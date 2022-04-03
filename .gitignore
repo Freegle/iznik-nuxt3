@@ -1,0 +1,16 @@
+node_modules
+*.log
+.nuxt
+nuxt.d.ts
+.output
+.env
+
+# Our additions.
+docker-compose.override.yaml
+docker-compose.override.yml
+debug.log
+.idea
+static/sw.js
+
+# OSx files
+.DS_Store
