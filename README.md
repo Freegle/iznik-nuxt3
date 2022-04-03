@@ -1,7 +1,7 @@
 **This is a WIP rewrite of the front-end client into Nuxt v3.  It's not ready yet, by a long chalk.**
 
 What does exist:
-* Use of Nuxt 3 (still in Beta) and hence Vue 3.
+* Use of Nuxt 3 (still in Beta) and hence Vue 3 + Vite.
 * Use of Bootstrap Vue 3 (still in alpha), including customisation.  This is a replacement for Bootstrap Vue.
 * Use of Pinia as a replacement for Vuex.  This looks much nicer.
 * Use of layout.
