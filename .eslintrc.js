@@ -12,5 +12,6 @@ module.exports = {
   globals: {
     definePageMeta: 'readonly',
     useRuntimeConfig: 'readonly',
+    defineNuxtPlugin: 'readonly',
   },
 }
