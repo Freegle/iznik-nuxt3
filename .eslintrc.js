@@ -9,4 +9,8 @@ module.exports = {
   rules: {
     'no-console': 'off',
   },
+  globals: {
+    definePageMeta: 'readonly',
+    useRuntimeConfig: 'readonly',
+  },
 }
