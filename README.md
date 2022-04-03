@@ -12,6 +12,8 @@ What doesn't exist yet:
 * We'll need to rewrite the stores, and this is a good opportunity to organise the use of the store better.
 * Can't generate a static site yet.  Looks like this is coming soon in Nuxt3 - see https://github.com/nuxt/framework/discussions/560.  Meanwhile npm run dev.
 * Persistent store.  We may want to rethink how we do this given the hassle of localForage, IndexedDB etc.
+* Trial Capacitor.
+* CircleCI/playwright testing from the get go?
 
 # iznik-nuxt3
 
