@@ -1,7 +1,15 @@
 **This is a WIP rewrite of the front-end client into Nuxt v3.  It's not ready yet, by a long chalk.**
 
-* Most pages don't exist.
-* Can't generate a static site yet.  Coming soon in Nuxt3 - see https://github.com/nuxt/framework/discussions/560.  Meanwhile npm run dev.
+What does exist:
+* Use of Nuxt 3 (still in Beta) and hence Vue 3.
+* Use of Bootstrap Vue 3 (still in alpha), including customisation.  This is a replacement for Bootstrap Vue.
+* Use of Pinia as a replacement for Vuex.  This looks much nicer.
+* Use of layout.
+
+What doesn't exist yet:
+* The actual pages for the app don't exist.
+* Can't generate a static site yet.  Looks like this is coming soon in Nuxt3 - see https://github.com/nuxt/framework/discussions/560.  Meanwhile npm run dev.
+* Persistent store.  We may want to rethink how we do this given the hassle of localForage, IndexedDB etc.
 
 # iznik-nuxt3
 
