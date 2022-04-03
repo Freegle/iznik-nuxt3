@@ -12,8 +12,6 @@ import { useGroupStore } from '../stores/group'
 import { useMiscStore } from '../stores/misc'
 
 const GROUP = 21354
-const groupStore = useGroupStore()
-const miscStore = useMiscStore()
 
 // TODO Can we avoid having to default the default layout on each page?  Didn't want to work.
 definePageMeta({
@@ -29,11 +27,15 @@ export default {
     // See https://stackoverflow.com/questions/71383166/rationale-behind-providing-a-key-in-useasyncdata-function
     useLazyAsyncData('group-' + GROUP, () => groupStore.fetch(GROUP))
 
-    return { miscStore }
+    // TODO Could we ensure all stores were available in every component?
+    const groupStore = useGroupStore()
+    const miscStore = useMiscStore()
+
+    return { miscStore, groupStore }
   },
   computed: {
     group() {
-      return groupStore.get(GROUP)
+      return this.groupStore.get(GROUP)
     },
   },
 }

@@ -34,4 +34,11 @@ export default {
   GOOGLE_API_KEY: 'AIzaSyArVxoX781qdcbmQZi1PKHX-qa0bPbboH4',
   GOOGLE_CLIENT_ID:
     '423761283916-1rpa8120tpudgv4nf44cpmlf8slqbf4f.apps.googleusercontent.com',
+
+  FACEBOOK_APPID: '134980666550322',
+
+  YAHOO_CLIENTID:
+    'dj0yJmk9N245WTRqaDd2dnA4JmQ9WVdrOWIzTlZNMU01TjJjbWNHbzlNQS0tJnM9Y29uc3VtZXJzZWNyZXQmc3Y9MCZ4PWRh',
+
+  SENTRY_DSN: 'https://4de62393d60a4d2aae4ccc3519e94878@sentry.io/1868170',
 }

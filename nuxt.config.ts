@@ -1,5 +1,5 @@
 import { defineNuxtConfig } from 'nuxt3'
-import * as constants from './constants'
+import constants from './constants'
 
 export default defineNuxtConfig({
   // We use a static target with no SSR:
