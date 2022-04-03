@@ -1,0 +1,278 @@
+@import 'color-vars';
+@import 'bootstrap-custom';
+@import 'bootstrap/scss/_functions.scss';
+@import 'bootstrap/scss/_variables.scss';
+@import 'bootstrap/scss/mixins/_breakpoints.scss';
+@import 'typography';
+@import 'buttons';
+
+.strike {
+  text-decoration: line-through;
+  text-decoration-style: double;
+  font-weight: normal;
+}
+
+.bg-success {
+  background-color: $colour-success-bg !important;
+  color: $colour-success-fg !important;
+}
+
+.card-header.bg-success {
+  border-bottom: 1px solid $colour-success-bg;
+}
+
+.bg-info {
+  background-color: $colour-info-bg !important;
+  color: $colour-info-fg !important;
+}
+
+.border-info {
+  border-color: $colour-info-bg !important;
+}
+
+.card-header.bg-info {
+  border-bottom: 1px solid $colour-info-bg;
+}
+
+div[variant="success"] .card-header {
+  color: $colour-success-fg;
+  background-color: $color-green--light;
+  border-color: $colour-success-bg;
+}
+
+.truncate {
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+body.fd {
+  background-image: url('~static/wallpaper.png');
+}
+
+body.modtools {
+  background-color: $color-modtools-green--light;
+}
+
+/* Very basic dark mode implementation for MT - commented out as unpopular and needs improvement */
+//@media (prefers-color-scheme: dark) {
+//  body.modtools {
+//    filter: grayscale(0.8)
+//  }
+//}
+
+// We have to go to some effort to style the resize grip.  We can't have it in a scoped style otherwise it won't
+// apply to the grip, and the image is small enough that it gets inlined into base64, so we can't use an
+// image file - instead we encode it here.
+.handle {
+  content: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QAAAAAAAD5Q7t/AAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAB3RJTUUH4AQLDigeVd0uIAAAAHpJREFUOMvVkDEKgDAMRQuOLoIHcHTUybmb4BW8gPQM4tWfg6mUIJRmUf+W8P9/JM59RkAHBACZK2Dh0ii7GtiiRxcEMQ8yx/ABtBJeZeefCgB6Rd41GZhzp9xhoMmSk+BLZPWDcnJSMJnIqqScrMI2shTYyOqJ3v1OJ4UMEzPeJauEAAAAAElFTkSuQmCC');
+  height: 16px;
+  width: 16px;
+  position: absolute;
+  z-index: 1000;
+  cursor: pointer;
+}
+
+.handle-tl {
+  top: 0;
+  left: 0;
+}
+
+.handle-tr {
+  top: 0;
+  right: 0;
+  rotate: 90deg;
+}
+
+.handle-bl {
+  bottom: 0;
+  left: 0;
+  rotate: 270deg;
+}
+
+.handle-br {
+  bottom: 0;
+  right: 0;
+  rotate: 180deg;
+}
+
+.clickme {
+  cursor: pointer;
+}
+
+.card-header-tabs li a {
+  border: 1px lightgrey solid !important;
+}
+
+.nodecor {
+  text-decoration: none !important;
+  color: $color-black !important;
+}
+
+.prewrap {
+  white-space: pre-wrap !important;
+}
+
+.preline {
+  white-space: pre-line !important;
+}
+
+.decornone {
+  &:hover,
+  &:focus {
+    text-decoration: none;
+  }
+}
+
+.fade-enter-active, .fade-leave-active {
+    transition: opacity 1s;
+}
+.fade-enter, .fade-leave-to {
+    opacity: 0;
+}
+
+.fadein-enter-active {
+    transition: opacity 1s;
+}
+.fadein-enter {
+    opacity: 0;
+}
+
+.forcebreak {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  -ms-word-break: break-all;
+  word-break: break-word;
+  -ms-hyphens: auto;
+  -moz-hyphens: auto;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+}
+
+.black {
+  color: $color-black;
+}
+
+.white, .white > a {
+  color: $color-white !important;
+}
+
+.fa-icon {
+  /* These appear misaligned - fix */
+  margin-bottom: 3px;
+
+  /* This is to resolve an issue with icon alignment. */
+  /* It reverts a change made in 4.1.0 of vue-awesome */
+  vertical-align: middle !important;
+}
+
+.fa-fw {
+  width: 1rem;
+  height: 1rem;
+}
+
+.text-faded {
+  color: $color-gray--faded !important;
+}
+
+.nopara p {
+  margin-bottom: 0;
+  display: inline;
+}
+
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome and Opera */
+}
+
+legend {
+  font-weight: bold !important;
+}
+
+.mx-datepicker-popup {
+  z-index: 2000 !important;
+}
+
+/* Overrides default Bootstrap tooltip opacity (0.9) */
+.tooltip.b-tooltip {
+  opacity: 1;
+}
+
+/* Ensure any autocompletes are visible on top of google maps. */
+.pac-container {
+  z-index: 10000;
+}
+
+.sidebar__wrapper {
+  height: calc(100vh - 68px);
+
+  .card-body .card {
+    border-radius: unset;
+  }
+}
+
+.pulsate {
+  -webkit-animation: pulsate 1s ease-out;
+  -webkit-animation-iteration-count: infinite;
+  opacity: 0.5;
+}
+
+@-webkit-keyframes pulsate {
+  0% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 1.0;
+  }
+  100% {
+    opacity: 0.25;
+  }
+}
+
+form {
+  label,
+  .col-form-label {
+    font-weight: bold;
+    color: $color-black;
+    margin-top: 10px;
+  }
+
+  .is-invalid label,
+  .is-invalid .col-form-label {
+    color: $color-red;
+  }
+
+  .form-group.is-invalid .invalid-feedback {
+    display: block;
+  }
+}
+
+.form-control-xl {
+  height: calc(2em + 0.60rem + 2px);
+  padding: 0.5rem 1rem;
+  font-size: 1.5rem;
+  line-height: 2;
+  border-radius: 0.3rem;
+}
+
+// Move the attribution slightly to make way for resizers if present
+.leaflet-container .leaflet-control-attribution {
+  right: 20px;
+}
+
+// Bootstrap tooltips appear above modals on mobile even after a modal is shown from a click.  This is confusing.
+// We don't have any tooltips inside modals so move them down.
+.tooltip {
+  z-index: 1030;
+}
+
+label {
+  font-weight: bold;
+}
