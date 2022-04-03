@@ -13,5 +13,6 @@ module.exports = {
     definePageMeta: 'readonly',
     useRuntimeConfig: 'readonly',
     defineNuxtPlugin: 'readonly',
+    useLazyAsyncData: 'readonly',
   },
 }

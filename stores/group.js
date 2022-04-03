@@ -10,7 +10,6 @@ export const useGroupStore = defineStore({
   actions: {
     async fetch(id) {
       id = parseInt(id)
-      console.log('Fetch', id, api())
       this.list[id] = await api().group.fetch(
         id,
         true,
@@ -33,17 +32,11 @@ export const useGroupStore = defineStore({
   },
   getters: {
     get: (state) => (idOrName) => {
-      console.log('Get group', idOrName, state.list)
       let ret = null
 
       if (!isNaN(idOrName)) {
         // Numeric - find by id
         idOrName = parseInt(idOrName)
-        console.log(
-          'Find by id',
-          state.list[idOrName] ? 'present' : 'absent',
-          state.list[idOrName]
-        )
         return state.list[idOrName] ? state.list[idOrName] : null
       } else {
         // Not - scan for match
