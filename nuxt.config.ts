@@ -15,10 +15,6 @@ export default defineNuxtConfig({
   ssr: false,
   target: 'static',
 
-  scripts: {
-    build: "nuxi generate"
-  },
-
   build: {
     // Reduce size of CSS initial load.
     extractCSS: true,
@@ -52,6 +48,8 @@ export default defineNuxtConfig({
       }
     },
   },
+
+  buildModules: ['@pinia/nuxt'],
 
   // Environment variables the client needs.
   publicRuntimeConfig: {

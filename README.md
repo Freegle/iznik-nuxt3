@@ -1,5 +1,8 @@
 **This is a WIP rewrite of the front-end client into Nuxt v3.  It's not ready yet, by a long chalk.**
 
+* Most pages don't exist.
+* Can't generate a static site yet.  Coming soon in Nuxt3 - see https://github.com/nuxt/framework/discussions/560.  Meanwhile npm run dev.
+
 # iznik-nuxt3
 
 Iznik is a platform for online reuse of unwanted items.  The old  version is [here](https://github.com/Freegle/iznik-nuxt).

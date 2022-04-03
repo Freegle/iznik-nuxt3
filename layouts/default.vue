@@ -22,8 +22,13 @@
     </client-only>
   </div>
 </template>
-
+<script setup>
+</script>
 <script>
+import { useMiscStore } from '../stores/misc'
+
+const misc = useMiscStore()
+
 // import replyToPost from '@/mixins/replyToPost'
 // import BouncingEmail from '~/components/BouncingEmail'
 // import MainHeader from '~/components/MainHeader'
@@ -83,9 +88,9 @@ export default {
       // Add class for screen background.
       document.body.classList.add('fd')
   //
-  //     // Start our timer.  Holding the time in the store allows us to update the time regularly and have reactivity
-  //     // cause displayed fromNow() values to change, rather than starting a timer for each of them.
-  //     this.updateTime()
+      // Start our timer.  Holding the time in the store allows us to update the time regularly and have reactivity
+      // cause displayed fromNow() values to change, rather than starting a timer for each of them.
+      this.updateTime()
   //   }
   //
   //   // Ensure we know whether we're FD or MT.
@@ -187,12 +192,12 @@ export default {
   //   console.log('Destroy layout')
   //   clearTimeout(this.timeTimer)
   // },
-  // methods: {
-  //   updateTime() {
-  //     this.$store.dispatch('misc/setTime')
-  //     this.timeTimer = setTimeout(this.updateTime, 10000)
-  //   }
-  // }
+  methods: {
+    updateTime() {
+      misc.setTime()
+      this.timeTimer = setTimeout(this.updateTime, 1000)
+    }
+  }
 }
 </script>
 
