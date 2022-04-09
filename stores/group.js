@@ -12,6 +12,7 @@ export const useGroupStore = defineStore({
       id = parseInt(id)
       this.list[id] = await api().group.fetch(
         id,
+        // TODO How to handle extra information like this which slows down the call?
         true,
         true,
         true,

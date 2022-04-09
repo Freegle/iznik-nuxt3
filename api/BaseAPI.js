@@ -1,4 +1,5 @@
-import * as Sentry from '@sentry/browser'
+// TODO Sentry
+// import * as Sentry from '@sentry/browser'
 import axios from 'axios'
 
 export class APIError extends Error {
@@ -143,16 +144,17 @@ export default class BaseAPI {
         console.log('Log it?', log)
 
         if (log) {
-          Sentry.captureException(
-            'API request failed ' +
-              path +
-              ' returned HTTP ' +
-              status +
-              ' ret ' +
-              retstr +
-              ' status ' +
-              statusstr
-          )
+          // TODO Sentry
+          // Sentry.captureException(
+          //   'API request failed ' +
+          //     path +
+          //     ' returned HTTP ' +
+          //     status +
+          //     ' ret ' +
+          //     retstr +
+          //     ' status ' +
+          //     statusstr
+          // )
         }
 
         const message = [

@@ -32,4 +32,6 @@ export default defineNuxtConfig({
     BUILD_DATE: new Date().toISOString(),
   },
   css: ['@/assets/css/global.scss'],
+
+  // TODO Sentry
 })

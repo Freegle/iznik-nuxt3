@@ -1,7 +1,6 @@
 import path from 'path-browserify'
-import { defineConfig } from 'vite'
 import eslintPlugin from 'vite-plugin-eslint'
-import * as constants from './constants'
+import constants from './constants'
 
 export default {
   // Make the ~ and @ aliases work in Vite as per https://github.com/vitejs/vite/issues/382.

@@ -4,7 +4,10 @@
     <b-button variant="primary"> Test {{ $config.API }} </b-button>
     <p>Time now to show store access and reactivity: {{ miscStore.time }}</p>
 
-    <p v-if="group">Fetched group {{ group.namedisplay }}</p>
+    <p v-if="group">
+      Fetched group {{ group.namedisplay }} to show use of API component and
+      axios
+    </p>
   </div>
 </template>
 <script>
@@ -25,6 +28,7 @@ export default {
     //
     // The first parameter to useLazyAsyncData needs to be a unique key.
     // See https://stackoverflow.com/questions/71383166/rationale-behind-providing-a-key-in-useasyncdata-function
+    console.log('Async')
     useLazyAsyncData('group-' + GROUP, () => groupStore.fetch(GROUP))
 
     // TODO Could we ensure all stores were available in every component?
@@ -35,6 +39,7 @@ export default {
   },
   computed: {
     group() {
+      console.log('Computed')
       return this.groupStore.get(GROUP)
     },
   },
