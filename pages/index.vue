@@ -8,11 +8,13 @@
       Fetched group {{ group.namedisplay }} to show use of API component and
       axios
     </p>
+    {{ messages }}
   </div>
 </template>
 <script>
 import { useGroupStore } from '../stores/group'
 import { useMiscStore } from '../stores/misc'
+import { useIsochroneStore } from '../stores/isochrone'
 
 const GROUP = 21354
 
@@ -30,17 +32,21 @@ export default {
     // See https://stackoverflow.com/questions/71383166/rationale-behind-providing-a-key-in-useasyncdata-function
     console.log('Async')
     useLazyAsyncData('group-' + GROUP, () => groupStore.fetch(GROUP))
+    useLazyAsyncData('isochrone', () => isochroneStore.fetch())
 
     // TODO Could we ensure all stores were available in every component?
     const groupStore = useGroupStore()
     const miscStore = useMiscStore()
+    const isochroneStore = useIsochroneStore()
 
-    return { miscStore, groupStore }
+    return { miscStore, groupStore, isochroneStore }
   },
   computed: {
     group() {
-      console.log('Computed')
       return this.groupStore.get(GROUP)
+    },
+    messages() {
+      return this.isochroneStore.get()
     },
   },
 }

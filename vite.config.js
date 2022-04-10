@@ -3,6 +3,8 @@ import eslintPlugin from 'vite-plugin-eslint'
 import constants from './constants'
 
 export default {
+  debug: true,
+
   // Make the ~ and @ aliases work in Vite as per https://github.com/vitejs/vite/issues/382.
   resolve: {
     alias: [
@@ -24,9 +26,15 @@ export default {
 
   server: {
     proxy: {
-      '/api': {
-        target: constants.IZNIK_API,
+      '/apiv1': {
+        target: constants.IZNIK_API_V1,
         changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/apiv1/, '/api/'),
+      },
+      '/apiv2': {
+        target: constants.IZNIK_API_V2,
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/apiv2/, '/api/'),
       },
     },
   },

@@ -4,7 +4,7 @@ import constants from './constants'
 export default defineNuxtConfig({
   // We use a static target with no SSR:
   // - We need static rendering for good SEO.
-  // - It means the users pay for the CPU not Freegle.
+  // - It means the users pay for the CPU not Freegle.  Cheapskates.
   ssr: false,
   target: 'static',
 
@@ -17,8 +17,10 @@ export default defineNuxtConfig({
 
   // Environment variables the client needs.
   publicRuntimeConfig: {
-    API: constants.API,
-    IZNIK_API: constants.IZNIK_API,
+    APIv1: constants.APIv1,
+    APIv2: constants.APIv2,
+    IZNIK_API_V1: constants.IZNIK_API_V1,
+    IZNIK_API_V2: constants.IZNIK_API_V2,
     OSM_TILE: constants.OSM_TILE,
     GEOCODE: constants.GEOCODE,
     FACEBOOK_APPID: constants.FACEBOOK_APPID,
@@ -32,6 +34,10 @@ export default defineNuxtConfig({
     BUILD_DATE: new Date().toISOString(),
   },
   css: ['@/assets/css/global.scss'],
+
+  alias: {
+    'color-vars': 'assets/css/_color-vars.scss',
+  },
 
   // TODO Sentry
 })

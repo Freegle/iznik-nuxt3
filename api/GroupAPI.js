@@ -28,7 +28,7 @@ export default class GroupAPI extends BaseAPI {
     await this.$post('/group', {
       id: groupid,
       uid,
-      action: 'RemoveFacebook'
+      action: 'RemoveFacebook',
     })
   }
 }

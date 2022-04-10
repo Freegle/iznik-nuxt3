@@ -1,19 +1,7 @@
 import BaseAPI from '@/api/BaseAPI'
 
-export default class ActivityAPI extends BaseAPI {
-  add(params) {
-    return this.$put('/isochrone', params)
-  }
-
+export default class IsochroneAPI extends BaseAPI {
   fetch(params) {
-    return this.$get('/isochrone', params)
-  }
-
-  patch(params) {
-    return this.$patch('/isochrone', params)
-  }
-
-  del(id) {
-    return this.$del('/isochrone', { id })
+    return this.$getv2('/message/isochrones', params)
   }
 }

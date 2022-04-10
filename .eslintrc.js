@@ -13,6 +13,9 @@ module.exports = {
     definePageMeta: 'readonly',
     useRuntimeConfig: 'readonly',
     defineNuxtPlugin: 'readonly',
+    useRoute: 'readonly',
+    useAsyncData: 'readonly',
     useLazyAsyncData: 'readonly',
+    createApp: 'readonly',
   },
 }

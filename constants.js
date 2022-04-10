@@ -9,11 +9,15 @@ export default {
   //   - On the client we don't set a base URL, so it goes to the server the client was served up from.  That then proxies
   //     it on to IZNIK_API via the proxy: directive below.
   // - The rest of the client code just uses the API prefix.  The base URL kicks in (or doesn't) as described above.
-  API: '/api',
-
+  //
   // IZNIK_API is where we send it to.  This avoids CORS issues (and removes preflight OPTIONS calls for GETs, which
   // hurt client performance).
-  IZNIK_API: process.env.IZNIK_API || 'https://fdapilive.ilovefreegle.org',
+  APIv1: '/apiv1',
+  IZNIK_API_V1:
+    process.env.IZNIK_API_V1 || 'https://fdapilive.ilovefreegle.org',
+
+  APIv2: '/apiv2',
+  IZNIK_API_V2: process.env.IZNIK_API_V2 || 'http://www.ilovefreegle.org:8192',
 
   // This is where the user site is.
   USER_SITE: 'https://www.ilovefreegle.org',

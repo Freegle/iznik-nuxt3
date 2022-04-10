@@ -10,7 +10,7 @@
     <!--    <BouncingEmail />-->
     <div class="navbar-toggle" style="display: none" />
     <div id="serverloader" class="bg-white">
-      <b-img src="loader.gif" alt="Loading..." />
+      <b-img src="/loader.gif" alt="Loading..." />
       <!-- Don't allow this to format neatly, otherwise SSR doesn't match and we get a client-side re-render -->
       <!-- eslint-disable-next-line -->
       <p><span>Loading...</span><br><span class="font-weight-bold">Stuck here?  Try refreshing.  Or Chrome.</span><ExternalLink href="mailto:support@ilovefreegle.org" style="color: black;"><br> No luck? Contact us</ExternalLink></p>

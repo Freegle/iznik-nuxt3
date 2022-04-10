@@ -1,7 +1,5 @@
 import api from '~/api'
 
-console.log('API plugin')
-
 export default defineNuxtPlugin((nuxtApp) => {
   const config = useRuntimeConfig()
   return {

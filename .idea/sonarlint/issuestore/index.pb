@@ -3,11 +3,6 @@
 ..idea/inspectionProfiles/profiles_settings.xml,1\e\1e9075f5bf079c01ef2c910709e91a497d262080
 =
 tsconfig.json,6\1\61ebb9fd6e8cf9082658121d5d81e297791dacd0
-;
-setvars.cmd,4\9\49e4b62efd5e19dd3b5bf34e20c968a663cdea1d
-:
-
-.gitignore,a\5\a5cc2925ca8258af241be7e5b0381edf30266302
 K
 plugins/bootstrap.client.ts,e\d\edead1fc716e235a541e36b78598e3b56b40893c
 J
@@ -20,8 +15,6 @@ K
 components/ExternalLink.vue,9\d\9dbdb7d75f43f2f11395fd8d08832b112b026223
 P
  assets/css/bootstrap-custom.scss,1\8\18cbc59a2e67a596aa4319d39ca61895ec3b5975
-F
-assets/css/global.scss,9\3\93f7bdf25e960d02d1ce46d043363ad696289706
 ;
 .prettierrc,2\0\20137a9e94744624390b6748bc96df5ca1579b71
 Q
@@ -111,8 +104,6 @@ D
 D
 api/ModConfigsAPI.js,0\e\0e045cdcce92f983e2b24179c8515f48a0d4c33b
 C
-api/IsochroneAPI.js,a\2\a2893df612a6df150a2212f6c381083622d79d61
-C
 api/VisualiseAPI.js,8\a\8a72da3628f740b685f7c8b87a1faa6cdd882277
 C
 api/DashboardAPI.js,e\2\e2643e646967ef858b7f04677e65f82ae5621893
@@ -154,8 +145,6 @@ K
 api/NewsAPI.js,1\e\1edd1a45e923e0416589683177cf873a70afe2de
 >
 api/ChatAPI.js,b\7\b7f5238d98d0fe5945809ab88c26129e29113874
->
-api/index.d.ts,0\0\003584391006adb2eb802f21f153baef81417fe6
 =
 api/JobAPI.js,e\4\e446ea75f7acf5aec9909fb1f44c389a87a821ef
 @
@@ -172,5 +161,3 @@ K
 api/TrystAPI.js,c\b\cb92b0dd95061e06d526e9ee259062cf29b51332
 ?
 api/AlertAPI.js,c\9\c9c5093304a7c79d2638a51f9e327582108d5965
-?
-api/GroupAPI.js,4\1\414bc5706d1863ea27a4157f8e8319dd5a58e315
