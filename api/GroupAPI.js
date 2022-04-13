@@ -7,12 +7,12 @@ export default class GroupAPI extends BaseAPI {
   }
 
   async fetch(id, polygon, showmods, sponsors, tnkey, log) {
-    const { group } = await this.$get(
-      '/group',
-      { id, polygon, showmods, sponsors, tnkey },
+    return await this.$getv2(
+      '/group/' + id,
+      // TODO { polygon, showmods, sponsors, tnkey }
+      {},
       log
     )
-    return group
   }
 
   async patch(params) {

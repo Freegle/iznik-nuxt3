@@ -80,7 +80,7 @@ export default {
   },
   computed: {
     validImage() {
-      return this.image || require('~/static/defaultprofile.png')
+      return this.image || '/defaultprofile.png'
     },
     className() {
       let ret = 'p-0 profile profile--' + this.size
@@ -94,7 +94,7 @@ export default {
   },
   methods: {
     brokenProfileImage(event) {
-      event.target.src = require('~/static/defaultprofile.png')
+      event.target.src = '/defaultprofile.png'
     },
   },
 }

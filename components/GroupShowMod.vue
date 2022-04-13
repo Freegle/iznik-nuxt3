@@ -1,7 +1,8 @@
-gr<template>
+gr
+<template>
   <div :title="modtoshow.displayname">
     <ProfileImage
-      :image="modtoshow.profile.url"
+      :image="modtoshow.profile.paththumb"
       is-thumbnail
       size="md"
       :alt-text="modtoshow.displayname"
@@ -18,8 +19,8 @@ export default {
   props: {
     modtoshow: {
       type: Object,
-      required: true
-    }
-  }
+      required: true,
+    },
+  },
 }
 </script>

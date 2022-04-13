@@ -23,7 +23,7 @@
         </b-card-title>
         <b-card-sub-title>{{ group.tagline }}</b-card-sub-title>
         <div v-if="group.membercount" class="text-muted small">
-          Founded <Date :value="group.founded" format="dateonly" />.
+          Founded <DateFormatted :value="group.founded" format="dateonly" />.
           {{ group.membercount.toLocaleString() }} current freeglers.
         </div>
       </div>
@@ -78,7 +78,7 @@
       <h2 class="header--size5 mb-3">
         If you have questions, you can contact our lovely local volunteers here:
       </h2>
-      <ExternalLink v-if="!me" :href="'mailto:' + modsemail">
+      <ExternalLink v-if="!me" :href="'mailto:' + group.modsemail">
         <span class="btn btn-white mb-3"> Contact&nbsp;volunteers </span>
         <div
           v-if="group.showmods && group.showmods.length"
@@ -153,13 +153,13 @@
 <script>
 import SponsorLogo from './SponsorLogo'
 import GroupShowMod from './GroupShowMod'
-import Date from './Date'
+import DateFormatted from './DateFormatted'
 // TODO
 // import ChatButton from '~/components/ChatButton'
 import ExternalLink from '~/components/ExternalLink'
 
 export default {
-  components: { GroupShowMod, SponsorLogo, ExternalLink, Date },
+  components: { GroupShowMod, SponsorLogo, ExternalLink, DateFormatted },
   props: {
     group: {
       type: Object,
@@ -185,10 +185,6 @@ export default {
       return false
       // const member = this.$store.getters['auth/member'](this.group.id)
       // return member
-    },
-    modsemail() {
-      // The server is confused and sometimes returns one or the other.  This is a bug.
-      return this.group.modsemail || this.group.modsmail
     },
   },
   methods: {
