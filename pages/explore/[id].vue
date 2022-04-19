@@ -14,45 +14,51 @@
     </b-row>
   </div>
 </template>
-<script>
+<script setup>
 import { useGroupStore } from '~/stores/group'
-import { useMiscStore } from '~/stores/misc'
-import NoticeMessage from '~/components/NoticeMessage'
-import ExploreGroup from '~/components/ExploreGroup'
 
+const groupStore = useGroupStore()
+
+// The first parameter needs to be a unique key.
+// See https://stackoverflow.com/questions/71383166/rationale-behind-providing-a-key-in-useasyncdata-function
+//
+// We don't use lazy because we want the page to be rendered for SEO.
+const route = useRoute()
+const id = route.params.id
+
+console.log('Load data')
+const { data, refresh, pending } = await useAsyncData(
+  'explore-' + route.params.id,
+  async () => {
+    console.log('Inside callback')
+    return await groupStore.fetch(route.params.id)
+    console.log('Callback end')
+  },
+  {
+    lazy: false,
+  }
+)
+console.log('Loaded', data, refresh, pending)
+await refresh()
+console.log("Refreshed")
+
+// TODO Could we ensure all stores were available in every component?
+// TODO Page loading not blocked?  Maybe works when built.
+</script>
+
+<script>
 definePageMeta({
   layout: 'default',
 })
 
 export default {
-  components: {
-    NoticeMessage,
-    ExploreGroup,
-  },
-  async setup() {
-    // The first parameter needs to be a unique key.
-    // See https://stackoverflow.com/questions/71383166/rationale-behind-providing-a-key-in-useasyncdata-function
-    //
-    // We don't use lazy because we want the page to be rendered for SEO.
-    const route = useRoute()
-    await useAsyncData('explore-' + route.params.id, () =>
-      groupStore.fetch(route.params.id)
-    )
-
-    // useLazyAsyncData('isochrone', () => isochroneStore.fetch())
-
-    // TODO Could we ensure all stores were available in every component?
-    // TODO Page loading not blocked?  Maybe works when built.
-    const groupStore = useGroupStore()
-    const miscStore = useMiscStore()
-
-    return { miscStore, groupStore }
-  },
   computed: {
     group() {
-      const route = useRoute()
-      return this.groupStore.get(route.params.id)
+      return this.groupStore.get(this.id)
     },
+  },
+  mounted() {
+    console.log('Page mounted')
   },
   // TODO Meta data
   // TODO Other versions of this page.

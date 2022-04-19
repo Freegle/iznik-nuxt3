@@ -10,6 +10,7 @@ export const useGroupStore = defineStore({
   actions: {
     async fetch(id) {
       // TODO Caching/force
+      console.log('Fetch in store')
       id = parseInt(id)
       const group = await api().group.fetch(
         id,
@@ -31,6 +32,8 @@ export const useGroupStore = defineStore({
       if (group) {
         this.list[id] = group
       }
+
+      console.log('Fetched in store')
 
       return group
     },

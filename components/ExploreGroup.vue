@@ -35,10 +35,22 @@
     </client-only>
   </div>
 </template>
-<script>
-// import InfiniteLoading from 'vue-infinite-loading'
+<script setup>
+import { defineProps } from 'vue'
 import { useGroupStore } from '~/stores/group'
 
+const groupStore = useGroupStore()
+
+const props = defineProps({
+  id: String,
+})
+
+// console.log('Load data')
+// useAsyncData('group-' + props.id, () => groupStore.fetch(props.id))
+// console.log('Loaded')
+</script>
+<script>
+// import InfiniteLoading from 'vue-infinite-loading'
 export default {
   components: {
     // InfiniteLoading,
@@ -48,13 +60,6 @@ export default {
       validator: (prop) => typeof prop === 'number' || typeof prop === 'string',
       required: true,
     },
-  },
-  setup(props) {
-    const groupStore = useGroupStore()
-
-    useAsyncData('group-' + props.id, () => groupStore.fetch(props.id))
-
-    return { groupStore }
   },
   data() {
     return {
