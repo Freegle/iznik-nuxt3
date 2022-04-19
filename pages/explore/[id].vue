@@ -26,24 +26,13 @@ const groupStore = useGroupStore()
 const route = useRoute()
 const id = route.params.id
 
-console.log('Load data')
-const { data, refresh, pending } = await useAsyncData(
-  'explore-' + route.params.id,
-  async () => {
-    console.log('Inside callback')
-    return await groupStore.fetch(route.params.id)
-    console.log('Callback end')
-  },
-  {
-    lazy: false,
-  }
-)
-console.log('Loaded', data, refresh, pending)
+const { data, refresh, pending } = await useAsyncData('explore-' + route.params.id, () => groupStore.fetch(route.params.id))
+
+// Awaiting on refresh() seems to be necessary to make sure we wait until we've loaded the data before setup()
+// completes.  That is necessary otherwise we won't render the page when generating.
 await refresh()
-console.log("Refreshed")
 
 // TODO Could we ensure all stores were available in every component?
-// TODO Page loading not blocked?  Maybe works when built.
 </script>
 
 <script>
@@ -56,9 +45,6 @@ export default {
     group() {
       return this.groupStore.get(this.id)
     },
-  },
-  mounted() {
-    console.log('Page mounted')
   },
   // TODO Meta data
   // TODO Other versions of this page.
