@@ -56,12 +56,6 @@
 import { useMessageStore } from '~/stores/message'
 
 export default {
-  components: {
-    // MessageExpanded,
-    // MessageModal,
-    MessageSummary,
-    // MessagePhotosModal
-  },
   props: {
     id: {
       type: Number,
