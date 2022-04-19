@@ -37,17 +37,11 @@
 </template>
 <script>
 // import InfiniteLoading from 'vue-infinite-loading'
-import NoticeMessage from './NoticeMessage'
 import { useGroupStore } from '~/stores/group'
-import OurMessage from '~/components/OurMessage.vue'
-const groupHeader = () => import('~/components/GroupHeader.vue')
 
 export default {
   components: {
-    NoticeMessage,
     // InfiniteLoading,
-    groupHeader,
-    OurMessage,
   },
   props: {
     id: {

@@ -12,10 +12,7 @@ gr
   </div>
 </template>
 <script>
-import ProfileImage from './ProfileImage'
-
 export default {
-  components: { ProfileImage },
   props: {
     modtoshow: {
       type: Object,

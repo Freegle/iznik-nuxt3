@@ -61,11 +61,7 @@
   </div>
 </template>
 <script>
-import MessageTag from '@/components/MessageTag'
-
 export default {
-  components: { MessageTag },
-
   props: {
     id: {
       type: Number,

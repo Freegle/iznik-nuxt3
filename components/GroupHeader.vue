@@ -151,15 +151,10 @@
 </template>
 
 <script>
-import SponsorLogo from './SponsorLogo'
-import GroupShowMod from './GroupShowMod'
-import DateFormatted from './DateFormatted'
 // TODO
 // import ChatButton from '~/components/ChatButton'
-import ExternalLink from '~/components/ExternalLink'
 
 export default {
-  components: { GroupShowMod, SponsorLogo, ExternalLink, DateFormatted },
   props: {
     group: {
       type: Object,

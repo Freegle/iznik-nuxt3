@@ -43,10 +43,7 @@
 import twem from '~/mixins/twem'
 import { useMessageStore } from '~/stores/message'
 
-const Highlighter = () => import('vue-highlight-words')
-
 export default {
-  components: { Highlighter },
   mixins: [twem],
   props: {
     id: {

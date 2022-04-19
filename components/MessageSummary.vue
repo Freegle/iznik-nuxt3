@@ -51,28 +51,11 @@
 </template>
 
 <script>
-import MessageTag from '@/components/MessageTag'
-import MessageItemLocation from '~/components/MessageItemLocation'
-import MessageFreegled from '~/components/MessageFreegled'
-import MessagePromised from '~/components/MessagePromised'
-import MessageAttachments from '~/components/MessageAttachments'
 import { useMessageStore } from '~/stores/message'
-
-const MessageHistory = () => import('~/components/MessageHistory')
-// const MessageDescription = () => import('~/components/MessageDescription')
 
 const me = useMe()
 
 export default {
-  components: {
-    // MessageDescription,
-    MessageItemLocation,
-    MessageFreegled,
-    MessagePromised,
-    MessageAttachments,
-    MessageHistory,
-    MessageTag,
-  },
   props: {
     id: {
       type: Number,

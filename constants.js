@@ -4,14 +4,11 @@ export default {
   // - API is the constant the code uses to make an API call - it's basically just a prefix.
   //
   // How do these get used?
-  // - In axios-baseurl:
-  //   - On the server we set the base URL to IZNIK_API.  We make calls to the API and don't have to worry about CORS.
-  //   - On the client we don't set a base URL, so it goes to the server the client was served up from.  That then proxies
-  //     it on to IZNIK_API via the proxy: directive below.
-  // - The rest of the client code just uses the API prefix.  The base URL kicks in (or doesn't) as described above.
+  // - The client code just uses the API prefixes APIv1 and APIv2.
+  // - In dev mode, the vite config proxies those to IZNIK_API_V1 and IZNIK_API_V2.
+  // - In live mode, the nginx config does the same.
   //
-  // IZNIK_API is where we send it to.  This avoids CORS issues (and removes preflight OPTIONS calls for GETs, which
-  // hurt client performance).
+  // This avoids CORS issues (and removes preflight OPTIONS calls for GETs, which hurt client performance).
   APIv1: '/apiv1',
   IZNIK_API_V1:
     process.env.IZNIK_API_V1 || 'https://fdapilive.ilovefreegle.org',

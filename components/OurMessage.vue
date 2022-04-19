@@ -53,12 +53,6 @@
 </template>
 
 <script>
-import MessageSummary from '@/components/MessageSummary'
-//
-// import MessageModal from '@/components/MessageModal'
-// import MessageExpanded from '@/components/MessageExpanded'
-//
-// const MessagePhotosModal = () => import('./MessagePhotosModal')
 import { useMessageStore } from '~/stores/message'
 
 export default {
