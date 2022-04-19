@@ -10,7 +10,6 @@ export const useGroupStore = defineStore({
   actions: {
     async fetch(id) {
       id = parseInt(id)
-      console.log('Fetch', id)
       const group = await api().group.fetch(
         id,
         // TODO How to handle extra information like this which slows down the call?
@@ -32,7 +31,6 @@ export const useGroupStore = defineStore({
         this.list[id] = group
       }
 
-      console.log('Fetched', group)
       return group
     },
     remember(id, val) {

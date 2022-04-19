@@ -220,7 +220,6 @@ export default class BaseAPI {
     // TODO Wait for the store to be loaded.  This ensures that axios-token doesn't get called before there is a token
     // in the store to insert.
     // await this.store.restored
-    console.log('Request v2', this.$config)
 
     try {
       const ret = await this.$axios.request({

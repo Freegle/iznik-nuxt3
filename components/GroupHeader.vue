@@ -22,7 +22,7 @@
           />
         </b-card-title>
         <b-card-sub-title>{{ group.tagline }}</b-card-sub-title>
-        <div v-if="group.membercount" class="text-muted small">
+        <div v-if="group.membercount && group.founded" class="text-muted small">
           Founded <DateFormatted :value="group.founded" format="dateonly" />.
           {{ group.membercount.toLocaleString() }} current freeglers.
         </div>

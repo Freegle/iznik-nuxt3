@@ -29,20 +29,20 @@ export default {
     NoticeMessage,
     ExploreGroup,
   },
-  setup() {
+  async setup() {
     // The first parameter needs to be a unique key.
     // See https://stackoverflow.com/questions/71383166/rationale-behind-providing-a-key-in-useasyncdata-function
     //
     // We don't use lazy because we want the page to be rendered for SEO.
     const route = useRoute()
-    useAsyncData('explore-' + route.params.id, () =>
+    await useAsyncData('explore-' + route.params.id, () =>
       groupStore.fetch(route.params.id)
     )
 
     // useLazyAsyncData('isochrone', () => isochroneStore.fetch())
 
     // TODO Could we ensure all stores were available in every component?
-    // TODO Page loading not blocked.
+    // TODO Page loading not blocked?  Maybe works when built.
     const groupStore = useGroupStore()
     const miscStore = useMiscStore()
 
