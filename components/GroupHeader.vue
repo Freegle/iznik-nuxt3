@@ -45,7 +45,7 @@
         <div class="button__items">
           <b-button
             v-if="!amAMember"
-            class="mb-1 ml-1"
+            class="mb-1 ms-1"
             variant="primary"
             @click="join"
           >
@@ -54,7 +54,7 @@
           </b-button>
           <b-button
             v-else-if="amAMember === 'Member'"
-            class="mb-1 ml-1"
+            class="mb-1 ms-1"
             variant="white"
             @click="leave"
           >
@@ -88,7 +88,7 @@
             v-for="mod in group.showmods"
             :key="'showmod-' + mod.id"
             :modtoshow="mod"
-            class="ml-1"
+            class="ms-1"
           />
         </div>
       </ExternalLink>
@@ -109,7 +109,7 @@
           <!--            :groupid="group.id"-->
           <!--            chattype="User2Mod"-->
           <!--          >-->
-          <!--            <GroupShowMod :modtoshow="mod" class="ml-1" />-->
+          <!--            <GroupShowMod :modtoshow="mod" class="ms-1" />-->
           <!--          </ChatButton>-->
         </div>
       </div>
@@ -130,7 +130,7 @@
               :image="sponsor.imageurl"
               :alt-text="'Sponsor logo for ' + sponsor.name"
             />
-            <div class="ml-2">
+            <div class="ms-2">
               <p class="small text-muted">
                 This community is kindly sponsored by:
               </p>

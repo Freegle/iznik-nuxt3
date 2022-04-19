@@ -9,6 +9,7 @@ export const useGroupStore = defineStore({
   }),
   actions: {
     async fetch(id) {
+      // TODO Caching/force
       id = parseInt(id)
       const group = await api().group.fetch(
         id,

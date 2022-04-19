@@ -4,7 +4,7 @@
     <main>
       <slot
         ref="pageContent"
-        class="ml-0 pl-0 pl-sm-1 pr-0 pr-sm-1 pageContent"
+        class="ml-0 ps-0 pe-sm-1 pe-0 pe-sm-1 pageContent"
       />
     </main>
     <!--    <BouncingEmail />-->

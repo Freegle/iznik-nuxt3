@@ -7,53 +7,13 @@
       :group="group"
       :show-join="true"
     />
-    <div v-else>
-      <b-card variant="default">
-        <b-card-body class="p-0 mb-2">
-          <p class="text-center text-muted">
-            Offer stuff you don't need, or find stuff you want.
-          </p>
-          <b-row>
-            <b-col cols="5">
-              <b-button
-                to="/give"
-                class="mt-1"
-                size="lg"
-                block
-                variant="primary"
-              >
-                <client-only>
-                  <v-icon icon="gift" />
-                </client-only>
-                &nbsp;Give stuff
-              </b-button>
-            </b-col>
-            <b-col cols="2" />
-            <b-col cols="5">
-              <b-button
-                to="/find"
-                class="mt-1"
-                size="lg"
-                block
-                variant="secondary"
-              >
-                <client-only>
-                  <v-icon icon="search" />
-                </client-only>
-                &nbsp;Ask for stuff
-              </b-button>
-            </b-col>
-          </b-row>
-        </b-card-body>
-      </b-card>
-    </div>
 
     <div
       v-for="message in filteredMessages"
       :key="'message-' + message.id"
       class="p-0"
     >
-      <Message :id="message.id" record-view />
+      <OurMessage :id="message.id" record-view />
     </div>
 
     <client-only>
@@ -79,15 +39,15 @@
 // import InfiniteLoading from 'vue-infinite-loading'
 import NoticeMessage from './NoticeMessage'
 import { useGroupStore } from '~/stores/group'
+import OurMessage from '~/components/OurMessage.vue'
 const groupHeader = () => import('~/components/GroupHeader.vue')
-const Message = () => import('~/components/Message.vue')
 
 export default {
   components: {
     NoticeMessage,
     // InfiniteLoading,
     groupHeader,
-    Message,
+    OurMessage,
   },
   props: {
     id: {
@@ -111,7 +71,14 @@ export default {
   },
   computed: {
     messages() {
-      const messages = []
+      const messages = [
+        {
+          id: 85299327,
+        },
+        {
+          id: 88378080,
+        },
+      ]
 
       // if (this.group) {
       //   messages = this.$store.getters['messages/getByGroup'](this.group.id)
@@ -121,17 +88,14 @@ export default {
 
       return messages
     },
-
     filteredMessages() {
       return this.messages.filter((message) => {
         return !message.outcomes || message.outcomes.length === 0
       })
     },
-
     group() {
       return this.groupStore.get(this.id)
     },
-
     closed() {
       let ret = false
 

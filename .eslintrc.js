@@ -8,6 +8,12 @@ module.exports = {
   // add your custom rules here
   rules: {
     'no-console': 'off',
+    'vue/multi-word-component-names': [
+      'error',
+      {
+        ignores: ['Message'],
+      },
+    ],
   },
   globals: {
     definePageMeta: 'readonly',
@@ -17,5 +23,6 @@ module.exports = {
     useAsyncData: 'readonly',
     useLazyAsyncData: 'readonly',
     createApp: 'readonly',
+    useMe: 'readonly',
   },
 }

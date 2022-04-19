@@ -3,8 +3,6 @@
 ..idea/inspectionProfiles/profiles_settings.xml,1\e\1e9075f5bf079c01ef2c910709e91a497d262080
 =
 tsconfig.json,6\1\61ebb9fd6e8cf9082658121d5d81e297791dacd0
-K
-plugins/bootstrap.client.ts,e\d\edead1fc716e235a541e36b78598e3b56b40893c
 J
 assets/css/typography.scss,d\9\d9431d166b4172c2373982ce3ad0394b7490a4df
 K
@@ -93,8 +91,6 @@ A
 api/StoriesAPI.js,5\d\5d8a074961b8688b3366e572fccb73afa1924654
 A
 api/GiftAidAPI.js,d\a\da61409889ab99a82a344c9786a2c6170e132333
-A
-api/MessageAPI.js,8\5\85b66593643d6f1098f76fcb4f61ae9e6514f9a3
 A
 api/AddressAPI.js,2\2\22fa7cac261737126739b5fd7e9a7f6cdc4159cf
 A

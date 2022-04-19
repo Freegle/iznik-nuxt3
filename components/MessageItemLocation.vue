@@ -1,0 +1,139 @@
+<template>
+  <div class="item header--size4">
+    <h3 class="m-0 d-flex justify-content-between">
+      <div class="w-100">
+        <div class="sr-only">
+          {{ type }}
+        </div>
+        <Highlighter
+          v-if="matchedon"
+          :search-words="[matchedon.word]"
+          :text-to-highlight="item"
+          highlight-class-name="highlight"
+          auto-escape
+          class="item"
+        />
+        <span
+          v-else
+          :class="{
+            item: true,
+            nowrap: !expanded,
+          }"
+          itemprop="name"
+        >
+          {{ item }}
+        </span>
+      </div>
+      <div>
+        <b-badge
+          v-if="message && message.availablenow > 1"
+          variant="info"
+          class="ms-2 me-2 mt-0 align-top"
+        >
+          {{ message.availablenow ? message.availablenow : '0' }} left
+        </b-badge>
+      </div>
+    </h3>
+    <div class="location">
+      {{ location }}
+    </div>
+  </div>
+</template>
+<script>
+import twem from '~/mixins/twem'
+import { useMessageStore } from '~/stores/message'
+
+const Highlighter = () => import('vue-highlight-words')
+
+export default {
+  components: { Highlighter },
+  mixins: [twem],
+  props: {
+    id: {
+      type: Number,
+      required: true,
+    },
+    messageOverride: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+    matchedon: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+    type: {
+      type: String,
+      required: false,
+      default: null,
+    },
+    expanded: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+  },
+  setup(props) {
+    const messageStore = useMessageStore()
+
+    useAsyncData('message-' + props.id, () => messageStore.fetch(props.id))
+
+    return { messageStore }
+  },
+  computed: {
+    message() {
+      return this.messageStore.byId(this.id)
+    },
+    subject() {
+      return this.message ? this.message.subject : null
+    },
+    item() {
+      let ret = this.subject
+
+      if (this.subject) {
+        const matches = /(.*?):([^)].*)\((.*)\)/.exec(this.subject)
+
+        if (matches && matches.length > 0 && matches[2].length > 0) {
+          ret = matches[2]
+        }
+      }
+
+      return ret ? this.twem(ret) : 'unknown'
+    },
+    location() {
+      let ret = null
+
+      if (this.subject) {
+        const matches = /(.*?):([^)].*)\((.*)\)/.exec(this.subject)
+
+        if (matches && matches.length > 0 && matches[3].length > 0) {
+          ret = matches[3]
+        }
+      }
+
+      return ret ? this.twem(ret) : null
+    },
+  },
+}
+</script>
+<style scoped lang="scss">
+@import 'color-vars';
+
+.item {
+  color: $colour-info-fg !important;
+  font-weight: bold !important;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  display: block;
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+.location {
+  color: $color-gray--darker !important;
+  font-size: 1.25rem;
+}
+</style>
