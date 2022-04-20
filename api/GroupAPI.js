@@ -7,7 +7,6 @@ export default class GroupAPI extends BaseAPI {
   }
 
   async fetch(id, polygon, showmods, sponsors, tnkey, log) {
-    console.log('Fetch group', id)
     const group = await this.$getv2(
       '/group/' + id,
       // TODO { polygon, showmods, sponsors, tnkey }
@@ -15,8 +14,11 @@ export default class GroupAPI extends BaseAPI {
       log
     )
 
-    console.log('Fetched group')
     return group
+  }
+
+  async fetchMessages(id) {
+    return await this.$getv2('/group/' + id + '/message')
   }
 
   async patch(params) {

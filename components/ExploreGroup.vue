@@ -7,31 +7,28 @@
       :group="group"
       :show-join="true"
     />
-
     <div
-      v-for="message in filteredMessages"
-      :key="'message-' + message.id"
+      v-for="message in messagesToShow"
+      :key="'message-' + message"
       class="p-0"
     >
-      <OurMessage :id="message.id" record-view />
+      <OurMessage :id="message" record-view />
     </div>
+    <InfiniteLoading
+      :identifier="messages.length"
+      :distance="1000"
+      :slots="{ complete: '', error: '' }"
+      @infinite="loadMore"
+    />
 
     <client-only>
       <NoticeMessage
-        v-if="!busy && !filteredMessages.length"
+        v-if="!busy && !messages.length"
         variant="info"
         class="mt-2"
       >
         There are no messages on this group yet.
       </NoticeMessage>
-      <!--      TODO Infinite loading.-->
-      <!--      <infinite-loading :distance="distance" @infinite="loadMoreMessages">-->
-      <!--        <span slot="no-results" />-->
-      <!--        <span slot="no-more" />-->
-      <!--        <span slot="spinner">-->
-      <!--          <b-img-lazy src="~/static/loader.gif" alt="Loading" />-->
-      <!--        </span>-->
-      <!--      </infinite-loading>-->
     </client-only>
   </div>
 </template>
@@ -44,6 +41,8 @@ const groupStore = useGroupStore()
 const props = defineProps({
   id: String,
 })
+
+groupStore.fetchMessages(props.id)
 
 // console.log('Load data')
 // useAsyncData('group-' + props.id, () => groupStore.fetch(props.id))
@@ -64,33 +63,15 @@ export default {
   data() {
     return {
       busy: false,
-      context: null,
-      distance: 1000,
+      toShow: 10,
     }
   },
   computed: {
     messages() {
-      const messages = [
-        {
-          id: 85299327,
-        },
-        {
-          id: 88378080,
-        },
-      ]
-
-      // if (this.group) {
-      //   messages = this.$store.getters['messages/getByGroup'](this.group.id)
-      // } else {
-      //   messages = this.$store.getters['messages/getAll']
-      // }
-
-      return messages
+      return this.groupStore.getMessages(this.id)
     },
-    filteredMessages() {
-      return this.messages.filter((message) => {
-        return !message.outcomes || message.outcomes.length === 0
-      })
+    messagesToShow() {
+      return this.messages.slice(0, this.toShow)
     },
     group() {
       return this.groupStore.get(this.id)
@@ -106,47 +87,16 @@ export default {
     },
   },
   methods: {
-    loadMoreMessages($state) {
-      this.busy = true
-
-      let messages
-
-      if (this.group) {
-        messages = this.$store.getters['messages/getByGroup'](this.group.id)
+    loadMore($state) {
+      console.log('Load more', this.toShow, this.messages.length)
+      if (this.toShow < this.messages.length) {
+        this.toShow++
+        console.log('Loaded')
+        $state.loaded()
       } else {
-        messages = this.$store.getters['messages/getAll']
+        console.log('Complete')
+        $state.complete()
       }
-
-      const lastCount = messages.length
-
-      this.$store
-        .dispatch('messages/fetchMessages', {
-          groupid: this.group ? this.group.id : null,
-          collection: 'Approved',
-          summary: true,
-          types: ['Offer', 'Wanted'],
-          context: this.context,
-        })
-        .then(() => {
-          this.busy = false
-
-          this.context = this.$store.getters['messages/getContext']
-
-          if (this.group) {
-            messages = this.$store.getters['messages/getByGroup'](this.group.id)
-          } else {
-            messages = this.$store.getters['messages/getAll']
-          }
-
-          if (messages.length === lastCount) {
-            $state.complete()
-          } else {
-            $state.loaded()
-          }
-        })
-        .catch(() => {
-          $state.complete()
-        })
     },
   },
 }

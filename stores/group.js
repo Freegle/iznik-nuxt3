@@ -5,12 +5,12 @@ export const useGroupStore = defineStore({
   id: 'group',
   state: () => ({
     list: {},
+    messages: {},
     _remember: {},
   }),
   actions: {
     async fetch(id) {
       // TODO Caching/force
-      console.log('Fetch in store')
       id = parseInt(id)
       const group = await api().group.fetch(
         id,
@@ -33,12 +33,18 @@ export const useGroupStore = defineStore({
         this.list[id] = group
       }
 
-      console.log('Fetched in store')
-
       return group
     },
     remember(id, val) {
       this._remember[id] = val
+    },
+    async fetchMessages(id) {
+      id = parseInt(id)
+      const messages = await api().group.fetchMessages(id)
+
+      if (messages) {
+        this.messages[id] = messages
+      }
     },
   },
   getters: {
@@ -64,6 +70,13 @@ export const useGroupStore = defineStore({
       }
 
       return ret
+    },
+    getMessages: (state) => (id) => {
+      if (id in state.messages) {
+        return state.messages[id]
+      } else {
+        return []
+      }
     },
     remembered: (state) => (id) => state._remember[id],
   },

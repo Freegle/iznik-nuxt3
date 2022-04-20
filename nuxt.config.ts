@@ -39,5 +39,9 @@ export default defineNuxtConfig({
     'color-vars': 'assets/css/_color-vars.scss',
   },
 
+  generate: {
+    routes: ['/explore/21496'],
+  },
+
   // TODO Sentry
 })

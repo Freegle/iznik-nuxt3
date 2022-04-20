@@ -6,10 +6,10 @@
       class="text--small"
     >
       <span class="time" :title="group.arrival"
-        >{{ arrival(group.arrival) }} on</span
-      >
+        >{{ arrival(group.arrival) }} on
+      </span>
       <nuxt-link :to="'/explore/' + exploreLink(group)">
-        {{ group.namedisplay }}
+        {{ groupName(group) }}
       </nuxt-link>
       <client-only>
         <nuxt-link
@@ -111,6 +111,15 @@ export default {
     },
   },
   methods: {
+    groupName(group) {
+      const thegroup = this.groupStore.get(group.groupid)
+
+      if (thegroup) {
+        return thegroup.nameshort
+      } else {
+        return null
+      }
+    },
     exploreLink(group) {
       // Better to link to the group by name if possible to avoid nuxt generate creating explore pages for the
       // id variants.
