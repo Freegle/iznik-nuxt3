@@ -42,7 +42,12 @@ export default defineNuxtConfig({
         scss: {
           additionalData:
             // Include some CSS in all components.
-            '@import "@/assets/css/_color-vars.scss"; @import "~bootstrap/scss/functions"; @import "~bootstrap/scss/variables"; @import "~bootstrap/scss/mixins/_breakpoints";',
+            // TODO Tried to include these but broke the colours:
+            // @import '~bootstrap/scss/functions';
+            // @import '~bootstrap/scss/variables';
+            // @import '~bootstrap/scss/mixins/_breakpoints';
+            //
+            '@import "@/assets/css/_color-vars.scss";',
         },
       },
     },
