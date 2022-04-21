@@ -17,7 +17,8 @@
     <InfiniteLoading
       :identifier="messages.length"
       :distance="1000"
-      :slots="{ complete: '', error: '' }"
+      :slots="{ complete: ' ', error: ' ' }"
+      :first-load="true"
       @infinite="loadMore"
     />
 
@@ -32,35 +33,21 @@
     </client-only>
   </div>
 </template>
-<script setup>
+<script setup></script>
+<script>
 import { useGroupStore } from '~/stores/group'
 
-const groupStore = useGroupStore()
-
-const props = defineProps({
-  id: {
-    type: String,
-    required: true,
-  },
-})
-
-groupStore.fetchMessages(props.id)
-
-// console.log('Load data')
-// useAsyncData('group-' + props.id, () => groupStore.fetch(props.id))
-// console.log('Loaded')
-</script>
-<script>
-// import InfiniteLoading from 'vue-infinite-loading'
 export default {
-  components: {
-    // InfiniteLoading,
-  },
   props: {
     id: {
       validator: (prop) => typeof prop === 'number' || typeof prop === 'string',
       required: true,
     },
+  },
+  async setup(props) {
+    const groupStore = useGroupStore()
+    await groupStore.fetchMessages(props.id)
+    return { groupStore }
   },
   data() {
     return {
@@ -90,13 +77,10 @@ export default {
   },
   methods: {
     loadMore($state) {
-      console.log('Load more', this.toShow, this.messages.length)
       if (this.toShow < this.messages.length) {
         this.toShow++
-        console.log('Loaded')
         $state.loaded()
       } else {
-        console.log('Complete')
         $state.complete()
       }
     },

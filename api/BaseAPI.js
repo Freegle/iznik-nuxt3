@@ -67,7 +67,9 @@ export default class BaseAPI {
       const ret = await this.$axios.request({
         ...config,
         method,
-        url: this.$config.APIv1 + path,
+        url:
+          (process.server ? this.$config.IZNIK_API_V1 : this.$config.APIv1) +
+          path,
       })
       ;({ status, data } = ret)
     } catch (e) {
@@ -225,7 +227,9 @@ export default class BaseAPI {
       const ret = await this.$axios.request({
         ...config,
         method,
-        url: this.$config.APIv2 + path,
+        url:
+          (process.server ? this.$config.IZNIK_API_V2 : this.$config.APIv2) +
+          path,
       })
       ;({ status, data } = ret)
     } catch (e) {

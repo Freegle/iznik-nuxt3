@@ -2,11 +2,12 @@ import { defineNuxtConfig } from 'nuxt'
 import constants from './constants'
 
 export default defineNuxtConfig({
-  // We use a static target with no SSR:
-  // - We need static rendering for good SEO.
-  // - It means the users pay for the CPU not Freegle.  Cheapskates.
-  ssr: false,
+  // We need static rendering for good SEO.  It means the users pay for the CPU not Freegle.  Cheapskates.
   target: 'static',
+
+  // SSR true means that the pages will be rendered on generate.  SSR false means that the pages are generated but
+  // only contain the scripts required to render on the client.
+  ssr: true,
 
   build: {
     // Reduce size of CSS initial load.

@@ -1,5 +1,6 @@
 <template>
-  <div v-if="textbody && textbody !== 'null'" v-line-clamp="2" class="textbody">
+  <div v-if="textbody && textbody !== 'null'" class="textbody">
+    <!--     TODO lineclamp-->
     <Highlighter
       v-if="me && matchedon"
       :search-words="[matchedon.word]"
