@@ -135,11 +135,6 @@ export default {
 </script>
 
 <style scoped lang="scss">
-@import 'color-vars';
-@import '~bootstrap/scss/functions';
-@import '~bootstrap/scss/variables';
-@import '~bootstrap/scss/mixins/_breakpoints';
-
 .card-body {
   padding: 0px;
 }

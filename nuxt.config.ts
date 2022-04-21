@@ -33,10 +33,19 @@ export default defineNuxtConfig({
     SENTRY_DSN: constants.SENTRY_DSN,
     BUILD_DATE: new Date().toISOString(),
   },
+
   css: ['@/assets/css/global.scss'],
 
-  alias: {
-    'color-vars': 'assets/css/_color-vars.scss',
+  vite: {
+    css: {
+      preprocessorOptions: {
+        scss: {
+          additionalData:
+            // Include some CSS in all components.
+            '@import "@/assets/css/_color-vars.scss"; @import "~bootstrap/scss/functions"; @import "~bootstrap/scss/variables"; @import "~bootstrap/scss/mixins/_breakpoints";',
+        },
+      },
+    },
   },
 
   generate: {

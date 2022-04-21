@@ -18,8 +18,6 @@ export default {
 </script>
 
 <style scoped lang="scss">
-@import 'color-vars';
-
 .notice {
   border-width: 1px;
   border-style: solid;

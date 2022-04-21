@@ -56,8 +56,6 @@ export default {
 }
 </script>
 <style scoped lang="scss">
-@import 'color-vars';
-
 .textbody {
   font-size: 1.25rem;
   word-break: break-word !important;

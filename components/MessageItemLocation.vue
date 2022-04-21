@@ -118,8 +118,6 @@ export default {
 }
 </script>
 <style scoped lang="scss">
-@import 'color-vars';
-
 .item {
   color: $colour-info-fg !important;
   font-weight: bold !important;

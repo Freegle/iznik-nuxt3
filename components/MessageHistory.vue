@@ -144,8 +144,6 @@ export default {
 }
 </script>
 <style scoped lang="scss">
-@import 'color-vars';
-
 .time {
   color: $colour-success-fg;
 }

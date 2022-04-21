@@ -101,7 +101,6 @@ export default {
 </script>
 
 <style scoped lang="scss">
-@import 'color-vars';
 @import 'bootstrap/scss/_functions';
 @import 'bootstrap/scss/_variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
