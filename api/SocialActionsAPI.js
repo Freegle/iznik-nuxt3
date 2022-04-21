@@ -21,7 +21,7 @@ export default class SocialActionsAPI extends BaseAPI {
     return this.$post('/socialactions', {
       groupid,
       msgid,
-      action: 'HidePopular'
+      action: 'HidePopular',
     })
   }
 }

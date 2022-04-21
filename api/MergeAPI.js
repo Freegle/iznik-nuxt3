@@ -20,7 +20,7 @@ export default class MergeAPI extends BaseAPI {
       uid: params.uid,
       user1: params.user1,
       user2: params.user2,
-      action: 'Accept'
+      action: 'Accept',
     })
   }
 
@@ -30,7 +30,7 @@ export default class MergeAPI extends BaseAPI {
       uid: params.uid,
       user1: params.user1,
       user2: params.user2,
-      action: 'Reject'
+      action: 'Reject',
     })
   }
 }

@@ -17,7 +17,7 @@ export default class CommunityEventAPI extends BaseAPI {
     return this.$patch('/communityevent', {
       id,
       groupid,
-      action: 'RemoveGroup'
+      action: 'RemoveGroup',
     })
   }
 

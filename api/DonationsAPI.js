@@ -6,7 +6,7 @@ export default class DonationsAPI extends BaseAPI {
     const { target, raised } = ret.donations
     return {
       target: Math.round(parseInt(target)),
-      raised: Math.round(parseInt(raised))
+      raised: Math.round(parseInt(raised)),
     }
   }
 

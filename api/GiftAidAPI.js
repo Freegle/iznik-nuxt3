@@ -8,7 +8,7 @@ export default class GiftAidAPI extends BaseAPI {
 
   async list() {
     const ret = await this.$get('/giftaid', {
-      all: true
+      all: true,
     })
 
     return ret.giftaids
@@ -16,7 +16,7 @@ export default class GiftAidAPI extends BaseAPI {
 
   async search(val) {
     const ret = await this.$get('/giftaid', {
-      search: val
+      search: val,
     })
 
     return ret.giftaids
@@ -44,7 +44,7 @@ export default class GiftAidAPI extends BaseAPI {
       postcode,
       housenameornumber,
       reviewed,
-      deleted
+      deleted,
     }
     return this.$patch('/giftaid', data)
   }

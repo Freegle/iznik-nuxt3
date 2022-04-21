@@ -4,7 +4,7 @@ export const useMiscStore = defineStore({
   id: 'misc',
   state: () => ({
     time: null,
-    vals: {}
+    vals: {},
   }),
   actions: {
     set(params) {
@@ -12,9 +12,9 @@ export const useMiscStore = defineStore({
     },
     setTime() {
       this.time = new Date()
-    }
+    },
   },
   getters: {
-    get: state => key => state[key]
+    get: (state) => (key) => state[key],
   },
 })

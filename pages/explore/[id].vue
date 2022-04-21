@@ -14,33 +14,35 @@
     </b-row>
   </div>
 </template>
-<script setup>
+<script>
+// TODO Could we ensure all stores were available in every component?
 import { useGroupStore } from '~/stores/group'
 
-const groupStore = useGroupStore()
-
-// The first parameter needs to be a unique key.
-// See https://stackoverflow.com/questions/71383166/rationale-behind-providing-a-key-in-useasyncdata-function
-//
-// We don't use lazy because we want the page to be rendered for SEO.
-const route = useRoute()
-const id = route.params.id
-
-const { data, refresh, pending } = await useAsyncData('explore-' + route.params.id, () => groupStore.fetch(route.params.id))
-
-// Awaiting on refresh() seems to be necessary to make sure we wait until we've loaded the data before setup()
-// completes.  That is necessary otherwise we won't render the page when generating.
-await refresh()
-
-// TODO Could we ensure all stores were available in every component?
-</script>
-
-<script>
 definePageMeta({
   layout: 'default',
 })
 
 export default {
+  async setup() {
+    const groupStore = useGroupStore()
+
+    // The first parameter needs to be a unique key.
+    // See https://stackoverflow.com/questions/71383166/rationale-behind-providing-a-key-in-useasyncdata-function
+    //
+    // We don't use lazy because we want the page to be rendered for SEO.
+    const route = useRoute()
+    const id = route.params.id
+
+    const { refresh } = await useAsyncData('explore-' + route.params.id, () =>
+      groupStore.fetch(route.params.id)
+    )
+
+    // Awaiting on refresh() seems to be necessary to make sure we wait until we've loaded the data before setup()
+    // completes.  That is necessary otherwise we won't render the page when generating.
+    await refresh()
+
+    return { id, groupStore }
+  },
   computed: {
     group() {
       return this.groupStore.get(this.id)

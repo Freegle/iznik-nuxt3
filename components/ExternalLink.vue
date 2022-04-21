@@ -7,8 +7,8 @@ export default {
   props: {
     href: {
       type: String,
-      required: true
-    }
+      required: true,
+    },
   },
   methods: {
     openInBrowser() {
@@ -18,7 +18,7 @@ export default {
         return false
       }
       return true
-    }
-  }
+    },
+  },
 }
 </script>

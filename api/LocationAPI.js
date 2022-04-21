@@ -18,7 +18,7 @@ export default class LocationAPI extends BaseAPI {
       id,
       action: 'Exclude',
       byname: false,
-      groupid: groupid
+      groupid,
     })
   }
 }

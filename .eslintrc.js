@@ -8,14 +8,15 @@ module.exports = {
   // add your custom rules here
   rules: {
     'no-console': 'off',
-    'vue/multi-word-component-names': [
-      'error',
-      {
-        ignores: ['Message'],
-      },
-    ],
   },
+  overrides: [
+    {
+      files: ['layouts/*.vue', 'pages/**/*.vue'],
+      rules: { 'vue/multi-word-component-names': 'off' },
+    },
+  ],
   globals: {
+    defineProps: 'readonly',
     definePageMeta: 'readonly',
     useRuntimeConfig: 'readonly',
     defineNuxtPlugin: 'readonly',

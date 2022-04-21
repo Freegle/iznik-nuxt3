@@ -6,7 +6,7 @@ export default class ChatAPI extends BaseAPI {
       ? this.$get(
           `/chat/rooms/${chatid}/messages`,
           { limit, context },
-          function(data) {
+          function (data) {
             if (data && data.ret === 2) {
               // We handle this in the chat page
               return false
@@ -31,7 +31,7 @@ export default class ChatAPI extends BaseAPI {
     return this.$post('/chatrooms', {
       id: chatid,
       lastmsgseen: lastmsg,
-      allowback
+      allowback,
     })
   }
 
@@ -40,7 +40,7 @@ export default class ChatAPI extends BaseAPI {
   }
 
   send(data) {
-    return this.$post('/chatmessages', data, function(data) {
+    return this.$post('/chatmessages', data, function (data) {
       if (data && data.ret === 4) {
         // Don't log errors for banned users - handled elsewhere.
         return false
@@ -53,7 +53,7 @@ export default class ChatAPI extends BaseAPI {
   nudge(chatid) {
     return this.$post('/chatrooms', {
       id: chatid,
-      action: 'Nudge'
+      action: 'Nudge',
     })
   }
 
@@ -69,7 +69,7 @@ export default class ChatAPI extends BaseAPI {
     const modtools = this.store.getters['misc/get']('modtools')
     return this.$get('/chatrooms', {
       count: true,
-      chattypes: modtools ? ['User2Mod', 'Mod2Mod'] : ['User2User', 'User2Mod']
+      chattypes: modtools ? ['User2Mod', 'Mod2Mod'] : ['User2User', 'User2Mod'],
     })
   }
 
@@ -96,15 +96,15 @@ export default class ChatAPI extends BaseAPI {
   whitelist(msgid) {
     return this.$post('/chatmessages', {
       id: msgid,
-      action: 'ApproveAllFuture'
+      action: 'ApproveAllFuture',
     })
   }
 
   rsvp(chatid, id, value) {
     return this.$patch('/chatmessages', {
       roomid: chatid,
-      id: id,
-      replyexpected: value
+      id,
+      replyexpected: value,
     })
   }
 

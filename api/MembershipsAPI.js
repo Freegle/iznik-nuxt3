@@ -36,61 +36,61 @@ export default class MembershipsAPI extends BaseAPI {
   reply(userid, groupid, subject = null, stdmsgid = null, body = null) {
     return this.$post('/memberships', {
       action: 'Leave Approved Member',
-      userid: userid,
-      groupid: groupid,
-      subject: subject,
-      stdmsgid: stdmsgid,
-      body: body
+      userid,
+      groupid,
+      subject,
+      stdmsgid,
+      body,
     })
   }
 
   delete(userid, groupid, subject = null, stdmsgid = null, body = null) {
     return this.$post('/memberships', {
       action: 'Delete Approved Member',
-      userid: userid,
-      groupid: groupid,
-      subject: subject,
-      stdmsgid: stdmsgid,
-      body: body
+      userid,
+      groupid,
+      subject,
+      stdmsgid,
+      body,
     })
   }
 
   remove(userid, groupid) {
     return this.$del('/memberships', {
-      userid: userid,
-      groupid: groupid
+      userid,
+      groupid,
     })
   }
 
   ban(userid, groupid) {
     return this.$del('/memberships', {
-      userid: userid,
-      groupid: groupid,
-      ban: true
+      userid,
+      groupid,
+      ban: true,
     })
   }
 
   unban(userid, groupid) {
     return this.$post('/memberships', {
-      userid: userid,
-      groupid: groupid,
-      action: 'Unban'
+      userid,
+      groupid,
+      action: 'Unban',
     })
   }
 
   hold(userid, groupid) {
     return this.$post('/memberships', {
       action: 'Hold',
-      userid: userid,
-      groupid: groupid
+      userid,
+      groupid,
     })
   }
 
   release(userid, groupid) {
     return this.$post('/memberships', {
       action: 'Release',
-      userid: userid,
-      groupid: groupid
+      userid,
+      groupid,
     })
   }
 

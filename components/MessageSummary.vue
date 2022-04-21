@@ -53,8 +53,6 @@
 <script>
 import { useMessageStore } from '~/stores/message'
 
-const me = useMe()
-
 export default {
   props: {
     id: {

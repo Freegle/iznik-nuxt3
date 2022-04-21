@@ -17,14 +17,14 @@ export default class TrystAPI extends BaseAPI {
   confirm(id) {
     return this.$post('/tryst', {
       id,
-      confirm: true
+      confirm: true,
     })
   }
 
   decline(id) {
     return this.$post('/tryst', {
       id,
-      decline: true
+      decline: true,
     })
   }
 

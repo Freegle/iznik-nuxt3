@@ -18,31 +18,31 @@ export default class UserAPI extends BaseAPI {
       rating,
       action: 'Rate',
       reason,
-      text
+      text,
     })
   }
 
   ratingReviewed(ratingid) {
     return this.$post('/user', {
-      ratingid: ratingid,
-      action: 'RatingReviewed'
+      ratingid,
+      action: 'RatingReviewed',
     })
   }
 
   unbounce(id) {
-    return this.$post('/user', { id: id, action: 'Unbounce' })
+    return this.$post('/user', { id, action: 'Unbounce' })
   }
 
   addEmail(id, email) {
-    return this.$post('/user', { id: id, action: 'AddEmail', email: email })
+    return this.$post('/user', { id, action: 'AddEmail', email })
   }
 
   removeEmail(id, email) {
-    return this.$post('/user', { id: id, action: 'RemoveEmail', email: email })
+    return this.$post('/user', { id, action: 'RemoveEmail', email })
   }
 
   add(email, logError = true) {
-    return this.$put('/user', { email: email }, logError)
+    return this.$put('/user', { email }, logError)
   }
 
   merge(email1, email2, id1, id2, reason) {
@@ -52,7 +52,7 @@ export default class UserAPI extends BaseAPI {
       id1,
       id2,
       reason,
-      action: 'Merge'
+      action: 'Merge',
     })
   }
 
@@ -62,7 +62,7 @@ export default class UserAPI extends BaseAPI {
 
   purge(id) {
     return this.$del('/user', {
-      id
+      id,
     })
   }
 }

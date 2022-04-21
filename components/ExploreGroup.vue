@@ -33,13 +33,15 @@
   </div>
 </template>
 <script setup>
-import { defineProps } from 'vue'
 import { useGroupStore } from '~/stores/group'
 
 const groupStore = useGroupStore()
 
 const props = defineProps({
-  id: String,
+  id: {
+    type: String,
+    required: true,
+  },
 })
 
 groupStore.fetchMessages(props.id)

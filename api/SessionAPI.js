@@ -20,7 +20,7 @@ export default class SessionAPI extends BaseAPI {
     googlelogin,
     googleauthcode,
     u,
-    k
+    k,
   }) {
     return this.$post('/session', {
       email,
@@ -30,7 +30,7 @@ export default class SessionAPI extends BaseAPI {
       googlelogin,
       googleauthcode,
       u,
-      k
+      k,
     })
   }
 
@@ -45,7 +45,7 @@ export default class SessionAPI extends BaseAPI {
   related(userlist) {
     return this.$post('/session', {
       action: 'Related',
-      userlist: userlist
+      userlist,
     })
   }
 }

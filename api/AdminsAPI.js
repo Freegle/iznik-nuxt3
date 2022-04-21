@@ -21,14 +21,14 @@ export default class AdminsAPI extends BaseAPI {
   async hold(id) {
     await this.$post('/admin', {
       id,
-      action: 'Hold'
+      action: 'Hold',
     })
   }
 
   async release(id) {
     await this.$post('/admin', {
       id,
-      action: 'Release'
+      action: 'Release',
     })
   }
 }
