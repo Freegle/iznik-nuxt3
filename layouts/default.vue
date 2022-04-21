@@ -25,11 +25,8 @@
     </client-only>
   </div>
 </template>
-<script setup></script>
 <script>
 import { useMiscStore } from '../stores/misc'
-
-const misc = useMiscStore()
 
 // import replyToPost from '@/mixins/replyToPost'
 // import BouncingEmail from '~/components/BouncingEmail'
@@ -195,6 +192,7 @@ export default {
   // },
   methods: {
     updateTime() {
+      const misc = useMiscStore()
       misc.setTime()
       this.timeTimer = setTimeout(this.updateTime, 1000)
     },

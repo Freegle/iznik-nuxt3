@@ -36,7 +36,8 @@
         </b-badge>
       </div>
       <div :class="{ thumbnail: thumbnail, notThumbnail: !thumbnail }">
-        <b-img-lazy
+        <!--        TODO Lazy-->
+        <b-img
           rounded
           class="d-none d-md-block attachment p-0"
           generator-unable-to-provide-required-alt=""
@@ -46,7 +47,7 @@
           @error.native="brokenImage"
           @click.native="$emit('zoom')"
         />
-        <b-img-lazy
+        <b-img
           rounded
           class="d-block d-md-none attachment p-0"
           generator-unable-to-provide-required-alt=""
