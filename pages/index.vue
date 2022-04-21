@@ -30,7 +30,11 @@ export default {
     //
     // The first parameter to useLazyAsyncData needs to be a unique key.
     // See https://stackoverflow.com/questions/71383166/rationale-behind-providing-a-key-in-useasyncdata-function
-    console.log('Async')
+    if (!getActivePinia()) {
+      const pinia = createPinia()
+      setActivePinia(pinia)
+    }
+
     useLazyAsyncData('group-' + GROUP, () => groupStore.fetch(GROUP))
     useLazyAsyncData('isochrone', () => isochroneStore.fetch())
 
