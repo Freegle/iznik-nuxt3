@@ -13,7 +13,6 @@ gr
 </template>
 <script>
 export default {
-  global: false,
   props: {
     modtoshow: {
       type: Object,

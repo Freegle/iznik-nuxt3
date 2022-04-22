@@ -47,7 +47,6 @@ const Highlighter = () => import('vue-highlight-words')
 
 export default {
   components: { Highlighter },
-  global: false,
   mixins: [twem],
   props: {
     id: {

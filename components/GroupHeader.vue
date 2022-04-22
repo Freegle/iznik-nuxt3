@@ -155,7 +155,6 @@
 // import ChatButton from '~/components/ChatButton'
 
 export default {
-  global: false,
   props: {
     group: {
       type: Object,

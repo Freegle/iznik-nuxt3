@@ -12,7 +12,6 @@ dayjs.extend(advancedFormat)
 dayjs.extend(relativeTime)
 
 export default {
-  global: false,
   props: {
     value: {
       type: String,

@@ -38,7 +38,6 @@
 import { useGroupStore } from '~/stores/group'
 
 export default {
-  global: false,
   props: {
     id: {
       validator: (prop) => typeof prop === 'number' || typeof prop === 'string',

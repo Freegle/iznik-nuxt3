@@ -24,7 +24,6 @@
 </template>
 <script>
 export default {
-  global: false,
   props: {
     id: {
       type: Number,

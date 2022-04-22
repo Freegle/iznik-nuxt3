@@ -15,7 +15,6 @@ import { useGroupStore } from '../stores/group'
 import { useMessageStore } from '~/stores/message'
 
 export default {
-  global: false,
   props: {
     id: {
       type: Number,
