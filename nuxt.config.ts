@@ -12,6 +12,8 @@ export default defineNuxtConfig({
   build: {
     // Reduce size of CSS initial load.
     extractCSS: true,
+
+    transpile: [/bootstrap-vue-3/],
   },
 
   buildModules: ['@pinia/nuxt'],
