@@ -83,11 +83,6 @@ export default {
     //       console.log('Store restore wait failed', e)
     //     }
     //
-    // Add class for screen background.
-    if (process && process.browser) {
-      document.body.classList.add('fd')
-    }
-
     //
     // Start our timer.  Holding the time in the store allows us to update the time regularly and have reactivity
     // cause displayed fromNow() values to change, rather than starting a timer for each of them.

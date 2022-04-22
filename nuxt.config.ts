@@ -13,6 +13,7 @@ export default defineNuxtConfig({
     // Reduce size of CSS initial load.
     extractCSS: true,
 
+    // Need to transpile otherwise SSR fails - see https://github.com/nuxt/framework/discussions/4523.
     transpile: [/bootstrap-vue-3/],
   },
 
