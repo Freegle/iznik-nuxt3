@@ -25,8 +25,5 @@ module.exports = {
     useLazyAsyncData: 'readonly',
     createApp: 'readonly',
     useMe: 'readonly',
-    getActivePinia: 'readonly',
-    createPinia: 'readonly',
-    setActivePinia: 'readonly',
   },
 }

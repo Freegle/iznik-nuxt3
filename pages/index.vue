@@ -12,6 +12,7 @@
   </div>
 </template>
 <script>
+import { getActivePinia, createPinia, setActivePinia } from 'pinia'
 import { useGroupStore } from '../stores/group'
 import { useMiscStore } from '../stores/misc'
 import { useIsochroneStore } from '../stores/isochrone'
@@ -27,21 +28,21 @@ export default {
   setup() {
     // We don't use the syntactic sugar of <script setup> because they we have to do imports and const definitions
     // multiple times.
-    //
-    // The first parameter to useLazyAsyncData needs to be a unique key.
-    // See https://stackoverflow.com/questions/71383166/rationale-behind-providing-a-key-in-useasyncdata-function
     if (!getActivePinia()) {
+      // This seems to be needed for SSR.
       const pinia = createPinia()
       setActivePinia(pinia)
     }
-
-    useLazyAsyncData('group-' + GROUP, () => groupStore.fetch(GROUP))
-    useLazyAsyncData('isochrone', () => isochroneStore.fetch())
 
     // TODO Could we ensure all stores were available in every component?
     const groupStore = useGroupStore()
     const miscStore = useMiscStore()
     const isochroneStore = useIsochroneStore()
+
+    // The first parameter to useLazyAsyncData needs to be a unique key.
+    // See https://stackoverflow.com/questions/71383166/rationale-behind-providing-a-key-in-useasyncdata-function
+    useLazyAsyncData('group-' + GROUP, () => groupStore.fetch(GROUP))
+    useLazyAsyncData('isochrone', () => isochroneStore.fetch())
 
     return { miscStore, groupStore, isochroneStore }
   },
