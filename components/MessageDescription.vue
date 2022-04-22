@@ -18,6 +18,7 @@ import twem from '~/mixins/twem'
 const Highlighter = () => import('vue-highlight-words')
 
 export default {
+  global: false,
   components: { Highlighter },
   mixins: [twem],
   props: {

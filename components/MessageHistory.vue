@@ -61,6 +61,7 @@ import dayjs from 'dayjs'
 import { useGroupStore } from '~/stores/group'
 
 export default {
+  global: false,
   name: 'MessageHistory',
   props: {
     id: {

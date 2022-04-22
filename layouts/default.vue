@@ -84,7 +84,10 @@ export default {
     //     }
     //
     // Add class for screen background.
-    document.body.classList.add('fd')
+    if (process.browser) {
+      document.body.classList.add('fd')
+    }
+
     //
     // Start our timer.  Holding the time in the store allows us to update the time regularly and have reactivity
     // cause displayed fromNow() values to change, rather than starting a timer for each of them.
@@ -194,7 +197,10 @@ export default {
     updateTime() {
       const misc = useMiscStore()
       misc.setTime()
-      this.timeTimer = setTimeout(this.updateTime, 1000)
+
+      if (process.browser) {
+        this.timeTimer = setTimeout(this.updateTime, 1000)
+      }
     },
   },
 }

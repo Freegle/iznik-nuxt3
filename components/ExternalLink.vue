@@ -4,6 +4,7 @@
 </template>
 <script>
 export default {
+  global: false,
   props: {
     href: {
       type: String,

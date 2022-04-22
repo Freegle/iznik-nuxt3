@@ -6,6 +6,7 @@
 
 <script>
 export default {
+  global: false,
   name: 'NoticeMessage',
   props: {
     variant: {

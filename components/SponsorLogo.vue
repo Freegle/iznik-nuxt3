@@ -15,6 +15,7 @@
 // Vue DOM patching overall, and this component is used in places like chat where it appears many times.  Testing shows
 // this has a significant performance benefit.
 export default {
+  global: false,
   name: 'SponsorLogo',
   props: {
     image: {

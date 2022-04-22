@@ -39,6 +39,7 @@
 // this has a significant performance benefit.
 export default {
   name: 'ProfileImage',
+  global: false,
   props: {
     image: {
       type: String,
