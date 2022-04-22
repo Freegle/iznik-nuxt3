@@ -1,7 +1,6 @@
 <template>
   <div>
-    <!--    TODO Lazy-->
-    <b-img src="~/static/freegled.jpg" class="freegled__image" />
+    <b-img-lazy src="~/static/freegled.jpg" class="freegled__image" />
     <b-tooltip variant="success" :target="'msg-' + id">
       <p v-if="message.type === 'Offer'">Yay, someone took it!</p>
       <p v-else>Hurray, they got what they were looking for!</p>
@@ -13,7 +12,9 @@
   </div>
 </template>
 <script>
+import BImgLazy from './BImgLazy'
 export default {
+  components: { BImgLazy },
   props: {
     id: {
       type: Number,

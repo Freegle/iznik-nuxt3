@@ -1,8 +1,7 @@
 <template>
   <div>
     <div v-if="summary">
-      <!--      TODO Lazy-->
-      <b-img src="~/static/promised.jpg" class="promised__image" />
+      <b-img-lazy src="~/static/promised.jpg" class="promised__image" />
       <b-tooltip variant="success" :target="'msg-' + id">
         <p v-if="!toMe">
           This item has already been promised to someone. You can still reply,

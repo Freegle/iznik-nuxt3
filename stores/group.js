@@ -12,25 +12,30 @@ export const useGroupStore = defineStore({
     async fetch(id) {
       // TODO Caching/force
       id = parseInt(id)
-      const group = await api().group.fetch(
-        id,
-        // TODO How to handle extra information like this which slows down the call?
-        true,
-        true,
-        true,
-        true,
-        function (data) {
-          if (data && data.ret === 10) {
-            // Not hosting a group isn't worth logging.
-            return false
-          } else {
-            return true
-          }
-        }
-      )
 
-      if (group) {
-        this.list[id] = group
+      let group = null
+
+      if (!isNaN(id)) {
+        group = await api().group.fetch(
+          id,
+          // TODO How to handle extra information like this which slows down the call?
+          true,
+          true,
+          true,
+          true,
+          function (data) {
+            if (data && data.ret === 10) {
+              // Not hosting a group isn't worth logging.
+              return false
+            } else {
+              return true
+            }
+          }
+        )
+
+        if (group) {
+          this.list[id] = group
+        }
       }
 
       return group

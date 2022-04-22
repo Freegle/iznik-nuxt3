@@ -14,7 +14,7 @@ export default defineNuxtConfig({
     extractCSS: true,
 
     // Need to transpile otherwise SSR fails - see https://github.com/nuxt/framework/discussions/4523.
-    transpile: [/bootstrap-vue-3/],
+    transpile: [/bootstrap-vue-3/, /vue3-lazyload/],
   },
 
   buildModules: ['@pinia/nuxt'],

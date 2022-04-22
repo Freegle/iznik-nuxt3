@@ -1,16 +1,16 @@
 <template>
   <span class="ProfileImage__container">
-    <!--    TODO Lazy-->
-    <!--    <b-img-lazy-->
-    <!--      v-if="lazy"-->
-    <!--      rounded="circle"-->
-    <!--      :thumbnail="isThumbnail"-->
-    <!--      :class="className"-->
-    <!--      :alt="altText"-->
-    <!--      :src="validImage"-->
-    <!--      @error.native="brokenProfileImage"-->
-    <!--    />-->
+    <b-img-lazy
+      v-if="lazy"
+      rounded="circle"
+      :thumbnail="isThumbnail"
+      :class="className"
+      :alt="altText"
+      :src="validImage"
+      @error.native="brokenProfileImage"
+    />
     <b-img
+      v-else
       rounded="circle"
       :thumbnail="isThumbnail"
       :class="className"
