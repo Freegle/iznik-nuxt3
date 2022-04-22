@@ -21,7 +21,6 @@ export default {
   },
 
   // Make Lint errors cause build failures.
-  // TODO Not sure this works.
   plugins: [eslintPlugin()],
 
   server: {
@@ -29,12 +28,12 @@ export default {
       '/apiv1': {
         target: constants.IZNIK_API_V1,
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/apiv1/, '/api/'),
+        rewrite: (path) => path.replace(/^\/apiv1/, '/'),
       },
       '/apiv2': {
         target: constants.IZNIK_API_V2,
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/apiv2/, '/api/'),
+        rewrite: (path) => path.replace(/^\/apiv2/, '/'),
       },
     },
   },

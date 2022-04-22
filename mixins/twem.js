@@ -1,5 +1,7 @@
 import twemoji from 'vue-twemoji'
 
+// TODO Convert to composable.
+
 export default {
   methods: {
     twem(msg) {

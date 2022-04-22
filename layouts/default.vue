@@ -84,7 +84,7 @@ export default {
     //     }
     //
     // Add class for screen background.
-    if (process.browser) {
+    if (process && process.browser) {
       document.body.classList.add('fd')
     }
 

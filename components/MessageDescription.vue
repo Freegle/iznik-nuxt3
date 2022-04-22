@@ -1,6 +1,5 @@
 <template>
   <div v-if="textbody && textbody !== 'null'" class="textbody">
-    <!--     TODO lineclamp-->
     <Highlighter
       v-if="me && matchedon"
       :search-words="[matchedon.word]"
@@ -60,5 +59,9 @@ export default {
 .textbody {
   font-size: 1.25rem;
   word-break: break-word !important;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 </style>
