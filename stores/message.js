@@ -4,9 +4,7 @@ import api from '~/api'
 export const useMessageStore = defineStore({
   id: 'message',
   state: () => ({
-    // We use Map so that we can have quick access by id and also preserve order.
-    // TODO Do we need this?  Or do we have ordering in the caller?
-    list: new Map(),
+    list: {},
 
     // Lists for Browse
     primaryList: [],
@@ -21,13 +19,13 @@ export const useMessageStore = defineStore({
       const message = await api().message.fetch(id)
 
       if (message) {
-        this.list.set(message.id, message)
+        this.list[message.id] = message
       }
     },
   },
   getters: {
     byId: (state) => {
-      return (id) => state.list.get(id)
+      return (id) => state.list[id]
     },
   },
 })

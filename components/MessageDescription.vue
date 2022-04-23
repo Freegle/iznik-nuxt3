@@ -12,13 +12,12 @@
 </template>
 <script>
 import { useMessageStore } from '~/stores/message'
-import twem from '~/mixins/twem'
+import { twem } from '~/composables/useTwem'
 
 const Highlighter = () => import('vue-highlight-words')
 
 export default {
   components: { Highlighter },
-  mixins: [twem],
   props: {
     id: {
       type: Number,
@@ -50,7 +49,7 @@ export default {
       return this.messageStore.byId(this.id)
     },
     textbody() {
-      return this.message ? this.twem(this.message.textbody) : null
+      return this.message ? twem(this.message.textbody) : null
     },
   },
 }
