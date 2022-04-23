@@ -1,5 +1,7 @@
-import BootstrapVue3 from 'bootstrap-vue-3'
+import BButton from 'bootstrap-vue-3'
+import BNotice from 'bootstrap-vue-3'
 
 export default defineNuxtPlugin((nuxtApp) => {
-  nuxtApp.vueApp.use(BootstrapVue3)
+  nuxtApp.vueApp.use(BButton)
+  nuxtApp.vueApp.use(BNotice)
 })
