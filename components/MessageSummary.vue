@@ -17,7 +17,7 @@
       <MessageHistory
         :message="message"
         class="mb-1 header-history"
-        :display-message-link="sm()"
+        :display-message-link="breakpoint === 'sm'"
       />
       <div class="mb-1 header-description">
         <div
@@ -51,6 +51,7 @@
 </template>
 
 <script>
+import { useMiscStore } from '../stores/misc'
 import { useMessageStore } from '~/stores/message'
 
 export default {
@@ -86,6 +87,9 @@ export default {
     return {}
   },
   computed: {
+    breakpoint() {
+      return useMiscStore().getBreakpoint
+    },
     message() {
       return this.messageStore.byId(this.id)
     },
@@ -110,10 +114,6 @@ export default {
     },
   },
   methods: {
-    sm() {
-      // TODO What's the right way?  See https://github.com/cdmoro/bootstrap-vue-3/issues/361
-      return false
-    },
     expand() {
       this.$emit('expand')
     },

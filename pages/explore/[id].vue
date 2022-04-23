@@ -15,7 +15,6 @@
   </div>
 </template>
 <script>
-// TODO Could we ensure all stores were available in every component?
 import { useGroupStore } from '~/stores/group'
 
 definePageMeta({

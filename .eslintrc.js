@@ -26,5 +26,6 @@ module.exports = {
     createApp: 'readonly',
     useNuxtApp: 'readonly',
     useMe: 'readonly',
+    computed: 'readonly',
   },
 }

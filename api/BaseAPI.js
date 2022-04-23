@@ -32,8 +32,6 @@ export class SignUpError extends Error {
 
 export default class BaseAPI {
   constructor() {
-    // TODO This way of accessing config and axios works but seems weird.  Revist later when the better way might
-    // be obvious.
     const config = useRuntimeConfig()
 
     this.$axios = axios
@@ -43,25 +41,6 @@ export default class BaseAPI {
   async $request(method, path, config, logError = true) {
     let status = null
     let data = null
-
-    // TODO Wait for the store to be loaded.  This ensures that axios-token doesn't get called before there is a token
-    // in the store to insert.
-    // await this.store.restored
-
-    // TODO Set modtools parameter
-    const modtools = false
-
-    if (method !== 'POST') {
-      if (config.params) {
-        config.params.modtools = modtools
-      }
-    } else {
-      if (!config.data) {
-        config.data = {}
-      }
-
-      config.data.modtools = modtools
-    }
 
     try {
       const ret = await this.$axios.request({
@@ -218,10 +197,6 @@ export default class BaseAPI {
   async $requestv2(method, path, config, logError = true) {
     let status = null
     let data = null
-
-    // TODO Wait for the store to be loaded.  This ensures that axios-token doesn't get called before there is a token
-    // in the store to insert.
-    // await this.store.restored
 
     try {
       const ret = await this.$axios.request({

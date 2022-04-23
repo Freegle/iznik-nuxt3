@@ -4,6 +4,7 @@ export const useMiscStore = defineStore({
   id: 'misc',
   state: () => ({
     time: null,
+    breakpoint: null,
     vals: {},
   }),
   actions: {
@@ -13,8 +14,13 @@ export const useMiscStore = defineStore({
     setTime() {
       this.time = new Date()
     },
+    setBreakpoint(val) {
+      console.log('Set', val, this)
+      this.breakpoint = val
+    },
   },
   getters: {
     get: (state) => (key) => state[key],
+    getBreakpoint: (state) => state.breakpoint,
   },
 })

@@ -8,6 +8,7 @@
       />
     </main>
     <!--    <BouncingEmail />-->
+    BReakpoint {{ breakpoint }}
     <div class="navbar-toggle" style="display: none" />
     <div id="serverloader" class="bg-white">
       <b-img src="/loader.gif" alt="Loading..." />
@@ -21,20 +22,12 @@
       <div class="d-none">
         <!--        <ChatButton v-if="replyToSend" ref="replyToPostChatButton" :userid="replyToUser" />-->
       </div>
-      <!--      <Breakpoint />-->
+      <BreakpointFettler />
     </client-only>
   </div>
 </template>
 <script>
 import { useMiscStore } from '../stores/misc'
-
-// import replyToPost from '@/mixins/replyToPost'
-// import BouncingEmail from '~/components/BouncingEmail'
-// import MainHeader from '~/components/MainHeader'
-// const Breakpoint = () => import('~/components/Breakpoint')
-// const ChatPopups = () => import('~/components/ChatPopups')
-// const ChatButton = () => import('~/components/ChatButton')
-// const ExternalLink = () => import('~/components/ExternalLink')
 
 export default {
   components: {
@@ -45,7 +38,6 @@ export default {
     // ExternalLink,
     // MainHeader
   },
-  // mixins: [replyToPost],
   data() {
     return {
       complete: false,
@@ -53,6 +45,13 @@ export default {
       unreadNotificationCount: 0,
       chatCount: 0,
     }
+  },
+  // mixins: [replyToPost],
+  computed: {
+    breakpoint() {
+      const store = useMiscStore()
+      return store.getBreakpoint
+    },
   },
   // head() {
   //   const totalCount = this.unreadNotificationCount + this.chatCount
