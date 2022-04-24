@@ -3,7 +3,6 @@
     <MessageAttachments
       v-if="gotAttachments"
       :id="id"
-      :message-override="messageOverride"
       :attachments="message.attachments"
       class="image-wrapper"
       :disabled="message.successful"
@@ -13,33 +12,18 @@
     <div class="d-flex mb-1 mt-2 justify-content-between p-2 p-md-0">
       <div class="d-flex flex-column justify-content-between w-100">
         <div v-if="!gotAttachments" class="d-flex">
-          <MessageTag
-            :id="id"
-            def
-            inline
-            :message-override="messageOverride"
-            class="pl-2 pr-2"
-          />
+          <MessageTag :id="id" def inline class="pl-2 pr-2" />
         </div>
         <MessageItemLocation
           :id="id"
-          :message-override="messageOverride"
           :matchedon="message.matchedon"
           class="mb-1 header-title flex-grow-1"
           :type="message.type"
           :expanded="true"
         />
-        <MessageActions
-          v-if="!simple && actions"
-          :id="id"
-          :message-override="messageOverride"
-        />
+        <MessageActions v-if="!simple && actions" :id="id" />
       </div>
-      <MessageHistoryExpanded
-        :id="id"
-        :message-override="messageOverride"
-        class="mb-1 d-none d-md-block"
-      />
+      <MessageHistoryExpanded :id="id" class="mb-1 d-none d-md-block" />
     </div>
     <div class="bg-white mb-3 p-2 p-md-0">
       <MessagePromised
@@ -48,7 +32,7 @@
         :to-me="message.promisedtome"
         class="mb-3 mt-1"
       />
-      <MessageTextBody :id="id" :message-override="messageOverride" />
+      <MessageTextBody :id="id" />
       <MessageReplyInfo :message="message" />
       <client-only>
         <!--        TODO-->
@@ -60,16 +44,11 @@
         <!--          :height="150"-->
         <!--        />-->
       </client-only>
-      <MessageHistoryExpanded
-        :id="id"
-        :message-override="messageOverride"
-        class="d-block d-md-none mt-2 mt-md-0"
-      />
+      <MessageHistoryExpanded :id="id" class="d-block d-md-none mt-2 mt-md-0" />
       <!--      TODO-->
       <!--      <MessageReplySection-->
       <!--        v-if="replyable && !replied"-->
       <!--        :id="id"-->
-      <!--        :message-override="messageOverride"-->
       <!--        class="mt-3"-->
       <!--        @close="$emit('close')"-->
       <!--        @sent="sent"-->
@@ -118,11 +97,6 @@ export default {
     id: {
       type: Number,
       required: true,
-    },
-    messageOverride: {
-      type: Object,
-      required: false,
-      default: null,
     },
     showMap: {
       type: Boolean,

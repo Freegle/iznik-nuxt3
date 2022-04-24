@@ -71,7 +71,7 @@
           v-for="group in message.groups"
           :key="'message-' + message.id + '-' + group.id"
         >
-          <span :title="group.arrival">{{ timeago(group.arrival) }} on</span>
+          <span :title="group.arrival">{{ $timeago(group.arrival) }} on</span>
           <nuxt-link :to="'/explore/' + exploreLink(group)">
             {{ group.namedisplay }}
           </nuxt-link>

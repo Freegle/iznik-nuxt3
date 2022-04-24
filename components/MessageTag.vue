@@ -20,11 +20,6 @@ export default {
       type: Number,
       required: true,
     },
-    messageOverride: {
-      type: Object,
-      required: false,
-      default: null,
-    },
     def: {
       type: Boolean,
       required: false,

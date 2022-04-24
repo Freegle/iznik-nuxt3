@@ -54,7 +54,7 @@
 </template>
 
 <script>
-import { useMessageStore } from '~/stores/message'
+import { useMessageStore } from '../stores/message'
 
 export default {
   props: {
@@ -133,10 +133,8 @@ export default {
       )
     },
     replyToUser() {
-      const msg = this.$store.getters['messages/get'](this.id)
-
-      if (msg && msg.fromuser) {
-        return msg.fromuser.id
+      if (this.message && this.message.fromuser) {
+        return this.message.fromuser.id
       }
 
       return null

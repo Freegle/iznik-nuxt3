@@ -4,12 +4,7 @@
       v-if="defaultAttachments || !attachments.length"
       class="d-none d-md-block"
     >
-      <MessageTag
-        :id="id"
-        def
-        :message-override="messageOverride"
-        class="ps-2 pe-2"
-      />
+      <MessageTag :id="id" def class="ps-2 pe-2" />
       <div class="d-flex justify-content-around bg rounded">
         <b-img
           src="/camera.png"
@@ -18,11 +13,7 @@
       </div>
     </div>
     <button v-else class="w-100 p-0 border-0" :disabled="disabled">
-      <MessageTag
-        :id="id"
-        :message-override="messageOverride"
-        class="ps-2 pe-2"
-      />
+      <MessageTag :id="id" class="ps-2 pe-2" />
       <div
         v-if="!thumbnail && attachments && attachments.length"
         class="photozoom"
@@ -66,11 +57,6 @@ export default {
     id: {
       type: Number,
       required: true,
-    },
-    messageOverride: {
-      type: Object,
-      required: false,
-      default: null,
     },
     attachments: {
       type: Array,

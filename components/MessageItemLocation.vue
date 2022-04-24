@@ -52,11 +52,6 @@ export default {
       type: Number,
       required: true,
     },
-    messageOverride: {
-      type: Object,
-      required: false,
-      default: null,
-    },
     matchedon: {
       type: Object,
       required: false,
