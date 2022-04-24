@@ -116,16 +116,54 @@
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import {
+  faArrowLeft,
+  faBars,
+  faBullhorn,
+  faCoffee,
+  faCog,
+  faCalendarAlt,
   faCrown,
+  faEye,
   faGift,
+  faHandsHelping,
+  faHashtag,
+  faHome,
   faLeaf,
+  faLink,
   faPlus,
+  faQuestionCircle,
   faSearch,
+  faShoppingCart,
+  faSignOutAlt,
   faSpinner,
   faTrashAlt,
+  faUser,
 } from '@fortawesome/free-solid-svg-icons'
 
-library.add(faCrown, faGift, faLeaf, faPlus, faSearch, faSpinner, faTrashAlt)
+library.add(
+  faArrowLeft,
+  faBars,
+  faBullhorn,
+  faCoffee,
+  faCog,
+  faCalendarAlt,
+  faCrown,
+  faEye,
+  faGift,
+  faHandsHelping,
+  faHashtag,
+  faHome,
+  faLeaf,
+  faLink,
+  faPlus,
+  faQuestionCircle,
+  faSearch,
+  faShoppingCart,
+  faSignOutAlt,
+  faSpinner,
+  faTrashAlt,
+  faUser
+)
 
 export default defineNuxtPlugin((nuxtApp) => {
   nuxtApp.vueApp.component('VIcon', FontAwesomeIcon)

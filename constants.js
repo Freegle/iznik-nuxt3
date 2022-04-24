@@ -10,6 +10,7 @@ export default {
   //
   // This avoids CORS issues (and removes preflight OPTIONS calls for GETs, which hurt client performance).
   APIv1: '/apiv1',
+  API: '/apiv1', // TODO Retire
   IZNIK_API_V1:
     process.env.IZNIK_API_V1 || 'https://fdapilive.ilovefreegle.org',
 

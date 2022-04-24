@@ -15,12 +15,10 @@ export const useMiscStore = defineStore({
       this.time = new Date()
     },
     setBreakpoint(val) {
-      console.log('Set', val, this)
       this.breakpoint = val
     },
   },
   getters: {
     get: (state) => (key) => state[key],
-    getBreakpoint: (state) => state.breakpoint,
   },
 })

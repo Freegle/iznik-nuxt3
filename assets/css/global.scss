@@ -267,3 +267,95 @@ label {
   font-weight: bold !important;
 }
 
+// Bootstrap 4 class compatibility.  TODO remove.
+.sr-only {
+  @extend .visually-hidden
+}
+
+.ml-1 {
+  @extend .ms-1
+}
+
+.ml-2 {
+  @extend .ms-2
+}
+
+.ml-3 {
+  @extend .ms-3
+}
+
+.ml-4 {
+  @extend .ms-4
+}
+
+.ml-5 {
+  @extend .ms-5
+}
+
+.mr-1 {
+  @extend .me-1
+}
+
+.mr-2 {
+  @extend .me-2
+}
+
+.mr-3 {
+  @extend .me-3
+}
+
+.mr-4 {
+  @extend .me-4
+}
+
+.mr-5 {
+  @extend .me-5
+}
+
+.pl-1 {
+  @extend .ps-1
+}
+
+.pl-2 {
+  @extend .ps-2
+}
+
+.pl-3 {
+  @extend .ps-3
+}
+
+.pl-4 {
+  @extend .ps-4
+}
+
+.pl-5 {
+  @extend .ps-5
+}
+
+.pr-1 {
+  @extend .pe-1
+}
+
+.pr-2 {
+  @extend .pe-2
+}
+
+.pr-3 {
+  @extend .pe-3
+}
+
+.pr-4 {
+  @extend .pe-4
+}
+
+.pr-5 {
+  @extend .pe-5
+}
+
+.ml-auto {
+  @extend .ms-auto
+}
+
+.mr-auto {
+  @extend .me-auto
+}

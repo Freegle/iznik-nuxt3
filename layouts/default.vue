@@ -1,6 +1,9 @@
 <template>
   <div>
-    <!--    <MainHeader :chat-count.sync="chatCount" :unread-notification-count.sync="unreadNotificationCount" />-->
+    <MainHeader
+      :chat-count.sync="chatCount"
+      :unread-notification-count.sync="unreadNotificationCount"
+    />
     <main>
       <slot
         ref="pageContent"
@@ -8,7 +11,6 @@
       />
     </main>
     <!--    <BouncingEmail />-->
-    BReakpoint {{ breakpoint }}
     <div class="navbar-toggle" style="display: none" />
     <div id="serverloader" class="bg-white">
       <b-img src="/loader.gif" alt="Loading..." />
@@ -28,6 +30,7 @@
 </template>
 <script>
 import { useMiscStore } from '../stores/misc'
+import MainHeader from '../components/MainHeader'
 
 export default {
   components: {
@@ -36,7 +39,7 @@ export default {
     // ChatButton,
     // BouncingEmail,
     // ExternalLink,
-    // MainHeader
+    MainHeader,
   },
   data() {
     return {
@@ -44,6 +47,7 @@ export default {
       timeTimer: null,
       unreadNotificationCount: 0,
       chatCount: 0,
+      loggedIn: false, // TODO
     }
   },
   // mixins: [replyToPost],
@@ -198,6 +202,7 @@ export default {
     },
   },
 }
+// TODO Look for v-icon name= and replace with v-icon icon=
 </script>
 
 <style scoped lang="scss">

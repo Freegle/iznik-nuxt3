@@ -18,15 +18,15 @@
     </div>
     <div v-if="startExpanded">
       <!--      TODO-->
-      <!--      <MessageExpanded-->
-      <!--          :id="message.id"-->
-      <!--          :replyable="replyable"-->
-      <!--          :hide-close="hideClose"-->
-      <!--          :actions="actions"-->
-      <!--          :show-map="true"-->
-      <!--          class="bg-white p-2"-->
-      <!--          @zoom="showPhotosModal"-->
-      <!--      />-->
+      <MessageExpanded
+        :id="message.id"
+        :replyable="replyable"
+        :hide-close="hideClose"
+        :actions="actions"
+        :show-map="true"
+        class="bg-white p-2"
+        @zoom="showPhotosModal"
+      />
       <!--      <MessagePhotosModal-->
       <!--          :id="message.id"-->
       <!--          ref="photoModal"-->
@@ -37,6 +37,7 @@
         :id="message.id"
         :expand-button-text="expandButtonText"
         :replyable="replyable"
+        class="mt-3"
         @expand="expand"
         @zoom="zoom"
       />

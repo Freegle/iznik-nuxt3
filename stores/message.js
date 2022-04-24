@@ -14,7 +14,7 @@ export const useMessageStore = defineStore({
     fetching: {},
   }),
   actions: {
-    async fetch(id) {
+    async fetch(id, force) {
       // TODO Caching/force
       const message = await api().message.fetch(id)
 
