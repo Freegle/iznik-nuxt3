@@ -11,53 +11,20 @@
       <nuxt-link :to="'/explore/' + exploreLink(group)">
         {{ groupName(group) }}
       </nuxt-link>
-      <client-only>
-        <nuxt-link
-          v-if="displayMessageLink"
-          :to="'/message/' + message.id"
-          :class="modinfo ? '' : 'text-faded'"
-        >
-          #{{ message.id }}
-        </nuxt-link>
-      </client-only>
-      <span v-if="modinfo">
-        via {{ source }},
-        <span v-if="message.fromip">
-          from IP {{ message.fromip }} in
-          <span
-            :class="
-              message.fromcountry === 'United Kingdom' ? '' : 'text-danger'
-            "
-            >{{ message.fromcountry }}.</span
-          >
-        </span>
-        <span v-else> IP unavailable. </span>
-      </span>
-      <span
-        v-if="group && group.approvedby && group.approvedby.displayname"
-        class="text-faded"
+      &nbsp;
+      <nuxt-link
+        v-if="displayMessageLink"
+        :to="'/message/' + message.id"
+        class="text-faded text-decoration-none"
       >
-        Approved by {{ group.approvedby.displayname }}
-      </span>
-    </div>
-    <div
-      v-if="
-        modinfo &&
-        message.groups &&
-        message.groups.length &&
-        message.groups[0].arrival !== message.date
-      "
-      class="small"
-    >
-      <span v-if="!today">
-        First posted on {{ message.groups[0].namedisplay }} on
-        {{ datetime(message.date) }}
-      </span>
+        #{{ message.id }}
+      </nuxt-link>
     </div>
   </div>
 </template>
 <script>
 import dayjs from 'dayjs'
+import { useMessageStore } from '../stores/message'
 import { useGroupStore } from '~/stores/group'
 
 export default {
@@ -65,21 +32,9 @@ export default {
   props: {
     id: {
       type: Number,
-      default: 0,
-    },
-    groups: {
-      type: Array,
-      default: () => [],
-    },
-    displayMessageLink: {
-      type: Boolean,
-      default: false,
-    },
-    message: {
-      type: Object,
       required: true,
     },
-    modinfo: {
+    displayMessageLink: {
       type: Boolean,
       default: false,
     },
@@ -87,10 +42,14 @@ export default {
   setup(props) {
     const me = useMe()
     const groupStore = useGroupStore()
+    const messageStore = useMessageStore()
 
-    return { me, groupStore }
+    return { me, groupStore, messageStore }
   },
   computed: {
+    message() {
+      return this.messageStore.byId(this.id)
+    },
     today() {
       return dayjs(this.message.date).isSame(dayjs(), 'day')
     },

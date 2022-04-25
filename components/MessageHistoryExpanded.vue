@@ -71,9 +71,9 @@
           v-for="group in message.groups"
           :key="'message-' + message.id + '-' + group.id"
         >
-          <span :title="group.arrival">{{ $timeago(group.arrival) }} on</span>
+          <span :title="group.arrival">{{ $timeago(group.arrival) }} on </span>
           <nuxt-link :to="'/explore/' + exploreLink(group)">
-            {{ group.namedisplay }}
+            {{ groupName(group) }}
           </nuxt-link>
         </div>
         <span
@@ -111,14 +111,17 @@ export default {
       type: Number,
       default: 0,
     },
-    groups: {
-      type: Array,
-      default: () => [],
-    },
   },
   setup(props) {
     const messageStore = useMessageStore()
     const groupStore = useGroupStore()
+
+    // Make sure we have all groups cached for computed properties below.
+    messageStore.byId(props.id).groups.forEach((g) => {
+      if (!groupStore.get(g.groupid)) {
+        groupStore.fetch(g.groupid)
+      }
+    })
 
     return { messageStore, timeago, groupStore }
   },
@@ -137,17 +140,15 @@ export default {
   },
   methods: {
     exploreLink(group) {
+      const thegroup = this.groupStore.get(group.groupid)
+
       // Better to link to the group by name if possible to avoid nuxt generate creating explore pages for the
       // id variants.
-      // TODO PERF Do we need to fetch the group?
-      const thegroup = this.groupStore.fetch(group.groupid)
-
-      if (thegroup) {
-        // TODO Not working.
-        return thegroup.nameshort
-      } else {
-        return group.groupid
-      }
+      return thegroup ? thegroup.nameshort : group.groupid
+    },
+    groupName(group) {
+      const thegroup = this.groupStore.get(group.groupid)
+      return thegroup ? thegroup.namedisplay : null
     },
     showProfileModal(e) {
       this.showProfile = true

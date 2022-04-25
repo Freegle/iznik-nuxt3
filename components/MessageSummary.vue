@@ -15,9 +15,9 @@
         :expanded="false"
       />
       <MessageHistory
-        :message="message"
+        :id="id"
         class="mb-1 header-history"
-        :display-message-link="breakpoint === 'sm'"
+        display-message-link
       />
       <div class="mb-1 header-description">
         <div
@@ -51,7 +51,6 @@
 </template>
 
 <script>
-import { useMiscStore } from '../stores/misc'
 import { useMessageStore } from '~/stores/message'
 
 export default {
@@ -87,9 +86,6 @@ export default {
     return {}
   },
   computed: {
-    breakpoint() {
-      return useMiscStore().getBreakpoint
-    },
     message() {
       return this.messageStore.byId(this.id)
     },
