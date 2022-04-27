@@ -30,7 +30,7 @@
     "@vue/cli-plugin-eslint": "^5.0.4",
     "axios": "^0.26.1",
     "bootstrap": "git://github.com/xvaara/bootstrap.git",
-    "bootstrap-vue-3": "0.1.9",
+    "bootstrap-vue-3": "0.1.11",
     "dayjs": "^1.11.0",
     "path-browserify": "^1.0.1",
     "pinia": "^2.0.13",

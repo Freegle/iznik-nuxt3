@@ -28,7 +28,7 @@
         variant="info"
         class="mt-2"
       >
-        There are no messages on this group yet.
+        There are no messages on this community yet.
       </NoticeMessage>
     </client-only>
   </div>
