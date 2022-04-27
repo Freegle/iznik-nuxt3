@@ -86,11 +86,12 @@
           away
         </span>
       </div>
-      <ProfileModal
-        v-if="showProfile && message && message.fromuser"
-        :id="message.fromuser.id"
-        ref="profile"
-      />
+      <!--      TODO-->
+      <!--      <ProfileModal-->
+      <!--        v-if="showProfile && message && message.fromuser"-->
+      <!--        :id="message.fromuser.id"-->
+      <!--        ref="profile"-->
+      <!--      />-->
     </div>
   </div>
 </template>
@@ -100,11 +101,9 @@ import { useMessageStore } from '~/stores/message'
 import { useGroupStore } from '~/stores/group'
 import { timeago } from '~/composables/useTimeFormat'
 
-const ProfileModal = () => import('~/components/ProfileModal')
-
 export default {
   name: 'MessageHistory',
-  components: { ProfileImage, ProfileModal },
+  components: { ProfileImage },
 
   props: {
     id: {
