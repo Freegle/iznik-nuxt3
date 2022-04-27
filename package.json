@@ -5,6 +5,9 @@
     "build": "nuxi generate",
     "start": "node .output/server/index.mjs"
   },
+  "engines": {
+    "node": ">=16.13.2"
+  },
   "devDependencies": {
     "@capacitor/cli": "^3.4.3",
     "@nuxtjs/eslint-config": "^9.0.0",
