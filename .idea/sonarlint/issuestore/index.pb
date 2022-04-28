@@ -117,8 +117,6 @@ K
 api/StatusAPI.js,e\e\eed2c1e351d8c2fbc8dfa737a03a41536be08107
 ?
 api/AlertAPI.js,c\9\c9c5093304a7c79d2638a51f9e327582108d5965
-p
-@.github/workflows/azure-static-web-apps-red-pebble-0ca006d03.yml,7\4\743dedc5732b84b375c87947e7005b2a49ccf4e6
 U
 %components/MessageHistoryExpanded.vue,3\0\3046957f838f82ace007b225cbbb8860f410f24e
 F
