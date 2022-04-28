@@ -195,10 +195,7 @@ export default {
     updateTime() {
       const misc = useMiscStore()
       misc.setTime()
-
-      if (process.browser) {
-        this.timeTimer = setTimeout(this.updateTime, 1000)
-      }
+      this.timeTimer = setTimeout(this.updateTime, 1000)
     },
   },
 }

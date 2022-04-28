@@ -15,6 +15,7 @@ export const useGroupStore = defineStore({
 
       let group = null
 
+      // TODO Handle fetch by name.
       if (!isNaN(id)) {
         group = await api().group.fetch(
           id,
