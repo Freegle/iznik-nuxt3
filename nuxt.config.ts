@@ -36,7 +36,10 @@ export default defineNuxtConfig({
     BUILD_DATE: new Date().toISOString(),
   },
 
-  css: ['@/assets/css/global.scss'],
+  css: [
+    '@/node_modules/@fortawesome/fontawesome-svg-core/styles.css',
+    '@/assets/css/global.scss',
+  ],
 
   vite: {
     css: {
