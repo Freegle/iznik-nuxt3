@@ -433,8 +433,6 @@
 // const NotificationOptions = () => import('~/components/NotificationOptions')
 import axios from 'axios'
 
-const runtimeConfig = useRuntimeConfig()
-
 export default {
   name: 'MainHeader',
   components: {
@@ -500,6 +498,8 @@ export default {
   mounted() {
     setTimeout(async () => {
       // Look for a custom logo.
+      const runtimeConfig = useRuntimeConfig()
+
       const api = runtimeConfig.public.APIv1
       const res = await axios.get(api + '/logo')
 
