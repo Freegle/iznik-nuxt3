@@ -20,7 +20,7 @@ export default defineNuxtPlugin((nuxtApp) => {
             this.waitForRef(name, callback)
           }, 100)
         }
-      }
-    }
+      },
+    },
   })
-}
+})
