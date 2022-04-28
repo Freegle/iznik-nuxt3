@@ -1,0 +1,13 @@
+diff --git a/node_modules/@vue/shared/dist/shared.cjs.js b/node_modules/@vue/shared/dist/shared.cjs.js
+index c1fb8b0..b2a1b09 100644
+--- a/node_modules/@vue/shared/dist/shared.cjs.js
++++ b/node_modules/@vue/shared/dist/shared.cjs.js
+@@ -384,7 +384,7 @@ function escapeHtml(string) {
+ // https://www.w3.org/TR/html52/syntax.html#comments
+ const commentStripRE = /^-?>|<!--|-->|--!>|<!-$/g;
+ function escapeHtmlComment(src) {
+-    return src.replace(commentStripRE, '');
++    return src.replace ? src.replace(commentStripRE, '') : '';
+ }
+ 
+ function looseCompareArrays(a, b) {
