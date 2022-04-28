@@ -58,6 +58,9 @@ export default defineNuxtConfig({
   },
 
   generate: {
+    // Don't crawl - we end up with all the messages, which takes too long.
+    crawler: false,
+
     routes: ['/explore/21496'],
   },
 
