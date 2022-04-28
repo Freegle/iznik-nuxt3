@@ -26,12 +26,12 @@ export default {
   server: {
     proxy: {
       '/apiv1': {
-        target: constants.IZNIK_API_V1,
+        target: constants.APIv1,
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/apiv1/, '/'),
       },
       '/apiv2': {
-        target: constants.IZNIK_API_V2,
+        target: constants.APIv2,
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/apiv2/, '/'),
       },

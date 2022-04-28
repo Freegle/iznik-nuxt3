@@ -1,21 +1,9 @@
 export default {
-  // We have two constants for the API location.  Why?
-  // - IZNIK_API is the actual location of the server hosting the API.  It's not used directly by the code.
-  // - API is the constant the code uses to make an API call - it's basically just a prefix.
-  //
-  // How do these get used?
-  // - The client code just uses the API prefixes APIv1 and APIv2.
-  // - In dev mode, the vite config proxies those to IZNIK_API_V1 and IZNIK_API_V2.
-  // - In live mode, the nginx config does the same.
-  //
-  // This avoids CORS issues (and removes preflight OPTIONS calls for GETs, which hurt client performance).
-  APIv1: '/apiv1',
-  API: '/apiv1', // TODO Retire
-  IZNIK_API_V1:
-    process.env.IZNIK_API_V1 || 'https://fdapilive.ilovefreegle.org',
+  // Legacy API, especially mod ops.
+  APIv1: process.env.IZNIK_API_V1 || 'https://fdapilive.ilovefreegle.org',
 
-  APIv2: '/apiv2',
-  IZNIK_API_V2: process.env.IZNIK_API_V2 || 'http://www.ilovefreegle.org:8192',
+  // New style API, for fast read ops.
+  APIv2: process.env.IZNIK_API_V2 || 'http://www.ilovefreegle.org:8192',
 
   // This is where the user site is.
   USER_SITE: 'https://www.ilovefreegle.org',

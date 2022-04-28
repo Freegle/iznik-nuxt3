@@ -23,8 +23,6 @@ export default defineNuxtConfig({
   publicRuntimeConfig: {
     APIv1: constants.APIv1,
     APIv2: constants.APIv2,
-    IZNIK_API_V1: constants.IZNIK_API_V1,
-    IZNIK_API_V2: constants.IZNIK_API_V2,
     OSM_TILE: constants.OSM_TILE,
     GEOCODE: constants.GEOCODE,
     FACEBOOK_APPID: constants.FACEBOOK_APPID,
