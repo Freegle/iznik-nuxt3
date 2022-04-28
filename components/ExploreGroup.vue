@@ -60,7 +60,7 @@ export default {
       return this.groupStore.getMessages(this.id)
     },
     messagesToShow() {
-      return this.messages.slice(0, this.toShow)
+      return this.messages ? this.messages.slice(0, this.toShow) : []
     },
     group() {
       return this.groupStore.get(this.id)
