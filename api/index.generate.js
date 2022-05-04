@@ -69,8 +69,8 @@ function generateIndex(entries) {
     '',
     generateImports(entries),
     '',
-    'export default (nuxtApp, config) => {',
-    'const options = { nuxtApp, config }',
+    'export default (config) => {',
+    'const options = config',
     'return {'
   )
 

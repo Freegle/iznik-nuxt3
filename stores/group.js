@@ -4,19 +4,22 @@ import api from '~/api'
 export const useGroupStore = defineStore({
   id: 'group',
   state: () => ({
+    config: {},
     list: {},
     messages: {},
     _remember: {},
   }),
   actions: {
+    init(config) {
+      this.config = config
+    },
     async fetch(id, force) {
       id = parseInt(id)
-      console.log('GRoup fetch', id)
 
       // TODO Handle fetch by name.
       if (!isNaN(id)) {
         if (force || !this.list[id]) {
-          const group = await api(this.$nuxt, this.$nuxt.$config).group.fetch(
+          const group = await api(this.config).group.fetch(
             id,
             // TODO How to handle extra information like this which slows down the call?
             true,
@@ -33,8 +36,6 @@ export const useGroupStore = defineStore({
             }
           )
 
-          console.log('api called')
-
           if (group) {
             this.list[id] = group
           }
@@ -48,10 +49,7 @@ export const useGroupStore = defineStore({
     },
     async fetchMessages(id) {
       id = parseInt(id)
-      const messages = await api(
-        this.$nuxt,
-        this.$nuxt.$config
-      ).group.fetchMessages(id)
+      const messages = await api(this.config).group.fetchMessages(id)
 
       if (messages) {
         this.messages[id] = messages

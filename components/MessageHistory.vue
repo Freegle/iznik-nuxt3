@@ -5,11 +5,13 @@
       :key="'message-' + message.id + '-' + group.id"
       class="text--small"
     >
-      <span class="time" :title="group.arrival"
-        >{{ arrival(group.arrival) }} on
-      </span>
-      <nuxt-link :to="'/explore/' + exploreLink(group)">
-        {{ groupName(group) }}
+      <span :title="group.arrival">{{ $timeago(group.arrival) }} on </span>
+      <nuxt-link
+        v-if="group.groupid in groups"
+        :to="'/explore/' + groups[group.groupid].exploreLink"
+        :title="'Click to view ' + groups[group.groupid].namedisplay"
+      >
+        {{ groups[group.groupid].namedisplay }}
       </nuxt-link>
       &nbsp;
       <nuxt-link
@@ -50,6 +52,27 @@ export default {
     message() {
       return this.messageStore.byId(this.id)
     },
+    groups() {
+      const ret = {}
+
+      if (this.message) {
+        this.message.groups.forEach((g) => {
+          const thegroup = this.groupStore.get(g.groupid)
+
+          if (thegroup) {
+            ret[g.groupid] = thegroup
+
+            // Better to link to the group by name if possible to avoid nuxt generate creating explore pages for the
+            // id variants.
+            ret[g.groupid].exploreLink = thegroup
+              ? thegroup.nameshort
+              : g.groupid
+          }
+        })
+      }
+
+      return ret
+    },
     today() {
       return dayjs(this.message.date).isSame(dayjs(), 'day')
     },
@@ -66,37 +89,6 @@ export default {
         return 'Freegle website'
       } else {
         return this.message.source
-      }
-    },
-  },
-  methods: {
-    groupName(group) {
-      const thegroup = this.groupStore.get(group.groupid)
-
-      if (thegroup) {
-        return thegroup.nameshort
-      } else {
-        return null
-      }
-    },
-    exploreLink(group) {
-      // Better to link to the group by name if possible to avoid nuxt generate creating explore pages for the
-      // id variants.
-      const thegroup = this.groupStore.get(group.id)
-
-      if (thegroup) {
-        return thegroup.nameshort
-      } else {
-        return group.id
-      }
-    },
-    arrival(time) {
-      // If we're logged out, just show the time.  This avoids screen flicker where we show an older date from a
-      // version of a page which we've rendered earlier and then update on the client.
-      if (this.me) {
-        return dayjs(time).fromNow()
-      } else {
-        return dayjs(time).format('Do MMMM, YYYY HH:mm')
       }
     },
   },

@@ -20,6 +20,7 @@ module.exports = {
     definePageMeta: 'readonly',
     useRuntimeConfig: 'readonly',
     defineNuxtPlugin: 'readonly',
+    defineNuxtRouteMiddleware: 'readonly',
     getCurrentInstance: 'readonly',
     useRoute: 'readonly',
     useAsyncData: 'readonly',

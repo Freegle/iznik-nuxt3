@@ -31,9 +31,9 @@ export class SignUpError extends Error {
 }
 
 export default class BaseAPI {
-  constructor(options) {
+  constructor(config) {
     this.$axios = axios
-    this.ourConfig = options.config
+    this.ourConfig = config
   }
 
   async $request(method, path, config, logError = true) {

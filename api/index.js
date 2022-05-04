@@ -48,8 +48,8 @@ import UserSearchAPI from './UserSearchAPI.js'
 import VisualiseAPI from './VisualiseAPI.js'
 import VolunteeringAPI from './VolunteeringAPI.js'
 
-export default (nuxtApp, config) => {
-  const options = { nuxtApp, config }
+export default (config) => {
+  const options = config
   return {
     activity: new ActivityAPI(options),
     address: new AddressAPI(options),

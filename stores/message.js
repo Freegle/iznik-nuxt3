@@ -4,6 +4,7 @@ import api from '~/api'
 export const useMessageStore = defineStore({
   id: 'message',
   state: () => ({
+    config: {},
     list: {},
 
     // Lists for Browse
@@ -15,21 +16,19 @@ export const useMessageStore = defineStore({
     fetching: {},
   }),
   actions: {
+    init(config) {
+      this.config = config
+    },
     async fetch(id, force) {
       id = parseInt(id)
-      console.log('Message fetch')
 
       if (force || !this.list[id]) {
-        const message = await api(this.$nuxt, this.$nuxt.$config).message.fetch(
-          id
-        )
+        const message = await api(this.config).message.fetch(id)
 
         if (message) {
           this.list[id] = message
         }
       }
-
-      console.log('Message fetched')
 
       return this.list[id]
     },

@@ -102,17 +102,18 @@ export default {
 
       if (message) {
         // Get the groups into store too.
-        message.groups.forEach(async (g) => {
+        const promises = []
+        message.groups.forEach((g) => {
           if (!groupStore.get(g.groupid)) {
-            console.log('GEt group', g.groupid)
             try {
-              await groupStore.fetch(g.groupid)
+              promises.push(groupStore.fetch(g.groupid))
             } catch (e) {
               console.log('Fetch fail', e)
             }
-            console.log('Got group', g.groupid)
           }
         })
+
+        await Promise.all(promises)
       } else {
         ctx.emit('notFound')
       }

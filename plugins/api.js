@@ -1,10 +1,11 @@
 import api from '~/api'
 
-export default defineNuxtPlugin((nuxtApp) => {
-  const config = useRuntimeConfig()
+export default defineNuxtPlugin(() => {
+  const runtimeConfig = useRuntimeConfig()
+
   return {
     provide: {
-      api: api(nuxtApp, config),
+      api: api(runtimeConfig),
     },
   }
 })
