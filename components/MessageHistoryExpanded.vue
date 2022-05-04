@@ -72,8 +72,12 @@
           :key="'message-' + message.id + '-' + group.id"
         >
           <span :title="group.arrival">{{ $timeago(group.arrival) }} on </span>
-          <nuxt-link :to="'/explore/' + exploreLink(group)">
-            {{ groupName(group) }}
+          <nuxt-link
+            v-if="group.groupid in groups"
+            :to="'/explore/' + groups[group.groupid].exploreLink"
+            :title="'Click to view ' + groups[group.groupid].namedisplay"
+          >
+            {{ groups[group.groupid].namedisplay }}
           </nuxt-link>
         </div>
         <span
@@ -115,13 +119,6 @@ export default {
     const messageStore = useMessageStore()
     const groupStore = useGroupStore()
 
-    // Make sure we have all groups cached for computed properties below.
-    messageStore.byId(props.id).groups.forEach((g) => {
-      if (!groupStore.get(g.groupid)) {
-        groupStore.fetch(g.groupid)
-      }
-    })
-
     return { messageStore, timeago, groupStore }
   },
   data() {
@@ -136,19 +133,29 @@ export default {
     today() {
       return this.$dayjs(this.message.date).isSame(this.$dayjs(), 'day')
     },
+    groups() {
+      const ret = {}
+
+      if (this.message) {
+        this.message.groups.forEach((g) => {
+          const thegroup = this.groupStore.get(g.groupid)
+
+          if (thegroup) {
+            ret[g.groupid] = thegroup
+
+            // Better to link to the group by name if possible to avoid nuxt generate creating explore pages for the
+            // id variants.
+            ret[g.groupid].exploreLink = thegroup
+              ? thegroup.nameshort
+              : g.groupid
+          }
+        })
+      }
+
+      return ret
+    },
   },
   methods: {
-    exploreLink(group) {
-      const thegroup = this.groupStore.get(group.groupid)
-
-      // Better to link to the group by name if possible to avoid nuxt generate creating explore pages for the
-      // id variants.
-      return thegroup ? thegroup.nameshort : group.groupid
-    },
-    groupName(group) {
-      const thegroup = this.groupStore.get(group.groupid)
-      return thegroup ? thegroup.namedisplay : null
-    },
     showProfileModal(e) {
       this.showProfile = true
 

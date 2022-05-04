@@ -11,16 +11,27 @@ export const useMessageStore = defineStore({
     secondaryList: [],
 
     // Messages we're in the process of fetching
+    // TODO
     fetching: {},
   }),
   actions: {
     async fetch(id, force) {
-      // TODO Caching/force
-      const message = await api().message.fetch(id)
+      id = parseInt(id)
+      console.log('Message fetch')
 
-      if (message) {
-        this.list[message.id] = message
+      if (force || !this.list[id]) {
+        const message = await api(this.$nuxt, this.$nuxt.$config).message.fetch(
+          id
+        )
+
+        if (message) {
+          this.list[id] = message
+        }
       }
+
+      console.log('Message fetched')
+
+      return this.list[id]
     },
   },
   getters: {

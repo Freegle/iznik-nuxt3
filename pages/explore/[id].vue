@@ -9,7 +9,7 @@
     </b-row>
     <b-row v-else class="m-0">
       <b-col cols="12" lg="6" class="p-0" offset-lg="3">
-        <ExploreGroup v-if="$route.params.id" :id="$route.params.id" />
+        <ExploreGroup v-if="id" :id="id" />
       </b-col>
     </b-row>
   </div>
@@ -32,13 +32,7 @@ export default {
     const route = useRoute()
     const id = route.params.id
 
-    const { refresh } = await useAsyncData('explore-' + route.params.id, () =>
-      groupStore.fetch(route.params.id)
-    )
-
-    // Awaiting on refresh() seems to be necessary to make sure we wait until we've loaded the data before setup()
-    // completes.  That is necessary otherwise we won't render the page when generating.
-    await refresh()
+    await groupStore.fetch(route.params.id)
 
     return { id, groupStore }
   },

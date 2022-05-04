@@ -9,44 +9,49 @@ export const useGroupStore = defineStore({
     _remember: {},
   }),
   actions: {
-    async fetch(id) {
-      // TODO Caching/force
+    async fetch(id, force) {
       id = parseInt(id)
-
-      let group = null
+      console.log('GRoup fetch', id)
 
       // TODO Handle fetch by name.
       if (!isNaN(id)) {
-        group = await api().group.fetch(
-          id,
-          // TODO How to handle extra information like this which slows down the call?
-          true,
-          true,
-          true,
-          true,
-          function (data) {
-            if (data && data.ret === 10) {
-              // Not hosting a group isn't worth logging.
-              return false
-            } else {
-              return true
+        if (force || !this.list[id]) {
+          const group = await api(this.$nuxt, this.$nuxt.$config).group.fetch(
+            id,
+            // TODO How to handle extra information like this which slows down the call?
+            true,
+            true,
+            true,
+            true,
+            function (data) {
+              if (data && data.ret === 10) {
+                // Not hosting a group isn't worth logging.
+                return false
+              } else {
+                return true
+              }
             }
-          }
-        )
+          )
 
-        if (group) {
-          this.list[id] = group
+          console.log('api called')
+
+          if (group) {
+            this.list[id] = group
+          }
         }
       }
 
-      return group
+      return this.list[id]
     },
     remember(id, val) {
       this._remember[id] = val
     },
     async fetchMessages(id) {
       id = parseInt(id)
-      const messages = await api().group.fetchMessages(id)
+      const messages = await api(
+        this.$nuxt,
+        this.$nuxt.$config
+      ).group.fetchMessages(id)
 
       if (messages) {
         this.messages[id] = messages

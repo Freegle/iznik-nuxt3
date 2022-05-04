@@ -500,7 +500,7 @@ export default {
       // Look for a custom logo.
       const runtimeConfig = useRuntimeConfig()
 
-      const api = runtimeConfig.public.APIv1
+      const api = runtimeConfig.APIv1
       const res = await axios.get(api + '/logo')
 
       if (res.status === 200) {

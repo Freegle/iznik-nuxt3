@@ -55,6 +55,7 @@
 
 <script>
 import { useMessageStore } from '../stores/message'
+import { useGroupStore } from '~/stores/group'
 
 export default {
   props: {
@@ -92,10 +93,32 @@ export default {
       required: true,
     },
   },
-  setup(props) {
+  async setup(props, ctx) {
     const messageStore = useMessageStore()
+    const groupStore = useGroupStore()
 
-    useAsyncData('message-' + props.id, () => messageStore.fetch(props.id))
+    try {
+      const message = await messageStore.fetch(props.id)
+
+      if (message) {
+        // Get the groups into store too.
+        message.groups.forEach(async (g) => {
+          if (!groupStore.get(g.groupid)) {
+            console.log('GEt group', g.groupid)
+            try {
+              await groupStore.fetch(g.groupid)
+            } catch (e) {
+              console.log('Fetch fail', e)
+            }
+            console.log('Got group', g.groupid)
+          }
+        })
+      } else {
+        ctx.emit('notFound')
+      }
+    } catch (e) {
+      ctx.emit('notFound')
+    }
 
     return { messageStore }
   },

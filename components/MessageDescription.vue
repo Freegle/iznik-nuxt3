@@ -32,9 +32,6 @@ export default {
   setup(props) {
     const messageStore = useMessageStore()
     const me = useMe()
-
-    useAsyncData('message-' + props.id, () => messageStore.fetch(props.id))
-
     return { me, messageStore }
   },
   computed: {

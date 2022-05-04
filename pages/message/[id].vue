@@ -7,7 +7,18 @@
     <b-row class="m-0">
       <b-col cols="0" xl="3" class="d-none d-xl-block" />
       <b-col cols="12" xl="6" class="p-0">
-        <div v-if="error" class="bg-white p-2">
+        <div
+          v-if="
+            error ||
+            (message &&
+              ((message.outcomes && message.outcomes.length > 0) ||
+                message.deleted ||
+                (message.groups &&
+                  message.groups.length &&
+                  message.groups[0].collection === 'Rejected')))
+          "
+          class="bg-white p-2"
+        >
           <h1>Sorry, that message isn't around any more.</h1>
           <div>
             <p>
@@ -51,60 +62,16 @@
         <!--              expand-->
         <!--          />-->
         <!--        </div>-->
-        <div
-          v-else-if="
-            message &&
-            ((message.outcomes && message.outcomes.length > 0) ||
-              message.deleted ||
-              (message.groups &&
-                message.groups.length &&
-                message.groups[0].collection === 'Rejected'))
-          "
-        >
-          <h1>{{ message.subject }}</h1>
-          <NoticeMessage variant="info">
-            <p>
-              Sorry, that message is no longer available. Why not look for
-              something else?
-            </p>
-          </NoticeMessage>
-          <b-row>
-            <b-col cols="5" class="mt-1">
-              <b-button
-                to="/give"
-                class="mt-1"
-                size="lg"
-                block
-                variant="primary"
-              >
-                <v-icon icon="gift" />&nbsp;Give stuff
-              </b-button>
-            </b-col>
-            <b-col cols="2" />
-            <b-col cols="5">
-              <b-button
-                to="/find"
-                class="mt-1"
-                size="lg"
-                block
-                variant="secondary"
-              >
-                <v-icon icon="shopping-cart" />
-                >&nbsp;Ask for stuff
-              </b-button>
-            </b-col>
-          </b-row>
-        </div>
         <div v-else>
           <GlobalWarning />
           <OurMessage
-            v-if="message"
+            :id="id"
             ref="message"
-            v-bind="message"
             :start-expanded="true"
             hide-close
             class="botpad"
             record-view
+            @not-found="error = true"
           />
         </div>
       </b-col>
@@ -114,28 +81,20 @@
 </template>
 <script>
 import { useMessageStore } from '~/stores/message'
+import { useGroupStore } from '~/stores/group'
 
 definePageMeta({
   layout: 'default',
 })
 
 export default {
-  async setup() {
+  setup() {
     const messageStore = useMessageStore()
+    const groupStore = useGroupStore()
 
     // We don't use lazy because we want the page to be rendered for SEO.
     const route = useRoute()
-    const id = route.params.id
-
-    const { refresh } = await useAsyncData('message-' + route.params.id, () =>
-      messageStore.fetch(route.params.id)
-    )
-
-    // Awaiting on refresh() seems to be necessary to make sure we wait until we've loaded the data before setup()
-    // completes.  That is necessary otherwise we won't render the page when generating.
-    await refresh()
-
-    const error = !messageStore.byId(route.params.id)
+    const id = parseInt(route.params.id)
 
     // if (process.browser) {
     //   TODO
@@ -145,7 +104,12 @@ export default {
     //   })
     // }
     //
-    return { id, messageStore, error }
+    return { id, messageStore, groupStore }
+  },
+  data() {
+    return {
+      error: false,
+    }
   },
   computed: {
     message() {

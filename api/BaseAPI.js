@@ -31,11 +31,9 @@ export class SignUpError extends Error {
 }
 
 export default class BaseAPI {
-  constructor() {
-    const config = useRuntimeConfig()
-
+  constructor(options) {
     this.$axios = axios
-    this.$config = config
+    this.ourConfig = options.config
   }
 
   async $request(method, path, config, logError = true) {
@@ -46,7 +44,7 @@ export default class BaseAPI {
       const ret = await this.$axios.request({
         ...config,
         method,
-        url: this.$config.APIv1 + path,
+        url: this.ourConfig.APIv1 + path,
       })
       ;({ status, data } = ret)
     } catch (e) {
@@ -200,7 +198,7 @@ export default class BaseAPI {
       const ret = await this.$axios.request({
         ...config,
         method,
-        url: this.$config.APIv2 + path,
+        url: this.ourConfig.APIv2 + path,
       })
       ;({ status, data } = ret)
     } catch (e) {

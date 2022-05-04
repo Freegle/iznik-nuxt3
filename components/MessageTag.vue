@@ -35,8 +35,6 @@ export default {
     const messageStore = useMessageStore()
     const groupStore = useGroupStore()
 
-    useAsyncData('message-' + props.id, () => messageStore.fetch(props.id))
-
     return { messageStore, groupStore }
   },
   computed: {

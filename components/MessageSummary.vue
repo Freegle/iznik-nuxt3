@@ -77,9 +77,6 @@ export default {
   },
   setup(props) {
     const messageStore = useMessageStore()
-
-    useAsyncData('message-' + props.id, () => messageStore.fetch(props.id))
-
     return { messageStore }
   },
   data() {
