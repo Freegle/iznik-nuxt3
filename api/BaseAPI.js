@@ -44,7 +44,7 @@ export default class BaseAPI {
       const ret = await this.$axios.request({
         ...config,
         method,
-        url: this.ourConfig.APIv1 + path,
+        url: this.ourConfig.public.APIv1 + path,
       })
       ;({ status, data } = ret)
     } catch (e) {
@@ -198,7 +198,7 @@ export default class BaseAPI {
       const ret = await this.$axios.request({
         ...config,
         method,
-        url: this.ourConfig.APIv2 + path,
+        url: this.ourConfig.public.APIv2 + path,
       })
       ;({ status, data } = ret)
     } catch (e) {
