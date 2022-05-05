@@ -35,7 +35,7 @@ export default {
   },
   props: {
     messageId: {
-      type: String,
+      type: Number,
       required: true,
     },
     attachments: {

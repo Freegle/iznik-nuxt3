@@ -6,14 +6,13 @@
     :title="message.subject"
     size="lg"
     ok-only
+    ok-variant="secondary"
+    ok-title="Close"
   >
     <ImageCarousel
       :message-id="message.id"
       :attachments="message.attachments"
     />
-    <template slot="modal-footer" slot-scope="{ cancel }">
-      <b-button variant="secondary" @click="cancel"> Close </b-button>
-    </template>
   </b-modal>
 </template>
 <script>
