@@ -17,7 +17,6 @@
       <span itemprop="availability">Instock</span>
     </div>
     <div v-if="startExpanded">
-      <!--      TODO-->
       <MessageExpanded
         :id="message.id"
         :replyable="replyable"
@@ -27,10 +26,9 @@
         class="bg-white p-2"
         @zoom="showPhotosModal"
       />
-      <!--      <MessagePhotosModal-->
-      <!--          :id="message.id"-->
-      <!--          ref="photoModal"-->
-      <!--      />-->
+      <client-only>
+        <MessagePhotosModal :id="message.id" ref="photoModal" />
+      </client-only>
     </div>
     <div v-else>
       <MessageSummary
@@ -41,7 +39,6 @@
         @expand="expand"
         @zoom="zoom"
       />
-      <!--      todo-->
       <!--      <MessageModal-->
       <!--          :id="message.id"-->
       <!--          ref="modal"-->
