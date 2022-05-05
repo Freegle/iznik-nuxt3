@@ -34,13 +34,15 @@
       />
       <MessageTextBody :id="id" />
       <MessageReplyInfo :message="message" />
-      <MessageMap
-        v-if="showMap && validPosition"
-        :home="home"
-        :position="{ lat: message.lat, lng: message.lng }"
-        class="mt-2"
-        :height="150"
-      />
+      <client-only>
+        <MessageMap
+          v-if="showMap && validPosition"
+          :home="home"
+          :position="{ lat: message.lat, lng: message.lng }"
+          class="mt-2"
+          :height="150"
+        />
+      </client-only>
       <MessageHistoryExpanded :id="id" class="d-block d-md-none mt-2 mt-md-0" />
       <!--      TODO-->
       <!--      <MessageReplySection-->
