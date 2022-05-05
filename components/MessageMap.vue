@@ -128,7 +128,7 @@ export default {
       return 'Map data &copy; <a href="https://www.openstreetmap.org/" rel="noopener noreferrer">OpenStreetMap</a> contributors'
     },
   },
-  async beforeMount() {
+  async beforeCreate() {
     const L = await import('leaflet/dist/leaflet-src.esm')
     this.L = L
   },
