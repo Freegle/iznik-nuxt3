@@ -129,8 +129,10 @@ export default {
     },
   },
   async beforeCreate() {
-    const L = await import('leaflet/dist/leaflet-src.esm')
-    this.L = L
+    if (process.client) {
+      const L = await import('leaflet/dist/leaflet-src.esm')
+      this.L = L
+    }
   },
   methods: {
     idle(themap) {
