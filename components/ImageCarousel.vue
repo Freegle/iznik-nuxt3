@@ -55,21 +55,3 @@ export default {
   },
 }
 </script>
-<style scoped lang="scss">
-//:deep(.carousel-caption) {
-//  position: unset !important;
-//}
-//
-//:deep(:not(.vh--none) .messagePhoto) {
-//  max-height: calc(100vh - 150px) !important;
-//  object-fit: cover;
-//}
-//
-//:deep(.width) {
-//  width: 100% !important;
-//
-//  div:not(.vh--message-bottom) {
-//    width: 100% !important;
-//  }
-//}
-</style>
