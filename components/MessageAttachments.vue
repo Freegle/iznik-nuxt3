@@ -139,9 +139,12 @@ export default {
   right: 10px;
   position: absolute;
   bottom: 10px;
-  background-color: $color-gray--darker;
-  color: white;
   border-radius: 4px;
+
+  :deep(.badge) {
+    background-color: $color-gray--darker !important;
+    color: white !important;
+  }
 }
 
 .photozoom {

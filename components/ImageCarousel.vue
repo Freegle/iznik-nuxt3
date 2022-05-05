@@ -2,16 +2,18 @@
   <div>
     <b-carousel
       :id="'message-carousel-' + messageId"
-      indicators
+      v-model="slide"
       img-width="100%"
       :interval="0"
       no-touch
       :controls="attachments.length > 1"
+      @sliding-end="slideEnd"
     >
       <b-carousel-slide
         v-for="(attachment, index) in attachments"
+        :id="'message-carousel-' + messageId + '-' + index"
         :key="'mesagephohoto-' + attachment.id"
-        active
+        :active="slide === index"
       >
         <inner-image-zoom
           zoom-type="click"
@@ -19,7 +21,6 @@
           :alt="'Message photo ' + index"
           :zoom-scale="3"
         />
-        <!--        class-name="img-fluid w-100 messagePhoto"-->
       </b-carousel-slide>
     </b-carousel>
   </div>
@@ -40,6 +41,16 @@ export default {
     attachments: {
       type: Array,
       required: true,
+    },
+  },
+  data() {
+    return {
+      slide: 0,
+    }
+  },
+  methods: {
+    slideEnd(slide) {
+      this.slide = slide
     },
   },
 }

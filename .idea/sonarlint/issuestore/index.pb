@@ -7,8 +7,6 @@ J
 assets/css/typography.scss,d\9\d9431d166b4172c2373982ce3ad0394b7490a4df
 K
 assets/css/_color-vars.scss,3\4\347b52873c29ed03c5d958796a92eafa7522a09f
-P
- assets/css/bootstrap-custom.scss,1\8\18cbc59a2e67a596aa4319d39ca61895ec3b5975
 ;
 .prettierrc,2\0\20137a9e94744624390b6748bc96df5ca1579b71
 Q

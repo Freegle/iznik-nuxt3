@@ -7,7 +7,10 @@
     size="lg"
     ok-only
   >
-    <ImageCarousel message-id="message.id" :attachments="message.attachments" />
+    <ImageCarousel
+      :message-id="message.id"
+      :attachments="message.attachments"
+    />
     <template slot="modal-footer" slot-scope="{ cancel }">
       <b-button variant="secondary" @click="cancel"> Close </b-button>
     </template>
@@ -41,6 +44,8 @@ export default {
 <style scoped lang="scss">
 :deep(.carousel-caption) {
   position: unset !important;
+  padding-top: 0px !important;
+  padding-bottom: 0px !important;
 }
 
 :deep(.carousel-item.active) {
