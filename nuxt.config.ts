@@ -1,5 +1,5 @@
 import { defineNuxtConfig } from 'nuxt'
-import constants from './constants'
+import config from './config'
 
 export default defineNuxtConfig({
   // We need static rendering for good SEO.  It means the users pay for the CPU not Freegle.  Cheapskates.
@@ -21,24 +21,25 @@ export default defineNuxtConfig({
 
   // Environment variables the client needs.
   publicRuntimeConfig: {
-    APIv1: constants.APIv1,
-    APIv2: constants.APIv2,
-    OSM_TILE: constants.OSM_TILE,
-    GEOCODE: constants.GEOCODE,
-    FACEBOOK_APPID: constants.FACEBOOK_APPID,
-    YAHOO_CLIENTID: constants.YAHOO_CLIENTID,
-    GOOGLE_MAPS_KEY: constants.GOOGLE_MAPS_KEY,
-    GOOGLE_API_KEY: constants.GOOGLE_API_KEY,
-    GOOGLE_CLIENT_ID: constants.GOOGLE_CLIENT_ID,
-    USER_SITE: constants.USER_SITE,
-    IMAGE_SITE: constants.IMAGE_SITE,
-    SENTRY_DSN: constants.SENTRY_DSN,
+    APIv1: config.APIv1,
+    APIv2: config.APIv2,
+    OSM_TILE: config.OSM_TILE,
+    GEOCODE: config.GEOCODE,
+    FACEBOOK_APPID: config.FACEBOOK_APPID,
+    YAHOO_CLIENTID: config.YAHOO_CLIENTID,
+    GOOGLE_MAPS_KEY: config.GOOGLE_MAPS_KEY,
+    GOOGLE_API_KEY: config.GOOGLE_API_KEY,
+    GOOGLE_CLIENT_ID: config.GOOGLE_CLIENT_ID,
+    USER_SITE: config.USER_SITE,
+    IMAGE_SITE: config.IMAGE_SITE,
+    SENTRY_DSN: config.SENTRY_DSN,
     BUILD_DATE: new Date().toISOString(),
   },
 
   css: [
     '@/node_modules/@fortawesome/fontawesome-svg-core/styles.css',
     '@/assets/css/global.scss',
+    'leaflet/dist/leaflet.css',
   ],
 
   vite: {

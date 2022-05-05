@@ -16,6 +16,7 @@ module.exports = {
     },
   ],
   globals: {
+    process: 'readonly',
     defineProps: 'readonly',
     definePageMeta: 'readonly',
     useRuntimeConfig: 'readonly',

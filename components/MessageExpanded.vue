@@ -34,16 +34,13 @@
       />
       <MessageTextBody :id="id" />
       <MessageReplyInfo :message="message" />
-      <client-only>
-        <!--        TODO-->
-        <!--        <MessageMap-->
-        <!--          v-if="showMap && validPosition"-->
-        <!--          :home="home"-->
-        <!--          :position="{ lat: message.lat, lng: message.lng }"-->
-        <!--          class="mt-2"-->
-        <!--          :height="150"-->
-        <!--        />-->
-      </client-only>
+      <MessageMap
+        v-if="showMap && validPosition"
+        :home="home"
+        :position="{ lat: message.lat, lng: message.lng }"
+        class="mt-2"
+        :height="150"
+      />
       <MessageHistoryExpanded :id="id" class="d-block d-md-none mt-2 mt-md-0" />
       <!--      TODO-->
       <!--      <MessageReplySection-->
@@ -144,16 +141,19 @@ export default {
       return this.message.lat || this.message.lng
     },
     home() {
-      let ret = null
+      // TODO
+      return null
 
-      if (this.me && this.me.settings && this.me.settings.mylocation) {
-        ret = {
-          lat: this.me.settings.mylocation.lat,
-          lng: this.me.settings.mylocation.lng,
-        }
-      }
-
-      return ret
+      // let ret = null
+      //
+      // if (this.me && this.me.settings && this.me.settings.mylocation) {
+      //   ret = {
+      //     lat: this.me.settings.mylocation.lat,
+      //     lng: this.me.settings.mylocation.lng,
+      //   }
+      // }
+      //
+      // return ret
     },
     replyToSend() {
       let ret = null
@@ -182,21 +182,6 @@ export default {
 
       return ret
     },
-  },
-  mounted() {
-    // TODO process.browser
-
-    if (
-      // process.browser &&
-      !this.message ||
-      !this.message.fromuser ||
-      typeof this.message.fromuser !== 'object'
-    ) {
-      // We are on the client and loading a page which we have rendered on the server rather than navigated to on the
-      // client side.  We will therefore have rendered it logged out.  Refetch the message so that we get more info,
-      // which we may do when logged in.
-      this.messageStore.fetch(this.id, true)
-    }
   },
   methods: {
     sent() {

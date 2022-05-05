@@ -96,14 +96,14 @@ export default {
     const route = useRoute()
     const id = parseInt(route.params.id)
 
-    // if (process.browser) {
-    //   TODO
+    // TODO
+    // if (process.client) {
     //   this.$api.bandit.chosen({
     //     uid: 'messageview',
     //     variant: 'single',
     //   })
     // }
-    //
+
     return { id, messageStore, groupStore }
   },
   data() {

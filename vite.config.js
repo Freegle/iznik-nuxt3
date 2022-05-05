@@ -1,6 +1,6 @@
 import path from 'path-browserify'
 import eslintPlugin from 'vite-plugin-eslint'
-import constants from './constants'
+import config from './config'
 
 export default {
   debug: true,
@@ -26,12 +26,12 @@ export default {
   server: {
     proxy: {
       '/apiv1': {
-        target: constants.APIv1,
+        target: config.APIv1,
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/apiv1/, '/'),
       },
       '/apiv2': {
-        target: constants.APIv2,
+        target: config.APIv2,
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/apiv2/, '/'),
       },
