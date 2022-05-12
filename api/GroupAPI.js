@@ -2,8 +2,7 @@ import BaseAPI from '@/api/BaseAPI'
 
 export default class GroupAPI extends BaseAPI {
   async list(params) {
-    const { groups } = await this.$get('/groups', params)
-    return groups
+    return await this.$getv2('/group', params)
   }
 
   async fetch(id, polygon, showmods, sponsors, tnkey, log) {

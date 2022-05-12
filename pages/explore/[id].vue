@@ -9,7 +9,7 @@
     </b-row>
     <b-row v-else class="m-0">
       <b-col cols="12" lg="6" class="p-0" offset-lg="3">
-        <ExploreGroup v-if="id" :id="id" />
+        <ExploreGroup v-if="group.id" :id="group.id" />
       </b-col>
     </b-row>
   </div>
