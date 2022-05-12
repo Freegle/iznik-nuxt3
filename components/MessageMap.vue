@@ -20,7 +20,6 @@
       :interactive="false"
       :icon="blurmarker"
     />
-    <l-geojson v-if="boundary" :geojson="boundaryJSON" :options="cgaOptions" />
   </l-map>
 </template>
 <script>
@@ -30,11 +29,7 @@ import { MAX_MAP_ZOOM } from '~/constants'
 // TODO
 // import map from '@/mixins/map.js'
 
-const AREA_FILL_COLOUR = 'darkblue'
-const CGA_BOUNDARY_COLOUR = 'darkblue'
-
 export default {
-  // mixins: [map],
   props: {
     home: {
       type: Object,
@@ -79,13 +74,6 @@ export default {
         touchZoom: !this.locked,
         scrollWheelZoom: false,
         bounceAtZoomLimits: true,
-      }
-    },
-    cgaOptions() {
-      return {
-        fillColor: AREA_FILL_COLOUR,
-        fillOpacity: 0,
-        color: CGA_BOUNDARY_COLOUR,
       }
     },
     // homeicon() {
