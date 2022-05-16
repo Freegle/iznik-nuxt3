@@ -39,13 +39,13 @@
         @expand="expand"
         @zoom="zoom"
       />
-      <!--      <MessageModal-->
-      <!--          :id="message.id"-->
-      <!--          ref="modal"-->
-      <!--          :replyable="replyable"-->
-      <!--          :hide-close="hideClose"-->
-      <!--          :actions="actions"-->
-      <!--      />-->
+      <MessageModal
+        :id="message.id"
+        ref="modal"
+        :replyable="replyable"
+        :hide-close="hideClose"
+        :actions="actions"
+      />
     </div>
   </div>
 </template>
@@ -217,9 +217,6 @@ export default {
 
         this.waitForRef('modal', () => {
           this.$refs.modal.show(zoom)
-          this.$store.dispatch('messages/fetch', {
-            id: this.id,
-          })
         })
 
         this.view()

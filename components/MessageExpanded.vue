@@ -34,7 +34,6 @@
       />
       <MessageTextBody :id="id" />
       <MessageReplyInfo :message="message" />
-      Showmap {{ showMap }}, {{ validPosition }}
       <MessageMap
         v-if="showMap && validPosition"
         :home="home"
