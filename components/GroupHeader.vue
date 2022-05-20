@@ -29,17 +29,15 @@
       </div>
       <div class="group__links text-muted small">
         See
-        <nuxt-link :to="{ path: '/communityevents/' + group.id }">
-          community events </nuxt-link
-        >,
-        <nuxt-link :to="{ path: '/volunteerings/' + group.id }">
-          volunteer opportunities </nuxt-link
-        >,
-        <nuxt-link :to="{ path: '/stories/' + group.id }"> stories </nuxt-link>,
+        <!--eslint-disable-next-line-->
+        <nuxt-link :to="{ path: '/communityevents/' + group.id }">community events</nuxt-link>,
+        <!--eslint-disable-next-line-->
+        <nuxt-link :to="{ path: '/volunteerings/' + group.id }">volunteer opportunities</nuxt-link>,
+        <!--eslint-disable-next-line-->
+        <nuxt-link :to="{ path: '/stories/' + group.id }">stories</nuxt-link>,
         or
-        <nuxt-link :to="{ path: '/stats/' + group.nameshort }">
-          stats
-        </nuxt-link>
+        <!--eslint-disable-next-line-->
+        <nuxt-link :to="{ path: '/stats/' + group.nameshort }">stats</nuxt-link>
       </div>
       <div class="mt-2 group__buttons">
         <div class="button__items">
