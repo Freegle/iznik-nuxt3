@@ -170,8 +170,6 @@ P
  assets/css/bootstrap-custom.scss,1\8\18cbc59a2e67a596aa4319d39ca61895ec3b5975
 M
 components/MessageSummary.vue,5\a\5a01b659a739b4584f899fc40fac1291d680cb3c
-I
-components/MessageTag.vue,1\7\1737762721b62c5df052b6fa89fa8e5993fae57e
 Q
 !components/MessageAttachments.vue,3\2\32575f0cd8b9f5844a2ba2c1267108721d45a662
 L

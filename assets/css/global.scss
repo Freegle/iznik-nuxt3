@@ -359,3 +359,11 @@ label {
 .mr-auto {
   @extend .me-auto
 }
+
+.font-weight-bold {
+  @extend .fw-bold
+}
+
+.font-weight-normal {
+  @extend .fw-normal
+}
