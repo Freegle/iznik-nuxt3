@@ -24,11 +24,6 @@ definePageMeta({
 export default {
   async setup() {
     const groupStore = useGroupStore()
-
-    // The first parameter needs to be a unique key.
-    // See https://stackoverflow.com/questions/71383166/rationale-behind-providing-a-key-in-useasyncdata-function
-    //
-    // We don't use lazy because we want the page to be rendered for SEO.
     const route = useRoute()
     const id = route.params.id
 

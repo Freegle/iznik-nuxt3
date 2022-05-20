@@ -52,9 +52,14 @@
 
 <script>
 import { useMessageStore } from '../stores/message'
+import MessageModal from '@/components/MessageModal'
+
 import { useGroupStore } from '~/stores/group'
 
 export default {
+  components: {
+    MessageModal,
+  },
   props: {
     id: {
       type: Number,
@@ -233,9 +238,7 @@ export default {
     async view() {
       if (this.recordView) {
         if (this.me) {
-          await this.$store.dispatch('messages/view', {
-            id: this.id,
-          })
+          await this.messageStore.view(this.id)
         }
 
         this.$emit('view')
