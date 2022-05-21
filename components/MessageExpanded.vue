@@ -142,7 +142,10 @@ export default {
     },
     home() {
       // TODO
-      return null
+      return {
+        lat: 53.945,
+        lng: -2.5209,
+      }
 
       // let ret = null
       //

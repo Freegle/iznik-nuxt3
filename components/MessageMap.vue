@@ -8,13 +8,11 @@
     @ready="idle"
   >
     <l-tile-layer :url="osmtile" :attribution="attribution" />
-    <!--    <l-marker-->
-    <!--      v-if="home"-->
-    <!--      :lat-lng="[home.lat, home.lng]"-->
-    <!--      :interactive="false"-->
-    <!--      :icon="homeicon"-->
-    <!--      class="bg-none"-->
-    <!--    />-->
+    <l-marker v-if="home && hi" :lat-lng="home">
+      <l-icon class="bg-none">
+        <component :is="hi" class="component-here" />
+      </l-icon>
+    </l-marker>
     <l-marker
       :lat-lng="[position.lat, position.lng]"
       :interactive="false"
@@ -25,7 +23,10 @@
 <script>
 // eslint-disable-next-line node/no-deprecated-api
 import Wkt from 'wicket'
+import { defineComponent } from 'vue'
+import HomeIcon from './HomeIcon'
 import { MAX_MAP_ZOOM } from '~/constants'
+
 // TODO
 // import map from '@/mixins/map.js'
 
@@ -61,10 +62,38 @@ export default {
       default: 200,
     },
   },
-  data() {
-    return {
-      L: null,
+  async setup() {
+    let hi = null
+    let L = null
+
+    if (process.client) {
+      L = await import('leaflet/dist/leaflet-src.esm')
+
+      console.log('Mounted')
+      hi = defineComponent({
+        extends: L.DivIcon,
+        data() {
+          return {
+            'lat-lng': this.home,
+            interactive: false,
+            class: 'bg-none',
+          }
+        },
+        render() {
+          console.log('Render homeicon')
+          return HomeIcon.render()
+        },
+      })
+      //
+      // console.log('Created hi')
+      //
+      // this.waitForRef('homeIcon', () => {
+      //   console.log('Mount', this.$refs.homeIcon)
+      //   createApp(hi).mount(this.$refs.homeIcon.$el)
+      // })
     }
+
+    return { L, hi }
   },
   computed: {
     mapOptions() {
@@ -76,19 +105,6 @@ export default {
         bounceAtZoomLimits: true,
       }
     },
-    // homeicon() {
-    // Render the component off document.
-    // // TODO
-    // const Mine = Vue.extend(HomeIcon)
-    // let re = new Mine()
-    //
-    // re = re.$mount().$el
-    //
-    // return new this.L.DivIcon({
-    //   html: re.outerHTML,
-    //   className: 'bg-none',
-    // })
-    // },
     blurmarker() {
       return this.L
         ? new this.L.Icon({
@@ -115,14 +131,6 @@ export default {
     attribution() {
       return 'Map data &copy; <a href="https://www.openstreetmap.org/" rel="noopener noreferrer">OpenStreetMap</a> contributors'
     },
-  },
-  async beforeCreate() {
-    // We can only render this on the client.  Pre-render fails, and vue-leaflet doesn't seem to render the map in
-    // any case.  See https://github.com/vue-leaflet/vue-leaflet/discussions/208.
-    if (process.client) {
-      const L = await import('leaflet/dist/leaflet-src.esm')
-      this.L = L
-    }
   },
   methods: {
     idle(themap) {
