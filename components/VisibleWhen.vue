@@ -4,6 +4,8 @@
   </div>
 </template>
 <script>
+import { useMiscStore } from '../stores/misc'
+
 export default {
   props: {
     at: {
@@ -18,6 +20,10 @@ export default {
     },
   },
   computed: {
+    breakpoint() {
+      const store = useMiscStore()
+      return store.getBreakpoint
+    },
     show() {
       if (process.server) {
         // Drop all optional components for SSR, otherwise we might start to render them on the client when we

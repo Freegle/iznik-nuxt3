@@ -449,6 +449,7 @@ export default {
       unreadNotificationCount: 0,
       chatCount: 0,
       loggedIn: false, // TODO
+      me: null, // TODO
     }
   },
   computed: {
@@ -531,8 +532,8 @@ export default {
       // Go to the landing page.
       this.$router.push('/')
     },
-    async showAboutMe() {
-      await this.fetchMe(['me'], true)
+    showAboutMe() {
+      // await this.fetchMe(['me'], true)
       this.$refs.aboutMeModal.show()
     },
     maybeReload(route) {

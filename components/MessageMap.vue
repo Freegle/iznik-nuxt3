@@ -9,7 +9,7 @@
   >
     <l-tile-layer :url="osmtile" :attribution="attribution" />
     <l-marker v-if="home" :lat-lng="home">
-      <l-icon class="bg-none">
+      <l-icon>
         <HomeIcon />
       </l-icon>
     </l-marker>

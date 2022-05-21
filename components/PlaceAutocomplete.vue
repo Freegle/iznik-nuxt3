@@ -69,10 +69,17 @@ export default {
   },
   data() {
     return {
-      source: process.env.GEOCODE || 'https://geocode.ilovefreegle.org/api',
       results: [],
       wip: null,
     }
+  },
+  computed: {
+    source() {
+      const runtimeConfig = useRuntimeConfig()
+      return (
+        runtimeConfig.public.GEOCODE || 'https://geocode.ilovefreegle.org/api'
+      )
+    },
   },
   methods: {
     process(results) {

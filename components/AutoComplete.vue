@@ -22,7 +22,7 @@
         <b-input-group-append>
           <b-button variant="white" class="transbord p-0 pr-2" tabindex="-1">
             <v-icon
-              name="sync"
+              icon="sync"
               :class="
                 'text-success fa-spin ' +
                 (ajaxInProgress ? 'visible' : 'invisible')
@@ -808,7 +808,7 @@ input[invalid='true'] {
 }
 .input-group.autocomplete-wrap input,
 .input-group-append button {
-  border: none;
+  border: none !important;
 }
 .input-group-append button:focus {
   outline: none;
@@ -821,7 +821,7 @@ input[invalid='true'] {
 
 .invalid {
   box-shadow: 0 0 0 0.2rem $color-red;
-  border: none;
+  border: none !important;
   border-radius: 4px;
 }
 input[invalid='true'] {

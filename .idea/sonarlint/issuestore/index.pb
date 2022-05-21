@@ -148,8 +148,6 @@ K
 api/index.d.ts,0\0\003584391006adb2eb802f21f153baef81417fe6
 >
 plugins/api.js,4\9\49318d122287d970374a8621fa266adb2cc53863
-9
-	config.js,1\6\1677f29b39bf4fb465d7689c0b6b95fc646fcdbc
 C
 layouts/default.vue,f\8\f82bd9fd254b878380d49bf1912fcdc115084492
 <

@@ -17,17 +17,15 @@
             class="flex-grow-1 w-100"
             @click="play"
           />
-          <b-embed
+          <video
             v-else
-            ref="video"
-            type="video"
-            autoplay
-            controls
+            autoplay="autoplay"
+            controls="controls"
             poster="/songpreview.png"
-            loop
-            class="shadow flex-grow-1"
+            loop="loop"
             src="/song.mp4"
-          />
+            class="embed-responsive-item shadow flex-grow-1"
+          ></video>
         </div>
       </VisibleWhen>
     </client-only>
@@ -42,7 +40,7 @@
         We'll match you with someone local. All completely free.
       </p>
       <div class="d-flex buttons">
-        <b-btn
+        <b-button
           variant="primary"
           size="lg"
           to="/give"
@@ -50,9 +48,9 @@
           @click="clicked('give')"
         >
           Give Stuff
-        </b-btn>
+        </b-button>
         <div style="width: 4vw" class="d-none d-lg-block" />
-        <b-btn
+        <b-button
           variant="secondary"
           size="lg"
           to="/find"
@@ -60,7 +58,7 @@
           @click="clicked('ask')"
         >
           Ask for Stuff
-        </b-btn>
+        </b-button>
       </div>
       <div
         class="font-weight-bold text-header text--medium-responsive mt-3 mb-4"
@@ -110,6 +108,8 @@
   </div>
 </template>
 <script>
+import api from '~/api'
+
 export default {
   data() {
     return {
@@ -123,19 +123,22 @@ export default {
   },
   async mounted() {
     if (process.client) {
-      await this.fetchMe(['me', 'groups'])
+      // await this.fetchMe(['me', 'groups'])
 
       if (this.me) {
         this.goHome()
       } else {
         // Ensure we can still load the page if we get an API error.
         try {
-          const type = await this.$store.$api.bandit.choose({
+          const runtimeConfig = useRuntimeConfig()
+          const type = await api(runtimeConfig).bandit.choose({
             uid: 'landing',
           })
 
           this.type = type.variant
-        } catch (e) {}
+        } catch (e) {
+          console.error(e)
+        }
 
         if (this.type !== 'Map') {
           // The video plays with sound, wrongly, even if the muted attribute is set.  So set it here.
@@ -147,18 +150,19 @@ export default {
 
         // Set up a watch on the store.  We do this because initially the store hasn't yet been reloaded from local
         // storage, so we don't know if we're logged in. When it does get loaded, this watch will fire.
-        this.userWatch = this.$store.watch(
-          (state, getters) => {
-            return this.me
-          },
-          (newValue, oldValue) => {
-            if (newValue) {
-              if (this.$nuxt.path === '/' || !this.$nuxt.path) {
-                this.goHome()
-              }
-            }
-          }
-        )
+        // TODO
+        // this.userWatch = this.$store.watch(
+        //   (state, getters) => {
+        //     return this.me
+        //   },
+        //   (newValue, oldValue) => {
+        //     if (newValue) {
+        //       if (this.$nuxt.path === '/' || !this.$nuxt.path) {
+        //         this.goHome()
+        //       }
+        //     }
+        //   }
+        // )
       }
     }
   },
