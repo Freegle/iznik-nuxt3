@@ -30,6 +30,7 @@
         </div>
       </div>
       <div class="d-flex justify-content-between navlinks">
+        <!-- eslint-disable-next-line -->
         <nuxt-link to="/about" class="menu__link">
           <client-only>
             <v-icon icon="info-circle" class="link__icon" />
@@ -87,6 +88,7 @@ export default {}
 
 .menu__link {
   color: $color-black;
+  text-decoration: none;
 }
 
 .link__icon {
