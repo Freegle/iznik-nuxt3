@@ -8,9 +8,9 @@
     @ready="idle"
   >
     <l-tile-layer :url="osmtile" :attribution="attribution" />
-    <l-marker v-if="home && hi" :lat-lng="home">
+    <l-marker v-if="home" :lat-lng="home">
       <l-icon class="bg-none">
-        <component :is="hi" class="component-here" />
+        <HomeIcon />
       </l-icon>
     </l-marker>
     <l-marker
@@ -21,16 +21,11 @@
   </l-map>
 </template>
 <script>
-// eslint-disable-next-line node/no-deprecated-api
-import Wkt from 'wicket'
-import { defineComponent } from 'vue'
 import HomeIcon from './HomeIcon'
 import { MAX_MAP_ZOOM } from '~/constants'
 
-// TODO
-// import map from '@/mixins/map.js'
-
 export default {
+  components: { HomeIcon },
   props: {
     home: {
       type: Object,
@@ -63,37 +58,13 @@ export default {
     },
   },
   async setup() {
-    let hi = null
     let L = null
 
     if (process.client) {
       L = await import('leaflet/dist/leaflet-src.esm')
-
-      console.log('Mounted')
-      hi = defineComponent({
-        extends: L.DivIcon,
-        data() {
-          return {
-            'lat-lng': this.home,
-            interactive: false,
-            class: 'bg-none',
-          }
-        },
-        render() {
-          console.log('Render homeicon')
-          return HomeIcon.render()
-        },
-      })
-      //
-      // console.log('Created hi')
-      //
-      // this.waitForRef('homeIcon', () => {
-      //   console.log('Mount', this.$refs.homeIcon)
-      //   createApp(hi).mount(this.$refs.homeIcon.$el)
-      // })
     }
 
-    return { L, hi }
+    return { L }
   },
   computed: {
     mapOptions() {
@@ -112,17 +83,6 @@ export default {
             iconSize: [100, 100],
           })
         : null
-    },
-    boundaryJSON() {
-      const wkt = new Wkt.Wkt()
-      try {
-        wkt.read(this.boundary)
-        return wkt.toJson()
-      } catch (e) {
-        console.log('WKT error', this.boundary, e)
-      }
-
-      return null
     },
     osmtile() {
       const runtimeConfig = useRuntimeConfig()
