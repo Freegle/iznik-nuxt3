@@ -1,20 +1,22 @@
 <template>
-  <l-moving-marker
+  <l-marker
     v-if="currlat !== null"
     :key="'visualiseuser-' + id"
     :lat-lng="[currlat, currlng]"
     title="Freegler"
     :duration="2000"
-    :icon="mapicon"
-  />
+  >
+    <l-icon>
+      <ProfileImage :image="icon" border size="lg-always" :lazy="false" />
+    </l-icon>
+  </l-marker>
 </template>
 <script>
-const LMovingMarker = () => import('vue2-leaflet-movingmarker')
-
-// import ProfileImage from './ProfileImage'
+import ProfileImage from './ProfileImage'
+// const LMovingMarker = () => import('vue2-leaflet-movingmarker')
 
 export default {
-  components: { LMovingMarker },
+  components: { ProfileImage },
   props: {
     id: {
       type: Number,
@@ -39,29 +41,6 @@ export default {
       currlng: null,
     }
   },
-  computed: {
-    mapicon() {
-      // Render the component off document.
-      return null
-      // todo
-      // const Mine = Vue.extend(ProfileImage)
-      // let re = new Mine({
-      //   propsData: {
-      //     image: this.icon,
-      //     border: true,
-      //     size: 'lg-always',
-      //     lazy: false,
-      //   },
-      // })
-      //
-      // re = re.$mount().$el
-      //
-      // return new L.DivIcon({
-      //   html: re.outerHTML,
-      //   className: 'clear map__user-icon',
-      // })
-    },
-  },
   mounted() {
     this.currlat = this.lat
     this.currlng = this.lng
@@ -74,9 +53,8 @@ export default {
   },
 }
 </script>
-
-<style>
-.map__user-icon .ProfileImage__container img {
+<style scoped lang="scss">
+:deep(img) {
   animation-duration: 1s;
   animation-iteration-count: 1;
 

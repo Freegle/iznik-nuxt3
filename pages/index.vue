@@ -24,7 +24,7 @@
             poster="/songpreview.png"
             loop="loop"
             src="/song.mp4"
-            class="embed-responsive-item shadow flex-grow-1 w-100"
+            class="embed-responsive-item shadow flex-grow-1 w-100 bg-secondary"
           ></video>
         </div>
       </VisibleWhen>

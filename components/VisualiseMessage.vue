@@ -1,18 +1,24 @@
 <template>
-  <l-moving-marker
+  <l-marker
     v-if="currlat !== null"
     :key="'visualisemessage-' + id"
     :lat-lng="[currlat, currlng]"
     title="post"
     :duration="2000"
-    :icon="mapicon"
-  />
+  >
+    <l-icon
+      :icon-url="icon"
+      :icon-size="[100, 100]"
+      :icon-anchor="[30, 110]"
+      class-name="border border-primary rounded item-image"
+    />
+  </l-marker>
 </template>
 <script>
-const LMovingMarker = () => import('vue2-leaflet-movingmarker')
+// const LMovingMarker = () => import('vue2-leaflet-movingmarker')
 
 export default {
-  components: { LMovingMarker },
+  // components: { LMovingMarker },
   props: {
     id: {
       type: Number,
@@ -33,27 +39,8 @@ export default {
   },
   data() {
     return {
-      L: null,
       currlat: null,
       currlng: null,
-    }
-  },
-  computed: {
-    mapicon() {
-      return this.L.icon({
-        iconUrl: this.icon,
-        iconSize: [100, 100],
-        iconAnchor: [30, 110],
-        className: 'border border-primary rounded item-image',
-      })
-    },
-  },
-  async beforeCreate() {
-    // We can only render this on the client.  Pre-render fails, and vue-leaflet doesn't seem to render the map in
-    // any case.  See https://github.com/vue-leaflet/vue-leaflet/discussions/208.
-    if (process.client) {
-      const L = await import('leaflet/dist/leaflet-src.esm')
-      this.L = L
     }
   },
   mounted() {

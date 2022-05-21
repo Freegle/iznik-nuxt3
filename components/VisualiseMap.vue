@@ -83,7 +83,7 @@
 // import VisualiseSpeech from './VisualiseSpeech'
 import api from '~/api'
 
-import { attribution, osmtile } from '~/composables/useMap'
+import { attribution, osmtile, getDistance } from '~/composables/useMap'
 
 export default {
   async setup() {
@@ -266,10 +266,7 @@ export default {
       item.others.forEach((o) => {
         // Get distance from the poster.  Sometimes we get replies from far away which makes the map look silly, so
         // exclude those.
-        const dist = this.getDistance(
-          [item.fromlat, item.fromlng],
-          [o.lat, o.lng]
-        )
+        const dist = getDistance([item.fromlat, item.fromlng], [o.lat, o.lng])
 
         if (dist < 20000) {
           lats.push(o.lat)
