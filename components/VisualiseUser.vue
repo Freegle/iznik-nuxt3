@@ -66,7 +66,6 @@ export default {
 :deep(img) {
   animation-duration: 1s;
   animation-iteration-count: 1;
-
   animation-name: bounce-animation;
   animation-timing-function: ease;
 }

@@ -27,14 +27,14 @@
             :lng="item.fromlng"
             :icon="item.from.icon"
           />
-          <!--          <VisualiseUser-->
-          <!--            v-if="showReplies && item"-->
-          <!--            :id="item.to.id"-->
-          <!--            :lat="item.tolat"-->
-          <!--            :lng="item.tolng"-->
-          <!--            :z-index-offset="1000"-->
-          <!--            :icon="item.to.icon"-->
-          <!--          />-->
+          <VisualiseSpeech
+            v-if="showReplies && item"
+            :lat-lng="[item.tolat, item.tolng]"
+            :text="reply(item.to.id)"
+            class-name="clear"
+            :popup-anchor="[-50, -50]"
+            :z-index-offset="1000"
+          />
           <VisualiseUser
             v-if="showTo && item"
             :id="item.to.id"

@@ -257,6 +257,11 @@ form {
   right: 20px;
 }
 
+// Animate marker moves (as used on landing page).
+.leaflet-marker-pane > * {
+  transition: transform 2s ease;
+}
+
 // Bootstrap tooltips appear above modals on mobile even after a modal is shown from a click.  This is confusing.
 // We don't have any tooltips inside modals so move them down.
 .tooltip {
