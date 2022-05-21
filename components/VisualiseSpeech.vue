@@ -1,9 +1,13 @@
 <template>
-  <div class="thick wide bg-white text-center rounded pt-1 speech-bubble">
-    <h3>
-      {{ text }}
-    </h3>
-  </div>
+  <l-marker :lat-lng="latLng">
+    <l-icon>
+      <div class="thick wide bg-white text-center rounded pt-1 speech-bubble">
+        <h3>
+          {{ text }}
+        </h3>
+      </div>
+    </l-icon>
+  </l-marker>
 </template>
 
 <script>
@@ -11,14 +15,17 @@ export default {
   props: {
     text: {
       type: String,
-      required: true
-    }
-  }
+      required: true,
+    },
+    latLng: {
+      type: Array,
+      required: true,
+    },
+  },
 }
 </script>
 
 <style scoped lang="scss">
-@import 'color-vars';
 @import '~bootstrap/scss/functions';
 @import '~bootstrap/scss/variables';
 @import '~bootstrap/scss/mixins/_breakpoints';

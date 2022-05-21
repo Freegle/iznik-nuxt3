@@ -27,12 +27,14 @@
             :lng="item.fromlng"
             :icon="item.from.icon"
           />
-          <l-marker
-            v-if="showReplies && item"
-            :lat-lng="[item.tolat, item.tolng]"
-            :icon="replyIcon(item.touser)"
-            :z-index-offset="1000"
-          />
+          <!--          <VisualiseUser-->
+          <!--            v-if="showReplies && item"-->
+          <!--            :id="item.to.id"-->
+          <!--            :lat="item.tolat"-->
+          <!--            :lng="item.tolng"-->
+          <!--            :z-index-offset="1000"-->
+          <!--            :icon="item.to.icon"-->
+          <!--          />-->
           <VisualiseUser
             v-if="showTo && item"
             :id="item.to.id"
@@ -52,11 +54,13 @@
             />
           </div>
           <div v-if="showReplies">
-            <l-marker
+            <VisualiseSpeech
               v-for="other in item.others"
               :key="'otherreply-' + other.id"
               :lat-lng="[other.lat, other.lng]"
-              :icon="replyIcon(other.id)"
+              :text="reply(other.id)"
+              class-name="clear"
+              :popup-anchor="[-50, -50]"
               :z-index-offset="1000"
             />
           </div>
@@ -68,10 +72,12 @@
             :lat="item.fromlat"
             :lng="item.fromlng"
           />
-          <l-marker
+          <VisualiseSpeech
             v-if="item && showThanks"
             :lat-lng="[item.tolat, item.tolng]"
-            :icon="thanksIcon"
+            :text="text"
+            class-name="clear"
+            :popup-anchor="[-50, -50]"
           />
         </div>
       </l-map>
@@ -80,12 +86,15 @@
 </template>
 <script>
 // TODO
-// import VisualiseSpeech from './VisualiseSpeech'
+import VisualiseSpeech from './VisualiseSpeech'
 import api from '~/api'
 
 import { attribution, osmtile, getDistance } from '~/composables/useMap'
 
 export default {
+  components: {
+    VisualiseSpeech,
+  },
   async setup() {
     let L = null
 
@@ -143,34 +152,13 @@ export default {
     item() {
       return this.list.length ? this.list[0] : null
     },
-    thanksIcon() {
-      // TODO
-      return null
-      // // Render the component off document.
-      // let Mine
-      //
-      // console.log('Thanks icon')
-      // defineComponent({
-      //   extends: defineComponent({ ...VisualiseSpeech }),
-      //   data: () => ({
-      //     text: this.thanksText[
-      //       // Reference item.id so that we generate a different message each time.
-      //       Math.floor(Math.random() * this.thanksText.length) +
-      //         this.item.id -
-      //         this.item.id
-      //     ],
-      //   }),
-      //   created() {
-      //     console.log('Created', this.$root)
-      //     Mine = this.$root
-      //   },
-      // })
-      //
-      // return new this.L.DivIcon({
-      //   html: Mine.$mount().$el.outerHTML,
-      //   popupAnchor: [-50, -50],
-      //   className: 'clear',
-      // })
+    text() {
+      return this.thanksText[
+        // Reference item.id so that we generate a different message each time.
+        Math.floor(Math.random() * this.thanksText.length) +
+          this.item.id -
+          this.item.id
+      ]
     },
   },
   async beforeCreate() {
@@ -315,27 +303,11 @@ export default {
 
       this.flyToFromUser()
     },
-    replyIcon(id) {
-      // TODO
-      return null
-      // // Render the component off document.
-      // const Mine = Vue.extend(VisualiseSpeech)
-      // let re = new Mine({
-      //   propsData: {
-      //     text: this.replyText[
-      //       // Reference id so that we generate a different message each time.
-      //       (id % this.replyText.length) + this.item.id - this.item.id
-      //     ],
-      //   },
-      // })
-      //
-      // re = re.$mount().$el
-      //
-      // return new this.L.DivIcon({
-      //   html: re.outerHTML,
-      //   popupAnchor: [-50, -50],
-      //   className: 'clear',
-      // })
+    reply(id) {
+      // Reference id so that we generate a different message each time.
+      return this.replyText[
+        (id % this.replyText.length) + this.item.id - this.item.id
+      ]
     },
   },
 }

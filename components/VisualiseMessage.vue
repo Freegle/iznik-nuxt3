@@ -15,10 +15,7 @@
   </l-marker>
 </template>
 <script>
-// const LMovingMarker = () => import('vue2-leaflet-movingmarker')
-
 export default {
-  // components: { LMovingMarker },
   props: {
     id: {
       type: Number,

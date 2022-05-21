@@ -660,7 +660,7 @@ export default {
 }
 
 /* Deep selector for scoped CSS */
-::v-deep .pcinp {
+:v-deep(.pcinp) {
   min-width: 100px;
   max-width: 238px;
   margin: 0 auto;
@@ -694,7 +694,7 @@ export default {
   border-bottom-right-radius: 2px;
 }
 
-::v-deep .postcodelist.autocomplete ul {
+:v-deep(.postcodelist.autocomplete ul) {
   position: initial;
 }
 

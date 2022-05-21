@@ -155,7 +155,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
-::v-deep .listentrylist {
+:deep(.listentrylist) {
   width: 100%;
   right: 0 !important;
   border-color: $color-blue--light;
@@ -163,7 +163,7 @@ export default {
   box-shadow: 0 1px 0 0.2rem rgba(0, 123, 255, 0.25);
 }
 
-::v-deep .listentry mark {
+:deep(.listentry mark) {
   padding-left: 0;
   padding-right: 0;
 }

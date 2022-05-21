@@ -2,6 +2,7 @@
   <l-marker
     v-if="currlat !== null"
     :key="'visualiseuser-' + id"
+    ref="marker"
     :lat-lng="[currlat, currlng]"
     title="Freegler"
     :duration="2000"
@@ -13,7 +14,6 @@
 </template>
 <script>
 import ProfileImage from './ProfileImage'
-// const LMovingMarker = () => import('vue2-leaflet-movingmarker')
 
 export default {
   components: { ProfileImage },
@@ -34,6 +34,15 @@ export default {
       type: Number,
       required: true,
     },
+  },
+  async setup() {
+    let L = null
+
+    if (process.client) {
+      L = await import('leaflet/dist/leaflet-src.esm')
+    }
+
+    return { L }
   },
   data() {
     return {
