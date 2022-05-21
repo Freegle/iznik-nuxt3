@@ -23,6 +23,7 @@
 <script>
 import HomeIcon from './HomeIcon'
 import { MAX_MAP_ZOOM } from '~/constants'
+import { attribution, osmtile } from '~/composables/useMap'
 
 export default {
   components: { HomeIcon },
@@ -64,7 +65,7 @@ export default {
       L = await import('leaflet/dist/leaflet-src.esm')
     }
 
-    return { L }
+    return { L, osmtile: osmtile(), attribution: attribution() }
   },
   computed: {
     mapOptions() {
@@ -83,13 +84,6 @@ export default {
             iconSize: [100, 100],
           })
         : null
-    },
-    osmtile() {
-      const runtimeConfig = useRuntimeConfig()
-      return runtimeConfig.public.OSM_TILE
-    },
-    attribution() {
-      return 'Map data &copy; <a href="https://www.openstreetmap.org/" rel="noopener noreferrer">OpenStreetMap</a> contributors'
     },
   },
   methods: {

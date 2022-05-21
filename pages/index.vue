@@ -9,7 +9,7 @@
         class="map justify-content-start flex-column d-flex"
       >
         <VisualiseMap v-if="type === 'Map'" class="shadow flex-grow-1" />
-        <div v-else-if="type === 'Song'">
+        <div v-else-if="type === 'Song'" class="w-100">
           <b-img
             v-if="!timeToPlay"
             fluid
@@ -24,7 +24,7 @@
             poster="/songpreview.png"
             loop="loop"
             src="/song.mp4"
-            class="embed-responsive-item shadow flex-grow-1"
+            class="embed-responsive-item shadow flex-grow-1 w-100"
           ></video>
         </div>
       </VisibleWhen>

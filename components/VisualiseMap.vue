@@ -3,8 +3,8 @@
     <client-only>
       <l-map
         ref="map"
-        :zoom="8"
-        :center="center"
+        :zoom.sync="zoom"
+        :center.sync="center"
         :options="{
           zoomControl: false,
           scrollWheelZoom: false,
@@ -81,12 +81,29 @@
 <script>
 // TODO
 // import VisualiseSpeech from './VisualiseSpeech'
-// import map from '@/mixins/map.js'
+import api from '~/api'
+
+import { attribution, osmtile } from '~/composables/useMap'
 
 export default {
+  async setup() {
+    let L = null
+
+    if (process.client) {
+      L = await import('leaflet/dist/leaflet-src.esm')
+    }
+
+    return {
+      L,
+      osmtile: osmtile(),
+      attribution: attribution(),
+    }
+  },
   data() {
     return {
-      L: null,
+      center: [53.945, -2.5209],
+      zoom: 8,
+      bounds: null,
       context: null,
       running: true,
       index: 0,
@@ -123,16 +140,6 @@ export default {
     }
   },
   computed: {
-    mapHeight() {
-      let height = 0
-
-      if (process.client) {
-        height = window.innerHeight - 70
-        height = height < 200 ? 200 : height
-      }
-
-      return height
-    },
     item() {
       return this.list.length ? this.list[0] : null
     },
@@ -176,12 +183,8 @@ export default {
   },
   methods: {
     idle(map) {
-      this.boundsChanged()
-
-      if (this.running && this.bounds) {
-        if (this.list.length === 0) {
-          this.doNext()
-        }
+      if (this.running && this.list.length === 0) {
+        this.doNext()
       }
     },
     moveend() {
@@ -243,7 +246,7 @@ export default {
 
       if (this.list.length) {
         if (this.$refs.map) {
-          this.$refs.map.mapObject.flyToBounds(
+          this.$refs.map.leafletObject.flyToBounds(
             this.itemBounds(this.list[0]),
             14
           )
@@ -292,13 +295,16 @@ export default {
       this.showThanks = false
       this.showReplies = false
 
+      const bounds = this.$refs.map.leafletObject.getBounds()
+
       if (this.list.length === 0) {
         // Get some more.
-        const ret = await this.$api.visualise.fetch({
-          swlat: this.bounds.getSouthWest().lat,
-          swlng: this.bounds.getSouthWest().lng,
-          nelat: this.bounds.getNorthEast().lat,
-          nelng: this.bounds.getNorthEast().lng,
+        const runtimeConfig = useRuntimeConfig()
+        const ret = await api(runtimeConfig).visualise.fetch({
+          swlat: bounds.getSouthWest().lat,
+          swlng: bounds.getSouthWest().lng,
+          nelat: bounds.getNorthEast().lat,
+          nelng: bounds.getNorthEast().lng,
           context: this.context,
         })
 
