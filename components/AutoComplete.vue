@@ -105,7 +105,7 @@
 /* eslint-disable */
 
 import cloneDeep from 'lodash.clonedeep'
-const Highlighter = () => import('vue-highlight-words')
+import Highlighter from 'vue-highlight-words'
 
 export default {
   components: {
