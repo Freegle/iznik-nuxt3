@@ -42,6 +42,7 @@
             :lat="item.tolat"
             :lng="item.tolng"
             :icon="item.to.icon"
+            :z-index-offset="1000"
           />
           <div v-if="showOthers">
             <VisualiseUser
