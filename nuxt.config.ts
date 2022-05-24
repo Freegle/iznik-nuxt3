@@ -7,14 +7,19 @@ export default defineNuxtConfig({
 
   // SSR true means that the pages will be rendered on generate.  SSR false means that the pages are generated but
   // only contain the scripts required to render on the client.
-  ssr: true,
+  ssr: false,
 
   build: {
     // Reduce size of CSS initial load.
     extractCSS: true,
 
     // Need to transpile otherwise SSR fails - see https://github.com/nuxt/framework/discussions/4523.
-    transpile: [/bootstrap-vue-3/, /vue3-lazyload/, /vue-image-zoomer/],
+    transpile: [
+      /bootstrap-vue-3/,
+      /vue3-lazyload/,
+      /vue-image-zoomer/,
+      /vue3-draggable-resizable/,
+    ],
   },
 
   buildModules: ['@pinia/nuxt'],

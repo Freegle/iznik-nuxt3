@@ -24,8 +24,8 @@ export default {
   },
   methods: {
     check() {
-      const misc = useMiscStore()
-      const oldBreakpoint = misc.breakpoint
+      const miscStore = useMiscStore()
+      const oldBreakpoint = miscStore.breakpoint
       let currentBreakpoint = oldBreakpoint
       ;['xs', 'sm', 'md', 'lg', 'xl', 'xxl'].forEach((breakpoint) => {
         if (this.$refs[breakpoint]) {
@@ -36,7 +36,7 @@ export default {
         }
 
         if (currentBreakpoint !== oldBreakpoint) {
-          misc.setBreakpoint(currentBreakpoint)
+          miscStore.setBreakpoint(currentBreakpoint)
         }
       })
     },

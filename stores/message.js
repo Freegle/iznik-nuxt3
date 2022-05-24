@@ -35,6 +35,9 @@ export const useMessageStore = defineStore({
     async view(id) {
       await api(this.config).message.view(id)
     },
+    clear() {
+      this.list = {}
+    },
   },
   getters: {
     byId: (state) => {

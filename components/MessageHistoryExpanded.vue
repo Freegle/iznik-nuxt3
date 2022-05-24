@@ -43,12 +43,7 @@
           @click="showProfileModal"
         >
           <span v-if="message.fromuser.info.openoffers" class="text-success">
-            {{
-              message.fromuser.info.openoffers
-                | pluralize(['open OFFER', 'open OFFERs'], {
-                  includeNumber: true,
-                })
-            }}
+            {{ openOfferPlural }}
           </span>
           <span
             v-if="
@@ -59,12 +54,7 @@
             &bull;
           </span>
           <span v-if="message.fromuser.info.openwanteds" class="text-success">
-            {{
-              message.fromuser.info.openwanteds
-                | pluralize(['open WANTED', 'open WANTEDs'], {
-                  includeNumber: true,
-                })
-            }}
+            {{ openWantedPlural }}
           </span>
         </div>
         <div
@@ -85,9 +75,7 @@
           class="align-middle"
           @click="showProfileModal"
         >
-          About
-          {{ message.milesaway | pluralize('mile', { includeNumber: true }) }}
-          away
+          About {{ milesPlural }} away
         </span>
       </div>
       <!--      TODO-->
@@ -100,6 +88,7 @@
   </div>
 </template>
 <script>
+import pluralize from 'pluralize'
 import ProfileImage from '@/components/ProfileImage'
 import { useMessageStore } from '~/stores/message'
 import { useGroupStore } from '~/stores/group'
@@ -127,6 +116,19 @@ export default {
     }
   },
   computed: {
+    milesPlural() {
+      return pluralize('mile', this.message.milesaway, true)
+    },
+    openOfferPlural() {
+      return this.message && this.message.fromuser && this.message.fromuser.info
+        ? pluralize('open OFFER', this.message.fromuser.info.openoffers, true)
+        : null
+    },
+    openWantedPlural() {
+      return this.message && this.message.fromuser && this.message.fromuser.info
+        ? pluralize('open WANTED', this.message.fromuser.info.openwanteds, true)
+        : null
+    },
     message() {
       return this.messageStore.byId(this.id)
     },

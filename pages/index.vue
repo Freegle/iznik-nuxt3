@@ -214,12 +214,7 @@ export default {
         variant: this.type + '-place',
       })
 
-      this.$router.push({
-        name: 'explore-place-place',
-        params: {
-          place: JSON.stringify(place),
-        },
-      })
+      this.$router.push('/explore/place/' + JSON.stringify(place))
     },
     play() {
       this.waitForRef('video', async () => {

@@ -20,23 +20,23 @@ import NoticeMessage from './NoticeMessage'
 export default {
   components: { NoticeMessage },
   setup() {
-    const misc = useMiscStore()
-    return { misc }
+    const miscStore = useMiscStore()
+    return { miscStore }
   },
   computed: {
     show() {
-      return !this.misc.get('hideglobalwarning')
+      return !this.miscStore.get('hideglobalwarning')
     },
   },
   methods: {
     hideit() {
-      this.misc.set({
+      this.miscStore.set({
         key: 'hideglobalwarning',
         value: true,
       })
     },
     showit() {
-      this.misc.set({
+      this.miscStore.set({
         key: 'hideglobalwarning',
         value: false,
       })

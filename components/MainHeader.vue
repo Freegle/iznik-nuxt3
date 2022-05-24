@@ -72,10 +72,7 @@
                   v-if="openPostCount"
                   variant="info"
                   class="mypostsbadge"
-                  :title="
-                    openPostCount
-                      | pluralize('open post', { includeNumber: true })
-                  "
+                  :title="openPostCountPlural"
                 >
                   {{ openPostCount }}
                 </b-badge>
@@ -96,12 +93,7 @@
                   v-if="newsCount"
                   variant="info"
                   class="newsbadge"
-                  :title="
-                    newsCount
-                      | pluralize('unread ChitChat post', {
-                        includeNumber: true,
-                      })
-                  "
+                  :title="newsCountPlural"
                 >
                   {{ newsCount }}
                 </b-badge>
@@ -328,10 +320,7 @@
                 v-if="openPostCount"
                 variant="info"
                 class="mypostsbadge2"
-                :title="
-                  openPostCount
-                    | pluralize('open post', { includeNumber: true })
-                "
+                :title="openPostCountPlural"
               >
                 {{ openPostCount }}
               </b-badge>
@@ -351,10 +340,7 @@
                 v-if="newsCount"
                 variant="info"
                 class="newsbadge2"
-                :title="
-                  newsCount
-                    | pluralize('unread ChitChat post', { includeNumber: true })
-                "
+                :title="newsCountPlural"
               >
                 {{ newsCount }}
               </b-badge>
@@ -432,6 +418,7 @@
 // const SimpleView = () => import('../components/SimpleView')
 // const NotificationOptions = () => import('~/components/NotificationOptions')
 import axios from 'axios'
+import pluralize from 'pluralize'
 
 export default {
   name: 'MainHeader',
@@ -468,8 +455,14 @@ export default {
     newsCount() {
       return this.$store.getters['newsfeed/count']
     },
+    newCountPlural() {
+      return pluralize('unread ChitChat post', this.newsCount, true)
+    },
     openPostCount() {
       return this.me ? this.me.openposts : 0
+    },
+    openPostCountPlural() {
+      return pluralize('open post', this.openPostCount, { includeNumber: true })
     },
   },
   watch: {

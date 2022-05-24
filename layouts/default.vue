@@ -193,8 +193,8 @@ export default {
   // },
   methods: {
     updateTime() {
-      const misc = useMiscStore()
-      misc.setTime()
+      const miscStore = useMiscStore()
+      miscStore.setTime()
       this.timeTimer = setTimeout(this.updateTime, 1000)
     },
   },

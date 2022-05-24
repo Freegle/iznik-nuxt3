@@ -77,9 +77,7 @@ export default {
   computed: {
     source() {
       const runtimeConfig = useRuntimeConfig()
-      return (
-        runtimeConfig.public.GEOCODE || 'https://geocode.ilovefreegle.org/api'
-      )
+      return runtimeConfig.public.GEOCODE
     },
   },
   methods: {

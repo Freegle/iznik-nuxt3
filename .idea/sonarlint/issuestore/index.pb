@@ -132,8 +132,6 @@ A
 api/MessageAPI.js,8\5\85b66593643d6f1098f76fcb4f61ae9e6514f9a3
 B
 api/ActivityAPI.js,1\6\1657e79abd0a55b600d9bace9f3243322fad1d11
-U
-%components/MessageHistoryExpanded.vue,3\0\3046957f838f82ace007b225cbbb8860f410f24e
 E
 api/index.generate.js,8\c\8c55f1204114ed98508a0f134c0326cc51f78cfd
 <
@@ -142,14 +140,6 @@ M
 components/MessageHistory.vue,5\a\5aae4eaa518c2c2a3c7dcd17b2a8069a5c7508d2
 K
 middleware/config.global.js,d\b\dbb013faec5ae60e461154b95e946427ddd1b2c5
->
-api/index.d.ts,0\0\003584391006adb2eb802f21f153baef81417fe6
->
-plugins/api.js,4\9\49318d122287d970374a8621fa266adb2cc53863
-C
-layouts/default.vue,f\8\f82bd9fd254b878380d49bf1912fcdc115084492
-<
-constants.js,d\2\d22c4bff3d9040862d2e503976dad4d7e7b8cebd
 M
 plugins/vue-leaflet.client.js,3\5\353dee8b524a16fc964452bc6bd79982e54f3e9c
 p
