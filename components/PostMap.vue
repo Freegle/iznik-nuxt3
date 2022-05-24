@@ -48,25 +48,6 @@
               >
                 <v-icon icon="times-circle" title="Hide map" />
               </b-button>
-              <b-button
-                v-if="!locked"
-                variant="link"
-                class="pauto black p-1"
-                @click="lockMap"
-              >
-                <v-icon
-                  icon="lock-open"
-                  title="Lock the map to this area on this devices"
-                />
-              </b-button>
-              <b-button
-                v-else
-                variant="link"
-                class="pauto black p-1"
-                @click="unlockMap"
-              >
-                <v-icon name="lock" title="Unlock the map area" />
-              </b-button>
             </div>
             <l-tile-layer :url="osmtile" :attribution="attribution" />
             <div v-if="showMessages">
@@ -104,48 +85,6 @@
         </div>
       </div>
     </div>
-    <b-modal
-      id="postMapLock"
-      v-model="lockModal"
-      title="Map Locked"
-      generator-unable-to-provide-required-alt=""
-      no-stacking
-      ok-only
-    >
-      <template slot="default">
-        <p>
-          The map is now locked to this position. The posts you see below will
-          only be the ones from this map area.
-        </p>
-        <p>
-          If you want to move the map, or revert to seeing the posts from all
-          your communities when you load this page, then click again to unlock
-          the map.
-        </p>
-      </template>
-    </b-modal>
-    <b-modal
-      id="postMapUnlock"
-      v-model="unlockModal"
-      title="Map Unlocked"
-      generator-unable-to-provide-required-alt=""
-      no-stacking
-      ok-only
-    >
-      <template slot="default">
-        <p>
-          The map is now unlocked. The posts you see below when you first come
-          to this page will be the ones from your communities.
-        </p>
-        <p>
-          Once you move the map then they will be the ones shown from the map
-          area.
-        </p>
-        <p>
-          If you want to lock the map to a new area, click again to lock it.
-        </p>
-      </template>
-    </b-modal>
   </div>
 </template>
 <script>
@@ -274,8 +213,6 @@ export default {
       resizedHeight: null,
       lastBounds: null,
       zoom: 5,
-      lockModal: false,
-      unlockModal: false,
       destroyed: false,
       mapIdle: 0,
       doInfiniteScroll: process.server,
@@ -284,9 +221,9 @@ export default {
   computed: {
     mapOptions() {
       return {
-        zoomControl: !this.locked,
-        dragging: !this.locked && this.L && !this.L.Browser.mobile,
-        touchZoom: !this.locked,
+        zoomControl: true,
+        dragging: this.L && !this.L.Browser.mobile,
+        touchZoom: true,
         scrollWheelZoom: false,
         bounceAtZoomLimits: true,
         gestureHandling: true,
@@ -397,9 +334,6 @@ export default {
         ? this.messageLocations
         : []
     },
-    locked() {
-      return this.miscStore.get('postmaparea')
-    },
   },
   watch: {
     groups: {
@@ -465,9 +399,7 @@ export default {
           const runtimeConfig = useRuntimeConfig()
 
           new Geocoder({
-            placeholder: this.locked
-              ? 'Unlock map and search...'
-              : 'Search for a place...',
+            placeholder: 'Search for a place...',
             defaultMarkGeocode: false,
             geocoder: new Photon({
               // this.L.Control.Geocoder.photon({
@@ -484,16 +416,10 @@ export default {
               ],
               serviceUrl: runtimeConfig.public.GEOCODE,
             }),
-            collapsed: this.locked,
+            collapsed: false,
           })
             .on('markgeocode', async function (e) {
               if (e && e.geocode && e.geocode.bbox) {
-                // Searching unlocks the map
-                self.miscStore.set({
-                  key: 'postmaparea',
-                  value: null,
-                })
-
                 // Empty out the query box so that the dropdown closes.  Note that "this" is the control object,
                 // which is why this isn't in a separate method.
                 this.setQuery('')
@@ -713,24 +639,6 @@ export default {
         [bounds.getSouthWest().lat, bounds.getSouthWest().lng],
         [bounds.getNorthEast().lat, bounds.getNorthEast().lng],
       ]
-    },
-    lockMap() {
-      this.miscStore.set({
-        key: 'postmaparea',
-        value: this.toJSON(this.mapObject.getBounds()),
-      })
-
-      this.lockModal = true
-      this.bump++
-    },
-    unlockMap() {
-      this.miscStore.set({
-        key: 'postmaparea',
-        value: null,
-      })
-
-      this.unlockModal = true
-      this.bump++
     },
   },
 }

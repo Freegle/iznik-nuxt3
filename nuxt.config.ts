@@ -7,7 +7,7 @@ export default defineNuxtConfig({
 
   // SSR true means that the pages will be rendered on generate.  SSR false means that the pages are generated but
   // only contain the scripts required to render on the client.
-  ssr: false,
+  ssr: true,
 
   build: {
     // Reduce size of CSS initial load.
@@ -68,7 +68,7 @@ export default defineNuxtConfig({
     // Don't crawl - we end up with all the messages, which takes too long.
     crawler: false,
 
-    routes: ['/explore/21496'],
+    // TODO Do something here.  Hybrid?
   },
 
   // TODO Sentry

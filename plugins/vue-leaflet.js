@@ -13,8 +13,6 @@ import {
   LRectangle,
 } from '@vue-leaflet/vue-leaflet'
 import { defineNuxtPlugin } from '#app'
-import('leaflet/dist/leaflet-src.esm')
-import('leaflet-control-geocoder')
 
 export default defineNuxtPlugin((nuxtApp) => {
   nuxtApp.vueApp.component('l-map', LMap)

@@ -5,12 +5,14 @@
       <b-col cols="12" lg="6" class="p-0">
         <div v-if="place">
           <h1 class="sr-only">Freegling map near {{ place.name }}</h1>
-          <AdaptiveMap
-            v-if="initialBounds"
-            :initial-bounds="initialBounds"
-            class="mt-2"
-            show-start-message
-          />
+          <client-only>
+            <AdaptiveMap
+              v-if="initialBounds"
+              :initial-bounds="initialBounds"
+              class="mt-2"
+              show-start-message
+            />
+          </client-only>
         </div>
         <b-alert v-else show variant="danger">
           Something went wrong. Please contact us to let us know what you were
@@ -25,9 +27,9 @@
   </b-container>
 </template>
 <script>
-// import AdaptiveMap from '../../../components/AdaptiveMap'
 import ExternalLink from '../../../components/ExternalLink'
 import { useGroupStore } from '~/stores/group'
+const AdaptiveMap = () => import('../../../components/AdaptiveMap')
 // TODO
 // import buildHead from '@/mixins/buildHead.js'
 // import loginOptional from '@/mixins/loginOptional.js'
@@ -35,7 +37,7 @@ import { useGroupStore } from '~/stores/group'
 export default {
   components: {
     ExternalLink,
-    // AdaptiveMap
+    AdaptiveMap,
   },
   // mixins: [loginOptional, buildHead],
   async setup() {

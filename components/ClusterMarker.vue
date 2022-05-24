@@ -183,6 +183,8 @@ export default {
   },
   methods: {
     clusterClick(cluster) {
+      // TODO This click gives errors; possibly related to https://github.com/vue-leaflet/vue-leaflet/issues/141.
+      // Waiting on new npm package.
       let zoom = this.index.getClusterExpansionZoom(
         cluster.properties.cluster_id
       )

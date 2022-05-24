@@ -99,6 +99,8 @@ export default {
   async setup() {
     let L = null
 
+    // We can only render this on the client.  Pre-render fails, and vue-leaflet doesn't seem to render the map in
+    // any case.  See https://github.com/vue-leaflet/vue-leaflet/discussions/208.
     if (process.client) {
       L = await import('leaflet/dist/leaflet-src.esm')
     }
@@ -161,14 +163,6 @@ export default {
           this.item.id
       ]
     },
-  },
-  async beforeCreate() {
-    // We can only render this on the client.  Pre-render fails, and vue-leaflet doesn't seem to render the map in
-    // any case.  See https://github.com/vue-leaflet/vue-leaflet/discussions/208.
-    if (process.client) {
-      const L = await import('leaflet/dist/leaflet-src.esm')
-      this.L = L
-    }
   },
   methods: {
     idle(map) {
