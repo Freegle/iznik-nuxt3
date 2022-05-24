@@ -161,7 +161,7 @@
             :key="'messagelist-' + message.id"
             class="p-0"
           >
-            <Message
+            <OurMessage
               :id="message.id"
               record-view
               class="mb-2 mb-sm-3"
@@ -214,7 +214,7 @@ const AdaptiveMapGroup = () => import('./AdaptiveMapGroup')
 const ExternalLink = () => import('./ExternalLink')
 // const GroupSelect = () => import('./GroupSelect')
 const NoticeMessage = () => import('./NoticeMessage')
-const Message = () => import('~/components/Message.vue')
+const OurMessage = () => import('~/components/OurMessage.vue')
 const GroupHeader = () => import('~/components/GroupHeader.vue')
 const JobsTopBar = () => import('~/components/JobsTopBar')
 
@@ -226,7 +226,7 @@ export default {
     // GroupSelect,
     ExternalLink,
     AdaptiveMapGroup,
-    Message,
+    OurMessage,
     JobsTopBar,
   },
   props: {
