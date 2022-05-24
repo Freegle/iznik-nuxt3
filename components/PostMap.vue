@@ -92,8 +92,6 @@
 // import Vue3DraggableResizable from 'vue3-draggable-resizable'
 import 'vue3-draggable-resizable/dist/Vue3DraggableResizable.css'
 import cloneDeep from 'lodash.clonedeep'
-import { Geocoder } from 'leaflet-control-geocoder/src/control'
-import { Photon } from 'leaflet-control-geocoder/src/geocoders/photon'
 import { useMiscStore } from '../stores/misc'
 import { useGroupStore } from '../stores/group'
 import { useMessageStore } from '../stores/message'
@@ -185,6 +183,7 @@ export default {
     if (process.client) {
       L = await import('leaflet/dist/leaflet-src.esm')
 
+      window.L = L
       await import('leaflet-control-geocoder/dist/Control.Geocoder.css')
       const { GestureHandling } = await import('leaflet-gesture-handling')
       await import('leaflet-gesture-handling/dist/leaflet-gesture-handling.css')
@@ -391,12 +390,19 @@ export default {
     ready() {
       const self = this
 
-      this.waitForRef('map', () => {
+      this.waitForRef('map', async () => {
         this.$emit('update:ready', true)
         this.mapObject = this.$refs.map.leafletObject
 
         if (process.client) {
           const runtimeConfig = useRuntimeConfig()
+
+          const { Geocoder } = await import(
+            'leaflet-control-geocoder/src/control'
+          )
+          const { Photon } = await import(
+            'leaflet-control-geocoder/src/geocoders/photon'
+          )
 
           new Geocoder({
             placeholder: 'Search for a place...',

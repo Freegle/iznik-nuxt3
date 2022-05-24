@@ -16,7 +16,6 @@
         @moveend="moveend"
         @ready="idle"
       >
-        <!--        :style="'width: ' + mapWidth + 'px; height: ' + mapWidth + 'px'"-->
         <l-tile-layer :url="osmtile" :attribution="attribution" />
         <div v-if="item">
           <VisualiseUser

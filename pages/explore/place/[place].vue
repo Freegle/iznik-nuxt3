@@ -44,15 +44,11 @@ export default {
     const groupStore = useGroupStore()
     const route = useRoute()
     const place = route.params.place ? JSON.parse(route.params.place) : null
+    const initialBounds = place && place.bbox ? place.bbox : null
 
     await groupStore.fetch()
 
-    return { groupStore, place }
-  },
-  data() {
-    return {
-      initialBounds: null,
-    }
+    return { groupStore, place, initialBounds }
   },
   // TODO
   // head() {
@@ -62,8 +58,5 @@ export default {
   //     null
   //   )
   // },
-  mounted() {
-    this.initialBounds = this.place ? this.place.bbox : null
-  },
 }
 </script>

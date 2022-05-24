@@ -7,11 +7,6 @@ export function attribution() {
   return 'Map data &copy; <a href="https://www.openstreetmap.org/" rel="noopener noreferrer">OpenStreetMap</a> contributors'
 }
 
-export function mapWidth() {
-  const contWidth = this.$refs.mapcont ? this.$refs.mapcont.clientWidth : 0
-  return contWidth + this.bump - this.bump
-}
-
 export function toRadian(degree) {
   return (degree * Math.PI) / 180
 }

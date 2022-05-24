@@ -215,7 +215,6 @@ const ExternalLink = () => import('./ExternalLink')
 // const GroupSelect = () => import('./GroupSelect')
 const NoticeMessage = () => import('./NoticeMessage')
 const Message = () => import('~/components/Message.vue')
-const PostMap = () => import('~/components/PostMap')
 const GroupHeader = () => import('~/components/GroupHeader.vue')
 const JobsTopBar = () => import('~/components/JobsTopBar')
 
@@ -228,7 +227,6 @@ export default {
     ExternalLink,
     AdaptiveMapGroup,
     Message,
-    PostMap,
     JobsTopBar,
   },
   props: {
@@ -309,7 +307,7 @@ export default {
       default: false,
     },
   },
-  setup(props) {
+  async setup(props) {
     const miscStore = useMiscStore()
     const groupStore = useGroupStore()
     const messageStore = useMessageStore()
@@ -328,6 +326,8 @@ export default {
       // Get the messages in our own groups for the initial view.
       // TODO
     }
+
+    let bounds = null
 
     // We might have a preference for which type of posts we view.
     const postType = miscStore.get('postType')
@@ -349,6 +349,21 @@ export default {
       }
     }
 
+    const showGroups = props.startOnGroups
+    const groupids = props.initialGroupIds
+    const swlat = props.initialBounds[0][0]
+    const swlng = props.initialBounds[0][1]
+    const nelat = props.initialBounds[1][0]
+    const nelng = props.initialBounds[1][1]
+    const search = props.initialSearch
+    const searchOn = props.initialSearch
+
+    if (process.client) {
+      const L = await import('leaflet/dist/leaflet-src.esm')
+
+      bounds = L.latLngBounds(L.latLng(swlat, swlng), L.latLng(nelat, nelng))
+    }
+
     return {
       miscStore,
       groupStore,
@@ -357,6 +372,15 @@ export default {
       postType,
       selectedType,
       trackViews,
+      bounds,
+      showGroups,
+      groupids,
+      swlat,
+      swlng,
+      nelat,
+      nelng,
+      search,
+      searchOn,
     }
   },
   data() {
@@ -371,15 +395,8 @@ export default {
       loading: false,
       lat: null,
       lng: null,
-      swlat: null,
-      swlng: null,
-      nelat: null,
-      nelng: null,
-      groupids: [],
-      bounds: null,
       zoom: null,
       centre: null,
-      showGroups: true,
       mapready: process.server,
       mapMoved: false,
       messagesOnMap: [],
@@ -409,8 +426,6 @@ export default {
         },
       ],
       selectedGroup: null,
-      search: null,
-      searchOn: null,
       context: null,
       trackedView: false,
     }
@@ -708,27 +723,6 @@ export default {
       this.toShow = 0
       this.infiniteId++
     },
-  },
-  async beforeCreate() {
-    if (process.client) {
-      const L = await import('leaflet/dist/leaflet-src.esm')
-      this.L = L
-
-      this.bounds = this.L.latLngBounds(
-        this.L.latLng(this.swlat, this.swlng),
-        this.L.latLng(this.nelat, this.nelng)
-      )
-    }
-  },
-  created() {
-    this.showGroups = this.startOnGroups
-    this.groupids = this.initialGroupIds
-    this.swlat = this.initialBounds[0][0]
-    this.swlng = this.initialBounds[0][1]
-    this.nelat = this.initialBounds[1][0]
-    this.nelng = this.initialBounds[1][1]
-    this.search = this.initialSearch
-    this.searchOn = this.initialSearch
   },
   methods: {
     // Simple throttle.  When we get more than a certain number of outstanding fetches, wait until they are all
