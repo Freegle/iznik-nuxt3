@@ -152,7 +152,8 @@
           </NoticeMessage>
         </div>
         <GroupHeader v-if="group" :group="group" show-join />
-        <JobsTopBar v-if="jobs" class="d-block d-lg-none" />
+        <!--        TODO Jobs-->
+        <!--        <JobsTopBar v-if="jobs" class="d-block d-lg-none" />-->
 
         <h2 class="sr-only">List of wanteds and offers</h2>
         <div v-if="filteredMessages && filteredMessages.length">
@@ -216,7 +217,7 @@ const ExternalLink = () => import('./ExternalLink')
 const NoticeMessage = () => import('./NoticeMessage')
 const OurMessage = () => import('~/components/OurMessage.vue')
 const GroupHeader = () => import('~/components/GroupHeader.vue')
-const JobsTopBar = () => import('~/components/JobsTopBar')
+// const JobsTopBar = () => import('~/components/JobsTopBar')
 
 export default {
   components: {
@@ -227,7 +228,7 @@ export default {
     ExternalLink,
     AdaptiveMapGroup,
     OurMessage,
-    JobsTopBar,
+    // JobsTopBar,
   },
   props: {
     initialBounds: {
