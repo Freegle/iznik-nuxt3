@@ -14,6 +14,9 @@
       <!--            :class-name="'m-1 text-truncate maxwidth'"-->
       <!--          />-->
       <!--        </div>-->
+      <!--      <client-only>-->
+      <!--        <div v-observe-visibility="joinVisibilityChanged" />-->
+      <!--      </client-only>-->
       <!--      </div>-->
     </client-only>
     <client-only>
@@ -44,6 +47,7 @@
         @messages="messagesChanged($event)"
         @groups="groupsChanged($event)"
       />
+      <div v-observe-visibility="mapVisibilityChanged" />
     </client-only>
     <div v-if="mapready" class="rest">
       <div v-if="showClosest" class="mb-1 border p-2 bg-white">
@@ -138,7 +142,9 @@
           </div>
         </div>
         <div
-          v-if="messagesOnMap && messagesOnMap.length"
+          v-if="
+            mapVisible && !postsVisible && messagesOnMap && messagesOnMap.length
+          "
           class="d-flex justify-content-center mt-1 mb-1"
         >
           <NoticeMessage variant="info">
@@ -156,23 +162,21 @@
         <!--        <JobsTopBar v-if="jobs" class="d-block d-lg-none" />-->
 
         <h2 class="sr-only">List of wanteds and offers</h2>
-        <div v-if="filteredMessages && filteredMessages.length">
+        <client-only>
+          <div v-observe-visibility="messageVisibilityChanged" />
+        </client-only>
+        <div v-if="filteredMessages.length">
           <div
             v-for="message in filteredMessages"
             :key="'messagelist-' + message.id"
             class="p-0"
           >
-            <OurMessage
-              :id="message.id"
-              record-view
-              class="mb-2 mb-sm-3"
-              @view="recordView"
-            />
+            <OurMessage :id="message.id" record-view @view="recordView" />
           </div>
         </div>
         <client-only>
           <infinite-loading
-            v-if="initialBounds"
+            v-if="messagesForList.length"
             :identifier="infiniteId"
             force-use-infinite-wrapper="body"
             :distance="distance"
@@ -181,7 +185,7 @@
             <span slot="no-results" />
             <span slot="no-more" />
             <span slot="spinner">
-              <b-img-lazy src="~/static/loader.gif" alt="Loading" />
+              <b-img-lazy src="/loader.gif" alt="Loading" />
             </span>
           </infinite-loading>
           <NoticeMessage
@@ -206,6 +210,7 @@
   </div>
 </template>
 <script>
+import dayjs from 'dayjs'
 import { useMiscStore } from '../stores/misc'
 import { useGroupStore } from '../stores/group'
 import { useMessageStore } from '../stores/message'
@@ -220,6 +225,8 @@ const NoticeMessage = () => import('./NoticeMessage')
 const OurMessage = () => import('~/components/OurMessage.vue')
 const GroupHeader = () => import('~/components/GroupHeader.vue')
 // const JobsTopBar = () => import('~/components/JobsTopBar')
+
+const MIN_TO_SHOW = 10
 
 export default {
   components: {
@@ -402,16 +409,19 @@ export default {
       zoom: null,
       centre: null,
       mapready: process.server,
+      mapVisible: true,
+      postsVisible: true,
+      joinVisible: false,
       mapMoved: false,
       messagesOnMap: [],
+      messagesInOwnGroups: [],
       bump: 1,
 
       // Infinite message scroll
       busy: false,
       infiniteId: +new Date(),
       distance: 1000,
-      messagesInOwnGroups: [],
-      toShow: 0,
+      toShow: MIN_TO_SHOW,
 
       // Filters
       typeOptions: [
@@ -478,16 +488,10 @@ export default {
       const count = this.messages ? this.messages.length : 0
       return count
     },
-    locked() {
-      return this.miscStore && this.miscStore.get('postmaparea')
-    },
     messagesForList() {
       let msgs = []
 
-      if (this.locked) {
-        // If the post map is locked to an area, then we always show the posts in that area.
-        msgs = this.sortedMessagesOnMap
-      } else if (this.search) {
+      if (this.search) {
         // Whether or not the map has moved, the messages are returned through the map.
         msgs = this.sortedMessagesOnMap
       } else if (!this.mapMoved && this.me) {
@@ -507,6 +511,7 @@ export default {
     },
     messagesForListIds() {
       // Remember that Vue2 doesn't support reactivity on Map() so we can't use that.
+      // TODO MINOR
       return this.messagesForList.map((m) => parseInt(m.id))
     },
     filteredMessages() {
@@ -530,49 +535,39 @@ export default {
           const m = this.messagesForList[i]
 
           if (this.wantMessage(m)) {
-            const message = this.messageStore.byId(m.id)
+            // Pass whether the message has been freegled or promised, which is returned in the summary call.
+            let addIt = true
 
-            if (message) {
-              const key = message.fromuser + '|' + message.subject
-              const already =
-                key in dups && message.groups[0].groupid !== dups[key]
+            if (m.successful) {
+              // if (this.myid === message.fromuser) {
+              //   // Always show your own messages.  We have at least one freegler for whom this is emotionally
+              //   // important.
+              //   // TODO
+              //   addIt = true
+              // } else
+              const daysago = dayjs().diff(dayjs(m.date), 'day')
 
-              if (!already && !message.deleted) {
-                // Pass whether the message has been freegled or promised, which is returned in the summary call.
-                message.successful = !!m.successful
-                message.promised = !!m.promised
+              if (this.selectedType !== 'All') {
+                // Don't show freegled posts if you're already filtering.
+                addIt = false
+              } else if (daysago > 7) {
+                addIt = false
+              } else {
+                const lastfour = ret.slice(-4)
+                let gotSuccessful = false
 
-                let addIt = true
+                lastfour.forEach((m) => {
+                  gotSuccessful |= m.successful
+                })
 
-                if (message.successful) {
-                  if (this.myid === message.fromuser) {
-                    // Always show your own messages.  We have at least one freegler for whom this is emotionally
-                    // important.
-                    addIt = true
-                  } else if (this.selectedType !== 'All') {
-                    // Don't show freegled posts if you're already filtering.
-                    addIt = false
-                  } else if (message.daysago > 7) {
-                    addIt = false
-                  } else {
-                    const lastfour = ret.slice(-4)
-                    let gotSuccessful = false
-
-                    lastfour.forEach((m) => {
-                      gotSuccessful |= m.successful
-                    })
-
-                    if (gotSuccessful) {
-                      addIt = false
-                    }
-                  }
-                }
-
-                if (addIt) {
-                  dups[key] = message.groups[0].groupid
-                  ret.push(message)
+                if (gotSuccessful) {
+                  addIt = false
                 }
               }
+            }
+
+            if (addIt) {
+              ret.push(m)
             }
           }
         }
@@ -710,31 +705,36 @@ export default {
         this.searchOn = null
       }
     },
-    locked() {
-      // When the post map is locked/unlocked we need to reset the infinite scroll so that we see the appropriate
-      // messages.
-      this.infiniteId++
-
-      if (this.locked) {
-        this.postMapInitialBounds = this.locked
-      } else {
-        this.postMapInitialBounds = this.initialBounds
-      }
-
-      this.bump++
-    },
     messagesForList() {
-      this.toShow = 0
+      this.toShow = MIN_TO_SHOW
       this.infiniteId++
     },
   },
   methods: {
     // Simple throttle.  When we get more than a certain number of outstanding fetches, wait until they are all
     // finished.  This stops the infinite scroll going beserk.
-    // TODO
-    loadMore($state) {
-      // await this.throttleFetches()
+    throttleFetches() {
+      const fetching = this.messageStore.fetchingCount
 
+      if (fetching < 5) {
+        return Promise.resolve()
+      } else {
+        return new Promise((resolve) => {
+          this.checkThrottle(resolve)
+        })
+      }
+    },
+    checkThrottle(resolve) {
+      const fetching = this.messageStore.fetchingCount
+
+      if (fetching === 0) {
+        resolve()
+      } else {
+        setTimeout(this.checkThrottle, 100, resolve)
+      }
+    },
+    loadMore($state) {
+      console.log('Load more')
       do {
         this.toShow++
       } while (
@@ -744,16 +744,22 @@ export default {
 
       if (this.toShow > this.messagesForList.length) {
         // We're showing all the messages
+        console.log('Complete')
         $state.complete()
       } else {
         // We need another message.
         const m = this.messagesForList[this.toShow - 1]
 
-        // We always want to trigger a fetch to the store, because the store will decide whether a cached message
-        // needs refreshing.
-        this.messageStore.fetch(m.id)
+        this.$nextTick(async () => {
+          // We always want to trigger a fetch to the store, because the store will decide whether a cached message
+          // needs refreshing.
+          await this.throttleFetches()
+          await this.messageStore.fetch(m.id)
 
-        console.log('All loaded')
+          // Kick the scroll to see if we need more.
+          this.infiniteId++
+        })
+
         $state.loaded()
       }
     },
@@ -780,10 +786,7 @@ export default {
     },
     doSearch() {
       if (this.search) {
-        if (this.busy) {
-          // Try later.  Otherwise we might end up with messages in store not matching our search.
-          setTimeout(this.doSearch, 100)
-        } else if (this.searchOn !== this.search) {
+        if (this.searchOn !== this.search) {
           // Set some values which will cause the post map to search.
           this.messagesOnMap = []
           this.searchOn = this.search
@@ -791,6 +794,15 @@ export default {
           this.infiniteId++
         }
       }
+    },
+    messageVisibilityChanged(visible) {
+      this.postsVisible = visible
+    },
+    mapVisibilityChanged(visible) {
+      this.mapVisible = visible
+    },
+    joinVisibilityChanged(visible) {
+      this.joinVisible = visible
     },
     wantMessage(m) {
       return (

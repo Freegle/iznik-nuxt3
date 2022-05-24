@@ -17,6 +17,7 @@ export const useMessageStore = defineStore({
     // Messages we're in the process of fetching
     // TODO
     fetching: {},
+    fetchingCount: 0,
   }),
   actions: {
     init(config) {
@@ -26,7 +27,9 @@ export const useMessageStore = defineStore({
       id = parseInt(id)
 
       if (force || !this.list[id]) {
+        this.fetchingCount++
         const message = await api(this.config).message.fetch(id)
+        this.fetchingCount--
 
         if (message) {
           this.list[id] = message

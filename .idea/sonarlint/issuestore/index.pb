@@ -142,14 +142,10 @@ M
 plugins/vue-leaflet.client.js,3\5\353dee8b524a16fc964452bc6bd79982e54f3e9c
 p
 @.github/workflows/azure-static-web-apps-red-pebble-0ca006d03.yml,7\4\743dedc5732b84b375c87947e7005b2a49ccf4e6
-P
- plugins/vue3-infinite-loading.js,4\9\49a07cbdb1a03f6dc4bcda395505c4756c2c597a
 E
 plugins/waitForRef.js,d\c\dcf8d09a4ca7c8a1d40ed9b2269761988ba0e45d
 P
  assets/css/bootstrap-custom.scss,1\8\18cbc59a2e67a596aa4319d39ca61895ec3b5975
-M
-components/MessageSummary.vue,5\a\5a01b659a739b4584f899fc40fac1291d680cb3c
 Q
 !components/MessageAttachments.vue,3\2\32575f0cd8b9f5844a2ba2c1267108721d45a662
 L
