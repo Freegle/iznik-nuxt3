@@ -22,6 +22,7 @@ export default defineNuxtConfig({
     ],
   },
 
+  // TODO Search for .sync modifier, which is replaced by v-model:.
   buildModules: ['@pinia/nuxt'],
 
   // Environment variables the client needs.

@@ -8,11 +8,15 @@ module.exports = {
   // add your custom rules here
   rules: {
     'no-console': 'off',
+    // no-v-model-argument rule is broken for Vue3, which requires that syntax for .sync.
+    'vue/no-v-model-argument': 'off',
   },
   overrides: [
     {
       files: ['layouts/*.vue', 'pages/**/*.vue'],
-      rules: { 'vue/multi-word-component-names': 'off' },
+      rules: {
+        'vue/multi-word-component-names': 'off',
+      },
     },
   ],
   globals: {

@@ -3,8 +3,8 @@
     <client-only>
       <l-map
         ref="map"
-        :zoom.sync="zoom"
-        :center.sync="center"
+        v-model:zoom="zoom"
+        v-model:center="center"
         :options="{
           zoomControl: false,
           scrollWheelZoom: false,

@@ -1,8 +1,8 @@
 <template>
   <div>
     <MainHeader
-      :chat-count.sync="chatCount"
-      :unread-notification-count.sync="unreadNotificationCount"
+      v-model:chat-count="chatCount"
+      v-model:unread-notification-count="unreadNotificationCount"
     />
     <main>
       <slot
