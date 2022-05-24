@@ -22,17 +22,17 @@
         :key="'postmap-' + bump"
         v-model:ready="mapready"
         v-model:bounds="bounds"
+        v-model:show-groups="showGroups"
+        v-model:moved="mapMoved"
+        v-model:zoom="zoom"
+        v-model:centre="centre"
+        v-model:loading="loading"
         :initial-bounds="postMapInitialBounds"
         :height-fraction="heightFraction"
-        v-model:show-groups="showGroups"
         :min-zoom="minZoom"
-        v-model:moved="mapMoved"
         :max-zoom="maxZoom"
-        v-model:zoom="zoom"
         :post-zoom="10"
-        v-model:centre="centre"
         :force-messages="forceMessages"
-        v-model:loading="loading"
         :type="selectedType"
         :search="searchOn"
         :search-on-groups="!mapMoved"
@@ -211,6 +211,8 @@ import { useGroupStore } from '../stores/group'
 import { useMessageStore } from '../stores/message'
 import { MAX_MAP_ZOOM } from '~/constants'
 // import JoinWithConfirm from '~/components/JoinWithConfirm'
+import { getDistance } from '~/composables/useMap'
+
 const AdaptiveMapGroup = () => import('./AdaptiveMapGroup')
 const ExternalLink = () => import('./ExternalLink')
 // const GroupSelect = () => import('./GroupSelect')
@@ -388,6 +390,7 @@ export default {
     return {
       // TODO
       me: null,
+      myGroups: [],
 
       // Map stuff
       L: null,
@@ -527,7 +530,7 @@ export default {
           const m = this.messagesForList[i]
 
           if (this.wantMessage(m)) {
-            const message = this.messageStore.get(m.id)
+            const message = this.messageStore.byId(m.id)
 
             if (message) {
               const key = message.fromuser + '|' + message.subject
@@ -651,7 +654,7 @@ export default {
                 // Visible group?
                 if (group.onmap && group.publish) {
                   // How far away?
-                  group.distance = this.getDistance(
+                  group.distance = getDistance(
                     [this.centre.lat, this.centre.lng],
                     [group.lat, group.lng]
                   )
@@ -664,7 +667,7 @@ export default {
                     ret.push(group)
                   } else if (group.altlat || group.altlng) {
                     // A few groups have two centres because they are large.
-                    group.distance = this.getDistance(
+                    group.distance = getDistance(
                       [this.centre.lat, this.centre.lng],
                       [group.altlat, group.altlng]
                     )
@@ -750,6 +753,7 @@ export default {
         // needs refreshing.
         this.messageStore.fetch(m.id)
 
+        console.log('All loaded')
         $state.loaded()
       }
     },
