@@ -152,7 +152,6 @@ export default {
   },
 }
 </script>
-
 <style scoped lang="scss">
 :deep(.listentrylist) {
   width: 100%;

@@ -698,18 +698,6 @@ export default {
   position: initial;
 }
 
-/*.autocomplete ul:before{*/
-/*content: "";*/
-/*display: block;*/
-/*position: absolute;*/
-/*height: 0;*/
-/*width: 0;*/
-/*border: 10px solid transparent;*/
-/*border-bottom: 10px solid $color-gray--lighter;*/
-/*left: 46%;*/
-/*top: -20px*/
-/*}*/
-
 .autocomplete-anchor-text {
   color: $color-gray--dark !important;
 }
@@ -746,10 +734,9 @@ export default {
 }
 
 .autocomplete ul li a:hover .autocomplete-anchor-label,
-.autocomplete ul li.focus-list a span, /*backwards compat*/
+.autocomplete ul li.focus-list a span,
 .autocomplete ul li a:hover .autocomplete-anchor-label,
 .autocomplete ul li.focus-list a span {
-  /*backwards compat*/
   color: $color-white;
 }
 
@@ -758,21 +745,6 @@ export default {
   right: 0px;
   z-index: 2000;
 }
-
-/*.showAll-transition{
-  opacity: 1;
-  height: 50px;
-  overflow: hidden;
-}
-
-.showAll-enter{
-  opacity: 0.3;
-  height: 0;
-}
-
-.showAll-leave{
-  display: none;
-}*/
 
 input[invalid='true'] {
   box-shadow: 0 0 0 0.2rem $color-red;
@@ -828,7 +800,7 @@ input[invalid='true'] {
   box-shadow: none;
 }
 
-.highlight {
+:deep(.highlight) {
   font-weight: bold;
   background-color: initial;
 }

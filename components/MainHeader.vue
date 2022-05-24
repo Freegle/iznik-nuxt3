@@ -10,14 +10,16 @@
     >
       <!--      <b-nav-brand to="/" class="p-0">-->
       <!--      TODO -->
-      <b-img
-        class="logo mr-2"
-        height="58"
-        width="58"
-        rounded
-        :src="logo"
-        alt="Home"
-      />
+      <nuxt-link to="/">
+        <b-img
+          class="logo mr-2"
+          height="58"
+          width="58"
+          rounded
+          :src="logo"
+          alt="Home"
+        />
+      </nuxt-link>
       <!--      </b-nav-brand>-->
       <client-only>
         <!--        <b-nav-toggle v-if="loggedIn" target="nav_collapse" />-->
