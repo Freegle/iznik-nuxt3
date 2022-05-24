@@ -211,6 +211,7 @@
 </template>
 <script>
 import dayjs from 'dayjs'
+import { ref } from 'vue'
 import { useMiscStore } from '../stores/misc'
 import { useGroupStore } from '../stores/group'
 import { useMessageStore } from '../stores/message'
@@ -341,7 +342,7 @@ export default {
 
     // We might have a preference for which type of posts we view.
     const postType = miscStore.get('postType')
-    const selectedType = postType || 'All'
+    const selectedType = ref(postType || 'All')
 
     // We want to track views of messages for new members.
     // TODO
@@ -365,8 +366,8 @@ export default {
     const swlng = props.initialBounds[0][1]
     const nelat = props.initialBounds[1][0]
     const nelng = props.initialBounds[1][1]
-    const search = props.initialSearch
-    const searchOn = props.initialSearch
+    const search = ref(props.initialSearch)
+    const searchOn = ref(props.initialSearch)
 
     if (process.client) {
       const L = await import('leaflet/dist/leaflet-src.esm')

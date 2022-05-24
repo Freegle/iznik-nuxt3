@@ -104,7 +104,7 @@ export default {
       default: 0,
     },
   },
-  setup(props) {
+  setup() {
     const messageStore = useMessageStore()
     const groupStore = useGroupStore()
 

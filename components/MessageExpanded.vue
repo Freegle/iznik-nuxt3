@@ -116,7 +116,7 @@ export default {
       default: true,
     },
   },
-  setup(props) {
+  setup() {
     const messageStore = useMessageStore()
     return { messageStore }
   },

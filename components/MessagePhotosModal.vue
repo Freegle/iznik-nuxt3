@@ -29,7 +29,7 @@ export default {
       required: true,
     },
   },
-  setup(props, ctx) {
+  setup() {
     const messageStore = useMessageStore()
     return { messageStore }
   },

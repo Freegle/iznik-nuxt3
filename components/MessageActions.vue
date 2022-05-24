@@ -43,7 +43,7 @@ export default {
       required: true,
     },
   },
-  setup(props) {
+  setup() {
     const messageStore = useMessageStore()
     return { messageStore }
   },

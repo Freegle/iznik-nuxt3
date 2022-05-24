@@ -29,7 +29,7 @@ export default {
       default: null,
     },
   },
-  setup(props) {
+  setup() {
     const messageStore = useMessageStore()
     const me = useMe()
     return { me, messageStore }
