@@ -128,8 +128,6 @@ O
 components/MessageReplyInfo.vue,e\c\ec41b2ea59ba23268b0dd43bd2dd92e879957f0e
 Q
 !public/logos/user_logo_vector.svg,4\f\4f3b49f3d209bdb50b28a81f3fbd9f4e772e8d57
-A
-api/MessageAPI.js,8\5\85b66593643d6f1098f76fcb4f61ae9e6514f9a3
 B
 api/ActivityAPI.js,1\6\1657e79abd0a55b600d9bace9f3243322fad1d11
 E

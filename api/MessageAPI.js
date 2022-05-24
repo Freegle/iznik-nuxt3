@@ -5,6 +5,16 @@ export default class MessageAPI extends BaseAPI {
     return this.$getv2('/message/' + id, {}, logError)
   }
 
+  inbounds(swlat, swlng, nelat, nelng, groupid) {
+    return this.$getv2('/message/inbounds', {
+      swlat,
+      swlng,
+      nelat,
+      nelng,
+      groupid,
+    })
+  }
+
   fetchMessages(params) {
     return this.$get('/messages', params)
   }

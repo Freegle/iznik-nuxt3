@@ -11,6 +11,9 @@ export const useMessageStore = defineStore({
     primaryList: [],
     secondaryList: [],
 
+    // In bounds
+    bounds: {},
+
     // Messages we're in the process of fetching
     // TODO
     fetching: {},
@@ -32,6 +35,22 @@ export const useMessageStore = defineStore({
 
       return this.list[id]
     },
+    async fetchInBounds(swlat, swlng, nelat, nelng, groupid) {
+      // TODO Cache
+      const ret = await api(this.config).message.inbounds(
+        swlat,
+        swlng,
+        nelat,
+        nelng,
+        groupid
+      )
+
+      const key =
+        swlat + ':' + swlng + ':' + nelat + ':' + nelng + ':' + groupid
+
+      this.bounds[key] = ret
+      return ret
+    },
     async view(id) {
       await api(this.config).message.view(id)
     },
@@ -42,6 +61,12 @@ export const useMessageStore = defineStore({
   getters: {
     byId: (state) => {
       return (id) => state.list[id]
+    },
+    inBounds: (state) => (swlat, swlng, nelat, nelng, groupid) => {
+      const key =
+        swlat + ':' + swlng + ':' + nelat + ':' + nelng + ':' + groupid
+
+      return key in this.bounds ? this.bounds[key] : []
     },
   },
 })

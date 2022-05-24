@@ -157,6 +157,7 @@ import { Geocoder } from 'leaflet-control-geocoder/src/control'
 import { Photon } from 'leaflet-control-geocoder/src/geocoders/photon'
 import { useMiscStore } from '../stores/misc'
 import { useGroupStore } from '../stores/group'
+import { useMessageStore } from '../stores/message'
 import GroupMarker from './GroupMarker'
 import BrowseHomeIcon from './BrowseHomeIcon'
 import { attribution, osmtile } from '~/composables/useMap'
@@ -238,6 +239,8 @@ export default {
   async setup() {
     const miscStore = useMiscStore()
     const groupStore = useGroupStore()
+    const messageStore = useMessageStore()
+
     let L = null
 
     if (process.client) {
@@ -252,6 +255,7 @@ export default {
     return {
       miscStore,
       groupStore,
+      messageStore,
       L,
       osmtile: osmtile(),
       attribution: attribution(),
@@ -577,14 +581,13 @@ export default {
 
         if (!this.search) {
           // Get the messages in the map view.
-          params = {
-            subaction: 'inbounds',
+          messages = await this.messageStore.fetchInBounds(
             swlat,
             swlng,
             nelat,
             nelng,
-            groupid: this.groupid,
-          }
+            this.groupid
+          )
         } else {
           // We are searching.  Get the list of messages from the server.
           // eslint-disable-next-line no-lonely-if
@@ -612,15 +615,18 @@ export default {
               nelng,
             }
           }
+
+          // TODO Need Go API call
+          const ret = await this.$api.message.fetchMessages(params)
+
+          if (ret.ret === 0 && ret.messages && !this.destroyed) {
+            // Don't really understand why the clone is necessary, but it is - without it we seem to process
+            // old data inside the watch().
+            messages = cloneDeep(ret.messages)
+          }
         }
 
-        const ret = await this.$api.message.fetchMessages(params)
-
-        if (ret.ret === 0 && ret.messages && !this.destroyed) {
-          // Don't really understand why the clone is necessary, but it is - without it we seem to process
-          // old data inside the watch().
-          messages = cloneDeep(ret.messages)
-
+        if (messages && messages.length) {
           if (this.groupid) {
             messages = messages.filter((m) => {
               return m.groupid === this.groupid

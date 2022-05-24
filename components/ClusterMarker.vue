@@ -28,11 +28,13 @@
         :interactive="false"
         @click="pointClick(cluster)"
       >
-        <ClusterIcon
-          :count="cluster.properties ? cluster.properties.point_count : 1"
-          :tag="tag"
-          :class-name="'clear ' + cssClass"
-        />
+        <l-icon>
+          <ClusterIcon
+            :count="cluster.properties ? cluster.properties.point_count : 1"
+            :tag="tag"
+            :class-name="'clear ' + cssClass"
+          />
+        </l-icon>
       </l-marker>
     </div>
   </div>
