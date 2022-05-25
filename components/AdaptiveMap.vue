@@ -98,7 +98,6 @@
         </p>
       </div>
       <div v-else>
-        <h2 v-if="group" class="sr-only">Community Information</h2>
         <h2 class="sr-only">Search Filters</h2>
         <div variant="info" class="p-2 border border-info bg-white filters">
           <!--          <GroupSelect-->
@@ -157,88 +156,38 @@
             <v-icon icon="angle-double-down" class="pulsate" />
           </NoticeMessage>
         </div>
-        <GroupHeader v-if="group" :group="group" show-join />
-        <!--        TODO Jobs-->
-        <!--        <JobsTopBar v-if="jobs" class="d-block d-lg-none" />-->
-
-        <h2 class="sr-only">List of wanteds and offers</h2>
-        <client-only>
-          <div v-observe-visibility="messageVisibilityChanged" />
-        </client-only>
-        <div v-if="filteredMessages.length">
-          <div
-            v-for="message in filteredMessages"
-            :key="'messagelist-' + message.id"
-            class="p-0"
-          >
-            <OurMessage :id="message.id" record-view @view="recordView" />
-          </div>
-        </div>
-        <client-only>
-          <infinite-loading
-            v-if="messagesForList.length"
-            :identifier="infiniteId"
-            force-use-infinite-wrapper="body"
-            :distance="distance"
-            @infinite="loadMore"
-          >
-            <span slot="no-results" />
-            <span slot="no-more" />
-            <span slot="spinner">
-              <b-img-lazy src="/loader.gif" alt="Loading" />
-            </span>
-          </infinite-loading>
-          <NoticeMessage
-            v-if="!busy && !loading && searchOn && !filteredMessages.length"
-          >
-            <p>
-              Sorry, we didn't find anything. Things come and go quickly,
-              though, so you could try later. Or you could:
-            </p>
-            <div class="d-flex justify-content-start flex-wrap">
-              <b-button to="/give" variant="primary" class="topbutton m-1">
-                <v-icon icon="gift" />&nbsp;Post an OFFER
-              </b-button>
-              <b-button to="/find" variant="primary" class="topbutton m-1">
-                <v-icon icon="shopping-cart" />&nbsp;Post a WANTED
-              </b-button>
-            </div>
-          </NoticeMessage>
-        </client-only>
+        <MessageList
+          v-model:visible="postsVisible"
+          :selected-group="selectedGroup"
+          :selected-type="selectedType"
+          :messages-for-list="filteredMessages"
+          :bump="infiniteId"
+          :loading="loading"
+        />
       </div>
     </div>
   </div>
 </template>
 <script>
-import dayjs from 'dayjs'
 import { ref } from 'vue'
 import { useMiscStore } from '../stores/misc'
 import { useGroupStore } from '../stores/group'
 import { useMessageStore } from '../stores/message'
+import MessageList from './MessageList'
 import { MAX_MAP_ZOOM } from '~/constants'
 // import JoinWithConfirm from '~/components/JoinWithConfirm'
 import { getDistance } from '~/composables/useMap'
 
 const AdaptiveMapGroup = () => import('./AdaptiveMapGroup')
 const ExternalLink = () => import('./ExternalLink')
-// const GroupSelect = () => import('./GroupSelect')
-const NoticeMessage = () => import('./NoticeMessage')
-const OurMessage = () => import('~/components/OurMessage.vue')
-const GroupHeader = () => import('~/components/GroupHeader.vue')
-// const JobsTopBar = () => import('~/components/JobsTopBar')
-
-const MIN_TO_SHOW = 10
 
 export default {
   components: {
+    MessageList,
     // JoinWithConfirm,
-    NoticeMessage,
-    GroupHeader,
     // GroupSelect,
     ExternalLink,
     AdaptiveMapGroup,
-    OurMessage,
-    // JobsTopBar,
   },
   props: {
     initialBounds: {
@@ -312,11 +261,6 @@ export default {
       required: false,
       default: null,
     },
-    track: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
   },
   async setup(props) {
     const miscStore = useMiscStore()
@@ -328,11 +272,6 @@ export default {
       : props.initialBounds
     // this.postMapInitialBounds = this.initialBounds
 
-    // if (this.myGroups && this.myGroups.length === 1) {
-    //   // TODO We will be showing the single group.
-    //   groupStore.fetch(myGroups[0].id)
-    // }
-
     if (props.startOnGroups) {
       // Get the messages in our own groups for the initial view.
       // TODO
@@ -343,22 +282,6 @@ export default {
     // We might have a preference for which type of posts we view.
     const postType = miscStore.get('postType')
     const selectedType = ref(postType || 'All')
-
-    // We want to track views of messages for new members.
-    // TODO
-    let trackViews = false
-
-    if (props.track) {
-      // TODO && this.me
-      trackViews = true
-
-      // eslint-disable-next-line no-undef
-      try {
-        window.__insp.push(['tagSession', { browsepage: 'oldskool' }])
-      } catch (e) {
-        console.log('Failed to tag inspectlet')
-      }
-    }
 
     const showGroups = props.startOnGroups
     const groupids = props.initialGroupIds
@@ -382,7 +305,6 @@ export default {
       postMapInitialBounds,
       postType,
       selectedType,
-      trackViews,
       bounds,
       showGroups,
       groupids,
@@ -398,7 +320,6 @@ export default {
     return {
       // TODO
       me: null,
-      myGroups: [],
 
       // Map stuff
       L: null,
@@ -411,18 +332,13 @@ export default {
       centre: null,
       mapready: process.server,
       mapVisible: true,
-      postsVisible: true,
+      postsVisible: false,
       joinVisible: false,
       mapMoved: false,
       messagesOnMap: [],
       messagesInOwnGroups: [],
       bump: 1,
-
-      // Infinite message scroll
-      busy: false,
       infiniteId: +new Date(),
-      distance: 1000,
-      toShow: MIN_TO_SHOW,
 
       // Filters
       typeOptions: [
@@ -442,7 +358,6 @@ export default {
       ],
       selectedGroup: null,
       context: null,
-      trackedView: false,
     }
   },
   computed: {
@@ -452,17 +367,6 @@ export default {
         this.closestGroups.length &&
         this.closestGroups.length < 20
       )
-    },
-    group() {
-      let ret = null
-
-      if (this.selectedGroup) {
-        ret = this.groupStore.get(this.selectedGroup)
-      } else if (this.myGroups && this.myGroups.length === 1) {
-        ret = this.groupStore.get(this.myGroups[0].id)
-      }
-
-      return ret
     },
     regions() {
       const regions = []
@@ -516,70 +420,16 @@ export default {
       return this.messagesForList.map((m) => parseInt(m.id))
     },
     filteredMessages() {
-      const ret = []
-      const dups = []
+      let ret = []
 
       if (!this.search) {
-        // We want to filter by:
-        // - Possibly a message type
-        // - Possibly a group id
-        // - Don't show deleted posts.  Remember the map may lag a bit as it's only updated on cron, so we
-        //   may be returned some.
-        // - Do show completed posts - makes us look good.  But not too many.
-        //
-        // Filter out dups by subject (for crossposting).
-        for (
-          let i = 0;
-          i < this.messagesForList.length && i < this.toShow;
-          i++
-        ) {
-          const m = this.messagesForList[i]
-
-          if (this.wantMessage(m)) {
-            // Pass whether the message has been freegled or promised, which is returned in the summary call.
-            let addIt = true
-
-            if (m.successful) {
-              // if (this.myid === message.fromuser) {
-              //   // Always show your own messages.  We have at least one freegler for whom this is emotionally
-              //   // important.
-              //   // TODO
-              //   addIt = true
-              // } else
-              const daysago = dayjs().diff(dayjs(m.date), 'day')
-
-              if (this.selectedType !== 'All') {
-                // Don't show freegled posts if you're already filtering.
-                addIt = false
-              } else if (daysago > 7) {
-                addIt = false
-              } else {
-                const lastfour = ret.slice(-4)
-                let gotSuccessful = false
-
-                lastfour.forEach((m) => {
-                  gotSuccessful |= m.successful
-                })
-
-                if (gotSuccessful) {
-                  addIt = false
-                }
-              }
-            }
-
-            if (addIt) {
-              ret.push(m)
-            }
-          }
-        }
+        ret = this.messagesForList
       } else {
         // We are searching.  We get the messages from the store.
+        // TODO
         const messages = this.$store.getters['messages/getAll']
         messages.forEach((message) => {
           if (message) {
-            const key = message.fromuser + '|' + message.subject
-            const already = key in dups
-
             // Pass whether the message has been freegled, which in this case is returned as the outcomes in the
             // message.
             let successful = false
@@ -598,11 +448,9 @@ export default {
             message.successful = successful
 
             if (
-              !already &&
               !message.deleted &&
               (!message.outcomes || message.outcomes.length === 0)
             ) {
-              dups[key] = true
               ret.push(message)
             }
           }
@@ -693,6 +541,7 @@ export default {
       }
     },
     selectedType(newVal) {
+      // TODO Store in server prefs.
       this.miscStore.set({
         key: 'postType',
         value: newVal,
@@ -707,63 +556,10 @@ export default {
       }
     },
     messagesForList() {
-      this.toShow = MIN_TO_SHOW
       this.infiniteId++
     },
   },
   methods: {
-    // Simple throttle.  When we get more than a certain number of outstanding fetches, wait until they are all
-    // finished.  This stops the infinite scroll going beserk.
-    throttleFetches() {
-      const fetching = this.messageStore.fetchingCount
-
-      if (fetching < 5) {
-        return Promise.resolve()
-      } else {
-        return new Promise((resolve) => {
-          this.checkThrottle(resolve)
-        })
-      }
-    },
-    checkThrottle(resolve) {
-      const fetching = this.messageStore.fetchingCount
-
-      if (fetching === 0) {
-        resolve()
-      } else {
-        setTimeout(this.checkThrottle, 100, resolve)
-      }
-    },
-    loadMore($state) {
-      console.log('Load more')
-      do {
-        this.toShow++
-      } while (
-        this.toShow < this.messagesForList.length &&
-        !this.wantMessage(this.messagesForList[this.toShow])
-      )
-
-      if (this.toShow > this.messagesForList.length) {
-        // We're showing all the messages
-        console.log('Complete')
-        $state.complete()
-      } else {
-        // We need another message.
-        const m = this.messagesForList[this.toShow - 1]
-
-        this.$nextTick(async () => {
-          // We always want to trigger a fetch to the store, because the store will decide whether a cached message
-          // needs refreshing.
-          await this.throttleFetches()
-          await this.messageStore.fetch(m.id)
-
-          // Kick the scroll to see if we need more.
-          this.infiniteId++
-        })
-
-        $state.loaded()
-      }
-    },
     messagesChanged(messages) {
       let changed = false
       if (!messages || !this.messagesOnMap) {
@@ -796,31 +592,11 @@ export default {
         }
       }
     },
-    messageVisibilityChanged(visible) {
-      this.postsVisible = visible
-    },
     mapVisibilityChanged(visible) {
       this.mapVisible = visible
     },
     joinVisibilityChanged(visible) {
       this.joinVisible = visible
-    },
-    wantMessage(m) {
-      return (
-        (this.selectedType === 'All' || this.selectedType === m.type) &&
-        (!this.selectedGroup ||
-          parseInt(m.groupid) === parseInt(this.selectedGroup))
-      )
-    },
-    recordView() {
-      if (this.trackViews && !this.trackedView) {
-        this.trackedView = true
-
-        this.$api.bandit.chosen({
-          uid: 'messageview',
-          variant: 'community',
-        })
-      }
     },
   },
 }
