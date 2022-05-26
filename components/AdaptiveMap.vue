@@ -557,6 +557,7 @@ export default {
     },
     messagesForList() {
       this.infiniteId++
+      console.log('Messages for list changed', this.infiniteId)
     },
   },
   methods: {
@@ -575,7 +576,6 @@ export default {
 
       if (changed) {
         this.messagesOnMap = messages
-        this.infiniteId++
       }
     },
     groupsChanged(groupids) {

@@ -6,7 +6,7 @@
     <div v-else>
       <div
         ref="mapcont"
-        :style="mapHeight"
+        :style="'height: ' + mapHeight + 'px'"
         class="w-100 position-relative mb-1"
       >
         <div class="mapbox">
@@ -28,6 +28,9 @@
           <l-map
             ref="map"
             :key="'map-' + bump"
+            v-model:bounds="bounds"
+            v-model:center="center"
+            v-model:zoom="zoom"
             :style="'width: 100%; height: ' + mapHeight + 'px'"
             :min-zoom="minZoom"
             :max-zoom="maxZoom"
@@ -173,7 +176,7 @@ export default {
       default: false,
     },
   },
-  async setup() {
+  async setup(props) {
     const miscStore = useMiscStore()
     const groupStore = useGroupStore()
     const messageStore = useMessageStore()
@@ -190,6 +193,18 @@ export default {
       L.Map.addInitHook('addHandler', 'gestureHandling', GestureHandling)
     }
 
+    const mapHeight = computed(() => {
+      let height = 0
+
+      // TODO Resized height
+      if (process.client) {
+        height = window.innerHeight / props.heightFraction - 70
+        height = height < 200 ? 200 : height
+      }
+
+      return height
+    })
+
     return {
       miscStore,
       groupStore,
@@ -197,11 +212,12 @@ export default {
       L,
       osmtile: osmtile(),
       attribution: attribution(),
+      mapHeight,
     }
   },
   data() {
     return {
-      // TODO
+      // TODO me
       me: null,
       context: null,
       messageLocations: [],
@@ -209,12 +225,12 @@ export default {
       manyToShow: 20,
       shownMany: false,
       bump: 1,
-      resizedHeight: null,
       lastBounds: null,
       zoom: 5,
       destroyed: false,
       mapIdle: 0,
-      doInfiniteScroll: process.server,
+      center: null,
+      bounds: null,
     }
   },
   computed: {
@@ -230,20 +246,6 @@ export default {
     },
     mapHidden() {
       return this.canHide && this.miscStore.get('hidepostmap')
-    },
-    mapHeight() {
-      if (this.resizedHeight !== null) {
-        return this.resizedHeight
-      }
-
-      let height = 0
-
-      if (process.client) {
-        height = window.innerHeight / this.heightFraction - 70
-        height = height < 200 ? 200 : height
-      }
-
-      return height
     },
     showMessages() {
       // We're zoomed in far enough or we're forcing ourselves to show them (but not so that it's silly)
@@ -335,6 +337,17 @@ export default {
     },
   },
   watch: {
+    bounds() {
+      this.getMessages()
+    },
+    zoom(newVal) {
+      if (newVal < this.postZoom && !this.forceMessages) {
+        console.log('Force show groups')
+        this.$emit('update:showGroups', true)
+      } else {
+        this.$emit('update:showGroups', false)
+      }
+    },
     groups: {
       immediate: true,
       handler(newval) {
@@ -365,6 +378,7 @@ export default {
             [group.bbox.nelat, group.bbox.nelng],
           ]).pad(0.1)
           this.mapObject.flyToBounds(bounds)
+          console.log('Use box for group')
         }
       }
     },
@@ -393,6 +407,7 @@ export default {
       this.waitForRef('map', async () => {
         this.$emit('update:ready', true)
         this.mapObject = this.$refs.map.leafletObject
+        this.$refs.map.leafletObject.fitBounds(this.initialBounds)
 
         if (process.client) {
           const runtimeConfig = useRuntimeConfig()
@@ -453,8 +468,6 @@ export default {
               }
             })
             .addTo(this.mapObject)
-
-          this.mapObject.fitBounds(this.initialBounds)
         }
       })
     },
@@ -463,14 +476,6 @@ export default {
 
       if (this.mapObject) {
         // We need to update the parent about our zoom level and whether we are showing the posts or groups.
-        this.zoom = this.mapObject.getZoom()
-
-        if (this.zoom < this.postZoom && !this.forceMessages) {
-          this.$emit('update:showGroups', true)
-        } else {
-          this.$emit('update:showGroups', false)
-        }
-
         const bounds = this.mapObject.getBounds().toBBoxString()
 
         if (bounds !== this.lastBounds) {

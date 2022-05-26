@@ -42,6 +42,7 @@
   </div>
 </template>
 <script>
+import { useGroupStore } from '../stores/group'
 import ExternalLink from './ExternalLink'
 import GroupProfileImage from './GroupProfileImage'
 
@@ -53,9 +54,16 @@ export default {
       required: true,
     },
   },
+  setup() {
+    const groupStore = useGroupStore()
+
+    return {
+      groupStore,
+    }
+  },
   computed: {
     group() {
-      return this.$store.getters['group/get'](this.id)
+      return this.groupStore.get(this.id)
     },
   },
 }
