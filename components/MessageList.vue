@@ -88,11 +88,13 @@ export default {
     },
     loading: {
       type: Boolean,
-      required: true,
+      required: false,
+      default: false,
     },
     bump: {
       type: Number,
-      required: true,
+      required: false,
+      default: 0,
     },
   },
   setup(props) {

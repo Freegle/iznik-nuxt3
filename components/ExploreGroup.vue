@@ -1,43 +1,17 @@
 <template>
-  <div>
-    <GroupHeader
-      v-if="group"
-      :id="group.id"
-      :key="'group-' + (group ? group.id : null)"
-      :group="group"
-      :show-join="true"
-    />
-    <div
-      v-for="message in messagesToShow"
-      :key="'message-' + message"
-      class="p-0"
-    >
-      <OurMessage :id="message" record-view />
-    </div>
-    <InfiniteLoading
-      :identifier="messages.length"
-      :distance="1000"
-      :slots="{ complete: ' ', error: ' ' }"
-      :first-load="true"
-      @infinite="loadMore"
-    />
-
-    <client-only>
-      <NoticeMessage
-        v-if="!busy && !messages.length"
-        variant="info"
-        class="mt-2"
-      >
-        There are no messages on this community yet.
-      </NoticeMessage>
-    </client-only>
-  </div>
+  <MessageList
+    :messages-for-list="messagesToShow"
+    :selected-group="id"
+    :bump="bump"
+  />
 </template>
 <script setup></script>
 <script>
+import MessageList from './MessageList'
 import { useGroupStore } from '~/stores/group'
 
 export default {
+  components: { MessageList },
   props: {
     id: {
       validator: (prop) => typeof prop === 'number' || typeof prop === 'string',
@@ -51,8 +25,7 @@ export default {
   },
   data() {
     return {
-      busy: false,
-      toShow: 10,
+      bump: 0,
     }
   },
   computed: {
@@ -60,7 +33,10 @@ export default {
       return this.groupStore.getMessages(this.id)
     },
     messagesToShow() {
-      return this.messages ? this.messages.slice(0, this.toShow) : []
+      const ids = this.messages ? this.messages.slice(0, this.toShow) : []
+      return ids.map((id) => {
+        return { id, groupid: this.id }
+      })
     },
     group() {
       return this.groupStore.get(this.id)
@@ -73,6 +49,11 @@ export default {
       }
 
       return ret
+    },
+  },
+  watch: {
+    messagesToShow() {
+      this.bump++
     },
   },
   methods: {
