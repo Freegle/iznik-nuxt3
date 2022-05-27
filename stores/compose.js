@@ -179,27 +179,31 @@ export const useComposeStore = defineStore({
       }
     },
     setItem(params) {
-      if (!this.messages[params.id]) {
-        this.messages[params.id] = {
-          id: params.id,
+      const id = params.id
+
+      if (!this.messages[id]) {
+        this.messages[id] = {
+          id,
         }
       }
 
-      this.messages[params.id].item = params.item
-      this.messages[params.id].type = params.type
-      this.messages[params.id].availablenow = params.availablenow
-      this.messages[params.id].savedAt = Date.now()
+      this.messages[id].item = params.item + ''
+      this.messages[id].type = params.type
+      this.messages[id].availablenow = params.availablenow + 0
+      this.messages[id].savedAt = Date.now()
     },
     setDescription(params) {
-      if (!this.messages[params.id]) {
-        this.messages[params.id] = {
-          id: params.id,
+      const id = params.id
+
+      if (!this.messages[id]) {
+        this.messages[id] = {
+          id,
         }
       }
 
-      this.messages[params.id].description = params.description
-      this.messages[params.id].type = params.type
-      this.messages[params.id].savedAt = Date.now()
+      this.messages[id].description = params.description + ''
+      this.messages[id].type = params.type
+      this.messages[id].savedAt = Date.now()
     },
     addAttachment(params) {
       this.attachments[params.id] = this.attachments[params.id]

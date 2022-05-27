@@ -54,7 +54,7 @@
         v-if="closeButton"
         icon="times-circle"
         class="close mt-1 clickme"
-        scale="2"
+        size="2x"
         @click="close"
       />
       <ul :class="`${getClassName('listentrylist')}`">

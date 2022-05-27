@@ -2,7 +2,7 @@
   <div class="container p-0">
     <span @click="rotateLeft">
       <v-icon label="Rotate left" class="topleft clickme" title="Rotate left">
-        <v-icon icon="circle" scale="2" />
+        <v-icon icon="circle" size="2x" />
         <v-icon name="reply" class="image__icon" />
       </v-icon>
     </span>
@@ -13,7 +13,7 @@
         title="Rotate right"
         flip="horizontal"
       >
-        <v-icon icon="circle" scale="2" />
+        <v-icon icon="circle" size="2x" />
         <v-icon name="reply" class="image__icon" />
       </v-icon>
     </span>
@@ -23,7 +23,7 @@
         class="bottomright clickme"
         title="Remove this photo"
       >
-        <v-icon icon="circle" scale="2" />
+        <v-icon icon="circle" size="2x" />
         <v-icon name="trash-alt" class="image__icon" />
       </v-icon>
     </span>

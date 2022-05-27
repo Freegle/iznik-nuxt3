@@ -38,7 +38,7 @@
               to="/browse"
               @mousedown="maybeReload('/browse')"
             >
-              <v-icon icon="eye" scale="2" /><br />
+              <v-icon icon="eye" size="2x" /><br />
               <span class="nav-item__text">Browse</span>
             </b-nav-item>
             <b-nav-item
@@ -48,7 +48,7 @@
               to="/give"
               @mousedown="maybeReload('/give')"
             >
-              <v-icon icon="gift" scale="2" /><br />
+              <v-icon icon="gift" size="2x" /><br />
               <span class="nav-item__text">Give</span>
             </b-nav-item>
             <b-nav-item
@@ -58,7 +58,7 @@
               to="/find"
               @mousedown="maybeReload('/find')"
             >
-              <v-icon icon="shopping-cart" scale="2" /><br />
+              <v-icon icon="shopping-cart" size="2x" /><br />
               <span class="nav-item__text">&nbsp;Ask</span>
             </b-nav-item>
             <b-nav-item
@@ -69,7 +69,7 @@
               @mousedown="maybeReload('/myposts')"
             >
               <div class="position-relative">
-                <v-icon icon="home" scale="2" /><br />
+                <v-icon icon="home" size="2x" /><br />
                 <b-badge
                   v-if="openPostCount"
                   variant="info"
@@ -90,7 +90,7 @@
               @mousedown="maybeReload('/chitchat')"
             >
               <div class="position-relative">
-                <v-icon icon="coffee" scale="2" /><br />
+                <v-icon icon="coffee" size="2x" /><br />
                 <b-badge
                   v-if="newsCount"
                   variant="info"
@@ -110,7 +110,7 @@
               to="/communityevents"
               @mousedown="maybeReload('/communityevents')"
             >
-              <v-icon icon="calendar-alt" scale="2" /><br />
+              <v-icon icon="calendar-alt" size="2x" /><br />
               <span class="nav-item__text">Events</span>
             </b-nav-item>
             <b-nav-item
@@ -121,7 +121,7 @@
               to="/volunteerings"
               @mousedown="maybeReload('/volunteerings')"
             >
-              <v-icon icon="hands-helping" scale="2" /><br />
+              <v-icon icon="hands-helping" size="2x" /><br />
               <span class="nav-item__text">Volunteer</span>
             </b-nav-item>
           </b-nav>
@@ -158,7 +158,7 @@
               @mousedown="maybeReload('/promote')"
             >
               <div class="position-relative">
-                <v-icon icon="bullhorn" scale="2" /><br />
+                <v-icon icon="bullhorn" size="2x" /><br />
                 <span class="nav-item__text">Promote</span>
               </div>
             </b-nav-item>
@@ -169,7 +169,7 @@
               to="/help"
               @mousedown="maybeReload('/help')"
             >
-              <v-icon icon="question-circle" scale="2" /><br />
+              <v-icon icon="question-circle" size="2x" /><br />
               <span class="nav-item__text">Help</span>
             </b-nav-item>
             <b-nav-item
@@ -179,7 +179,7 @@
               to="/settings"
               @mousedown="maybeReload('/settings')"
             >
-              <v-icon icon="cog" scale="2" /><br />
+              <v-icon icon="cog" size="2x" /><br />
               <span class="nav-item__text">Settings</span>
             </b-nav-item>
             <b-nav-item
@@ -188,7 +188,7 @@
               class="text-center p-0 small"
               @click="logOut"
             >
-              <v-icon icon="sign-out-alt" scale="2" /><br />
+              <v-icon icon="sign-out-alt" size="2x" /><br />
               <span class="nav-item__text">Logout</span>
             </b-nav-item>
           </b-nav>
@@ -271,7 +271,7 @@
             v-b-toggle.nav_collapse_mobile
             class="toggler white"
           >
-            <v-icon icon="bars" class="mb-1" scale="1.5" />
+            <v-icon icon="bars" class="mb-1" size="1-5x" />
           </b-button>
         </b-nav>
       </div>
@@ -289,7 +289,7 @@
             to="/browse"
             @mousedown="maybeReload('/browse')"
           >
-            <v-icon icon="eye" scale="2" /><br />
+            <v-icon icon="eye" size="2x" /><br />
             <span class="nav-item__text">Browse</span>
           </b-nav-item>
           <b-nav-item
@@ -298,7 +298,7 @@
             to="/give"
             @mousedown="maybeReload('/give')"
           >
-            <v-icon icon="gift" scale="2" /><br />
+            <v-icon icon="gift" size="2x" /><br />
             <span class="nav-item__text">Give</span>
           </b-nav-item>
           <b-nav-item
@@ -307,7 +307,7 @@
             to="/find"
             @mousedown="maybeReload('/find')"
           >
-            <v-icon icon="shopping-cart" scale="2" /><br />
+            <v-icon icon="shopping-cart" size="2x" /><br />
             <span class="nav-item__text">Ask</span>
           </b-nav-item>
           <b-nav-item
@@ -317,7 +317,7 @@
             @mousedown="maybeReload('/myposts')"
           >
             <div class="position-relative">
-              <v-icon icon="home" scale="2" /><br />
+              <v-icon icon="home" size="2x" /><br />
               <b-badge
                 v-if="openPostCount"
                 variant="info"
@@ -337,7 +337,7 @@
             @mousedown="maybeReload('/chitchat')"
           >
             <div class="position-relative">
-              <v-icon icon="coffee" scale="2" /><br />
+              <v-icon icon="coffee" size="2x" /><br />
               <b-badge
                 v-if="newsCount"
                 variant="info"
@@ -356,7 +356,7 @@
             to="/communityevents"
             @mousedown="maybeReload('/communityevents')"
           >
-            <v-icon icon="calendar-alt" scale="2" /><br />
+            <v-icon icon="calendar-alt" size="2x" /><br />
             <span class="nav-item__text">Events</span>
           </b-nav-item>
           <b-nav-item
@@ -366,7 +366,7 @@
             to="/volunteerings"
             @mousedown="maybeReload('/volunteerings')"
           >
-            <v-icon icon="hands-helping" scale="2" /><br />
+            <v-icon icon="hands-helping" size="2x" /><br />
             <span class="nav-item__text">Volunteer</span>
           </b-nav-item>
           <b-nav-item
@@ -376,7 +376,7 @@
             to="/promote"
             @mousedown="maybeReload('/promote')"
           >
-            <v-icon icon="bullhorn" scale="2" /><br />
+            <v-icon icon="bullhorn" size="2x" /><br />
             <span class="nav-item__text">Promote</span>
           </b-nav-item>
           <b-nav-item
@@ -385,7 +385,7 @@
             to="/help"
             @mousedown="maybeReload('/help')"
           >
-            <v-icon icon="question-circle" scale="2" /><br />
+            <v-icon icon="question-circle" size="2x" /><br />
             <span class="nav-item__text">Help</span>
           </b-nav-item>
           <b-nav-item
@@ -394,11 +394,11 @@
             to="/settings"
             @mousedown="maybeReload('/settings')"
           >
-            <v-icon icon="cog" scale="2" /><br />
+            <v-icon icon="cog" size="2x" /><br />
             <span class="nav-item__text">Settings</span>
           </b-nav-item>
           <b-nav-item no-prefetch class="text-center p-0" @click="logOut">
-            <v-icon icon="sign-out-alt" scale="2" /><br />
+            <v-icon icon="sign-out-alt" size="2x" /><br />
             <span class="nav-item__text">Logout</span>
           </b-nav-item>
         </b-nav>

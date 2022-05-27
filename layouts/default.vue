@@ -200,6 +200,8 @@ export default {
   },
 }
 // TODO Look for v-icon name = and replace with v-icon icon=
+// TODO Look for scale= and replace with size=
+// TODO Look for b-btn and replace with b-button
 </script>
 
 <style scoped lang="scss">

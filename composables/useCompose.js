@@ -25,6 +25,8 @@ export function setup() {
   const composeStore = useComposeStore()
   const groupStore = useGroupStore()
 
+  const postType = ref(null)
+
   const group = computed({
     set(groupid) {
       composeStore.group = groupid
@@ -76,6 +78,35 @@ export function setup() {
     })
   }
 
+  const ids = computed(() => {
+    // ids of messages we are composing.
+    const messages = composeStore.messages
+    // TODO me
+    const myid = null
+
+    let ids = []
+    for (const [id, message] in messages) {
+      // We don't want to return messages where we are logged in as one user but the message came from another.
+      // This can happen if you repost, don't complete, sign in as another user.  The server submit call will
+      // fail in that case, so we are better off not showing the message at all and letting them compose from
+      // scratch.
+      if (
+        id &&
+        message.id &&
+        message.type === postType &&
+        (!message.savedBy || message.savedBy === myid)
+      ) {
+        ids.push(message.id)
+      }
+    }
+
+    if (ids.length === 0) {
+      ids = [getId()]
+    }
+
+    return ids
+  })
+
   // Make sure we're not wrongly set as being in the middle of an upload
   composeStore.uploading = false
 
@@ -83,7 +114,7 @@ export function setup() {
   composeStore.prune()
 
   return {
-    postType: ref(null),
+    postType,
     submitting: ref(false),
     invalid: ref(false),
     notAllowed: ref(false),
@@ -91,34 +122,7 @@ export function setup() {
     initialPostcode,
     group,
     closed: computed(() => group?.settings?.closed),
-    ids: computed(() => {
-      // ids of messages we are composing.
-      const messages = composeStore.messages
-      // TODO me
-      const myid = null
-
-      let ids = []
-      for (const [id, message] in messages) {
-        // We don't want to return messages where we are logged in as one user but the message came from another.
-        // This can happen if you repost, don't complete, sign in as another user.  The server submit call will
-        // fail in that case, so we are better off not showing the message at all and letting them compose from
-        // scratch.
-        if (
-          id &&
-          message.id &&
-          message.type === this.postType &&
-          (!message.savedBy || message.savedBy === myid)
-        ) {
-          ids.push(message.id)
-        }
-      }
-
-      if (ids.length === 0) {
-        ids = [getId()]
-      }
-
-      return ids
-    }),
+    ids,
     notblank: computed(() => {
       let ret = false
       const messages = composeStore.messages
@@ -137,12 +141,12 @@ export function setup() {
     }),
     messageValid: computed(() => {
       const messages = Object.values(composeStore.messages).filter((m) => {
-        return m.id && m.type === this.postType
+        return m.id && m.type === postType
       })
 
       let valid = false
 
-      if (messages?.length && this.ids) {
+      if (messages?.length && ids) {
         valid = true
 
         for (const message of messages) {

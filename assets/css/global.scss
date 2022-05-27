@@ -372,3 +372,20 @@ label {
 .font-weight-normal {
   @extend .fw-normal
 }
+
+// Unusual icon sizes.
+.fa-8-75x {
+  font-size: 8.75em;
+}
+
+.fa-0-8x {
+  font-size: 0.8em;
+}
+
+.fa-1-5x {
+  font-size: 1.5em;
+}
+
+.fa-1-75x {
+  font-size: 1.75em;
+}
