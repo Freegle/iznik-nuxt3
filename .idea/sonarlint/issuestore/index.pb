@@ -95,8 +95,6 @@ D
 api/ShortlinksAPI.js,c\b\cb451ccd7b6657ec64f3a6cdcf7ca6ac0920db35
 D
 api/UserSearchAPI.js,f\3\f357355b36dc70ef59401e3dc25ed0bd1b70b776
-K
-api/MicroVolunteeringAPI.js,9\d\9d3cdd093c9c6954fc494af1ae02cadcfbef715e
 >
 api/TeamAPI.js,0\c\0c483c7d97421107fd6bae646e87eddeae0f54e6
 >
@@ -144,8 +142,6 @@ L
 components/ImageCarousel.vue,8\a\8a64bdf71cd9616196ebd5e7d026c538b362624c
 ?
 api/GroupAPI.js,4\1\414bc5706d1863ea27a4157f8e8319dd5a58e315
-?
-mixins/modal.js,2\4\242cb39c1290e542de850d27346a8eee203a1a0f
 G
 components/HomeIcon.vue,7\c\7c623b1ef6a65a34ae9b19f7dd8ce32c19b03c11
 9
@@ -166,8 +162,6 @@ G
 assets/css/buttons.scss,5\6\5615eaaa94584cd65014af762879d5d52ae01f63
 I
 components/MainFooter.vue,c\c\cc6a9aac18da5b9383c700dfbf2d9ed1102fd280
->
-stores/misc.js,c\1\c1582899917559222f8ff905a7ddb3681240ae51
 <
 constants.js,d\2\d22c4bff3d9040862d2e503976dad4d7e7b8cebd
 >
@@ -182,44 +176,24 @@ N
 components/GroupMarkerRich.vue,8\a\8aaa1071734bb3c6190c7aa7af2b31c432946e71
 M
 components/BrowseHomeIcon.vue,7\2\72ba9751e86f7d8eecc45eb5c0cb1ea0e60a9a7d
-P
- components/GroupProfileImage.vue,b\5\b5858969667382ed852f57b40bf437322f3202f6
 F
 plugins/vue-awesome.js,b\5\b56b6be10a2d54e61be9a00e55cf880f053b6a05
 P
  components/BreakpointFettler.vue,8\e\8e34afee9b1c7f0452507b4d997c7b9391ffae33
 J
 components/ClusterIcon.vue,0\8\08970a418757cdcb9a6570dab0fa3edc73341e1d
-A
-api/MessageAPI.js,8\5\85b66593643d6f1098f76fcb4f61ae9e6514f9a3
 L
 components/ClusterMarker.vue,8\c\8c3f4b6c5cd87060a0e6239035627046c8ea2c2a
 P
  patches/@vue+shared+3.2.34.patch,7\b\7be1eba3d13b4a79dcfdf26e9941d2a285612132
-F
-plugins/vue-leaflet.js,1\a\1aebed952f3161b933bd729ef93ae0e021b5271e
-?
-pages/index.vue,f\f\ff87ee14320f4d3dd6a94ef6dde25ffe0b16242a
 I
 components/MessageMap.vue,0\e\0ee9e7d53a75c705d4baac77103a58f29a72fa35
 >
 vite.config.js,2\3\23e488f27597a265a6ab2b1efbe18221c6f88c2f
-C
-layouts/default.vue,f\8\f82bd9fd254b878380d49bf1912fcdc115084492
->
-nuxt.config.ts,e\4\e44500e8e3ef8f6dba8f3d3501f7d772d94a973c
-<
-.eslintrc.js,d\b\dbc0c31823b8f2e4ed04a397722fed33a67f123f
-E
-composables/useMap.js,b\d\bdc7dcad8ae0ea34f942375058a2d2df30fb8d3b
 L
 composables/useTimeFormat.js,7\0\709cd036b5a035c9c2d61cf9319ff01fac902f33
 P
  plugins/vue3-infinite-loading.js,4\9\49a07cbdb1a03f6dc4bcda395505c4756c2c597a
-A
-stores/message.js,2\b\2b3bd949929b1f7fbe9b5946475e839f21a2e845
-A
-package-lock.json,f\a\fa288d1472d29beccb489a676f68739ad365fc47
 L
 components/GlobalWarning.vue,2\4\241c995ec539e24adeed098c7b1bc25809de8713
 I
@@ -228,14 +202,8 @@ K
 components/VisualiseMap.vue,6\a\6a69d8baeb5edf1ffc528f3293e12d7f7d8e000f
 L
 components/VisualiseUser.vue,0\7\072091229f974ec9e0c97f6ce963c14d3b9800d0
-F
-pages/explore/[id].vue,8\e\8e2382e8d34a0933e293b70cf1c981ceb3a3eaad
-F
-pages/message/[id].vue,f\9\f9bd92d8736dc3a61d26388a6e4153223a46b35d
 Q
 !components/MessageDescription.vue,6\c\6c96dfe19f731d5129d1814fa2f450c829370288
-K
-components/MessageModal.vue,d\d\ddeb0c5394e3c331b036c9379f81912b1aa9c883
 M
 components/MessageSummary.vue,5\a\5a01b659a739b4584f899fc40fac1291d680cb3c
 Q

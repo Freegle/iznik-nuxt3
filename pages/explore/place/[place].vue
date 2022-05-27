@@ -27,9 +27,11 @@
   </b-container>
 </template>
 <script>
+import { useRoute } from 'vue-router'
 import ExternalLink from '../../../components/ExternalLink'
 import { useGroupStore } from '~/stores/group'
 const AdaptiveMap = () => import('../../../components/AdaptiveMap')
+
 // TODO Buildhead
 // import buildHead from '@/mixins/buildHead.js'
 // import loginOptional from '@/mixins/loginOptional.js'

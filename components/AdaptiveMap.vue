@@ -338,7 +338,7 @@ export default {
       messagesOnMap: [],
       messagesInOwnGroups: [],
       bump: 1,
-      infiniteId: +new Date(),
+      infiniteId: 1,
 
       // Filters
       typeOptions: [

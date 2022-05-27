@@ -57,6 +57,35 @@ export const useMessageStore = defineStore({
     async view(id) {
       await api(this.config).message.view(id)
     },
+    async update(params) {
+      const data = await api(this.config).message.update(params)
+
+      if (!data.deleted) {
+        // Fetch back the updated version.
+        await this.fetch({ id: params.id, force: true })
+      }
+
+      return data
+    },
+    async patch(params) {
+      const data = await api(this.config).message.save(params)
+
+      // Clear from store to ensure no attachments.
+      this.remove({
+        id: params.id,
+      })
+
+      await this.fetch({ id: params.id, force: true })
+
+      return data
+    },
+    remove(item) {
+      this.list = this.list.filter((obj) => {
+        return parseInt(obj.id) !== parseInt(item.id)
+      })
+
+      delete this.index[parseInt(item.id)]
+    },
     clear() {
       this.list = {}
     },
@@ -71,5 +100,6 @@ export const useMessageStore = defineStore({
 
       return key in this.bounds ? this.bounds[key] : []
     },
+    all: (state) => Object.values(state.list),
   },
 })

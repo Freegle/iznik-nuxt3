@@ -15,6 +15,7 @@
   </div>
 </template>
 <script>
+import { useRoute } from 'vue-router'
 import { useGroupStore } from '~/stores/group'
 
 definePageMeta({

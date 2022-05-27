@@ -199,7 +199,7 @@ export default {
     },
   },
 }
-// TODO Look for v-icon name= and replace with v-icon icon=
+// TODO Look for v-icon name = and replace with v-icon icon=
 </script>
 
 <style scoped lang="scss">

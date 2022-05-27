@@ -27,7 +27,6 @@ module.exports = {
     defineNuxtPlugin: 'readonly',
     defineNuxtRouteMiddleware: 'readonly',
     getCurrentInstance: 'readonly',
-    useRoute: 'readonly',
     useAsyncData: 'readonly',
     useLazyAsyncData: 'readonly',
     createApp: 'readonly',
