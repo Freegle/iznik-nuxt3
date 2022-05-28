@@ -33,6 +33,7 @@ import FilePondPluginImagePreview from 'filepond-plugin-image-preview'
 import FilePondPluginImageTransform from 'filepond-plugin-image-transform'
 import FilePondPluginImageResize from 'filepond-plugin-image-resize'
 import FilePondPluginImageExifOrientation from 'filepond-plugin-image-exif-orientation'
+import { useComposeStore } from '../stores/compose'
 
 const FilePond = vueFilePond(
   FilePondPluginFileValidateType,
@@ -86,6 +87,13 @@ export default {
       default: null,
     },
   },
+  setup(props) {
+    const composeStore = useComposeStore()
+
+    return {
+      composeStore,
+    }
+  },
   data() {
     return {
       imageid: null,
@@ -114,7 +122,7 @@ export default {
       }
     },
     async process(fieldName, file, metadata, load, error, progress, abort) {
-      await this.$store.dispatch('compose/setUploading', true)
+      this.composeStore.uploading = true
 
       const data = new FormData()
       const fn = file.name.toLowerCase()
@@ -142,7 +150,9 @@ export default {
         data.append('groupid', this.groupid)
       }
 
-      const ret = await this.$axios.post(process.env.API + '/image', data, {
+      const runtimeConfig = useRuntimeConfig()
+
+      const ret = await this.$axios.post(runtimeConfig.APIv1 + '/image', data, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -205,8 +215,8 @@ export default {
       this.$refs.pond.addFile(f)
     },
 
-    async allProcessed() {
-      await this.$store.dispatch('compose/setUploading', false)
+    allProcessed() {
+      this.composeStore.uploading = true
       this.$emit('allProcessed')
     },
 

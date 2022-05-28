@@ -12,6 +12,7 @@ export const useComposeStore = defineStore({
     group: null,
     messages: [],
     attachments: {},
+    attachmentBump: 1,
     progress: 1,
     max: 4,
     uploading: false,
@@ -213,6 +214,8 @@ export const useComposeStore = defineStore({
         ? this.attachments[params.id]
         : []
       this.attachments[params.id].push(params.attachment)
+      console.log('Added attachment', params.id, params.attachment)
+      this.attachmentBump++
     },
     setAttachmentsForMessage(params) {
       this.attachments[params.id] = params.attachments
@@ -436,13 +439,15 @@ export const useComposeStore = defineStore({
       return ret
     },
     attachments: (state) => (id) => {
-      return state.attachments[id] ? state.attachments[id] : []
+      console.log('Get attachments', id)
+      return state.attachmentBump && state.attachments[id]
+        ? state.attachments[id]
+        : []
     },
     progress: (state) => {
       return (Math.min(state.progress, state.max - 1) * 100) / state.max
     },
     messageValid: (state) => (postType) => {
-      console.log('Calc valid', postType)
       // Is there at least one valid message of this type
       const messages = state.messages.filter((m) => {
         return m.type === postType.value

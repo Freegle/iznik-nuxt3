@@ -1,31 +1,26 @@
 <template>
   <div class="container p-0">
     <span @click="rotateLeft">
-      <v-icon label="Rotate left" class="topleft clickme" title="Rotate left">
+      <div label="Rotate left" class="topleft clickme" title="Rotate left">
         <v-icon icon="circle" size="2x" />
-        <v-icon name="reply" class="image__icon" />
-      </v-icon>
+        <v-icon icon="reply" class="image__icon" />
+      </div>
     </span>
     <span @click="rotateRight">
-      <v-icon
-        label="Rotate right"
-        class="topright clickme"
-        title="Rotate right"
-        flip="horizontal"
-      >
+      <div label="Rotate right" class="topright clickme" title="Rotate right">
         <v-icon icon="circle" size="2x" />
-        <v-icon name="reply" class="image__icon" />
-      </v-icon>
+        <v-icon icon="reply" class="image__icon" flip="horizontal" />
+      </div>
     </span>
     <span @click="remove">
-      <v-icon
+      <div
         label="Remove this photo"
         class="bottomright clickme"
         title="Remove this photo"
       >
         <v-icon icon="circle" size="2x" />
-        <v-icon name="trash-alt" class="image__icon" />
-      </v-icon>
+        <v-icon icon="trash-alt" class="image__icon" />
+      </div>
     </span>
     <b-img
       v-if="thumbnail"
@@ -139,6 +134,11 @@ export default {
 
 .image__icon {
   color: $color-white;
+  transform: translate(-1.5em, -0.5em);
+
+  &.fa-flip-horizontal {
+    transform: translate(-1.5em, -0.5em) scaleX(-1);
+  }
 }
 
 .square {

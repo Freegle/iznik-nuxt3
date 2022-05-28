@@ -1,6 +1,5 @@
 <template>
   <div>
-    Post message id {{ id }}
     <client-only>
       <div class="d-flex flex-wrap">
         <div
@@ -158,6 +157,7 @@ export default {
       },
     },
     attachments() {
+      console.log('Compute attachments')
       return this.composeStore.attachments(this.id)
     },
     placeholder() {
