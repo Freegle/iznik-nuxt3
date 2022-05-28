@@ -47,6 +47,7 @@
     "filepond-plugin-image-preview": "^4.6.11",
     "filepond-plugin-image-resize": "^2.0.10",
     "filepond-plugin-image-transform": "^3.8.7",
+    "floating-vue": "^2.0.0-beta.16",
     "heic2any": "^0.0.3",
     "leaflet": "^1.8.0",
     "leaflet-control-geocoder": "^1.13.0",

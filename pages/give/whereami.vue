@@ -35,7 +35,7 @@
           </b-col>
         </b-row>
         <div v-if="postcodeValid && noGroups">
-          <NoticeMessage variant="info">
+          <NoticeMessage variant="info" class="mt-2">
             We're really sorry, but there are no communities near there. If
             you'd like to start one, please
             <ExternalLink href="mailto:newgroups@ilovefreegle.org">
@@ -97,6 +97,7 @@ import NoticeMessage from '../../components/NoticeMessage'
 import ExternalLink from '@/components/ExternalLink'
 import GlobalWarning from '~/components/GlobalWarning'
 import PostCode from '~/components/PostCode'
+import { setup, postcodeSelect, postcodeClear } from '~/composables/useCompose'
 
 const ComposeGroup = () => import('~/components/ComposeGroup')
 const WizardProgress = () => import('~/components/WizardProgress')
@@ -111,18 +112,31 @@ export default {
     ComposeGroup,
     WizardProgress,
   },
+  async setup() {
+    const inherited = await setup('Offer')
+    return inherited
+  },
   // mixins: [loginOptional, buildHead, compose],
   data() {
     return {
       id: null,
-      source: process.env.API + '/locations?typeahead=',
     }
   },
-  head() {
-    return this.buildHead(
-      'Give something',
-      'OFFER something to people nearby and see who wants it'
-    )
+  // head() {
+  //   return this.buildHead(
+  //     'Give something',
+  //     'OFFER something to people nearby and see who wants it'
+  //   )
+  // },
+  computed: {
+    source() {
+      const runtimeConfig = useRuntimeConfig()
+      return runtimeConfig.APIv1 + '/locations?typeahead='
+    },
+  },
+  methods: {
+    postcodeSelect,
+    postcodeClear,
   },
 }
 </script>

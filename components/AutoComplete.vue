@@ -300,7 +300,7 @@ export default {
     },
     type(newVal) {
       // We want to alert users of this component to changed data.
-      this.$emit('input', newVal)
+      this.$emit('update:modelValue', newVal)
     }
   },
 

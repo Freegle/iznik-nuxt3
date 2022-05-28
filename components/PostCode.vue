@@ -1,34 +1,61 @@
 <template>
   <div class="d-flex">
     <div class="d-flex flex-column">
-      <label v-if="label" :for="$id('postcodeautocomplete')">{{ label }}</label>
+      <label v-if="label" :for="id">{{ label }}</label>
       <div class="d-flex">
-        <AutoComplete
-          :id="$id('postcodeautocomplete')"
-          ref="autocomplete"
-          v-model="wip"
-          restrict
-          :url="source"
-          param="typeahead"
-          :custom-params="{ pconly: pconly }"
-          anchor="name"
-          label=""
-          :placeholder="pconly ? 'Type postcode' : 'Type location'"
-          :classes="{
-            input: 'form-control form-control-' + size + ' text-center pcinp',
-            list: 'postcodelist',
-            listentry: 'w-100',
-            listentrylist: 'listentry',
-          }"
-          class="mr-1"
-          :min="3"
-          :debounce="200"
-          :process="process"
-          :on-select="select"
-          :size="10"
-          :variant="variant"
-          @invalid="invalid"
-        />
+        <v-tooltip
+          :triggers="[]"
+          :shown="wip && (!results || results?.length > 1)"
+          placement="top"
+          :delay="{ show: 3000 }"
+        >
+          <AutoComplete
+            :id="id"
+            ref="autocomplete"
+            v-model="wip"
+            restrict
+            :url="source"
+            param="typeahead"
+            :custom-params="{ pconly: pconly }"
+            anchor="name"
+            label=""
+            :placeholder="pconly ? 'Type postcode' : 'Type location'"
+            :classes="{
+              input: 'form-control form-control-' + size + ' text-center pcinp',
+              list: 'postcodelist',
+              listentry: 'w-100',
+              listentrylist: 'listentry',
+            }"
+            class="mr-1"
+            :min="3"
+            :debounce="200"
+            :process="process"
+            :on-select="select"
+            :size="10"
+            :variant="variant"
+            @invalid="invalid"
+          />
+
+          <!--          -->
+          <template #popper> Keep typing your full postcode... </template>
+        </v-tooltip>
+
+        <v-tooltip
+          :shown="showToolTip"
+          :target="id"
+          placement="top"
+          variant="primary"
+          :triggers="[]"
+          :skidding="-50"
+        >
+          <template #popper>
+            <div class="font-weight-bold">
+              Your device thinks you're here.<br /><br />
+
+              If it's wrong, please change it.
+            </div>
+          </template>
+        </v-tooltip>
 
         <div v-if="find && !wip">
           <b-button
@@ -42,35 +69,14 @@
             <v-icon v-else icon="map-marker-alt" />
           </b-button>
         </div>
-
-        <b-tooltip
-          :show.sync="showToolTip"
-          :target="$id('postcodeautocomplete')"
-          placement="top"
-          variant="primary"
-          triggers=""
-        >
-          <div class="font-weight-bold">
-            Your device thinks you're here.<br /><br />
-
-            If it's wrong, please change it.
-          </div>
-        </b-tooltip>
-        <b-tooltip
-          :show="wip && (!results || !results.length)"
-          :target="$id('postcodeautocomplete')"
-          placement="top"
-          variant="primary"
-          triggers=""
-          :delay="{ show: 1000 }"
-        >
-          Keep typing your full postcode...
-        </b-tooltip>
       </div>
     </div>
   </div>
 </template>
 <script>
+import { ref } from 'vue'
+import { uid } from '../composables/useId'
+import { useComposeStore } from '~/stores/compose'
 import AutoComplete from '~/components/AutoComplete'
 
 export default {
@@ -119,66 +125,59 @@ export default {
       default: null,
     },
   },
-  data() {
-    return {
-      source: process.env.API + '/locations',
-      results: [],
-      composeLocation: null,
-      locating: false,
-      locationFailed: false,
-      showToolTip: false,
-      wip: null,
-    }
-  },
-  async mounted() {
-    if (this.focus) {
-      // Focus on postcode to grab their attention.
-      this.$refs.autocomplete.$refs.input.focus()
-    }
+  setup(props) {
+    const composeStore = useComposeStore()
 
-    // Components can't use asyncData, so we fetch here.  Can't do this for SSR, but that's fine as we don't
-    // need to render this on the server.
-    let value = this.value
+    let value = props.value
 
-    if (this.pconly && value === null && this.myLocation) {
+    if (props.pconly && value === null && props.myLocation) {
       // If we are logged in then we may have a known location to use as the default.
-      value = this.myLocation.name
+      value = props.myLocation.name
     }
 
-    if (this.pconly && !value && !this.noStore) {
+    if (props.pconly && !value && !props.noStore) {
       // We might have one we are composing.
-      const pc = this.$store.getters['compose/getPostcode']
+      const pc = composeStore.postcode
 
-      if (pc && pc.name) {
+      if (pc?.name) {
         value = pc.name
       }
     }
 
-    if (value) {
-      // Got one. Set this as the default in the input.
-      this.$refs.autocomplete.setValue(value)
+    // Unique id
+    const id = uid('postcode')
 
-      // We want to signal that we have a selected value.  Unfortunately what we have in auth from the session call
-      // doesn't contain the groups near the location, so we need to fetch that.
-      const loc = await this.$axios.get(process.env.API + '/locations', {
-        params: {
-          typeahead: value,
-        },
-      })
-
-      this.$emit('selected', loc.data.locations[0])
+    return {
+      composeStore,
+      wip: ref(value),
+      id,
     }
-
-    this.composeLocation = value
-
-    if (this.$refs.autocomplete) {
-      // Might have gone from DOM by now due to navigation.
-      this.$refs.autocomplete.setValue(value)
+  },
+  data() {
+    return {
+      results: [],
+      locating: false,
+      locationFailed: false,
+      showToolTip: false,
+    }
+  },
+  computed: {
+    source() {
+      const runtimeConfig = useRuntimeConfig()
+      return runtimeConfig.APIv1 + '/locations'
+    },
+  },
+  mounted() {
+    this.waitForRef('autocomplete', () => {
+      if (this.focus) {
+        // Focus on postcode to grab their attention.
+        this.$refs.autocomplete.$refs.input.focus()
+      }
 
       // We need some fettling of the input keystrokes.
       const input = this.$refs.autocomplete.$refs.input
       input.addEventListener('keydown', this.keydown, false)
-    }
+    })
   },
   methods: {
     invalid() {
@@ -214,9 +213,18 @@ export default {
       this.results = ret
       return ret
     },
-    select(pc) {
+    async select(pc) {
       if (pc) {
-        this.$emit('selected', pc)
+        // We have the name.  We need the full postcode.
+        const loc = await this.$axios.get(this.source, {
+          params: {
+            typeahead: pc.name,
+          },
+        })
+
+        if (loc?.data?.locations?.length === 1) {
+          this.$emit('selected', loc.data.locations[0])
+        }
       } else {
         this.$emit('cleared')
       }
@@ -230,7 +238,7 @@ export default {
         ) {
           this.locating = true
           navigator.geolocation.getCurrentPosition(async (position) => {
-            const res = await this.$axios.get(process.env.API + '/locations', {
+            const res = await this.$axios.get(this.source, {
               params: {
                 lat: position.coords.latitude,
                 lng: position.coords.longitude,
@@ -245,7 +253,9 @@ export default {
             ) {
               // Got it - put it in the autocomplete input, and indicate that we've selected it.
               this.$refs.autocomplete.setValue(res.data.location.name)
-              this.$emit('selected', res.data.location)
+              this.select({
+                name: res.data.location.name,
+              })
 
               // Show the user we've done this, and make them think.
               this.showToolTip = true
@@ -277,5 +287,9 @@ export default {
   border-color: $color-blue--light;
   outline: 0;
   box-shadow: 0 1px 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+:deep(.popover) {
+  background-color: black;
 }
 </style>

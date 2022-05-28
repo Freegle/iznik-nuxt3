@@ -191,7 +191,7 @@ legend {
 }
 
 /* Overrides default Bootstrap tooltip opacity (0.9) */
-.tooltip.b-tooltip {
+.v-popper__inner {
   opacity: 1;
 }
 

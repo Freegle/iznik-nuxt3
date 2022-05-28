@@ -214,12 +214,10 @@ export default {
     addFile(f) {
       this.$refs.pond.addFile(f)
     },
-
     allProcessed() {
-      this.composeStore.uploading = true
+      this.composeStore.uploading = false
       this.$emit('allProcessed')
     },
-
     detector(source, type) {
       // This function is never executed...
       return new Promise((resolve, reject) => {

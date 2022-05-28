@@ -106,6 +106,7 @@ export function setup(type) {
     wentWrong: ref(false),
     initialPostcode,
     group,
+    postcode,
     closed: computed(() => group?.settings?.closed),
     ids,
     notblank: computed(() => {
@@ -128,13 +129,15 @@ export function setup(type) {
       return composeStore.messageValid(postType)
     }),
     uploadingPhoto: computed(() => {
+      console.log('Compute uploading', composeStore.uploading)
       return composeStore.uploading
     }),
     noGroups: computed(() => {
-      return !postcode?.groupsnear?.length
+      console.log('compute groupsname', postcode)
+      return composeStore.noGroupd
     }),
     postcodeValid: computed(() => {
-      return postcode?.name
+      return composeStore.postcodeValid
     }),
     emailIsntOurs: computed(() => {
       let ret = false
@@ -174,6 +177,7 @@ export function postcodeClear() {
 }
 
 export function postcodeSelect(pc) {
+  console.log('Postcode select', pc)
   const composeStore = useComposeStore()
 
   const currentpc = composeStore.postcode
@@ -182,6 +186,7 @@ export function postcodeSelect(pc) {
     // The postcode has genuinely changed or been set for the first time.  We don't want to go through this code
     // if the postcode is the same, otherwise we'll reset the group (which might have been changed from the first,
     // for example in the give flow if you choose a different group.
+    console.log('Set it')
     composeStore.setPostcode(pc)
 
     // If we don't have a group currently which is in the list near this postcode, choose the closest.  That
@@ -198,10 +203,10 @@ export function postcodeSelect(pc) {
 
       if (!found) {
         if (pc.groupsnear.length) {
-          this.group = pc.groupsnear[0].id
+          composeStore.group = pc.groupsnear[0].id
         }
       } else {
-        this.group = groupid
+        composeStore.group = groupid
       }
     }
   }

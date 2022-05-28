@@ -475,5 +475,12 @@ export const useComposeStore = defineStore({
 
       return valid
     },
+    postcodeValid: (state) => {
+      console.log('styore postcode valid')
+      return state.postcode?.name
+    },
+    noGroups: (state) => {
+      return !state.postcode?.groupsnear?.length
+    },
   },
 })
