@@ -1,12 +1,8 @@
 <template>
   <div class="d-flex flex-column">
-    <b-form-group
-      :label="label"
-      :label-for="'email-' + uniqueid"
-      label-class="mt-0"
-    >
+    <b-form-group :label="label" :label-for="uid" label-class="mt-0">
       <validating-form-input
-        :id="'email-' + uniqueid"
+        :id="uid"
         v-model:valid="emailValid"
         v-model="currentEmail"
         type="email"
@@ -82,7 +78,7 @@ export default {
     },
   },
   setup(props) {
-    const id = uid()
+    const id = uid('email')
 
     return {
       uid: id,
