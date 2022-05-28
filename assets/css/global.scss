@@ -272,6 +272,11 @@ label {
   font-weight: bold !important;
 }
 
+// Don't underlink link buttons:
+.btn-link:not(:hover) {
+  text-decoration: none;
+}
+
 // Bootstrap 4 class compatibility.  TODO MINOR remove.
 .sr-only {
   @extend .visually-hidden
