@@ -133,8 +133,7 @@ export function setup(type) {
       return composeStore.uploading
     }),
     noGroups: computed(() => {
-      console.log('compute groupsname', postcode)
-      return composeStore.noGroupd
+      return composeStore.noGroups
     }),
     postcodeValid: computed(() => {
       return composeStore.postcodeValid
@@ -193,6 +192,8 @@ export function postcodeSelect(pc) {
     // allows people to select further away groups if they wish.
     const groupid = composeStore.group
 
+    console.log('Conside pc', pc)
+
     if (pc && pc.groupsnear) {
       let found = false
       for (const group of pc.groupsnear) {
@@ -202,7 +203,9 @@ export function postcodeSelect(pc) {
       }
 
       if (!found) {
+        console.log('not found')
         if (pc.groupsnear.length) {
+          console.log('set', pc.groupsnear[0].id)
           composeStore.group = pc.groupsnear[0].id
         }
       } else {

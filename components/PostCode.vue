@@ -62,6 +62,7 @@
             variant="secondary"
             :size="size"
             title="Find my device's location instead of typing a postcode"
+            class="tweakHeight"
             @click="findLoc"
           >
             <v-icon v-if="locating" icon="sync" class="fa-spin" />
@@ -291,5 +292,9 @@ export default {
 
 :deep(.popover) {
   background-color: black;
+}
+
+.tweakHeight {
+  line-height: 1.7em;
 }
 </style>

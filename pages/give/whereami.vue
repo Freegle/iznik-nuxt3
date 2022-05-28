@@ -51,7 +51,7 @@
             </b-col>
           </b-row>
           <b-row v-if="postcodeValid" class="mt-1">
-            <b-col class="text-center">
+            <b-col class="d-flex justify-content-around">
               <ComposeGroup />
             </b-col>
           </b-row>
