@@ -92,7 +92,7 @@ import NoticeMessage from '../../components/NoticeMessage'
 // import loginOptional from '@/mixins/loginOptional.js'
 // import compose from '@/mixins/compose.js'
 // import buildHead from '@/mixins/buildHead.js'
-import { setup } from '~/composables/useCompose'
+import { setup, deleteItem, addItem } from '~/composables/useCompose'
 
 const PostMessage = () => import('~/components/PostMessage')
 const WizardProgress = () => import('~/components/WizardProgress')
@@ -119,6 +119,10 @@ export default {
     // }
 
     return inherited
+  },
+  methods: {
+    deleteItem,
+    addItem,
   },
   // mixins: [loginOptional, buildHead, compose],
   // TODO

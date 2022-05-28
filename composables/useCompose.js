@@ -169,7 +169,7 @@ export async function deleteItem() {
     attachments: [],
   })
 
-  await composeStore.clearMessage({
+  await composeStore.deleteMessage({
     id: this.ids[this.ids.length - 1],
   })
 }
@@ -180,7 +180,6 @@ export function postcodeClear() {
 }
 
 export function postcodeSelect(pc) {
-  console.log('Postcode select', pc)
   const composeStore = useComposeStore()
 
   const currentpc = composeStore.postcode

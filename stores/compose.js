@@ -227,8 +227,8 @@ export const useComposeStore = defineStore({
 
       this.attachments[params.id] = newAtts
     },
-    clearMessage(params) {
-      delete this.messages[params.id]
+    deleteMessage(params) {
+      this.messages = this.messages.filter((m) => m.id !== params.id)
     },
     async saveDraft(params) {
       const messages = this.messages
@@ -400,7 +400,7 @@ export const useComposeStore = defineStore({
             // This can happen for legacy stores.
             this.messages[id].savedAt = Date.now()
           } else if (Date.now() - m.savedAt > 7 * 24 * 60 * 60 * 1000) {
-            this.clearMessage({
+            this.deleteMessage({
               id,
             })
           }
@@ -439,7 +439,6 @@ export const useComposeStore = defineStore({
       return ret
     },
     attachments: (state) => (id) => {
-      console.log('Get attachments', id)
       return state.attachmentBump && state.attachments[id]
         ? state.attachments[id]
         : []
