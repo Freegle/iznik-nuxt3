@@ -1,5 +1,6 @@
 <template>
   <div>
+    Post message id {{ id }}
     <client-only>
       <div class="d-flex flex-wrap">
         <div
@@ -61,12 +62,7 @@
             size="lg"
           />
         </div>
-        <PostItem
-          ref="item"
-          v-model="item"
-          class="item pt-1"
-          @input="itemType"
-        />
+        <PostItem :id="id" ref="item" class="item pt-1" />
         <client-only>
           <NumberIncrementDecrement
             v-if="type === 'Offer'"
@@ -76,41 +72,6 @@
             class="count pt-1"
           />
         </client-only>
-      </div>
-      <NoticeMessage v-if="duplicate" variant="warning">
-        <p>
-          You already have an open post
-          <span class="font-weight-bold">{{ duplicate.subject }}</span
-          >.
-        </p>
-        <p>
-          If it's the same, please go to
-          <nuxt-link to="/myposts"> My Posts </nuxt-link> and use the
-          <em>Repost</em> button.
-        </p>
-        <p>
-          If it's different, please change the name slightly - then it'll be
-          clearer for everyone that it's not the same.
-        </p>
-      </NoticeMessage>
-      <div>
-        <NoticeMessage v-if="vague" variant="warning" class="mt-1 mb-1">
-          <p>
-            Please avoid very general terms. Be precise - you'll get a better
-            response.
-          </p>
-        </NoticeMessage>
-        <NoticeMessage v-if="warn" variant="warning" class="mt-1">
-          <h1 class="header--size3">
-            <client-only>
-              <v-icon icon="info-circle" size="1-75x" />
-            </client-only>
-            {{ warn.type }}
-          </h1>
-          <p>
-            {{ warn.message }}
-          </p>
-        </NoticeMessage>
       </div>
       <div class="d-flex flex-column mt-2">
         <label :for="$id('description')">Please give a few details:</label>
@@ -124,11 +85,10 @@
     </client-only>
   </div>
 </template>
-
 <script>
+import { uid } from '../composables/useId'
 import { useComposeStore } from '../stores/compose'
 import { useMessageStore } from '../stores/message'
-import NoticeMessage from './NoticeMessage'
 import NumberIncrementDecrement from './NumberIncrementDecrement'
 const OurFilePond = () => import('~/components/OurFilePond')
 const PostPhoto = () => import('~/components/PostPhoto')
@@ -137,7 +97,6 @@ const PostItem = () => import('~/components/PostItem')
 export default {
   components: {
     NumberIncrementDecrement,
-    NoticeMessage,
     OurFilePond,
     PostPhoto,
     PostItem,
@@ -146,83 +105,30 @@ export default {
     id: {
       type: Number,
       required: false,
-      default: -1,
+      default: null,
     },
     type: {
       type: String,
       required: true,
     },
   },
-  setup() {
+  setup(props) {
     const composeStore = useComposeStore()
     const messageStore = useMessageStore()
+
+    composeStore.setType({
+      id: props.id,
+      type: props.type,
+    })
 
     return { composeStore, messageStore }
   },
   data() {
     return {
-      domid: 1,
       uploading: false,
       myFiles: [],
       pondBrowse: true,
       hidingPhotoButton: false,
-      vagueness: [
-        '^eney fink$',
-        '^eney think$',
-        '^furniture$',
-        '^household$',
-        '^anything$',
-        '^stuff$',
-        '^things$',
-        '^tools$',
-        '^garden$',
-        '^goods$',
-        "^don't know$",
-        '^items$',
-        '^browsing$',
-        '^browse$',
-        '^any$',
-      ],
-      warnings: [
-        {
-          type: 'Upholstered household items and furniture',
-          message:
-            'There is no requirement for freegled items to have fire labels, but please be honest in your description or make sure you don’t ask for things that aren’t suitable for your use.',
-          keywords: [
-            'sofa',
-            'sofabed',
-            'couch',
-            'settee',
-            'armchair',
-            'headboard',
-            'stool',
-            'futon',
-            'mattress',
-            'mattress',
-            'pillow',
-            'cushion',
-            'seat pad',
-          ],
-        },
-        {
-          type: 'Cot Mattress',
-          message:
-            'To be safe mattresses should be clean, dry and free from fabric tears, fit the cot snugly, with no gaps, firm and with no sagging.',
-          keywords: ['cot mattress'],
-        },
-        {
-          type: 'Motorcycle and cycle helmets',
-          message:
-            'Using helmets that have been involved in a crash is not recommended.',
-          keywords: ['helmet'],
-        },
-        {
-          type: 'Car seats',
-          message:
-            'These should be undamaged and suitable for the child’s weight and height, and fit securely in the vehicle.',
-          keywords: ['car seat', 'carseat', 'child car'],
-        },
-      ],
     }
   },
   computed: {
@@ -236,61 +142,17 @@ export default {
           : 1
       },
       set(newValue) {
-        this.saveItem(this.item, newValue)
+        this.setAvailable(this.id, newValue)
       },
-    },
-    item: {
-      get() {
-        const msg = this.composeStore.message(this.id)
-        return msg && msg.item ? msg.item : ''
-      },
-      set(newValue) {
-        this.saveItem(newValue, this.availablenow)
-      },
-    },
-    vague() {
-      let ret = false
-      let item = this.item
-
-      if (item) {
-        item = item.toLowerCase()
-
-        this.vagueness.forEach((v) => {
-          if (item.match(v)) {
-            ret = true
-          }
-        })
-      }
-
-      return ret
-    },
-    warn() {
-      let ret = null
-      let item = this.item
-
-      if (item) {
-        item = item.toLowerCase()
-
-        this.warnings.forEach((k) => {
-          k.keywords.forEach((v) => {
-            if (item.includes(v)) {
-              ret = k
-            }
-          })
-        })
-      }
-
-      return ret
     },
     description: {
       get() {
         const msg = this.composeStore.message(this.id)
-        return msg ? msg.description : null
+        return msg?.description
       },
       set(newValue) {
         this.composeStore.setDescription({
           id: this.id,
-          type: this.type,
           description: newValue,
         })
       },
@@ -303,39 +165,8 @@ export default {
         ? "e.g. colour, condition, size, whether it's working etc."
         : "Explain what you're looking for, and why you'd like it."
     },
-    duplicate() {
-      let ret = null
-
-      const messages = this.messageStore.all
-
-      messages.forEach((m) => {
-        if (
-          m.fromuser &&
-          m.fromuser.id === this.myid &&
-          m.type === this.type &&
-          m.item &&
-          this.item &&
-          m.item.name.toLowerCase() === this.item.toLowerCase() &&
-          m.id !== this.id &&
-          (!m.outcomes || !m.outcomes.length)
-        ) {
-          // Exactly duplicate of open post.
-          ret = m
-        }
-      })
-
-      return ret
-    },
   },
   methods: {
-    saveItem(item, availablenow) {
-      this.composeStore.setItem({
-        id: this.id,
-        item,
-        type: this.type,
-        availablenow,
-      })
-    },
     photoAdd() {
       // Flag that we're uploading.  This will trigger the render of the filepond instance and subsequently the
       // init callback below.
@@ -363,28 +194,6 @@ export default {
         photoid: id,
       })
     },
-    itemType(value) {
-      if (value) {
-        this.composeStore.setItem({
-          id: this.id,
-          item: this.item,
-          type: this.type,
-          availablenow: this.availablenow,
-        })
-      } else {
-        this.uploading = false
-      }
-    },
-    chooseSuggestion(suggestion) {
-      this.item = suggestion.name
-      this.$refs.item.set(this.item)
-      this.composeStore.setItem({
-        id: this.id,
-        item: this.item,
-        type: this.type,
-        availablenow: this.availablenow,
-      })
-    },
     drop(e) {
       // Although it's probably not widely used (I didn't know it even worked) in the old code you could drag and drog
       // a file onto the Add photos button.  So we should handle that too here.
@@ -408,7 +217,7 @@ export default {
       this.hidingPhotoButton = true
     },
     $id(type) {
-      return type + this.domid++
+      return uid(type)
     },
   },
 }

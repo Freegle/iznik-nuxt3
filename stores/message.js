@@ -87,7 +87,7 @@ export const useMessageStore = defineStore({
       delete this.index[parseInt(item.id)]
     },
     clear() {
-      this.list = {}
+      this.$reset()
     },
   },
   getters: {

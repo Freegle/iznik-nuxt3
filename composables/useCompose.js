@@ -4,28 +4,12 @@ import { useComposeStore } from '~/stores/compose'
 import { useGroupStore } from '~/stores/group'
 import { useMessageStore } from '~/stores/message'
 
-export function getId() {
-  const composeStore = useComposeStore()
-
-  // Find a new id.  Use the messages because ids is filtered by type.
-  let nextId = -1
-  const messages = composeStore.messages
-
-  for (const [, message] in messages) {
-    nextId = Math.min(message.id, nextId)
-  }
-
-  nextId--
-
-  return nextId
-}
-
-export function setup() {
+export function setup(type) {
   // We can use this to set up a bunch of data and computed properties in a caller.
   const composeStore = useComposeStore()
   const groupStore = useGroupStore()
 
-  const postType = ref(null)
+  const postType = ref(type)
 
   const group = computed({
     set(groupid) {
@@ -80,29 +64,22 @@ export function setup() {
 
   const ids = computed(() => {
     // ids of messages we are composing.
-    const messages = composeStore.messages
     // TODO me
     const myid = null
 
-    let ids = []
-    for (const [id, message] in messages) {
+    const ids = []
+    composeStore.all.forEach((message) => {
       // We don't want to return messages where we are logged in as one user but the message came from another.
       // This can happen if you repost, don't complete, sign in as another user.  The server submit call will
       // fail in that case, so we are better off not showing the message at all and letting them compose from
       // scratch.
       if (
-        id &&
-        message.id &&
-        message.type === postType &&
+        message.type === type &&
         (!message.savedBy || message.savedBy === myid)
       ) {
         ids.push(message.id)
       }
-    }
-
-    if (ids.length === 0) {
-      ids = [getId()]
-    }
+    })
 
     return ids
   })
@@ -112,6 +89,14 @@ export function setup() {
 
   // We also want to prune any old messages from our store.
   composeStore.prune()
+
+  if (composeStore.all.length === 0) {
+    const id = composeStore.add()
+    composeStore.setType({
+      id,
+      type,
+    })
+  }
 
   return {
     postType,
@@ -125,7 +110,7 @@ export function setup() {
     ids,
     notblank: computed(() => {
       let ret = false
-      const messages = composeStore.messages
+      const messages = composeStore.all
       if (messages?.length > 0) {
         const message = messages[0]
 
@@ -140,31 +125,7 @@ export function setup() {
       return ret
     }),
     messageValid: computed(() => {
-      const messages = Object.values(composeStore.messages).filter((m) => {
-        return m.id && m.type === postType
-      })
-
-      let valid = false
-
-      if (messages?.length && ids) {
-        valid = true
-
-        for (const message of messages) {
-          const atts = Object.values(composeStore.attachments(message.id))
-
-          // A message is valid if there is an item, and either a description or a photo.
-          if (
-            !message.item ||
-            !message.item.trim() ||
-            ((!message.description || !message.description.trim()) &&
-              !atts.length)
-          ) {
-            valid = false
-          }
-        }
-      }
-
-      return valid
+      return composeStore.messageValid(postType)
     }),
     uploadingPhoto: computed(() => {
       return composeStore.uploading
@@ -249,7 +210,7 @@ export function postcodeSelect(pc) {
 export function addItem() {
   const composeStore = useComposeStore()
 
-  const id = getId()
+  const id = composeStore.add()
 
   composeStore.setMessage({
     id,

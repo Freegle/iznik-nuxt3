@@ -6,6 +6,7 @@
           <WizardProgress :active-stage="1" class="d-none d-md-flex" />
         </client-only>
         <h1 class="text-center">First, tell us about your item</h1>
+        ids {{ ids }}
         <ul
           v-for="(id, index) in ids"
           :key="'post-' + id"
@@ -39,6 +40,7 @@
                   >
                     <v-icon icon="trash-alt" />&nbsp;Delete last item
                   </b-button>
+                  Valid {{ messageValid }}
                   <b-button
                     v-if="ids.length < 6 && messageValid"
                     variant="secondary"
@@ -104,7 +106,7 @@ export default {
     WizardProgress,
   },
   async setup() {
-    const inherited = await setup()
+    const inherited = await setup('Offer')
 
     // TODO me
     // if (this.me) {
@@ -121,11 +123,6 @@ export default {
     return inherited
   },
   // mixins: [loginOptional, buildHead, compose],
-  data() {
-    return {
-      postType: 'Offer',
-    }
-  },
   // TODO
   // head() {
   //   return this.buildHead(

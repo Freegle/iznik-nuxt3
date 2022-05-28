@@ -10,7 +10,7 @@ export const useComposeStore = defineStore({
     emailAt: null,
     postcode: null,
     group: null,
-    messages: {},
+    messages: [],
     attachments: {},
     progress: 1,
     max: 4,
@@ -20,7 +20,6 @@ export const useComposeStore = defineStore({
   actions: {
     calculateSteps(type) {
       let steps = 0
-      console.log('Calculate steps', this.messages, type)
 
       // eslint-disable-next-line no-unused-vars
       for (const id in this.messages) {
@@ -37,14 +36,11 @@ export const useComposeStore = defineStore({
         }
       }
 
-      console.log('Steps', steps)
-
       // Add an extra step to be used immediately to show we've started.
       this.progress = 1
       this.max = steps + 2
     },
     async createDraft(message, email) {
-      console.log('Create draft', message, email)
       const attids = []
 
       if (this.attachments[message.id]) {
@@ -65,9 +61,7 @@ export const useComposeStore = defineStore({
         email,
       }
 
-      console.log('Data for put', data)
       const { id } = await this.$api.message.put(data)
-      console.log('Returned', id)
       this.progress++
       return id
     },
@@ -163,6 +157,18 @@ export const useComposeStore = defineStore({
         this.postcode = pc
       }
     },
+    add() {
+      const id = this.messages.length
+      this.ensureMessage(id)
+      return id
+    },
+    ensureMessage(id) {
+      if (!this.messages[id]) {
+        this.messages[id] = {
+          id,
+        }
+      }
+    },
     setMessage(message) {
       // TODO me
       const me = null
@@ -178,31 +184,28 @@ export const useComposeStore = defineStore({
         )
       }
     },
+    setType(params) {
+      const id = params.id
+      this.ensureMessage(id)
+      this.messages[id].type = params.type
+      this.messages[id].savedAt = Date.now()
+    },
     setItem(params) {
       const id = params.id
-
-      if (!this.messages[id]) {
-        this.messages[id] = {
-          id,
-        }
-      }
-
-      this.messages[id].item = params.item + ''
-      this.messages[id].type = params.type
-      this.messages[id].availablenow = params.availablenow + 0
+      this.ensureMessage(id)
+      this.messages[id].item = params.item
+      this.messages[id].savedAt = Date.now()
+    },
+    setAvailableNow(params) {
+      const id = params.id
+      this.ensureMessage(id)
+      this.messages[id].availablenow = params.availablenow
       this.messages[id].savedAt = Date.now()
     },
     setDescription(params) {
       const id = params.id
-
-      if (!this.messages[id]) {
-        this.messages[id] = {
-          id,
-        }
-      }
-
-      this.messages[id].description = params.description + ''
-      this.messages[id].type = params.type
+      this.ensureMessage(id)
+      this.messages[id].description = params.description
       this.messages[id].savedAt = Date.now()
     },
     addAttachment(params) {
@@ -225,7 +228,7 @@ export const useComposeStore = defineStore({
       delete this.messages[params.id]
     },
     async saveDraft(params) {
-      const messages = Object.entries(this.messages)
+      const messages = this.messages
       console.log('Save drafts', messages, params.type)
 
       this.calculateSteps(params.type)
@@ -291,7 +294,7 @@ export const useComposeStore = defineStore({
       // For messages which we are reposting, we need to edit them to pick up updated, convert them back into a draft,
       // and then submit them.
       const results = []
-      const messages = Object.entries(this.messages)
+      const messages = this.messages
       console.log('Submit', messages, params.type)
 
       this.calculateSteps(params.type)
@@ -387,7 +390,7 @@ export const useComposeStore = defineStore({
       // show an old message, which may then get edited to be a new one, leaving replies to the old message pointing
       // at the new one.  I'm looking at you, Craig.
       if (this.messages) {
-        for (const id in this.messages) {
+        for (let id = 0; id < this.messages.length; id++) {
           const m = this.messages[id]
 
           if (!m.savedAt) {
@@ -402,19 +405,70 @@ export const useComposeStore = defineStore({
       }
     },
     clear() {
-      this.messages = {}
-      this.attachments = {}
+      this.$reset()
     },
   },
   getters: {
+    ids: (state) => {
+      // We return a fake "id" which is the index.  This is a client-side id only.
+      const ret = []
+
+      for (let i = 0; i < state.messages.length; i++) {
+        ret.push(i)
+      }
+
+      return ret
+    },
     message: (state) => (id) => {
-      return state.messages[id]
+      const m = state.messages[id]
+      m.id = id
+      return m
+    },
+    all: (state) => {
+      const ret = []
+
+      for (let id = 0; id < state.messages.length; id++) {
+        const m = state.messages[id]
+        m.id = id
+        ret.push(m)
+      }
+
+      return ret
     },
     attachments: (state) => (id) => {
       return state.attachments[id] ? state.attachments[id] : []
     },
     progress: (state) => {
       return (Math.min(state.progress, state.max - 1) * 100) / state.max
+    },
+    messageValid: (state) => (postType) => {
+      console.log('Calc valid', postType)
+      // Is there at least one valid message of this type
+      const messages = state.messages.filter((m) => {
+        return m.type === postType.value
+      })
+
+      let valid = false
+
+      if (messages?.length) {
+        valid = true
+
+        for (const message of messages) {
+          const atts = Object.values(state.attachments(message.id))
+
+          // A message is valid if there is an item, and either a description or a photo.
+          if (
+            !message.item ||
+            !message.item.trim() ||
+            ((!message.description || !message.description.trim()) &&
+              !atts.length)
+          ) {
+            valid = false
+          }
+        }
+      }
+
+      return valid
     },
   },
 })
