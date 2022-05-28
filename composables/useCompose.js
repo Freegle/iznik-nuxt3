@@ -125,6 +125,10 @@ export function setup(type) {
 
       return ret
     }),
+    progressValue() {
+      return composeStore.progress
+    },
+    // TODO MINOR Use Pinia mapping?
     messageValid: computed(() => {
       return composeStore.messageValid(postType)
     }),

@@ -30,15 +30,15 @@
                 happening and encouraging them to join.
               </p>
               <EmailValidator
-                :email.sync="email"
-                :valid.sync="emailValid"
+                v-model:email="email"
+                v-model:valid="emailValid"
                 center
                 class="align-items-center font-weight-bold"
               />
               <EmailBelongsToSomeoneElse
                 v-if="emailValid && emailBelongsToSomeoneElse"
                 class="mb-2"
-                :ours="me.email"
+                :ours="me?.email"
                 :theirs="email"
               />
             </b-col>
@@ -101,11 +101,14 @@
   </div>
 </template>
 <script>
-import EmailValidator from '../../components/EmailValidator'
+import { mapWritableState } from 'pinia'
+import { useComposeStore } from '../../stores/compose'
+import EmailValidator from '~/components/EmailValidator'
 // import loginOptional from '@/mixins/loginOptional.js'
 // import buildHead from '@/mixins/buildHead.js'
 import NoticeMessage from '~/components/NoticeMessage'
 import ExternalLink from '~/components/ExternalLink'
+import { setup } from '~/composables/useCompose'
 
 const EmailBelongsToSomeoneElse = () =>
   import('~/components/EmailBelongsToSomeoneElse')
@@ -118,6 +121,10 @@ export default {
     EmailBelongsToSomeoneElse,
     EmailValidator,
     WizardProgress,
+  },
+  async setup() {
+    const inherited = await setup('Offer')
+    return inherited
   },
   // mixins: [loginOptional, buildHead],
   data() {
@@ -136,11 +143,7 @@ export default {
   //   )
   // },
   computed: {
-    progressValue() {
-      const progress = this.$store.getters['compose/getProgress']
-      console.log('Progress', progress)
-      return progress
-    },
+    ...mapWritableState(useComposeStore, ['email']),
   },
   mounted() {
     if (!this.messageValid) {

@@ -7,13 +7,14 @@
     >
       <validating-form-input
         :id="'email-' + uniqueid"
-        :value="email"
+        v-model:valid="emailValid"
+        v-model="currentEmail"
         type="email"
         name="email"
         :size="size"
         :min-length="1"
         class="email"
-        :validation="$v.email"
+        :validation="emailValidator"
         validation-enabled
         :validation-messages="{
           email: 'Please enter a valid email address.',
@@ -21,9 +22,6 @@
         :center="center"
         autocomplete="username email"
         placeholder="Email address"
-        @input="input"
-        @focus="focus"
-        @blur="blur"
       />
     </b-form-group>
     <div
@@ -41,10 +39,11 @@
     </div>
   </div>
 </template>
-
 <script>
-import useVuelidate from '@vuelidate/core'
-import { required, email } from '@vuelidate/validators'
+import { ref } from 'vue'
+import { useVuelidate } from '@vuelidate/core'
+import { required, email as emailValidation } from '@vuelidate/validators'
+import { uid } from '../composables/useId'
 import ValidatingFormInput from '../components/ValidatingFormInput'
 import validationHelpers from '@/mixins/validationHelpers'
 
@@ -82,18 +81,24 @@ export default {
       default: "What's your email address?",
     },
   },
-  setup() {
-    return { v$: useVuelidate() }
+  setup(props) {
+    const id = uid()
+
+    return {
+      uid: id,
+      v$: useVuelidate(),
+      currentEmail: ref(props.email),
+    }
   },
   data() {
     return {
       suggestedDomains: [],
-      focused: false,
-      uniqueid: '',
+      emailValidator: emailValidation,
+      emailValid: false,
     }
   },
   watch: {
-    email: {
+    currentEmail: {
       immediate: true,
       async handler(newVal) {
         if (newVal && newVal.includes('@')) {
@@ -103,11 +108,16 @@ export default {
           // Wait for the first dot, as that will be long enough that we don't thrash the server.
           if (domain.includes('.')) {
             this.suggestedDomains = []
-            const ret = await this.$axios.get(process.env.API + '/domains', {
-              params: {
-                domain,
-              },
-            })
+            const runtimeConfig = useRuntimeConfig()
+
+            const ret = await this.$axios.get(
+              runtimeConfig.APIv1 + '/domains',
+              {
+                params: {
+                  domain,
+                },
+              }
+            )
 
             if (ret && ret.data && ret.data.ret === 0) {
               this.suggestedDomains = ret.data.suggestions
@@ -116,20 +126,14 @@ export default {
         }
 
         // This check needs to be here rather than in checkState to ensure the vuelidate has got itself sorted out.
-        const valid = !this.$v.email.$invalid
-        this.$emit('update:valid', valid)
+        this.checkState(newVal)
       },
     },
   },
-  async mounted() {
-    this.checkState(this.email)
-
-    this.uniqueid = await this.$store.dispatch('uniqueid/generate')
+  mounted() {
+    this.checkState(this.currentEmail)
   },
   methods: {
-    input(newVal) {
-      this.checkState(newVal)
-    },
     checkState(email) {
       if (email !== this.email) {
         // Emitting a null or '' value does not trigger an update of the prop in the parent.  I don't know whether
@@ -137,10 +141,16 @@ export default {
         // we at least trigger this component to update and notice that the email is not valid.
         this.$emit('update:email', email ? email.trim() : ' ')
 
-        if (email && !this.focused) {
-          this.$v.$touch()
+        if (email) {
+          this.v$.$touch()
+
+          // Wait for vuelidate to sort itself out.
+          this.$nextTick(() => {
+            const valid = !this.v$.email.$invalid
+            this.$emit('update:valid', valid)
+          })
         } else {
-          this.$v.$reset()
+          this.v$.$reset()
 
           // Signal that the email is no longer valid.  The watch doesn't get called to make this happen, so you
           // can end up with an empty email by typing one, then selecting and deleting it.
@@ -148,15 +158,9 @@ export default {
         }
       }
     },
-    focus() {
-      this.focused = true
-    },
-    blur() {
-      this.focused = false
-    },
   },
   validations: {
-    email: { required, email },
+    email: { required, emailValidation },
   },
 }
 </script>
