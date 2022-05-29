@@ -3,6 +3,9 @@ import api from '~/api'
 
 export const useMessageStore = defineStore({
   id: 'message',
+  persist: {
+    enabled: true,
+  },
   state: () => ({
     config: {},
     list: {},

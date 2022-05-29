@@ -157,7 +157,6 @@ export default {
       },
     },
     attachments() {
-      console.log('Compute attachments')
       return this.composeStore.attachments(this.id)
     },
     placeholder() {

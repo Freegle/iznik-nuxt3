@@ -203,7 +203,6 @@ export default {
 // TODO Look for scale= and replace with size=
 // TODO Look for b-btn and replace with b-button
 </script>
-
 <style scoped lang="scss">
 html {
   box-sizing: border-box;

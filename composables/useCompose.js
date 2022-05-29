@@ -133,7 +133,6 @@ export function setup(type) {
       return composeStore.messageValid(postType)
     }),
     uploadingPhoto: computed(() => {
-      console.log('Compute uploading', composeStore.uploading)
       return composeStore.uploading
     }),
     noGroups: computed(() => {

@@ -3,6 +3,9 @@ import api from '~/api'
 
 export const useIsochroneStore = defineStore({
   id: 'isochrone',
+  persist: {
+    enabled: true,
+  },
   state: () => ({
     list: [],
   }),

@@ -113,8 +113,6 @@ F
 composables/useTwem.js,5\d\5d8b72c928c91e040e2bf6e89d56ace5c11dde92
 F
 api/VolunteeringAPI.js,c\4\c4390b060577a8da370ed95f27a81dc4e80a2e85
-C
-stores/isochrone.js,c\6\c634376556eca9e0642588198ba0f26f5017814c
 O
 components/MessageReplyInfo.vue,e\c\ec41b2ea59ba23268b0dd43bd2dd92e879957f0e
 Q
@@ -185,8 +183,6 @@ I
 vite.config.js,2\3\23e488f27597a265a6ab2b1efbe18221c6f88c2f
 L
 composables/useTimeFormat.js,7\0\709cd036b5a035c9c2d61cf9319ff01fac902f33
-P
- plugins/vue3-infinite-loading.js,4\9\49a07cbdb1a03f6dc4bcda395505c4756c2c597a
 L
 components/GlobalWarning.vue,2\4\241c995ec539e24adeed098c7b1bc25809de8713
 I
@@ -203,3 +199,92 @@ N
 components/MessageTextBody.vue,f\5\f56e58283c5ca7270de883b4ad9cc16968c89cf2
 M
 components/MessageHistory.vue,5\a\5aae4eaa518c2c2a3c7dcd17b2a8069a5c7508d2
+R
+"components/MessageItemLocation.vue,c\6\c6411a71dd244fa85486a5d82c6db0a2d9aeb882
+X
+(plugins/vue3-observe-visiblity.client.js,9\d\9dea7b767255299bc877c684fe4fc63568069c9f
+J
+components/GroupHeader.vue,f\c\fcde825fa7d0f9ba5f261420450e23db125395b8
+J
+components/GroupMarker.vue,9\6\966e4c28c0c2f90ccc5b01f4e13501125e6ebd4b
+K
+api/MicroVolunteeringAPI.js,9\d\9d3cdd093c9c6954fc494af1ae02cadcfbef715e
+U
+%components/MessageHistoryExpanded.vue,3\0\3046957f838f82ace007b225cbbb8860f410f24e
+K
+components/MessageModal.vue,d\d\ddeb0c5394e3c331b036c9379f81912b1aa9c883
+A
+api/MessageAPI.js,8\5\85b66593643d6f1098f76fcb4f61ae9e6514f9a3
+J
+components/MessageList.vue,2\6\2630f57b465052683b3a94936c0015f9cfd1d545
+K
+components/ExploreGroup.vue,5\f\5f628598e13dcd16c03b307c280862323aad3b29
+F
+plugins/vue-leaflet.js,1\a\1aebed952f3161b933bd729ef93ae0e021b5271e
+?
+mixins/modal.js,2\4\242cb39c1290e542de850d27346a8eee203a1a0f
+M
+components/ValidatingForm.vue,f\3\f382498688332cd7336f40e2a22d79cd7acb2b01
+O
+pages/explore/place/[place].vue,a\8\a817b4f4f02d71b546c4a427eaa451a6b22a8efd
+F
+pages/message/[id].vue,f\9\f9bd92d8736dc3a61d26388a6e4153223a46b35d
+M
+components/WizardProgress.vue,c\5\c5cee26476a32e9e7931f1b7c26911992d127b79
+P
+ components/GroupProfileImage.vue,b\5\b5858969667382ed852f57b40bf437322f3202f6
+K
+mixins/validationHelpers.js,d\8\d8807426ca312e6562e21d9620744c5d8394e916
+P
+ components/EmailConfirmModal.vue,8\5\85863f32f2548b252403246764e16b9ae064f938
+K
+components/ConfirmModal.vue,f\e\fe4c8b0461c88fa51406bfcec16cde119a7b751f
+F
+pages/explore/[id].vue,8\e\8e2382e8d34a0933e293b70cf1c981ceb3a3eaad
+M
+components/MessageActions.vue,2\4\248ec0cabc015c096f25352e85ae4cba78047f87
+O
+components/AdaptiveMapGroup.vue,9\f\9f4b4d2079f03989f7f4faac70ff81c311447018
+:
+
+.gitignore,a\5\a5cc2925ca8258af241be7e5b0381edf30266302
+N
+components/MessageExpanded.vue,3\3\339a8d0e220d146ed1afa710be546f4a398fbecd
+F
+components/PostMap.vue,9\3\93df401eaefe49204b2abc483b8d7a6af7a742ed
+?
+pages/index.vue,f\f\ff87ee14320f4d3dd6a94ef6dde25ffe0b16242a
+K
+components/VisualiseMap.vue,6\a\6a69d8baeb5edf1ffc528f3293e12d7f7d8e000f
+H
+components/PostPhoto.vue,5\2\52d93e8133f6377dd11668f02969cffda3993419
+I
+components/MainHeader.vue,2\9\295860774a9016755601bf2f9163ab97b7fd98f7
+I
+components/OurMessage.vue,5\7\570abf852657abfcbf2ddeb8d913088c95474015
+G
+components/PostItem.vue,8\8\882a7cbe44a39c73c1bae6410ac297868b1234b7
+P
+ components/PlaceAutocomplete.vue,9\d\9d3b190b2ceff83f1f01c1e10d5e5046e0d9d574
+K
+components/AutoComplete.vue,5\e\5e9b66b0135bf8d8a5aa72861458d81f449dfd75
+F
+plugins/vue-awesome.js,b\5\b56b6be10a2d54e61be9a00e55cf880f053b6a05
+J
+components/OurFilePond.vue,4\5\456162bca7010eae861f4c88aaaa6d91f16405f4
+J
+components/GroupSelect.vue,9\0\907e604b46639533d68dd601971613af9e1cc759
+G
+pages/give/whereami.vue,4\d\4d1a10a0774f973186e55fe1562c48dade531666
+K
+components/ComposeGroup.vue,3\6\362cd70c50777d99dfd37f9e4f55a417848c38f4
+E
+composables/useMap.js,b\d\bdc7dcad8ae0ea34f942375058a2d2df30fb8d3b
+W
+'components/NumberIncrementDecrement.vue,d\0\d0947e5b809de8caed3221cd0f89350dd31fd4ca
+G
+components/PostCode.vue,5\0\50c8f0f680ba903904cd3e76ae907ebd5e30f071
+J
+components/AdaptiveMap.vue,5\a\5a13286b0f52d53448a4c1bb73331f546dcb6c6d
+Q
+!components/ValidatingTextarea.vue,4\4\44c034de63c10e2a47e4374e3d102ab3715d21bb

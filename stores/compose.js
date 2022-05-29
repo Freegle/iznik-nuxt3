@@ -3,6 +3,14 @@ import { useMessageStore } from '~/stores/message'
 
 export const useComposeStore = defineStore({
   id: 'compose',
+  persist: {
+    enabled: true,
+    strategies: [
+      // We need to persist this to local storage so that the flows work when logged out - we may navigate away
+      // from the page to do login.
+      localStorage,
+    ],
+  },
   // We allow composing of multiple posts for the same location/email, so messages and attachments are indexed by
   // id.  The id is a client-only index; it becomes a real id once the items are posted.
   state: () => ({

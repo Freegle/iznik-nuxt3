@@ -19,6 +19,7 @@ export default defineNuxtConfig({
       /vue3-lazyload/,
       /vue-image-zoomer/,
       /vue3-draggable-resizable/,
+      /pinia-plugin-persist/,
     ],
   },
 
