@@ -3,9 +3,6 @@ import api from '~/api'
 
 export const useGroupStore = defineStore({
   id: 'group',
-  persist: {
-    enabled: true,
-  },
   state: () => ({
     config: {},
     list: {},
