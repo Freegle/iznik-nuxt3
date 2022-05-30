@@ -105,6 +105,16 @@ export default {
       supported: true,
     }
   },
+  mounted() {
+    if (process.client) {
+      const externalScript = document.createElement('script')
+      externalScript.setAttribute(
+        'src',
+        'https://cdn.jsdelivr.net/npm/heic2any_ags@0.0.4/dist/heic2any.min.js'
+      )
+      document.head.appendChild(externalScript)
+    }
+  },
   methods: {
     photoInit() {
       if (!this.$refs.pond._pond) {
@@ -131,9 +141,10 @@ export default {
         // If we have an HEIC file, then the server can't cope with it as it will fail imagecreatefromstring, so
         // convert it to a PNG file on the client before upload.  We have to restrict the quality to keep the cconversion
         // time reasonable.
+        //
+        // TODO APP Does this work in the app?  Dynamically including was the only way I could get it to work.
         const blob = file.slice(0, file.size, 'image/heic')
-        const heic2any = await import('heic2any')
-        const png = await heic2any.default({
+        const png = await window.heic2any({
           blob,
           toType: 'image/jpeg',
           quality: 0.1,

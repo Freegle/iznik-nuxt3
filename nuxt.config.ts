@@ -64,12 +64,6 @@ export default defineNuxtConfig({
         },
       },
     },
-    build: {
-      rollupOptions: {
-        // heic2any confuses rollup.
-        external: ['heic2any'],
-      },
-    },
   },
 
   generate: {
