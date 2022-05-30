@@ -20,6 +20,7 @@ export default defineNuxtConfig({
       /vue-image-zoomer/,
       /vue3-draggable-resizable/,
       /pinia-plugin-persist/,
+      /heic2any/,
     ],
   },
 
