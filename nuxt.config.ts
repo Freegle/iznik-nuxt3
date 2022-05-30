@@ -20,7 +20,6 @@ export default defineNuxtConfig({
       /vue-image-zoomer/,
       /vue3-draggable-resizable/,
       /pinia-plugin-persist/,
-      /heic2any/,
     ],
   },
 
@@ -63,6 +62,12 @@ export default defineNuxtConfig({
             //
             '@import "@/assets/css/_color-vars.scss";',
         },
+      },
+    },
+    build: {
+      rollupOptions: {
+        // heic2any confuses rollup.
+        external: ['heic2any'],
       },
     },
   },

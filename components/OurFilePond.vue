@@ -133,7 +133,11 @@ export default {
         // time reasonable.
         const blob = file.slice(0, file.size, 'image/heic')
         const heic2any = await import('heic2any')
-        const png = await heic2any({ blob, toType: 'image/jpeg', quality: 0.1 })
+        const png = await heic2any.default({
+          blob,
+          toType: 'image/jpeg',
+          quality: 0.1,
+        })
         data.append('photo', png, 'photo')
       } else {
         data.append('photo', file, 'photo')
