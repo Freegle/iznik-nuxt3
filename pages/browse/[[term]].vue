@@ -5,11 +5,12 @@
       <b-row class="m-0">
         <b-col cols="0" lg="3" class="p-0 pr-1">
           <VisibleWhen :at="['lg', 'xl']">
-            <SidebarLeft
-              v-if="showRest"
-              :show-community-events="true"
-              :show-bot-left="true"
-            />
+            <!--            TODO-->
+            <!--            <SidebarLeft-->
+            <!--              v-if="showRest"-->
+            <!--              :show-community-events="true"-->
+            <!--              :show-bot-left="true"-->
+            <!--            />-->
           </VisibleWhen>
         </b-col>
         <b-col cols="12" lg="6" class="p-0">
@@ -76,11 +77,12 @@
         </b-col>
         <b-col cols="0" lg="3" class="p-0 pl-1">
           <VisibleWhen :at="['lg', 'xl']">
-            <sidebar-right
-              v-if="showRest"
-              show-volunteer-opportunities
-              show-job-opportunities
-            />
+            <!--            TODO-->
+            <!--            <sidebar-right-->
+            <!--              v-if="showRest"-->
+            <!--              show-volunteer-opportunities-->
+            <!--              show-job-opportunities-->
+            <!--            />-->
           </VisibleWhen>
         </b-col>
       </b-row>
@@ -106,8 +108,8 @@ const AdaptiveMap = () => import('~/components/AdaptiveMap')
 const IsochronePostMapAndList = () =>
   import('~/components/IsochronePostMapAndList')
 const GlobalWarning = () => import('~/components/GlobalWarning')
-const SidebarLeft = () => import('~/components/SidebarLeft')
-const SidebarRight = () => import('~/components/SidebarRight')
+// const SidebarLeft = () => import('~/components/SidebarLeft')
+// const SidebarRight = () => import('~/components/SidebarRight')
 const ExpectedRepliesWarning = () =>
   import('~/components/ExpectedRepliesWarning')
 // const MicroVolunteering = () => import('~/components/MicroVolunteering.vue')
@@ -119,8 +121,8 @@ export default {
     // MicroVolunteering,
     IsochronePostMapAndList,
     GlobalWarning,
-    SidebarLeft,
-    SidebarRight,
+    // SidebarLeft,
+    // SidebarRight,
     ExpectedRepliesWarning,
     // AboutMeModal,
   },
