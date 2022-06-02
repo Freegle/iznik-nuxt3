@@ -22,7 +22,7 @@
       </nuxt-link>
       <div class="d-flex">
         <nuxt-link class="mr-4" to="/give">Give</nuxt-link>
-        <nuxt-link class="mr-4" to="/browse/a">Browse</nuxt-link>
+        <nuxt-link class="mr-4" to="/browse">Browse</nuxt-link>
         <nuxt-link class="mr-4" to="/explore">Explore</nuxt-link>
       </div>
       <!--      </b-nav-brand>-->

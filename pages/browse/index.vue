@@ -137,6 +137,7 @@ export default {
 
     let searchTerm = route.params.term
     // TODO Optional parameters not working - see https://github.com/nuxt/framework/issues/4634
+    // Rename back to [[term]].vue.
     searchTerm = ''
 
     // We want this to be our next home page.
