@@ -19,7 +19,7 @@
 </template>
 <script>
 import cloneDeep from 'lodash.clonedeep'
-import { useMiscStore } from '../stores/misc'
+import { useMiscStore } from '~/stores/misc'
 import { useGroupStore } from '~/stores/group'
 
 export default {

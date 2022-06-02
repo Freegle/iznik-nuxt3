@@ -151,7 +151,6 @@ export default {
     //   }
   },
   async beforeCreate() {
-    console.log('Before create')
     const route = useRoute()
     const authStore = useAuthStore()
 
@@ -175,8 +174,6 @@ export default {
       // Before we do anything, see if we are logged in.
       await authStore.fetchUser()
     }
-
-    console.log('Before create complete')
   },
   beforeDestroy() {
     clearTimeout(this.timeTimer)

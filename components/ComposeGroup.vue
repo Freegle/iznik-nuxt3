@@ -7,8 +7,8 @@
 </template>
 <script>
 import { mapWritableState } from 'pinia'
-import { useMiscStore } from '../stores/misc'
 import { useComposeStore } from '../stores/compose'
+import { useMiscStore } from '~/stores/misc'
 import { useGroupStore } from '~/stores/group'
 
 export default {

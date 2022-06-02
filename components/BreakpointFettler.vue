@@ -10,7 +10,7 @@
 </template>
 <script>
 import ResizeObserver from 'resize-observer-polyfill'
-import { useMiscStore } from '../stores/misc'
+import { useMiscStore } from '~/stores/misc'
 
 export default {
   mounted() {

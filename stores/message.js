@@ -54,6 +54,10 @@ export const useMessageStore = defineStore({
       this.bounds[key] = ret
       return ret
     },
+    async fetchMyGroups() {
+      // TODO Cache
+      return await api(this.config).message.mygroups()
+    },
     async view(id) {
       await api(this.config).message.view(id)
     },

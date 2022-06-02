@@ -14,7 +14,6 @@
     <template slot="modal-title">
       <h2>Let's get freegling!</h2>
     </template>
-    Emailk {{ email }}, {{ emailValid }}, password {{ password }}
     <p v-if="signUp" class="text-center">
       You'll get emails. Name, approx. location, and profile picture are public
       - you can hide your real name and picture from Settings. Logging in adds

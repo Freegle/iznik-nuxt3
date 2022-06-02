@@ -170,10 +170,11 @@
 </template>
 <script>
 import { ref } from 'vue'
-import { useMiscStore } from '../stores/misc'
+import { useAuthStore } from '../stores/auth'
 import { useGroupStore } from '../stores/group'
 import { useMessageStore } from '../stores/message'
 import MessageList from './MessageList'
+import { useMiscStore } from '~/stores/misc'
 import { MAX_MAP_ZOOM } from '~/constants'
 // import JoinWithConfirm from '~/components/JoinWithConfirm'
 import { getDistance } from '~/composables/useMap'
@@ -264,6 +265,7 @@ export default {
   },
   async setup(props) {
     const miscStore = useMiscStore()
+    const authStore = useAuthStore()
     const groupStore = useGroupStore()
     const messageStore = useMessageStore()
 
@@ -272,9 +274,11 @@ export default {
       : props.initialBounds
     // this.postMapInitialBounds = this.initialBounds
 
-    if (props.startOnGroups) {
+    let messagesInOwnGroups = []
+
+    if (props.startOnGroups || props.forceMessages) {
       // Get the messages in our own groups for the initial view.
-      // TODO
+      messagesInOwnGroups = await messageStore.fetchMyGroups()
     }
 
     let bounds = null
@@ -300,9 +304,11 @@ export default {
 
     return {
       miscStore,
+      authStore,
       groupStore,
       messageStore,
       postMapInitialBounds,
+      messagesInOwnGroups,
       postType,
       selectedType,
       bounds,
@@ -333,7 +339,6 @@ export default {
       joinVisible: false,
       mapMoved: false,
       messagesOnMap: [],
-      messagesInOwnGroups: [],
       bump: 1,
       infiniteId: 1,
 
@@ -419,12 +424,12 @@ export default {
     filteredMessages() {
       let ret = []
 
+      console.log('compute filtered')
       if (!this.search) {
         ret = this.messagesForList
       } else {
         // We are searching.  We get the messages from the store.
-        // TODO
-        const messages = this.$store.getters['messages/getAll']
+        const messages = this.messageStore.list
         messages.forEach((message) => {
           if (message) {
             // Pass whether the message has been freegled, which in this case is returned as the outcomes in the
@@ -487,9 +492,7 @@ export default {
                 this.bounds.contains([group.altlat, group.altlng]))
             ) {
               // Are we already a member?
-              // TODO
-              // const member = this.$store.getters['auth/member'](group.id)
-              const member = false
+              const member = this.authStore.member(group.id)
 
               if (!member) {
                 // Visible group?

@@ -14,8 +14,8 @@
   </div>
 </template>
 <script>
-import { useMiscStore } from '../stores/misc'
 import NoticeMessage from './NoticeMessage'
+import { useMiscStore } from '~/stores/misc'
 
 export default {
   components: { NoticeMessage },

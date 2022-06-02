@@ -95,11 +95,11 @@
 // import Vue3DraggableResizable from 'vue3-draggable-resizable'
 import 'vue3-draggable-resizable/dist/Vue3DraggableResizable.css'
 import cloneDeep from 'lodash.clonedeep'
-import { useMiscStore } from '../stores/misc'
 import { useGroupStore } from '../stores/group'
 import { useMessageStore } from '../stores/message'
 import GroupMarker from './GroupMarker'
 import BrowseHomeIcon from './BrowseHomeIcon'
+import { useMiscStore } from '~/stores/misc'
 import { attribution, osmtile } from '~/composables/useMap'
 const ClusterMarker = () => import('./ClusterMarker')
 

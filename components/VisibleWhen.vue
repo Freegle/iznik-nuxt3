@@ -4,7 +4,7 @@
   </div>
 </template>
 <script>
-import { useMiscStore } from '../stores/misc'
+import { useMiscStore } from '~/stores/misc'
 
 export default {
   props: {

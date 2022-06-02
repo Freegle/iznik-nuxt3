@@ -53,9 +53,9 @@
 import { ref } from 'vue'
 
 import dayjs from 'dayjs'
-import { useMiscStore } from '../stores/misc'
 import { useGroupStore } from '../stores/group'
 import { useMessageStore } from '../stores/message'
+import { useMiscStore } from '~/stores/misc'
 
 // const GroupSelect = () => import('./GroupSelect')
 const NoticeMessage = () => import('./NoticeMessage')
