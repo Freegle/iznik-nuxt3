@@ -218,6 +218,7 @@ export default class BaseAPI {
       const ret = await this.$axios.request({
         ...config,
         method,
+        headers,
         url: this.ourConfig.public.APIv2 + path,
       })
       ;({ status, data } = ret)

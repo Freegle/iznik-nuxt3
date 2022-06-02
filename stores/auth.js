@@ -139,23 +139,57 @@ export const useAuthStore = defineStore({
     },
     async fetchUser() {
       // We're so vain, we probably think this call is about us.
-      console.log('fetch user')
-      const { me, persistent, groups } = await this.$api.session.fetch({
-        components: [
-          'me',
-          'groups',
-          'aboutme',
-          'phone',
-          'notifications',
-          'expectedreplies',
-        ],
-      })
+      let me = null
+      let groups = null
 
-      console.log('Fetched', me)
+      if (this.jwt) {
+        // We have a JWT which we can use with the new, faster API.
+        try {
+          me = await this.$api.session.fetchv2({})
+        } catch (e) {
+          console.log('exception')
+        }
+
+        if (me) {
+          groups = me.memberships
+          delete me.memberships
+        } else {
+          // Any JWT must be invalid.
+          console.log('reset JWT')
+          this.jwt = null
+        }
+      }
+
+      if (!me) {
+        // Fall back to the older API which will authenticate via the persistent token and PHP session.
+        const ret = await this.$api.session.fetch({
+          components: [
+            'me',
+            'groups',
+            'aboutme',
+            'phone',
+            'notifications',
+            'expectedreplies',
+          ],
+        })
+
+        let persistent = null
+        let jwt = null
+
+        if (ret) {
+          ;({ me, persistent, jwt, groups } = ret)
+        }
+
+        if (me) {
+          // Save the persistent session token.
+          this.persistent = persistent
+
+          // Save the JWT, so that we can use the faster API next time.
+          this.jwt = jwt
+        }
+      }
+
       if (me) {
-        // Save the persistent session token.
-        this.persistent = persistent
-
         if (groups && groups.length) {
           this.groups = groups
         } else {
@@ -175,7 +209,6 @@ export const useAuthStore = defineStore({
           composeStore.email = me.email
         }
       }
-      console.log('fetch user complete')
     },
     async saveAboutMe(value) {
       await this.saveAndGet({
@@ -220,17 +253,15 @@ export const useAuthStore = defineStore({
   },
   getters: {
     member: (state) => (id) => {
-      let ret = false
-
       if (state.user) {
         for (const group of state.groups) {
-          if (parseInt(group.id) === parseInt(id)) {
-            ret = group.role ? group.role : group.myrole
+          if (parseInt(group.groupid) === parseInt(id)) {
+            return group.role
           }
         }
       }
 
-      return ret
+      return false
     },
   },
 })

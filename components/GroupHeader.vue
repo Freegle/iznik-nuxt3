@@ -151,6 +151,7 @@
 <script>
 // TODO
 // import ChatButton from '~/components/ChatButton'
+import { useAuthStore } from '~/stores/auth'
 
 export default {
   props: {
@@ -163,21 +164,21 @@ export default {
       required: true,
     },
   },
+  setup() {
+    const authStore = useAuthStore()
+
+    return {
+      authStore,
+    }
+  },
   data() {
     return {
       joiningOrLeaving: false,
     }
   },
   computed: {
-    me() {
-      // TODO
-      return null
-    },
     amAMember() {
-      // TODO
-      return false
-      // const member = this.$store.getters['auth/member'](this.group.id)
-      // return member
+      return this.authStore.member(this.group?.id)
     },
   },
   methods: {

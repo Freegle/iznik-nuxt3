@@ -192,8 +192,6 @@ R
 X
 (plugins/vue3-observe-visiblity.client.js,9\d\9dea7b767255299bc877c684fe4fc63568069c9f
 J
-components/GroupHeader.vue,f\c\fcde825fa7d0f9ba5f261420450e23db125395b8
-J
 components/GroupMarker.vue,9\6\966e4c28c0c2f90ccc5b01f4e13501125e6ebd4b
 K
 api/MicroVolunteeringAPI.js,9\d\9d3cdd093c9c6954fc494af1ae02cadcfbef715e
@@ -232,8 +230,6 @@ O
 :
 
 .gitignore,a\5\a5cc2925ca8258af241be7e5b0381edf30266302
-N
-components/MessageExpanded.vue,3\3\339a8d0e220d146ed1afa710be546f4a398fbecd
 K
 components/VisualiseMap.vue,6\a\6a69d8baeb5edf1ffc528f3293e12d7f7d8e000f
 I

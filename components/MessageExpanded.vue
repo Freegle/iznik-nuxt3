@@ -123,7 +123,6 @@ export default {
   data() {
     return {
       replied: false,
-      simple: false, // TODO
     }
   },
   computed: {
