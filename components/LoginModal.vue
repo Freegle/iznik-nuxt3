@@ -245,12 +245,6 @@ export default {
     // Use of this.bump means we will recompute when we need to, i.e. when the modal is shown.  This is overriding
     // normal reactivity but that's because the SDKs we use aren't written in Vue.
     facebookDisabled() {
-      console.log(
-        'Evaluate Facebook disabled',
-        this.showSocialLoginBlocked,
-        typeof window.FB,
-        this.bump
-      )
       return (
         this.bump &&
         (this.showSocialLoginBlocked || typeof window.FB === 'undefined')

@@ -217,8 +217,6 @@ export default {
   },
   data() {
     return {
-      // TODO me
-      me: null,
       context: null,
       messageLocations: [],
       mapObject: null,

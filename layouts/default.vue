@@ -29,8 +29,10 @@
   </div>
 </template>
 <script>
+import { useRoute } from 'vue-router'
 import { useMiscStore } from '../stores/misc'
 import MainHeader from '../components/MainHeader'
+import { useAuthStore } from '~/stores/auth'
 
 export default {
   components: {
@@ -47,7 +49,6 @@ export default {
       timeTimer: null,
       unreadNotificationCount: 0,
       chatCount: 0,
-      loggedIn: false, // TODO
     }
   },
   // mixins: [replyToPost],
@@ -78,30 +79,10 @@ export default {
   // },
   // async mounted() {
   mounted() {
-    //   if (process.client) {
-    //     try {
-    //       // Wait for the store if necessary.
-    //       await this.$store.restored
-    //     } catch (e) {
-    //       console.log('Store restore wait failed', e)
-    //     }
-    //
-    //
     // Start our timer.  Holding the time in the store allows us to update the time regularly and have reactivity
     // cause displayed fromNow() values to change, rather than starting a timer for each of them.
     this.updateTime()
-    //   }
-    //
-    //   // Ensure we know whether we're FD or MT.
-    //   const existingModtools = this.$store.getters['misc/get']('modtools')
-    //
-    //   if (existingModtools) {
-    //     this.$store.dispatch('misc/set', {
-    //       key: 'modtools',
-    //       value: false
-    //     })
-    //   }
-    //
+
     if (document) {
       // We added a basic loader into the HTML.  This helps if we are loaded on an old browser where our JS bombs
       // out - at least we display something, with a link to support.  But now we're up and running, remove that.
@@ -120,41 +101,42 @@ export default {
     //     this.$store.dispatch('tryst/fetch')
     //   }
     //
-    //   try {
-    //     // Set the build date.  This may get superceded by Sentry releases, but it does little harm to add it in.
-    //     this.$sentry.setExtra('builddate', process.env.BUILD_DATE)
-    //
-    //     if (this.me) {
-    //       // Set the context for sentry so that we know which users are having errors.
-    //       this.$sentry.setUser({ userid: this.myid })
-    //
-    //       // eslint-disable-next-line no-undef
-    //       if (typeof __insp !== 'undefined') {
-    //         // eslint-disable-next-line no-undef
-    //         __insp.push([
-    //           'tagSession',
-    //           {
-    //             userid: this.myid,
-    //             builddate: process.env.BUILD_DATE
-    //           }
-    //         ])
-    //       }
-    //     } else {
-    //       // eslint-disable-next-line no-undef,no-lonely-if
-    //       if (typeof __insp !== 'undefined') {
-    //         // eslint-disable-next-line no-undef
-    //         __insp.push([
-    //           'tagSession',
-    //           {
-    //             userid: 'Logged out',
-    //             builddate: process.env.BUILD_DATE
-    //           }
-    //         ])
-    //       }
-    //     }
-    //   } catch (e) {
-    //     console.log('Failed to set context', e)
-    //   }
+    try {
+      // TODO Sentry
+      // Set the build date.  This may get superceded by Sentry releases, but it does little harm to add it in.
+      // this.$sentry.setExtra('builddate', process.env.BUILD_DATE)
+      //
+      //     if (this.me) {
+      //       // Set the context for sentry so that we know which users are having errors.
+      //       this.$sentry.setUser({ userid: this.myid })
+      //
+      //       // eslint-disable-next-line no-undef
+      //       if (typeof __insp !== 'undefined') {
+      //         // eslint-disable-next-line no-undef
+      //         __insp.push([
+      //           'tagSession',
+      //           {
+      //             userid: this.myid,
+      //             builddate: process.env.BUILD_DATE
+      //           }
+      //         ])
+      //       }
+      //     } else {
+      //       // eslint-disable-next-line no-undef,no-lonely-if
+      //       if (typeof __insp !== 'undefined') {
+      //         // eslint-disable-next-line no-undef
+      //         __insp.push([
+      //           'tagSession',
+      //           {
+      //             userid: 'Logged out',
+      //             builddate: process.env.BUILD_DATE
+      //           }
+      //         ])
+      //       }
+      //     }
+    } catch (e) {
+      console.log('Failed to set context', e)
+    }
     //
     //   if (process.client) {
     //     if (this.replyToSend) {
@@ -168,29 +150,37 @@ export default {
     //     }
     //   }
   },
-  // async beforeCreate() {
-  //   if (this.$route.query.u && this.$route.query.k) {
-  //     try {
-  //       // Clear the related list.  This avoids accidentally flagging members as related if people forget to close
-  //       // an incognito tab while impersonating.
-  //       await this.$store.dispatch('auth/clearRelated')
-  //
-  //       // Log in using the username and key.
-  //       await this.$store.dispatch('auth/login', {
-  //         u: this.$route.query.u,
-  //         k: this.$route.query.k,
-  //         force: true
-  //       })
-  //     } catch (e) {
-  //       // Login failed.  Usually this is because they're logged in as someone else. Ignore it.
-  //       console.log('Login failed', e)
-  //     }
-  //   }
-  // },
-  // beforeDestroy() {
-  //   console.log('Destroy layout')
-  //   clearTimeout(this.timeTimer)
-  // },
+  async beforeCreate() {
+    console.log('Before create')
+    const route = useRoute()
+    const authStore = useAuthStore()
+
+    if (route.query.u && route.query.k) {
+      // We are impersonating.
+      try {
+        // Clear the related list.  This avoids accidentally flagging members as related if people forget to close
+        // an incognito tab while impersonating.
+        await authStore.clearRelated()
+
+        // Log in using the username and key.
+        await authStore.login({
+          u: this.$route.query.u,
+          k: this.$route.query.k,
+        })
+      } catch (e) {
+        // Login failed.  Usually this is because they're logged in as someone else. Ignore it.
+        console.log('Login failed', e)
+      }
+    } else {
+      // Before we do anything, see if we are logged in.
+      await authStore.fetchUser()
+    }
+
+    console.log('Before create complete')
+  },
+  beforeDestroy() {
+    clearTimeout(this.timeTimer)
+  },
   methods: {
     updateTime() {
       const miscStore = useMiscStore()

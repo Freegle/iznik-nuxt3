@@ -5,13 +5,6 @@ import { useAuthStore } from '~/stores/auth'
 let fetchingPromise = null
 
 export default {
-  setup() {
-    const authStore = useAuthStore()
-
-    return {
-      authStore,
-    }
-  },
   computed: {
     me() {
       return this.realMe
@@ -19,7 +12,8 @@ export default {
     realMe() {
       // We have this separate method so that components can override me() and still access the real user if they
       // need to. This is used by impersonation.
-      const me = this.authStore.user
+      const authStore = useAuthStore()
+      const me = authStore.user
       return me && me.id ? me : null
     },
     myid() {
@@ -29,7 +23,8 @@ export default {
       return this.me !== null
     },
     myGroups() {
-      return this.me ? this.authStore.groups : []
+      const authStore = useAuthStore()
+      return this.me ? authStore.groups : []
     },
     anyGroups() {
       return this.myGroups.length > 0
@@ -149,6 +144,8 @@ export default {
         : null
     },
     async fetchMe(hitServer) {
+      const authStore = useAuthStore()
+
       // We can be called in several ways.
       //
       // - hitServer = true.  We must query the server, and wait for the response before returning.  This is used
@@ -170,7 +167,7 @@ export default {
 
       if (!hitServer) {
         // We don't have to hit the server before we return, but we might need to if we don't have the user.
-        if (!this.authStore.user && fetchingPromise) {
+        if (!authStore.user && fetchingPromise) {
           // We are already in the process of fetching the user, so we just need to wait until that completes.
           await fetchingPromise
         }
@@ -189,7 +186,7 @@ export default {
       }
 
       if (needToFetch) {
-        fetchingPromise = this.authStore.fetchUser()
+        fetchingPromise = authStore.fetchUser()
 
         if (hitServer) {
           // We need to wait for the server before returning.

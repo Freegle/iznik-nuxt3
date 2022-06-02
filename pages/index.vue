@@ -117,8 +117,6 @@ export default {
       ourBackground: false,
       type: null,
       timeToPlay: false,
-      // TODO
-      me: null,
     }
   },
   async mounted() {

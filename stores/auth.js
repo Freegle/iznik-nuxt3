@@ -75,14 +75,14 @@ export const useAuthStore = defineStore({
         await this.$api.session.related(this.userlist)
       }
     },
-    logout() {
-      this.setUser(null)
-      this.$api.session.logout()
-      this.$axios.defaults.headers.common.Authorization = null
-      this.$axios.setToken(false)
+    clearRelated() {
+      this.userlist = []
+    },
+    async logout() {
+      await this.$api.session.logout()
+      this.$reset()
     },
     async forget() {
-      this.$api.session.forget()
       await this.$api.session.forget()
       await this.logout()
     },
@@ -139,6 +139,7 @@ export const useAuthStore = defineStore({
     },
     async fetchUser() {
       // We're so vain, we probably think this call is about us.
+      console.log('fetch user')
       const { me, persistent, groups } = await this.$api.session.fetch({
         components: [
           'me',
@@ -150,6 +151,7 @@ export const useAuthStore = defineStore({
         ],
       })
 
+      console.log('Fetched', me)
       if (me) {
         // Save the persistent session token.
         this.persistent = persistent
@@ -173,6 +175,7 @@ export const useAuthStore = defineStore({
           composeStore.email = me.email
         }
       }
+      console.log('fetch user complete')
     },
     async saveAboutMe(value) {
       await this.saveAndGet({

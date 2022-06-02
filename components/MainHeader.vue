@@ -20,6 +20,10 @@
           alt="Home"
         />
       </nuxt-link>
+      <div class="d-flex">
+        <nuxt-link class="mr-4" to="/give">Give</nuxt-link>
+        <nuxt-link class="mr-4" to="/explore/">Explore</nuxt-link>
+      </div>
       <!--      </b-nav-brand>-->
       <client-only>
         <!--        <b-nav-toggle v-if="loggedIn" target="nav_collapse" />-->
@@ -417,10 +421,11 @@
 // const ChatMenu = () => import('~/components/ChatMenu')
 // const SimpleView = () => import('../components/SimpleView')
 // const NotificationOptions = () => import('~/components/NotificationOptions')
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 import pluralize from 'pluralize'
 import LoginModal from '~/components/LoginModal'
+import { useAuthStore } from '~/stores/auth'
 
 export default {
   name: 'MainHeader',
@@ -431,14 +436,23 @@ export default {
     LoginModal,
     // AboutMeModal,
   },
+  setup() {
+    const authStore = useAuthStore()
+    const route = useRoute()
+    const router = useRouter()
+
+    return {
+      authStore,
+      route,
+      router,
+    }
+  },
   data() {
     return {
       distance: 1000,
       logo: '/icon.png',
       unreadNotificationCount: 0,
       chatCount: 0,
-      loggedIn: false, // TODO
-      me: null, // TODO
     }
   },
   computed: {
@@ -455,7 +469,9 @@ export default {
       )
     },
     newsCount() {
-      return this.$store.getters['newsfeed/count']
+      return 0
+      // return this.$store.getters['newsfeed/count']
+      // TODO
     },
     newCountPlural() {
       return pluralize('unread ChitChat post', this.newsCount, true)
@@ -521,27 +537,27 @@ export default {
         this.$cookies.removeAll()
       } catch (e) {}
 
-      await this.$store.dispatch('auth/logout')
-      this.$store.dispatch('auth/forceLogin', false)
+      await this.authStore.logOut()
+      this.authStore.forceLogin = false
 
       // Go to the landing page.
-      this.$router.push('/')
+      this.router.push('/')
     },
     showAboutMe() {
       // await this.fetchMe(['me'], true)
       this.$refs.aboutMeModal.show()
     },
     maybeReload(route) {
-      if (this.$router.currentRoute.path === route) {
+      if (this.router.currentRoute.path === route) {
         // We have clicked to route to the page we're already on.  Force a full refresh.
         window.location.reload(true)
       }
     },
     backButton() {
       try {
-        this.$router.back()
+        this.router.back()
       } catch (e) {
-        this.$router.push('/')
+        this.router.push('/')
       }
     },
     getCounts() {

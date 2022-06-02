@@ -318,9 +318,6 @@ export default {
   },
   data() {
     return {
-      // TODO
-      me: null,
-
       // Map stuff
       L: null,
       heightFraction: 3,

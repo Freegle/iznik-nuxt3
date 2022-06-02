@@ -46,10 +46,8 @@ export default class BaseAPI {
 
       const authStore = useAuthStore()
 
-      console.log('Request', method, authStore.persistent)
       if (authStore.persistent) {
         // Use the persistent token (a kind of JWT) to authenticate the request.
-        console.log('add auth')
         headers.Authorization = 'Iznik ' + JSON.stringify(authStore.persistent)
       }
 
