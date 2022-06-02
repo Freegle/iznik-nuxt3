@@ -4,7 +4,8 @@ export default class SessionAPI extends BaseAPI {
   fetch(params) {
     // Add the build date to the session call.  This is used by the server to spot out of date apps, but we need
     // to make it clear that we're not an app at all.
-    params.webversion = process.env.BUILD_DATE
+    const runtimeConfig = useRuntimeConfig()
+    params.webversion = runtimeConfig.public.BUILD_DATE
     return this.$get('/session', params)
   }
 

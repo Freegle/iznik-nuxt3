@@ -123,8 +123,6 @@ E
 api/index.generate.js,8\c\8c55f1204114ed98508a0f134c0326cc51f78cfd
 <
 api/index.js,2\c\2c25deeb166656b4911fb4d91c226203a203e50f
-K
-middleware/config.global.js,d\b\dbb013faec5ae60e461154b95e946427ddd1b2c5
 p
 @.github/workflows/azure-static-web-apps-red-pebble-0ca006d03.yml,7\4\743dedc5732b84b375c87947e7005b2a49ccf4e6
 E
@@ -147,8 +145,6 @@ O
 components/VisualiseMessage.vue,0\9\09f07b2e833d01d768bb49278e4ec5a318190e53
 K
 components/ProfileImage.vue,f\e\fe9dbbd347cf9d358d121cab15a09f5e48f87cc3
->
-api/BaseAPI.js,d\8\d8dc35e38de643e66f58be4dae0852a98d2d23ed
 G
 components/BImgLazy.vue,c\e\ceb301d20cafc70f141f07390a95af09446c9762
 G
@@ -159,8 +155,6 @@ I
 constants.js,d\2\d22c4bff3d9040862d2e503976dad4d7e7b8cebd
 >
 api/index.d.ts,0\0\003584391006adb2eb802f21f153baef81417fe6
->
-plugins/api.js,4\9\49318d122287d970374a8621fa266adb2cc53863
 J
 components/VisibleWhen.vue,4\c\4c7a61268111a958787b9c1515f44e3dd950e792
 B
@@ -219,8 +213,6 @@ K
 components/ExploreGroup.vue,5\f\5f628598e13dcd16c03b307c280862323aad3b29
 F
 plugins/vue-leaflet.js,1\a\1aebed952f3161b933bd729ef93ae0e021b5271e
-?
-mixins/modal.js,2\4\242cb39c1290e542de850d27346a8eee203a1a0f
 M
 components/ValidatingForm.vue,f\3\f382498688332cd7336f40e2a22d79cd7acb2b01
 O
@@ -254,10 +246,6 @@ F
 pages/index.vue,f\f\ff87ee14320f4d3dd6a94ef6dde25ffe0b16242a
 K
 components/VisualiseMap.vue,6\a\6a69d8baeb5edf1ffc528f3293e12d7f7d8e000f
-H
-components/PostPhoto.vue,5\2\52d93e8133f6377dd11668f02969cffda3993419
-I
-components/MainHeader.vue,2\9\295860774a9016755601bf2f9163ab97b7fd98f7
 I
 components/OurMessage.vue,5\7\570abf852657abfcbf2ddeb8d913088c95474015
 G
@@ -266,14 +254,10 @@ P
  components/PlaceAutocomplete.vue,9\d\9d3b190b2ceff83f1f01c1e10d5e5046e0d9d574
 K
 components/AutoComplete.vue,5\e\5e9b66b0135bf8d8a5aa72861458d81f449dfd75
-F
-plugins/vue-awesome.js,b\5\b56b6be10a2d54e61be9a00e55cf880f053b6a05
 J
 components/GroupSelect.vue,9\0\907e604b46639533d68dd601971613af9e1cc759
 G
 pages/give/whereami.vue,4\d\4d1a10a0774f973186e55fe1562c48dade531666
-K
-components/ComposeGroup.vue,3\6\362cd70c50777d99dfd37f9e4f55a417848c38f4
 E
 composables/useMap.js,b\d\bdc7dcad8ae0ea34f942375058a2d2df30fb8d3b
 W

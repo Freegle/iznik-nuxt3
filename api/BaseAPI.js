@@ -1,6 +1,7 @@
 // TODO Sentry
 // import * as Sentry from '@sentry/browser'
 import axios from 'axios'
+import { useAuthStore } from '~/stores/auth'
 
 export class APIError extends Error {
   constructor({ request, response }, message) {
@@ -41,9 +42,21 @@ export default class BaseAPI {
     let data = null
 
     try {
+      const headers = {}
+
+      const authStore = useAuthStore()
+
+      console.log('Request', method, authStore.persistent)
+      if (authStore.persistent) {
+        // Use the persistent token (a kind of JWT) to authenticate the request.
+        console.log('add auth')
+        headers.Authorization = 'Iznik ' + JSON.stringify(authStore.persistent)
+      }
+
       const ret = await this.$axios.request({
         ...config,
         method,
+        headers,
         url: this.ourConfig.public.APIv1 + path,
       })
       ;({ status, data } = ret)
@@ -195,6 +208,15 @@ export default class BaseAPI {
     let data = null
 
     try {
+      const headers = {}
+
+      const authStore = useAuthStore()
+
+      if (authStore.jwt) {
+        // Use the JWT to authenticate the request.
+        headers.Authorization = authStore.jwt
+      }
+
       const ret = await this.$axios.request({
         ...config,
         method,

@@ -405,16 +405,14 @@
       </b-collapse>
     </b-nav>
     <client-only>
-      <!--      TODO-->
-      <!--      <LoginModal ref="loginModal" />-->
+      <LoginModal ref="loginModal" />
       <!--      <AboutMeModal ref="aboutMeModal" />-->
     </client-only>
   </header>
 </template>
 
 <script>
-// Import login modal as I've seen an issue where it's not in $refs when you click on the signin button too rapidly.
-// import LoginModal from '~/components/LoginModal'
+// Import login modal synchronously as I've seen an issue where it's not in $refs when you click on the signin button too rapidly.
 // const AboutMeModal = () => import('~/components/AboutMeModal')
 // const ChatMenu = () => import('~/components/ChatMenu')
 // const SimpleView = () => import('../components/SimpleView')
@@ -422,6 +420,7 @@
 import { useRoute } from 'vue-router'
 import axios from 'axios'
 import pluralize from 'pluralize'
+import LoginModal from '~/components/LoginModal'
 
 export default {
   name: 'MainHeader',
@@ -429,7 +428,7 @@ export default {
     // SimpleView,
     // NotificationOptions,
     // ChatMenu,
-    // LoginModal,
+    LoginModal,
     // AboutMeModal,
   },
   data() {
