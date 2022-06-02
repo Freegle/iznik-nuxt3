@@ -18,11 +18,12 @@
           <!--          <MicroVolunteering />-->
           <div v-if="showRest">
             <GlobalWarning />
-            <ExpectedRepliesWarning
-              v-if="me && me.expectedreplies"
-              :count="me.expectedreplies"
-              :chats="me.expectedchats"
-            />
+            <!--            TODO Chats-->
+            <!--            <ExpectedRepliesWarning-->
+            <!--              v-if="me && me.expectedreplies"-->
+            <!--              :count="me.expectedreplies"-->
+            <!--              :chats="me.expectedchats"-->
+            <!--            />-->
             <div class="bg-white d-block d-xl-none">
               <div class="d-flex justify-content-between flex-wrap">
                 <b-button to="/give" variant="primary" class="topbutton m-1">
@@ -101,17 +102,14 @@ import { useIsochroneStore } from '~/stores/isochrone'
 // import buildHead from '@/mixins/buildHead.js'
 // import map from '@/mixins/map.js'
 
-// import isochroneMixin from '@/mixins/isochrone'
-// import IsochronePostMapAndList from '~/components/IsochronePostMapAndList'
-// import AboutMeModal from '~/components/AboutMeModal'
 const AdaptiveMap = () => import('~/components/AdaptiveMap')
 const IsochronePostMapAndList = () =>
   import('~/components/IsochronePostMapAndList')
 const GlobalWarning = () => import('~/components/GlobalWarning')
 // const SidebarLeft = () => import('~/components/SidebarLeft')
 // const SidebarRight = () => import('~/components/SidebarRight')
-const ExpectedRepliesWarning = () =>
-  import('~/components/ExpectedRepliesWarning')
+// const ExpectedRepliesWarning = () =>
+//   import('~/components/ExpectedRepliesWarning')
 // const MicroVolunteering = () => import('~/components/MicroVolunteering.vue')
 
 export default {
@@ -123,7 +121,7 @@ export default {
     GlobalWarning,
     // SidebarLeft,
     // SidebarRight,
-    ExpectedRepliesWarning,
+    // ExpectedRepliesWarning,
     // AboutMeModal,
   },
   // head() {
