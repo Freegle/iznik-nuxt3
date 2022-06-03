@@ -43,7 +43,7 @@
         :groupid="selectedGroup"
         :region="region"
         :can-hide="canHide"
-        @searched="selectedGroup = null"
+        @searched="selectedGroup = 0"
         @messages="messagesChanged($event)"
         @groups="groupsChanged($event)"
       />
@@ -100,14 +100,14 @@
       <div v-else>
         <h2 class="sr-only">Search Filters</h2>
         <div variant="info" class="p-2 border border-info bg-white filters">
-          <!--          <GroupSelect-->
-          <!--            v-if="me"-->
-          <!--            v-model="selectedGroup"-->
-          <!--            label="Communities to view"-->
-          <!--            label-sr-only-->
-          <!--            all-->
-          <!--            :all-my="false"-->
-          <!--          />-->
+          <GroupSelect
+            v-if="me"
+            v-model="selectedGroup"
+            label="Communities to view"
+            label-sr-only
+            all
+            all-my
+          />
           <div v-if="me" />
           <div>
             <label for="typeOptions" class="sr-only"
@@ -178,6 +178,7 @@ import { useMiscStore } from '~/stores/misc'
 import { MAX_MAP_ZOOM } from '~/constants'
 // import JoinWithConfirm from '~/components/JoinWithConfirm'
 import { getDistance } from '~/composables/useMap'
+import GroupSelect from '~/components/GroupSelect'
 
 const AdaptiveMapGroup = () => import('./AdaptiveMapGroup')
 const ExternalLink = () => import('./ExternalLink')
@@ -186,7 +187,7 @@ export default {
   components: {
     MessageList,
     // JoinWithConfirm,
-    // GroupSelect,
+    GroupSelect,
     ExternalLink,
     AdaptiveMapGroup,
   },
@@ -358,7 +359,7 @@ export default {
           text: 'Just WANTEDs',
         },
       ],
-      selectedGroup: null,
+      selectedGroup: 0,
       context: null,
     }
   },

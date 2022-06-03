@@ -1,5 +1,6 @@
 // Global mixin so that every component can access the logged in state and user.  We use a mixin rather than the Vue
 // idiom of provide/inject because you still have to remember to inject in each component.  And you won't, will you?
+import cloneDeep from 'lodash.clonedeep'
 import { useAuthStore } from '~/stores/auth'
 
 let fetchingPromise = null
@@ -24,7 +25,19 @@ export default {
     },
     myGroups() {
       const authStore = useAuthStore()
-      return this.me ? authStore.groups : []
+      let ret = []
+
+      if (this.me) {
+        ret = authStore.groups.map((g) => {
+          // Memberships have an id of the membership whereas we want the groups to have the id of the group.
+          const g2 = cloneDeep(g)
+          g2.id = g.groupid
+          delete g2.groupid
+          return g2
+        })
+      }
+
+      return ret
     },
     anyGroups() {
       return this.myGroups.length > 0

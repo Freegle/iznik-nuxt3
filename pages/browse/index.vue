@@ -98,7 +98,6 @@ import { useMiscStore } from '~/stores/misc'
 import { useAuthStore } from '~/stores/auth'
 import { useGroupStore } from '~/stores/group'
 import { useIsochroneStore } from '~/stores/isochrone'
-// import loginRequired from '@/mixins/loginRequired.js'
 // import buildHead from '@/mixins/buildHead.js'
 // import map from '@/mixins/map.js'
 
@@ -160,8 +159,6 @@ export default {
       searchTerm,
     }
   },
-  // TODO
-  // mixins: [loginRequired, buildHead, map, isochroneMixin],
   data() {
     return {
       initialBounds: null,

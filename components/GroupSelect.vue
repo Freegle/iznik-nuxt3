@@ -46,7 +46,7 @@ export default {
     },
     value: {
       type: Number,
-      default: null,
+      default: 0,
     },
     // Whether we show "All my groups" or "Please choose a group"
     all: {
@@ -125,7 +125,7 @@ export default {
         return this.value
       },
       set(val) {
-        this.$emit('input', val)
+        this.$emit('update:modelValue', val)
 
         if (this.remember) {
           this.miscStore.set({
@@ -168,19 +168,19 @@ export default {
 
       if (this.all) {
         groups.push({
-          value: null,
+          value: 0,
           text: this.active
             ? '-- My active communities --'
             : this.allMy
             ? '-- All my communities --'
             : '-- All communities --',
-          selected: this.selectedGroup === null,
+          selected: this.selectedGroup === 0,
         })
       } else {
         groups.push({
-          value: null,
+          value: 0,
           text: '-- Please choose --',
-          selected: this.selectedGroup === null,
+          selected: this.selectedGroup === 0,
         })
       }
 
@@ -201,10 +201,9 @@ export default {
       for (const group of this.sortedGroups) {
         if (
           this.listall ||
-          (group.type === 'Freegle' &&
-            (!this.modonly ||
-              group.role === 'Owner' ||
-              group.role === 'Moderator'))
+          !this.modonly ||
+          group.role === 'Owner' ||
+          group.role === 'Moderator'
         ) {
           let text = group.namedisplay
 
@@ -221,6 +220,7 @@ export default {
               }
             })
           }
+
           groups.push({
             value: group.id,
             text,
@@ -243,15 +243,13 @@ export default {
     invalidSelection: {
       immediate: true,
       handler(val) {
-        if (val && this.restrict) this.selectedGroup = null
+        if (val && this.restrict) this.selectedGroup = 0
       },
     },
   },
   async mounted() {
     if (this.listall) {
-      await this.$store.dispatch('group/list', {
-        grouptype: 'Freegle',
-      })
+      await this.groupStore.fetch()
     }
 
     if (this.remember) {
