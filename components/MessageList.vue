@@ -27,11 +27,11 @@
         :distance="distance"
         @infinite="loadMore"
       >
-        <span slot="no-results" />
-        <span slot="no-more" />
-        <span slot="spinner">
+        <template #error>&nbsp;</template>
+        <template #complete>&nbsp;</template>
+        <template #spinner>
           <b-img-lazy src="/loader.gif" alt="Loading" />
-        </span>
+        </template>
       </infinite-loading>
       <NoticeMessage v-if="!busy && !loading && !messagesForList.length">
         <p>

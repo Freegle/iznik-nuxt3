@@ -128,7 +128,7 @@
               <b-form-input
                 v-model="search"
                 type="text"
-                placeholder="Search posts"
+                placeholder="Search posts TODO"
                 autocomplete="off"
                 @keyup.enter.exact="doSearch"
               />
