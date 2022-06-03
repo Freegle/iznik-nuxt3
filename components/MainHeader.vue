@@ -21,9 +21,10 @@
         />
       </nuxt-link>
       <div class="d-flex">
-        <nuxt-link class="mr-4" to="/give">Give</nuxt-link>
-        <nuxt-link class="mr-4" to="/browse">Browse</nuxt-link>
-        <nuxt-link class="mr-4" to="/explore">Explore</nuxt-link>
+        <b-button class="mr-4" variant="link" to="/give">Give</b-button>
+        <b-button class="mr-4" variant="link" to="/browse">Browse</b-button>
+        <b-button class="mr-4" variant="link" to="/explore">Explore</b-button>
+        <b-button class="mr-4" variant="link" @click="logout">Log Out</b-button>
       </div>
       <!--      </b-nav-brand>-->
       <client-only>
@@ -191,7 +192,7 @@
               id="menu-option-logout"
               no-prefetch
               class="text-center p-0 small"
-              @click="logOut"
+              @click="logout"
             >
               <v-icon icon="sign-out-alt" size="2x" /><br />
               <span class="nav-item__text">Logout</span>
@@ -402,7 +403,7 @@
             <v-icon icon="cog" size="2x" /><br />
             <span class="nav-item__text">Settings</span>
           </b-nav-item>
-          <b-nav-item no-prefetch class="text-center p-0" @click="logOut">
+          <b-nav-item no-prefetch class="text-center p-0" @click="logout">
             <v-icon icon="sign-out-alt" size="2x" /><br />
             <span class="nav-item__text">Logout</span>
           </b-nav-item>
@@ -531,14 +532,14 @@ export default {
     requestLogin() {
       this.$refs.loginModal.show()
     },
-    async logOut() {
+    async logout() {
       // Remove all cookies, both client and server.  This seems to be necessary to kill off the PHPSESSID cookie
       // on the server, which would otherwise keep us logged in despite our efforts.
       try {
         this.$cookies.removeAll()
       } catch (e) {}
 
-      await this.authStore.logOut()
+      await this.authStore.logout()
       this.authStore.forceLogin = false
 
       // Go to the landing page.
