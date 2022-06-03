@@ -360,7 +360,6 @@ export default {
       }
     },
     async showPostsFromNearby() {
-      // TODO Settings
       const settings = this.me.settings
       settings.browseView = 'nearby'
 

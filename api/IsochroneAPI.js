@@ -2,7 +2,7 @@ import BaseAPI from '@/api/BaseAPI'
 
 export default class IsochroneAPI extends BaseAPI {
   fetchv1(params) {
-    return this.$getv1('/isochrone', params)
+    return this.$get('/isochrone', params)
   }
 
   fetchv2(params) {

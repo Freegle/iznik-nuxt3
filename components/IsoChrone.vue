@@ -249,6 +249,7 @@ export default {
     },
     changeMinutes(newVal) {
       if (this.id) {
+        // TODO ISOCHRONE
         this.$store.dispatch('isochrones/edit', {
           id: this.id,
           minutes: this.minutes,

@@ -42,7 +42,7 @@ export default class BaseAPI {
     let data = null
 
     try {
-      const headers = {}
+      const headers = config.headers ? config.headers : {}
 
       const authStore = useAuthStore()
 
@@ -206,7 +206,7 @@ export default class BaseAPI {
     let data = null
 
     try {
-      const headers = {}
+      const headers = config.headers ? config.headers : {}
 
       const authStore = useAuthStore()
 
