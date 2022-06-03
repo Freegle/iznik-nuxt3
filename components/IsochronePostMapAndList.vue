@@ -281,7 +281,7 @@ export default {
       groupStore,
       messageStore,
       authStore,
-      selectedType,
+      selectedType: ref(selectedType),
       showGroups: ref(props.startOnGroups),
       groupids: ref(props.initialGroupIds),
       swlat: ref(props.initialBounds[0][0]),
@@ -498,7 +498,7 @@ export default {
       }
     },
     selectedType(newVal) {
-      this.mistStore.set({
+      this.miscStore.set({
         key: 'postType',
         value: newVal,
       })
