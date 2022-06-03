@@ -514,11 +514,6 @@ export default {
     messagesForList() {
       this.infiniteId++
     },
-    isochroneBounds() {
-      // TODO MINOR This causes screen flicker.  Would be better to kick the map in some way.
-      this.infiniteId++
-      this.bump++
-    },
   },
   mounted() {
     // We want to track views of messages for new members.

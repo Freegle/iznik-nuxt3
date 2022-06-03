@@ -111,6 +111,7 @@
 // import Vue3DraggableResizable from 'vue3-draggable-resizable'
 import 'vue3-draggable-resizable/dist/Vue3DraggableResizable.css'
 import cloneDeep from 'lodash.clonedeep'
+import { mapState } from 'pinia'
 import { useGroupStore } from '../stores/group'
 import { useMessageStore } from '../stores/message'
 import GroupMarker from './GroupMarker'
@@ -262,6 +263,7 @@ export default {
     }
   },
   computed: {
+    ...mapState(useIsochroneStore, { isochroneBounds: 'bounds' }),
     mapOptions() {
       return {
         zoomControl: true,
@@ -411,16 +413,22 @@ export default {
     },
   },
   watch: {
-    bounds() {
+    bounds(newVal, oldVal) {
+      if (oldVal !== null) {
+        this.moved = true
+      }
+
       this.getMessages()
     },
     zoom(newVal) {
       if (newVal < this.postZoom && !this.forceMessages) {
-        console.log('Force show groups')
         this.$emit('update:showGroups', true)
       } else {
         this.$emit('update:showGroups', false)
       }
+    },
+    isochroneBounds() {
+      this.getMessages()
     },
     groups: {
       immediate: true,
