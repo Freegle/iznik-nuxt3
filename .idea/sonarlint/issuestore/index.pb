@@ -149,8 +149,6 @@ I
 components/MainFooter.vue,c\c\cc6a9aac18da5b9383c700dfbf2d9ed1102fd280
 <
 constants.js,d\2\d22c4bff3d9040862d2e503976dad4d7e7b8cebd
->
-api/index.d.ts,0\0\003584391006adb2eb802f21f153baef81417fe6
 N
 components/GroupMarkerRich.vue,8\a\8aaa1071734bb3c6190c7aa7af2b31c432946e71
 M
@@ -177,8 +175,6 @@ Q
 !components/MessagePhotosModal.vue,a\9\a95aa902140bec73f38307d04824bdb6c4d66101
 N
 components/MessageTextBody.vue,f\5\f56e58283c5ca7270de883b4ad9cc16968c89cf2
-M
-components/MessageHistory.vue,5\a\5aae4eaa518c2c2a3c7dcd17b2a8069a5c7508d2
 R
 "components/MessageItemLocation.vue,c\6\c6411a71dd244fa85486a5d82c6db0a2d9aeb882
 X
@@ -187,8 +183,6 @@ J
 components/GroupMarker.vue,9\6\966e4c28c0c2f90ccc5b01f4e13501125e6ebd4b
 K
 api/MicroVolunteeringAPI.js,9\d\9d3cdd093c9c6954fc494af1ae02cadcfbef715e
-U
-%components/MessageHistoryExpanded.vue,3\0\3046957f838f82ace007b225cbbb8860f410f24e
 K
 components/MessageModal.vue,d\d\ddeb0c5394e3c331b036c9379f81912b1aa9c883
 K

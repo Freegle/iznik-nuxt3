@@ -65,6 +65,8 @@ const GroupHeader = () => import('~/components/GroupHeader.vue')
 
 const MIN_TO_SHOW = 10
 
+// TODO LoveJunk as per IsochronePostMap
+
 export default {
   components: {
     OurMessage,

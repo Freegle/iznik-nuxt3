@@ -8,9 +8,11 @@ import {
   faAngleDoubleRight,
   faArrowLeft,
   faBars,
+  faBicycle,
   faBookOpen,
   faBullhorn,
   faCamera,
+  faCar,
   faCheckCircle,
   faCircle,
   faCoffee,
@@ -31,6 +33,7 @@ import {
   faLock,
   faLockOpen,
   faMapMarkerAlt,
+  faMinus,
   faPlus,
   faQuestionCircle,
   faReply,
@@ -42,6 +45,7 @@ import {
   faTimesCircle,
   faTrashAlt,
   faUser,
+  faWalking,
 } from '@fortawesome/free-solid-svg-icons'
 
 library.add(
@@ -50,9 +54,11 @@ library.add(
   faAngleDoubleRight,
   faArrowLeft,
   faBars,
+  faBicycle,
   faBookOpen,
   faBullhorn,
   faCamera,
+  faCar,
   faCheckCircle,
   faCircle,
   faCoffee,
@@ -73,6 +79,7 @@ library.add(
   faLock,
   faLockOpen,
   faMapMarkerAlt,
+  faMinus,
   faPlus,
   faQuestionCircle,
   faReply,
@@ -83,7 +90,8 @@ library.add(
   faSync,
   faTimesCircle,
   faTrashAlt,
-  faUser
+  faUser,
+  faWalking
 )
 
 export default defineNuxtPlugin((nuxtApp) => {

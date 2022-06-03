@@ -56,18 +56,54 @@
                 track
               />
             </div>
-            <IsochronePostMapAndList
-              v-else-if="browseView === 'nearby'"
-              :key="'map-' + bump"
-              :initial-bounds="initialBounds"
-              :initial-search="searchTerm"
-              class="mt-2"
-              force-messages
-              group-info
-              jobs
-              :show-many="false"
-              can-hide
-            />
+            <div v-else>
+              <div class="mb-1 border p-2 bg-white">
+                <NoticeMessage
+                  v-if="!messagesOnMapCount && !me?.settings.mylocation"
+                  variant="warning"
+                >
+                  There are no posts in this area at the moment. You can check
+                  back later, or use the controls below:
+                  <ul>
+                    <li>
+                      The <em>Travel time</em> slider lets you see posts from
+                      further away.
+                    </li>
+                    <li>
+                      <!-- eslint-disable-next-line-->
+                      You can change your location in <nuxt-link to="/settings">Settings</nuxt-link>.
+                    </li>
+                    <li>
+                      The <em>Add location</em> link lets you show posts from
+                      another postcode.
+                    </li>
+                  </ul>
+                </NoticeMessage>
+                <NoticeMessage v-if="!isochrones.length" variant="warning">
+                  <p class="font-weight-bold">
+                    What's your postcode? We'll show you posts nearby.
+                  </p>
+                  <PostCode @selected="savePostcode" />
+                </NoticeMessage>
+                <IsoChrones />
+                <div class="small mt-1">
+                  <!-- eslint-disable-next-line-->
+                  Show posts from <b-button variant="link" size="sm" class="mb-1 p-0" @click="showPostsFromMyGroups">all my communities</b-button> instead.
+                </div>
+              </div>
+              <IsochronePostMapAndList
+                :key="'map-' + bump"
+                v-model:messagesOnMapCount="messagesOnMapCount"
+                :initial-bounds="initialBounds"
+                :initial-search="searchTerm"
+                class="mt-2"
+                force-messages
+                group-info
+                jobs
+                :show-many="false"
+                can-hide
+              />
+            </div>
           </div>
           <!--          TODO. Overlap with MainHeader?-->
           <!--          <AboutMeModal-->
@@ -166,14 +202,17 @@ export default {
       bump: 1,
       showAboutMe: false,
       reviewAboutMe: false,
+      messagesOnMapCount: 0,
     }
   },
   computed: {
     browseView() {
-      // TODO Not returned from server yet.  Change default back to nearby.
       return this?.me?.settings?.browseView
         ? this.me.settings.browseView
-        : 'mygroups'
+        : 'nearby'
+    },
+    isochrones() {
+      return this.isochroneStore.list
     },
   },
   watch: {
@@ -241,16 +280,7 @@ export default {
     async calculateInitialMapBounds() {
       // The initial bounds for the map are determined from the isochrones if possible.  We might have them cached
       // in store.
-      const isochrones = this.isochroneStore.list
-
-      if (!isochrones || !isochrones.length) {
-        // Not got them - fetch from server.
-        await this.isochroneStore.fetch()
-      } else {
-        // Got them - refresh in the background.
-        this.isochroneStore.fetch()
-      }
-
+      await this.isochroneStore.fetch()
       this.initialBounds = this.isochroneStore.bounds
 
       if (!this.initialBounds) {
@@ -277,20 +307,23 @@ export default {
               const wkt = new Wkt.Wkt()
               wkt.read(g.bbox)
               const obj = wkt.toObject()
-              const thisbounds = obj.getBounds()
-              const thissw = thisbounds.getSouthWest()
-              const thisne = thisbounds.getNorthEast()
 
-              if (
-                mylat >= thissw.lat &&
-                mylat <= thisne.lat &&
-                mylng >= thissw.lng &&
-                mylng <= thisne.lng
-              ) {
-                swlat = (thissw.lat + thisne.lat) / 2
-                swlng = thissw.lng
-                nelat = (thissw.lat + thisne.lat) / 2
-                nelng = thisne.lng
+              if (obj?.getBounds) {
+                const thisbounds = obj.getBounds()
+                const thissw = thisbounds.getSouthWest()
+                const thisne = thisbounds.getNorthEast()
+
+                if (
+                  mylat >= thissw.lat &&
+                  mylat <= thisne.lat &&
+                  mylng >= thissw.lng &&
+                  mylng <= thisne.lng
+                ) {
+                  swlat = (thissw.lat + thisne.lat) / 2
+                  swlng = thissw.lng
+                  nelat = (thissw.lat + thisne.lat) / 2
+                  nelng = thisne.lng
+                }
               }
             }
           })
@@ -334,6 +367,27 @@ export default {
       await this.authStore.saveAndGet({
         settings,
       })
+    },
+    async showPostsFromMyGroups() {
+      const settings = this.me.settings
+      settings.browseView = 'mygroups'
+
+      await this.authStore.saveAndGet({
+        settings,
+      })
+    },
+    async savePostcode(pc) {
+      const settings = this.me.settings
+
+      if (!settings.mylocation || settings.mylocation.id !== pc.id) {
+        settings.mylocation = pc
+        await this.authStore.saveAndGet({
+          settings,
+        })
+
+        // Now get an isochrone at this location.
+        await this.isochroneStore.fetch()
+      }
     },
   },
 }

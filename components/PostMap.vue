@@ -83,6 +83,14 @@
                 :size="largeGroupMarkers ? 'rich' : 'poor'"
               />
             </div>
+            <div v-if="showIsochrones">
+              <l-geojson
+                v-for="g in isochroneGEOJSONs"
+                :key="'isochrone' + g.id"
+                :geojson="g.json"
+                :options="isochroneOptions"
+              />
+            </div>
           </l-map>
           <!--          </vue3-draggable-resizable>-->
         </div>
@@ -100,6 +108,7 @@ import { useMessageStore } from '../stores/message'
 import GroupMarker from './GroupMarker'
 import BrowseHomeIcon from './BrowseHomeIcon'
 import { useMiscStore } from '~/stores/misc'
+import { useIsochroneStore } from '~/stores/isochrone'
 import { attribution, osmtile } from '~/composables/useMap'
 const ClusterMarker = () => import('./ClusterMarker')
 
@@ -111,6 +120,11 @@ export default {
     GroupMarker,
   },
   props: {
+    showIsochrones: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     initialBounds: {
       type: Array,
       required: true,
@@ -180,6 +194,7 @@ export default {
     const miscStore = useMiscStore()
     const groupStore = useGroupStore()
     const messageStore = useMessageStore()
+    const isochroneStore = useIsochroneStore()
 
     let L = null
 
@@ -192,6 +207,8 @@ export default {
       await import('leaflet-gesture-handling/dist/leaflet-gesture-handling.css')
       L.Map.addInitHook('addHandler', 'gestureHandling', GestureHandling)
     }
+
+    const Wkt = await import('wicket')
 
     const mapHeight = computed(() => {
       let height = 0
@@ -209,7 +226,9 @@ export default {
       miscStore,
       groupStore,
       messageStore,
+      isochroneStore,
       L,
+      Wkt,
       osmtile: osmtile(),
       attribution: attribution(),
       mapHeight,
@@ -229,6 +248,7 @@ export default {
       mapIdle: 0,
       center: null,
       bounds: null,
+      everFetched: false,
     }
   },
   computed: {
@@ -333,6 +353,79 @@ export default {
         ? this.messageLocations
         : []
     },
+    isochrones() {
+      return this.isochroneStore.list
+    },
+    isochroneGEOJSONs() {
+      const ret = []
+
+      this.isochrones.forEach((i) => {
+        const wkt = new this.Wkt.Wkt()
+        try {
+          wkt.read(i.polygon)
+          ret.push({
+            id: i.id,
+            json: wkt.toJson(),
+          })
+        } catch (e) {
+          console.log('WKT error', location, e)
+        }
+      })
+
+      return ret
+    },
+    isochroneOptions() {
+      return {
+        fillColor: 'darkblue',
+        fill: true,
+        fillOpacity: 0.2,
+        color: 'darkblue',
+      }
+    },
+    fetchedPrimaryMessages() {
+      return this.messageStore.primaryList
+    },
+    fetchedSecondaryMessages() {
+      return this.messageStore.secondaryList
+    },
+    primaryMessageList() {
+      if (!this.groupid && this.type === 'All') {
+        // No filtering - return them all.
+        return this.fetchedPrimaryMessages
+      } else {
+        return this.fetchedPrimaryMessages.filter((m) => {
+          return (
+            (!this.groupid || m.groupid === this.groupid) &&
+            (this.type === 'All' || m.type === this.type)
+          )
+        })
+      }
+    },
+    primaryMessageIds() {
+      const ret = []
+
+      this.primaryMessageList.forEach((m) => {
+        ret[m.id] = true
+      })
+
+      return ret
+    },
+    secondaryMessageList() {
+      if (this.fetchedSecondaryMessages.length > 200) {
+        // So many posts that the precise numbers no longer matter that much.  So return all the ones we have fetched
+        // rather than spend CPU on filtering (which is a significant issue on slow browsers).
+        return this.fetchedSecondaryMessages
+      } else {
+        // Return anything relevant we have fetched which is not already in the primary one.
+        return this.fetchedSecondaryMessages.filter((m) => {
+          return (
+            !this.primaryMessageIds[m.id] &&
+            (!this.groupid || m.groupid === this.groupid) &&
+            (this.type === 'All' || m.type === this.type)
+          )
+        })
+      }
+    },
   },
   watch: {
     bounds() {
@@ -421,7 +514,6 @@ export default {
             placeholder: 'Search for a place...',
             defaultMarkGeocode: false,
             geocoder: new Photon({
-              // this.L.Control.Geocoder.photon({
               geocodingQueryParams: {
                 bbox: '-7.57216793459, 49.959999905, 1.68153079591, 58.6350001085',
               },
@@ -515,14 +607,39 @@ export default {
         let params = null
 
         if (!this.search) {
-          // Get the messages in the map view.
-          messages = await this.messageStore.fetchInBounds(
-            swlat,
-            swlng,
-            nelat,
-            nelng,
-            this.groupid
-          )
+          if (this.showIsochrones) {
+            // The default view unless we've moved the map is the messages in the isochrones.
+            if (this.isochrones.length) {
+              // We have some.
+              params = {
+                subaction: 'isochrones',
+                groupid: this.groupid,
+                search: this.search,
+              }
+
+              messages = await this.isochroneStore.fetchMessages()
+            } else {
+              // We don't, which will be because we don't have a location.  Use the bounding boxes of the groups we
+              // are in.
+              const groupbounds = this.myGroupsBoundingBox
+              messages = await this.messageStore.fetchInBounds(
+                groupbounds[0][0],
+                groupbounds[0][1],
+                groupbounds[1][0],
+                groupbounds[1][1],
+                this.groupid
+              )
+            }
+          } else {
+            // Get the messages in the map view.
+            messages = await this.messageStore.fetchInBounds(
+              swlat,
+              swlng,
+              nelat,
+              nelng,
+              this.groupid
+            )
+          }
         } else {
           // We are searching.  Get the list of messages from the server.
           // eslint-disable-next-line no-lonely-if

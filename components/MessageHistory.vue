@@ -5,7 +5,7 @@
       :key="'message-' + message.id + '-' + group.id"
       class="text--small"
     >
-      <span :title="group.arrival">{{ $timeago(group.arrival) }} on </span>
+      <span :title="group.arrival">{{ timeago(group.arrival) }} on </span>
       <nuxt-link
         v-if="group.groupid in groups"
         :to="'/explore/' + groups[group.groupid].exploreLink"
@@ -28,6 +28,7 @@
 import dayjs from 'dayjs'
 import { useMessageStore } from '../stores/message'
 import { useGroupStore } from '~/stores/group'
+import { timeago } from '~/composables/useTimeFormat'
 
 export default {
   name: 'MessageHistory',
@@ -46,7 +47,7 @@ export default {
     const groupStore = useGroupStore()
     const messageStore = useMessageStore()
 
-    return { me, groupStore, messageStore }
+    return { me, groupStore, messageStore, timeago }
   },
   computed: {
     message() {

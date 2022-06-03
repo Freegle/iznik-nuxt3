@@ -1,21 +1,19 @@
 <template>
-  <client-only>
-    <div>
-      <label
-        v-if="label"
-        for="communitieslist"
-        :class="labelSrOnly ? 'sr-only' : ''"
-        >{{ label }}</label
-      >
-      <b-form-select
-        id="communitieslist"
-        v-model="selectedGroup"
-        :size="size"
-        :options="groupOptions"
-        :disabled="disabled"
-      />
-    </div>
-  </client-only>
+  <div>
+    <label
+      v-if="label"
+      for="communitieslist"
+      :class="labelSrOnly ? 'sr-only' : ''"
+      >{{ label }}</label
+    >
+    <b-form-select
+      id="communitieslist"
+      v-model="selectedGroup"
+      :size="size"
+      :options="groupOptions"
+      :disabled="disabled"
+    />
+  </div>
 </template>
 <script>
 import cloneDeep from 'lodash.clonedeep'

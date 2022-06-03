@@ -58,6 +58,22 @@ export const useMessageStore = defineStore({
       // TODO Cache
       return await api(this.config).message.mygroups()
     },
+    async fetchPrimaryMessages(params) {
+      const ret = await api(this.config).message.fetchMessages(params)
+
+      if (ret && ret.ret === 0) {
+        // TODO New API
+        this.primaryList = ret.messages
+      }
+    },
+    async fetchSecondaryMessages(params) {
+      const ret = await api(this.config).message.fetchMessages(params)
+
+      if (ret && ret.ret === 0) {
+        // TODO New API
+        this.secondaryList = ret.messages
+      }
+    },
     async view(id) {
       await api(this.config).message.view(id)
     },

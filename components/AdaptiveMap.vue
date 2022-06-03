@@ -425,7 +425,6 @@ export default {
     filteredMessages() {
       let ret = []
 
-      console.log('compute filtered')
       if (!this.search) {
         ret = this.messagesForList
       } else {
@@ -542,7 +541,7 @@ export default {
       }
     },
     selectedType(newVal) {
-      // TODO Store in server prefs.
+      // TODO MINOR Store in server prefs.
       this.miscStore.set({
         key: 'postType',
         value: newVal,
