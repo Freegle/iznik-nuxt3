@@ -223,7 +223,6 @@ export default {
   },
   watch: {
     bump() {
-      console.log('Bump message list')
       this.infiniteId++
     },
   },

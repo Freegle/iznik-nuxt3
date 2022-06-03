@@ -250,7 +250,7 @@ export default {
     changeMinutes(newVal) {
       if (this.id) {
         // TODO ISOCHRONE
-        this.$store.dispatch('isochrones/edit', {
+        this.isochroneStore.edit({
           id: this.id,
           minutes: this.minutes,
           transport: this.isochrone.transport,
@@ -259,7 +259,7 @@ export default {
     },
     changeTransport(type) {
       if (this.id) {
-        this.$store.dispatch('isochrones/edit', {
+        this.isochroneStore.edit({
           id: this.id,
           minutes: this.minutes,
           transport: type,
@@ -275,7 +275,7 @@ export default {
       this.pc = null
     },
     async add() {
-      await this.$store.dispatch('isochrones/add', {
+      await this.isochroneStore.add({
         minutes: this.minutes,
         transport: this.transport,
         locationid: this.pc.id,
@@ -289,7 +289,7 @@ export default {
       this.$emit('added')
     },
     remove() {
-      this.$store.dispatch('isochrones/delete', {
+      this.isochroneStore.delete({
         id: this.id,
       })
     },

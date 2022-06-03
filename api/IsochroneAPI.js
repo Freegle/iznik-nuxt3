@@ -12,4 +12,12 @@ export default class IsochroneAPI extends BaseAPI {
   fetchMessages(params) {
     return this.$getv2('/isochrone/message', params)
   }
+
+  patch(params) {
+    return this.$patch('/isochrone', params)
+  }
+
+  del(id) {
+    return this.$del('/isochrone', { id })
+  }
 }

@@ -24,12 +24,31 @@ export const useIsochroneStore = defineStore({
       } catch (e) {
         // Most likely a 403 error, which we get when there is no isochrone.  Call the old API, which will create one
         // for us.
-        this.list = await api(this.config).isochrone.fetchv1()
+        await api(this.config).isochrone.fetchv1()
+        this.list = await api(this.config).isochrone.fetchv2()
       }
     },
     async fetchMessages() {
       // TODO CACHE
       return await api(this.config).isochrone.fetchMessages()
+    },
+    async delete({ id }) {
+      await api(this.config).isochrone.del(id)
+      await this.fetch()
+    },
+    async add(params) {
+      const id = await api(this.config).isochrone.add(params)
+      await this.fetch()
+      return id
+    },
+    async edit(params) {
+      await api(this.config).isochrone.patch({
+        id: params.id,
+        transport: params.transport,
+        minutes: params.minutes,
+      })
+
+      await this.fetch()
     },
   },
   getters: {

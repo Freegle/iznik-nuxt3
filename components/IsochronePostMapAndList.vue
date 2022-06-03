@@ -167,12 +167,14 @@
 </template>
 <script>
 import { ref } from 'vue'
+import { mapState } from 'pinia'
 import { useGroupStore } from '../stores/group'
 import { useMessageStore } from '../stores/message'
 import { useAuthStore } from '~/stores/auth'
 import { useMiscStore } from '~/stores/misc'
 import { getDistance } from '~/composables/useMap'
 import { MAX_MAP_ZOOM } from '~/constants'
+import { useIsochroneStore } from '~/stores/isochrone'
 
 // import JoinWithConfirm from '~/components/JoinWithConfirm'
 const AdaptiveMapGroup = () => import('./AdaptiveMapGroup')
@@ -337,6 +339,7 @@ export default {
     }
   },
   computed: {
+    ...mapState(useIsochroneStore, { isochroneBounds: 'bounds' }),
     regions() {
       const regions = []
 
@@ -509,8 +512,12 @@ export default {
       }
     },
     messagesForList() {
-      this.toShow = 0
       this.infiniteId++
+    },
+    isochroneBounds() {
+      // TODO MINOR This causes screen flicker.  Would be better to kick the map in some way.
+      this.infiniteId++
+      this.bump++
     },
   },
   mounted() {
