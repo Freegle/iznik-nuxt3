@@ -13,9 +13,14 @@
       <div
         v-for="message in deDuplicatedMessages"
         :key="'messagelist-' + message.id"
+        :ref="'messagewrapper-' + message.id"
         class="p-0"
       >
-        <OurMessage :id="message.id" record-view />
+        <OurMessage
+          :id="message.id"
+          v-observe-visibility="messageVisible"
+          record-view
+        />
       </div>
     </div>
     <client-only>
@@ -66,6 +71,7 @@ const GroupHeader = () => import('~/components/GroupHeader.vue')
 const MIN_TO_SHOW = 10
 
 // TODO LoveJunk as per IsochronePostMap
+// TODO Ensure Message visible case of reply then go back to the list.
 
 export default {
   components: {
@@ -125,6 +131,8 @@ export default {
       busy: false,
       distance: 1000,
       toShow: MIN_TO_SHOW,
+      maxMessageVisible: 0,
+      ensuredMessageVisible: false,
     }
   },
   computed: {
@@ -138,6 +146,9 @@ export default {
       }
 
       return ret
+    },
+    filteredIdsToShow() {
+      return this.filteredMessagesToShow.map((m) => m.id)
     },
     filteredMessagesToShow() {
       const ret = []
@@ -280,6 +291,35 @@ export default {
     },
     visibilityChanged(visible) {
       this.$emit('update:visible', visible)
+    },
+    messageVisible(isVisible, entry) {
+      if (isVisible && entry) {
+        const tid = entry.target.id
+        const p = tid.indexOf('-')
+
+        if (p !== -1) {
+          const id = parseInt(tid.substring(p + 1))
+          console.log('Visible', id, this.maxMessageVisible)
+
+          if (id) {
+            this.maxMessageVisible = id
+            console.log('Save', this.messageStore.byId(id))
+
+            try {
+              history.replaceState(
+                {
+                  msgid: id,
+                },
+                null
+              )
+              console.log('Replaced state', id)
+            } catch (e) {
+              // Some browsers throw exceptions if this is called too frequently.
+              console.log('Ignore replaceState exception', e)
+            }
+          }
+        }
+      }
     },
   },
 }

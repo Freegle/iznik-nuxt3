@@ -309,13 +309,7 @@ export default {
       messagesOnMap: [],
       bump: 1,
 
-      // Infinite message scroll
-      ensureMessageVisible: null,
-      maxMessageVisible: null,
-      busy: false,
       infiniteId: +new Date(),
-      distance: 1000,
-      toShow: 0,
 
       // Filters
       typeOptions: [
@@ -380,7 +374,6 @@ export default {
       return msgs
     },
     messagesForListIds() {
-      // Remember that Vue2 doesn't support reactivity on Map() so we can't use that.
       return this.messagesForList.map((m) => parseInt(m.id))
     },
     filteredMessages() {
@@ -515,23 +508,6 @@ export default {
         this.searchOn = null
       }
     },
-    filteredMessages(newval) {
-      if (this.ensureMessageVisible) {
-        this.$nextTick(() => {
-          let ref = this.$refs['messagewrapper-' + this.ensureMessageVisible]
-
-          if (ref) {
-            // Dynamic refs returned as array.
-            ref = Array.isArray(ref) ? ref[0] : ref
-
-            if (ref) {
-              ref.scrollIntoView(false)
-              this.ensureMessageVisible = null
-            }
-          }
-        })
-      }
-    },
     messagesForList() {
       this.toShow = 0
       this.infiniteId++
@@ -539,6 +515,7 @@ export default {
   },
   mounted() {
     // We want to track views of messages for new members.
+    // TODO Track views - review code
     if (this.me) {
       this.trackViews = true
 
@@ -548,12 +525,6 @@ export default {
       } catch (e) {
         console.log('Failed to tag inspectlet')
       }
-    }
-
-    // We might have history which tells us to go back to a particular message. This is a common case on mobile -
-    // you view a message, reply, then go back and expect to be where you were in the list.
-    if (history && history.state && history.state.msgid) {
-      this.ensureMessageVisible = parseInt(history.state.msgid)
     }
   },
   methods: {

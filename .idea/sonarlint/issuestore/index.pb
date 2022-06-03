@@ -210,8 +210,6 @@ O
 .gitignore,a\5\a5cc2925ca8258af241be7e5b0381edf30266302
 K
 components/VisualiseMap.vue,6\a\6a69d8baeb5edf1ffc528f3293e12d7f7d8e000f
-I
-components/OurMessage.vue,5\7\570abf852657abfcbf2ddeb8d913088c95474015
 G
 components/PostItem.vue,8\8\882a7cbe44a39c73c1bae6410ac297868b1234b7
 P
