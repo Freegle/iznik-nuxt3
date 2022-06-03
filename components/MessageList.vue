@@ -16,11 +16,7 @@
         :ref="'messagewrapper-' + message.id"
         class="p-0"
       >
-        <OurMessage
-          :id="message.id"
-          v-observe-visibility="messageVisible"
-          record-view
-        />
+        <OurMessage :id="message.id" record-view />
       </div>
     </div>
     <client-only>
@@ -291,35 +287,6 @@ export default {
     },
     visibilityChanged(visible) {
       this.$emit('update:visible', visible)
-    },
-    messageVisible(isVisible, entry) {
-      if (isVisible && entry) {
-        const tid = entry.target.id
-        const p = tid.indexOf('-')
-
-        if (p !== -1) {
-          const id = parseInt(tid.substring(p + 1))
-          console.log('Visible', id, this.maxMessageVisible)
-
-          if (id) {
-            this.maxMessageVisible = id
-            console.log('Save', this.messageStore.byId(id))
-
-            try {
-              history.replaceState(
-                {
-                  msgid: id,
-                },
-                null
-              )
-              console.log('Replaced state', id)
-            } catch (e) {
-              // Some browsers throw exceptions if this is called too frequently.
-              console.log('Ignore replaceState exception', e)
-            }
-          }
-        }
-      }
     },
   },
 }

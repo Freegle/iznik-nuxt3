@@ -11,7 +11,7 @@
         :title="cluster.properties"
         @click="clusterClick(cluster)"
       >
-        <l-icon>
+        <l-icon :class-name="cssClass">
           <ClusterIcon
             :count="cluster.properties ? cluster.properties.point_count : 1"
             :tag="tag"
@@ -26,6 +26,7 @@
           cluster.geometry.coordinates[0],
         ]"
         :interactive="false"
+        :class-name="cssClass"
         @click="pointClick(cluster)"
       >
         <l-icon>

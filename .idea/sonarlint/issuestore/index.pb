@@ -153,10 +153,6 @@ N
 components/GroupMarkerRich.vue,8\a\8aaa1071734bb3c6190c7aa7af2b31c432946e71
 M
 components/BrowseHomeIcon.vue,7\2\72ba9751e86f7d8eecc45eb5c0cb1ea0e60a9a7d
-J
-components/ClusterIcon.vue,0\8\08970a418757cdcb9a6570dab0fa3edc73341e1d
-L
-components/ClusterMarker.vue,8\c\8c3f4b6c5cd87060a0e6239035627046c8ea2c2a
 P
  patches/@vue+shared+3.2.34.patch,7\b\7be1eba3d13b4a79dcfdf26e9941d2a285612132
 I

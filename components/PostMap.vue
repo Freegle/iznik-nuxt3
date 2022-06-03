@@ -61,6 +61,14 @@
                 tag="post"
                 @click="idle"
               />
+              <ClusterMarker
+                v-if="!moved"
+                :markers="secondaryMessagesForMap"
+                :map="mapObject"
+                tag="post"
+                css-class="fadedMarker"
+                @click="idle"
+              />
               <l-marker
                 v-if="me && me.settings && me.settings.mylocation"
                 :lat-lng="[me.lat, me.lng]"
@@ -237,7 +245,9 @@ export default {
   data() {
     return {
       context: null,
-      messageLocations: [],
+      messageList: [],
+      secondaryMessageList: [],
+      moved: false,
       mapObject: null,
       manyToShow: 20,
       shownMany: false,
@@ -274,8 +284,8 @@ export default {
     groups() {
       const ret = []
 
-      if (this.messageLocations) {
-        this.messageLocations.forEach((m) => {
+      if (this.messageList) {
+        this.messageList.forEach((m) => {
           if (!ret.includes(m.groupid)) {
             ret.push(m.groupid)
           }
@@ -347,10 +357,8 @@ export default {
       return sorted
     },
     messagesForMap() {
-      return this.mapObject &&
-        this.messageLocations &&
-        this.messageLocations.length
-        ? this.messageLocations
+      return this.mapObject && this.messageList && this.messageList.length
+        ? this.messageList
         : []
     },
     isochrones() {
@@ -382,35 +390,19 @@ export default {
         color: 'darkblue',
       }
     },
-    fetchedPrimaryMessages() {
-      return this.messageStore.primaryList
+    messageIds() {
+      return this.messageList.map((m) => m.id)
     },
-    fetchedSecondaryMessages() {
-      return this.messageStore.secondaryList
-    },
-    primaryMessageList() {
-      if (!this.groupid && this.type === 'All') {
-        // No filtering - return them all.
-        return this.fetchedPrimaryMessages
-      } else {
-        return this.fetchedPrimaryMessages.filter((m) => {
-          return (
-            (!this.groupid || m.groupid === this.groupid) &&
-            (this.type === 'All' || m.type === this.type)
-          )
-        })
-      }
-    },
-    secondaryMessageList() {
-      if (this.fetchedSecondaryMessages.length > 200) {
+    secondaryMessagesForMap() {
+      if (this.secondaryMessageList?.length > 200) {
         // So many posts that the precise numbers no longer matter that much.  So return all the ones we have fetched
         // rather than spend CPU on filtering (which is a significant issue on slow browsers).
-        return this.fetchedSecondaryMessages
+        return this.secondaryMessageList
       } else {
         // Return anything relevant we have fetched which is not already in the primary one.
-        return this.fetchedSecondaryMessages.filter((m) => {
+        return this.secondaryMessageList.filter((m) => {
           return (
-            !this.primaryMessageIds[m.id] &&
+            !this.messageIds[m.id] &&
             (!this.groupid || m.groupid === this.groupid) &&
             (this.type === 'All' || m.type === this.type)
           )
@@ -472,8 +464,6 @@ export default {
     },
   },
   mounted() {
-    this.messageLocations = this.initialMessageLocations
-
     if (this.mapHidden) {
       // Say we're ready so the parent can crack on.
       this.$emit('update:ready', true)
@@ -563,6 +553,7 @@ export default {
           if (this.lastBounds !== null) {
             // The map has now moved from the initial position.
             this.$emit('update:moved', true)
+            this.moved = true
           }
 
           this.lastBounds = bounds
@@ -598,7 +589,7 @@ export default {
         let params = null
 
         if (!this.search) {
-          if (this.showIsochrones) {
+          if (this.showIsochrones && !this.moved) {
             // The default view unless we've moved the map is the messages in the isochrones.
             if (this.isochrones.length) {
               // We have some.
@@ -610,6 +601,13 @@ export default {
 
               // TODO ISOCHRONES This just fetches the primary one - need to make it work with secondary too.
               messages = await this.isochroneStore.fetchMessages()
+
+              // Fetch the messages in bounds too, so that we can show those as secondary.
+              this.messageStore
+                .fetchInBounds(swlat, swlng, nelat, nelng, this.groupid)
+                .then((res) => {
+                  this.secondaryMessageList = res
+                })
             } else {
               // We don't, which will be because we don't have a location.  Use the bounding boxes of the groups we
               // are in.
@@ -716,7 +714,7 @@ export default {
           }
         }
 
-        this.messageLocations = messages
+        this.messageList = messages
         this.$emit('messages', messages)
         this.$emit('update:loading', false)
       }
@@ -803,5 +801,16 @@ export default {
 
 .pauto {
   pointer-events: auto;
+}
+
+:deep(.fadedMarker) {
+  filter: grayscale(100%);
+  z-index: -1 !important;
+
+  &.icon,
+  .icon {
+    border: 5px solid $color-gray--light;
+    opacity: 0.5;
+  }
 }
 </style>

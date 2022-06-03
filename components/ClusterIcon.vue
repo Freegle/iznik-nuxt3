@@ -1,6 +1,6 @@
 <template>
   <div
-    class="icon d-flex flex-column justify-content-center"
+    :class="'icon d-flex flex-column justify-content-center ' + className"
     @click="$emit('click')"
   >
     <span :class="{ small: count >= 1000, normal: count < 1000 }">
@@ -24,6 +24,11 @@ export default {
       type: String,
       required: false,
       default: null,
+    },
+    className: {
+      type: String,
+      required: false,
+      default: '',
     },
   },
   computed: {
