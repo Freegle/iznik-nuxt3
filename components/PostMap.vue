@@ -401,15 +401,6 @@ export default {
         })
       }
     },
-    primaryMessageIds() {
-      const ret = []
-
-      this.primaryMessageList.forEach((m) => {
-        ret[m.id] = true
-      })
-
-      return ret
-    },
     secondaryMessageList() {
       if (this.fetchedSecondaryMessages.length > 200) {
         // So many posts that the precise numbers no longer matter that much.  So return all the ones we have fetched
@@ -617,6 +608,7 @@ export default {
                 search: this.search,
               }
 
+              // TODO ISOCHRONES This just fetches the primary one - need to make it work with secondary too.
               messages = await this.isochroneStore.fetchMessages()
             } else {
               // We don't, which will be because we don't have a location.  Use the bounding boxes of the groups we

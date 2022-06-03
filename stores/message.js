@@ -7,10 +7,6 @@ export const useMessageStore = defineStore({
     config: {},
     list: {},
 
-    // Lists for Browse
-    primaryList: [],
-    secondaryList: [],
-
     // In bounds
     bounds: {},
 

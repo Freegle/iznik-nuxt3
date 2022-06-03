@@ -171,7 +171,7 @@ import { useGroupStore } from '../stores/group'
 import { useMessageStore } from '../stores/message'
 import { useAuthStore } from '~/stores/auth'
 import { useMiscStore } from '~/stores/misc'
-
+import { getDistance } from '~/composables/useMap'
 import { MAX_MAP_ZOOM } from '~/constants'
 
 // import JoinWithConfirm from '~/components/JoinWithConfirm'
@@ -459,7 +459,7 @@ export default {
                 // Visible group?
                 if (group.onmap && group.publish) {
                   // How far away?
-                  group.distance = this.getDistance(
+                  group.distance = getDistance(
                     [this.centre.lat, this.centre.lng],
                     [group.lat, group.lng]
                   )
@@ -472,7 +472,7 @@ export default {
                     ret.push(group)
                   } else if (group.altlat || group.altlng) {
                     // A few groups have two centres because they are large.
-                    group.distance = this.getDistance(
+                    group.distance = getDistance(
                       [this.centre.lat, this.centre.lng],
                       [group.altlat, group.altlng]
                     )
