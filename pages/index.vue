@@ -240,7 +240,7 @@ export default {
 .grid {
   display: grid;
   grid-template-columns: 1fr 1.2fr;
-  grid-template-rows: 1fr 50px minmax(50px, auto);
+  grid-template-rows: 1fr 300px minmax(50px, auto);
 
   @include media-breakpoint-up(sm) {
     grid-template-columns: 0.4fr 0.6fr;
