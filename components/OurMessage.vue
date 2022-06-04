@@ -49,7 +49,6 @@
     </div>
   </div>
 </template>
-
 <script>
 import { useMessageStore } from '../stores/message'
 import MessageModal from '@/components/MessageModal'
@@ -96,9 +95,7 @@ export default {
     },
   },
   async setup(props, ctx) {
-    const runtimeConfig = useRuntimeConfig()
     const messageStore = useMessageStore()
-    messageStore.init(runtimeConfig)
     const groupStore = useGroupStore()
 
     try {

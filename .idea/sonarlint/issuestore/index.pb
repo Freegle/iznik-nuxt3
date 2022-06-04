@@ -191,8 +191,6 @@ M
 components/WizardProgress.vue,c\5\c5cee26476a32e9e7931f1b7c26911992d127b79
 P
  components/GroupProfileImage.vue,b\5\b5858969667382ed852f57b40bf437322f3202f6
-K
-mixins/validationHelpers.js,d\8\d8807426ca312e6562e21d9620744c5d8394e916
 P
  components/EmailConfirmModal.vue,8\5\85863f32f2548b252403246764e16b9ae064f938
 K
@@ -204,21 +202,13 @@ O
 :
 
 .gitignore,a\5\a5cc2925ca8258af241be7e5b0381edf30266302
-K
-components/VisualiseMap.vue,6\a\6a69d8baeb5edf1ffc528f3293e12d7f7d8e000f
 G
 components/PostItem.vue,8\8\882a7cbe44a39c73c1bae6410ac297868b1234b7
 P
  components/PlaceAutocomplete.vue,9\d\9d3b190b2ceff83f1f01c1e10d5e5046e0d9d574
-K
-components/AutoComplete.vue,5\e\5e9b66b0135bf8d8a5aa72861458d81f449dfd75
-G
-pages/give/whereami.vue,4\d\4d1a10a0774f973186e55fe1562c48dade531666
 E
 composables/useMap.js,b\d\bdc7dcad8ae0ea34f942375058a2d2df30fb8d3b
 W
 'components/NumberIncrementDecrement.vue,d\0\d0947e5b809de8caed3221cd0f89350dd31fd4ca
-G
-components/PostCode.vue,5\0\50c8f0f680ba903904cd3e76ae907ebd5e30f071
 Q
 !components/ValidatingTextarea.vue,4\4\44c034de63c10e2a47e4374e3d102ab3715d21bb

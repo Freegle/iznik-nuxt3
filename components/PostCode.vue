@@ -12,7 +12,7 @@
           <AutoComplete
             :id="id"
             ref="autocomplete"
-            v-model="wip"
+            :init-value="wip"
             restrict
             :url="source"
             param="typeahead"

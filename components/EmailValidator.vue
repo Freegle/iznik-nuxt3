@@ -131,12 +131,12 @@ export default {
   },
   methods: {
     checkState(email) {
-      if (email !== this.email) {
-        // Emitting a null or '' value does not trigger an update of the prop in the parent.  I don't know whether
-        // this is intentional, but the consequence is that the email appears to remain valid.  By emitting a space
-        // we at least trigger this component to update and notice that the email is not valid.
-        this.$emit('update:email', email ? email.trim() : ' ')
+      // Emitting a null or '' value does not trigger an update of the prop in the parent.  I don't know whether
+      // this is intentional, but the consequence is that the email appears to remain valid.  By emitting a space
+      // we at least trigger this component to update and notice that the email is not valid.
+      this.$emit('update:email', email ? email.trim() : ' ')
 
+      if (this.v$.$reset) {
         if (email) {
           this.v$.$touch()
 

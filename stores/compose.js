@@ -1,32 +1,41 @@
 import { defineStore } from 'pinia'
 import { useMessageStore } from '~/stores/message'
+import api from '~/api'
+import { useAuthStore } from '~/stores/auth'
 
 export const useComposeStore = defineStore({
   id: 'compose',
   persist: {
     enabled: true,
     strategies: [
-      // We need to persist this to local storage so that the flows work when logged out - we may navigate away
-      // from the page to do login.
-      localStorage,
+      {
+        // We need to persist this to local storage so that the flows work when logged out - we may navigate away
+        // from the page to do login.
+        storage: localStorage,
+      },
     ],
   },
   // We allow composing of multiple posts for the same location/email, so messages and attachments are indexed by
   // id.  The id is a client-only index; it becomes a real id once the items are posted.
   state: () => ({
+    api: null,
     email: null,
     emailAt: null,
     postcode: null,
     group: null,
     messages: [],
-    attachments: {},
+    _attachments: {},
     attachmentBump: 1,
-    progress: 1,
+    _progress: 1,
     max: 4,
     uploading: false,
     lastSubmitted: 0,
   }),
   actions: {
+    init(config) {
+      this.config = config
+      this.$api = api(config)
+    },
     calculateSteps(type) {
       let steps = 0
 
@@ -46,15 +55,15 @@ export const useComposeStore = defineStore({
       }
 
       // Add an extra step to be used immediately to show we've started.
-      this.progress = 1
+      this._progress = 1
       this.max = steps + 2
     },
     async createDraft(message, email) {
       const attids = []
 
-      if (this.attachments[message.id]) {
-        for (const att in this.attachments[message.id]) {
-          attids.push(this.attachments[message.id][att].id)
+      if (this._attachments[message.id]) {
+        for (const att in this._attachments[message.id]) {
+          attids.push(this._attachments[message.id][att].id)
         }
       }
 
@@ -71,7 +80,7 @@ export const useComposeStore = defineStore({
       }
 
       const { id } = await this.$api.message.put(data)
-      this.progress++
+      this._progress++
       return id
     },
     async submitDraft(id, email) {
@@ -83,7 +92,7 @@ export const useComposeStore = defineStore({
         return data.ret !== 8 && data.ret !== 9
       })
       console.log('Returned', ret)
-      this.progress++
+      this._progress++
       return ret
     },
     markSubmitted(id, me) {
@@ -112,7 +121,7 @@ export const useComposeStore = defineStore({
         action: 'RejectToDraft',
       })
 
-      this.progress++
+      this._progress++
     },
     async updateIt(
       id,
@@ -138,7 +147,7 @@ export const useComposeStore = defineStore({
       const messageStore = useMessageStore()
       await messageStore.patch(data)
 
-      this.progress++
+      this._progress++
     },
     setEmail(email) {
       this.email = email
@@ -163,6 +172,7 @@ export const useComposeStore = defineStore({
           })
         }
 
+        console.log('Store pc', pc)
         this.postcode = pc
       }
     },
@@ -178,9 +188,7 @@ export const useComposeStore = defineStore({
         }
       }
     },
-    setMessage(message) {
-      // TODO me
-      const me = null
+    setMessage({ message, me }) {
       message.savedAt = Date.now()
       message.savedBy = me ? me.id : null
 
@@ -218,83 +226,25 @@ export const useComposeStore = defineStore({
       this.messages[id].savedAt = Date.now()
     },
     addAttachment(params) {
-      this.attachments[params.id] = this.attachments[params.id]
-        ? this.attachments[params.id]
+      this._attachments[params.id] = this._attachments[params.id]
+        ? this._attachments[params.id]
         : []
-      this.attachments[params.id].push(params.attachment)
+      this._attachments[params.id].push(params.attachment)
       console.log('Added attachment', params.id, params.attachment)
       this.attachmentBump++
     },
     setAttachmentsForMessage(params) {
-      this.attachments[params.id] = params.attachments
+      this._attachments[params.id] = params._attachments
     },
     removeAttachment(params) {
-      const newAtts = this.attachments[params.id].filter((obj) => {
+      const newAtts = this._attachments[params.id].filter((obj) => {
         return parseInt(obj.id) !== parseInt(params.photoid)
       })
 
-      this.attachments[params.id] = newAtts
+      this._attachments[params.id] = newAtts
     },
     deleteMessage(params) {
       this.messages = this.messages.filter((m) => m.id !== params.id)
-    },
-    async saveDraft(params) {
-      const messages = this.messages
-      console.log('Save drafts', messages, params.type)
-
-      this.calculateSteps(params.type)
-
-      // Before we do anything, give a spurious sense of progress.
-      this.progress++
-
-      for (const [id, message] of messages) {
-        if (message.type === params.type && !message.submitted) {
-          console.log(
-            'Save draft message',
-            id,
-            message,
-            this.attachments[message.id]
-          )
-
-          if (message.id < 0) {
-            // This is a draft we have composed on the client, which doesn't have a corresponding server message yet.
-            // We need to:
-            // - create a drafted
-            // - submit it
-            // - mark it in our store as submitted.
-            console.log('Draft', params.email)
-            await this.createDraft(message, params.email)
-          } else {
-            // This is one of our existing messages which we are reposting.  We need to convert it back to a draft,
-            // edit it (to update it from our client data), and then submit.
-            console.log('Existing message')
-            const id = message.id
-            await this.backToDraft(id)
-
-            const attids = []
-
-            if (this.attachments[message.id]) {
-              for (const att in this.attachments[message.id]) {
-                attids.push(this.attachments[message.id][att].id)
-              }
-            }
-
-            await this.updateIt(
-              id,
-              this.postcode.id,
-              message.type,
-              message.item,
-              message.description,
-              attids,
-              'availablenow' in message ? message.availablenow : 1,
-              this.group
-            )
-          }
-        }
-      }
-
-      console.log('Done')
-      this.clear()
     },
     async submit(params) {
       // This is the most important bit of code in the client :-).  We have our messages in the compose store.
@@ -311,28 +261,32 @@ export const useComposeStore = defineStore({
       this.calculateSteps(params.type)
 
       // Before we do anything, give a spurious sense of progress.
-      this.progress++
+      this._progress++
 
-      for (const [id, message] of messages) {
+      for (const id in messages) {
+        console.log('ID ', id)
+        const message = messages[id]
+
         if (message.type === params.type && !message.submitted) {
           console.log(
             'Submit message',
             id,
             this.email,
             message,
-            this.attachments[message.id]
+            this._attachments[message.id]
           )
 
           let result
 
-          if (message.id < 0) {
+          if (message.id <= 0) {
             // This is a draft we have composed on the client, which doesn't have a corresponding server message yet.
             // We need to:
             // - create a drafted
             // - submit it
             // - mark it in our store as submitted.
-            console.log('Draft')
+            console.log('Create draft')
             const id = await this.createDraft(message, this.email)
+            console.log('Created draft', id)
 
             const { groupid, newuser, newpassword } = await this.submitDraft(
               id,
@@ -349,9 +303,9 @@ export const useComposeStore = defineStore({
 
             const attids = []
 
-            if (this.attachments[message.id]) {
-              for (const att in this.attachments[message.id]) {
-                attids.push(this.attachments[message.id][att].id)
+            if (this._attachments[message.id]) {
+              for (const att in this._attachments[message.id]) {
+                attids.push(this._attachments[message.id][att].id)
               }
             }
 
@@ -377,15 +331,13 @@ export const useComposeStore = defineStore({
           console.log('Got result', result)
           results.push(result)
 
-          // TODO me
-          // const me = rootGetters['auth/user']
-          const me = null
+          const me = useAuthStore().user
           this.markSubmitted(result.id, me)
         }
       }
 
       console.log('Done')
-      this.clear()
+      this.clearMessages()
 
       // We might have done this logged out.  By the time it has completed we will have an account, so we want to make
       // sure that the login page pops up rather than the signup page.
@@ -415,8 +367,9 @@ export const useComposeStore = defineStore({
         }
       }
     },
-    clear() {
-      this.$reset()
+    clearMessages() {
+      this.messages = []
+      this._attachments = {}
     },
   },
   getters: {
@@ -447,12 +400,12 @@ export const useComposeStore = defineStore({
       return ret
     },
     attachments: (state) => (id) => {
-      return state.attachmentBump && state.attachments[id]
-        ? state.attachments[id]
+      return state.attachmentBump && state._attachments[id]
+        ? state._attachments[id]
         : []
     },
     progress: (state) => {
-      return (Math.min(state.progress, state.max - 1) * 100) / state.max
+      return (Math.min(state._progress, state.max - 1) * 100) / state.max
     },
     messageValid: (state) => (postType) => {
       // Is there at least one valid message of this type
@@ -466,7 +419,10 @@ export const useComposeStore = defineStore({
         valid = true
 
         for (const message of messages) {
-          const atts = Object.values(state.attachments(message.id))
+          const atts =
+            message.id in state._attachments
+              ? Object.values(state._attachments[message.id])
+              : []
 
           // A message is valid if there is an item, and either a description or a photo.
           if (

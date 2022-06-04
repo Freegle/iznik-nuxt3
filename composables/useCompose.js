@@ -3,11 +3,13 @@ import { ref, computed } from 'vue'
 import { useComposeStore } from '~/stores/compose'
 import { useGroupStore } from '~/stores/group'
 import { useMessageStore } from '~/stores/message'
+import { useAuthStore } from '~/stores/auth'
 
 export function setup(type) {
   // We can use this to set up a bunch of data and computed properties in a caller.
   const composeStore = useComposeStore()
   const groupStore = useGroupStore()
+  const authStore = useAuthStore()
 
   const postType = ref(type)
 
@@ -30,13 +32,11 @@ export function setup(type) {
     },
   })
 
-  // TODO me
-  const me = null
-
   const email = computed({
     get() {
       // See if we have a local email stored from last time we were logged in.
       let email = composeStore.email
+      const me = authStore.user
 
       if (!email && me && me.email) {
         // If we're logged in, then we have an email from that which takes precedence.
@@ -51,7 +51,7 @@ export function setup(type) {
   })
 
   const route = useRoute()
-  const initialPostcode = route.query.postcode ?? postcode?.name
+  const initialPostcode = route.query.postcode ?? composeStore.postcode?.name
 
   // We want to refetch the group in case its closed status has changed.
   const groupid = composeStore.group
@@ -64,8 +64,7 @@ export function setup(type) {
 
   const ids = computed(() => {
     // ids of messages we are composing.
-    // TODO me
-    const myid = null
+    const myid = authStore.user?.id
 
     const ids = []
     composeStore.all.forEach((message) => {
@@ -99,12 +98,13 @@ export function setup(type) {
   }
 
   return {
+    email,
     postType,
     submitting: ref(false),
     invalid: ref(false),
     notAllowed: ref(false),
     wentWrong: ref(false),
-    initialPostcode,
+    initialPostcode: ref(initialPostcode),
     group,
     postcode,
     closed: computed(() => group?.settings?.closed),
@@ -143,11 +143,13 @@ export function setup(type) {
     }),
     emailIsntOurs: computed(() => {
       let ret = false
+      const me = authStore.user
+      const em = email + ''
 
       if (email && me) {
         ret = !me.emails.find((e) => {
           return (
-            email
+            em
               .toLowerCase()
               .trim()
               .localeCompare(e.email.toLowerCase().trim()) === 0
@@ -234,6 +236,7 @@ export function addItem() {
 export async function freegleIt(type) {
   const composeStore = useComposeStore()
   const messageStore = useMessageStore()
+  const authStore = useAuthStore()
   const router = useRouter()
 
   this.submitting = true
@@ -251,15 +254,14 @@ export async function freegleIt(type) {
       newpassword: null,
     }
 
-    results.forEach((res) => {
+    await results.forEach(async (res) => {
       if (res.newuser) {
         params.newuser = res.newuser
         params.newpassword = res.newpassword
 
         // Fetch the session so that we know we're logged in, and so that we have permission to fetch messages
         // below.
-        // TODO me
-        // await this.fetchMe(['groups'], true)
+        await authStore.fetchUser()
       }
     })
 
@@ -267,13 +269,9 @@ export async function freegleIt(type) {
 
     if (results.length > 0 && results[0].groupid) {
       results.forEach((res) => {
+        console.log('Process result', res)
         params.justPosted.push(res.id)
-
-        promises.push(
-          messageStore.fetch({
-            id: res.id,
-          })
-        )
+        promises.push(messageStore.fetch(res.id))
       })
 
       await Promise.all(promises)
@@ -296,6 +294,8 @@ export async function freegleIt(type) {
       this.wentWrong = true
     }
   }
+
+  this.submitting = false
 }
 
 export function emailInUse(email) {

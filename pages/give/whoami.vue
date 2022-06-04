@@ -1,4 +1,3 @@
-\
 <template>
   <div>
     <client-only>
@@ -103,12 +102,13 @@
 <script>
 import { mapWritableState } from 'pinia'
 import { useComposeStore } from '../../stores/compose'
+import { useUserStore } from '../../stores/user'
 import EmailValidator from '~/components/EmailValidator'
 // import loginOptional from '@/mixins/loginOptional.js'
 // import buildHead from '@/mixins/buildHead.js'
 import NoticeMessage from '~/components/NoticeMessage'
 import ExternalLink from '~/components/ExternalLink'
-import { setup } from '~/composables/useCompose'
+import { setup, freegleIt } from '~/composables/useCompose'
 
 const EmailBelongsToSomeoneElse = () =>
   import('~/components/EmailBelongsToSomeoneElse')
@@ -143,7 +143,7 @@ export default {
   //   )
   // },
   computed: {
-    ...mapWritableState(useComposeStore, ['email']),
+    ...mapWritableState(useComposeStore, ['email', 'progress']),
   },
   mounted() {
     if (!this.messageValid) {
@@ -157,17 +157,17 @@ export default {
   methods: {
     async next() {
       this.emailBelongsToSomeoneElse = false
-      console.log('Check email', this.email)
 
       if (this.emailIsntOurs) {
         // Need to check if it's ok to use.
         console.log('Not ours')
-        const inuse = await this.emailInUse(this.email)
+        const userStore = useUserStore()
+        const inuse = await userStore.emailIsInUse(this.email)
 
         if (!inuse) {
           // Not in use - that's ok.
           console.log('Not in use')
-          this.freegleIt('Offer')
+          await freegleIt.call(this, 'Offer')
         } else {
           // We can't proceed.
           console.log('Belongs to someone else')
@@ -175,7 +175,7 @@ export default {
         }
       } else {
         console.log('One of ours')
-        this.freegleIt('Offer')
+        await freegleIt.call(this, 'Offer')
       }
     },
   },
