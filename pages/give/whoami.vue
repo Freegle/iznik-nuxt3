@@ -89,7 +89,7 @@
                 animate
                 variant="success"
               >
-                <b-progress-bar :value="progressValue" />
+                <b-progress-bar :value="progress" />
               </b-progress>
             </b-col>
           </b-row>
