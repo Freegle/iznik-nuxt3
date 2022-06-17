@@ -265,7 +265,7 @@
           <client-only>
             <b-nav-item v-if="!loggedIn" no-prefetch>
               <div class="btn btn-white" @click="requestLogin">
-                Sign in or Join
+                Log in or Join
               </div>
             </b-nav-item>
           </client-only>

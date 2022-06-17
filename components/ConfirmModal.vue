@@ -4,7 +4,7 @@
       <!-- eslint-disable-next-line -->
       <div v-html="message" />
     </template>
-    <template #modal-footer>
+    <template #footer>
       <b-button variant="white" @click="cancel"> Cancel </b-button>
       <b-button variant="primary" @click="confirm"> Confirm </b-button>
     </template>

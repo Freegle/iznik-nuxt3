@@ -11,23 +11,23 @@
     :no-close-on-esc="forceLogin"
   >
     <!-- This is required as the default bootstrap component makes the main title an h5 -->
-    <template slot="modal-title">
+    <template #title>
       <h2>Let's get freegling!</h2>
     </template>
     <p v-if="signUp" class="text-center">
-      You'll get emails. Name, approx. location, and profile picture are public
-      - you can hide your real name and picture from Settings. Logging in adds
-      cookies and local storage. Read
+      You'll get emails. Name, approximate location, and profile picture are
+      public - you can hide your real name and picture from Settings. Logging in
+      adds cookies and local storage. Read
       <nuxt-link target="_blank" to="/terms"> Terms of Use </nuxt-link> and
       <nuxt-link target="_blank" to="/privacy"> Privacy </nuxt-link> for
       details. Ok? Now come on in...
     </p>
     <p v-if="loginType" class="text-center font-weight-bold">
-      You usually sign in using {{ loginType }}.
+      You usually log in using {{ loginType }}.
     </p>
     <div class="d-flex flex-column flex-lg-row justify-content-between p-3">
       <div class="signin__section--social">
-        <h3 class="header--size5 pb-3">Continue with your social account</h3>
+        <h3 class="header--size5 pb-3">Log in with a social account</h3>
         <p v-if="signUp" class="font-weight-bold">
           Using one of these buttons is the easiest way to create an account:
         </p>
@@ -71,7 +71,7 @@
           >
         </b-button>
         <notice-message v-if="socialblocked" variant="warning">
-          Social sign in blocked - check your privacy settings, including any ad
+          Social log in blocked - check your privacy settings, including any ad
           blockers such as Adblock Plus.
         </notice-message>
         <b-alert v-if="socialLoginError" variant="danger" show>
@@ -88,16 +88,6 @@
           <span v-if="signUp"> Create an account on Freegle </span>
           <span v-else>Continue with your Freegle account</span>
         </h3>
-        <span v-if="signUp" class="text-center font-weight-bold">
-          Already a freegler?
-          <b-button
-            variant="link"
-            class="font-weight-bold pl-1 py-0 border-0 align-top"
-            @click="clickShowSignIn"
-          >
-            Sign In
-          </b-button>
-        </span>
         <b-form
           id="loginform"
           ref="form"
@@ -110,7 +100,7 @@
           <div v-if="signUp">
             <b-form-group
               id="firstnameGroup"
-              label="Your first name"
+              label="First name"
               label-for="firstname"
               label-class="mb-0"
             >
@@ -125,7 +115,7 @@
             </b-form-group>
             <b-form-group
               id="lastnameGroup"
-              label="Your last name"
+              label="Last name"
               label-for="lastname"
               label-class="mb-0"
             >
@@ -144,14 +134,14 @@
             v-model:email="email"
             v-model:valid="emailValid"
             size="md"
-            label="Your email address:"
+            label="Email address"
           />
           <NoticeMessage v-if="referToGoogleButton">
-            Please use the <em>Continue with Google</em> button to sign in. That
+            Please use the <em>Continue with Google</em> button to log in. That
             way you don't need to remember a password on this site.
           </NoticeMessage>
           <NoticeMessage v-if="referToYahooButton">
-            Please use the <em>Continue with Yahoo</em> button to sign in. That
+            Please use the <em>Continue with Yahoo</em> button to log in. That
             way you don't need to remember a password on this site.
           </NoticeMessage>
           <PasswordEntry v-model="password" :original-password="password" />
@@ -160,32 +150,40 @@
             block
             size="lg"
             variant="primary"
-            class="mb-2 mt-2"
+            class="mb-2 mt-2 w-100"
             type="submit"
             value="login"
             :disabled="nativeDisabled"
           >
-            <span v-if="!signUp"> Sign in to Freegle </span>
-            <span v-else> Sign up to Freegle </span>
+            <span v-if="!signUp"> Log in to Freegle </span>
+            <span v-else> Register on Freegle </span>
           </b-button>
           <b-alert v-if="nativeLoginError" variant="danger" show>
             Login Failed: {{ nativeLoginError }}
           </b-alert>
           <div v-if="!signUp" class="text-center">
-            <nuxt-link to="/forgot" @click.native="forgot">
+            <nuxt-link to="/forgot" class="nodecor" @click.native="forgot">
               I forgot my password
             </nuxt-link>
-            <p class="mb-0">
-              New freegler?
+            <p class="mb-0 text-center">
               <b-button
                 variant="link"
                 class="pl-1 pr-0 py-0 border-0 align-top"
                 @click="clickShowSignUp"
               >
-                Sign Up
+                New freegler? Register
               </b-button>
             </p>
           </div>
+          <p v-if="signUp" class="text-center font-weight-bold">
+            <b-button
+              variant="link"
+              class="font-weight-bold pl-1 py-0 border-0 align-top"
+              @click="clickShowSignIn"
+            >
+              Already a freegler? Log in
+            </b-button>
+          </p>
         </b-form>
       </div>
     </div>
@@ -369,7 +367,7 @@ export default {
       e.preventDefault()
       e.stopPropagation()
 
-      // Probably this is someone who is already a user and is trying to sign in, but has cleared their cache
+      // Probably this is someone who is already a user and is trying to log in, but has cleared their cache
       // (so we've forgotten that they've previously signed in) and hasn't noticed that they need to switch.
       const confused =
         !this.firstname && !this.lastname && this.email && this.password
@@ -430,7 +428,7 @@ export default {
         }
       } else if (this.email && this.password) {
         // Login
-        console.log('Sign in')
+        console.log('Log in')
         this.authStore
           .login({
             email: this.email,
@@ -788,5 +786,9 @@ $color-yahoo: #6b0094;
   @include media-breakpoint-up(lg) {
     margin: 7px 0 7px 0;
   }
+}
+
+:deep(.link a) {
+  text-decoration: none !important;
 }
 </style>

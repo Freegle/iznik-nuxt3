@@ -133,7 +133,7 @@ export const useAuthStore = defineStore({
         // We need to fetch the user to get the groups, persistent token etc.
         await this.fetchUser()
       } else {
-        // Sign up failed.
+        // Register failed.
         throw new SignUpError(ret, status)
       }
     },

@@ -69,7 +69,7 @@ export function setup(type) {
     const ids = []
     composeStore.all.forEach((message) => {
       // We don't want to return messages where we are logged in as one user but the message came from another.
-      // This can happen if you repost, don't complete, sign in as another user.  The server submit call will
+      // This can happen if you repost, don't complete, log in as another user.  The server submit call will
       // fail in that case, so we are better off not showing the message at all and letting them compose from
       // scratch.
       if (
