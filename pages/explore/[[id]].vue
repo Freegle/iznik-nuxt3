@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-row v-if="!group" class="m-0">
+    <b-row v-if="id && !group" class="m-0">
       <b-col cols="12" lg="6" class="p-0" offset-lg="3">
         <NoticeMessage variant="danger" class="mt-2">
           Sorry, we don't recognise that community name.
@@ -9,7 +9,18 @@
     </b-row>
     <b-row v-else class="m-0">
       <b-col cols="12" lg="6" class="p-0" offset-lg="3">
-        <ExploreGroup v-if="group.id" :id="group.id" />
+        <ExploreGroup v-if="group?.id" :id="group.id" />
+        <client-only v-else>
+          <AdaptiveMap
+            class="mt-2"
+            show-start-message
+            :initial-bounds="[
+              [49.959999905, -7.57216793459],
+              [58.6350001085, 1.68153079591],
+            ]"
+            start-on-groups
+          />
+        </client-only>
       </b-col>
     </b-row>
   </div>
@@ -28,7 +39,13 @@ export default {
     const route = useRoute()
     const id = route.params.id
 
-    await groupStore.fetch(route.params.id)
+    if (id) {
+      // Fetch the specific group.
+      await groupStore.fetch(route.params.id)
+    } else {
+      // Fetch all groups for the map.  No need to await - rendering the map is eye candy.
+      groupStore.fetch()
+    }
 
     return { id, groupStore }
   },
@@ -38,6 +55,5 @@ export default {
     },
   },
   // TODO Meta data
-  // TODO Other versions of this page.
 }
 </script>

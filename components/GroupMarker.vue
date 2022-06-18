@@ -8,7 +8,7 @@
     <l-icon v-if="size === 'rich'">
       <GroupMarkerRich :group="group" />
     </l-icon>
-    <l-icon v-else icon-url="/mapmarker.gif" />
+    <l-icon v-else icon-url="/mapmarker.gif" :icon-size="[15, 19]" />
     <l-tooltip v-if="size === 'poor'">
       {{ group.namedisplay }}
     </l-tooltip>
@@ -38,7 +38,6 @@ export default {
   },
 }
 </script>
-
 <style scoped lang="scss">
 .thick {
   border: 2px solid $color-green--darker !important;

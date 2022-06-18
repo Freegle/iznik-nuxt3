@@ -273,7 +273,6 @@ export default {
     const postMapInitialBounds = miscStore.get('postmaparea')
       ? miscStore.get('postmaparea')
       : props.initialBounds
-    // this.postMapInitialBounds = this.initialBounds
 
     let messagesInOwnGroups = []
 

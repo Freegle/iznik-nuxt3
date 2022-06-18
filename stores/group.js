@@ -23,6 +23,7 @@ export const useGroupStore = defineStore({
 
           groups.forEach((g) => {
             this.allGroups[g.nameshort] = g
+            this.list[g.id] = g
           })
         }
 

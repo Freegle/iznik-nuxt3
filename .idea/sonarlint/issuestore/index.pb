@@ -173,14 +173,10 @@ R
 "components/MessageItemLocation.vue,c\6\c6411a71dd244fa85486a5d82c6db0a2d9aeb882
 X
 (plugins/vue3-observe-visiblity.client.js,9\d\9dea7b767255299bc877c684fe4fc63568069c9f
-J
-components/GroupMarker.vue,9\6\966e4c28c0c2f90ccc5b01f4e13501125e6ebd4b
 K
 api/MicroVolunteeringAPI.js,9\d\9d3cdd093c9c6954fc494af1ae02cadcfbef715e
 K
 components/MessageModal.vue,d\d\ddeb0c5394e3c331b036c9379f81912b1aa9c883
-K
-components/ExploreGroup.vue,5\f\5f628598e13dcd16c03b307c280862323aad3b29
 F
 plugins/vue-leaflet.js,1\a\1aebed952f3161b933bd729ef93ae0e021b5271e
 M
@@ -191,14 +187,8 @@ M
 components/WizardProgress.vue,c\5\c5cee26476a32e9e7931f1b7c26911992d127b79
 P
  components/GroupProfileImage.vue,b\5\b5858969667382ed852f57b40bf437322f3202f6
-P
- components/EmailConfirmModal.vue,8\5\85863f32f2548b252403246764e16b9ae064f938
-K
-components/ConfirmModal.vue,f\e\fe4c8b0461c88fa51406bfcec16cde119a7b751f
 M
 components/MessageActions.vue,2\4\248ec0cabc015c096f25352e85ae4cba78047f87
-O
-components/AdaptiveMapGroup.vue,9\f\9f4b4d2079f03989f7f4faac70ff81c311447018
 :
 
 .gitignore,a\5\a5cc2925ca8258af241be7e5b0381edf30266302
