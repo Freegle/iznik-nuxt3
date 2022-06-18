@@ -276,7 +276,7 @@ export default {
 
     let messagesInOwnGroups = []
 
-    if (props.startOnGroups || props.forceMessages) {
+    if (authStore.user?.id && (props.startOnGroups || props.forceMessages)) {
       // Get the messages in our own groups for the initial view.
       messagesInOwnGroups = await messageStore.fetchMyGroups()
     }

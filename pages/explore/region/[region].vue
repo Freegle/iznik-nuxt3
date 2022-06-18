@@ -31,7 +31,6 @@ export default {
       ? route.params.region.trim().toLowerCase()
       : null
 
-    console.log('Region', region)
     // Get all the groups in store for the adaptive map.
     await groupStore.fetch()
 

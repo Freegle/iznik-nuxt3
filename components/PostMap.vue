@@ -83,7 +83,7 @@
                 </l-tooltip>
               </l-marker>
             </div>
-            <div v-else>
+            <div v-else-if="showGroups">
               <GroupMarker
                 v-for="g in groupsInBounds"
                 :key="'marker-' + g.id + '-' + zoom"
@@ -280,8 +280,14 @@ export default {
     showMessages() {
       // We're zoomed in far enough or we're forcing ourselves to show them (but not so that it's silly)
       return (
-        this.zoom >= this.postZoom || (this.forceMessages && this.zoom >= 7)
+        this.mapIdle > 0 &&
+        (this.zoom >= this.postZoom || (this.forceMessages && this.zoom >= 7))
       )
+    },
+    showGroups() {
+      // Don't show until the map has been idle - there is an issue with markers not destroying properly which this
+      // provokes.
+      return this.mapIdle > 0 && !this.showMessages
     },
     groups() {
       const ret = []
@@ -551,6 +557,7 @@ export default {
       })
     },
     idle() {
+      console.log('showMessages idle')
       this.mapIdle++
 
       if (this.mapObject) {

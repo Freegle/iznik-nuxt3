@@ -4,7 +4,6 @@
     :lat-lng="[group.lat, group.lng]"
     @click="goto"
   >
-    // TODO Bug Go to explore page, zoom out, expect to see markers.
     <l-icon v-if="size === 'rich'">
       <GroupMarkerRich :group="group" />
     </l-icon>

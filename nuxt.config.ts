@@ -7,7 +7,9 @@ export default defineNuxtConfig({
 
   // SSR true means that the pages will be rendered on generate.  SSR false means that the pages are generated but
   // only contain the scripts required to render on the client.
-  ssr: true,
+  //
+  // TODO SSR This is broken by pinia persist - see https://github.com/Seb-L/pinia-plugin-persist/issues/44
+  ssr: false,
 
   build: {
     // Reduce size of CSS initial load.
