@@ -1,0 +1,32 @@
+diff --git a/node_modules/@vue-leaflet/vue-leaflet/dist/vue-leaflet.esm.js b/node_modules/@vue-leaflet/vue-leaflet/dist/vue-leaflet.esm.js
+index 8229c4f..30746d7 100644
+--- a/node_modules/@vue-leaflet/vue-leaflet/dist/vue-leaflet.esm.js
++++ b/node_modules/@vue-leaflet/vue-leaflet/dist/vue-leaflet.esm.js
+@@ -1414,6 +1414,7 @@ var script$a = {
+       propsBinder(methods, {}, props);
+ 
+       const observer = new MutationObserver(scheduleHtmlSwap);
++
+       observer.observe(root.value, {
+         attributes: true,
+         childList: true,
+diff --git a/node_modules/@vue-leaflet/vue-leaflet/src/functions/layer.js b/node_modules/@vue-leaflet/vue-leaflet/src/functions/layer.js
+index 236ffb8..1ba3000 100644
+--- a/node_modules/@vue-leaflet/vue-leaflet/src/functions/layer.js
++++ b/node_modules/@vue-leaflet/vue-leaflet/src/functions/layer.js
+@@ -80,13 +80,13 @@ export const setup = (props, leafletRef, context) => {
+       leafletRef.value.bindTooltip(leafletObject);
+     },
+     unbindTooltip() {
+-      const tooltip = leafletRef.value ? leafletRef.value.getTooltip() : null;
++      const tooltip = leafletRef.value && isFunction(leafletRef.value.unbindTooltip) ? leafletRef.value.getTooltip() : null;
+       if (tooltip) {
+         tooltip.unbindTooltip();
+       }
+     },
+     unbindPopup() {
+-      const popup = leafletRef.value ? leafletRef.value.getPopup() : null;
++      const popup = leafletRef.value && isFunction(leafletRef.value.unbindTooltip) ? leafletRef.value.getPopup() : null;
+       if (popup) {
+         popup.unbindPopup();
+       }

@@ -185,8 +185,6 @@ F
 pages/message/[id].vue,f\9\f9bd92d8736dc3a61d26388a6e4153223a46b35d
 M
 components/WizardProgress.vue,c\5\c5cee26476a32e9e7931f1b7c26911992d127b79
-P
- components/GroupProfileImage.vue,b\5\b5858969667382ed852f57b40bf437322f3202f6
 M
 components/MessageActions.vue,2\4\248ec0cabc015c096f25352e85ae4cba78047f87
 :
