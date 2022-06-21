@@ -60,6 +60,8 @@
     "pluralize": "^8.0.0",
     "resize-observer-polyfill": "^1.5.1",
     "supercluster": "^7.1.5",
+    "turf-distance": "^3.0.12",
+    "turf-point": "^2.0.1",
     "v3-infinite-loading": "^1.0.6",
     "vue-filepond": "^7.0.3",
     "vue-highlight-words": "^2.0.0",

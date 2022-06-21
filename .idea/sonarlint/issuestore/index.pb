@@ -129,8 +129,6 @@ Q
 !components/MessageAttachments.vue,3\2\32575f0cd8b9f5844a2ba2c1267108721d45a662
 L
 components/ImageCarousel.vue,8\a\8a64bdf71cd9616196ebd5e7d026c538b362624c
-?
-api/GroupAPI.js,4\1\414bc5706d1863ea27a4157f8e8319dd5a58e315
 G
 components/HomeIcon.vue,7\c\7c623b1ef6a65a34ae9b19f7dd8ce32c19b03c11
 9
@@ -153,8 +151,6 @@ N
 components/GroupMarkerRich.vue,8\a\8aaa1071734bb3c6190c7aa7af2b31c432946e71
 M
 components/BrowseHomeIcon.vue,7\2\72ba9751e86f7d8eecc45eb5c0cb1ea0e60a9a7d
-P
- patches/@vue+shared+3.2.34.patch,7\b\7be1eba3d13b4a79dcfdf26e9941d2a285612132
 I
 components/MessageMap.vue,0\e\0ee9e7d53a75c705d4baac77103a58f29a72fa35
 L
@@ -175,8 +171,6 @@ X
 (plugins/vue3-observe-visiblity.client.js,9\d\9dea7b767255299bc877c684fe4fc63568069c9f
 K
 api/MicroVolunteeringAPI.js,9\d\9d3cdd093c9c6954fc494af1ae02cadcfbef715e
-K
-components/MessageModal.vue,d\d\ddeb0c5394e3c331b036c9379f81912b1aa9c883
 F
 plugins/vue-leaflet.js,1\a\1aebed952f3161b933bd729ef93ae0e021b5271e
 M

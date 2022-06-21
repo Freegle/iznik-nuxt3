@@ -16,14 +16,15 @@ export const useGroupStore = defineStore({
     },
     async fetch(id, force) {
       if (isNaN(id)) {
-        // Get by name.
+        // Get by name.  Case-insensitive.
+        id = id.toLowerCase()
+
         if (!this.allGroups[id]) {
           // Fetch all the groups.
           const groups = await api(this.config).group.list()
 
           groups.forEach((g) => {
-            this.allGroups[g.nameshort] = g
-            this.list[g.id] = g
+            this.allGroups[g.nameshort.toLowerCase()] = g
           })
         }
 
@@ -37,22 +38,14 @@ export const useGroupStore = defineStore({
       id = parseInt(id)
 
       if (force || !this.list[id]) {
-        const group = await api(this.config).group.fetch(
-          id,
-          // TODO How to handle extra information like this which slows down the call?
-          true,
-          true,
-          true,
-          true,
-          function (data) {
-            if (data && data.ret === 10) {
-              // Not hosting a group isn't worth logging.
-              return false
-            } else {
-              return true
-            }
+        const group = await api(this.config).group.fetch(id, function (data) {
+          if (data && data.ret === 10) {
+            // Not hosting a group isn't worth logging.
+            return false
+          } else {
+            return true
           }
-        )
+        })
 
         if (group) {
           this.list[group.id] = group

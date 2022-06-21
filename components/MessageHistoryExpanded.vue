@@ -70,11 +70,7 @@
             {{ groups[group.groupid].namedisplay }}
           </nuxt-link>
         </div>
-        <span
-          v-if="message.milesaway"
-          class="align-middle"
-          @click="showProfileModal"
-        >
+        <span v-if="milesaway" class="align-middle" @click="showProfileModal">
           About {{ milesPlural }} away
         </span>
       </div>
@@ -89,6 +85,7 @@
 </template>
 <script>
 import pluralize from 'pluralize'
+import { milesAway } from '../composables/useDistance'
 import ProfileImage from '@/components/ProfileImage'
 import { useMessageStore } from '~/stores/message'
 import { useGroupStore } from '~/stores/group'
@@ -116,8 +113,16 @@ export default {
     }
   },
   computed: {
+    milesaway() {
+      return milesAway(
+        this.me?.lat,
+        this.me?.lng,
+        this.message?.lat,
+        this.message?.lng
+      )
+    },
     milesPlural() {
-      return pluralize('mile', this.message.milesaway, true)
+      return pluralize('mile', this.milesaway, true)
     },
     openOfferPlural() {
       return this.message && this.message.fromuser && this.message.fromuser.info

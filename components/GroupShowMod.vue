@@ -1,4 +1,3 @@
-gr
 <template>
   <div :title="modtoshow.displayname">
     <ProfileImage
