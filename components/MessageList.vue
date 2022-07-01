@@ -155,7 +155,7 @@ export default {
       // - Don't show deleted posts.  Remember the map may lag a bit as it's only updated on cron, so we
       //   may be returned some.
       // - Do show completed posts - makes us look good.  But not too many.
-      //
+      // TODO Check that we filter crosspost duplicates, e.g. for user #41412221.
       for (let i = 0; i < this.messagesForList.length && i < this.toShow; i++) {
         const m = this.messagesForList[i]
 

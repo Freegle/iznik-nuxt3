@@ -77,7 +77,7 @@ export default class BaseAPI {
         ;({ status, data } = await this.$axios.request({
           ...config,
           method,
-          url: process.env.APIv1 + path,
+          url: this.ourConfig.public.APIv1 + path,
         }))
       } else if (e.message.match(/.*aborted.*/i)) {
         // We've seen requests get aborted immediately after beforeunload().  Makes sense to abort the requests
@@ -241,7 +241,7 @@ export default class BaseAPI {
         ;({ status, data } = await this.$axios.request({
           ...config,
           method,
-          url: process.env.APIv1 + path,
+          url: this.ourConfig.public.APIv1 + path,
         }))
       } else if (e.message.match(/.*aborted.*/i)) {
         // We've seen requests get aborted immediately after beforeunload().  Makes sense to abort the requests

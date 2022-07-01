@@ -15,44 +15,53 @@ export const useGroupStore = defineStore({
       this.config = config
     },
     async fetch(id, force) {
-      if (isNaN(id)) {
-        // Get by name.  Case-insensitive.
-        id = id.toLowerCase()
+      if (id) {
+        if (isNaN(id)) {
+          // Get by name.  Case-insensitive.
+          id = id.toLowerCase()
 
-        if (!this.allGroups[id]) {
-          // Fetch all the groups.
-          const groups = await api(this.config).group.list()
+          if (!this.allGroups[id]) {
+            // Fetch all the groups.
+            const groups = await api(this.config).group.list()
 
-          groups.forEach((g) => {
-            this.allGroups[g.nameshort.toLowerCase()] = g
-          })
-        }
-
-        if (!this.allGroups[id]) {
-          return null
-        }
-
-        id = this.allGroups[id].id
-      }
-
-      id = parseInt(id)
-
-      if (force || !this.list[id]) {
-        const group = await api(this.config).group.fetch(id, function (data) {
-          if (data && data.ret === 10) {
-            // Not hosting a group isn't worth logging.
-            return false
-          } else {
-            return true
+            groups.forEach((g) => {
+              this.allGroups[g.nameshort.toLowerCase()] = g
+            })
           }
-        })
 
-        if (group) {
-          this.list[group.id] = group
+          if (!this.allGroups[id]) {
+            return null
+          }
+
+          id = this.allGroups[id].id
         }
-      }
 
-      return this.list[id]
+        id = parseInt(id)
+
+        if (force || !this.list[id]) {
+          const group = await api(this.config).group.fetch(id, function (data) {
+            if (data && data.ret === 10) {
+              // Not hosting a group isn't worth logging.
+              return false
+            } else {
+              return true
+            }
+          })
+
+          if (group) {
+            this.list[group.id] = group
+          }
+        }
+
+        return this.list[id]
+      } else {
+        // Fetching all groups.
+        const groups = await api(this.config).group.list()
+
+        groups.forEach((g) => {
+          this.allGroups[g.nameshort.toLowerCase()] = g
+        })
+      }
     },
     remember(id, val) {
       this._remember[id] = val

@@ -556,7 +556,6 @@ export default {
     },
     messagesForList() {
       this.infiniteId++
-      console.log('Messages for list changed', this.infiniteId)
     },
   },
   methods: {

@@ -88,8 +88,11 @@ export default {
       this.$emit('remove', this.id)
     },
     rotate(deg) {
+      const runtimeConfig = useRuntimeConfig()
+      const api = runtimeConfig.APIv1
+
       this.$axios
-        .post(process.env.API + '/image', {
+        .post(api + '/image', {
           id: this.id,
           rotate: deg,
           bust: Date.now(),

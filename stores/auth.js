@@ -108,7 +108,10 @@ export const useAuthStore = defineStore({
       }
     },
     async lostPassword(params) {
-      const res = await this.$axios.post(process.env.API + '/session', {
+      const runtimeConfig = useRuntimeConfig()
+      const api = runtimeConfig.APIv1
+
+      const res = await this.$axios.post(api + '/session', {
         action: 'LostPassword',
         email: params.email,
       })
@@ -116,7 +119,10 @@ export const useAuthStore = defineStore({
       return res
     },
     async unsubscribe(params) {
-      const res = await this.$axios.post(process.env.API + '/session', {
+      const runtimeConfig = useRuntimeConfig()
+      const api = runtimeConfig.APIv1
+
+      const res = await this.$axios.post(api + '/session', {
         action: 'Unsubscribe',
         email: params.email,
       })
@@ -124,7 +130,10 @@ export const useAuthStore = defineStore({
       return res.data
     },
     async signup(params) {
-      const res = await this.$axios.put(process.env.API + '/user', params)
+      const runtimeConfig = useRuntimeConfig()
+      const api = runtimeConfig.APIv1
+
+      const res = await this.$axios.put(api + '/user', params)
       const { ret, status } = res.data
 
       if (res.status === 200 && res.data.ret === 0) {
