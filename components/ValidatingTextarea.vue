@@ -18,6 +18,6 @@
 import validationFieldHelpers from '@/mixins/validationFieldHelpers'
 
 export default {
-  mixins: [validationFieldHelpers]
+  mixins: [validationFieldHelpers],
 }
 </script>

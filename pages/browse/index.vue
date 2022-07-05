@@ -135,7 +135,6 @@ import { useAuthStore } from '~/stores/auth'
 import { useGroupStore } from '~/stores/group'
 import { useIsochroneStore } from '~/stores/isochrone'
 // import buildHead from '@/mixins/buildHead.js'
-// import map from '@/mixins/map.js'
 
 const AdaptiveMap = () => import('~/components/AdaptiveMap')
 const IsochronePostMapAndList = () =>

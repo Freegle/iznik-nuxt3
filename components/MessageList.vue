@@ -66,7 +66,6 @@ const GroupHeader = () => import('~/components/GroupHeader.vue')
 
 const MIN_TO_SHOW = 10
 
-// TODO LoveJunk as per IsochronePostMap
 // TODO Ensure Message visible case of reply then go back to the list.
 
 export default {

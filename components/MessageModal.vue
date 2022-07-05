@@ -52,7 +52,7 @@
             v-else
             class="d-flex flex-column -justify-content-around align-content-center"
           >
-            <b-img-lazy src="~/static/loader.gif" alt="Loading" />
+            <b-img src="/loader.gif" alt="Loading..." />
           </div>
         </template>
       </b-modal>

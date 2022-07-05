@@ -85,6 +85,7 @@
 </template>
 <script>
 import pluralize from 'pluralize'
+import dayjs from 'dayjs'
 import { milesAway } from '../composables/useDistance'
 import ProfileImage from '@/components/ProfileImage'
 import { useMessageStore } from '~/stores/message'
@@ -138,7 +139,7 @@ export default {
       return this.messageStore.byId(this.id)
     },
     today() {
-      return this.$dayjs(this.message.date).isSame(this.$dayjs(), 'day')
+      return dayjs(this.message.date).isSame(dayjs(), 'day')
     },
     groups() {
       const ret = {}

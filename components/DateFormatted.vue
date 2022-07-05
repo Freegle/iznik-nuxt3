@@ -11,6 +11,8 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 dayjs.extend(advancedFormat)
 dayjs.extend(relativeTime)
 
+// TODO MINOR Search for other examples of dayjs which should use this.
+
 export default {
   props: {
     value: {

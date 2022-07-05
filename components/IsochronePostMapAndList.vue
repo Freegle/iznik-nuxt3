@@ -146,7 +146,6 @@
         <!--        <JobsTopBar-->
         <!--          v-if="jobs"-->
         <!--          class="d-block d-lg-none"-->
-        <!--          :shown-love-junk="shownLoveJunk"-->
         <!--        />-->
 
         <h2 class="sr-only">List of wanteds and offers</h2>
@@ -333,9 +332,6 @@ export default {
       context: null,
       trackViews: false,
       trackedView: false,
-
-      // LoveJunk
-      shownLoveJunk: false,
     }
   },
   computed: {

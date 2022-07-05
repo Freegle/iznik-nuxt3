@@ -24,6 +24,7 @@
         <b-button class="mr-4" variant="link" to="/give">Give</b-button>
         <b-button class="mr-4" variant="link" to="/browse">Browse</b-button>
         <b-button class="mr-4" variant="link" to="/explore">Explore</b-button>
+        <b-button class="mr-4" variant="link" to="/chats">Chats</b-button>
         <b-button class="mr-4" variant="link" @click="logout">Log Out</b-button>
       </div>
       <!--      </b-nav-brand>-->

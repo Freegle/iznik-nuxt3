@@ -3,6 +3,8 @@
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import {
+  faArrowCircleLeft,
+  faArrowCircleRight,
   faAngleDoubleDown,
   faAngleDoubleLeft,
   faAngleDoubleRight,
@@ -13,6 +15,7 @@ import {
   faBullhorn,
   faCamera,
   faCar,
+  faCheck,
   faCheckCircle,
   faCircle,
   faCoffee,
@@ -49,10 +52,13 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 
 library.add(
+  faArrowLeft,
+  faArrowCircleRight,
+  faArrowCircleLeft,
+  faArrowCircleRight,
   faAngleDoubleDown,
   faAngleDoubleLeft,
   faAngleDoubleRight,
-  faArrowLeft,
   faBars,
   faBicycle,
   faBookOpen,
@@ -60,6 +66,7 @@ library.add(
   faCamera,
   faCar,
   faCheckCircle,
+  faCheck,
   faCircle,
   faCoffee,
   faCog,

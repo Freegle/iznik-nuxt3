@@ -1,26 +1,13 @@
 import BaseAPI from '@/api/BaseAPI'
 
 export default class ChatAPI extends BaseAPI {
-  fetch(chatid, { limit, context }) {
-    return chatid
-      ? this.$get(
-          `/chat/rooms/${chatid}/messages`,
-          { limit, context },
-          function (data) {
-            if (data && data.ret === 2) {
-              // We handle this in the chat page
-              return false
-            } else {
-              return true
-            }
-          }
-        )
-      : this.$get(`/chatmessages`, { limit, context })
+  fetchMessages(chatid) {
+    // TODO Chat paging
+    return this.$getv2(`/chat/${chatid}/message`)
   }
 
-  async listChats(params) {
-    const { chatrooms } = await this.$get('/chat/rooms', params)
-    return chatrooms
+  async listChats() {
+    return await this.$getv2('/chat')
   }
 
   fetchChat(chatid) {
