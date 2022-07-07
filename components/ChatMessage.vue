@@ -7,7 +7,6 @@
           :chatmessage="chatmessage"
           :otheruser="otheruser"
           :pov="pov"
-          :chatusers="chatusers"
           :highlight-emails="highlightEmails"
         />
       </div>
@@ -17,7 +16,6 @@
         :chatmessage="chatmessage"
         :otheruser="otheruser"
         :pov="pov"
-        :chatusers="chatusers"
       />
       <div v-else-if="chatmessage.type === 'Interested'">
         <chat-message-interested
@@ -26,7 +24,6 @@
           :chatmessage="chatmessage"
           :otheruser="otheruser"
           :pov="pov"
-          :chatusers="chatusers"
           :highlight-emails="highlightEmails"
         />
       </div>
@@ -37,7 +34,6 @@
           :chatmessage="chatmessage"
           :otheruser="otheruser"
           :pov="pov"
-          :chatusers="chatusers"
         />
       </div>
       <div v-else-if="chatmessage.type === 'Promised' && otheruser">
@@ -47,7 +43,6 @@
           :chatmessage="chatmessage"
           :otheruser="otheruser"
           :pov="pov"
-          :chatusers="chatusers"
         />
       </div>
       <div v-else-if="chatmessage.type === 'Reneged' && otheruser">
@@ -57,7 +52,6 @@
           :chatmessage="chatmessage"
           :otheruser="otheruser"
           :pov="pov"
-          :chatusers="chatusers"
         />
       </div>
       <div v-else-if="chatmessage.type === 'Address' && otheruser">
@@ -67,7 +61,6 @@
           :chatmessage="chatmessage"
           :otheruser="otheruser"
           :pov="pov"
-          :chatusers="chatusers"
         />
       </div>
       <div v-else-if="chatmessage.type === 'Nudge' && otheruser">
@@ -77,7 +70,6 @@
           :chatmessage="chatmessage"
           :otheruser="otheruser"
           :pov="pov"
-          :chatusers="chatusers"
         />
       </div>
       <div v-else-if="chatmessage.type === 'ModMail'">
@@ -86,7 +78,6 @@
           :chatmessage="chatmessage"
           :otheruser="null"
           :pov="pov"
-          :chatusers="chatusers"
         />
       </div>
       <div v-else-if="chatmessage.type === 'Schedule' && otheruser">
@@ -96,7 +87,6 @@
           :chatmessage="chatmessage"
           :otheruser="otheruser"
           :pov="pov"
-          :chatusers="chatusers"
         />
       </div>
       <div v-else-if="chatmessage.type === 'ScheduleUpdated' && otheruser">
@@ -106,16 +96,6 @@
           :chatmessage="chatmessage"
           :otheruser="otheruser"
           :pov="pov"
-          :chatusers="chatusers"
-        />
-      </div>
-      <div v-else-if="chatmessage.type === 'ReportedUser'">
-        <chat-message-report
-          :chat="chat"
-          :chatmessage="chatmessage"
-          :otheruser="otheruser"
-          :pov="pov"
-          :chatusers="chatusers"
         />
       </div>
       <div v-else-if="supportOrAdmin">
@@ -128,7 +108,6 @@
         :otheruser="otheruser"
         :last="last"
         :pov="pov"
-        :chatusers="chatusers"
       />
       <div v-if="selected">
         <b-button variant="link" @click="markUnseen"> Mark unread </b-button>
@@ -149,11 +128,10 @@ import ChatMessageNudge from './ChatMessageNudge'
 import ChatMessageDateRead from './ChatMessageDateRead'
 import ChatMessageModMail from './ChatMessageModMail'
 import ChatMessageSchedule from './ChatMessageSchedule'
-import ChatMessageReport from './ChatMessageReport'
 import ChatMessageWarning from '~/components/ChatMessageWarning'
 import 'vue-simple-context-menu/dist/vue-simple-context-menu.css'
 
-// System chat message doesn't seem to be used; ReportedUser is for ModTools only.
+// System chat message doesn't seem to be used;
 export default {
   components: {
     ChatMessageWarning,
@@ -168,7 +146,6 @@ export default {
     ChatMessageNudge,
     ChatMessageModMail,
     ChatMessageSchedule,
-    ChatMessageReport,
   },
   props: {
     chat: {
@@ -194,10 +171,6 @@ export default {
       required: false,
       default: null,
     },
-    chatusers: {
-      type: Array,
-      required: true,
-    },
     highlightEmails: {
       type: Boolean,
       required: false,
@@ -211,7 +184,6 @@ export default {
   },
   data() {
     return {
-      uniqueid: '',
       selected: false,
       options: [
         {
@@ -219,9 +191,6 @@ export default {
         },
       ],
     }
-  },
-  async mounted() {
-    this.uniqueid = await this.$store.dispatch('uniqueid/generate')
   },
   methods: {
     selectMe() {

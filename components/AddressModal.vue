@@ -133,7 +133,7 @@
             </b-row>
           </div>
         </template>
-        <template slot="modal-footer">
+        <template #footer>
           <b-button v-if="!choose" variant="white" @click="hide">
             Close
           </b-button>
@@ -155,7 +155,6 @@
 <script>
 import SpinButton from './SpinButton'
 import modal from '@/mixins/modal'
-import map from '@/mixins/map'
 import PostCode from '~/components/PostCode'
 
 export default {
@@ -163,7 +162,7 @@ export default {
     PostCode,
     SpinButton,
   },
-  mixins: [modal, map],
+  mixins: [modal],
   props: {
     choose: {
       type: Boolean,

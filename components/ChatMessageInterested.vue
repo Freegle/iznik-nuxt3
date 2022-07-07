@@ -21,7 +21,6 @@
         </div>
         <div
           v-if="
-            !modtools &&
             refmsg &&
             refmsg.type === 'Offer' &&
             (!refmsg.outcomes || !refmsg.outcomes.length)
@@ -158,9 +157,6 @@ export default {
   extends: ChatBase,
 
   computed: {
-    modtools() {
-      return this.$store.getters['misc/get']('modtools')
-    },
     replyusers() {
       const ret = []
       const retids = []

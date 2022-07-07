@@ -2,8 +2,9 @@
   <div />
 </template>
 <script>
+import { useUserStore } from '../stores/user'
 import { twem } from '~/composables/useTwem'
-import { EMAIL_REGEX, URL_REGEX } from '~/constants'
+import { EMAIL_REGEX } from '~/constants'
 
 export default {
   props: {
@@ -30,43 +31,35 @@ export default {
       required: false,
       default: null,
     },
-    chatusers: {
-      type: Array,
-      required: true,
-    },
     highlightEmails: {
       type: Boolean,
       required: false,
       default: false,
     },
   },
+  setup() {
+    const userStore = useUserStore()
+    let chatMessageUser = null
+
+    // Get the user for the message.
+    console.log('Fetch user', this.chatmessage?.userid)
+    if (this.chatmessage?.userid) {
+      userStore.fetch(this.chatmessage.userid)
+      chatMessageUser = computed(() => userStore.get(this.chatmessage.userid))
+    }
+
+    return { userStore, chatMessageUser }
+  },
   computed: {
-    modtools() {
-      return this.$store.getters['misc/get']('modtools')
-    },
     regexEmail() {
       return EMAIL_REGEX
     },
     emessage() {
-      let trim = this.chatmessage.message
+      const trim = this.chatmessage.message
         .replace(/(\r\n|\r|\n){2,}/g, '$1\n')
         .trim()
 
-      if (this.modtools) {
-        // Make links clickable.  We only do this on modtools to avoid members clicking on unsafe links without
-        // more effort.
-        trim = trim.replace(
-          URL_REGEX,
-          (match) => `<a href="${match}">${match}</a>`
-        )
-      }
-
-      return twem.twem(this.$twemoji, trim)
-    },
-    chatMessageUser() {
-      return this.chatusers.find((u) => {
-        return u.id === this.chatmessage.userid
-      })
+      return twem(trim)
     },
     chatMessageProfileImage() {
       return this.chatMessageUser
@@ -94,17 +87,8 @@ export default {
     },
     messageIsFromCurrentUser() {
       if (this.chat.chattype === 'User2Mod') {
-        // For User2Mod chats we want it on the right hand side we sent it, or if we're in MT and the sender of this
-        // message is not the user with whom the chat is (i.e. it's a mod).
-        const modtools = this.$store.getters['misc/get']('modtools')
-
-        return (
-          this.chatmessage.userid === this.me.id ||
-          (modtools &&
-            this.chat &&
-            this.chat.user1 &&
-            this.chat.user1.id !== this.chatmessage.userid)
-        )
+        // For User2Mod chats we want it on the right hand side we sent it.
+        return this.chatmessage.userid === this.me.id
       } else {
         return this.chatmessage.userid === this.me.id
       }

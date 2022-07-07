@@ -55,13 +55,7 @@ export default {
         chatid: null,
       })
 
-      const modtools = this.$store.getters['misc/get']('modtools')
-
-      if (modtools) {
-        this.$router.push('/modtools/chats')
-      } else {
-        this.$router.push('/chats')
-      }
+      this.$router.push('/chats')
     },
   },
 }

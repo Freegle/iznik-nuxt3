@@ -1,5 +1,8 @@
 // Vue v3 doesn't support filters, so we have a global mixin which defines methods to achieve the same goal.
 import dayjs from 'dayjs'
+import isToday from 'dayjs/plugin/isToday'
+
+dayjs.extend(isToday)
 
 export function timeago(val) {
   // dayjs pluralises wrongly in some cases - we've seen 1 hours ago.

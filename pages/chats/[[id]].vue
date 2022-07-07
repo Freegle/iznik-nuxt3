@@ -1,6 +1,6 @@
 <template>
   <client-only>
-    <b-container fluid>
+    <div>
       <h1 class="sr-only">Chats</h1>
       <b-row class="m-0">
         <b-col
@@ -92,8 +92,9 @@
                 : ['md', 'lg', 'xl']
             "
           >
+            <ChatNotVisible v-if="notVisible" />
             <ChatPane
-              v-if="selectedChatId"
+              v-else-if="selectedChatId"
               :id="selectedChatId"
               :key="'chatpane-' + selectedChatId"
             />
@@ -116,7 +117,7 @@
         ref="chathideall"
         @confirm="hideAll"
       />
-    </b-container>
+    </div>
   </client-only>
 </template>
 <script>
@@ -145,21 +146,25 @@ export default {
     ChatListEntry,
     ChatHideModal,
   },
-  setup(props) {
+  async setup(props) {
     const route = useRoute()
     let { selectedChatId } = setupChat()
+    let notVisible = false
 
     selectedChatId = parseInt(route.params.id)
 
-    // Fetch the list of chats.  No need to await.
+    // Fetch the list of chats.
     const chatStore = useChatStore()
-    chatStore.fetchChats()
+    await chatStore.fetchChats()
 
-    if (selectedChatId) {
+    if (!chatStore.byId(selectedChatId)) {
+      // This isn't a chat we can see.
+      notVisible = true
+    } else {
       chatStore.fetchMessages(selectedChatId)
     }
 
-    return { chatStore, selectedChatId }
+    return { chatStore, selectedChatId, notVisible }
   },
   data() {
     return {
@@ -167,6 +172,10 @@ export default {
       showHideAllModal: false,
       showChats: 20,
       search: null,
+      searching: false, // TODO Search
+      complete: false, // TODO Show older,
+      bump: 0, // TODO Minor is this used?,
+      distance: 1000,
     }
   },
   // TODO Head
@@ -178,7 +187,7 @@ export default {
   // },
   computed: {
     filteredChats() {
-      let chats = this.chatStore.list
+      let chats = this.chatStore.list ? this.chatStore.list : []
 
       if (chats && this.search && this.searching) {
         // We apply the search on names in here so that we can respond on the client rapidly while the background server
@@ -224,7 +233,7 @@ export default {
   methods: {
     fetchOlder() {
       this.showingOlder = true
-      this.listChats('11 September 2009')
+      this.chatStore.fetchChats('11 September 2009')
     },
     showHideAll() {
       this.showHideAllModal = true
@@ -242,8 +251,7 @@ export default {
         })
       }
 
-      const modtools = this.$store.getters['misc/get']('modtools')
-      this.$router.push((modtools ? '/modtools' : '') + '/chats')
+      this.$router.push('/chats')
     },
     loadMore($state) {
       // We use an infinite scroll on the list of chats because even though we have all the data in hand, the less
@@ -258,6 +266,16 @@ export default {
       } else {
         $state.loaded()
       }
+    },
+    async markAllRead() {
+      // TODO Minor speed up
+      for (const chat of this.sortedChats) {
+        if (chat.unseen) {
+          await this.chatStore.markSeen(chat.id)
+        }
+      }
+
+      this.chatStore.fetchChats()
     },
   },
 }

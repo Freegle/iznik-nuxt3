@@ -13,6 +13,7 @@
         />
       </div>
       <div class="w-100">
+        <!--        TODO MINOR Chat name can overflow without truncation.-->
         <!-- eslint-disable-next-line-->
         <span class="pl-0 mb-0 chatname truncate d-flex justify-content-between">{{ chat.name }} <SupporterInfo v-if="supporter" class="mr-3 mt-1 small" /></span>
         <!-- eslint-disable-next-line-->

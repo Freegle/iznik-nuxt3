@@ -5,18 +5,10 @@
   >
     <div class="chatMessage forcebreak chatMessage__owner">
       <span v-if="!highlightEmails">
-        <span v-if="modtools">
-          <!-- eslint-disable-next-line-->
-          <span v-if="messageIsNew" class="prewrap font-weight-bold" v-html="emessage" />
-          <!-- eslint-disable-next-line-->
-          <span v-else class="preline forcebreak" v-html="emessage" />
-        </span>
-        <span v-else>
-          <span v-if="messageIsNew" class="prewrap font-weight-bold">{{
-            emessage
-          }}</span>
-          <span v-else class="preline forcebreak">{{ emessage }}</span>
-        </span>
+        <span v-if="messageIsNew" class="prewrap font-weight-bold">{{
+          emessage
+        }}</span>
+        <span v-else class="preline forcebreak">{{ emessage }}</span>
         <b-img
           v-if="chatmessage.image"
           fluid

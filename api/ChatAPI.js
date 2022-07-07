@@ -6,8 +6,11 @@ export default class ChatAPI extends BaseAPI {
     return this.$getv2(`/chat/${chatid}/message`)
   }
 
-  async listChats() {
-    return await this.$getv2('/chat')
+  async listChats(since) {
+    return await this.$getv2('/chat', {
+      // TODO Server needs to support this
+      age: since,
+    })
   }
 
   fetchChat(chatid) {
@@ -17,6 +20,7 @@ export default class ChatAPI extends BaseAPI {
   markSeen(chatid, lastmsg, allowback) {
     return this.$post('/chatrooms', {
       id: chatid,
+      // TODO Minor are these parameters used?
       lastmsgseen: lastmsg,
       allowback,
     })
@@ -53,10 +57,9 @@ export default class ChatAPI extends BaseAPI {
   }
 
   unseenCount(chatid) {
-    const modtools = this.store.getters['misc/get']('modtools')
     return this.$get('/chatrooms', {
       count: true,
-      chattypes: modtools ? ['User2Mod', 'Mod2Mod'] : ['User2User', 'User2Mod'],
+      chattypes: ['User2User', 'User2Mod'],
     })
   }
 

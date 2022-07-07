@@ -114,8 +114,8 @@
         click the <em>Promise</em> button. And you can come back here later.
       </p>
     </template>
-    <template slot="modal-footer" slot-scope="{ cancel }">
-      <b-button variant="white" @click="cancel"> Cancel </b-button>
+    <template #footer>
+      <b-button variant="white" @click="hide"> Cancel </b-button>
       <b-button variant="primary" :disabled="buttonDisabled" @click="promise">
         Promise
       </b-button>

@@ -163,7 +163,7 @@
           please adjust the numbers above.
         </NoticeMessage>
       </template>
-      <template slot="modal-footer">
+      <template #footer>
         <div>
           <div class="d-flex flex-wrap justify-content-end">
             <b-button variant="secondary" @click="cancel"> Cancel </b-button>

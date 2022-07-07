@@ -25,7 +25,7 @@
         </p>
       </div>
     </template>
-    <template slot="modal-footer">
+    <template #footer>
       <div v-if="chaseup" class="d-flex justify-content-between w-100">
         <b-button variant="secondary" @click="no"> No thanks </b-button>
         <b-button variant="primary" @click="yes"> Yes please </b-button>

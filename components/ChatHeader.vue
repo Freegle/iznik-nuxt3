@@ -127,7 +127,7 @@
           @click="collapsed = true"
         >
           <v-icon
-            name="chevron-circle-up"
+            icon="chevron-circle-up"
             scale="2"
             class="text-faded"
             title="Collapse this section"
@@ -176,7 +176,7 @@
         @click="collapsed = false"
       >
         <v-icon
-          name="chevron-down"
+          icon="chevron-down"
           scale="2"
           class="text-faded"
           title="Expand this section"
@@ -216,6 +216,8 @@
   </div>
 </template>
 <script>
+import { useChatStore } from '../stores/chat'
+import { useMiscStore } from '~/stores/misc'
 import SupporterInfo from '~/components/SupporterInfo'
 
 const ChatBlockModal = () => import('./ChatBlockModal')
@@ -233,13 +235,28 @@ export default {
     ChatHideModal,
     ChatReportModal,
   },
+  props: {
+    id: {
+      type: Number,
+      required: true,
+    },
+  },
+  setup() {
+    const chatStore = useChatStore()
+    const miscStore = useMiscStore()
+
+    return { chatStore, miscStore }
+  },
   computed: {
+    chat() {
+      return this.chatStore.byId(this.id)
+    },
     collapsed: {
       get() {
-        return this.$store.getters['misc/get']('chatinfoheader')
+        return this.miscStore.get('chatinfoheader')
       },
       set(newVal) {
-        this.$store.dispatch('misc/set', {
+        this.miscStore.set({
           key: 'chatinfoheader',
           value: newVal,
         })
@@ -263,8 +280,7 @@ export default {
         id: this.id,
       })
 
-      const modtools = this.$store.getters['misc/get']('modtools')
-      this.$router.push((modtools ? '/modtools' : '') + '/chats')
+      this.$router.push('/chats')
     },
   },
 }

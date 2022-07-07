@@ -5,10 +5,7 @@
       v-model:unread-notification-count="unreadNotificationCount"
     />
     <main>
-      <slot
-        ref="pageContent"
-        class="ml-0 ps-0 pe-sm-1 pe-0 pe-sm-1 pageContent"
-      />
+      <slot ref="pageContent" class="ml-0 ps-0 pe-0 pageContent" />
     </main>
     <!--    <BouncingEmail />-->
     <div class="navbar-toggle" style="display: none" />

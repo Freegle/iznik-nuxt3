@@ -10,10 +10,28 @@ export const useUserStore = defineStore({
     init(config) {
       this.config = config
     },
-
     async emailIsInUse(params) {
       const ret = await api(this.config).user.fetch(params)
       return ret && ret.id
+    },
+    async fetch(id, force) {
+      id = parseInt(id)
+
+      if (force || !this.list[id]) {
+        // TODO Caching
+        const user = await api(this.config).user.fetch(id)
+
+        if (user) {
+          this.list[id] = user
+        }
+      }
+
+      return this.list[id]
+    },
+  },
+  getters: {
+    byId: (state) => {
+      return (id) => state.list[id]
     },
   },
 })

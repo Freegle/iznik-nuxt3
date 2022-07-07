@@ -5,8 +5,6 @@
 tsconfig.json,6\1\61ebb9fd6e8cf9082658121d5d81e297791dacd0
 J
 assets/css/typography.scss,d\9\d9431d166b4172c2373982ce3ad0394b7490a4df
-K
-assets/css/_color-vars.scss,3\4\347b52873c29ed03c5d958796a92eafa7522a09f
 ;
 .prettierrc,2\0\20137a9e94744624390b6748bc96df5ca1579b71
 Q
@@ -149,12 +147,8 @@ M
 components/BrowseHomeIcon.vue,7\2\72ba9751e86f7d8eecc45eb5c0cb1ea0e60a9a7d
 I
 components/MessageMap.vue,0\e\0ee9e7d53a75c705d4baac77103a58f29a72fa35
-L
-composables/useTimeFormat.js,7\0\709cd036b5a035c9c2d61cf9319ff01fac902f33
 I
 components/MessageTag.vue,1\7\1737762721b62c5df052b6fa89fa8e5993fae57e
-L
-components/VisualiseUser.vue,0\7\072091229f974ec9e0c97f6ce963c14d3b9800d0
 Q
 !components/MessageDescription.vue,6\c\6c96dfe19f731d5129d1814fa2f450c829370288
 Q
@@ -224,18 +218,12 @@ H
 stores/auth.js,f\1\f13119e39f6f4d4f27ecdda7f114db1962f4c5c2
 C
 capacitor.config.ts,d\b\db2de0c4fdaae9c34a88b5558ef0e682f154a8d9
-C
-layouts/default.vue,f\8\f82bd9fd254b878380d49bf1912fcdc115084492
 P
  components/BreakpointFettler.vue,8\e\8e34afee9b1c7f0452507b4d997c7b9391ffae33
 >
 stores/misc.js,c\1\c1582899917559222f8ff905a7ddb3681240ae51
-A
-stores/message.js,2\b\2b3bd949929b1f7fbe9b5946475e839f21a2e845
 ?
 pages/index.vue,f\f\ff87ee14320f4d3dd6a94ef6dde25ffe0b16242a
-F
-pages/message/[id].vue,f\9\f9bd92d8736dc3a61d26388a6e4153223a46b35d
 H
 pages/explore/[[id]].vue,c\c\cccf021088b437283e4b7891434146d8d05f0273
 J

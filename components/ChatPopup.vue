@@ -92,7 +92,6 @@
                       chatmessage.id ===
                       chatmessages[chatmessages.length - 1].id
                     "
-                    :chatusers="chatusers"
                   />
                 </li>
               </ul>
@@ -350,11 +349,8 @@ export default {
       this.$store.dispatch('popupchats/hide', { id: this.chat.id })
     },
     maximise() {
-      const modtools = this.$store.getters['misc/get']('modtools')
       this.$store.dispatch('popupchats/hide', { id: this.chat.id })
-      this.$router.push(
-        (modtools ? '/modtools' : '') + '/chats/' + this.chat.id
-      )
+      this.$router.push('/chats/' + this.chat.id)
     },
     onResize(x, y, width, height) {
       this.$store.dispatch('popupchats/popup', {

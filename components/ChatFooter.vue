@@ -284,7 +284,7 @@
             class="fa-spin"
             title="Sending..."
           />
-          <v-icon v-else name="angle-double-right" title="Send" />
+          <v-icon v-else icon="angle-double-right" title="Send" />
         </b-button>
       </div>
     </div>
@@ -300,7 +300,7 @@
       :id="otheruser ? otheruser.id : null"
       ref="profile"
     />
-    <AddressModal ref="addressModal" :choose="true" @chosen="sendAddress" />
+    <!--    <AddressModal ref="addressModal" :choose="true" @chosen="sendAddress" TODO />-->
     <ChatRSVPModal v-if="RSVP" :id="id" ref="rsvp" :user="otheruser" />
     <NudgeTooSoonWarningModal ref="nudgetoosoonwarning" @confirm="doNudge" />
     <NudgeWarningModal ref="nudgewarning" @confirm="doNudge" />
@@ -316,7 +316,6 @@ const UserRatings = () => import('~/components/UserRatings')
 const PromiseModal = () => import('~/components/PromiseModal')
 const ProfileModal = () => import('~/components/ProfileModal')
 const NoticeMessage = () => import('~/components/NoticeMessage')
-const AddressModal = () => import('~/components/AddressModal')
 const ChatRSVPModal = () => import('~/components/ChatRSVPModal')
 const NudgeWarningModal = () => import('~/components/NudgeWarningModal')
 const NudgeTooSoonWarningModal = () =>
@@ -333,22 +332,21 @@ export default {
     NoticeMessage,
     PromiseModal,
     ProfileModal,
-    AddressModal,
     ChatRSVPModal,
     MicroVolunteering,
   },
+  data() {
+    return {
+      sending: false,
+      showMicrovolunteering: false,
+    }
+  },
   computed: {
     noticesToShow() {
-      const modtools = this.$store.getters['misc/get']('modtools')
-
       return (
         this.badratings ||
         this.expectedreply ||
-        (this.spammer && this.spammer.collection !== 'Whitelisted') ||
-        (modtools &&
-          this.otheruser &&
-          this.otheruser.comments &&
-          this.otheruser.comments.length)
+        (this.spammer && this.spammer.collection !== 'Whitelisted')
       )
     },
   },

@@ -26,8 +26,8 @@
         </b-col>
       </b-row>
     </template>
-    <template slot="modal-footer" slot-scope="{ cancel }">
-      <b-button variant="white" @click="cancel"> Close </b-button>
+    <template #footer>
+      <b-button variant="white" @click="hide"> Close </b-button>
       <b-button variant="primary" @click="send"> Send Report </b-button>
     </template>
   </b-modal>

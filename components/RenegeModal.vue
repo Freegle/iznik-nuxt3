@@ -36,8 +36,8 @@
       </p>
       <UserRatings :id="selectedUser" class="mt-2" size="lg" />
     </template>
-    <template slot="modal-footer" slot-scope="{ cancel }">
-      <b-button variant="white" @click="cancel"> Cancel </b-button>
+    <template #footer>
+      <b-button variant="white" @click="hide"> Cancel </b-button>
       <b-button variant="warning" @click="renege"> Unpromise </b-button>
     </template>
   </b-modal>
