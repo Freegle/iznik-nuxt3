@@ -52,7 +52,7 @@
           </notice-message>
         </div>
         <div
-          class="float-right ml-2 mr-2 mt-2 clickme"
+          class="float-end ml-2 mr-2 mt-2 clickme"
           title="Hide warnings"
           @click="showNotices = false"
         >
@@ -180,17 +180,17 @@
             <v-icon icon="question-circle" /> Central
           </external-link>
         </span>
-        <b-button variant="primary" class="float-right ml-1" @click="send">
+        <b-button variant="primary" class="float-end ml-1" @click="send">
           Send&nbsp;
           <v-icon
             v-if="sending"
-            name="sync"
+            icon="sync"
             class="fa-spin"
             title="Sending..."
           />
-          <v-icon v-else name="angle-double-right" title="Send" />
+          <v-icon v-else icon="angle-double-right" title="Send" />
         </b-button>
-        <b-button variant="secondary" class="float-right" @click="photoAdd">
+        <b-button variant="secondary" class="float-end" @click="photoAdd">
           <v-icon icon="camera" />
         </b-button>
       </div>
@@ -202,7 +202,7 @@
           class="ml-1 mr-2"
           @click="promise(null)"
         >
-          <v-icon scale="2" name="handshake" class="fa-mob" />
+          <v-icon scale="2" icon="handshake" class="fa-mob" />
           <div class="mobtext text--smallest">Promise</div>
         </div>
         <div
@@ -213,7 +213,7 @@
           class="mr-2"
           @click="addressBook"
         >
-          <v-icon scale="2" name="address-book" class="fa-mob" />
+          <v-icon scale="2" icon="address-book" class="fa-mob" />
           <div class="mobtext text--smallest">Address</div>
         </div>
         <div
@@ -223,7 +223,7 @@
           class="mr-2"
           @click="spamReport"
         >
-          <v-icon scale="2" name="ban" class="fa-mob" />
+          <v-icon scale="2" icon="ban" class="fa-mob" />
           <div class="mobtext text--smallest">Spammer</div>
         </div>
         <div
@@ -236,7 +236,7 @@
             href="https://discourse.ilovefreegle.org/c/central"
             class="nocolor"
           >
-            <v-icon scale="2" name="question-circle" class="fa-mob" />
+            <v-icon scale="2" icon="question-circle" class="fa-mob" />
           </external-link>
           <div class="mobtext text--smallest">Central</div>
         </div>
@@ -253,7 +253,7 @@
           class="mr-2"
           @click="nudge"
         >
-          <v-icon scale="2" name="bell" class="fa-mob" />
+          <v-icon scale="2" icon="bell" class="fa-mob" />
           <div class="mobtext text--smallest">Nudge</div>
         </div>
         <div
@@ -269,18 +269,18 @@
           class="mr-2"
           @click="nudgeTooSoon"
         >
-          <v-icon scale="2" name="bell" class="fa-mob" />
+          <v-icon scale="2" icon="bell" class="fa-mob" />
           <div class="mobtext text--smallest">Nudge</div>
         </div>
         <div class="" @click="photoAdd">
-          <v-icon scale="2" name="camera" class="fa-mob" />
+          <v-icon scale="2" icon="camera" class="fa-mob" />
           <div class="mobtext text--smallest">Photo</div>
         </div>
         <b-button variant="primary" @click="send">
           Send
           <v-icon
             v-if="sending"
-            name="sync"
+            icon="sync"
             class="fa-spin"
             title="Sending..."
           />
@@ -308,6 +308,7 @@
   </div>
 </template>
 <script>
+import { setupChat } from '../composables/useChat'
 import ExternalLink from './ExternalLink'
 
 // Don't use dynamic imports because it stops us being able to scroll to the bottom after render.
@@ -335,10 +336,19 @@ export default {
     ChatRSVPModal,
     MicroVolunteering,
   },
+  props: {
+    id: { type: Number, required: true },
+  },
+  setup(props) {
+    const { chat } = setupChat(props.id)
+
+    return { chat }
+  },
   data() {
     return {
       sending: false,
       showMicrovolunteering: false,
+      showNotices: true, // TODO Add timer
     }
   },
   computed: {

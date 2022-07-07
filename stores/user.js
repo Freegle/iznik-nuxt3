@@ -5,6 +5,7 @@ export const useUserStore = defineStore({
   id: 'user',
   state: () => ({
     config: {},
+    list: {},
   }),
   actions: {
     init(config) {

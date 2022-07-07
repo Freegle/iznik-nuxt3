@@ -2,27 +2,27 @@
   <div>
     <b-row
       v-if="
-        !chatmessage.sameasnext ||
+        !chatmessage?.sameasnext ||
         last ||
-        chatmessage.bymailid ||
-        chatmessage.gap
+        chatmessage?.bymailid ||
+        chatmessage?.gap
       "
       class="text-muted small"
     >
       <b-col v-if="!messageIsFromCurrentUser">
         <span
           class="chat__dateread--theirs"
-          :title="datetimeshort(chatmessage.date)"
+          :title="datetimeshort(chatmessage?.date)"
         >
-          {{ timeadapt(chatmessage.date) }}
-          <span v-if="chatmessage.reviewrequired" class="text-danger small">
+          {{ timeadapt(chatmessage?.date) }}
+          <span v-if="chatmessage?.reviewrequired" class="text-danger small">
             Pending review
           </span>
           <span
-            v-if="mod && chatmessage.bymailid"
+            v-if="mod && chatmessage?.bymailid"
             class="btn btn-sm mb-2 btn-white clickme"
             :title="
-              'Received by email #' + chatmessage.bymailid + ' click to view'
+              'Received by email #' + chatmessage?.bymailid + ' click to view'
             "
             @click="viewOriginal"
           >
@@ -30,7 +30,7 @@
           </span>
         </span>
         <b-badge
-          v-if="chatmessage.replyexpected && !chatmessage.replyreceived"
+          v-if="chatmessage?.replyexpected && !chatmessage?.replyreceived"
           variant="danger"
         >
           RSVP - reply expected
@@ -39,13 +39,13 @@
       <b-col v-else>
         <span class="float-right chat__dateread--mine">
           <span
-            v-if="chatmessage.seenbyall"
+            v-if="chatmessage?.seenbyall"
             title="This message has been read."
           >
             <v-icon icon="check" class="text-success" />
           </span>
           <span
-            v-else-if="chatmessage.mailedtoall"
+            v-else-if="chatmessage?.mailedtoall"
             title="This message has been sent out by email from our system."
           >
             <v-icon icon="envelope" />
@@ -71,35 +71,35 @@
             <v-icon icon="check" class="text-muted" />
           </span>
           <span v-if="chat.chattype === 'User2Mod'">
-            <span v-if="chatmessage.userid === me.id"> You </span>
+            <span v-if="chatmessage?.userid === me.id"> You </span>
             <span v-else-if="othermodname">
               {{ othermodname }}
             </span>
             <span v-else>
               <v-icon icon="hashtag" class="text-muted" scale="0.5" />{{
-                chatmessage.userid
+                chatmessage?.userid
               }}
             </span>
             sent this
           </span>
-          <span v-if="chatmessage.reviewrequired" class="text-danger small">
+          <span v-if="chatmessage?.reviewrequired" class="text-danger small">
             Pending review
           </span>
-          <span :title="datetimeshort(chatmessage.date)">{{
-            timeadapt(chatmessage.date)
+          <span :title="datetimeshort(chatmessage?.date)">{{
+            timeadapt(chatmessage?.date)
           }}</span>
           <span
-            v-if="mod && chatmessage.bymailid"
+            v-if="mod && chatmessage?.bymailid"
             class="btn btn-sm btn-white mb-2 clickme"
             :title="
-              'Received by email #' + chatmessage.bymailid + ' click to view'
+              'Received by email #' + chatmessage?.bymailid + ' click to view'
             "
             @click="viewOriginal"
           >
             <v-icon icon="info-circle" /> View original email
           </span>
           <b-badge
-            v-if="chatmessage.replyexpected && !chatmessage.replyreceived"
+            v-if="chatmessage?.replyexpected && !chatmessage?.replyreceived"
             variant="info"
           >
             RSVP - reply requested
@@ -108,7 +108,7 @@
       </b-col>
       <ModMessageEmailModal
         v-if="showOriginal"
-        :id="chatmessage.bymailid"
+        :id="chatmessage?.bymailid"
         ref="original"
         collection="Chat"
       />
@@ -117,6 +117,8 @@
 </template>
 
 <script>
+import { setupChat } from '../composables/useChat'
+import { useUserStore } from '../stores/user'
 import ChatBase from './ChatBase'
 const ModMessageEmailModal = () => import('~/components/ModMessageEmailModal')
 
@@ -125,7 +127,41 @@ export default {
     ModMessageEmailModal,
   },
   extends: ChatBase,
+  props: {
+    chatid: {
+      type: Number,
+      required: true,
+    },
+    id: {
+      type: Number,
+      required: true,
+    },
+  },
+  setup(props) {
+    const userStore = useUserStore()
 
+    const { chat, chatmessages, otheruser } = setupChat(props.chatid)
+
+    const chatmessage = computed(() => {
+      return chatmessages.value.find((m) => {
+        return m.id === props.id
+      })
+    })
+
+    let chatMessageUser = null
+
+    if (chatmessage?.userid) {
+      userStore.fetch(this.chatmessage.userid)
+      chatMessageUser = userStore.get(chatmessage.userid)
+    }
+
+    return {
+      chatmessage,
+      chat,
+      otheruser,
+      chatMessageUser,
+    }
+  },
   data() {
     return {
       showOriginal: false,
@@ -155,5 +191,6 @@ export default {
 
 .chat__dateread--mine {
   padding-right: 30px;
+  padding-left: 10px;
 }
 </style>

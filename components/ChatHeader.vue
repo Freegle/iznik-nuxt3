@@ -217,6 +217,7 @@
 </template>
 <script>
 import { useChatStore } from '../stores/chat'
+import { setupChat } from '../composables/useChat'
 import { useMiscStore } from '~/stores/misc'
 import SupporterInfo from '~/components/SupporterInfo'
 
@@ -241,16 +242,15 @@ export default {
       required: true,
     },
   },
-  setup() {
+  setup(props) {
     const chatStore = useChatStore()
     const miscStore = useMiscStore()
 
-    return { chatStore, miscStore }
+    const { chat, otheruser, unseen } = setupChat(props.id)
+
+    return { chatStore, miscStore, chat, otheruser, unseen }
   },
   computed: {
-    chat() {
-      return this.chatStore.byId(this.id)
-    },
     collapsed: {
       get() {
         return this.miscStore.get('chatinfoheader')
@@ -263,6 +263,7 @@ export default {
       },
     },
     loaded() {
+      // TODO Minor this could probably go now that we have setup()
       return this.chat && this.otheruser && this.otheruser.info
     },
   },
@@ -281,6 +282,16 @@ export default {
       })
 
       this.$router.push('/chats')
+    },
+    showhide() {
+      this.waitForRef('chathide', () => {
+        this.$refs.chathide.show()
+      })
+    },
+    showblock() {
+      this.waitForRef('chatblock', () => {
+        this.$refs.chatblock.show()
+      })
     },
   },
 }

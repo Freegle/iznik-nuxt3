@@ -127,7 +127,6 @@ import VisibleWhen from '../../components/VisibleWhen'
 // TODO import loginRequired from '@/mixins/loginRequired.js'
 import { useChatStore } from '~/stores/chat'
 import SidebarRight from '~/components/SidebarRight'
-import { setupChat } from '~/composables/useChat'
 
 // We can't use async on ChatListEntry else the infinite scroll kicks in and tries to load everything while we are
 // still waiting for the import to complete.
@@ -148,10 +147,9 @@ export default {
   },
   async setup(props) {
     const route = useRoute()
-    let { selectedChatId } = setupChat()
     let notVisible = false
 
-    selectedChatId = parseInt(route.params.id)
+    const selectedChatId = parseInt(route.params.id)
 
     // Fetch the list of chats.
     const chatStore = useChatStore()

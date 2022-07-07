@@ -3,23 +3,19 @@
 </template>
 <script>
 import { useUserStore } from '../stores/user'
+import { useChatStore } from '../stores/chat'
 import { twem } from '~/composables/useTwem'
 import { EMAIL_REGEX } from '~/constants'
 
 export default {
   props: {
-    chat: {
-      type: Object,
+    chatid: {
+      type: Number,
       required: true,
     },
-    chatmessage: {
-      type: Object,
+    id: {
+      type: Number,
       required: true,
-    },
-    otheruser: {
-      type: Object,
-      required: false,
-      default: null,
     },
     last: {
       type: Boolean,
@@ -37,34 +33,30 @@ export default {
       default: false,
     },
   },
-  setup() {
-    const userStore = useUserStore()
-    let chatMessageUser = null
-
-    // Get the user for the message.
-    console.log('Fetch user', this.chatmessage?.userid)
-    if (this.chatmessage?.userid) {
-      userStore.fetch(this.chatmessage.userid)
-      chatMessageUser = computed(() => userStore.get(this.chatmessage.userid))
-    }
-
-    return { userStore, chatMessageUser }
-  },
   computed: {
     regexEmail() {
       return EMAIL_REGEX
     },
     emessage() {
-      const trim = this.chatmessage.message
+      const trim = this.chatmessage?.message
         .replace(/(\r\n|\r|\n){2,}/g, '$1\n')
         .trim()
 
       return twem(trim)
     },
+    chatMessageUser() {
+      const userStore = useUserStore()
+
+      if (this.chatmessage?.userid) {
+        return userStore.byId(this.chatmessage.userid)
+      }
+
+      return null
+    },
     chatMessageProfileImage() {
       return this.chatMessageUser
         ? this.chatMessageUser.profile.turl
-        : this.chat.icon
+        : this.chat?.icon
     },
     refmsg() {
       return this.chatmessage.refmsg
@@ -86,11 +78,49 @@ export default {
       }
     },
     messageIsFromCurrentUser() {
-      if (this.chat.chattype === 'User2Mod') {
+      if (this.chat?.chattype === 'User2Mod') {
         // For User2Mod chats we want it on the right hand side we sent it.
-        return this.chatmessage.userid === this.me.id
+        return this.chatmessage?.userid === this.myid
       } else {
-        return this.chatmessage.userid === this.me.id
+        return this.chatmessage?.userid === this.myid
+      }
+    },
+    // There is duplicate code here vs the useChat composable.  But we want the benefit of extending a component to pick
+    // up the props, and Vue3's extend intentionally doesn't allow us to provide a setup() method from which we could
+    // use the composable.  Probably there is a way to handle this better.
+    chat() {
+      const chatStore = useChatStore()
+      return chatStore.byId(this.chatid)
+    },
+    chatmessage() {
+      const chatStore = useChatStore()
+      const chatmessages = chatStore.messagesById(this.chatid)
+      return chatmessages.find((m) => {
+        return m.id === this.id
+      })
+    },
+    otheruserid() {
+      // The user who isn't us.
+      let ret = null
+
+      if (
+        this.chat &&
+        this.myid &&
+        this.chat.chattype === 'User2User' &&
+        this.chat.user1
+      ) {
+        ret = this.chat.user1 === this.myid ? this.chat.user2 : this.chat.user1
+      }
+
+      return ret
+    },
+    otheruser() {
+      const userStore = useUserStore()
+
+      if (this.otheruserid) {
+        return userStore.byId(this.otheruserid)
+      } else {
+        return null
       }
     },
   },

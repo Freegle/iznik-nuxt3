@@ -36,10 +36,9 @@
             >
               <ChatMessage
                 v-for="(chatmessage, index) in chatmessages"
+                :id="chatmessage.id"
                 :key="'chatmessage-' + chatmessage.id"
-                :chatmessage="chatmessage"
-                :chat="chat"
-                :otheruser="otheruser"
+                :chatid="chatmessage.chatid"
                 :last="
                   chatmessage.id === chatmessages[chatmessages.length - 1].id
                 "
@@ -65,6 +64,7 @@ import { useChatStore } from '../stores/chat'
 import ChatHeader from './ChatHeader'
 import ChatFooter from './ChatFooter'
 import { useUserStore } from '~/stores/user'
+import { setupChat } from '~/composables/useChat'
 
 // Don't use dynamic imports because it stops us being able to scroll to the bottom after render.
 import ChatMessage from '~/components/ChatMessage.vue'
@@ -81,11 +81,13 @@ export default {
       required: true,
     },
   },
-  setup() {
+  setup(props) {
     const chatStore = useChatStore()
     const userStore = useUserStore()
 
-    return { chatStore, userStore }
+    const { chat, chatmessages, otheruserid, otheruser } = setupChat(props.id)
+
+    return { chatStore, userStore, chat, chatmessages, otheruserid, otheruser }
   },
   data() {
     return {
@@ -96,38 +98,6 @@ export default {
       messagesToShow: 1,
       chatBusy: false,
     }
-  },
-  computed: {
-    chat() {
-      return this.chatStore.byId(this.id)
-    },
-    chatmessages() {
-      return this.chatStore.messagesById(this.id)
-    },
-    otheruserid() {
-      // The user who isn't us.
-      let ret = null
-
-      if (
-        this.chat &&
-        this.myid &&
-        this.chat.chattype === 'User2User' &&
-        this.chat.user1
-      ) {
-        ret = this.chat.user1 === this.myid ? this.chat.user2 : this.chat.user1
-      }
-
-      return ret
-    },
-    otheruser() {
-      let user = null
-
-      if (this.otheruserid) {
-        user = this.userStore.byId(this.otheruserid)
-      }
-
-      return user
-    },
   },
   watch: {
     me(newVal, oldVal) {

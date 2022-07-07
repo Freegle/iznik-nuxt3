@@ -1,111 +1,95 @@
 <template>
   <client-only>
     <div :class="selected ? 'selected' : ''" @click="selectMe">
-      <div v-if="chatmessage.type === 'Default'">
+      <div v-if="chatmessage?.type === 'Default'">
         <chat-message-text
-          :chat="chat"
-          :chatmessage="chatmessage"
-          :otheruser="otheruser"
+          :id="id"
+          :chatid="chatid"
           :pov="pov"
           :highlight-emails="highlightEmails"
         />
       </div>
       <chat-message-image
-        v-else-if="chatmessage.type === 'Image'"
-        :chat="chat"
-        :chatmessage="chatmessage"
-        :otheruser="otheruser"
+        v-else-if="chatmessage?.type === 'Image'"
+        :id="id"
+        :chatid="chatid"
         :pov="pov"
       />
-      <div v-else-if="chatmessage.type === 'Interested'">
+      <div v-else-if="chatmessage?.type === 'Interested'">
         <chat-message-interested
           v-if="otheruser || chat.chattype === 'User2Mod'"
-          :chat="chat"
-          :chatmessage="chatmessage"
-          :otheruser="otheruser"
+          :id="id"
+          :chatid="chatid"
           :pov="pov"
           :highlight-emails="highlightEmails"
         />
       </div>
-      <div v-else-if="chatmessage.type === 'Completed' && otheruser">
+      <div v-else-if="chatmessage?.type === 'Completed' && otheruser">
         <chat-message-completed
           v-if="otheruser"
-          :chat="chat"
-          :chatmessage="chatmessage"
-          :otheruser="otheruser"
+          :id="id"
+          :chatid="chatid"
           :pov="pov"
         />
       </div>
-      <div v-else-if="chatmessage.type === 'Promised' && otheruser">
+      <div v-else-if="chatmessage?.type === 'Promised' && otheruser">
         <chat-message-promised
           v-if="otheruser"
-          :chat="chat"
-          :chatmessage="chatmessage"
-          :otheruser="otheruser"
+          :id="id"
+          :chatid="chatid"
           :pov="pov"
         />
       </div>
-      <div v-else-if="chatmessage.type === 'Reneged' && otheruser">
+      <div v-else-if="chatmessage?.type === 'Reneged' && otheruser">
         <chat-message-reneged
           v-if="otheruser"
-          :chat="chat"
-          :chatmessage="chatmessage"
-          :otheruser="otheruser"
+          :id="id"
+          :chatid="chatid"
           :pov="pov"
         />
       </div>
-      <div v-else-if="chatmessage.type === 'Address' && otheruser">
+      <div v-else-if="chatmessage?.type === 'Address' && otheruser">
         <chat-message-address
           v-if="otheruser"
-          :chat="chat"
-          :chatmessage="chatmessage"
-          :otheruser="otheruser"
+          :id="id"
+          :chatid="chatid"
           :pov="pov"
         />
       </div>
-      <div v-else-if="chatmessage.type === 'Nudge' && otheruser">
+      <div v-else-if="chatmessage?.type === 'Nudge' && otheruser">
         <chat-message-nudge
           v-if="otheruser"
-          :chat="chat"
-          :chatmessage="chatmessage"
-          :otheruser="otheruser"
+          :id="id"
+          :chatid="chatid"
           :pov="pov"
         />
       </div>
-      <div v-else-if="chatmessage.type === 'ModMail'">
-        <chat-message-mod-mail
-          :chat="chat"
-          :chatmessage="chatmessage"
-          :otheruser="null"
-          :pov="pov"
-        />
+      <div v-else-if="chatmessage?.type === 'ModMail'">
+        <chat-message-mod-mail :id="id" :chatid="chatid" :pov="pov" />
       </div>
-      <div v-else-if="chatmessage.type === 'Schedule' && otheruser">
+      <div v-else-if="chatmessage?.type === 'Schedule' && otheruser">
         <chat-message-schedule
           v-if="otheruser"
-          :chat="chat"
-          :chatmessage="chatmessage"
-          :otheruser="otheruser"
+          :id="id"
+          :chatid="chatid"
           :pov="pov"
         />
       </div>
-      <div v-else-if="chatmessage.type === 'ScheduleUpdated' && otheruser">
+      <div v-else-if="chatmessage?.type === 'ScheduleUpdated' && otheruser">
         <chat-message-schedule
           v-if="otheruser"
-          :chat="chat"
-          :chatmessage="chatmessage"
-          :otheruser="otheruser"
+          :id="id"
+          :chatid="chatid"
           :pov="pov"
         />
       </div>
       <div v-else-if="supportOrAdmin">
-        Unknown chat message type {{ chatmessage.type }}
+        Unknown chat message type {{ chatmessage?.type }}
       </div>
-      <chat-message-warning :chatmessage="chatmessage" />
+      <chat-message-warning v-if="phoneNumber" />
       <chat-message-date-read
-        :chat="chat"
-        :chatmessage="chatmessage"
-        :otheruser="otheruser"
+        :id="id"
+        :chatid="chatid"
         :last="last"
         :pov="pov"
       />
@@ -116,7 +100,8 @@
   </client-only>
 </template>
 <script>
-// Don't use dynamic imports because it stops us being able to scroll to the bottom after render.
+import { useChatStore } from '../stores/chat'
+import { setupChat } from '../composables/useChat'
 import ChatMessageText from './ChatMessageText'
 import ChatMessageImage from './ChatMessageImage'
 import ChatMessageInterested from './ChatMessageInterested'
@@ -148,18 +133,13 @@ export default {
     ChatMessageSchedule,
   },
   props: {
-    chat: {
-      type: Object,
+    chatid: {
+      type: Number,
       required: true,
     },
-    chatmessage: {
-      type: Object,
+    id: {
+      type: Number,
       required: true,
-    },
-    otheruser: {
-      type: Object,
-      required: false,
-      default: null,
     },
     last: {
       type: Boolean,
@@ -182,6 +162,25 @@ export default {
       default: null,
     },
   },
+  setup(props) {
+    const chatStore = useChatStore()
+
+    const { chat, chatmessages, otheruser } = setupChat(props.chatid)
+
+    // TODO MINOR Should this be in composable, and indexed better?  Similar code elsewhere
+    const chatmessage = computed(() => {
+      return chatmessages.value.find((m) => {
+        return m.id === props.id
+      })
+    })
+
+    return {
+      chatStore,
+      chat,
+      chatmessage,
+      otheruser,
+    }
+  },
   data() {
     return {
       selected: false,
@@ -192,9 +191,29 @@ export default {
       ],
     }
   },
+  computed: {
+    phoneNumber() {
+      let ret = false
+
+      if (this.chatmessage && this.chatmessage.message) {
+        const re = /\+(\d\d)[^:]/gm
+        const matches = re.exec(this.chatmessage.message)
+
+        if (matches && matches.length > 1) {
+          const country = matches[1]
+
+          if (parseInt(country) !== 44) {
+            ret = true
+          }
+        }
+      }
+
+      return ret
+    },
+  },
   methods: {
     selectMe() {
-      if (this.chatmessage.userid !== this.myid) {
+      if (this.chatmessage?.userid !== this.myid) {
         this.selected = true
       }
     },

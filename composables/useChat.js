@@ -1,5 +1,6 @@
-import { ref } from 'vue'
 import { useChatStore } from '~/stores/chat'
+import { useUserStore } from '~/stores/user'
+import { useAuthStore } from '~/stores/auth'
 
 export function chatCollate(msgs) {
   const ret = []
@@ -36,14 +37,45 @@ export function chatCollate(msgs) {
   return ret
 }
 
-export function setupChat() {
+export function setupChat(selectedChatId) {
   const chatStore = useChatStore()
-  const selectedChatId = ref(null)
+  const userStore = useUserStore()
+  const authStore = useAuthStore()
+
+  const chat = computed(() => {
+    return selectedChatId ? chatStore.byId(selectedChatId) : null
+  })
+
+  const myid = authStore.user?.id
+
+  const otheruserid = computed(() => {
+    // The user who isn't us.
+    let ret = null
+
+    if (chat && myid && chat.chattype === 'User2User' && chat.user1) {
+      ret = chat.user1 === myid ? chat.user2 : chat.user1
+    }
+
+    return ret
+  })
+
+  const unseen = computed(() => chat?.unseen)
 
   return {
-    chat: computed(() => {
-      return selectedChatId ? chatStore.get(selectedChatId.value) : null
+    chat,
+    unseen,
+    chatmessages: computed(() => {
+      return chatStore.messagesById(selectedChatId)
     }),
-    selectedChatId,
+    otheruserid,
+    otheruser: computed(() => {
+      let user = null
+
+      if (otheruserid?.value) {
+        user = userStore.byId(otheruserid.value)
+      }
+
+      return user
+    }),
   }
 }

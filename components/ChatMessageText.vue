@@ -10,9 +10,9 @@
         }}</span>
         <span v-else class="preline forcebreak">{{ emessage }}</span>
         <b-img
-          v-if="chatmessage.image"
+          v-if="chatmessage?.image"
           fluid
-          :src="chatmessage.image.path"
+          :src="chatmessage?.image.path"
           lazy
           rounded
         />
@@ -35,9 +35,9 @@
           />
         </span>
         <b-img
-          v-if="chatmessage.image"
+          v-if="chatmessage?.image"
           fluid
-          :src="chatmessage.image.path"
+          :src="chatmessage?.image.path"
           lazy
           rounded
         />
@@ -53,7 +53,6 @@
     </div>
   </div>
 </template>
-
 <script>
 import Highlighter from 'vue-highlight-words'
 import ChatBase from '~/components/ChatBase'
@@ -68,8 +67,8 @@ export default {
   computed: {
     messageIsNew() {
       return (
-        this.chatmessage.secondsago < 60 ||
-        this.chatmessage.id > this.chat.lastmsgseen
+        this.chatmessage?.secondsago < 60 ||
+        this.chatmessage?.id > this.chat?.lastmsgseen
       )
     },
   },
