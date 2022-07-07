@@ -71,8 +71,8 @@ export function setupChat(selectedChatId) {
     otheruser: computed(() => {
       let user = null
 
-      if (otheruserid?.value) {
-        user = userStore.byId(otheruserid.value)
+      if (chat?.value?.otheruid) {
+        user = userStore.byId(chat.value.otheruid)
       }
 
       return user

@@ -557,7 +557,6 @@ export default {
       })
     },
     idle() {
-      console.log('showMessages idle')
       this.mapIdle++
 
       if (this.mapObject) {

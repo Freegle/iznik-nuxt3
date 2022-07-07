@@ -137,10 +137,10 @@ export default {
       required: true,
     },
   },
-  setup(props) {
+  async setup(props) {
     const userStore = useUserStore()
 
-    const { chat, chatmessages, otheruser } = setupChat(props.chatid)
+    const { chat, chatmessages, otheruser } = await setupChat(props.chatid)
 
     const chatmessage = computed(() => {
       return chatmessages.value.find((m) => {

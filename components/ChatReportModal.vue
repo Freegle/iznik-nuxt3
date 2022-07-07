@@ -13,11 +13,11 @@
           <h4>Which community is this about?</h4>
           <GroupSelect v-model="groupid" class="mt-1 mb-1" />
           <h4>Why are you reporting this?</h4>
-          <b-select v-model="reason" class="mt-1 mb-1">
+          <b-form-select v-model="reason" class="mt-1 mb-1">
             <option value="null">-- Please choose --</option>
             <option value="Spam">It's Spam</option>
             <option value="Other">Something else</option>
-          </b-select>
+          </b-form-select>
           <h4>What's wrong?</h4>
           <b-textarea
             v-model="comments"

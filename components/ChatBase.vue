@@ -99,26 +99,11 @@ export default {
         return m.id === this.id
       })
     },
-    otheruserid() {
-      // The user who isn't us.
-      let ret = null
-
-      if (
-        this.chat &&
-        this.myid &&
-        this.chat.chattype === 'User2User' &&
-        this.chat.user1
-      ) {
-        ret = this.chat.user1 === this.myid ? this.chat.user2 : this.chat.user1
-      }
-
-      return ret
-    },
     otheruser() {
       const userStore = useUserStore()
 
-      if (this.otheruserid) {
-        return userStore.byId(this.otheruserid)
+      if (this.chat?.otheruid) {
+        return userStore.byId(this.chat.otheruid)
       } else {
         return null
       }

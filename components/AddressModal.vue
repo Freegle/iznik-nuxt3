@@ -20,7 +20,7 @@
             <p v-if="!choose">These are your current addresses.</p>
             <b-row>
               <b-col cols="12" sm="8">
-                <b-select
+                <b-form-select
                   v-model="selectedAddress"
                   :options="addressOptions"
                   class="mb-2 font-weight-bold"
@@ -114,7 +114,7 @@
             <p class="mt-2">Choose an address:</p>
             <b-row v-if="propertyOptions && propertyOptions.length">
               <b-col cols="12" sm="8">
-                <b-select
+                <b-form-select
                   v-model="selectedProperty"
                   :options="propertyOptions"
                   class="mb-2 font-weight-bold"

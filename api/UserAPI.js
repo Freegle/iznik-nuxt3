@@ -1,8 +1,8 @@
 import BaseAPI from '@/api/BaseAPI'
 
 export default class UserAPI extends BaseAPI {
-  async fetch(params) {
-    return await this.$getv2('/user', params)
+  async fetch(id) {
+    return await this.$getv2('/user/' + id)
   }
 
   rate(id, rating, reason, text) {

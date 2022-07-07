@@ -47,7 +47,7 @@
       </div>
     </div>
     <div class="d-none d-md-block">
-      <b-select
+      <b-form-select
         v-if="moreUsersToSelect && showSelect"
         v-model="selectUser"
         :options="userOptions(false)"
@@ -57,7 +57,7 @@
       />
     </div>
     <div class="d-block d-md-none">
-      <b-select
+      <b-form-select
         v-if="moreUsersToSelect && showSelect"
         v-model="selectUser"
         :options="userOptions(true)"

@@ -118,6 +118,8 @@
   </client-only>
 </template>
 <script>
+import { useUserStore } from '../stores/user'
+
 export default {
   props: {
     id: {
@@ -141,6 +143,13 @@ export default {
       default: false,
     },
   },
+  setup(props) {
+    const userStore = useUserStore()
+
+    userStore.fetch(props.id)
+
+    return { userStore }
+  },
   data() {
     return {
       bump: 1,
@@ -152,21 +161,13 @@ export default {
   },
   computed: {
     user() {
-      // Look for the user in both the user store (FD) and the members store (MT).  This saves some fetches which can
-      // result in weird render errors.
       let ret = null
 
       if (this.id) {
-        let user = this.$store.getters['user/get'](this.id)
+        const user = this.userStore.byId(this.id)
 
         if (user && user.info) {
           ret = user
-        } else {
-          user = this.$store.getters['members/getByUserId'](this.id)
-
-          if (user && user.info) {
-            ret = user
-          }
         }
       }
 
@@ -196,17 +197,6 @@ export default {
         )
       }
     },
-  },
-  mounted() {
-    // Components can't use asyncData, so we fetch here.  Can't do this for SSR, but that's fine as we don't
-    // need to render this pane on the server.
-    if (this.id) {
-      // Not in the store yet - fetch.
-      this.$store.dispatch('user/fetch', {
-        id: this.id,
-        info: true,
-      })
-    }
   },
   methods: {
     async rate(rating, reason, text) {

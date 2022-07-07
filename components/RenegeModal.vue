@@ -11,14 +11,14 @@
         people.
       </notice-message>
       <p>You're no longer promising:</p>
-      <b-select
+      <b-form-select
         :value="selectedMessage"
         :options="messageOptions"
         class="mb-2 font-weight-bold"
         disabled
       />
       <p>...to:</p>
-      <b-select
+      <b-form-select
         :value="selectedUser"
         :options="userOptions"
         class="mb-2 font-weight-bold"

@@ -81,13 +81,13 @@ export default {
       required: true,
     },
   },
-  setup(props) {
+  async setup(props) {
     const chatStore = useChatStore()
     const userStore = useUserStore()
 
-    const { chat, chatmessages, otheruserid, otheruser } = setupChat(props.id)
+    const { chat, chatmessages, otheruser } = await setupChat(props.id)
 
-    return { chatStore, userStore, chat, chatmessages, otheruserid, otheruser }
+    return { chatStore, userStore, chat, chatmessages, otheruser }
   },
   data() {
     return {

@@ -125,6 +125,8 @@ import { useRoute } from 'vue-router'
 import dayjs from 'dayjs'
 import VisibleWhen from '../../components/VisibleWhen'
 // TODO import loginRequired from '@/mixins/loginRequired.js'
+import { setupChat } from '../../composables/useChat'
+import { useUserStore } from '../../stores/user'
 import { useChatStore } from '~/stores/chat'
 import SidebarRight from '~/components/SidebarRight'
 
@@ -147,6 +149,8 @@ export default {
   },
   async setup(props) {
     const route = useRoute()
+    const userStore = useUserStore()
+
     let notVisible = false
 
     const selectedChatId = parseInt(route.params.id)
@@ -155,11 +159,21 @@ export default {
     const chatStore = useChatStore()
     await chatStore.fetchChats()
 
-    if (!chatStore.byId(selectedChatId)) {
-      // This isn't a chat we can see.
-      notVisible = true
-    } else {
-      chatStore.fetchMessages(selectedChatId)
+    if (selectedChatId) {
+      if (!chatStore.byId(selectedChatId)) {
+        // This isn't a chat we can see.
+        notVisible = true
+      } else {
+        chatStore.fetchMessages(selectedChatId)
+
+        // Fetch the user.
+        const { chat, otheruser } = setupChat(selectedChatId)
+
+        if (chat?.value?.otheruid && !otheruser?.value) {
+          // We don't have the other user.
+          await userStore.fetch(chat.value.otheruid)
+        }
+      }
     }
 
     return { chatStore, selectedChatId, notVisible }

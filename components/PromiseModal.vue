@@ -13,14 +13,14 @@
         the <em>Unpromise</em> button.
       </notice-message>
       <p>You're promising:</p>
-      <b-select
+      <b-form-select
         v-model="message"
         :options="messageOptions"
         class="mb-2 font-weight-bold"
       />
       <div>
         <label for="who" class="font-weight-normal">...to:</label>
-        <b-select
+        <b-form-select
           id="who"
           v-model="currentlySelected"
           :options="userOptions"

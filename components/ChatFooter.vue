@@ -23,9 +23,9 @@
               with them, give them a thumbs up.
             </p>
             <UserRatings
-              v-if="otheruser"
-              :id="otheruserid"
-              :key="'otheruser-' + otheruserid"
+              v-if="chat.otheruid"
+              :id="chat.otheruid"
+              :key="'otheruser-' + chat.otheruid"
             />
           </notice-message>
           <notice-message
@@ -339,10 +339,10 @@ export default {
   props: {
     id: { type: Number, required: true },
   },
-  setup(props) {
-    const { chat } = setupChat(props.id)
+  async setup(props) {
+    const { chat, otheruser } = await setupChat(props.id)
 
-    return { chat }
+    return { chat, otheruser }
   },
   data() {
     return {

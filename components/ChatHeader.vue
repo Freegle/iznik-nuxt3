@@ -48,8 +48,8 @@
           class="d-flex flex-column align-content-between pr-1"
         >
           <UserRatings
-            :id="otheruserid"
-            :key="'otheruser-' + otheruserid"
+            :id="chat.otheruid"
+            :key="'otheruser-' + chat.otheruid"
             class="mt-1 d-flex justify-content-end"
             size="sm"
           />
@@ -242,11 +242,11 @@ export default {
       required: true,
     },
   },
-  setup(props) {
+  async setup(props) {
     const chatStore = useChatStore()
     const miscStore = useMiscStore()
 
-    const { chat, otheruser, unseen } = setupChat(props.id)
+    const { chat, otheruser, unseen } = await setupChat(props.id)
 
     return { chatStore, miscStore, chat, otheruser, unseen }
   },
