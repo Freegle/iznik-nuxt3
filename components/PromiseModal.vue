@@ -46,56 +46,28 @@
               @focus="openPicker"
             />
             <b-input-group-append>
-              <b-form-datepicker
-                ref="datePicker"
+              <b-form-input
+                id="date"
                 v-model="date"
-                locale="en"
+                type="date"
+                placeholder="Choose a day"
                 :min="minDate"
                 :max="maxDate"
-                nav-button-variant="primary"
-                reset-button
-                :reset-value="null"
-                close-button
-                button-only
-                label-reset-button="Clear"
-                :label-help="null"
-                @context="onContext"
-              >
-                <template slot="button-content">
-                  <div class="align-content-center">
-                    <v-icon icon="calendar-alt" />
-                    Choose a day
-                  </div>
-                </template>
-                <template slot="nav-prev-year"> &nbsp; </template>
-                <template slot="nav-next-year"> &nbsp; </template>
-                <template slot="nav-this-month"> &nbsp; </template>
-                <template slot="nav-prev-month">
-                  <b-button variant="btn-secondary">
-                    <v-icon icon="arrow-circle-left" />&nbsp;Last month
-                  </b-button>
-                </template>
-                <template slot="nav-next-month">
-                  <b-button variant="btn-secondary">
-                    Next month&nbsp;<v-icon icon="arrow-circle-right" />
-                  </b-button>
-                </template>
-              </b-form-datepicker>
+              />
             </b-input-group-append>
           </b-input-group>
         </div>
         <div>
           <label for="time">at:</label>
-          <b-form-timepicker
+          <b-form-input
             id="time"
             v-model="time"
-            locale="en"
+            type="time"
             placeholder="Choose a time"
             :minutes-step="15"
             :offset="-10"
             menu-class="border-primary shadow-lg"
             :class="date && !time ? 'border-danger' : ''"
-            @hidden="considerOddTime"
           />
         </div>
         <div class="d-flex flex-column justify-content-center">
@@ -166,10 +138,10 @@ export default {
   },
   computed: {
     minDate() {
-      return dayjs().toDate()
+      return dayjs().format('YYYY-MM-DD')
     },
     maxDate() {
-      return dayjs().add(14, 'day').toDate()
+      return dayjs().add(14, 'day').format('YYYY-MM-DD')
     },
     buttonDisabled() {
       return (
