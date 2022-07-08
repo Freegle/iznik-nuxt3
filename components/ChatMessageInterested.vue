@@ -146,6 +146,7 @@ import ProfileImage from '~/components/ProfileImage'
 const OutcomeModal = () => import('~/components/OutcomeModal')
 const PromiseModal = () => import('~/components/PromiseModal')
 const ChatMessageSummary = () => import('~/components/ChatMessageSummary')
+const Highlighter = () => import('vue-highlight-words')
 
 export default {
   components: {
@@ -153,6 +154,7 @@ export default {
     OutcomeModal,
     PromiseModal,
     ChatMessageSummary,
+    Highlighter,
   },
   extends: ChatBase,
 

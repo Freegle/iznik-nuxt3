@@ -1,124 +1,119 @@
 <template>
-  <client-only>
-    <div>
-      <h1 class="sr-only">Chats</h1>
-      <b-row class="m-0">
-        <b-col
-          id="chatlist"
-          cols="12"
-          md="4"
-          xl="3"
-          class="chatlist p-0 bg-white"
+  <div>
+    <h1 class="sr-only">Chats</h1>
+    <b-row class="m-0">
+      <b-col
+        id="chatlist"
+        cols="12"
+        md="4"
+        xl="3"
+        class="chatlist p-0 bg-white"
+      >
+        <VisibleWhen
+          :at="
+            selectedChatId
+              ? ['md', 'lg', 'xl']
+              : ['xs', 'sm', 'md', 'lg', 'xl', 'xxl']
+          "
         >
-          <VisibleWhen
-            :at="
-              selectedChatId
-                ? ['md', 'lg', 'xl']
-                : ['xs', 'sm', 'md', 'lg', 'xl', 'xxl']
-            "
-          >
-            <b-card class="p-0">
-              <b-card-body class="p-0">
-                <div class="d-flex justify-content-between flex-wrap">
-                  <form role="search" class="mb-1 mr-1">
-                    <label for="search-bar" class="sr-only">Search chats</label>
-                    <b-form-input
-                      id="search-bar"
-                      v-model="search"
-                      placeholder="Search chats"
-                      class="flex-shrink-1"
-                    />
-                  </form>
-                  <b-button variant="primary" class="mb-1" @click="markAllRead">
-                    <v-icon icon="check" /> Mark all read
-                  </b-button>
-                </div>
-              </b-card-body>
-            </b-card>
-            <!--            TODO Highlight unread and RSVP chats which might be below the fold.-->
-            <p v-if="!visibleChats?.length" class="ml-2">
-              <span v-if="searching" class="pulsate"> Searching... </span>
-              <span v-else> No chats to show. </span>
-            </p>
-            <div v-else>
-              <ChatListEntry
-                v-for="chat in visibleChats"
-                :id="chat.id"
-                :key="'chat-' + chat.id"
-                :class="{
-                  chat: true,
-                  active:
-                    chat && parseInt(selectedChatId) === parseInt(chat.id),
-                }"
-              />
-              <infinite-loading
-                :identifier="bump"
-                force-use-infinite-wrapper="#chatlist"
-                :distance="distance"
-                @infinite="loadMore"
-              >
-                <template #error>&nbsp;</template>
-                <template #complete>&nbsp;</template>
-                <template #spinner>&nbsp;</template>
-              </infinite-loading>
-            </div>
-            <div class="d-flex justify-content-around">
-              <b-button
-                v-if="!search && mightBeOldChats && complete && !showingOlder"
-                variant="link"
-                size="sm"
-                @click="fetchOlder"
-              >
-                Show older chats
-              </b-button>
-            </div>
-            <div class="d-flex justify-content-around mt-2">
-              <b-button
-                v-if="complete && visibleChats && visibleChats.length"
-                variant="link"
-                size="sm"
-                @click="showHideAll"
-              >
-                Hide all chats
-              </b-button>
-            </div>
-          </VisibleWhen>
-        </b-col>
-        <b-col cols="12" md="8" xl="6" class="chatback p-0">
-          <VisibleWhen
-            :at="
-              selectedChatId
-                ? ['xs', 'sm', 'md', 'lg', 'xl']
-                : ['md', 'lg', 'xl']
-            "
-          >
-            <ChatNotVisible v-if="notVisible" />
-            <ChatPane
-              v-else-if="selectedChatId"
-              :id="selectedChatId"
-              :key="'chatpane-' + selectedChatId"
+          <b-card class="p-0">
+            <b-card-body class="p-0">
+              <div class="d-flex justify-content-between flex-wrap">
+                <form role="search" class="mb-1 mr-1">
+                  <label for="search-bar" class="sr-only">Search chats</label>
+                  <b-form-input
+                    id="search-bar"
+                    v-model="search"
+                    placeholder="Search chats"
+                    class="flex-shrink-1"
+                  />
+                </form>
+                <b-button variant="primary" class="mb-1" @click="markAllRead">
+                  <v-icon icon="check" /> Mark all read
+                </b-button>
+              </div>
+            </b-card-body>
+          </b-card>
+          <!--            TODO Highlight unread and RSVP chats which might be below the fold.-->
+          <p v-if="!visibleChats?.length" class="ml-2">
+            <span v-if="searching" class="pulsate"> Searching... </span>
+            <span v-else> No chats to show. </span>
+          </p>
+          <div v-else>
+            <ChatListEntry
+              v-for="chat in visibleChats"
+              :id="chat.id"
+              :key="'chat-' + chat.id"
+              :class="{
+                chat: true,
+                active: chat && parseInt(selectedChatId) === parseInt(chat.id),
+              }"
             />
-            <p v-else class="text-center text-info font-weight-bold mt-2">
-              Please click on a chat in the left pane.
-            </p>
-          </VisibleWhen>
-        </b-col>
-        <b-col cols="0" xl="3" class="p-0 pl-1">
-          <VisibleWhen :at="['xl']">
-            <SidebarRight
-              :show-volunteer-opportunities="false"
-              :show-job-opportunities="true"
-            />
-          </VisibleWhen>
-        </b-col>
-      </b-row>
-      <ChatHideModal
-        v-if="showHideAllModal"
-        ref="chathideall"
-        @confirm="hideAll"
-      />
-    </div>
-  </client-only>
+            <infinite-loading
+              :identifier="bump"
+              force-use-infinite-wrapper="#chatlist"
+              :distance="distance"
+              @infinite="loadMore"
+            >
+              <template #error>&nbsp;</template>
+              <template #complete>&nbsp;</template>
+              <template #spinner>&nbsp;</template>
+            </infinite-loading>
+          </div>
+          <div class="d-flex justify-content-around">
+            <b-button
+              v-if="!search && mightBeOldChats && complete && !showingOlder"
+              variant="link"
+              size="sm"
+              @click="fetchOlder"
+            >
+              Show older chats
+            </b-button>
+          </div>
+          <div class="d-flex justify-content-around mt-2">
+            <b-button
+              v-if="complete && visibleChats && visibleChats.length"
+              variant="link"
+              size="sm"
+              @click="showHideAll"
+            >
+              Hide all chats
+            </b-button>
+          </div>
+        </VisibleWhen>
+      </b-col>
+      <b-col cols="12" md="8" xl="6" class="chatback p-0">
+        <VisibleWhen
+          :at="
+            selectedChatId ? ['xs', 'sm', 'md', 'lg', 'xl'] : ['md', 'lg', 'xl']
+          "
+        >
+          <ChatNotVisible v-if="notVisible" />
+          <ChatPane
+            v-else-if="selectedChatId"
+            :id="selectedChatId"
+            :key="'chatpane-' + selectedChatId"
+          />
+          <p v-else class="text-center text-info font-weight-bold mt-2">
+            Please click on a chat in the left pane.
+          </p>
+        </VisibleWhen>
+      </b-col>
+      <b-col cols="0" xl="3" class="p-0 pl-1">
+        <VisibleWhen :at="['xl']">
+          <SidebarRight
+            :show-volunteer-opportunities="false"
+            :show-job-opportunities="true"
+          />
+        </VisibleWhen>
+      </b-col>
+    </b-row>
+    <ChatHideModal
+      v-if="showHideAllModal"
+      ref="chathideall"
+      @confirm="hideAll"
+    />
+  </div>
 </template>
 <script>
 import { useRoute } from 'vue-router'

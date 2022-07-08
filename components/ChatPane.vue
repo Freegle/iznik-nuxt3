@@ -94,7 +94,6 @@ export default {
       headerLoaded: false,
       distance: 1000,
       showNotices: true,
-      sendmessage: null,
       messagesToShow: 1,
       chatBusy: false,
     }

@@ -1,103 +1,101 @@
 <template>
-  <client-only>
-    <span class="d-inline">
-      <span v-if="user?.info?.ratings">
-        <span v-if="showName">
-          {{ user.displayname }}
-        </span>
-        <b-button
-          v-b-tooltip.hover.top
-          :size="size"
-          :variant="user.info.ratings.Up > 0 ? 'primary' : 'white'"
-          :title="uptitle"
-          :disabled="disabled || user.id === myid ? 'true' : undefined"
-          :class="{
-            mine: user.info.ratings.Mine === 'Up',
-          }"
-          @click="up"
-        >
-          <v-icon icon="thumbs-up" />&nbsp;{{ user.info.ratings.Up }}
-        </b-button>
-        <b-button
-          v-b-tooltip.hover.top
-          :size="size"
-          :variant="user.info.ratings.Down > 0 ? 'warning' : 'white'"
-          :title="downtitle"
-          :disabled="disabled || user.id === myid ? 'true' : undefined"
-          :class="{
-            mine: user.info.ratings.Mine === 'Down',
-          }"
-          @click="down"
-        >
-          <v-icon icon="thumbs-down" />&nbsp;{{ user.info.ratings.Down }}
-        </b-button>
+  <span class="d-inline">
+    <span v-if="user?.info?.ratings">
+      <span v-if="showName">
+        {{ user.displayname }}
       </span>
-      <b-modal
-        v-model="showDown"
-        title="Giving a Thumbs Down..."
-        ok-title="Submit"
-        @ok="doSomeoneDown"
+      <b-button
+        v-b-tooltip.hover.top
+        :size="size"
+        :variant="user.info.ratings.Up > 0 ? 'primary' : 'white'"
+        :title="uptitle"
+        :disabled="disabled || user.id === myid ? 'true' : undefined"
+        :class="{
+          mine: user.info.ratings.Mine === 'Up',
+        }"
+        @click="up"
       >
-        <p>
-          Please tell us why you're doing this. Your local volunteers may see
-          what you put, but the other freegler won't.
-        </p>
-        <div class="mt=2">
-          <b-form-group v-slot="{ ariaDescribedby }" label="What went wrong?">
-            <b-form-radio
-              v-model="reason"
-              :aria-describedby="ariaDescribedby"
-              name="reason"
-              value="NoShow"
-              >No Show</b-form-radio
-            >
-            <b-form-radio
-              v-model="reason"
-              :aria-describedby="ariaDescribedby"
-              name="reason"
-              value="Punctuality"
-              >Was late or early</b-form-radio
-            >
-            <b-form-radio
-              v-model="reason"
-              :aria-describedby="ariaDescribedby"
-              name="reason"
-              value="Ghosted"
-              >Stopped replying</b-form-radio
-            >
-            <b-form-radio
-              v-model="reason"
-              :aria-describedby="ariaDescribedby"
-              name="reason"
-              value="Rude"
-              >Unpleasant behaviour</b-form-radio
-            >
-            <b-form-radio
-              v-model="reason"
-              :aria-describedby="ariaDescribedby"
-              name="reason"
-              value="Other"
-              >Something else</b-form-radio
-            >
-          </b-form-group>
-        </div>
-        <div class="mt-2">
-          <label class="font-weight-bold" for="text">
-            Please give a bit of detail.
-          </label>
-          <b-form-textarea
-            id="text"
-            v-model="text"
-            rows="3"
-            placeholder="Explain what happened here..."
-          />
-        </div>
-        <b-alert variant="danger" :show="showError" class="mt-2">
-          Please select a reason and add some detail. Thanks.
-        </b-alert>
-      </b-modal>
+        <v-icon icon="thumbs-up" />&nbsp;{{ user.info.ratings.Up }}
+      </b-button>
+      <b-button
+        v-b-tooltip.hover.top
+        :size="size"
+        :variant="user.info.ratings.Down > 0 ? 'warning' : 'white'"
+        :title="downtitle"
+        :disabled="disabled || user.id === myid ? 'true' : undefined"
+        :class="{
+          mine: user.info.ratings.Mine === 'Down',
+        }"
+        @click="down"
+      >
+        <v-icon icon="thumbs-down" />&nbsp;{{ user.info.ratings.Down }}
+      </b-button>
     </span>
-  </client-only>
+    <b-modal
+      v-model="showDown"
+      title="Giving a Thumbs Down..."
+      ok-title="Submit"
+      @ok="doSomeoneDown"
+    >
+      <p>
+        Please tell us why you're doing this. Your local volunteers may see what
+        you put, but the other freegler won't.
+      </p>
+      <div class="mt=2">
+        <b-form-group v-slot="{ ariaDescribedby }" label="What went wrong?">
+          <b-form-radio
+            v-model="reason"
+            :aria-describedby="ariaDescribedby"
+            name="reason"
+            value="NoShow"
+            >No Show</b-form-radio
+          >
+          <b-form-radio
+            v-model="reason"
+            :aria-describedby="ariaDescribedby"
+            name="reason"
+            value="Punctuality"
+            >Was late or early</b-form-radio
+          >
+          <b-form-radio
+            v-model="reason"
+            :aria-describedby="ariaDescribedby"
+            name="reason"
+            value="Ghosted"
+            >Stopped replying</b-form-radio
+          >
+          <b-form-radio
+            v-model="reason"
+            :aria-describedby="ariaDescribedby"
+            name="reason"
+            value="Rude"
+            >Unpleasant behaviour</b-form-radio
+          >
+          <b-form-radio
+            v-model="reason"
+            :aria-describedby="ariaDescribedby"
+            name="reason"
+            value="Other"
+            >Something else</b-form-radio
+          >
+        </b-form-group>
+      </div>
+      <div class="mt-2">
+        <label class="font-weight-bold" for="text">
+          Please give a bit of detail.
+        </label>
+        <b-form-textarea
+          id="text"
+          v-model="text"
+          rows="3"
+          placeholder="Explain what happened here..."
+        />
+      </div>
+      <b-alert variant="danger" :show="showError" class="mt-2">
+        Please select a reason and add some detail. Thanks.
+      </b-alert>
+    </b-modal>
+  </span>
 </template>
 <script>
 import { useUserStore } from '../stores/user'

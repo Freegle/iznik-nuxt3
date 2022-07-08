@@ -58,7 +58,7 @@
                     />
                   </l-map>
                   <p class="mt-2">
-                    <v-icon name="info-circle" /> Drag the marker if it's not in
+                    <v-icon icon="info-circle" /> Drag the marker if it's not in
                     the right place.
                   </p>
                 </b-col>
@@ -97,7 +97,7 @@
             class="mt-2"
             @click="addnew"
           >
-            <v-icon name="plus" /> Add a new address
+            <v-icon icon="plus" /> Add a new address
           </b-button>
           <div v-else>
             <h4 class="mt-2">Add a new address</h4>

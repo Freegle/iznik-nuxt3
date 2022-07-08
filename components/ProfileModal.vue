@@ -2,10 +2,7 @@
   <b-modal id="profilemodal" v-model="showModal" size="lg">
     <template #header>
       <div class="w-100 coverphoto">
-        <profile-header
-          :id="id"
-          class="flex-grow-1 px-3 py-2"
-        />
+        <ProfileHeader :id="id" class="flex-grow-1 px-3 py-2" />
       </div>
     </template>
     <template #default>

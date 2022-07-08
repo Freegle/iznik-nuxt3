@@ -22,7 +22,7 @@
             {{ dateonly(user.added) }}.
           </div>
           <span v-if="user.settings.showmod" class="text-muted">
-            <v-icon name="leaf" /> Freegle Volunteer
+            <v-icon icon="leaf" /> Freegle Volunteer
           </span>
         </div>
       </div>

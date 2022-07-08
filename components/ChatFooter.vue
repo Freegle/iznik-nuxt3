@@ -270,6 +270,7 @@
 import { setupChat } from '../composables/useChat'
 import { useMiscStore } from '../stores/misc'
 import ExternalLink from './ExternalLink'
+import { untwem } from '~/composables/useTwem'
 
 // Don't use dynamic imports because it stops us being able to scroll to the bottom after render.
 const OurFilePond = () => import('~/components/OurFilePond')
@@ -311,9 +312,16 @@ export default {
       uploading: false,
       showMicrovolunteering: false,
       showNotices: true, // TODO Add timer
+      sendmessage: null,
+      RSVP: false,
+      likelymsg: null,
     }
   },
   computed: {
+    ouroffers() {
+      // TODO Get our messages
+      return []
+    },
     expectedreply() {
       return this.otheruser?.info?.expectedreply
     },
@@ -354,6 +362,125 @@ export default {
     async doNudge() {
       await this.chatStore.nudge(this.id)
       this._updateAfterSend()
+    },
+    nudge() {
+      this.waitForRef('nudgewarning', () => {
+        this.$refs.nudgewarning.show()
+      })
+    },
+    newline() {
+      const p = this.$refs.chatarea.selectionStart
+      if (p) {
+        this.sendmessage =
+          this.sendmessage.substring(0, p) +
+          '\n' +
+          this.sendmessage.substring(p)
+        this.$nextTick(() => {
+          this.$refs.chatarea.selectionStart = p + 1
+          this.$refs.chatarea.selectionEnd = p + 1
+        })
+      } else {
+        this.sendmessage += '\n'
+      }
+    },
+    addressBook() {
+      this.waitForRef('addressModal', () => {
+        this.$refs.addressModal.show()
+      })
+    },
+    photoAdd() {
+      // Flag that we're uploading.  This will trigger the render of the filepond instance and subsequently the
+      // processed callback below.
+      this.uploading = true
+    },
+    promise(date) {
+      // Show the modal first, as eye candy.
+      this.waitForRef('promise', () => {
+        this.$refs.promise.show(date)
+
+        this.$nextTick(() => {
+          // Get our offers.
+          // await this.$store.dispatch('messages/fetchMessages', {
+          //   fromuser: this.myid,
+          //   types: ['Offer'],
+          //   hasoutcome: false,
+          //   limit: 100,
+          //   collection: 'AllUser',
+          // })
+          //
+          // this.ouroffers = this.$store.getters['messages/getAll'].filter(
+          //   (m) => m.mine
+          // )
+
+          // TODO Get our messages
+          this.ouroffers = []
+
+          // Find the last message referenced in this chat, if any.  That's the most likely one you'd want to promise,
+          // so it should be the default.
+          this.likelymsg = 0
+
+          for (const msg of this.chatmessages) {
+            if (msg.refmsg) {
+              // Check that it's still in our list of messages
+              for (const ours of this.ouroffers) {
+                if (
+                  ours.id === msg.refmsg.id &&
+                  !ours.promised &&
+                  (!ours.outcomes || ours.outcomes.length === 0)
+                ) {
+                  this.likelymsg = msg.refmsg.id
+                }
+              }
+            }
+          }
+
+          this._updateAfterSend()
+        })
+      })
+    },
+    async send() {
+      let msg = this.sendmessage
+
+      if (msg) {
+        this.sending = true
+
+        // If the current last message in this chat is an "interested" from the other party, then we're going to ask
+        // if they expect a reply.
+        const RSVP =
+          this.chatmessages.length &&
+          this.chatmessages[this.chatmessages.length - 1].type ===
+            'Interested' &&
+          this.chatmessages[this.chatmessages.length - 1].userid !==
+            this.myid &&
+          this.chat.chattype === 'User2User'
+
+        // Encode up any emojis.
+        msg = untwem(msg)
+
+        // Send it
+        await this.$store.dispatch('chatmessages/send', {
+          roomid: this.id,
+          message: msg,
+        })
+
+        // Clear the message now it's sent.
+        this.sendmessage = ''
+
+        await this._updateAfterSend()
+
+        if (RSVP) {
+          this.RSVP = true
+          this.waitForRef('rsvp', () => {
+            this.$refs.rsvp.show()
+          })
+        } else {
+          // We've sent a message.  This would be a good time to do some microvolunteering.
+          this.showMicrovolunteering = true
+        }
+
+        // Start the timer which indicates we may still be typing.
+        this.startTypingTimer()
+      }
     },
   },
 }

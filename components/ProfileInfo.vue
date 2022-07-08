@@ -17,7 +17,7 @@
         class="supporter d-flex justify-content-between flex-wrap"
       >
         <span class="align-self-center">
-          <v-icon name="heart" /> Very kindly keeps Freegle running with
+          <v-icon icon="heart" /> Very kindly keeps Freegle running with
           donations of time or money.
         </span>
         <b-button
@@ -45,27 +45,18 @@
         class="mt-2"
       >
         <notice-message v-if="user.info.expectedreply" variant="warning">
-          <v-icon name="exclamation-triangle" />&nbsp;{{
-            user.info.expectedreply
-              | pluralize(['freegler is', 'freeglers are'], {
-                includeNumber: true,
-              })
-          }}
+          <v-icon icon="exclamation-triangle" />&nbsp;{{ expectedreplies }}
           still waiting for them to reply on here.
         </notice-message>
         <template #header>
-          <v-icon name="info-circle" /> About this freegler
+          <v-icon icon="info-circle" /> About this freegler
         </template>
         <b-card-body class="p-0 pt-1">
           <p v-if="user.info.milesaway">
-            <v-icon name="map-marker-alt" class="fa-fw" />
+            <v-icon icon="map-marker-alt" class="fa-fw" />
             <span v-if="user.info.publiclocation">
               <span v-if="user.info.publiclocation.location">
-                {{ user.info.publiclocation.location }},
-                {{
-                  user.info.milesaway
-                    | pluralize(['mile', 'miles'], { includeNumber: true })
-                }}
+                {{ user.info.publiclocation.location }}, {{ milesaway }}
                 away.
               </span>
               <span v-else-if="user.info.publiclocation.groupname">
@@ -74,7 +65,7 @@
               <span v-else> Unknown </span>
             </span>
           </p>
-          <ReplyTime :user="user" />
+          <ReplyTime :id="id" />
         </b-card-body>
       </b-card>
       <b-card
@@ -84,9 +75,8 @@
         no-body
       >
         <template #header>
-          <v-icon name="gift" />
-          {{ activeOffers.length }} active
-          {{ activeOffers.length | pluralize(['OFFER', 'OFFERs']) }}
+          <v-icon icon="gift" />
+          {{ activeOFFERCount }}
         </template>
         <b-card-body class="p-0 pt-2 pb-2">
           <div v-if="activeOffers.length">
@@ -108,9 +98,8 @@
         no-body
       >
         <template #header>
-          <v-icon name="search" />
-          {{ activeWanteds.length }} active
-          {{ activeWanteds.length | pluralize(['WANTED', 'WANTEDs']) }}
+          <v-icon icon="search" />
+          {{ activeWANTEDCount }}
         </template>
         <b-card-body class="p-0 pt-2 pb-2">
           <div v-if="activeWanteds.length">
@@ -132,7 +121,7 @@
         class="mt-2"
       >
         <template #header>
-          <v-icon name="chart-bar" />
+          <v-icon icon="chart-bar" />
           <span
             v-if="user.info.offers + user.info.wanteds + user.info.replies > 0"
             >Activity in the last 90 days</span
@@ -144,7 +133,7 @@
             v-if="user.info.offers + user.info.wanteds + user.info.replies > 0"
           >
             <b-col cols="12" md="4">
-              <v-icon name="gift" />
+              <v-icon icon="gift" />
               {{
                 user.info.offers
                   | pluralize(['recent OFFER', 'recent OFFERs'], {
@@ -153,7 +142,7 @@
               }}.
             </b-col>
             <b-col cols="12" md="4">
-              <v-icon name="search" />
+              <v-icon icon="search" />
               {{
                 user.info.wanteds
                   | pluralize(['recent WANTED', 'recent WANTEDs'], {
@@ -162,7 +151,7 @@
               }}.
             </b-col>
             <b-col cols="12" md="4">
-              <v-icon name="envelope" />
+              <v-icon icon="envelope" />
               {{
                 user.info.replies
                   | pluralize(['reply', 'replies'], { includeNumber: true })
@@ -172,14 +161,14 @@
           <b-row>
             <b-col>
               <span v-if="user.info.collected">
-                <v-icon name="check" /> Picked up about
+                <v-icon icon="check" /> Picked up about
                 {{
                   user.info.collected
                     | pluralize('item', { includeNumber: true })
                 }}.
               </span>
               <span v-else>
-                <v-icon name="check" class="text-faded" />&nbsp;Not received any
+                <v-icon icon="check" class="text-faded" />&nbsp;Not received any
                 items recently, so far as we know.
               </span>
             </b-col>
@@ -192,8 +181,10 @@
     </NoticeMessage>
   </div>
 </template>
-
 <script>
+import pluralize from 'pluralize'
+import { useUserStore } from '../stores/user'
+import { milesAway } from '../composables/useDistance'
 import SupporterInfoModal from '~/components/SupporterInfoModal'
 import NoticeMessage from '~/components/NoticeMessage'
 import { twem } from '~/composables/useTwem'
@@ -222,6 +213,13 @@ export default {
       default: true,
     },
   },
+  setup(props) {
+    const userStore = useUserStore()
+
+    return {
+      userStore,
+    }
+  },
   data() {
     return {
       invalidUser: false,
@@ -230,8 +228,7 @@ export default {
   },
   computed: {
     user() {
-      const ret = this.id ? this.$store.getters['user/get'](this.id) : null
-      return ret
+      return this.id ? this.userStore.byId(this.id) : null
     },
     activeOffers() {
       return this.active('Offer')
@@ -245,30 +242,33 @@ export default {
         : null
     },
     messages() {
-      return this.$store.getters['messages/getAll'].filter(
-        (m) => m.fromuser && m.fromuser.id === this.user.id
+      // TODO messages for this user.
+      return []
+      // return this.$store.getters['messages/getAll'].filter(
+      //   (m) => m.fromuser && m.fromuser.id === this.user.id
+      // )
+    },
+    expectedreplies() {
+      return pluralize(
+        ['freegler is', 'freeglers are'],
+        this.user?.info?.expectedreply,
+        true
       )
     },
-  },
-  async mounted() {
-    // Get the user and their messages.  Don't clear the store of messages, as there are cases where that would
-    // end up destroying ourselves (view message, opens modal, click to view info).
-    await this.$store.dispatch('user/fetch', {
-      id: this.id,
-      info: true,
-    })
-
-    const user = this.$store.getters['user/get'](this.id)
-
-    if (user) {
-      await this.$store.dispatch('messages/fetchMessages', {
-        fromuser: this.id,
-        limit: 1000,
-        age: user.info.openage,
-      })
-    } else {
-      this.invalidUser = true
-    }
+    milesaway() {
+      // TODO Miles away calculation.
+      return pluralize(
+        'mile',
+        milesAway(this.me?.lat, this.me?.lng, this.user?.lat, this.user?.lng),
+        true
+      )
+    },
+    activeOFFERCount() {
+      return pluralize('OFFER', this.activeOffers.length, true)
+    },
+    activeWANTEDCount() {
+      return pluralize('WANTED', this.activeWanteds.length, true)
+    },
   },
   methods: {
     active(type) {

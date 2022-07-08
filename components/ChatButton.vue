@@ -84,7 +84,7 @@ export default {
         firstmessage,
         firstmsgid,
         this.groupid,
-        this.userid,
+        this.userid
       )
 
       if (this.groupid > 0) {
