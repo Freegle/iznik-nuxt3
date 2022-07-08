@@ -74,11 +74,10 @@ export default {
     },
   },
   methods: {
-    gotoChat(popup) {
-      this.openChat(null, null, null, popup)
+    gotoChat() {
+      this.openChat(null, null, null)
     },
-
-    async openChat(event, firstmessage, firstmsgid, popup, route = true) {
+    async openChat(event, firstmessage, firstmsgid) {
       this.$emit('click')
       console.log(
         'Open chat',
@@ -86,8 +85,6 @@ export default {
         firstmsgid,
         this.groupid,
         this.userid,
-        popup,
-        route
       )
 
       if (this.groupid > 0) {
@@ -98,15 +95,7 @@ export default {
           groupid: this.groupid,
         })
 
-        if (popup) {
-          await this.$store.dispatch('popupchats/popup', {
-            id: chatid,
-          })
-          console.log('Popped up')
-          this.$emit('chatpopup')
-        } else {
-          this.$router.push('/chats/' + chatid)
-        }
+        this.$router.push('/chats/' + chatid)
       } else if (this.userid > 0) {
         const chatid = await this.$store.dispatch('chats/openChatToUser', {
           userid: this.userid,
@@ -135,15 +124,7 @@ export default {
             this.$emit('sent')
           }
 
-          console.log('Consider popup, route', popup, route, chatid)
-          if (popup) {
-            await this.$store.dispatch('popupchats/popup', {
-              id: chatid,
-            })
-            this.$emit('chatpopup')
-          } else if (route) {
-            this.$router.push('/chats/' + chatid)
-          }
+          this.$router.push('/chats/' + chatid)
         }
       }
     },

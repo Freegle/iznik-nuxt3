@@ -38,7 +38,6 @@
             title="Message"
             class="mb-1 order-1 order-lg-0 align-self-lg-center"
             variant="secondary"
-            @chatpopup="$emit('chatpopup')"
           />
           <UserRatings
             :id="id"
