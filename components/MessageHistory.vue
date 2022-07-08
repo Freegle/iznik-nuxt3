@@ -1,7 +1,7 @@
 <template>
   <div>
     <div
-      v-for="group in message.groups"
+      v-for="group in message?.groups"
       :key="'message-' + message.id + '-' + group.id"
       class="text--small"
     >

@@ -13,7 +13,7 @@
             </b-card-text>
           </b-card>
         </div>
-        <div v-else class="media float-right">
+        <div v-else class="media float-end">
           <b-card border-variant="warning">
             <b-card-title>
               <h4><v-icon icon="bell" />&nbsp;You nudged them.</h4>

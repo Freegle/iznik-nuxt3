@@ -46,7 +46,7 @@
               />
             </div>
             <div v-if="chatBusy && headerLoaded" class="text-center">
-              <b-img class="float-right" src="~static/loader.gif" />
+              <b-img class="float-end" src="~static/loader.gif" />
             </div>
           </div>
           <ChatFooter
@@ -115,6 +115,15 @@ export default {
       } else {
         $state.complete()
       }
+    },
+    scrollToBottom() {
+      this.waitForRef('chatContent', () => {
+        const container = this.$refs.chatContent
+
+        if (container) {
+          container.scrollTop = container.scrollHeight
+        }
+      })
     },
   },
 }

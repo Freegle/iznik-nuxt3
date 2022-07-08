@@ -17,7 +17,7 @@
                     refmsg.attachments &&
                     refmsg.attachments.length > 0
                   "
-                  class="float-right ml-1"
+                  class="float-end ml-1"
                   rounded
                   thumbnail
                   generator-unable-to-provide-required-alt=""
@@ -73,7 +73,7 @@
             </b-card-text>
           </b-card>
         </div>
-        <div v-else class="media float-right">
+        <div v-else class="media float-end">
           <b-card border-variant="success">
             <b-card-title>
               <nuxt-link
@@ -88,7 +88,7 @@
                     refmsg.attachments &&
                     refmsg.attachments.length > 0
                   "
-                  class="float-right"
+                  class="float-end"
                   rounded
                   thumbnail
                   generator-unable-to-provide-required-alt=""

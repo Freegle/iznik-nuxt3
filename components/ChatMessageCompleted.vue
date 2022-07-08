@@ -9,7 +9,7 @@
                 v-if="
                   refmsg && refmsg.attachments && refmsg.attachments.length > 0
                 "
-                class="float-right"
+                class="float-end"
                 rounded
                 thumbnail
                 generator-unable-to-provide-required-alt=""
@@ -30,14 +30,14 @@
             </b-card-text>
           </b-card>
         </div>
-        <div v-else class="media float-right">
+        <div v-else class="media float-end">
           <b-card border-variant="info">
             <b-card-title>
               <b-img
                 v-if="
                   refmsg && refmsg.attachments && refmsg.attachments.length > 0
                 "
-                class="float-right"
+                class="float-end"
                 rounded
                 thumbnail
                 generator-unable-to-provide-required-alt=""

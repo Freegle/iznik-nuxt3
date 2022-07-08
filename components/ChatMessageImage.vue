@@ -27,7 +27,7 @@
             />
           </div>
         </div>
-        <div v-else class="media float-right">
+        <div v-else class="media float-end">
           <div class="media-body chatMessage" @click="zoom = true">
             <b-img-lazy
               v-if="chatmessage.image"

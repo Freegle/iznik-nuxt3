@@ -1,48 +1,57 @@
 <template>
-  <div class="clickme" @click="click">
-    <div class="messagecard p-2">
-      <div class="image-wrapper">
-        <b-img-lazy
-          v-if="!imageBroken && attachment"
-          rounded
-          generator-unable-to-provide-required-alt=""
-          title="Item picture"
-          :src="attachment"
-          itemprop="image"
-          class="attachment"
-          @error.native="brokenImage"
-        />
-      </div>
-      <div class="rest">
-        <MessageItemLocation
-          :id="message.id"
-          class="mb-1 header-title"
-          :type="message.type"
-          :expanded="false"
-          :message-override="message"
-        />
-        <MessageHistory
-          :message="message"
-          class="mb-1 header-history"
-          :display-message-link="sm()"
-        />
+  <div>
+    <div v-if="!message">{{ id }} A message that no longer exists.</div>
+    <div v-else>
+      <div class="clickme" @click="click">
+        <div class="messagecard p-2">
+          <div class="image-wrapper">
+            <b-img-lazy
+              v-if="!imageBroken && attachment"
+              rounded
+              generator-unable-to-provide-required-alt=""
+              title="Item picture"
+              :src="attachment"
+              itemprop="image"
+              class="attachment"
+              @error.native="brokenImage"
+            />
+          </div>
+          <div class="rest">
+            <MessageItemLocation
+              :id="id"
+              class="mb-1 header-title"
+              :type="message.type"
+              :expanded="false"
+              :message-override="message"
+            />
+            <MessageHistory
+              :id="id"
+              class="mb-1 header-history"
+              :display-message-link="sm"
+            />
+          </div>
+        </div>
+        <notice-message
+          v-if="
+            (message.outcomes && message.outcomes.length) || message.deleted
+          "
+          class="mt-2 mb-2"
+        >
+          <v-icon icon="info-circle" />
+          <span v-if="message.type === 'Offer'">
+            This is no longer available.
+          </span>
+          <span v-else> They are no longer looking for this. </span>
+        </notice-message>
       </div>
     </div>
-    <notice-message
-      v-if="(message.outcomes && message.outcomes.length) || message.deleted"
-      class="mt-2 mb-2"
-    >
-      <v-icon icon="info-circle" />
-      <span v-if="message.type === 'Offer'">
-        This is no longer available.
-      </span>
-      <span v-else> They are no longer looking for this. </span>
-    </notice-message>
   </div>
 </template>
 
 <script>
 // Need to import rather than async otherwise the render doesn't happen and ref isn't set.
+import { useMessageStore } from '../stores/message'
+import { useGroupStore } from '../stores/group'
 import MessageItemLocation from '~/components/MessageItemLocation'
 import { useMiscStore } from '~/stores/misc'
 
@@ -56,16 +65,38 @@ export default {
     NoticeMessage,
   },
   props: {
-    message: {
-      type: Object,
-      required: false,
-      default: null,
+    id: {
+      type: Number,
+      required: true,
     },
   },
-  setup() {
+  async setup(props) {
     const miscStore = useMiscStore()
+    const messageStore = useMessageStore()
+    const groupStore = useGroupStore()
+
+    // Fetch the message info.
+    try {
+      await messageStore.fetch(props.id)
+
+      const message = messageStore.byId(props.id)
+
+      if (message) {
+        message.groups.forEach((g) => {
+          const thegroup = groupStore.get(g.groupid)
+
+          if (!thegroup) {
+            groupStore.fetch(g.groupid)
+          }
+        })
+      }
+    } catch (e) {
+      console.log('Message fetch failed', props.id, e)
+    }
+
     return {
       miscStore,
+      messageStore,
     }
   },
   data() {
@@ -74,10 +105,11 @@ export default {
     }
   },
   computed: {
+    message() {
+      return this.messageStore.byId(this.id)
+    },
     attachment() {
-      return this.message &&
-        this.message.attachments &&
-        this.message.attachments.length
+      return this.message?.attachments?.length
         ? this.message.attachments[0].paththumb
         : null
     },
@@ -90,10 +122,10 @@ export default {
       this.imageBroken = true
     },
     click() {
-      if (this.message.fromuser && this.message.fromuser.id === this.myid) {
-        this.$router.push('/mypost/' + this.message.id)
+      if (this.message.fromuser === this.myid) {
+        this.$router.push('/mypost/' + this.id)
       } else {
-        this.$router.push('/message/' + this.message.id)
+        this.$router.push('/message/' + this.id)
       }
     },
   },

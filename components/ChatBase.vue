@@ -59,11 +59,7 @@ export default {
         : this.chat?.icon
     },
     refmsg() {
-      return this.chatmessage.refmsg
-        ? this.chatmessage.refmsg
-        : {
-            subject: 'A message which no longer exists',
-          }
+      return this.chatmessage?.refmsgid
     },
     // We override the normal methods because we might have an explicit point-of-view to honour.
     me() {

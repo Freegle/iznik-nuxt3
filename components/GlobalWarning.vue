@@ -2,7 +2,7 @@
   <div v-if="false">
     <client-only>
       <NoticeMessage v-if="show" variant="danger">
-        <b-button variant="link" class="float-right" @click="hideit">
+        <b-button variant="link" class="float-end" @click="hideit">
           Hide this
         </b-button>
         <p>This would be a global alert.</p>

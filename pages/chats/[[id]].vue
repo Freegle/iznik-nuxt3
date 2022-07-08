@@ -167,10 +167,9 @@ export default {
         chatStore.fetchMessages(selectedChatId)
 
         // Fetch the user.
-        const { chat, otheruser } = setupChat(selectedChatId)
+        const { chat } = setupChat(selectedChatId)
 
-        if (chat?.value?.otheruid && !otheruser?.value) {
-          // We don't have the other user.
+        if (chat?.value?.otheruid) {
           await userStore.fetch(chat.value.otheruid)
         }
       }

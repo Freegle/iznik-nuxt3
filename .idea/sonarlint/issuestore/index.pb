@@ -117,8 +117,6 @@ B
 api/ActivityAPI.js,1\6\1657e79abd0a55b600d9bace9f3243322fad1d11
 E
 api/index.generate.js,8\c\8c55f1204114ed98508a0f134c0326cc51f78cfd
-P
- assets/css/bootstrap-custom.scss,1\8\18cbc59a2e67a596aa4319d39ca61895ec3b5975
 Q
 !components/MessageAttachments.vue,3\2\32575f0cd8b9f5844a2ba2c1267108721d45a662
 L
@@ -206,14 +204,10 @@ M
 components/MessageSummary.vue,5\a\5a01b659a739b4584f899fc40fac1291d680cb3c
 >
 api/BaseAPI.js,d\8\d8dc35e38de643e66f58be4dae0852a98d2d23ed
-F
-components/PostMap.vue,9\3\93df401eaefe49204b2abc483b8d7a6af7a742ed
 ;
 setvars.cmd,4\9\49e4b62efd5e19dd3b5bf34e20c968a663cdea1d
 H
 components/PostPhoto.vue,5\2\52d93e8133f6377dd11668f02969cffda3993419
->
-stores/auth.js,f\1\f13119e39f6f4d4f27ecdda7f114db1962f4c5c2
 C
 capacitor.config.ts,d\b\db2de0c4fdaae9c34a88b5558ef0e682f154a8d9
 P

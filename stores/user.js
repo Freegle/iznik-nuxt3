@@ -21,7 +21,6 @@ export const useUserStore = defineStore({
       if (force || !this.list[id]) {
         // TODO Caching
         const user = await api(this.config).user.fetch(id)
-        console.log('Fetched ', id, user)
 
         if (user) {
           this.list[id] = user

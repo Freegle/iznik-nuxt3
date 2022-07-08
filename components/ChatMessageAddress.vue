@@ -59,7 +59,7 @@
             </b-card-text>
           </b-card>
         </div>
-        <div v-else class="media float-right">
+        <div v-else class="media float-end">
           <b-card border-variant="success">
             <b-card-title>
               <h4>You sent an address:</h4>

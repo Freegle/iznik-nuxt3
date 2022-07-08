@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-textarea
+    <b-form-textarea
       :id="id"
       :state="validationState"
       :aria-describedby="feedbackId"

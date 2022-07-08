@@ -246,9 +246,9 @@ export default {
     const chatStore = useChatStore()
     const miscStore = useMiscStore()
 
-    const { chat, otheruser, unseen } = await setupChat(props.id)
+    const { chat, otheruser, unseen, milesaway } = await setupChat(props.id)
 
-    return { chatStore, miscStore, chat, otheruser, unseen }
+    return { chatStore, miscStore, chat, otheruser, unseen, milesaway }
   },
   computed: {
     collapsed: {
@@ -265,6 +265,32 @@ export default {
     loaded() {
       // TODO Minor this could probably go now that we have setup()
       return this.chat && this.otheruser && this.otheruser.info
+    },
+    replytime() {
+      let ret = null
+      let secs = null
+
+      if (this.otheruser && this.otheruser.info) {
+        secs = this.otheruser.info.replytime
+      }
+
+      if (secs) {
+        if (secs < 60) {
+          ret = Math.round(secs) + ' second'
+        } else if (secs < 60 * 60) {
+          ret = Math.round(secs / 60) + ' minute'
+        } else if (secs < 24 * 60 * 60) {
+          ret = Math.round(secs / 60 / 60) + ' hour'
+        } else {
+          ret = Math.round(secs / 60 / 60 / 24) + ' day'
+        }
+
+        if (ret.indexOf('1 ') !== 0) {
+          ret += 's'
+        }
+      }
+
+      return ret
     },
   },
   watch: {
@@ -292,6 +318,26 @@ export default {
       this.waitForRef('chatblock', () => {
         this.$refs.chatblock.show()
       })
+    },
+    showInfo() {
+      this.waitForRef('profile', () => {
+        this.$refs.profile.show()
+      })
+    },
+    report() {
+      this.waitForRef('chatreport', () => {
+        this.$refs.chatreport.show()
+      })
+    },
+    block() {
+      this.$store.dispatch('chats/block', {
+        id: this.id,
+      })
+
+      this.$router.push('/chats')
+    },
+    async markRead() {
+      await this.chatStore.markRead(this.id)
     },
   },
 }

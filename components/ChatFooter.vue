@@ -42,10 +42,7 @@
             }}
             still waiting for them to reply on here.
           </notice-message>
-          <notice-message
-            v-if="spammer && spammer.collection !== 'Whitelisted'"
-            variant="danger"
-          >
+          <notice-message v-if="otheruser?.spammer" variant="danger">
             This person has been reported as a spammer or scammer. Please do not
             talk to them and under no circumstances send them any money. Do not
             arrange anything by courier.
@@ -59,48 +56,10 @@
           <v-icon icon="times-circle" scale="1.5" />
         </div>
       </div>
-      <b-alert
-        v-if="otheruser && showHandoverPrompt"
-        variant="info"
-        :show="30"
-        class="m-0"
-        dismissible
-        @dismissed="notHandover"
-      >
-        Looks like you might be agreeing a handover with
-        <strong>{{ otheruser.displayname }}</strong
-        >?
-        <!--        TODO Tooltips-->
-        <div class="d-flex mt-2">
-          <b-button
-            v-b-tooltip.hover.top
-            size="lg"
-            variant="primary"
-            title="Yes, I'm agreeing a handover"
-            @click="promise(discussedDate)"
-          >
-            Yes, I am
-          </b-button>
-          <b-button
-            v-b-tooltip.hover.top
-            size="lg"
-            variant="secondary"
-            title="No, I'm not agreeing a handover"
-            class="ml-4"
-            @click="notHandover"
-          >
-            Not now
-          </b-button>
-        </div>
-        <p class="mt-1">
-          Tip: if you're not agreeing it just yet, click <em>Not Now</em> to
-          continue chatting and then click <em>Promise</em> later.
-        </p>
-      </b-alert>
-      <div v-else>
+      <div>
         <label for="chatmessage" class="sr-only">Chat message</label>
         <b-form-textarea
-          v-if="enterNewLine && !spammer"
+          v-if="enterNewLine && !otheruser?.spammer"
           id="chatmessage"
           ref="chatarea"
           v-model="sendmessage"
@@ -110,7 +69,7 @@
           @focus="markRead"
         />
         <b-form-textarea
-          v-else-if="!spammer"
+          v-else-if="!otheruser?.spammer"
           id="chatmessage"
           ref="chatarea"
           v-model="sendmessage"
@@ -126,7 +85,7 @@
         />
       </div>
     </div>
-    <div v-if="!spammer && !showHandoverPrompt" class="bg-white pt-1 pb-1">
+    <div v-if="!otheruser?.spammer" class="bg-white pt-1 pb-1">
       <div class="d-none d-lg-block">
         <span v-if="chat && chat.chattype === 'User2User' && otheruser">
           <b-button
@@ -309,6 +268,7 @@
 </template>
 <script>
 import { setupChat } from '../composables/useChat'
+import { useMiscStore } from '../stores/misc'
 import ExternalLink from './ExternalLink'
 
 // Don't use dynamic imports because it stops us being able to scroll to the bottom after render.
@@ -340,24 +300,60 @@ export default {
     id: { type: Number, required: true },
   },
   async setup(props) {
-    const { chat, otheruser } = await setupChat(props.id)
+    const miscStore = useMiscStore()
+    const { chat, otheruser, tooSoonToNudge } = await setupChat(props.id)
 
-    return { chat, otheruser }
+    return { chat, otheruser, tooSoonToNudge, miscStore }
   },
   data() {
     return {
       sending: false,
+      uploading: false,
       showMicrovolunteering: false,
       showNotices: true, // TODO Add timer
     }
   },
   computed: {
+    expectedreply() {
+      return this.otheruser?.info?.expectedreply
+    },
     noticesToShow() {
-      return (
-        this.badratings ||
-        this.expectedreply ||
-        (this.spammer && this.spammer.collection !== 'Whitelisted')
-      )
+      return this.badratings || this.expectedreply || this.otheruser?.spammer
+    },
+    badratings() {
+      let ret = false
+
+      if (
+        this.otheruser?.info?.ratings &&
+        this.otheruser.info.ratings.Down > 2 &&
+        this.otheruser.info.ratings.Down > 2 * this.otheruser.info.ratings.Up
+      ) {
+        ret = true
+      }
+
+      return ret
+    },
+    enterNewLine() {
+      // TODO Store enternewline in settings
+      return false
+    },
+    // TODO MINOR Consider showing handover prompt in less annoying way.
+  },
+  methods: {
+    async markRead() {
+      await this.chatStore.markRead(this.id)
+      this._updateAfterSend()
+    },
+    async _updateAfterSend() {
+      this.sending = false
+      this.$emit('scrollbottom')
+
+      // We also want to trigger an update in the chat list.
+      await this.chatStore.fetchChat(this.id)
+    },
+    async doNudge() {
+      await this.chatStore.nudge(this.id)
+      this._updateAfterSend()
     },
   },
 }

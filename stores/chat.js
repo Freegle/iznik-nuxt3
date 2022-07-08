@@ -21,6 +21,10 @@ export const useChatStore = defineStore({
         this.listById[c.id] = c
       })
     },
+    async fetchChat(id) {
+      const chat = await api(this.config).chat.fetchChat(id)
+      this.listById[id] = chat
+    },
     async fetchMessages(id) {
       const messages = await api(this.config).chat.fetchMessages(id)
       this.messages[id] = messages
@@ -33,6 +37,9 @@ export const useChatStore = defineStore({
         api(this.config).chat.markSeen(id)
         this.list[id].unseen = 0
       }
+    },
+    async nudge(id) {
+      await api(this.config).chat.nudge(id)
     },
   },
   getters: {

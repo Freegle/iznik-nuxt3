@@ -27,14 +27,14 @@
                 />
               </b-col>
               <b-col cols="12" sm="4">
-                <b-btn variant="secondary" @click="deleteIt">
+                <b-button variant="secondary" @click="deleteIt">
                   <v-icon
                     v-if="deleting"
                     name="sync"
                     class="fa-spin text-success"
                   />
                   <v-icon v-else name="trash-alt" /> Delete
-                </b-btn>
+                </b-button>
               </b-col>
             </b-row>
             <div v-if="selectedAddress">
@@ -70,7 +70,7 @@
               </p>
               <b-row>
                 <b-col cols="12" sm="8">
-                  <b-textarea
+                  <b-form-textarea
                     v-model="instructions"
                     rows="2"
                     max-rows="6"
@@ -91,14 +91,14 @@
             </div>
           </div>
           <p v-else>You don't have any addresses yet.</p>
-          <b-btn
+          <b-button
             v-if="!showAdd"
             variant="secondary"
             class="mt-2"
             @click="addnew"
           >
             <v-icon name="plus" /> Add a new address
-          </b-btn>
+          </b-button>
           <div v-else>
             <h4 class="mt-2">Add a new address</h4>
             <p>Choose a postcode:</p>
@@ -121,14 +121,18 @@
                 />
               </b-col>
               <b-col cols="12" sm="4">
-                <b-btn v-if="selectedProperty" variant="primary" @click="add">
+                <b-button
+                  v-if="selectedProperty"
+                  variant="primary"
+                  @click="add"
+                >
                   <v-icon
                     v-if="adding"
                     name="sync"
                     class="fa-spin text-success"
                   />
                   <v-icon v-else name="plus" /> Add
-                </b-btn>
+                </b-button>
               </b-col>
             </b-row>
           </div>

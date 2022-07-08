@@ -132,7 +132,7 @@
           </NoticeMessage>
           <div>
             <label class="mt-4 strong"> It went well/badly because: </label>
-            <b-textarea
+            <b-form-textarea
               v-model="comments"
               rows="3"
               max-rows="6"

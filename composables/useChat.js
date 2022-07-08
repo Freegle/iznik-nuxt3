@@ -42,40 +42,55 @@ export function setupChat(selectedChatId) {
   const userStore = useUserStore()
   const authStore = useAuthStore()
 
+  const myid = authStore.user?.id
+
   const chat = computed(() => {
     return selectedChatId ? chatStore.byId(selectedChatId) : null
   })
 
-  const myid = authStore.user?.id
-
-  const otheruserid = computed(() => {
-    // The user who isn't us.
-    let ret = null
-
-    if (chat && myid && chat.chattype === 'User2User' && chat.user1) {
-      ret = chat.user1 === myid ? chat.user2 : chat.user1
-    }
-
-    return ret
+  const chatmessages = computed(() => {
+    return chatStore.messagesById(selectedChatId)
   })
 
-  const unseen = computed(() => chat?.unseen)
+  const mymessages = computed(() => {
+    return chatmessages.filter((m) => m.userid === myid)
+  })
+
+  const lastfromme = computed(() => {
+    let last = 0
+
+    mymessages.forEach((m) => {
+      last = Math.max(last, new Date(m.date).getTime())
+    })
+
+    return last
+  })
+
+  const otheruser = computed(() => {
+    let user = null
+
+    if (chat?.value?.otheruid) {
+      user = userStore.byId(chat.value.otheruid)
+    }
+
+    return user
+  })
 
   return {
     chat,
-    unseen,
-    chatmessages: computed(() => {
-      return chatStore.messagesById(selectedChatId)
+    unseen: computed(() => chat?.unseen),
+    chatmessages,
+    otheruser,
+    mymessages,
+    lastfromme,
+    tooSoonToNudge: computed(() => {
+      return (
+        lastfromme > 0 &&
+        new Date().getTime() - lastfromme < 24 * 60 * 60 * 1000
+      )
     }),
-    otheruserid,
-    otheruser: computed(() => {
-      let user = null
-
-      if (chat?.value?.otheruid) {
-        user = userStore.byId(chat.value.otheruid)
-      }
-
-      return user
+    milesaway: computed(() => {
+      return otheruser?.info?.milesaway
     }),
   }
 }

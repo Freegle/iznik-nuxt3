@@ -37,7 +37,7 @@
         </b-badge>
       </b-col>
       <b-col v-else>
-        <span class="float-right chat__dateread--mine">
+        <span class="float-end chat__dateread--mine">
           <span
             v-if="chatmessage?.seenbyall"
             title="This message has been read."
@@ -85,7 +85,7 @@
           <span v-if="chatmessage?.reviewrequired" class="text-danger small">
             Pending review
           </span>
-          <span :title="datetimeshort(chatmessage?.date)">{{
+          <span :title="datetimeshort(chatmessage?.date)" class="ml-1">{{
             timeadapt(chatmessage?.date)
           }}</span>
           <span
@@ -190,7 +190,7 @@ export default {
 }
 
 .chat__dateread--mine {
-  padding-right: 30px;
+  padding-right: 40px;
   padding-left: 10px;
 }
 </style>

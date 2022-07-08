@@ -42,7 +42,7 @@
                 size="sm"
                 class="pl-1 pt-1"
               />
-              <span class="pl-2 pr-1 float-right" @click="hide">
+              <span class="pl-2 pr-1 float-end" @click="hide">
                 <v-icon
                   name="times"
                   scale="1.5"
@@ -50,7 +50,7 @@
                   title="Hide chat window"
                 />
               </span>
-              <span class="pl-1 float-right" @click="maximise">
+              <span class="pl-1 float-end" @click="maximise">
                 <v-icon
                   name="window-maximize"
                   scale="1.5"
@@ -116,7 +116,7 @@
                 "
               >
                 <span
-                  class="float-right mr-2 mt-2 clickme"
+                  class="float-end mr-2 mt-2 clickme"
                   title="Hide warnings"
                   @click="showNotices = false"
                 >
@@ -212,7 +212,7 @@
 
                 <b-button
                   variant="primary"
-                  class="float-right mr-1"
+                  class="float-end mr-1"
                   @click="send"
                 >
                   <v-icon

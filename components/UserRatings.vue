@@ -1,11 +1,11 @@
 <template>
   <client-only>
-    <span :key="bump" class="d-inline">
-      <span v-if="user && user.info">
+    <span class="d-inline">
+      <span v-if="user?.info?.ratings">
         <span v-if="showName">
           {{ user.displayname }}
         </span>
-        <b-btn
+        <b-button
           v-b-tooltip.hover.top
           :size="size"
           :variant="user.info.ratings.Up > 0 ? 'primary' : 'white'"
@@ -17,8 +17,8 @@
           @click="up"
         >
           <v-icon icon="thumbs-up" />&nbsp;{{ user.info.ratings.Up }}
-        </b-btn>
-        <b-btn
+        </b-button>
+        <b-button
           v-b-tooltip.hover.top
           :size="size"
           :variant="user.info.ratings.Down > 0 ? 'warning' : 'white'"
@@ -30,25 +30,7 @@
           @click="down"
         >
           <v-icon icon="thumbs-down" />&nbsp;{{ user.info.ratings.Down }}
-        </b-btn>
-      </span>
-      <span v-else-if="user">
-        <b-btn
-          variant="white"
-          title="No ratings yet.  Click to rate."
-          :disabled="disabled || user.id === myid ? 'true' : undefined"
-          @click="up"
-        >
-          <v-icon icon="thumbs-up" />&nbsp;0
-        </b-btn>
-        <b-btn
-          variant="white"
-          title="No ratings yet.  Click to rate."
-          :disabled="disabled || user.id === myid ? 'true' : undefined"
-          @click="down"
-        >
-          <v-icon icon="thumbs-down" />&nbsp;0
-        </b-btn>
+        </b-button>
       </span>
       <b-modal
         v-model="showDown"
@@ -152,7 +134,6 @@ export default {
   },
   data() {
     return {
-      bump: 1,
       showDown: false,
       reason: null,
       text: null,
@@ -206,8 +187,6 @@ export default {
         reason,
         text,
       })
-
-      this.bump++
     },
     async up() {
       this.showDown = false

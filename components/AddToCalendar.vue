@@ -1,9 +1,9 @@
 <template>
   <div>
-    <b-btn :variant="variant" :size="size" @click="download">
+    <b-button :variant="variant" :size="size" @click="download">
       <v-icon icon="calendar-alt" />
       Add to Calendar
-    </b-btn>
+    </b-button>
   </div>
 </template>
 <script>

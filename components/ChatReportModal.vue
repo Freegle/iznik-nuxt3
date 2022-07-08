@@ -19,7 +19,7 @@
             <option value="Other">Something else</option>
           </b-form-select>
           <h4>What's wrong?</h4>
-          <b-textarea
+          <b-form-textarea
             v-model="comments"
             placeholder="Please tell us what's wrong.  This will go to our lovely volunteers, who will try to help you."
           />

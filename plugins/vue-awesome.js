@@ -3,6 +3,7 @@
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import {
+  faAddressBook,
   faArrowCircleLeft,
   faArrowCircleRight,
   faAngleDoubleDown,
@@ -11,6 +12,7 @@ import {
   faArrowLeft,
   faBan,
   faBars,
+  faBell,
   faBicycle,
   faBookOpen,
   faBullhorn,
@@ -30,6 +32,7 @@ import {
   faGift,
   faHandHoldingHeart,
   faHandsHelping,
+  faHandshake,
   faHashtag,
   faHome,
   faInfoCircle,
@@ -54,6 +57,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 
 library.add(
+  faAddressBook,
   faArrowLeft,
   faArrowCircleRight,
   faArrowCircleLeft,
@@ -63,6 +67,7 @@ library.add(
   faAngleDoubleRight,
   faBan,
   faBars,
+  faBell,
   faBicycle,
   faBookOpen,
   faBullhorn,
@@ -82,6 +87,7 @@ library.add(
   faGift,
   faHandHoldingHeart,
   faHandsHelping,
+  faHandshake,
   faHashtag,
   faHome,
   faInfoCircle,
