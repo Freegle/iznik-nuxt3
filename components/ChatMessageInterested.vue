@@ -5,7 +5,7 @@
   >
     <div class="chatMessage forcebreak chatMessage__owner">
       <div v-if="chatmessage.userid != myid">
-        <ChatMessageSummary v-if="refmsg" :id="refmsg" class="mt-1 mb-2" />
+        <ChatMessageSummary v-if="refmsgid" :id="refmsgid" class="mt-1 mb-2" />
         <div>
           <!-- eslint-disable-next-line -->
           <span v-if="(chatmessage.secondsago < 60) || (chatmessage.id > chat.lastmsgseen)" class="prewrap font-weight-bold" v-html="emessage" />
@@ -63,8 +63,9 @@
             </div>
           </div>
           <OutcomeModal
+            v-if="refmsgid"
+            :id="refmsgid"
             ref="outcomeModal"
-            :message="refmsg"
             @outcome="refetch"
           />
           <PromiseModal
@@ -77,7 +78,7 @@
         </div>
       </div>
       <div v-else>
-        <ChatMessageSummary v-if="refmsg" :id="refmsg" class="mt-1 mb-2" />
+        <ChatMessageSummary v-if="refmsgid" :id="refmsgid" class="mt-1 mb-2" />
         <div>
           <span v-if="!highlightEmails">
             <span

@@ -1,6 +1,7 @@
 <template>
   <div>
     <b-modal
+      v-if="message"
       id="promisemodal"
       v-model="showModal"
       size="lg"
@@ -182,6 +183,7 @@
   </div>
 </template>
 <script>
+import { useMessageStore } from '../stores/message'
 import OutcomeBy from './OutcomeBy'
 import SpinButton from './SpinButton'
 import modal from '@/mixins/modal'
@@ -191,8 +193,8 @@ export default {
   components: { NoticeMessage, SpinButton, OutcomeBy },
   mixins: [modal],
   props: {
-    message: {
-      type: Object,
+    id: {
+      type: Number,
       required: true,
     },
     takenBy: {
@@ -200,6 +202,10 @@ export default {
       required: false,
       default: null,
     },
+  },
+  setup() {
+    const messageStore = useMessageStore()
+    return { messageStore }
   },
   data() {
     return {
@@ -212,6 +218,9 @@ export default {
     }
   },
   computed: {
+    message() {
+      return this.messageStore.byId(this.id)
+    },
     left() {
       let left = this.message.availableinitially
         ? this.message.availableinitially

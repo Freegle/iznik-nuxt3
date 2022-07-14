@@ -4,6 +4,7 @@
 <script>
 import { useUserStore } from '../stores/user'
 import { useChatStore } from '../stores/chat'
+import { useMessageStore } from '../stores/message'
 import { twem } from '~/composables/useTwem'
 import { EMAIL_REGEX } from '~/constants'
 
@@ -58,8 +59,12 @@ export default {
         ? this.chatMessageUser.profile.turl
         : this.chat?.icon
     },
-    refmsg() {
+    refmsgid() {
       return this.chatmessage?.refmsgid
+    },
+    refmsg() {
+      const messageStore = useMessageStore()
+      return this.refmsgid ? messageStore.byId(this.refmsgid) : null
     },
     // We override the normal methods because we might have an explicit point-of-view to honour.
     me() {

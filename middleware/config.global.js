@@ -6,6 +6,7 @@ import { useIsochroneStore } from '~/stores/isochrone'
 import { useComposeStore } from '~/stores/compose'
 import { useChatStore } from '~/stores/chat'
 import { useAddressStore } from '~/stores/address'
+import { useTrystStore } from '~/stores/tryst'
 
 export default defineNuxtRouteMiddleware((to) => {
   // We're having trouble accessing the Nuxt config from within a Pinia store.  So instead we access it here, then
@@ -20,6 +21,7 @@ export default defineNuxtRouteMiddleware((to) => {
   const composeStore = useComposeStore()
   const chatStore = useChatStore()
   const addressStore = useAddressStore()
+  const trystStore = useTrystStore()
 
   groupStore.init(runtimeConfig)
   messageStore.init(runtimeConfig)
@@ -29,4 +31,5 @@ export default defineNuxtRouteMiddleware((to) => {
   composeStore.init(runtimeConfig)
   chatStore.init(runtimeConfig)
   addressStore.init(runtimeConfig)
+  trystStore.init(runtimeConfig)
 })

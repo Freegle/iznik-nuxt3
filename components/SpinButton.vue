@@ -12,13 +12,13 @@
       </span>
       <span>
         <span v-if="name">
-          <v-icon v-if="done" name="check" :class="spinclass" />
+          <v-icon v-if="done" icon="check" :class="spinclass" />
           <v-icon
             v-else-if="doing"
-            name="sync"
+            icon="sync"
             :class="'fa-spin ' + spinclass"
           />
-          <v-icon v-else :name="name" />&nbsp;
+          <v-icon v-else :icon="name" />&nbsp;
         </span>
         <span v-if="!iconlast">
           {{ label }}

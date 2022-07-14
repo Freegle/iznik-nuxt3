@@ -186,11 +186,13 @@ export default {
 
 <style scoped>
 .chat__dateread--theirs {
-  padding-left: 30px;
+  padding-left: 40px;
+  margin-bottom: 5px;
 }
 
 .chat__dateread--mine {
   padding-right: 40px;
   padding-left: 10px;
+  margin-bottom: 5px;
 }
 </style>

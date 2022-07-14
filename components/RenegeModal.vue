@@ -45,6 +45,8 @@
 
 <script>
 import dayjs from 'dayjs'
+import { useTrystStore } from '../stores/tryst'
+import { useMessageStore } from '../stores/message'
 import modal from '@/mixins/modal'
 import UserRatings from '~/components/UserRatings'
 
@@ -76,6 +78,17 @@ export default {
       default: 0,
     },
   },
+  async setup() {
+    const trystStore = useTrystStore()
+    const messageStore = useMessageStore()
+
+    await trystStore.fetch()
+
+    return {
+      trystStore,
+      messageStore,
+    }
+  },
   data() {
     return {
       removeTryst: true,
@@ -94,12 +107,16 @@ export default {
           })
         }
 
-        for (const message of this.messages) {
-          options.push({
-            value: message.id,
-            text: message.subject,
-            selected: this.selectedMessage === message.id,
-          })
+        for (const id of this.messages) {
+          const message = this.messageStore.byId(id)
+
+          if (message) {
+            options.push({
+              value: message.id,
+              text: message.subject,
+              selected: this.selectedMessage === message.id,
+            })
+          }
         }
       }
 
@@ -141,7 +158,7 @@ export default {
     },
     tryst() {
       return this.selectedUser
-        ? this.$store.getters['tryst/getByUser'](this.selectedUser)
+        ? this.trystStore.getByUser(this.selectedUser)
         : null
     },
     trystdate() {
@@ -152,6 +169,7 @@ export default {
   },
   methods: {
     async renege() {
+      // TODO Renege
       await this.$store.dispatch('messages/renege', {
         id: this.selectedMessage,
         userid: this.selectedUser,

@@ -5,8 +5,6 @@ export const useAddressStore = defineStore({
   id: 'address',
   state: () => ({
     config: null,
-    WKT: null,
-    L: null,
     list: [],
   }),
   actions: {

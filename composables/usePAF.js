@@ -23,7 +23,6 @@ export function constructAddress(
   suOrganizationIndicator,
   deliveryPointSuffix
 ) {
-  console.log('constructAddress', arguments)
   let processed = false
   let processingError = false
   const addressLines = []

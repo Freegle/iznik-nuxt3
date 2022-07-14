@@ -143,7 +143,7 @@
             <v-icon icon="question-circle" /> Central
           </external-link>
         </span>
-        <b-button variant="primary" class="float-end ml-1" @click="send">
+        <b-button variant="primary" class="float-end ml-1 mr-1" @click="send">
           Send&nbsp;
           <v-icon
             v-if="sending"
@@ -155,6 +155,7 @@
         </b-button>
         <b-button variant="secondary" class="float-end" @click="photoAdd">
           <v-icon icon="camera" />
+          Photo
         </b-button>
       </div>
       <div class="d-flex d-lg-none justify-content-between align-middle">
@@ -252,6 +253,7 @@
       </div>
     </div>
     <PromiseModal
+      v-if="showPromise"
       ref="promise"
       :messages="ouroffers"
       :selected-message="likelymsg ? likelymsg : 0"
@@ -316,6 +318,7 @@ export default {
       uploading: false,
       showMicrovolunteering: false,
       showNotices: true, // TODO Add timer
+      showPromise: false,
       sendmessage: null,
       RSVP: false,
       likelymsg: null,
@@ -399,6 +402,8 @@ export default {
     },
     promise(date) {
       // Show the modal first, as eye candy.
+      this.showPromise = true
+
       this.waitForRef('promise', () => {
         this.$refs.promise.show(date)
 

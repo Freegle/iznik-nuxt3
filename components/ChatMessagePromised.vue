@@ -7,8 +7,8 @@
             <b-card-title>
               <nuxt-link
                 :to="
-                  (messageIsFromCurrentUser ? '/myposts' : '/message/') +
-                  refmsg.id
+                  (messageIsFromCurrentUser ? '/myposts/' : '/message/') +
+                  refmsgid
                 "
               >
                 <b-img
@@ -39,8 +39,8 @@
               <br />
               <nuxt-link
                 :to="
-                  (messageIsFromCurrentUser ? '/myposts' : '/message/') +
-                  refmsg.id
+                  (messageIsFromCurrentUser ? '/myposts/' : '/message/') +
+                  refmsgid
                 "
               >
                 <h4>
@@ -78,8 +78,8 @@
             <b-card-title>
               <nuxt-link
                 :to="
-                  (messageIsFromCurrentUser ? '/myposts' : '/message/') +
-                  refmsg.id
+                  (messageIsFromCurrentUser ? '/myposts/' : '/message/') +
+                  refmsgid
                 "
               >
                 <b-img
@@ -111,18 +111,21 @@
               <br />
               <nuxt-link
                 :to="
-                  (messageIsFromCurrentUser ? '/myposts' : '/message/') +
-                  refmsg.id
+                  (messageIsFromCurrentUser ? '/myposts/' : '/message/') +
+                  refmsgid
                 "
               >
                 <h4>
-                  {{ refmsg.subject }}
+                  {{ refmsg?.subject }}
                 </h4>
               </nuxt-link>
               <p v-if="trystdate" class="small text-info">
                 Handover arranged for <strong>{{ trystdate }}</strong>
               </p>
-              <div class="d-flex mt-1 flex-wrap justify-content-between">
+              <div
+                v-if="refmsg"
+                class="d-flex mt-1 flex-wrap justify-content-between"
+              >
                 <template v-if="tryst">
                   <AddToCalendar :ics="tryst.ics" class="mr-2 mb-1" />
                   <b-button
@@ -137,7 +140,7 @@
                   <PromiseModal
                     ref="promise"
                     :messages="[refmsg]"
-                    :selected-message="refmsg.id"
+                    :selected-message="refmsgid"
                     :users="otheruser ? [otheruser] : []"
                     :selected-user="otheruser ? otheruser.id : null"
                   />
@@ -156,7 +159,7 @@
                   <PromiseModal
                     ref="promise"
                     :messages="[refmsg]"
-                    :selected-message="refmsg.id"
+                    :selected-message="refmsgid"
                     :users="otheruser ? [otheruser] : []"
                     :selected-user="otheruser ? otheruser.id : null"
                   />
@@ -200,7 +203,7 @@
                   />
                 </span>
               </div>
-              <p v-if="!refmsg.availablenow" class="text-muted">
+              <p v-if="!refmsg?.availablenow" class="text-muted">
                 This has now been taken.
               </p>
             </b-card-text>
@@ -209,15 +212,17 @@
       </b-col>
     </b-row>
     <RenegeModal
+      v-if="refmsgid"
       ref="renege"
-      :messages="[refmsg]"
-      :selected-message="refmsg.id"
+      :messages="[refmsgid]"
+      :selected-message="refmsgid"
       :users="[otheruser]"
       :selected-user="otheruser.id"
     />
     <OutcomeModal
+      v-if="refmsgid"
+      :id="refmsgid"
       ref="outcomeModal"
-      :message="refmsg"
       :taken-by="takenBy"
       @outcome="refetch"
     />
@@ -226,6 +231,7 @@
 
 <script>
 import dayjs from 'dayjs'
+import { useTrystStore } from '../stores/tryst'
 import OutcomeModal from '@/components/OutcomeModal'
 import AddToCalendar from '~/components/AddToCalendar'
 import ChatBase from '~/components/ChatBase'
@@ -243,10 +249,19 @@ export default {
     PromiseModal,
   },
   extends: ChatBase,
+  async setup() {
+    const trystStore = useTrystStore()
+
+    await trystStore.fetch()
+
+    return {
+      trystStore,
+    }
+  },
   computed: {
     tryst() {
       return this.otheruser
-        ? this.$store.getters['tryst/getByUser'](this.otheruser.id)
+        ? this.trystStore.getByUser(this.otheruser.id)
         : null
     },
     trystdate() {
@@ -278,8 +293,9 @@ export default {
       })
     },
     async outcome(type) {
+      // TODO Outcomes.
       await this.$store.dispatch('messages/fetch', {
-        id: this.refmsg.id,
+        id: this.refmsgid,
       })
 
       this.waitForRef('outcomeModal', () => {
