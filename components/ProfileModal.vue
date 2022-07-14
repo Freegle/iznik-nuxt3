@@ -45,6 +45,6 @@ export default {
 .coverphoto {
   min-height: 100px !important;
   width: 100% !important;
-  background-image: url('~static/wallpaper.png');
+  background-image: url('/wallpaper.png');
 }
 </style>
