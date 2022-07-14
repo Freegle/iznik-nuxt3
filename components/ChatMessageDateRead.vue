@@ -106,12 +106,6 @@
           </b-badge>
         </span>
       </b-col>
-      <ModMessageEmailModal
-        v-if="showOriginal"
-        :id="chatmessage?.bymailid"
-        ref="original"
-        collection="Chat"
-      />
     </b-row>
   </div>
 </template>
@@ -120,12 +114,8 @@
 import { setupChat } from '../composables/useChat'
 import { useUserStore } from '../stores/user'
 import ChatBase from './ChatBase'
-const ModMessageEmailModal = () => import('~/components/ModMessageEmailModal')
 
 export default {
-  components: {
-    ModMessageEmailModal,
-  },
   extends: ChatBase,
   props: {
     chatid: {
