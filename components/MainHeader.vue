@@ -411,10 +411,8 @@
         </b-nav>
       </b-collapse>
     </b-nav>
-    <client-only>
-      <LoginModal ref="loginModal" />
-      <!--      <AboutMeModal ref="aboutMeModal" />-->
-    </client-only>
+    <LoginModal ref="loginModal" />
+    <!--      <AboutMeModal ref="aboutMeModal" />-->
   </header>
 </template>
 
