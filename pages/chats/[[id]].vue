@@ -51,7 +51,6 @@
             />
             <infinite-loading
               :identifier="bump"
-              force-use-infinite-wrapper="#chatlist"
               :distance="distance"
               @infinite="loadMore"
             >

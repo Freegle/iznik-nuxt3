@@ -23,7 +23,6 @@
       <infinite-loading
         v-if="messagesForList.length"
         :identifier="infiniteId"
-        force-use-infinite-wrapper="body"
         :distance="distance"
         @infinite="loadMore"
       >

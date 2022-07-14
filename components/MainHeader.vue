@@ -278,7 +278,7 @@
             v-b-toggle.nav_collapse_mobile
             class="toggler white"
           >
-            <v-icon icon="bars" class="mb-1" size="1-5x" />
+            <v-icon icon="bars" class="mb-1 fa-1-5x" />
           </b-button>
         </b-nav>
       </div>

@@ -158,7 +158,6 @@ export default {
     Highlighter,
   },
   extends: ChatBase,
-
   computed: {
     replyusers() {
       const ret = []
