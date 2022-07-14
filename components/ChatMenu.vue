@@ -75,7 +75,7 @@ export default {
 
 // We need to style the anchor but also override the bootstrap nav-link class
 .chat-menu-item,
-::v-deep .nav-link {
+:deep(.nav-link) {
   color: $color-white !important;
 
   &:hover,

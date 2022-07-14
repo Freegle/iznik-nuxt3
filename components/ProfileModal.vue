@@ -34,11 +34,11 @@ export default {
 }
 </script>
 <style scoped lang="scss">
-::v-deep .media .align-self-start {
+:deep(.media .align-self-start) {
   margin-right: 0.25rem !important;
 }
 
-::v-deep .modal-header {
+:deep(.modal-header) {
   padding: 0px;
 }
 
