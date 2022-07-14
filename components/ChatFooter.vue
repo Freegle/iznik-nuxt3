@@ -132,17 +132,6 @@
             </b-button>
           </div>
         </span>
-        <span v-if="chat && chat.chattype === 'User2Mod'">
-          <b-button v-if="mod" variant="secondary" @click="spamReport">
-            <v-icon icon="ban" /> Spammer
-          </b-button>
-          <external-link
-            href="https://discourse.ilovefreegle.org/c/central"
-            class="nocolor btn btn-secondary"
-          >
-            <v-icon icon="question-circle" /> Central
-          </external-link>
-        </span>
         <b-button variant="primary" class="float-end ml-1 mr-1" @click="send">
           Send&nbsp;
           <v-icon

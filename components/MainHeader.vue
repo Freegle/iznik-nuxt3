@@ -571,7 +571,6 @@ export default {
   },
 }
 </script>
-
 <style scoped lang="scss">
 @import '~bootstrap/scss/functions';
 @import '~bootstrap/scss/variables';
