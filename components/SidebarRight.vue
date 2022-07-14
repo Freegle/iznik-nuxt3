@@ -9,7 +9,7 @@
             variant="sidebar"
           />
           <VolunteerOpportunitySidebar
-            v-if="showVolunteerOpportunities && false"
+            v-if="showVolunteerOpportunities"
             :class="itemclass"
           />
         </div>
