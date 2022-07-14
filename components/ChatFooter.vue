@@ -92,6 +92,7 @@
             v-b-tooltip.hover.top
             variant="secondary"
             title="Promise an item to this person"
+            class="mr-1"
             @click="promise(null)"
           >
             <v-icon icon="handshake" class="fa-fw" />&nbsp;Promise
@@ -101,6 +102,7 @@
             v-b-tooltip.hover.top
             variant="secondary"
             title="Send your address"
+            class="mr-1"
             @click="addressBook"
           >
             <v-icon icon="address-book" class="fa-fw" />&nbsp;Address
@@ -110,6 +112,7 @@
             v-b-tooltip.hover.top
             variant="secondary"
             title="Waiting for a reply?  Nudge this freegler."
+            class="mr-1"
             @click="nudge"
           >
             <v-icon icon="bell" class="fa-fw" />&nbsp;Nudge
@@ -123,6 +126,7 @@
               v-b-tooltip.hover.top
               variant="secondary"
               title="It's too soon to nudge"
+              class="mr-1"
             >
               <v-icon icon="bell" class="fa-fw" />&nbsp;Nudge
             </b-button>

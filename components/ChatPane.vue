@@ -43,6 +43,7 @@
                   chatmessage.id === chatmessages[chatmessages.length - 1].id
                 "
                 :prevmessage="index > 0 ? chatmessages[index - 1].id : null"
+                class="mb-1"
               />
             </div>
             <div v-if="chatBusy && headerLoaded" class="text-center">

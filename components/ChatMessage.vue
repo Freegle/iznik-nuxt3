@@ -1,103 +1,86 @@
 <template>
-  <client-only>
-    <div :class="selected ? 'selected' : ''" @click="selectMe">
-      <div v-if="chatmessage?.type === 'Default'">
-        <chat-message-text
-          :id="id"
-          :chatid="chatid"
-          :pov="pov"
-          :highlight-emails="highlightEmails"
-        />
-      </div>
-      <chat-message-image
-        v-else-if="chatmessage?.type === 'Image'"
+  <div :class="selected ? 'selected' : ''" @click="selectMe">
+    <div v-if="chatmessage?.type === 'Default'">
+      <chat-message-text
         :id="id"
         :chatid="chatid"
         :pov="pov"
+        :highlight-emails="highlightEmails"
       />
-      <div v-else-if="chatmessage?.type === 'Interested'">
-        <chat-message-interested
-          v-if="otheruser || chat.chattype === 'User2Mod'"
-          :id="id"
-          :chatid="chatid"
-          :pov="pov"
-          :highlight-emails="highlightEmails"
-        />
-      </div>
-      <div v-else-if="chatmessage?.type === 'Completed' && otheruser">
-        <chat-message-completed
-          v-if="otheruser"
-          :id="id"
-          :chatid="chatid"
-          :pov="pov"
-        />
-      </div>
-      <div v-else-if="chatmessage?.type === 'Promised' && otheruser">
-        <chat-message-promised
-          v-if="otheruser"
-          :id="id"
-          :chatid="chatid"
-          :pov="pov"
-        />
-      </div>
-      <div v-else-if="chatmessage?.type === 'Reneged' && otheruser">
-        <chat-message-reneged
-          v-if="otheruser"
-          :id="id"
-          :chatid="chatid"
-          :pov="pov"
-        />
-      </div>
-      <div v-else-if="chatmessage?.type === 'Address' && otheruser">
-        <chat-message-address
-          v-if="otheruser"
-          :id="id"
-          :chatid="chatid"
-          :pov="pov"
-        />
-      </div>
-      <div v-else-if="chatmessage?.type === 'Nudge' && otheruser">
-        <chat-message-nudge
-          v-if="otheruser"
-          :id="id"
-          :chatid="chatid"
-          :pov="pov"
-        />
-      </div>
-      <div v-else-if="chatmessage?.type === 'ModMail'">
-        <chat-message-mod-mail :id="id" :chatid="chatid" :pov="pov" />
-      </div>
-      <div v-else-if="chatmessage?.type === 'Schedule' && otheruser">
-        <chat-message-schedule
-          v-if="otheruser"
-          :id="id"
-          :chatid="chatid"
-          :pov="pov"
-        />
-      </div>
-      <div v-else-if="chatmessage?.type === 'ScheduleUpdated' && otheruser">
-        <chat-message-schedule
-          v-if="otheruser"
-          :id="id"
-          :chatid="chatid"
-          :pov="pov"
-        />
-      </div>
-      <div v-else-if="supportOrAdmin">
-        Unknown chat message type {{ chatmessage?.type }}
-      </div>
-      <chat-message-warning v-if="phoneNumber" />
-      <chat-message-date-read
-        :id="id"
-        :chatid="chatid"
-        :last="last"
-        :pov="pov"
-      />
-      <div v-if="selected">
-        <b-button variant="link" @click="markUnseen"> Mark unread </b-button>
-      </div>
     </div>
-  </client-only>
+    <chat-message-image
+      v-else-if="chatmessage?.type === 'Image'"
+      :id="id"
+      :chatid="chatid"
+      :pov="pov"
+    />
+    <div v-else-if="chatmessage?.type === 'Interested'">
+      <chat-message-interested
+        v-if="otheruser || chat.chattype === 'User2Mod'"
+        :id="id"
+        :chatid="chatid"
+        :pov="pov"
+        :highlight-emails="highlightEmails"
+      />
+    </div>
+    <div v-else-if="chatmessage?.type === 'Completed' && otheruser">
+      <chat-message-completed
+        v-if="otheruser"
+        :id="id"
+        :chatid="chatid"
+        :pov="pov"
+      />
+    </div>
+    <div v-else-if="chatmessage?.type === 'Promised' && otheruser">
+      <chat-message-promised
+        v-if="otheruser"
+        :id="id"
+        :chatid="chatid"
+        :pov="pov"
+      />
+    </div>
+    <div v-else-if="chatmessage?.type === 'Reneged' && otheruser">
+      <chat-message-reneged
+        v-if="otheruser"
+        :id="id"
+        :chatid="chatid"
+        :pov="pov"
+      />
+    </div>
+    <div v-else-if="chatmessage?.type === 'Address' && otheruser">
+      <chat-message-address
+        v-if="otheruser"
+        :id="id"
+        :chatid="chatid"
+        :pov="pov"
+      />
+    </div>
+    <div v-else-if="chatmessage?.type === 'Nudge' && otheruser">
+      <chat-message-nudge
+        v-if="otheruser"
+        :id="id"
+        :chatid="chatid"
+        :pov="pov"
+      />
+    </div>
+    <div v-else-if="chatmessage?.type === 'ModMail'">
+      <chat-message-mod-mail :id="id" :chatid="chatid" :pov="pov" />
+    </div>
+    <div v-else-if="chatmessage?.type === 'Schedule' && otheruser">
+      <!--      This type has been retired.-->
+    </div>
+    <div v-else-if="chatmessage?.type === 'ScheduleUpdated' && otheruser">
+      <!--      This type has been retired.-->
+    </div>
+    <div v-else-if="supportOrAdmin">
+      Unknown chat message type {{ chatmessage?.type }}
+    </div>
+    <chat-message-warning v-if="phoneNumber" />
+    <chat-message-date-read :id="id" :chatid="chatid" :last="last" :pov="pov" />
+    <div v-if="selected">
+      <b-button variant="link" @click="markUnseen"> Mark unread </b-button>
+    </div>
+  </div>
 </template>
 <script>
 import { useChatStore } from '../stores/chat'
@@ -112,7 +95,6 @@ import ChatMessageAddress from './ChatMessageAddress'
 import ChatMessageNudge from './ChatMessageNudge'
 import ChatMessageDateRead from './ChatMessageDateRead'
 import ChatMessageModMail from './ChatMessageModMail'
-import ChatMessageSchedule from './ChatMessageSchedule'
 import ChatMessageWarning from '~/components/ChatMessageWarning'
 import 'vue-simple-context-menu/dist/vue-simple-context-menu.css'
 
@@ -130,7 +112,6 @@ export default {
     ChatMessageReneged,
     ChatMessageNudge,
     ChatMessageModMail,
-    ChatMessageSchedule,
   },
   props: {
     chatid: {

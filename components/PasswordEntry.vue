@@ -12,6 +12,7 @@
         placeholder="Choose password"
         class="password__input"
         @input="$emit('update:modelValue', $event)"
+        @change="$emit('update:modelValue', $event)"
       />
       <span class="password__focus-element" />
       <b-input-group-append>

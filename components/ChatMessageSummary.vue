@@ -17,13 +17,9 @@
             />
           </div>
           <div class="rest">
-            <MessageItemLocation
-              :id="id"
-              class="mb-1 header-title"
-              :type="message.type"
-              :expanded="false"
-              :message-override="message"
-            />
+            <div class="header--size4 item">
+              {{ message.subject }}
+            </div>
             <MessageHistory
               :id="id"
               class="mb-1 header-history"
@@ -52,7 +48,6 @@
 // Need to import rather than async otherwise the render doesn't happen and ref isn't set.
 import { useMessageStore } from '../stores/message'
 import { useGroupStore } from '../stores/group'
-import MessageItemLocation from '~/components/MessageItemLocation'
 import { useMiscStore } from '~/stores/misc'
 
 const MessageHistory = () => import('~/components/MessageHistory')
@@ -60,7 +55,6 @@ const NoticeMessage = () => import('~/components/NoticeMessage')
 
 export default {
   components: {
-    MessageItemLocation,
     MessageHistory,
     NoticeMessage,
   },
@@ -82,11 +76,11 @@ export default {
       const message = messageStore.byId(props.id)
 
       if (message) {
-        message.groups.forEach((g) => {
+        message.groups.forEach(async (g) => {
           const thegroup = groupStore.get(g.groupid)
 
           if (!thegroup) {
-            groupStore.fetch(g.groupid)
+            await groupStore.fetch(g.groupid)
           }
         })
       }
@@ -169,5 +163,13 @@ export default {
   height: 100px;
   width: 100px;
   box-shadow: 0 0 1 $color-gray--dark;
+}
+
+.item {
+  color: $colour-info-fg !important;
+  font-weight: bold !important;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  display: block;
 }
 </style>

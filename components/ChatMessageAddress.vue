@@ -11,43 +11,37 @@
               <b-row>
                 <b-col>
                   <pre
-                    v-if="chatmessage.address.id"
-                    :class="chatmessage.address.instructions ? '' : 'mb-2'"
-                    >{{ chatmessage.address.multiline }}</pre
+                    v-if="address"
+                    :class="address.instructions ? '' : 'mb-2'"
+                    >{{ multiline }}</pre
                   >
                   <pre v-else>This address has been deleted.</pre>
-                  <hr v-if="chatmessage.address.instructions" />
-                  <div v-if="chatmessage.address.instructions" class="mb-2">
-                    {{ chatmessage.address.instructions }}
+                  <hr v-if="address?.instructions" />
+                  <div v-if="address?.instructions" class="mb-2">
+                    {{ address.instructions }}
                   </div>
                 </b-col>
               </b-row>
-              <b-row v-if="chatmessage.address && chatmessage.address.postcode">
+              <b-row v-if="address?.postcode">
                 <b-col>
                   <l-map
                     ref="map"
                     :zoom="16"
-                    :center="[
-                      chatmessage.address.postcode.lat,
-                      chatmessage.address.postcode.lng,
-                    ]"
+                    :center="[address.lat, address.lng]"
                     :style="'width: 100%; height: 200px'"
                   >
                     <l-tile-layer :url="osmtile" :attribution="attribution" />
                     <l-marker
-                      :lat-lng="[
-                        chatmessage.address.lat,
-                        chatmessage.address.lng,
-                      ]"
+                      :lat-lng="[address.lat, address.lng]"
                       :interactive="false"
                     />
                   </l-map>
                   <ExternalLink
                     :href="
                       'https://maps.google.com/?q=' +
-                      chatmessage.address.lat +
+                      address.lat +
                       ',' +
-                      chatmessage.address.lng +
+                      address.lng +
                       '&z=16'
                     "
                     class="mt-1"
@@ -68,40 +62,37 @@
               <b-row>
                 <b-col cols="12">
                   <pre
-                    v-if="chatmessage.address.id"
-                    :class="chatmessage.address.instructions ? '' : 'mb-2'"
-                    >{{ chatmessage.address.multiline }}</pre
+                    v-if="address"
+                    :class="address.instructions ? '' : 'mb-2'"
+                    >{{ multiline }}</pre
                   >
                   <pre v-else>This address has been deleted.</pre>
-                  <hr v-if="chatmessage.address.instructions" />
-                  <div v-if="chatmessage.address.instructions" class="mb-2">
-                    {{ chatmessage.address.instructions }}
+                  <hr v-if="address.instructions" />
+                  <div v-if="address.instructions" class="mb-2">
+                    {{ address.instructions }}
                   </div>
                 </b-col>
               </b-row>
-              <b-row v-if="chatmessage.address && chatmessage.address.postcode">
+              <b-row v-if="address?.postcode">
                 <b-col>
                   <l-map
                     ref="map"
                     :zoom="14"
-                    :center="[chatmessage.address.lat, chatmessage.address.lng]"
+                    :center="[address.lat, address.lng]"
                     :style="'width: 100%; height: 200px'"
                   >
                     <l-tile-layer :url="osmtile" :attribution="attribution" />
                     <l-marker
-                      :lat-lng="[
-                        chatmessage.address.lat,
-                        chatmessage.address.lng,
-                      ]"
+                      :lat-lng="[address.lat, address.lng]"
                       :interactive="false"
                     />
                   </l-map>
                   <ExternalLink
                     :href="
                       'https://maps.google.com/?q=' +
-                      chatmessage.address.lat +
+                      address.lat +
                       ',' +
-                      chatmessage.address.lng +
+                      address.lng +
                       '&z=16'
                     "
                     class="mt-1"
@@ -118,11 +109,78 @@
   </div>
 </template>
 <script>
+import { useAddressStore } from '../stores/address'
 import ExternalLink from './ExternalLink'
 import ChatBase from '~/components/ChatBase'
+import { constructAddress } from '~/composables/usePAF'
+import { attribution, osmtile } from '~/composables/useMap'
 
 export default {
   components: { ExternalLink },
   extends: ChatBase,
+  async setup() {
+    let L = null
+
+    if (process.client) {
+      L = await import('leaflet/dist/leaflet-src.esm')
+    }
+
+    // Make sure we have the addresses.
+    const addressStore = useAddressStore()
+
+    await addressStore.fetch()
+
+    return {
+      addressStore,
+      L,
+      osmtile: osmtile(),
+      attribution: attribution(),
+    }
+  },
+  computed: {
+    address() {
+      // The addressid is (wrongly) stored in the message.
+      if (this.chatmessage?.message) {
+        return this.addressStore.get(parseInt(this.chatmessage.message))
+      }
+
+      return null
+    },
+    multiline() {
+      if (!this.address) {
+        return null
+      }
+
+      const delimiter = '\n'
+      const addressLines = constructAddress(
+        this.address.id,
+        this.address.postcode,
+        this.address.posttown,
+        this.address.dependentlocality,
+        this.address.doubledependentlocality,
+        this.address.thoroughfaredescriptor,
+        this.address.dependentthoroughfaredescriptor,
+        this.address.buildingnumber,
+        this.address.buildingname,
+        this.address.subbuildingname,
+        this.address.pobox,
+        this.address.departmentname,
+        this.address.organizationname,
+        this.address.postcodetype,
+        this.address.suorganizationindicator,
+        this.address.deliverypointsuffix
+      )
+
+      let address =
+        addressLines.join(delimiter) +
+        delimiter +
+        this.address.posttown +
+        ' ' +
+        this.address.postcode
+      address = address.indexOf(', ') === 0 ? address.substring(2) : address
+
+      return address
+    },
+  },
 }
 </script>
