@@ -305,7 +305,7 @@ export default {
   display: grid;
 
   grid-template-rows: auto auto auto auto;
-  grid-template-colums: auto auto;
+  grid-template-columns: auto auto;
 
   .sliderLabel {
     grid-row: 1 / 2;
