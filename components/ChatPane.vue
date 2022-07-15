@@ -130,11 +130,14 @@ export default {
       }
     },
     scrollToBottom() {
-      const container = this.$refs.chatContent
+      // TODO MINOR would be satisfying to make this purely event driven.
+      setTimeout(() => {
+        const container = this.$refs.chatContent
 
-      if (container) {
-        container.scrollTop = container.scrollHeight
-      }
+        if (container) {
+          container.scrollTop = container.scrollHeight
+        }
+      }, 100)
     },
     topChanged(isVisible) {
       this.topVisible = isVisible
