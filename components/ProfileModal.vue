@@ -1,6 +1,13 @@
 <template>
-  <b-modal id="profilemodal" v-model="showModal" size="lg">
-    <template #header>
+  <b-modal
+    id="profilemodal"
+    v-model="showModal"
+    size="lg"
+    title-class="w-100"
+    header-class="p-0"
+    hide-header-close
+  >
+    <template #title>
       <div class="w-100 coverphoto">
         <ProfileHeader :id="id" class="flex-grow-1 px-3 py-2" />
       </div>
@@ -34,14 +41,6 @@ export default {
 }
 </script>
 <style scoped lang="scss">
-:deep(.media .align-self-start) {
-  margin-right: 0.25rem !important;
-}
-
-:deep(.modal-header) {
-  padding: 0px;
-}
-
 .coverphoto {
   min-height: 100px !important;
   width: 100% !important;

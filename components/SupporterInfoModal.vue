@@ -6,7 +6,7 @@
         v-model="showModal"
         title="What are Freegle Supporters?"
       >
-        <template slot="default">
+        <template #default>
           <p>
             We're free to use, but we're not free to run. To keep running, we
             need volunteer time, and we need charity funds.

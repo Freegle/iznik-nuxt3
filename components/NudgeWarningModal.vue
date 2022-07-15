@@ -5,7 +5,7 @@
     title="Nudging"
     no-stacking
   >
-    <template slot="default">
+    <template #default>
       <p>
         Nudging is a gentle way to let the other person know that you're waiting
         for a reply.

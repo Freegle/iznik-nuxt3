@@ -125,7 +125,7 @@ export default {
         this.checkState(newVal)
 
         // Vuelidate doesn't like upper case email characters.  Force the email to lower case.
-        this.currentEmail = newVal.toLowerCase()
+        this.currentEmail = newVal ? newVal.toLowerCase() : null
       },
     },
   },

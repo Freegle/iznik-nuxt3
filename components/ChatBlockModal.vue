@@ -5,7 +5,7 @@
     :title="'Block ' + user.displayname"
     no-stacking
   >
-    <template slot="default">
+    <template #default>
       <b-row>
         <b-col>
           <p>

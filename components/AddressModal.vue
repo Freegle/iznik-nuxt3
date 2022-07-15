@@ -9,7 +9,7 @@
         size="lg"
         no-stacking
       >
-        <template slot="default">
+        <template #default>
           <p>
             We'll store your address here so that you can easily send it to
             other people in future. We won't give it out to anyone or send you

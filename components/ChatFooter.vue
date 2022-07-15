@@ -437,6 +437,11 @@ export default {
         })
       })
     },
+    showInfo() {
+      this.waitForRef('profile', () => {
+        this.$refs.profile.show()
+      })
+    },
     async send() {
       let msg = this.sendmessage
 

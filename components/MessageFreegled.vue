@@ -13,6 +13,7 @@
 </template>
 <script>
 import BImgLazy from './BImgLazy'
+
 export default {
   components: { BImgLazy },
   props: {

@@ -1,5 +1,5 @@
 <template>
-  <span class="d-inline">
+  <span class="d-inline user-ratings">
     <span v-if="user?.info?.ratings">
       <span v-if="showName">
         {{ user.displayname }}
@@ -12,6 +12,7 @@
         :disabled="disabled || user.id === myid ? 'true' : undefined"
         :class="{
           mine: user.info.ratings.Mine === 'Up',
+          'mr-1': true,
         }"
         @click="up"
       >
@@ -25,6 +26,7 @@
         :disabled="disabled || user.id === myid ? 'true' : undefined"
         :class="{
           mine: user.info.ratings.Mine === 'Down',
+          'ml-1': true,
         }"
         @click="down"
       >

@@ -30,7 +30,6 @@ export const useMiscStore = defineStore({
   },
   getters: {
     get: (state) => (key) => {
-      console.log('Get ', key, state.vals[key])
       return state.vals[key]
     },
   },

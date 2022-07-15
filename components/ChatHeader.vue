@@ -19,7 +19,7 @@
           class="d-flex flex-column align-content-around justify-content-center"
           @click="showInfo"
         >
-          <div class="font-weight-bold black">
+          <div class="font-weight-bold black text--large">
             {{ chat.name }}
           </div>
           <div

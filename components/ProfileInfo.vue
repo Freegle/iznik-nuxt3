@@ -124,6 +124,7 @@
           <v-icon icon="chart-bar" />
           <span
             v-if="user.info.offers + user.info.wanteds + user.info.replies > 0"
+            class="ml-1"
             >Activity in the last 90 days</span
           >
           <span v-else>No recent activity.</span>
@@ -221,7 +222,7 @@ export default {
       return this.active('Wanted')
     },
     aboutme() {
-      return this.user?.info?.aboutme ? twem(this.user.info.aboutme.text) : null
+      return this.user?.aboutme ? twem(this.user.aboutme.text) : null
     },
     messages() {
       // TODO messages for this user.

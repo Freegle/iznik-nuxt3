@@ -8,7 +8,7 @@
     hide-header-close
     no-close-on-esc
   >
-    <template slot="default">
+    <template #default>
       <div v-if="chaseup">
         <p>
           Shall we remind <em>{{ user.displayname }}</em> if they don't reply?

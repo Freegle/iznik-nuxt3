@@ -6,7 +6,7 @@
     size="lg"
     no-stacking
   >
-    <template slot="default">
+    <template #default>
       <b-row>
         <b-col>
           <p>Sorry you're having trouble.</p>

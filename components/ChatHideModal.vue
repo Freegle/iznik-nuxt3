@@ -1,6 +1,6 @@
 <template>
   <b-modal id="blockmodal" v-model="showModal" :title="title" no-stacking>
-    <template slot="default">
+    <template #default>
       <b-row>
         <b-col>
           <p v-if="id">

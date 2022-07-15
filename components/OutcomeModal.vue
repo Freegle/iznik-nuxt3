@@ -8,7 +8,7 @@
       no-stacking
       dialog-class="maxWidth"
     >
-      <template slot="modal-title">
+      <template #title>
         <h3 class="d-flex justify-content-between">
           {{ message.subject }}
           <div>
@@ -22,7 +22,7 @@
           </div>
         </h3>
       </template>
-      <template slot="default">
+      <template #default>
         <NoticeMessage v-if="type === 'Withdrawn'" variant="info">
           <p>
             If everything worked out OK, then use

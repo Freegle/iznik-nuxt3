@@ -9,8 +9,8 @@
           :class="btnClass + ' d-none d-sm-inline'"
           @click="gotoChat(true)"
         >
-          <v-icon v-if="showIcon" name="comments" />
-          <span v-if="title">
+          <v-icon v-if="showIcon" icon="comments" />
+          <span v-if="title" class="ml-1">
             {{ title }}
           </span>
         </b-button>
@@ -20,8 +20,8 @@
           :class="btnClass + ' d-inline-block d-sm-none'"
           @click="gotoChat(false)"
         >
-          <v-icon v-if="showIcon" name="comments" />
-          <span v-if="title">
+          <v-icon v-if="showIcon" icon="comments" />
+          <span v-if="title" class="ml-1">
             {{ title }}
           </span>
         </b-button>

@@ -5,7 +5,7 @@
     title="Remove a promise"
     size="lg"
   >
-    <template slot="default">
+    <template #default>
       <notice-message class="mb-3">
         Please only do this if there's a good reason, so as not to disappoint
         people.

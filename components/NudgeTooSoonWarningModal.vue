@@ -5,7 +5,7 @@
     title="Nudging"
     no-stacking
   >
-    <template slot="default">
+    <template #default>
       <p>
         It's too soon to nudge - you need to wait 24 hours after the last
         message.

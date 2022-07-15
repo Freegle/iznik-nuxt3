@@ -61,7 +61,7 @@
       no-stacking
       ok-only
     >
-      <template slot="default">
+      <template #default>
         <b-img-lazy
           v-if="chatmessage.image"
           fluid

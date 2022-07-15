@@ -211,8 +211,11 @@ export default class BaseAPI {
       const authStore = useAuthStore()
 
       if (authStore.jwt) {
-        // Use the JWT to authenticate the request.
+        // Use the JWT to authenticate the request if possible.
         headers.Authorization = authStore.jwt
+
+        // The JWT is quick but short-lived; use the persistent token as a fallback.
+        headers.Authorization2 = JSON.stringify(authStore.persistent)
       }
 
       const ret = await this.$axios.request({
