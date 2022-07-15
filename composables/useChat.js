@@ -1,3 +1,5 @@
+import pluralize from 'pluralize'
+import { milesAway } from '../composables/useDistance'
 import { useChatStore } from '~/stores/chat'
 import { useUserStore } from '~/stores/user'
 import { useAuthStore } from '~/stores/auth'
@@ -76,6 +78,19 @@ export function setupChat(selectedChatId) {
     return user
   })
 
+  const milesaway = computed(() =>
+    milesAway(
+      authStore.user?.lat,
+      authStore.user?.lng,
+      otheruser?.value?.lat,
+      otheruser?.value?.lng
+    )
+  )
+
+  const milesstring = computed(
+    () => pluralize('mile', milesaway.value, true) + ' away'
+  )
+
   return {
     chat,
     unseen: computed(() => chat?.unseen),
@@ -89,8 +104,7 @@ export function setupChat(selectedChatId) {
         new Date().getTime() - lastfromme < 24 * 60 * 60 * 1000
       )
     }),
-    milesaway: computed(() => {
-      return otheruser?.info?.milesaway
-    }),
+    milesaway,
+    milesstring,
   }
 }

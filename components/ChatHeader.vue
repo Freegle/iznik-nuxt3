@@ -39,12 +39,7 @@
               >.
             </div>
             <div v-if="milesaway" class="d-inline d-md-block">
-              About
-              <strong
-                >{{
-                  milesaway | pluralize('mile', { includeNumber: true })
-                }}
-                away</strong
+              About <strong>{{ milesstring }}</strong
               >.
             </div>
           </div>
@@ -252,18 +247,26 @@ export default {
     const chatStore = useChatStore()
     const miscStore = useMiscStore()
 
-    const { chat, otheruser, unseen, milesaway } = await setupChat(props.id)
+    const { chat, otheruser, unseen, milesaway, milesstring } = await setupChat(
+      props.id
+    )
 
-    return { chatStore, miscStore, chat, otheruser, unseen, milesaway }
+    return {
+      chatStore,
+      miscStore,
+      chat,
+      otheruser,
+      unseen,
+      milesaway,
+      milesstring,
+    }
   },
   computed: {
     collapsed: {
       get() {
-        console.log('Get', this.miscStore.get('chatinfoheader'))
         return this.miscStore.get('chatinfoheader')
       },
       set(newVal) {
-        console.log('Set, newVal: ', newVal)
         this.miscStore.set({
           key: 'chatinfoheader',
           value: newVal,
