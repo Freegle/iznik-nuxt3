@@ -6,9 +6,7 @@
           <b-card border-variant="info" class="ml-2">
             <b-card-title>
               <b-img
-                v-if="
-                  refmsg && refmsg.attachments && refmsg.attachments.length > 0
-                "
+                v-if="refmsg?.attachments?.length > 0"
                 class="float-end"
                 rounded
                 thumbnail
@@ -19,11 +17,11 @@
                 @error="brokenImage"
               />
               <h4>
-                {{ refmsg.subject }}
+                {{ refmsg?.subject }}
               </h4>
             </b-card-title>
             <b-card-text>
-              <span v-if="refmsg.type === 'Offer'">
+              <span v-if="refmsg?.type === 'Offer'">
                 This is no longer available.
               </span>
               <span v-else> Thanks, this has now been received. </span>
@@ -34,9 +32,7 @@
           <b-card border-variant="info">
             <b-card-title>
               <b-img
-                v-if="
-                  refmsg && refmsg.attachments && refmsg.attachments.length > 0
-                "
+                v-if="refmsg?.attachments?.length > 0"
                 class="float-end"
                 rounded
                 thumbnail
@@ -47,7 +43,7 @@
                 @error="brokenImage"
               />
               <h4>
-                {{ refmsg.subject }}
+                {{ refmsg?.subject }}
               </h4>
             </b-card-title>
             <b-card-text>
