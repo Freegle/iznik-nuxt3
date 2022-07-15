@@ -43,11 +43,6 @@ import { uid } from '../composables/useId'
 import ValidatingFormInput from '../components/ValidatingFormInput'
 import validationHelpers from '@/mixins/validationHelpers'
 
-function emailFormatter(value) {
-  if (!value) return value
-  return value.toLowerCase()
-}
-
 export default {
   components: { ValidatingFormInput },
   mixins: [validationHelpers],
@@ -128,6 +123,9 @@ export default {
 
         // This check needs to be here rather than in checkState to ensure the vuelidate has got itself sorted out.
         this.checkState(newVal)
+
+        // Vuelidate doesn't like upper case email characters.  Force the email to lower case.
+        this.currentEmail = newVal.toLowerCase()
       },
     },
   },
@@ -161,7 +159,7 @@ export default {
     },
   },
   validations: {
-    email: { required, email: (val) => emailValidation(emailFormatter(val)) },
+    email: { required, emailValidation },
   },
 }
 </script>

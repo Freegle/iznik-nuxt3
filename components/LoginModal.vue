@@ -286,6 +286,7 @@ export default {
       return this.email && this.email.toLowerCase().includes('yahoo')
     },
     nativeDisabled() {
+      console.log('Email valid: ' + this.emailValid)
       return this.nativeBump && (!this.emailValid || !this.password)
     },
   },
