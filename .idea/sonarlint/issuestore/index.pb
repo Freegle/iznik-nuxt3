@@ -159,9 +159,6 @@ M
 components/WizardProgress.vue,c\5\c5cee26476a32e9e7931f1b7c26911992d127b79
 M
 components/MessageActions.vue,2\4\248ec0cabc015c096f25352e85ae4cba78047f87
-:
-
-.gitignore,a\5\a5cc2925ca8258af241be7e5b0381edf30266302
 G
 components/PostItem.vue,8\8\882a7cbe44a39c73c1bae6410ac297868b1234b7
 P

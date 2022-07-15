@@ -55,8 +55,8 @@ export default {
       return null
     },
     chatMessageProfileImage() {
-      return this.chatMessageUser
-        ? this.chatMessageUser.profile.turl
+      return this.chatmessage.userid === this.myid
+        ? this.me.profile.paththumb
         : this.chat?.icon
     },
     refmsgid() {
