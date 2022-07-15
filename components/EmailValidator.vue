@@ -43,6 +43,11 @@ import { uid } from '../composables/useId'
 import ValidatingFormInput from '../components/ValidatingFormInput'
 import validationHelpers from '@/mixins/validationHelpers'
 
+function emailFormatter(value) {
+  if (!value) return value
+  return value.toLowerCase()
+}
+
 export default {
   components: { ValidatingFormInput },
   mixins: [validationHelpers],
@@ -156,7 +161,7 @@ export default {
     },
   },
   validations: {
-    email: { required, emailValidation },
+    email: { required, email: (val) => emailValidation(emailFormatter(val)) },
   },
 }
 </script>
