@@ -7,6 +7,14 @@
       class="outer position-relative"
     >
       <div class="nameinfo pt-1 pb-1 pl-1">
+        <ProfileImage
+          v-if="chat.icon"
+          :image="chat.icon"
+          class="mr-1 inline"
+          is-thumbnail
+          size="xl"
+          border
+        />
         <div
           class="d-flex flex-column align-content-around justify-content-center"
           @click="showInfo"
@@ -18,18 +26,16 @@
             v-if="!collapsed && otheruser && otheruser.info"
             class="userinfo small flex flex-wrap mr-2"
           >
-            <div v-if="otheruser.info.lastaccess" class="d-inline d-md-block">
+            <div v-if="otheruser.lastaccess" class="d-inline d-md-block">
               <span class="d-none d-md-inline">Last seen</span>
               <span class="d-inline d-md-none">Seen</span>
-              <strong :title="datetimeshort(otheruser.info.lastaccess)">{{
-                timeago(otheruser.info.lastaccess)
-              }}</strong
-              >.
+              <!-- eslint-disable-next-line-->
+              <strong :title="datetimeshort(otheruser.lastaccess)" class="ml-1" >{{ timeago(otheruser.lastaccess) }}</strong>.
             </div>
             <div v-if="replytime" class="d-inline d-md-block">
               <span class="d-none d-md-inline">Typically replies in</span>
               <span class="d-inline d-md-none">Replies in</span>
-              <strong>{{ replytime }}</strong
+              <strong class="ml-1">{{ replytime }}</strong
               >.
             </div>
             <div v-if="milesaway" class="d-inline d-md-block">
@@ -128,8 +134,7 @@
         >
           <v-icon
             icon="chevron-circle-up"
-            scale="2"
-            class="text-faded"
+            class="text-faded fa-2x"
             title="Collapse this section"
           />
         </div>
@@ -176,8 +181,7 @@
         @click="collapsed = false"
       >
         <v-icon
-          icon="chevron-down"
-          scale="2"
+          icon="chevron-circle-down"
           class="text-faded"
           title="Expand this section"
         />
@@ -218,6 +222,7 @@
 <script>
 import { useChatStore } from '../stores/chat'
 import { setupChat } from '../composables/useChat'
+import ProfileImage from './ProfileImage'
 import { useMiscStore } from '~/stores/misc'
 import SupporterInfo from '~/components/SupporterInfo'
 
@@ -235,6 +240,7 @@ export default {
     ChatBlockModal,
     ChatHideModal,
     ChatReportModal,
+    ProfileImage,
   },
   props: {
     id: {
@@ -253,9 +259,11 @@ export default {
   computed: {
     collapsed: {
       get() {
+        console.log('Get', this.miscStore.get('chatinfoheader'))
         return this.miscStore.get('chatinfoheader')
       },
       set(newVal) {
+        console.log('Set, newVal: ', newVal)
         this.miscStore.set({
           key: 'chatinfoheader',
           value: newVal,
@@ -355,7 +363,7 @@ export default {
 
 .nameinfo {
   display: grid;
-  grid-template-columns: 1fr 121px;
+  grid-template-columns: auto 1fr 121px;
 }
 
 .hidelink a {

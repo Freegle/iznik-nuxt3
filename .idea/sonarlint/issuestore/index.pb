@@ -200,8 +200,6 @@ C
 capacitor.config.ts,d\b\db2de0c4fdaae9c34a88b5558ef0e682f154a8d9
 P
  components/BreakpointFettler.vue,8\e\8e34afee9b1c7f0452507b4d997c7b9391ffae33
->
-stores/misc.js,c\1\c1582899917559222f8ff905a7ddb3681240ae51
 ?
 pages/index.vue,f\f\ff87ee14320f4d3dd6a94ef6dde25ffe0b16242a
 H

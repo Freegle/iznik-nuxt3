@@ -34,12 +34,7 @@
             class="clickme"
             @click.native="showInfo"
           >
-            <v-icon icon="exclamation-triangle" />&nbsp;{{
-              expectedreply
-                | pluralize(['freegler is', 'freeglers are'], {
-                  includeNumber: true,
-                })
-            }}
+            <v-icon icon="exclamation-triangle" />&nbsp;{{ expectedreplies }}
             still waiting for them to reply on here.
           </notice-message>
           <notice-message v-if="otheruser?.spammer" variant="danger">
@@ -48,13 +43,14 @@
             arrange anything by courier.
           </notice-message>
         </div>
-        <div
-          class="float-end ml-2 mr-2 mt-2 clickme"
+        <b-button
+          variant="warning"
+          class="float-end bg-warning"
           title="Hide warnings"
           @click="showNotices = false"
         >
           <v-icon icon="times-circle" scale="1.5" />
-        </div>
+        </b-button>
       </div>
       <div>
         <label for="chatmessage" class="sr-only">Chat message</label>
@@ -262,6 +258,7 @@
   </div>
 </template>
 <script>
+import pluralize from 'pluralize'
 import { setupChat } from '../composables/useChat'
 import { useMiscStore } from '../stores/misc'
 import ExternalLink from './ExternalLink'
@@ -342,6 +339,10 @@ export default {
       return false
     },
     // TODO MINOR Consider showing handover prompt in less annoying way.
+    expectedreplies() {
+      pluralize.addIrregularRule('freegler is', 'freeglers are')
+      return pluralize('freegler is', this.otheruser?.info?.expectedreply, true)
+    },
   },
   methods: {
     async markRead() {
@@ -502,5 +503,11 @@ export default {
   display: grid;
   grid-template-columns: auto;
   grid-auto-rows: max-content;
+}
+
+.btn-warning {
+  background-color: $color-yellow-1 !important;
+  color: black !important;
+  border: 0;
 }
 </style>

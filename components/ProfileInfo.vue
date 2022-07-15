@@ -134,38 +134,22 @@
           >
             <b-col cols="12" md="4">
               <v-icon icon="gift" />
-              {{
-                user.info.offers
-                  | pluralize(['recent OFFER', 'recent OFFERs'], {
-                    includeNumber: true,
-                  })
-              }}.
+              {{ recentOFFERCount }}.
             </b-col>
             <b-col cols="12" md="4">
               <v-icon icon="search" />
-              {{
-                user.info.wanteds
-                  | pluralize(['recent WANTED', 'recent WANTEDs'], {
-                    includeNumber: true,
-                  })
-              }}.
+              {{ recentWANTEDCount }}.
             </b-col>
             <b-col cols="12" md="4">
               <v-icon icon="envelope" />
-              {{
-                user.info.replies
-                  | pluralize(['reply', 'replies'], { includeNumber: true })
-              }}.
+              {{ recentReplyCount }}
             </b-col>
           </b-row>
           <b-row>
             <b-col>
               <span v-if="user.info.collected">
                 <v-icon icon="check" /> Picked up about
-                {{
-                  user.info.collected
-                    | pluralize('item', { includeNumber: true })
-                }}.
+                {{ recentCollectedCount }}.
               </span>
               <span v-else>
                 <v-icon icon="check" class="text-faded" />&nbsp;Not received any
@@ -237,9 +221,7 @@ export default {
       return this.active('Wanted')
     },
     aboutme() {
-      return this.user && this.user.info && this.user.info.aboutme
-        ? twem(this.user.info.aboutme.text)
-        : null
+      return this.user?.info?.aboutme ? twem(this.user.info.aboutme.text) : null
     },
     messages() {
       // TODO messages for this user.
@@ -249,11 +231,8 @@ export default {
       // )
     },
     expectedreplies() {
-      return pluralize(
-        ['freegler is', 'freeglers are'],
-        this.user?.info?.expectedreply,
-        true
-      )
+      pluralize.addIrregularRule('freegler is', 'freeglers are')
+      return pluralize('freegler is', this.user?.info?.expectedreply, true)
     },
     milesaway() {
       // TODO Miles away calculation.
@@ -268,6 +247,18 @@ export default {
     },
     activeWANTEDCount() {
       return pluralize('WANTED', this.activeWanteds.length, true)
+    },
+    recentOFFERCount() {
+      return pluralize('OFFER', this.user?.info?.offers, true)
+    },
+    recentWANTEDCount() {
+      return pluralize('WANTED', this.user?.info?.wanteds, true)
+    },
+    recentReplyCount() {
+      return pluralize('reply', this.user?.info?.replies, true)
+    },
+    recentCollectedCount() {
+      return pluralize('item', this.user?.info?.collected, true)
     },
   },
   methods: {

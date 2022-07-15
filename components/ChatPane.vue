@@ -117,17 +117,14 @@ export default {
             this.messagesToShow + 10
           )
 
-          console.log('Show more')
           this.scrollTimer = setTimeout(this.checkScroll, this.scrollInterval)
         } else {
           // We can see the top and we're showing everything.
-          console.log('Showing all')
           this.scrollToBottom()
           this.scrolledToBottom = true
         }
       } else if (!this.scrolledToBottom) {
         // The top is not visible.  We want to make sure we are scrolled to the bottom.
-        console.log('No top')
         this.scrollToBottom()
         this.scrolledToBottom = true
       }
