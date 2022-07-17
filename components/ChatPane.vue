@@ -15,15 +15,24 @@
             opacity: opacity,
           }"
         >
-          <ChatMessage
+          <Suspense
             v-for="(chatmessage, index) in chatmesagesToShow"
-            :id="chatmessage.id"
             :key="'chatmessage-' + chatmessage.id"
-            :chatid="chatmessage.chatid"
-            :last="chatmessage.id === chatmessages[chatmessages.length - 1].id"
-            :prevmessage="index > 0 ? chatmessages[index - 1].id : null"
-            class="mb-1"
-          />
+          >
+            <ChatMessage
+              :id="chatmessage.id"
+              :chatid="chatmessage.chatid"
+              :last="
+                chatmessage.id === chatmessages[chatmessages.length - 1].id
+              "
+              :prevmessage="index > 0 ? chatmessages[index - 1].id : null"
+              class="mb-1"
+            />
+
+            <template #fallback>
+              <div class="invisible">Loading {{ chatmessage.id }}...</div>
+            </template>
+          </Suspense>
         </div>
         <div v-observe-visibility="bottomChanged" />
       </div>
@@ -136,6 +145,8 @@ export default {
   },
   methods: {
     checkScroll() {
+      this.scrollTimer = null
+
       if (this.topVisible) {
         if (this.messagesToShow < this.chatmessages?.length) {
           // We can see the top and we're not showing everything yet.  We need to show more.
@@ -168,6 +179,10 @@ export default {
     },
     topChanged(isVisible) {
       this.topVisible = isVisible
+
+      if (this.topVisible && !this.scrollTimer) {
+        this.scrollTimer = setTimeout(this.checkScroll, this.scrollInterval)
+      }
     },
     bottomChanged(isVisible) {
       this.bottomVisible = isVisible

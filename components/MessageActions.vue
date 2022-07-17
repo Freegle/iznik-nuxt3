@@ -27,7 +27,7 @@
       target="_blank"
       :to="'/message/' + message.id"
     >
-      <v-icon icon="hashtag" size="0-8x" />{{ message.id }}
+      <v-icon icon="hashtag" class="fa-0-8x" />{{ message.id }}
     </b-button>
     <!--    TODO-->
     <!--    <ShareModal v-if="message.url" :id="message.id" ref="shareModal" />-->

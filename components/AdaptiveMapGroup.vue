@@ -22,7 +22,7 @@
           :href="'mailto:' + group.modsemail"
           class="text-muted small"
         >
-          <v-icon icon="envelope" title="Contact volunteers" size="0-8x" />
+          <v-icon icon="envelope" title="Contact volunteers" class="fa-0-8x" />
           Contact volunteers
         </ExternalLink>
       </div>

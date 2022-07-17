@@ -10,14 +10,18 @@
       <div v-observe-visibility="visibilityChanged" />
     </client-only>
     <div v-if="deDuplicatedMessages.length">
-      <div
+      <Suspense
         v-for="message in deDuplicatedMessages"
         :key="'messagelist-' + message.id"
-        :ref="'messagewrapper-' + message.id"
-        class="p-0"
       >
-        <OurMessage :id="message.id" record-view />
-      </div>
+        <div :ref="'messagewrapper-' + message.id" class="p-0">
+          <OurMessage :id="message.id" record-view />
+        </div>
+
+        <template #fallback>
+          <div class="invisible">Loading {{ message.id }}...</div>
+        </template>
+      </Suspense>
     </div>
     <client-only>
       <infinite-loading

@@ -8,15 +8,21 @@ export const useTrystStore = defineStore({
     WKT: null,
     L: null,
     list: [],
+    fetching: null,
   }),
   actions: {
     init(config) {
       this.config = config
     },
     async fetch() {
-      // TODO CACHE
-      const { trysts } = await api(this.config).tryst.fetch()
-      this.list = trysts
+      if (this.fetching) {
+        await this.fetching
+      } else {
+        this.fetching = api(this.config).tryst.fetch()
+        const { trysts } = await this.fetching
+        this.fetching = null
+        this.list = trysts
+      }
     },
   },
   getters: {

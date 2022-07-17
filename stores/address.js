@@ -6,14 +6,19 @@ export const useAddressStore = defineStore({
   state: () => ({
     config: null,
     list: [],
+    fetching: null,
   }),
   actions: {
     init(config) {
       this.config = config
     },
     async fetch() {
-      // TODO CACHE
-      this.list = await api(this.config).address.fetchv2()
+      if (this.fetching) {
+        await this.fetching
+      } else {
+        this.fetching = api(this.config).address.fetchv2()
+        this.list = await this.fetching
+      }
     },
   },
   getters: {

@@ -63,13 +63,13 @@
             </div>
           </div>
           <OutcomeModal
-            v-if="refmsgid"
+            v-if="showOutcome && refmsgid"
             :id="refmsgid"
             ref="outcomeModal"
             @outcome="refetch"
           />
           <PromiseModal
-            ref="promise"
+            ref="showPromise && promise"
             :messages="[refmsg]"
             :selected-message="refmsg.id"
             :users="otheruser ? [otheruser] : []"
@@ -144,9 +144,9 @@
 <script>
 import ChatBase from '~/components/ChatBase'
 import ProfileImage from '~/components/ProfileImage'
+import ChatMessageSummary from '~/components/ChatMessageSummary'
 const OutcomeModal = () => import('~/components/OutcomeModal')
 const PromiseModal = () => import('~/components/PromiseModal')
-const ChatMessageSummary = () => import('~/components/ChatMessageSummary')
 const Highlighter = () => import('vue-highlight-words')
 
 export default {
@@ -158,6 +158,12 @@ export default {
     Highlighter,
   },
   extends: ChatBase,
+  data() {
+    return {
+      showOutcome: false,
+      showPromise: false,
+    }
+  },
   computed: {
     replyusers() {
       const ret = []
@@ -181,6 +187,7 @@ export default {
   },
   methods: {
     promise() {
+      this.showPromise = true
       this.waitForRef('promise', () => {
         this.$refs.promise.show()
       })
@@ -190,6 +197,7 @@ export default {
         id: this.refmsg.id,
       })
 
+      this.showOutcome = true
       this.waitForRef('outcomeModal', () => {
         this.$refs.outcomeModal.show(type)
       })

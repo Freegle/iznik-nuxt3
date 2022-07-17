@@ -11,7 +11,6 @@ export const useMessageStore = defineStore({
     bounds: {},
 
     // Messages we're in the process of fetching
-    // TODO
     fetching: {},
     fetchingCount: 0,
   }),
@@ -23,12 +22,20 @@ export const useMessageStore = defineStore({
       id = parseInt(id)
 
       if (force || !this.list[id]) {
-        this.fetchingCount++
-        const message = await api(this.config).message.fetch(id)
-        this.fetchingCount--
+        if (this.fetching[id]) {
+          // Already fetching
+          await this.fetching[id]
+        } else {
+          this.fetchingCount++
+          this.fetching[id] = api(this.config).message.fetch(id)
+          this.fetchingCount--
 
-        if (message) {
-          this.list[id] = message
+          const message = await this.fetching[id]
+          this.fetching[id] = null
+
+          if (message) {
+            this.list[id] = message
+          }
         }
       }
 

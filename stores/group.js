@@ -9,6 +9,7 @@ export const useGroupStore = defineStore({
     messages: {},
     allGroups: {},
     _remember: {},
+    fetching: {},
   }),
   actions: {
     init(config) {
@@ -39,17 +40,28 @@ export const useGroupStore = defineStore({
         id = parseInt(id)
 
         if (force || !this.list[id]) {
-          const group = await api(this.config).group.fetch(id, function (data) {
-            if (data && data.ret === 10) {
-              // Not hosting a group isn't worth logging.
-              return false
-            } else {
-              return true
-            }
-          })
+          if (this.fetching[id]) {
+            // Already fetching
+            await this.fetching[id]
+          } else {
+            this.fetching[id] = api(this.config).group.fetch(
+              id,
+              function (data) {
+                if (data && data.ret === 10) {
+                  // Not hosting a group isn't worth logging.
+                  return false
+                } else {
+                  return true
+                }
+              }
+            )
 
-          if (group) {
-            this.list[group.id] = group
+            const group = await this.fetching[id]
+            this.fetching[id] = null
+
+            if (group) {
+              this.list[group.id] = group
+            }
           }
         }
 
