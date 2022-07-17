@@ -88,9 +88,8 @@
             selectedChatId ? ['xs', 'sm', 'md', 'lg', 'xl'] : ['md', 'lg', 'xl']
           "
         >
-          <ChatNotVisible v-if="notVisible" />
           <ChatPane
-            v-else-if="selectedChatId"
+            v-if="selectedChatId"
             :id="selectedChatId"
             :key="'chatpane-' + selectedChatId"
           />
@@ -144,7 +143,6 @@ export default {
   async setup(props) {
     const route = useRoute()
 
-    let notVisible = false
     const id = parseInt(route.params.id)
 
     const selectedChatId = ref(id)
@@ -153,14 +151,7 @@ export default {
     const chatStore = useChatStore()
     await chatStore.fetchChats()
 
-    if (selectedChatId) {
-      if (!chatStore.byId(id)) {
-        // This isn't a chat we can see.
-        notVisible = true
-      }
-    }
-
-    return { chatStore, selectedChatId, notVisible }
+    return { chatStore, selectedChatId }
   },
   data() {
     return {

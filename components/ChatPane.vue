@@ -1,6 +1,7 @@
 <template>
   <div>
-    <div v-if="me" class="chatHolder">
+    <ChatNotVisible v-if="notVisible" />
+    <div v-else-if="me" class="chatHolder">
       <ChatHeader :id="id" class="chatTitle" :loaded.sync="headerLoaded" />
       <div
         v-if="chat && chatmessages?.length"
@@ -88,6 +89,15 @@ export default {
     }
   },
   computed: {
+    notVisible() {
+      let ret = false
+      if (this.id && !this.chatStore.byId(this.id)) {
+        // This isn't a chat we can see.
+        ret = true
+      }
+
+      return ret
+    },
     chatmesagesToShow() {
       return this.chatmessages.slice(-this.messagesToShow)
     },
