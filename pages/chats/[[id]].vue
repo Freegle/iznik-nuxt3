@@ -157,28 +157,21 @@ export default {
     return {
       showingOlder: false,
       showHideAllModal: false,
+      minShowChats: 20,
       showChats: 20,
       search: null,
-      searching: false, // TODO Search
-      complete: false, // TODO Show older,
-      bump: 0, // TODO Minor is this used?,
+      searching: false,
+      complete: false,
+      bump: 1,
       distance: 1000,
+      searchSince: '2009-09-11',
     }
   },
-  // TODO Head
-  // head() {
-  //   return this.buildHead(
-  //     'Chats',
-  //     "See the conversations you're having with other freeglers."
-  //   )
-  // },
   computed: {
     filteredChats() {
       let chats = this.chatStore.list ? this.chatStore.list : []
 
-      if (chats && this.search && this.searching) {
-        // We apply the search on names in here so that we can respond on the client rapidly while the background server
-        // search is more thorough.
+      if (chats && this.search) {
         const l = this.search.toLowerCase()
         chats = chats.filter((chat) => {
           if (
@@ -196,9 +189,10 @@ export default {
       return chats
     },
     visibleChats() {
-      const chats = this.filteredChats
-        ? this.filteredChats.slice(0, this.showChats)
-        : []
+      const chats =
+        this.bump && this.filteredChats
+          ? this.filteredChats.slice(0, this.showChats)
+          : []
 
       return chats
     },
@@ -217,10 +211,31 @@ export default {
       return false
     },
   },
+  // TODO Head
+  // head() {
+  //   return this.buildHead(
+  //     'Chats',
+  //     "See the conversations you're having with other freeglers."
+  //   )
+  // },
+  watch: {
+    search(newVal, oldVal) {
+      this.showChats = this.minShowChats
+      this.bump++
+
+      if (!newVal) {
+        // Force a refresh to remove any old chats.
+        this.chatStore.fetchChats(this.searchSince)
+      } else if (newVal.length > 2) {
+        // Force a server search to pick up old chats or more subtle matches.
+        this.searchMore()
+      }
+    },
+  },
   methods: {
     fetchOlder() {
       this.showingOlder = true
-      this.chatStore.fetchChats('11 September 2009')
+      this.chatStore.fetchChats(this.searchSince)
     },
     showHideAll() {
       this.showHideAllModal = true
@@ -273,6 +288,31 @@ export default {
       }
 
       this.selectedChatId = id
+    },
+    async searchMore() {
+      if (this.searching) {
+        // Queue until we've finished.
+        this.searchlast = this.search
+      } else {
+        this.searching = this.search
+
+        await this.chatStore.fetchChats(this.searchSince, this.search)
+
+        this.showChats = this.minShowChats
+        this.bump++
+
+        while (this.searchlast) {
+          // We have another search queued.
+          const val2 = this.searchlast
+          this.searching = this.searchlast
+          this.searchlast = null
+          await this.chatStore.fetchChats(this.searchSince, val2)
+          this.showChats = this.minShowChats
+          this.bump++
+        }
+
+        this.searching = null
+      }
     },
   },
 }

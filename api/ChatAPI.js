@@ -6,15 +6,15 @@ export default class ChatAPI extends BaseAPI {
     return this.$getv2(`/chat/${chatid}/message`)
   }
 
-  async listChats(since) {
+  async listChats(since, search) {
     return await this.$getv2('/chat', {
-      // TODO Server needs to support this
-      age: since,
+      since,
+      search,
     })
   }
 
   fetchChat(chatid) {
-    return this.$get('/chatrooms', { id: chatid })
+    return this.$getv2('/chat/' + chatid)
   }
 
   markSeen(chatid, lastmsg, allowback) {

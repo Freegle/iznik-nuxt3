@@ -39,11 +39,22 @@ export default {
       return EMAIL_REGEX
     },
     emessage() {
-      const trim = this.chatmessage?.message
-        .replace(/(\r\n|\r|\n){2,}/g, '$1\n')
-        .trim()
+      const m = this.chatmessage?.message
 
-      return twem(trim)
+      if (m) {
+        const trim = m.replace(/(\r\n|\r|\n){2,}/g, '$1\n').trim()
+
+        try {
+          twem(trim)
+        } catch (e) {
+          console.error(e, trim, m)
+        }
+        const ret = twem(trim)
+
+        return ret
+      } else {
+        return null
+      }
     },
     chatMessageUser() {
       const userStore = useUserStore()
@@ -112,7 +123,7 @@ export default {
   },
   methods: {
     brokenImage(event) {
-      event.target.src = require('~/static/defaultprofile.png')
+      event.target.src = '/defaultprofile.png'
     },
     refetch() {
       // TODO This is a poor way of refreshing this individual message, but there isn't a server call for it.

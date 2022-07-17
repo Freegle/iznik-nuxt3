@@ -71,7 +71,7 @@
         />
       </template>
       <template #footer>
-        <b-button variant="white" @click="hide"> Close </b-button>
+        <b-button variant="white" @click="zoom = false"> Close </b-button>
       </template>
     </b-modal>
   </div>
@@ -93,7 +93,7 @@ export default {
   },
   methods: {
     brokenImage(event) {
-      event.target.src = require('~/static/placeholder.jpg')
+      event.target.src = '/placeholder.jpg'
     },
   },
 }

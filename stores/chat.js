@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import dayjs from 'dayjs'
 import api from '~/api'
 
 export const useChatStore = defineStore({
@@ -12,9 +13,14 @@ export const useChatStore = defineStore({
     init(config) {
       this.config = config
     },
-    async fetchChats(since) {
+    async fetchChats(since, search) {
       // TODO Don't lose currently selected old chat - see store in old code.
-      const chats = await api(this.config).chat.listChats(since)
+
+      if (since) {
+        since = dayjs(since).toISOString()
+      }
+
+      const chats = await api(this.config).chat.listChats(since, search)
       this.list = chats
 
       chats.forEach((c) => {

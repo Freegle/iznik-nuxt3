@@ -3,7 +3,10 @@
     <b-row class="pb-1">
       <b-col>
         <div v-if="chatmessage.userid != myid" class="media">
-          <b-card border-variant="warning" class="ml-2">
+          <div v-if="!refmsg">
+            This chat message refers to a post which has been deleted.
+          </div>
+          <b-card v-else border-variant="warning" class="ml-2">
             <b-card-title>
               <b-img
                 v-if="
@@ -57,7 +60,10 @@
           </b-card>
         </div>
         <div v-else class="media float-end">
-          <b-card border-variant="warning">
+          <div v-if="!refmsg">
+            This chat message refers to a post which has been deleted.
+          </div>
+          <b-card v-else border-variant="warning">
             <b-card-title>
               <b-img
                 v-if="

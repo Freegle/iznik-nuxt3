@@ -23,13 +23,8 @@
         :highlight-emails="highlightEmails"
       />
     </div>
-    <div v-else-if="chatmessage?.type === 'Completed' && otheruser">
-      <chat-message-completed
-        v-if="otheruser"
-        :id="id"
-        :chatid="chatid"
-        :pov="pov"
-      />
+    <div v-else-if="chatmessage?.type === 'Completed'">
+      <chat-message-completed :id="id" :chatid="chatid" :pov="pov" />
     </div>
     <div v-else-if="chatmessage?.type === 'Promised' && otheruser">
       <chat-message-promised
@@ -66,14 +61,15 @@
     <div v-else-if="chatmessage?.type === 'ModMail'">
       <chat-message-mod-mail :id="id" :chatid="chatid" :pov="pov" />
     </div>
-    <div v-else-if="chatmessage?.type === 'Schedule' && otheruser">
+    <div v-else-if="chatmessage?.type === 'Schedule'">
       <!--      This type has been retired.-->
     </div>
-    <div v-else-if="chatmessage?.type === 'ScheduleUpdated' && otheruser">
+    <div v-else-if="chatmessage?.type === 'ScheduleUpdated'">
       <!--      This type has been retired.-->
     </div>
-    <div v-else-if="supportOrAdmin">
-      Unknown chat message type {{ chatmessage?.type }}
+    <div v-else>
+      Unknown chat message type {{ chatmessage?.type }}, {{ chat }}
+      {{ chatmessage }}
     </div>
     <chat-message-warning v-if="phoneNumber" />
     <chat-message-date-read :id="id" :chatid="chatid" :last="last" :pov="pov" />

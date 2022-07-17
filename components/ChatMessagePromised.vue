@@ -3,7 +3,10 @@
     <b-row class="pb-1">
       <b-col>
         <div v-if="chatmessage.userid != myid" class="media">
-          <b-card border-variant="success" class="ml-2">
+          <div v-if="!refmsg">
+            This chat message refers to a post which has been deleted.
+          </div>
+          <b-card v-else border-variant="success" class="ml-2">
             <b-card-title>
               <nuxt-link
                 :to="
@@ -44,7 +47,7 @@
                 "
               >
                 <h4>
-                  {{ refmsg.subject }}
+                  {{ refmsg?.subject }}
                 </h4>
               </nuxt-link>
               <AddToCalendar v-if="tryst" :ics="tryst.ics" class="mr-2" />
@@ -74,7 +77,10 @@
           </b-card>
         </div>
         <div v-else class="media float-end">
-          <b-card border-variant="success">
+          <div v-if="!refmsg">
+            This chat message refers to a post which has been deleted.
+          </div>
+          <b-card v-else border-variant="success">
             <b-card-title>
               <nuxt-link
                 :to="

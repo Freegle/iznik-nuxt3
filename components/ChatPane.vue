@@ -66,12 +66,21 @@ export default {
 
     const { chat, chatmessages, otheruser } = await setupChat(props.id)
 
-    // Fetch the messages.
-    chatStore.fetchMessages(props.id)
+    if (props.id) {
+      if (!chatStore.byId(props.id)) {
+        // It might be an old chat which doesn't appear in our recent ones, but which we are specifically trying
+        // to go to.  Fetch all the chats.
+        // TODO MINOR Could be speeded up.
+        await chatStore.fetchChats('2009-09-11')
+      }
 
-    // Fetch the user.
-    if (chat?.value?.otheruid) {
-      await userStore.fetch(chat.value.otheruid)
+      // Fetch the messages.
+      chatStore.fetchMessages(props.id)
+
+      // Fetch the user.
+      if (chat?.value?.otheruid) {
+        await userStore.fetch(chat.value.otheruid)
+      }
     }
 
     return { chatStore, userStore, chat, chatmessages, otheruser }

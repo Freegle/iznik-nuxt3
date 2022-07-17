@@ -1,4 +1,4 @@
-import twemoji from 'vue-twemoji'
+import twemoji from 'twemoji'
 
 export function twem(msg) {
   if (typeof msg === 'number') {
