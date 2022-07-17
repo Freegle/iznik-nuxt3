@@ -1,5 +1,5 @@
 <template>
-  <div v-if="chat" class="clickme noselect mb-1 mt-1" @click="click">
+  <div v-if="chat" class="clickme noselect mb-1 mt-1">
     <div class="ml-1 mr-1 d-flex justify-content-start w-100">
       <div class="d-flex flex-column justify-content-around">
         <ProfileImage
@@ -97,13 +97,6 @@ export default {
       }
 
       return false
-    },
-  },
-
-  methods: {
-    click() {
-      // We need to do a full route otherwise the back button doesn't work.
-      this.$router.push('/chats/' + this.id)
     },
   },
 }

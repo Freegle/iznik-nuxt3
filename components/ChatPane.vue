@@ -65,6 +65,14 @@ export default {
 
     const { chat, chatmessages, otheruser } = await setupChat(props.id)
 
+    // Fetch the messages.
+    chatStore.fetchMessages(props.id)
+
+    // Fetch the user.
+    if (chat?.value?.otheruid) {
+      await userStore.fetch(chat.value.otheruid)
+    }
+
     return { chatStore, userStore, chat, chatmessages, otheruser }
   },
   data() {

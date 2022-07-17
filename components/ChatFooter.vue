@@ -246,7 +246,7 @@
       :selected-user="otheruser ? otheruser.id : null"
     />
     <ProfileModal
-      v-if="otheruser"
+      v-if="showProfile && otheruser"
       :id="otheruser ? otheruser.id : null"
       ref="profile"
     />
@@ -305,6 +305,7 @@ export default {
       showMicrovolunteering: false,
       showNotices: true, // TODO Add timer
       showPromise: false,
+      showProfile: false,
       sendmessage: null,
       RSVP: false,
       likelymsg: null,
@@ -438,6 +439,7 @@ export default {
       })
     },
     showInfo() {
+      this.showProfile = true
       this.waitForRef('profile', () => {
         this.$refs.profile.show()
       })

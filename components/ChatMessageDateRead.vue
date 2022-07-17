@@ -1,112 +1,107 @@
 <template>
-  <div>
-    <b-row
-      v-if="
-        !chatmessage?.sameasnext ||
-        last ||
-        chatmessage?.bymailid ||
-        chatmessage?.gap
-      "
-      class="text-muted small"
-    >
-      <b-col v-if="!messageIsFromCurrentUser">
+  <div
+    v-if="
+      !chatmessage?.sameasnext ||
+      last ||
+      chatmessage?.bymailid ||
+      chatmessage?.gap
+    "
+    class="text-muted small"
+  >
+    <div v-if="!messageIsFromCurrentUser">
+      <span
+        class="chat__dateread--theirs"
+        :title="datetimeshort(chatmessage?.date)"
+      >
+        {{ timeadapt(chatmessage?.date) }}
+        <span v-if="chatmessage?.reviewrequired" class="text-danger small">
+          Pending review
+        </span>
         <span
-          class="chat__dateread--theirs"
-          :title="datetimeshort(chatmessage?.date)"
+          v-if="mod && chatmessage?.bymailid"
+          class="btn btn-sm mb-2 btn-white clickme"
+          :title="
+            'Received by email #' + chatmessage?.bymailid + ' click to view'
+          "
+          @click="viewOriginal"
         >
-          {{ timeadapt(chatmessage?.date) }}
-          <span v-if="chatmessage?.reviewrequired" class="text-danger small">
-            Pending review
+          <v-icon icon="info-circle" /> View original email
+        </span>
+      </span>
+      <b-badge
+        v-if="chatmessage?.replyexpected && !chatmessage?.replyreceived"
+        variant="danger"
+      >
+        RSVP - reply expected
+      </b-badge>
+    </div>
+    <div v-else>
+      <span class="float-end chat__dateread--mine">
+        <span v-if="chatmessage?.seenbyall" title="This message has been read.">
+          <v-icon icon="check" class="text-success" />
+        </span>
+        <span
+          v-else-if="chatmessage?.mailedtoall"
+          title="This message has been sent out by email from our system."
+        >
+          <v-icon icon="envelope" />
+        </span>
+        <span
+          v-else-if="
+            mod &&
+            chat &&
+            chat.chattype === 'User2Mod' &&
+            otheruser &&
+            otheruser.settings &&
+            otheruser.settings.notifications &&
+            !otheruser.settings.notifications.email
+          "
+          title="This freegler normally has email notifications turned off.  We always email messages from mods though."
+        >
+          <v-icon icon="envelope" class="text-danger" />
+        </span>
+        <span
+          v-else
+          title="This message has been delivered in Chat.  Depending on the other freegler's settings it may also be sent out by email soon - then this would turn into a little envelope."
+        >
+          <v-icon icon="check" class="text-muted" />
+        </span>
+        <span v-if="chat.chattype === 'User2Mod'">
+          <span v-if="chatmessage?.userid === me.id"> You </span>
+          <span v-else-if="othermodname">
+            {{ othermodname }}
           </span>
-          <span
-            v-if="mod && chatmessage?.bymailid"
-            class="btn btn-sm mb-2 btn-white clickme"
-            :title="
-              'Received by email #' + chatmessage?.bymailid + ' click to view'
-            "
-            @click="viewOriginal"
-          >
-            <v-icon icon="info-circle" /> View original email
+          <span v-else>
+            <v-icon icon="hashtag" class="text-muted" scale="0.5" />{{
+              chatmessage?.userid
+            }}
           </span>
+          sent this
+        </span>
+        <span v-if="chatmessage?.reviewrequired" class="text-danger small">
+          Pending review
+        </span>
+        <span :title="datetimeshort(chatmessage?.date)" class="ml-1">{{
+          timeadapt(chatmessage?.date)
+        }}</span>
+        <span
+          v-if="mod && chatmessage?.bymailid"
+          class="btn btn-sm btn-white mb-2 clickme"
+          :title="
+            'Received by email #' + chatmessage?.bymailid + ' click to view'
+          "
+          @click="viewOriginal"
+        >
+          <v-icon icon="info-circle" /> View original email
         </span>
         <b-badge
           v-if="chatmessage?.replyexpected && !chatmessage?.replyreceived"
-          variant="danger"
+          variant="info"
         >
-          RSVP - reply expected
+          RSVP - reply requested
         </b-badge>
-      </b-col>
-      <b-col v-else>
-        <span class="float-end chat__dateread--mine">
-          <span
-            v-if="chatmessage?.seenbyall"
-            title="This message has been read."
-          >
-            <v-icon icon="check" class="text-success" />
-          </span>
-          <span
-            v-else-if="chatmessage?.mailedtoall"
-            title="This message has been sent out by email from our system."
-          >
-            <v-icon icon="envelope" />
-          </span>
-          <span
-            v-else-if="
-              mod &&
-              chat &&
-              chat.chattype === 'User2Mod' &&
-              otheruser &&
-              otheruser.settings &&
-              otheruser.settings.notifications &&
-              !otheruser.settings.notifications.email
-            "
-            title="This freegler normally has email notifications turned off.  We always email messages from mods though."
-          >
-            <v-icon icon="envelope" class="text-danger" />
-          </span>
-          <span
-            v-else
-            title="This message has been delivered in Chat.  Depending on the other freegler's settings it may also be sent out by email soon - then this would turn into a little envelope."
-          >
-            <v-icon icon="check" class="text-muted" />
-          </span>
-          <span v-if="chat.chattype === 'User2Mod'">
-            <span v-if="chatmessage?.userid === me.id"> You </span>
-            <span v-else-if="othermodname">
-              {{ othermodname }}
-            </span>
-            <span v-else>
-              <v-icon icon="hashtag" class="text-muted" scale="0.5" />{{
-                chatmessage?.userid
-              }}
-            </span>
-            sent this
-          </span>
-          <span v-if="chatmessage?.reviewrequired" class="text-danger small">
-            Pending review
-          </span>
-          <span :title="datetimeshort(chatmessage?.date)" class="ml-1">{{
-            timeadapt(chatmessage?.date)
-          }}</span>
-          <span
-            v-if="mod && chatmessage?.bymailid"
-            class="btn btn-sm btn-white mb-2 clickme"
-            :title="
-              'Received by email #' + chatmessage?.bymailid + ' click to view'
-            "
-            @click="viewOriginal"
-          >
-            <v-icon icon="info-circle" /> View original email
-          </span>
-          <b-badge
-            v-if="chatmessage?.replyexpected && !chatmessage?.replyreceived"
-            variant="info"
-          >
-            RSVP - reply requested
-          </b-badge>
-        </span>
-      </b-col>
-    </b-row>
+      </span>
+    </div>
   </div>
 </template>
 

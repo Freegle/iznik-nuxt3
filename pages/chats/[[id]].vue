@@ -48,6 +48,7 @@
                 chat: true,
                 active: chat && parseInt(selectedChatId) === parseInt(chat.id),
               }"
+              @click="gotoChat(chat.id)"
             />
             <infinite-loading
               :identifier="bump"
@@ -117,10 +118,9 @@
 <script>
 import { useRoute } from 'vue-router'
 import dayjs from 'dayjs'
+import { ref } from 'vue'
 import VisibleWhen from '../../components/VisibleWhen'
 // TODO import loginRequired from '@/mixins/loginRequired.js'
-import { setupChat } from '../../composables/useChat'
-import { useUserStore } from '../../stores/user'
 import { useChatStore } from '~/stores/chat'
 import SidebarRight from '~/components/SidebarRight'
 
@@ -143,29 +143,20 @@ export default {
   },
   async setup(props) {
     const route = useRoute()
-    const userStore = useUserStore()
 
     let notVisible = false
+    const id = parseInt(route.params.id)
 
-    const selectedChatId = parseInt(route.params.id)
+    const selectedChatId = ref(id)
 
     // Fetch the list of chats.
     const chatStore = useChatStore()
     await chatStore.fetchChats()
 
     if (selectedChatId) {
-      if (!chatStore.byId(selectedChatId)) {
+      if (!chatStore.byId(id)) {
         // This isn't a chat we can see.
         notVisible = true
-      } else {
-        chatStore.fetchMessages(selectedChatId)
-
-        // Fetch the user.
-        const { chat } = setupChat(selectedChatId)
-
-        if (chat?.value?.otheruid) {
-          await userStore.fetch(chat.value.otheruid)
-        }
       }
     }
 
@@ -281,6 +272,16 @@ export default {
       }
 
       this.chatStore.fetchChats()
+    },
+    gotoChat(id) {
+      try {
+        history.pushState({}, null, '/chats/' + id)
+      } catch (e) {
+        // Some browsers throw exceptions if this is called too frequently.
+        console.log('Ignore replaceState exception', e)
+      }
+
+      this.selectedChatId = id
     },
   },
 }

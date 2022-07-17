@@ -18,7 +18,14 @@ export const useChatStore = defineStore({
       this.list = chats
 
       chats.forEach((c) => {
-        this.listById[c.id] = c
+        // If we already have the chat with this date then don't set it - this avoids reactivity causing a slew of
+        // component updates for no good reason.
+        if (
+          !this.listById[c.id] ||
+          this.listById[c.id].lastdate !== c.lastdate
+        ) {
+          this.listById[c.id] = c
+        }
       })
     },
     async fetchChat(id) {

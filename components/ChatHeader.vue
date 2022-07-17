@@ -183,24 +183,27 @@
       </div>
       <div v-if="otheruser && otheruser.info">
         <ChatBlockModal
-          v-if="chat.chattype === 'User2User'"
+          v-if="showChatBlock && chat.chattype === 'User2User'"
           :id="id"
           ref="chatblock"
           :user="otheruser"
           @confirm="block"
         />
         <ChatReportModal
-          v-if="chat.chattype === 'User2User'"
+          v-if="showChatReport && chat.chattype === 'User2User'"
           :id="'report-' + id"
           ref="chatreport"
           :user="otheruser"
           :chatid="chat.id"
           @confirm="hide"
         />
-        <ProfileModal :id="otheruser.id" ref="profile" />
+        <ProfileModal v-if="showProfile" :id="otheruser.id" ref="profile" />
       </div>
       <ChatHideModal
-        v-if="chat.chattype === 'User2User' || chat.chattype === 'User2Mod'"
+        v-if="
+          showChatHide &&
+          (chat.chattype === 'User2User' || chat.chattype === 'User2Mod')
+        "
         :id="id"
         ref="chathide"
         :user="otheruser"
@@ -259,6 +262,14 @@ export default {
       unseen,
       milesaway,
       milesstring,
+    }
+  },
+  data() {
+    return {
+      showProfile: false,
+      showChatHide: false,
+      showChatBlock: false,
+      showChatReport: false,
     }
   },
   computed: {
@@ -321,21 +332,25 @@ export default {
       this.$router.push('/chats')
     },
     showhide() {
+      this.showChatHide = true
       this.waitForRef('chathide', () => {
         this.$refs.chathide.show()
       })
     },
     showblock() {
+      this.showChatBlock = true
       this.waitForRef('chatblock', () => {
         this.$refs.chatblock.show()
       })
     },
     showInfo() {
+      this.showProfile = true
       this.waitForRef('profile', () => {
         this.$refs.profile.show()
       })
     },
     report() {
+      this.showChatReport = true
       this.waitForRef('chatreport', () => {
         this.$refs.chatreport.show()
       })
