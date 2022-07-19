@@ -31,7 +31,7 @@
     "@fortawesome/free-solid-svg-icons": "^6.1.1",
     "@fortawesome/vue-fontawesome": "^3.0.0-5",
     "@nuxtjs/sentry": "^5.1.7",
-    "@pinia/nuxt": "^0.1.8",
+    "@pinia/nuxt": "^0.3",
     "@popperjs/core": "^2.11.4",
     "@vue/cli-plugin-eslint": "^5.0.4",
     "@vuelidate/core": "^2.0.0-alpha.41",

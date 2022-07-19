@@ -12,7 +12,6 @@ What does exist:
 
 What doesn't exist yet:
 * Almost all the app function.
-* Persistent store.  We may want to rethink how we do this given the hassle of localForage, IndexedDB etc.
 * CircleCI/playwright testing from the get go?
 
 # iznik-nuxt3
