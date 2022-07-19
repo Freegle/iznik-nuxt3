@@ -13,7 +13,7 @@
         >
           <li class="p-0">
             <b-card no-body>
-              <b-card-body class="p-1">
+              <b-card-body class="p-1" sub-title="">
                 <PostMessage :id="id" type="Offer" />
               </b-card-body>
               <b-card-footer

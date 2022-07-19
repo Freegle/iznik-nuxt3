@@ -1,5 +1,273 @@
 <template>
   <header>
+    <nav
+      id="navbar_large"
+      class="navbar ourBack d-none d-xl-flex pl-1 pr-2 navbar-dark fixed-top navbar-expand-xl"
+    >
+      <nuxt-link to="/" class="navbar-brand p-0">
+        <b-img
+          class="logo mr-2"
+          height="58"
+          width="58"
+          rounded
+          :src="logo"
+          alt="Home"
+        />
+      </nuxt-link>
+      <b-button
+        aria-label="Toggle navigation"
+        class="navbar-toggler collapsed"
+        aria-controls="nav_collapse"
+        style="overflow-anchor: none"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </b-button>
+      <div
+        id="nav_collapse"
+        class="flex-nowrap justify-content-between navbar-collapse collapse"
+        style="display: none"
+      >
+        <ul class="navbar-nav mainnav mainnav--left">
+          <li>
+            <nuxt-link
+              id="menu-option-mygroups"
+              no-prefetch
+              class="nav-link text-center small p-0 ml-2"
+              to="/browse"
+              @mousedown="maybeReload('/browse')"
+            >
+              <v-icon icon="eye" class="fa-2x" /><br />
+              <span class="nav-item__text">Browse</span>
+            </nuxt-link>
+          </li>
+          <li>
+            <nuxt-link
+              id="menu-option-give"
+              no-prefetch
+              class="nav-link text-center small p-0"
+              to="/give"
+              @mousedown="maybeReload('/give')"
+            >
+              <v-icon icon="gift" class="fa-2x" /><br />
+              <span class="nav-item__text">Give</span>
+            </nuxt-link>
+          </li>
+          <li>
+            <nuxt-link
+              id="menu-option-find"
+              no-prefetch
+              class="nav-link text-center small p-0"
+              to="/find"
+              @mousedown="maybeReload('/find')"
+            >
+              <v-icon icon="shopping-cart" class="fa-2x" /><br />
+              <span class="nav-item__text">&nbsp;Ask</span>
+            </nuxt-link>
+          </li>
+          <li>
+            <nuxt-link
+              id="menu-option-myposts"
+              no-prefetch
+              class="nav-link text-center small p-0"
+              to="/myposts"
+              @mousedown="maybeReload('/myposts')"
+            >
+              <div class="position-relative">
+                <v-icon icon="home" class="fa-2x" /><br />
+                <b-badge
+                  v-if="openPostCount"
+                  variant="info"
+                  class="mypostsbadge"
+                  :title="
+                    openPostCount
+                      | pluralize('open post', { includeNumber: true })
+                  "
+                >
+                  {{ openPostCount }}
+                </b-badge>
+                <span class="nav-item__text">My Posts</span>
+              </div>
+            </nuxt-link>
+          </li>
+          <li>
+            <nuxt-link
+              v-if="!simple"
+              id="menu-option-chitchat"
+              no-prefetch
+              class="nav-link text-center small p-0"
+              to="/chitchat"
+              @mousedown="maybeReload('/chitchat')"
+            >
+              <div class="position-relative">
+                <v-icon icon="coffee" class="fa-2x" /><br />
+                <b-badge
+                  v-if="newsCount"
+                  variant="info"
+                  class="newsbadge"
+                  :title="
+                    newsCount
+                      | pluralize('unread ChitChat post', {
+                        includeNumber: true,
+                      })
+                  "
+                >
+                  {{ newsCount }}
+                </b-badge>
+                <span class="nav-item__text">ChitChat</span>
+              </div>
+            </nuxt-link>
+          </li>
+          <li>
+            <nuxt-link
+              v-if="!simple"
+              id="menu-option-communityevents"
+              no-prefetch
+              class="nav-link text-center small p-0"
+              to="/communityevents"
+              @mousedown="maybeReload('/communityevents')"
+            >
+              <v-icon icon="calendar-alt" class="fa-2x" /><br />
+              <span class="nav-item__text">Events</span>
+            </nuxt-link>
+          </li>
+          <li>
+            <nuxt-link
+              v-if="!simple"
+              id="menu-option-volunteering"
+              no-prefetch
+              class="nav-link text-center small p-0"
+              to="/volunteerings"
+              @mousedown="maybeReload('/volunteerings')"
+            >
+              <v-icon icon="hands-helping" class="fa-2x" /><br />
+              <span class="nav-item__text">Volunteer</span>
+            </nuxt-link>
+          </li>
+        </ul>
+        <!--        TOTO Simple?-->
+        <!--        <div  class="simplewrapper pb-2">-->
+        <!--          <div-->
+        <!--            data-v-72fc0792=""-->
+        <!--            -->
+        <!--            title="Toggle between the full website and a simplified version"-->
+        <!--            class="wrapper"-->
+        <!--          >-->
+        <!--            <label-->
+        <!--              data-v-25adc6c0=""-->
+        <!--              data-v-72fc0792=""-->
+        <!--              class="toggle vue-js-switch toggled"-->
+        <!--              value="true"-->
+        <!--              height="36"-->
+        <!--              width="150"-->
+        <!--              font-size="14"-->
+        <!--              labels="[object Object]"-->
+        <!--              ><input-->
+        <!--                data-v-25adc6c0=""-->
+        <!--                type="checkbox"-->
+        <!--                class="v-switch-input"-->
+        <!--              />-->
+        <!--              <div-->
+        <!--                data-v-25adc6c0=""-->
+        <!--                class="v-switch-core"-->
+        <!--                style="-->
+        <!--                  width: 150px;-->
+        <!--                  height: 36px;-->
+        <!--                  background-color: rgb(117, 199, 145);-->
+        <!--                  border-radius: 18px;-->
+        <!--                "-->
+        <!--              >-->
+        <!--                <div-->
+        <!--                  data-v-25adc6c0=""-->
+        <!--                  class="v-switch-button"-->
+        <!--                  style="-->
+        <!--                    width: 30px;-->
+        <!--                    height: 30px;-->
+        <!--                    transition: transform 300ms ease 0s;-->
+        <!--                    transform: translate3d(117px, 3px, 0px);-->
+        <!--                  "-->
+        <!--                ></div>-->
+        <!--              </div>-->
+        <!--              <span-->
+        <!--                data-v-25adc6c0=""-->
+        <!--                class="v-switch-label v-left"-->
+        <!--                style="line-height: 36px; font-size: 14px"-->
+        <!--                >Full Website</span-->
+        <!--              ></label-->
+        <!--            >-->
+        <!--          </div>-->
+        <!--        </div>-->
+        <ul class="navbar-nav mainnav mainnav--right">
+          <li>
+            <NotificationOptions
+              v-if="loggedIn"
+              :distance="distance"
+              :small-screen="false"
+              :unread-notification-count.sync="unreadNotificationCount"
+              @showAboutMe="showAboutMe"
+            />
+          </li>
+          <li>
+            <ChatMenu
+              v-if="loggedIn"
+              id="menu-option-chat"
+              :is-list-item="true"
+              :chat-count.sync="chatCount"
+            />
+          </li>
+          <li>
+            <nuxt-link
+              v-if="!simple"
+              id="menu-option-spread"
+              no-prefetch
+              class="nav-link text-center small p-0"
+              to="/promote"
+              @mousedown="maybeReload('/promote')"
+            >
+              <div class="position-relative">
+                <v-icon icon="bullhorn" class="fa-2x" /><br />
+                <span class="nav-item__text">Promote</span>
+              </div>
+            </nuxt-link>
+          </li>
+          <li>
+            <nuxt-link
+              id="menu-option-help"
+              no-prefetch
+              class="nav-link text-center small p-0"
+              to="/help"
+              @mousedown="maybeReload('/help')"
+            >
+              <v-icon icon="question-circle" class="fa-2x" /><br />
+              <span class="nav-item__text">Help</span>
+            </nuxt-link>
+          </li>
+          <li>
+            <nuxt-link
+              id="menu-option-settings"
+              no-prefetch
+              class="nav-link text-center small p-0"
+              to="/settings"
+              @mousedown="maybeReload('/settings')"
+            >
+              <v-icon icon="cog" class="fa-2x" /><br />
+              <span class="nav-item__text">Settings</span>
+            </nuxt-link>
+          </li>
+          <li>
+            <nuxt-link
+              id="menu-option-logout"
+              no-prefetch
+              class="nav-link text-center p-0 small"
+              @click="logout"
+            >
+              <v-icon icon="sign-out-alt" class="fa-2x" /><br />
+              <span class="nav-item__text">Logout</span>
+            </nuxt-link>
+          </li>
+        </ul>
+      </div>
+      <!---->
+    </nav>
     <!-- Navbar for large screens-->
     <b-nav
       id="navbar_large"
@@ -20,13 +288,13 @@
           alt="Home"
         />
       </nuxt-link>
-      <div class="d-flex">
-        <b-button class="mr-4" variant="link" to="/give">Give</b-button>
-        <b-button class="mr-4" variant="link" to="/browse">Browse</b-button>
-        <b-button class="mr-4" variant="link" to="/explore">Explore</b-button>
-        <b-button class="mr-4" variant="link" to="/chats">Chats</b-button>
-        <b-button class="mr-4" variant="link" @click="logout">Log Out</b-button>
-      </div>
+      <!--      <div class="d-flex">-->
+      <!--        <b-button class="mr-4" variant="link" to="/give">Give</b-button>-->
+      <!--        <b-button class="mr-4" variant="link" to="/browse">Browse</b-button>-->
+      <!--        <b-button class="mr-4" variant="link" to="/explore">Explore</b-button>-->
+      <!--        <b-button class="mr-4" variant="link" to="/chats">Chats</b-button>-->
+      <!--        <b-button class="mr-4" variant="link" @click="logout">Log Out</b-button>-->
+      <!--      </div>-->
       <!--      </b-nav-brand>-->
       <client-only>
         <!--        <b-nav-toggle v-if="loggedIn" target="nav_collapse" />-->
@@ -38,45 +306,45 @@
           class="flex-nowrap justify-content-between"
         >
           <b-nav class="mainnav mainnav--left">
-            <b-nav-item
+            <nuxt-link
               id="menu-option-mygroups"
               no-prefetch
-              class="text-center small p-0 ml-2"
+              class="nav-link text-center small p-0 ml-2"
               to="/browse"
               @mousedown="maybeReload('/browse')"
             >
-              <v-icon icon="eye" size="2x" /><br />
+              <v-icon icon="eye" class="fa-2x" /><br />
               <span class="nav-item__text">Browse</span>
-            </b-nav-item>
-            <b-nav-item
+            </nuxt-link>
+            <nuxt-link
               id="menu-option-give"
               no-prefetch
-              class="text-center small p-0"
+              class="nav-link text-center small p-0"
               to="/give"
               @mousedown="maybeReload('/give')"
             >
-              <v-icon icon="gift" size="2x" /><br />
+              <v-icon icon="gift" class="fa-2x" /><br />
               <span class="nav-item__text">Give</span>
-            </b-nav-item>
-            <b-nav-item
+            </nuxt-link>
+            <nuxt-link
               id="menu-option-find"
               no-prefetch
-              class="text-center small p-0"
+              class="nav-link text-center small p-0"
               to="/find"
               @mousedown="maybeReload('/find')"
             >
-              <v-icon icon="shopping-cart" size="2x" /><br />
+              <v-icon icon="shopping-cart" class="fa-2x" /><br />
               <span class="nav-item__text">&nbsp;Ask</span>
-            </b-nav-item>
-            <b-nav-item
+            </nuxt-link>
+            <nuxt-link
               id="menu-option-myposts"
               no-prefetch
-              class="text-center small p-0"
+              class="nav-link text-center small p-0"
               to="/myposts"
               @mousedown="maybeReload('/myposts')"
             >
               <div class="position-relative">
-                <v-icon icon="home" size="2x" /><br />
+                <v-icon icon="home" class="fa-2x" /><br />
                 <b-badge
                   v-if="openPostCount"
                   variant="info"
@@ -87,17 +355,17 @@
                 </b-badge>
                 <span class="nav-item__text">My Posts</span>
               </div>
-            </b-nav-item>
-            <b-nav-item
+            </nuxt-link>
+            <nuxt-link
               v-if="!simple"
               id="menu-option-chitchat"
               no-prefetch
-              class="text-center small p-0"
+              class="nav-link text-center small p-0"
               to="/chitchat"
               @mousedown="maybeReload('/chitchat')"
             >
               <div class="position-relative">
-                <v-icon icon="coffee" size="2x" /><br />
+                <v-icon icon="coffee" class="fa-2x" /><br />
                 <b-badge
                   v-if="newsCount"
                   variant="info"
@@ -108,29 +376,29 @@
                 </b-badge>
                 <span class="nav-item__text">ChitChat</span>
               </div>
-            </b-nav-item>
-            <b-nav-item
+            </nuxt-link>
+            <nuxt-link
               v-if="!simple"
               id="menu-option-communityevents"
               no-prefetch
-              class="text-center small p-0"
+              class="nav-link text-center small p-0"
               to="/communityevents"
               @mousedown="maybeReload('/communityevents')"
             >
-              <v-icon icon="calendar-alt" size="2x" /><br />
+              <v-icon icon="calendar-alt" class="fa-2x" /><br />
               <span class="nav-item__text">Events</span>
-            </b-nav-item>
-            <b-nav-item
+            </nuxt-link>
+            <nuxt-link
               v-if="!simple"
               id="menu-option-volunteering"
               no-prefetch
-              class="text-center small p-0"
+              class="nav-link text-center small p-0"
               to="/volunteerings"
               @mousedown="maybeReload('/volunteerings')"
             >
-              <v-icon icon="hands-helping" size="2x" /><br />
+              <v-icon icon="hands-helping" class="fa-2x" /><br />
               <span class="nav-item__text">Volunteer</span>
-            </b-nav-item>
+            </nuxt-link>
           </b-nav>
           <client-only>
             <div class="simplewrapper pb-2">
@@ -156,56 +424,56 @@
             <!--              :is-list-item="true"-->
             <!--              :chat-count.sync="chatCount"-->
             <!--            />-->
-            <b-nav-item
+            <nuxt-link
               v-if="!simple"
               id="menu-option-spread"
               no-prefetch
-              class="text-center small p-0"
+              class="nav-link text-center small p-0"
               to="/promote"
               @mousedown="maybeReload('/promote')"
             >
               <div class="position-relative">
-                <v-icon icon="bullhorn" size="2x" /><br />
+                <v-icon icon="bullhorn" class="fa-2x" /><br />
                 <span class="nav-item__text">Promote</span>
               </div>
-            </b-nav-item>
-            <b-nav-item
+            </nuxt-link>
+            <nuxt-link
               id="menu-option-help"
               no-prefetch
-              class="text-center small p-0"
+              class="nav-link text-center small p-0"
               to="/help"
               @mousedown="maybeReload('/help')"
             >
-              <v-icon icon="question-circle" size="2x" /><br />
+              <v-icon icon="question-circle" class="fa-2x" /><br />
               <span class="nav-item__text">Help</span>
-            </b-nav-item>
-            <b-nav-item
+            </nuxt-link>
+            <nuxt-link
               id="menu-option-settings"
               no-prefetch
-              class="text-center small p-0"
+              class="nav-link text-center small p-0"
               to="/settings"
               @mousedown="maybeReload('/settings')"
             >
-              <v-icon icon="cog" size="2x" /><br />
+              <v-icon icon="cog" class="fa-2x" /><br />
               <span class="nav-item__text">Settings</span>
-            </b-nav-item>
-            <b-nav-item
+            </nuxt-link>
+            <nuxt-link
               id="menu-option-logout"
               no-prefetch
-              class="text-center p-0 small"
+              class="nav-link text-center p-0 small"
               @click="logout"
             >
-              <v-icon icon="sign-out-alt" size="2x" /><br />
+              <v-icon icon="sign-out-alt" class="fa-2x" /><br />
               <span class="nav-item__text">Logout</span>
-            </b-nav-item>
+            </nuxt-link>
           </b-nav>
         </b-collapse>
       </client-only>
       <b-nav v-if="!loggedIn" class="ml-auto pt-2 pr-2">
         <client-only>
-          <b-nav-item no-prefetch>
+          <nuxt-link no-prefetch>
             <div class="btn btn-white" @click="requestLogin">Sign&nbsp;in</div>
-          </b-nav-item>
+          </nuxt-link>
         </client-only>
       </b-nav>
     </b-nav>
@@ -264,11 +532,11 @@
 
         <b-nav>
           <client-only>
-            <b-nav-item v-if="!loggedIn" no-prefetch>
+            <nuxt-link v-if="!loggedIn" no-prefetch>
               <div class="btn btn-white" @click="requestLogin">
                 Log in or Join
               </div>
-            </b-nav-item>
+            </nuxt-link>
           </client-only>
         </b-nav>
 
@@ -290,124 +558,150 @@
         is-nav
       >
         <b-nav class="ml-auto flex-row flex-wrap small">
-          <b-nav-item
-            no-prefetch
-            class="text-center p-0"
-            to="/browse"
-            @mousedown="maybeReload('/browse')"
-          >
-            <v-icon icon="eye" size="2x" /><br />
-            <span class="nav-item__text">Browse</span>
-          </b-nav-item>
-          <b-nav-item
-            no-prefetch
-            class="text-center p-0"
-            to="/give"
-            @mousedown="maybeReload('/give')"
-          >
-            <v-icon icon="gift" size="2x" /><br />
-            <span class="nav-item__text">Give</span>
-          </b-nav-item>
-          <b-nav-item
-            no-prefetch
-            class="text-center p-0"
-            to="/find"
-            @mousedown="maybeReload('/find')"
-          >
-            <v-icon icon="shopping-cart" size="2x" /><br />
-            <span class="nav-item__text">Ask</span>
-          </b-nav-item>
-          <b-nav-item
-            no-prefetch
-            class="text-center p-0"
-            to="/myposts"
-            @mousedown="maybeReload('/myposts')"
-          >
-            <div class="position-relative">
-              <v-icon icon="home" size="2x" /><br />
-              <b-badge
-                v-if="openPostCount"
-                variant="info"
-                class="mypostsbadge2"
-                :title="openPostCountPlural"
-              >
-                {{ openPostCount }}
-              </b-badge>
-              <span class="nav-item__text">My Posts</span>
-            </div>
-          </b-nav-item>
-          <b-nav-item
-            v-if="!simple"
-            no-prefetch
-            class="text-center p-0 white"
-            to="/chitchat"
-            @mousedown="maybeReload('/chitchat')"
-          >
-            <div class="position-relative">
-              <v-icon icon="coffee" size="2x" /><br />
-              <b-badge
-                v-if="newsCount"
-                variant="info"
-                class="newsbadge2"
-                :title="newsCountPlural"
-              >
-                {{ newsCount }}
-              </b-badge>
-              <span class="nav-item__text">ChitChat</span>
-            </div>
-          </b-nav-item>
-          <b-nav-item
-            v-if="!simple"
-            no-prefetch
-            class="text-center p-0"
-            to="/communityevents"
-            @mousedown="maybeReload('/communityevents')"
-          >
-            <v-icon icon="calendar-alt" size="2x" /><br />
-            <span class="nav-item__text">Events</span>
-          </b-nav-item>
-          <b-nav-item
-            v-if="!simple"
-            no-prefetch
-            class="text-center p-0"
-            to="/volunteerings"
-            @mousedown="maybeReload('/volunteerings')"
-          >
-            <v-icon icon="hands-helping" size="2x" /><br />
-            <span class="nav-item__text">Volunteer</span>
-          </b-nav-item>
-          <b-nav-item
-            v-if="!simple"
-            no-prefetch
-            class="text-center p-0"
-            to="/promote"
-            @mousedown="maybeReload('/promote')"
-          >
-            <v-icon icon="bullhorn" size="2x" /><br />
-            <span class="nav-item__text">Promote</span>
-          </b-nav-item>
-          <b-nav-item
-            no-prefetch
-            class="text-center p-0"
-            to="/help"
-            @mousedown="maybeReload('/help')"
-          >
-            <v-icon icon="question-circle" size="2x" /><br />
-            <span class="nav-item__text">Help</span>
-          </b-nav-item>
-          <b-nav-item
-            no-prefetch
-            class="text-center p-0"
-            to="/settings"
-            @mousedown="maybeReload('/settings')"
-          >
-            <v-icon icon="cog" size="2x" /><br />
-            <span class="nav-item__text">Settings</span>
-          </b-nav-item>
-          <b-nav-item no-prefetch class="text-center p-0" @click="logout">
-            <v-icon icon="sign-out-alt" size="2x" /><br />
-            <span class="nav-item__text">Logout</span>
-          </b-nav-item>
+          <li class="nav-item text-center p-0">
+            <nuxt-link
+              no-prefetch
+              class="nav-link text-center p-0"
+              to="/browse"
+              @mousedown="maybeReload('/browse')"
+            >
+              <v-icon icon="eye" class="fa-2x" /><br />
+              <span class="nav-item__text">Browse</span>
+            </nuxt-link>
+          </li>
+          <li class="nav-item text-center p-0">
+            <nuxt-link
+              no-prefetch
+              class="nav-link text-center p-0"
+              to="/give"
+              @mousedown="maybeReload('/give')"
+            >
+              <v-icon icon="gift" class="fa-2x" /><br />
+              <span class="nav-item__text">Give</span>
+            </nuxt-link>
+          </li>
+          <li class="nav-item text-center p-0">
+            <nuxt-link
+              no-prefetch
+              class="nav-link text-center p-0"
+              to="/find"
+              @mousedown="maybeReload('/find')"
+            >
+              <v-icon icon="shopping-cart" class="fa-2x" /><br />
+              <span class="nav-item__text">Ask</span>
+            </nuxt-link>
+          </li>
+          <li class="nav-item text-center p-0">
+            <nuxt-link
+              no-prefetch
+              class="nav-link text-center p-0"
+              to="/myposts"
+              @mousedown="maybeReload('/myposts')"
+            >
+              <div class="position-relative">
+                <v-icon icon="home" class="fa-2x" /><br />
+                <b-badge
+                  v-if="openPostCount"
+                  variant="info"
+                  class="mypostsbadge2"
+                  :title="openPostCountPlural"
+                >
+                  {{ openPostCount }}
+                </b-badge>
+                <span class="nav-item__text">My Posts</span>
+              </div>
+            </nuxt-link>
+          </li>
+          <li class="nav-item text-center p-0">
+            <nuxt-link
+              v-if="!simple"
+              no-prefetch
+              class="nav-link text-center p-0 white"
+              to="/chitchat"
+              @mousedown="maybeReload('/chitchat')"
+            >
+              <div class="position-relative">
+                <v-icon icon="coffee" class="fa-2x" /><br />
+                <b-badge
+                  v-if="newsCount"
+                  variant="info"
+                  class="newsbadge2"
+                  :title="newsCountPlural"
+                >
+                  {{ newsCount }}
+                </b-badge>
+                <span class="nav-item__text">ChitChat</span>
+              </div>
+            </nuxt-link>
+          </li>
+          <li class="nav-item text-center p-0">
+            <nuxt-link
+              v-if="!simple"
+              no-prefetch
+              class="nav-link text-center p-0"
+              to="/communityevents"
+              @mousedown="maybeReload('/communityevents')"
+            >
+              <v-icon icon="calendar-alt" class="fa-2x" /><br />
+              <span class="nav-item__text">Events</span>
+            </nuxt-link>
+          </li>
+          <li class="nav-item text-center p-0">
+            <nuxt-link
+              v-if="!simple"
+              no-prefetch
+              class="nav-link text-center p-0"
+              to="/volunteerings"
+              @mousedown="maybeReload('/volunteerings')"
+            >
+              <v-icon icon="hands-helping" class="fa-2x" /><br />
+              <span class="nav-item__text">Volunteer</span>
+            </nuxt-link>
+          </li>
+          <li class="nav-item text-center p-0">
+            <nuxt-link
+              v-if="!simple"
+              no-prefetch
+              class="nav-link text-center p-0"
+              to="/promote"
+              @mousedown="maybeReload('/promote')"
+            >
+              <v-icon icon="bullhorn" class="fa-2x" /><br />
+              <span class="nav-item__text">Promote</span>
+            </nuxt-link>
+          </li>
+          <li class="nav-item text-center p-0">
+            <nuxt-link
+              no-prefetch
+              class="nav-link text-center p-0"
+              to="/help"
+              @mousedown="maybeReload('/help')"
+            >
+              <v-icon icon="question-circle" class="fa-2x" /><br />
+              <span class="nav-item__text">Help</span>
+            </nuxt-link>
+          </li>
+          <li class="nav-item text-center p-0">
+            <nuxt-link
+              no-prefetch
+              class="nav-link text-center p-0"
+              to="/settings"
+              @mousedown="maybeReload('/settings')"
+            >
+              <v-icon icon="cog" class="fa-2x" /><br />
+              <span class="nav-item__text">Settings</span>
+            </nuxt-link>
+          </li>
+          <li class="nav-item text-center p-0">
+            <nuxt-link
+              no-prefetch
+              class="nav-link text-center p-0"
+              @click="logout"
+            >
+              <v-icon icon="sign-out-alt" class="fa-2x" /><br />
+              <span class="nav-item__text">Logout</span>
+            </nuxt-link>
+          </li>
         </b-nav>
       </b-collapse>
     </b-nav>
@@ -421,18 +715,18 @@
 // const AboutMeModal = () => import('~/components/AboutMeModal')
 // const ChatMenu = () => import('~/components/ChatMenu')
 // const SimpleView = () => import('../components/SimpleView')
-// const NotificationOptions = () => import('~/components/NotificationOptions')
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 import pluralize from 'pluralize'
 import LoginModal from '~/components/LoginModal'
 import { useAuthStore } from '~/stores/auth'
+const NotificationOptions = () => import('~/components/NotificationOptions')
 
 export default {
   name: 'MainHeader',
   components: {
     // SimpleView,
-    // NotificationOptions,
+    NotificationOptions,
     // ChatMenu,
     LoginModal,
     // AboutMeModal,

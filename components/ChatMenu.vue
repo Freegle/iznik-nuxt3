@@ -2,13 +2,13 @@
   <component
     :is="chatType"
     :class="{ 'text-white': !isListItem }"
-    class="chat-menu-item"
+    class="nav-link text-center chat-menu-item"
     href="#"
     aria-label="chats"
     @click="toChats"
   >
     <div class="position-relative small">
-      <v-icon icon="comments" scale="2" class="chat__icon" />
+      <v-icon icon="comments" class="fa-2x chat__icon" />
       <div class="nav-item__text d-none d-xl-block">Chats</div>
       <b-badge v-if="chatCount" variant="danger" class="chatbadge">
         {{ chatCount }}
@@ -18,6 +18,8 @@
 </template>
 
 <script>
+import { useChatStore } from '../stores/chat'
+
 export default {
   name: 'ChatMenu',
   props: {
@@ -27,6 +29,13 @@ export default {
       default: true,
     },
   },
+  setup() {
+    const chatStore = useChatStore()
+
+    return {
+      chatStore,
+    }
+  },
   computed: {
     chatType() {
       // A different component needs to be created depending on the context in which it's used
@@ -34,7 +43,7 @@ export default {
     },
     chatCount() {
       // Don't show so many that the layout breaks.
-      return Math.min(99, this.$store.getters['chats/unseenCount'])
+      return Math.min(99, this.chatStore.unreadCount)
     },
   },
   watch: {
@@ -50,17 +59,11 @@ export default {
         e.stopImmediatePropagation()
       }
 
-      // Ensure we have no chat selected.  On mobile this will force us to show the chat list.
-      this.$store.dispatch('chats/currentChat', {
-        chatid: null,
-      })
-
       this.$router.push('/chats')
     },
   },
 }
 </script>
-
 <style scoped lang="scss">
 .chatbadge {
   position: absolute;
@@ -69,7 +72,8 @@ export default {
 }
 
 .chat__icon {
-  height: 32px;
+  height: 28px;
+  width: 28px;
   margin: 0;
 }
 

@@ -72,5 +72,9 @@ export const useChatStore = defineStore({
     messagesById: (state) => {
       return (id) => state.messages[id]
     },
+    unreadCount: (state) => {
+      // count chats with unseen messages
+      return state.list.reduce((total, chat) => (total += chat.unseen), 0)
+    },
   },
 })

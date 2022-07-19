@@ -7,6 +7,7 @@ import { useComposeStore } from '~/stores/compose'
 import { useChatStore } from '~/stores/chat'
 import { useAddressStore } from '~/stores/address'
 import { useTrystStore } from '~/stores/tryst'
+import { useNotificationStore } from '~/stores/notification'
 
 export default defineNuxtRouteMiddleware((to) => {
   // We're having trouble accessing the Nuxt config from within a Pinia store.  So instead we access it here, then
@@ -22,6 +23,7 @@ export default defineNuxtRouteMiddleware((to) => {
   const chatStore = useChatStore()
   const addressStore = useAddressStore()
   const trystStore = useTrystStore()
+  const notificationStore = useNotificationStore()
 
   groupStore.init(runtimeConfig)
   messageStore.init(runtimeConfig)
@@ -32,4 +34,5 @@ export default defineNuxtRouteMiddleware((to) => {
   chatStore.init(runtimeConfig)
   addressStore.init(runtimeConfig)
   trystStore.init(runtimeConfig)
+  notificationStore.init(runtimeConfig)
 })

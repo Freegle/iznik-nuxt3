@@ -6,7 +6,7 @@
           class="photoholder bg-light d-flex flex-column align-items-center justify-items-center mr-1"
         >
           <client-only>
-            <v-icon icon="camera" size="8-75x" class="text-faded" />
+            <v-icon icon="camera" class="fa-8-75x text-faded" />
           </client-only>
           <b-button
             variant="primary"
