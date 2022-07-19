@@ -1,5 +1,5 @@
 diff --git a/node_modules/@vue-leaflet/vue-leaflet/dist/vue-leaflet.cjs.js b/node_modules/@vue-leaflet/vue-leaflet/dist/vue-leaflet.cjs.js
-index a14a296..f734f70 100644
+index a14a296..6426116 100644
 --- a/node_modules/@vue-leaflet/vue-leaflet/dist/vue-leaflet.cjs.js
 +++ b/node_modules/@vue-leaflet/vue-leaflet/dist/vue-leaflet.cjs.js
 @@ -224,13 +224,19 @@ const setup$1 = (props, leafletRef, context) => {
@@ -25,7 +25,7 @@ index a14a296..f734f70 100644
          popup.unbindPopup();
        }
 diff --git a/node_modules/@vue-leaflet/vue-leaflet/dist/vue-leaflet.esm.js b/node_modules/@vue-leaflet/vue-leaflet/dist/vue-leaflet.esm.js
-index 8229c4f..61ca309 100644
+index 8229c4f..60dfbd9 100644
 --- a/node_modules/@vue-leaflet/vue-leaflet/dist/vue-leaflet.esm.js
 +++ b/node_modules/@vue-leaflet/vue-leaflet/dist/vue-leaflet.esm.js
 @@ -200,13 +200,19 @@ const setup$1 = (props, leafletRef, context) => {
@@ -59,7 +59,7 @@ index 8229c4f..61ca309 100644
          attributes: true,
          childList: true,
 diff --git a/node_modules/@vue-leaflet/vue-leaflet/dist/vue-leaflet.umd.js b/node_modules/@vue-leaflet/vue-leaflet/dist/vue-leaflet.umd.js
-index acbf69b..8699249 100644
+index acbf69b..d1f060e 100644
 --- a/node_modules/@vue-leaflet/vue-leaflet/dist/vue-leaflet.umd.js
 +++ b/node_modules/@vue-leaflet/vue-leaflet/dist/vue-leaflet.umd.js
 @@ -204,13 +204,19 @@
@@ -84,8 +84,52 @@ index acbf69b..8699249 100644
          if (popup) {
            popup.unbindPopup();
          }
+diff --git a/node_modules/@vue-leaflet/vue-leaflet/src/components/LMarker.vue b/node_modules/@vue-leaflet/vue-leaflet/src/components/LMarker.vue
+index b5fdbc7..dbbbc45 100644
+--- a/node_modules/@vue-leaflet/vue-leaflet/src/components/LMarker.vue
++++ b/node_modules/@vue-leaflet/vue-leaflet/src/components/LMarker.vue
+@@ -33,17 +33,32 @@ export default {
+       (newIcon) => leafletRef.value.setIcon && leafletRef.value.setIcon(newIcon)
+     );
+     const { options, methods } = markerSetup(props, leafletRef, context);
+-    if (options.icon === undefined) {
+-      // If the options objection has a property named 'icon', then Leaflet will overwrite
+-      // the default icon with it for the marker, _even if it is undefined_.
+-      // This leads to the issue discussed in https://github.com/vue-leaflet/vue-leaflet/issues/130
+-      delete options.icon;
+-    }
+ 
+     onMounted(async () => {
+-      const { marker, DomEvent } = useGlobalLeaflet
++      const { marker, DomEvent, divIcon } = useGlobalLeaflet
+         ? WINDOW_OR_GLOBAL.L
+         : await import("leaflet/dist/leaflet-src.esm");
++
++      // If an icon is not specified in the options, then either the content of the LMarker's
++      // slot should be displayed if present, or the default Leaflet icon should be used if not.
++      // Either way, the `undefined` property needs to be modified.
++      if (options.icon === undefined) {
++        if (context.slots.default) {
++          // If there is slot content to be displayed, then the initial state of the icon should be
++          // invisible until it is replaced by any calls to `setIcon` or `setParentHtml` from within
++          // the default slot.
++          // Creating an empty div with no classes accomplishes this, avoiding the issue discussed in
++          // https://github.com/vue-leaflet/vue-leaflet/issues/170.
++          options.icon = divIcon({ className: "" });
++        } else {
++          // If the options object has a property named 'icon' when passed to `marker`, then Leaflet
++          // will overwrite the default icon with that value for the marker, _even if it is undefined_.
++          // This leads to the issue discussed in https://github.com/vue-leaflet/vue-leaflet/issues/130,
++          // and is avoided by simply removing that property.
++          delete options.icon;
++        }
++      }
++
+       leafletRef.value = marker(props.latLng, options);
+ 
+       const listeners = remapEvents(context.attrs);
 diff --git a/node_modules/@vue-leaflet/vue-leaflet/src/functions/layer.js b/node_modules/@vue-leaflet/vue-leaflet/src/functions/layer.js
-index 236ffb8..a232f44 100644
+index 236ffb8..226ec14 100644
 --- a/node_modules/@vue-leaflet/vue-leaflet/src/functions/layer.js
 +++ b/node_modules/@vue-leaflet/vue-leaflet/src/functions/layer.js
 @@ -80,13 +80,19 @@ export const setup = (props, leafletRef, context) => {

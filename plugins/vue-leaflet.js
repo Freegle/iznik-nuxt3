@@ -11,7 +11,7 @@ import {
   LFeatureGroup,
   LTooltip,
   LRectangle,
-} from '@vue-leaflet/vue-leaflet'
+} from '@vue-leaflet/vue-leaflet/src/components'
 import { defineNuxtPlugin } from '#app'
 
 export default defineNuxtPlugin((nuxtApp) => {
