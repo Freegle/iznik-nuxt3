@@ -64,7 +64,7 @@ export default {
     const chatStore = useChatStore()
     const userStore = useUserStore()
 
-    const { chat, chatmessages, otheruser } = await setupChat(props.id)
+    const { chat, otheruser } = await setupChat(props.id)
 
     if (props.id) {
       if (!chatStore.byId(props.id)) {
@@ -83,7 +83,9 @@ export default {
     }
 
     // Reverse the chatmessages because we use flex-direction: column-reverse for scrolling reasons.
-    chatmessages.value.reverse()
+    const chatmessages = computed(() => {
+      return chatStore.messagesById(props.id).reverse()
+    })
 
     return { chatStore, userStore, chat, chatmessages, otheruser }
   },
