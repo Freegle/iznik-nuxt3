@@ -8,13 +8,7 @@
         ref="chatContent"
         class="chatContent"
       >
-        <div v-observe-visibility="topChanged" />
-        <div
-          class="pt-1 mb-1 w-100"
-          :style="{
-            opacity: opacity,
-          }"
-        >
+        <div class="pt-1 mb-1 w-100 itemwrapper">
           <Suspense
             v-for="(chatmessage, index) in chatmessages"
             :key="'chatmessage-' + chatmessage.id"
@@ -34,17 +28,13 @@
               <div class="invisible">Loading {{ chatmessage.id }}...</div>
             </template>
           </Suspense>
+          <div v-observe-visibility="topChanged" />
         </div>
-        <div v-observe-visibility="bottomChanged" />
       </div>
       <div v-else-if="chatBusy && headerLoaded" class="text-center">
         <b-img class="float-end" src="~static/loader.gif" />
       </div>
-      <ChatFooter
-        v-bind="$props"
-        class="chatFooter"
-        @scrollbottom="scrollToBottom(true)"
-      />
+      <ChatFooter v-bind="$props" class="chatFooter" />
     </div>
   </div>
 </template>
@@ -92,6 +82,9 @@ export default {
       }
     }
 
+    // Reverse the chatmessages because we use flex-direction: column-reverse for scrolling reasons.
+    chatmessages.value.reverse()
+
     return { chatStore, userStore, chat, chatmessages, otheruser }
   },
   data() {
@@ -100,10 +93,10 @@ export default {
       showNotices: true,
       messagesToShow: 0,
       chatBusy: false,
-      scrolledToBottom: false,
       topVisible: true,
       scrollTimer: null,
       scrollInterval: 50,
+      lastScrollHeight: 0,
     }
   },
   computed: {
@@ -115,14 +108,6 @@ export default {
       }
 
       return ret
-    },
-    opacity() {
-      // Until we've finished our initial render, don't show anything.  Reduces flicker.
-      return this.scrolledToBottom ? 1 : 0
-    },
-    overflow() {
-      // Until we've finished our initial render, hide the scroll bar.  Reduces flicker
-      return this.scrolledToBottom ? 'auto' : 'hidden'
     },
   },
   watch: {
@@ -144,6 +129,16 @@ export default {
     checkScroll() {
       this.scrollTimer = null
 
+      const container = this.$refs.chatContent
+      const scrollHeight = container?.scrollHeight
+
+      if (scrollHeight === this.lastScrollHeight) {
+        // The scroll height has not changed. No need to do anything.  This handles the case where components have
+        // been added but haven't finished rendering yet.
+        this.scrollTimer = setTimeout(this.checkScroll, this.scrollInterval)
+        return
+      }
+
       if (this.topVisible) {
         if (this.messagesToShow < this.chatmessages?.length) {
           // We can see the top and we're not showing everything yet.  We need to show more.
@@ -156,41 +151,17 @@ export default {
             this.messagesToShow + 10
           )
 
+          this.lastScrollHeight = scrollHeight
           this.scrollTimer = setTimeout(this.checkScroll, this.scrollInterval)
-        } else {
-          // We can see the top and we're showing everything.
-          this.scrollToBottom()
-          this.scrolledToBottom = true
         }
-      } else if (!this.scrolledToBottom) {
-        // The top is not visible.  We want to make sure we are scrolled to the bottom.
-        this.scrollToBottom()
-        this.scrolledToBottom = true
       }
-    },
-    scrollToBottom() {
-      // TODO MINOR would be satisfying to make this purely event driven.
-      setTimeout(() => {
-        const container = this.$refs.chatContent
-
-        if (container) {
-          container.scrollTop = container.scrollHeight
-        }
-      }, 100)
     },
     topChanged(isVisible) {
       this.topVisible = isVisible
 
       if (this.topVisible && !this.scrollTimer) {
+        // We don't want to do this too frequently.
         this.scrollTimer = setTimeout(this.checkScroll, this.scrollInterval)
-      }
-    },
-    bottomChanged(isVisible) {
-      this.bottomVisible = isVisible
-
-      if (!this.scrolledToBottom) {
-        // We've not yet completed our initial load, and we've lost the bottom.  Force us back down there.
-        this.scrollToBottom()
       }
     },
   },
@@ -217,11 +188,18 @@ export default {
   order: 3;
   justify-content: flex-start;
   flex-grow: 1;
-  overflow-y: v-bind('overflow');
+  overflow-y: scroll;
   overflow-x: hidden;
+  display: flex;
+  flex-direction: column-reverse;
 }
 
 .chatFooter {
   order: 4;
+}
+
+.itemwrapper {
+  display: flex;
+  flex-direction: column-reverse;
 }
 </style>
