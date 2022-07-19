@@ -20,7 +20,6 @@ export default class ChatAPI extends BaseAPI {
   markRead(chatid, lastmsg, allowback) {
     return this.$post('/chatrooms', {
       id: chatid,
-      // TODO Minor are these parameters used?
       lastmsgseen: lastmsg,
       allowback,
     })
