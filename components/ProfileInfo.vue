@@ -7,7 +7,7 @@
         border-variant="success"
         class="mt-1"
       >
-        <b-card-body class="p-0">
+        <b-card-body sub-title="" class="p-0">
           <profile-header :id="id" class="m-0" />
         </b-card-body>
       </b-card>
@@ -30,7 +30,7 @@
         <SupporterInfoModal v-if="showSupporterInfo" ref="supporterInfoModal" />
       </NoticeMessage>
       <b-card v-if="aboutme" variant="white" class="mt-2">
-        <b-card-body class="p-0">
+        <b-card-body sub-title="" class="p-0">
           <div class="mb-1">
             <blockquote class="font-weight-bold">
               &quot;{{ aboutme }}&quot;
@@ -51,7 +51,7 @@
         <template #header>
           <v-icon icon="info-circle" /> About this freegler
         </template>
-        <b-card-body class="p-0 pt-1">
+        <b-card-body sub-title="" class="p-0 pt-1">
           <p v-if="user.info.milesaway">
             <v-icon icon="map-marker-alt" class="fa-fw" />
             <span v-if="user.info.publiclocation">
@@ -78,7 +78,7 @@
           <v-icon icon="gift" />
           {{ activeOFFERCount }}
         </template>
-        <b-card-body class="p-0 pt-2 pb-2">
+        <b-card-body sub-title="" class="p-0 pt-2 pb-2">
           <div v-if="activeOffers.length">
             <div
               v-for="message in activeOffers"
@@ -101,7 +101,7 @@
           <v-icon icon="search" />
           {{ activeWANTEDCount }}
         </template>
-        <b-card-body class="p-0 pt-2 pb-2">
+        <b-card-body sub-title="" class="p-0 pt-2 pb-2">
           <div v-if="activeWanteds.length">
             <div
               v-for="message in activeWanteds"
@@ -129,7 +129,7 @@
           >
           <span v-else>No recent activity.</span>
         </template>
-        <b-card-body class="p-0 pt-1">
+        <b-card-body sub-title="" class="p-0 pt-1">
           <b-row
             v-if="user.info.offers + user.info.wanteds + user.info.replies > 0"
           >

@@ -122,7 +122,7 @@
         no-body
         class="max"
       >
-        <b-card-body class="p-1">
+        <b-card-body sub-title="" class="p-1">
           <div class="d-flex">
             <SponsorLogo
               :image="sponsor.imageurl"
