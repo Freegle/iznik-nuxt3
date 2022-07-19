@@ -16,10 +16,11 @@
           }"
         >
           <Suspense
-            v-for="(chatmessage, index) in chatmesagesToShow"
+            v-for="(chatmessage, index) in chatmessages"
             :key="'chatmessage-' + chatmessage.id"
           >
             <ChatMessage
+              v-if="index < messagesToShow"
               :id="chatmessage.id"
               :chatid="chatmessage.chatid"
               :last="
@@ -115,9 +116,6 @@ export default {
 
       return ret
     },
-    chatmesagesToShow() {
-      return this.chatmessages.slice(-this.messagesToShow)
-    },
     opacity() {
       // Until we've finished our initial render, don't show anything.  Reduces flicker.
       return this.scrolledToBottom ? 1 : 0
@@ -149,6 +147,10 @@ export default {
       if (this.topVisible) {
         if (this.messagesToShow < this.chatmessages?.length) {
           // We can see the top and we're not showing everything yet.  We need to show more.
+          //
+          // We used to use a computed property based on this index.  But that meant that the computed property
+          // had a new value each time we changed this, which forced re-render of each of the messages.  By referencing
+          // messagesToShow in the v-for loop we only trigger a render of the new items.
           this.messagesToShow = Math.min(
             this.chatmessages?.length,
             this.messagesToShow + 10
