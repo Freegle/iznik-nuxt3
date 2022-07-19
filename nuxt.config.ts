@@ -76,4 +76,96 @@ export default defineNuxtConfig({
   },
 
   // TODO Sentry
+
+  app: {
+    head: {
+      title: "Freegle - Don't throw it away, give it away!",
+      meta: [
+        { charset: 'utf-8' },
+        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+        { hid: 'author', name: 'author', content: 'Freegle' },
+        { name: 'supported-color-schemes', content: 'light' },
+        { name: 'color-scheme', content: 'light' },
+        {
+          name: 'facebook-domain-verification',
+          content: 'zld0jt8mvf06rt1c3fnxvls3zntxj6',
+        },
+        { hid: 'og:type', property: 'og:type', content: 'website' },
+        {
+          hid: 'description',
+          name: 'description',
+          content:
+            "Give and get stuff for free in your local community.  Don't just recycle - reuse, freecycle and freegle!",
+        },
+        {
+          hid: 'apple-mobile-web-app-title',
+          name: 'apple-mobile-web-app-title',
+          content:
+            "Give and get stuff for free in your local community.  Don't just recycle - reuse, freecycle and freegle!",
+        },
+
+        {
+          hid: 'og:image',
+          property: 'og:image',
+          content: config.USER_SITE + '/icon.png',
+        },
+        { hid: 'og:locale', property: 'og:locale', content: 'en_GB' },
+        {
+          hid: 'og:title',
+          property: 'og:title',
+          content: "Freegle - Don't throw it away, give it away!",
+        },
+        { hid: 'og:site_name', property: 'og:site_name', content: 'Freegle' },
+        {
+          hid: 'og:url',
+          property: 'og:url',
+          content: 'https://www.ilovefreegle.org',
+        },
+        {
+          hid: 'fb:app_id',
+          property: 'fb:app_id',
+          content: config.FACEBOOK_APPID,
+        },
+        {
+          hid: 'og:description',
+          property: 'og:description',
+          content:
+            "Give and get stuff for free in your local community.  Don't just recycle - reuse, freecycle and freegle!",
+        },
+        {
+          hid: 'fb:app_id',
+          property: 'og:site_name',
+          content: config.FACEBOOK_APPID,
+        },
+
+        {
+          hid: 'twitter:title',
+          name: 'twitter:title',
+          content: "Freegle - Don't throw it away, give it away!",
+        },
+        {
+          hid: 'twitter:description',
+          name: 'twitter:description',
+          content:
+            "Give and get stuff for free in your local community.  Don't just recycle - reuse, freecycle and freegle!",
+        },
+        {
+          hid: 'twitter:image',
+          name: 'twitter:image',
+          content: config.USER_SITE + '/icon.png',
+        },
+        {
+          hid: 'twitter:image:alt',
+          name: 'twitter:image:alt',
+          content: 'The Freegle logo',
+        },
+        {
+          hid: 'twitter:card',
+          name: 'twitter:card',
+          content: 'summary_large_image',
+        },
+        { hid: 'twitter:site', name: 'twitter:site', content: 'thisisfreegle' },
+      ],
+    },
+  },
 })

@@ -108,9 +108,18 @@
   </div>
 </template>
 <script>
+import { buildHead } from '../composables/useBuildHead'
 import api from '~/api'
 
 export default {
+  setup() {
+    useHead(
+      buildHead(
+        'OFFER',
+        'OFFER something to people nearby and see who wants it'
+      )
+    )
+  },
   data() {
     return {
       userWatch: null,
