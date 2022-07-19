@@ -44,11 +44,12 @@
       class="p-0 notpad"
       link-class="notification-list__item"
     >
-      <Notification
-        :notification="notification"
-        class="p-0"
-        @showModal="showAboutMe"
-      />
+      <!--      <Notification-->
+      <!--        :notification="notification"-->
+      <!--        class="p-0"-->
+      <!--        @showModal="showAboutMe"-->
+      <!--      />-->
+      <!--      TODO Notifications-->
     </b-dropdown-item>
     <infinite-loading :distance="distance" @infinite="loadMoreNotifications">
       <span slot="no-results" />
@@ -62,12 +63,12 @@
 <script>
 import { useNotificationStore } from '../stores/notification'
 
-const Notification = () => import('~/components/Notification')
+// const Notification = () => import('~/components/Notification')
 
 export default {
   name: 'NotificationOptions',
   components: {
-    Notification,
+    // Notification,
   },
   props: {
     distance: {
