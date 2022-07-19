@@ -29,7 +29,6 @@ export function buildHead(title, description, image = null, bodyAttrs = {}) {
   ]
 
   const retImage = image || runtimeConfig.public.USER_SITE + '/icon.png'
-  console.log('retImage', retImage, image, runtimeConfig.public.USER_SITE)
 
   meta.push({
     hid: 'og:image',
@@ -51,8 +50,40 @@ export function buildHead(title, description, image = null, bodyAttrs = {}) {
     content: retImage,
   })
 
+  meta.push({ name: 'msapplication-TileColor', content: '#ffffff' })
+  meta.push({
+    name: 'msapplication-TileImage',
+    content: '/icons/mstile-144x144.png',
+  })
+  meta.push({
+    name: 'msapplication-config',
+    content: '/icons/browserconfig.xml',
+  })
+  meta.push({ name: 'theme-color', content: '#ffffff' })
+
   return {
     title,
     meta,
+    link: [
+      {
+        rel: 'apple-touch-icon',
+        sizes: '180x180',
+        href: '/icons/apple-touch-icon.png',
+      },
+      {
+        rel: 'icon',
+        type: 'image/png',
+        sizes: '32x32',
+        href: '/icons/favicon-32x32.png',
+      },
+      {
+        rel: 'icon',
+        type: 'image/png',
+        sizes: '16x16',
+        href: '/icons/favicon-16x16.png',
+      },
+      { href: '/icons/safari-pinned-tab.svg', color: '#5bbad5' },
+      { rel: 'shortcut icon', href: '/icons/favicon.ico' },
+    ],
   }
 }
