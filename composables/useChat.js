@@ -91,9 +91,11 @@ export function setupChat(selectedChatId) {
     () => pluralize('mile', milesaway.value, true) + ' away'
   )
 
+  const unseen = computed(() => chat?.value?.unseen)
+
   return {
     chat,
-    unseen: computed(() => chat?.unseen),
+    unseen,
     chatmessages,
     otheruser,
     mymessages,
@@ -106,5 +108,6 @@ export function setupChat(selectedChatId) {
     }),
     milesaway,
     milesstring,
+    chatStore,
   }
 }

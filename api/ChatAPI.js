@@ -17,7 +17,7 @@ export default class ChatAPI extends BaseAPI {
     return this.$getv2('/chat/' + chatid)
   }
 
-  markSeen(chatid, lastmsg, allowback) {
+  markRead(chatid, lastmsg, allowback) {
     return this.$post('/chatrooms', {
       id: chatid,
       // TODO Minor are these parameters used?

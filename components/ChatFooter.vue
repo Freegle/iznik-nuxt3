@@ -296,9 +296,11 @@ export default {
   },
   async setup(props) {
     const miscStore = useMiscStore()
-    const { chat, otheruser, tooSoonToNudge } = await setupChat(props.id)
+    const { chat, otheruser, tooSoonToNudge, chatStore } = await setupChat(
+      props.id
+    )
 
-    return { chat, otheruser, tooSoonToNudge, miscStore }
+    return { chat, otheruser, tooSoonToNudge, miscStore, chatStore }
   },
   data() {
     return {

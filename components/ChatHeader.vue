@@ -362,8 +362,8 @@ export default {
 
       this.$router.push('/chats')
     },
-    async markRead() {
-      await this.chatStore.markRead(this.id)
+    markRead() {
+      this.chatStore.markRead(this.id)
     },
   },
 }
