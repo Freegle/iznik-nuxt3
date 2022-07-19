@@ -17,6 +17,7 @@
 </template>
 <script>
 import { useRoute } from 'vue-router'
+import { buildHead } from '../../../composables/useBuildHead'
 import { useGroupStore } from '~/stores/group'
 import AdaptiveMap from '~/components/AdaptiveMap'
 
@@ -24,12 +25,19 @@ export default {
   components: {
     AdaptiveMap,
   },
-  async setup() {
+  async setup(props) {
     const groupStore = useGroupStore()
     const route = useRoute()
     const region = route.params.region
       ? route.params.region.trim().toLowerCase()
       : null
+
+    useHead(
+      buildHead(
+        'Explore Freegle communities' +
+          (route.params.region ? ' in ' + route.params.region : '')
+      )
+    )
 
     // Get all the groups in store for the adaptive map.
     await groupStore.fetch()
@@ -75,9 +83,5 @@ export default {
       initialGroupIds: groupids,
     }
   },
-  // TODO Buildhead
-  //   head() {
-  //     return this.buildHead('Explore Freegle communities in ' + this.region)
-  //   },
 }
 </script>

@@ -93,7 +93,7 @@
 <script>
 import NoticeMessage from '../../components/NoticeMessage'
 // import loginOptional from '@/mixins/loginOptional.js'
-// import buildHead from '@/mixins/buildHead.js'
+import { buildHead } from '../../composables/useBuildHead'
 import ExternalLink from '@/components/ExternalLink'
 import GlobalWarning from '~/components/GlobalWarning'
 import PostCode from '~/components/PostCode'
@@ -113,21 +113,23 @@ export default {
     WizardProgress,
   },
   async setup() {
+    useHead(
+      buildHead(
+        'OFFER',
+        'OFFER something to people nearby and see who wants it'
+      )
+    )
+
     const inherited = await setup('Offer')
+
     return inherited
   },
-  // mixins: [loginOptional, buildHead, compose],
+  // mixins: [loginOptional, compose],
   data() {
     return {
       id: null,
     }
   },
-  // head() {
-  //   return this.buildHead(
-  //     'Give something',
-  //     'OFFER something to people nearby and see who wants it'
-  //   )
-  // },
   computed: {
     source() {
       const runtimeConfig = useRuntimeConfig()

@@ -27,6 +27,7 @@
 </template>
 <script>
 import { useRoute } from 'vue-router'
+import { buildHead } from '../../composables/useBuildHead'
 import { useGroupStore } from '~/stores/group'
 
 definePageMeta({
@@ -38,14 +39,19 @@ export default {
     const groupStore = useGroupStore()
     const route = useRoute()
     const id = route.params.id
+    let group = null
 
     if (id) {
       // Fetch the specific group.
-      await groupStore.fetch(route.params.id)
+      group = await groupStore.fetch(route.params.id)
     } else {
       // Fetch all groups for the map.  No need to await - rendering the map is eye candy.
       groupStore.fetch()
     }
+
+    useHead(
+      buildHead(group ? 'Explore ' + group.namedisplay : 'Explore Freegle')
+    )
 
     return { id, groupStore }
   },
@@ -54,6 +60,5 @@ export default {
       return this.groupStore.get(this.id)
     },
   },
-  // TODO Meta data
 }
 </script>

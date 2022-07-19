@@ -91,7 +91,7 @@ import NoticeMessage from '../../components/NoticeMessage'
 // TODO
 // import loginOptional from '@/mixins/loginOptional.js'
 // import compose from '@/mixins/compose.js'
-// import buildHead from '@/mixins/buildHead.js'
+import { buildHead } from '../../composables/useBuildHead'
 import { setup, deleteItem, addItem } from '~/composables/useCompose'
 
 const PostMessage = () => import('~/components/PostMessage')
@@ -105,6 +105,13 @@ export default {
   },
   async setup() {
     const inherited = await setup('Offer')
+
+    useHead(
+      buildHead(
+        'OFFER',
+        'OFFER something to people nearby and see who wants it'
+      )
+    )
 
     // TODO me
     // if (this.me) {
@@ -124,14 +131,7 @@ export default {
     deleteItem,
     addItem,
   },
-  // mixins: [loginOptional, buildHead, compose],
-  // TODO
-  // head() {
-  //   return this.buildHead(
-  //     'OFFER',
-  //     'OFFER something to people nearby and see who wants it'
-  //   )
-  // },
+  // mixins: [loginOptional, compose],
 }
 </script>
 <style scoped>

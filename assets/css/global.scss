@@ -272,6 +272,10 @@ label {
   font-weight: bold !important;
 }
 
+.overflow-y-scroll {
+  overflow-y: scroll;
+}
+
 // Don't underlink link buttons:
 .btn-link:not(:hover) {
   text-decoration: none;

@@ -129,12 +129,12 @@
 <script>
 import dayjs from 'dayjs'
 import { useRoute, useRouter } from 'vue-router'
+import { buildHead } from '../../composables/useBuildHead'
 import VisibleWhen from '~/components/VisibleWhen'
 import { useMiscStore } from '~/stores/misc'
 import { useAuthStore } from '~/stores/auth'
 import { useGroupStore } from '~/stores/group'
 import { useIsochroneStore } from '~/stores/isochrone'
-// import buildHead from '@/mixins/buildHead.js'
 
 const AdaptiveMap = () => import('~/components/AdaptiveMap')
 const IsochronePostMapAndList = () =>
@@ -158,10 +158,13 @@ export default {
     // ExpectedRepliesWarning,
     // AboutMeModal,
   },
-  // head() {
-  //   return this.buildHead('Browse', 'See OFFERs and WANTEDs')
-  // },
   setup() {
+    useHead(
+      buildHead('Browse', 'See OFFERs and WANTEDs', null, {
+        class: 'overflow-y-scroll',
+      })
+    )
+
     const route = useRoute()
     const router = useRouter()
     const miscStore = useMiscStore()

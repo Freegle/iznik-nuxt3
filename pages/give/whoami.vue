@@ -103,9 +103,9 @@
 import { mapWritableState } from 'pinia'
 import { useComposeStore } from '../../stores/compose'
 import { useUserStore } from '../../stores/user'
+import { buildHead } from '../../composables/useBuildHead'
 import EmailValidator from '~/components/EmailValidator'
 // import loginOptional from '@/mixins/loginOptional.js'
-// import buildHead from '@/mixins/buildHead.js'
 import NoticeMessage from '~/components/NoticeMessage'
 import ExternalLink from '~/components/ExternalLink'
 import { setup, freegleIt } from '~/composables/useCompose'
@@ -123,10 +123,17 @@ export default {
     WizardProgress,
   },
   async setup() {
+    useHead(
+      buildHead(
+        'OFFER',
+        'OFFER something to people nearby and see who wants it'
+      )
+    )
+
     const inherited = await setup('Offer')
     return inherited
   },
-  // mixins: [loginOptional, buildHead],
+  // mixins: [loginOptional],
   data() {
     return {
       id: null,
@@ -135,13 +142,6 @@ export default {
       emailBelongsToSomeoneElse: false,
     }
   },
-  // TODO head
-  // head() {
-  //   return this.buildHead(
-  //     'OFFER',
-  //     'OFFER something to people nearby and see who wants it'
-  //   )
-  // },
   computed: {
     ...mapWritableState(useComposeStore, ['email', 'progress']),
   },

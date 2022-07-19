@@ -56,6 +56,7 @@ export default {
     },
   },
   // head() {
+  // TODO Head
   //   const totalCount = this.unreadNotificationCount + this.chatCount
   //   return {
   //     titleTemplate: totalCount > 0 ? `(${totalCount}) %s` : '%s',

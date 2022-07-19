@@ -29,11 +29,10 @@
 <script>
 import { useRoute } from 'vue-router'
 import ExternalLink from '../../../components/ExternalLink'
+import { buildHead } from '../../../composables/useBuildHead'
 import { useGroupStore } from '~/stores/group'
 const AdaptiveMap = () => import('../../../components/AdaptiveMap')
 
-// TODO Buildhead
-// import buildHead from '@/mixins/buildHead.js'
 // import loginOptional from '@/mixins/loginOptional.js'
 // TODO Go to landing page, explore, go back, go forward - blank page.
 export default {
@@ -41,8 +40,15 @@ export default {
     ExternalLink,
     AdaptiveMap,
   },
-  // mixins: [loginOptional, buildHead],
+  // mixins: [loginOptional],
   async setup() {
+    useHead(
+      buildHead(
+        'Explore Freegle',
+        "There are lots of lovely communities of freeglers across the UK. Shall we see what they're up to?"
+      )
+    )
+
     const groupStore = useGroupStore()
     const route = useRoute()
     const place = route.params.place ? JSON.parse(route.params.place) : null
@@ -52,13 +58,5 @@ export default {
 
     return { groupStore, place, initialBounds }
   },
-  // TODO
-  // head() {
-  //   return this.buildHead(
-  //     'Explore Freegle',
-  //     "There are lots of lovely communities of freeglers across the UK. Shall we see what they're up to?",
-  //     null
-  //   )
-  // },
 }
 </script>

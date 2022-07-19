@@ -119,6 +119,7 @@ import dayjs from 'dayjs'
 import { ref } from 'vue'
 import VisibleWhen from '../../components/VisibleWhen'
 // TODO import loginRequired from '@/mixins/loginRequired.js'
+import { buildHead } from '../../composables/useBuildHead'
 import { useChatStore } from '~/stores/chat'
 import SidebarRight from '~/components/SidebarRight'
 
@@ -140,6 +141,13 @@ export default {
     ChatHideModal,
   },
   async setup(props) {
+    useHead(
+      buildHead(
+        'Chats',
+        "See the conversations you're having with other freeglers."
+      )
+    )
+
     const route = useRoute()
 
     const id = parseInt(route.params.id)
@@ -210,13 +218,6 @@ export default {
       return false
     },
   },
-  // TODO Head
-  // head() {
-  //   return this.buildHead(
-  //     'Chats',
-  //     "See the conversations you're having with other freeglers."
-  //   )
-  // },
   watch: {
     search(newVal, oldVal) {
       this.showChats = this.minShowChats
