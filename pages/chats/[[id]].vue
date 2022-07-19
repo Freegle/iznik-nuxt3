@@ -40,16 +40,17 @@
             <span v-else> No chats to show. </span>
           </p>
           <div v-else>
-            <ChatListEntry
+            <div
               v-for="chat in visibleChats"
-              :id="chat.id"
               :key="'chat-' + chat.id"
               :class="{
                 chat: true,
-                active: chat && parseInt(selectedChatId) === parseInt(chat.id),
+                active: selectedChatId === chat?.id,
               }"
               @click="gotoChat(chat.id)"
-            />
+            >
+              <ChatListEntry :id="chat.id" />
+            </div>
             <infinite-loading
               :identifier="bump"
               :distance="distance"

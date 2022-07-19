@@ -77,11 +77,7 @@ export default {
 
       if (message) {
         message.groups.forEach(async (g) => {
-          const thegroup = groupStore.get(g.groupid)
-
-          if (!thegroup) {
-            await groupStore.fetch(g.groupid)
-          }
+          await groupStore.fetch(g.groupid)
         })
       }
     } catch (e) {

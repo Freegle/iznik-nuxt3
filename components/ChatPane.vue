@@ -79,11 +79,10 @@ export default {
       if (!chatStore.byId(props.id)) {
         // It might be an old chat which doesn't appear in our recent ones, but which we are specifically trying
         // to go to.  Fetch all the chats.
-        // TODO MINOR Could be speeded up.
         await chatStore.fetchChats('2009-09-11')
       }
 
-      // Fetch the messages.
+      // Fetch the messages.  No need to wait, as we might already have the messages in store.
       chatStore.fetchMessages(props.id)
 
       // Fetch the user.

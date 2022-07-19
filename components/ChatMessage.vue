@@ -188,6 +188,10 @@ export default {
       return ret
     },
   },
+  beforeUpdate() {
+    console.log('ChatMessage beforeUpdate')
+    console.trace()
+  },
   methods: {
     selectMe() {
       if (this.chatmessage?.userid !== this.myid) {
