@@ -1,5 +1,5 @@
 <template>
-  <div v-if="chat" class="clickme noselect mb-1 mt-1">
+  <div v-if="chat" class="clickme noselect mb-1 mt-1" @mouseenter="fetch">
     <div class="ml-1 mr-1 d-flex justify-content-start w-100">
       <div class="d-flex flex-column justify-content-around">
         <ProfileImage
@@ -55,6 +55,11 @@ export default {
       chatStore,
     }
   },
+  data() {
+    return {
+      fetched: false,
+    }
+  },
   computed: {
     chat() {
       return this.chatStore.byId(this.id)
@@ -97,6 +102,12 @@ export default {
       }
 
       return false
+    },
+  },
+  methods: {
+    async fetch() {
+      this.fetched = true
+      await this.chatStore.fetchMessages(this.id)
     },
   },
 }
