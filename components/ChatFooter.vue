@@ -60,6 +60,7 @@
           ref="chatarea"
           v-model="sendmessage"
           placeholder="Type here..."
+          enterkeyhint="send"
           rows="3"
           max-rows="8"
           @focus="markRead"
@@ -72,6 +73,7 @@
           placeholder="Type here..."
           rows="3"
           max-rows="8"
+          enterkeyhint="enter"
           autocapitalize="none"
           @keydown.enter.exact.prevent
           @keyup.enter.exact="send"
