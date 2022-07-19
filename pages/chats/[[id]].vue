@@ -16,24 +16,22 @@
               : ['xs', 'sm', 'md', 'lg', 'xl', 'xxl']
           "
         >
-          <b-card class="p-0">
-            <b-card-body class="p-0">
-              <div class="d-flex justify-content-between flex-wrap">
-                <form role="search" class="mb-1 mr-1">
-                  <label for="search-bar" class="sr-only">Search chats</label>
-                  <b-form-input
-                    id="search-bar"
-                    v-model="search"
-                    placeholder="Search chats"
-                    class="flex-shrink-1"
-                  />
-                </form>
-                <b-button variant="primary" class="mb-1" @click="markAllRead">
-                  <v-icon icon="check" /> Mark all read
-                </b-button>
-              </div>
-            </b-card-body>
-          </b-card>
+          <div
+            class="d-flex justify-content-between flex-wrap p-3 pb-2 pt-2 border-bottom"
+          >
+            <form role="search" class="mb-1 mr-1">
+              <label for="search-bar" class="sr-only">Search chats</label>
+              <b-form-input
+                id="search-bar"
+                v-model="search"
+                placeholder="Search chats"
+                class="flex-shrink-1"
+              />
+            </form>
+            <b-button variant="primary" class="mb-1" @click="markAllRead">
+              <v-icon icon="check" /> Mark all read
+            </b-button>
+          </div>
           <!--            TODO Highlight unread and RSVP chats which might be below the fold.-->
           <p v-if="!visibleChats?.length" class="ml-2">
             <span v-if="searching" class="pulsate"> Searching... </span>

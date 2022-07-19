@@ -7,6 +7,9 @@
         v-if="chat && chatmessages?.length"
         ref="chatContent"
         class="chatContent"
+        :style="{
+          opacity: opacity,
+        }"
       >
         <div class="pt-1 mb-1 w-100 itemwrapper">
           <Suspense
@@ -84,7 +87,7 @@ export default {
 
     // Reverse the chatmessages because we use flex-direction: column-reverse for scrolling reasons.
     const chatmessages = computed(() => {
-      return chatStore.messagesById(props.id).reverse()
+      return chatStore.messagesById(props.id).slice().reverse()
     })
 
     return { chatStore, userStore, chat, chatmessages, otheruser }
@@ -98,7 +101,7 @@ export default {
       topVisible: true,
       scrollTimer: null,
       scrollInterval: 50,
-      lastScrollHeight: 0,
+      loaded: false,
     }
   },
   computed: {
@@ -110,6 +113,10 @@ export default {
       }
 
       return ret
+    },
+    opacity() {
+      // Until we've finished our initial render, don't show anything.  Reduces flicker.
+      return this.loaded ? 1 : 0
     },
   },
   watch: {
@@ -131,31 +138,21 @@ export default {
     checkScroll() {
       this.scrollTimer = null
 
-      const container = this.$refs.chatContent
-      const scrollHeight = container?.scrollHeight
+      if (this.topVisible && this.messagesToShow < this.chatmessages?.length) {
+        // We can see the top and we're not showing everything yet.  We need to show more.
+        //
+        // We used to use a computed property based on this index.  But that meant that the computed property
+        // had a new value each time we changed this, which forced re-render of each of the messages.  By referencing
+        // messagesToShow in the v-for loop we only trigger a render of the new items.
+        this.messagesToShow = Math.min(
+          this.chatmessages?.length,
+          this.messagesToShow + 10
+        )
 
-      if (scrollHeight === this.lastScrollHeight) {
-        // The scroll height has not changed. No need to do anything.  This handles the case where components have
-        // been added but haven't finished rendering yet.
         this.scrollTimer = setTimeout(this.checkScroll, this.scrollInterval)
-        return
-      }
-
-      if (this.topVisible) {
-        if (this.messagesToShow < this.chatmessages?.length) {
-          // We can see the top and we're not showing everything yet.  We need to show more.
-          //
-          // We used to use a computed property based on this index.  But that meant that the computed property
-          // had a new value each time we changed this, which forced re-render of each of the messages.  By referencing
-          // messagesToShow in the v-for loop we only trigger a render of the new items.
-          this.messagesToShow = Math.min(
-            this.chatmessages?.length,
-            this.messagesToShow + 10
-          )
-
-          this.lastScrollHeight = scrollHeight
-          this.scrollTimer = setTimeout(this.checkScroll, this.scrollInterval)
-        }
+      } else if (!this.loaded) {
+        // We have finished loading - either we've we shown enough to hide the top, or we have loaded everything.
+        this.loaded = true
       }
     },
     topChanged(isVisible) {
@@ -194,6 +191,7 @@ export default {
   overflow-x: hidden;
   display: flex;
   flex-direction: column-reverse;
+  transition: opacity 0.1s ease-in;
 }
 
 .chatFooter {
