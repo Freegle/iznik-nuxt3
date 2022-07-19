@@ -1,9 +1,9 @@
 import axios from 'axios'
 
-export default () => {
+export default defineNuxtPlugin(() => {
   return {
     provide: {
       axios: axios.default,
     },
   }
-}
+})
