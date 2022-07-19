@@ -181,7 +181,7 @@ export default {
 }
 
 /* These classes style the bootstrap b-nav-item-dropdown component */
-::v-deep .notification-list__dropdown-toggle {
+:deep(.notification-list__dropdown-toggle) {
   color: $color-white !important;
 
   &:hover {
@@ -189,7 +189,7 @@ export default {
   }
 }
 
-::v-deep .notification-list__dropdown-menu {
+:deep(.notification-list__dropdown-menu) {
   height: 500px;
   width: 300px;
   overflow-y: auto;
@@ -204,7 +204,7 @@ export default {
   }
 }
 
-.notification-list ::v-deep .dropdown-item {
+:deep(.notification-list .dropdown-item) {
   width: 300px;
   max-width: 100%;
   padding-left: 5px;

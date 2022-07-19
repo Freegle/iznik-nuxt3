@@ -41,7 +41,7 @@ export function buildHead(title, description, image = null, bodyAttrs = {}) {
   meta.push({
     hid: 'og:url',
     property: 'og:url',
-    content: runtimeConfig.public.USER_SITE + route.fullPath,
+    content: runtimeConfig.public.USER_SITE + (route ? route.fullPath : ''),
   })
 
   meta.push({
@@ -85,5 +85,6 @@ export function buildHead(title, description, image = null, bodyAttrs = {}) {
       { href: '/icons/safari-pinned-tab.svg', color: '#5bbad5' },
       { rel: 'shortcut icon', href: '/icons/favicon.ico' },
     ],
+    bodyAttrs,
   }
 }

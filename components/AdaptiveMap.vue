@@ -417,8 +417,6 @@ export default {
       return msgs
     },
     messagesForListIds() {
-      // Remember that Vue2 doesn't support reactivity on Map() so we can't use that.
-      // TODO MINOR
       return this.messagesForList.map((m) => parseInt(m.id))
     },
     filteredMessages() {

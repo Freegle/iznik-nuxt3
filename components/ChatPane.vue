@@ -120,9 +120,24 @@ export default {
     },
   },
   watch: {
-    me(newVal, oldVal) {
+    async me(newVal, oldVal) {
       if (!oldVal && newVal) {
-        // TODO FEtch new messages
+        await this.chatStore.fetchChats()
+
+        if (this.id) {
+          if (!this.chatStore.byId(this.id)) {
+            // It might be an old chat which doesn't appear in our recent ones, but which we are specifically trying
+            // to go to.  Fetch all the chats.
+            await this.chatStore.fetchChats('2009-09-11')
+          }
+
+          this.chatStore.fetchMessages(this.id)
+
+          // Fetch the user.
+          if (this.chat?.value?.otheruid) {
+            await this.userStore.fetch(this.chat.value.otheruid)
+          }
+        }
       }
     },
   },

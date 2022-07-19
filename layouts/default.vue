@@ -233,4 +233,8 @@ body.modal-open {
     opacity: 1;
   }
 }
+
+main {
+  margin-top: 66px;
+}
 </style>

@@ -88,7 +88,7 @@ export const useAuthStore = defineStore({
     },
     async login(params) {
       const res = await this.$api.session.login(params)
-      const { ret, status, user, persistent } = res
+      const { ret, status, user, persistent, jwt } = res
 
       if (ret === 0 && user) {
         // Successful login.
@@ -96,12 +96,11 @@ export const useAuthStore = defineStore({
         // Save the persistent session token.
         this.persistent = persistent
 
+        // Save the JWT, so that we can use the faster API next time.
+        this.jwt = jwt
+
         // Login succeeded.  Set the user, which will trigger various rerendering if we were required to be logged in.
         this.setUser(user)
-
-        // We need to fetch the user again to get the groups, which aren't returned by the login API.
-        // TODO Make them, then.
-        await this.fetchUser()
       } else {
         // Login failed.
         throw new LoginError(ret, status)

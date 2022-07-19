@@ -126,12 +126,10 @@ export default {
       event.target.src = '/defaultprofile.png'
     },
     refetch() {
-      // TODO This is a poor way of refreshing this individual message, but there isn't a server call for it.
-      this.$store.dispatch('chatmessages/fetch', {
-        chatid: this.chatmessage.chatid,
-        limit: 100,
-        noContext: true,
-      })
+      if (this.chatmessage?.refmsgid) {
+        const messageStore = useMessageStore()
+        messageStore.fetch(this.chatmessage.refmsgid)
+      }
     },
   },
 }

@@ -57,7 +57,7 @@ export default defineNuxtConfig({
         scss: {
           additionalData:
             // Include some CSS in all components.
-            // TODO Tried to include these but broke the colours:
+            // TODO MINOR Tried to include these but broke the colours:
             // @import '~bootstrap/scss/functions';
             // @import '~bootstrap/scss/variables';
             // @import '~bootstrap/scss/mixins/_breakpoints';

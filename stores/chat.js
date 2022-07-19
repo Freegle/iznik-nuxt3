@@ -14,8 +14,6 @@ export const useChatStore = defineStore({
       this.config = config
     },
     async fetchChats(since, search) {
-      // TODO Don't lose currently selected old chat - see store in old code.
-
       if (since) {
         since = dayjs(since).toISOString()
       }

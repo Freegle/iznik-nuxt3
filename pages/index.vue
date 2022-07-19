@@ -249,18 +249,18 @@ export default {
 .grid {
   display: grid;
   grid-template-columns: 1fr 1.2fr;
-  grid-template-rows: 1fr 300px minmax(50px, auto);
+  grid-template-rows: 100px 1fr 300px minmax(50px, auto);
 
   @include media-breakpoint-up(sm) {
     grid-template-columns: 0.4fr 0.6fr;
-    grid-template-rows: auto auto auto;
+    grid-template-rows: 100px auto auto auto;
     grid-column-gap: 50px;
     grid-row-gap: 30px;
   }
 }
 
 .map {
-  grid-row: 2 / 3;
+  grid-row: 3 / 4;
   grid-column: 1 / 3;
 
   @include media-breakpoint-up(sm) {
@@ -268,7 +268,7 @@ export default {
   }
 
   @include media-breakpoint-up(lg) {
-    grid-row: 1 / 2;
+    grid-row: 2 / 3;
     grid-column: 1 / 2;
     // 100vh includes the header and margins etc so they need to be taken off
     height: calc(100vh - 150px);
@@ -277,7 +277,7 @@ export default {
 }
 
 .info {
-  grid-row: 1 / 2;
+  grid-row: 2 / 3;
   grid-column: 1 / 3;
   text-align: center;
   justify-self: center;
@@ -289,16 +289,16 @@ export default {
 }
 
 .app-download {
-  grid-row: 2 / 3;
+  grid-row: 3 / 4;
   grid-column: 1 / 3;
   justify-self: center;
 
   @include media-breakpoint-up(sm) {
-    grid-row: 3 / 4;
+    grid-row: 4 / 5;
   }
 
   @include media-breakpoint-up(lg) {
-    grid-row: 2 / 3;
+    grid-row: 3 / 4;
   }
 }
 
@@ -311,15 +311,15 @@ export default {
 }
 
 .thefooter {
-  grid-row: 3 / 4;
+  grid-row: 4 / 5;
   grid-column: 1 / 3;
 
   @include media-breakpoint-up(sm) {
-    grid-row: 4 / 5;
+    grid-row: 5 / 6;
   }
 
   @include media-breakpoint-up(lg) {
-    grid-row: 3 / 4;
+    grid-row: 4 / 5;
   }
 }
 

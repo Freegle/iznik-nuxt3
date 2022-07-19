@@ -1,6 +1,7 @@
 <template>
   <header>
-    <nav
+    <!-- Navbar for large screens-->
+    <b-nav
       id="navbar_large"
       class="navbar ourBack d-none d-xl-flex pl-1 pr-2 navbar-dark fixed-top navbar-expand-xl"
     >
@@ -15,6 +16,7 @@
         />
       </nuxt-link>
       <b-button
+        v-if="loggedIn"
         aria-label="Toggle navigation"
         class="navbar-toggler collapsed"
         aria-controls="nav_collapse"
@@ -23,6 +25,7 @@
         <span class="navbar-toggler-icon"></span>
       </b-button>
       <div
+        v-if="loggedIn"
         id="nav_collapse"
         class="flex-nowrap justify-content-between navbar-collapse collapse"
         style="display: none"
@@ -266,216 +269,15 @@
           </li>
         </ul>
       </div>
-      <!---->
-    </nav>
-    <!-- Navbar for large screens-->
-    <b-nav
-      id="navbar_large"
-      toggleable="xl"
-      type="dark"
-      class="ourBack d-none d-xl-flex p-1"
-      fixed="top"
-    >
-      <!--      <b-nav-brand to="/" class="p-0">-->
-      <!--      TODO -->
-      <nuxt-link to="/">
-        <b-img
-          class="logo mr-2"
-          height="58"
-          width="58"
-          rounded
-          :src="logo"
-          alt="Home"
-        />
-      </nuxt-link>
-      <!--      <div class="d-flex">-->
-      <!--        <b-button class="mr-4" variant="link" to="/give">Give</b-button>-->
-      <!--        <b-button class="mr-4" variant="link" to="/browse">Browse</b-button>-->
-      <!--        <b-button class="mr-4" variant="link" to="/explore">Explore</b-button>-->
-      <!--        <b-button class="mr-4" variant="link" to="/chats">Chats</b-button>-->
-      <!--        <b-button class="mr-4" variant="link" @click="logout">Log Out</b-button>-->
-      <!--      </div>-->
-      <!--      </b-nav-brand>-->
-      <client-only>
-        <!--        <b-nav-toggle v-if="loggedIn" target="nav_collapse" />-->
-        <b-collapse
-          v-if="loggedIn"
-          id="nav_collapse"
-          ref="nav_collapse"
-          is-nav
-          class="flex-nowrap justify-content-between"
-        >
-          <b-nav class="mainnav mainnav--left">
-            <nuxt-link
-              id="menu-option-mygroups"
-              no-prefetch
-              class="nav-link text-center small p-0 ml-2"
-              to="/browse"
-              @mousedown="maybeReload('/browse')"
-            >
-              <v-icon icon="eye" class="fa-2x" /><br />
-              <span class="nav-item__text">Browse</span>
-            </nuxt-link>
-            <nuxt-link
-              id="menu-option-give"
-              no-prefetch
-              class="nav-link text-center small p-0"
-              to="/give"
-              @mousedown="maybeReload('/give')"
-            >
-              <v-icon icon="gift" class="fa-2x" /><br />
-              <span class="nav-item__text">Give</span>
-            </nuxt-link>
-            <nuxt-link
-              id="menu-option-find"
-              no-prefetch
-              class="nav-link text-center small p-0"
-              to="/find"
-              @mousedown="maybeReload('/find')"
-            >
-              <v-icon icon="shopping-cart" class="fa-2x" /><br />
-              <span class="nav-item__text">&nbsp;Ask</span>
-            </nuxt-link>
-            <nuxt-link
-              id="menu-option-myposts"
-              no-prefetch
-              class="nav-link text-center small p-0"
-              to="/myposts"
-              @mousedown="maybeReload('/myposts')"
-            >
-              <div class="position-relative">
-                <v-icon icon="home" class="fa-2x" /><br />
-                <b-badge
-                  v-if="openPostCount"
-                  variant="info"
-                  class="mypostsbadge"
-                  :title="openPostCountPlural"
-                >
-                  {{ openPostCount }}
-                </b-badge>
-                <span class="nav-item__text">My Posts</span>
-              </div>
-            </nuxt-link>
-            <nuxt-link
-              v-if="!simple"
-              id="menu-option-chitchat"
-              no-prefetch
-              class="nav-link text-center small p-0"
-              to="/chitchat"
-              @mousedown="maybeReload('/chitchat')"
-            >
-              <div class="position-relative">
-                <v-icon icon="coffee" class="fa-2x" /><br />
-                <b-badge
-                  v-if="newsCount"
-                  variant="info"
-                  class="newsbadge"
-                  :title="newsCountPlural"
-                >
-                  {{ newsCount }}
-                </b-badge>
-                <span class="nav-item__text">ChitChat</span>
-              </div>
-            </nuxt-link>
-            <nuxt-link
-              v-if="!simple"
-              id="menu-option-communityevents"
-              no-prefetch
-              class="nav-link text-center small p-0"
-              to="/communityevents"
-              @mousedown="maybeReload('/communityevents')"
-            >
-              <v-icon icon="calendar-alt" class="fa-2x" /><br />
-              <span class="nav-item__text">Events</span>
-            </nuxt-link>
-            <nuxt-link
-              v-if="!simple"
-              id="menu-option-volunteering"
-              no-prefetch
-              class="nav-link text-center small p-0"
-              to="/volunteerings"
-              @mousedown="maybeReload('/volunteerings')"
-            >
-              <v-icon icon="hands-helping" class="fa-2x" /><br />
-              <span class="nav-item__text">Volunteer</span>
-            </nuxt-link>
-          </b-nav>
-          <client-only>
-            <div class="simplewrapper pb-2">
-              <!--              TODO-->
-              <!--              <SimpleView-->
-              <!--                v-if="loggedIn"-->
-              <!--                :key="'simpleview-' + simple"-->
-              <!--                navbar-->
-              <!--              />-->
-            </div>
-          </client-only>
-          <b-nav class="mainnav mainnav--right">
-            <!--            <NotificationOptions-->
-            <!--              v-if="loggedIn"-->
-            <!--              :distance="distance"-->
-            <!--              :small-screen="false"-->
-            <!--              :unread-notification-count.sync="unreadNotificationCount"-->
-            <!--              @showAboutMe="showAboutMe"-->
-            <!--            />-->
-            <!--            <ChatMenu-->
-            <!--              v-if="loggedIn"-->
-            <!--              id="menu-option-chat"-->
-            <!--              :is-list-item="true"-->
-            <!--              :chat-count.sync="chatCount"-->
-            <!--            />-->
-            <nuxt-link
-              v-if="!simple"
-              id="menu-option-spread"
-              no-prefetch
-              class="nav-link text-center small p-0"
-              to="/promote"
-              @mousedown="maybeReload('/promote')"
-            >
-              <div class="position-relative">
-                <v-icon icon="bullhorn" class="fa-2x" /><br />
-                <span class="nav-item__text">Promote</span>
-              </div>
-            </nuxt-link>
-            <nuxt-link
-              id="menu-option-help"
-              no-prefetch
-              class="nav-link text-center small p-0"
-              to="/help"
-              @mousedown="maybeReload('/help')"
-            >
-              <v-icon icon="question-circle" class="fa-2x" /><br />
-              <span class="nav-item__text">Help</span>
-            </nuxt-link>
-            <nuxt-link
-              id="menu-option-settings"
-              no-prefetch
-              class="nav-link text-center small p-0"
-              to="/settings"
-              @mousedown="maybeReload('/settings')"
-            >
-              <v-icon icon="cog" class="fa-2x" /><br />
-              <span class="nav-item__text">Settings</span>
-            </nuxt-link>
-            <nuxt-link
-              id="menu-option-logout"
-              no-prefetch
-              class="nav-link text-center p-0 small"
-              @click="logout"
-            >
-              <v-icon icon="sign-out-alt" class="fa-2x" /><br />
-              <span class="nav-item__text">Logout</span>
-            </nuxt-link>
-          </b-nav>
-        </b-collapse>
-      </client-only>
-      <b-nav v-if="!loggedIn" class="ml-auto pt-2 pr-2">
+      <div v-if="!loggedIn" class="navbar-nav ml-auto">
         <client-only>
-          <nuxt-link no-prefetch>
-            <div class="btn btn-white" @click="requestLogin">Sign&nbsp;in</div>
-          </nuxt-link>
+          <div class="nav-item" no-prefetch>
+            <b-button variant="white" @click="requestLogin">
+              Sign&nbsp;in
+            </b-button>
+          </div>
         </client-only>
-      </b-nav>
+      </div>
     </b-nav>
     <!-- Navbar for small screens -->
     <b-nav
@@ -544,7 +346,7 @@
           <b-button
             v-if="loggedIn"
             v-b-toggle.nav_collapse_mobile
-            class="toggler white"
+            class="toggler white mr-1"
           >
             <v-icon icon="bars" class="mb-1 fa-1-5x" />
           </b-button>

@@ -120,6 +120,7 @@ import { ref } from 'vue'
 import VisibleWhen from '../../components/VisibleWhen'
 // TODO import loginRequired from '@/mixins/loginRequired.js'
 import { buildHead } from '../../composables/useBuildHead'
+import { useAuthStore } from '../../stores/auth'
 import { useChatStore } from '~/stores/chat'
 import SidebarRight from '~/components/SidebarRight'
 
@@ -148,15 +149,22 @@ export default {
       )
     )
 
-    const route = useRoute()
-
-    const id = parseInt(route.params.id)
-
-    const selectedChatId = ref(id)
-
-    // Fetch the list of chats.
     const chatStore = useChatStore()
-    await chatStore.fetchChats()
+    const authStore = useAuthStore()
+    const myid = authStore.user?.id
+
+    let selectedChatId = null
+
+    if (myid) {
+      const route = useRoute()
+
+      const id = parseInt(route.params.id)
+
+      selectedChatId = ref(id)
+
+      // Fetch the list of chats.
+      await chatStore.fetchChats()
+    }
 
     return { chatStore, selectedChatId }
   },
