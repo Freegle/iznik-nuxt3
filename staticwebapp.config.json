@@ -2,5 +2,11 @@
   "globalHeaders": {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "*"
+  },
+  "responseOverrides": {
+    "404": {
+      "rewrite": "/404/index.html",
+      "statusCode": 200
+    }
   }
 }
