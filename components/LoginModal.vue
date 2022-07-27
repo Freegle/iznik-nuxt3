@@ -18,9 +18,9 @@
       You'll get emails. Name, approximate location, and profile picture are
       public - you can hide your real name and picture from Settings. Logging in
       adds cookies and local storage. Read
-      <nuxt-link target="_blank" to="/terms"> Terms of Use </nuxt-link> and
-      <nuxt-link target="_blank" to="/privacy"> Privacy </nuxt-link> for
-      details. Ok? Now come on in...
+      <nuxt-link target="_blank" to="/terms">Terms of Use</nuxt-link> and
+      <nuxt-link target="_blank" to="/privacy">Privacy</nuxt-link> for details.
+      Ok? Now come on in...
     </p>
     <p v-if="loginType" class="text-center font-weight-bold">
       You usually log in using {{ loginType }}.
