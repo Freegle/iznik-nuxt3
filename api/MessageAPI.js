@@ -6,7 +6,7 @@ export default class MessageAPI extends BaseAPI {
   }
 
   fetchByUser(id, logError = true) {
-    return this.$getv2('/user/' + id + '/messages', {}, logError)
+    return this.$getv2('/user/' + id + '/message', {}, logError)
   }
 
   inbounds(swlat, swlng, nelat, nelng, groupid) {

@@ -94,9 +94,9 @@
     </template>
   </b-modal>
 </template>
-
 <script>
 import dayjs from 'dayjs'
+import { useTrystStore } from '../stores/tryst'
 import modal from '@/mixins/modal'
 
 const NoticeMessage = () => import('~/components/NoticeMessage')
@@ -125,6 +125,13 @@ export default {
       required: false,
       default: 0,
     },
+  },
+  setup() {
+    const trystStore = useTrystStore()
+
+    return {
+      trystStore,
+    }
   },
   data() {
     return {
@@ -211,7 +218,7 @@ export default {
     },
     tryst() {
       return this.currentlySelected
-        ? this.$store.getters['tryst/getByUser'](this.currentlySelected)
+        ? this.trystStore.getByUser(this.currentlySelected)
         : null
     },
   },
@@ -302,7 +309,7 @@ export default {
       }
 
       // Fetch any existing trysts.
-      await this.$store.dispatch('tryst/fetch')
+      await this.trystStore.fetch()
 
       // We can get called with a pointer event.
       if (date && typeof date.format === 'function') {

@@ -87,7 +87,8 @@ export default {
 
     // Reverse the chatmessages because we use flex-direction: column-reverse for scrolling reasons.
     const chatmessages = computed(() => {
-      return chatStore.messagesById(props.id).slice().reverse()
+      const msgs = chatStore.messagesById(props.id)
+      return msgs ? msgs.slice().reverse() : []
     })
 
     return { chatStore, userStore, chat, chatmessages, otheruser }

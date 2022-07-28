@@ -46,3 +46,6 @@ export const DAY_WORDS = [
 ]
 
 export const MAX_MAP_ZOOM = 14
+
+export const RECENT_MESSAGES = 31
+export const OWN_POSTS_AGE = 120

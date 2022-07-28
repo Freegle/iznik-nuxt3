@@ -59,8 +59,8 @@ import { ref } from 'vue'
 import dayjs from 'dayjs'
 import { useGroupStore } from '../stores/group'
 import { useMessageStore } from '../stores/message'
+import { throttleFetches } from '../composables/useThrottle'
 import { useMiscStore } from '~/stores/misc'
-
 // const GroupSelect = () => import('./GroupSelect')
 const NoticeMessage = () => import('./NoticeMessage')
 const OurMessage = () => import('~/components/OurMessage.vue')
@@ -247,7 +247,7 @@ export default {
         this.$nextTick(async () => {
           // We always want to trigger a fetch to the store, because the store will decide whether a cached message
           // needs refreshing.
-          await this.throttleFetches()
+          await throttleFetches()
           await this.messageStore.fetch(m.id)
 
           // Kick the scroll to see if we need more.
@@ -259,26 +259,6 @@ export default {
     },
     // Simple throttle.  When we get more than a certain number of outstanding fetches, wait until they are all
     // finished.  This stops the infinite scroll going beserk.
-    throttleFetches() {
-      const fetching = this.messageStore.fetchingCount
-
-      if (fetching < 5) {
-        return Promise.resolve()
-      } else {
-        return new Promise((resolve) => {
-          this.checkThrottle(resolve)
-        })
-      }
-    },
-    checkThrottle(resolve) {
-      const fetching = this.messageStore.fetchingCount
-
-      if (fetching === 0) {
-        resolve()
-      } else {
-        setTimeout(this.checkThrottle, 100, resolve)
-      }
-    },
     wantMessage(m) {
       return (
         (this.selectedType === 'All' || this.selectedType === m.type) &&

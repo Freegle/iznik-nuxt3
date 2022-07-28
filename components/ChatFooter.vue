@@ -263,6 +263,8 @@
 import pluralize from 'pluralize'
 import { setupChat } from '../composables/useChat'
 import { useMiscStore } from '../stores/misc'
+import { useMessageStore } from '../stores/message'
+import { fetchOurOffers } from '../composables/useThrottle'
 import ExternalLink from './ExternalLink'
 import { untwem } from '~/composables/useTwem'
 
@@ -296,6 +298,8 @@ export default {
   },
   async setup(props) {
     const miscStore = useMiscStore()
+    const messageStore = useMessageStore()
+
     const { chat, otheruser, tooSoonToNudge, chatStore, chatmessages } =
       await setupChat(props.id)
 
@@ -305,6 +309,7 @@ export default {
       tooSoonToNudge,
       miscStore,
       chatStore,
+      messageStore,
       chatmessages,
     }
   },
@@ -321,13 +326,10 @@ export default {
       likelymsg: null,
       typingLastMessage: null,
       typingTimer: null,
+      ouroffers: [],
     }
   },
   computed: {
-    ouroffers() {
-      // TODO Get our messages
-      return []
-    },
     expectedreply() {
       return this.otheruser?.info?.expectedreply
     },
@@ -416,8 +418,9 @@ export default {
         this.$refs.promise.show(date)
 
         this.$nextTick(async () => {
-          // Get our offers.
-          this.ouroffers = await this.messageStore.fetchByUser(this.myid)
+          this.ouroffers = await fetchOurOffers()
+
+          console.log('Got full offers', this.ouroffers)
 
           // Find the last message referenced in this chat, if any.  That's the most likely one you'd want to promise,
           // so it should be the default.
