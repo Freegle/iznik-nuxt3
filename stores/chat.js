@@ -62,6 +62,18 @@ export const useChatStore = defineStore({
     async nudge(id) {
       await api(this.config).chat.nudge(id)
     },
+    async typing(chatid) {
+      await api(this.config).chat.typing(chatid)
+    },
+    async send(chatid, message) {
+      await api(this.config).chat.send({
+        roomid: chatid,
+        message,
+      })
+
+      // Get the latest messages back.
+      this.fetchMessages(chatid)
+    },
   },
   getters: {
     byId: (state) => {

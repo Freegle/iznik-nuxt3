@@ -296,11 +296,17 @@ export default {
   },
   async setup(props) {
     const miscStore = useMiscStore()
-    const { chat, otheruser, tooSoonToNudge, chatStore } = await setupChat(
-      props.id
-    )
+    const { chat, otheruser, tooSoonToNudge, chatStore, chatmessages } =
+      await setupChat(props.id)
 
-    return { chat, otheruser, tooSoonToNudge, miscStore, chatStore }
+    return {
+      chat,
+      otheruser,
+      tooSoonToNudge,
+      miscStore,
+      chatStore,
+      chatmessages,
+    }
   },
   data() {
     return {
@@ -313,6 +319,8 @@ export default {
       sendmessage: null,
       RSVP: false,
       likelymsg: null,
+      typingLastMessage: null,
+      typingTimer: null,
     }
   },
   computed: {
@@ -343,11 +351,16 @@ export default {
       // TODO Store enternewline in settings
       return false
     },
-    // TODO MINOR Consider showing handover prompt in less annoying way.
+    // TODO MINOR Consider showing handover prompt, but in less annoying way.
     expectedreplies() {
       pluralize.addIrregularRule('freegler is', 'freeglers are')
       return pluralize('freegler is', this.otheruser?.info?.expectedreply, true)
     },
+  },
+  beforeDestroy() {
+    if (this.typingTimer) {
+      clearTimeout(this.typingTimer)
+    }
   },
   methods: {
     async markRead() {
@@ -402,22 +415,9 @@ export default {
       this.waitForRef('promise', () => {
         this.$refs.promise.show(date)
 
-        this.$nextTick(() => {
+        this.$nextTick(async () => {
           // Get our offers.
-          // await this.$store.dispatch('messages/fetchMessages', {
-          //   fromuser: this.myid,
-          //   types: ['Offer'],
-          //   hasoutcome: false,
-          //   limit: 100,
-          //   collection: 'AllUser',
-          // })
-          //
-          // this.ouroffers = this.$store.getters['messages/getAll'].filter(
-          //   (m) => m.mine
-          // )
-
-          // TODO Get our messages
-          this.ouroffers = []
+          this.ouroffers = await this.messageStore.fetchByUser(this.myid)
 
           // Find the last message referenced in this chat, if any.  That's the most likely one you'd want to promise,
           // so it should be the default.
@@ -468,10 +468,7 @@ export default {
         msg = untwem(msg)
 
         // Send it
-        await this.$store.dispatch('chatmessages/send', {
-          roomid: this.id,
-          message: msg,
-        })
+        await this.chatStore.send(this.id, msg)
 
         // Clear the message now it's sent.
         this.sendmessage = ''
@@ -489,6 +486,22 @@ export default {
         }
 
         // Start the timer which indicates we may still be typing.
+        this.startTypingTimer()
+      }
+    },
+    startTypingTimer() {
+      // We want to let the server know regularly that we are still typing.  This will bump earlier recent chat
+      // messages so that they don't get send out by email.  This helps with people who don't expect enter to act
+      // as send.
+      if (!this.typingTimer) {
+        this.typingLastMessage = this.sendmessage
+        this.typingTimer = setTimeout(this.stillTyping, 10000)
+      }
+    },
+    async stillTyping() {
+      if (this.sendmessage !== this.typingLastMessage) {
+        // We are still typing.
+        await this.chatStore.typing(this.id)
         this.startTypingTimer()
       }
     },
