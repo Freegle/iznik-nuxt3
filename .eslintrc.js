@@ -1,5 +1,11 @@
 module.exports = {
   root: true,
+  parser: 'vue-eslint-parser',
+  parserOptions: {
+    parser: 'espree',
+    ecmaVersion: 2022,
+    sourceType: 'module',
+  },
   env: {
     browser: true,
     node: true,
