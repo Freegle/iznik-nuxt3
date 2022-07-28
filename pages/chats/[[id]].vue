@@ -166,6 +166,19 @@ export default {
 
       // Fetch the list of chats.
       await chatStore.fetchChats()
+
+      // Is this chat in the list?
+      let chat = chatStore.byId(id)
+
+      if (!chat) {
+        // Might be old.  Try fetching it specifically.
+        chat = await chatStore.fetchChat(id)
+
+        if (!chat) {
+          // Not found.  Go to the list.
+          selectedChatId = null
+        }
+      }
     }
 
     return { chatStore, selectedChatId }

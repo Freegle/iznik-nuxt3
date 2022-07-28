@@ -26,7 +26,7 @@
     <div v-else-if="chatmessage?.type === 'Completed'">
       <chat-message-completed :id="id" :chatid="chatid" :pov="pov" />
     </div>
-    <div v-else-if="chatmessage?.type === 'Promised' && otheruser">
+    <div v-else-if="chatmessage?.type === 'Promised'">
       <chat-message-promised
         v-if="otheruser"
         :id="id"
@@ -34,7 +34,7 @@
         :pov="pov"
       />
     </div>
-    <div v-else-if="chatmessage?.type === 'Reneged' && otheruser">
+    <div v-else-if="chatmessage?.type === 'Reneged'">
       <chat-message-reneged
         v-if="otheruser"
         :id="id"
@@ -42,7 +42,7 @@
         :pov="pov"
       />
     </div>
-    <div v-else-if="chatmessage?.type === 'Address' && otheruser">
+    <div v-else-if="chatmessage?.type === 'Address'">
       <chat-message-address
         v-if="otheruser"
         :id="id"
@@ -50,7 +50,7 @@
         :pov="pov"
       />
     </div>
-    <div v-else-if="chatmessage?.type === 'Nudge' && otheruser">
+    <div v-else-if="chatmessage?.type === 'Nudge'">
       <chat-message-nudge
         v-if="otheruser"
         :id="id"
