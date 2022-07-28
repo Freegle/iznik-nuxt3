@@ -12,7 +12,7 @@
         <VisibleWhen
           :at="
             selectedChatId
-              ? ['md', 'lg', 'xl']
+              ? ['md', 'lg', 'xl', 'xxl']
               : ['xs', 'sm', 'md', 'lg', 'xl', 'xxl']
           "
         >
@@ -84,7 +84,9 @@
       <b-col cols="12" md="8" xl="6" class="chatback p-0">
         <VisibleWhen
           :at="
-            selectedChatId ? ['xs', 'sm', 'md', 'lg', 'xl'] : ['md', 'lg', 'xl']
+            selectedChatId
+              ? ['xs', 'sm', 'md', 'lg', 'xl', 'xxl']
+              : ['md', 'lg', 'xl', 'xxl']
           "
         >
           <ChatPane
@@ -98,7 +100,7 @@
         </VisibleWhen>
       </b-col>
       <b-col cols="0" xl="3" class="p-0 pl-1">
-        <VisibleWhen :at="['xl']">
+        <VisibleWhen :at="['xl', 'xxl']">
           <SidebarRight
             :show-volunteer-opportunities="false"
             :show-job-opportunities="true"
@@ -158,7 +160,7 @@ export default {
     if (myid) {
       const route = useRoute()
 
-      const id = parseInt(route.params.id)
+      const id = route.params.id ? parseInt(route.params.id) : 0
 
       selectedChatId = ref(id)
 

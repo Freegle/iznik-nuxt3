@@ -4,7 +4,7 @@
     <client-only>
       <b-row class="m-0">
         <b-col cols="0" lg="3" class="p-0 pr-1">
-          <VisibleWhen :at="['lg', 'xl']">
+          <VisibleWhen :at="['lg', 'xl', 'xxl']">
             <!--            TODO-->
             <!--            <SidebarLeft-->
             <!--              v-if="showRest"-->
@@ -113,7 +113,7 @@
           <!--          />-->
         </b-col>
         <b-col cols="0" lg="3" class="p-0 pl-1">
-          <VisibleWhen :at="['lg', 'xl']">
+          <VisibleWhen :at="['lg', 'xl', 'xxl']">
             <!--            TODO-->
             <!--            <sidebar-right-->
             <!--              v-if="showRest"-->
