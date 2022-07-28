@@ -43,7 +43,7 @@ export default {
 <style scoped lang="scss">
 .supporter {
   color: white;
-  background-color: $color-gold;
+  background-color: $color-gold !important;
 }
 
 .size-lg {
