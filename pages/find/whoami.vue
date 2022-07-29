@@ -125,18 +125,18 @@ export default {
   async setup() {
     useHead(
       buildHead(
-        'OFFER',
-        'OFFER something to people nearby and see who wants it'
+        'WANTED',
+        "Ask people nearby if they have what you're looking for"
       )
     )
 
-    const inherited = await setup('Offer')
+    const inherited = await setup('Wanted')
     return inherited
   },
   data() {
     return {
       id: null,
-      postType: 'Offer',
+      postType: 'Wanted',
       emailValid: false,
       emailBelongsToSomeoneElse: false,
     }
@@ -148,11 +148,11 @@ export default {
     const router = useRouter()
 
     if (!this.messageValid) {
-      router.push('/give')
+      router.push('/find')
     }
 
     if (!this.postcodeValid) {
-      router.push('/give/whereami')
+      router.push('/find/whereami')
     }
   },
   methods: {
@@ -169,7 +169,7 @@ export default {
         if (!inuse) {
           // Not in use - that's ok.
           console.log('Not in use')
-          await freegleIt.call(this, 'Offer', router)
+          await freegleIt.call(this, 'Wanted', router)
         } else {
           // We can't proceed.
           console.log('Belongs to someone else')
@@ -177,7 +177,7 @@ export default {
         }
       } else {
         console.log('One of ours')
-        await freegleIt.call(this, 'Offer', router)
+        await freegleIt.call(this, 'Wanted', router)
       }
     },
   },

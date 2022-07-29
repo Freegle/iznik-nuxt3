@@ -1,4 +1,4 @@
-import { useRouter, useRoute } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { ref, computed } from 'vue'
 import { useComposeStore } from '~/stores/compose'
 import { useGroupStore } from '~/stores/group'
@@ -57,9 +57,7 @@ export function setup(type) {
   const groupid = composeStore.group
 
   if (groupid) {
-    groupStore.fetch({
-      id: groupid,
-    })
+    groupStore.fetch(groupid)
   }
 
   const ids = computed(() => {
@@ -68,6 +66,7 @@ export function setup(type) {
 
     const ids = []
     composeStore.all.forEach((message) => {
+      console.log('Got message:', JSON.stringify(message))
       // We don't want to return messages where we are logged in as one user but the message came from another.
       // This can happen if you repost, don't complete, log in as another user.  The server submit call will
       // fail in that case, so we are better off not showing the message at all and letting them compose from
@@ -80,6 +79,8 @@ export function setup(type) {
       }
     })
 
+    console.log('ids', ids)
+
     return ids
   })
 
@@ -89,13 +90,7 @@ export function setup(type) {
   // We also want to prune any old messages from our store.
   composeStore.prune()
 
-  if (composeStore.all.length === 0) {
-    const id = composeStore.add()
-    composeStore.setType({
-      id,
-      type,
-    })
-  }
+  ensureEachType()
 
   return {
     email,
@@ -141,10 +136,11 @@ export function setup(type) {
     emailIsntOurs: computed(() => {
       let ret = false
       const me = authStore.user
-      const em = email + ''
+      const em = email.value + ''
 
       if (email && me) {
         ret = !me.emails.find((e) => {
+          console.log('Compare', em, e.email)
           return (
             em
               .toLowerCase()
@@ -159,6 +155,29 @@ export function setup(type) {
   }
 }
 
+export function ensureEachType() {
+  const composeStore = useComposeStore()
+
+  // Ensure there is a blank message of each type.
+  if (composeStore.all.filter((m) => m.type === 'Offer').length === 0) {
+    const id = composeStore.add()
+    composeStore.setType({
+      id,
+      type: 'Offer',
+    })
+    composeStore.setClientOnly(id)
+  }
+
+  if (composeStore.all.filter((m) => m.type === 'Wanted').length === 0) {
+    const id = composeStore.add()
+    composeStore.setType({
+      id,
+      type: 'Wanted',
+    })
+    composeStore.setClientOnly(id)
+  }
+}
+
 export async function deleteItem() {
   const composeStore = useComposeStore()
 
@@ -170,6 +189,8 @@ export async function deleteItem() {
   await composeStore.deleteMessage({
     id: this.ids[this.ids.length - 1],
   })
+
+  ensureEachType()
 }
 
 export function postcodeClear() {
@@ -230,11 +251,10 @@ export function addItem() {
   })
 }
 
-export async function freegleIt(type) {
+export async function freegleIt(type, router) {
   const composeStore = useComposeStore()
   const messageStore = useMessageStore()
   const authStore = useAuthStore()
-  const router = useRouter()
 
   this.submitting = true
 
@@ -273,12 +293,14 @@ export async function freegleIt(type) {
 
       await Promise.all(promises)
 
+      console.log('Router', router)
       router.push({
         name: 'myposts',
         params,
       })
     } else {
       // Was probably already submitted
+      console.log('Router', router)
       router.push({
         name: 'myposts',
       })

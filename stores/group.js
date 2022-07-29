@@ -19,6 +19,7 @@ export const useGroupStore = defineStore({
       if (id) {
         if (isNaN(id)) {
           // Get by name.  Case-insensitive.
+          console.log('Get group by name', id)
           id = id.toLowerCase()
 
           if (!this.allGroups[id]) {

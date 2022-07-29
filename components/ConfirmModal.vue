@@ -5,7 +5,7 @@
       <div v-html="message" />
     </template>
     <template #footer>
-      <b-button variant="white" @click="cancel"> Cancel </b-button>
+      <b-button variant="white" @click="hide"> Cancel </b-button>
       <b-button variant="primary" @click="confirm"> Confirm </b-button>
     </template>
   </b-modal>

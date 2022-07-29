@@ -23,7 +23,7 @@ export const useComposeStore = defineStore({
     emailAt: null,
     postcode: null,
     group: null,
-    messages: [],
+    messages: {},
     _attachments: {},
     attachmentBump: 1,
     _progress: 1,
@@ -201,6 +201,9 @@ export const useComposeStore = defineStore({
         )
       }
     },
+    setClientOnly(id) {
+      this.messages[id].clientonly = true
+    },
     setType(params) {
       const id = params.id
       this.ensureMessage(id)
@@ -278,7 +281,7 @@ export const useComposeStore = defineStore({
 
           let result
 
-          if (message.id <= 0) {
+          if (message.clientonly || message.id < 100) {
             // This is a draft we have composed on the client, which doesn't have a corresponding server message yet.
             // We need to:
             // - create a drafted
@@ -297,6 +300,7 @@ export const useComposeStore = defineStore({
           } else {
             // This is one of our existing messages which we are reposting.  We need to convert it back to a draft,
             // edit it (to update it from our client data), and then submit.
+            // TODO Needs testing
             console.log('Existing message')
             const id = message.id
             await this.backToDraft(id)

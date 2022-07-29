@@ -5,7 +5,7 @@
         <client-only>
           <WizardProgress :active-stage="1" class="d-none d-md-flex" />
         </client-only>
-        <h1 class="text-center">First, tell us about your item</h1>
+        <h1 class="text-center">First, what are you looking for?</h1>
         <ul
           v-for="(id, index) in ids"
           :key="'post-' + id"
@@ -14,7 +14,7 @@
           <li class="p-0">
             <b-card no-body>
               <b-card-body class="p-1" sub-title="">
-                <PostMessage :id="id" type="Offer" />
+                <PostMessage :id="id" type="Wanted" />
               </b-card-body>
               <b-card-footer
                 v-if="index === ids.length - 1"
@@ -61,7 +61,7 @@
                 :disabled="uploadingPhoto"
                 size="lg"
                 block
-                to="/give/whereami"
+                to="/find/whereami"
               >
                 Next <v-icon icon="angle-double-right" />
               </b-button>
@@ -71,7 +71,7 @@
                 variant="primary"
                 size="lg"
                 :disabled="uploadingPhoto"
-                to="/give/whereami"
+                to="/find/whereami"
               >
                 Next <v-icon icon="angle-double-right" />
               </b-button>
@@ -101,13 +101,13 @@ export default {
     WizardProgress,
   },
   async setup() {
-    console.log("Setup on 'give' page")
-    const inherited = await setup('Offer')
+    console.log('setup on find')
+    const inherited = await setup('Wanted')
 
     useHead(
       buildHead(
-        'OFFER',
-        'OFFER something to people nearby and see who wants it'
+        'WANTED',
+        "Ask people nearby if they have what you're looking for"
       )
     )
 
