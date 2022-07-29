@@ -97,6 +97,7 @@
 <script>
 import dayjs from 'dayjs'
 import { useTrystStore } from '../stores/tryst'
+import { useMessageStore } from '../stores/message'
 import modal from '@/mixins/modal'
 
 const NoticeMessage = () => import('~/components/NoticeMessage')
@@ -128,9 +129,11 @@ export default {
   },
   setup() {
     const trystStore = useTrystStore()
+    const messageStore = useMessageStore()
 
     return {
       trystStore,
+      messageStore,
     }
   },
   data() {
@@ -263,10 +266,7 @@ export default {
   methods: {
     async promise() {
       if (this.currentlySelected > 0) {
-        await this.$store.dispatch('messages/promise', {
-          id: this.message,
-          userid: this.currentlySelected,
-        })
+        await this.messageStore.promise(this.message, this.currentlySelected)
 
         const arrangedfor =
           this.time && this.date
@@ -276,21 +276,15 @@ export default {
         if (arrangedfor) {
           if (!this.tryst) {
             // No arrangement yet.
-            await this.$store.dispatch('tryst/add', {
-              user1: this.myid,
-              user2: this.currentlySelected,
-              arrangedfor,
-            })
+            await this.trystStore.add(
+              this.myid,
+              this.currentlySelected,
+              arrangedfor
+            )
           } else {
             // Update
-            await this.$store.dispatch('tryst/edit', {
-              id: this.tryst.id,
-              arrangedfor,
-            })
+            await this.trystStore.edit(this.tryst.id, arrangedfor)
           }
-
-          // Fetch the trysts again, to make sure we show messages correctly on the chat.
-          this.$store.dispatch('tryst/fetch')
         }
 
         this.hide()
@@ -332,9 +326,7 @@ export default {
       }
     },
     deleteTryst() {
-      this.$store.dispatch('tryst/delete', {
-        id: this.tryst.id,
-      })
+      this.trystStore.delete(this.tryst.id)
     },
     considerOddTime() {
       this.showOddTime =

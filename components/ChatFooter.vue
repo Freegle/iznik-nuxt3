@@ -246,6 +246,7 @@
       :selected-message="likelymsg ? likelymsg : 0"
       :users="otheruser ? [otheruser] : []"
       :selected-user="otheruser ? otheruser.id : null"
+      @hide="fetchMessages"
     />
     <ProfileModal
       v-if="showProfile && otheruser"
@@ -420,8 +421,6 @@ export default {
         this.$nextTick(async () => {
           this.ouroffers = await fetchOurOffers()
 
-          console.log('Got full offers', this.ouroffers)
-
           // Find the last message referenced in this chat, if any.  That's the most likely one you'd want to promise,
           // so it should be the default.
           this.likelymsg = 0
@@ -440,8 +439,6 @@ export default {
               }
             }
           }
-
-          this._updateAfterSend()
         })
       })
     },
@@ -507,6 +504,9 @@ export default {
         await this.chatStore.typing(this.id)
         this.startTypingTimer()
       }
+    },
+    fetchMessages() {
+      this.chatStore.fetchMessages(this.id)
     },
   },
 }

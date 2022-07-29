@@ -115,6 +115,15 @@ export const useMessageStore = defineStore({
     clear() {
       this.$reset()
     },
+    async promise(id, userid) {
+      await api(this.config).message.update({
+        id,
+        userid,
+        action: 'Promise',
+      })
+
+      await this.fetch({ id, force: true })
+    },
   },
   getters: {
     byId: (state) => {

@@ -31,6 +31,7 @@ export default {
       this.showModal = true
     },
     hide() {
+      this.$emit('hide')
       this.showModal = false
     },
     back(next) {

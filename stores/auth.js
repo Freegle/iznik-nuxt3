@@ -59,20 +59,22 @@ export const useAuthStore = defineStore({
       }
     },
     async addRelatedUser(id) {
-      // Keep track of which users we log in as.
-      if (!this.userlist) {
-        this.userlist = []
-      }
-
-      if (!this.userlist.includes(id)) {
-        if (this.userlist.length > 9) {
-          this.userlist.pop()
+      if (id) {
+        // Keep track of which users we log in as.
+        if (!this.userlist) {
+          this.userlist = []
         }
 
-        this.userlist.unshift(id)
+        if (!this.userlist.includes(id)) {
+          if (this.userlist.length > 9) {
+            this.userlist.pop()
+          }
 
-        // Logged in as multiple users.  Let the server know.
-        await this.$api.session.related(this.userlist)
+          this.userlist.unshift(id)
+
+          // Logged in as multiple users.  Let the server know.
+          await this.$api.session.related(this.userlist)
+        }
       }
     },
     clearRelated() {

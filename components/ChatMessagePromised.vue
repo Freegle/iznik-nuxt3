@@ -12,9 +12,7 @@
             "
           >
             <b-img
-              v-if="
-                refmsg && refmsg.attachments && refmsg.attachments.length > 0
-              "
+              v-if="refmsg?.attachments?.length > 0"
               class="float-end ml-1"
               rounded
               thumbnail
@@ -299,7 +297,6 @@ export default {
   },
 }
 </script>
-
 <style scoped lang="scss">
 .unpromise__slash {
   transform: rotate(180deg);
