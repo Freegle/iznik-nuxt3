@@ -200,6 +200,7 @@
       :selected-message="refmsgid"
       :users="[otheruser]"
       :selected-user="otheruser.id"
+      @hide="fetchMessages"
     />
     <OutcomeModal
       v-if="showOutcome && refmsgid"
@@ -214,6 +215,8 @@
 <script>
 import dayjs from 'dayjs'
 import { useTrystStore } from '../stores/tryst'
+import { fetchOurOffers } from '../composables/useThrottle'
+import { useChatStore } from '../stores/chat'
 import OutcomeModal from '@/components/OutcomeModal'
 import AddToCalendar from '~/components/AddToCalendar'
 import ChatBase from '~/components/ChatBase'
@@ -233,11 +236,13 @@ export default {
   extends: ChatBase,
   async setup() {
     const trystStore = useTrystStore()
+    const chatStore = useChatStore()
 
     await trystStore.fetch()
 
     return {
       trystStore,
+      chatStore,
     }
   },
   data() {
@@ -275,13 +280,18 @@ export default {
       this.showRenege = true
       this.waitForRef('renege', () => {
         this.$refs.renege.show()
+        fetchOurOffers()
       })
     },
     changeTime() {
       this.showPromise = true
+
       this.waitForRef('promise', () => {
         this.$refs.promise.show()
       })
+    },
+    fetchMessages() {
+      this.chatStore.fetchMessages(this.chatmessage.chatid)
     },
     async outcome(type) {
       // TODO Outcomes.

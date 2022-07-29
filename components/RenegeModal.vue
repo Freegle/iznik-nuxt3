@@ -12,14 +12,14 @@
       </notice-message>
       <p>You're no longer promising:</p>
       <b-form-select
-        :value="selectedMessage"
+        v-model="message"
         :options="messageOptions"
         class="mb-2 font-weight-bold"
-        disabled
+        disabled=""
       />
       <p>...to:</p>
       <b-form-select
-        :value="selectedUser"
+        v-model="user"
         :options="userOptions"
         class="mb-2 font-weight-bold"
         disabled
@@ -92,6 +92,8 @@ export default {
   data() {
     return {
       removeTryst: true,
+      message: null,
+      user: null,
     }
   },
   computed: {
@@ -120,6 +122,7 @@ export default {
         }
       }
 
+      console.log('Opeionts', options)
       return options
     },
     userOptions() {
@@ -168,17 +171,16 @@ export default {
     },
   },
   methods: {
+    show() {
+      this.showModal = true
+      this.message = this.selectedMessage
+      this.user = this.selectedUser
+    },
     async renege() {
-      // TODO Renege
-      await this.$store.dispatch('messages/renege', {
-        id: this.selectedMessage,
-        userid: this.selectedUser,
-      })
+      await this.messageStore.renege(this.message, this.user)
 
       if (this.tryst && this.removeTryst) {
-        await this.$store.dispatch('tryst/delete', {
-          id: this.tryst.id,
-        })
+        await this.trystStore.delete(this.tryst.id)
       }
 
       this.hide()

@@ -25,7 +25,7 @@ export const useTrystStore = defineStore({
       }
     },
     async add(user1, user2, arrangedfor) {
-      const id = await this.$api.tryst.add({
+      const id = await api(this.config).tryst.add({
         user1,
         user2,
         arrangedfor,
@@ -38,7 +38,7 @@ export const useTrystStore = defineStore({
       return id
     },
     async edit(id, arrangedfor) {
-      await this.$api.tryst.edit({
+      await api(this.config).tryst.edit({
         id,
         arrangedfor,
       })
@@ -46,7 +46,7 @@ export const useTrystStore = defineStore({
       await this.fetch()
     },
     async delete(id) {
-      await this.$api.tryst.delete({
+      await api(this.config).tryst.delete({
         id,
       })
       await this.fetch()

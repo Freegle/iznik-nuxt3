@@ -122,7 +122,16 @@ export const useMessageStore = defineStore({
         action: 'Promise',
       })
 
-      await this.fetch({ id, force: true })
+      await this.fetch(id, true)
+    },
+    async renege(id, userid) {
+      await api(this.config).message.update({
+        id,
+        userid,
+        action: 'Renege',
+      })
+
+      await this.fetch(id, true)
     },
   },
   getters: {
