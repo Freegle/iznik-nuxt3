@@ -23,6 +23,13 @@ module.exports = {
         ignores: ['error'],
       },
     ],
+    'prettier/prettier': [
+      'error',
+      {
+        'endOfLine': 'auto',
+      }
+    ],
+    "import/no-named-as-default":0
   },
   overrides: [
     {
