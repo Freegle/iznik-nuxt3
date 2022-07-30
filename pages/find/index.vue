@@ -101,7 +101,6 @@ export default {
     WizardProgress,
   },
   async setup() {
-    console.log('setup on find')
     const inherited = await setup('Wanted')
 
     useHead(

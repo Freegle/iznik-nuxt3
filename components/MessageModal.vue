@@ -21,7 +21,13 @@
                 class="d-flex justify-content-between p-2 mb-2 p-md-0 mb-md-0"
               >
                 <div class="pr-2 w-50">
-                  <b-button variant="secondary" size="lg" block @click="hide">
+                  <b-button
+                    variant="secondary"
+                    size="lg"
+                    class="w-100"
+                    block
+                    @click="hide"
+                  >
                     Close
                   </b-button>
                 </div>

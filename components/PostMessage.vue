@@ -65,8 +65,8 @@
         <client-only>
           <NumberIncrementDecrement
             v-if="type === 'Offer'"
-            :count.sync="availablenow"
-            label="Quantity TODO"
+            v-model="availablenow"
+            label="Quantity"
             append-text=" available"
             class="count pt-1"
           />
@@ -141,7 +141,7 @@ export default {
           : 1
       },
       set(newValue) {
-        this.setAvailable(this.id, newValue)
+        this.composeStore.setAvailableNow(this.id, newValue)
       },
     },
     description: {

@@ -27,6 +27,7 @@
   "dependencies": {
     "@capacitor/android": "^3.4.3",
     "@capacitor/core": "^3.4.3",
+    "@chenfengyuan/vue-number-input": "^2.0.1",
     "@fortawesome/fontawesome-svg-core": "^6.1.1",
     "@fortawesome/free-solid-svg-icons": "^6.1.1",
     "@fortawesome/vue-fontawesome": "^3.0.0-5",
@@ -65,6 +66,7 @@
     "turf-point": "^2.0.1",
     "twemoji": "^14.0.2",
     "v3-infinite-loading": "^1.0.6",
+    "vue": "^3.2.37",
     "vue-filepond": "^7.0.3",
     "vue-highlight-words": "^2.0.0",
     "vue-inner-image-zoom": "^2.0.0",

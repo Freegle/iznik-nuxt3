@@ -101,7 +101,6 @@ export default {
     WizardProgress,
   },
   async setup() {
-    console.log("Setup on 'give' page")
     const inherited = await setup('Offer')
 
     useHead(

@@ -62,7 +62,13 @@
           </b-row>
         </div>
         <div class="mt-1 d-block d-md-none">
-          <b-button variant="primary" size="lg" block to="/give/whoami">
+          <b-button
+            variant="primary"
+            size="lg"
+            block
+            class="w-100"
+            to="/give/whoami"
+          >
             Next <v-icon icon="angle-double-right" />
           </b-button>
         </div>

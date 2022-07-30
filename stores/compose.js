@@ -216,10 +216,9 @@ export const useComposeStore = defineStore({
       this.messages[id].item = params.item
       this.messages[id].savedAt = Date.now()
     },
-    setAvailableNow(params) {
-      const id = params.id
+    setAvailableNow(id, availablenow) {
       this.ensureMessage(id)
-      this.messages[id].availablenow = params.availablenow
+      this.messages[id].availablenow = availablenow
       this.messages[id].savedAt = Date.now()
     },
     setDescription(params) {
@@ -233,7 +232,6 @@ export const useComposeStore = defineStore({
         ? this._attachments[params.id]
         : []
       this._attachments[params.id].push(params.attachment)
-      console.log('Added attachment', params.id, params.attachment)
       this.attachmentBump++
     },
     setAttachmentsForMessage(params) {

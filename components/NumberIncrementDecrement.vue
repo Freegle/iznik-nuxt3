@@ -7,27 +7,32 @@
       }"
       >{{ label }}</label
     >
-    <!--    TODO Spin Button-->
-    <!--    <b-form-spinbutton-->
-    <!--      :id="$id('spinbutton')"-->
-    <!--      v-model="current"-->
-    <!--      type="number"-->
-    <!--      :min="min"-->
-    <!--      :max="max"-->
-    <!--      step="1"-->
-    <!--      :size="size"-->
-    <!--      :formatter-fn="formatter"-->
-    <!--    />-->
+    <vue-number-input
+      :model-value="modelValue"
+      controls
+      inline
+      center
+      :step="1"
+      :min="min"
+      :max="max"
+      :size="size"
+      @update:model-value="update"
+    />
+    <div v-if="appendText" class="available text-muted small">
+      {{ appendText.trim() }}
+    </div>
   </div>
 </template>
 <script>
-// import { FormSpinbuttonPlugin } from 'bootstrap-vue'
-// Vue.use(FormSpinbuttonPlugin)
+import VueNumberInput from '@chenfengyuan/vue-number-input'
 import { uid } from '../composables/useId'
 
 export default {
+  components: {
+    VueNumberInput,
+  },
   props: {
-    count: {
+    modelValue: {
       type: Number,
       required: true,
     },
@@ -69,19 +74,8 @@ export default {
   },
   data() {
     return {
-      current: 1,
+      val2: 1,
     }
-  },
-  watch: {
-    current(newVal) {
-      this.$emit('update:count', newVal)
-    },
-    count(newVal) {
-      this.current = newVal
-    },
-  },
-  created() {
-    this.current = this.count
   },
   methods: {
     formatter(val) {
@@ -89,6 +83,9 @@ export default {
     },
     $id(type) {
       return uid(type)
+    },
+    update(newVal, oldVal) {
+      this.$emit('update:modelValue', newVal, oldVal)
     },
   },
 }
@@ -100,5 +97,24 @@ export default {
 
 .border {
   border: 1px solid black;
+}
+
+:deep(input) {
+  border-bottom-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+  font-size: 1.6rem !important;
+  line-height: 2rem !important;
+  padding-top: 0.2rem !important;
+  padding-bottom: 0.7rem !important;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.available {
+  //position: absolute;
+  translate: 0 -14px;
+  font-size: 0.6rem;
 }
 </style>
