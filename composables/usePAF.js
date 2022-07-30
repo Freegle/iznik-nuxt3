@@ -293,3 +293,49 @@ export function constructAddress(
 
   return addressLines
 }
+
+export function constructMultiLine(address) {
+  if (!address) {
+    return null
+  }
+
+  const delimiter = '\n'
+  const addressLines = constructAddress(
+    address.id,
+    address.postcode,
+    address.posttown,
+    address.dependentlocality,
+    address.doubledependentlocality,
+    address.thoroughfaredescriptor,
+    address.dependentthoroughfaredescriptor,
+    address.buildingnumber,
+    address.buildingname,
+    address.subbuildingname,
+    address.pobox,
+    address.departmentname,
+    address.organizationname,
+    address.postcodetype,
+    address.suorganizationindicator,
+    address.deliverypointsuffix
+  )
+
+  let ret =
+    addressLines.join(delimiter) +
+    delimiter +
+    address.posttown +
+    ' ' +
+    address.postcode
+  ret = ret.indexOf(', ') === 0 ? ret.substring(2) : ret
+
+  return ret
+}
+
+export function constructSingleLine(address) {
+  let ret = constructMultiLine(address)
+
+  if (ret) {
+    ret = ret.replace(/\n/g, ', ')
+  }
+
+  return ret
+}

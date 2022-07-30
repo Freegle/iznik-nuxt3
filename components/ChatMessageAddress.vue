@@ -112,7 +112,7 @@
 import { useAddressStore } from '../stores/address'
 import ExternalLink from './ExternalLink'
 import ChatBase from '~/components/ChatBase'
-import { constructAddress } from '~/composables/usePAF'
+import { constructMultiLine } from '~/composables/usePAF'
 import { attribution, osmtile } from '~/composables/useMap'
 
 export default {
@@ -147,39 +147,7 @@ export default {
       return null
     },
     multiline() {
-      if (!this.address) {
-        return null
-      }
-
-      const delimiter = '\n'
-      const addressLines = constructAddress(
-        this.address.id,
-        this.address.postcode,
-        this.address.posttown,
-        this.address.dependentlocality,
-        this.address.doubledependentlocality,
-        this.address.thoroughfaredescriptor,
-        this.address.dependentthoroughfaredescriptor,
-        this.address.buildingnumber,
-        this.address.buildingname,
-        this.address.subbuildingname,
-        this.address.pobox,
-        this.address.departmentname,
-        this.address.organizationname,
-        this.address.postcodetype,
-        this.address.suorganizationindicator,
-        this.address.deliverypointsuffix
-      )
-
-      let address =
-        addressLines.join(delimiter) +
-        delimiter +
-        this.address.posttown +
-        ' ' +
-        this.address.postcode
-      address = address.indexOf(', ') === 0 ? address.substring(2) : address
-
-      return address
+      return constructMultiLine(this.address)
     },
   },
 }

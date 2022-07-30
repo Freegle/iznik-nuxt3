@@ -8,6 +8,7 @@
         :alt="choose ? 'Please choose an address' : 'Address Book'"
         size="lg"
         no-stacking
+        @shown="showMap = true"
       >
         <template #default>
           <p>
@@ -27,36 +28,35 @@
                 />
               </b-col>
               <b-col cols="12" sm="4">
-                <b-button variant="secondary" @click="deleteIt">
-                  <v-icon
-                    v-if="deleting"
-                    name="sync"
-                    class="fa-spin text-success"
-                  />
-                  <v-icon v-else name="trash-alt" /> Delete
-                </b-button>
+                <SpinButton
+                  name="trash-alt"
+                  label="Delete"
+                  variant="secondary"
+                  :handler="deleteIt"
+                />
               </b-col>
             </b-row>
             <div v-if="selectedAddress">
               <b-row class="mb-2">
                 <b-col cols="12" sm="8">
-                  <l-map
-                    v-if="showMap && selectedAddressObject"
-                    ref="map"
-                    :zoom="16"
-                    :center="[
-                      selectedAddressObject.lat,
-                      selectedAddressObject.lng,
-                    ]"
-                    :style="'width: 100%; height: 200px'"
-                  >
-                    <l-tile-layer :url="osmtile" :attribution="attribution" />
-                    <l-marker
-                      :lat-lng="markerLatLng"
-                      draggable
-                      @update:latLng="updateMarker"
-                    />
-                  </l-map>
+                  <div :style="'width: 100%; height: 200px'">
+                    <l-map
+                      v-if="showMap && selectedAddressObject"
+                      ref="map"
+                      :zoom="16"
+                      :center="[
+                        selectedAddressObject.lat,
+                        selectedAddressObject.lng,
+                      ]"
+                    >
+                      <l-tile-layer :url="osmtile" :attribution="attribution" />
+                      <l-marker
+                        :lat-lng="markerLatLng"
+                        draggable
+                        @update:latLng="updateMarker"
+                      />
+                    </l-map>
+                  </div>
                   <p class="mt-2">
                     <v-icon icon="info-circle" /> Drag the marker if it's not in
                     the right place.
@@ -71,7 +71,7 @@
               <b-row>
                 <b-col cols="12" sm="8">
                   <b-form-textarea
-                    v-model="instructions"
+                    v-model="updatedInstructions"
                     rows="2"
                     max-rows="6"
                     class="mb-1"
@@ -121,24 +121,19 @@
                 />
               </b-col>
               <b-col cols="12" sm="4">
-                <b-button
+                <SpinButton
                   v-if="selectedProperty"
+                  label="Add"
                   variant="primary"
-                  @click="add"
-                >
-                  <v-icon
-                    v-if="adding"
-                    name="sync"
-                    class="fa-spin text-success"
-                  />
-                  <v-icon v-else name="plus" /> Add
-                </b-button>
+                  name="plus"
+                  :handler="add"
+                />
               </b-col>
             </b-row>
           </div>
         </template>
         <template #footer>
-          <b-button v-if="!choose" variant="white" @click="hide">
+          <b-button v-if="!choose" variant="white" class="mr-2" @click="hide">
             Close
           </b-button>
           <div v-else>
@@ -146,6 +141,7 @@
             <b-button
               variant="primary"
               :disabled="!selectedAddress"
+              class="ml-2"
               @click="chooseIt"
             >
               Send this Address
@@ -157,6 +153,11 @@
   </div>
 </template>
 <script>
+import { ref } from 'vue'
+import { useAddressStore } from '../stores/address'
+import { constructSingleLine } from '../composables/usePAF'
+import { useAuthStore } from '../stores/auth'
+import { attribution, osmtile } from '../composables/useMap'
 import SpinButton from './SpinButton'
 import modal from '@/mixins/modal'
 import PostCode from '~/components/PostCode'
@@ -174,13 +175,26 @@ export default {
       default: false,
     },
   },
+  async setup() {
+    const addressStore = useAddressStore()
+    const authStore = useAuthStore()
+
+    await addressStore.fetch()
+
+    const addresses = ref(addressStore.list)
+
+    return {
+      authStore,
+      addressStore,
+      addresses,
+      osmtile: osmtile(),
+      attribution: attribution(),
+    }
+  },
   data() {
     return {
       showAdd: false,
-      deleting: false,
-      adding: false,
       updatedInstructions: null,
-      addresses: [],
       postcode: null,
       properties: {},
       selectedProperty: 0,
@@ -193,7 +207,7 @@ export default {
       Object.values(this.addresses).forEach((address) => {
         ret.push({
           value: address.id,
-          text: address.singleline,
+          text: constructSingleLine(address),
         })
       })
 
@@ -209,8 +223,8 @@ export default {
 
       const singles = {}
 
-      if (this.properties) {
-        Object.values(this.properties).forEach((address) => {
+      if (this.addressStore.properties) {
+        Object.values(this.addressStore.properties).forEach((address) => {
           if (!singles[address.singleline]) {
             ret.push({
               value: address.id,
@@ -225,16 +239,26 @@ export default {
       return ret
     },
     selectedAddress: {
-      // We remember the preferred address on this device.
+      // We remember the preferred address.
       get() {
-        return this.$store.getters['address/selected']
+        console.log(this.me?.settings, this.addresses)
+        return this.me?.settings?.selectedAddress
       },
-      set(newValue) {
-        this.$store.dispatch('address/select', newValue)
+      async set(newValue) {
+        if (newValue) {
+          const settings = this.me.settings
+          settings.selectedAddress = newValue
+
+          await this.authStore.saveAndGet({
+            settings,
+          })
+        }
       },
     },
     selectedAddressObject() {
-      return this.selectedAddress ? this.addresses[this.selectedAddress] : null
+      return this.selectedAddress
+        ? this.addresses.find((a) => a.id === this.selectedAddress)
+        : null
     },
     markerLatLng: {
       get() {
@@ -261,23 +285,17 @@ export default {
     },
     instructions: {
       get() {
-        let ret = null
-
-        if (this.selectedAddress) {
-          ret = this.addresses[this.selectedAddress].instructions
-        }
-
-        return ret
+        return this.selectedAddressObject?.instructions
       },
       set(newValue) {
         this.updatedInstructions = newValue
       },
     },
   },
-  beforeDestroy() {
-    if (this.addressWatch) {
-      this.addressWatch()
-    }
+  watch: {
+    selectedAddressObject(newVal) {
+      this.updatedInstructions = newVal?.instructions
+    },
   },
   methods: {
     selectFirst() {
@@ -294,41 +312,16 @@ export default {
       }
 
       this.updatedInstructions = this.instructions
-
-      setTimeout(() => {
-        this.showMap = true
-      }, 100)
     },
-    async show() {
+    show() {
       // Fetch the current addresses before opening the modal.
-      await this.$store.dispatch('address/fetch')
       this.showModal = true
 
-      // Probably because of PEBCAK, I had a problem where if you brought up the modal, changed the data, cancelled, then
-      // brought it up again, the old data was still present despite the fetch that happens above being called again.
-      // So we jump through some hoops with a watcher and a local property.  It'll do for now.
-      // The store was updated but the computed property didn't get called again.  Perhaps it's replacing the whole
-      // array?  But if that was the problem then this watch wouldn't fire.
-      if (this.addressWatch) {
-        this.addressWatch()
-      }
-
-      this.addresses = this.$store.getters['address/list']
       this.selectFirst()
 
       if (this.addresses.length === 0) {
         this.showAdd = true
       }
-
-      this.addressWatch = this.$store.watch(
-        (state, getters) => {
-          return getters['address/list']
-        },
-        (newValue) => {
-          this.addresses = newValue
-          this.selectFirst()
-        }
-      )
     },
     hide() {
       this.showModal = false
@@ -349,11 +342,7 @@ export default {
       this.adding = false
     },
     async deleteIt() {
-      this.deleting = true
-      await this.$store.dispatch('address/delete', {
-        id: this.selectedAddress,
-      })
-      this.deleting = false
+      await this.addressStore.delete(this.selectedAddress)
     },
     postcodeCleared() {
       this.postcode = null
@@ -362,11 +351,8 @@ export default {
       this.postcode = pc
 
       // Fetch the postal addresses within that postcode
-      await this.$store.dispatch('address/fetchProperties', {
-        postcodeid: pc.id,
-      })
+      await this.addressStore.fetchProperties(pc.id)
 
-      this.properties = this.$store.getters['address/properties']
       this.selectedProperty = 0
     },
     async saveInstructions() {
@@ -383,7 +369,6 @@ export default {
       this.hide()
     },
     async updateMarker(val) {
-      console.log('Update marker', JSON.stringify(val))
       await this.$store.dispatch('address/update', {
         id: this.selectedAddress,
         lat: val.lat,

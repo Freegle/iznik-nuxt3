@@ -253,7 +253,13 @@
       :id="otheruser ? otheruser.id : null"
       ref="profile"
     />
-    <!--    <AddressModal ref="addressModal" :choose="true" @chosen="sendAddress" TODO />-->
+    <AddressModal
+      v-if="showAddress"
+      ref="addressModal"
+      :choose="true"
+      t-o-d-o
+      @chosen="sendAddress"
+    />
     <ChatRSVPModal v-if="RSVP" :id="id" ref="rsvp" :user="otheruser" />
     <NudgeTooSoonWarningModal ref="nudgetoosoonwarning" @confirm="doNudge" />
     <NudgeWarningModal ref="nudgewarning" @confirm="doNudge" />
@@ -274,6 +280,7 @@ const OurFilePond = () => import('~/components/OurFilePond')
 const UserRatings = () => import('~/components/UserRatings')
 const PromiseModal = () => import('~/components/PromiseModal')
 const ProfileModal = () => import('~/components/ProfileModal')
+const AddressModal = () => import('~/components/AddressModal')
 const NoticeMessage = () => import('~/components/NoticeMessage')
 const ChatRSVPModal = () => import('~/components/ChatRSVPModal')
 const NudgeWarningModal = () => import('~/components/NudgeWarningModal')
@@ -290,6 +297,7 @@ export default {
     OurFilePond,
     NoticeMessage,
     PromiseModal,
+    AddressModal,
     ProfileModal,
     ChatRSVPModal,
     MicroVolunteering,
@@ -322,6 +330,7 @@ export default {
       showNotices: true, // TODO Add timer
       showPromise: false,
       showProfile: false,
+      showAddress: false,
       sendmessage: null,
       RSVP: false,
       likelymsg: null,
@@ -402,6 +411,8 @@ export default {
       }
     },
     addressBook() {
+      this.showAddress = true
+
       this.waitForRef('addressModal', () => {
         this.$refs.addressModal.show()
       })
