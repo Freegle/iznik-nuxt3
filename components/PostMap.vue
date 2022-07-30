@@ -559,27 +559,31 @@ export default {
     idle() {
       this.mapIdle++
 
-      if (this.mapObject) {
-        // We need to update the parent about our zoom level and whether we are showing the posts or groups.
-        const bounds = this.mapObject.getBounds().toBBoxString()
+      try {
+        if (this.mapObject) {
+          // We need to update the parent about our zoom level and whether we are showing the posts or groups.
+          const bounds = this.mapObject.getBounds().toBBoxString()
 
-        if (bounds !== this.lastBounds) {
-          if (this.lastBounds !== null) {
-            // The map has now moved from the initial position.
-            this.$emit('update:moved', true)
-            this.moved = true
+          if (bounds !== this.lastBounds) {
+            if (this.lastBounds !== null) {
+              // The map has now moved from the initial position.
+              this.$emit('update:moved', true)
+              this.moved = true
+            }
+
+            this.lastBounds = bounds
+
+            if (this.showMessages) {
+              this.getMessages()
+            }
           }
 
-          this.lastBounds = bounds
-
-          if (this.showMessages) {
-            this.getMessages()
-          }
+          this.$emit('update:bounds', this.mapObject.getBounds())
+          this.$emit('update:zoom', this.mapObject.getZoom())
+          this.$emit('update:centre', this.mapObject.getCenter())
         }
-
-        this.$emit('update:bounds', this.mapObject.getBounds())
-        this.$emit('update:zoom', this.mapObject.getZoom())
-        this.$emit('update:centre', this.mapObject.getCenter())
+      } catch (e) {
+        console.error('Error in map idle', e)
       }
     },
     async getMessages() {

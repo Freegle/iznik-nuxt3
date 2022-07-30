@@ -13,7 +13,7 @@ export const useAuthStore = defineStore({
 
         // We don't persist much about the user, to avoid data getting 'stuck'.  All we need is enough to log us
         // in, and information about which users have been used on this device.
-        paths: ['jwt', 'persistent', 'userlist'],
+        paths: ['jwt', 'persistent', 'userlist', 'loginCount', 'loggedInEver'],
       },
     ],
   },
@@ -33,6 +33,7 @@ export const useAuthStore = defineStore({
     loggedInEver: false,
     userlist: [],
     loginType: null,
+    loginCount: 0,
   }),
   actions: {
     init(config) {
@@ -107,6 +108,8 @@ export const useAuthStore = defineStore({
         // Login failed.
         throw new LoginError(ret, status)
       }
+
+      this.loginCount++
     },
     async lostPassword(params) {
       const runtimeConfig = useRuntimeConfig()
@@ -146,6 +149,8 @@ export const useAuthStore = defineStore({
         // Register failed.
         throw new SignUpError(ret, status)
       }
+
+      this.loginCount++
     },
     async fetchUser() {
       // We're so vain, we probably think this call is about us.

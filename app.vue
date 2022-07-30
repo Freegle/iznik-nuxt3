@@ -1,16 +1,26 @@
 <template>
   <div>
     <NuxtLayout>
-      <NuxtPage />
+      <NuxtPage :key="loginCount" />
     </NuxtLayout>
   </div>
 </template>
 <script setup>
 import { useRoute } from 'vue-router'
+import { computed } from 'vue'
 import { useAuthStore } from './stores/auth'
 
 const route = useRoute()
 const authStore = useAuthStore()
+
+const runtimeConfig = useRuntimeConfig()
+authStore.init(runtimeConfig)
+
+// We use a key to force the whole page to re-render if we have logged in.  This is a sledgehammer way of
+// re-calling all the setup() methods etc.  Perhaps there's a better way to do this.
+const loginCount = computed(() => {
+  return authStore.loginCount
+})
 
 if (route.query.u && route.query.k) {
   // We are impersonating.
