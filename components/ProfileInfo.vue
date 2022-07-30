@@ -236,7 +236,6 @@ export default {
       return pluralize('freegler is', this.user?.info?.expectedreply, true)
     },
     milesaway() {
-      // TODO Miles away calculation.
       return pluralize(
         'mile',
         milesAway(this.me?.lat, this.me?.lng, this.user?.lat, this.user?.lng),

@@ -85,7 +85,6 @@
   </div>
 </template>
 <script>
-// TODO
 import VisualiseSpeech from './VisualiseSpeech'
 import api from '~/api'
 

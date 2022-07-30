@@ -285,7 +285,7 @@ export default {
       },
     },
     loaded() {
-      // TODO Minor this could probably go now that we have setup()
+      // TODO MINOR this could probably go now that we have setup()
       return this.chat && this.otheruser && this.otheruser.info
     },
     replytime() {
