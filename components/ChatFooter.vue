@@ -114,7 +114,9 @@
           </b-button>
           <div
             v-if="!simple && tooSoonToNudge"
-            v-tooltip="'It\'s too soon to nudge'"
+            v-tooltip="
+              'You need to wait a day since the last message before nudging.'
+            "
             class="d-inline"
             @click="nudgeTooSoon"
           >
@@ -208,7 +210,9 @@
             tooSoonToNudge &&
             !simple
           "
-          v-tooltip="'It\'s too soon to nudge.'"
+          v-tooltip="
+            'You need to wait a day since the last message before nudging.'
+          "
           class="mr-2"
           @click="nudgeTooSoon"
         >
