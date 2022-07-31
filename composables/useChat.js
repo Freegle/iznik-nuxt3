@@ -122,7 +122,6 @@ export async function fetchReferencedMessage(chatid, id) {
   })
 
   if (chatmessage?.refmsgid) {
-    console.log('Need to fetch', chatmessage.refmsgid)
     const messageStore = useMessageStore()
     await messageStore.fetch(chatmessage.refmsgid)
   }

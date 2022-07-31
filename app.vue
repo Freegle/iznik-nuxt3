@@ -42,4 +42,28 @@ if (route.query.u && route.query.k) {
   // Before we do anything, see if we are logged in.
   await authStore.fetchUser()
 }
+
+// There's a bug https://github.com/nuxt/framework/issues/3141 which causes route to stop working.
+const messages = [
+  `Uncaught NotFoundError: Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.`, // chromium based
+  `NotFoundError: The object can not be found here.`, // safari
+  `Cannot read properties of null (reading 'subTree')`,
+]
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('error', (ev) => {
+    if (messages.includes(ev.message)) {
+      ev.preventDefault()
+      window.location.reload()
+    }
+  })
+
+  window.onunhandledrejection = (ev) => {
+    // We get various of these - some from Leaflet.  It seems to break Nuxt routing and we get stuck, so if we
+    // get one of these reload the page so that at least we keep going.
+    console.error('Unhandled rejection - may break Nuxt - reload')
+    ev.preventDefault()
+    window.location.reload()
+  }
+}
 </script>
