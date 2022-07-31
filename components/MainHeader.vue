@@ -5,7 +5,7 @@
       id="navbar_large"
       class="navbar ourBack d-none d-xl-flex pl-1 pr-2 navbar-dark fixed-top navbar-expand-xl"
     >
-      <nuxt-link to="/" class="navbar-brand p-0">
+      <nuxt-link :to="homePage" class="navbar-brand p-0">
         <b-img
           class="logo mr-2"
           height="58"
@@ -520,6 +520,7 @@
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 import pluralize from 'pluralize'
+import { useMiscStore } from '../stores/misc'
 import LoginModal from '~/components/LoginModal'
 import { useAuthStore } from '~/stores/auth'
 const NotificationOptions = () => import('~/components/NotificationOptions')
@@ -535,10 +536,12 @@ export default {
   },
   setup() {
     const authStore = useAuthStore()
+    const miscStore = useMiscStore()
     const route = useRoute()
     const router = useRouter()
 
     return {
+      miscStore,
       authStore,
       route,
       router,
@@ -553,6 +556,19 @@ export default {
     }
   },
   computed: {
+    homePage() {
+      const lastRoute = this.miscStore.get('lasthomepage')
+
+      let nextroute = '/browse'
+
+      if (lastRoute === 'news') {
+        nextroute = '/chitchat'
+      } else if (lastRoute === 'myposts') {
+        nextroute = '/myposts'
+      }
+
+      return nextroute
+    },
     showBackButton() {
       // On mobile we want to show a back button instead of the logo when we're not on one of the "home" routes,
       // which are /browse, /chitchat, /myposts

@@ -108,17 +108,26 @@
   </div>
 </template>
 <script>
+import { useRouter } from 'nuxt/app'
+import { useRoute } from 'vue-router'
 import { buildHead } from '../composables/useBuildHead'
+import { useMiscStore } from '../stores/misc'
 import api from '~/api'
 
 export default {
   setup() {
+    const miscStore = useMiscStore()
+
     useHead(
       buildHead(
         'OFFER',
         'OFFER something to people nearby and see who wants it'
       )
     )
+
+    return {
+      miscStore,
+    }
   },
   data() {
     return {
@@ -154,22 +163,6 @@ export default {
             this.play()
           }, 1000)
         }
-
-        // Set up a watch on the store.  We do this because initially the store hasn't yet been reloaded from local
-        // storage, so we don't know if we're logged in. When it does get loaded, this watch will fire.
-        // TODO
-        // this.userWatch = this.$store.watch(
-        //   (state, getters) => {
-        //     return this.me
-        //   },
-        //   (newValue, oldValue) => {
-        //     if (newValue) {
-        //       if (this.$nuxt.path === '/' || !this.$nuxt.path) {
-        //         this.goHome()
-        //       }
-        //     }
-        //   }
-        // )
       }
     }
   },
@@ -180,20 +173,27 @@ export default {
   },
   methods: {
     goHome() {
-      let route = '/browse'
+      let nextroute = '/browse'
 
       // Logged in homepage - on client side we want to load the last page, for logged in users.
       try {
-        const lastRoute = this.$store.getters['misc/get']('lasthomepage')
+        const lastRoute = this.miscStore.get('lasthomepage')
 
         if (lastRoute === 'news') {
-          route = '/chitchat'
+          nextroute = '/chitchat'
         } else if (lastRoute === 'myposts') {
-          route = '/myposts'
+          nextroute = '/myposts'
         }
 
-        if (this.$nuxt.path !== route) {
-          this.$router.push(route)
+        const router = useRouter()
+        const route = useRoute()
+
+        console.log('route', route)
+        if (route.path !== nextroute) {
+          console.log('Push', nextroute)
+          this.$nextTick(() => {
+            router.push(nextroute)
+          })
         }
       } catch (e) {
         console.log('Exception', e)
