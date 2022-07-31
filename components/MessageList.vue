@@ -127,7 +127,7 @@ export default {
     return {
       // Infinite message scroll
       busy: false,
-      distance: 1000,
+      distance: 2000,
       toShow: MIN_TO_SHOW,
       maxMessageVisible: 0,
       ensuredMessageVisible: false,
