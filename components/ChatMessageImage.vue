@@ -1,58 +1,35 @@
 <template>
-  <div>
-    <b-row class="pb-1">
-      <b-col>
-        <div v-if="chatmessage.userid != myid" class="media">
-          <div class="media-left">
-            <div class="media-object" @click="zoom = true">
-              <b-img-lazy
-                v-if="chatmessage.image"
-                fluid
-                rounded
-                thumbnail
-                class="chatimage clickme"
-                generator-unable-to-provide-required-alt=""
-                :src="chatmessage.image.path"
-                @error.native="brokenImage"
-              />
-            </div>
-          </div>
-          <div class="media-body">
-            <ProfileImage
-              v-if="otheruser"
-              :image="otheruser.profile.turl"
-              class="mr-1 mb-1 mt-1 inline"
-              is-thumbnail
-              size="sm"
-            />
-          </div>
-        </div>
-        <div v-else class="media float-end">
-          <div class="media-body chatMessage" @click="zoom = true">
-            <b-img-lazy
-              v-if="chatmessage.image"
-              fluid
-              rounded
-              thumbnail
-              class="chatimage clickme"
-              generator-unable-to-provide-required-alt=""
-              :src="chatmessage.image.path"
-              @error.native="brokenImage"
-            />
-          </div>
-          <div class="media-right">
-            <div class="media-object">
-              <ProfileImage
-                :image="me.profile.turl"
-                class="mr-1 ml-1 mb-1 mt-1 inline"
-                is-thumbnail
-                size="sm"
-              />
-            </div>
-          </div>
-        </div>
-      </b-col>
-    </b-row>
+  <div
+    :class="{
+      myImage: messageIsFromCurrentUser,
+      'd-flex': true,
+      'justify-content-end': messageIsFromCurrentUser,
+      'justify-content-start': !messageIsFromCurrentUser,
+    }"
+  >
+    <ProfileImage
+      v-if="!messageIsFromCurrentUser"
+      :image="chatMessageProfileImage"
+      is-thumbnail
+      size="sm"
+      class="mr-1 mb-1 mt-1 inline"
+    />
+    <b-img-lazy
+      v-if="chatmessage.image"
+      fluid
+      class="chatimage clickme img-thumbnail rounded"
+      generator-unable-to-provide-required-alt=""
+      :src="chatmessage.image.path"
+      @click.native="zoom = true"
+      @error.native="brokenImage"
+    />
+    <ProfileImage
+      v-if="messageIsFromCurrentUser"
+      :image="chatMessageProfileImage"
+      is-thumbnail
+      size="sm"
+      class="ml-1 mb-1 mt-1 inline"
+    />
     <b-modal
       :id="'photoModal-' + chatmessage.id"
       ref="photoModal"
@@ -102,5 +79,13 @@ export default {
 <style scoped>
 .chatimage {
   max-height: 50vh;
+}
+
+:deep(.chatMessage) {
+  border: none !important;
+}
+
+:deep(.myImage) {
+  margin-left: auto;
 }
 </style>

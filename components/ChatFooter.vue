@@ -515,6 +515,17 @@ export default {
       await this.chatStore.send(this.id, null, id)
       await this._updateAfterSend
     },
+    async photoProcessed(imageid, imagethumb, image) {
+      // We have uploaded a photo.  Remove the filepond instance.
+      this.uploading = false
+
+      // Show the chat busy indicator.
+      this.chatBusy = true
+
+      // We have uploaded a photo.  Post a chatmessage referencing it.
+      await this.chatStore.send(this.id, null, null, imageid)
+      await this._updateAfterSend()
+    },
   },
 }
 </script>
