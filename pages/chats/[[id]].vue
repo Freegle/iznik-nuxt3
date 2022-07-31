@@ -118,7 +118,6 @@
 <script>
 import { useRoute } from 'vue-router'
 import dayjs from 'dayjs'
-import { ref } from 'vue'
 import VisibleWhen from '../../components/VisibleWhen'
 // TODO import loginRequired from '@/mixins/loginRequired.js'
 import { buildHead } from '../../composables/useBuildHead'
@@ -155,14 +154,10 @@ export default {
     const authStore = useAuthStore()
     const myid = authStore.user?.id
 
-    let selectedChatId = null
-
     if (myid) {
       const route = useRoute()
 
       const id = route.params.id ? parseInt(route.params.id) : 0
-
-      selectedChatId = ref(id)
 
       // Fetch the list of chats.
       await chatStore.fetchChats()
@@ -173,15 +168,10 @@ export default {
       if (!chat) {
         // Might be old.  Try fetching it specifically.
         chat = await chatStore.fetchChat(id)
-
-        if (!chat) {
-          // Not found.  Go to the list.
-          selectedChatId = null
-        }
       }
     }
 
-    return { chatStore, selectedChatId }
+    return { chatStore }
   },
   data() {
     return {
@@ -195,6 +185,7 @@ export default {
       bump: 1,
       distance: 1000,
       searchSince: '2009-09-11',
+      selectedChatId: null,
     }
   },
   computed: {
@@ -257,6 +248,14 @@ export default {
         this.searchMore()
       }
     },
+  },
+  mounted() {
+    this.selectedChatId = null
+
+    if (this.myid) {
+      const route = useRoute()
+      this.selectedChatId = route.params.id ? parseInt(route.params.id) : 0
+    }
   },
   methods: {
     fetchOlder() {
