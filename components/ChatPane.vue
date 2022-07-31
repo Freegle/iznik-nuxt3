@@ -28,7 +28,9 @@
             />
 
             <template #fallback>
-              <div class="invisible">Loading {{ chatmessage.id }}...</div>
+              <div class="invisible" style="min-height: 101px">
+                Loading {{ chatmessage.id }}...
+              </div>
             </template>
           </Suspense>
           <div v-observe-visibility="topChanged" />

@@ -9,9 +9,7 @@
           <b-card v-else border-variant="warning" class="ml-2">
             <b-card-title>
               <b-img
-                v-if="
-                  refmsg && refmsg.attachments && refmsg.attachments.length > 0
-                "
+                v-if="refmsg?.attachments?.length > 0"
                 class="float-end"
                 rounded
                 thumbnail
@@ -121,8 +119,8 @@
     </b-row>
   </div>
 </template>
-
 <script>
+import { fetchReferencedMessage } from '../composables/useChat'
 import ChatBase from '~/components/ChatBase'
 import ProfileImage from '~/components/ProfileImage'
 
@@ -131,5 +129,8 @@ export default {
     ProfileImage,
   },
   extends: ChatBase,
+  async setup(props) {
+    await fetchReferencedMessage(props.chatid, props.id)
+  },
 }
 </script>

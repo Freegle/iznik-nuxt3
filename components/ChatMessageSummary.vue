@@ -43,7 +43,6 @@
     </div>
   </div>
 </template>
-
 <script>
 // Need to import rather than async otherwise the render doesn't happen and ref isn't set.
 import { useMessageStore } from '../stores/message'

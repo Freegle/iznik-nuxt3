@@ -66,7 +66,7 @@
             v-if="showOutcome && refmsgid"
             :id="refmsgid"
             ref="outcomeModal"
-            @outcome="refetch"
+            @outcome="fetchMessage"
           />
           <PromiseModal
             ref="showPromise && promise"
@@ -142,6 +142,7 @@
 </template>
 
 <script>
+import { fetchReferencedMessage } from '../composables/useChat'
 import ChatBase from '~/components/ChatBase'
 import ProfileImage from '~/components/ProfileImage'
 import ChatMessageSummary from '~/components/ChatMessageSummary'
@@ -158,6 +159,9 @@ export default {
     Highlighter,
   },
   extends: ChatBase,
+  async setup(props) {
+    await fetchReferencedMessage(props.chatid, props.id)
+  },
   data() {
     return {
       showOutcome: false,

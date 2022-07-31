@@ -207,16 +207,16 @@
       :id="refmsgid"
       ref="outcomeModal"
       :taken-by="takenBy"
-      @outcome="refetch"
+      @outcome="fetchMessage"
     />
   </div>
 </template>
-
 <script>
 import dayjs from 'dayjs'
 import { useTrystStore } from '../stores/tryst'
 import { fetchOurOffers } from '../composables/useThrottle'
 import { useChatStore } from '../stores/chat'
+import { fetchReferencedMessage } from '../composables/useChat'
 import OutcomeModal from '@/components/OutcomeModal'
 import AddToCalendar from '~/components/AddToCalendar'
 import ChatBase from '~/components/ChatBase'
@@ -234,11 +234,13 @@ export default {
     PromiseModal,
   },
   extends: ChatBase,
-  async setup() {
+  async setup(props) {
     const trystStore = useTrystStore()
     const chatStore = useChatStore()
 
     await trystStore.fetch()
+
+    await fetchReferencedMessage(props.chatid, props.id)
 
     return {
       trystStore,

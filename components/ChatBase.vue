@@ -5,6 +5,7 @@
 import { useUserStore } from '../stores/user'
 import { useChatStore } from '../stores/chat'
 import { useMessageStore } from '../stores/message'
+import { useGroupStore } from '../stores/group'
 import { twem } from '~/composables/useTwem'
 import { EMAIL_REGEX } from '~/constants'
 
@@ -107,6 +108,7 @@ export default {
     chatmessage() {
       const chatStore = useChatStore()
       const chatmessages = chatStore.messagesById(this.chatid)
+      // TODO MINOR Perf could restructure chat store a bit to avoid this loop.
       return chatmessages.find((m) => {
         return m.id === this.id
       })
@@ -129,6 +131,29 @@ export default {
       if (this.chatmessage?.refmsgid) {
         const messageStore = useMessageStore()
         messageStore.fetch(this.chatmessage.refmsgid)
+      }
+    },
+    async fetchMessage() {
+      const id = this.chatmessage?.refmsgid
+
+      if (id) {
+        const messageStore = useMessageStore()
+        const groupStore = useGroupStore()
+
+        // Fetch the message info.
+        try {
+          await messageStore.fetch(id)
+
+          const message = messageStore.byId(id)
+
+          if (message) {
+            message.groups.forEach(async (g) => {
+              await groupStore.fetch(g.groupid)
+            })
+          }
+        } catch (e) {
+          console.log('Message fetch failed', id, e)
+        }
       }
     },
   },

@@ -3,6 +3,7 @@ import { milesAway } from '../composables/useDistance'
 import { useChatStore } from '~/stores/chat'
 import { useUserStore } from '~/stores/user'
 import { useAuthStore } from '~/stores/auth'
+import { useMessageStore } from '~/stores/message'
 
 export function chatCollate(msgs) {
   const ret = []
@@ -109,5 +110,20 @@ export function setupChat(selectedChatId) {
     milesaway,
     milesstring,
     chatStore,
+  }
+}
+
+export async function fetchReferencedMessage(chatid, id) {
+  const chatStore = useChatStore()
+  const chatmessages = chatStore.messagesById(chatid)
+  // TODO MINOR Perf could restructure chat store a bit to avoid this loop.
+  const chatmessage = chatmessages.find((m) => {
+    return m.id === id
+  })
+
+  if (chatmessage?.refmsgid) {
+    console.log('Need to fetch', chatmessage.refmsgid)
+    const messageStore = useMessageStore()
+    await messageStore.fetch(chatmessage.refmsgid)
   }
 }
