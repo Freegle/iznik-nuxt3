@@ -19,12 +19,11 @@ export const useAddressStore = defineStore({
       } else {
         this.fetching = api(this.config).address.fetchv2()
         this.list = await this.fetching
+        this.fetching = null
       }
     },
     async delete(id) {
-      await api(this.config).address.del({
-        id,
-      })
+      await api(this.config).address.del(id)
 
       await this.fetch()
     },
@@ -36,6 +35,14 @@ export const useAddressStore = defineStore({
       addresses.forEach((address) => {
         this.properties[address.id] = address
       })
+    },
+    async update(params) {
+      await api(this.config).address.update(params)
+    },
+    async add(params) {
+      const { id } = await api(this.config).address.add(params)
+      await this.fetch()
+      return id
     },
   },
   getters: {

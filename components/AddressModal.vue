@@ -111,25 +111,27 @@
                 />
               </b-col>
             </b-row>
-            <p class="mt-2">Choose an address:</p>
-            <b-row v-if="propertyOptions && propertyOptions.length">
-              <b-col cols="12" sm="8">
-                <b-form-select
-                  v-model="selectedProperty"
-                  :options="propertyOptions"
-                  class="mb-2 font-weight-bold"
-                />
-              </b-col>
-              <b-col cols="12" sm="4">
-                <SpinButton
-                  v-if="selectedProperty"
-                  label="Add"
-                  variant="primary"
-                  name="plus"
-                  :handler="add"
-                />
-              </b-col>
-            </b-row>
+            <div v-if="postcode">
+              <p class="mt-2">Choose an address:</p>
+              <b-row v-if="propertyOptions && propertyOptions.length">
+                <b-col cols="12" sm="8">
+                  <b-form-select
+                    v-model="selectedProperty"
+                    :options="propertyOptions"
+                    class="mb-2 font-weight-bold"
+                  />
+                </b-col>
+                <b-col cols="12" sm="4">
+                  <SpinButton
+                    v-if="selectedProperty"
+                    label="Add"
+                    variant="primary"
+                    name="plus"
+                    :handler="add"
+                  />
+                </b-col>
+              </b-row>
+            </div>
           </div>
         </template>
         <template #footer>
@@ -153,7 +155,6 @@
   </div>
 </template>
 <script>
-import { ref } from 'vue'
 import { useAddressStore } from '../stores/address'
 import { constructSingleLine } from '../composables/usePAF'
 import { useAuthStore } from '../stores/auth'
@@ -181,12 +182,9 @@ export default {
 
     await addressStore.fetch()
 
-    const addresses = ref(addressStore.list)
-
     return {
       authStore,
       addressStore,
-      addresses,
       osmtile: osmtile(),
       attribution: attribution(),
     }
@@ -202,9 +200,12 @@ export default {
     }
   },
   computed: {
+    addresses() {
+      return this.addressStore.list
+    },
     addressOptions() {
       const ret = []
-      Object.values(this.addresses).forEach((address) => {
+      this.addresses.forEach((address) => {
         ret.push({
           value: address.id,
           text: constructSingleLine(address),
@@ -241,18 +242,21 @@ export default {
     selectedAddress: {
       // We remember the preferred address.
       get() {
-        console.log(this.me?.settings, this.addresses)
-        return this.me?.settings?.selectedAddress
+        const selected = this.me?.settings?.selectedAddress
+
+        if (this.addresses.find((address) => address.id === selected)) {
+          return selected
+        } else {
+          return null
+        }
       },
       async set(newValue) {
-        if (newValue) {
-          const settings = this.me.settings
-          settings.selectedAddress = newValue
+        const settings = this.me.settings
+        settings.selectedAddress = newValue
 
-          await this.authStore.saveAndGet({
-            settings,
-          })
-        }
+        await this.authStore.saveAndGet({
+          settings,
+        })
       },
     },
     selectedAddressObject() {
@@ -299,19 +303,28 @@ export default {
   },
   methods: {
     selectFirst() {
-      if (
-        !this.selectedAddress &&
-        this.addresses &&
-        this.addresses.length > 0
-      ) {
+      if (this.selectedAddress) {
+        const sel = this.addresses.find(
+          (address) => address.id === this.selectedAddress
+        )
+        if (sel) {
+          // We have selected a valid address.
+          this.instructions = sel.instructions
+          this.updatedInstructions = this.instructions
+          return
+        }
+      }
+
+      // Select first.
+      if (this.addresses?.length > 0) {
         this.selectedAddress = this.addresses[0].id
         this.instructions = this.addresses[0].instructions
+        this.updatedInstructions = this.instructions
       } else {
         this.selectedAddress = null
         this.instructions = null
+        this.updatedInstructions = null
       }
-
-      this.updatedInstructions = this.instructions
     },
     show() {
       // Fetch the current addresses before opening the modal.
@@ -329,20 +342,18 @@ export default {
       this.showMap = false
     },
     async add() {
-      this.adding = true
-
-      const id = await this.$store.dispatch('address/add', {
+      const id = await this.addressStore.add({
         pafid: this.selectedProperty,
         instructions: this.updatedInstructions,
       })
 
-      await this.$store.dispatch('address/fetch')
       this.selectedAddress = id
 
-      this.adding = false
+      this.showAdd = false
     },
     async deleteIt() {
       await this.addressStore.delete(this.selectedAddress)
+      this.selectFirst()
     },
     postcodeCleared() {
       this.postcode = null
@@ -356,20 +367,21 @@ export default {
       this.selectedProperty = 0
     },
     async saveInstructions() {
-      await this.$store.dispatch('address/update', {
+      await this.addressStore.update({
         id: this.selectedAddress,
         instructions: this.updatedInstructions,
       })
     },
     addnew() {
       this.showAdd = true
+      this.updatedInstructions = null
     },
     chooseIt() {
       this.$emit('chosen', this.selectedAddress)
       this.hide()
     },
     async updateMarker(val) {
-      await this.$store.dispatch('address/update', {
+      await this.addressStore.update({
         id: this.selectedAddress,
         lat: val.lat,
         lng: val.lng,

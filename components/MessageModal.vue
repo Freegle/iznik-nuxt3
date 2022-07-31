@@ -118,11 +118,7 @@ export default {
       this.showImages = showImages
     },
     shown() {
-      // We need to kick the Message component to show the map once the modal has been shown, else it doesn't
-      // render correctly.
-      setTimeout(() => {
-        this.modalShown = true
-      }, 100)
+      this.modalShown = true
     },
   },
 }

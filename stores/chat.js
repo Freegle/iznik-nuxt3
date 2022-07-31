@@ -65,10 +65,11 @@ export const useChatStore = defineStore({
     async typing(chatid) {
       await api(this.config).chat.typing(chatid)
     },
-    async send(chatid, message) {
+    async send(chatid, message, addressid) {
       await api(this.config).chat.send({
         roomid: chatid,
         message,
+        addressid,
       })
 
       // Get the latest messages back.

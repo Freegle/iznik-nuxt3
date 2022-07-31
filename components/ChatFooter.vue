@@ -519,6 +519,10 @@ export default {
     fetchMessages() {
       this.chatStore.fetchMessages(this.id)
     },
+    async sendAddress(id) {
+      await this.chatStore.send(this.id, null, id)
+      await this._updateAfterSend
+    },
   },
 }
 </script>
