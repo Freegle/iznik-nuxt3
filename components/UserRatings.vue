@@ -5,10 +5,9 @@
         {{ user.displayname }}
       </span>
       <b-button
-        v-b-tooltip.hover.top
+        v-tooltip="uptitle"
         :size="size"
         :variant="user.info.ratings.Up > 0 ? 'primary' : 'white'"
-        :title="uptitle"
         :disabled="disabled || user.id === myid ? 'true' : undefined"
         :class="{
           mine: user.info.ratings.Mine === 'Up',
@@ -19,10 +18,9 @@
         <v-icon icon="thumbs-up" />&nbsp;{{ user.info.ratings.Up }}
       </b-button>
       <b-button
-        v-b-tooltip.hover.top
+        v-tooltip="downtitle"
         :size="size"
         :variant="user.info.ratings.Down > 0 ? 'warning' : 'white'"
-        :title="downtitle"
         :disabled="disabled || user.id === myid ? 'true' : undefined"
         :class="{
           mine: user.info.ratings.Mine === 'Down',

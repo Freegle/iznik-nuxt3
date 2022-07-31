@@ -61,6 +61,7 @@ export const useChatStore = defineStore({
     },
     async nudge(id) {
       await api(this.config).chat.nudge(id)
+      this.fetchMessages(id)
     },
     async typing(chatid) {
       await api(this.config).chat.typing(chatid)
@@ -81,7 +82,7 @@ export const useChatStore = defineStore({
       return (id) => state.listById[id]
     },
     messagesById: (state) => {
-      return (id) => state.messages[id]
+      return (id) => (state.messages[id] ? state.messages[id] : [])
     },
     unreadCount: (state) => {
       // count chats with unseen messages

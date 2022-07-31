@@ -87,9 +87,8 @@
       <div class="d-none d-lg-block">
         <span v-if="chat && chat.chattype === 'User2User' && otheruser">
           <b-button
-            v-b-tooltip.hover.top
+            v-tooltip="'Promise an item to this person'"
             variant="secondary"
-            title="Promise an item to this person"
             class="mr-1"
             @click="promise(null)"
           >
@@ -97,9 +96,8 @@
           </b-button>
           <b-button
             v-if="!simple"
-            v-b-tooltip.hover.top
+            v-tooltip="'Send your address'"
             variant="secondary"
-            title="Send your address"
             class="mr-1"
             @click="addressBook"
           >
@@ -107,9 +105,8 @@
           </b-button>
           <b-button
             v-if="!simple && !tooSoonToNudge"
-            v-b-tooltip.hover.top
+            v-tooltip="'Waiting for a reply?  Nudge this freegler.'"
             variant="secondary"
-            title="Waiting for a reply?  Nudge this freegler."
             class="mr-1"
             @click="nudge"
           >
@@ -117,15 +114,11 @@
           </b-button>
           <div
             v-if="!simple && tooSoonToNudge"
+            v-tooltip="'It\'s too soon to nudge'"
             class="d-inline"
             @click="nudgeTooSoon"
           >
-            <b-button
-              v-b-tooltip.hover.top
-              variant="secondary"
-              title="It's too soon to nudge"
-              class="mr-1"
-            >
+            <b-button variant="secondary" class="mr-1" disabled>
               <v-icon icon="bell" class="fa-fw" />&nbsp;Nudge
             </b-button>
           </div>
@@ -148,8 +141,7 @@
       <div class="d-flex d-lg-none justify-content-between align-middle">
         <div
           v-if="chat && chat.chattype === 'User2User' && otheruser"
-          v-b-tooltip.hover.top
-          title="Promise an item to this person"
+          v-tooltip="'Promise an item to this person'"
           class="ml-1 mr-2"
           @click="promise(null)"
         >
@@ -158,8 +150,7 @@
         </div>
         <div
           v-if="chat && chat.chattype === 'User2User' && otheruser && !simple"
-          v-b-tooltip.hover.top
-          title="Send your address"
+          v-tooltip="'Send your address'"
           disabled
           class="mr-2"
           @click="addressBook"
@@ -169,8 +160,7 @@
         </div>
         <div
           v-if="chat && chat.chattype === 'User2Mod' && mod"
-          v-b-tooltip.hover.top
-          title="Report as spammer"
+          v-tooltip="'Report as spammer'"
           class="mr-2"
           @click="spamReport"
         >
@@ -179,8 +169,7 @@
         </div>
         <div
           v-if="chat && chat.chattype === 'User2Mod' && mod"
-          v-b-tooltip.hover.top
-          title="Ask on Central for help"
+          v-tooltip="'Ask on Central for help'"
           class="mr-2"
         >
           <external-link
@@ -199,8 +188,7 @@
             !tooSoonToNudge &&
             !simple
           "
-          v-b-tooltip.hover.top
-          title="Waiting for a reply?  Nudge this freegler."
+          v-tooltip="'Waiting for a reply?  Nudge this freegler.'"
           class="mr-2"
           @click="nudge"
         >
@@ -215,8 +203,7 @@
             tooSoonToNudge &&
             !simple
           "
-          v-b-tooltip.hover.top
-          title="It's too soon to nudge."
+          v-tooltip="'It\'s too soon to nudge.'"
           class="mr-2"
           @click="nudgeTooSoon"
         >

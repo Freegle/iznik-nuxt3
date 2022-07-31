@@ -55,13 +55,13 @@ export function setupChat(selectedChatId) {
   })
 
   const mymessages = computed(() => {
-    return chatmessages.filter((m) => m.userid === myid)
+    return chatmessages.value.filter((m) => m.userid === myid)
   })
 
   const lastfromme = computed(() => {
     let last = 0
 
-    mymessages.forEach((m) => {
+    mymessages.value.forEach((m) => {
       last = Math.max(last, new Date(m.date).getTime())
     })
 
@@ -102,8 +102,8 @@ export function setupChat(selectedChatId) {
     lastfromme,
     tooSoonToNudge: computed(() => {
       return (
-        lastfromme > 0 &&
-        new Date().getTime() - lastfromme < 24 * 60 * 60 * 1000
+        lastfromme.value > 0 &&
+        new Date().getTime() - lastfromme.value < 24 * 60 * 60 * 1000
       )
     }),
     milesaway,
