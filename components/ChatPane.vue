@@ -210,6 +210,8 @@ export default {
   display: flex;
   flex-direction: column-reverse;
   transition: opacity 0.1s ease-in;
+  padding-right: 5px;
+  padding-left: 5px;
 }
 
 .chatFooter {

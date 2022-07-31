@@ -86,6 +86,7 @@
           </b-button>
           <div v-if="otheruser && otheruser.info" class="mr-2">
             <b-button
+              v-tooltip="'Show the full profile for this freegler'"
               variant="secondary"
               class="d-none d-md-block"
               @click="showInfo"
@@ -93,6 +94,7 @@
               View profile
             </b-button>
             <b-button
+              v-tooltip="'Show the full profile for this freegler'"
               variant="link"
               size="sm"
               class="d-block d-md-none"
@@ -106,6 +108,7 @@
             class="mr-2"
           >
             <b-button
+              v-tooltip="'Don\'t show this chat unless there\'s a new message'"
               variant="secondary"
               class="d-none d-md-block"
               @click="showhide"
@@ -113,6 +116,7 @@
               Hide chat
             </b-button>
             <b-button
+              v-tooltip="'Don\'t show this chat unless there\'s a new message'"
               variant="link"
               size="sm"
               class="d-block d-md-none"
@@ -136,6 +140,7 @@
         <div class="d-flex">
           <div v-if="chat.chattype === 'User2User' && otheruser" class="mr-2">
             <b-button
+              v-tooltip="'Block this freegler from talking to you.'"
               variant="secondary"
               class="d-none d-md-block"
               @click="showblock"
@@ -143,6 +148,7 @@
               Block
             </b-button>
             <b-button
+              v-tooltip="'Block this freegler from talking to you.'"
               variant="link"
               size="sm"
               class="d-block d-md-none"
@@ -153,6 +159,7 @@
           </div>
           <div v-if="chat.chattype === 'User2User' && otheruser">
             <b-button
+              v-tooltip="'Report this chat to the volunteers'"
               variant="secondary"
               class="d-none d-md-block"
               @click="report"

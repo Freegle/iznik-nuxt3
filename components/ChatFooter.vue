@@ -133,7 +133,12 @@
           />
           <v-icon v-else icon="angle-double-right" title="Send" />
         </b-button>
-        <b-button variant="secondary" class="float-end" @click="photoAdd">
+        <b-button
+          v-tooltip="'Upload a photo'"
+          variant="secondary"
+          class="float-end"
+          @click="photoAdd"
+        >
           <v-icon icon="camera" />
           Photo
         </b-button>
