@@ -33,8 +33,10 @@ export const useChatStore = defineStore({
       })
     },
     async fetchChat(id) {
-      const chat = await api(this.config).chat.fetchChat(id)
-      this.listById[id] = chat
+      if (id > 0) {
+        const chat = await api(this.config).chat.fetchChat(id)
+        this.listById[id] = chat
+      }
     },
     async fetchMessages(id) {
       const messages = await api(this.config).chat.fetchMessages(id)
