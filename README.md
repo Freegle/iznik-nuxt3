@@ -40,6 +40,14 @@ Then install all the dependencies:
 npm install
 ```
 
+Set some environment variables:
+```
+IZNIK_API_V1=https://fdapidbg.ilovefreegle.org/api
+IZNIK_API_V2=https://nuxt3.ilovefreegle.org/apiv2
+```
+
+(if running the Go Server locally then http://localhost:8192/api)
+
 Then start the dev server:
 ```
 npm run dev
