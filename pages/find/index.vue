@@ -25,7 +25,7 @@
                   variant="link"
                   size="sm"
                   class="mr-1"
-                  @click="deleteItem"
+                  @click="deleteItem(id)"
                 >
                   <v-icon icon="trash-alt" />&nbsp;Clear form
                 </b-button>
@@ -35,7 +35,7 @@
                     variant="link"
                     size="sm"
                     class="mr-1"
-                    @click="deleteItem"
+                    @click="deleteItem(id)"
                   >
                     <v-icon icon="trash-alt" />&nbsp;Delete last item
                   </b-button>

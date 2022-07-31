@@ -105,14 +105,15 @@ export function setup(type) {
       let ret = false
       const messages = composeStore.all
       if (messages?.length > 0) {
-        const message = messages[0]
+        messages.forEach((message) => {
+          const atts = Object.values(composeStore.attachments(message.id))
 
-        const atts = Object.values(composeStore.attachments(message.id))
-
-        ret =
-          (message.item && message.item.trim()) ||
-          (message.description && message.description.trim()) ||
-          atts.length
+          ret ||=
+            message.type === postType.value &&
+            ((message.item && message.item.trim()) ||
+              (message.description && message.description.trim()) ||
+              atts?.length)
+        })
       }
 
       return ret
@@ -163,6 +164,7 @@ export function ensureEachType() {
       type: 'Offer',
     })
     composeStore.setClientOnly(id)
+    composeStore.setAttachmentsForMessage(id, [])
   }
 
   if (composeStore.all.filter((m) => m.type === 'Wanted').length === 0) {
@@ -172,20 +174,14 @@ export function ensureEachType() {
       type: 'Wanted',
     })
     composeStore.setClientOnly(id)
+    composeStore.setAttachmentsForMessage(id, [])
   }
 }
 
-export async function deleteItem() {
+export async function deleteItem(id) {
   const composeStore = useComposeStore()
 
-  await composeStore.setAttachmentsForMessage({
-    id: this.ids[this.ids.length - 1],
-    attachments: [],
-  })
-
-  await composeStore.deleteMessage({
-    id: this.ids[this.ids.length - 1],
-  })
+  await composeStore.deleteMessage(id)
 
   ensureEachType()
 }
