@@ -3,16 +3,15 @@
 What does exist:
 * Use of Nuxt 3 (still in Beta) and hence Vue 3 + Vite.
 * Use of Bootstrap Vue 3 (still in alpha), including customisation.  This is a replacement for Bootstrap Vue.
-* Use of Pinia as a replacement for Vuex.  This looks much nicer.
-* Use of layout.
-* Proof of concept Explore Group and Message page.
+* Use of Pinia as a replacement for Vuex.  This is much nicer.
 * Static site generation.
 * CD on Azure.
 * Proof of Concept Capacitor app.  Since we can't yet generate a static site, this serves a hello world HTML file from www.
 
 What doesn't exist yet:
-* Almost all the app function.
-* CircleCI/playwright testing from the get go?
+* Give/Ask flows when logged out initially.
+* ChitChat/Events/Volunteers/Settings/Promote/Help
+* CircleCI/playwright testing.
 
 # iznik-nuxt3
 
