@@ -1,6 +1,6 @@
 <template>
   <div>
-    <NuxtLayout>
+    <NuxtLayout v-if="ready">
       <NuxtPage :key="loginCount" />
     </NuxtLayout>
   </div>
@@ -20,6 +20,9 @@ import { useTrystStore } from './stores/tryst'
 import { useNotificationStore } from './stores/notification'
 
 const route = useRoute()
+
+// Don't render the app until we've done everything in here.
+let ready = false
 
 // We're having trouble accessing the Nuxt config from within a Pinia store.  So instead we access it here, then
 // pass it in to each store via an init() action.
@@ -99,4 +102,6 @@ if (typeof window !== 'undefined') {
     }
   }
 }
+
+ready = true
 </script>
