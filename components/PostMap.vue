@@ -609,15 +609,8 @@ export default {
         if (!this.search) {
           if (this.showIsochrones && !this.moved) {
             // The default view unless we've moved the map is the messages in the isochrones.
-            if (this.isochrones.length) {
+            if (this.isochrones?.length) {
               // We have some.
-              params = {
-                subaction: 'isochrones',
-                groupid: this.groupid,
-                search: this.search,
-              }
-
-              // TODO ISOCHRONES This just fetches the primary one - need to make it work with secondary too.
               messages = await this.isochroneStore.fetchMessages()
 
               // Fetch the messages in bounds too, so that we can show those as secondary.

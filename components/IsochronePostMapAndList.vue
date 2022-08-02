@@ -34,10 +34,10 @@
     </client-only>
     <div v-if="mapready" class="rest">
       <div v-if="closestGroups?.length" class="mb-1 border p-2 bg-white">
+        {{ closestGroups.length }} groups near you - TODO show Join button
         <h2 class="sr-only">Nearby commmunities</h2>
         <div class="d-flex flex-wrap justify-content-center">
           <div v-for="g in closestGroups" :key="'group-' + g.id">
-            <!--            TODO Join-->
             <!--            <JoinWithConfirm-->
             <!--              :id="g.id"-->
             <!--              :name="g.namedisplay"-->
@@ -150,6 +150,7 @@
           <div v-observe-visibility="messageVisibilityChanged" />
         </client-only>
         <MessageList
+          v-if="updatedMessagesOnMap || messagesOnMap.length"
           v-model:visible="postsVisible"
           :selected-group="selectedGroup"
           :selected-type="selectedType"
@@ -268,6 +269,7 @@ export default {
     const groupStore = useGroupStore()
     const messageStore = useMessageStore()
     const authStore = useAuthStore()
+    const isochroneStore = useIsochroneStore()
 
     // We might have a preference for which type of posts we view.
     const selectedType = miscStore.get('postType') ?? 'All'
@@ -277,6 +279,7 @@ export default {
       groupStore,
       messageStore,
       authStore,
+      isochroneStore,
       selectedType: ref(selectedType),
       showGroups: ref(props.startOnGroups),
       groupids: ref(props.initialGroupIds),
@@ -304,7 +307,7 @@ export default {
       postsVisible: false,
       joinVisible: false,
       mapMoved: false,
-      messagesOnMap: [],
+      updatedMessagesOnMap: null,
       bump: 1,
 
       infiniteId: +new Date(),
@@ -333,6 +336,20 @@ export default {
   },
   computed: {
     ...mapState(useIsochroneStore, { isochroneBounds: 'bounds' }),
+    messagesOnMap: {
+      get() {
+        if (this.updatedMessagesOnMap !== null) {
+          // We have been told by the map to show a specific set of messages.
+          return this.updatedMessagesOnMap
+        } else {
+          // See if we have some from the isochrone, which we will have fetched in browse/index.
+          return this.isochroneStore.messageList ?? []
+        }
+      },
+      set(newVal) {
+        this.updatedMessagesOnMap = newVal
+      },
+    },
     regions() {
       const regions = []
 
@@ -412,9 +429,13 @@ export default {
       return ret
     },
     sortedMessagesOnMap() {
-      return this.messagesOnMap.slice().sort((a, b) => {
-        return new Date(b.arrival).getTime() - new Date(a.arrival).getTime()
-      })
+      if (this.messagesOnMap) {
+        return this.messagesOnMap.slice().sort((a, b) => {
+          return new Date(b.arrival).getTime() - new Date(a.arrival).getTime()
+        })
+      } else {
+        return []
+      }
     },
     showRegions() {
       // We want to show the regions if we're zoomed out, or for SSR = SEO.
@@ -524,25 +545,27 @@ export default {
   },
   methods: {
     messagesChanged(messages) {
-      let changed = false
+      if (messages) {
+        let changed = false
 
-      if (!messages || !this.messagesOnMap) {
-        changed = true
-      } else {
-        const oldids = this.messagesOnMap.map((m) => m.id)
-        const newids = messages.map((m) => m.id)
-
-        if (JSON.stringify(oldids) !== JSON.stringify(newids)) {
+        if (!messages || !this.messagesOnMap) {
           changed = true
+        } else {
+          const oldids = this.messagesOnMap.map((m) => m.id)
+          const newids = messages.map((m) => m.id)
+
+          if (JSON.stringify(oldids) !== JSON.stringify(newids)) {
+            changed = true
+          }
         }
-      }
 
-      if (changed) {
-        this.messagesOnMap = messages
-        this.infiniteId++
-      }
+        if (changed) {
+          this.messagesOnMap = messages
+          this.infiniteId++
+        }
 
-      this.$emit('update:messagesOnMapCount', this.messagesOnMap.length)
+        this.$emit('update:messagesOnMapCount', this.messagesOnMap.length)
+      }
     },
     groupsChanged(groupids) {
       this.groupids = groupids

@@ -8,6 +8,8 @@ export const useIsochroneStore = defineStore({
     WKT: null,
     L: null,
     list: [],
+    fetchingMessages: null,
+    messageList: [],
   }),
   actions: {
     async init(config) {
@@ -28,9 +30,18 @@ export const useIsochroneStore = defineStore({
         this.list = await api(this.config).isochrone.fetchv2()
       }
     },
-    async fetchMessages() {
-      // TODO CACHE
-      return await api(this.config).isochrone.fetchMessages()
+    async fetchMessages(force) {
+      if (force || !this.messageList?.length) {
+        if (this.fetchingMessages) {
+          await this.fetchingMessages
+        } else {
+          this.fetchingMessages = api(this.config).isochrone.fetchMessages()
+          this.messageList = await this.fetchingMessages
+          this.fetchingMessages = null
+        }
+      }
+
+      return this.messageList
     },
     async delete({ id }) {
       await api(this.config).isochrone.del(id)
