@@ -32,7 +32,7 @@
       />
       <div v-observe-visibility="mapVisibilityChanged" />
     </client-only>
-    <div v-if="mapready" class="rest">
+    <div class="rest">
       <div v-if="closestGroups?.length" class="mb-1 border p-2 bg-white">
         {{ closestGroups.length }} groups near you - TODO show Join button
         <h2 class="sr-only">Nearby commmunities</h2>
@@ -124,9 +124,7 @@
           </div>
         </div>
         <div
-          v-if="
-            mapVisible && !postsVisible && messagesOnMap && messagesOnMap.length
-          "
+          v-if="!postsVisible && messagesOnMap?.length"
           class="d-flex justify-content-center mt-1 mb-1"
         >
           <NoticeMessage variant="info">
