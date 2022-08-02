@@ -89,7 +89,7 @@
           <b-button
             v-tooltip="'Promise an item to this person'"
             variant="secondary"
-            class="mr-1"
+            class="ml-1 mr-2"
             @click="promise(null)"
           >
             <v-icon icon="handshake" class="fa-fw" />&nbsp;Promise
@@ -98,7 +98,7 @@
             v-if="!simple"
             v-tooltip="'Send your address'"
             variant="secondary"
-            class="mr-1"
+            class="mr-2"
             @click="addressBook"
           >
             <v-icon icon="address-book" class="fa-fw" />&nbsp;Address
@@ -107,7 +107,7 @@
             v-if="!simple && !tooSoonToNudge"
             v-tooltip="'Waiting for a reply?  Nudge this freegler.'"
             variant="secondary"
-            class="mr-1"
+            class="mr-2"
             @click="nudge"
           >
             <v-icon icon="bell" class="fa-fw" />&nbsp;Nudge
@@ -120,12 +120,12 @@
             class="d-inline"
             @click="nudgeTooSoon"
           >
-            <b-button variant="secondary" class="mr-1" disabled>
+            <b-button variant="secondary" class="mr-2" disabled>
               <v-icon icon="bell" class="fa-fw" />&nbsp;Nudge
             </b-button>
           </div>
         </span>
-        <b-button variant="primary" class="float-end ml-1 mr-1" @click="send">
+        <b-button variant="primary" class="float-end ml-2 mr-2" @click="send">
           Send&nbsp;
           <v-icon
             v-if="sending"

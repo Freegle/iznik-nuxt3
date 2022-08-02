@@ -102,6 +102,11 @@ export default {
       required: false,
       default: 0,
     },
+    exclude: {
+      type: Number,
+      required: false,
+      default: null,
+    },
   },
   setup(props) {
     const groupStore = useGroupStore()
@@ -209,7 +214,7 @@ export default {
         // Filter out dups by subject (for crossposting).
         const message = this.messageStore.byId(m.id)
 
-        if (message) {
+        if (message && m.id !== this.exclude) {
           const key = message.fromuser + '|' + message.subject
           const already = key in dups
 

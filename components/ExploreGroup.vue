@@ -1,21 +1,31 @@
 <template>
-  <MessageList
-    :messages-for-list="messagesToShow"
-    :selected-group="id"
-    :bump="bump"
-  />
+  <div>
+    <OurMessage v-if="msgid" :id="msgid" record-view class="mb-2 mt-2" />
+    <MessageList
+      :messages-for-list="messagesToShow"
+      :selected-group="id"
+      :bump="bump"
+      :exclude="msgid"
+    />
+  </div>
 </template>
 <script setup></script>
 <script>
 import MessageList from './MessageList'
+import OurMessage from './OurMessage'
 import { useGroupStore } from '~/stores/group'
 
 export default {
-  components: { MessageList },
+  components: { MessageList, OurMessage },
   props: {
     id: {
       validator: (prop) => typeof prop === 'number' || typeof prop === 'string',
       required: true,
+    },
+    msgid: {
+      type: Number,
+      required: false,
+      default: null,
     },
   },
   async setup(props) {
