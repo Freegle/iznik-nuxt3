@@ -1,12 +1,9 @@
 <template>
-  <div>
-    Group {{ group }}
-    <b-form-select
-      v-model="group"
-      :style="(width ? 'width: ' + width + 'px' : '') + '; max-width: 300px;'"
-      :options="groupOptions"
-    />
-  </div>
+  <b-form-select
+    v-model="group"
+    :style="(width ? 'width: ' + width + 'px' : '') + '; max-width: 300px;'"
+    :options="groupOptions"
+  />
 </template>
 <script>
 import { useComposeStore } from '../stores/compose'
