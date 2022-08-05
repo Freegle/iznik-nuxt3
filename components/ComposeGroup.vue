@@ -1,12 +1,14 @@
 <template>
-  <b-form-select
-    v-model="group"
-    :style="(width ? 'width: ' + width + 'px' : '') + '; max-width: 300px;'"
-    :options="groupOptions"
-  />
+  <div>
+    Group {{ group }}
+    <b-form-select
+      v-model="group"
+      :style="(width ? 'width: ' + width + 'px' : '') + '; max-width: 300px;'"
+      :options="groupOptions"
+    />
+  </div>
 </template>
 <script>
-import { mapWritableState } from 'pinia'
 import { useComposeStore } from '../stores/compose'
 import { useMiscStore } from '~/stores/misc'
 import { useGroupStore } from '~/stores/group'
@@ -27,7 +29,17 @@ export default {
     return { miscStore, groupStore, composeStore }
   },
   computed: {
-    ...mapWritableState(useComposeStore, ['group']),
+    group() {
+      let ret = this.composeStore.group
+
+      if (!ret) {
+        if (this.postcode?.groupsnear) {
+          ret = this.postcode.groupsnear[0].id
+        }
+      }
+
+      return ret
+    },
     postcode() {
       return this.composeStore.postcode
     },
