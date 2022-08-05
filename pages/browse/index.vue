@@ -362,7 +362,6 @@ export default {
       } else {
         // We have some isochrones.  By default we'll be showing that view in PostMap, so start the fetch of the
         // messages now.  That way we can display the list rapidly.
-        console.log('Fetch isochrone messages from browse')
         this.isochroneStore.fetchMessages(true)
       }
     },
