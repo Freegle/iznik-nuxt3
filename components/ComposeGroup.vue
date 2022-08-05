@@ -58,19 +58,16 @@ export default {
       }
 
       // Add any other groups we are a member of and might want to select.
-      // TODO me
-      // for (const group of this.myGroups) {
-      //   if (group.type === 'Freegle') {
-      //     if (!ids[group.id]) {
-      //       ret.push({
-      //         value: group.id,
-      //         text: group.namedisplay ? group.namedisplay : group.nameshort,
-      //       })
-      //
-      //       ids[group.id] = true
-      //     }
-      //   }
-      // }
+      for (const group of this.myGroups) {
+        if (!ids[group.id]) {
+          ret.push({
+            value: group.id,
+            text: group.namedisplay ? group.namedisplay : group.nameshort,
+          })
+
+          ids[group.id] = true
+        }
+      }
 
       return ret
     },
