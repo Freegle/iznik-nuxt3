@@ -98,7 +98,6 @@ export default {
   data() {
     return {
       headerLoaded: false,
-      showNotices: true,
       messagesToShow: 0,
       chatBusy: false,
       topVisible: true,

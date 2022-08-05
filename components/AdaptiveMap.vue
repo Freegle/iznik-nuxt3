@@ -2,7 +2,7 @@
   <div>
     <h2 class="sr-only">Map of offers and wanteds</h2>
     <client-only>
-      <!--      TODO-->
+      <!--      TODO JOIN -->
       <!--      <div v-if="!loggedIn && showClosest" class="overlapnav w-100">-->
       <!--        <div class="d-flex justify-content-around pl-1 pr-1 w-100">-->
       <!--          <JoinWithConfirm-->
@@ -54,7 +54,7 @@
         <h2 class="sr-only">Nearby commmunities</h2>
         <div class="d-flex flex-wrap justify-content-center">
           <div v-for="g in closestGroups.slice(0, 3)" :key="'group-' + g.id">
-            <!--            TODO-->
+            <!--            TODO JOIN -->
             <!--            <JoinWithConfirm-->
             <!--              :id="g.id"-->
             <!--              :name="g.namedisplay"-->

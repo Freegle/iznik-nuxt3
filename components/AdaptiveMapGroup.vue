@@ -17,10 +17,9 @@
         <div v-if="group.tagline">
           {{ group.tagline }}
         </div>
-        <!--        TODO MINOR The underline looks weird here.-->
         <ExternalLink
           :href="'mailto:' + group.modsemail"
-          class="text-muted small"
+          class="text-muted small nodecor"
         >
           <v-icon icon="envelope" title="Contact volunteers" class="fa-0-8x" />
           Contact volunteers

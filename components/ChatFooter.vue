@@ -323,7 +323,7 @@ export default {
       sending: false,
       uploading: false,
       showMicrovolunteering: false,
-      showNotices: true, // TODO Add timer
+      showNotices: true,
       showPromise: false,
       showProfile: false,
       showAddress: false,
@@ -369,6 +369,11 @@ export default {
     if (this.typingTimer) {
       clearTimeout(this.typingTimer)
     }
+  },
+  mounted() {
+    setTimeout(() => {
+      this.showNotices = false
+    }, 30000)
   },
   methods: {
     async markRead() {
