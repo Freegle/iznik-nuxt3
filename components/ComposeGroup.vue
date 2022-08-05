@@ -83,7 +83,7 @@ export default {
         typeahead: this.postcode.name,
       })
 
-      if (location?.ret === 0 && location?.locations[0]) {
+      if (location?.ret === 0 && location?.locations.length > 0) {
         this.composeStore.postcode = location.locations[0]
       }
     }

@@ -20,21 +20,26 @@
         Share
       </b-button>
     </div>
-    <b-button
-      variant="link"
-      class="p-0 text-faded mr-2"
-      size="sm"
-      target="_blank"
-      :to="'/message/' + message.id"
+    <div
+      v-tooltip="'Click to view this message in a single page'"
+      @click.native.prevent="goto"
     >
-      <v-icon icon="hashtag" class="fa-0-8x" />{{ message.id }}
-    </b-button>
+      <b-button
+        variant="link"
+        class="p-0 text-faded mr-2"
+        size="sm"
+        :to="'/message/' + message.id"
+      >
+        <v-icon icon="hashtag" class="fa-0-8x" />{{ message.id }}
+      </b-button>
+    </div>
     <!--    TODO-->
     <!--    <ShareModal v-if="message.url" :id="message.id" ref="shareModal" />-->
     <!--    <MessageReportModal ref="reportModal" :message="message" />-->
   </div>
 </template>
 <script>
+import { useRouter } from 'nuxt/app'
 import { useMessageStore } from '~/stores/message'
 export default {
   props: {
@@ -58,6 +63,10 @@ export default {
     },
     report() {
       this.$refs.reportModal.show()
+    },
+    goto() {
+      const router = useRouter()
+      router.push('/message/' + this.id)
     },
   },
 }

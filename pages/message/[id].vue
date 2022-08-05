@@ -81,21 +81,45 @@
 </template>
 <script>
 import { useRoute } from 'vue-router'
+import { buildHead } from '../../composables/useBuildHead'
 import { useMessageStore } from '~/stores/message'
 import { useGroupStore } from '~/stores/group'
+import { twem } from '~/composables/useTwem'
 
 definePageMeta({
   layout: 'default',
 })
 
 export default {
-  setup() {
+  async setup(props) {
     const messageStore = useMessageStore()
     const groupStore = useGroupStore()
 
     // We don't use lazy because we want the page to be rendered for SEO.
     const route = useRoute()
     const id = parseInt(route.params.id)
+
+    const message = await messageStore.fetch(id)
+
+    if (message) {
+      let snip = null
+
+      if (message.snippet) {
+        snip = twem(message.snippet) + '...'
+      } else {
+        snip = 'Click for more details'
+      }
+
+      useHead(
+        buildHead(
+          message.subject,
+          snip,
+          message.attachments && message.attachments.length > 0
+            ? message.attachments[0].path
+            : null
+        )
+      )
+    }
 
     // TODO
     // if (process.client) {
@@ -117,6 +141,5 @@ export default {
       return this.messageStore.byId(this.id)
     },
   },
-  // TODO Meta data
 }
 </script>
