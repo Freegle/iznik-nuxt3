@@ -9,6 +9,7 @@
 import { useComposeStore } from '../stores/compose'
 import { useMiscStore } from '~/stores/misc'
 import { useGroupStore } from '~/stores/group'
+import api from '~/api'
 
 export default {
   props: {
@@ -75,19 +76,17 @@ export default {
   async mounted() {
     // The postcode we have contains a list of groups.  That list might contain groups which are no longer valid,
     // for example if they have been merged.  So we want to refetch the postcode so that our store gets updated.
-    // TODO Minor
-    // if (this.postcode) {
-    //   await this.$store.dispatch('locations/fetch', {
-    //     typeahead: this.postcode.name,
-    //   })
-    //
-    //   const list = Object.values(this.$store.getters['locations/list'])
-    //   list.forEach((l) => {
-    //     if (l.id === this.postcode.id) {
-    //       this.$store.dispatch('compose/setPostcode', l)
-    //     }
-    //   })
-    // }
+    if (this.postcode) {
+      const runtimeConfig = useRuntimeConfig()
+
+      const location = await api(runtimeConfig).location.fetch({
+        typeahead: this.postcode.name,
+      })
+
+      if (location?.ret === 0 && location?.locations[0]) {
+        this.composeStore.postcode = location.locations[0]
+      }
+    }
   },
 }
 </script>
