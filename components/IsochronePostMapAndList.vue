@@ -1,7 +1,7 @@
 <template>
   <div>
     <h2 class="sr-only">Map of offers and wanteds</h2>
-    <client-only>
+    <Suspense>
       <PostMap
         v-if="initialBounds"
         :key="'postmap-' + bump"
@@ -30,8 +30,13 @@
         @messages="messagesChanged($event)"
         @groups="groupsChanged($event)"
       />
-      <div v-observe-visibility="mapVisibilityChanged" />
-    </client-only>
+      <template #fallback>
+        <div class="invisible" :style="'min-height: ' + mapHeight + 'px'">
+          Loading map...
+        </div>
+      </template>
+    </Suspense>
+    <div v-observe-visibility="mapVisibilityChanged" />
     <div class="rest">
       <div v-if="closestGroups?.length" class="mb-1 border p-2 bg-white">
         {{ closestGroups.length }} groups near you - TODO show Join button
@@ -165,6 +170,7 @@ import { ref } from 'vue'
 import { mapState } from 'pinia'
 import { useGroupStore } from '../stores/group'
 import { useMessageStore } from '../stores/message'
+import { calculateMapHeight } from '../composables/useMap'
 import { useAuthStore } from '~/stores/auth'
 import { useMiscStore } from '~/stores/misc'
 import { getDistance } from '~/composables/useMap'
@@ -334,6 +340,9 @@ export default {
   },
   computed: {
     ...mapState(useIsochroneStore, { isochroneBounds: 'bounds' }),
+    mapHeight() {
+      return calculateMapHeight(this.heightFraction)
+    },
     messagesOnMap: {
       get() {
         if (this.updatedMessagesOnMap !== null) {

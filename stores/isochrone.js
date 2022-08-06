@@ -9,6 +9,7 @@ export const useIsochroneStore = defineStore({
     L: null,
     list: [],
     fetchingMessages: null,
+    fetchingIsochrones: null,
     messageList: [],
   }),
   actions: {
@@ -19,16 +20,25 @@ export const useIsochroneStore = defineStore({
 
       this.config = config
     },
-    async fetch() {
-      // TODO CACHE
-      try {
-        this.list = await api(this.config).isochrone.fetchv2()
-      } catch (e) {
-        // Most likely a 403 error, which we get when there is no isochrone.  Call the old API, which will create one
-        // for us.
-        await api(this.config).isochrone.fetchv1()
-        this.list = await api(this.config).isochrone.fetchv2()
+    async fetch(force) {
+      if (!this.list?.length || force) {
+        try {
+          if (this.fetchingIsochrones) {
+            await this.fetchingIsochrones
+          } else {
+            this.fetchingIsochrones = api(this.config).isochrone.fetchv2()
+            this.list = await this.fetchingIsochrones
+            this.fetchingMessages = null
+          }
+        } catch (e) {
+          // Most likely a 403 error, which we get when there is no isochrone.  Call the old API, which will create one
+          // for us.
+          await api(this.config).isochrone.fetchv1()
+          this.list = await api(this.config).isochrone.fetchv2()
+        }
       }
+
+      return this.list
     },
     async fetchMessages(force) {
       if (force || !this.messageList?.length) {

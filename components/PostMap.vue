@@ -114,6 +114,7 @@ import cloneDeep from 'lodash.clonedeep'
 import { mapState } from 'pinia'
 import { useGroupStore } from '../stores/group'
 import { useMessageStore } from '../stores/message'
+import { calculateMapHeight } from '../composables/useMap'
 import GroupMarker from './GroupMarker'
 import BrowseHomeIcon from './BrowseHomeIcon'
 import { useMiscStore } from '~/stores/misc'
@@ -219,18 +220,6 @@ export default {
 
     const Wkt = await import('wicket')
 
-    const mapHeight = computed(() => {
-      let height = 0
-
-      // TODO Resized height
-      if (process.client) {
-        height = window.innerHeight / props.heightFraction - 70
-        height = height < 200 ? 200 : height
-      }
-
-      return height
-    })
-
     return {
       miscStore,
       groupStore,
@@ -240,7 +229,6 @@ export default {
       Wkt,
       osmtile: osmtile(),
       attribution: attribution(),
-      mapHeight,
     }
   },
   data() {
@@ -264,6 +252,9 @@ export default {
   },
   computed: {
     ...mapState(useIsochroneStore, { isochroneBounds: 'bounds' }),
+    mapHeight() {
+      return calculateMapHeight(this.heightFraction)
+    },
     mapOptions() {
       return {
         zoomControl: true,

@@ -28,3 +28,15 @@ export function getDistance(origin, destination) {
   const EARTH_RADIUS = 6371
   return c * EARTH_RADIUS * 1000
 }
+
+export function calculateMapHeight(heightFraction) {
+  let height = 0
+
+  // TODO Resized height
+  if (process.client) {
+    height = window.innerHeight / heightFraction - 70
+    height = height < 200 ? 200 : height
+  }
+
+  return height
+}
