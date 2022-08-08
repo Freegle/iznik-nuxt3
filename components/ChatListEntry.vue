@@ -1,23 +1,25 @@
 <template>
   <div v-if="chat" class="clickme noselect mb-1 mt-1" @mouseenter="fetch">
-    <div class="ml-1 mr-1 d-flex justify-content-start w-100">
-      <div class="d-flex flex-column justify-content-around">
-        <ProfileImage
-          v-if="chat.icon"
-          :image="chat.icon"
-          class="mr-1 inline"
-          is-thumbnail
-          size="lg"
-          border
-          :badge="chat.unseen ? chat.unseen : null"
-        />
-      </div>
-      <div class="w-100">
-        <!--        TODO MINOR Chat name can overflow without truncation.-->
-        <!-- eslint-disable-next-line-->
-        <span class="pl-0 mb-0 chatname truncate d-flex justify-content-between">{{ chat.name }} <SupporterInfo v-if="chat.supporter" class="mr-3 mt-1 small" /></span>
-        <!-- eslint-disable-next-line-->
-        <div class="small text-muted" :title="dateFormatted">{{ timeago(chat.lastdate) }}</div>
+    <div class="layout">
+      <ProfileImage
+        v-if="chat.icon"
+        :image="chat.icon"
+        class="ml-1 mr-1 profile"
+        is-thumbnail
+        size="lg"
+        border
+        :badge="chat.unseen ? chat.unseen : null"
+      />
+      <div class="chatentry">
+        <div class="d-flex justify-content-between w-100">
+          <!-- eslint-disable-next-line-->
+          <span class="pl-0 mb-0 chatname truncate">{{ chat.name }}{{ chat.name }}{{ chat.name }}{{ chat.name }}{{ chat.name }}{{ chat.name }}</span>
+          <!-- eslint-disable-next-line-->
+          <SupporterInfo v-if="chat.supporter" class="mr-3 mb-1 small" />
+        </div>
+        <div class="small text-muted" :title="dateFormatted">
+          {{ timeago(chat.lastdate) }}
+        </div>
         <div>
           <b-badge v-if="chat.replyexpected" variant="danger">
             RSVP - please reply
@@ -91,9 +93,23 @@ export default {
 }
 </script>
 <style scoped lang="scss">
+@import 'bootstrap/scss/_functions.scss';
+@import 'bootstrap/scss/_variables.scss';
+@import 'bootstrap/scss/mixins/_breakpoints.scss';
+
 .chatname {
   color: $colour-info-fg;
   font-weight: bold;
   white-space: nowrap;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: min-content calc(98% - 30px);
+  align-items: center;
+
+  @include media-breakpoint-up(sm) {
+    grid-template-columns: min-content calc(98% - 50px);
+  }
 }
 </style>
