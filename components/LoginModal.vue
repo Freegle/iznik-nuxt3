@@ -512,6 +512,7 @@ export default {
       }
     },
     loginGoogle() {
+      // TODO MINOR Look into https://developers.google.com/identity/gsi/web/guides/automatic-sign-in-sign-out
       this.loginType = 'Google'
 
       this.nativeLoginError = null
