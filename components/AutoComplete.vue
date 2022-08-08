@@ -804,4 +804,8 @@ input[invalid='true'] {
   font-weight: bold;
   background-color: initial;
 }
+
+:deep(mark) {
+  padding: 0 !important;
+}
 </style>
