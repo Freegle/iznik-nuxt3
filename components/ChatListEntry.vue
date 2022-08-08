@@ -13,7 +13,7 @@
       <div class="chatentry">
         <div class="d-flex justify-content-between w-100">
           <!-- eslint-disable-next-line-->
-          <span class="pl-0 mb-0 chatname truncate">{{ chat.name }}{{ chat.name }}{{ chat.name }}{{ chat.name }}{{ chat.name }}{{ chat.name }}</span>
+          <span class="pl-0 mb-0 chatname truncate">{{ chat.name }}</span>
           <!-- eslint-disable-next-line-->
           <SupporterInfo v-if="chat.supporter" class="mr-3 mb-1 small" />
         </div>
