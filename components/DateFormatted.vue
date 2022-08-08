@@ -7,11 +7,16 @@
 import dayjs from 'dayjs'
 import advancedFormat from 'dayjs/plugin/advancedFormat'
 import relativeTime from 'dayjs/plugin/relativeTime'
+import {
+  dateonly,
+  datetime,
+  datetimeshort,
+  dateshort,
+  weekdayshort,
+} from '../composables/useTimeFormat'
 
 dayjs.extend(advancedFormat)
 dayjs.extend(relativeTime)
-
-// TODO MINOR Search for other examples of dayjs which should use this.
 
 export default {
   props: {
@@ -27,24 +32,30 @@ export default {
   },
   computed: {
     formatted() {
-      let format
+      let ret = null
 
       switch (this.format) {
         case 'dateonly':
-          format = 'Do MMMM, YYYY'
+          ret = dateonly(this.value)
+          break
+        case 'dateshort':
+          ret = dateshort(this.value)
           break
         case 'datetime':
-          format = 'Do MMMM, YYYY HH:mm:ss'
+          ret = datetime(this.value)
           break
         case 'datetimeshort':
-          format = 'Do MMM, YYYY HH:mm'
+          ret = datetimeshort(this.value)
+          break
+        case 'weekdaytime':
+          ret = weekdayshort(this.value)
           break
         default:
-          format = 'Do MMMM, YYYY HH:mm:ss'
+          ret = datetime(this.value)
           break
       }
 
-      return dayjs(this.value).format(format)
+      return ret
     },
   },
   // timeago(val) {

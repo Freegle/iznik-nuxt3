@@ -40,3 +40,7 @@ export function datetimeshort(val) {
 export function dateshort(val) {
   return dayjs(val).format('MMM DD, YYYY')
 }
+
+export function weekdayshort(val) {
+  return dayjs(val).format('dddd Do HH:mm a')
+}

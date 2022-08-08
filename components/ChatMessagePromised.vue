@@ -111,8 +111,11 @@
               {{ refmsg?.subject }}
             </h4>
           </nuxt-link>
-          <p v-if="trystdate" class="small text-info">
-            Handover arranged for <strong>{{ trystdate }}</strong>
+          <p v-if="tryst.arrangedfor" class="small text-info">
+            Handover arranged for
+            <strong
+              ><DateFormatted :value="tryst.arrangedfor" format="weekdaytime"
+            /></strong>
           </p>
           <div
             v-if="refmsg"
@@ -212,11 +215,11 @@
   </div>
 </template>
 <script>
-import dayjs from 'dayjs'
 import { useTrystStore } from '../stores/tryst'
 import { fetchOurOffers } from '../composables/useThrottle'
 import { useChatStore } from '../stores/chat'
 import { fetchReferencedMessage } from '../composables/useChat'
+import DateFormatted from './DateFormatted'
 import OutcomeModal from '@/components/OutcomeModal'
 import AddToCalendar from '~/components/AddToCalendar'
 import ChatBase from '~/components/ChatBase'
@@ -232,6 +235,7 @@ export default {
     ProfileImage,
     RenegeModal,
     PromiseModal,
+    DateFormatted,
   },
   extends: ChatBase,
   async setup(props) {
@@ -258,11 +262,6 @@ export default {
     tryst() {
       return this.otheruser
         ? this.trystStore.getByUser(this.otheruser.id)
-        : null
-    },
-    trystdate() {
-      return this.tryst
-        ? dayjs(this.tryst.arrangedfor).format('dddd Do HH:mm a')
         : null
     },
     takenBy() {

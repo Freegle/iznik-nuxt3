@@ -26,7 +26,10 @@
       />
       <div v-if="tryst" class="d-flex flex-wrap">
         <b-form-checkbox v-model="removeTryst" size="lg">
-          Cancel handover arranged for <strong>{{ trystdate }}</strong>
+          Cancel handover arranged for
+          <strong
+            ><DateFormatted :value="tryst.arrangedfor" format="weekdaytime"
+          /></strong>
         </b-form-checkbox>
       </div>
       <hr />
@@ -44,11 +47,11 @@
 </template>
 
 <script>
-import dayjs from 'dayjs'
 import { useTrystStore } from '../stores/tryst'
 import { useMessageStore } from '../stores/message'
 import modal from '@/mixins/modal'
 import UserRatings from '~/components/UserRatings'
+import DateFormatted from '~/components/DateFormatted'
 
 const NoticeMessage = () => import('~/components/NoticeMessage')
 
@@ -56,6 +59,7 @@ export default {
   components: {
     NoticeMessage,
     UserRatings,
+    DateFormatted,
   },
   mixins: [modal],
   props: {
@@ -162,11 +166,6 @@ export default {
     tryst() {
       return this.selectedUser
         ? this.trystStore.getByUser(this.selectedUser)
-        : null
-    },
-    trystdate() {
-      return this.tryst
-        ? dayjs(this.tryst.arrangedfor).format('dddd Do HH:mm a')
         : null
     },
   },
