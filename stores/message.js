@@ -61,8 +61,8 @@ export const useMessageStore = defineStore({
       // TODO Cache
       return await api(this.config).message.mygroups()
     },
-    async fetchByUser(userid) {
-      return await api(this.config).message.fetchByUser(userid)
+    async fetchByUser(userid, active) {
+      return await api(this.config).message.fetchByUser(userid, active)
     },
     async fetchPrimaryMessages(params) {
       const ret = await api(this.config).message.fetchMessages(params)

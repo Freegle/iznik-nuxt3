@@ -80,13 +80,11 @@
         </template>
         <b-card-body sub-title="" class="p-0 pt-2 pb-2">
           <div v-if="activeOffers.length">
-            <div
-              v-for="message in activeOffers"
-              :key="'message-' + message.id"
-              class="p-0"
-            >
-              <OurMessage :id="message.id" record-view />
-            </div>
+            <MessageList
+              :messages-for-list="activeOffers"
+              selected-type="Offer"
+              class="p-2"
+            />
           </div>
           <p v-else class="pl-3">None at the moment.</p>
         </b-card-body>
@@ -103,13 +101,11 @@
         </template>
         <b-card-body sub-title="" class="p-0 pt-2 pb-2">
           <div v-if="activeWanteds.length">
-            <div
-              v-for="message in activeWanteds"
-              :key="'message-' + message.id"
-              class="p-0"
-            >
-              <OurMessage :id="message.id" record-view />
-            </div>
+            <MessageList
+              :messages-for-list="activeWanteds"
+              selected-type="Wanted"
+              class="p-2"
+            />
           </div>
           <p v-else class="pl-3">None at the moment.</p>
         </b-card-body>
@@ -135,11 +131,11 @@
           >
             <b-col cols="12" md="4">
               <v-icon icon="gift" />
-              {{ recentOFFERCount }}.
+              {{ recentOFFERCount }}
             </b-col>
             <b-col cols="12" md="4">
               <v-icon icon="search" />
-              {{ recentWANTEDCount }}.
+              {{ recentWANTEDCount }}
             </b-col>
             <b-col cols="12" md="4">
               <v-icon icon="envelope" />
@@ -170,12 +166,13 @@
 import pluralize from 'pluralize'
 import { useUserStore } from '../stores/user'
 import { milesAway } from '../composables/useDistance'
+import { useMessageStore } from '../stores/message'
 import SupporterInfoModal from '~/components/SupporterInfoModal'
 import NoticeMessage from '~/components/NoticeMessage'
 import { twem } from '~/composables/useTwem'
 
 import ReplyTime from '~/components/ReplyTime'
-import OurMessage from '~/components/OurMessage.vue'
+import MessageList from '~/components/MessageList.vue'
 import ProfileHeader from '~/components/ProfileHeader'
 
 export default {
@@ -183,7 +180,7 @@ export default {
     SupporterInfoModal,
     NoticeMessage,
     ReplyTime,
-    OurMessage,
+    MessageList,
     ProfileHeader,
   },
 
@@ -198,11 +195,22 @@ export default {
       default: true,
     },
   },
-  setup(props) {
+  async setup(props) {
     const userStore = useUserStore()
+    const messageStore = useMessageStore()
+
+    // Get active messages
+    const messages = await messageStore.fetchByUser(props.id, true)
+
+    // Load them into store.
+    messages.forEach((message) => {
+      messageStore.fetch(message.id)
+    })
 
     return {
       userStore,
+      messageStore,
+      messages,
     }
   },
   data() {
@@ -224,13 +232,6 @@ export default {
     aboutme() {
       return this.user?.aboutme ? twem(this.user.aboutme.text) : null
     },
-    messages() {
-      // TODO messages for this user.
-      return []
-      // return this.$store.getters['messages/getAll'].filter(
-      //   (m) => m.fromuser && m.fromuser.id === this.user.id
-      // )
-    },
     expectedreplies() {
       pluralize.addIrregularRule('freegler is', 'freeglers are')
       return pluralize('freegler is', this.user?.info?.expectedreply, true)
@@ -243,10 +244,10 @@ export default {
       )
     },
     activeOFFERCount() {
-      return pluralize('OFFER', this.activeOffers.length, true)
+      return pluralize('active OFFER', this.activeOffers.length, true)
     },
     activeWANTEDCount() {
-      return pluralize('WANTED', this.activeWanteds.length, true)
+      return pluralize('active WANTED', this.activeWanteds.length, true)
     },
     recentOFFERCount() {
       return pluralize('OFFER', this.user?.info?.offers, true)
@@ -266,15 +267,7 @@ export default {
       const ret = []
 
       for (const message of this.messages) {
-        // We need to check the fromuser.  This is because we've seen a slow call from another page complete and
-        // pollute the store with messages from other people.  We might not have the fromuser if we're logged out,
-        // though.  That leaves a slight bug in place.
-        if (
-          message.type === type &&
-          (!message.outcomes || message.outcomes.length === 0) &&
-          (!message.fromuser ||
-            parseInt(message.fromuser.id) === parseInt(this.id))
-        ) {
+        if (message.type === type && !message.successful) {
           ret.push(message)
         }
       }
