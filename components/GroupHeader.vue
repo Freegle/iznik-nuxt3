@@ -91,24 +91,24 @@
         </div>
       </ExternalLink>
       <div v-else>
-        <!--        <ChatButton-->
-        <!--          :groupid="group.id"-->
-        <!--          title="Contact Volunteers"-->
-        <!--          chattype="User2Mod"-->
-        <!--          variant="white"-->
-        <!--        />-->
+        <ChatButton
+          :groupid="group.id"
+          title="Contact Volunteers"
+          chattype="User2Mod"
+          variant="white"
+        />
         <div
           v-if="group.showmods && group.showmods.length"
           class="d-flex flex-wrap justify-content-start mt-3"
         >
-          <!--          <ChatButton-->
-          <!--            v-for="mod in group.showmods"-->
-          <!--            :key="'showmod-' + mod.id"-->
-          <!--            :groupid="group.id"-->
-          <!--            chattype="User2Mod"-->
-          <!--          >-->
-          <!--            <GroupShowMod :modtoshow="mod" class="ms-1" />-->
-          <!--          </ChatButton>-->
+          <ChatButton
+            v-for="mod in group.showmods"
+            :key="'showmod-' + mod.id"
+            :groupid="group.id"
+            chattype="User2Mod"
+          >
+            <GroupShowMod :modtoshow="mod" class="ms-1" />
+          </ChatButton>
         </div>
       </div>
     </div>
@@ -149,11 +149,13 @@
 </template>
 
 <script>
-// TODO
-// import ChatButton from '~/components/ChatButton'
+import ChatButton from '~/components/ChatButton'
 import { useAuthStore } from '~/stores/auth'
 
 export default {
+  components: {
+    ChatButton,
+  },
   props: {
     group: {
       type: Object,

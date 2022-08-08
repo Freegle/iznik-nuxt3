@@ -30,6 +30,9 @@
   </div>
 </template>
 <script>
+import { useRouter } from 'nuxt/app'
+import { useChatStore } from '../stores/chat'
+
 export default {
   props: {
     size: {
@@ -73,11 +76,20 @@ export default {
       default: null,
     },
   },
+  setup() {
+    const chatStore = useChatStore()
+
+    return {
+      chatStore,
+    }
+  },
   methods: {
     gotoChat() {
       this.openChat(null, null, null)
     },
     async openChat(event, firstmessage, firstmsgid) {
+      const router = useRouter()
+
       this.$emit('click')
       console.log(
         'Open chat',
@@ -90,14 +102,14 @@ export default {
       if (this.groupid > 0) {
         // Open a chat to the mods.  If we are in FD then we just pass the group id and the chat opens from us to the
         // mods; if we're in MT we pass the groupid and userid and it opens from us mods to the user.
-        const chatid = await this.$store.dispatch('chats/openChatToMods', {
+        const chatid = await this.chatStore.openChatToMods({
           userid: null,
           groupid: this.groupid,
         })
 
-        this.$router.push('/chats/' + chatid)
+        router.push('/chats/' + chatid)
       } else if (this.userid > 0) {
-        const chatid = await this.$store.dispatch('chats/openChatToUser', {
+        const chatid = await this.chatStore.openChatToUser({
           userid: this.userid,
           chattype: this.chattype,
         })
@@ -105,7 +117,7 @@ export default {
         if (chatid) {
           if (firstmessage) {
             console.log('First message to send', firstmessage)
-            await this.$store.dispatch('chatmessages/send', {
+            await this.chatStore.send({
               roomid: chatid,
               message: firstmessage,
               refmsgid: firstmsgid,
@@ -115,16 +127,13 @@ export default {
 
             if (firstmsgid) {
               // Refresh the message so that our reply will show.
-              this.$store.dispatch('messages/fetch', {
-                id: firstmsgid,
-                force: true,
-              })
+              this.chatStore.fetchMessages(firstmsgid, true)
             }
 
             this.$emit('sent')
           }
 
-          this.$router.push('/chats/' + chatid)
+          router.push('/chats/' + chatid)
         }
       }
     },

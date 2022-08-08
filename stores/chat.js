@@ -79,6 +79,62 @@ export const useChatStore = defineStore({
       // Get the latest messages back.
       this.fetchMessages(chatid)
     },
+    async openChat(params) {
+      let id = null
+      let logIt = true
+
+      try {
+        const rsp = await api(this.config).chat.openChat(
+          params,
+          function (data) {
+            if (data && data.ret === 4) {
+              // Don't log errors for banned users.
+              logIt = false
+            } else {
+              logIt = true
+            }
+
+            return logIt
+          }
+        )
+
+        id = rsp.id
+      } catch (e) {
+        if (!logIt) {
+          // Just pretend nothing happened.  This is better than showing the user an error, which will make them
+          // try to find ways around the ban.
+          console.log('Swallow exception')
+        } else {
+          console.log('Failed to open chat', e)
+          throw e
+        }
+      }
+
+      if (id) {
+        await this.fetchChat(id)
+      }
+
+      return id
+    },
+    async openChatToMods(params) {
+      const id = await this.openChat({
+        chattype: 'User2Mod',
+        groupid: params.groupid,
+        userid: params.userid,
+      })
+
+      return id
+    },
+    async openChatToUser(params) {
+      // We might have a type override.  Otherwise open a user chat on FD and mod chat on MT.
+      const id = await this.openChat({
+        chattype: params.chattype ? params.chattype : 'User2User',
+        groupid: params.groupid,
+        userid: params.userid,
+      })
+
+      return id
+    },
   },
   getters: {
     byId: (state) => {
