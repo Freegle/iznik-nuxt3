@@ -2,7 +2,7 @@
   <div v-if="user" class="d-flex w-100">
     <ProfileImage
       :image="user.profile.path"
-      class="mb-1 mt-1 inline"
+      class="mb-1 mt-1 inline mr-2"
       is-thumbnail
       size="xl"
     />
@@ -16,14 +16,13 @@
             <span class="glyphicon glyphicon-heart" /> Freegler since
             {{ dateonly(user.added) }}.
           </div>
-          <span v-if="user?.settings?.showmod" class="text-muted">
+          <span v-if="user?.showmod" class="text-muted">
             <v-icon icon="leaf" /> Freegle Volunteer
-            <!--            TODO Does this work?-->
           </span>
         </div>
       </div>
       <div>
-        <div class="text--small text-faded mb-1 text-start text-lg-end">
+        <div class="text--small text-faded mb-1 text-start text-lg-end mr-2">
           #{{ id }}
         </div>
         <div class="d-flex flex-row flex-lg-column align-items-baseline">
