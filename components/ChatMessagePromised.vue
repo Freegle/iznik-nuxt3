@@ -111,7 +111,7 @@
               {{ refmsg?.subject }}
             </h4>
           </nuxt-link>
-          <p v-if="tryst.arrangedfor" class="small text-info">
+          <p v-if="tryst?.arrangedfor" class="small text-info">
             Handover arranged for
             <strong
               ><DateFormatted :value="tryst.arrangedfor" format="weekdaytime"
