@@ -40,7 +40,7 @@
     "autoprefixer": "10.4.5",
     "axios": "^0.26.1",
     "bootstrap": "github:xvaara/bootstrap.git",
-    "bootstrap-vue-3": "^0.1.13",
+    "bootstrap-vue-3": "^0.2.6",
     "dayjs": "^1.11.0",
     "filepond": "^4.30.3",
     "filepond-plugin-file-validate-type": "^1.2.8",
