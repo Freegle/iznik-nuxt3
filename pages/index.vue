@@ -121,7 +121,11 @@ export default {
     useHead(
       buildHead(
         'OFFER',
-        'OFFER something to people nearby and see who wants it'
+        'OFFER something to people nearby and see who wants it',
+        null,
+        {
+          class: 'landing',
+        }
       )
     )
 
@@ -249,7 +253,7 @@ export default {
 .grid {
   display: grid;
   grid-template-columns: 1fr 1.2fr;
-  grid-template-rows: 100px 1fr 300px minmax(50px, auto);
+  grid-template-rows: 0px 1fr 60px minmax(50px, auto);
 
   @include media-breakpoint-up(sm) {
     grid-template-columns: 0.4fr 0.6fr;
@@ -277,7 +281,7 @@ export default {
 }
 
 .info {
-  grid-row: 2 / 3;
+  grid-row: 1 / 3;
   grid-column: 1 / 3;
   text-align: center;
   justify-self: center;
@@ -358,5 +362,9 @@ export default {
 .explore {
   padding-top: 9px;
   padding-bottom: 9px;
+}
+
+main {
+  margin-top: 0px;
 }
 </style>

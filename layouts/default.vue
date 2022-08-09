@@ -162,6 +162,10 @@ export default {
 // TODO Look for b-btn and replace with b-button
 </script>
 <style scoped lang="scss">
+@import '~bootstrap/scss/functions';
+@import '~bootstrap/scss/variables';
+@import '~bootstrap/scss/mixins/_breakpoints';
+
 html {
   box-sizing: border-box;
 }
@@ -207,7 +211,19 @@ body.modal-open {
   }
 }
 
-main {
-  margin-top: 66px;
+body:not(.landing) {
+  main {
+    margin-top: 66px;
+  }
+}
+
+body.landing {
+  main {
+    margin-top: 0px;
+
+    @include media-breakpoint-up(md) {
+      margin-top: 66px;
+    }
+  }
 }
 </style>

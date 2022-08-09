@@ -18,7 +18,7 @@
               </b-card-body>
               <b-card-footer
                 v-if="index === ids.length - 1"
-                class="d-flex justify-content-between p-0 pt-1"
+                class="d-flex justify-content-between p-0 pt-1 bg-transparent border-top-0"
               >
                 <b-button
                   v-if="ids.length === 1 && notblank"
