@@ -113,8 +113,12 @@ import { useRoute } from 'vue-router'
 import { buildHead } from '../composables/useBuildHead'
 import { useMiscStore } from '../stores/misc'
 import api from '~/api'
+const VisualiseMap = () => import('~/components/VisualiseMap')
 
 export default {
+  components: {
+    VisualiseMap,
+  },
   setup() {
     const miscStore = useMiscStore()
 
