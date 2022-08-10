@@ -39,17 +39,16 @@
     <div v-observe-visibility="mapVisibilityChanged" />
     <div class="rest">
       <div v-if="closestGroups?.length" class="mb-1 border p-2 bg-white">
-        {{ closestGroups.length }} groups near you - TODO show Join button
         <h2 class="sr-only">Nearby commmunities</h2>
         <div class="d-flex flex-wrap justify-content-center">
           <div v-for="g in closestGroups" :key="'group-' + g.id">
-            <!--            <JoinWithConfirm-->
-            <!--              :id="g.id"-->
-            <!--              :name="g.namedisplay"-->
-            <!--              size="md"-->
-            <!--              variant="primary"-->
-            <!--              class="m-1"-->
-            <!--            />-->
+            <JoinWithConfirm
+              :id="g.id"
+              :name="g.namedisplay"
+              size="md"
+              variant="primary"
+              class="m-1"
+            />
           </div>
         </div>
       </div>
@@ -177,7 +176,7 @@ import { getDistance } from '~/composables/useMap'
 import { MAX_MAP_ZOOM } from '~/constants'
 import { useIsochroneStore } from '~/stores/isochrone'
 
-// import JoinWithConfirm from '~/components/JoinWithConfirm'
+import JoinWithConfirm from '~/components/JoinWithConfirm'
 const AdaptiveMapGroup = () => import('./AdaptiveMapGroup')
 const ExternalLink = () => import('./ExternalLink')
 const GroupSelect = () => import('./GroupSelect')
@@ -187,7 +186,7 @@ const PostMap = () => import('~/components/PostMap')
 
 export default {
   components: {
-    // JoinWithConfirm,
+    JoinWithConfirm,
     NoticeMessage,
     GroupSelect,
     ExternalLink,

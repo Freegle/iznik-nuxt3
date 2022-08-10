@@ -2,22 +2,21 @@
   <div>
     <h2 class="sr-only">Map of offers and wanteds</h2>
     <client-only>
-      <!--      TODO JOIN -->
-      <!--      <div v-if="!loggedIn && showClosest" class="overlapnav w-100">-->
-      <!--        <div class="d-flex justify-content-around pl-1 pr-1 w-100">-->
-      <!--          <JoinWithConfirm-->
-      <!--            :id="closestGroups[0].id"-->
-      <!--            :name="closestGroups[0].namedisplay + ' for email alerts'"-->
-      <!--            size="lg"-->
-      <!--            variant="white"-->
-      <!--            class="m-1"-->
-      <!--            :class-name="'m-1 text-truncate maxwidth'"-->
-      <!--          />-->
-      <!--        </div>-->
-      <!--      <client-only>-->
-      <!--        <div v-observe-visibility="joinVisibilityChanged" />-->
-      <!--      </client-only>-->
-      <!--      </div>-->
+      <div v-if="!loggedIn && showClosest" class="overlapnav w-100">
+        <div class="d-flex justify-content-around pl-1 pr-1 w-100">
+          <JoinWithConfirm
+            :id="closestGroups[0].id"
+            :name="closestGroups[0].namedisplay + ' for email alerts'"
+            size="lg"
+            variant="white"
+            class="m-1"
+            :class-name="'m-1 text-truncate maxwidth'"
+          />
+        </div>
+        <client-only>
+          <div v-observe-visibility="joinVisibilityChanged" />
+        </client-only>
+      </div>
     </client-only>
     <client-only>
       <PostMap
@@ -54,14 +53,13 @@
         <h2 class="sr-only">Nearby commmunities</h2>
         <div class="d-flex flex-wrap justify-content-center">
           <div v-for="g in closestGroups.slice(0, 3)" :key="'group-' + g.id">
-            <!--            TODO JOIN -->
-            <!--            <JoinWithConfirm-->
-            <!--              :id="g.id"-->
-            <!--              :name="g.namedisplay"-->
-            <!--              size="md"-->
-            <!--              variant="primary"-->
-            <!--              class="m-1"-->
-            <!--            />-->
+            <JoinWithConfirm
+              :id="g.id"
+              :name="g.namedisplay"
+              size="md"
+              variant="primary"
+              class="m-1"
+            />
           </div>
         </div>
       </div>
@@ -176,7 +174,7 @@ import { useMessageStore } from '../stores/message'
 import MessageList from './MessageList'
 import { useMiscStore } from '~/stores/misc'
 import { MAX_MAP_ZOOM } from '~/constants'
-// import JoinWithConfirm from '~/components/JoinWithConfirm'
+import JoinWithConfirm from '~/components/JoinWithConfirm'
 import { getDistance } from '~/composables/useMap'
 import GroupSelect from '~/components/GroupSelect'
 
@@ -186,7 +184,7 @@ const ExternalLink = () => import('./ExternalLink')
 export default {
   components: {
     MessageList,
-    // JoinWithConfirm,
+    JoinWithConfirm,
     GroupSelect,
     ExternalLink,
     AdaptiveMapGroup,

@@ -286,7 +286,6 @@ export async function freegleIt(type, router) {
 
       await Promise.all(promises)
 
-      console.log('Router', router)
       router.push({
         name: 'myposts',
         params,
