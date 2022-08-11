@@ -136,6 +136,7 @@ export default {
       toShow: MIN_TO_SHOW,
       maxMessageVisible: 0,
       ensuredMessageVisible: false,
+      emitted: false,
     }
   },
   computed: {
@@ -272,7 +273,17 @@ export default {
       )
     },
     visibilityChanged(visible) {
-      this.$emit('update:visible', visible)
+      if (!visible) {
+        if (!this.emitted) {
+          // Only emit this once, to stop us thrashing.
+          this.$emit('update:visible', visible)
+          console.log('Emit visible', false)
+          this.emitted = true
+        }
+      } else {
+        console.log('Emit visible', true)
+        this.$emit('update:visible', visible)
+      }
     },
   },
 }

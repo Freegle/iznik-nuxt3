@@ -127,6 +127,7 @@
             </b-input-group>
           </div>
         </div>
+        <!--        TODO This causes screen-thrashing-->
         <div
           v-if="!postsVisible && messagesOnMap?.length"
           class="d-flex justify-content-center mt-1 mb-1"
@@ -148,9 +149,6 @@
         <!--        />-->
 
         <h2 class="sr-only">List of wanteds and offers</h2>
-        <client-only>
-          <div v-observe-visibility="messageVisibilityChanged" />
-        </client-only>
         <MessageList
           v-if="updatedMessagesOnMap || messagesOnMap.length"
           v-model:visible="postsVisible"
@@ -589,9 +587,6 @@ export default {
           this.infiniteId++
         }
       }
-    },
-    messageVisibilityChanged(visible) {
-      this.postsVisible = visible
     },
     mapVisibilityChanged(visible) {
       this.mapVisible = visible
