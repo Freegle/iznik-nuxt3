@@ -127,7 +127,6 @@
             </b-input-group>
           </div>
         </div>
-        <!--        TODO This causes screen-thrashing-->
         <div
           v-if="!postsVisible && messagesOnMap?.length"
           class="d-flex justify-content-center mt-1 mb-1"

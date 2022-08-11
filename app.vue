@@ -103,5 +103,30 @@ if (typeof window !== 'undefined') {
   }
 }
 
+const chatCount = computed(() => {
+  return chatStore.unreadCount
+})
+
+useHead({
+  titleTemplate: (titleChunk) => {
+    if (titleChunk.charAt(0) !== '(' && chatCount > 0) {
+      return '(' + chatCount.value + ') ' + titleChunk
+    } else {
+      return titleChunk
+    }
+  },
+})
+//   const totalCount = this.unreadNotificationCount + this.chatCount
+//   return {
+//     titleTemplate: totalCount > 0 ? `(${totalCount}) %s` : '%s',
+//     link: [
+//       {
+//         rel: 'icon',
+//         type: 'image/x-icon',
+//         href: '/icon.png'
+//       }
+//     ]
+//   }
+
 ready = true
 </script>

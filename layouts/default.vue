@@ -53,22 +53,9 @@ export default {
       return store.getBreakpoint
     },
   },
-  // head() {
-  // TODO Head
-  //   const totalCount = this.unreadNotificationCount + this.chatCount
-  //   return {
-  //     titleTemplate: totalCount > 0 ? `(${totalCount}) %s` : '%s',
-  //     link: [
-  //       {
-  //         rel: 'icon',
-  //         type: 'image/x-icon',
-  //         href: '/icon.png'
-  //       }
-  //     ]
-  //   }
-  // },
   // watch: {
   //   $route(newVal) {
+  // TODO Google Analytics
   //     // Automatic route tracking doesn't seem to be working.
   //     this.$ga.page(newVal.fullPath)
   //   }

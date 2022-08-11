@@ -2,7 +2,7 @@
   <div>
     <ChatNotVisible v-if="notVisible" />
     <div v-else-if="me" class="chatHolder">
-      <ChatHeader :id="id" class="chatTitle" :loaded.sync="headerLoaded" />
+      <ChatHeader :id="id" class="chatTitle" />
       <div
         v-if="chat && chatmessages?.length"
         ref="chatContent"
@@ -36,7 +36,7 @@
           <div v-observe-visibility="topChanged" />
         </div>
       </div>
-      <div v-else-if="chatBusy && headerLoaded" class="text-center">
+      <div v-else-if="chatBusy" class="text-center">
         <b-img class="float-end" src="~static/loader.gif" />
       </div>
       <ChatFooter v-bind="$props" class="chatFooter" />
@@ -97,7 +97,6 @@ export default {
   },
   data() {
     return {
-      headerLoaded: false,
       messagesToShow: 0,
       chatBusy: false,
       topVisible: true,

@@ -291,10 +291,6 @@ export default {
         })
       },
     },
-    loaded() {
-      // TODO MINOR this could probably go now that we have setup()
-      return this.chat && this.otheruser && this.otheruser.info
-    },
     replytime() {
       let ret = null
       let secs = null
@@ -320,11 +316,6 @@ export default {
       }
 
       return ret
-    },
-  },
-  watch: {
-    loaded() {
-      this.$emit('update:loaded', true)
     },
   },
   methods: {
