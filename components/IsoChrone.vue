@@ -98,7 +98,7 @@
         <label class="font-weight-bold travelLabel"> Travel by: </label>
         <div class="travel">
           <b-button
-            :variant="isochrone.transport === 'Walk' ? 'primary' : 'white'"
+            :variant="transport === 'Walk' ? 'primary' : 'white'"
             @click="changeTransport('Walk')"
           >
             <v-icon icon="walking" /><span class="d-none d-md-inline-block"
@@ -106,7 +106,7 @@
             >
           </b-button>
           <b-button
-            :variant="isochrone.transport === 'Cycle' ? 'primary' : 'white'"
+            :variant="transport === 'Cycle' ? 'primary' : 'white'"
             @click="changeTransport('Cycle')"
           >
             <v-icon icon="bicycle" /><span class="d-none d-md-inline-block"
@@ -114,7 +114,7 @@
             >
           </b-button>
           <b-button
-            :variant="isochrone.transport === 'Drive' ? 'primary' : 'white'"
+            :variant="transport === 'Drive' ? 'primary' : 'white'"
             @click="changeTransport('Drive')"
           >
             <v-icon icon="car" /><span class="d-none d-md-inline-block"
@@ -149,6 +149,7 @@
 </template>
 <script>
 import { mapState } from 'pinia'
+import { ref } from 'vue'
 import PostCode from '~/components/PostCode'
 import SpinButton from '~/components/SpinButton'
 import { useIsochroneStore } from '~/stores/isochrone'
@@ -179,21 +180,23 @@ export default {
     const isochroneStore = useIsochroneStore()
 
     let minutes = 20
+    let transport = 'Drive'
 
     if (props.id) {
       minutes = isochroneStore.get(props.id).minutes
+      transport = isochroneStore.get(props.id).transport
     }
 
     return {
       isochroneStore,
-      minutes,
+      minutes: ref(minutes),
+      transport: ref(transport),
     }
   },
   data() {
     return {
       minMinutes: 5,
       maxMinutes: 45,
-      transport: null,
       pc: null,
       nickname: null,
       step: 5,
@@ -249,13 +252,14 @@ export default {
     },
     changeMinutes(newVal) {
       if (this.id) {
-        // TODO ISOCHRONE
         this.isochroneStore.edit({
           id: this.id,
-          minutes: this.minutes,
+          minutes: newVal,
           transport: this.isochrone.transport,
         })
       }
+
+      this.minutes = newVal
     },
     changeTransport(type) {
       if (this.id) {
@@ -264,9 +268,9 @@ export default {
           minutes: this.minutes,
           transport: type,
         })
-      } else {
-        this.transport = type
       }
+
+      this.transport = type
     },
     selectPostcode(pc) {
       this.pc = pc
@@ -300,6 +304,10 @@ export default {
 @import '~bootstrap/scss/functions';
 @import '~bootstrap/scss/variables';
 @import '~bootstrap/scss/mixins/_breakpoints';
+
+:deep(button) {
+  box-shadow: none !important;
+}
 
 .layout {
   display: grid;

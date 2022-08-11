@@ -531,6 +531,10 @@ export default {
     messagesForList() {
       this.infiniteId++
     },
+    isochroneBounds() {
+      this.bump++
+      this.infiniteId++
+    },
   },
   mounted() {
     // We want to track views of messages for new members.

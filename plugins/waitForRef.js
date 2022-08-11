@@ -6,7 +6,7 @@
 //
 // So we have a cheap and cheerful poll timer.
 //
-// TODO But this should use promises rather than callbacks.
+// TODO MINOR But this should use promises rather than callbacks.
 export default defineNuxtPlugin((nuxtApp) => {
   nuxtApp.vueApp.mixin({
     methods: {

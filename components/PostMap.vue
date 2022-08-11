@@ -27,7 +27,6 @@
           <!--          >-->
           <l-map
             ref="map"
-            :key="'map-' + bump"
             v-model:bounds="bounds"
             v-model:center="center"
             v-model:zoom="zoom"
@@ -240,7 +239,6 @@ export default {
       mapObject: null,
       manyToShow: 20,
       shownMany: false,
-      bump: 1,
       lastBounds: null,
       zoom: 5,
       destroyed: false,
@@ -424,7 +422,7 @@ export default {
         this.$emit('update:showGroups', false)
       }
     },
-    isochroneBounds() {
+    isochroneBounds(newVal) {
       this.getMessages()
     },
     groups: {
@@ -660,7 +658,7 @@ export default {
             }
           }
 
-          // TODO Need Go API call
+          // TODO PERF Need Go API call
           const ret = await this.$api.message.fetchMessages(params)
 
           if (ret.ret === 0 && ret.messages && !this.destroyed) {

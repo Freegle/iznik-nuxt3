@@ -11,6 +11,7 @@ export const useIsochroneStore = defineStore({
     fetchingMessages: null,
     fetchingIsochrones: null,
     messageList: [],
+    bounds: null,
   }),
   actions: {
     async init(config) {
@@ -28,7 +29,7 @@ export const useIsochroneStore = defineStore({
           } else {
             this.fetchingIsochrones = api(this.config).isochrone.fetchv2()
             this.list = await this.fetchingIsochrones
-            this.fetchingMessages = null
+            this.fetchingIsochrones = null
           }
         } catch (e) {
           // Most likely a 403 error, which we get when there is no isochrone.  Call the old API, which will create one
@@ -38,6 +39,7 @@ export const useIsochroneStore = defineStore({
         }
       }
 
+      this.computeBounds()
       return this.list
     },
     async fetchMessages(force) {
@@ -55,11 +57,13 @@ export const useIsochroneStore = defineStore({
     },
     async delete({ id }) {
       await api(this.config).isochrone.del(id)
-      await this.fetch()
+      this.fetchMessages(true)
+      await this.fetch(true)
     },
     async add(params) {
       const id = await api(this.config).isochrone.add(params)
-      await this.fetch()
+      this.fetchMessages(true)
+      await this.fetch(true)
       return id
     },
     async edit(params) {
@@ -69,13 +73,14 @@ export const useIsochroneStore = defineStore({
         minutes: params.minutes,
       })
 
-      await this.fetch()
+      this.fetchMessages(true)
+      await this.fetch(true)
     },
-  },
-  getters: {
-    bounds: (state) => {
+    computeBounds() {
       // We have a problem with getting the bounds using leaflet - it looks like a timing error.  So do it ourselves.
-      const isochrones = state.list
+      const isochrones = this.list
+
+      this.bounds = null
 
       if (isochrones?.length) {
         let swlat = null
@@ -85,7 +90,7 @@ export const useIsochroneStore = defineStore({
 
         isochrones.forEach((i) => {
           try {
-            const wkt = new state.Wkt.Wkt()
+            const wkt = new this.Wkt.Wkt()
             wkt.read(i.polygon)
             const obj = wkt.toObject()
             const thisbounds = obj.getBounds()
@@ -102,15 +107,15 @@ export const useIsochroneStore = defineStore({
         })
 
         if (swlat !== null) {
-          return [
+          this.bounds = [
             [swlat, swlng],
             [nelat, nelng],
           ]
         }
       }
-
-      return null
     },
+  },
+  getters: {
     get: (state) => (id) => {
       return state.list.find((i) => i.id === id)
     },

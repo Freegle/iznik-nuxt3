@@ -277,11 +277,9 @@ export default {
         if (!this.emitted) {
           // Only emit this once, to stop us thrashing.
           this.$emit('update:visible', visible)
-          console.log('Emit visible', false)
           this.emitted = true
         }
       } else {
-        console.log('Emit visible', true)
         this.$emit('update:visible', visible)
       }
     },

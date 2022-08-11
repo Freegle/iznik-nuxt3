@@ -1,6 +1,6 @@
 <template>
   <div>
-    <label for="placeautocomplete" class="smaller font-weight-bold">
+    <label for="placeautocomplete" class="smaller font-weight-bold mb-1">
       <span v-if="labeltextSr" class="sr-only">
         {{ labeltextSr }}
       </span>
