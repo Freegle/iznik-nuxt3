@@ -7,7 +7,6 @@
           <VisibleWhen :at="['lg', 'xl', 'xxl']">
             <!--            TODO-->
             <!--            <SidebarLeft-->
-            <!--              v-if="showRest"-->
             <!--              :show-community-events="true"-->
             <!--              :show-bot-left="true"-->
             <!--            />-->
@@ -16,7 +15,7 @@
         <b-col cols="12" lg="6" class="p-0">
           <!--          TODO Microvol-->
           <!--          <MicroVolunteering />-->
-          <div v-if="showRest">
+          <div>
             <GlobalWarning />
             <!--            TODO Chats-->
             <!--            <ExpectedRepliesWarning-->
@@ -116,7 +115,6 @@
           <VisibleWhen :at="['lg', 'xl', 'xxl']">
             <!--            TODO-->
             <!--            <sidebar-right-->
-            <!--              v-if="showRest"-->
             <!--              show-volunteer-opportunities-->
             <!--              show-job-opportunities-->
             <!--            />-->
@@ -158,7 +156,7 @@ export default {
     // ExpectedRepliesWarning,
     // AboutMeModal,
   },
-  setup() {
+  async setup() {
     useHead(
       buildHead('Browse', 'See OFFERs and WANTEDs', null, {
         class: 'overflow-y-scroll',
@@ -187,6 +185,10 @@ export default {
       })
     }
 
+    // Also get all the groups.  This allows us to suggest other groups to join from within the map.
+    // Doing this now slows down the load, but reduces flicker.
+    await groupStore.fetch()
+
     return {
       route,
       router,
@@ -200,7 +202,6 @@ export default {
   data() {
     return {
       initialBounds: null,
-      showRest: false,
       bump: 1,
       showAboutMe: false,
       reviewAboutMe: false,
@@ -228,55 +229,48 @@ export default {
       },
     },
   },
-  mounted() {
-    // Also get all the groups.  This allows us to suggest other groups to join from within the map.  No rush
-    // though, so delay it.
-    setTimeout(async () => {
-      this.groupStore.fetch()
-      this.showRest = true
+  async mounted() {
+    if (this.me) {
+      const lastask = this.miscStore.get('lastaboutmeask')
+      const now = new Date().getTime()
 
-      if (this.me) {
-        const lastask = this.miscStore.get('lastaboutmeask')
-        const now = new Date().getTime()
+      if (!lastask || now - lastask > 90 * 24 * 60 * 60 * 1000) {
+        // Not asked too recently.
+        await this.fetchMe(true)
 
-        if (!lastask || now - lastask > 90 * 24 * 60 * 60 * 1000) {
-          // Not asked too recently.
-          await this.fetchMe()
+        if (!this.me.aboutme || !this.me.aboutme.text) {
+          // We have not yet provided one.
+          const daysago = dayjs().diff(dayjs(this.me.added), 'days')
 
-          if (!this.me.aboutme || !this.me.aboutme.text) {
-            // We have not yet provided one.
-            const daysago = dayjs().diff(dayjs(this.me.added), 'days')
+          if (daysago > 7) {
+            // Nudge to ask people to to introduce themselves.
+            this.showAboutMe = true
+          }
+        } else {
+          const monthsago = dayjs().diff(
+            dayjs(this.me.aboutme.timestamp),
+            'months'
+          )
 
-            if (daysago > 7) {
-              // Nudge to ask people to to introduce themselves.
-              this.showAboutMe = true
-            }
-          } else {
-            const monthsago = dayjs().diff(
-              dayjs(this.me.aboutme.timestamp),
-              'months'
-            )
-
-            if (monthsago >= 6) {
-              // Old.  Ask them to review it.
-              this.showAboutMe = true
-              this.reviewAboutMe = true
-            }
+          if (monthsago >= 6) {
+            // Old.  Ask them to review it.
+            this.showAboutMe = true
+            this.reviewAboutMe = true
           }
         }
-
-        if (this.showAboutMe) {
-          this.waitForRef('aboutMeModal', () => {
-            this.$refs.aboutMeModal.show()
-          })
-
-          this.miscStore.set({
-            key: 'lastaboutmeask',
-            value: now,
-          })
-        }
       }
-    }, 5000)
+
+      if (this.showAboutMe) {
+        this.waitForRef('aboutMeModal', () => {
+          this.$refs.aboutMeModal.show()
+        })
+
+        this.miscStore.set({
+          key: 'lastaboutmeask',
+          value: now,
+        })
+      }
+    }
   },
   methods: {
     async calculateInitialMapBounds() {
