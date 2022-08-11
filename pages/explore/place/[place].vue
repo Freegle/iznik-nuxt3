@@ -33,14 +33,11 @@ import { buildHead } from '../../../composables/useBuildHead'
 import { useGroupStore } from '~/stores/group'
 const AdaptiveMap = () => import('../../../components/AdaptiveMap')
 
-// import loginOptional from '@/mixins/loginOptional.js'
-// TODO Go to landing page, explore, go back, go forward - blank page.
 export default {
   components: {
     ExternalLink,
     AdaptiveMap,
   },
-  // mixins: [loginOptional],
   async setup() {
     useHead(
       buildHead(

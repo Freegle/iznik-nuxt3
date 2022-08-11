@@ -98,7 +98,6 @@
 
 <script>
 import NoticeMessage from '../../components/NoticeMessage'
-// import loginOptional from '@/mixins/loginOptional.js'
 import { buildHead } from '../../composables/useBuildHead'
 import ExternalLink from '@/components/ExternalLink'
 import GlobalWarning from '~/components/GlobalWarning'
@@ -130,7 +129,6 @@ export default {
 
     return inherited
   },
-  // mixins: [loginOptional, compose],
   data() {
     return {
       id: null,

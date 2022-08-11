@@ -273,28 +273,30 @@ export default {
       this.showThanks = false
       this.showReplies = false
 
-      const bounds = this.$refs.map.leafletObject.getBounds()
+      if (this.$refs?.map?.leafletObject) {
+        const bounds = this.$refs.map.leafletObject.getBounds()
 
-      if (this.list.length === 0) {
-        // Get some more.
-        const runtimeConfig = useRuntimeConfig()
-        const ret = await api(runtimeConfig).visualise.fetch({
-          swlat: bounds.getSouthWest().lat,
-          swlng: bounds.getSouthWest().lng,
-          nelat: bounds.getNorthEast().lat,
-          nelng: bounds.getNorthEast().lng,
-          context: this.context,
-        })
+        if (this.list.length === 0) {
+          // Get some more.
+          const runtimeConfig = useRuntimeConfig()
+          const ret = await api(runtimeConfig).visualise.fetch({
+            swlat: bounds.getSouthWest().lat,
+            swlng: bounds.getSouthWest().lng,
+            nelat: bounds.getNorthEast().lat,
+            nelng: bounds.getNorthEast().lng,
+            context: this.context,
+          })
 
-        if (ret.ret === 0) {
-          this.context = ret.context
-          this.list = ret.list
-        } else {
-          this.running = false
+          if (ret.ret === 0) {
+            this.context = ret.context
+            this.list = ret.list
+          } else {
+            this.running = false
+          }
         }
-      }
 
-      this.flyToFromUser()
+        this.flyToFromUser()
+      }
     },
     reply(id) {
       // Reference id so that we generate a different message each time.

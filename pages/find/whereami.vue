@@ -124,7 +124,6 @@ export default {
 
     return inherited
   },
-  // mixins: [loginOptional, compose],
   data() {
     return {
       id: null,
