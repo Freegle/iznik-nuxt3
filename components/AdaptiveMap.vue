@@ -333,7 +333,7 @@ export default {
       centre: null,
       mapready: process.server,
       mapVisible: true,
-      postsVisible: false,
+      postsVisible: true,
       joinVisible: false,
       mapMoved: false,
       messagesOnMap: [],
