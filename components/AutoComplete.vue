@@ -637,8 +637,7 @@ export default {
 
 <style scoped lang="scss">
 .transbord {
-  border-color: $color-gray-4;
-  border-left: none;
+  border-color: transparent !important;
 }
 
 /* iteminp class is passed into this component in a prop */
