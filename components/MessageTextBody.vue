@@ -14,10 +14,9 @@
   </div>
 </template>
 <script>
+import Highlighter from 'vue-highlight-words'
 import { twem } from '~/composables/useTwem'
 import { useMessageStore } from '~/stores/message'
-
-const Highlighter = () => import('vue-highlight-words')
 
 export default {
   components: { Highlighter },

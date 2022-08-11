@@ -662,9 +662,7 @@ export default {
           const ret = await this.$api.message.fetchMessages(params)
 
           if (ret.ret === 0 && ret.messages && !this.destroyed) {
-            // Don't really understand why the clone is necessary, but it is - without it we seem to process
-            // old data inside the watch().
-            messages = cloneDeep(ret.messages)
+            messages = ret.messages
           }
         }
 
@@ -714,7 +712,7 @@ export default {
           }
         }
 
-        this.messageList = messages
+        this.messageList = messages || []
         this.$emit('messages', messages)
         this.$emit('update:loading', false)
       }

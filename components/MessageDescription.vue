@@ -1,7 +1,7 @@
 <template>
   <div v-if="textbody && textbody !== 'null'" class="textbody">
     <Highlighter
-      v-if="me && matchedon"
+      v-if="matchedon"
       :search-words="[matchedon.word]"
       :text-to-highlight="textbody"
       highlight-class-name="highlight"
@@ -11,10 +11,9 @@
   </div>
 </template>
 <script>
+import Highlighter from 'vue-highlight-words'
 import { useMessageStore } from '~/stores/message'
 import { twem } from '~/composables/useTwem'
-
-const Highlighter = () => import('vue-highlight-words')
 
 export default {
   components: { Highlighter },
@@ -31,8 +30,7 @@ export default {
   },
   setup() {
     const messageStore = useMessageStore()
-    const me = useMe()
-    return { me, messageStore }
+    return { messageStore }
   },
   computed: {
     clamp() {

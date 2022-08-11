@@ -115,7 +115,7 @@
               <b-form-input
                 v-model="search"
                 type="text"
-                placeholder="Search posts TODO"
+                placeholder="Search posts"
                 autocomplete="off"
                 @keyup.enter.exact="doSearch"
               />
@@ -398,8 +398,9 @@ export default {
       if (!this.search) {
         ret = this.messagesForList
       } else {
-        // We are searching.  We get the messages from the store.
-        const messages = this.messageStore.list
+        // We are searching.
+        const messages = this.messagesForList
+
         messages.forEach((message) => {
           if (message) {
             // Pass whether the message has been freegled, which in this case is returned as the outcomes in the

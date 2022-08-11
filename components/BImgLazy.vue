@@ -8,7 +8,7 @@
   />
 </template>
 <script>
-// TODO MINOR Alpha of Bootstrap-Vue-3 doesn't support lazy load so we roll our own for now.
+// Alpha of Bootstrap-Vue-3 doesn't support lazy load so we roll our own for now.
 
 export default {
   props: {

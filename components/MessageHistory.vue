@@ -43,11 +43,10 @@ export default {
     },
   },
   setup() {
-    const me = useMe()
     const groupStore = useGroupStore()
     const messageStore = useMessageStore()
 
-    return { me, groupStore, messageStore, timeago }
+    return { groupStore, messageStore, timeago }
   },
   computed: {
     message() {

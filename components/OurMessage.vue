@@ -36,6 +36,7 @@
         :expand-button-text="expandButtonText"
         :replyable="replyable"
         class="mt-3"
+        :matchedon="matchedon"
         @expand="expand"
         @zoom="zoom"
       />
@@ -63,6 +64,11 @@ export default {
     id: {
       type: Number,
       required: true,
+    },
+    matchedon: {
+      type: Object,
+      required: false,
+      default: null,
     },
     expandButtonText: {
       type: String,

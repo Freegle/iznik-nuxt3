@@ -140,15 +140,14 @@
     </div>
   </div>
 </template>
-
 <script>
+import Highlighter from 'vue-highlight-words'
 import { fetchReferencedMessage } from '../composables/useChat'
 import ChatBase from '~/components/ChatBase'
 import ProfileImage from '~/components/ProfileImage'
 import ChatMessageSummary from '~/components/ChatMessageSummary'
 const OutcomeModal = () => import('~/components/OutcomeModal')
 const PromiseModal = () => import('~/components/PromiseModal')
-const Highlighter = () => import('vue-highlight-words')
 
 export default {
   components: {

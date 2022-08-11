@@ -60,9 +60,6 @@
 </template>
 
 <script>
-// Need to import rather than async otherwise the render doesn't happen and ref isn't set.
-// import Vue from 'vue'
-// import { TooltipPlugin } from 'bootstrap-vue'
 import MessageReplyInfo from './MessageReplyInfo'
 import { useMessageStore } from '~/stores/message'
 import MessagePromised from '@/components/MessagePromised'
@@ -75,9 +72,6 @@ import MessageAttachments from '~/components/MessageAttachments'
 
 const MessageHistoryExpanded = () =>
   import('~/components/MessageHistoryExpanded')
-
-// TODO
-// Vue.use(TooltipPlugin)
 
 export default {
   components: {

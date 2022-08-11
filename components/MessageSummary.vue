@@ -15,7 +15,7 @@
     <div :class="classes" @click="expand">
       <MessageItemLocation
         :id="id"
-        :matchedon="message.matchedon"
+        :matchedon="matchedon"
         class="mb-1 header-title"
         :type="message.type"
         :expanded="false"
@@ -34,7 +34,7 @@
           <MessageTag :id="id" class="ps-2 pe-2" inline />
           <div class="flex-grow-1" />
         </div>
-        <MessageDescription :id="id" :matchedon="message.matchedon" />
+        <MessageDescription :id="id" :matchedon="matchedon" />
       </div>
       <div
         v-if="!message.successful && replyable"
@@ -64,6 +64,11 @@ export default {
     id: {
       type: Number,
       required: true,
+    },
+    matchedon: {
+      type: Object,
+      required: false,
+      default: null,
     },
     expandButtonText: {
       type: String,

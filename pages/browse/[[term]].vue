@@ -170,10 +170,7 @@ export default {
     const groupStore = useGroupStore()
     const isochroneStore = useIsochroneStore()
 
-    let searchTerm = route.params.term
-    // TODO Optional parameters not working - see https://github.com/nuxt/framework/issues/4634
-    // Rename back to [[term]].vue.
-    searchTerm = ''
+    const searchTerm = route.params.term
 
     // We want this to be our next home page.
     const existingHomepage = miscStore.get('lasthomepage')
@@ -223,7 +220,7 @@ export default {
       immediate: true,
       handler(newVal, oldVal) {
         if (newVal && !oldVal) {
-          this.calculateInitialMapBounds()
+          this.calculateInitialMapBounds(!this.searchTerm)
           this.bump++
         }
       },
@@ -273,7 +270,7 @@ export default {
     }
   },
   methods: {
-    async calculateInitialMapBounds() {
+    async calculateInitialMapBounds(fetchIsochrones) {
       // The initial bounds for the map are determined from the isochrones if possible.  We might have them cached
       // in store.
       await this.isochroneStore.fetch()
@@ -353,7 +350,7 @@ export default {
         if (bounds) {
           this.initialBounds = bounds
         }
-      } else {
+      } else if (fetchIsochrones) {
         // We have some isochrones.  By default we'll be showing that view in PostMap, so start the fetch of the
         // messages now.  That way we can display the list rapidly.
         this.isochroneStore.fetchMessages(true)

@@ -268,6 +268,7 @@ import { setupChat } from '../composables/useChat'
 import { useMiscStore } from '../stores/misc'
 import { useMessageStore } from '../stores/message'
 import { fetchOurOffers } from '../composables/useThrottle'
+import { useAuthStore } from '../stores/auth'
 import ExternalLink from './ExternalLink'
 import { untwem } from '~/composables/useTwem'
 
@@ -302,6 +303,7 @@ export default {
     id: { type: Number, required: true },
   },
   async setup(props) {
+    const authStore = useAuthStore()
     const miscStore = useMiscStore()
     const messageStore = useMessageStore()
 
@@ -316,6 +318,7 @@ export default {
       chatStore,
       messageStore,
       chatmessages,
+      authStore,
     }
   },
   data() {
@@ -355,9 +358,18 @@ export default {
 
       return ret
     },
-    enterNewLine() {
-      // TODO Store enternewline in settings
-      return false
+    enterNewLine: {
+      get() {
+        return this.me?.settings?.enterNewLine
+      },
+      async set(newVal) {
+        const settings = this.me.settings
+        settings.enterNewLine = newVal
+
+        await this.authStore.saveAndGet({
+          settings,
+        })
+      },
     },
     // TODO MINOR Consider showing handover prompt, but in less annoying way.
     expectedreplies() {

@@ -40,10 +40,9 @@
   </div>
 </template>
 <script>
+import Highlighter from 'vue-highlight-words'
 import { useMessageStore } from '~/stores/message'
 import { twem } from '~/composables/useTwem'
-
-const Highlighter = () => import('vue-highlight-words')
 
 export default {
   components: { Highlighter },

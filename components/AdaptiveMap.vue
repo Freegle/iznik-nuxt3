@@ -282,7 +282,7 @@ export default {
     let bounds = null
 
     // We might have a preference for which type of posts we view.
-    const postType = miscStore.get('postType')
+    const postType = authStore.user?.settings.browsePostType
     const selectedType = ref(postType || 'All')
 
     const showGroups = props.startOnGroups
@@ -424,7 +424,8 @@ export default {
         ret = this.messagesForList
       } else {
         // We are searching.  We get the messages from the store.
-        const messages = this.messageStore.list
+        const messages = this.messagesForList
+
         messages.forEach((message) => {
           if (message) {
             // Pass whether the message has been freegled, which in this case is returned as the outcomes in the
@@ -535,11 +536,12 @@ export default {
         this.groupStore.fetch(newVal)
       }
     },
-    selectedType(newVal) {
-      // TODO MINOR Store in server prefs.
-      this.miscStore.set({
-        key: 'postType',
-        value: newVal,
+    async selectedType(newVal) {
+      const settings = this.me.settings
+      settings.browsePostType = newVal
+
+      await this.authStore.saveAndGet({
+        settings,
       })
 
       this.infiniteId++

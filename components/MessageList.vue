@@ -9,13 +9,17 @@
     <client-only>
       <div v-observe-visibility="visibilityChanged" />
     </client-only>
-    <div v-if="deDuplicatedMessages.length">
+    <div v-if="deDuplicatedMessages?.length">
       <Suspense
         v-for="message in deDuplicatedMessages"
         :key="'messagelist-' + message.id"
       >
         <div :ref="'messagewrapper-' + message.id" class="p-0">
-          <OurMessage :id="message.id" record-view />
+          <OurMessage
+            :id="message.id"
+            :matchedon="message.matchedon"
+            record-view
+          />
         </div>
 
         <template #fallback>
@@ -25,7 +29,7 @@
     </div>
     <client-only>
       <infinite-loading
-        v-if="messagesForList.length"
+        v-if="messagesForList?.length"
         :identifier="infiniteId"
         :distance="distance"
         @infinite="loadMore"
@@ -36,7 +40,7 @@
           <b-img-lazy src="/loader.gif" alt="Loading" />
         </template>
       </infinite-loading>
-      <NoticeMessage v-if="!busy && !loading && !messagesForList.length">
+      <NoticeMessage v-if="!busy && !loading && !messagesForList?.length">
         <p>
           Sorry, we didn't find anything. Things come and go quickly, though, so
           you could try later. Or you could:
@@ -164,7 +168,11 @@ export default {
       //   may be returned some.
       // - Do show completed posts - makes us look good.  But not too many.
       // TODO Check that we filter crosspost duplicates, e.g. for user #41412221.
-      for (let i = 0; i < this.messagesForList.length && i < this.toShow; i++) {
+      for (
+        let i = 0;
+        i < this.messagesForList?.length && i < this.toShow;
+        i++
+      ) {
         const m = this.messagesForList[i]
 
         if (this.wantMessage(m)) {
@@ -239,11 +247,11 @@ export default {
       do {
         this.toShow++
       } while (
-        this.toShow < this.messagesForList.length &&
+        this.toShow < this.messagesForList?.length &&
         !this.wantMessage(this.messagesForList[this.toShow])
       )
 
-      if (this.toShow > this.messagesForList.length) {
+      if (this.toShow > this.messagesForList?.length) {
         // We're showing all the messages
         $state.complete()
       } else {
