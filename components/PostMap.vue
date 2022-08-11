@@ -713,7 +713,7 @@ export default {
         }
 
         this.messageList = messages || []
-        this.$emit('messages', messages)
+        this.$emit('messages', this.messageList)
         this.$emit('update:loading', false)
       }
 
