@@ -13,6 +13,7 @@ export const useMessageStore = defineStore({
     // Messages we're in the process of fetching
     fetching: {},
     fetchingCount: 0,
+    fetchingMyGroups: null,
   }),
   actions: {
     init(config) {
@@ -42,7 +43,7 @@ export const useMessageStore = defineStore({
       return this.list[id]
     },
     async fetchInBounds(swlat, swlng, nelat, nelng, groupid) {
-      // TODO Cache
+      // Don't cache this, as it might change.
       const ret = await api(this.config).message.inbounds(
         swlat,
         swlng,
@@ -58,27 +59,19 @@ export const useMessageStore = defineStore({
       return ret
     },
     async fetchMyGroups() {
-      // TODO Cache
-      return await api(this.config).message.mygroups()
+      let ret = null
+
+      if (this.fetchingMyGroups) {
+        ret = await this.fetchingMyGroups
+      } else {
+        this.fetchingMyGroups = api(this.config).message.mygroups()
+        ret = await this.fetchingMyGroups
+        this.fetchingMyGroups = null
+      }
+      return ret
     },
     async fetchByUser(userid, active) {
       return await api(this.config).message.fetchByUser(userid, active)
-    },
-    async fetchPrimaryMessages(params) {
-      const ret = await api(this.config).message.fetchMessages(params)
-
-      if (ret && ret.ret === 0) {
-        // TODO New API
-        this.primaryList = ret.messages
-      }
-    },
-    async fetchSecondaryMessages(params) {
-      const ret = await api(this.config).message.fetchMessages(params)
-
-      if (ret && ret.ret === 0) {
-        // TODO New API
-        this.secondaryList = ret.messages
-      }
     },
     async view(id) {
       await api(this.config).message.view(id)

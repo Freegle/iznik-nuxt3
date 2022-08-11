@@ -6,6 +6,7 @@ export const useUserStore = defineStore({
   state: () => ({
     config: {},
     list: {},
+    fetching: {},
   }),
   actions: {
     init(config) {
@@ -19,11 +20,17 @@ export const useUserStore = defineStore({
       id = parseInt(id)
 
       if (force || !this.list[id]) {
-        // TODO Caching
-        const user = await api(this.config).user.fetch(id)
+        if (this.fetching[id]) {
+          await this.fetching[id]
+        } else {
+          this.fetching[id] = api(this.config).user.fetch(id)
+          const user = await this.fetching[id]
 
-        if (user) {
-          this.list[id] = user
+          if (user) {
+            this.list[id] = user
+          }
+
+          this.fetchind[id] = null
         }
       }
 

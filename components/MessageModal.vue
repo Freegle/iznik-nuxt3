@@ -5,7 +5,7 @@
         id="messagemodal"
         v-model="showModal"
         size="lg"
-        hide-footer
+        class="hide-footer"
         body-class="p-0 p-md-3"
         @shown="shown"
       >

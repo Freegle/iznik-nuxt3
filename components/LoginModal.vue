@@ -5,10 +5,10 @@
     ref="loginModal"
     v-model="showModal"
     size="lg"
-    hide-footer
     no-close-on-backdrop
     :hide-header-close="forceLogin"
     :no-close-on-esc="forceLogin"
+    class="hide-footer"
   >
     <!-- This is required as the default bootstrap component makes the main title an h5 -->
     <template #title>
@@ -102,7 +102,6 @@
               id="firstnameGroup"
               label="First name"
               label-for="firstname"
-              label-class="mb-0"
             >
               <b-form-input
                 id="firstname"
@@ -111,13 +110,13 @@
                 name="firstname"
                 class="mb-3"
                 autocomplete="given-name"
+                placeholder="Your first name"
               />
             </b-form-group>
             <b-form-group
               id="lastnameGroup"
               label="Last name"
               label-for="lastname"
-              label-class="mb-0"
             >
               <b-form-input
                 id="lastname"
@@ -126,6 +125,7 @@
                 name="lastname"
                 class="mb-3"
                 autocomplete="family-name"
+                placeholder="Your last or family name"
               />
             </b-form-group>
           </div>
@@ -134,7 +134,7 @@
             v-model:email="email"
             v-model:valid="emailValid"
             size="md"
-            label="Email address"
+            label="Your email address"
           />
           <NoticeMessage v-if="referToGoogleButton">
             Please use the <em>Continue with Google</em> button to log in. That
@@ -791,5 +791,11 @@ $color-yahoo: #6b0094;
 
 :deep(.link a) {
   text-decoration: none !important;
+}
+
+:deep {
+  .is-invalid label {
+    color: unset;
+  }
 }
 </style>
