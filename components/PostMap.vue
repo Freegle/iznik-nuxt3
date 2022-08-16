@@ -69,7 +69,7 @@
                 @click="idle"
               />
               <l-marker
-                v-if="me && me.settings && me.settings.mylocation"
+                v-if="me?.settings?.mylocation && (me.lat || me.lng)"
                 :lat-lng="[me.lat, me.lng]"
                 @click="goHome"
               >
