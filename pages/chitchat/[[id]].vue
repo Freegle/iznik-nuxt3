@@ -14,7 +14,7 @@
           :chats="me.expectedchats"
         />
         <b-card v-if="!id" body-class="p-2 p-md-4">
-          <b-card-text>
+          <b-card-text class="mb-0">
             <h5 class="text-center mb-3 d-block d-md-none">
               <span class="d-none d-sm-inline"
                 >Looking for your posts? Click</span
@@ -51,7 +51,7 @@
           </b-card-text>
           <v-tooltip
             :shown="showToolGive"
-            :target="givebutton"
+            target="givebutton"
             placement="bottom"
             variant="primary"
             :triggers="[]"
@@ -65,7 +65,7 @@
           </v-tooltip>
           <v-tooltip
             :shown="showToolFind"
-            :target="findbutton"
+            target="findbutton"
             placement="bottom"
             variant="primary"
             :triggers="[]"
@@ -81,13 +81,13 @@
         <div v-if="!id" class="mt-2">
           <b-card no-body class="mb-2">
             <b-card-text class="p-2 pb-0 mb-0">
-              <label class="font-weight-bold" for="startThread"
+              <label class="font-weight-bold mb-1" for="startThread"
                 >Chat to nearby freeglers!
                 <span class="d-none d-sm-inline"
                   >Ask for advice, recommendations, or just have a natter:</span
                 ></label
               >
-              <b-textarea
+              <b-form-textarea
                 id="startThread"
                 v-model="startThread"
                 rows="2"
@@ -150,7 +150,6 @@
               <NewsThread
                 :id="entry.id"
                 :key="'newsthread-' + entry.id"
-                :users="users"
                 :scroll-to="scrollTo"
               />
             </li>
@@ -181,12 +180,16 @@
 </template>
 
 <script>
+import { useRoute } from 'vue-router'
 import NoticeMessage from '../../components/NoticeMessage'
 import GlobalWarning from '../../components/GlobalWarning'
 import VisibleWhen from '../../components/VisibleWhen'
 import { buildHead } from '../../composables/useBuildHead'
-import { untwem } from '~/composables/useTwem'
+import { useMiscStore } from '../../stores/misc'
+import { useNewsfeedStore } from '../../stores/newsfeed'
+import { useAuthStore } from '../../stores/auth'
 import NewsThread from '~/components/NewsThread.vue'
+import { untwem } from '~/composables/useTwem'
 
 const OurFilePond = () => import('~/components/OurFilePond')
 const SidebarLeft = () => import('~/components/SidebarLeft')
@@ -212,16 +215,40 @@ export default {
     return !params.id || /^\d+$/.test(params.id)
   },
   setup() {
+    const miscStore = useMiscStore()
+    const newsfeedStore = useNewsfeedStore()
+    const authStore = useAuthStore()
+
+    const route = useRoute()
+    const id = route.params.id
+
+    // We want this to be our next home page.
+    const existingHomepage = miscStore.get('lasthomepage')
+
+    if (existingHomepage !== 'news') {
+      miscStore.set({
+        key: 'lasthomepage',
+        value: 'news',
+      })
+    }
+
     useHead(
       buildHead(
         'ChitChat',
         'Chat to nearby freeglers...ask for advice, recommendations or just have a good old natter.'
       )
     )
+
+    return {
+      authStore,
+      newsfeedStore,
+      miscStore,
+      id,
+    }
   },
   data() {
     return {
-      busy: false,
+      show: 0,
       startThread: null,
       scrollTo: null,
       infiniteId: +new Date(),
@@ -239,22 +266,20 @@ export default {
   computed: {
     selectedArea: {
       get() {
-        const remembered = this.$store.getters['newsfeed/area']
-
-        return remembered || 0
+        const settings = this.me.settings
+        return settings.newsfeedarea || 0
       },
-      set(newval) {
-        this.$store.commit('newsfeed/area', {
-          area: newval,
+      async set(newval) {
+        const settings = this.me.settings
+        settings.newsfeedarea = newval
+
+        await this.authStore.saveAndGet({
+          settings,
         })
       },
     },
-    users() {
-      const users = this.$store.getters['newsfeed/users']
-      return users
-    },
     newsfeed() {
-      return this.$store.getters['newsfeed/newsfeed']
+      return this.newsfeedStore.list
     },
   },
   beforeCreate() {
@@ -265,19 +290,6 @@ export default {
     this.runChecks = false
   },
   mounted() {
-    // We want this to be our next home page.
-    const existingHomepage = this.$store.getters['misc/get']('lasthomepage')
-
-    if (existingHomepage !== 'news') {
-      this.$store.dispatch('misc/set', {
-        key: 'lasthomepage',
-        value: 'news',
-      })
-    }
-
-    // Clear the store otherwise existing info may prevent us triggering a fetch via loadMore.
-    this.$store.dispatch('newsfeed/clearFeed')
-
     setTimeout(this.runCheck, 3000)
   },
   methods: {
@@ -340,7 +352,7 @@ export default {
         setTimeout(this.runCheck, 1000)
       }
     },
-    async loadMore($state) {
+    loadMore($state) {
       this.busy = true
       this.scrollTo = this.id
 
@@ -348,70 +360,11 @@ export default {
         if ($state.complete) {
           $state.complete()
         }
+      } else if (this.show < this.newsfeed.length) {
+        this.show++
+        $state.loaded()
       } else {
-        try {
-          const context = this.$store.getters['newsfeed/getContext']
-          const visited = []
-
-          if (this.id) {
-            // Just one - fetch it by id.
-            let id = this.id
-            let item
-            let maxdepth = 100
-
-            do {
-              maxdepth--
-
-              if (maxdepth <= 0) {
-                // Fallback to ensure no infinite loop in case of weird thread structure.  We're only supposed to allow
-                // replies and replies to replies, but we've had at least one but resulting in deeper nesting than that.
-                // Better to display any such threads as well as fix any bugs that create them.
-                break
-              }
-
-              // await this.$store.dispatch('newsfeed/clearFeed')
-              await this.$store.dispatch('newsfeed/fetch', {
-                id,
-              })
-
-              item = this.$store.getters['newsfeed/get'](id)
-
-              if (!item) {
-                console.error('Failed to get newsfeed', id)
-                break
-              } else {
-                const headid = parseInt(item.threadhead)
-
-                if (id === headid || visited.includes(headid)) {
-                  break
-                } else {
-                  visited.push(headid)
-                  id = headid
-                }
-              }
-            } while (true)
-
-            $state.complete()
-          } else {
-            // Fetch for the area we are interested in.
-            await this.$store.dispatch('newsfeed/fetchFeed', {
-              context,
-              distance: this.selectedArea,
-            })
-
-            if ($state.loaded) {
-              $state.loaded()
-            }
-          }
-        } catch (e) {
-          console.error('Load failed', e)
-
-          if ($state.complete) {
-            $state.complete()
-          }
-        }
-
-        this.busy = false
+        $state.complete()
       }
     },
     areaChange() {
@@ -458,7 +411,7 @@ export default {
 @import '~bootstrap/scss/variables';
 @import '~bootstrap/scss/mixins/_breakpoints';
 
-.post__button {
+:deep(.post__button) {
   @include media-breakpoint-up(sm) {
     width: 40%;
   }

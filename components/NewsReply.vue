@@ -168,7 +168,7 @@
             />
           </span>
         </b-input-group-prepend>
-        <b-textarea
+        <b-form-textarea
           ref="replybox"
           v-model="replybox"
           size="sm"
@@ -205,7 +205,7 @@
               />
             </span>
           </b-input-group-prepend>
-          <b-textarea
+          <b-form-textarea
             ref="replybox"
             v-model="replybox"
             size="sm"
@@ -276,7 +276,7 @@
       no-stacking
     >
       <template slot="default">
-        <b-textarea
+        <b-form-textarea
           ref="editText"
           v-model="reply.message"
           rows="8"

@@ -17,7 +17,13 @@
           class="d-block mt-1"
         >
           <v-icon icon="map-marker-alt" />
-          <span>{{ me.settings.mylocation.area.name }}</span>
+          <span
+            v-tooltip="
+              'This is where other people will see that you are.  Change your location from Settings.'
+            "
+            class="ml-1"
+            >{{ me.settings.mylocation.area.name }}</span
+          >
         </div>
       </div>
       <div class="d-none d-sm-flex align-items-center">
@@ -30,7 +36,13 @@
           class="w-50"
         >
           <v-icon icon="map-marker-alt" />
-          <span>{{ me.settings.mylocation.area.name }}</span>
+          <span
+            v-tooltip="
+              'This is where other people will see that you are.  Change your location from Settings.'
+            "
+            class="ml-1"
+            >{{ me.settings.mylocation.area.name }}</span
+          >
         </div>
         <b-form-select
           v-model="selectedArea"
@@ -43,7 +55,16 @@
   </b-card>
 </template>
 <script>
+import { useAuthStore } from '../stores/auth'
+
 export default {
+  setup() {
+    const authStore = useAuthStore()
+
+    return {
+      authStore,
+    }
+  },
   data() {
     return {
       areaOptions: [
@@ -85,13 +106,15 @@ export default {
   computed: {
     selectedArea: {
       get() {
-        const remembered = this.$store.getters['newsfeed/area']
-
-        return remembered || 0
+        const settings = this.me.settings
+        return settings.newsfeedarea || 0
       },
-      set(newval) {
-        this.$store.commit('newsfeed/area', {
-          area: newval,
+      async set(newval) {
+        const settings = this.me.settings
+        settings.newsfeedarea = newval
+
+        await this.authStore.saveAndGet({
+          settings,
         })
       },
     },

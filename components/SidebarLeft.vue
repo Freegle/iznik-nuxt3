@@ -15,10 +15,9 @@
     />
   </div>
 </template>
-
 <script>
+import BotLeftBox from '~/components/BotLeftBox'
 const CommunityEventSidebar = () => import('~/components/CommunityEventSidebar')
-const BotLeftBox = () => import('~/components/BotLeftBox')
 
 export default {
   components: {

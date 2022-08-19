@@ -57,7 +57,6 @@
               :is="newsComponentName"
               :id="newsfeed.id"
               :newsfeed="newsfeed"
-              :users="users"
               @focus-comment="focusComment"
             />
             <NewsPreview
@@ -79,7 +78,6 @@
         <NewsReplies
           :id="id"
           :threadhead="newsfeed"
-          :users="users"
           :scroll-to="scrollTo"
           :reply-ids="newsfeed.replies.map((r) => r.id)"
           :reply-to="replyingTo"
@@ -104,7 +102,7 @@
                 />
               </span>
             </b-input-group-prepend>
-            <b-textarea
+            <b-form-textarea
               ref="threadcomment"
               v-model="threadcomment"
               size="sm"
@@ -140,7 +138,7 @@
                   />
                 </span>
               </b-input-group-prepend>
-              <b-textarea
+              <b-form-textarea
                 ref="threadcomment"
                 v-model="threadcomment"
                 size="sm"
@@ -205,7 +203,7 @@
       no-stacking
     >
       <template slot="default">
-        <b-textarea
+        <b-form-textarea
           ref="editText"
           v-model="newsfeed.message"
           rows="8"
@@ -280,10 +278,6 @@ export default {
   props: {
     id: {
       type: Number,
-      required: true,
-    },
-    users: {
-      type: Object,
       required: true,
     },
     scrollTo: {
