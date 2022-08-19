@@ -1,0 +1,159 @@
+<template>
+  <div>
+    <div class="d-flex">
+      <ProfileImage
+        v-if="users[userid].profile.turl"
+        :image="users[userid].profile.turl"
+        class="mr-1 mb-1 mt-1 inline"
+        is-thumbnail
+        :is-moderator="Boolean(users[userid].settings.showmod)"
+        size="lg"
+      />
+      <div>
+        <span class="text-success font-weight-bold">{{
+          users[userid].displayname
+        }}</span>
+        created an event<span class="d-none d-md-inline-block">:</span
+        ><br class="d-block d-md-none" />
+        <strong>{{ newsfeed.communityevent.title }}</strong>
+        <br />
+        <span class="text-muted small">
+          {{ timeago(newsfeed.added) }}
+        </span>
+        <span v-if="newsfeed.communityevent.groups.length > 0">
+          on {{ newsfeed.communityevent.groups[0].namedisplay }}
+        </span>
+      </div>
+    </div>
+    <div class="communityevent__container">
+      <div class="communityevent__description">
+        <div v-if="newsfeed.communityevent.description" class="text-truncate">
+          <v-icon icon="info-circle" class="fa-fw" />
+          {{ newsfeed.communityevent.description }}
+        </div>
+        <div v-if="newsfeed.communityevent.location" class="text-truncate">
+          <v-icon icon="map-marker-alt" class="fa-fw" />
+          {{ newsfeed.communityevent.location }}
+        </div>
+        <div v-if="date">
+          <v-icon icon="calendar-alt" /> {{ date.start }} - {{ date.end }}
+        </div>
+        <b-button variant="secondary" class="mt-3 mb-2" @click="moreInfo">
+          <v-icon icon="info-circle" /> More info
+        </b-button>
+      </div>
+      <div class="communityevent__photo">
+        <b-img
+          v-if="newsfeed.communityevent.photo"
+          rounded
+          lazy
+          :src="newsfeed.communityevent.photo.paththumb"
+          class="clickme mt-2 mt-md-0 w-100"
+          @click="moreInfo"
+        />
+      </div>
+    </div>
+    <hr />
+    <div class="mt-2 d-flex flex-wrap justify-content-between">
+      <NewsLoveComment
+        :newsfeed="newsfeed"
+        @focus-comment="$emit('focus-comment')"
+      />
+      <div>
+        <b-button variant="secondary" size="sm" @click="addEvent">
+          <v-icon icon="plus" /> Add your event
+        </b-button>
+      </div>
+    </div>
+    <!--  TODO Community Event-->
+    <!--    <CommunityEventModal ref="addEvent" :start-edit="true" />-->
+    <!--    <CommunityEventModal ref="moreInfo" :event="newsfeed.communityevent" />-->
+  </div>
+</template>
+<script>
+import NewsBase from '~/components/NewsBase'
+import NewsLoveComment from '~/components/NewsLoveComment'
+import ProfileImage from '~/components/ProfileImage'
+// const CommunityEventModal = () => import('~/components/CommunityEventModal')
+
+export default {
+  components: {
+    NewsLoveComment,
+    // CommunityEventModal,
+    ProfileImage,
+  },
+  extends: NewsBase,
+  computed: {
+    date() {
+      // Similar code to CommunityEvent
+      let ret = null
+      const dates = this.newsfeed.communityevent.dates
+      let count = 0
+      const Moment = this.$dayjs
+
+      if (dates) {
+        for (let i = 0; i < dates.length; i++) {
+          const date = dates[i]
+          if (
+            new Moment().diff(date.end) < 0 ||
+            new Moment().isSame(date.end, 'day')
+          ) {
+            if (count === 0) {
+              const startm = new Moment(date.start)
+              let endm = new Moment(date.end)
+              endm = endm.isSame(startm, 'day')
+                ? endm.format('HH:mm')
+                : endm.format('ddd, Do MMM HH:mm')
+              ret = {
+                start: startm.format('ddd, Do MMM HH:mm'),
+                end: endm,
+              }
+            }
+
+            count++
+          }
+        }
+      }
+
+      return ret
+    },
+  },
+  methods: {
+    moreInfo() {
+      this.$refs.moreInfo.show()
+    },
+    addEvent() {
+      this.$refs.addEvent.show()
+    },
+  },
+}
+</script>
+
+<style scoped lang="scss">
+@import '~bootstrap/scss/functions';
+@import '~bootstrap/scss/variables';
+@import '~bootstrap/scss/mixins/_breakpoints';
+
+.communityevent__container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.communityevent__description {
+  width: 100%;
+
+  @include media-breakpoint-up(lg) {
+    width: 65%;
+    padding-right: 15px;
+  }
+}
+
+.communityevent__photo {
+  width: 100%;
+
+  @include media-breakpoint-up(lg) {
+    width: 30%;
+  }
+}
+</style>

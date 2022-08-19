@@ -1,0 +1,114 @@
+<template>
+  <div>
+    <NewsUserIntro
+      v-if="userid"
+      :userid="userid"
+      :users="users"
+      :newsfeed="newsfeed"
+      append="told their Freegle story"
+    />
+    <b-row>
+      <b-col>
+        <b-card variant="success" no-body>
+          <b-card-header class="font-weight-bold">
+            {{ newsfeed.story.headline }}
+          </b-card-header>
+          <b-card-text class="p-2 preline">
+            <b-img
+              v-if="newsfeed.story.photo"
+              v-b-modal="'photoModal-' + newsfeed.id"
+              thumbnail
+              rounded
+              lazy
+              :src="newsfeed.story.photo.paththumb"
+              class="clickme float-right ml-2"
+              @click="showPhotoModal"
+            />
+            <read-more
+              v-if="story"
+              :text="story"
+              :max-chars="500"
+              class="font-weight-bold preline forcebreak nopara"
+            />
+          </b-card-text>
+        </b-card>
+      </b-col>
+    </b-row>
+    <div class="mt-2 d-flex flex-wrap justify-content-between">
+      <NewsLoveComment
+        :newsfeed="newsfeed"
+        @focus-comment="$emit('focus-comment')"
+      />
+      <div>
+        <b-button
+          variant="secondary"
+          size="sm"
+          class="d-inline-block mr-1"
+          @click="shareStory"
+        >
+          <v-icon icon="share-alt" /><span class="d-none d-inline-block-md">
+            Share</span
+          >
+        </b-button>
+        <b-button variant="secondary" to="/stories" size="sm" class="mr-1">
+          <v-icon icon="book-open" />
+          <span class="d-none d-inline-block-md">More stories</span>
+          <span class="d-inline-block d-none-md">More</span>
+        </b-button>
+        <b-button variant="primary" size="sm" @click="showAddModal">
+          <v-icon icon="book-open" />
+          <span class="d-none d-inline-block-md">Tell your story!</span>
+          <span class="d-inline-block d-none-md">Tell yours</span>
+        </b-button>
+      </div>
+    </div>
+    <NewsPhotoModal
+      v-if="newsfeed.story.photo"
+      :id="newsfeed.story.photo.id"
+      ref="photoModal"
+      :newsfeedid="newsfeed.id"
+      :src="newsfeed.story.photo.path"
+      imgtype="Story"
+      imgflag="story"
+    />
+    <StoriesAddModal ref="addmodal" />
+    <StoriesShareModal :story="newsfeed.story" />
+  </div>
+</template>
+<script>
+import { twem } from '~/composables/useTwem'
+import NewsBase from '~/components/NewsBase'
+
+import NewsUserIntro from '~/components/NewsUserIntro'
+import NewsLoveComment from '~/components/NewsLoveComment'
+import NewsPhotoModal from '~/components/NewsPhotoModal'
+const StoriesAddModal = () => import('~/components/StoriesAddModal')
+const StoriesShareModal = () => import('~/components/StoriesShareModal')
+
+export default {
+  components: {
+    NewsPhotoModal,
+    NewsUserIntro,
+    NewsLoveComment,
+    StoriesAddModal,
+    StoriesShareModal,
+  },
+  extends: NewsBase,
+  computed: {
+    story() {
+      let story = this.newsfeed.story.story
+      story = story ? twem(story) : ''
+      story = story.trim()
+      return story
+    },
+  },
+  methods: {
+    showAddModal() {
+      this.$refs.addmodal.show()
+    },
+    shareStory() {
+      this.$bvModal.show('storiesShareModal-' + this.newsfeed.story.id)
+    },
+  },
+}
+</script>
