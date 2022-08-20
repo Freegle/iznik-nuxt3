@@ -5,9 +5,8 @@ export default class NewsAPI extends BaseAPI {
     return this.$get('/newsfeed', params)
   }
 
-  async fetch(params) {
-    const { newsfeed } = await this.$get('/newsfeed', params)
-    return newsfeed
+  async fetch(id) {
+    return await this.$getv2(id ? '/newsfeed/' + id : '/newsfeed')
   }
 
   async send(data) {

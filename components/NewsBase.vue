@@ -2,6 +2,7 @@
   <div />
 </template>
 <script>
+import { useNewsfeedStore } from '../stores/newsfeed'
 import { twem } from '~/composables/useTwem'
 
 export default {
@@ -9,10 +10,6 @@ export default {
   props: {
     id: {
       type: Number,
-      required: true,
-    },
-    users: {
-      type: Object,
       required: true,
     },
   },
@@ -25,28 +22,14 @@ export default {
   },
   computed: {
     emessage() {
-      return this.newsfeed.message
-        ? twem(this.$twemoji, this.newsfeed.message)
-        : null
+      return this.newsfeed.message ? twem(this.newsfeed.message) : null
     },
     newsfeed() {
-      return this.$store.getters['newsfeed/get'](this.id)
+      const newsfeedStore = useNewsfeedStore()
+      return newsfeedStore.byId(this.id)
     },
     userid() {
-      // The API returns userid in the summary and user.id when we get an individual object, so we need to
-      // mess about to get the userid.
-      const newsfeed = this.$store.getters['newsfeed/get'](this.id)
-      let ret = null
-
-      if (newsfeed) {
-        if (newsfeed.userid) {
-          ret = newsfeed.userid
-        } else if (newsfeed.user) {
-          ret = newsfeed.user.id
-        }
-      }
-
-      return ret
+      return this.newsfeed?.userid
     },
   },
   methods: {

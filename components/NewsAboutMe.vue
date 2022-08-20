@@ -3,7 +3,6 @@
     <NewsUserIntro
       v-if="userid"
       :userid="userid"
-      :users="users"
       :newsfeed="newsfeed"
       append="introduced themselves"
     />

@@ -16,7 +16,7 @@
             title="Rotate left"
           >
             <v-icon icon="circle" scale="2" />
-            <v-icon name="reply" class="image__icon" />
+            <v-icon icon="reply" class="image__icon" />
           </v-icon>
         </span>
         <span @click="rotateRight">
@@ -27,7 +27,7 @@
             flip="horizontal"
           >
             <v-icon icon="circle" scale="2" />
-            <v-icon name="reply" class="image__icon" />
+            <v-icon icon="reply" class="image__icon" />
           </v-icon>
         </span>
         <span v-if="mod" @click="remove">
@@ -37,7 +37,7 @@
             title="Remove this photo"
           >
             <v-icon icon="circle" scale="2" />
-            <v-icon name="trash-alt" class="image__icon" />
+            <v-icon icon="trash-alt" class="image__icon" />
           </v-icon>
         </span>
         <b-img

@@ -92,7 +92,7 @@
             />
           </nuxt-link>
           <ProfileImage
-            :image="me.profile.turl"
+            :image="me.profile.path"
             class="mr-1 mb-1 mt-1 inline"
             is-thumbnail
             size="sm"

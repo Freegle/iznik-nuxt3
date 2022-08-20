@@ -143,7 +143,6 @@
     <NewsReplies
       :id="id"
       :threadhead="threadhead"
-      :users="users"
       :scroll-to="scrollTo"
       :reply-ids="reply.replies.map((r) => r.id)"
       :reply-to="reply.id"
@@ -160,8 +159,8 @@
         <b-input-group-prepend>
           <span class="input-group-text pl-1 pr-1">
             <ProfileImage
-              v-if="me.profile.turl"
-              :image="me.profile.turl"
+              v-if="me.profile.path"
+              :image="me.profile.path"
               class="m-0 inline float-left"
               is-thumbnail
               size="sm"
@@ -188,17 +187,18 @@
         @keyup.enter.exact.prevent
         @keydown.enter.exact="sendReply"
       >
-        <at-ta
-          ref="at"
-          :members="tagusers"
-          class="pl-2 input-group"
-          :filter-match="filterMatch"
-        >
+        <!--        <at-ta-->
+        <!--          ref="at"-->
+        <!--          :members="tagusers"-->
+        <!--          class="pl-2 input-group"-->
+        <!--          :filter-match="filterMatch"-->
+        <!--        >-->
+        <b-input-group>
           <b-input-group-prepend>
             <span class="input-group-text pl-1 pr-1">
               <ProfileImage
-                v-if="me.profile.turl"
-                :image="me.profile.turl"
+                v-if="me.profile.path"
+                :image="me.profile.path"
                 class="m-0 inline float-left"
                 is-thumbnail
                 size="sm"
@@ -222,7 +222,8 @@
             @keydown.alt.shift.exact.prevent="newlineReply"
             @focus="focusedReply"
           />
-        </at-ta>
+        </b-input-group>
+        <!--        </at-ta>-->
       </div>
       <div class="d-flex justify-content-between flex-wrap mt-1 pl-2">
         <b-button size="sm" variant="secondary" @click="photoAdd">
@@ -348,10 +349,6 @@ export default {
     },
     replyid: {
       type: Number,
-      required: true,
-    },
-    users: {
-      type: Object,
       required: true,
     },
     scrollTo: {
@@ -635,11 +632,11 @@ export default {
   font-size: 0.8rem;
 }
 
-::v-deep .fa-icon {
+:deep(.fa-icon) {
   margin-bottom: 1px;
 }
 
-::v-deep .strike {
+:deep(.strike) {
   text-decoration: line-through;
 }
 </style>

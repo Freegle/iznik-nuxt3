@@ -40,7 +40,6 @@
           :id="id"
           :key="'reply-' + reply.id"
           :replyid="reply.id"
-          :users="users"
           :threadhead="threadhead"
           :scroll-to="scrollTo"
         />
@@ -68,10 +67,6 @@ export default {
       required: true,
     },
     threadhead: {
-      type: Object,
-      required: true,
-    },
-    users: {
       type: Object,
       required: true,
     },

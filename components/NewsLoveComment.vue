@@ -6,9 +6,9 @@
     >
       <li class="list-inline-item">
         <b-button v-if="!newsfeed.loved" variant="link" size="sm" @click="love">
-          <v-icon v-if="loving" name="sync" class="fa-spin text-success" />
-          <v-icon v-else name="heart" />
-          <span class="d-none d-sm-inline">Love this</span>
+          <v-icon v-if="loving" icon="sync" class="fa-spin text-success" />
+          <v-icon v-else icon="heart" />
+          <span class="d-none d-sm-inline ml-1">Love this</span>
         </b-button>
         <b-button
           v-if="newsfeed.loved"

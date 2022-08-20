@@ -58,10 +58,6 @@ export default {
       type: Number,
       required: true,
     },
-    users: {
-      type: Object,
-      required: true,
-    },
     newsfeed: {
       type: Object,
       required: true,

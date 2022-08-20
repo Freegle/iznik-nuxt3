@@ -1,11 +1,6 @@
 <template>
   <div>
-    <NewsUserIntro
-      v-if="userid"
-      :userid="userid"
-      :users="users"
-      :newsfeed="newsfeed"
-    />
+    <NewsUserIntro v-if="userid" :userid="userid" :newsfeed="newsfeed" />
     <!-- eslint-disable-next-line-->
     <div v-if="newsfeed.html" v-html="newsfeed.html" />
     <read-more
@@ -37,9 +32,9 @@
           class="mr-2"
         />
         <b-button
-          variant="secondary"
-          size="sm"
+          variant="link"
           class="d-inline-block"
+          size="sm"
           @click="share"
         >
           <v-icon icon="share-alt" /> Share

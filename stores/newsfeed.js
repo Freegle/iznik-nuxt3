@@ -5,7 +5,8 @@ export const useNewsfeedStore = defineStore({
   id: 'newsfeed',
   state: () => ({
     config: null,
-    list: [],
+    feed: [],
+    list: {},
   }),
   actions: {
     init(config) {
@@ -13,14 +14,18 @@ export const useNewsfeedStore = defineStore({
     },
     async fetch(id) {
       if (!id) {
-        this.list = await api(this.config).newsfeed.fetchv2()
-        return this.list
+        this.feed = await api(this.config).news.fetch()
+        console.log('Fetched feed', this.list)
+        return this.feed
+      } else {
+        this.list[id] = await api(this.config).news.fetch(id)
+        return this.list[id]
       }
     },
   },
   getters: {
-    get: (state) => (id) => {
-      return state.list.find((i) => i.id === id)
+    byId: (state) => (id) => {
+      return state.list[id]
     },
   },
 })

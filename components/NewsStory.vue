@@ -3,7 +3,6 @@
     <NewsUserIntro
       v-if="userid"
       :userid="userid"
-      :users="users"
       :newsfeed="newsfeed"
       append="told their Freegle story"
     />
@@ -21,7 +20,7 @@
               rounded
               lazy
               :src="newsfeed.story.photo.paththumb"
-              class="clickme float-right ml-2"
+              class="clickme float-end ml-2"
               @click="showPhotoModal"
             />
             <read-more
@@ -41,7 +40,7 @@
       />
       <div>
         <b-button
-          variant="secondary"
+          variant="link"
           size="sm"
           class="d-inline-block mr-1"
           @click="shareStory"

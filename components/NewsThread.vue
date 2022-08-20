@@ -1,13 +1,10 @@
 <template>
-  <div
-    v-if="newsfeed && newsfeed.visible && !newsfeed.unfollowed"
-    class="bg-white"
-  >
-    <b-card :class="backgroundColor" no-body>
+  <div class="bg-white">
+    <b-card v-if="newsfeed" :class="backgroundColor" no-body>
       <b-card-body class="p-1 p-sm-2">
         <b-card-text>
           <div v-if="isNewsComponent">
-            <b-dropdown class="float-right" right variant="white">
+            <b-dropdown class="float-end" right variant="white">
               <template slot="button-content" />
               <b-dropdown-item
                 :href="'/chitchat/' + newsfeed.id"
@@ -76,6 +73,7 @@
       </b-card-body>
       <div slot="footer">
         <NewsReplies
+          v-if="newsfeed.replies"
           :id="id"
           :threadhead="newsfeed"
           :scroll-to="scrollTo"
@@ -91,29 +89,31 @@
             <!--              class="flex-shrink-2 input-group"-->
             <!--              :filter-match="filterMatch"-->
             <!--            >-->
-            <b-input-group-prepend>
-              <span class="input-group-text pl-1 pr-1">
-                <ProfileImage
-                  v-if="me.profile.turl"
-                  :image="me.profile.turl"
-                  class="m-0 inline float-left"
-                  is-thumbnail
-                  size="sm"
-                />
-              </span>
-            </b-input-group-prepend>
-            <b-form-textarea
-              ref="threadcomment"
-              v-model="threadcomment"
-              size="sm"
-              rows="1"
-              max-rows="8"
-              maxlength="2048"
-              spellcheck="true"
-              placeholder="Write a comment on this thread..."
-              class="p-0 pl-1 pt-1"
-              @focus="focusedComment"
-            />
+            <b-input-group>
+              <b-input-group-prepend>
+                <span class="input-group-text pl-1 pr-1">
+                  <ProfileImage
+                    v-if="me.profile.path"
+                    :image="me.profile.path"
+                    class="m-0 inline float-left"
+                    is-thumbnail
+                    size="sm"
+                  />
+                </span>
+              </b-input-group-prepend>
+              <b-form-textarea
+                ref="threadcomment"
+                v-model="threadcomment"
+                size="sm"
+                rows="1"
+                max-rows="8"
+                maxlength="2048"
+                spellcheck="true"
+                placeholder="Write a comment on this thread..."
+                class="p-0 pl-1 pt-1"
+                @focus="focusedComment"
+              />
+            </b-input-group>
             <!--            </at-ta>-->
           </div>
           <div
@@ -121,17 +121,18 @@
             @keyup.enter.exact.prevent
             @keydown.enter.exact="sendComment"
           >
-            <at-ta
-              ref="at"
-              :members="tagusers"
-              class="flex-shrink-2 input-group"
-              :filter-match="filterMatch"
-            >
+            <!--            <at-ta-->
+            <!--              ref="at"-->
+            <!--              :members="tagusers"-->
+            <!--              class="flex-shrink-2 input-group"-->
+            <!--              :filter-match="filterMatch"-->
+            <!--            >-->
+            <b-input-group>
               <b-input-group-prepend>
                 <span class="input-group-text pl-1 pr-1">
                   <ProfileImage
-                    v-if="me.profile.turl"
-                    :image="me.profile.turl"
+                    v-if="me.profile.path"
+                    :image="me.profile.path"
                     class="m-0 inline float-left"
                     is-thumbnail
                     size="sm"
@@ -153,7 +154,9 @@
                 @keydown.alt.shift.exact.prevent="newlineComment"
                 @focus="focusedComment"
               />
-            </at-ta>
+            </b-input-group>
+            <!--            </at-ta>-->
+            <!--            TODO Form auto text area not yet implemented-->
           </div>
           <div
             v-if="threadcomment"
@@ -227,6 +230,7 @@
   </div>
 </template>
 <script>
+import { useNewsfeedStore } from '../stores/newsfeed'
 import NewsReportModal from './NewsReportModal'
 import SpinButton from './SpinButton'
 import NewsReplies from '~/components/NewsReplies'
@@ -274,7 +278,6 @@ export default {
     ProfileImage,
     ConfirmModal,
   },
-
   props: {
     id: {
       type: Number,
@@ -285,6 +288,15 @@ export default {
       required: false,
       default: '',
     },
+  },
+  async setup(props) {
+    const newsfeedStore = useNewsfeedStore()
+
+    await newsfeedStore.fetch(props.id)
+
+    return {
+      newsfeedStore,
+    }
   },
   data() {
     return {
@@ -314,14 +326,24 @@ export default {
   computed: {
     canRefer() {
       return (
-        (this.mod && this.newsfeed.type !== 'AboutMe') || this.supportOrAdmin
+        (this.mod && this.newsfeed?.type !== 'AboutMe') || this.supportOrAdmin
       )
     },
-    enterNewLine() {
-      return this.$store.getters['misc/get']('enternewline')
+    enterNewLine: {
+      get() {
+        return this.me?.settings?.enterNewLine
+      },
+      async set(newVal) {
+        const settings = this.me.settings
+        settings.enterNewLine = newVal
+
+        await this.authStore.saveAndGet({
+          settings,
+        })
+      },
     },
     newsfeed() {
-      return this.$store.getters['newsfeed/get'](this.id)
+      return this.newsfeedStore.byId(this.id)
     },
     tagusers() {
       const ret = []
@@ -347,7 +369,7 @@ export default {
       )
     },
     backgroundColor() {
-      return this.elementBackgroundColor[this.newsfeed.type] || 'card__default'
+      return this.elementBackgroundColor[this.newsfeed?.type] || 'card__default'
     },
     visiblereplies() {
       // These are the replies which are candidates to show, i.e. not deleted or hidden.
@@ -390,10 +412,12 @@ export default {
       return ret
     },
     isNewsComponent() {
-      return this.newsfeed.type in this.newsComponents
+      return this.newsfeed?.type in this.newsComponents
     },
     newsComponentName() {
-      return this.isNewsComponent ? this.newsComponents[this.newsfeed.type] : ''
+      return this.isNewsComponent
+        ? this.newsComponents[this.newsfeed?.type]
+        : ''
     },
     starter() {
       if (
@@ -546,7 +570,7 @@ export default {
 @import '~bootstrap/scss/variables';
 @import '~bootstrap/scss/mixins/_breakpoints';
 
-::v-deep .img-thumbnail {
+:deep(.img-thumbnail) {
   cursor: pointer;
 
   max-width: 100px;

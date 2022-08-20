@@ -3,7 +3,6 @@
     <NewsUserIntro
       v-if="userid"
       :userid="userid"
-      :users="users"
       :newsfeed="newsfeed"
       append="put up a poster"
       :append-bold="info.title"

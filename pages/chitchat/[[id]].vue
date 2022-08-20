@@ -134,26 +134,12 @@
           Sorry, this thread isn't around any more.
         </NoticeMessage>
         <div class="p-0 pt-1 mb-1">
-          <ul
-            v-for="entry in newsfeed"
+          <NewsThread
+            v-for="entry in newsfeedToShow"
+            :id="entry.id"
             :key="'newsfeed-' + entry.id + '-area-' + selectedArea"
-            class="list-unstyled"
-          >
-            <li
-              v-if="
-                entry &&
-                entry.visible &&
-                !entry.unfollowed &&
-                entry.threadhead === entry.id
-              "
-            >
-              <NewsThread
-                :id="entry.id"
-                :key="'newsthread-' + entry.id"
-                :scroll-to="scrollTo"
-              />
-            </li>
-          </ul>
+            :scroll-to="scrollTo"
+          />
           <client-only>
             <infinite-loading
               :identifier="infiniteId"
@@ -214,7 +200,7 @@ export default {
     // Must be a number if present
     return !params.id || /^\d+$/.test(params.id)
   },
-  setup() {
+  async setup() {
     const miscStore = useMiscStore()
     const newsfeedStore = useNewsfeedStore()
     const authStore = useAuthStore()
@@ -238,6 +224,8 @@ export default {
         'Chat to nearby freeglers...ask for advice, recommendations or just have a good old natter.'
       )
     )
+
+    await newsfeedStore.fetch(id)
 
     return {
       authStore,
@@ -279,7 +267,12 @@ export default {
       },
     },
     newsfeed() {
-      return this.newsfeedStore.list
+      return Object.values(this.newsfeedStore.feed)
+    },
+    newsfeedToShow() {
+      return this.newsfeed
+        .slice(0, this.show)
+        .filter((entry) => !entry.unfollowed)
     },
   },
   beforeCreate() {

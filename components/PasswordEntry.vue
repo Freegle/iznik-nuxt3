@@ -25,7 +25,7 @@
         >
           <div class="text-secondary">
             <v-icon icon="eye" flip="horizontal" />
-            <v-icon v-if="showPassword" name="slash" class="superimpose" />
+            <v-icon v-if="showPassword" icon="slash" class="superimpose" />
           </div>
         </b-button>
       </b-input-group-append>

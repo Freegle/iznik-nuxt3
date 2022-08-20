@@ -2,7 +2,7 @@
   <div>
     <div class="d-flex">
       <ProfileImage
-        :image="require(`@/static/icon.png`)"
+        image="/icon.png"
         class="ml-1 mb-1 inline"
         is-thumbnail
         size="lg"
@@ -38,12 +38,7 @@
         :newsfeed="newsfeed"
         @focus-comment="$emit('focus-comment')"
       />
-      <b-button
-        variant="secondary"
-        size="sm"
-        class="d-inline-block"
-        @click="share"
-      >
+      <b-button variant="link" class="d-inline-block" size="sm" @click="share">
         <v-icon icon="share-alt" /> Share
       </b-button>
     </div>
