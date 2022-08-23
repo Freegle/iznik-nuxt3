@@ -1,8 +1,0 @@
-{
-  "routes": [],
-  "responseOverrides": {
-    "404": {
-      "rewrite": "/200.html"
-    }
-  }
-}
