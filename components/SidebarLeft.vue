@@ -4,10 +4,11 @@
     class="sidebar__wrapper maxheight d-flex flex-column justify-content-between"
   >
     <div>
-      <CommunityEventSidebar
-        v-if="showCommunityEvents && false"
-        class="flex-grow-1 sidebar__community-event"
-      />
+      <!--      TODO Community events-->
+      <!--      <CommunityEventSidebar-->
+      <!--        v-if="showCommunityEvents && false"-->
+      <!--        class="flex-grow-1 sidebar__community-event"-->
+      <!--      />-->
     </div>
     <BotLeftBox
       v-if="showBotLeft"
@@ -17,11 +18,11 @@
 </template>
 <script>
 import BotLeftBox from '~/components/BotLeftBox'
-const CommunityEventSidebar = () => import('~/components/CommunityEventSidebar')
+// const CommunityEventSidebar = () => import('~/components/CommunityEventSidebar')
 
 export default {
   components: {
-    CommunityEventSidebar,
+    // CommunityEventSidebar,
     BotLeftBox,
   },
   props: {
