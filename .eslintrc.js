@@ -47,5 +47,6 @@ module.exports = {
     useNuxtApp: 'readonly',
     useHead: 'readonly',
     computed: 'readonly',
+    usePinia: 'readonly',
   },
 }

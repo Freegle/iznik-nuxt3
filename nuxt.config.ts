@@ -26,7 +26,15 @@ export default defineNuxtConfig({
   },
 
   // TODO Search for .sync modifier, which is replaced by v-model:.
-  buildModules: ['@pinia/nuxt', 'floating-vue/nuxt'],
+  buildModules: [
+    [
+      '@pinia/nuxt',
+      {
+        autoImports: ['defineStore'],
+      },
+    ],
+    'floating-vue/nuxt',
+  ],
 
   // Environment variables the client needs.
   publicRuntimeConfig: {

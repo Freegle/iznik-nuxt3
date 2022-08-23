@@ -29,6 +29,18 @@ let ready = false
 // pass it in to each store via an init() action.
 const runtimeConfig = useRuntimeConfig()
 
+// Initialise pinia here - @pinia/nuxt doesn't seem to kick in early enough.
+usePinia()
+// const pinia = createPinia()
+// const nuxtApp = useNuxtApp()
+// nuxtApp.vueApp.use(pinia)
+// setActivePinia(pinia)
+// if (process.server) {
+//   nuxtApp.payload.pinia = pinia.state.value
+// } else if (nuxtApp.payload && nuxtApp.payload.pinia) {
+//   pinia.state.value = nuxtApp.payload.pinia
+// }
+
 const groupStore = useGroupStore()
 const messageStore = useMessageStore()
 const authStore = useAuthStore()
