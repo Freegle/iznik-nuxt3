@@ -9,11 +9,11 @@
         </b-col>
         <b-col cols="12" lg="6" class="newsfeedHolder p-0">
           <GlobalWarning />
-          <ExpectedRepliesWarning
-            v-if="me && me.expectedreplies"
-            :count="me.expectedreplies"
-            :chats="me.expectedchats"
-          />
+          <!--          <ExpectedRepliesWarning-->
+          <!--            v-if="me && me.expectedreplies"-->
+          <!--            :count="me.expectedreplies"-->
+          <!--            :chats="me.expectedchats"-->
+          <!--          />-->
           <b-card v-if="!id" body-class="p-2 p-md-4">
             <b-card-text class="mb-0">
               <h5 class="text-center mb-3 d-block d-md-none">
@@ -194,14 +194,15 @@ const OurFilePond = () => import('~/components/OurFilePond')
 const SidebarLeft = () => import('~/components/SidebarLeft')
 const SidebarRight = () => import('~/components/SidebarRight')
 const NewsLocation = () => import('~/components/NewsLocation')
-const ExpectedRepliesWarning = () =>
-  import('~/components/ExpectedRepliesWarning')
+// const ExpectedRepliesWarning = () =>
+//   import('~/components/ExpectedRepliesWarning')
 
 export default {
   components: {
     VisibleWhen,
     GlobalWarning,
-    ExpectedRepliesWarning,
+    // TODO Expected replies.
+    // ExpectedRepliesWarning,
     NoticeMessage,
     NewsThread,
     OurFilePond,
