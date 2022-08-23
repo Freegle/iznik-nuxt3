@@ -70,8 +70,9 @@
       imgtype="Story"
       imgflag="story"
     />
-    <StoriesAddModal ref="addmodal" />
-    <StoriesShareModal :story="newsfeed.story" />
+    <!--    TODO Stories-->
+    <!--    <StoriesAddModal ref="addmodal" />-->
+    <!--    <StoriesShareModal :story="newsfeed.story" />-->
   </div>
 </template>
 <script>
@@ -81,16 +82,16 @@ import NewsBase from '~/components/NewsBase'
 import NewsUserIntro from '~/components/NewsUserIntro'
 import NewsLoveComment from '~/components/NewsLoveComment'
 import NewsPhotoModal from '~/components/NewsPhotoModal'
-const StoriesAddModal = () => import('~/components/StoriesAddModal')
-const StoriesShareModal = () => import('~/components/StoriesShareModal')
+// const StoriesAddModal = () => import('~/components/StoriesAddModal')
+// const StoriesShareModal = () => import('~/components/StoriesShareModal')
 
 export default {
   components: {
     NewsPhotoModal,
     NewsUserIntro,
     NewsLoveComment,
-    StoriesAddModal,
-    StoriesShareModal,
+    // StoriesAddModal,
+    // StoriesShareModal,
   },
   extends: NewsBase,
   computed: {

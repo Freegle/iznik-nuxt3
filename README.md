@@ -9,7 +9,7 @@ What does exist:
 
 What doesn't exist yet:
 * Give/Ask flows when logged out initially.
-* ChitChat/Events/Volunteers/Settings/Promote/Help/Notfications
+* ChitChat/Events/Volunteers/Settings/Promote/Help/Notifications
 * Static site generation.
 * CircleCI/playwright testing.
 
