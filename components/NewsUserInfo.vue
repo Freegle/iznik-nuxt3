@@ -1,12 +1,12 @@
 <template>
   <nuxt-link
     :to="'/profile/' + user.id"
-    class="text-success decornone"
+    class="text-success nodecor"
     :title="'Click to view profile for ' + user.displayname"
   >
     <span class="text-muted small">
       <span v-if="user.info && user.info.publiclocation" class="pl-0">
-        <v-icon icon="map-marker-alt" />&nbsp;{{
+        <v-icon icon="map-marker-alt" class="ml-2" />&nbsp;{{
           user.info.publiclocation.display
         }}
       </span>

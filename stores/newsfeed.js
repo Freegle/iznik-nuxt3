@@ -12,10 +12,9 @@ export const useNewsfeedStore = defineStore({
     init(config) {
       this.config = config
     },
-    async fetch(id) {
+    async fetch(id, distance) {
       if (!id) {
-        this.feed = await api(this.config).news.fetch()
-        console.log('Fetched feed', this.list)
+        this.feed = await api(this.config).news.fetch(null, distance)
         return this.feed
       } else {
         this.list[id] = await api(this.config).news.fetch(id)

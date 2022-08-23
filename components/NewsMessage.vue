@@ -28,17 +28,19 @@
           :userid="newsfeed.userid"
           title="Message"
           size="sm"
-          variant="secondary"
-          class="mr-2"
-        />
-        <b-button
           variant="link"
-          class="d-inline-block"
-          size="sm"
-          @click="share"
-        >
-          <v-icon icon="share-alt" /> Share
-        </b-button>
+          class="mr-2 align-self-baseline"
+        />
+        <div>
+          <b-button
+            variant="link"
+            class="d-inline-block"
+            size="sm"
+            @click="share"
+          >
+            <v-icon icon="share-alt" /> Share
+          </b-button>
+        </div>
       </div>
     </div>
     <b-modal
@@ -59,6 +61,7 @@
   </div>
 </template>
 <script>
+import ReadMore from 'vue-read-more3/src/ReadMoreComponent'
 import ChatButton from './ChatButton'
 import NewsBase from '~/components/NewsBase'
 import NewsUserIntro from '~/components/NewsUserIntro'
@@ -72,6 +75,7 @@ export default {
     NewsShareModal,
     NewsUserIntro,
     NewsLoveComment,
+    ReadMore,
   },
   extends: NewsBase,
 }

@@ -1,5 +1,5 @@
 <template>
-  <nav class="bg-transparent">
+  <nav class="bg-transparent pr-2">
     <div
       class="flex-wrap d-flex flex-row justify-content-between text-muted small list-unstyled"
     >
@@ -27,7 +27,12 @@
         href="https://github.com/Freegle/iznik-nuxt"
         title="We're open source - find us on GitHub"
       >
-        <b-img-lazy alt="GitHub" src="/botleft/github.svg" width="40" />
+        <b-img-lazy
+          alt="GitHub"
+          src="/botleft/github.svg"
+          width="40"
+          class="mr-1"
+        />
       </ExternalLink>
     </div>
   </nav>

@@ -70,6 +70,7 @@
     "vue-filepond": "^7.0.3",
     "vue-highlight-words": "^3.0.0",
     "vue-inner-image-zoom": "^2.0.0",
+    "vue-read-more3": "^1.2.2",
     "vue-simple-context-menu": "^4.0.4",
     "vue2-leaflet-movingmarker": "^1.1.0",
     "vue3-draggable-resizable": "^1.6.3",

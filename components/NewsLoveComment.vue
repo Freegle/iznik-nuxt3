@@ -1,48 +1,37 @@
 <template>
-  <span>
-    <ul
-      v-if="newsfeed"
-      class="list-unstyled list-inline d-flex align-items-center"
+  <div v-if="newsfeed" class="d-flex align-items-center mt-1">
+    <b-button v-if="!newsfeed.loved" variant="link" size="sm" @click="love">
+      <v-icon v-if="loving" icon="sync" class="fa-spin text-success" />
+      <v-icon v-else icon="heart" />
+      <span class="d-none d-sm-inline ml-1">Love this</span>
+    </b-button>
+    <b-button v-if="newsfeed.loved" variant="link" size="sm" @click="unlove">
+      <v-icon icon="heart" class="text-danger" /><span
+        class="d-none d-sm-inline"
+        >&nbsp;Unlove this</span
+      >
+    </b-button>
+    <b-button
+      v-if="!newsfeed.closed"
+      variant="link"
+      size="sm"
+      @click="focusComment"
     >
-      <li class="list-inline-item">
-        <b-button v-if="!newsfeed.loved" variant="link" size="sm" @click="love">
-          <v-icon v-if="loving" icon="sync" class="fa-spin text-success" />
-          <v-icon v-else icon="heart" />
-          <span class="d-none d-sm-inline ml-1">Love this</span>
-        </b-button>
-        <b-button
-          v-if="newsfeed.loved"
-          variant="link"
-          size="sm"
-          @click="unlove"
-        >
-          <v-icon icon="heart" class="text-danger" /><span
-            class="d-none d-sm-inline"
-            >&nbsp;Unlove this</span
-          >
-        </b-button>
-      </li>
-      <li v-if="!newsfeed.closed" class="list-inline-item">
-        <b-button variant="link" size="sm" @click="focusComment">
-          <v-icon icon="comment" /><span class="d-none d-sm-inline"
-            >&nbsp;Reply</span
-          >
-        </b-button>
-      </li>
-      <li class="list-inline-item">
-        <b-button
-          v-if="newsfeed.loves"
-          variant="link"
-          class="showlove"
-          :aria-label="getShowLovesLabel"
-          @click="showLove"
-        >
-          <v-icon icon="heart" class="text-danger" />&nbsp;{{ newsfeed.loves }}
-        </b-button>
-      </li>
-    </ul>
+      <v-icon icon="comment" /><span class="d-none d-sm-inline"
+        >&nbsp;Reply</span
+      >
+    </b-button>
+    <b-button
+      v-if="newsfeed.loves"
+      variant="link"
+      class="showlove"
+      :aria-label="getShowLovesLabel"
+      @click="showLove"
+    >
+      <v-icon icon="heart" class="text-danger" />&nbsp;{{ newsfeed.loves }}
+    </b-button>
     <NewsLovesModal :id="newsfeed.id" ref="loveModal" />
-  </span>
+  </div>
 </template>
 <script>
 import pluralize from 'pluralize'

@@ -26,7 +26,9 @@
         </b-col>
       </b-row>
     </div>
-    <div class="mt-2 d-flex flex-wrap justify-content-between">
+    <div
+      class="mt-2 d-flex flex-wrap justify-content-between align-items-center"
+    >
       <NewsLoveComment
         :newsfeed="newsfeed"
         @focus-comment="$emit('focus-comment')"
@@ -56,6 +58,7 @@
   </div>
 </template>
 <script>
+import ReadMore from 'vue-read-more3/src/ReadMoreComponent'
 import NewsBase from '~/components/NewsBase'
 import NewsUserIntro from '~/components/NewsUserIntro'
 import NewsLoveComment from '~/components/NewsLoveComment'
@@ -66,6 +69,7 @@ export default {
     // AboutMeModal,
     NewsUserIntro,
     NewsLoveComment,
+    ReadMore,
   },
   extends: NewsBase,
   methods: {

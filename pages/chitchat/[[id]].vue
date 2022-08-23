@@ -1,170 +1,183 @@
 <template>
-  <b-container v-if="me" fluid>
-    <b-row class="m-0">
-      <b-col cols="0" lg="3" class="p-0 pr-1">
-        <VisibleWhen :at="['lg', 'xl', 'xxl']">
-          <SidebarLeft :show-community-events="true" :show-bot-left="true" />
-        </VisibleWhen>
-      </b-col>
-      <b-col cols="12" lg="6" class="newsfeedHolder p-0">
-        <GlobalWarning />
-        <ExpectedRepliesWarning
-          v-if="me && me.expectedreplies"
-          :count="me.expectedreplies"
-          :chats="me.expectedchats"
-        />
-        <b-card v-if="!id" body-class="p-2 p-md-4">
-          <b-card-text class="mb-0">
-            <h5 class="text-center mb-3 d-block d-md-none">
-              <span class="d-none d-sm-inline"
-                >Looking for your posts? Click</span
-              >
-              <span class="d-inline d-sm-none">Your posts are</span>
-              <!-- eslint-disable-next-line -->
-              <nuxt-link to="/myposts">here</nuxt-link>.
-            </h5>
-            <h5 class="text-center mb-3 d-block d-md-none">
-              Browse OFFERs/WANTEDs
-              <!-- eslint-disable-next-line -->
-              <nuxt-link to="/browse">here</nuxt-link>.
-            </h5>
-            <div class="d-flex justify-content-between">
-              <b-button
-                id="givebutton"
-                ref="givebutton"
-                to="/give"
-                variant="primary"
-                class="post__button"
-              >
-                Give stuff
-              </b-button>
-              <b-button
-                id="findbutton"
-                ref="findbutton"
-                to="/find"
-                variant="secondary"
-                class="post__button"
-              >
-                Ask for stuff
-              </b-button>
-            </div>
-          </b-card-text>
-          <v-tooltip
-            :shown="showToolGive"
-            target="givebutton"
-            placement="bottom"
-            variant="primary"
-            :triggers="[]"
-          >
-            <template #popper>
-              <div>
-                Giving something away? Click the Give button. Chitchat is for
-                other discussion.
-              </div>
-            </template>
-          </v-tooltip>
-          <v-tooltip
-            :shown="showToolFind"
-            target="findbutton"
-            placement="bottom"
-            variant="primary"
-            :triggers="[]"
-          >
-            <template #popper>
-              <div>
-                Looking for an item? Click the Find button. Chitchat is for
-                other discussion.
-              </div>
-            </template>
-          </v-tooltip>
-        </b-card>
-        <div v-if="!id" class="mt-2">
-          <b-card no-body class="mb-2">
-            <b-card-text class="p-2 pb-0 mb-0">
-              <label class="font-weight-bold mb-1" for="startThread"
-                >Chat to nearby freeglers!
-                <span class="d-none d-sm-inline"
-                  >Ask for advice, recommendations, or just have a natter:</span
-                ></label
-              >
-              <b-form-textarea
-                id="startThread"
-                v-model="startThread"
-                rows="2"
-                max-rows="8"
-                placeholder="What's going on in your world?"
-                class="border border-primary"
-              />
-              <div class="small text-muted">
-                Everything here is public. Be kind
-                <span class="d-none d-sm-inline">to each other</span>;
-                occasionally we may moderate to ensure things stay friendly.
-              </div>
-              <b-img
-                v-if="imageid"
-                lazy
-                thumbnail
-                :src="imagethumb"
-                class="image__uploaded"
-              />
-            </b-card-text>
-            <hr class="mt-1 mb-1" />
-            <OurFilePond
-              v-if="uploading"
-              class="bg-white m-0 pondrow"
-              imgtype="Newsfeed"
-              imgflag="newsfeed"
-              @photoProcessed="photoProcessed"
-            />
-            <div class="pb-1 d-flex justify-content-end">
-              <b-button variant="secondary" class="mr-2" @click="photoAdd">
-                Add photo
-              </b-button>
-              <b-button variant="primary" class="mr-2" @click="postIt">
-                Post it!
-              </b-button>
-            </div>
-          </b-card>
-        </div>
-        <NewsLocation v-if="!id" class="p-2" @changed="areaChange" />
-        <NoticeMessage
-          v-if="id && newsfeed && newsfeed.length && !newsfeed[0].visible"
-          class="mt-2"
-        >
-          Sorry, this thread isn't around any more.
-        </NoticeMessage>
-        <div class="p-0 pt-1 mb-1">
-          <NewsThread
-            v-for="entry in newsfeedToShow"
-            :id="entry.id"
-            :key="'newsfeed-' + entry.id + '-area-' + selectedArea"
-            :scroll-to="scrollTo"
+  <Suspense>
+    <b-container v-if="me" fluid>
+      <b-row class="m-0">
+        <b-col cols="0" lg="3" class="p-0 pr-1">
+          <VisibleWhen :at="['lg', 'xl', 'xxl']">
+            <SidebarLeft :show-community-events="true" :show-bot-left="true" />
+          </VisibleWhen>
+        </b-col>
+        <b-col cols="12" lg="6" class="newsfeedHolder p-0">
+          <GlobalWarning />
+          <ExpectedRepliesWarning
+            v-if="me && me.expectedreplies"
+            :count="me.expectedreplies"
+            :chats="me.expectedchats"
           />
-          <client-only>
-            <infinite-loading
-              :identifier="infiniteId"
-              force-use-infinite-wrapper="body"
-              :distance="distance"
-              @infinite="loadMore"
+          <b-card v-if="!id" body-class="p-2 p-md-4">
+            <b-card-text class="mb-0">
+              <h5 class="text-center mb-3 d-block d-md-none">
+                <span class="d-none d-sm-inline"
+                  >Looking for your posts? Click</span
+                >
+                <span class="d-inline d-sm-none">Your posts are</span>
+                <!-- eslint-disable-next-line -->
+                <nuxt-link to="/myposts">here</nuxt-link>.
+              </h5>
+              <h5 class="text-center mb-3 d-block d-md-none">
+                Browse OFFERs/WANTEDs
+                <!-- eslint-disable-next-line -->
+                <nuxt-link to="/browse">here</nuxt-link>.
+              </h5>
+              <div class="d-flex justify-content-between">
+                <b-button
+                  id="givebutton"
+                  ref="givebutton"
+                  to="/give"
+                  variant="primary"
+                  class="post__button"
+                >
+                  Give stuff
+                </b-button>
+                <b-button
+                  id="findbutton"
+                  ref="findbutton"
+                  to="/find"
+                  variant="secondary"
+                  class="post__button"
+                >
+                  Ask for stuff
+                </b-button>
+              </div>
+            </b-card-text>
+            <v-tooltip
+              :shown="showToolGive"
+              target="givebutton"
+              placement="bottom"
+              variant="primary"
+              :triggers="[]"
             >
-              <span slot="no-results" />
-              <span slot="no-more" />
-              <span slot="spinner">
-                <b-img-lazy src="~/static/loader.gif" alt="Loading" />
-              </span>
-            </infinite-loading>
-          </client-only>
-        </div>
-      </b-col>
-      <b-col cols="0" lg="3" class="p-0 pl-1">
-        <VisibleWhen :at="['lg', 'xl', 'xxl']">
-          <sidebar-right show-volunteer-opportunities show-job-opportunities />
-        </VisibleWhen>
-      </b-col>
-    </b-row>
-  </b-container>
+              <template #popper>
+                <div>
+                  Giving something away? Click the Give button. Chitchat is for
+                  other discussion.
+                </div>
+              </template>
+            </v-tooltip>
+            <v-tooltip
+              :shown="showToolFind"
+              target="findbutton"
+              placement="bottom"
+              variant="primary"
+              :triggers="[]"
+            >
+              <template #popper>
+                <div>
+                  Looking for an item? Click the Find button. Chitchat is for
+                  other discussion.
+                </div>
+              </template>
+            </v-tooltip>
+          </b-card>
+          <div v-if="!id" class="mt-2">
+            <b-card no-body class="mb-2">
+              <b-card-text class="p-2 pb-0 mb-0">
+                <label class="font-weight-bold mb-1" for="startThread"
+                  >Chat to nearby freeglers!
+                  <span class="d-none d-sm-inline"
+                    >Ask for advice, recommendations, or just have a
+                    natter:</span
+                  ></label
+                >
+                <b-form-textarea
+                  id="startThread"
+                  v-model="startThread"
+                  rows="2"
+                  max-rows="8"
+                  placeholder="What's going on in your world?"
+                  class="border border-primary"
+                />
+                <div class="small text-muted">
+                  Everything here is public. Be kind
+                  <span class="d-none d-sm-inline">to each other</span>;
+                  occasionally we may moderate to ensure things stay friendly.
+                </div>
+                <b-img
+                  v-if="imageid"
+                  lazy
+                  thumbnail
+                  :src="imagethumb"
+                  class="image__uploaded"
+                />
+              </b-card-text>
+              <hr class="mt-1 mb-1" />
+              <OurFilePond
+                v-if="uploading"
+                class="bg-white m-0 pondrow"
+                imgtype="Newsfeed"
+                imgflag="newsfeed"
+                @photoProcessed="photoProcessed"
+              />
+              <div class="pb-1 d-flex justify-content-end">
+                <b-button variant="secondary" class="mr-2" @click="photoAdd">
+                  Add photo
+                </b-button>
+                <b-button variant="primary" class="mr-2" @click="postIt">
+                  Post it!
+                </b-button>
+              </div>
+            </b-card>
+          </div>
+          <NewsLocation v-if="!id" class="p-2" @changed="areaChange" />
+          <NoticeMessage
+            v-if="id && newsfeed && newsfeed.length && !newsfeed[0].visible"
+            class="mt-2"
+          >
+            Sorry, this thread isn't around any more.
+          </NoticeMessage>
+          <div class="p-0 pt-1 mb-1">
+            <NewsThread
+              v-for="entry in newsfeedToShow"
+              :id="entry.id"
+              :key="'newsfeed-' + entry.id + '-area-' + selectedArea"
+              :scroll-to="scrollTo"
+              class="mt-2"
+            />
+            <client-only v-if="newsfeed?.length">
+              <div v-observe-visibility="loadMore" />
+              <div
+                v-if="show < newsfeed.length"
+                class="d-flex justify-content-around"
+              >
+                <b-button
+                  v-if="showMore"
+                  variant="secondary"
+                  class="mt-4"
+                  @click="loadMore"
+                >
+                  Load more
+                </b-button>
+              </div>
+            </client-only>
+          </div>
+        </b-col>
+        <b-col cols="0" lg="3" class="p-0 pl-1">
+          <VisibleWhen :at="['lg', 'xl', 'xxl']">
+            <sidebar-right
+              show-volunteer-opportunities
+              show-job-opportunities
+            />
+          </VisibleWhen>
+        </b-col>
+      </b-row>
+    </b-container>
+    <template #fallback>
+      <div class="text-center">
+        <b-img class="float-end" src="/loader.gif" />
+      </div>
+    </template>
+  </Suspense>
 </template>
-
 <script>
 import { useRoute } from 'vue-router'
 import NoticeMessage from '../../components/NoticeMessage'
@@ -225,13 +238,18 @@ export default {
       )
     )
 
-    await newsfeedStore.fetch(id)
+    const me = authStore.user
+    const settings = me.settings
+    const distance = settings.newsfeedarea || 0
+
+    await newsfeedStore.fetch(id, distance)
 
     return {
       authStore,
       newsfeedStore,
       miscStore,
       id,
+      infiniteId: new Date().getTime(),
     }
   },
   data() {
@@ -239,7 +257,6 @@ export default {
       show: 0,
       startThread: null,
       scrollTo: null,
-      infiniteId: +new Date(),
       uploading: false,
       imageid: null,
       imagethumb: null,
@@ -249,6 +266,7 @@ export default {
       shownToolGive: false,
       showToolFind: false,
       shownToolFind: false,
+      showLoadMore: false,
     }
   },
   computed: {
@@ -284,6 +302,7 @@ export default {
   },
   mounted() {
     setTimeout(this.runCheck, 3000)
+    this.showLoadMore = true
   },
   methods: {
     runCheck() {
@@ -345,19 +364,10 @@ export default {
         setTimeout(this.runCheck, 1000)
       }
     },
-    loadMore($state) {
-      this.busy = true
-      this.scrollTo = this.id
-
-      if (!this.me) {
-        if ($state.complete) {
-          $state.complete()
-        }
-      } else if (this.show < this.newsfeed.length) {
-        this.show++
-        $state.loaded()
-      } else {
-        $state.complete()
+    loadMore(visible) {
+      console.log('Load more visible', visible)
+      if (visible) {
+        this.show += 10
       }
     },
     areaChange() {

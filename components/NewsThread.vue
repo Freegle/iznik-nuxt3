@@ -129,7 +129,7 @@
             <!--            >-->
             <b-input-group>
               <b-input-group-prepend>
-                <span class="input-group-text pl-1 pr-1">
+                <span class="input-group-text pl-2 pr-1">
                   <ProfileImage
                     v-if="me.profile.path"
                     :image="me.profile.path"
@@ -148,7 +148,7 @@
                 maxlength="2048"
                 spellcheck="true"
                 placeholder="Write a comment on this thread and hit enter to post..."
-                class="p-0 pl-1 pt-1"
+                class="p-0 pl-2 pt-2"
                 autocapitalize="none"
                 @keydown.enter.shift.exact.prevent="newlineComment"
                 @keydown.alt.shift.exact.prevent="newlineComment"
@@ -231,6 +231,7 @@
 </template>
 <script>
 import { useNewsfeedStore } from '../stores/newsfeed'
+import { useUserStore } from '../stores/user'
 import NewsReportModal from './NewsReportModal'
 import SpinButton from './SpinButton'
 import NewsReplies from '~/components/NewsReplies'
@@ -291,8 +292,16 @@ export default {
   },
   async setup(props) {
     const newsfeedStore = useNewsfeedStore()
+    const userStore = useUserStore()
 
     await newsfeedStore.fetch(props.id)
+
+    const newsfeed = newsfeedStore.byId(props.id)
+
+    if (newsfeed?.userid) {
+      // Get the user now - we'll need it in subcomponents and getting it now reduces flicker.
+      await userStore.fetch(newsfeed.userid)
+    }
 
     return {
       newsfeedStore,
@@ -594,5 +603,10 @@ export default {
 
 .image__uploaded {
   width: 100px;
+}
+
+:deep(.dropdown-toggle) {
+  padding-right: 13px;
+  padding-left: 10px;
 }
 </style>

@@ -35,7 +35,6 @@
     <ProfileModal v-if="infoclick" :id="userid" ref="profilemodal" />
   </div>
 </template>
-
 <script>
 // Use import rather than async otherwise we have trouble with refs.
 import { useUserStore } from '../stores/user'
