@@ -15,8 +15,8 @@
           placeholder="Please let us know what you don't like, and one of our volunteers will review it."
         />
       </template>
-      <template slot="modal-footer" slot-scope="{ cancel }">
-        <b-button variant="white" @click="cancel"> Close </b-button>
+      <template #footer>
+        <b-button variant="white" @click="hide"> Close </b-button>
         <b-button variant="primary" @click="report"> Submit Report </b-button>
       </template>
     </b-modal>

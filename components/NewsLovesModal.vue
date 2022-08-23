@@ -36,8 +36,8 @@
           </li>
         </ul>
       </template>
-      <template slot="modal-footer" slot-scope="{ cancel }">
-        <b-button variant="white" @click="cancel"> Close </b-button>
+      <template #footer>
+        <b-button variant="white" @click="hide"> Close </b-button>
       </template>
     </b-modal>
   </span>

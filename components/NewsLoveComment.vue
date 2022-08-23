@@ -45,6 +45,7 @@
   </span>
 </template>
 <script>
+import pluralize from 'pluralize'
 import NewsLovesModal from './NewsLovesModal'
 
 export default {
@@ -66,13 +67,7 @@ export default {
     getShowLovesLabel() {
       return (
         'This comment has ' +
-        this.$options.filters.pluralize(
-          this.newsfeed.loves,
-          ['love', 'loves'],
-          {
-            includeNumber: true,
-          }
-        ) +
+        pluralize('love', this.newsfeed?.loves, true) +
         '. Who loves this?'
       )
     },

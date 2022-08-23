@@ -286,8 +286,8 @@
           placeholder="Edit your post..."
         />
       </template>
-      <template slot="modal-footer" slot-scope="{ cancel }">
-        <b-button variant="white" @click="cancel"> Cancel </b-button>
+      <template #footer>
+        <b-button variant="white" @click="hide"> Cancel </b-button>
         <b-button variant="primary" @click="save"> Save </b-button>
       </template>
     </b-modal>

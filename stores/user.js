@@ -30,7 +30,7 @@ export const useUserStore = defineStore({
             this.list[id] = user
           }
 
-          this.fetchind[id] = null
+          this.fetching[id] = null
         }
       }
 

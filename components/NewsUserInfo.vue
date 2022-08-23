@@ -30,7 +30,7 @@
           }}&nbsp;
         </span>
       </span>
-      <span v-if="user.settings.showmod">
+      <span v-if="user.showmod">
         &bull;
         <v-icon icon="leaf" /> Freegle Volunteer
       </span>
@@ -38,11 +38,27 @@
   </nuxt-link>
 </template>
 <script>
+import { useUserStore } from '../stores/user'
+
 export default {
   props: {
-    user: {
-      type: Object,
+    userid: {
+      type: Number,
       required: true,
+    },
+  },
+  async setup(props) {
+    const userStore = useUserStore()
+
+    await userStore.fetch(props.userid)
+
+    return {
+      userStore,
+    }
+  },
+  computed: {
+    user() {
+      return this.userid ? this.userStore.byId(this.userid) : null
     },
   },
 }

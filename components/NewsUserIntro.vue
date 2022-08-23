@@ -1,26 +1,22 @@
 <template>
   <div
-    v-if="userid && users[userid]"
+    v-if="user"
     class="clickme"
     title="Click to see their profile"
     @click="showInfo"
   >
-    <div class="media clickme">
-      <div class="media-left">
-        <div class="media-object">
-          <ProfileImage
-            v-if="users[userid].profile.turl"
-            :image="users[userid].profile.turl"
-            class="ml-1 mb-1 inline"
-            is-thumbnail
-            :is-moderator="Boolean(users[userid].settings.showmod)"
-            size="lg"
-          />
-        </div>
-      </div>
+    <div class="d-flex clickme">
+      <ProfileImage
+        v-if="user.profile.path"
+        :image="user.profile.path"
+        class="ml-1 mb-1 inline"
+        is-thumbnail
+        :is-moderator="Boolean(user.showmod)"
+        size="lg"
+      />
       <div class="media-body ml-2">
         <span class="text-success font-weight-bold">
-          {{ users[userid].displayname }}
+          {{ user.displayname }}
         </span>
         {{ append }}
         <span v-if="appendBold"> "{{ appendBold }}" </span>
@@ -28,7 +24,7 @@
         <span class="text-muted small pl-0">
           {{ timeago(newsfeed.added) }}
         </span>
-        <NewsUserInfo :user="users[userid]" />
+        <NewsUserInfo :userid="userid" />
       </div>
     </div>
     <div v-if="mod && newsfeed.type === 'AboutMe'" class="text-muted small">
@@ -42,6 +38,7 @@
 
 <script>
 // Use import rather than async otherwise we have trouble with refs.
+import { useUserStore } from '../stores/user'
 import ProfileModal from '~/components/ProfileModal'
 import NewsUserInfo from '~/components/NewsUserInfo'
 import ProfileImage from '~/components/ProfileImage'
@@ -52,7 +49,6 @@ export default {
     ProfileModal,
     ProfileImage,
   },
-
   props: {
     userid: {
       type: Number,
@@ -73,10 +69,24 @@ export default {
       default: '',
     },
   },
+  async setup(props) {
+    const userStore = useUserStore()
+
+    await userStore.fetch(props.userid)
+
+    return {
+      userStore,
+    }
+  },
   data() {
     return {
       infoclick: false,
     }
+  },
+  computed: {
+    user() {
+      return this.userid ? this.userStore.byId(this.userid) : null
+    },
   },
   methods: {
     showInfo() {
