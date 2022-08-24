@@ -448,14 +448,26 @@ export default {
       if (groupid) {
         // Use the bounding box for the group.
         const group = this.myGroup(groupid)
+        console.log('Got group', group)
 
         if (group.bbox) {
-          const bounds = new this.L.LatLngBounds([
-            [group.bbox.swlat, group.bbox.swlng],
-            [group.bbox.nelat, group.bbox.nelng],
-          ]).pad(0.1)
-          this.mapObject.flyToBounds(bounds)
-          console.log('Use box for group')
+          const wkt = new this.Wkt.Wkt()
+          try {
+            wkt.read(group.bbox)
+            const obj = wkt.toObject()
+            const thisbounds = obj.getBounds()
+            const sw = thisbounds.getSouthWest()
+            const ne = thisbounds.getNorthEast()
+
+            const bounds = new this.L.LatLngBounds([
+              [sw.lat, sw.lng],
+              [ne.lat, ne.lng],
+            ]).pad(0.1)
+
+            this.mapObject.flyToBounds(bounds)
+          } catch (e) {
+            console.log('WKT error', location, e)
+          }
         }
       }
     },
