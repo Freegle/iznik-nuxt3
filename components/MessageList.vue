@@ -180,29 +180,30 @@ export default {
           let addIt = true
 
           if (m.successful) {
-            // if (this.myid === message.fromuser) {
-            //   // Always show your own messages.  We have at least one freegler for whom this is emotionally
-            //   // important.
-            //   // TODO
-            //   addIt = true
-            // } else
-            const daysago = dayjs().diff(dayjs(m.date), 'day')
-
-            if (this.selectedType !== 'All') {
-              // Don't show freegled posts if you're already filtering.
-              addIt = false
-            } else if (daysago > 7) {
-              addIt = false
+            if (this.myid === m.fromuser) {
+              // Always show your own messages.  We have at least one freegler for whom this is emotionally
+              // important.
+              // TODO
+              addIt = true
             } else {
-              const lastfour = ret.slice(-4)
-              let gotSuccessful = false
+              const daysago = dayjs().diff(dayjs(m.date), 'day')
 
-              lastfour.forEach((m) => {
-                gotSuccessful |= m.successful
-              })
-
-              if (gotSuccessful) {
+              if (this.selectedType !== 'All') {
+                // Don't show freegled posts if you're already filtering.
                 addIt = false
+              } else if (daysago > 7) {
+                addIt = false
+              } else {
+                const lastfour = ret.slice(-4)
+                let gotSuccessful = false
+
+                lastfour.forEach((m) => {
+                  gotSuccessful |= m.successful
+                })
+
+                if (gotSuccessful) {
+                  addIt = false
+                }
               }
             }
           }
