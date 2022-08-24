@@ -1,14 +1,16 @@
 <template>
   <div @click="$emit('click')">
     <div v-if="summary">
-      <b-img-lazy src="~/static/promised.jpg" class="promised__image" />
-      <b-tooltip variant="success" :target="'msg-' + id">
-        <p v-if="!toMe">
-          This item has already been promised to someone. You can still reply,
-          but you'll probably only get it if someone else drops out.
-        </p>
-        <p v-else>This has been promised to you.</p>
-      </b-tooltip>
+      <b-img-lazy src="/promised.jpg" class="promised__image" />
+      <v-tooltip variant="success" :target="'msg-' + id">
+        <template #popper>
+          <p v-if="!toMe">
+            This item has already been promised to someone. You can still reply,
+            but you'll probably only get it if someone else drops out.
+          </p>
+          <p v-else>This has been promised to you.</p>
+        </template>
+      </v-tooltip>
     </div>
     <div v-else>
       <notice-message v-if="!toMe" variant="warning">

@@ -1,14 +1,16 @@
 <template>
   <div>
-    <b-img-lazy src="~/static/freegled.jpg" class="freegled__image" />
-    <b-tooltip variant="success" :target="'msg-' + id">
-      <p v-if="message.type === 'Offer'">Yay, someone took it!</p>
-      <p v-else>Hurray, they got what they were looking for!</p>
-      <p>
-        Don't forget to Mark your posts as TAKEN/RECEIVED from
-        <em>My Posts</em>.
-      </p>
-    </b-tooltip>
+    <b-img-lazy src="/freegled.jpg" class="freegled__image" />
+    <v-tooltip variant="success" :target="'msg-' + id">
+      <template #popper>
+        <p v-if="message.type === 'Offer'">Yay, someone took it!</p>
+        <p v-else>Hurray, they got what they were looking for!</p>
+        <p>
+          Don't forget to Mark your posts as TAKEN/RECEIVED from
+          <em>My Posts</em>.
+        </p>
+      </template>
+    </v-tooltip>
   </div>
 </template>
 <script>
