@@ -140,6 +140,7 @@ export default {
       busy: false,
       distance: 2000,
       toShow: MIN_TO_SHOW,
+      prefetched: 0,
       maxMessageVisible: 0,
       ensuredMessageVisible: false,
       emitted: false,
@@ -243,6 +244,23 @@ export default {
   watch: {
     bump() {
       this.infiniteId++
+    },
+    toShow: {
+      async handler(newVal) {
+        // We want to prefetch some messages so that they are ready in store for if/when we scroll down and want to
+        // add them to the DOM.
+        for (
+          let i = Math.max(newVal + 1, this.prefetched);
+          i < this.messagesForList.length && this.prefetch < newVal + 5;
+          i++
+        ) {
+          console.log('prefetch', this.messagesForList[i].id)
+          await throttleFetches()
+          await this.messageStore.fetch(this.messagesForList[i].id)
+          this.prefetched++
+        }
+      },
+      immediate: true,
     },
   },
   methods: {
