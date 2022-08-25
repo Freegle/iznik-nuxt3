@@ -42,6 +42,24 @@ export const useMessageStore = defineStore({
 
       return this.list[id]
     },
+    async fetchMultiple(ids, force) {
+      const left = []
+
+      ids.forEach((id) => {
+        id = parseInt(id)
+
+        if ((force || !this.list[id]) && !this.fetching[id]) {
+          // This is a message we need to fetch and aren't currently fetching.
+          left.push(id)
+        }
+      })
+
+      if (left.length) {
+        this.fetchingCount++
+        await api(this.config).message.fetch(left.join(','))
+        this.fetchingCount--
+      }
+    },
     async fetchInBounds(swlat, swlng, nelat, nelng, groupid) {
       // Don't cache this, as it might change.
       const ret = await api(this.config).message.inbounds(

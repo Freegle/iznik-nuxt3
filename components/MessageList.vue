@@ -249,16 +249,22 @@ export default {
       async handler(newVal) {
         // We want to prefetch some messages so that they are ready in store for if/when we scroll down and want to
         // add them to the DOM.
+        const ids = []
+
         for (
           let i = Math.max(newVal + 1, this.prefetched);
-          i < this.messagesForList.length && this.prefetch < newVal + 5;
+          i < this.messagesForList.length && ids.length < 5;
           i++
         ) {
-          console.log('prefetch', this.messagesForList[i].id)
-          await throttleFetches()
-          await this.messageStore.fetch(this.messagesForList[i].id)
-          this.prefetched++
+          if (this.wantMessage(this.messagesForList[i])) {
+            ids.push(this.messagesForList[i].id)
+          }
+
+          this.prefetched = i
         }
+
+        await throttleFetches()
+        await this.messageStore.fetchMultiple(ids)
       },
       immediate: true,
     },

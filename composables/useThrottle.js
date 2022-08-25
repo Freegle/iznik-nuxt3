@@ -12,7 +12,7 @@ export function throttleFetches() {
     return Promise.resolve()
   } else {
     return new Promise((resolve) => {
-      this.checkThrottle(resolve)
+      checkThrottle(resolve)
     })
   }
 }
