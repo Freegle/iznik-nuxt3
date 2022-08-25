@@ -1,54 +1,59 @@
 <template>
-  <div
-    v-if="message"
-    :id="'msg-' + id"
-    class="position-relative ms-2 me-2 ms-sm-0 me-sm-0"
-    itemscope
-    itemtype="http://schema.org/Product"
-  >
+  <Suspense>
     <div
-      itemprop="offers"
+      v-if="message"
+      :id="'msg-' + id"
+      class="position-relative ms-2 me-2 ms-sm-0 me-sm-0"
       itemscope
-      itemtype="http://schema.org/Offer"
-      class="d-none"
+      itemtype="http://schema.org/Product"
     >
-      <meta itemprop="priceCurrency" content="GBP" />
-      <span itemprop="price">0</span> |
-      <span itemprop="availability">Instock</span>
+      <div
+        itemprop="offers"
+        itemscope
+        itemtype="http://schema.org/Offer"
+        class="d-none"
+      >
+        <meta itemprop="priceCurrency" content="GBP" />
+        <span itemprop="price">0</span> |
+        <span itemprop="availability">Instock</span>
+      </div>
+      <div v-if="startExpanded">
+        <MessageExpanded
+          :id="message.id"
+          :replyable="replyable"
+          :hide-close="hideClose"
+          :actions="actions"
+          :show-map="true"
+          class="bg-white p-2"
+          @zoom="showPhotosModal"
+        />
+        <client-only>
+          <MessagePhotosModal :id="message.id" ref="photoModal" />
+        </client-only>
+      </div>
+      <div v-else>
+        <MessageSummary
+          :id="message.id"
+          :expand-button-text="expandButtonText"
+          :replyable="replyable"
+          class="mt-3"
+          :matchedon="matchedon"
+          @expand="expand"
+          @zoom="zoom"
+        />
+        <MessageModal
+          :id="message.id"
+          ref="modal"
+          :replyable="replyable"
+          :hide-close="hideClose"
+          :actions="actions"
+        />
+      </div>
     </div>
-    <div v-if="startExpanded">
-      <MessageExpanded
-        :id="message.id"
-        :replyable="replyable"
-        :hide-close="hideClose"
-        :actions="actions"
-        :show-map="true"
-        class="bg-white p-2"
-        @zoom="showPhotosModal"
-      />
-      <client-only>
-        <MessagePhotosModal :id="message.id" ref="photoModal" />
-      </client-only>
-    </div>
-    <div v-else>
-      <MessageSummary
-        :id="message.id"
-        :expand-button-text="expandButtonText"
-        :replyable="replyable"
-        class="mt-3"
-        :matchedon="matchedon"
-        @expand="expand"
-        @zoom="zoom"
-      />
-      <MessageModal
-        :id="message.id"
-        ref="modal"
-        :replyable="replyable"
-        :hide-close="hideClose"
-        :actions="actions"
-      />
-    </div>
-  </div>
+    <template #fallback>
+      <div class="invisible">Loading {{ id }}...</div>
+    </template>
+  </Suspense>
 </template>
 <script>
 import { useMessageStore } from '../stores/message'
