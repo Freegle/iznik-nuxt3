@@ -37,7 +37,9 @@
         <template #error>&nbsp;</template>
         <template #complete>&nbsp;</template>
         <template #spinner>
-          <b-img-lazy src="/loader.gif" alt="Loading" />
+          <div class="text-center">
+            <b-img-lazy src="/loader.gif" alt="Loading" />
+          </div>
         </template>
       </infinite-loading>
       <NoticeMessage v-if="!busy && !loading && !messagesForList?.length">
@@ -244,7 +246,7 @@ export default {
     },
   },
   methods: {
-    loadMore($state) {
+    async loadMore($state) {
       do {
         this.toShow++
       } while (
@@ -252,24 +254,25 @@ export default {
         !this.wantMessage(this.messagesForList[this.toShow])
       )
 
-      if (this.toShow > this.messagesForList?.length) {
-        // We're showing all the messages
-        $state.complete()
-      } else {
+      if (
+        this.toShow <= this.messagesForList?.length &&
+        this.wantMessage(this.messagesForList[this.toShow])
+      ) {
         // We need another message.
         const m = this.messagesForList[this.toShow - 1]
 
-        this.$nextTick(async () => {
-          // We always want to trigger a fetch to the store, because the store will decide whether a cached message
-          // needs refreshing.
-          await throttleFetches()
-          await this.messageStore.fetch(m.id)
-
-          // Kick the scroll to see if we need more.
-          this.infiniteId++
-        })
+        // We always want to trigger a fetch to the store, because the store will decide whether a cached message
+        // needs refreshing.
+        await throttleFetches()
+        await this.messageStore.fetch(m.id)
 
         $state.loaded()
+
+        // Kick the scroll to see if we need more - it seems to need this.
+        this.infiniteId++
+      } else {
+        // We're showing all the messages
+        $state.complete()
       }
     },
     // Simple throttle.  When we get more than a certain number of outstanding fetches, wait until they are all
