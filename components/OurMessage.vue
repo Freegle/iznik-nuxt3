@@ -171,7 +171,7 @@ export default {
     },
     replyToUser() {
       if (this.message && this.message.fromuser) {
-        return this.message.fromuser.id
+        return this.message.fromuser
       }
 
       return null

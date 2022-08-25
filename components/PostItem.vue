@@ -189,7 +189,7 @@ export default {
       messages.forEach((m) => {
         if (
           m.fromuser &&
-          m.fromuser.id === this.myid &&
+          m.fromuser === this.myid &&
           m.type === this.type &&
           m.item &&
           this.item &&

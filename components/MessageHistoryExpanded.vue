@@ -1,13 +1,13 @@
 <template>
   <div>
     <div
-      v-if="message.fromuser"
+      v-if="fromuser"
       class="grey p-2 d-flex clickme"
-      :title="'Click to view profile for ' + message.fromuser.displayname"
+      :title="'Click to view profile for ' + fromuser.displayname"
     >
       <ProfileImage
-        v-if="message.fromuser && message.fromuser.profile"
-        :image="message.fromuser.profile.turl"
+        v-if="fromuser && fromuser.profile"
+        :image="fromuser.profile.turl"
         class="ml-1 mb-1 inline"
         is-thumbnail
         size="sm"
@@ -19,7 +19,7 @@
           @click="showProfileModal"
         >
           <div class="text-muted align-middle decornone d-flex">
-            Posted by {{ message.fromuser.displayname }}
+            Posted by {{ fromuser.displayname }}
           </div>
         </div>
         <nuxt-link
@@ -31,29 +31,22 @@
           <v-icon icon="link" /> Connected before
         </nuxt-link>
         <!--        TODO-->
-        <!--        <Supporter v-if="message.fromuser.supporter" class="d-inline" />-->
+        <!--        <Supporter v-if="fromuser.supporter" class="d-inline" />-->
         <div
           v-if="
-            message.fromuser &&
-            message.fromuser.info &&
-            message.fromuser.info.openoffers +
-              message.fromuser.info.openwanteds >
-              0
+            fromuser &&
+            fromuser.info &&
+            fromuser.info.openoffers + fromuser.info.openwanteds > 0
           "
           @click="showProfileModal"
         >
-          <span v-if="message.fromuser.info.openoffers" class="text-success">
+          <span v-if="fromuser.info.openoffers" class="text-success">
             {{ openOfferPlural }}
           </span>
-          <span
-            v-if="
-              message.fromuser.info.openoffers &&
-              message.fromuser.info.openwanteds
-            "
-          >
+          <span v-if="fromuser.info.openoffers && fromuser.info.openwanteds">
             &bull;
           </span>
-          <span v-if="message.fromuser.info.openwanteds" class="text-success">
+          <span v-if="fromuser.info.openwanteds" class="text-success">
             {{ openWantedPlural }}
           </span>
         </div>
@@ -76,8 +69,8 @@
       </div>
       <!--      TODO-->
       <!--      <ProfileModal-->
-      <!--        v-if="showProfile && message && message.fromuser"-->
-      <!--        :id="message.fromuser.id"-->
+      <!--        v-if="showProfile && message && fromuser"-->
+      <!--        :id="fromuser.id"-->
       <!--        ref="profile"-->
       <!--      />-->
     </div>
@@ -87,6 +80,7 @@
 import pluralize from 'pluralize'
 import dayjs from 'dayjs'
 import { milesAway } from '../composables/useDistance'
+import { useUserStore } from '../stores/user'
 import ProfileImage from '@/components/ProfileImage'
 import { useMessageStore } from '~/stores/message'
 import { useGroupStore } from '~/stores/group'
@@ -102,11 +96,18 @@ export default {
       default: 0,
     },
   },
-  setup() {
+  async setup(props) {
     const messageStore = useMessageStore()
     const groupStore = useGroupStore()
+    const userStore = useUserStore()
 
-    return { messageStore, timeago, groupStore }
+    const message = messageStore.byId(props.id)
+
+    if (message) {
+      await userStore.fetch(message.fromuser)
+    }
+
+    return { messageStore, timeago, groupStore, userStore }
   },
   data() {
     return {
@@ -114,6 +115,11 @@ export default {
     }
   },
   computed: {
+    fromuser() {
+      return this.message?.fromuser
+        ? this.userStore.byId(this.message?.fromuser)
+        : null
+    },
     milesaway() {
       return milesAway(
         this.me?.lat,
@@ -126,13 +132,13 @@ export default {
       return pluralize('mile', this.milesaway, true)
     },
     openOfferPlural() {
-      return this.message && this.message.fromuser && this.message.fromuser.info
-        ? pluralize('open OFFER', this.message.fromuser.info.openoffers, true)
+      return this.message && this.fromuser && this.fromuser.info
+        ? pluralize('open OFFER', this.fromuser.info.openoffers, true)
         : null
     },
     openWantedPlural() {
-      return this.message && this.message.fromuser && this.message.fromuser.info
-        ? pluralize('open WANTED', this.message.fromuser.info.openwanteds, true)
+      return this.message && this.fromuser && this.fromuser.info
+        ? pluralize('open WANTED', this.fromuser.info.openwanteds, true)
         : null
     },
     message() {
