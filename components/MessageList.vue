@@ -1,33 +1,33 @@
 <template>
-  <div>
-    <h2 v-if="group" class="sr-only">Community Information</h2>
-    <GroupHeader v-if="group" :group="group" show-join />
-    <!--        TODO Jobs-->
-    <!--        <JobsTopBar v-if="jobs" class="d-block d-lg-none" />-->
+  <Suspense>
+    <div>
+      <h2 v-if="group" class="sr-only">Community Information</h2>
+      <GroupHeader v-if="group" :group="group" show-join />
+      <!--        TODO Jobs-->
+      <!--        <JobsTopBar v-if="jobs" class="d-block d-lg-none" />-->
 
-    <h2 class="sr-only">List of wanteds and offers</h2>
-    <client-only>
-      <div v-observe-visibility="visibilityChanged" />
-    </client-only>
-    <div v-if="deDuplicatedMessages?.length">
-      <Suspense
-        v-for="message in deDuplicatedMessages"
-        :key="'messagelist-' + message.id"
-      >
-        <div :ref="'messagewrapper-' + message.id" class="p-0">
-          <OurMessage
-            :id="message.id"
-            :matchedon="message.matchedon"
-            record-view
-          />
-        </div>
+      <h2 class="sr-only">List of wanteds and offers</h2>
+      <client-only>
+        <div v-observe-visibility="visibilityChanged" />
+      </client-only>
+      <div v-if="deDuplicatedMessages?.length">
+        <Suspense
+          v-for="message in deDuplicatedMessages"
+          :key="'messagelist-' + message.id"
+        >
+          <div :ref="'messagewrapper-' + message.id" class="p-0">
+            <OurMessage
+              :id="message.id"
+              :matchedon="message.matchedon"
+              record-view
+            />
+          </div>
 
-        <template #fallback>
-          <div class="invisible">Loading {{ message.id }}...</div>
-        </template>
-      </Suspense>
-    </div>
-    <client-only>
+          <template #fallback>
+            <div class="invisible">Loading {{ message.id }}...</div>
+          </template>
+        </Suspense>
+      </div>
       <infinite-loading
         v-if="messagesForList?.length"
         :identifier="infiniteId"
@@ -42,7 +42,7 @@
           </div>
         </template>
       </infinite-loading>
-      <NoticeMessage v-if="!busy && !loading && !messagesForList?.length">
+      <NoticeMessage v-if="!loading && !messagesForList?.length">
         <p>
           Sorry, we didn't find anything. Things come and go quickly, though, so
           you could try later. Or you could:
@@ -56,16 +56,21 @@
           </b-button>
         </div>
       </NoticeMessage>
-    </client-only>
-  </div>
+    </div>
+    <template #fallback>
+      <div class="text-center">
+        <b-img-lazy src="/loader.gif" alt="Loading" />
+      </div>
+    </template>
+  </Suspense>
 </template>
 <script>
 import { ref } from 'vue'
-
 import dayjs from 'dayjs'
 import { useGroupStore } from '../stores/group'
 import { useMessageStore } from '../stores/message'
 import { throttleFetches } from '../composables/useThrottle'
+import InfiniteLoading from '~/components/InfiniteLoading'
 import { useMiscStore } from '~/stores/misc'
 // const GroupSelect = () => import('./GroupSelect')
 const NoticeMessage = () => import('./NoticeMessage')
@@ -82,6 +87,7 @@ export default {
     OurMessage,
     GroupHeader,
     NoticeMessage,
+    InfiniteLoading,
   },
   props: {
     messagesForList: {
@@ -112,9 +118,15 @@ export default {
       type: Number,
       required: false,
       default: null,
+      busy: true,
+    },
+    visible: {
+      type: Boolean,
+      required: false,
+      default: true,
     },
   },
-  setup(props) {
+  async setup(props) {
     const groupStore = useGroupStore()
     const messageStore = useMessageStore()
     const miscStore = useMiscStore()
@@ -124,6 +136,18 @@ export default {
     if (myGroups && myGroups.length === 1) {
       // TODO We will be showing the single group.
       groupStore.fetch(myGroups[0].id)
+    }
+
+    // Get the initial messages to show in a single call.  There will be a delay during which we will see the
+    // loader, but it's better to fetch a screenful than have the loader sliding down
+    // the screen.  Once we've loaded then the loader will be shown by the infinite scroll, but we will normally
+    // not see if because of prefetching.
+    const initialIds = props.messagesForList
+      .slice(0, MIN_TO_SHOW)
+      .map((message) => message.id)
+
+    if (initialIds.length) {
+      await messageStore.fetchMultiple(initialIds)
     }
 
     return {
@@ -137,7 +161,6 @@ export default {
   data() {
     return {
       // Infinite message scroll
-      busy: false,
       distance: 2000,
       toShow: MIN_TO_SHOW,
       prefetched: 0,
@@ -242,29 +265,28 @@ export default {
     },
   },
   watch: {
-    bump() {
-      this.infiniteId++
-    },
     toShow: {
       async handler(newVal) {
-        // We want to prefetch some messages so that they are ready in store for if/when we scroll down and want to
-        // add them to the DOM.
-        const ids = []
+        if (newVal + 5 > this.prefetched) {
+          // We want to prefetch some messages so that they are ready in store for if/when we scroll down and want to
+          // add them to the DOM.
+          const ids = []
 
-        for (
-          let i = Math.max(newVal + 1, this.prefetched);
-          i < this.messagesForList.length && ids.length < 5;
-          i++
-        ) {
-          if (this.wantMessage(this.messagesForList[i])) {
-            ids.push(this.messagesForList[i].id)
+          for (
+            let i = Math.max(newVal + 1, this.prefetched);
+            i < this.messagesForList.length && ids.length < 5;
+            i++
+          ) {
+            if (this.wantMessage(this.messagesForList[i])) {
+              ids.push(this.messagesForList[i].id)
+            }
+
+            this.prefetched = i
           }
 
-          this.prefetched = i
+          await throttleFetches()
+          await this.messageStore.fetchMultiple(ids)
         }
-
-        await throttleFetches()
-        await this.messageStore.fetchMultiple(ids)
       },
       immediate: true,
     },
@@ -291,9 +313,6 @@ export default {
         await this.messageStore.fetch(m.id)
 
         $state.loaded()
-
-        // Kick the scroll to see if we need more - it seems to need this.
-        this.infiniteId++
       } else {
         // We're showing all the messages
         $state.complete()

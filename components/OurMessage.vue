@@ -42,6 +42,7 @@
           @zoom="zoom"
         />
         <MessageModal
+          v-if="expanded"
           :id="message.id"
           ref="modal"
           :replyable="replyable"

@@ -62,6 +62,7 @@
 </template>
 <script>
 import { useNotificationStore } from '../stores/notification'
+import InfiniteLoading from '~/components/InfiniteLoading'
 
 // const Notification = () => import('~/components/Notification')
 
@@ -69,6 +70,7 @@ export default {
   name: 'NotificationOptions',
   components: {
     // Notification,
+    InfiniteLoading,
   },
   props: {
     distance: {

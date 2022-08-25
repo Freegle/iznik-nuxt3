@@ -119,9 +119,11 @@
 import { useRoute } from 'vue-router'
 import dayjs from 'dayjs'
 import VisibleWhen from '../../components/VisibleWhen'
+
 // TODO import loginRequired from '@/mixins/loginRequired.js'
 import { buildHead } from '../../composables/useBuildHead'
 import { useAuthStore } from '../../stores/auth'
+import InfiniteLoading from '~/components/InfiniteLoading'
 import { useChatStore } from '~/stores/chat'
 import SidebarRight from '~/components/SidebarRight'
 
@@ -141,6 +143,7 @@ export default {
     SidebarRight,
     ChatListEntry,
     ChatHideModal,
+    InfiniteLoading,
   },
   async setup(props) {
     useHead(
