@@ -1,5 +1,5 @@
 diff --git a/node_modules/@vue-leaflet/vue-leaflet/README.md b/node_modules/@vue-leaflet/vue-leaflet/README.md
-index c7d34f5..e4b3a57 100644
+index c7d34f5..7ce5c97 100644
 --- a/node_modules/@vue-leaflet/vue-leaflet/README.md
 +++ b/node_modules/@vue-leaflet/vue-leaflet/README.md
 @@ -2,8 +2,9 @@
@@ -8307,6 +8307,42 @@ index bbf34b7..60ba247 100644
      });
  
      return { root };
+diff --git a/node_modules/@vue-leaflet/vue-leaflet/src/components/LMarker.vue b/node_modules/@vue-leaflet/vue-leaflet/src/components/LMarker.vue
+index b5fdbc7..ae8c69c 100644
+--- a/node_modules/@vue-leaflet/vue-leaflet/src/components/LMarker.vue
++++ b/node_modules/@vue-leaflet/vue-leaflet/src/components/LMarker.vue
+@@ -41,9 +41,30 @@ export default {
+     }
+ 
+     onMounted(async () => {
+-      const { marker, DomEvent } = useGlobalLeaflet
++      const { marker, DomEvent, divIcon } = useGlobalLeaflet
+         ? WINDOW_OR_GLOBAL.L
+         : await import("leaflet/dist/leaflet-src.esm");
++
++      // If an icon is not specified in the options, then either the content of the LMarker's
++      // slot should be displayed if present, or the default Leaflet icon should be used if not.
++      // Either way, the `undefined` property needs to be modified.
++      if (options.icon === undefined) {
++        if (context.slots.default) {
++          // If there is slot content to be displayed, then the initial state of the icon should be
++          // invisible until it is replaced by any calls to `setIcon` or `setParentHtml` from within
++          // the default slot.
++          // Creating an empty div with no classes accomplishes this, avoiding the issue discussed in
++          // https://github.com/vue-leaflet/vue-leaflet/issues/170.
++          options.icon = divIcon({ className: "" });
++        } else {
++          // If the options object has a property named 'icon' when passed to `marker`, then Leaflet
++          // will overwrite the default icon with that value for the marker, _even if it is undefined_.
++          // This leads to the issue discussed in https://github.com/vue-leaflet/vue-leaflet/issues/130,
++          // and is avoided by simply removing that property.
++          delete options.icon;
++        }
++      }
++
+       leafletRef.value = marker(props.latLng, options);
+ 
+       const listeners = remapEvents(context.attrs);
 diff --git a/node_modules/@vue-leaflet/vue-leaflet/src/components/LTileLayer.vue b/node_modules/@vue-leaflet/vue-leaflet/src/components/LTileLayer.vue
 index e8603fd..417f550 100644
 --- a/node_modules/@vue-leaflet/vue-leaflet/src/components/LTileLayer.vue
