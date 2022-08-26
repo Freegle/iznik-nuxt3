@@ -42,14 +42,13 @@
         :height="150"
       />
       <MessageHistoryExpanded :id="id" class="d-block d-md-none mt-2 mt-md-0" />
-      <!--      TODO-->
-      <!--      <MessageReplySection-->
-      <!--        v-if="replyable && !replied"-->
-      <!--        :id="id"-->
-      <!--        class="mt-3"-->
-      <!--        @close="$emit('close')"-->
-      <!--        @sent="sent"-->
-      <!--      />-->
+      <MessageReplySection
+        v-if="replyable && !replied"
+        :id="id"
+        class="mt-3"
+        @close="$emit('close')"
+        @sent="sent"
+      />
       <b-alert v-if="replied" variant="info" show class="mt-2" fade>
         We've sent your message. You'll get replies in the
         <nuxt-link to="/chats"> Chats </nuxt-link> section on here, and by
@@ -58,7 +57,6 @@
     </div>
   </div>
 </template>
-
 <script>
 import MessageReplyInfo from './MessageReplyInfo'
 import { useMessageStore } from '~/stores/message'
