@@ -77,6 +77,7 @@
 <script>
 import { ref } from 'vue'
 import { uid } from '../composables/useId'
+import { useAuthStore } from '../stores/auth'
 import { useComposeStore } from '~/stores/compose'
 import AutoComplete from '~/components/AutoComplete'
 
@@ -128,12 +129,14 @@ export default {
   },
   setup(props) {
     const composeStore = useComposeStore()
+    const authStore = useAuthStore()
 
     let value = props.value
+    const me = authStore.user
 
-    if (props.pconly && value === null && props.myLocation) {
+    if (props.pconly && value === null && me?.settings?.mylocation?.name) {
       // If we are logged in then we may have a known location to use as the default.
-      value = props.myLocation.name
+      value = me?.settings?.mylocation?.name
     }
 
     if (props.pconly && !value && !props.noStore) {

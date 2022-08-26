@@ -90,8 +90,8 @@ export default {
       return (
         this.me &&
         this.me.phone &&
-        (this.me.phone + '').indexOf('447') !== 0 &&
-        (this.me.phone + '').indexOf('07') !== 0
+        (this.me.phone + '').includes('447') &&
+        (this.me.phone + '').includes('07')
       )
     },
     phone() {

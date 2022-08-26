@@ -43,12 +43,7 @@ export default {
       return this.myGroups.length > 0
     },
     myLocation() {
-      return this.me &&
-        this.me.settings &&
-        this.me.settings.mylocation &&
-        this.me.settings.mylocation.name
-        ? this.me.settings.mylocation
-        : null
+      return this.me?.settings?.mylocation?.name
     },
     mod() {
       return (
