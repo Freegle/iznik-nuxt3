@@ -117,22 +117,27 @@ export default {
         if (chatid) {
           if (firstmessage) {
             console.log('First message to send', firstmessage)
-            await this.chatStore.send({
-              roomid: chatid,
-              message: firstmessage,
-              refmsgid: firstmsgid,
-            })
+            await this.chatStore.send(
+              chatid,
+              firstmessage,
+              null,
+              null,
+              firstmsgid
+            )
 
             console.log('Sent')
 
             if (firstmsgid) {
               // Refresh the message so that our reply will show.
-              this.chatStore.fetchMessages(firstmsgid, true)
+              await this.chatStore.fetchMessages(chatid, true)
             }
 
             this.$emit('sent')
           }
 
+          // TODO Consider the UX here.  For example, if we reply to a message from the browse list, we then
+          // are sent to chat.  This is useful for them to see what chat is, but means they have to hit Back
+          // twice to go back to the message list - where they end up in the wrong place.
           router.push('/chats/' + chatid)
         }
       }

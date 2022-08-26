@@ -7,6 +7,7 @@ export const useReplyStore = defineStore({
     strategies: [
       {
         storage: localStorage,
+        paths: ['replyMsgId', 'replyMessage', 'replyingAt'],
       },
     ],
   },

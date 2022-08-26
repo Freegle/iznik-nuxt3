@@ -51,8 +51,7 @@
       />
       <b-alert v-if="replied" variant="info" show class="mt-2" fade>
         We've sent your message. You'll get replies in the
-        <nuxt-link to="/chats"> Chats </nuxt-link> section on here, and by
-        email.
+        <nuxt-link to="/chats">Chats</nuxt-link> section on here, and by email.
       </b-alert>
     </div>
   </div>

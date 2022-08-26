@@ -123,7 +123,7 @@
   </div>
 </template>
 <script>
-import { mapState } from 'pinia'
+import { mapWritableState } from 'pinia'
 import { useMessageStore } from '../stores/message'
 import { useAuthStore } from '../stores/auth'
 import { useReplyStore } from '../stores/reply'
@@ -207,8 +207,7 @@ export default {
       }
     },
   },
-  ...mapState(useAuthStore, ['loggedInEver', 'forceLogin']),
-  ...mapState(useReplyStore, ['replyMsgId', 'replyMessage', 'replyingAt']),
+  ...mapWritableState(useAuthStore, ['loggedInEver', 'forceLogin']),
   methods: {
     async registerOrSend() {
       // We've got a reply and an email address.  Maybe the email address is a registered user, maybe it's new.  If
@@ -253,9 +252,16 @@ export default {
 
       if (this.reply) {
         // Save the reply
-        this.replyMsgId = this.id
-        this.replyMessage = this.reply
-        this.replyingAt = Date.now()
+        const replyStore = useReplyStore()
+        replyStore.replyMsgId = this.id
+        replyStore.replyMessage = this.reply
+        replyStore.replyingAt = Date.now()
+        console.log(
+          'State',
+          useReplyStore().replyMsgId,
+          useReplyStore().replyMessage,
+          useReplyStore().replyingAt
+        )
 
         if (this.me) {
           // We have several things to do:

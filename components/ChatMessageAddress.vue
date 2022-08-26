@@ -67,8 +67,8 @@
                     >{{ multiline }}</pre
                   >
                   <pre v-else>This address has been deleted.</pre>
-                  <hr v-if="address.instructions" />
-                  <div v-if="address.instructions" class="mb-2">
+                  <hr v-if="address?.instructions" />
+                  <div v-if="address?.instructions" class="mb-2">
                     {{ address.instructions }}
                   </div>
                 </b-col>

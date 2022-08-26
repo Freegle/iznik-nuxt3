@@ -68,13 +68,29 @@ export const useChatStore = defineStore({
     async typing(chatid) {
       await api(this.config).chat.typing(chatid)
     },
-    async send(chatid, message, addressid, imageid) {
-      await api(this.config).chat.send({
+    async send(chatid, message, addressid, imageid, refmsgid) {
+      const data = {
         roomid: chatid,
-        message,
-        addressid,
-        imageid,
-      })
+      }
+
+      // Need to omit these if they are not set otherwise server doesn't like it.
+      if (message) {
+        data.message = message
+      }
+
+      if (addressid) {
+        data.addressid = addressid
+      }
+
+      if (imageid) {
+        data.imageid = imageid
+      }
+
+      if (refmsgid) {
+        data.refmsgid = refmsgid
+      }
+
+      await api(this.config).chat.send(data)
 
       // Get the latest messages back.
       this.fetchMessages(chatid)
