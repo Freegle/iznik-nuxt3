@@ -273,7 +273,19 @@ export default {
     async calculateInitialMapBounds(fetchIsochrones) {
       // The initial bounds for the map are determined from the isochrones if possible.  We might have them cached
       // in store.
-      await this.isochroneStore.fetch()
+      this.isochroneStore.fetchMessages(true)
+
+      const promises = []
+      promises.push(this.isochroneStore.fetch())
+
+      if (fetchIsochrones) {
+        // By default we'll be showing the isochrone view in PostMap, so start the fetch of the messages now.  That
+        // way we can display the list rapidly.  Fetching this and the isochrones in parallel reduces latency.
+        promises.push(this.isochroneStore.fetchMessages(true))
+      }
+
+      await Promise.all(promises)
+
       this.initialBounds = this.isochroneStore.bounds
 
       if (!this.initialBounds) {
@@ -350,10 +362,6 @@ export default {
         if (bounds) {
           this.initialBounds = bounds
         }
-      } else if (fetchIsochrones) {
-        // We have some isochrones.  By default we'll be showing that view in PostMap, so start the fetch of the
-        // messages now.  That way we can display the list rapidly.
-        this.isochroneStore.fetchMessages(true)
       }
     },
     async showPostsFromNearby() {
