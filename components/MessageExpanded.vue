@@ -34,13 +34,16 @@
       />
       <MessageTextBody :id="id" />
       <MessageReplyInfo :message="message" />
-      <MessageMap
-        v-if="showMap && validPosition"
-        :home="home"
-        :position="{ lat: message.lat, lng: message.lng }"
-        class="mt-2 messagemap"
-        :height="150"
-      />
+      <div v-if="validPosition" class="mt-2">
+        <MessageMap
+          v-if="showMap"
+          :home="home"
+          :position="{ lat: message.lat, lng: message.lng }"
+          class="messagemap"
+          :height="150"
+        />
+        <div v-else style="height: 150px" />
+      </div>
       <MessageHistoryExpanded :id="id" class="d-block d-md-none mt-2 mt-md-0" />
       <MessageReplySection
         v-if="replyable && !replied"
