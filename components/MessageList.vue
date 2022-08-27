@@ -146,7 +146,7 @@ export default {
       .slice(0, MIN_TO_SHOW)
       .map((message) => message.id)
 
-    if (initialIds.length) {
+    if (initialIds?.length) {
       await messageStore.fetchMultiple(initialIds)
     }
 
@@ -284,8 +284,10 @@ export default {
             this.prefetched = i
           }
 
-          await throttleFetches()
-          await this.messageStore.fetchMultiple(ids)
+          if (ids.length) {
+            await throttleFetches()
+            await this.messageStore.fetchMultiple(ids)
+          }
         }
       },
       immediate: true,

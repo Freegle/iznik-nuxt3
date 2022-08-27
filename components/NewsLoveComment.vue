@@ -35,6 +35,7 @@
 </template>
 <script>
 import pluralize from 'pluralize'
+import { useNewsfeedStore } from '../stores/newsfeed'
 import NewsLovesModal from './NewsLovesModal'
 
 export default {
@@ -46,6 +47,13 @@ export default {
       type: Object,
       required: true,
     },
+  },
+  setup() {
+    const newsfeedStore = useNewsfeedStore()
+
+    return {
+      newsfeedStore,
+    }
   },
   data() {
     return {
@@ -65,20 +73,18 @@ export default {
     async love() {
       this.loving = true
 
-      await this.$store.dispatch('newsfeed/love', {
-        id: this.newsfeed.id,
-        threadhead: this.newsfeed.threadhead,
-      })
+      console.log('Love', this.newsfeed)
+      await this.newsfeedStore.love(this.newsfeed.id, this.newsfeed.threadhead)
 
       this.loving = false
     },
     async unlove() {
       this.loving = true
 
-      await this.$store.dispatch('newsfeed/unlove', {
-        id: this.newsfeed.id,
-        threadhead: this.newsfeed.threadhead,
-      })
+      await this.newsfeedStore.unlove(
+        this.newsfeed.id,
+        this.newsfeed.threadhead
+      )
 
       this.loving = false
     },

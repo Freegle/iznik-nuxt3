@@ -352,6 +352,7 @@ export default {
       },
     },
     newsfeed() {
+      console.log('Compute newsfeed', this.id, this.newsfeedStore.byId(this.id))
       return this.newsfeedStore.byId(this.id)
     },
     tagusers() {
