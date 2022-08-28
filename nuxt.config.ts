@@ -11,6 +11,8 @@ export default defineNuxtConfig({
   // TODO SSR This is broken by pinia persist - see https://github.com/Seb-L/pinia-plugin-persist/issues/44
   ssr: false,
 
+  nitro: { prerender: { routes: ['/404.html'] } },
+
   build: {
     // Reduce size of CSS initial load.
     extractCSS: true,
