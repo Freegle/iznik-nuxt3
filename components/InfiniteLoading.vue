@@ -17,8 +17,6 @@
 <script>
 // Derived from https://github.com/oumoussa98/vue3-infinite-loading.  Reworked radically to allow an async event
 // handler, and to make consistent with the rest of this codebase.
-import { nextTick } from 'vue'
-
 export default {
   props: {
     top: { type: Boolean, required: false },
@@ -34,10 +32,11 @@ export default {
       state: 'ready',
       bump: 0,
       visible: false,
+      timer: null,
     }
   },
   watch: {
-    async state(newVal) {
+    state(newVal) {
       // console.log('state changed', newVal)
       if (newVal === 'loading') {
         // This is an internal change - nothing to do.
@@ -48,19 +47,9 @@ export default {
         const parentEl = this.target || document.documentElement
         const prevHeight = parentEl.scrollHeight
 
-        // Tick to ensure that this.visible is up to date.
-        await nextTick()
-
         if (newVal === 'loaded' && this.top) {
           // console.log('Adjust scrollTop')
           parentEl.scrollTop = parentEl.scrollHeight - prevHeight
-        }
-
-        if (newVal === 'loaded' && this.visible) {
-          // We loaded some more, but it's still visible.  So try again.  That will result in another change to
-          // the state once complete, and we'll come through here again.
-          // console.log('Loaded and still visible')
-          await this.emit()
         }
       }
     },
@@ -70,27 +59,43 @@ export default {
       this.bump++
     },
   },
+  beforeUnmount() {
+    if (this.timer) {
+      clearTimeout(this.timer)
+    }
+  },
   async mounted() {
     if (this.firstload) {
       await this.emit()
     }
+
+    // It would be nice if we didn't need a timer and could be purely event-driven.  But there is no guarantee
+    // that what happens in response to our emit will result in all the components being rendered, and although
+    // Vue3 has Suspense I can't see an easy way of waiting for all renders to finish.
+    this.timer = setTimeout(this.fallback, 100)
   },
   methods: {
-    async visibilityChanged(isVisible) {
+    fallback() {
+      this.timer = null
+
+      if (this.visible && this.state === 'loaded') {
+        // We have loaded and not completed, and yet it's still visible.  We need to do some more.
+        // console.log('Fallback emit')
+        this.emit()
+      }
+
+      this.timer = setTimeout(this.fallback, 100)
+    },
+    visibilityChanged(isVisible) {
       // console.log('Visibility changed', isVisible)
       this.visible = isVisible
-
-      if (this.state !== 'complete') {
-        if (isVisible && this.state === 'loaded') {
-          // console.log('Became visible, emit')
-          await this.emit()
-        }
-      } else {
-        // console.log('Already complete')
-      }
     },
-    emit() {
+    async emit() {
       this.loading()
+
+      // Wait for the next tick otherwise if the event handlers return synchronously we may not end up triggering
+      // the watch.
+      await this.$nextTick()
       this.$emit('infinite', this)
     },
     loading() {
