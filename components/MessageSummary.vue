@@ -105,7 +105,10 @@ export default {
         wanted: this.message.type === 'Wanted',
         clickme: !this.message.successful,
         promisedfade:
-          this.message.promised && this.replyable && !this.message.promisedtome,
+          this.message.promised &&
+          this.replyable &&
+          !this.message.promisedtome &&
+          !this.message.successful,
         'p-2': true,
         'p-sm-3': true,
       }
@@ -148,7 +151,7 @@ export default {
 }
 
 .promisedfade {
-  opacity: 0.3;
+  opacity: 0.5;
 }
 
 .messagecard {
