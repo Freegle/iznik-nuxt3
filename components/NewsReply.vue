@@ -53,7 +53,7 @@
           <span class="text-muted small mr-1">
             {{ timeago(reply.added) }}
           </span>
-          <NewsUserInfo :userid="userid" class="mb-1 mr-1" />
+          <NewsUserInfo :userid="userid" class="mr-1" />
           &bull;
           <b-button
             variant="link"
@@ -85,7 +85,7 @@
               Unlove this
             </b-button>
           </template>
-          <template v-if="!reply.loves">
+          <template v-if="reply.loves">
             &bull;
             <b-button
               variant="link"
@@ -373,7 +373,6 @@ export default {
     const userStore = useUserStore()
 
     const reply = newsfeedStore.byId(props.replyid)
-    console.log('Got reply', props, reply)
 
     if (reply?.userid) {
       await userStore.fetch(reply.userid)

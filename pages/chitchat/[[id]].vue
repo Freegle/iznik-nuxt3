@@ -207,7 +207,7 @@ export default {
     // Must be a number if present
     return !params.id || /^\d+$/.test(params.id)
   },
-  async setup() {
+  async setup(props) {
     const miscStore = useMiscStore()
     const newsfeedStore = useNewsfeedStore()
     const authStore = useAuthStore()
@@ -281,9 +281,13 @@ export default {
       return Object.values(this.newsfeedStore.feed)
     },
     newsfeedToShow() {
-      return this.newsfeed
-        .slice(0, this.show)
-        .filter((entry) => !entry.unfollowed)
+      if (this.id) {
+        return [this.newsfeedStore.byId(this.id)]
+      } else {
+        return this.newsfeed
+          .slice(0, this.show)
+          .filter((entry) => !entry.unfollowed)
+      }
     },
   },
   beforeCreate() {
