@@ -140,7 +140,6 @@ export default {
   },
 }
 </script>
-
 <style scoped lang="scss">
 @import '~bootstrap/scss/functions';
 @import '~bootstrap/scss/variables';
@@ -151,7 +150,7 @@ export default {
 }
 
 .promisedfade {
-  opacity: 0.5;
+  filter: contrast(50%);
 }
 
 .messagecard {
