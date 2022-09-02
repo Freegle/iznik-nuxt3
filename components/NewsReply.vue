@@ -269,7 +269,7 @@
       no-stacking
       ok-only
     >
-      <template slot="default">
+      <template #default>
         <b-img fluid rounded center :src="reply.image.path" />
       </template>
     </b-modal>
@@ -281,7 +281,7 @@
       size="lg"
       no-stacking
     >
-      <template slot="default">
+      <template #default>
         <b-form-textarea
           ref="editText"
           v-model="reply.message"

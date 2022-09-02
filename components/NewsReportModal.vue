@@ -7,7 +7,7 @@
       size="lg"
       no-stacking
     >
-      <template slot="default">
+      <template #default>
         <p>What don't you like about this?</p>
         <b-form-textarea
           v-model="reason"

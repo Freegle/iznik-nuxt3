@@ -51,7 +51,7 @@
       no-stacking
       ok-only
     >
-      <template slot="default">
+      <template #default>
         <b-img fluid rounded center :src="newsfeed.image.path" />
       </template>
     </b-modal>

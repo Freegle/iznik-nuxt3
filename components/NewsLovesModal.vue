@@ -6,7 +6,7 @@
       :title="title"
       no-stacking
     >
-      <template slot="default">
+      <template #default>
         <ul v-if="newsfeed" class="p-0">
           <li
             v-for="(love, index) in newsfeed.lovelist"

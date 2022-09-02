@@ -7,7 +7,7 @@
     no-stacking
     ok-only
   >
-    <template slot="default">
+    <template #default>
       <div class="container p-0">
         <span @click="rotateLeft">
           <v-icon

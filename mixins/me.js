@@ -95,16 +95,6 @@ export default {
       // console.log('compute simple', ret, this.me)
       return ret
     },
-    // Permissions. We have these as individual computed properties so they can be cached.
-    hasPermissionNewsletter() {
-      return this.hasPermission('Newsletter')
-    },
-    hasPermissionSpamAdmin() {
-      return this.hasPermission('SpamAdmin')
-    },
-    hasPermissionGiftAid() {
-      return this.hasPermission('GiftAid')
-    },
     supporter() {
       return this.me && this.me.supporter
     },

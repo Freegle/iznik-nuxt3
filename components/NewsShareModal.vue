@@ -6,7 +6,7 @@
       size="lg"
       no-stacking
     >
-      <template slot="default">
+      <template #default>
         <p>
           <a target="_blank" :href="url">{{ url }}</a>
         </p>
@@ -87,7 +87,7 @@
           </div>
         </social-sharing>
       </template>
-      <template slot="modal-footer" slot-scope="{ cancel }">
+      <template #footer slot-scope="{ cancel }">
         <b-button variant="secondary" @click="cancel"> Close </b-button>
       </template>
     </b-modal>

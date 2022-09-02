@@ -208,7 +208,7 @@
       size="lg"
       no-stacking
     >
-      <template slot="default">
+      <template #default>
         <b-form-textarea
           ref="editText"
           v-model="newsfeed.message"
