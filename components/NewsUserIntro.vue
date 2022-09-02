@@ -1,13 +1,8 @@
 <template>
-  <div
-    v-if="user"
-    class="clickme"
-    title="Click to see their profile"
-    @click="showInfo"
-  >
+  <div class="clickme" title="Click to see their profile" @click="showInfo">
     <div class="d-flex clickme">
       <ProfileImage
-        v-if="user.profile.path"
+        v-if="user?.profile?.path"
         :image="user.profile.path"
         class="ml-1 mb-1 inline"
         is-thumbnail
@@ -16,18 +11,18 @@
       />
       <div class="media-body ml-2">
         <span class="text-success font-weight-bold">
-          {{ user.displayname }}
+          {{ user?.displayname }}
         </span>
         {{ append }}
         <span v-if="appendBold"> "{{ appendBold }}" </span>
         <br />
         <span class="text-muted small pl-0">
-          {{ timeago(newsfeed.added) }}
+          {{ timeago(newsfeed?.added) }}
         </span>
         <NewsUserInfo :userid="userid" />
       </div>
     </div>
-    <div v-if="mod && newsfeed.type === 'AboutMe'" class="text-muted small">
+    <div v-if="mod && newsfeed?.type === 'AboutMe'" class="text-muted small">
       (Note to mods: Members are encouraged to introduce themselves, and then
       their introductions appear automatically on here, and also show to other
       freeglers in chats.)

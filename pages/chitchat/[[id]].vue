@@ -141,7 +141,6 @@
               :id="entry.id"
               :key="'newsfeed-' + entry.id + '-area-' + selectedArea"
               :scroll-to="scrollTo"
-              class="mt-2"
             />
             <infinite-loading
               v-if="newsfeed.length"
@@ -248,7 +247,7 @@ export default {
   },
   data() {
     return {
-      show: 0,
+      show: 10,
       startThread: null,
       scrollTo: null,
       uploading: false,
@@ -358,10 +357,13 @@ export default {
       }
     },
     loadMore($state) {
+      console.log('Load more', this.show, this.newsfeed.length)
       if (this.show < this.newsfeed.length) {
-        this.show += 10
+        this.show += 1
+        console.log('loaded')
         $state.loaded()
       } else {
+        console.log('complete')
         $state.complete()
       }
     },

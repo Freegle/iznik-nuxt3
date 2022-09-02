@@ -1,240 +1,248 @@
 <template>
-  <div class="bg-white">
-    <b-card v-if="newsfeed" :class="backgroundColor" no-body footer-class="p-0">
-      <b-card-body class="p-1 p-sm-2">
-        <b-card-text>
-          <div v-if="isNewsComponent">
-            <b-dropdown class="float-end" right variant="white">
-              <template slot="button-content" />
-              <b-dropdown-item
-                :href="'/chitchat/' + newsfeed?.id"
-                target="_blank"
-              >
-                Open in new window
-              </b-dropdown-item>
-              <b-dropdown-item
-                v-if="myid === parseInt(newsfeed.userid) || mod"
-                :b-v-modal="'newsEdit' + newsfeed?.id"
-                @click="show"
-              >
-                Edit
-              </b-dropdown-item>
-              <b-dropdown-item @click="unfollow">
-                Unfollow this thread
-              </b-dropdown-item>
-              <b-dropdown-item @click="report">
-                Report this thread or one of its replies
-              </b-dropdown-item>
-              <b-dropdown-item
-                v-if="myid === parseInt(newsfeed.userid) || mod"
-                @click="deleteIt"
-              >
-                Delete this thread
-              </b-dropdown-item>
-              <b-dropdown-item v-if="canRefer" @click="referToOffer">
-                Refer to OFFER
-              </b-dropdown-item>
-              <b-dropdown-item v-if="canRefer" @click="referToWanted">
-                Refer to WANTED
-              </b-dropdown-item>
-              <b-dropdown-item v-if="canRefer" @click="referToTaken">
-                Refer to TAKEN
-              </b-dropdown-item>
-              <b-dropdown-item v-if="canRefer" @click="referToReceived">
-                Refer to RECEIVED
-              </b-dropdown-item>
-              <b-dropdown-item
-                v-if="supportOrAdmin && newsfeed.hidden"
-                @click="unhide"
-              >
-                Unhide post
-              </b-dropdown-item>
-            </b-dropdown>
-            <component
-              :is="newsComponentName"
-              v-if="newsfeed"
-              :id="newsfeed?.id"
-              :newsfeed="newsfeed"
-              @focus-comment="focusComment"
-            />
-            <div v-else>Bad feed item {{ newsfeed }}</div>
-            <NewsPreview
-              v-if="newsfeed.preview && !newsfeed.html"
-              :preview="newsfeed.preview"
-              class="mt-1"
-            />
-            <div v-if="newsfeed.hidden" class="text-danger small">
-              This has been hidden and is only visible to volunteers and the
-              person who posted it.
+  <Suspense>
+    <template #fallback>
+      <div class="invisible" style="min-height: 200px">
+        <p>Loading {{ id }}</p>
+      </div>
+    </template>
+    <div class="bg-white mt-2">
+      <b-card :class="backgroundColor" no-body footer-class="p-0">
+        <b-card-body class="p-1 p-sm-2">
+          <b-card-text>
+            <div v-if="isNewsComponent">
+              <b-dropdown class="float-end" right variant="white">
+                <template slot="button-content" />
+                <b-dropdown-item
+                  :href="'/chitchat/' + newsfeed?.id"
+                  target="_blank"
+                >
+                  Open in new window
+                </b-dropdown-item>
+                <b-dropdown-item
+                  v-if="myid === parseInt(newsfeed.userid) || mod"
+                  :b-v-modal="'newsEdit' + newsfeed?.id"
+                  @click="show"
+                >
+                  Edit
+                </b-dropdown-item>
+                <b-dropdown-item @click="unfollow">
+                  Unfollow this thread
+                </b-dropdown-item>
+                <b-dropdown-item @click="report">
+                  Report this thread or one of its replies
+                </b-dropdown-item>
+                <b-dropdown-item
+                  v-if="myid === parseInt(newsfeed.userid) || mod"
+                  @click="deleteIt"
+                >
+                  Delete this thread
+                </b-dropdown-item>
+                <b-dropdown-item v-if="canRefer" @click="referToOffer">
+                  Refer to OFFER
+                </b-dropdown-item>
+                <b-dropdown-item v-if="canRefer" @click="referToWanted">
+                  Refer to WANTED
+                </b-dropdown-item>
+                <b-dropdown-item v-if="canRefer" @click="referToTaken">
+                  Refer to TAKEN
+                </b-dropdown-item>
+                <b-dropdown-item v-if="canRefer" @click="referToReceived">
+                  Refer to RECEIVED
+                </b-dropdown-item>
+                <b-dropdown-item
+                  v-if="supportOrAdmin && newsfeed.hidden"
+                  @click="unhide"
+                >
+                  Unhide post
+                </b-dropdown-item>
+              </b-dropdown>
+              <component
+                :is="newsComponentName"
+                v-if="newsfeed"
+                :id="newsfeed?.id"
+                :newsfeed="newsfeed"
+                @focus-comment="focusComment"
+              />
+              <div v-else>Bad feed item {{ newsfeed }}</div>
+              <NewsPreview
+                v-if="newsfeed.preview && !newsfeed.html"
+                :preview="newsfeed.preview"
+                class="mt-1"
+              />
+              <div v-if="newsfeed.hidden" class="text-danger small">
+                This has been hidden and is only visible to volunteers and the
+                person who posted it.
+              </div>
             </div>
-          </div>
-          <notice-message v-else variant="danger">
-            Unknown item type {{ newsfeed.type }}
-          </notice-message>
-        </b-card-text>
-      </b-card-body>
-      <template #footer>
-        <NewsReplies
-          v-if="newsfeed.replies"
-          :id="id"
-          :threadhead="newsfeed"
-          :scroll-to="scrollTo"
-          :reply-ids="newsfeed.replies.map((r) => r.id)"
-          :reply-to="replyingTo"
-          :depth="1"
-          class="mr-1"
-        />
-        <span v-if="!newsfeed.closed">
-          <div v-if="enterNewLine">
-            <!--            <at-ta-->
-            <!--              ref="at"-->
-            <!--              :members="tagusers"-->
-            <!--              class="flex-shrink-2 input-group"-->
-            <!--              :filter-match="filterMatch"-->
-            <!--            >-->
-            <b-input-group>
-              <b-input-group-prepend>
-                <span class="input-group-text pl-1 pr-1">
-                  <ProfileImage
-                    v-if="me.profile.path"
-                    :image="me.profile.path"
-                    class="m-0 inline float-left"
-                    is-thumbnail
-                    size="sm"
-                  />
-                </span>
-              </b-input-group-prepend>
-              <b-form-textarea
-                ref="threadcomment"
-                v-model="threadcomment"
-                size="sm"
-                rows="1"
-                max-rows="8"
-                maxlength="2048"
-                spellcheck="true"
-                placeholder="Write a comment on this thread..."
-                class="p-0 pl-1 pt-1"
-                @focus="focusedComment"
+            <notice-message v-else variant="danger">
+              Unknown item type {{ newsfeed.type }}
+            </notice-message>
+          </b-card-text>
+        </b-card-body>
+        <template #footer>
+          <NewsReplies
+            v-if="newsfeed.replies"
+            :id="id"
+            :threadhead="newsfeed"
+            :scroll-to="scrollTo"
+            :reply-ids="newsfeed.replies.map((r) => r.id)"
+            :reply-to="replyingTo"
+            :depth="1"
+            class="mr-1"
+          />
+          <span v-if="!newsfeed.closed">
+            <div v-if="enterNewLine">
+              <!--            <at-ta-->
+              <!--              ref="at"-->
+              <!--              :members="tagusers"-->
+              <!--              class="flex-shrink-2 input-group"-->
+              <!--              :filter-match="filterMatch"-->
+              <!--            >-->
+              <b-input-group>
+                <b-input-group-prepend>
+                  <span class="input-group-text pl-1 pr-1">
+                    <ProfileImage
+                      v-if="me.profile.path"
+                      :image="me.profile.path"
+                      class="m-0 inline float-left"
+                      is-thumbnail
+                      size="sm"
+                      :lazy="false"
+                    />
+                  </span>
+                </b-input-group-prepend>
+                <b-form-textarea
+                  ref="threadcomment"
+                  v-model="threadcomment"
+                  size="sm"
+                  rows="1"
+                  max-rows="8"
+                  maxlength="2048"
+                  spellcheck="true"
+                  placeholder="Write a comment on this thread..."
+                  class="p-0 pl-1 pt-1"
+                  @focus="focusedComment"
+                />
+              </b-input-group>
+              <!--            </at-ta>-->
+            </div>
+            <div
+              v-else
+              @keyup.enter.exact.prevent
+              @keydown.enter.exact="sendComment"
+            >
+              <!--            <at-ta-->
+              <!--              ref="at"-->
+              <!--              :members="tagusers"-->
+              <!--              class="flex-shrink-2 input-group"-->
+              <!--              :filter-match="filterMatch"-->
+              <!--            >-->
+              <b-input-group>
+                <b-input-group-prepend>
+                  <span class="input-group-text pl-2 pr-1">
+                    <ProfileImage
+                      v-if="me.profile.path"
+                      :image="me.profile.path"
+                      class="m-0 inline float-left"
+                      is-thumbnail
+                      size="sm"
+                    />
+                  </span>
+                </b-input-group-prepend>
+                <b-form-textarea
+                  ref="threadcomment"
+                  v-model="threadcomment"
+                  size="sm"
+                  rows="1"
+                  max-rows="8"
+                  maxlength="2048"
+                  spellcheck="true"
+                  placeholder="Write a comment on this thread and hit enter to post..."
+                  class="p-0 pl-2 pt-2"
+                  autocapitalize="none"
+                  @keydown.enter.shift.exact.prevent="newlineComment"
+                  @keydown.alt.shift.exact.prevent="newlineComment"
+                  @focus="focusedComment"
+                />
+              </b-input-group>
+              <!--            </at-ta>-->
+              <!--            TODO Form auto text area not yet implemented-->
+            </div>
+            <div
+              v-if="threadcomment"
+              class="d-flex justify-content-between flex-wrap mt-2"
+            >
+              <b-button variant="secondary" @click="photoAdd">
+                <v-icon icon="camera" /><span class="d-none d-sm-inline"
+                  >&nbsp;Add Photo</span
+                >
+              </b-button>
+              <SpinButton
+                v-if="enterNewLine"
+                variant="primary"
+                name="angle-double-right"
+                label="Post"
+                spinclass="text-white"
+                iconlast
+                :handler="sendComment"
               />
-            </b-input-group>
-            <!--            </at-ta>-->
-          </div>
-          <div
-            v-else
-            @keyup.enter.exact.prevent
-            @keydown.enter.exact="sendComment"
-          >
-            <!--            <at-ta-->
-            <!--              ref="at"-->
-            <!--              :members="tagusers"-->
-            <!--              class="flex-shrink-2 input-group"-->
-            <!--              :filter-match="filterMatch"-->
-            <!--            >-->
-            <b-input-group>
-              <b-input-group-prepend>
-                <span class="input-group-text pl-2 pr-1">
-                  <ProfileImage
-                    v-if="me.profile.path"
-                    :image="me.profile.path"
-                    class="m-0 inline float-left"
-                    is-thumbnail
-                    size="sm"
-                  />
-                </span>
-              </b-input-group-prepend>
-              <b-form-textarea
-                ref="threadcomment"
-                v-model="threadcomment"
-                size="sm"
-                rows="1"
-                max-rows="8"
-                maxlength="2048"
-                spellcheck="true"
-                placeholder="Write a comment on this thread and hit enter to post..."
-                class="p-0 pl-2 pt-2"
-                autocapitalize="none"
-                @keydown.enter.shift.exact.prevent="newlineComment"
-                @keydown.alt.shift.exact.prevent="newlineComment"
-                @focus="focusedComment"
-              />
-            </b-input-group>
-            <!--            </at-ta>-->
-            <!--            TODO Form auto text area not yet implemented-->
-          </div>
-          <div
-            v-if="threadcomment"
-            class="d-flex justify-content-between flex-wrap mt-2"
-          >
-            <b-button variant="secondary" @click="photoAdd">
-              <v-icon icon="camera" /><span class="d-none d-sm-inline"
-                >&nbsp;Add Photo</span
-              >
-            </b-button>
-            <SpinButton
-              v-if="enterNewLine"
-              variant="primary"
-              name="angle-double-right"
-              label="Post"
-              spinclass="text-white"
-              iconlast
-              :handler="sendComment"
+            </div>
+            <b-img
+              v-if="imageid"
+              lazy
+              thumbnail
+              :src="imagethumb"
+              class="mt-1 ml-4 image__uploaded"
             />
-          </div>
-          <b-img
-            v-if="imageid"
-            lazy
-            thumbnail
-            :src="imagethumb"
-            class="mt-1 ml-4 image__uploaded"
+            <OurFilePond
+              v-if="uploading"
+              class="bg-white m-0 pondrow"
+              imgtype="Newsfeed"
+              imgflag="newsfeed"
+              @photoProcessed="photoProcessed"
+            />
+          </span>
+          <notice-message v-else>
+            This thread is now closed. Thanks to everyone who contributed.
+          </notice-message>
+        </template>
+      </b-card>
+      <b-modal
+        v-if="showEditModal"
+        :id="'newsEdit-' + newsfeed?.id"
+        ref="editModal"
+        title="Edit your post"
+        size="lg"
+        no-stacking
+      >
+        <template #default>
+          <b-form-textarea
+            ref="editText"
+            v-model="newsfeed.message"
+            rows="8"
+            maxlength="2048"
+            spellcheck="true"
+            placeholder="Edit your post..."
           />
-          <OurFilePond
-            v-if="uploading"
-            class="bg-white m-0 pondrow"
-            imgtype="Newsfeed"
-            imgflag="newsfeed"
-            @photoProcessed="photoProcessed"
-          />
-        </span>
-        <notice-message v-else>
-          This thread is now closed. Thanks to everyone who contributed.
-        </notice-message>
-      </template>
-    </b-card>
-    <b-modal
-      v-if="showEditModal"
-      :id="'newsEdit-' + newsfeed?.id"
-      ref="editModal"
-      title="Edit your post"
-      size="lg"
-      no-stacking
-    >
-      <template #default>
-        <b-form-textarea
-          ref="editText"
-          v-model="newsfeed.message"
-          rows="8"
-          maxlength="2048"
-          spellcheck="true"
-          placeholder="Edit your post..."
-        />
-      </template>
-      <template #footer>
-        <b-button variant="white" @click="hide"> Cancel </b-button>
-        <b-button variant="primary" @click="save"> Save </b-button>
-      </template>
-    </b-modal>
-    <NewsReportModal
-      v-if="showReportModal"
-      :id="newsfeed.id"
-      ref="reportmodal"
-    />
-    <ConfirmModal
-      v-if="showDeleteModal"
-      ref="deleteConfirm"
-      :title="'Delete thread started by ' + starter"
-      @confirm="deleteConfirmed"
-    />
-  </div>
+        </template>
+        <template #footer>
+          <b-button variant="white" @click="hide"> Cancel </b-button>
+          <b-button variant="primary" @click="save"> Save </b-button>
+        </template>
+      </b-modal>
+      <NewsReportModal
+        v-if="showReportModal"
+        :id="newsfeed.id"
+        ref="reportmodal"
+      />
+      <ConfirmModal
+        v-if="showDeleteModal"
+        ref="deleteConfirm"
+        :title="'Delete thread started by ' + starter"
+        @confirm="deleteConfirmed"
+      />
+    </div>
+  </Suspense>
 </template>
 <script>
 import { useNewsfeedStore } from '../stores/newsfeed'

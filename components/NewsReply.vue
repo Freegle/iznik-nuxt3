@@ -13,6 +13,7 @@
             Boolean(user.showmod && reply.replyto === threadhead.id)
           "
           :size="reply.replyto !== threadhead.id ? 'sm' : 'md'"
+          :lazy="false"
         />
       </div>
       <div class="align-top">

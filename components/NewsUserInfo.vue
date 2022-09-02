@@ -50,16 +50,16 @@ export default {
   async setup(props) {
     const userStore = useUserStore()
 
-    await userStore.fetch(props.userid)
+    const user = await userStore.fetch(props.userid)
 
     return {
       userStore,
+      user,
     }
   },
-  computed: {
-    user() {
-      return this.userid ? this.userStore.byId(this.userid) : null
-    },
+  beforeUpdate() {
+    console.log('User info update')
+    console.trace()
   },
 }
 </script>
