@@ -83,7 +83,7 @@
           <NewsReplies
             v-if="newsfeed.replies"
             :id="id"
-            :threadhead="newsfeed"
+            :threadhead="newsfeed.id"
             :scroll-to="scrollTo"
             :reply-ids="newsfeed.replies.map((r) => r.id)"
             :reply-to="replyingTo"

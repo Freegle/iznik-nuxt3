@@ -76,7 +76,7 @@ export default {
       required: true,
     },
     threadhead: {
-      type: Object,
+      type: Number,
       required: true,
     },
     replyTo: {

@@ -9,10 +9,8 @@
         <ProfileImage
           :image="user.profile.paththumb"
           class="ml-1 mr-2 mt-1 mb-1 inline float-left"
-          :is-moderator="
-            Boolean(user.showmod && reply.replyto === threadhead.id)
-          "
-          :size="reply.replyto !== threadhead.id ? 'sm' : 'md'"
+          :is-moderator="Boolean(user.showmod && reply.replyto === threadhead)"
+          :size="reply.replyto !== threadhead ? 'sm' : 'md'"
           :lazy="false"
         />
       </div>
@@ -352,7 +350,7 @@ export default {
       required: true,
     },
     threadhead: {
-      type: Object,
+      type: Number,
       required: true,
     },
     replyid: {
@@ -508,7 +506,7 @@ export default {
         await this.$store.dispatch('newsfeed/send', {
           message: msg,
           replyto: this.replyingTo,
-          threadhead: this.reply.threadhead,
+          threadhead: this.threadhead,
           imageid: this.imageid,
         })
 
@@ -541,28 +539,24 @@ export default {
     async love(e) {
       const el = e.target
       el.classList.add('pulsate')
-      await this.$store.dispatch('newsfeed/love', {
-        id: this.replyid,
-        replyto: this.reply.replyto,
-        threadhead: this.reply.threadhead,
-      })
+
+      await this.newsfeedStore.love(this.replyid, this.threadhead)
+
       el.classList.remove('pulsate')
     },
     async unlove(e) {
       const el = e.target
       el.classList.add('pulsate')
-      await this.$store.dispatch('newsfeed/unlove', {
-        id: this.replyid,
-        replyto: this.reply.replyto,
-        threadhead: this.reply.threadhead,
-      })
+
+      await this.newsfeedStore.unlove(this.replyid, this.threadhead)
+
       el.classList.remove('pulsate')
     },
     save() {
       this.$store.dispatch('newsfeed/edit', {
         id: this.replyid,
         message: this.reply.message,
-        threadhead: this.reply.threadhead,
+        threadhead: this.threadhead,
       })
 
       this.$refs.editModal.hide()
@@ -576,7 +570,7 @@ export default {
     deleteConfirm() {
       this.$store.dispatch('newsfeed/delete', {
         id: this.replyid,
-        threadhead: this.threadhead.id,
+        threadhead: this.threadhead,
       })
     },
     brokenImage(event) {
