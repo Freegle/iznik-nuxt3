@@ -84,11 +84,8 @@ export default {
         this.$refs.deleteConfirm.show()
       })
     },
-    deleteConfirm() {
-      this.$store.dispatch('newsfeed/delete', {
-        id: this.id,
-        threadhead: this.threadhead.id,
-      })
+    async deleteConfirm() {
+      await this.newsStore.delete(this.id, this.threadhead)
     },
   },
 }

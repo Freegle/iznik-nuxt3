@@ -40,10 +40,7 @@ export default {
   },
   methods: {
     async report() {
-      await this.$store.dispatch('newsfeed/report', {
-        id: this.id,
-        reason: this.reason,
-      })
+      await this.newsfeedStore.report(this.id, this.reason)
 
       this.hide()
     },

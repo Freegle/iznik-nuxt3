@@ -170,7 +170,7 @@
             </div>
             <div
               v-if="threadcomment"
-              class="d-flex justify-content-between flex-wrap mt-2"
+              class="d-flex justify-content-between flex-wrap m-1"
             >
               <b-button variant="secondary" @click="photoAdd">
                 <v-icon icon="camera" /><span class="d-none d-sm-inline"
@@ -470,12 +470,12 @@ export default {
       if (this.threadcomment && this.threadcomment.trim()) {
         // Encode up any emojis.
         const msg = untwem(this.threadcomment)
-        await this.$store.dispatch('newsfeed/send', {
-          message: msg,
-          replyto: this.replyingTo,
-          threadhead: this.newsfeed.threadhead,
-          imageid: this.imageid,
-        })
+        await this.newsfeedStore.send(
+          msg,
+          this.replyingTo,
+          this.id,
+          this.imageid
+        )
 
         // New message will be shown because it's in the store and we have a computed property.
 
@@ -509,11 +509,12 @@ export default {
         this.$refs.editModal.show()
       })
     },
-    save() {
-      this.$store.dispatch('newsfeed/edit', {
-        id: this.newsfeed.id,
-        message: this.newsfeed.message,
-      })
+    async save() {
+      await this.newsfeedStore.edit(
+        this.id,
+        this.newsfeed.message,
+        this.newsfeed.id
+      )
 
       this.$refs.editModal.hide()
     },
@@ -524,15 +525,10 @@ export default {
       })
     },
     deleteConfirmed() {
-      this.$store.dispatch('newsfeed/delete', {
-        id: this.id,
-        threadhead: this.id,
-      })
+      this.newsfeedStore.delete(this.id, this.id)
     },
-    unfollow() {
-      this.$store.dispatch('newsfeed/unfollow', {
-        id: this.id,
-      })
+    async unfollow() {
+      await this.newsfeedStore.unfollow(this.id)
     },
     report() {
       this.showReportModal = true
@@ -553,21 +549,10 @@ export default {
       this.referTo('Recived')
     },
     async unhide() {
-      await this.$store.dispatch('newsfeed/unhide', {
-        id: this.id,
-      })
-      await this.$store.dispatch('newsfeed/fetch', {
-        id: this.id,
-      })
+      await this.newsfeedStore.unhide(this.id)
     },
     async referTo(type) {
-      await this.$store.dispatch('newsfeed/referto', {
-        id: this.id,
-        type,
-      })
-      await this.$store.dispatch('newsfeed/fetch', {
-        id: this.id,
-      })
+      await this.newsfeedStore.referTo(this.id, type)
     },
     filterMatch(name, chunk) {
       // Only match at start of string.

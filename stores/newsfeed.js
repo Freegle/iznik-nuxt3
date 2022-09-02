@@ -51,6 +51,52 @@ export const useNewsfeedStore = defineStore({
       await api(this.config).news.unlove(id)
       await this.fetch(threadhead)
     },
+    async send(message, replyto, threadhead, imageid) {
+      if (message) {
+        // Removing the enter on the end can prevent some duplicates.
+        message = message.trim()
+      }
+
+      const id = await api(this.config).news.send({
+        message,
+        replyto,
+        threadhead,
+        imageid,
+      })
+
+      await this.fetch(threadhead || id)
+
+      return id
+    },
+    async edit(id, message, threadhead) {
+      await api(this.config).news.edit(id, message)
+      await this.fetch(threadhead)
+    },
+    async delete(id, threadhead) {
+      await api(this.config).news.del(id)
+      await this.fetch(threadhead)
+
+      if (id !== threadhead) {
+        await this.fetch(threadhead)
+      } else {
+        this.list[id] = null
+        this.feed = this.feed.filter((item) => item.id !== id)
+      }
+    },
+    async unfollow(id) {
+      await api(this.config).news.unfollow(id)
+    },
+    async unhide(id) {
+      await api(this.config).news.unhide(id)
+      await this.fetch(id)
+    },
+    async referto(id, type) {
+      await api(this.config).news.referto(id, type)
+      await this.fetch(id)
+    },
+    async report(id, reason) {
+      await api(this.config).news.report(id, reason)
+    },
   },
   getters: {
     byId: (state) => (id) => {

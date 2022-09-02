@@ -53,6 +53,7 @@
   </b-modal>
 </template>
 <script>
+import { useNewsfeedStore } from '../stores/newsfeed'
 import modal from '@/mixins/modal'
 
 export default {
@@ -99,7 +100,14 @@ export default {
     remove() {
       this.$emit('remove', this.id)
     },
-    rotate(deg) {
+    setup() {
+      const newsfeedStore = useNewsfeedStore()
+
+      return {
+        newsfeedStore,
+      }
+    },
+    async rotate(deg) {
       const data = {
         id: this.id,
         rotate: deg,
@@ -114,9 +122,7 @@ export default {
       })
 
       // Refetch the newsfeed entry to update any values in the parents, via the store.
-      this.$store.dispatch('newsfeed/fetch', {
-        id: this.newsfeedid,
-      })
+      await this.newsfeedStore.fetch(this.newsfeedid, true)
     },
     rotateLeft() {
       this.rotate(90)

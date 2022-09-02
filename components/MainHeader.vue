@@ -511,7 +511,6 @@
     <!--      <AboutMeModal ref="aboutMeModal" />-->
   </header>
 </template>
-
 <script>
 // Import login modal synchronously as I've seen an issue where it's not in $refs when you click on the signin button too rapidly.
 // const AboutMeModal = () => import('~/components/AboutMeModal')
@@ -661,7 +660,7 @@ export default {
       this.$refs.aboutMeModal.show()
     },
     maybeReload(route) {
-      if (this.router.currentRoute.path === route) {
+      if (this.router?.currentRoute?.value?.path === route) {
         // We have clicked to route to the page we're already on.  Force a full refresh.
         window.location.reload(true)
       }

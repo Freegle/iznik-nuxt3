@@ -357,13 +357,10 @@ export default {
       }
     },
     loadMore($state) {
-      console.log('Load more', this.show, this.newsfeed.length)
       if (this.show < this.newsfeed.length) {
         this.show += 1
-        console.log('loaded')
         $state.loaded()
       } else {
-        console.log('complete')
         $state.complete()
       }
     },
@@ -378,10 +375,7 @@ export default {
         // Encode up any emojis.
         msg = untwem(msg)
 
-        await this.$store.dispatch('newsfeed/send', {
-          message: msg,
-          imageid: this.imageid,
-        })
+        await this.newsfeedStore.send(msg, null, null, this.imageid)
 
         // Clear the textarea now it's sent.
         this.startThread = null

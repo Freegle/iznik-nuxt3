@@ -43,6 +43,7 @@
   </span>
 </template>
 <script>
+import { useNewsfeedStore } from '../stores/newsfeed'
 import modal from '@/mixins/modal'
 import NewsUserInfo from '~/components/NewsUserInfo'
 import ProfileImage from '~/components/ProfileImage'
@@ -58,6 +59,13 @@ export default {
       type: Number,
       required: true,
     },
+  },
+  setup() {
+    const newsfeedStore = useNewsfeedStore()
+
+    return {
+      newsfeedStore,
+    }
   },
   data() {
     return {
@@ -94,10 +102,7 @@ export default {
   },
   methods: {
     async show() {
-      this.newsfeed = await this.$store.dispatch('newsfeed/fetch', {
-        id: this.id,
-        lovelist: true,
-      })
+      await this.newsStore.fetch(this.id, true, true)
 
       this.showModal = true
     },

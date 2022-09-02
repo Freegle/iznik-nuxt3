@@ -229,7 +229,7 @@
         </b-input-group>
         <!--        </at-ta>-->
       </div>
-      <div class="d-flex justify-content-between flex-wrap mt-1 pl-2">
+      <div class="d-flex justify-content-between flex-wrap m-1">
         <b-button size="sm" variant="secondary" @click="photoAdd">
           <v-icon icon="camera" />&nbsp;Add Photo
         </b-button>
@@ -503,12 +503,12 @@ export default {
       if (this.replybox && this.replybox.trim()) {
         const msg = untwem(this.replybox)
 
-        await this.$store.dispatch('newsfeed/send', {
-          message: msg,
-          replyto: this.replyingTo,
-          threadhead: this.threadhead,
-          imageid: this.imageid,
-        })
+        await this.newsfeedStore.send(
+          msg,
+          this.replyingTo,
+          this.threadhead,
+          this.imageid
+        )
 
         // New message will be shown because it's in the store and we have a computed property.
 
@@ -552,12 +552,12 @@ export default {
 
       el.classList.remove('pulsate')
     },
-    save() {
-      this.$store.dispatch('newsfeed/edit', {
-        id: this.replyid,
-        message: this.reply.message,
-        threadhead: this.threadhead,
-      })
+    async save() {
+      await this.newsfeedStore.edit(
+        this.replyid,
+        this.reply.message,
+        this.threadhead
+      )
 
       this.$refs.editModal.hide()
     },
@@ -567,11 +567,8 @@ export default {
         this.$refs.deleteConfirm.show()
       })
     },
-    deleteConfirm() {
-      this.$store.dispatch('newsfeed/delete', {
-        id: this.replyid,
-        threadhead: this.threadhead,
-      })
+    async deleteConfirm() {
+      await this.newsfeedStore.delete(this.replyid, this.threadhead)
     },
     brokenImage(event) {
       event.target.src = '/defaultprofile.png'
