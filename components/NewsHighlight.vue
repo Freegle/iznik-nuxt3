@@ -97,10 +97,9 @@ export default {
   },
 }
 </script>
-
 <style scoped lang="scss">
-.highlight {
-  color: $color-blue--base;
-  background-color: initial;
+:deep(.highlight) {
+  color: $color-blue--base !important;
+  background-color: initial !important;
 }
 </style>

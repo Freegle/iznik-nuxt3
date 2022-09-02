@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div :class="{ 'pl-1': depth === 1 }">
     <div v-if="showEarlierRepliesOption">
       <b-button
         v-if="!showAllReplies"
@@ -8,10 +8,7 @@
         class="pl-0"
         @click.prevent="showAllReplies = true"
       >
-        Show earlier
-        {{ numberOfRepliesNotShown | pluralize(['reply', 'replies']) }} ({{
-          numberOfRepliesNotShown
-        }})
+        Show earlier {{ numberOfRepliesNotShown }}
       </b-button>
       <b-button
         v-else
@@ -23,31 +20,40 @@
         Hide earlier replies
       </b-button>
     </div>
-    <ul
+    <div
       v-for="reply in repliestoshow"
       :key="'newsfeed-' + reply.id"
-      class="'p-0 pt-1 list-unstyled mb-1 pl-1 border-left"
+      class="lines"
     >
-      <li>
-        <news-refer
-          v-if="reply.type.indexOf('ReferTo') === 0"
-          :id="id"
-          :type="reply.type"
-          :threadhead="threadhead"
-        />
-        <news-reply
-          v-else
-          :id="id"
-          :key="'reply-' + reply.id"
-          :replyid="reply.id"
-          :threadhead="threadhead"
-          :scroll-to="scrollTo"
-        />
-      </li>
-    </ul>
+      <NewsRefer
+        v-if="reply.type.indexOf('ReferTo') === 0"
+        :id="id"
+        :type="reply.type"
+        :threadhead="threadhead"
+        class="content pt-1 pb-1"
+      />
+      <NewsReply
+        v-else
+        :id="id"
+        :key="'reply-' + reply.id"
+        :replyid="reply.id"
+        :threadhead="threadhead"
+        :scroll-to="scrollTo"
+        :class="{
+          content: true,
+          'pt-1': true,
+          'pb-1': true,
+          'pl-4': depth === 2,
+        }"
+        :depth="depth"
+      />
+      <div v-if="depth === 1" class="line" />
+    </div>
   </div>
 </template>
 <script>
+import pluralize from 'pluralize'
+import { useNewsfeedStore } from '../stores/newsfeed'
 import NewsRefer from '~/components/NewsRefer'
 
 const NewsReply = () => import('~/components/NewsReply.vue')
@@ -80,6 +86,17 @@ export default {
       required: false,
       default: '',
     },
+    depth: {
+      type: Number,
+      required: true,
+    },
+  },
+  setup(props) {
+    const newsfeedStore = useNewsfeedStore()
+
+    return {
+      newsfeedStore,
+    }
   },
   data() {
     return {
@@ -91,7 +108,7 @@ export default {
       const ret = []
 
       this.replyIds.forEach((id) => {
-        ret.push(this.$store.getters['newsfeed/get'](id))
+        ret.push(this.newsfeedStore.byId(id))
       })
 
       return ret
@@ -101,7 +118,7 @@ export default {
       const ret = []
 
       for (let i = 0; i < this.replies.length; i++) {
-        if ((!this.replies[i].deleted && this.replies[i].visible) || this.mod) {
+        if (!this.replies[i].deleted || this.mod) {
           ret.push(this.replies[i])
         }
       }
@@ -153,11 +170,36 @@ export default {
         !this.visiblereplies ||
         this.visiblereplies.length < INITIAL_NUMBER_OF_REPLIES_TO_SHOW
       ) {
-        return 0
+        return null
       }
 
-      return this.visiblereplies.length - INITIAL_NUMBER_OF_REPLIES_TO_SHOW
+      return pluralize(
+        'reply',
+        this.visiblereplies.length - INITIAL_NUMBER_OF_REPLIES_TO_SHOW,
+        true
+      )
     },
   },
 }
 </script>
+<style lang="scss">
+.lines {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+
+  .content {
+    grid-column: 1 / 2;
+    grid-row: 1 / 2;
+    z-index: 1001;
+  }
+
+  .line {
+    grid-column: 1 / 2;
+    grid-row: 1 / 2;
+    border-left: 1px solid #e0e0e0;
+    margin-left: 21px;
+    z-index: 1000;
+  }
+}
+</style>

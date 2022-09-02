@@ -328,7 +328,7 @@ export default {
   background-color: $color-gray--lighter;
 }
 
-:v-deep(.phone) {
+:deep(.phone) {
   border: 2px solid $color-gray--normal !important;
 }
 </style>

@@ -6,7 +6,7 @@
         :image="users[userid].profile.turl"
         class="ml-1 mr-2 mb-1 inline"
         is-thumbnail
-        :is-moderator="Boolean(users[userid].settings.showmod)"
+        :is-moderator="Boolean(users[userid].showmod)"
         size="lg"
       />
       <div>

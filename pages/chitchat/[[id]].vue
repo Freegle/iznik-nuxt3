@@ -143,22 +143,13 @@
               :scroll-to="scrollTo"
               class="mt-2"
             />
-            <client-only v-if="newsfeed?.length">
-              <div v-observe-visibility="loadMore" />
-              <div
-                v-if="show < newsfeed.length"
-                class="d-flex justify-content-around"
-              >
-                <b-button
-                  v-if="showMore"
-                  variant="secondary"
-                  class="mt-4"
-                  @click="loadMore"
-                >
-                  Load more
-                </b-button>
-              </div>
-            </client-only>
+            <infinite-loading
+              v-if="newsfeed.length"
+              :identifier="infiniteId"
+              force-use-infinite-wrapper="body"
+              :distance="distance"
+              @infinite="loadMore"
+            />
           </div>
         </b-col>
         <b-col cols="0" lg="3" class="p-0 pl-1">
@@ -187,6 +178,7 @@ import { buildHead } from '../../composables/useBuildHead'
 import { useMiscStore } from '../../stores/misc'
 import { useNewsfeedStore } from '../../stores/newsfeed'
 import { useAuthStore } from '../../stores/auth'
+import InfiniteLoading from '~/components/InfiniteLoading'
 import NewsThread from '~/components/NewsThread.vue'
 import { untwem } from '~/composables/useTwem'
 
@@ -209,6 +201,7 @@ export default {
     SidebarLeft,
     SidebarRight,
     NewsLocation,
+    InfiniteLoading,
   },
   validate({ params }) {
     // Must be a number if present
@@ -240,8 +233,8 @@ export default {
     )
 
     const me = authStore.user
-    const settings = me.settings
-    const distance = settings.newsfeedarea || 0
+    const settings = me?.settings
+    const distance = settings?.newsfeedarea || 0
 
     await newsfeedStore.fetch(id, distance)
 
@@ -267,7 +260,6 @@ export default {
       shownToolGive: false,
       showToolFind: false,
       shownToolFind: false,
-      showLoadMore: false,
     }
   },
   computed: {
@@ -300,10 +292,6 @@ export default {
   beforeDestroy() {
     // Stop timers which would otherwise kill garbage collection.
     this.runChecks = false
-  },
-  mounted() {
-    setTimeout(this.runCheck, 3000)
-    this.showLoadMore = true
   },
   methods: {
     runCheck() {
@@ -365,10 +353,12 @@ export default {
         setTimeout(this.runCheck, 1000)
       }
     },
-    loadMore(visible) {
-      console.log('Load more visible', visible)
-      if (visible) {
+    loadMore($state) {
+      if (this.show < this.newsfeed.length) {
         this.show += 10
+        $state.loaded()
+      } else {
+        $state.complete()
       }
     },
     areaChange() {

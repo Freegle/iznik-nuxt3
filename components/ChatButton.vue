@@ -10,7 +10,7 @@
           @click="gotoChat(true)"
         >
           <v-icon v-if="showIcon" icon="comments" />
-          <span v-if="title" class="ml-1">
+          <span v-if="title" :class="titleClass">
             {{ title }}
           </span>
         </b-button>
@@ -21,7 +21,7 @@
           @click="gotoChat(false)"
         >
           <v-icon v-if="showIcon" icon="comments" />
-          <span v-if="title" class="ml-1">
+          <span v-if="title" :class="titleClass">
             {{ title }}
           </span>
         </b-button>
@@ -74,6 +74,11 @@ export default {
       type: String,
       required: false,
       default: null,
+    },
+    titleClass: {
+      type: String,
+      required: false,
+      default: 'ml-1',
     },
   },
   setup() {

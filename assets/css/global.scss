@@ -289,6 +289,14 @@ label {
 }
 
 // Bootstrap 4 class compatibility.  TODO MINOR CSS remove.
+.border-left {
+  @extend .border-start
+}
+
+.border-right {
+  @extend .border-end
+}
+
 .sr-only {
   @extend .visually-hidden
 }

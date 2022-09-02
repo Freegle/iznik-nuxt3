@@ -87,7 +87,7 @@
       <div class="d-none d-lg-block">
         <span v-if="chat && chat.chattype === 'User2User' && otheruser">
           <b-button
-            v-tooltip="'Promise an item to this person'"
+            v-tooltip="'Promise an item to this freegler'"
             variant="secondary"
             class="ml-1 mr-2"
             @click="promise(null)"
@@ -148,7 +148,7 @@
       <div class="d-flex d-lg-none justify-content-between align-middle">
         <div
           v-if="chat && chat.chattype === 'User2User' && otheruser"
-          v-tooltip="'Promise an item to this person'"
+          v-tooltip="'Promise an item to this freegler'"
           class="ml-1 mr-2"
           @click="promise(null)"
         >

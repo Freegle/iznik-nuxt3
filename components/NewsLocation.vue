@@ -106,8 +106,8 @@ export default {
   computed: {
     selectedArea: {
       get() {
-        const settings = this.me.settings
-        return settings.newsfeedarea || 0
+        const settings = this.me?.settings
+        return settings?.newsfeedarea || 0
       },
       async set(newval) {
         const settings = this.me.settings

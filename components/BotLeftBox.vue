@@ -1,5 +1,5 @@
 <template>
-  <nav class="bg-transparent pr-2">
+  <nav class="bg-transparent pr-2 botleft">
     <div
       class="flex-wrap d-flex flex-row justify-content-between text-muted small list-unstyled"
     >
@@ -51,5 +51,10 @@ export default {
 <style scoped lang="scss">
 a {
   color: $color-black !important;
+}
+
+.botleft {
+  position: fixed;
+  bottom: 10px;
 }
 </style>

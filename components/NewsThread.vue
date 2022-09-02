@@ -1,20 +1,20 @@
 <template>
   <div class="bg-white">
-    <b-card v-if="newsfeed" :class="backgroundColor" no-body>
+    <b-card v-if="newsfeed" :class="backgroundColor" no-body footer-class="p-0">
       <b-card-body class="p-1 p-sm-2">
         <b-card-text>
           <div v-if="isNewsComponent">
             <b-dropdown class="float-end" right variant="white">
               <template slot="button-content" />
               <b-dropdown-item
-                :href="'/chitchat/' + newsfeed.id"
+                :href="'/chitchat/' + newsfeed?.id"
                 target="_blank"
               >
                 Open in new window
               </b-dropdown-item>
               <b-dropdown-item
-                v-if="parseInt(me.id) === parseInt(newsfeed.userid) || mod"
-                :b-v-modal="'newsEdit' + newsfeed.id"
+                v-if="myid === parseInt(newsfeed.userid) || mod"
+                :b-v-modal="'newsEdit' + newsfeed?.id"
                 @click="show"
               >
                 Edit
@@ -26,7 +26,7 @@
                 Report this thread or one of its replies
               </b-dropdown-item>
               <b-dropdown-item
-                v-if="parseInt(me.id) === parseInt(newsfeed.userid) || mod"
+                v-if="myid === parseInt(newsfeed.userid) || mod"
                 @click="deleteIt"
               >
                 Delete this thread
@@ -52,10 +52,12 @@
             </b-dropdown>
             <component
               :is="newsComponentName"
-              :id="newsfeed.id"
+              v-if="newsfeed"
+              :id="newsfeed?.id"
               :newsfeed="newsfeed"
               @focus-comment="focusComment"
             />
+            <div v-else>Bad feed item {{ newsfeed }}</div>
             <NewsPreview
               v-if="newsfeed.preview && !newsfeed.html"
               :preview="newsfeed.preview"
@@ -71,7 +73,7 @@
           </notice-message>
         </b-card-text>
       </b-card-body>
-      <div slot="footer">
+      <template #footer>
         <NewsReplies
           v-if="newsfeed.replies"
           :id="id"
@@ -79,7 +81,8 @@
           :scroll-to="scrollTo"
           :reply-ids="newsfeed.replies.map((r) => r.id)"
           :reply-to="replyingTo"
-          class="pl-3"
+          :depth="1"
+          class="mr-1"
         />
         <span v-if="!newsfeed.closed">
           <div v-if="enterNewLine">
@@ -195,11 +198,11 @@
         <notice-message v-else>
           This thread is now closed. Thanks to everyone who contributed.
         </notice-message>
-      </div>
+      </template>
     </b-card>
     <b-modal
       v-if="showEditModal"
-      :id="'newsEdit-' + newsfeed.id"
+      :id="'newsEdit-' + newsfeed?.id"
       ref="editModal"
       title="Edit your post"
       size="lg"
@@ -220,7 +223,11 @@
         <b-button variant="primary" @click="save"> Save </b-button>
       </template>
     </b-modal>
-    <NewsReportModal :id="newsfeed.id" ref="newsreport" />
+    <NewsReportModal
+      v-if="showReportModal"
+      :id="newsfeed.id"
+      ref="reportmodal"
+    />
     <ConfirmModal
       v-if="showDeleteModal"
       ref="deleteConfirm"
@@ -311,7 +318,6 @@ export default {
     return {
       replyingTo: null,
       threadcomment: null,
-      newsreport: false,
       newsComponents: {
         AboutMe: 'NewsAboutMe',
         Message: 'NewsMessage',
@@ -330,6 +336,7 @@ export default {
       imagethumb: null,
       showDeleteModal: false,
       showEditModal: false,
+      showReportModal: false,
     }
   },
   computed: {
@@ -352,7 +359,6 @@ export default {
       },
     },
     newsfeed() {
-      console.log('Compute newsfeed', this.id, this.newsfeedStore.byId(this.id))
       return this.newsfeedStore.byId(this.id)
     },
     tagusers() {
@@ -430,10 +436,7 @@ export default {
         : ''
     },
     starter() {
-      if (
-        this.newsfeed.userid === this.myid ||
-        (this.newsfeed.user && this.newsfeed.user.id === this.myid)
-      ) {
+      if (this.newsfeed.userid === this.myid) {
         return 'you'
       } else if (this.users[this.newsfeed.userid]) {
         return this.users[this.newsfeed.userid].displayname
@@ -524,7 +527,10 @@ export default {
       })
     },
     report() {
-      this.$refs.newsreport.show()
+      this.showReportModal = true
+      this.waitRef('reportModal', () => {
+        this.$refs.reportModal.show()
+      })
     },
     referToOffer() {
       this.referTo('Offer')

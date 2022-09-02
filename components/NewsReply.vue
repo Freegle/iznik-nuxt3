@@ -1,152 +1,157 @@
 <template>
-  <div v-if="reply && userid && users[userid] && (reply.visible || mod)">
-    <b-row class="p-0" :class="scrollToThis ? 'bg-info' : ''">
-      <b-col class="p-0">
-        <div v-if="users[userid].profile" class="reply">
-          <div
-            class="clickme align-top"
-            title="Click to see their profile"
-            @click="showInfo"
-          >
-            <ProfileImage
-              :image="users[userid].profile.turl"
-              class="ml-1 mr-2 mt-2 mb-1 inline float-left"
-              :is-moderator="
-                Boolean(
-                  users[userid].settings.showmod &&
-                    reply.replyto === threadhead.id
-                )
-              "
-              :size="reply.replyto !== threadhead.id ? 'sm' : 'md'"
-            />
-          </div>
-          <div class="align-top">
-            <span
-              class="text-success font-weight-bold clickme"
-              title="Click to see their profile"
-              @click="showInfo"
-              >{{ users[userid].displayname }}</span
-            >
-            <span
-              :class="
-                'font-weight-bold preline forcebreak text--small nopara ' +
-                (!reply.visible || reply.deleted ? 'strike' : '')
-              "
-            >
-              <NewsHighlight
-                :search-words="threadUsers"
-                :text="emessage"
-                :max-chars="500"
-                class="font-weight-bold preline forcebreak text--small d-inline"
-              />
-              <br />
-            </span>
-            <div v-if="reply.image">
-              <b-img
-                v-b-modal="'photoModal-' + replyid"
-                rounded
-                class="clickme replyphoto"
-                generator-unable-to-provide-required-alt=""
-                :src="reply.image.paththumb"
-                @error="brokenImage"
-              />
-            </div>
-            <span
-              v-if="userid && users[userid]"
-              class="text-muted d-flex flex-row flex-wrap align-items-center"
-            >
-              <span class="text-muted small mr-1">
-                {{ timeago(reply.added) }}
-              </span>
-              <NewsUserInfo :user="users[userid]" class="px-1" />
-              <b-button
-                variant="link"
-                size="sm"
-                class="reply__button text-muted"
-                @click="replyReply"
-              >
-                Reply
-              </b-button>
-              <b-button
-                v-if="!reply.loved"
-                variant="link"
-                size="sm"
-                class="reply__button text-muted"
-                @click="love"
-              >
-                Love this
-              </b-button>
-              <b-button
-                v-if="reply.loved"
-                variant="link"
-                size="sm"
-                class="reply__button text-muted"
-                @click="unlove"
-              >
-                Unlove this
-              </b-button>
-              <b-button
-                v-if="reply.loves"
-                variant="link"
-                size="sm"
-                class="mr-1 small text-muted showlove"
-                :aria-label="getShowLovesLabel"
-                @click="showLove"
-              >
-                <v-icon icon="heart" class="text-danger" />&nbsp;{{
-                  reply.loves
-                }}
-              </b-button>
-              <b-button
-                v-if="parseInt(me.id) === parseInt(userid)"
-                variant="link"
-                size="sm"
-                class="reply__button text-muted"
-                @click="showEdit"
-              >
-                Edit
-              </b-button>
-              <b-button
-                v-if="parseInt(me.id) === parseInt(userid) || mod"
-                variant="link"
-                size="sm"
-                class="reply__button text-muted"
-                @click="deleteReply"
-              >
-                Delete
-              </b-button>
-              <ChatButton
-                v-if="parseInt(me.id) !== parseInt(userid)"
-                class="reply__button text-muted d-flex align-items-center"
-                :userid="userid"
-                title="Message"
-                variant="link"
-                size="sm"
-                :show-icon="false"
-                btn-class="text-muted"
-              />
-            </span>
-            <NewsPreview
-              v-if="reply.preview"
-              :preview="reply.preview"
-              class="mt-1"
-              size="sm"
-            />
-            <div v-if="reply.hidden" class="text-danger small">
-              This has been hidden and is only visible to volunteers and the
-              person who posted it.
-            </div>
-          </div>
+  <div v-if="reply && user" :class="{ 'bg-info': scrollToThis }">
+    <div v-if="user.profile" class="reply">
+      <div
+        class="clickme align-top"
+        title="Click to see their profile"
+        @click="showInfo"
+      >
+        <ProfileImage
+          :image="user.profile.paththumb"
+          class="ml-1 mr-2 mt-1 mb-1 inline float-left"
+          :is-moderator="
+            Boolean(user.showmod && reply.replyto === threadhead.id)
+          "
+          :size="reply.replyto !== threadhead.id ? 'sm' : 'md'"
+        />
+      </div>
+      <div class="align-top">
+        <span
+          class="text-success font-weight-bold clickme"
+          title="Click to see their profile"
+          @click="showInfo"
+          >{{ user.displayname }}</span
+        >
+        <span
+          :class="
+            'font-weight-bold preline forcebreak text--small nopara ml-1 ' +
+            (reply.deleted ? 'strike' : '')
+          "
+        >
+          <NewsHighlight
+            :search-words="threadUsers"
+            :text="emessage"
+            :max-chars="500"
+            class="font-weight-bold preline forcebreak text--small d-inline"
+          />
+          <br />
+        </span>
+        <div v-if="reply.image">
+          <b-img
+            v-b-modal="'photoModal-' + replyid"
+            rounded
+            class="clickme replyphoto"
+            generator-unable-to-provide-required-alt=""
+            :src="reply.image.paththumb"
+            @error="brokenImage"
+          />
         </div>
-      </b-col>
-    </b-row>
+        <span
+          v-if="userid && user"
+          class="text-muted d-flex flex-row flex-wrap align-items-center"
+        >
+          <span class="text-muted small mr-1">
+            {{ timeago(reply.added) }}
+          </span>
+          <NewsUserInfo :userid="userid" class="mb-1 mr-1" />
+          &bull;
+          <b-button
+            variant="link"
+            size="sm"
+            class="reply__button text-muted"
+            @click="replyReply"
+          >
+            Reply
+          </b-button>
+          <template v-if="!reply.loved">
+            &bull;
+            <b-button
+              variant="link"
+              size="sm"
+              class="reply__button text-muted"
+              @click="love"
+            >
+              Love this
+            </b-button>
+          </template>
+          <template v-if="reply.loved">
+            &bull;
+            <b-button
+              variant="link"
+              size="sm"
+              class="reply__button text-muted"
+              @click="unlove"
+            >
+              Unlove this
+            </b-button>
+          </template>
+          <template v-if="!reply.loves">
+            &bull;
+            <b-button
+              variant="link"
+              size="sm"
+              class="mr-1 small text-muted showlove"
+              :aria-label="getShowLovesLabel"
+              @click="showLove"
+            >
+              <v-icon icon="heart" class="text-danger" />&nbsp;{{ reply.loves }}
+            </b-button>
+          </template>
+          <template v-if="parseInt(me.id) === parseInt(userid)">
+            &bull;
+            <b-button
+              variant="link"
+              size="sm"
+              class="reply__button text-muted"
+              @click="showEdit"
+            >
+              Edit
+            </b-button>
+          </template>
+          <template v-if="parseInt(me.id) === parseInt(userid)">
+            &bull;
+            <b-button
+              variant="link"
+              size="sm"
+              class="reply__button text-muted"
+              @click="deleteReply"
+            >
+              Delete
+            </b-button>
+          </template>
+          <template v-if="parseInt(me.id) !== parseInt(userid)">
+            &bull;
+            <ChatButton
+              class="reply__button text-muted d-flex align-items-center"
+              :userid="userid"
+              title="Message"
+              variant="link"
+              size="sm"
+              :show-icon="false"
+              btn-class="text-muted p-0 mbsmall"
+              title-class="ml-0"
+            />
+          </template>
+        </span>
+        <NewsPreview
+          v-if="reply.preview"
+          :preview="reply.preview"
+          class="mt-1"
+          size="sm"
+        />
+        <div v-if="reply.hidden" class="text-danger small">
+          This has been hidden and is only visible to volunteers and the person
+          who posted it.
+        </div>
+      </div>
+    </div>
     <NewsReplies
       :id="id"
       :threadhead="threadhead"
       :scroll-to="scrollTo"
       :reply-ids="reply.replies.map((r) => r.id)"
       :reply-to="reply.id"
-      :class="firstlevel ? 'pl-3' : ''"
+      :depth="depth + 1"
     />
     <div v-if="showReplyBox" class="mb-2 pb-1 ml-4">
       <div v-if="enterNewLine" class="w-100">
@@ -296,16 +301,18 @@
     <ConfirmModal
       v-if="showDeleteModal"
       ref="deleteConfirm"
-      :title="'Delete reply from ' + users[userid].displayname"
+      :title="'Delete reply from ' + user.displayname"
       @confirm="deleteConfirm"
     />
   </div>
 </template>
-
 <script>
+import pluralize from 'pluralize'
+import { useNewsfeedStore } from '../stores/newsfeed'
+import { useUserStore } from '../stores/user'
 import NewsLovesModal from './NewsLovesModal'
 import SpinButton from './SpinButton'
-import { twem } from '~/composables/useTwem'
+import { twem, untwem } from '~/composables/useTwem'
 
 import NewsUserInfo from '~/components/NewsUserInfo'
 import NewsHighlight from '~/components/NewsHighlight'
@@ -356,6 +363,26 @@ export default {
       required: false,
       default: '',
     },
+    depth: {
+      type: Number,
+      required: true,
+    },
+  },
+  async setup(props) {
+    const newsfeedStore = useNewsfeedStore()
+    const userStore = useUserStore()
+
+    const reply = newsfeedStore.byId(props.replyid)
+    console.log('Got reply', props, reply)
+
+    if (reply?.userid) {
+      await userStore.fetch(reply.userid)
+    }
+
+    return {
+      userStore,
+      newsfeedStore,
+    }
   },
   data() {
     return {
@@ -374,32 +401,23 @@ export default {
   },
   computed: {
     enterNewLine() {
-      return this.$store.getters['misc/get']('enternewline')
+      return this.me?.settings?.enterNewLine
     },
     userid() {
-      // The API can return slightly different things in different places.
-      if (this.reply.userid) {
-        return this.reply.userid
-      }
-
-      if (this.reply.user) {
-        return this.reply.user.id
-      }
-
-      return null
+      return this.reply?.userid
+    },
+    user() {
+      return this.userStore.byId(this.reply.userid)
     },
     reply() {
-      const ret = this.$store.getters['newsfeed/get'](this.replyid)
-      return ret
-    },
-    firstlevel() {
-      // We need to know which are the first level replies, because we indent those but not any subsequent replies.
-      return this.reply && this.reply.replyto === this.reply.threadhead
+      return this.newsfeedStore.byId(this.replyid)
     },
     tagusers() {
       const ret = []
-      for (const user in this.users) {
-        ret.push(this.users[user].displayname)
+
+      for (const uid in this.userStore.list) {
+        const user = this.userStore.list[uid]
+        ret.push(user.displayname)
       }
 
       return ret.sort((a, b) => {
@@ -424,8 +442,8 @@ export default {
     },
     threadUsers() {
       const ret = []
-      for (const user in this.users) {
-        ret.push('@' + this.users[user].displayname)
+      for (const user in this.tagusers) {
+        ret.push('@' + this.tagusers[user])
       }
       return ret
     },
@@ -435,9 +453,7 @@ export default {
     getShowLovesLabel() {
       return (
         'This comment has ' +
-        this.$options.filters.pluralize(this.reply.loves, ['love', 'loves'], {
-          includeNumber: true,
-        }) +
+        pluralize('love', this.reply.loves, true) +
         '. Who loves this?'
       )
     },
@@ -469,7 +485,7 @@ export default {
         this.$refs.replybox.focus()
 
         // Reply with tag.
-        this.replybox = '@' + this.users[this.userid].displayname + ' '
+        this.replybox = '@' + this.user.displayname + ' '
       })
     },
     focusReply() {
@@ -487,7 +503,7 @@ export default {
 
       // Encode up any emojis.
       if (this.replybox && this.replybox.trim()) {
-        const msg = twem.untwem(this.replybox)
+        const msg = untwem(this.replybox)
 
         await this.$store.dispatch('newsfeed/send', {
           message: msg,
@@ -619,11 +635,6 @@ export default {
   margin-left: 3px;
   margin-right: 3px;
   padding: 0;
-
-  &:before {
-    content: '\2022';
-    padding-right: 2px;
-  }
 }
 
 .showlove {
@@ -638,5 +649,9 @@ export default {
 
 :deep(.strike) {
   text-decoration: line-through;
+}
+
+:deep(.mbsmall) {
+  margin-bottom: 0.125rem !important;
 }
 </style>

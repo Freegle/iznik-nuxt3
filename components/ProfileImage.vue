@@ -98,11 +98,21 @@ export default {
   },
 }
 </script>
-
 <style scoped lang="scss">
 @import 'bootstrap/scss/_functions';
 @import 'bootstrap/scss/_variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+
+.ProfileImage__container {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+
+  img {
+    grid-row: 1 / 2;
+    grid-column: 1 / 2;
+  }
+}
 
 .profile {
   object-fit: cover;
@@ -189,16 +199,14 @@ export default {
   }
 }
 
-.ProfileImage__container {
-  position: relative;
-  padding-right: 5px;
-}
-
 .ProfileImage__moderator {
-  position: absolute;
-  bottom: 0;
-  right: 0;
+  display: flex;
+  align-self: flex-end;
+  justify-self: flex-end;
   border-radius: 50%;
+  grid-row: 1 / 2;
+  grid-column: 1 / 2;
+  translate: 3px 3px;
 
   :not(.badge) {
     background-color: $color-white;
@@ -207,60 +215,50 @@ export default {
 }
 
 .ProfileImage__moderator--sm {
-  padding: 2px;
   width: 12px;
   height: 12px;
 
   @include media-breakpoint-up(md) {
-    padding: 3px;
     width: 16px;
     height: 16px;
   }
 }
 
 .ProfileImage__moderator--md {
-  padding: 2px;
   width: 16px;
   height: 16px;
 
   @include media-breakpoint-up(md) {
-    padding: 3px;
     width: 20px;
     height: 20px;
   }
 }
 
 .ProfileImage__moderator--lg {
-  padding: 2px;
   width: 18px;
   height: 18px;
 
   @include media-breakpoint-up(md) {
-    padding: 3px;
     width: 24px;
     height: 24px;
   }
 }
 
 .ProfileImage__moderator--xl {
-  padding: 2px;
   width: 24px;
   height: 24px;
 
   @include media-breakpoint-up(md) {
-    padding: 3px;
     width: 36px;
     height: 36px;
   }
 }
 
 .ProfileImage__moderator--xxl {
-  padding: 2px;
   width: 24px;
   height: 24px;
 
   @include media-breakpoint-up(md) {
-    padding: 3px;
     width: 36px;
     height: 36px;
   }

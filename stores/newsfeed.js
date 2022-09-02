@@ -16,24 +16,36 @@ export const useNewsfeedStore = defineStore({
     init(config) {
       this.config = config
     },
+    addItems(items) {
+      items.forEach((item) => {
+        this.list[item.id] = item
+
+        if (item.replies?.length) {
+          this.addItems(item.replies)
+        }
+      })
+    },
     async fetch(id, distance) {
       if (!id) {
         // Get the feed.
         this.feed = await api(this.config).news.fetch(null, distance)
-        console.log('fetched feed')
         return this.feed
       } else {
         // Get a single item.
-        this.list[id] = await api(this.config).news.fetch(id)
-        console.log('Fetched single', id, this.list[id])
+        const ret = await api(this.config).news.fetch(id)
+
+        if (ret?.id) {
+          this.list[id] = ret
+
+          this.addItems([ret])
+        }
+
         return this.list[id]
       }
     },
     async love(id, threadhead) {
       await api(this.config).news.love(id)
-      console.log('loved', id, threadhead)
       await this.fetch(threadhead)
-      console.log('fetched', threadhead)
     },
     async unlove(id, threadhead) {
       await api(this.config).news.unlove(id)
