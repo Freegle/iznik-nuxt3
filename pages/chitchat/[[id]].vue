@@ -164,7 +164,7 @@
     </b-container>
     <template #fallback>
       <div class="text-center">
-        <b-img class="float-end" src="/loader.gif" />
+        <b-img src="/loader.gif" />
       </div>
     </template>
   </Suspense>

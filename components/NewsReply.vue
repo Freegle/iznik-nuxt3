@@ -579,7 +579,7 @@ export default {
       })
     },
     brokenImage(event) {
-      event.target.src = require('~/static/defaultprofile.png')
+      event.target.src = '/defaultprofile.png'
     },
     showEdit() {
       this.showEditModal = true

@@ -52,8 +52,11 @@
   </div>
 </template>
 <script>
+import { ref, computed } from 'vue'
 import pluralize from 'pluralize'
 import { useNewsfeedStore } from '../stores/newsfeed'
+import { useAuthStore } from '../stores/auth'
+import { useUserStore } from '../stores/user'
 import NewsRefer from '~/components/NewsRefer'
 
 const NewsReply = () => import('~/components/NewsReply.vue')
@@ -91,63 +94,73 @@ export default {
       required: true,
     },
   },
-  setup(props) {
+  async setup(props) {
     const newsfeedStore = useNewsfeedStore()
+    const authStore = useAuthStore()
+    const userStore = useUserStore()
+    const showAllReplies = ref(false)
 
-    return {
-      newsfeedStore,
-    }
-  },
-  data() {
-    return {
-      showAllReplies: false,
-    }
-  },
-  computed: {
-    replies() {
+    // We do a lot of things in setup() in this component rather than computed properties via the legacy options API.
+    //
+    // This is because it allows us to identify which replies we are going to show, and then fetch the users for them
+    // in advance.  That avoids the screen flicker that happens if we delay fetching the user until we render each reply.
+    const me = authStore.user
+
+    const mod = computed(() => {
+      return (
+        me &&
+        (me.systemrole === 'Moderator' ||
+          me.systemrole === 'Support' ||
+          me.systemrole === 'Admin')
+      )
+    })
+
+    const replies = computed(() => {
       const ret = []
 
-      this.replyIds.forEach((id) => {
-        ret.push(this.newsfeedStore.byId(id))
+      props.replyIds.forEach((id) => {
+        ret.push(newsfeedStore.byId(id))
       })
 
       return ret
-    },
-    visiblereplies() {
+    })
+
+    const visiblereplies = computed(() => {
       // These are the replies which are candidates to show, i.e. not deleted or hidden.
       const ret = []
 
-      for (let i = 0; i < this.replies.length; i++) {
-        if (!this.replies[i].deleted || this.mod) {
-          ret.push(this.replies[i])
+      for (let i = 0; i < replies.value.length; i++) {
+        if (!replies.value[i].deleted || mod) {
+          ret.push(replies.value[i])
         }
       }
 
       return ret
-    },
-    repliestoshow() {
+    })
+
+    const repliestoshow = computed(() => {
       let ret = []
 
-      if (this.visiblereplies.length) {
+      if (visiblereplies.value.length) {
         if (
-          this.showAllReplies ||
-          this.scrollTo ||
-          this.visiblereplies.length <= INITIAL_NUMBER_OF_REPLIES_TO_SHOW
+          showAllReplies ||
+          scrollTo ||
+          visiblereplies.value.length <= INITIAL_NUMBER_OF_REPLIES_TO_SHOW
         ) {
           // Return all the replies
-          ret = this.visiblereplies
-        } else if (!this.replyTo) {
+          ret = visiblereplies.value
+        } else if (!props.replyTo) {
           // Show the last 5
-          ret = this.visiblereplies.slice(-5)
+          ret = visiblereplies.value.slice(-5)
         } else {
           // We are need to show what we are replying to and everything after that.
           ret = []
           let seen = false
 
-          for (let i = 0; i < this.visiblereplies.length; i++) {
-            const reply = this.visiblereplies[i]
+          for (let i = 0; i < visiblereplies.value.length; i++) {
+            const reply = visiblereplies.value[i]
 
-            if (reply.id === this.replyTo || seen) {
+            if (reply.id === props.replyTo || seen) {
               seen = true
               ret.push(reply)
             }
@@ -155,13 +168,45 @@ export default {
 
           if (!seen) {
             // Probably won't happen.
-            ret = this.visiblereplies.slice(-5)
+            ret = visiblereplies.slice(-5)
           }
         }
       }
 
       return ret
-    },
+    })
+
+    // Extract unique userids from repliestoshow
+    const userids = []
+
+    repliestoshow.value.forEach((reply) => {
+      if (
+        reply.userid &&
+        !userStore.byId(reply.userid) &&
+        !userids.includes(reply.userid)
+      ) {
+        userids.push(reply.userid)
+      }
+    })
+
+    // Fetch these users in advance.
+    const promises = []
+
+    userids.forEach((userid) => {
+      promises.push(userStore.fetch(userid))
+    })
+
+    await Promise.all(promises)
+
+    return {
+      newsfeedStore,
+      replies,
+      visiblereplies,
+      repliestoshow,
+      showAllReplies,
+    }
+  },
+  computed: {
     showEarlierRepliesOption() {
       return this.visiblereplies.length > INITIAL_NUMBER_OF_REPLIES_TO_SHOW
     },
