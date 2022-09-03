@@ -81,7 +81,7 @@
         </b-card-body>
         <template #footer>
           <NewsReplies
-            v-if="newsfeed.replies"
+            v-if="newsfeed?.replies"
             :id="id"
             :threadhead="newsfeed.id"
             :scroll-to="scrollTo"
@@ -397,16 +397,14 @@ export default {
       // These are the replies which are candidates to show, i.e. not deleted or hidden.
       const ret = []
 
-      if (this.newsfeed) {
-        if (this.newsfeed.replies && this.newsfeed.replies.length) {
-          for (let i = 0; i < this.newsfeed.replies.length; i++) {
-            if (
-              (!this.newsfeed.replies[i].deleted &&
-                this.newsfeed.replies[i].visible) ||
-              this.mod
-            ) {
-              ret.push(this.newsfeed.replies[i])
-            }
+      if (this.newsfeed?.replies?.length) {
+        for (let i = 0; i < this.newsfeed.replies.length; i++) {
+          if (
+            (!this.newsfeed.replies[i].deleted &&
+              this.newsfeed.replies[i].visible) ||
+            this.mod
+          ) {
+            ret.push(this.newsfeed.replies[i])
           }
         }
       }
