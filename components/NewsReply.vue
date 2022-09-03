@@ -19,7 +19,7 @@
           class="text-success font-weight-bold clickme"
           title="Click to see their profile"
           @click="showInfo"
-          >{{ user.displayname }}</span
+          >{{ reply.displayname.trim() }}</span
         >
         <span
           :class="
@@ -52,7 +52,7 @@
           <span class="text-muted small mr-1">
             {{ timeago(reply.added) }}
           </span>
-          <NewsUserInfo :userid="userid" class="mr-1" />
+          <NewsUserInfo :id="id" class="mr-1" />
           &bull;
           <b-button
             variant="link"
@@ -300,7 +300,7 @@
     <ConfirmModal
       v-if="showDeleteModal"
       ref="deleteConfirm"
-      :title="'Delete reply from ' + user.displayname"
+      :title="'Delete reply from ' + newsfeed.displayname"
       @confirm="deleteConfirm"
     />
   </div>
@@ -343,7 +343,6 @@ export default {
     ProfileImage,
     ConfirmModal,
   },
-
   props: {
     id: {
       type: Number,

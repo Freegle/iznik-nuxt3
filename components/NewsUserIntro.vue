@@ -19,7 +19,7 @@
         <span class="text-muted small pl-0">
           {{ timeago(newsfeed?.added) }}
         </span>
-        <NewsUserInfo :userid="userid" />
+        <NewsUserInfo :id="newsfeed.id" />
       </div>
     </div>
     <div v-if="mod && newsfeed?.type === 'AboutMe'" class="text-muted small">

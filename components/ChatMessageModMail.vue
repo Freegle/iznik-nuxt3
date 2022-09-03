@@ -60,8 +60,8 @@
     </b-row>
   </div>
 </template>
-
 <script>
+import { useComposeStore } from '../stores/compose'
 import ChatBase from '~/components/ChatBase'
 import ProfileImage from '~/components/ProfileImage'
 
@@ -70,6 +70,11 @@ export default {
     ProfileImage,
   },
   extends: ChatBase,
+  setup() {
+    const composeStore = useComposeStore()
+
+    return { composeStore }
+  },
   computed: {
     group() {
       return this.chat && this.chat.group ? this.chat.group : null
@@ -80,28 +85,26 @@ export default {
   },
   methods: {
     async repost() {
-      // Get the full message - we don't have the body.
-      await this.$store.dispatch('messages/fetch', {
-        id: this.chatmessage.refmsg.id,
-      })
-
-      const message = this.$store.getters['messages/get'](
-        this.chatmessage.refmsg.id
-      )
+      const message = this.composeStore.message(this.chatmessage.refmsg.id)
 
       // Add this message to the compose store so that it will show up on the compose page.
-      await this.$store.dispatch('compose/setMessage', {
-        id: message.id,
-        type: message.type,
-        item: message.item.name.trim(),
-        description: message.textbody.trim(),
-        availablenow: message.availablenow,
-      })
+      await this.composeStore.setMessage(
+        {
+          message: {
+            id: message.id,
+            type: message.type,
+            item: message.item.name.trim(),
+            description: message.textbody.trim(),
+            availablenow: message.availablenow,
+          },
+        },
+        this.me
+      )
 
-      await this.$store.dispatch('compose/setAttachmentsForMessage', {
-        id: message.id,
-        attachments: message.attachments,
-      })
+      await this.composeStore.setAttachmentsForMessage(
+        message.id,
+        message.attachments
+      )
 
       this.$router.push(message.type === 'Offer' ? '/give' : 'find')
     },

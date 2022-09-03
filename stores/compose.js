@@ -108,10 +108,7 @@ export const useComposeStore = defineStore({
         me,
       })
 
-      this.setAttachmentsForMessage({
-        id,
-        attachments: [],
-      })
+      this.setAttachmentsForMessage(id, [])
     },
     async backToDraft(id) {
       console.log('Back to draft', id)
@@ -234,8 +231,8 @@ export const useComposeStore = defineStore({
       this._attachments[params.id].push(params.attachment)
       this.attachmentBump++
     },
-    setAttachmentsForMessage(params) {
-      this._attachments[params.id] = params._attachments
+    setAttachmentsForMessage(id, attachments) {
+      this._attachments[id] = attachments
     },
     removeAttachment(params) {
       const newAtts = this._attachments[params.id].filter((obj) => {

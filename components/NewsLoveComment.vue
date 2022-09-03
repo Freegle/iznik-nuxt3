@@ -30,7 +30,7 @@
     >
       <v-icon icon="heart" class="text-danger" />&nbsp;{{ newsfeed.loves }}
     </b-button>
-    <NewsLovesModal :id="newsfeed.id" ref="loveModal" />
+    <NewsLovesModal v-if="showLoveModal" :id="newsfeed.id" ref="loveModal" />
   </div>
 </template>
 <script>
@@ -58,6 +58,7 @@ export default {
   data() {
     return {
       loving: false,
+      showLoveModal: false,
     }
   },
   computed: {
@@ -92,7 +93,11 @@ export default {
       this.$emit('focus-comment')
     },
     showLove() {
-      this.$refs.loveModal.show()
+      this.showLoveModal = true
+
+      this.waitForRef('loveModal', () => {
+        this.$refs.loveModal.show()
+      })
     },
   },
 }

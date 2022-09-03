@@ -30,6 +30,7 @@
                   {{ love.displayname }}
                 </span>
                 <br />
+                <!--                TODO-->
                 <NewsUserInfo :user="love" :index="index" />
               </div>
             </div>

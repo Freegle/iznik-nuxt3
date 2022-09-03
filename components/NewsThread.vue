@@ -371,9 +371,7 @@ export default {
     },
     tagusers() {
       const ret = []
-      for (const user in this.users) {
-        ret.push(this.users[user].displayname)
-      }
+      // TODO
 
       return ret.sort((a, b) => {
         if (typeof a === 'string' && typeof b === 'string') {
@@ -446,8 +444,8 @@ export default {
     starter() {
       if (this.newsfeed.userid === this.myid) {
         return 'you'
-      } else if (this.users[this.newsfeed.userid]) {
-        return this.users[this.newsfeed.userid].displayname
+      } else if (this.newsfeed.displayname) {
+        return this.newsfeed.displayname
       } else {
         return 'someone'
       }
