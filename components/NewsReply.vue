@@ -52,7 +52,7 @@
           <span class="text-muted small mr-1">
             {{ timeago(reply.added) }}
           </span>
-          <NewsUserInfo :id="id" class="mr-1" />
+          <NewsUserInfo :id="replyid" class="mr-1" />
           &bull;
           <b-button
             variant="link"
