@@ -272,31 +272,14 @@
         <b-img fluid rounded center :src="reply.image.path" />
       </template>
     </b-modal>
-    <b-modal
-      v-if="showEditModal"
-      :id="'newsEdit-' + replyid"
-      ref="editModal"
-      title="Edit your post"
-      size="lg"
-      no-stacking
-    >
-      <template #default>
-        <b-form-textarea
-          ref="editText"
-          v-model="reply.message"
-          rows="8"
-          maxlength="2048"
-          spellcheck="true"
-          placeholder="Edit your post..."
-        />
-      </template>
-      <template #footer>
-        <b-button variant="white" @click="hide"> Cancel </b-button>
-        <b-button variant="primary" @click="save"> Save </b-button>
-      </template>
-    </b-modal>
     <ProfileModal v-if="infoclick" :id="userid" ref="profilemodal" />
     <NewsLovesModal v-if="showLoveModal" :id="replyid" ref="loveModal" />
+    <NewsEditModal
+      v-if="showEditModal"
+      :id="replyid"
+      ref="editModal"
+      :threadhead="threadhead"
+    />
     <ConfirmModal
       v-if="showDeleteModal"
       ref="deleteConfirm"
@@ -311,6 +294,7 @@ import { useNewsfeedStore } from '../stores/newsfeed'
 import { useUserStore } from '../stores/user'
 import NewsLovesModal from './NewsLovesModal'
 import SpinButton from './SpinButton'
+import NewsEditModal from './NewsEditModal'
 import { twem, untwem } from '~/composables/useTwem'
 
 import NewsUserInfo from '~/components/NewsUserInfo'
@@ -330,6 +314,7 @@ const OurFilePond = () => import('~/components/OurFilePond')
 export default {
   name: 'NewsReply',
   components: {
+    NewsEditModal,
     NewsReplies,
     SpinButton,
     OurFilePond,
@@ -536,15 +521,6 @@ export default {
       await this.newsfeedStore.unlove(this.replyid, this.threadhead)
 
       el.classList.remove('pulsate')
-    },
-    async save() {
-      await this.newsfeedStore.edit(
-        this.replyid,
-        this.reply.message,
-        this.threadhead
-      )
-
-      this.$refs.editModal.hide()
     },
     deleteReply() {
       this.showDeleteModal = true

@@ -201,29 +201,12 @@
         </notice-message>
       </template>
     </b-card>
-    <b-modal
+    <NewsEditModal
       v-if="showEditModal"
-      :id="'newsEdit-' + newsfeed?.id"
+      :id="id"
       ref="editModal"
-      title="Edit your post"
-      size="lg"
-      no-stacking
-    >
-      <template #default>
-        <b-form-textarea
-          ref="editText"
-          v-model="newsfeed.message"
-          rows="8"
-          maxlength="2048"
-          spellcheck="true"
-          placeholder="Edit your post..."
-        />
-      </template>
-      <template #footer>
-        <b-button variant="white" @click="hide"> Cancel </b-button>
-        <b-button variant="primary" @click="save"> Save </b-button>
-      </template>
-    </b-modal>
+      :threadhead="newsfeed?.threadhead"
+    />
     <NewsReportModal
       v-if="showReportModal"
       :id="newsfeed.id"
