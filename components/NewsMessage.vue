@@ -47,7 +47,7 @@
       v-if="newsfeed.image"
       :id="'photoModal-' + newsfeed.id"
       ref="photoModal"
-      title="ChitChat Photo"
+      title="ChitChat photo"
       generator-unable-to-provide-required-alt=""
       size="lg"
       no-stacking

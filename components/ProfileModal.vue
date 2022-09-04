@@ -21,6 +21,7 @@
   </b-modal>
 </template>
 <script>
+import { useUserStore } from '../stores/user'
 import modal from '@/mixins/modal'
 import ProfileInfo from '~/components/ProfileInfo'
 import ProfileHeader from '~/components/ProfileHeader'
@@ -37,6 +38,15 @@ export default {
       required: false,
       default: 0,
     },
+  },
+  async setup(props) {
+    const userStore = useUserStore()
+
+    await userStore.fetch(props.id)
+
+    return {
+      userStore,
+    }
   },
 }
 </script>

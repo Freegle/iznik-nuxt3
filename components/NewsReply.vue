@@ -39,7 +39,7 @@
           <b-img
             v-b-modal="'photoModal-' + replyid"
             rounded
-            class="clickme replyphoto"
+            class="clickme replyphoto mt-2 mb-2"
             generator-unable-to-provide-required-alt=""
             :src="reply.image.paththumb"
             @error="brokenImage"
@@ -262,7 +262,7 @@
       v-if="reply.image"
       :id="'photoModal-' + replyid"
       ref="photoModal"
-      title="ChitChat Photo"
+      title="ChitChat photo"
       generator-unable-to-provide-required-alt=""
       size="lg"
       no-stacking
@@ -309,6 +309,7 @@
 import pluralize from 'pluralize'
 import { useNewsfeedStore } from '../stores/newsfeed'
 import { useUserStore } from '../stores/user'
+import waitForRef from '../plugins/waitForRef'
 import NewsLovesModal from './NewsLovesModal'
 import SpinButton from './SpinButton'
 import { twem, untwem } from '~/composables/useTwem'
@@ -453,12 +454,10 @@ export default {
   },
   methods: {
     showInfo() {
-      // We use v-if so that the profile modal is not inserted into the DOM until we have clicked, which saves the
-      // fetch of the user info.
       this.infoclick = true
-      setTimeout(() => {
+      this.waitForRef('profilemodal', () => {
         this.$refs.profilemodal.show()
-      }, 25)
+      })
     },
     replyReply() {
       console.log('Replying to', this.replyid, this.reply)

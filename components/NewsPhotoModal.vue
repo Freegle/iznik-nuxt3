@@ -2,7 +2,7 @@
   <b-modal
     :id="'newsPhotoModal-' + id"
     v-model="showModal"
-    title="ChitChat Photo"
+    title="ChitChat photo"
     size="lg"
     no-stacking
     ok-only
