@@ -1,15 +1,15 @@
 <template>
-  <div v-if="reply && user" :class="{ 'bg-info': scrollToThis }">
-    <div v-if="user.profile" class="reply">
+  <div :class="{ 'bg-info': scrollToThis }">
+    <div class="reply">
       <div
         class="clickme align-top"
         title="Click to see their profile"
         @click="showInfo"
       >
         <ProfileImage
-          :image="user.profile.paththumb"
+          :image="reply.profile?.paththumb"
           class="ml-1 mr-2 mt-1 mb-1 inline float-left"
-          :is-moderator="Boolean(user.showmod && reply.replyto === threadhead)"
+          :is-moderator="Boolean(reply.showmod && reply.replyto === threadhead)"
           :size="reply.replyto !== threadhead ? 'sm' : 'md'"
           :lazy="false"
         />
@@ -46,7 +46,7 @@
           />
         </div>
         <span
-          v-if="userid && user"
+          v-if="userid"
           class="text-muted d-flex flex-row flex-wrap align-items-center"
         >
           <span class="text-muted small mr-1">
@@ -300,7 +300,7 @@
     <ConfirmModal
       v-if="showDeleteModal"
       ref="deleteConfirm"
-      :title="'Delete reply from ' + newsfeed.displayname"
+      :title="'Delete reply from ' + reply.displayname"
       @confirm="deleteConfirm"
     />
   </div>
@@ -366,15 +366,9 @@ export default {
       required: true,
     },
   },
-  async setup(props) {
+  setup(props) {
     const newsfeedStore = useNewsfeedStore()
     const userStore = useUserStore()
-
-    const reply = newsfeedStore.byId(props.replyid)
-
-    if (reply?.userid) {
-      await userStore.fetch(reply.userid)
-    }
 
     return {
       userStore,
@@ -403,19 +397,13 @@ export default {
     userid() {
       return this.reply?.userid
     },
-    user() {
-      return this.userStore.byId(this.reply.userid)
-    },
     reply() {
       return this.newsfeedStore.byId(this.replyid)
     },
     tagusers() {
       const ret = []
 
-      for (const uid in this.userStore.list) {
-        const user = this.userStore.list[uid]
-        ret.push(user.displayname)
-      }
+      // TODO Tagging.
 
       return ret.sort((a, b) => {
         if (typeof a === 'string' && typeof b === 'string') {
@@ -482,7 +470,7 @@ export default {
         this.$refs.replybox.focus()
 
         // Reply with tag.
-        this.replybox = '@' + this.user.displayname + ' '
+        this.replybox = '@' + this.reply.displayname + ' '
       })
     },
     focusReply() {

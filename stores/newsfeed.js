@@ -11,6 +11,9 @@ export const useNewsfeedStore = defineStore({
 
     // This is the list of full items we've fetched.
     list: {},
+
+    // These are the ones we are currently fetching.
+    fetching: {},
   }),
   actions: {
     init(config) {
@@ -25,23 +28,27 @@ export const useNewsfeedStore = defineStore({
         }
       })
     },
-    async fetch(id, distance) {
-      if (!id) {
-        // Get the feed.
-        this.feed = await api(this.config).news.fetch(null, distance)
-        return this.feed
-      } else {
-        // Get a single item.
-        const ret = await api(this.config).news.fetch(id)
+    async fetchFeed(distance) {
+      this.feed = await api(this.config).news.fetch(null, distance)
+      return this.feed
+    },
+    async fetch(id, force) {
+      if (!this.list[id] || force) {
+        if (!this.fetching[id]) {
+          this.fetching[id] = api(this.config).news.fetch(id)
+        }
+
+        const ret = await this.fetching[id]
+        this.fetching[id] = null
 
         if (ret?.id) {
           this.list[id] = ret
 
           this.addItems([ret])
         }
-
-        return this.list[id]
       }
+
+      return this.list[id]
     },
     async love(id, threadhead) {
       await api(this.config).news.love(id)

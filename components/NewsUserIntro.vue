@@ -2,16 +2,16 @@
   <div class="clickme" title="Click to see their profile" @click="showInfo">
     <div class="d-flex clickme">
       <ProfileImage
-        v-if="user?.profile?.path"
-        :image="user.profile.path"
+        v-if="newsfeed.profile?.path"
+        :image="newsfeed.profile.path"
         class="ml-1 mb-1 inline"
         is-thumbnail
-        :is-moderator="Boolean(user.showmod)"
+        :is-moderator="Boolean(newsfeed.showmod)"
         size="lg"
       />
       <div class="media-body ml-2">
         <span class="text-success font-weight-bold">
-          {{ user?.displayname }}
+          {{ newsfeed.displayname }}
         </span>
         {{ append }}
         <span v-if="appendBold"> "{{ appendBold }}" </span>
@@ -32,7 +32,6 @@
 </template>
 <script>
 // Use import rather than async otherwise we have trouble with refs.
-import { useUserStore } from '../stores/user'
 import ProfileModal from '~/components/ProfileModal'
 import NewsUserInfo from '~/components/NewsUserInfo'
 import ProfileImage from '~/components/ProfileImage'
@@ -63,24 +62,10 @@ export default {
       default: '',
     },
   },
-  async setup(props) {
-    const userStore = useUserStore()
-
-    await userStore.fetch(props.userid)
-
-    return {
-      userStore,
-    }
-  },
   data() {
     return {
       infoclick: false,
     }
-  },
-  computed: {
-    user() {
-      return this.userid ? this.userStore.byId(this.userid) : null
-    },
   },
   methods: {
     showInfo() {

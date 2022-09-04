@@ -236,7 +236,18 @@ export default {
     const settings = me?.settings
     const distance = settings?.newsfeedarea || 0
 
-    await newsfeedStore.fetch(id, distance)
+    if (id) {
+      await newsfeedStore.fetch(id)
+    } else {
+      await newsfeedStore.fetchFeed(distance)
+
+      // Fetch the first few threads in parallel so that they are in the store.  This speeds up rendering the
+      // first page.
+      const firstThreads = newsfeedStore.feed.slice(0, 5)
+      firstThreads.forEach((thread) => {
+        newsfeedStore.fetch(thread.id)
+      })
+    }
 
     return {
       authStore,
@@ -374,7 +385,7 @@ export default {
     },
     async areaChange() {
       const distance = this.me?.settings?.newsfeedarea || 0
-      await this.newsfeedStore.fetch(null, distance)
+      await this.newsfeedStore.fetchFeed(distance)
     },
     async postIt() {
       let msg = this.startThread

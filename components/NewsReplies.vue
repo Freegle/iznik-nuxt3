@@ -94,7 +94,7 @@ export default {
       required: true,
     },
   },
-  async setup(props) {
+  setup(props) {
     const newsfeedStore = useNewsfeedStore()
     const authStore = useAuthStore()
     const userStore = useUserStore()
@@ -188,15 +188,6 @@ export default {
         userids.push(reply.userid)
       }
     })
-
-    // Fetch these users in advance.
-    const promises = []
-
-    userids.forEach((userid) => {
-      promises.push(userStore.fetch(userid))
-    })
-
-    await Promise.all(promises)
 
     return {
       newsfeedStore,
