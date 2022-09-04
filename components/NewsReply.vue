@@ -309,7 +309,6 @@
 import pluralize from 'pluralize'
 import { useNewsfeedStore } from '../stores/newsfeed'
 import { useUserStore } from '../stores/user'
-import waitForRef from '../plugins/waitForRef'
 import NewsLovesModal from './NewsLovesModal'
 import SpinButton from './SpinButton'
 import { twem, untwem } from '~/composables/useTwem'
