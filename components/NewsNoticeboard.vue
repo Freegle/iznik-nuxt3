@@ -53,6 +53,7 @@ import NewsBase from '~/components/NewsBase'
 import NewsUserIntro from '~/components/NewsUserIntro'
 import NewsLoveComment from '~/components/NewsLoveComment'
 import NoticeMessage from '~/components/NoticeMessage'
+import { attribution, osmtile } from '~/composables/useMap'
 
 export default {
   components: {
@@ -61,6 +62,19 @@ export default {
     NoticeMessage,
   },
   extends: NewsBase,
+  async setup() {
+    let L = null
+
+    if (process.client) {
+      L = await import('leaflet/dist/leaflet-src.esm')
+    }
+
+    return {
+      L,
+      osmtile: osmtile(),
+      attribution: attribution(),
+    }
+  },
   computed: {
     info() {
       let info = {}
