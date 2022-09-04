@@ -304,6 +304,7 @@ export default {
       default: '',
     },
   },
+  emits: ['rendered'],
   async setup(props) {
     const newsfeedStore = useNewsfeedStore()
 
@@ -439,6 +440,10 @@ export default {
         return 'someone'
       }
     },
+  },
+  async mounted() {
+    await this.$nextTick()
+    this.$emit('rendered')
   },
   methods: {
     focusComment() {

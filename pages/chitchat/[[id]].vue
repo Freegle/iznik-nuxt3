@@ -141,6 +141,7 @@
               :id="entry.id"
               :key="'newsfeed-' + entry.id + '-area-' + selectedArea"
               :scroll-to="scrollTo"
+              @rendered="rendered"
             />
             <infinite-loading
               v-if="newsfeed.length"
@@ -247,7 +248,7 @@ export default {
   },
   data() {
     return {
-      show: 10,
+      show: 0,
       startThread: null,
       scrollTo: null,
       uploading: false,
@@ -259,6 +260,7 @@ export default {
       shownToolGive: false,
       showToolFind: false,
       shownToolFind: false,
+      infiniteState: null,
     }
   },
   computed: {
@@ -356,10 +358,16 @@ export default {
         setTimeout(this.runCheck, 1000)
       }
     },
+    rendered() {
+      // We do this so that we wait until one item has rendered before inserting another.  Otherwise we get them
+      // appearing out of order, which is worse than there being a delay before they appear in series.
+      this.infiniteState.loaded()
+    },
     loadMore($state) {
+      this.infiniteState = $state
+
       if (this.show < this.newsfeed.length) {
         this.show += 1
-        $state.loaded()
       } else {
         $state.complete()
       }
