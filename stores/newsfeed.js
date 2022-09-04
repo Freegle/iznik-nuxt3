@@ -52,11 +52,11 @@ export const useNewsfeedStore = defineStore({
     },
     async love(id, threadhead) {
       await api(this.config).news.love(id)
-      await this.fetch(threadhead)
+      await this.fetch(threadhead, true)
     },
     async unlove(id, threadhead) {
       await api(this.config).news.unlove(id)
-      await this.fetch(threadhead)
+      await this.fetch(threadhead, true)
     },
     async send(message, replyto, threadhead, imageid) {
       if (message) {
@@ -71,17 +71,16 @@ export const useNewsfeedStore = defineStore({
         imageid,
       })
 
-      await this.fetch(threadhead || id)
+      await this.fetch(threadhead || id, true)
 
       return id
     },
     async edit(id, message, threadhead) {
       await api(this.config).news.edit(id, message)
-      await this.fetch(threadhead)
+      await this.fetch(threadhead, true)
     },
     async delete(id, threadhead) {
       await api(this.config).news.del(id)
-      await this.fetch(threadhead)
 
       if (id !== threadhead) {
         await this.fetch(threadhead)
