@@ -36,6 +36,10 @@ export const useUserStore = defineStore({
 
       return this.list[id]
     },
+    async rate(id, rating, reason, text) {
+      await api(this.config).user.rate(id, rating, reason, text)
+      await this.fetch(id, true)
+    },
   },
   getters: {
     byId: (state) => {

@@ -79,11 +79,10 @@
           {{ activeOFFERCount }}
         </template>
         <b-card-body sub-title="" class="p-0 pt-2 pb-2">
-          <div v-if="activeOffers.length">
+          <div v-if="activeOffers.length" class="p-2">
             <MessageList
               :messages-for-list="activeOffers"
               selected-type="Offer"
-              class="p-2"
             />
           </div>
           <p v-else class="pl-3">None at the moment.</p>
@@ -100,11 +99,10 @@
           {{ activeWANTEDCount }}
         </template>
         <b-card-body sub-title="" class="p-0 pt-2 pb-2">
-          <div v-if="activeWanteds.length">
+          <div v-if="activeWanteds.length" class="p-2">
             <MessageList
               :messages-for-list="activeWanteds"
               selected-type="Wanted"
-              class="p-2"
             />
           </div>
           <p v-else class="pl-3">None at the moment.</p>

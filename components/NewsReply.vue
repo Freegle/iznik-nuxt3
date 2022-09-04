@@ -19,7 +19,7 @@
           class="text-success font-weight-bold clickme"
           title="Click to see their profile"
           @click="showInfo"
-          >{{ reply.displayname.trim() }}</span
+          >{{ reply.displayname }}</span
         >
         <span
           :class="

@@ -179,12 +179,7 @@ export default {
   },
   methods: {
     async rate(rating, reason, text) {
-      await this.$store.dispatch('user/rate', {
-        id: this.id,
-        rating,
-        reason,
-        text,
-      })
+      await this.userStore.rate(this.id, rating, reason, text)
     },
     async up() {
       this.showDown = false
