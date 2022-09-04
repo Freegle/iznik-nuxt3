@@ -5,9 +5,10 @@ export default class NewsAPI extends BaseAPI {
     return this.$get('/newsfeed', params)
   }
 
-  async fetch(id, distance) {
+  async fetch(id, distance, lovelist) {
     return await this.$getv2(id ? '/newsfeed/' + id : '/newsfeed', {
       distance,
+      lovelist,
     })
   }
 

@@ -372,7 +372,9 @@ export default {
     rendered() {
       // We do this so that we wait until one item has rendered before inserting another.  Otherwise we get them
       // appearing out of order, which is worse than there being a delay before they appear in series.
-      this.infiniteState.loaded()
+      if (this.infiniteState) {
+        this.infiniteState.loaded()
+      }
     },
     loadMore($state) {
       this.infiniteState = $state

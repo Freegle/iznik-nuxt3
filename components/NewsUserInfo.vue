@@ -69,9 +69,5 @@ export default {
       return ret
     },
   },
-  beforeUpdate() {
-    console.log('User info update')
-    console.trace()
-  },
 }
 </script>

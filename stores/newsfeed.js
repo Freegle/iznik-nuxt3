@@ -32,10 +32,10 @@ export const useNewsfeedStore = defineStore({
       this.feed = await api(this.config).news.fetch(null, distance)
       return this.feed
     },
-    async fetch(id, force) {
+    async fetch(id, force, lovelist) {
       if (!this.list[id] || force) {
         if (!this.fetching[id]) {
-          this.fetching[id] = api(this.config).news.fetch(id)
+          this.fetching[id] = api(this.config).news.fetch(id, null, lovelist)
         }
 
         const ret = await this.fetching[id]
