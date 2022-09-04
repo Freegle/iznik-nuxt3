@@ -364,9 +364,9 @@ export default {
         $state.complete()
       }
     },
-    areaChange() {
-      this.infiniteId++
-      this.$store.commit('newsfeed/clearFeed')
+    async areaChange() {
+      const distance = this.me?.settings?.newsfeedarea || 0
+      await this.newsfeedStore.fetch(null, distance)
     },
     async postIt() {
       let msg = this.startThread

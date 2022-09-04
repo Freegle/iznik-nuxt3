@@ -2,7 +2,7 @@
   <nuxt-link
     :to="'/profile/' + newsfeed.userid"
     class="text-success nodecor"
-    :title="'Click to view profile for ' + user?.displayname"
+    :title="'Click to view profile for ' + newsfeed.displayname"
   >
     <span class="text-muted small">
       <span v-if="newsfeed.location" class="pl-0">
@@ -10,16 +10,18 @@
           newsfeed.location
         }}
       </span>
-      <span v-if="user?.info?.openoffers + user?.info?.openwanteds > 0">
+      <span
+        v-if="newsfeed.userinfo.openoffers + newsfeed.userinfo.openwanteds > 0"
+      >
         &bull;
-        <span v-if="user.info.openoffers" class="text-success">
+        <span v-if="newsfeed.userinfo.openoffers" class="text-success">
           {{ openoffers }}&nbsp;
         </span>
-        <span v-if="user?.info?.openwanteds" class="text-success">
+        <span v-if="newsfeed.userinfo.openwanteds" class="text-success">
           {{ openwanted }}&nbsp;
         </span>
       </span>
-      <span v-if="user?.showmod">
+      <span v-if="newsfeed.showmod">
         &bull;
         <v-icon icon="leaf" /> Freegle Volunteer
       </span>
@@ -28,7 +30,6 @@
 </template>
 <script>
 import pluralize from 'pluralize'
-import { useUserStore } from '../stores/user'
 import { useNewsfeedStore } from '../stores/newsfeed'
 
 export default {
@@ -39,19 +40,9 @@ export default {
     },
   },
   setup(props) {
-    const userStore = useUserStore()
     const newsfeedStore = useNewsfeedStore()
 
-    // Fetch the user to get all the info we might show.  But we don't need to wait because we have the name to render
-    // from the newsfeed object.
-    const newsfeed = newsfeedStore.byId(props.id)
-
-    if (newsfeed) {
-      userStore.fetch(newsfeed.userid)
-    }
-
     return {
-      userStore,
       newsfeedStore,
     }
   },
@@ -59,16 +50,11 @@ export default {
     newsfeed() {
       return this.newsfeedStore.byId(this.id)
     },
-    user() {
-      return this.newsfeed?.userid
-        ? this.userStore.byId(this.newsfeed.userid)
-        : null
-    },
     openoffers() {
       let ret = null
 
-      if (this.user?.info) {
-        ret = pluralize('OFFER', this.user.info.openoffers, true)
+      if (this.newsfeed.userinfo) {
+        ret = pluralize('OFFER', this.newsfeed.userinfo.openoffers, true)
       }
 
       return ret
@@ -76,8 +62,8 @@ export default {
     openwanted() {
       let ret = null
 
-      if (this.user?.info) {
-        ret = pluralize('WANTED', this.user.info.openwanteds, true)
+      if (this.newsfeed.userinfo) {
+        ret = pluralize('WANTED', this.newsfeed.userinfo.openwanteds, true)
       }
 
       return ret

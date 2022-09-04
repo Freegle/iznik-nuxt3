@@ -246,7 +246,6 @@
 </template>
 <script>
 import { useNewsfeedStore } from '../stores/newsfeed'
-import { useUserStore } from '../stores/user'
 import NewsReportModal from './NewsReportModal'
 import SpinButton from './SpinButton'
 import NewsReplies from '~/components/NewsReplies'
@@ -307,16 +306,8 @@ export default {
   },
   async setup(props) {
     const newsfeedStore = useNewsfeedStore()
-    const userStore = useUserStore()
 
     await newsfeedStore.fetch(props.id)
-
-    const newsfeed = newsfeedStore.byId(props.id)
-
-    if (newsfeed?.userid) {
-      // Get the user now - we'll need it in subcomponents and getting it now reduces flicker.
-      await userStore.fetch(newsfeed.userid)
-    }
 
     return {
       newsfeedStore,

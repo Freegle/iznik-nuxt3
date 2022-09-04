@@ -8,8 +8,8 @@
       :append-bold="info.title"
     />
     <p>
-      To help Freegle, <strong>{{ users[userid].displayname }}</strong> printed
-      a Freegle poster and put it up where people can see it.
+      To help Freegle, <strong>{{ newsfeed.displayname }}</strong> printed a
+      Freegle poster and put it up where people can see it.
     </p>
     <notice-message v-if="info.description || info.name" class="prewrap">
       <strong v-if="info.name">"{{ info.name.trim() }}"</strong>
