@@ -16,7 +16,6 @@
     </div>
   </component>
 </template>
-
 <script>
 import { useChatStore } from '../stores/chat'
 
