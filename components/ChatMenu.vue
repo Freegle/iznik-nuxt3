@@ -7,7 +7,7 @@
     aria-label="chats"
     @click="toChats"
   >
-    <div class="position-relative small">
+    <div class="position-relative">
       <v-icon icon="comments" class="fa-2x chat__icon" />
       <div class="nav-item__text d-none d-xl-block">Chats</div>
       <b-badge v-if="chatCount" variant="danger" class="chatbadge">
@@ -71,8 +71,8 @@ export default {
 }
 
 .chat__icon {
-  height: 28px;
-  width: 28px;
+  height: 32px;
+  width: 32px;
   margin: 0;
 }
 

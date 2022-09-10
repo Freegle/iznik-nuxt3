@@ -10,11 +10,11 @@
       <b-col>
         <b-card variant="success" no-body>
           <b-card-header class="font-weight-bold">
-            {{ newsfeed.story.headline }}
+            {{ newsfeed?.story?.headline }}
           </b-card-header>
           <b-card-text class="p-2 preline">
             <b-img
-              v-if="newsfeed.story.photo"
+              v-if="newsfeed?.story?.photo"
               v-b-modal="'photoModal-' + newsfeed.id"
               thumbnail
               rounded
@@ -62,8 +62,8 @@
       </div>
     </div>
     <NewsPhotoModal
-      v-if="newsfeed.story.photo"
-      :id="newsfeed.story.photo.id"
+      v-if="newsfeed?.story?.photo"
+      :id="newsfeed?.story.photo.id"
       ref="photoModal"
       :newsfeedid="newsfeed.id"
       :src="newsfeed.story.photo.path"
@@ -96,7 +96,7 @@ export default {
   extends: NewsBase,
   computed: {
     story() {
-      let story = this.newsfeed.story.story
+      let story = this.newsfeed?.story?.story
       story = story ? twem(story) : ''
       story = story.trim()
       return story
