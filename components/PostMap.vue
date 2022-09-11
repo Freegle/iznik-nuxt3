@@ -678,7 +678,7 @@ export default {
           }
         }
 
-        if (messages && messages.length) {
+        if (messages?.length) {
           if (this.groupid) {
             messages = messages.filter((m) => {
               return m.groupid === this.groupid

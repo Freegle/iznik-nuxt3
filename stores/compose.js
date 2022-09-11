@@ -406,13 +406,14 @@ export const useComposeStore = defineStore({
     },
     messageValid: (state) => (postType) => {
       // Is there at least one valid message of this type
-      const messages = state.messages.filter((m) => {
-        return m.type === postType.value
-      })
 
       let valid = false
 
-      if (messages?.length) {
+      if (state.messages?.length) {
+        const messages = state.messages.filter((m) => {
+          return m.type === postType.value
+        })
+
         valid = true
 
         for (const message of messages) {
