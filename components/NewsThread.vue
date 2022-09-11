@@ -576,4 +576,8 @@ export default {
   padding-right: 13px;
   padding-left: 10px;
 }
+
+:deep(.dropdown-menu) {
+  z-index: 10000;
+}
 </style>

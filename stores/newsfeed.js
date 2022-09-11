@@ -84,6 +84,7 @@ export const useNewsfeedStore = defineStore({
         message = message.trim()
       }
 
+      console.log('Reply to', replyto, threadhead)
       const id = await api(this.config).news.send({
         message,
         replyto,
@@ -91,7 +92,13 @@ export const useNewsfeedStore = defineStore({
         imageid,
       })
 
-      await this.fetch(threadhead || id, true)
+      if (!threadhead) {
+        console.log('New post, fetch feed')
+        this.fetchFeed()
+      } else {
+        console.log('Fetch thread head', threadhead)
+        await this.fetch(threadhead, true)
+      }
 
       return id
     },
