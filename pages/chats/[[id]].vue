@@ -273,12 +273,8 @@ export default {
       })
     },
     async hideAll() {
-      const self = this
-
       for (let i = 0; i < this.visibleChats.length; i++) {
-        await self.$store.dispatch('chats/hide', {
-          id: this.visibleChats[i].id,
-        })
+        await this.chatStore.hide(this.visibleChats[i].id)
       }
 
       this.$router.push('/chats')

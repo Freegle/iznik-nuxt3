@@ -151,6 +151,13 @@ export const useChatStore = defineStore({
 
       return id
     },
+    async hide(id) {
+      await api(this.config).chat.hideChat(id)
+    },
+    async pollForChatUpdates() {
+      await this.fetchChats()
+      setTimeout(this.pollForChatUpdates, 30000)
+    },
   },
   getters: {
     byId: (state) => {

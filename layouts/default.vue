@@ -28,6 +28,7 @@
 <script>
 import { useMiscStore } from '../stores/misc'
 import MainHeader from '../components/MainHeader'
+import { useChatStore } from '../stores/chat'
 
 export default {
   components: {
@@ -76,13 +77,14 @@ export default {
       l.style.display = 'none'
     }
 
-    //   if (this.me) {
-    //     // Get chats and poll regularly for new ones
-    //     this.$store.dispatch('chats/fetchLatestChats')
-    //
-    //     // Get any existing trysts.
-    //     this.$store.dispatch('tryst/fetch')
-    //   }
+    if (this.me) {
+      // Get chats and poll regularly for new ones
+      const chatStore = useChatStore()
+      chatStore.pollForChatUpdates()
+      //
+      //     // Get any existing trysts.
+      //     this.$store.dispatch('tryst/fetch')
+    }
     //
     try {
       // TODO Sentry
