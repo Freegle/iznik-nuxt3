@@ -100,6 +100,15 @@ export const useChatStore = defineStore({
       // Get the latest messages back.
       this.fetchMessages(chatid)
     },
+    async report(chatid, reason, comments, refchatid) {
+      await api(this.config).chat.send({
+        roomid: chatid,
+        reportreason: reason,
+        message: comments,
+        refchatid,
+      })
+      this.fetchMessages(chatid)
+    },
     async openChat(params) {
       let id = null
       let logIt = true
@@ -169,6 +178,10 @@ export const useChatStore = defineStore({
     async pollForChatUpdates() {
       await this.fetchChats()
       setTimeout(this.pollForChatUpdates, 30000)
+    },
+    async rsvp(id, roomid, value) {
+      await api(this.config).chat.rsvp(id, roomid, value)
+      await this.fetchChat(roomid)
     },
   },
   getters: {

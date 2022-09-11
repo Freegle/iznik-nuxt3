@@ -88,11 +88,7 @@ export default {
   methods: {
     async yes() {
       if (this.mylast) {
-        await this.$store.dispatch('chatmessages/rsvp', {
-          id: this.mylast.id,
-          roomid: this.mylast.chatid,
-          value: 1,
-        })
+        await this.chatStore.rsvp(this.mylast.id, this.mylast.chatid, 1)
       }
 
       this.hide()
@@ -100,11 +96,7 @@ export default {
 
     async no() {
       if (this.mylast) {
-        await this.$store.dispatch('chatmessages/rsvp', {
-          id: this.mylast.id,
-          roomid: this.mylast.chatid,
-          value: 0,
-        })
+        await this.chatStore.rsvp(this.mylast.id, this.mylast.chatid, 0)
       }
 
       if (this.dohide) {

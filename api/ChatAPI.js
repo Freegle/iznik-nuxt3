@@ -89,7 +89,7 @@ export default class ChatAPI extends BaseAPI {
     })
   }
 
-  rsvp(chatid, id, value) {
+  rsvp(id, chatid, value) {
     return this.$patch('/chatmessages', {
       roomid: chatid,
       id,

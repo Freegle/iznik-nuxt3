@@ -51,6 +51,13 @@ export default {
       required: true,
     },
   },
+  setup() {
+    const chatStore = useChatStore()
+
+    return {
+      chatStore,
+    }
+  },
   data() {
     return {
       groupid: null,
@@ -61,20 +68,14 @@ export default {
   methods: {
     async send() {
       if (this.groupid && this.reason && this.comments) {
-        const chatid = await this.$store.dispatch('chats/openChatToMods', {
-          groupid: this.groupid,
-        })
+        const chatid = await this.chatStore.openChatToMods(this.groupid)
 
-        await this.$store.dispatch('popupchats/popup', {
-          id: chatid,
-        })
-
-        await this.$store.dispatch('chatmessages/send', {
-          roomid: chatid,
-          reportreason: this.reason,
-          message: this.comments,
-          refchatid: this.chatid,
-        })
+        await this.chatStore.report(
+          chatid,
+          this.reason,
+          this.comments,
+          this.chatid
+        )
 
         this.hide()
       }
