@@ -52,12 +52,12 @@
   </div>
 </template>
 <script>
+import { useNewsfeedStore } from '../stores/newsfeed'
 import NoticeMessage from './NoticeMessage'
 const ConfirmModal = () => import('~/components/ConfirmModal.vue')
 
 export default {
   components: { NoticeMessage, ConfirmModal },
-
   props: {
     id: {
       type: Number,
@@ -72,6 +72,13 @@ export default {
       required: true,
     },
   },
+  setup() {
+    const newsfeedStore = useNewsfeedStore()
+
+    return {
+      newsfeedStore,
+    }
+  },
   data() {
     return {
       showDeleteModal: false,
@@ -85,7 +92,7 @@ export default {
       })
     },
     async deleteConfirm() {
-      await this.newsStore.delete(this.id, this.threadhead)
+      await this.newsfeedStore.delete(this.id, this.threadhead)
     },
   },
 }

@@ -14,10 +14,18 @@ export const useNewsfeedStore = defineStore({
 
     // These are the ones we are currently fetching.
     fetching: {},
+
+    // Count of interesting items
+    count: 0,
   }),
   actions: {
     init(config) {
       this.config = config
+    },
+    async fetchCount() {
+      const ret = await api(this.config).news.count()
+      this.count = ret?.count
+      return this.count
     },
     addItems(items) {
       items.forEach((item) => {
@@ -30,6 +38,18 @@ export const useNewsfeedStore = defineStore({
     },
     async fetchFeed(distance) {
       this.feed = await api(this.config).news.fetch(null, distance)
+
+      // Update the max seen
+      let max = null
+
+      for (const item of this.feed) {
+        max = Math.max(max, item.id)
+      }
+
+      if (max) {
+        api(this.config).news.seen(max)
+      }
+
       return this.feed
     },
     async fetch(id, force, lovelist) {

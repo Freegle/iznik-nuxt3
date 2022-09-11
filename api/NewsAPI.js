@@ -54,8 +54,6 @@ export default class NewsAPI extends BaseAPI {
   }
 
   async count(id, type) {
-    const ret = await this.$get('/newsfeed', { count: true })
-
-    return ret.ret === 0 ? ret.unseencount : 0
+    return await this.$getv2('/newsfeedcount')
   }
 }

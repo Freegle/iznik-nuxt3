@@ -81,10 +81,7 @@
                   v-if="openPostCount"
                   variant="info"
                   class="mypostsbadge"
-                  :title="
-                    openPostCount
-                      | pluralize('open post', { includeNumber: true })
-                  "
+                  :title="openPostCountPlural"
                 >
                   {{ openPostCount }}
                 </b-badge>
@@ -107,12 +104,7 @@
                   v-if="newsCount"
                   variant="info"
                   class="newsbadge"
-                  :title="
-                    newsCount
-                      | pluralize('unread ChitChat post', {
-                        includeNumber: true,
-                      })
-                  "
+                  :title="newsCountPlural"
                 >
                   {{ newsCount }}
                 </b-badge>
@@ -520,6 +512,7 @@ import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 import pluralize from 'pluralize'
 import { useMiscStore } from '../stores/misc'
+import { useNewsfeedStore } from '../stores/newsfeed'
 import LoginModal from '~/components/LoginModal'
 import { useAuthStore } from '~/stores/auth'
 const NotificationOptions = () => import('~/components/NotificationOptions')
@@ -536,12 +529,14 @@ export default {
   setup() {
     const authStore = useAuthStore()
     const miscStore = useMiscStore()
+    const newsfeedStore = useNewsfeedStore()
     const route = useRoute()
     const router = useRouter()
 
     return {
       miscStore,
       authStore,
+      newsfeedStore,
       route,
       router,
     }
@@ -581,11 +576,9 @@ export default {
       )
     },
     newsCount() {
-      return 0
-      // return this.$store.getters['newsfeed/count']
-      // TODO
+      return this.newsfeedStore.count
     },
-    newCountPlural() {
+    newsCountPlural() {
       return pluralize('unread ChitChat post', this.newsCount, true)
     },
     openPostCount() {
@@ -672,9 +665,9 @@ export default {
         this.router.push('/')
       }
     },
-    getCounts() {
+    async getCounts() {
       // TODO
-      // await this.$store.dispatch('newsfeed/count')
+      await this.newsfeedStore.fetchCount()
       // await this.fetchMe(['openposts'], true)
 
       setTimeout(this.getCounts, 60000)
@@ -826,8 +819,10 @@ svg.fa-icon {
 .newsbadge {
   position: absolute;
   top: 2px;
-  left: 25px;
+  right: 10px;
   font-size: 11px;
+  background-color: $colour-secondary !important;
+  color: white !important;
 }
 
 .newsbadge2 {
