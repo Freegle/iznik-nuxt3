@@ -55,7 +55,9 @@
   </div>
 </template>
 <script>
+import { useAuthStore } from '../stores/auth'
 import SpinButton from './SpinButton'
+
 export default {
   components: { SpinButton },
   props: {
@@ -64,21 +66,25 @@ export default {
       required: true,
     },
   },
+  setup() {
+    const authStore = useAuthStore()
+
+    return {
+      authStore,
+    }
+  },
   data() {
     return {
       newPassword: null,
       emailFrequency: null,
     }
   },
-  mounted() {
-    this.fetchMe(['me', 'groups'])
-  },
   methods: {
     async setPassword() {
       this.savingPassword = true
 
       if (this.newPassword) {
-        this.me = await this.$store.dispatch('auth/saveAndGet', {
+        await this.authStore.saveAndGet({
           password: this.newPassword,
         })
       }
@@ -97,7 +103,7 @@ export default {
 
       for (const group of this.me.groups) {
         if (group.type === 'Freegle') {
-          await this.$store.dispatch('auth/setGroup', {
+          await this.authStore.setGroup({
             userid: this.me.id,
             groupid: group.id,
             emailfrequency: frequency,

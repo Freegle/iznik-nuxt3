@@ -44,6 +44,8 @@
   </div>
 </template>
 <script>
+import { useAuthStore } from '../stores/auth'
+
 export default {
   props: {
     size: {
@@ -76,6 +78,13 @@ export default {
       required: false,
       default: null,
     },
+  },
+  setup() {
+    const authStore = useAuthStore()
+
+    return {
+      authStore,
+    }
   },
   data() {
     return {
@@ -110,7 +119,7 @@ export default {
       if (!this.notMobile) {
         this.savingPhone = true
 
-        await this.$store.dispatch('auth/saveAndGet', {
+        await this.authStore.saveAndGet({
           phone: this.me.phone,
         })
 
@@ -128,7 +137,7 @@ export default {
         this.me.phone = null
       }, 1000)
 
-      await this.$store.dispatch('auth/saveAndGet', {
+      await this.authStore.saveAndGet({
         phone: '',
       })
 

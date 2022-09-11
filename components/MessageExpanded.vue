@@ -60,6 +60,7 @@
   </div>
 </template>
 <script>
+import { useReplyStore } from '../stores/reply'
 import MessageReplyInfo from './MessageReplyInfo'
 import { useMessageStore } from '~/stores/message'
 import MessagePromised from '@/components/MessagePromised'
@@ -134,28 +135,23 @@ export default {
       return this.message.lat || this.message.lng
     },
     home() {
-      // TODO
-      return {
-        lat: 53.945,
-        lng: -2.5209,
+      let ret = null
+
+      if (this.me?.lat || this.me?.lng) {
+        ret = {
+          lat: this.me.lat,
+          lng: this.me.lng,
+        }
       }
 
-      // let ret = null
-      //
-      // if (this.me && this.me.settings && this.me.settings.mylocation) {
-      //   ret = {
-      //     lat: this.me.settings.mylocation.lat,
-      //     lng: this.me.settings.mylocation.lng,
-      //   }
-      // }
-      //
-      // return ret
+      return ret
     },
     replyToSend() {
       let ret = null
 
       if (this.me) {
-        ret = this.$store.getters['reply/get']
+        const replyStore = useReplyStore()
+        ret = replyStore.state
       }
 
       return ret

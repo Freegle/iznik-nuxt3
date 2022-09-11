@@ -187,6 +187,3 @@ export default {
   },
 }
 </script>
-
-this.$store.dispatch('message/renege', { id: this.message.id, userid:
-this.message.promises[0].userid })

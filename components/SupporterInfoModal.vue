@@ -44,6 +44,8 @@
   </div>
 </template>
 <script>
+import { useMiscStore } from '../stores/misc'
+import { useUserStore } from '../stores/user'
 import modal from '@/mixins/modal'
 import DonationButton from '~/components/DonationButton'
 
@@ -53,12 +55,12 @@ export default {
   methods: {
     donateTime() {
       // Turn microvolunteering on.
-      this.$store.dispatch('misc/set', {
+      useMiscStore().set({
         key: 'microvolunteeringinviteaccepted',
         value: Date.now(),
       })
 
-      this.$store.dispatch('user/edit', {
+      useUserStore().edit({
         id: this.myid,
         trustlevel: 'Basic',
       })

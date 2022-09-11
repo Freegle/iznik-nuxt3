@@ -14,6 +14,7 @@
   </div>
 </template>
 <script>
+import { useMessageStore } from '../stores/message'
 import BImgLazy from './BImgLazy'
 
 export default {
@@ -24,9 +25,16 @@ export default {
       required: true,
     },
   },
+  setup() {
+    const messageStore = useMessageStore()
+
+    return {
+      messageStore,
+    }
+  },
   computed: {
     message() {
-      return this.$store.getters['messages/get'](this.id)
+      return this.messageStore.byId(this.id)
     },
   },
 }

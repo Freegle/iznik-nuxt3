@@ -127,6 +127,7 @@ export default {
     //     if (this.replyToSend) {
     //       // We have loaded the site with a reply that needs sending.  This happens if we force login in a way that
     //       // causes us to navigate away and back again.  Fetch the relevant message.
+    // TODO
     //       await this.$store.dispatch('messages/fetch', {
     //         id: this.replyToSend.replyMsgId
     //       })

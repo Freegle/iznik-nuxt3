@@ -83,23 +83,6 @@ export default {
       defaultAttachments: false,
     }
   },
-  computed: {
-    message() {
-      return (
-        this.messageOverride ?? this.$store.getters['messages/get'](this.id)
-      )
-    },
-    group() {
-      let ret = null
-
-      if (this.message && this.message.groups && this.message.groups.length) {
-        const groupid = this.message.groups[0].groupid
-        ret = this.myGroups.find((g) => parseInt(g.id) === groupid)
-      }
-
-      return ret
-    },
-  },
   methods: {
     brokenImage() {
       // If the attachment image is broken, we're best off just hiding it.
