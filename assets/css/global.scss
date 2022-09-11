@@ -7,6 +7,10 @@
 @import 'typography';
 @import 'buttons';
 
+html {
+  scroll-behavior: smooth
+}
+
 .strike {
   text-decoration: line-through;
   text-decoration-style: double;
@@ -413,3 +417,4 @@ label {
 .fa-1-75x {
   font-size: 1.75em;
 }
+
