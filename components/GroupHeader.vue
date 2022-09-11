@@ -41,24 +41,22 @@
       </div>
       <div class="mt-2 group__buttons">
         <div class="button__items">
-          <b-button
+          <SpinButton
             v-if="!amAMember"
-            class="mb-1 ms-1"
+            name="trash-alt"
             variant="primary"
-            @click="join"
-          >
-            <v-icon v-if="joiningOrLeaving" icon="sync" class="fa-spinner" />
-            Join this community
-          </b-button>
-          <b-button
-            v-else-if="amAMember === 'Member'"
             class="mb-1 ms-1"
+            label="Join this community"
+            @click="join"
+          />
+          <SpinButton
+            v-if="amAMember === 'Member'"
+            name="trash-alt"
             variant="white"
+            class="mb-1 ms-1"
+            label="Leave"
             @click="leave"
-          >
-            <v-icon v-if="joiningOrLeaving" icon="sync" class="fa-spinner" />
-            <v-icon v-else icon="trash-alt" />&nbsp;Leave
-          </b-button>
+          />
         </div>
       </div>
     </div>
@@ -149,11 +147,13 @@
 </template>
 
 <script>
+import SpinButton from './SpinButton'
 import ChatButton from '~/components/ChatButton'
 import { useAuthStore } from '~/stores/auth'
 
 export default {
   components: {
+    SpinButton,
     ChatButton,
   },
   props: {
@@ -173,11 +173,6 @@ export default {
       authStore,
     }
   },
-  data() {
-    return {
-      joiningOrLeaving: false,
-    }
-  },
   computed: {
     amAMember() {
       return this.authStore.member(this.group?.id)
@@ -187,10 +182,7 @@ export default {
     async leave() {
       this.joiningOrLeaving = true
 
-      await this.$store.dispatch('auth/leaveGroup', {
-        userid: this.myid,
-        groupid: this.group.id,
-      })
+      await this.authStore.leaveGroup(this.myid, this.group.id)
 
       this.joiningOrLeaving = false
     },
@@ -201,10 +193,7 @@ export default {
       } else {
         this.joiningOrLeaving = true
 
-        await this.$store.dispatch('auth/joinGroup', {
-          userid: this.myid,
-          groupid: this.group.id,
-        })
+        await this.authStore.joinGroup(this.myid, this.group.id)
 
         this.joiningOrLeaving = false
       }

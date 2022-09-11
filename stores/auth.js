@@ -250,13 +250,19 @@ export const useAuthStore = defineStore({
     async setGroup(params) {
       await this.$api.memberships.update(params)
     },
-    async leaveGroup(params) {
-      await this.$api.memberships.leaveGroup(params)
+    async leaveGroup(userid, groupid) {
+      await this.$api.memberships.leaveGroup({
+        userid,
+        groupid,
+      })
       await this.fetchUser()
       return this.user
     },
-    async joinGroup(params) {
-      await this.$api.memberships.joinGroup(params)
+    async joinGroup(userid, groupid) {
+      await this.$api.memberships.joinGroup({
+        userid,
+        groupid,
+      })
       await this.fetchUser()
       return this.user
     },

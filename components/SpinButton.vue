@@ -33,7 +33,6 @@ import ConfirmModal from './ConfirmModal'
 
 export default {
   components: { ConfirmModal },
-
   props: {
     variant: {
       type: String,
