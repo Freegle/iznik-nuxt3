@@ -33,6 +33,7 @@
   </b-modal>
 </template>
 <script>
+import { useChatStore } from '../stores/chat'
 import GroupSelect from './GroupSelect'
 import modal from '@/mixins/modal'
 
