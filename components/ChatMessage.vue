@@ -74,7 +74,7 @@
     <chat-message-warning v-if="phoneNumber" />
     <chat-message-date-read :id="id" :chatid="chatid" :last="last" :pov="pov" />
     <div v-if="selected">
-      <b-button variant="link" @click="markUnseen"> Mark unread </b-button>
+      <b-button variant="link" @click="markUnread"> Mark unread </b-button>
     </div>
   </div>
 </template>
@@ -194,12 +194,9 @@ export default {
         this.selected = true
       }
     },
-    async markUnseen() {
-      await this.$store.dispatch('chats/markUnseen', {
-        chatid: this.chat.id,
-        msgid: this.prevmessage,
-      })
-
+    async markUnread() {
+      console.log('Mark unread', this.chatid, this.prevmessage)
+      await this.chatStore.markUnread(this.chatid, this.prevmessage)
       this.selected = false
     },
   },

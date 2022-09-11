@@ -61,6 +61,11 @@ export const useChatStore = defineStore({
         this.listById[id].unseen = 0
       }
     },
+    async markUnread(chatid, prevmsgid) {
+      console.log('MArkunread', chatid, prevmsgid)
+      await api(this.config).chat.markRead(chatid, prevmsgid, true)
+      await this.fetchChat(chatid)
+    },
     async nudge(id) {
       await api(this.config).chat.nudge(id)
       this.fetchMessages(id)
