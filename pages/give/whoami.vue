@@ -108,11 +108,9 @@ import { buildHead } from '../../composables/useBuildHead'
 import EmailValidator from '~/components/EmailValidator'
 import NoticeMessage from '~/components/NoticeMessage'
 import ExternalLink from '~/components/ExternalLink'
+import EmailBelongsToSomeoneElse from '~/components/EmailBelongsToSomeoneElse'
 import { setup, freegleIt } from '~/composables/useCompose'
-
-const EmailBelongsToSomeoneElse = () =>
-  import('~/components/EmailBelongsToSomeoneElse')
-const WizardProgress = () => import('~/components/WizardProgress')
+import WizardProgress from '~/components/WizardProgress'
 
 export default {
   components: {

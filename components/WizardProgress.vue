@@ -26,7 +26,6 @@
     </div>
   </div>
 </template>
-
 <script>
 export default {
   name: 'WizardProgress',
@@ -41,7 +40,6 @@ export default {
   },
 }
 </script>
-
 <style scoped lang="scss">
 .wizard {
   margin-top: 20px;
