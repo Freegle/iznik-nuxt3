@@ -440,6 +440,7 @@ export default {
     showInfo() {
       this.infoclick = true
       this.waitForRef('profilemodal', () => {
+        // TODO Show method isn't available immediately.  How to fix?
         this.$refs.profilemodal.show()
       })
     },

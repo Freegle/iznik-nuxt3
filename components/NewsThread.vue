@@ -55,6 +55,7 @@
               v-if="newsfeed"
               :id="newsfeed?.id"
               :newsfeed="newsfeed"
+              :class="newsfeed.deleted ? 'strike' : ''"
               @focus-comment="focusComment"
             />
             <div v-else>Bad feed item {{ newsfeed }}</div>
@@ -82,7 +83,7 @@
           :reply-ids="newsfeed.replies.map((r) => r.id)"
           :reply-to="replyingTo"
           :depth="1"
-          class="mr-1"
+          :class="newsfeed.deleted ? 'strike mr-1' : 'mr-1'"
         />
         <span v-if="!newsfeed.closed">
           <div v-if="enterNewLine">
@@ -579,5 +580,9 @@ export default {
 
 :deep(.dropdown-menu) {
   z-index: 10000;
+}
+
+:deep(.strike) {
+  text-decoration: line-through;
 }
 </style>
