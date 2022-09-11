@@ -143,6 +143,7 @@
 <script>
 import Highlighter from 'vue-highlight-words'
 import { fetchReferencedMessage } from '../composables/useChat'
+import { useMessageStore } from '../stores/message'
 import ChatBase from '~/components/ChatBase'
 import ProfileImage from '~/components/ProfileImage'
 import ChatMessageSummary from '~/components/ChatMessageSummary'
@@ -167,27 +168,6 @@ export default {
       showPromise: false,
     }
   },
-  computed: {
-    replyusers() {
-      const ret = []
-      const retids = []
-
-      const message = this.$store.getters['messages/get'](this.refmsg.id)
-
-      if (message) {
-        if (this.refmsg && message.replies) {
-          for (const reply of message.replies) {
-            if (!retids.includes(reply.user.id)) {
-              ret.push(reply.user)
-              retids[reply.userid] = true
-            }
-          }
-        }
-      }
-
-      return ret
-    },
-  },
   methods: {
     promise() {
       this.showPromise = true
@@ -196,9 +176,9 @@ export default {
       })
     },
     async outcome(type) {
-      await this.$store.dispatch('messages/fetch', {
-        id: this.refmsg.id,
-      })
+      // Make sure we're up to date.
+      const messageStore = useMessageStore()
+      await messageStore.fetch(this.refmsgid)
 
       this.showOutcome = true
       this.waitForRef('outcomeModal', () => {

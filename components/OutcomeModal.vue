@@ -65,7 +65,7 @@
             <label class="mt-3 strong">
               How do you feel about freegling just now?
             </label>
-            <b-button-group class="d-none d-md-block">
+            <b-button-group class="d-none d-md-block mt-1">
               <b-button
                 :pressed="happiness === 'Happy'"
                 :variant="happiness === 'Happy' ? 'info' : 'primary'"
@@ -137,7 +137,7 @@
               v-model="comments"
               rows="3"
               max-rows="6"
-              class="border-primary"
+              class="border-primary mt-1"
             />
             <div class="text-muted small mt-2">
               <span
@@ -286,23 +286,23 @@ export default {
 
           for (const u of this.tookUsers) {
             if (u.count > 0) {
-              await this.$store.dispatch('messages/addBy', {
-                id: this.message.id,
-                userid: u.userid > 0 ? u.userid : null,
-                count: u.count,
-              })
+              await this.messageStore.addBy(
+                this.message.id,
+                u.userid > 0 ? u.userid : null,
+                u.count
+              )
             } else {
-              await this.$store.dispatch('messages/removeBy', {
-                id: this.message.id,
-                userid: u.userid > 0 ? u.userid : null,
-              })
+              await this.messageStore.removeBy(
+                this.message.id,
+                u.userid > 0 ? u.userid : null
+              )
             }
           }
         }
 
         if (complete) {
           // The post is being taken/received.
-          await this.$store.dispatch('messages/update', {
+          await this.messageStore.update({
             action: 'Outcome',
             id: this.message.id,
             outcome: this.type,
@@ -353,5 +353,9 @@ export default {
   :deep(.maxWidth) {
     max-width: calc(100vw - 16px);
   }
+}
+
+:deep(.btn-group .btn) {
+  border: 1px solid black;
 }
 </style>

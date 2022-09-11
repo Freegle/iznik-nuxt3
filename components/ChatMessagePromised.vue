@@ -219,6 +219,7 @@ import { useTrystStore } from '../stores/tryst'
 import { fetchOurOffers } from '../composables/useThrottle'
 import { useChatStore } from '../stores/chat'
 import { fetchReferencedMessage } from '../composables/useChat'
+import { useMessageStore } from '../stores/message'
 import DateFormatted from './DateFormatted'
 import OutcomeModal from '@/components/OutcomeModal'
 import AddToCalendar from '~/components/AddToCalendar'
@@ -295,10 +296,8 @@ export default {
       this.chatStore.fetchMessages(this.chatmessage.chatid)
     },
     async outcome(type) {
-      // TODO Outcomes.
-      await this.$store.dispatch('messages/fetch', {
-        id: this.refmsgid,
-      })
+      const messageStore = useMessageStore()
+      await messageStore.fetch(this.refmsgid)
 
       this.showOutcome = true
       this.waitForRef('outcomeModal', () => {

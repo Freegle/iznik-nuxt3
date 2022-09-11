@@ -15,7 +15,7 @@
     <div
       v-for="user in selectedUsers"
       :key="'selected-' + user.userid"
-      class="layout mb-2"
+      class="layout mb-2 mt-1"
     >
       <span
         v-if="user.userid > 0"
@@ -37,18 +37,18 @@
       </div>
       <div :class="'ml-1 took ' + (availableinitially <= 1 ? 'd-none' : '')">
         <NumberIncrementDecrement
+          v-model="user.count"
           label="Number taken"
           label-s-r-only
           append-text=" taken"
           :min="0"
           :max="left + user.count"
-          :count.sync="user.count"
         />
       </div>
     </div>
-    <div class="d-none d-md-block">
+    <div class="d-none d-md-block mt-1">
       <b-form-select
-        v-if="moreUsersToSelect && showSelect"
+        v-if="moreUsersToSelect"
         v-model="selectUser"
         :options="userOptions(false)"
         size="lg"
@@ -58,7 +58,7 @@
     </div>
     <div class="d-block d-md-none">
       <b-form-select
-        v-if="moreUsersToSelect && showSelect"
+        v-if="moreUsersToSelect"
         v-model="selectUser"
         :options="userOptions(true)"
         size="lg"
@@ -73,6 +73,7 @@
   </div>
 </template>
 <script>
+import { useMessageStore } from '../stores/message'
 import UserRatings from './UserRatings'
 import NumberIncrementDecrement from './NumberIncrementDecrement'
 
@@ -106,11 +107,31 @@ export default {
       default: false,
     },
   },
+  async setup(props) {
+    const messageStore = useMessageStore()
+
+    let selectedUsers = []
+
+    if (props.msgid) {
+      const message = await messageStore.fetch(props.msgid)
+
+      if (message && message.by) {
+        selectedUsers = message.by
+      }
+
+      if (props.takenBy) {
+        selectedUsers.push(props.takenBy)
+      }
+    }
+
+    return {
+      messageStore,
+      selectedUsers,
+    }
+  },
   data() {
     return {
-      showSelect: false,
       selectUser: -1,
-      selectedUsers: [],
       emptyUser: {
         id: -1,
         count: 0,
@@ -119,27 +140,17 @@ export default {
   },
   computed: {
     message() {
-      if (this.msgid) {
-        return this.$store.getters['messages/get'](this.msgid)
-      }
-
-      return null
+      return this.msgid ? this.messageStore.byId(this.msgid) : null
     },
     repliers() {
       const ret = []
 
-      if (this.message && this.message.replies) {
+      if (this.message?.replies) {
         this.message.replies.forEach((u) => {
-          if (u.user && u.user.id) {
-            ret.push({
-              userid: u.user.id,
-              displayname: u.user.displayname,
-            })
-          } else {
-            ret.push({
-              userid: null,
-            })
-          }
+          ret.push({
+            userid: u.userid,
+            displayname: u.displayname,
+          })
         })
       }
 
@@ -179,27 +190,12 @@ export default {
     },
   },
   watch: {
-    selectedUsers(newVal) {
-      this.$emit('tookUsers', newVal)
+    selectedUsers: {
+      handler(newVal) {
+        this.$emit('tookUsers', newVal)
+      },
+      immediate: true,
     },
-  },
-  async created() {
-    // The message may already have some information about people who have taken some.  Fetch it (in non-summary mode)
-    // to find out.
-    const { message } = await this.$api.message.fetch({
-      id: this.message.id,
-    })
-
-    if (message && message.by) {
-      this.selectedUsers = message.by
-      this.$emit('tookUsers', this.selectedUsers)
-    }
-
-    if (this.takenBy) {
-      this.selectedUsers.push(this.takenBy)
-    }
-
-    this.showSelect = true
   },
   methods: {
     selected(userid) {

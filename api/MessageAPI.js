@@ -169,12 +169,11 @@ export default class MessageAPI extends BaseAPI {
     })
   }
 
-  removeBy(id, userid, count) {
+  removeBy(id, userid) {
     return this.$post('/message', {
       action: 'RemoveBy',
       id,
       userid,
-      count,
     })
   }
 }

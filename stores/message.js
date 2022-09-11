@@ -149,6 +149,14 @@ export const useMessageStore = defineStore({
 
       await this.fetch(id, true)
     },
+    async addBy(id, userid, count) {
+      await api(this.config).message.addBy(id, userid, count)
+      await this.fetch(id, true)
+    },
+    async removeBy(id, userid) {
+      await api(this.config).message.removeBy(id, userid)
+      await this.fetch(id, true)
+    },
   },
   getters: {
     byId: (state) => {
