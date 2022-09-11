@@ -225,6 +225,7 @@
   </div>
 </template>
 <script>
+import { useRouter } from 'nuxt/app'
 import { useChatStore } from '../stores/chat'
 import { setupChat } from '../composables/useChat'
 import ProfileImage from './ProfileImage'
@@ -319,15 +320,15 @@ export default {
     },
   },
   methods: {
-    popup() {
-      this.$store.dispatch('popupchats/popup', { id: this.chat.id })
+    async hide() {
+      await this.chatStore.hide(this.id)
+      const router = useRouter()
+      router.push('/chats')
     },
-    hide() {
-      this.$store.dispatch('chats/hide', {
-        id: this.id,
-      })
-
-      this.$router.push('/chats')
+    async block() {
+      await this.chatStore.block(this.id)
+      const router = useRouter()
+      router.push('/chats')
     },
     showhide() {
       this.showChatHide = true
@@ -353,15 +354,9 @@ export default {
         this.$refs.chatreport.show()
       })
     },
-    block() {
-      this.$store.dispatch('chats/block', {
-        id: this.id,
-      })
-
-      this.$router.push('/chats')
-    },
-    markRead() {
-      this.chatStore.markRead(this.id)
+    async markRead() {
+      await this.chatStore.markRead(this.id)
+      await this.chatStore.fetchChat(this.id)
     },
   },
 }

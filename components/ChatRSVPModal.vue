@@ -40,6 +40,7 @@
   </b-modal>
 </template>
 <script>
+import { useChatStore } from '../stores/chat'
 import modal from '@/mixins/modal'
 
 export default {
@@ -55,6 +56,13 @@ export default {
       required: true,
     },
   },
+  setup() {
+    const chatStore = useChatStore()
+
+    return {
+      chatStore,
+    }
+  },
   data() {
     return {
       chaseup: false,
@@ -63,7 +71,7 @@ export default {
   },
   computed: {
     chatmessages() {
-      return this.$store.getters['chatmessages/getMessages'](this.id)
+      return this.chatStore.messagesById(this.id)
     },
     mylast() {
       let ret = null
@@ -100,9 +108,7 @@ export default {
       }
 
       if (this.dohide) {
-        await this.$store.dispatch('chats/hide', {
-          id: this.id,
-        })
+        await this.chatStore.hide(this.id)
       }
 
       this.hide()

@@ -171,6 +171,9 @@ export default {
       if (!chat) {
         // Might be old.  Try fetching it specifically.
         chat = await chatStore.fetchChat(id)
+      } else {
+        // We have the chat, but maybe it's not quite up to date (e.g. a new message).  So fetch, but don't wait.
+        chatStore.fetchChat(id)
       }
     }
 
