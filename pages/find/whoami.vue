@@ -86,7 +86,7 @@
                 v-else
                 height="48px"
                 class="mt-2"
-                animate
+                animated
                 variant="success"
               >
                 <b-progress-bar :value="progress" />

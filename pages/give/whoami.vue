@@ -86,7 +86,7 @@
                 v-else
                 height="48px"
                 class="mt-2"
-                animate
+                animated
                 variant="success"
               >
                 <b-progress-bar :value="progress" />
@@ -128,8 +128,7 @@ export default {
       )
     )
 
-    const inherited = await setup('Offer')
-    return inherited
+    return await setup('Offer')
   },
   data() {
     return {
