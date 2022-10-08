@@ -5,9 +5,7 @@
         <div
           class="photoholder bg-light d-flex flex-column align-items-center justify-items-center mr-1"
         >
-          <client-only>
-            <v-icon icon="camera" class="fa-8-75x text-faded" />
-          </client-only>
+          <v-icon icon="camera" class="fa-8-75x text-faded" />
           <b-button
             variant="primary"
             size="lg"
@@ -36,19 +34,17 @@
         <hr />
       </div>
       <div v-if="uploading" class="bg-white">
-        <client-only>
-          <OurFilePond
-            ref="filepond"
-            imgtype="Message"
-            imgflag="message"
-            :identify="true"
-            :browse="pondBrowse"
-            :multiple="true"
-            @photoProcessed="photoProcessed"
-            @allProcessed="allProcessed"
-            @init="hidePhotoButton"
-          />
-        </client-only>
+        <OurFilePond
+          ref="filepond"
+          imgtype="Message"
+          imgflag="message"
+          :identify="true"
+          :browse="pondBrowse"
+          :multiple="true"
+          @photoProcessed="photoProcessed"
+          @allProcessed="allProcessed"
+          @init="hidePhotoButton"
+        />
       </div>
       <div class="subject-layout mb-1 mt-1">
         <div class="d-flex flex-column">
@@ -62,15 +58,13 @@
           />
         </div>
         <PostItem :id="id" ref="item" class="item pt-1" />
-        <client-only>
-          <NumberIncrementDecrement
-            v-if="type === 'Offer'"
-            v-model="availablenow"
-            label="Quantity"
-            append-text=" available"
-            class="count pt-1"
-          />
-        </client-only>
+        <NumberIncrementDecrement
+          v-if="type === 'Offer'"
+          v-model="availablenow"
+          label="Quantity"
+          append-text=" available"
+          class="count pt-1"
+        />
       </div>
       <div class="d-flex flex-column mt-2">
         <label :for="$id('description')">Please give a few details:</label>

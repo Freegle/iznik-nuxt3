@@ -13,9 +13,7 @@
             :class-name="'m-1 text-truncate maxwidth'"
           />
         </div>
-        <client-only>
-          <div v-observe-visibility="joinVisibilityChanged" />
-        </client-only>
+        <div v-observe-visibility="joinVisibilityChanged" />
       </div>
     </client-only>
     <client-only>

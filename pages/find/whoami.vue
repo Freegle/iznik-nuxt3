@@ -3,9 +3,7 @@
     <client-only>
       <b-row class="m-0">
         <b-col cols="12" lg="8" offset-lg="2">
-          <client-only>
-            <WizardProgress :active-stage="3" class="d-none d-md-flex" />
-          </client-only>
+          <WizardProgress :active-stage="3" class="d-none d-md-flex" />
           <h1 class="text-center">Finally, your email address</h1>
           <b-row>
             <b-col class="text-center">
