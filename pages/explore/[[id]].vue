@@ -50,7 +50,14 @@ export default {
     }
 
     useHead(
-      buildHead(group ? 'Explore ' + group.namedisplay : 'Explore Freegle')
+      buildHead(
+        group ? 'Explore ' + group.namedisplay : 'Explore Freegle',
+        null,
+        null,
+        {
+          class: 'overflow-y-scroll',
+        }
+      )
     )
 
     return { id, groupStore }

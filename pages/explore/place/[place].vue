@@ -42,7 +42,11 @@ export default {
     useHead(
       buildHead(
         'Explore Freegle',
-        "There are lots of lovely communities of freeglers across the UK. Shall we see what they're up to?"
+        "There are lots of lovely communities of freeglers across the UK. Shall we see what they're up to?",
+        null,
+        {
+          class: 'overflow-y-scroll',
+        }
       )
     )
 

@@ -35,7 +35,11 @@ export default {
     useHead(
       buildHead(
         'Explore Freegle communities' +
-          (route.params.region ? ' in ' + route.params.region : '')
+          (route.params.region ? ' in ' + route.params.region : ''),
+        null,
+        {
+          class: 'overflow-y-scroll',
+        }
       )
     )
 

@@ -228,7 +228,11 @@ export default {
     useHead(
       buildHead(
         'ChitChat',
-        'Chat to nearby freeglers...ask for advice, recommendations or just have a good old natter.'
+        'Chat to nearby freeglers...ask for advice, recommendations or just have a good old natter.',
+        null,
+        {
+          class: 'overflow-y-scroll',
+        }
       )
     )
 
