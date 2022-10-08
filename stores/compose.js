@@ -50,7 +50,6 @@ export const useComposeStore = defineStore({
     init(config) {
       this.config = config
       this.$api = api(config)
-      console.log('Init compose store', this)
     },
     calculateSteps(type) {
       let steps = 0
@@ -410,7 +409,6 @@ export const useComposeStore = defineStore({
       let gotWanted = false
 
       for (let id = 0; id < state.messages.length; id++) {
-        console.log('GEt all', id, state.messages[id], state.messages)
         const m = state.messages[id]
 
         if (m) {

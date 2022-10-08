@@ -1,6 +1,7 @@
 <template>
-  <b-img-lazy
+  <b-img
     v-if="showImage"
+    lazy
     thumbnail
     class="sponsorClass m-0"
     :alt="altText"
@@ -13,10 +14,8 @@
 // This component should be imported, rather than using async require.  This is because async requires result in more
 // Vue DOM patching overall, and this component is used in places like chat where it appears many times.  Testing shows
 // this has a significant performance benefit.
-import BImgLazy from './BImgLazy'
 export default {
   name: 'SponsorLogo',
-  components: { BImgLazy },
   props: {
     image: {
       type: String,

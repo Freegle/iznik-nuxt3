@@ -70,7 +70,6 @@ export function setup(type) {
       // This can happen if you repost, don't complete, log in as another user.  The server submit call will
       // fail in that case, so we are better off not showing the message at all and letting them compose from
       // scratch.
-      console.log('consider', message.type, type, message.savedBy, myid)
       if (
         message.type === type &&
         (!message.savedBy || message.savedBy === myid)

@@ -33,12 +33,10 @@ const runtimeConfig = useRuntimeConfig()
 
 // Initialise pinia here - @pinia/nuxt doesn't seem to kick in early enough.
 try {
-  console.log('Initialise pinia')
   const pinia = usePinia()
   const nuxtApp = useNuxtApp()
   nuxtApp.vueApp.use(pinia)
   setActivePinia(pinia)
-  console.log('Set active')
   if (process.server) {
     nuxtApp.payload.pinia = pinia.state.value
   } else if (nuxtApp.payload && nuxtApp.payload.pinia) {
@@ -54,9 +52,6 @@ const authStore = useAuthStore()
 const userStore = useUserStore()
 const isochroneStore = useIsochroneStore()
 const composeStore = useComposeStore()
-composeStore.$subscribe((action, state) => {
-  console.log('Pinia action', action, state)
-})
 const chatStore = useChatStore()
 const addressStore = useAddressStore()
 const trystStore = useTrystStore()

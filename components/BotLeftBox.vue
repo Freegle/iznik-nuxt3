@@ -27,7 +27,8 @@
         href="https://github.com/Freegle/iznik-nuxt"
         title="We're open source - find us on GitHub"
       >
-        <b-img-lazy
+        <b-img
+          lazy
           alt="GitHub"
           src="/botleft/github.svg"
           width="40"
@@ -39,11 +40,9 @@
 </template>
 <script>
 import ExternalLink from './ExternalLink'
-import BImgLazy from './BImgLazy'
 
 export default {
   components: {
-    BImgLazy,
     ExternalLink,
   },
 }

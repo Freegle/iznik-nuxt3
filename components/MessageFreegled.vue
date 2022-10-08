@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-img-lazy src="/freegled.jpg" class="freegled__image" />
+    <b-img lazy src="/freegled.jpg" class="freegled__image" />
     <v-tooltip variant="success" :target="'msg-' + id">
       <template #popper>
         <p v-if="message.type === 'Offer'">Yay, someone took it!</p>
@@ -15,10 +15,8 @@
 </template>
 <script>
 import { useMessageStore } from '../stores/message'
-import BImgLazy from './BImgLazy'
 
 export default {
-  components: { BImgLazy },
   props: {
     id: {
       type: Number,
