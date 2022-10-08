@@ -15,7 +15,7 @@
     <template #default>
       <ProfileInfo :id="id" :header="false" />
     </template>
-    <template #footer>
+    <template #modal-footer>
       <b-button variant="primary" @click="hide"> Close </b-button>
     </template>
   </b-modal>

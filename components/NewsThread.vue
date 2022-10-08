@@ -74,7 +74,7 @@
           </notice-message>
         </b-card-text>
       </b-card-body>
-      <template #footer>
+      <template #modal-footer>
         <NewsReplies
           v-if="newsfeed?.replies"
           :id="id"

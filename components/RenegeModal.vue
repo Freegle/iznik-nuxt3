@@ -39,7 +39,7 @@
       </p>
       <UserRatings :id="selectedUser" class="mt-2" size="lg" />
     </template>
-    <template #footer>
+    <template #modal-footer>
       <b-button variant="white" @click="hide"> Cancel </b-button>
       <b-button variant="warning" @click="renege"> Unpromise </b-button>
     </template>

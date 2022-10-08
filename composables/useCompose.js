@@ -70,6 +70,7 @@ export function setup(type) {
       // This can happen if you repost, don't complete, log in as another user.  The server submit call will
       // fail in that case, so we are better off not showing the message at all and letting them compose from
       // scratch.
+      console.log('consider', message.type, type, message.savedBy, myid)
       if (
         message.type === type &&
         (!message.savedBy || message.savedBy === myid)
@@ -86,8 +87,6 @@ export function setup(type) {
 
   // We also want to prune any old messages from our store.
   composeStore.prune()
-
-  ensureEachType()
 
   return {
     email,
@@ -157,8 +156,15 @@ export function ensureEachType() {
   const composeStore = useComposeStore()
 
   // Ensure there is a blank message of each type.
+  console.log(
+    'Ensure each type',
+    composeStore,
+    JSON.stringify(composeStore.messages),
+    JSON.stringify(composeStore.messages.filter((m) => m.type === 'Offer'))
+  )
   if (composeStore.all.filter((m) => m.type === 'Offer').length === 0) {
     const id = composeStore.add()
+    console.log('Ensure offer', id)
     composeStore.setType({
       id,
       type: 'Offer',
@@ -169,6 +175,7 @@ export function ensureEachType() {
 
   if (composeStore.all.filter((m) => m.type === 'Wanted').length === 0) {
     const id = composeStore.add()
+    console.log('Ensure wanted', id)
     composeStore.setType({
       id,
       type: 'Wanted',
@@ -232,15 +239,20 @@ export function postcodeSelect(pc) {
 
 export function addItem() {
   const composeStore = useComposeStore()
+  const authStore = useAuthStore()
 
   const id = composeStore.add()
+  const me = authStore.user
 
   composeStore.setMessage({
-    id,
-    item: null,
-    description: null,
-    type: this.postType,
-    availablenow: 1,
+    message: {
+      id,
+      item: null,
+      description: null,
+      type: this.postType,
+      availablenow: 1,
+    },
+    me,
   })
 }
 

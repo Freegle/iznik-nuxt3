@@ -74,7 +74,6 @@ export default {
     async love() {
       this.loving = true
 
-      console.log('Love', this.newsfeed)
       await this.newsfeedStore.love(this.newsfeed.id, this.newsfeed.threadhead)
 
       this.loving = false

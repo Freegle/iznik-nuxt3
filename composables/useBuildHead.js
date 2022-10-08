@@ -1,5 +1,7 @@
 import { useRoute } from 'vue-router'
 
+const route = useRoute()
+
 export function buildHead(title, description, image = null, bodyAttrs = {}) {
   const runtimeConfig = useRuntimeConfig()
 
@@ -35,8 +37,6 @@ export function buildHead(title, description, image = null, bodyAttrs = {}) {
     property: 'og:image',
     content: retImage,
   })
-
-  const route = useRoute()
 
   meta.push({
     hid: 'og:url',

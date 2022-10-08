@@ -38,6 +38,7 @@ module.exports = {
     defineProps: 'readonly',
     definePageMeta: 'readonly',
     useRuntimeConfig: 'readonly',
+    defineNuxtConfig: 'readonly',
     defineNuxtPlugin: 'readonly',
     defineEmits: 'readonly',
     defineNuxtRouteMiddleware: 'readonly',

@@ -15,7 +15,7 @@
       spellcheck="true"
       placeholder="Edit your post..."
     />
-    <template #footer>
+    <template #modal-footer>
       <b-button variant="white" @click="hide"> Cancel </b-button>
       <b-button variant="primary" @click="save"> Save </b-button>
     </template>

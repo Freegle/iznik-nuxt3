@@ -27,16 +27,21 @@ export default {
     return { miscStore, groupStore, composeStore }
   },
   computed: {
-    group() {
-      let ret = this.composeStore.group
+    group: {
+      get() {
+        let ret = this.composeStore.group
 
-      if (!ret) {
-        if (this.postcode?.groupsnear) {
-          ret = this.postcode.groupsnear[0].id
+        if (!ret) {
+          if (this.postcode?.groupsnear) {
+            ret = this.postcode.groupsnear[0].id
+          }
         }
-      }
 
-      return ret
+        return ret
+      },
+      set(newVal) {
+        this.composeStore.group = newVal
+      },
     },
     postcode() {
       return this.composeStore.postcode

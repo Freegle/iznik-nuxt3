@@ -87,7 +87,7 @@
           </div>
         </social-sharing>
       </template>
-      <template #footer slot-scope="{ cancel }">
+      <template #modal-footer slot-scope="{ cancel }">
         <b-button variant="secondary" @click="cancel"> Close </b-button>
       </template>
     </b-modal>

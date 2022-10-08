@@ -164,7 +164,7 @@
           please adjust the numbers above.
         </NoticeMessage>
       </template>
-      <template #footer>
+      <template #modal-footer>
         <div>
           <div class="d-flex flex-wrap justify-content-end">
             <b-button variant="secondary" @click="cancel"> Cancel </b-button>

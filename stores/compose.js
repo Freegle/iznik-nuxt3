@@ -3,6 +3,21 @@ import { useMessageStore } from '~/stores/message'
 import api from '~/api'
 import { useAuthStore } from '~/stores/auth'
 
+const defaultOffer = {
+  id: 0,
+  type: 'Offer',
+  text: '',
+  attachments: [],
+  clientOnly: true,
+}
+const defaultWanted = {
+  id: 1,
+  type: 'Wanted',
+  text: '',
+  attachments: [],
+  clientOnly: true,
+}
+
 export const useComposeStore = defineStore({
   id: 'compose',
   persist: {
@@ -23,7 +38,7 @@ export const useComposeStore = defineStore({
     emailAt: null,
     postcode: null,
     group: null,
-    messages: {},
+    messages: [],
     _attachments: {},
     attachmentBump: 1,
     _progress: 1,
@@ -35,6 +50,7 @@ export const useComposeStore = defineStore({
     init(config) {
       this.config = config
       this.$api = api(config)
+      console.log('Init compose store', this)
     },
     calculateSteps(type) {
       let steps = 0
@@ -332,7 +348,7 @@ export const useComposeStore = defineStore({
           results.push(result)
 
           const me = useAuthStore().user
-          this.markSubmitted(result.id, me)
+          this.markSubmitted(message.id, me)
         }
       }
 
@@ -346,10 +362,19 @@ export const useComposeStore = defineStore({
       return results
     },
     prune() {
-      // We want to clear any messages from our local store that are not fairly recent, otherwise we can confusingly
-      // show an old message, which may then get edited to be a new one, leaving replies to the old message pointing
-      // at the new one.  I'm looking at you, Craig.
+      if (!Array.isArray(this.messages)) {
+        // This is bad data.
+        console.log('Bad compose messages, discard')
+        this.messages = []
+      }
+
       if (this.messages) {
+        // Remove empty.
+        this.messages = this.messages.filter((m) => m)
+
+        // We want to clear any messages from our local store that are not fairly recent, otherwise we can confusingly
+        // show an old message, which may then get edited to be a new one, leaving replies to the old message pointing
+        // at the new one.  I'm looking at you, Craig.
         for (let id = 0; id < this.messages.length; id++) {
           const m = this.messages[id]
 
@@ -370,27 +395,51 @@ export const useComposeStore = defineStore({
     },
   },
   getters: {
-    ids: (state) => {
-      // We return a fake "id" which is the index.  This is a client-side id only.
-      const ret = []
-
-      for (let i = 0; i < state.messages.length; i++) {
-        ret.push(i)
-      }
-
-      return ret
-    },
     message: (state) => (id) => {
       const m = state.messages[id]
-      m.id = id
+
+      if (m) {
+        m.id = id
+      }
+
       return m
     },
     all: (state) => {
       const ret = []
+      let gotOffer = false
+      let gotWanted = false
 
       for (let id = 0; id < state.messages.length; id++) {
+        console.log('GEt all', id, state.messages[id], state.messages)
         const m = state.messages[id]
-        m.id = id
+
+        if (m) {
+          if (m.type === 'Offer') {
+            gotOffer = true
+          }
+
+          if (m.type === 'Wanted') {
+            gotWanted = true
+          }
+
+          m.id = id
+          ret.push(m)
+        }
+      }
+
+      // We want to ensure that we always return at least one offer or wanted.
+      //
+      // This can also happen, it seems, during the initial load before the Pinia
+      // state has been restored.  We used to try to spot when the store didn't have the right messages and fix them
+      // up, but because the state hadn't been restored we actually lost what was in there.
+      if (!gotOffer) {
+        const m = defaultOffer
+        m.id = ret.length
+        ret.push(m)
+      }
+      if (!gotWanted) {
+        const m = defaultWanted
+        m.id = ret.length
         ret.push(m)
       }
 
@@ -406,12 +455,11 @@ export const useComposeStore = defineStore({
     },
     messageValid: (state) => (postType) => {
       // Is there at least one valid message of this type
-
       let valid = false
 
       if (state.messages?.length) {
         const messages = state.messages.filter((m) => {
-          return m.type === postType.value
+          return m?.type === postType.value
         })
 
         valid = true

@@ -134,7 +134,7 @@
             </div>
           </div>
         </template>
-        <template #footer>
+        <template #modal-footer>
           <b-button v-if="!choose" variant="white" class="mr-2" @click="hide">
             Close
           </b-button>
