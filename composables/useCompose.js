@@ -152,45 +152,10 @@ export function setup(type) {
   }
 }
 
-export function ensureEachType() {
-  const composeStore = useComposeStore()
-
-  // Ensure there is a blank message of each type.
-  console.log(
-    'Ensure each type',
-    composeStore,
-    JSON.stringify(composeStore.messages),
-    JSON.stringify(composeStore.messages.filter((m) => m.type === 'Offer'))
-  )
-  if (composeStore.all.filter((m) => m.type === 'Offer').length === 0) {
-    const id = composeStore.add()
-    console.log('Ensure offer', id)
-    composeStore.setType({
-      id,
-      type: 'Offer',
-    })
-    composeStore.setClientOnly(id)
-    composeStore.setAttachmentsForMessage(id, [])
-  }
-
-  if (composeStore.all.filter((m) => m.type === 'Wanted').length === 0) {
-    const id = composeStore.add()
-    console.log('Ensure wanted', id)
-    composeStore.setType({
-      id,
-      type: 'Wanted',
-    })
-    composeStore.setClientOnly(id)
-    composeStore.setAttachmentsForMessage(id, [])
-  }
-}
-
 export async function deleteItem(id) {
   const composeStore = useComposeStore()
 
   await composeStore.deleteMessage(id)
-
-  ensureEachType()
 }
 
 export function postcodeClear() {

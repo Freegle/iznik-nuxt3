@@ -6,7 +6,6 @@
           <WizardProgress :active-stage="1" class="d-none d-md-flex" />
         </client-only>
         <h1 class="text-center">First, what are you looking for?</h1>
-        ids {{ ids }}
         <ul
           v-for="(id, index) in ids"
           :key="'post-' + id"
