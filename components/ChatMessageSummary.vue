@@ -5,8 +5,9 @@
       <div class="clickme" @click="click">
         <div class="messagecard p-2">
           <div class="image-wrapper">
-            <b-img-lazy
+            <b-img
               v-if="!imageBroken && attachment"
+              lazy
               rounded
               generator-unable-to-provide-required-alt=""
               title="Item picture"

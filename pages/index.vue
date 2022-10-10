@@ -84,7 +84,8 @@
         class="mr-2"
         rel="noopener noreferrer"
       >
-        <b-img-lazy
+        <b-img
+          lazy
           alt="Freegle Android app on Google Play"
           title="Freegle Android app on Google Play"
           class="app-download__image"
@@ -96,7 +97,8 @@
         target="_blank"
         rel="noopener noreferrer"
       >
-        <b-img-lazy
+        <b-img
+          lazy
           alt="Freegle app for iPhone, iPad, and iPod touch"
           title="Freegle app for iPhone, iPad, and iPod Touch"
           class="app-download__image"

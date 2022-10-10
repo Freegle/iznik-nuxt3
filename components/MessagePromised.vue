@@ -1,7 +1,7 @@
 <template>
   <div @click="$emit('click')">
     <div v-if="summary">
-      <b-img-lazy src="/promised.jpg" class="promised__image" />
+      <b-img lazy src="/promised.jpg" class="promised__image" />
       <v-tooltip variant="success" :target="'msg-' + id">
         <template #popper>
           <p v-if="!toMe">

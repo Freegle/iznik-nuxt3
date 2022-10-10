@@ -22,6 +22,7 @@
         <!--        <ChatButton v-if="replyToSend" ref="replyToPostChatButton" :userid="replyToUser" />-->
       </div>
       <BreakpointFettler />
+      <GoogleOneTap />
     </client-only>
   </div>
 </template>
@@ -29,6 +30,7 @@
 import { useMiscStore } from '../stores/misc'
 import MainHeader from '../components/MainHeader'
 import { useChatStore } from '../stores/chat'
+import GoogleOneTap from '../components/GoogleOneTap'
 
 export default {
   components: {
@@ -37,6 +39,7 @@ export default {
     // ChatButton,
     // BouncingEmail,
     // ExternalLink,
+    GoogleOneTap,
     MainHeader,
   },
   data() {

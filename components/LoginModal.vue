@@ -32,6 +32,19 @@
           Using one of these buttons is the easiest way to create an account:
         </p>
         <b-button
+          id="loginGoogle"
+          class="social-button social-button--google"
+          :disabled="googleDisabled"
+        >
+          <b-img
+            src="/signinbuttons/google-logo.svg"
+            class="social-button__image"
+          />
+          <span class="p-2 text--medium font-weight-bold"
+            >Continue with Google</span
+          >
+        </b-button>
+        <b-button
           class="social-button social-button--facebook"
           :disabled="facebookDisabled"
           @click="loginFacebook"
@@ -42,19 +55,6 @@
           />
           <span class="p-2 text--medium font-weight-bold"
             >Continue with Facebook</span
-          >
-        </b-button>
-        <b-button
-          class="social-button social-button--google"
-          :disabled="googleDisabled"
-          @click="loginGoogle"
-        >
-          <b-img
-            src="/signinbuttons/google-logo.svg"
-            class="social-button__image"
-          />
-          <span class="p-2 text--medium font-weight-bold"
-            >Continue with Google</span
           >
         </b-button>
         <b-button
@@ -251,7 +251,7 @@ export default {
       return (
         this.bump &&
         this.showSocialLoginBlocked &&
-        (!window || !window.gapi || !window.gapi.client)
+        (!window || !window.google || !window.google.accounts)
       )
     },
     yahooDisabled() {
@@ -511,6 +511,9 @@ export default {
         this.socialLoginError = 'Facebook login error: ' + e.message
       }
     },
+    handleGoogleCredentialsResponse(response) {
+      console.log('Google login', response)
+    },
     loginGoogle() {
       // TODO MINOR Look into https://developers.google.com/identity/gsi/web/guides/automatic-sign-in-sign-out
       this.loginType = 'Google'
@@ -606,33 +609,44 @@ export default {
         }
         const js = d.createElement(s)
         js.id = id
-        js.src = 'https://apis.google.com/js/platform.js'
+        js.src = 'https://accounts.google.com/gsi/client'
         js.onload = (e) => {
-          setTimeout(() => {
-            if (window.gapi) {
-              try {
-                window.gapi.load('client', {
-                  callback() {
-                    window.gapi.client.init({
-                      apiKey: self.runtimeConfig.public.GOOGLE_API_KEY,
-                    })
-                    window.gapiLoaded = true
-                  },
-                  onerror() {
-                    console.error('gapi.client failed to load!')
-                  },
-                  timeout: 30000,
-                  ontimeout() {
-                    console.error('GAPI client load timed out')
-                  },
-                })
+          console.log('GSI loaded')
+          window.google.accounts.id.initialize({
+            client_id: self.runtimeConfig.public.GOOGLE_CLIENT_ID,
+            callback: self.handleGoogleCredentialsResponse,
+          })
+          window.google.accounts.id.renderButton(
+            document.getElementById('loginGoogle'),
+            { theme: 'outline', size: 'large' } // customization attributes
+          )
+          window.google.accounts.id.prompt() // also display the One Tap dialog
 
-                window.gapi.load('auth2')
-              } catch (e) {
-                console.error('GAPI load failed', e)
-              }
-            }
-          }, 10)
+          // setTimeout(() => {
+          //   if (window.gapi) {
+          //     try {
+          //       window.gapi.load('client', {
+          //         callback() {
+          //           window.gapi.client.init({
+          //             apiKey: self.runtimeConfig.public.GOOGLE_API_KEY,
+          //           })
+          //           window.gapiLoaded = true
+          //         },
+          //         onerror() {
+          //           console.error('gapi.client failed to load!')
+          //         },
+          //         timeout: 30000,
+          //         ontimeout() {
+          //           console.error('GAPI client load timed out')
+          //         },
+          //       })
+          //
+          //       window.gapi.load('auth2')
+          //     } catch (e) {
+          //       console.error('GAPI load failed', e)
+          //     }
+          //   }
+          // }, 10)
         }
         fjs.parentNode.insertBefore(js, fjs)
       })(document, 'script', 'google-jssdk')

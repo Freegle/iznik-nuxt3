@@ -14,8 +14,9 @@
       size="sm"
       class="mr-1 mb-1 mt-1 inline"
     />
-    <b-img-lazy
+    <b-img
       v-if="chatmessage.image"
+      lazy
       fluid
       class="chatimage clickme img-thumbnail rounded"
       generator-unable-to-provide-required-alt=""
@@ -39,8 +40,9 @@
       ok-only
     >
       <template #default>
-        <b-img-lazy
+        <b-img
           v-if="chatmessage.image"
+          lazy
           fluid
           generator-unable-to-provide-required-alt=""
           :src="chatmessage.image.path"

@@ -9,14 +9,16 @@
     <b-card-body class="p-1">
       <div class="layout align-top">
         <div v-if="preview.image" class="image">
-          <b-img-lazy
+          <b-img
             v-if="size === 'md'"
+            lazy
             :src="preview.image"
             class="previewimage"
             @error.native="brokenImage"
           />
-          <b-img-lazy
+          <b-img
             v-if="size === 'sm'"
+            lazy
             :src="preview.image"
             class="previewimagesm"
             @error.native="brokenImage"

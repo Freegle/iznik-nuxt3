@@ -10,9 +10,10 @@
       class="font-weight-bold preline forcebreak nopara"
     />
     <div>
-      <b-img-lazy
+      <b-img
         v-if="newsfeed.image"
         v-b-modal="'photoModal-' + newsfeed.id"
+        lazy
         rounded
         :src="newsfeed.image.path"
         class="clickme imgthumb mt-1"

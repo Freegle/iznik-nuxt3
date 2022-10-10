@@ -1,7 +1,8 @@
 <template>
   <span class="ProfileImage__container">
-    <b-img-lazy
+    <b-img
       v-if="lazy"
+      lazy
       rounded="circle"
       :thumbnail="isThumbnail"
       :class="className"

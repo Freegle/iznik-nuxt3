@@ -13,14 +13,14 @@
     <div class="d-flex justify-content-between">
       <div class="d-flex">
         <ExternalLink href="https://www.facebook.com/Freegle/" title="Facebook">
-          <b-img-lazy alt="Facebook" src="/botleft/facebook.png" width="40" />
+          <b-img lazy alt="Facebook" src="/botleft/facebook.png" width="40" />
         </ExternalLink>
         <ExternalLink
           href="https://twitter.com/thisisfreegle"
           title="Twitter"
           class="pl-1"
         >
-          <b-img-lazy alt="Twitter" src="/botleft/twitter.png" width="40" />
+          <b-img lazy alt="Twitter" src="/botleft/twitter.png" width="40" />
         </ExternalLink>
       </div>
       <ExternalLink
