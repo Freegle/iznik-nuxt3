@@ -49,6 +49,13 @@ export default {
       js.onload = (e) => {
         console.log('GSI loaded')
         window.google.accounts.id.prompt() // Display the One Tap dialog
+        window.google.accounts.id.prompt((notification) => {
+          console.log('Prompt returned', notification)
+
+          if (notification.isNotDisplayed() || !notification.isDisplayed()) {
+            console.log('Not displayed')
+          }
+        })
       }
       fjs.parentNode.insertBefore(js, fjs)
     })(document, 'script', 'google-jssdk')
