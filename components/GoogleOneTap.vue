@@ -50,7 +50,7 @@ export default {
         console.log('GSI loaded')
         window.google.accounts.id.prompt() // Display the One Tap dialog
         window.google.accounts.id.prompt((notification) => {
-          console.log('Prompt returned', notification)
+          console.log('One Tap prompt returned', notification)
 
           if (notification.isNotDisplayed() || !notification.isDisplayed()) {
             console.log('Not displayed')

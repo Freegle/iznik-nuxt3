@@ -31,19 +31,7 @@
         <p v-if="signUp" class="font-weight-bold">
           Using one of these buttons is the easiest way to create an account:
         </p>
-        <b-button
-          id="loginGoogle"
-          class="social-button social-button--google"
-          :disabled="googleDisabled"
-        >
-          <b-img
-            src="/signinbuttons/google-logo.svg"
-            class="social-button__image"
-          />
-          <span class="p-2 text--medium font-weight-bold"
-            >Continue with Google</span
-          >
-        </b-button>
+        <div id="loginGoogle" class="mb-4" />
         <b-button
           class="social-button social-button--facebook"
           :disabled="facebookDisabled"
@@ -189,7 +177,6 @@
     </div>
   </b-modal>
 </template>
-
 <script>
 import { mapState, mapWritableState } from 'pinia'
 import { LoginError, SignUpError } from '../api/BaseAPI'
@@ -625,25 +612,26 @@ export default {
 
       ;(function (d, s, id) {
         const fjs = d.getElementsByTagName(s)[0]
-        if (d.getElementById(id)) {
-          return
+
+        if (!d.getElementById(id)) {
+          // Not already installed.
+          const js = d.createElement(s)
+          js.id = id
+          js.src = 'https://accounts.google.com/gsi/client'
+          js.onload = (e) => {
+            console.log('GSI loaded')
+            window.google.accounts.id.initialize({
+              client_id: self.runtimeConfig.public.GOOGLE_CLIENT_ID,
+              callback: self.handleGoogleCredentialsResponse,
+            })
+          }
+          fjs.parentNode.insertBefore(js, fjs)
         }
-        const js = d.createElement(s)
-        js.id = id
-        js.src = 'https://accounts.google.com/gsi/client'
-        js.onload = (e) => {
-          console.log('GSI loaded')
-          window.google.accounts.id.initialize({
-            client_id: self.runtimeConfig.public.GOOGLE_CLIENT_ID,
-            callback: self.handleGoogleCredentialsResponse,
-          })
-          window.google.accounts.id.renderButton(
-            document.getElementById('loginGoogle'),
-            { theme: 'outline', size: 'large' } // customization attributes
-          )
-          window.google.accounts.id.prompt() // also display the One Tap dialog
-        }
-        fjs.parentNode.insertBefore(js, fjs)
+
+        window.google.accounts.id.renderButton(
+          document.getElementById('loginGoogle'),
+          { theme: 'filled_blue', size: 'large' } // customization attributes
+        )
       })(document, 'script', 'google-jssdk')
     },
     installFacebookSDK() {
