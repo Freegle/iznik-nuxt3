@@ -511,8 +511,29 @@ export default {
         this.socialLoginError = 'Facebook login error: ' + e.message
       }
     },
-    handleGoogleCredentialsResponse(response) {
+    async handleGoogleCredentialsResponse(response) {
       console.log('Google login', response)
+      this.loginType = 'Google'
+      this.nativeLoginError = null
+      this.socialLoginError = null
+      if (response?.credential) {
+        console.log('Signed in')
+
+        try {
+          await this.authStore.login({
+            googleauthcode: response.credential,
+            googlelogin: true,
+          })
+
+          // We are now logged in.
+          console.log('Logged in')
+          self.pleaseShowModal = false
+        } catch (e) {
+          this.socialLoginError = 'Google login failed: ' + e.message
+        }
+      } else if (response?.error && response.error !== 'immediate_failed') {
+        this.socialLoginError = 'Google login failed: ' + response.error
+      }
     },
     loginGoogle() {
       // TODO MINOR Look into https://developers.google.com/identity/gsi/web/guides/automatic-sign-in-sign-out
@@ -621,32 +642,6 @@ export default {
             { theme: 'outline', size: 'large' } // customization attributes
           )
           window.google.accounts.id.prompt() // also display the One Tap dialog
-
-          // setTimeout(() => {
-          //   if (window.gapi) {
-          //     try {
-          //       window.gapi.load('client', {
-          //         callback() {
-          //           window.gapi.client.init({
-          //             apiKey: self.runtimeConfig.public.GOOGLE_API_KEY,
-          //           })
-          //           window.gapiLoaded = true
-          //         },
-          //         onerror() {
-          //           console.error('gapi.client failed to load!')
-          //         },
-          //         timeout: 30000,
-          //         ontimeout() {
-          //           console.error('GAPI client load timed out')
-          //         },
-          //       })
-          //
-          //       window.gapi.load('auth2')
-          //     } catch (e) {
-          //       console.error('GAPI load failed', e)
-          //     }
-          //   }
-          // }, 10)
         }
         fjs.parentNode.insertBefore(js, fjs)
       })(document, 'script', 'google-jssdk')
@@ -759,6 +754,10 @@ $color-yahoo: #6b0094;
 .social-button--google {
   border: 2px solid $color-google;
   background-color: $color-google;
+}
+
+:deep(.social-button--google > div) {
+  width: 100%;
 }
 
 .social-button--yahoo {
