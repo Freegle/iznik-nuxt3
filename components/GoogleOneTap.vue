@@ -34,31 +34,33 @@ export default {
   },
   mounted() {
     console.log('Install OneTap')
-    window.handleGoogleCredentialsResponse =
-      this.handleGoogleCredentialsResponse
+    if (!this.loggedIn) {
+      window.handleGoogleCredentialsResponse =
+        this.handleGoogleCredentialsResponse
 
-    this.show = true
-    ;(function (d, s, id) {
-      const fjs = d.getElementsByTagName(s)[0]
-      if (d.getElementById(id)) {
-        return
-      }
-      const js = d.createElement(s)
-      js.id = id
-      js.src = 'https://accounts.google.com/gsi/client'
-      js.onload = (e) => {
-        console.log('GSI loaded')
-        window.google.accounts.id.prompt() // Display the One Tap dialog
-        window.google.accounts.id.prompt((notification) => {
-          console.log('One Tap prompt returned', notification)
+      this.show = true
+      ;(function (d, s, id) {
+        const fjs = d.getElementsByTagName(s)[0]
+        if (d.getElementById(id)) {
+          return
+        }
+        const js = d.createElement(s)
+        js.id = id
+        js.src = 'https://accounts.google.com/gsi/client'
+        js.onload = (e) => {
+          console.log('GSI loaded')
+          window.google.accounts.id.prompt() // Display the One Tap dialog
+          window.google.accounts.id.prompt((notification) => {
+            console.log('One Tap prompt returned', notification)
 
-          if (notification.isNotDisplayed() || !notification.isDisplayed()) {
-            console.log('Not displayed')
-          }
-        })
-      }
-      fjs.parentNode.insertBefore(js, fjs)
-    })(document, 'script', 'google-jssdk')
+            if (notification.isNotDisplayed() || !notification.isDisplayed()) {
+              console.log('Not displayed')
+            }
+          })
+        }
+        fjs.parentNode.insertBefore(js, fjs)
+      })(document, 'script', 'google-jssdk')
+    }
   },
   methods: {
     async handleGoogleCredentialsResponse(response) {
