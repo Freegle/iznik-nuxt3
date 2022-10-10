@@ -61,35 +61,39 @@ export default {
     })(document, 'script', 'google-jssdk')
   },
   methods: {
-    handleGoogleCredentialsResponse(response) {
-      console.log('Google login', response)
-      const decoded = jwt_decode(response.credential)
-      console.log('Decoded', decoded)
+    async handleGoogleCredentialsResponse(response) {
+      console.log('Google login in OneTap', response)
+      console.log('Are we logged in', this.loggedIn)
 
-      // this.loginType = 'Google'
-      // this.nativeLoginError = null
-      // this.socialLoginError = null
-      // if (response?.credential) {
-      //   console.log('Signed in')
-      //
-      //   try {
-      //     await this.authStore.login({
-      //       googleauthcode: response.credential,
-      //       googlelogin: true,
-      //     })
-      //
-      //     // We are now logged in.
-      //     console.log('Logged in')
-      //     self.pleaseShowModal = false
-      //   } catch (e) {
-      //     this.socialLoginError = 'Google login failed: ' + e.message
-      //   }
-      // } else if (response?.error && response.error !== 'immediate_failed') {
-      //   this.socialLoginError = 'Google login failed: ' + response.error
-      // }
-    },
-    googleHandleToken(token) {
-      console.log('Handle token', token)
+      if (!this.loggedIn) {
+        const decoded = jwt_decode(response.credential)
+        console.log('Decoded', decoded)
+
+        // Now we can pass response.credential to the server, which can verify it to confirm our login as per
+        // https://developers.google.com/identity/gsi/web/guides/verify-google-id-token.
+      }
+
+      this.loginType = 'Google'
+      this.nativeLoginError = null
+      this.socialLoginError = null
+      if (response?.credential) {
+        console.log('Signed in')
+
+        try {
+          await this.authStore.login({
+            googlejwt: response.credential,
+            googlelogin: true,
+          })
+
+          // We are now logged in.
+          console.log('Logged in')
+          self.pleaseShowModal = false
+        } catch (e) {
+          this.socialLoginError = 'Google login failed: ' + e.message
+        }
+      } else if (response?.error && response.error !== 'immediate_failed') {
+        this.socialLoginError = 'Google login failed: ' + response.error
+      }
     },
   },
 }
