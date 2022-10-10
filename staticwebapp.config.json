@@ -1,7 +1,8 @@
 {
   "globalHeaders": {
     "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "*"
+    "Access-Control-Allow-Methods": "*",
+    "Referrer-Policy": "strict-origin-when-cross-origin"
   },
   "responseOverrides": {
     "404": {
