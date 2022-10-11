@@ -157,6 +157,9 @@ export const useMessageStore = defineStore({
       await api(this.config).message.removeBy(id, userid)
       await this.fetch(id, true)
     },
+    async intend(id, outcome) {
+      await api(this.config).message.intend(id, outcome)
+    },
   },
   getters: {
     byId: (state) => {
