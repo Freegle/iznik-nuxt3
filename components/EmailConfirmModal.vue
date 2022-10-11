@@ -9,7 +9,7 @@
   >
     <p>We've sent you a verification mail.</p>
     <p>Don't forget to check your spam folder!</p>
-    <template #modal-footer>
+    <template #footer>
       <b-button variant="primary" @click="cancel"> Close </b-button>
     </template>
   </b-modal>

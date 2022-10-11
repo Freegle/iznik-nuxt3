@@ -26,11 +26,12 @@ import {
   faChevronCircleDown,
   faChevronCircleUp,
   faCircle,
+  faClipboard,
   faClock,
   faCoffee,
+  faCog,
   faComment,
   faComments,
-  faCog,
   faCalendarAlt,
   faCrown,
   faEnvelope,
@@ -74,6 +75,12 @@ import {
   faWalking,
 } from '@fortawesome/free-solid-svg-icons'
 
+import {
+  faFacebook,
+  faTwitter,
+  faWhatsapp,
+} from '@fortawesome/free-brands-svg-icons'
+
 library.add(
   faAddressBook,
   faArrowLeft,
@@ -99,9 +106,10 @@ library.add(
   faChevronCircleDown,
   faChevronCircleUp,
   faCircle,
+  faClipboard,
   faClock,
-  faCoffee,
   faCog,
+  faCoffee,
   faComment,
   faComments,
   faCalendarAlt,
@@ -144,7 +152,10 @@ library.add(
   faTimesCircle,
   faTrashAlt,
   faUser,
-  faWalking
+  faWalking,
+  faFacebook,
+  faTwitter,
+  faWhatsapp
 )
 
 export default defineNuxtPlugin((nuxtApp) => {

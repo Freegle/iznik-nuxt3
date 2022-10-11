@@ -87,7 +87,7 @@
         and click the <em>Promise</em> button. You you can come back here later.
       </p>
     </template>
-    <template #modal-footer>
+    <template #footer>
       <b-button variant="white" @click="hide"> Cancel </b-button>
       <b-button variant="primary" :disabled="buttonDisabled" @click="promise">
         Promise

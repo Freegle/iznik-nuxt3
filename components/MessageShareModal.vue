@@ -15,82 +15,80 @@
             freegling too!
           </p>
         </NoticeMessage>
-        <div class="d-flex flex-wrap justify-content-around mt-3">
-          <social-sharing
-            :url="message.url"
-            :title="'Sharing ' + message.subject"
-            :description="message.textbody"
-            hashtags="freegle,free,reuse"
-            inline-template
-            @open="chose"
-          >
-            <network network="facebook">
-              <b-btn variant="secondary" size="lg" class="facebook mt-1 mb-1">
-                <v-icon name="brands/facebook" />
-                Facebook
-              </b-btn>
-            </network>
-          </social-sharing>
-          <social-sharing
-            :url="message.url"
-            :title="'Sharing ' + message.subject"
-            :description="message.textbody"
-            hashtags="freegle,free,reuse"
-            inline-template
-            @open="chose"
-          >
-            <network network="twitter">
-              <b-btn variant="secondary" size="lg" class="twitter mt-1 mb-1">
-                <v-icon name="brands/twitter" />
-                Twitter
-              </b-btn>
-            </network>
-          </social-sharing>
-          <social-sharing
-            :url="message.url"
-            :title="'Sharing ' + message.subject"
-            :description="message.textbody"
-            hashtags="freegle,free,reuse"
-            inline-template
-            @open="chose"
-          >
-            <network network="email">
-              <b-btn variant="primary" size="lg" class="gmail mt-1 mb-1">
-                <v-icon name="envelope" />
-                Email
-              </b-btn>
-            </network>
-          </social-sharing>
-          <social-sharing
-            :url="message.url"
-            :title="'Sharing ' + message.subject"
-            :description="message.textbody"
-            hashtags="freegle,free,reuse"
-            inline-template
-            @open="chose"
-          >
-            <network network="whatsapp">
-              <b-btn variant="primary" size="lg" class="whatsapp mt-1 mb-1">
-                <v-icon name="brands/whatsapp" />
-                Whatsapp
-              </b-btn>
-            </network>
-          </social-sharing>
-          <div ref="container">
-            <b-btn variant="info" size="lg" class="mt-1 mb-1" @click="doCopy">
-              <v-icon v-if="copied" name="check" />
-              <v-icon v-else name="copy" />
+        <p>You can share using these buttons:</p>
+        <b-list-group horizontal class="flex-wrap">
+          <b-list-group-item>
+            <ShareNetwork
+              network="facebook"
+              :url="message.url"
+              :title="message.subject"
+              :description="message.textbody"
+              hashtags="freegle,free,reuse"
+            >
+              <b-button variant="secondary" class="mt-1 facebook">
+                <v-icon :icon="['fab', 'facebook']" /> Facebook
+              </b-button>
+            </ShareNetwork>
+          </b-list-group-item>
+          <b-list-group-item>
+            <ShareNetwork
+              network="twitter"
+              :url="message.url"
+              :title="message.subject"
+              :description="message.textbody"
+              hashtags="freegle,free,reuse"
+            >
+              <b-button variant="secondary" class="mt-1 twitter">
+                <v-icon :icon="['fab', 'twitter']" /> Twitter
+              </b-button>
+            </ShareNetwork>
+          </b-list-group-item>
+          <b-list-group-item>
+            <ShareNetwork
+              network="whatsapp"
+              :url="message.url"
+              :title="message.subject"
+              :description="message.textbody"
+              hashtags="freegle,free,reuse"
+            >
+              <b-button variant="secondary" class="mt-1 whatsapp">
+                <v-icon :icon="['fab', 'whatsapp']" /> Whatsapp
+              </b-button>
+            </ShareNetwork>
+          </b-list-group-item>
+          <b-list-group-item>
+            <ShareNetwork
+              network="email"
+              :url="message.url"
+              :title="message.subject"
+              :description="message.textbody"
+              hashtags="freegle,free,reuse"
+            >
+              <b-button variant="secondary" class="mt-1 gmail">
+                <v-icon icon="envelope" /> Email
+              </b-button>
+            </ShareNetwork>
+          </b-list-group-item>
+          <b-list-group-item>
+            <b-button
+              variant="secondary"
+              size="md"
+              class="mt-1 mb-1"
+              @click="doCopy"
+            >
+              <v-icon v-if="copied" icon="check" />
+              <v-icon v-else icon="clipboard" />
               Copy
-            </b-btn>
-          </div>
-        </div>
+            </b-button>
+          </b-list-group-item>
+        </b-list-group>
       </div>
       <p class="mt-3 text-center text-muted">
         You can share your own posts at any time from <em>My Posts</em>.
       </p>
     </template>
-    <template #modal-footer>
-      <b-button variant="primary" @click="hide"> Close </b-button>
+    <template #footer>
+      <b-button variant="primary" @click="hide">Close</b-button>
     </template>
   </b-modal>
 </template>
@@ -165,10 +163,12 @@ export default {
 
 :deep(.whatsapp) {
   background-color: $color-whatsapp !important;
+  color: white;
 }
 
 :deep(.gmail) {
   background-color: $color-gmail !important;
+  color: white;
 }
 
 :deep(.buttons button) {

@@ -14,13 +14,15 @@
         {{ groups[group.groupid].namedisplay }}
       </nuxt-link>
       &nbsp;
-      <span
+      <b-button
         v-if="displayMessageLink"
+        variant="link"
         :to="'/message/' + message.id"
         class="text-faded text-decoration-none"
+        size="xs"
       >
         #{{ message.id }}
-      </span>
+      </b-button>
     </div>
   </div>
 </template>

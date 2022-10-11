@@ -19,76 +19,72 @@
         >
           <div>
             <p>You can share using these buttons:</p>
-            <!--            TODO Only show similar buttons to the ones in MessageShareModal-->
             <b-list-group horizontal class="flex-wrap">
               <b-list-group-item>
-                <network network="facebook">
-                  <b-button variant="secondary">
-                    <v-icon icon="brands/facebook" /> Facebook
+                <ShareNetwork
+                  network="facebook"
+                  :url="url"
+                  :title="newsfeed.message"
+                  hashtags="freegle,free,reuse"
+                >
+                  <b-button variant="secondary" class="mt-1 facebook">
+                    <v-icon :icon="['fab', 'facebook']" /> Facebook
                   </b-button>
-                </network>
+                </ShareNetwork>
               </b-list-group-item>
               <b-list-group-item>
-                <network network="twitter">
-                  <b-button variant="secondary">
-                    <v-icon icon="brands/twitter" /> Twitter
+                <ShareNetwork
+                  network="twitter"
+                  :url="url"
+                  :title="newsfeed.message"
+                  hashtags="freegle,free,reuse"
+                >
+                  <b-button variant="secondary" class="mt-1 twitter">
+                    <v-icon :icon="['fab', 'twitter']" /> Twitter
                   </b-button>
-                </network>
+                </ShareNetwork>
               </b-list-group-item>
               <b-list-group-item>
-                <network network="whatsapp">
-                  <b-button variant="secondary">
-                    <v-icon icon="brands/whatsapp" /> Whatsapp
+                <ShareNetwork
+                  network="whatsapp"
+                  :url="url"
+                  :title="newsfeed.message"
+                  hashtags="freegle,free,reuse"
+                >
+                  <b-button variant="secondary" class="mt-1 whatsapp">
+                    <v-icon :icon="['fab', 'whatsapp']" /> Whatsapp
                   </b-button>
-                </network>
+                </ShareNetwork>
               </b-list-group-item>
               <b-list-group-item>
-                <network network="pinterest">
-                  <b-button variant="secondary">
-                    <v-icon icon="brands/pinterest" /> Pinterest
-                  </b-button>
-                </network>
-              </b-list-group-item>
-              <b-list-group-item>
-                <network network="telegram">
-                  <b-button variant="secondary">
-                    <v-icon icon="brands/telegram" /> Telegram
-                  </b-button>
-                </network>
-              </b-list-group-item>
-              <b-list-group-item>
-                <network network="sms">
-                  <b-button variant="secondary">
-                    <v-icon icon="comment" /> SMS
-                  </b-button>
-                </network>
-              </b-list-group-item>
-              <b-list-group-item>
-                <network network="email">
-                  <b-button variant="secondary">
+                <ShareNetwork
+                  network="email"
+                  :url="url"
+                  :title="newsfeed.message"
+                  hashtags="freegle,free,reuse"
+                >
+                  <b-button variant="secondary" class="mt-1 gmail">
                     <v-icon icon="envelope" /> Email
                   </b-button>
-                </network>
+                </ShareNetwork>
               </b-list-group-item>
               <b-list-group-item>
-                <network network="skype">
-                  <b-button variant="secondary">
-                    <v-icon icon="brands/skype" /> Skype
-                  </b-button>
-                </network>
-              </b-list-group-item>
-              <b-list-group-item>
-                <network network="googleplus">
-                  <b-button variant="secondary">
-                    <v-icon icon="brands/google-plus" /> Google+
-                  </b-button>
-                </network>
+                <b-button
+                  variant="secondary"
+                  size="md"
+                  class="mt-1 mb-1"
+                  @click="doCopy"
+                >
+                  <v-icon v-if="copied" icon="check" />
+                  <v-icon v-else icon="clipboard" />
+                  Copy
+                </b-button>
               </b-list-group-item>
             </b-list-group>
           </div>
         </social-sharing>
       </template>
-      <template #modal-footer slot-scope="{ cancel }">
+      <template #footer slot-scope="{ cancel }">
         <b-button variant="secondary" @click="cancel"> Close </b-button>
       </template>
     </b-modal>

@@ -36,7 +36,7 @@
             </div>
           </div>
         </template>
-        <template #modal-footer>
+        <template #footer>
           <b-button variant="white" @click="hide"> Close </b-button>
         </template>
       </b-modal>

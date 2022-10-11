@@ -15,7 +15,7 @@
         are only able to check their messages every day or two.
       </p>
     </template>
-    <template #modal-footer>
+    <template #footer>
       <b-button variant="white" @click="hide"> Close </b-button>
     </template>
   </b-modal>

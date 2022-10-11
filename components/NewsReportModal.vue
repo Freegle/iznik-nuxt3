@@ -15,7 +15,7 @@
           placeholder="Please let us know what you don't like, and one of our volunteers will review it."
         />
       </template>
-      <template #modal-footer>
+      <template #footer>
         <b-button variant="white" @click="hide"> Close </b-button>
         <b-button variant="primary" @click="report"> Submit Report </b-button>
       </template>

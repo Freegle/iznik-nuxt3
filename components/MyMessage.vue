@@ -16,7 +16,7 @@
                 </b-badge>
               </h3>
               <read-more
-                v-if="message && message.textbody"
+                v-if="message.textbody"
                 :text="message.textbody"
                 :max-chars="maxChars"
                 class="nopara"
@@ -133,14 +133,29 @@
                   :key="'message-' + message.id + '-' + group.id"
                   class="small text-muted text-wrap"
                 >
-                  {{ timeago(group.arrival) }} on {{ group.namedisplay }}
-                  <nuxt-link :to="'/message/' + message.id">
-                    <span class="text-muted small">#{{ message.id }}</span>
+                  {{ timeago(group.arrival) }} on
+                  <nuxt-link
+                    v-if="group.groupid in groups"
+                    :to="'/explore/' + groups[group.groupid].exploreLink"
+                    :title="
+                      'Click to view ' + groups[group.groupid].namedisplay
+                    "
+                  >
+                    {{ groups[group.groupid].namedisplay }}
                   </nuxt-link>
+                  &nbsp;
+                  <b-button
+                    variant="link"
+                    :to="'/message/' + message.id"
+                    size="xs"
+                    class="text-faded decornone"
+                  >
+                    #{{ message.id }}
+                  </b-button>
                 </div>
               </div>
               <span>
-                <b-button class="ml-1" variant="secondary">
+                <b-button v-if="!expand" class="ml-1" variant="secondary">
                   <v-icon v-if="!expanded" icon="caret-down" />
                   <v-icon v-else icon="caret-up" />
                   <template slot="button-content" />
@@ -406,6 +421,7 @@
 import ReadMore from 'vue-read-more3/src/ReadMoreComponent'
 import { useMessageStore } from '../stores/message'
 import { useChatStore } from '../stores/chat'
+import { useGroupStore } from '../stores/group'
 import MessagePhotosModal from '@/components/MessagePhotosModal'
 import MyMessagePromisedTo from '@/components/MyMessagePromisedTo'
 import PromiseModal from '~/components/PromiseModal'
@@ -466,10 +482,12 @@ export default {
   setup() {
     const messageStore = useMessageStore()
     const chatStore = useChatStore()
+    const groupStore = useGroupStore()
 
     return {
       messageStore,
       chatStore,
+      groupStore,
     }
   },
   data() {
@@ -486,6 +504,28 @@ export default {
   computed: {
     message() {
       return this.messageStore.byId(this.id)
+    },
+    groups() {
+      const ret = {}
+
+      if (this.message) {
+        console.log(this.message)
+        this.message.groups.forEach((g) => {
+          const thegroup = this.groupStore.get(g.groupid)
+
+          if (thegroup) {
+            ret[g.groupid] = thegroup
+
+            // Better to link to the group by name if possible to avoid nuxt generate creating explore pages for the
+            // id variants.
+            ret[g.groupid].exploreLink = thegroup
+              ? thegroup.nameshort
+              : g.groupid
+          }
+        })
+      }
+
+      return ret
     },
     unseen() {
       // We want all the chats from replies.  We fetch them in default.vue, here we only need to

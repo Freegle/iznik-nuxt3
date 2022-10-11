@@ -16,7 +16,7 @@
         two.
       </p>
     </template>
-    <template #modal-footer>
+    <template #footer>
       <b-button variant="white" @click="hide"> Cancel </b-button>
       <b-button variant="primary" @click="confirm">
         Got it - please nudge them

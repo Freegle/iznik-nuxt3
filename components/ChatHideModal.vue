@@ -15,7 +15,7 @@
         </b-col>
       </b-row>
     </template>
-    <template #modal-footer>
+    <template #footer>
       <b-button variant="white" @click="hide"> Cancel </b-button>
       <b-button variant="primary" @click="confirm"> Confirm </b-button>
     </template>

@@ -14,7 +14,7 @@
           class="mt-2"
         />
       </div>
-      <template #modal-footer>
+      <template #footer>
         <b-button variant="white" @click="hide"> Close </b-button>
       </template>
     </b-modal>

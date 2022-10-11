@@ -41,6 +41,7 @@
 </template>
 <script>
 import { useRoute } from 'vue-router'
+import { useGroupStore } from '../../../stores/group'
 import { buildHead } from '~/composables/useBuildHead'
 import { useMessageStore } from '~/stores/message'
 import { useAuthStore } from '~/stores/auth'
@@ -56,9 +57,9 @@ export default {
     GlobalWarning,
   },
   async setup() {
-    console.log('Setup')
     const authStore = useAuthStore()
     const messageStore = useMessageStore()
+    const groupStore = useGroupStore()
 
     const route = useRoute()
 
@@ -72,6 +73,21 @@ export default {
 
     try {
       message = await messageStore.fetch(id, true)
+
+      // Get the groups into store too.
+      const promises = []
+      message.groups.forEach((g) => {
+        console.log('Consider get group', g)
+        if (!groupStore.get(g.groupid)) {
+          try {
+            promises.push(groupStore.fetch(g.groupid))
+          } catch (e) {
+            console.log('Fetch fail', e)
+          }
+        }
+      })
+
+      await Promise.all(promises)
 
       useHead(buildHead(message ? message.subject : 'My Posts', null))
 
@@ -105,6 +121,8 @@ export default {
     }
 
     return {
+      authStore,
+      groupStore,
       messageStore,
       missing,
       id,

@@ -49,7 +49,7 @@
           @error.native="brokenImage"
         />
       </template>
-      <template #modal-footer>
+      <template #footer>
         <b-button variant="white" @click="zoom = false"> Close </b-button>
       </template>
     </b-modal>
