@@ -307,9 +307,3 @@ export default {
   },
 }
 </script>
-<style scoped lang="scss">
-.unpromise__slash {
-  transform: rotate(180deg);
-  color: $color-red;
-}
-</style>

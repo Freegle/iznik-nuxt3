@@ -19,11 +19,11 @@
     >
       <span
         v-if="user.userid > 0"
-        class="text--large font-weight-bold mt-1 text-left select"
+        class="text--large font-weight-bold mt-1 text-start select"
       >
         {{ user.displayname }}
       </span>
-      <span v-else class="text--large font-weight-bold mt-1 text-left select">
+      <span v-else class="text--large font-weight-bold mt-1 text-start select">
         <span v-if="availableinitially === 1">Someone else</span>
         <span v-else>Other people</span>
       </span>

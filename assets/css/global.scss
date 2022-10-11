@@ -293,6 +293,10 @@ label {
 }
 
 // Bootstrap 4 class compatibility.  TODO MINOR CSS remove.
+.text-left {
+  @extend .text-start;
+}
+
 .border-left {
   @extend .border-start
 }

@@ -19,6 +19,7 @@
         >
           <div>
             <p>You can share using these buttons:</p>
+            <!--            TODO Only show similar buttons to the ones in MessageShareModal-->
             <b-list-group horizontal class="flex-wrap">
               <b-list-group-item>
                 <network network="facebook">

@@ -4,14 +4,13 @@
       <b-col cols="12" lg="6" offset-lg="3" class="p-0">
         <div>
           <GlobalWarning />
-          <div v-if="message">Show {{ message }}</div>
-          <!--          <MyMessage-->
-          <!--            v-if="message?.fromuser?.id === myid"-->
-          <!--            :id="id"-->
-          <!--            :show-old="true"-->
-          <!--            :expand="true"-->
-          <!--            :action="action"-->
-          <!--          />-->
+          <MyMessage
+            v-if="message?.fromuser === myid"
+            :id="id"
+            :show-old="true"
+            :expand="true"
+            :action="action"
+          />
           <b-alert v-else variant="warning" class="mt-2" show>
             <h3>That post wasn't made from {{ me.email }}.</h3>
             <h5>{{ message.subject }}</h5>
@@ -47,13 +46,13 @@ import { useMessageStore } from '~/stores/message'
 import { useAuthStore } from '~/stores/auth'
 import NoticeMessage from '~/components/NoticeMessage'
 import GlobalWarning from '~/components/GlobalWarning'
-// const MyMessage = () => import('~/components/MyMessage.vue')
+const MyMessage = () => import('~/components/MyMessage.vue')
 // const DonationAskModal = () => import('~/components/DonationAskModal')
 
 export default {
   components: {
     NoticeMessage,
-    // MyMessage,
+    MyMessage,
     GlobalWarning,
   },
   async setup() {
@@ -63,7 +62,7 @@ export default {
 
     const route = useRoute()
 
-    const id = route.params.id
+    const id = parseInt(route.params.id)
     const action = route.params.action
 
     const myid = authStore.user?.id

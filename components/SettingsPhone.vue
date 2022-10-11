@@ -14,12 +14,12 @@
             <b-button variant="white" @click="savePhone">
               <v-icon
                 v-if="savingPhone"
-                name="sync"
+                icon="sync"
                 class="text-success fa-spin"
               />
               <v-icon
                 v-else-if="savedPhone"
-                name="check"
+                icon="check"
                 class="text-success"
               />
               <v-icon v-else name="save" />
@@ -34,9 +34,9 @@
         class="align-self-start"
         @click="removePhone"
       >
-        <v-icon v-if="removingPhone" name="sync" class="text-success fa-spin" />
-        <v-icon v-else-if="removedPhone" name="check" class="text-success" />
-        <v-icon v-else name="trash-alt" />
+        <v-icon v-if="removingPhone" icon="sync" class="text-success fa-spin" />
+        <v-icon v-else-if="removedPhone" icon="check" class="text-success" />
+        <v-icon v-else icon="trash-alt" />
         Remove
       </b-button>
     </div>
