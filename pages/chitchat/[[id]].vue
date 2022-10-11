@@ -294,7 +294,21 @@ export default {
       },
     },
     newsfeed() {
-      return Object.values(this.newsfeedStore.feed)
+      let ret = Object.values(this.newsfeedStore.feed)
+
+      // Suppress duplicate posts.
+      ret = ret.filter((item, index) => {
+        if (index === 0) {
+          return true
+        }
+
+        return (
+          item.userid !== ret[index - 1].userid ||
+          item.message !== ret[index - 1].message
+        )
+      })
+
+      return ret
     },
     newsfeedToShow() {
       if (this.id) {
