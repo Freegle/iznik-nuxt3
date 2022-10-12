@@ -6,7 +6,6 @@ export default {
     replyToSend() {
       // This is here because we can arrive back at the site after a login which was triggered because we were
       // trying to reply.
-      console.log('Compute reply', this.me)
       if (this.me) {
         const replyStore = useReplyStore()
         const ret = {
@@ -14,7 +13,6 @@ export default {
           replyMessage: replyStore.replyMessage,
           replyingAt: replyStore.replyingAt,
         }
-        console.log('Reply', ret)
 
         if (
           ret &&
@@ -25,7 +23,6 @@ export default {
         ) {
           // We have a fairly recent reply to send.  Don't want to send old replies which somehow get stuck in
           // local storage.
-          console.log('Recent')
           return ret
         }
       }

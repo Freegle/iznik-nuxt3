@@ -77,7 +77,6 @@ export default {
       // Get the groups into store too.
       const promises = []
       message.groups.forEach((g) => {
-        console.log('Consider get group', g)
         if (!groupStore.get(g.groupid)) {
           try {
             promises.push(groupStore.fetch(g.groupid))

@@ -15,7 +15,7 @@
             freegling too!
           </p>
         </NoticeMessage>
-        <p>You can share using these buttons:</p>
+        <p class="mt-1">You can share using these buttons:</p>
         <b-list-group horizontal class="flex-wrap">
           <b-list-group-item>
             <ShareNetwork

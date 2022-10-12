@@ -172,5 +172,10 @@ export const useMessageStore = defineStore({
       return key in this.bounds ? this.bounds[key] : []
     },
     all: (state) => Object.values(state.list),
+    byUser: (state) => (userid) => {
+      return Object.values(Object.values(state.list)).filter((msg) => {
+        return msg.fromuser === userid
+      })
+    },
   },
 })

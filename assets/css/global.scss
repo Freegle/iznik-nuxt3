@@ -31,6 +31,12 @@ html {
   color: $colour-info-fg !important;
 }
 
+.badge.bg-info {
+  background-color: $colour-secondary !important;
+  color: white !important;
+
+}
+
 .border-info {
   border-color: $colour-info-bg !important;
 }

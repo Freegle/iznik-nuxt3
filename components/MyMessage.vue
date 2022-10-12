@@ -6,8 +6,8 @@
         class="mb-1 bnuorder"
         :border-variant="expanded ? 'primary' : 'success'"
       >
-        <b-card-body class="p-2">
-          <b-card-text class="d-flex justify-content-between flex-wrap">
+        <b-card-body class="p-2 w-100">
+          <b-card-text class="d-flex justify-content-between flex-wrap w-100">
             <div>
               <h3 class="text-wrap flex-shrink-2 mr-2 mb-0 text-start">
                 {{ message.subject }}
@@ -106,11 +106,11 @@
             :v-b-toggle="'mypost-' + message.id"
             block
             variant="white"
-            class="text-start text-truncate noborder hover p-1 p-md-2"
+            class="text-start text-truncate noborder hover p-1 p-md-2 w-100"
             @click="toggle"
           >
-            <div class="d-flex justify-content-between">
-              <div class="d-flex flex-column">
+            <div class="d-flex justify-content-between w-100">
+              <div class="d-flex flex-column w-100">
                 <h3 class="text-wrap flex-shrink-2 mr-2 mb-0">
                   <span v-if="message.isdraft">
                     {{ message.type.toUpperCase() }}: {{ message.subject }} ({{
@@ -130,7 +130,7 @@
                 </h3>
                 <div
                   v-for="group in message.groups"
-                  :key="'message-' + message.id + '-' + group.id"
+                  :key="'message-' + message.id + '-' + group.groupid"
                   class="small text-muted text-wrap"
                 >
                   {{ timeago(group.arrival) }} on
@@ -163,12 +163,13 @@
               </span>
             </div>
             <div class="d-flex flex-wrap">
-              <div v-if="message.replycount > 0 && !expanded" class="mr-2">
+              <div v-if="message.replycount > 0 && !expanded" class="mr-2 mt-1">
                 <b-badge variant="info">
                   <v-icon icon="user" class="fa-fw" />
                   {{
-                    message.replycount
-                      | pluralize(['reply', 'replies'], { includeNumber: true })
+                    message.replycount === 1
+                      ? '1 reply'
+                      : message.replycount + ' replies'
                   }}
                 </b-badge>
               </div>
@@ -193,9 +194,9 @@
                 <div v-else class="ml-1 text-info">
                   <MyMessagePromisedTo
                     v-for="p in promisedTo"
+                    :id="message.id"
                     :key="'promised-' + p.id"
                     :promise="p"
-                    :message="message"
                     :replyusers="replyusers"
                   />
                 </div>
@@ -306,7 +307,7 @@
         </b-card-header>
         <b-collapse
           :id="'mypost-' + message.id"
-          :visible="expanded"
+          v-model="expanded"
           role="tabpanel"
           @show="expanded = true"
           @hidden="expanded = false"
@@ -358,8 +359,9 @@
                   </div>
                 </div>
                 <hr />
+                <!--                TODO-->
                 <table
-                  v-if="replies.length > 0"
+                  v-if="replies.length > 0 && replies.length < 0"
                   class="table table-borderless table-striped mb-0"
                 >
                   <tbody>
@@ -397,8 +399,8 @@
     </div>
     <OutcomeModal
       v-if="showOutcomeModal"
+      :id="id"
       ref="outcomeModal"
-      :message="message"
       @outcome="hide = true"
     />
     <MessageShareModal
@@ -419,9 +421,12 @@
 </template>
 <script>
 import ReadMore from 'vue-read-more3/src/ReadMoreComponent'
+import { useRouter } from 'nuxt/app'
 import { useMessageStore } from '../stores/message'
 import { useChatStore } from '../stores/chat'
 import { useGroupStore } from '../stores/group'
+import { useUserStore } from '../stores/user'
+import { useTrystStore } from '../stores/tryst'
 import MessagePhotosModal from '@/components/MessagePhotosModal'
 import MyMessagePromisedTo from '@/components/MyMessagePromisedTo'
 import PromiseModal from '~/components/PromiseModal'
@@ -479,15 +484,21 @@ export default {
       default: false,
     },
   },
-  setup() {
+  async setup(props) {
     const messageStore = useMessageStore()
     const chatStore = useChatStore()
     const groupStore = useGroupStore()
+    const userStore = useUserStore()
+    const trystStore = useTrystStore()
+
+    await messageStore.fetch(props.id)
 
     return {
       messageStore,
       chatStore,
       groupStore,
+      userStore,
+      trystStore,
     }
   },
   data() {
@@ -509,7 +520,6 @@ export default {
       const ret = {}
 
       if (this.message) {
-        console.log(this.message)
         this.message.groups.forEach((g) => {
           const thegroup = this.groupStore.get(g.groupid)
 
@@ -656,8 +666,8 @@ export default {
 
       if (this.message && this.message.replies) {
         for (const reply of this.message.replies) {
-          if (!retids.includes(reply.user.id)) {
-            ret.push(reply.user)
+          if (!retids.includes(reply.userid)) {
+            ret.push(reply.userid)
             retids[reply.userid] = true
           }
         }
@@ -668,10 +678,11 @@ export default {
     chats() {
       // We want all the chats which reference this message.  We fetch them in myposts, here we only need to
       // get them from the store
-      const chats = this.$store.getters['chats/list']
+      const chats = this.chatStore.list ? this.chatStore.list : []
       const ret = []
 
       for (const chat of chats) {
+        // TODO Chat doesn't return refmsgids yet.
         if (chat.refmsgids) {
           if (chat.refmsgids.includes(this.message.id)) {
             // This chat references this message
@@ -691,10 +702,10 @@ export default {
         this.message.promises.length
       ) {
         this.message.promises.forEach((p) => {
-          const user = this.$store.getters['user/get'](p.userid)
+          const user = this.userStore.byId(p.userid)
 
           if (user) {
-            const tryst = this.$store.getters['tryst/getByUser'](p.userid)
+            const tryst = this.trystStore.getByUser(p.userid)
             const date = tryst
               ? this.$dayjs(tryst.arrangedfor).format('dddd Do HH:mm a')
               : null
@@ -731,12 +742,7 @@ export default {
           // We may need to fetch user info for promises.
           if (newVal.promises) {
             newVal.promises.forEach((p) => {
-              const user = this.$store.getters['user/get'](p.userid)
-              if (!user) {
-                this.$store.dispatch('user/fetch', {
-                  id: p.userid,
-                })
-              }
+              this.userStore.fetch(p.userid)
             })
           }
         }
@@ -773,7 +779,8 @@ export default {
   },
   methods: {
     toggle() {
-      this.$root.$emit('bv::toggle::collapse', 'mypost-' + this.message.id)
+      console.log('Toggle')
+      this.expanded = !this.expanded
     },
     showPhotos() {
       this.waitForRef('photoModal', () => {
@@ -811,19 +818,24 @@ export default {
     },
     async repost() {
       // Remove any partially composed messages we currently have, because they'll be confusing.
-      await this.$store.dispatch('compose/clearMessages')
+      await this.composeStore.clearMessages()
 
       // Add this message to the compose store so that it will show up on the compose page.
-      await this.$store.dispatch('compose/setMessage', {
-        id: this.message.id,
-        savedBy: this.message.fromuser,
-        item: this.message.item.name.trim(),
-        description: this.message.textbody
-          ? this.message.textbody.trim()
-          : null,
-        availablenow: this.message.availablenow,
-        type: this.message.type,
-      })
+      await this.composeStore.setMessage(
+        {
+          message: {
+            id: this.message.id,
+            savedBy: this.message.fromuser,
+            item: this.message.item.name.trim(),
+            description: this.message.textbody
+              ? this.message.textbody.trim()
+              : null,
+            availablenow: this.message.availablenow,
+            type: this.message.type,
+          },
+        },
+        this.me
+      )
 
       // Set the current location and nearby groups, too, since we're about to use them
       if (this.message.location) {
@@ -833,15 +845,16 @@ export default {
           },
         })
 
-        await this.$store.dispatch('compose/setPostcode', loc.data.locations[0])
+        await this.composeStore.setPostcode(loc.data.locations[0])
       }
 
-      await this.$store.dispatch('compose/setAttachmentsForMessage', {
-        id: this.message.id,
-        attachments: this.message.attachments,
-      })
+      await this.composeStore.setAttachmentsForMessage(
+        this.message.id,
+        this.message.attachments
+      )
 
-      this.$router.push(this.message.type === 'Offer' ? '/give' : '/find')
+      const router = useRouter()
+      router.push(this.message.type === 'Offer' ? '/give' : '/find')
     },
     hasOutcome(val) {
       let ret = false
@@ -885,5 +898,9 @@ img.attachment {
 .hover:hover {
   color: initial;
   background-color: $colour-success-bg !important;
+}
+
+:deep(.btn-content) {
+  width: 100%;
 }
 </style>
