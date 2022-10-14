@@ -62,7 +62,6 @@ export const useChatStore = defineStore({
       }
     },
     async markUnread(chatid, prevmsgid) {
-      console.log('MArkunread', chatid, prevmsgid)
       await api(this.config).chat.markRead(chatid, prevmsgid, true)
       await this.fetchChat(chatid)
     },
@@ -196,6 +195,22 @@ export const useChatStore = defineStore({
       return state.list
         ? state.list.reduce((total, chat) => (total += chat.unseen), 0)
         : 0
+    },
+    toUser: (state) => (id) => {
+      // We look in listById not list.  This is because we might fetch a chat that isn't in the ones returned by
+      // list, and it would get removed from list by the next poll.  But it will stay in listById.
+      let ret = null
+
+      for (const c in state.listById) {
+        if (
+          state.listById[c].chattype === 'User2User' &&
+          state.listById[c].otheruid === id
+        ) {
+          ret = state.listById[c]
+          break
+        }
+      }
+      return ret
     },
   },
 })

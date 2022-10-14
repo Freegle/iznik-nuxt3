@@ -188,7 +188,11 @@
                 </b-badge>
               </div>
               <div v-else-if="message.promisecount > 0" class="mr-2">
-                <b-badge v-if="promisedTo.length === 0" variant="success">
+                <b-badge
+                  v-if="promisedTo.length === 0"
+                  variant="success"
+                  class="mt-1"
+                >
                   <v-icon icon="handshake" class="fa-fw" /> Promised
                 </b-badge>
                 <div v-else class="ml-1 text-info">
@@ -359,9 +363,8 @@
                   </div>
                 </div>
                 <hr />
-                <!--                TODO-->
                 <table
-                  v-if="replies.length > 0 && replies.length < 0"
+                  v-if="replies.length > 0"
                   class="table table-borderless table-striped mb-0"
                 >
                   <tbody>
@@ -373,9 +376,9 @@
                         :taken="taken"
                         :received="received"
                         :withdrawn="withdrawn"
-                        :closest="reply.user.id === closestUser"
-                        :best="reply.user.id === bestRatedUser"
-                        :quickest="reply.user.id === quickestUser"
+                        :closest="reply.userid === closestUser"
+                        :best="reply.userid === bestRatedUser"
+                        :quickest="reply.userid === quickestUser"
                       />
                     </tr>
                   </tbody>
@@ -577,26 +580,22 @@ export default {
       return rejected
     },
     replies() {
-      if (this.message.isdraft) {
-        return []
-      } else {
-        // Show the replies with unseen messages first, then most recent
-        // console.log('Sort replies', this.message.replies, this)
-        const self = this
-        return [...this.message.replies].sort((a, b) => {
-          const aunseen = self.countUnseen(a)
-          const bunseen = self.countUnseen(b)
-          const adate = new Date(a.lastdate).getTime()
-          const bdate = new Date(b.lastdate).getTime()
+      // Show the replies with unseen messages first, then most recent
+      // console.log('Sort replies', this.message.replies, this)
+      const self = this
+      return [...this.message.replies].sort((a, b) => {
+        const aunseen = self.countUnseen(a)
+        const bunseen = self.countUnseen(b)
+        const adate = new Date(a.lastdate).getTime()
+        const bdate = new Date(b.lastdate).getTime()
 
-          // console.log('Unseen', aunseen, bunseen, adate, bdate)
-          if (aunseen !== bunseen) {
-            return bunseen - aunseen
-          } else {
-            return bdate - adate
-          }
-        })
-      }
+        // console.log('Unseen', aunseen, bunseen, adate, bdate)
+        if (aunseen !== bunseen) {
+          return bunseen - aunseen
+        } else {
+          return bdate - adate
+        }
+      })
     },
     closestUser() {
       let ret = null
@@ -779,7 +778,6 @@ export default {
   },
   methods: {
     toggle() {
-      console.log('Toggle')
       this.expanded = !this.expanded
     },
     showPhotos() {

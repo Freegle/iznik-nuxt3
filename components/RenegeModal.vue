@@ -126,7 +126,6 @@ export default {
         }
       }
 
-      console.log('Opeionts', options)
       return options
     },
     userOptions() {

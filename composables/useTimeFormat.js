@@ -25,6 +25,10 @@ export function timeadapt(val) {
   }
 }
 
+export function datelocale(val) {
+  return dayjs(val).toLocaleString()
+}
+
 export function dateonly(val) {
   return dayjs(val).format('Do MMMM, YYYY')
 }

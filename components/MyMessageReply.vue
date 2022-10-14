@@ -5,21 +5,21 @@
       <div class="d-flex flex-column justify-content-start user">
         <div class="d-flex mr-4 clickme" @click="showProfileModal">
           <ProfileImage
-            :image="reply.user.profile.turl"
+            :image="replyuser.profile.paththumb"
             class="m-1 d-none d-md-block"
             is-thumbnail
             size="sm"
           />
           <ProfileImage
-            :image="reply.user.profile.turl"
+            :image="replyuser.profile.paththumb"
             class="m-1 d-block d-md-none"
             is-thumbnail
             size="lg"
           />
           <!-- eslint-disable-next-line -->
-            <span class="align-middle mt-1" v-if="unseen > 0"><strong>{{ reply.user.displayname }}</strong></span>
+            <span class="align-middle mt-1" v-if="unseen > 0"><strong>{{ replyuser.displayname }}</strong></span>
           <!-- eslint-disable-next-line -->
-            <span v-else class="align-middle mt-1"><strong>{{ reply.user.displayname }}</strong></span>
+            <span v-else class="align-middle mt-1"><strong>{{ replyuser.displayname }}</strong></span>
         </div>
       </div>
       <div class="badges d-flex flex-wrap justify-content-end">
@@ -39,34 +39,32 @@
           </b-badge>
         </div>
         <SupporterInfo
-          v-if="reply.user.supporter"
+          v-if="replyuser.supporter"
           class="mt-1 mr-1 d-flex flex-column justify-content-center"
         />
       </div>
       <div
         class="pl-1 flex-shrink-1 ratings d-flex d-md-none justify-content-end"
       >
-        <UserRatings :id="reply.user.id" size="sm" />
+        <UserRatings :id="replyuser.id" size="sm" />
       </div>
       <div
         class="pl-1 flex-shrink-1 ratings d-none d-md-flex justify-content-end w-100 pr-1"
       >
-        <UserRatings :id="reply.user.id" />
+        <UserRatings :id="replyuser.id" />
       </div>
       <div class="d-flex flex-column justify-content-center wrote">
         <div>
           <div class="text-muted small mb-1">
-            <span v-if="reply.lastuserid !== myid"> last wrote to you </span>
-            <span v-else> you last sent </span>
-            <span :title="$dayjs(reply.lastdate).toLocaleString()">
-              {{ timeago(reply.lastdate) }}
+            <span :title="replylocale">
+              {{ replyago }}
             </span>
           </div>
           <span v-if="unseen > 0" class="bg-white snippet text-primary">
-            {{ reply.snippet }}...
+            {{ chat?.snippet }}...
           </span>
-          <span v-else-if="reply.snippet" class="bg-white snippet">
-            {{ reply.snippet }}...
+          <span v-else-if="chat?.snippet" class="bg-white snippet">
+            {{ chat?.snippet }}...
           </span>
           <span v-else class="ml-4"> ... </span>
         </div>
@@ -76,7 +74,7 @@
           <b-button
             v-if="promised && !taken && !withdrawn"
             variant="warning"
-            class="align-middle mt-1 mb-1"
+            class="align-middle mt-1 mb-1 mr-2"
             @click="unpromise"
           >
             <v-icon>
@@ -88,28 +86,15 @@
           <b-button
             v-else-if="message.type === 'Offer' && !taken && !withdrawn"
             variant="primary"
-            class="align-middle mt-1 mb-1"
+            class="align-middle mt-1 mb-1 mr-2"
             @click="promise"
           >
             <v-icon icon="handshake" /> Promise
           </b-button>
           <b-button
             variant="secondary"
-            class="d-none d-sm-inline-block align-middle mt-1 mb-1 mr-1"
-            @click="chat(true)"
-          >
-            <b-badge v-if="unseen > 0" variant="danger">
-              {{ unseen }}
-            </b-badge>
-            <span v-else>
-              <v-icon icon="comments" />
-            </span>
-            Chat
-          </b-button>
-          <b-button
-            variant="secondary"
-            class="d-inline-block d-sm-none align-middle mt-1 mb-1 mr-1"
-            @click="chat(false)"
+            class="align-middle mt-1 mb-1 mr-1"
+            @click="openChat"
           >
             <b-badge v-if="unseen > 0" variant="danger">
               {{ unseen }}
@@ -126,26 +111,31 @@
       ref="promise"
       :messages="[message]"
       :selected-message="message.id"
-      :users="[reply.user]"
-      :selected-user="reply.user.id"
+      :users="[replyuser]"
+      :selected-user="replyuser.id"
     />
     <RenegeModal
       ref="renege"
       :messages="[message]"
       :selected-message="message.id"
-      :users="[reply.user]"
-      :selected-user="reply.user.id"
+      :users="[replyuser]"
+      :selected-user="replyuser.id"
     />
     <ProfileModal
-      v-if="showProfile && reply && reply.user"
-      :id="reply.user.id"
+      v-if="showProfile && reply && replyuser"
+      :id="replyuser.id"
       ref="profile"
     />
   </div>
 </template>
 <script>
+import { useRouter } from 'nuxt/app'
+import { useUserStore } from '../stores/user'
+import { useMessageStore } from '../stores/message'
+import { useChatStore } from '../stores/chat'
 import SupporterInfo from '~/components/SupporterInfo'
 import ProfileImage from '~/components/ProfileImage'
+import { timeago, datelocale } from '~/composables/useTimeFormat'
 
 const PromiseModal = () => import('./PromiseModal')
 const RenegeModal = () => import('./RenegeModal')
@@ -161,7 +151,6 @@ export default {
     ProfileImage,
     ProfileModal,
   },
-
   props: {
     message: {
       type: Object,
@@ -206,12 +195,53 @@ export default {
       default: false,
     },
   },
+  async setup(props) {
+    const userStore = useUserStore()
+    const messageStore = useMessageStore()
+    const chatStore = useChatStore()
+
+    const promises = []
+
+    promises.push(userStore.fetch(props.reply.userid))
+
+    const chat = chatStore.toUser(props.reply.userid)
+
+    if (!chat) {
+      // Probably an old reply that isn't fetched in the default chat list.  Fetch it.
+      console.log('Need to fetch chat', props.reply.userid)
+      promises.push(
+        chatStore.openChatToUser({
+          userid: props.reply.userid,
+        })
+      )
+    }
+
+    await Promise.all(promises)
+
+    return {
+      userStore,
+      messageStore,
+      chatStore,
+    }
+  },
   data() {
     return {
       showProfile: false,
     }
   },
   computed: {
+    chat() {
+      return this.chatStore.toUser(this.reply.userid)
+    },
+    replyuser() {
+      return this.userStore.byId(this.reply.userid)
+    },
+    replyago() {
+      return timeago(this.chat?.lastdate)
+    },
+    replylocale() {
+      return datelocale(this.chat?.lastdate)
+    },
     unseen() {
       // See if this reply has unseen messages in the chats.
       let unseen = 0
@@ -227,7 +257,7 @@ export default {
     promised() {
       if (this.message.promisecount) {
         for (const promise of this.message.promises) {
-          if (promise.userid === this.reply.user.id) {
+          if (promise.userid === this.reply.userid) {
             return true
           }
         }
@@ -237,32 +267,9 @@ export default {
     },
   },
   methods: {
-    async chat(popup) {
-      // We might have closed off the chat, in which case it will no longer appear in our list.
-      const chats = this.$store.getters['chats/list']
-      let found = false
-      for (const chat of chats) {
-        if (parseInt(chat.id) === parseInt(this.reply.chatid)) {
-          found = chat.id
-        }
-      }
-
-      if (!found) {
-        // We did close it, so we need to reopen it.
-        found = await this.$store.dispatch('chats/openChatToUser', {
-          userid: this.reply.user.id,
-        })
-      }
-
-      if (found) {
-        if (popup) {
-          await this.$store.dispatch('popupchats/popup', {
-            id: this.reply.chatid,
-          })
-        } else {
-          this.$router.push('/chats/' + this.reply.chatid)
-        }
-      }
+    openChat() {
+      const router = useRouter()
+      router.push('/chats/' + this.chat?.id)
     },
     promise() {
       this.$refs.promise.show()
