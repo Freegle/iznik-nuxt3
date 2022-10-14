@@ -34,7 +34,11 @@ html {
 .badge.bg-info {
   background-color: $colour-secondary !important;
   color: white !important;
+}
 
+.badge.bg-success {
+  background-color: $color-green-background!important;
+  color: white !important;
 }
 
 .border-info {
