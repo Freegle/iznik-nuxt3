@@ -19,7 +19,6 @@ export const useGroupStore = defineStore({
       if (id) {
         if (isNaN(id)) {
           // Get by name.  Case-insensitive.
-          console.log('Get group by name', id)
           id = id.toLowerCase()
 
           if (!this.allGroups[id]) {
@@ -40,7 +39,8 @@ export const useGroupStore = defineStore({
 
         id = parseInt(id)
 
-        if (force || !this.list[id]) {
+        // If we don't have the settings, then we only have the copy of group data from list(), not the whole thing.
+        if (force || !this.list[id] || !this.list[id].settings) {
           if (this.fetching[id]) {
             // Already fetching
             await this.fetching[id]

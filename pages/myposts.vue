@@ -292,9 +292,7 @@
 </template>
 <script>
 import { useRoute } from 'vue-router'
-import dayjs from 'dayjs'
 import pluralize from 'pluralize'
-import { MESSAGE_EXPIRE_TIME, GROUP_REPOSTS } from '../constants'
 import InviteContacts from '../components/InviteContacts'
 import VisibleWhen from '../components/VisibleWhen'
 import { useGroupStore } from '../stores/group'
@@ -338,7 +336,11 @@ export default {
     useHead(
       buildHead(
         'My Posts',
-        "See OFFERs/WANTEDs that you've posted, and replies to them."
+        "See OFFERs/WANTEDs that you've posted, and replies to them.",
+        null,
+        {
+          class: 'overflow-y-scroll',
+        }
       )
     )
 
@@ -360,39 +362,6 @@ export default {
 
     const myid = authStore.user?.id
     const messages = await messageStore.fetchByUser(myid, false)
-
-    async function hasExpired(message) {
-      // Consider whether the message has expired.  It's lighter load on the server to do this here rather than
-      // when querying.
-      let expired = false
-
-      const group = await groupStore.fetch(message.groupid)
-
-      const daysago = dayjs().diff(dayjs(message.arrival), 'day')
-      const maxagetoshow = group.settings.maxagetoshow
-        ? group.settings.maxagetoshow
-        : MESSAGE_EXPIRE_TIME
-      const reposts = group.settings.reposts
-        ? group.settings.reposts
-        : GROUP_REPOSTS
-      const repost = message.type === 'Offer' ? reposts.offer : reposts.wanted
-      const maxreposts = repost * (reposts.max + 1)
-      const expiretime = Math.max(maxreposts, maxagetoshow)
-      expired = daysago > expiretime
-
-      return expired
-    }
-
-    for (const message of messages) {
-      if (!message.hasoutcome) {
-        const expired = await hasExpired(message)
-
-        if (expired) {
-          message.hasoutcome = true
-        }
-      }
-    }
-
     const expand = messages.length <= 5
 
     return {
@@ -624,26 +593,17 @@ export default {
       })
     },
     postSort(a, b) {
-      // Show promised items first, then by most recent activity.
+      // Show promised items first, then by most recently posted.
+      const showOld =
+        a.type === 'Offer' ? this.showOldOffers : this.showOldWanteds
 
-      if (a.promised && !b.promised) {
+      if (!showOld && a.promised && !b.promised) {
         return -1
-      } else if (b.promised && !a.promised) {
+      } else if (!showOld && b.promised && !a.promised) {
         return 1
       } else {
-        let adate = null
-        let bdate = null
-        if (a.lastdate && b.lastdate) {
-          adate = a.lastdate
-          bdate = b.lastdate
-        } else if (a.groups && a.groups.length && b.groups && b.groups.length) {
-          adate = a.groups[0].arrival
-          bdate = b.groups[0].arrival
-        } else {
-          adate = a.arrival
-          bdate = b.arrival
-        }
-
+        const adate = a.arrival
+        const bdate = b.arrival
         return new Date(bdate).getTime() - new Date(adate).getTime()
       }
     },

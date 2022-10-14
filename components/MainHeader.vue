@@ -78,12 +78,12 @@
               <div class="position-relative">
                 <v-icon icon="home" class="fa-2x" /><br />
                 <b-badge
-                  v-if="openPostCount"
+                  v-if="activePostsCount"
                   variant="info"
                   class="mypostsbadge"
-                  :title="openPostCountPlural"
+                  :title="activePostsCountPlural"
                 >
-                  {{ openPostCount }}
+                  {{ activePostsCount }}
                 </b-badge>
                 <span class="nav-item__text">My Posts</span>
               </div>
@@ -395,12 +395,12 @@
               <div class="position-relative">
                 <v-icon icon="home" class="fa-2x" /><br />
                 <b-badge
-                  v-if="openPostCount"
+                  v-if="activePostsCount"
                   variant="info"
                   class="mypostsbadge2"
-                  :title="openPostCountPlural"
+                  :title="activePostsCountPlural"
                 >
-                  {{ openPostCount }}
+                  {{ activePostsCount }}
                 </b-badge>
                 <span class="nav-item__text">My Posts</span>
               </div>
@@ -513,6 +513,7 @@ import axios from 'axios'
 import pluralize from 'pluralize'
 import { useMiscStore } from '../stores/misc'
 import { useNewsfeedStore } from '../stores/newsfeed'
+import { useMessageStore } from '../stores/message'
 import LoginModal from '~/components/LoginModal'
 import { useAuthStore } from '~/stores/auth'
 const NotificationOptions = () => import('~/components/NotificationOptions')
@@ -530,6 +531,7 @@ export default {
     const authStore = useAuthStore()
     const miscStore = useMiscStore()
     const newsfeedStore = useNewsfeedStore()
+    const messageStore = useMessageStore()
     const route = useRoute()
     const router = useRouter()
 
@@ -537,6 +539,7 @@ export default {
       miscStore,
       authStore,
       newsfeedStore,
+      messageStore,
       route,
       router,
     }
@@ -547,6 +550,7 @@ export default {
       logo: '/icon.png',
       unreadNotificationCount: 0,
       chatCount: 0,
+      activePostsCount: 0,
     }
   },
   computed: {
@@ -581,11 +585,10 @@ export default {
     newsCountPlural() {
       return pluralize('unread ChitChat post', this.newsCount, true)
     },
-    openPostCount() {
-      return this.me ? this.me.openposts : 0
-    },
-    openPostCountPlural() {
-      return pluralize('open post', this.openPostCount, { includeNumber: true })
+    activePostsCountPlural() {
+      return pluralize('open post', this.activePostsCount, {
+        includeNumber: true,
+      })
     },
   },
   watch: {
@@ -666,9 +669,21 @@ export default {
       }
     },
     async getCounts() {
-      // TODO
-      await this.newsfeedStore.fetchCount()
-      // await this.fetchMe(['openposts'], true)
+      if (this.myid) {
+        await this.newsfeedStore.fetchCount()
+
+        // Get the messages for the currently logged in user.  This will also speed up the My Posts page.
+        const messages = await this.messageStore.fetchByUser(this.myid, false)
+
+        this.activePostsCount = 0
+
+        if (messages) {
+          // Count messages with no outcome
+          this.activePostsCount = messages.filter((msg) => {
+            return !msg.hasoutcome
+          }).length
+        }
+      }
 
       setTimeout(this.getCounts, 60000)
     },

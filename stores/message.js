@@ -1,11 +1,15 @@
 import { defineStore } from 'pinia'
+import dayjs from 'dayjs'
 import api from '~/api'
+import { GROUP_REPOSTS, MESSAGE_EXPIRE_TIME } from '~/constants'
+import { useGroupStore } from '~/stores/group'
 
 export const useMessageStore = defineStore({
   id: 'message',
   state: () => ({
     config: {},
     list: {},
+    byUser: {},
 
     // In bounds
     bounds: {},
@@ -93,8 +97,67 @@ export const useMessageStore = defineStore({
       }
       return ret
     },
-    async fetchByUser(userid, active) {
-      return await api(this.config).message.fetchByUser(userid, active)
+    async hasExpired(message) {
+      // Consider whether the message has expired.  It's lighter load on the server to do this here rather than
+      // when querying.
+      let expired = false
+
+      const groupStore = useGroupStore()
+      const group = await groupStore.fetch(message.groupid)
+
+      const daysago = dayjs().diff(dayjs(message.arrival), 'day')
+      const maxagetoshow = group.settings.maxagetoshow
+        ? group.settings.maxagetoshow
+        : MESSAGE_EXPIRE_TIME
+      const reposts = group.settings.reposts
+        ? group.settings.reposts
+        : GROUP_REPOSTS
+      const repost = message.type === 'Offer' ? reposts.offer : reposts.wanted
+      const maxreposts = repost * (reposts.max + 1)
+      const expiretime = Math.max(maxreposts, maxagetoshow)
+      expired = daysago > expiretime
+
+      return expired
+    },
+    async fetchByUser(userid, active, force) {
+      let messages = []
+
+      const promise = api(this.config).message.fetchByUser(userid, active)
+
+      if (force || !this.byUser[userid]) {
+        messages = await promise
+
+        for (const message of messages) {
+          if (!message.hasoutcome) {
+            const expired = await this.hasExpired(message)
+
+            if (expired) {
+              message.hasoutcome = true
+            }
+          }
+        }
+
+        this.byUser[userid] = messages
+      } else if (this.byUser[userid]) {
+        // Fetch but don't wait
+        promise.then(async (msgs) => {
+          for (const message of msgs) {
+            if (!message.hasoutcome) {
+              const expired = await this.hasExpired(message)
+
+              if (expired) {
+                message.hasoutcome = true
+              }
+            }
+          }
+
+          this.byUser[userid] = msgs
+        })
+
+        messages = this.byUser[userid]
+      }
+
+      return messages
     },
     async view(id) {
       await api(this.config).message.view(id)
@@ -173,7 +236,7 @@ export const useMessageStore = defineStore({
     },
     all: (state) => Object.values(state.list),
     byUser: (state) => (userid) => {
-      return Object.values(Object.values(state.list)).filter((msg) => {
+      return Object.values(state.list).filter((msg) => {
         return msg.fromuser === userid
       })
     },
