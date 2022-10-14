@@ -175,7 +175,7 @@
               </div>
               <div
                 v-if="message.outcomes && message.outcomes.length > 0"
-                class="mr-2"
+                class="mr-2 mt-1"
               >
                 <b-badge v-if="taken" variant="success">
                   <v-icon icon="check" class="fa-fw" /> Taken

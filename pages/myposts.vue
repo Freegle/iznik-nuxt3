@@ -73,20 +73,20 @@
                   Stuff you're giving away.
                 </p>
                 <b-img
-                  v-if="busy && offers.length === 0"
+                  v-if="busyOffers && offers.length === 0"
                   lazy
                   src="~/static/loader.gif"
                   alt="Loading..."
                 />
                 <div
                   v-if="
-                    busy ||
+                    busyOffers ||
                     activeOfferCount > 0 ||
                     (showOldOffers && offers.length > 0)
                   "
                 >
                   <div
-                    v-for="message in offers"
+                    v-for="message in offersShown"
                     :key="'message-' + message.id"
                     class="p-0 text-left mt-1"
                   >
@@ -96,6 +96,11 @@
                       :expand="expand"
                     />
                   </div>
+                  <infinite-loading
+                    :key="infiniteIdOffers"
+                    :distance="distance"
+                    @infinite="loadMoreOffers"
+                  />
                 </div>
                 <div v-else>
                   <b-row>
@@ -157,13 +162,13 @@
                 </p>
                 <div
                   v-if="
-                    busy ||
+                    busyWanteds ||
                     activeWantedCount > 0 ||
                     (showOldWanteds && wanteds.length > 0)
                   "
                 >
                   <div
-                    v-for="message in wanteds"
+                    v-for="message in wantedsShown"
                     :key="'message-' + message.id"
                     class="p-0 text-left mt-1"
                   >
@@ -173,6 +178,11 @@
                       :expand="expand"
                     />
                   </div>
+                  <infinite-loading
+                    :key="infiniteIdWanteds"
+                    :distance="distance"
+                    @infinite="loadMoreWanteds"
+                  />
                 </div>
                 <div v-else>
                   <p>You have no active WANTEDs.</p>
@@ -211,7 +221,7 @@
                   These are also email alerts - we'll mail you matching posts.
                 </p>
                 <ul
-                  v-if="busy || (searches && Object.keys(searches).length > 0)"
+                  v-if="searches && Object.keys(searches).length > 0"
                   class="list-group list-group-horizontal flex-wrap"
                 >
                   <li
@@ -293,6 +303,7 @@ import { useMessageStore } from '../stores/message'
 import { useMiscStore } from '../stores/misc'
 import { useComposeStore } from '../stores/compose'
 import { buildHead } from '~/composables/useBuildHead'
+import InfiniteLoading from '~/components/InfiniteLoading'
 const JustPosted = () => import('~/components/JustPosted')
 const JobsTopBar = () => import('~/components/JobsTopBar')
 const MyMessage = () => import('~/components/MyMessage.vue')
@@ -314,6 +325,7 @@ export default {
     SidebarRight,
     // DonationAskModal,
     ExpectedRepliesWarning,
+    InfiniteLoading,
   },
   mixins: [buildHead],
   async setup() {
@@ -368,10 +380,6 @@ export default {
       const expiretime = Math.max(maxreposts, maxagetoshow)
       expired = daysago > expiretime
 
-      if (!expired) {
-        console.log('Not expired', message, group.settings, daysago, expiretime)
-      }
-
       return expired
     }
 
@@ -403,10 +411,16 @@ export default {
   data() {
     return {
       id: null,
-      busy: true,
+      busyOffers: true,
+      busyWanteds: true,
       context: null,
       showOldOffers: false,
       showOldWanteds: false,
+      offersToShow: 0,
+      wantedsToShow: 0,
+      infiniteIdOffers: 1,
+      infiniteIdWanteds: 1,
+      distance: 1000,
       removingSearch: null,
       removedSearch: null,
       donationGroup: null,
@@ -429,6 +443,12 @@ export default {
       )
       ret.sort(this.postSort)
       return ret
+    },
+    offersShown() {
+      return this.offers.slice(0, this.offersToShow)
+    },
+    wantedsShown() {
+      return this.wanteds.slice(0, this.wantedsToShow)
     },
     oldOfferCount() {
       let count = 0
@@ -505,6 +525,14 @@ export default {
       }
     },
   },
+  watch: {
+    offers() {
+      this.infiniteIdOffers++
+    },
+    wanteds() {
+      this.infiniteIdWanteds++
+    },
+  },
   mounted() {
     const lastask = this.miscStore.get('lastdonationask')
     let canask =
@@ -548,6 +576,30 @@ export default {
     },
     toggleOldWanted() {
       this.showOldWanteds = !this.showOldWanteds
+    },
+    async loadMoreOffers($state) {
+      this.offersToShow++
+
+      if (this.offersToShow > this.offers.length) {
+        this.offersToShow = this.offers.length
+        this.busyOffers = false
+        $state.complete()
+      } else {
+        await this.messageStore.fetch(this.offers[this.offersToShow - 1].id)
+        $state.loaded()
+      }
+    },
+    async loadMoreWanteds($state) {
+      this.wantedsToShow++
+
+      if (this.wantedsToShow > this.wanteds.length) {
+        this.wantedsToShow = this.wanteds.length
+        this.busyWanteds = false
+        $state.complete()
+      } else {
+        await this.messageStore.fetch(this.wanteds[this.wantedsToShow - 1].id)
+        $state.loaded()
+      }
     },
     async deleteSearch(id) {
       this.removingSearch = id
