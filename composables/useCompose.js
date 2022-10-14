@@ -235,7 +235,6 @@ export async function freegleIt(type, router) {
     // The params we pass from the results may crucially include new user information,
     // and depending on timing this may not appear in the first result, so look for one of those first.
     const params = {
-      justPosted: [],
       newuser: null,
       newpassword: null,
     }
@@ -256,7 +255,6 @@ export async function freegleIt(type, router) {
     if (results.length > 0 && results[0].groupid) {
       results.forEach((res) => {
         console.log('Process result', res)
-        params.justPosted.push(res.id)
         promises.push(messageStore.fetch(res.id))
       })
 

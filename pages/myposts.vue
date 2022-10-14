@@ -5,25 +5,19 @@
       <b-col cols="0" lg="3" class="p-0 pr-1">
         <VisibleWhen :at="['lg', 'xl']">
           <SidebarLeft
-            v-if="me && !justPosted"
+            v-if="me"
             :show-community-events="true"
             :show-bot-left="true"
           />
         </VisibleWhen>
       </b-col>
       <b-col cols="12" lg="6" class="p-0">
-        <ExpectedRepliesWarning
-          v-if="me && me.expectedreplies"
-          :count="me.expectedreplies"
-          :chats="me.expectedchats"
-        />
-        <div v-if="justPosted && justPosted.length">
-          <JustPosted
-            :ids="justPosted"
-            :newuser="newuser"
-            :newpassword="newpassword"
-          />
-        </div>
+        <!--        TODO Expected replies-->
+        <!--        <ExpectedRepliesWarning-->
+        <!--          v-if="me && me.expectedreplies"-->
+        <!--          :count="me.expectedreplies"-->
+        <!--          :chats="me.expectedchats"-->
+        <!--        />-->
         <div v-if="!me" class="d-flex justify-content-center mt-4 flex-wrap">
           <b-button variant="primary" size="lg" @click="forceLogin">
             Log in to continue <v-icon icon="angle-double-right" />
@@ -31,7 +25,8 @@
         </div>
         <div v-else>
           <VisibleWhen :at="['xs', 'sm', 'md']">
-            <JobsTopBar v-if="!justPosted" />
+            <!--            TODO Jobs-->
+            <!--            <JobsTopBar />-->
           </VisibleWhen>
           <b-card v-if="contactPicker" border-variant="info">
             <InviteContacts class="bg-white" />
@@ -279,7 +274,7 @@
       <b-col cols="0" lg="3" class="p-0 pl-1">
         <VisibleWhen :at="['lg', 'xl']">
           <sidebar-right
-            v-if="me && !justPosted"
+            v-if="me"
             show-volunteer-opportunities
             show-job-opportunities
           />
@@ -302,27 +297,25 @@ import { useMiscStore } from '../stores/misc'
 import { useComposeStore } from '../stores/compose'
 import { buildHead } from '~/composables/useBuildHead'
 import InfiniteLoading from '~/components/InfiniteLoading'
-const JustPosted = () => import('~/components/JustPosted')
-const JobsTopBar = () => import('~/components/JobsTopBar')
+// const JobsTopBar = () => import('~/components/JobsTopBar')
 const MyMessage = () => import('~/components/MyMessage.vue')
 const SidebarLeft = () => import('~/components/SidebarLeft')
 const SidebarRight = () => import('~/components/SidebarRight')
 // TODO Donations
 // const DonationAskModal = () => import('~/components/DonationAskModal')
-const ExpectedRepliesWarning = () =>
-  import('~/components/ExpectedRepliesWarning')
+// const ExpectedRepliesWarning = () =>
+//   import('~/components/ExpectedRepliesWarning')
 
 export default {
   components: {
     VisibleWhen,
     InviteContacts,
-    JustPosted,
-    JobsTopBar,
+    // JobsTopBar,
     MyMessage,
     SidebarLeft,
     SidebarRight,
     // DonationAskModal,
-    ExpectedRepliesWarning,
+    // ExpectedRepliesWarning,
     InfiniteLoading,
   },
   mixins: [buildHead],
@@ -356,7 +349,6 @@ export default {
 
     // We might have parameters from just having posted.
     const route = useRoute()
-    const justPosted = route.params.justPosted
     const newuser = route.params.newuser
     const newpassword = route.params.newpassword
 
@@ -370,7 +362,6 @@ export default {
       messageStore,
       miscStore,
       composeStore,
-      justPosted,
       newuser,
       newpassword,
       messages,

@@ -1,101 +1,6 @@
 <template>
   <div v-if="!hide">
-    <div v-if="justPosted">
-      <b-card
-        no-body
-        class="mb-1 bnuorder"
-        :border-variant="expanded ? 'primary' : 'success'"
-      >
-        <b-card-body class="p-2 w-100">
-          <b-card-text class="d-flex justify-content-between flex-wrap w-100">
-            <div>
-              <h3 class="text-wrap flex-shrink-2 mr-2 mb-0 text-start">
-                {{ message.subject }}
-                <b-badge v-if="message.availableinitially > 1" variant="info">
-                  {{ message.availablenow ? message.availablenow : '0' }} left
-                </b-badge>
-              </h3>
-              <read-more
-                v-if="message.textbody"
-                :text="message.textbody"
-                :max-chars="maxChars"
-                class="nopara"
-              />
-            </div>
-            <div
-              v-if="message.attachments.length > 0"
-              class="clickme position-relative"
-              @click="showPhotos"
-            >
-              <div class="small">
-                <b-badge
-                  v-if="message.attachments.length > 1"
-                  class="photobadge"
-                  variant="primary"
-                >
-                  {{ message.attachments.length }} <v-icon icon="camera" />
-                </b-badge>
-              </div>
-              <b-img
-                lazy
-                rounded
-                thumbnail
-                class="attachment p-0 square mb-1"
-                generator-unable-to-provide-required-alt=""
-                title="Item picture"
-                :src="message.attachments[0].paththumb"
-              />
-            </div>
-          </b-card-text>
-        </b-card-body>
-        <b-card-footer v-if="me" class="p-1">
-          <div class="d-flex justify-content-start flex-wrap">
-            <b-button
-              v-if="!rejected && !simple"
-              variant="primary"
-              title="Share"
-              class="m-1"
-              @click="share"
-            >
-              <v-icon icon="share-alt" /> Share
-            </b-button>
-            <b-button
-              v-if="message.canedit && message.location && message.item"
-              variant="secondary"
-              class="m-1"
-              @click="edit"
-            >
-              <v-icon icon="pen" /> Edit
-            </b-button>
-            <b-button
-              v-if="!rejected && message.type === 'Offer' && !taken"
-              variant="secondary"
-              class="m-1"
-              @click="outcome('Taken')"
-            >
-              <v-icon icon="check" /> Mark as TAKEN
-            </b-button>
-            <b-button
-              v-if="!rejected && message.type === 'Wanted' && !received"
-              variant="secondary"
-              class="m-1"
-              @click="outcome('Received')"
-            >
-              <v-icon icon="check" /> Mark as RECEIVED
-            </b-button>
-            <b-button
-              v-if="!rejected && !taken && !received && !withdrawn"
-              variant="secondary"
-              class="m-1"
-              @click="outcome('Withdrawn')"
-            >
-              <v-icon icon="trash-alt" /> Withdraw
-            </b-button>
-          </div>
-        </b-card-footer>
-      </b-card>
-    </div>
-    <div v-else-if="showOld || !message.outcomes || !message.outcomes.length">
+    <div v-if="showOld || !message.outcomes || !message.outcomes.length">
       <b-card
         no-body
         class="mb-1 bnuorder"
@@ -480,11 +385,6 @@ export default {
       type: String,
       required: false,
       default: null,
-    },
-    justPosted: {
-      type: Boolean,
-      required: false,
-      default: false,
     },
   },
   async setup(props) {
