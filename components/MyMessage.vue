@@ -602,8 +602,10 @@ export default {
       let dist = null
 
       if (this.replyusers.length > 1) {
-        this.replyusers.forEach((u) => {
-          if (dist === null || (u.info && u.info.milesaway < dist)) {
+        this.replyusers.forEach((uid) => {
+          const u = this.userStore.byId(uid)
+
+          if (u && (dist === null || (u.info && u?.info.milesaway < dist))) {
             dist = u.info.milesaway
             ret = u.id
           }
@@ -617,12 +619,10 @@ export default {
       let rating = null
 
       if (this.replyusers.length > 1) {
-        this.replyusers.forEach((u) => {
-          if (
-            u.info &&
-            u.info.ratings &&
-            u.info.ratings.Up + u.info.ratings.Down > 0
-          ) {
+        this.replyusers.forEach((uid) => {
+          const u = this.userStore.byId(uid)
+
+          if (u && u.info?.ratings?.Up + u.info?.ratings?.Down > 0) {
             const thisrating =
               u.info.ratings.Up / (u.info.ratings.Up + u.info.ratings.Down)
 
@@ -644,10 +644,12 @@ export default {
       let replytime = null
 
       if (this.replyusers.length > 1) {
-        this.replyusers.forEach((u) => {
+        this.replyusers.forEach((uid) => {
+          const u = this.userStore.byId(uid)
+
           if (
-            u.info &&
-            u.info.replytime &&
+            u &&
+            u.info?.replytime &&
             (replytime === null ||
               (u.info.replytime && u.info.replytime < replytime))
           ) {

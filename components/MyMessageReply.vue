@@ -208,7 +208,6 @@ export default {
 
     if (!chat) {
       // Probably an old reply that isn't fetched in the default chat list.  Fetch it.
-      console.log('Need to fetch chat', props.reply.userid)
       promises.push(
         chatStore.openChatToUser({
           userid: props.reply.userid,
