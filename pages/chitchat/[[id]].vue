@@ -247,10 +247,14 @@ export default {
 
       // Fetch the first few threads in parallel so that they are in the store.  This speeds up rendering the
       // first page.
-      const firstThreads = newsfeedStore.feed.slice(0, 5)
-      firstThreads.forEach((thread) => {
-        newsfeedStore.fetch(thread.id)
-      })
+      const feed = newsfeedStore.feed
+
+      if (feed?.length) {
+        const firstThreads = feed.slice(0, 5)
+        firstThreads.forEach((thread) => {
+          newsfeedStore.fetch(thread.id)
+        })
+      }
     }
 
     return {

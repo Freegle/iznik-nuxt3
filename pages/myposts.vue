@@ -353,8 +353,14 @@ export default {
     const newpassword = route.params.newpassword
 
     const myid = authStore.user?.id
-    const messages = await messageStore.fetchByUser(myid, false)
-    const expand = messages.length <= 5
+
+    let messages = []
+    let expand = false
+
+    if (myid) {
+      messages = await messageStore.fetchByUser(myid, false)
+      expand = messages.length <= 5
+    }
 
     return {
       authStore,
