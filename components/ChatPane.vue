@@ -24,7 +24,9 @@
                 chatmessage.id === chatmessages[chatmessages.length - 1].id
               "
               :prevmessage="
-                index < chatmessages.length ? chatmessages[index + 1].id : null
+                index + 1 < chatmessages.length
+                  ? chatmessages[index + 1].id
+                  : null
               "
               class="mb-1"
             />
