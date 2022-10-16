@@ -14,7 +14,9 @@ export default defineNuxtPlugin((nuxtApp) => {
         // When a component is conditional using a v-if, it sometimes takes more than one tick for it to appear.  So
         // we have a bit of a timer.
         if (this.$refs[name]) {
-          callback.apply(this)
+          setTimeout(() => {
+            callback.apply(this)
+          })
         } else {
           setTimeout(() => {
             this.waitForRef(name, callback)

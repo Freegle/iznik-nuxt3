@@ -94,7 +94,7 @@ export const useNewsfeedStore = defineStore({
 
       if (!threadhead) {
         console.log('New post, fetch feed')
-        this.fetchFeed()
+        await this.fetchFeed()
       } else {
         console.log('Fetch thread head', threadhead)
         await this.fetch(threadhead, true)

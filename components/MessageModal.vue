@@ -45,6 +45,7 @@
             <MessageExpanded
               v-else
               :id="id"
+              :key="bumpMessage"
               :replyable="replyable"
               :hide-close="hideClose"
               :actions="actions"
@@ -104,6 +105,7 @@ export default {
     return {
       modalShown: false,
       showImages: false,
+      bumpMessage: 1,
     }
   },
   computed: {
@@ -119,6 +121,14 @@ export default {
     },
     shown() {
       this.modalShown = true
+
+      // Bump the message, so that if we come back in again we'll re-render a new MessageExpanded with a blank
+      // reply section.
+      this.bumpMessage++
+    },
+    hide() {
+      this.$emit('hide')
+      this.showModal = false
     },
   },
 }

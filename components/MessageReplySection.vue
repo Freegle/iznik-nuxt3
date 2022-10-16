@@ -295,7 +295,6 @@ export default {
           // Now we can send the reply via chat.
           await this.$nextTick()
           await this.replyToPost()
-          this.sent()
         } else {
           // We're not logged in yet.  We need to force a log in.  Once that completes then either the watch in here
           // or default.vue will spot we have a reply to send and make it happen.
