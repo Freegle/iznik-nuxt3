@@ -1,9 +1,8 @@
 import BaseAPI from '@/api/BaseAPI'
 
 export default class UserSearchAPI extends BaseAPI {
-  async list(params) {
-    const { usersearches } = await this.$get('/usersearch', params)
-    return usersearches
+  async fetch(userid) {
+    return await this.$getv2('/user/' + userid + '/search')
   }
 
   del(id) {

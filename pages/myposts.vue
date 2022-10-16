@@ -211,49 +211,20 @@
             </template>
             <b-card-body class="p-1 p-lg-3">
               <b-card-text class="text-center">
-                <p v-if="searches.length > 0" class="text-muted">
+                <p v-if="searches?.length > 0" class="text-muted">
                   What you've recently searched for - click to search again.
                   These are also email alerts - we'll mail you matching posts.
                 </p>
                 <ul
-                  v-if="searches && Object.keys(searches).length > 0"
+                  v-if="searches?.length"
                   class="list-group list-group-horizontal flex-wrap"
                 >
-                  <li
+                  <UserSearch
                     v-for="search in searches"
                     :key="'search-' + search.id"
+                    :search="search"
                     class="text-left mt-1 list-group-item bg-white border text-nowrap mr-2"
-                  >
-                    <b-button
-                      :to="'/browse/' + search.term"
-                      variant="white d-inline"
-                    >
-                      <v-icon icon="search" /> {{ search.term }}
-                      <span class="text-muted small">{{
-                        searchAgo(search.daysago)
-                      }}</span>
-                    </b-button>
-                    <span
-                      class="ml-3 d-inline clickme"
-                      @click="deleteSearch(search.id)"
-                    >
-                      <v-icon
-                        v-if="removingSearch === search.id"
-                        icon="sync"
-                        class="text-success fa-spin"
-                      />
-                      <v-icon
-                        v-else-if="removedSearch === search.id"
-                        icon="check"
-                        class="text-success"
-                      />
-                      <v-icon
-                        v-else
-                        icon="trash-alt"
-                        title="Delete this search"
-                      />
-                    </span>
-                  </li>
+                  />
                 </ul>
                 <div v-else>
                   <p>Nothing here yet. Why not...</p>
@@ -288,6 +259,7 @@
 <script>
 import { useRoute } from 'vue-router'
 import pluralize from 'pluralize'
+import dayjs from 'dayjs'
 import InviteContacts from '../components/InviteContacts'
 import VisibleWhen from '../components/VisibleWhen'
 import { useGroupStore } from '../stores/group'
@@ -295,6 +267,7 @@ import { useAuthStore } from '../stores/auth'
 import { useMessageStore } from '../stores/message'
 import { useMiscStore } from '../stores/misc'
 import { useComposeStore } from '../stores/compose'
+import { useSearchStore } from '../stores/search'
 import { buildHead } from '~/composables/useBuildHead'
 import InfiniteLoading from '~/components/InfiniteLoading'
 // const JobsTopBar = () => import('~/components/JobsTopBar')
@@ -325,6 +298,7 @@ export default {
     const groupStore = useGroupStore()
     const miscStore = useMiscStore()
     const composeStore = useComposeStore()
+    const searchStore = useSearchStore()
 
     useHead(
       buildHead(
@@ -360,6 +334,9 @@ export default {
     if (myid) {
       messages = await messageStore.fetchByUser(myid, false)
       expand = messages.length <= 5
+
+      // No need to wait for searches - often below the fold.
+      searchStore.fetch(myid)
     }
 
     return {
@@ -368,6 +345,7 @@ export default {
       messageStore,
       miscStore,
       composeStore,
+      searchStore,
       newuser,
       newpassword,
       messages,
@@ -387,8 +365,6 @@ export default {
       infiniteIdOffers: 1,
       infiniteIdWanteds: 1,
       distance: 1000,
-      removingSearch: null,
-      removedSearch: null,
       donationGroup: null,
     }
   },
@@ -471,15 +447,17 @@ export default {
       return count
     },
     searches() {
-      // TODO searches
       // Show the searches within the last 90 days, most recent first.  Anything older is less likely to be relevant
       // and it stops it growing forever, forcing them to delete things.
-      // let ret = Object.values(this.$store.getters['searches/list'])
-      // ret = ret.filter((a) => a.daysago <= 90)
-      // ret.sort((a, b) => a.daysago - b.daysago)
-      //
-      // return ret
-      return []
+      let ret = this.searchStore.list
+      const now = dayjs()
+      ret = ret.filter((a) => {
+        const daysago = now.diff(dayjs(a.date), 'day')
+        return daysago <= 90
+      })
+      ret.sort((a, b) => a.daysago - b.daysago)
+
+      return ret
     },
     contactPicker() {
       if (process.server) {
@@ -567,23 +545,6 @@ export default {
         $state.loaded()
       }
     },
-    async deleteSearch(id) {
-      this.removingSearch = id
-
-      setTimeout(() => {
-        this.me.phone = null
-      }, 1000)
-
-      await this.$store.dispatch('searches/delete', {
-        id,
-      })
-
-      this.removingSearch = null
-      this.removedSearch = id
-      setTimeout(() => {
-        this.removedSearch = null
-      }, 2000)
-    },
     ask(groupid) {
       this.waitForRef('askmodal', () => {
         this.$refs.askmodal.show()
@@ -606,9 +567,6 @@ export default {
     },
     forceLogin() {
       this.authStore.forceLogin = true
-    },
-    searchAgo() {
-      return pluralize('day', this.oldWantdCount, true) + ' ago'
     },
   },
 }

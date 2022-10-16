@@ -21,6 +21,7 @@ import { useTrystStore } from './stores/tryst'
 import { useNotificationStore } from './stores/notification'
 import { useNewsfeedStore } from './stores/newsfeed'
 import { useReplyStore } from './stores/reply'
+import { useSearchStore } from './stores/search'
 
 const route = useRoute()
 
@@ -58,6 +59,7 @@ const trystStore = useTrystStore()
 const notificationStore = useNotificationStore()
 const newsfeedStore = useNewsfeedStore()
 const replyStore = useReplyStore()
+const searchStore = useSearchStore()
 
 groupStore.init(runtimeConfig)
 messageStore.init(runtimeConfig)
@@ -71,6 +73,7 @@ trystStore.init(runtimeConfig)
 notificationStore.init(runtimeConfig)
 newsfeedStore.init(runtimeConfig)
 replyStore.init(runtimeConfig)
+searchStore.init(runtimeConfig)
 
 // We use a key to force the whole page to re-render if we have logged in.  This is a sledgehammer way of
 // re-calling all the setup() methods etc.  Perhaps there's a better way to do this.
