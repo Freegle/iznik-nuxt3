@@ -1,8 +1,9 @@
 import BaseAPI from '@/api/BaseAPI'
 
 export default class StoriesAPI extends BaseAPI {
-  fetch(params) {
-    return this.$get('/stories', params)
+  fetchv2(id) {
+    console.log('Fetch', id)
+    return this.$getv2('/story/' + id)
   }
 
   async add(data) {

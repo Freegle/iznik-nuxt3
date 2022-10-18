@@ -10,7 +10,7 @@
       <b-col>
         <b-card variant="success" no-body>
           <b-card-header class="font-weight-bold">
-            {{ newsfeed?.story?.headline }}
+            {{ headline }}
           </b-card-header>
           <b-card-text class="p-2 preline">
             <b-img
@@ -24,8 +24,8 @@
               @click="showPhotoModal"
             />
             <read-more
-              v-if="story"
-              :text="story"
+              v-if="body"
+              :text="body"
               :max-chars="500"
               class="font-weight-bold preline forcebreak nopara"
             />
@@ -76,6 +76,9 @@
   </div>
 </template>
 <script>
+import ReadMore from 'vue-read-more3/src/ReadMoreComponent'
+import { useStoryStore } from '../stores/stories'
+import { useNewsfeedStore } from '../stores/newsfeed'
 import { twem } from '~/composables/useTwem'
 import NewsBase from '~/components/NewsBase'
 
@@ -90,16 +93,34 @@ export default {
     NewsPhotoModal,
     NewsUserIntro,
     NewsLoveComment,
+    ReadMore,
     // StoriesAddModal,
     // StoriesShareModal,
   },
   extends: NewsBase,
+  async setup(props) {
+    const storyStore = useStoryStore()
+    const newsfeedStore = useNewsfeedStore()
+
+    console.log('Props', props)
+    const newsfeed = newsfeedStore.byId(props.id)
+    await storyStore.fetch(newsfeed.storyid)
+
+    return {
+      storyStore,
+    }
+  },
   computed: {
     story() {
-      let story = this.newsfeed?.story?.story
-      story = story ? twem(story) : ''
+      return this.storyStore.byId(this.newsfeed?.storyid)
+    },
+    body() {
+      let story = twem(this.story?.story)
       story = story.trim()
       return story
+    },
+    headline() {
+      return this.story?.headline
     },
   },
   methods: {
