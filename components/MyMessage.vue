@@ -580,17 +580,9 @@ export default {
       // We want all the chats which reference this message.  We fetch them in myposts, here we only need to
       // get them from the store
       const chats = this.chatStore.list ? this.chatStore.list : []
-      const ret = []
-
-      for (const chat of chats) {
-        // TODO Chat doesn't return refmsgids yet.
-        if (chat.refmsgids) {
-          if (chat.refmsgids.includes(this.message.id)) {
-            // This chat references this message
-            ret.push(chat)
-          }
-        }
-      }
+      const ret = chats.filter((c) => {
+        return this.message.refchatids.includes(c.id)
+      })
 
       return ret
     },
