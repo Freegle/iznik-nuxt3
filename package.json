@@ -40,7 +40,7 @@
     "@vuelidate/validators": "^2.0.0-alpha.29",
     "autoprefixer": "10.4.5",
     "axios": "^0.26.1",
-    "bootstrap": "github:xvaara/bootstrap.git",
+    "bootstrap": "^5.2.2",
     "bootstrap-vue-3": "^0.3.11",
     "dayjs": "^1.11.0",
     "filepond": "^4.30.3",
