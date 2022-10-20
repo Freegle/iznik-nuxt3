@@ -522,7 +522,7 @@ export default {
         this.replyusers.forEach((uid) => {
           const u = this.userStore.byId(uid)
 
-          if (u && u.info?.ratings?.Up + u.info?.ratings?.Down > 0) {
+          if (u && u.info?.ratings?.Up + u.info?.ratings?.Down > 2) {
             const thisrating =
               u.info.ratings.Up / (u.info.ratings.Up + u.info.ratings.Down)
 
