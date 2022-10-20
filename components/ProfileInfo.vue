@@ -52,15 +52,15 @@
           <v-icon icon="info-circle" /> About this freegler
         </template>
         <b-card-body sub-title="" class="p-0 pt-1">
-          <p v-if="user.info.milesaway">
+          <p v-if="publicLocation">
             <v-icon icon="map-marker-alt" class="fa-fw" />
-            <span v-if="user.info.publiclocation">
-              <span v-if="user.info.publiclocation.location">
-                {{ user.info.publiclocation.location }}, {{ milesaway }}
+            <span v-if="publicLocation">
+              <span v-if="publicLocation.location">
+                {{ publicLocation.location }}, {{ milesaway }}
                 away.
               </span>
-              <span v-else-if="user.info.publiclocation.groupname">
-                {{ user.info.publiclocation.groupname }}
+              <span v-else-if="publicLocation.groupname">
+                {{ publicLocation.groupname }}
               </span>
               <span v-else> Unknown </span>
             </span>
@@ -205,6 +205,9 @@ export default {
       messageStore.fetch(message.id)
     })
 
+    // Get public location.
+    await userStore.fetchPublicLocation(props.id)
+
     return {
       userStore,
       messageStore,
@@ -220,6 +223,9 @@ export default {
   computed: {
     user() {
       return this.id ? this.userStore.byId(this.id) : null
+    },
+    publicLocation() {
+      return this.id ? this.userStore.publicLocationById(this.id) : null
     },
     activeOffers() {
       return this.active('Offer')

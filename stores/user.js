@@ -6,7 +6,9 @@ export const useUserStore = defineStore({
   state: () => ({
     config: {},
     list: {},
+    locationList: {},
     fetching: {},
+    fetchingLocation: {},
   }),
   actions: {
     init(config) {
@@ -36,6 +38,28 @@ export const useUserStore = defineStore({
 
       return this.list[id]
     },
+    async fetchPublicLocation(id, force) {
+      id = parseInt(id)
+
+      if (force || !this.locationList[id]) {
+        if (this.fetchingLocation[id]) {
+          await this.fetchingLocation[id]
+        } else {
+          this.fetchingLocation[id] = api(this.config).user.fetchPublicLocation(
+            id
+          )
+          const location = await this.fetchingLocation[id]
+
+          if (location) {
+            this.locationList[id] = location
+          }
+
+          this.fetchingLocation[id] = null
+        }
+      }
+
+      return this.locationList[id]
+    },
     async rate(id, rating, reason, text) {
       await api(this.config).user.rate(id, rating, reason, text)
       await this.fetch(id, true)
@@ -48,6 +72,9 @@ export const useUserStore = defineStore({
   getters: {
     byId: (state) => {
       return (id) => state.list[id]
+    },
+    publicLocationById: (state) => {
+      return (id) => state.locationList[id]
     },
   },
 })

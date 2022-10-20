@@ -18,10 +18,8 @@
         </span>
         <br />
         <span class="text-muted small">
-          <span v-if="user.info.publiclocation" class="pl-0">
-            <v-icon icon="map-marker-alt" />&nbsp;{{
-              user.info.publiclocation.display
-            }}
+          <span v-if="publicLocation" class="pl-0">
+            <v-icon icon="map-marker-alt" />&nbsp;{{ publicLocation.display }}
           </span>
           <span v-if="user.info.openoffers + user.info.openwanteds > 0">
             &bull;
@@ -57,6 +55,9 @@ export default {
 
     await userStore.fetch(props.id)
 
+    // Get public location.  Don't wait, as a bit slow.
+    userStore.fetchPublicLocation(props.id)
+
     return {
       userStore,
     }
@@ -64,6 +65,9 @@ export default {
   computed: {
     user() {
       return this.userStore.byId(this.id)
+    },
+    publicLocation() {
+      return this.id ? this.userStore.publicLocationById(this.id) : null
     },
     openoffers() {
       let ret = null

@@ -5,6 +5,10 @@ export default class UserAPI extends BaseAPI {
     return await this.$getv2('/user/' + id)
   }
 
+  async fetchPublicLocation(id) {
+    return await this.$getv2('/user/' + id + '/publiclocation')
+  }
+
   rate(id, rating, reason, text) {
     return this.$post('/user', {
       ratee: id,
