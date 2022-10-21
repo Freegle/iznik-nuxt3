@@ -3,6 +3,7 @@
 </template>
 <script>
 import { useNewsfeedStore } from '../stores/newsfeed'
+import { useUserStore } from '../stores/user'
 import { twem } from '~/composables/useTwem'
 
 export default {
@@ -30,6 +31,10 @@ export default {
     },
     userid() {
       return this.newsfeed?.userid
+    },
+    user() {
+      const userStore = useUserStore()
+      return userStore.byId(this.userid)
     },
   },
   methods: {

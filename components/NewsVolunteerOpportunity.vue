@@ -1,44 +1,43 @@
 <template>
-  <div v-if="newsfeed.volunteering">
+  <div v-if="volunteering">
     <div class="d-flex">
       <ProfileImage
-        v-if="users[userid].profile.turl"
-        :image="users[userid].profile.turl"
+        v-if="user.profile.paththumb"
+        :image="user.profile.paththumb"
         class="ml-1 mr-2 mb-1 inline"
         is-thumbnail
-        :is-moderator="Boolean(users[userid].showmod)"
+        :is-moderator="Boolean(user.showmod)"
         size="lg"
       />
       <div>
         <span class="text-success font-weight-bold">{{
-          users[userid].displayname
+          user.displayname
         }}</span>
         posted a volunteering opportunity<span class="d-none d-md-inline-block"
           >:</span
         ><br class="d-block d-md-none font-weight-bold" />
-        {{ newsfeed.volunteering.title }}
+        {{ volunteering.title }}
         <br />
         <span class="text-muted small">
           {{ timeago(newsfeed.added) }}
-        </span>
-        <span
-          v-if="
-            newsfeed.volunteering.groups && newsfeed.volunteering.groups.length
-          "
-        >
-          on {{ newsfeed.volunteering.groups[0].namedisplay }}
+          on
+          <span v-for="groupid in volunteering.groups" :key="groupid">
+            <span v-if="group(groupid)">
+              {{ group(groupid).namedisplay }}
+            </span>
+          </span>
         </span>
       </div>
     </div>
     <div class="volunteering__container">
       <div class="volunteering__description">
-        <div v-if="newsfeed.volunteering.description" class="text-truncate">
+        <div v-if="volunteering.description" class="text-truncate">
           <v-icon icon="info-circle" class="fa-fw" />
-          {{ newsfeed.volunteering.description }}
+          {{ volunteering.description }}
         </div>
-        <div v-if="newsfeed.volunteering.location" class="text-truncate">
+        <div v-if="volunteering.location" class="text-truncate">
           <v-icon icon="map-marker-alt" class="fa-fw" />
-          {{ newsfeed.volunteering.location }}
+          {{ volunteering.location }}
         </div>
         <b-button variant="secondary" class="mt-3 mb-2" @click="moreInfo">
           <v-icon icon="info-circle" /> More info
@@ -46,10 +45,10 @@
       </div>
       <div class="volunteering__photo">
         <b-img
-          v-if="newsfeed.volunteering.photo"
+          v-if="volunteering.image"
           rounded
           lazy
-          :src="newsfeed.volunteering.photo.paththumb"
+          :src="volunteering.image.paththumb"
           class="clickme mt-2 mt-md-0 w-100"
           @click="moreInfo"
         />
@@ -67,34 +66,69 @@
         </b-button>
       </div>
     </div>
-    <!--    TODO Volunteer-->
-    <!--    <VolunteerOpportunityModal ref="addOpportunity" :start-edit="true" />-->
-    <!--    <VolunteerOpportunityModal-->
-    <!--      ref="moreInfo"-->
-    <!--      :volunteering="newsfeed.volunteering"-->
-    <!--    />-->
+    <VolunteerOpportunityModal ref="addOpportunity" :start-edit="true" />
+    <VolunteerOpportunityModal :id="newsfeed.volunteeringid" ref="moreInfo" />
   </div>
 </template>
-
 <script>
+import { useVolunteeringStore } from '../stores/volunteering'
+import { useNewsfeedStore } from '../stores/newsfeed'
+import { useUserStore } from '../stores/user'
+import { useGroupStore } from '../stores/group'
 import NewsBase from '~/components/NewsBase'
 import NewsLoveComment from '~/components/NewsLoveComment'
 import ProfileImage from '~/components/ProfileImage'
-// const VolunteerOpportunityModal = () => import('./VolunteerOpportunityModal')
+const VolunteerOpportunityModal = () => import('./VolunteerOpportunityModal')
 
 export default {
   components: {
-    // VolunteerOpportunityModal,
+    VolunteerOpportunityModal,
     NewsLoveComment,
     ProfileImage,
   },
   extends: NewsBase,
+  async setup(props) {
+    const volunteeringStore = useVolunteeringStore()
+    const newsfeedStore = useNewsfeedStore()
+    const userStore = useUserStore()
+    const groupStore = useGroupStore()
+
+    const newsfeed = newsfeedStore.byId(props.id)
+    await userStore.fetch(newsfeed.userid)
+
+    try {
+      const volunteering = await volunteeringStore.fetch(
+        newsfeed.volunteeringid
+      )
+
+      await volunteering.groups.forEach(async (groupid) => {
+        await groupStore.fetch(groupid)
+      })
+    } catch (e) {
+      // Most likely doesn't exist.
+    }
+
+    return {
+      volunteeringStore,
+      newsfeedStore,
+      userStore,
+      groupStore,
+    }
+  },
+  computed: {
+    volunteering() {
+      return this.volunteeringStore.byId(this.newsfeed.volunteeringid)
+    },
+  },
   methods: {
     moreInfo() {
       this.$refs.moreInfo.show()
     },
     addOpportunity() {
       this.$refs.addOpportunity.show()
+    },
+    group(groupid) {
+      return this.groupStore.get(groupid)
     },
   },
 }
