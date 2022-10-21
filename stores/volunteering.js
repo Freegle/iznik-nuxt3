@@ -60,8 +60,15 @@ export const useVolunteeringStore = defineStore({
     },
     async save(data) {
       await api(this.config).volunteering.save(data)
-      // Fetch back to update store and thereby components
-      await this.fetch(data.id)
+      await this.fetch(data.id, true)
+    },
+    async renew(id) {
+      await api(this.config).volunteering.renew(id)
+      await this.fetch(id, true)
+    },
+    async expire(id) {
+      await api(this.config).volunteering.expire(id)
+      await this.fetch(id, true)
     },
   },
   getters: {
