@@ -9,7 +9,7 @@ export const useMessageStore = defineStore({
   state: () => ({
     config: {},
     list: {},
-    byUser: {},
+    byUserList: {},
 
     // In bounds
     bounds: {},
@@ -124,7 +124,7 @@ export const useMessageStore = defineStore({
 
       const promise = api(this.config).message.fetchByUser(userid, active)
 
-      if (force || !this.byUser[userid]) {
+      if (force || !this.byUserList[userid]) {
         messages = await promise
 
         for (const message of messages) {
@@ -137,8 +137,8 @@ export const useMessageStore = defineStore({
           }
         }
 
-        this.byUser[userid] = messages
-      } else if (this.byUser[userid]) {
+        this.byUserList[userid] = messages
+      } else if (this.byUserList[userid]) {
         // Fetch but don't wait
         promise.then(async (msgs) => {
           for (const message of msgs) {
@@ -151,10 +151,10 @@ export const useMessageStore = defineStore({
             }
           }
 
-          this.byUser[userid] = msgs
+          this.byUserList[userid] = msgs
         })
 
-        messages = this.byUser[userid]
+        messages = this.byUserList[userid]
       }
 
       return messages

@@ -1,8 +1,12 @@
 import BaseAPI from '@/api/BaseAPI'
 
 export default class VolunteeringAPI extends BaseAPI {
-  fetchv2(id) {
+  fetch(id) {
     return this.$getv2('/volunteering/' + id)
+  }
+
+  list(id) {
+    return this.$getv2('/volunteering')
   }
 
   save(data) {

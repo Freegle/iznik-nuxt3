@@ -33,7 +33,6 @@ export default {
     },
   },
   mounted() {
-    console.log('Install OneTap')
     if (!this.loggedIn) {
       window.handleGoogleCredentialsResponse =
         this.handleGoogleCredentialsResponse
@@ -48,7 +47,6 @@ export default {
         js.id = id
         js.src = 'https://accounts.google.com/gsi/client'
         js.onload = (e) => {
-          console.log('GSI loaded')
           window.google.accounts.id.prompt() // Display the One Tap dialog
           window.google.accounts.id.prompt((notification) => {
             console.log('One Tap prompt returned', notification)

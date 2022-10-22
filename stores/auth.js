@@ -164,7 +164,6 @@ export const useAuthStore = defineStore({
       let me = null
       let groups = null
 
-      console.log('Fetch user, JWT:', this.jwt)
       if (this.jwt) {
         // We have a JWT which we can use with the new, faster API.
         try {
@@ -174,19 +173,16 @@ export const useAuthStore = defineStore({
         }
 
         if (me) {
-          console.log('Got v2', me)
           groups = me.memberships
           delete me.memberships
         } else {
           // Any JWT must be invalid.
-          console.log('reset JWT')
           this.jwt = null
         }
       }
 
       if (!me) {
         // Fall back to the older API which will authenticate via the persistent token and PHP session.
-        console.log('Fetch from v1')
         const ret = await this.$api.session.fetch({
           components: [
             'me',

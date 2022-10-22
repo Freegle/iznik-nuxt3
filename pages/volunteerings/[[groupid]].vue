@@ -1,7 +1,7 @@
 <template>
   <div>
     <b-row class="m-0">
-      <b-col cols="12" lg="6" class="p-0" offset-lg="3">
+      <b-col cols="12" lg="6" class="p-0 mt-1" offset-lg="3">
         <div>
           <h1>Volunteer Opportunities</h1>
           <GlobalWarning />
@@ -10,11 +10,18 @@
             lovely community of freeglers to help.
           </p>
           <div class="d-flex justify-content-between mb-3">
-            <groupSelect v-if="me" v-model="groupid" class="pr-2" all />
+            <GroupSelect
+              v-if="me"
+              v-model="groupid"
+              class="pr-2"
+              all
+              :value="groupid"
+              @update:modelValue="changeGroup"
+            />
             <b-button
               variant="primary"
               class="float-right"
-              @click="showEventModal"
+              @click="showVolunteerModal"
             >
               <v-icon icon="plus" /> Add an opportunity
             </b-button>
@@ -22,14 +29,14 @@
         </div>
         <h2 class="sr-only">List of volunteer opportunities</h2>
         <div
-          v-for="volunteering in volunteerings"
-          :key="'volunteering-' + volunteering.id"
+          v-for="id in volunteerings"
+          :key="'volunteering-' + id"
           class="mt-2"
         >
           <VolunteerOpportunity
-            v-if="!volunteering.pending"
+            :id="id"
+            :filter-group="groupid"
             :summary="false"
-            :item="volunteering"
           />
         </div>
         <client-only>
@@ -37,18 +44,9 @@
             :key="'infinite-' + groupid"
             :identifier="infiniteId"
             force-use-infinite-wrapper="body"
+            :distance="1000"
             @infinite="loadMore"
-          >
-            <span slot="no-results">
-              <notice-message v-if="!volunteerings || !volunteerings.length">
-                There are no volunteer opportunities to show. Why not add one?
-              </notice-message>
-            </span>
-            <span slot="no-more" />
-            <span slot="spinner">
-              <b-img lazy src="~/static/loader.gif" alt="Loading" />
-            </span>
-          </infinite-loading>
+          />
         </client-only>
       </b-col>
       <b-col cols="0" md="3" class="d-none d-md-block" />
@@ -57,9 +55,8 @@
   </div>
 </template>
 <script>
-// TODO Volunteering - check all routes after retiring createGroupRoute
-// TODO This page not tested
 import { useRoute } from 'vue-router'
+import { useRouter } from 'nuxt/app'
 import GlobalWarning from '../../components/GlobalWarning'
 import { buildHead } from '../../composables/useBuildHead'
 import { useVolunteeringStore } from '../../stores/volunteering'
@@ -70,7 +67,6 @@ const VolunteerOpportunity = () =>
   import('~/components/VolunteerOpportunity.vue')
 const VolunteerOpportunityModal = () =>
   import('~/components/VolunteerOpportunityModal')
-const NoticeMessage = () => import('~/components/NoticeMessage')
 
 export default {
   components: {
@@ -79,7 +75,6 @@ export default {
     GroupSelect,
     VolunteerOpportunity,
     VolunteerOpportunityModal,
-    NoticeMessage,
   },
   mixins: [buildHead],
   async setup() {
@@ -87,7 +82,7 @@ export default {
     const groupStore = useGroupStore()
 
     const route = useRoute()
-    const groupid = route.params.groupid
+    const groupid = parseInt(route.params.groupid)
 
     await volunteeringStore.fetchList()
 
@@ -95,19 +90,24 @@ export default {
     let image
 
     if (groupid) {
-      const group = await groupStore.fetch()
+      const group = await groupStore.fetch(groupid)
 
       name = 'Volunteer Opportunities for ' + group.namedisplay
-      image = group.profile
+      image = group?.profile
     } else {
       name = 'Volunteer Opportunities'
       image = null
     }
 
-    buildHead(
-      name,
-      'Are you a charity or good cause that needs volunteers? Ask our lovely community of freeglers to help.',
-      image
+    useHead(
+      buildHead(
+        name,
+        'Are you a charity or good cause that needs volunteers? Ask our lovely community of freeglers to help.',
+        image,
+        {
+          class: 'overflow-y-scroll',
+        }
+      )
     )
 
     return {
@@ -118,44 +118,32 @@ export default {
   },
   data() {
     return {
-      context: null,
+      toShow: 0,
       infiniteId: +new Date(),
-      complete: false,
     }
   },
   computed: {
+    forUser() {
+      return this.volunteeringStore.forUser
+    },
     volunteerings() {
-      return this.volunteeringStore.sortedList.filter(
-        (v) => !this.groupid || v.groupid === this.groupid
-      )
+      return this.forUser.slice(0, this.toShow)
     },
   },
   methods: {
-    async loadMore($state) {
-      let volunteerings = this.$store.getters['volunteerops/list']
-      const currentCount =
-        volunteerings && volunteerings.length ? volunteerings.length : 0
-
-      this.context = this.$store.getters['volunteerops/getContext']
-
-      await this.$store.dispatch('volunteerops/fetch', {
-        groupid: this.groupid ? this.groupid : null,
-        context: this.context,
-      })
-
-      volunteerings = this.$store.getters['volunteerops/list']
-
-      const newCount =
-        volunteerings && volunteerings.length ? volunteerings.length : 0
-      if (currentCount === newCount) {
-        this.complete = true
-        $state.complete()
-      } else {
+    changeGroup(newval) {
+      const router = useRouter()
+      router.push(newval ? '/volunteerings/' + newval : '/volunteerings')
+    },
+    loadMore($state) {
+      if (this.toShow < this.forUser.length) {
+        this.toShow++
         $state.loaded()
+      } else {
+        $state.complete()
       }
     },
-
-    showEventModal() {
+    showVolunteerModal() {
       if (this.me) {
         this.$refs.volunteermodal.show()
       } else {

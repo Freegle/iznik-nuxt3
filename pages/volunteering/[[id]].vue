@@ -55,10 +55,12 @@ export default {
 
     try {
       const volunteering = volunteeringStore.fetch(id)
-      buildHead(
-        volunteering.title,
-        volunteering.description,
-        volunteering.image ? volunteering.image.path : null
+      useHead(
+        buildHead(
+          volunteering.title,
+          volunteering.description,
+          volunteering.image ? volunteering.image.path : null
+        )
       )
     } catch (e) {
       invalid = true

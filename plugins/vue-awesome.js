@@ -72,6 +72,7 @@ import {
   faTimesCircle,
   faTrashAlt,
   faUser,
+  faUsers,
   faWalking,
 } from '@fortawesome/free-solid-svg-icons'
 
@@ -152,6 +153,7 @@ library.add(
   faTimesCircle,
   faTrashAlt,
   faUser,
+  faUsers,
   faWalking,
   faFacebook,
   faTwitter,

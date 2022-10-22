@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-card variant="success" no-body>
+    <b-card v-if="volunteering" variant="success" no-body>
       <b-card-title
         class="bg-info px-2 mb-0 pt-2 pb-2 text-truncate d-flex justify-content-between header--size4"
         :title-tag="titleTag"
@@ -95,10 +95,14 @@
             :src="volunteering.image.path"
           />
           <div
-            v-if="volunteering.groups && volunteering.groups.length > 0"
+            v-if="volunteering.groups?.length > 0"
             class="small text-muted text-center"
           >
-            Posted on {{ volunteering.groups[0].namedisplay }}
+            Posted on
+            <span v-for="(group, index) in groups" :key="index">
+              <span v-if="index > 0">, </span>
+              {{ group.namedisplay }}
+            </span>
           </div>
         </div>
         <div v-else class="volunteerop">
@@ -122,15 +126,15 @@
             </div>
             <div
               v-if="volunteering.groups && volunteering.groups.length > 0"
-              class="media"
+              class="d-flex flex-row mt-1"
             >
-              <div class="media-left">
-                <div class="media-object pl-1 text-muted">
-                  <v-icon icon="users" class="fa-fw" />
-                </div>
-              </div>
-              <div class="media-body ml-2 small">
-                Posted on {{ volunteering.groups[0].namedisplay }}
+              <v-icon icon="users" class="fa-fw" />
+              <div class="ml-2 small">
+                Posted on
+                <span v-for="(group, index) in groups" :key="index">
+                  <span v-if="index > 0">, </span>
+                  {{ group.namedisplay }}
+                </span>
               </div>
             </div>
             <read-more
@@ -177,6 +181,7 @@
 import ReadMore from 'vue-read-more3/src/ReadMoreComponent'
 import { useVolunteeringStore } from '../stores/volunteering'
 import { useUserStore } from '../stores/user'
+import { useGroupStore } from '../stores/group'
 import NoticeMessage from './NoticeMessage'
 import { twem } from '~/composables/useTwem'
 const VolunteerOpportunityModal = () => import('./VolunteerOpportunityModal')
@@ -196,6 +201,11 @@ export default {
       type: Number,
       required: true,
     },
+    filterGroup: {
+      type: Number,
+      required: false,
+      default: null,
+    },
     titleTag: {
       type: String,
       required: false,
@@ -205,15 +215,21 @@ export default {
   async setup(props) {
     const volunteeringStore = useVolunteeringStore()
     const userStore = useUserStore()
+    const groupStore = useGroupStore()
 
     if (props.id) {
       const v = await volunteeringStore.fetch(props.id)
       await userStore.fetch(v.userid)
+
+      v.groups?.forEach(async (id) => {
+        await groupStore.fetch(id)
+      })
     }
 
     return {
       volunteeringStore,
       userStore,
+      groupStore,
     }
   },
   data() {
@@ -224,7 +240,31 @@ export default {
   },
   computed: {
     volunteering() {
-      return this.volunteeringStore.byId(this.id)
+      const v = this.volunteeringStore.byId(this.id)
+
+      if (v) {
+        if (!this.filterGroup) {
+          return v
+        }
+
+        if (v.groups.includes(this.filterGroup)) {
+          return v
+        }
+      }
+
+      return null
+    },
+    groups() {
+      const ret = []
+      this.volunteering.groups.forEach((id) => {
+        const group = this.groupStore.get(id)
+
+        if (group) {
+          ret.push(group)
+        }
+      })
+
+      return ret
     },
     user() {
       return this.userStore.byId(this.volunteering?.userid)
