@@ -43,7 +43,6 @@
               type="text"
               placeholder="No day yet"
               autocomplete="off"
-              @focus="openPicker"
             />
             <b-input-group-append>
               <b-form-input
@@ -319,11 +318,6 @@ export default {
         this.formattedDate = dayjs(ctx.selectedYMD).format('dddd Do')
       } else {
         this.formattedDate = null
-      }
-    },
-    openPicker() {
-      if (this.$refs.datePicker) {
-        this.$refs.datePicker.$el.click()
       }
     },
     deleteTryst() {

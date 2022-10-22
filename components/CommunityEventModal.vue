@@ -7,16 +7,10 @@
     @hidden="reset"
   >
     <template slot="modal-header">
-      <h4 v-if="added">
-        Your event has been added
-      </h4>
+      <h4 v-if="added">Your event has been added</h4>
       <h4 v-else-if="editing">
-        <span v-if="isExisting">
-          Edit Event
-        </span>
-        <span v-else>
-          Add Event
-        </span>
+        <span v-if="isExisting"> Edit Event </span>
+        <span v-else> Add Event </span>
       </h4>
       <div v-else>
         <h4>{{ event.title }}</h4>
@@ -25,12 +19,20 @@
     </template>
     <template slot="default">
       <div v-if="added">
-        <p>One of our volunteers will check over your event, and then we'll publicise it to other freeglers.  Hope it goes well!</p>
         <p>
-          Hope you find someone!  Please make sure you get back to everyone who replies, so that they feel good about your organisation
-          (and Freegle!).
+          One of our volunteers will check over your event, and then we'll
+          publicise it to other freeglers. Hope it goes well!
         </p>
-        <p>Freegle is free to use, but not free to run.  If you can, <strong>please donate &pound;1</strong> to keep us running - but anything you can give is very welcome.</p>
+        <p>
+          Hope you find someone! Please make sure you get back to everyone who
+          replies, so that they feel good about your organisation (and
+          Freegle!).
+        </p>
+        <p>
+          Freegle is free to use, but not free to run. If you can,
+          <strong>please donate &pound;1</strong> to keep us running - but
+          anything you can give is very welcome.
+        </p>
         <donation-button />
       </div>
       <div v-else>
@@ -50,63 +52,55 @@
             <b-col class="mb-2 prewrap font-weight-bold forcebreak">{{ description }}</b-col>
           </b-row>
           <b-row>
-            <b-col cols="4" md="3" class="field">
-              Where
-            </b-col>
+            <b-col cols="4" md="3" class="field"> Where </b-col>
             <b-col cols="8" md="9">
               {{ event.location }}
             </b-col>
           </b-row>
           <b-row>
-            <b-col cols="4" md="3" class="field">
-              When
-            </b-col>
+            <b-col cols="4" md="3" class="field"> When </b-col>
             <b-col cols="8" md="9">
-              <div v-for="date in event.dates" :key="'event-' + event.id + '-' + date.uniqueid" :class="date && date.string && date.string.past ? 'inpast': ''">
+              <div
+                v-for="date in event.dates"
+                :key="'event-' + event.id + '-' + date.uniqueid"
+                :class="date && date.string && date.string.past ? 'inpast' : ''"
+              >
                 <span v-if="date && date.string">
                   <span v-if="date.string.start">
                     {{ date.string.start }}
                   </span>
-                  <span v-if="date.string.start && date.string.end">
-                    -
-                  </span>
+                  <span v-if="date.string.start && date.string.end"> - </span>
                   <span v-if="date.string.end">
                     {{ date.string.end }}
                   </span>
-                  <br>
+                  <br />
                 </span>
               </div>
             </b-col>
           </b-row>
           <b-row v-if="event.contactname">
-            <b-col cols="4" md="3" class="field">
-              Contact name
-            </b-col>
+            <b-col cols="4" md="3" class="field"> Contact name </b-col>
             <b-col cols="8" md="9">
               {{ event.contactname }}
             </b-col>
           </b-row>
           <b-row v-if="event.contactemail">
-            <b-col cols="4" md="3" class="field">
-              Contact email
-            </b-col>
+            <b-col cols="4" md="3" class="field"> Contact email </b-col>
             <b-col cols="8" md="9">
               <!-- eslint-disable-next-line -->
               <ExternalLink :href="'mailto:' + event.contactemail">{{ event.contactemail }}</ExternalLink>
             </b-col>
           </b-row>
           <b-row v-if="event.contactphone">
-            <b-col cols="4" md="3" class="field">
-              Contact Phone
-            </b-col>
+            <b-col cols="4" md="3" class="field"> Contact Phone </b-col>
             <b-col cols="8" md="9">
-              <a :href="'tel:' + event.contactphone">{{ event.contactphone }}</a>
+              <a :href="'tel:' + event.contactphone">{{
+                event.contactphone
+              }}</a>
             </b-col>
           </b-row>
           <b-row v-if="event.contacturl">
-            <b-col cols="4" md="3" class="field">
-              Website
-            </b-col>
+            <b-col cols="4" md="3" class="field"> Website </b-col>
             <b-col cols="8" md="9" class="forcebreak">
               <ExternalLink :href="event.contacturl">
                 {{ event.contacturl }}
@@ -114,9 +108,10 @@
             </b-col>
           </b-row>
 
-          <br>
+          <br />
           <p v-if="event.user" class="text-muted">
-            Posted by {{ event.user.displayname }} <span class="text-faded">(#{{ event.user.id }})</span>
+            Posted by {{ event.user.displayname }}
+            <span class="text-faded">(#{{ event.user.id }})</span>
           </p>
         </div>
         <validating-form v-else>
@@ -148,7 +143,7 @@
                   :validation-enabled="validationEnabled"
                   :validation-messages="{
                     required: 'Please add a title',
-                    maxLength: ({ max }) => `Max length is ${max}`
+                    maxLength: ({ max }) => `Max length is ${max}`,
                   }"
                 />
               </b-form-group>
@@ -157,35 +152,51 @@
               <div class="float-right">
                 <div v-if="eventEdit.photo" class="container p-0">
                   <span @click="rotateLeft">
-                    <v-icon label="Rotate left" class="topleft clickme" title="Rotate left">
-                      <v-icon name="circle" scale="2" />
-                      <v-icon
-                        name="reply"
-                        class="rotate__icon"
-                      />
+                    <v-icon
+                      label="Rotate left"
+                      class="topleft clickme"
+                      title="Rotate left"
+                    >
+                      <v-icon icon="circle" scale="2" />
+                      <v-icon icon="reply" class="rotate__icon" />
                     </v-icon>
                   </span>
                   <span @click="rotateRight">
-                    <v-icon label="Rotate right" class="topright clickme" title="Rotate right" flip="horizontal">
-                      <v-icon name="circle" scale="2" />
-                      <v-icon
-                        name="reply"
-                        class="rotate__icon"
-                      />
+                    <v-icon
+                      label="Rotate right"
+                      class="topright clickme"
+                      title="Rotate right"
+                      flip="horizontal"
+                    >
+                      <v-icon icon="circle" scale="2" />
+                      <v-icon icon="reply" class="rotate__icon" />
                     </v-icon>
                   </span>
                 </div>
-                <b-img v-if="eventEdit.photo" thumbnail :src="eventEdit.photo.paththumb + '?' + cacheBust" />
-                <b-img v-else width="250" thumbnail src="~/static/placeholder.jpg" />
+                <b-img
+                  v-if="eventEdit.photo"
+                  thumbnail
+                  :src="eventEdit.photo.paththumb + '?' + cacheBust"
+                />
+                <b-img
+                  v-else
+                  width="250"
+                  thumbnail
+                  src="~/static/placeholder.jpg"
+                />
               </div>
             </b-col>
           </b-row>
           <span v-if="enabled">
             <b-row>
               <b-col>
-                <b-btn variant="primary" class="mt-1 float-right" @click="photoAdd">
-                  <v-icon name="camera" /> Upload photo
-                </b-btn>
+                <b-button
+                  variant="primary"
+                  class="mt-1 float-right"
+                  @click="photoAdd"
+                >
+                  <v-icon icon="camera" /> Upload photo
+                </b-button>
               </b-col>
             </b-row>
             <b-row v-if="uploading">
@@ -203,7 +214,9 @@
               ref="eventEdit__description"
               label="What is it?"
               label-for="description"
-              :state="validationEnabled ? !$v.eventEdit.description.$invalid : null"
+              :state="
+                validationEnabled ? !$v.eventEdit.description.$invalid : null
+              "
             >
               <validating-textarea
                 id="description"
@@ -216,7 +229,7 @@
                 :validation="$v.eventEdit.description"
                 :validation-enabled="validationEnabled"
                 :validation-messages="{
-                  required: 'Please add a description'
+                  required: 'Please add a description',
                 }"
               />
             </b-form-group>
@@ -224,7 +237,9 @@
               ref="eventEdit__location"
               label="Where is it?"
               label-for="location"
-              :state="validationEnabled ? !$v.eventEdit.location.$invalid : null"
+              :state="
+                validationEnabled ? !$v.eventEdit.location.$invalid : null
+              "
             >
               <validating-form-input
                 id="location"
@@ -234,7 +249,7 @@
                 :validation="$v.eventEdit.location"
                 :validation-enabled="validationEnabled"
                 :validation-messages="{
-                  required: 'Please add a location'
+                  required: 'Please add a location',
                 }"
               />
             </b-form-group>
@@ -243,17 +258,28 @@
               label="When is it?"
               :state="validationEnabled ? !$v.eventEdit.dates.$invalid : null"
             >
-              <p>You can add multiple dates if the event occurs several times.</p>
+              <p>
+                You can add multiple dates if the event occurs several times.
+              </p>
               <b-form-invalid-feedback class="mb-3">
                 Please add at least one date
               </b-form-invalid-feedback>
-              <StartEndCollection v-if="eventEdit.dates" v-model="eventEdit.dates" required :max-duration-days="3" />
+              <StartEndCollection
+                v-if="eventEdit.dates"
+                v-model="eventEdit.dates"
+                required
+                :max-duration-days="3"
+              />
             </b-form-group>
             <b-form-group
               ref="eventEdit__contactname"
               label="Contact name:"
               label-for="contactname"
-              :state="eventEdit.contactname && validationEnabled ? !$v.eventEdit.contactname.$invalid : null"
+              :state="
+                eventEdit.contactname && validationEnabled
+                  ? !$v.eventEdit.contactname.$invalid
+                  : null
+              "
             >
               <validating-form-input
                 id="contactname"
@@ -263,7 +289,7 @@
                 :validation="$v.eventEdit.contactname"
                 :validation-enabled="eventEdit.contactname && validationEnabled"
                 :validation-messages="{
-                  maxLength: ({ max }) => `Max length is ${max}`
+                  maxLength: ({ max }) => `Max length is ${max}`,
                 }"
               />
             </b-form-group>
@@ -274,10 +300,7 @@
               :valid.sync="emailValid"
               label="Contact email:"
             />
-            <b-form-group
-              label="Contact phone:"
-              label-for="contactphone"
-            >
+            <b-form-group label="Contact phone:" label-for="contactphone">
               <b-form-input
                 id="contactphone"
                 v-model="eventEdit.contactphone"
@@ -285,10 +308,7 @@
                 placeholder="Can people reach you by phone? (Optional)"
               />
             </b-form-group>
-            <b-form-group
-              label="Web link:"
-              label-for="contacturl"
-            >
+            <b-form-group label="Web link:" label-for="contacturl">
               <b-form-input
                 id="contacturl"
                 v-model="eventEdit.contacturl"
@@ -298,38 +318,73 @@
             </b-form-group>
           </span>
           <NoticeMessage v-else variant="warning" class="mt-2">
-            <v-icon name="info-circle" />&nbsp;This community has chosen not to allow Community Events.
+            <v-icon icon="info-circle" />&nbsp;This community has chosen not to
+            allow Community Events.
           </NoticeMessage>
         </validating-form>
       </div>
     </template>
     <template slot="modal-footer" slot-scope="{ ok, cancel }">
       <div v-if="added">
-        <b-button variant="white" class="float-right" :disabled="uploadingPhoto" @click="cancel">
+        <b-button
+          variant="white"
+          class="float-right"
+          :disabled="uploadingPhoto"
+          @click="cancel"
+        >
           Close
         </b-button>
       </div>
       <div v-else>
         <div v-if="event.canmodify" class="w-100">
-          <b-button v-if="!editing" variant="white" class="float-left" :disabled="uploadingPhoto" @click="editing = true">
-            <v-icon name="pen" />
+          <b-button
+            v-if="!editing"
+            variant="white"
+            class="float-left"
+            :disabled="uploadingPhoto"
+            @click="editing = true"
+          >
+            <v-icon icon="pen" />
             Edit
           </b-button>
-          <b-button variant="white" class="float-left ml-1" :disabled="uploadingPhoto" @click="deleteIt">
-            <v-icon name="trash-alt" />
+          <b-button
+            variant="white"
+            class="float-left ml-1"
+            :disabled="uploadingPhoto"
+            @click="deleteIt"
+          >
+            <v-icon icon="trash-alt" />
             Delete
           </b-button>
         </div>
-        <b-button v-if="!editing" variant="white" class="float-right" :disabled="uploadingPhoto" @click="cancel">
+        <b-button
+          v-if="!editing"
+          variant="white"
+          class="float-right"
+          :disabled="uploadingPhoto"
+          @click="cancel"
+        >
           Close
         </b-button>
-        <b-button v-if="editing" variant="primary" class="float-right" :disabled="uploadingPhoto" @click="saveIt">
+        <b-button
+          v-if="editing"
+          variant="primary"
+          class="float-right"
+          :disabled="uploadingPhoto"
+          @click="saveIt"
+        >
           <v-icon v-if="saving" name="sync" class="fa-spin" />
           <v-icon v-else name="save" />
           <span v-if="isExisting">Save Changes</span>
           <span v-else>Add Event</span>
         </b-button>
-        <b-button v-if="editing" variant="white" class="float-right mr-1" :disabled="uploadingPhoto" @click="dontSave">
+        <b-button
+          v-if="editing"
+          variant="white"
+          class="float-right mr-1"
+          :disabled="uploadingPhoto"
+          @click="dontSave"
+        >
           Cancel
         </b-button>
       </div>
@@ -338,12 +393,12 @@
 </template>
 
 <script>
-import modal from '@/mixins/modal'
 import { required, maxLength } from 'vuelidate/lib/validators'
 import cloneDeep from 'lodash.clonedeep'
 import { validationMixin } from 'vuelidate'
-import validationHelpers from '@/mixins/validationHelpers'
 import EmailValidator from './EmailValidator'
+import validationHelpers from '@/mixins/validationHelpers'
+import modal from '@/mixins/modal'
 import ValidatingForm from '~/components/ValidatingForm'
 import ValidatingFormInput from '~/components/ValidatingFormInput'
 import ValidatingTextarea from '~/components/ValidatingTextarea'
@@ -369,7 +424,7 @@ function initialEvent() {
     contactemail: null,
     contactphone: null,
     contacturl: null,
-    canmodify: null
+    canmodify: null,
   }
 }
 
@@ -389,14 +444,14 @@ function initialData() {
   }
 
   return {
-    eventEdit: eventEdit,
+    eventEdit,
     editing: false,
     added: false,
     groupid: null,
     uploading: false,
     cacheBust: Date.now(),
     saving: false,
-    emailValid: false
+    emailValid: false,
   }
 }
 
@@ -411,19 +466,19 @@ export default {
     StartEndCollection,
     NoticeMessage,
     DonationButton,
-    ExternalLink
+    ExternalLink,
   },
   mixins: [validationMixin, validationHelpers, modal],
   props: {
     event: {
       type: Object,
-      default: initialEvent
+      default: initialEvent,
     },
     startEdit: {
       type: Boolean,
       required: false,
-      default: false
-    }
+      default: false,
+    },
   },
   data: initialData,
   computed: {
@@ -456,7 +511,7 @@ export default {
       const { photo: oldPhoto } = this.event
       const { photo: newPhoto } = this.eventEdit
       return newPhoto && (oldPhoto ? newPhoto.id !== oldPhoto.id : true)
-    }
+    },
   },
   methods: {
     show() {
@@ -468,7 +523,7 @@ export default {
     },
     async deleteIt() {
       await this.$store.dispatch('communityevents/delete', {
-        id: this.event.id
+        id: this.event.id,
       })
 
       this.hide()
@@ -499,7 +554,7 @@ export default {
         if (this.shouldUpdatePhoto) {
           await this.$store.dispatch('communityevents/setPhoto', {
             id,
-            photoid: this.eventEdit.photo.id
+            photoid: this.eventEdit.photo.id,
           })
         }
 
@@ -510,13 +565,13 @@ export default {
           // Save the new group, then remove the old group, so it won't get stranded.
           await this.$store.dispatch('communityevents/addGroup', {
             id,
-            groupid: this.groupid
+            groupid: this.groupid,
           })
 
           if (oldgroupid) {
             await this.$store.dispatch('communityevents/removeGroup', {
               id,
-              groupid: oldgroupid
+              groupid: oldgroupid,
             })
           }
         }
@@ -524,7 +579,7 @@ export default {
         await this.$store.dispatch('communityevents/setDates', {
           id,
           olddates: this.event.dates,
-          newdates: this.eventEdit.dates
+          newdates: this.eventEdit.dates,
         })
 
         await this.$store.dispatch('communityevents/save', this.eventEdit)
@@ -544,25 +599,25 @@ export default {
           if (photoid) {
             await this.$store.dispatch('communityevents/setPhoto', {
               id,
-              photoid: photoid
+              photoid,
             })
           }
 
           // Save the group.
           await this.$store.dispatch('communityevents/addGroup', {
             id,
-            groupid: this.groupid
+            groupid: this.groupid,
           })
 
           await this.$store.dispatch('communityevents/setDates', {
             id,
             olddates: [],
-            newdates: dates
+            newdates: dates,
           })
 
           // Fetch for good luck.
           await this.$store.dispatch('communityevents/fetch', {
-            id
+            id,
           })
 
           this.added = true
@@ -572,7 +627,7 @@ export default {
     async dontSave() {
       // We may have updated the event during the edit.  Fetch it again to reset those changes.
       await this.$store.dispatch('communityevents/fetch', {
-        id: this.event.id
+        id: this.event.id,
       })
 
       this.hide()
@@ -589,7 +644,7 @@ export default {
       this.eventEdit.photo = {
         id: imageid,
         path: image,
-        paththumb: imagethumb
+        paththumb: imagethumb,
       }
 
       if (ocr) {
@@ -613,7 +668,7 @@ export default {
           id: this.eventEdit.photo.id,
           rotate: deg,
           bust: Date.now(),
-          communityevent: true
+          communityevent: true,
         })
         .then(() => {
           this.cacheBust = Date.now()
@@ -624,32 +679,32 @@ export default {
     },
     rotateRight() {
       this.rotate(-90)
-    }
+    },
   },
   validations: {
     groupid: {
-      required
+      required,
     },
     eventEdit: {
       title: {
         required,
-        maxLength: maxLength(80)
+        maxLength: maxLength(80),
       },
       description: {
-        required
+        required,
       },
       location: {
-        required
+        required,
       },
       dates: {
-        minLength: dates =>
-          dates.filter(({ start, end }) => start && end).length > 0
+        minLength: (dates) =>
+          dates.filter(({ start, end }) => start && end).length > 0,
       },
       contactname: {
-        maxLength: maxLength(60)
-      }
-    }
-  }
+        maxLength: maxLength(60),
+      },
+    },
+  },
 }
 </script>
 
