@@ -138,6 +138,9 @@
                     remember="editopportunity"
                     :systemwide="true"
                   />
+                  <p v-if="showGroupError" class="text-danger font-weight-bold">
+                    Please select a community.
+                  </p>
                   <NoticeMessage
                     v-if="groupid === -2"
                     variant="danger"
@@ -415,7 +418,7 @@
           <SpinButton
             v-if="editing"
             variant="primary"
-            :disabled="uploadingPhoto || groupid <= 0"
+            :disabled="uploadingPhoto"
             :handler="saveIt"
             name="save"
             :label="volunteering.id ? 'Save Changes' : 'Add Opportunity'"
@@ -525,6 +528,7 @@ export default {
       groupid: null,
       cacheBust: Date.now(),
       uploading: false,
+      showGroupError: false,
     }
   },
   computed: {
@@ -624,8 +628,8 @@ export default {
 
       return true
     },
-    validateContactNAme(value) {
-      if (value.length > 60) {
+    validateContactName(value) {
+      if (value?.length > 60) {
         return 'Please enter 60 characters or fewer.'
       }
 
@@ -638,11 +642,18 @@ export default {
     async saveIt() {
       const validate = await this.$refs.form.validate()
 
+      if (!this.groupid) {
+        this.showGroupError = true
+        return
+      } else {
+        this.showGroupError = false
+      }
+
       if (!validate.valid) {
-        console.log('Invalid')
         return
       }
 
+      console.log('check group', this.groupid)
       if (this.isExisting) {
         const { id } = this.volunteering
         // This is an edit.
