@@ -6,7 +6,7 @@
       :aria-describedby="feedbackId"
       :minlength="minLength"
       :maxlength="maxLength"
-      :value="value"
+      v-bind="$attrs"
       @blur="validation.$touch"
     />
     <b-form-invalid-feedback v-if="hasValidationError" :id="feedbackId">

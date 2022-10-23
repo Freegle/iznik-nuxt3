@@ -4,9 +4,9 @@
       :label="label"
       :label-for="uid"
       label-class="mt-0"
-      :state="emailValid"
+      :state="valid"
     >
-      emailValid {{ emailValid }}, {{ currentEmail }}, {{ email }}
+      Current {{ currentEmail }}, {{ email }}
       <validating-form-input
         :id="uid"
         v-model:valid="emailValid"
@@ -44,7 +44,7 @@
 <script>
 import { ref } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
-import { required, email as emailValidation } from '@vuelidate/validators'
+import { email as emailValidation } from '@vuelidate/validators'
 import { uid } from '../composables/useId'
 import ValidatingFormInput from '../components/ValidatingFormInput'
 import validationHelpers from '@/mixins/validationHelpers'
@@ -91,13 +91,10 @@ export default {
   setup(props) {
     const id = uid('email')
 
-    const currentEmail = ref(null)
-    currentEmail.value = props.email
-
     return {
       uid: id,
       v$: useVuelidate(),
-      currentEmail,
+      currentEmail: ref(props.email),
     }
   },
   data() {
@@ -160,9 +157,9 @@ export default {
 
           // Wait for vuelidate to sort itself out.
           this.$nextTick(() => {
-            console.log('Vuelidate says invalid?', this.v$.email.$invalid)
-            this.emailValid = !this.v$.email.$invalid
-            this.$emit('update:valid', this.emailValid)
+            const valid = !this.v$.email.$invalid
+            console.log('check valid', valid, this.v$)
+            this.$emit('update:valid', valid)
           })
         } else {
           this.v$.$reset()
@@ -170,14 +167,13 @@ export default {
           // If we require an email, signal that it  is no longer valid.  The watch doesn't get called to make this
           // happen, so you can end up with an empty email by typing one, then selecting and deleting it.
           console.log('No email, use required', this.required)
-          this.emailValid = !this.required
-          this.$emit('update:valid', this.emailValid)
+          this.$emit('update:valid', !this.required)
         }
       }
     },
   },
   validations: {
-    email: { required, emailValidation },
+    email: { emailValidation },
   },
 }
 </script>

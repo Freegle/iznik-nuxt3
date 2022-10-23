@@ -4,10 +4,10 @@
       <EmailValidator
         v-if="!me"
         ref="email"
+        v-model:email="email"
+        v-model:valid="emailValid"
         size="lg"
         label="Your email address:"
-        :email.sync="email"
-        :valid.sync="emailValid"
       />
       <MessageStillAvailable v-if="stillAvailable" class="mb-1 mt-1" />
       <b-form-group

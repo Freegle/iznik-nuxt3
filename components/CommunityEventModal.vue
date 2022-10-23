@@ -296,8 +296,8 @@
             <EmailValidator
               ref="email"
               size="md"
-              :email.sync="eventEdit.contactemail"
-              :valid.sync="emailValid"
+              v-model:email="eventEdit.contactemail"
+              v-model:valid="emailValid"
               label="Contact email:"
             />
             <b-form-group label="Contact phone:" label-for="contactphone">

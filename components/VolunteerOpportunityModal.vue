@@ -148,6 +148,8 @@
                     Please select a community
                   </b-form-invalid-feedback>
                 </b-form-group>
+                Validatioin {{ validationEnabled }},
+                {{ !v$.volunteering.title.$invalid }}
                 <b-form-group
                   v-if="enabled"
                   ref="volunteering__title"
@@ -166,6 +168,7 @@
                     :validation-enabled="validationEnabled"
                     :validation-messages="{
                       required: 'Please add a title',
+                      minLength: ({ min }) => `Min length is ${min}`,
                       maxLength: ({ max }) => `Max length is ${max}`,
                     }"
                   />
@@ -336,9 +339,9 @@
               email valid {{ emailValid }}
               <EmailValidator
                 ref="email"
+                v-model:email="volunteering.contactemail"
+                v-model:valid="emailValid"
                 size="md"
-                :email.sync="volunteering.contactemail"
-                :valid.sync="emailValid"
                 label="Contact email:"
                 :required="false"
               />
@@ -437,7 +440,7 @@
 </template>
 <script>
 import { useVuelidate } from '@vuelidate/core'
-import { maxLength, required } from '@vuelidate/validators'
+import { minLength, maxLength, required } from '@vuelidate/validators'
 import { useVolunteeringStore } from '../stores/volunteering'
 import { useComposeStore } from '../stores/compose'
 import { useUserStore } from '../stores/user'
@@ -724,6 +727,7 @@ export default {
     volunteering: {
       title: {
         required,
+        minLength: minLength(10),
         maxLength: maxLength(80),
       },
       description: {

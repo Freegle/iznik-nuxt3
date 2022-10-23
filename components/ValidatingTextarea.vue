@@ -4,6 +4,7 @@
       :id="id"
       :state="validationState"
       :aria-describedby="feedbackId"
+      v-bind="$attrs"
       @blur="validation.$touch"
     />
     <b-form-invalid-feedback v-if="hasValidationError" :id="feedbackId">

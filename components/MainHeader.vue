@@ -197,7 +197,7 @@
               v-if="loggedIn"
               :distance="distance"
               :small-screen="false"
-              :unread-notification-count.sync="unreadNotificationCount"
+              v-model:unread-notification-count="unreadNotificationCount"
               @showAboutMe="showAboutMe"
             />
           </li>
@@ -206,7 +206,7 @@
               v-if="loggedIn"
               id="menu-option-chat"
               :is-list-item="true"
-              :chat-count.sync="chatCount"
+              v-model:chat-count="chatCount"
             />
           </li>
           <li>
