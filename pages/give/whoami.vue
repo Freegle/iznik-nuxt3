@@ -28,7 +28,6 @@
               </p>
               <EmailValidator
                 v-model:email="email"
-                v-model:valid="emailValid"
                 center
                 class="align-items-center font-weight-bold"
               />

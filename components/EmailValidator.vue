@@ -2,29 +2,22 @@
   <div class="d-flex flex-column">
     <b-form-group
       :label="label"
-      :label-for="uid"
+      label-for="email"
       label-class="mt-0"
-      :state="valid"
+      :state="true"
     >
-      Current {{ currentEmail }}, {{ email }}
-      <validating-form-input
-        :id="uid"
-        v-model:valid="emailValid"
+      <Field
+        id="email"
         v-model="currentEmail"
+        :rules="validateEmail"
         type="email"
         name="email"
-        :size="size"
-        :min-length="1"
-        class="email"
-        :validation="emailValidator"
-        validation-enabled
-        :validation-messages="{
-          email: 'Please enter a valid email address.',
-        }"
+        :class="'email form-control input-' + size"
         :center="center"
         autocomplete="username email"
-        placeholder="Email address"
+        :placeholder="'Email address ' + (required ? '' : '(Optional)')"
       />
+      <ErrorMessage name="email" class="text-danger font-weight-bold" />
     </b-form-group>
     <div
       v-if="suggestedDomains && suggestedDomains.length"
@@ -43,15 +36,11 @@
 </template>
 <script>
 import { ref } from 'vue'
-import { useVuelidate } from '@vuelidate/core'
-import { email as emailValidation } from '@vuelidate/validators'
-import { uid } from '../composables/useId'
-import ValidatingFormInput from '../components/ValidatingFormInput'
-import validationHelpers from '@/mixins/validationHelpers'
+import { Field, ErrorMessage } from 'vee-validate'
+import { EMAIL_REGEX } from '~/constants'
 
 export default {
-  components: { ValidatingFormInput },
-  mixins: [validationHelpers],
+  components: { Field, ErrorMessage },
   props: {
     email: {
       type: String,
@@ -62,10 +51,6 @@ export default {
       type: Boolean,
       required: false,
       default: true,
-    },
-    valid: {
-      type: Boolean,
-      required: true,
     },
     center: {
       type: Boolean,
@@ -89,19 +74,13 @@ export default {
     },
   },
   setup(props) {
-    const id = uid('email')
-
     return {
-      uid: id,
-      v$: useVuelidate(),
       currentEmail: ref(props.email),
     }
   },
   data() {
     return {
       suggestedDomains: [],
-      emailValidator: emailValidation,
-      emailValid: false,
     }
   },
   watch: {
@@ -131,53 +110,23 @@ export default {
             }
           }
         }
-
-        // This check needs to be here rather than in checkState to ensure the vuelidate has got itself sorted out.
-        this.checkState(newVal)
-
-        // Vuelidate doesn't like upper case email characters.  Force the email to lower case.
-        this.currentEmail = newVal ? newVal.toLowerCase() : null
       },
     },
   },
-  mounted() {
-    this.checkState(this.currentEmail)
-  },
   methods: {
-    checkState(email) {
-      // Emitting a null or '' value does not trigger an update of the prop in the parent.  I don't know whether
-      // this is intentional, but the consequence is that the email appears to remain valid.  By emitting a space
-      // we at least trigger this component to update and notice that the email is not valid.
-      console.log('Check staqte', email)
-      this.$emit('update:email', email ? email.trim() : ' ')
-
-      if (this.v$.$reset) {
-        if (email) {
-          this.v$.$touch()
-
-          // Wait for vuelidate to sort itself out.
-          this.$nextTick(() => {
-            const valid = !this.v$.email.$invalid
-            console.log('check valid', valid, this.v$)
-            this.$emit('update:valid', valid)
-          })
-        } else {
-          this.v$.$reset()
-
-          // If we require an email, signal that it  is no longer valid.  The watch doesn't get called to make this
-          // happen, so you can end up with an empty email by typing one, then selecting and deleting it.
-          console.log('No email, use required', this.required)
-          this.$emit('update:valid', !this.required)
-        }
+    validateEmail(value) {
+      if (!value) {
+        return 'Please enter an email address.'
       }
+
+      if (!new RegExp(EMAIL_REGEX).test(value)) {
+        return 'Please enter a valid email address.'
+      }
+      return true
     },
-  },
-  validations: {
-    email: { emailValidation },
   },
 }
 </script>
-
 <style scoped>
 .email {
   width: 100%;

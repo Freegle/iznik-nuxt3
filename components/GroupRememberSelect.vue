@@ -1,5 +1,5 @@
 <template>
-  <groupSelect
+  <GroupSelect
     v-model="selectValue"
     :all="all"
     :systemwide="systemwide"
@@ -8,7 +8,7 @@
 </template>
 <script>
 import { useGroupStore } from '../stores/group'
-import groupSelect from './GroupSelect'
+import GroupSelect from './GroupSelect'
 
 function intOrNull(val) {
   return typeof val === 'number' ? parseInt(val) : null
@@ -16,7 +16,7 @@ function intOrNull(val) {
 
 export default {
   components: {
-    groupSelect,
+    GroupSelect,
   },
   props: {
     remember: {

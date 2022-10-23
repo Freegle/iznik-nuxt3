@@ -21,7 +21,7 @@
 </template>
 <script>
 import { ref } from 'vue'
-import { useUniqueStore } from '../stores/uniqueid'
+import { uid } from '../composables/useId'
 import StartEndDate from '~/components/StartEndDate'
 
 export default {
@@ -45,12 +45,11 @@ export default {
     },
   },
   setup(props) {
-    const uniqueStore = useUniqueStore()
     const current = ref(props.modelValue)
 
     if (props.modelValue.length === 0 && props.required) {
       current.push({
-        uniqueid: uniqueStore.generate(),
+        uniqueid: uid(),
         start: null,
         end: null,
         past: false,
@@ -58,7 +57,6 @@ export default {
     }
 
     return {
-      uniqueStore,
       current,
     }
   },
@@ -72,9 +70,9 @@ export default {
       const idx = this.current.indexOf(item)
       if (idx !== -1) this.current.splice(idx, 1)
     },
-    async add() {
+    add() {
       this.current.push({
-        uniqueid: await this.uniqueStore.generate(),
+        uniqueid: uid(),
         start: null,
         end: null,
         past: false,

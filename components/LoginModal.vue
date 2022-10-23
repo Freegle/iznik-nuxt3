@@ -120,7 +120,6 @@
           <EmailValidator
             ref="email"
             v-model:email="email"
-            v-model:valid="emailValid"
             size="md"
             label="Your email address"
           />

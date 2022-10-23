@@ -54,19 +54,19 @@
               <b-col class="mb-2 prewrap font-weight-bold forcebreak">{{ description }}</b-col>
             </b-row>
             <b-row class="mt-2">
-              <b-col cols="4" md="3" class="field"> Time commitment </b-col>
+              <b-col cols="4" md="3" class="field"> Time commitment</b-col>
               <b-col cols="8" md="9" class="forcebreak">
                 {{ volunteering.timecommitment }}
               </b-col>
             </b-row>
             <b-row>
-              <b-col cols="4" md="3" class="field"> Where </b-col>
+              <b-col cols="4" md="3" class="field"> Where</b-col>
               <b-col cols="8" md="9" class="forcebreak">
                 {{ volunteering.location }}
               </b-col>
             </b-row>
             <b-row>
-              <b-col cols="4" md="3" class="field"> When </b-col>
+              <b-col cols="4" md="3" class="field"> When</b-col>
               <b-col cols="8" md="9">
                 <div
                   v-for="date in volunteering?.dates"
@@ -96,20 +96,22 @@
               </b-col>
             </b-row>
             <b-row v-if="volunteering.contactname">
-              <b-col cols="4" md="3" class="field"> Contact name </b-col>
+              <b-col cols="4" md="3" class="field"> Contact name</b-col>
               <b-col cols="8" md="9">
                 {{ volunteering.contactname }}
               </b-col>
             </b-row>
             <b-row v-if="volunteering.contactemail">
-              <b-col cols="4" md="3" class="field"> Contact email </b-col>
+              <b-col cols="4" md="3" class="field"> Contact email</b-col>
               <b-col cols="8" md="9">
                 <!-- eslint-disable-next-line -->
-                <ExternalLink :href="'mailto:' + volunteering.contactemail">{{ volunteering.contactemail }}</ExternalLink>
+                <ExternalLink :href="'mailto:' + volunteering.contactemail">
+                  {{ volunteering.contactemail }}
+                </ExternalLink>
               </b-col>
             </b-row>
             <b-row v-if="volunteering.contacturl">
-              <b-col cols="4" md="3" class="field"> Website </b-col>
+              <b-col cols="4" md="3" class="field"> Website</b-col>
               <b-col cols="8" md="9" class="forcebreak">
                 <ExternalLink :href="volunteering.contacturl">
                   {{ volunteering.contacturl }}
@@ -123,13 +125,13 @@
               <span class="text-faded">(#{{ user.id }})</span>
             </p>
           </div>
-          <validating-form v-else-if="volunteering">
+          <Form v-else-if="volunteering" ref="form">
             <b-row>
               <b-col cols="12" md="6">
                 <b-form-group
                   ref="groupid"
                   label="For which community?"
-                  :state="validationEnabled ? !v$.groupid.$invalid : true"
+                  :state="true"
                 >
                   <GroupRememberSelect
                     v-model="groupid"
@@ -148,29 +150,24 @@
                     Please select a community
                   </b-form-invalid-feedback>
                 </b-form-group>
-                Validatioin {{ validationEnabled }},
-                {{ !v$.volunteering.title.$invalid }}
                 <b-form-group
                   v-if="enabled"
-                  ref="volunteering__title"
                   label="What's the opportunity?"
                   label-for="title"
-                  :state="
-                    validationEnabled ? !v$.volunteering.title.$invalid : true
-                  "
+                  :state="true"
                 >
-                  <validating-form-input
+                  <Field
                     id="title"
                     v-model="volunteering.title"
+                    name="title"
                     type="text"
                     placeholder="Give the opportunity a short title"
-                    :validation="v$.volunteering.title"
-                    :validation-enabled="validationEnabled"
-                    :validation-messages="{
-                      required: 'Please add a title',
-                      minLength: ({ min }) => `Min length is ${min}`,
-                      maxLength: ({ max }) => `Max length is ${max}`,
-                    }"
+                    :rules="validateTitle"
+                    class="form-control"
+                  />
+                  <ErrorMessage
+                    name="title"
+                    class="text-danger font-weight-bold"
                   />
                 </b-form-group>
               </b-col>
@@ -236,70 +233,64 @@
                 ref="volunteering__description"
                 label="What is it?"
                 label-for="description"
-                :state="
-                  validationEnabled
-                    ? !v$.volunteering.description.$invalid
-                    : true
-                "
+                :state="true"
               >
-                <validating-textarea
+                <Field
                   id="description"
                   v-model="volunteering.description"
+                  name="description"
+                  class="form-control mt-2"
+                  as="textarea"
                   rows="5"
                   max-rows="8"
                   spellcheck="true"
                   placeholder="Please let people know what the opportunity is - any organisation which is involved, what you'd like them to do, and why they might like to do it."
-                  class="mt-2"
-                  :validation="v$.volunteering.description"
-                  :validation-enabled="validationEnabled"
-                  :validation-messages="{
-                    required: 'Please add a description',
-                  }"
+                  :rules="validateDescription"
+                />
+                <ErrorMessage
+                  name="description"
+                  class="text-danger font-weight-bold"
                 />
               </b-form-group>
               <b-form-group
                 ref="volunteering__timecommitment"
                 label="Time commitment:"
-                label-for="description"
-                :state="
-                  validationEnabled
-                    ? !v$.volunteering.timecommitment.$invalid
-                    : true
-                "
+                label-for="timecommitment"
+                :state="true"
               >
-                <validating-textarea
+                <Field
                   id="timecommitment"
                   v-model="volunteering.timecommitment"
+                  as="textarea"
+                  name="timecommitment"
                   rows="2"
                   max-rows="8"
                   spellcheck="true"
                   placeholder="Please let people know what the time commitment is that you're looking for, e.g. how many hours a week, what times of day."
-                  class="mt-2"
-                  :validation="v$.volunteering.timecommitment"
-                  :validation-enabled="validationEnabled"
-                  :validation-messages="{
-                    required: 'Please add the time commitment',
-                  }"
+                  class="mt-2 form-control"
+                  :rule="validateTimeCommitment"
+                />
+                <ErrorMessage
+                  name="timecommitment"
+                  class="text-danger font-weight-bold"
                 />
               </b-form-group>
               <b-form-group
                 ref="volunteering__location"
                 label="Where is it?"
                 label-for="location"
-                :state="
-                  validationEnabled ? !v$.volunteering.location.$invalid : true
-                "
+                :state="true"
               >
-                <validating-form-input
+                <Field
                   id="location"
                   v-model="volunteering.location"
-                  type="text"
+                  name="location"
+                  class="form-control"
                   placeholder="Where does the volunteering happen? Add a postcode to make sure people can find you!"
-                  :validation="v$.volunteering.location"
-                  :validation-enabled="validationEnabled"
-                  :validation-messages="{
-                    required: 'Please add a location',
-                  }"
+                />
+                <ErrorMessage
+                  name="location"
+                  class="text-danger font-weight-bold"
                 />
               </b-form-group>
               <b-form-group label="When is it?" :state="true">
@@ -316,47 +307,52 @@
                 ref="volunteering__contactname"
                 label="Contact name:"
                 label-for="contactname"
-                :state="
-                  volunteering.contactname && validationEnabled
-                    ? !v$.volunteering.contactname.$invalid
-                    : true
-                "
+                :state="true"
               >
-                <validating-form-input
+                <Field
                   id="contactname"
                   v-model="volunteering.contactname"
+                  class="form-control"
+                  name="contactname"
                   type="text"
                   placeholder="Is there a contact person for anyone who wants to find out more? (Optional)"
-                  :validation="v$.volunteering.contactname"
-                  :validation-enabled="
-                    volunteering.contactname && validationEnabled
-                  "
-                  :validation-messages="{
-                    maxLength: ({ max }) => `Max length is ${max}`,
-                  }"
+                  :rules="validateContactName"
+                />
+                <ErrorMessage
+                  name="contactname"
+                  class="text-danger font-weight-bold"
                 />
               </b-form-group>
-              email valid {{ emailValid }}
               <EmailValidator
-                ref="email"
                 v-model:email="volunteering.contactemail"
-                v-model:valid="emailValid"
                 size="md"
                 label="Contact email:"
                 :required="false"
               />
-              <b-form-group label="Contact phone:" label-for="contactphone">
-                <b-form-input
+              <b-form-group
+                label="Contact phone:"
+                label-for="contactphone"
+                :state="true"
+              >
+                <Field
                   id="contactphone"
                   v-model="volunteering.contactphone"
+                  class="form-control"
+                  name="contactphone"
                   type="tel"
                   placeholder="Can people reach you by phone? (Optional)"
                 />
               </b-form-group>
-              <b-form-group label="Web link:" label-for="contacturl">
-                <b-form-input
+              <b-form-group
+                label="Web link:"
+                label-for="contacturl"
+                :state="true"
+              >
+                <Field
                   id="contacturl"
                   v-model="volunteering.contacturl"
+                  name="contacturl"
+                  class="form-control"
                   type="url"
                   placeholder="Is there more information on the web? (Optional)"
                 />
@@ -366,7 +362,7 @@
               <v-icon icon="info-circle" />&nbsp;This community has chosen not
               to allow Volunteer Opportunities.
             </NoticeMessage>
-          </validating-form>
+          </Form>
         </div>
       </div>
     </template>
@@ -419,7 +415,7 @@
           <SpinButton
             v-if="editing"
             variant="primary"
-            :disabled="uploadingPhoto"
+            :disabled="uploadingPhoto || groupid <= 0"
             :handler="saveIt"
             name="save"
             :label="volunteering.id ? 'Save Changes' : 'Add Opportunity'"
@@ -439,24 +435,26 @@
   </b-modal>
 </template>
 <script>
-import { useVuelidate } from '@vuelidate/core'
-import { minLength, maxLength, required } from '@vuelidate/validators'
+import { defineRule, Form, Field, ErrorMessage } from 'vee-validate'
+import { required, email, min, max } from '@vee-validate/rules'
 import { useVolunteeringStore } from '../stores/volunteering'
 import { useComposeStore } from '../stores/compose'
 import { useUserStore } from '../stores/user'
 import EmailValidator from './EmailValidator'
-import validationHelpers from '@/mixins/validationHelpers'
 import modal from '@/mixins/modal'
-import ValidatingForm from '~/components/ValidatingForm'
-import ValidatingFormInput from '~/components/ValidatingFormInput'
-import ValidatingTextarea from '~/components/ValidatingTextarea'
 import { twem } from '~/composables/useTwem'
+
 const GroupRememberSelect = () => import('~/components/GroupRememberSelect')
 const OurFilePond = () => import('~/components/OurFilePond')
 const StartEndCollection = () => import('~/components/StartEndCollection')
 const NoticeMessage = () => import('~/components/NoticeMessage')
 const DonationButton = () => import('~/components/DonationButton')
 const ExternalLink = () => import('~/components/ExternalLink')
+
+defineRule('required', required)
+defineRule('email', email)
+defineRule('min', min)
+defineRule('max', max)
 
 function initialVolunteering() {
   return {
@@ -481,17 +479,17 @@ function initialVolunteering() {
 export default {
   components: {
     EmailValidator,
-    ValidatingForm,
-    ValidatingFormInput,
-    ValidatingTextarea,
     GroupRememberSelect,
     OurFilePond,
     StartEndCollection,
     NoticeMessage,
     DonationButton,
     ExternalLink,
+    Form,
+    Field,
+    ErrorMessage,
   },
-  mixins: [validationHelpers, modal],
+  mixins: [modal],
   props: {
     id: {
       type: Number,
@@ -518,7 +516,6 @@ export default {
       volunteeringStore,
       composeStore,
       userStore,
-      v$: useVuelidate(),
     }
   },
   data() {
@@ -527,7 +524,6 @@ export default {
       added: false,
       groupid: null,
       cacheBust: Date.now(),
-      emailValid: true,
       uploading: false,
     }
   },
@@ -592,21 +588,58 @@ export default {
       this.uploading = false
       this.showModal = false
     },
+    validateTitle(value) {
+      if (!value) {
+        return 'Please enter a title.'
+      }
+
+      if (value.length < 10) {
+        return 'Title must be 10 or more characters.'
+      }
+
+      if (value.length > 80) {
+        return 'Title must be fewer than 80 characters.'
+      }
+
+      return true
+    },
+    validateDescription(value) {
+      if (!value) {
+        return 'Please enter a description.'
+      }
+
+      return true
+    },
+    validateTimeCommitment(value) {
+      if (!value) {
+        return 'Please enter the time commitment.'
+      }
+
+      return true
+    },
+    validateLocation(value) {
+      if (!value) {
+        return 'Please enter a location.'
+      }
+
+      return true
+    },
+    validateContactNAme(value) {
+      if (value.length > 60) {
+        return 'Please enter 60 characters or fewer.'
+      }
+
+      return true
+    },
     async deleteIt() {
       await this.volunteeringStore.delete(this.volunteering.id)
       this.hide()
     },
     async saveIt() {
-      this.v$.$touch()
+      const validate = await this.$refs.form.validate()
 
-      if (this.volunteering.email && !this.emailValid) {
-        // Would be nice to focus on the email, but that's hard to do without introducing a whole load of focus methods
-        // through several component layers down to the input.
-        return
-      }
-
-      if (this.v$.$anyError) {
-        this.validationFocusFirstError()
+      if (!validate.valid) {
+        console.log('Invalid')
         return
       }
 
@@ -718,30 +751,6 @@ export default {
     },
     rotateRight() {
       this.rotate(-90)
-    },
-  },
-  validations: {
-    groupid: {
-      required,
-    },
-    volunteering: {
-      title: {
-        required,
-        minLength: minLength(10),
-        maxLength: maxLength(80),
-      },
-      description: {
-        required,
-      },
-      timecommitment: {
-        required,
-      },
-      location: {
-        required,
-      },
-      contactname: {
-        maxLength: maxLength(60),
-      },
     },
   },
 }

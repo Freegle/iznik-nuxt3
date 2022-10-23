@@ -297,7 +297,6 @@
               ref="email"
               size="md"
               v-model:email="eventEdit.contactemail"
-              v-model:valid="emailValid"
               label="Contact email:"
             />
             <b-form-group label="Contact phone:" label-for="contactphone">
