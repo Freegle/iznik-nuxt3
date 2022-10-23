@@ -18,6 +18,7 @@
       @init="photoInit"
       @processfile="processed"
       @processfiles="allProcessed"
+      :max-parallel-uploads="1"
     />
     <div v-else>
       Sorry, photo uploads aren't supported on this browser. Maybe it's old?
