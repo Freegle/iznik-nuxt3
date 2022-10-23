@@ -1,11 +1,5 @@
 <template>
-  <b-modal
-    id="profilemodal"
-    v-model="showModal"
-    size="lg"
-    no-stacking
-    @hidden="reset"
-  >
+  <b-modal id="profilemodal" v-model="showModal" size="lg" no-stacking>
     <template #header>
       <h4 v-if="added">Your opportunity has been added</h4>
       <h4 v-else-if="editing">
@@ -20,359 +14,357 @@
       </span>
     </template>
     <template #default>
-      <!--      TODO Volunteering add/edit.-->
-      <div v-if="added">
-        <p>
-          One of our volunteers will check over your opportunity, and then we'll
-          publicise it to other freeglers.
-        </p>
-        <p>
-          Hope you find someone! Please make sure you get back to everyone who
-          replies, so that they feel good about your organisation (and
-          Freegle!).
-        </p>
-        <p>
-          Freegle is free to use, but not free to run. If you can,
-          <strong>please donate &pound;1</strong> to keep us running - but
-          anything you can give is very welcome.
-        </p>
-        <donation-button />
-      </div>
-      <div v-else>
-        <div v-if="!editing">
-          <div v-if="volunteering.image">
-            <notice-message class="mb-3">
-              Scroll down past the picture for more information!
-            </notice-message>
+      <div v-if="volunteering">
+        <div v-if="added">
+          <p>
+            One of our volunteers will check over your opportunity, and then
+            we'll publicise it to other freeglers.
+          </p>
+          <p>
+            Hope you find someone! Please make sure you get back to everyone who
+            replies, so that they feel good about your organisation (and
+            Freegle!).
+          </p>
+          <p>
+            Freegle is free to use, but not free to run. If you can,
+            <strong>please donate &pound;1</strong> to keep us running - but
+            anything you can give is very welcome.
+          </p>
+          <donation-button />
+        </div>
+        <div v-else>
+          <div v-if="!editing">
+            <div v-if="volunteering.image">
+              <notice-message class="mb-3">
+                Scroll down past the picture for more information!
+              </notice-message>
+              <b-row>
+                <b-col>
+                  <b-img
+                    lazy
+                    fluid
+                    :src="volunteering.image.path"
+                    class="mb-2 w-100"
+                  />
+                </b-col>
+              </b-row>
+            </div>
             <b-row>
-              <b-col>
-                <b-img
-                  lazy
-                  fluid
-                  :src="volunteering.image.path"
-                  class="mb-2 w-100"
-                />
+              <!-- eslint-disable-next-line-->
+              <b-col class="mb-2 prewrap font-weight-bold forcebreak">{{ description }}</b-col>
+            </b-row>
+            <b-row class="mt-2">
+              <b-col cols="4" md="3" class="field"> Time commitment </b-col>
+              <b-col cols="8" md="9" class="forcebreak">
+                {{ volunteering.timecommitment }}
               </b-col>
             </b-row>
-          </div>
-          <b-row>
-            <!-- eslint-disable-next-line-->
-            <b-col class="mb-2 prewrap font-weight-bold forcebreak">{{ description }}</b-col>
-          </b-row>
-          <b-row class="mt-2">
-            <b-col cols="4" md="3" class="field"> Time commitment </b-col>
-            <b-col cols="8" md="9" class="forcebreak">
-              {{ volunteering.timecommitment }}
-            </b-col>
-          </b-row>
-          <b-row>
-            <b-col cols="4" md="3" class="field"> Where </b-col>
-            <b-col cols="8" md="9" class="forcebreak">
-              {{ volunteering.location }}
-            </b-col>
-          </b-row>
-          <b-row>
-            <b-col cols="4" md="3" class="field"> When </b-col>
-            <b-col cols="8" md="9">
-              <div
-                v-for="date in volunteering?.dates"
-                :key="
-                  'volunteering-' +
-                  volunteering?.id +
-                  '-' +
-                  (date.start ? date.start.toString() : '') +
-                  '-' +
-                  (date.end ? date.end.toString() : '')
-                "
-                :class="date && date.string && date.string.past ? 'inpast' : ''"
-              >
-                <span v-if="date && date.string">
-                  <span v-if="date.string.start">
-                    {{ date.string.start }}
-                  </span>
-                  <span v-if="date.string.start && date.string.end"> - </span>
-                  <span v-if="date.string.end">
-                    {{ date.string.end }}
-                  </span>
-                  <br />
-                </span>
-              </div>
-            </b-col>
-          </b-row>
-          <b-row v-if="volunteering.contactname">
-            <b-col cols="4" md="3" class="field"> Contact name </b-col>
-            <b-col cols="8" md="9">
-              {{ volunteering.contactname }}
-            </b-col>
-          </b-row>
-          <b-row v-if="volunteering.contactemail">
-            <b-col cols="4" md="3" class="field"> Contact email </b-col>
-            <b-col cols="8" md="9">
-              <!-- eslint-disable-next-line -->
-              <ExternalLink :href="'mailto:' + volunteering.contactemail">{{ volunteering.contactemail }}</ExternalLink>
-            </b-col>
-          </b-row>
-          <b-row v-if="volunteering.contacturl">
-            <b-col cols="4" md="3" class="field"> Website </b-col>
-            <b-col cols="8" md="9" class="forcebreak">
-              <ExternalLink :href="volunteering.contacturl">
-                {{ volunteering.contacturl }}
-              </ExternalLink>
-            </b-col>
-          </b-row>
-
-          <br />
-          <p v-if="user" class="text-muted">
-            Posted by {{ user.displayname }}
-            <span class="text-faded">(#{{ user.id }})</span>
-          </p>
-        </div>
-        <validating-form v-else>
-          <b-row>
-            <b-col cols="12" md="6">
-              <b-form-group
-                ref="groupid"
-                label="For which community?"
-                :state="validationEnabled ? !$v.groupid.$invalid : null"
-              >
-                <groupRememberSelect
-                  v-model="groupid"
-                  remember="editopportunity"
-                  :systemwide="true"
-                />
-                <NoticeMessage
-                  v-if="groupid === -2"
-                  variant="danger"
-                  class="mt-1"
+            <b-row>
+              <b-col cols="4" md="3" class="field"> Where </b-col>
+              <b-col cols="8" md="9" class="forcebreak">
+                {{ volunteering.location }}
+              </b-col>
+            </b-row>
+            <b-row>
+              <b-col cols="4" md="3" class="field"> When </b-col>
+              <b-col cols="8" md="9">
+                <div
+                  v-for="date in volunteering?.dates"
+                  :key="
+                    'volunteering-' +
+                    volunteering?.id +
+                    '-' +
+                    (date.start ? date.start.toString() : '') +
+                    '-' +
+                    (date.end ? date.end.toString() : '')
+                  "
+                  :class="
+                    date && date.string && date.string.past ? 'inpast' : ''
+                  "
                 >
-                  This is a national volunteer opportunity which will go out to
-                  all communities. Please review carefully.
-                </NoticeMessage>
-                <b-form-invalid-feedback>
-                  Please select a community
-                </b-form-invalid-feedback>
+                  <span v-if="date && date.string">
+                    <span v-if="date.string.start">
+                      {{ date.string.start }}
+                    </span>
+                    <span v-if="date.string.start && date.string.end"> - </span>
+                    <span v-if="date.string.end">
+                      {{ date.string.end }}
+                    </span>
+                    <br />
+                  </span>
+                </div>
+              </b-col>
+            </b-row>
+            <b-row v-if="volunteering.contactname">
+              <b-col cols="4" md="3" class="field"> Contact name </b-col>
+              <b-col cols="8" md="9">
+                {{ volunteering.contactname }}
+              </b-col>
+            </b-row>
+            <b-row v-if="volunteering.contactemail">
+              <b-col cols="4" md="3" class="field"> Contact email </b-col>
+              <b-col cols="8" md="9">
+                <!-- eslint-disable-next-line -->
+                <ExternalLink :href="'mailto:' + volunteering.contactemail">{{ volunteering.contactemail }}</ExternalLink>
+              </b-col>
+            </b-row>
+            <b-row v-if="volunteering.contacturl">
+              <b-col cols="4" md="3" class="field"> Website </b-col>
+              <b-col cols="8" md="9" class="forcebreak">
+                <ExternalLink :href="volunteering.contacturl">
+                  {{ volunteering.contacturl }}
+                </ExternalLink>
+              </b-col>
+            </b-row>
+
+            <br />
+            <p v-if="user" class="text-muted">
+              Posted by {{ user.displayname }}
+              <span class="text-faded">(#{{ user.id }})</span>
+            </p>
+          </div>
+          <validating-form v-else-if="volunteering">
+            <b-row>
+              <b-col cols="12" md="6">
+                <b-form-group
+                  ref="groupid"
+                  label="For which community?"
+                  :state="validationEnabled ? !v$.groupid.$invalid : true"
+                >
+                  <GroupRememberSelect
+                    v-model="groupid"
+                    remember="editopportunity"
+                    :systemwide="true"
+                  />
+                  <NoticeMessage
+                    v-if="groupid === -2"
+                    variant="danger"
+                    class="mt-1"
+                  >
+                    This is a national volunteer opportunity which will go out
+                    to all communities. Please review carefully.
+                  </NoticeMessage>
+                  <b-form-invalid-feedback>
+                    Please select a community
+                  </b-form-invalid-feedback>
+                </b-form-group>
+                <b-form-group
+                  v-if="enabled"
+                  ref="volunteering__title"
+                  label="What's the opportunity?"
+                  label-for="title"
+                  :state="
+                    validationEnabled ? !v$.volunteering.title.$invalid : true
+                  "
+                >
+                  <validating-form-input
+                    id="title"
+                    v-model="volunteering.title"
+                    type="text"
+                    placeholder="Give the opportunity a short title"
+                    :validation="v$.volunteering.title"
+                    :validation-enabled="validationEnabled"
+                    :validation-messages="{
+                      required: 'Please add a title',
+                      maxLength: ({ max }) => `Max length is ${max}`,
+                    }"
+                  />
+                </b-form-group>
+              </b-col>
+              <b-col v-if="enabled" cols="12" md="6">
+                <div class="float-right">
+                  <div v-if="volunteering.image" class="container p-0">
+                    <span @click="rotateLeft">
+                      <v-icon
+                        label="Rotate left"
+                        class="topleft clickme"
+                        title="Rotate left"
+                      >
+                        <v-icon icon="circle" scale="2" />
+                        <v-icon icon="reply" class="rotate__icon" />
+                      </v-icon>
+                    </span>
+                    <span @click="rotateRight">
+                      <v-icon
+                        label="Rotate right"
+                        class="topright clickme"
+                        title="Rotate right"
+                        flip="horizontal"
+                      >
+                        <v-icon icon="circle" scale="2" />
+                        <v-icon icon="reply" class="rotate__icon" />
+                      </v-icon>
+                    </span>
+                  </div>
+                  <b-img
+                    v-if="volunteering.image"
+                    thumbnail
+                    :src="volunteering.image.paththumb + '?' + cacheBust"
+                  />
+                  <b-img v-else width="250" thumbnail src="/placeholder.jpg" />
+                </div>
+              </b-col>
+            </b-row>
+            <span v-if="enabled">
+              <b-row>
+                <b-col>
+                  <b-button
+                    variant="primary"
+                    class="mt-1 float-right"
+                    @click="photoAdd"
+                  >
+                    <v-icon icon="camera" /> Upload photo
+                  </b-button>
+                </b-col>
+              </b-row>
+              <b-row v-if="uploading">
+                <b-col>
+                  <OurFilePond
+                    class="bg-white"
+                    imgtype="Volunteering"
+                    imgflag="volunteering"
+                    :ocr="true"
+                    @photoProcessed="photoProcessed"
+                  />
+                </b-col>
+              </b-row>
+
+              <b-form-group
+                ref="volunteering__description"
+                label="What is it?"
+                label-for="description"
+                :state="
+                  validationEnabled
+                    ? !v$.volunteering.description.$invalid
+                    : true
+                "
+              >
+                <validating-textarea
+                  id="description"
+                  v-model="volunteering.description"
+                  rows="5"
+                  max-rows="8"
+                  spellcheck="true"
+                  placeholder="Please let people know what the opportunity is - any organisation which is involved, what you'd like them to do, and why they might like to do it."
+                  class="mt-2"
+                  :validation="v$.volunteering.description"
+                  :validation-enabled="validationEnabled"
+                  :validation-messages="{
+                    required: 'Please add a description',
+                  }"
+                />
               </b-form-group>
               <b-form-group
-                v-if="enabled"
-                ref="volunteeringEdit__title"
-                label="What's the opportunity?"
-                label-for="title"
+                ref="volunteering__timecommitment"
+                label="Time commitment:"
+                label-for="description"
                 :state="
-                  validationEnabled ? !$v.volunteeringEdit.title.$invalid : null
+                  validationEnabled
+                    ? !v$.volunteering.timecommitment.$invalid
+                    : true
+                "
+              >
+                <validating-textarea
+                  id="timecommitment"
+                  v-model="volunteering.timecommitment"
+                  rows="2"
+                  max-rows="8"
+                  spellcheck="true"
+                  placeholder="Please let people know what the time commitment is that you're looking for, e.g. how many hours a week, what times of day."
+                  class="mt-2"
+                  :validation="v$.volunteering.timecommitment"
+                  :validation-enabled="validationEnabled"
+                  :validation-messages="{
+                    required: 'Please add the time commitment',
+                  }"
+                />
+              </b-form-group>
+              <b-form-group
+                ref="volunteering__location"
+                label="Where is it?"
+                label-for="location"
+                :state="
+                  validationEnabled ? !v$.volunteering.location.$invalid : true
                 "
               >
                 <validating-form-input
-                  id="title"
-                  v-model="volunteeringEdit.title"
+                  id="location"
+                  v-model="volunteering.location"
                   type="text"
-                  placeholder="Give the opportunity a short title"
-                  :validation="$v.volunteeringEdit.title"
+                  placeholder="Where does the volunteering happen? Add a postcode to make sure people can find you!"
+                  :validation="v$.volunteering.location"
                   :validation-enabled="validationEnabled"
                   :validation-messages="{
-                    required: 'Please add a title',
+                    required: 'Please add a location',
+                  }"
+                />
+              </b-form-group>
+              <b-form-group label="When is it?" :state="true">
+                <p>
+                  You can add multiple dates if the opportunity occurs several
+                  times.
+                </p>
+                <StartEndCollection
+                  v-if="volunteering.dates"
+                  v-model="volunteering.dates"
+                />
+              </b-form-group>
+              <b-form-group
+                ref="volunteering__contactname"
+                label="Contact name:"
+                label-for="contactname"
+                :state="
+                  volunteering.contactname && validationEnabled
+                    ? !v$.volunteering.contactname.$invalid
+                    : true
+                "
+              >
+                <validating-form-input
+                  id="contactname"
+                  v-model="volunteering.contactname"
+                  type="text"
+                  placeholder="Is there a contact person for anyone who wants to find out more? (Optional)"
+                  :validation="v$.volunteering.contactname"
+                  :validation-enabled="
+                    volunteering.contactname && validationEnabled
+                  "
+                  :validation-messages="{
                     maxLength: ({ max }) => `Max length is ${max}`,
                   }"
                 />
               </b-form-group>
-            </b-col>
-            <b-col v-if="enabled" cols="12" md="6">
-              <div class="float-right">
-                <div v-if="volunteering.image" class="container p-0">
-                  <span @click="rotateLeft">
-                    <v-icon
-                      label="Rotate left"
-                      class="topleft clickme"
-                      title="Rotate left"
-                    >
-                      <v-icon icon="circle" scale="2" />
-                      <v-icon icon="reply" class="rotate__icon" />
-                    </v-icon>
-                  </span>
-                  <span @click="rotateRight">
-                    <v-icon
-                      label="Rotate right"
-                      class="topright clickme"
-                      title="Rotate right"
-                      flip="horizontal"
-                    >
-                      <v-icon icon="circle" scale="2" />
-                      <v-icon icon="reply" class="rotate__icon" />
-                    </v-icon>
-                  </span>
-                </div>
-                <b-img
-                  v-if="volunteeringEdit.image"
-                  thumbnail
-                  :src="volunteeringEdit.image.paththumb + '?' + cacheBust"
+              email valid {{ emailValid }}
+              <EmailValidator
+                ref="email"
+                size="md"
+                :email.sync="volunteering.contactemail"
+                :valid.sync="emailValid"
+                label="Contact email:"
+                :required="false"
+              />
+              <b-form-group label="Contact phone:" label-for="contactphone">
+                <b-form-input
+                  id="contactphone"
+                  v-model="volunteering.contactphone"
+                  type="tel"
+                  placeholder="Can people reach you by phone? (Optional)"
                 />
-                <b-img
-                  v-else
-                  width="250"
-                  thumbnail
-                  src="~/static/placeholder.jpg"
+              </b-form-group>
+              <b-form-group label="Web link:" label-for="contacturl">
+                <b-form-input
+                  id="contacturl"
+                  v-model="volunteering.contacturl"
+                  type="url"
+                  placeholder="Is there more information on the web? (Optional)"
                 />
-              </div>
-            </b-col>
-          </b-row>
-          <span v-if="enabled">
-            <b-row>
-              <b-col>
-                <b-button
-                  variant="primary"
-                  class="mt-1 float-right"
-                  @click="photoAdd"
-                >
-                  <v-icon icon="camera" /> Upload photo
-                </b-button>
-              </b-col>
-            </b-row>
-            <b-row v-if="uploading">
-              <b-col>
-                <OurFilePond
-                  class="bg-white"
-                  imgtype="Volunteering"
-                  imgflag="volunteering"
-                  :ocr="true"
-                  @photoProcessed="photoProcessed"
-                />
-              </b-col>
-            </b-row>
-
-            <b-form-group
-              ref="volunteeringEdit__description"
-              label="What is it?"
-              label-for="description"
-              :state="
-                validationEnabled
-                  ? !$v.volunteeringEdit.description.$invalid
-                  : null
-              "
-            >
-              <validating-textarea
-                id="description"
-                v-model="volunteeringEdit.description"
-                rows="5"
-                max-rows="8"
-                spellcheck="true"
-                placeholder="Please let people know what the opportunity is - any organisation which is involved, what you'd like them to do, and why they might like to do it."
-                class="mt-2"
-                :validation="$v.volunteeringEdit.description"
-                :validation-enabled="validationEnabled"
-                :validation-messages="{
-                  required: 'Please add a description',
-                }"
-              />
-            </b-form-group>
-            <b-form-group
-              ref="volunteeringEdit__timecommitment"
-              label="Time commitment:"
-              label-for="description"
-              :state="
-                validationEnabled
-                  ? !$v.volunteeringEdit.timecommitment.$invalid
-                  : null
-              "
-            >
-              <validating-textarea
-                id="timecommitment"
-                v-model="volunteeringEdit.timecommitment"
-                rows="2"
-                max-rows="8"
-                spellcheck="true"
-                placeholder="Please let people know what the time commitment is that you're looking for, e.g. how many hours a week, what times of day."
-                class="mt-2"
-                :validation="$v.volunteeringEdit.timecommitment"
-                :validation-enabled="validationEnabled"
-                :validation-messages="{
-                  required: 'Please add the time commitment',
-                }"
-              />
-            </b-form-group>
-            <b-form-group
-              ref="volunteeringEdit__location"
-              label="Where is it?"
-              label-for="location"
-              :state="
-                validationEnabled
-                  ? !$v.volunteeringEdit.location.$invalid
-                  : null
-              "
-            >
-              <validating-form-input
-                id="location"
-                v-model="volunteeringEdit.location"
-                type="text"
-                placeholder="Where does the volunteering happen? Add a postcode to make sure people can find you!"
-                :validation="$v.volunteeringEdit.location"
-                :validation-enabled="validationEnabled"
-                :validation-messages="{
-                  required: 'Please add a location',
-                }"
-              />
-            </b-form-group>
-            <b-form-group label="When is it?">
-              <p>
-                You can add multiple dates if the opportunity occurs several
-                times.
-              </p>
-              <StartEndCollection
-                v-if="volunteeringEdit.dates"
-                v-model="volunteeringEdit.dates"
-              />
-            </b-form-group>
-            <b-form-group
-              ref="volunteeringEdit__contactname"
-              label="Contact name:"
-              label-for="contactname"
-              :state="
-                volunteeringEdit.contactname && validationEnabled
-                  ? !$v.volunteeringEdit.contactname.$invalid
-                  : null
-              "
-            >
-              <validating-form-input
-                id="contactname"
-                v-model="volunteeringEdit.contactname"
-                type="text"
-                placeholder="Is there a contact person for anyone who wants to find out more? (Optional)"
-                :validation="$v.volunteeringEdit.contactname"
-                :validation-enabled="
-                  volunteeringEdit.contactname && validationEnabled
-                "
-                :validation-messages="{
-                  maxLength: ({ max }) => `Max length is ${max}`,
-                }"
-              />
-            </b-form-group>
-            <EmailValidator
-              ref="email"
-              size="md"
-              :email.sync="volunteeringEdit.contactemail"
-              :valid.sync="emailValid"
-              label="Contact email:"
-            />
-            <b-form-group label="Contact phone:" label-for="contactphone">
-              <b-form-input
-                id="contactphone"
-                v-model="volunteeringEdit.contactphone"
-                type="tel"
-                placeholder="Can people reach you by phone? (Optional)"
-              />
-            </b-form-group>
-            <b-form-group label="Web link:" label-for="contacturl">
-              <b-form-input
-                id="contacturl"
-                v-model="volunteeringEdit.contacturl"
-                type="url"
-                placeholder="Is there more information on the web? (Optional)"
-              />
-            </b-form-group>
-          </span>
-          <NoticeMessage v-else variant="warning" class="mt-2">
-            <v-icon icon="info-circle" />&nbsp;This community has chosen not to
-            allow Volunteer Opportunities.
-          </NoticeMessage>
-        </validating-form>
+              </b-form-group>
+            </span>
+            <NoticeMessage v-else variant="warning" class="mt-2">
+              <v-icon icon="info-circle" />&nbsp;This community has chosen not
+              to allow Volunteer Opportunities.
+            </NoticeMessage>
+          </validating-form>
+        </div>
       </div>
     </template>
     <template #footer>
@@ -387,7 +379,10 @@
         </b-button>
       </div>
       <div v-else>
-        <div v-if="volunteering.canmodify" class="w-100">
+        <div
+          v-if="volunteering.canmodify"
+          class="w-100 d-flex justify-content-between"
+        >
           <b-button
             v-if="!editing"
             variant="white"
@@ -408,36 +403,34 @@
             Delete
           </b-button>
         </div>
-        <b-button
-          v-if="!editing"
-          variant="white"
-          class="float-right"
-          :disabled="uploadingPhoto"
-          @click="hide"
-        >
-          Close
-        </b-button>
-        <b-button
-          v-if="editing"
-          variant="primary"
-          class="float-right"
-          :disabled="uploadingPhoto"
-          @click="saveIt"
-        >
-          <v-icon v-if="saving" name="sync" class="fa-spin" />
-          <v-icon v-else name="save" />
-          <span v-if="volunteering.id">Save Changes</span>
-          <span v-else>Add Opportunity</span>
-        </b-button>
-        <b-button
-          v-if="editing"
-          variant="white"
-          class="float-right mr-1"
-          :disabled="uploadingPhoto"
-          @click="dontSave"
-        >
-          hide
-        </b-button>
+        <div class="w-100 d-flex justify-content-between">
+          <b-button
+            v-if="!editing"
+            variant="white"
+            class="float-right"
+            :disabled="uploadingPhoto"
+            @click="hide"
+          >
+            Close
+          </b-button>
+          <SpinButton
+            v-if="editing"
+            variant="primary"
+            :disabled="uploadingPhoto"
+            :handler="saveIt"
+            name="save"
+            :label="volunteering.id ? 'Save Changes' : 'Add Opportunity'"
+          />
+          <b-button
+            v-if="editing"
+            variant="white"
+            class="float-right mr-1"
+            :disabled="uploadingPhoto"
+            @click="dontSave"
+          >
+            Hide
+          </b-button>
+        </div>
       </div>
     </template>
   </b-modal>
@@ -445,7 +438,6 @@
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { maxLength, required } from '@vuelidate/validators'
-import cloneDeep from 'lodash.clonedeep'
 import { useVolunteeringStore } from '../stores/volunteering'
 import { useComposeStore } from '../stores/compose'
 import { useUserStore } from '../stores/user'
@@ -456,7 +448,6 @@ import ValidatingForm from '~/components/ValidatingForm'
 import ValidatingFormInput from '~/components/ValidatingFormInput'
 import ValidatingTextarea from '~/components/ValidatingTextarea'
 import { twem } from '~/composables/useTwem'
-
 const GroupRememberSelect = () => import('~/components/GroupRememberSelect')
 const OurFilePond = () => import('~/components/OurFilePond')
 const StartEndCollection = () => import('~/components/StartEndCollection')
@@ -481,35 +472,6 @@ function initialVolunteering() {
     contactphone: null,
     contacturl: null,
     canmodify: null,
-  }
-}
-
-function initialData() {
-  const volunteeringEdit = cloneDeep(this.volunteering)
-
-  if (volunteeringEdit?.dates) {
-    // May need to convert to date objects.
-    for (let i = 0; i < volunteeringEdit.dates.length; i++) {
-      if (typeof volunteeringEdit.dates[i].start === 'string') {
-        volunteeringEdit.dates[i].start = new Date(
-          volunteeringEdit.dates[i].start
-        )
-      }
-      if (typeof volunteeringEdit.dates[i].end === 'string') {
-        volunteeringEdit.dates[i].end = new Date(volunteeringEdit.dates[i].end)
-      }
-    }
-  }
-
-  return {
-    volunteeringEdit,
-    editing: false,
-    added: false,
-    groupid: null,
-    uploading: false,
-    cacheBust: Date.now(),
-    saving: false,
-    emailValid: false,
   }
 }
 
@@ -556,12 +518,29 @@ export default {
       v$: useVuelidate(),
     }
   },
-  data: initialData,
+  data() {
+    return {
+      editing: false,
+      added: false,
+      groupid: null,
+      cacheBust: Date.now(),
+      emailValid: true,
+      uploading: false,
+    }
+  },
   computed: {
     volunteering() {
-      return this.id
-        ? this.volunteeringStore.byId(this.id)
-        : initialVolunteering()
+      let ret = null
+
+      if (this.id) {
+        ret = this.volunteeringStore.byId(this.id)
+      }
+
+      if (!ret) {
+        ret = initialVolunteering()
+      }
+
+      return ret
     },
     user() {
       return this.userStore.byId(this.volunteering?.userid)
@@ -593,7 +572,7 @@ export default {
     },
     shouldUpdatePhoto() {
       const { photo: oldPhoto } = this.volunteering
-      const { photo: newPhoto } = this.volunteeringEdit
+      const { photo: newPhoto } = this.volunteering
       return newPhoto && (oldPhoto ? newPhoto.id !== oldPhoto.id : true)
     },
   },
@@ -609,40 +588,30 @@ export default {
       this.editing = false
       this.uploading = false
       this.showModal = false
-      this.saving = false
     },
     async deleteIt() {
       await this.volunteeringStore.delete(this.volunteering.id)
       this.hide()
     },
-    reset() {
-      Object.assign(this, initialData.call(this))
-      this.$v.$reset()
-    },
     async saveIt() {
-      this.$v.$touch()
+      this.v$.$touch()
 
-      if (this.volunteeringEdit.email && !this.emailValid) {
+      if (this.volunteering.email && !this.emailValid) {
         // Would be nice to focus on the email, but that's hard to do without introducing a whole load of focus methods
         // through several component layers down to the input.
         return
       }
 
-      if (this.$v.$anyError) {
+      if (this.v$.$anyError) {
         this.validationFocusFirstError()
         return
       }
-
-      this.saving = true
 
       if (this.isExisting) {
         const { id } = this.volunteering
         // This is an edit.
         if (this.shouldUpdatePhoto) {
-          await this.volunteeringStore.setPhoto(
-            id,
-            this.volunteeringEdit.image.id
-          )
+          await this.volunteeringStore.setPhoto(id, this.volunteering.image.id)
         }
 
         const oldgroupid =
@@ -666,22 +635,22 @@ export default {
         await this.volunteeringStore.setDates({
           id,
           olddates: this.volunteering.dates,
-          newdates: this.volunteeringEdit.dates,
+          newdates: this.volunteering.dates,
         })
 
-        await this.volunteeringStore.save(this.volunteeringEdit)
+        await this.volunteeringStore.save(this.volunteering)
 
         this.added = true
       } else {
         // This is an add.  First create it to get the id.
-        const dates = this.volunteeringEdit.dates
-        const photoid = this.volunteeringEdit.image
-          ? this.volunteeringEdit.image.id
+        const dates = this.volunteering.dates
+        const photoid = this.volunteering.image
+          ? this.volunteering.image.id
           : null
 
         const id = await this.$store.dispatch(
           'volunteerops/add',
-          this.volunteeringEdit
+          this.volunteering
         )
 
         if (id) {
@@ -720,7 +689,7 @@ export default {
       // We have uploaded a photo.  Remove the filepond instance.
       this.uploading = false
 
-      this.volunteeringEdit.image = {
+      this.volunteering.image = {
         id: imageid,
         path: image,
         paththumb: imagethumb,
@@ -732,7 +701,7 @@ export default {
     rotate(deg) {
       this.$axios
         .post(process.env.API + '/image', {
-          id: this.volunteeringEdit.image.id,
+          id: this.volunteering.image.id,
           rotate: deg,
           bust: Date.now(),
           volunteering: true,
@@ -752,7 +721,7 @@ export default {
     groupid: {
       required,
     },
-    volunteeringEdit: {
+    volunteering: {
       title: {
         required,
         maxLength: maxLength(80),

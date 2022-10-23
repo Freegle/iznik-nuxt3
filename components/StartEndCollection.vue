@@ -1,19 +1,20 @@
 <template>
   <div>
     <div
-      v-for="(date, idx) in value"
+      v-for="(date, idx) in modelValue"
       :key="date.uniqueid"
       :class="date.string && date.string.past ? 'inpast' : ''"
     >
       <StartEndDate
         v-model="current[idx]"
-        :removable="!required || value.length > 1"
+        :removable="!required || modelValue.length > 1"
         :max-duration-days="maxDurationDays"
         @remove="remove(date)"
       />
     </div>
     <b-button variant="secondary" class="mt-1" @click="add">
-      <v-icon icon="plus" /> Add <span v-if="value.length > 0">another</span
+      <v-icon icon="plus" /> Add
+      <span v-if="modelValue.length > 0">another</span
       ><span v-else>a</span> date
     </b-button>
   </div>
@@ -28,7 +29,7 @@ export default {
     StartEndDate,
   },
   props: {
-    value: {
+    modelValue: {
       type: Array,
       required: true,
     },
@@ -45,9 +46,9 @@ export default {
   },
   setup(props) {
     const uniqueStore = useUniqueStore()
-    const current = ref(props.value)
+    const current = ref(props.modelValue)
 
-    if (props.value.length === 0 && props.required) {
+    if (props.modelValue.length === 0 && props.required) {
       current.push({
         uniqueid: uniqueStore.generate(),
         start: null,

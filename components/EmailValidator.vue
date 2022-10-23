@@ -1,6 +1,12 @@
 <template>
   <div class="d-flex flex-column">
-    <b-form-group :label="label" :label-for="uid" label-class="mt-0">
+    <b-form-group
+      :label="label"
+      :label-for="uid"
+      label-class="mt-0"
+      :state="emailValid"
+    >
+      emailValid {{ emailValid }}, {{ currentEmail }}, {{ email }}
       <validating-form-input
         :id="uid"
         v-model:valid="emailValid"
@@ -52,6 +58,11 @@ export default {
       required: false,
       default: null,
     },
+    required: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
     valid: {
       type: Boolean,
       required: true,
@@ -80,10 +91,13 @@ export default {
   setup(props) {
     const id = uid('email')
 
+    const currentEmail = ref(null)
+    currentEmail.value = props.email
+
     return {
       uid: id,
       v$: useVuelidate(),
-      currentEmail: ref(props.email),
+      currentEmail,
     }
   },
   data() {
@@ -137,6 +151,7 @@ export default {
       // Emitting a null or '' value does not trigger an update of the prop in the parent.  I don't know whether
       // this is intentional, but the consequence is that the email appears to remain valid.  By emitting a space
       // we at least trigger this component to update and notice that the email is not valid.
+      console.log('Check staqte', email)
       this.$emit('update:email', email ? email.trim() : ' ')
 
       if (this.v$.$reset) {
@@ -145,15 +160,18 @@ export default {
 
           // Wait for vuelidate to sort itself out.
           this.$nextTick(() => {
-            const valid = !this.v$.email.$invalid
-            this.$emit('update:valid', valid)
+            console.log('Vuelidate says invalid?', this.v$.email.$invalid)
+            this.emailValid = !this.v$.email.$invalid
+            this.$emit('update:valid', this.emailValid)
           })
         } else {
           this.v$.$reset()
 
-          // Signal that the email is no longer valid.  The watch doesn't get called to make this happen, so you
-          // can end up with an empty email by typing one, then selecting and deleting it.
-          this.$emit('update:valid', false)
+          // If we require an email, signal that it  is no longer valid.  The watch doesn't get called to make this
+          // happen, so you can end up with an empty email by typing one, then selecting and deleting it.
+          console.log('No email, use required', this.required)
+          this.emailValid = !this.required
+          this.$emit('update:valid', this.emailValid)
         }
       }
     },

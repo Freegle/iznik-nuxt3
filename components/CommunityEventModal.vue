@@ -120,7 +120,7 @@
               <b-form-group
                 ref="groupid"
                 label="For which community?"
-                :state="validationEnabled ? !$v.groupid.$invalid : null"
+                :state="validationEnabled ? !v$.groupid.$invalid : null"
               >
                 <groupRememberSelect v-model="groupid" remember="editevent" />
                 <b-form-invalid-feedback>
@@ -132,14 +132,14 @@
                 ref="eventEdit__title"
                 label="What's the event's name?"
                 label-for="title"
-                :state="validationEnabled ? !$v.eventEdit.title.$invalid : null"
+                :state="validationEnabled ? !v$.eventEdit.title.$invalid : null"
               >
                 <validating-form-input
                   id="title"
                   v-model="eventEdit.title"
                   type="text"
                   placeholder="Give the event a short title"
-                  :validation="$v.eventEdit.title"
+                  :validation="v$.eventEdit.title"
                   :validation-enabled="validationEnabled"
                   :validation-messages="{
                     required: 'Please add a title',
@@ -215,7 +215,7 @@
               label="What is it?"
               label-for="description"
               :state="
-                validationEnabled ? !$v.eventEdit.description.$invalid : null
+                validationEnabled ? !v$.eventEdit.description.$invalid : null
               "
             >
               <validating-textarea
@@ -226,7 +226,7 @@
                 spellcheck="true"
                 placeholder="Let people know what the event is - why they should come, what to expect, and any admission charge or fee (we only approve free or cheap events)."
                 class="mt-2"
-                :validation="$v.eventEdit.description"
+                :validation="v$.eventEdit.description"
                 :validation-enabled="validationEnabled"
                 :validation-messages="{
                   required: 'Please add a description',
@@ -238,7 +238,7 @@
               label="Where is it?"
               label-for="location"
               :state="
-                validationEnabled ? !$v.eventEdit.location.$invalid : null
+                validationEnabled ? !v$.eventEdit.location.$invalid : null
               "
             >
               <validating-form-input
@@ -246,7 +246,7 @@
                 v-model="eventEdit.location"
                 type="text"
                 placeholder="Where is it being held? Add a postcode to make sure people can find you!"
-                :validation="$v.eventEdit.location"
+                :validation="v$.eventEdit.location"
                 :validation-enabled="validationEnabled"
                 :validation-messages="{
                   required: 'Please add a location',
@@ -256,7 +256,7 @@
             <b-form-group
               ref="eventEdit__dates"
               label="When is it?"
-              :state="validationEnabled ? !$v.eventEdit.dates.$invalid : null"
+              :state="validationEnabled ? !v$.eventEdit.dates.$invalid : null"
             >
               <p>
                 You can add multiple dates if the event occurs several times.
@@ -277,7 +277,7 @@
               label-for="contactname"
               :state="
                 eventEdit.contactname && validationEnabled
-                  ? !$v.eventEdit.contactname.$invalid
+                  ? !v$.eventEdit.contactname.$invalid
                   : null
               "
             >
@@ -286,7 +286,7 @@
                 v-model="eventEdit.contactname"
                 type="text"
                 placeholder="Is there a contact person for anyone who wants to find out more? (Optional)"
-                :validation="$v.eventEdit.contactname"
+                :validation="v$.eventEdit.contactname"
                 :validation-enabled="eventEdit.contactname && validationEnabled"
                 :validation-messages="{
                   maxLength: ({ max }) => `Max length is ${max}`,
@@ -530,10 +530,10 @@ export default {
     },
     reset() {
       Object.assign(this, initialData.call(this))
-      this.$v.$reset()
+      this.v$.$reset()
     },
     async saveIt() {
-      this.$v.$touch()
+      this.v$.$touch()
 
       if (this.eventEdit.contactemail && !this.emailValid) {
         // Would be nice to focus on the email, but that's hard to do without introducing a whole load of focus methods
@@ -541,7 +541,7 @@ export default {
         return
       }
 
-      if (this.$v.$anyError) {
+      if (this.v$.$anyError) {
         this.validationFocusFirstError()
         return
       }

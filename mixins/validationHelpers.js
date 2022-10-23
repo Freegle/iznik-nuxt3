@@ -5,10 +5,11 @@
  * It does not include vuelidate, so include that too in your form component.
  */
 import get from 'lodash.get'
+
 export default {
   computed: {
     validationEnabled() {
-      return this.$v.$dirty
+      return this.v$?.$dirty
     },
   },
   methods: {
@@ -26,11 +27,11 @@ export default {
      * We then find this ref, scroll to it, and focus any input or textarea.
      */
     validationFocusFirstError() {
-      const error = this.$v
+      const error = this.v$
         .$flattenParams()
         .map(({ path }) => ({
           path,
-          validator: get(this.$v, path),
+          validator: get(this.v$, path),
           ref: this.$refs[path.join('__')],
         }))
         .find(({ ref, validator }) => ref && validator.$error)

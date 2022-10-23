@@ -1,9 +1,16 @@
 <template>
-  <form v-bind="$attrs" v-on="$listeners">
+  <form>
     <slot />
   </form>
 </template>
-
 <script>
-export default {}
+import { useVuelidate } from '@vuelidate/core'
+
+export default {
+  setup() {
+    return {
+      v$: useVuelidate(),
+    }
+  },
+}
 </script>
