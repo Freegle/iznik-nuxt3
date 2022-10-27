@@ -115,6 +115,10 @@ export default {
   },
   methods: {
     validateEmail(value) {
+      if (!value && !this.required) {
+        return true
+      }
+
       if (!value) {
         return 'Please enter an email address.'
       }
@@ -122,6 +126,7 @@ export default {
       if (!new RegExp(EMAIL_REGEX).test(value)) {
         return 'Please enter a valid email address.'
       }
+
       return true
     },
   },

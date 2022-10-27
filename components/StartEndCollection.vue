@@ -1,20 +1,19 @@
 <template>
   <div>
     <div
-      v-for="(date, idx) in modelValue"
+      v-for="(date, idx) in current"
       :key="date.uniqueid"
       :class="date.string && date.string.past ? 'inpast' : ''"
     >
       <StartEndDate
         v-model="current[idx]"
-        :removable="!required || modelValue.length > 1"
+        :removable="!required || current.length > 1"
         :max-duration-days="maxDurationDays"
         @remove="remove(date)"
       />
     </div>
-    <b-button variant="secondary" class="mt-1" @click="add">
-      <v-icon icon="plus" /> Add
-      <span v-if="modelValue.length > 0">another</span
+    <b-button variant="secondary" class="mt-2" @click="add">
+      <v-icon icon="plus" /> Add <span v-if="current.length > 0">another</span
       ><span v-else>a</span> date
     </b-button>
   </div>
@@ -47,13 +46,15 @@ export default {
   setup(props) {
     const current = ref(props.modelValue)
 
-    if (props.modelValue.length === 0 && props.required) {
-      current.push({
-        uniqueid: uid(),
-        start: null,
-        end: null,
-        past: false,
-      })
+    if (props.modelValue?.length === 0 && props.required) {
+      current.value = [
+        {
+          uniqueid: uid('date-'),
+          start: null,
+          end: null,
+          past: false,
+        },
+      ]
     }
 
     return {
@@ -71,12 +72,14 @@ export default {
       if (idx !== -1) this.current.splice(idx, 1)
     },
     add() {
+      console.log('Add')
       this.current.push({
-        uniqueid: uid(),
+        uniqueid: uid('date-'),
         start: null,
         end: null,
         past: false,
       })
+      console.log('Added')
     },
   },
 }

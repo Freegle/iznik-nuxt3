@@ -2,55 +2,32 @@
   <div
     class="form__element p-2 d-flex justify-content-between flex-column flex-lg-row align-items-md-end"
   >
-    <div class="d-flex flex-column flex-md-row mb-3 mb-lg-0">
-      <div class="mr-0 mr-md-4 mb-3 mb-md-0 d-flex flex-column">
+    <div v-if="current" class="d-flex flex-column flex-md-row mb-3 mb-lg-0">
+      <div class="pe-0 ps-md-2 mb-3 mb-md-0 d-flex flex-column">
         <label for="startDate" class="date__label">{{ fromLabel }}</label>
-        <b-input-group class="mb-3">
-          <b-form-input
-            ref="dateInput"
-            v-model="current.start"
-            type="text"
-            placeholder="Start date"
-            autocomplete="off"
-          />
-          <b-input-group-append>
-            <b-form-input
-              v-model="current.start"
-              type="date"
-              placeholder="Choose a date"
-              :min="minDate"
-              :max="maxDate"
-            />
-          </b-input-group-append>
-        </b-input-group>
+        <b-form-input
+          v-model="current.start"
+          type="date"
+          placeholder="Choose a date"
+          :min="today"
+        />
       </div>
-      <div class="mr-lg-4 d-flex flex-column">
+      <div class="pe-lg-4 ps-lg-2 d-flex flex-column">
         <label for="endDate" class="date__label">{{ toLabel }}</label>
-        <b-input-group class="mb-3">
-          <b-form-input
-            ref="dateInput"
-            v-model="current.end"
-            type="text"
-            placeholder="Enddate"
-            autocomplete="off"
-          />
-          <b-input-group-append>
-            <b-form-input
-              v-model="current.end"
-              type="date"
-              placeholder="Choose a date"
-              :min="minDate"
-              :max="maxDate"
-            />
-          </b-input-group-append>
-        </b-input-group>
+        <b-form-input
+          v-model="current.end"
+          type="date"
+          placeholder="Choose a date"
+          :min="minEndDate"
+        />
       </div>
     </div>
     <div>
       <b-button
         v-if="removable"
         variant="secondary"
-        size="sm"
+        size="md"
+        class="me-2"
         @click="$emit('remove')"
       >
         <v-icon icon="trash-alt" title="Delete this date" aria-hidden="true" />
@@ -62,16 +39,14 @@
 <script>
 import { ref } from 'vue'
 import dayjs from 'dayjs'
+import minMax from 'dayjs/plugin/minMax'
 
-// Minimum length of event (it's rounded to 30 minute intervals anyway)
-const MIN_DURATION_MINUTES = 30
-
-const FORMAT = 'ddd, Do MMM HH:mm a'
+dayjs.extend(minMax)
 
 export default {
   components: {},
   props: {
-    value: {
+    modelValue: {
       type: Object,
       required: true,
     },
@@ -97,7 +72,7 @@ export default {
     },
   },
   setup(props) {
-    const current = ref(props.value)
+    const current = ref(props.modelValue)
 
     return {
       current,
@@ -106,6 +81,18 @@ export default {
   computed: {
     oneHourAfterStart() {
       return dayjs(this.current ? this.current.start : null).add(1, 'hour')
+    },
+    today() {
+      return dayjs().format('YYYY-MM-DD')
+    },
+    minEndDate() {
+      const start = this.current?.start
+
+      if (start) {
+        return start
+      } else {
+        return this.today
+      }
     },
   },
   watch: {
@@ -119,41 +106,14 @@ export default {
             'day'
         const changed = dayjs(start).diff(oldStart, unit)
         if (changed !== 0) {
-          this.current.end = dayjs(this.current.end).add(changed, unit).toDate()
+          this.current.end = dayjs(this.current.end)
+            .add(changed, unit)
+            .format('YYYY-MM-DD')
         }
       } else {
         // clear the end date when the start date is cleared
         this.current.end = null
       }
-    },
-  },
-  created() {
-    // used for default start date, 9am bright and early :)
-    this.todayAt9am = dayjs().hour(9).minute(0).second(0)
-
-    // custom formatter using dayjs
-    this.format = {
-      stringify(date) {
-        return date ? dayjs(date).format(FORMAT) : ''
-      },
-      parse(value) {
-        return value ? dayjs(value, FORMAT).toDate() : null
-      },
-    }
-  },
-  methods: {
-    minDate() {
-      return dayjs().toDate()
-    },
-    maxDate() {
-      const today = dayjs()
-      const start = dayjs(this.current.start)
-      const max = start.add(this.maxDurationDays - 1, 'day')
-
-      return dayjs.max(today, start, max).toDate()
-    },
-    maxTime() {
-      return dayjs(this.current.start).add(MIN_DURATION_MINUTES, 'minute')
     },
   },
 }

@@ -20,7 +20,7 @@
           />
           <v-icon v-else :icon="name" />&nbsp;
         </span>
-        <span v-if="!iconlast">
+        <span v-if="!iconlast" class="ml-1">
           {{ label }}
         </span>
       </span>

@@ -62,6 +62,15 @@ export const useVolunteeringStore = defineStore({
       await Promise.all(promises)
       await this.fetch(params.id, true)
     },
+    async add(data) {
+      const id = await api(this.config).volunteering.add(data)
+
+      if (id) {
+        await this.fetch(id, true)
+      }
+
+      return id
+    },
     async save(data) {
       await api(this.config).volunteering.save(data)
       await this.fetch(data.id, true)

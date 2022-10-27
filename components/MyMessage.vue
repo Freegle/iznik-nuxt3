@@ -130,7 +130,7 @@
                 v-if="rejected && !withdrawn"
                 variant="secondary"
                 class="mr-2 mb-1"
-                @click="outcome('Withdrawn')"
+                @click="outcome('Withdrawn', $event)"
               >
                 <v-icon class="d-none d-sm-inline" icon="trash-alt" /> Withdraw
               </b-button>
@@ -138,7 +138,7 @@
                 v-if="!rejected && message.type === 'Offer' && !taken"
                 variant="primary"
                 class="mr-2 mb-1"
-                @click="outcome('Taken')"
+                @click="outcome('Taken', $event)"
               >
                 <v-icon class="d-none d-sm-inline" icon="check" /> Mark as TAKEN
               </b-button>
@@ -146,7 +146,7 @@
                 v-if="!rejected && message.type === 'Wanted' && !received"
                 variant="primary"
                 class="mr-2 mb-1"
-                @click="outcome('Received')"
+                @click="outcome('Received', $event)"
               >
                 <v-icon class="d-none d-sm-inline" icon="check" /> Mark as
                 RECEIVED
@@ -168,7 +168,7 @@
                 v-if="!rejected && !taken && !received && !withdrawn"
                 variant="secondary"
                 class="mr-2 mb-1"
-                @click="outcome('Withdrawn')"
+                @click="outcome('Withdrawn', $event)"
               >
                 <v-icon class="d-none d-sm-inline" icon="trash-alt" /> Withdraw
               </b-button>
@@ -696,19 +696,37 @@ export default {
         this.$refs.outcomeModal.show(type)
       })
     },
-    share() {
+    share(e) {
+      if (e) {
+        e.preventDefault()
+        e.stopPropagation()
+        e.stopImmediatePropagation()
+      }
+
       this.showShareModal = true
       this.waitForRef('shareModal', () => {
         this.$refs.shareModal.show()
       })
     },
-    edit() {
+    edit(e) {
+      if (e) {
+        e.preventDefault()
+        e.stopPropagation()
+        e.stopImmediatePropagation()
+      }
+
       this.showEditModal = true
       this.waitForRef('editModal', () => {
         this.$refs.editModal.show()
       })
     },
-    async repost() {
+    async repost(e) {
+      if (e) {
+        e.preventDefault()
+        e.stopPropagation()
+        e.stopImmediatePropagation()
+      }
+
       // Remove any partially composed messages we currently have, because they'll be confusing.
       await this.composeStore.clearMessages()
 

@@ -175,36 +175,38 @@
                 </b-form-group>
               </b-col>
               <b-col v-if="enabled" cols="12" md="6">
-                <div class="float-right">
-                  <div v-if="volunteering.image" class="container p-0">
-                    <span @click="rotateLeft">
-                      <v-icon
-                        label="Rotate left"
-                        class="topleft clickme"
-                        title="Rotate left"
-                      >
-                        <v-icon icon="circle" scale="2" />
-                        <v-icon icon="reply" class="rotate__icon" />
-                      </v-icon>
-                    </span>
-                    <span @click="rotateRight">
-                      <v-icon
-                        label="Rotate right"
-                        class="topright clickme"
-                        title="Rotate right"
-                        flip="horizontal"
-                      >
-                        <v-icon icon="circle" scale="2" />
-                        <v-icon icon="reply" class="rotate__icon" />
-                      </v-icon>
-                    </span>
+                <div v-if="volunteering.image" class="float-right container">
+                  <div
+                    class="clickme rotateleft stacked"
+                    label="Rotate left"
+                    title="Rotate left"
+                    @click="rotateLeft"
+                  >
+                    <v-icon icon="circle" size="2x" />
+                    <v-icon icon="reply" class="ml-2" />
                   </div>
-                  <b-img
-                    v-if="volunteering.image"
-                    thumbnail
-                    :src="volunteering.image.paththumb + '?' + cacheBust"
-                  />
-                  <b-img v-else width="250" thumbnail src="/placeholder.jpg" />
+                  <div
+                    label="Rotate right"
+                    class="rotateright clickme stacked"
+                    title="Rotate right"
+                    @click="rotateRight"
+                  >
+                    <v-icon icon="circle" size="2x" />
+                    <v-icon icon="reply" flip="horizontal" />
+                  </div>
+                  <div class="image">
+                    <b-img
+                      v-if="volunteering.image"
+                      fluid
+                      :src="volunteering.image.paththumb + '?' + cacheBust"
+                    />
+                    <b-img
+                      v-else
+                      width="250"
+                      thumbnail
+                      src="/placeholder.jpg"
+                    />
+                  </div>
                 </div>
               </b-col>
             </b-row>
@@ -271,7 +273,7 @@
                   spellcheck="true"
                   placeholder="Please let people know what the time commitment is that you're looking for, e.g. how many hours a week, what times of day."
                   class="mt-2 form-control"
-                  :rule="validateTimeCommitment"
+                  :rules="validateTimeCommitment"
                 />
                 <ErrorMessage
                   name="timecommitment"
@@ -290,6 +292,7 @@
                   name="location"
                   class="form-control"
                   placeholder="Where does the volunteering happen? Add a postcode to make sure people can find you!"
+                  :rules="validateLocation"
                 />
                 <ErrorMessage
                   name="location"
@@ -415,14 +418,6 @@
           >
             Close
           </b-button>
-          <SpinButton
-            v-if="editing"
-            variant="primary"
-            :disabled="uploadingPhoto"
-            :handler="saveIt"
-            name="save"
-            :label="volunteering.id ? 'Save Changes' : 'Add Opportunity'"
-          />
           <b-button
             v-if="editing"
             variant="white"
@@ -432,6 +427,14 @@
           >
             Hide
           </b-button>
+          <SpinButton
+            v-if="editing"
+            variant="primary"
+            :disabled="uploadingPhoto"
+            :handler="saveIt"
+            name="save"
+            :label="volunteering.id ? 'Save Changes' : 'Add Opportunity'"
+          />
         </div>
       </div>
     </template>
@@ -566,8 +569,8 @@ export default {
       let ret = true
 
       if (group) {
-        if ('volunteering' in group.settings) {
-          ret = group.settings.volunteering
+        if ('volunteeringallowed' in group) {
+          ret = group.volunteeringallowed
         }
       }
 
@@ -653,7 +656,6 @@ export default {
         return
       }
 
-      console.log('check group', this.groupid)
       if (this.isExisting) {
         const { id } = this.volunteering
         // This is an edit.
@@ -695,10 +697,7 @@ export default {
           ? this.volunteering.image.id
           : null
 
-        const id = await this.$store.dispatch(
-          'volunteerops/add',
-          this.volunteering
-        )
+        const id = await this.volunteeringStore.add(this.volunteering)
 
         if (id) {
           if (photoid) {
@@ -746,8 +745,11 @@ export default {
       // events.
     },
     rotate(deg) {
+      const runtimeConfig = useRuntimeConfig()
+      const api = runtimeConfig.APIv1
+
       this.$axios
-        .post(process.env.API + '/image', {
+        .post(api + '/image', {
           id: this.volunteering.image.id,
           rotate: deg,
           bust: Date.now(),
@@ -772,18 +774,6 @@ export default {
   color: $color-green--darker;
 }
 
-.topleft {
-  top: 12px;
-  left: 10px;
-  position: absolute;
-}
-
-.topright {
-  top: 12px;
-  right: 10px;
-  position: absolute;
-}
-
 .container {
   position: relative;
 }
@@ -794,5 +784,54 @@ export default {
 
 .modal-footer > div {
   width: 100%;
+}
+
+.container {
+  display: grid;
+  grid-template-columns: 32px 250px 32px;
+  justify-content: end;
+}
+
+.rotateleft {
+  grid-row: 1 / 2;
+  grid-column: 1 / 2;
+  z-index: 10000;
+}
+
+.rotateright {
+  grid-row: 1 / 2;
+  grid-column: 3 / 4;
+  z-index: 10000;
+}
+
+.image {
+  grid-row: 1 / 2;
+  grid-column: 2 / 3;
+}
+
+.image__icon {
+  color: $color-white;
+
+  &.fa-flip-horizontal {
+    transform: translate(-1.5em, -0.5em) scaleX(-1);
+  }
+}
+
+.stacked {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+
+  svg {
+    grid-row: 1 / 2;
+    grid-column: 1 / 2;
+  }
+
+  svg:nth-child(2) {
+    z-index: 10000;
+    color: white;
+    padding-top: 7px;
+    padding-right: 7px;
+  }
 }
 </style>
