@@ -14,6 +14,8 @@ jobs:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
     name: Build and Deploy Job
+    env:
+      NODE_OPTIONS: --max_old_space_size=16384
     steps:
       - uses: actions/checkout@v2
         with:
