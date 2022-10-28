@@ -1,39 +1,41 @@
 <template>
-  <div v-if="newsfeed?.communityevent">
+  <div v-if="event">
     <div class="d-flex">
       <ProfileImage
-        v-if="users[userid].profile.turl"
-        :image="users[userid].profile.turl"
-        class="mr-1 mb-1 mt-1 inline"
+        v-if="user.profile.paththumb"
+        :image="user.profile.paththumb"
+        class="ml-1 mr-2 mb-1 inline"
         is-thumbnail
-        :is-moderator="Boolean(users[userid].showmod)"
+        :is-moderator="Boolean(user.showmod)"
         size="lg"
       />
       <div>
         <span class="text-success font-weight-bold">{{
-          users[userid].displayname
+          user.displayname
         }}</span>
         created an event<span class="d-none d-md-inline-block">:</span
         ><br class="d-block d-md-none" />
-        <strong>{{ newsfeed.communityevent.title }}</strong>
+        &nbsp;<strong>{{ event.title }}</strong>
         <br />
         <span class="text-muted small">
           {{ timeago(newsfeed.added) }}
         </span>
-        <span v-if="newsfeed.communityevent.groups.length > 0">
-          on {{ newsfeed.communityevent.groups[0].namedisplay }}
+        <span v-for="groupid in event.groups" :key="groupid">
+          <span v-if="group(groupid)">
+            {{ group(groupid).namedisplay }}
+          </span>
         </span>
       </div>
     </div>
     <div class="communityevent__container">
       <div class="communityevent__description">
-        <div v-if="newsfeed.communityevent.description" class="text-truncate">
+        <div v-if="event.description" class="text-truncate">
           <v-icon icon="info-circle" class="fa-fw" />
-          {{ newsfeed.communityevent.description }}
+          {{ event.description }}
         </div>
-        <div v-if="newsfeed.communityevent.location" class="text-truncate">
+        <div v-if="event.location" class="text-truncate">
           <v-icon icon="map-marker-alt" class="fa-fw" />
-          {{ newsfeed.communityevent.location }}
+          {{ event.location }}
         </div>
         <div v-if="date">
           <v-icon icon="calendar-alt" /> {{ date.start }} - {{ date.end }}
@@ -44,10 +46,10 @@
       </div>
       <div class="communityevent__photo">
         <b-img
-          v-if="newsfeed.communityevent.photo"
+          v-if="event.photo"
           rounded
           lazy
-          :src="newsfeed.communityevent.photo.paththumb"
+          :src="event.photo.paththumb"
           class="clickme mt-2 mt-md-0 w-100"
           @click="moreInfo"
         />
@@ -65,42 +67,71 @@
         </b-button>
       </div>
     </div>
-    <!--  TODO Community Event-->
-    <!--    <CommunityEventModal ref="addEvent" :start-edit="true" />-->
-    <!--    <CommunityEventModal ref="moreInfo" :event="newsfeed.communityevent" />-->
+    <CommunityEventModal ref="addEvent" :start-edit="true" />
+    <CommunityEventModal :id="event.id" ref="moreInfo" />
   </div>
 </template>
 <script>
-import NewsBase from '~/components/NewsBase'
-import NewsLoveComment from '~/components/NewsLoveComment'
+import dayjs from 'dayjs'
+import { useCommunityEventStore } from '../stores/communityevent'
+import { useNewsfeedStore } from '../stores/newsfeed'
+import { useUserStore } from '../stores/user'
+import { useGroupStore } from '../stores/group'
 import ProfileImage from '~/components/ProfileImage'
-// const CommunityEventModal = () => import('~/components/CommunityEventModal')
+import NewsLoveComment from '~/components/NewsLoveComment'
+import NewsBase from '~/components/NewsBase'
+const CommunityEventModal = () => import('~/components/CommunityEventModal')
 
 export default {
   components: {
     NewsLoveComment,
-    // CommunityEventModal,
+    CommunityEventModal,
     ProfileImage,
   },
   extends: NewsBase,
+  async setup(props) {
+    const communityEventStore = useCommunityEventStore()
+    const newsfeedStore = useNewsfeedStore()
+    const userStore = useUserStore()
+    const groupStore = useGroupStore()
+
+    const newsfeed = newsfeedStore.byId(props.id)
+    await userStore.fetch(newsfeed.userid)
+
+    try {
+      const event = await communityEventStore.fetch(newsfeed.eventid)
+
+      await event.groups.forEach(async (groupid) => {
+        await groupStore.fetch(groupid)
+      })
+    } catch (e) {
+      // Most likely doesn't exist.
+    }
+
+    return {
+      communityEventStore,
+      newsfeedStore,
+      userStore,
+      groupStore,
+    }
+  },
   computed: {
+    event() {
+      return this.communityEventStore.byId(this.newsfeed.eventid)
+    },
     date() {
       // Similar code to CommunityEvent
       let ret = null
-      const dates = this.newsfeed.communityevent.dates
+      const dates = this.event.dates
       let count = 0
-      const Moment = this.$dayjs
 
       if (dates) {
         for (let i = 0; i < dates.length; i++) {
           const date = dates[i]
-          if (
-            new Moment().diff(date.end) < 0 ||
-            new Moment().isSame(date.end, 'day')
-          ) {
+          if (dayjs().diff(date.end) < 0 || dayjs().isSame(date.end, 'day')) {
             if (count === 0) {
-              const startm = new Moment(date.start)
-              let endm = new Moment(date.end)
+              const startm = dayjs(date.start)
+              let endm = dayjs(date.end)
               endm = endm.isSame(startm, 'day')
                 ? endm.format('HH:mm')
                 : endm.format('ddd, Do MMM HH:mm')
@@ -124,6 +155,9 @@ export default {
     },
     addEvent() {
       this.$refs.addEvent.show()
+    },
+    group(groupid) {
+      return this.groupStore.get(groupid)
     },
   },
 }
