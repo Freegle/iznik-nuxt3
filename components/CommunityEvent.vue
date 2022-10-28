@@ -1,0 +1,295 @@
+<template>
+  <div>
+    <b-card v-if="event" variant="success" no-body>
+      <b-card-title
+        class="bg-info px-2 mb-0 pt-2 pb-2 text-truncate d-flex justify-content-between header--size4"
+        :title-tag="titleTag"
+      >
+        <nuxt-link :to="'/communityevent/' + event.id" class="event__link">
+          {{ event.title }}
+        </nuxt-link>
+        <nuxt-link
+          v-if="!summary"
+          :to="'/communityevent/' + event.id"
+          class="event__link small text-muted"
+        >
+          #{{ event.id }}
+        </nuxt-link>
+      </b-card-title>
+      <b-card-body class="p-1 pt-0">
+        <div v-if="summary">
+          <div class="media">
+            <div class="media-left">
+              <div class="media-object pl-1 text-muted">
+                <v-icon icon="info-circle" class="fa-fw" />
+              </div>
+            </div>
+            <div class="media-body ml-2 mt-2 text-truncate">
+              {{ description }}
+            </div>
+          </div>
+          <div v-if="event.earliestDate" class="media">
+            <div class="media-left">
+              <div class="media-object pl-1 text-muted">
+                <v-icon icon="clock" class="fa-fw" />
+              </div>
+            </div>
+            <div class="media-body ml-2">
+              {{ event.earliestDate.string.start }} -
+              {{ event.earliestDate.string.end }}
+            </div>
+          </div>
+          <div v-if="event.location" class="d-flex flex-row mt-2">
+            <v-icon icon="map-marker-alt" class="fa-fw" />
+            <div class="ml-2 small">
+              {{ event.location }}
+            </div>
+          </div>
+          <div class="text-center mt-2 mb-2">
+            <b-button
+              variant="secondary"
+              size="sm"
+              :aria-label="
+                'More info about ' + event.title + ' community event'
+              "
+              @click="showEventModal"
+            >
+              <v-icon icon="info-circle" /> More info
+            </b-button>
+          </div>
+          <b-img
+            v-if="event.image"
+            lazy
+            class="w-100"
+            :src="event.image.path"
+          />
+          <div
+            v-if="event.groups?.length > 0"
+            class="small text-muted text-center"
+          >
+            Posted on
+            <span v-for="(group, index) in groups" :key="index">
+              <span v-if="index > 0">, </span>
+              {{ group.namedisplay }}
+            </span>
+          </div>
+        </div>
+        <div v-else class="event">
+          <div class="event__body">
+            <div v-if="event.earliestDate" class="media">
+              <div class="media-left">
+                <div class="media-object pl-1 text-muted">
+                  <v-icon icon="clock" class="fa-fw" />
+                </div>
+              </div>
+              <div class="media-body ml-2">
+                {{ event.earliestDate.string.start }} -
+                {{ event.earliestDate.string.end }}
+              </div>
+            </div>
+            <div v-if="event.location" class="d-flex flex-row mt-2">
+              <v-icon icon="map-marker-alt" class="fa-fw" />
+              <div class="ml-2 small">
+                {{ event.location }}
+              </div>
+            </div>
+            <div
+              v-if="event.groups && event.groups.length > 0"
+              class="d-flex flex-row mt-1"
+            >
+              <v-icon icon="users" class="fa-fw" />
+              <div class="ml-2 small">
+                Posted on
+                <span v-for="(group, index) in groups" :key="index">
+                  <span v-if="index > 0">, </span>
+                  {{ group.namedisplay }}
+                </span>
+              </div>
+            </div>
+            <read-more
+              v-if="description"
+              :text="description"
+              :max-chars="300"
+              class="ml-1 font-weight-bold preline forcebreak nopara"
+            />
+            <div class="mt-2 mb-2 ml-1">
+              <b-button
+                variant="secondary"
+                :aria-label="
+                  'More info about ' + event.title + ' community event'
+                "
+                @click="showEventModal"
+              >
+                <v-icon icon="info-circle" /> More info
+              </b-button>
+            </div>
+          </div>
+          <b-img
+            v-if="event.image"
+            lazy
+            :src="event.image.path"
+            rounded
+            thumbnail
+            class="square"
+            generator-unable-to-provide-required-alt=""
+            title="Opportunity photo"
+          />
+        </div>
+      </b-card-body>
+    </b-card>
+    <CommunityEventModal v-if="showModal" :id="id" ref="eventmodal" />
+  </div>
+</template>
+<script>
+import ReadMore from 'vue-read-more3/src/ReadMoreComponent'
+import { useCommunityEventStore } from '../stores/communityevent'
+import { useUserStore } from '../stores/user'
+import { useGroupStore } from '../stores/group'
+import { twem } from '~/composables/useTwem'
+const CommunityEventModal = () => import('./CommunityEventModal')
+
+export default {
+  components: {
+    CommunityEventModal,
+    ReadMore,
+  },
+  props: {
+    summary: {
+      type: Boolean,
+      required: true,
+    },
+    id: {
+      type: Number,
+      required: true,
+    },
+    filterGroup: {
+      type: Number,
+      required: false,
+      default: null,
+    },
+    titleTag: {
+      type: String,
+      required: false,
+      default: 'h3',
+    },
+  },
+  async setup(props) {
+    const communityEventStore = useCommunityEventStore()
+    const userStore = useUserStore()
+    const groupStore = useGroupStore()
+
+    if (props.id) {
+      const v = await communityEventStore.fetch(props.id)
+      await userStore.fetch(v.userid)
+
+      v.groups?.forEach(async (id) => {
+        await groupStore.fetch(id)
+      })
+    }
+
+    return {
+      communityEventStore,
+      userStore,
+      groupStore,
+    }
+  },
+  data() {
+    return {
+      renewed: false,
+      showModal: false,
+    }
+  },
+  computed: {
+    event() {
+      const v = this.communityEventStore.byId(this.id)
+
+      if (v) {
+        if (!this.filterGroup) {
+          return v
+        }
+
+        if (v.groups.includes(this.filterGroup)) {
+          return v
+        }
+      }
+
+      return null
+    },
+    groups() {
+      const ret = []
+      this.event.groups.forEach((id) => {
+        const group = this.groupStore.get(id)
+
+        if (group) {
+          ret.push(group)
+        }
+      })
+
+      return ret
+    },
+    user() {
+      return this.userStore.byId(this.event?.userid)
+    },
+    description() {
+      let desc = this.event.description
+      desc = desc ? twem(desc) : ''
+      desc = desc.trim()
+      return desc
+    },
+    warning() {
+      const added = new Date(this.event.added).getTime()
+      const renewed = new Date(this.event.renewed).getTime()
+      const now = Date.now()
+
+      let warn = false
+
+      if (renewed) {
+        warn = now - renewed > 31 * 24 * 60 * 60 * 1000
+      } else {
+        warn = now - added > 31 * 24 * 60 * 60 * 1000
+      }
+
+      return warn
+    },
+    mine() {
+      return this.user.id === this.myid
+    },
+  },
+  methods: {
+    showEventModal() {
+      this.showModal = true
+      this.waitForRef('eventmodal', () => {
+        this.$refs.eventmodal.show()
+      })
+    },
+  },
+}
+</script>
+<style scoped lang="scss">
+@import '~bootstrap/scss/functions';
+@import '~bootstrap/scss/variables';
+@import '~bootstrap/scss/mixins/_breakpoints';
+
+.square {
+  object-fit: cover;
+  width: 200px;
+  height: 200px;
+}
+
+.event__link {
+  color: $color-blue--2;
+}
+
+.event {
+  display: flex;
+  flex-direction: column;
+
+  @include media-breakpoint-up(sm) {
+    flex-direction: row;
+  }
+}
+
+.event__body {
+  flex-grow: 1;
+}
+</style>

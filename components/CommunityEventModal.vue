@@ -102,10 +102,10 @@
               </ExternalLink>
             </b-col>
           </b-row>
-          <b-row v-if="volunteering.phone">
+          <b-row v-if="event.phone">
             <b-col cols="4" md="3" class="field"> Contact phone</b-col>
             <b-col cols="8" md="9">
-              {{ volunteering.contactphone }}
+              {{ event.contactphone }}
             </b-col>
           </b-row>
           <br />
