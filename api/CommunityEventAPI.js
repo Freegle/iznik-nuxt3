@@ -9,8 +9,13 @@ export default class CommunityEventAPI extends BaseAPI {
     return this.$getv2('/communityevent')
   }
 
-  create(event) {
-    return this.$post('/communityevent', event)
+  save(data) {
+    return this.$patch('/communityevent', data)
+  }
+
+  async add(data) {
+    const { id } = await this.$post('/communityevent', data)
+    return id
   }
 
   addGroup(id, groupid) {
@@ -35,10 +40,6 @@ export default class CommunityEventAPI extends BaseAPI {
 
   removeDate(id, dateid) {
     return this.$patch('/communityevent', { id, dateid, action: 'RemoveDate' })
-  }
-
-  save(event) {
-    return this.$patch('/communityevent', event)
   }
 
   del(id) {

@@ -1,7 +1,7 @@
 <template>
   <b-modal id="profilemodal" v-model="showModal" size="lg" no-stacking>
     <template #header>
-      <h4 v-if="added">Your opportunity has been added</h4>
+      <h4 v-if="added">Your event has been added</h4>
       <h4 v-else-if="editing">
         <span v-if="event?.id"> Edit Community Event </span>
         <span v-else> Add Community Event </span>
@@ -14,7 +14,7 @@
     <template #default>
       <div v-if="added">
         <p>
-          One of our volunteers will check over your opportunity, and then we'll
+          One of our volunteers will check over your event, and then we'll
           publicise it to other freeglers.
         </p>
         <p>
@@ -144,7 +144,7 @@
               </b-form-group>
               <b-form-group
                 v-if="enabled"
-                label="What's the opportunity?"
+                label="What's the event?"
                 label-for="title"
                 :state="true"
               >
@@ -153,7 +153,7 @@
                   v-model="event.title"
                   name="title"
                   type="text"
-                  placeholder="Give the opportunity a short title"
+                  placeholder="Give the community event a short title"
                   :rules="validateTitle"
                   class="form-control"
                 />
@@ -210,8 +210,8 @@
               <b-col>
                 <OurFilePond
                   class="bg-white"
-                  imgtype="Volunteering"
-                  imgflag="event"
+                  imgtype="CommunityEvent"
+                  imgflag="communityevent"
                   :ocr="true"
                   @photoProcessed="photoProcessed"
                 />
@@ -233,7 +233,7 @@
                 rows="5"
                 max-rows="8"
                 spellcheck="true"
-                placeholder="Please let people know what the opportunity is - any organisation which is involved, what you'd like them to do, and why they might like to do it."
+                placeholder="Let people know what the event is - why they should come, what to expect, and any admission charge or fee (we only approve free or cheap events)."
                 :rules="validateDescription"
               />
               <ErrorMessage
@@ -252,7 +252,7 @@
                 v-model="event.location"
                 name="location"
                 class="form-control"
-                placeholder="Where does the event happen? Add a postcode to make sure people can find you!"
+                placeholder="Where is it being held? Add a postcode to make sure people can find you!"
                 :rules="validateLocation"
               />
               <ErrorMessage
@@ -262,10 +262,16 @@
             </b-form-group>
             <b-form-group label="When is it?" :state="true">
               <p>
-                You can add multiple dates if the opportunity occurs several
-                times.
+                You can add multiple dates if the event occurs several times.
               </p>
-              <StartEndCollection v-if="event.dates" v-model="event.dates" />
+              <StartEndCollection
+                v-if="event.dates"
+                v-model="event.dates"
+                time
+              />
+              <p v-if="showDateError" class="text-danger font-weight-bold">
+                Please fill out the start and end date/time.
+              </p>
             </b-form-group>
             <b-form-group
               ref="volunteering__contactname"
@@ -390,7 +396,7 @@
             :disabled="uploadingPhoto"
             :handler="saveIt"
             name="save"
-            :label="event.id ? 'Save Changes' : 'Add Opportunity'"
+            :label="event.id ? 'Save Changes' : 'Add Event'"
           />
         </div>
       </div>
@@ -403,6 +409,7 @@ import { required, email, min, max } from '@vee-validate/rules'
 import { useCommunityEventStore } from '../stores/communityevent'
 import { useComposeStore } from '../stores/compose'
 import { useUserStore } from '../stores/user'
+import { uid } from '../composables/useId'
 import EmailValidator from './EmailValidator'
 import modal from '@/mixins/modal'
 import { twem } from '~/composables/useTwem'
@@ -419,7 +426,7 @@ defineRule('email', email)
 defineRule('min', min)
 defineRule('max', max)
 
-function initialVolunteering() {
+function initialEvent() {
   return {
     id: null,
     title: null,
@@ -428,7 +435,16 @@ function initialVolunteering() {
     user: null,
     url: null,
     location: null,
-    dates: [],
+    dates: [
+      {
+        uniqueid: uid('date-'),
+        start: null,
+        end: null,
+        starttime: null,
+        endtime: null,
+        past: false,
+      },
+    ],
     groups: [],
     contactname: null,
     contactemail: null,
@@ -488,6 +504,7 @@ export default {
       cacheBust: Date.now(),
       uploading: false,
       showGroupError: false,
+      showDateError: false,
     }
   },
   computed: {
@@ -499,7 +516,7 @@ export default {
       }
 
       if (!ret) {
-        ret = initialVolunteering()
+        ret = initialEvent()
       }
 
       return ret
@@ -541,6 +558,7 @@ export default {
   methods: {
     show() {
       this.editing = this.startEdit
+      this.added = false
       this.showModal = true
       if (this.event?.groups?.length > 0) {
         this.groupid = this.event.groups[0]
@@ -599,6 +617,19 @@ export default {
         return
       } else {
         this.showGroupError = false
+      }
+
+      if (this.event.dates?.length) {
+        for (const date of this.event.dates) {
+          if (!date.start || !date.end || !date.starttime || !date.endtime) {
+            this.showDateError = true
+            return
+          }
+        }
+
+        this.showDateError = false
+      } else {
+        this.showDateError = true
       }
 
       if (!validate.valid) {
@@ -669,7 +700,7 @@ export default {
       }
     },
     async dontSave() {
-      // We may have updated the opportunity during the edit.  Fetch it again to reset those changes.
+      // We may have updated the event during the edit.  Fetch it again to reset those changes.
       await this.communityEventStore.fetch(this.event.id)
       this.hide()
     },
@@ -678,7 +709,7 @@ export default {
       // processed callback below.
       this.uploading = true
     },
-    photoProcessed(imageid, imagethumb, image) {
+    photoProcessed(imageid, imagethumb, image, ocr) {
       // We have uploaded a photo.  Remove the filepond instance.
       this.uploading = false
 
@@ -688,8 +719,20 @@ export default {
         paththumb: imagethumb,
       }
 
-      // We don't do OCR on these - volunteer op photos are much less likely to have useful text than community
-      // events.
+      if (ocr) {
+        // We might have some OCR text from a poster which we can add in.
+        const p = ocr.indexOf('\n')
+        const title = p !== -1 ? ocr.substring(0, p) : null
+        const desc = p !== -1 ? ocr.substring(p + 1) : ocr
+
+        if (!this.event.title) {
+          this.event.title = title
+        }
+
+        if (!this.event.description) {
+          this.event.description = desc
+        }
+      }
     },
     rotate(deg) {
       const runtimeConfig = useRuntimeConfig()

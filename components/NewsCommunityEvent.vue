@@ -19,10 +19,11 @@
         <br />
         <span class="text-muted small">
           {{ timeago(newsfeed.added) }}
-        </span>
-        <span v-for="groupid in event.groups" :key="groupid">
-          <span v-if="group(groupid)">
-            {{ group(groupid).namedisplay }}
+          on
+          <span v-for="groupid in event.groups" :key="groupid">
+            <span v-if="group(groupid)">
+              {{ group(groupid).namedisplay }}
+            </span>
           </span>
         </span>
       </div>
@@ -38,7 +39,8 @@
           {{ event.location }}
         </div>
         <div v-if="date">
-          <v-icon icon="calendar-alt" /> {{ date.start }} - {{ date.end }}
+          <v-icon icon="calendar-alt" class="fa-fw" /> {{ date.start }} -
+          {{ date.end }}
         </div>
         <b-button variant="secondary" class="mt-3 mb-2" @click="moreInfo">
           <v-icon icon="info-circle" /> More info

@@ -581,6 +581,7 @@ export default {
   methods: {
     show() {
       this.editing = this.startEdit
+      this.added = false
       this.showModal = true
       if (this.volunteering?.groups?.length > 0) {
         this.groupid = this.volunteering.groups[0]

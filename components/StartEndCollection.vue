@@ -9,6 +9,7 @@
         v-model="current[idx]"
         :removable="!required || current.length > 1"
         :max-duration-days="maxDurationDays"
+        :time="time"
         @remove="remove(date)"
       />
     </div>
@@ -42,6 +43,11 @@ export default {
       required: false,
       default: null,
     },
+    time: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   setup(props) {
     const current = ref(props.modelValue)
@@ -63,6 +69,7 @@ export default {
   },
   watch: {
     current(newVal) {
+      console.log('Current coll', newVal)
       this.$emit('update:modelValue', newVal)
     },
   },
@@ -72,14 +79,14 @@ export default {
       if (idx !== -1) this.current.splice(idx, 1)
     },
     add() {
-      console.log('Add')
       this.current.push({
         uniqueid: uid('date-'),
         start: null,
         end: null,
+        starttime: null,
+        endtime: null,
         past: false,
       })
-      console.log('Added')
     },
   },
 }

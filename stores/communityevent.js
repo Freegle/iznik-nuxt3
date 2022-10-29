@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import dayjs from 'dayjs'
 import api from '~/api'
 
 export const useCommunityEventStore = defineStore({
@@ -57,8 +58,8 @@ export const useCommunityEventStore = defineStore({
         promises.push(
           api(this.config).communityevent.addDate(
             params.id,
-            date.start,
-            date.end
+            dayjs(date.start + ' ' + date.starttime).toISOString(),
+            dayjs(date.end + ' ' + date.endtime).toISOString()
           )
         )
       }
