@@ -329,12 +329,12 @@
 </template>
 <script>
 import ReadMore from 'vue-read-more3/src/ReadMoreComponent'
-import { useRouter } from 'nuxt/app'
 import { useMessageStore } from '../stores/message'
 import { useChatStore } from '../stores/chat'
 import { useGroupStore } from '../stores/group'
 import { useUserStore } from '../stores/user'
 import { useTrystStore } from '../stores/tryst'
+import { useRouter } from '#imports'
 import MessagePhotosModal from '@/components/MessagePhotosModal'
 import MyMessagePromisedTo from '@/components/MyMessagePromisedTo'
 import PromiseModal from '~/components/PromiseModal'

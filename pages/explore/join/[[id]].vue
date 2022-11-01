@@ -14,9 +14,9 @@
 </template>
 <script>
 import { useRoute } from 'vue-router'
-import { useRouter } from 'nuxt/app'
 import { useGroupStore } from '../../../stores/group'
 import { useAuthStore } from '../../../stores/auth'
+import { useRouter } from '#imports'
 import NoticeMessage from '~/components/NoticeMessage'
 // TODO import loginRequired from '@/mixins/loginRequired.js'
 const ExploreGroup = () => import('~/components/ExploreGroup.vue')

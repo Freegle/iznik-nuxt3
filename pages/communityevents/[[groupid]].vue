@@ -45,11 +45,11 @@
 </template>
 <script>
 import { useRoute } from 'vue-router'
-import { useRouter } from 'nuxt/app'
 import GlobalWarning from '../../components/GlobalWarning'
 import { buildHead } from '../../composables/useBuildHead'
 import { useCommunityEventStore } from '../../stores/communityevent'
 import { useGroupStore } from '../../stores/group'
+import { useRouter } from '#imports'
 import InfiniteLoading from '~/components/InfiniteLoading'
 const GroupSelect = () => import('~/components/GroupSelect')
 const CommunityEvent = () => import('~/components/CommunityEvent.vue')

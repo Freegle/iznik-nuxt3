@@ -1,5 +1,4 @@
-// TODO Sentry
-// import * as Sentry from '@sentry/browser'
+import * as Sentry from '@sentry/browser'
 import axios from 'axios'
 import { useAuthStore } from '~/stores/auth'
 
@@ -124,17 +123,16 @@ export default class BaseAPI {
         console.log('Log it?', log)
 
         if (log) {
-          // TODO Sentry
-          // Sentry.captureException(
-          //   'API request failed ' +
-          //     path +
-          //     ' returned HTTP ' +
-          //     status +
-          //     ' ret ' +
-          //     retstr +
-          //     ' status ' +
-          //     statusstr
-          // )
+          Sentry.captureException(
+            'API request failed ' +
+              path +
+              ' returned HTTP ' +
+              status +
+              ' ret ' +
+              retstr +
+              ' status ' +
+              statusstr
+          )
         }
 
         const message = [
@@ -277,17 +275,14 @@ export default class BaseAPI {
       const log = typeof logError === 'function' ? logError(data) : logError
 
       if (log) {
-        // TODO Sentry
-        // Sentry.captureException(
-        //   'API request failed ' +
-        //     path +
-        //     ' returned HTTP ' +
-        //     status +
-        //     ' ret ' +
-        //     retstr +
-        //     ' status ' +
-        //     statusstr
-        // )
+        Sentry.captureException(
+          'API request failed ' +
+            path +
+            ' returned HTTP ' +
+            status +
+            ' status ' +
+            statusstr
+        )
       }
 
       const message = [

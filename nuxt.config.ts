@@ -84,8 +84,6 @@ export default defineNuxtConfig({
     // TODO Do something here.  Hybrid?
   },
 
-  // TODO Sentry
-
   app: {
     head: {
       title: "Freegle - Don't throw it away, give it away!",

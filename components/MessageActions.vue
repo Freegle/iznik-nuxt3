@@ -39,7 +39,7 @@
   </div>
 </template>
 <script>
-import { useRouter } from 'nuxt/app'
+import { useRouter } from '#imports'
 import { useMessageStore } from '~/stores/message'
 export default {
   props: {

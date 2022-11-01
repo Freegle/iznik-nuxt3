@@ -110,10 +110,10 @@
   </div>
 </template>
 <script>
-import { useRouter } from 'nuxt/app'
 import { useRoute } from 'vue-router'
 import { buildHead } from '../composables/useBuildHead'
 import { useMiscStore } from '../stores/misc'
+import { useRouter } from '#imports'
 import api from '~/api'
 const VisualiseMap = () => import('~/components/VisualiseMap')
 

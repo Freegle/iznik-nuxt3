@@ -30,8 +30,8 @@
   </div>
 </template>
 <script>
-import { useRouter } from 'nuxt/app'
 import { useChatStore } from '../stores/chat'
+import { useRouter } from '#imports'
 
 export default {
   props: {

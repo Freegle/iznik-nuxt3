@@ -129,10 +129,10 @@
   </div>
 </template>
 <script>
-import { useRouter } from 'nuxt/app'
 import { useUserStore } from '../stores/user'
 import { useMessageStore } from '../stores/message'
 import { useChatStore } from '../stores/chat'
+import { useRouter } from '#imports'
 import SupporterInfo from '~/components/SupporterInfo'
 import ProfileImage from '~/components/ProfileImage'
 import { timeago, datelocale } from '~/composables/useTimeFormat'

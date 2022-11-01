@@ -225,10 +225,10 @@
   </div>
 </template>
 <script>
-import { useRouter } from 'nuxt/app'
 import { useChatStore } from '../stores/chat'
 import { setupChat } from '../composables/useChat'
 import ProfileImage from './ProfileImage'
+import { useRouter } from '#imports'
 import { useMiscStore } from '~/stores/misc'
 import SupporterInfo from '~/components/SupporterInfo'
 

@@ -98,10 +98,10 @@
 </template>
 <script>
 import { mapWritableState } from 'pinia'
-import { useRouter } from 'nuxt/app'
 import { useComposeStore } from '../../stores/compose'
 import { useUserStore } from '../../stores/user'
 import { buildHead } from '../../composables/useBuildHead'
+import { useRouter } from '#imports'
 import EmailValidator from '~/components/EmailValidator'
 import NoticeMessage from '~/components/NoticeMessage'
 import ExternalLink from '~/components/ExternalLink'

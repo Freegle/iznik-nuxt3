@@ -18,7 +18,7 @@
   </div>
 </template>
 <script>
-import { useRouter } from 'nuxt/app'
+import { useRouter } from '#imports'
 
 const ConfirmModal = () => import('./ConfirmModal')
 

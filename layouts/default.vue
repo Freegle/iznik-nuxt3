@@ -88,40 +88,39 @@ export default {
       //     // Get any existing trysts.
       //     this.$store.dispatch('tryst/fetch')
     }
-    //
+
     try {
-      // TODO Sentry
       // Set the build date.  This may get superceded by Sentry releases, but it does little harm to add it in.
-      // this.$sentry.setExtra('builddate', process.env.BUILD_DATE)
-      //
-      //     if (this.me) {
-      //       // Set the context for sentry so that we know which users are having errors.
-      //       this.$sentry.setUser({ userid: this.myid })
-      //
-      //       // eslint-disable-next-line no-undef
-      //       if (typeof __insp !== 'undefined') {
-      //         // eslint-disable-next-line no-undef
-      //         __insp.push([
-      //           'tagSession',
-      //           {
-      //             userid: this.myid,
-      //             builddate: process.env.BUILD_DATE
-      //           }
-      //         ])
-      //       }
-      //     } else {
-      //       // eslint-disable-next-line no-undef,no-lonely-if
-      //       if (typeof __insp !== 'undefined') {
-      //         // eslint-disable-next-line no-undef
-      //         __insp.push([
-      //           'tagSession',
-      //           {
-      //             userid: 'Logged out',
-      //             builddate: process.env.BUILD_DATE
-      //           }
-      //         ])
-      //       }
-      //     }
+      this.$sentry.setExtra('builddate', process.env.BUILD_DATE)
+
+      if (this.me) {
+        // Set the context for sentry so that we know which users are having errors.
+        this.$sentry.setUser({ userid: this.myid })
+
+        // eslint-disable-next-line no-undef
+        if (typeof __insp !== 'undefined') {
+          // eslint-disable-next-line no-undef
+          __insp.push([
+            'tagSession',
+            {
+              userid: this.myid,
+              builddate: process.env.BUILD_DATE,
+            },
+          ])
+        }
+      } else {
+        // eslint-disable-next-line no-undef,no-lonely-if
+        if (typeof __insp !== 'undefined') {
+          // eslint-disable-next-line no-undef
+          __insp.push([
+            'tagSession',
+            {
+              userid: 'Logged out',
+              builddate: process.env.BUILD_DATE,
+            },
+          ])
+        }
+      }
     } catch (e) {
       console.log('Failed to set context', e)
     }

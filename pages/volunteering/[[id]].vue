@@ -27,10 +27,10 @@
 </template>
 <script>
 import { useRoute } from 'vue-router'
-import { useRouter } from 'nuxt/app'
 import NoticeMessage from '../../components/NoticeMessage'
 import { buildHead } from '../../composables/useBuildHead'
 import { useVolunteeringStore } from '../../stores/volunteering'
+import { useRouter } from '#imports'
 
 const VolunteerOpportunity = () =>
   import('~/components/VolunteerOpportunity.vue')

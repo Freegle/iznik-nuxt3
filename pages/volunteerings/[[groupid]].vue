@@ -56,11 +56,11 @@
 </template>
 <script>
 import { useRoute } from 'vue-router'
-import { useRouter } from 'nuxt/app'
 import GlobalWarning from '../../components/GlobalWarning'
 import { buildHead } from '../../composables/useBuildHead'
 import { useVolunteeringStore } from '../../stores/volunteering'
 import { useGroupStore } from '../../stores/group'
+import { useRouter } from '#imports'
 import InfiniteLoading from '~/components/InfiniteLoading'
 const GroupSelect = () => import('~/components/GroupSelect')
 const VolunteerOpportunity = () =>

@@ -36,6 +36,8 @@
     "@nuxtjs/sentry": "^5.1.7",
     "@pinia/nuxt": "^0.4",
     "@popperjs/core": "^2.11.4",
+    "@sentry/tracing": "^7.17.3",
+    "@sentry/vue": "^7.17.3",
     "@vee-validate/rules": "^4.7.1",
     "@vitejs/plugin-legacy": "^2.2.0",
     "@vue/cli-plugin-eslint": "^5.0.4",
