@@ -1,12 +1,12 @@
 <template>
   <div>
     <p v-if="replytime">
-      <v-icon icon="clock" class="fa-fw" /> Typically replies in
-      {{ replytime }}.
+      <v-icon icon="clock" class="fa-fw" />&nbsp;
+      <span> Typically replies in {{ replytime }}. </span>
     </p>
     <p v-else>
-      <v-icon icon="clock" class="fa-fw" /> We don't know how long they
-      typically take to reply.
+      <v-icon icon="clock" class="fa-fw" />&nbsp;
+      <span> We don't know how long they typically take to reply. </span>
     </p>
   </div>
 </template>

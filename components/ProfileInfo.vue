@@ -53,7 +53,7 @@
         </template>
         <b-card-body sub-title="" class="p-0 pt-1">
           <p v-if="publicLocation">
-            <v-icon icon="map-marker-alt" class="fa-fw" />
+            <v-icon icon="map-marker-alt" class="fa-fw" />&nbsp;
             <span v-if="publicLocation">
               <span v-if="publicLocation.location">
                 {{ publicLocation.location }}, {{ milesaway }}
