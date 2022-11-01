@@ -12,6 +12,7 @@
       add-modal-component="CommunityEventModal"
       item-key="event-"
     />
+    <infinite-loading :distance="200" @infinite="loadMore" />
   </aside>
 </template>
 <script>
@@ -40,12 +41,30 @@ export default {
       groupid,
     }
   },
+  data() {
+    return {
+      toShow: 1,
+    }
+  },
   computed: {
     forUser() {
       return this.communityEventStore.forUser
     },
     events() {
       return this.forUser.slice(0, this.toShow)
+    },
+  },
+  methods: {
+    loadMore($state) {
+      console.log('Load more events', this.toShow, this.forUser.length)
+      if (this.toShow < this.forUser.length) {
+        this.toShow++
+        console.log('Loaded')
+        $state.loaded()
+      } else {
+        console.log('Complete')
+        $state.complete()
+      }
     },
   },
 }

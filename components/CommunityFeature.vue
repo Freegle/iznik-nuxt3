@@ -116,6 +116,7 @@ export default {
 .title__link {
   color: $colour-header;
 }
+
 :deep(a) {
   text-decoration: none;
 }

@@ -8,6 +8,7 @@
         rootMargin: '0px 0px ' + distance + 'px 0px',
       },
     }"
+    class="infinite-loader mb-4"
   >
     <slot v-if="state == 'loading'" name="spinner"></slot>
     <slot v-if="state == 'complete'" name="complete"></slot>
@@ -87,7 +88,7 @@ export default {
       this.timer = setTimeout(this.fallback, 100)
     },
     visibilityChanged(isVisible) {
-      // console.log('Visibility changed', isVisible)
+      console.log('Visibility changed', isVisible)
       this.visible = isVisible
     },
     async emit() {

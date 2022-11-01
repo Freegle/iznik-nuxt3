@@ -12,6 +12,7 @@
       add-modal-component="VolunteerOpportunityModal"
       item-key="volunteering-"
     />
+    <infinite-loading :distance="200" @infinite="loadMore" />
   </aside>
 </template>
 <script>
@@ -39,12 +40,27 @@ export default {
       groupid,
     }
   },
+  data() {
+    return {
+      toShow: 1,
+    }
+  },
   computed: {
     forUser() {
       return this.volunteeringStore.forUser
     },
     opportunities() {
       return this.forUser.slice(0, this.toShow)
+    },
+  },
+  methods: {
+    loadMore($state) {
+      if (this.toShow < this.forUser.length) {
+        this.toShow++
+        $state.loaded()
+      } else {
+        $state.complete()
+      }
     },
   },
 }
