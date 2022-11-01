@@ -2,7 +2,7 @@
   <div>
     <b-card v-if="event" variant="success" no-body>
       <b-card-title
-        class="bg-info px-2 mb-0 pt-2 pb-2 text-truncate d-flex justify-content-between header--size4"
+        class="bg-light px-2 mb-0 pt-2 pb-2 text-truncate d-flex justify-content-between header--size4"
         :title-tag="titleTag"
       >
         <nuxt-link :to="'/communityevent/' + event.id" class="event__link">
@@ -18,32 +18,26 @@
       </b-card-title>
       <b-card-body class="p-1 pt-0">
         <div v-if="summary">
-          <div class="media">
-            <div class="media-left">
-              <div class="media-object pl-1 text-muted">
-                <v-icon icon="info-circle" class="fa-fw" />
-              </div>
-            </div>
-            <div class="media-body ml-2 mt-2 text-truncate">
+          <div class="d-flex">
+            <p class="text-truncate mb-0">
+              <v-icon icon="info-circle" class="fa-fw" />
               {{ description }}
-            </div>
+            </p>
           </div>
-          <div v-if="event.earliestDate" class="media">
-            <div class="media-left">
-              <div class="media-object pl-1 text-muted">
-                <v-icon icon="clock" class="fa-fw" />
-              </div>
-            </div>
-            <div class="media-body ml-2">
+          <div v-if="event.earliestDate" class="d-flex">
+            <p class="text-truncate mb-0 text-muted">
+              <v-icon icon="clock" class="fa-fw" />
               {{ event.earliestDate.string.start }} -
               {{ event.earliestDate.string.end }}
-            </div>
+            </p>
           </div>
-          <div v-if="event.location" class="d-flex flex-row mt-2">
-            <v-icon icon="map-marker-alt" class="fa-fw" />
-            <div class="ml-2 small">
-              {{ event.location }}
-            </div>
+          <div v-if="event.location" class="d-flex">
+            <p class="text-truncate mb-0">
+              <v-icon icon="map-marker-alt" class="fa-fw" />
+              <span class="ml-1 small">
+                {{ event.location }}
+              </span>
+            </p>
           </div>
           <div class="text-center mt-2 mb-2">
             <b-button
@@ -63,16 +57,6 @@
             class="w-100"
             :src="event.image.path"
           />
-          <div
-            v-if="event.groups?.length > 0"
-            class="small text-muted text-center"
-          >
-            Posted on
-            <span v-for="(group, index) in groups" :key="index">
-              <span v-if="index > 0">, </span>
-              {{ group.namedisplay }}
-            </span>
-          </div>
         </div>
         <div v-else class="event">
           <div class="event__body">

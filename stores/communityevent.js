@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import dayjs from 'dayjs'
 import api from '~/api'
+import { earliestDate, addStrings } from '~/composables/useTimeFormat'
 
 export const useCommunityEventStore = defineStore({
   id: 'communityevent',
@@ -20,7 +21,11 @@ export const useCommunityEventStore = defineStore({
           await this.fetching[id]
         } else {
           this.fetching[id] = api(this.config).communityevent.fetch(id)
-          this.list[id] = await this.fetching[id]
+          let item = await this.fetching[id]
+          item = addStrings(item)
+          item.earliestDate = earliestDate(item.dates)
+          item.earliestDateOfAll = earliestDate(item.dates, true)
+          this.list[id] = item
           this.fetching[id] = null
         }
       }

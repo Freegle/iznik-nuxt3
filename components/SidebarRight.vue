@@ -1,16 +1,12 @@
 <template>
   <div>
-    <div v-if="!simple" class="sidebar__wrapper">
+    <div class="sidebar__wrapper">
       <div class="d-flex flex-column justify-content-between mh-100">
         <div>
           <DonationMonthly
             v-if="false && supporter && !donor"
             class="w-100"
             variant="sidebar"
-          />
-          <VolunteerOpportunitySidebar
-            v-if="showVolunteerOpportunities"
-            :class="itemclass"
           />
         </div>
         <!--        TODO Jobs-->
@@ -27,19 +23,11 @@
 <script>
 import DonationMonthly from '~/components/DonationMonthly'
 
-const VolunteerOpportunitySidebar = () =>
-  import('~/components/VolunteerOpportunitySidebar')
-
 export default {
   components: {
     DonationMonthly,
-    VolunteerOpportunitySidebar,
   },
   props: {
-    showVolunteerOpportunities: {
-      type: Boolean,
-      required: false,
-    },
     showJobOpportunities: {
       type: Boolean,
       required: false,
@@ -51,11 +39,8 @@ export default {
     }
   },
   computed: {
-    both() {
-      return this.showJobOpportunities && this.showVolunteerOpportunities
-    },
     itemclass() {
-      return (this.both ? 'sidebar__item' : 'sidebar__full') + ' mt-2'
+      return 'sidebar__full mt-2'
     },
   },
 }

@@ -1,9 +1,9 @@
 <template>
-  <b-container v-if="me" fluid>
+  <b-container v-if="me" fluid class="p-0">
     <b-row class="m-0">
       <b-col cols="0" lg="3" class="p-0 pr-1">
         <VisibleWhen :at="['lg', 'xl', 'xxl']">
-          <SidebarLeft :show-community-events="true" :show-bot-left="true" />
+          <SidebarLeft show-community-events show-volunteer-opportunities />
         </VisibleWhen>
       </b-col>
       <b-col cols="12" lg="6" class="newsfeedHolder p-0">

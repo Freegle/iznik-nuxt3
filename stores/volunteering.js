@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import api from '~/api'
+import { addStrings, earliestDate } from '~/composables/useTimeFormat'
 
 export const useVolunteeringStore = defineStore({
   id: 'volunteering',
@@ -19,7 +20,11 @@ export const useVolunteeringStore = defineStore({
           await this.fetching[id]
         } else {
           this.fetching[id] = api(this.config).volunteering.fetch(id)
-          this.list[id] = await this.fetching[id]
+          let item = await this.fetching[id]
+          item = addStrings(item)
+          item.earliestDate = earliestDate(item.dates)
+          item.earliestDateOfAll = earliestDate(item.dates, true)
+          this.list[id] = item
           this.fetching[id] = null
         }
       }

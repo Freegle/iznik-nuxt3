@@ -7,7 +7,7 @@
     <main>
       <slot ref="pageContent" class="ml-0 ps-0 pe-0 pageContent" />
     </main>
-    <!--    <BouncingEmail />-->
+    <!--  TODO  <BouncingEmail />-->
     <div class="navbar-toggle" style="display: none" />
     <div id="serverloader" class="bg-white">
       <b-img src="/loader.gif" alt="Loading..." />
@@ -16,10 +16,9 @@
       <p><span>Loading...</span><br><span class="font-weight-bold">Stuck here?  Try refreshing.  Or Chrome.</span><ExternalLink href="mailto:support@ilovefreegle.org" style="color: black;"><br> No luck? Contact us</ExternalLink></p>
     </div>
     <client-only>
-      <!--      <ChatPopups v-if="loggedIn" class="d-none d-sm-block" />-->
       <span ref="breakpoint" class="d-inline d-sm-none" />
       <div class="d-none">
-        <!--        <ChatButton v-if="replyToSend" ref="replyToPostChatButton" :userid="replyToUser" />-->
+        <!--  TODO      <ChatButton v-if="replyToSend" ref="replyToPostChatButton" :userid="replyToUser" />-->
       </div>
       <BreakpointFettler />
       <GoogleOneTap />

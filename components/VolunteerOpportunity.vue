@@ -2,7 +2,7 @@
   <div>
     <b-card v-if="volunteering" variant="success" no-body>
       <b-card-title
-        class="bg-info px-2 mb-0 pt-2 pb-2 text-truncate d-flex justify-content-between header--size4"
+        class="bg-light px-2 mb-0 pt-2 pb-2 text-truncate d-flex justify-content-between header--size4"
         :title-tag="titleTag"
       >
         <nuxt-link
@@ -46,33 +46,31 @@
             <v-icon icon="trash-alt" /> No, please remove it
           </b-button>
         </div>
-        <div v-if="summary">
-          <div class="media">
-            <div class="media-left">
-              <div class="media-object pl-1 text-muted">
-                <v-icon icon="info-circle" class="fa-fw" />
-              </div>
-            </div>
-            <div class="media-body ml-2 mt-2 text-truncate">
+        <div v-if="summary" class="pt-1">
+          <div class="d-flex">
+            <p class="text-truncate mb-0">
+              <v-icon icon="info-circle" class="fa-fw" />
               {{ description }}
-            </div>
+            </p>
           </div>
-          <div v-if="volunteering.earliestDate" class="media">
-            <div class="media-left">
-              <div class="media-object pl-1 text-muted">
+          <div v-if="volunteering.earliestDate">
+            <div class="d-flex">
+              <p class="text-truncate mb-0">
                 <v-icon icon="clock" class="fa-fw" />
-              </div>
-            </div>
-            <div class="media-body ml-2">
-              {{ volunteering.earliestDate.string.start }} -
-              {{ volunteering.earliestDate.string.end }}
+                {{ volunteering.earliestDate.string.start }} -
+                {{ volunteering.earliestDate.string.end }}
+              </p>
             </div>
           </div>
-          <div v-if="volunteering.location" class="d-flex flex-row mt-2">
-            <v-icon icon="map-marker-alt" class="fa-fw" />
-            <div class="ml-2 small">
-              {{ volunteering.location }}
-            </div>
+          <div v-if="volunteering.location">
+            <span class="d-flex">
+              <p class="text-truncate mb-0">
+                <v-icon icon="map-marker-alt" class="fa-fw" />
+                <span class="small ml-1">
+                  {{ volunteering.location }}
+                </span>
+              </p>
+            </span>
           </div>
           <div class="text-center mt-2 mb-2">
             <b-button
@@ -94,16 +92,6 @@
             class="w-100"
             :src="volunteering.image.path"
           />
-          <div
-            v-if="volunteering.groups?.length > 0"
-            class="small text-muted text-center"
-          >
-            Posted on
-            <span v-for="(group, index) in groups" :key="index">
-              <span v-if="index > 0">, </span>
-              {{ group.namedisplay }}
-            </span>
-          </div>
         </div>
         <div v-else class="volunteerop">
           <div class="volunteerop__body">

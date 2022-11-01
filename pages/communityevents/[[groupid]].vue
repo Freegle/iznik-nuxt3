@@ -79,10 +79,10 @@ export default {
     if (groupid) {
       const group = await groupStore.fetch(groupid)
 
-      name = 'Volunteer Opportunities for ' + group.namedisplay
+      name = 'Community Events for ' + group.namedisplay
       image = group?.profile
     } else {
-      name = 'Volunteer Opportunities'
+      name = 'Community Events'
       image = null
     }
 

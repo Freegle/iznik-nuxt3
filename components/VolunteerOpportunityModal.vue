@@ -719,8 +719,11 @@ export default {
       }
     },
     async dontSave() {
-      // We may have updated the opportunity during the edit.  Fetch it again to reset those changes.
-      await this.volunteeringStore.fetch(this.volunteering.id)
+      if (this.id) {
+        // We may have updated the opportunity during the edit.  Fetch it again to reset those changes.
+        await this.volunteeringStore.fetch(this.volunteering.id)
+      }
+
       this.hide()
     },
     photoAdd() {

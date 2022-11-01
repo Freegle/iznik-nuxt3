@@ -565,9 +565,11 @@ export default {
       }
     },
     hide() {
+      console.log('Hide')
       this.editing = false
       this.uploading = false
       this.showModal = false
+      console.log('Hidden')
     },
     validateTitle(value) {
       if (!value) {
@@ -700,8 +702,11 @@ export default {
       }
     },
     async dontSave() {
-      // We may have updated the event during the edit.  Fetch it again to reset those changes.
-      await this.communityEventStore.fetch(this.event.id)
+      if (this.id) {
+        // We may have updated the event during the edit.  Fetch it again to reset those changes.
+        await this.communityEventStore.fetch(this.event.id)
+      }
+
       this.hide()
     },
     photoAdd() {

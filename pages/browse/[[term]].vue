@@ -5,11 +5,7 @@
       <b-row class="m-0">
         <b-col cols="0" lg="3" class="p-0 pr-1">
           <VisibleWhen :at="['lg', 'xl', 'xxl']">
-            <!--            TODO-->
-            <!--            <SidebarLeft-->
-            <!--              :show-community-events="true"-->
-            <!--              :show-bot-left="true"-->
-            <!--            />-->
+            <SidebarLeft />
           </VisibleWhen>
         </b-col>
         <b-col cols="12" lg="6" class="p-0">

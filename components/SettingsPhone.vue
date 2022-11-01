@@ -22,7 +22,7 @@
                 icon="check"
                 class="text-success"
               />
-              <v-icon v-else name="save" />
+              <v-icon v-else icon="save" />
               Save
             </b-button>
           </b-input-group-append>

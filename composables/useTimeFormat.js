@@ -4,6 +4,45 @@ import isToday from 'dayjs/plugin/isToday'
 
 dayjs.extend(isToday)
 
+export function earliestDate(dates, ofall) {
+  // Find the earliest date which is in the future.
+  const now = Date.now()
+  let earliest = null
+  let earliestDate = null
+
+  for (let i = 0; i < dates.length; i++) {
+    const atime = new Date(dates[i].start).getTime()
+    if ((ofall || atime >= now) && (!earliest || atime < earliest)) {
+      earliest = atime
+      earliestDate = dates[i]
+    }
+  }
+
+  return earliestDate
+}
+
+export function addStrings(item) {
+  // Add human readable versions of each date range.
+  if (item) {
+    for (let i = 0; i < item.dates.length; i++) {
+      const date = item.dates[i]
+      const startm = dayjs(date.start)
+      let endm = dayjs(date.end)
+      endm = endm.isSame(startm, 'day')
+        ? endm.format('HH:mm')
+        : endm.format('ddd, Do MMM HH:mm')
+
+      item.dates[i].string = {
+        start: startm.format('ddd, Do MMM HH:mm'),
+        end: endm,
+        past: Date.now() > new Date(date.start),
+      }
+    }
+  }
+
+  return item
+}
+
 export function timeago(val) {
   // dayjs pluralises wrongly in some cases - we've seen 1 hours ago.
   const dePlural = /^1 (.*)s/
