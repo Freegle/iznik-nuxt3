@@ -44,7 +44,7 @@
         header-text-variant="white"
         class="mt-2"
       >
-        <notice-message v-if="user.info.expectedreply" variant="warning">
+        <notice-message v-if="user.expectedreplies" variant="warning">
           <v-icon icon="exclamation-triangle" />&nbsp;{{ expectedreplies }}
           still waiting for them to reply on here.
         </notice-message>
@@ -238,7 +238,7 @@ export default {
     },
     expectedreplies() {
       pluralize.addIrregularRule('freegler is', 'freeglers are')
-      return pluralize('freegler is', this.user?.info?.expectedreply, true)
+      return pluralize('freegler is', this.user?.expectedreplies, true)
     },
     milesaway() {
       return pluralize(

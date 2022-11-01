@@ -13,12 +13,11 @@
           <!--          <MicroVolunteering />-->
           <div>
             <GlobalWarning />
-            <!--            TODO Chats-->
-            <!--            <ExpectedRepliesWarning-->
-            <!--              v-if="me && me.expectedreplies"-->
-            <!--              :count="me.expectedreplies"-->
-            <!--              :chats="me.expectedchats"-->
-            <!--            />-->
+            <ExpectedRepliesWarning
+              v-if="me && me.expectedreplies"
+              :count="me.expectedreplies"
+              :chats="me.expectedchats"
+            />
             <div class="bg-white d-block d-xl-none">
               <div class="d-flex justify-content-between flex-wrap">
                 <b-button to="/give" variant="primary" class="topbutton m-1">
@@ -136,8 +135,8 @@ const IsochronePostMapAndList = () =>
 const GlobalWarning = () => import('~/components/GlobalWarning')
 // const SidebarLeft = () => import('~/components/SidebarLeft')
 // const SidebarRight = () => import('~/components/SidebarRight')
-// const ExpectedRepliesWarning = () =>
-//   import('~/components/ExpectedRepliesWarning')
+const ExpectedRepliesWarning = () =>
+  import('~/components/ExpectedRepliesWarning')
 // const MicroVolunteering = () => import('~/components/MicroVolunteering.vue')
 
 export default {
@@ -149,7 +148,7 @@ export default {
     GlobalWarning,
     // SidebarLeft,
     // SidebarRight,
-    // ExpectedRepliesWarning,
+    ExpectedRepliesWarning,
     // AboutMeModal,
   },
   async setup() {

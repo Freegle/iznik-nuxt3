@@ -29,7 +29,7 @@
             />
           </notice-message>
           <notice-message
-            v-else-if="expectedreply"
+            v-else-if="expectedreplies"
             variant="warning"
             class="clickme"
             @click.native="showInfo"
@@ -339,11 +339,8 @@ export default {
     }
   },
   computed: {
-    expectedreply() {
-      return this.otheruser?.info?.expectedreply
-    },
     noticesToShow() {
-      return this.badratings || this.expectedreply || this.otheruser?.spammer
+      return this.badratings || this.expectedreplies || this.otheruser?.spammer
     },
     badratings() {
       let ret = false
@@ -374,7 +371,7 @@ export default {
     // TODO MINOR Consider showing handover prompt, but in less annoying way.
     expectedreplies() {
       pluralize.addIrregularRule('freegler is', 'freeglers are')
-      return pluralize('freegler is', this.otheruser?.info?.expectedreply, true)
+      return pluralize('freegler is', this.otheruser?.expectedreplies, true)
     },
   },
   beforeDestroy() {

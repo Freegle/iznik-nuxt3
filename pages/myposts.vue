@@ -8,12 +8,11 @@
         </VisibleWhen>
       </b-col>
       <b-col cols="12" lg="6" class="p-0">
-        <!--        TODO Expected replies-->
-        <!--        <ExpectedRepliesWarning-->
-        <!--          v-if="me && me.expectedreplies"-->
-        <!--          :count="me.expectedreplies"-->
-        <!--          :chats="me.expectedchats"-->
-        <!--        />-->
+        <ExpectedRepliesWarning
+          v-if="me && me.expectedreplies"
+          :count="me.expectedreplies"
+          :chats="me.expectedchats"
+        />
         <div v-if="!me" class="d-flex justify-content-center mt-4 flex-wrap">
           <b-button variant="primary" size="lg" @click="forceLogin">
             Log in to continue <v-icon icon="angle-double-right" />
@@ -272,8 +271,8 @@ const SidebarLeft = () => import('~/components/SidebarLeft')
 const SidebarRight = () => import('~/components/SidebarRight')
 // TODO Donations
 // const DonationAskModal = () => import('~/components/DonationAskModal')
-// const ExpectedRepliesWarning = () =>
-//   import('~/components/ExpectedRepliesWarning')
+const ExpectedRepliesWarning = () =>
+  import('~/components/ExpectedRepliesWarning')
 
 export default {
   components: {
@@ -284,7 +283,7 @@ export default {
     SidebarLeft,
     SidebarRight,
     // DonationAskModal,
-    // ExpectedRepliesWarning,
+    ExpectedRepliesWarning,
     InfiniteLoading,
   },
   mixins: [buildHead],
