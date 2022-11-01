@@ -1,24 +1,22 @@
 <template>
-  <div class="d-flex justify-content-between">
-    <div class="sidebar__wrapper pt-3">
-      <CommunityEventSidebar
-        v-if="showCommunityEvents"
-        class="flex-grow-1 sidebar__community-event"
-      />
-      <hr
-        v-if="showCommunityEvents && showVolunteerOpportunities"
-        class="m-0 hr1"
-      />
-      <VolunteerOpportunitySidebar
-        v-if="showVolunteerOpportunities"
-        class="flex-grow-1 sidebar__volunteer-opportunity"
-      />
-      <hr
-        v-if="showCommunityEvents && showVolunteerOpportunities"
-        class="mt-0 hr2"
-      />
-      <BotLeftBox v-if="showBotLeft" class="social-media__wrapper ml-2" />
-    </div>
+  <div class="sidebar__wrapper pt-3 pr-3">
+    <CommunityEventSidebar
+      v-if="showCommunityEvents"
+      class="flex-grow-1 sidebar__community-event"
+    />
+    <hr
+      v-if="showCommunityEvents && showVolunteerOpportunities"
+      class="m-0 hr1"
+    />
+    <VolunteerOpportunitySidebar
+      v-if="showVolunteerOpportunities"
+      class="flex-grow-1 sidebar__volunteer-opportunity"
+    />
+    <hr
+      v-if="showCommunityEvents && showVolunteerOpportunities"
+      class="mt-0 hr2"
+    />
+    <BotLeftBox v-if="showBotLeft" class="social-media__wrapper ml-2" />
   </div>
 </template>
 <script>

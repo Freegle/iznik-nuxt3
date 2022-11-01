@@ -2,10 +2,13 @@
   <div>
     <b-card v-if="event" variant="success" no-body>
       <b-card-title
-        class="bg-light px-2 mb-0 pt-2 pb-2 text-truncate d-flex justify-content-between header--size4"
+        class="bg-light px-2 mb-0 pt-2 pb-2 d-flex justify-content-between header--size4"
         :title-tag="titleTag"
       >
-        <nuxt-link :to="'/communityevent/' + event.id" class="event__link">
+        <nuxt-link
+          :to="'/communityevent/' + event.id"
+          class="event__link text-truncate"
+        >
           {{ event.title }}
         </nuxt-link>
         <nuxt-link

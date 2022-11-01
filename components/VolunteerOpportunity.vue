@@ -2,12 +2,12 @@
   <div>
     <b-card v-if="volunteering" variant="success" no-body>
       <b-card-title
-        class="bg-light px-2 mb-0 pt-2 pb-2 text-truncate d-flex justify-content-between header--size4"
+        class="bg-light px-2 mb-0 pt-2 pb-2 d-flex justify-content-between header--size4"
         :title-tag="titleTag"
       >
         <nuxt-link
           :to="'/volunteering/' + volunteering.id"
-          class="volunteerop__link"
+          class="volunteerop__link text-truncate"
         >
           {{ volunteering.title }}
         </nuxt-link>
