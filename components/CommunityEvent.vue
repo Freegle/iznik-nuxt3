@@ -63,19 +63,15 @@
         </div>
         <div v-else class="event">
           <div class="event__body">
-            <div v-if="event.earliestDate" class="media">
-              <div class="media-left">
-                <div class="media-object pl-1 text-muted">
-                  <v-icon icon="clock" class="fa-fw" />
-                </div>
-              </div>
-              <div class="media-body ml-2">
+            <div v-if="event.earliestDate" class="d-flex flex-row mt-2">
+              <v-icon icon="clock" class="fa-fw mt-1" />
+              <div class="ml-2">
                 {{ event.earliestDate.string.start }} -
                 {{ event.earliestDate.string.end }}
               </div>
             </div>
             <div v-if="event.location" class="d-flex flex-row mt-2">
-              <v-icon icon="map-marker-alt" class="fa-fw" />
+              <v-icon icon="map-marker-alt" class="fa-fw mt-1" />
               <div class="ml-2 small">
                 {{ event.location }}
               </div>
@@ -84,7 +80,7 @@
               v-if="event.groups && event.groups.length > 0"
               class="d-flex flex-row mt-1"
             >
-              <v-icon icon="users" class="fa-fw" />
+              <v-icon icon="users" class="fa-fw mt-1" />
               <div class="ml-2 small">
                 Posted on
                 <span v-for="(group, index) in groups" :key="index">
@@ -97,7 +93,7 @@
               v-if="description"
               :text="description"
               :max-chars="300"
-              class="ml-1 font-weight-bold preline forcebreak nopara"
+              class="ml-1 font-weight-bold preline forcebreak nopara mt-1"
             />
             <div class="mt-2 mb-2 ml-1">
               <b-button

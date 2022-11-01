@@ -1,6 +1,5 @@
 /**
  * This is a mixin for the form you want to validate.
- * TODO MINOR Convert to composable
  *
  * It does not include vuelidate, so include that too in your form component.
  */

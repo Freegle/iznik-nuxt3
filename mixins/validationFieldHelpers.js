@@ -1,6 +1,5 @@
 /**
  * These are helpers useful for our validation field helpers. The ones that wrap the bootstrap components.
- * TODO MINOR Convert to composable
  */
 export default {
   props: {
