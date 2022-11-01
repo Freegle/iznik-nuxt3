@@ -76,7 +76,7 @@ export default {
     const { chat, otheruser } = await setupChat(props.id)
 
     if (props.id) {
-      if (!chatStore.byId(props.id)) {
+      if (!chatStore.byChatId(props.id)) {
         // It might be an old chat which doesn't appear in our recent ones, but which we are specifically trying
         // to go to.  Fetch all the chats.
         await chatStore.fetchChats('2009-09-11')
@@ -112,7 +112,7 @@ export default {
   computed: {
     notVisible() {
       let ret = false
-      if (this.id && !this.chatStore.byId(this.id)) {
+      if (this.id && !this.chatStore.byChatId(this.id)) {
         // This isn't a chat we can see.
         ret = true
       }
@@ -130,7 +130,7 @@ export default {
         await this.chatStore.fetchChats()
 
         if (this.id) {
-          if (!this.chatStore.byId(this.id)) {
+          if (!this.chatStore.byChatId(this.id)) {
             // It might be an old chat which doesn't appear in our recent ones, but which we are specifically trying
             // to go to.  Fetch all the chats.
             await this.chatStore.fetchChats('2009-09-11')

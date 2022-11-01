@@ -40,7 +40,7 @@ export function chatCollate(msgs) {
   return ret
 }
 
-export function setupChat(selectedChatId) {
+export function setupChat(selectedChatId, chatMessageId) {
   const chatStore = useChatStore()
   const userStore = useUserStore()
   const authStore = useAuthStore()
@@ -48,7 +48,7 @@ export function setupChat(selectedChatId) {
   const myid = authStore.user?.id
 
   const chat = computed(() => {
-    return selectedChatId ? chatStore.byId(selectedChatId) : null
+    return selectedChatId ? chatStore.byChatId(selectedChatId) : null
   })
 
   const chatmessages = computed(() => {
@@ -94,6 +94,12 @@ export function setupChat(selectedChatId) {
 
   const unseen = computed(() => chat?.value?.unseen)
 
+  let chatmessage = null
+
+  if (chatMessageId) {
+    chatmessage = computed(() => chatStore.messageById(chatMessageId))
+  }
+
   return {
     chat,
     unseen,
@@ -110,16 +116,13 @@ export function setupChat(selectedChatId) {
     milesaway,
     milesstring,
     chatStore,
+    chatmessage,
   }
 }
 
 export async function fetchReferencedMessage(chatid, id) {
   const chatStore = useChatStore()
-  const chatmessages = chatStore.messagesById(chatid)
-  // TODO MINOR Perf could restructure chat store a bit to avoid this loop.
-  const chatmessage = chatmessages.find((m) => {
-    return m.id === id
-  })
+  const chatmessage = chatStore.messageById(id)
 
   if (chatmessage?.refmsgid) {
     const messageStore = useMessageStore()

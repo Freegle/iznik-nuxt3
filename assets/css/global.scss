@@ -277,7 +277,6 @@ form {
 
 // Bootstrap tooltips appear above modals on mobile even after a modal is shown from a click.  This is confusing.
 // Most tooltips aren't inside modals so move them down.
-// TODO MINOR CSS This breaks display of ratings within the profile modal.
 .tooltip {
   z-index: 1030;
 }

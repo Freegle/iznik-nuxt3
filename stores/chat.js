@@ -6,7 +6,8 @@ export const useChatStore = defineStore({
   id: 'chat',
   state: () => ({
     list: [],
-    listById: {},
+    listByChatId: {},
+    listByChatMessageId: {},
     messages: {},
   }),
   actions: {
@@ -25,17 +26,17 @@ export const useChatStore = defineStore({
         // If we already have the chat with this date then don't set it - this avoids reactivity causing a slew of
         // component updates for no good reason.
         if (
-          !this.listById[c.id] ||
-          this.listById[c.id].lastdate !== c.lastdate
+          !this.listByChatId[c.id] ||
+          this.listByChatId[c.id].lastdate !== c.lastdate
         ) {
-          this.listById[c.id] = c
+          this.listByChatId[c.id] = c
         }
       })
     },
     async fetchChat(id) {
       if (id > 0) {
         const chat = await api(this.config).chat.fetchChat(id)
-        this.listById[id] = chat
+        this.listByChatId[id] = chat
       }
     },
     async fetchMessages(id) {
@@ -47,18 +48,22 @@ export const useChatStore = defineStore({
       // Chat messages are immutable.
       if (this.messages[id]?.length !== messages.length) {
         this.messages[id] = messages
+
+        messages.forEach((m) => {
+          this.listByChatMessageId[m.id] = m
+        })
       }
 
       return messages
     },
     markRead(id) {
-      const chat = this.listById[id]
+      const chat = this.listByChatId[id]
 
       if (chat?.unseen > 0) {
         // Cheat and set the value rather than fetch from the search.  This speeds things up a lot, and when we
         // use this we expect to then call fetchChats after we've finished.
         api(this.config).chat.markRead(id, chat.lastmsg, false)
-        this.listById[id].unseen = 0
+        this.listByChatId[id].unseen = 0
       }
     },
     async markUnread(chatid, prevmsgid) {
@@ -184,11 +189,14 @@ export const useChatStore = defineStore({
     },
   },
   getters: {
-    byId: (state) => {
-      return (id) => state.listById[id]
+    byChatId: (state) => {
+      return (id) => state.listByChatId[id]
     },
     messagesById: (state) => {
       return (id) => (state.messages[id] ? state.messages[id] : [])
+    },
+    messageById: (state) => {
+      return (id) => state.listByChatMessageId[id]
     },
     unreadCount: (state) => {
       // count chats with unseen messages
@@ -197,16 +205,16 @@ export const useChatStore = defineStore({
         : 0
     },
     toUser: (state) => (id) => {
-      // We look in listById not list.  This is because we might fetch a chat that isn't in the ones returned by
-      // list, and it would get removed from list by the next poll.  But it will stay in listById.
+      // We look in listByChatId not list.  This is because we might fetch a chat that isn't in the ones returned by
+      // list, and it would get removed from list by the next poll.  But it will stay in listByChatId.
       let ret = null
 
-      for (const c in state.listById) {
+      for (const c in state.listByChatId) {
         if (
-          state.listById[c].chattype === 'User2User' &&
-          state.listById[c].otheruid === id
+          state.listByChatId[c].chattype === 'User2User' &&
+          state.listByChatId[c].otheruid === id
         ) {
-          ret = state.listById[c]
+          ret = state.listByChatId[c]
           break
         }
       }

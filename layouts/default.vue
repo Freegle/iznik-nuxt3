@@ -31,6 +31,7 @@ import { useMiscStore } from '../stores/misc'
 import MainHeader from '../components/MainHeader'
 import { useChatStore } from '../stores/chat'
 import GoogleOneTap from '../components/GoogleOneTap'
+const { $sentrySetContext, $sentrySetUser } = useNuxtApp()
 
 export default {
   components: {
@@ -84,18 +85,19 @@ export default {
       // Get chats and poll regularly for new ones
       const chatStore = useChatStore()
       chatStore.pollForChatUpdates()
-      //
-      //     // Get any existing trysts.
-      //     this.$store.dispatch('tryst/fetch')
     }
 
     try {
       // Set the build date.  This may get superceded by Sentry releases, but it does little harm to add it in.
-      this.$sentry.setExtra('builddate', process.env.BUILD_DATE)
+      const runtimeConfig = useRuntimeConfig()
+
+      $sentrySetContext('builddate', {
+        buildDate: runtimeConfig.public.BUILD_DATE,
+      })
 
       if (this.me) {
         // Set the context for sentry so that we know which users are having errors.
-        this.$sentry.setUser({ userid: this.myid })
+        $sentrySetUser({ userid: this.myid })
 
         // eslint-disable-next-line no-undef
         if (typeof __insp !== 'undefined') {

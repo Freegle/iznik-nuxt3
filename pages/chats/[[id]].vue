@@ -166,7 +166,7 @@ export default {
       await chatStore.fetchChats()
 
       // Is this chat in the list?
-      let chat = chatStore.byId(id)
+      let chat = chatStore.byChatId(id)
 
       if (!chat) {
         // Might be old.  Try fetching it specifically.

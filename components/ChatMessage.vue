@@ -142,14 +142,10 @@ export default {
   async setup(props) {
     const chatStore = useChatStore()
 
-    const { chat, chatmessages, otheruser } = await setupChat(props.chatid)
-
-    // TODO MINOR Should this be in composable, and indexed better?  Similar code elsewhere
-    const chatmessage = computed(() => {
-      return chatmessages.value.find((m) => {
-        return m.id === props.id
-      })
-    })
+    const { chat, otheruser, chatmessage } = await setupChat(
+      props.chatid,
+      props.id
+    )
 
     return {
       chatStore,

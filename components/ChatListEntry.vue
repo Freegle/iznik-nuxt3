@@ -64,7 +64,7 @@ export default {
   },
   computed: {
     chat() {
-      return this.chatStore.byId(this.id)
+      return this.chatStore.byChatId(this.id)
     },
     dateFormatted() {
       if (this.chat) {

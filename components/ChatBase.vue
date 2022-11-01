@@ -103,15 +103,10 @@ export default {
     // use the composable.  Probably there is a way to handle this better.
     chat() {
       const chatStore = useChatStore()
-      return chatStore.byId(this.chatid)
+      return chatStore.byChatId(this.chatid)
     },
     chatmessage() {
-      const chatStore = useChatStore()
-      const chatmessages = chatStore.messagesById(this.chatid)
-      // TODO MINOR Perf could restructure chat store a bit to avoid this loop.
-      return chatmessages.find((m) => {
-        return m.id === this.id
-      })
+      return useChatStore().messageById(this.id)
     },
     otheruser() {
       const userStore = useUserStore()

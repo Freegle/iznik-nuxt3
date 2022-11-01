@@ -2,7 +2,6 @@ import BaseAPI from '@/api/BaseAPI'
 
 export default class ChatAPI extends BaseAPI {
   fetchMessages(chatid) {
-    // TODO MINOR PERFORMANCE Chat paging
     return this.$getv2(`/chat/${chatid}/message`)
   }
 
