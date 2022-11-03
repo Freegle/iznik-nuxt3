@@ -101,10 +101,7 @@
       </b-col>
       <b-col cols="0" xl="3" class="p-0 pl-1">
         <VisibleWhen :at="['xl', 'xxl']">
-          <SidebarRight
-            :show-volunteer-opportunities="false"
-            :show-job-opportunities="true"
-          />
+          <SidebarRight :show-job-opportunities="true" />
         </VisibleWhen>
       </b-col>
     </b-row>

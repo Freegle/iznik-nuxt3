@@ -239,11 +239,7 @@
       </b-col>
       <b-col cols="0" lg="3" class="p-0 pl-1">
         <VisibleWhen :at="['lg', 'xl']">
-          <sidebar-right
-            v-if="me"
-            show-volunteer-opportunities
-            show-job-opportunities
-          />
+          <SidebarRight show-job-opportunities />
         </VisibleWhen>
       </b-col>
     </b-row>

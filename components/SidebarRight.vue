@@ -1,31 +1,31 @@
 <template>
   <div>
     <div class="sidebar__wrapper">
-      <div class="d-flex flex-column justify-content-between mh-100">
+      <div class="d-flex flex-column justify-content-between mh-100 pl-3">
         <div>
           <DonationMonthly
-            v-if="false && supporter && !donor"
+            v-if="supporter && !donor"
             class="w-100"
             variant="sidebar"
           />
         </div>
-        <!--        TODO Jobs-->
-        <!--        <JobsSidebar-->
-        <!--          v-if="showJobOpportunities"-->
-        <!--          :class="itemclass"-->
-        <!--          :shown-love-junk="shown"-->
-        <!--        />-->
+        <JobsSidebar
+          v-if="showJobOpportunities"
+          :class="itemclass"
+          :shown-love-junk="shown"
+        />
       </div>
     </div>
   </div>
 </template>
-
 <script>
+import JobsSidebar from './JobsSidebar'
 import DonationMonthly from '~/components/DonationMonthly'
 
 export default {
   components: {
     DonationMonthly,
+    JobsSidebar,
   },
   props: {
     showJobOpportunities: {
@@ -45,7 +45,6 @@ export default {
   },
 }
 </script>
-
 <style scoped>
 .sidebar__item {
   flex: 0 1 50%;

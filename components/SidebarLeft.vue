@@ -62,6 +62,7 @@ export default {
 .sidebar__community-event {
   grid-row: 1 / 2;
   overflow-y: auto;
+  scrollbar-gutter: stable;
 }
 
 .hr1 {
@@ -71,6 +72,7 @@ export default {
 .sidebar__volunteer-opportunity {
   grid-row: 3 / 4;
   overflow-y: auto;
+  scrollbar-gutter: stable;
 }
 
 .hr2 {

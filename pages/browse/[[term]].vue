@@ -109,7 +109,7 @@
         <b-col cols="0" lg="3" class="p-0 pl-1">
           <VisibleWhen :at="['lg', 'xl', 'xxl']">
             <!--            TODO-->
-            <!--            <sidebar-right-->
+            <!--            <SidebarRight-->
             <!--              show-volunteer-opportunities-->
             <!--              show-job-opportunities-->
             <!--            />-->

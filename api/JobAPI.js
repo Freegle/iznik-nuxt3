@@ -1,14 +1,16 @@
 import BaseAPI from '@/api/BaseAPI'
 
 export default class JobAPI extends BaseAPI {
-  async fetch(params) {
+  async fetchv2(lat, lng) {
     // No need to log errors about this request - it often times out.
-    const ret = await this.$get('/jobs', params, false)
-    if (ret && ret.ret === 0 && ret.jobs) {
-      return ret.jobs
-    } else {
-      throw new Error('Unexpected API data returned', ret)
-    }
+    return await this.$getv2(
+      '/jobs',
+      {
+        lat,
+        lng,
+      },
+      false
+    )
   }
 
   async log(params) {

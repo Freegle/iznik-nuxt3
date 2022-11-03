@@ -2,7 +2,7 @@
   <div class="clickme" @click="submit">
     <b-img
       lazy
-      src="~/static/donate_per_month.jpg"
+      src="/donate_per_month.jpg"
       alt="Click to support Freegle by donating £1 per month"
       class="w-100"
       title="Click here to set up a £1/month donation to Freegle.  Thank you!"
