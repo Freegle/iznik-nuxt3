@@ -16,10 +16,7 @@
         </div>
         <b-alert v-else show variant="danger">
           Something went wrong. Please contact us to let us know what you were
-          trying to do.
-          <ExternalLink href="mailto:support@ilovefreegle.org">
-            support@ilovefreegle.org
-          </ExternalLink>
+          trying to do at <SupportLink />
         </b-alert>
       </b-col>
       <b-col cols="0" lg="3" class="d-none d-lg-block p-0 pl-1" />
@@ -28,14 +25,14 @@
 </template>
 <script>
 import { useRoute } from 'vue-router'
-import ExternalLink from '../../../components/ExternalLink'
+import SupportLink from '../../../components/SupportLink'
 import { buildHead } from '../../../composables/useBuildHead'
 import { useGroupStore } from '~/stores/group'
 const AdaptiveMap = () => import('../../../components/AdaptiveMap')
 
 export default {
   components: {
-    ExternalLink,
+    SupportLink,
     AdaptiveMap,
   },
   async setup() {

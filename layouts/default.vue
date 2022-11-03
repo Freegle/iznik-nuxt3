@@ -13,7 +13,7 @@
       <b-img src="/loader.gif" alt="Loading..." />
       <!-- Don't allow this to format neatly, otherwise SSR doesn't match and we get a client-side re-render -->
       <!-- eslint-disable-next-line -->
-      <p><span>Loading...</span><br><span class="font-weight-bold">Stuck here?  Try refreshing.  Or Chrome.</span><ExternalLink href="mailto:support@ilovefreegle.org" style="color: black;"><br> No luck? Contact us</ExternalLink></p>
+      <p><span>Loading...</span><br><span class="font-weight-bold">Stuck here?  Try refreshing.  Or Chrome.</span><br><SupportLink text="No luck? Contact us" /></p>
     </div>
     <client-only>
       <span ref="breakpoint" class="d-inline d-sm-none" />
@@ -30,16 +30,14 @@ import { useMiscStore } from '../stores/misc'
 import MainHeader from '../components/MainHeader'
 import { useChatStore } from '../stores/chat'
 import GoogleOneTap from '../components/GoogleOneTap'
+import SupportLink from '../components/SupportLink'
 const { $sentrySetContext, $sentrySetUser } = useNuxtApp()
 
 export default {
   components: {
-    // Breakpoint,
-    // ChatPopups,
-    // ChatButton,
     // BouncingEmail,
-    // ExternalLink,
     GoogleOneTap,
+    SupportLink,
     MainHeader,
   },
   data() {

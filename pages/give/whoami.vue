@@ -77,7 +77,8 @@
               </NoticeMessage>
               <NoticeMessage v-else-if="wentWrong" variant="danger">
                 <!-- eslint-disable-next-line -->
-                Something went wrong.  Please try again, and if this keeps happening then contact <ExternalLink href="mailto:support@ilovefreegle.org">support@ilovefreegle.org</ExternalLink>.
+                Something went wrong.  Please try again, and if this keeps happening then contact
+                <SupportLink />.
               </NoticeMessage>
               <b-progress
                 v-else
@@ -104,14 +105,14 @@ import { buildHead } from '../../composables/useBuildHead'
 import { useRouter } from '#imports'
 import EmailValidator from '~/components/EmailValidator'
 import NoticeMessage from '~/components/NoticeMessage'
-import ExternalLink from '~/components/ExternalLink'
+import SupportLink from '~/components/ExternalLink'
 import EmailBelongsToSomeoneElse from '~/components/EmailBelongsToSomeoneElse'
 import { setup, freegleIt } from '~/composables/useCompose'
 import WizardProgress from '~/components/WizardProgress'
 
 export default {
   components: {
-    ExternalLink,
+    SupportLink,
     NoticeMessage,
     EmailBelongsToSomeoneElse,
     EmailValidator,

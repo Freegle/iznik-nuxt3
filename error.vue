@@ -17,15 +17,16 @@
       </p>
       <p>
         <!-- eslint-disable-next-line -->
-        Having problems? <ExternalLink href="mailto:support@ilovefreegle.org">Contact us</ExternalLink>
+        Having problems? <SupportLink text="Contact us" />
       </p>
     </div>
   </div>
 </template>
 <script>
-const ExternalLink = () => import('~/components/ExternalLink')
+import SupportLink from './components/SupportLink'
+
 export default {
-  components: { ExternalLink },
+  components: { SupportLink },
   props: {
     error: {
       type: Object,
