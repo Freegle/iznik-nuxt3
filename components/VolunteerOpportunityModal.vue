@@ -124,7 +124,10 @@
           <br />
           <p v-if="user" class="text-muted">
             Posted by {{ user.displayname }}
-            <span class="text-faded">(#{{ user.id }})</span>
+            <span v-for="(group, index) in groups" :key="index">
+              <span v-if="index > 0">, </span><v-else>on </v-else>
+              {{ group.namedisplay }}
+            </span>
           </p>
         </div>
         <Form v-else-if="volunteering" ref="form">
@@ -442,6 +445,7 @@ import { required, email, min, max } from '@vee-validate/rules'
 import { useVolunteeringStore } from '../stores/volunteering'
 import { useComposeStore } from '../stores/compose'
 import { useUserStore } from '../stores/user'
+import { useGroupStore } from '../stores/group'
 import EmailValidator from './EmailValidator'
 import modal from '@/mixins/modal'
 import { twem } from '~/composables/useTwem'
@@ -508,16 +512,22 @@ export default {
     const volunteeringStore = useVolunteeringStore()
     const composeStore = useComposeStore()
     const userStore = useUserStore()
+    const groupStore = useGroupStore()
 
     if (props.id) {
       const v = await volunteeringStore.fetch(props.id)
       await userStore.fetch(v.userid)
+
+      v.groups?.forEach(async (id) => {
+        await groupStore.fetch(id)
+      })
     }
 
     return {
       volunteeringStore,
       composeStore,
       userStore,
+      groupStore,
     }
   },
   data() {
@@ -541,6 +551,18 @@ export default {
       if (!ret) {
         ret = initialVolunteering()
       }
+
+      return ret
+    },
+    groups() {
+      const ret = []
+      this.volunteering.groups.forEach((id) => {
+        const group = this.groupStore.get(id)
+
+        if (group) {
+          ret.push(group)
+        }
+      })
 
       return ret
     },

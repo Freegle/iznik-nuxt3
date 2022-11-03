@@ -5,7 +5,6 @@
     title="ChitChat photo"
     size="lg"
     no-stacking
-    ok-only
   >
     <template #default>
       <div class="container p-0">
@@ -48,6 +47,11 @@
           generator-unable-to-provide-required-alt=""
           @error="brokenImage"
         />
+      </div>
+    </template>
+    <template #footer>
+      <div class="d-flex justify-content-end">
+        <b-button variant="white" @click="hide"> Close </b-button>
       </div>
     </template>
   </b-modal>

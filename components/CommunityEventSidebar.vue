@@ -56,13 +56,10 @@ export default {
   },
   methods: {
     loadMore($state) {
-      console.log('Load more events', this.toShow, this.forUser.length)
       if (this.toShow < this.forUser.length) {
         this.toShow++
-        console.log('Loaded')
         $state.loaded()
       } else {
-        console.log('Complete')
         $state.complete()
       }
     },

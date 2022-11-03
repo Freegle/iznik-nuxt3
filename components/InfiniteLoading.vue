@@ -88,7 +88,6 @@ export default {
       this.timer = setTimeout(this.fallback, 100)
     },
     visibilityChanged(isVisible) {
-      console.log('Visibility changed', isVisible)
       this.visible = isVisible
     },
     async emit() {

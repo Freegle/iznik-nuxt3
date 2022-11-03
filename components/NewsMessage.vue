@@ -52,7 +52,7 @@
       generator-unable-to-provide-required-alt=""
       size="lg"
       no-stacking
-      ok-only
+      hide-footer
     >
       <template #default>
         <b-img fluid rounded center :src="newsfeed.image.path" />
