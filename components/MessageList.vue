@@ -3,9 +3,7 @@
     <div>
       <h2 v-if="group" class="sr-only">Community Information</h2>
       <GroupHeader v-if="group" :group="group" show-join />
-      <!--        TODO Jobs-->
-      <!--        <JobsTopBar v-if="jobs" class="d-block d-lg-none" />-->
-
+      <JobsTopBar />
       <h2 class="sr-only">List of wanteds and offers</h2>
       <client-only>
         <div v-observe-visibility="visibilityChanged" />
@@ -76,7 +74,7 @@ import { useMiscStore } from '~/stores/misc'
 const NoticeMessage = () => import('./NoticeMessage')
 const OurMessage = () => import('~/components/OurMessage.vue')
 const GroupHeader = () => import('~/components/GroupHeader.vue')
-// const JobsTopBar = () => import('~/components/JobsTopBar')
+const JobsTopBar = () => import('~/components/JobsTopBar')
 
 const MIN_TO_SHOW = 10
 
@@ -88,6 +86,7 @@ export default {
     GroupHeader,
     NoticeMessage,
     InfiniteLoading,
+    JobsTopBar,
   },
   props: {
     messagesForList: {

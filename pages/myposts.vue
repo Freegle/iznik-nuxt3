@@ -20,8 +20,7 @@
         </div>
         <div v-else>
           <VisibleWhen :at="['xs', 'sm', 'md']">
-            <!--            TODO Jobs-->
-            <!--            <JobsTopBar />-->
+            <JobsTopBar />
           </VisibleWhen>
           <b-card v-if="contactPicker" border-variant="info">
             <InviteContacts class="bg-white" />
@@ -261,7 +260,7 @@ import { useComposeStore } from '../stores/compose'
 import { useSearchStore } from '../stores/search'
 import { buildHead } from '~/composables/useBuildHead'
 import InfiniteLoading from '~/components/InfiniteLoading'
-// const JobsTopBar = () => import('~/components/JobsTopBar')
+const JobsTopBar = () => import('~/components/JobsTopBar')
 const MyMessage = () => import('~/components/MyMessage.vue')
 const SidebarLeft = () => import('~/components/SidebarLeft')
 const SidebarRight = () => import('~/components/SidebarRight')
@@ -274,7 +273,7 @@ export default {
   components: {
     VisibleWhen,
     InviteContacts,
-    // JobsTopBar,
+    JobsTopBar,
     MyMessage,
     SidebarLeft,
     SidebarRight,

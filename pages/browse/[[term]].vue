@@ -30,7 +30,7 @@
             </div>
           </div>
           <div v-if="initialBounds">
-            <div v-if="browseView === 'mygroups'" class="bg-white">
+            <div v-if="browseView === 'mygroups'" class="bg-white mt-2">
               <div class="small d-flex justify-content-end">
                 <div>
                   <!-- eslint-disable-next-line-->

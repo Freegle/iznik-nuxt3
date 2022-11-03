@@ -370,8 +370,12 @@ export default {
     },
     // TODO MINOR Consider showing handover prompt, but in less annoying way.
     expectedreplies() {
-      pluralize.addIrregularRule('freegler is', 'freeglers are')
-      return pluralize('freegler is', this.otheruser?.expectedreplies, true)
+      if (this.otheruser?.expectedreplies) {
+        pluralize.addIrregularRule('freegler is', 'freeglers are')
+        return pluralize('freegler is', this.otheruser?.expectedreplies, true)
+      }
+
+      return null
     },
   },
   beforeDestroy() {

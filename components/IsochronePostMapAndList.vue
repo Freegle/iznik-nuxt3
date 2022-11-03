@@ -141,11 +141,6 @@
             <v-icon icon="angle-double-down" class="pulsate" />
           </NoticeMessage>
         </div>
-        <!--        TODO Jobs-->
-        <!--        <JobsTopBar-->
-        <!--          v-if="jobs"-->
-        <!--          class="d-block d-lg-none"-->
-        <!--        />-->
 
         <h2 class="sr-only">List of wanteds and offers</h2>
         <MessageList
@@ -179,7 +174,6 @@ const ExternalLink = () => import('./ExternalLink')
 const GroupSelect = () => import('./GroupSelect')
 const NoticeMessage = () => import('./NoticeMessage')
 const PostMap = () => import('~/components/PostMap')
-// const JobsTopBar = () => import('~/components/JobsTopBar')
 
 export default {
   components: {
@@ -189,7 +183,6 @@ export default {
     ExternalLink,
     AdaptiveMapGroup,
     PostMap,
-    // JobsTopBar,
   },
   props: {
     initialBounds: {

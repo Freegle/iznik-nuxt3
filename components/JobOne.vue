@@ -43,7 +43,7 @@
         <b-row>
           <b-col>
             <ExternalLink :href="job.url">
-              <b-button variant="info"> More Info </b-button>
+              <b-button variant="primary"> More Info </b-button>
             </ExternalLink>
           </b-col>
         </b-row>

@@ -1,5 +1,5 @@
 <template>
-  <aside v-if="location" @click="maybeRecord">
+  <aside v-if="location">
     <NoticeMessage v-if="blocked" variant="warning" class="d-none">
       <h3>Please help keep Freegle running</h3>
       <p>
@@ -69,7 +69,6 @@ export default {
     const location = computed(() => me?.settings?.mylocation?.name || null)
 
     if (location.value && lat && lng) {
-      console.log('Fetch jobs in', lat, lng)
       await jobStore.fetch(lat, lng)
     }
 

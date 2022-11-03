@@ -1,106 +1,107 @@
 <template>
-  <div v-if="!simple && location" class="mb-2 jobbox bg-light overflow-hidden forcewrap" @click="maybeRecord">
+  <div v-if="location" class="mb-2 jobbox bg-light overflow-hidden forcewrap">
     <NoticeMessage v-if="blocked" variant="warning" class="d-none">
       <h2 class="header--size3 d-none d-md-block">
         Please help keep Freegle running
       </h2>
       <p class="d-none d-md-block">
-        We normally show job ads here.  It looks like you may have an AdBlocker or security software which is blocking those.
-        We're not mad on ads either, but please consider donating to help us keep going:
+        We normally show job ads here. It looks like you may have an AdBlocker
+        or security software which is blocking those. We're not mad on ads
+        either, but please consider donating to help us keep going:
       </p>
       <p class="d-block d-md-none">
-        It looks like you're blocking job ads.  Please consider donating:
+        It looks like you're blocking job ads. Please consider donating:
       </p>
       <donation-button />
     </NoticeMessage>
-    <div v-else-if="jobs.length">
-      <h2 class="sr-only">
-        Jobs
-      </h2>
+    <div v-else-if="list.length">
+      <h2 class="sr-only">Jobs</h2>
       <div class="mb-1 text-center small text-muted">
-        Jobs near you.  Freegle gets a <span class="d-none d-md-inline">small amount if you are interested and click</span><span class="d-inline d-md-none">little if you click</span><span class="d-none d-md-inline">, which helps keep us going</span>.
+        Jobs near you. Freegle gets a
+        <span class="d-none d-md-inline"
+          >small amount if you are interested and click</span
+        ><span class="d-inline d-md-none">little if you click</span
+        ><span class="d-none d-md-inline">, which helps keep us going</span>.
         <!-- eslint-disable-next-line -->
         <nuxt-link to="/jobs">See more<span class="d-none d-md-inline"> jobs</span></nuxt-link>.
       </div>
       <ul class="list-unstyled">
-        <li v-for="(job, index) in jobs" :key="'job-' + job.job_reference">
-          <Job :summary="true" :job="job" :class="index > 1 ? 'd-none d-md-block' : ''" />
+        <li v-for="(job, index) in list" :key="'job-' + job.job_reference">
+          <JobOne
+            :id="job.id"
+            :summary="true"
+            :class="index > 1 ? 'd-none d-md-block' : ''"
+          />
         </li>
       </ul>
     </div>
   </div>
 </template>
-
 <script>
-import jobs from '@/mixins/jobs'
-const Job = () => import('./Job')
+import { mapState } from 'pinia'
+import { useJobStore } from '../stores/job'
+import { useAuthStore } from '../stores/auth'
+const JobOne = () => import('./JobOne')
 const NoticeMessage = () => import('./NoticeMessage')
 const DonationButton = () => import('./DonationButton')
 
 export default {
   components: {
     NoticeMessage,
-    Job,
-    DonationButton
+    JobOne,
+    DonationButton,
   },
-  mixins: [jobs],
-  props: {
-    shownLoveJunk: {
-      type: Boolean,
-      required: false,
-      default: false
+  async setup() {
+    const jobStore = useJobStore()
+    const authStore = useAuthStore()
+
+    const me = authStore.user
+    const lat = me?.lat
+    const lng = me?.lng
+
+    const location = computed(() => me?.settings?.mylocation?.name || null)
+
+    if (location.value && lat && lng) {
+      await jobStore.fetch(lat, lng)
     }
-  },
-  data: function() {
+
     return {
-      location: null
+      jobStore,
+      location,
     }
   },
   computed: {
-    jobs() {
-      const jobs = this.$store.getters['jobs/list']
-      return this.prioritise(jobs, 3)
+    ...mapState(useJobStore, ['blocked']),
+    list() {
+      return this.prioritise(this.jobStore.list, 3)
     },
-    blocked() {
-      return this.$store.getters['jobs/blocked']
-    }
-  },
-  watch: {
-    shownLoveJunk: {
-      handler(newVal) {
-        if (newVal) {
-          this.$api.bandit.shown({
-            uid: 'jobs-love-junk',
-            variant: 'topbar'
-          })
-        }
-      },
-      immediate: true
-    }
-  },
-  mounted() {
-    if (this.myLocation) {
-      this.location = this.myLocation.name
-    }
-
-    if (this.location) {
-      // Delay a little bit to give the main pane a chance to load.
-      setTimeout(() => {
-        this.$store.dispatch('jobs/fetch', {
-          location: this.location
-        })
-      }, 1000)
-    }
   },
   methods: {
-    async maybeRecord() {
-      if (this.shownLoveJunk) {
-        await this.$api.bandit.chosen({
-          uid: 'jobs-love-junk',
-          variant: 'topbar'
-        })
-      }
-    }
-  }
+    prioritise(jobs, len) {
+      console.log('Priorities', jobs, len)
+      // We want to show jobs with the ones with the highest CPC first, because that will generate the most
+      // for us.  But if the CPC is the same, then we can randomise the order - perhaps increasing the
+      // chances of a click.
+
+      // For now we just slick; the jobs are shown with the ones which generate us most first.  This does mean
+      // people will see the same jobs, though.
+      jobs.forEach((j) => {
+        j.sortBy = j.cpc.toFixed(3) + '-' + Math.random()
+      })
+
+      jobs.sort((a, b) => {
+        return a.sortBy.localeCompare(b.sortBy)
+      })
+
+      jobs = jobs.slice(0, len)
+
+      return jobs
+    },
+  },
 }
 </script>
+<style scoped lang="scss">
+:deep(a) {
+  text-decoration: none;
+}
+</style>
