@@ -92,7 +92,9 @@ export default {
   },
   methods: {
     clicked() {
-      if (process.env.IS_APP) {
+      const runtimeConfig = useRuntimeConfig()
+
+      if (runtimeConfig.public.IS_APP) {
         // eslint-disable-next-line no-undef
         cordova.InAppBrowser.open(this.href, '_system')
         return false
