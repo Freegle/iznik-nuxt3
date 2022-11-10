@@ -102,7 +102,6 @@ export default {
     const storyStore = useStoryStore()
     const newsfeedStore = useNewsfeedStore()
 
-    console.log('Props', props)
     const newsfeed = newsfeedStore.byId(props.id)
     await storyStore.fetch(newsfeed.storyid)
 

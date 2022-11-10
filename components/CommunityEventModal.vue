@@ -112,7 +112,7 @@
           <p v-if="user" class="text-muted">
             Posted by {{ user.displayname }}
             <span v-for="(group, index) in groups" :key="index">
-              <span v-if="index > 0">, </span><v-else>on </v-else>
+              <span v-if="index > 0">, </span><span v-else>on </span>
               {{ group.namedisplay }}
             </span>
           </p>

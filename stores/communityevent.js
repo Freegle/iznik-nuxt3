@@ -16,18 +16,22 @@ export const useCommunityEventStore = defineStore({
       this.config = config
     },
     async fetch(id, force) {
-      if (force || !this.list[id]) {
-        if (this.fetching[id]) {
-          await this.fetching[id]
-        } else {
-          this.fetching[id] = api(this.config).communityevent.fetch(id)
-          let item = await this.fetching[id]
-          item = addStrings(item)
-          item.earliestDate = earliestDate(item.dates)
-          item.earliestDateOfAll = earliestDate(item.dates, true)
-          this.list[id] = item
-          this.fetching[id] = null
+      try {
+        if (force || !this.list[id]) {
+          if (this.fetching[id]) {
+            await this.fetching[id]
+          } else {
+            this.fetching[id] = api(this.config).communityevent.fetch(id)
+            let item = await this.fetching[id]
+            item = addStrings(item)
+            item.earliestDate = earliestDate(item.dates)
+            item.earliestDateOfAll = earliestDate(item.dates, true)
+            this.list[id] = item
+            this.fetching[id] = null
+          }
         }
+      } catch (e) {
+        console.log('Failed to fetch event', id, e)
       }
 
       return this.list[id]

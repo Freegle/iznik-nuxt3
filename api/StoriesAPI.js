@@ -2,7 +2,6 @@ import BaseAPI from '@/api/BaseAPI'
 
 export default class StoriesAPI extends BaseAPI {
   fetchv2(id) {
-    console.log('Fetch', id)
     return this.$getv2('/story/' + id)
   }
 
