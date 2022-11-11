@@ -162,7 +162,7 @@
           class="mr-2"
           @click="addressBook"
         >
-          <v-icon scale="2" icon="address-book" class="fa-mob" />
+          <v-icon scale="3" icon="address-book" class="fa-mob" />
           <div class="mobtext text--smallest">Address</div>
         </div>
         <div

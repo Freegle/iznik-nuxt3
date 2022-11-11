@@ -116,7 +116,6 @@ export function setup(type) {
 
       return ret
     }),
-    // TODO MINOR Use Pinia mapping?
     messageValid: computed(() => {
       return composeStore.messageValid(postType)
     }),

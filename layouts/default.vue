@@ -128,7 +128,7 @@ export default {
     //     if (this.replyToSend) {
     //       // We have loaded the site with a reply that needs sending.  This happens if we force login in a way that
     //       // causes us to navigate away and back again.  Fetch the relevant message.
-    // TODO
+    // TODO Loaded with reply to send
     //       await this.$store.dispatch('messages/fetch', {
     //         id: this.replyToSend.replyMsgId
     //       })
@@ -149,7 +149,6 @@ export default {
   },
 }
 // TODO Look for v-icon name = and replace with v-icon icon=
-// TODO Look for scale= and replace with size=
 // TODO Look for b-btn and replace with b-button
 </script>
 <style scoped lang="scss">

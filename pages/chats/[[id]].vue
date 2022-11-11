@@ -17,7 +17,7 @@
           "
         >
           <div
-            class="d-flex justify-content-between flex-wrap p-3 pb-2 pt-2 border-bottom"
+            class="d-flex justify-content-between flex-wrap mb-2 mt-3 border-bottom"
           >
             <form role="search" class="mb-1 mr-1">
               <label for="search-bar" class="sr-only">Search chats</label>

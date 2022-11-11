@@ -33,15 +33,24 @@
         <v-icon icon="hashtag" class="fa-0-8x" />{{ message.id }}
       </b-button>
     </div>
-    <!--    TODO-->
-    <!--    <ShareModal v-if="message.url" :id="message.id" ref="shareModal" />-->
+    <MessageShareModal
+      v-if="showShareModal && message.url"
+      :id="message.id"
+      ref="shareModal"
+    />
+    <!--    TODO Report message-->
     <!--    <MessageReportModal ref="reportModal" :message="message" />-->
   </div>
 </template>
 <script>
 import { useRouter } from '#imports'
 import { useMessageStore } from '~/stores/message'
+const MessageShareModal = () => import('./MessageShareModal')
+
 export default {
+  components: {
+    MessageShareModal,
+  },
   props: {
     id: {
       type: Number,
@@ -52,6 +61,11 @@ export default {
     const messageStore = useMessageStore()
     return { messageStore }
   },
+  data() {
+    return {
+      showShareModal: false,
+    }
+  },
   computed: {
     message() {
       return this.messageStore.byId(this.id)
@@ -59,7 +73,10 @@ export default {
   },
   methods: {
     share() {
-      this.$refs.shareModal.show()
+      this.showShareModal = true
+      this.waitForRef('shareModal', () => {
+        this.$refs.shareModal.show()
+      })
     },
     report() {
       this.$refs.reportModal.show()
