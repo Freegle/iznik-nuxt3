@@ -308,20 +308,20 @@
       </div>
       <div class="d-flex align-items-center">
         <client-only>
-          <!--          <NotificationOptions-->
-          <!--            v-if="loggedIn"-->
-          <!--            :distance="distance"-->
-          <!--            :small-screen="true"-->
-          <!--            :unread-notification-count.sync="unreadNotificationCount"-->
-          <!--            @showAboutMe="showAboutMe"-->
-          <!--          />-->
-          <!--          <ChatMenu-->
-          <!--            v-if="loggedIn"-->
-          <!--            id="menu-option-chat-sm"-->
-          <!--            :is-list-item="false"-->
-          <!--            :chat-count.sync="chatCount"-->
-          <!--            class="mr-3"-->
-          <!--          />-->
+          <NotificationOptions
+            v-if="loggedIn"
+            :distance="distance"
+            :small-screen="true"
+            :unread-notification-count.sync="unreadNotificationCount"
+            @showAboutMe="showAboutMe"
+          />
+          <ChatMenu
+            v-if="loggedIn"
+            id="menu-option-chat-sm"
+            :is-list-item="false"
+            :chat-count.sync="chatCount"
+            class="mr-3"
+          />
         </client-only>
 
         <b-nav>
@@ -514,6 +514,7 @@ import pluralize from 'pluralize'
 import { useMiscStore } from '../stores/misc'
 import { useNewsfeedStore } from '../stores/newsfeed'
 import { useMessageStore } from '../stores/message'
+import { useNotificationStore } from '../stores/notification'
 import LoginModal from '~/components/LoginModal'
 import { useAuthStore } from '~/stores/auth'
 const NotificationOptions = () => import('~/components/NotificationOptions')
@@ -532,6 +533,7 @@ export default {
     const miscStore = useMiscStore()
     const newsfeedStore = useNewsfeedStore()
     const messageStore = useMessageStore()
+    const notificationStore = useNotificationStore()
     const route = useRoute()
     const router = useRouter()
 
@@ -540,6 +542,7 @@ export default {
       authStore,
       newsfeedStore,
       messageStore,
+      notificationStore,
       route,
       router,
     }
@@ -682,6 +685,13 @@ export default {
           this.activePostsCount = messages.filter((msg) => {
             return !msg.hasoutcome
           }).length
+        }
+
+        this.unreadNotificationCount = await this.notificationStore.fetchCount()
+
+        if (this.unreadNotificationCount) {
+          // Fetch the notifications too, so that we can be quick if they view them.
+          this.notificationStore.fetchList()
         }
       }
 

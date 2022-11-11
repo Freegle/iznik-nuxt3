@@ -7,7 +7,7 @@
     >
       <ProfileImage
         v-if="fromuser && fromuser.profile"
-        :image="fromuser.profile.turl"
+        :image="fromuser.profile.paththumb"
         class="ml-1 mb-1 inline"
         is-thumbnail
         size="sm"

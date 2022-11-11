@@ -58,24 +58,5 @@ export default {
       return ret
     },
   },
-  // timeago(val) {
-  //   // dayjs pluralises wrongly in some cases - we've seen 1 hours ago.
-  //   const dePlural = new RegExp(/^1 (.*)s/)
-  //
-  //   let f = dayjs(val).fromNow()
-  //   f = f.replace(dePlural, '1 $1')
-  //
-  //   return f
-  // },
-  // timeadapt(val) {
-  //   const t = dayjs(val)
-  //
-  //   if (t.isToday()) {
-  //     // For today, just show the time.
-  //     return t.format('HH:mm')
-  //   } else {
-  //     return t.format('DD MMM YYYY HH:mm')
-  //   }
-  // },
 }
 </script>

@@ -4,7 +4,7 @@
     class="white text-center notification-list"
     :class="{ 'mr-2': smallScreen }"
     :variant="smallScreen ? 'transparent' : ''"
-    toggle-class="notification-list__dropdown-toggle"
+    toggle-class="notification-list__dropdown-toggle p-0"
     menu-class="notification-list__dropdown-menu"
     lazy
     right
@@ -12,7 +12,7 @@
     aria-label="notifications"
     @shown="loadLatestNotifications"
   >
-    <template slot="button-content">
+    <template #button-content>
       <div
         class="position-relative"
         :class="{ 'text-center small': !smallScreen }"
@@ -41,15 +41,9 @@
     <b-dropdown-item
       v-for="notification in notifications"
       :key="'notification-' + notification.id"
-      class="p-0 notpad"
-      link-class="notification-list__item"
+      link-class="notification-list__item p-1"
     >
-      <!--      <Notification-->
-      <!--        :notification="notification"-->
-      <!--        class="p-0"-->
-      <!--        @showModal="showAboutMe"-->
-      <!--      />-->
-      <!--      TODO Notifications-->
+      <NotificationOne :id="notification.id" @showModal="showAboutMe" />
     </b-dropdown-item>
     <infinite-loading :distance="distance" @infinite="loadMoreNotifications">
       <span slot="no-results" />
@@ -64,12 +58,12 @@
 import { useNotificationStore } from '../stores/notification'
 import InfiniteLoading from '~/components/InfiniteLoading'
 
-// const Notification = () => import('~/components/Notification')
+const NotificationOne = () => import('~/components/NotificationOne')
 
 export default {
   name: 'NotificationOptions',
   components: {
-    // Notification,
+    NotificationOne,
     InfiniteLoading,
   },
   props: {
@@ -92,12 +86,11 @@ export default {
   },
   computed: {
     notificationType() {
-      // A different component needs to be created depending on the context in which it's used
-      return this.smallScreen ? 'b-dropdown' : 'b-nav-item-dropdown'
+      return 'b-dropdown'
     },
     notifications() {
-      // TODO Notifications
-      return []
+      // return first
+      return this.notificationStore.list
     },
     unreadNotificationCount() {
       return this.notificationStore.count
@@ -108,48 +101,17 @@ export default {
       this.$emit('update:unreadNotificationCount', this.unreadNotificationCount)
     },
   },
-  mounted() {
-    if (this.me) {
-      // TODO Get notifications and poll regularly for new ones.
-      // this.$store.dispatch('notifications/updateNotifications')
-    }
-  },
   methods: {
     loadLatestNotifications() {
       // We want to make sure we have the most up to date notifications.
-      this.complete = false
-      this.$store.dispatch('notifications/clear')
-      this.$store.dispatch('notifications/fetchNextListChunk')
+      this.notificationStore.fetchList()
     },
     loadMoreNotifications($state) {
       $state.complete()
-      // if (this.complete) {
-      //   $state.complete()
-      // } else {
-      //   try {
-      //     const currentCount = this.notifications.length
-      //
-      //     await this.$store.dispatch('notifications/fetchNextListChunk')
-      //
-      //     const notifications =
-      //       this.$store.getters['notifications/getCurrentList']
-      //
-      //     if (currentCount === notifications.length) {
-      //       this.complete = true
-      //       $state.complete()
-      //     } else {
-      //       $state.loaded()
-      //     }
-      //   } catch (e) {
-      //     console.error(e)
-      //     $state.complete()
-      //   }
-      // }
     },
     async markAllRead() {
-      await this.$store.dispatch('notifications/allSeen')
-      await this.$store.dispatch('notifications/updateUnreadNotificationCount')
-      await this.$store.dispatch('notifications/fetchNextListChunk')
+      await this.notificationStore.allSeen()
+      await this.notificationStore.fetchCount()
     },
     showAboutMe() {
       this.$emit('showAboutMe')
@@ -157,7 +119,6 @@ export default {
   },
 }
 </script>
-
 <style scoped lang="scss">
 @import '~bootstrap/scss/functions';
 @import '~bootstrap/scss/variables';
@@ -169,7 +130,8 @@ export default {
   left: 18px;
 
   @include media-breakpoint-up(xl) {
-    left: 40px;
+    left: 45px;
+    top: 3px;
   }
 }
 
@@ -193,7 +155,7 @@ export default {
 
 :deep(.notification-list__dropdown-menu) {
   height: 500px;
-  width: 300px;
+  width: min(400px, 100vw);
   overflow-y: auto;
 
   // The offset property of the b-dropdown doesn't function when contained
@@ -207,9 +169,13 @@ export default {
 }
 
 :deep(.notification-list .dropdown-item) {
-  width: 300px;
+  width: min(400px, 100vw);
   max-width: 100%;
   padding-left: 5px;
   overflow-wrap: break-word;
+}
+
+:deep(.dropdown-toggle.show) {
+  border-color: transparent !important;
 }
 </style>

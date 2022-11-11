@@ -63,6 +63,14 @@ div[variant="success"] .card-header {
   display: block;
 }
 
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 body {
   background-image: url('/wallpaper.png');
 }
@@ -430,4 +438,3 @@ label {
 .fa-1-75x {
   font-size: 1.75em;
 }
-

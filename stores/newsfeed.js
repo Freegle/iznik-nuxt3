@@ -53,19 +53,23 @@ export const useNewsfeedStore = defineStore({
       return this.feed
     },
     async fetch(id, force, lovelist) {
-      if (!this.list[id] || force) {
-        if (!this.fetching[id]) {
-          this.fetching[id] = api(this.config).news.fetch(id, null, lovelist)
+      try {
+        if (!this.list[id] || force) {
+          if (!this.fetching[id]) {
+            this.fetching[id] = api(this.config).news.fetch(id, null, lovelist)
+          }
+
+          const ret = await this.fetching[id]
+          this.fetching[id] = null
+
+          if (ret?.id) {
+            this.list[id] = ret
+
+            this.addItems([ret])
+          }
         }
-
-        const ret = await this.fetching[id]
-        this.fetching[id] = null
-
-        if (ret?.id) {
-          this.list[id] = ret
-
-          this.addItems([ret])
-        }
+      } catch (e) {
+        console.log('Fetch of newsfeed failed', id, e)
       }
 
       return this.list[id]

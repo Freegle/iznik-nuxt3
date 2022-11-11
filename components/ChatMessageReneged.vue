@@ -20,7 +20,7 @@
                 @error="brokenImage"
               />
               <ProfileImage
-                :image="otheruser.profile.turl"
+                :image="otheruser.profile.paththumb"
                 class="mr-1 mb-1 mt-1 inline"
                 is-thumbnail
                 size="sm"
