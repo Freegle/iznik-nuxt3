@@ -1,6 +1,7 @@
 <template>
   <component
     :is="notificationType"
+    id="notification-list"
     class="white text-center notification-list"
     :class="{ 'mr-2': smallScreen }"
     :variant="smallScreen ? 'transparent' : ''"
@@ -39,13 +40,18 @@
     </b-dropdown-item>
     <b-dropdown-divider />
     <b-dropdown-item
-      v-for="notification in notifications"
+      v-for="notification in notificationsToShow"
       :key="'notification-' + notification.id"
       link-class="notification-list__item p-1"
     >
       <NotificationOne :id="notification.id" @showModal="showAboutMe" />
     </b-dropdown-item>
-    <infinite-loading :distance="distance" @infinite="loadMoreNotifications">
+    <infinite-loading
+      :key="infiniteId"
+      :distance="distance"
+      force-use-infinite-wrapper="#notification-list"
+      @infinite="loadMoreNotifications"
+    >
       <span slot="no-results" />
       <span slot="no-more" />
       <span slot="spinner">
@@ -80,8 +86,16 @@ export default {
   setup() {
     const notificationStore = useNotificationStore()
 
+    // await notificationStore.fetchList()
+
     return {
       notificationStore,
+    }
+  },
+  data() {
+    return {
+      toShow: 0,
+      infiniteId: 0,
     }
   },
   computed: {
@@ -91,6 +105,9 @@ export default {
     notifications() {
       // return first
       return this.notificationStore.list
+    },
+    notificationsToShow() {
+      return this.notifications.slice(0, this.toShow)
     },
     unreadNotificationCount() {
       return this.notificationStore.count
@@ -102,12 +119,23 @@ export default {
     },
   },
   methods: {
-    loadLatestNotifications() {
+    async loadLatestNotifications() {
       // We want to make sure we have the most up to date notifications.
-      this.notificationStore.fetchList()
+      await this.notificationStore.fetchList()
+      this.toShow = 0
+      this.infiniteId++
     },
     loadMoreNotifications($state) {
-      $state.complete()
+      if (this.toShow < this.notifications.length) {
+        this.toShow++
+        this.$nextTick().then(() => {
+          $state.loaded()
+        })
+      } else {
+        this.$nextTick().then(() => {
+          $state.complete()
+        })
+      }
     },
     async markAllRead() {
       await this.notificationStore.allSeen()

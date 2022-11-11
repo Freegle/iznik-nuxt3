@@ -112,7 +112,7 @@ export default {
   },
   methods: {
     clicked() {
-      this.$store.dispatch('jobs/log', {
+      this.jobStore.log({
         id: this.job.id,
       })
     },

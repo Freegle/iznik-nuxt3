@@ -195,6 +195,7 @@ export default {
     fromme() {
       return this.message?.fromuser === this.myid
     },
+    ...mapWritableState(useAuthStore, ['loggedInEver', 'forceLogin']),
   },
   watch: {
     me(newVal, oldVal) {
@@ -206,7 +207,6 @@ export default {
       }
     },
   },
-  ...mapWritableState(useAuthStore, ['loggedInEver', 'forceLogin']),
   methods: {
     async registerOrSend() {
       // We've got a reply and an email address.  Maybe the email address is a registered user, maybe it's new.  If

@@ -27,6 +27,9 @@ export const useNotificationStore = defineStore({
 
       return this.list
     },
+    async seen(id) {
+      await api(this.config).notification.seen(id)
+    },
   },
   getters: {
     byId: (state) => (id) => {

@@ -70,9 +70,7 @@ export default {
   methods: {
     markSeen() {
       if (!this.notification?.seen) {
-        this.$store.dispatch('notifications/seen', {
-          id: this.notification.id,
-        })
+        this.notificationStore.seen(this.id)
       }
     },
     click() {

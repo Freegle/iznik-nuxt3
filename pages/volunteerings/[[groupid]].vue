@@ -56,10 +56,12 @@
 </template>
 <script>
 import { useRoute } from 'vue-router'
+import { mapWritableState } from 'pinia'
 import GlobalWarning from '../../components/GlobalWarning'
 import { buildHead } from '../../composables/useBuildHead'
 import { useVolunteeringStore } from '../../stores/volunteering'
 import { useGroupStore } from '../../stores/group'
+import { useAuthStore } from '../../stores/auth'
 import { useRouter } from '#imports'
 import InfiniteLoading from '~/components/InfiniteLoading'
 const GroupSelect = () => import('~/components/GroupSelect')
@@ -123,6 +125,7 @@ export default {
     }
   },
   computed: {
+    ...mapWritableState(useAuthStore, ['forceLogin']),
     forUser() {
       return this.volunteeringStore.forUser
     },
@@ -147,7 +150,7 @@ export default {
       if (this.me) {
         this.$refs.volunteermodal.show()
       } else {
-        this.$store.dispatch('auth/forceLogin', true)
+        this.forceLogin = true
       }
     },
   },
