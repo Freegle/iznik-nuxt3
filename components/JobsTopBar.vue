@@ -78,7 +78,6 @@ export default {
   },
   methods: {
     prioritise(jobs, len) {
-      console.log('Priorities', jobs, len)
       // We want to show jobs with the ones with the highest CPC first, because that will generate the most
       // for us.  But if the CPC is the same, then we can randomise the order - perhaps increasing the
       // chances of a click.

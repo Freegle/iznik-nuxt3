@@ -14,12 +14,12 @@
           </b-card-header>
           <b-card-text class="p-2 preline">
             <b-img
-              v-if="newsfeed?.story?.photo"
+              v-if="story?.image"
               v-b-modal="'photoModal-' + newsfeed.id"
               thumbnail
               rounded
               lazy
-              :src="newsfeed.story.photo.paththumb"
+              :src="story.image.paththumb"
               class="clickme float-end ml-2"
               @click="showPhotoModal"
             />
@@ -62,11 +62,11 @@
       </div>
     </div>
     <NewsPhotoModal
-      v-if="newsfeed?.story?.photo"
-      :id="newsfeed?.story.photo.id"
+      v-if="story?.image"
+      :id="story.image.id"
       ref="photoModal"
       :newsfeedid="newsfeed.id"
-      :src="newsfeed.story.photo.path"
+      :src="story.image.path"
       imgtype="Story"
       imgflag="story"
     />
