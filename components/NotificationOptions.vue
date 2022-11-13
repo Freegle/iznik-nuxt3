@@ -31,12 +31,13 @@
     </template>
     <b-dropdown-item
       v-if="notifications.length"
-      class="text-right"
       link-class="notification-list__item"
     >
-      <b-button variant="secondary" size="sm" @click="markAllRead">
-        Mark all read
-      </b-button>
+      <div class="d-flex justify-content-end">
+        <b-button variant="secondary" size="sm" @click="markAllRead">
+          Mark all read
+        </b-button>
+      </div>
     </b-dropdown-item>
     <b-dropdown-divider />
     <b-dropdown-item
@@ -94,7 +95,7 @@ export default {
   },
   data() {
     return {
-      toShow: 0,
+      toShow: 5,
       infiniteId: 0,
     }
   },
@@ -121,20 +122,17 @@ export default {
   methods: {
     async loadLatestNotifications() {
       // We want to make sure we have the most up to date notifications.
+      this.$el.scrollTop = 0
       await this.notificationStore.fetchList()
-      this.toShow = 0
       this.infiniteId++
+      this.toShow = 5
     },
     loadMoreNotifications($state) {
       if (this.toShow < this.notifications.length) {
-        this.toShow++
-        this.$nextTick().then(() => {
-          $state.loaded()
-        })
+        this.toShow = Math.min(this.notifications.length, this.toShow + 5)
+        $state.loaded()
       } else {
-        this.$nextTick().then(() => {
-          $state.complete()
-        })
+        $state.complete()
       }
     },
     async markAllRead() {

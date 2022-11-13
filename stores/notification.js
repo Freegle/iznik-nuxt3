@@ -22,7 +22,10 @@ export const useNotificationStore = defineStore({
       this.list = await api(this.config).notification.list()
 
       this.list.forEach((item) => {
-        this.listById[item.id] = item
+        // Notifications are immutable so we can avoid triggering a re-render.
+        if (!this.listById[item.id]) {
+          this.listById[item.id] = item
+        }
       })
 
       return this.list
