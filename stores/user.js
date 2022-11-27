@@ -68,6 +68,10 @@ export const useUserStore = defineStore({
       await api(this.config).user.save(params)
       await this.fetchUser()
     },
+    async removeEmail(id, email) {
+      await api(this.config).user.removeEmail(id, email)
+      await this.fetch(id, true)
+    },
   },
   getters: {
     byId: (state) => {

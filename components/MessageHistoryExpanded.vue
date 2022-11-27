@@ -30,8 +30,7 @@
         >
           <v-icon icon="link" /> Connected before
         </nuxt-link>
-        <!--        TODO-->
-        <!--        <SupporterInfo v-if="fromuser.supporter" class="d-inline" />-->
+        <SupporterInfo v-if="fromuser.supporter" class="d-inline" />
         <div
           v-if="
             fromuser &&

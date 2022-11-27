@@ -232,9 +232,11 @@ export const useAuthStore = defineStore({
       }
     },
     async saveAboutMe(value) {
-      await this.saveAndGet({
+      const data = await this.$api.session.save({
         aboutme: value,
       })
+      await this.fetchUser()
+      return data
     },
     async saveEmail(params) {
       const data = await this.$api.session.save(params)
