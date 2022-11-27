@@ -1,6 +1,7 @@
 import config from './config'
 
 export default defineNuxtConfig({
+  _cli: false,
   // We need static rendering for good SEO.
   target: 'static',
 
@@ -36,6 +37,25 @@ export default defineNuxtConfig({
     ],
     'floating-vue/nuxt',
   ],
+
+  axios: {
+    proxy: true,
+    retry: {
+      // Retry failed requests to give a bit more resilience to flaky networks, especially on mobile.
+      // This also helps with server upgrades.
+      //
+      // Note that this doesn't retry requests that never complete.
+      retries: 10,
+      retryDelay: function (retryCount: any) {
+        return retryCount * 1000
+      },
+      // eslint-disable-next-line handle-callback-err
+      retryCondition: (error: any) => {
+        return true
+      },
+      shouldResetTimeout: true,
+    },
+  },
 
   // Environment variables the client needs.
   publicRuntimeConfig: {
