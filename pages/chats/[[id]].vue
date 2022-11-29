@@ -117,7 +117,6 @@ import { useRoute } from 'vue-router'
 import dayjs from 'dayjs'
 import VisibleWhen from '../../components/VisibleWhen'
 
-// TODO import loginRequired from '@/mixins/loginRequired.js'
 import { buildHead } from '../../composables/useBuildHead'
 import { useAuthStore } from '../../stores/auth'
 import InfiniteLoading from '~/components/InfiniteLoading'

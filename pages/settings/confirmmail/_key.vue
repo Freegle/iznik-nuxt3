@@ -95,13 +95,11 @@
 <script>
 import { useAuthStore } from '../../../stores/auth'
 import { useRoute, useRouter } from '#imports'
-import loginRequired from '@/mixins/loginRequired.js'
 import buildHead from '@/mixins/buildHead'
 const ExternalLink = () => import('~/components/ExternalLink')
 
 export default {
   components: { ExternalLink },
-  mixins: [loginRequired, buildHead],
   setup() {
     const authStore = useAuthStore()
     const route = useRoute()
@@ -127,9 +125,6 @@ export default {
       resent: false,
       email: null,
     }
-  },
-  head() {
-    return this.buildHead()
   },
   async mounted() {
     this.email = this.me.email

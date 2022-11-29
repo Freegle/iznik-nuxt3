@@ -18,7 +18,6 @@ import { useGroupStore } from '../../../stores/group'
 import { useAuthStore } from '../../../stores/auth'
 import { useRouter } from '#imports'
 import NoticeMessage from '~/components/NoticeMessage'
-// TODO import loginRequired from '@/mixins/loginRequired.js'
 const ExploreGroup = () => import('~/components/ExploreGroup.vue')
 
 export default {
@@ -26,7 +25,6 @@ export default {
     NoticeMessage,
     ExploreGroup,
   },
-  // mixins: [loginRequired],
   async setup() {
     const authStore = useAuthStore()
     const groupStore = useGroupStore()
