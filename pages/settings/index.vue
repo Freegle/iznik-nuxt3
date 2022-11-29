@@ -1,779 +1,684 @@
 <template>
   <div>
-    <div v-if="me && me.settings && me.settings.notifications">
-      <h1 class="sr-only">Settings</h1>
-      <client-only>
-        <b-row class="m-0">
-          <b-col cols="0" xl="3" />
-          <b-col cols="12" xl="6" class="p-0">
-            <b-card
-              border-variant="info"
-              header-bg-variant="info"
-              header-text-variant="white"
-              class="mt-2"
-            >
-              <template #header>
-                <h2 class="bg-info header--size5 mb-0">
-                  <v-icon icon="globe-europe" />
-                  Your Public Profile
-                </h2>
-              </template>
-              <b-card-body class="p-0 pt-1">
-                <p class="text-muted">
-                  This is what other freeglers can see about you.
-                </p>
-                <b-row>
-                  <b-col cols="12">
-                    <label>
-                      Your name (or to make things more fun, use a nickname):
-                    </label>
-                    <b-input-group>
-                      <b-form-input
-                        id="myname"
-                        v-model="me.displayname"
-                        placeholder="Your name"
-                      />
-                      <b-input-group-append>
-                        <b-button variant="white" @click="saveName">
-                          <v-icon icon="save" />&nbsp;Save
-                        </b-button>
-                      </b-input-group-append>
-                    </b-input-group>
-                  </b-col>
-                </b-row>
-                <b-row class="mt-2">
-                  <b-col cols="12" xl="6">
-                    <b-card>
-                      <b-card-body class="text-center p-2">
-                        <div class="d-flex justify-content-around">
-                          <ProfileImage
-                            v-if="me.profile.path"
-                            :image="profileurl + '?' + cacheBust"
-                            class="mr-1 mb-1 mt-1 inline"
-                            is-thumbnail
-                            size="xl"
-                          />
-                        </div>
-                        <OurToggle
-                          :value="useprofile"
-                          class="mt-2"
-                          :height="30"
-                          :width="100"
-                          :font-size="14"
-                          :sync="true"
-                          :labels="{ checked: 'Show', unchecked: 'Hide' }"
-                          color="#61AE24"
-                          @change="changeUseProfile"
-                        />
-                        <br />
-                        <span
-                          v-if="me.profile.ours"
-                          class="clickme mt-1 align-bottom"
-                          @click="rotateLeft"
-                        >
-                          <v-icon label="Rotate left" title="Rotate left">
-                            <v-icon
-                              icon="circle"
-                              scale="2"
-                              class="text-muted"
-                            />
-                            <v-icon icon="reply" class="image__icon" />
-                          </v-icon>
-                        </span>
-                        <b-button
-                          variant="secondary"
-                          class="mt-2"
-                          @click="uploadProfile"
-                        >
-                          <v-icon icon="camera" /> Upload photo
-                        </b-button>
-                        <span
-                          v-if="me.profile.ours"
-                          class="clickme mt-1 align-bottom image__icon stacked"
-                          @click="rotateRight"
-                        >
-                          <v-icon
-                            label="Rotate right"
-                            title="Rotate right"
-                            flip="horizontal"
-                            name="reply"
-                          />
-                          <v-icon icon="circle" scale="2" class="text-muted" />
-                        </span>
-                        <b-row v-if="uploading" class="bg-white">
-                          <b-col class="p-0">
-                            <OurFilePond
-                              imgtype="User"
-                              imgflag="user"
-                              :msgid="me.id"
-                              @photoProcessed="photoProcessed"
-                            />
-                          </b-col>
-                        </b-row>
-                        <div v-if="supporter" class="mt-4">
-                          <SupporterInfo size="lg" :hidden="!showSupporter" />
-                          <b-button
-                            variant="link"
-                            size="sm"
-                            @click="toggleSupporter"
-                          >
-                            <span v-if="showSupporter">
-                              Click to hide from others
-                            </span>
-                            <span v-else> Click to show to others </span>
-                          </b-button>
-                          <p class="text-muted small mt-2">
-                            <span v-if="showSupporter">
-                              Other freeglers can see that you have kindly
-                              supported Freegle recently with time or funds.
-                            </span>
-                            <span v-else>
-                              Other freeglers can't see this.
-                            </span>
-                          </p>
-                        </div>
-                      </b-card-body>
-                    </b-card>
-                  </b-col>
-                  <b-col cols="12" xl="6">
-                    <b-card no-body>
-                      <b-card-body class="text-left p-0 p-sm-2">
-                        <div v-if="aboutme">
-                          &quot;{{ aboutme }}&quot;
-                          <br />
-                          <b-button
-                            variant="white"
-                            class="mt-2"
-                            @click="addAbout"
-                          >
-                            <v-icon icon="pen" /> Edit
-                          </b-button>
-                        </div>
-                        <div v-else>
-                          <notice-message>
-                            Please write something to let other freeglers know a
-                            bit about you. It makes freegling more fun and helps
-                            get a better response when you're replying to
-                            OFFERs.
-                          </notice-message>
-                          <b-button
-                            variant="white"
-                            class="mt-2"
-                            @click="addAbout"
-                          >
-                            <v-icon icon="pen" /> Introduce yourself
-                          </b-button>
-                        </div>
-                      </b-card-body>
-                    </b-card>
-                  </b-col>
-                </b-row>
-                <b-row>
-                  <b-col>
-                    <b-button
-                      variant="primary"
-                      class="mt-2"
-                      @click="viewProfile"
-                    >
-                      <v-icon icon="eye" /> View Your Profile
-                    </b-button>
-                  </b-col>
-                </b-row>
-              </b-card-body>
-            </b-card>
-            <b-card
-              v-if="!simple"
-              border-variant="info"
-              header-bg-variant="info"
-              header-text-variant="white"
-              class="mt-2"
-            >
-              <template #header>
-                <h2 class="bg-info header--size5 mb-0">
-                  <v-icon icon="globe-europe" />
-                  Arranging Collections
-                </h2>
-              </template>
-              <b-card-body class="p-0 pt-1">
-                <p class="text-muted">
-                  This is information you can choose to send to other freeglers
-                  when arranging collections.
-                </p>
-                <b-row>
-                  <b-col>
-                    <h3 class="header--size5 header5__color mt-2">
-                      Address Book
-                    </h3>
-                    <p class="mt-2">
-                      You can save your address and send it to other freeglers,
-                      then you don't have to type it each time.
-                    </p>
-                    <b-button variant="white" @click="addressBook">
-                      <v-icon icon="address-book" /> Open Address Book
-                    </b-button>
-                  </b-col>
-                </b-row>
-              </b-card-body>
-            </b-card>
-            <b-card
-              border-variant="info"
-              header-bg-variant="info"
-              header-text-variant="white"
-              class="mt-2"
-            >
-              <template #header>
-                <h2 class="bg-info header--size5 mb-0">
-                  <v-icon icon="lock" />
-                  Your Account Settings
-                </h2>
-              </template>
-              <b-card-body class="p-0 pt-1">
-                <p class="text-muted">
-                  This information is private. Other freeglers can't see it.
-                </p>
-                <b-row>
-                  <b-col cols="12" sm="6">
-                    <EmailValidator
-                      ref="email"
-                      size="md"
-                      :email.sync="me.email"
-                      :valid.sync="emailValid"
-                      label="Your email address:"
+    <h1 class="sr-only">Settings</h1>
+    <client-only>
+      <b-row class="m-0">
+        <b-col cols="0" xl="3" />
+        <b-col cols="12" xl="6" class="p-0">
+          <b-card
+            border-variant="info"
+            header-bg-variant="info"
+            header-text-variant="white"
+            class="mt-2"
+          >
+            <template #header>
+              <h2 class="bg-info header--size5 mb-0">
+                <v-icon icon="globe-europe" />
+                Your Public Profile
+              </h2>
+            </template>
+            <b-card-body class="p-0 pt-1">
+              <p class="text-muted">
+                This is what other freeglers can see about you.
+              </p>
+              <b-row>
+                <b-col cols="12">
+                  <label>
+                    Your name (or to make things more fun, use a nickname):
+                  </label>
+                  <b-input-group>
+                    <b-form-input
+                      id="myname"
+                      v-model="me.displayname"
+                      placeholder="Your name"
                     />
-                    <SpinButton
-                      variant="primary"
-                      name="save"
-                      label="Save"
-                      :handler="saveEmail"
-                    />
-                    <div v-if="otheremails.length" class="mt-1 mb-3">
-                      <p class="m-0">Other emails:</p>
-                      <EmailOwn
-                        v-for="email in otheremails"
-                        :key="'ownemail-' + email.id"
-                        :email="email"
-                      />
-                    </div>
-                    <NoticeMessage
-                      v-if="me.bouncing"
-                      variant="danger"
-                      class="mb-2"
-                    >
-                      <p>
-                        We can't send to your email address. Please change it to
-                        a valid one and press <em>Save</em>.
-                      </p>
-                      <p>Or if you're sure it's valid:</p>
-                      <b-button variant="white" @click="unbounce">
-                        <v-icon
-                          v-if="unbouncing"
-                          name="sync"
-                          class="text-success fa-spin"
-                        />
-                        <v-icon
-                          v-else-if="unbounced"
-                          name="check"
-                          class="text-success"
-                        />
-                        <v-icon v-else name="check" />
-                        Try again
+                    <b-input-group-append>
+                      <b-button variant="white" @click="saveName">
+                        <v-icon icon="save" />&nbsp;Save
                       </b-button>
-                    </NoticeMessage>
-                  </b-col>
-                </b-row>
-                <b-row>
-                  <b-col cols="12" sm="6">
-                    <PasswordEntry
-                      :original-password="me.password"
-                      show-save-option
-                    />
-                  </b-col>
-                </b-row>
-                <b-row>
-                  <b-col cols="12">
-                    <b-form-group label="Your Postcode:">
-                      <div class="d-flex flex-wrap">
-                        <PostCode
-                          @selected="selectPostcode"
-                          @cleared="clearPostcode"
-                        />
-                        <SpinButton
-                          variant="white"
-                          size="lg"
-                          class="mb-2 d-inline"
-                          :disabled="!pc"
-                          :handler="savePostcode"
-                          name="save"
-                          label="Save"
+                    </b-input-group-append>
+                  </b-input-group>
+                </b-col>
+              </b-row>
+              <b-row class="mt-2">
+                <b-col cols="12" xl="6">
+                  <b-card>
+                    <b-card-body class="text-center p-2">
+                      <div class="d-flex justify-content-around">
+                        <ProfileImage
+                          :image="
+                            useprofile ? profileurl + '?' + cacheBust : null
+                          "
+                          class="mr-1 mb-1 mt-1 inline"
+                          is-thumbnail
+                          size="xl"
                         />
                       </div>
-                    </b-form-group>
-                  </b-col>
-                </b-row>
-                <b-row>
-                  <b-col>
-                    <hr />
-                    <b-button variant="secondary" size="lg" to="/unsubscribe">
-                      Unsubscribe or Leave Communities
-                    </b-button>
-                  </b-col>
-                </b-row>
-              </b-card-body>
-            </b-card>
-            <b-card
-              border-variant="info"
-              header-bg-variant="info"
-              header-text-variant="white"
-              class="mt-2"
-            >
-              <template #header>
-                <h2 class="bg-info header--size5 mb-0">
-                  <v-icon icon="envelope" />
-                  Community Mail Settings
-                </h2>
-              </template>
-              <div v-if="me.groups && me.groups.length">
-                <p>
-                  You can pause regular emails for a while, for example if
-                  you're on holiday.
-                </p>
-                <OurToggle
-                  v-model="emailsOn"
-                  :height="34"
-                  :width="150"
-                  :font-size="14"
-                  :sync="true"
-                  :labels="{ checked: 'Mails On', unchecked: 'Mails Paused' }"
-                  color="#61AE24"
-                  @change="changeHolidayToggle"
-                />
-                <span v-if="!emailsOn">
-                  <span class="align-top ml-2 mr-2"> until </span>
-                  <b-form-input
-                    v-model="me.onholidaytill"
-                    type="date"
-                    placeholder="Set a date"
-                    :min="today"
-                    :max="aMonthFromNow"
-                    size="15"
-                  />
-                </span>
-                <b-card-body class="p-0 pt-1">
-                  <p>
-                    You can control the type and frequency of emails from your
-                    Freegle communities.
-                  </p>
-                  <div v-if="simpleSettings && !showAdvanced">
-                    <div>
-                      <SettingsGroup
-                        :emailfrequency.sync="emailSimple"
-                        :volunteeringallowed.sync="volunteeringSimple"
-                        :eventsallowed.sync="eventSimple"
+                      <OurToggle
+                        v-model="useprofile"
+                        class="mt-2"
+                        :labels="{ checked: 'Show', unchecked: 'Hide' }"
+                        @change="changeUseProfile"
                       />
-                      <p class="text-muted">
-                        Occasionally we may also send ADMIN mails about the
-                        running of Freegle.
-                      </p>
-                      <hr />
-                      <a v-if="!showAdvanced" href="#" @click="toggleAdvanced">
-                        Show advanced settings
-                      </a>
-                    </div>
-                  </div>
-                  <div v-else>
-                    <div v-if="me.groups">
-                      <div
-                        v-for="group in me.groups"
-                        :key="'settingsgroup-' + group.id"
-                        class="list-unstyled"
+                      <br />
+                      <span
+                        v-if="me.profile.ours"
+                        class="clickme mt-1 align-bottom"
+                        @click="rotateLeft"
                       >
-                        <b-card
-                          v-if="group.type === 'Freegle'"
-                          class="nocardbot"
+                        <v-icon label="Rotate left" title="Rotate left">
+                          <v-icon icon="circle" scale="2" class="text-muted" />
+                          <v-icon icon="reply" class="image__icon" />
+                        </v-icon>
+                      </span>
+                      <b-button
+                        variant="secondary"
+                        class="mt-2"
+                        @click="uploadProfile"
+                      >
+                        <v-icon icon="camera" /> Upload photo
+                      </b-button>
+                      <span
+                        v-if="me.profile.ours"
+                        class="clickme mt-1 align-bottom image__icon stacked"
+                        @click="rotateRight"
+                      >
+                        <v-icon
+                          label="Rotate right"
+                          title="Rotate right"
+                          flip="horizontal"
+                          name="reply"
+                        />
+                        <v-icon icon="circle" scale="2" class="text-muted" />
+                      </span>
+                      <b-row v-if="uploading" class="bg-white">
+                        <b-col class="p-0">
+                          <OurFilePond
+                            imgtype="User"
+                            imgflag="user"
+                            :msgid="me.id"
+                            @photoProcessed="photoProcessed"
+                          />
+                        </b-col>
+                      </b-row>
+                      <div v-if="supporter" class="mt-4">
+                        <SupporterInfo size="lg" :hidden="!showSupporter" />
+                        <b-button
+                          variant="link"
+                          size="sm"
+                          @click="toggleSupporter"
                         >
-                          <b-card-title title-tag="h3" class="header--size4">
-                            <nuxt-link :to="'/explore/' + group.nameshort">
-                              <b-img
-                                v-if="group.profile"
-                                lazy
-                                rounded
-                                thumbnail
-                                alt="Community profile picture"
-                                :src="group.profile"
-                                class="float-right groupprofile"
-                              />
-                            </nuxt-link>
-                            <nuxt-link
-                              :to="'/explore/' + group.nameshort"
-                              class="group__title"
-                            >
-                              {{ group.namedisplay }}
-                            </nuxt-link>
-                            <span
-                              v-if="
-                                group.role === 'Moderator' ||
-                                group.role === 'Owner'
-                              "
-                            >
-                              <v-icon icon="crown" class="text-success" />
-                            </span>
-                          </b-card-title>
-                          <b-card-body class="p-0 pt-2">
-                            <SettingsGroup
-                              :groupid="group.id"
-                              :emailfrequency="
-                                group.mysettings
-                                  ? group.mysettings.emailfrequency
-                                  : 24
-                              "
-                              :volunteeringallowed="
-                                Boolean(
-                                  group.mysettings
-                                    ? group.mysettings.volunteeringallowed
-                                    : true
-                                )
-                              "
-                              :eventsallowed="
-                                Boolean(
-                                  group.mysettings
-                                    ? group.mysettings.eventsallowed
-                                    : true
-                                )
-                              "
-                              :leave="group.role === 'Member'"
-                              @change="groupChange"
-                              @leave="leaveGroup(group.id)"
-                            />
-                          </b-card-body>
-                        </b-card>
+                          <span v-if="showSupporter">
+                            Click to hide from others
+                          </span>
+                          <span v-else> Click to show to others </span>
+                        </b-button>
+                        <p class="text-muted small mt-2">
+                          <span v-if="showSupporter">
+                            Other freeglers can see that you have kindly
+                            supported Freegle recently with time or funds.
+                          </span>
+                          <span v-else> Other freeglers can't see this. </span>
+                        </p>
                       </div>
-                    </div>
-                    <p class="text-muted mt-2">
-                      Occasionally we may also send ADMIN mails about the
-                      running of Freegle.
-                    </p>
+                    </b-card-body>
+                  </b-card>
+                </b-col>
+                <b-col cols="12" xl="6">
+                  <b-card no-body>
+                    <b-card-body class="text-left p-0 p-sm-2">
+                      <div v-if="aboutme">
+                        &quot;{{ aboutme }}&quot;
+                        <br />
+                        <b-button
+                          variant="white"
+                          class="mt-2"
+                          @click="addAbout"
+                        >
+                          <v-icon icon="pen" /> Edit
+                        </b-button>
+                      </div>
+                      <div v-else>
+                        <notice-message>
+                          Please write something to let other freeglers know a
+                          bit about you. It makes freegling more fun and helps
+                          get a better response when you're replying to OFFERs.
+                        </notice-message>
+                        <b-button
+                          variant="white"
+                          class="mt-2"
+                          @click="addAbout"
+                        >
+                          <v-icon icon="pen" /> Introduce yourself
+                        </b-button>
+                      </div>
+                    </b-card-body>
+                  </b-card>
+                </b-col>
+              </b-row>
+              <b-row>
+                <b-col>
+                  <b-button variant="primary" class="mt-2" @click="viewProfile">
+                    <v-icon icon="eye" /> View Your Profile
+                  </b-button>
+                </b-col>
+              </b-row>
+            </b-card-body>
+          </b-card>
+          <b-card
+            border-variant="info"
+            header-bg-variant="info"
+            header-text-variant="white"
+            class="mt-2"
+          >
+            <template #header>
+              <h2 class="bg-info header--size5 mb-0">
+                <v-icon icon="globe-europe" />
+                Arranging Collections
+              </h2>
+            </template>
+            <b-card-body class="p-0 pt-1">
+              <p class="text-muted">
+                This is information you can choose to send to other freeglers
+                when arranging collections.
+              </p>
+              <b-row>
+                <b-col>
+                  <h3 class="header--size5 header5__color mt-2">
+                    Address Book
+                  </h3>
+                  <p class="mt-2">
+                    You can save your address and send it to other freeglers,
+                    then you don't have to type it each time.
+                  </p>
+                  <b-button variant="white" @click="addressBook">
+                    <v-icon icon="address-book" /> Open Address Book
+                  </b-button>
+                </b-col>
+              </b-row>
+            </b-card-body>
+          </b-card>
+          <b-card
+            border-variant="info"
+            header-bg-variant="info"
+            header-text-variant="white"
+            class="mt-2"
+          >
+            <template #header>
+              <h2 class="bg-info header--size5 mb-0">
+                <v-icon icon="lock" />
+                Your Account Settings
+              </h2>
+            </template>
+            <b-card-body class="p-0 pt-1">
+              <p class="text-muted">
+                This information is private. Other freeglers can't see it.
+              </p>
+              <b-row>
+                <b-col cols="12" sm="6">
+                  <EmailValidator
+                    ref="email"
+                    size="md"
+                    :email.sync="me.email"
+                    :valid.sync="emailValid"
+                    label="Your email address:"
+                  />
+                  <SpinButton
+                    variant="primary"
+                    name="save"
+                    label="Save"
+                    :handler="saveEmail"
+                  />
+                  <div v-if="otheremails.length" class="mt-1 mb-3">
+                    <p class="m-0">Other emails:</p>
+                    <EmailOwn
+                      v-for="email in otheremails"
+                      :key="'ownemail-' + email.id"
+                      :email="email"
+                    />
                   </div>
-                </b-card-body>
-              </div>
-              <div v-else>You're not a member of any communities yet.</div>
-            </b-card>
-            <b-card
-              v-if="!simple"
-              border-variant="info"
-              header-bg-variant="info"
-              header-text-variant="white"
-              class="mt-2"
-            >
-              <template #header>
-                <h2 class="bg-info header--size5 mb-0">
-                  <v-icon icon="bell" />
-                  Chat Notifications
-                </h2>
-              </template>
-              <b-card-body class="p-0 pt-1">
-                <p class="text-muted">
-                  <v-icon icon="lock" /> Other freeglers won't see this.
-                </p>
-                <p class="text-muted">
-                  Messages from other freeglers will appear in the
-                  <nuxt-link to="/chats">Chats</nuxt-link> section. We can also
-                  notify you in other ways.
-                </p>
-                <notice-message variant="warning">
-                  Email doesn't always get through, so check your spam folders,
-                  and check <nuxt-link to="/chats">Chats</nuxt-link> on here
-                  occasionally.
-                </notice-message>
-                <hr />
-                <h3 class="header--size5 header5__color">Text Alerts</h3>
-                <p>
-                  We can send SMS alerts to your phone when you have a new
-                  message on Freegle or a handover soon.
-                </p>
-                <SettingsPhone />
-                <div v-if="me.phone">
                   <NoticeMessage
-                    v-if="
-                      me.phonelastsent &&
-                      (!me.phonelastclicked ||
-                        me.phonelastclicked < me.phonelastsent)
-                    "
-                    variant="warning"
+                    v-if="me.bouncing"
+                    variant="danger"
                     class="mb-2"
                   >
                     <p>
-                      We've stopped sending you SMS alerts, because you don't
-                      seem to be clicking on them. We do this to save Freegle
-                      money.
+                      We can't send to your email address. Please change it to a
+                      valid one and press <em>Save</em>.
                     </p>
-                    <ul>
-                      <li>
-                        If you don't want to get SMS alerts, please click
-                        <em>Remove</em> above to remove your number.
-                      </li>
-                      <li>
-                        If you do still want to receive SMS alerts again, please
-                        remove and re-add your mobile number, and we'll start
-                        again.
-                      </li>
-                    </ul>
+                    <p>Or if you're sure it's valid:</p>
+                    <SpinButton
+                      variant="white"
+                      name="check"
+                      label="Try again"
+                      :handler="unbounce"
+                    />
                   </NoticeMessage>
-                  <NoticeMessage v-else variant="warning" class="mb-2">
-                    <p>It costs Freegle to send these - if you can, please:</p>
-                    <donation-button />
-                  </NoticeMessage>
-                </div>
-                <h3 class="header--size5 header5__color">Email Alerts</h3>
-                <p>
-                  Mail me Chat messages from other freeglers about my OFFERs and
-                  WANTEDs.
-                </p>
-                <OurToggle
-                  v-model="me.settings.notifications.email"
-                  :height="30"
-                  :width="150"
-                  :font-size="14"
-                  :sync="true"
-                  :labels="{ checked: 'Emails On', unchecked: 'Emails Off' }"
-                  color="#61AE24"
-                  @change="changeNotification($event, 'email')"
+                </b-col>
+              </b-row>
+              <b-row>
+                <b-col cols="12" sm="6">
+                  <PasswordEntry
+                    :original-password="me.password"
+                    show-save-option
+                  />
+                </b-col>
+              </b-row>
+              <b-row>
+                <b-col cols="12">
+                  <b-form-group label="Your Postcode:">
+                    <div class="d-flex flex-wrap">
+                      <PostCode
+                        @selected="selectPostcode"
+                        @cleared="clearPostcode"
+                      />
+                      <SpinButton
+                        variant="white"
+                        size="lg"
+                        class="mb-2 d-inline"
+                        :disabled="!pc"
+                        :handler="savePostcode"
+                        name="save"
+                        label="Save"
+                      />
+                    </div>
+                  </b-form-group>
+                </b-col>
+              </b-row>
+              <b-row>
+                <b-col>
+                  <hr />
+                  <b-button variant="secondary" size="lg" to="/unsubscribe">
+                    Unsubscribe or Leave Communities
+                  </b-button>
+                </b-col>
+              </b-row>
+            </b-card-body>
+          </b-card>
+          <b-card
+            border-variant="info"
+            header-bg-variant="info"
+            header-text-variant="white"
+            class="mt-2"
+          >
+            <template #header>
+              <h2 class="bg-info header--size5 mb-0">
+                <v-icon icon="envelope" />
+                Community Mail Settings
+              </h2>
+            </template>
+            <div v-if="me.groups && me.groups.length">
+              <p>
+                You can pause regular emails for a while, for example if you're
+                on holiday.
+              </p>
+              <OurToggle
+                v-model="emailsOn"
+                :height="34"
+                :width="150"
+                :sync="true"
+                :labels="{ checked: 'Mails On', unchecked: 'Mails Paused' }"
+                color="#61AE24"
+                @change="changeHolidayToggle"
+              />
+              <span v-if="!emailsOn">
+                <span class="align-top ml-2 mr-2"> until </span>
+                <b-form-input
+                  v-model="me.onholidaytill"
+                  type="date"
+                  placeholder="Set a date"
+                  :min="today"
+                  :max="aMonthFromNow"
+                  size="15"
                 />
-                <hr />
-                <p>
-                  We can email you a copy of your own Chat messages sent on the
-                  website.
-                </p>
-                <OurToggle
-                  v-model="me.settings.notifications.emailmine"
-                  :height="30"
-                  :width="150"
-                  :font-size="14"
-                  :sync="true"
-                  :labels="{
-                    checked: 'Email Mine',
-                    unchecked: 'Don\'t Email Mine',
-                  }"
-                  color="#61AE24"
-                  @change="changeNotification($event, 'emailmine')"
-                />
-                <hr />
-                <p>
-                  We can email you about ChitChat, and notifications (the bell
-                  icon).
-                </p>
-                <OurToggle
-                  v-model="notificationmails"
-                  :height="30"
-                  :width="150"
-                  :font-size="14"
-                  :sync="true"
-                  :labels="{ checked: 'Send Them', unchecked: 'No Thanks' }"
-                  color="#61AE24"
-                  @change="changeNotifChitchat"
-                />
-                <hr />
-                <p>
-                  We can email you about specific OFFERs/WANTEDs we think you
-                  might be interested in, or to remind you that we would love
-                  you to freegle again.
-                </p>
-                <OurToggle
-                  v-model="relevantallowed"
-                  :height="30"
-                  :width="150"
-                  :font-size="14"
-                  :sync="true"
-                  :labels="{ checked: 'Send Them', unchecked: 'No Thanks' }"
-                  color="#61AE24"
-                  @change="changeRelevant"
-                />
-                <hr />
-                <p>
-                  We send occasional newsletters or collections of nice stories
-                  from other freeglers.
-                </p>
-                <OurToggle
-                  v-model="newslettersallowed"
-                  :height="30"
-                  :width="150"
-                  :font-size="14"
-                  :sync="true"
-                  :labels="{ checked: 'Send Them', unchecked: 'No Thanks' }"
-                  color="#61AE24"
-                  @change="changeNewsletter"
-                />
-                <hr />
-                <p>We send occasional mails to encourage you to freegle.</p>
-                <OurToggle
-                  v-model="me.settings.engagement"
-                  :height="30"
-                  :width="150"
-                  :font-size="14"
-                  :sync="true"
-                  :labels="{ checked: 'Send Them', unchecked: 'No Thanks' }"
-                  color="#61AE24"
-                  @change="changeEngagement"
-                />
-                <hr />
-                <h3 class="header--size5 header5__color">Other Alerts</h3>
-                <p>
-                  Apps for your
-                  <a
-                    href="https://play.google.com/store/apps/details?id=org.ilovefreegle.direct"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    >Android</a
-                  >
-                  or
-                  <a
-                    href="https://itunes.apple.com/gb/app/freegle/id970045029?ls=1&mt=8"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    >IOS</a
-                  >
-                  phone/tablet.
-                </p>
-                <OurToggle
-                  v-model="me.settings.notifications.app"
-                  :height="30"
-                  :width="220"
-                  :font-size="14"
-                  :sync="true"
-                  :labels="{
-                    checked: 'App Notifications On',
-                    unchecked: 'App Notifications Off',
-                  }"
-                  color="#61AE24"
-                  @change="changeNotification($event, 'app')"
-                />
-                <hr />
-                <p>
-                  You'll see a popup asking if we can send "web push"
-                  notifications. They appear on your taskbar, or on mobile at
-                  the top.
-                </p>
-                <OurToggle
-                  v-model="me.settings.notifications.push"
-                  :height="30"
-                  :width="220"
-                  :font-size="14"
-                  :sync="true"
-                  :labels="{
-                    checked: 'Browser Popups On',
-                    unchecked: 'Browser Popups Off',
-                  }"
-                  color="#61AE24"
-                  @change="changeNotification($event, 'push')"
-                />
-                <hr />
-                <p>
-                  This is the red bell icon you know and love. They don't show
-                  on mobile - Facebook doesn't do that.
-                </p>
-                <OurToggle
-                  v-model="me.settings.notifications.facebook"
-                  :height="30"
-                  :width="220"
-                  :font-size="14"
-                  :sync="true"
-                  :labels="{
-                    checked: 'Facebook Notifications On',
-                    unchecked: 'Facebook Notifications Off',
-                  }"
-                  color="#61AE24"
-                  @change="changeNotification($event, 'facebook')"
-                />
-              </b-card-body>
-            </b-card>
-            <b-card
-              v-if="!simple"
-              border-variant="info"
-              header-bg-variant="info"
-              header-text-variant="white"
-              class="mt-2"
-            >
-              <template #header>
-                <h2 class="bg-info header--size5 mb-0">
-                  <v-icon icon="cog" />
-                  Other
-                </h2>
-              </template>
+              </span>
               <b-card-body class="p-0 pt-1">
-                <b-form-group>
-                  <h3 class="header--size5 header5__color">
-                    What the enter key does
-                  </h3>
-                  <p>
-                    Normally hitting enter/return sends chat messages, rather
-                    than add a new line. If you prefer it to add a new line,
-                    then you can change the setting on this device. This can
-                    cause problems on some devices, so if you have problems with
-                    this setting, then please change it back.
+                <p>
+                  You can control the type and frequency of emails from your
+                  Freegle communities.
+                </p>
+                <div v-if="simpleSettings && !showAdvanced">
+                  <div>
+                    <SettingsGroup
+                      :emailfrequency.sync="emailSimple"
+                      :volunteeringallowed.sync="volunteeringSimple"
+                      :eventsallowed.sync="eventSimple"
+                    />
+                    <p class="text-muted">
+                      Occasionally we may also send ADMIN mails about the
+                      running of Freegle.
+                    </p>
+                    <hr />
+                    <a v-if="!showAdvanced" href="#" @click="toggleAdvanced">
+                      Show advanced settings
+                    </a>
+                  </div>
+                </div>
+                <div v-else>
+                  <div v-if="me.groups">
+                    <div
+                      v-for="group in me.groups"
+                      :key="'settingsgroup-' + group.id"
+                      class="list-unstyled"
+                    >
+                      <b-card v-if="group.type === 'Freegle'" class="nocardbot">
+                        <b-card-title title-tag="h3" class="header--size4">
+                          <nuxt-link :to="'/explore/' + group.nameshort">
+                            <b-img
+                              v-if="group.profile"
+                              lazy
+                              rounded
+                              thumbnail
+                              alt="Community profile picture"
+                              :src="group.profile"
+                              class="float-right groupprofile"
+                            />
+                          </nuxt-link>
+                          <nuxt-link
+                            :to="'/explore/' + group.nameshort"
+                            class="group__title"
+                          >
+                            {{ group.namedisplay }}
+                          </nuxt-link>
+                          <span
+                            v-if="
+                              group.role === 'Moderator' ||
+                              group.role === 'Owner'
+                            "
+                          >
+                            <v-icon icon="crown" class="text-success" />
+                          </span>
+                        </b-card-title>
+                        <b-card-body class="p-0 pt-2">
+                          <SettingsGroup
+                            :groupid="group.id"
+                            :emailfrequency="
+                              group.mysettings
+                                ? group.mysettings.emailfrequency
+                                : 24
+                            "
+                            :volunteeringallowed="
+                              Boolean(
+                                group.mysettings
+                                  ? group.mysettings.volunteeringallowed
+                                  : true
+                              )
+                            "
+                            :eventsallowed="
+                              Boolean(
+                                group.mysettings
+                                  ? group.mysettings.eventsallowed
+                                  : true
+                              )
+                            "
+                            :leave="group.role === 'Member'"
+                            @change="groupChange"
+                            @leave="leaveGroup(group.id)"
+                          />
+                        </b-card-body>
+                      </b-card>
+                    </div>
+                  </div>
+                  <p class="text-muted mt-2">
+                    Occasionally we may also send ADMIN mails about the running
+                    of Freegle.
                   </p>
-                  <OurToggle
-                    v-model="enterAddsNewLine"
-                    class="mt-2"
-                    :height="30"
-                    :width="150"
-                    :font-size="14"
-                    :sync="true"
-                    :labels="{
-                      checked: 'Insert new line',
-                      unchecked: 'Send message',
-                    }"
-                    color="#61AE24"
-                  />
-                </b-form-group>
-                <b-form-group v-if="!simple">
-                  <h3 class="header--size5 header5__color">Auto-reposts</h3>
-                  <p>
-                    In most Freegle communities, your OFFER/WANTED posts will be
-                    automatically reposted (or "bumped") unless you've marked
-                    them as TAKEN/RECEIVED/Withdrawn from
-                    <!-- eslint-disable-next-line-->
-                    <nuxt-link to="/myposts">My Posts</nuxt-link>.
-                  </p>
-                  <OurToggle
-                    v-model="autoreposts"
-                    :height="30"
-                    :width="150"
-                    :font-size="14"
-                    :sync="true"
-                    :labels="{
-                      checked: 'Autorepost On',
-                      unchecked: 'Autorepost Off',
-                    }"
-                    color="#61AE24"
-                    @change="changeAutorepost"
-                  />
-                </b-form-group>
+                </div>
               </b-card-body>
-            </b-card>
-          </b-col>
-          <b-col cols="0" xl="3" />
-        </b-row>
-        <AboutMeModal ref="aboutmemodal" @datachange="update" />
-        <ProfileModal :id="me ? me.id : null" ref="profilemodal" />
-        <EmailConfirmModal ref="emailconfirm" />
-        <AddressModal ref="addressModal" />
-      </client-only>
-    </div>
-    <div v-else class="text-center">
-      <b-img lazy src="~/static/loader.gif" alt="Loading" />
-      <p>
-        <span>Loading...</span><br /><span class="font-weight-bold"
-          >Stuck here? Try refreshing. Or Chrome.</span
-        >
-        <br />
-        No luck?
-        <ExternalLink
-          href="mailto:support@ilovefreegle.org"
-          style="color: black"
-        >
-          Contact us
-        </ExternalLink>
-      </p>
-    </div>
+            </div>
+            <div v-else>You're not a member of any communities yet.</div>
+          </b-card>
+          <b-card
+            border-variant="info"
+            header-bg-variant="info"
+            header-text-variant="white"
+            class="mt-2"
+          >
+            <template #header>
+              <h2 class="bg-info header--size5 mb-0">
+                <v-icon icon="bell" />
+                Chat Notifications
+              </h2>
+            </template>
+            <b-card-body class="p-0 pt-1">
+              <p class="text-muted">
+                <v-icon icon="lock" /> Other freeglers won't see this.
+              </p>
+              <p class="text-muted">
+                Messages from other freeglers will appear in the
+                <nuxt-link to="/chats">Chats</nuxt-link> section. We can also
+                notify you in other ways.
+              </p>
+              <notice-message variant="warning">
+                Email doesn't always get through, so check your spam folders,
+                and check <nuxt-link to="/chats">Chats</nuxt-link> on here
+                occasionally.
+              </notice-message>
+              <hr />
+              <h3 class="header--size5 header5__color">Text Alerts</h3>
+              <p>
+                We can send SMS alerts to your phone when you have a new message
+                on Freegle or a handover soon.
+              </p>
+              <SettingsPhone />
+              <div v-if="me.phone">
+                <NoticeMessage
+                  v-if="
+                    me.phonelastsent &&
+                    (!me.phonelastclicked ||
+                      me.phonelastclicked < me.phonelastsent)
+                  "
+                  variant="warning"
+                  class="mb-2"
+                >
+                  <p>
+                    We've stopped sending you SMS alerts, because you don't seem
+                    to be clicking on them. We do this to save Freegle money.
+                  </p>
+                  <ul>
+                    <li>
+                      If you don't want to get SMS alerts, please click
+                      <em>Remove</em> above to remove your number.
+                    </li>
+                    <li>
+                      If you do still want to receive SMS alerts again, please
+                      remove and re-add your mobile number, and we'll start
+                      again.
+                    </li>
+                  </ul>
+                </NoticeMessage>
+                <NoticeMessage v-else variant="warning" class="mb-2">
+                  <p>It costs Freegle to send these - if you can, please:</p>
+                  <donation-button />
+                </NoticeMessage>
+              </div>
+              <h3 class="header--size5 header5__color">Email Alerts</h3>
+              <p>
+                Mail me Chat messages from other freeglers about my OFFERs and
+                WANTEDs.
+              </p>
+              <OurToggle
+                v-model="notificationSettings.email"
+                :height="30"
+                :width="150"
+                :sync="true"
+                :labels="{ checked: 'Emails On', unchecked: 'Emails Off' }"
+                color="#61AE24"
+                @change="changeNotification($event, 'email')"
+              />
+              <hr />
+              <p>
+                We can email you a copy of your own Chat messages sent on the
+                website.
+              </p>
+              <OurToggle
+                v-model="notificationSettings.emailmine"
+                :height="30"
+                :width="150"
+                :sync="true"
+                :labels="{
+                  checked: 'Email Mine',
+                  unchecked: 'Don\'t Email Mine',
+                }"
+                color="#61AE24"
+                @change="changeNotification($event, 'emailmine')"
+              />
+              <hr />
+              <p>
+                We can email you about ChitChat, and notifications (the bell
+                icon).
+              </p>
+              <OurToggle
+                v-model="notificationmails"
+                :height="30"
+                :width="150"
+                :sync="true"
+                :labels="{ checked: 'Send Them', unchecked: 'No Thanks' }"
+                color="#61AE24"
+                @change="changeNotifChitchat"
+              />
+              <hr />
+              <p>
+                We can email you about specific OFFERs/WANTEDs we think you
+                might be interested in, or to remind you that we would love you
+                to freegle again.
+              </p>
+              <OurToggle
+                v-model="relevantallowed"
+                :height="30"
+                :width="150"
+                :sync="true"
+                :labels="{ checked: 'Send Them', unchecked: 'No Thanks' }"
+                color="#61AE24"
+                @change="changeRelevant"
+              />
+              <hr />
+              <p>
+                We send occasional newsletters or collections of nice stories
+                from other freeglers.
+              </p>
+              <OurToggle
+                v-model="newslettersallowed"
+                :height="30"
+                :width="150"
+                :sync="true"
+                :labels="{ checked: 'Send Them', unchecked: 'No Thanks' }"
+                color="#61AE24"
+                @change="changeNewsletter"
+              />
+              <hr />
+              <p>We send occasional mails to encourage you to freegle.</p>
+              <OurToggle
+                v-model="me.settings.engagement"
+                :height="30"
+                :width="150"
+                :sync="true"
+                :labels="{ checked: 'Send Them', unchecked: 'No Thanks' }"
+                color="#61AE24"
+                @change="changeEngagement"
+              />
+              <hr />
+              <h3 class="header--size5 header5__color">Other Alerts</h3>
+              <p>
+                Apps for your
+                <a
+                  href="https://play.google.com/store/apps/details?id=org.ilovefreegle.direct"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >Android</a
+                >
+                or
+                <a
+                  href="https://itunes.apple.com/gb/app/freegle/id970045029?ls=1&mt=8"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >IOS</a
+                >
+                phone/tablet.
+              </p>
+              <OurToggle
+                v-model="notificationSettings.app"
+                :height="30"
+                :width="220"
+                :sync="true"
+                :labels="{
+                  checked: 'App Notifications On',
+                  unchecked: 'App Notifications Off',
+                }"
+                color="#61AE24"
+                @change="changeNotification($event, 'app')"
+              />
+            </b-card-body>
+          </b-card>
+          <b-card
+            border-variant="info"
+            header-bg-variant="info"
+            header-text-variant="white"
+            class="mt-2"
+          >
+            <template #header>
+              <h2 class="bg-info header--size5 mb-0">
+                <v-icon icon="cog" />
+                Other
+              </h2>
+            </template>
+            <b-card-body class="p-0 pt-1">
+              <b-form-group>
+                <h3 class="header--size5 header5__color">
+                  What the enter key does
+                </h3>
+                <p>
+                  Normally hitting enter/return sends chat messages, rather than
+                  add a new line. If you prefer it to add a new line, then you
+                  can change the setting on this device. This can cause problems
+                  on some devices, so if you have problems with this setting,
+                  then please change it back.
+                </p>
+                <OurToggle
+                  v-model="enterAddsNewLine"
+                  class="mt-2"
+                  :height="30"
+                  :width="150"
+                  :sync="true"
+                  :labels="{
+                    checked: 'Insert new line',
+                    unchecked: 'Send message',
+                  }"
+                  color="#61AE24"
+                />
+              </b-form-group>
+              <b-form-group>
+                <h3 class="header--size5 header5__color">Auto-reposts</h3>
+                <p>
+                  In most Freegle communities, your OFFER/WANTED posts will be
+                  automatically reposted (or "bumped") unless you've marked them
+                  as TAKEN/RECEIVED/Withdrawn from
+                  <!-- eslint-disable-next-line-->
+                    <nuxt-link to="/myposts">My Posts</nuxt-link>.
+                </p>
+                <OurToggle
+                  v-model="autoreposts"
+                  :height="30"
+                  :width="150"
+                  :sync="true"
+                  :labels="{
+                    checked: 'Autorepost On',
+                    unchecked: 'Autorepost Off',
+                  }"
+                  color="#61AE24"
+                  @change="changeAutorepost"
+                />
+              </b-form-group>
+            </b-card-body>
+          </b-card>
+        </b-col>
+        <b-col cols="0" xl="3" />
+      </b-row>
+      <AboutMeModal ref="aboutmemodal" @datachange="update" />
+      <ProfileModal :id="me ? me.id : null" ref="profilemodal" />
+      <EmailConfirmModal ref="emailconfirm" />
+      <AddressModal ref="addressModal" />
+    </client-only>
   </div>
 </template>
 <script>
@@ -783,7 +688,6 @@ import EmailOwn from '../../components/EmailOwn'
 import { useMiscStore } from '../../stores/misc'
 import { useAuthStore } from '../../stores/auth'
 import { buildHead } from '../../composables/useBuildHead'
-import ExternalLink from '~/components/ExternalLink'
 import SettingsPhone from '~/components/SettingsPhone'
 import SupporterInfo from '~/components/SupporterInfo'
 import EmailConfirmModal from '~/components/EmailConfirmModal'
@@ -804,7 +708,6 @@ export default {
   components: {
     SupporterInfo,
     SettingsPhone,
-    ExternalLink,
     EmailOwn,
     EmailValidator,
     OurToggle,
@@ -847,8 +750,6 @@ export default {
       showAdvanced: false,
       savingPostcode: false,
       savedPostcode: false,
-      unbouncing: false,
-      unbounced: false,
       uploading: false,
       emailValid: false,
       cacheBust: Date.now(),
@@ -876,6 +777,37 @@ export default {
       get() {
         return Boolean(this.me.relevantallowed)
       },
+    },
+    notificationSettings() {
+      const ret = {
+        email: true,
+        emailmine: false,
+        push: true,
+        facebook: true,
+        app: true,
+      }
+
+      const settings = this.me?.settings?.notifications
+
+      if (settings) {
+        if ('email' in settings) {
+          ret.email = settings.email
+        }
+        if ('emailmine' in settings) {
+          ret.emailmine = settings.emailmine
+        }
+        if ('push' in settings) {
+          ret.push = settings.push
+        }
+        if ('facebook' in settings) {
+          ret.facebook = settings.facebook
+        }
+        if ('app' in settings) {
+          ret.app = settings.app
+        }
+      }
+
+      return ret
     },
     notificationmails: {
       // This is 1/0 in the model whereas we want Boolean.
@@ -1020,7 +952,7 @@ export default {
       const settings = this.me.settings
       settings.hidesupporter = this.showSupporter
 
-      await this.$store.dispatch('auth/saveAndGet', {
+      await this.authStore.saveAndGet({
         settings,
       })
     },
@@ -1028,7 +960,7 @@ export default {
       // This is a hack.  In the lost password case, we've seen that the login which is driven via the default
       // layout completes after we have retrieved our user.  The result is that we don't have the right info in "me".
       // I have discovered a truly marvellous fix for this, which this comment is too short to contain.
-      if (!this.me || !this.me.settings || !this.me.settings.notifications) {
+      if (!this.me || !this.me.settings || !this.notificationSettings) {
         this.update()
       } else {
         setTimeout(this.checkUser, 200)
@@ -1067,13 +999,13 @@ export default {
     },
     async changeUseProfile(c, e) {
       const settings = this.me.settings
-      settings.useprofile = c.value
-      await this.$store.dispatch('auth/saveAndGet', {
+      settings.useprofile = c
+      await this.authStore.saveAndGet({
         settings,
       })
     },
     async saveName() {
-      await this.$store.dispatch('auth/saveAndGet', {
+      await this.authStore.saveAndGet({
         displayname: this.me.displayname,
       })
     },
@@ -1087,7 +1019,7 @@ export default {
       this.savingEmail = true
 
       if (this.me.email) {
-        const data = await this.$store.dispatch('auth/saveEmail', {
+        const data = await this.authStore.saveEmail({
           email: this.me.email,
         })
 
@@ -1108,9 +1040,7 @@ export default {
       this.unbouncing = true
 
       if (this.me.email && this.me.bouncing) {
-        await this.$store.dispatch('auth/unbounce', {
-          id: this.me.id,
-        })
+        await this.authStore.unbounce(this.me.id)
       }
 
       this.unbouncing = false
@@ -1125,7 +1055,7 @@ export default {
 
       if (!settings.mylocation || settings.mylocation.id !== this.pc.id) {
         settings.mylocation = this.pc
-        await this.$store.dispatch('auth/saveAndGet', {
+        await this.authStore.saveAndGet({
           settings,
         })
       }
@@ -1167,59 +1097,56 @@ export default {
     async changeNotification(e, type) {
       const settings = this.me.settings
       settings.notifications[type] = e.value
-      await this.$store.dispatch('auth/saveAndGet', {
+      await this.authStore.saveAndGet({
         settings,
       })
     },
     async changeRelevant(e) {
-      await this.$store.dispatch('auth/saveAndGet', {
+      await this.authStore.saveAndGet({
         relevantallowed: e.value,
       })
     },
     async changeNotifChitchat(e) {
       const settings = this.me.settings
       settings.notificationmails = e.value
-      await this.$store.dispatch('auth/saveAndGet', {
+      await this.authStore.saveAndGet({
         settings,
       })
     },
     async changeNewsletter(e) {
-      await this.$store.dispatch('auth/saveAndGet', {
+      await this.authStore.saveAndGet({
         newslettersallowed: e.value,
       })
     },
     async changeEngagement(e) {
       const settings = this.me.settings
       settings.engagement = e.value
-      await this.$store.dispatch('auth/saveAndGet', {
+      await this.authStore.saveAndGet({
         settings,
       })
     },
     async changeAutorepost(e) {
       const settings = this.me.settings
       settings.autorepostsdisable = !e.value
-      await this.$store.dispatch('auth/saveAndGet', {
+      await this.authStore.saveAndGet({
         settings,
       })
     },
     async changeHolidayDate(val) {
-      await this.$store.dispatch('auth/saveAndGet', {
+      await this.authStore.saveAndGet({
         onholidaytill: val,
       })
     },
     async changeHolidayToggle(val) {
       if (val.value) {
         // Turned mails back on
-        await this.$store.dispatch('auth/saveAndGet', {
+        await this.authStore.saveAndGet({
           onholidaytill: null,
         })
       }
     },
     async leaveGroup(id) {
-      await this.$store.dispatch('auth/leaveGroup', {
-        userid: this.me.id,
-        groupid: id,
-      })
+      await this.authStore.leaveGroup(id)
     },
     addressBook() {
       this.$refs.addressModal.show()
