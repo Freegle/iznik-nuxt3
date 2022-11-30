@@ -94,8 +94,8 @@
 </template>
 <script>
 import { useAuthStore } from '../../../stores/auth'
+import { buildHead } from '../../composables/useBuildHead'
 import { useRoute, useRouter } from '#imports'
-import buildHead from '@/mixins/buildHead'
 const ExternalLink = () => import('~/components/ExternalLink')
 
 export default {
