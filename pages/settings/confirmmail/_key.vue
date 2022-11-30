@@ -93,8 +93,8 @@
   </div>
 </template>
 <script>
-import { useAuthStore } from '../../../stores/auth'
-import { buildHead } from '../../composables/useBuildHead'
+import { useAuthStore } from '~/stores/auth'
+import { buildHead } from '~/composables/useBuildHead'
 import { useRoute, useRouter } from '#imports'
 const ExternalLink = () => import('~/components/ExternalLink')
 
