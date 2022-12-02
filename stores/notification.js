@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import api from '~/api'
 
+// TODO Old client uses notification poll to record active users - how should we do that?
 export const useNotificationStore = defineStore({
   id: 'notification',
   state: () => ({
