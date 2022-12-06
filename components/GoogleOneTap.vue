@@ -17,6 +17,7 @@ export default {
     const authStore = useAuthStore()
     const runtimeConfig = useRuntimeConfig()
 
+
     return {
       authStore,
       runtimeConfig,

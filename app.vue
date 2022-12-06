@@ -9,6 +9,7 @@
 import { useRoute } from 'vue-router'
 import { computed } from 'vue'
 import { createPinia, setActivePinia } from 'pinia'
+import piniaPersist from 'pinia-plugin-persist'
 import { useAuthStore } from './stores/auth'
 import { useGroupStore } from './stores/group'
 import { useMessageStore } from './stores/message'
@@ -36,7 +37,7 @@ let ready = false
 // pass it in to each store via an init() action.
 const runtimeConfig = useRuntimeConfig()
 
-// Initialise pinia here - @pinia/nuxt doesn't seem to kick in early enough.
+// Initialise pinia here - @pinia/nuxt doesn't seem to kick in early enough if we install it as a plugin
 try {
   const pinia = createPinia()
   const nuxtApp = useNuxtApp()
@@ -47,6 +48,8 @@ try {
   } else if (nuxtApp.payload && nuxtApp.payload.pinia) {
     pinia.state.value = nuxtApp.payload.pinia
   }
+
+  pinia.use(piniaPersist)
 } catch (e) {
   console.error('Pinia init', e)
 }
