@@ -49,34 +49,21 @@
               </b-button>
             </div>
           </b-card-text>
-          <v-b-tooltip
-            :shown="showToolGive"
+
+          <b-popover
+            content="Giving something away? Click the Give button. Chitchat is for other discussion."
             target="givebutton"
             placement="bottom"
             variant="primary"
-            :triggers="[]"
-          >
-            <template #popper>
-              <div>
-                Giving something away? Click the Give button. Chitchat is for
-                other discussion.
-              </div>
-            </template>
-          </v-b-tooltip>
-          <v-b-tooltip
-            :shown="showToolFind"
+            :show="showToolGive"
+          />
+          <b-popover
+            content="Looking for an item? Click the Find button. Chitchat is for other discussion."
             target="findbutton"
             placement="bottom"
             variant="primary"
-            :triggers="[]"
-          >
-            <template #popper>
-              <div>
-                Looking for an item? Click the Find button. Chitchat is for
-                other discussion.
-              </div>
-            </template>
-          </v-b-tooltip>
+            :show="showToolFind"
+          />
         </b-card>
         <div v-if="!id" class="mt-2">
           <b-card no-body class="mb-2">

@@ -2,15 +2,14 @@
   <div @click="$emit('click')">
     <div v-if="summary">
       <b-img lazy src="/promised.jpg" class="promised__image" />
-      <v-b-tooltip variant="success" :target="'msg-' + id">
-        <template #popper>
-          <p v-if="!toMe">
-            This item has already been promised to someone. You can still reply,
-            but you'll probably only get it if someone else drops out.
-          </p>
-          <p v-else>This has been promised to you.</p>
-        </template>
-      </v-b-tooltip>
+      <b-popover
+        :content="title"
+        placement="top"
+        variant="primary"
+        triggers="hover"
+        :target="'msg-' + id"
+        custom-class="primary"
+      />
     </div>
     <div v-else>
       <notice-message v-if="!toMe" variant="warning">
@@ -39,6 +38,15 @@ export default {
       type: Boolean,
       required: false,
       default: false,
+    },
+  },
+  computed: {
+    title() {
+      if (!this.toMe) {
+        return "This item has already been promised to someone. You can still reply, but you'll probably only get it if someone else drops out."
+      } else {
+        return 'This has been promised to you.'
+      }
     },
   },
 }

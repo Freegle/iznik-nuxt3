@@ -3,11 +3,14 @@
     <div class="d-flex flex-column">
       <label v-if="label" :for="id">{{ label }}</label>
       <div class="d-flex">
-        <v-b-tooltip
-          :triggers="[]"
-          :shown="wip && (!results || results?.length > 1)"
-          placement="top"
-          :delay="{ show: 3000 }"
+        <div
+          v-b-tooltip="{
+            title: 'Keep typing your full postcode...',
+            triggers: [],
+            shown: wip && (!results || results?.length > 1),
+            placement: 'top',
+            delay: { show: 3000 },
+          }"
         >
           <AutoComplete
             :id="id"
@@ -35,28 +38,15 @@
             :variant="variant"
             @invalid="invalid"
           />
-
-          <!--          -->
-          <template #popper> Keep typing your full postcode... </template>
-        </v-b-tooltip>
-
-        <v-b-tooltip
-          :shown="showToolTip"
+        </div>
+        <b-popover
+          content="Your device thinks you're here. If it's wrong, please change it."
           :target="id"
           placement="top"
           variant="primary"
-          :triggers="[]"
+          :show="showLocated"
           :skidding="-50"
-        >
-          <template #popper>
-            <div class="font-weight-bold">
-              Your device thinks you're here.<br /><br />
-
-              If it's wrong, please change it.
-            </div>
-          </template>
-        </v-b-tooltip>
-
+        />
         <div v-if="find && !wip">
           <b-button
             variant="secondary"
@@ -162,7 +152,7 @@ export default {
       results: [],
       locating: false,
       locationFailed: false,
-      showToolTip: false,
+      showLocated: false,
     }
   },
   computed: {
@@ -196,7 +186,7 @@ export default {
         this.invalid()
       } else {
         // Hide the tooltip in case it's showing from a use of the find button.
-        this.showToolTip = false
+        this.showLocated = false
       }
     },
     process(results) {
@@ -262,8 +252,8 @@ export default {
               })
 
               // Show the user we've done this, and make them think.
-              this.showToolTip = true
-              setTimeout(() => (this.showToolTip = false), 10000)
+              this.showLocated = true
+              setTimeout(() => (this.showLocated = false), 10000)
             } else {
               this.locationFailed = true
             }

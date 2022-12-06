@@ -438,3 +438,17 @@ label {
 .fa-1-75x {
   font-size: 1.75em;
 }
+
+.popover.primary {
+  background: $color-green-background !important;
+
+  .popover-body {
+    color: white !important;
+  }
+
+  .popover-arrow {
+    &::before, &::after {
+      border-top-color: $color-green-background !important;
+    }
+  }
+}

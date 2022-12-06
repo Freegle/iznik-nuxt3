@@ -1,16 +1,14 @@
 <template>
   <div>
     <b-img lazy src="/freegled.jpg" class="freegled__image" />
-    <v-b-tooltip variant="success" :target="'msg-' + id">
-      <template #popper>
-        <p v-if="message.type === 'Offer'">Yay, someone took it!</p>
-        <p v-else>Hurray, they got what they were looking for!</p>
-        <p>
-          Don't forget to Mark your posts as TAKEN/RECEIVED from
-          <em>My Posts</em>.
-        </p>
-      </template>
-    </v-b-tooltip>
+    <b-popover
+      :content="title"
+      placement="top"
+      variant="primary"
+      triggers="hover"
+      :target="'msg-' + id"
+      custom-class="primary"
+    />
   </div>
 </template>
 <script>
@@ -33,6 +31,19 @@ export default {
   computed: {
     message() {
       return this.messageStore.byId(this.id)
+    },
+    title() {
+      let ret = null
+
+      if (this.message.type === 'Offer') {
+        ret = 'Yay, someone took it!'
+      } else {
+        ret = 'Hurray, they got what they were looking for!'
+      }
+
+      ret += " Don't forget to Mark your posts as TAKEN/RECEIVED from My Posts."
+
+      return ret
     },
   },
 }
