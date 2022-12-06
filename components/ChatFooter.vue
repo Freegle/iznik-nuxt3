@@ -175,19 +175,6 @@
           <div class="mobtext text--smallest">Spammer</div>
         </div>
         <div
-          v-if="chat && chat.chattype === 'User2Mod' && mod"
-          v-tooltip="'Ask on Central for help'"
-          class="mr-2"
-        >
-          <external-link
-            href="https://discourse.ilovefreegle.org/c/central"
-            class="nocolor"
-          >
-            <v-icon scale="2" icon="question-circle" class="fa-mob" />
-          </external-link>
-          <div class="mobtext text--smallest">Central</div>
-        </div>
-        <div
           v-if="
             chat &&
             chat.chattype === 'User2User' &&
