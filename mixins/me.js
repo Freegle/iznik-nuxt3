@@ -13,9 +13,14 @@ export default {
     realMe() {
       // We have this separate method so that components can override me() and still access the real user if they
       // need to. This is used by impersonation.
-      const authStore = useAuthStore()
-      const me = authStore.user
-      return me && me.id ? me : null
+      try {
+        const authStore = useAuthStore()
+        const me = authStore.user
+        return me?.id ? me : null
+      } catch (e) {
+        console.log('RealME error', e)
+        return null
+      }
     },
     myid() {
       return this.me?.id

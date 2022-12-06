@@ -256,7 +256,6 @@ import { useMiscStore } from '../stores/misc'
 import { useMessageStore } from '../stores/message'
 import { fetchOurOffers } from '../composables/useThrottle'
 import { useAuthStore } from '../stores/auth'
-import ExternalLink from './ExternalLink'
 import { untwem } from '~/composables/useTwem'
 
 // Don't use dynamic imports because it stops us being able to scroll to the bottom after render.
@@ -276,7 +275,6 @@ export default {
   components: {
     NudgeTooSoonWarningModal,
     NudgeWarningModal,
-    ExternalLink,
     UserRatings,
     OurFilePond,
     NoticeMessage,

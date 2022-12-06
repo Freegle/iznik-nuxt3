@@ -8,7 +8,7 @@
 <script setup>
 import { useRoute } from 'vue-router'
 import { computed } from 'vue'
-import { setActivePinia } from 'pinia'
+import { createPinia, setActivePinia } from 'pinia'
 import { useAuthStore } from './stores/auth'
 import { useGroupStore } from './stores/group'
 import { useMessageStore } from './stores/message'
@@ -38,7 +38,7 @@ const runtimeConfig = useRuntimeConfig()
 
 // Initialise pinia here - @pinia/nuxt doesn't seem to kick in early enough.
 try {
-  const pinia = usePinia()
+  const pinia = createPinia()
   const nuxtApp = useNuxtApp()
   nuxtApp.vueApp.use(pinia)
   setActivePinia(pinia)
@@ -93,25 +93,33 @@ const loginCount = computed(() => {
   return authStore.loginCount
 })
 
-if (route.query.u && route.query.k) {
-  // We are impersonating.
-  try {
-    // Clear the related list.  This avoids accidentally flagging members as related if people forget to close
-    // an incognito tab while impersonating.
-    await authStore.clearRelated()
+try {
+  if (route.query.u && route.query.k) {
+    // We are impersonating.
+    try {
+      // Clear the related list.  This avoids accidentally flagging members as related if people forget to close
+      // an incognito tab while impersonating.
+      await authStore.clearRelated()
 
-    // Log in using the username and key.
-    await authStore.login({
-      u: this.$route.query.u,
-      k: this.$route.query.k,
-    })
-  } catch (e) {
-    // Login failed.  Usually this is because they're logged in as someone else. Ignore it.
-    console.log('Login failed', e)
+      // Log in using the username and key.
+      await authStore.login({
+        u: this.$route.query.u,
+        k: this.$route.query.k,
+      })
+    } catch (e) {
+      // Login failed.  Usually this is because they're logged in as someone else. Ignore it.
+      console.log('Login failed', e)
+    }
+  } else {
+    // Before we do anything, see if we are logged in.
+    try {
+      await authStore.fetchUser()
+    } catch (e) {
+      console.log('Fetch user failed', e)
+    }
   }
-} else {
-  // Before we do anything, see if we are logged in.
-  await authStore.fetchUser()
+} catch (e) {
+  console.error('Error fetching user', e)
 }
 
 // There's a bug https://github.com/nuxt/framework/issues/3141 which causes route to stop working.

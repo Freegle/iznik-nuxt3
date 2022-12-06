@@ -14,9 +14,6 @@ export default defineNuxtConfig({
   nitro: { prerender: { routes: ['/404.html'] } },
 
   build: {
-    // Reduce size of CSS initial load.
-    extractCSS: true,
-
     // Need to transpile otherwise SSR fails - see https://github.com/nuxt/framework/discussions/4523.
     transpile: [
       /bootstrap-vue-3/,
@@ -25,6 +22,11 @@ export default defineNuxtConfig({
       /vue3-draggable-resizable/,
       /pinia-plugin-persist/,
     ],
+  },
+
+  webpack: {
+    // Reduce size of CSS initial load.
+    extractCSS: true,
   },
 
   // TODO Search for .sync modifier, which is replaced by v-model:.
@@ -46,7 +48,7 @@ export default defineNuxtConfig({
       //
       // Note that this doesn't retry requests that never complete.
       retries: 10,
-      retryDelay: function (retryCount: any) {
+      retryDelay: function (retryCount) {
         return retryCount * 1000
       },
       // eslint-disable-next-line handle-callback-err
@@ -58,20 +60,22 @@ export default defineNuxtConfig({
   },
 
   // Environment variables the client needs.
-  publicRuntimeConfig: {
-    APIv1: config.APIv1,
-    APIv2: config.APIv2,
-    OSM_TILE: config.OSM_TILE,
-    GEOCODE: config.GEOCODE,
-    FACEBOOK_APPID: config.FACEBOOK_APPID,
-    YAHOO_CLIENTID: config.YAHOO_CLIENTID,
-    GOOGLE_MAPS_KEY: config.GOOGLE_MAPS_KEY,
-    GOOGLE_API_KEY: config.GOOGLE_API_KEY,
-    GOOGLE_CLIENT_ID: config.GOOGLE_CLIENT_ID,
-    USER_SITE: config.USER_SITE,
-    IMAGE_SITE: config.IMAGE_SITE,
-    SENTRY_DSN: config.SENTRY_DSN,
-    BUILD_DATE: new Date().toISOString(),
+  runtimeConfig: {
+    public: {
+      APIv1: config.APIv1,
+      APIv2: config.APIv2,
+      OSM_TILE: config.OSM_TILE,
+      GEOCODE: config.GEOCODE,
+      FACEBOOK_APPID: config.FACEBOOK_APPID,
+      YAHOO_CLIENTID: config.YAHOO_CLIENTID,
+      GOOGLE_MAPS_KEY: config.GOOGLE_MAPS_KEY,
+      GOOGLE_API_KEY: config.GOOGLE_API_KEY,
+      GOOGLE_CLIENT_ID: config.GOOGLE_CLIENT_ID,
+      USER_SITE: config.USER_SITE,
+      IMAGE_SITE: config.IMAGE_SITE,
+      SENTRY_DSN: config.SENTRY_DSN,
+      BUILD_DATE: new Date().toISOString(),
+    },
   },
 
   css: [
