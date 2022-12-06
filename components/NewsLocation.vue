@@ -18,7 +18,7 @@
         >
           <v-icon icon="map-marker-alt" />
           <span
-            v-tooltip="
+            v-b-tooltip="
               'This is where other people will see that you are.  Change your location from Settings.'
             "
             class="ml-1"
@@ -37,7 +37,7 @@
         >
           <v-icon icon="map-marker-alt" />
           <span
-            v-tooltip="
+            v-b-tooltip="
               'This is where other people will see that you are.  Change your location from Settings.'
             "
             class="ml-1"

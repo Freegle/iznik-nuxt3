@@ -21,7 +21,7 @@
       </b-button>
     </div>
     <div
-      v-tooltip="'Click to view this message in a single page'"
+      v-b-tooltip="'Click to view this message in a single page'"
       @click.native.prevent="goto"
     >
       <b-button

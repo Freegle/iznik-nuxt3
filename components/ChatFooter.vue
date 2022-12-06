@@ -87,7 +87,7 @@
       <div class="d-none d-lg-block">
         <span v-if="chat && chat.chattype === 'User2User' && otheruser">
           <b-button
-            v-tooltip="'Promise an item to this freegler'"
+            v-b-tooltip="'Promise an item to this freegler'"
             variant="secondary"
             class="ml-1 mr-2"
             @click="promise(null)"
@@ -96,7 +96,7 @@
           </b-button>
           <b-button
             v-if="!simple"
-            v-tooltip="'Send your address'"
+            v-b-tooltip="'Send your address'"
             variant="secondary"
             class="mr-2"
             @click="addressBook"
@@ -105,7 +105,7 @@
           </b-button>
           <b-button
             v-if="!simple && !tooSoonToNudge"
-            v-tooltip="'Waiting for a reply?  Nudge this freegler.'"
+            v-b-tooltip="'Waiting for a reply?  Nudge this freegler.'"
             variant="secondary"
             class="mr-2"
             @click="nudge"
@@ -114,7 +114,7 @@
           </b-button>
           <div
             v-if="!simple && tooSoonToNudge"
-            v-tooltip="
+            v-b-tooltip="
               'You need to wait a day since the last message before nudging.'
             "
             class="d-inline"
@@ -136,7 +136,7 @@
           <v-icon v-else icon="angle-double-right" title="Send" />
         </b-button>
         <b-button
-          v-tooltip="'Upload a photo'"
+          v-b-tooltip="'Upload a photo'"
           variant="secondary"
           class="float-end"
           @click="photoAdd"
@@ -148,7 +148,7 @@
       <div class="d-flex d-lg-none justify-content-between align-middle">
         <div
           v-if="chat && chat.chattype === 'User2User' && otheruser"
-          v-tooltip="'Promise an item to this freegler'"
+          v-b-tooltip="'Promise an item to this freegler'"
           class="ml-1 mr-2"
           @click="promise(null)"
         >
@@ -157,7 +157,7 @@
         </div>
         <div
           v-if="chat && chat.chattype === 'User2User' && otheruser && !simple"
-          v-tooltip="'Send your address'"
+          v-b-tooltip="'Send your address'"
           disabled
           class="mr-2"
           @click="addressBook"
@@ -167,7 +167,7 @@
         </div>
         <div
           v-if="chat && chat.chattype === 'User2Mod' && mod"
-          v-tooltip="'Report as spammer'"
+          v-b-tooltip="'Report as spammer'"
           class="mr-2"
           @click="spamReport"
         >
@@ -182,7 +182,7 @@
             !tooSoonToNudge &&
             !simple
           "
-          v-tooltip="'Waiting for a reply?  Nudge this freegler.'"
+          v-b-tooltip="'Waiting for a reply?  Nudge this freegler.'"
           class="mr-2"
           @click="nudge"
         >
@@ -197,7 +197,7 @@
             tooSoonToNudge &&
             !simple
           "
-          v-tooltip="
+          v-b-tooltip="
             'You need to wait a day since the last message before nudging.'
           "
           class="mr-2"

@@ -49,7 +49,7 @@
               </b-button>
             </div>
           </b-card-text>
-          <v-tooltip
+          <v-b-tooltip
             :shown="showToolGive"
             target="givebutton"
             placement="bottom"
@@ -62,8 +62,8 @@
                 other discussion.
               </div>
             </template>
-          </v-tooltip>
-          <v-tooltip
+          </v-b-tooltip>
+          <v-b-tooltip
             :shown="showToolFind"
             target="findbutton"
             placement="bottom"
@@ -76,7 +76,7 @@
                 other discussion.
               </div>
             </template>
-          </v-tooltip>
+          </v-b-tooltip>
         </b-card>
         <div v-if="!id" class="mt-2">
           <b-card no-body class="mb-2">

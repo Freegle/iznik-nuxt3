@@ -1,7 +1,7 @@
 <template>
   <div>
     <b-img lazy src="/freegled.jpg" class="freegled__image" />
-    <v-tooltip variant="success" :target="'msg-' + id">
+    <v-b-tooltip variant="success" :target="'msg-' + id">
       <template #popper>
         <p v-if="message.type === 'Offer'">Yay, someone took it!</p>
         <p v-else>Hurray, they got what they were looking for!</p>
@@ -10,7 +10,7 @@
           <em>My Posts</em>.
         </p>
       </template>
-    </v-tooltip>
+    </v-b-tooltip>
   </div>
 </template>
 <script>

@@ -2,7 +2,7 @@
   <div @click="$emit('click')">
     <div v-if="summary">
       <b-img lazy src="/promised.jpg" class="promised__image" />
-      <v-tooltip variant="success" :target="'msg-' + id">
+      <v-b-tooltip variant="success" :target="'msg-' + id">
         <template #popper>
           <p v-if="!toMe">
             This item has already been promised to someone. You can still reply,
@@ -10,7 +10,7 @@
           </p>
           <p v-else>This has been promised to you.</p>
         </template>
-      </v-tooltip>
+      </v-b-tooltip>
     </div>
     <div v-else>
       <notice-message v-if="!toMe" variant="warning">

@@ -3,7 +3,7 @@
     <div class="d-flex flex-column">
       <label v-if="label" :for="id">{{ label }}</label>
       <div class="d-flex">
-        <v-tooltip
+        <v-b-tooltip
           :triggers="[]"
           :shown="wip && (!results || results?.length > 1)"
           placement="top"
@@ -38,9 +38,9 @@
 
           <!--          -->
           <template #popper> Keep typing your full postcode... </template>
-        </v-tooltip>
+        </v-b-tooltip>
 
-        <v-tooltip
+        <v-b-tooltip
           :shown="showToolTip"
           :target="id"
           placement="top"
@@ -55,7 +55,7 @@
               If it's wrong, please change it.
             </div>
           </template>
-        </v-tooltip>
+        </v-b-tooltip>
 
         <div v-if="find && !wip">
           <b-button
