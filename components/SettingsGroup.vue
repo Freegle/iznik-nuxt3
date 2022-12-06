@@ -1,10 +1,10 @@
 <template>
   <div>
-    <b-row>
+    <b-row class="align-items-end">
       <b-col cols="12" sm="6">
         <b-form-group label="OFFER and WANTED posts:">
           <b-form-select
-            :value="emailfrequency"
+            :model-value="emailfrequency"
             :class="highlightEmailFrequencyIfOn"
             @change="(newval) => outcast('emailfrequency', newval)"
           >
@@ -17,10 +17,10 @@
       <b-col v-if="leave" cols="12" sm="6">
         <SpinButton
           variant="secondary"
-          class="float-right mt-4"
           :handler="leaveGroup"
           name="trash-alt"
           label="Leave"
+          class="mb-3"
         />
       </b-col>
     </b-row>
@@ -28,11 +28,11 @@
       <b-col cols="12" sm="6">
         <b-form-group label="Community Event mails:">
           <OurToggle
-            :value="eventsallowed"
+            :model-value="eventsallowed"
             class="mt-2"
             :height="30"
             :width="100"
-            :font-size="14"
+            font-size="14"
             :sync="true"
             :labels="{ checked: 'Weekly', unchecked: 'Off' }"
             color="#61AE24"
@@ -43,11 +43,11 @@
       <b-col cols="12" sm="6">
         <b-form-group label="Volunteer Opportunity mails:">
           <OurToggle
-            :value="volunteeringallowed"
+            :model-value="volunteeringallowed"
             class="mt-2"
             :height="30"
             :width="100"
-            :font-size="14"
+            font-size="14"
             :sync="true"
             :labels="{ checked: 'Weekly', unchecked: 'Off' }"
             color="#61AE24"
@@ -96,14 +96,11 @@ export default {
     }
   },
   computed: {
-    user() {
-      return this.me
-    },
     membership() {
       let ret = null
 
-      if (this.user?.memberof) {
-        this.user.memberof.forEach((g) => {
+      if (this.myGroups) {
+        this.myGroups.forEach((g) => {
           if (g.id === this.groupid) {
             ret = g
           }

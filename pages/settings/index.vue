@@ -307,7 +307,7 @@
                 Community Mail Settings
               </h2>
             </template>
-            <div v-if="me.groups && me.groups.length">
+            <div v-if="myGroups">
               <p>
                 You can pause regular emails for a while, for example if you're
                 on holiday.
@@ -355,13 +355,13 @@
                   </div>
                 </div>
                 <div v-else>
-                  <div v-if="me.groups">
+                  <div v-if="myGroups">
                     <div
-                      v-for="group in me.groups"
+                      v-for="group in myGroups"
                       :key="'settingsgroup-' + group.id"
                       class="list-unstyled"
                     >
-                      <b-card v-if="group.type === 'Freegle'" class="nocardbot">
+                      <b-card class="nocardbot">
                         <b-card-title title-tag="h3" class="header--size4">
                           <nuxt-link :to="'/explore/' + group.nameshort">
                             <b-img
@@ -392,25 +392,11 @@
                         <b-card-body class="p-0 pt-2">
                           <SettingsGroup
                             :groupid="group.id"
-                            :emailfrequency="
-                              group.mysettings
-                                ? group.mysettings.emailfrequency
-                                : 24
-                            "
+                            :emailfrequency="group.emailfrequency"
                             :volunteeringallowed="
-                              Boolean(
-                                group.mysettings
-                                  ? group.mysettings.volunteeringallowed
-                                  : true
-                              )
+                              Boolean(group.volunteeringallowed)
                             "
-                            :eventsallowed="
-                              Boolean(
-                                group.mysettings
-                                  ? group.mysettings.eventsallowed
-                                  : true
-                              )
-                            "
+                            :eventsallowed="Boolean(group.eventsallowed)"
                             :leave="group.role === 'Member'"
                             @change="groupChange"
                             @leave="leaveGroup(group.id)"
@@ -854,25 +840,19 @@ export default {
       let volunteering = null
 
       // If we have the same settings on all groups, then we can show a simplified view.
-      if (this.me && this.me.groups) {
-        for (const group of this.me.groups) {
-          if (group.type === 'Freegle') {
-            const mysettings = group.mysettings
-
-            if (mysettings) {
-              if (emailFrequency === null) {
-                emailFrequency = mysettings.emailfrequency
-                communityEvents = mysettings.eventsallowed
-                volunteering = mysettings.volunteeringallowed
-              } else if (
-                emailFrequency !== mysettings.emailfrequency ||
-                communityEvents !== mysettings.eventsallowed ||
-                volunteering !== mysettings.volunteeringallowed
-              ) {
-                ret = false
-                break
-              }
-            }
+      if (this.myGroups) {
+        for (const group of this.myGroups) {
+          if (emailFrequency === null) {
+            emailFrequency = group.emailfrequency
+            communityEvents = group.eventsallowed
+            volunteering = group.volunteeringallowed
+          } else if (
+            emailFrequency !== group.emailfrequency ||
+            communityEvents !== group.eventsallowed ||
+            volunteering !== group.volunteeringallowed
+          ) {
+            ret = false
+            break
           }
         }
       }
@@ -1078,7 +1058,7 @@ export default {
             groupid: group.id,
           }
           params[param] = value
-          await this.$store.dispatch('auth/setGroup', params)
+          await this.authStore.setGroup(params)
         }
       }
 
@@ -1090,7 +1070,7 @@ export default {
         groupid: e.groupid,
       }
       params[e.param] = e.val
-      await this.$store.dispatch('auth/setGroup', params)
+      await this.authStore.setGroup(params)
 
       await this.fetch()
     },
@@ -1138,7 +1118,7 @@ export default {
       })
     },
     async changeHolidayToggle(val) {
-      if (val.value) {
+      if (val) {
         // Turned mails back on
         await this.authStore.saveAndGet({
           onholidaytill: null,
