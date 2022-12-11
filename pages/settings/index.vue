@@ -54,13 +54,14 @@
                           size="xl"
                         />
                       </div>
-                      <OurToggle
-                        v-model="useprofile"
-                        class="mt-2"
-                        :labels="{ checked: 'Show', unchecked: 'Hide' }"
-                        @change="changeUseProfile"
-                      />
-                      <br />
+                      <div class="d-flex justify-content-around mb-2">
+                        <OurToggle
+                          v-model="useprofile"
+                          class="mt-2"
+                          :labels="{ checked: 'Showing', unchecked: 'Hidden' }"
+                          @change="changeUseProfile"
+                        />
+                      </div>
                       <span
                         v-if="me.profile.ours"
                         class="clickme mt-1 align-bottom"
@@ -314,10 +315,13 @@
               </p>
               <OurToggle
                 v-model="emailsOn"
-                :height="34"
+                size="lg"
                 :width="150"
                 :sync="true"
-                :labels="{ checked: 'Mails On', unchecked: 'Mails Paused' }"
+                :labels="{
+                  checked: 'Mails are On',
+                  unchecked: 'Mails are Paused',
+                }"
                 color="#61AE24"
                 @change="changeHolidayToggle"
               />
@@ -332,7 +336,7 @@
                   size="15"
                 />
               </span>
-              <b-card-body class="p-0 pt-1">
+              <b-card-body class="p-0 pt-1 mt-1">
                 <p>
                   You can control the type and frequency of emails from your
                   Freegle communities.
@@ -485,10 +489,12 @@
               </p>
               <OurToggle
                 v-model="notificationSettings.email"
-                :height="30"
                 :width="150"
                 :sync="true"
-                :labels="{ checked: 'Emails On', unchecked: 'Emails Off' }"
+                :labels="{
+                  checked: 'Emails are On',
+                  unchecked: 'Emails are Off',
+                }"
                 color="#61AE24"
                 @change="changeNotification($event, 'email')"
               />
@@ -499,12 +505,11 @@
               </p>
               <OurToggle
                 v-model="notificationSettings.emailmine"
-                :height="30"
                 :width="150"
                 :sync="true"
                 :labels="{
-                  checked: 'Email Mine',
-                  unchecked: 'Don\'t Email Mine',
+                  checked: 'Emailing Mine',
+                  unchecked: 'Not emailing Mine',
                 }"
                 color="#61AE24"
                 @change="changeNotification($event, 'emailmine')"
@@ -516,10 +521,9 @@
               </p>
               <OurToggle
                 v-model="notificationmails"
-                :height="30"
                 :width="150"
                 :sync="true"
-                :labels="{ checked: 'Send Them', unchecked: 'No Thanks' }"
+                :labels="{ checked: 'Sending', unchecked: 'Not sending' }"
                 color="#61AE24"
                 @change="changeNotifChitchat"
               />
@@ -531,10 +535,9 @@
               </p>
               <OurToggle
                 v-model="relevantallowed"
-                :height="30"
                 :width="150"
                 :sync="true"
-                :labels="{ checked: 'Send Them', unchecked: 'No Thanks' }"
+                :labels="{ checked: 'Sending', unchecked: 'Not sending' }"
                 color="#61AE24"
                 @change="changeRelevant"
               />
@@ -545,10 +548,9 @@
               </p>
               <OurToggle
                 v-model="newslettersallowed"
-                :height="30"
                 :width="150"
                 :sync="true"
-                :labels="{ checked: 'Send Them', unchecked: 'No Thanks' }"
+                :labels="{ checked: 'Sending', unchecked: 'Not sending' }"
                 color="#61AE24"
                 @change="changeNewsletter"
               />
@@ -556,10 +558,9 @@
               <p>We send occasional mails to encourage you to freegle.</p>
               <OurToggle
                 v-model="me.settings.engagement"
-                :height="30"
                 :width="150"
                 :sync="true"
-                :labels="{ checked: 'Send Them', unchecked: 'No Thanks' }"
+                :labels="{ checked: 'Sending', unchecked: 'Not sending' }"
                 color="#61AE24"
                 @change="changeEngagement"
               />
@@ -584,7 +585,6 @@
               </p>
               <OurToggle
                 v-model="notificationSettings.app"
-                :height="30"
                 :width="220"
                 :sync="true"
                 :labels="{
@@ -623,12 +623,11 @@
                 <OurToggle
                   v-model="enterAddsNewLine"
                   class="mt-2"
-                  :height="30"
                   :width="150"
                   :sync="true"
                   :labels="{
-                    checked: 'Insert new line',
-                    unchecked: 'Send message',
+                    checked: 'Inserts new line',
+                    unchecked: 'Sends message',
                   }"
                   color="#61AE24"
                 />
@@ -644,12 +643,11 @@
                 </p>
                 <OurToggle
                   v-model="autoreposts"
-                  :height="30"
                   :width="150"
                   :sync="true"
                   :labels="{
-                    checked: 'Autorepost On',
-                    unchecked: 'Autorepost Off',
+                    checked: 'Autoreposting is On',
+                    unchecked: 'Autoreposting is Off',
                   }"
                   color="#61AE24"
                   @change="changeAutorepost"

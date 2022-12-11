@@ -452,3 +452,19 @@ label {
     }
   }
 }
+
+:root {
+  .toggle-sm {
+    --toggle-height: 1rem;
+  }
+
+  .toggle-md {
+    --toggle-height: 2rem;
+    --toggle-font-size: 16px;
+  }
+
+  .toggle-lg {
+    --toggle-height: 3rem;
+    --toggle-font-size: 20px;
+  }
+}
