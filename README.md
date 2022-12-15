@@ -43,7 +43,7 @@ npm install
 Set some environment variables:
 ```
 IZNIK_API_V1=https://fdapidbg.ilovefreegle.org/api
-IZNIK_API_V2=https://api.ilovefreegle.org/apiv2
+IZNIK_API_V2=https://api.ilovefreegle.org:8192/apiv2
 ```
 
 (if running the Go Server locally then http://localhost:8192/api)
