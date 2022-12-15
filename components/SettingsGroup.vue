@@ -34,7 +34,7 @@
             :width="100"
             font-size="14"
             :sync="true"
-            :labels="{ checked: 'Weekly', unchecked: 'Off' }"
+            :labels="{ checked: 'Sending weekly', unchecked: 'Not sending' }"
             color="#61AE24"
             @change="(newval) => outcast('eventsallowed', newval.value)"
           />
@@ -49,7 +49,7 @@
             :width="100"
             font-size="14"
             :sync="true"
-            :labels="{ checked: 'Weekly', unchecked: 'Off' }"
+            :labels="{ checked: 'Sending weekly', unchecked: 'Not sending' }"
             color="#61AE24"
             @change="(newval) => outcast('volunteeringallowed', newval.value)"
           />

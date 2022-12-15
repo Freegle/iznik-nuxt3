@@ -508,8 +508,8 @@
                 :width="150"
                 :sync="true"
                 :labels="{
-                  checked: 'Emailing Mine',
-                  unchecked: 'Not emailing Mine',
+                  checked: 'Emailing a copy',
+                  unchecked: 'Not emailing a copy',
                 }"
                 color="#61AE24"
                 @change="changeNotification($event, 'emailmine')"
@@ -588,8 +588,8 @@
                 :width="220"
                 :sync="true"
                 :labels="{
-                  checked: 'App Notifications On',
-                  unchecked: 'App Notifications Off',
+                  checked: 'App notifications are On',
+                  unchecked: 'App notifications are Off',
                 }"
                 color="#61AE24"
                 @change="changeNotification($event, 'app')"
