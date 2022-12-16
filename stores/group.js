@@ -25,9 +25,11 @@ export const useGroupStore = defineStore({
             // Fetch all the groups.
             const groups = await api(this.config).group.list()
 
-            groups.forEach((g) => {
-              this.allGroups[g.nameshort.toLowerCase()] = g
-            })
+            if (groups) {
+              groups.forEach((g) => {
+                this.allGroups[g.nameshort.toLowerCase()] = g
+              })
+            }
           }
 
           if (!this.allGroups[id]) {
@@ -71,10 +73,12 @@ export const useGroupStore = defineStore({
         // Fetching all groups.
         const groups = await api(this.config).group.list()
 
-        groups.forEach((g) => {
-          this.allGroups[g.nameshort.toLowerCase()] = g
-          this.list[g.id] = g
-        })
+        if (groups) {
+          groups.forEach((g) => {
+            this.allGroups[g.nameshort.toLowerCase()] = g
+            this.list[g.id] = g
+          })
+        }
       }
     },
     remember(id, val) {

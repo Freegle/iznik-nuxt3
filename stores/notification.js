@@ -33,6 +33,11 @@ export const useNotificationStore = defineStore({
     },
     async seen(id) {
       await api(this.config).notification.seen(id)
+      await this.fetchCount()
+    },
+    async allSeen(id) {
+      await api(this.config).notification.allSeen(id)
+      await this.fetchCount()
     },
   },
   getters: {
