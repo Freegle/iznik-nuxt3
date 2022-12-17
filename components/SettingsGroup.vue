@@ -2,7 +2,7 @@
   <div>
     <b-row class="align-items-end">
       <b-col cols="12" sm="6">
-        <b-form-group label="OFFER and WANTED posts:">
+        <b-form-group :label="label">
           <b-form-select
             :model-value="emailfrequency"
             :class="highlightEmailFrequencyIfOn"
@@ -24,7 +24,7 @@
       </b-col>
     </b-row>
     <b-row>
-      <b-col cols="12" sm="6">
+      <b-col v-if="!eventshide" cols="12" sm="6">
         <b-form-group label="Community Event mails:">
           <OurToggle
             :model-value="eventsallowed"
@@ -38,7 +38,7 @@
           />
         </b-form-group>
       </b-col>
-      <b-col cols="12" sm="6">
+      <b-col v-if="!volunteerhide" cols="12" sm="6">
         <b-form-group label="Volunteer Opportunity mails:">
           <OurToggle
             :model-value="volunteeringallowed"
@@ -70,6 +70,21 @@ export default {
       default: null,
     },
     leave: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    label: {
+      type: String,
+      required: false,
+      default: 'OFFER and WANTED posts:',
+    },
+    eventshide: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    volunteerhide: {
       type: Boolean,
       required: false,
       default: false,

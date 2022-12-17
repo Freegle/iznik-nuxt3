@@ -285,7 +285,6 @@
               </p>
             </b-card-body>
           </b-card>
-
           <b-card
             border-variant="info"
             header-bg-variant="info"
@@ -304,30 +303,104 @@
                   You can control how often you get emails from your Freegle
                   communities.
                 </p>
-                <notice-message variant="warning" class="mb-2">
-                  Email doesn't always get through, so check your spam folders,
-                  and check <nuxt-link to="/chats">Chats</nuxt-link> on here
-                  occasionally.
-                </notice-message>
                 <div v-if="simpleSettings && !showAdvanced">
-                  <div>
+                  <b-form-group label="Choose your email level:">
+                    <b-form-select v-model="simpleEmailSetting">
+                      <b-form-select-option value="None">
+                        Emails are off
+                      </b-form-select-option>
+                      <b-form-select-option value="Basic">
+                        We will send limited emails
+                      </b-form-select-option>
+                      <b-form-select-option value="Full">
+                        We will send all types of emails
+                      </b-form-select-option>
+                    </b-form-select>
+                  </b-form-group>
+                  <div v-if="simpleEmailSetting !== 'None'">
                     <SettingsGroup
                       v-model:emailfrequency="emailSimple"
-                      v-model:volunteeringallowed="volunteeringSimple"
-                      v-model:eventsallowed="eventSimple"
+                      eventshide
+                      volunteerhide
+                      label="Choose OFFER/WANTED frequency:"
                     />
-                    <hr />
-                    <p class="text-muted">
-                      Occasionally we may also send ADMIN mails about the
-                      running of Freegle.
-                    </p>
-                    <hr />
-                    <a v-if="!showAdvanced" href="#" @click="toggleAdvanced">
-                      Show advanced email settings
-                    </a>
+                    <notice-message variant="warning" class="mb-2">
+                      Email doesn't always get through, so check your spam
+                      folders, and check
+                      <nuxt-link to="/chats">Chats</nuxt-link> on here
+                      occasionally.
+                    </notice-message>
+                    <div v-if="simpleEmailSetting === 'Basic'" class="small">
+                      <p>You will also receive:</p>
+                      <ul>
+                        <li>
+                          Chat replies from other freeglers, for example about
+                          your posts.
+                        </li>
+                      </ul>
+                      <p>You will not receive:</p>
+                      <ul>
+                        <li>Community Event emails</li>
+                        <li>Volunteer Opportunity emails</li>
+                        <li>Emails about ChitChat posts</li>
+                        <li>Emails about notifications on the site</li>
+                        <li>
+                          Emails about specific OFFERs/WANTEDs we think you
+                          might be interested in
+                        </li>
+                        <li>
+                          Emails to remind you that we would love you to freegle
+                          again
+                        </li>
+                        <li>
+                          Occasional newsletters or collections of nice stories
+                        </li>
+                      </ul>
+                    </div>
+                    <div v-else class="small">
+                      <p>You will also receive:</p>
+                      <ul>
+                        <li>
+                          Chat replies from other freeglers, for example about
+                          your posts.
+                        </li>
+                        <li>Community Event emails</li>
+                        <li>Volunteer Opportunity emails</li>
+                        <li>Emails about ChitChat posts</li>
+                        <li>Emails about notifications on the site</li>
+                        <li>
+                          Emails about specific OFFERs/WANTEDs we think you
+                          might be interested in
+                        </li>
+                        <li>
+                          Emails to remind you that we would love you to freegle
+                          again
+                        </li>
+                        <li>
+                          Occasional newsletters or collections of nice stories
+                        </li>
+                      </ul>
+                    </div>
                   </div>
+                  <p v-if="simpleEmailSetting !== 'None'">
+                    Occasionally we may also send ADMIN mails about the running
+                    of Freegle.
+                  </p>
+                  <p v-else>
+                    Occasionally we may still send ADMIN mails about the running
+                    of Freegle.
+                  </p>
+                  <a v-if="!showAdvanced" href="#" @click="toggleAdvanced">
+                    Show advanced email settings
+                  </a>
                 </div>
                 <div v-else>
+                  <notice-message variant="warning" class="mb-2">
+                    Email doesn't always get through, so check your spam
+                    folders, and check
+                    <nuxt-link to="/chats">Chats</nuxt-link> on here
+                    occasionally.
+                  </notice-message>
                   <div>
                     <div
                       v-for="group in myGroups"
@@ -507,6 +580,8 @@
                       again.
                     </li>
                   </ul>
+                  <p>It costs Freegle to send these - if you can, please:</p>
+                  <donation-button />
                 </NoticeMessage>
                 <NoticeMessage v-else variant="warning" class="mb-2">
                   <p>It costs Freegle to send these - if you can, please:</p>
@@ -534,10 +609,11 @@
                 </h3>
                 <p>
                   Normally hitting enter/return sends chat messages, rather than
-                  add a new line. If you prefer it to add a new line, then you
-                  can change the setting on this device. This can cause problems
-                  on some devices, so if you have problems with this setting,
-                  then please change it back.
+                  add a new line.
+                </p>
+                <p v-if="enterAddsNewLine">
+                  This can cause problems on some devices, so if you have
+                  problems with this setting, then please change it back.
                 </p>
                 <OurToggle
                   v-model="enterAddsNewLine"
@@ -748,6 +824,20 @@ export default {
       }
 
       return ret
+    },
+    simpleEmailSetting: {
+      // There are three variants:
+      // - None.  All the options are off.
+      // - Basic.  OFFER/WANTED, chat messages,
+      // - Full.  OFFER/WANTED, community event, volunteer ops, chitchat, notifications,
+      get() {
+        if (!this.simpleSettings) {
+          return null
+        }
+
+        return 'Full'
+      },
+      set(newVal) {},
     },
     checkSimplicity() {
       let ret = true
