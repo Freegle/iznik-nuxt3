@@ -184,9 +184,9 @@
               <div class="d-flex">
                 <EmailValidator
                   ref="email"
+                  v-model:email="me.email"
+                  v-model:valid="emailValid"
                   size="md"
-                  :email.sync="me.email"
-                  :valid.sync="emailValid"
                   label="Your email address:"
                 />
                 <SpinButton
@@ -285,6 +285,7 @@
               </p>
             </b-card-body>
           </b-card>
+
           <b-card
             border-variant="info"
             header-bg-variant="info"
@@ -294,56 +295,35 @@
             <template #header>
               <h2 class="bg-info header--size5 mb-0">
                 <v-icon icon="envelope" />
-                Community Mail Settings
+                Email Settings
               </h2>
             </template>
             <div v-if="myGroups">
-              <p>
-                You can pause regular emails for a while, for example if you're
-                on holiday.
-              </p>
-              <OurToggle
-                v-model="emailsOn"
-                size="lg"
-                :width="150"
-                :sync="true"
-                :labels="{
-                  checked: 'Mails are On',
-                  unchecked: 'Mails are Paused',
-                }"
-                color="#61AE24"
-                @change="changeHolidayToggle"
-              />
-              <span v-if="!emailsOn">
-                <span class="align-top ml-2 mr-2"> until </span>
-                <b-form-input
-                  v-model="me.onholidaytill"
-                  type="date"
-                  placeholder="Set a date"
-                  :min="today"
-                  :max="aMonthFromNow"
-                  size="15"
-                />
-              </span>
               <b-card-body class="p-0 pt-1 mt-1">
                 <p>
-                  You can control the type and frequency of emails from your
-                  Freegle communities.
+                  You can control how often you get emails from your Freegle
+                  communities.
                 </p>
+                <notice-message variant="warning" class="mb-2">
+                  Email doesn't always get through, so check your spam folders,
+                  and check <nuxt-link to="/chats">Chats</nuxt-link> on here
+                  occasionally.
+                </notice-message>
                 <div v-if="simpleSettings && !showAdvanced">
                   <div>
                     <SettingsGroup
-                      :emailfrequency.sync="emailSimple"
-                      :volunteeringallowed.sync="volunteeringSimple"
-                      :eventsallowed.sync="eventSimple"
+                      v-model:emailfrequency="emailSimple"
+                      v-model:volunteeringallowed="volunteeringSimple"
+                      v-model:eventsallowed="eventSimple"
                     />
+                    <hr />
                     <p class="text-muted">
                       Occasionally we may also send ADMIN mails about the
                       running of Freegle.
                     </p>
                     <hr />
                     <a v-if="!showAdvanced" href="#" @click="toggleAdvanced">
-                      Show advanced settings
+                      Show advanced email settings
                     </a>
                   </div>
                 </div>
@@ -385,23 +365,100 @@
                         <b-card-body class="p-0 pt-2">
                           <SettingsGroup
                             :groupid="group.id"
-                            :emailfrequency="group.emailfrequency"
-                            :volunteeringallowed="
-                              Boolean(group.volunteeringallowed)
-                            "
-                            :eventsallowed="Boolean(group.eventsallowed)"
                             :leave="group.role === 'Member'"
-                            @change="groupChange"
                             @leave="leaveGroup(group.id)"
                           />
                         </b-card-body>
                       </b-card>
                     </div>
+                    <hr />
+                    <p>
+                      Mail me replies from other freeglers about my OFFERs and
+                      WANTEDs.
+                    </p>
+                    <OurToggle
+                      v-model="notificationSettings.email"
+                      :width="150"
+                      :sync="true"
+                      :labels="{
+                        checked: 'Emails are On',
+                        unchecked: 'Emails are Off',
+                      }"
+                      color="#61AE24"
+                      @change="changeNotification($event, 'email')"
+                    />
+                    <hr />
+                    <p>
+                      We can email you a copy of your own Chat messages sent on
+                      the website.
+                    </p>
+                    <OurToggle
+                      v-model="notificationSettings.emailmine"
+                      :width="150"
+                      :sync="true"
+                      :labels="{
+                        checked: 'Emailing a copy',
+                        unchecked: 'Not emailing a copy',
+                      }"
+                      color="#61AE24"
+                      @change="changeNotification($event, 'emailmine')"
+                    />
+                    <hr />
+                    <p>
+                      We can email you about ChitChat, and notifications (the
+                      bell icon).
+                    </p>
+                    <OurToggle
+                      v-model="notificationmails"
+                      :width="150"
+                      :sync="true"
+                      :labels="{ checked: 'Sending', unchecked: 'Not sending' }"
+                      color="#61AE24"
+                      @change="changeNotifChitchat"
+                    />
+                    <hr />
+                    <p>
+                      We can email you about specific OFFERs/WANTEDs we think
+                      you might be interested in, or to remind you that we would
+                      love you to freegle again.
+                    </p>
+                    <OurToggle
+                      v-model="relevantallowed"
+                      :width="150"
+                      :sync="true"
+                      :labels="{ checked: 'Sending', unchecked: 'Not sending' }"
+                      color="#61AE24"
+                      @change="changeRelevant"
+                    />
+                    <hr />
+                    <p>
+                      We send occasional newsletters or collections of nice
+                      stories from other freeglers.
+                    </p>
+                    <OurToggle
+                      v-model="newslettersallowed"
+                      :width="150"
+                      :sync="true"
+                      :labels="{ checked: 'Sending', unchecked: 'Not sending' }"
+                      color="#61AE24"
+                      @change="changeNewsletter"
+                    />
+                    <hr />
+                    <p>We send occasional mails to encourage you to freegle.</p>
+                    <OurToggle
+                      v-model="me.settings.engagement"
+                      :width="150"
+                      :sync="true"
+                      :labels="{ checked: 'Sending', unchecked: 'Not sending' }"
+                      color="#61AE24"
+                      @change="changeEngagement"
+                    />
+                    <hr />
+                    <p class="text-muted mt-2">
+                      Occasionally we may also send ADMIN mails about the
+                      running of Freegle.
+                    </p>
                   </div>
-                  <p class="text-muted mt-2">
-                    Occasionally we may also send ADMIN mails about the running
-                    of Freegle.
-                  </p>
                 </div>
               </b-card-body>
             </div>
@@ -416,22 +473,10 @@
             <template #header>
               <h2 class="bg-info header--size5 mb-0">
                 <v-icon icon="bell" />
-                Chat Notifications
+                Text Alerts
               </h2>
             </template>
             <b-card-body class="p-0 pt-1">
-              <p class="text-muted">
-                Messages from other freeglers will appear in the
-                <nuxt-link to="/chats">Chats</nuxt-link> section. We can also
-                notify you in other ways.
-              </p>
-              <notice-message variant="warning">
-                Email doesn't always get through, so check your spam folders,
-                and check <nuxt-link to="/chats">Chats</nuxt-link> on here
-                occasionally.
-              </notice-message>
-              <hr />
-              <h3 class="header--size5 header5__color">Text Alerts</h3>
               <p>
                 We can send SMS alerts to your phone when you have a new message
                 on Freegle or a handover soon.
@@ -468,88 +513,6 @@
                   <donation-button />
                 </NoticeMessage>
               </div>
-              <h3 class="header--size5 header5__color">Email Alerts</h3>
-              <p>
-                Mail me Chat messages from other freeglers about my OFFERs and
-                WANTEDs.
-              </p>
-              <OurToggle
-                v-model="notificationSettings.email"
-                :width="150"
-                :sync="true"
-                :labels="{
-                  checked: 'Emails are On',
-                  unchecked: 'Emails are Off',
-                }"
-                color="#61AE24"
-                @change="changeNotification($event, 'email')"
-              />
-              <hr />
-              <p>
-                We can email you a copy of your own Chat messages sent on the
-                website.
-              </p>
-              <OurToggle
-                v-model="notificationSettings.emailmine"
-                :width="150"
-                :sync="true"
-                :labels="{
-                  checked: 'Emailing a copy',
-                  unchecked: 'Not emailing a copy',
-                }"
-                color="#61AE24"
-                @change="changeNotification($event, 'emailmine')"
-              />
-              <hr />
-              <p>
-                We can email you about ChitChat, and notifications (the bell
-                icon).
-              </p>
-              <OurToggle
-                v-model="notificationmails"
-                :width="150"
-                :sync="true"
-                :labels="{ checked: 'Sending', unchecked: 'Not sending' }"
-                color="#61AE24"
-                @change="changeNotifChitchat"
-              />
-              <hr />
-              <p>
-                We can email you about specific OFFERs/WANTEDs we think you
-                might be interested in, or to remind you that we would love you
-                to freegle again.
-              </p>
-              <OurToggle
-                v-model="relevantallowed"
-                :width="150"
-                :sync="true"
-                :labels="{ checked: 'Sending', unchecked: 'Not sending' }"
-                color="#61AE24"
-                @change="changeRelevant"
-              />
-              <hr />
-              <p>
-                We send occasional newsletters or collections of nice stories
-                from other freeglers.
-              </p>
-              <OurToggle
-                v-model="newslettersallowed"
-                :width="150"
-                :sync="true"
-                :labels="{ checked: 'Sending', unchecked: 'Not sending' }"
-                color="#61AE24"
-                @change="changeNewsletter"
-              />
-              <hr />
-              <p>We send occasional mails to encourage you to freegle.</p>
-              <OurToggle
-                v-model="me.settings.engagement"
-                :width="150"
-                :sync="true"
-                :labels="{ checked: 'Sending', unchecked: 'Not sending' }"
-                color="#61AE24"
-                @change="changeEngagement"
-              />
             </b-card-body>
           </b-card>
           <b-card
@@ -698,9 +661,6 @@ export default {
     }
   },
   computed: {
-    emailsOn() {
-      return !Object.keys(this.me).includes('onholidaytill')
-    },
     today() {
       return dayjs().format('YYYY-MM-DD')
     },
@@ -791,23 +751,28 @@ export default {
     },
     checkSimplicity() {
       let ret = true
-      let emailFrequency = null
+      let first = true
+      let emailFrequency = 24
       let communityEvents = null
       let volunteering = null
 
       // If we have the same settings on all groups, then we can show a simplified view.
       if (this.myGroups) {
         for (const group of this.myGroups) {
-          if (emailFrequency === null) {
+          if (first) {
             emailFrequency = group.emailfrequency
             communityEvents = group.eventsallowed
             volunteering = group.volunteeringallowed
+            first = false
           } else if (
             emailFrequency !== group.emailfrequency ||
             communityEvents !== group.eventsallowed ||
             volunteering !== group.volunteeringallowed
           ) {
             ret = false
+            emailFrequency = group.emailfrequency
+            communityEvents = group.eventsallowed
+            volunteering = group.volunteeringallowed
             break
           }
         }
@@ -1014,16 +979,6 @@ export default {
 
       await this.fetch()
     },
-    async groupChange(e) {
-      const params = {
-        userid: this.me.id,
-        groupid: e.groupid,
-      }
-      params[e.param] = e.val
-      await this.authStore.setGroup(params)
-
-      await this.fetch()
-    },
     async changeNotification(e, type) {
       const settings = this.me.settings
       settings.notifications[type] = e.value
@@ -1061,19 +1016,6 @@ export default {
       await this.authStore.saveAndGet({
         settings,
       })
-    },
-    async changeHolidayDate(val) {
-      await this.authStore.saveAndGet({
-        onholidaytill: val,
-      })
-    },
-    async changeHolidayToggle(val) {
-      if (val) {
-        // Turned mails back on
-        await this.authStore.saveAndGet({
-          onholidaytill: null,
-        })
-      }
     },
     async leaveGroup(id) {
       await this.authStore.leaveGroup(id)

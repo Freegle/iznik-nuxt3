@@ -184,29 +184,39 @@ export const useAuthStore = defineStore({
       if (!me) {
         // Fall back to the older API which will authenticate via the persistent token and PHP session.
         const ret = await this.$api.session.fetch({
-          components: [
-            'me',
-            'groups',
-            'aboutme',
-            'phone',
-            'notifications',
-            'expectedreplies',
-          ],
+          components: ['me'],
         })
 
         let persistent = null
         let jwt = null
 
         if (ret) {
-          ;({ me, persistent, jwt, groups } = ret)
-        }
+          ;({ me, persistent, jwt } = ret)
 
-        if (me) {
-          // Save the persistent session token.
-          this.persistent = persistent
+          if (me) {
+            // Save the persistent session token.
+            this.persistent = persistent
 
-          // Save the JWT, so that we can use the faster API next time.
-          this.jwt = jwt
+            // Save the JWT, so that we can use the faster API next time.
+            this.jwt = jwt
+          }
+
+          if (jwt) {
+            // Now use the JWT on the new API.
+            try {
+              me = await this.$api.session.fetchv2({})
+            } catch (e) {
+              console.log('exception')
+            }
+
+            if (me) {
+              groups = me.memberships
+              delete me.memberships
+            } else {
+              // Any JWT must be invalid.
+              this.jwt = null
+            }
+          }
         }
       }
 
@@ -254,6 +264,7 @@ export const useAuthStore = defineStore({
     },
     async setGroup(params) {
       await this.$api.memberships.update(params)
+      await this.fetchUser()
     },
     async leaveGroup(userid, groupid) {
       await this.$api.memberships.leaveGroup({

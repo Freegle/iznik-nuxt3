@@ -612,18 +612,19 @@ export default {
           js.src = 'https://accounts.google.com/gsi/client'
           js.onload = (e) => {
             console.log('GSI loaded')
+
             window.google.accounts.id.initialize({
               client_id: self.runtimeConfig.public.GOOGLE_CLIENT_ID,
               callback: self.handleGoogleCredentialsResponse,
             })
+
+            window.google.accounts.id.renderButton(
+              document.getElementById('loginGoogle'),
+              { theme: 'filled_blue', size: 'large' } // customization attributes
+            )
           }
           fjs.parentNode.insertBefore(js, fjs)
         }
-
-        window.google.accounts.id.renderButton(
-          document.getElementById('loginGoogle'),
-          { theme: 'filled_blue', size: 'large' } // customization attributes
-        )
       })(document, 'script', 'google-jssdk')
     },
     installFacebookSDK() {

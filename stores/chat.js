@@ -180,7 +180,10 @@ export const useChatStore = defineStore({
       // Don't fetch chats.  We might be called in a loop and once we've completed the caller normally routes.
     },
     async pollForChatUpdates() {
-      await this.fetchChats()
+      if (this.myid) {
+        await this.fetchChats()
+      }
+
       setTimeout(this.pollForChatUpdates, 30000)
     },
     async rsvp(id, roomid, value) {

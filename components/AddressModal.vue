@@ -244,7 +244,7 @@ export default {
       get() {
         const selected = this.me?.settings?.selectedAddress
 
-        if (this.addresses.find((address) => address.id === selected)) {
+        if (this.addresses?.find((address) => address.id === selected)) {
           return selected
         } else {
           return null
@@ -261,7 +261,7 @@ export default {
     },
     selectedAddressObject() {
       return this.selectedAddress
-        ? this.addresses.find((a) => a.id === this.selectedAddress)
+        ? this.addresses?.find((a) => a.id === this.selectedAddress)
         : null
     },
     markerLatLng: {
@@ -304,7 +304,7 @@ export default {
   methods: {
     selectFirst() {
       if (this.selectedAddress) {
-        const sel = this.addresses.find(
+        const sel = this.addresses?.find(
           (address) => address.id === this.selectedAddress
         )
         if (sel) {

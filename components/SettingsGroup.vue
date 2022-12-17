@@ -6,7 +6,6 @@
           <b-form-select
             :model-value="emailfrequency"
             :class="highlightEmailFrequencyIfOn"
-            @change="(newval) => outcast('emailfrequency', newval)"
           >
             <option value="-1">Immediately</option>
             <option value="24">Every day</option>
@@ -36,7 +35,6 @@
             :sync="true"
             :labels="{ checked: 'Sending weekly', unchecked: 'Not sending' }"
             color="#61AE24"
-            @change="(newval) => outcast('eventsallowed', newval.value)"
           />
         </b-form-group>
       </b-col>
@@ -51,7 +49,6 @@
             :sync="true"
             :labels="{ checked: 'Sending weekly', unchecked: 'Not sending' }"
             color="#61AE24"
-            @change="(newval) => outcast('volunteeringallowed', newval.value)"
           />
         </b-form-group>
       </b-col>
@@ -59,6 +56,7 @@
   </div>
 </template>
 <script>
+import { useAuthStore } from '../stores/auth'
 import OurToggle from '~/components/OurToggle'
 
 export default {
@@ -71,37 +69,56 @@ export default {
       required: false,
       default: null,
     },
-    emailfrequency: {
-      type: Number,
-      required: true,
-    },
-    eventsallowed: {
-      type: Boolean,
-      required: true,
-    },
-    volunteeringallowed: {
-      type: Boolean,
-      required: true,
-    },
     leave: {
       type: Boolean,
       required: false,
       default: false,
     },
   },
-  setup() {},
+  setup() {
+    const authStore = useAuthStore()
+
+    return {
+      authStore,
+    }
+  },
   data() {
     return {
       leaving: false,
     }
   },
   computed: {
+    emailfrequency: {
+      get() {
+        return this.membership?.emailfrequency
+      },
+      async set(newval) {
+        await this.changeValue('emailfrequency', newval)
+      },
+    },
+    eventsallowed: {
+      get() {
+        return Boolean(this.membership?.eventsallowed)
+      },
+      async set(newval) {
+        await this.changeValue('eventsallowed', newval ? 1 : 0)
+      },
+    },
+    volunteeringallowed: {
+      get() {
+        return Boolean(this.membership?.volunteeringallowed)
+      },
+      async set(newval) {
+        await this.changeValue('volunteeringallowed', newval ? 1 : 0)
+      },
+    },
     membership() {
       let ret = null
 
       if (this.myGroups) {
         this.myGroups.forEach((g) => {
-          if (g.id === this.groupid) {
+          // Groupid can be null for the simple settings which are shared across all groups.
+          if (!this.groupid || g.id === this.groupid) {
             ret = g
           }
         })
@@ -118,13 +135,15 @@ export default {
     },
   },
   methods: {
-    outcast(param, val) {
-      this.$emit('update:' + param, val)
-      this.$emit('change', {
+    async changeValue(param, val) {
+      const params = {
+        userid: this.myid,
         groupid: this.groupid,
-        param,
-        val,
-      })
+      }
+
+      params[param] = parseInt(val)
+
+      await this.authStore.setGroup(params)
     },
     leaveGroup() {
       this.$emit('leave')

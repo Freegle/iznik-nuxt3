@@ -44,7 +44,6 @@ export default {
     },
   },
   setup(props) {
-    console.log('Toggle setup', props.modelValue)
     return {
       currentValue: ref(props.modelValue),
     }
