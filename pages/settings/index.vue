@@ -324,63 +324,9 @@
                       volunteerhide
                       label="Choose OFFER/WANTED frequency:"
                     />
-                    <notice-message variant="warning" class="mb-2">
-                      Email doesn't always get through, so check your spam
-                      folders, and check
-                      <nuxt-link to="/chats">Chats</nuxt-link> on here
-                      occasionally.
-                    </notice-message>
-                    <div v-if="simpleEmailSetting === 'Basic'" class="small">
-                      <p>You will also receive:</p>
-                      <ul>
-                        <li>
-                          Chat replies from other freeglers, for example about
-                          your posts.
-                        </li>
-                      </ul>
-                      <p>You will not receive:</p>
-                      <ul>
-                        <li>Community Event emails</li>
-                        <li>Volunteer Opportunity emails</li>
-                        <li>Emails about ChitChat posts</li>
-                        <li>Emails about notifications on the site</li>
-                        <li>
-                          Emails about specific OFFERs/WANTEDs we think you
-                          might be interested in
-                        </li>
-                        <li>
-                          Emails to remind you that we would love you to freegle
-                          again
-                        </li>
-                        <li>
-                          Occasional newsletters or collections of nice stories
-                        </li>
-                      </ul>
-                    </div>
-                    <div v-else class="small">
-                      <p>You will also receive:</p>
-                      <ul>
-                        <li>
-                          Chat replies from other freeglers, for example about
-                          your posts.
-                        </li>
-                        <li>Community Event emails</li>
-                        <li>Volunteer Opportunity emails</li>
-                        <li>Emails about ChitChat posts</li>
-                        <li>Emails about notifications on the site</li>
-                        <li>
-                          Emails about specific OFFERs/WANTEDs we think you
-                          might be interested in
-                        </li>
-                        <li>
-                          Emails to remind you that we would love you to freegle
-                          again
-                        </li>
-                        <li>
-                          Occasional newsletters or collections of nice stories
-                        </li>
-                      </ul>
-                    </div>
+                    <SettingsEmailInfo
+                      v-model:simple-email-setting="simpleEmailSetting"
+                    />
                   </div>
                   <p v-if="simpleEmailSetting !== 'None'">
                     Occasionally we may also send ADMIN mails about the running
@@ -667,6 +613,7 @@ import EmailOwn from '../../components/EmailOwn'
 import { useMiscStore } from '../../stores/misc'
 import { useAuthStore } from '../../stores/auth'
 import { buildHead } from '../../composables/useBuildHead'
+import SettingsEmailInfo from '../../components/SettingsEmailInfo'
 import SettingsPhone from '~/components/SettingsPhone'
 import SupporterInfo from '~/components/SupporterInfo'
 import EmailConfirmModal from '~/components/EmailConfirmModal'
@@ -685,6 +632,7 @@ import PasswordEntry from '~/components/PasswordEntry'
 
 export default {
   components: {
+    SettingsEmailInfo,
     SupporterInfo,
     SettingsPhone,
     EmailOwn,
