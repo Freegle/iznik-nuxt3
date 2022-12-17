@@ -27,6 +27,9 @@
             </b-button>
           </b-input-group-append>
         </b-input-group>
+        <p class="text-muted mt-1">
+          <v-icon icon="lock" /> Other freeglers won't see this.
+        </p>
       </b-form-group>
       <b-button
         v-if="!hideRemove && me.phone"

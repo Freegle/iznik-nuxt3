@@ -120,6 +120,7 @@
           <EmailValidator
             ref="email"
             v-model:email="email"
+            v-model:valid="emailValid"
             size="md"
             label="Your email address"
           />
@@ -284,7 +285,6 @@ export default {
         if (newVal && !this.initialisedSocialLogin) {
           // We only use the Google and Facebook SDKs in login, so we can install them here in the modal.  This means we
           // don't load the scripts for every page.
-          console.log('Load SDK')
           this.installGoogleSDK()
           this.installFacebookSDK()
           this.initialisedSocialLogin = true
@@ -414,7 +414,6 @@ export default {
         }
       } else if (this.email && this.password) {
         // Login
-        console.log('Log in')
         this.authStore
           .login({
             email: this.email,
@@ -422,31 +421,26 @@ export default {
           })
           .then(() => {
             // We are now logged in. Prompt the browser to remember the credentials.
-            console.log('Signed in')
             if (window.PasswordCredential) {
-              console.log('Try save')
               try {
                 // We used to pass in the DOM element, but in Chrome 92 that causes a crash.
                 const c = new window.PasswordCredential({
                   id: this.email,
                   password: this.password,
                 })
-                console.log('Got creds')
                 navigator.credentials
                   .store(c)
                   .then(function () {
-                    console.log('Stored')
                     self.pleaseShowModal = false
                   })
                   .catch((err) => {
                     console.error('Failed to save credentials', err)
                   })
               } catch (e) {
-                console.log('Failed to save', e)
+                console.log('Failed to save credentials2', e)
                 self.pleaseShowModal = false
               }
             } else {
-              console.log('No credentials')
               self.pleaseShowModal = false
             }
           })

@@ -1,7 +1,7 @@
 <template>
-  <div class="d-flex justify-content-between">
-    <em class="pt-2">{{ email.email }}</em>
-    <b-button variant="link" class="align-baseline" @click="deleteIt">
+  <div>
+    <em class="pt-2 flex-shrink-1">{{ email.email }}</em>
+    <b-button variant="link" class="align-baseline" size="sm" @click="deleteIt">
       Remove
     </b-button>
   </div>

@@ -15,6 +15,7 @@
 // This is a separate component partly because the toggle we use is not SSR-safe, and by async loading this component
 // we can avoid importing it until we're on the client.
 import Toggle from '@vueform/toggle'
+import { ref } from 'vue'
 
 export default {
   components: {
@@ -42,18 +43,16 @@ export default {
       default: 'green',
     },
   },
-  data() {
+  setup(props) {
+    console.log('Toggle setup', props.modelValue)
     return {
-      currentValue: false,
+      currentValue: ref(props.modelValue),
     }
   },
   watch: {
     currentValue(newVal) {
       this.$emit('change', newVal)
     },
-  },
-  mounted() {
-    this.currentValue = this.modelValue
   },
 }
 </script>

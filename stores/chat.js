@@ -200,9 +200,14 @@ export const useChatStore = defineStore({
     },
     unreadCount: (state) => {
       // count chats with unseen messages
-      return state.list
-        ? state.list.reduce((total, chat) => (total += chat.unseen), 0)
-        : 0
+      let ret = 0
+
+      // Scan listBychatId adding chat.unseen
+      Object.keys(state.listByChatId).forEach((key) => {
+        ret += state.listByChatId[key].unseen
+      })
+
+      return ret
     },
     toUser: (state) => (id) => {
       // We look in listByChatId not list.  This is because we might fetch a chat that isn't in the ones returned by

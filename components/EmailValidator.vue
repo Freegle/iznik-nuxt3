@@ -8,6 +8,7 @@
     >
       <Field
         id="email"
+        ref="email"
         v-model="currentEmail"
         :rules="validateEmail"
         type="email"
@@ -74,8 +75,10 @@ export default {
     },
   },
   setup(props) {
+    const currentEmail = ref(props.email)
+
     return {
-      currentEmail: ref(props.email),
+      currentEmail,
     }
   },
   data() {
@@ -109,6 +112,12 @@ export default {
               this.suggestedDomains = ret.data.suggestions
             }
           }
+        }
+
+        this.$emit('update:email', newVal)
+        const validate = await this.$refs.email?.validate()
+        if (validate) {
+          this.$emit('update:valid', validate.valid)
         }
       },
     },

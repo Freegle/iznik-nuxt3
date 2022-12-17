@@ -293,7 +293,6 @@ export default {
       }
     },
     async markAllRead() {
-      // TODO Minor speed up
       for (const chat of this.filteredChats) {
         if (chat.unseen) {
           await this.chatStore.markRead(chat.id)

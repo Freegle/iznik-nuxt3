@@ -23,9 +23,7 @@
               </p>
               <b-row>
                 <b-col cols="12">
-                  <label>
-                    Your name (or to make things more fun, use a nickname):
-                  </label>
+                  <label> Your name (or a nickname): </label>
                   <b-input-group>
                     <b-form-input
                       id="myname"
@@ -174,94 +172,58 @@
           >
             <template #header>
               <h2 class="bg-info header--size5 mb-0">
-                <v-icon icon="globe-europe" />
-                Arranging Collections
-              </h2>
-            </template>
-            <b-card-body class="p-0 pt-1">
-              <p class="text-muted">
-                This is information you can choose to send to other freeglers
-                when arranging collections.
-              </p>
-              <b-row>
-                <b-col>
-                  <h3 class="header--size5 header5__color mt-2">
-                    Address Book
-                  </h3>
-                  <p class="mt-2">
-                    You can save your address and send it to other freeglers,
-                    then you don't have to type it each time.
-                  </p>
-                  <b-button variant="white" @click="addressBook">
-                    <v-icon icon="address-book" /> Open Address Book
-                  </b-button>
-                </b-col>
-              </b-row>
-            </b-card-body>
-          </b-card>
-          <b-card
-            border-variant="info"
-            header-bg-variant="info"
-            header-text-variant="white"
-            class="mt-2"
-          >
-            <template #header>
-              <h2 class="bg-info header--size5 mb-0">
-                <v-icon icon="lock" />
+                <v-icon icon="user" />
                 Your Account Settings
               </h2>
             </template>
             <b-card-body class="p-0 pt-1">
               <p class="text-muted">
-                This information is private. Other freeglers can't see it.
+                <v-icon icon="lock" /> This is private. Other freeglers can't
+                see this.
               </p>
-              <b-row>
-                <b-col cols="12" sm="6">
-                  <EmailValidator
-                    ref="email"
-                    size="md"
-                    :email.sync="me.email"
-                    :valid.sync="emailValid"
-                    label="Your email address:"
-                  />
-                  <SpinButton
-                    variant="primary"
-                    name="save"
-                    label="Save"
-                    :handler="saveEmail"
-                  />
-                  <div v-if="otheremails.length" class="mt-1 mb-3">
-                    <p class="m-0">Other emails:</p>
-                    <EmailOwn
-                      v-for="email in otheremails"
-                      :key="'ownemail-' + email.id"
-                      :email="email"
-                    />
-                  </div>
-                  <NoticeMessage
-                    v-if="me.bouncing"
-                    variant="danger"
-                    class="mb-2"
-                  >
-                    <p>
-                      We can't send to your email address. Please change it to a
-                      valid one and press <em>Save</em>.
-                    </p>
-                    <p>Or if you're sure it's valid:</p>
-                    <SpinButton
-                      variant="white"
-                      name="check"
-                      label="Try again"
-                      :handler="unbounce"
-                    />
-                  </NoticeMessage>
-                </b-col>
-              </b-row>
+              <div class="d-flex">
+                <EmailValidator
+                  ref="email"
+                  size="md"
+                  :email.sync="me.email"
+                  :valid.sync="emailValid"
+                  label="Your email address:"
+                />
+                <SpinButton
+                  variant="primary"
+                  name="save"
+                  label="Save"
+                  :handler="saveEmail"
+                  class="align-self-end pb-3"
+                />
+              </div>
+              <div v-if="otheremails.length" class="mt-1 mb-3">
+                <p class="m-0">Other emails:</p>
+                <EmailOwn
+                  v-for="email in otheremails"
+                  :key="'ownemail-' + email.id"
+                  :email="email"
+                />
+              </div>
+              <NoticeMessage v-if="me.bouncing" variant="danger" class="mb-2">
+                <p>
+                  We can't send to your email address. Please change it to a
+                  valid one and press <em>Save</em>.
+                </p>
+                <p>Or if you're sure it's valid:</p>
+                <SpinButton
+                  variant="white"
+                  name="check"
+                  label="Try again"
+                  :handler="unbounce"
+                />
+              </NoticeMessage>
               <b-row>
                 <b-col cols="12" sm="6">
                   <PasswordEntry
                     :original-password="me.password"
                     show-save-option
+                    placeholder="Your password"
                   />
                 </b-col>
               </b-row>
@@ -294,6 +256,33 @@
                   </b-button>
                 </b-col>
               </b-row>
+            </b-card-body>
+          </b-card>
+          <b-card
+            border-variant="info"
+            header-bg-variant="info"
+            header-text-variant="white"
+            class="mt-2"
+          >
+            <template #header>
+              <h2 class="bg-info header--size5 mb-0">
+                <v-icon icon="address-book" />
+                Your Address Book
+              </h2>
+            </template>
+            <b-card-body class="p-0 pt-1">
+              <p>
+                You can save your address and directions, and send them to other
+                freeglers, so you don't have to type it each time.
+              </p>
+              <b-button variant="white" @click="addressBook">
+                Open Address Book
+              </b-button>
+              <p class="text-muted mt-2">
+                <v-icon icon="lock" />
+                This is private. Other freeglers can't see this unless you send
+                it to them.
+              </p>
             </b-card-body>
           </b-card>
           <b-card
@@ -359,7 +348,7 @@
                   </div>
                 </div>
                 <div v-else>
-                  <div v-if="myGroups">
+                  <div>
                     <div
                       v-for="group in myGroups"
                       :key="'settingsgroup-' + group.id"
@@ -431,9 +420,6 @@
               </h2>
             </template>
             <b-card-body class="p-0 pt-1">
-              <p class="text-muted">
-                <v-icon icon="lock" /> Other freeglers won't see this.
-              </p>
               <p class="text-muted">
                 Messages from other freeglers will appear in the
                 <nuxt-link to="/chats">Chats</nuxt-link> section. We can also
@@ -563,36 +549,6 @@
                 :labels="{ checked: 'Sending', unchecked: 'Not sending' }"
                 color="#61AE24"
                 @change="changeEngagement"
-              />
-              <hr />
-              <h3 class="header--size5 header5__color">Other Alerts</h3>
-              <p>
-                Apps for your
-                <a
-                  href="https://play.google.com/store/apps/details?id=org.ilovefreegle.direct"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  >Android</a
-                >
-                or
-                <a
-                  href="https://itunes.apple.com/gb/app/freegle/id970045029?ls=1&mt=8"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  >IOS</a
-                >
-                phone/tablet.
-              </p>
-              <OurToggle
-                v-model="notificationSettings.app"
-                :width="220"
-                :sync="true"
-                :labels="{
-                  checked: 'App notifications are On',
-                  unchecked: 'App notifications are Off',
-                }"
-                color="#61AE24"
-                @change="changeNotification($event, 'app')"
               />
             </b-card-body>
           </b-card>
@@ -729,7 +685,6 @@ export default {
   },
   data() {
     return {
-      emailsOn: null,
       pc: null,
       showAdvanced: false,
       savingPostcode: false,
@@ -743,6 +698,9 @@ export default {
     }
   },
   computed: {
+    emailsOn() {
+      return !Object.keys(this.me).includes('onholidaytill')
+    },
     today() {
       return dayjs().format('YYYY-MM-DD')
     },
@@ -953,12 +911,6 @@ export default {
     async update() {
       try {
         await this.fetch()
-
-        this.$nextTick(() => {
-          if (this.me) {
-            this.emailsOn = !Object.keys(this.me).includes('onholidaytill')
-          }
-        })
       } catch (e) {
         console.error('Failed to fetch user', e)
       }
