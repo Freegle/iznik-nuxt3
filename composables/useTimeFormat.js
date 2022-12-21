@@ -2,7 +2,7 @@
 import dayjs from 'dayjs'
 import isToday from 'dayjs/plugin/isToday'
 
-await dayjs.extend(isToday)
+dayjs.extend(isToday)
 
 export function earliestDate(dates, ofall) {
   // Find the earliest date which is in the future.
