@@ -34,24 +34,6 @@
         for that email address if you have one.
       </p>
     </b-card>
-    <b-card v-if="me" variant="white">
-      <h2 class="text-center">How often do you want emails?</h2>
-      <p class="text-center">
-        We'll email you OFFERs and WANTEDs from other freeglers. How often do
-        you want them?
-      </p>
-      <div class="d-flex flex-wrap justify-content-between">
-        <b-button :variant="frequencyChosen(24)" @click="emails(24)">
-          Daily
-        </b-button>
-        <b-button :variant="frequencyChosen(0)" @click="emails(0)">
-          Immediately
-        </b-button>
-        <b-button :variant="frequencyChosen(-1)" @click="emails(-1)">
-          Never
-        </b-button>
-      </div>
-    </b-card>
   </div>
 </template>
 <script>
@@ -76,47 +58,15 @@ export default {
   data() {
     return {
       newPassword: null,
-      emailFrequency: null,
     }
   },
   methods: {
     async setPassword() {
-      this.savingPassword = true
-
       if (this.newPassword) {
         await this.authStore.saveAndGet({
           password: this.newPassword,
         })
       }
-
-      this.savingPassword = false
-      this.savedPassword = true
-      setTimeout(() => {
-        this.savedPassword = false
-      }, 2000)
-    },
-    async emails(frequency) {
-      this.$api.bandit.chosen({
-        uid: 'newuser-email-frequency',
-        variant: frequency,
-      })
-
-      for (const group of this.me.groups) {
-        if (group.type === 'Freegle') {
-          await this.authStore.setGroup({
-            userid: this.me.id,
-            groupid: group.id,
-            emailfrequency: frequency,
-          })
-        }
-      }
-
-      this.fetchMe(['me', 'groups'])
-
-      this.emailFrequency = frequency
-    },
-    frequencyChosen(freq) {
-      return this.emailFrequency === freq ? 'primary' : 'secondary'
     },
   },
 }
