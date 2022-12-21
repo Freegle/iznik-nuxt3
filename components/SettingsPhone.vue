@@ -36,10 +36,8 @@
         variant="link"
         class="align-self-start"
         @click="removePhone"
+        size="sm"
       >
-        <v-icon v-if="removingPhone" icon="sync" class="text-success fa-spin" />
-        <v-icon v-else-if="removedPhone" icon="check" class="text-success" />
-        <v-icon v-else icon="trash-alt" />
         Remove
       </b-button>
     </div>
@@ -93,8 +91,6 @@ export default {
     return {
       savingPhone: false,
       savedPhone: false,
-      removingPhone: false,
-      removedPhone: false,
     }
   },
   computed: {
@@ -134,8 +130,6 @@ export default {
       }
     },
     async removePhone() {
-      this.removingPhone = true
-
       setTimeout(() => {
         this.me.phone = null
       }, 1000)
@@ -143,12 +137,6 @@ export default {
       await this.authStore.saveAndGet({
         phone: '',
       })
-
-      this.removingPhone = false
-      this.removedPhone = true
-      setTimeout(() => {
-        this.removedPhone = false
-      }, 2000)
     },
   },
 }

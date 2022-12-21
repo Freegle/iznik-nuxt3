@@ -46,7 +46,7 @@
       >
         <b-img
           alt=""
-          src="~/static/pp_cc_mark_37x23.jpg"
+          src="/pp_cc_mark_37x23.jpg"
           class="mr-2 d-none d-sm-inline"
         />
         <span v-if="!show">Donate </span><span v-if="show">{{ show }}</span>

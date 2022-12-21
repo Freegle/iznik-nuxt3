@@ -157,7 +157,7 @@
               </b-row>
               <b-row>
                 <b-col>
-                  <b-button variant="primary" class="mt-2" @click="viewProfile">
+                  <b-button variant="white" class="mt-2" @click="viewProfile">
                     <v-icon icon="eye" /> View Your Profile
                   </b-button>
                 </b-col>
@@ -252,6 +252,7 @@
                 <b-col>
                   <hr />
                   <b-button variant="secondary" size="lg" to="/unsubscribe">
+                    <v-icon icon="trash-alt" />
                     Unsubscribe or Leave Communities
                   </b-button>
                 </b-col>
@@ -275,7 +276,7 @@
                 You can save your address and directions, and send them to other
                 freeglers, so you don't have to type it each time.
               </p>
-              <b-button variant="white" @click="addressBook">
+              <b-button variant="secondary" @click="addressBook">
                 Open Address Book
               </b-button>
               <p class="text-muted mt-2">
@@ -473,7 +474,7 @@
                       @change="changeEngagement"
                     />
                     <hr />
-                    <p class="text-muted mt-2">
+                    <p class="mt-2">
                       Occasionally we may also send ADMIN mails about the
                       running of Freegle.
                     </p>
