@@ -7,12 +7,10 @@
         :border-variant="expanded ? 'primary' : 'success'"
       >
         <b-card-header header-tag="header" class="p-1" role="tab">
-          <b-button
-            :v-b-toggle="'mypost-' + message.id"
-            block
-            variant="white"
-            class="text-start text-truncate noborder hover p-1 p-md-2 w-100"
-            @click="toggle"
+          <div
+              :v-b-toggle="'mypost-' + message.id"
+              class="bg-white p-2 clickme"
+              @click="toggle"
           >
             <div class="d-flex justify-content-between w-100">
               <div class="d-flex flex-column w-100">
@@ -212,7 +210,7 @@
                 <v-icon class="d-none d-sm-inline" icon="share-alt" /> Share
               </b-button>
             </div>
-          </b-button>
+          </div>
         </b-card-header>
         <b-collapse
           :id="'mypost-' + message.id"
