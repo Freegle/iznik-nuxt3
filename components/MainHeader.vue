@@ -91,7 +91,6 @@
           </li>
           <li>
             <nuxt-link
-              v-if="!simple"
               id="menu-option-chitchat"
               no-prefetch
               class="nav-link text-center small p-0"
@@ -114,7 +113,6 @@
           </li>
           <li>
             <nuxt-link
-              v-if="!simple"
               id="menu-option-communityevents"
               no-prefetch
               class="nav-link text-center small p-0"
@@ -127,7 +125,6 @@
           </li>
           <li>
             <nuxt-link
-              v-if="!simple"
               id="menu-option-volunteering"
               no-prefetch
               class="nav-link text-center small p-0"
@@ -139,58 +136,6 @@
             </nuxt-link>
           </li>
         </ul>
-        <!--        TOTO Simple?-->
-        <!--        <div  class="simplewrapper pb-2">-->
-        <!--          <div-->
-        <!--            data-v-72fc0792=""-->
-        <!--            -->
-        <!--            title="Toggle between the full website and a simplified version"-->
-        <!--            class="wrapper"-->
-        <!--          >-->
-        <!--            <label-->
-        <!--              data-v-25adc6c0=""-->
-        <!--              data-v-72fc0792=""-->
-        <!--              class="toggle vue-js-switch toggled"-->
-        <!--              value="true"-->
-        <!--              height="36"-->
-        <!--              width="150"-->
-        <!--              font-size="14"-->
-        <!--              labels="[object Object]"-->
-        <!--              ><input-->
-        <!--                data-v-25adc6c0=""-->
-        <!--                type="checkbox"-->
-        <!--                class="v-switch-input"-->
-        <!--              />-->
-        <!--              <div-->
-        <!--                data-v-25adc6c0=""-->
-        <!--                class="v-switch-core"-->
-        <!--                style="-->
-        <!--                  width: 150px;-->
-        <!--                  height: 36px;-->
-        <!--                  background-color: rgb(117, 199, 145);-->
-        <!--                  border-radius: 18px;-->
-        <!--                "-->
-        <!--              >-->
-        <!--                <div-->
-        <!--                  data-v-25adc6c0=""-->
-        <!--                  class="v-switch-button"-->
-        <!--                  style="-->
-        <!--                    width: 30px;-->
-        <!--                    height: 30px;-->
-        <!--                    transition: transform 300ms ease 0s;-->
-        <!--                    transform: translate3d(117px, 3px, 0px);-->
-        <!--                  "-->
-        <!--                ></div>-->
-        <!--              </div>-->
-        <!--              <span-->
-        <!--                data-v-25adc6c0=""-->
-        <!--                class="v-switch-label v-left"-->
-        <!--                style="line-height: 36px; font-size: 14px"-->
-        <!--                >Full Website</span-->
-        <!--              ></label-->
-        <!--            >-->
-        <!--          </div>-->
-        <!--        </div>-->
         <ul class="navbar-nav mainnav mainnav--right">
           <li>
             <NotificationOptions
@@ -211,7 +156,6 @@
           </li>
           <li>
             <nuxt-link
-              v-if="!simple"
               id="menu-option-spread"
               no-prefetch
               class="nav-link text-center small p-0"
@@ -408,7 +352,6 @@
           </li>
           <li class="nav-item text-center p-0">
             <nuxt-link
-              v-if="!simple"
               no-prefetch
               class="nav-link text-center p-0 white"
               to="/chitchat"
@@ -430,7 +373,6 @@
           </li>
           <li class="nav-item text-center p-0">
             <nuxt-link
-              v-if="!simple"
               no-prefetch
               class="nav-link text-center p-0"
               to="/communityevents"
@@ -442,7 +384,6 @@
           </li>
           <li class="nav-item text-center p-0">
             <nuxt-link
-              v-if="!simple"
               no-prefetch
               class="nav-link text-center p-0"
               to="/volunteerings"
@@ -454,7 +395,6 @@
           </li>
           <li class="nav-item text-center p-0">
             <nuxt-link
-              v-if="!simple"
               no-prefetch
               class="nav-link text-center p-0"
               to="/promote"
@@ -507,7 +447,6 @@
 // Import login modal synchronously as I've seen an issue where it's not in $refs when you click on the signin button too rapidly.
 // const AboutMeModal = () => import('~/components/AboutMeModal')
 // const ChatMenu = () => import('~/components/ChatMenu')
-// const SimpleView = () => import('../components/SimpleView')
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 import pluralize from 'pluralize'
@@ -810,10 +749,6 @@ nav .navbar li a.nuxt-link-active {
   padding: 0px;
   margin-top: -5px;
   margin-bottom: -5px;
-}
-
-.simplewrapper {
-  width: 150px;
 }
 
 svg.fa-icon {

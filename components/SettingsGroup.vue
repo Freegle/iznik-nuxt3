@@ -133,7 +133,6 @@ export default {
     },
     membership() {
       let ret = null
-      console.log('Look for membership', this.groupid, this.myGroups)
 
       if (this.myGroups) {
         this.myGroups.forEach((g) => {

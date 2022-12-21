@@ -60,36 +60,35 @@
                           @change="changeUseProfile"
                         />
                       </div>
-                      <span
-                        v-if="me.profile.ours"
-                        class="clickme mt-1 align-bottom"
-                        @click="rotateLeft"
+                      <div
+                        class="d-flex justify-content-around align-items-center"
                       >
-                        <v-icon label="Rotate left" title="Rotate left">
-                          <v-icon icon="circle" scale="2" class="text-muted" />
-                          <v-icon icon="reply" class="image__icon" />
-                        </v-icon>
-                      </span>
-                      <b-button
-                        variant="secondary"
-                        class="mt-2"
-                        @click="uploadProfile"
-                      >
-                        <v-icon icon="camera" /> Upload photo
-                      </b-button>
-                      <span
-                        v-if="me.profile.ours"
-                        class="clickme mt-1 align-bottom image__icon stacked"
-                        @click="rotateRight"
-                      >
-                        <v-icon
-                          label="Rotate right"
+                        <div
+                          v-if="me.profile.ours"
+                          class="clickme image__icon stacked mt-2"
+                          title="Rotate left"
+                          @click="rotateLeft"
+                        >
+                          <v-icon icon="circle" size="2x" />
+                          <v-icon icon="reply" class="pl-2" />
+                        </div>
+                        <b-button
+                          variant="secondary"
+                          class="mt-2"
+                          @click="uploadProfile"
+                        >
+                          <v-icon icon="camera" /> Upload photo
+                        </b-button>
+                        <div
+                          v-if="me.profile.ours"
+                          class="clickme image__icon stacked mt-2"
                           title="Rotate right"
-                          flip="horizontal"
-                          name="reply"
-                        />
-                        <v-icon icon="circle" scale="2" class="text-muted" />
-                      </span>
+                          @click="rotateRight"
+                        >
+                          <v-icon icon="circle" size="2x" />
+                          <v-icon icon="reply" flip="horizontal" class="pr-2" />
+                        </div>
+                      </div>
                       <b-row v-if="uploading" class="bg-white">
                         <b-col class="p-0">
                           <OurFilePond
@@ -497,7 +496,8 @@
             border-variant="info"
             header-bg-variant="info"
             header-text-variant="white"
-            class="mt-2"
+            class="mt-2 pl-3 pr-3 pt-3"
+            no-body
           >
             <template #header>
               <h2 class="bg-info header--size5 mb-0">
@@ -1088,7 +1088,10 @@ export default {
       this.uploading = true
     },
     async rotate(deg) {
-      await this.$axios.post(process.env.API + '/image', {
+      const runtimeConfig = useRuntimeConfig()
+      const api = runtimeConfig.APIv1
+
+      this.$axios.post(api + '/image', {
         id: this.me.profile.id,
         rotate: deg,
         bust: Date.now(),
@@ -1136,6 +1139,7 @@ export default {
   display: grid;
   grid-template-columns: 1fr;
   grid-template-rows: 1fr;
+  color: $color-gray--dark;
 
   svg {
     grid-row: 1 / 2;
@@ -1146,7 +1150,6 @@ export default {
     z-index: 10000;
     color: white;
     padding-top: 7px;
-    padding-right: 7px;
   }
 }
 </style>

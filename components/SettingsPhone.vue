@@ -35,8 +35,8 @@
         v-if="!hideRemove && me.phone"
         variant="link"
         class="align-self-start"
-        @click="removePhone"
         size="sm"
+        @click="removePhone"
       >
         Remove
       </b-button>
