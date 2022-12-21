@@ -262,9 +262,12 @@ export const useAuthStore = defineStore({
       await this.fetchUser()
       return this.user
     },
-    async setGroup(params) {
+    async setGroup(params, nofetch) {
       await this.$api.memberships.update(params)
-      await this.fetchUser()
+
+      if (!nofetch) {
+        await this.fetchUser()
+      }
     },
     async leaveGroup(userid, groupid) {
       await this.$api.memberships.leaveGroup({

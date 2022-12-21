@@ -4,7 +4,7 @@
       <b-col cols="12" sm="6">
         <b-form-group :label="label">
           <b-form-select
-            :model-value="emailfrequency"
+            v-model="emailfrequency"
             :class="highlightEmailFrequencyIfOn"
           >
             <option value="-1">Immediately</option>
@@ -105,7 +105,11 @@ export default {
   computed: {
     emailfrequency: {
       get() {
-        return this.membership?.emailfrequency
+        if (this.membership) {
+          return this.membership.emailfrequency.toString()
+        }
+
+        return null
       },
       async set(newval) {
         await this.changeValue('emailfrequency', newval)
@@ -129,6 +133,7 @@ export default {
     },
     membership() {
       let ret = null
+      console.log('Look for membership', this.groupid, this.myGroups)
 
       if (this.myGroups) {
         this.myGroups.forEach((g) => {
@@ -151,14 +156,18 @@ export default {
   },
   methods: {
     async changeValue(param, val) {
-      const params = {
-        userid: this.myid,
-        groupid: this.groupid,
+      this.$emit('update:' + param, val)
+
+      if (this.groupid) {
+        const params = {
+          userid: this.myid,
+          groupid: this.groupid,
+        }
+
+        params[param] = parseInt(val)
+
+        await this.authStore.setGroup(params)
       }
-
-      params[param] = parseInt(val)
-
-      await this.authStore.setGroup(params)
     },
     leaveGroup() {
       this.$emit('leave')

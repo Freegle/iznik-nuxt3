@@ -308,16 +308,25 @@
                   <b-form-group label="Choose your email level:">
                     <b-form-select v-model="simpleEmailSetting">
                       <b-form-select-option value="None">
-                        Emails are off
+                        Off
                       </b-form-select-option>
                       <b-form-select-option value="Basic">
-                        We will send limited emails
+                        Basic - limited emails
                       </b-form-select-option>
                       <b-form-select-option value="Full">
-                        We will send all types of emails
+                        Standard - all types of emails
                       </b-form-select-option>
                     </b-form-select>
                   </b-form-group>
+                  <NoticeMessage
+                    v-if="simpleEmailSetting === 'None'"
+                    variant="danger"
+                    class="mb-1"
+                  >
+                    If people message you, you won't get any emails. Please make
+                    sure you check Chats regularly so that you don't miss
+                    anything.
+                  </NoticeMessage>
                   <div v-if="simpleEmailSetting !== 'None'">
                     <SettingsGroup
                       v-model:emailfrequency="emailSimple"
@@ -780,13 +789,15 @@ export default {
       // - Basic.  OFFER/WANTED, chat messages,
       // - Full.  OFFER/WANTED, community event, volunteer ops, chitchat, notifications,
       get() {
-        if (!this.simpleSettings) {
-          return null
-        }
-
-        return 'Full'
+        return this.me.settings?.simplemail
+          ? this.me.settings.simplemail
+          : 'Full'
       },
-      set(newVal) {},
+      async set(newVal) {
+        await this.authStore.saveAndGet({
+          simplemail: newVal,
+        })
+      },
     },
     checkSimplicity() {
       let ret = true
@@ -825,6 +836,12 @@ export default {
       }
     },
     simpleSettings() {
+      if (this.me?.settings?.simplemail) {
+        // We know that we have simple settings.
+        return true
+      }
+
+      // Check whether our settings are the same on all groups
       const simple = this.checkSimplicity
       return simple.ret
     },
@@ -834,6 +851,7 @@ export default {
         return simple.emailFrequency
       },
       set(newValue) {
+        console.log('Change email simple', newValue)
         this.changeAllGroups('emailfrequency', newValue)
       },
     },
@@ -907,10 +925,7 @@ export default {
       }
     },
     async fetch() {
-      await this.fetchMe(
-        ['me', 'phone', 'groups', 'aboutme', 'notifications'],
-        true
-      )
+      await this.authStore.fetchUser()
     },
     async update() {
       try {
@@ -1005,15 +1020,16 @@ export default {
       this.showAdvanced = !this.showAdvanced
     },
     async changeAllGroups(param, value) {
-      for (const group of this.me.groups) {
-        if (group.type === 'Freegle') {
-          const params = {
-            userid: this.me.id,
-            groupid: group.id,
-          }
-          params[param] = value
-          await this.authStore.setGroup(params)
+      console.log('Change all', this.myGroups)
+      for (const group of this.myGroups) {
+        const params = {
+          userid: this.me.id,
+          groupid: group.id,
         }
+        params[param] = value
+
+        // Don't fetch for each group.
+        await this.authStore.setGroup(params, true)
       }
 
       await this.fetch()
