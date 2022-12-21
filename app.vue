@@ -106,8 +106,8 @@ try {
 
       // Log in using the username and key.
       await authStore.login({
-        u: this.$route.query.u,
-        k: this.$route.query.k,
+        u: route.query.u,
+        k: route.query.k,
       })
     } catch (e) {
       // Login failed.  Usually this is because they're logged in as someone else. Ignore it.

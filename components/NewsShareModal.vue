@@ -84,17 +84,17 @@
           </div>
         </social-sharing>
       </template>
-      <template #footer slot-scope="{ cancel }">
-        <b-button variant="secondary" @click="cancel"> Close </b-button>
+      <template #footer>
+        <b-button variant="secondary" @click="hide"> Close </b-button>
       </template>
     </b-modal>
   </div>
 </template>
 <script>
-// There are a bunch of icons we need only rarely.  By requiring them here we avoid
-// requiring them in the vue-awesome plugin.  That makes them available everywhere - but
-// increases the bundle size.  Putting them here allows better bundling.
+import modal from '@/mixins/modal'
+
 export default {
+  mixins: [modal],
   props: {
     newsfeed: {
       type: Object,

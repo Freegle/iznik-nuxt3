@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import axios from 'axios'
 import { LoginError, SignUpError } from '../api/BaseAPI'
 import { useComposeStore } from '../stores/compose'
 import api from '~/api'
@@ -93,8 +94,9 @@ export const useAuthStore = defineStore({
       this.$reset()
     },
     async forget() {
-      await this.$api.session.forget()
+      const { ret } = await this.$api.session.forget()
       await this.logout()
+      return ret
     },
     async login(params) {
       const res = await this.$api.session.login(params)
@@ -122,7 +124,7 @@ export const useAuthStore = defineStore({
       const runtimeConfig = useRuntimeConfig()
       const api = runtimeConfig.APIv1
 
-      const res = await this.$axios.post(api + '/session', {
+      const res = await axios.post(api + '/session', {
         action: 'LostPassword',
         email: params.email,
       })
@@ -133,22 +135,28 @@ export const useAuthStore = defineStore({
       const runtimeConfig = useRuntimeConfig()
       const api = runtimeConfig.APIv1
 
-      const res = await this.$axios.post(api + '/session', {
+      const res = await axios.post(api + '/session', {
         action: 'Unsubscribe',
         email: params.email,
       })
 
       return res.data
     },
-    async signup(params) {
+    async signUp(params) {
       const runtimeConfig = useRuntimeConfig()
       const api = runtimeConfig.APIv1
 
-      const res = await this.$axios.put(api + '/user', params)
-      const { ret, status } = res.data
+      const res = await axios.put(api + '/user', params)
+      const { ret, status, jwt, persistent } = res.data
 
       if (res.status === 200 && res.data.ret === 0) {
         this.forceLogin = false
+
+        // Save the persistent session token.
+        this.persistent = persistent
+
+        // Save the JWT, so that we can use the faster API next time.
+        this.jwt = jwt
 
         // We need to fetch the user to get the groups, persistent token etc.
         await this.fetchUser()

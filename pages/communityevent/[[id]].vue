@@ -63,9 +63,11 @@ export default {
       )
     } catch (e) {
       invalid = true
-      buildHead(
-        'Community Event ' + id,
-        "Sorry, that community event isn't around any more."
+      useHead(
+        buildHead(
+          'Community Event ' + id,
+          "Sorry, that community event isn't around any more."
+        )
       )
     }
 

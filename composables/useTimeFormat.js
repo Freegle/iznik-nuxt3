@@ -2,7 +2,7 @@
 import dayjs from 'dayjs'
 import isToday from 'dayjs/plugin/isToday'
 
-dayjs.extend(isToday)
+await dayjs.extend(isToday)
 
 export function earliestDate(dates, ofall) {
   // Find the earliest date which is in the future.
@@ -44,11 +44,19 @@ export function addStrings(item) {
 }
 
 export function timeago(val) {
-  // dayjs pluralises wrongly in some cases - we've seen 1 hours ago.
-  const dePlural = /^1 (.*)s/
+  let f = null
 
-  let f = dayjs(val).fromNow()
-  f = f.replace(dePlural, '1 $1')
+  try {
+    // dayjs pluralises wrongly in some cases - we've seen 1 hours ago.
+    const dePlural = /^1 (.*)s/
+
+    const v = dayjs(val)
+    f = v.fromNow()
+    f = f.replace(dePlural, '1 $1')
+  } catch (e) {
+    // We've seen this happen when timeago is called early on, before (we think) dayjs has sorted itself out.
+    console.log('timeago error', e)
+  }
 
   return f
 }

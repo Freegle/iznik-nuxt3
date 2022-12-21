@@ -505,7 +505,7 @@
                 Text Alerts
               </h2>
             </template>
-            <b-card-body class="p-0 pt-1">
+            <b-card-body class="p-0 pl-3 pr-3 pt-3">
               <p>
                 We can send SMS alerts to your phone when you have a new message
                 on Freegle or a handover soon.
