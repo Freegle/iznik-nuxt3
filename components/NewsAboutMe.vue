@@ -37,8 +37,7 @@
         <b-button variant="primary" size="sm" @click="showModal">
           <v-icon icon="user" /> Introduce yourself to everyone
         </b-button>
-        <!--        TODO About Me-->
-        <!--        <AboutMeModal ref="modal" />-->
+        <AboutMeModal v-if="showAboutMe" ref="modal" />
       </div>
     </div>
     <b-modal
@@ -62,20 +61,29 @@ import ReadMore from 'vue-read-more3/src/ReadMoreComponent'
 import NewsBase from '~/components/NewsBase'
 import NewsUserIntro from '~/components/NewsUserIntro'
 import NewsLoveComment from '~/components/NewsLoveComment'
-// const AboutMeModal = () => import('./AboutMeModal')
+const AboutMeModal = () => import('./AboutMeModal')
 
 export default {
   components: {
-    // AboutMeModal,
+    AboutMeModal,
     NewsUserIntro,
     NewsLoveComment,
     ReadMore,
   },
   extends: NewsBase,
+  data() {
+    return {
+      showAboutMe: false,
+    }
+  },
   methods: {
     async showModal() {
       await this.fetchMe(['me'], true)
-      this.$refs.modal.show()
+
+      this.showAboutMe = true
+      this.waitForRef('modal', () => {
+        this.$refs.modal.show()
+      })
     },
   },
 }

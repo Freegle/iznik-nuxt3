@@ -142,7 +142,7 @@ export default {
     // the screen.  Once we've loaded then the loader will be shown by the infinite scroll, but we will normally
     // not see if because of prefetching.
     const initialIds = props.messagesForList
-      .slice(0, MIN_TO_SHOW)
+      ?.slice(0, MIN_TO_SHOW)
       .map((message) => message.id)
 
     if (initialIds?.length) {

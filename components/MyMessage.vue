@@ -8,9 +8,9 @@
       >
         <b-card-header header-tag="header" class="p-1" role="tab">
           <div
-              :v-b-toggle="'mypost-' + message.id"
-              class="bg-white p-2 clickme"
-              @click="toggle"
+            :v-b-toggle="'mypost-' + message.id"
+            class="bg-white p-2 clickme"
+            @click="toggle"
           >
             <div class="d-flex justify-content-between w-100">
               <div class="d-flex flex-column w-100">
@@ -342,17 +342,7 @@ const OutcomeModal = () => import('./OutcomeModal')
 // const MessageEditModal = () => import('./MessageEditModal')
 const NoticeMessage = () => import('~/components/NoticeMessage')
 
-// TODO ResizeText
-// let ResizeText = null
-//
-// if (process.client) {
-//   ResizeText = require('vue-resize-text')
-// }
-
 export default {
-  directives: {
-    // ResizeText,
-  },
   components: {
     MyMessagePromisedTo,
     MessagePhotosModal,

@@ -281,14 +281,3 @@ export async function freegleIt(type, router) {
 
   this.submitting = false
 }
-
-export function emailInUse(email) {
-  // If we are logged in, and we have an email address in hand which is not one of our own, then this is
-  // worth knowing because it suggests that the user is confused and has multiple accounts.  Check with the
-  // server whether this email is in use by another account.
-  // TODO email in use
-  return false
-  // return this.$store.dispatch('user/emailIsInUse', {
-  //   email,
-  // })
-}

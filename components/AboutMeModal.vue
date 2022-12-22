@@ -10,7 +10,7 @@
     size="lg"
     no-stacking
   >
-    <template slot="default">
+    <template #default>
       <notice-message v-if="review" type="info">
         You added this a while ago - can you just check it still applies? If it
         does, just click <em>Cancel</em>. If you want to change it, edit it and

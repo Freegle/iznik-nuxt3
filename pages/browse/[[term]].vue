@@ -99,12 +99,11 @@
               />
             </div>
           </div>
-          <!--          TODO. Overlap with MainHeader?-->
-          <!--          <AboutMeModal-->
-          <!--            v-if="showAboutMe"-->
-          <!--            ref="aboutMeModal"-->
-          <!--            :review="reviewAboutMe"-->
-          <!--          />-->
+          <AboutMeModal
+            v-if="showAboutMe"
+            ref="aboutMeModal"
+            :review="reviewAboutMe"
+          />
         </b-col>
         <b-col cols="0" lg="3" class="p-0 pl-1">
           <VisibleWhen :at="['lg', 'xl', 'xxl']">
@@ -135,6 +134,7 @@ const IsochronePostMapAndList = () =>
 const GlobalWarning = () => import('~/components/GlobalWarning')
 // const SidebarLeft = () => import('~/components/SidebarLeft')
 // const SidebarRight = () => import('~/components/SidebarRight')
+const AboutMeModal = () => import('~/components/AboutMeModal')
 const ExpectedRepliesWarning = () =>
   import('~/components/ExpectedRepliesWarning')
 // const MicroVolunteering = () => import('~/components/MicroVolunteering.vue')
@@ -149,7 +149,7 @@ export default {
     // SidebarLeft,
     // SidebarRight,
     ExpectedRepliesWarning,
-    // AboutMeModal,
+    AboutMeModal,
   },
   async setup() {
     useHead(

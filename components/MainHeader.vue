@@ -257,7 +257,7 @@
             :distance="distance"
             :small-screen="true"
             :unread-notification-count.sync="unreadNotificationCount"
-            @showAboutMe="showAboutMe"
+            @showAboutMe="showAboutMeModal"
           />
           <ChatMenu
             v-if="loggedIn"
@@ -440,12 +440,11 @@
       </b-collapse>
     </b-nav>
     <LoginModal ref="loginModal" />
-    <!--      <AboutMeModal ref="aboutMeModal" />-->
+    <AboutMeModal v-if="showAboutMe" ref="aboutMeModal" />
   </header>
 </template>
 <script>
 // Import login modal synchronously as I've seen an issue where it's not in $refs when you click on the signin button too rapidly.
-// const AboutMeModal = () => import('~/components/AboutMeModal')
 // const ChatMenu = () => import('~/components/ChatMenu')
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
@@ -456,16 +455,16 @@ import { useMessageStore } from '../stores/message'
 import { useNotificationStore } from '../stores/notification'
 import LoginModal from '~/components/LoginModal'
 import { useAuthStore } from '~/stores/auth'
+const AboutMeModal = () => import('~/components/AboutMeModal')
 const NotificationOptions = () => import('~/components/NotificationOptions')
 
 export default {
   name: 'MainHeader',
   components: {
-    // SimpleView,
     NotificationOptions,
     // ChatMenu,
     LoginModal,
-    // AboutMeModal,
+    AboutMeModal,
   },
   setup() {
     const authStore = useAuthStore()
@@ -493,6 +492,7 @@ export default {
       unreadNotificationCount: 0,
       chatCount: 0,
       activePostsCount: 0,
+      showAboutMeModal: false,
     }
   },
   computed: {
@@ -593,9 +593,13 @@ export default {
       // Go to the landing page.
       this.router.push('/')
     },
-    showAboutMe() {
-      // await this.fetchMe(['me'], true)
-      this.$refs.aboutMeModal.show()
+    async showAboutMe() {
+      await this.fetchMe(true)
+
+      this.showAboutMeModal = true
+      this.waitForRef('modal', () => {
+        this.$refs.aboutMeModal.show()
+      })
     },
     maybeReload(route) {
       if (this.router?.currentRoute?.value?.path === route) {

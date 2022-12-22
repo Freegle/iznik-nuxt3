@@ -14,8 +14,10 @@ export const useUserStore = defineStore({
     init(config) {
       this.config = config
     },
-    async emailIsInUse(params) {
-      const ret = await api(this.config).user.fetch(params)
+    async emailIsInUse(email) {
+      const ret = await api(this.config).user.fetch({
+        email,
+      })
       return ret && ret.id
     },
     async fetch(id, force) {
