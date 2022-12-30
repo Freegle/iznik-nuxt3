@@ -33,6 +33,8 @@ export default {
     },
   },
   mounted() {
+    const self = this
+
     if (!this.loggedIn) {
       window.handleGoogleCredentialsResponse =
         this.handleGoogleCredentialsResponse
@@ -53,11 +55,18 @@ export default {
 
             if (notification.isNotDisplayed() || !notification.isDisplayed()) {
               console.log('Not displayed')
+              self.$emit('complete')
             }
           })
+          js.onerror = (e) => {
+            console.log('Error loading Google One Tap', e)
+            self.$emit('complete')
+          }
         }
         fjs.parentNode.insertBefore(js, fjs)
       })(document, 'script', 'google-jssdk')
+    } else {
+      self.$emit('complete')
     }
   },
   methods: {

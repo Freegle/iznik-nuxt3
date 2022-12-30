@@ -4,7 +4,8 @@
       v-model:chat-count="chatCount"
       v-model:unread-notification-count="unreadNotificationCount"
     />
-    <main>
+    complete {{ complete }}
+    <main v-if="complete">
       <slot ref="pageContent" class="ml-0 ps-0 pe-0 pageContent" />
     </main>
     <!--  TODO  <BouncingEmail />-->
@@ -21,7 +22,7 @@
         <!--  TODO      <ChatButton v-if="replyToSend" ref="replyToPostChatButton" :userid="replyToUser" />-->
       </div>
       <BreakpointFettler />
-      <GoogleOneTap />
+      <GoogleOneTap @complete="complete = true" />
     </client-only>
   </div>
 </template>

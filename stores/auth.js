@@ -85,7 +85,7 @@ export const useAuthStore = defineStore({
     async logout() {
       try {
         console.log('Disable Google autoselect')
-        window.google.accounts.id.disableAutoSelect()
+        window?.google?.accounts?.id?.disableAutoSelect()
       } catch (e) {
         console.log('Ignore Google autoselect error', e)
       }
@@ -100,9 +100,9 @@ export const useAuthStore = defineStore({
     },
     async login(params) {
       const res = await this.$api.session.login(params)
-      const { ret, status, user, persistent, jwt } = res
+      const { ret, status, persistent, jwt } = res
 
-      if (ret === 0 && user) {
+      if (ret === 0) {
         // Successful login.
         //
         // Save the persistent session token.
@@ -111,8 +111,8 @@ export const useAuthStore = defineStore({
         // Save the JWT, so that we can use the faster API next time.
         this.jwt = jwt
 
-        // Login succeeded.  Set the user, which will trigger various rerendering if we were required to be logged in.
-        this.setUser(user)
+        // Login succeeded.  Get the user from the new API.
+        await this.fetchUser()
       } else {
         // Login failed.
         throw new LoginError(ret, status)
