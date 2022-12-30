@@ -1,9 +1,5 @@
 <template>
   <div>
-    <notice-message variant="warning" class="mb-2">
-      Email doesn't always get through, so check your spam folders, and check
-      <nuxt-link to="/chats">Chats</nuxt-link> on here occasionally.
-    </notice-message>
     <div v-if="showMore">
       <div v-if="simpleEmailSetting === 'Basic'" class="small">
         <p>You will also receive:</p>
@@ -47,14 +43,13 @@
     </div>
     <div v-else>
       <p>
-        You will get some other mails.
         <b-button
           variant="link"
           size="sm"
-          class="mb-1 pl-0"
+          class="mb-1 p-0"
           @click="showMore = true"
         >
-          (Show details)
+          Click to see the emails we send
         </b-button>
       </p>
     </div>

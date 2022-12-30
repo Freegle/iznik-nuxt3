@@ -302,7 +302,24 @@
                 <p>
                   You can control how often you get emails from your Freegle
                   communities.
+                  <span v-if="simpleEmailSetting !== 'None'">
+                    Occasionally we may also send ADMIN mails about the running
+                    of Freegle.
+                  </span>
+                  <span v-else>
+                    Occasionally we may still send ADMIN mails about the running
+                    of Freegle.
+                  </span>
                 </p>
+                <notice-message
+                  v-if="simpleEmailSetting !== 'None'"
+                  variant="warning"
+                  class="mb-2"
+                >
+                  Email doesn't always get through, so check your spam folders,
+                  and check
+                  <nuxt-link to="/chats">Chats</nuxt-link> on here occasionally.
+                </notice-message>
                 <div v-if="simpleSettings && !showAdvanced">
                   <b-form-group label="Choose your email level:">
                     <b-form-select v-model="simpleEmailSetting">
@@ -337,25 +354,17 @@
                       v-model:simple-email-setting="simpleEmailSetting"
                     />
                   </div>
-                  <p v-if="simpleEmailSetting !== 'None'">
-                    Occasionally we may also send ADMIN mails about the running
-                    of Freegle.
-                  </p>
-                  <p v-else>
-                    Occasionally we may still send ADMIN mails about the running
-                    of Freegle.
-                  </p>
-                  <a v-if="!showAdvanced" href="#" @click="toggleAdvanced">
-                    Show advanced email settings
-                  </a>
+                  <b-button
+                    v-if="!showAdvanced"
+                    variant="link"
+                    size="sm"
+                    class="p-0"
+                    @click="toggleAdvanced"
+                  >
+                    Click to show advanced email settings
+                  </b-button>
                 </div>
                 <div v-else>
-                  <notice-message variant="warning" class="mb-2">
-                    Email doesn't always get through, so check your spam
-                    folders, and check
-                    <nuxt-link to="/chats">Chats</nuxt-link> on here
-                    occasionally.
-                  </notice-message>
                   <div>
                     <div
                       v-for="group in myGroups"
@@ -496,7 +505,7 @@
             border-variant="info"
             header-bg-variant="info"
             header-text-variant="white"
-            class="mt-2 pl-3 pr-3 pt-3"
+            class="mt-2"
             no-body
           >
             <template #header>
