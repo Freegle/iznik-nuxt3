@@ -1,5 +1,5 @@
 <template>
-  <div class="sidebar__wrapper pt-3 pr-3">
+  <div class="sidebar__wrapper pr-3">
     <CommunityEventSidebar
       v-if="showCommunityEvents"
       class="flex-grow-1 sidebar__community-event"
