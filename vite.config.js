@@ -13,7 +13,6 @@ export default {
         find: /~(.+)/,
         replacement: path.join(process.cwd(), 'node_modules/$1'),
       },
-
       {
         find: /@\//,
         replacement: path.join(process.cwd(), './src/renderer') + '/',
