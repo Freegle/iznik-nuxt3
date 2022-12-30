@@ -10,17 +10,27 @@ export default {
       type: String,
       default: 'support@ilovefreegle.org',
     },
+    email: {
+      type: String,
+      default: 'support@ilovefreegle.org',
+    },
   },
   computed: {
     href() {
       if (this.myid) {
         return (
-          'mailto:support@ilovefreegle.org?body=%0D%0A%0D%0ANote to support: this freegler was logged in as user id: #' +
+          'mailto:' +
+          this.email +
+          '?body=%0D%0A%0D%0ANote to support: this freegler was logged in as user id: #' +
           this.myid +
           '.'
         )
       } else {
-        return 'mailto:support@ilovefreegle.org?body=%0D%0A%0D%0ANote to support: this freegler was not logged in.'
+        return (
+          'mailto:' +
+          this.email +
+          '?body=%0D%0A%0D%0ANote to support: this freegler was not logged in.'
+        )
       }
     },
   },

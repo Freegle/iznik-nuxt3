@@ -53,12 +53,75 @@
       </div>
       <hr />
       <p>TODO More FAQs - Support compiling a list</p>
+      <h2 class="header--size1">Something else?</h2>
+      <p>
+        If your question isn't answered above, or you wish to compliment or
+        complain, then you can <strong>contact your volunteer team</strong>, who
+        will be happy to hear whether Freegle is doing a great job or needs
+        changing.
+      </p>
+      <h3 class="header--size5">
+        Which Freegle community do you need help with?
+      </h3>
+      <b-card v-if="loggedIn" no-body>
+        <b-card-body class="p-3">
+          <GroupRememberSelect
+            v-model="contactGroupId"
+            remember="contactmods"
+            class="mb-3"
+          />
+          <ChatButton
+            :groupid="contactGroupId"
+            size="md"
+            title="Contact community volunteers"
+            variant="primary"
+            class="mb-2"
+          />
+        </b-card-body>
+      </b-card>
+      <div class="text-muted">
+        <hr />
+        <p>
+          Your local volunteers will usually be the best way for you to get
+          help, and it helps us if you use them where possible.
+        </p>
+        <div v-if="!loggedIn" class="mb-1">
+          <notice-message>
+            Please log in using the menu option at the top to contact your
+            community volunteers.
+          </notice-message>
+        </div>
+        <p>But you can also contact:</p>
+        <ul>
+          <li>
+            Our support volunteers at <SupportLink />. They deal with questions
+            about this site, or problems with freegling where your local
+            community volunteers can't help.
+          </li>
+          <li>
+            <!-- eslint-disable-next-line -->
+            Our national mailbox volunteers at <SupportLink email="info@ilovefreegle.org" text="info@ilovefreegle.org" />. They
+            />. They deal with more general questions about Freegle which aren't
+            specific to one community, or if you have issues you can't resolve
+            with your local team. Please be aware that we have very limited
+            powers. Local communities are autonomous, but we can help negotiate,
+            explain and make suggestions where appropriate.
+          </li>
+          <li>
+            <!-- eslint-disable-next-line -->
+            Our media volunteers at <SupportLink email="media@ilovefreegle.org" text="media@ilovefreegle.org" />. Please use this if
+            you are a member of the media and want to help publicise Freegle.  For urgent press enquiries only, call +44 (0)7962 449573.
+          </li>
+        </ul>
+        <p>This version of the site was built on {{ version }}.</p>
+      </div>
     </b-col>
     <b-col cols="0" md="3" />
   </b-row>
 </template>
 <script>
 import { Searcher } from 'fast-fuzzy'
+import dayjs from 'dayjs'
 
 export default {
   data() {
@@ -66,12 +129,12 @@ export default {
       question: null,
       searcher: null,
       forIndex: [],
+      contactGroupId: null,
     }
   },
   computed: {
     matches() {
       if (!this.searcher || !this.question) {
-        console.log('Show all', this.searcher, this.question)
         return this.forIndex.map((o) => o.id)
       }
 
@@ -80,10 +143,15 @@ export default {
       })
 
       result = result.slice(0, 10)
-      console.log('Results', result)
 
       // Get id prop from each
       return result.map((r) => r.item.id)
+    },
+    version() {
+      const runtimeConfig = useRuntimeConfig()
+      const date = dayjs(runtimeConfig.public.BUILD_DATE)
+
+      return date.format('Do MMMM, YYYY') + ' at ' + date.format('HH:mm')
     },
   },
   mounted() {
