@@ -51,49 +51,53 @@
           </div>
         </div>
       </div>
+      <hr />
       <p>TODO More FAQs - Support compiling a list</p>
     </b-col>
     <b-col cols="0" md="3" />
   </b-row>
 </template>
 <script>
-import FuzzySearch from 'fuzzy-search'
+import { Searcher } from 'fast-fuzzy'
 
 export default {
   data() {
     return {
       question: null,
       searcher: null,
+      forIndex: [],
     }
   },
   computed: {
     matches() {
-      if (!this.searcher) {
-        return []
+      if (!this.searcher || !this.question) {
+        console.log('Show all', this.searcher, this.question)
+        return this.forIndex.map((o) => o.id)
       }
 
-      let result = this.searcher.search(this.question)
+      let result = this.searcher.search(this.question, {
+        returnMatchData: true,
+      })
 
       result = result.slice(0, 10)
       console.log('Results', result)
 
       // Get id prop from each
-      return result.map((r) => r.id)
+      return result.map((r) => r.item.id)
     },
   },
   mounted() {
     // Scan the FAQs above and extract the plain text for each one, and then construct a search index.
     const faqs = this.$refs.faq.children
 
-    const forIndex = []
+    this.forIndex = []
 
     for (const question of faqs) {
       try {
         const questionText = question.children[0].innerText.trim()
         const answerText = question.children[1].innerText.trim()
-        console.log('Add', questionText, answerText)
 
-        forIndex.push({
+        this.forIndex.push({
           id: question.id,
           question: questionText,
           answer: answerText,
@@ -103,7 +107,10 @@ export default {
       }
     }
 
-    this.searcher = new FuzzySearch(forIndex, ['question', 'answer'])
+    this.searcher = new Searcher(this.forIndex, {
+      threshold: 0.7,
+      keySelector: (obj) => obj.question + ' ' + obj.answer,
+    })
   },
 }
 </script>
