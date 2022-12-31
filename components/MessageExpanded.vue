@@ -21,7 +21,7 @@
           :type="message.type"
           :expanded="true"
         />
-        <MessageActions v-if="!simple && actions" :id="id" />
+        <MessageActions v-if="actions" :id="id" />
       </div>
       <MessageHistoryExpanded :id="id" class="mb-1 d-none d-md-block" />
     </div>

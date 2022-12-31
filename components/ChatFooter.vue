@@ -95,7 +95,6 @@
             <v-icon icon="handshake" class="fa-fw" />&nbsp;Promise
           </b-button>
           <b-button
-            v-if="!simple"
             v-b-tooltip="'Send your address'"
             variant="secondary"
             class="mr-2"
@@ -104,7 +103,7 @@
             <v-icon icon="address-book" class="fa-fw" />&nbsp;Address
           </b-button>
           <b-button
-            v-if="!simple && !tooSoonToNudge"
+            v-if="!tooSoonToNudge"
             v-b-tooltip="'Waiting for a reply?  Nudge this freegler.'"
             variant="secondary"
             class="mr-2"
@@ -113,7 +112,7 @@
             <v-icon icon="bell" class="fa-fw" />&nbsp;Nudge
           </b-button>
           <div
-            v-if="!simple && tooSoonToNudge"
+            v-if="tooSoonToNudge"
             v-b-tooltip="
               'You need to wait a day since the last message before nudging.'
             "
@@ -156,7 +155,7 @@
           <div class="mobtext text--smallest">Promise</div>
         </div>
         <div
-          v-if="chat && chat.chattype === 'User2User' && otheruser && !simple"
+          v-if="chat && chat.chattype === 'User2User' && otheruser"
           v-b-tooltip="'Send your address'"
           disabled
           class="mr-2"
@@ -180,7 +179,6 @@
             chat.chattype === 'User2User' &&
             otheruser &&
             !tooSoonToNudge &&
-            !simple
           "
           v-b-tooltip="'Waiting for a reply?  Nudge this freegler.'"
           class="mr-2"
@@ -195,7 +193,6 @@
             chat.chattype === 'User2User' &&
             otheruser &&
             tooSoonToNudge &&
-            !simple
           "
           v-b-tooltip="
             'You need to wait a day since the last message before nudging.'

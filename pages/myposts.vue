@@ -190,7 +190,6 @@
             </b-card-body>
           </b-card>
           <b-card
-            v-if="!simple"
             class="mt-2"
             border-variant="info"
             header="info"

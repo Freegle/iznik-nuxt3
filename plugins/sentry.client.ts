@@ -8,6 +8,11 @@ export default defineNuxtPlugin((nuxtApp) => {
   Sentry.init({
     app: [vueApp],
     dsn: config.SENTRY_DSN,
+    // Some errors seem benign, and so we ignore them on the client side rather than clutter our sentry logs.
+    ignoreErrors: [
+      'ResizeObserver loop limit exceeded', // Benign - see https://stackoverflow.com/questions/49384120/resizeobserver-loop-limit-exceeded
+      'Navigation cancelled from ', // This can happen if someone clicks twice in quick succession
+    ],
     integrations: [
       new Integrations.BrowserTracing({
         routingInstrumentation: Sentry.vueRouterInstrumentation(

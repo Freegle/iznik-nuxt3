@@ -201,7 +201,7 @@
                 <span class="small">{{ timeago(message.canrepostat) }}</span>
               </b-button>
               <b-button
-                v-if="!rejected && !simple"
+                v-if="!rejected"
                 variant="secondary"
                 title="Share"
                 class="mr-2 mb-1"
