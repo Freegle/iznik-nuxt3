@@ -101,7 +101,6 @@ export default {
     WizardProgress,
   },
   async setup() {
-    console.log('Setup for Watend')
     const inherited = await setup('Wanted')
 
     useHead(

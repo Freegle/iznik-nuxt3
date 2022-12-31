@@ -57,7 +57,7 @@
             size="lg"
           />
         </div>
-        <PostItem :id="id" ref="item" class="item pt-1" />
+        <PostItem :id="id" ref="item" :type="type" class="item pt-1" />
         <NumberIncrementDecrement
           v-if="type === 'Offer'"
           v-model="availablenow"

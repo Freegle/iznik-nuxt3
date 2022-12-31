@@ -63,6 +63,10 @@ export default {
       type: Number,
       required: true,
     },
+    type: {
+      type: String,
+      required: true,
+    },
   },
   setup() {
     const composeStore = useComposeStore()
