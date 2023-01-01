@@ -178,7 +178,7 @@
             chat &&
             chat.chattype === 'User2User' &&
             otheruser &&
-            !tooSoonToNudge &&
+            !tooSoonToNudge
           "
           v-b-tooltip="'Waiting for a reply?  Nudge this freegler.'"
           class="mr-2"
