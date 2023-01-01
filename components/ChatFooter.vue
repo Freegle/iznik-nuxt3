@@ -189,10 +189,7 @@
         </div>
         <div
           v-if="
-            chat &&
-            chat.chattype === 'User2User' &&
-            otheruser &&
-            tooSoonToNudge &&
+            chat && chat.chattype === 'User2User' && otheruser && tooSoonToNudge
           "
           v-b-tooltip="
             'You need to wait a day since the last message before nudging.'
