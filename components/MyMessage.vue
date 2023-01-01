@@ -553,11 +553,22 @@ export default {
       const ret = []
       const retids = []
 
-      if (this.message && this.message.replies) {
+      if (this.message?.replies) {
         for (const reply of this.message.replies) {
           if (!retids.includes(reply.userid)) {
             ret.push(reply.userid)
             retids[reply.userid] = true
+          }
+        }
+      }
+
+      // Also add anyone who the message has been promised to.  It is possible to manually promise to someone who
+      // hasn't replied, during the course of a chat.
+      if (this.message?.promises) {
+        for (const promise of this.message.promises) {
+          if (!retids.includes(promise.userid)) {
+            ret.push(promise.userid)
+            retids[promise.userid] = true
           }
         }
       }
