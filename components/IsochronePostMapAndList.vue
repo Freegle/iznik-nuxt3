@@ -157,11 +157,11 @@
   </div>
 </template>
 <script>
-import { ref } from '#imports'
 import { mapState } from 'pinia'
 import { useGroupStore } from '../stores/group'
 import { useMessageStore } from '../stores/message'
 import { calculateMapHeight } from '../composables/useMap'
+import { ref } from '#imports'
 import { useAuthStore } from '~/stores/auth'
 import { useMiscStore } from '~/stores/misc'
 import { getDistance } from '~/composables/useMap'
