@@ -67,6 +67,16 @@ export default {
       type: String,
       required: true,
     },
+    edit: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    edititem: {
+      type: String,
+      required: false,
+      default: null,
+    },
   },
   setup() {
     const composeStore = useComposeStore()
@@ -141,14 +151,23 @@ export default {
   computed: {
     item: {
       get() {
-        const msg = this.composeStore.message(this.id)
-        return msg?.item
+        if (!this.edit) {
+          const msg = this.composeStore.message(this.id)
+          return msg?.item
+        } else {
+          return this.edititem
+        }
       },
       set(newValue) {
-        this.composeStore.setItem({
-          id: this.id,
-          item: newValue,
-        })
+        if (!this.edit) {
+          this.composeStore.setItem({
+            id: this.id,
+            item: newValue,
+          })
+        } else {
+          console.log('Set new item', newValue)
+          this.$emit('update:edititem', newValue)
+        }
       },
     },
     vague() {

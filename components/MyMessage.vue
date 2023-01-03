@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!hide">
+  <div v-if="!hide && message">
     <div v-if="showOld || !message.outcomes || !message.outcomes.length">
       <b-card
         no-body
@@ -310,7 +310,7 @@
       :id="message.id"
       ref="shareModal"
     />
-    <MessageEditModal v-if="showEditModal" ref="editModal" :id="id" />
+    <MessageEditModal v-if="showEditModal" :id="id" ref="editModal" />
     <PromiseModal
       v-if="showPromiseModal"
       ref="promiseModal"

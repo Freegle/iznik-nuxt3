@@ -180,16 +180,12 @@ export const useMessageStore = defineStore({
         id: params.id,
       })
 
-      await this.fetch({ id: params.id, force: true })
+      await this.fetch(params.id, true)
 
       return data
     },
     remove(item) {
-      this.list = this.list.filter((obj) => {
-        return parseInt(obj.id) !== parseInt(item.id)
-      })
-
-      delete this.index[parseInt(item.id)]
+      delete this.list[parseInt(item.id)]
     },
     clear() {
       this.$reset()

@@ -27,7 +27,13 @@
               </div>
             </b-col>
             <b-col cols="6">
-              <PostItem ref="item" v-model="item" />
+              <PostItem
+                :id="id"
+                ref="item"
+                v-model:edititem="edititem"
+                :type="type"
+                edit
+              />
             </b-col>
             <b-col cols="6" md="3">
               <!--              TODO MINOR The postcode isn't the same height as the inputs.-->
@@ -35,7 +41,7 @@
                 label="Postcode"
                 :find="false"
                 size="lg"
-                :value="message.location.name"
+                :value="postcode.name"
                 @selected="postcodeSelect"
                 @cleared="postcodeClear"
               />
@@ -66,7 +72,7 @@
           <b-col>
             <b-form-textarea
               ref="textbody"
-              v-model="message.textbody"
+              v-model="edittextbody"
               :placeholder="placeholder"
               rows="8"
               class="mt-2"
@@ -108,20 +114,21 @@
           :disabled="uploadingPhoto"
           name="save"
           label="Save"
+          spinclass="text-white"
           @click="save"
         />
       </template>
     </b-modal>
-    <OutcomeModal ref="outcomeModal" :message="message" />
+    <OutcomeModal :id="id" ref="outcomeModal" />
   </div>
 </template>
 <script>
+import { ref, toRaw } from 'vue'
 import { useMessageStore } from '../stores/message'
 import { useComposeStore } from '../stores/compose'
 import { useGroupStore } from '../stores/group'
 import { uid } from '../composables/useId'
 import NumberIncrementDecrement from './NumberIncrementDecrement'
-import { ref } from '#imports'
 import modal from '@/mixins/modal'
 import OutcomeModal from '~/components/OutcomeModal'
 import PostCode from '~/components/PostCode'
@@ -150,7 +157,10 @@ export default {
     const composeStore = useComposeStore()
     const groupStore = useGroupStore()
 
-    const message = await messageStore.fetch(props.id, true)
+    const message = toRaw(await messageStore.fetch(props.id, true))
+    console.log('Message', message)
+    const textbody = message.textbody
+    const item = message.item.name
 
     return {
       messageStore,
@@ -158,12 +168,12 @@ export default {
       groupStore,
       message,
       attachments: ref(message.attachments),
-      textbody: ref(message.textbody),
+      edittextbody: ref(textbody),
       availablenow: ref(message.availablenow),
       availableinitially: ref(message.availableinitially),
       type: ref(message.type),
-      item: ref(message.item),
-      postcode: ref(message.postcode),
+      edititem: ref(item),
+      postcode: ref(message.location),
     }
   },
   data() {
@@ -221,7 +231,7 @@ export default {
   },
   methods: {
     async save() {
-      if (this.item && (this.message.textbody || this.attachments.length)) {
+      if (this.edititem && (this.edittextbody || this.attachments.length)) {
         const attids = []
         for (const att of this.attachments) {
           attids.push(att.id)
@@ -233,16 +243,18 @@ export default {
         // Conceivably they are wrongly editing rather than using Mark as TAKEN - but if that's what's happening then
         // they won't be able to get down as far as 0 available because we have a min value of 1.  That will keep
         // the post open, and they will hopefully realise their error and use Mark as TAKEN eventually.
-        await this.messageStore.patch({
-          id: this.message.id,
+        const params = {
+          id: this.id,
           msgtype: this.type,
-          item: this.item,
-          location: this.postcode.name,
-          textbody: this.textbody,
+          item: this.edititem,
+          location: this.postcode?.name,
+          textbody: this.edittextbody,
           attachments: attids,
           availablenow: this.availablenow,
           availableinitially: this.availablenow,
-        })
+        }
+
+        await this.messageStore.patch(params)
 
         this.hide()
       }
