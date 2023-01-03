@@ -20,8 +20,8 @@
   </div>
 </template>
 <script>
-import { ref } from 'vue'
 import { uid } from '../composables/useId'
+import { ref } from '#imports'
 import StartEndDate from '~/components/StartEndDate'
 
 export default {

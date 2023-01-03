@@ -204,7 +204,7 @@ body.modal-open {
 
 body:not(.landing) {
   main {
-    margin-top: 66px;
+    margin-top: 51px;
   }
 }
 
@@ -213,7 +213,7 @@ body.landing {
     margin-top: 0px;
 
     @include media-breakpoint-up(md) {
-      margin-top: 66px;
+      margin-top: 51px;
     }
   }
 }

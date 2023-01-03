@@ -65,9 +65,9 @@
   </div>
 </template>
 <script>
-import { ref } from 'vue'
 import { uid } from '../composables/useId'
 import { useAuthStore } from '../stores/auth'
+import { ref } from '#imports'
 import { useComposeStore } from '~/stores/compose'
 import AutoComplete from '~/components/AutoComplete'
 

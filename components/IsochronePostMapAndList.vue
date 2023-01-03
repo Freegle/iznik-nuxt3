@@ -157,7 +157,7 @@
   </div>
 </template>
 <script>
-import { ref } from 'vue'
+import { ref } from '#imports'
 import { mapState } from 'pinia'
 import { useGroupStore } from '../stores/group'
 import { useMessageStore } from '../stores/message'

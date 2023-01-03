@@ -150,12 +150,7 @@
                 RECEIVED
               </b-button>
               <b-button
-                v-if="
-                  !rejected &&
-                  message.canedit &&
-                  message.location &&
-                  message.item
-                "
+                v-if="!rejected"
                 variant="secondary"
                 class="mr-2 mb-1"
                 @click="edit"
@@ -170,6 +165,7 @@
               >
                 <v-icon class="d-none d-sm-inline" icon="trash-alt" /> Withdraw
               </b-button>
+              <!--              TODO canrepost-->
               <b-button
                 v-if="
                   !rejected &&
@@ -314,8 +310,7 @@
       :id="message.id"
       ref="shareModal"
     />
-    <!--    TODO Message Edit-->
-    <!--    <MessageEditModal v-if="showEditModal" ref="editModal" :message="message" />-->
+    <MessageEditModal v-if="showEditModal" ref="editModal" :id="id" />
     <PromiseModal
       v-if="showPromiseModal"
       ref="promiseModal"
@@ -339,7 +334,7 @@ import PromiseModal from '~/components/PromiseModal'
 const MyMessageReply = () => import('./MyMessageReply.vue')
 const MessageShareModal = () => import('./MessageShareModal')
 const OutcomeModal = () => import('./OutcomeModal')
-// const MessageEditModal = () => import('./MessageEditModal')
+const MessageEditModal = () => import('./MessageEditModal')
 const NoticeMessage = () => import('~/components/NoticeMessage')
 
 export default {
@@ -350,7 +345,7 @@ export default {
     OutcomeModal,
     MessageShareModal,
     MyMessageReply,
-    // MessageEditModal,
+    MessageEditModal,
     NoticeMessage,
     ReadMore,
   },

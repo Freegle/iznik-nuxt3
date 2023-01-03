@@ -52,7 +52,7 @@
   </div>
 </template>
 <script>
-import { ref, computed } from 'vue'
+import { ref, computed } from '#imports'
 import pluralize from 'pluralize'
 import { useNewsfeedStore } from '../stores/newsfeed'
 import { useAuthStore } from '../stores/auth'

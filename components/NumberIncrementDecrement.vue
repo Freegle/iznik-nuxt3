@@ -61,11 +61,6 @@ export default {
       required: false,
       default: '',
     },
-    canedit: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
     size: {
       type: String,
       required: false,

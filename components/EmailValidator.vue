@@ -36,8 +36,8 @@
   </div>
 </template>
 <script>
-import { ref } from 'vue'
 import { Field, ErrorMessage } from 'vee-validate'
+import { ref } from '#imports'
 import { EMAIL_REGEX } from '~/constants'
 
 export default {

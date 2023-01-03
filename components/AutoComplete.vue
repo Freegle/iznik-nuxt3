@@ -88,7 +88,6 @@
     </div>
   </div>
 </template>
-
 <script>
 /*
  * Originally based on:

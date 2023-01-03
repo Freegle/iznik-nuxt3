@@ -61,9 +61,9 @@
   </div>
 </template>
 <script>
-import { ref } from 'vue'
 import dayjs from 'dayjs'
 import minMax from 'dayjs/plugin/minMax'
+import { ref } from '#imports'
 
 dayjs.extend(minMax)
 
