@@ -165,11 +165,11 @@
   </div>
 </template>
 <script>
-import { ref } from '#imports'
 import { useAuthStore } from '../stores/auth'
 import { useGroupStore } from '../stores/group'
 import { useMessageStore } from '../stores/message'
 import MessageList from './MessageList'
+import { ref } from '#imports'
 import { useMiscStore } from '~/stores/misc'
 import { MAX_MAP_ZOOM } from '~/constants'
 import JoinWithConfirm from '~/components/JoinWithConfirm'
