@@ -8,7 +8,7 @@
     <main v-if="complete">
       <slot ref="pageContent" class="ml-0 ps-0 pe-0 pageContent" />
     </main>
-    <!--  TODO  <BouncingEmail />-->
+    <BouncingEmail />
     <div class="navbar-toggle" style="display: none" />
     <div id="serverloader" class="bg-white">
       <b-img src="/loader.gif" alt="Loading..." />
@@ -32,11 +32,12 @@ import MainHeader from '../components/MainHeader'
 import { useChatStore } from '../stores/chat'
 import GoogleOneTap from '../components/GoogleOneTap'
 import SupportLink from '../components/SupportLink'
+import BouncingEmail from '~/components/BouncingEmail'
 const { $sentrySetContext, $sentrySetUser } = useNuxtApp()
 
 export default {
   components: {
-    // BouncingEmail,
+    BouncingEmail,
     GoogleOneTap,
     SupportLink,
     MainHeader,
