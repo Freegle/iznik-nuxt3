@@ -29,7 +29,7 @@
           {{ warn.message }}
         </p>
       </NoticeMessage>
-      <NoticeMessage v-if="duplicate" variant="warning">
+      <NoticeMessage v-if="duplicate" variant="warning" class="mt-2">
         <p>
           You already have an open post
           <span class="font-weight-bold">{{ duplicate.subject }}</span
@@ -37,11 +37,11 @@
         </p>
         <p>
           If it's the same item, please go to
-          <nuxt-link to="/myposts"> My Posts </nuxt-link> and use the
+          <nuxt-link to="/myposts">My Posts</nuxt-link> and use the
           <em>Repost</em> button.
         </p>
         <p>
-          If it's different, please change the name slightly - then it'll be
+          If it's actually a different item, please change the name slightly - then it'll be
           clearer for everyone that it's not the same.
         </p>
       </NoticeMessage>

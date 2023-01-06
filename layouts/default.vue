@@ -150,8 +150,6 @@ export default {
     },
   },
 }
-// TODO Look for v-icon name = and replace with v-icon icon=
-// TODO Look for b-btn and replace with b-button
 </script>
 <style scoped lang="scss">
 @import '~bootstrap/scss/functions';

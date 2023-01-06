@@ -10,6 +10,7 @@ export function setup(type) {
   const composeStore = useComposeStore()
   const groupStore = useGroupStore()
   const authStore = useAuthStore()
+  const messageStore = useMessageStore()
 
   const postType = ref(type)
 
@@ -86,6 +87,13 @@ export function setup(type) {
 
   // We also want to prune any old messages from our store.
   composeStore.prune()
+
+  const myid = authStore.user?.id
+
+  if (myid) {
+    // Get our own posts so that we can spot duplicates.
+    messageStore.fetchByUser(myid, false)
+  }
 
   return {
     email,

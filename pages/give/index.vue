@@ -110,18 +110,6 @@ export default {
       )
     )
 
-    // TODO me
-    // if (this.me) {
-    //   // Get our own posts so that we can spot duplicates.
-    //   this.$store.dispatch('messages/fetchMessages', {
-    //     collection: 'AllUser',
-    //     summary: true,
-    //     types: ['Offer'],
-    //     fromuser: this.me.id,
-    //     limit: 15,
-    //   })
-    // }
-
     return inherited
   },
   methods: {

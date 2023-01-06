@@ -323,8 +323,6 @@ export default {
       ],
       selectedGroup: null,
       context: null,
-      trackViews: false,
-      trackedView: false,
     }
   },
   computed: {
@@ -530,20 +528,6 @@ export default {
       this.infiniteId++
     },
   },
-  mounted() {
-    // We want to track views of messages for new members.
-    // TODO Track views - review code
-    if (this.me) {
-      this.trackViews = true
-
-      // eslint-disable-next-line no-undef
-      try {
-        window.__insp.push(['tagSession', { browsepage: 'newskool' }])
-      } catch (e) {
-        console.log('Failed to tag inspectlet')
-      }
-    }
-  },
   methods: {
     messagesChanged(messages) {
       if (messages) {
@@ -596,16 +580,6 @@ export default {
         // Make the item filter also work to filter out the successful posts.
         (this.selectedType === 'All' || !m.successful)
       )
-    },
-    recordView() {
-      if (this.trackViews && !this.trackedView) {
-        this.trackedView = true
-
-        this.$api.bandit.chosen({
-          uid: 'messageview',
-          variant: 'isochrone',
-        })
-      }
     },
     messageVisible(isVisible, entry) {
       if (isVisible && entry && entry.target.id) {

@@ -1,6 +1,6 @@
 <template>
   <b-col>
-    <!--    TODO-->
+    <!--    TODO Microvolunteering-->
     <!--    <client-only v-if="me">-->
     <!--      <MicroVolunteering />-->
     <!--    </client-only>-->
@@ -54,14 +54,13 @@
             </b-col>
           </b-row>
         </div>
-        <!--        TODO-->
-        <!--        <div v-else-if="myid && message && message.fromuser && message.fromuser.id === myid">-->
-        <!--          <MyMessage-->
-        <!--              :message="message"-->
-        <!--              :show-old="true"-->
-        <!--              expand-->
-        <!--          />-->
-        <!--        </div>-->
+        <div v-else-if="myid && message && message.fromuser === myid">
+          <MyMessage
+              :message="message"
+              :show-old="true"
+              expand
+          />
+        </div>
         <div v-else>
           <GlobalWarning />
           <OurMessage
@@ -85,12 +84,16 @@ import { buildHead } from '../../composables/useBuildHead'
 import { useMessageStore } from '~/stores/message'
 import { useGroupStore } from '~/stores/group'
 import { twem } from '~/composables/useTwem'
+import MyMessage from '~/components/MyMessage'
 
 definePageMeta({
   layout: 'default',
 })
 
 export default {
+  components: {
+    MyMessage,
+  },
   async setup(props) {
     const messageStore = useMessageStore()
     const groupStore = useGroupStore()
@@ -120,14 +123,6 @@ export default {
         )
       )
     }
-
-    // TODO
-    // if (process.client) {
-    //   this.$api.bandit.chosen({
-    //     uid: 'messageview',
-    //     variant: 'single',
-    //   })
-    // }
 
     return { id, messageStore, groupStore }
   },
