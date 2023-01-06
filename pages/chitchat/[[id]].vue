@@ -125,7 +125,7 @@
             v-for="entry in newsfeedToShow"
             :id="entry.id"
             :key="'newsfeed-' + entry.id + '-area-' + selectedArea"
-            :scroll-to="scrollTo"
+            :scroll-to="id"
             @rendered="rendered"
           />
           <infinite-loading
@@ -216,7 +216,11 @@ export default {
     const distance = settings?.newsfeedarea || 0
 
     if (id) {
-      await newsfeedStore.fetch(id)
+      const newsfeed = await newsfeedStore.fetch(id)
+
+      if (newsfeed?.id !== newsfeed?.threadhead) {
+        await newsfeedStore.fetch(newsfeed.threadhead)
+      }
     } else {
       await newsfeedStore.fetchFeed(distance)
 
@@ -244,7 +248,6 @@ export default {
     return {
       show: 0,
       startThread: null,
-      scrollTo: null,
       uploading: false,
       imageid: null,
       imagethumb: null,
@@ -291,7 +294,14 @@ export default {
     },
     newsfeedToShow() {
       if (this.id) {
-        return [this.newsfeedStore.byId(this.id)]
+        const newsfeed = this.newsfeedStore.byId(this.id)
+        if (newsfeed.id !== newsfeed.threadhead) {
+          // We are loading a specific page for a reply but we want to show the whole thread.
+          return [this.newsfeedStore.byId(newsfeed.threadhead)]
+        } else {
+          // Show this item.
+          return [this.newsfeedStore.byId(this.id)]
+        }
       } else {
         return this.newsfeed
           .slice(0, this.show)

@@ -4,9 +4,6 @@
   </span>
 </template>
 <script>
-import dayjs from 'dayjs'
-import advancedFormat from 'dayjs/plugin/advancedFormat'
-import relativeTime from 'dayjs/plugin/relativeTime'
 import {
   dateonly,
   datetime,
@@ -14,9 +11,6 @@ import {
   dateshort,
   weekdayshort,
 } from '../composables/useTimeFormat'
-
-dayjs.extend(advancedFormat)
-dayjs.extend(relativeTime)
 
 export default {
   props: {

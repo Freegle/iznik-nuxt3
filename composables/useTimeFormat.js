@@ -1,7 +1,11 @@
 // Vue v3 doesn't support filters, so we have a global mixin which defines methods to achieve the same goal.
 import dayjs from 'dayjs'
 import isToday from 'dayjs/plugin/isToday'
+import advancedFormat from 'dayjs/plugin/advancedFormat'
+import relativeTime from 'dayjs/plugin/relativeTime'
 
+dayjs.extend(advancedFormat)
+dayjs.extend(relativeTime)
 dayjs.extend(isToday)
 
 export function earliestDate(dates, ofall) {
@@ -46,17 +50,12 @@ export function addStrings(item) {
 export function timeago(val) {
   let f = null
 
-  try {
-    // dayjs pluralises wrongly in some cases - we've seen 1 hours ago.
-    const dePlural = /^1 (.*)s/
+  // dayjs pluralises wrongly in some cases - we've seen 1 hours ago.
+  const dePlural = /^1 (.*)s/
 
-    const v = dayjs(val)
-    f = v.fromNow()
-    f = f.replace(dePlural, '1 $1')
-  } catch (e) {
-    // We've seen this happen when timeago is called early on, before (we think) dayjs has sorted itself out.
-    console.log('timeago error', e)
-  }
+  const v = dayjs(val)
+  f = v.fromNow()
+  f = f.replace(dePlural, '1 $1')
 
   return f
 }
