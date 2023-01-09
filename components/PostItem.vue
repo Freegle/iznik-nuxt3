@@ -41,8 +41,8 @@
           <em>Repost</em> button.
         </p>
         <p>
-          If it's actually a different item, please change the name slightly - then it'll be
-          clearer for everyone that it's not the same.
+          If it's actually a different item, please change the name slightly -
+          then it'll be clearer for everyone that it's not the same.
         </p>
       </NoticeMessage>
     </div>

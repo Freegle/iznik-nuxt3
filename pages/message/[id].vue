@@ -55,11 +55,7 @@
           </b-row>
         </div>
         <div v-else-if="myid && message && message.fromuser === myid">
-          <MyMessage
-              :message="message"
-              :show-old="true"
-              expand
-          />
+          <MyMessage :id="id" :show-old="true" expand />
         </div>
         <div v-else>
           <GlobalWarning />
