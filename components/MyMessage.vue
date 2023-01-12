@@ -165,7 +165,6 @@
               >
                 <v-icon class="d-none d-sm-inline" icon="trash-alt" /> Withdraw
               </b-button>
-              <!--              TODO canrepost-->
               <b-button
                 v-if="
                   !rejected &&
@@ -616,7 +615,6 @@ export default {
 
       const d = this.$dayjs(this.message.canrepostat)
       const now = this.$dayjs()
-      console.log(this.message.canrepostat, d, now)
 
       return d.isAfter(now)
     },

@@ -4,7 +4,6 @@
       v-model:chat-count="chatCount"
       v-model:unread-notification-count="unreadNotificationCount"
     />
-    complete {{ complete }}
     <main v-if="complete">
       <slot ref="pageContent" class="ml-0 ps-0 pe-0 pageContent" />
     </main>

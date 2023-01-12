@@ -39,7 +39,8 @@
               to="/browse"
               @mousedown="maybeReload('/browse')"
             >
-              <v-icon icon="eye" class="fa-2x" /><br />
+              <v-icon icon="eye" class="fa-2x" />
+              <br />
               <span class="nav-item__text">Browse</span>
             </nuxt-link>
           </li>
@@ -51,7 +52,8 @@
               to="/give"
               @mousedown="maybeReload('/give')"
             >
-              <v-icon icon="gift" class="fa-2x" /><br />
+              <v-icon icon="gift" class="fa-2x" />
+              <br />
               <span class="nav-item__text">Give</span>
             </nuxt-link>
           </li>
@@ -63,7 +65,8 @@
               to="/find"
               @mousedown="maybeReload('/find')"
             >
-              <v-icon icon="shopping-cart" class="fa-2x" /><br />
+              <v-icon icon="shopping-cart" class="fa-2x" />
+              <br />
               <span class="nav-item__text">&nbsp;Ask</span>
             </nuxt-link>
           </li>
@@ -76,7 +79,8 @@
               @mousedown="maybeReload('/myposts')"
             >
               <div class="position-relative">
-                <v-icon icon="home" class="fa-2x" /><br />
+                <v-icon icon="home" class="fa-2x" />
+                <br />
                 <b-badge
                   v-if="activePostsCount"
                   variant="info"
@@ -98,7 +102,8 @@
               @mousedown="maybeReload('/chitchat')"
             >
               <div class="position-relative">
-                <v-icon icon="coffee" class="fa-2x" /><br />
+                <v-icon icon="coffee" class="fa-2x" />
+                <br />
                 <b-badge
                   v-if="newsCount"
                   variant="info"
@@ -119,7 +124,8 @@
               to="/communityevents"
               @mousedown="maybeReload('/communityevents')"
             >
-              <v-icon icon="calendar-alt" class="fa-2x" /><br />
+              <v-icon icon="calendar-alt" class="fa-2x" />
+              <br />
               <span class="nav-item__text">Events</span>
             </nuxt-link>
           </li>
@@ -131,7 +137,8 @@
               to="/volunteerings"
               @mousedown="maybeReload('/volunteerings')"
             >
-              <v-icon icon="hands-helping" class="fa-2x" /><br />
+              <v-icon icon="hands-helping" class="fa-2x" />
+              <br />
               <span class="nav-item__text">Volunteer</span>
             </nuxt-link>
           </li>
@@ -163,7 +170,8 @@
               @mousedown="maybeReload('/promote')"
             >
               <div class="position-relative">
-                <v-icon icon="bullhorn" class="fa-2x" /><br />
+                <v-icon icon="bullhorn" class="fa-2x" />
+                <br />
                 <span class="nav-item__text">Promote</span>
               </div>
             </nuxt-link>
@@ -176,7 +184,8 @@
               to="/help"
               @mousedown="maybeReload('/help')"
             >
-              <v-icon icon="question-circle" class="fa-2x" /><br />
+              <v-icon icon="question-circle" class="fa-2x" />
+              <br />
               <span class="nav-item__text">Help</span>
             </nuxt-link>
           </li>
@@ -188,7 +197,8 @@
               to="/settings"
               @mousedown="maybeReload('/settings')"
             >
-              <v-icon icon="cog" class="fa-2x" /><br />
+              <v-icon icon="cog" class="fa-2x" />
+              <br />
               <span class="nav-item__text">Settings</span>
             </nuxt-link>
           </li>
@@ -199,7 +209,8 @@
               class="nav-link text-center p-0 small"
               @click="logout"
             >
-              <v-icon icon="sign-out-alt" class="fa-2x" /><br />
+              <v-icon icon="sign-out-alt" class="fa-2x" />
+              <br />
               <span class="nav-item__text">Logout</span>
             </nuxt-link>
           </li>
@@ -223,21 +234,16 @@
       class="ourBack d-flex justify-content-between d-xl-none"
       fixed="top"
     >
-      <!--      TODO-->
-      <!--      <b-nav-brand v-if="showBackButton" class="p-0">-->
-      <div v-if="showBackButton">
-        <client-only>
-          <b-button
-            ref="backButton"
-            variant="white"
-            class="nohover"
-            @click="backButton"
-          >
-            <v-icon icon="arrow-left" />
-          </b-button>
-        </client-only>
-        <!--      </b-nav-brand>-->
-      </div>
+      <b-navbar-brand v-if="showBackButton" class="p-0">
+        <b-button
+          ref="backButton"
+          variant="white"
+          class="nohover"
+          @click="backButton"
+        >
+          <v-icon icon="arrow-left" />
+        </b-button>
+      </b-navbar-brand>
       <div v-else class="p-0">
         <!--      <b-nav-brand v-else to="/" class="p-0">-->
         <b-img
@@ -303,7 +309,8 @@
               to="/browse"
               @mousedown="maybeReload('/browse')"
             >
-              <v-icon icon="eye" class="fa-2x" /><br />
+              <v-icon icon="eye" class="fa-2x" />
+              <br />
               <span class="nav-item__text">Browse</span>
             </nuxt-link>
           </li>
@@ -314,7 +321,8 @@
               to="/give"
               @mousedown="maybeReload('/give')"
             >
-              <v-icon icon="gift" class="fa-2x" /><br />
+              <v-icon icon="gift" class="fa-2x" />
+              <br />
               <span class="nav-item__text">Give</span>
             </nuxt-link>
           </li>
@@ -325,7 +333,8 @@
               to="/find"
               @mousedown="maybeReload('/find')"
             >
-              <v-icon icon="shopping-cart" class="fa-2x" /><br />
+              <v-icon icon="shopping-cart" class="fa-2x" />
+              <br />
               <span class="nav-item__text">Ask</span>
             </nuxt-link>
           </li>
@@ -337,7 +346,8 @@
               @mousedown="maybeReload('/myposts')"
             >
               <div class="position-relative">
-                <v-icon icon="home" class="fa-2x" /><br />
+                <v-icon icon="home" class="fa-2x" />
+                <br />
                 <b-badge
                   v-if="activePostsCount"
                   variant="info"
@@ -358,7 +368,8 @@
               @mousedown="maybeReload('/chitchat')"
             >
               <div class="position-relative">
-                <v-icon icon="coffee" class="fa-2x" /><br />
+                <v-icon icon="coffee" class="fa-2x" />
+                <br />
                 <b-badge
                   v-if="newsCount"
                   variant="info"
@@ -378,7 +389,8 @@
               to="/communityevents"
               @mousedown="maybeReload('/communityevents')"
             >
-              <v-icon icon="calendar-alt" class="fa-2x" /><br />
+              <v-icon icon="calendar-alt" class="fa-2x" />
+              <br />
               <span class="nav-item__text">Events</span>
             </nuxt-link>
           </li>
@@ -389,7 +401,8 @@
               to="/volunteerings"
               @mousedown="maybeReload('/volunteerings')"
             >
-              <v-icon icon="hands-helping" class="fa-2x" /><br />
+              <v-icon icon="hands-helping" class="fa-2x" />
+              <br />
               <span class="nav-item__text">Volunteer</span>
             </nuxt-link>
           </li>
@@ -400,7 +413,8 @@
               to="/promote"
               @mousedown="maybeReload('/promote')"
             >
-              <v-icon icon="bullhorn" class="fa-2x" /><br />
+              <v-icon icon="bullhorn" class="fa-2x" />
+              <br />
               <span class="nav-item__text">Promote</span>
             </nuxt-link>
           </li>
@@ -411,7 +425,8 @@
               to="/help"
               @mousedown="maybeReload('/help')"
             >
-              <v-icon icon="question-circle" class="fa-2x" /><br />
+              <v-icon icon="question-circle" class="fa-2x" />
+              <br />
               <span class="nav-item__text">Help</span>
             </nuxt-link>
           </li>
@@ -422,7 +437,8 @@
               to="/settings"
               @mousedown="maybeReload('/settings')"
             >
-              <v-icon icon="cog" class="fa-2x" /><br />
+              <v-icon icon="cog" class="fa-2x" />
+              <br />
               <span class="nav-item__text">Settings</span>
             </nuxt-link>
           </li>
@@ -432,7 +448,8 @@
               class="nav-link text-center p-0"
               @click="logout"
             >
-              <v-icon icon="sign-out-alt" class="fa-2x" /><br />
+              <v-icon icon="sign-out-alt" class="fa-2x" />
+              <br />
               <span class="nav-item__text">Logout</span>
             </nuxt-link>
           </li>
@@ -455,6 +472,7 @@ import { useMessageStore } from '../stores/message'
 import { useNotificationStore } from '../stores/notification'
 import LoginModal from '~/components/LoginModal'
 import { useAuthStore } from '~/stores/auth'
+
 const AboutMeModal = () => import('~/components/AboutMeModal')
 const NotificationOptions = () => import('~/components/NotificationOptions')
 
