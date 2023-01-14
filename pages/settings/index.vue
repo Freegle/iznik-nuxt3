@@ -64,7 +64,7 @@
                         class="d-flex justify-content-around align-items-center"
                       >
                         <div
-                          v-if="me.profile.ours"
+                          v-if="me.profile.ours && useprofile"
                           class="clickme image__icon stacked mt-2"
                           title="Rotate left"
                           @click="rotateLeft"
@@ -80,7 +80,7 @@
                           <v-icon icon="camera" /> Upload photo
                         </b-button>
                         <div
-                          v-if="me.profile.ours"
+                          v-if="me.profile.ours && useprofile"
                           class="clickme image__icon stacked mt-2"
                           title="Rotate right"
                           @click="rotateRight"
