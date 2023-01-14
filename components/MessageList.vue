@@ -132,11 +132,6 @@ export default {
 
     const myGroups = []
 
-    if (myGroups && myGroups.length === 1) {
-      // TODO We will be showing the single group.
-      groupStore.fetch(myGroups[0].id)
-    }
-
     // Get the initial messages to show in a single call.  There will be a delay during which we will see the
     // loader, but it's better to fetch a screenful than have the loader sliding down
     // the screen.  Once we've loaded then the loader will be shown by the infinite scroll, but we will normally

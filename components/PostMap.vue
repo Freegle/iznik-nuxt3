@@ -106,8 +106,6 @@
   </div>
 </template>
 <script>
-// TODO
-// import Vue3DraggableResizable from 'vue3-draggable-resizable'
 import 'vue3-draggable-resizable/dist/Vue3DraggableResizable.css'
 import cloneDeep from 'lodash.clonedeep'
 import { mapState } from 'pinia'
@@ -125,7 +123,6 @@ export default {
   components: {
     BrowseHomeIcon,
     ClusterMarker,
-    // Vue3DraggableResizable,
     GroupMarker,
   },
   props: {
@@ -670,7 +667,7 @@ export default {
             }
           }
 
-          // TODO PERF Need Go API call
+          // TODO PERF Need Go API call, but perhaps we will use Algolia.
           const ret = await this.$api.message.fetchMessages(params)
 
           if (ret.ret === 0 && ret.messages && !this.destroyed) {

@@ -32,7 +32,6 @@ export function getDistance(origin, destination) {
 export function calculateMapHeight(heightFraction) {
   let height = 0
 
-  // TODO Resized height
   if (process.client) {
     height = window.innerHeight / heightFraction - 70
     height = height < 200 ? 200 : height
