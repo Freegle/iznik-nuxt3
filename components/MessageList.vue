@@ -208,7 +208,6 @@ export default {
             if (this.myid === m.fromuser) {
               // Always show your own messages.  We have at least one freegler for whom this is emotionally
               // important.
-              // TODO
               addIt = true
             } else {
               const daysago = dayjs().diff(dayjs(m.date), 'day')

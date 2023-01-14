@@ -66,12 +66,11 @@
           About {{ milesPlural }} away
         </span>
       </div>
-      <!--      TODO-->
-      <!--      <ProfileModal-->
-      <!--        v-if="showProfile && message && fromuser"-->
-      <!--        :id="fromuser.id"-->
-      <!--        ref="profile"-->
-      <!--      />-->
+      <ProfileModal
+        v-if="showProfile && message && fromuser"
+        :id="fromuser.id"
+        ref="profile"
+      />
     </div>
   </div>
 </template>
@@ -80,14 +79,15 @@ import pluralize from 'pluralize'
 import dayjs from 'dayjs'
 import { milesAway } from '../composables/useDistance'
 import { useUserStore } from '../stores/user'
-import ProfileImage from '@/components/ProfileImage'
+import ProfileImage from '~/components/ProfileImage'
 import { useMessageStore } from '~/stores/message'
 import { useGroupStore } from '~/stores/group'
 import { timeago } from '~/composables/useTimeFormat'
+const ProfileModal = () => import('~/components/ProfileModal')
 
 export default {
   name: 'MessageHistory',
-  components: { ProfileImage },
+  components: { ProfileImage, ProfileModal },
 
   props: {
     id: {
