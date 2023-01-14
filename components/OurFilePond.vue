@@ -143,7 +143,6 @@ export default {
         // convert it to a PNG file on the client before upload.  We have to restrict the quality to keep the cconversion
         // time reasonable.
         //
-        // TODO APP Does this work in the app?  Dynamically including was the only way I could get it to work.
         const blob = file.slice(0, file.size, 'image/heic')
         const png = await window.heic2any({
           blob,

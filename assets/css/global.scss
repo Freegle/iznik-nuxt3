@@ -309,7 +309,7 @@ label {
   text-decoration: none;
 }
 
-// Bootstrap 4 class compatibility.  TODO MINOR CSS remove.
+// Bootstrap 4 class compatibility.  TODO MINOR CSS remove once we've finished the new code and can do search and replace.
 .text-left {
   @extend .text-start;
 }

@@ -105,15 +105,7 @@
             :review="reviewAboutMe"
           />
         </b-col>
-        <b-col cols="0" lg="3" class="p-0 pl-1">
-          <VisibleWhen :at="['lg', 'xl', 'xxl']">
-            <!--            TODO-->
-            <!--            <SidebarRight-->
-            <!--              show-volunteer-opportunities-->
-            <!--              show-job-opportunities-->
-            <!--            />-->
-          </VisibleWhen>
-        </b-col>
+        <b-col cols="0" lg="3" class="p-0 pl-1"> </b-col>
       </b-row>
     </client-only>
   </b-container>

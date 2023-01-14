@@ -260,16 +260,16 @@
         <client-only>
           <NotificationOptions
             v-if="loggedIn"
+            v-model:unread-notification-count="unreadNotificationCount"
             :distance="distance"
             :small-screen="true"
-            :unread-notification-count.sync="unreadNotificationCount"
             @showAboutMe="showAboutMeModal"
           />
           <ChatMenu
             v-if="loggedIn"
             id="menu-option-chat-sm"
+            v-model:chat-count="chatCount"
             :is-list-item="false"
-            :chat-count.sync="chatCount"
             class="mr-3"
           />
         </client-only>
