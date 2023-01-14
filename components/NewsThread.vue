@@ -1,6 +1,6 @@
 <template>
   <div class="bg-white mt-2">
-    <b-card :class="backgroundColor" no-body footer-class="p-0">
+    <b-card :class="backgroundColor" no-body>
       <b-card-body class="p-1 p-sm-2">
         <b-card-text>
           <div v-if="isNewsComponent">
@@ -87,80 +87,80 @@
         />
         <span v-if="!newsfeed.closed">
           <div v-if="enterNewLine">
-            <!--            <at-ta-->
-            <!--              ref="at"-->
-            <!--              :members="tagusers"-->
-            <!--              class="flex-shrink-2 input-group"-->
-            <!--              :filter-match="filterMatch"-->
-            <!--            >-->
-            <b-input-group>
-              <b-input-group-prepend>
-                <span class="input-group-text pl-1 pr-1">
-                  <ProfileImage
-                    v-if="me.profile.path"
-                    :image="me.profile.path"
-                    class="m-0 inline float-left"
-                    is-thumbnail
-                    size="sm"
-                    :lazy="false"
-                  />
-                </span>
-              </b-input-group-prepend>
-              <b-form-textarea
-                ref="threadcomment"
-                v-model="threadcomment"
-                size="sm"
-                rows="1"
-                max-rows="8"
-                maxlength="2048"
-                spellcheck="true"
-                placeholder="Write a comment on this thread..."
-                class="p-0 pl-1 pt-1"
-                @focus="focusedComment"
-              />
-            </b-input-group>
-            <!--            </at-ta>-->
+            <at-ta
+              ref="at"
+              :members="tagusers"
+              class="flex-shrink-2 input-group"
+              :filter-match="filterMatch"
+            >
+              <b-input-group>
+                <b-input-group-prepend>
+                  <span class="input-group-text pl-1 pr-1">
+                    <ProfileImage
+                      v-if="me.profile.path"
+                      :image="me.profile.path"
+                      class="m-0 inline float-left"
+                      is-thumbnail
+                      size="sm"
+                      :lazy="false"
+                    />
+                  </span>
+                </b-input-group-prepend>
+                <b-form-textarea
+                  ref="threadcomment"
+                  v-model="threadcomment"
+                  size="sm"
+                  rows="1"
+                  max-rows="8"
+                  maxlength="2048"
+                  spellcheck="true"
+                  placeholder="Write a comment on this thread..."
+                  class="p-0 pl-1 pt-1"
+                  @focus="focusedComment"
+                />
+              </b-input-group>
+            </at-ta>
           </div>
           <div
             v-else
             @keyup.enter.exact.prevent
             @keydown.enter.exact="sendComment"
           >
-            <!--            <at-ta-->
-            <!--              ref="at"-->
-            <!--              :members="tagusers"-->
-            <!--              class="flex-shrink-2 input-group"-->
-            <!--              :filter-match="filterMatch"-->
-            <!--            >-->
-            <b-input-group>
-              <b-input-group-prepend>
-                <span class="input-group-text pl-2 pr-1">
-                  <ProfileImage
-                    v-if="me.profile.path"
-                    :image="me.profile.path"
-                    class="m-0 inline float-left"
-                    is-thumbnail
-                    size="sm"
-                  />
-                </span>
-              </b-input-group-prepend>
-              <b-form-textarea
-                ref="threadcomment"
-                v-model="threadcomment"
-                size="sm"
-                rows="1"
-                max-rows="8"
-                maxlength="2048"
-                spellcheck="true"
-                placeholder="Write a comment on this thread and hit enter to post..."
-                class="p-0 pl-2 pt-2"
-                autocapitalize="none"
-                @keydown.enter.shift.exact.prevent="newlineComment"
-                @keydown.alt.shift.exact.prevent="newlineComment"
-                @focus="focusedComment"
-              />
-            </b-input-group>
-            <!--            </at-ta>-->
+            <at-ta
+              ref="at"
+              :members="tagusers"
+              class="flex-shrink-2 input-group"
+              :filter-match="filterMatch"
+            >
+              <b-input-group>
+                <b-input-group-prepend>
+                  <span class="input-group-text pl-2 pr-1">
+                    <ProfileImage
+                      v-if="me.profile.path"
+                      :image="me.profile.path"
+                      class="m-0 inline float-left"
+                      is-thumbnail
+                      size="sm"
+                    />
+                  </span>
+                </b-input-group-prepend>
+                <b-form-textarea
+                  ref="threadcomment"
+                  v-model="threadcomment"
+                  size="sm"
+                  rows="1"
+                  max-rows="8"
+                  maxlength="2048"
+                  spellcheck="true"
+                  placeholder="Write a comment on this thread and hit enter to post..."
+                  class="p-0 pl-2 pt-2"
+                  autocapitalize="none"
+                  @keydown.enter.shift.exact.prevent="newlineComment"
+                  @keydown.alt.shift.exact.prevent="newlineComment"
+                  @focus="focusedComment"
+                />
+              </b-input-group>
+            </at-ta>
             <!--            TODO Form auto text area not yet implemented-->
           </div>
           <div
@@ -222,6 +222,7 @@
   </div>
 </template>
 <script>
+import AtTa from 'vue-at/dist/vue-at-textarea'
 import { useNewsfeedStore } from '../stores/newsfeed'
 import NewsReportModal from './NewsReportModal'
 import SpinButton from './SpinButton'
@@ -244,9 +245,6 @@ import ProfileImage from '~/components/ProfileImage'
 const ConfirmModal = () => import('~/components/ConfirmModal.vue')
 const OurFilePond = () => import('~/components/OurFilePond')
 
-// TODO Tagging
-// const AtTa = process.client ? require('vue-at/dist/vue-at-textarea') : undefined
-
 const INITIAL_NUMBER_OF_REPLIES_TO_SHOW = 10
 
 export default {
@@ -266,7 +264,7 @@ export default {
     NewsNoticeboard,
     NoticeMessage,
     NewsPreview,
-    // AtTa,
+    AtTa,
     ProfileImage,
     ConfirmModal,
   },
@@ -339,16 +337,7 @@ export default {
       return this.newsfeedStore.byId(this.id)
     },
     tagusers() {
-      const ret = []
-      // TODO
-
-      return ret.sort((a, b) => {
-        if (typeof a === 'string' && typeof b === 'string') {
-          return a.toLowerCase().localeCompare(b.toLowerCase())
-        } else {
-          return 0
-        }
-      })
+      return this.newsfeedStore.tagusers?.map((u) => u.displayname)
     },
     mod() {
       const me = this.me

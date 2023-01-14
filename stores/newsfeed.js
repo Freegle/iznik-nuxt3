@@ -139,5 +139,45 @@ export const useNewsfeedStore = defineStore({
     byId: (state) => (id) => {
       return state.list[id]
     },
+    tagusers(state) {
+      let ret = []
+      const userids = {}
+
+      for (const id in state.list) {
+        const item = state.list[id]
+
+        if (item.userid && item.displayname) {
+          if (!userids[item.userid]) {
+            userids[item.userid] = true
+            ret.push({
+              id: item.userid,
+              displayname: item.displayname,
+            })
+          }
+        }
+
+        if (item.replies?.length) {
+          for (const reply of item.replies) {
+            if (reply.userid && reply.displayname) {
+              if (!userids[reply.userid]) {
+                userids[reply.userid] = true
+                ret.push({
+                  id: reply.userid,
+                  displayname: reply.displayname,
+                })
+              }
+            }
+          }
+        }
+      }
+
+      ret = ret.sort((a, b) => {
+        return a.displayname
+          .toLowerCase()
+          .localeCompare(b.displayname.toLowerCase())
+      })
+
+      return ret
+    },
   },
 })

@@ -154,50 +154,12 @@
     />
     <div v-if="showReplyBox" class="mb-2 pb-1 ml-4">
       <div v-if="enterNewLine" class="w-100">
-        <!--        <at-ta-->
-        <!--          ref="at"-->
-        <!--          :members="tagusers"-->
-        <!--          class="pl-2 input-group"-->
-        <!--          :filter-match="filterMatch"-->
-        <!--        >-->
-        <b-input-group-prepend>
-          <span class="input-group-text pl-1 pr-1">
-            <ProfileImage
-              v-if="me.profile.path"
-              :image="me.profile.path"
-              class="m-0 inline float-left"
-              is-thumbnail
-              size="sm"
-            />
-          </span>
-        </b-input-group-prepend>
-        <b-form-textarea
-          ref="replybox"
-          v-model="replybox"
-          size="sm"
-          rows="1"
-          max-rows="8"
-          maxlength="2048"
-          spellcheck="true"
-          placeholder="Write a reply to this comment..."
-          class="p-0 pl-1 pt-1"
-          @focus="focusedReply"
-        />
-        <!--        </at-ta>-->
-      </div>
-      <div
-        v-else
-        class="w-100"
-        @keyup.enter.exact.prevent
-        @keydown.enter.exact="sendReply"
-      >
-        <!--        <at-ta-->
-        <!--          ref="at"-->
-        <!--          :members="tagusers"-->
-        <!--          class="pl-2 input-group"-->
-        <!--          :filter-match="filterMatch"-->
-        <!--        >-->
-        <b-input-group>
+        <at-ta
+          ref="at"
+          :members="tagusers"
+          class="pl-2 input-group"
+          :filter-match="filterMatch"
+        >
           <b-input-group-prepend>
             <span class="input-group-text pl-1 pr-1">
               <ProfileImage
@@ -217,17 +179,55 @@
             max-rows="8"
             maxlength="2048"
             spellcheck="true"
-            placeholder="Write a reply to this comment and hit enter to send..."
+            placeholder="Write a reply to this comment..."
             class="p-0 pl-1 pt-1"
-            autocapitalize="none"
-            @keydown.enter.exact.prevent
-            @keyup.enter.exact="sendReply"
-            @keydown.enter.shift.exact.prevent="newlineReply"
-            @keydown.alt.shift.exact.prevent="newlineReply"
             @focus="focusedReply"
           />
-        </b-input-group>
-        <!--        </at-ta>-->
+        </at-ta>
+      </div>
+      <div
+        v-else
+        class="w-100"
+        @keyup.enter.exact.prevent
+        @keydown.enter.exact="sendReply"
+      >
+        <at-ta
+          ref="at"
+          :members="tagusers"
+          class="pl-2 input-group"
+          :filter-match="filterMatch"
+        >
+          <b-input-group>
+            <b-input-group-prepend>
+              <span class="input-group-text pl-1 pr-1">
+                <ProfileImage
+                  v-if="me.profile.path"
+                  :image="me.profile.path"
+                  class="m-0 inline float-left"
+                  is-thumbnail
+                  size="sm"
+                />
+              </span>
+            </b-input-group-prepend>
+            <b-form-textarea
+              ref="replybox"
+              v-model="replybox"
+              size="sm"
+              rows="1"
+              max-rows="8"
+              maxlength="2048"
+              spellcheck="true"
+              placeholder="Write a reply to this comment and hit enter to send..."
+              class="p-0 pl-1 pt-1"
+              autocapitalize="none"
+              @keydown.enter.exact.prevent
+              @keyup.enter.exact="sendReply"
+              @keydown.enter.shift.exact.prevent="newlineReply"
+              @keydown.alt.shift.exact.prevent="newlineReply"
+              @focus="focusedReply"
+            />
+          </b-input-group>
+        </at-ta>
       </div>
       <div class="d-flex justify-content-between flex-wrap m-1">
         <b-button size="sm" variant="secondary" @click="photoAdd">
@@ -290,6 +290,7 @@
 </template>
 <script>
 import pluralize from 'pluralize'
+import AtTa from 'vue-at/dist/vue-at-textarea'
 import { useNewsfeedStore } from '../stores/newsfeed'
 import { useUserStore } from '../stores/user'
 import NewsLovesModal from './NewsLovesModal'
@@ -308,9 +309,6 @@ const ConfirmModal = () => import('~/components/ConfirmModal.vue')
 const NewsReplies = () => import('~/components/NewsReplies.vue')
 const OurFilePond = () => import('~/components/OurFilePond')
 
-// TODO Tagging
-// const AtTa = process.client ? require('vue-at/dist/vue-at-textarea') : undefined
-
 export default {
   name: 'NewsReply',
   components: {
@@ -324,7 +322,7 @@ export default {
     ProfileModal,
     ChatButton,
     NewsPreview,
-    // AtTa,
+    AtTa,
     ProfileImage,
     ConfirmModal,
   },
@@ -386,17 +384,7 @@ export default {
       return this.newsfeedStore.byId(this.replyid)
     },
     tagusers() {
-      const ret = []
-
-      // TODO Tagging.
-
-      return ret.sort((a, b) => {
-        if (typeof a === 'string' && typeof b === 'string') {
-          return a.toLowerCase().localeCompare(b.toLowerCase())
-        } else {
-          return 0
-        }
-      })
+      return this.newsfeedStore.tagusers?.map((u) => u.displayname)
     },
     mod() {
       const me = this.me
