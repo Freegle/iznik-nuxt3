@@ -74,7 +74,7 @@
                   >Ask for advice, recommendations, or just have a natter:</span
                 ></label
               >
-              <b-form-textarea
+              <AutoHeightTextarea
                 id="startThread"
                 v-model="startThread"
                 rows="2"
@@ -154,6 +154,7 @@ import { buildHead } from '../../composables/useBuildHead'
 import { useMiscStore } from '../../stores/misc'
 import { useNewsfeedStore } from '../../stores/newsfeed'
 import { useAuthStore } from '../../stores/auth'
+import AutoHeightTextarea from '../../components/AutoHeightTextarea'
 import InfiniteLoading from '~/components/InfiniteLoading'
 import NewsThread from '~/components/NewsThread.vue'
 import { untwem } from '~/composables/useTwem'
@@ -177,6 +178,7 @@ export default {
     SidebarRight,
     NewsLocation,
     InfiniteLoading,
+    AutoHeightTextarea,
   },
   validate({ params }) {
     // Must be a number if present

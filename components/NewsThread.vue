@@ -106,7 +106,7 @@
                     />
                   </span>
                 </b-input-group-prepend>
-                <b-form-textarea
+                <AutoHeightTextarea
                   ref="threadcomment"
                   v-model="threadcomment"
                   size="sm"
@@ -115,7 +115,7 @@
                   maxlength="2048"
                   spellcheck="true"
                   placeholder="Write a comment on this thread..."
-                  class="p-0 pl-1 pt-1"
+                  class="p-0 pl-1 pt-1 enternewline"
                   @focus="focusedComment"
                 />
               </b-input-group>
@@ -144,7 +144,7 @@
                     />
                   </span>
                 </b-input-group-prepend>
-                <b-form-textarea
+                <AutoHeightTextarea
                   ref="threadcomment"
                   v-model="threadcomment"
                   size="sm"
@@ -153,7 +153,7 @@
                   maxlength="2048"
                   spellcheck="true"
                   placeholder="Write a comment on this thread and hit enter to post..."
-                  class="p-0 pl-2 pt-2"
+                  class="p-0 pl-2 pt-2 entersend"
                   autocapitalize="none"
                   @keydown.enter.shift.exact.prevent="newlineComment"
                   @keydown.alt.shift.exact.prevent="newlineComment"
@@ -161,7 +161,6 @@
                 />
               </b-input-group>
             </at-ta>
-            <!--            TODO Form auto text area not yet implemented-->
           </div>
           <div
             v-if="threadcomment"
@@ -226,6 +225,7 @@ import AtTa from 'vue-at/dist/vue-at-textarea'
 import { useNewsfeedStore } from '../stores/newsfeed'
 import NewsReportModal from './NewsReportModal'
 import SpinButton from './SpinButton'
+import AutoHeightTextarea from './AutoHeightTextarea'
 import NewsReplies from '~/components/NewsReplies'
 import { untwem } from '~/composables/useTwem'
 
@@ -267,6 +267,7 @@ export default {
     AtTa,
     ProfileImage,
     ConfirmModal,
+    AutoHeightTextarea,
   },
   props: {
     id: {
