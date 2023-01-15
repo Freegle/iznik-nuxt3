@@ -209,6 +209,19 @@ export default {
         })
       }
 
+      // Sort by last date.
+      chats.sort((a, b) => {
+        if (a.lastdate && b.lastdate) {
+          return dayjs(b.lastdate).diff(dayjs(a.lastdate))
+        } else if (a.lastdate) {
+          return -1
+        } else if (b.lastdate) {
+          return 1
+        } else {
+          return 0
+        }
+      })
+
       return chats
     },
     visibleChats() {
