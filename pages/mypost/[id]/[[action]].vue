@@ -35,8 +35,7 @@
         </div>
       </b-col>
     </b-row>
-    <!--    TODO Donations-->
-    <!--    <DonationAskModal ref="askmodal" :groupid="donationGroup" />-->
+    <DonationAskModal ref="askmodal" :groupid="donationGroup" />
   </b-container>
 </template>
 <script>
@@ -48,13 +47,14 @@ import { useAuthStore } from '~/stores/auth'
 import NoticeMessage from '~/components/NoticeMessage'
 import GlobalWarning from '~/components/GlobalWarning'
 const MyMessage = () => import('~/components/MyMessage.vue')
-// const DonationAskModal = () => import('~/components/DonationAskModal')
+const DonationAskModal = () => import('~/components/DonationAskModal')
 
 export default {
   components: {
     NoticeMessage,
     MyMessage,
     GlobalWarning,
+    DonationAskModal,
   },
   async setup() {
     const authStore = useAuthStore()

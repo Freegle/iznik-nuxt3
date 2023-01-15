@@ -241,8 +241,7 @@
         </VisibleWhen>
       </b-col>
     </b-row>
-    <!--    TODO Donations-->
-    <!--    <DonationAskModal ref="askmodal" :groupid="donationGroup" />-->
+    <DonationAskModal ref="askmodal" :groupid="donationGroup" />
   </b-container>
 </template>
 <script>
@@ -263,8 +262,7 @@ const JobsTopBar = () => import('~/components/JobsTopBar')
 const MyMessage = () => import('~/components/MyMessage.vue')
 const SidebarLeft = () => import('~/components/SidebarLeft')
 const SidebarRight = () => import('~/components/SidebarRight')
-// TODO Donations
-// const DonationAskModal = () => import('~/components/DonationAskModal')
+const DonationAskModal = () => import('~/components/DonationAskModal')
 const ExpectedRepliesWarning = () =>
   import('~/components/ExpectedRepliesWarning')
 
@@ -276,7 +274,7 @@ export default {
     MyMessage,
     SidebarLeft,
     SidebarRight,
-    // DonationAskModal,
+    DonationAskModal,
     ExpectedRepliesWarning,
     InfiniteLoading,
   },
