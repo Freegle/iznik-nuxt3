@@ -14,24 +14,9 @@
         to keep us running.
       </p>
       <div class="d-flex justify-content-between flex-wrap">
-        <donation-button
-          link="paypal5"
-          show="£5"
-          class="mb-1"
-          @clicked="score(5)"
-        />
-        <donation-button
-          link="paypal10"
-          show="£10"
-          class="mb-1"
-          @clicked="score(10)"
-        />
-        <donation-button
-          link="paypal25"
-          show="£25"
-          class="mb-1"
-          @clicked="score(25)"
-        />
+        <donation-button value="5" class="mb-1" @clicked="score(5)" />
+        <donation-button value="10" class="mb-1" @clicked="score(10)" />
+        <donation-button value="25" class="mb-1" @clicked="score(25)" />
       </div>
       <div class="mt-2 mb-4 d-flex border border-secondary rounded p-2">
         <SupporterInfo size="lg" class="mr-2 align-self-center" />
@@ -65,7 +50,8 @@ export default {
   props: {
     groupid: {
       type: Number,
-      required: true,
+      required: false,
+      default: null,
     },
     groupname: {
       type: String,

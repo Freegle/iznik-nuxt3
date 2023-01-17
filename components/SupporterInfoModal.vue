@@ -20,7 +20,7 @@
             Supporter badge. People will see you're a committed freegler.
           </p>
           <div class="d-flex justify-content-between flex-wrap">
-            <DonationButton link="paypal1510" class="mt-2" />
+            <DonationButton class="mt-2" />
             <div class="align-self-center">
               <b-button
                 variant="secondary"

@@ -19,24 +19,9 @@
         </div>
       </div>
       <div class="d-flex justify-content-between flex-wrap">
-        <donation-button
-          link="paypal2"
-          show="£2"
-          class="mb-1"
-          @clicked="score(2)"
-        />
-        <donation-button
-          link="paypal5"
-          show="£5"
-          class="mb-1"
-          @clicked="score(5)"
-        />
-        <donation-button
-          link="paypal10"
-          show="£10"
-          class="mb-1"
-          @clicked="score(10)"
-        />
+        <donation-button value="2" class="mb-1" @clicked="score(2)" />
+        <donation-button value="5" class="mb-1" @clicked="score(5)" />
+        <donation-button value="10" class="mb-1" @clicked="score(10)" />
       </div>
       <p v-if="groupid && !targetMet" class="text-muted small mt-1">
         This will contribute to the general fund for the ongoing support of
@@ -59,7 +44,8 @@ export default {
   props: {
     groupid: {
       type: Number,
-      required: true,
+      required: false,
+      default: null,
     },
     groupname: {
       type: String,

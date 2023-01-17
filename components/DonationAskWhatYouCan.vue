@@ -12,7 +12,7 @@
         <strong> Please donate what you can </strong>
         to keep us running.
       </p>
-      <donation-button link="paypal1510" @clicked="score(5)" />
+      <donation-button @clicked="score(5)" />
       <div class="mt-2 mb-4 d-flex border border-secondary rounded p-2">
         <SupporterInfo size="lg" class="mr-2 align-self-center" />
         <div>
@@ -45,7 +45,8 @@ export default {
   props: {
     groupid: {
       type: Number,
-      required: true,
+      required: false,
+      default: null,
     },
     groupname: {
       type: String,

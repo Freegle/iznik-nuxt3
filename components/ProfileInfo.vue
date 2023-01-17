@@ -194,7 +194,6 @@ export default {
     },
   },
   async setup(props) {
-    console.trace()
     const userStore = useUserStore()
     const messageStore = useMessageStore()
 
