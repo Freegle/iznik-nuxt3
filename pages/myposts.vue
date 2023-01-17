@@ -481,25 +481,23 @@ export default {
       })
     }
 
-    // For some reason we can't capture emitted events from the outcome modal so use root as a bus.
-    // TODO Donations
-    // this.$root.$on('outcome', (params) => {
-    //   const { groupid, outcome } = params
-    //
-    //   if (outcome === 'Taken' || outcome === 'Received') {
-    //     // If someone has set up a regular donation, then we don't ask them to donate again.  Wouldn't be fair to
-    //     // pester them.
-    //     if (!this.me.donorrecurring && canask) {
-    //       this.donationGroup = groupid
-    //       this.ask()
-    //
-    //       this.$store.dispatch('misc/set', {
-    //         key: 'lastdonationask',
-    //         value: new Date().getTime(),
-    //       })
-    //     }
-    //   }
-    // })
+    this.$bus.$on('outcome', (params) => {
+      const { groupid, outcome } = params
+
+      if (outcome === 'Taken' || outcome === 'Received') {
+        // If someone has set up a regular donation, then we don't ask them to donate again.  Wouldn't be fair to
+        // pester them.
+        if (!this.me.donorrecurring && canask) {
+          this.donationGroup = groupid
+          this.ask()
+
+          this.$store.dispatch('misc/set', {
+            key: 'lastdonationask',
+            value: new Date().getTime(),
+          })
+        }
+      }
+    })
   },
   methods: {
     toggleOldOffer() {

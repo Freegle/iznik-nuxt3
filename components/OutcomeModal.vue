@@ -327,7 +327,7 @@ export default {
 
     hide() {
       // We're having trouble capturing events from this modal, so use root as a bus.
-      this.$root.$emit('outcome', {
+      this.$bus.$emit('outcome', {
         groupid: this.groupid,
         outcome: this.type,
       })

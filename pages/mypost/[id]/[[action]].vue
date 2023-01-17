@@ -140,16 +140,14 @@ export default {
     },
   },
   mounted() {
-    // TODO Donation
-    // For some reason we can't capture emitted events from the outcome modal so use root as a bus.
-    // this.$root.$on('outcome', (params) => {
-    //   const { groupid, outcome } = params
-    //
-    //   if (outcome === 'Taken' || outcome === 'Received') {
-    //     this.donationGroup = groupid
-    //     this.ask()
-    //   }
-    // })
+    this.$bus.$on('outcome', (params) => {
+      const { groupid, outcome } = params
+
+      if (outcome === 'Taken' || outcome === 'Received') {
+        this.donationGroup = groupid
+        this.ask()
+      }
+    })
   },
   methods: {
     ask(groupid) {
