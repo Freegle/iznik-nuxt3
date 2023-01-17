@@ -14,7 +14,7 @@
     </div>
     <p class="font-weight-bold text-center mt-4">
       If you're able to donate to help us keep going, that would be lovely.
-      Monthly donations are particularly helpful
+      Monthly donations are particularly helpful.
     </p>
     <div class="d-flex flex-wrap justify-content-between mt-2">
       <donation-button value="1" class="mb-1" @clicked="score(1)" />
