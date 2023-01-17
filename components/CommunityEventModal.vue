@@ -582,11 +582,9 @@ export default {
       }
     },
     hide() {
-      console.log('Hide')
       this.editing = false
       this.uploading = false
       this.showModal = false
-      console.log('Hidden')
     },
     validateTitle(value) {
       if (!value) {

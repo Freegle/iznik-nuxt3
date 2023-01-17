@@ -124,8 +124,6 @@ const AdaptiveMap = () => import('~/components/AdaptiveMap')
 const IsochronePostMapAndList = () =>
   import('~/components/IsochronePostMapAndList')
 const GlobalWarning = () => import('~/components/GlobalWarning')
-// const SidebarLeft = () => import('~/components/SidebarLeft')
-// const SidebarRight = () => import('~/components/SidebarRight')
 const AboutMeModal = () => import('~/components/AboutMeModal')
 const ExpectedRepliesWarning = () =>
   import('~/components/ExpectedRepliesWarning')
@@ -138,8 +136,6 @@ export default {
     // MicroVolunteering,
     IsochronePostMapAndList,
     GlobalWarning,
-    // SidebarLeft,
-    // SidebarRight,
     ExpectedRepliesWarning,
     AboutMeModal,
   },

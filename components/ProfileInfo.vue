@@ -170,8 +170,8 @@ import NoticeMessage from '~/components/NoticeMessage'
 import { twem } from '~/composables/useTwem'
 
 import ReplyTime from '~/components/ReplyTime'
-import MessageList from '~/components/MessageList.vue'
 import ProfileHeader from '~/components/ProfileHeader'
+const MessageList = () => import('~/components/MessageList.vue')
 
 export default {
   components: {
@@ -194,6 +194,7 @@ export default {
     },
   },
   async setup(props) {
+    console.trace()
     const userStore = useUserStore()
     const messageStore = useMessageStore()
 
