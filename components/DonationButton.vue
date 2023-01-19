@@ -94,7 +94,6 @@ export default {
       e.stopPropagation()
     },
     clicked() {
-      // TODO App - does this work?  Can we retrofit this to the old app?
       this.$refs.paypalbutton.firstChild.click()
     },
     async donateMonthly() {

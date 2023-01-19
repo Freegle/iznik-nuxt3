@@ -35,6 +35,7 @@
           aria-label="Save password"
           name="save"
           label="Save"
+          spinclass="text-white"
           :handler="savePassword"
         />
       </b-input-group-append>
