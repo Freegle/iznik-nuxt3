@@ -90,15 +90,15 @@
         </b-row>
         <b-row v-if="attachments && attachments.length">
           <b-col>
-            <b-list-group horizontal class="mb-1 mt-2">
-              <b-list-group-item
+            <div class="d-flex flex-wrap mb-1 mt-2">
+              <div
                 v-for="att in attachments"
                 :key="'image-' + att.id"
                 class="bg-transparent p-0"
               >
                 <PostPhoto v-bind="att" @remove="removePhoto" />
-              </b-list-group-item>
-            </b-list-group>
+              </div>
+            </div>
           </b-col>
         </b-row>
       </template>
