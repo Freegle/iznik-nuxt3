@@ -91,7 +91,15 @@ export const useAuthStore = defineStore({
       }
 
       await this.$api.session.logout()
+
+      // We are going to reset the store, but there are a few things we want to preserve.
+      const loginCount = this.loginCount
+      const config = this.config
+      const api = this.$api
       this.$reset()
+      this.loginCount = loginCount
+      this.config = config
+      this.$api = api
     },
     async forget() {
       const { ret } = await this.$api.session.forget()

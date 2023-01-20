@@ -743,7 +743,9 @@ export default {
       }
     },
     goHome() {
-      this.mapObject.flyTo(new this.L.LatLng(this.me.lat, this.me.lng))
+      if (this.me.lat || this.me.lng) {
+        this.mapObject.flyTo(new this.L.LatLng(this.me.lat, this.me.lng))
+      }
     },
     hideMap() {
       this.miscStore.set({

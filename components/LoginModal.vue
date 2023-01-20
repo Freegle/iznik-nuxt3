@@ -31,7 +31,6 @@
         <p v-if="signUp" class="font-weight-bold">
           Using one of these buttons is the easiest way to create an account:
         </p>
-        <div id="loginGoogle" class="mb-4" />
         <b-button
           class="social-button social-button--facebook"
           :disabled="facebookDisabled"
@@ -45,6 +44,10 @@
             >Continue with Facebook</span
           >
         </b-button>
+        <div
+          id="googleLoginButton"
+          class="social-button social-button--google clickme"
+        />
         <b-button
           class="social-button social-button--yahoo"
           :disabled="yahooDisabled"
@@ -226,8 +229,9 @@ export default {
     }
   },
   computed: {
-    // Use of this.bump means we will recompute when we need to, i.e. when the modal is shown.  This is overriding
-    // normal reactivity but that's because the SDKs we use aren't written in Vue.
+    clientId() {
+      return this.runtimeConfig.public.GOOGLE_CLIENT_ID
+    },
     facebookDisabled() {
       return (
         this.bump &&
@@ -282,12 +286,16 @@ export default {
       handler(newVal) {
         this.pleaseShowModal = newVal
 
-        if (newVal && !this.initialisedSocialLogin) {
-          // We only use the Google and Facebook SDKs in login, so we can install them here in the modal.  This means we
-          // don't load the scripts for every page.
+        if (newVal) {
+          if (!this.initialisedSocialLogin) {
+            // We only use the Google and Facebook SDKs in login, so we can install them here in the modal.  This means we
+            // don't load the scripts for every page.
+            this.installFacebookSDK()
+            this.initialisedSocialLogin = true
+          }
+
+          // Need to install Google every time to get the button rendered.
           this.installGoogleSDK()
-          this.installFacebookSDK()
-          this.initialisedSocialLogin = true
         }
       },
     },
@@ -302,6 +310,14 @@ export default {
       handler(newVal) {
         this.showModal = this.pleaseShowModal || newVal
       },
+    },
+    me(newVal) {
+      // Need to do this when we log out to get the signin button rendered on the login modal.
+      if (!newVal) {
+        this.$nextTick(() => {
+          this.installGoogleSDK()
+        })
+      }
     },
   },
   beforeDestroy() {
@@ -501,58 +517,19 @@ export default {
 
         try {
           await this.authStore.login({
-            googleauthcode: response.credential,
+            googlejwt: response.credential,
             googlelogin: true,
           })
 
           // We are now logged in.
           console.log('Logged in')
-          self.pleaseShowModal = false
+          this.pleaseShowModal = false
         } catch (e) {
           this.socialLoginError = 'Google login failed: ' + e.message
         }
       } else if (response?.error && response.error !== 'immediate_failed') {
         this.socialLoginError = 'Google login failed: ' + response.error
       }
-    },
-    loginGoogle() {
-      this.loginType = 'Google'
-
-      this.nativeLoginError = null
-      this.socialLoginError = null
-      const params = {
-        clientid: this.runtimeConfig.public.GOOGLE_CLIENT_ID,
-        cookiepolicy: 'single_host_origin',
-        callback: async (authResult) => {
-          console.log('Signin returned', authResult)
-          if (authResult.access_token) {
-            console.log('Signed in')
-
-            try {
-              await this.authStore.login({
-                googleauthcode: authResult.code,
-                googlelogin: true,
-              })
-
-              // We are now logged in.
-              console.log('Logged in')
-              self.pleaseShowModal = false
-            } catch (e) {
-              this.socialLoginError = 'Google login failed: ' + e.message
-            }
-          } else if (
-            authResult.error &&
-            authResult.error !== 'immediate_failed'
-          ) {
-            this.socialLoginError = 'Google login failed: ' + authResult.error
-          }
-        },
-        immediate: false,
-        scope: 'profile email',
-        app_package_name: 'org.ilovefreegle.direct',
-      }
-
-      window.gapi.auth.signIn(params)
     },
     loginYahoo() {
       this.authStore.oginType = 'Yahoo'
@@ -600,32 +577,17 @@ export default {
       this.$router.push('/forgot')
     },
     installGoogleSDK() {
-      const self = this
-
-      ;(function (d, s, id) {
-        const fjs = d.getElementsByTagName(s)[0]
-
-        if (!d.getElementById(id)) {
-          // Not already installed.
-          const js = d.createElement(s)
-          js.id = id
-          js.src = 'https://accounts.google.com/gsi/client'
-          js.onload = (e) => {
-            console.log('GSI loaded')
-
-            window.google.accounts.id.initialize({
-              client_id: self.runtimeConfig.public.GOOGLE_CLIENT_ID,
-              callback: self.handleGoogleCredentialsResponse,
-            })
-
-            window.google.accounts.id.renderButton(
-              document.getElementById('loginGoogle'),
-              { theme: 'filled_blue', size: 'large' } // customization attributes
-            )
-          }
-          fjs.parentNode.insertBefore(js, fjs)
-        }
-      })(document, 'script', 'google-jssdk')
+      console.log('Install google SDK')
+      // Google client library should be loaded by default.vue.
+      window?.google?.accounts?.id?.initialize({
+        client_id: this.clientId,
+        callback: this.handleGoogleCredentialsResponse,
+      })
+      console.log('Render google button')
+      window?.google?.accounts?.id?.renderButton(
+        document.getElementById('googleLoginButton'),
+        { theme: 'outline', size: 'large', width: '300px' }
+      )
     },
     installFacebookSDK() {
       const self = this
@@ -730,11 +692,13 @@ $color-yahoo: #6b0094;
 .social-button--facebook {
   border: 2px solid $color-facebook;
   background-color: $color-facebook;
+  width: 100%;
 }
 
 .social-button--google {
   border: 2px solid $color-google;
-  background-color: $color-google;
+  background-color: #dadce0;
+  width: 100%;
 }
 
 :deep(.social-button--google > div) {
@@ -744,6 +708,7 @@ $color-yahoo: #6b0094;
 .social-button--yahoo {
   border: 2px solid $color-yahoo;
   background-color: $color-yahoo;
+  width: 100%;
 }
 
 .divider__wrapper {

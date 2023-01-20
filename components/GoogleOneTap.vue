@@ -49,7 +49,6 @@ export default {
         js.id = id
         js.src = 'https://accounts.google.com/gsi/client'
         js.onload = (e) => {
-          window.google.accounts.id.prompt() // Display the One Tap dialog
           window.google.accounts.id.prompt((notification) => {
             console.log('One Tap prompt returned', notification)
 
