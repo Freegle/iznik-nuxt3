@@ -13,17 +13,35 @@
       />
       <hr />
       <div ref="faq">
-        <div v-show="matches.includes('unsubscribe')" id="unsubscribe">
-          <h3>How do I unsubscribe?</h3>
-          <div>
-            If you'd like to leave Freegle, then go
-            <nuxt-link to="/unsubscribe">here</nuxt-link>. But remember that you
-            can also reduce the number and frequency of emails from
-            <nuxt-link to="/settings">Settings</nuxt-link>.
-          </div>
-        </div>
-        <div v-show="matches.includes('taken')" id="taken">
-          <h3>My OFFER has been TAKEN - what do I do?</h3>
+        <HelpQuestion id="unsubscribe" :matches="matches">
+          <template #title>How do I leave/unsubscribe?</template>
+          <template #default>
+            <p>
+              If you'd like to leave Freegle, then go
+              <nuxt-link to="/unsubscribe">here</nuxt-link>.
+            </p>
+            <p>
+              But if you're just getting more emails than you want, you can
+              reduce the number and frequency of emails from
+              <nuxt-link to="/settings">Settings</nuxt-link>.
+            </p>
+          </template>
+        </HelpQuestion>
+        <HelpQuestion id="rules" :matches="matches">
+          <template #title>What are your rules?</template>
+          <template #default>
+            <TermsOfUse />
+          </template>
+        </HelpQuestion>
+        <HelpQuestion id="toomanyemails" :matches="matches">
+          <template #title>How do I get fewer emails?</template>
+          <p>
+            <!-- eslint-disable-next-line-->
+            If you go to <nuxt-link to="/settings">Settings</nuxt-link> then you can change how many mails you get in your <em>Mail Settings</em>.
+          </p>
+        </HelpQuestion>
+        <HelpQuestion id="taken" :matches="matches">
+          <template #title>My OFFER has been TAKEN - what do I do?</template>
           <div>
             <p>
               If someone has collected your OFFER, then make sure you're logged
@@ -49,10 +67,196 @@
               to expand it before the buttons appear.
             </p>
           </div>
-        </div>
+        </HelpQuestion>
+        <HelpQuestion id="repost" :matches="matches">
+          <template #title>How do I repost an item?</template>
+          <div>
+            <p>
+              <!-- eslint-disable-next-line-->
+                If you've not had any replies, this happens automatically.  If you go to <nuxt-link to="/myposts">My Posts</nuxt-link>, and click on the post, you can see the time until the auto-repost is due on there, like this:
+            </p>
+            <p>
+              <span class="success"> Auto-repost due in 2 days</span>
+            </p>
+            <p>
+              If you have had replies, you need to use the
+              <em>Repost</em> button in the same place.
+            </p>
+          </div>
+        </HelpQuestion>
+        <HelpQuestion id="changeemail" :matches="matches">
+          <template #title>How do I change my email address?</template>
+          <div>
+            <p>
+              <!-- eslint-disable-next-line-->
+                You can do this from your <nuxt-link to="/settings">Settings</nuxt-link>, in the <em>Personal Information</em> section.
+            </p>
+          </div>
+        </HelpQuestion>
+        <HelpQuestion id="gdpr" :matches="matches">
+          <template #title>What data do you store about me?</template>
+          <p>
+            If you're really into privacy or GDPR, tou can see what data we
+            store about you, and download it,
+            <nuxt-link to="/mydata"> here </nuxt-link>.
+          </p>
+        </HelpQuestion>
+        <HelpQuestion id="app" :matches="matches">
+          <template #title>Do you have a mobile app?</template>
+          <div>
+            <p>
+              We do! Freegling is easy on mobiles and tablets, and you get
+              notifications of replies so you don't have to rely on email.
+              Download using these links or search for Freegle in your app store
+              - it's free!
+            </p>
+            <div class="d-flex justify-content-between">
+              <a
+                href="https://play.google.com/store/apps/details?id=org.ilovefreegle.direct"
+                class="mt-2"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <img
+                  alt="Freegle Android app on Google Play"
+                  title="Freegle Android app on Google Play"
+                  class="img-responsive"
+                  src="/en-play-badge.png"
+                />
+              </a>
+              <a
+                href="https://itunes.apple.com/gb/app/freegle/id970045029?ls=1&amp;mt=8"
+                class="mt-2"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <img
+                  alt="Freegle app for iPhone, iPad, and iPod touch"
+                  title="Freegle app for iPhone, iPad, and iPod touch"
+                  class="img-responsive"
+                  src="/app-store-black-sm.png"
+                />
+              </a>
+            </div>
+            <p class="mt-2">
+              The app is only available in the UK app stores. We support Android
+              4.4/iOS 10 or later.
+            </p>
+          </div>
+        </HelpQuestion>
+        <HelpQuestion id="canihelp" :matches="matches">
+          <template #title>Can I help?</template>
+          <div>
+            <p>
+              Yes! Freegle is run by volunteers. The first stage is to become a
+              Freegle Supporter, by donating time or funds (whichever you're
+              able).
+            </p>
+            <b-button variant="primary" class="mb-2" @click="supporterInfo">
+              Find out more
+            </b-button>
+            <SupporterInfoModal ref="supporterInfoModal" />
+            <p>
+              If you'd like to spread the word you can download a poster or ask
+              for "business cards" to hand out:
+            </p>
+            <b-button to="/promote" variant="primary" class="mb-2">
+              Find out more
+            </b-button>
+            <p>
+              If you would like to help run one of the local communities, which
+              is a good place to start, please use the <em>Contact</em> button
+              below.
+            </p>
+            <p>
+              You can also volunteer nationally. We really need people in these
+              areas:
+            </p>
+            <ul>
+              <li>
+                Publicity: if you can help locally or nationally, especially
+                with councils, we'd love to hear from you.
+              </li>
+              <li>
+                Fundraising: we run on volunteers and donations, and just about
+                get by, but we could do so much more with more.
+              </li>
+              <li>
+                Graphics: we need people who can produce striking images,
+                posters, etc.
+              </li>
+              <li>
+                User Experience (UX): if you work in this area we could use your
+                help.
+              </li>
+              <li>
+                IT geeks who know some of these: VueJS/Bootstrap
+                4/CSS/PHP/Percona/nginx - find us on
+                <a
+                  target="_blank"
+                  href="https://github.com/Freegle"
+                  rel="noopener noreferrer"
+                  >GitHub</a
+                >.
+              </li>
+            </ul>
+            <p>
+              <!-- eslint-disable-next-line -->
+              You can reach us at <ExternalLink href="mailto:volunteers@ilovefreegle.org">volunteers@ilovefreegle.org</ExternalLink>.
+            </p>
+            <p>
+              Or if you'd like to donate to our charity, you can do that
+              <nuxt-link to="/donate"> here </nuxt-link> or here:
+            </p>
+            <p>
+              <DonationButton :direct-donation="true" />
+            </p>
+          </div>
+        </HelpQuestion>
+        <HelpQuestion id="donate" :matches="matches">
+          <template #title>How do I donate?</template>
+          <div>
+            <p>
+              If you're able to donate to keep Freegle running, you can do that
+              here:
+            </p>
+            <DonationButton :direct-donation="true" />
+            <p>Monthly donations are particularly welcome.</p>
+            <p>
+              If you don't use PayPal, there are other ways to donate
+              <nuxt-link to="/donate">here</nuxt-link>.
+            </p>
+          </div>
+        </HelpQuestion>
+        <HelpQuestion id="selling" :matches="matches">
+          <template #title>Can I sell something given on Freegle?</template>
+          <div>
+            <p>
+              Reselling also keeps stuff out of landfill; but please don't sell
+              items you got from Freegle without the agreement of the person who
+              gave them to you.
+            </p>
+          </div>
+        </HelpQuestion>
+        <HelpQuestion id="howdoichoose" :matches="matches">
+          <template #title
+            >How do I choose if several people are interested?
+          </template>
+          <div>
+            <p>
+              Unless you are in a hurry, it is better leave it a while to see
+              who replies before choosing. Some people use
+              first-come-first-served, but you don't have to.
+            </p>
+            <p>
+              You can see in someone's profile how close they are, how many
+              thumbs up/down they have from other freeglers.
+            </p>
+            <p>It'sup to you - deciding is all part of the fun!</p>
+          </div>
+        </HelpQuestion>
       </div>
       <hr />
-      <p>TODO More FAQs - Support compiling a list</p>
       <h2 class="header--size1">Something else?</h2>
       <p>
         If your question isn't answered above, or you wish to compliment or
@@ -100,8 +304,7 @@
           </li>
           <li>
             <!-- eslint-disable-next-line -->
-            Our national mailbox volunteers at <SupportLink email="info@ilovefreegle.org" text="info@ilovefreegle.org" />. They
-            />. They deal with more general questions about Freegle which aren't
+            Our national mailbox volunteers at <SupportLink email="info@ilovefreegle.org" text="info@ilovefreegle.org" />. They deal with more general questions about Freegle which aren't
             specific to one community, or if you have issues you can't resolve
             with your local team. Please be aware that we have very limited
             powers. Local communities are autonomous, but we can help negotiate,
@@ -122,8 +325,10 @@
 <script>
 import { Searcher } from 'fast-fuzzy'
 import dayjs from 'dayjs'
+import HelpQuestion from '../components/HelpQuestion'
 
 export default {
+  components: { HelpQuestion },
   data() {
     return {
       question: null,
@@ -164,6 +369,7 @@ export default {
       try {
         const questionText = question.children[0].innerText.trim()
         const answerText = question.children[1].innerText.trim()
+        console.log('Question', questionText, question)
 
         this.forIndex.push({
           id: question.id,
@@ -179,6 +385,11 @@ export default {
       threshold: 0.7,
       keySelector: (obj) => obj.question + ' ' + obj.answer,
     })
+  },
+  methods: {
+    supporterInfo() {
+      this.$refs.supporterInfoModal.show()
+    },
   },
 }
 </script>
