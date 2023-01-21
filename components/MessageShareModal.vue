@@ -120,7 +120,6 @@ export default {
   },
   data() {
     return {
-      shared: false,
       copied: false,
     }
   },
@@ -138,9 +137,6 @@ export default {
         // Must no longer exist on server.
         this.close()
       }
-    },
-    chose(type) {
-      this.shared = true
     },
     async doCopy() {
       await navigator.clipboard.writeText(this.message.url)

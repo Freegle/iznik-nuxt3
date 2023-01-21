@@ -50,12 +50,12 @@
           >
         </b-button>
         <b-button variant="secondary" to="/stories" size="sm" class="mr-1">
-          <v-icon icon="book-open" />
+          <v-icon icon="book-open" class="mr-1" />
           <span class="d-none d-inline-block-md">More stories</span>
           <span class="d-inline-block d-none-md">More</span>
         </b-button>
         <b-button variant="primary" size="sm" @click="showAddModal">
-          <v-icon icon="book-open" />
+          <v-icon icon="book-open" class="mr-1" />
           <span class="d-none d-inline-block-md">Tell your story!</span>
           <span class="d-inline-block d-none-md">Tell yours</span>
         </b-button>
@@ -70,9 +70,8 @@
       imgtype="Story"
       imgflag="story"
     />
-    <!--    TODO Stories-->
-    <!--    <StoriesAddModal ref="addmodal" />-->
-    <!--    <StoriesShareModal :story="newsfeed.story" />-->
+    <StoryAddModal v-if="showAdd" ref="addmodal" />
+    <StoryShareModal v-if="showShare" :id="newsfeed.storyid" ref="share" />
   </div>
 </template>
 <script>
@@ -85,8 +84,8 @@ import NewsBase from '~/components/NewsBase'
 import NewsUserIntro from '~/components/NewsUserIntro'
 import NewsLoveComment from '~/components/NewsLoveComment'
 import NewsPhotoModal from '~/components/NewsPhotoModal'
-// const StoriesAddModal = () => import('~/components/StoriesAddModal')
-// const StoriesShareModal = () => import('~/components/StoriesShareModal')
+const StoryAddModal = () => import('~/components/StoryAddModal')
+const StoryShareModal = () => import('~/components/StoryShareModal')
 
 export default {
   components: {
@@ -94,8 +93,8 @@ export default {
     NewsUserIntro,
     NewsLoveComment,
     ReadMore,
-    // StoriesAddModal,
-    // StoriesShareModal,
+    StoryAddModal,
+    StoryShareModal,
   },
   extends: NewsBase,
   async setup(props) {
@@ -107,6 +106,12 @@ export default {
 
     return {
       storyStore,
+    }
+  },
+  data() {
+    return {
+      showShare: false,
+      showAdd: false,
     }
   },
   computed: {
@@ -124,10 +129,16 @@ export default {
   },
   methods: {
     showAddModal() {
-      this.$refs.addmodal.show()
+      this.showAdd = true
+      this.waitForRef('addmodal', () => {
+        this.$refs.addmodal.show()
+      })
     },
     shareStory() {
-      this.$bvModal.show('storiesShareModal-' + this.newsfeed.story.id)
+      this.showShare = true
+      this.waitForRef('share', () => {
+        this.$refs.share.show()
+      })
     },
   },
 }

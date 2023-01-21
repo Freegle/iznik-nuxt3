@@ -160,8 +160,7 @@ html {
 }
 
 .pageContent {
-  top: 75px;
-  position: fixed;
+  margin-top: 75px;
 }
 
 *,

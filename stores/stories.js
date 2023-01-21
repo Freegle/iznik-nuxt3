@@ -25,6 +25,14 @@ export const useStoryStore = defineStore({
 
       return this.list[id]
     },
+    add(headline, story, photo, allowpublic) {
+      return api(this.config).stories.add({
+        headline,
+        story,
+        photo,
+        allowpublic,
+      })
+    },
   },
   getters: {
     byId: (state) => (id) => {

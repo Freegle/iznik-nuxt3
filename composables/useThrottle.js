@@ -30,7 +30,6 @@ export function checkThrottle(resolve) {
 }
 
 export async function fetchOurOffers() {
-  // TODO MINOR PERFORMANCE Pass age to server
   const messageStore = useMessageStore()
   const authStore = useAuthStore()
 

@@ -32,7 +32,6 @@
               <v-icon icon="check" /> Mark all read
             </b-button>
           </div>
-          <!--            TODO Highlight unread and RSVP chats which might be below the fold.-->
           <p v-if="!visibleChats?.length" class="ml-2">
             <span v-if="searching" class="pulsate"> Searching... </span>
             <span v-else> No chats to show. </span>
