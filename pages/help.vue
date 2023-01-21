@@ -220,7 +220,7 @@
               If you're able to donate to keep Freegle running, you can do that
               here:
             </p>
-            <DonationButton :direct-donation="true" />
+            <DonationButton :direct-donation="true" class="mb-1" />
             <p>Monthly donations are particularly welcome.</p>
             <p>
               If you don't use PayPal, there are other ways to donate
@@ -369,7 +369,6 @@ export default {
       try {
         const questionText = question.children[0].innerText.trim()
         const answerText = question.children[1].innerText.trim()
-        console.log('Question', questionText, question)
 
         this.forIndex.push({
           id: question.id,
