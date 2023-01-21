@@ -348,6 +348,7 @@
   </div>
 </template>
 <script>
+import { useRoute } from 'vue-router'
 import { useTeamStore } from '../stores/team'
 import { buildHead } from '~/composables/useBuildHead'
 import ProfileImage from '~/components/ProfileImage'
@@ -358,9 +359,10 @@ export default {
   },
   async setup() {
     const teamStore = useTeamStore()
-
+    const route = useRoute()
     useHead(
       buildHead(
+        route,
         'About Us',
         'What we do, how it works, who we are...all that stuff.'
       )

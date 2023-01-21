@@ -91,11 +91,11 @@ export default {
     MyMessage,
   },
   async setup(props) {
+    const route = useRoute()
     const messageStore = useMessageStore()
     const groupStore = useGroupStore()
 
     // We don't use lazy because we want the page to be rendered for SEO.
-    const route = useRoute()
     const id = parseInt(route.params.id)
 
     const message = await messageStore.fetch(id)
@@ -111,6 +111,7 @@ export default {
 
       useHead(
         buildHead(
+          route,
           message.subject,
           snip,
           message.attachments && message.attachments.length > 0

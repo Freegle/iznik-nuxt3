@@ -131,6 +131,7 @@ export default {
 
     useHead(
       buildHead(
+        route,
         'Unsubscribe',
         'Want to leave Freegle?  You can do that from here.'
       )

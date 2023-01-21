@@ -160,13 +160,17 @@
   </div>
 </template>
 <script>
+import { useRoute } from 'vue-router'
 import { buildHead } from '~/composables/useBuildHead'
 import ExternalLink from '~/components/ExternalLink'
 
 export default {
   components: { ExternalLink },
   setup() {
-    useHead(buildHead('Privacy', 'What data we keep and how we protect it'))
+    const route = useRoute()
+    useHead(
+      buildHead(route, 'Privacy', 'What data we keep and how we protect it')
+    )
   },
 }
 </script>

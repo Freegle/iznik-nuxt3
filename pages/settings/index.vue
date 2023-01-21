@@ -627,6 +627,7 @@
 </template>
 <script>
 import dayjs from 'dayjs'
+import { useRoute } from 'vue-router'
 import EmailValidator from '../../components/EmailValidator'
 import EmailOwn from '../../components/EmailOwn'
 import { useMiscStore } from '../../stores/misc'
@@ -670,11 +671,13 @@ export default {
     PasswordEntry,
   },
   setup() {
+    const route = useRoute()
     const miscStore = useMiscStore()
     const authStore = useAuthStore()
 
     useHead(
       buildHead(
+        route,
         'Settings',
         'What people see about you, your email settings, all that good stuff...',
         null,

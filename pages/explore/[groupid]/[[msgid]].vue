@@ -41,7 +41,10 @@ export default {
     }
 
     useHead(
-      buildHead(group ? 'Explore ' + group.namedisplay : 'Explore Freegle')
+      buildHead(
+        route,
+        group ? 'Explore ' + group.namedisplay : 'Explore Freegle'
+      )
     )
 
     return { id, msgid, groupStore }

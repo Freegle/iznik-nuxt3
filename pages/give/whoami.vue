@@ -100,6 +100,7 @@
 </template>
 <script>
 import { mapWritableState } from 'pinia'
+import { useRoute } from 'vue-router'
 import { useComposeStore } from '../../stores/compose'
 import { useUserStore } from '../../stores/user'
 import { buildHead } from '../../composables/useBuildHead'
@@ -120,8 +121,11 @@ export default {
     WizardProgress,
   },
   async setup() {
+    const route = useRoute()
+
     useHead(
       buildHead(
+        route,
         'OFFER',
         'OFFER something to people nearby and see who wants it'
       )

@@ -4,8 +4,8 @@
       v-model:chat-count="chatCount"
       v-model:unread-notification-count="unreadNotificationCount"
     />
-    <main v-if="complete">
-      <slot ref="pageContent" class="ml-0 ps-0 pe-0 pageContent" />
+    <main v-if="complete" class="ml-0 ps-0 pe-0 pageContent">
+      <slot ref="pageContent" />
     </main>
     <BouncingEmail />
     <div class="navbar-toggle" style="display: none" />
@@ -160,7 +160,8 @@ html {
 }
 
 .pageContent {
-  padding-top: 68px;
+  top: 75px;
+  position: fixed;
 }
 
 *,
@@ -197,22 +198,6 @@ body.modal-open {
   100% {
     visibility: visible;
     opacity: 1;
-  }
-}
-
-body:not(.landing) {
-  main {
-    margin-top: 51px;
-  }
-}
-
-body.landing {
-  main {
-    margin-top: 0px;
-
-    @include media-breakpoint-up(md) {
-      margin-top: 51px;
-    }
   }
 }
 </style>

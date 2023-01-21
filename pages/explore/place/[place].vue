@@ -36,8 +36,11 @@ export default {
     AdaptiveMap,
   },
   async setup() {
+    const route = useRoute()
+
     useHead(
       buildHead(
+        route,
         'Explore Freegle',
         "There are lots of lovely communities of freeglers across the UK. Shall we see what they're up to?",
         null,
@@ -48,7 +51,6 @@ export default {
     )
 
     const groupStore = useGroupStore()
-    const route = useRoute()
     const place = route.params.place ? JSON.parse(route.params.place) : null
     const initialBounds = place && place.bbox ? place.bbox : null
 

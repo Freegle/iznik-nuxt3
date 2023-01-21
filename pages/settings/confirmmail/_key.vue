@@ -101,13 +101,14 @@ const ExternalLink = () => import('~/components/ExternalLink')
 export default {
   components: { ExternalLink },
   setup() {
-    const authStore = useAuthStore()
     const route = useRoute()
+    const authStore = useAuthStore()
 
     const key = route.params.key
 
     useHead(
       buildHead(
+        route,
         'Confirm Email',
         'Confirm your email address so that we send mails to the right place.'
       )

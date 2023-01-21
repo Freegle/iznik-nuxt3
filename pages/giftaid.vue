@@ -1,0 +1,295 @@
+<template>
+  <b-container fluid>
+    <b-row class="m-0">
+      <b-col cols="0" lg="3" class="d-none d-lg-block p-0 pr-1" />
+      <b-col cols="12" lg="6" class="bg-white">
+        <h1>Gift Aid for Freegle</h1>
+        <p>
+          Your kind donation will go even further if we can claim Gift Aid on
+          it. Please fill out this form if you are able.
+        </p>
+        <div v-if="oldoptions">
+          <client-only>
+            <label class="strong"> I'd like Freegle to claim Gift Aid: </label>
+            <br />
+            <OurToggle
+              v-model="giftAidAllowed"
+              :height="34"
+              :width="150"
+              :font-size="14"
+              :sync="true"
+              :labels="{ checked: 'Yes', unchecked: 'No' }"
+              color="#61AE24"
+              class="mt-3"
+              @change="changeGiftAidToggle"
+            />
+            <br />
+          </client-only>
+        </div>
+        <div v-else>
+          <client-only>
+            <label class="strong">
+              I'd like Freegle to claim Gift Aid on my donation, and any
+              donations I make in the future or have made in the past four
+              years:
+            </label>
+            <br />
+            <OurToggle
+              v-model="giftAidAllowed"
+              :height="34"
+              :width="150"
+              :font-size="14"
+              :sync="true"
+              :labels="{ checked: 'Yes', unchecked: 'No' }"
+              color="#61AE24"
+              class="mt-3"
+              @change="changeGiftAidToggle"
+            />
+            <br />
+          </client-only>
+        </div>
+        <div v-if="giftAidAllowed">
+          <b-form-group
+            id="fullnamelabel"
+            label="Your full (real) name"
+            label-for="fullname"
+            label-class="label"
+          >
+            <div
+              v-if="
+                me &&
+                me.displayname &&
+                !fullname &&
+                me.displayname.indexOf(' ') !== -1
+              "
+            >
+              <b-button
+                variant="secondary"
+                class="mb-2"
+                @click="fullname = me.displayname"
+              >
+                Click here to use <strong>{{ me.displayname }}</strong>
+              </b-button>
+            </div>
+            <b-form-input
+              id="fullname"
+              v-model="fullname"
+              name="fullname"
+              autocomplete="given-name"
+              placeholder="Your full name"
+              :class="{ 'border-warning': nameInvalid, 'mb-3': true }"
+            />
+          </b-form-group>
+          <b-form-group
+            id="homeaddresslabel"
+            label="Your home address"
+            label-for="homeaddress"
+            label-class="label"
+          >
+            <div v-for="address in addresses" :key="'address-' + address.id">
+              <div v-if="!homeaddress">
+                <b-button
+                  variant="secondary"
+                  class="mb-2"
+                  @click="homeaddress = address.multiline"
+                >
+                  Click here to use
+                  <span class="font-weight-bold">{{ address.singleline }}</span>
+                </b-button>
+              </div>
+            </div>
+            <p><strong>Please make sure you include a postcode.</strong></p>
+            <b-form-textarea
+              id="homeaddress"
+              v-model="homeaddress"
+              rows="4"
+              name="homeaddress"
+              placeholder="Your home address"
+              :class="{ 'border-warning': addressInvalid, 'mb-3': true }"
+            />
+          </b-form-group>
+          <b-form-group
+            v-if="oldoptions"
+            id="periodlabel"
+            label="This declaration covers"
+            label-for="period"
+            label-class="label"
+          >
+            <b-form-radio
+              v-model="period"
+              name="period"
+              value="Past4YearsAndFuture"
+            >
+              This donation and any donations I make in the future or have made
+              in the past four years
+            </b-form-radio>
+            <b-form-radio v-model="period" name="period" value="Since">
+              All donations in the last five years
+            </b-form-radio>
+            <b-form-radio v-model="period" name="period" value="This">
+              Just this donation
+            </b-form-radio>
+            <b-form-radio v-model="period" name="period" value="Future">
+              This and all future donations
+            </b-form-radio>
+          </b-form-group>
+          <NoticeMessage class="info">
+            By submitting this declaration I confirm that I am a UK taxpayer and
+            understand that if I pay less Income Tax and/or Capital Gains Tax in
+            the current tax year than the amount of Gift Aid claimed on all my
+            donations it is my responsibility to pay any difference.
+          </NoticeMessage>
+        </div>
+        <SpinButton
+          name="save"
+          size="lg"
+          variant="primary"
+          label="Submit Gift Aid Declaration"
+          class="mt-4"
+          :handler="save"
+          :disabled="!valid"
+        />
+        <NoticeMessage v-if="saved" variant="primary" class="mt-2">
+          Thank you. We have saved your Gift Aid Declaration. It's very kind of
+          you to help keep Freegle going.
+        </NoticeMessage>
+        <hr />
+        <div class="small mt-2">
+          <p>Please return to this page and amend your details if you:</p>
+          <ul>
+            <li>Want to cancel this declaration</li>
+            <li>Change your name or home address</li>
+            <li>
+              No longer pay sufficient tax on your income and/or capital gains.
+            </li>
+          </ul>
+          <SpinButton
+            v-if="valid"
+            name="trash-alt"
+            size="lg"
+            variant="white"
+            label="Remove Gift Aid Consent"
+            class="mt-2 mb-2"
+            :handler="remove"
+          />
+        </div>
+      </b-col>
+      <b-col cols="0" lg="3" class="d-none d-lg-block p-0 pl-1" />
+    </b-row>
+  </b-container>
+</template>
+<script>
+import { useRoute } from 'vue-router'
+import SpinButton from '../components/SpinButton'
+import NoticeMessage from '../components/NoticeMessage'
+import { useAddressStore } from '../stores/address'
+import { useGiftAidStore } from '../stores/giftaid'
+import { buildHead } from '~/composables/useBuildHead'
+import OurToggle from '~/components/OurToggle'
+import { ref } from '#imports'
+
+export default {
+  components: { SpinButton, NoticeMessage, OurToggle },
+  async setup() {
+    const route = useRoute()
+    const addressStore = useAddressStore()
+    const giftAidStore = useGiftAidStore()
+
+    const addresses = computed(() => addressStore.addresses)
+    await addressStore.fetch()
+
+    await giftAidStore.fetch()
+
+    const giftaid = computed(() => giftAidStore.giftaid)
+    const period = computed({
+      get: () =>
+        giftAidStore.period ? giftAidStore.period : 'Past4YearsAndFuture',
+      set: (value) => (giftAidStore.period = value),
+    })
+
+    const fullname = computed({
+      get: () => giftAidStore.giftaid.fullname,
+      set: (value) => (giftAidStore.giftaid.fullname = value),
+    })
+
+    const homeaddress = computed({
+      get: () => giftAidStore.giftaid.homeaddress,
+      set: (value) => (giftAidStore.giftaid.homeaddress = value),
+    })
+
+    const giftAidAllowed = period.value !== 'Declined'
+
+    const oldoptions = computed(() => {
+      let oldoptions = false
+
+      if (
+        period.value === 'Since' ||
+        period.value === 'This' ||
+        period.value === 'Future'
+      ) {
+        // Older gift aid options from a previous declaration.
+        oldoptions = true
+      }
+
+      return oldoptions
+    })
+
+    useHead(
+      buildHead(route, 'Gift Aid', 'Add gift aid to your donation to Freegle')
+    )
+
+    return {
+      addressStore,
+      giftAidStore,
+      addresses,
+      giftaid,
+      period,
+      fullname,
+      homeaddress,
+      giftAidAllowed: ref(giftAidAllowed),
+      oldoptions,
+    }
+  },
+  data() {
+    return {
+      saved: false,
+    }
+  },
+  computed: {
+    valid() {
+      return this.period && this.fullname && this.homeaddress
+    },
+    nameInvalid() {
+      return !this.fullname || !this.fullname.includes(' ')
+    },
+    addressInvalid() {
+      return !this.homeaddress || !this.homeaddress.includes(' ')
+    },
+  },
+  methods: {
+    async save() {
+      await this.giftAidStore.save()
+      this.saved = true
+    },
+    async remove() {
+      await this.giftAidStore.remove()
+      this.period = 'Since'
+      this.fullname = null
+      this.homeaddress = null
+    },
+    changeGiftAidToggle(val) {
+      if (val.value) {
+        this.period = 'Since'
+      } else {
+        this.period = 'Declined'
+      }
+    },
+  },
+}
+</script>
+<style scoped lang="scss">
+:deep(.label) {
+  font-weight: bold;
+  color: $color-green--darker;
+}
+</style>

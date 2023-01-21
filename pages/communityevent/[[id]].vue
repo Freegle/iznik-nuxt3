@@ -56,6 +56,7 @@ export default {
       const event = eventStore.fetch(id)
       useHead(
         buildHead(
+          route,
           event.title,
           event.description,
           event.image ? event.image.path : null
@@ -65,6 +66,7 @@ export default {
       invalid = true
       useHead(
         buildHead(
+          route,
           'Community Event ' + id,
           "Sorry, that community event isn't around any more."
         )

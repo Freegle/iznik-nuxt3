@@ -92,6 +92,7 @@
 </template>
 
 <script>
+import { useRoute } from 'vue-router'
 import NoticeMessage from '../../components/NoticeMessage'
 import { buildHead } from '../../composables/useBuildHead'
 import ExternalLink from '@/components/ExternalLink'
@@ -113,8 +114,11 @@ export default {
     WizardProgress,
   },
   async setup() {
+    const route = useRoute()
+
     useHead(
       buildHead(
+        route,
         'WANTED',
         "Ask people nearby if they have what you're looking for"
       )

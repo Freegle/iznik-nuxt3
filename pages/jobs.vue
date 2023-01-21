@@ -51,6 +51,7 @@
 </template>
 <script>
 import { mapState } from 'pinia'
+import { useRoute } from 'vue-router'
 import JobOne from '../components/JobOne'
 import { useJobStore } from '../stores/job'
 import { useAuthStore } from '../stores/auth'
@@ -74,9 +75,11 @@ export default {
     const lng = ref(me?.lng)
 
     const location = ref(me?.settings?.mylocation?.name || null)
+    const route = useRoute()
 
     useHead(
       buildHead(
+        route,
         'Jobs',
         'Freegle gets a little bit to help keep us going if you click on them.',
         null,

@@ -142,6 +142,7 @@
 </template>
 <script>
 import { mapState } from 'pinia'
+import { useRoute } from 'vue-router'
 import DonationThermometer from '../components/DonationThermometer'
 import DonationButton from '../components/DonationButton'
 import ExternalLink from '../components/ExternalLink'
@@ -156,8 +157,11 @@ export default {
   },
   ...mapState(useDonationStore, ['target']),
   setup() {
+    const route = useRoute()
+
     useHead(
       buildHead(
+        route,
         'Donate to Freegle',
         "We're free to use, but not free to run.  Can you help us keep going?"
       )

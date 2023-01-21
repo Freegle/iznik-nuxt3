@@ -51,6 +51,7 @@ export default {
 
     useHead(
       buildHead(
+        route,
         group ? 'Explore ' + group.namedisplay : 'Explore Freegle',
         null,
         null,

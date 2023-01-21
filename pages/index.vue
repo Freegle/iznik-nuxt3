@@ -123,9 +123,11 @@ export default {
   },
   setup() {
     const miscStore = useMiscStore()
+    const route = useRoute()
 
     useHead(
       buildHead(
+        route,
         'OFFER',
         'OFFER something to people nearby and see who wants it',
         null,

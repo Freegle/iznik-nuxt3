@@ -1,6 +1,10 @@
-import { useRoute } from 'vue-router'
-
-export function buildHead(title, description, image = null, bodyAttrs = {}) {
+export function buildHead(
+  route,
+  title,
+  description,
+  image = null,
+  bodyAttrs = {}
+) {
   const runtimeConfig = useRuntimeConfig()
 
   const meta = [
@@ -35,8 +39,6 @@ export function buildHead(title, description, image = null, bodyAttrs = {}) {
     property: 'og:image',
     content: retImage,
   })
-
-  const route = useRoute()
 
   meta.push({
     hid: 'og:url',

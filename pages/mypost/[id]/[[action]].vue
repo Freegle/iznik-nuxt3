@@ -88,7 +88,7 @@ export default {
 
       await Promise.all(promises)
 
-      useHead(buildHead(message ? message.subject : 'My Posts', null))
+      useHead(buildHead(route, message ? message.subject : 'My Posts', null))
 
       if (myid) {
         if (message?.fromuser !== myid) {

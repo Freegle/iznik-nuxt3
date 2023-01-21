@@ -103,6 +103,7 @@ export default {
 
     useHead(
       buildHead(
+        route,
         name,
         'Are you a charity or good cause that needs volunteers? Ask our lovely community of freeglers to help.',
         image,

@@ -204,6 +204,7 @@ export default {
 
     useHead(
       buildHead(
+        route,
         'ChitChat',
         'Chat to nearby freeglers...ask for advice, recommendations or just have a good old natter.',
         null,

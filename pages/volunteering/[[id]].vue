@@ -57,6 +57,7 @@ export default {
       const volunteering = volunteeringStore.fetch(id)
       useHead(
         buildHead(
+          route,
           volunteering.title,
           volunteering.description,
           volunteering.image ? volunteering.image.path : null
@@ -65,6 +66,7 @@ export default {
     } catch (e) {
       invalid = true
       buildHead(
+        route,
         'Volunteer Opportunity ' + id,
         "Sorry, that volunteer opportunity isn't around any more."
       )

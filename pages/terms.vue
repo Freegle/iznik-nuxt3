@@ -12,6 +12,7 @@
   </div>
 </template>
 <script>
+import { useRoute } from 'vue-router'
 import { buildHead } from '~/composables/useBuildHead'
 import TermsOfUse from '~/components/TermsOfUse'
 
@@ -20,8 +21,14 @@ export default {
     TermsOfUse,
   },
   setup() {
+    const route = useRoute()
+
     useHead(
-      buildHead('Terms of Use', "Our Terms of Use.  They're pleasingly short.")
+      buildHead(
+        route,
+        'Terms of Use',
+        "Our Terms of Use.  They're pleasingly short."
+      )
     )
   },
 }

@@ -140,13 +140,14 @@ export default {
     AboutMeModal,
   },
   async setup() {
+    const route = useRoute()
+
     useHead(
-      buildHead('Browse', 'See OFFERs and WANTEDs', null, {
+      buildHead(route, 'Browse', 'See OFFERs and WANTEDs', null, {
         class: 'overflow-y-scroll',
       })
     )
 
-    const route = useRoute()
     const router = useRouter()
     const miscStore = useMiscStore()
     const authStore = useAuthStore()

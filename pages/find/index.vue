@@ -87,6 +87,7 @@
   </div>
 </template>
 <script>
+import { useRoute } from 'vue-router'
 import NoticeMessage from '../../components/NoticeMessage'
 import { buildHead } from '../../composables/useBuildHead'
 import { setup, deleteItem, addItem } from '~/composables/useCompose'
@@ -101,10 +102,12 @@ export default {
     WizardProgress,
   },
   async setup() {
+    const route = useRoute()
     const inherited = await setup('Wanted')
 
     useHead(
       buildHead(
+        route,
         'WANTED',
         "Ask people nearby if they have what you're looking for"
       )

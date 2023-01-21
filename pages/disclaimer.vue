@@ -65,12 +65,19 @@
   </div>
 </template>
 <script>
+import { useRoute } from 'vue-router'
 import { buildHead } from '~/composables/useBuildHead'
 
 export default {
   setup() {
+    const route = useRoute()
+
     useHead(
-      buildHead('Disclaimer', 'What you need to know when using Freegle.')
+      buildHead(
+        route,
+        'Disclaimer',
+        'What you need to know when using Freegle.'
+      )
     )
   },
 }

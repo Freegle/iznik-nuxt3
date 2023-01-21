@@ -34,6 +34,7 @@ export default {
 
     useHead(
       buildHead(
+        route,
         'Explore Freegle communities' +
           (route.params.region ? ' in ' + route.params.region : ''),
         null,

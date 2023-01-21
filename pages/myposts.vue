@@ -287,8 +287,11 @@ export default {
     const composeStore = useComposeStore()
     const searchStore = useSearchStore()
 
+    const route = useRoute()
+
     useHead(
       buildHead(
+        route,
         'My Posts',
         "See OFFERs/WANTEDs that you've posted, and replies to them.",
         null,
@@ -309,7 +312,6 @@ export default {
     }
 
     // We might have parameters from just having posted.
-    const route = useRoute()
     const newuser = route.params.newuser
     const newpassword = route.params.newpassword
 

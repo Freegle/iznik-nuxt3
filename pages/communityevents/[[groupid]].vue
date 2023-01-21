@@ -90,6 +90,7 @@ export default {
 
     useHead(
       buildHead(
+        route,
         name,
         'These are local events, posted by other freeglers like you.',
         image,
