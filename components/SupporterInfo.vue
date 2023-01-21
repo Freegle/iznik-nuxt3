@@ -5,6 +5,9 @@
     }"
   >
     <b-badge
+      v-b-tooltip="{
+        title: 'Kindly supports Freegle - click for more info',
+      }"
       variant="primary rounded supporter"
       :class="'clickme ' + 'size-' + size"
       @click="showModal"
