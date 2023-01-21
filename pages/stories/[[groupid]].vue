@@ -15,12 +15,13 @@
           <p>So please tell us your story!</p>
           <b-row>
             <b-col>
-              <groupSelect
+              <GroupSelect
                 v-if="loggedIn"
-                v-model="groupid"
+                :value="groupid"
                 class="float-left"
                 all
                 :restrict="false"
+                @update:modelValue="changeGroup"
               />
             </b-col>
             <b-col>
@@ -71,6 +72,7 @@ export default {
     const groupStore = useGroupStore()
 
     const groupid = route.params.groupid ? parseInt(route.params.groupid) : null
+    console.log('Stories', groupid)
     const limit = parseInt(route.query.limit) || LIMIT
 
     const stories = await storyStore.fetchByGroup(groupid, limit)
@@ -110,6 +112,11 @@ export default {
   methods: {
     showAddModal() {
       this.$refs.addmodal.show()
+    },
+    changeGroup(newval) {
+      console.log('Change group to', newval)
+      this.storyStore.list = {}
+      this.$router.push(newval ? '/stories/' + newval : '/stories')
     },
   },
 }
