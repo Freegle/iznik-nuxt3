@@ -5,6 +5,10 @@ export default class StoriesAPI extends BaseAPI {
     return this.$getv2('/story/' + id)
   }
 
+  fetch(params) {
+    return this.$get('/stories', params)
+  }
+
   async add(data) {
     const { id } = await this.$put('/stories', data)
     return id

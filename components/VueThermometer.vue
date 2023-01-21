@@ -136,10 +136,12 @@ export default {
     options: {
       type: Object,
       required: false,
+      default: null,
     },
     customClass: {
       type: String,
       required: false,
+      default: null,
     },
   },
   data() {
