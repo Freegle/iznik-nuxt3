@@ -12,7 +12,7 @@
       :class="'clickme ' + 'size-' + size"
       @click="showModal"
     >
-      <v-icon icon="heart" />
+      <v-icon icon="trophy" />
       Supporter
     </b-badge>
     <SupporterInfoModal ref="modal" />
