@@ -106,6 +106,7 @@ export default {
       required: true,
     },
   },
+  emits: ['notFound', 'view'],
   async setup(props, ctx) {
     const messageStore = useMessageStore()
     const groupStore = useGroupStore()

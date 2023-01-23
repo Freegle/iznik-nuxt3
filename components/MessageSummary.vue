@@ -17,7 +17,6 @@
         :id="id"
         :matchedon="matchedon"
         class="mb-1 header-title"
-        :type="message.type"
         :expanded="false"
       />
       <MessageHistory

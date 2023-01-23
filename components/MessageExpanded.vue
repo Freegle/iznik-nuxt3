@@ -18,7 +18,6 @@
           :id="id"
           :matchedon="message.matchedon"
           class="mb-1 header-title flex-grow-1"
-          :type="message.type"
           :expanded="true"
         />
         <MessageActions v-if="actions" :id="id" />

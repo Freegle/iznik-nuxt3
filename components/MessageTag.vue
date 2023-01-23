@@ -5,9 +5,12 @@
       tagbadge: true,
       tagdef: def,
       'font-weight-bold': true,
+      forcebreak: true,
+      'text-wrap': true,
+      'text-left': true,
     }"
   >
-    {{ tag }}
+    {{ tagForGroup }}
   </div>
 </template>
 <script>
@@ -31,9 +34,18 @@ export default {
       default: false,
     },
   },
-  setup(props) {
+  async setup(props) {
     const messageStore = useMessageStore()
     const groupStore = useGroupStore()
+
+    const message = await messageStore.fetch(props.id)
+    const fetching = []
+
+    message.groups.forEach((group) => {
+      fetching.push(groupStore.fetch(group.groupid))
+    })
+
+    await Promise.all(fetching)
 
     return { messageStore, groupStore }
   },
@@ -44,19 +56,26 @@ export default {
     group() {
       return this.groupStore.get(this.message.groups[0].groupid)
     },
-    tag() {
-      // Get the tag from the group if we can
-      if (this.message) {
-        if (this.group && this.group.settings && this.group.settings.keywords) {
-          const type =
-            this.group.settings.keywords[this.message.type.toUpperCase()]
-          return type || this.message.type
-        } else {
-          return this.message.type
+    tagForGroup() {
+      let ret = null
+
+      this.message.groups.forEach((g) => {
+        const group = this.groupStore.get(g.groupid)
+        switch (this.message?.type) {
+          case 'Offer':
+            ret = group.settings?.keywords?.offer
+              ? group.settings.keywords.offer
+              : 'OFFER'
+            break
+          case 'Wanted':
+            ret = group.settings?.keywords?.wanted
+              ? group.settings.keywords.wanted
+              : 'WANTED'
+            break
         }
-      } else {
-        return null
-      }
+      })
+
+      return ret
     },
   },
 }
@@ -74,6 +93,7 @@ export default {
   color: white;
   border-radius: 4px;
   text-transform: uppercase;
+  max-width: calc(100% - 20px);
 
   &.tagdef {
     left: 0px;

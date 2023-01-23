@@ -57,14 +57,13 @@
         <div v-else-if="myid && message && message.fromuser === myid">
           <MyMessage :id="id" :show-old="true" expand />
         </div>
-        <div v-else>
+        <div v-else class="botpad">
           <GlobalWarning />
           <OurMessage
             :id="id"
             ref="message"
             :start-expanded="true"
             hide-close
-            class="botpad"
             record-view
             @not-found="error = true"
           />
