@@ -166,6 +166,10 @@ const NewsLocation = () => import('~/components/NewsLocation')
 const ExpectedRepliesWarning = () =>
   import('~/components/ExpectedRepliesWarning')
 
+definePageMeta({
+  layout: 'login',
+})
+
 export default {
   components: {
     VisibleWhen,

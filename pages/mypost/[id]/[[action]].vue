@@ -49,6 +49,10 @@ import GlobalWarning from '~/components/GlobalWarning'
 const MyMessage = () => import('~/components/MyMessage.vue')
 const DonationAskModal = () => import('~/components/DonationAskModal')
 
+definePageMeta({
+  layout: 'login',
+})
+
 export default {
   components: {
     NoticeMessage,

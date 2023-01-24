@@ -266,6 +266,10 @@ const DonationAskModal = () => import('~/components/DonationAskModal')
 const ExpectedRepliesWarning = () =>
   import('~/components/ExpectedRepliesWarning')
 
+definePageMeta({
+  layout: 'login',
+})
+
 export default {
   components: {
     VisibleWhen,

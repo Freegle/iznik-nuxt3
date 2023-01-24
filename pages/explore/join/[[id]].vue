@@ -20,6 +20,10 @@ import { useRouter } from '#imports'
 import NoticeMessage from '~/components/NoticeMessage'
 const ExploreGroup = () => import('~/components/ExploreGroup.vue')
 
+definePageMeta({
+  layout: 'login',
+})
+
 export default {
   components: {
     NoticeMessage,

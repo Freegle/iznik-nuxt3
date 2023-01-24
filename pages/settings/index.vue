@@ -650,6 +650,10 @@ import OurToggle from '~/components/OurToggle'
 import DonationButton from '~/components/DonationButton'
 import PasswordEntry from '~/components/PasswordEntry'
 
+definePageMeta({
+  layout: 'login',
+})
+
 export default {
   components: {
     SettingsEmailInfo,

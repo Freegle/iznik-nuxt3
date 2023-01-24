@@ -578,7 +578,7 @@ export default {
     },
     installGoogleSDK() {
       console.log('Install google SDK')
-      // Google client library should be loaded by default.vue.
+      // Google client library should have been loaded by the layout.
       window?.google?.accounts?.id?.initialize({
         client_id: this.clientId,
         callback: this.handleGoogleCredentialsResponse,

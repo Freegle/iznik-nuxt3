@@ -188,6 +188,10 @@ import { buildHead } from '~/composables/useBuildHead'
 import OurToggle from '~/components/OurToggle'
 import { ref } from '#imports'
 
+definePageMeta({
+  layout: 'login',
+})
+
 export default {
   components: { SpinButton, NoticeMessage, OurToggle },
   async setup() {

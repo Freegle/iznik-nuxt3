@@ -27,12 +27,6 @@
             </p>
           </template>
         </HelpQuestion>
-        <HelpQuestion id="rules" :matches="matches">
-          <template #title>What are your rules?</template>
-          <template #default>
-            <TermsOfUse />
-          </template>
-        </HelpQuestion>
         <HelpQuestion id="toomanyemails" :matches="matches">
           <template #title>How do I get fewer emails?</template>
           <p>
@@ -254,6 +248,12 @@
             </p>
             <p>It'sup to you - deciding is all part of the fun!</p>
           </div>
+        </HelpQuestion>
+        <HelpQuestion id="rules" :matches="matches">
+          <template #title>What are your rules?</template>
+          <template #default>
+            <TermsOfUse />
+          </template>
         </HelpQuestion>
       </div>
       <hr />

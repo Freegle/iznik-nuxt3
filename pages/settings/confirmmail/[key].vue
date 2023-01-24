@@ -98,6 +98,10 @@ import { buildHead } from '~/composables/useBuildHead'
 import { useRoute, useRouter } from '#imports'
 const ExternalLink = () => import('~/components/ExternalLink')
 
+definePageMeta({
+  layout: 'login',
+})
+
 export default {
   components: { ExternalLink },
   setup() {

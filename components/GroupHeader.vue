@@ -21,7 +21,7 @@
             :title="'You have role ' + amAMember"
           />
         </b-card-title>
-        <b-card-sub-title>{{ group.tagline }}</b-card-sub-title>
+        <b-card-subtitle>{{ group.tagline }}</b-card-subtitle>
         <div v-if="group.membercount && group.founded" class="text-muted small">
           Founded <DateFormatted :value="group.founded" format="dateonly" />.
           {{ group.membercount.toLocaleString() }} current freeglers.
@@ -70,7 +70,7 @@
       <span v-if="group.description" v-html="group.description"/>
     </div>
     <div>
-      <hr class="mt-0" />
+      <hr class="mt-2" />
       <h2 class="header--size5 mb-3">
         If you have questions, you can contact our lovely local volunteers here:
       </h2>

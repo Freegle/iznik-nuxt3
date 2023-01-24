@@ -120,6 +120,10 @@ import { useAuthStore } from '~/stores/auth'
 import { useGroupStore } from '~/stores/group'
 import { useIsochroneStore } from '~/stores/isochrone'
 
+definePageMeta({
+  layout: 'login',
+})
+
 const AdaptiveMap = () => import('~/components/AdaptiveMap')
 const IsochronePostMapAndList = () =>
   import('~/components/IsochronePostMapAndList')

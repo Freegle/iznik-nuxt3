@@ -129,7 +129,7 @@ import ChatListEntry from '~/components/ChatListEntry.vue'
 const ChatHideModal = () => import('~/components/ChatHideModal')
 
 definePageMeta({
-  layout: 'default',
+  layout: 'login',
 })
 
 export default {
