@@ -37,6 +37,7 @@
 </template>
 <script>
 import { Field, ErrorMessage } from 'vee-validate'
+import axios from 'axios'
 import { ref } from '#imports'
 import { EMAIL_REGEX } from '~/constants'
 
@@ -99,14 +100,11 @@ export default {
             this.suggestedDomains = []
             const runtimeConfig = useRuntimeConfig()
 
-            const ret = await this.$axios.get(
-              runtimeConfig.APIv1 + '/domains',
-              {
-                params: {
-                  domain,
-                },
-              }
-            )
+            const ret = await axios.get(runtimeConfig.APIv1 + '/domains', {
+              params: {
+                domain,
+              },
+            })
 
             if (ret && ret.data && ret.data.ret === 0) {
               this.suggestedDomains = ret.data.suggestions

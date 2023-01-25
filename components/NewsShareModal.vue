@@ -104,7 +104,9 @@ export default {
   computed: {
     url() {
       if (this.newsfeed) {
-        return process.env.USER_SITE + '/chitchat/' + this.newsfeed.id
+        const runtimeConfig = useRuntimeConfig()
+
+        return runtimeConfig.public.USER_SITE + '/chitchat/' + this.newsfeed.id
       }
 
       return null

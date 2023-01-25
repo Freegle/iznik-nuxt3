@@ -47,6 +47,7 @@
   </div>
 </template>
 <script>
+import axios from 'axios'
 const ConfirmModal = () => import('./ConfirmModal.vue')
 
 export default {
@@ -91,7 +92,7 @@ export default {
       const runtimeConfig = useRuntimeConfig()
       const api = runtimeConfig.APIv1
 
-      this.$axios
+      axios
         .post(api + '/image', {
           id: this.id,
           rotate: deg,

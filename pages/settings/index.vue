@@ -628,6 +628,7 @@
 <script>
 import dayjs from 'dayjs'
 import { useRoute } from 'vue-router'
+import axios from 'axios'
 import EmailValidator from '../../components/EmailValidator'
 import EmailOwn from '../../components/EmailOwn'
 import { useMiscStore } from '../../stores/misc'
@@ -1107,7 +1108,7 @@ export default {
       const runtimeConfig = useRuntimeConfig()
       const api = runtimeConfig.APIv1
 
-      this.$axios.post(api + '/image', {
+      axios.post(api + '/image', {
         id: this.me.profile.id,
         rotate: deg,
         bust: Date.now(),

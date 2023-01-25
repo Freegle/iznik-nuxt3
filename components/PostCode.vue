@@ -70,6 +70,8 @@ import { useAuthStore } from '../stores/auth'
 import { ref } from '#imports'
 import { useComposeStore } from '~/stores/compose'
 import AutoComplete from '~/components/AutoComplete'
+import axios from 'axios'
+import axios from 'axios'
 
 export default {
   components: {
@@ -210,7 +212,7 @@ export default {
     async select(pc) {
       if (pc) {
         // We have the name.  We need the full postcode.
-        const loc = await this.$axios.get(this.source, {
+        const loc = await axios.get(this.source, {
           params: {
             typeahead: pc.name,
           },
@@ -232,7 +234,7 @@ export default {
         ) {
           this.locating = true
           navigator.geolocation.getCurrentPosition(async (position) => {
-            const res = await this.$axios.get(this.source, {
+            const res = await axios.get(this.source, {
               params: {
                 lat: position.coords.latitude,
                 lng: position.coords.longitude,

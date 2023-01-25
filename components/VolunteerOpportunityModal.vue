@@ -442,6 +442,7 @@
 <script>
 import { defineRule, Form, Field, ErrorMessage } from 'vee-validate'
 import { required, email, min, max } from '@vee-validate/rules'
+import axios from 'axios'
 import { useVolunteeringStore } from '../stores/volunteering'
 import { useComposeStore } from '../stores/compose'
 import { useUserStore } from '../stores/user'
@@ -449,7 +450,6 @@ import { useGroupStore } from '../stores/group'
 import EmailValidator from './EmailValidator'
 import modal from '@/mixins/modal'
 import { twem } from '~/composables/useTwem'
-
 const GroupRememberSelect = () => import('~/components/GroupRememberSelect')
 const OurFilePond = () => import('~/components/OurFilePond')
 const StartEndCollection = () => import('~/components/StartEndCollection')
@@ -770,7 +770,7 @@ export default {
       const runtimeConfig = useRuntimeConfig()
       const api = runtimeConfig.APIv1
 
-      this.$axios
+      axios
         .post(api + '/image', {
           id: this.volunteering.image.id,
           rotate: deg,

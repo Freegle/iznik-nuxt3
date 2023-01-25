@@ -404,6 +404,7 @@
 <script>
 import { defineRule, Form, Field, ErrorMessage } from 'vee-validate'
 import { required, email, min, max } from '@vee-validate/rules'
+import axios from 'axios'
 import { useCommunityEventStore } from '../stores/communityevent'
 import { useComposeStore } from '../stores/compose'
 import { useUserStore } from '../stores/user'
@@ -452,7 +453,6 @@ function initialEvent() {
     canmodify: null,
   }
 }
-
 export default {
   components: {
     EmailValidator,
@@ -758,7 +758,7 @@ export default {
       const runtimeConfig = useRuntimeConfig()
       const api = runtimeConfig.APIv1
 
-      this.$axios
+      axios
         .post(api + '/image', {
           id: this.event.image.id,
           rotate: deg,

@@ -99,7 +99,7 @@ export default {
             'tagSession',
             {
               userid: this.myid,
-              builddate: process.env.BUILD_DATE,
+              builddate: runtimeConfig.public.BUILD_DATE,
             },
           ])
         }
@@ -111,7 +111,7 @@ export default {
             'tagSession',
             {
               userid: 'Logged out',
-              builddate: process.env.BUILD_DATE,
+              builddate: runtimeConfig.public.BUILD_DATE,
             },
           ])
         }

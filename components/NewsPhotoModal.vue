@@ -57,6 +57,7 @@
   </b-modal>
 </template>
 <script>
+import axios from 'axios'
 import { useNewsfeedStore } from '../stores/newsfeed'
 import modal from '@/mixins/modal'
 
@@ -121,7 +122,9 @@ export default {
       data[this.imgflag] = 1
       data.imgtype = this.imgtype
 
-      this.$axios.post(process.env.API + '/image', data).then(() => {
+      const runtimeConfig = useRuntimeConfig()
+
+      axios.post(runtimeConfig.public.APIv1 + '/image', data).then(() => {
         this.cacheBust = Date.now()
       })
 

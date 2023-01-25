@@ -143,6 +143,7 @@
   </b-modal>
 </template>
 <script>
+import axios from 'axios'
 import { useStoryStore } from '../stores/stories'
 import { useComposeStore } from '../stores/compose'
 import modal from '@/mixins/modal'
@@ -198,8 +199,10 @@ export default {
       }
     },
     rotate(deg) {
-      this.$axios
-        .post(process.env.API + '/image', {
+      const runtimeConfig = useRuntimeConfig()
+
+      axios
+        .post(runtimeConfig.public.APIv1 + '/image', {
           id: this.story.photo.id,
           rotate: deg,
           bust: Date.now(),

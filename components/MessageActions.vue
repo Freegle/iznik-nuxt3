@@ -38,18 +38,19 @@
       :id="message.id"
       ref="shareModal"
     />
-    <!--    TODO Report message-->
-    <!--    <MessageReportModal ref="reportModal" :message="message" />-->
+    <MessageReportModal :id="id" ref="reportModal" />
   </div>
 </template>
 <script>
 import { useRouter } from '#imports'
 import { useMessageStore } from '~/stores/message'
 const MessageShareModal = () => import('./MessageShareModal')
+const MessageReportModal = () => import('./MessageReportModal')
 
 export default {
   components: {
     MessageShareModal,
+    MessageReportModal,
   },
   props: {
     id: {

@@ -34,6 +34,7 @@ import FilePondPluginImagePreview from 'filepond-plugin-image-preview'
 import FilePondPluginImageTransform from 'filepond-plugin-image-transform'
 import FilePondPluginImageResize from 'filepond-plugin-image-resize'
 import FilePondPluginImageExifOrientation from 'filepond-plugin-image-exif-orientation'
+import axios from 'axios'
 import { useComposeStore } from '../stores/compose'
 
 const FilePond = vueFilePond(
@@ -167,7 +168,7 @@ export default {
 
       const runtimeConfig = useRuntimeConfig()
 
-      const ret = await this.$axios.post(runtimeConfig.APIv1 + '/image', data, {
+      const ret = await axios.post(runtimeConfig.APIv1 + '/image', data, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

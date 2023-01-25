@@ -321,6 +321,7 @@
 </template>
 <script>
 import ReadMore from 'vue-read-more3/src/ReadMoreComponent'
+import axios from 'axios'
 import { useMessageStore } from '../stores/message'
 import { useChatStore } from '../stores/chat'
 import { useGroupStore } from '../stores/group'
@@ -742,7 +743,9 @@ export default {
 
       // Set the current location and nearby groups, too, since we're about to use them
       if (this.message.location) {
-        const loc = await this.$axios.get(process.env.API + '/locations', {
+        const runtimeConfig = useRuntimeConfig()
+
+        const loc = await axios.get(runtimeConfig.public.APIv1 + '/locations', {
           params: {
             typeahead: this.message.location.name,
           },
