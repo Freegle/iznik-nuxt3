@@ -296,7 +296,7 @@ export default {
       offsetY = Number(offsetY) + Number(base) + length
       const offsetX =
         'm' + Number(this.defaultOptions.layout.width * 0.4) + '.121861,'
-      return offsetX + offsetY + '.121853,0' // todo this fix x offset
+      return offsetX + offsetY + '.121853,0'
     },
   },
 }

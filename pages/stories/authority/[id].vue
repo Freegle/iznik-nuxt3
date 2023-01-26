@@ -31,7 +31,6 @@
   </div>
 </template>
 <script>
-// TODO Authority page doesn't exist yet.
 import { useRoute } from 'vue-router'
 import { useStoryStore } from '../../../stores/stories'
 import { buildHead } from '../../../composables/useBuildHead'
