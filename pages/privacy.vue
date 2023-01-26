@@ -58,18 +58,6 @@
           and does not require consent.
         </li>
         <li>
-          We use
-          <!-- eslint-disable-next-line -->
-          <ExternalLink href="https://analytics.google.com">Google Analytics</ExternalLink>
-          to collect traffic statistics. This is configured in a way that means
-          it
-          <!-- eslint-disable-next-line -->
-          <ExternalLink href="https://law.stackexchange.com/questions/28367/gdpr-whats-classed-as-an-opt-in-for-google-analytics-cookie-and-do-i-need-to">does not require consent</ExternalLink>
-          We have a data processing agreement with Google, we have enabled IP
-          anonymization/masking, disabled data sharing, and are not using any
-          other google services in combination with Google Analytics.
-        </li>
-        <li>
           We use Google and Facebook's code to allow you to log in. They store a
           few third-party cookies, of their own, but before you've logged in
           they don't know who you are. If you are concerned about these, you can

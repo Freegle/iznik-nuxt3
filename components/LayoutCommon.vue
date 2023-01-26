@@ -52,13 +52,6 @@ export default {
       return store.getBreakpoint
     },
   },
-  // watch: {
-  //   $route(newVal) {
-  // TODO Google Analytics
-  //     // Automatic route tracking doesn't seem to be working.
-  //     this.$ga.page(newVal.fullPath)
-  //   }
-  // },
   mounted() {
     // Start our timer.  Holding the time in the store allows us to update the time regularly and have reactivity
     // cause displayed fromNow() values to change, rather than starting a timer for each of them.
