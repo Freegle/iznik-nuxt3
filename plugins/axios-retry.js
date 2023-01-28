@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/prefer-includes */
 import axios from 'axios'
 
 export default defineNuxtPlugin((nuxtApp) => {
@@ -12,8 +13,8 @@ export default defineNuxtPlugin((nuxtApp) => {
     console.log('Axios-retry, error', message)
     if (
       !(
-        message.toLowerCase().includes('timeout') ||
-        message.toLowerCase().includes('network error')
+        message.toLowerCase().indexOf('timeout') !== -1 ||
+        message.toLowerCase().indexOf('network error') !== -1
       )
     ) {
       return Promise.reject(err)
