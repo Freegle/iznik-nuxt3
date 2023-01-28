@@ -50,6 +50,9 @@
           :actions="actions"
         />
       </div>
+      <client-only>
+        <div v-observe-visibility="visibilityChanged" />
+      </client-only>
     </div>
     <template #fallback>
       <div class="invisible">Loading {{ id }}...</div>
@@ -106,7 +109,7 @@ export default {
       required: true,
     },
   },
-  emits: ['notFound', 'view'],
+  emits: ['notFound', 'view', 'visible'],
   async setup(props, ctx) {
     const messageStore = useMessageStore()
     const groupStore = useGroupStore()
@@ -252,6 +255,11 @@ export default {
         }
 
         this.$emit('view')
+      }
+    },
+    visibilityChanged(vis) {
+      if (vis) {
+        this.$emit('visible', this.id)
       }
     },
   },

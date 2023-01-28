@@ -18,9 +18,9 @@
               :id="message.id"
               :matchedon="message.matchedon"
               record-view
+              @visible="messageVisible"
             />
           </div>
-
           <template #fallback>
             <div class="invisible">Loading {{ message.id }}...</div>
           </template>
@@ -67,7 +67,7 @@ import dayjs from 'dayjs'
 import { useGroupStore } from '../stores/group'
 import { useMessageStore } from '../stores/message'
 import { throttleFetches } from '../composables/useThrottle'
-import { ref } from '#imports'
+import { useRouter, ref } from '#imports'
 import InfiniteLoading from '~/components/InfiniteLoading'
 import { useMiscStore } from '~/stores/misc'
 // const GroupSelect = () => import('./GroupSelect')
@@ -286,6 +286,11 @@ export default {
       immediate: true,
     },
   },
+  mounted() {
+    const router = useRouter()
+    const currentRoute = router.currentRoute.value
+    console.log('MessageList mounted', currentRoute)
+  },
   methods: {
     async loadMore($state) {
       do {
@@ -331,6 +336,17 @@ export default {
         }
       } else {
         this.$emit('update:visible', visible)
+      }
+    },
+    messageVisible(id) {
+      // We want to store the last visible message as a parameter in the history, so that if we come back to a
+      // page containing it, we will scroll to it.
+      try {
+        const state = window.history.state
+        state.scrollToMessage = id
+        window.history.replaceState(state, '')
+      } catch (e) {
+        console.log('Exception', e)
       }
     },
   },
