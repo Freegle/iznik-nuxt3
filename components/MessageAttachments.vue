@@ -8,7 +8,7 @@
       <div class="d-flex justify-content-around bg rounded">
         <b-img
           src="/camera.png"
-          class="align-self-center justify-se w-100 rounded"
+          class="align-self-center justify-se w-100 rounded h-100 fit-cover"
         />
       </div>
     </div>
