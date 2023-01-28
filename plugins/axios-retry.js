@@ -10,7 +10,12 @@ export default defineNuxtPlugin((nuxtApp) => {
 
     // Retry certain errors only
     console.log('Axios-retry, error', message)
-    if (!(message.includes('timeout') || message.includes('Network Error'))) {
+    if (
+      !(
+        message.toLowerCase().includes('timeout') ||
+        message.toLowerCase().includes('network error')
+      )
+    ) {
       return Promise.reject(err)
     }
 
