@@ -34,6 +34,7 @@ jobs:
           output_location: ".output/public" # Built app content directory - optional
           ###### End of Repository/Build Configurations ######
         env:
+          NPM_CONFIG_LEGACY_PEER_DEPS: true
           IZNIK_API_V1: https://fdapilive.ilovefreegle.org/api
           IZNIK_API_V2: https://api.ilovefreegle.org:8192/apiv2
 
