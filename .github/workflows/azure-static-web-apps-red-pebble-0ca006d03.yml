@@ -34,7 +34,7 @@ jobs:
           output_location: ".output/public" # Built app content directory - optional
           ###### End of Repository/Build Configurations ######
         env:
-          IZNIK_API_V1: https://fdapidbg.ilovefreegle.org/api
+          IZNIK_API_V1: https://fdapilive.ilovefreegle.org/api
           IZNIK_API_V2: https://api.ilovefreegle.org:8192/apiv2
 
   close_pull_request_job:
