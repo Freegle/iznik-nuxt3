@@ -21,8 +21,8 @@ export default defineNuxtConfig({
   // target: server and ssr: true I've not tried yet.  That would be a solution for Facebook preview, but would
   // need more expensive hosting.
 
-  target: 'static',
-  ssr: false,
+  target: 'server',
+  ssr: true,
 
   nitro: {
     prerender: {
