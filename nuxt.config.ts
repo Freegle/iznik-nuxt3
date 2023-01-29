@@ -2,16 +2,33 @@ import config from './config'
 
 export default defineNuxtConfig({
   _cli: false,
-  // We need static rendering for good SEO.
-  target: 'static',
 
-  // SSR true means that the pages will be rendered on generate.  SSR false means that the pages are generated but
-  // only contain the scripts required to render on the client.
+  // Rendering modes are confusing.
   //
-  // TODO SSR This is broken by pinia persist - see https://github.com/Seb-L/pinia-plugin-persist/issues/44
+  // target: can be static (can host on static hosting such as Azure Static Web Apps) or server (requires a node server).
+  //
+  // target: static and ssr: true doesn't work because of issues with Bootstrap and/or bootstrap-vue-3.  I'm not
+  // clear which, but the bootstrap-vue-3 project isn't particularly interested in supporting SSR.
+  // So for static targets, we must have ssr: false.
+  //
+  // This means that the pages are generated but only contain the scripts required to render on the client, and not
+  // the full pre-rendered HTML. This functions fine for users and SEO (which nowadays executes JS).
+  // But Facebook preview doesn't execute JS, which means that url preview doesn't work.
+  //
+  // target: server and ssr: false would be a bit pointless - you'd require non-static hosting but not gain anything
+  // over target: static and ssr: false, so far as I can see.
+  //
+  // target: server and ssr: true I've not tried yet.  That would be a solution for Facebook preview, but would
+  // need more expensive hosting.
+
+  target: 'static',
   ssr: false,
 
-  nitro: { prerender: { routes: ['/404.html'] } },
+  nitro: {
+    prerender: {
+      routes: ['/404.html', '/sitemap.xml'],
+    },
+  },
 
   build: {
     // Need to transpile otherwise SSR fails - see https://github.com/nuxt/framework/discussions/4523.
@@ -29,7 +46,6 @@ export default defineNuxtConfig({
     extractCSS: true,
   },
 
-  // TODO Search for .sync modifier, which is replaced by v-model:.
   buildModules: [
     [
       '@pinia/nuxt',
