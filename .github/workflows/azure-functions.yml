@@ -1,12 +1,12 @@
 # .github/workflows/azure.yml
-name: azure
+name: azure-functions
 on:
   push:
     branches:
-      - main
+      - master
   pull_request:
     branches:
-      - main
+      - master
 jobs:
   deploy:
     runs-on: ${{ matrix.os }}
