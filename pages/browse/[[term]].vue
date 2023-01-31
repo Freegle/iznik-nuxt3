@@ -144,6 +144,7 @@ export default {
     AboutMeModal,
   },
   async setup() {
+    console.log('Browse setup')
     const route = useRoute()
 
     useHead(

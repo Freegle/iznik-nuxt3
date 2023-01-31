@@ -122,6 +122,7 @@ export default {
     VisualiseMap,
   },
   setup() {
+    console.log('Index setup')
     const miscStore = useMiscStore()
     const route = useRoute()
 

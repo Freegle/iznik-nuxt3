@@ -3,11 +3,20 @@
     <LayoutCommon v-if="ready">
       <slot />
     </LayoutCommon>
-    <GoogleOneTap @complete="googleLoaded" />
+    <!--    <client-only>-->
+    <!--      <GoogleOneTap @complete="googleLoaded" />-->
+    <!--    </client-only>-->
   </div>
 </template>
 <script>
+import LayoutCommon from '../components/LayoutCommon'
+// const GoogleOneTap = () => import('~/components/GoogleOneTap')
+
 export default {
+  components: {
+    LayoutCommon,
+    // GoogleOneTap,
+  },
   data() {
     return {
       ready: false,

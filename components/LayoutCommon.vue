@@ -1,22 +1,27 @@
 <template>
   <div>
-    <MainHeader
-      v-model:chat-count="chatCount"
-      v-model:unread-notification-count="unreadNotificationCount"
-    />
+    <client-only>
+      <MainHeader
+        v-model:chat-count="chatCount"
+        v-model:unread-notification-count="unreadNotificationCount"
+      />
+    </client-only>
     <main class="ml-0 ps-0 pe-0 pageContent">
       <slot ref="pageContent" />
     </main>
-    <BouncingEmail />
-    <div class="navbar-toggle" style="display: none" />
-    <div id="serverloader" class="bg-white">
-      <b-img src="/loader.gif" alt="Loading..." />
-      <!-- Don't allow this to format neatly, otherwise SSR doesn't match and we get a client-side re-render -->
-      <!-- eslint-disable-next-line -->
-      <p><span>Loading...</span><br><span class="font-weight-bold">Stuck here?  Try refreshing.  Or Chrome.</span><br><SupportLink text="No luck? Contact us" /></p>
-    </div>
     <client-only>
-      <span ref="breakpoint" class="d-inline d-sm-none" />
+      <BouncingEmail />
+      <div class="navbar-toggle" style="display: none" />
+      <div id="serverloader" class="bg-white">
+        <b-img src="/loader.gif" alt="Loading..." />
+        <p>
+          <span>Loading...</span><br /><span class="font-weight-bold"
+            >Stuck here? Try refreshing. Or Chrome.</span
+          ><br /><SupportLink text="No luck? Contact us" />
+        </p>
+      </div>
+    </client-only>
+    <client-only>
       <div class="d-none">
         <!--  TODO      <ChatButton v-if="replyToSend" ref="replyToPostChatButton" :userid="replyToUser" />-->
       </div>
@@ -26,10 +31,11 @@
 </template>
 <script>
 import { useMiscStore } from '../stores/misc'
-import MainHeader from '../components/MainHeader'
 import { useChatStore } from '../stores/chat'
-import SupportLink from '../components/SupportLink'
-import BouncingEmail from '~/components/BouncingEmail'
+const SupportLink = () => import('~/components/SupportLink')
+const BouncingEmail = () => import('~/components/BouncingEmail')
+const MainHeader = () => import('~/components/MainHeader')
+const BreakpointFettler = () => import('~/components/BreakpointFettler')
 const { $sentrySetContext, $sentrySetUser } = useNuxtApp()
 
 export default {
@@ -37,6 +43,7 @@ export default {
     BouncingEmail,
     SupportLink,
     MainHeader,
+    BreakpointFettler,
   },
   data() {
     return {

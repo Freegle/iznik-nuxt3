@@ -20,8 +20,8 @@ export default defineNuxtConfig({
   // the full pre-rendered HTML. This functions fine for users and SEO (which nowadays executes JS).
   // But Facebook preview doesn't execute JS, which means that url preview doesn't work.
 
-  target: 'static',
-  ssr: false,
+  target: 'server',
+  ssr: true,
 
   nitro: {
     prerender: {

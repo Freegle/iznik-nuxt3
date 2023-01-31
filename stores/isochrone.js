@@ -15,9 +15,11 @@ export const useIsochroneStore = defineStore({
   }),
   actions: {
     async init(config) {
-      this.Wkt = await import('wicket')
-      window.L = await import('leaflet/dist/leaflet-src.esm')
-      await import('wicket/wicket-leaflet')
+      if (process.client) {
+        this.Wkt = await import('wicket')
+        window.L = await import('leaflet/dist/leaflet-src.esm')
+        await import('wicket/wicket-leaflet')
+      }
 
       this.config = config
     },

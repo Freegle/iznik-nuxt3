@@ -4,12 +4,15 @@ export const useReplyStore = defineStore({
   id: 'reply',
   persist: {
     enabled: true,
-    strategies: [
-      {
-        storage: localStorage,
-        paths: ['replyMsgId', 'replyMessage', 'replyingAt'],
-      },
-    ],
+    strategies:
+      typeof localStorage === 'undefined'
+        ? []
+        : [
+            {
+              storage: localStorage,
+              paths: ['replyMsgId', 'replyMessage', 'replyingAt'],
+            },
+          ],
   },
   state: () => ({
     replyMsgId: null,

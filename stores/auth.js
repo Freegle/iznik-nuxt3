@@ -8,19 +8,27 @@ export const useAuthStore = defineStore({
   id: 'auth',
   persist: {
     enabled: true,
-    strategies: [
-      {
-        storage: localStorage,
+    strategies:
+      typeof localStorage === 'undefined'
+        ? []
+        : [
+            {
+              storage: localStorage,
 
-        // We don't persist much about the user, to avoid data getting 'stuck'.  All we need is enough to log us
-        // in, and information about which users have been used on this device.
-        paths: ['jwt', 'persistent', 'userlist', 'loginCount', 'loggedInEver'],
-      },
-    ],
+              // We don't persist much about the user, to avoid data getting 'stuck'.  All we need is enough to log us
+              // in, and information about which users have been used on this device.
+              paths: [
+                'jwt',
+                'persistent',
+                'userlist',
+                'loginCount',
+                'loggedInEver',
+              ],
+            },
+          ],
   },
   state: () => ({
     config: null,
-    $api: null,
 
     // For APIv2
     jwt: null,

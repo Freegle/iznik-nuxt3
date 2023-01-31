@@ -5,6 +5,7 @@ export function buildHead(
   image = null,
   bodyAttrs = {}
 ) {
+  console.log('Build head')
   const runtimeConfig = useRuntimeConfig()
 
   const meta = [
@@ -63,6 +64,7 @@ export function buildHead(
   })
   meta.push({ name: 'theme-color', content: '#ffffff' })
 
+  console.log('Build head return')
   return {
     title,
     meta,

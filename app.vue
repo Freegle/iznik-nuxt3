@@ -9,7 +9,6 @@
 import { useRoute } from 'vue-router'
 import { computed } from 'vue'
 import { createPinia, setActivePinia } from 'pinia'
-import piniaPersist from 'pinia-plugin-persist'
 import { useAuthStore } from './stores/auth'
 import { useGroupStore } from './stores/group'
 import { useMessageStore } from './stores/message'
@@ -32,6 +31,8 @@ import { useDonationStore } from './stores/donations'
 import { useGiftAidStore } from './stores/giftaid'
 import { useAuthorityStore } from './stores/authority'
 
+const piniaPersist = () => import('pinia-plugin-persist')
+
 const route = useRoute()
 
 // Don't render the app until we've done everything in here.
@@ -49,11 +50,13 @@ try {
   setActivePinia(pinia)
   if (process.server) {
     nuxtApp.payload.pinia = pinia.state.value
-  } else if (nuxtApp.payload && nuxtApp.payload.pinia) {
-    pinia.state.value = nuxtApp.payload.pinia
-  }
+  } else {
+    if (nuxtApp.payload && nuxtApp.payload.pinia) {
+      pinia.state.value = nuxtApp.payload.pinia
+    }
 
-  pinia.use(piniaPersist)
+    pinia.use(piniaPersist)
+  }
 } catch (e) {
   console.error('Pinia init', e)
 }
@@ -137,56 +140,58 @@ try {
   console.error('Error fetching user', e)
 }
 
-// There's a bug https://github.com/nuxt/framework/issues/3141 which causes route to stop working.
-const messages = [
-  `Uncaught NotFoundError: Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.`, // chromium based
-  `NotFoundError: The object can not be found here.`, // safari
-  `Cannot read properties of null (reading 'subTree')`,
-]
+if (process.client) {
+  if (typeof window !== 'undefined') {
+    // There's a bug https://github.com/nuxt/framework/issues/3141 which causes route to stop working.
+    const messages = [
+      `Uncaught NotFoundError: Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.`, // chromium based
+      `NotFoundError: The object can not be found here.`, // safari
+      `Cannot read properties of null (reading 'subTree')`,
+    ]
 
-if (typeof window !== 'undefined') {
-  window.addEventListener('error', (ev) => {
-    if (messages.includes(ev.message)) {
-      ev.preventDefault()
-      window.location.reload()
-    }
-  })
+    window.addEventListener('error', (ev) => {
+      if (messages.includes(ev.message)) {
+        ev.preventDefault()
+        window.location.reload()
+      }
+    })
 
-  window.onunhandledrejection = (ev) => {
-    // We get various of these - some from Leaflet.  It seems to break Nuxt routing and we get stuck, so if we
-    // get one of these reload the page so that at least we keep going.
-    if (messages.includes(ev.message)) {
-      console.error('Unhandled rejection - may break Nuxt - reload')
-      ev.preventDefault()
-      window.location.reload()
+    window.onunhandledrejection = (ev) => {
+      // We get various of these - some from Leaflet.  It seems to break Nuxt routing and we get stuck, so if we
+      // get one of these reload the page so that at least we keep going.
+      if (messages.includes(ev.message)) {
+        console.error('Unhandled rejection - may break Nuxt - reload')
+        ev.preventDefault()
+        window.location.reload()
+      }
     }
   }
+
+  const chatCount = computed(() => {
+    return chatStore.unreadCount
+  })
+
+  useHead({
+    titleTemplate: (titleChunk) => {
+      if (titleChunk.charAt(0) !== '(' && chatCount > 0) {
+        return '(' + chatCount.value + ') ' + titleChunk
+      } else {
+        return titleChunk
+      }
+    },
+  })
+  //   const totalCount = this.unreadNotificationCount + this.chatCount
+  //   return {
+  //     titleTemplate: totalCount > 0 ? `(${totalCount}) %s` : '%s',
+  //     link: [
+  //       {
+  //         rel: 'icon',
+  //         type: 'image/x-icon',
+  //         href: '/icon.png'
+  //       }
+  //     ]
+  //   }
 }
-
-const chatCount = computed(() => {
-  return chatStore.unreadCount
-})
-
-useHead({
-  titleTemplate: (titleChunk) => {
-    if (titleChunk.charAt(0) !== '(' && chatCount > 0) {
-      return '(' + chatCount.value + ') ' + titleChunk
-    } else {
-      return titleChunk
-    }
-  },
-})
-//   const totalCount = this.unreadNotificationCount + this.chatCount
-//   return {
-//     titleTemplate: totalCount > 0 ? `(${totalCount}) %s` : '%s',
-//     link: [
-//       {
-//         rel: 'icon',
-//         type: 'image/x-icon',
-//         href: '/icon.png'
-//       }
-//     ]
-//   }
 
 ready = true
 </script>
