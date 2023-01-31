@@ -27,9 +27,7 @@
           class="bg-white p-2"
           @zoom="showPhotosModal"
         />
-        <client-only>
-          <MessagePhotosModal :id="message.id" ref="photoModal" />
-        </client-only>
+        <MessagePhotosModal :id="message.id" ref="photoModal" />
       </div>
       <div v-else>
         <MessageSummary
@@ -50,9 +48,7 @@
           :actions="actions"
         />
       </div>
-      <client-only>
-        <div v-observe-visibility="visibilityChanged" />
-      </client-only>
+      <div v-observe-visibility="visibilityChanged" />
     </div>
     <template #fallback>
       <div class="invisible">Loading {{ id }}...</div>

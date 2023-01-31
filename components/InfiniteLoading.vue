@@ -1,19 +1,21 @@
 <template>
-  <div
-    ref="infiniteLoading"
-    :key="bump"
-    v-observe-visibility="{
-      callback: visibilityChanged,
-      intersection: {
-        rootMargin: '0px 0px ' + distance + 'px 0px',
-      },
-    }"
-    class="infinite-loader mb-4"
-  >
-    <slot v-if="state == 'loading'" name="spinner"></slot>
-    <slot v-if="state == 'complete'" name="complete"></slot>
-    <slot v-if="state == 'error'" name="error"></slot>
-  </div>
+  <client-only>
+    <div
+      ref="infiniteLoading"
+      :key="bump"
+      v-observe-visibility="{
+        callback: visibilityChanged,
+        intersection: {
+          rootMargin: '0px 0px ' + distance + 'px 0px',
+        },
+      }"
+      class="infinite-loader mb-4"
+    >
+      <slot v-if="state == 'loading'" name="spinner"></slot>
+      <slot v-if="state == 'complete'" name="complete"></slot>
+      <slot v-if="state == 'error'" name="error"></slot>
+    </div>
+  </client-only>
 </template>
 <script>
 // Derived from https://github.com/oumoussa98/vue3-infinite-loading.  Reworked radically to allow an async event

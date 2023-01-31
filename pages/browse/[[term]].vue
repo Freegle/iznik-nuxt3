@@ -1,7 +1,7 @@
 <template>
-  <b-container fluid>
-    <h1 class="sr-only">Browse items</h1>
-    <client-only>
+  <client-only>
+    <b-container fluid>
+      <h1 class="sr-only">Browse items</h1>
       <b-row class="m-0">
         <b-col cols="0" lg="3" class="p-0 pr-1">
           <VisibleWhen :at="['lg', 'xl', 'xxl']">
@@ -107,8 +107,8 @@
         </b-col>
         <b-col cols="0" lg="3" class="p-0 pl-1"> </b-col>
       </b-row>
-    </client-only>
-  </b-container>
+    </b-container>
+  </client-only>
 </template>
 <script>
 import dayjs from 'dayjs'

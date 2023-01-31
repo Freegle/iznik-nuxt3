@@ -1,248 +1,250 @@
 <template>
-  <b-container fluid>
-    <h1 class="sr-only">My posts</h1>
-    <b-row class="m-0">
-      <b-col cols="0" lg="3" class="p-0 pr-1">
-        <VisibleWhen :at="['lg', 'xl']">
-          <SidebarLeft />
-        </VisibleWhen>
-      </b-col>
-      <b-col cols="12" lg="6" class="p-0">
-        <ExpectedRepliesWarning
-          v-if="me && me.expectedreplies"
-          :count="me.expectedreplies"
-          :chats="me.expectedchats"
-        />
-        <div v-if="!me" class="d-flex justify-content-center mt-4 flex-wrap">
-          <b-button variant="primary" size="lg" @click="forceLogin">
-            Log in to continue <v-icon icon="angle-double-right" />
-          </b-button>
-        </div>
-        <div v-else>
-          <VisibleWhen :at="['xs', 'sm', 'md']">
-            <JobsTopBar />
+  <client-only>
+    <b-container fluid>
+      <h1 class="sr-only">My posts</h1>
+      <b-row class="m-0">
+        <b-col cols="0" lg="3" class="p-0 pr-1">
+          <VisibleWhen :at="['lg', 'xl']">
+            <SidebarLeft />
           </VisibleWhen>
-          <b-card v-if="contactPicker" border-variant="info">
-            <InviteContacts class="bg-white" />
-          </b-card>
-          <b-card
-            class="mt-2"
-            border-variant="info"
-            header="info"
-            header-bg-variant="info"
-            header-text-variant="white"
-            no-body
-          >
-            <template #header>
-              <div class="d-flex justify-content-between">
-                <h2 class="d-inline header--size3">
-                  <v-icon icon="gift" scale="2" /> Your OFFERs
-                </h2>
-                <span v-if="oldOfferCount > 0">
-                  <span v-if="showOldOffers" class="float-right">
-                    <b-button
-                      variant="secondary"
-                      title="Show old OFFERs"
-                      @click="toggleOldOffer"
-                    >
-                      Hide {{ oldOfferCountStr }}
-                    </b-button>
+        </b-col>
+        <b-col cols="12" lg="6" class="p-0">
+          <ExpectedRepliesWarning
+            v-if="me && me.expectedreplies"
+            :count="me.expectedreplies"
+            :chats="me.expectedchats"
+          />
+          <div v-if="!me" class="d-flex justify-content-center mt-4 flex-wrap">
+            <b-button variant="primary" size="lg" @click="forceLogin">
+              Log in to continue <v-icon icon="angle-double-right" />
+            </b-button>
+          </div>
+          <div v-else>
+            <VisibleWhen :at="['xs', 'sm', 'md']">
+              <JobsTopBar />
+            </VisibleWhen>
+            <b-card v-if="contactPicker" border-variant="info">
+              <InviteContacts class="bg-white" />
+            </b-card>
+            <b-card
+              class="mt-2"
+              border-variant="info"
+              header="info"
+              header-bg-variant="info"
+              header-text-variant="white"
+              no-body
+            >
+              <template #header>
+                <div class="d-flex justify-content-between">
+                  <h2 class="d-inline header--size3">
+                    <v-icon icon="gift" scale="2" /> Your OFFERs
+                  </h2>
+                  <span v-if="oldOfferCount > 0">
+                    <span v-if="showOldOffers" class="float-right">
+                      <b-button
+                        variant="secondary"
+                        title="Show old OFFERs"
+                        @click="toggleOldOffer"
+                      >
+                        Hide {{ oldOfferCountStr }}
+                      </b-button>
+                    </span>
+                    <span v-else class="float-right">
+                      <b-button variant="secondary" @click="toggleOldOffer">
+                        +{{ oldOfferCountStr }}
+                      </b-button>
+                    </span>
                   </span>
-                  <span v-else class="float-right">
-                    <b-button variant="secondary" @click="toggleOldOffer">
-                      +{{ oldOfferCountStr }}
-                    </b-button>
-                  </span>
-                </span>
-              </div>
-            </template>
-            <b-card-body class="p-1 p-lg-3">
-              <b-card-text class="text-center">
-                <p v-if="activeOfferCount > 0" class="text-muted">
-                  Stuff you're giving away.
-                </p>
-                <b-img
-                  v-if="busyOffers && offers.length === 0"
-                  lazy
-                  src="~/static/loader.gif"
-                  alt="Loading..."
-                />
-                <div
-                  v-if="
-                    busyOffers ||
-                    activeOfferCount > 0 ||
-                    (showOldOffers && offers.length > 0)
-                  "
-                >
+                </div>
+              </template>
+              <b-card-body class="p-1 p-lg-3">
+                <b-card-text class="text-center">
+                  <p v-if="activeOfferCount > 0" class="text-muted">
+                    Stuff you're giving away.
+                  </p>
+                  <b-img
+                    v-if="busyOffers && offers.length === 0"
+                    lazy
+                    src="~/static/loader.gif"
+                    alt="Loading..."
+                  />
                   <div
-                    v-for="message in offersShown"
-                    :key="'message-' + message.id"
-                    class="p-0 text-left mt-1"
+                    v-if="
+                      busyOffers ||
+                      activeOfferCount > 0 ||
+                      (showOldOffers && offers.length > 0)
+                    "
                   >
-                    <MyMessage
-                      :id="message.id"
-                      :show-old="showOldOffers"
-                      :expand="expand"
+                    <div
+                      v-for="message in offersShown"
+                      :key="'message-' + message.id"
+                      class="p-0 text-left mt-1"
+                    >
+                      <MyMessage
+                        :id="message.id"
+                        :show-old="showOldOffers"
+                        :expand="expand"
+                      />
+                    </div>
+                    <infinite-loading
+                      :key="infiniteIdOffers"
+                      :distance="distance"
+                      @infinite="loadMoreOffers"
                     />
                   </div>
-                  <infinite-loading
-                    :key="infiniteIdOffers"
-                    :distance="distance"
-                    @infinite="loadMoreOffers"
-                  />
-                </div>
-                <div v-else>
-                  <b-row>
-                    <b-col>
-                      <p>You have no active OFFERs.</p>
-                    </b-col>
-                  </b-row>
-                  <b-row>
-                    <b-col class="text-center">
+                  <div v-else>
+                    <b-row>
+                      <b-col>
+                        <p>You have no active OFFERs.</p>
+                      </b-col>
+                    </b-row>
+                    <b-row>
+                      <b-col class="text-center">
+                        <b-button
+                          to="/give"
+                          class="mt-1"
+                          size="lg"
+                          variant="primary"
+                        >
+                          <v-icon icon="gift" />&nbsp;OFFER something
+                        </b-button>
+                      </b-col>
+                    </b-row>
+                  </div>
+                </b-card-text>
+              </b-card-body>
+            </b-card>
+            <b-card
+              class="mt-2"
+              border-variant="info"
+              header="info"
+              header-bg-variant="info"
+              header-text-variant="white"
+              no-body
+            >
+              <template #header>
+                <div class="d-flex justify-content-between">
+                  <h2 class="d-inline header--size3">
+                    <v-icon icon="shopping-cart" scale="2" /> Your WANTEDs
+                  </h2>
+                  <span v-if="oldWantedCount > 0">
+                    <span v-if="showOldWanteds" class="float-right">
                       <b-button
-                        to="/give"
+                        variant="secondary"
+                        title="Show old WANTEDs"
+                        @click="toggleOldWanted"
+                      >
+                        Hide {{ oldWantedCountStr }}
+                      </b-button>
+                    </span>
+                    <span v-else class="float-right">
+                      <b-button variant="secondary" @click="toggleOldWanted">
+                        +{{ oldWantedCountStr }}
+                      </b-button>
+                    </span>
+                  </span>
+                </div>
+              </template>
+              <b-card-body class="p-1 p-lg-3">
+                <b-card-text class="text-center">
+                  <p v-if="activeWantedCount > 0" class="text-muted">
+                    Stuff you're trying to find.
+                  </p>
+                  <div
+                    v-if="
+                      busyWanteds ||
+                      activeWantedCount > 0 ||
+                      (showOldWanteds && wanteds.length > 0)
+                    "
+                  >
+                    <div
+                      v-for="message in wantedsShown"
+                      :key="'message-' + message.id"
+                      class="p-0 text-left mt-1"
+                    >
+                      <MyMessage
+                        :id="message.id"
+                        :show-old="showOldWanteds"
+                        :expand="expand"
+                      />
+                    </div>
+                    <infinite-loading
+                      :key="infiniteIdWanteds"
+                      :distance="distance"
+                      @infinite="loadMoreWanteds"
+                    />
+                  </div>
+                  <div v-else>
+                    <p>You have no active WANTEDs.</p>
+                    <div class="d-flex justify-content-around mb-2">
+                      <b-button
+                        to="/find"
                         class="mt-1"
                         size="lg"
-                        variant="primary"
+                        variant="secondary"
                       >
-                        <v-icon icon="gift" />&nbsp;OFFER something
+                        <v-icon icon="shopping-cart" />&nbsp;Ask for something
                       </b-button>
-                    </b-col>
-                  </b-row>
-                </div>
-              </b-card-text>
-            </b-card-body>
-          </b-card>
-          <b-card
-            class="mt-2"
-            border-variant="info"
-            header="info"
-            header-bg-variant="info"
-            header-text-variant="white"
-            no-body
-          >
-            <template #header>
-              <div class="d-flex justify-content-between">
-                <h2 class="d-inline header--size3">
-                  <v-icon icon="shopping-cart" scale="2" /> Your WANTEDs
-                </h2>
-                <span v-if="oldWantedCount > 0">
-                  <span v-if="showOldWanteds" class="float-right">
-                    <b-button
-                      variant="secondary"
-                      title="Show old WANTEDs"
-                      @click="toggleOldWanted"
-                    >
-                      Hide {{ oldWantedCountStr }}
-                    </b-button>
-                  </span>
-                  <span v-else class="float-right">
-                    <b-button variant="secondary" @click="toggleOldWanted">
-                      +{{ oldWantedCountStr }}
-                    </b-button>
-                  </span>
-                </span>
-              </div>
-            </template>
-            <b-card-body class="p-1 p-lg-3">
-              <b-card-text class="text-center">
-                <p v-if="activeWantedCount > 0" class="text-muted">
-                  Stuff you're trying to find.
-                </p>
-                <div
-                  v-if="
-                    busyWanteds ||
-                    activeWantedCount > 0 ||
-                    (showOldWanteds && wanteds.length > 0)
-                  "
-                >
-                  <div
-                    v-for="message in wantedsShown"
-                    :key="'message-' + message.id"
-                    class="p-0 text-left mt-1"
-                  >
-                    <MyMessage
-                      :id="message.id"
-                      :show-old="showOldWanteds"
-                      :expand="expand"
-                    />
+                    </div>
                   </div>
-                  <infinite-loading
-                    :key="infiniteIdWanteds"
-                    :distance="distance"
-                    @infinite="loadMoreWanteds"
-                  />
-                </div>
-                <div v-else>
-                  <p>You have no active WANTEDs.</p>
-                  <div class="d-flex justify-content-around mb-2">
+                </b-card-text>
+              </b-card-body>
+            </b-card>
+            <b-card
+              class="mt-2"
+              border-variant="info"
+              header="info"
+              header-bg-variant="info"
+              header-text-variant="white"
+              no-body
+            >
+              <template #header>
+                <h2 class="d-inline header--size3">
+                  <v-icon icon="search" scale="2" /> Your Searches
+                </h2>
+              </template>
+              <b-card-body class="p-1 p-lg-3">
+                <b-card-text class="text-center">
+                  <p v-if="searches?.length > 0" class="text-muted">
+                    What you've recently searched for - click to search again.
+                    These are also email alerts - we'll mail you matching posts.
+                  </p>
+                  <ul
+                    v-if="searches?.length"
+                    class="list-group list-group-horizontal flex-wrap"
+                  >
+                    <UserSearch
+                      v-for="search in searches"
+                      :key="'search-' + search.id"
+                      :search="search"
+                      class="text-left mt-1 list-group-item bg-white border text-nowrap mr-2"
+                    />
+                  </ul>
+                  <div v-else>
+                    <p>Nothing here yet. Why not...</p>
                     <b-button
                       to="/find"
                       class="mt-1"
                       size="lg"
                       variant="secondary"
                     >
-                      <v-icon icon="shopping-cart" />&nbsp;Ask for something
+                      <v-icon icon="shopping-cart" />&nbsp;Ask for stuff
                     </b-button>
                   </div>
-                </div>
-              </b-card-text>
-            </b-card-body>
-          </b-card>
-          <b-card
-            class="mt-2"
-            border-variant="info"
-            header="info"
-            header-bg-variant="info"
-            header-text-variant="white"
-            no-body
-          >
-            <template #header>
-              <h2 class="d-inline header--size3">
-                <v-icon icon="search" scale="2" /> Your Searches
-              </h2>
-            </template>
-            <b-card-body class="p-1 p-lg-3">
-              <b-card-text class="text-center">
-                <p v-if="searches?.length > 0" class="text-muted">
-                  What you've recently searched for - click to search again.
-                  These are also email alerts - we'll mail you matching posts.
-                </p>
-                <ul
-                  v-if="searches?.length"
-                  class="list-group list-group-horizontal flex-wrap"
-                >
-                  <UserSearch
-                    v-for="search in searches"
-                    :key="'search-' + search.id"
-                    :search="search"
-                    class="text-left mt-1 list-group-item bg-white border text-nowrap mr-2"
-                  />
-                </ul>
-                <div v-else>
-                  <p>Nothing here yet. Why not...</p>
-                  <b-button
-                    to="/find"
-                    class="mt-1"
-                    size="lg"
-                    variant="secondary"
-                  >
-                    <v-icon icon="shopping-cart" />&nbsp;Ask for stuff
-                  </b-button>
-                </div>
-              </b-card-text>
-            </b-card-body>
-          </b-card>
-        </div>
-      </b-col>
-      <b-col cols="0" lg="3" class="p-0 pl-1">
-        <VisibleWhen :at="['lg', 'xl']">
-          <SidebarRight show-job-opportunities />
-        </VisibleWhen>
-      </b-col>
-    </b-row>
-    <DonationAskModal ref="askmodal" :groupid="donationGroup" />
-  </b-container>
+                </b-card-text>
+              </b-card-body>
+            </b-card>
+          </div>
+        </b-col>
+        <b-col cols="0" lg="3" class="p-0 pl-1">
+          <VisibleWhen :at="['lg', 'xl']">
+            <SidebarRight show-job-opportunities />
+          </VisibleWhen>
+        </b-col>
+      </b-row>
+      <DonationAskModal ref="askmodal" :groupid="donationGroup" />
+    </b-container>
+  </client-only>
 </template>
 <script>
 import { useRoute } from 'vue-router'

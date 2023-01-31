@@ -1,87 +1,85 @@
 <template>
   <div ref="mapcont" class="d-flex">
-    <client-only>
-      <l-map
-        ref="map"
-        v-model:zoom="zoom"
-        v-model:center="center"
-        :options="{
-          zoomControl: false,
-          scrollWheelZoom: false,
-          bounceAtZoomLimits: true,
-        }"
-        :min-zoom="8"
-        :max-zoom="15"
-        class="flex-grow-1"
-        @moveend="moveend"
-        @ready="idle"
-      >
-        <l-tile-layer :url="osmtile" :attribution="attribution" />
-        <div v-if="item">
+    <l-map
+      ref="map"
+      v-model:zoom="zoom"
+      v-model:center="center"
+      :options="{
+        zoomControl: false,
+        scrollWheelZoom: false,
+        bounceAtZoomLimits: true,
+      }"
+      :min-zoom="8"
+      :max-zoom="15"
+      class="flex-grow-1"
+      @moveend="moveend"
+      @ready="idle"
+    >
+      <l-tile-layer :url="osmtile" :attribution="attribution" />
+      <div v-if="item">
+        <VisualiseUser
+          v-if="showFrom && item"
+          :id="item.from.id"
+          ref="fromuser"
+          :lat="item.fromlat"
+          :lng="item.fromlng"
+          :icon="item.from.icon"
+        />
+        <VisualiseSpeech
+          v-if="showReplies && item"
+          :lat-lng="[item.tolat, item.tolng]"
+          :text="reply(item.to.id)"
+          class-name="clear"
+          :popup-anchor="[-50, -50]"
+          :z-index-offset="1000"
+        />
+        <VisualiseUser
+          v-if="showTo && item"
+          :id="item.to.id"
+          ref="touser"
+          :lat="item.tolat"
+          :lng="item.tolng"
+          :icon="item.to.icon"
+          :z-index-offset="1000"
+        />
+        <div v-if="showOthers">
           <VisualiseUser
-            v-if="showFrom && item"
-            :id="item.from.id"
-            ref="fromuser"
-            :lat="item.fromlat"
-            :lng="item.fromlng"
-            :icon="item.from.icon"
-          />
-          <VisualiseSpeech
-            v-if="showReplies && item"
-            :lat-lng="[item.tolat, item.tolng]"
-            :text="reply(item.to.id)"
-            class-name="clear"
-            :popup-anchor="[-50, -50]"
-            :z-index-offset="1000"
-          />
-          <VisualiseUser
-            v-if="showTo && item"
-            :id="item.to.id"
-            ref="touser"
-            :lat="item.tolat"
-            :lng="item.tolng"
-            :icon="item.to.icon"
-            :z-index-offset="1000"
-          />
-          <div v-if="showOthers">
-            <VisualiseUser
-              v-for="other in item.others"
-              :id="other.id"
-              :key="'other-' + other.id"
-              :lat="other.lat"
-              :lng="other.lng"
-              :icon="other.icon"
-            />
-          </div>
-          <div v-if="showReplies">
-            <VisualiseSpeech
-              v-for="other in item.others"
-              :key="'otherreply-' + other.id"
-              :lat-lng="[other.lat, other.lng]"
-              :text="reply(other.id)"
-              class-name="clear"
-              :popup-anchor="[-50, -50]"
-              :z-index-offset="1000"
-            />
-          </div>
-          <VisualiseMessage
-            v-if="showMessage"
-            :id="item.msgid"
-            ref="message"
-            :icon="item.attachment.thumb"
-            :lat="item.fromlat"
-            :lng="item.fromlng"
-          />
-          <VisualiseSpeech
-            v-if="item && showThanks"
-            :lat-lng="[item.tolat, item.tolng]"
-            :text="text"
-            class-name="clear"
-            :popup-anchor="[-50, -50]"
+            v-for="other in item.others"
+            :id="other.id"
+            :key="'other-' + other.id"
+            :lat="other.lat"
+            :lng="other.lng"
+            :icon="other.icon"
           />
         </div>
-      </l-map>
-    </client-only>
+        <div v-if="showReplies">
+          <VisualiseSpeech
+            v-for="other in item.others"
+            :key="'otherreply-' + other.id"
+            :lat-lng="[other.lat, other.lng]"
+            :text="reply(other.id)"
+            class-name="clear"
+            :popup-anchor="[-50, -50]"
+            :z-index-offset="1000"
+          />
+        </div>
+        <VisualiseMessage
+          v-if="showMessage"
+          :id="item.msgid"
+          ref="message"
+          :icon="item.attachment.thumb"
+          :lat="item.fromlat"
+          :lng="item.fromlng"
+        />
+        <VisualiseSpeech
+          v-if="item && showThanks"
+          :lat-lng="[item.tolat, item.tolng]"
+          :text="text"
+          class-name="clear"
+          :popup-anchor="[-50, -50]"
+        />
+      </div>
+    </l-map>
   </div>
 </template>
 <script>

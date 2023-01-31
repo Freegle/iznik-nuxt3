@@ -1,19 +1,23 @@
 <template>
-  <b-row class="m-0">
-    <b-col cols="12" lg="6" class="p-0" offset-lg="3">
-      <h1 class="sr-only">Freegling map in {{ region }}</h1>
-      <AdaptiveMap
-        v-if="initialBounds"
-        :initial-bounds="initialBounds"
-        start-on-groups
-        :initial-group-ids="initialGroupIds"
-        :region="region"
-        class="mt-2"
-        show-start-message
-      />
-      <b-alert v-else variant="danger" show> That region isn't valid. </b-alert>
-    </b-col>
-  </b-row>
+  <client-only>
+    <b-row class="m-0">
+      <b-col cols="12" lg="6" class="p-0" offset-lg="3">
+        <h1 class="sr-only">Freegling map in {{ region }}</h1>
+        <AdaptiveMap
+          v-if="initialBounds"
+          :initial-bounds="initialBounds"
+          start-on-groups
+          :initial-group-ids="initialGroupIds"
+          :region="region"
+          class="mt-2"
+          show-start-message
+        />
+        <b-alert v-else variant="danger" show>
+          That region isn't valid.
+        </b-alert>
+      </b-col>
+    </b-row>
+  </client-only>
 </template>
 <script>
 import { useRoute } from 'vue-router'

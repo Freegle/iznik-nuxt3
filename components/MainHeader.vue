@@ -217,13 +217,11 @@
         </ul>
       </div>
       <div v-if="!loggedIn" class="navbar-nav ml-auto">
-        <client-only>
-          <div class="nav-item" no-prefetch>
-            <b-button variant="white" class="mr-2" @click="requestLogin">
-              Sign&nbsp;in
-            </b-button>
-          </div>
-        </client-only>
+        <div class="nav-item" no-prefetch>
+          <b-button variant="white" class="mr-2" @click="requestLogin">
+            Sign&nbsp;in
+          </b-button>
+        </div>
       </div>
     </b-nav>
     <!-- Navbar for small screens -->
@@ -257,31 +255,27 @@
         <!--      </b-nav-brand>-->
       </div>
       <div class="d-flex align-items-center">
-        <client-only>
-          <NotificationOptions
-            v-if="loggedIn"
-            v-model:unread-notification-count="unreadNotificationCount"
-            :distance="distance"
-            :small-screen="true"
-            @showAboutMe="showAboutMeModal"
-          />
-          <ChatMenu
-            v-if="loggedIn"
-            id="menu-option-chat-sm"
-            v-model:chat-count="chatCount"
-            :is-list-item="false"
-            class="mr-3"
-          />
-        </client-only>
+        <NotificationOptions
+          v-if="loggedIn"
+          v-model:unread-notification-count="unreadNotificationCount"
+          :distance="distance"
+          :small-screen="true"
+          @showAboutMe="showAboutMeModal"
+        />
+        <ChatMenu
+          v-if="loggedIn"
+          id="menu-option-chat-sm"
+          v-model:chat-count="chatCount"
+          :is-list-item="false"
+          class="mr-3"
+        />
 
         <b-nav>
-          <client-only>
-            <nuxt-link v-if="!loggedIn" no-prefetch>
-              <div class="btn btn-white" @click="requestLogin">
-                Log in or Join
-              </div>
-            </nuxt-link>
-          </client-only>
+          <nuxt-link v-if="!loggedIn" no-prefetch>
+            <div class="btn btn-white" @click="requestLogin">
+              Log in or Join
+            </div>
+          </nuxt-link>
         </b-nav>
 
         <b-nav class="">

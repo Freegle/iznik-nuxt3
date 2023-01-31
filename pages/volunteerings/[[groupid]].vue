@@ -1,45 +1,45 @@
 <template>
-  <div>
-    <b-row class="m-0">
-      <b-col cols="12" lg="6" class="p-0 mt-1" offset-lg="3">
-        <div>
-          <h1>Volunteer Opportunities</h1>
-          <GlobalWarning />
-          <p>
-            Are you a charity or good cause that needs volunteers? Ask our
-            lovely community of freeglers to help.
-          </p>
-          <div class="d-flex justify-content-between mb-3">
-            <GroupSelect
-              v-if="me"
-              v-model="groupid"
-              class="pr-2"
-              all
-              :value="groupid"
-              @update:modelValue="changeGroup"
-            />
-            <b-button
-              variant="primary"
-              class="float-right"
-              @click="showVolunteerModal"
-            >
-              <v-icon icon="plus" /> Add an opportunity
-            </b-button>
+  <client-only>
+    <div>
+      <b-row class="m-0">
+        <b-col cols="12" lg="6" class="p-0 mt-1" offset-lg="3">
+          <div>
+            <h1>Volunteer Opportunities</h1>
+            <GlobalWarning />
+            <p>
+              Are you a charity or good cause that needs volunteers? Ask our
+              lovely community of freeglers to help.
+            </p>
+            <div class="d-flex justify-content-between mb-3">
+              <GroupSelect
+                v-if="me"
+                v-model="groupid"
+                class="pr-2"
+                all
+                :value="groupid"
+                @update:modelValue="changeGroup"
+              />
+              <b-button
+                variant="primary"
+                class="float-right"
+                @click="showVolunteerModal"
+              >
+                <v-icon icon="plus" /> Add an opportunity
+              </b-button>
+            </div>
           </div>
-        </div>
-        <h2 class="sr-only">List of volunteer opportunities</h2>
-        <div
-          v-for="id in volunteerings"
-          :key="'volunteering-' + id"
-          class="mt-2"
-        >
-          <VolunteerOpportunity
-            :id="id"
-            :filter-group="groupid"
-            :summary="false"
-          />
-        </div>
-        <client-only>
+          <h2 class="sr-only">List of volunteer opportunities</h2>
+          <div
+            v-for="id in volunteerings"
+            :key="'volunteering-' + id"
+            class="mt-2"
+          >
+            <VolunteerOpportunity
+              :id="id"
+              :filter-group="groupid"
+              :summary="false"
+            />
+          </div>
           <infinite-loading
             :key="'infinite-' + groupid"
             :identifier="infiniteId"
@@ -47,12 +47,12 @@
             :distance="1000"
             @infinite="loadMore"
           />
-        </client-only>
-      </b-col>
-      <b-col cols="0" md="3" class="d-none d-md-block" />
-    </b-row>
-    <VolunteerOpportunityModal ref="volunteermodal" :start-edit="true" />
-  </div>
+        </b-col>
+        <b-col cols="0" md="3" class="d-none d-md-block" />
+      </b-row>
+      <VolunteerOpportunityModal ref="volunteermodal" :start-edit="true" />
+    </div>
+  </client-only>
 </template>
 <script>
 import { mapWritableState } from 'pinia'

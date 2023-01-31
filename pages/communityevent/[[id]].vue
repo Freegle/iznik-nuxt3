@@ -1,29 +1,31 @@
 <template>
-  <b-row v-if="invalid" class="m-0">
-    <b-col cols="12" lg="6" class="p-0" offset-lg="3">
-      <NoticeMessage variant="danger" class="mt-2">
-        Sorry, that community event isn't around any more.
-      </NoticeMessage>
-    </b-col>
-  </b-row>
-  <div v-else>
-    <b-row class="m-0">
-      <b-col cols="0" md="3" class="d-none d-md-block" />
-      <b-col cols="12" md="6" class="p-0">
-        <CommunityEvent
-          v-if="!invalid"
-          :id="id"
-          :summary="false"
-          class="mt-1"
-          title-tag="h1"
-        />
-        <NoticeMessage v-else>
-          Sorry, we can't find that volunteer opportunity.
+  <client-only>
+    <b-row v-if="invalid" class="m-0">
+      <b-col cols="12" lg="6" class="p-0" offset-lg="3">
+        <NoticeMessage variant="danger" class="mt-2">
+          Sorry, that community event isn't around any more.
         </NoticeMessage>
       </b-col>
-      <b-col cols="0" md="3" class="d-none d-md-block" />
     </b-row>
-  </div>
+    <div v-else>
+      <b-row class="m-0">
+        <b-col cols="0" md="3" class="d-none d-md-block" />
+        <b-col cols="12" md="6" class="p-0">
+          <CommunityEvent
+            v-if="!invalid"
+            :id="id"
+            :summary="false"
+            class="mt-1"
+            title-tag="h1"
+          />
+          <NoticeMessage v-else>
+            Sorry, we can't find that volunteer opportunity.
+          </NoticeMessage>
+        </b-col>
+        <b-col cols="0" md="3" class="d-none d-md-block" />
+      </b-row>
+    </div>
+  </client-only>
 </template>
 <script>
 import { useRoute } from 'vue-router'

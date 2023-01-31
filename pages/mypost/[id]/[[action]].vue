@@ -1,42 +1,44 @@
 <template>
-  <b-container fluid>
-    <b-row class="m-0">
-      <b-col cols="12" lg="6" offset-lg="3" class="p-0">
-        <div>
-          <GlobalWarning />
-          <MyMessage
-            v-if="message?.fromuser === myid"
-            :id="id"
-            :show-old="true"
-            :expand="true"
-            :action="action"
-          />
-          <b-alert v-else variant="warning" class="mt-2" show>
-            <h3>That post wasn't made from {{ me.email }}.</h3>
-            <h5>{{ message.subject }}</h5>
-            <p>
-              Please change your email from
-              <!-- eslint-disable-next-line-->
+  <client-only>
+    <b-container fluid>
+      <b-row class="m-0">
+        <b-col cols="12" lg="6" offset-lg="3" class="p-0">
+          <div>
+            <GlobalWarning />
+            <MyMessage
+              v-if="message?.fromuser === myid"
+              :id="id"
+              :show-old="true"
+              :expand="true"
+              :action="action"
+            />
+            <b-alert v-else variant="warning" class="mt-2" show>
+              <h3>That post wasn't made from {{ me.email }}.</h3>
+              <h5>{{ message.subject }}</h5>
+              <p>
+                Please change your email from
+                <!-- eslint-disable-next-line-->
               <nuxt-link to="/settings">Settings</nuxt-link>
-              if necessary - we'll merge your accounts.
-            </p>
-          </b-alert>
-        </div>
-        <div v-if="missing">
-          <NoticeMessage variant="danger" class="mt-1">
-            Sorry, we couldn't find that message. Perhaps it's been deleted, or
-            perhaps the link you clicked on is wrong?
-          </NoticeMessage>
-          <div class="text-center">
-            <b-button variant="primary" size="lg" class="mt-2" to="/myposts">
-              Go to My Posts <v-icon icon="angle-double-right" />
-            </b-button>
+                if necessary - we'll merge your accounts.
+              </p>
+            </b-alert>
           </div>
-        </div>
-      </b-col>
-    </b-row>
-    <DonationAskModal ref="askmodal" :groupid="donationGroup" />
-  </b-container>
+          <div v-if="missing">
+            <NoticeMessage variant="danger" class="mt-1">
+              Sorry, we couldn't find that message. Perhaps it's been deleted,
+              or perhaps the link you clicked on is wrong?
+            </NoticeMessage>
+            <div class="text-center">
+              <b-button variant="primary" size="lg" class="mt-2" to="/myposts">
+                Go to My Posts <v-icon icon="angle-double-right" />
+              </b-button>
+            </div>
+          </div>
+        </b-col>
+      </b-row>
+      <DonationAskModal ref="askmodal" :groupid="donationGroup" />
+    </b-container>
+  </client-only>
 </template>
 <script>
 import { useRoute } from 'vue-router'

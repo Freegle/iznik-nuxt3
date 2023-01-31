@@ -5,9 +5,7 @@
       <GroupHeader v-if="group" :group="group" show-join />
       <JobsTopBar />
       <h2 class="sr-only">List of wanteds and offers</h2>
-      <client-only>
-        <div v-observe-visibility="visibilityChanged" />
-      </client-only>
+      <div v-observe-visibility="visibilityChanged" />
       <div v-if="deDuplicatedMessages?.length">
         <Suspense
           v-for="message in deDuplicatedMessages"

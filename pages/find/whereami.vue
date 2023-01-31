@@ -1,96 +1,97 @@
 <template>
-  <b-row class="m-0">
-    <b-col cols="12" lg="8" offset-lg="2" class="p-0 fader">
-      <GlobalWarning />
-      <client-only>
-        <WizardProgress :active-stage="2" class="d-none d-md-flex" />
-      </client-only>
-      <h1 class="text-center">Now, tell us where you are</h1>
-      <p class="text-center">
-        We'll use this to show your wanted to people nearby. Don't worry, we
-        won't give other people your postcode.
-      </p>
-      <client-only>
-        <b-row>
-          <b-col class="text-center">
-            <PostCode
-              class="justify-content-center"
-              :value="initialPostcode"
-              @selected="postcodeSelect"
-              @cleared="postcodeClear"
-            />
-          </b-col>
-        </b-row>
-        <b-row v-if="!closed && postcodeValid">
-          <b-col class="text-center">
-            <transition name="fade">
-              <nuxt-link to="/find/whoami">
-                <v-icon
-                  icon="check-circle"
-                  class="text-success mt-2 fa-bh"
-                  scale="5"
-                />
-              </nuxt-link>
-            </transition>
-          </b-col>
-        </b-row>
-        <div v-if="postcodeValid && noGroups">
-          <NoticeMessage variant="info" class="mt-2">
-            We're really sorry, but there are no communities near there. If
-            you'd like to start one, please
-            <ExternalLink href="mailto:newgroups@ilovefreegle.org">
-              get in touch!
-            </ExternalLink>
-          </NoticeMessage>
-        </div>
-        <div v-else>
-          <b-row v-if="postcodeValid" class="mt-1">
+  <client-only>
+    <b-row class="m-0">
+      <b-col cols="12" lg="8" offset-lg="2" class="p-0 fader">
+        <GlobalWarning />
+        <client-only>
+          <WizardProgress :active-stage="2" class="d-none d-md-flex" />
+        </client-only>
+        <h1 class="text-center">Now, tell us where you are</h1>
+        <p class="text-center">
+          We'll use this to show your wanted to people nearby. Don't worry, we
+          won't give other people your postcode.
+        </p>
+        <client-only>
+          <b-row>
             <b-col class="text-center">
-              Freegle has local communities for each area. We'll We'll put
-              anything you post on here, and search this community and others
-              nearby.
+              <PostCode
+                class="justify-content-center"
+                :value="initialPostcode"
+                @selected="postcodeSelect"
+                @cleared="postcodeClear"
+              />
             </b-col>
           </b-row>
-          <b-row v-if="postcodeValid" class="mt-1">
-            <b-col class="d-flex justify-content-around">
-              <ComposeGroup />
+          <b-row v-if="!closed && postcodeValid">
+            <b-col class="text-center">
+              <transition name="fade">
+                <nuxt-link to="/find/whoami">
+                  <v-icon
+                    icon="check-circle"
+                    class="text-success mt-2 fa-bh"
+                    scale="5"
+                  />
+                </nuxt-link>
+              </transition>
             </b-col>
           </b-row>
-          <b-row v-if="postcodeValid" class="mt-1">
-            <b-col class="text-center text-muted small">
-              Click on the name above to choose a different community.
-            </b-col>
-          </b-row>
-        </div>
-        <div class="mt-1 d-block d-md-none">
-          <b-button variant="primary" class="w-100" block to="/find/whoami">
-            Next <v-icon icon="angle-double-right" />
-          </b-button>
-        </div>
-        <div class="mt-1 d-none d-md-flex justify-content-between">
-          <b-button
-            variant="secondary"
-            size="lg"
-            to="/find"
-            class="d-none d-md-block"
-          >
-            <v-icon icon="angle-double-left" /> Back
-          </b-button>
-          <b-button
-            v-if="postcodeValid && !closed"
-            variant="primary"
-            size="lg"
-            to="/find/whoami"
-          >
-            Next <v-icon icon="angle-double-right" />
-          </b-button>
-        </div>
-      </client-only>
-    </b-col>
-    <b-col cols="0" md="3" />
-  </b-row>
+          <div v-if="postcodeValid && noGroups">
+            <NoticeMessage variant="info" class="mt-2">
+              We're really sorry, but there are no communities near there. If
+              you'd like to start one, please
+              <ExternalLink href="mailto:newgroups@ilovefreegle.org">
+                get in touch!
+              </ExternalLink>
+            </NoticeMessage>
+          </div>
+          <div v-else>
+            <b-row v-if="postcodeValid" class="mt-1">
+              <b-col class="text-center">
+                Freegle has local communities for each area. We'll We'll put
+                anything you post on here, and search this community and others
+                nearby.
+              </b-col>
+            </b-row>
+            <b-row v-if="postcodeValid" class="mt-1">
+              <b-col class="d-flex justify-content-around">
+                <ComposeGroup />
+              </b-col>
+            </b-row>
+            <b-row v-if="postcodeValid" class="mt-1">
+              <b-col class="text-center text-muted small">
+                Click on the name above to choose a different community.
+              </b-col>
+            </b-row>
+          </div>
+          <div class="mt-1 d-block d-md-none">
+            <b-button variant="primary" class="w-100" block to="/find/whoami">
+              Next <v-icon icon="angle-double-right" />
+            </b-button>
+          </div>
+          <div class="mt-1 d-none d-md-flex justify-content-between">
+            <b-button
+              variant="secondary"
+              size="lg"
+              to="/find"
+              class="d-none d-md-block"
+            >
+              <v-icon icon="angle-double-left" /> Back
+            </b-button>
+            <b-button
+              v-if="postcodeValid && !closed"
+              variant="primary"
+              size="lg"
+              to="/find/whoami"
+            >
+              Next <v-icon icon="angle-double-right" />
+            </b-button>
+          </div>
+        </client-only>
+      </b-col>
+      <b-col cols="0" md="3" />
+    </b-row>
+  </client-only>
 </template>
-
 <script>
 import { useRoute } from 'vue-router'
 import NoticeMessage from '../../components/NoticeMessage'

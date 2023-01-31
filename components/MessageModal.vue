@@ -1,69 +1,65 @@
 <template>
   <div>
-    <client-only>
-      <b-modal
-        id="messagemodal"
-        v-model="showModal"
-        size="lg"
-        class="hide-footer"
-        body-class="p-0 p-md-3"
-        @shown="shown"
-      >
-        <template #default>
-          <div v-if="message">
-            <div v-if="showImages">
-              <ImageCarousel
-                :message-id="id"
-                :attachments="message.attachments"
-              />
-              <hr />
-              <div
-                class="d-flex justify-content-between p-2 mb-2 p-md-0 mb-md-0"
-              >
-                <div class="pr-2 w-50">
-                  <b-button
-                    variant="secondary"
-                    size="lg"
-                    class="w-100"
-                    block
-                    @click="hide"
-                  >
-                    Close
-                  </b-button>
-                </div>
+    <b-modal
+      id="messagemodal"
+      v-model="showModal"
+      size="lg"
+      class="hide-footer"
+      body-class="p-0 p-md-3"
+      @shown="shown"
+    >
+      <template #default>
+        <div v-if="message">
+          <div v-if="showImages">
+            <ImageCarousel
+              :message-id="id"
+              :attachments="message.attachments"
+            />
+            <hr />
+            <div class="d-flex justify-content-between p-2 mb-2 p-md-0 mb-md-0">
+              <div class="pr-2 w-50">
                 <b-button
+                  variant="secondary"
                   size="lg"
-                  variant="primary"
+                  class="w-100"
                   block
-                  class="w-50 pl-2"
-                  @click="showImages = false"
+                  @click="hide"
                 >
-                  View description
+                  Close
                 </b-button>
               </div>
+              <b-button
+                size="lg"
+                variant="primary"
+                block
+                class="w-50 pl-2"
+                @click="showImages = false"
+              >
+                View description
+              </b-button>
             </div>
-            <MessageExpanded
-              v-else
-              :id="id"
-              :key="bumpMessage"
-              :replyable="replyable"
-              :hide-close="hideClose"
-              :actions="actions"
-              :show-map="modalShown"
-              class="ml-md-2 mr-md-2 mt-md-2 ml-0 mr-0 mt-0"
-              @close="hide"
-              @zoom="showImages = true"
-            />
           </div>
-          <div
+          <MessageExpanded
             v-else
-            class="d-flex flex-column -justify-content-around align-content-center"
-          >
-            <b-img src="/loader.gif" alt="Loading..." />
-          </div>
-        </template>
-      </b-modal>
-    </client-only>
+            :id="id"
+            :key="bumpMessage"
+            :replyable="replyable"
+            :hide-close="hideClose"
+            :actions="actions"
+            :show-map="modalShown"
+            class="ml-md-2 mr-md-2 mt-md-2 ml-0 mr-0 mt-0"
+            @close="hide"
+            @zoom="showImages = true"
+          />
+        </div>
+        <div
+          v-else
+          class="d-flex flex-column -justify-content-around align-content-center"
+        >
+          <b-img src="/loader.gif" alt="Loading..." />
+        </div>
+      </template>
+    </b-modal>
   </div>
 </template>
 <script>

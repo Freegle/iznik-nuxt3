@@ -1,10 +1,12 @@
 <template>
-  <b-row class="m-0">
-    <b-col cols="0" md="3" class="d-none d-md-block" />
-    <b-col cols="12" md="6" class="p-0">
-      <ProfileInfo :id="id" />
-    </b-col>
-  </b-row>
+  <client-only>
+    <b-row class="m-0">
+      <b-col cols="0" md="3" class="d-none d-md-block" />
+      <b-col cols="12" md="6" class="p-0">
+        <ProfileInfo :id="id" />
+      </b-col>
+    </b-row>
+  </client-only>
 </template>
 <script>
 import { useRoute } from 'vue-router'

@@ -39,27 +39,29 @@
       <p class="text--medium-responsive black font-weight-bold">
         We'll match you with someone local. All completely free.
       </p>
-      <div class="d-flex buttons">
-        <b-button
-          variant="primary"
-          size="lg"
-          to="/give"
-          class="text--medium-responsive ml-1 ml-sm-0"
-          @click="clicked('give')"
-        >
-          Give Stuff
-        </b-button>
-        <div style="width: 4vw" class="d-none d-lg-block" />
-        <b-button
-          variant="secondary"
-          size="lg"
-          to="/find"
-          class="text--medium-responsive mr-1 mr-sm-0"
-          @click="clicked('ask')"
-        >
-          Ask for Stuff
-        </b-button>
-      </div>
+      <client-only>
+        <div class="d-flex buttons">
+          <b-button
+            variant="primary"
+            size="lg"
+            to="/give"
+            class="text--medium-responsive ml-1 ml-sm-0"
+            @click="clicked('give')"
+          >
+            Give Stuff
+          </b-button>
+          <div style="width: 4vw" class="d-none d-lg-block" />
+          <b-button
+            variant="secondary"
+            size="lg"
+            to="/find"
+            class="text--medium-responsive mr-1 mr-sm-0"
+            @click="clicked('ask')"
+          >
+            Ask for Stuff
+          </b-button>
+        </div>
+      </client-only>
       <div
         class="font-weight-bold text-header text--medium-responsive mt-3 mb-4"
       >
@@ -68,69 +70,74 @@
       <h2 class="text--medium-responsive font-weight-bold black">
         Just looking?
       </h2>
-      <div class="d-flex centresmall flex-wrap">
-        <PlaceAutocomplete
-          class="mb-2"
-          labeltext="See what's being freegled near you."
-          labeltext-sr="Enter your location and"
-          @selected="explorePlace($event)"
-        />
+      <client-only>
+        <div class="d-flex centresmall flex-wrap">
+          <PlaceAutocomplete
+            class="mb-2"
+            labeltext="See what's being freegled near you."
+            labeltext-sr="Enter your location and"
+            @selected="explorePlace($event)"
+          />
+        </div>
+      </client-only>
+    </div>
+    <client-only>
+      <div class="app-download mt-2">
+        <a
+          href="https://play.google.com/store/apps/details?id=org.ilovefreegle.direct"
+          target="_blank"
+          class="mr-2"
+          rel="noopener noreferrer"
+        >
+          <b-img
+            lazy
+            alt="Freegle Android app on Google Play"
+            title="Freegle Android app on Google Play"
+            class="app-download__image"
+            src="/en-play-badge.png"
+          />
+        </a>
+        <a
+          href="https://itunes.apple.com/gb/app/freegle/id970045029?ls=1&amp;mt=8"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <b-img
+            lazy
+            alt="Freegle app for iPhone, iPad, and iPod touch"
+            title="Freegle app for iPhone, iPad, and iPod Touch"
+            class="app-download__image"
+            src="/app-store-black-sm.png"
+          />
+        </a>
       </div>
-    </div>
-    <div class="app-download mt-2">
-      <a
-        href="https://play.google.com/store/apps/details?id=org.ilovefreegle.direct"
-        target="_blank"
-        class="mr-2"
-        rel="noopener noreferrer"
-      >
-        <b-img
-          lazy
-          alt="Freegle Android app on Google Play"
-          title="Freegle Android app on Google Play"
-          class="app-download__image"
-          src="/en-play-badge.png"
-        />
-      </a>
-      <a
-        href="https://itunes.apple.com/gb/app/freegle/id970045029?ls=1&amp;mt=8"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <b-img
-          lazy
-          alt="Freegle app for iPhone, iPad, and iPod touch"
-          title="Freegle app for iPhone, iPad, and iPod Touch"
-          class="app-download__image"
-          src="/app-store-black-sm.png"
-        />
-      </a>
-    </div>
-    <main-footer class="thefooter" />
+    </client-only>
+    <MainFooter class="thefooter" />
   </div>
 </template>
 <script>
 import { useRoute } from 'vue-router'
 import { buildHead } from '../composables/useBuildHead'
 import { useMiscStore } from '../stores/misc'
+import MainFooter from '../components/MainFooter'
 import { useRouter } from '#imports'
 import api from '~/api'
 const VisualiseMap = () => import('~/components/VisualiseMap')
 
 export default {
   components: {
+    MainFooter,
     VisualiseMap,
   },
   setup() {
-    console.log('Index setup')
     const miscStore = useMiscStore()
     const route = useRoute()
 
     useHead(
       buildHead(
         route,
-        'OFFER',
-        'OFFER something to people nearby and see who wants it',
+        "Don't throw it away, give it away!",
+        "Freegle - like online dating for stuff. Got stuff you don't need? Looking for something? We'll match you with someone local. All completely free.",
         null,
         {
           class: 'landing',

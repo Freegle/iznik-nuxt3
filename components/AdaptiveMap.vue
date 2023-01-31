@@ -1,51 +1,47 @@
 <template>
   <div>
     <h2 class="sr-only">Map of offers and wanteds</h2>
-    <client-only>
-      <div v-if="!loggedIn && showClosest" class="overlapnav w-100">
-        <div class="d-flex justify-content-around pl-1 pr-1 w-100">
-          <JoinWithConfirm
-            :id="closestGroups[0].id"
-            :name="closestGroups[0].namedisplay + ' for email alerts'"
-            size="lg"
-            variant="white"
-            class="m-1"
-            :class-name="'m-1 text-truncate maxwidth'"
-          />
-        </div>
-        <div v-observe-visibility="joinVisibilityChanged" />
+    <div v-if="!loggedIn && showClosest" class="overlapnav w-100">
+      <div class="d-flex justify-content-around pl-1 pr-1 w-100">
+        <JoinWithConfirm
+          :id="closestGroups[0].id"
+          :name="closestGroups[0].namedisplay + ' for email alerts'"
+          size="lg"
+          variant="white"
+          class="m-1"
+          :class-name="'m-1 text-truncate maxwidth'"
+        />
       </div>
-    </client-only>
-    <client-only>
-      <PostMap
-        v-if="postMapInitialBounds"
-        :key="'postmap-' + bump"
-        v-model:ready="mapready"
-        v-model:bounds="bounds"
-        v-model:show-groups="showGroups"
-        v-model:moved="mapMoved"
-        v-model:zoom="zoom"
-        v-model:centre="centre"
-        v-model:loading="loading"
-        :initial-bounds="postMapInitialBounds"
-        :height-fraction="heightFraction"
-        :min-zoom="minZoom"
-        :max-zoom="maxZoom"
-        :post-zoom="10"
-        :force-messages="forceMessages"
-        :type="selectedType"
-        :search="searchOn"
-        :search-on-groups="!mapMoved"
-        :show-many="showMany"
-        :groupid="selectedGroup"
-        :region="region"
-        :can-hide="canHide"
-        @searched="selectedGroup = 0"
-        @messages="messagesChanged($event)"
-        @groups="groupsChanged($event)"
-      />
-      <div v-observe-visibility="mapVisibilityChanged" />
-    </client-only>
+      <div v-observe-visibility="joinVisibilityChanged" />
+    </div>
+    <PostMap
+      v-if="postMapInitialBounds"
+      :key="'postmap-' + bump"
+      v-model:ready="mapready"
+      v-model:bounds="bounds"
+      v-model:show-groups="showGroups"
+      v-model:moved="mapMoved"
+      v-model:zoom="zoom"
+      v-model:centre="centre"
+      v-model:loading="loading"
+      :initial-bounds="postMapInitialBounds"
+      :height-fraction="heightFraction"
+      :min-zoom="minZoom"
+      :max-zoom="maxZoom"
+      :post-zoom="10"
+      :force-messages="forceMessages"
+      :type="selectedType"
+      :search="searchOn"
+      :search-on-groups="!mapMoved"
+      :show-many="showMany"
+      :groupid="selectedGroup"
+      :region="region"
+      :can-hide="canHide"
+      @searched="selectedGroup = 0"
+      @messages="messagesChanged($event)"
+      @groups="groupsChanged($event)"
+    />
+    <div v-observe-visibility="mapVisibilityChanged" />
     <div v-if="mapready" class="rest">
       <div v-if="showClosest" class="mb-1 border p-2 bg-white">
         <h2 class="sr-only">Nearby commmunities</h2>

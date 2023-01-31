@@ -1,102 +1,109 @@
 <template>
-  <div>
-    <client-only>
-      <b-row class="m-0">
-        <b-col cols="12" lg="8" offset-lg="2">
-          <WizardProgress :active-stage="3" class="d-none d-md-flex" />
-          <h1 class="text-center">Finally, your email address</h1>
-          <b-row>
-            <b-col class="text-center">
-              <p class="text-muted">
-                We need your email address to let you know when you have
-                replies. We won't give your email to anyone else.
-              </p>
-              <p class="text-muted">
-                You will get emails from us, which you can control or turn off
-                from Settings. Read
-                <nuxt-link target="_blank" to="/terms">
-                  Terms of Use
-                </nuxt-link>
-                and
-                <nuxt-link target="_blank" to="/privacy"> Privacy </nuxt-link>
-                for details.
-              </p>
-              <p class="text-muted">
-                We may show this post to people who are not yet members of
-                Freegle. This helps the community grow by showing people what's
-                happening and encouraging them to join.
-              </p>
-              <EmailValidator
-                v-model:email="email"
-                v-model:valid="emailValid"
-                center
-                class="align-items-center font-weight-bold"
-              />
-              <EmailBelongsToSomeoneElse
-                v-if="emailValid && emailBelongsToSomeoneElse"
-                class="mb-2"
-                :ours="me?.email"
-                :theirs="email"
-              />
-            </b-col>
-          </b-row>
-          <div class="d-block d-md-none">
-            <b-button
-              v-if="emailValid && !submitting"
-              variant="primary"
-              size="lg"
-              block
-              @click="next"
-            >
-              Freegle it! <v-icon icon="angle-double-right" />
-            </b-button>
-          </div>
-          <div class="d-none d-md-block">
-            <div class="d-flex justify-content-between">
-              <b-button
-                variant="secondary"
-                size="lg"
-                to="/find/whereami"
-                class="d-none d-md-block"
-              >
-                <v-icon icon="angle-double-left" /> Back
-              </b-button>
+  <client-only>
+    <div>
+      <client-only>
+        <b-row class="m-0">
+          <b-col cols="12" lg="8" offset-lg="2">
+            <WizardProgress :active-stage="3" class="d-none d-md-flex" />
+            <h1 class="text-center">Finally, your email address</h1>
+            <b-row>
+              <b-col class="text-center">
+                <p class="text-muted">
+                  We need your email address to let you know when you have
+                  replies. We won't give your email to anyone else.
+                </p>
+                <p class="text-muted">
+                  You will get emails from us, which you can control or turn off
+                  from Settings. Read
+                  <nuxt-link target="_blank" to="/terms">
+                    Terms of Use
+                  </nuxt-link>
+                  and
+                  <nuxt-link target="_blank" to="/privacy"> Privacy </nuxt-link>
+                  for details.
+                </p>
+                <p class="text-muted">
+                  We may show this post to people who are not yet members of
+                  Freegle. This helps the community grow by showing people
+                  what's happening and encouraging them to join.
+                </p>
+                <EmailValidator
+                  v-model:email="email"
+                  v-model:valid="emailValid"
+                  center
+                  class="align-items-center font-weight-bold"
+                />
+                <EmailBelongsToSomeoneElse
+                  v-if="emailValid && emailBelongsToSomeoneElse"
+                  class="mb-2"
+                  :ours="me?.email"
+                  :theirs="email"
+                />
+              </b-col>
+            </b-row>
+            <div class="d-block d-md-none">
               <b-button
                 v-if="emailValid && !submitting"
                 variant="primary"
                 size="lg"
+                block
                 @click="next"
               >
                 Freegle it! <v-icon icon="angle-double-right" />
               </b-button>
             </div>
-          </div>
-          <b-row v-if="submitting">
-            <b-col cols="12" md="6" offset-md="3" class="text-center pt-2 mt-2">
-              <NoticeMessage v-if="notAllowed" variant="danger">
-                You are not allowed to post on this community.
-              </NoticeMessage>
-              <NoticeMessage v-else-if="wentWrong" variant="danger">
-                <!-- eslint-disable-next-line -->
-                Something went wrong.  Please try again, and if this keeps happening then contact
-                <SupportLink />.
-              </NoticeMessage>
-              <b-progress
-                v-else
-                height="48px"
-                class="mt-2"
-                animated
-                variant="success"
+            <div class="d-none d-md-block">
+              <div class="d-flex justify-content-between">
+                <b-button
+                  variant="secondary"
+                  size="lg"
+                  to="/find/whereami"
+                  class="d-none d-md-block"
+                >
+                  <v-icon icon="angle-double-left" /> Back
+                </b-button>
+                <b-button
+                  v-if="emailValid && !submitting"
+                  variant="primary"
+                  size="lg"
+                  @click="next"
+                >
+                  Freegle it! <v-icon icon="angle-double-right" />
+                </b-button>
+              </div>
+            </div>
+            <b-row v-if="submitting">
+              <b-col
+                cols="12"
+                md="6"
+                offset-md="3"
+                class="text-center pt-2 mt-2"
               >
-                <b-progress-bar :value="progress" />
-              </b-progress>
-            </b-col>
-          </b-row>
-        </b-col>
-        <b-col cols="0" md="3" />
-      </b-row>
-    </client-only>
-  </div>
+                <NoticeMessage v-if="notAllowed" variant="danger">
+                  You are not allowed to post on this community.
+                </NoticeMessage>
+                <NoticeMessage v-else-if="wentWrong" variant="danger">
+                  <!-- eslint-disable-next-line -->
+                Something went wrong.  Please try again, and if this keeps happening then contact
+                  <SupportLink />.
+                </NoticeMessage>
+                <b-progress
+                  v-else
+                  height="48px"
+                  class="mt-2"
+                  animated
+                  variant="success"
+                >
+                  <b-progress-bar :value="progress" />
+                </b-progress>
+              </b-col>
+            </b-row>
+          </b-col>
+          <b-col cols="0" md="3" />
+        </b-row>
+      </client-only>
+    </div>
+  </client-only>
 </template>
 <script>
 import { mapWritableState } from 'pinia'

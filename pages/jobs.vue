@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <client-only>
+  <client-only>
+    <div>
       <b-row class="m-0">
         <b-col cols="0" md="3" class="d-none d-md-block" />
         <b-col cols="12" md="6" class="mt-2 bg-white">
@@ -46,8 +46,8 @@
           </div>
         </b-col>
       </b-row>
-    </client-only>
-  </div>
+    </div>
+  </client-only>
 </template>
 <script>
 import { mapState } from 'pinia'

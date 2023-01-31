@@ -20,9 +20,7 @@
       </NoticeMessage>
       <NoticeMessage v-if="warn" variant="warning" class="mt-1">
         <h1 class="header--size3">
-          <client-only>
-            <v-icon icon="info-circle" size="1-75x" />
-          </client-only>
+          <v-icon icon="info-circle" size="1-75x" />
           {{ warn.type }}
         </h1>
         <p>

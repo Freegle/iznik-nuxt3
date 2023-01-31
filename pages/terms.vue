@@ -1,15 +1,17 @@
 <template>
-  <div class="d-flex justify-content-center">
-    <div class="terms__container px-3 bg-white">
-      <h1 class="text-center">Terms of Use</h1>
-      <TermsOfUse />
-      <h3>Got questions?</h3>
-      <p>
-        If you have questions, please
-        <nuxt-link to="/help"> contact us. </nuxt-link>
-      </p>
+  <client-only>
+    <div class="d-flex justify-content-center">
+      <div class="terms__container px-3 bg-white">
+        <h1 class="text-center">Terms of Use</h1>
+        <TermsOfUse />
+        <h3>Got questions?</h3>
+        <p>
+          If you have questions, please
+          <nuxt-link to="/help"> contact us. </nuxt-link>
+        </p>
+      </div>
     </div>
-  </div>
+  </client-only>
 </template>
 <script>
 import { useRoute } from 'vue-router'

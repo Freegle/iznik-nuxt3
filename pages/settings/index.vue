@@ -1,7 +1,7 @@
 <template>
-  <div>
-    <h1 class="sr-only">Settings</h1>
-    <client-only>
+  <client-only>
+    <div>
+      <h1 class="sr-only">Settings</h1>
       <b-row class="m-0">
         <b-col cols="0" xl="3" />
         <b-col cols="12" xl="6" class="p-0">
@@ -622,8 +622,8 @@
       <ProfileModal :id="me ? me.id : null" ref="profilemodal" />
       <EmailConfirmModal ref="emailconfirm" />
       <AddressModal ref="addressModal" />
-    </client-only>
-  </div>
+    </div>
+  </client-only>
 </template>
 <script>
 import dayjs from 'dayjs'

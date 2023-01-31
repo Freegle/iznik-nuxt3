@@ -1,34 +1,34 @@
 <template>
-  <div>
-    <b-row class="m-0">
-      <b-col cols="12" lg="6" class="p-0 mt-1" offset-lg="3">
-        <div>
-          <h1>Community Events</h1>
-          <GlobalWarning />
-          <p>These are local events, posted by other freeglers like you.</p>
-          <div class="d-flex justify-content-between mb-3">
-            <GroupSelect
-              v-if="me"
-              v-model="groupid"
-              class="pr-2"
-              all
-              :value="groupid"
-              @update:modelValue="changeGroup"
-            />
-            <b-button
-              variant="primary"
-              class="float-right"
-              @click="showEventModal"
-            >
-              <v-icon icon="plus" /> Add a community event
-            </b-button>
+  <client-only>
+    <div>
+      <b-row class="m-0">
+        <b-col cols="12" lg="6" class="p-0 mt-1" offset-lg="3">
+          <div>
+            <h1>Community Events</h1>
+            <GlobalWarning />
+            <p>These are local events, posted by other freeglers like you.</p>
+            <div class="d-flex justify-content-between mb-3">
+              <GroupSelect
+                v-if="me"
+                v-model="groupid"
+                class="pr-2"
+                all
+                :value="groupid"
+                @update:modelValue="changeGroup"
+              />
+              <b-button
+                variant="primary"
+                class="float-right"
+                @click="showEventModal"
+              >
+                <v-icon icon="plus" /> Add a community event
+              </b-button>
+            </div>
           </div>
-        </div>
-        <h2 class="sr-only">List of community events</h2>
-        <div v-for="id in events" :key="'event-' + id" class="mt-2">
-          <CommunityEvent :id="id" :filter-group="groupid" :summary="false" />
-        </div>
-        <client-only>
+          <h2 class="sr-only">List of community events</h2>
+          <div v-for="id in events" :key="'event-' + id" class="mt-2">
+            <CommunityEvent :id="id" :filter-group="groupid" :summary="false" />
+          </div>
           <infinite-loading
             :key="'infinite-' + groupid"
             :identifier="infiniteId"
@@ -36,12 +36,12 @@
             :distance="1000"
             @infinite="loadMore"
           />
-        </client-only>
-      </b-col>
-      <b-col cols="0" md="3" class="d-none d-md-block" />
-    </b-row>
-    <CommunityEventModal ref="eventmodal" :start-edit="true" />
-  </div>
+        </b-col>
+        <b-col cols="0" md="3" class="d-none d-md-block" />
+      </b-row>
+      <CommunityEventModal ref="eventmodal" :start-edit="true" />
+    </div>
+  </client-only>
 </template>
 <script>
 import { useRoute } from 'vue-router'

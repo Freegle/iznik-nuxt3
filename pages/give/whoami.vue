@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <client-only>
+  <client-only>
+    <div>
       <b-row class="m-0">
         <b-col cols="12" lg="8" offset-lg="2">
           <WizardProgress :active-stage="3" class="d-none d-md-flex" />
@@ -95,8 +95,8 @@
         </b-col>
         <b-col cols="0" md="3" />
       </b-row>
-    </client-only>
-  </div>
+    </div>
+  </client-only>
 </template>
 <script>
 import { mapWritableState } from 'pinia'

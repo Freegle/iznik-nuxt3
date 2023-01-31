@@ -6,17 +6,22 @@ export default defineNuxtConfig({
   // Rendering modes are confusing.
   //
   // target can be static (can host on static hosting such as Azure Static Web Apps) or server (requires a node server).
-  // ssr can be true (renders on server) or false (renders on client).
   //
-  // Ideally we'd support full SSR so that we could render pages on the server or client depending on our hosting choice.
-  // But we use Bootstrap and bootstrap-vue-next.  These do not yet support SSR, and the bootstrap-vue-next team isn't
-  // particularly interested in doing that.  So we can't render full pages on the server any time soon.
+  // ssr can be true (renders at generate time for target: static or in node server for traget: server), or
+  // false (renders on client).
   //
-  // Can we just render purely on the client?  Crawlers nowadays are smart enough to render pages on the client.
+  // Ideally we'd use SSR so that we could render pages on the server or client depending on our hosting choice.
+  // But not all dependencies we use support SSR.  Crucially, we use Bootstrap and bootstrap-vue-next.  These do
+  // not yet support SSR, and the bootstrap-vue-next team isn't particularly interested in doing that.
+  //
+  // So we can't render full pages on the server any time soon. Can we just render purely on the client?
+  //
+  // Crawlers nowadays are smart enough to render pages on the client.  So that would be fine.
   // But Facebook link preview isn't, and we want that to work.
   //
   // However to get that preview working, we only really need the meta tags which are added in the setup() calls of
-  // individual pages.  So we can mask out the rest of the page using <client-only>.
+  // individual pages.  We don't need the full DOM rendered.  So we can mask out bootstrap-containing elements
+  // using <client-only>, and use async component loading to avoid pulling in code if need be.
   //
   // Sometimes when debugging it's useful to set ssr: false, because the errors are clearer when generated on the client.
   target: 'server',

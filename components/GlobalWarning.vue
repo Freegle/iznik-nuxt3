@@ -1,16 +1,14 @@
 <template>
   <div v-if="false">
-    <client-only>
-      <NoticeMessage v-if="show" variant="danger">
-        <b-button variant="link" class="float-end" @click="hideit">
-          Hide this
-        </b-button>
-        <p>This would be a global alert.</p>
-      </NoticeMessage>
-      <div v-else class="text-danger text-right clickme" @click="showit">
-        Show notice.
-      </div>
-    </client-only>
+    <NoticeMessage v-if="show" variant="danger">
+      <b-button variant="link" class="float-end" @click="hideit">
+        Hide this
+      </b-button>
+      <p>This would be a global alert.</p>
+    </NoticeMessage>
+    <div v-else class="text-danger text-right clickme" @click="showit">
+      Show notice.
+    </div>
   </div>
 </template>
 <script>
