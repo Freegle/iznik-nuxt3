@@ -286,10 +286,6 @@ export default {
       immediate: true,
     },
   },
-  mounted() {
-    const router = useRouter()
-    const currentRoute = router.currentRoute.value
-  },
   methods: {
     async loadMore($state) {
       do {
