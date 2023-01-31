@@ -67,10 +67,9 @@ import dayjs from 'dayjs'
 import { useGroupStore } from '../stores/group'
 import { useMessageStore } from '../stores/message'
 import { throttleFetches } from '../composables/useThrottle'
-import { useRouter, ref } from '#imports'
+import { ref } from '#imports'
 import InfiniteLoading from '~/components/InfiniteLoading'
 import { useMiscStore } from '~/stores/misc'
-// const GroupSelect = () => import('./GroupSelect')
 const NoticeMessage = () => import('./NoticeMessage')
 const OurMessage = () => import('~/components/OurMessage.vue')
 const GroupHeader = () => import('~/components/GroupHeader.vue')
