@@ -289,7 +289,6 @@ export default {
   mounted() {
     const router = useRouter()
     const currentRoute = router.currentRoute.value
-    console.log('MessageList mounted', currentRoute)
   },
   methods: {
     async loadMore($state) {
