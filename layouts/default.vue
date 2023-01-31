@@ -3,23 +3,25 @@
     <LayoutCommon v-if="ready">
       <slot />
     </LayoutCommon>
-    <!--    <client-only>-->
-    <!--      <GoogleOneTap @complete="googleLoaded" />-->
-    <!--    </client-only>-->
+    <client-only>
+      <GoogleOneTap @complete="googleLoaded" />
+    </client-only>
   </div>
 </template>
 <script>
 import LayoutCommon from '../components/LayoutCommon'
-// const GoogleOneTap = () => import('~/components/GoogleOneTap')
+const GoogleOneTap = () => import('~/components/GoogleOneTap')
 
 export default {
   components: {
     LayoutCommon,
-    // GoogleOneTap,
+    GoogleOneTap,
   },
   data() {
     return {
-      ready: false,
+      // On the server we want to render immediately, because we're not going to find out that we're logged in - that
+      // checking only happens on the client.
+      ready: process.server,
     }
   },
   methods: {

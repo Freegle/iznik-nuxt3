@@ -12,15 +12,15 @@
     <client-only>
       <BouncingEmail />
       <div class="navbar-toggle" style="display: none" />
-      <div id="serverloader" class="bg-white">
-        <b-img src="/loader.gif" alt="Loading..." />
-        <p>
-          <span>Loading...</span><br /><span class="font-weight-bold"
-            >Stuck here? Try refreshing. Or Chrome.</span
-          ><br /><SupportLink text="No luck? Contact us" />
-        </p>
-      </div>
     </client-only>
+    <div id="serverloader" class="bg-white">
+      <img src="/loader.gif" alt="Loading..." />
+      <p>
+        <span>Loading...</span><br /><span class="font-weight-bold"
+          >Stuck here? Try refreshing. Or Chrome.</span
+        ><br /><SupportLink text="No luck? Contact us" />
+      </p>
+    </div>
     <client-only>
       <div class="d-none">
         <!--  TODO      <ChatButton v-if="replyToSend" ref="replyToPostChatButton" :userid="replyToUser" />-->
@@ -36,7 +36,6 @@ const SupportLink = () => import('~/components/SupportLink')
 const BouncingEmail = () => import('~/components/BouncingEmail')
 const MainHeader = () => import('~/components/MainHeader')
 const BreakpointFettler = () => import('~/components/BreakpointFettler')
-const { $sentrySetContext, $sentrySetUser } = useNuxtApp()
 
 export default {
   components: {
@@ -62,7 +61,9 @@ export default {
   mounted() {
     // Start our timer.  Holding the time in the store allows us to update the time regularly and have reactivity
     // cause displayed fromNow() values to change, rather than starting a timer for each of them.
-    this.updateTime()
+    if (process.client) {
+      this.updateTime()
+    }
 
     if (document) {
       // We added a basic loader into the HTML.  This helps if we are loaded on an old browser where our JS bombs
@@ -83,6 +84,7 @@ export default {
     try {
       // Set the build date.  This may get superceded by Sentry releases, but it does little harm to add it in.
       const runtimeConfig = useRuntimeConfig()
+      const { $sentrySetContext, $sentrySetUser } = useNuxtApp()
 
       $sentrySetContext('builddate', {
         buildDate: runtimeConfig.public.BUILD_DATE,
@@ -134,7 +136,9 @@ export default {
     //   }
   },
   beforeDestroy() {
-    clearTimeout(this.timeTimer)
+    if (process.client) {
+      clearTimeout(this.timeTimer)
+    }
   },
   methods: {
     updateTime() {

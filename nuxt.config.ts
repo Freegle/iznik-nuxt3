@@ -5,21 +5,20 @@ export default defineNuxtConfig({
 
   // Rendering modes are confusing.
   //
-  // target: can be static (can host on static hosting such as Azure Static Web Apps) or server (requires a node server).
+  // target can be static (can host on static hosting such as Azure Static Web Apps) or server (requires a node server).
+  // ssr can be true (renders on server) or false (renders on client).
   //
-  // ssr: true doesn't work because of issues with Bootstrap and/or bootstrap-vue-3.  I'm not
-  // clear which, but the bootstrap-vue-3 project isn't particularly interested in supporting SSR.
-  // So we must have ssr: false.
+  // Ideally we'd support full SSR so that we could render pages on the server or client depending on our hosting choice.
+  // But we use Bootstrap and bootstrap-vue-next.  These do not yet support SSR, and the bootstrap-vue-next team isn't
+  // particularly interested in doing that.  So we can't render full pages on the server any time soon.
   //
-  // target: server and ssr: false would be a bit pointless - you'd require non-static hosting but not gain anything
-  // over target: static and ssr: false, so far as I can see.
+  // Can we just render purely on the client?  Crawlers nowadays are smart enough to render pages on the client.
+  // But Facebook link preview isn't, and we want that to work.
   //
-  // So this leaves target: static and ssr: false.
+  // However to get that preview working, we only really need the meta tags which are added in the setup() calls of
+  // individual pages.  So we can mask out the rest of the page using <client-only>.
   //
-  // This means that the pages are generated but only contain the scripts required to render on the client, and not
-  // the full pre-rendered HTML. This functions fine for users and SEO (which nowadays executes JS).
-  // But Facebook preview doesn't execute JS, which means that url preview doesn't work.
-
+  // Sometimes when debugging it's useful to set ssr: false, because the errors are clearer when generated on the client.
   target: 'server',
   ssr: true,
 

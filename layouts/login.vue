@@ -1,10 +1,8 @@
 <template>
   <div>
-    <client-only>
-      <LayoutCommon v-if="ready">
-        <slot />
-      </LayoutCommon>
-    </client-only>
+    <LayoutCommon v-if="ready">
+      <slot />
+    </LayoutCommon>
     <client-only>
       <GoogleOneTap @complete="googleLoaded" />
       <LoginModal v-if="googleReady" />
