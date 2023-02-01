@@ -80,13 +80,12 @@
           </li>
           <li>
             We show jobs ads from
-            <!-- eslint-disable-next-line -->
-          <ExternalLink href="https://uk.whatjobs.com/">WhatJobs</ExternalLink>, both on the site and in emails.
-          We'd prefer not to,
-          but we don't raise enough from <nuxt-link to="/donate">
-            donations
-          </nuxt-link> alone to keep going.  We don't pass them any information at all unless you click on one of the
-            the the the the the the job links, not even your IP your IP address.
+            <ExternalLink href="https://uk.whatjobs.com/">WhatJobs</ExternalLink
+            >, both on the site and in emails. We'd prefer not to, but we don't
+            raise enough from
+            <nuxt-link to="/donate"> donations </nuxt-link> alone to keep going.
+            We don't pass them any information at all unless you click on one of
+            the job links, not even your IP your IP address.
           </li>
         </ul>
         <h2>Sentry</h2>
@@ -158,9 +157,16 @@ import ExternalLink from '~/components/ExternalLink'
 export default {
   components: { ExternalLink },
   setup() {
+    const runtimeConfig = useRuntimeConfig()
     const route = useRoute()
+
     useHead(
-      buildHead(route, 'Privacy', 'What data we keep and how we protect it')
+      buildHead(
+        route,
+        runtimeConfig,
+        'Privacy',
+        'What data we keep and how we protect it'
+      )
     )
   },
 }

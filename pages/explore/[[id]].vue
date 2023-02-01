@@ -31,12 +31,9 @@ import { useRoute } from 'vue-router'
 import { buildHead } from '../../composables/useBuildHead'
 import { useGroupStore } from '~/stores/group'
 
-definePageMeta({
-  layout: 'default',
-})
-
 export default {
   async setup() {
+    const runtimeConfig = useRuntimeConfig()
     const groupStore = useGroupStore()
     const route = useRoute()
     const id = route.params.id
@@ -53,6 +50,7 @@ export default {
     useHead(
       buildHead(
         route,
+        runtimeConfig,
         group ? 'Explore ' + group.namedisplay : 'Explore Freegle',
         null,
         null,

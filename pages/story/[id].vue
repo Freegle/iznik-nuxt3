@@ -47,6 +47,7 @@ export default {
     StoryOne,
   },
   async setup(props) {
+    const runtimeConfig = useRuntimeConfig()
     const route = useRoute()
     const storyStore = useStoryStore()
 
@@ -62,11 +63,13 @@ export default {
     }
 
     if (invalid) {
-      useHead(buildHead(route, 'Story #' + id))
+      useHead(buildHead(route, useRuntimeConfig(), 'Story #' + id))
     } else {
       useHead(
         buildHead(
           route,
+          runtimeConfig,
+
           story ? 'Freegle Story: ' + story.headline : 'Freegle Stories',
           story.story,
           story.photo

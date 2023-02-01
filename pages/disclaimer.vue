@@ -72,11 +72,13 @@ import { buildHead } from '~/composables/useBuildHead'
 
 export default {
   setup() {
+    const runtimeConfig = useRuntimeConfig()
     const route = useRoute()
 
     useHead(
       buildHead(
         route,
+        runtimeConfig,
         'Disclaimer',
         'What you need to know when using Freegle.'
       )

@@ -30,6 +30,7 @@ export default {
     AdaptiveMap,
   },
   async setup(props) {
+    const runtimeConfig = useRuntimeConfig()
     const groupStore = useGroupStore()
     const route = useRoute()
     const region = route.params.region
@@ -39,6 +40,7 @@ export default {
     useHead(
       buildHead(
         route,
+        runtimeConfig,
         'Explore Freegle communities' +
           (route.params.region ? ' in ' + route.params.region : ''),
         null,

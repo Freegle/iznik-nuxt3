@@ -36,11 +36,13 @@ export default {
     AdaptiveMap,
   },
   async setup() {
+    const runtimeConfig = useRuntimeConfig()
     const route = useRoute()
 
     useHead(
       buildHead(
         route,
+        runtimeConfig,
         'Explore Freegle',
         "There are lots of lovely communities of freeglers across the UK. Shall we see what they're up to?",
         null,

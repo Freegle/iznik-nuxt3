@@ -83,15 +83,12 @@ import { useGroupStore } from '~/stores/group'
 import { twem } from '~/composables/useTwem'
 import MyMessage from '~/components/MyMessage'
 
-definePageMeta({
-  layout: 'default',
-})
-
 export default {
   components: {
     MyMessage,
   },
   async setup(props) {
+    const runtimeConfig = useRuntimeConfig()
     const route = useRoute()
     const messageStore = useMessageStore()
     const groupStore = useGroupStore()
@@ -113,6 +110,7 @@ export default {
       useHead(
         buildHead(
           route,
+          runtimeConfig,
           message.subject,
           snip,
           message.attachments && message.attachments.length > 0

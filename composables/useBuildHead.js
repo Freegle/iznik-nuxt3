@@ -1,12 +1,12 @@
 export function buildHead(
   route,
+  runtimeConfig,
   title,
   description,
   image = null,
   bodyAttrs = {}
 ) {
-  const runtimeConfig = useRuntimeConfig()
-
+  // Pain to have to pass in runtimeConfig but you can't use that in a composable.
   const meta = [
     {
       hid: 'description',

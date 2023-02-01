@@ -143,8 +143,14 @@ export default {
     InfiniteLoading,
   },
   async setup(props) {
+    const route = useRoute
+    const runtimeConfig = useRuntimeConfig()
+
     useHead(
       buildHead(
+        route,
+        runtimeConfig,
+
         'Chats',
         "See the conversations you're having with other freeglers."
       )

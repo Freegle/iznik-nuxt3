@@ -144,13 +144,20 @@ export default {
     AboutMeModal,
   },
   async setup() {
-    console.log('Browse setup')
     const route = useRoute()
+    const runtimeConfig = useRuntimeConfig()
 
     useHead(
-      buildHead(route, 'Browse', 'See OFFERs and WANTEDs', null, {
-        class: 'overflow-y-scroll',
-      })
+      buildHead(
+        route,
+        runtimeConfig,
+        'Browse',
+        'See OFFERs and WANTEDs',
+        null,
+        {
+          class: 'overflow-y-scroll',
+        }
+      )
     )
 
     const router = useRouter()

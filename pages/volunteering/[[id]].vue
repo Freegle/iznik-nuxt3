@@ -43,6 +43,7 @@ export default {
     VolunteerOpportunity,
   },
   setup() {
+    const runtimeConfig = useRuntimeConfig()
     const volunteeringStore = useVolunteeringStore()
     const route = useRoute()
     const router = useRouter()
@@ -60,6 +61,7 @@ export default {
       useHead(
         buildHead(
           route,
+          runtimeConfig,
           volunteering.title,
           volunteering.description,
           volunteering.image ? volunteering.image.path : null
@@ -69,6 +71,7 @@ export default {
       invalid = true
       buildHead(
         route,
+        useRuntimeConfig(),
         'Volunteer Opportunity ' + id,
         "Sorry, that volunteer opportunity isn't around any more."
       )

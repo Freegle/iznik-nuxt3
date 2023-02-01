@@ -67,6 +67,7 @@ export default {
     JobOne,
   },
   async setup() {
+    const runtimeConfig = useRuntimeConfig()
     const jobStore = useJobStore()
     const authStore = useAuthStore()
 
@@ -80,6 +81,7 @@ export default {
     useHead(
       buildHead(
         route,
+        runtimeConfig,
         'Jobs',
         'Freegle gets a little bit to help keep us going if you click on them.',
         null,

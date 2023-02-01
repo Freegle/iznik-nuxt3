@@ -676,6 +676,7 @@ export default {
     PasswordEntry,
   },
   setup() {
+    const runtimeConfig = useRuntimeConfig()
     const route = useRoute()
     const miscStore = useMiscStore()
     const authStore = useAuthStore()
@@ -683,6 +684,7 @@ export default {
     useHead(
       buildHead(
         route,
+        runtimeConfig,
         'Settings',
         'What people see about you, your email settings, all that good stuff...',
         null,

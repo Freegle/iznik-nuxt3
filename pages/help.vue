@@ -333,12 +333,24 @@
   </client-only>
 </template>
 <script>
+import { useRoute } from 'vue-router'
 import { Searcher } from 'fast-fuzzy'
 import dayjs from 'dayjs'
 import HelpQuestion from '../components/HelpQuestion'
+import { buildHead } from '~/composables/useBuildHead'
 
 export default {
   components: { HelpQuestion },
+  setup() {
+    const route = useRoute()
+    const runtimeConfig = useRuntimeConfig()
+
+    useHead(
+      buildHead(route, runtimeConfig, 'Help', 'Help with Freegle', null, {
+        class: 'overflow-y-scroll',
+      })
+    )
+  },
   data() {
     return {
       question: null,

@@ -196,6 +196,7 @@ definePageMeta({
 export default {
   components: { SpinButton, NoticeMessage, OurToggle },
   async setup() {
+    const runtimeConfig = useRuntimeConfig()
     const route = useRoute()
     const addressStore = useAddressStore()
     const giftAidStore = useGiftAidStore()
@@ -240,7 +241,12 @@ export default {
     })
 
     useHead(
-      buildHead(route, 'Gift Aid', 'Add gift aid to your donation to Freegle')
+      buildHead(
+        route,
+        runtimeConfig,
+        'Gift Aid',
+        'Add gift aid to your donation to Freegle'
+      )
     )
 
     return {

@@ -163,11 +163,13 @@ export default {
   },
   ...mapState(useDonationStore, ['target']),
   setup() {
+    const runtimeConfig = useRuntimeConfig()
     const route = useRoute()
 
     useHead(
       buildHead(
         route,
+        runtimeConfig,
         'Donate to Freegle',
         "We're free to use, but not free to run.  Can you help us keep going?"
       )

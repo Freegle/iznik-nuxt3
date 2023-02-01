@@ -49,6 +49,7 @@ export default {
     StoryOne,
   },
   async setup(props) {
+    const runtimeConfig = useRuntimeConfig()
     const route = useRoute()
     const storyStore = useStoryStore()
     const authorityStore = useAuthorityStore()
@@ -63,6 +64,7 @@ export default {
     useHead(
       buildHead(
         route,
+        runtimeConfig,
         authority?.authorityname
           ? 'Stories for ' + authority?.authorityname
           : 'Stories from freeglers',

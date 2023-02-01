@@ -69,6 +69,7 @@ export default {
     StoryOne,
   },
   async setup(props) {
+    const runtimeConfig = useRuntimeConfig()
     const route = useRoute()
     const storyStore = useStoryStore()
     const groupStore = useGroupStore()
@@ -83,6 +84,7 @@ export default {
     useHead(
       buildHead(
         route,
+        runtimeConfig,
         group?.namedisplay
           ? 'Stories for ' + group?.namedisplay
           : 'Stories from freeglers',

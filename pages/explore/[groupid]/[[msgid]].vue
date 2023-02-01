@@ -16,45 +16,34 @@
     </div>
   </client-only>
 </template>
-<script>
+<script setup>
 import { useRoute } from 'vue-router'
 import { buildHead } from '~/composables/useBuildHead'
 import { useGroupStore } from '~/stores/group'
 
-definePageMeta({
-  layout: 'default',
+const runtimeConfig = useRuntimeConfig()
+const groupStore = useGroupStore()
+const route = useRoute()
+const id = route.params.groupid
+const msgid = parseInt(route.params.msgid)
+
+const group = computed(() => {
+  return groupStore.get(id)
 })
 
-export default {
-  async setup() {
-    const groupStore = useGroupStore()
-    const route = useRoute()
-    const id = route.params.groupid
-    const msgid = parseInt(route.params.msgid)
-
-    let group = null
-
-    if (id) {
-      // Fetch the specific group.
-      group = await groupStore.fetch(route.params.id)
-    } else {
-      // Fetch all groups for the map.  No need to await - rendering the map is eye candy.
-      groupStore.fetch()
-    }
-
-    useHead(
-      buildHead(
-        route,
-        group ? 'Explore ' + group.namedisplay : 'Explore Freegle'
-      )
-    )
-
-    return { id, msgid, groupStore }
-  },
-  computed: {
-    group() {
-      return this.groupStore.get(this.id)
-    },
-  },
+if (id) {
+  // Fetch the specific group.
+  await groupStore.fetch(route.params.id)
+} else {
+  // Fetch all groups for the map.  No need to await - rendering the map is eye candy.
+  groupStore.fetch()
 }
+
+useHead(
+  buildHead(
+    route,
+    runtimeConfig,
+    group ? 'Explore ' + group.value.namedisplay : 'Explore Freegle'
+  )
+)
 </script>

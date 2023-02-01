@@ -116,10 +116,12 @@ export default {
   },
   async setup() {
     const route = useRoute()
+    const runtimeConfig = useRuntimeConfig()
 
     useHead(
       buildHead(
         route,
+        runtimeConfig,
         'WANTED',
         "Ask people nearby if they have what you're looking for"
       )

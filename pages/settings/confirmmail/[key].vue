@@ -107,6 +107,7 @@ definePageMeta({
 export default {
   components: { ExternalLink },
   setup() {
+    const runtimeConfig = useRuntimeConfig()
     const route = useRoute()
     const authStore = useAuthStore()
 
@@ -115,6 +116,7 @@ export default {
     useHead(
       buildHead(
         route,
+        runtimeConfig,
         'Confirm Email',
         'Confirm your email address so that we send mails to the right place.'
       )

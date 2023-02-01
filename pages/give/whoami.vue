@@ -121,11 +121,13 @@ export default {
     WizardProgress,
   },
   async setup() {
+    const runtimeConfig = useRuntimeConfig()
     const route = useRoute()
 
     useHead(
       buildHead(
         route,
+        runtimeConfig,
         'OFFER',
         'OFFER something to people nearby and see who wants it'
       )

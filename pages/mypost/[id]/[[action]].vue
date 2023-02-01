@@ -63,6 +63,7 @@ export default {
     DonationAskModal,
   },
   async setup() {
+    const runtimeConfig = useRuntimeConfig()
     const authStore = useAuthStore()
     const messageStore = useMessageStore()
     const groupStore = useGroupStore()
@@ -94,7 +95,14 @@ export default {
 
       await Promise.all(promises)
 
-      useHead(buildHead(route, message ? message.subject : 'My Posts', null))
+      useHead(
+        buildHead(
+          route,
+          runtimeConfig,
+          message ? message.subject : 'My Posts',
+          null
+        )
+      )
 
       if (myid) {
         if (message?.fromuser !== myid) {

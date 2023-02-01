@@ -367,11 +367,13 @@ export default {
     ProfileImage,
   },
   async setup() {
+    const runtimeConfig = useRuntimeConfig()
     const teamStore = useTeamStore()
     const route = useRoute()
     useHead(
       buildHead(
         route,
+        runtimeConfig,
         'About Us',
         'What we do, how it works, who we are...all that stuff.'
       )

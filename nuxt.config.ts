@@ -23,6 +23,10 @@ export default defineNuxtConfig({
   // individual pages.  We don't need the full DOM rendered.  So we can mask out bootstrap-containing elements
   // using <client-only>, and use async component loading to avoid pulling in code if need be.
   //
+  // We handle most of this in the pages, rather than in the components.  Some features of Nuxt don't work well unless
+  // you're using <script setup> (i.e. not in setup()), such as useRuntimeConfig().  So we use <script setup> in those
+  // pages, though for historical reasons we don't generally use it in the components.
+  //
   // Sometimes when debugging it's useful to set ssr: false, because the errors are clearer when generated on the client.
   target: 'server',
   ssr: true,

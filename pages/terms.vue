@@ -23,11 +23,13 @@ export default {
     TermsOfUse,
   },
   setup() {
+    const runtimeConfig = useRuntimeConfig()
     const route = useRoute()
 
     useHead(
       buildHead(
         route,
+        runtimeConfig,
         'Terms of Use',
         "Our Terms of Use.  They're pleasingly short."
       )

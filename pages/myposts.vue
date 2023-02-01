@@ -286,6 +286,7 @@ export default {
   },
   mixins: [buildHead],
   async setup() {
+    const runtimeConfig = useRuntimeConfig()
     const authStore = useAuthStore()
     const messageStore = useMessageStore()
     const groupStore = useGroupStore()
@@ -298,6 +299,7 @@ export default {
     useHead(
       buildHead(
         route,
+        runtimeConfig,
         'My Posts',
         "See OFFERs/WANTEDs that you've posted, and replies to them.",
         null,

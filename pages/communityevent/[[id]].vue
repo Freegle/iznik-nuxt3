@@ -42,6 +42,7 @@ export default {
     CommunityEvent,
   },
   setup() {
+    const runtimeConfig = useRuntimeConfig()
     const eventStore = useCommunityEventStore()
     const route = useRoute()
     const router = useRouter()
@@ -59,6 +60,7 @@ export default {
       useHead(
         buildHead(
           route,
+          runtimeConfig,
           event.title,
           event.description,
           event.image ? event.image.path : null
@@ -69,6 +71,7 @@ export default {
       useHead(
         buildHead(
           route,
+          runtimeConfig,
           'Community Event ' + id,
           "Sorry, that community event isn't around any more."
         )

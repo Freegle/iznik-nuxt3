@@ -67,6 +67,7 @@ export default {
   },
   mixins: [buildHead],
   async setup() {
+    const runtimeConfig = useRuntimeConfig()
     const communityEventStore = useCommunityEventStore()
     const groupStore = useGroupStore()
 
@@ -91,6 +92,7 @@ export default {
     useHead(
       buildHead(
         route,
+        runtimeConfig,
         name,
         'These are local events, posted by other freeglers like you.',
         image,

@@ -129,6 +129,7 @@ export default {
   },
   mixins: [buildHead],
   setup() {
+    const runtimeConfig = useRuntimeConfig()
     const route = useRoute()
     const userid = parseInt(route.params.id)
     const confirmed = route.query.confirm
@@ -138,6 +139,7 @@ export default {
     useHead(
       buildHead(
         route,
+        runtimeConfig,
         'Unsubscribe',
         'Want to leave Freegle?  You can do that from here.'
       )

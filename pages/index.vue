@@ -130,12 +130,14 @@ export default {
     VisualiseMap,
   },
   setup() {
+    const runtimeConfig = useRuntimeConfig()
     const miscStore = useMiscStore()
     const route = useRoute()
 
     useHead(
       buildHead(
         route,
+        runtimeConfig,
         "Don't throw it away, give it away!",
         "Freegle - like online dating for stuff. Got stuff you don't need? Looking for something? We'll match you with someone local. All completely free.",
         null,

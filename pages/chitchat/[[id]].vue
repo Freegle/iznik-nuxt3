@@ -192,6 +192,7 @@ export default {
     return !params.id || /^\d+$/.test(params.id)
   },
   async setup(props) {
+    const runtimeConfig = useRuntimeConfig()
     const miscStore = useMiscStore()
     const newsfeedStore = useNewsfeedStore()
     const authStore = useAuthStore()
@@ -212,6 +213,7 @@ export default {
     useHead(
       buildHead(
         route,
+        runtimeConfig,
         'ChitChat',
         'Chat to nearby freeglers...ask for advice, recommendations or just have a good old natter.',
         null,
