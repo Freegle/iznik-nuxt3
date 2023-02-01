@@ -2,15 +2,15 @@
 
 What does exist:
 * Use of Nuxt 3 (still in Beta) and hence Vue 3 + Vite.
-* Use of Bootstrap Vue 3 (still in alpha), including customisation.  This is a replacement for Bootstrap Vue.
+* Use of Bootstrap Vue Next (still in alpha), including customisation.  This is a replacement for Bootstrap Vue.
 * Use of Pinia as a replacement for Vuex.  This is much nicer.
 * CD on Azure.
-* Proof of Concept Capacitor app.  Since we can't yet generate a static site, this serves a hello world HTML file from www.
+* Proof of Concept Capacitor app (needs revisiting).
 
 What doesn't exist yet:
 * Give/Ask flows when logged out initially.
-* ChitChat/Events/Volunteers/Settings/Promote/Help/Notifications
-* Static site generation.
+* Some of the minor pages (see list in nuxt.config)
+* SSR (but getting there).
 * CircleCI/playwright testing.
 
 # iznik-nuxt3
@@ -33,7 +33,7 @@ hear about it; you can mail <geeks@ilovefreegle.org>.
 
 # Development
 
-Currently only tested on node v16.13.2 and npm v8.1.2.  Other versions cause issues on Windows builds.
+Currently only tested on node v16.13.2 and npm v9.4.0.  Other versions cause issues on Windows builds.
 
 Then install all the dependencies:
 ```
@@ -53,7 +53,7 @@ Then start the dev server:
 npm run dev
 ```
 
-This will serve up the site at [localhost:3001](http://localhost:3001).
+This will serve up the site at [localhost:3002](http://localhost:3002).
 
 It will watch for changes and do hot module reloading.  Occasionally you'll need to restart Vite when it doesn't 
 pick up a change.
@@ -63,7 +63,7 @@ pick up a change.
 Briefly:
 * [Nuxt](https://v3.nuxtjs.org/), which is [Vue 3](https://vuejs.org/) (so we get all
   that nice reactive stuff), with a standard layout and SSR/static site generation.
-* [BootstrapVue 3](https://cdmoro.github.io/bootstrap-vue-3/), which is Bootstrap v5 for Vue 3 / Nuxt 3.
+* [Bootstrap Vue Next](https://github.com/bootstrap-vue/bootstrap-vue-next/), which is Bootstrap v5 for Vue 3 / Nuxt 3.
 
 <img src="http://www.browserstack.com/images/layout/browserstack-logo-600x315.png" width="280"/>
 
