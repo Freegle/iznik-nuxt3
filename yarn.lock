@@ -1022,7 +1022,7 @@
     consola "^2.15.3"
     lodash.mergewith "^4.6.2"
 
-"@pinia/nuxt@^0.4":
+"@pinia/nuxt@^0.4.6":
   version "0.4.6"
   resolved "https://registry.yarnpkg.com/@pinia/nuxt/-/nuxt-0.4.6.tgz#ce83714f700594187d8a29e8f4bdaf31abe0bef1"
   integrity sha512-HjrYEfLdFpmsjhicPJgL36jVhzHWukIQPFFHGTSF84Cplu+f2nY2XHKqe9ToHzE9rLee2RjLOwAzOnXa/I/u6A==

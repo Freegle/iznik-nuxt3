@@ -14,6 +14,7 @@
     <template #title>
       <h2>Let's get freegling!</h2>
     </template>
+    Show modal? {{ showModal }}
     <p v-if="signUp" class="text-center">
       You'll get emails. Name, approximate location, and profile picture are
       public - you can hide your real name and picture from Settings. Logging in
@@ -347,6 +348,7 @@ export default {
       }
     },
     show() {
+      console.log('show modal')
       this.pleaseShowModal = true
       this.nativeLoginError = null
       this.socialLoginError = null

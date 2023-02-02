@@ -4,7 +4,7 @@
       <slot />
     </LayoutCommon>
     <client-only>
-      <GoogleOneTap @complete="googleLoaded" />
+      <GoogleOneTap v-if="oneTap" @complete="googleLoaded" />
     </client-only>
   </div>
 </template>
@@ -23,30 +23,36 @@ export default {
       // On the server we want to render immediately, because we're not going to find out that we're logged in - that
       // checking only happens on the client.
       ready: !!process.server,
+      oneTap: false,
     }
   },
-  watch: {
-    loginStateKnown: {
-      handler(newVal) {
-        if (newVal) {
-          // Whether or not we are logged in, at least we now know.  We need this so that we don't trigger
-          // API calls without a JWT when we are in fact logged in.  Now we can continue.
-          console.log('Login state now known', newVal)
-          this.ready = true
-        }
-      },
-      immediate: true,
-    },
-  },
+  async mounted() {
+    if (this.jwt) {
+      // We have a JWT, which may or may not be valid on the server.  If it is, then we can crack on and
+      // start rendering the page.  This will be quicker than waiting for GoogleOneTap to load and tell us
+      // whether or not we can log in that way.
+      const authStore = useAuthStore()
+      const user = await authStore.fetchUser()
 
+      if (user) {
+        this.ready = true
+      }
+    }
+
+    if (!this.ready) {
+      // We don't have a valid JWT.  See if OneTap can sign us in.
+      console.log('Try for onetap')
+      this.oneTap = true
+    }
+  },
   methods: {
     async googleLoaded() {
       // For this layout we don't need to be logged in.  So can just continue.  But we want to know first whether or
       // not we are logged in.
       const authStore = useAuthStore()
-      console.log('Google loaded')
       await authStore.fetchUser()
-      console.log('Fetched')
+
+      this.ready = true
     },
   },
 }

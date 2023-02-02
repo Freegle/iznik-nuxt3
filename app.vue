@@ -8,7 +8,7 @@
 <script setup>
 import { useRoute } from 'vue-router'
 import { computed } from 'vue'
-import { createPinia, setActivePinia } from 'pinia'
+// import { createPinia, setActivePinia } from 'pinia'
 import { useAuthStore } from './stores/auth'
 import { useGroupStore } from './stores/group'
 import { useMessageStore } from './stores/message'
@@ -31,7 +31,7 @@ import { useDonationStore } from './stores/donations'
 import { useGiftAidStore } from './stores/giftaid'
 import { useAuthorityStore } from './stores/authority'
 
-const piniaPersist = () => import('pinia-plugin-persist')
+// const piniaPersist = () => import('pinia-plugin-persist')
 
 const route = useRoute()
 
@@ -43,23 +43,23 @@ let ready = false
 const runtimeConfig = useRuntimeConfig()
 
 // Initialise pinia here - @pinia/nuxt doesn't seem to kick in early enough if we install it as a plugin
-try {
-  const pinia = createPinia()
-  const nuxtApp = useNuxtApp()
-  nuxtApp.vueApp.use(pinia)
-  setActivePinia(pinia)
-  if (process.server) {
-    nuxtApp.payload.pinia = pinia.state.value
-  } else {
-    if (nuxtApp.payload && nuxtApp.payload.pinia) {
-      pinia.state.value = nuxtApp.payload.pinia
-    }
-
-    pinia.use(piniaPersist)
-  }
-} catch (e) {
-  console.error('Pinia init', e)
-}
+// try {
+//   const pinia = createPinia()
+//   const nuxtApp = useNuxtApp()
+//   nuxtApp.vueApp.use(pinia)
+//   setActivePinia(pinia)
+//   if (process.server) {
+//     nuxtApp.payload.pinia = pinia.state.value
+//   } else {
+//     if (nuxtApp.payload && nuxtApp.payload.pinia) {
+//       pinia.state.value = nuxtApp.payload.pinia
+//     }
+//
+//     pinia.use(piniaPersist)
+//   }
+// } catch (e) {
+//   console.error('Pinia init', e)
+// }
 
 const groupStore = useGroupStore()
 const messageStore = useMessageStore()

@@ -67,6 +67,8 @@ export default defineNuxtConfig({
     extractCSS: true,
   },
 
+  modules: ['@pinia/nuxt'],
+
   buildModules: [
     [
       '@pinia/nuxt',

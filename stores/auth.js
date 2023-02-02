@@ -4,7 +4,6 @@ import { LoginError, SignUpError } from '../api/BaseAPI'
 import { useComposeStore } from '../stores/compose'
 import api from '~/api'
 
-console.log('Auth those, got local storage?', typeof localStorage)
 export const useAuthStore = defineStore({
   id: 'auth',
   persist: {
@@ -271,6 +270,8 @@ export const useAuthStore = defineStore({
 
       console.log('Setting known state')
       this.loginStateKnown = true
+
+      return this.user
     },
     async saveAboutMe(value) {
       const data = await this.$api.session.save({
