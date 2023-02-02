@@ -43,7 +43,11 @@ useHead(
   buildHead(
     route,
     runtimeConfig,
-    group ? 'Explore ' + group.value.namedisplay : 'Explore Freegle'
+    group ? 'Explore ' + group.value.namedisplay : 'Explore Freegle',
+    group?.description
+      ? group.description
+      : "Give and get stuff for free. Offer things you don't need, and ask for things you'd like. Don't just recycle - reuse with Freegle!",
+    group.profile ? group.profile : '/icon.png'
   )
 )
 </script>
