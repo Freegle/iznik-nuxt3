@@ -28,8 +28,11 @@
 </template>
 <script setup>
 import { useRoute } from 'vue-router'
+import { defineAsyncComponent } from 'vue'
 import { buildHead } from '../../composables/useBuildHead'
 import { useGroupStore } from '~/stores/group'
+
+defineAsyncComponent(() => import('~/components/AdaptiveMap'))
 
 const runtimeConfig = useRuntimeConfig()
 const groupStore = useGroupStore()

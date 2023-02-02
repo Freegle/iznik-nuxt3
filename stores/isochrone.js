@@ -14,16 +14,20 @@ export const useIsochroneStore = defineStore({
     bounds: null,
   }),
   actions: {
-    async init(config) {
-      if (process.client) {
+    async loadLeaflet() {
+      // No point loading leafleft (which is large) until we need it.
+      if (process.client && (!this.Wkt || !window.L)) {
         this.Wkt = await import('wicket')
-        window.L = await import('leaflet/dist/leaflet-src.esm')
+        window.L = await import('leaflet')
         await import('wicket/wicket-leaflet')
       }
-
+    },
+    init(config) {
       this.config = config
     },
     async fetch(force) {
+      await this.loadLeaflet()
+
       if (!this.list?.length || force) {
         try {
           if (this.fetchingIsochrones) {

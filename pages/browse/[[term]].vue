@@ -113,6 +113,7 @@
 <script>
 import dayjs from 'dayjs'
 import { useRoute, useRouter } from 'vue-router'
+import { defineAsyncComponent } from 'vue'
 import { buildHead } from '../../composables/useBuildHead'
 import VisibleWhen from '~/components/VisibleWhen'
 import { useMiscStore } from '~/stores/misc'
@@ -124,7 +125,6 @@ definePageMeta({
   layout: 'login',
 })
 
-const AdaptiveMap = () => import('~/components/AdaptiveMap')
 const IsochronePostMapAndList = () =>
   import('~/components/IsochronePostMapAndList')
 const GlobalWarning = () => import('~/components/GlobalWarning')
@@ -135,7 +135,7 @@ const ExpectedRepliesWarning = () =>
 
 export default {
   components: {
-    AdaptiveMap,
+    AdaptiveMap: defineAsyncComponent(() => import('~/components/AdaptiveMap')),
     VisibleWhen,
     // MicroVolunteering,
     IsochronePostMapAndList,

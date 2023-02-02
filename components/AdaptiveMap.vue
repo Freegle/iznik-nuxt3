@@ -161,6 +161,7 @@
   </div>
 </template>
 <script>
+import { defineAsyncComponent } from 'vue'
 import { useAuthStore } from '../stores/auth'
 import { useGroupStore } from '../stores/group'
 import { useMessageStore } from '../stores/message'
@@ -182,6 +183,7 @@ export default {
     GroupSelect,
     ExternalLink,
     AdaptiveMapGroup,
+    PostMap: defineAsyncComponent(() => import('./PostMap')),
   },
   props: {
     initialBounds: {

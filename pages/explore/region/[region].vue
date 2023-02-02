@@ -21,13 +21,13 @@
 </template>
 <script>
 import { useRoute } from 'vue-router'
+import { defineAsyncComponent } from 'vue'
 import { buildHead } from '../../../composables/useBuildHead'
 import { useGroupStore } from '~/stores/group'
-import AdaptiveMap from '~/components/AdaptiveMap'
 
 export default {
   components: {
-    AdaptiveMap,
+    AdaptiveMap: defineAsyncComponent(() => import('~/components/AdaptiveMap')),
   },
   async setup(props) {
     const runtimeConfig = useRuntimeConfig()

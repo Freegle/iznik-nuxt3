@@ -25,15 +25,15 @@
 </template>
 <script>
 import { useRoute } from 'vue-router'
+import { defineAsyncComponent } from 'vue'
 import SupportLink from '../../../components/SupportLink'
 import { buildHead } from '../../../composables/useBuildHead'
 import { useGroupStore } from '~/stores/group'
-const AdaptiveMap = () => import('../../../components/AdaptiveMap')
 
 export default {
   components: {
     SupportLink,
-    AdaptiveMap,
+    AdaptiveMap: defineAsyncComponent(() => import('~/components/AdaptiveMap')),
   },
   async setup() {
     const runtimeConfig = useRuntimeConfig()

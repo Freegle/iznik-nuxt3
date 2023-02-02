@@ -158,6 +158,7 @@
 </template>
 <script>
 import { mapState } from 'pinia'
+import { defineAsyncComponent } from 'vue'
 import { useGroupStore } from '../stores/group'
 import { useMessageStore } from '../stores/message'
 import { calculateMapHeight } from '../composables/useMap'
@@ -173,7 +174,6 @@ const AdaptiveMapGroup = () => import('./AdaptiveMapGroup')
 const ExternalLink = () => import('./ExternalLink')
 const GroupSelect = () => import('./GroupSelect')
 const NoticeMessage = () => import('./NoticeMessage')
-const PostMap = () => import('~/components/PostMap')
 
 export default {
   components: {
@@ -182,7 +182,7 @@ export default {
     GroupSelect,
     ExternalLink,
     AdaptiveMapGroup,
-    PostMap,
+    PostMap: defineAsyncComponent(() => import('~/components/PostMap')),
   },
   props: {
     initialBounds: {
