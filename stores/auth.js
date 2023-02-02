@@ -268,7 +268,6 @@ export const useAuthStore = defineStore({
         }
       }
 
-      console.log('Setting known state')
       this.loginStateKnown = true
 
       return this.user

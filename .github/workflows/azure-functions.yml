@@ -27,11 +27,11 @@ jobs:
         run: yarn
 
       - name: Build
-        run: npm run build
+        run: export NITRO_PRESET = azure-functions; npm run build
         env:
           NITRO_PRESET: azure-functions
           IZNIK_API_V1: https://fdapilive.ilovefreegle.org/api
-          IZNIK_API_V2: https://api.ilovefreegle.org:8192/api
+          IZNIK_API_V2: https://api.ilovefreegle.org:8192/apiv2
 
       - name: Zip output
         uses: montudor/action-zip@v1
