@@ -11,6 +11,10 @@ export default {
       const authStore = useAuthStore()
       return authStore.loginStateKnown
     },
+    jwt() {
+      const authStore = useAuthStore()
+      return authStore.jwt
+    },
     me() {
       return this.realMe
     },

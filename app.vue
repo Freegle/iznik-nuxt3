@@ -128,13 +128,6 @@ try {
       // Login failed.  Usually this is because they're logged in as someone else. Ignore it.
       console.log('Login failed', e)
     }
-  } else {
-    // Before we do anything, see if we are logged in.
-    try {
-      await authStore.fetchUser()
-    } catch (e) {
-      console.log('Fetch user failed', e)
-    }
   }
 } catch (e) {
   console.error('Error fetching user', e)

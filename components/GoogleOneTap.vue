@@ -36,6 +36,7 @@ export default {
     const self = this
 
     if (!this.loggedIn) {
+      console.log('One tap, got JWT', this.jwt)
       try {
         window.handleGoogleCredentialsResponse =
           this.handleGoogleCredentialsResponse

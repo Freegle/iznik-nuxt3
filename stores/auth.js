@@ -4,6 +4,7 @@ import { LoginError, SignUpError } from '../api/BaseAPI'
 import { useComposeStore } from '../stores/compose'
 import api from '~/api'
 
+console.log('Auth those, got local storage?', typeof localStorage)
 export const useAuthStore = defineStore({
   id: 'auth',
   persist: {
@@ -206,6 +207,7 @@ export const useAuthStore = defineStore({
         }
       }
 
+      console.log('After JWT', this.jwt, me)
       if (!me) {
         // Fall back to the older API which will authenticate via the persistent token and PHP session.
         const ret = await this.$api.session.fetch({
@@ -215,6 +217,7 @@ export const useAuthStore = defineStore({
         let persistent = null
         let jwt = null
 
+        console.log('Old API', ret)
         if (ret) {
           ;({ me, persistent, jwt } = ret)
 
@@ -266,6 +269,7 @@ export const useAuthStore = defineStore({
         }
       }
 
+      console.log('Setting known state')
       this.loginStateKnown = true
     },
     async saveAboutMe(value) {

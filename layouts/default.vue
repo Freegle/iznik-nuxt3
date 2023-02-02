@@ -31,6 +31,7 @@ export default {
         if (newVal) {
           // Whether or not we are logged in, at least we now know.  We need this so that we don't trigger
           // API calls without a JWT when we are in fact logged in.  Now we can continue.
+          console.log('Login state now known', newVal)
           this.ready = true
         }
       },
@@ -43,7 +44,9 @@ export default {
       // For this layout we don't need to be logged in.  So can just continue.  But we want to know first whether or
       // not we are logged in.
       const authStore = useAuthStore()
+      console.log('Google loaded')
       await authStore.fetchUser()
+      console.log('Fetched')
     },
   },
 }
