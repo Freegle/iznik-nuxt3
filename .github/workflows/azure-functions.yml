@@ -1,5 +1,6 @@
 # .github/workflows/azure.yml
-name: azure
+name: Azure Functions (for SSR)
+
 on:
   push:
     branches:

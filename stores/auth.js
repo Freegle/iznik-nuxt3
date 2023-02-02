@@ -65,7 +65,7 @@ export const useAuthStore = defineStore({
           // We have logged in.
           this.forceLogin = false
         }
-      } else if (this.user || this.user === {}) {
+      } else {
         this.user = null
       }
     },

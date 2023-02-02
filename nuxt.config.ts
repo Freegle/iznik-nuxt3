@@ -109,7 +109,6 @@ export default defineNuxtConfig({
   ],
 
   vite: {
-    serveStatic: true,
     css: {
       preprocessorOptions: {
         scss: {

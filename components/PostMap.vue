@@ -109,15 +109,22 @@
 import 'vue3-draggable-resizable/dist/Vue3DraggableResizable.css'
 import cloneDeep from 'lodash.clonedeep'
 import { mapState } from 'pinia'
+import L from 'leaflet'
+import { GestureHandling } from 'leaflet-gesture-handling'
+import Wkt from 'wicket'
 import { useGroupStore } from '../stores/group'
 import { useMessageStore } from '../stores/message'
 import { calculateMapHeight } from '../composables/useMap'
 import GroupMarker from './GroupMarker'
 import BrowseHomeIcon from './BrowseHomeIcon'
+import ClusterMarker from './ClusterMarker'
 import { useMiscStore } from '~/stores/misc'
 import { useIsochroneStore } from '~/stores/isochrone'
 import { attribution, osmtile } from '~/composables/useMap'
-const ClusterMarker = () => import('./ClusterMarker')
+import 'leaflet-control-geocoder/dist/Control.Geocoder.css'
+import 'leaflet-gesture-handling/dist/leaflet-gesture-handling.css'
+
+L.Map.addInitHook('addHandler', 'gestureHandling', GestureHandling)
 
 export default {
   components: {
@@ -196,25 +203,11 @@ export default {
       default: false,
     },
   },
-  async setup(props) {
+  setup(props) {
     const miscStore = useMiscStore()
     const groupStore = useGroupStore()
     const messageStore = useMessageStore()
     const isochroneStore = useIsochroneStore()
-
-    let L = null
-
-    if (process.client) {
-      L = await import('leaflet/dist/leaflet-src.esm')
-
-      window.L = L
-      await import('leaflet-control-geocoder/dist/Control.Geocoder.css')
-      const { GestureHandling } = await import('leaflet-gesture-handling')
-      await import('leaflet-gesture-handling/dist/leaflet-gesture-handling.css')
-      L.Map.addInitHook('addHandler', 'gestureHandling', GestureHandling)
-    }
-
-    const Wkt = await import('wicket')
 
     return {
       miscStore,

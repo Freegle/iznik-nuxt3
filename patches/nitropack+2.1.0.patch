@@ -1,0 +1,12 @@
+diff --git a/node_modules/nitropack/dist/runtime/entries/azure-functions.mjs b/node_modules/nitropack/dist/runtime/entries/azure-functions.mjs
+index bb79acd..4cd009c 100644
+--- a/node_modules/nitropack/dist/runtime/entries/azure-functions.mjs
++++ b/node_modules/nitropack/dist/runtime/entries/azure-functions.mjs
+@@ -12,6 +12,6 @@ export async function handle(context, req) {
+   context.res = {
+     status,
+     headers,
+-    body: body ? body.toString() : statusText
++    body: body ? body : statusText
+   };
+ }
