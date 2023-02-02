@@ -1,3 +1,4 @@
+// Install this in a plugin to make it work with SSR.
 import VueFilePond from 'vue-filepond'
 import 'filepond/dist/filepond.min.css'
 import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.css'
@@ -16,5 +17,5 @@ export default defineNuxtPlugin((nuxtApp) => {
     FilePondPluginImageExifOrientation
   )
 
-  nuxtApp.vueApp.use(FilePond)
+  nuxtApp.vueApp.component('FilePond', FilePond)
 })
