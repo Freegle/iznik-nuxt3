@@ -54,107 +54,83 @@
     </div>
   </client-only>
 </template>
-<script>
-import { mapWritableState } from 'pinia'
+<script setup>
 import GlobalWarning from '../../components/GlobalWarning'
 import { buildHead } from '../../composables/useBuildHead'
 import { useVolunteeringStore } from '../../stores/volunteering'
 import { useGroupStore } from '../../stores/group'
 import { useAuthStore } from '../../stores/auth'
-import { useRoute, useRouter } from '#imports'
+import { ref, computed, useRoute, useRouter } from '#imports'
 import InfiniteLoading from '~/components/InfiniteLoading'
-const GroupSelect = () => import('~/components/GroupSelect')
-const VolunteerOpportunity = () =>
-  import('~/components/VolunteerOpportunity.vue')
-const VolunteerOpportunityModal = () =>
-  import('~/components/VolunteerOpportunityModal')
+import VolunteerOpportunityModal from '~/components/VolunteerOpportunityModal'
+import GroupSelect from '~/components/GroupSelect'
+import VolunteerOpportunity from '~/components/VolunteerOpportunity.vue'
 
-export default {
-  components: {
-    GlobalWarning,
-    InfiniteLoading,
-    GroupSelect,
-    VolunteerOpportunity,
-    VolunteerOpportunityModal,
-  },
-  mixins: [buildHead],
-  async setup() {
-    const runtimeConfig = useRuntimeConfig()
-    const volunteeringStore = useVolunteeringStore()
-    const groupStore = useGroupStore()
+const runtimeConfig = useRuntimeConfig()
+const volunteeringStore = useVolunteeringStore()
+const groupStore = useGroupStore()
+const authStore = useAuthStore()
 
-    const route = useRoute()
-    const groupid = parseInt(route.params.groupid)
+const route = useRoute()
+const groupid = parseInt(route.params.groupid)
 
+let name
+let image
+
+if (groupid) {
+  const group = await groupStore.fetch(groupid)
+  name = 'Volunteer Opportunities for ' + group.namedisplay
+  image = group?.profile
+} else {
+  if (authStore.user) {
+    // We are logged in, so we can fetch the ops for our groups.
     await volunteeringStore.fetchList()
+  }
 
-    let name
-    let image
+  name = 'Volunteer Opportunities'
+  image = null
+}
 
-    if (groupid) {
-      const group = await groupStore.fetch(groupid)
-
-      name = 'Volunteer Opportunities for ' + group.namedisplay
-      image = group?.profile
-    } else {
-      name = 'Volunteer Opportunities'
-      image = null
+useHead(
+  buildHead(
+    route,
+    runtimeConfig,
+    name,
+    'Are you a charity or good cause that needs volunteers? Ask our lovely community of freeglers to help.',
+    image,
+    {
+      class: 'overflow-y-scroll',
     }
+  )
+)
 
-    useHead(
-      buildHead(
-        route,
-        runtimeConfig,
-        name,
-        'Are you a charity or good cause that needs volunteers? Ask our lovely community of freeglers to help.',
-        image,
-        {
-          class: 'overflow-y-scroll',
-        }
-      )
-    )
+const toShow = ref(0)
+const infiniteId = ref(new Date().toString())
 
-    return {
-      volunteeringStore,
-      groupStore,
-      groupid,
-    }
-  },
-  data() {
-    return {
-      toShow: 0,
-      infiniteId: +new Date(),
-    }
-  },
-  computed: {
-    ...mapWritableState(useAuthStore, ['forceLogin']),
-    forUser() {
-      return this.volunteeringStore.forUser
-    },
-    volunteerings() {
-      return this.forUser.slice(0, this.toShow)
-    },
-  },
-  methods: {
-    changeGroup(newval) {
-      const router = useRouter()
-      router.push(newval ? '/volunteerings/' + newval : '/volunteerings')
-    },
-    loadMore($state) {
-      if (this.toShow < this.forUser.length) {
-        this.toShow++
-        $state.loaded()
-      } else {
-        $state.complete()
-      }
-    },
-    showVolunteerModal() {
-      if (this.me) {
-        this.$refs.volunteermodal.show()
-      } else {
-        this.forceLogin = true
-      }
-    },
-  },
+const forUser = computed(() => {
+  return volunteeringStore.forUser
+})
+
+const volunteerings = computed(() => {
+  return forUser.value.slice(0, toShow.value)
+})
+
+const changeGroup = function (newval) {
+  const router = useRouter()
+  router.push(newval ? '/volunteerings/' + newval : '/volunteerings')
+}
+const loadMore = function ($state) {
+  if (toShow.value < forUser.value.length) {
+    toShow.value++
+    $state.loaded()
+  } else {
+    $state.complete()
+  }
+}
+
+const volunteermodal = ref(null)
+
+const showVolunteerModal = () => {
+  volunteermodal.show()
 }
 </script>

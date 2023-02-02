@@ -50,78 +50,59 @@
     </div>
   </client-only>
 </template>
-<script>
-import { useRoute } from 'vue-router'
+<script setup>
 import { useStoryStore } from '../../stores/stories'
 import { buildHead } from '../../composables/useBuildHead'
 import { useGroupStore } from '../../stores/group'
+import GroupSelect from '../../components/GroupSelect'
 import StoryOne from '../../components/StoryOne'
-
-const GroupSelect = () => import('~/components/GroupSelect')
-const StoryAddModal = () => import('~/components/StoryAddModal')
+import StoryAddModal from '../../components/StoryAddModal'
+import { ref, computed, useRoute, useRouter } from '#imports'
 
 const LIMIT = 20
 
-export default {
-  components: {
-    GroupSelect,
-    StoryAddModal,
-    StoryOne,
-  },
-  async setup(props) {
-    const runtimeConfig = useRuntimeConfig()
-    const route = useRoute()
-    const storyStore = useStoryStore()
-    const groupStore = useGroupStore()
+const runtimeConfig = useRuntimeConfig()
+const route = useRoute()
+const storyStore = useStoryStore()
+const groupStore = useGroupStore()
 
-    const groupid = route.params.groupid ? parseInt(route.params.groupid) : null
-    console.log('Stories', groupid)
-    const limit = parseInt(route.query.limit) || LIMIT
+const groupid = parseInt(route.params.groupid)
+const limit = parseInt(route.query.limit) || LIMIT
 
-    const stories = await storyStore.fetchByGroup(groupid, limit)
-    const group = await groupStore.fetch(groupid)
+const stories = await storyStore.fetchByGroup(groupid, limit)
+const group = await groupStore.fetch(groupid)
 
-    useHead(
-      buildHead(
-        route,
-        runtimeConfig,
-        group?.namedisplay
-          ? 'Stories for ' + group?.namedisplay
-          : 'Stories from freeglers',
-        'Real stories from real freeglers.'
-      )
-    )
+useHead(
+  buildHead(
+    route,
+    runtimeConfig,
+    group?.namedisplay
+      ? 'Stories for ' + group?.namedisplay
+      : 'Stories from freeglers',
+    'Real stories from real freeglers.'
+  )
+)
 
-    return {
-      storyStore,
-      groupStore,
-      groupid,
-      group,
-      groupname: group?.namedisplay,
-      stories,
-    }
-  },
-  computed: {
-    sortedStories() {
-      if (this.stories?.length) {
-        const stories = this.stories
-        return stories.sort(function (a, b) {
-          return new Date(b.date).getTime() - new Date(a.date).getTime()
-        })
-      }
+const sortedStories = computed(() => {
+  if (stories?.length) {
+    const stories2 = stories
+    return stories2.sort(function (a, b) {
+      return new Date(b.date).getTime() - new Date(a.date).getTime()
+    })
+  }
 
-      return []
-    },
-  },
-  methods: {
-    showAddModal() {
-      this.$refs.addmodal.show()
-    },
-    changeGroup(newval) {
-      console.log('Change group to', newval)
-      this.storyStore.list = {}
-      this.$router.push(newval ? '/stories/' + newval : '/stories')
-    },
-  },
+  return []
+})
+
+const addmodal = ref(null)
+
+const showAddModal = function () {
+  addmodal.show()
+}
+
+const changeGroup = function (newval) {
+  storyStore.list = {}
+  const router = useRouter()
+  router.push(newval ? '/stories/' + newval : '/stories')
 }
 </script>

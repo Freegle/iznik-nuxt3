@@ -10,6 +10,7 @@
 </template>
 <script>
 import LayoutCommon from '../components/LayoutCommon'
+import { useAuthStore } from '~/stores/auth'
 const GoogleOneTap = () => import('~/components/GoogleOneTap')
 
 export default {
@@ -24,10 +25,25 @@ export default {
       ready: !!process.server,
     }
   },
+  watch: {
+    loginStateKnown: {
+      handler(newVal) {
+        if (newVal) {
+          // Whether or not we are logged in, at least we now know.  We need this so that we don't trigger
+          // API calls without a JWT when we are in fact logged in.  Now we can continue.
+          this.ready = true
+        }
+      },
+      immediate: true,
+    },
+  },
+
   methods: {
-    googleLoaded() {
-      // For this layout we don't need to be logged in.  So can just continue.
-      this.ready = true
+    async googleLoaded() {
+      // For this layout we don't need to be logged in.  So can just continue.  But we want to know first whether or
+      // not we are logged in.
+      const authStore = useAuthStore()
+      await authStore.fetchUser()
     },
   },
 }

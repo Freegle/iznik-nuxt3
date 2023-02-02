@@ -36,6 +36,7 @@ export const useAuthStore = defineStore({
     // For APIv2,
     persistent: null,
 
+    loginStateKnown: false,
     forceLogin: false,
     user: null,
     groups: [],
@@ -264,6 +265,8 @@ export const useAuthStore = defineStore({
           composeStore.email = me.email
         }
       }
+
+      this.loginStateKnown = true
     },
     async saveAboutMe(value) {
       const data = await this.$api.session.save({

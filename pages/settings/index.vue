@@ -678,9 +678,6 @@ export default {
   setup() {
     const runtimeConfig = useRuntimeConfig()
     const route = useRoute()
-    const miscStore = useMiscStore()
-    const authStore = useAuthStore()
-
     useHead(
       buildHead(
         route,
@@ -693,6 +690,9 @@ export default {
         }
       )
     )
+
+    const miscStore = useMiscStore()
+    const authStore = useAuthStore()
 
     return {
       miscStore,

@@ -43,106 +43,84 @@
     </div>
   </client-only>
 </template>
-<script>
+<script setup>
 import { useRoute } from 'vue-router'
-import { mapWritableState } from 'pinia'
 import GlobalWarning from '../../components/GlobalWarning'
 import { buildHead } from '../../composables/useBuildHead'
 import { useCommunityEventStore } from '../../stores/communityevent'
 import { useGroupStore } from '../../stores/group'
 import { useAuthStore } from '../../stores/auth'
-import { useRouter } from '#imports'
+import { ref, computed, useRouter } from '#imports'
 import InfiniteLoading from '~/components/InfiniteLoading'
-const GroupSelect = () => import('~/components/GroupSelect')
-const CommunityEvent = () => import('~/components/CommunityEvent.vue')
-const CommunityEventModal = () => import('~/components/CommunityEventModal')
+import CommunityEventModal from '~/components/CommunityEventModal'
+import GroupSelect from '~/components/GroupSelect'
+import CommunityEvent from '~/components/CommunityEvent.vue'
 
-export default {
-  components: {
-    GlobalWarning,
-    InfiniteLoading,
-    GroupSelect,
-    CommunityEvent,
-    CommunityEventModal,
-  },
-  mixins: [buildHead],
-  async setup() {
-    const runtimeConfig = useRuntimeConfig()
-    const communityEventStore = useCommunityEventStore()
-    const groupStore = useGroupStore()
+const runtimeConfig = useRuntimeConfig()
+const communityEventStore = useCommunityEventStore()
+const groupStore = useGroupStore()
+const authStore = useAuthStore()
 
-    const route = useRoute()
-    const groupid = parseInt(route.params.groupid)
+const route = useRoute()
+const groupid = parseInt(route.params.groupid)
 
+let name
+let image
+
+if (groupid) {
+  const group = await groupStore.fetch(groupid)
+  name = 'Community Events for ' + group.namedisplay
+  image = group?.profile
+} else {
+  if (authStore.user) {
+    // We are logged in, so we can fetch the events for our groups.
     await communityEventStore.fetchList()
+  }
 
-    let name
-    let image
+  name = 'Community Events'
+  image = null
+}
 
-    if (groupid) {
-      const group = await groupStore.fetch(groupid)
-
-      name = 'Community Events for ' + group.namedisplay
-      image = group?.profile
-    } else {
-      name = 'Community Events'
-      image = null
+useHead(
+  buildHead(
+    route,
+    runtimeConfig,
+    name,
+    'These are local events, posted by other freeglers like you.',
+    image,
+    {
+      class: 'overflow-y-scroll',
     }
+  )
+)
 
-    useHead(
-      buildHead(
-        route,
-        runtimeConfig,
-        name,
-        'These are local events, posted by other freeglers like you.',
-        image,
-        {
-          class: 'overflow-y-scroll',
-        }
-      )
-    )
+const toShow = ref(0)
+const infiniteId = ref(new Date().toString())
 
-    return {
-      communityEventStore,
-      groupStore,
-      groupid,
-    }
-  },
-  data() {
-    return {
-      toShow: 0,
-      infiniteId: +new Date(),
-    }
-  },
-  computed: {
-    ...mapWritableState(useAuthStore, ['forceLogin']),
-    forUser() {
-      return this.communityEventStore.forUser
-    },
-    events() {
-      return this.forUser.slice(0, this.toShow)
-    },
-  },
-  methods: {
-    changeGroup(newval) {
-      const router = useRouter()
-      router.push(newval ? '/communityevents/' + newval : '/communityevents')
-    },
-    loadMore($state) {
-      if (this.toShow < this.forUser.length) {
-        this.toShow++
-        $state.loaded()
-      } else {
-        $state.complete()
-      }
-    },
-    showEventModal() {
-      if (this.me) {
-        this.$refs.eventmodal.show()
-      } else {
-        this.forceLogin = true
-      }
-    },
-  },
+const forUser = computed(() => {
+  return communityEventStore.forUser
+})
+
+const events = computed(() => {
+  return forUser.value.slice(0, toShow.value)
+})
+
+const changeGroup = function (newval) {
+  const router = useRouter()
+  router.push(newval ? '/communityevents/' + newval : '/communityevents')
+}
+const loadMore = function ($state) {
+  if (toShow.value < forUser.value.length) {
+    toShow.value++
+    $state.loaded()
+  } else {
+    $state.complete()
+  }
+}
+
+const eventmodal = ref(null)
+
+const showEventModal = () => {
+  eventmodal.show()
 }
 </script>

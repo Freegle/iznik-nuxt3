@@ -193,22 +193,8 @@ export default {
   },
   async setup(props) {
     const runtimeConfig = useRuntimeConfig()
-    const miscStore = useMiscStore()
-    const newsfeedStore = useNewsfeedStore()
-    const authStore = useAuthStore()
-
     const route = useRoute()
     const id = route.params.id
-
-    // We want this to be our next home page.
-    const existingHomepage = miscStore.get('lasthomepage')
-
-    if (existingHomepage !== 'news') {
-      miscStore.set({
-        key: 'lasthomepage',
-        value: 'news',
-      })
-    }
 
     useHead(
       buildHead(
@@ -222,6 +208,20 @@ export default {
         }
       )
     )
+
+    const miscStore = useMiscStore()
+    const newsfeedStore = useNewsfeedStore()
+    const authStore = useAuthStore()
+
+    // We want this to be our next home page.
+    const existingHomepage = miscStore.get('lasthomepage')
+
+    if (existingHomepage !== 'news') {
+      miscStore.set({
+        key: 'lasthomepage',
+        value: 'news',
+      })
+    }
 
     const me = authStore.user
     const settings = me?.settings

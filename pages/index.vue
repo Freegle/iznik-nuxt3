@@ -131,7 +131,6 @@ export default {
   },
   setup() {
     const runtimeConfig = useRuntimeConfig()
-    const miscStore = useMiscStore()
     const route = useRoute()
 
     useHead(
@@ -146,6 +145,8 @@ export default {
         }
       )
     )
+
+    const miscStore = useMiscStore()
 
     return {
       miscStore,

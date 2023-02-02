@@ -64,15 +64,15 @@ export default {
   },
   async setup() {
     const runtimeConfig = useRuntimeConfig()
-    const authStore = useAuthStore()
-    const messageStore = useMessageStore()
-    const groupStore = useGroupStore()
-
     const route = useRoute()
-
     const id = parseInt(route.params.id)
     const action = route.params.action
 
+    useHead(buildHead(route, runtimeConfig, 'My Posts', null))
+
+    const authStore = useAuthStore()
+    const messageStore = useMessageStore()
+    const groupStore = useGroupStore()
     const myid = authStore.user?.id
 
     let message = null
@@ -94,15 +94,6 @@ export default {
       })
 
       await Promise.all(promises)
-
-      useHead(
-        buildHead(
-          route,
-          runtimeConfig,
-          message ? message.subject : 'My Posts',
-          null
-        )
-      )
 
       if (myid) {
         if (message?.fromuser !== myid) {

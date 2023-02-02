@@ -7,6 +7,10 @@ let fetchingPromise = null
 
 export default {
   computed: {
+    loginStateKnown() {
+      const authStore = useAuthStore()
+      return authStore.loginStateKnown
+    },
     me() {
       return this.realMe
     },

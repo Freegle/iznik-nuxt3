@@ -5,27 +5,41 @@ export default defineNuxtConfig({
 
   // Rendering modes are confusing.
   //
-  // target can be static (can host on static hosting such as Azure Static Web Apps) or server (requires a node server).
-  //
-  // ssr can be true (renders at generate time for target: static or in node server for traget: server), or
-  // false (renders on client).
+  // - target can be:
+  //   - static: can host on static hosting such as Azure Static Web Apps
+  //   - server: requires a node server.
+  // - ssr can be:
+  //   - true: renders at
+  //     - generate time for target: static, or
+  //     - in node server for target: server)
+  //   - false: renders on client.
   //
   // Ideally we'd use SSR so that we could render pages on the server or client depending on our hosting choice.
-  // But not all dependencies we use support SSR.  Crucially, we use Bootstrap and bootstrap-vue-next.  These do
-  // not yet support SSR, and the bootstrap-vue-next team isn't particularly interested in doing that.
+  // - But not all dependencies we use support SSR.
+  // - Crucially, we use Bootstrap and bootstrap-vue-next.
+  // - These do not yet support SSR.
   //
   // So we can't render full pages on the server any time soon. Can we just render purely on the client?
   //
   // Crawlers nowadays are smart enough to render pages on the client.  So that would be fine.
   // But Facebook link preview isn't, and we want that to work.
   //
-  // However to get that preview working, we only really need the meta tags which are added in the setup() calls of
-  // individual pages.  We don't need the full DOM rendered.  So we can mask out bootstrap-containing elements
-  // using <client-only>, and use async component loading to avoid pulling in code if need be.
+  // However to get that preview working:
+  // - We only really need the meta tags which are added in the setup() calls of
+  //   individual pages.
+  // - We don't need the full DOM rendered.
+  // - So we can mask out bootstrap-containing elements using <client-only>, and use async component
+  //   loading to avoid pulling in code if need be.
   //
-  // We handle most of this in the pages, rather than in the components.  Some features of Nuxt don't work well unless
-  // you're using <script setup> (i.e. not in setup()), such as useRuntimeConfig().  So we use <script setup> in those
-  // pages, though for historical reasons we don't generally use it in the components.
+  // We handle most of this in the pages, rather than in the components - pages are where we set the meta tags for
+  // preview.
+  //
+  // Unfortuntely:
+  // - Nuxt/Vue has issues setting meta tags via useHead() when using the options API, where you can get
+  //   an error saying the nuxt instance is not available if you've done an await first.
+  // - Sometimes we do want to do that, e.g. to get a group so that we can use the info in the meta tags.
+  // - In that case we've reworked the pages to use <script setup>.
+  // - For historical reasons and preference we use the options API everwhere else.
   //
   // Sometimes when debugging it's useful to set ssr: false, because the errors are clearer when generated on the client.
   target: 'server',

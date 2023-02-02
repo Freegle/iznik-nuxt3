@@ -132,9 +132,7 @@ export default {
       )
     )
 
-    const inherited = await setup('Offer')
-
-    return inherited
+    return await setup('Offer')
   },
   data() {
     return {

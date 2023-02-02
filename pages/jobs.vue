@@ -68,14 +68,6 @@ export default {
   },
   async setup() {
     const runtimeConfig = useRuntimeConfig()
-    const jobStore = useJobStore()
-    const authStore = useAuthStore()
-
-    const me = authStore.user
-    const lat = ref(me?.lat)
-    const lng = ref(me?.lng)
-
-    const location = ref(me?.settings?.mylocation?.name || null)
     const route = useRoute()
 
     useHead(
@@ -90,6 +82,15 @@ export default {
         }
       )
     )
+
+    const jobStore = useJobStore()
+    const authStore = useAuthStore()
+
+    const me = authStore.user
+    const lat = ref(me?.lat)
+    const lng = ref(me?.lng)
+
+    const location = ref(me?.settings?.mylocation?.name || null)
 
     if (location.value && lat && lng) {
       await jobStore.fetch(lat.value, lng.value)

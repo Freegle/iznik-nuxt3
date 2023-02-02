@@ -198,6 +198,16 @@ export default {
   async setup() {
     const runtimeConfig = useRuntimeConfig()
     const route = useRoute()
+
+    useHead(
+      buildHead(
+        route,
+        runtimeConfig,
+        'Gift Aid',
+        'Add gift aid to your donation to Freegle'
+      )
+    )
+
     const addressStore = useAddressStore()
     const giftAidStore = useGiftAidStore()
 
@@ -239,15 +249,6 @@ export default {
 
       return oldoptions
     })
-
-    useHead(
-      buildHead(
-        route,
-        runtimeConfig,
-        'Gift Aid',
-        'Add gift aid to your donation to Freegle'
-      )
-    )
 
     return {
       addressStore,

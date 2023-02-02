@@ -31,7 +31,6 @@ export default {
   },
   async setup(props) {
     const runtimeConfig = useRuntimeConfig()
-    const groupStore = useGroupStore()
     const route = useRoute()
     const region = route.params.region
       ? route.params.region.trim().toLowerCase()
@@ -51,6 +50,7 @@ export default {
     )
 
     // Get all the groups in store for the adaptive map.
+    const groupStore = useGroupStore()
     await groupStore.fetch()
 
     // Calculate the initial bounds for the region.

@@ -27,66 +27,45 @@
     </div>
   </client-only>
 </template>
-<script>
+<script setup>
 import { useRoute } from 'vue-router'
 import NoticeMessage from '../../components/NoticeMessage'
 import { buildHead } from '../../composables/useBuildHead'
 import { useVolunteeringStore } from '../../stores/volunteering'
 import { useRouter } from '#imports'
+import VolunteerOpportunity from '~/components/VolunteerOpportunity'
 
-const VolunteerOpportunity = () =>
-  import('~/components/VolunteerOpportunity.vue')
+const runtimeConfig = useRuntimeConfig()
+const volunteeringStore = useVolunteeringStore()
+const route = useRoute()
+const router = useRouter()
+const id = parseInt(route.params.id)
 
-export default {
-  components: {
-    NoticeMessage,
-    VolunteerOpportunity,
-  },
-  setup() {
-    const runtimeConfig = useRuntimeConfig()
-    const volunteeringStore = useVolunteeringStore()
-    const route = useRoute()
-    const router = useRouter()
-    const id = parseInt(route.params.id)
+if (!id) {
+  // Probably here by mistake - send to the list of all of them.
+  router.push('/volunteerings')
+}
 
-    if (!id) {
-      // Probably here by mistake - send to the list of all of them.
-      router.push('/volunteerings')
-    }
+let invalid = false
 
-    let invalid = false
-
-    try {
-      const volunteering = volunteeringStore.fetch(id)
-      useHead(
-        buildHead(
-          route,
-          runtimeConfig,
-          volunteering.title,
-          volunteering.description,
-          volunteering.image ? volunteering.image.path : null
-        )
-      )
-    } catch (e) {
-      invalid = true
-      buildHead(
-        route,
-        useRuntimeConfig(),
-        'Volunteer Opportunity ' + id,
-        "Sorry, that volunteer opportunity isn't around any more."
-      )
-    }
-
-    return {
-      volunteeringStore,
-      invalid,
-      id,
-    }
-  },
-  computed: {
-    volunteering() {
-      return this.volunteeringStore.byId(this.$route.params.id)
-    },
-  },
+try {
+  const volunteering = volunteeringStore.fetch(id)
+  useHead(
+    buildHead(
+      route,
+      runtimeConfig,
+      volunteering.title,
+      volunteering.description,
+      volunteering.image ? volunteering.image.path : null
+    )
+  )
+} catch (e) {
+  invalid = true
+  buildHead(
+    route,
+    useRuntimeConfig(),
+    'Volunteer Opportunity ' + id,
+    "Sorry, that volunteer opportunity isn't around any more."
+  )
 }
 </script>

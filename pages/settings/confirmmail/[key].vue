@@ -109,8 +109,6 @@ export default {
   setup() {
     const runtimeConfig = useRuntimeConfig()
     const route = useRoute()
-    const authStore = useAuthStore()
-
     const key = route.params.key
 
     useHead(
@@ -121,6 +119,8 @@ export default {
         'Confirm your email address so that we send mails to the right place.'
       )
     )
+
+    const authStore = useAuthStore()
 
     return {
       authStore,

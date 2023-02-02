@@ -287,13 +287,6 @@ export default {
   mixins: [buildHead],
   async setup() {
     const runtimeConfig = useRuntimeConfig()
-    const authStore = useAuthStore()
-    const messageStore = useMessageStore()
-    const groupStore = useGroupStore()
-    const miscStore = useMiscStore()
-    const composeStore = useComposeStore()
-    const searchStore = useSearchStore()
-
     const route = useRoute()
 
     useHead(
@@ -308,6 +301,13 @@ export default {
         }
       )
     )
+
+    const authStore = useAuthStore()
+    const messageStore = useMessageStore()
+    const groupStore = useGroupStore()
+    const miscStore = useMiscStore()
+    const composeStore = useComposeStore()
+    const searchStore = useSearchStore()
 
     // We want this to be our next home page.
     const existingHomepage = miscStore.get('lasthomepage')

@@ -32,70 +32,50 @@
     </div>
   </client-only>
 </template>
-<script>
-import { useRoute } from 'vue-router'
+<script setup>
 import { useStoryStore } from '../../../stores/stories'
 import { buildHead } from '../../../composables/useBuildHead'
 import { useAuthorityStore } from '../../../stores/authority'
-
-const StoryAddModal = () => import('~/components/StoryAddModal')
-const StoryOne = () => import('~/components/StoryOne')
+import StoryOne from '../../components/StoryOne'
+import StoryAddModal from '../../components/StoryAddModal'
+import { ref, computed, useRoute } from '#imports'
 
 const LIMIT = 20
 
-export default {
-  components: {
-    StoryAddModal,
-    StoryOne,
-  },
-  async setup(props) {
-    const runtimeConfig = useRuntimeConfig()
-    const route = useRoute()
-    const storyStore = useStoryStore()
-    const authorityStore = useAuthorityStore()
+const runtimeConfig = useRuntimeConfig()
+const route = useRoute()
+const storyStore = useStoryStore()
+const authorityStore = useAuthorityStore()
 
-    const authorityid = route.params.id ? parseInt(route.params.id) : null
-    const limit = parseInt(route.query.limit) || LIMIT
+const authorityid = route.params.id ? parseInt(route.params.id) : null
+const limit = parseInt(route.query.limit) || LIMIT
 
-    storyStore.list = {}
-    await storyStore.fetchByAuthority(authorityid, limit)
-    const authority = await authorityStore.fetch(authorityid)
+storyStore.list = {}
+const stories = await storyStore.fetchByAuthority(authorityid, limit)
+const authority = await authorityStore.fetch(authorityid)
 
-    useHead(
-      buildHead(
-        route,
-        runtimeConfig,
-        authority?.authorityname
-          ? 'Stories for ' + authority?.authorityname
-          : 'Stories from freeglers',
-        'Real stories from real freeglers.'
-      )
-    )
+useHead(
+  buildHead(
+    route,
+    runtimeConfig,
+    authority?.authorityname
+      ? 'Stories for ' + authority?.authorityname
+      : 'Stories from freeglers',
+    'Real stories from real freeglers.'
+  )
+)
 
-    return {
-      storyStore,
-      authorityStore,
-      authorityid,
-      authority,
-      authorityname: authority?.authorityname,
-    }
-  },
-  computed: {
-    sortedStories() {
-      if (this.stories?.length) {
-        const stories = this.stories
-        return stories.sort(function (a, b) {
-          return new Date(b.date).getTime() - new Date(a.date).getTime()
-        })
-      }
+const authorityname = authority?.authorityname
 
-      return []
-    },
-  },
-  methods: {
-    showAddModal() {
-      this.$refs.addmodal.show()
-    },
-  },
+const sortedStories = computed(() => {
+  const stories2 = stories
+  return stories2.sort(function (a, b) {
+    return new Date(b.date).getTime() - new Date(a.date).getTime()
+  })
+})
+
+const addmodal = ref(null)
+const showAddModal = () => {
+  addmodal.value.show()
 }
 </script>

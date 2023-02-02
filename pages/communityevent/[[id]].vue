@@ -27,67 +27,51 @@
     </div>
   </client-only>
 </template>
-<script>
+<script setup>
 import { useRoute } from 'vue-router'
 import NoticeMessage from '../../components/NoticeMessage'
 import { buildHead } from '../../composables/useBuildHead'
 import { useCommunityEventStore } from '../../stores/communityevent'
+import CommunityEvent from '../../components/CommunityEvent'
 import { useRouter } from '#imports'
 
-const CommunityEvent = () => import('~/components/CommunityEvent.vue')
+const runtimeConfig = useRuntimeConfig()
+const eventStore = useCommunityEventStore()
+const route = useRoute()
+const router = useRouter()
+const id = parseInt(route.params.id)
 
-export default {
-  components: {
-    NoticeMessage,
-    CommunityEvent,
-  },
-  setup() {
-    const runtimeConfig = useRuntimeConfig()
-    const eventStore = useCommunityEventStore()
-    const route = useRoute()
-    const router = useRouter()
-    const id = parseInt(route.params.id)
+if (!id) {
+  // Probably here by mistake - send to the list of all of them.
+  router.push('/communityevents')
+}
 
-    if (!id) {
-      // Probably here by mistake - send to the list of all of them.
-      router.push('/volunteerings')
-    }
+let invalid = false
 
-    let invalid = false
+try {
+  eventStore.fetch(id)
+  const event = computed(() => {
+    return eventStore.byId(id)
+  })
 
-    try {
-      const event = eventStore.fetch(id)
-      useHead(
-        buildHead(
-          route,
-          runtimeConfig,
-          event.title,
-          event.description,
-          event.image ? event.image.path : null
-        )
-      )
-    } catch (e) {
-      invalid = true
-      useHead(
-        buildHead(
-          route,
-          runtimeConfig,
-          'Community Event ' + id,
-          "Sorry, that community event isn't around any more."
-        )
-      )
-    }
-
-    return {
-      eventStore,
-      invalid,
-      id,
-    }
-  },
-  computed: {
-    event() {
-      return this.eventStore.byId(this.$route.params.id)
-    },
-  },
+  useHead(
+    buildHead(
+      route,
+      runtimeConfig,
+      event.title,
+      event.description,
+      event.image ? event.image.path : null
+    )
+  )
+} catch (e) {
+  invalid = true
+  useHead(
+    buildHead(
+      route,
+      runtimeConfig,
+      'Community Event ' + id,
+      "Sorry, that community event isn't around any more."
+    )
+  )
 }
 </script>

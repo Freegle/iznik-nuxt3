@@ -131,10 +131,6 @@ export default {
   setup() {
     const runtimeConfig = useRuntimeConfig()
     const route = useRoute()
-    const userid = parseInt(route.params.id)
-    const confirmed = route.query.confirm
-
-    const authStore = useAuthStore()
 
     useHead(
       buildHead(
@@ -144,6 +140,11 @@ export default {
         'Want to leave Freegle?  You can do that from here.'
       )
     )
+
+    const userid = parseInt(route.params.id)
+    const confirmed = route.query.confirm
+
+    const authStore = useAuthStore()
 
     return {
       authStore,

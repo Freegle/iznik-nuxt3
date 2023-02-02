@@ -368,8 +368,8 @@ export default {
   },
   async setup() {
     const runtimeConfig = useRuntimeConfig()
-    const teamStore = useTeamStore()
     const route = useRoute()
+
     useHead(
       buildHead(
         route,
@@ -379,6 +379,7 @@ export default {
       )
     )
 
+    const teamStore = useTeamStore()
     const volunteers = await teamStore.fetch('Volunteers')
     const board = await teamStore.fetch('Board')
 

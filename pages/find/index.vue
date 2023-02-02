@@ -104,7 +104,6 @@ export default {
   async setup() {
     const runtimeConfig = useRuntimeConfig()
     const route = useRoute()
-    const inherited = await setup('Wanted')
 
     useHead(
       buildHead(
@@ -115,7 +114,7 @@ export default {
       )
     )
 
-    return inherited
+    return await setup('Wanted')
   },
   methods: {
     deleteItem,

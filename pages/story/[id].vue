@@ -32,62 +32,46 @@
     </div>
   </client-only>
 </template>
-<script>
-import { useRoute } from 'vue-router'
+<script setup>
 import NoticeMessage from '../../components/NoticeMessage'
 import { buildHead } from '../../composables/useBuildHead'
 import { useStoryStore } from '../../stores/stories'
+import StoryAddModal from '../../components/StoryAddModal'
 import StoryOne from '~/components/StoryOne'
-const StoryAddModal = () => import('~/components/StoryAddModal')
+import { ref, useRoute } from '#imports'
 
-export default {
-  components: {
-    NoticeMessage,
-    StoryAddModal,
-    StoryOne,
-  },
-  async setup(props) {
-    const runtimeConfig = useRuntimeConfig()
-    const route = useRoute()
-    const storyStore = useStoryStore()
+const runtimeConfig = useRuntimeConfig()
+const route = useRoute()
+const storyStore = useStoryStore()
 
-    const id = parseInt(route.params.id)
+const id = parseInt(route.params.id)
 
-    let invalid = false
-    let story = null
+let invalid = false
+let story = null
 
-    try {
-      story = await storyStore.fetch(id)
-    } catch (e) {
-      invalid = true
-    }
+try {
+  story = await storyStore.fetch(id)
+} catch (e) {
+  invalid = true
+}
 
-    if (invalid) {
-      useHead(buildHead(route, useRuntimeConfig(), 'Story #' + id))
-    } else {
-      useHead(
-        buildHead(
-          route,
-          runtimeConfig,
+if (invalid) {
+  useHead(buildHead(route, useRuntimeConfig(), 'Story #' + id))
+} else {
+  useHead(
+    buildHead(
+      route,
+      runtimeConfig,
 
-          story ? 'Freegle Story: ' + story.headline : 'Freegle Stories',
-          story.story,
-          story.photo
-        )
-      )
-    }
+      story ? 'Freegle Story: ' + story.headline : 'Freegle Stories',
+      story.story,
+      story.photo
+    )
+  )
+}
 
-    return {
-      id,
-      story,
-      storyStore,
-      invalid,
-    }
-  },
-  methods: {
-    showAddModal() {
-      this.$refs.addmodal.show()
-    },
-  },
+const addmodal = ref(null)
+const showAddModal = () => {
+  addmodal.value.show()
 }
 </script>
