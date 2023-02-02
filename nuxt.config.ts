@@ -34,16 +34,16 @@ export default defineNuxtConfig({
   // We handle most of this in the pages, rather than in the components - pages are where we set the meta tags for
   // preview.
   //
-  // Unfortuntely:
+  // Unfortunately:
   // - Nuxt/Vue has issues setting meta tags via useHead() when using the options API, where you can get
   //   an error saying the nuxt instance is not available if you've done an await first.
   // - Sometimes we do want to do that, e.g. to get a group so that we can use the info in the meta tags.
   // - In that case we've reworked the pages to use <script setup>.
-  // - For historical reasons and preference we use the options API everwhere else.
+  // - For historical reasons and preference we use the options API everywhere else.
   //
   // Sometimes when debugging it's useful to set ssr: false, because the errors are clearer when generated on the client.
   target: 'server',
-  ssr: false,
+  ssr: true,
 
   nitro: {
     prerender: {

@@ -54,9 +54,9 @@ try {
     buildHead(
       route,
       runtimeConfig,
-      volunteering.title,
-      volunteering.description,
-      volunteering.image ? volunteering.image.path : null
+      volunteering.value.title,
+      volunteering.value.description,
+      volunteering.value.image ? volunteering.value.image.path : null
     )
   )
 } catch (e) {
