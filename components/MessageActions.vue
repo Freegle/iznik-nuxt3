@@ -83,6 +83,7 @@ export default {
       this.$refs.reportModal.show()
     },
     goto() {
+      console.log('Goto', this.id)
       const router = useRouter()
       router.push('/message/' + this.id)
     },

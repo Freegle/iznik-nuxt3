@@ -464,8 +464,8 @@ import { useMiscStore } from '../stores/misc'
 import { useNewsfeedStore } from '../stores/newsfeed'
 import { useMessageStore } from '../stores/message'
 import { useNotificationStore } from '../stores/notification'
-import LoginModal from '~/components/LoginModal'
 import { useAuthStore } from '~/stores/auth'
+import LoginModal from '~/components/LoginModal'
 
 const AboutMeModal = () => import('~/components/AboutMeModal')
 const NotificationOptions = () => import('~/components/NotificationOptions')

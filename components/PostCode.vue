@@ -40,11 +40,12 @@
           />
         </div>
         <b-popover
+          v-if="showLocated"
           content="Your device thinks you're here. If it's wrong, please change it."
           :target="id"
           placement="top"
           variant="primary"
-          :show="showLocated"
+          :show="true"
           :skidding="-50"
         />
         <div v-if="find && !wip">
@@ -164,14 +165,18 @@ export default {
   },
   mounted() {
     this.waitForRef('autocomplete', () => {
-      if (this.focus) {
-        // Focus on postcode to grab their attention.
-        this.$refs.autocomplete.$refs.input.focus()
-      }
+      if (this.$refs.autocomplete) {
+        if (this.focus) {
+          // Focus on postcode to grab their attention.
+          this.$refs.autocomplete.$refs.input.focus()
+        }
 
-      // We need some fettling of the input keystrokes.
-      const input = this.$refs.autocomplete.$refs.input
-      input.addEventListener('keydown', this.keydown, false)
+        // We need some fettling of the input keystrokes.
+        const input = this.$refs.autocomplete.$refs.input
+        input.addEventListener('keydown', this.keydown, false)
+      } else {
+        // Not quite sure how this happens, but it does.
+      }
     })
   },
   methods: {
@@ -273,7 +278,6 @@ export default {
   },
 }
 </script>
-
 <style scoped lang="scss">
 :deep(.listentry) {
   width: 100%;

@@ -75,62 +75,44 @@
     </b-col>
   </client-only>
 </template>
-<script>
+<script setup>
 import { useRoute } from 'vue-router'
 import { buildHead } from '../../composables/useBuildHead'
 import { useMessageStore } from '~/stores/message'
-import { useGroupStore } from '~/stores/group'
 import { twem } from '~/composables/useTwem'
 import MyMessage from '~/components/MyMessage'
 
-export default {
-  components: {
-    MyMessage,
-  },
-  async setup(props) {
-    const runtimeConfig = useRuntimeConfig()
-    const route = useRoute()
-    const messageStore = useMessageStore()
-    const groupStore = useGroupStore()
+const runtimeConfig = useRuntimeConfig()
+const route = useRoute()
+const messageStore = useMessageStore()
 
-    // We don't use lazy because we want the page to be rendered for SEO.
-    const id = parseInt(route.params.id)
+// We don't use lazy because we want the page to be rendered for SEO.
+const id = parseInt(route.params.id)
 
-    const message = await messageStore.fetch(id)
+await messageStore.fetch(id)
+const message = computed(() => {
+  return messageStore.byId(id)
+})
 
-    if (message) {
-      let snip = null
+if (message.value) {
+  let snip = null
 
-      if (message.snippet) {
-        snip = twem(message.snippet) + '...'
-      } else {
-        snip = 'Click for more details'
-      }
+  if (message.value.snippet) {
+    snip = twem(message.value.snippet) + '...'
+  } else {
+    snip = 'Click for more details'
+  }
 
-      useHead(
-        buildHead(
-          route,
-          runtimeConfig,
-          message.subject,
-          snip,
-          message.attachments && message.attachments.length > 0
-            ? message.attachments[0].path
-            : null
-        )
-      )
-    }
-
-    return { id, messageStore, groupStore }
-  },
-  data() {
-    return {
-      error: false,
-    }
-  },
-  computed: {
-    message() {
-      return this.messageStore.byId(this.id)
-    },
-  },
+  useHead(
+    buildHead(
+      route,
+      runtimeConfig,
+      message.value.subject,
+      snip,
+      message.value.attachments && message.value.attachments.length > 0
+        ? message.value.attachments[0].path
+        : null
+    )
+  )
 }
 </script>

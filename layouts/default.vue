@@ -21,7 +21,7 @@ export default {
     return {
       // On the server we want to render immediately, because we're not going to find out that we're logged in - that
       // checking only happens on the client.
-      ready: process.server,
+      ready: !!process.server,
     }
   },
   methods: {

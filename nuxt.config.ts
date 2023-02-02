@@ -29,7 +29,7 @@ export default defineNuxtConfig({
   //
   // Sometimes when debugging it's useful to set ssr: false, because the errors are clearer when generated on the client.
   target: 'server',
-  ssr: true,
+  ssr: false,
 
   nitro: {
     prerender: {

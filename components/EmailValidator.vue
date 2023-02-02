@@ -7,7 +7,6 @@
       :state="true"
     >
       <Field
-        id="email"
         ref="email"
         v-model="currentEmail"
         :rules="validateEmail"
