@@ -26,29 +26,10 @@
   </div>
 </template>
 <script>
-import 'filepond/dist/filepond.min.css'
-import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.css'
-import vueFilePond from 'vue-filepond'
-import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type'
-import FilePondPluginImagePreview from 'filepond-plugin-image-preview'
-import FilePondPluginImageTransform from 'filepond-plugin-image-transform'
-import FilePondPluginImageResize from 'filepond-plugin-image-resize'
-import FilePondPluginImageExifOrientation from 'filepond-plugin-image-exif-orientation'
 import axios from 'axios'
 import { useComposeStore } from '../stores/compose'
 
-const FilePond = vueFilePond(
-  FilePondPluginFileValidateType,
-  FilePondPluginImagePreview,
-  FilePondPluginImageTransform,
-  FilePondPluginImageResize,
-  FilePondPluginImageExifOrientation
-)
-
 export default {
-  components: {
-    FilePond,
-  },
   props: {
     imgtype: {
       type: String,
