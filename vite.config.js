@@ -24,10 +24,7 @@ export default {
     // Make Lint errors cause build failures.
     eslintPlugin(),
     legacy({
-      targets: [
-        // We want to try to support XP.
-        '> 0.5%, last 2 versions, Firefox ESR, not dead or Chrome >= 49 or Firefox >= 52',
-      ],
+      targets: ['> 0.5%, last 2 versions, Firefox ESR, not dead'],
     }),
   ],
 
