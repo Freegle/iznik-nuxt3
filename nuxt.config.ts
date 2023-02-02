@@ -109,6 +109,7 @@ export default defineNuxtConfig({
   ],
 
   vite: {
+    serveStatic: true,
     css: {
       preprocessorOptions: {
         scss: {
@@ -128,8 +129,6 @@ export default defineNuxtConfig({
   generate: {
     // Don't crawl - we end up with all the messages, which takes too long.
     crawler: false,
-
-    // TODO Do something here.  Hybrid?  Depends on how well Google can index and Facebook/Twitter can preview.
   },
 
   app: {
