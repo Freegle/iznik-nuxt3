@@ -20,14 +20,13 @@
 import { useRoute } from 'vue-router'
 import { buildHead } from '~/composables/useBuildHead'
 import { useGroupStore } from '~/stores/group'
-const NoticeMessage = () => import('~/components/NoticeMessage')
-const ExploreGroup = () => import('~/components/ExploreGroup')
 
 const runtimeConfig = useRuntimeConfig()
-const groupStore = useGroupStore()
 const route = useRoute()
 const id = route.params.groupid
 const msgid = parseInt(route.params.msgid)
+
+const groupStore = useGroupStore()
 
 const group = computed(() => {
   return groupStore.get(id)

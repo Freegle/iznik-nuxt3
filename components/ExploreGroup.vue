@@ -9,7 +9,6 @@
     />
   </div>
 </template>
-<script setup></script>
 <script>
 import MessageList from './MessageList'
 import OurMessage from './OurMessage'
