@@ -20,6 +20,8 @@
 import { useRoute } from 'vue-router'
 import { buildHead } from '~/composables/useBuildHead'
 import { useGroupStore } from '~/stores/group'
+const NoticeMessage = () => import('~/components/NoticeMessage')
+const ExploreGroup = () => import('~/components/ExploreGroup')
 
 const runtimeConfig = useRuntimeConfig()
 const groupStore = useGroupStore()
@@ -33,21 +35,28 @@ const group = computed(() => {
 
 if (id) {
   // Fetch the specific group.
-  await groupStore.fetch(route.params.id)
+  await groupStore.fetch(id, true)
+  useHead(
+    buildHead(
+      route,
+      runtimeConfig,
+      'Explore ' + group.value.namedisplay,
+      group.value.description
+        ? group.value.description
+        : "Give and get stuff for free. Offer things you don't need, and ask for things you'd like. Don't just recycle - reuse with Freegle!",
+      group.value.profile ? group.value.profile : '/icon.png'
+    )
+  )
 } else {
   // Fetch all groups for the map.  No need to await - rendering the map is eye candy.
   groupStore.fetch()
-}
-
-useHead(
-  buildHead(
-    route,
-    runtimeConfig,
-    group ? 'Explore ' + group.value.namedisplay : 'Explore Freegle',
-    group?.description
-      ? group.description
-      : "Give and get stuff for free. Offer things you don't need, and ask for things you'd like. Don't just recycle - reuse with Freegle!",
-    group.profile ? group.profile : '/icon.png'
+  useHead(
+    buildHead(
+      route,
+      runtimeConfig,
+      'Explore Freegle',
+      "Give and get stuff for free. Offer things you don't need, and ask for things you'd like. Don't just recycle - reuse with Freegle!"
+    )
   )
-)
+}
 </script>
