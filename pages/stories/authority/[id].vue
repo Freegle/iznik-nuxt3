@@ -33,11 +33,11 @@
   </client-only>
 </template>
 <script setup>
-import { useStoryStore } from '../../../stores/stories'
-import { buildHead } from '../../../composables/useBuildHead'
-import { useAuthorityStore } from '../../../stores/authority'
-import StoryOne from '../../components/StoryOne'
-import StoryAddModal from '../../components/StoryAddModal'
+import { useStoryStore } from '~/stores/stories'
+import { buildHead } from '~/composables/useBuildHead'
+import { useAuthorityStore } from '~/stores/authority'
+import StoryOne from '~/components/StoryOne'
+import StoryAddModal from '~/components/StoryAddModal'
 import { ref, computed, useRoute } from '#imports'
 
 const LIMIT = 20

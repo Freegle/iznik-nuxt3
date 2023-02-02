@@ -54,9 +54,9 @@
 import { useStoryStore } from '../../stores/stories'
 import { buildHead } from '../../composables/useBuildHead'
 import { useGroupStore } from '../../stores/group'
-import GroupSelect from '../../components/GroupSelect'
-import StoryOne from '../../components/StoryOne'
-import StoryAddModal from '../../components/StoryAddModal'
+import GroupSelect from '~/components/GroupSelect'
+import StoryOne from '~/components/StoryOne'
+import StoryAddModal from '~/components/StoryAddModal'
 import { ref, computed, useRoute, useRouter } from '#imports'
 
 const LIMIT = 20
