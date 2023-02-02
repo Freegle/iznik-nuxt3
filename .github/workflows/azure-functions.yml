@@ -43,6 +43,8 @@ jobs:
         run: npm run build
         env:
           NITRO_PRESET: azure-functions
+          IZNIK_API_V1: https://fdapilive.ilovefreegle.org/api
+          IZNIK_API_V2: https://api.ilovefreegle.org:8192/api
 
       - name: 'Deploy to Azure Functions'
         uses: Azure/functions-action@v1
