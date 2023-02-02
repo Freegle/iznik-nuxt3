@@ -2,7 +2,8 @@
   "private": true,
   "scripts": {
     "dev": "nuxi dev --port=3002",
-    "build": "nuxi generate",
+    "build": "nuxi build",
+    "generate": "nuxi generate",
     "start": "node .output/server/index.mjs",
     "postinstall": "patch-package",
     "lint": "eslint --fix --ext .js,.jsx,.ts,.vue ."
