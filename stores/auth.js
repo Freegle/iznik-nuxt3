@@ -206,7 +206,6 @@ export const useAuthStore = defineStore({
         }
       }
 
-      console.log('After JWT', this.jwt, me)
       if (!me) {
         // Fall back to the older API which will authenticate via the persistent token and PHP session.
         const ret = await this.$api.session.fetch({

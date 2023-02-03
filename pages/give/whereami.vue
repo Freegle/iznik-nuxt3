@@ -106,8 +106,8 @@ import GlobalWarning from '~/components/GlobalWarning'
 import PostCode from '~/components/PostCode'
 import { setup, postcodeSelect, postcodeClear } from '~/composables/useCompose'
 
-const ComposeGroup = () => import('~/components/ComposeGroup')
-const WizardProgress = () => import('~/components/WizardProgress')
+import WizardProgress from '~/components/WizardProgress'
+import ComposeGroup from '~/components/ComposeGroup'
 
 export default {
   options: () => {},

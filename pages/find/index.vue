@@ -92,8 +92,8 @@ import NoticeMessage from '../../components/NoticeMessage'
 import { buildHead } from '../../composables/useBuildHead'
 import { setup, deleteItem, addItem } from '~/composables/useCompose'
 
-const PostMessage = () => import('~/components/PostMessage')
-const WizardProgress = () => import('~/components/WizardProgress')
+import PostMessage from '~/components/PostMessage'
+import WizardProgress from '~/components/WizardProgress'
 
 export default {
   components: {
