@@ -6,7 +6,7 @@
   </div>
 </template>
 <script setup>
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { computed } from 'vue'
 // import { createPinia, setActivePinia } from 'pinia'
 import { useAuthStore } from './stores/auth'
@@ -34,6 +34,22 @@ import { useAuthorityStore } from './stores/authority'
 // const piniaPersist = () => import('pinia-plugin-persist')
 
 const route = useRoute()
+const router = useRouter()
+
+// Reload page if we get an error which suggests that a new version has been deployed under our feet.
+// See https://github.com/nuxt/nuxt/issues/14594
+router.onError((error) => {
+  const messages = [
+    'Importing a module script failed', // safari
+    'Failed to fetch dynamically imported module', // edge & chrome
+  ]
+  if (messages.some((message) => error?.message.includes(message))) {
+    ;(() => {
+      console.log('Failed to load chunk, reloading page.')
+      router.go(0)
+    })()
+  }
+})
 
 // Don't render the app until we've done everything in here.
 let ready = false
