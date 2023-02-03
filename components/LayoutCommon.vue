@@ -13,8 +13,12 @@
       <BouncingEmail />
       <div class="navbar-toggle" style="display: none" />
     </client-only>
-    <div id="serverloader" class="bg-none d-flex justify-content-around w-100">
-      <div class="text-center">
+    <div
+      v-if="showLoader"
+      id="serverloader"
+      class="bg-none d-flex justify-content-around w-100"
+    >
+      <div class="text-center bg-white p-2">
         <img src="/loader.gif" alt="Loading..." />
         <p>
           <span>Loading...</span><br /><span class="font-weight-bold"
@@ -28,12 +32,15 @@
         <!--  TODO      <ChatButton v-if="replyToSend" ref="replyToPostChatButton" :userid="replyToUser" />-->
       </div>
       <BreakpointFettler />
+      <div id="here" />
+      <SomethingWentWrong />
     </client-only>
   </div>
 </template>
 <script>
 import { useMiscStore } from '../stores/misc'
 import { useChatStore } from '../stores/chat'
+import SomethingWentWrong from './SomethingWentWrong'
 const SupportLink = () => import('~/components/SupportLink')
 const BouncingEmail = () => import('~/components/BouncingEmail')
 const MainHeader = () => import('~/components/MainHeader')
@@ -45,9 +52,11 @@ export default {
     SupportLink,
     MainHeader,
     BreakpointFettler,
+    SomethingWentWrong,
   },
   data() {
     return {
+      showLoader: true,
       timeTimer: null,
       unreadNotificationCount: 0,
       chatCount: 0,
@@ -65,16 +74,13 @@ export default {
     // cause displayed fromNow() values to change, rather than starting a timer for each of them.
     if (process.client) {
       this.updateTime()
-    }
 
-    if (document) {
       // We added a basic loader into the HTML.  This helps if we are loaded on an old browser where our JS bombs
       // out - at least we display something, with a link to support.  But now we're up and running, remove that.
       //
       // We have an animation on the loader so that it only becomes visible after ~10s.  That prevents page flicker
       // if we manage to get up and running rapidly.
-      const l = document.getElementById('serverloader')
-      l.style.display = 'none'
+      this.showLoader = false
     }
 
     if (this.me) {

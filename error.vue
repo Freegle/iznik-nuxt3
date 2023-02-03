@@ -1,41 +1,66 @@
 <template>
-  <div class="error__wrapper">
-    <div class="error__image" />
-    <div class="error">
-      <h1 v-if="error.statusCode === 404">
-        <div class="error__heading--main">
-          Oh no! That page doesn't seem to exist...
+  <div>
+    <div class="error__wrapper">
+      <div class="error__image" />
+      <div class="error">
+        <div v-if="maintenance" class="maintenance__container px-3 bg-white">
+          <h1 class="mt-4">Sorry - we're doing some maintenance</h1>
+          <p>
+            We're doing some maintenance work just now - one on't cross beams
+            gone owt askew on treadle, the dilithium crystals need polishing,
+            the server pie has a soggy bottom, that kind of thing.
+          </p>
+          <p>
+            Usually this doesn't take more than an hour or two. Please
+            <nuxt-link to="/">try again</nuxt-link>
+            later.
+          </p>
+          <p>
+            P.S. We know this is a bit of a pain, and we try really hard to
+            avoid taking the whole site down where we can. Very occasionally we
+            need to do it. If you want to
+            <ExternalLink
+              href="https://www.paypal.com/gb/fundraiser/charity/55681"
+              >donate a quid</ExternalLink
+            >, that'll help it happen less often.
+          </p>
         </div>
-        <div class="error__heading--sub">Maybe it's been freegled?</div>
-      </h1>
-      <div v-else>
-        <h1 class="error__heading--main">Oh dear! Something went wrong...</h1>
-        <p>Error was: {{ JSON.stringify(error) }}</p>
+        <div v-else>
+          <h1 v-if="error.statusCode === 404">
+            <div class="error__heading--main">
+              Oh no! That page doesn't seem to exist...
+            </div>
+            <div class="error__heading--sub">Maybe it's been freegled?</div>
+          </h1>
+          <div v-else>
+            <h1 class="error__heading--main">
+              Oh dear! Something went wrong...
+            </h1>
+            <p v-if="error && JSON.stringify(error).length > 2">
+              Error was: {{ JSON.stringify(error) }}
+            </p>
+          </div>
+          <p>
+            <nuxt-link to="/">Click here</nuxt-link> to go back to the home page
+          </p>
+          <p>
+            <!-- eslint-disable-next-line -->
+            Having problems? <SupportLink text="Contact us" />
+          </p>
+        </div>
       </div>
-      <p>
-        <nuxt-link to="/"> Click here </nuxt-link> to go back to the home page
-      </p>
-      <p>
-        <!-- eslint-disable-next-line -->
-        Having problems? <SupportLink text="Contact us" />
-      </p>
     </div>
   </div>
 </template>
-<script>
+<script setup>
 import SupportLink from './components/SupportLink'
+import ExternalLink from '~/components/ExternalLink'
+import { useError } from '#imports'
 
-export default {
-  components: { SupportLink },
-  props: {
-    error: {
-      type: Object,
-      default() {
-        return {}
-      },
-    },
-  },
-}
+// Although we have a separate error page which we're supposed to catch and redirect to in something-went-wrong, there
+// seem to be some paths whereby we can end up here.  So handle it here too.
+const error = useError()
+const maintenance = error?.value?.message === 'Maintenance error'
 </script>
 <style scoped lang="scss">
 @import '~bootstrap/scss/functions';

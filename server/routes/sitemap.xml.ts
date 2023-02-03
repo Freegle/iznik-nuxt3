@@ -33,7 +33,6 @@ export default defineEventHandler(async (event) => {
 
     // TODO Councils - separate site?
     // TODO Pages: mobile, promote, noticeboards, poster, shortlinks, stats, merge, mydata, norfolk
-    // TODO Maintenance page.
   ]
 
   // Fetch all the groups.

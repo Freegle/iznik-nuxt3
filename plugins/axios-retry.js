@@ -20,7 +20,7 @@ export default defineNuxtPlugin((nuxtApp) => {
       return Promise.reject(err)
     }
 
-    if (!config.includes('retry')) {
+    if (!config.retryCount) {
       console.log('No retry config, use default')
       config.retryCount = 10
       config.retryDelay = 1000

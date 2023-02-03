@@ -215,7 +215,6 @@ export const useAuthStore = defineStore({
         let persistent = null
         let jwt = null
 
-        console.log('Old API', ret)
         if (ret) {
           ;({ me, persistent, jwt } = ret)
 

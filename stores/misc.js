@@ -19,6 +19,7 @@ export const useMiscStore = defineStore({
     time: null,
     breakpoint: null,
     vals: {},
+    somethingWentWrong: false,
   }),
   actions: {
     set(params) {
