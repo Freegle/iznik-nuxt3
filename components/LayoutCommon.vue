@@ -13,13 +13,15 @@
       <BouncingEmail />
       <div class="navbar-toggle" style="display: none" />
     </client-only>
-    <div id="serverloader" class="bg-white">
-      <img src="/loader.gif" alt="Loading..." />
-      <p>
-        <span>Loading...</span><br /><span class="font-weight-bold"
-          >Stuck here? Try refreshing. Or Chrome.</span
-        ><br /><SupportLink text="No luck? Contact us" />
-      </p>
+    <div id="serverloader" class="bg-none d-flex justify-content-around w-100">
+      <div>
+        <img src="/loader.gif" alt="Loading..." />
+        <p>
+          <span>Loading...</span><br /><span class="font-weight-bold"
+            >Stuck here? Try refreshing. Or Chrome.</span
+          ><br /><SupportLink text="No luck? Contact us" />
+        </p>
+      </div>
     </div>
     <client-only>
       <div class="d-none">
