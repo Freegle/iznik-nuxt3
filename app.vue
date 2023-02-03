@@ -6,9 +6,8 @@
   </div>
 </template>
 <script setup>
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { computed } from 'vue'
-// import { createPinia, setActivePinia } from 'pinia'
 import { useAuthStore } from './stores/auth'
 import { useGroupStore } from './stores/group'
 import { useMessageStore } from './stores/message'
@@ -31,25 +30,7 @@ import { useDonationStore } from './stores/donations'
 import { useGiftAidStore } from './stores/giftaid'
 import { useAuthorityStore } from './stores/authority'
 
-// const piniaPersist = () => import('pinia-plugin-persist')
-
 const route = useRoute()
-const router = useRouter()
-
-// Reload page if we get an error which suggests that a new version has been deployed under our feet.
-// See https://github.com/nuxt/nuxt/issues/14594
-router.onError((error) => {
-  const messages = [
-    'Importing a module script failed', // safari
-    'Failed to fetch dynamically imported module', // edge & chrome
-  ]
-  if (messages.some((message) => error?.message.includes(message))) {
-    ;(() => {
-      console.log('Failed to load chunk, reloading page.')
-      router.go(0)
-    })()
-  }
-})
 
 // Don't render the app until we've done everything in here.
 let ready = false
@@ -57,25 +38,6 @@ let ready = false
 // We're having trouble accessing the Nuxt config from within a Pinia store.  So instead we access it here, then
 // pass it in to each store via an init() action.
 const runtimeConfig = useRuntimeConfig()
-
-// Initialise pinia here - @pinia/nuxt doesn't seem to kick in early enough if we install it as a plugin
-// try {
-//   const pinia = createPinia()
-//   const nuxtApp = useNuxtApp()
-//   nuxtApp.vueApp.use(pinia)
-//   setActivePinia(pinia)
-//   if (process.server) {
-//     nuxtApp.payload.pinia = pinia.state.value
-//   } else {
-//     if (nuxtApp.payload && nuxtApp.payload.pinia) {
-//       pinia.state.value = nuxtApp.payload.pinia
-//     }
-//
-//     pinia.use(piniaPersist)
-//   }
-// } catch (e) {
-//   console.error('Pinia init', e)
-// }
 
 const groupStore = useGroupStore()
 const messageStore = useMessageStore()
