@@ -41,6 +41,7 @@ module.exports = {
     useRuntimeConfig: 'readonly',
     defineNuxtConfig: 'readonly',
     defineNuxtPlugin: 'readonly',
+    defineNitroPlugin: 'readonly',
     defineEmits: 'readonly',
     defineNuxtRouteMiddleware: 'readonly',
     getCurrentInstance: 'readonly',
