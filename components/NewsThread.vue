@@ -221,7 +221,7 @@
   </div>
 </template>
 <script>
-import AtTa from 'vue-at/dist/vue-at-textarea'
+import { defineAsyncComponent } from 'vue'
 import { useNewsfeedStore } from '../stores/newsfeed'
 import NewsReportModal from './NewsReportModal'
 import SpinButton from './SpinButton'
@@ -264,7 +264,7 @@ export default {
     NewsNoticeboard,
     NoticeMessage,
     NewsPreview,
-    AtTa,
+    AtTa: defineAsyncComponent(() => import('vue-at/dist/vue-at-textarea')),
     ProfileImage,
     ConfirmModal,
     AutoHeightTextarea,

@@ -290,7 +290,7 @@
 </template>
 <script>
 import pluralize from 'pluralize'
-import AtTa from 'vue-at/dist/vue-at-textarea'
+import { defineAsyncComponent } from 'vue'
 import { useNewsfeedStore } from '../stores/newsfeed'
 import { useUserStore } from '../stores/user'
 import NewsLovesModal from './NewsLovesModal'
@@ -322,7 +322,7 @@ export default {
     ProfileModal,
     ChatButton,
     NewsPreview,
-    AtTa,
+    AtTa: defineAsyncComponent(() => import('vue-at/dist/vue-at-textarea')),
     ProfileImage,
     ConfirmModal,
   },
