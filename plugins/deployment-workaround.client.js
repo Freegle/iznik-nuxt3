@@ -7,8 +7,8 @@ export default defineNuxtPlugin((nuxtApp) => {
       'Failed to fetch dynamically imported module', // edge & chrome
     ]
     if (messages.some((message) => error?.message.includes(message))) {
-      ;(async () => {
-        await alert('TODO: warning text here that the page will be refreshed')
+      ;(() => {
+        console.error('Missing script, reload site')
         nuxtApp.$router.go(0)
       })()
     }
