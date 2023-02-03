@@ -45,6 +45,18 @@ export default defineNuxtConfig({
   target: 'server',
   ssr: true,
 
+  routeRules: {
+    // It's very possible that I misunderstand caching.  But it seems to me that we should never cache
+    // the top-level route pages, because they will contain the names of top-level asset files, which will have
+    // hashes in them.  If a new deployment happens, the hash will be wrong and the old files won't exist, so it
+    // would be a mistake to serve them.
+    //
+    // This still leaves issues where a deployment happens while a page is partway through loading assets, or
+    // later loads assets which are no longer present.  We handle that in deployment-workaround.client.js by
+    // reloading the page.
+    '/**': { headers: { 'cache-control': 'no-cache' } },
+  },
+
   nitro: {
     prerender: {
       routes: ['/404.html', '/sitemap.xml'],
