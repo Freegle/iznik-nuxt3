@@ -91,10 +91,14 @@
 // There are a bunch of icons we need only rarely.  By requiring them here we avoid
 // requiring them in the vue-awesome plugin.  That makes them available everywhere - but
 // increases the bundle size.  Putting them here allows better bundling.
+import { ShareNetwork } from 'vue-social-sharing'
 import { useStoryStore } from '../stores/stories'
 import modal from '@/mixins/modal'
 
 export default {
+  components: {
+    ShareNetwork,
+  },
   mixins: [modal],
   props: {
     id: {
