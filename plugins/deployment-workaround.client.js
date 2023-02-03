@@ -17,6 +17,7 @@ export default defineNuxtPlugin((nuxtApp) => {
   const errorHandler = nuxtApp.vueApp.config.errorHandler
 
   nuxtApp.vueApp.config.errorHandler = (err, instance, info) => {
+    console.log('Deployment workaround, error', err)
     if (typeof errorHandler === 'function') {
       errorHandler.call(err, instance, info)
     }
@@ -25,6 +26,7 @@ export default defineNuxtPlugin((nuxtApp) => {
   }
 
   nuxtApp.$router.onError((error) => {
+    console.log('Deployment workaround, router error', error)
     checkError(error)
   })
 })
