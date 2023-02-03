@@ -180,7 +180,6 @@ body.modal-open {
   text-align: center;
   position: fixed; /* or absolute */
   top: calc(50% - 44px);
-  left: calc(50% - 44px);
   font-size: 12px;
   padding: 5px;
   border: 1px black;
