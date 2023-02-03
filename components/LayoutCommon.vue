@@ -14,7 +14,7 @@
       <div class="navbar-toggle" style="display: none" />
     </client-only>
     <div id="serverloader" class="bg-none d-flex justify-content-around w-100">
-      <div>
+      <div class="text-center">
         <img src="/loader.gif" alt="Loading..." />
         <p>
           <span>Loading...</span><br /><span class="font-weight-bold"
