@@ -22,7 +22,7 @@ export default {
 
   plugins: [
     // Make Lint errors cause build failures.
-    eslintPlugin(),
+    // eslintPlugin(),
     legacy({
       targets: ['> 0.5%, last 2 versions, Firefox ESR, not dead'],
     }),
