@@ -8,6 +8,7 @@
           Mobile app version: {{ mobileVersion }}.
           <span style="display:none;">{{ mobileInfo }}</span>
         </p>
+        <RateAppModal ref="rateappmodal" />
         <h1>How can we help?</h1>
         <p>
           Type a question in here, and we'll see if we can find an answer for
@@ -430,9 +431,8 @@ export default {
       this.$refs.supporterInfoModal.show()
     },
     showRateMe() { // CC
-      //window.localStorage.removeItem('rateappnotagain')
-      //this.$refs.rateappmodal.show()
-      console.log("=============== showRateMe")
+      // TODO window.localStorage.removeItem('rateappnotagain')
+      this.$refs.rateappmodal.show()
     },
   },
 }
