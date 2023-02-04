@@ -10,7 +10,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     }
 
     // Retry certain errors only
-    console.log('Axios-retry, error', message)
+    console.log('Axios-retry, error', message, config?.retryCount)
     if (
       !(
         message.toLowerCase().indexOf('timeout') !== -1 ||

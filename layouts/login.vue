@@ -11,6 +11,8 @@
 </template>
 <script>
 import { useAuthStore } from '../stores/auth'
+import LayoutCommon from '../components/LayoutCommon'
+import { ref } from '#imports'
 const GoogleOneTap = () => import('~/components/GoogleOneTap')
 const LoginModal = () => import('~/components/LoginModal')
 
@@ -18,31 +20,57 @@ export default {
   components: {
     GoogleOneTap,
     LoginModal,
+    LayoutCommon,
   },
-  data() {
-    return {
-      ready: false,
-      oneTap: false,
-      googleReady: false,
-    }
-  },
-  async mounted() {
-    if (this.jwt) {
-      // We have a JWT, which may or may not be valid on the server.  If it is, then we can crack on and
-      // start rendering the page.  This will be quicker than waiting for GoogleOneTap to load and tell us
+  async setup() {
+    const ready = ref(false)
+    const oneTap = ref(false)
+    const googleReady = ref(false)
+    const authStore = useAuthStore()
+    const jwt = authStore.auth.jwt
+    const persistent = authStore.auth.persistent
+
+    if (jwt || persistent) {
+      // We have some credentials, which may or may not be valid on the server.  If they are, then we can crack on and
+      // start rendering the page.  This will be quicker than waiting for GoogleOneTap to load on the client and tell us
       // whether or not we can log in that way.
-      const authStore = useAuthStore()
-      const user = await authStore.fetchUser()
+      let user = null
+      console.log('Login layout, fetch user')
+
+      try {
+        user = await authStore.fetchUser()
+        console.log('Fetched user')
+      } catch (e) {
+        console.log('Error fetching user', e)
+      }
 
       if (user) {
-        this.ready = true
+        ready.value = true
       }
     }
 
-    if (!this.ready) {
+    if (!ready.value) {
       // We don't have a valid JWT.  See if OneTap can sign us in.
-      this.oneTap = true
+      oneTap.value = true
     }
+
+    return {
+      ready,
+      oneTap,
+      googleReady,
+    }
+  },
+  watch: {
+    me: {
+      immediate: true,
+      handler(newVal) {
+        console.log('Me watch', newVal)
+        if (newVal) {
+          // We've logged in.
+          this.ready = true
+        }
+      },
+    },
   },
   methods: {
     googleLoaded() {

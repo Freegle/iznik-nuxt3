@@ -215,7 +215,7 @@ export default {
     me: {
       immediate: true,
       handler(newVal, oldVal) {
-        if (newVal && !oldVal) {
+        if (newVal && !oldVal && process.client) {
           this.calculateInitialMapBounds(!this.searchTerm)
           this.bump++
         }

@@ -188,12 +188,14 @@ export default class BaseAPI {
 
       const authStore = useAuthStore()
 
-      if (authStore.jwt) {
+      if (authStore?.auth?.jwt) {
         // Use the JWT to authenticate the request if possible.
-        headers.Authorization = authStore.jwt
+        headers.Authorization = JSON.stringify(authStore.auth.jwt)
+      }
 
+      if (authStore?.auth?.persistent) {
         // The JWT is quick but short-lived; use the persistent token as a fallback.
-        headers.Authorization2 = JSON.stringify(authStore.persistent)
+        headers.Authorization2 = JSON.stringify(authStore.auth.persistent)
       }
 
       const ret = await this.$axios.request({
@@ -204,7 +206,7 @@ export default class BaseAPI {
       })
       ;({ status, data } = ret)
     } catch (e) {
-      console.log('Axios error', path, e)
+      console.log('Axios error', path, e?.message)
       if (e.message.match(/.*aborted.*/i)) {
         // We've seen requests get aborted immediately after beforeunload().  Makes sense to abort the requests
         // when you're leaving a page.  No point in rippling those errors up to result in Sentry errors.
