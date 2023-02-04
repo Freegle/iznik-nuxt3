@@ -3,7 +3,8 @@
     <!-- Navbar for large screens-->
     <b-nav
       id="navbar_large"
-      class="navbar ourBack d-none d-xl-flex pl-1 pr-2 navbar-dark fixed-top navbar-expand-xl"
+      class="navbar ourBack d-none d-xl-flex pl-1 pr-2 navbar-dark navbar-expand-xl"
+      fixed="top"
     >
       <nuxt-link :to="homePage" class="navbar-brand p-0">
         <b-img
