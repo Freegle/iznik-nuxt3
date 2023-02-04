@@ -93,13 +93,17 @@
   </b-modal>
 </template>
 <script>
-import { ShareNetwork } from 'vue-social-sharing'
+import pkg from 'vue-social-sharing'
+import { defineAsyncComponent } from 'vue'
 import { useMessageStore } from '../stores/message'
 import NoticeMessage from './NoticeMessage'
 import modal from '@/mixins/modal'
 
 export default {
-  components: { NoticeMessage, ShareNetwork },
+  components: {
+    NoticeMessage,
+    ShareNetwork: defineAsyncComponent(() => pkg.ShareNetwork),
+  },
   mixins: [modal],
   props: {
     id: {

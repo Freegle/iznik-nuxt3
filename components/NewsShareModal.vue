@@ -91,11 +91,12 @@
   </div>
 </template>
 <script>
-import { ShareNetwork } from 'vue-social-sharing'
+import pkg from 'vue-social-sharing'
+import { defineAsyncComponent } from 'vue'
 import modal from '@/mixins/modal'
 
 export default {
-  components: { ShareNetwork },
+  components: { ShareNetwork: defineAsyncComponent(() => pkg.ShareNetwork) },
   mixins: [modal],
   props: {
     newsfeed: {
