@@ -91,7 +91,6 @@
   </div>
 </template>
 <script>
-import { defineAsyncComponent } from 'vue'
 import modal from '@/mixins/modal'
 
 export default {
