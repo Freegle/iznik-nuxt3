@@ -1,6 +1,12 @@
 {
 	"appId": "org.ilovefreegle.direct",
 	"appName": "Freegle",
-	"webDir": "www",
-	"bundledWebRuntime": false
+	"webDir": ".output/public",
+	"bundledWebRuntime": false,
+	"cordova": {
+		"preferences": {
+			"CameraUsesGeolocation": "true",
+			"AndroidLaunchMode": "singleTask"
+		}
+	}
 }

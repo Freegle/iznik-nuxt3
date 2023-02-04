@@ -3,4 +3,6 @@
   <access origin="*" />
   
   
+  <preference name="CameraUsesGeolocation" value="true" />
+  <preference name="AndroidLaunchMode" value="singleTask" />
 </widget>
