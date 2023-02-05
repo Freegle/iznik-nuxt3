@@ -21,15 +21,16 @@
   </b-modal>
 </template>
 <script>
+import { defineAsyncComponent } from 'vue'
 import { useUserStore } from '../stores/user'
 import modal from '@/mixins/modal'
-import ProfileInfo from '~/components/ProfileInfo'
-import ProfileHeader from '~/components/ProfileHeader'
 
 export default {
   components: {
-    ProfileInfo,
-    ProfileHeader,
+    ProfileInfo: defineAsyncComponent(() => import('~/components/ProfileInfo')),
+    ProfileHeader: defineAsyncComponent(() =>
+      import('~/components/ProfileHeader')
+    ),
   },
   mixins: [modal],
   props: {

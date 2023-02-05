@@ -3,7 +3,7 @@
     <div>
       <h2 v-if="group" class="sr-only">Community Information</h2>
       <GroupHeader v-if="group" :group="group" show-join />
-      <JobsTopBar />
+      <JobsTopBar v-if="jobs" />
       <h2 class="sr-only">List of wanteds and offers</h2>
       <div v-observe-visibility="visibilityChanged" />
       <div v-if="deDuplicatedMessages?.length">
@@ -117,6 +117,11 @@ export default {
       busy: true,
     },
     visible: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
+    jobs: {
       type: Boolean,
       required: false,
       default: true,

@@ -126,9 +126,6 @@ export const useMessageStore = defineStore({
 
       if (force || !this.byUserList[userid]) {
         messages = await promise
-        // TODO Error retrying.  If this fails due to network conditions, we get returned a null message and then
-        // hit an exception.  Can we pop up a network toast?
-
         for (const message of messages) {
           if (!message.hasoutcome) {
             const expired = await this.hasExpired(message)

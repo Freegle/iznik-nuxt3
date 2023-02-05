@@ -83,6 +83,7 @@
             <MessageList
               :messages-for-list="activeOffers"
               selected-type="Offer"
+              :jobs="false"
             />
           </div>
           <p v-else class="pl-3">None at the moment.</p>
@@ -103,6 +104,7 @@
             <MessageList
               :messages-for-list="activeWanteds"
               selected-type="Wanted"
+              :jobs="false"
             />
           </div>
           <p v-else class="pl-3">None at the moment.</p>
