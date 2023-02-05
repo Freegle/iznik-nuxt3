@@ -336,14 +336,17 @@ export default {
       }
     },
     messageVisible(id) {
-      // We want to store the last visible message as a parameter in the history, so that if we come back to a
-      // page containing it, we will scroll to it.
-      try {
-        const state = window.history.state
-        state.scrollToMessage = id
-        window.history.replaceState(state, '')
-      } catch (e) {
-        console.log('Exception', e)
+      if (process.client) {
+        // We want to store the last visible message as a parameter in the history, so that if we come back to a
+        // page containing it, we will scroll to it.
+        try {
+          console.log('Store in window history', id)
+          const state = window.history.state
+          state.scrollToMessage = id
+          window.history.replaceState(state, '')
+        } catch (e) {
+          console.log('Exception storing message visible', e)
+        }
       }
     },
   },
