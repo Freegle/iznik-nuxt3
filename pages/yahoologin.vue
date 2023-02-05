@@ -8,9 +8,9 @@
 <script setup>
 import axios from 'axios'
 import { useAuthStore } from '~/stores/auth'
-import { useRoute } from '#imports'
+import { useRoute, useRouter } from '#imports'
 
-// const router = useRouter()
+const router = useRouter()
 const route = useRoute()
 const runtimeConfig = useRuntimeConfig()
 const API = runtimeConfig.public.APIv1
@@ -32,10 +32,10 @@ if (authStore.user) {
   if (returnto) {
     // Go where we want to be.  Make sure we remove the code to avoid us trying to log in again.
     console.log('Return to', returnto)
-    // router.push(returnto)
+    router.push(returnto)
   } else {
     console.log('Just go home')
-    // router.push('/')
+    router.push('/')
   }
 } else if (!code) {
   // Probably they rejected our authorisation.  Just go back to the same page we were at.
@@ -43,17 +43,23 @@ if (authStore.user) {
   // window.location = returnto
 } else {
   // We have a code.  Use it on the server to log ion.
-  await axios.post(API + '/session', {
+  const result = await axios.post(API + '/session', {
     yahoocodelogin: code,
   })
 
-  if (returnto) {
-    // Go where we want to be.  Make sure we remove the code to avoid us trying to log in again.
-    console.log('Return to', returnto)
-    // router.go(returnto)
-  } else {
-    console.log('Just go home')
-    // router.push('/')
+  if (result?.data?.ret === 0) {
+    // Success
+    const authStore = useAuthStore()
+    authStore.setAuth(result.data.jwt, result.data.persistent)
+
+    if (returnto) {
+      // Go where we want to be.  Make sure we remove the code to avoid us trying to log in again.
+      console.log('Return to', returnto)
+      router.go(returnto)
+    } else {
+      console.log('Just go home')
+      router.push('/')
+    }
   }
 }
 </script>
