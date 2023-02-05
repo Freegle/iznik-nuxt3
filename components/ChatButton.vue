@@ -137,9 +137,8 @@ export default {
             this.$emit('sent')
           }
 
-          // TODO Consider the UX here.  For example, if we reply to a message from the browse list, we then
-          // are sent to chat.  This is useful for them to see what chat is, but means they have to hit Back
-          // twice to go back to the message list - where they end up in the wrong place.
+          // If we hit the back button, then the code in MessageList to scroll into view will bring us back to the
+          // right place.
           router.push('/chats/' + chatid)
         }
       }

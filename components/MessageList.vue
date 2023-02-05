@@ -17,6 +17,7 @@
               :matchedon="message.matchedon"
               record-view
               @visible="messageVisible"
+              :scrollIntoView="scrollToMessage === message.id"
             />
           </div>
           <template #fallback>
@@ -146,19 +147,38 @@ export default {
       await messageStore.fetchMultiple(initialIds)
     }
 
+    const toShow = ref(MIN_TO_SHOW)
+    let scrollToMessage = null
+
+    if (process.client) {
+      scrollToMessage = window?.history?.state?.scrollToMessage
+      if (scrollToMessage) {
+        console.log('Scroll to', scrollToMessage)
+        const ix = props.messagesForList.findIndex(
+          (message) => message.id === scrollToMessage
+        )
+        console.log('Found ix', ix)
+
+        if (ix > 0) {
+          toShow.value = ix + 1
+        }
+      }
+    }
+
     return {
       infiniteId: ref(props.bump),
       myGroups,
       groupStore,
       messageStore,
       miscStore,
+      toShow,
+      scrollToMessage,
     }
   },
   data() {
     return {
       // Infinite message scroll
       distance: 2000,
-      toShow: MIN_TO_SHOW,
       prefetched: 0,
       maxMessageVisible: 0,
       ensuredMessageVisible: false,
