@@ -9,7 +9,7 @@
 import LayoutCommon from '../components/LayoutCommon'
 import { ref } from '#imports'
 import { useAuthStore } from '~/stores/auth'
-// CC const GoogleOneTap = () => import('~/components/GoogleOneTap') // Also removed from template above
+// CC const GoogleOneTap = () => import('~/components/GoogleOneTap') // Also removed from template above <GoogleOneTap v-if="oneTap" @complete="googleLoaded" />
 
 export default {
   components: {

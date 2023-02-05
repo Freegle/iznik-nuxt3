@@ -4,7 +4,6 @@
       <slot />
     </LayoutCommon>
     <client-only>
-      <GoogleOneTap v-if="oneTap" @complete="googleLoaded" />
       <LoginModal ref="loginModal" />
     </client-only>
   </div>
@@ -13,17 +12,17 @@
 import { useAuthStore } from '../stores/auth'
 import LayoutCommon from '../components/LayoutCommon'
 import { ref } from '#imports'
-const GoogleOneTap = () => import('~/components/GoogleOneTap')
+// CC const GoogleOneTap = () => import('~/components/GoogleOneTap') // Also removed from template above <GoogleOneTap v-if="oneTap" @complete="googleLoaded" />
 const LoginModal = () => import('~/components/LoginModal')
 
 export default {
   components: {
-    GoogleOneTap,
+    // CC GoogleOneTap,
     LoginModal,
     LayoutCommon,
   },
   async setup() {
-    const ready = ref(false)
+    const ready = ref(true) // CC
     const oneTap = ref(false)
     const googleReady = ref(false)
     const authStore = useAuthStore()
@@ -49,10 +48,10 @@ export default {
       }
     }
 
-    if (!ready.value) {
+    /* // CC if (!ready.value) {
       // We don't have a valid JWT.  See if OneTap can sign us in.
       oneTap.value = true
-    }
+    }*/
 
     return {
       ready,
