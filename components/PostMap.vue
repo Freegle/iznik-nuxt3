@@ -110,7 +110,6 @@ import 'vue3-draggable-resizable/dist/Vue3DraggableResizable.css'
 import cloneDeep from 'lodash.clonedeep'
 import { mapState } from 'pinia'
 import L from 'leaflet'
-import { GestureHandling } from 'leaflet-gesture-handling'
 import Wkt from 'wicket'
 import { useGroupStore } from '../stores/group'
 import { useMessageStore } from '../stores/message'
@@ -123,8 +122,6 @@ import { useIsochroneStore } from '~/stores/isochrone'
 import { attribution, osmtile } from '~/composables/useMap'
 import 'leaflet-control-geocoder/dist/Control.Geocoder.css'
 import 'leaflet-gesture-handling/dist/leaflet-gesture-handling.css'
-
-L.Map.addInitHook('addHandler', 'gestureHandling', GestureHandling)
 
 export default {
   components: {
@@ -203,11 +200,17 @@ export default {
       default: false,
     },
   },
-  setup(props) {
+  async setup(props) {
     const miscStore = useMiscStore()
     const groupStore = useGroupStore()
     const messageStore = useMessageStore()
     const isochroneStore = useIsochroneStore()
+
+    L.Map.addInitHook(
+      'addHandler',
+      'gestureHandling',
+      await import('leaflet-gesture-handling').GestureHandling
+    )
 
     return {
       miscStore,
