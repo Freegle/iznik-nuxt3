@@ -187,18 +187,19 @@ body.modal-open {
   border: 1px black;
   border-radius: 5px;
   animation: 15s fadeIn;
+  opacity: 0;
 }
 
 @keyframes fadeIn {
   0% {
-    opacity: 0;
+    opacity: 0 !important;
   }
   90% {
-    opacity: 0;
+    opacity: 0 !important;
   }
   100% {
-    visibility: visible;
-    opacity: 1;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
 }
 </style>
