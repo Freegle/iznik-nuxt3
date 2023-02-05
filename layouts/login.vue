@@ -64,7 +64,6 @@ export default {
     me: {
       immediate: true,
       handler(newVal) {
-        console.log('Me watch', newVal)
         if (newVal) {
           // We've logged in.
           this.ready = true
