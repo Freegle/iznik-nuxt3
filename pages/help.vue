@@ -261,7 +261,7 @@
                 You can see in someone's profile how close they are, how many
                 thumbs up/down they have from other freeglers.
               </p>
-              <p>It'sup to you - deciding is all part of the fun!</p>
+              <p>It's up to you - deciding is all part of the fun!</p>
             </div>
           </HelpQuestion>
           <HelpQuestion id="rules" :matches="matches">

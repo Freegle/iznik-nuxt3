@@ -3,6 +3,7 @@
     <div
       v-if="message"
       :id="'msg-' + id"
+      ref="msg"
       class="position-relative ms-2 me-2 ms-sm-0 me-sm-0"
       itemscope
       itemtype="http://schema.org/Product"
@@ -103,6 +104,11 @@ export default {
     recordView: {
       type: Boolean,
       required: true,
+    },
+    scrollIntoView: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   emits: ['notFound', 'view', 'visible'],
@@ -222,6 +228,12 @@ export default {
       this.reply = reply.replyMessage
       await this.expand()
       this.sendReply()
+    }
+
+    if (this.scrollIntoView) {
+      this.waitForRef('msg', () => {
+        this.$refs.msg.scrollIntoView()
+      })
     }
   },
   methods: {

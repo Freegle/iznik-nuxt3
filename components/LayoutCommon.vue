@@ -187,6 +187,7 @@ body.modal-open {
   border: 1px black;
   border-radius: 5px;
   animation: 15s fadeIn;
+  visibility: visible !important;
 }
 
 @keyframes fadeIn {
@@ -197,7 +198,6 @@ body.modal-open {
     opacity: 0;
   }
   100% {
-    visibility: visible;
     opacity: 1;
   }
 }

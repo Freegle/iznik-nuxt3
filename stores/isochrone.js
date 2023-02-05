@@ -14,20 +14,15 @@ export const useIsochroneStore = defineStore({
     bounds: null,
   }),
   actions: {
-    async loadLeaflet() {
-      // No point loading leafleft (which is large) until we need it.
-      if (process.client && (!this.Wkt || !window.L)) {
-        this.Wkt = await import('wicket')
-        window.L = await import('leaflet')
-        await import('wicket/wicket-leaflet')
-      }
+    initLeaflet(wkt) {
+      this.Wkt = wkt
     },
     init(config) {
       this.config = config
     },
     async fetch(force) {
-      await this.loadLeaflet()
-
+      // The caller is expected to have made sure that leaflet and Wkt are loaded and passed to initLeaflet.  This
+      // is a bit of a kludge to get SSR working.
       if (!this.list?.length || force) {
         try {
           if (this.fetchingIsochrones) {

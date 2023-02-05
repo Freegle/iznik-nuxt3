@@ -16,6 +16,7 @@
               :id="message.id"
               :matchedon="message.matchedon"
               record-view
+              :scroll-into-view="scrollToMessage === message.id"
               @visible="messageVisible"
             />
           </div>
@@ -146,19 +147,36 @@ export default {
       await messageStore.fetchMultiple(initialIds)
     }
 
+    const toShow = ref(MIN_TO_SHOW)
+    let scrollToMessage = null
+
+    if (process.client) {
+      scrollToMessage = window?.history?.state?.scrollToMessage
+      if (scrollToMessage) {
+        const ix = props.messagesForList.findIndex(
+          (message) => message.id === scrollToMessage
+        )
+
+        if (ix > 0) {
+          toShow.value = ix + 1
+        }
+      }
+    }
+
     return {
       infiniteId: ref(props.bump),
       myGroups,
       groupStore,
       messageStore,
       miscStore,
+      toShow,
+      scrollToMessage,
     }
   },
   data() {
     return {
       // Infinite message scroll
       distance: 2000,
-      toShow: MIN_TO_SHOW,
       prefetched: 0,
       maxMessageVisible: 0,
       ensuredMessageVisible: false,
@@ -336,14 +354,16 @@ export default {
       }
     },
     messageVisible(id) {
-      // We want to store the last visible message as a parameter in the history, so that if we come back to a
-      // page containing it, we will scroll to it.
-      try {
-        const state = window.history.state
-        state.scrollToMessage = id
-        window.history.replaceState(state, '')
-      } catch (e) {
-        console.log('Exception', e)
+      if (process.client) {
+        // We want to store the last visible message as a parameter in the history, so that if we come back to a
+        // page containing it, we will scroll to it.
+        try {
+          const state = window.history.state
+          state.scrollToMessage = id
+          window.history.replaceState(state, '')
+        } catch (e) {
+          console.log('Exception storing message visible', e)
+        }
       }
     },
   },
