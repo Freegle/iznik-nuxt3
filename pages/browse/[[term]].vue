@@ -1,6 +1,6 @@
 <template>
   <client-only>
-    <b-container fluid>
+    <b-container fluid class="p-0 p-xl-2">
       <h1 class="sr-only">Browse items</h1>
       <b-row class="m-0">
         <b-col cols="0" lg="3" class="p-0 pr-1">
@@ -215,7 +215,7 @@ export default {
     me: {
       immediate: true,
       handler(newVal, oldVal) {
-        if (newVal && !oldVal) {
+        if (newVal && !oldVal && process.client) {
           this.calculateInitialMapBounds(!this.searchTerm)
           this.bump++
         }

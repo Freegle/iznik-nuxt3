@@ -166,10 +166,6 @@ html {
   box-sizing: border-box;
 }
 
-.pageContent {
-  margin-top: 75px;
-}
-
 *,
 *:before,
 *:after {

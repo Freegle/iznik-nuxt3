@@ -10,7 +10,7 @@
         <p>
           <a target="_blank" :href="url">{{ url }}</a>
         </p>
-        <SocialSharing
+        <social-sharing
           :url="url"
           :title="'Sharing chitchat'"
           :description="newsfeed.message"
@@ -82,7 +82,7 @@
               </b-list-group-item>
             </b-list-group>
           </div>
-        </SocialSharing>
+        </social-sharing>
       </template>
       <template #footer>
         <b-button variant="secondary" @click="hide"> Close </b-button>
@@ -91,11 +91,9 @@
   </div>
 </template>
 <script>
-import { ShareNetwork } from 'vue-social-sharing'
 import modal from '@/mixins/modal'
 
 export default {
-  components: { ShareNetwork },
   mixins: [modal],
   props: {
     newsfeed: {

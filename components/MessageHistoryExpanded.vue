@@ -2,18 +2,18 @@
   <div>
     <div
       v-if="fromuser"
-      class="grey p-2 d-flex clickme"
+      class="grey p-2 clickme"
       :title="'Click to view profile for ' + fromuser.displayname"
     >
-      <ProfileImage
-        v-if="fromuser && fromuser.profile"
-        :image="fromuser.profile.paththumb"
-        class="ml-1 mb-1 inline"
-        is-thumbnail
-        size="sm"
-        @click="showProfileModal"
-      />
-      <div>
+      <div class="d-flex">
+        <ProfileImage
+          v-if="fromuser && fromuser.profile"
+          :image="fromuser.profile.paththumb"
+          class="mr-1 mb-1 inline"
+          is-thumbnail
+          size="md"
+          @click="showProfileModal"
+        />
         <div
           class="d-flex justify-content-between flex-wrap order-0"
           @click="showProfileModal"
@@ -30,48 +30,48 @@
         >
           <v-icon icon="link" /> Connected before
         </nuxt-link>
-        <SupporterInfo v-if="fromuser.supporter" class="d-inline" />
-        <div
-          v-if="
-            fromuser &&
-            fromuser.info &&
-            fromuser.info.openoffers + fromuser.info.openwanteds > 0
-          "
-          @click="showProfileModal"
-        >
-          <span v-if="fromuser.info.openoffers" class="text-success">
-            {{ openOfferPlural }}
-          </span>
-          <span v-if="fromuser.info.openoffers && fromuser.info.openwanteds">
-            &bull;
-          </span>
-          <span v-if="fromuser.info.openwanteds" class="text-success">
-            {{ openWantedPlural }}
-          </span>
-        </div>
-        <div
-          v-for="group in message.groups"
-          :key="'message-' + message.id + '-' + group.id"
-        >
-          <span :title="group.arrival">{{ timeago(group.arrival) }} on </span>
-          <nuxt-link
-            v-if="group.groupid in groups"
-            :to="'/explore/' + groups[group.groupid].exploreLink"
-            :title="'Click to view ' + groups[group.groupid].namedisplay"
-          >
-            {{ groups[group.groupid].namedisplay }}
-          </nuxt-link>
-        </div>
-        <span v-if="milesaway" class="align-middle" @click="showProfileModal">
-          About {{ milesPlural }} away
+      </div>
+      <SupporterInfo v-if="fromuser.supporter" class="d-inline" />
+      <div
+        v-if="
+          fromuser &&
+          fromuser.info &&
+          fromuser.info.openoffers + fromuser.info.openwanteds > 0
+        "
+        @click="showProfileModal"
+      >
+        <span v-if="fromuser.info.openoffers" class="text-success">
+          {{ openOfferPlural }}
+        </span>
+        <span v-if="fromuser.info.openoffers && fromuser.info.openwanteds">
+          &bull;
+        </span>
+        <span v-if="fromuser.info.openwanteds" class="text-success">
+          {{ openWantedPlural }}
         </span>
       </div>
-      <ProfileModal
-        v-if="showProfile && message && fromuser"
-        :id="fromuser.id"
-        ref="profile"
-      />
+      <div
+        v-for="group in message.groups"
+        :key="'message-' + message.id + '-' + group.id"
+      >
+        <span :title="group.arrival">{{ timeago(group.arrival) }} on </span>
+        <nuxt-link
+          v-if="group.groupid in groups"
+          :to="'/explore/' + groups[group.groupid].exploreLink"
+          :title="'Click to view ' + groups[group.groupid].namedisplay"
+        >
+          {{ groups[group.groupid].namedisplay }}
+        </nuxt-link>
+      </div>
+      <span v-if="milesaway" class="align-middle" @click="showProfileModal">
+        About {{ milesPlural }} away
+      </span>
     </div>
+    <ProfileModal
+      v-if="showProfile && message && fromuser"
+      :id="fromuser.id"
+      ref="profile"
+    />
   </div>
 </template>
 <script>

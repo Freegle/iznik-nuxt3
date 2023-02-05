@@ -3,6 +3,7 @@ import axios from 'axios'
 import { LoginError, SignUpError } from '../api/BaseAPI'
 import { useComposeStore } from '../stores/compose'
 import api from '~/api'
+import { useCookie } from '#imports'
 
 export const useAuthStore = defineStore({
   id: 'auth',
@@ -30,11 +31,13 @@ export const useAuthStore = defineStore({
   state: () => ({
     config: null,
 
-    // For APIv2
-    jwt: null,
+    auth: {
+      // For APIv2
+      jwt: null,
 
-    // For APIv2,
-    persistent: null,
+      // For APIv2,
+      persistent: null,
+    },
 
     loginStateKnown: false,
     forceLogin: false,
@@ -49,6 +52,32 @@ export const useAuthStore = defineStore({
     init(config) {
       this.config = config
       this.$api = api(config)
+
+      // See if we have auth info in cookies.  This is useful to know early on during SSR because we can return
+      // info to the client, which means we won't flicker from the logged out to logged in views.
+      const jwt = useCookie('jwt')?.value
+      if (!this.auth.jwt && jwt) {
+        console.log('Got JWT cookie', jwt)
+        this.auth.jwt = jwt
+      }
+
+      const persistent = useCookie('persistent')?.value
+      if (!this.auth.persistent && persistent) {
+        console.log('Got persistent cookie', persistent)
+        this.auth.persistent = persistent
+      }
+    },
+    setAuth(jwt, persistent) {
+      this.auth.jwt = jwt
+      this.auth.persistent = persistent
+
+      if (process.client) {
+        // Store the values in cookies.  This means they are accessible during SSR.
+        const j = useCookie('jwt')
+        const p = useCookie('persistent')
+        j.value = jwt
+        p.value = JSON.stringify(persistent)
+      }
     },
     setUser(value) {
       if (value) {
@@ -121,15 +150,13 @@ export const useAuthStore = defineStore({
 
       if (ret === 0) {
         // Successful login.
-        //
-        // Save the persistent session token.
-        this.persistent = persistent
-
-        // Save the JWT, so that we can use the faster API next time.
-        this.jwt = jwt
+        console.log('Successful login')
+        this.setAuth(jwt, persistent)
+        console.log('Set auth', jwt, persistent)
 
         // Login succeeded.  Get the user from the new API.
         await this.fetchUser()
+        console.log('Fetched user')
       } else {
         // Login failed.
         throw new LoginError(ret, status)
@@ -169,11 +196,7 @@ export const useAuthStore = defineStore({
       if (res.status === 200 && res.data.ret === 0) {
         this.forceLogin = false
 
-        // Save the persistent session token.
-        this.persistent = persistent
-
-        // Save the JWT, so that we can use the faster API next time.
-        this.jwt = jwt
+        this.setAuth(jwt, persistent)
 
         // We need to fetch the user to get the groups, persistent token etc.
         await this.fetchUser()
@@ -189,25 +212,27 @@ export const useAuthStore = defineStore({
       let me = null
       let groups = null
 
-      if (this.jwt) {
-        // We have a JWT which we can use with the new, faster API.
+      console.log('Consider got auth')
+      if (this.auth.jwt || this.auth.persistent) {
+        console.log('Got auth')
+        // We have auth info.  The new API can authenticate using either the JWT or the persistent token.
         try {
           me = await this.$api.session.fetchv2({})
+          console.log('Done fetchv2')
         } catch (e) {
-          console.log('exception')
+          // Failed.  This can validly happen with a 404 if the JWT is invalid.
+          console.log('Exception fetching user')
         }
 
         if (me) {
           groups = me.memberships
           delete me.memberships
-        } else {
-          // Any JWT must be invalid.
-          this.jwt = null
         }
       }
 
       if (!me) {
-        // Fall back to the older API which will authenticate via the persistent token and PHP session.
+        // Try the older API which will authenticate via the persistent token and PHP session.
+        console.log('Try older')
         const ret = await this.$api.session.fetch({
           components: ['me'],
         })
@@ -219,11 +244,7 @@ export const useAuthStore = defineStore({
           ;({ me, persistent, jwt } = ret)
 
           if (me) {
-            // Save the persistent session token.
-            this.persistent = persistent
-
-            // Save the JWT, so that we can use the faster API next time.
-            this.jwt = jwt
+            this.setAuth(jwt, persistent)
           }
 
           if (jwt) {
@@ -237,9 +258,6 @@ export const useAuthStore = defineStore({
             if (me) {
               groups = me.memberships
               delete me.memberships
-            } else {
-              // Any JWT must be invalid.
-              this.jwt = null
             }
           }
         }
@@ -264,6 +282,9 @@ export const useAuthStore = defineStore({
           // because persisted.
           composeStore.email = me.email
         }
+      } else {
+        // Any auth info must be invalid.
+        this.setAuth(null, null)
       }
 
       this.loginStateKnown = true

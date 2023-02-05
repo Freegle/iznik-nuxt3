@@ -13,7 +13,7 @@ export default {
     },
     jwt() {
       const authStore = useAuthStore()
-      return authStore.jwt
+      return authStore.auth.jwt
     },
     me() {
       return this.realMe

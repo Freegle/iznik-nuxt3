@@ -20,7 +20,7 @@
                 <span class="d-none d-sm-inline"
                   >Looking for your posts? Click</span
                 >
-                <span class="d-inline d-sm-none">Your posts are</span>
+                <span class="d-inline d-sm-none">Your posts are </span>
                 <!-- eslint-disable-next-line -->
                 <nuxt-link to="/myposts">here</nuxt-link>.
               </h5>

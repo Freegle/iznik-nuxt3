@@ -74,9 +74,9 @@
         <p>Once you log in, you're giving us consent to do the following.</p>
         <ul>
           <li>
-            We store more information in your local storage. Part of this is so
-            that you don't need to log in as often, and the rest is to speed up
-            the site (it's a cache).
+            We store more information in your local storage and cookies. Part of
+            this is so that you don't need to log in as often, and the rest is
+            so that we don't lose messages when you're replying.
           </li>
           <li>
             We show jobs ads from
@@ -132,6 +132,10 @@
         <h3>Change History</h3>
         <p>Here are the changes to this page.</p>
         <ul class>
+          <li>
+            04/02/2023: Removed Google Analytics, which we no longer use. Add
+            mention of cookies.
+          </li>
           <li>
             04/10/2021: Added section on data deletion as per Facebook request.
           </li>
