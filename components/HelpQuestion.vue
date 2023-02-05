@@ -5,7 +5,7 @@
     </h3>
     <slot v-if="expanded || matches.length <= 3" name="default"> </slot>
     <div v-else>
-      <b-button variant="secondary" @click="expand">
+      <b-button variant="white" @click="expand">
         Click to show answer
       </b-button>
     </div>
