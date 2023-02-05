@@ -8,9 +8,9 @@
 <script setup>
 import axios from 'axios'
 import { useAuthStore } from '~/stores/auth'
-import { useRoute, useRouter } from '#imports'
+import { useRoute } from '#imports'
 
-const router = useRouter()
+// const router = useRouter()
 const route = useRoute()
 const runtimeConfig = useRuntimeConfig()
 const API = runtimeConfig.public.APIv1
@@ -32,15 +32,15 @@ if (authStore.user) {
   if (returnto) {
     // Go where we want to be.  Make sure we remove the code to avoid us trying to log in again.
     console.log('Return to', returnto)
-    router.push(returnto)
+    // router.push(returnto)
   } else {
     console.log('Just go home')
-    router.push('/')
+    // router.push('/')
   }
 } else if (!code) {
   // Probably they rejected our authorisation.  Just go back to the same page we were at.
   console.log('No code found, return to', returnto)
-  window.location = returnto
+  // window.location = returnto
 } else {
   // We have a code.  Use it on the server to log ion.
   await axios.post(API + '/session', {
@@ -50,10 +50,10 @@ if (authStore.user) {
   if (returnto) {
     // Go where we want to be.  Make sure we remove the code to avoid us trying to log in again.
     console.log('Return to', returnto)
-    router.go(returnto)
+    // router.go(returnto)
   } else {
     console.log('Just go home')
-    router.push('/')
+    // router.push('/')
   }
 }
 </script>

@@ -267,96 +267,98 @@ export default {
   },
   methods: {
     async calculateInitialMapBounds(fetchIsochrones) {
-      // The initial bounds for the map are determined from the isochrones if possible.  We might have them cached
-      // in store.
-      this.isochroneStore.fetchMessages(true)
+      if (process.client) {
+        // The initial bounds for the map are determined from the isochrones if possible.  We might have them cached
+        // in store.
+        this.isochroneStore.fetchMessages(true)
 
-      const promises = []
-      promises.push(this.isochroneStore.fetch())
+        const promises = []
+        promises.push(this.isochroneStore.fetch())
 
-      if (fetchIsochrones) {
-        // By default we'll be showing the isochrone view in PostMap, so start the fetch of the messages now.  That
-        // way we can display the list rapidly.  Fetching this and the isochrones in parallel reduces latency.
-        promises.push(this.isochroneStore.fetchMessages(true))
-      }
+        if (fetchIsochrones) {
+          // By default we'll be showing the isochrone view in PostMap, so start the fetch of the messages now.  That
+          // way we can display the list rapidly.  Fetching this and the isochrones in parallel reduces latency.
+          promises.push(this.isochroneStore.fetchMessages(true))
+        }
 
-      await Promise.all(promises)
+        await Promise.all(promises)
 
-      this.initialBounds = this.isochroneStore.bounds
+        this.initialBounds = this.isochroneStore.bounds
 
-      if (!this.initialBounds) {
-        // We don't have any isochrones yet. Use the bounding box of the group that our own
-        // location is within.
-        let mylat = null
-        let mylng = null
+        if (!this.initialBounds) {
+          // We don't have any isochrones yet. Use the bounding box of the group that our own
+          // location is within.
+          let mylat = null
+          let mylng = null
 
-        let swlat = null
-        let swlng = null
-        let nelat = null
-        let nelng = null
+          let swlat = null
+          let swlng = null
+          let nelat = null
+          let nelng = null
 
-        if (this.me && (this.me.lat || this.me.lng)) {
-          mylat = this.me.lat
-          mylng = this.me.lng
+          if (this.me && (this.me.lat || this.me.lng)) {
+            mylat = this.me.lat
+            mylng = this.me.lng
 
-          this.myGroups.forEach(async (g) => {
-            if (g.bbox) {
-              const Wkt = await import('wicket')
-              window.L = await import('leaflet/dist/leaflet-src.esm')
-              await import('wicket/wicket-leaflet')
+            this.myGroups.forEach(async (g) => {
+              if (g.bbox) {
+                const Wkt = await import('wicket')
+                window.L = await import('leaflet/dist/leaflet-src.esm')
+                await import('wicket/wicket-leaflet')
 
-              const wkt = new Wkt.Wkt()
-              wkt.read(g.bbox)
-              const obj = wkt.toObject()
+                const wkt = new Wkt.Wkt()
+                wkt.read(g.bbox)
+                const obj = wkt.toObject()
 
-              if (obj?.getBounds) {
-                const thisbounds = obj.getBounds()
-                const thissw = thisbounds.getSouthWest()
-                const thisne = thisbounds.getNorthEast()
+                if (obj?.getBounds) {
+                  const thisbounds = obj.getBounds()
+                  const thissw = thisbounds.getSouthWest()
+                  const thisne = thisbounds.getNorthEast()
 
-                if (
-                  mylat >= thissw.lat &&
-                  mylat <= thisne.lat &&
-                  mylng >= thissw.lng &&
-                  mylng <= thisne.lng
-                ) {
-                  swlat = (thissw.lat + thisne.lat) / 2
-                  swlng = thissw.lng
-                  nelat = (thissw.lat + thisne.lat) / 2
-                  nelng = thisne.lng
+                  if (
+                    mylat >= thissw.lat &&
+                    mylat <= thisne.lat &&
+                    mylng >= thissw.lng &&
+                    mylng <= thisne.lng
+                  ) {
+                    swlat = (thissw.lat + thisne.lat) / 2
+                    swlng = thissw.lng
+                    nelat = (thissw.lat + thisne.lat) / 2
+                    nelng = thisne.lng
+                  }
                 }
               }
-            }
-          })
-        }
+            })
+          }
 
-        let bounds = null
+          let bounds = null
 
-        if (
-          swlat !== null &&
-          swlng !== null &&
-          nelat !== null &&
-          nelng !== null
-        ) {
-          bounds = [
-            [swlat, swlng],
-            [nelat, nelng],
-          ]
-        } else if (this.me && mylat !== null && mylng !== null) {
-          // We're not a member of any groups, but at least we know where we are.  Centre there, and then let
-          // the map zoom to somewhere sensible.
-          bounds = [
-            [mylat - 0.01, mylng - 0.01],
-            [mylat + 0.01, mylng + 0.01],
-          ]
-        } else {
-          // We aren't a member of any groups and we don't know where we are.  This can happen, but it's rare.
-          // Send them to the explore page to pick somewhere.
-          this.router.push('/explore')
-        }
+          if (
+            swlat !== null &&
+            swlng !== null &&
+            nelat !== null &&
+            nelng !== null
+          ) {
+            bounds = [
+              [swlat, swlng],
+              [nelat, nelng],
+            ]
+          } else if (this.me && mylat !== null && mylng !== null) {
+            // We're not a member of any groups, but at least we know where we are.  Centre there, and then let
+            // the map zoom to somewhere sensible.
+            bounds = [
+              [mylat - 0.01, mylng - 0.01],
+              [mylat + 0.01, mylng + 0.01],
+            ]
+          } else {
+            // We aren't a member of any groups and we don't know where we are.  This can happen, but it's rare.
+            // Send them to the explore page to pick somewhere.
+            this.router.push('/explore')
+          }
 
-        if (bounds) {
-          this.initialBounds = bounds
+          if (bounds) {
+            this.initialBounds = bounds
+          }
         }
       }
     },

@@ -7,13 +7,14 @@
       :interval="0"
       no-touch
       :controls="attachments.length > 1"
-      @sliding-end="slideEnd"
+      @slid="slideEnd"
     >
       <b-carousel-slide
         v-for="(attachment, index) in attachments"
         :id="'message-carousel-' + messageId + '-' + index"
         :key="'mesagephohoto-' + attachment.id"
         :active="slide === index"
+        class="slide"
       >
         <inner-image-zoom
           zoom-type="click"
@@ -50,6 +51,7 @@ export default {
   },
   methods: {
     slideEnd(slide) {
+      console.log('Slide end')
       this.slide = slide
     },
   },

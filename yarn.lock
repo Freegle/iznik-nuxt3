@@ -2013,10 +2013,10 @@ boolbase@^1.0.0:
   resolved "https://registry.npmjs.org/boolbase/-/boolbase-1.0.0.tgz"
   integrity sha512-JZOSA7Mo9sNGB8+UjSgzdLtokWAky1zbztM3WRLCbZ70/3cTANmQmOdR7y2g+J0e2WXywy1yS468tY+IruqEww==
 
-bootstrap-vue-next@^0.6.6:
-  version "0.6.7"
-  resolved "https://registry.npmjs.org/bootstrap-vue-next/-/bootstrap-vue-next-0.6.7.tgz"
-  integrity sha512-lLKtM819OmcoELgFn2rkKq+PFv2es1wb2oYN3DpJu+2bVm8UVrrM1xHI4WuPWGjKk2PCyCk89Q2nZy1H0TQEfw==
+bootstrap-vue-next@^0.7.3:
+  version "0.7.3"
+  resolved "https://registry.npmjs.org/bootstrap-vue-next/-/bootstrap-vue-next-0.7.3.tgz"
+  integrity sha512-YHlqH6dCWZsCwQTBUOrhER3f/G/vN/aC34zAaFxnewXNkWJIdNWSdF0cipJqDti9aSC7iuprNu7Q0Ajeg/jElA==
   dependencies:
     "@nuxt/kit" "3.0.0"
     "@vueuse/core" "^9.11.1"
