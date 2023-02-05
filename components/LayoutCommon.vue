@@ -17,7 +17,6 @@
       v-if="showLoader"
       id="serverloader"
       class="bg-none d-flex justify-content-around w-100"
-      style="visibility: hidden"
     >
       <div class="text-center bg-white p-2">
         <img src="/loader.gif" alt="Loading..." />
@@ -193,13 +192,13 @@ body.modal-open {
 
 @keyframes fadeIn {
   0% {
-    opacity: 0 !important;
+    opacity: 0;
   }
   90% {
-    opacity: 0 !important;
+    opacity: 0;
   }
   100% {
-    opacity: 1 !important;
+    opacity: 1;
   }
 }
 </style>

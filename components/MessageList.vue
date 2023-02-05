@@ -16,8 +16,8 @@
               :id="message.id"
               :matchedon="message.matchedon"
               record-view
+              :scroll-into-view="scrollToMessage === message.id"
               @visible="messageVisible"
-              :scrollIntoView="scrollToMessage === message.id"
             />
           </div>
           <template #fallback>
@@ -153,11 +153,9 @@ export default {
     if (process.client) {
       scrollToMessage = window?.history?.state?.scrollToMessage
       if (scrollToMessage) {
-        console.log('Scroll to', scrollToMessage)
         const ix = props.messagesForList.findIndex(
           (message) => message.id === scrollToMessage
         )
-        console.log('Found ix', ix)
 
         if (ix > 0) {
           toShow.value = ix + 1
@@ -360,7 +358,6 @@ export default {
         // We want to store the last visible message as a parameter in the history, so that if we come back to a
         // page containing it, we will scroll to it.
         try {
-          console.log('Store in window history', id)
           const state = window.history.state
           state.scrollToMessage = id
           window.history.replaceState(state, '')

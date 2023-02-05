@@ -230,7 +230,6 @@ export default {
       this.sendReply()
     }
 
-    console.log('mounted', this.id, this.scrollIntoView)
     if (this.scrollIntoView) {
       this.waitForRef('msg', () => {
         this.$refs.msg.scrollIntoView()
