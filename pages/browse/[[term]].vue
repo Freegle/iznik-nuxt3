@@ -214,8 +214,16 @@ export default {
   watch: {
     me: {
       immediate: true,
-      handler(newVal, oldVal) {
+      async handler(newVal, oldVal) {
         if (newVal && !oldVal && process.client) {
+          // No point loading leafleft (which is large) until we need it.
+          if (!window.L) {
+            const wkt = await import('wicket')
+            window.L = await import('leaflet/dist/leaflet-src.esm')
+            await import('wicket/wicket-leaflet')
+            this.isochroneStore.initLeaflet(wkt)
+          }
+
           this.calculateInitialMapBounds(!this.searchTerm)
           this.bump++
         }
