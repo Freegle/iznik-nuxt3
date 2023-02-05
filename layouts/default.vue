@@ -9,29 +9,15 @@
 import LayoutCommon from '../components/LayoutCommon'
 import { ref } from '#imports'
 import { useAuthStore } from '~/stores/auth'
-// CC const GoogleOneTap = () => import('~/components/GoogleOneTap')
+// CC const GoogleOneTap = () => import('~/components/GoogleOneTap') // Also removed from template above
 
 export default {
   components: {
     LayoutCommon,
     // CC GoogleOneTap,
   },
-<<<<<<< HEAD
-  data() {
-    return {
-      // On the server we want to render immediately, because we're not going to find out that we're logged in - that
-      // checking only happens on the client.
-      ready: true, // CC
-      oneTap: false,
-    }
-  },
-  async mounted() {
-    if (this.jwt) {
-      // We have a JWT, which may or may not be valid on the server.  If it is, then we can crack on and
-      // start rendering the page.  This will be quicker than waiting for GoogleOneTap to load and tell us
-=======
   async setup() {
-    const ready = ref(false)
+    const ready = ref(true) // CC
     const oneTap = ref(false)
     const googleReady = ref(false)
     const authStore = useAuthStore()
@@ -41,7 +27,6 @@ export default {
     if (jwt || persistent) {
       // We have some credentials, which may or may not be valid on the server.  If they are, then we can crack on and
       // start rendering the page.  This will be quicker than waiting for GoogleOneTap to load on the client and tell us
->>>>>>> master
       // whether or not we can log in that way.
       let user = null
 
@@ -56,10 +41,10 @@ export default {
       }
     }
 
-    if (!ready.value) {
+    /* // CC if (!ready.value) {
       // We don't have a valid JWT.  See if OneTap can sign us in.
       oneTap.value = true
-    }
+    }*/
 
     return {
       ready,
