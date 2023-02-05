@@ -93,13 +93,12 @@
   </b-modal>
 </template>
 <script>
-import { ShareNetwork } from 'vue-social-sharing'
 import { useMessageStore } from '../stores/message'
 import NoticeMessage from './NoticeMessage'
 import modal from '@/mixins/modal'
 
 export default {
-  components: { NoticeMessage, ShareNetwork },
+  components: { NoticeMessage },
   mixins: [modal],
   props: {
     id: {
