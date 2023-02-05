@@ -291,7 +291,7 @@ export default {
   }
 
   @include media-breakpoint-up(lg) {
-    grid-row: 2 / 3;
+    grid-row: 1 / 3;
     grid-column: 1 / 2;
     // 100vh includes the header and margins etc so they need to be taken off
     height: calc(100vh - 150px);
