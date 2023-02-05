@@ -92,7 +92,7 @@
           <HelpQuestion id="gdpr" :matches="matches">
             <template #title>What data do you store about me?</template>
             <p>
-              If you're really into privacy or GDPR, tou can see what data we
+              If you're really into privacy or GDPR, you can see what data we
               store about you, and download it,
               <nuxt-link to="/mydata"> here </nuxt-link>.
             </p>
