@@ -14,15 +14,15 @@
           Type a question in here, and we'll see if we can find an answer for
           you.
         </p>
-        <b-form-input v-model="question"
-                      placeholder="Type your question here..."
-                      class="border-primary" />
+        <b-form-input
+          v-model="question"
+          placeholder="Type your question here..."
+          class="border-primary"
+        />
         <hr />
         <div ref="faq">
           <HelpQuestion id="unsubscribe" :matches="matches">
-            <template #title>
-              How do I leave/unsubscribe?
-            </template>
+            <template #title>How do I leave/unsubscribe?</template>
             <template #default>
               <p>
                 If you'd like to leave Freegle, then go
@@ -36,18 +36,14 @@
             </template>
           </HelpQuestion>
           <HelpQuestion id="toomanyemails" :matches="matches">
-            <template #title>
-              How do I get fewer emails?
-            </template>
+            <template #title>How do I get fewer emails?</template>
             <p>
               <!-- eslint-disable-next-line-->
-              If you go to <nuxt-link to="/settings">Settings</nuxt-link> then you can change how many mails you get in your <em>Mail Settings</em>.
+            If you go to <nuxt-link to="/settings">Settings</nuxt-link> then you can change how many mails you get in your <em>Mail Settings</em>.
             </p>
           </HelpQuestion>
           <HelpQuestion id="taken" :matches="matches">
-            <template #title>
-              My OFFER has been TAKEN - what do I do?
-            </template>
+            <template #title>My OFFER has been TAKEN - what do I do?</template>
             <div>
               <p>
                 If someone has collected your OFFER, then make sure you're
@@ -75,9 +71,7 @@
             </div>
           </HelpQuestion>
           <HelpQuestion id="repost" :matches="matches">
-            <template #title>
-              How do I repost an item?
-            </template>
+            <template #title>How do I repost an item?</template>
             <div>
               <p>
                 <!-- eslint-disable-next-line-->
@@ -93,9 +87,7 @@
             </div>
           </HelpQuestion>
           <HelpQuestion id="changeemail" :matches="matches">
-            <template #title>
-              How do I change my email address?
-            </template>
+            <template #title>How do I change my email address?</template>
             <div>
               <p>
                 <!-- eslint-disable-next-line-->
@@ -104,9 +96,7 @@
             </div>
           </HelpQuestion>
           <HelpQuestion id="gdpr" :matches="matches">
-            <template #title>
-              What data do you store about me?
-            </template>
+            <template #title>What data do you store about me?</template>
             <p>
               If you're really into privacy or GDPR, tou can see what data we
               store about you, and download it,
@@ -114,9 +104,7 @@
             </p>
           </HelpQuestion>
           <HelpQuestion id="app" :matches="matches">
-            <template #title>
-              Do you have a mobile app?
-            </template>
+            <template #title>Do you have a mobile app?</template>
             <div>
               <p>
                 We do! Freegling is easy on mobiles and tablets, and you get
@@ -125,23 +113,31 @@
                 store - it's free!
               </p>
               <div class="d-flex justify-content-between">
-                <a href="https://play.google.com/store/apps/details?id=org.ilovefreegle.direct"
-                   class="mt-2"
-                   target="_blank"
-                   rel="noopener noreferrer">
-                  <img alt="Freegle Android app on Google Play"
-                       title="Freegle Android app on Google Play"
-                       class="img-responsive"
-                       src="/en-play-badge.png" />
+                <a
+                  href="https://play.google.com/store/apps/details?id=org.ilovefreegle.direct"
+                  class="mt-2"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <img
+                    alt="Freegle Android app on Google Play"
+                    title="Freegle Android app on Google Play"
+                    class="img-responsive"
+                    src="/en-play-badge.png"
+                  />
                 </a>
-                <a href="https://itunes.apple.com/gb/app/freegle/id970045029?ls=1&amp;mt=8"
-                   class="mt-2"
-                   target="_blank"
-                   rel="noopener noreferrer">
-                  <img alt="Freegle app for iPhone, iPad, and iPod touch"
-                       title="Freegle app for iPhone, iPad, and iPod touch"
-                       class="img-responsive"
-                       src="/app-store-black-sm.png" />
+                <a
+                  href="https://itunes.apple.com/gb/app/freegle/id970045029?ls=1&amp;mt=8"
+                  class="mt-2"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <img
+                    alt="Freegle app for iPhone, iPad, and iPod touch"
+                    title="Freegle app for iPhone, iPad, and iPod touch"
+                    class="img-responsive"
+                    src="/app-store-black-sm.png"
+                  />
                 </a>
               </div>
               <p class="mt-2">
@@ -151,9 +147,7 @@
             </div>
           </HelpQuestion>
           <HelpQuestion id="canihelp" :matches="matches">
-            <template #title>
-              Can I help?
-            </template>
+            <template #title>Can I help?</template>
             <div>
               <p>
                 Yes! Freegle is run by volunteers. The first stage is to become
@@ -200,14 +194,17 @@
                 <li>
                   IT geeks who know some of these: VueJS/Bootstrap
                   4/CSS/PHP/Percona/nginx - find us on
-                  <a target="_blank"
-                     href="https://github.com/Freegle"
-                     rel="noopener noreferrer">GitHub</a>.
+                  <a
+                    target="_blank"
+                    href="https://github.com/Freegle"
+                    rel="noopener noreferrer"
+                    >GitHub</a
+                  >.
                 </li>
               </ul>
               <p>
                 <!-- eslint-disable-next-line -->
-                You can reach us at <ExternalLink href="mailto:volunteers@ilovefreegle.org">volunteers@ilovefreegle.org</ExternalLink>.
+              You can reach us at <ExternalLink href="mailto:volunteers@ilovefreegle.org">volunteers@ilovefreegle.org</ExternalLink>.
               </p>
               <p>
                 Or if you'd like to donate to our charity, you can do that
@@ -219,9 +216,7 @@
             </div>
           </HelpQuestion>
           <HelpQuestion id="donate" :matches="matches">
-            <template #title>
-              How do I donate?
-            </template>
+            <template #title>How do I donate?</template>
             <div>
               <p>
                 If you're able to donate to keep Freegle running, you can do
@@ -236,9 +231,7 @@
             </div>
           </HelpQuestion>
           <HelpQuestion id="selling" :matches="matches">
-            <template #title>
-              Can I sell something given on Freegle?
-            </template>
+            <template #title>Can I sell something given on Freegle?</template>
             <div>
               <p>
                 Reselling also keeps stuff out of landfill; but please don't
@@ -248,8 +241,8 @@
             </div>
           </HelpQuestion>
           <HelpQuestion id="howdoichoose" :matches="matches">
-            <template #title>
-              How do I choose if several people are interested?
+            <template #title
+              >How do I choose if several people are interested?
             </template>
             <div>
               <p>
@@ -265,9 +258,7 @@
             </div>
           </HelpQuestion>
           <HelpQuestion id="rules" :matches="matches">
-            <template #title>
-              What are your rules?
-            </template>
+            <template #title>What are your rules?</template>
             <template #default>
               <TermsOfUse />
             </template>
@@ -286,14 +277,18 @@
         </h3>
         <b-card v-if="loggedIn" no-body>
           <b-card-body class="p-3">
-            <GroupRememberSelect v-model="contactGroupId"
-                                 remember="contactmods"
-                                 class="mb-3" />
-            <ChatButton :groupid="contactGroupId"
-                        size="md"
-                        title="Contact community volunteers"
-                        variant="primary"
-                        class="mb-2" />
+            <GroupRememberSelect
+              v-model="contactGroupId"
+              remember="contactmods"
+              class="mb-3"
+            />
+            <ChatButton
+              :groupid="contactGroupId"
+              size="md"
+              title="Contact community volunteers"
+              variant="primary"
+              class="mb-2"
+            />
           </b-card-body>
         </b-card>
         <div class="text-muted">
@@ -317,8 +312,10 @@
             </li>
             <li>
               Our national mailbox volunteers at
-              <SupportLink email="info@ilovefreegle.org"
-                           text="info@ilovefreegle.org" />. They deal with more general questions about Freegle which
+              <SupportLink
+                email="info@ilovefreegle.org"
+                text="info@ilovefreegle.org"
+              />. They deal with more general questions about Freegle which
               aren't specific to one community, or if you have issues you can't
               resolve with your local team. Please be aware that we have very
               limited powers. Local communities are autonomous, but we can help
@@ -326,8 +323,10 @@
             </li>
             <li>
               Our media volunteers at
-              <SupportLink email="media@ilovefreegle.org"
-                           text="media@ilovefreegle.org" />. Please use this if you are a member of the media and want to
+              <SupportLink
+                email="media@ilovefreegle.org"
+                text="media@ilovefreegle.org"
+              />. Please use this if you are a member of the media and want to
               help publicise Freegle. For urgent press enquiries only, call +44
               (0)7962 449573.
             </li>
