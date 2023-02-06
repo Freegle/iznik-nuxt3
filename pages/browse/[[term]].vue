@@ -123,25 +123,28 @@ import { useIsochroneStore } from '~/stores/isochrone'
 
 definePageMeta({
   layout: 'login',
+  alias: ['/communities'],
 })
 
-const IsochronePostMapAndList = () =>
-  import('~/components/IsochronePostMapAndList')
-const GlobalWarning = () => import('~/components/GlobalWarning')
-const AboutMeModal = () => import('~/components/AboutMeModal')
-const ExpectedRepliesWarning = () =>
-  import('~/components/ExpectedRepliesWarning')
 // const MicroVolunteering = () => import('~/components/MicroVolunteering.vue')
 
 export default {
   components: {
     AdaptiveMap: defineAsyncComponent(() => import('~/components/AdaptiveMap')),
+    IsochronePostMapAndList: defineAsyncComponent(() =>
+      import('~/components/IsochronePostMapAndList')
+    ),
+    GlobalWarning: defineAsyncComponent(() =>
+      import('~/components/GlobalWarning')
+    ),
+    AboutMeModal: defineAsyncComponent(() =>
+      import('~/components/AboutMeModal')
+    ),
+    ExpectedRepliesWarning: defineAsyncComponent(() =>
+      import('~/components/ExpectedRepliesWarning')
+    ),
     VisibleWhen,
     // MicroVolunteering,
-    IsochronePostMapAndList,
-    GlobalWarning,
-    ExpectedRepliesWarning,
-    AboutMeModal,
   },
   async setup() {
     const route = useRoute()
