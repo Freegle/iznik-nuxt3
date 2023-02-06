@@ -8,7 +8,7 @@
           Mobile app version: {{ mobileVersion }}.
           <span style="display:none;">{{ mobileInfo }}</span>
         </p>
-        <RateAppModal ref="rateappmodal" />
+        <RateAppModal v-if="isApp" ref="rateappmodal" />
         <h1>How can we help?</h1>
         <p>
           Type a question in here, and we'll see if we can find an answer for
@@ -340,107 +340,107 @@
   </client-only>
 </template>
 <script>
-import { useRoute } from 'vue-router'
-import { Searcher } from 'fast-fuzzy'
-import dayjs from 'dayjs'
-import HelpQuestion from '../components/HelpQuestion'
-import { buildHead } from '~/composables/useBuildHead'
+  import { useRoute } from 'vue-router'
+  import { Searcher } from 'fast-fuzzy'
+  import dayjs from 'dayjs'
+  import HelpQuestion from '../components/HelpQuestion'
+  import { buildHead } from '~/composables/useBuildHead'
 
-export default {
-  components: { HelpQuestion },
-  setup() {
-    const route = useRoute()
-    const runtimeConfig = useRuntimeConfig()
+  export default {
+    components: { HelpQuestion },
+    setup() {
+      const route = useRoute()
+      const runtimeConfig = useRuntimeConfig()
 
-    useHead(
-      buildHead(route, runtimeConfig, 'Help', 'Help with Freegle', null, {
-        class: 'overflow-y-scroll',
-      })
-    )
-  },
-  data() {
-    return {
-      question: null,
-      searcher: null,
-      forIndex: [],
-      contactGroupId: null,
-    }
-  },
-  computed: {
-    isApp() {
-      const runtimeConfig = useRuntimeConfig()
-      return runtimeConfig.public.IS_APP // true
+      useHead(
+        buildHead(route, runtimeConfig, 'Help', 'Help with Freegle', null, {
+          class: 'overflow-y-scroll',
+        })
+      )
     },
-    mobileVersion() {
-      const runtimeConfig = useRuntimeConfig()
-      return runtimeConfig.public.MOBILE_VERSION
-    },
-    mobileInfo() {
-      return 'TO DO';
-      //return mobilestate.devicePersistentId;
-    },
-    matches() {
-      if (!this.searcher || !this.question) {
-        return this.forIndex.map((o) => o.id)
+    data() {
+      return {
+        question: null,
+        searcher: null,
+        forIndex: [],
+        contactGroupId: null,
       }
-
-      let result = this.searcher.search(this.question, {
-        returnMatchData: true,
-      })
-
-      result = result.slice(0, 10)
-
-      // Get id prop from each
-      return result.map((r) => r.item.id)
     },
-    version() {
-      const runtimeConfig = useRuntimeConfig()
-      const date = dayjs(runtimeConfig.public.BUILD_DATE)
-
-      return date.format('Do MMMM, YYYY') + ' at ' + date.format('HH:mm')
-    },
-  },
-  mounted() {
-    // Scan the FAQs above and extract the plain text for each one, and then construct a search index.
-    this.waitForRef('faq', () => {
-      const faqs = this.$refs.faq.children
-
-      this.forIndex = []
-
-      for (const question of faqs) {
-        try {
-          const questionText = question.children[0].innerText.trim()
-          const answerText = question.children[1].innerText.trim()
-
-          this.forIndex.push({
-            id: question.id,
-            question: questionText,
-            answer: answerText,
-          })
-        } catch (e) {
-          console.error('Malformed FAQ', question)
+    computed: {
+      isApp() {
+        const runtimeConfig = useRuntimeConfig()
+        return runtimeConfig.public.IS_APP
+      },
+      mobileVersion() {
+        const runtimeConfig = useRuntimeConfig()
+        return runtimeConfig.public.MOBILE_VERSION
+      },
+      mobileInfo() {
+        return 'TO DO'; // TODO
+        //return mobilestate.devicePersistentId;
+      },
+      matches() {
+        if (!this.searcher || !this.question) {
+          return this.forIndex.map((o) => o.id)
         }
-      }
 
-      this.searcher = new Searcher(this.forIndex, {
-        threshold: 0.7,
-        keySelector: (obj) => obj.question + ' ' + obj.answer,
+        let result = this.searcher.search(this.question, {
+          returnMatchData: true,
+        })
+
+        result = result.slice(0, 10)
+
+        // Get id prop from each
+        return result.map((r) => r.item.id)
+      },
+      version() {
+        const runtimeConfig = useRuntimeConfig()
+        const date = dayjs(runtimeConfig.public.BUILD_DATE)
+
+        return date.format('Do MMMM, YYYY') + ' at ' + date.format('HH:mm')
+      },
+    },
+    mounted() {
+      // Scan the FAQs above and extract the plain text for each one, and then construct a search index.
+      this.waitForRef('faq', () => {
+        const faqs = this.$refs.faq.children
+
+        this.forIndex = []
+
+        for (const question of faqs) {
+          try {
+            const questionText = question.children[0].innerText.trim()
+            const answerText = question.children[1].innerText.trim()
+
+            this.forIndex.push({
+              id: question.id,
+              question: questionText,
+              answer: answerText,
+            })
+          } catch (e) {
+            console.error('Malformed FAQ', question)
+          }
+        }
+
+        this.searcher = new Searcher(this.forIndex, {
+          threshold: 0.7,
+          keySelector: (obj) => obj.question + ' ' + obj.answer,
+        })
       })
-    })
-  },
-  methods: {
-    supporterInfo() {
-      this.$refs.supporterInfoModal.show()
     },
-    showRateMe() { // CC
-      // TODO window.localStorage.removeItem('rateappnotagain')
-      this.$refs.rateappmodal.show()
+    methods: {
+      supporterInfo() {
+        this.$refs.supporterInfoModal.show()
+      },
+      showRateMe() { // CC
+        // TODO window.localStorage.removeItem('rateappnotagain')
+        this.$refs.rateappmodal.show()
+      },
     },
-  },
-}
+  }
 </script>
 <style scoped lang="scss">
-:deep(h3) {
-  margin-top: 0.5rem;
-}
+  :deep(h3) {
+    margin-top: 0.5rem;
+  }
 </style>
