@@ -48,6 +48,13 @@ export default {
           delete g2.groupid
           return g2
         })
+
+        // Sort by namedisplay case insensitive
+        ret.sort((a, b) => {
+          const aName = a.namedisplay.toLowerCase()
+          const bName = b.namedisplay.toLowerCase()
+          return aName < bName ? -1 : aName > bName ? 1 : 0
+        })
       }
 
       return ret
