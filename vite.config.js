@@ -22,8 +22,8 @@ export default {
 
   plugins: [
     // Make Lint errors cause build failures.
-    // eslintPlugin(),
-    /*legacy({ // Do not use this as it generates System.register which is not defined
+    // CC eslintPlugin(),
+    /*legacy({ // CC Do not use this as it generates System.register which is not defined
       targets: ['> 0.5%, last 2 versions, Firefox ESR, not dead'],
     }),*/
   ],

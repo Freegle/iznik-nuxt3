@@ -115,7 +115,7 @@ export default defineNuxtConfig({
       SENTRY_DSN: config.SENTRY_DSN,
       BUILD_DATE: new Date().toISOString(),
       MOBILE_VERSION,
-      IS_APP: true,
+      IS_APP: process.env.IZNIK_NUXT3_IS_APP === 'true',
     },
   },
 
