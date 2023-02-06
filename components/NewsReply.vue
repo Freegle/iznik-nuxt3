@@ -96,7 +96,7 @@
               <v-icon icon="heart" class="text-danger" />&nbsp;{{ reply.loves }}
             </b-button>
           </template>
-          <template v-if="parseInt(me.id) === parseInt(userid)">
+          <template v-if="parseInt(me.id) === parseInt(userid) || admin">
             &bull;
             <b-button
               variant="link"
@@ -107,7 +107,7 @@
               Edit
             </b-button>
           </template>
-          <template v-if="parseInt(me.id) === parseInt(userid)">
+          <template v-if="parseInt(me.id) === parseInt(userid) || mod">
             &bull;
             <b-button
               variant="link"
