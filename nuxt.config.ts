@@ -1,5 +1,6 @@
 import config from './config'
 
+const isApp = process.env.IZNIK_NUXT3_IS_APP === 'true'
 const MOBILE_VERSION = '3.0.0'
 
 export default defineNuxtConfig({
@@ -44,8 +45,8 @@ export default defineNuxtConfig({
   // - For historical reasons and preference we use the options API everywhere else.
   //
   // Sometimes when debugging it's useful to set ssr: false, because the errors are clearer when generated on the client.
-  target: 'static',
-  ssr: false,
+  target: isApp ? 'static' : 'server',
+  ssr: !isApp,
 
   routeRules: {
     // It's very possible that I misunderstand caching.  But it seems to me that we should never cache
@@ -115,7 +116,7 @@ export default defineNuxtConfig({
       SENTRY_DSN: config.SENTRY_DSN,
       BUILD_DATE: new Date().toISOString(),
       MOBILE_VERSION,
-      IS_APP: process.env.IZNIK_NUXT3_IS_APP === 'true',
+      IS_APP: isApp,
     },
   },
 
