@@ -3,6 +3,16 @@ import eslintPlugin from 'vite-plugin-eslint'
 import legacy from '@vitejs/plugin-legacy'
 import config from './config'
 
+const isApp = process.env.IZNIK_NUXT3_IS_APP === 'true'
+const plugins = []
+if( !isApp) {
+  plugins.push(eslintPlugin()) // Make Lint errors cause build failures.
+  plugins.push( // CC Generates System.register which is not defined
+    legacy({
+      targets: ['> 0.5%, last 2 versions, Firefox ESR, not dead'],
+    }))
+}
+
 export default {
   debug: true,
 
@@ -20,13 +30,7 @@ export default {
     ],
   },
 
-  plugins: [
-    // Make Lint errors cause build failures.
-    // CC eslintPlugin(),
-    /*legacy({ // CC Do not use this as it generates System.register which is not defined
-      targets: ['> 0.5%, last 2 versions, Firefox ESR, not dead'],
-    }),*/
-  ],
+  plugins,
 
   server: {
     proxy: {
