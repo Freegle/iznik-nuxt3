@@ -344,6 +344,7 @@ import { Searcher } from 'fast-fuzzy'
 import dayjs from 'dayjs'
 import HelpQuestion from '../components/HelpQuestion'
 import { buildHead } from '~/composables/useBuildHead'
+import { mobilestate } from '@/plugins/app-init'
 
 export default {
   components: { HelpQuestion },
@@ -394,9 +395,8 @@ export default {
       const runtimeConfig = useRuntimeConfig()
       return runtimeConfig.public.MOBILE_VERSION
     },
-    mobileInfo() {
-      return 'TO DO'; // TODO
-      //return mobilestate.devicePersistentId;
+     mobileInfo() {
+      return mobilestate.devicePersistentId;
     },
   },
   mounted() {
@@ -431,8 +431,8 @@ export default {
     supporterInfo() {
       this.$refs.supporterInfoModal.show()
     },
-    showRateMe() { // CC
-      // TODO window.localStorage.removeItem('rateappnotagain')
+    showRateMe() {
+      window.localStorage.removeItem('rateappnotagain')
       this.$refs.rateappmodal.show()
     },
   },
