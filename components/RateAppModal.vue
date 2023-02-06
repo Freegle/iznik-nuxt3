@@ -29,6 +29,8 @@
   </b-modal>
 </template>
 <script>
+import { AppLauncher } from '@capacitor/app-launcher'
+import { Device } from '@capacitor/device'
 //import { mobilestate } from '@/plugins/app-init-push'
 import modal from '@/mixins/modal'
 
@@ -44,11 +46,13 @@ export default {
       this.hide()
     },
 
-    confirm() {
+    async confirm () {
       let review_link = "market://details?id=org.ilovefreegle.direct";
+      const info = await Device.getInfo(); // TODO
+      if( info.platform==='ios') review_link = 'https://apps.apple.com/gb/app/id970045029?action=write-review'
       // TODO if (mobilestate.isiOS) review_link = 'https://apps.apple.com/gb/app/id970045029?action=write-review'
       console.log('rateApp.vue: ', review_link)
-      // TODO cordova.InAppBrowser.open(review_link, '_system')
+      AppLauncher.openUrl({ url: review_link })
       this.hide()
     }
   }

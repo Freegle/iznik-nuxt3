@@ -291,6 +291,11 @@
   "resolved" "https://registry.npmjs.org/@capacitor/android/-/android-4.6.3.tgz"
   "version" "4.6.3"
 
+"@capacitor/app-launcher@^4.1.0":
+  "integrity" "sha512-0Gv2AOwj5L4uohi384aOSMcfwdVFVuIN9BROxPRC0Ir1sg9Fv60Mu9yBzjVQ0ijLXoZw/nfrFEPSHBWxHmS6Pg=="
+  "resolved" "https://registry.npmjs.org/@capacitor/app-launcher/-/app-launcher-4.1.0.tgz"
+  "version" "4.1.0"
+
 "@capacitor/cli@^4.0.0":
   "integrity" "sha512-3BLti5iAo8lzkwUeWoZCMBGKxkY2aAlGR0SCmVzok3c2LXJwYNhrlrsoKFRjUHsiO4CmhmtR1ee2gsjvIzkOqQ=="
   "resolved" "https://registry.npmjs.org/@capacitor/cli/-/cli-4.6.3.tgz"
@@ -320,6 +325,11 @@
   "version" "4.6.3"
   dependencies:
     "tslib" "^2.1.0"
+
+"@capacitor/device@^4.1.0":
+  "integrity" "sha512-BlcYb6e6m+vC1SxeyUDIUGfuNXdKEcpFPDCs/kxk2SByFc/BkvXeoy4NjY4qmTderGELofX9bta5Iy9JV7rGUg=="
+  "resolved" "https://registry.npmjs.org/@capacitor/device/-/device-4.1.0.tgz"
+  "version" "4.1.0"
 
 "@capacitor/ios@^4.6.3":
   "integrity" "sha512-sjvyIx/7U376YnTWIXjIBspzf0e1ZKocVjpTeqtM9AbUg4XtPQZa1Lje/lT6EFQ71bGTcxmq0wylnPRB7LzHNg=="

@@ -28,7 +28,9 @@
   },
   "dependencies": {
     "@capacitor/android": "^4.0.0",
+    "@capacitor/app-launcher": "^4.1.0",
     "@capacitor/core": "^4.0.0",
+    "@capacitor/device": "^4.1.0",
     "@capacitor/ios": "^4.6.3",
     "@capacitor/status-bar": "^4.1.1",
     "@chenfengyuan/vue-number-input": "^2.0.1",

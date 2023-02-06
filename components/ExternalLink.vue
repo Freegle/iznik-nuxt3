@@ -3,6 +3,8 @@
   <a :href="href" target="_blank" rel="noopener noreferrer" @click="openInBrowser"><slot /></a>
 </template>
 <script>
+import { AppLauncher } from '@capacitor/app-launcher'
+
 export default {
   props: {
     href: {
@@ -13,10 +15,8 @@ export default {
   methods: {
     openInBrowser() {
       const runtimeConfig = useRuntimeConfig()
-
       if (runtimeConfig.public.IS_APP) {
-        // eslint-disable-next-line no-undef
-        cordova.InAppBrowser.open(this.href, '_system')
+        AppLauncher.openUrl({ url: this.href })
         return false
       }
       return true
