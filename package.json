@@ -30,6 +30,7 @@
     "@capacitor/android": "^4.0.0",
     "@capacitor/core": "^4.0.0",
     "@capacitor/ios": "^4.6.3",
+    "@capacitor/status-bar": "^4.1.1",
     "@chenfengyuan/vue-number-input": "^2.0.1",
     "@fortawesome/fontawesome-svg-core": "^6.1.1",
     "@fortawesome/free-brands-svg-icons": "^6.2.0",

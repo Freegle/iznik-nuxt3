@@ -326,6 +326,11 @@
   "resolved" "https://registry.npmjs.org/@capacitor/ios/-/ios-4.6.3.tgz"
   "version" "4.6.3"
 
+"@capacitor/status-bar@^4.1.1":
+  "integrity" "sha512-3wosxMD1XuIFz88+c2GdVEHSJV6u7suOeKQjyWf3zf9eFr622Sg+udZqDbC0dtTWXw97BWyCjv3r1EYJw7XnIA=="
+  "resolved" "https://registry.npmjs.org/@capacitor/status-bar/-/status-bar-4.1.1.tgz"
+  "version" "4.1.1"
+
 "@chenfengyuan/vue-number-input@^2.0.1":
   "integrity" "sha512-/jqmfmFulFOGlozts0Sf2GCESMRYVTfZZSz2Tf4n9O5DKjqMi5B/MfRzm5H5A57WuG3L80yXFWFN+XeACKaIhQ=="
   "resolved" "https://registry.npmjs.org/@chenfengyuan/vue-number-input/-/vue-number-input-2.0.1.tgz"
