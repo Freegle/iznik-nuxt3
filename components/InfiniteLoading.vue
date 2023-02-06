@@ -58,8 +58,9 @@ export default {
     },
     identifier() {
       // We've been asked to kick the component to reset it.
-      this.state = 'ready'
+      console.log('Bump')
       this.bump++
+      this.emit()
     },
   },
   beforeUnmount() {
