@@ -277,7 +277,6 @@ export const useAuthStore = defineStore({
         // Set the user, which will trigger various re-rendering if we were required to be logged in.
         this.setUser(me)
 
-        console.log('========CALL savePushId')
         await this.savePushId() // Tell server our mobile push notification id, if available // CC
 
         const composeStore = useComposeStore()

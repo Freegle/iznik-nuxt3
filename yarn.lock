@@ -346,6 +346,11 @@
   "resolved" "https://registry.npmjs.org/@capacitor/status-bar/-/status-bar-4.1.1.tgz"
   "version" "4.1.1"
 
+"@capawesome/capacitor-badge@^2.0.2":
+  "integrity" "sha512-xJ/apRvyuhD0WsBC4UisXvTIUzTXfZ7jeALAxqOPLqrJpcM1aUqYAdS6qWls9ndKrIKp3PgkwNnspFopDqU6kg=="
+  "resolved" "https://registry.npmjs.org/@capawesome/capacitor-badge/-/capacitor-badge-2.0.2.tgz"
+  "version" "2.0.2"
+
 "@chenfengyuan/vue-number-input@^2.0.1":
   "integrity" "sha512-/jqmfmFulFOGlozts0Sf2GCESMRYVTfZZSz2Tf4n9O5DKjqMi5B/MfRzm5H5A57WuG3L80yXFWFN+XeACKaIhQ=="
   "resolved" "https://registry.npmjs.org/@chenfengyuan/vue-number-input/-/vue-number-input-2.0.1.tgz"

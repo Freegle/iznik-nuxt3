@@ -18,6 +18,7 @@
 </template>
 <script>
 import { useChatStore } from '../stores/chat'
+import { setBadgeCount } from '../plugins/app-init'
 
 export default {
   name: 'ChatMenu',
@@ -42,7 +43,10 @@ export default {
     },
     chatCount() {
       // Don't show so many that the layout breaks.
-      return Math.min(99, this.chatStore.unreadCount)
+      const chatcount = Math.min(99, this.chatStore.unreadCount)
+      setBadgeCount(chatcount)
+      console.log('chatcount:',chatcount)
+      return chatcount
     },
   },
   watch: {

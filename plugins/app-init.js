@@ -18,6 +18,7 @@
 
 import { useAuthStore } from '~/stores/auth'
 import { AppLauncher } from '@capacitor/app-launcher'
+import { Badge } from '@capawesome/capacitor-badge'
 import { Device } from '@capacitor/device'
 import { PushNotifications } from '@capacitor/push-notifications'
 
@@ -173,13 +174,17 @@ export default defineNuxtPlugin(async () => {
 
 // Set home screen badge count
 let lastBadgeCount = -1
-export function setBadgeCount(badgeCount) { // TODO
+export async function setBadgeCount(badgeCount) { // TODO
+  const runtimeConfig = useRuntimeConfig()
+  if (!runtimeConfig.public.IS_APP) return
   if( isNaN(badgeCount)) badgeCount = 0
   if (badgeCount !== lastBadgeCount) {
-    if (process.env.IS_APP) {
+    const runtimeConfig = useRuntimeConfig()
+    if (runtimeConfig.public.IS_APP) {
       if (mobilePush) {
         console.log('setBadgeCount', badgeCount)
-        mobilePush.setApplicationIconBadgeNumber(function () { }, function () { }, badgeCount)
+        await Badge.set({ badgeCount });
+        //mobilePush.setApplicationIconBadgeNumber(function () { }, function () { }, badgeCount)
         lastBadgeCount = badgeCount
       }
     }
