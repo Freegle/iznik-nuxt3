@@ -406,7 +406,9 @@ export default {
     },
     async areaChange() {
       const distance = this.me?.settings?.newsfeedarea || 0
+      await this.newsfeedStore.reset()
       await this.newsfeedStore.fetchFeed(distance)
+      this.infiniteId++
     },
     async postIt() {
       let msg = this.startThread
