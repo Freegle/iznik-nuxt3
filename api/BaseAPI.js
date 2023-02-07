@@ -51,6 +51,12 @@ export default class BaseAPI {
           'Iznik ' + JSON.stringify(authStore.auth.persistent)
       }
 
+      const runtimeConfig = useRuntimeConfig() // CC
+      if (!config.data) config.data = {}
+      config.data.modtools = false      
+      config.data.app = runtimeConfig.public.IS_APP
+      // TODO if (pushAccepted) config.data.pushAccepted = (pushAccepted === 2)
+
       const ret = await this.$axios.request({
         ...config,
         method,

@@ -16,16 +16,11 @@
 // Ongoing:
 // - Handle push notifications TODO
 
+import { useAuthStore } from '~/stores/auth'
 import { AppLauncher } from '@capacitor/app-launcher'
 import { Device } from '@capacitor/device'
-import {
-  // ActionPerformed,
-  // PushNotificationSchema,
-  PushNotifications,
-  // Token,
-} from '@capacitor/push-notifications'
+import { PushNotifications } from '@capacitor/push-notifications'
 
-let acceptedMobilePushId = false
 let mobilePush = false
 let lastPushMsgid = false
 let checkedForUpdate = false
@@ -40,6 +35,7 @@ export const pushstate = {
   isiOS: false,
   route: false,
   modtools: false,
+  acceptedMobilePushId: false,
   mobilePushId: false, // Note: mobilePushId is the same regardless of which user is logged in
   inlineReply: false,
   chatid: false,
@@ -144,12 +140,14 @@ export default defineNuxtPlugin(async () => {
       console.log('Push registration success, token: ', token.value)
       // mobilePushId reported in to server in savePushId() by store/auth.js fetchUser
       // The watch code below also calls savePushId() in case we've already logged in
+      const authStore = useAuthStore()
+      authStore.savePushId()
 
-      PushNotifications.listChannels().then(result => {
+      /*PushNotifications.listChannels().then(result => {
         for (const channel of result.channels) {
           console.log("CHANNEL", channel)
         }
-      })
+      })*/
     }
   )
   // Some issue with our setup and push will not work
@@ -162,7 +160,7 @@ export default defineNuxtPlugin(async () => {
   // Show us the notification payload if the app is open on our device
   PushNotifications.addListener('pushNotificationReceived',
     (notification) => {
-      console.log('Push received:', notification)
+      console.log('============ Push received:', notification)
     }
   )
 
@@ -173,3 +171,20 @@ export default defineNuxtPlugin(async () => {
     }
   )
 })
+
+// Set home screen badge count
+let lastBadgeCount = -1
+export function setBadgeCount(badgeCount) { // TODO
+  if( isNaN(badgeCount)) badgeCount = 0
+  if (badgeCount !== lastBadgeCount) {
+    if (process.env.IS_APP) {
+      if (mobilePush) {
+        console.log('setBadgeCount', badgeCount)
+        mobilePush.setApplicationIconBadgeNumber(function () { }, function () { }, badgeCount)
+        lastBadgeCount = badgeCount
+      }
+    }
+  }
+}
+
+// TODO async function checkForAppUpdate($api, $axios, store, router) {

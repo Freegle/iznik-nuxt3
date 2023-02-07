@@ -4,6 +4,7 @@ import { LoginError, SignUpError } from '../api/BaseAPI'
 import { useComposeStore } from '../stores/compose'
 import api from '~/api'
 import { useCookie } from '#imports'
+import { mobilestate, pushstate } from '@/plugins/app-init'
 
 export const useAuthStore = defineStore({
   id: 'auth',
@@ -127,6 +128,8 @@ export const useAuthStore = defineStore({
       } catch (e) {
         console.log('Ignore Google autoselect error', e)
       }
+
+      this.logoutPushId() // CC
 
       await this.$api.session.logout()
 
@@ -274,6 +277,9 @@ export const useAuthStore = defineStore({
         // Set the user, which will trigger various re-rendering if we were required to be logged in.
         this.setUser(me)
 
+        console.log('========CALL savePushId')
+        await this.savePushId() // Tell server our mobile push notification id, if available // CC
+
         const composeStore = useComposeStore()
         const email = composeStore.email
 
@@ -342,6 +348,48 @@ export const useAuthStore = defineStore({
         // Logged in as multiple users.  Let the server know.
         await this.$api.session.related(this.userlist)
       }
+    },
+    async savePushId(){ // CC
+      // Tell server our push notification id
+      // Cope if not logged in ie do it later
+      console.log('------------- savePushId', pushstate.mobilePushId)
+      if( this.user!==null){
+        console.log('------------- LOGGED IN')
+        if (pushstate.acceptedMobilePushId !== pushstate.mobilePushId) {
+          console.log('------------- mobilePushId', pushstate.mobilePushId)
+          const params = {
+            notifications: {
+              push: {
+                type: mobilestate.isiOS ? 'FCMIOS' : 'FCMAndroid',
+                subscription: pushstate.mobilePushId
+              }
+            }
+          }
+          //try {
+          //  // Wait for the store if necessary.
+          //  await store.restored
+          //} catch (e) {
+          //  console.log('Store restore wait failed', e)
+          //}
+          //console.log("savePushId RESTORED")
+          const data = await this.$api.session.save(params)
+          if (data.ret === 0) {
+            pushstate.acceptedMobilePushId = pushstate.mobilePushId
+            console.log('savePushId: saved OK')
+          } else { // 1 === Not logged in
+            console.log('savePushId: Not logged in: OK will try again when signed in')
+          }
+        }
+      } else{
+        console.log('------------- NOT LOGGED IN')
+      }
+    },
+    // Remember if we've logged out
+    // It could tell the server to invalidate pushid
+    // However we simply zap acceptedMobilePushId so it is sent when logged in
+    logoutPushId() { // TODO
+      pushstate.acceptedMobilePushId = false
+      console.log('logoutPushId')
     },
   },
   getters: {
