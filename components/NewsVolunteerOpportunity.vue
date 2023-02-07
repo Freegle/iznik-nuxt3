@@ -87,7 +87,7 @@ export default {
     ProfileImage,
   },
   extends: NewsBase,
-  async setup(props) {
+  async setup(props, ctx) {
     const volunteeringStore = useVolunteeringStore()
     const newsfeedStore = useNewsfeedStore()
     const userStore = useUserStore()
@@ -106,6 +106,7 @@ export default {
       })
     } catch (e) {
       // Most likely doesn't exist.
+      ctx.emit('hide')
     }
 
     return {

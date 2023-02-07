@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white mt-2">
+  <div v-if="showThis" class="bg-white mt-2">
     <b-card :class="backgroundColor" no-body>
       <b-card-body class="p-1 p-sm-2">
         <b-card-text>
@@ -57,6 +57,7 @@
               :newsfeed="newsfeed"
               :class="newsfeed.deleted ? 'strike' : ''"
               @focus-comment="focusComment"
+              @hide="showThis = false"
             />
             <div v-else>Bad feed item {{ newsfeed }}</div>
             <NewsPreview
@@ -313,6 +314,7 @@ export default {
       showDeleteModal: false,
       showEditModal: false,
       showReportModal: false,
+      showThis: true,
     }
   },
   computed: {
