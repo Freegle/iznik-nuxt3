@@ -5,18 +5,23 @@ const config: CapacitorConfig = {
   appName: 'Freegle',
   webDir: '.output/public',
   bundledWebRuntime: false,
-   "cordova": {
-     "preferences": { // Get from iznik-nuxt/mobile/freegle/android/config.xml and package.json
-       "CameraUsesGeolocation": "true",
-       AndroidLaunchMode: "singleTask"
-       // cordova-plugin-facebook-connect
-       // @havesource/cordova-plugin-push
-       // cordova-plugin-google-signin
-       // ionic-plugin-deeplinks
-       // sentry-cordova
-       // cordova-plugin-geolocation "GPS_REQUIRED": "false"
+  "cordova": {
+    "preferences": { // Get from iznik-nuxt/mobile/freegle/android/config.xml and package.json
+      "CameraUsesGeolocation": "true",
+      AndroidLaunchMode: "singleTask"
+      // cordova-plugin-facebook-connect
+      // @havesource/cordova-plugin-push
+      // cordova-plugin-google-signin
+      // ionic-plugin-deeplinks
+      // sentry-cordova
+      // cordova-plugin-geolocation "GPS_REQUIRED": "false"
     }
-  }
+  },
+  plugins: {
+    PushNotifications: {
+      presentationOptions: ["badge", "sound", "alert"],
+    },
+  },
 };
 
 export default config;

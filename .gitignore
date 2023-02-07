@@ -16,3 +16,6 @@ static/sw.js
 
 # OSx files
 .DS_Store
+
+# app secrets
+android/app/google-services.json

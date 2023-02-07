@@ -8,5 +8,14 @@
 			"CameraUsesGeolocation": "true",
 			"AndroidLaunchMode": "singleTask"
 		}
+	},
+	"plugins": {
+		"PushNotifications": {
+			"presentationOptions": [
+				"badge",
+				"sound",
+				"alert"
+			]
+		}
 	}
 }
