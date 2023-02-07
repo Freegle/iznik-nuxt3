@@ -350,13 +350,10 @@ export const useAuthStore = defineStore({
       }
     },
     async savePushId(){ // CC
-      // Tell server our push notification id
-      // Cope if not logged in ie do it later
-      console.log('------------- savePushId', pushstate.mobilePushId)
-      if( this.user!==null){
-        console.log('------------- LOGGED IN')
+      // Tell server our push notification id if logged in
+      if( this.user !== null) {
         if (pushstate.acceptedMobilePushId !== pushstate.mobilePushId) {
-          console.log('------------- mobilePushId', pushstate.mobilePushId)
+          console.log('sending mobilePushId', pushstate.mobilePushId)
           const params = {
             notifications: {
               push: {
@@ -365,13 +362,6 @@ export const useAuthStore = defineStore({
               }
             }
           }
-          //try {
-          //  // Wait for the store if necessary.
-          //  await store.restored
-          //} catch (e) {
-          //  console.log('Store restore wait failed', e)
-          //}
-          //console.log("savePushId RESTORED")
           const data = await this.$api.session.save(params)
           if (data.ret === 0) {
             pushstate.acceptedMobilePushId = pushstate.mobilePushId
@@ -380,11 +370,9 @@ export const useAuthStore = defineStore({
             console.log('savePushId: Not logged in: OK will try again when signed in')
           }
         }
-      } else{
-        console.log('------------- NOT LOGGED IN')
       }
     },
-    // Remember if we've logged out
+    // Remember that we've logged out
     // It could tell the server to invalidate pushid
     // However we simply zap acceptedMobilePushId so it is sent when logged in
     logoutPushId() { // TODO

@@ -55,7 +55,6 @@ export default class BaseAPI {
       if (!config.data) config.data = {}
       config.data.modtools = false      
       config.data.app = runtimeConfig.public.IS_APP
-      // TODO if (pushAccepted) config.data.pushAccepted = (pushAccepted === 2)
 
       const ret = await this.$axios.request({
         ...config,

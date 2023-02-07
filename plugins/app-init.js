@@ -44,7 +44,7 @@ export const pushstate = {
   checkForUpdate: false
 }
 
-console.log('--------------startup--------------')
+console.log('--------------app-int plugin startup--------------')
 
 export default defineNuxtPlugin(async () => {
   const runtimeConfig = useRuntimeConfig()
@@ -136,10 +136,9 @@ export default defineNuxtPlugin(async () => {
   // On success, we should be able to receive notifications
   PushNotifications.addListener('registration',
     (token) => {
-      pushstate.mobilePushId = token.value
       console.log('Push registration success, token: ', token.value)
-      // mobilePushId reported in to server in savePushId() by store/auth.js fetchUser
-      // The watch code below also calls savePushId() in case we've already logged in
+      pushstate.mobilePushId = token.value
+      // Tell server now if logged in
       const authStore = useAuthStore()
       authStore.savePushId()
 
