@@ -41,14 +41,13 @@ export default {
   },
   methods: {
     notagain() {
-      // TODO window.localStorage.setItem('rateappnotagain',true)
+      window.localStorage.setItem('rateappnotagain',true)
       this.hide()
     },
 
     async confirm () {
       let review_link = "market://details?id=org.ilovefreegle.direct";
       if (mobilestate.isiOS) review_link = 'https://apps.apple.com/gb/app/id970045029?action=write-review'
-      console.log('rateApp.vue: ', review_link)
       AppLauncher.openUrl({ url: review_link })
       this.hide()
     }
