@@ -56,8 +56,14 @@ export const useMobileStore = defineStore({ // Do not persist
     isiOS: false,
     devicePersistentId: null,
     lastBadgeCount: -1,
+    modtools: false,
+    inlineReply: false,
+    chatid: false,
+    pushed: false, // Set to true to handle push in Vue context
+    route: false,
   }),
   actions: {
+    //////////////
     init(config) {
       this.config = config
       this.isApp = config.public.ISAPP
@@ -67,6 +73,7 @@ export const useMobileStore = defineStore({ // Do not persist
 
       this.initApp()
     },
+    //////////////
     async initApp() {
       console.log('--------------initapp--------------')
       const deviceinfo = await Device.getInfo()
@@ -109,7 +116,7 @@ export const useMobileStore = defineStore({ // Do not persist
         }
       })*/
 
-      if (!this.isiOS) {
+      /*if (!this.isiOS) {
         // Create our Android push channel
         PushNotifications.createChannel({
           id: 'PushPluginChannel',
@@ -132,7 +139,7 @@ export const useMobileStore = defineStore({ // Do not persist
         }).then((x) => {
           console.log("CHANNEL DELETED: PushDefaultForeground")
         })
-      }
+      }*/
 
       /* PushNotifications.checkPermissions().then((result) => {
         console.log('checkPermissions:', result) // Android always returns "granted"
@@ -181,6 +188,7 @@ export const useMobileStore = defineStore({ // Do not persist
       PushNotifications.addListener('pushNotificationReceived',
         (notification) => {
           console.log('============ Push received:', notification)
+          this.handleNotification(notification)
         }
       )
 
@@ -192,6 +200,7 @@ export const useMobileStore = defineStore({ // Do not persist
       )
 
     },
+    //////////////
     async setBadgeCount(badgeCount) { // TODO
       if (!this.isApp) return
       if (isNaN(badgeCount)) badgeCount = 0
@@ -202,7 +211,122 @@ export const useMobileStore = defineStore({ // Do not persist
         this.lastBadgeCount = badgeCount
       }
     },
-    // TODO async function checkForAppUpdate($api, $axios, store, router) {
+    //////////////
+    // Usually receives a clear to zero notification followed by the real one
+    //  notification.data:
+    //    badge: "9"
+    //    chatcount: "9"
+    //    chatids: "13246706"
+    //    content-available: "1"
+    //    count: "9"
+    //    image: "www/images/user_logo.png"
+    //    message: ""
+    //    modtools: ""
+    //    notId: "1675884730"
+    //    notifcount: "0"
+    //    route: "/chats"
+    //    sound: "default"
+    //    title: "You have 9 new messages"
+    async handleNotification(notification) {
+      const router = useRouter()
+
+      //console.log('push notification', notificationType)
+      console.log(notification)
+      const data = notification.data
+      // const foreground = data.foreground.toString() === 'true' // Was first called in foreground or background
+      // let msgid = new Date().getTime() // Can't tell if double event if notId not given
+      let msgid = 0
+      if ('notId' in data) {
+        msgid = data.notId
+      }
+      //const doubleEvent = !foreground && msgid !== 0 && msgid === lastPushMsgid
+      lastPushMsgid = msgid
+      if (!('count' in data)) {
+        data.count = 0
+      }
+      if (!('modtools' in data)) {
+        data.modtools = 0
+      }
+      const modtools = data.modtools == '1'
+      this.modtools = modtools
+      data.count = parseInt(data.badge)
+      //console.log('foreground ' + foreground + ' double ' + doubleEvent + ' msgid: ' + msgid + ' count: ' + data.count + ' modtools: ' + modtools)
+      if (data.count === 0) {
+        PushNotifications.removeAllDeliveredNotifications()
+        //mobilePush.clearAllNotifications() // no success and error fns given
+        console.log('clearAllNotifications')
+      }
+      console.log('handleNotification badgeCount', data.count)
+      this.setBadgeCount(data.count)
+      //mobilePush.setApplicationIconBadgeNumber(function () { }, function () { }, data.count)
+
+      if (!this.isiOS && 'inlineReply' in data) {
+        const inlineReply = data.inlineReply.trim()
+        console.log('======== inlineReply', inlineReply)
+        if (inlineReply) {
+          this.inlineReply = inlineReply
+          this.chatid = parseInt(data.chatids)
+        }
+      }
+
+      // Pass route to go to (or update) but only if in background or just starting app
+      // Note: if in foreground then rely on count updates to inform user
+      if ('route' in data) {
+        this.route = data.route // eg /chat/123456 or /chats
+      }
+
+      if (this.inlineReply) {
+        const params = {
+          roomid: this.chatid,
+          message: this.inlineReply
+        }
+        // CC TODO store.$api.chat.send(params)
+        this.inlineReply = false
+        this.pushed = false
+        this.route = false
+        return
+      }
+      //store.dispatch('notifications/count')
+      //store.dispatch('chats/listChats')
+      //await api(this.config).chat.listChats(since, search)
+      /*if (this.modtools) {
+        store.dispatch('auth/fetchUser', {
+          components: ['work'],
+          force: true
+        })
+      }*/
+
+      if (this.route) {
+        console.log('this.route', this.route)
+        this.route = this.route.replace('/chat/', '/chats/') // Match redirects in nuxt.config.js
+        console.log('router.currentRoute', router.currentRoute)
+        console.log('router.RouteLocation ', router.RouteLocation)
+        if (router.currentRoute.path !== this.route) {
+          console.log('GO TO ', this.route)
+          router.push({ path: this.route })  // Often doesn't work as intended when starting app from scratch as this routing is too early. Delaying doesn't seem to help.
+        }
+      }
+
+      this.route = false
+
+
+      // iOS needs to be told when we've finished: do it after a short delay to allow our code to run
+      /*if (this.isiOS) {
+        setTimeout(function () {
+          mobilePush.finish(
+            function () {
+              console.log('iOS push finished OK')
+            },
+            function () {
+              console.log('iOS push finished error')
+            },
+            data.notId
+          )
+        }, 50)
+      }*/
+    },
+    //////////////
+    // TODO async function checkForAppUpdate($api, $axios, store, router)
   }
 })
 
