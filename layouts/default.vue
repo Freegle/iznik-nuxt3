@@ -22,8 +22,7 @@ export default {
   },
   async setup() {
     const mobileStore = useMobileStore() // CC
-    console.log("default mobileStore.isApp",mobileStore.isApp)
-    const ready = ref(mobileStore.isApp) // CC
+    const ready = ref(mobileStore.isApp)
     const oneTap = ref(false)
     const googleReady = ref(false)
     const authStore = useAuthStore()

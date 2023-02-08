@@ -1,7 +1,7 @@
 <template>
   <div>
     <client-only>
-      <div v-if="isiOSapp" style="height:1rem;"></div>
+      <div v-if="isiOSapp" style="height:50px;"></div>
       <MainHeader
         v-model:chat-count="chatCount"
         v-model:unread-notification-count="unreadNotificationCount"
