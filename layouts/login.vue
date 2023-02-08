@@ -11,6 +11,7 @@
 </template>
 <script>
 import { useAuthStore } from '../stores/auth'
+import { useMobileStore } from '~/stores/mobile'
 import LayoutCommon from '../components/LayoutCommon'
 import { ref } from '#imports'
 const GoogleOneTap = () => import('~/components/GoogleOneTap')
@@ -23,8 +24,9 @@ export default {
     LayoutCommon,
   },
   async setup() {
-    const runtimeConfig = useRuntimeConfig() // CC
-    const ready = ref(runtimeConfig.public.IS_APP) // CC
+    const mobileStore = useMobileStore() // CC
+    console.log("login mobileStore.isApp",mobileStore.isApp)
+    const ready = ref(mobileStore.isApp) // CC
     const oneTap = ref(false)
     const googleReady = ref(false)
     const authStore = useAuthStore()
@@ -50,7 +52,7 @@ export default {
       }
     }
 
-    if (!ready.value && !runtimeConfig.public.IS_APP) { // CC
+    if (!ready.value && !mobileStore.isApp) { // CC
       // We don't have a valid JWT.  See if OneTap can sign us in.
       oneTap.value = true
     }

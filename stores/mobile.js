@@ -109,28 +109,30 @@ export const useMobileStore = defineStore({ // Do not persist
         }
       })*/
 
-      // Create our Android push channel
-      PushNotifications.createChannel({
-        id: 'PushPluginChannel',
-        name: 'Freegle chats',
-        description: 'Direct messages with other Freeglers',
-        //sound: 'res/raw/unconvinced',
-        importance: 3,
-        visibility: 1,
-        lights: true,
-        lightColor: '#5ECA24',
-        vibration: false
-      }).then(() => {
-        console.log("CHANNEL CREATED: PushPluginChannel")
-      });
+      if (!this.isiOS) {
+        // Create our Android push channel
+        PushNotifications.createChannel({
+          id: 'PushPluginChannel',
+          name: 'Freegle chats',
+          description: 'Direct messages with other Freeglers',
+          //sound: 'res/raw/unconvinced',
+          importance: 3,
+          visibility: 1,
+          lights: true,
+          lightColor: '#5ECA24',
+          vibration: false
+        }).then(() => {
+          console.log("CHANNEL CREATED: PushPluginChannel")
+        });
 
-      // Delete given Android push channel called PushDefaultForeground
-      // OK if already deleted
-      PushNotifications.deleteChannel({
-        id: 'PushDefaultForeground'
-      }).then((x) => {
-        console.log("CHANNEL DELETED: PushDefaultForeground")
-      })
+        // Delete given Android push channel called PushDefaultForeground
+        // OK if already deleted
+        PushNotifications.deleteChannel({
+          id: 'PushDefaultForeground'
+        }).then((x) => {
+          console.log("CHANNEL DELETED: PushDefaultForeground")
+        })
+      }
 
       /* PushNotifications.checkPermissions().then((result) => {
         console.log('checkPermissions:', result) // Android always returns "granted"
@@ -159,11 +161,13 @@ export const useMobileStore = defineStore({ // Do not persist
           const authStore = useAuthStore()
           authStore.savePushId()
 
-          /*PushNotifications.listChannels().then(result => {
-            for (const channel of result.channels) {
-              console.log("CHANNEL", channel)
-            }
-          })*/
+          /*if (!this.isiOS) {
+            PushNotifications.listChannels().then(result => {
+              for (const channel of result.channels) {
+                console.log("CHANNEL", channel)
+              }
+            })
+          }*/
         }
       )
       // Some issue with our setup and push will not work

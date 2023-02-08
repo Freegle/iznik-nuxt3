@@ -4,6 +4,7 @@
 </template>
 <script>
 import { AppLauncher } from '@capacitor/app-launcher'
+import { useMobileStore } from '@/stores/mobile'
 
 export default {
   props: {
@@ -14,8 +15,8 @@ export default {
   },
   methods: {
     openInBrowser() {
-      const runtimeConfig = useRuntimeConfig()
-      if (runtimeConfig.public.IS_APP) {
+      const mobileStore = useMobileStore()
+      if (mobileStore.isApp) {
         AppLauncher.openUrl({ url: this.href })
         return false
       }
