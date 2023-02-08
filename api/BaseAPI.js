@@ -51,6 +51,20 @@ export default class BaseAPI {
           'Iznik ' + JSON.stringify(authStore.auth.persistent)
       }
 
+      if (method !== 'POST') {
+        if (!config.params) {
+          config.params = {}
+        }
+
+        config.params.modtools = false
+      } else {
+        if (!config.data) {
+          config.data = {}
+        }
+
+        config.data.modtools = false
+      }
+
       const ret = await this.$axios.request({
         ...config,
         method,
