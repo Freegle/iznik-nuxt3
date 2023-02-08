@@ -133,6 +133,7 @@ export const useMobileStore = defineStore({ // Do not persist
         });
 
         // Delete given Android push channel called PushDefaultForeground
+        // This is created if capacitor.config.ts has plugins:PushNotifications:presentationOptions
         // OK if already deleted
         PushNotifications.deleteChannel({
           id: 'PushDefaultForeground'
@@ -212,6 +213,7 @@ export const useMobileStore = defineStore({ // Do not persist
       }
     },
     //////////////
+    // https://capacitorjs.com/docs/apis/push-notifications
     // Usually receives a clear to zero notification followed by the real one
     //  notification.data:
     //    badge: "9"
@@ -297,10 +299,8 @@ export const useMobileStore = defineStore({ // Do not persist
       }*/
 
       if (this.route) {
-        console.log('this.route', this.route)
         this.route = this.route.replace('/chat/', '/chats/') // Match redirects in nuxt.config.js
         console.log('router.currentRoute', router.currentRoute)
-        console.log('router.RouteLocation ', router.RouteLocation)
         if (router.currentRoute.path !== this.route) {
           console.log('GO TO ', this.route)
           router.push({ path: this.route })  // Often doesn't work as intended when starting app from scratch as this routing is too early. Delaying doesn't seem to help.
