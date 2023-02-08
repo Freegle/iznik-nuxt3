@@ -6,6 +6,8 @@ import api from '~/api'
 import { useCookie } from '#imports'
 import { useMobileStore } from '@/stores/mobile'
 
+console.log("------typeof localStorage", typeof localStorage)
+
 export const useAuthStore = defineStore({
   id: 'auth',
   persist: {
@@ -20,8 +22,7 @@ export const useAuthStore = defineStore({
               // We don't persist much about the user, to avoid data getting 'stuck'.  All we need is enough to log us
               // in, and information about which users have been used on this device.
               paths: [
-                'jwt',
-                'persistent',
+                'auth', // stringified
                 'userlist',
                 'loginCount',
                 'loggedInEver',
@@ -373,6 +374,7 @@ export const useAuthStore = defineStore({
     // It could tell the server to invalidate pushid
     // However we simply zap acceptedMobilePushId so it is sent when logged in
     logoutPushId() { // TODO
+      const mobileStore = useMobileStore()
       mobileStore.acceptedMobilePushId = false
       console.log('logoutPushId')
     },
