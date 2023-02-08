@@ -344,8 +344,7 @@ import { Searcher } from 'fast-fuzzy'
 import dayjs from 'dayjs'
 import HelpQuestion from '../components/HelpQuestion'
 import { buildHead } from '~/composables/useBuildHead'
-import { mobilestate } from '@/plugins/app-init'
-import { useMobileStore } from './stores/mobile'
+import { useMobileStore } from '@/stores/mobile'
 
 export default {
   components: { HelpQuestion },
@@ -397,7 +396,8 @@ export default {
       return runtimeConfig.public.MOBILE_VERSION
     },
      mobileInfo() {
-      return mobilestate.devicePersistentId;
+      const mobileStore = useMobileStore()
+      return mobileStore.devicePersistentId;
     },
   },
   mounted() {

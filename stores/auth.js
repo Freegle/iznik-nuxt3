@@ -4,7 +4,7 @@ import { LoginError, SignUpError } from '../api/BaseAPI'
 import { useComposeStore } from '../stores/compose'
 import api from '~/api'
 import { useCookie } from '#imports'
-import { mobilestate, pushstate } from '@/plugins/app-init'
+import { useMobileStore } from '@/stores/mobile'
 
 export const useAuthStore = defineStore({
   id: 'auth',
@@ -346,21 +346,22 @@ export const useAuthStore = defineStore({
       }
     },
     async savePushId(){ // CC
+      const mobileStore = useMobileStore()
       // Tell server our push notification id if logged in
       if( this.user !== null) {
-        if (pushstate.acceptedMobilePushId !== pushstate.mobilePushId) {
-          console.log('sending mobilePushId', pushstate.mobilePushId)
+        if (mobileStore.acceptedMobilePushId !== mobileStore.mobilePushId) {
+          console.log('sending mobilePushId', mobileStore.mobilePushId)
           const params = {
             notifications: {
               push: {
-                type: mobilestate.isiOS ? 'FCMIOS' : 'FCMAndroid',
-                subscription: pushstate.mobilePushId
+                type: mobileStore.isiOS ? 'FCMIOS' : 'FCMAndroid',
+                subscription: mobileStore.mobilePushId
               }
             }
           }
           const data = await this.$api.session.save(params)
           if (data.ret === 0) {
-            pushstate.acceptedMobilePushId = pushstate.mobilePushId
+            mobileStore.acceptedMobilePushId = mobileStore.mobilePushId
             console.log('savePushId: saved OK')
           } else { // 1 === Not logged in
             console.log('savePushId: Not logged in: OK will try again when signed in')
@@ -372,7 +373,7 @@ export const useAuthStore = defineStore({
     // It could tell the server to invalidate pushid
     // However we simply zap acceptedMobilePushId so it is sent when logged in
     logoutPushId() { // TODO
-      pushstate.acceptedMobilePushId = false
+      mobileStore.acceptedMobilePushId = false
       console.log('logoutPushId')
     },
   },

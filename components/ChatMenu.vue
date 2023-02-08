@@ -18,7 +18,7 @@
 </template>
 <script>
 import { useChatStore } from '../stores/chat'
-import { setBadgeCount } from '../plugins/app-init'
+import { useMobileStore } from '@/stores/mobile'
 
 export default {
   name: 'ChatMenu',
@@ -42,9 +42,10 @@ export default {
       return this.isListItem ? 'b-nav-item' : 'a'
     },
     chatCount() {
+      const mobileStore = useMobileStore()
       // Don't show so many that the layout breaks.
       const chatcount = Math.min(99, this.chatStore.unreadCount)
-      setBadgeCount(chatcount)
+      mobileStore.setBadgeCount(chatcount)
       console.log('chatcount:',chatcount)
       return chatcount
     },

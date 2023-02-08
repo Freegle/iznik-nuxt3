@@ -30,7 +30,7 @@
 </template>
 <script>
 import { AppLauncher } from '@capacitor/app-launcher'
-import { mobilestate } from '@/plugins/app-init'
+import { useMobileStore } from '@/stores/mobile'
 import modal from '@/mixins/modal'
 
 export default {
@@ -46,8 +46,9 @@ export default {
     },
 
     async confirm () {
+      const mobileStore = useMobileStore()
       let review_link = "market://details?id=org.ilovefreegle.direct";
-      if (mobilestate.isiOS) review_link = 'https://apps.apple.com/gb/app/id970045029?action=write-review'
+      if (mobileStore.isiOS) review_link = 'https://apps.apple.com/gb/app/id970045029?action=write-review'
       AppLauncher.openUrl({ url: review_link })
       this.hide()
     }

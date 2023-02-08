@@ -112,6 +112,8 @@ export default defineNuxtConfig({
       IMAGE_SITE: config.IMAGE_SITE,
       SENTRY_DSN: config.SENTRY_DSN,
       BUILD_DATE: new Date().toISOString(),
+      ISAPP: config.ISAPP,
+      MOBILE_VERSION: config.MOBILE_VERSION,
     },
   },
 
