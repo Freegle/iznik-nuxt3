@@ -3,9 +3,8 @@ import eslintPlugin from 'vite-plugin-eslint'
 import legacy from '@vitejs/plugin-legacy'
 import config from './config'
 
-const isApp = process.env.IZNIK_NUXT3_IS_APP === 'true'
 const plugins = []
-if( !isApp) {
+if( !config.ISAPP) {
   plugins.push(eslintPlugin()) // Make Lint errors cause build failures.
   plugins.push( // CC Generates System.register which is not defined
     legacy({

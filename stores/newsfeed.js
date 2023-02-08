@@ -22,6 +22,11 @@ export const useNewsfeedStore = defineStore({
     init(config) {
       this.config = config
     },
+    reset() {
+      const init = this.config
+      this.$reset()
+      this.config = init
+    },
     async fetchCount() {
       const ret = await api(this.config).news.count()
       this.count = ret?.count

@@ -76,6 +76,8 @@
 import { useMessageStore } from '../stores/message'
 import UserRatings from './UserRatings'
 import NumberIncrementDecrement from './NumberIncrementDecrement'
+import { useUserStore } from '~/stores/user'
+import { ref } from '#imports'
 
 export default {
   components: { NumberIncrementDecrement, UserRatings },
@@ -109,29 +111,52 @@ export default {
   },
   async setup(props) {
     const messageStore = useMessageStore()
-
-    let selectedUsers = []
+    const userStore = useUserStore()
 
     if (props.msgid) {
-      const message = await messageStore.fetch(props.msgid)
-
-      if (message && message.by) {
-        selectedUsers = message.by
-      }
-
-      if (props.takenBy) {
-        selectedUsers.push(props.takenBy)
-      }
+      await messageStore.fetch(props.msgid)
     }
+
+    const message = computed(() =>
+      props.msgid ? messageStore.byId(props.msgid) : null
+    )
+
+    const selectUser = ref(-1)
+
+    const selectedUsers = computed(() => {
+      let ret = []
+
+      if (props.msgid) {
+        if (message && message.by) {
+          ret = [message.by]
+        }
+
+        if (props.takenBy) {
+          ret.push(props.takenBy)
+        }
+
+        if (selectUser.value) {
+          // Note that the value may be -1 for someone else, so the user may not exist.
+          ret.push({
+            userid: selectUser.value,
+            displayname: userStore.byId(selectUser.value)?.displayname,
+            count: 1,
+          })
+        }
+      }
+
+      return ret
+    })
 
     return {
       messageStore,
       selectedUsers,
+      selectUser,
+      message,
     }
   },
   data() {
     return {
-      selectUser: -1,
       emptyUser: {
         id: -1,
         count: 0,
@@ -139,9 +164,6 @@ export default {
     }
   },
   computed: {
-    message() {
-      return this.msgid ? this.messageStore.byId(this.msgid) : null
-    },
     repliers() {
       const ret = []
 
@@ -281,7 +303,7 @@ select {
     padding: 10px;
 
     grid-template-rows: auto;
-    grid-template-columns: 1fr 155px 160px;
+    grid-template-columns: 1fr 160px 160px;
   }
 
   .select {

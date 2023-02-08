@@ -153,13 +153,10 @@ export const useAuthStore = defineStore({
 
       if (ret === 0) {
         // Successful login.
-        console.log('Successful login')
         this.setAuth(jwt, persistent)
-        console.log('Set auth', jwt, persistent)
 
         // Login succeeded.  Get the user from the new API.
         await this.fetchUser()
-        console.log('Fetched user')
       } else {
         // Login failed.
         throw new LoginError(ret, status)

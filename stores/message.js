@@ -166,7 +166,7 @@ export const useMessageStore = defineStore({
 
       if (!data.deleted) {
         // Fetch back the updated version.
-        await this.fetch({ id: params.id, force: true })
+        await this.fetch(params.id, true)
       }
 
       return data

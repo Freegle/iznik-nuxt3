@@ -98,7 +98,7 @@
           <HelpQuestion id="gdpr" :matches="matches">
             <template #title>What data do you store about me?</template>
             <p>
-              If you're really into privacy or GDPR, tou can see what data we
+              If you're really into privacy or GDPR, you can see what data we
               store about you, and download it,
               <nuxt-link to="/mydata"> here </nuxt-link>.
             </p>
@@ -345,6 +345,7 @@ import dayjs from 'dayjs'
 import HelpQuestion from '../components/HelpQuestion'
 import { buildHead } from '~/composables/useBuildHead'
 import { mobilestate } from '@/plugins/app-init'
+import { useMobileStore } from './stores/mobile'
 
 export default {
   components: { HelpQuestion },
@@ -388,8 +389,8 @@ export default {
       return date.format('Do MMMM, YYYY') + ' at ' + date.format('HH:mm')
     },
     isApp() {
-      const runtimeConfig = useRuntimeConfig()
-      return runtimeConfig.public.IS_APP
+      const mobileStore = useMobileStore()
+      return mobileStore.isApp
     },
     mobileVersion() {
       const runtimeConfig = useRuntimeConfig()

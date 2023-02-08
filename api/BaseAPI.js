@@ -1,6 +1,7 @@
 import * as Sentry from '@sentry/browser'
 import axios from 'axios'
 import { useAuthStore } from '~/stores/auth'
+import { useMobileStore } from '~/stores/mobile'
 
 export class APIError extends Error {
   constructor({ request, response }, message) {
@@ -44,6 +45,7 @@ export default class BaseAPI {
       const headers = config.headers ? config.headers : {}
 
       const authStore = useAuthStore()
+      const mobileStore = useMobileStore()
 
       if (authStore.auth.persistent) {
         // Use the persistent token (a kind of JWT) to authenticate the request.
@@ -51,10 +53,21 @@ export default class BaseAPI {
           'Iznik ' + JSON.stringify(authStore.auth.persistent)
       }
 
-      const runtimeConfig = useRuntimeConfig() // CC
-      if (!config.data) config.data = {}
-      config.data.modtools = false      
-      config.data.app = runtimeConfig.public.IS_APP
+      if (method !== 'POST') {
+        if (!config.params) {
+          config.params = {}
+        }
+
+        config.params.modtools = false
+        config.params.app = mobileStore.isApp
+      } else {
+        if (!config.data) {
+          config.data = {}
+        }
+
+        config.data.modtools = false
+        config.data.app = mobileStore.isApp
+      }
 
       const ret = await this.$axios.request({
         ...config,

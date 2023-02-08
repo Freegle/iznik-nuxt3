@@ -49,6 +49,7 @@
               >
                 <ChatListEntry :id="chat.id" />
               </div>
+              <!--                :key="bump"-->
               <infinite-loading
                 :identifier="bump"
                 :distance="distance"
@@ -280,9 +281,10 @@ export default {
     }
   },
   methods: {
-    fetchOlder() {
+    async fetchOlder() {
+      await this.chatStore.fetchChats(this.searchSince)
       this.showingOlder = true
-      this.chatStore.fetchChats(this.searchSince)
+      this.bump++
     },
     showHideAll() {
       this.showHideAllModal = true

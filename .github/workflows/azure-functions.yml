@@ -34,11 +34,6 @@ jobs:
           IZNIK_API_V1: https://fdapilive.ilovefreegle.org/api
           IZNIK_API_V2: https://api.ilovefreegle.org:8192/apiv2
 
-#      - name: Zip output
-#        uses: montudor/action-zip@v1
-#        with:
-#          args: zip -qq -r .output/deploy.zip .output
-#
       - name: 'Deploy to Azure Functions'
         uses: Azure/functions-action@v1
         with:

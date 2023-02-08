@@ -3,7 +3,7 @@
     :is="notificationType"
     id="notification-list"
     class="white text-center notification-list"
-    :class="{ 'mr-2': smallScreen }"
+    :class="{ 'mr-2': smallScreen, topstack: true }"
     :variant="smallScreen ? 'transparent' : ''"
     toggle-class="notification-list__dropdown-toggle p-0"
     menu-class="notification-list__dropdown-menu"
@@ -203,5 +203,9 @@ export default {
 
 :deep(.dropdown-toggle.show) {
   border-color: transparent !important;
+}
+
+.topstack {
+  z-index: 10000;
 }
 </style>

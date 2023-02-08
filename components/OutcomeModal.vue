@@ -304,7 +304,7 @@ export default {
           // The post is being taken/received.
           await this.messageStore.update({
             action: 'Outcome',
-            id: this.message.id,
+            id: this.id,
             outcome: this.type,
             happiness: this.happiness,
             comment: this.comments,
