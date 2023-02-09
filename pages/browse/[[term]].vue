@@ -167,7 +167,6 @@ export default {
     const miscStore = useMiscStore()
     const authStore = useAuthStore()
     const groupStore = useGroupStore()
-    const isochroneStore = useIsochroneStore()
 
     const searchTerm = route.params.term
 
@@ -211,7 +210,8 @@ export default {
         : 'nearby'
     },
     isochrones() {
-      return this.isochroneStore.list
+      const isochroneStore = useIsochroneStore()
+      return isochroneStore.list
     },
   },
   watch: {
@@ -224,7 +224,8 @@ export default {
             const wkt = await import('wicket')
             window.L = await import('leaflet/dist/leaflet-src.esm')
             await import('wicket/wicket-leaflet')
-            this.isochroneStore.initLeaflet(wkt)
+            const isochroneStore = useIsochroneStore()
+            isochroneStore.initLeaflet(wkt)
           }
 
           this.calculateInitialMapBounds(!this.searchTerm)
@@ -281,20 +282,20 @@ export default {
       if (process.client) {
         // The initial bounds for the map are determined from the isochrones if possible.  We might have them cached
         // in store.
-        this.isochroneStore.fetchMessages(true)
+         = useIsochroneStore()
+        isochroneStore.fetchMessages(true)
 
-        const promises = []
-        promises.push(this.isochroneStore.fetch())
+        const promises = [        promises.push(isochroneStore.fetch())
 
         if (fetchIsochrones) {
           // By default we'll be showing the isochrone view in PostMap, so start the fetch of the messages now.  That
           // way we can display the list rapidly.  Fetching this and the isochrones in parallel reduces latency.
-          promises.push(this.isochroneStore.fetchMessages(true))
+          promises.push(isochroneStore.fetchMessages(true))
         }
 
         await Promise.all(promises)
 
-        this.initialBounds = this.isochroneStore.bounds
+        this.initialBounds = isochroneStore.bounds
 
         if (!this.initialBounds) {
           // We don't have any isochrones yet. Use the bounding box of the group that our own
@@ -399,7 +400,8 @@ export default {
         })
 
         // Now get an isochrone at this location.
-        await this.isochroneStore.fetch()
+        const isochroneStore = useIsochroneStore()
+        await isochroneStore.fetch()
       }
     },
   },
