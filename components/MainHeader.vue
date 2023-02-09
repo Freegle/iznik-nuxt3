@@ -496,6 +496,7 @@ export default {
       notificationStore,
       route,
       router,
+      path: route.path,
     }
   },
   data() {
@@ -631,8 +632,15 @@ export default {
       if (this.myid) {
         await this.newsfeedStore.fetchCount()
 
-        // Get the messages for the currently logged in user.  This will also speed up the My Posts page.
-        const messages = await this.messageStore.fetchByUser(this.myid, false)
+        let messages = []
+
+        if (this.path !== '/profile/' + this.myid) {
+          // Get the messages for the currently logged in user.  This will also speed up the My Posts page.
+          //
+          // We don't do this if we're looking at our own profile otherwise this fetch and the one in ProfileInfo
+          // can interfere with each other.
+          messages = await this.messageStore.fetchByUser(this.myid, false)
+        }
 
         this.activePostsCount = 0
 

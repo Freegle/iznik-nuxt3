@@ -10,7 +10,7 @@
 </template>
 <script>
 import { useRoute } from 'vue-router'
-import { useUserStore } from '../../stores/user'
+import { useUserStore } from '~/stores/user'
 import ProfileInfo from '~/components/ProfileInfo'
 
 export default {
