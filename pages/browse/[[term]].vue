@@ -190,7 +190,6 @@ export default {
       miscStore,
       authStore,
       groupStore,
-      isochroneStore,
       searchTerm,
     }
   },
