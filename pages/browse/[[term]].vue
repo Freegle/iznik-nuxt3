@@ -282,7 +282,7 @@ export default {
       if (process.client) {
         // The initial bounds for the map are determined from the isochrones if possible.  We might have them cached
         // in store.
-         = useIsochroneStore()
+        const isochroneStore = useIsochroneStore()
         isochroneStore.fetchMessages(true)
 
         const promises = [        promises.push(isochroneStore.fetch())
