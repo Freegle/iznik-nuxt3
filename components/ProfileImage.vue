@@ -27,7 +27,10 @@
     <b-badge
       v-if="badge !== null"
       variant="danger"
-      :class="'ProfileImage__moderator ProfileImage__moderator--' + size"
+      :class="
+        'd-flex justify-content-around align-items-center ProfileImage__moderator ProfileImage__moderator--' +
+        size
+      "
     >
       {{ badge }}
     </b-badge>
@@ -238,20 +241,24 @@ export default {
 .ProfileImage__moderator--lg {
   width: 18px;
   height: 18px;
+  font-size: 0.5rem;
 
   @include media-breakpoint-up(md) {
     width: 24px;
     height: 24px;
+    font-size: 0.75rem;
   }
 }
 
 .ProfileImage__moderator--xl {
   width: 24px;
   height: 24px;
+  font-size: 0.75rem;
 
   @include media-breakpoint-up(md) {
     width: 36px;
     height: 36px;
+    font-size: 1rem;
   }
 }
 
