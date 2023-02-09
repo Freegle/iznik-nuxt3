@@ -285,7 +285,8 @@ export default {
         const isochroneStore = useIsochroneStore()
         isochroneStore.fetchMessages(true)
 
-        const promises = [        promises.push(isochroneStore.fetch())
+        const promises = []
+        promises.push(isochroneStore.fetch())
 
         if (fetchIsochrones) {
           // By default we'll be showing the isochrone view in PostMap, so start the fetch of the messages now.  That
