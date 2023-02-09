@@ -576,12 +576,13 @@
                   Normally hitting enter/return sends chat messages, rather than
                   add a new line.
                 </p>
-                <p v-if="enterAddsNewLine">
-                  This can cause problems on some devices, so if you have
-                  problems with this setting, then please change it back.
+                <p v-if="enterNewLine">
+                  You have this set to add a new line. This can cause problems
+                  on some devices, so if you have problems with this setting,
+                  then please change it back.
                 </p>
                 <OurToggle
-                  v-model="enterAddsNewLine"
+                  v-model="enterNewLine"
                   class="mt-2"
                   :width="150"
                   :sync="true"
@@ -590,6 +591,7 @@
                     unchecked: 'Sends message',
                   }"
                   color="#61AE24"
+                  @change="changeNewLine"
                 />
               </b-form-group>
               <b-form-group>
@@ -711,6 +713,7 @@ export default {
       userTimer: null,
       initialEmail: null,
       autoreposts: true,
+      enterNewLine: false,
     }
   },
   computed: {
@@ -892,19 +895,6 @@ export default {
         this.changeAllGroups('eventsallowed', newValue)
       },
     },
-    enterAddsNewLine: {
-      get() {
-        return this.me?.settings?.enterNewLine
-      },
-      async set(newVal) {
-        const settings = this.me.settings
-        settings.enterNewLine = newVal
-
-        await this.authStore.saveAndGet({
-          settings,
-        })
-      },
-    },
     otheremails() {
       return this.me.emails
         ? this.me.emails.filter((e) => {
@@ -921,6 +911,7 @@ export default {
     await this.update()
     this.initialEmail = this.me.email
     this.autoreposts = !this.me.settings.autorepostsdisable
+    this.enterNewLine = this.me.settings.enterNewLine
 
     setTimeout(this.checkUser, 200)
   },
@@ -1055,41 +1046,49 @@ export default {
     },
     async changeNotification(e, type) {
       const settings = this.me.settings
-      settings.notifications[type] = e.value
+      settings.notifications[type] = e
       await this.authStore.saveAndGet({
         settings,
       })
     },
     async changeRelevant(e) {
       await this.authStore.saveAndGet({
-        relevantallowed: e.value,
+        relevantallowed: e,
       })
     },
     async changeNotifChitchat(e) {
       const settings = this.me.settings
-      settings.notificationmails = e.value
+      settings.notificationmails = e
       await this.authStore.saveAndGet({
         settings,
       })
     },
     async changeNewsletter(e) {
       await this.authStore.saveAndGet({
-        newslettersallowed: e.value,
+        newslettersallowed: e,
       })
     },
     async changeEngagement(e) {
       const settings = this.me.settings
-      settings.engagement = e.value
+      settings.engagement = e
       await this.authStore.saveAndGet({
         settings,
       })
     },
     async changeAutorepost(e) {
       const settings = this.me.settings
-      settings.autorepostsdisable = !e.value
+      settings.autorepostsdisable = !e
       await this.authStore.saveAndGet({
         settings,
       })
+    },
+    async changeNewLine(e) {
+      const settings = this.me.settings
+      settings.enterNewLine = e
+      await this.authStore.saveAndGet({
+        settings,
+      })
+      this.enterNewLine = e
     },
     async leaveGroup(id) {
       await this.authStore.leaveGroup(id)
