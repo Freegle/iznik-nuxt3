@@ -12,6 +12,9 @@ export const useNewsfeedStore = defineStore({
     // This is the list of full items we've fetched.
     list: {},
 
+    // Max seen
+    maxSeen: 0,
+
     // These are the ones we are currently fetching.
     fetching: {},
 
@@ -21,6 +24,7 @@ export const useNewsfeedStore = defineStore({
   actions: {
     init(config) {
       this.config = config
+      this.maxSeen = 0
     },
     reset() {
       const init = this.config
@@ -36,6 +40,10 @@ export const useNewsfeedStore = defineStore({
       items.forEach((item) => {
         this.list[item.id] = item
 
+        if (item.id > this.maxSeen) {
+          this.maxSeen = item.id
+        }
+
         if (item.replies?.length) {
           this.addItems(item.replies)
         }
@@ -43,21 +51,11 @@ export const useNewsfeedStore = defineStore({
     },
     async fetchFeed(distance) {
       this.feed = await api(this.config).news.fetch(null, distance)
-
-      // Update the max seen
-      let max = null
-
-      for (const item of this.feed) {
-        max = Math.max(max, item.id)
-      }
-
-      if (max) {
-        api(this.config).news.seen(max)
-      }
-
       return this.feed
     },
     async fetch(id, force, lovelist) {
+      const prevMax = this.maxSeen
+
       try {
         if (!this.list[id] || force) {
           if (!this.fetching[id]) {
@@ -75,6 +73,10 @@ export const useNewsfeedStore = defineStore({
         }
       } catch (e) {
         console.log('Fetch of newsfeed failed', id, e)
+      }
+
+      if (this.maxSeen > prevMax) {
+        api(this.config).news.seen(this.maxSeen)
       }
 
       return this.list[id]

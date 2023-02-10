@@ -200,7 +200,7 @@ export default {
     const messageStore = useMessageStore()
 
     // Get active messages
-    const messages = await messageStore.fetchByUser(props.id, true)
+    const messages = await messageStore.fetchByUser(props.id, true, true)
 
     // Load them into store.
     messages.forEach((message) => {

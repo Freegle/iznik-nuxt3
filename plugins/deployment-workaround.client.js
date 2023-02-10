@@ -3,8 +3,9 @@
 export default defineNuxtPlugin((nuxtApp) => {
   const checkError = (error) => {
     const messages = [
-      'Importing a module script failed', // safari
-      'Failed to fetch dynamically imported module', // edge & chrome
+      'Importing a module script failed',
+      'Failed to fetch dynamically imported module',
+      'Unable to preload CSS',
     ]
     if (messages.some((message) => error?.message.includes(message))) {
       ;(() => {

@@ -109,7 +109,6 @@
 import 'vue3-draggable-resizable/dist/Vue3DraggableResizable.css'
 import cloneDeep from 'lodash.clonedeep'
 import { mapState } from 'pinia'
-import L from 'leaflet'
 import Wkt from 'wicket'
 import { useGroupStore } from '../stores/group'
 import { useMessageStore } from '../stores/message'
@@ -200,24 +199,17 @@ export default {
       default: false,
     },
   },
-  async setup(props) {
+  setup(props) {
     const miscStore = useMiscStore()
     const groupStore = useGroupStore()
     const messageStore = useMessageStore()
     const isochroneStore = useIsochroneStore()
-
-    L.Map.addInitHook(
-      'addHandler',
-      'gestureHandling',
-      await import('leaflet-gesture-handling').GestureHandling
-    )
 
     return {
       miscStore,
       groupStore,
       messageStore,
       isochroneStore,
-      L,
       Wkt,
       osmtile: osmtile(),
       attribution: attribution(),
@@ -471,11 +463,18 @@ export default {
       )
     },
   },
-  mounted() {
+  async mounted() {
     if (this.mapHidden) {
       // Say we're ready so the parent can crack on.
       this.$emit('update:ready', true)
     }
+
+    window.L = await import('leaflet/dist/leaflet-src.esm')
+    window.L.Map.addInitHook(
+      'addHandler',
+      'gestureHandling',
+      await import('leaflet-gesture-handling').GestureHandling
+    )
   },
   beforeDestroy() {
     this.destroyed = true
