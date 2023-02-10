@@ -145,26 +145,21 @@ if (process.client) {
     return chatStore.unreadCount
   })
 
+  const notificationCount = computed(() => {
+    return notificationStore.count
+  })
+
   useHead({
     titleTemplate: (titleChunk) => {
-      if (titleChunk.charAt(0) !== '(' && chatCount > 0) {
-        return '(' + chatCount.value + ') ' + titleChunk
+      const totalCount = notificationCount + chatCount.value
+
+      if (titleChunk.charAt(0) !== '(' && totalCount.value > 0) {
+        return '(' + totalCount.value + ') ' + titleChunk
       } else {
         return titleChunk
       }
     },
   })
-  //   const totalCount = this.unreadNotificationCount + this.chatCount
-  //   return {
-  //     titleTemplate: totalCount > 0 ? `(${totalCount}) %s` : '%s',
-  //     link: [
-  //       {
-  //         rel: 'icon',
-  //         type: 'image/x-icon',
-  //         href: '/icon.png'
-  //       }
-  //     ]
-  //   }
 }
 
 ready = true

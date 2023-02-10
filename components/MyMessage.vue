@@ -469,10 +469,9 @@ export default {
       return [...this.message.replies].sort((a, b) => {
         const aunseen = self.countUnseen(a)
         const bunseen = self.countUnseen(b)
-        const adate = new Date(a.lastdate).getTime()
-        const bdate = new Date(b.lastdate).getTime()
+        const adate = new Date(a.date).getTime()
+        const bdate = new Date(b.date).getTime()
 
-        // console.log('Unseen', aunseen, bunseen, adate, bdate)
         if (aunseen !== bunseen) {
           return bunseen - aunseen
         } else {

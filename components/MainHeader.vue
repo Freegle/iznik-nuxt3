@@ -268,7 +268,7 @@
           id="menu-option-chat-sm"
           v-model:chat-count="chatCount"
           :is-list-item="false"
-          class="mr-3"
+          class="mr-4"
         />
 
         <b-nav>

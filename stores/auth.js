@@ -21,12 +21,7 @@ export const useAuthStore = defineStore({
 
               // We don't persist much about the user, to avoid data getting 'stuck'.  All we need is enough to log us
               // in, and information about which users have been used on this device.
-              paths: [
-                'auth', // stringified
-                'userlist',
-                'loginCount',
-                'loggedInEver',
-              ],
+              paths: ['auth', 'userlist', 'loginCount', 'loggedInEver'],
             },
           ],
   },
