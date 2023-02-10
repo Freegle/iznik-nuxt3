@@ -328,8 +328,7 @@ export const useMobileStore = defineStore({ // Do not persist
 
       const reqdValues = await api(this.config).config.get({ key: requiredKey })
       if (reqdValues && reqdValues.length === 1) {
-        //const requiredVersion = reqdValues[0].value
-        const requiredVersion = '4.1.4'
+        const requiredVersion = reqdValues[0].value
         if (requiredVersion) {
           this.apprequiredversion = requiredVersion
           if (this.versionOutOfDate(requiredVersion)) {
