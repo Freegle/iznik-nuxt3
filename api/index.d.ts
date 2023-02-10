@@ -19,6 +19,7 @@ import BanditAPI from './BanditAPI.js'
 import ChatAPI from './ChatAPI.js'
 import CommentAPI from './CommentAPI.js'
 import CommunityEventAPI from './CommunityEventAPI.js'
+import ConfigAPI from './ConfigAPI.js'
 import DashboardAPI from './DashboardAPI.js'
 import DomainAPI from './DomainAPI.js'
 import DonationsAPI from './DonationsAPI.js'
@@ -60,6 +61,7 @@ interface API {
   chat: ChatAPI;
   comment: CommentAPI;
   communityevent: CommunityEventAPI;
+  config: ConfigAPI;
   dashboard: DashboardAPI;
   domain: DomainAPI;
   donations: DonationsAPI;

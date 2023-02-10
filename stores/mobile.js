@@ -2,10 +2,6 @@
 // - This code is run once at app startup - and does nothing on the web
 // - Then handles push notifications and deeplinks
 //
-// State:
-// - mobilestate
-// - pushstate
-//
 // Initialise app:
 // - Get device info and id
 // - Set iOS window.open TODO
@@ -22,30 +18,7 @@ import { Badge } from '@capawesome/capacitor-badge'
 import { PushNotifications } from '@capacitor/push-notifications'
 import { useAuthStore } from '~/stores/auth'
 import { AppLauncher } from '@capacitor/app-launcher'
-
-let mobilePush = false
-let lastPushMsgid = false
-let checkedForUpdate = false
-
-/*export const mobilestate = {
-  isiOS: false,
-  devicePersistentId: null
-}
-
-export const pushstate = {
-  pushed: false, // Set to true to handle push in Vue context
-  isiOS: false,
-  route: false,
-  modtools: false,
-  acceptedMobilePushId: false,
-  mobilePushId: false, // Note: mobilePushId is the same regardless of which user is logged in
-  inlineReply: false,
-  chatid: false,
-  apprequiredversion: false,
-  applatestversion: false,
-  checkForUpdate: false
-}
-*/
+import api from '~/api'
 
 export const useMobileStore = defineStore({ // Do not persist
   id: 'mobile',
@@ -61,6 +34,10 @@ export const useMobileStore = defineStore({ // Do not persist
     chatid: false,
     pushed: false, // Set to true to handle push in Vue context
     route: false,
+    apprequiredversion: false,
+    applatestversion: false,
+    appupdaterequired: false,
+    appupdateavailable: false,
   }),
   actions: {
     //////////////
@@ -75,6 +52,15 @@ export const useMobileStore = defineStore({ // Do not persist
     },
     //////////////
     async initApp() {
+      await this.getDeviceInfo()
+      await this.fixIOSwindowOpen()
+      await this.enableAndroidPinchZoom()
+      await this.initDeepLinks()
+      await this.initPushNotifications()
+      await this.checkForAppUpdate()
+    },
+    //////////////
+    async getDeviceInfo() {
       console.log('--------------initapp--------------')
       const deviceinfo = await Device.getInfo()
       console.log('deviceinfo', deviceinfo)
@@ -82,6 +68,9 @@ export const useMobileStore = defineStore({ // Do not persist
       const deviceid = await Device.getId()
       console.log('deviceid', deviceid)
       this.devicePersistentId = deviceid.uuid
+    },
+    //////////////
+    async fixIOSwindowOpen() {
 
       // Make window.open work in iOS app TODO is this needed?
       const prevwindowopener = window.open
@@ -89,6 +78,9 @@ export const useMobileStore = defineStore({ // Do not persist
         console.log('App window.open', url)
         AppLauncher.openUrl({ url: this.href })
       }
+    },
+    //////////////
+    async enableAndroidPinchZoom() {
 
       /* TODO
       if (!this.isiOS) {
@@ -98,6 +90,9 @@ export const useMobileStore = defineStore({ // Do not persist
         cordova.plugins.ZoomControl.setDisplayZoomControls('false') // Sets whether the WebView should display on-screen zoom controls when using the built-in zoom mechanisms.
         cordova.plugins.ZoomControl.setUseWideViewPort('false') // Sets whether the WebView should enable support for the "viewport" HTML meta tag or should use a wide viewport.
       }*/
+    },
+    //////////////
+    async initDeepLinks() {
 
       /* TODO
       window.IonicDeeplink.route({
@@ -115,7 +110,9 @@ export const useMobileStore = defineStore({ // Do not persist
           linkstate.received = true
         }
       })*/
-
+    },
+    //////////////
+    async initPushNotifications() {
       /*if (!this.isiOS) {
         // Create our Android push channel
         PushNotifications.createChannel({
@@ -199,7 +196,6 @@ export const useMobileStore = defineStore({ // Do not persist
           console.log('Push action performed:', notification)
         }
       )
-
     },
     //////////////
     async setBadgeCount(badgeCount) { // TODO
@@ -242,7 +238,7 @@ export const useMobileStore = defineStore({ // Do not persist
         msgid = data.notId
       }
       //const doubleEvent = !foreground && msgid !== 0 && msgid === lastPushMsgid
-      lastPushMsgid = msgid
+      //lastPushMsgid = msgid
       if (!('count' in data)) {
         data.count = 0
       }
@@ -326,7 +322,48 @@ export const useMobileStore = defineStore({ // Do not persist
       }*/
     },
     //////////////
-    // TODO async function checkForAppUpdate($api, $axios, store, router)
+    async checkForAppUpdate($api, $axios, store, router) {
+      const requiredKey = this.isiOS ? 'app_fd_version_ios_required' : 'app_fd_version_android_required'
+      const latestKey = this.isiOS ? 'app_fd_version_ios_latest' : 'app_fd_version_android_latest'
+
+      const reqdValues = await api(this.config).config.get({ key: requiredKey })
+      if (reqdValues && reqdValues.length === 1) {
+        //const requiredVersion = reqdValues[0].value
+        const requiredVersion = '4.1.4'
+        if (requiredVersion) {
+          this.apprequiredversion = requiredVersion
+          if (this.versionOutOfDate(requiredVersion)) {
+            this.appupdaterequired = true
+            console.log('==========appupdate required!')
+          }
+        }
+      }
+
+      const latestValues = await api(this.config).config.get({ key: latestKey })
+      if (latestValues && latestValues.length === 1) {
+        const latestVersion = latestValues[0].value
+        if (latestVersion) {
+          this.applatestversion = latestVersion
+          if (this.versionOutOfDate(latestVersion)) {
+            this.appupdateavailable = true
+          }
+        }
+      }
+    },
+    versionOutOfDate(newver) {
+      const runtimeConfig = useRuntimeConfig()
+      const currentver = runtimeConfig.public.MOBILE_VERSION
+      if (!newver) return false
+      const anewver = newver.split('.')
+      const acurrentver = currentver.split('.')
+      for (let vno = 0; vno < 3; vno++) {
+        const cv = parseInt(acurrentver[vno])
+        const nv = parseInt(anewver[vno])
+        if (nv > cv) return true
+        if (nv < cv) return false
+      }
+      return false
+    },
   }
 })
 

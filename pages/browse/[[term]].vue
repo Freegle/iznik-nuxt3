@@ -11,6 +11,7 @@
         <b-col cols="12" lg="6" class="p-0">
           <!--          TODO Microvol-->
           <!--          <MicroVolunteering />-->
+          <AppUpdateAvailable />
           <div>
             <GlobalWarning />
             <ExpectedRepliesWarning
