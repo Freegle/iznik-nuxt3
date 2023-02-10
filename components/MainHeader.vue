@@ -639,7 +639,7 @@ export default {
           //
           // We don't do this if we're looking at our own profile otherwise this fetch and the one in ProfileInfo
           // can interfere with each other.
-          messages = await this.messageStore.fetchByUser(this.myid, false)
+          messages = await this.messageStore.fetchByUser(this.myid, true)
         }
 
         this.activePostsCount = 0
