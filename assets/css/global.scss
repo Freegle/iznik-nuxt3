@@ -1,3 +1,29 @@
+#serverloader {
+  z-index: 1000;
+  display: flex !important;
+  text-align: center;
+  position: fixed; /* or absolute */
+  top: calc(50% - 44px);
+  font-size: 12px;
+  padding: 5px;
+  border: 1px black;
+  border-radius: 5px;
+  animation: 15s fadeIn;
+  visibility: visible !important;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  90% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
 @import 'assets/css/_color-vars.scss';
 
 @import 'bootstrap-custom';
