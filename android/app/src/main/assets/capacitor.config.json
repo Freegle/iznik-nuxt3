@@ -20,6 +20,14 @@
 		"Badge": {
 			"persist": true,
 			"autoClear": false
+		},
+		"GoogleAuth": {
+			"scopes": [
+				"profile",
+				"email"
+			],
+			"serverClientId": "423761283916-1rpa8120tpudgv4nf44cpmlf8slqbf4f.apps.googleusercontent.com",
+			"forceCodeForRefreshToken": true
 		}
 	}
 }

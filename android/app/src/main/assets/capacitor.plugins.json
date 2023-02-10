@@ -18,5 +18,9 @@
 	{
 		"pkg": "@capawesome/capacitor-badge",
 		"classpath": "io.capawesome.capacitorjs.plugins.badge.BadgePlugin"
+	},
+	{
+		"pkg": "@codetrix-studio/capacitor-google-auth",
+		"classpath": "com.codetrixstudio.capacitor.GoogleAuth.GoogleAuth"
 	}
 ]

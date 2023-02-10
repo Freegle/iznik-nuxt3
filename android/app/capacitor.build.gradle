@@ -14,6 +14,7 @@ dependencies {
     implementation project(':capacitor-push-notifications')
     implementation project(':capacitor-status-bar')
     implementation project(':capawesome-capacitor-badge')
+    implementation project(':codetrix-studio-capacitor-google-auth')
 
 }
 

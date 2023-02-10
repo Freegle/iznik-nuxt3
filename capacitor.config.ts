@@ -1,5 +1,12 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
+//import * as frconfig2 from './config'
+//console.log(frconfig2.GOOGLE_CLIENT_ID)
+
+const frconfig = {  // TODO
+  GOOGLE_CLIENT_ID: '423761283916-1rpa8120tpudgv4nf44cpmlf8slqbf4f.apps.googleusercontent.com'
+}
+
 const config: CapacitorConfig = {
   appId: 'org.ilovefreegle.direct',  // Fix back to .direct
   appName: 'Freegle',
@@ -24,7 +31,12 @@ const config: CapacitorConfig = {
     Badge: {
       "persist": true,
       "autoClear": false
-    }
+    },
+    "GoogleAuth": {
+      "scopes": ["profile", "email"],
+      "serverClientId": frconfig.GOOGLE_CLIENT_ID,
+      "forceCodeForRefreshToken": true,
+    },
   },
 };
 

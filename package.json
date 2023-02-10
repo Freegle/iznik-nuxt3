@@ -36,6 +36,7 @@
     "@capacitor/status-bar": "^4.1.1",
     "@capawesome/capacitor-badge": "^2.0.2",
     "@chenfengyuan/vue-number-input": "^2.0.1",
+    "@codetrix-studio/capacitor-google-auth": "^3.2.2",
     "@fortawesome/fontawesome-svg-core": "^6.1.1",
     "@fortawesome/free-brands-svg-icons": "^6.2.0",
     "@fortawesome/free-solid-svg-icons": "^6.1.1",
