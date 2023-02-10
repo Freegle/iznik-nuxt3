@@ -35,17 +35,20 @@ const group = computed(() => {
 if (id) {
   // Fetch the specific group.
   await groupStore.fetch(id, true)
-  useHead(
-    buildHead(
-      route,
-      runtimeConfig,
-      'Explore ' + group.value.namedisplay,
-      group.value.description
-        ? group.value.description
-        : "Give and get stuff for free. Offer things you don't need, and ask for things you'd like. Don't just recycle - reuse with Freegle!",
-      group.value.profile ? group.value.profile : '/icon.png'
+
+  if (group.value) {
+    useHead(
+      buildHead(
+        route,
+        runtimeConfig,
+        'Explore ' + group.value.namedisplay,
+        group.value.description
+          ? group.value.description
+          : "Give and get stuff for free. Offer things you don't need, and ask for things you'd like. Don't just recycle - reuse with Freegle!",
+        group.value.profile ? group.value.profile : '/icon.png'
+      )
     )
-  )
+  }
 } else {
   // Fetch all groups for the map.  No need to await - rendering the map is eye candy.
   groupStore.fetch()
