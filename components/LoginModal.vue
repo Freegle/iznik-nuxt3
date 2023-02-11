@@ -45,7 +45,19 @@
             >Continue with Facebook</span
           >
         </b-button>
-        <div
+        <b-button v-if="isApp"
+          class="social-button social-button--google-app"
+          @click="loginGoogle"
+        >
+          <b-img
+            src="/signinbuttons/google-logo.svg"
+            class="social-button__image"
+          />
+          <span class="p-2 text--medium font-weight-bold"
+            >Continue with Google</span
+          >
+        </b-button>
+        <div v-if="!isApp"
           id="googleLoginButton"
           class="social-button social-button--google clickme"
         />
@@ -186,6 +198,7 @@ import { mapState, mapWritableState } from 'pinia'
 import { LoginError, SignUpError } from '../api/BaseAPI'
 import EmailValidator from './EmailValidator'
 import { useAuthStore } from '~/stores/auth'
+import { useMobileStore } from '@/stores/mobile'
 import me from '~/mixins/me.js'
 
 const NoticeMessage = () => import('~/components/NoticeMessage')
@@ -251,10 +264,12 @@ export default {
       return false
     },
     socialblocked() {
+      const mobileStore = useMobileStore()
+      const googleActuallyDisabled =  mobileStore.isApp ? false : this.googleDisabled
       const ret =
         this.bump &&
         this.initialisedSocialLogin &&
-        (this.facebookDisabled || this.googleDisabled || this.yahooDisabled) &&
+        (this.facebookDisabled || googleActuallyDisabled || this.yahooDisabled) &&
         this.timerElapsed
       return ret
     },
@@ -279,6 +294,10 @@ export default {
     },
     nativeDisabled() {
       return this.nativeBump && (!this.emailValid || !this.password)
+    },
+    isApp() {
+      const mobileStore = useMobileStore()
+      return mobileStore.isApp
     },
   },
   watch: {
@@ -509,6 +528,11 @@ export default {
         this.socialLoginError = 'Facebook login error: ' + e.message
       }
     },
+    async loginGoogle() {
+      console.log('loginGoogle')
+      const response = await GoogleAuth.signIn();
+      console.log(response);
+    },
     async handleGoogleCredentialsResponse(response) {
       console.log('Google login', response)
       this.loginType = 'Google'
@@ -579,17 +603,23 @@ export default {
       this.$router.push('/forgot')
     },
     installGoogleSDK() {
-      console.log('Install google SDK')
-      // Google client library should have been loaded by the layout.
-      window?.google?.accounts?.id?.initialize({
-        client_id: this.clientId,
-        callback: this.handleGoogleCredentialsResponse,
-      })
-      console.log('Render google button')
-      window?.google?.accounts?.id?.renderButton(
-        document.getElementById('googleLoginButton'),
-        { theme: 'outline', size: 'large', width: '300px' }
-      )
+      if( this.isApp){
+        console.log('GoogleAuth.initialize A')
+        GoogleAuth.initialize()
+        console.log('GoogleAuth.initialize B')
+      } else {
+        console.log('Install google SDK')
+        // Google client library should have been loaded by the layout.
+        window?.google?.accounts?.id?.initialize({
+          client_id: this.clientId,
+          callback: this.handleGoogleCredentialsResponse,
+        })
+        console.log('Render google button')
+        window?.google?.accounts?.id?.renderButton(
+          document.getElementById('googleLoginButton'),
+          { theme: 'outline', size: 'large', width: '300px' }
+        )
+      }
     },
     installFacebookSDK() {
       const self = this
@@ -700,6 +730,12 @@ $color-yahoo: #6b0094;
 .social-button--google {
   border: 2px solid $color-google;
   background-color: #dadce0;
+  width: 100%;
+}
+.social-button--google-app {
+  border: 2px solid $color-google;
+  background-color: #fff;
+  color: #3c4043;
   width: 100%;
 }
 
