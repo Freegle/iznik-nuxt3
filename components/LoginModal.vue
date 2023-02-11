@@ -532,7 +532,7 @@ export default {
       try{
         console.log('loginGoogle')
         const response = await GoogleAuth.signIn();
-        console.log(response);
+        console.log(response.message, response.code);
       } catch( e){
         this.socialLoginError = 'Google login error: ' + e.message
       }
