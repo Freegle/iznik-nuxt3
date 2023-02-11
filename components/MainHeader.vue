@@ -598,7 +598,13 @@ export default {
       // Remove all cookies, both client and server.  This seems to be necessary to kill off the PHPSESSID cookie
       // on the server, which would otherwise keep us logged in despite our efforts.
       try {
-        this.$cookies.removeAll()
+        console.log("logout removeAll A")
+        const jwtCookie = useCookie('jwt')
+        if( jwtCookie!=null) jwtCookie.value = null
+        const persistentCookie = useCookie('persistent')
+        if( persistentCookie!=null) persistentCookie.value = null
+        //this.$cookies.removeAll()
+        console.log("logout removeAll B")
       } catch (e) {}
 
       await this.authStore.logout()

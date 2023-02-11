@@ -6,8 +6,6 @@ import api from '~/api'
 import { useCookie } from '#imports'
 import { useMobileStore } from '@/stores/mobile'
 
-console.log("------typeof localStorage", typeof localStorage)
-
 export const useAuthStore = defineStore({
   id: 'auth',
   persist: {

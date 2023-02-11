@@ -14,7 +14,6 @@
     <template #title>
       <h2>Let's get freegling!</h2>
     </template>
-    Show modal? {{ showModal }}
     <p v-if="signUp" class="text-center">
       You'll get emails. Name, approximate location, and profile picture are
       public - you can hide your real name and picture from Settings. Logging in
@@ -194,6 +193,7 @@
   </b-modal>
 </template>
 <script>
+import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth'
 import { mapState, mapWritableState } from 'pinia'
 import { LoginError, SignUpError } from '../api/BaseAPI'
 import EmailValidator from './EmailValidator'
@@ -529,9 +529,13 @@ export default {
       }
     },
     async loginGoogle() {
-      console.log('loginGoogle')
-      const response = await GoogleAuth.signIn();
-      console.log(response);
+      try{
+        console.log('loginGoogle')
+        const response = await GoogleAuth.signIn();
+        console.log(response);
+      } catch( e){
+        this.socialLoginError = 'Google login error: ' + e.message
+      }
     },
     async handleGoogleCredentialsResponse(response) {
       console.log('Google login', response)
