@@ -13,7 +13,6 @@ const AndroidKeyStorePassword = process.env['FREEGLE_NUXT3_KEYSTORE_PASSWORD']
 if( typeof AndroidKeyStorePassword!=="string") throw "process.env.FREEGLE_NUXT3_KEYSTORE_PASSWORD not set"
 const AndroidKeyStoreAlias = process.env['FREEGLE_NUXT3_KEYSTORE_ALIAS']
 if( typeof AndroidKeyStoreAlias!=="string") throw "process.env.FREEGLE_NUXT3_KEYSTORE_ALIAS not set"
-console.log("process.env.FREEGLE_NUXT3_KEYSTORE_PASSWORD deliberately wrong!")
 
 const config: CapacitorConfig = {
   appId: 'org.ilovefreegle.direct',  // Fix back to .direct
