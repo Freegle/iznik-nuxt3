@@ -1,5 +1,7 @@
 import config from './config'
 
+// @ts-ignore
+// @ts-ignore
 export default defineNuxtConfig({
   _cli: false,
 
@@ -42,6 +44,7 @@ export default defineNuxtConfig({
   // - For historical reasons and preference we use the options API everywhere else.
   //
   // Sometimes when debugging it's useful to set ssr: false, because the errors are clearer when generated on the client.
+  // @ts-ignore
   target: 'server',
   ssr: true,
 
@@ -60,6 +63,9 @@ export default defineNuxtConfig({
   nitro: {
     prerender: {
       routes: ['/404.html', '/sitemap.xml'],
+
+      // Don't crawl, else we end up with all the messages.
+      crawlLinks: false,
     },
   },
 
@@ -136,11 +142,6 @@ export default defineNuxtConfig({
         },
       },
     },
-  },
-
-  generate: {
-    // Don't crawl - we end up with all the messages, which takes too long.
-    crawler: false,
   },
 
   app: {
