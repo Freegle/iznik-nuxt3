@@ -1,5 +1,5 @@
 <template>
-  <client-only>
+  <client-only v-if="me">
     <div>
       <h1 class="sr-only">Settings</h1>
       <b-row class="m-0">

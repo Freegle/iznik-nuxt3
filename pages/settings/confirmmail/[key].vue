@@ -1,5 +1,5 @@
 <template>
-  <client-only>
+  <client-only v-if="me">
     <div>
       <b-row class="m-0">
         <b-col cols="0" md="3" class="d-none d-md-block" />

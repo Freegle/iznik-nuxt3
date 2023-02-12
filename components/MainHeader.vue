@@ -207,7 +207,7 @@
             <nuxt-link
               id="menu-option-logout"
               no-prefetch
-              class="nav-link text-center p-0 small"
+              class="nav-link text-center p-0 small clickme"
               @click="logout"
             >
               <v-icon icon="sign-out-alt" class="fa-2x" />
@@ -440,7 +440,7 @@
           <li class="nav-item text-center p-0">
             <nuxt-link
               no-prefetch
-              class="nav-link text-center p-0"
+              class="nav-link text-center p-0 clickme"
               @click="logout"
             >
               <v-icon icon="sign-out-alt" class="fa-2x" />
@@ -467,6 +467,7 @@ import { useMessageStore } from '../stores/message'
 import { useNotificationStore } from '../stores/notification'
 import { useAuthStore } from '~/stores/auth'
 import LoginModal from '~/components/LoginModal'
+import { useCookie } from '#imports'
 
 const AboutMeModal = () => import('~/components/AboutMeModal')
 const NotificationOptions = () => import('~/components/NotificationOptions')
@@ -598,8 +599,19 @@ export default {
       // Remove all cookies, both client and server.  This seems to be necessary to kill off the PHPSESSID cookie
       // on the server, which would otherwise keep us logged in despite our efforts.
       try {
-        this.$cookies.removeAll()
-      } catch (e) {}
+        const jwtCookie = useCookie('jwt')
+        if (jwtCookie !== null) {
+          jwtCookie.value = null
+        }
+
+        const persistentCookie = useCookie('persistent')
+
+        if (persistentCookie !== null) {
+          persistentCookie.value = null
+        }
+      } catch (e) {
+        console.error('Failed to clear cookies', e)
+      }
 
       await this.authStore.logout()
       this.authStore.forceLogin = false
