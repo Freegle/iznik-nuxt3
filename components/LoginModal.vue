@@ -77,7 +77,7 @@
           Social log in blocked - check your privacy settings, including any ad
           blockers such as Adblock Plus.
         </notice-message>
-        <b-alert v-if="socialLoginError" variant="danger" show>
+        <b-alert v-if="socialLoginError" variant="danger" :modelValue="true">
           Login Failed: {{ socialLoginError }}
         </b-alert>
       </div>
@@ -161,7 +161,7 @@
             <span v-if="!signUp"> Log in to Freegle </span>
             <span v-else> Register on Freegle </span>
           </b-button>
-          <b-alert v-if="nativeLoginError" variant="danger" show>
+          <b-alert v-if="nativeLoginError" variant="danger" :modelValue="true">
             Login Failed: {{ nativeLoginError }}
           </b-alert>
           <div v-if="!signUp" class="text-center">
@@ -533,7 +533,9 @@ export default {
         console.log('loginGoogle')
         const response = await GoogleAuth.signIn();
         console.log(response.message, response.code);
+        this.socialLoginError = 'Google did something'
       } catch( e){
+        console.log('Google login error: ', e)
         this.socialLoginError = 'Google login error: ' + e.message
       }
     },
