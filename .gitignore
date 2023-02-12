@@ -19,3 +19,4 @@ static/sw.js
 
 # app secrets
 android/app/google-services.json
+ios/App/App/GoogleService-Info.plist
