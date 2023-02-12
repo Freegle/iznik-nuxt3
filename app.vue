@@ -151,7 +151,7 @@ if (process.client) {
 
   useHead({
     titleTemplate: (titleChunk) => {
-      const totalCount = notificationCount + chatCount.value
+      const totalCount = notificationCount.value + chatCount.value
 
       if (titleChunk.charAt(0) !== '(' && totalCount.value > 0) {
         return '(' + totalCount.value + ') ' + titleChunk

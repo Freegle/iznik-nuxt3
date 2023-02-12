@@ -17,13 +17,15 @@
     <div
       v-if="showLoader"
       id="serverloader"
-      class="bg-none d-flex justify-content-around w-100"
+      class="bg-none justify-content-around w-100"
+      style="display: none"
     >
       <div class="text-center bg-white p-2">
         <img src="/loader.gif" alt="Loading..." />
         <p>
           <span>Loading...</span><br /><span class="font-weight-bold"
-            >Stuck here? Try refreshing. Or Chrome.</span
+            >Stuck here? We couldn't load our Javascript. Try refreshing. Or
+            Chrome.</span
           ><br /><SupportLink text="No luck? Contact us" />
         </p>
       </div>
@@ -181,30 +183,5 @@ html {
 
 body.modal-open {
   padding-right: 0px !important;
-}
-
-#serverloader {
-  z-index: 1000;
-  text-align: center;
-  position: fixed; /* or absolute */
-  top: calc(50% - 44px);
-  font-size: 12px;
-  padding: 5px;
-  border: 1px black;
-  border-radius: 5px;
-  animation: 15s fadeIn;
-  visibility: visible !important;
-}
-
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
-  }
-  90% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
 }
 </style>

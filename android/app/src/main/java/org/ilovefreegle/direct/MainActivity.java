@@ -1,14 +1,15 @@
 package org.ilovefreegle.direct;
 
+import android.util.Log;
 import com.getcapacitor.BridgeActivity;
 import android.os.Bundle;
 import com.codetrixstudio.capacitor.GoogleAuth.GoogleAuth;
 
 public class MainActivity extends BridgeActivity {
 
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
+  public void onCreate(Bundle savedInstanceState) {
+    //Log.e("PHDCC","org.ilovefreegle.direct onCreate A");
     super.onCreate(savedInstanceState);
-    this.registerPlugin(GoogleAuth.class);
+    registerPlugin(GoogleAuth.class);
   }
 }

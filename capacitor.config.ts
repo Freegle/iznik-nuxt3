@@ -4,15 +4,23 @@ import { CapacitorConfig } from '@capacitor/cli';
 //console.log(frconfig2.GOOGLE_CLIENT_ID)
 
 const frconfig = {  // TODO
-  GOOGLE_CLIENT_ID: '423761283916-1rpa8120tpudgv4nf44cpmlf8slqbf4f.apps.googleusercontent.com'
+  GOOGLE_CLIENT_ID: '423761283916-1rpa8120tpudgv4nf44cpmlf8slqbf4f.apps.googleusercontent.com'  // OK as serverClientId - SERVER_CLIENT_ID
 }
+
+const AndroidKeyStorePath = process.env['FREEGLE_NUXT3_KEYSTORE_PATH']
+if( typeof AndroidKeyStorePath!=="string") throw "process.env.FREEGLE_NUXT3_KEYSTORE_PATH not set"
+const AndroidKeyStorePassword = process.env['FREEGLE_NUXT3_KEYSTORE_PASSWORD']
+if( typeof AndroidKeyStorePassword!=="string") throw "process.env.FREEGLE_NUXT3_KEYSTORE_PASSWORD not set"
+const AndroidKeyStoreAlias = process.env['FREEGLE_NUXT3_KEYSTORE_ALIAS']
+if( typeof AndroidKeyStoreAlias!=="string") throw "process.env.FREEGLE_NUXT3_KEYSTORE_ALIAS not set"
+console.log("process.env.FREEGLE_NUXT3_KEYSTORE_PASSWORD deliberately wrong!")
 
 const config: CapacitorConfig = {
   appId: 'org.ilovefreegle.direct',  // Fix back to .direct
   appName: 'Freegle',
   webDir: '.output/public',
   bundledWebRuntime: false,
-  "cordova": {
+  cordova: {
     "preferences": { // Get from iznik-nuxt/mobile/freegle/android/config.xml and package.json
       "CameraUsesGeolocation": "true",
       AndroidLaunchMode: "singleTask"
@@ -22,6 +30,15 @@ const config: CapacitorConfig = {
       // ionic-plugin-deeplinks
       // sentry-cordova
       // cordova-plugin-geolocation "GPS_REQUIRED": "false"
+    }
+  },
+  android: {
+    buildOptions: {
+      "keystorePath": AndroidKeyStorePath,
+      "keystorePassword": AndroidKeyStorePassword,
+      "keystoreAlias": AndroidKeyStoreAlias,
+      "keystoreAliasPassword": AndroidKeyStorePassword,
+      "releaseType": "APK",
     }
   },
   plugins: {

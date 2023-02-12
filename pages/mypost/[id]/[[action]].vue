@@ -1,5 +1,5 @@
 <template>
-  <client-only>
+  <client-only v-if="me">
     <b-container fluid>
       <b-row class="m-0">
         <b-col cols="12" lg="6" offset-lg="3" class="p-0">

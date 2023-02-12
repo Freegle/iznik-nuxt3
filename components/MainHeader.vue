@@ -207,7 +207,7 @@
             <nuxt-link
               id="menu-option-logout"
               no-prefetch
-              class="nav-link text-center p-0 small"
+              class="nav-link text-center p-0 small clickme"
               @click="logout"
             >
               <v-icon icon="sign-out-alt" class="fa-2x" />
@@ -440,7 +440,7 @@
           <li class="nav-item text-center p-0">
             <nuxt-link
               no-prefetch
-              class="nav-link text-center p-0"
+              class="nav-link text-center p-0 clickme"
               @click="logout"
             >
               <v-icon icon="sign-out-alt" class="fa-2x" />
@@ -467,6 +467,7 @@ import { useMessageStore } from '../stores/message'
 import { useNotificationStore } from '../stores/notification'
 import { useAuthStore } from '~/stores/auth'
 import LoginModal from '~/components/LoginModal'
+import { useCookie } from '#imports'
 
 const AboutMeModal = () => import('~/components/AboutMeModal')
 const NotificationOptions = () => import('~/components/NotificationOptions')
@@ -599,10 +600,18 @@ export default {
       // on the server, which would otherwise keep us logged in despite our efforts.
       try {
         const jwtCookie = useCookie('jwt')
-        if( jwtCookie!=null) jwtCookie.value = null
+        if (jwtCookie !== null) {
+          jwtCookie.value = null
+        }
+
         const persistentCookie = useCookie('persistent')
-        if( persistentCookie!=null) persistentCookie.value = null
-      } catch (e) {}
+
+        if (persistentCookie !== null) {
+          persistentCookie.value = null
+        }
+      } catch (e) {
+        console.error('Failed to clear cookies', e)
+      }
 
       await this.authStore.logout()
       this.authStore.forceLogin = false
@@ -642,7 +651,7 @@ export default {
           //
           // We don't do this if we're looking at our own profile otherwise this fetch and the one in ProfileInfo
           // can interfere with each other.
-          messages = await this.messageStore.fetchByUser(this.myid, false)
+          messages = await this.messageStore.fetchByUser(this.myid, true)
         }
 
         this.activePostsCount = 0

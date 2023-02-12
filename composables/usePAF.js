@@ -169,17 +169,17 @@ export function constructAddress(
       buildingName.match(/^[0-9].*[0-9][a-zA-Z]$/) ||
       buildingName.length === 1
     ) {
-      if (nextLinePrefix.length && !exceptionSubBuildingName) {
+      if (nextLinePrefix?.length && !exceptionSubBuildingName) {
         addressLines.push(nextLinePrefix.trim())
       }
-      nextLinePrefix = (nextLinePrefix.trim() + ' ' + buildingName).trim()
+      nextLinePrefix = (nextLinePrefix?.trim() + ' ' + buildingName).trim()
       if (buildingName.length === 1 && isNaN(buildingName)) {
         nextLinePrefix += ','
       }
       nextLinePrefix += ' '
     } else {
       addressLines.push(
-        (nextLinePrefix ? nextLinePrefix.trim() + ' ' : '') + buildingName
+        (nextLinePrefix ? nextLinePrefix?.trim() + ' ' : '') + buildingName
       )
       nextLinePrefix = null
     }

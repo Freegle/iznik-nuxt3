@@ -93,6 +93,13 @@
           </mappings>
         </serverdata>
       </paths>
+      <paths name="db-1.freegle.katapult.cloud">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="db1.ilovefreegle.org">
         <serverdata>
           <mappings>

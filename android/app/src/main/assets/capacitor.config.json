@@ -9,6 +9,15 @@
 			"AndroidLaunchMode": "singleTask"
 		}
 	},
+	"android": {
+		"buildOptions": {
+			"keystorePath": "D:\\FreeglePenrithEden\\iznik-releases\\keys\\android-chrisphdcccom.new.keystore",
+			"keystorePassword": "hkk8XLd7PyzdK2sss",
+			"keystoreAlias": "Freegle Ltd Chris",
+			"keystoreAliasPassword": "hkk8XLd7PyzdK2sss",
+			"releaseType": "APK"
+		}
+	},
 	"plugins": {
 		"PushNotifications": {
 			"presentationOptions": [
