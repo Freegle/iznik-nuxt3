@@ -7,7 +7,6 @@
       :interval="0"
       no-touch
       :controls="attachments.length > 1"
-      @slid="slideEnd"
     >
       <b-carousel-slide
         v-for="(attachment, index) in attachments"
@@ -48,12 +47,6 @@ export default {
     return {
       slide: 0,
     }
-  },
-  methods: {
-    slideEnd(slide) {
-      console.log('Slide end')
-      this.slide = slide
-    },
   },
 }
 </script>
