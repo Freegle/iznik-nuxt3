@@ -20,3 +20,6 @@ static/sw.js
 # app secrets
 android/app/google-services.json
 ios/App/App/GoogleService-Info.plist
+
+# copied with app secrets
+android/app/src/main/assets/capacitor.config.json
