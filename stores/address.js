@@ -4,7 +4,6 @@ import api from '~/api'
 export const useAddressStore = defineStore({
   id: 'address',
   state: () => ({
-    config: null,
     list: [],
     fetching: null,
     properties: {},

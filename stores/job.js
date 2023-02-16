@@ -4,7 +4,6 @@ import api from '~/api'
 export const useJobStore = defineStore({
   id: 'job',
   state: () => ({
-    config: null,
     list: [],
     fetching: null,
     blocked: false,

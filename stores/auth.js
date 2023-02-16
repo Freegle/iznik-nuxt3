@@ -23,8 +23,6 @@ export const useAuthStore = defineStore({
           ],
   },
   state: () => ({
-    config: null,
-
     auth: {
       // For APIv2
       jwt: null,

@@ -6,7 +6,6 @@ import { earliestDate, addStrings } from '~/composables/useTimeFormat'
 export const useCommunityEventStore = defineStore({
   id: 'communityevent',
   state: () => ({
-    config: null,
     list: {},
     fetching: {},
     forUser: [],

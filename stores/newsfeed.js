@@ -4,8 +4,6 @@ import api from '~/api'
 export const useNewsfeedStore = defineStore({
   id: 'newsfeed',
   state: () => ({
-    config: null,
-
     // This is a barebones list of items in order.
     feed: [],
 

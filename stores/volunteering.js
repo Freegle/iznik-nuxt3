@@ -5,7 +5,6 @@ import { addStrings, earliestDate } from '~/composables/useTimeFormat'
 export const useVolunteeringStore = defineStore({
   id: 'volunteering',
   state: () => ({
-    config: null,
     list: {},
     fetching: {},
     forUser: [],

@@ -112,7 +112,7 @@ import { mapState } from 'pinia'
 import Wkt from 'wicket'
 import { useGroupStore } from '../stores/group'
 import { useMessageStore } from '../stores/message'
-import { calculateMapHeight } from '../composables/useMap'
+import { calculateMapHeight, loadLeaflet } from '../composables/useMap'
 import GroupMarker from './GroupMarker'
 import BrowseHomeIcon from './BrowseHomeIcon'
 import ClusterMarker from './ClusterMarker'
@@ -350,7 +350,7 @@ export default {
       const ret = []
 
       this.isochrones.forEach((i) => {
-        const wkt = new this.Wkt.Wkt()
+        const wkt = new Wkt.Wkt()
         try {
           wkt.read(i.polygon)
           ret.push({
@@ -436,7 +436,7 @@ export default {
         console.log('Got group', group)
 
         if (group.bbox) {
-          const wkt = new this.Wkt.Wkt()
+          const wkt = new Wkt.Wkt()
           try {
             wkt.read(group.bbox)
             const obj = wkt.toObject()
@@ -444,12 +444,21 @@ export default {
             const sw = thisbounds.getSouthWest()
             const ne = thisbounds.getNorthEast()
 
-            const bounds = new this.L.LatLngBounds([
+            const bounds = new window.L.LatLngBounds([
               [sw.lat, sw.lng],
               [ne.lat, ne.lng],
             ]).pad(0.1)
 
-            this.mapObject.flyToBounds(bounds)
+            // For reasons I don't understand, leaflet throws errors if we don't make these local here.
+            const swlat = bounds.getSouthWest().lat
+            const swlng = bounds.getSouthWest().lng
+            const nelat = bounds.getNorthEast().lat
+            const nelng = bounds.getNorthEast().lng
+
+            this.mapObject.flyToBounds([
+              [swlat, swlng],
+              [nelat, nelng],
+            ])
           } catch (e) {
             console.log('WKT error', location, e)
           }
@@ -469,12 +478,7 @@ export default {
       this.$emit('update:ready', true)
     }
 
-    window.L = await import('leaflet/dist/leaflet-src.esm')
-    window.L.Map.addInitHook(
-      'addHandler',
-      'gestureHandling',
-      await import('leaflet-gesture-handling').GestureHandling
-    )
+    await loadLeaflet()
   },
   beforeDestroy() {
     this.destroyed = true

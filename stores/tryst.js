@@ -4,7 +4,6 @@ import api from '~/api'
 export const useTrystStore = defineStore({
   id: 'tryst',
   state: () => ({
-    config: null,
     WKT: null,
     L: null,
     list: [],

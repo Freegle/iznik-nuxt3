@@ -11,7 +11,7 @@ export default class GroupAPI extends BaseAPI {
     return group
   }
 
-  async fetchMessages(id) {
+  async fetchMessagesForGroup(id) {
     return await this.$getv2('/group/' + id + '/message')
   }
 
