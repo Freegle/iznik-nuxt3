@@ -207,8 +207,11 @@ import EmailValidator from './EmailValidator'
 import { useAuthStore } from '~/stores/auth'
 import { useMobileStore } from '@/stores/mobile'
 import me from '~/mixins/me.js'
-
-import { SignInWithApple } from '@capacitor-community/apple-sign-in';
+let SignInWithApple = false
+if (process.env.BUILDENV === 'ios') {
+  const modulename = '@capacitor-community/apple-sign-in'
+  SignInWithApple = import(modulename)
+}
 
 const NoticeMessage = () => import('~/components/NoticeMessage')
 const PasswordEntry = () => import('~/components/PasswordEntry')

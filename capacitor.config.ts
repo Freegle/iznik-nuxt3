@@ -8,13 +8,13 @@ const frconfig = {  // TODO
 }
 
 const AndroidKeyStorePath = process.env['FREEGLE_NUXT3_KEYSTORE_PATH']
-if( typeof AndroidKeyStorePath!=="string") throw "process.env.FREEGLE_NUXT3_KEYSTORE_PATH not set"
+if (typeof AndroidKeyStorePath !== "string") throw "process.env.FREEGLE_NUXT3_KEYSTORE_PATH not set"
 const AndroidKeyStorePassword = process.env['FREEGLE_NUXT3_KEYSTORE_PASSWORD']
-if( typeof AndroidKeyStorePassword!=="string") throw "process.env.FREEGLE_NUXT3_KEYSTORE_PASSWORD not set"
+if (typeof AndroidKeyStorePassword !== "string") throw "process.env.FREEGLE_NUXT3_KEYSTORE_PASSWORD not set"
 const AndroidKeyStoreAlias = process.env['FREEGLE_NUXT3_KEYSTORE_ALIAS']
-if( typeof AndroidKeyStoreAlias!=="string") throw "process.env.FREEGLE_NUXT3_KEYSTORE_ALIAS not set"
+if (typeof AndroidKeyStoreAlias !== "string") throw "process.env.FREEGLE_NUXT3_KEYSTORE_ALIAS not set"
 const AndroidKeyAliasPassword = process.env['FREEGLE_NUXT3_KEYALIAS_PASSWORD']
-if( typeof AndroidKeyAliasPassword!=="string") throw "process.env.FREEGLE_NUXT3_KEYALIAS_PASSWORD not set"
+if (typeof AndroidKeyAliasPassword !== "string") throw "process.env.FREEGLE_NUXT3_KEYALIAS_PASSWORD not set"
 
 const config: CapacitorConfig = {
   appId: 'org.ilovefreegle.direct',  // Fix back to .direct
@@ -34,6 +34,14 @@ const config: CapacitorConfig = {
     }
   },
   android: {
+    includePlugins: [
+      "@capacitor/app-launcher",
+      "@capacitor/device",
+      "@capacitor/push-notifications",
+      "@capacitor/status-bar",
+      "@capawesome/capacitor-badge",
+      "@codetrix-studio/capacitor-google-auth",
+    ],
     buildOptions: {
       "keystorePath": AndroidKeyStorePath,
       "keystorePassword": AndroidKeyStorePassword,
@@ -42,15 +50,15 @@ const config: CapacitorConfig = {
       "releaseType": "APK",
     }
   },
-  ios:{
-    includePlugins: [ 
-    "@capacitor/app-launcher",
-    "@capacitor/device",
-    "@capacitor/push-notifications",
-    "@capacitor/status-bar",
-    "@capawesome/capacitor-badge",
-	"@codetrix-studio/capacitor-google-auth",
-    "@capacitor-community/apple-sign-in"]
+  ios: {
+    includePlugins: [
+      "@capacitor/app-launcher",
+      "@capacitor/device",
+      "@capacitor/push-notifications",
+      "@capacitor/status-bar",
+      "@capawesome/capacitor-badge",
+      "@codetrix-studio/capacitor-google-auth",
+      "@capacitor-community/apple-sign-in"]
   },
   plugins: {
     PushNotifications: {

@@ -1,9 +1,5 @@
 [
 	{
-		"pkg": "@capacitor-community/apple-sign-in",
-		"classpath": "com.getcapacitor.community.applesignin.SignInWithApple"
-	},
-	{
 		"pkg": "@capacitor/app-launcher",
 		"classpath": "com.capacitorjs.plugins.applauncher.AppLauncherPlugin"
 	},
