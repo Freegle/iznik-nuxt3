@@ -42,6 +42,9 @@ const config: CapacitorConfig = {
       "releaseType": "APK",
     }
   },
+  ios:{
+    includePlugins: [ "capacitor-community/apple-sign-in"]
+  },
   plugins: {
     PushNotifications: {
       presentationOptions: ["badge", "sound", "alert"],

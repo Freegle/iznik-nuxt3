@@ -27,6 +27,7 @@ export const useMobileStore = defineStore({ // Do not persist
     isApp: false,
     mobileVersion: false,
     isiOS: false,
+    osVersion: false,
     devicePersistentId: null,
     lastBadgeCount: -1,
     modtools: false,
@@ -65,6 +66,7 @@ export const useMobileStore = defineStore({ // Do not persist
       const deviceinfo = await Device.getInfo()
       console.log('deviceinfo', deviceinfo)
       this.isiOS = deviceinfo.platform === 'ios'
+      this.osVersion = deviceinfo.osVersion
       const deviceid = await Device.getId()
       console.log('deviceid', deviceid)
       this.devicePersistentId = deviceid.uuid

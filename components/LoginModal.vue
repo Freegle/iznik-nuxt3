@@ -44,6 +44,13 @@
             >Continue with Facebook</span
           >
         </b-button>
+        <b-button v-if="isiOSapp" 
+          class="social-button social-button--apple" :disabled="appleDisabled" 
+          @click="loginApple"
+        >
+          <b-img src="signinbuttons/Apple_logo_white.svg" class="social-button__image" />
+          <span class="p-2 social-button__text font-weight-bold">Sign in with Apple</span>
+        </b-button>
         <b-button v-if="isApp"
           class="social-button social-button--google-app"
           @click="loginGoogle"
@@ -247,10 +254,17 @@ export default {
       return this.runtimeConfig.public.GOOGLE_CLIENT_ID
     },
     facebookDisabled() {
+      const mobileStore = useMobileStore()
+      if( mobileStore.isApp) return false
       return (
         this.bump &&
         (this.showSocialLoginBlocked || typeof window.FB === 'undefined')
       )
+    },
+    appleDisabled() {
+      const mobileStore = useMobileStore()
+      if( !mobileStore.isiOS) return true
+      return parseFloat(mobileStore.osVersion) < 13
     },
     googleDisabled() {
       return (
@@ -265,7 +279,7 @@ export default {
     },
     socialblocked() {
       const mobileStore = useMobileStore()
-      const googleActuallyDisabled =  mobileStore.isApp ? false : this.googleDisabled
+      const googleActuallyDisabled = mobileStore.isApp ? false : this.googleDisabled
       const ret =
         this.bump &&
         this.initialisedSocialLogin &&
@@ -299,6 +313,10 @@ export default {
       const mobileStore = useMobileStore()
       return mobileStore.isApp
     },
+    isiOSapp() {
+      const mobileStore = useMobileStore()
+      return mobileStore.isiOS
+    }
   },
   watch: {
     showModal: {
@@ -528,6 +546,17 @@ export default {
         this.socialLoginError = 'Facebook login error: ' + e.message
       }
     },
+    async loginApple() {
+      // https://github.com/capacitor-community/apple-sign-in
+      this.socialLoginError = null
+      this.loginWaitMessage = null
+      try{
+        console.log('loginApple')
+      } catch( e){
+        console.log('Apple login error: ', e)
+        this.socialLoginError = 'Apple login error: ' + e.message
+      }
+    },
     async loginGoogle() {
       try{
         console.log('loginGoogle')
@@ -686,6 +715,7 @@ export default {
 $color-facebook: #4267b2;
 $color-google: #4285f4;
 $color-yahoo: #6b0094;
+$color-apple: #000000;
 
 .signin__section--social {
   flex: 0 1 auto;
@@ -731,6 +761,17 @@ $color-yahoo: #6b0094;
   border: 2px solid $color-facebook;
   background-color: $color-facebook;
   width: 100%;
+}
+
+.social-button--apple {
+  border: 2px solid $color-apple;
+  background-color: $color-apple;
+  width: 100%;
+}
+.social-button--apple .social-button__image {
+  width: 56px;
+  height: 56px;
+  background-color: $color-black;
 }
 
 .social-button--google {
