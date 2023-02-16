@@ -11,7 +11,11 @@
           v-for="message in deDuplicatedMessages"
           :key="'messagelist-' + message.id"
         >
-          <div :ref="'messagewrapper-' + message.id" class="p-0">
+          <div
+            :id="'messagewrapper-' + message.id"
+            :ref="'messagewrapper-' + message.id"
+            class="p-0"
+          >
             <OurMessage
               :id="message.id"
               :matchedon="message.matchedon"
@@ -225,7 +229,7 @@ export default {
               // important.
               addIt = true
             } else {
-              const daysago = dayjs().diff(dayjs(m.date), 'day')
+              const daysago = dayjs().diff(dayjs(m.arrival), 'day')
 
               if (this.selectedType !== 'All') {
                 // Don't show freegled posts if you're already filtering.
@@ -263,7 +267,10 @@ export default {
         // Filter out dups by subject (for crossposting).
         const message = this.messageStore.byId(m.id)
 
-        if (message && m.id !== this.exclude) {
+        if (!message) {
+          // We haven't yet fetched it, so we don't yet know if it's a dup.
+          ret.push(m)
+        } else if (m.id !== this.exclude) {
           const key = message.fromuser + '|' + message.subject
           const already = key in dups
 
