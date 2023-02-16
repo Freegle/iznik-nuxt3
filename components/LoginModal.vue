@@ -208,6 +208,8 @@ import { useAuthStore } from '~/stores/auth'
 import { useMobileStore } from '@/stores/mobile'
 import me from '~/mixins/me.js'
 
+import { SignInWithApple } from '@capacitor-community/apple-sign-in';
+
 const NoticeMessage = () => import('~/components/NoticeMessage')
 const PasswordEntry = () => import('~/components/PasswordEntry')
 
@@ -552,6 +554,24 @@ export default {
       this.loginWaitMessage = null
       try{
         console.log('loginApple')
+        
+        const options = {
+			scopes: 'email name'
+		}
+
+		SignInWithApple.authorize(options)
+		  .then((result) => {
+		    // Handle user information
+		    // Validate token with server and create new session
+		    console.log("SIWA success",result)
+		    this.socialLoginError = "SIWA success"
+		  })
+		  .catch(e => {
+		    // Handle error
+		    console.log("SIWA error",e)
+		    this.socialLoginError = e.message
+		  });
+        
       } catch( e){
         console.log('Apple login error: ', e)
         this.socialLoginError = 'Apple login error: ' + e.message

@@ -286,6 +286,14 @@
     "@babel/helper-validator-identifier" "^7.19.1"
     to-fast-properties "^2.0.0"
 
+"@capacitor-community/apple-sign-in@^4.0.0":
+  version "4.0.0"
+  resolved "https://registry.npmjs.org/@capacitor-community/apple-sign-in/-/apple-sign-in-4.0.0.tgz"
+  integrity sha512-hWX3zzII7J84vCNo2seP6L8hskRFnpHjjxZkrDRCk2j+0BBFII/tv8eQNd/e2dmYZ6FBOuS2rK8JUbXdbPhxmw==
+  dependencies:
+    "@types/scriptjs" "0.0.2"
+    scriptjs "^2.5.9"
+
 "@capacitor/android@^4.0.0":
   version "4.6.3"
   resolved "https://registry.npmjs.org/@capacitor/android/-/android-4.6.3.tgz"
@@ -1351,6 +1359,11 @@
   integrity sha512-pSAff4IAxJjfAXUG6tFkO7dsSbTmf8CtUpfhhZ5VhkRpC4628tJhh3+V6H1E+/Gs9piSzYKT5yzHO5M4GG9jkw==
   dependencies:
     "@types/node" "*"
+
+"@types/scriptjs@0.0.2":
+  version "0.0.2"
+  resolved "https://registry.npmjs.org/@types/scriptjs/-/scriptjs-0.0.2.tgz"
+  integrity sha512-GFrUgzGYfNX3VWZwMyzr0JrBwzLv5Kes4BQBvo6hXdRy14/GBbpCiVwwB7v1o2xIEvFf+9GyznmYhuesQQjSag==
 
 "@types/semver@^7.3.12":
   version "7.3.13"
@@ -7743,6 +7756,11 @@ schema-utils@^4.0.0:
     ajv "^8.8.0"
     ajv-formats "^2.1.1"
     ajv-keywords "^5.0.0"
+
+scriptjs@^2.5.9:
+  version "2.5.9"
+  resolved "https://registry.npmjs.org/scriptjs/-/scriptjs-2.5.9.tgz"
+  integrity sha512-qGVDoreyYiP1pkQnbnFAUIS5AjenNwwQBdl7zeos9etl+hYKWahjRTfzAZZYBv5xNHx7vNKCmaLDQZ6Fr2AEXg==
 
 scule@^1.0.0:
   version "1.0.0"

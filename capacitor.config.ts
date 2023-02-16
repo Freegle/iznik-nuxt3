@@ -50,7 +50,7 @@ const config: CapacitorConfig = {
     "@capacitor/status-bar",
     "@capawesome/capacitor-badge",
 	"@codetrix-studio/capacitor-google-auth",
-    "capacitor-community/apple-sign-in"]
+    "@capacitor-community/apple-sign-in"]
   },
   plugins: {
     PushNotifications: {
