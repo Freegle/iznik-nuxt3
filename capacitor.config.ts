@@ -43,7 +43,14 @@ const config: CapacitorConfig = {
     }
   },
   ios:{
-    includePlugins: [ "capacitor-community/apple-sign-in"]
+    includePlugins: [ 
+    "@capacitor/app-launcher",
+    "@capacitor/device",
+    "@capacitor/push-notifications",
+    "@capacitor/status-bar",
+    "@capawesome/capacitor-badge",
+	"@codetrix-studio/capacitor-google-auth",
+    "capacitor-community/apple-sign-in"]
   },
   plugins: {
     PushNotifications: {
