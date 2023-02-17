@@ -551,29 +551,37 @@ export default {
         this.socialLoginError = 'Facebook login error: ' + e.message
       }
     },
-    async loginApple() {
+    loginApple() {
       // https://github.com/capacitor-community/apple-sign-in
       this.socialLoginError = null
       this.loginWaitMessage = null
       try{
         console.log('loginApple')
         
-        const options = {
-			scopes: 'email name'
-		}
+        const options = { scopes: 'email name' }
 
-		SignInWithApple.authorize(options)
-		  .then((result) => {
-		    // Handle user information
-		    // Validate token with server and create new session
-		    console.log("SIWA success",result)
-		    this.socialLoginError = "SIWA success"
-		  })
-		  .catch(e => {
-		    // Handle error
-		    console.log("SIWA error",e)
-		    this.socialLoginError = e.message
-		  });
+        SignInWithApple.authorize(options)
+          .then( async result => {
+            // Handle user information
+            // Validate token with server and create new session
+            console.log("SIWA success",result.identityToken,result)
+            
+            if (result.identityToken) { // identityToken, user, etc
+              await this.authStore.login({
+                applecredentials: result.identityToken,
+                applelogin: true
+              })
+              // We are now logged in.
+              self.pleaseShowModal = false
+            } else{
+              this.socialLoginError = "No identityToken given"
+            }
+          })
+          .catch(e => {
+            console.log("SIWA error",e)
+            this.socialLoginError = e.message
+            console.log("SIWA error code",e.code)
+          });
         
       } catch( e){
         console.log('Apple login error: ', e)

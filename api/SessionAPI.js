@@ -29,6 +29,10 @@ export default class SessionAPI extends BaseAPI {
     googlejwt,
     u,
     k,
+    mobile,
+    appversion,
+    applecredentials,
+    applelogin,
   }) {
     return this.$post('/session', {
       email,
@@ -40,6 +44,10 @@ export default class SessionAPI extends BaseAPI {
       googlejwt,
       u,
       k,
+      mobile,
+      appversion,
+      applecredentials,
+      applelogin,
     })
   }
 
