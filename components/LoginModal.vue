@@ -534,7 +534,7 @@ export default {
       }
     },
     loginYahoo() {
-      this.authStore.oginType = 'Yahoo'
+      this.authStore.loginType = 'Yahoo'
 
       // Sadly Yahoo doesn't support a Javascript-only OAuth flow, so far as I can tell.  So what we do is
       // redirect to Yahoo, which returns back to us with a code parameter, which we then pass to the server
