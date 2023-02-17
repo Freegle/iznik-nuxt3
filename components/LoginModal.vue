@@ -207,11 +207,12 @@ import EmailValidator from './EmailValidator'
 import { useAuthStore } from '~/stores/auth'
 import { useMobileStore } from '@/stores/mobile'
 import me from '~/mixins/me.js'
-let SignInWithApple = false
-if (process.env.BUILDENV === 'ios') {
-  const modulename = '@capacitor-community/apple-sign-in'
-  SignInWithApple = import(modulename)
-}
+
+console.log('loginApple SIWA start')
+import { SignInWithApple } from '@capacitor-community/apple-sign-in'
+// const modulename = '@capacitor-community/apple-sign-in'
+// SignInWithApple = import(modulename)
+console.log('loginApple SIWA got')
 
 const NoticeMessage = () => import('~/components/NoticeMessage')
 const PasswordEntry = () => import('~/components/PasswordEntry')
@@ -557,6 +558,7 @@ export default {
       this.loginWaitMessage = null
       try{
         console.log('loginApple')
+
         
         const options = { scopes: 'email name' }
 
@@ -564,11 +566,11 @@ export default {
           .then( async result => {
             // Handle user information
             // Validate token with server and create new session
-            console.log("SIWA success",result.identityToken,result)
+            console.log("SIWA success",result.response.identityToken,result)
             
-            if (result.identityToken) { // identityToken, user, etc
+            if (result.response.identityToken) { // identityToken, user, etc
               await this.authStore.login({
-                applecredentials: result.identityToken,
+                applecredentials: result.response.identityToken,
                 applelogin: true
               })
               // We are now logged in.
