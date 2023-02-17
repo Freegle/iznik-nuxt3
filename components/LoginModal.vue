@@ -572,7 +572,7 @@ export default {
             }
           })
           .catch(e => {
-            if( e.message.indexOf('1003') !== -1 ) {
+            if( e.message.indexOf('1001') !== -1 ) {
               this.socialLoginError = 'Apple login cancelled'
             } else {
               console.log("SIWA error",e)
