@@ -33,6 +33,7 @@ export default class SessionAPI extends BaseAPI {
     appversion,
     applecredentials,
     applelogin,
+    yahoocodelogin,
   }) {
     return this.$post('/session', {
       email,
@@ -48,6 +49,7 @@ export default class SessionAPI extends BaseAPI {
       appversion,
       applecredentials,
       applelogin,
+      yahoocodelogin,
     })
   }
 

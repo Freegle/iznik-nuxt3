@@ -208,6 +208,7 @@ import { useMobileStore } from '@/stores/mobile'
 import me from '~/mixins/me.js'
 import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth'
 import { SignInWithApple } from '@capacitor-community/apple-sign-in'
+import { appYahooLogin } from '../composables/app-yahoo'
 
 const NoticeMessage = () => import('~/components/NoticeMessage')
 const PasswordEntry = () => import('~/components/PasswordEntry')
@@ -516,6 +517,9 @@ export default {
 
       this.nativeLoginError = null
       this.socialLoginError = null
+
+      // App: https://github.com/capacitor-community/facebook-login
+
       try {
         let response = null
         const promise = new Promise(function (resolve) {
@@ -621,14 +625,70 @@ export default {
       }
     },
     loginYahoo() {
-      this.authStore.oginType = 'Yahoo'
+      this.authStore.loginType = 'Yahoo'
+
+      this.nativeLoginError = null
+      this.socialLoginError = null
+
+      const mobileStore = useMobileStore()
+      if( mobileStore.isApp) {
+        appYahooLogin(this.$route.fullPath,
+        ret => { // arrow so .this. is correct
+            //this.loginWaitMessage = "Please wait..."
+            //console.log('appYahooLogin completed', ret)
+            const returnto = ret.returnto
+            const code = ret.code
+            console.log("Yahoo AAAA")
+            if (this.me) {
+              console.log("Yahoo BBB")
+              // We are logged in.  Go back to where we want to be.
+              console.log('Already logged in')
+              if (returnto) {
+                // Go where we want to be.  Make sure we remove the code to avoid us trying to log in again.
+                console.log('Return to', returnto)
+                this.$router.push(returnto)
+              } else {
+                console.log('Just go home')
+                this.$router.push('/')
+              }
+            } else if (!code) {
+              this.socialLoginError = 'Yahoo login failed: '+ret.error
+              //this.loginWaitMessage = null
+            } else {
+              console.log("Yahoo DDD")
+              const self = this
+              this.authStore.login({
+                yahoocodelogin: code
+              })
+              .then(async result => {
+                const ret = result.data
+                console.log('Yahoologin session login returned', ret)
+                if (ret.ret === 0) {
+                  console.log('Logged in')
+                  this.pleaseShowModal = false
+
+                  if (returnto) {
+                    // Go where we want to be.  Make sure we remove the code to avoid us trying to log in again.
+                    console.log('Return to', returnto)
+                    this.$router.go(returnto)
+                  } else {
+                    console.log('Just go home')
+                    this.$router.push('/')
+                  }
+                } else {
+                  console.error('Server login failed', ret)
+                  this.socialLoginError = 'Yahoo login failed'
+                  //this.loginWaitMessage = null
+                }
+              })
+            }
+          })
+        return
+      }
 
       // Sadly Yahoo doesn't support a Javascript-only OAuth flow, so far as I can tell.  So what we do is
       // redirect to Yahoo, which returns back to us with a code parameter, which we then pass to the server
       // to complete the signin.  This replaces the old flow which stopped working in Jan 2020.
-      this.nativeLoginError = null
-      this.socialLoginError = null
-
       const url =
         'https://api.login.yahoo.com/oauth2/request_auth?client_id=' +
         this.runtimeConfig.public.YAHOO_CLIENTID +

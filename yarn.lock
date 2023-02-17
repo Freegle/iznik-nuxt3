@@ -344,6 +344,11 @@
   resolved "https://registry.npmjs.org/@capacitor/ios/-/ios-4.6.3.tgz"
   integrity sha512-sjvyIx/7U376YnTWIXjIBspzf0e1ZKocVjpTeqtM9AbUg4XtPQZa1Lje/lT6EFQ71bGTcxmq0wylnPRB7LzHNg==
 
+"@capacitor/network@^4.1.0":
+  version "4.1.0"
+  resolved "https://registry.npmjs.org/@capacitor/network/-/network-4.1.0.tgz"
+  integrity sha512-GMJ6LmxmrFA55rAaYxgm4tKSZyUmuLRreQz5Gdu0P09Ja8abSjmXa/DX16gOu1I1+wqHWm2rRI6nPkeUH55Ibw==
+
 "@capacitor/push-notifications@^4.1.2":
   version "4.1.2"
   resolved "https://registry.npmjs.org/@capacitor/push-notifications/-/push-notifications-4.1.2.tgz"
@@ -3015,6 +3020,11 @@ copy-webpack-plugin@^9.0.1:
     normalize-path "^3.0.0"
     schema-utils "^3.1.1"
     serialize-javascript "^6.0.0"
+
+cordova-plugin-inappbrowser@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.npmjs.org/cordova-plugin-inappbrowser/-/cordova-plugin-inappbrowser-5.0.0.tgz"
+  integrity sha512-MqnpmUQ/iy6hxtIGDdlIhy8aNi1pNanLATpbnkk7uCqW9YQ4rH/dGK9zESbZ50pUi2A2D2QMjBXNV175TJK5OQ==
 
 core-js@^3.26.0, core-js@^3.6.5:
   version "3.27.2"

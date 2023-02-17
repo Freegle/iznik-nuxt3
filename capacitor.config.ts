@@ -35,8 +35,11 @@ const config: CapacitorConfig = {
   },
   android: {
     includePlugins: [
+      "cordova-plugin-inappbrowser",
       "@capacitor/app-launcher",
+      "@capacitor/browser",
       "@capacitor/device",
+      "@capacitor/network",
       "@capacitor/push-notifications",
       "@capacitor/status-bar",
       "@capawesome/capacitor-badge",
@@ -52,8 +55,11 @@ const config: CapacitorConfig = {
   },
   ios: {
     includePlugins: [
+      "cordova-plugin-inappbrowser",
       "@capacitor/app-launcher",
+      "@capacitor/browser",
       "@capacitor/device",
+      "@capacitor/network",
       "@capacitor/push-notifications",
       "@capacitor/status-bar",
       "@capawesome/capacitor-badge",
