@@ -200,19 +200,14 @@
   </b-modal>
 </template>
 <script>
-import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth'
 import { mapState, mapWritableState } from 'pinia'
 import { LoginError, SignUpError } from '../api/BaseAPI'
 import EmailValidator from './EmailValidator'
 import { useAuthStore } from '~/stores/auth'
 import { useMobileStore } from '@/stores/mobile'
 import me from '~/mixins/me.js'
-
-console.log('loginApple SIWA start')
+import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth'
 import { SignInWithApple } from '@capacitor-community/apple-sign-in'
-// const modulename = '@capacitor-community/apple-sign-in'
-// SignInWithApple = import(modulename)
-console.log('loginApple SIWA got')
 
 const NoticeMessage = () => import('~/components/NoticeMessage')
 const PasswordEntry = () => import('~/components/PasswordEntry')
@@ -558,14 +553,11 @@ export default {
       this.loginWaitMessage = null
       try{
         console.log('loginApple')
-
-        
         const options = { scopes: 'email name' }
 
         SignInWithApple.authorize(options)
           .then( async result => {
-            // Handle user information
-            // Validate token with server and create new session
+            // Sign in using token at server
             console.log("SIWA success",result.response.identityToken,result)
             
             if (result.response.identityToken) { // identityToken, user, etc
@@ -580,9 +572,12 @@ export default {
             }
           })
           .catch(e => {
-            console.log("SIWA error",e)
-            this.socialLoginError = e.message
-            console.log("SIWA error code",e.code)
+            if( e.message.indexOf('1003') !== -1 ) {
+              this.socialLoginError = 'Apple login cancelled'
+            } else {
+              console.log("SIWA error",e)
+              this.socialLoginError = e.message
+            }
           });
         
       } catch( e){
