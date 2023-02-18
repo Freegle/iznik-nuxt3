@@ -566,10 +566,12 @@ export default {
             console.log("SIWA success",result.response.identityToken,result)
             
             if (result.response.identityToken) { // identityToken, user, etc
+              console.log("SIWA AAAA",result.response.identityToken)
               await this.authStore.login({
                 applecredentials: result.response.identityToken,
                 applelogin: true
               })
+              console.log("SIWA BBBB")
               // We are now logged in.
               self.pleaseShowModal = false
             } else{
@@ -577,6 +579,7 @@ export default {
             }
           })
           .catch(e => {
+            console.log("SIWA ZZZ",e)
             if( e.message.indexOf('1001') !== -1 ) {
               this.socialLoginError = 'Apple login cancelled'
             } else {
