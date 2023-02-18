@@ -627,7 +627,6 @@ export default {
     },
     loginYahoo() {
       this.loginType = 'Yahoo'
-      this.authStore.loginType = 'Yahoo'
 
       this.nativeLoginError = null
       this.socialLoginError = null
@@ -640,9 +639,7 @@ export default {
             //console.log('appYahooLogin completed', ret)
             const returnto = ret.returnto
             const code = ret.code
-            console.log("Yahoo AAAA")
             if (this.me) {
-              console.log("Yahoo BBB")
               // We are logged in.  Go back to where we want to be.
               console.log('Already logged in')
               if (returnto) {
@@ -657,8 +654,6 @@ export default {
               this.socialLoginError = 'Yahoo login failed: '+ret.error
               //this.loginWaitMessage = null
             } else {
-              console.log("Yahoo DDD")
-              const self = this
               this.authStore.login({
                 yahoocodelogin: code
               })
