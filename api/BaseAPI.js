@@ -34,7 +34,7 @@ export class SignUpError extends Error {
 export default class BaseAPI {
   constructor(config) {
     this.$axios = axios
-    this.ourConfig = config
+    this.config = config
   }
 
   async $request(method, path, config, logError = true) {
@@ -73,7 +73,7 @@ export default class BaseAPI {
         ...config,
         method,
         headers,
-        url: this.ourConfig.public.APIv1 + path,
+        url: this.config.public.APIv1 + path,
       })
       ;({ status, data } = ret)
     } catch (e) {
@@ -221,7 +221,7 @@ export default class BaseAPI {
         ...config,
         method,
         headers,
-        url: this.ourConfig.public.APIv2 + path,
+        url: this.config.public.APIv2 + path,
       })
       ;({ status, data } = ret)
     } catch (e) {

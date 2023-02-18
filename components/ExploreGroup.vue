@@ -29,7 +29,7 @@ export default {
   },
   async setup(props) {
     const groupStore = useGroupStore()
-    await groupStore.fetchMessages(props.id)
+    await groupStore.fetchMessagesForGroup(props.id)
     return { groupStore }
   },
   data() {

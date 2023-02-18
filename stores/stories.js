@@ -4,7 +4,6 @@ import api from '~/api'
 export const useStoryStore = defineStore({
   id: 'story',
   state: () => ({
-    config: null,
     list: {},
     fetching: {},
   }),

@@ -39,3 +39,17 @@ export function calculateMapHeight(heightFraction) {
 
   return height
 }
+
+export async function loadLeaflet() {
+  if (process.client && !window.L) {
+    window.L = await import('leaflet/dist/leaflet-src.esm')
+    window.L.Map.addInitHook(
+      'addHandler',
+      'gestureHandling',
+      await import('leaflet-gesture-handling').GestureHandling
+    )
+
+    window.Wkt = await import('wicket')
+    await import('wicket/wicket-leaflet')
+  }
+}

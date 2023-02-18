@@ -4,7 +4,6 @@ import api from '~/api'
 export const useGroupStore = defineStore({
   id: 'group',
   state: () => ({
-    config: {},
     list: {},
     messages: {},
     allGroups: {},
@@ -84,9 +83,9 @@ export const useGroupStore = defineStore({
     remember(id, val) {
       this._remember[id] = val
     },
-    async fetchMessages(id) {
+    async fetchMessagesForGroup(id) {
       id = parseInt(id)
-      const messages = await api(this.config).group.fetchMessages(id)
+      const messages = await api(this.config).group.fetchMessagesForGroup(id)
 
       if (messages) {
         this.messages[id] = messages

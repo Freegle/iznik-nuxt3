@@ -2,9 +2,9 @@
   <div>
     <h2 class="sr-only">Map of offers and wanteds</h2>
     <Suspense>
+      <!--      :key="'postmap-' + bump"-->
       <PostMap
         v-if="initialBounds"
-        :key="'postmap-' + bump"
         v-model:ready="mapready"
         v-model:bounds="bounds"
         v-model:show-groups="showGroups"
@@ -501,10 +501,22 @@ export default {
     },
   },
   watch: {
-    selectedGroup(newVal) {
+    async selectedGroup(newVal) {
       if (newVal) {
         this.groupStore.fetch(newVal)
       }
+      console.log('Isochrone group changed', newVal)
+      await this.messageStore.clear()
+
+      if (newVal) {
+        await this.groupStore.fetch(newVal)
+        await this.groupStore.fetchMessagesForGroup(newVal)
+        console.log('Fetched messages')
+      } else {
+        await this.isochroneStore.fetch()
+      }
+
+      this.infiniteId++
     },
     selectedType(newVal) {
       this.miscStore.set({

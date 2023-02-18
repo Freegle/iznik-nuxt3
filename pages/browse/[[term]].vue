@@ -115,7 +115,8 @@
 import dayjs from 'dayjs'
 import { useRoute, useRouter } from 'vue-router'
 import { defineAsyncComponent } from 'vue'
-import { buildHead } from '../../composables/useBuildHead'
+import { loadLeaflet } from '~/composables/useMap'
+import { buildHead } from '~/composables/useBuildHead'
 import VisibleWhen from '~/components/VisibleWhen'
 import { useMiscStore } from '~/stores/misc'
 import { useAuthStore } from '~/stores/auth'
@@ -220,14 +221,7 @@ export default {
       immediate: true,
       async handler(newVal, oldVal) {
         if (newVal && !oldVal && process.client) {
-          // No point loading leafleft (which is large) until we need it.
-          if (!window.L) {
-            const wkt = await import('wicket')
-            window.L = await import('leaflet/dist/leaflet-src.esm')
-            await import('wicket/wicket-leaflet')
-            this.isochroneStore.initLeaflet(wkt)
-          }
-
+          await loadLeaflet()
           this.calculateInitialMapBounds(!this.searchTerm)
           this.bump++
         }
@@ -314,11 +308,8 @@ export default {
 
             this.myGroups.forEach(async (g) => {
               if (g.bbox) {
-                const Wkt = await import('wicket')
-                window.L = await import('leaflet/dist/leaflet-src.esm')
-                await import('wicket/wicket-leaflet')
-
-                const wkt = new Wkt.Wkt()
+                await loadLeaflet()
+                const wkt = new window.Wkt.Wkt()
                 wkt.read(g.bbox)
                 const obj = wkt.toObject()
 

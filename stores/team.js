@@ -4,7 +4,6 @@ import api from '~/api'
 export const useTeamStore = defineStore({
   id: 'team',
   state: () => ({
-    config: null,
     list: [],
     fetching: null,
   }),

@@ -4,8 +4,6 @@ import api from '~/api'
 export const useIsochroneStore = defineStore({
   id: 'isochrone',
   state: () => ({
-    config: null,
-    WKT: null,
     L: null,
     list: [],
     fetchingMessages: null,
@@ -14,14 +12,11 @@ export const useIsochroneStore = defineStore({
     bounds: null,
   }),
   actions: {
-    initLeaflet(wkt) {
-      this.Wkt = wkt
-    },
     init(config) {
       this.config = config
     },
     async fetch(force) {
-      // The caller is expected to have made sure that leaflet and Wkt are loaded and passed to initLeaflet.  This
+      // The caller is expected to have made sure that leaflet and Wkt are loaded.  This
       // is a bit of a kludge to get SSR working.
       if (!this.list?.length || force) {
         try {
@@ -91,7 +86,7 @@ export const useIsochroneStore = defineStore({
 
         isochrones.forEach((i) => {
           try {
-            const wkt = new this.Wkt.Wkt()
+            const wkt = new window.Wkt.Wkt()
             wkt.read(i.polygon)
             const obj = wkt.toObject()
             const thisbounds = obj.getBounds()
@@ -103,7 +98,7 @@ export const useIsochroneStore = defineStore({
             nelat = nelat === null ? thisne.lat : Math.max(nelat, thisne.lat)
             nelng = nelng === null ? thisne.lng : Math.min(nelng, thisne.lng)
           } catch (e) {
-            console.log('WKT parse error on isochrone', i.id, e)
+            console.log('WKT parse error on isochrone', i.id, e, i)
           }
         })
 

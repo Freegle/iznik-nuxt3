@@ -4,7 +4,6 @@ import api from '~/api'
 export const useSearchStore = defineStore({
   id: 'search',
   state: () => ({
-    config: null,
     list: [],
     fetching: null,
   }),

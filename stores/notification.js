@@ -4,7 +4,6 @@ import api from '~/api'
 export const useNotificationStore = defineStore({
   id: 'notification',
   state: () => ({
-    config: null,
     list: [],
     listById: {},
     count: 0,

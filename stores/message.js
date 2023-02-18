@@ -7,7 +7,6 @@ import { useGroupStore } from '~/stores/group'
 export const useMessageStore = defineStore({
   id: 'message',
   state: () => ({
-    config: {},
     list: {},
     byUserList: {},
 
@@ -62,11 +61,15 @@ export const useMessageStore = defineStore({
         this.fetchingCount++
         const msgs = await api(this.config).message.fetch(left.join(','))
 
-        msgs.forEach((msg) => {
-          this.list[msg.id] = msg
-        })
+        if (msgs && msgs.forEach) {
+          msgs.forEach((msg) => {
+            this.list[msg.id] = msg
+          })
 
-        this.fetchingCount--
+          this.fetchingCount--
+        } else {
+          console.error('Failed to fetch', msgs)
+        }
       }
     },
     async fetchInBounds(swlat, swlng, nelat, nelng, groupid) {

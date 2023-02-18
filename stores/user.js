@@ -4,7 +4,6 @@ import api from '~/api'
 export const useUserStore = defineStore({
   id: 'user',
   state: () => ({
-    config: {},
     list: {},
     locationList: {},
     fetching: {},
