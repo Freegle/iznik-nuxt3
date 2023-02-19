@@ -43,6 +43,7 @@ const config: CapacitorConfig = {
       "@capacitor/push-notifications",
       "@capacitor/status-bar",
       "@capawesome/capacitor-badge",
+      "@capacitor-community/facebook-login",
       "@codetrix-studio/capacitor-google-auth",
     ],
     buildOptions: {
@@ -63,8 +64,10 @@ const config: CapacitorConfig = {
       "@capacitor/push-notifications",
       "@capacitor/status-bar",
       "@capawesome/capacitor-badge",
+      "@capacitor-community/facebook-login",
+      "@capacitor-community/apple-sign-in",
       "@codetrix-studio/capacitor-google-auth",
-      "@capacitor-community/apple-sign-in"]
+    ]
   },
   plugins: {
     PushNotifications: {

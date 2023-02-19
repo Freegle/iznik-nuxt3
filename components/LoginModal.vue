@@ -209,6 +209,7 @@ import { useMobileStore } from '@/stores/mobile'
 import me from '~/mixins/me.js'
 import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth'
 import { SignInWithApple } from '@capacitor-community/apple-sign-in'
+import { FacebookLogin } from '@capacitor-community/facebook-login'
 import { appYahooLogin } from '../composables/app-yahoo'
 
 const NoticeMessage = () => import('~/components/NoticeMessage')
@@ -257,16 +258,14 @@ export default {
       return this.runtimeConfig.public.GOOGLE_CLIENT_ID
     },
     facebookDisabled() {
-      const mobileStore = useMobileStore()
-      if( mobileStore.isApp) return false
+      if( this.isApp) return false
       return (
         this.bump &&
         (this.showSocialLoginBlocked || typeof window.FB === 'undefined')
       )
     },
     appleDisabled() {
-      const mobileStore = useMobileStore()
-      if( !mobileStore.isiOS) return true
+      if( !this.isiOS) return true
       return parseFloat(mobileStore.osVersion) < 13
     },
     googleDisabled() {
@@ -281,8 +280,7 @@ export default {
       return false
     },
     socialblocked() {
-      const mobileStore = useMobileStore()
-      const googleActuallyDisabled = mobileStore.isApp ? false : this.googleDisabled
+      const googleActuallyDisabled = this.isApp ? false : this.googleDisabled
       const ret =
         this.bump &&
         this.initialisedSocialLogin &&
@@ -331,7 +329,9 @@ export default {
           if (!this.initialisedSocialLogin) {
             // We only use the Google and Facebook SDKs in login, so we can install them here in the modal.  This means we
             // don't load the scripts for every page.
-            this.installFacebookSDK()
+            if( !this.isApp){
+              this.installFacebookSDK()
+            }
             this.initialisedSocialLogin = true
           }
 
@@ -521,6 +521,29 @@ export default {
 
       // App: https://github.com/capacitor-community/facebook-login
 
+      if( this.isApp) {
+        console.log("Facebook app start")
+        const FACEBOOK_PERMISSIONS = [
+          'email',
+          //'user_birthday',
+          //'user_photos',
+          //'user_gender',
+        ]
+        try{
+          const result = await FacebookLogin.login({ permissions: FACEBOOK_PERMISSIONS })
+          console.log("Facebook result", result) // recentlyGrantedPermissions, recentlyDeniedPermissions
+          console.log("Facebook", result.recentlyGrantedPermissions, result.recentlyDeniedPermissions) // recentlyGrantedPermissions, recentlyDeniedPermissions
+          if (result.accessToken) {
+            // Login successful.
+            console.log(`Facebook access token is ${result.accessToken.token}`)
+          }
+          this.socialLoginError = 'Facebook app login failed'
+        } catch (e) {
+          this.socialLoginError = 'Facebook app login error: ' + e.message
+        }
+        return 
+      }
+
       try {
         let response = null
         const promise = new Promise(function (resolve) {
@@ -634,8 +657,7 @@ export default {
       this.nativeLoginError = null
       this.socialLoginError = null
 
-      const mobileStore = useMobileStore()
-      if( mobileStore.isApp) {
+      if( this.isApp) {
         appYahooLogin(this.$route.fullPath,
         ret => { // arrow so .this. is correct
             //this.loginWaitMessage = "Please wait..."

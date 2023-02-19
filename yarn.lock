@@ -294,6 +294,13 @@
     "@types/scriptjs" "0.0.2"
     scriptjs "^2.5.9"
 
+"@capacitor-community/facebook-login@^4.0.0-1":
+  version "4.0.0-1"
+  resolved "https://registry.npmjs.org/@capacitor-community/facebook-login/-/facebook-login-4.0.0-1.tgz"
+  integrity sha512-YLv20lEq9hL04KN/rAwqzJ8dPaB9vIHEDVx0p2iY1TiOihiRwWfAxzx/sv40vq7AmBI4xSXXfn0dfXDDRhBxvA==
+  dependencies:
+    "@capacitor/core" "^4.0.0"
+
 "@capacitor/android@^4.0.0":
   version "4.6.3"
   resolved "https://registry.npmjs.org/@capacitor/android/-/android-4.6.3.tgz"

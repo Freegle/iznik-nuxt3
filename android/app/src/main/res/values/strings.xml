@@ -4,4 +4,6 @@
     <string name="title_activity_main">Freegle</string>
     <string name="package_name">org.ilovefreegle.direct</string>
     <string name="custom_url_scheme">org.ilovefreegle.direct</string>
+    <string name="facebook_app_id">134980666550322</string>
+    <string name="facebook_client_token">eb343dff9d3f338007745bdd0c9a6cd5</string>
 </resources>
