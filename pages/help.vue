@@ -136,7 +136,7 @@
               </div>
               <p class="mt-2">
                 The app is only available in the UK app stores. We support
-                Android 4.4/iOS 10 or later.
+                Android 5.1/iOS 13 or later.
               </p>
             </div>
           </HelpQuestion>
