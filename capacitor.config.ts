@@ -55,6 +55,7 @@ const config: CapacitorConfig = {
     }
   },
   ios: {
+    contentInset: 'always',
     includePlugins: [
       "cordova-plugin-inappbrowser",
       "@capacitor/app-launcher",
@@ -67,7 +68,7 @@ const config: CapacitorConfig = {
       "@capacitor-community/facebook-login",
       "@capacitor-community/apple-sign-in",
       "@codetrix-studio/capacitor-google-auth",
-    ]
+    ] 
   },
   plugins: {
     PushNotifications: {
