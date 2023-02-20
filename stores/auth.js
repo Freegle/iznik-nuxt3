@@ -5,6 +5,7 @@ import { useComposeStore } from '../stores/compose'
 import api from '~/api'
 import { useCookie } from '#imports'
 import { useMobileStore } from '@/stores/mobile'
+import { FacebookLogin } from '@capacitor-community/facebook-login';
 
 export const useAuthStore = defineStore({
   id: 'auth',
@@ -116,14 +117,23 @@ export const useAuthStore = defineStore({
       this.userlist = []
     },
     async logout() {
+      const mobileStore = useMobileStore()
       try {
         console.log('Disable Google autoselect')
         window?.google?.accounts?.id?.disableAutoSelect()
       } catch (e) {
         console.log('Ignore Google autoselect error', e)
       }
+      if( mobileStore.isApp){
+        try {
+          console.log('Facebook logout start')
+          await FacebookLogin.logout();
+        } catch (e) {
+          console.log('Ignore Facebook logout error', e)
+        }
 
-      this.logoutPushId() // CC
+        this.logoutPushId()
+      }
 
       await this.$api.session.logout()
 
@@ -268,7 +278,7 @@ export const useAuthStore = defineStore({
         // Set the user, which will trigger various re-rendering if we were required to be logged in.
         this.setUser(me)
 
-        await this.savePushId() // Tell server our mobile push notification id, if available // CC
+        await this.savePushId() // Tell server our mobile push notification id, if available
 
         const composeStore = useComposeStore()
         const email = composeStore.email
@@ -339,7 +349,7 @@ export const useAuthStore = defineStore({
         await this.$api.session.related(this.userlist)
       }
     },
-    async savePushId(){ // CC
+    async savePushId(){
       const mobileStore = useMobileStore()
       // Tell server our push notification id if logged in
       if( this.user !== null) {

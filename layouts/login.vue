@@ -24,7 +24,7 @@ export default {
     LayoutCommon,
   },
   async setup() {
-    const mobileStore = useMobileStore() // CC
+    const mobileStore = useMobileStore()
     const ready = ref(mobileStore.isApp)
     const oneTap = ref(false)
     const googleReady = ref(false)
@@ -51,7 +51,7 @@ export default {
       }
     }
 
-    if (!ready.value && !mobileStore.isApp) { // CC
+    if (!ready.value && !mobileStore.isApp) {
       // We don't have a valid JWT.  See if OneTap can sign us in.
       oneTap.value = true
     }
