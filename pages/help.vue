@@ -106,6 +106,10 @@
           <HelpQuestion id="app" :matches="matches">
             <template #title>Do you have a mobile app?</template>
             <div>
+              <div v-if="isApp">
+                Yes! You are using the {{ appType }} app, version {{ mobileVersion }}.
+              </div>
+              <div v-else>
               <p>
                 We do! Freegling is easy on mobiles and tablets, and you get
                 notifications of replies so you don't have to rely on email.
@@ -142,9 +146,10 @@
               </div>
               <p class="mt-2">
                 The app is only available in the UK app stores. We support
-                Android 4.4/iOS 10 or later.
+                Android 5.1/iOS 13 or later.
               </p>
             </div>
+          </div>
           </HelpQuestion>
           <HelpQuestion id="canihelp" :matches="matches">
             <template #title>Can I help?</template>
@@ -390,6 +395,10 @@ export default {
     isApp() {
       const mobileStore = useMobileStore()
       return mobileStore.isApp
+    },
+    appType() {
+      const mobileStore = useMobileStore()
+      return mobileStore.isiOS ? 'iOS' : 'Android'
     },
     mobileVersion() {
       const runtimeConfig = useRuntimeConfig()

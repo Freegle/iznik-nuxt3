@@ -82,7 +82,7 @@
       </client-only>
     </div>
     <client-only>
-      <div class="app-download mt-2">
+      <div v-if="!isApp" class="app-download mt-2">
         <a
           href="https://play.google.com/store/apps/details?id=org.ilovefreegle.direct"
           target="_blank"
@@ -119,6 +119,7 @@
 import { useRoute } from 'vue-router'
 import { buildHead } from '../composables/useBuildHead'
 import { useMiscStore } from '../stores/misc'
+import { useMobileStore } from '../stores/mobile'
 import MainFooter from '../components/MainFooter'
 import { useRouter } from '#imports'
 import api from '~/api'
@@ -159,6 +160,12 @@ export default {
       type: null,
       timeToPlay: false,
     }
+  },
+  computed: {
+    isApp() {
+      const mobileStore = useMobileStore()
+      return mobileStore.isApp
+    },
   },
   async mounted() {
     if (process.client) {
