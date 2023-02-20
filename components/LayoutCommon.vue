@@ -1,7 +1,6 @@
 <template>
   <div>
     <client-only>
-      <div v-if="isiOSapp" style="height:50px;"></div>
       <MainHeader
         v-model:chat-count="chatCount"
         v-model:unread-notification-count="unreadNotificationCount"
@@ -43,7 +42,6 @@
 <script>
 import { useMiscStore } from '../stores/misc'
 import { useChatStore } from '../stores/chat'
-import { useMobileStore } from '~/stores/mobile'
 import SomethingWentWrong from './SomethingWentWrong'
 const SupportLink = () => import('~/components/SupportLink')
 const BouncingEmail = () => import('~/components/BouncingEmail')
@@ -72,10 +70,6 @@ export default {
       const store = useMiscStore()
       return store.getBreakpoint
     },
-    isiOSapp(){ // TODO BODGE TO SHIFT APP DOWN SO HEADER VISIBLE
-      const mobileStore = useMobileStore()
-      return mobileStore.isiOS
-    }
   },
   mounted() {
     // Start our timer.  Holding the time in the store allows us to update the time regularly and have reactivity

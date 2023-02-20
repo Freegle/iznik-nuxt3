@@ -41,7 +41,6 @@ const config: CapacitorConfig = {
       "@capacitor/device",
       "@capacitor/network",
       "@capacitor/push-notifications",
-      "@capacitor/status-bar",
       "@capawesome/capacitor-badge",
       "@capacitor-community/facebook-login",
       "@codetrix-studio/capacitor-google-auth",
@@ -55,7 +54,7 @@ const config: CapacitorConfig = {
     }
   },
   ios: {
-    contentInset: 'always',
+    contentInset: 'automatic',
     includePlugins: [
       "cordova-plugin-inappbrowser",
       "@capacitor/app-launcher",
@@ -63,7 +62,6 @@ const config: CapacitorConfig = {
       "@capacitor/device",
       "@capacitor/network",
       "@capacitor/push-notifications",
-      "@capacitor/status-bar",
       "@capawesome/capacitor-badge",
       "@capacitor-community/facebook-login",
       "@capacitor-community/apple-sign-in",
