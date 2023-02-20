@@ -270,6 +270,7 @@ export default {
     },
     appleDisabled() {
       if( !this.isiOS) return true
+      const mobileStore = useMobileStore()
       return parseFloat(mobileStore.osVersion) < 13
     },
     googleDisabled() {
