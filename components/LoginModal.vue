@@ -46,7 +46,7 @@
         </b-button>
         <b-button v-if="isiOS" 
           class="social-button social-button--apple" :disabled="appleDisabled" 
-          @click="loginApple"
+          @click="loginAppleApp"
         >
           <b-img src="signinbuttons/Apple_logo_white.svg" class="social-button__image" />
           <span class="p-2 social-button__text font-weight-bold">Sign in with Apple</span>
@@ -596,19 +596,17 @@ export default {
         this.socialLoginError = 'Facebook login error: ' + e.message
       }
     },
-    loginApple() {
+    loginAppleApp() {
       // https://github.com/capacitor-community/apple-sign-in
       this.socialLoginError = null
       this.loginWaitMessage = null
       try{
-        console.log('loginApple')
+        console.log('loginAppleApp')
         const options = { scopes: 'email name' }
 
         SignInWithApple.authorize(options)
           .then( async result => {
             // Sign in using token at server
-            console.log("SIWA success",result.response.identityToken,result)
-            
             if (result.response.identityToken) { // identityToken, user, etc
               this.loginWaitMessage = "Please wait..."
               await this.authStore.login({
