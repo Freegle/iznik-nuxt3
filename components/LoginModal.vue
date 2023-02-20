@@ -542,15 +542,22 @@ export default {
           //'user_gender',
         ]
         try{
-          const result = await FacebookLogin.login({ permissions: FACEBOOK_PERMISSIONS })
-          console.log("Facebook result", result) // recentlyGrantedPermissions, recentlyDeniedPermissions
-          console.log("Facebook", result.recentlyGrantedPermissions, result.recentlyDeniedPermissions) // recentlyGrantedPermissions, recentlyDeniedPermissions
-          if (result.accessToken) {
+          const response = await FacebookLogin.login({ permissions: FACEBOOK_PERMISSIONS })
+          console.log("Facebook response", response) // recentlyGrantedPermissions, recentlyDeniedPermissions
+          if (response.accessToken) {
             // Login successful.
             this.loginWaitMessage = "Please wait..."
-            console.log(`Facebook access token is ${result.accessToken.token}`)
+            const accessToken = response.accessToken.token
+            console.log('Facebook access token is',accessToken)
+            await this.authStore.login({
+              fblogin: 1,
+              fbaccesstoken: accessToken,
+            })
+            // We are now logged in.
+            self.pleaseShowModal = false
+          } else {
+            this.socialLoginError = 'Facebook app login failed'
           }
-          this.socialLoginError = 'Facebook app login failed'
         } catch (e) {
           this.socialLoginError = 'Facebook app login error: ' + e.message
         }
