@@ -44,7 +44,9 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
-	<true/>
+	<false/>
+	<key>UIStatusBarHidden</key>
+	<false/>
   <key>CFBundleURLTypes</key>
   <array>
       <dict>
