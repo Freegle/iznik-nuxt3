@@ -53,7 +53,7 @@
         </b-button>
         <b-button v-if="isApp"
           class="social-button social-button--google-app"
-          @click="loginGoogle"
+          @click="loginGoogleApp"
         >
           <b-img
             src="/signinbuttons/google-logo.svg"
@@ -84,6 +84,9 @@
           Social log in blocked - check your privacy settings, including any ad
           blockers such as Adblock Plus.
         </notice-message>
+        <b-alert v-if="loginWaitMessage" variant="warning" :modelValue="true">
+          {{ loginWaitMessage }}
+        </b-alert>
         <b-alert v-if="socialLoginError" variant="danger" :modelValue="true">
           Login Failed: {{ socialLoginError }}
         </b-alert>
@@ -246,6 +249,7 @@ export default {
       forceSignIn: false,
       nativeLoginError: null,
       socialLoginError: null,
+      loginWaitMessage: null,
       showPassword: false,
       initialisedSocialLogin: false,
       showSocialLoginBlocked: false,
@@ -323,6 +327,7 @@ export default {
     showModal: {
       immediate: true,
       handler(newVal) {
+        this.loginWaitMessage = null
         this.pleaseShowModal = newVal
 
         if (newVal) {
@@ -349,6 +354,7 @@ export default {
     forceLogin: {
       immediate: true,
       handler(newVal) {
+        this.loginWaitMessage = null
         this.showModal = this.pleaseShowModal || newVal
       },
     },
@@ -374,6 +380,7 @@ export default {
       } else {
         this.socialLoginError = 'Something went wrong; please try later.'
       }
+      this.loginWaitMessage = null
     },
     bumpIt() {
       // Force reconsideration of social signin disabled.  Need to do that regularly in case the SDKs haven't loaded
@@ -392,6 +399,7 @@ export default {
       this.pleaseShowModal = true
       this.nativeLoginError = null
       this.socialLoginError = null
+      this.loginWaitMessage = null
 
       setTimeout(() => {
         this.timerElapsed = true
@@ -408,6 +416,7 @@ export default {
       const self = this
       this.nativeLoginError = null
       this.socialLoginError = null
+      this.loginWaitMessage = null
       e.preventDefault()
       e.stopPropagation()
 
@@ -472,6 +481,7 @@ export default {
         }
       } else if (this.email && this.password) {
         // Login
+        this.loginWaitMessage = "Please wait..."
         this.authStore
           .login({
             email: this.email,
@@ -510,6 +520,7 @@ export default {
             } else {
               throw e // let others bubble up
             }
+            this.loginWaitMessage = null
           })
       }
     },
@@ -518,6 +529,7 @@ export default {
 
       this.nativeLoginError = null
       this.socialLoginError = null
+      this.loginWaitMessage = null
 
       // App: https://github.com/capacitor-community/facebook-login
 
@@ -535,12 +547,14 @@ export default {
           console.log("Facebook", result.recentlyGrantedPermissions, result.recentlyDeniedPermissions) // recentlyGrantedPermissions, recentlyDeniedPermissions
           if (result.accessToken) {
             // Login successful.
+            this.loginWaitMessage = "Please wait..."
             console.log(`Facebook access token is ${result.accessToken.token}`)
           }
           this.socialLoginError = 'Facebook app login failed'
         } catch (e) {
           this.socialLoginError = 'Facebook app login error: ' + e.message
         }
+        this.loginWaitMessage = null
         return 
       }
 
@@ -589,7 +603,8 @@ export default {
             console.log("SIWA success",result.response.identityToken,result)
             
             if (result.response.identityToken) { // identityToken, user, etc
-              console.log("SIWA AAAA",result.response.identityToken)
+              this.loginWaitMessage = "Please wait..."
+        console.log("SIWA AAAA",result.response.identityToken)
               await this.authStore.login({
                 applecredentials: result.response.identityToken,
                 applelogin: true
@@ -599,6 +614,7 @@ export default {
               self.pleaseShowModal = false
             } else{
               this.socialLoginError = "No identityToken given"
+              this.loginWaitMessage = null
             }
           })
           .catch(e => {
@@ -609,6 +625,7 @@ export default {
               console.log("SIWA error",e)
               this.socialLoginError = e.message
             }
+            this.loginWaitMessage = null
           });
         
       } catch( e){
@@ -616,16 +633,18 @@ export default {
         this.socialLoginError = 'Apple login error: ' + e.message
       }
     },
-    async loginGoogle() {
+    async loginGoogleApp() {
       try{
-        console.log('loginGoogle')
+        console.log('loginGoogleApp')
         const response = await GoogleAuth.signIn();
         console.log(response.message, response.code);
+        this.loginWaitMessage = "Please wait..."
         this.socialLoginError = 'Google did something'
       } catch( e){
         console.log('Google login error: ', e)
         this.socialLoginError = 'Google login error: ' + e.message
       }
+      this.loginWaitMessage = null
     },
     async handleGoogleCredentialsResponse(response) {
       console.log('Google login', response)
@@ -656,11 +675,12 @@ export default {
 
       this.nativeLoginError = null
       this.socialLoginError = null
+      this.loginWaitMessage = null
 
       if( this.isApp) {
         appYahooLogin(this.$route.fullPath,
         ret => { // arrow so .this. is correct
-            //this.loginWaitMessage = "Please wait..."
+            this.loginWaitMessage = "Please wait..."
             //console.log('appYahooLogin completed', ret)
             const returnto = ret.returnto
             const code = ret.code
@@ -677,7 +697,7 @@ export default {
               }
             } else if (!code) {
               this.socialLoginError = 'Yahoo login failed: '+ret.error
-              //this.loginWaitMessage = null
+              this.loginWaitMessage = null
             } else {
               this.authStore.login({
                 yahoocodelogin: code
@@ -700,7 +720,7 @@ export default {
                 } else {
                   console.error('Server login failed', ret)
                   this.socialLoginError = 'Yahoo login failed'
-                  //this.loginWaitMessage = null
+                  this.loginWaitMessage = null
                 }
               })
             }

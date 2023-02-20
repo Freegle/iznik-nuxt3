@@ -61,6 +61,7 @@ export const useAuthStore = defineStore({
       }
     },
     setAuth(jwt, persistent) {
+      console.log('Saving jwt and persistent')
       this.auth.jwt = jwt
       this.auth.persistent = persistent
 
@@ -70,6 +71,7 @@ export const useAuthStore = defineStore({
         const p = useCookie('persistent')
         j.value = jwt
         p.value = JSON.stringify(persistent)
+        console.log('Saved jwt and persistent cookies')
       }
     },
     setUser(value) {

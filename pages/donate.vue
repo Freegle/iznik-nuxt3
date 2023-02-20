@@ -135,7 +135,7 @@
                   <b-img
                     fluid
                     class="img-rounded img-responsive"
-                    src="/ebay.png"
+                    src="/donate/ebay.png"
                   />
                 </a>
               </b-card-text>
