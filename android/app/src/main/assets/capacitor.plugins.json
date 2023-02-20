@@ -16,10 +16,6 @@
 		"classpath": "com.capacitorjs.plugins.pushnotifications.PushNotificationsPlugin"
 	},
 	{
-		"pkg": "@capacitor/status-bar",
-		"classpath": "com.capacitorjs.plugins.statusbar.StatusBarPlugin"
-	},
-	{
 		"pkg": "@capawesome/capacitor-badge",
 		"classpath": "io.capawesome.capacitorjs.plugins.badge.BadgePlugin"
 	},
