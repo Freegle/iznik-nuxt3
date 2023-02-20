@@ -126,7 +126,6 @@ export const useAuthStore = defineStore({
       }
       if( mobileStore.isApp){
         try {
-          console.log('Facebook logout start')
           await FacebookLogin.logout();
         } catch (e) {
           console.log('Ignore Facebook logout error', e)

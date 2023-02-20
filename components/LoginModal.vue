@@ -44,7 +44,7 @@
             >Continue with Facebook</span
           >
         </b-button>
-        <b-button v-if="isiOSapp" 
+        <b-button v-if="isiOS" 
           class="social-button social-button--apple" :disabled="appleDisabled" 
           @click="loginApple"
         >
@@ -318,7 +318,7 @@ export default {
       const mobileStore = useMobileStore()
       return mobileStore.isApp
     },
-    isiOSapp() {
+    isiOS() {
       const mobileStore = useMobileStore()
       return mobileStore.isiOS
     }
