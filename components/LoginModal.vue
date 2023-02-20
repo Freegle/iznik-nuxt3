@@ -611,12 +611,10 @@ export default {
             
             if (result.response.identityToken) { // identityToken, user, etc
               this.loginWaitMessage = "Please wait..."
-        console.log("SIWA AAAA",result.response.identityToken)
               await this.authStore.login({
-                applecredentials: result.response.identityToken,
+                applecredentials: result.response,
                 applelogin: true
               })
-              console.log("SIWA BBBB")
               // We are now logged in.
               self.pleaseShowModal = false
             } else{
@@ -625,11 +623,9 @@ export default {
             }
           })
           .catch(e => {
-            console.log("SIWA ZZZ",e)
             if( e.message.indexOf('1001') !== -1 ) {
               this.socialLoginError = 'Apple login cancelled'
             } else {
-              console.log("SIWA error",e)
               this.socialLoginError = e.message
             }
             this.loginWaitMessage = null
