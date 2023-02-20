@@ -543,12 +543,11 @@ export default {
         ]
         try{
           const response = await FacebookLogin.login({ permissions: FACEBOOK_PERMISSIONS })
-          console.log("Facebook response", response) // recentlyGrantedPermissions, recentlyDeniedPermissions
-          if (response.accessToken) {
+          // console.log("Facebook response", response) // recentlyGrantedPermissions, recentlyDeniedPermissions
+          if (response && response.accessToken) {
             // Login successful.
             this.loginWaitMessage = "Please wait..."
             const accessToken = response.accessToken.token
-            console.log('Facebook access token is',accessToken)
             await this.authStore.login({
               fblogin: 1,
               fbaccesstoken: accessToken,
