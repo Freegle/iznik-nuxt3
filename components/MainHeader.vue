@@ -609,7 +609,7 @@ export default {
         if (persistentCookie !== null) {
           persistentCookie.value = null
         }
-        console.error('Cleared cookies')
+        console.log('Cleared cookies')
       } catch (e) {
         console.error('Failed to clear cookies', e)
       }

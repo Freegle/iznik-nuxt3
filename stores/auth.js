@@ -5,7 +5,8 @@ import { useComposeStore } from '../stores/compose'
 import api from '~/api'
 import { useCookie } from '#imports'
 import { useMobileStore } from '@/stores/mobile'
-import { FacebookLogin } from '@capacitor-community/facebook-login';
+import { FacebookLogin } from '@capacitor-community/facebook-login'
+import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth'
 
 export const useAuthStore = defineStore({
   id: 'auth',
@@ -129,6 +130,12 @@ export const useAuthStore = defineStore({
           await FacebookLogin.logout();
         } catch (e) {
           console.log('Ignore Facebook logout error', e)
+        }
+
+        try {
+          await GoogleAuth.signOut();
+        } catch (e) {
+          console.log('Ignore Google signOut error', e)
         }
 
         this.logoutPushId()

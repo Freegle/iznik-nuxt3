@@ -6,4 +6,5 @@
     <string name="custom_url_scheme">org.ilovefreegle.direct</string>
     <string name="facebook_app_id">134980666550322</string>
     <string name="facebook_client_token">eb343dff9d3f338007745bdd0c9a6cd5</string>
+    <string name="server_client_id">423761283916-1rpa8120tpudgv4nf44cpmlf8slqbf4f.apps.googleusercontent.com</string>
 </resources>

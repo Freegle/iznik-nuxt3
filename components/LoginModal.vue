@@ -636,6 +636,7 @@ export default {
     },
     async loginGoogleApp() {
       // https://github.com/CodetrixStudio/CapacitorGoogleAuth
+      // Only works in Android when app signed correctly
       try{
         console.log('loginGoogleApp')
         const response = await GoogleAuth.signIn();
