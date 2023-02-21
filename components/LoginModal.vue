@@ -635,12 +635,24 @@ export default {
       }
     },
     async loginGoogleApp() {
+      // https://github.com/CodetrixStudio/CapacitorGoogleAuth
       try{
         console.log('loginGoogleApp')
         const response = await GoogleAuth.signIn();
-        console.log(response.message, response.code);
-        this.loginWaitMessage = "Please wait..."
-        this.socialLoginError = 'Google did something'
+        console.log(response)
+        if( response.authentication && response.authentication.accessToken){
+          this.loginWaitMessage = "Please wait..."
+          await this.authStore.login({
+              googlejwt: authResult.code,
+              googlelogin: true
+            })
+          // We are now logged in.
+          console.log('Logged in')
+          self.pleaseShowModal = false
+        } else{
+          this.socialLoginError = 'Google: no authentication.accessToken found'
+        }
+        this.loginWaitMessage = null
       } catch( e){
         console.log('Google login error: ', e)
         this.socialLoginError = 'Google login error: ' + e.message
@@ -770,9 +782,7 @@ export default {
     },
     installGoogleSDK() {
       if( this.isApp){
-        console.log('GoogleAuth.initialize A')
         GoogleAuth.initialize()
-        console.log('GoogleAuth.initialize B')
       } else {
         console.log('Install google SDK')
         // Google client library should have been loaded by the layout.
