@@ -80,6 +80,7 @@ const config: CapacitorConfig = {
       "scopes": ["profile", "email"],
       "serverClientId": frconfig.GOOGLE_CLIENT_ID,
       "forceCodeForRefreshToken": true,
+      "iosClientId": "423761283916-2kavl4pp132cmjormmifomo2r8hhta52.apps.googleusercontent.com",
     },
   },
 };
