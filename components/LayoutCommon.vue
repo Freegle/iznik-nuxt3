@@ -178,4 +178,8 @@ html {
 body.modal-open {
   padding-right: 0px !important;
 }
+
+.pageContent {
+  margin-top: 75px;
+}
 </style>
