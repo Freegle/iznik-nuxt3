@@ -366,7 +366,7 @@ export default {
   components: {
     ProfileImage,
   },
-  async setup() {
+  setup() {
     const runtimeConfig = useRuntimeConfig()
     const route = useRoute()
 
@@ -380,13 +380,16 @@ export default {
     )
 
     const teamStore = useTeamStore()
-    const volunteers = await teamStore.fetch('Volunteers')
-    const board = await teamStore.fetch('Board')
+    teamStore.fetch('Volunteers')
+    teamStore.fetch('Board')
+
+    const volunteers = computed(() => teamStore.getTeam('Volunteers')?.members)
+    const board = computed(() => teamStore.getTeam('Board')?.members)
 
     return {
       teamStore,
-      volunteers: volunteers.members,
-      board: board.members,
+      volunteers,
+      board,
     }
   },
 }

@@ -1,9 +1,9 @@
 <template>
   <header>
     <!-- Navbar for large screens-->
-    <b-nav
+    <b-navbar
       id="navbar_large"
-      class="navbar ourBack d-none d-xl-flex pl-1 pr-2 navbar-dark navbar-expand-xl"
+      class="ourBack d-none d-xl-flex pl-1 pr-2 navbar-dark navbar-expand-xl"
       fixed="top"
     >
       <nuxt-link :to="homePage" class="navbar-brand p-0">
@@ -224,9 +224,9 @@
           </b-button>
         </div>
       </div>
-    </b-nav>
+    </b-navbar>
     <!-- Navbar for small screens -->
-    <b-nav
+    <b-navbar
       id="navbar_small"
       toggleable="xl"
       type="dark"
@@ -450,7 +450,7 @@
           </li>
         </b-nav>
       </b-collapse>
-    </b-nav>
+    </b-navbar>
     <LoginModal ref="loginModal" />
     <AboutMeModal v-if="showAboutMe" ref="aboutMeModal" />
   </header>
