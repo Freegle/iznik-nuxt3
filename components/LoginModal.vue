@@ -639,18 +639,18 @@ export default {
       try{
         console.log('loginGoogleApp')
         const response = await GoogleAuth.signIn();
-        console.log(response)
-        if( response.authentication && response.authentication.accessToken){
+        //console.log(response)
+        if( response.authentication && response.authentication.idToken) {
           this.loginWaitMessage = "Please wait..."
           await this.authStore.login({
-              googlejwt: authResult.code,
+              googlejwt: response.authentication.idToken,
               googlelogin: true
             })
           // We are now logged in.
           console.log('Logged in')
           self.pleaseShowModal = false
         } else{
-          this.socialLoginError = 'Google: no authentication.accessToken found'
+          this.socialLoginError = 'Google: no authentication.idToken found'
         }
         this.loginWaitMessage = null
       } catch( e){
