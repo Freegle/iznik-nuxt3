@@ -114,6 +114,7 @@ export const useMobileStore = defineStore({ // Do not persist
       })*/
     },
     //////////////
+    // https://capacitorjs.com/docs/apis/push-notifications
     async initPushNotifications() {
       /*if (!this.isiOS) {
         // Create our Android push channel
