@@ -22,7 +22,7 @@ def capacitor_pods
   pod 'CordovaPlugins', :path => '../capacitor-cordova-ios-plugins'
 end
 
-target 'App' do
+target 'Freegle' do
   capacitor_pods
   # Add your Pods here
 end
