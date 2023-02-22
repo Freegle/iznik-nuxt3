@@ -6,7 +6,6 @@
           v-model="selectedArea"
           :options="areaOptions"
           class="d-block"
-          @change="areaChange"
         />
         <div
           v-if="
@@ -48,7 +47,6 @@
           v-model="selectedArea"
           :options="areaOptions"
           class="w-50"
-          @change="areaChange"
         />
       </div>
     </b-card-text>
@@ -116,12 +114,9 @@ export default {
         await this.authStore.saveAndGet({
           settings,
         })
+
+        this.$emit('changed')
       },
-    },
-  },
-  methods: {
-    areaChange() {
-      this.$emit('changed')
     },
   },
 }

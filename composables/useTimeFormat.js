@@ -14,7 +14,7 @@ export function earliestDate(dates, ofall) {
   let earliest = null
   let earliestDate = null
 
-  for (let i = 0; i < dates.length; i++) {
+  for (let i = 0; i < dates?.length; i++) {
     const atime = new Date(dates[i].start).getTime()
     if ((ofall || atime >= now) && (!earliest || atime < earliest)) {
       earliest = atime
@@ -28,7 +28,7 @@ export function earliestDate(dates, ofall) {
 export function addStrings(item) {
   // Add human readable versions of each date range.
   if (item) {
-    for (let i = 0; i < item.dates.length; i++) {
+    for (let i = 0; i < item?.dates?.length; i++) {
       const date = item.dates[i]
       const startm = dayjs(date.start)
       let endm = dayjs(date.end)

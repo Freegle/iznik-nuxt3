@@ -38,10 +38,6 @@ export const useNewsfeedStore = defineStore({
       items.forEach((item) => {
         this.list[item.id] = item
 
-        if (item.id > this.maxSeen) {
-          this.maxSeen = item.id
-        }
-
         if (item.replies?.length) {
           this.addItems(item.replies)
         }
@@ -56,6 +52,10 @@ export const useNewsfeedStore = defineStore({
 
       try {
         if (!this.list[id] || force) {
+          if (id > this.maxSeen) {
+            this.maxSeen = id
+          }
+
           if (!this.fetching[id]) {
             this.fetching[id] = api(this.config).news.fetch(id, null, lovelist)
           }
@@ -74,6 +74,7 @@ export const useNewsfeedStore = defineStore({
       }
 
       if (this.maxSeen > prevMax) {
+        console.log('New max', this.maxSeen, prevMax)
         api(this.config).news.seen(this.maxSeen)
       }
 
