@@ -419,7 +419,7 @@ export default {
     type() {
       this.lastBounds = null
 
-      if (this.zoom >= this.postZoom) {
+      if (this.zoom >= this.postZoom || this.search) {
         this.getMessages()
       }
     },
@@ -641,24 +641,23 @@ export default {
         } else {
           // We are searching.  Get the list of messages from the server.
           // eslint-disable-next-line no-lonely-if
-          if (this.searchOnGroups) {
-            // We want the server to search on our own groups.
+          const gids = this.groupid
+            ? [this.groupid]
+            : this.myGroups.map((g) => g.id)
+
+          if (this.searchOnGroups && gids.length) {
+            // Got some groups to search on.
             params = {
-              collection: 'Approved',
-              subaction: 'searchmess',
               messagetype: this.type,
               search: this.search,
-              groupid: this.groupid,
-              searchmygroups: true,
+              groupids: gids,
             }
           } else {
-            // We want to search within the map area.
+            // Use the box.
             params = {
-              collection: 'Approved',
-              subaction: 'searchmess',
               messagetype: this.type,
               search: this.search,
-              groupid: this.groupid,
+              groupids: gids.join(','),
               swlat,
               swlng,
               nelat,
@@ -666,11 +665,10 @@ export default {
             }
           }
 
-          // TODO PERF Need Go API call, but perhaps we will use Algolia.
-          const ret = await this.$api.message.fetchMessages(params)
+          const ret = await this.messageStore.search(params)
 
-          if (ret.ret === 0 && ret.messages && !this.destroyed) {
-            messages = ret.messages
+          if (ret && !this.destroyed) {
+            messages = ret
           }
         }
 

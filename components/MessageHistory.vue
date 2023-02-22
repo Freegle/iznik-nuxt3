@@ -23,6 +23,7 @@
       >
         #{{ message.id }}
       </b-button>
+      <!--      TODO Show approved by for mods-->
     </div>
   </div>
 </template>

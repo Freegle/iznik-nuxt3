@@ -120,7 +120,7 @@
               <b-form-input
                 v-model="search"
                 type="text"
-                placeholder="Search posts TODO"
+                placeholder="Search posts"
                 autocomplete="off"
                 @keyup.enter.exact="doSearch"
               />
@@ -579,7 +579,6 @@ export default {
           // Set some values which will cause the post map to search.
           this.messagesOnMap = []
           this.searchOn = this.search
-          this.messageStore.clear()
           this.infiniteId++
         }
       }
