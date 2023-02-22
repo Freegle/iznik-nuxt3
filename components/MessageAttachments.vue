@@ -1,7 +1,7 @@
 <template>
   <div>
     <div
-      v-if="defaultAttachments || !attachments.length"
+      v-if="defaultAttachments || !attachments?.length"
       class="d-none d-md-block"
     >
       <MessageTag :id="id" def class="ps-2 pe-2" />
@@ -12,7 +12,11 @@
         />
       </div>
     </div>
-    <button v-else class="w-100 p-0 border-0" :disabled="disabled">
+    <button
+      v-else-if="attachments?.length"
+      class="w-100 p-0 border-0"
+      :disabled="disabled"
+    >
       <MessageTag :id="id" class="ps-2 pe-2" />
       <div
         v-if="!thumbnail && attachments && attachments.length"
