@@ -74,7 +74,6 @@ export const useNewsfeedStore = defineStore({
       }
 
       if (this.maxSeen > prevMax) {
-        console.log('New max', this.maxSeen, prevMax)
         api(this.config).news.seen(this.maxSeen)
       }
 
