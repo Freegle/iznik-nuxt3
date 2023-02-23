@@ -149,7 +149,6 @@
             <span v-if="!signUp"> Log in to Freegle </span>
             <span v-else> Register on Freegle </span>
           </b-button>
-          <!--          TODO Login modal not showing - see Slack from Chris-->
           <b-alert v-if="nativeLoginError" variant="danger" :model-value="true">
             Login Failed: {{ nativeLoginError }}
           </b-alert>
