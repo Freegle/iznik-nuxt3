@@ -279,7 +279,7 @@ export default {
       swlng: ref(props.initialBounds[0][1]),
       nelat: props.initialBounds[1][0],
       nelng: props.initialBounds[1][1],
-      search: props.initialSearch,
+      search: ref(props.initialSearch),
       searchOn: props.initialSearch,
     }
   },
@@ -527,6 +527,8 @@ export default {
       if (!newval) {
         // We've cleared the search box, so cancel the search and return the map to normal.
         this.searchOn = null
+        this.messagesOnMap = []
+        this.infiniteId++
       }
     },
     messagesForList() {
