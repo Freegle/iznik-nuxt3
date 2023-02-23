@@ -203,11 +203,11 @@ export const useComposeStore = defineStore({
         }
       }
     },
-    setMessage({ message, me }) {
+    setMessage(id, message, me) {
       message.savedAt = Date.now()
       message.savedBy = me ? me.id : null
 
-      this.messages[message.id] = message
+      this.messages[id] = message
 
       if (message && message.submitted) {
         this.lastSubmitted = Math.max(
