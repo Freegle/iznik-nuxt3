@@ -75,7 +75,7 @@
           </b-button>
         </div>
       </div>
-      <b-alert v-if="showOddTime" show variant="warning">
+      <b-alert v-if="showOddTime" :model-value="true" variant="warning">
         This is an early/late time. Just saying, in case it's not right.
       </b-alert>
       <p class="mt-2">

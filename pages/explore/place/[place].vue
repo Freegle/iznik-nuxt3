@@ -13,7 +13,7 @@
               show-start-message
             />
           </div>
-          <b-alert v-else show variant="danger">
+          <b-alert v-else :model-value="true" variant="danger">
             Something went wrong. Please contact us to let us know what you were
             trying to do at <SupportLink />
           </b-alert>

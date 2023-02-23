@@ -91,7 +91,7 @@
           placeholder="Explain what happened here..."
         />
       </div>
-      <b-alert variant="danger" :show="showError" class="mt-2">
+      <b-alert variant="danger" v-model="showError" class="mt-2">
         Please select a reason and add some detail. Thanks.
       </b-alert>
     </b-modal>

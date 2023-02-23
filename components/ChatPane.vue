@@ -1,6 +1,6 @@
 <template>
   <div>
-    <ChatNotVisible v-if="notVisible" />
+    <ChatNotVisible v-if="notVisible" id="notvisible" />
     <div v-else-if="me" class="chatHolder">
       <ChatHeader :id="id" class="chatTitle" />
       <div
@@ -57,11 +57,14 @@ import { setupChat } from '~/composables/useChat'
 // Don't use dynamic imports because it stops us being able to scroll to the bottom after render.
 import ChatMessage from '~/components/ChatMessage.vue'
 
+const ChatNotVisible = () => import('~/components/ChatNotVisible.vue')
+
 export default {
   components: {
     ChatHeader,
     ChatFooter,
     ChatMessage,
+    ChatNotVisible,
   },
   props: {
     id: {
@@ -82,12 +85,14 @@ export default {
         await chatStore.fetchChats('2009-09-11')
       }
 
-      // Fetch the messages.  No need to wait, as we might already have the messages in store.
-      chatStore.fetchMessages(props.id)
+      if (chat?.value) {
+        // Fetch the messages.  No need to wait, as we might already have the messages in store.
+        chatStore.fetchMessages(props.id)
 
-      // Fetch the user.
-      if (chat?.value?.otheruid) {
-        await userStore.fetch(chat.value.otheruid)
+        // Fetch the user.
+        if (chat?.value?.otheruid) {
+          await userStore.fetch(chat.value.otheruid)
+        }
       }
     }
 

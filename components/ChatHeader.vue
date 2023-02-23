@@ -325,9 +325,12 @@ export default {
   },
   methods: {
     async hide() {
+      console.log('Hide chat')
       await this.chatStore.hide(this.id)
       const router = useRouter()
+      console.log('Push')
       router.push('/chats')
+      console.log('ushed')
     },
     async block() {
       await this.chatStore.block(this.id)

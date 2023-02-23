@@ -65,7 +65,7 @@
           Social log in blocked - check your privacy settings, including any ad
           blockers such as Adblock Plus.
         </notice-message>
-        <b-alert v-if="socialLoginError" variant="danger" show>
+        <b-alert v-if="socialLoginError" variant="danger" :model-value="true">
           Login Failed: {{ socialLoginError }}
         </b-alert>
       </div>
@@ -150,7 +150,7 @@
             <span v-else> Register on Freegle </span>
           </b-button>
           <!--          TODO Login modal not showing - see Slack from Chris-->
-          <b-alert v-if="nativeLoginError" variant="danger" show>
+          <b-alert v-if="nativeLoginError" variant="danger" :model-value="true">
             Login Failed: {{ nativeLoginError }}
           </b-alert>
           <div v-if="!signUp" class="text-center">
