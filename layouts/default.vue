@@ -59,7 +59,6 @@ export default {
     loginStateKnown: {
       immediate: true,
       handler(newVal) {
-        console.log('Login watch', newVal)
         if (newVal) {
           // We now know whether or not we have logged in.
           this.ready = true
