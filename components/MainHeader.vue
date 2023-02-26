@@ -302,6 +302,7 @@
               no-prefetch
               class="nav-link text-center p-0"
               to="/browse"
+              @click="clickedMobileNav"
               @mousedown="maybeReload('/browse')"
             >
               <v-icon icon="eye" class="fa-2x" />
@@ -314,6 +315,7 @@
               no-prefetch
               class="nav-link text-center p-0"
               to="/give"
+              @click="clickedMobileNav"
               @mousedown="maybeReload('/give')"
             >
               <v-icon icon="gift" class="fa-2x" />
@@ -326,6 +328,7 @@
               no-prefetch
               class="nav-link text-center p-0"
               to="/find"
+              @click="clickedMobileNav"
               @mousedown="maybeReload('/find')"
             >
               <v-icon icon="shopping-cart" class="fa-2x" />
@@ -338,6 +341,7 @@
               no-prefetch
               class="nav-link text-center p-0"
               to="/myposts"
+              @click="clickedMobileNav"
               @mousedown="maybeReload('/myposts')"
             >
               <div class="position-relative">
@@ -360,6 +364,7 @@
               no-prefetch
               class="nav-link text-center p-0 white"
               to="/chitchat"
+              @click="clickedMobileNav"
               @mousedown="maybeReload('/chitchat')"
             >
               <div class="position-relative">
@@ -382,6 +387,7 @@
               no-prefetch
               class="nav-link text-center p-0"
               to="/communityevents"
+              @click="clickedMobileNav"
               @mousedown="maybeReload('/communityevents')"
             >
               <v-icon icon="calendar-alt" class="fa-2x" />
@@ -394,6 +400,7 @@
               no-prefetch
               class="nav-link text-center p-0"
               to="/volunteerings"
+              @click="clickedMobileNav"
               @mousedown="maybeReload('/volunteerings')"
             >
               <v-icon icon="hands-helping" class="fa-2x" />
@@ -406,6 +413,7 @@
               no-prefetch
               class="nav-link text-center p-0"
               to="/promote"
+              @click="clickedMobileNav"
               @mousedown="maybeReload('/promote')"
             >
               <v-icon icon="bullhorn" class="fa-2x" />
@@ -418,6 +426,7 @@
               no-prefetch
               class="nav-link text-center p-0"
               to="/help"
+              @click="clickedMobileNav"
               @mousedown="maybeReload('/help')"
             >
               <v-icon icon="question-circle" class="fa-2x" />
@@ -430,6 +439,7 @@
               no-prefetch
               class="nav-link text-center p-0"
               to="/settings"
+              @click="clickedMobileNav"
               @mousedown="maybeReload('/settings')"
             >
               <v-icon icon="cog" class="fa-2x" />
@@ -555,22 +565,6 @@ export default {
     chatCount() {
       this.$emit('update:chatCount', this.chatCount)
     },
-    $route() {
-      // Close the dropdown menu when we move around.
-      if (
-        this.$refs.nav_collapse &&
-        this.$refs.nav_collapse.$el.classList.contains('show')
-      ) {
-        this.$root.$emit('bv::toggle::collapse', 'nav_collapse')
-      }
-
-      if (
-        this.$refs.nav_collapse_mobile &&
-        this.$refs.nav_collapse_mobile.$el.classList.contains('show')
-      ) {
-        this.$root.$emit('bv::toggle::collapse', 'nav_collapse_mobile')
-      }
-    },
   },
   mounted() {
     setTimeout(async () => {
@@ -672,6 +666,10 @@ export default {
       }
 
       setTimeout(this.getCounts, 60000)
+    },
+    clickedMobileNav() {
+      console.log('Clicked mobile nav')
+      this.$refs?.mobileNav?.toggle()
     },
   },
 }
