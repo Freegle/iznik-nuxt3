@@ -114,17 +114,17 @@ export const useComposeStore = defineStore({
       return ret
     },
     markSubmitted(id, me) {
-      console.log('Mark submitted', id)
-      this.setMessage({
-        message: {
+      this.setMessage(
+        id,
+        {
           id,
           submitted: true,
           item: null,
           description: null,
           availablenow: 1,
         },
-        me,
-      })
+        me
+      )
 
       this.setAttachmentsForMessage(id, [])
     },
