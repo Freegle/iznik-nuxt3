@@ -1,6 +1,6 @@
 <template>
   <div>
-    <LayoutCommon v-if="ready" :key="bump">
+    <LayoutCommon :key="bump">
       <slot />
     </LayoutCommon>
     <client-only>
