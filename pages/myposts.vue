@@ -501,7 +501,7 @@ export default {
           this.donationGroup = groupid
           this.ask()
 
-          this.$store.dispatch('misc/set', {
+          this.miscStore.set({
             key: 'lastdonationask',
             value: new Date().getTime(),
           })
