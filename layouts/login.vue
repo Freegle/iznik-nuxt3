@@ -1,11 +1,11 @@
 <template>
   <div>
-    <LayoutCommon v-if="ready">
+    <LayoutCommon v-if="ready" :key="bump">
       <slot />
     </LayoutCommon>
     <client-only>
-      <GoogleOneTap v-if="oneTap" @complete="googleLoaded" />
-      <LoginModal ref="loginModal" />
+      <GoogleOneTap v-if="oneTap" @loggedin="googleLoggedIn" />
+      <LoginModal v-if="!me" ref="loginModal" />
     </client-only>
   </div>
 </template>
@@ -25,7 +25,6 @@ export default {
   async setup() {
     const ready = ref(false)
     const oneTap = ref(false)
-    const googleReady = ref(false)
     const authStore = useAuthStore()
     const jwt = authStore.auth.jwt
     const persistent = authStore.auth.persistent
@@ -57,7 +56,11 @@ export default {
     return {
       ready,
       oneTap,
-      googleReady,
+    }
+  },
+  data() {
+    return {
+      bump: 0,
     }
   },
   watch: {
@@ -71,20 +74,19 @@ export default {
       },
     },
   },
+  mounted() {
+    if (!this.me) {
+      console.log('Not logged in, force')
+      this.waitForRef('loginModal', () => {
+        console.log(this.$refs.loginModal)
+        this.$refs.loginModal.show()
+      })
+    }
+  },
   methods: {
-    googleLoaded() {
-      // For this layout we know that we need to be logged in.  Now that we know whether Google has logged us in,
-      // we can render the login modal, which may or may not be needed.
-      this.googleReady = true
-      console.log('Google ready')
-
-      if (!this.me) {
-        console.log('Not logged in, force')
-        this.waitForRef('loginModal', () => {
-          console.log(this.$refs.loginModal)
-          this.$refs.loginModal.show()
-        })
-      }
+    googleLoggedIn() {
+      // OneTap has logged us in.  Re-render the page as logged in.
+      this.bump++
     },
   },
 }

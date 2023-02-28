@@ -1,10 +1,10 @@
 <template>
   <div>
-    <LayoutCommon v-if="ready">
+    <LayoutCommon v-if="ready" :key="bump">
       <slot />
     </LayoutCommon>
     <client-only>
-      <GoogleOneTap v-if="oneTap" @complete="googleLoaded" />
+      <GoogleOneTap v-if="oneTap" @loggedin="googleLoggedIn" />
     </client-only>
   </div>
 </template>
@@ -55,6 +55,11 @@ export default {
       googleReady,
     }
   },
+  data() {
+    return {
+      bump: 0,
+    }
+  },
   watch: {
     loginStateKnown: {
       immediate: true,
@@ -66,15 +71,19 @@ export default {
       },
     },
   },
+  async mounted() {
+    // For this layout we don't need to be logged in.  So can just continue.  But we want to know first whether or
+    // not we are logged in.  We might already know that from the server via cookies, but if not, find out.
+    console.log('Google loaded', this.loginStateKnown)
+    if (!this.loginStateKnown) {
+      const authStore = useAuthStore()
+      await authStore.fetchUser()
+    }
+  },
   methods: {
-    async googleLoaded() {
-      // For this layout we don't need to be logged in.  So can just continue.  But we want to know first whether or
-      // not we are logged in.  We might already know that from the server via cookies, but if not, find out.
-      console.log('Google loaded', this.loginStateKnown)
-      if (!this.loginStateKnown) {
-        const authStore = useAuthStore()
-        await authStore.fetchUser()
-      }
+    googleLoggedIn() {
+      // OneTap has logged us in.  Re-render the page as logged in.
+      this.bump++
     },
   },
 }
