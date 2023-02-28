@@ -4,8 +4,12 @@
       <slot />
     </LayoutCommon>
     <client-only>
-      <GoogleOneTap v-if="oneTap" @loggedin="googleLoggedIn" />
-      <LoginModal v-if="!loggedIn" ref="loginModal" />
+      <GoogleOneTap
+        v-if="oneTap"
+        @loggedin="googleLoggedIn"
+        @complete="googleLoaded"
+      />
+      <LoginModal v-if="!loggedIn" ref="loginModal" :key="bumpLogin" />
     </client-only>
   </div>
 </template>
@@ -61,6 +65,7 @@ export default {
   data() {
     return {
       bump: 0,
+      bumpLogin: 0,
     }
   },
   watch: {
@@ -87,6 +92,10 @@ export default {
     googleLoggedIn() {
       // OneTap has logged us in.  Re-render the page as logged in.
       this.bump++
+    },
+    googleLoaded() {
+      // We need to force the login modal to rerender, otherwise the login button doesn't always show.
+      this.bumpLogin++
     },
   },
 }
