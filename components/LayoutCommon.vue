@@ -1,11 +1,5 @@
 <template>
   <div>
-    <client-only>
-      <MainHeader
-        v-model:chat-count="chatCount"
-        v-model:unread-notification-count="unreadNotificationCount"
-      />
-    </client-only>
     <main class="ml-0 ps-0 pe-0 pageContent">
       <slot ref="pageContent" />
     </main>
@@ -45,14 +39,12 @@ import { useChatStore } from '../stores/chat'
 import SomethingWentWrong from './SomethingWentWrong'
 const SupportLink = () => import('~/components/SupportLink')
 const BouncingEmail = () => import('~/components/BouncingEmail')
-const MainHeader = () => import('~/components/MainHeader')
 const BreakpointFettler = () => import('~/components/BreakpointFettler')
 
 export default {
   components: {
     BouncingEmail,
     SupportLink,
-    MainHeader,
     BreakpointFettler,
     SomethingWentWrong,
   },
@@ -60,8 +52,6 @@ export default {
     return {
       showLoader: true,
       timeTimer: null,
-      unreadNotificationCount: 0,
-      chatCount: 0,
     }
   },
   // mixins: [replyToPost],
@@ -72,6 +62,7 @@ export default {
     },
   },
   mounted() {
+    console.log('Layout common mounted')
     // Start our timer.  Holding the time in the store allows us to update the time regularly and have reactivity
     // cause displayed fromNow() values to change, rather than starting a timer for each of them.
     if (process.client) {

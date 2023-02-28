@@ -1,5 +1,8 @@
 <template>
   <div>
+    <client-only>
+      <MainHeader />
+    </client-only>
     <NuxtLayout v-if="ready">
       <NuxtPage :key="loginCount" />
     </NuxtLayout>

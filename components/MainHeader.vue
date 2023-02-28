@@ -282,6 +282,7 @@
         <b-nav class="">
           <b-button
             v-if="loggedIn"
+            ref="mobileNav"
             v-b-toggle.nav_collapse_mobile
             class="toggler white mr-1"
           >
@@ -668,8 +669,8 @@ export default {
       setTimeout(this.getCounts, 60000)
     },
     clickedMobileNav() {
-      console.log('Clicked mobile nav')
-      this.$refs?.mobileNav?.toggle()
+      console.log('Clicked mobile nav', this.$refs?.mobileNav)
+      this.$refs?.mobileNav?.$el?.click()
     },
   },
 }
