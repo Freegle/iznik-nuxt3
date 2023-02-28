@@ -5,7 +5,7 @@
     </LayoutCommon>
     <client-only>
       <GoogleOneTap v-if="oneTap" @loggedin="googleLoggedIn" />
-      <LoginModal v-if="!me" ref="loginModal" />
+      <LoginModal v-if="!loggedIn" ref="loginModal" />
     </client-only>
   </div>
 </template>
@@ -75,7 +75,7 @@ export default {
     },
   },
   mounted() {
-    if (!this.me) {
+    if (!this.loggedIn) {
       console.log('Not logged in, force')
       this.waitForRef('loginModal', () => {
         console.log(this.$refs.loginModal)
