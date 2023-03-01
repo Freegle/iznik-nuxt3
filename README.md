@@ -1,16 +1,14 @@
 **This is a WIP rewrite of the front-end client into Nuxt v3.  It's not ready yet, by a long chalk.**
 
 What does exist:
-* Use of Nuxt 3 (still in Beta) and hence Vue 3 + Vite.
+* Use of Nuxt 3 and hence Vue 3 + Vite.
 * Use of Bootstrap Vue Next (still in alpha), including customisation.  This is a replacement for Bootstrap Vue.
 * Use of Pinia as a replacement for Vuex.  This is much nicer.
-* CD on Azure.
-* Proof of Concept Capacitor app (needs revisiting).
+* Continuous Delivery via Azure.
+* Capacitor app (WIP).
 
 What doesn't exist yet:
-* Give/Ask flows when logged out initially.
-* Some of the minor pages (see list in nuxt.config)
-* SSR (but getting there).
+* TODO Some of the minor pages (councils, stats, noticeboards, engage, livemap, merge, mobile, mydata)
 * CircleCI/playwright testing.
 
 # iznik-nuxt3
