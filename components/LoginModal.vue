@@ -4,15 +4,17 @@
     id="loginModal"
     ref="loginModal"
     v-model="showModal"
+    no-fade
     size="lg"
     no-close-on-backdrop
     :hide-header-close="forceLogin"
     :no-close-on-esc="forceLogin"
-    class="hide-footer"
+    hide-footer
+    modal-class="verytop"
   >
     <!-- This is required as the default bootstrap component makes the main title an h5 -->
     <template #title>
-      <h2>Let's get freegling!</h2>
+      <h2>Let's get freegling! - show {{ showModal }}</h2>
     </template>
     <p v-if="signUp" class="text-center">
       You'll get emails. Name, approximate location, and profile picture are
@@ -308,6 +310,7 @@ export default {
     forceLogin: {
       immediate: true,
       handler(newVal) {
+        console.log('Force login changed to ' + newVal)
         this.showModal = this.pleaseShowModal || newVal
       },
     },

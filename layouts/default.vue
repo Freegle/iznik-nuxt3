@@ -5,6 +5,7 @@
     </LayoutCommon>
     <client-only>
       <GoogleOneTap v-if="oneTap" @loggedin="googleLoggedIn" />
+      <LoginModal v-if="!loggedIn" ref="loginModal" />
     </client-only>
   </div>
 </template>
@@ -13,11 +14,13 @@ import LayoutCommon from '../components/LayoutCommon'
 import { ref } from '#imports'
 import { useAuthStore } from '~/stores/auth'
 const GoogleOneTap = () => import('~/components/GoogleOneTap')
+const LoginModal = () => import('~/components/LoginModal')
 
 export default {
   components: {
     LayoutCommon,
     GoogleOneTap,
+    LoginModal,
   },
   async setup() {
     const ready = ref(false)

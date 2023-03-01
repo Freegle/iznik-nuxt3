@@ -75,18 +75,12 @@ export default {
         if (newVal) {
           // We've logged in.
           this.ready = true
+        } else {
+          const authStore = useAuthStore()
+          authStore.forceLogin = true
         }
       },
     },
-  },
-  mounted() {
-    if (!this.loggedIn) {
-      console.log('Not logged in, force')
-      this.waitForRef('loginModal', () => {
-        console.log(this.$refs.loginModal)
-        this.$refs.loginModal.show()
-      })
-    }
   },
   methods: {
     googleLoggedIn() {

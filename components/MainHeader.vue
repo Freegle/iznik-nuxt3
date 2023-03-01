@@ -462,7 +462,6 @@
         </b-nav>
       </b-collapse>
     </b-navbar>
-    <LoginModal ref="loginModal" />
     <AboutMeModal v-if="showAboutMe" ref="aboutMeModal" />
   </header>
 </template>
@@ -477,7 +476,6 @@ import { useNewsfeedStore } from '../stores/newsfeed'
 import { useMessageStore } from '../stores/message'
 import { useNotificationStore } from '../stores/notification'
 import { useAuthStore } from '~/stores/auth'
-import LoginModal from '~/components/LoginModal'
 import { useCookie } from '#imports'
 
 const AboutMeModal = () => import('~/components/AboutMeModal')
@@ -487,8 +485,6 @@ export default {
   name: 'MainHeader',
   components: {
     NotificationOptions,
-    // ChatMenu,
-    LoginModal,
     AboutMeModal,
   },
   setup() {
@@ -588,7 +584,8 @@ export default {
   },
   methods: {
     requestLogin() {
-      this.$refs.loginModal.show()
+      const authStore = useAuthStore()
+      authStore.forceLogin = true
     },
     async logout() {
       // Remove all cookies, both client and server.  This seems to be necessary to kill off the PHPSESSID cookie
@@ -612,7 +609,7 @@ export default {
       this.authStore.forceLogin = false
 
       // Go to the landing page.
-      this.router.push('/')
+      this.router.push('/', true)
     },
     async showAboutMe() {
       await this.fetchMe(true)
