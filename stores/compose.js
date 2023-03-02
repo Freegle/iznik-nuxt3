@@ -314,7 +314,6 @@ export const useComposeStore = defineStore({
           } else {
             // This is one of our existing messages which we are reposting.  We need to convert it back to a draft,
             // edit it (to update it from our client data), and then submit.
-            // TODO Needs testing
             console.log('Existing message')
             const id = message.id
             await this.backToDraft(id)

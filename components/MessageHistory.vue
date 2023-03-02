@@ -23,13 +23,17 @@
       >
         #{{ message.id }}
       </b-button>
-      <!--      TODO Show approved by for mods-->
+      <span v-if="approvedby" class="text-muted small">
+        Approved by {{ approvedby }}
+      </span>
     </div>
   </div>
 </template>
 <script>
 import dayjs from 'dayjs'
-import { useMessageStore } from '../stores/message'
+import { useAuthStore } from '~/stores/auth'
+import { useUserStore } from '~/stores/user'
+import { useMessageStore } from '~/stores/message'
 import { useGroupStore } from '~/stores/group'
 import { timeago } from '~/composables/useTimeFormat'
 
@@ -45,34 +49,63 @@ export default {
       default: false,
     },
   },
-  setup() {
+  setup(props) {
     const groupStore = useGroupStore()
     const messageStore = useMessageStore()
+    const authStore = useAuthStore()
+    const userStore = useUserStore()
 
-    return { groupStore, messageStore, timeago }
+    const me = authStore.user
+
+    if (
+      me &&
+      (me.systemrole === 'Moderator' ||
+        me.systemrole === 'Support' ||
+        me.systemrole === 'Admin')
+    ) {
+      // Fetch any approving mod.  No need to wait.
+      const message = messageStore.byId(props.id)
+      for (const group of message?.groups) {
+        if (group?.approvedby) {
+          userStore.fetch(group.approvedby)
+        }
+      }
+    }
+
+    return { groupStore, messageStore, authStore, userStore, timeago }
   },
   computed: {
+    approvedby() {
+      let approvedby = ''
+
+      if (this.mod) {
+        for (const group of this.message?.groups) {
+          if (group?.approvedby) {
+            const mod = this.userStore.byId(group.approvedby)
+            approvedby = mod?.displayname
+          }
+        }
+      }
+
+      return approvedby
+    },
     message() {
       return this.messageStore.byId(this.id)
     },
     groups() {
       const ret = {}
 
-      if (this.message) {
-        this.message.groups.forEach((g) => {
-          const thegroup = this.groupStore.get(g.groupid)
+      this.message?.groups.forEach((g) => {
+        const thegroup = this.groupStore.get(g.groupid)
 
-          if (thegroup) {
-            ret[g.groupid] = thegroup
+        if (thegroup) {
+          ret[g.groupid] = thegroup
 
-            // Better to link to the group by name if possible to avoid nuxt generate creating explore pages for the
-            // id variants.
-            ret[g.groupid].exploreLink = thegroup
-              ? thegroup.nameshort
-              : g.groupid
-          }
-        })
-      }
+          // Better to link to the group by name if possible to avoid nuxt generate creating explore pages for the
+          // id variants.
+          ret[g.groupid].exploreLink = thegroup ? thegroup.nameshort : g.groupid
+        }
+      })
 
       return ret
     },

@@ -1,11 +1,4 @@
-**This is a WIP rewrite of the front-end client into Nuxt v3.  It's not ready yet, by a long chalk.**
-
-What does exist:
-* Use of Nuxt 3 and hence Vue 3 + Vite.
-* Use of Bootstrap Vue Next (still in alpha), including customisation.  This is a replacement for Bootstrap Vue.
-* Use of Pinia as a replacement for Vuex.  This is much nicer.
-* Continuous Delivery via Azure.
-* Capacitor app (WIP).
+**This is a WIP rewrite of the front-end client into Nuxt v3.  It's not ready yet, but it's getting there.**
 
 What doesn't exist yet:
 * TODO Some of the minor pages (councils, stats, noticeboards, engage, livemap, merge, mobile, mydata)
@@ -59,9 +52,12 @@ pick up a change.
 # Technologies
 
 Briefly:
-* [Nuxt](https://v3.nuxtjs.org/), which is [Vue 3](https://vuejs.org/) (so we get all
-  that nice reactive stuff), with a standard layout and SSR/static site generation.
+* [Nuxt 3](https://v3.nuxtjs.org/), which is [Vue 3](https://vuejs.org/) (so we get all
+  that nice reactive stuff), with a standard folder layout, SSR/static site generation and Pinia as a replacement 
+  for Vuex.
 * [Bootstrap Vue Next](https://github.com/bootstrap-vue/bootstrap-vue-next/), which is Bootstrap v5 for Vue 3 / Nuxt 3.
+* Continuous Delivery via Azure.
+* Capacitor app (WIP).
 
 <img src="http://www.browserstack.com/images/layout/browserstack-logo-600x315.png" width="280"/>
 
