@@ -4,15 +4,17 @@
     id="loginModal"
     ref="loginModal"
     v-model="showModal"
+    no-fade
     size="lg"
     no-close-on-backdrop
     :hide-header-close="forceLogin"
     :no-close-on-esc="forceLogin"
-    class="hide-footer"
+    hide-footer
+    modal-class="verytop"
   >
     <!-- This is required as the default bootstrap component makes the main title an h5 -->
     <template #title>
-      <h2>Let's get freegling!</h2>
+      <h2>Let's get freegling! - show {{ showModal }}</h2>
     </template>
     <p v-if="signUp" class="text-center">
       You'll get emails. Name, approximate location, and profile picture are
@@ -65,7 +67,7 @@
           Social log in blocked - check your privacy settings, including any ad
           blockers such as Adblock Plus.
         </notice-message>
-        <b-alert v-if="socialLoginError" variant="danger" show>
+        <b-alert v-if="socialLoginError" variant="danger" :model-value="true">
           Login Failed: {{ socialLoginError }}
         </b-alert>
       </div>
@@ -149,8 +151,7 @@
             <span v-if="!signUp"> Log in to Freegle </span>
             <span v-else> Register on Freegle </span>
           </b-button>
-          <!--          TODO Login modal not showing - see Slack from Chris-->
-          <b-alert v-if="nativeLoginError" variant="danger" show>
+          <b-alert v-if="nativeLoginError" variant="danger" :model-value="true">
             Login Failed: {{ nativeLoginError }}
           </b-alert>
           <div v-if="!signUp" class="text-center">
@@ -309,6 +310,7 @@ export default {
     forceLogin: {
       immediate: true,
       handler(newVal) {
+        console.log('Force login changed to ' + newVal)
         this.showModal = this.pleaseShowModal || newVal
       },
     },
@@ -534,7 +536,7 @@ export default {
       }
     },
     loginYahoo() {
-      this.authStore.oginType = 'Yahoo'
+      this.loginType = 'Yahoo'
 
       // Sadly Yahoo doesn't support a Javascript-only OAuth flow, so far as I can tell.  So what we do is
       // redirect to Yahoo, which returns back to us with a code parameter, which we then pass to the server
@@ -701,6 +703,7 @@ $color-yahoo: #6b0094;
   border: 2px solid $color-google;
   background-color: #dadce0;
   width: 100%;
+  min-height: 44px;
 }
 
 :deep(.social-button--google > div) {

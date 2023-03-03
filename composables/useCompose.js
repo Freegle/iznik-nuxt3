@@ -215,16 +215,17 @@ export function addItem() {
   const id = composeStore.add()
   const me = authStore.user
 
-  composeStore.setMessage({
-    message: {
+  composeStore.setMessage(
+    id,
+    {
       id,
       item: null,
       description: null,
       type: this.postType,
       availablenow: 1,
     },
-    me,
-  })
+    me
+  )
 }
 
 export async function freegleIt(type, router) {

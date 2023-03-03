@@ -69,6 +69,10 @@ export default defineNuxtConfig({
     },
   },
 
+  experimental: {
+    emitRouteChunkError: 'reload',
+  },
+
   build: {
     // Need to transpile otherwise SSR fails - see https://github.com/nuxt/framework/discussions/4523.
     transpile: [

@@ -6,6 +6,7 @@ export default class NoticeboardAPI extends BaseAPI {
   }
 
   async add(data) {
+    console.log('add', data)
     const { id } = await this.$post('/noticeboard', data)
     return id
   }

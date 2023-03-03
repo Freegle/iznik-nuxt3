@@ -115,12 +115,12 @@
   </client-only>
 </template>
 <script>
-import { useRoute } from 'vue-router'
 import dayjs from 'dayjs'
 import VisibleWhen from '../../components/VisibleWhen'
 
 import { buildHead } from '../../composables/useBuildHead'
 import { useAuthStore } from '../../stores/auth'
+import { useRoute, useRouter } from '#imports'
 import InfiniteLoading from '~/components/InfiniteLoading'
 import { useChatStore } from '~/stores/chat'
 import SidebarRight from '~/components/SidebarRight'
@@ -174,7 +174,11 @@ export default {
 
       if (!chat) {
         // Might be old.  Try fetching it specifically.
-        chat = await chatStore.fetchChat(id)
+        try {
+          chat = await chatStore.fetchChat(id)
+        } catch (e) {
+          console.log("Couldn't fetch chat", id, e)
+        }
       } else {
         // We have the chat, but maybe it's not quite up to date (e.g. a new message).  So fetch, but don't wait.
         chatStore.fetchChat(id)
@@ -298,7 +302,8 @@ export default {
         await this.chatStore.hide(this.visibleChats[i].id)
       }
 
-      this.$router.push('/chats')
+      const router = useRouter()
+      router.push('/chats')
     },
     loadMore($state) {
       // We use an infinite scroll on the list of chats because even though we have all the data in hand, the less

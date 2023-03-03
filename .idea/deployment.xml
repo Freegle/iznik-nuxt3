@@ -72,6 +72,13 @@
           </mappings>
         </serverdata>
       </paths>
+      <paths name="bulk2 (Katapult)">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="bulk2.ilovefreegle.org">
         <serverdata>
           <mappings>
@@ -80,6 +87,13 @@
         </serverdata>
       </paths>
       <paths name="bulk3.ilovefreegle.org">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="bulk4 (Katapult)">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />

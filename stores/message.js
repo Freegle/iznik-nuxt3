@@ -88,6 +88,11 @@ export const useMessageStore = defineStore({
       this.bounds[key] = ret
       return ret
     },
+    async search(params) {
+      await this.clear()
+      const ret = await api(this.config).message.search(params)
+      return ret
+    },
     async fetchMyGroups() {
       let ret = null
 

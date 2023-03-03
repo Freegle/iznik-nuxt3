@@ -51,7 +51,13 @@
         @close="$emit('close')"
         @sent="sent"
       />
-      <b-alert v-if="replied" variant="info" show class="mt-2" fade>
+      <b-alert
+        v-if="replied"
+        variant="info"
+        :model-value="true"
+        class="mt-2"
+        fade
+      >
         We've sent your message. You'll get replies in the
         <nuxt-link to="/chats">Chats</nuxt-link> section on here, and by email.
       </b-alert>

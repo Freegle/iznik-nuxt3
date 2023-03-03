@@ -131,6 +131,6 @@ const loadMore = function ($state) {
 const volunteermodal = ref(null)
 
 const showVolunteerModal = () => {
-  volunteermodal.show()
+  volunteermodal.value.show()
 }
 </script>

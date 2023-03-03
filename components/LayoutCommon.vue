@@ -1,11 +1,5 @@
 <template>
   <div>
-    <client-only>
-      <MainHeader
-        v-model:chat-count="chatCount"
-        v-model:unread-notification-count="unreadNotificationCount"
-      />
-    </client-only>
     <main class="ml-0 ps-0 pe-0 pageContent">
       <slot ref="pageContent" />
     </main>
@@ -31,7 +25,11 @@
     </div>
     <client-only>
       <div class="d-none">
-        <!--  TODO      <ChatButton v-if="replyToSend" ref="replyToPostChatButton" :userid="replyToUser" />-->
+        <ChatButton
+          v-if="replyToSend"
+          ref="replyToPostChatButton"
+          :userid="replyToUser"
+        />
       </div>
       <BreakpointFettler />
       <div id="here" />
@@ -40,28 +38,27 @@
   </div>
 </template>
 <script>
-import { useMiscStore } from '../stores/misc'
-import { useChatStore } from '../stores/chat'
 import SomethingWentWrong from './SomethingWentWrong'
+import { useMessageStore } from '~/stores/message'
+import { useMiscStore } from '~/stores/misc'
+import { useChatStore } from '~/stores/chat'
+import replyToPost from '@/mixins/replyToPost'
 const SupportLink = () => import('~/components/SupportLink')
 const BouncingEmail = () => import('~/components/BouncingEmail')
-const MainHeader = () => import('~/components/MainHeader')
 const BreakpointFettler = () => import('~/components/BreakpointFettler')
 
 export default {
   components: {
     BouncingEmail,
     SupportLink,
-    MainHeader,
     BreakpointFettler,
     SomethingWentWrong,
   },
+  mixins: [replyToPost],
   data() {
     return {
       showLoader: true,
       timeTimer: null,
-      unreadNotificationCount: 0,
-      chatCount: 0,
     }
   },
   // mixins: [replyToPost],
@@ -71,7 +68,7 @@ export default {
       return store.getBreakpoint
     },
   },
-  mounted() {
+  async mounted() {
     // Start our timer.  Holding the time in the store allows us to update the time regularly and have reactivity
     // cause displayed fromNow() values to change, rather than starting a timer for each of them.
     if (process.client) {
@@ -131,19 +128,16 @@ export default {
     } catch (e) {
       console.log('Failed to set context', e)
     }
-    //
-    //   if (process.client) {
-    //     if (this.replyToSend) {
-    //       // We have loaded the site with a reply that needs sending.  This happens if we force login in a way that
-    //       // causes us to navigate away and back again.  Fetch the relevant message.
-    // TODO Loaded with reply to send
-    //       await this.$store.dispatch('messages/fetch', {
-    //         id: this.replyToSend.replyMsgId
-    //       })
-    //
-    //       this.replyToPost()
-    //     }
-    //   }
+
+    if (process.client) {
+      if (this.replyToSend) {
+        // We have loaded the site with a reply that needs sending.  This happens if we force login in a way that
+        // causes us to navigate away and back again.  Fetch the relevant message.
+        const messageStore = useMessageStore()
+        await messageStore.fetch(this.replyToSend.replyMsgId, true)
+        this.replyToPost()
+      }
+    }
   },
   beforeDestroy() {
     if (process.client) {
@@ -177,5 +171,9 @@ html {
 
 body.modal-open {
   padding-right: 0px !important;
+}
+
+.pageContent {
+  margin-top: 75px;
 }
 </style>

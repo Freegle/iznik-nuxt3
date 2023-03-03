@@ -80,8 +80,6 @@ const JobsTopBar = () => import('~/components/JobsTopBar')
 
 const MIN_TO_SHOW = 10
 
-// TODO Ensure Message visible case of reply then go back to the list.
-
 export default {
   components: {
     OurMessage,

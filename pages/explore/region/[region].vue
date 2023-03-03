@@ -12,7 +12,7 @@
           class="mt-2"
           show-start-message
         />
-        <b-alert v-else variant="danger" show>
+        <b-alert v-else variant="danger" :model-value="true">
           That region isn't valid.
         </b-alert>
       </b-col>
