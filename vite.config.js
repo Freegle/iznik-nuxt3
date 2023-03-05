@@ -1,6 +1,7 @@
 import path from 'path-browserify'
 import eslintPlugin from 'vite-plugin-eslint'
 import legacy from '@vitejs/plugin-legacy'
+import { VitePWA } from 'vite-plugin-pwa'
 import config from './config'
 
 export default {
@@ -21,6 +22,7 @@ export default {
   },
 
   plugins: [
+    VitePWA({ registerType: 'autoUpdate' }),
     // Make Lint errors cause build failures.
     eslintPlugin(),
     legacy({
