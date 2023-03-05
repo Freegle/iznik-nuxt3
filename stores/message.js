@@ -132,7 +132,8 @@ export const useMessageStore = defineStore({
 
       const promise = api(this.config).message.fetchByUser(userid, active)
 
-      if (force || !this.byUserList[userid]) {
+      // If we're getting non-active messages make sure we hit the server as the cache might be of active only.
+      if (!active || force || !this.byUserList[userid]) {
         messages = await promise
         for (const message of messages) {
           if (!message.hasoutcome) {

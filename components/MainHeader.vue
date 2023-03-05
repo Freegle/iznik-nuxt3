@@ -515,6 +515,7 @@ export default {
       chatCount: 0,
       activePostsCount: 0,
       showAboutMeModal: false,
+      countTimer: null,
     }
   },
   computed: {
@@ -561,6 +562,16 @@ export default {
     },
     chatCount() {
       this.$emit('update:chatCount', this.chatCount)
+    },
+    myid(newVal, oldVal) {
+      if (newVal && !oldVal) {
+        // Just logged in, update the counts sooner.
+        if (this.countTimer) {
+          clearTimeout(this.countTimer)
+        }
+
+        this.getCounts()
+      }
     },
   },
   mounted() {
@@ -663,7 +674,7 @@ export default {
         }
       }
 
-      setTimeout(this.getCounts, 60000)
+      this.countTimer = setTimeout(this.getCounts, 60000)
     },
     clickedMobileNav() {
       console.log('Clicked mobile nav', this.$refs?.mobileNav)
