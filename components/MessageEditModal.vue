@@ -273,6 +273,11 @@ export default {
       // We have uploaded a photo.  Remove the filepond instance.
       this.uploading = false
 
+      if (!this.attachments) {
+        console.log('Fix empty attach')
+        this.attachments = []
+      }
+
       this.attachments.push({
         id: imageid,
         paththumb: imagethumb,
