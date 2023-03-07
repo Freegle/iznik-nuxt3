@@ -48,6 +48,7 @@
         </b-button>
         <div
           id="googleLoginButton"
+          ref="googleLoginButton"
           class="social-button social-button--google clickme"
         />
         <b-button
@@ -581,17 +582,33 @@ export default {
       this.$router.push('/forgot')
     },
     installGoogleSDK() {
-      console.log('Install google SDK')
-      // Google client library should have been loaded by the layout.
-      window?.google?.accounts?.id?.initialize({
-        client_id: this.clientId,
-        callback: this.handleGoogleCredentialsResponse,
-      })
-      console.log('Render google button')
-      window?.google?.accounts?.id?.renderButton(
-        document.getElementById('googleLoginButton'),
-        { theme: 'outline', size: 'large', width: '300px' }
-      )
+      if (
+        window &&
+        window.google &&
+        window.google.accounts &&
+        window.google.accounts.id
+      ) {
+        console.log('Install google SDK')
+        // Google client library should be loaded by default.vue.
+        window.google.accounts.id.initialize({
+          client_id: this.clientId,
+          callback: this.handleGoogleCredentialsResponse,
+        })
+        console.log(
+          'Render google button',
+          document.getElementById('googleLoginButton')
+        )
+
+        this.waitForRef('googleLoginButton', () => {
+          console.log('Found google button ref')
+          window.google.accounts.id.renderButton(
+            document.getElementById('googleLoginButton'),
+            { theme: 'outline', size: 'large', width: '300px' }
+          )
+        })
+      } else {
+        console.log('Google not yet fully loaded')
+      }
     },
     installFacebookSDK() {
       const self = this
