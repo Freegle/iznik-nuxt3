@@ -1,6 +1,6 @@
 <template>
   <div>
-    <LayoutCommon :key="bump">
+    <LayoutCommon :key="'nuxt-' + bump">
       <slot />
     </LayoutCommon>
     <client-only>
@@ -9,7 +9,11 @@
         @loggedin="googleLoggedIn"
         @complete="googleLoaded"
       />
-      <LoginModal v-if="!loggedIn" ref="loginModal" :key="bumpLogin" />
+      <LoginModal
+        v-if="!loggedIn"
+        ref="loginModal"
+        :key="'login-' + bumpLogin"
+      />
     </client-only>
   </div>
 </template>
