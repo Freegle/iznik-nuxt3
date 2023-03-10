@@ -116,7 +116,7 @@ export const useMobileStore = defineStore({ // Do not persist
     //////////////
     // https://capacitorjs.com/docs/apis/push-notifications
     async initPushNotifications() {
-      /*if (!this.isiOS) {
+      if (!this.isiOS) {
         // Create our Android push channel
         PushNotifications.createChannel({
           id: 'PushPluginChannel',
@@ -140,7 +140,7 @@ export const useMobileStore = defineStore({ // Do not persist
         }).then((x) => {
           console.log("CHANNEL DELETED: PushDefaultForeground")
         })
-      }*/
+      }
 
       /* PushNotifications.checkPermissions().then((result) => {
         console.log('checkPermissions:', result) // Android always returns "granted"
@@ -206,8 +206,12 @@ export const useMobileStore = defineStore({ // Do not persist
       if (isNaN(badgeCount)) badgeCount = 0
       if (badgeCount !== this.lastBadgeCount) {
         console.log('setBadgeCount', badgeCount)
-        await Badge.set({ badgeCount });
+        //const rv = await Badge.isSupported();
+        //console.log('isSupported', rv.isSupported)
+        await Badge.set({ count: badgeCount });
         //mobilePush.setApplicationIconBadgeNumber(function () { }, function () { }, badgeCount)
+        //const result = await Badge.get();
+        //console.log("Get Badge Count: ", result.count);
         this.lastBadgeCount = badgeCount
       }
     },
