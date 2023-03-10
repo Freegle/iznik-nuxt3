@@ -66,11 +66,20 @@ const route = useRoute()
 const storyStore = useStoryStore()
 const groupStore = useGroupStore()
 
-const groupid = parseInt(route.params.groupid)
+const groupid = parseInt(route.params.groupid) || 0
 const limit = parseInt(route.query.limit) || LIMIT
 
 const stories = await storyStore.fetchByGroup(groupid, limit)
 const group = await groupStore.fetch(groupid)
+
+const groupname = computed(() => {
+  if (groupid?.value) {
+    const group = groupStore.get(groupid.value)
+    return group?.namedisplay
+  }
+
+  return 'Freegle'
+})
 
 useHead(
   buildHead(

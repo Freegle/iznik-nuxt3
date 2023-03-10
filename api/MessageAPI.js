@@ -25,6 +25,13 @@ export default class MessageAPI extends BaseAPI {
     })
   }
 
+  search(params) {
+    return this.$getv2(
+      '/message/search/' + encodeURIComponent(params.search),
+      params
+    )
+  }
+
   mygroups() {
     return this.$getv2('/message/mygroups')
   }

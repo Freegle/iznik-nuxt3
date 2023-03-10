@@ -330,7 +330,7 @@ export default {
     let expand = false
 
     if (myid) {
-      messages = await messageStore.fetchByUser(myid, false)
+      messages = await messageStore.fetchByUser(myid, false, true)
       expand = messages.length <= 5
 
       // No need to wait for searches - often below the fold.
@@ -502,7 +502,7 @@ export default {
           this.donationGroup = groupid
           this.ask()
 
-          this.$store.dispatch('misc/set', {
+          this.miscStore.set({
             key: 'lastdonationask',
             value: new Date().getTime(),
           })

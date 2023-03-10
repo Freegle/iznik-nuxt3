@@ -120,7 +120,7 @@
               <b-form-input
                 v-model="search"
                 type="text"
-                placeholder="Search posts TODO"
+                placeholder="Search posts"
                 autocomplete="off"
                 @keyup.enter.exact="doSearch"
               />
@@ -546,6 +546,8 @@ export default {
       if (!newval) {
         // We've cleared the search box, so cancel the search and return the map to normal.
         this.searchOn = null
+        this.messagesOnMap = []
+        this.infiniteId++
       }
     },
     messagesForList() {
@@ -579,7 +581,6 @@ export default {
           // Set some values which will cause the post map to search.
           this.messagesOnMap = []
           this.searchOn = this.search
-          this.messageStore.clear()
           this.infiniteId++
         }
       }

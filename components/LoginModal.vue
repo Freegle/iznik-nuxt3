@@ -4,15 +4,17 @@
     id="loginModal"
     ref="loginModal"
     v-model="showModal"
+    no-fade
     size="lg"
     no-close-on-backdrop
     :hide-header-close="forceLogin"
     :no-close-on-esc="forceLogin"
-    class="hide-footer"
+    hide-footer
+    modal-class="verytop"
   >
     <!-- This is required as the default bootstrap component makes the main title an h5 -->
     <template #title>
-      <h2>Let's get freegling!</h2>
+      <h2>Let's get freegling! - show {{ showModal }}</h2>
     </template>
     <p v-if="signUp" class="text-center">
       You'll get emails. Name, approximate location, and profile picture are
@@ -65,6 +67,7 @@
         </b-button>
         <div v-if="!isApp"
           id="googleLoginButton"
+          ref="googleLoginButton"
           class="social-button social-button--google clickme"
         />
         <b-button
@@ -84,10 +87,10 @@
           Social log in blocked - check your privacy settings, including any ad
           blockers such as Adblock Plus.
         </notice-message>
-        <b-alert v-if="loginWaitMessage" variant="warning" :modelValue="true">
+        <b-alert v-if="loginWaitMessage" variant="warning" :model-value="true">
           {{ loginWaitMessage }}
         </b-alert>
-        <b-alert v-if="socialLoginError" variant="danger" :modelValue="true">
+        <b-alert v-if="socialLoginError" variant="danger" :model-value="true">
           Login Failed: {{ socialLoginError }}
         </b-alert>
       </div>
@@ -171,8 +174,7 @@
             <span v-if="!signUp"> Log in to Freegle </span>
             <span v-else> Register on Freegle </span>
           </b-button>
-          <!--          TODO Login modal not showing - see Slack from Chris-->
-          <b-alert v-if="nativeLoginError" variant="danger" :modelValue="true">
+          <b-alert v-if="nativeLoginError" variant="danger" :model-value="true">
             Login Failed: {{ nativeLoginError }}
           </b-alert>
           <div v-if="!signUp" class="text-center">
@@ -356,6 +358,7 @@ export default {
       immediate: true,
       handler(newVal) {
         this.loginWaitMessage = null
+        console.log('Force login changed to ' + newVal)
         this.showModal = this.pleaseShowModal || newVal
       },
     },
@@ -785,17 +788,33 @@ export default {
       if( this.isApp){
         GoogleAuth.initialize()
       } else {
+      if (
+        window &&
+        window.google &&
+        window.google.accounts &&
+        window.google.accounts.id
+      ) {
         console.log('Install google SDK')
-        // Google client library should have been loaded by the layout.
-        window?.google?.accounts?.id?.initialize({
+        // Google client library should be loaded by default.vue.
+        window.google.accounts.id.initialize({
           client_id: this.clientId,
           callback: this.handleGoogleCredentialsResponse,
         })
-        console.log('Render google button')
-        window?.google?.accounts?.id?.renderButton(
-          document.getElementById('googleLoginButton'),
-          { theme: 'outline', size: 'large', width: '300px' }
+        console.log(
+          'Render google button',
+          document.getElementById('googleLoginButton')
         )
+
+        this.waitForRef('googleLoginButton', () => {
+          console.log('Found google button ref')
+          window.google.accounts.id.renderButton(
+            document.getElementById('googleLoginButton'),
+            { theme: 'outline', size: 'large', width: '300px' }
+          )
+        })
+      } else {
+        console.log('Google not yet fully loaded')
+      }
       }
     },
     installFacebookSDK() {
@@ -920,6 +939,7 @@ $color-apple: #000000;
   border: 2px solid $color-google;
   background-color: #dadce0;
   width: 100%;
+  min-height: 44px;
 }
 .social-button--google-app {
   border: 2px solid $color-google;

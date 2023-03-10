@@ -121,6 +121,6 @@ const loadMore = function ($state) {
 const eventmodal = ref(null)
 
 const showEventModal = () => {
-  eventmodal.show()
+  eventmodal.value.show()
 }
 </script>

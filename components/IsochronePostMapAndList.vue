@@ -2,7 +2,6 @@
   <div>
     <h2 class="sr-only">Map of offers and wanteds</h2>
     <Suspense>
-      <!--      :key="'postmap-' + bump"-->
       <PostMap
         v-if="initialBounds"
         v-model:ready="mapready"
@@ -280,7 +279,7 @@ export default {
       swlng: ref(props.initialBounds[0][1]),
       nelat: props.initialBounds[1][0],
       nelng: props.initialBounds[1][1],
-      search: props.initialSearch,
+      search: ref(props.initialSearch),
       searchOn: props.initialSearch,
     }
   },
@@ -505,13 +504,11 @@ export default {
       if (newVal) {
         this.groupStore.fetch(newVal)
       }
-      console.log('Isochrone group changed', newVal)
       await this.messageStore.clear()
 
       if (newVal) {
         await this.groupStore.fetch(newVal)
         await this.groupStore.fetchMessagesForGroup(newVal)
-        console.log('Fetched messages')
       } else {
         await this.isochroneStore.fetch()
       }
@@ -530,6 +527,8 @@ export default {
       if (!newval) {
         // We've cleared the search box, so cancel the search and return the map to normal.
         this.searchOn = null
+        this.messagesOnMap = []
+        this.infiniteId++
       }
     },
     messagesForList() {
@@ -567,16 +566,12 @@ export default {
     groupsChanged(groupids) {
       this.groupids = groupids
     },
-    async doSearch() {
+    doSearch() {
       if (this.search) {
-        if (this.busy) {
-          // Try later.  Otherwise we might end up with messages in store not matching our search.
-          setTimeout(this.doSearch, 100)
-        } else if (this.searchOn !== this.search) {
+        if (this.searchOn !== this.search) {
           // Set some values which will cause the post map to search.
           this.messagesOnMap = []
           this.searchOn = this.search
-          await this.messageStore.clear()
           this.infiniteId++
         }
       }

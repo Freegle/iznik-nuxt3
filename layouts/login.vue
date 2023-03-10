@@ -1,11 +1,19 @@
 <template>
   <div>
-    <LayoutCommon v-if="ready">
+    <LayoutCommon :key="'nuxt-' + bump">
       <slot />
     </LayoutCommon>
     <client-only>
-      <GoogleOneTap v-if="oneTap" @complete="googleLoaded" />
-      <LoginModal ref="loginModal" />
+      <GoogleOneTap
+        v-if="oneTap"
+        @loggedin="googleLoggedIn"
+        @complete="googleLoaded"
+      />
+      <LoginModal
+        v-if="!loggedIn"
+        ref="loginModal"
+        :key="'login-' + bumpLogin"
+      />
     </client-only>
   </div>
 </template>
@@ -27,7 +35,6 @@ export default {
     const mobileStore = useMobileStore()
     const ready = ref(mobileStore.isApp)
     const oneTap = ref(false)
-    const googleReady = ref(false)
     const authStore = useAuthStore()
     const jwt = authStore.auth.jwt
     const persistent = authStore.auth.persistent
@@ -59,7 +66,12 @@ export default {
     return {
       ready,
       oneTap,
-      googleReady,
+    }
+  },
+  data() {
+    return {
+      bump: 0,
+      bumpLogin: 0,
     }
   },
   watch: {
@@ -69,24 +81,21 @@ export default {
         if (newVal) {
           // We've logged in.
           this.ready = true
+        } else {
+          const authStore = useAuthStore()
+          authStore.forceLogin = true
         }
       },
     },
   },
   methods: {
+    googleLoggedIn() {
+      // OneTap has logged us in.  Re-render the page as logged in.
+      this.bump++
+    },
     googleLoaded() {
-      // For this layout we know that we need to be logged in.  Now that we know whether Google has logged us in,
-      // we can render the login modal, which may or may not be needed.
-      this.googleReady = true
-      console.log('Google ready')
-
-      if (!this.me) {
-        console.log('Not logged in, force')
-        this.waitForRef('loginModal', () => {
-          console.log(this.$refs.loginModal)
-          this.$refs.loginModal.show()
-        })
-      }
+      // We need to force the login modal to rerender, otherwise the login button doesn't always show.
+      this.bumpLogin++
     },
   },
 }

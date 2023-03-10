@@ -1,10 +1,11 @@
 <template>
   <div>
-    <LayoutCommon v-if="ready">
+    <LayoutCommon v-if="ready" :key="bump">
       <slot />
     </LayoutCommon>
     <client-only>
-      <GoogleOneTap v-if="oneTap" @complete="googleLoaded" />
+      <GoogleOneTap v-if="oneTap" @loggedin="googleLoggedIn" />
+      <LoginModal v-if="!loggedIn" ref="loginModal" />
     </client-only>
   </div>
 </template>
@@ -14,11 +15,13 @@ import { ref } from '#imports'
 import { useAuthStore } from '~/stores/auth'
 import { useMobileStore } from '~/stores/mobile'
 const GoogleOneTap = () => import('~/components/GoogleOneTap')
+const LoginModal = () => import('~/components/LoginModal')
 
 export default {
   components: {
     LayoutCommon,
     GoogleOneTap,
+    LoginModal,
   },
   async setup() {
     const mobileStore = useMobileStore()
@@ -57,11 +60,15 @@ export default {
       googleReady,
     }
   },
+  data() {
+    return {
+      bump: 0,
+    }
+  },
   watch: {
     loginStateKnown: {
       immediate: true,
       handler(newVal) {
-        console.log('Login watch', newVal)
         if (newVal) {
           // We now know whether or not we have logged in.
           this.ready = true
@@ -69,15 +76,19 @@ export default {
       },
     },
   },
+  async mounted() {
+    // For this layout we don't need to be logged in.  So can just continue.  But we want to know first whether or
+    // not we are logged in.  We might already know that from the server via cookies, but if not, find out.
+    console.log('Google loaded', this.loginStateKnown)
+    if (!this.loginStateKnown) {
+      const authStore = useAuthStore()
+      await authStore.fetchUser()
+    }
+  },
   methods: {
-    async googleLoaded() {
-      // For this layout we don't need to be logged in.  So can just continue.  But we want to know first whether or
-      // not we are logged in.  We might already know that from the server via cookies, but if not, find out.
-      console.log('Google loaded', this.loginStateKnown)
-      if (!this.loginStateKnown) {
-        const authStore = useAuthStore()
-        await authStore.fetchUser()
-      }
+    googleLoggedIn() {
+      // OneTap has logged us in.  Re-render the page as logged in.
+      this.bump++
     },
   },
 }

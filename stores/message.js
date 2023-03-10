@@ -88,6 +88,11 @@ export const useMessageStore = defineStore({
       this.bounds[key] = ret
       return ret
     },
+    async search(params) {
+      await this.clear()
+      const ret = await api(this.config).message.search(params)
+      return ret
+    },
     async fetchMyGroups() {
       let ret = null
 
@@ -127,7 +132,8 @@ export const useMessageStore = defineStore({
 
       const promise = api(this.config).message.fetchByUser(userid, active)
 
-      if (force || !this.byUserList[userid]) {
+      // If we're getting non-active messages make sure we hit the server as the cache might be of active only.
+      if (!active || force || !this.byUserList[userid]) {
         messages = await promise
         for (const message of messages) {
           if (!message.hasoutcome) {

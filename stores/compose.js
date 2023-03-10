@@ -114,17 +114,17 @@ export const useComposeStore = defineStore({
       return ret
     },
     markSubmitted(id, me) {
-      console.log('Mark submitted', id)
-      this.setMessage({
-        message: {
+      this.setMessage(
+        id,
+        {
           id,
           submitted: true,
           item: null,
           description: null,
           availablenow: 1,
         },
-        me,
-      })
+        me
+      )
 
       this.setAttachmentsForMessage(id, [])
     },
@@ -203,11 +203,11 @@ export const useComposeStore = defineStore({
         }
       }
     },
-    setMessage({ message, me }) {
+    setMessage(id, message, me) {
       message.savedAt = Date.now()
       message.savedBy = me ? me.id : null
 
-      this.messages[message.id] = message
+      this.messages[id] = message
 
       if (message && message.submitted) {
         this.lastSubmitted = Math.max(
@@ -314,7 +314,6 @@ export const useComposeStore = defineStore({
           } else {
             // This is one of our existing messages which we are reposting.  We need to convert it back to a draft,
             // edit it (to update it from our client data), and then submit.
-            // TODO Needs testing
             console.log('Existing message')
             const id = message.id
             await this.backToDraft(id)

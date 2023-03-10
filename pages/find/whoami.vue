@@ -47,6 +47,7 @@
                 variant="primary"
                 size="lg"
                 block
+                class="w-100"
                 @click="next"
               >
                 Freegle it! <v-icon icon="angle-double-right" />

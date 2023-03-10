@@ -63,6 +63,7 @@
                   size="lg"
                   block
                   to="/give/whereami"
+                  class="w-100"
                 >
                   Next <v-icon icon="angle-double-right" />
                 </b-button>

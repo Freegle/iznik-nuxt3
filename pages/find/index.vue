@@ -61,6 +61,7 @@
                   size="lg"
                   block
                   to="/find/whereami"
+                  class="w-100"
                 >
                   Next <v-icon icon="angle-double-right" />
                 </b-button>

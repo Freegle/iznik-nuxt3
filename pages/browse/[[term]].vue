@@ -276,8 +276,6 @@ export default {
       if (process.client) {
         // The initial bounds for the map are determined from the isochrones if possible.  We might have them cached
         // in store.
-        this.isochroneStore.fetchMessages(true)
-
         const promises = []
         promises.push(this.isochroneStore.fetch())
 

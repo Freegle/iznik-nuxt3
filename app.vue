@@ -1,5 +1,8 @@
 <template>
   <div>
+    <client-only>
+      <MainHeader />
+    </client-only>
     <NuxtLayout v-if="ready">
       <NuxtPage :key="loginCount" />
     </NuxtLayout>
@@ -8,6 +11,7 @@
 <script setup>
 import { useRoute } from 'vue-router'
 import { computed } from 'vue'
+import { useNoticeboardStore } from './stores/noticeboard'
 import { useAuthStore } from './stores/auth'
 import { useGroupStore } from './stores/group'
 import { useMessageStore } from './stores/message'
@@ -61,6 +65,7 @@ const teamStore = useTeamStore()
 const donationStore = useDonationStore()
 const giftAidStore = useGiftAidStore()
 const authorityStore = useAuthorityStore()
+const noticeboardStore = useNoticeboardStore()
 const mobileStore = useMobileStore()
 
 groupStore.init(runtimeConfig)
@@ -84,6 +89,7 @@ teamStore.init(runtimeConfig)
 donationStore.init(runtimeConfig)
 giftAidStore.init(runtimeConfig)
 authorityStore.init(runtimeConfig)
+noticeboardStore.init(runtimeConfig)
 mobileStore.init(runtimeConfig)
 
 // We use a key to force the whole page to re-render if we have logged in.  This is a sledgehammer way of

@@ -110,27 +110,31 @@ export default {
 
         // Now we can pass response.credential to the server, which can verify it to confirm our login as per
         // https://developers.google.com/identity/gsi/web/guides/verify-google-id-token.
-      }
 
-      this.loginType = 'Google'
-      this.nativeLoginError = null
-      this.socialLoginError = null
-      if (response?.credential) {
-        console.log('Signed in')
+        this.loginType = 'Google'
+        this.nativeLoginError = null
+        this.socialLoginError = null
+        if (response?.credential) {
+          console.log('Signed in')
 
-        try {
-          await this.authStore.login({
-            googlejwt: response.credential,
-            googlelogin: true,
-          })
+          try {
+            await this.authStore.login({
+              googlejwt: response.credential,
+              googlelogin: true,
+            })
 
-          // We are now logged in.
-          console.log('Logged in')
-        } catch (e) {
-          this.socialLoginError = 'Google login failed: ' + e.message
+            // We are now logged in.
+            console.log('Logged in')
+            this.$emit('loggedin')
+          } catch (e) {
+            this.socialLoginError = 'Google login failed: ' + e.message
+          }
+        } else if (response?.error && response.error !== 'immediate_failed') {
+          this.socialLoginError = 'Google login failed: ' + response.error
         }
-      } else if (response?.error && response.error !== 'immediate_failed') {
-        this.socialLoginError = 'Google login failed: ' + response.error
+      } else {
+        console.log('Was already logged in')
+        this.$emit('complete')
       }
     },
   },

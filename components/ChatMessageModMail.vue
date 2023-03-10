@@ -87,16 +87,18 @@ export default {
     async repost() {
       const message = this.composeStore.message(this.chatmessage.refmsg.id)
 
+      // Remove any partially composed messages we currently have, because they'll be confusing.
+      await this.composeStore.clearMessages()
+
       // Add this message to the compose store so that it will show up on the compose page.
       await this.composeStore.setMessage(
+        0,
         {
-          message: {
-            id: message.id,
-            type: message.type,
-            item: message.item.name.trim(),
-            description: message.textbody.trim(),
-            availablenow: message.availablenow,
-          },
+          id: message.id,
+          type: message.type,
+          item: message.item.name.trim(),
+          description: message.textbody.trim(),
+          availablenow: message.availablenow,
         },
         this.me
       )

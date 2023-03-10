@@ -282,6 +282,7 @@
         <b-nav class="">
           <b-button
             v-if="loggedIn"
+            ref="mobileNav"
             v-b-toggle.nav_collapse_mobile
             class="toggler white mr-1"
           >
@@ -302,6 +303,7 @@
               no-prefetch
               class="nav-link text-center p-0"
               to="/browse"
+              @click="clickedMobileNav"
               @mousedown="maybeReload('/browse')"
             >
               <v-icon icon="eye" class="fa-2x" />
@@ -314,6 +316,7 @@
               no-prefetch
               class="nav-link text-center p-0"
               to="/give"
+              @click="clickedMobileNav"
               @mousedown="maybeReload('/give')"
             >
               <v-icon icon="gift" class="fa-2x" />
@@ -326,6 +329,7 @@
               no-prefetch
               class="nav-link text-center p-0"
               to="/find"
+              @click="clickedMobileNav"
               @mousedown="maybeReload('/find')"
             >
               <v-icon icon="shopping-cart" class="fa-2x" />
@@ -338,6 +342,7 @@
               no-prefetch
               class="nav-link text-center p-0"
               to="/myposts"
+              @click="clickedMobileNav"
               @mousedown="maybeReload('/myposts')"
             >
               <div class="position-relative">
@@ -360,6 +365,7 @@
               no-prefetch
               class="nav-link text-center p-0 white"
               to="/chitchat"
+              @click="clickedMobileNav"
               @mousedown="maybeReload('/chitchat')"
             >
               <div class="position-relative">
@@ -382,6 +388,7 @@
               no-prefetch
               class="nav-link text-center p-0"
               to="/communityevents"
+              @click="clickedMobileNav"
               @mousedown="maybeReload('/communityevents')"
             >
               <v-icon icon="calendar-alt" class="fa-2x" />
@@ -394,6 +401,7 @@
               no-prefetch
               class="nav-link text-center p-0"
               to="/volunteerings"
+              @click="clickedMobileNav"
               @mousedown="maybeReload('/volunteerings')"
             >
               <v-icon icon="hands-helping" class="fa-2x" />
@@ -406,6 +414,7 @@
               no-prefetch
               class="nav-link text-center p-0"
               to="/promote"
+              @click="clickedMobileNav"
               @mousedown="maybeReload('/promote')"
             >
               <v-icon icon="bullhorn" class="fa-2x" />
@@ -418,6 +427,7 @@
               no-prefetch
               class="nav-link text-center p-0"
               to="/help"
+              @click="clickedMobileNav"
               @mousedown="maybeReload('/help')"
             >
               <v-icon icon="question-circle" class="fa-2x" />
@@ -430,6 +440,7 @@
               no-prefetch
               class="nav-link text-center p-0"
               to="/settings"
+              @click="clickedMobileNav"
               @mousedown="maybeReload('/settings')"
             >
               <v-icon icon="cog" class="fa-2x" />
@@ -451,7 +462,6 @@
         </b-nav>
       </b-collapse>
     </b-navbar>
-    <LoginModal ref="loginModal" />
     <AboutMeModal v-if="showAboutMe" ref="aboutMeModal" />
   </header>
 </template>
@@ -466,7 +476,6 @@ import { useNewsfeedStore } from '../stores/newsfeed'
 import { useMessageStore } from '../stores/message'
 import { useNotificationStore } from '../stores/notification'
 import { useAuthStore } from '~/stores/auth'
-import LoginModal from '~/components/LoginModal'
 import { useCookie } from '#imports'
 
 const AboutMeModal = () => import('~/components/AboutMeModal')
@@ -476,8 +485,6 @@ export default {
   name: 'MainHeader',
   components: {
     NotificationOptions,
-    // ChatMenu,
-    LoginModal,
     AboutMeModal,
   },
   setup() {
@@ -508,6 +515,7 @@ export default {
       chatCount: 0,
       activePostsCount: 0,
       showAboutMeModal: false,
+      countTimer: null,
     }
   },
   computed: {
@@ -555,20 +563,14 @@ export default {
     chatCount() {
       this.$emit('update:chatCount', this.chatCount)
     },
-    $route() {
-      // Close the dropdown menu when we move around.
-      if (
-        this.$refs.nav_collapse &&
-        this.$refs.nav_collapse.$el.classList.contains('show')
-      ) {
-        this.$root.$emit('bv::toggle::collapse', 'nav_collapse')
-      }
+    myid(newVal, oldVal) {
+      if (newVal && !oldVal) {
+        // Just logged in, update the counts sooner.
+        if (this.countTimer) {
+          clearTimeout(this.countTimer)
+        }
 
-      if (
-        this.$refs.nav_collapse_mobile &&
-        this.$refs.nav_collapse_mobile.$el.classList.contains('show')
-      ) {
-        this.$root.$emit('bv::toggle::collapse', 'nav_collapse_mobile')
+        this.getCounts()
       }
     },
   },
@@ -593,7 +595,8 @@ export default {
   },
   methods: {
     requestLogin() {
-      this.$refs.loginModal.show()
+      const authStore = useAuthStore()
+      authStore.forceLogin = true
     },
     async logout() {
       // Remove all cookies, both client and server.  This seems to be necessary to kill off the PHPSESSID cookie
@@ -618,7 +621,7 @@ export default {
       this.authStore.forceLogin = false
 
       // Go to the landing page.
-      this.router.push('/')
+      this.router.push('/', true)
     },
     async showAboutMe() {
       await this.fetchMe(true)
@@ -672,7 +675,11 @@ export default {
         }
       }
 
-      setTimeout(this.getCounts, 60000)
+      this.countTimer = setTimeout(this.getCounts, 60000)
+    },
+    clickedMobileNav() {
+      console.log('Clicked mobile nav', this.$refs?.mobileNav)
+      this.$refs?.mobileNav?.$el?.click()
     },
   },
 }

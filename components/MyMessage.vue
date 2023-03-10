@@ -66,7 +66,7 @@
               </span>
             </div>
             <div class="d-flex flex-wrap">
-              <div v-if="message.replycount > 0 && !expanded" class="mr-2 mt-1">
+              <div v-if="message.replycount > 0" class="mr-2 mt-1">
                 <b-badge variant="info">
                   <v-icon icon="user" class="fa-fw" />
                   {{
@@ -76,10 +76,7 @@
                   }}
                 </b-badge>
               </div>
-              <div
-                v-if="message.outcomes && message.outcomes.length > 0"
-                class="mr-2 mt-1"
-              >
+              <div v-if="message.outcomes?.length > 0" class="mr-2 mt-1">
                 <b-badge v-if="taken" variant="success">
                   <v-icon icon="check" class="fa-fw" /> Taken
                 </b-badge>
@@ -92,7 +89,7 @@
               </div>
               <div v-else-if="message.promisecount > 0" class="mr-2">
                 <b-badge
-                  v-if="promisedTo.length === 0"
+                  v-if="promisedTo?.length === 0"
                   variant="success"
                   class="mt-1"
                 >
@@ -225,7 +222,7 @@
                   <div>
                     <span class="prewrap">
                       <read-more
-                        v-if="message && message.textbody"
+                        v-if="message?.textbody"
                         :text="message.textbody"
                         :max-chars="maxChars"
                         class="nopara"
@@ -234,7 +231,7 @@
                   </div>
                   <div>
                     <div
-                      v-if="message.attachments.length > 0"
+                      v-if="!broken && message.attachments?.length > 0"
                       class="clickme position-relative"
                       @click="showPhotos"
                     >
@@ -256,13 +253,14 @@
                         generator-unable-to-provide-required-alt=""
                         title="Item picture"
                         :src="message.attachments[0].paththumb"
+                        @error.native="brokenImage"
                       />
                     </div>
                   </div>
                 </div>
                 <hr />
                 <table
-                  v-if="replies.length > 0"
+                  v-if="replies?.length > 0"
                   class="table table-borderless table-striped mb-0"
                 >
                   <tbody>
@@ -293,7 +291,7 @@
         </b-collapse>
       </b-card>
       <MessagePhotosModal
-        v-if="expanded && message.attachments.length"
+        v-if="expanded && message.attachments?.length"
         :id="message.id"
         ref="photoModal"
       />
@@ -322,6 +320,7 @@
 <script>
 import ReadMore from 'vue-read-more3/src/ReadMoreComponent'
 import axios from 'axios'
+import { useComposeStore } from '../stores/compose'
 import { useMessageStore } from '../stores/message'
 import { useChatStore } from '../stores/chat'
 import { useGroupStore } from '../stores/group'
@@ -376,6 +375,7 @@ export default {
     const groupStore = useGroupStore()
     const userStore = useUserStore()
     const trystStore = useTrystStore()
+    const composeStore = useComposeStore()
 
     await messageStore.fetch(props.id)
 
@@ -385,6 +385,7 @@ export default {
       groupStore,
       userStore,
       trystStore,
+      composeStore,
     }
   },
   data() {
@@ -396,6 +397,7 @@ export default {
       showEditModal: false,
       showShareModal: false,
       showPromiseModal: false,
+      broken: false,
     }
   },
   computed: {
@@ -430,7 +432,7 @@ export default {
 
       let unseen = 0
 
-      if (this.message && this.message.replies) {
+      if (this.message?.replies) {
         for (const reply of this.message.replies) {
           for (const chat of chats) {
             if (chat.id === reply.chatid) {
@@ -466,24 +468,29 @@ export default {
       // Show the replies with unseen messages first, then most recent
       // console.log('Sort replies', this.message.replies, this)
       const self = this
-      return [...this.message.replies].sort((a, b) => {
-        const aunseen = self.countUnseen(a)
-        const bunseen = self.countUnseen(b)
-        const adate = new Date(a.date).getTime()
-        const bdate = new Date(b.date).getTime()
 
-        if (aunseen !== bunseen) {
-          return bunseen - aunseen
-        } else {
-          return bdate - adate
-        }
-      })
+      if (this.message?.replies) {
+        return [...this.message?.replies].sort((a, b) => {
+          const aunseen = self.countUnseen(a)
+          const bunseen = self.countUnseen(b)
+          const adate = new Date(a.date).getTime()
+          const bdate = new Date(b.date).getTime()
+
+          if (aunseen !== bunseen) {
+            return bunseen - aunseen
+          } else {
+            return bdate - adate
+          }
+        })
+      }
+
+      return []
     },
     closestUser() {
       let ret = null
       let dist = null
 
-      if (this.replyusers.length > 1) {
+      if (this.replyusers?.length > 1) {
         this.replyusers.forEach((uid) => {
           const u = this.userStore.byId(uid)
 
@@ -500,7 +507,7 @@ export default {
       let ret = null
       let rating = null
 
-      if (this.replyusers.length > 1) {
+      if (this.replyusers?.length > 1) {
         this.replyusers.forEach((uid) => {
           const u = this.userStore.byId(uid)
 
@@ -526,7 +533,7 @@ export default {
       let ret = null
       let replytime = null
 
-      if (this.replyusers.length > 1) {
+      if (this.replyusers?.length > 1) {
         this.replyusers.forEach((uid) => {
           const u = this.userStore.byId(uid)
 
@@ -583,11 +590,7 @@ export default {
     promisedTo() {
       const ret = []
 
-      if (
-        this.expanded &&
-        this.message.promises &&
-        this.message.promises.length
-      ) {
+      if (this.expanded && this.message.promises?.length) {
         this.message.promises.forEach((p) => {
           const user = this.userStore.byId(p.userid)
 
@@ -725,17 +728,16 @@ export default {
 
       // Add this message to the compose store so that it will show up on the compose page.
       await this.composeStore.setMessage(
+        0,
         {
-          message: {
-            id: this.message.id,
-            savedBy: this.message.fromuser,
-            item: this.message.item.name.trim(),
-            description: this.message.textbody
-              ? this.message.textbody.trim()
-              : null,
-            availablenow: this.message.availablenow,
-            type: this.message.type,
-          },
+          id: this.message.id,
+          savedBy: this.message.fromuser,
+          item: this.message.item.name.trim(),
+          description: this.message.textbody
+            ? this.message.textbody.trim()
+            : null,
+          availablenow: this.message.availablenow,
+          type: this.message.type,
         },
         this.me
       )
@@ -764,7 +766,7 @@ export default {
     hasOutcome(val) {
       let ret = false
 
-      if (this.message.outcomes && this.message.outcomes.length) {
+      if (this.message.outcomes?.length) {
         for (const outcome of this.message.outcomes) {
           if (outcome.outcome === val) {
             ret = true
@@ -773,6 +775,9 @@ export default {
       }
 
       return ret
+    },
+    brokenImage() {
+      this.broken = true
     },
   },
 }

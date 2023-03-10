@@ -19,15 +19,15 @@ export const useIsochroneStore = defineStore({
       // The caller is expected to have made sure that leaflet and Wkt are loaded.  This
       // is a bit of a kludge to get SSR working.
       if (!this.list?.length || force) {
-        try {
-          if (this.fetchingIsochrones) {
-            await this.fetchingIsochrones
-          } else {
-            this.fetchingIsochrones = api(this.config).isochrone.fetchv2()
-            this.list = await this.fetchingIsochrones
-            this.fetchingIsochrones = null
-          }
-        } catch (e) {
+        if (this.fetchingIsochrones) {
+          await this.fetchingIsochrones
+        } else {
+          this.fetchingIsochrones = api(this.config).isochrone.fetchv2()
+          this.list = await this.fetchingIsochrones
+          this.fetchingIsochrones = null
+        }
+
+        if (!this.list.length) {
           // Most likely a 403 error, which we get when there is no isochrone.  Call the old API, which will create one
           // for us.
           await api(this.config).isochrone.fetchv1()
