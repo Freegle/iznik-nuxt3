@@ -25,6 +25,7 @@ end
 target 'Freegle' do
   capacitor_pods
   # Add your Pods here
+  pod 'Firebase/Messaging'
 end
 
 post_install do |installer|
