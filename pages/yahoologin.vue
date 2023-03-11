@@ -1,7 +1,7 @@
 <template>
   <b-row>
     <b-col class="text-center">
-      <b-img lazy src="/loader.gif" alt="Loading" />
+      <b-img lazy src="/loader.gif" alt="Loading" width="100px" />
     </b-col>
   </b-row>
 </template>

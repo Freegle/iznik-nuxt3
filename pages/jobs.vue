@@ -30,7 +30,7 @@
             </div>
           </div>
           <div v-if="busy" class="d-flex justify-content-around">
-            <b-img src="/loader.gif" alt="Loading..." />
+            <b-img lazy src="/loader.gif" alt="Loading" width="100px" />
           </div>
           <div v-else>
             <div v-for="job in list" :key="'job-' + job.job_reference">

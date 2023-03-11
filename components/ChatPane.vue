@@ -41,7 +41,7 @@
         </div>
       </div>
       <div v-else-if="chatBusy" class="text-center">
-        <b-img class="float-end" src="/loader.gif" />
+        <b-img class="float-end" src="/loader.gif" width="100px" />
       </div>
       <ChatFooter v-bind="$props" class="chatFooter" />
     </div>

@@ -56,7 +56,7 @@
       <span slot="no-results" />
       <span slot="no-more" />
       <span slot="spinner">
-        <b-img lazy src="/loader.gif" alt="Loading" />
+        <b-img lazy src="/loader.gif" alt="Loading" width="100px" />
       </span>
     </infinite-loading>
   </component>

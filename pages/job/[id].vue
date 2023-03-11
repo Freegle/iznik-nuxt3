@@ -10,7 +10,7 @@
             </b-button>
           </NoticeMessage>
           <div v-else class="d-flex justify-content-around">
-            <b-img lazy src="~/static/loader.gif" alt="Loading..." />
+            <b-img lazy src="/loader.gif" alt="Loading" width="100px" />
           </div>
         </b-col>
       </b-row>

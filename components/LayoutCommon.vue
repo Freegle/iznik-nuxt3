@@ -14,7 +14,7 @@
       style="display: none"
     >
       <div class="text-center bg-white p-2">
-        <img src="/loader.gif" alt="Loading..." />
+        <img src="/loader.gif" alt="Loading..." width="100px" />
         <p>
           <span>Loading...</span><br /><span class="font-weight-bold"
             >Stuck here? We couldn't load our Javascript. Try refreshing. Or

@@ -67,6 +67,7 @@
                     lazy
                     src="~/static/loader.gif"
                     alt="Loading..."
+                    width="100px"
                   />
                   <div
                     v-if="
