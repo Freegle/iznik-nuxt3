@@ -23,7 +23,21 @@
           </mappings>
         </serverdata>
       </paths>
+      <paths name="FD API DBG app4 Katapult">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="FD API LIVE app1 Katapult">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="FD API LIVE app4 Katapult">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
