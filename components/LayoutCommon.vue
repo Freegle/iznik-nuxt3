@@ -39,6 +39,7 @@
 </template>
 <script>
 import SomethingWentWrong from './SomethingWentWrong'
+import { useNotificationStore } from '~/stores/notification'
 import { useMessageStore } from '~/stores/message'
 import { useMiscStore } from '~/stores/misc'
 import { useChatStore } from '~/stores/chat'
@@ -137,6 +138,8 @@ export default {
         await messageStore.fetch(this.replyToSend.replyMsgId, true)
         this.replyToPost()
       }
+
+      this.monitorTabVisibility()
     }
   },
   beforeDestroy() {
@@ -149,6 +152,22 @@ export default {
       const miscStore = useMiscStore()
       miscStore.setTime()
       this.timeTimer = setTimeout(this.updateTime, 1000)
+    },
+    monitorTabVisibility() {
+      document.addEventListener('visibilitychange', () => {
+        const miscStore = useMiscStore()
+        miscStore.visible = !document.hidden
+
+        if (this.me && !document.hidden) {
+          // We have become visible.  Refetch our notification count and chat count, which are the two key things which
+          // produce red badges people should click on.
+          const notificationStore = useNotificationStore()
+          notificationStore.fetchCount()
+
+          const chatStore = useChatStore()
+          chatStore.fetchChats()
+        }
+      })
     },
   },
 }
