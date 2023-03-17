@@ -415,7 +415,9 @@ export default {
   },
   methods: {
     focusComment() {
-      this.$refs.threadcomment.focus()
+      this.waitForRef('threadcomment', () => {
+        this.$refs.threadcomment.$el.focus()
+      })
     },
     focusedComment() {
       this.replyingTo = this.newsfeed.id

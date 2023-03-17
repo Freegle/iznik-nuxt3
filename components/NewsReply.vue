@@ -436,9 +436,8 @@ export default {
       this.replyingTo = this.replyid
       this.showReplyBox = true
 
-      // Can't set focus immediately as not in DOM until re-render.
-      this.$nextTick(() => {
-        this.$refs.replybox.focus()
+      this.waitForRef('replybox', () => {
+        this.$refs.replybox.$el.focus()
 
         // Reply with tag.
         this.replybox = '@' + this.reply.displayname + ' '

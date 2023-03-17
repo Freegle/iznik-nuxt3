@@ -16,6 +16,34 @@
           </mappings>
         </serverdata>
       </paths>
+      <paths name="FD API DBG app1 Katapult">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="FD API DBG app4 Katapult">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="FD API LIVE app1 Katapult">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="FD API LIVE app4 Katapult">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="IZNIK Docker">
         <serverdata>
           <mappings>
@@ -72,6 +100,13 @@
           </mappings>
         </serverdata>
       </paths>
+      <paths name="backup (MB)">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="bulk2 (Katapult)">
         <serverdata>
           <mappings>
@@ -80,6 +115,13 @@
         </serverdata>
       </paths>
       <paths name="bulk2.ilovefreegle.org">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="bulk3 (Katapult)">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
@@ -107,7 +149,21 @@
           </mappings>
         </serverdata>
       </paths>
-      <paths name="db-1.freegle.katapult.cloud">
+      <paths name="db-1 (Katapult)">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="db-2 (Katapult)">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="db-3 (Katapult)">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
