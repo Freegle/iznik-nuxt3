@@ -1091,7 +1091,7 @@ export default {
       this.enterNewLine = e
     },
     async leaveGroup(id) {
-      await this.authStore.leaveGroup(id)
+      await this.authStore.leaveGroup(this.myid, id)
     },
     addressBook() {
       this.$refs.addressModal.show()
