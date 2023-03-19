@@ -216,6 +216,29 @@ export const useAuthStore = defineStore({
         if (me) {
           groups = me.memberships
           delete me.memberships
+
+          if (!this.auth.jwt && process.client) {
+            console.log('Pick up jwt for later')
+            // Pick up the JWT for later from the old API.  No need to wait, though.
+            this.$api.session
+              .fetch({
+                components: ['me'],
+              })
+              .then((ret) => {
+                console.log('got', ret)
+                let persistent = null
+                let jwt = null
+
+                if (ret) {
+                  ;({ me, persistent, jwt } = ret)
+                  console.log('Decode', jwt)
+
+                  if (me) {
+                    this.setAuth(jwt, persistent)
+                  }
+                }
+              })
+          }
         }
       }
 
