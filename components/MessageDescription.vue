@@ -1,5 +1,6 @@
 <template>
   <div v-if="textbody && textbody !== 'null'" class="textbody">
+    <span class="d-none" itemprop="description">{{ description }} </span>
     <Highlighter
       v-if="matchedon"
       :search-words="[matchedon.word]"
@@ -7,7 +8,7 @@
       highlight-class-name="highlight"
       auto-escape
     />
-    <span v-else itemprop="description">{{ textbody }}</span>
+    <span v-else>{{ textbody }}</span>
   </div>
 </template>
 <script>
@@ -45,6 +46,12 @@ export default {
     },
     textbody() {
       return this.message ? twem(this.message.textbody) : null
+    },
+    description() {
+      // Descriptions that are too long give Google errors.
+      return this.message
+        ? twem(this.message.textbody)?.substring(0, 160)
+        : null
     },
   },
 }
