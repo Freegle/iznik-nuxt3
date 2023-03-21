@@ -227,24 +227,26 @@ export default {
     const settings = me?.settings
     const distance = settings?.newsfeedarea || 0
 
-    if (id) {
-      const newsfeed = await newsfeedStore.fetch(id)
+    if (me) {
+      if (id) {
+        const newsfeed = await newsfeedStore.fetch(id)
 
-      if (newsfeed?.id !== newsfeed?.threadhead) {
-        await newsfeedStore.fetch(newsfeed.threadhead)
-      }
-    } else {
-      await newsfeedStore.fetchFeed(distance)
+        if (newsfeed?.id !== newsfeed?.threadhead) {
+          await newsfeedStore.fetch(newsfeed.threadhead)
+        }
+      } else {
+        await newsfeedStore.fetchFeed(distance)
 
-      // Fetch the first few threads in parallel so that they are in the store.  This speeds up rendering the
-      // first page.
-      const feed = newsfeedStore.feed
+        // Fetch the first few threads in parallel so that they are in the store.  This speeds up rendering the
+        // first page.
+        const feed = newsfeedStore.feed
 
-      if (feed?.length) {
-        const firstThreads = feed.slice(0, 5)
-        firstThreads.forEach((thread) => {
-          newsfeedStore.fetch(thread.id)
-        })
+        if (feed?.length) {
+          const firstThreads = feed.slice(0, 5)
+          firstThreads.forEach((thread) => {
+            newsfeedStore.fetch(thread.id)
+          })
+        }
       }
     }
 

@@ -355,6 +355,10 @@ export const useAuthStore = defineStore({
         await this.$api.session.related(this.userlist)
       }
     },
+    async makeEmailPrimary(email) {
+      await api(this.config).user.addEmail(this.user?.id, email, true)
+      return await this.fetchUser()
+    },
   },
   getters: {
     member: (state) => (id) => {

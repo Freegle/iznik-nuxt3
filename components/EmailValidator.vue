@@ -87,6 +87,9 @@ export default {
     }
   },
   watch: {
+    email(newVal) {
+      this.currentEmail = newVal
+    },
     currentEmail: {
       immediate: true,
       async handler(newVal) {
