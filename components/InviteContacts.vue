@@ -2,10 +2,10 @@
   <div>
     <div v-if="!contacts || !contacts.length" class="layout">
       <div>
-        <b-button v-if="isApp" variant="primary" size="lg" @click="getContacts">
+        <b-button v-if="isApp" variant="primary" size="lg" @click="inviteApp">
           Invite your friends!
         </b-button>
-        <b-button v-if="!isApp" variant="primary" size="lg" class="m-3" @click="inviteApp">
+        <b-button v-if="!isApp" variant="primary" size="lg" class="m-3" @click="getContacts">
           Invite your friends!
         </b-button>
       </div>
@@ -84,7 +84,7 @@
           class="mb-1 mr-1"
         >
           <b-button variant="primary">
-            <v-icon icon="envelope" /> {{ email.email }}
+            email.name <v-icon icon="envelope" /> {{ email.email }}
           </b-button>
         </ExternalLink>
       </div>
@@ -177,6 +177,7 @@ export default {
       )
     },
     async inviteApp(){
+      console.log("inviteApp")
       let rv = await Contacts.checkPermissions()
       console.log("checkPermissions",rv)
 
@@ -185,29 +186,30 @@ export default {
 
       const result = await Contacts.getContacts({
         projection: {
-          // Specify which fields should be retrieved.
           name: true,
           emails: true,
+          phones: true,
         },
       });
-
       for (const contact of result.contacts) {
-        console.log("contact",contact)
-        console.log("email(s)",contact.emails)
-        //const number = contact.emails?.[0]?.number;
-
-        //const street = contact.postalAddresses?.[0]?.street;
-
-        console.log(number, street);
+        //console.log(contact.name)
+        contact.name = [contact.name.display]
+        if( contact.phones && contact.phones.length>0){
+          contact.tel = []
+          for( const phone of contact.phones){
+            //console.log("phone",phone)
+            contact.tel.push(phone.number)
+          }
+        }
+        if( contact.emails && contact.emails.length>0){
+          contact.email = []
+          for( const email of contact.emails){
+            //console.log("email",email)
+            contact.email.push(email.address)
+          }
+        }
       }
-      /*const href = this.message.url
-      const subject = 'Sharing ' + this.message.subject
-      await Share.share({
-        title: subject,
-        text: this.message.textbody + "\n\n",  // not supported on some apps (Facebook, Instagram)
-        url: href,
-        dialogTitle: 'Share now...',
-      })*/
+      this.contacts = result.contacts
     },
   },
 }
