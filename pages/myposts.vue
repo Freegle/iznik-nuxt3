@@ -66,7 +66,7 @@
                   <b-img
                     v-if="busyOffers && offers.length === 0"
                     lazy
-                    src="~/static/loader.gif"
+                    src="/loader.gif"
                     alt="Loading..."
                     width="100px"
                   />

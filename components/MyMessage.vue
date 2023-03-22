@@ -320,6 +320,7 @@
 <script>
 import ReadMore from 'vue-read-more3/src/ReadMoreComponent'
 import axios from 'axios'
+import dayjs from 'dayjs'
 import { useComposeStore } from '../stores/compose'
 import { useMessageStore } from '../stores/message'
 import { useChatStore } from '../stores/chat'
@@ -597,7 +598,7 @@ export default {
           if (user) {
             const tryst = this.trystStore.getByUser(p.userid)
             const date = tryst
-              ? this.$dayjs(tryst.arrangedfor).format('dddd Do HH:mm a')
+              ? dayjs(tryst.arrangedfor).format('dddd Do HH:mm a')
               : null
 
             ret.push({
@@ -617,8 +618,8 @@ export default {
         return false
       }
 
-      const d = this.$dayjs(this.message.canrepostat)
-      const now = this.$dayjs()
+      const d = dayjs(this.message.canrepostat)
+      const now = dayjs()
 
       return d.isAfter(now)
     },

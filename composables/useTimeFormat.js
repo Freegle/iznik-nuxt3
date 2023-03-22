@@ -3,10 +3,14 @@ import dayjs from 'dayjs'
 import isToday from 'dayjs/plugin/isToday'
 import advancedFormat from 'dayjs/plugin/advancedFormat'
 import relativeTime from 'dayjs/plugin/relativeTime'
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore'
 
 dayjs.extend(advancedFormat)
 dayjs.extend(relativeTime)
 dayjs.extend(isToday)
+dayjs.extend(isSameOrAfter)
+dayjs.extend(isSameOrBefore)
 
 export function earliestDate(dates, ofall) {
   // Find the earliest date which is in the future.

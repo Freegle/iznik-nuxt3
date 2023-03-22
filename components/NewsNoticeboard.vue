@@ -45,6 +45,11 @@
         </b-button>
       </nuxt-link>
     </div>
+    <NewsShareModal
+      v-if="newsfeedModal"
+      ref="newsshare"
+      :newsfeed="newsfeedModal"
+    />
   </div>
 </template>
 <script>
@@ -54,12 +59,14 @@ import NewsUserIntro from '~/components/NewsUserIntro'
 import NewsLoveComment from '~/components/NewsLoveComment'
 import NoticeMessage from '~/components/NoticeMessage'
 import { attribution, osmtile } from '~/composables/useMap'
+const NewsShareModal = () => import('~/components/NewsShareModal')
 
 export default {
   components: {
     NewsUserIntro,
     NewsLoveComment,
     NoticeMessage,
+    NewsShareModal,
   },
   extends: NewsBase,
   async setup() {
