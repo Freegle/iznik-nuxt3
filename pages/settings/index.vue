@@ -186,17 +186,22 @@
                   v-model:email="me.email"
                   v-model:valid="emailValid"
                   size="md"
-                  label="Your email address:"
+                  label="Your primary email address:"
                 />
                 <SpinButton
                   variant="primary"
                   name="save"
                   label="Save"
                   :handler="saveEmail"
+                  spinclass="text-white"
                   class="align-self-end pb-3"
                 />
               </div>
-              <div v-if="otheremails.length" class="mt-1 mb-3">
+              <div
+                v-if="otheremails.length"
+                :key="JSON.stringify(otheremails) + me.email"
+                class="mt-1 mb-3"
+              >
                 <p class="m-0">Other emails:</p>
                 <EmailOwn
                   v-for="email in otheremails"
@@ -711,7 +716,6 @@ export default {
       emailValid: false,
       cacheBust: Date.now(),
       userTimer: null,
-      initialEmail: null,
       autoreposts: true,
       enterNewLine: false,
     }
@@ -898,18 +902,13 @@ export default {
     otheremails() {
       return this.me.emails
         ? this.me.emails.filter((e) => {
-            return (
-              !e.ourdomain &&
-              e.email !== this.me.email &&
-              e.email !== this.initialEmail
-            )
+            return !e.ourdomain && e.email !== this.me.email
           })
         : []
     },
   },
   async mounted() {
     await this.update()
-    this.initialEmail = this.me.email
     this.autoreposts = !this.me.settings.autorepostsdisable
     this.enterNewLine = this.me.settings.enterNewLine
 
@@ -1091,7 +1090,7 @@ export default {
       this.enterNewLine = e
     },
     async leaveGroup(id) {
-      await this.authStore.leaveGroup(id)
+      await this.authStore.leaveGroup(this.myid, id)
     },
     addressBook() {
       this.$refs.addressModal.show()

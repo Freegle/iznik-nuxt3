@@ -4,10 +4,19 @@
     <b-button variant="link" class="align-baseline" size="sm" @click="deleteIt">
       Remove
     </b-button>
+    <b-button
+      variant="link"
+      class="align-baseline"
+      size="sm"
+      @click="makePrimary"
+    >
+      Make Primary
+    </b-button>
   </div>
 </template>
 <script>
-import { useUserStore } from '../stores/user'
+import { useAuthStore } from '~/stores/auth'
+import { useUserStore } from '~/stores/user'
 
 export default {
   props: {
@@ -20,6 +29,10 @@ export default {
     async deleteIt() {
       const userStore = useUserStore()
       await userStore.removeEmail(this.myid, this.email.email)
+    },
+    async makePrimary() {
+      const authStore = useAuthStore()
+      await authStore.makeEmailPrimary(this.email.email)
     },
   },
 }
