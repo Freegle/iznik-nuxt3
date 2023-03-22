@@ -3732,6 +3732,11 @@ data-uri-to-buffer@^4.0.0:
   resolved "https://registry.npmjs.org/data-uri-to-buffer/-/data-uri-to-buffer-4.0.1.tgz"
   integrity sha512-0R9ikRb668HB7QDxT1vkpuUBtqc53YyAwMwGeUFKRojY/NWKvdZ+9UYtRfGmhqNbRkTSVpMbmyhXipFFv2cb/A==
 
+date-format-parse@^0.2.7:
+  version "0.2.7"
+  resolved "https://registry.npmjs.org/date-format-parse/-/date-format-parse-0.2.7.tgz"
+  integrity sha512-/+lyMUKoRogMuTeOVii6lUwjbVlesN9YRYLzZT/g3TEZ3uD9QnpjResujeEqUW+OSNbT7T1+SYdyEkTcRv+KDQ==
+
 dayjs@^1.11.0:
   version "1.11.7"
   resolved "https://registry.npmjs.org/dayjs/-/dayjs-1.11.7.tgz"
@@ -8993,6 +8998,14 @@ vue-clipboard2@^0.3.3:
   dependencies:
     clipboard "^2.0.0"
 
+vue-datepicker-next@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.npmjs.org/vue-datepicker-next/-/vue-datepicker-next-1.0.3.tgz"
+  integrity sha512-Brqjh896BJGVxP7d6tGDsPMu0SDAB8hAdtG7zWF8VIHJB21dk1VB9KgdajD9Y9uXbg+wHN0vmL7sbMPIyehQVQ==
+  dependencies:
+    date-format-parse "^0.2.7"
+    vue "^3.0.0"
+
 vue-demi@*, vue-demi@^0.13.11:
   version "0.13.11"
   resolved "https://registry.npmjs.org/vue-demi/-/vue-demi-0.13.11.tgz"
@@ -9095,7 +9108,7 @@ vue@^2.6.11:
     "@vue/compiler-sfc" "2.7.14"
     csstype "^3.1.0"
 
-vue@^3.0.0-beta.1, vue@^3.2.37, vue@^3.2.47:
+vue@^3.0.0, vue@^3.0.0-beta.1, vue@^3.2.37, vue@^3.2.47:
   version "3.2.47"
   resolved "https://registry.npmjs.org/vue/-/vue-3.2.47.tgz"
   integrity sha512-60188y/9Dc9WVrAZeUVSDxRQOZ+z+y5nO2ts9jWXSTkMvayiWxCWOWtBQoYjLeccfXkiiPZWAHcV+WTPhkqJHQ==

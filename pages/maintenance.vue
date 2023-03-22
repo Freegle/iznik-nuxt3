@@ -31,10 +31,6 @@ import { useRoute } from 'vue-router'
 import { buildHead } from '~/composables/useBuildHead'
 import ExternalLink from '~/components/ExternalLink'
 
-definePageMeta({
-  layout: 'empty',
-})
-
 const route = useRoute()
 const runtimeConfig = useRuntimeConfig()
 

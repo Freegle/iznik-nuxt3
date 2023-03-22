@@ -1,5 +1,5 @@
 <template>
-  <b-row class="m-0">
+  <b-row class="m-0 pt-4">
     <b-col cols="12" lg="6" class="p-0" offset-lg="3">
       <b-row>
         <b-col>
@@ -401,7 +401,6 @@ export default {
     this.end = dayjs().subtract(1, 'month').endOf('month')
 
     await this.statsStore.clear()
-    console.log('Groupid', this.groupid)
     await this.statsStore.fetch({
       group: this.groupid,
       grouptype: 'Freegle',

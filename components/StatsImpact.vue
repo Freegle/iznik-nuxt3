@@ -68,10 +68,7 @@
             <component :is="heading" class="purple">
               {{ totalGifts.toLocaleString() }}
               <br />
-              {{
-                totalGifts
-                  | pluralize(['GIFT', 'GIFTS'], { includeNumber: false })
-              }}
+              {{ totalGiftsPluralised }}
               <span v-if="range">
                 <br />
                 <span class="text-muted small">
@@ -89,10 +86,7 @@
             <component :is="heading" class="text-primary">
               {{ totalMembers.toLocaleString() }}
               <br />
-              {{
-                totalMembers
-                  | pluralize(['MEMBER', 'MEMBERS'], { includeNumber: false })
-              }}
+              {{ totalMembersPluralised }}
               <span v-if="range">
                 <br />
                 <span class="text-muted small">
@@ -110,18 +104,10 @@
             <component :is="heading" class="green">
               {{ groupCount.toLocaleString() }}
               <br />
-              {{
-                groupCount
-                  | pluralize(['COMMUNITY', 'COMMUNITIES'], {
-                    includeNumber: false,
-                  })
-              }}
+              {{ groupCountPluralised }}
               <br />
               <span class="text-muted small">
-                {{
-                  groupCount
-                    | pluralize(['SERVES', 'SERVE'], { includeNumber: false })
-                }}
+                {{ groupServePluralised }}
                 THIS AREA
               </span>
             </component>
@@ -137,100 +123,91 @@
     <b-row v-if="border" class="m-0 border border-light">
       <b-col class="bg-white text-faded">
         <div class="iconlist">
-          <v-icon icon="glass-martini" />
           <v-icon icon="camera" />
-          <v-icon icon="print" />
-          <v-icon icon="binoculars" />
-          <v-icon icon="umbrella" />
           <v-icon icon="coffee" />
-          <v-icon icon="bath" />
           <v-icon icon="clock" />
           <v-icon icon="bicycle" />
-          <v-icon icon="hat-wizard" />
-          <v-icon icon="bed" />
-          <v-icon icon="laptop" />
           <v-icon icon="gift" />
-          <v-icon icon="utensils" />
-          <v-icon icon="tablet-alt" />
           <v-icon icon="crown" />
-          <v-icon icon="baby-carriage" />
-          <v-icon icon="headphones" />
-          <v-icon icon="tv" />
           <v-icon icon="car" />
-          <v-icon icon="socks" />
-          <v-icon icon="mobile-alt" />
-          <v-icon icon="glass-martini" />
           <v-icon icon="camera" />
-          <v-icon icon="print" />
-          <v-icon icon="binoculars" />
-          <v-icon icon="umbrella" />
           <v-icon icon="coffee" />
-          <v-icon icon="bath" />
           <v-icon icon="clock" />
           <v-icon icon="bicycle" />
-          <v-icon icon="hat-wizard" />
-          <v-icon icon="bed" />
-          <v-icon icon="laptop" />
           <v-icon icon="gift" />
-          <v-icon icon="utensils" />
-          <v-icon icon="tablet-alt" />
           <v-icon icon="crown" />
-          <v-icon icon="baby-carriage" />
-          <v-icon icon="headphones" />
-          <v-icon icon="tv" />
           <v-icon icon="car" />
-          <v-icon icon="socks" />
-          <v-icon icon="mobile-alt" />
-          <v-icon icon="glass-martini" />
           <v-icon icon="camera" />
-          <v-icon icon="print" />
-          <v-icon icon="binoculars" />
-          <v-icon icon="umbrella" />
           <v-icon icon="coffee" />
-          <v-icon icon="bath" />
           <v-icon icon="clock" />
           <v-icon icon="bicycle" />
-          <v-icon icon="hat-wizard" />
-          <v-icon icon="bed" />
-          <v-icon icon="laptop" />
           <v-icon icon="gift" />
-          <v-icon icon="utensils" />
-          <v-icon icon="tablet-alt" />
           <v-icon icon="crown" />
-          <v-icon icon="baby-carriage" />
-          <v-icon icon="headphones" />
-          <v-icon icon="tv" />
           <v-icon icon="car" />
-          <v-icon icon="socks" />
-          <v-icon icon="mobile-alt" />
-          <v-icon icon="glass-martini" />
           <v-icon icon="camera" />
-          <v-icon icon="print" />
-          <v-icon icon="binoculars" />
-          <v-icon icon="umbrella" />
           <v-icon icon="coffee" />
-          <v-icon icon="bath" />
           <v-icon icon="clock" />
           <v-icon icon="bicycle" />
-          <v-icon icon="hat-wizard" />
-          <v-icon icon="bed" />
-          <v-icon icon="laptop" />
           <v-icon icon="gift" />
-          <v-icon icon="utensils" />
-          <v-icon icon="tablet-alt" />
           <v-icon icon="crown" />
-          <v-icon icon="baby-carriage" />
-          <v-icon icon="headphones" />
-          <v-icon icon="tv" />
           <v-icon icon="car" />
-          <v-icon icon="socks" />
-          <v-icon icon="mobile-alt" />
+          <v-icon icon="camera" />
+          <v-icon icon="coffee" />
+          <v-icon icon="clock" />
+          <v-icon icon="bicycle" />
+          <v-icon icon="gift" />
+          <v-icon icon="crown" />
+          <v-icon icon="car" />
+          <v-icon icon="camera" />
+          <v-icon icon="coffee" />
+          <v-icon icon="clock" />
+          <v-icon icon="bicycle" />
+          <v-icon icon="gift" />
+          <v-icon icon="crown" />
+          <v-icon icon="car" />
+          <v-icon icon="camera" />
+          <v-icon icon="coffee" />
+          <v-icon icon="clock" />
+          <v-icon icon="bicycle" />
+          <v-icon icon="gift" />
+          <v-icon icon="crown" />
+          <v-icon icon="car" />
+          <v-icon icon="camera" />
+          <v-icon icon="coffee" />
+          <v-icon icon="clock" />
+          <v-icon icon="bicycle" />
+          <v-icon icon="gift" />
+          <v-icon icon="crown" />
+          <v-icon icon="car" />
+          <v-icon icon="camera" />
+          <v-icon icon="coffee" />
+          <v-icon icon="clock" />
+          <v-icon icon="bicycle" />
+          <v-icon icon="gift" />
+          <v-icon icon="crown" />
+          <v-icon icon="car" />
+          <v-icon icon="camera" />
+          <v-icon icon="coffee" />
+          <v-icon icon="clock" />
+          <v-icon icon="bicycle" />
+          <v-icon icon="gift" />
+          <v-icon icon="crown" />
+          <v-icon icon="car" />
+          <v-icon icon="camera" />
+          <v-icon icon="coffee" />
+          <v-icon icon="clock" />
+          <v-icon icon="bicycle" />
+          <v-icon icon="gift" />
+          <v-icon icon="crown" />
+          <v-icon icon="car" />
         </div>
       </b-col>
     </b-row>
   </div>
 </template>
 <script>
+import pluralize from 'pluralize'
+
 export default {
   props: {
     totalWeight: {
@@ -290,7 +267,19 @@ export default {
       return this.fullStats ? 3 : 4
     },
     heading() {
-      return this.fullStats ? 'h5' : 'h2'
+      return this.fullStats ? 'H5' : 'H2'
+    },
+    totalGiftsPluralised() {
+      return pluralize('GIFT', this.totalGifts, false)
+    },
+    totalMembersPluralised() {
+      return pluralize('MEMBER', this.totalMembers, false)
+    },
+    groupCountPluralised() {
+      return pluralize('GROUP', this.groupCount, false)
+    },
+    groupServePluralised() {
+      return this.groupCount === 1 ? 'SERVES' : 'SERVE'
     },
   },
   methods: {

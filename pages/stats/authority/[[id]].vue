@@ -1,10 +1,10 @@
 <template>
-  <div>
+  <div class="pt-4">
     <b-row v-if="!stats">
       <b-col class="text-center">
         <h4>Crunching the numbers...</h4>
         <p>This may take a minute.</p>
-        <b-img-lazy src="/loader.gif" alt="Loading" />
+        <b-img lazy src="/loader.gif" alt="Loading" />
       </b-col>
     </b-row>
     <div>
@@ -241,7 +241,7 @@
                 <b-img
                   thumbnail
                   src="/icon.png"
-                  class="titlelogo float-right"
+                  class="titlelogo float-end"
                   @click="toggle"
                 />
                 <span class="text--largest">
@@ -275,14 +275,13 @@
                 </div>
                 <br />
                 <v-icon icon="globe-europe" /> www.ilovefreegle.org
-                <v-icon icon="brands/twitter" /> @thisisfreegle
-                <v-icon icon="brands/facebook" /> facebook.com/Freegle
+                <v-icon :icon="['fab', 'twitter']" /> @thisisfreegle
+                <v-icon :icon="['fab', 'facebook']" /> facebook.com/Freegle
               </div>
               <client-only>
                 <l-map
                   ref="map"
-                  :zoom="5"
-                  :center="center"
+                  v-model:zoom="zoom"
                   :style="
                     'width: ' + mapWidth + '; height: ' + mapHeight + 'px'
                   "
@@ -299,7 +298,7 @@
                   />
                 </l-map>
               </client-only>
-              <Impact
+              <StatsImpact
                 :total-weight="totalWeight"
                 :total-benefit="totalBenefit"
                 :total-c-o2="totalCO2"
@@ -371,7 +370,7 @@
                     <b-img
                       thumbnail
                       src="/icon.png"
-                      class="titlelogo float-right"
+                      class="titlelogo float-end"
                     />
                     <span class="text--largest">
                       {{ totalWeight }} TONNES REUSED
@@ -396,12 +395,14 @@
 // increases the bundle size.  Putting them here allows better bundling.
 import dayjs from 'dayjs'
 import { GChart } from 'vue-google-charts'
-import DatePicker from 'vue2-datepicker'
-import 'vue2-datepicker/index.css'
+import 'vue-datepicker-next/index.css'
 import { useRoute } from 'vue-router'
-import { useAuthorityStore } from './stores/authority'
+import { defineAsyncComponent } from 'vue'
+import Wkt from 'wicket'
+import { loadLeaflet, attribution, osmtile } from '~/composables/useMap'
+import { useAuthorityStore } from '~/stores/authority'
 import { MAX_MAP_ZOOM } from '~/constants'
-import Impact from '~/components/Impact'
+import StatsImpact from '~/components/StatsImpact'
 import { buildHead } from '~/composables/useBuildHead'
 import { useStatsStore } from '~/stores/stats'
 
@@ -415,11 +416,10 @@ const CO2_PER_TONNE = 0.51
 export default {
   components: {
     GroupMarker,
-    Impact,
+    StatsImpact,
     GChart,
-    DatePicker,
+    DatePicker: defineAsyncComponent(() => import('vue-datepicker-next')),
   },
-  layout: 'empty',
   setup() {
     const statsStore = useStatsStore()
     const authorityStore = useAuthorityStore()
@@ -438,11 +438,14 @@ export default {
     return {
       statsStore,
       authorityStore,
+      osmtile: osmtile(),
+      attribution: attribution(),
     }
   },
   data() {
     return {
       maxZoom: MAX_MAP_ZOOM,
+      zoom: 5,
       tables: false,
       startDate: null,
       endDate: null,
@@ -492,6 +495,20 @@ export default {
     }
   },
   computed: {
+    mapWidth() {
+      const contWidth = this.$refs.mapcont?.$el.clientWidth
+      return contWidth
+    },
+    mapHeight() {
+      let height = 0
+
+      if (process.client) {
+        height = Math.floor(window.innerHeight / 2)
+        height = height < 200 ? 200 : height
+      }
+
+      return height
+    },
     totalWeightUnRounded() {
       let total = 0
 
@@ -893,10 +910,44 @@ export default {
       .startOf('month')
       .format()
   },
-  mounted() {
+  async mounted() {
+    await loadLeaflet()
     this.fetchData(this.id)
   },
   methods: {
+    mapPoly(poly, options) {
+      let bounds = null
+
+      try {
+        const wkt = new Wkt.Wkt()
+        wkt.read(poly)
+
+        const mapobj = this.$refs.map.leafletObject
+        const obj = wkt.toObject(mapobj.defaults)
+
+        if (obj) {
+          // This might be a multipolygon.
+          if (Array.isArray(obj)) {
+            for (const ent of obj) {
+              ent.addTo(mapobj)
+              ent.setStyle(options)
+              const thisbounds = ent.getBounds()
+              bounds = bounds || thisbounds
+              bounds.extend(thisbounds.getNorthEast())
+              bounds.extend(thisbounds.getSouthWest())
+            }
+          } else {
+            obj.addTo(mapobj)
+            obj.setStyle(options)
+            bounds = obj.getBounds()
+          }
+        }
+      } catch (e) {
+        console.log('Map poly failed', poly, e)
+      }
+
+      return bounds
+    },
     async fetchData(id) {
       await this.authorityStore.fetch(id)
 
@@ -980,22 +1031,24 @@ export default {
       if (this.stats && this.authority && !this.addedPolygons) {
         this.addedPolygons = true
 
-        const bounds = this.mapPoly(this.authority.polygon, {
-          fillColor: 'blue',
-          weight: 0,
-          fillOpacity: 0.2,
-        })
-
-        this.$refs.map.mapObject.fitBounds(bounds)
-
-        for (const groupid in this.stats) {
-          const polygon = this.stats[groupid].group.poly
-
-          this.mapPoly(polygon, {
-            fillColor: 'grey',
+        if (this.authority) {
+          const bounds = this.mapPoly(this.authority.polygon, {
+            fillColor: 'blue',
             weight: 0,
             fillOpacity: 0.2,
           })
+
+          this.$refs.map.leafletObject.fitBounds(bounds)
+
+          for (const groupid in this.stats) {
+            const polygon = this.stats[groupid].group.poly
+
+            this.mapPoly(polygon, {
+              fillColor: 'grey',
+              weight: 0,
+              fillOpacity: 0.2,
+            })
+          }
         }
       }
     },
@@ -1037,11 +1090,15 @@ export default {
   color: $color-green--darker !important;
 }
 
-::v-deep .black {
+:deep(.black) {
   color: $color-black !important;
 }
 
-::v-deep .mx-datepicker {
+:deep(.mx-datepicker) {
   width: 100px;
+}
+
+:deep(a) {
+  text-decoration: none;
 }
 </style>

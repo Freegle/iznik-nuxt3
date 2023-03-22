@@ -5,9 +5,4 @@ export default class DashboardAPI extends BaseAPI {
     const { dashboard, components } = await this.$get('/dashboard', params)
     return dashboard || components
   }
-
-  async fetchHeatmap() {
-    const { heatmap } = await this.$get('/dashboard', { heatmap: true })
-    return heatmap
-  }
 }

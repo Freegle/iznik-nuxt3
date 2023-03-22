@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="pt-4">
     <b-row class="m-0">
       <b-col cols="0" md="3" class="d-none d-md-block" />
       <b-col cols="12" md="6" class="p-0">
@@ -39,14 +39,17 @@ export default {
     AutoComplete,
   },
   setup() {
-    const statsStore = useStatsStore()
     const runtimeConfig = useRuntimeConfig()
     const route = useRoute()
+    const statsStore = useStatsStore()
+
+    const api = runtimeConfig.public.APIv1
 
     useHead(
       buildHead(
         route,
         runtimeConfig,
+        api,
         'Statistics by Authority',
         "You can search for a council, local authority etc. Then we'll show you our impact in that area."
       )
@@ -54,11 +57,12 @@ export default {
 
     return {
       statsStore,
+      api,
     }
   },
   data() {
     return {
-      source: process.env.API + '/authority',
+      source: this.api + '/authority',
       results: [],
     }
   },
