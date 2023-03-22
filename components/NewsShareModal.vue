@@ -14,7 +14,7 @@
         <b-button v-if="isApp" variant="primary" size="lg" class="m-3" @click="shareApp">
           Share now
         </b-button>
-        <div>
+        <div v-if="!isApp">
           <p>You can share using these buttons:</p>
           <b-list-group horizontal class="flex-wrap">
             <b-list-group-item>
