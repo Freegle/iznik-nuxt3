@@ -319,4 +319,8 @@ export default {
   width: 2rem;
   height: 2rem;
 }
+
+:deep(.iconlist svg) {
+  margin-left: 2px;
+}
 </style>

@@ -30,29 +30,19 @@
         This is an A4 poster with tear-off strips - good for noticeboards in
         cafes, community venues, or at work.
       </p>
-      <client-only>
-        <b-form-radio-group
-          v-model="language"
-          buttons
-          class="border border-success rounded mb-2 clickme"
-        >
-          <b-form-radio
-            value="English"
-            button-variant="outline-primary"
-            class="clickme"
-          >
-            English
-          </b-form-radio>
-          <b-form-radio
-            value="Welsh"
-            button-variant="outline-danger"
-            class="clickme"
-          >
-            Welsh
-          </b-form-radio>
-        </b-form-radio-group>
-      </client-only>
-      <div v-if="language === 'English'" class="d-flex flex-wrap">
+      <b-button
+        variant="primary"
+        class="rounded-start"
+        @click="language = 'English'"
+        >English</b-button
+      >
+      <b-button
+        variant="outline-danger"
+        class="rounded-end border-danger"
+        @click="language = 'Welsh'"
+        >Welsh</b-button
+      >
+      <div v-if="language === 'English'" class="d-flex flex-wrap mt-2">
         <div class="mr-1">
           <h3 class="header--size4">A4</h3>
           <a

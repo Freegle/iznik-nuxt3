@@ -258,7 +258,7 @@
                     format="YYYY-MM"
                     placeholder=""
                   />
-                  <span class="font-weight-bold">-</span>
+                  <span class="font-weight-bold ml-1 mr-1">-</span>
                   <date-picker
                     id="endDate"
                     v-model="endDate"
@@ -269,7 +269,7 @@
                     format="YYYY-MM"
                     placeholder=""
                   />
-                  <span class="clickme" @click="reloadData">
+                  <span class="clickme ml-1" @click="reloadData">
                     <v-icon icon="sync" />
                   </span>
                 </div>
