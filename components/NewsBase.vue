@@ -39,12 +39,14 @@ export default {
   },
   methods: {
     brokenImage(event) {
-      event.target.src = require('~/static/defaultprofile.png')
+      event.target.src = require('../../../../../defaultprofile.png')
     },
     share() {
+      console.log('Share', this.newsfeed)
       this.newsfeedModal = this.newsfeed
-      this.$nextTick(() => {
-        this.$bvModal.show('newsShareModal-' + this.newsfeed.id)
+      this.waitForRef('newsshare', () => {
+        console.log('Got ref')
+        this.$refs.newsshare.show()
       })
     },
     showPhotoModal() {

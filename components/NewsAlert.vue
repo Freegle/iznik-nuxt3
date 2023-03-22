@@ -56,10 +56,13 @@
         <b-img fluid rounded center :src="newsfeed.image.path" />
       </template>
     </b-modal>
-    <NewsShareModal v-if="newsfeedModal" :newsfeed="newsfeedModal" />
+    <NewsShareModal
+      v-if="newsfeedModal"
+      ref="newsshare"
+      :newsfeed="newsfeedModal"
+    />
   </div>
 </template>
-
 <script>
 import NewsBase from '~/components/NewsBase'
 import NewsLoveComment from '~/components/NewsLoveComment'

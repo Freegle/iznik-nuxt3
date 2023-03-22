@@ -30,7 +30,7 @@
         This is an A4 poster with tear-off strips - good for noticeboards in
         cafes, community venues, or at work.
       </p>
-      <div>
+      <client-only>
         <b-form-radio-group
           v-model="language"
           buttons
@@ -51,7 +51,7 @@
             Welsh
           </b-form-radio>
         </b-form-radio-group>
-      </div>
+      </client-only>
       <div v-if="language === 'English'" class="d-flex flex-wrap">
         <div class="mr-1">
           <h3 class="header--size4">A4</h3>
