@@ -964,6 +964,11 @@
     "@types/scriptjs" "0.0.2"
     scriptjs "^2.5.9"
 
+"@capacitor-community/contacts@^4.0.3":
+  version "4.0.3"
+  resolved "https://registry.npmjs.org/@capacitor-community/contacts/-/contacts-4.0.3.tgz"
+  integrity sha512-DBmxJ7h4Yx07wiqXqcUaIEEDnQWI3lF5+gbeyORDpumI71Akw8SyeFVIQ6chUNdrbLt0xztYNkG6JTWLEM5XVQ==
+
 "@capacitor-community/facebook-login@^4.0.0-1":
   version "4.0.0-1"
   resolved "https://registry.npmjs.org/@capacitor-community/facebook-login/-/facebook-login-4.0.0-1.tgz"

@@ -14,6 +14,7 @@
           Share now
         </b-button>
         <social-sharing
+          v-if="!isApp" 
           :url="url"
           :title="'Sharing chitchat'"
           :description="newsfeed.message"

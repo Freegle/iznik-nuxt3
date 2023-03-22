@@ -29,6 +29,7 @@
   <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
   <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+  <uses-permission android:name="android.permission.READ_CONTACTS" />
   <queries>
     <intent>
       <action android:name="android.media.action.IMAGE_CAPTURE"/>
@@ -44,7 +45,6 @@
       <data android:mimeType="image/*" android:scheme="content"/>
     </intent>
   </queries>
-  <uses-permission android:name="android.permission.READ_CONTACTS"/>
   <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
   <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
   <uses-feature android:name="android.hardware.location.gps" android:required="true"/>
