@@ -16,7 +16,10 @@
           </p>
         </NoticeMessage>
         <p class="mt-1">You can share using these buttons:</p>
-        <b-list-group horizontal class="flex-wrap">
+        <b-button v-if="isApp" variant="primary" size="lg" class="m-3" @click="shareApp">
+          Share now
+        </b-button>
+        <b-list-group v-if="!isApp" horizontal class="flex-wrap">
           <b-list-group-item>
             <ShareNetwork
               network="facebook"
@@ -96,6 +99,8 @@
 import { useMessageStore } from '../stores/message'
 import NoticeMessage from './NoticeMessage'
 import modal from '@/mixins/modal'
+import { useMobileStore } from '@/stores/mobile'
+import { Share } from '@capacitor/share';
 
 export default {
   components: { NoticeMessage },
@@ -124,11 +129,25 @@ export default {
     }
   },
   computed: {
+    isApp() {
+      const mobileStore = useMobileStore()
+      return mobileStore.isApp
+    },
     message() {
       return this.messageStore.byId(this.id)
     },
   },
   methods: {
+    async shareApp(){
+      const href = this.message.url
+      const subject = 'Sharing ' + this.message.subject
+      await Share.share({
+        title: subject,
+        text: this.message.textbody + "\n\n",  // not supported on some apps (Facebook, Instagram)
+        url: href,
+        dialogTitle: 'Share now...',
+      })
+    },
     async show() {
       try {
         await this.messageStore.fetch(this.id, true)

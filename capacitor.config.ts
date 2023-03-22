@@ -49,6 +49,7 @@ const config: CapacitorConfig = {
       "@capacitor-community/fcm",
       "@capacitor-firebase/messaging",
       "@capacitor/camera",
+      "@capacitor/share",
     ],
     buildOptions: {
       "keystorePath": AndroidKeyStorePath,
@@ -73,6 +74,7 @@ const config: CapacitorConfig = {
       "@capacitor-community/apple-sign-in",
       "@codetrix-studio/capacitor-google-auth",
       "@capacitor/camera",
+      "@capacitor/share",
     ] 
   },
   plugins: {

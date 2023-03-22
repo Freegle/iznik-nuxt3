@@ -1046,6 +1046,11 @@
   resolved "https://registry.npmjs.org/@capacitor/push-notifications/-/push-notifications-4.1.2.tgz"
   integrity sha512-ok6CGvedwK1azmf8VWhrNlg6jhi4PFz3HoyS0GNE2ew7+JGnxN77sgK5q1TVzdkge+vkqipO6uu5bD1xfj/pWQ==
 
+"@capacitor/share@^4.1.1":
+  version "4.1.1"
+  resolved "https://registry.npmjs.org/@capacitor/share/-/share-4.1.1.tgz"
+  integrity sha512-srk1/8mz9U84Eyz7R0Wh76IhTAl+CaU5Q43rbwwDhjp5Q/NhNl9yNLGRZBRmV8qlyVMH7K5R2Se/VozM8CKJ/g==
+
 "@capawesome/capacitor-badge@^2.0.2":
   version "2.0.2"
   resolved "https://registry.npmjs.org/@capawesome/capacitor-badge/-/capacitor-badge-2.0.2.tgz"

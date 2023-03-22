@@ -10,6 +10,9 @@
         <p>
           <a target="_blank" :href="url">{{ url }}</a>
         </p>
+        <b-button v-if="isApp" variant="primary" size="lg" class="m-3" @click="shareApp">
+          Share now
+        </b-button>
         <social-sharing
           :url="url"
           :title="'Sharing chitchat'"
@@ -92,6 +95,8 @@
 </template>
 <script>
 import modal from '@/mixins/modal'
+import { useMobileStore } from '@/stores/mobile'
+import { Share } from '@capacitor/share';
 
 export default {
   mixins: [modal],
@@ -102,6 +107,10 @@ export default {
     },
   },
   computed: {
+    isApp() {
+      const mobileStore = useMobileStore()
+      return mobileStore.isApp
+    },
     url() {
       if (this.newsfeed) {
         const runtimeConfig = useRuntimeConfig()
@@ -110,6 +119,18 @@ export default {
       }
 
       return null
+    },
+  },
+  methods: {
+    async shareApp(){
+      const href = this.url
+      const subject = 'Sharing Freegle chitchat'
+      await Share.share({
+        title: subject,
+        text: this.newsfeed.message + "\n\n",  // not supported on some apps (Facebook, Instagram)
+        url: href,
+        dialogTitle: 'Share now...',
+      })
     },
   },
 }

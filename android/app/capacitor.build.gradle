@@ -19,6 +19,7 @@ dependencies {
     implementation project(':capacitor-community-fcm')
     implementation project(':capacitor-firebase-messaging')
     implementation project(':capacitor-camera')
+    implementation project(':capacitor-share')
 
 }
 

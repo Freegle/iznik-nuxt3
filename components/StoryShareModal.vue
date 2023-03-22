@@ -11,7 +11,10 @@
         <p>
           <a target="_blank" :href="story.url">{{ story.url }}</a>
         </p>
-        <div>
+        <b-button v-if="isApp" variant="primary" size="lg" class="m-3" @click="shareApp">
+          Share now
+        </b-button>
+        <div v-if="!isApp">
           <p>You can share using these buttons:</p>
           <b-list-group horizontal class="flex-wrap">
             <b-list-group-item>
@@ -93,6 +96,8 @@
 // increases the bundle size.  Putting them here allows better bundling.
 import { useStoryStore } from '../stores/stories'
 import modal from '@/mixins/modal'
+import { useMobileStore } from '@/stores/mobile'
+import { Share } from '@capacitor/share';
 
 export default {
   mixins: [modal],
@@ -115,11 +120,25 @@ export default {
     }
   },
   computed: {
+    isApp() {
+      const mobileStore = useMobileStore()
+      return mobileStore.isApp
+    },
     story() {
       return this.storyStore.byId(this.id)
     },
   },
   methods: {
+    async shareApp(){
+      const href = this.story.url
+      const subject = 'Sharing ' + this.story.headline
+      await Share.share({
+        title: subject,
+        text: this.story.story + "\n\n",  // not supported on some apps (Facebook, Instagram)
+        url: href,
+        dialogTitle: 'Share now...',
+      })
+    },
     async show() {
       try {
         await this.storyStore.fetch(this.id, true)

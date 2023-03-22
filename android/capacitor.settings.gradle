@@ -31,3 +31,6 @@ project(':capacitor-firebase-messaging').projectDir = new File('../node_modules/
 
 include ':capacitor-camera'
 project(':capacitor-camera').projectDir = new File('../node_modules/@capacitor/camera/android')
+
+include ':capacitor-share'
+project(':capacitor-share').projectDir = new File('../node_modules/@capacitor/share/android')
