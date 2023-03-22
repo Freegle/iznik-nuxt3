@@ -45,6 +45,10 @@ const config: CapacitorConfig = {
       "@capawesome/capacitor-badge",
       "@capacitor-community/facebook-login",
       "@codetrix-studio/capacitor-google-auth",
+      //"@capacitor/freegle-nuxt3-fcm",
+      "@capacitor-community/fcm",
+      "@capacitor-firebase/messaging",
+      "@capacitor/camera",
     ],
     buildOptions: {
       "keystorePath": AndroidKeyStorePath,
@@ -68,10 +72,14 @@ const config: CapacitorConfig = {
       "@capacitor-community/facebook-login",
       "@capacitor-community/apple-sign-in",
       "@codetrix-studio/capacitor-google-auth",
+      "@capacitor/camera",
     ] 
   },
   plugins: {
     PushNotifications: {
+      presentationOptions: ["badge", "sound", "alert"],
+    },
+    FirebaseMessaging: {
       presentationOptions: ["badge", "sound", "alert"],
     },
     Badge: {

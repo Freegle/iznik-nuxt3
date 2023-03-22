@@ -67,6 +67,30 @@
 	<string>LaunchScreen.storyboard</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
+
+	<key>NSCameraUsageDescription</key>
+	<string>So you can take a photo of an item to offer</string>
+
+  <key>NSPhotoLibraryUsageDescription</key>
+  <string>So you can save a photo of an item to offer</string>
+	
+	<key>NSPhotoLibraryAddUsageDescription</key>
+  <string>So you can send a photo of an item to offer</string>
+
+	<key>NSLocationAlwaysUsageDescription</key>
+  <string>To find your location when offering an item</string>
+
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>To find your location when offering an item</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>To find your location when offering an item</string>
+	<key>NSContactsUsageDescription</key>
+	<string>To invite a friend to use Freegle</string>
+
+	<key>NSMicrophoneUsageDescription</key>
+	<string>So you can say what you are looking for</string>
+
+
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
 		<string>armv7</string>

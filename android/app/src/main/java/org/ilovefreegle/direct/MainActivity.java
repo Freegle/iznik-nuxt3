@@ -5,6 +5,7 @@ import com.getcapacitor.BridgeActivity;
 import android.os.Bundle;
 import com.codetrixstudio.capacitor.GoogleAuth.GoogleAuth;
 import com.getcapacitor.community.facebooklogin.FacebookLogin;
+//import org.ilovefreegle.nuxt3fcm.FreegleFCMPlugin;
 
 public class MainActivity extends BridgeActivity {
 
@@ -13,5 +14,6 @@ public class MainActivity extends BridgeActivity {
     super.onCreate(savedInstanceState);
     registerPlugin(GoogleAuth.class);
     registerPlugin(FacebookLogin.class);
+    //registerPlugin(FreegleFCMPlugin.class);
   }
 }

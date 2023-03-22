@@ -11,7 +11,7 @@
       image-resize-target-width="800"
       image-resize-target-height="800"
       image-crop-aspect-ratio="1"
-      label-idle='Drag & Drop photos or <span class="btn btn-white ction"> Browse </span>'
+      :label-idle="userPrompt"
       :server="{ process, revert, restore, load, fetch }"
       :drop-on-element="false"
       :drop-on-page="true"
@@ -28,6 +28,8 @@
 <script>
 import axios from 'axios'
 import { useComposeStore } from '../stores/compose'
+import { useMobileStore } from '@/stores/mobile'
+import { Camera, CameraResultType } from '@capacitor/camera';
 
 export default {
   props: {
@@ -98,8 +100,66 @@ export default {
       document.head.appendChild(externalScript)
     }
   },
+  computed: {
+    userPrompt() {
+      const mobileStore = useMobileStore()
+      if (mobileStore.isApp) {
+        if (mobileStore.isiOS) {
+          return '<div><span class="filepond--label-action btn btn-white">Take a photo or Browse</span></div><div id="camera-msg"></div>'
+        }
+        else {
+          return '<div><span class="take-photo btn btn-primary">Take Photo</span> or <span class="btn btn-white">Browse</span></div><div id="camera-msg"></div>'
+        }
+      }
+      return 'Drag & Drop photos or <span class="btn btn-white ction"> Browse </span>'
+    }
+  },
   methods: {
+    async takeAppPhoto() { // CC
+      console.log("TAKE APP PHOTO")
+      try{
+        const image = await Camera.getPhoto({
+          quality: 50,
+          //allowEditing: true,
+          width: 1200,
+          height: 1200,
+          resultType: CameraResultType.DataUrl
+        })
+
+        var imageData = image.dataUrl;
+        console.log("takeAppPhoto",imageData)
+
+        this.$refs.pond.addFile(image.dataUrl);
+      }
+      catch(e) {
+        console.log("takeAppPhoto error",e)
+        document.getElementById('camera-msg').innerHTML = e.message
+      }
+    },
     photoInit() {
+      const mobileStore = useMobileStore()
+      if (mobileStore.isApp) {
+        if (mobileStore.isiOS) {
+          if (this.browse) {
+            this.$refs.pond.browse()
+          }
+        } else {
+          setTimeout(() => { // this.$nextTick didn't work
+            const takePhoto = this.$el.querySelector('.take-photo')
+            if( takePhoto){
+            takePhoto.addEventListener('click', e => {
+              this.takeAppPhoto()
+              e.preventDefault()
+              return false
+            })
+          }
+          }, 300)
+        }
+        if (this.browse) {
+          // NO: don't show camera automatically: this.takeAppPhoto()
+        }
+      }
+      else
       if (!this.$refs.pond._pond) {
         // This is the only way of finding out if the browser is supported - see
         // https://github.com/pqina/vue-filepond/issues/136
