@@ -225,6 +225,7 @@ import { useRoute } from 'vue-router'
 import PosterModal from '~/components/PosterModal'
 import InviteSomeone from '~/components/InviteSomeone'
 import { buildHead } from '~/composables/useBuildHead'
+import { useMobileStore } from '@/stores/mobile'
 
 definePageMeta({
   layout: 'login',
@@ -252,9 +253,15 @@ export default {
     }
   },
   computed: {
+    isApp() {
+      const mobileStore = useMobileStore()
+      return mobileStore.isApp
+    },
     contactPicker() {
       if (process.server) {
         return false
+      } else if( this.isApp) {
+        return true
       } else {
         const ret =
           'contacts' in window.navigator && 'ContactsManager' in window
