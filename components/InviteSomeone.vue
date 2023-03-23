@@ -184,29 +184,13 @@ export default {
 
     },
     async getContacts() {
-      try{
-        console.log("inviteApp")
-      let rv = await Contacts.checkPermissions()
-      console.log("checkPermissions",rv)
-
-      rv = await Contacts.requestPermissions()
-      console.log("requestPermissions",rv)
-
-
-        console.log("InviteSomeone A")
-      const ret = 'contacts' in window.navigator && 'ContactsManager' in window
-      console.log("InviteSomeone B", ret)
+      if( this.isApp) return
       this.contacts = await navigator.contacts.select(
         ['name', 'email', 'tel'],
         {
           multiple: true,
         }
       )
-      console.log("InviteSomeone C")
-      } catch( e){
-        console.log("InviteSomeone Z",e.message)
-
-      }
     },
   },
 }
