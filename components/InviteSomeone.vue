@@ -3,7 +3,7 @@
     <div v-if="isApp">
       <div>
         <b-button variant="primary" size="lg" @click="inviteApp">
-          Share with your friends!
+          Invite your friends!
         </b-button>
       </div>
     </div>
@@ -115,7 +115,7 @@ export default {
     return {
       contacts: null,
       invitation:
-        "Hi - I'm using Freegle to give and get things for free.  Check it out at https://www.ilovefreegle.org",
+        "Hi - I'm using Freegle to give and get things for free.  Check it out!",
     }
   },
   computed: {
@@ -175,6 +175,12 @@ export default {
   },
   methods: {
     async inviteApp(){
+      await Share.share({
+        title: 'Try out Freegle for free stuff',
+        text: 'Hi - I\'m using Freegle to give and get things for free.  Check it out at https://www.ilovefreegle.org',
+        url: 'https://www.ilovefreegle.org',
+        dialogTitle: 'Share now...',
+      })
 
     },
     async getContacts() {
