@@ -19,6 +19,8 @@ def capacitor_pods
   pod 'CapacitorCommunityFacebookLogin', :path => '../../node_modules/@capacitor-community/facebook-login'
   pod 'CapacitorCommunityAppleSignIn', :path => '../../node_modules/@capacitor-community/apple-sign-in'
   pod 'CodetrixStudioCapacitorGoogleAuth', :path => '../../node_modules/@codetrix-studio/capacitor-google-auth'
+  pod 'CapacitorCamera', :path => '../../node_modules/@capacitor/camera'
+  pod 'CapacitorShare', :path => '../../node_modules/@capacitor/share'
   pod 'CordovaPlugins', :path => '../capacitor-cordova-ios-plugins'
 end
 
