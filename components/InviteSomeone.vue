@@ -115,7 +115,7 @@ export default {
     return {
       contacts: null,
       invitation:
-        "Hi - I'm using Freegle to give and get things for free.  Check it out!",
+        "Hi - I'm using Freegle to give and get things for free.  Check it out at https://www.ilovefreegle.org",
     }
   },
   computed: {
@@ -177,7 +177,7 @@ export default {
     async inviteApp(){
       await Share.share({
         title: 'Try out Freegle for free stuff',
-        text: 'Hi - I\'m using Freegle to give and get things for free.  Check it out at https://www.ilovefreegle.org',
+        text: 'Hi - I\'m using Freegle to give and get things for free.  Check it out!',
         url: 'https://www.ilovefreegle.org',
         dialogTitle: 'Share now...',
       })
