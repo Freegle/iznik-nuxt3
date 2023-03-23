@@ -2,9 +2,9 @@
   <div>
     <div v-if="!contacts || !contacts.length" class="layout">
       <div>
-        <b-button v-if="isApp" variant="primary" size="lg" @click="inviteApp">
+        <!--b-button v-if="isApp" variant="primary" size="lg" @click="inviteApp">
           Invite your friends!
-        </b-button>
+        </b-button-->
         <b-button v-if="!isApp" variant="primary" size="lg" class="m-3" @click="getContacts">
           Invite your friends!
         </b-button>
@@ -94,7 +94,7 @@
 <script>
 import ExternalLink from './ExternalLink'
 import { useMobileStore } from '@/stores/mobile'
-import { Contacts } from '@capacitor-community/contacts';
+//import { Contacts } from '@capacitor-community/contacts';
 
 export default {
   components: { ExternalLink },
@@ -176,7 +176,7 @@ export default {
         }
       )
     },
-    async inviteApp(){
+    /*async inviteApp(){
       console.log("inviteApp")
       let rv = await Contacts.checkPermissions()
       console.log("checkPermissions",rv)
@@ -210,7 +210,7 @@ export default {
         }
       }
       this.contacts = result.contacts
-    },
+    },*/
   },
 }
 </script>

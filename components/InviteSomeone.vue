@@ -1,5 +1,13 @@
 <template>
   <div>
+    <div v-if="isApp">
+      <div>
+        <b-button variant="primary" size="lg" @click="inviteApp">
+          Share with your friends!
+        </b-button>
+      </div>
+    </div>
+    <div v-else>
     <div v-if="!contacts || !contacts.length" class="layout">
       <div>
         <b-button variant="primary" size="lg" @click="getContacts">
@@ -86,10 +94,13 @@
         </ExternalLink>
       </div>
     </div>
+    </div>
   </div>
 </template>
 <script>
 import ExternalLink from './ExternalLink'
+import { useMobileStore } from '@/stores/mobile'
+import { Share } from '@capacitor/share';
 
 export default {
   components: { ExternalLink },
@@ -108,6 +119,10 @@ export default {
     }
   },
   computed: {
+    isApp() {
+      const mobileStore = useMobileStore()
+      return mobileStore.isApp
+    },
     emails() {
       const ret = []
 
@@ -159,13 +174,33 @@ export default {
     },
   },
   methods: {
+    async inviteApp(){
+
+    },
     async getContacts() {
+      try{
+        console.log("inviteApp")
+      let rv = await Contacts.checkPermissions()
+      console.log("checkPermissions",rv)
+
+      rv = await Contacts.requestPermissions()
+      console.log("requestPermissions",rv)
+
+
+        console.log("InviteSomeone A")
+      const ret = 'contacts' in window.navigator && 'ContactsManager' in window
+      console.log("InviteSomeone B", ret)
       this.contacts = await navigator.contacts.select(
         ['name', 'email', 'tel'],
         {
           multiple: true,
         }
       )
+      console.log("InviteSomeone C")
+      } catch( e){
+        console.log("InviteSomeone Z",e.message)
+
+      }
     },
   },
 }
