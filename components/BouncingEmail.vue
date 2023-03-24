@@ -4,7 +4,7 @@
       <NoticeMessage v-if="me && me.bouncing" variant="danger">
         <v-icon icon="exclamation-triangle" />
         We can't send to your email address. Please go to
-        <nuxt-link to="/settings">Settings</nuxt-link>
+        <nuxt-link no-prefetch to="/settings">Settings</nuxt-link>
         to fix or retry.
       </NoticeMessage>
     </b-col>

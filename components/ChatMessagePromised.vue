@@ -7,6 +7,7 @@
       <b-card v-else border-variant="success" class="ml-2">
         <b-card-title>
           <nuxt-link
+            no-prefetch
             :to="
               (messageIsFromCurrentUser ? '/myposts/' : '/message/') + refmsgid
             "
@@ -32,6 +33,7 @@
           <span class="small black">Good news! You've been promised this:</span>
           <br />
           <nuxt-link
+            no-prefetch
             :to="
               (messageIsFromCurrentUser ? '/myposts/' : '/message/') + refmsgid
             "
@@ -73,6 +75,7 @@
       <b-card v-else border-variant="success">
         <b-card-title>
           <nuxt-link
+            no-prefetch
             :to="
               (messageIsFromCurrentUser ? '/myposts/' : '/message/') + refmsgid
             "
@@ -103,6 +106,7 @@
           >
           <br />
           <nuxt-link
+            no-prefetch
             :to="
               (messageIsFromCurrentUser ? '/myposts/' : '/message/') + refmsgid
             "

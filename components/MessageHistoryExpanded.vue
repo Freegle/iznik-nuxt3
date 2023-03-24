@@ -24,6 +24,7 @@
         </div>
         <nuxt-link
           v-if="message.interacted"
+          no-prefetch
           :to="'/chats/' + message.interacted"
           class="font-weight-bold"
           title="You've chatted to this freegler before.  Click here to view Chat."
@@ -57,6 +58,7 @@
         <span :title="group.arrival">{{ timeago(group.arrival) }} on </span>
         <nuxt-link
           v-if="group.groupid in groups"
+          no-prefetch
           :to="'/explore/' + groups[group.groupid].exploreLink"
           :title="'Click to view ' + groups[group.groupid].namedisplay"
         >

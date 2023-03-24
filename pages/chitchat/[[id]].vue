@@ -22,12 +22,12 @@
                 >
                 <span class="d-inline d-sm-none">Your posts are </span>
                 <!-- eslint-disable-next-line -->
-                <nuxt-link to="/myposts">here</nuxt-link>.
+                <nuxt-link  no-prefetch to="/myposts">here</nuxt-link>.
               </h5>
               <h5 class="text-center mb-3 d-block d-md-none">
                 Browse OFFERs/WANTEDs
                 <!-- eslint-disable-next-line -->
-                <nuxt-link to="/browse">here</nuxt-link>.
+                <nuxt-link  no-prefetch to="/browse">here</nuxt-link>.
               </h5>
               <div class="d-flex justify-content-between">
                 <b-button

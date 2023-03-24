@@ -22,7 +22,7 @@
       </div>
       <p class="mt-2">
         <!-- eslint-disable-next-line -->
-        Anything you can give is very welcome. You can find other ways to donate (e.g. bank transfer or cheque) <nuxt-link to="/donate">here</nuxt-link>.
+        Anything you can give is very welcome. You can find other ways to donate (e.g. bank transfer or cheque) <nuxt-link no-prefetch to="/donate">here</nuxt-link>.
       </p>
       <p v-if="groupid && !targetMet" class="text-muted small mt-1">
         This will contribute to the general fund for the ongoing support of

@@ -112,7 +112,7 @@
         </b-card>
         <p class="mt-2">
           If you want to find statistics for particular councils, click
-          <nuxt-link to="/stats/authorities">here</nuxt-link>.
+          <nuxt-link no-prefetch to="/stats/authorities">here</nuxt-link>.
         </p>
       </div>
     </b-col>

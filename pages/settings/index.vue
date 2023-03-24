@@ -323,7 +323,8 @@
                 >
                   Email doesn't always get through, so check your spam folders,
                   and check
-                  <nuxt-link to="/chats">Chats</nuxt-link> on here occasionally.
+                  <nuxt-link no-prefetch to="/chats">Chats</nuxt-link> on here
+                  occasionally.
                 </notice-message>
                 <div v-if="simpleSettings && !showAdvanced">
                   <b-form-group label="Choose your email level:">
@@ -606,7 +607,7 @@
                   automatically reposted (or "bumped") unless you've marked them
                   as TAKEN/RECEIVED/Withdrawn from
                   <!-- eslint-disable-next-line-->
-                    <nuxt-link to="/myposts">My Posts</nuxt-link>.
+                    <nuxt-link  no-prefetch to="/myposts">My Posts</nuxt-link>.
                 </p>
                 <OurToggle
                   v-model="autoreposts"

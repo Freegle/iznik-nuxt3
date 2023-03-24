@@ -6,7 +6,7 @@
       class="ourBack d-none d-xl-flex pl-1 pr-2 navbar-dark navbar-expand-xl"
       fixed="top"
     >
-      <nuxt-link :to="homePage" class="navbar-brand p-0">
+      <nuxt-link :to="homePage" class="navbar-brand p-0" no-prefetch>
         <b-img
           class="logo mr-2"
           height="58"

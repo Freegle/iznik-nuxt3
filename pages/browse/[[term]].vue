@@ -65,7 +65,7 @@
                     </li>
                     <li>
                       <!-- eslint-disable-next-line-->
-                      You can change your location in <nuxt-link to="/settings">Settings</nuxt-link>.
+                      You can change your location in <nuxt-link  no-prefetch to="/settings">Settings</nuxt-link>.
                     </li>
                     <li>
                       The <em>Add location</em> link lets you show posts from

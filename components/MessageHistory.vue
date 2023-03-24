@@ -8,6 +8,7 @@
       <span :title="group.arrival">{{ timeago(group.arrival) }} on </span>
       <nuxt-link
         v-if="group.groupid in groups"
+        no-prefetch
         :to="'/explore/' + groups[group.groupid].exploreLink"
         :title="'Click to view ' + groups[group.groupid].namedisplay"
       >

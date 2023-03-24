@@ -11,7 +11,7 @@
     </NoticeMessage>
     <b-card v-else-if="list.length" variant="white" no-body>
       <b-card-body class="p-0">
-        <nuxt-link to="/jobs">
+        <nuxt-link no-prefetch to="/jobs">
           <h2 class="header--size4 pt-1 ml-3">
             <v-icon icon="briefcase" scale="2" /> Jobs near you
           </h2>

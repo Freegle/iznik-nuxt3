@@ -29,12 +29,14 @@
     <div
       class="flex-wrap d-flex flex-row justify-content-between text-muted small list-unstyled"
     >
-      <nuxt-link to="/about" class="p-1"> About </nuxt-link>
-      <nuxt-link to="/terms" class="p-1"> Terms </nuxt-link>
-      <nuxt-link to="/privacy" class="p-1"> Privacy </nuxt-link>
-      <nuxt-link to="/disclaimer" class="p-1"> Disclaimer </nuxt-link>
-      <nuxt-link to="/donate" class="p-1"> Donate </nuxt-link>
-      <nuxt-link to="/help" class="p-1"> Contact </nuxt-link>
+      <nuxt-link no-prefetch to="/about" class="p-1"> About </nuxt-link>
+      <nuxt-link no-prefetch to="/terms" class="p-1"> Terms </nuxt-link>
+      <nuxt-link no-prefetch to="/privacy" class="p-1"> Privacy </nuxt-link>
+      <nuxt-link no-prefetch to="/disclaimer" class="p-1">
+        Disclaimer
+      </nuxt-link>
+      <nuxt-link no-prefetch to="/donate" class="p-1"> Donate </nuxt-link>
+      <nuxt-link no-prefetch to="/help" class="p-1"> Contact </nuxt-link>
     </div>
   </nav>
 </template>

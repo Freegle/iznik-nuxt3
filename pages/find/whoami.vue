@@ -15,11 +15,13 @@
                 <p class="text-muted">
                   You will get emails from us, which you can control or turn off
                   from Settings. Read
-                  <nuxt-link target="_blank" to="/terms">
+                  <nuxt-link no-prefetch target="_blank" to="/terms">
                     Terms of Use
                   </nuxt-link>
                   and
-                  <nuxt-link target="_blank" to="/privacy"> Privacy </nuxt-link>
+                  <nuxt-link no-prefetch target="_blank" to="/privacy">
+                    Privacy
+                  </nuxt-link>
                   for details.
                 </p>
                 <p class="text-muted">

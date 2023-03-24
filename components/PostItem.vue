@@ -35,7 +35,7 @@
         </p>
         <p>
           If it's the same item, please go to
-          <nuxt-link to="/myposts">My Posts</nuxt-link> and use the
+          <nuxt-link no-prefetch to="/myposts">My Posts</nuxt-link> and use the
           <em>Repost</em> button.
         </p>
         <p>

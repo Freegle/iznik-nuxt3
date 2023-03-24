@@ -2,7 +2,7 @@
   <div>
     <div class="d-flex align-items-start justify-content-between mb-1">
       <h2 class="header--size4 pl-2">
-        <nuxt-link :to="link" class="title__link">
+        <nuxt-link :to="link" class="title__link" no-prefetch>
           <v-icon :icon="iconName" scale="2" /> {{ title }}
         </nuxt-link>
       </h2>

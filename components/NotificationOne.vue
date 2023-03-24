@@ -36,14 +36,17 @@
 </template>
 <script>
 import { setupNotification } from '../composables/useNotification'
-import NotificationGiftAid from './NotificationGiftAid'
-import NotificationLovedPost from './NotificationLovedPost'
-import NotificationLovedComment from './NotificationLovedComment'
-import NotificationCommentOnPost from './NotificationCommentOnPost'
-import NotificationCommentOnComment from './NotificationCommentOnComment'
-import NotificationExhort from './NotificationExhort'
-import NotificationAboutMe from './NotificationAboutMe'
-import NotificationOpenPosts from './NotificationOpenPosts'
+const NotificationGiftAid = () => import('~/components/NotificationGiftAid')
+const NotificationLovedPost = () => import('~/components/NotificationLovedPost')
+const NotificationLovedComment = () =>
+  import('~/components/NotificationLovedComment')
+const NotificationCommentOnPost = () =>
+  import('~/components/NotificationCommentOnPost')
+const NotificationCommentOnComment = () =>
+  import('~/components/NotificationCommentOnComment')
+const NotificationExhort = () => import('~/components/NotificationExhort')
+const NotificationAboutMe = () => import('~/components/NotificationAboutMe')
+const NotificationOpenPosts = () => import('~/components/NotificationOpenPosts')
 
 export default {
   components: {

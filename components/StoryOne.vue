@@ -66,7 +66,11 @@
                 {{ publicLocation.groupname }}
               </span>
             </span>
-            <nuxt-link :to="'/story/' + story.id" class="text-muted nodecor">
+            <nuxt-link
+              no-prefetch
+              :to="'/story/' + story.id"
+              class="text-muted nodecor"
+            >
               #{{ story.id }}
             </nuxt-link>
           </div>

@@ -23,7 +23,7 @@
         ><span class="d-inline d-md-none">little if you click</span
         ><span class="d-none d-md-inline">, which helps keep us going</span>.
         <!-- eslint-disable-next-line -->
-        <nuxt-link to="/jobs">See more<span class="d-none d-md-inline"> jobs</span></nuxt-link>.
+        <nuxt-link no-prefetch to="/jobs">See more<span class="d-none d-md-inline"> jobs</span></nuxt-link>.
       </div>
       <ul class="list-unstyled">
         <li v-for="(job, index) in list" :key="'job-' + job.job_reference">

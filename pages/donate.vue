@@ -77,7 +77,7 @@
                 <p>
                   If you do this, please complete a Gift Aid
                   <!-- eslint-disable-next-line -->
-                Declaration <nuxt-link to="/giftaid">here</nuxt-link>.
+                Declaration <nuxt-link no-prefetch to="/giftaid">here</nuxt-link>.
                 </p>
               </b-card-text>
             </b-card>
@@ -96,7 +96,7 @@
                 <p>
                   If you do this, please complete a Gift Aid
                   <!-- eslint-disable-next-line -->
-                Declaration <nuxt-link to="/giftaid">here</nuxt-link>.
+                Declaration <nuxt-link  no-prefetch to="/giftaid">here</nuxt-link>.
                 </p>
               </b-card-text>
             </b-card>

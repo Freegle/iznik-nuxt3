@@ -39,6 +39,7 @@
                   {{ timeago(group.arrival) }} on
                   <nuxt-link
                     v-if="group.groupid in groups"
+                    no-prefetch
                     :to="'/explore/' + groups[group.groupid].exploreLink"
                     :title="
                       'Click to view ' + groups[group.groupid].namedisplay

@@ -12,7 +12,7 @@
           </p>
           <p>
             Usually this doesn't take more than an hour or two. Please
-            <nuxt-link to="/">try again</nuxt-link>
+            <nuxt-link no-prefetch to="/">try again</nuxt-link>
             later.
           </p>
           <p>
@@ -41,7 +41,8 @@
             </p>
           </div>
           <p>
-            <nuxt-link to="/">Click here</nuxt-link> to go back to the home page
+            <nuxt-link no-prefetch to="/">Click here</nuxt-link> to go back to
+            the home page
           </p>
           <p>
             <!-- eslint-disable-next-line -->
