@@ -342,7 +342,7 @@ import { Searcher } from 'fast-fuzzy'
 import dayjs from 'dayjs'
 import HelpQuestion from '../components/HelpQuestion'
 import { buildHead } from '~/composables/useBuildHead'
-const SupporterInfoModal = () => import('~/components/SupportInfoModal.vue')
+const SupporterInfoModal = () => import('~/components/SupporterInfoModal.vue')
 
 export default {
   components: { HelpQuestion, SupporterInfoModal },
