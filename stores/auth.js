@@ -153,13 +153,13 @@ export const useAuthStore = defineStore({
 
       this.loginCount++
     },
-    async lostPassword(params) {
+    async lostPassword(email) {
       const runtimeConfig = useRuntimeConfig()
       const api = runtimeConfig.APIv1
 
       const res = await axios.post(api + '/session', {
         action: 'LostPassword',
-        email: params.email,
+        email,
       })
 
       return res
