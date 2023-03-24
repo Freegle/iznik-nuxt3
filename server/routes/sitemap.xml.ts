@@ -32,7 +32,7 @@ export default defineEventHandler(async (event) => {
     { url: '/giftaid', changefreq: 'monthly', priority: 0.1 },
 
     // TODO Councils - separate site?
-    // TODO Pages: mobile, promote, noticeboards, poster, shortlinks, stats, merge, mydata, norfolk
+    // TODO Pages: mobile, shortlinks, stats, merge, mydata, norfolk
   ]
 
   // Fetch all the groups.

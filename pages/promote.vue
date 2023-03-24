@@ -129,11 +129,10 @@
       <b-button variant="primary" size="lg" class="mb-1" @click="added">
         I put up a poster!
       </b-button>
-      <!--      <p>-->
-      <!--        TODO MINOR Noticeboards page?-->
-      <!--        You can see where people have put up posters-->
-      <!--        <nuxt-link to="/noticeboards"> here </nuxt-link>.-->
-      <!--      </p>-->
+      <p>
+        You can see where people have put up posters
+        <nuxt-link to="/noticeboards">here</nuxt-link>.
+      </p>
       <hr />
       <h2 class="header--size3">Business Cards</h2>
       <p>
