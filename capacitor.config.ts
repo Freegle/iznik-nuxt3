@@ -52,7 +52,7 @@ const config: CapacitorConfig = {
       "@capacitor/share",
       "capacitor-zoom-android",
     ],
-    buildOptions: {
+    buildOptions: { // new creds which are not use. unsigned version needs signed with FREEGLE_KEYSTORE and FREEGLE_KEYSTORE_PASSWORD
       "keystorePath": AndroidKeyStorePath,
       "keystorePassword": AndroidKeyStorePassword,
       "keystoreAlias": AndroidKeyStoreAlias,

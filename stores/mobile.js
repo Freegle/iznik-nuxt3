@@ -192,6 +192,20 @@ export const useMobileStore = defineStore({ // Do not persist
     //////////////
     async initDeepLinks() {
 
+      /* TODO 
+      https://www.ilovefreegle.org/.well-known/assetlinks.json
+      nuxtApp.vueApp.addListener('appUrlOpen', function (event) {
+        // slug = /tabs/tabs2
+        const slug = event.url.split('.app').pop();
+        console.log(slug)
+        //// We only push to the route if there is a slug present
+        //if (slug) {
+        //  router.push({
+        //    path: slug,
+        //  });
+        //}
+      });*/
+
       /* TODO
       window.IonicDeeplink.route({
         '/': {
