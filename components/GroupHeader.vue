@@ -34,8 +34,7 @@
         <!--eslint-disable-next-line-->
         <nuxt-link no-prefetch :to="{ path: '/volunteerings/' + group.id }">volunteer opportunities</nuxt-link>,
         <!--eslint-disable-next-line-->
-        <nuxt-link no-prefetch :to="{ path: '/stories/' + group.id }">stories</nuxt-link>,
-        >, >, >, >, >, >, >, >, >, >, or
+        <nuxt-link no-prefetch :to="{ path: '/stories/' + group.id }">stories</nuxt-link>, or
         <!--eslint-disable-next-line-->
         <nuxt-link no-prefetch :to="{ path: '/stats/' + group.nameshort }">stats</nuxt-link>
       </div>
