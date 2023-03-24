@@ -24,9 +24,6 @@
             <VisibleWhen :at="['xs', 'sm', 'md']">
               <JobsTopBar />
             </VisibleWhen>
-            <b-card v-if="contactPicker" border-variant="info">
-              <InviteContacts class="bg-white" />
-            </b-card>
             <b-card
               class="mt-2"
               border-variant="info"
@@ -252,7 +249,6 @@
 import { useRoute } from 'vue-router'
 import pluralize from 'pluralize'
 import dayjs from 'dayjs'
-import InviteContacts from '../components/InviteContacts'
 import VisibleWhen from '../components/VisibleWhen'
 import { useGroupStore } from '../stores/group'
 import { useAuthStore } from '../stores/auth'
@@ -277,7 +273,6 @@ definePageMeta({
 export default {
   components: {
     VisibleWhen,
-    InviteContacts,
     JobsTopBar,
     MyMessage,
     SidebarLeft,
@@ -457,15 +452,6 @@ export default {
       ret.sort((a, b) => a.daysago - b.daysago)
 
       return ret
-    },
-    contactPicker() {
-      if (process.server) {
-        return false
-      } else {
-        const ret =
-          'contacts' in window.navigator && 'ContactsManager' in window
-        return ret
-      }
     },
   },
   watch: {

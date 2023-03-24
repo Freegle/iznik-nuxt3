@@ -178,7 +178,6 @@
             Login Failed: {{ nativeLoginError }}
           </b-alert>
           <div v-if="!signUp" class="text-center">
-            <!--            TODO Forgot page-->
             <nuxt-link to="/forgot" class="nodecor" @click.native="forgot">
               I forgot my password
             </nuxt-link>
