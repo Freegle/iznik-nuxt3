@@ -20,6 +20,7 @@ dependencies {
     implementation project(':capacitor-firebase-messaging')
     implementation project(':capacitor-camera')
     implementation project(':capacitor-share')
+    implementation project(':capacitor-zoom-android')
 
 }
 

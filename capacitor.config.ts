@@ -50,6 +50,7 @@ const config: CapacitorConfig = {
       "@capacitor-firebase/messaging",
       "@capacitor/camera",
       "@capacitor/share",
+      "capacitor-zoom-android",
     ],
     buildOptions: {
       "keystorePath": AndroidKeyStorePath,

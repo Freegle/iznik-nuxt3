@@ -63,6 +63,7 @@
     "axios": "^0.26.1",
     "bootstrap": "^5.2.2",
     "bootstrap-vue-next": "^0.7.3",
+    "capacitor-zoom-android": "^1.0.0",
     "cordova-plugin-inappbrowser": "^5.0.0",
     "dayjs": "^1.11.0",
     "fast-fuzzy": "^1.12.0",

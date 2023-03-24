@@ -23,6 +23,7 @@ import api from '~/api'
 import { FCM } from '@capacitor-community/fcm';
 //import { getMessaging, getToken as firebaseGetToken, onMessage, deleteToken, isSupported } from "firebase/messaging";
 import { FirebaseMessaging } from '@capacitor-firebase/messaging';
+import { ZoomPlugin } from 'capacitor-zoom-android';
 
 export const useMobileStore = defineStore({ // Do not persist
   id: 'mobile',
@@ -75,6 +76,7 @@ export const useMobileStore = defineStore({ // Do not persist
           console.log("PHDCC ZZZ ", e.message)
         }
       }*/
+      Capacitor.Plugins.ZoomPlugin.enableZoom()
     },
 
     async initFirebaseMessaging() {
@@ -183,15 +185,9 @@ export const useMobileStore = defineStore({ // Do not persist
     },
     //////////////
     async enableAndroidPinchZoom() {
-
-      /* TODO
       if (!this.isiOS) {
-        // Enable pinch zoom on Android
-        cordova.plugins.ZoomControl.ZoomControl('true') // enabling zoom control: setBuiltInZoomControls(true), setDefaultZoom(ZoomDensity.MEDIUM), setSupportZoom(true)
-        cordova.plugins.ZoomControl.setBuiltInZoomControls('true') // Sets whether the WebView should use its built-in zoom mechanisms
-        cordova.plugins.ZoomControl.setDisplayZoomControls('false') // Sets whether the WebView should display on-screen zoom controls when using the built-in zoom mechanisms.
-        cordova.plugins.ZoomControl.setUseWideViewPort('false') // Sets whether the WebView should enable support for the "viewport" HTML meta tag or should use a wide viewport.
-      }*/
+        ZoomPlugin.enableZoom()
+      }
     },
     //////////////
     async initDeepLinks() {
