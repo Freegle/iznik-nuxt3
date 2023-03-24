@@ -4,7 +4,7 @@ import api from '~/api'
 export const useNoticeboardStore = defineStore({
   id: 'noticeboard',
   state: () => ({
-    list: [],
+    list: {},
   }),
   actions: {
     init(config) {

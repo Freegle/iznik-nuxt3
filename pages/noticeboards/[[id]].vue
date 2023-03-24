@@ -42,7 +42,7 @@
                   :min-zoom="5"
                   :max-zoom="17"
                 >
-                  <l-tile-layer :url="osmtile" :attribution="attribution" />
+                  <l-tile-layer :url="osmtile()" :attribution="attribution()" />
                   <l-marker
                     v-for="n in noticeboards"
                     :key="'marker-' + n.id"
@@ -61,96 +61,79 @@
       </b-col>
       <b-col cols="0" md="3" class="d-none d-md-block" />
     </b-row>
-    <PosterModal ref="modal" />
+    <client-only>
+      <PosterModal ref="modal" />
+    </client-only>
   </div>
 </template>
-<script>
+<script setup>
 import { useRoute } from 'vue-router'
 import ExternalLink from '../../components/ExternalLink'
 import { loadLeaflet, attribution, osmtile } from '~/composables/useMap'
 import NoticeboardDetails from '~/components/NoticeboardDetails'
 import { buildHead } from '~/composables/useBuildHead'
 import { useNoticeboardStore } from '~/stores/noticeboard'
+import PosterModal from '~/components/PosterModal'
 
-const PosterModal = () => import('~/components/PosterModal')
+const runtimeConfig = useRuntimeConfig()
+const route = useRoute()
+const id = route.params.id ? parseInt(route.params.id) : null
+const noticeboardStore = useNoticeboardStore()
 
+await noticeboardStore.clear()
+
+const noticeboard = computed(() => (id ? noticeboardStore.byId(id) : null))
+const noticeboards = computed(() => noticeboardStore.list)
+
+if (!id || !noticeboardStore.list?.length) {
+  await noticeboardStore.fetch()
+
+  useHead(
+    buildHead(
+      route,
+      runtimeConfig,
+      'Noticeboards',
+      "We're building a map of noticeboards across the UK and putting Freegle posters on them.  Help us!"
+    )
+  )
+} else {
+  useHead(
+    buildHead(
+      route,
+      runtimeConfig,
+      'Noticeboard: ' + noticeboard?.value?.name,
+      noticeboard?.value?.description
+    )
+  )
+}
+
+const mapWidth = computed(() => {
+  let width = 0
+
+  if (process.client) {
+    width = Math.floor(window.innerHeight / 2)
+    width = width < 200 ? 200 : width
+  }
+
+  return width
+})
+</script>
+<script>
 export default {
-  components: {
-    ExternalLink,
-    NoticeboardDetails,
-    PosterModal,
-  },
-  async setup(props) {
-    const runtimeConfig = useRuntimeConfig()
-    const route = useRoute()
-    const id = route.params.id ? parseInt(route.params.id) : null
-    const noticeboardStore = useNoticeboardStore()
-
-    await noticeboardStore.clear()
-
-    if (!id || !noticeboardStore.list?.length) {
-      await noticeboardStore.fetch()
-
-      useHead(
-        buildHead(
-          route,
-          runtimeConfig,
-          'Noticeboards',
-          "We're building a map of noticeboards across the UK and putting Freegle posters on them.  Help us!"
-        )
-      )
-    } else {
-      useHead(
-        buildHead(
-          route,
-          runtimeConfig,
-          'Noticeboard: ' + noticeboardStore.list[0].name,
-          noticeboardStore.list[0].description
-        )
-      )
-    }
-
-    return {
-      id,
-      noticeboardStore,
-      osmtile: osmtile(),
-      attribution: attribution(),
-    }
-  },
   data() {
     return {
-      groupid: null,
-      context: null,
-      infiniteId: +new Date(),
-      complete: false,
-      modalStory: null,
       center: [53.945, -2.5209],
     }
   },
-  computed: {
-    noticeboard() {
-      return this.id ? this.noticeboardStore.byId(this.id) : null
-    },
-    noticeboards() {
-      return Object.values(this.noticeboardStore.list)
-    },
-    mapWidth() {
-      let height = 0
-
-      if (process.client) {
-        height = Math.floor(window.innerHeight / 2)
-        height = height < 200 ? 200 : height
-      }
-
-      return height
-    },
-  },
+  computed: {},
   async mounted() {
     await loadLeaflet()
   },
   methods: {
     added() {
+      console.log('wait for modal')
       this.waitForRef('modal', () => {
+        console.log('show')
         this.$refs.modal.show()
       })
     },
