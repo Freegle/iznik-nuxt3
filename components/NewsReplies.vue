@@ -46,6 +46,7 @@
           'pl-4': depth === 2,
         }"
         :depth="depth"
+        @rendered="rendered"
       />
       <div v-if="depth === 1" class="line" />
     </div>
@@ -214,6 +215,11 @@ export default {
         this.visiblereplies.length - INITIAL_NUMBER_OF_REPLIES_TO_SHOW,
         true
       )
+    },
+  },
+  methods: {
+    rendered(id) {
+      this.$emit('rendered', id)
     },
   },
 }

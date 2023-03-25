@@ -416,13 +416,19 @@ export default {
       )
     },
   },
+  watch: {
+    scrollTo(newVal) {
+      if (parseInt(this.scrollTo) === this.replyid && this.$el.scrollIntoView) {
+        this.$nextTick(() => {
+          this.$el.scrollIntoView(false)
+        })
+      }
+    },
+  },
   mounted() {
-    if (parseInt(this.scrollTo) === this.replyid && this.$el.scrollIntoView) {
-      // We want to scroll to this reply to make sure it's visible.
-      this.$nextTick(() => {
-        this.$el.scrollIntoView(false)
-      })
-    }
+    // This will get propogated up the stack so that we know if the reply to which we'd like to scroll has been
+    // rendered.  We'll then come through the watch above.
+    this.$emit('rendered', this.replyid)
   },
   methods: {
     showInfo() {

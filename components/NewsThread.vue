@@ -80,11 +80,12 @@
           v-if="newsfeed?.replies"
           :id="id"
           :threadhead="newsfeed.id"
-          :scroll-to="scrollTo"
+          :scroll-to="scrollDownTo"
           :reply-ids="newsfeed.replies.map((r) => r.id)"
           :reply-to="replyingTo"
           :depth="1"
           :class="newsfeed.deleted ? 'strike mr-1' : 'mr-1'"
+          @rendered="rendered"
         />
         <span v-if="!newsfeed.closed">
           <div v-if="enterNewLine">
@@ -293,6 +294,7 @@ export default {
   },
   data() {
     return {
+      scrollDownTo: null,
       replyingTo: null,
       threadcomment: null,
       newsComponents: {
@@ -411,9 +413,15 @@ export default {
     },
   },
   mounted() {
+    // Scroll down now that the child components are rendered.
     this.$emit('rendered')
   },
   methods: {
+    rendered(id) {
+      if (parseInt(id) === parseInt(this.scrollTo)) {
+        this.scrollDownTo = this.scrollTo
+      }
+    },
     focusComment() {
       this.waitForRef('threadcomment', () => {
         this.$refs.threadcomment.$el.focus()
