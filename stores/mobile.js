@@ -25,6 +25,7 @@ import { FCM } from '@capacitor-community/fcm';
 import { FirebaseMessaging } from '@capacitor-firebase/messaging';
 import { ZoomPlugin } from 'capacitor-zoom-android';
 import { App } from '@capacitor/app';
+import { useRouter } from '#imports'
 
 export const useMobileStore = defineStore({ // Do not persist
   id: 'mobile',
@@ -191,44 +192,22 @@ export const useMobileStore = defineStore({ // Do not persist
       }
     },
     //////////////
-    async initDeepLinks() {
-      console.log("initDeepLinks A")
-
-      //https://www.ilovefreegle.org/.well-known/assetlinks.json
-      //const nuxtApp = useNuxtApp()
+      // Needs: https://www.ilovefreegle.org/.well-known/assetlinks.json
+      async initDeepLinks() {
       if (process.client) {
         App.addListener('appUrlOpen', function (event) {
-          console.log("initDeepLinks C")
+          // url eg https://www.ilovefreegle.org/chats/13246706?u=32496365&src=chatnotif
           console.log("initDeepLinks D", event)
-          // slug = /tabs/tabs2
-          const slug = event.url.split('.app').pop();
-          console.log(slug)
-          //// We only push to the route if there is a slug present
-          //if (slug) {
-          //  router.push({
-          //    path: slug,
-          //  });
-          //}
+          const lookfor = 'ilovefreegle.org'
+          const ilfpos = event.url.indexOf(lookfor)
+          if( ilfpos!==false){
+            const route = event.url.substring(ilfpos+lookfor.length)
+            console.log("initDeepLinks E", route)
+            const router = useRouter()
+            router.push(route)
+          }
         })
       }
-      console.log("initDeepLinks B")
-
-      /* TODO
-      window.IonicDeeplink.route({
-        '/': {
-          target: '',
-          parent: ''
-        }
-      }, function (match) {
-        console.log('========== Universal/App-link NOT HANDLED', match)
-      }, function (nomatch) {
-        //console.log('========== Universal/App-link', nomatch.$link.path)
-        if (nomatch && nomatch.$link) {
-          console.log('linkstate.route', nomatch.$link)
-          linkstate.route = nomatch.$link
-          linkstate.received = true
-        }
-      })*/
     },
     //////////////
     // https://capacitorjs.com/docs/apis/push-notifications
