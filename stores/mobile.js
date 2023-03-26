@@ -191,19 +191,47 @@ export const useMobileStore = defineStore({ // Do not persist
         ZoomPlugin.enableZoom()
       }
     },
+    extractQueryStringParams(url) {
+      let urlParams = false
+      const qm = url.indexOf('?')
+      if (qm >= 0) {
+        const qs = url.substring(qm + 1)
+        // http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript
+        const pl = /\+/g  // Regex for replacing addition symbol with a space
+        const search = /([^&=]+)=?([^&]*)/g
+        const decode = s => { return decodeURIComponent(s.replace(pl, ' ')) }
+        urlParams = {}
+        let match
+        while ((match = search.exec(qs))) {
+          urlParams[decode(match[1]).replace(/\./g, "_")] = decode(match[2]) // Convert period to underscore to get through to openid.php
+        }
+      }
+      return urlParams
+    },
+    
     //////////////
-      // Needs: https://www.ilovefreegle.org/.well-known/assetlinks.json
-      async initDeepLinks() {
+    // Needs: https://www.ilovefreegle.org/.well-known/assetlinks.json
+    async initDeepLinks() {
       if (process.client) {
-        App.addListener('appUrlOpen', function (event) {
+        App.addListener('appUrlOpen', async event => {
           // url eg https://www.ilovefreegle.org/chats/13246706?u=32496365&src=chatnotif
-          console.log("initDeepLinks D", event)
           const lookfor = 'ilovefreegle.org'
           const ilfpos = event.url.indexOf(lookfor)
-          if( ilfpos!==false){
-            const route = event.url.substring(ilfpos+lookfor.length)
-            console.log("initDeepLinks E", route)
+          if (ilfpos !== false) {
+            const route = event.url.substring(ilfpos + lookfor.length)
             const router = useRouter()
+            if (route.indexOf('src=forgotpass') !== false) {  // Special handling of forgotpass
+              // /settings?u=uuu&k=kkk&src=forgotpass
+              const authStore = useAuthStore()
+              await authStore.clearRelated()
+              await authStore.logout()
+              const params = this.extractQueryStringParams(route)
+              // Log in using the username and key.
+              await authStore.login({
+                u: params.u,
+                k: params.k,
+              })
+            }
             router.push(route)
           }
         })
