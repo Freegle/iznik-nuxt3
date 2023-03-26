@@ -191,20 +191,29 @@ export const useMobileStore = defineStore({ // Do not persist
     },
     //////////////
     async initDeepLinks() {
+      console.log("initDeepLinks A")
 
-      /* TODO 
-      https://www.ilovefreegle.org/.well-known/assetlinks.json
-      nuxtApp.vueApp.addListener('appUrlOpen', function (event) {
-        // slug = /tabs/tabs2
-        const slug = event.url.split('.app').pop();
-        console.log(slug)
-        //// We only push to the route if there is a slug present
-        //if (slug) {
-        //  router.push({
-        //    path: slug,
-        //  });
-        //}
-      });*/
+      //https://www.ilovefreegle.org/.well-known/assetlinks.json
+      //const nuxtApp = useNuxtApp()
+      if (process.client) {
+        //nuxtApp.vueApp.addListener('appUrlOpen', function (event) {
+          if (typeof window !== 'undefined') {
+            console.log("initDeepLinks C")
+            window.addEventListener('appUrlOpen', function (event) {
+            console.log("initDeepLinks D")
+            // slug = /tabs/tabs2
+            const slug = event.url.split('.app').pop();
+            console.log(slug)
+            //// We only push to the route if there is a slug present
+            //if (slug) {
+            //  router.push({
+            //    path: slug,
+            //  });
+            //}
+          })
+        }
+        console.log("initDeepLinks B")
+      }
 
       /* TODO
       window.IonicDeeplink.route({
