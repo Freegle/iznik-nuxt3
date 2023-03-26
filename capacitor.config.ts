@@ -51,6 +51,7 @@ const config: CapacitorConfig = {
       "@capacitor/camera",
       "@capacitor/share",
       "capacitor-zoom-android",
+      "@capacitor/app",
     ],
     buildOptions: { // new creds which are not used. unsigned version needs signed with FREEGLE_KEYSTORE and FREEGLE_KEYSTORE_PASSWORD
       "keystorePath": AndroidKeyStorePath,
@@ -76,6 +77,7 @@ const config: CapacitorConfig = {
       "@codetrix-studio/capacitor-google-auth",
       "@capacitor/camera",
       "@capacitor/share",
+      "@capacitor/app",
     ] 
   },
   plugins: {

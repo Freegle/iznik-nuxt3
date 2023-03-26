@@ -21,6 +21,7 @@ dependencies {
     implementation project(':capacitor-camera')
     implementation project(':capacitor-share')
     implementation project(':capacitor-zoom-android')
+    implementation project(':capacitor-app')
 
 }
 

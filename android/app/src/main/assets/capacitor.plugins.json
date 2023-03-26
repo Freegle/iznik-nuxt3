@@ -46,5 +46,9 @@
 	{
 		"pkg": "capacitor-zoom-android",
 		"classpath": "com.ecc521.capacitorzoomandroid.ZoomPluginPlugin"
+	},
+	{
+		"pkg": "@capacitor/app",
+		"classpath": "com.capacitorjs.plugins.app.AppPlugin"
 	}
 ]

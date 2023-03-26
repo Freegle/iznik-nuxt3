@@ -24,6 +24,7 @@ import { FCM } from '@capacitor-community/fcm';
 //import { getMessaging, getToken as firebaseGetToken, onMessage, deleteToken, isSupported } from "firebase/messaging";
 import { FirebaseMessaging } from '@capacitor-firebase/messaging';
 import { ZoomPlugin } from 'capacitor-zoom-android';
+import { App } from '@capacitor/app';
 
 export const useMobileStore = defineStore({ // Do not persist
   id: 'mobile',
@@ -196,24 +197,21 @@ export const useMobileStore = defineStore({ // Do not persist
       //https://www.ilovefreegle.org/.well-known/assetlinks.json
       //const nuxtApp = useNuxtApp()
       if (process.client) {
-        //nuxtApp.vueApp.addListener('appUrlOpen', function (event) {
-          if (typeof window !== 'undefined') {
-            console.log("initDeepLinks C")
-            window.addEventListener('appUrlOpen', function (event) {
-            console.log("initDeepLinks D")
-            // slug = /tabs/tabs2
-            const slug = event.url.split('.app').pop();
-            console.log(slug)
-            //// We only push to the route if there is a slug present
-            //if (slug) {
-            //  router.push({
-            //    path: slug,
-            //  });
-            //}
-          })
-        }
-        console.log("initDeepLinks B")
+        App.addListener('appUrlOpen', function (event) {
+          console.log("initDeepLinks C")
+          console.log("initDeepLinks D", event)
+          // slug = /tabs/tabs2
+          const slug = event.url.split('.app').pop();
+          console.log(slug)
+          //// We only push to the route if there is a slug present
+          //if (slug) {
+          //  router.push({
+          //    path: slug,
+          //  });
+          //}
+        })
       }
+      console.log("initDeepLinks B")
 
       /* TODO
       window.IonicDeeplink.route({

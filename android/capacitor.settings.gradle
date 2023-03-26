@@ -37,3 +37,6 @@ project(':capacitor-share').projectDir = new File('../node_modules/@capacitor/sh
 
 include ':capacitor-zoom-android'
 project(':capacitor-zoom-android').projectDir = new File('../node_modules/capacitor-zoom-android/android')
+
+include ':capacitor-app'
+project(':capacitor-app').projectDir = new File('../node_modules/@capacitor/app/android')
