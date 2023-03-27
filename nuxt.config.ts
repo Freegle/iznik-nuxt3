@@ -55,8 +55,8 @@ export default defineNuxtConfig({
     // would be a mistake to serve them.
     //
     // This still leaves issues where a deployment happens while a page is partway through loading assets, or
-    // later loads assets which are no longer present.  We handle that in deployment-workaround.client.js by
-    // reloading the page.
+    // later loads assets which are no longer present.  Nuxt3 now has a fallback of reloading the page when
+    // it detects this.
     '/**': { headers: { 'cache-control': 'no-cache' } },
   },
 
