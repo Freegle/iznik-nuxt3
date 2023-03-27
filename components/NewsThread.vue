@@ -5,7 +5,7 @@
         <b-card-text>
           <div v-if="isNewsComponent">
             <b-dropdown class="float-end" right variant="white">
-              <template slot="button-content" />
+              <template #button-content />
               <b-dropdown-item
                 :href="'/chitchat/' + newsfeed?.id"
                 target="_blank"
@@ -195,7 +195,7 @@
             class="bg-white m-0 pondrow"
             imgtype="Newsfeed"
             imgflag="newsfeed"
-            @photoProcessed="photoProcessed"
+            @photo-processed="photoProcessed"
           />
         </span>
         <notice-message v-else>

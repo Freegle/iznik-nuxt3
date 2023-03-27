@@ -281,12 +281,12 @@ export default {
     const postType = authStore.user?.settings.browsePostType
     const selectedType = ref(postType || 'All')
 
-    const showGroups = props.startOnGroups
-    const groupids = props.initialGroupIds
-    const swlat = props.initialBounds[0][0]
-    const swlng = props.initialBounds[0][1]
-    const nelat = props.initialBounds[1][0]
-    const nelng = props.initialBounds[1][1]
+    const showGroups = ref(props.startOnGroups)
+    const groupids = ref(props.initialGroupIds)
+    const swlat = ref(props.initialBounds[0][0])
+    const swlng = ref(props.initialBounds[0][1])
+    const nelat = ref(props.initialBounds[1][0])
+    const nelng = ref(props.initialBounds[1][1])
     const search = ref(props.initialSearch)
     const searchOn = ref(props.initialSearch)
 

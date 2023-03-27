@@ -256,7 +256,7 @@
       class="bg-white m-0 pondrow"
       imgtype="Newsfeed"
       imgflag="newsfeed"
-      @photoProcessed="photoProcessed"
+      @photo-processed="photoProcessed"
     />
     <b-modal
       v-if="reply.image"

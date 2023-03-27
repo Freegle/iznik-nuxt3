@@ -57,7 +57,7 @@
             :left="left"
             :taken-by="takenBy"
             :choose-error="chooseError"
-            @tookUsers="tookUsers = $event"
+            @took-users="tookUsers = $event"
           />
         </div>
         <div v-if="showCompletion">

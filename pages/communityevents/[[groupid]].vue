@@ -14,7 +14,7 @@
                 class="pr-2"
                 all
                 :value="groupid"
-                @update:modelValue="changeGroup"
+                @update:model-value="changeGroup"
               />
               <b-button
                 variant="primary"

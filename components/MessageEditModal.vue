@@ -83,7 +83,7 @@
             <OurFilePond
               imgtype="Message"
               imgflag="message"
-              @photoProcessed="photoProcessed"
+              @photo-processed="photoProcessed"
             />
           </b-col>
         </b-row>

@@ -10,7 +10,7 @@
             title="Verification Succeeded"
             no-stacking
           >
-            <template slot="default">
+            <template #default>
               <b-row>
                 <b-col>
                   <p>
@@ -23,7 +23,7 @@
                 </b-col>
               </b-row>
             </template>
-            <template slot="modal-footer">
+            <template #modal-footer>
               <b-button variant="primary" @click="closed"> Close </b-button>
             </template>
           </b-modal>
@@ -33,7 +33,7 @@
             title="Verification Failed"
             no-stacking
           >
-            <template slot="default">
+            <template #default>
               <b-row>
                 <b-col>
                   <p>Sorry - we failed to verify your email address.</p>
@@ -53,7 +53,7 @@
                 </b-col>
               </b-row>
             </template>
-            <template slot="modal-footer">
+            <template #modal-footer>
               <b-button variant="white" @click="closed"> Cancel </b-button>
               <b-button variant="primary" @click="resend">
                 Resend verification mail
@@ -66,7 +66,7 @@
             title="Verification Sent"
             no-stacking
           >
-            <template slot="default">
+            <template #default>
               <b-row>
                 <b-col>
                   <p>
@@ -84,7 +84,7 @@
                 </b-col>
               </b-row>
             </template>
-            <template slot="modal-footer">
+            <template #modal-footer>
               <b-button variant="primary" @click="closed"> Close </b-button>
             </template>
           </b-modal>

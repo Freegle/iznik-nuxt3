@@ -151,7 +151,7 @@
               v-model:unread-notification-count="unreadNotificationCount"
               :distance="distance"
               :small-screen="false"
-              @showAboutMe="showAboutMe"
+              @show-about-me="showAboutMe"
             />
           </li>
           <li>
@@ -261,7 +261,7 @@
           v-model:unread-notification-count="unreadNotificationCount"
           :distance="distance"
           :small-screen="true"
-          @showAboutMe="showAboutMeModal"
+          @show-about-me="showAboutMeModal"
         />
         <ChatMenu
           v-if="loggedIn"

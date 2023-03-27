@@ -39,8 +39,8 @@
           title="Item picture"
           :src="thumbnail ? attachments[0].paththumb : attachments[0].path"
           itemprop="image"
-          @error.native="brokenImage"
-          @click.native="$emit('zoom')"
+          @error="brokenImage"
+          @click="$emit('zoom')"
         />
         <b-img
           lazy
@@ -50,8 +50,8 @@
           title="Item picture"
           :src="attachments[0].path"
           itemprop="image"
-          @error.native="brokenImage"
-          @click.native="$emit('zoom')"
+          @error="brokenImage"
+          @click="$emit('zoom')"
         />
       </div>
     </button>

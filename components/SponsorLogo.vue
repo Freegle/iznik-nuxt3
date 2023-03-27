@@ -6,7 +6,7 @@
     class="sponsorClass m-0"
     :alt="altText"
     :src="image"
-    @error.native="brokenSponsorImage"
+    @error="brokenSponsorImage"
   />
 </template>
 

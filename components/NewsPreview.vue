@@ -14,14 +14,14 @@
             lazy
             :src="preview.image"
             class="previewimage"
-            @error.native="brokenImage"
+            @error="brokenImage"
           />
           <b-img
             v-if="size === 'sm'"
             lazy
             :src="preview.image"
             class="previewimagesm"
-            @error.native="brokenImage"
+            @error="brokenImage"
           />
         </div>
         <div class="title">

@@ -57,7 +57,6 @@ export const useComposeStore = defineStore({
     calculateSteps(type) {
       let steps = 0
 
-      // eslint-disable-next-line no-unused-vars
       for (const id in this.messages) {
         const message = this.messages[id]
 

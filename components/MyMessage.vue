@@ -62,7 +62,7 @@
                 <b-button v-if="!expand" class="ml-1" variant="secondary">
                   <v-icon v-if="!expanded" icon="caret-down" />
                   <v-icon v-else icon="caret-up" />
-                  <template slot="button-content" />
+                  <template #button-content />
                 </b-button>
               </span>
             </div>
@@ -254,7 +254,7 @@
                         generator-unable-to-provide-required-alt=""
                         title="Item picture"
                         :src="message.attachments[0].paththumb"
-                        @error.native="brokenImage"
+                        @error="brokenImage"
                       />
                     </div>
                   </div>

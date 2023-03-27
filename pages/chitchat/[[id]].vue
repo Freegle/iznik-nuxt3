@@ -103,7 +103,7 @@
                 class="bg-white m-0 pondrow"
                 imgtype="Newsfeed"
                 imgflag="newsfeed"
-                @photoProcessed="photoProcessed"
+                @photo-processed="photoProcessed"
               />
               <div class="pb-1 d-flex justify-content-end">
                 <b-button variant="secondary" class="mr-2" @click="photoAdd">
@@ -326,7 +326,7 @@ export default {
   beforeCreate() {
     this.id = this.$route.params.id
   },
-  beforeDestroy() {
+  beforeUnmount() {
     // Stop timers which would otherwise kill garbage collection.
     this.runChecks = false
   },

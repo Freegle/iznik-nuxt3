@@ -23,7 +23,7 @@
     <NotificationAboutMe
       v-else-if="notification.type === 'AboutMe'"
       :id="id"
-      @showModal="showModal"
+      @show-modal="showModal"
     />
     <NotificationGiftAid v-else-if="notification.type === 'GiftAid'" :id="id" />
     <NotificationOpenPosts

@@ -95,7 +95,7 @@
                             imgtype="User"
                             imgflag="user"
                             :msgid="me.id"
-                            @photoProcessed="photoProcessed"
+                            @photo-processed="photoProcessed"
                           />
                         </b-col>
                       </b-row>

@@ -52,7 +52,7 @@
                     <l-marker
                       :lat-lng="markerLatLng"
                       draggable
-                      @update:latLng="updateMarker"
+                      @update:lat-lng="updateMarker"
                     />
                   </l-map>
                 </div>

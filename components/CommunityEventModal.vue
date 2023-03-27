@@ -112,7 +112,7 @@
             </span>
           </p>
         </div>
-        <Form v-else-if="event" ref="form">
+        <VForm v-else-if="event" ref="form">
           <b-row>
             <b-col cols="12" md="6">
               <b-form-group
@@ -211,7 +211,7 @@
                   imgtype="CommunityEvent"
                   imgflag="communityevent"
                   :ocr="true"
-                  @photoProcessed="photoProcessed"
+                  @photo-processed="photoProcessed"
                 />
               </b-col>
             </b-row>
@@ -330,7 +330,7 @@
             <v-icon icon="info-circle" />&nbsp;This community has chosen not to
             allow Volunteer Opportunities.
           </NoticeMessage>
-        </Form>
+        </VForm>
       </div>
     </template>
     <template #footer>
@@ -402,7 +402,7 @@
   </b-modal>
 </template>
 <script>
-import { defineRule, Form, Field, ErrorMessage } from 'vee-validate'
+import { defineRule, Form as VForm, Field, ErrorMessage } from 'vee-validate'
 import { required, email, min, max } from '@vee-validate/rules'
 import axios from 'axios'
 import { useCommunityEventStore } from '../stores/communityevent'
@@ -462,7 +462,7 @@ export default {
     NoticeMessage,
     DonationButton,
     ExternalLink,
-    Form,
+    VForm,
     Field,
     ErrorMessage,
   },

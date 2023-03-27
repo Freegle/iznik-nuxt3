@@ -102,7 +102,6 @@ export default {
         // Set the context for sentry so that we know which users are having errors.
         $sentrySetUser({ userid: this.myid })
 
-        // eslint-disable-next-line no-undef
         if (typeof __insp !== 'undefined') {
           // eslint-disable-next-line no-undef
           __insp.push([
@@ -114,7 +113,7 @@ export default {
           ])
         }
       } else {
-        // eslint-disable-next-line no-undef,no-lonely-if
+        // eslint-disable-next-line no-lonely-if
         if (typeof __insp !== 'undefined') {
           // eslint-disable-next-line no-undef
           __insp.push([
@@ -142,7 +141,7 @@ export default {
       this.monitorTabVisibility()
     }
   },
-  beforeDestroy() {
+  beforeUnmount() {
     if (process.client) {
       clearTimeout(this.timeTimer)
     }

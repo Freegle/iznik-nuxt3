@@ -87,7 +87,7 @@
       no-stacking
       ok-only
     >
-      <template slot="default">
+      <template #default>
         <b-img fluid rounded center :src="story.photo.path" />
       </template>
     </b-modal>

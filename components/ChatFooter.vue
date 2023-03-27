@@ -4,7 +4,7 @@
       <OurFilePond
         imgtype="ChatMessage"
         imgflag="chatmessage"
-        @photoProcessed="photoProcessed"
+        @photo-processed="photoProcessed"
       />
     </div>
     <div>
@@ -14,7 +14,7 @@
             v-if="badratings"
             variant="warning"
             class="clickme"
-            @click.native="showInfo"
+            @click="showInfo"
           >
             <p>
               <v-icon icon="exclamation-triangle" />&nbsp;This freegler has a
@@ -32,7 +32,7 @@
             v-else-if="expectedreplies"
             variant="warning"
             class="clickme"
-            @click.native="showInfo"
+            @click="showInfo"
           >
             <v-icon icon="exclamation-triangle" />&nbsp;{{ expectedreplies }}
             still waiting for them to reply on here.
@@ -357,7 +357,7 @@ export default {
       return null
     },
   },
-  beforeDestroy() {
+  beforeUnmount() {
     if (this.typingTimer) {
       clearTimeout(this.typingTimer)
     }

@@ -189,7 +189,7 @@ export default {
       }
     }
   },
-  beforeDestroy() {
+  beforeUnmount() {
     if (this.userWatch) {
       this.userWatch()
     }

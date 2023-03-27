@@ -22,7 +22,7 @@
     </div>
     <div
       v-b-tooltip="'Click to view this message in a single page'"
-      @click.native.prevent="goto"
+      @click.prevent="goto"
     >
       <b-button
         variant="link"

@@ -23,13 +23,13 @@
           <JobOne :id="job.id" :summary="true" />
         </div>
         <infinite-loading key="infinitejobs" @infinite="loadMore">
-          <span slot="no-results">
+          <template #no-results>
             <notice-message v-if="!list?.length">
               We can't find any jobs at the moment.
             </notice-message>
-          </span>
-          <span slot="no-more" />
-          <span slot="spinner" />
+          </template>
+          <template #no-more />
+          <template #spinner />
         </infinite-loading>
         <div class="d-flex justify-content-around mt-2 mb-2">
           <b-button variant="secondary" to="/jobs">

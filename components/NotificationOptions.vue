@@ -45,7 +45,7 @@
       :key="'notification-' + notification.id"
       link-class="notification-list__item p-1"
     >
-      <NotificationOne :id="notification.id" @showModal="showAboutMe" />
+      <NotificationOne :id="notification.id" @show-modal="showAboutMe" />
     </b-dropdown-item>
     <infinite-loading
       :key="infiniteId"
@@ -53,11 +53,11 @@
       force-use-infinite-wrapper="#notification-list"
       @infinite="loadMoreNotifications"
     >
-      <span slot="no-results" />
-      <span slot="no-more" />
-      <span slot="spinner">
+      <template #no-results />
+      <template #no-more />
+      <template #spinner>
         <b-img lazy src="/loader.gif" alt="Loading" width="100px" />
-      </span>
+      </template>
     </infinite-loading>
   </component>
 </template>

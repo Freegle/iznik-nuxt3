@@ -159,12 +159,7 @@
             Login Failed: {{ nativeLoginError }}
           </b-alert>
           <div v-if="!signUp" class="text-center">
-            <nuxt-link
-              no-prefetch
-              to="/forgot"
-              class="nodecor"
-              @click.native="forgot"
-            >
+            <nuxt-link no-prefetch to="/forgot" class="nodecor" @click="forgot">
               I forgot my password
             </nuxt-link>
             <p class="mb-0 text-center">
@@ -332,7 +327,7 @@ export default {
       }
     },
   },
-  beforeDestroy() {
+  beforeUnmount() {
     if (this.bumpTimer) {
       clearTimeout(this.bumpTimer)
       this.bumpTimer = null
