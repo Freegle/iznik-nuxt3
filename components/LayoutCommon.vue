@@ -62,7 +62,6 @@ export default {
       timeTimer: null,
     }
   },
-  // mixins: [replyToPost],
   computed: {
     breakpoint() {
       const store = useMiscStore()

@@ -99,6 +99,7 @@ export default defineNuxtConfig({
     // Render on demand - may never be shown in a given build - then cache for a while.
     '/communityevent/**': { swr: 3600 },
     '/communityevents/**': { swr: 3600 },
+    // TODO Enumerate groups and pre-render them.
     '/explore/**': { swr: 3600 },
     '/message/**': { swr: 600 },
     '/shortlink/**': { swr: 600 },
