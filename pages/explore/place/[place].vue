@@ -26,8 +26,8 @@
 <script>
 import { useRoute } from 'vue-router'
 import { defineAsyncComponent } from 'vue'
-import SupportLink from '../~/components/SupportLink'
 import { buildHead } from '../../../composables/useBuildHead'
+import SupportLink from '~/components/SupportLink'
 import { useGroupStore } from '~/stores/group'
 
 export default {
