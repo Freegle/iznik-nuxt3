@@ -49,15 +49,63 @@ export default defineNuxtConfig({
   ssr: true,
 
   routeRules: {
-    // It's very possible that I misunderstand caching.  But it seems to me that we should never cache
-    // the top-level route pages, because they will contain the names of top-level asset files, which will have
-    // hashes in them.  If a new deployment happens, the hash will be wrong and the old files won't exist, so it
-    // would be a mistake to serve them.
+    // Nuxt3 has some lovely features to do with how routes are generated/cached.  We use:
     //
-    // This still leaves issues where a deployment happens while a page is partway through loading assets, or
+    // prerender: true - this will be generated at build time.
+    // static: true - this is generated on demand, and then cached until the next build
+    // swr: 'time' - this is generated on demand each 'time' period.
+    // ssr: false - this is client-side rendered.
+    //
+    // There are potential issues where a deployment happens while a page is partway through loading assets, or
     // later loads assets which are no longer present.  Nuxt3 now has a fallback of reloading the page when
-    // it detects this.
-    '/**': { headers: { 'cache-control': 'no-cache' } },
+    // it detects a failed chunk load.
+    '/': { prerender: true },
+    '/explore': { prerender: true },
+    '/explore/region/': { prerender: true },
+    '/explore/find/**': { prerender: true },
+    '/explore/give/**': { prerender: true },
+    '/unsubscribe/**': { prerender: true },
+    '/about': { prerender: true },
+    '/disclaimer': { prerender: true },
+    '/donate': { prerender: true },
+    '/find/**': { prerender: true },
+    '/forgot': { prerender: true },
+    '/give/**': { prerender: true },
+    '/help': { prerender: true },
+    '/maintenance': { prerender: true },
+    '/mobile': { prerender: true },
+    '/privacy': { prerender: true },
+    '/unsubscribe': { prerender: true },
+    '/yahoologin': { prerender: true },
+
+    // These pages are for logged-in users, or aren't performance-critical enough to render on the server.
+    '/browse/**': { ssr: false },
+    '/chats/**': { ssr: false },
+    '/chitchat/**': { ssr: false },
+    '/donated': { ssr: false },
+    '/giftaid': { ssr: false },
+    '/job/**': { ssr: false },
+    '/jobs': { ssr: false },
+    '/merge/**': { ssr: false },
+    '/myposts': { ssr: false },
+    '/mypost/**': { ssr: false },
+    '/noticeboards/**': { ssr: false },
+    '/profile/**': { ssr: false },
+    '/promote': { ssr: false },
+    '/settings/**': { ssr: false },
+    '/stats/**': { ssr: false },
+    '/stories/**': { ssr: false },
+    '/story/**': { ssr: false },
+    '/teams': { ssr: false },
+
+    // Render on demand - may never be shown in a given build - then cache for a while.
+    '/communityevent/**': { swr: 3600 },
+    '/communityevents/**': { swr: 3600 },
+    '/explore/**': { swr: 3600 },
+    '/message/**': { swr: 600 },
+    '/shortlink/**': { swr: 600 },
+    '/volunteering/**': { swr: 3600 },
+    '/volunteerings/**': { swr: 3600 },
   },
 
   nitro: {

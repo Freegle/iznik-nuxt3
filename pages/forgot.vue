@@ -93,7 +93,6 @@ export default {
   methods: {
     async mail() {
       const res = await this.authStore.lostPassword(this.email)
-      console.log('Reutnred', res)
 
       if (res.data.ret === 0) {
         this.response = true
