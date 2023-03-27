@@ -81,7 +81,7 @@ export default {
       window.open(this.preview.url)
     },
     brokenImage(event) {
-      event.target.src = require('~/static/placeholder.jpg')
+      event.target.src = require('../../../../../placeholder.jpg')
     },
   },
 }
