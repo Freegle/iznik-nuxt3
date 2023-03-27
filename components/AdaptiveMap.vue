@@ -293,7 +293,10 @@ export default {
     if (process.client) {
       const L = await import('leaflet/dist/leaflet-src.esm')
 
-      bounds = L.latLngBounds(L.latLng(swlat, swlng), L.latLng(nelat, nelng))
+      bounds = L.latLngBounds(
+        L.latLng(swlat.value, swlng.value),
+        L.latLng(nelat.value, nelng.value)
+      )
     }
 
     return {
