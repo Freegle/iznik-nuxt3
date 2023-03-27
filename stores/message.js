@@ -67,6 +67,9 @@ export const useMessageStore = defineStore({
           })
 
           this.fetchingCount--
+        } else if (typeof msgs === 'object') {
+          this.list[msgs.id] = msgs
+          this.fetchingCount--
         } else {
           console.error('Failed to fetch', msgs)
         }

@@ -45,11 +45,11 @@
 </template>
 <script setup>
 import { useRoute } from 'vue-router'
-import GlobalWarning from '../../components/GlobalWarning'
 import { buildHead } from '../../composables/useBuildHead'
 import { useCommunityEventStore } from '../../stores/communityevent'
 import { useGroupStore } from '../../stores/group'
 import { useAuthStore } from '../../stores/auth'
+import GlobalWarning from '~/components/GlobalWarning'
 import { ref, computed, useRouter } from '#imports'
 import InfiniteLoading from '~/components/InfiniteLoading'
 import CommunityEventModal from '~/components/CommunityEventModal'

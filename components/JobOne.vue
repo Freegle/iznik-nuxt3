@@ -53,7 +53,7 @@
 </template>
 <script>
 import { useJobStore } from '../stores/job'
-import ExternalLink from '@/components/ExternalLink'
+import ExternalLink from '~/components/ExternalLink'
 
 export default {
   components: { ExternalLink },

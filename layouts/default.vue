@@ -10,7 +10,7 @@
   </div>
 </template>
 <script>
-import LayoutCommon from '../components/LayoutCommon'
+import LayoutCommon from '~/components/LayoutCommon'
 import { ref } from '#imports'
 import { useAuthStore } from '~/stores/auth'
 const GoogleOneTap = () => import('~/components/GoogleOneTap')

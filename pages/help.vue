@@ -340,7 +340,7 @@
 import { useRoute } from 'vue-router'
 import { Searcher } from 'fast-fuzzy'
 import dayjs from 'dayjs'
-import HelpQuestion from '../components/HelpQuestion'
+import HelpQuestion from '~/components/HelpQuestion'
 import { buildHead } from '~/composables/useBuildHead'
 const SupporterInfoModal = () => import('~/components/SupporterInfoModal.vue')
 

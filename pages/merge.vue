@@ -99,7 +99,7 @@
 </template>
 <script>
 import { useRoute } from 'vue-router'
-import SpinButton from '../components/SpinButton'
+import SpinButton from '~/components/SpinButton'
 import NoticeMessage from '~/components/NoticeMessage'
 import api from '~/api'
 const ExternalLink = () => import('~/components/ExternalLink')

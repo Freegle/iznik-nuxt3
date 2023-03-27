@@ -162,10 +162,10 @@
 <script>
 import { mapState } from 'pinia'
 import { useRoute } from 'vue-router'
-import DonationThermometer from '../components/DonationThermometer'
-import DonationButton from '../components/DonationButton'
-import ExternalLink from '../components/ExternalLink'
 import { useDonationStore } from '../stores/donations'
+import DonationThermometer from '~/components/DonationThermometer'
+import DonationButton from '~/components/DonationButton'
+import ExternalLink from '~/components/ExternalLink'
 import { buildHead } from '~/composables/useBuildHead'
 
 export default {

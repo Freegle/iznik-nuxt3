@@ -65,8 +65,8 @@
 <script>
 import { useMessageStore } from '../stores/message'
 import modal from '@/mixins/modal'
-import MessageExpanded from '@/components/MessageExpanded'
-import ImageCarousel from '@/components/ImageCarousel'
+import ImageCarousel from '~/components/ImageCarousel'
+const MessageExpanded = () => import('~/components/MessageExpanded')
 
 export default {
   components: { ImageCarousel, MessageExpanded },

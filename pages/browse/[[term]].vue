@@ -9,8 +9,7 @@
           </VisibleWhen>
         </b-col>
         <b-col cols="12" lg="6" class="p-0">
-          <!--          TODO Microvol-->
-          <!--          <MicroVolunteering />-->
+          <MicroVolunteering />
           <div>
             <GlobalWarning />
             <ExpectedRepliesWarning
@@ -127,7 +126,7 @@ definePageMeta({
   alias: ['/communities'],
 })
 
-// const MicroVolunteering = () => import('~/components/MicroVolunteering.vue')
+const MicroVolunteering = () => import('~/components/MicroVolunteering.vue')
 
 export default {
   components: {
@@ -145,7 +144,7 @@ export default {
       import('~/components/ExpectedRepliesWarning')
     ),
     VisibleWhen,
-    // MicroVolunteering,
+    MicroVolunteering,
   },
   async setup() {
     const route = useRoute()

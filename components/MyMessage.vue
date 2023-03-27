@@ -329,8 +329,8 @@ import { useGroupStore } from '../stores/group'
 import { useUserStore } from '../stores/user'
 import { useTrystStore } from '../stores/tryst'
 import { useRouter } from '#imports'
-import MessagePhotosModal from '@/components/MessagePhotosModal'
-import MyMessagePromisedTo from '@/components/MyMessagePromisedTo'
+import MessagePhotosModal from '~/components/MessagePhotosModal'
+import MyMessagePromisedTo from '~/components/MyMessagePromisedTo'
 import PromiseModal from '~/components/PromiseModal'
 const MyMessageReply = () => import('./MyMessageReply.vue')
 const MessageShareModal = () => import('./MessageShareModal')

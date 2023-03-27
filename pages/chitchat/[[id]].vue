@@ -150,14 +150,14 @@
 </template>
 <script>
 import { useRoute } from 'vue-router'
-import NoticeMessage from '../../components/NoticeMessage'
-import GlobalWarning from '../../components/GlobalWarning'
-import VisibleWhen from '../../components/VisibleWhen'
 import { buildHead } from '../../composables/useBuildHead'
 import { useMiscStore } from '../../stores/misc'
 import { useNewsfeedStore } from '../../stores/newsfeed'
 import { useAuthStore } from '../../stores/auth'
-import AutoHeightTextarea from '../../components/AutoHeightTextarea'
+import VisibleWhen from '~/components/VisibleWhen'
+import GlobalWarning from '~/components/GlobalWarning'
+import NoticeMessage from '~/components/NoticeMessage'
+import AutoHeightTextarea from '~/components/AutoHeightTextarea'
 import InfiniteLoading from '~/components/InfiniteLoading'
 import NewsThread from '~/components/NewsThread.vue'
 import { untwem } from '~/composables/useTwem'

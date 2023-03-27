@@ -19,7 +19,7 @@
 </template>
 <script>
 import { useAuthStore } from '../stores/auth'
-import LayoutCommon from '../components/LayoutCommon'
+import LayoutCommon from '~/components/LayoutCommon'
 import { ref } from '#imports'
 const GoogleOneTap = () => import('~/components/GoogleOneTap')
 const LoginModal = () => import('~/components/LoginModal')

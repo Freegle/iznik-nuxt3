@@ -58,7 +58,7 @@
 </template>
 <script>
 import { useMessageStore } from '../stores/message'
-import MessageModal from '@/components/MessageModal'
+import MessageModal from '~/components/MessageModal'
 
 import { useGroupStore } from '~/stores/group'
 

@@ -65,10 +65,6 @@ export const useUserStore = defineStore({
       await api(this.config).user.rate(id, rating, reason, text)
       await this.fetch(id, true)
     },
-    async edit(params) {
-      await api(this.config).user.save(params)
-      await this.fetchUser()
-    },
     async removeEmail(id, email) {
       await api(this.config).user.removeEmail(id, email)
       await this.fetch(id, true)

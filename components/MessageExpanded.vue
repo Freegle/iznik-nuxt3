@@ -69,11 +69,11 @@
 import { useReplyStore } from '../stores/reply'
 import MessageReplyInfo from './MessageReplyInfo'
 import { useMessageStore } from '~/stores/message'
-import MessagePromised from '@/components/MessagePromised'
-import MessageActions from '@/components/MessageActions'
-import MessageTextBody from '@/components/MessageTextBody'
+import MessagePromised from '~/components/MessagePromised'
+import MessageActions from '~/components/MessageActions'
+import MessageTextBody from '~/components/MessageTextBody'
 
-import MessageTag from '@/components/MessageTag'
+import MessageTag from '~/components/MessageTag'
 import MessageItemLocation from '~/components/MessageItemLocation'
 import MessageAttachments from '~/components/MessageAttachments'
 

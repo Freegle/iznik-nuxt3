@@ -55,11 +55,11 @@
   </client-only>
 </template>
 <script setup>
-import GlobalWarning from '../../components/GlobalWarning'
 import { buildHead } from '../../composables/useBuildHead'
 import { useVolunteeringStore } from '../../stores/volunteering'
 import { useGroupStore } from '../../stores/group'
 import { useAuthStore } from '../../stores/auth'
+import GlobalWarning from '~/components/GlobalWarning'
 import { ref, computed, useRoute, useRouter } from '#imports'
 import InfiniteLoading from '~/components/InfiniteLoading'
 import VolunteerOpportunityModal from '~/components/VolunteerOpportunityModal'

@@ -18,7 +18,7 @@
 <script>
 import { useMessageStore } from '../stores/message'
 import modal from '@/mixins/modal'
-import ImageCarousel from '@/components/ImageCarousel'
+import ImageCarousel from '~/components/ImageCarousel'
 
 export default {
   components: { ImageCarousel },

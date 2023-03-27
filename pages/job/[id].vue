@@ -20,7 +20,7 @@
 <script>
 import { useRoute } from 'vue-router'
 import { useJobStore } from '../../stores/job'
-import NoticeMessage from '@/components/NoticeMessage'
+import NoticeMessage from '~/components/NoticeMessage'
 
 export default {
   components: { NoticeMessage },
