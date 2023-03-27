@@ -220,7 +220,7 @@ export const useMobileStore = defineStore({ // Do not persist
           if (ilfpos !== false) {
             const route = event.url.substring(ilfpos + lookfor.length)
             const router = useRouter()
-            if (route.indexOf('src=forgotpass') !== false) {  // Special handling of forgotpass
+            if (route.indexOf('src=forgotpass') !== -1) {  // Special handling of forgotpass
               // /settings?u=uuu&k=kkk&src=forgotpass
               const authStore = useAuthStore()
               await authStore.clearRelated()
