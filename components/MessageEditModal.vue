@@ -229,10 +229,13 @@ export default {
   },
   methods: {
     async save() {
-      if (this.edititem && (this.edittextbody || this.attachments.length)) {
+      if (this.edititem && (this.edittextbody || this.attachments?.length)) {
         const attids = []
-        for (const att of this.attachments) {
-          attids.push(att.id)
+
+        if (this.attachments?.length) {
+          for (const att of this.attachments) {
+            attids.push(att.id)
+          }
         }
 
         // We change both availablenow and available initially.  Probably the user is correcting a mistake in how
