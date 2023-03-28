@@ -28,14 +28,6 @@
 		"classpath": "com.codetrixstudio.capacitor.GoogleAuth.GoogleAuth"
 	},
 	{
-		"pkg": "@capacitor-community/fcm",
-		"classpath": "com.getcapacitor.community.fcm.FCMPlugin"
-	},
-	{
-		"pkg": "@capacitor-firebase/messaging",
-		"classpath": "io.capawesome.capacitorjs.plugins.firebase.messaging.FirebaseMessagingPlugin"
-	},
-	{
 		"pkg": "@capacitor/camera",
 		"classpath": "com.capacitorjs.plugins.camera.CameraPlugin"
 	},

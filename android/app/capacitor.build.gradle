@@ -16,8 +16,6 @@ dependencies {
     implementation project(':capawesome-capacitor-badge')
     implementation project(':capacitor-community-facebook-login')
     implementation project(':codetrix-studio-capacitor-google-auth')
-    implementation project(':capacitor-community-fcm')
-    implementation project(':capacitor-firebase-messaging')
     implementation project(':capacitor-camera')
     implementation project(':capacitor-share')
     implementation project(':capacitor-zoom-android')

@@ -20,9 +20,9 @@ import { useAuthStore } from '~/stores/auth'
 import { AppLauncher } from '@capacitor/app-launcher'
 import api from '~/api'
 //import { FreegleFCM } from '@capacitor/freegle-nuxt3-fcm'
-import { FCM } from '@capacitor-community/fcm';
+//import { FCM } from '@capacitor-community/fcm';
 //import { getMessaging, getToken as firebaseGetToken, onMessage, deleteToken, isSupported } from "firebase/messaging";
-import { FirebaseMessaging } from '@capacitor-firebase/messaging';
+//import { FirebaseMessaging } from '@capacitor-firebase/messaging';
 import { ZoomPlugin } from 'capacitor-zoom-android';
 import { App } from '@capacitor/app';
 import { useRouter } from '#imports'
@@ -81,7 +81,7 @@ export const useMobileStore = defineStore({ // Do not persist
       Capacitor.Plugins.ZoomPlugin.enableZoom()
     },
 
-    async initFirebaseMessaging() {
+    /*async initFirebaseMessaging() {
       // https://www.npmjs.com/package/@capacitor-firebase/messaging
       // https://github.com/capawesome-team/capacitor-firebase/tree/main/packages/messaging
       console.log('====initFirebaseMessaging===')
@@ -96,16 +96,15 @@ export const useMobileStore = defineStore({ // Do not persist
       // Tell server now if logged in
       const authStore = useAuthStore()
       authStore.savePushId()
-      /*FCM.subscribeTo({ topic: "test" })
-        .then((r) => alert(`subscribed to topic`))
-        .catch((err) => console.log(err));
+      //FCM.subscribeTo({ topic: "test" })
+      //  .then((r) => alert(`subscribed to topic`))
+      //  .catch((err) => console.log(err));
 
-      FCM.getToken()
-        .then((r) => alert(`Token ${r.token}`))
-        .catch((err) => console.log(err));
-        */
+      //FCM.getToken()
+      //  .then((r) => alert(`Token ${r.token}`))
+      //  .catch((err) => console.log(err));
 
-      /*const isNtfSupported = await isSupported()
+      / * const isNtfSupported = await isSupported()
       if (!isNtfSupported) return
       console.log('====initFCM===2')
 
@@ -148,8 +147,8 @@ export const useMobileStore = defineStore({ // Do not persist
           });
       })
       return
-    }*/
-    },
+    } * /
+    },*/
     /*async subscribeTo(destination) {
       //subscribe to web topic
       const messaging = getMessaging();

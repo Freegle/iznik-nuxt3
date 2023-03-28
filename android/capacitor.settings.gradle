@@ -23,12 +23,6 @@ project(':capacitor-community-facebook-login').projectDir = new File('../node_mo
 include ':codetrix-studio-capacitor-google-auth'
 project(':codetrix-studio-capacitor-google-auth').projectDir = new File('../node_modules/@codetrix-studio/capacitor-google-auth/android')
 
-include ':capacitor-community-fcm'
-project(':capacitor-community-fcm').projectDir = new File('../node_modules/@capacitor-community/fcm/android')
-
-include ':capacitor-firebase-messaging'
-project(':capacitor-firebase-messaging').projectDir = new File('../node_modules/@capacitor-firebase/messaging/android')
-
 include ':capacitor-camera'
 project(':capacitor-camera').projectDir = new File('../node_modules/@capacitor/camera/android')
 
