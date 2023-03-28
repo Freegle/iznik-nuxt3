@@ -31,7 +31,7 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          NITRO_PRESET: cloudflare_pages
+          NITRO_PRESET: cloudflare
 
       - name: Publish to Cloudflare
         uses: cloudflare/wrangler-action@2.0.0
