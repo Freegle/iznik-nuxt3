@@ -64,9 +64,9 @@ export const useMobileStore = defineStore({ // Do not persist
       await this.fixIOSwindowOpen()
       await this.enableAndroidPinchZoom()
       await this.initDeepLinks()
-      //await this.initPushNotifications()
+      await this.initPushNotifications()
       await this.checkForAppUpdate()
-      await this.initFirebaseMessaging()
+      //await this.initFirebaseMessaging()
       /*if (!this.isiOS) {
         try {
           console.log("PHDCC AAA")
@@ -214,7 +214,7 @@ export const useMobileStore = defineStore({ // Do not persist
     async initDeepLinks() {
       if (process.client) {
         App.addListener('appUrlOpen', async event => {
-          // url eg https://www.ilovefreegle.org/chats/13246706?u=32496365&src=chatnotif
+          // url eg https://www.ilovefreegle.org/chats/123456?u=98765&src=chatnotif
           const lookfor = 'ilovefreegle.org'
           const ilfpos = event.url.indexOf(lookfor)
           if (ilfpos !== false) {
