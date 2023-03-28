@@ -152,20 +152,22 @@ export default {
       this.timeTimer = setTimeout(this.updateTime, 1000)
     },
     monitorTabVisibility() {
-      document.addEventListener('visibilitychange', () => {
-        const miscStore = useMiscStore()
-        miscStore.visible = !document.hidden
+      if (process.client) {
+        document.addEventListener('visibilitychange', () => {
+          const miscStore = useMiscStore()
+          miscStore.visible = !document.hidden
 
-        if (this.me && !document.hidden) {
-          // We have become visible.  Refetch our notification count and chat count, which are the two key things which
-          // produce red badges people should click on.
-          const notificationStore = useNotificationStore()
-          notificationStore.fetchCount()
+          if (this.me && !document.hidden) {
+            // We have become visible.  Refetch our notification count and chat count, which are the two key things which
+            // produce red badges people should click on.
+            const notificationStore = useNotificationStore()
+            notificationStore.fetchCount()
 
-          const chatStore = useChatStore()
-          chatStore.fetchChats()
-        }
-      })
+            const chatStore = useChatStore()
+            chatStore.fetchChats()
+          }
+        })
+      }
     },
   },
 }
