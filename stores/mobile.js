@@ -208,7 +208,7 @@ export const useMobileStore = defineStore({ // Do not persist
       }
       return urlParams
     },
-    
+
     //////////////
     // Needs: https://www.ilovefreegle.org/.well-known/assetlinks.json
     async initDeepLinks() {
@@ -240,9 +240,9 @@ export const useMobileStore = defineStore({ // Do not persist
     //////////////
     // https://capacitorjs.com/docs/apis/push-notifications
     async initPushNotifications() {
-      if (!this.isiOS) {
+      /*if (!this.isiOS) {
         // Create our Android push channel
-        PushNotifications.createChannel({
+        await PushNotifications.createChannel({
           id: 'PushPluginChannel',
           name: 'Freegle chats',
           description: 'Direct messages with other Freeglers',
@@ -252,19 +252,17 @@ export const useMobileStore = defineStore({ // Do not persist
           lights: true,
           lightColor: '#5ECA24',
           vibration: false
-        }).then(() => {
-          console.log("CHANNEL CREATED: PushPluginChannel")
-        });
+        })
+        console.log("CHANNEL CREATED: PushPluginChannel")
 
         // Delete given Android push channel called PushDefaultForeground
         // This is created if capacitor.config.ts has plugins:PushNotifications:presentationOptions
         // OK if already deleted
-        PushNotifications.deleteChannel({
+        await PushNotifications.deleteChannel({
           id: 'PushDefaultForeground'
-        }).then((x) => {
-          console.log("CHANNEL DELETED: PushDefaultForeground")
         })
-      }
+        console.log("CHANNEL DELETED: PushDefaultForeground")
+      }*/
 
       let permStatus = await PushNotifications.checkPermissions();
       console.log('checkPermissions:', permStatus)
@@ -272,22 +270,8 @@ export const useMobileStore = defineStore({ // Do not persist
         console.log('checkPermissions:', result) // Android always returns "granted"
       })*/
 
-      // Request permission to use push notifications
-      // iOS will prompt user and return if they granted permission or not
-      // Android will just grant without prompting
-      PushNotifications.requestPermissions().then(result => {
-        console.log('requestPermissions:', result)
-        if (result.receive === 'granted') {
-          // Register with Apple / Google to receive push via APNS/FCM
-          PushNotifications.register()
-        } else {
-          // Show some error
-          console.log('Error on request: ', result)
-        }
-      })
-
       // On success, we should be able to receive notifications
-      PushNotifications.addListener('registration',
+      await PushNotifications.addListener('registration',
         (token) => {
           console.log('Push registration success, token: ', token.value)
           this.mobilePushId = token.value
@@ -304,32 +288,52 @@ export const useMobileStore = defineStore({ // Do not persist
           }*/
         }
       )
+      console.log('addListener registration done')
+
       // Some issue with our setup and push will not work
-      PushNotifications.addListener('registrationError',
+      await PushNotifications.addListener('registrationError',
         (error) => {
           console.log('Error on registration: ', error)
         }
       )
+      console.log('addListener registrationError done')
 
       // Show us the notification payload if the app is open on our device
-      PushNotifications.addListener('pushNotificationReceived',
+      await PushNotifications.addListener('pushNotificationReceived',
         (notification) => {
           console.log('============ Push received:', notification)
           this.handleNotification(notification)
         }
       )
+      console.log('addListener pushNotificationReceived done')
 
       // Method called when tapping on a notification
-      PushNotifications.addListener('pushNotificationActionPerformed',
+      await PushNotifications.addListener('pushNotificationActionPerformed',
         (notification) => {
           console.log('Push action performed:', notification)
         }
       )
+      console.log('addListener pushNotificationActionPerformed done')
 
-      PushNotifications.getDeliveredNotifications().then(notificationList => {
-        console.log("getDeliveredNotifications")
-        console.log("getDeliveredNotifications", notificationList)
-      })
+      // Request permission to use push notifications
+      // iOS will prompt user and return if they granted permission or not
+      // Android will just grant without prompting
+      permStatus = await PushNotifications.requestPermissions()
+      console.log('requestPermissions:', permStatus)
+      if (permStatus.receive === 'granted') {
+        // Register with Apple / Google to receive push via APNS/FCM
+        await PushNotifications.register()
+        console.log('PUSH REGISTER OK')
+      } else {
+        // Show some error
+        console.log('Error on request: ', permStatus)
+      }
+
+      //PushNotifications.getDeliveredNotifications().then(notificationList => {
+      //  console.log("getDeliveredNotifications")
+      //  console.log("getDeliveredNotifications", notificationList)
+      //})
+      this.setBadgeCount(99)
     },
     //////////////
     async setBadgeCount(badgeCount) { // TODO
@@ -394,9 +398,9 @@ export const useMobileStore = defineStore({ // Do not persist
       data.count = parseInt(data.badge)
       //console.log('foreground ' + foreground + ' double ' + doubleEvent + ' msgid: ' + msgid + ' count: ' + data.count + ' modtools: ' + modtools)
       if (data.count === 0) {
-        PushNotifications.removeAllDeliveredNotifications()
+        //PushNotifications.removeAllDeliveredNotifications()
         //mobilePush.clearAllNotifications() // no success and error fns given
-        console.log('clearAllNotifications')
+        console.log('clearAllNotifications TODO')
       }
       console.log('handleNotification badgeCount', data.count)
       this.setBadgeCount(data.count)
