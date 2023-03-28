@@ -6,12 +6,12 @@ export const useVolunteeringStore = defineStore({
   id: 'volunteering',
   state: () => ({
     list: {},
-    fetching: {},
     forUser: [],
   }),
   actions: {
     init(config) {
       this.config = config
+      this.fetching = {}
     },
     async fetch(id, force) {
       try {

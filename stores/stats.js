@@ -3,9 +3,7 @@ import api from '~/api'
 
 export const useStatsStore = defineStore({
   id: 'stats',
-  state: () => ({
-    fetching: {},
-  }),
+  state: () => ({}),
   actions: {
     init(config) {
       this.config = config

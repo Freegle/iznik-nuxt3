@@ -6,12 +6,12 @@ export const useUserStore = defineStore({
   state: () => ({
     list: {},
     locationList: {},
-    fetching: {},
-    fetchingLocation: {},
   }),
   actions: {
     init(config) {
       this.config = config
+      this.fetching = {}
+      this.fetchingLocation = {}
     },
     async emailIsInUse(email) {
       const ret = await api(this.config).user.fetch({

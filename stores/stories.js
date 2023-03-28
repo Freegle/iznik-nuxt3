@@ -5,11 +5,11 @@ export const useStoryStore = defineStore({
   id: 'story',
   state: () => ({
     list: {},
-    fetching: {},
   }),
   actions: {
     init(config) {
       this.config = config
+      this.fetching = {}
     },
     async fetch(id, force) {
       if (force || !this.list[id]) {

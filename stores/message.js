@@ -12,15 +12,14 @@ export const useMessageStore = defineStore({
 
     // In bounds
     bounds: {},
-
-    // Messages we're in the process of fetching
-    fetching: {},
-    fetchingCount: 0,
-    fetchingMyGroups: null,
   }),
   actions: {
     init(config) {
       this.config = config
+      // Messages we're in the process of fetching
+      this.fetching = {}
+      this.fetchingCount = 0
+      this.fetchingMyGroups = null
     },
     async fetch(id, force) {
       id = parseInt(id)

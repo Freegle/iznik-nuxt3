@@ -7,12 +7,12 @@ export const useCommunityEventStore = defineStore({
   id: 'communityevent',
   state: () => ({
     list: {},
-    fetching: {},
     forUser: [],
   }),
   actions: {
     init(config) {
       this.config = config
+      this.fetching = {}
     },
     async fetch(id, force) {
       try {
