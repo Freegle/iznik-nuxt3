@@ -237,6 +237,7 @@ export const useMobileStore = defineStore({ // Do not persist
       }
     },
     //////////////
+    // https://developer.android.com/develop/ui/views/notifications
     // https://capacitorjs.com/docs/apis/push-notifications
     async initPushNotifications() {
       /*if (!this.isiOS) {
