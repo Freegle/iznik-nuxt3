@@ -62,7 +62,7 @@ jobs:
           name: == Install globals
           command: echo "Install globals"
       - run: sudo npm install -g rimraf
-      - run: npm install
+      - run: sudo npm install
 
 ################
 # FREEGLE app
