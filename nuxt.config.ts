@@ -1,5 +1,7 @@
 import config from './config'
 
+const MOBILE_VERSION = '3.0.0'
+
 // @ts-ignore
 // @ts-ignore
 export default defineNuxtConfig({

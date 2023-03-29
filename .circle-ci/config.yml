@@ -1,0 +1,103 @@
+# Android: runs in /home/circleci/project
+# Apple: runs in /Users/distiller/project as user distiller
+version: 2.1
+
+orbs:
+  node: circleci/node@4.1.0
+  android: circleci/android@1.0.3
+
+################
+workflows:
+  version: 2
+  build-and-publish:
+    jobs:
+      #- hold: # Job needs approval to run
+      #    type: approval      
+      - build-and-publish-apple:
+          filters:
+            branches:
+              only:
+                - app-publish
+
+################
+################ APPLE
+jobs:
+  build-and-publish-apple:
+    macos:
+      # https://circleci.com/docs/2.0/testing-ios/#supported-xcode-versions
+      xcode: "14.2.0" # 11.3.1 12.4.0 13.2.1 13.0.0
+    #resource_class: large
+    steps:
+      - checkout
+      - run: nvm list
+      - node/install:
+          lts: true # node 14.17.6 npm 6.14.15 for xcode:13.0.0
+          #install-npm: false
+          #node-version: "14.18.1"
+          #npm-version: "7.6.1"
+      - run: nvm list
+      #- run: nvm use 14.17.6; npm -v; node -v
+      - run: npm -v; node -v
+      - run: sudo chown -R 502:20 "/Users/distiller/.npm"
+
+      ################
+      - run:
+          name: == Decrypt secrets and set up signing
+          command: echo "Decrypt secrets"
+      - run: openssl version; tar --version; java -version
+      - run: cd mobile; openssl enc -aes-256-cbc -md sha512 -salt -d -in circleci-secrets.tar.enc -out circleci-secrets.tar -k $CIRCLE_TAR_PWD
+      - run: cd mobile; tar -xvf circleci-secrets.tar --no-same-owner; ls -l secrets
+
+      - run: chmod +x mobile/add-key.sh
+      - run: ./mobile/add-key.sh
+
+      ################
+      - run:
+          name: == Extract app version string
+          command: echo "Extract app version string"
+      - run: grep -o "MOBILE_VERSION = '[^']*'" nuxt.config.ts | sed -e "s/.*MOBILE_VERSION = '//; s/'.*//" >MOBILE_VERSION.txt
+      - run: echo "export MOBILE_VERSION=$(<MOBILE_VERSION.txt)" >> $BASH_ENV
+      - run: echo $MOBILE_VERSION
+
+      - run: mkdir releases
+
+################
+      - run:
+          name: == Install globals
+          command: echo "Install globals"
+      - run: sudo npm install -g rimraf
+      - run: npm install
+
+################
+# FREEGLE app
+      - run:
+          name: == Make Freegle app debug and release builds and upload to iTunes
+          command: echo "Make Freegle app"
+      - run: cp mobile/secrets/GoogleService-Info.plist .
+      - run: npm run generate
+      - run: npm cap sync ios
+      - run: npx cap build ios
+      - run: ls -l android/app/build/outputs/apk/release/
+
+################
+# UPLOAD TO GITHUB AS NEW TAGGED RELEASE
+      - run:
+          name: == Upload created ipas as a tagged github release
+          command: echo "Upload to github"
+      - run: git config --local user.name "$gitusername"
+      - run: git config --local user.email "$gitemail"
+      - run: echo "export CIRCLECI_TAG=circleci-ios-builds-fd$MOBILE_VERSION-$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)" >> $BASH_ENV
+      - run: echo $CIRCLECI_TAG
+      - run: git tag $CIRCLECI_TAG
+
+      - run: brew install ghr
+
+      - run: ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLECI_TAG} ./releases/
+
+################
+# STORE RELEASE IN CIRCLE-CI ARTIFACTS
+      - run:
+          name: == Store built ipas as circle-ci artifacts
+          command: echo "Store as circle-ci artifacts"
+      - store_artifacts:
+          path: ./releases
