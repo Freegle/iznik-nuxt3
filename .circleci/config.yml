@@ -18,13 +18,15 @@ workflows:
             branches:
               only:
                 - app-publish
+          requires:
+            - hold1
       - build-and-publish-android:
           filters:
             branches:
               only:
                 - app-publish
           requires:
-            - hold
+            - hold2
 
 ################
 ################ APPLE
@@ -162,6 +164,7 @@ jobs:
 
 ################
       - run: gradle -v # 6.8.3 - 7.3.3
+      - run: chmod +x android/gradlew
       
 ################
       - run:
