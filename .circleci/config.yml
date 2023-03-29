@@ -150,6 +150,7 @@ jobs:
 
       - run: npm -v; node -v # OK: 
 
+      - run: find / -name "zipalign"
       - run: sudo apt install zipalign
 
       - run: npm install
