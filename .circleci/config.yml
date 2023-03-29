@@ -51,7 +51,7 @@ jobs:
       - run:
           name: == Extract app version string
           command: echo "Extract app version string"
-      - run: grep -o "MOBILE_VERSION = '[^']*'" nuxt.config.ts | sed -e "s/.*MOBILE_VERSION = '//; s/'.*//" >MOBILE_VERSION.txt
+      - run: grep -o "MOBILE_VERSION: '[^']*'" config.js | sed -e "s/.*MOBILE_VERSION: '//; s/'.*//" >MOBILE_VERSION.txt
       - run: echo "export MOBILE_VERSION=$(<MOBILE_VERSION.txt)" >> $BASH_ENV
       - run: echo $MOBILE_VERSION
 
@@ -63,6 +63,9 @@ jobs:
           command: echo "Install globals"
       - run: sudo npm install -g rimraf
       - run: sudo npm install
+
+      # SHow current branch
+      - run: git rev-parse --abbrev-ref HEAD
 
 ################
 # FREEGLE app
