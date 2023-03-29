@@ -150,6 +150,8 @@ jobs:
 
       - run: npm -v; node -v # OK: 
 
+      - run: sudo apt install zipalign
+
       - run: npm install
       - run: npm install -g rimraf
 
