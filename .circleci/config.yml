@@ -13,6 +13,10 @@ workflows:
     jobs:
       - hold: # Job needs approval to run
           type: approval      
+      - hold1: # Apple Job needs approval to run
+          type: approval      
+      - hold2: # Android Job needs approval to run
+          type: approval      
       - build-and-publish-apple:
           filters:
             branches:
