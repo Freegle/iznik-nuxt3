@@ -13,9 +13,9 @@ workflows:
     jobs:
       - hold: # Job needs approval to run
           type: approval      
-      - hold1: # Apple Job needs approval to run
+      - HoldApple: # Apple Job needs approval to run
           type: approval      
-      - hold2: # Android Job needs approval to run
+      - HoldAndroid: # Android Job needs approval to run
           type: approval      
       - build-and-publish-apple:
           filters:
@@ -23,14 +23,14 @@ workflows:
               only:
                 - app-publish
           requires:
-            - hold1
+            - HoldApple
       - build-and-publish-android:
           filters:
             branches:
               only:
                 - app-publish
           requires:
-            - hold2
+            - HoldAndroid
 
 ################
 ################ APPLE
