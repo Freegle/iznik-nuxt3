@@ -218,10 +218,10 @@ jobs:
       # http://android-doc.github.io/tools/building/plugin-for-gradle.html
 #NO      - run: cat android/cdv-gradle-config.json
 
-      #- run: cat android/build.gradle
-      #- run: sed -i "/mavenCentral/amaven { url 'https://plugins.gradle.org/m2/' }" android/build.gradle
+      - run: cat android/build.gradle
+      - run: sed -i "/mavenCentral/amaven { url 'https://plugins.gradle.org/m2/' }" android/build.gradle
       #- run: sed -i "/dependencies/aclasspath 'com.github.triplet.gradle:play-publisher:3.7.0'" android/build.gradle
-      #- run: cat android/build.gradle
+      - run: cat android/build.gradle
 
       #- run: cat android/app/build.gradle
       #- run: sed -i "/dependencies/aclasspath 'com.github.triplet.gradle:play-publisher:3.7.0'" android/app/build.gradle
