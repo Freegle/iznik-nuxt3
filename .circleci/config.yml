@@ -40,6 +40,7 @@ jobs:
       # https://circleci.com/docs/2.0/testing-ios/#supported-xcode-versions
       xcode: "14.2.0" # 11.3.1 12.4.0 13.2.1 13.0.0
     #resource_class: large
+    resource_class: macos.x86.medium.gen2
     steps:
       - checkout
       - run: nvm list
@@ -217,22 +218,23 @@ jobs:
       # http://android-doc.github.io/tools/building/plugin-for-gradle.html
 #NO      - run: cat android/cdv-gradle-config.json
 
-      - run: cat android/build.gradle
-      - run: sed -i "/mavenCentral/amaven { url 'https://plugins.gradle.org/m2/' }" android/build.gradle
-      - run: sed -i "/dependencies/aclasspath 'com.github.triplet.gradle:play-publisher:3.7.0'" android/build.gradle
-      - run: cat android/build.gradle
+      #- run: cat android/build.gradle
+      #- run: sed -i "/mavenCentral/amaven { url 'https://plugins.gradle.org/m2/' }" android/build.gradle
+      #- run: sed -i "/dependencies/aclasspath 'com.github.triplet.gradle:play-publisher:3.7.0'" android/build.gradle
+      #- run: cat android/build.gradle
 
-      #- run: cat android/app/build.gradle
-      #- run: sed -i "/dependencies/aclasspath 'com.github.triplet.gradle:play-publisher:3.7.0'" android/app/build.gradle
+      - run: cat android/app/build.gradle
+      - run: sed -i "/dependencies/aclasspath 'com.github.triplet.gradle:play-publisher:3.7.0'" android/app/build.gradle
       #  repositories { maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
       #- run: echo "buildscript { repositories { maven { url 'https://plugins.gradle.org/m2/' } } dependencies { classpath 'com.github.triplet.gradle:play-publisher:3.7.0' } }" >>android/app/build.gradle
-      #- run: cat android/app/build.gradle
+      - run: cat android/app/build.gradle
 
+      # https://docs.gradle.org/current/userguide/command_line_interface.html
       - run: cp mobile/build-extras.gradle android/app
       - run: cat android/app/build-extras.gradle
       - run: cp mobile/secrets/api-freegle-google-play-deployment-2023.json android/app/api-freegle-google-play-deployment.json
-      - run: cd android; gradle tasks
-      - run: cd android; gradle app:publishReleaseApk --info || true # Ignore errors ie if versionCode already submitted
+      - run: cd android; gradle tasks --all
+      - run: cd android; gradle publishReleaseApk --info || true # Ignore errors ie if versionCode already submitted
 
 
 ################
@@ -253,7 +255,7 @@ jobs:
       - run: ls -l ghr_v0.13.0_linux_386
       - run: chmod +x ghr_v0.13.0_linux_386/ghr
 
-      - run: ghr_v0.13.0_linux_386/ghr -t ${GITHUB_TOKEN_NUXT3} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLECI_TAG} ./releases/
+#REDO - run: ghr_v0.13.0_linux_386/ghr -t ${GITHUB_TOKEN_NUXT3} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLECI_TAG} ./releases/
 
 ################
 # STORE RELEASE IN CIRCLE-CI ARTIFACTS
