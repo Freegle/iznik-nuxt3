@@ -31,6 +31,16 @@ target 'Freegle' do
   pod 'Firebase/Messaging'
 end
 
+#post_install do |installer|
+  assertDeploymentTarget(installer)
+#end
 post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      if config.build_settings['WRAPPER_EXTENSION'] == 'bundle'
+        config.build_settings['DEVELOPMENT_TEAM'] = 'FREEGLE_TEAM_ID'
+      end
+    end
+  end
   assertDeploymentTarget(installer)
 end
