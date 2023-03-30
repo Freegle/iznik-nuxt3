@@ -91,9 +91,8 @@ jobs:
       - run: npx cap sync ios
       - run: ls -l ios/App
       - run: xcodebuild -workspace ios/App/App.xcworkspace -list
-      - run: xcodebuild -workspace App.xcworkspace -scheme Freegle -destination generic/platform=iOS -archivePath App.xcarchive archive
-      # /Applications/Xcode-14.2.app/Contents/Developer/usr/bin/
-      - run: npx cap build ios
+      - run: cd ios/App; xcodebuild -workspace App.xcworkspace -scheme Freegle -destination generic/platform=iOS -archivePath App.xcarchive archive
+      #- run: npx cap build ios
       #- run: ls -l android/app/build/outputs/apk/release/
 
 ################
