@@ -84,8 +84,11 @@ jobs:
 ################
 # FREEGLE app
       - run:
-          name: == Make Freegle app release builds and upload to iTunes
+          name: == Make Freegle app release build and upload to iTunes
           command: echo "Make Freegle app"
+
+      - run: cd ios/App; sed -i '' "s/FREEGLE_TEAM_ID/$iosDeveloper/" Podfile
+      - run: cat ios/App/Podfile
       - run: cp mobile/secrets/GoogleService-Info.plist .
       - run: npm run generate
       - run: npx cap sync ios
