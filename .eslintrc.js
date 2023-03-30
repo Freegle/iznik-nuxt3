@@ -26,6 +26,7 @@ module.exports = {
         ignores: ['error'],
       },
     ],
+    'vue/script-setup-uses-vars': 'error',
   },
   overrides: [
     {

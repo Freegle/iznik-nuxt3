@@ -89,7 +89,7 @@
         />
         <span v-if="!newsfeed.closed">
           <div v-if="enterNewLine">
-            <at-ta
+            <OurAtTa
               ref="at"
               :members="tagusers"
               class="flex-shrink-2 input-group"
@@ -121,14 +121,14 @@
                   @focus="focusedComment"
                 />
               </b-input-group>
-            </at-ta>
+            </OurAtTa>
           </div>
           <div
             v-else
             @keyup.enter.exact.prevent
             @keydown.enter.exact="sendComment"
           >
-            <at-ta
+            <OurAtTa
               ref="at"
               :members="tagusers"
               class="flex-shrink-2 input-group"
@@ -162,7 +162,7 @@
                   @focus="focusedComment"
                 />
               </b-input-group>
-            </at-ta>
+            </OurAtTa>
           </div>
           <div
             v-if="threadcomment"
@@ -223,7 +223,6 @@
   </div>
 </template>
 <script>
-import { defineAsyncComponent } from 'vue'
 import { useNewsfeedStore } from '../stores/newsfeed'
 import NewsReportModal from './NewsReportModal'
 import SpinButton from './SpinButton'
@@ -246,6 +245,7 @@ import ProfileImage from '~/components/ProfileImage'
 
 const ConfirmModal = () => import('~/components/ConfirmModal.vue')
 const OurFilePond = () => import('~/components/OurFilePond')
+const OurAtTa = () => import('~/components/OurAtTa')
 
 const INITIAL_NUMBER_OF_REPLIES_TO_SHOW = 10
 
@@ -266,10 +266,10 @@ export default {
     NewsNoticeboard,
     NoticeMessage,
     NewsPreview,
-    AtTa: defineAsyncComponent(() => import('vue-at/dist/vue-at-textarea')),
     ProfileImage,
     ConfirmModal,
     AutoHeightTextarea,
+    OurAtTa,
   },
   props: {
     id: {

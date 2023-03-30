@@ -154,7 +154,7 @@
     />
     <div v-if="showReplyBox" class="mb-2 pb-1 ml-4">
       <div v-if="enterNewLine" class="w-100">
-        <at-ta
+        <OurAtTa
           ref="at"
           :members="tagusers"
           class="pl-2 input-group"
@@ -183,7 +183,7 @@
             class="p-0 pl-1 pt-1"
             @focus="focusedReply"
           />
-        </at-ta>
+        </OurAtTa>
       </div>
       <div
         v-else
@@ -191,7 +191,7 @@
         @keyup.enter.exact.prevent
         @keydown.enter.exact="sendReply"
       >
-        <at-ta
+        <OurAtTa
           ref="at"
           :members="tagusers"
           class="pl-2 input-group"
@@ -227,7 +227,7 @@
               @focus="focusedReply"
             />
           </b-input-group>
-        </at-ta>
+        </OurAtTa>
       </div>
       <div class="d-flex justify-content-between flex-wrap m-1">
         <b-button size="sm" variant="secondary" @click="photoAdd">
@@ -290,7 +290,6 @@
 </template>
 <script>
 import pluralize from 'pluralize'
-import { defineAsyncComponent } from 'vue'
 import { useNewsfeedStore } from '../stores/newsfeed'
 import { useUserStore } from '../stores/user'
 import NewsLovesModal from './NewsLovesModal'
@@ -308,6 +307,7 @@ const ProfileModal = () => import('~/components/ProfileModal')
 const ConfirmModal = () => import('~/components/ConfirmModal.vue')
 const NewsReplies = () => import('~/components/NewsReplies.vue')
 const OurFilePond = () => import('~/components/OurFilePond')
+const OurAtTa = () => import('~/components/OurAtTa')
 
 export default {
   name: 'NewsReply',
@@ -322,9 +322,9 @@ export default {
     ProfileModal,
     ChatButton,
     NewsPreview,
-    AtTa: defineAsyncComponent(() => import('vue-at/dist/vue-at-textarea')),
     ProfileImage,
     ConfirmModal,
+    OurAtTa,
   },
   props: {
     id: {
