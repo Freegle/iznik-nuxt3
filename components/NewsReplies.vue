@@ -27,7 +27,7 @@
     >
       <NewsRefer
         v-if="reply.type.indexOf('ReferTo') === 0"
-        :id="id"
+        :id="reply.id"
         :type="reply.type"
         :threadhead="threadhead"
         class="content pt-1 pb-1"
