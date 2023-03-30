@@ -231,6 +231,7 @@ jobs:
       #- run: cat android/app/build.gradle
 
       # https://docs.gradle.org/current/userguide/command_line_interface.html
+      # https://github.com/Triple-T/gradle-play-publisher/issues/81
       - run: cp mobile/build-extras.gradle android/app
       - run: cat android/app/build-extras.gradle
       - run: cp mobile/secrets/api-freegle-google-play-deployment-2023.json android/app/api-freegle-google-play-deployment.json
