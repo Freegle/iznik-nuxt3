@@ -223,11 +223,12 @@ jobs:
       #- run: sed -i "/dependencies/aclasspath 'com.github.triplet.gradle:play-publisher:3.7.0'" android/build.gradle
       - run: cat android/build.gradle
 
-      #- run: cat android/app/build.gradle
+      - run: cat android/app/build.gradle
       #- run: sed -i "/dependencies/aclasspath 'com.github.triplet.gradle:play-publisher:3.7.0'" android/app/build.gradle
       #  repositories { maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
       #- run: echo "buildscript { repositories { maven { url 'https://plugins.gradle.org/m2/' } } dependencies { classpath 'com.github.triplet.gradle:play-publisher:3.7.0' } }" >>android/app/build.gradle
-      #- run: cat android/app/build.gradle
+      - run: echo "buildscript { dependencies { classpath 'com.github.triplet.gradle:play-publisher:3.7.0' } }" >>android/app/build.gradle
+      - run: cat android/app/build.gradle
 
       # https://docs.gradle.org/current/userguide/command_line_interface.html
       - run: cp mobile/build-extras.gradle android/app
