@@ -207,6 +207,11 @@ export default {
 
       const messages = this.messageStore.all
 
+      // This may be a repost, in which case we don't want to flag the original.
+      const composing = this.composeStore.message(this.id)
+
+      const repostof = composing?.repostof
+
       messages.forEach((m) => {
         if (
           m.fromuser &&
@@ -216,6 +221,7 @@ export default {
           this.item &&
           m.item.name.toLowerCase() === this.item.toLowerCase() &&
           m.id !== this.id &&
+          (!repostof || repostof !== m.id) &&
           (!m.outcomes || !m.outcomes.length)
         ) {
           // Exactly duplicate of open post.

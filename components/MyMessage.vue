@@ -729,6 +729,7 @@ export default {
       await this.composeStore.clearMessages()
 
       // Add this message to the compose store so that it will show up on the compose page.
+      console.log('repost', this.id)
       await this.composeStore.setMessage(
         0,
         {
@@ -740,6 +741,7 @@ export default {
             : null,
           availablenow: this.message.availablenow,
           type: this.message.type,
+          repostof: this.id,
         },
         this.me
       )

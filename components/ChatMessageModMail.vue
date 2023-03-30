@@ -94,11 +94,11 @@ export default {
       await this.composeStore.setMessage(
         0,
         {
-          id: message.id,
           type: message.type,
           item: message.item.name.trim(),
           description: message.textbody.trim(),
           availablenow: message.availablenow,
+          repostof: this.chatmessage.refmsgid,
         },
         this.me
       )
