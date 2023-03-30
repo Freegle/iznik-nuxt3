@@ -84,13 +84,14 @@ jobs:
 ################
 # FREEGLE app
       - run:
-          name: == Make Freegle app debug and release builds and upload to iTunes
+          name: == Make Freegle app release builds and upload to iTunes
           command: echo "Make Freegle app"
       - run: cp mobile/secrets/GoogleService-Info.plist .
       - run: npm run generate
       - run: npx cap sync ios
+      - run: ls -l ios/App
       - run: npx cap build ios
-      - run: ls -l android/app/build/outputs/apk/release/
+      #- run: ls -l android/app/build/outputs/apk/release/
 
 ################
 # UPLOAD TO GITHUB AS NEW TAGGED RELEASE

@@ -60,7 +60,7 @@ const config: CapacitorConfig = {
     }
   },
   ios: {
-  	scheme: 'Freegle',
+  	scheme: 'App', // Freegle
     contentInset: 'automatic',
     includePlugins: [
       "cordova-plugin-inappbrowser",
