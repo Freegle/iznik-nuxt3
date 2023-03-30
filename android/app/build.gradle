@@ -6,8 +6,8 @@ android {
         applicationId "org.ilovefreegle.direct"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1200
-        versionName "3.01"
+        versionCode 1140 // 1200
+        versionName "2.0.100" // 3.0.0
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.

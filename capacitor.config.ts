@@ -1,8 +1,5 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
-//import * as frconfig2 from './config'
-//console.log(frconfig2.GOOGLE_CLIENT_ID)
-
 const frconfig = {  // TODO
   GOOGLE_CLIENT_ID: '423761283916-1rpa8120tpudgv4nf44cpmlf8slqbf4f.apps.googleusercontent.com',  // OK as serverClientId - SERVER_CLIENT_ID
   GOOGLE_IOS_CLIENT_ID: '423761283916-2kavl4pp132cmjormmifomo2r8hhta52.apps.googleusercontent.com'

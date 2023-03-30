@@ -222,7 +222,7 @@ jobs:
       - run: cat android/build.gradle
 
       - run: cat android/app/build.gradle
-      - run: sed -i "/AGP_VERSION/aclasspath 'com.github.triplet.gradle:play-publisher:3.7.0'" android/app/build.gradle
+      - run: sed -i "/AGP_VERSION/aclasspath 'com.github.triplet.gradle:play-publisher:3.7.0'" android/app/build.gradle # NEEDS FIXING
       - run: cat android/app/build.gradle
 
       - run: cp mobile/build-extras.gradle android/app
