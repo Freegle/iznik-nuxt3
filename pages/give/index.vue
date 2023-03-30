@@ -7,7 +7,6 @@
             <WizardProgress :active-stage="1" class="d-none d-md-flex" />
           </client-only>
           <h1 class="text-center">First, tell us about your item</h1>
-          ids {{ ids }}
           <ul
             v-for="(id, index) in ids"
             :key="'post-' + id"
