@@ -222,13 +222,14 @@ jobs:
       - run: cat android/build.gradle
 
       - run: cat android/app/build.gradle
-      - run: sed -i "/AGP_VERSION/aclasspath 'com.github.triplet.gradle:play-publisher:3.7.0'" android/app/build.gradle # NEEDS FIXING
+      #- run: sed -i "/AGP_VERSION/aclasspath 'com.github.triplet.gradle:play-publisher:3.7.0'" android/app/build.gradle # NEEDS FIXING
+      - run: echo "buildscript { dependencies { classpath 'com.github.triplet.gradle:play-publisher:3.7.0' } }" >>android/app/build.gradle
       - run: cat android/app/build.gradle
 
       - run: cp mobile/build-extras.gradle android/app
       - run: cat android/app/build-extras.gradle
       - run: cp mobile/secrets/api-freegle-google-play-deployment-2023.json android/app/api-freegle-google-play-deployment.json
-#      - run: cd android; gradle publishReleaseApk --info || true # Ignore errors ie if versionCode already submitted
+      - run: cd android; gradle publishReleaseApk --info || true # Ignore errors ie if versionCode already submitted
 
 
 ################
