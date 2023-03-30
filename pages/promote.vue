@@ -148,29 +148,19 @@
         >
         - download our file and upload it to their site when ordering.
       </p>
-      <div>
-        <b-form-radio-group
-          v-model="language"
-          buttons
-          class="border border-success rounded mb-2 clickme"
-        >
-          <b-form-radio
-            value="English"
-            button-variant="outline-primary"
-            class="clickme"
-          >
-            English
-          </b-form-radio>
-          <b-form-radio
-            value="Welsh"
-            button-variant="outline-danger"
-            class="clickme"
-          >
-            Welsh
-          </b-form-radio>
-        </b-form-radio-group>
-      </div>
-      <div v-if="language === 'English'">
+      <b-button
+        variant="primary"
+        class="rounded-start"
+        @click="language = 'English'"
+        >English</b-button
+      >
+      <b-button
+        variant="outline-danger"
+        class="rounded-end border-danger"
+        @click="language = 'Welsh'"
+        >Welsh</b-button
+      >
+      <div v-if="language === 'English'" class="mt-2">
         <div>
           <b-img
             lazy
@@ -189,7 +179,7 @@
           </b-button>
         </a>
       </div>
-      <div v-else>
+      <div v-else class="mt-2">
         <div>
           <b-img
             lazy
