@@ -5,17 +5,13 @@ export const useTeamStore = defineStore({
   id: 'team',
   state: () => ({
     list: {},
-    fetching: {},
   }),
   actions: {
     init(config) {
       this.config = config
+      this.fetching = {}
     },
     async fetch(team) {
-      if (!this.fetching) {
-        this.fetching = {}
-      }
-
       if (team in this.fetching) {
         await this.fetching[team]
       } else {

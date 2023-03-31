@@ -4,7 +4,7 @@
     <p>
       Please check your email in
       <!-- eslint-disable-next-line-->
-        <nuxt-link to="/settings">Settings</nuxt-link>.
+        <nuxt-link no-prefetch to="/settings">Settings</nuxt-link>.
         If you have trouble, please contact <SupportLink />
       who can help you merge multiple accounts.
     </p>

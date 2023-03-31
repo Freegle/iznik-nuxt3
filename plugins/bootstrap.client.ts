@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-named-as-default
 import { BootstrapVueNext, vBTooltip, vBToggle } from 'bootstrap-vue-next'
 
 export default defineNuxtPlugin((nuxtApp) => {

@@ -22,12 +22,12 @@
                 >
                 <span class="d-inline d-sm-none">Your posts are </span>
                 <!-- eslint-disable-next-line -->
-                <nuxt-link to="/myposts">here</nuxt-link>.
+                <nuxt-link  no-prefetch to="/myposts">here</nuxt-link>.
               </h5>
               <h5 class="text-center mb-3 d-block d-md-none">
                 Browse OFFERs/WANTEDs
                 <!-- eslint-disable-next-line -->
-                <nuxt-link to="/browse">here</nuxt-link>.
+                <nuxt-link  no-prefetch to="/browse">here</nuxt-link>.
               </h5>
               <div class="d-flex justify-content-between">
                 <b-button
@@ -103,7 +103,7 @@
                 class="bg-white m-0 pondrow"
                 imgtype="Newsfeed"
                 imgflag="newsfeed"
-                @photoProcessed="photoProcessed"
+                @photo-processed="photoProcessed"
               />
               <div class="pb-1 d-flex justify-content-end">
                 <b-button variant="secondary" class="mr-2" @click="photoAdd">
@@ -150,14 +150,14 @@
 </template>
 <script>
 import { useRoute } from 'vue-router'
-import NoticeMessage from '../../components/NoticeMessage'
-import GlobalWarning from '../../components/GlobalWarning'
-import VisibleWhen from '../../components/VisibleWhen'
 import { buildHead } from '../../composables/useBuildHead'
 import { useMiscStore } from '../../stores/misc'
 import { useNewsfeedStore } from '../../stores/newsfeed'
 import { useAuthStore } from '../../stores/auth'
-import AutoHeightTextarea from '../../components/AutoHeightTextarea'
+import VisibleWhen from '~/components/VisibleWhen'
+import GlobalWarning from '~/components/GlobalWarning'
+import NoticeMessage from '~/components/NoticeMessage'
+import AutoHeightTextarea from '~/components/AutoHeightTextarea'
 import InfiniteLoading from '~/components/InfiniteLoading'
 import NewsThread from '~/components/NewsThread.vue'
 import { untwem } from '~/composables/useTwem'
@@ -326,7 +326,7 @@ export default {
   beforeCreate() {
     this.id = this.$route.params.id
   },
-  beforeDestroy() {
+  beforeUnmount() {
     // Stop timers which would otherwise kill garbage collection.
     this.runChecks = false
   },

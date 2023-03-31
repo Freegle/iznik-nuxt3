@@ -89,8 +89,8 @@
 </template>
 <script>
 import { useRoute } from 'vue-router'
-import NoticeMessage from '../../components/NoticeMessage'
 import { buildHead } from '../../composables/useBuildHead'
+import NoticeMessage from '~/components/NoticeMessage'
 import { setup, deleteItem, addItem } from '~/composables/useCompose'
 
 import PostMessage from '~/components/PostMessage'

@@ -52,9 +52,9 @@
 <script>
 import { mapState } from 'pinia'
 import { useRoute } from 'vue-router'
-import JobOne from '../components/JobOne'
 import { useJobStore } from '../stores/job'
 import { useAuthStore } from '../stores/auth'
+import JobOne from '~/components/JobOne'
 import { buildHead } from '~/composables/useBuildHead'
 import { ref } from '#imports'
 import PlaceAutocomplete from '~/components/PlaceAutocomplete'

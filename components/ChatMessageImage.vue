@@ -21,8 +21,8 @@
       class="chatimage clickme img-thumbnail rounded"
       generator-unable-to-provide-required-alt=""
       :src="chatmessage.image.path"
-      @click.native="zoom = true"
-      @error.native="brokenImage"
+      @click="zoom = true"
+      @error="brokenImage"
     />
     <ProfileImage
       v-if="messageIsFromCurrentUser"
@@ -46,7 +46,7 @@
           fluid
           generator-unable-to-provide-required-alt=""
           :src="chatmessage.image.path"
-          @error.native="brokenImage"
+          @error="brokenImage"
         />
       </template>
       <template #footer>

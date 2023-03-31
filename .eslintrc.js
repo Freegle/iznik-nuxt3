@@ -14,6 +14,9 @@ module.exports = {
   // add your custom rules here
   rules: {
     'no-console': 'off',
+
+    // We have a lot of legacy code which doesn't define emits.
+    'vue/require-explicit-emits': 'off',
     // no-v-model-argument rule is broken for Vue3, which requires that syntax for .sync.
     'vue/no-v-model-argument': 'off',
     'vue/multi-word-component-names': [
@@ -23,6 +26,7 @@ module.exports = {
         ignores: ['error'],
       },
     ],
+    'vue/script-setup-uses-vars': 'error',
   },
   overrides: [
     {

@@ -41,9 +41,11 @@ export default {
     const message = await messageStore.fetch(props.id)
     const fetching = []
 
-    message.groups.forEach((group) => {
-      fetching.push(groupStore.fetch(group.groupid))
-    })
+    if (message?.groups) {
+      message.groups.forEach((group) => {
+        fetching.push(groupStore.fetch(group.groupid))
+      })
+    }
 
     await Promise.all(fetching)
 
@@ -59,7 +61,7 @@ export default {
     tagForGroup() {
       let ret = null
 
-      this.message.groups.forEach((g) => {
+      this.message?.groups?.forEach((g) => {
         const group = this.groupStore.get(g.groupid)
         switch (this.message?.type) {
           case 'Offer':

@@ -172,7 +172,7 @@
                   </p>
                   <p>
                     If you'd like to get involved,
-                    <nuxt-link to="/help">
+                    <nuxt-link no-prefetch to="/help">
                       contact your local community.
                     </nuxt-link>
                   </p>
@@ -227,7 +227,7 @@
                     charity funding. It usually goes to bigger charities than us
                     doing more important work, so we currently rely on voluntary
                     donations to cover our costs. You can donate
-                    <nuxt-link to="/donate"> here. </nuxt-link>
+                    <nuxt-link no-prefetch to="/donate"> here. </nuxt-link>
                   </p>
                   <p>
                     Many current donations come from our volunteers, who are
@@ -314,7 +314,7 @@
                     is XT32865). So we're legally a charity, and can claim Gift
                     Aid if you
                     <!-- eslint-disable-next-line-->
-                  <nuxt-link to="/donate">donate</nuxt-link>,
+                  <nuxt-link  no-prefetch to="/donate">donate</nuxt-link>,
                     <span
                       >but of a slightly different type than you might be used
                       to.</span
@@ -345,7 +345,7 @@
                 <b-card-text>
                   <p>
                     If you have questions, please
-                    <nuxt-link to="/help"> contact us. </nuxt-link>
+                    <nuxt-link no-prefetch to="/help"> contact us. </nuxt-link>
                   </p>
                 </b-card-text>
               </b-card-body>

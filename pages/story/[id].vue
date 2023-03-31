@@ -33,10 +33,10 @@
   </client-only>
 </template>
 <script setup>
-import NoticeMessage from '../../components/NoticeMessage'
 import { buildHead } from '../../composables/useBuildHead'
 import { useStoryStore } from '../../stores/stories'
-import StoryAddModal from '../../components/StoryAddModal'
+import NoticeMessage from '~/components/NoticeMessage'
+import StoryAddModal from '~/components/StoryAddModal'
 import StoryOne from '~/components/StoryOne'
 import { ref, useRoute } from '#imports'
 

@@ -14,7 +14,7 @@
               :src="attachment"
               itemprop="image"
               class="attachment"
-              @error.native="brokenImage"
+              @error="brokenImage"
             />
           </div>
           <div class="rest">

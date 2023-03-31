@@ -123,20 +123,20 @@ export default {
     const composeStore = useComposeStore()
     const authStore = useAuthStore()
 
-    let value = props.value
+    const wip = ref(props.value)
     const me = authStore.user
 
-    if (props.pconly && value === null && me?.settings?.mylocation?.name) {
+    if (props.pconly && wip.value === null && me?.settings?.mylocation?.name) {
       // If we are logged in then we may have a known location to use as the default.
-      value = me?.settings?.mylocation?.name
+      wip.value = me?.settings?.mylocation?.name
     }
 
-    if (props.pconly && !value && !props.noStore) {
+    if (props.pconly && !wip.value && !props.noStore) {
       // We might have one we are composing.
       const pc = composeStore.postcode
 
       if (pc?.name) {
-        value = pc.name
+        wip.value = pc.name
       }
     }
 
@@ -145,7 +145,7 @@ export default {
 
     return {
       composeStore,
-      wip: ref(value),
+      wip,
       id,
     }
   },

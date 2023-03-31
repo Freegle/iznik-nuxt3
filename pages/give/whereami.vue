@@ -25,7 +25,7 @@
           <b-row v-if="!closed && postcodeValid">
             <b-col class="text-center">
               <transition name="fade">
-                <nuxt-link to="/give/whoami">
+                <nuxt-link no-prefetch to="/give/whoami">
                   <v-icon
                     icon="check-circle"
                     class="text-success mt-2 fa-bh"
@@ -99,9 +99,9 @@
 </template>
 <script>
 import { useRoute } from 'vue-router'
-import NoticeMessage from '../../components/NoticeMessage'
 import { buildHead } from '../../composables/useBuildHead'
-import ExternalLink from '@/components/ExternalLink'
+import NoticeMessage from '~/components/NoticeMessage'
+import ExternalLink from '~/components/ExternalLink'
 import GlobalWarning from '~/components/GlobalWarning'
 import PostCode from '~/components/PostCode'
 import { setup, postcodeSelect, postcodeClear } from '~/composables/useCompose'

@@ -51,7 +51,7 @@
           "
         >
           <b-button variant="primary" class="mb-1 mr-1">
-            <v-icon icon="brands/whatsapp" /> {{ phone.name }}
+            <v-icon :icon="['fab', 'whatsapp']" /> {{ phone.name }}
             <span class="small"
               ><span class="small">{{ phone.phone }}</span></span
             >

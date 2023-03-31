@@ -22,7 +22,7 @@
                   class="float-left"
                   all
                   :restrict="false"
-                  @update:modelValue="changeGroup"
+                  @update:model-value="changeGroup"
                 />
               </b-col>
               <b-col>

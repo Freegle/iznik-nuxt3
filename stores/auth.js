@@ -338,6 +338,14 @@ export const useAuthStore = defineStore({
       await this.fetchUser()
       return data
     },
+    async saveMicrovolunteering(value) {
+      const data = await this.$api.user.save({
+        id: this.user?.id,
+        trustlevel: value,
+      })
+      await this.fetchUser()
+      return data
+    },
     async unbounce(id) {
       await this.$api.user.unbounce(id)
       this.user.bouncing = 0

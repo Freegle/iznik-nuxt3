@@ -68,7 +68,7 @@
 </template>
 <script setup>
 import { useRoute } from 'vue-router'
-import ExternalLink from '../../components/ExternalLink'
+import ExternalLink from '~/components/ExternalLink'
 import { loadLeaflet, attribution, osmtile } from '~/composables/useMap'
 import NoticeboardDetails from '~/components/NoticeboardDetails'
 import { buildHead } from '~/composables/useBuildHead'

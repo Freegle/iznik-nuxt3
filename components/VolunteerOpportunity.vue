@@ -8,12 +8,14 @@
         <nuxt-link
           :to="'/volunteering/' + volunteering.id"
           class="volunteerop__link text-truncate"
+          no-prefetch
         >
           {{ volunteering.title }}
         </nuxt-link>
         <nuxt-link
           v-if="!summary"
           :to="'/volunteering/' + volunteering.id"
+          no-prefetch
           class="volunteerop__link small text-muted"
         >
           #{{ volunteering.id }}

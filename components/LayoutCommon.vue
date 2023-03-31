@@ -62,7 +62,6 @@ export default {
       timeTimer: null,
     }
   },
-  // mixins: [replyToPost],
   computed: {
     breakpoint() {
       const store = useMiscStore()
@@ -102,7 +101,6 @@ export default {
         // Set the context for sentry so that we know which users are having errors.
         $sentrySetUser({ userid: this.myid })
 
-        // eslint-disable-next-line no-undef
         if (typeof __insp !== 'undefined') {
           // eslint-disable-next-line no-undef
           __insp.push([
@@ -114,7 +112,7 @@ export default {
           ])
         }
       } else {
-        // eslint-disable-next-line no-undef,no-lonely-if
+        // eslint-disable-next-line no-lonely-if
         if (typeof __insp !== 'undefined') {
           // eslint-disable-next-line no-undef
           __insp.push([
@@ -142,7 +140,7 @@ export default {
       this.monitorTabVisibility()
     }
   },
-  beforeDestroy() {
+  beforeUnmount() {
     if (process.client) {
       clearTimeout(this.timeTimer)
     }
@@ -154,20 +152,22 @@ export default {
       this.timeTimer = setTimeout(this.updateTime, 1000)
     },
     monitorTabVisibility() {
-      document.addEventListener('visibilitychange', () => {
-        const miscStore = useMiscStore()
-        miscStore.visible = !document.hidden
+      if (process.client) {
+        document.addEventListener('visibilitychange', () => {
+          const miscStore = useMiscStore()
+          miscStore.visible = !document.hidden
 
-        if (this.me && !document.hidden) {
-          // We have become visible.  Refetch our notification count and chat count, which are the two key things which
-          // produce red badges people should click on.
-          const notificationStore = useNotificationStore()
-          notificationStore.fetchCount()
+          if (this.me && !document.hidden) {
+            // We have become visible.  Refetch our notification count and chat count, which are the two key things which
+            // produce red badges people should click on.
+            const notificationStore = useNotificationStore()
+            notificationStore.fetchCount()
 
-          const chatStore = useChatStore()
-          chatStore.fetchChats()
-        }
-      })
+            const chatStore = useChatStore()
+            chatStore.fetchChats()
+          }
+        })
+      }
     },
   },
 }

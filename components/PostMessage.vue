@@ -40,8 +40,8 @@
         :identify="true"
         :browse="pondBrowse"
         :multiple="true"
-        @photoProcessed="photoProcessed"
-        @allProcessed="allProcessed"
+        @photo-processed="photoProcessed"
+        @all-processed="allProcessed"
         @init="hidePhotoButton"
       />
     </div>

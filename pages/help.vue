@@ -26,12 +26,12 @@
             <template #default>
               <p>
                 If you'd like to leave Freegle, then go
-                <nuxt-link to="/unsubscribe">here</nuxt-link>.
+                <nuxt-link no-prefetch to="/unsubscribe">here</nuxt-link>.
               </p>
               <p>
                 But if you're just getting more emails than you want, you can
                 reduce the number and frequency of emails from
-                <nuxt-link to="/settings">Settings</nuxt-link>.
+                <nuxt-link no-prefetch to="/settings">Settings</nuxt-link>.
               </p>
             </template>
           </HelpQuestion>
@@ -39,7 +39,7 @@
             <template #title>How do I get fewer emails?</template>
             <p>
               <!-- eslint-disable-next-line-->
-            If you go to <nuxt-link to="/settings">Settings</nuxt-link> then you can change how many mails you get in your <em>Mail Settings</em>.
+            If you go to <nuxt-link no-prefetch to="/settings">Settings</nuxt-link> then you can change how many mails you get in your <em>Mail Settings</em>.
             </p>
           </HelpQuestion>
           <HelpQuestion id="taken" :matches="matches">
@@ -48,8 +48,9 @@
               <p>
                 If someone has collected your OFFER, then make sure you're
                 logged in (click on <em>Sign in</em> on the top left if you need
-                to), then go to <nuxt-link to="/myposts">My Posts</nuxt-link>,
-                find your post, and click this button:
+                to), then go to
+                <nuxt-link no-prefetch to="/myposts">My Posts</nuxt-link>, find
+                your post, and click this button:
               </p>
               <div class="mt-2 mb-2">
                 <b-button variant="primary"> Mark as TAKEN </b-button>
@@ -57,8 +58,8 @@
 
               <p>
                 Similarly, if you have received your WANTED, go to
-                <nuxt-link to="/myposts">My Posts</nuxt-link>, find your post,
-                and click this:
+                <nuxt-link no-prefetch to="/myposts">My Posts</nuxt-link>, find
+                your post, and click this:
               </p>
               <div class="mb-2">
                 <b-button variant="primary"> Mark as RECEIVED </b-button>
@@ -75,7 +76,7 @@
             <div>
               <p>
                 <!-- eslint-disable-next-line-->
-                If you've not had any replies, this happens automatically.  If you go to <nuxt-link to="/myposts">My Posts</nuxt-link>, and click on the post, you can see the time until the auto-repost is due on there, like this:
+                If you've not had any replies, this happens automatically.  If you go to <nuxt-link  no-prefetch to="/myposts">My Posts</nuxt-link>, and click on the post, you can see the time until the auto-repost is due on there, like this:
               </p>
               <p>
                 <span class="success"> Auto-repost due in 2 days</span>
@@ -91,7 +92,7 @@
             <div>
               <p>
                 <!-- eslint-disable-next-line-->
-                You can do this from your <nuxt-link to="/settings">Settings</nuxt-link>, in the <em>Personal Information</em> section.
+                You can do this from your <nuxt-link  no-prefetch to="/settings">Settings</nuxt-link>, in the <em>Personal Information</em> section.
               </p>
             </div>
           </HelpQuestion>
@@ -100,7 +101,7 @@
             <p>
               If you're really into privacy or GDPR, you can see what data we
               store about you, and download it,
-              <nuxt-link to="/mydata"> here </nuxt-link>.
+              <nuxt-link no-prefetch to="/mydata"> here </nuxt-link>.
             </p>
           </HelpQuestion>
           <HelpQuestion id="app" :matches="matches">
@@ -162,7 +163,10 @@
               <b-button variant="primary" class="mb-2" @click="supporterInfo">
                 Find out more
               </b-button>
-              <SupporterInfoModal ref="supporterInfoModal" />
+              <SupporterInfoModal
+                v-if="showInfoModal"
+                ref="supporterInfoModal"
+              />
               <p>
                 If you'd like to spread the word you can download a poster or
                 ask for "business cards" to hand out:
@@ -213,7 +217,7 @@
               </p>
               <p>
                 Or if you'd like to donate to our charity, you can do that
-                <nuxt-link to="/donate"> here </nuxt-link> or here:
+                <nuxt-link no-prefetch to="/donate"> here </nuxt-link> or here:
               </p>
               <p>
                 <DonationButton :direct-donation="true" />
@@ -231,7 +235,7 @@
               <p>Monthly donations are particularly welcome.</p>
               <p>
                 If you don't use PayPal, there are other ways to donate
-                <nuxt-link to="/donate">here</nuxt-link>.
+                <nuxt-link no-prefetch to="/donate">here</nuxt-link>.
               </p>
             </div>
           </HelpQuestion>
@@ -347,12 +351,13 @@
 import { useRoute } from 'vue-router'
 import { Searcher } from 'fast-fuzzy'
 import dayjs from 'dayjs'
-import HelpQuestion from '../components/HelpQuestion'
+import HelpQuestion from '~/components/HelpQuestion'
 import { buildHead } from '~/composables/useBuildHead'
 import { useMobileStore } from '@/stores/mobile'
+const SupporterInfoModal = () => import('~/components/SupporterInfoModal.vue')
 
 export default {
-  components: { HelpQuestion },
+  components: { HelpQuestion, SupporterInfoModal },
   setup() {
     const route = useRoute()
     const runtimeConfig = useRuntimeConfig()
@@ -369,6 +374,7 @@ export default {
       searcher: null,
       forIndex: [],
       contactGroupId: null,
+      showInfoModal: false,
     }
   },
   computed: {
@@ -439,7 +445,10 @@ export default {
   },
   methods: {
     supporterInfo() {
-      this.$refs.supporterInfoModal.show()
+      this.showInfoModal = true
+      this.waitForRef('infoModal', () => {
+        this.$refs.supporterInfoModal.show()
+      })
     },
     showRateMe() {
       window.localStorage.removeItem('rateappnotagain')

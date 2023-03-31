@@ -167,13 +167,13 @@ import pluralize from 'pluralize'
 import { useUserStore } from '../stores/user'
 import { milesAway } from '../composables/useDistance'
 import { useMessageStore } from '../stores/message'
-import SupporterInfoModal from '~/components/SupporterInfoModal'
 import NoticeMessage from '~/components/NoticeMessage'
 import { twem } from '~/composables/useTwem'
 
 import ReplyTime from '~/components/ReplyTime'
 import ProfileHeader from '~/components/ProfileHeader'
 const MessageList = () => import('~/components/MessageList.vue')
+const SupporterInfoModal = () => import('~/components/SupporterInfoModal.vue')
 
 export default {
   components: {

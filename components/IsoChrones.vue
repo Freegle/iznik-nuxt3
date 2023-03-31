@@ -18,7 +18,7 @@
 <script>
 import { mapState } from 'pinia'
 import { useIsochroneStore } from '~/stores/isochrone'
-import IsoChrone from '@/components/IsoChrone'
+import IsoChrone from '~/components/IsoChrone'
 
 export default {
   components: {

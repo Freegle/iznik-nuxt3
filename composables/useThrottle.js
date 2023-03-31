@@ -3,6 +3,8 @@ import { useMessageStore } from '~/stores/message'
 import { useAuthStore } from '~/stores/auth'
 import { OWN_POSTS_AGE } from '~/constants'
 
+// Simple throttle.  When we get more than a certain number of outstanding fetches, wait until they are all
+// finished.  This stops the infinite scroll going beserk.
 export function throttleFetches() {
   const messageStore = useMessageStore()
 

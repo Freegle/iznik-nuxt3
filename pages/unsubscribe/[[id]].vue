@@ -23,7 +23,7 @@
             <notice-message class="mb-3">
               Too many emails? Don't leave! Go to
               <!-- eslint-disable-next-line-->
-            <nuxt-link to="/settings">Settings</nuxt-link>
+            <nuxt-link  no-prefetch to="/settings">Settings</nuxt-link>
               and adjust your Email Settings.
             </notice-message>
             <div v-if="loggedIn">
@@ -106,10 +106,10 @@
   </client-only>
 </template>
 <script>
-import SpinButton from '../../components/SpinButton'
-import EmailValidator from '../../components/EmailValidator'
 import { buildHead } from '../../composables/useBuildHead'
 import { useAuthStore } from '../../stores/auth'
+import SpinButton from '~/components/SpinButton'
+import EmailValidator from '~/components/EmailValidator'
 import { useRoute, useRouter } from '#imports'
 import ForgetFailModal from '~/components/ForgetFailModal'
 const GroupSelect = () => import('~/components/GroupSelect.vue')

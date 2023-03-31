@@ -1,10 +1,7 @@
 <template>
   <client-only>
     <b-col>
-      <!--    TODO Microvolunteering-->
-      <!--    <client-only v-if="me">-->
-      <!--      <MicroVolunteering />-->
-      <!--    </client-only>-->
+      <MicroVolunteering />
       <b-row class="m-0">
         <b-col cols="0" xl="3" class="d-none d-xl-block" />
         <b-col cols="12" xl="6" class="p-0">

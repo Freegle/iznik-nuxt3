@@ -8,7 +8,7 @@
       :class="className"
       :alt="altText"
       :src="validImage"
-      @error.native="brokenProfileImage"
+      @error="brokenProfileImage"
     />
     <b-img
       v-else

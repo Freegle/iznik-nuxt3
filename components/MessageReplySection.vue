@@ -124,12 +124,12 @@ import { useMessageStore } from '../stores/message'
 import { useAuthStore } from '../stores/auth'
 import { useReplyStore } from '../stores/reply'
 import replyToPost from '@/mixins/replyToPost'
-import MessageStillAvailable from '@/components/MessageStillAvailable'
-import SettingsPhone from '@/components/SettingsPhone'
-import PostCode from '@/components/PostCode'
-import EmailValidator from '@/components/EmailValidator'
-import NewUserInfo from '@/components/NewUserInfo'
-import ChatButton from '@/components/ChatButton'
+import MessageStillAvailable from '~/components/MessageStillAvailable'
+import SettingsPhone from '~/components/SettingsPhone'
+import PostCode from '~/components/PostCode'
+import EmailValidator from '~/components/EmailValidator'
+import NewUserInfo from '~/components/NewUserInfo'
+import ChatButton from '~/components/ChatButton'
 
 const NewFreegler = () => import('~/components/NewFreegler')
 

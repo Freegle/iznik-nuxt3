@@ -13,9 +13,6 @@ export const useNewsfeedStore = defineStore({
     // Max seen
     maxSeen: 0,
 
-    // These are the ones we are currently fetching.
-    fetching: {},
-
     // Count of interesting items
     count: 0,
   }),
@@ -23,6 +20,7 @@ export const useNewsfeedStore = defineStore({
     init(config) {
       this.config = config
       this.maxSeen = 0
+      this.fetching = {}
     },
     reset() {
       const init = this.config

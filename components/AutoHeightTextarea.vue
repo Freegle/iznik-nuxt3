@@ -82,7 +82,7 @@ export default {
       this.$emit('update:modelValue', newVal)
     },
   },
-  beforeDestroy() {
+  beforeUnmount() {
     if (this.rowTimer) {
       clearTimeout(this.rowTimer)
     }

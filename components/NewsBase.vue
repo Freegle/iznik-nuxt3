@@ -39,7 +39,7 @@ export default {
   },
   methods: {
     brokenImage(event) {
-      event.target.src = require('../../../../../defaultprofile.png')
+      event.target.src = '/defaultprofile.png'
     },
     share() {
       console.log('Share', this.newsfeed)

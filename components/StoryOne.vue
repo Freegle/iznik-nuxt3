@@ -66,7 +66,11 @@
                 {{ publicLocation.groupname }}
               </span>
             </span>
-            <nuxt-link :to="'/story/' + story.id" class="text-muted nodecor">
+            <nuxt-link
+              no-prefetch
+              :to="'/story/' + story.id"
+              class="text-muted nodecor"
+            >
               #{{ story.id }}
             </nuxt-link>
           </div>
@@ -83,7 +87,7 @@
       no-stacking
       ok-only
     >
-      <template slot="default">
+      <template #default>
         <b-img fluid rounded center :src="story.photo.path" />
       </template>
     </b-modal>
