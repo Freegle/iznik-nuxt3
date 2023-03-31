@@ -1,12 +1,12 @@
-// app-init.js: 
+// mobile.js: 
 // - This code is run once at app startup - and does nothing on the web
 // - Then handles push notifications and deeplinks
 //
 // Initialise app:
 // - Get device info and id
-// - Set iOS window.open TODO
-// - Enable pinch zoom on Android TODO
-// - Enable deeplinks TODO
+// - Set iOS window.open
+// - Enable pinch zoom on Android
+// - Enable deeplinks
 // - Set up push notifications
 //
 // Ongoing:
