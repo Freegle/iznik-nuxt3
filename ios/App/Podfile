@@ -32,7 +32,7 @@ target 'Freegle' do
 end
 
 #post_install do |installer|
-  assertDeploymentTarget(installer)
+#  assertDeploymentTarget(installer)
 #end
 post_install do |installer|
   installer.pods_project.targets.each do |target|
