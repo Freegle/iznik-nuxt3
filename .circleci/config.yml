@@ -111,8 +111,6 @@ jobs:
       - run: xcodebuild -list -project ios/App/App.xcodeproj
       - run: cd ios/App; xcodebuild -configuration Release -workspace App.xcworkspace -scheme Freegle -destination generic/platform=iOS -archivePath App.xcarchive archive
       
-      #- run: ls -l android/app/build/outputs/apk/release/
-
 ################
 # UPLOAD TO GITHUB AS NEW TAGGED RELEASE
       - run:
