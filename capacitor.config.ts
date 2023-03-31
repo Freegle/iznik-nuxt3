@@ -23,12 +23,6 @@ const config: CapacitorConfig = {
     "preferences": { // Get from iznik-nuxt/mobile/freegle/android/config.xml and package.json
       "CameraUsesGeolocation": "true",
       AndroidLaunchMode: "singleTask"
-      // cordova-plugin-facebook-connect
-      // @havesource/cordova-plugin-push
-      // cordova-plugin-google-signin
-      // ionic-plugin-deeplinks
-      // sentry-cordova
-      // cordova-plugin-geolocation "GPS_REQUIRED": "false"
     }
   },
   android: {
@@ -49,7 +43,6 @@ const config: CapacitorConfig = {
       "@capacitor/share",
       "capacitor-zoom-android",
       "@capacitor/app",
-      //"@havesource/cordova-plugin-push",
     ],
     buildOptions: { // new creds which are not used. unsigned version needs signed with FREEGLE_KEYSTORE and FREEGLE_KEYSTORE_PASSWORD
       "keystorePath": AndroidKeyStorePath,

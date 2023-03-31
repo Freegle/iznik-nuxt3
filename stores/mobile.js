@@ -22,7 +22,7 @@ import api from '~/api'
 //import { FreegleFCM } from '@capacitor/freegle-nuxt3-fcm'
 //import { FCM } from '@capacitor-community/fcm';
 //import { getMessaging, getToken as firebaseGetToken, onMessage, deleteToken, isSupported } from "firebase/messaging";
-//import { FirebaseMessaging } from '@capacitor-firebase/messaging';
+import { FirebaseMessaging } from '@capacitor-firebase/messaging';
 import { ZoomPlugin } from 'capacitor-zoom-android';
 import { App } from '@capacitor/app';
 import { useRouter } from '#imports'
@@ -96,6 +96,12 @@ export const useMobileStore = defineStore({ // Do not persist
       // Tell server now if logged in
       const authStore = useAuthStore()
       authStore.savePushId()
+
+      await FirebaseMessaging.addListener('notificationReceived', event => {
+        console.log('###########notificationReceived', { event });
+      })
+      console.log('====initFirebaseMessaging===E')
+
       //FCM.subscribeTo({ topic: "test" })
       //  .then((r) => alert(`subscribed to topic`))
       //  .catch((err) => console.log(err));
@@ -103,8 +109,8 @@ export const useMobileStore = defineStore({ // Do not persist
       //FCM.getToken()
       //  .then((r) => alert(`Token ${r.token}`))
       //  .catch((err) => console.log(err));
-
-      / * const isNtfSupported = await isSupported()
+      */
+      /* const isNtfSupported = await isSupported()
       if (!isNtfSupported) return
       console.log('====initFCM===2')
 
@@ -147,8 +153,8 @@ export const useMobileStore = defineStore({ // Do not persist
           });
       })
       return
-    } * /
-    },*/
+    } */
+    /*},*/
     /*async subscribeTo(destination) {
       //subscribe to web topic
       const messaging = getMessaging();
@@ -240,7 +246,7 @@ export const useMobileStore = defineStore({ // Do not persist
     // https://developer.android.com/develop/ui/views/notifications
     // https://capacitorjs.com/docs/apis/push-notifications
     async initPushNotifications() {
-      /*if (!this.isiOS) {
+      if (!this.isiOS) {
         // Create our Android push channel
         await PushNotifications.createChannel({
           id: 'PushPluginChannel',
@@ -262,7 +268,7 @@ export const useMobileStore = defineStore({ // Do not persist
           id: 'PushDefaultForeground'
         })
         console.log("CHANNEL DELETED: PushDefaultForeground")
-      }*/
+      }
 
       let permStatus = await PushNotifications.checkPermissions();
       console.log('checkPermissions:', permStatus)
