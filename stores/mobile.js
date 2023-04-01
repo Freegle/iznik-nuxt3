@@ -247,9 +247,17 @@ export const useMobileStore = defineStore({ // Do not persist
     // https://capacitorjs.com/docs/apis/push-notifications
     async initPushNotifications() {
       if (!this.isiOS) {
+        // Delete given Android push channel called PushDefaultForeground
+        // This is created if capacitor.config.ts has plugins:PushNotifications:presentationOptions
+        // OK if already deleted
+        await PushNotifications.deleteChannel({
+          id: 'PushDefaultForeground'
+        })
+        console.log("CHANNEL DELETED: PushDefaultForeground")
+
         // Create our Android push channel
         await PushNotifications.createChannel({
-          id: 'PushPluginChannel',
+          id: 'PushDefaultForeground', // PushPluginChannel
           name: 'Freegle chats',
           description: 'Direct messages with other Freeglers',
           //sound: 'res/raw/unconvinced',
@@ -259,15 +267,7 @@ export const useMobileStore = defineStore({ // Do not persist
           lightColor: '#5ECA24',
           vibration: false
         })
-        console.log("CHANNEL CREATED: PushPluginChannel")
-
-        // Delete given Android push channel called PushDefaultForeground
-        // This is created if capacitor.config.ts has plugins:PushNotifications:presentationOptions
-        // OK if already deleted
-        await PushNotifications.deleteChannel({
-          id: 'PushDefaultForeground'
-        })
-        console.log("CHANNEL DELETED: PushDefaultForeground")
+        console.log("CHANNEL CREATED: PushDefaultForeground")
       }
 
       let permStatus = await PushNotifications.checkPermissions();
@@ -285,13 +285,13 @@ export const useMobileStore = defineStore({ // Do not persist
           const authStore = useAuthStore()
           authStore.savePushId()
 
-          /*if (!this.isiOS) {
+          if (!this.isiOS) {
             PushNotifications.listChannels().then(result => {
               for (const channel of result.channels) {
                 console.log("CHANNEL", channel)
               }
             })
-          }*/
+          }
         }
       )
       console.log('addListener registration done')
