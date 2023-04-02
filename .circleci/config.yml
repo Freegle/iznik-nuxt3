@@ -276,7 +276,7 @@ jobs:
       - run: ls -l ghr_v0.13.0_linux_386
       - run: chmod +x ghr_v0.13.0_linux_386/ghr
 
-#REDO - run: ghr_v0.13.0_linux_386/ghr -t ${GITHUB_TOKEN_NUXT3} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLECI_TAG} ./releases/
+      - run: ghr_v0.13.0_linux_386/ghr -t ${GITHUB_TOKEN_NUXT3} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLECI_TAG} ./releases/
 
 ################
 # STORE RELEASE IN CIRCLE-CI ARTIFACTS
