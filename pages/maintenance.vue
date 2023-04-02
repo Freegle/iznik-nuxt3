@@ -12,7 +12,7 @@
       </p>
       <p>
         Usually this doesn't take more than an hour or two. Please
-        <nuxt-link to="/">try again</nuxt-link>
+        <nuxt-link no-prefetch to="/">try again</nuxt-link>
         later.
       </p>
       <p>

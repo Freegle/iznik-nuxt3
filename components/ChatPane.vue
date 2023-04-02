@@ -154,7 +154,7 @@ export default {
   mounted() {
     this.scrollTimer = setTimeout(this.checkScroll, this.scrollInterval)
   },
-  beforeDestroy() {
+  beforeUnmount() {
     if (this.scrollTimer) {
       clearTimeout(this.scrollTimer)
     }

@@ -39,6 +39,7 @@
                   {{ timeago(group.arrival) }} on
                   <nuxt-link
                     v-if="group.groupid in groups"
+                    no-prefetch
                     :to="'/explore/' + groups[group.groupid].exploreLink"
                     :title="
                       'Click to view ' + groups[group.groupid].namedisplay
@@ -61,7 +62,7 @@
                 <b-button v-if="!expand" class="ml-1" variant="secondary">
                   <v-icon v-if="!expanded" icon="caret-down" />
                   <v-icon v-else icon="caret-up" />
-                  <template slot="button-content" />
+                  <template #button-content />
                 </b-button>
               </span>
             </div>
@@ -253,7 +254,7 @@
                         generator-unable-to-provide-required-alt=""
                         title="Item picture"
                         :src="message.attachments[0].paththumb"
-                        @error.native="brokenImage"
+                        @error="brokenImage"
                       />
                     </div>
                   </div>
@@ -328,8 +329,8 @@ import { useGroupStore } from '../stores/group'
 import { useUserStore } from '../stores/user'
 import { useTrystStore } from '../stores/tryst'
 import { useRouter } from '#imports'
-import MessagePhotosModal from '@/components/MessagePhotosModal'
-import MyMessagePromisedTo from '@/components/MyMessagePromisedTo'
+import MessagePhotosModal from '~/components/MessagePhotosModal'
+import MyMessagePromisedTo from '~/components/MyMessagePromisedTo'
 import PromiseModal from '~/components/PromiseModal'
 const MyMessageReply = () => import('./MyMessageReply.vue')
 const MessageShareModal = () => import('./MessageShareModal')
@@ -728,6 +729,7 @@ export default {
       await this.composeStore.clearMessages()
 
       // Add this message to the compose store so that it will show up on the compose page.
+      console.log('repost', this.id)
       await this.composeStore.setMessage(
         0,
         {
@@ -739,6 +741,7 @@ export default {
             : null,
           availablenow: this.message.availablenow,
           type: this.message.type,
+          repostof: this.id,
         },
         this.me
       )

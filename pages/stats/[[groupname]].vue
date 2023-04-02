@@ -112,7 +112,7 @@
         </b-card>
         <p class="mt-2">
           If you want to find statistics for particular councils, click
-          <nuxt-link to="/stats/authorities">here</nuxt-link>.
+          <nuxt-link no-prefetch to="/stats/authorities">here</nuxt-link>.
         </p>
       </div>
     </b-col>
@@ -123,8 +123,8 @@
 import dayjs from 'dayjs'
 import { GChart } from 'vue-google-charts'
 import { useRoute } from 'vue-router'
-import StatsImpact from '../../components/StatsImpact'
-import ActivityGraph from '../../components/ActivityGraph'
+import StatsImpact from '~/components/StatsImpact'
+import ActivityGraph from '~/components/ActivityGraph'
 import { buildHead } from '~/composables/useBuildHead'
 import { useGroupStore } from '~/stores/group'
 import { useStatsStore } from '~/stores/stats'

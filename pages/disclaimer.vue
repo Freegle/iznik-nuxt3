@@ -60,7 +60,7 @@
           If you are unlucky enough to be scammed, please report it to the
           <ExternalLink href="http://www.actionfraud.police.uk/"
             >Police</ExternalLink
-          >, and <nuxt-link to="/help">to us</nuxt-link>.
+          >, and <nuxt-link no-prefetch to="/help">to us</nuxt-link>.
         </p>
       </div>
     </div>

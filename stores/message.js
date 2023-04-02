@@ -12,15 +12,14 @@ export const useMessageStore = defineStore({
 
     // In bounds
     bounds: {},
-
-    // Messages we're in the process of fetching
-    fetching: {},
-    fetchingCount: 0,
-    fetchingMyGroups: null,
   }),
   actions: {
     init(config) {
       this.config = config
+      // Messages we're in the process of fetching
+      this.fetching = {}
+      this.fetchingCount = 0
+      this.fetchingMyGroups = null
     },
     async fetch(id, force) {
       id = parseInt(id)
@@ -66,6 +65,9 @@ export const useMessageStore = defineStore({
             this.list[msg.id] = msg
           })
 
+          this.fetchingCount--
+        } else if (typeof msgs === 'object') {
+          this.list[msgs.id] = msgs
           this.fetchingCount--
         } else {
           console.error('Failed to fetch', msgs)
@@ -114,10 +116,10 @@ export const useMessageStore = defineStore({
       const group = await groupStore.fetch(message.groupid)
 
       const daysago = dayjs().diff(dayjs(message.arrival), 'day')
-      const maxagetoshow = group.settings.maxagetoshow
+      const maxagetoshow = group?.settings?.maxagetoshow
         ? group.settings.maxagetoshow
         : MESSAGE_EXPIRE_TIME
-      const reposts = group.settings.reposts
+      const reposts = group?.settings?.reposts
         ? group.settings.reposts
         : GROUP_REPOSTS
       const repost = message.type === 'Offer' ? reposts.offer : reposts.wanted

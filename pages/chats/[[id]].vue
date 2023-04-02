@@ -116,10 +116,10 @@
 </template>
 <script>
 import dayjs from 'dayjs'
-import VisibleWhen from '../../components/VisibleWhen'
 
 import { buildHead } from '../../composables/useBuildHead'
 import { useAuthStore } from '../../stores/auth'
+import VisibleWhen from '~/components/VisibleWhen'
 import { useRoute, useRouter } from '#imports'
 import InfiniteLoading from '~/components/InfiniteLoading'
 import { useChatStore } from '~/stores/chat'

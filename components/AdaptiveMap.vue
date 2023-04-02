@@ -79,7 +79,7 @@
           class="text-center mt-2 header--size5 text--medium-large-highlight community__text"
         >
           <!-- eslint-disable-next-line -->
-          Need help?  Go <nuxt-link to="/help">here</nuxt-link>.
+          Need help?  Go <nuxt-link no-prefetch to="/help">here</nuxt-link>.
         </p>
         <p
           v-if="showStartMessage"
@@ -281,19 +281,22 @@ export default {
     const postType = authStore.user?.settings.browsePostType
     const selectedType = ref(postType || 'All')
 
-    const showGroups = props.startOnGroups
-    const groupids = props.initialGroupIds
-    const swlat = props.initialBounds[0][0]
-    const swlng = props.initialBounds[0][1]
-    const nelat = props.initialBounds[1][0]
-    const nelng = props.initialBounds[1][1]
+    const showGroups = ref(props.startOnGroups)
+    const groupids = ref(props.initialGroupIds)
+    const swlat = ref(props.initialBounds[0][0])
+    const swlng = ref(props.initialBounds[0][1])
+    const nelat = ref(props.initialBounds[1][0])
+    const nelng = ref(props.initialBounds[1][1])
     const search = ref(props.initialSearch)
     const searchOn = ref(props.initialSearch)
 
     if (process.client) {
       const L = await import('leaflet/dist/leaflet-src.esm')
 
-      bounds = L.latLngBounds(L.latLng(swlat, swlng), L.latLng(nelat, nelng))
+      bounds = L.latLngBounds(
+        L.latLng(swlat.value, swlng.value),
+        L.latLng(nelat.value, nelng.value)
+      )
     }
 
     return {

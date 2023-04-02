@@ -1,6 +1,6 @@
 <template>
   <div>
-    <LayoutCommon v-if="ready" :key="bump">
+    <LayoutCommon :key="'nuxt-' + bump">
       <slot />
     </LayoutCommon>
     <client-only>
@@ -10,7 +10,7 @@
   </div>
 </template>
 <script>
-import LayoutCommon from '../components/LayoutCommon'
+import LayoutCommon from '~/components/LayoutCommon'
 import { ref } from '#imports'
 import { useAuthStore } from '~/stores/auth'
 import { useMobileStore } from '~/stores/mobile'
@@ -25,7 +25,7 @@ export default {
   },
   async setup() {
     const mobileStore = useMobileStore()
-    const ready = ref(mobileStore.isApp)
+    let ready = ref(mobileStore.isApp)
     const oneTap = ref(false)
     const googleReady = ref(false)
     const authStore = useAuthStore()
@@ -45,17 +45,16 @@ export default {
       }
 
       if (user) {
-        ready.value = true
+        ready = true
       }
     }
 
-    if (!ready.value && !mobileStore.isApp) {
+    if (!ready && !mobileStore.isApp) {
       // We don't have a valid JWT.  See if OneTap can sign us in.
       oneTap.value = true
     }
 
     return {
-      ready,
       oneTap,
       googleReady,
     }
@@ -70,8 +69,8 @@ export default {
       immediate: true,
       handler(newVal) {
         if (newVal) {
-          // We now know whether or not we have logged in.
-          this.ready = true
+          // We now know whether or not we have logged in.  Re-render the page to make it reflect that.
+          this.bump++
         }
       },
     },
@@ -79,7 +78,6 @@ export default {
   async mounted() {
     // For this layout we don't need to be logged in.  So can just continue.  But we want to know first whether or
     // not we are logged in.  We might already know that from the server via cookies, but if not, find out.
-    console.log('Google loaded', this.loginStateKnown)
     if (!this.loginStateKnown) {
       const authStore = useAuthStore()
       await authStore.fetchUser()

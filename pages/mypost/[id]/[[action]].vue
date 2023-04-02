@@ -18,7 +18,7 @@
               <p>
                 Please change your email from
                 <!-- eslint-disable-next-line-->
-              <nuxt-link to="/settings">Settings</nuxt-link>
+              <nuxt-link  no-prefetch to="/settings">Settings</nuxt-link>
                 if necessary - we'll merge your accounts.
               </p>
             </b-alert>

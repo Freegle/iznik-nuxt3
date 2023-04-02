@@ -248,7 +248,7 @@
                   {{ authority.name }}
                 </span>
                 <div class="d-inline-block align-top pt-2">
-                  <date-picker
+                  <OurDatePicker
                     id="startDate"
                     v-model="startDate"
                     class="ml-1"
@@ -259,7 +259,7 @@
                     placeholder=""
                   />
                   <span class="font-weight-bold ml-1 mr-1">-</span>
-                  <date-picker
+                  <OurDatePicker
                     id="endDate"
                     v-model="endDate"
                     class=""
@@ -395,10 +395,9 @@
 // increases the bundle size.  Putting them here allows better bundling.
 import dayjs from 'dayjs'
 import { GChart } from 'vue-google-charts'
-import 'vue-datepicker-next/index.css'
 import { useRoute } from 'vue-router'
-import { defineAsyncComponent } from 'vue'
 import Wkt from 'wicket'
+import OurDatePicker from '../../../components/OurDatePicker'
 import { loadLeaflet, attribution, osmtile } from '~/composables/useMap'
 import { useAuthorityStore } from '~/stores/authority'
 import { MAX_MAP_ZOOM } from '~/constants'
@@ -415,10 +414,10 @@ const CO2_PER_TONNE = 0.51
 
 export default {
   components: {
+    OurDatePicker,
     GroupMarker,
     StatsImpact,
     GChart,
-    DatePicker: defineAsyncComponent(() => import('vue-datepicker-next')),
   },
   setup() {
     const statsStore = useStatsStore()

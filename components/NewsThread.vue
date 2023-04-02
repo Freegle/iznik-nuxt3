@@ -5,7 +5,7 @@
         <b-card-text>
           <div v-if="isNewsComponent">
             <b-dropdown class="float-end" right variant="white">
-              <template slot="button-content" />
+              <template #button-content />
               <b-dropdown-item
                 :href="'/chitchat/' + newsfeed?.id"
                 target="_blank"
@@ -80,15 +80,16 @@
           v-if="newsfeed?.replies"
           :id="id"
           :threadhead="newsfeed.id"
-          :scroll-to="scrollTo"
+          :scroll-to="scrollDownTo"
           :reply-ids="newsfeed.replies.map((r) => r.id)"
           :reply-to="replyingTo"
           :depth="1"
           :class="newsfeed.deleted ? 'strike mr-1' : 'mr-1'"
+          @rendered="rendered"
         />
         <span v-if="!newsfeed.closed">
           <div v-if="enterNewLine">
-            <at-ta
+            <OurAtTa
               ref="at"
               :members="tagusers"
               class="flex-shrink-2 input-group"
@@ -120,14 +121,14 @@
                   @focus="focusedComment"
                 />
               </b-input-group>
-            </at-ta>
+            </OurAtTa>
           </div>
           <div
             v-else
             @keyup.enter.exact.prevent
             @keydown.enter.exact="sendComment"
           >
-            <at-ta
+            <OurAtTa
               ref="at"
               :members="tagusers"
               class="flex-shrink-2 input-group"
@@ -161,7 +162,7 @@
                   @focus="focusedComment"
                 />
               </b-input-group>
-            </at-ta>
+            </OurAtTa>
           </div>
           <div
             v-if="threadcomment"
@@ -194,7 +195,7 @@
             class="bg-white m-0 pondrow"
             imgtype="Newsfeed"
             imgflag="newsfeed"
-            @photoProcessed="photoProcessed"
+            @photo-processed="photoProcessed"
           />
         </span>
         <notice-message v-else>
@@ -222,7 +223,6 @@
   </div>
 </template>
 <script>
-import { defineAsyncComponent } from 'vue'
 import { useNewsfeedStore } from '../stores/newsfeed'
 import NewsReportModal from './NewsReportModal'
 import SpinButton from './SpinButton'
@@ -245,6 +245,7 @@ import ProfileImage from '~/components/ProfileImage'
 
 const ConfirmModal = () => import('~/components/ConfirmModal.vue')
 const OurFilePond = () => import('~/components/OurFilePond')
+const OurAtTa = () => import('~/components/OurAtTa')
 
 const INITIAL_NUMBER_OF_REPLIES_TO_SHOW = 10
 
@@ -265,10 +266,10 @@ export default {
     NewsNoticeboard,
     NoticeMessage,
     NewsPreview,
-    AtTa: defineAsyncComponent(() => import('vue-at/dist/vue-at-textarea')),
     ProfileImage,
     ConfirmModal,
     AutoHeightTextarea,
+    OurAtTa,
   },
   props: {
     id: {
@@ -293,6 +294,7 @@ export default {
   },
   data() {
     return {
+      scrollDownTo: null,
       replyingTo: null,
       threadcomment: null,
       newsComponents: {
@@ -411,9 +413,15 @@ export default {
     },
   },
   mounted() {
+    // Scroll down now that the child components are rendered.
     this.$emit('rendered')
   },
   methods: {
+    rendered(id) {
+      if (parseInt(id) === parseInt(this.scrollTo)) {
+        this.scrollDownTo = this.scrollTo
+      }
+    },
     focusComment() {
       this.waitForRef('threadcomment', () => {
         this.$refs.threadcomment.$el.focus()

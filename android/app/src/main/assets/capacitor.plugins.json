@@ -12,7 +12,7 @@
 		"classpath": "com.capacitorjs.plugins.network.NetworkPlugin"
 	},
 	{
-		"pkg": "@capacitor/push-notifications",
+		"pkg": "@freegle/capacitor-push-notifications",
 		"classpath": "com.capacitorjs.plugins.pushnotifications.PushNotificationsPlugin"
 	},
 	{

@@ -10,7 +10,6 @@ export default {
   setup() {
     const route = useRoute()
     const id = route.params.id
-    console.log(id)
 
     return {
       id,

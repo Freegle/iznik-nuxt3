@@ -181,10 +181,10 @@
 </template>
 <script>
 import { useRoute } from 'vue-router'
-import SpinButton from '../components/SpinButton'
-import NoticeMessage from '../components/NoticeMessage'
 import { useAddressStore } from '../stores/address'
 import { useGiftAidStore } from '../stores/giftaid'
+import SpinButton from '~/components/SpinButton'
+import NoticeMessage from '~/components/NoticeMessage'
 import { buildHead } from '~/composables/useBuildHead'
 import OurToggle from '~/components/OurToggle'
 import { ref } from '#imports'

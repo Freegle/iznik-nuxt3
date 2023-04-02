@@ -59,7 +59,8 @@
         fade
       >
         We've sent your message. You'll get replies in the
-        <nuxt-link to="/chats">Chats</nuxt-link> section on here, and by email.
+        <nuxt-link no-prefetch to="/chats">Chats</nuxt-link> section on here,
+        and by email.
       </b-alert>
     </div>
   </div>
@@ -68,11 +69,11 @@
 import { useReplyStore } from '../stores/reply'
 import MessageReplyInfo from './MessageReplyInfo'
 import { useMessageStore } from '~/stores/message'
-import MessagePromised from '@/components/MessagePromised'
-import MessageActions from '@/components/MessageActions'
-import MessageTextBody from '@/components/MessageTextBody'
+import MessagePromised from '~/components/MessagePromised'
+import MessageActions from '~/components/MessageActions'
+import MessageTextBody from '~/components/MessageTextBody'
 
-import MessageTag from '@/components/MessageTag'
+import MessageTag from '~/components/MessageTag'
 import MessageItemLocation from '~/components/MessageItemLocation'
 import MessageAttachments from '~/components/MessageAttachments'
 

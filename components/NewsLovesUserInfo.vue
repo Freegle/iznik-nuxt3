@@ -1,6 +1,7 @@
 <template>
   <nuxt-link
     v-if="user"
+    no-prefetch
     :to="'/profile/' + user.userid"
     class="text-success nodecor"
     :title="'Click to view profile for ' + user.displayname"

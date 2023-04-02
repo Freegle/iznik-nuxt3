@@ -31,37 +31,37 @@
       </div>
       <div class="d-flex justify-content-between navlinks">
         <!-- eslint-disable-next-line -->
-        <nuxt-link to="/about" class="menu__link">
+        <nuxt-link no-prefetch to="/about" class="menu__link">
           <client-only>
             <v-icon icon="info-circle" class="link__icon" />
           </client-only>
           About
         </nuxt-link>
-        <nuxt-link to="/terms" class="menu__link">
+        <nuxt-link no-prefetch to="/terms" class="menu__link">
           <client-only>
             <v-icon icon="book-open" class="link__icon" />
           </client-only>
           Terms
         </nuxt-link>
-        <nuxt-link to="/privacy" class="menu__link">
+        <nuxt-link no-prefetch to="/privacy" class="menu__link">
           <client-only>
             <v-icon icon="lock" class="link__icon" />
           </client-only>
           Privacy
         </nuxt-link>
-        <nuxt-link to="/disclaimer" class="menu__link">
+        <nuxt-link no-prefetch to="/disclaimer" class="menu__link">
           <client-only>
             <v-icon icon="gavel" class="link__icon" />
           </client-only>
           Disclaimer
         </nuxt-link>
-        <nuxt-link to="/donate" class="menu__link">
+        <nuxt-link no-prefetch to="/donate" class="menu__link">
           <client-only>
             <v-icon icon="hand-holding-heart" class="link__icon" />
           </client-only>
           Donate
         </nuxt-link>
-        <nuxt-link to="/help" class="menu__link">
+        <nuxt-link no-prefetch to="/help" class="menu__link">
           <client-only>
             <v-icon icon="envelope" class="link__icon" />
           </client-only>

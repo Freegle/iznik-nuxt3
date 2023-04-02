@@ -34,7 +34,7 @@
         :newsfeed="newsfeed"
         @focus-comment="$emit('focus-comment')"
       />
-      <nuxt-link to="/promote">
+      <nuxt-link no-prefetch to="/promote">
         <b-button
           variant="secondary"
           size="sm"

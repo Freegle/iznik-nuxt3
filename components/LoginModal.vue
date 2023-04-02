@@ -20,9 +20,12 @@
       You'll get emails. Name, approximate location, and profile picture are
       public - you can hide your real name and picture from Settings. Logging in
       adds cookies and local storage. Read
-      <nuxt-link target="_blank" to="/terms">Terms of Use</nuxt-link> and
-      <nuxt-link target="_blank" to="/privacy">Privacy</nuxt-link> for details.
-      Ok? Now come on in...
+      <nuxt-link no-prefetch target="_blank" to="/terms"
+        >Terms of Use</nuxt-link
+      >
+      and
+      <nuxt-link no-prefetch target="_blank" to="/privacy">Privacy</nuxt-link>
+      for details. Ok? Now come on in...
     </p>
     <p v-if="loginType" class="text-center font-weight-bold">
       You usually log in using {{ loginType }}.
@@ -178,7 +181,7 @@
             Login Failed: {{ nativeLoginError }}
           </b-alert>
           <div v-if="!signUp" class="text-center">
-            <nuxt-link to="/forgot" class="nodecor" @click.native="forgot">
+            <nuxt-link no-prefetch to="/forgot" class="nodecor" @click="forgot">
               I forgot my password
             </nuxt-link>
             <p class="mb-0 text-center">
@@ -371,7 +374,7 @@ export default {
       }
     },
   },
-  beforeDestroy() {
+  beforeUnmount() {
     if (this.bumpTimer) {
       clearTimeout(this.bumpTimer)
       this.bumpTimer = null

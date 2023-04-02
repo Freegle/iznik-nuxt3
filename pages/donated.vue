@@ -12,7 +12,7 @@
           </p>
           <p>
             You can also support us by putting up posters, inviting people, and
-            more. See <nuxt-link to="/promote">here</nuxt-link>.
+            more. See <nuxt-link no-prefetch to="/promote">here</nuxt-link>.
           </p>
           <p>Happy freegling!</p>
         </b-card-text>

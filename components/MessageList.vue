@@ -209,7 +209,6 @@ export default {
       // - Don't show deleted posts.  Remember the map may lag a bit as it's only updated on cron, so we
       //   may be returned some.
       // - Do show completed posts - makes us look good.  But not too many.
-      // TODO Check that we filter crosspost duplicates, e.g. for user #41412221.
       for (
         let i = 0;
         i < this.messagesForList?.length && i < this.toShow;
@@ -257,19 +256,40 @@ export default {
 
       return ret
     },
+    filteredMessagesInStore() {
+      const ret = {}
+
+      this.filteredMessagesToShow.forEach((m) => {
+        ret[m.id] = this.messageStore.byId(m.id)
+      })
+
+      return ret
+    },
     deDuplicatedMessages() {
       const ret = []
       const dups = []
 
       this.filteredMessagesToShow.forEach((m) => {
         // Filter out dups by subject (for crossposting).
-        const message = this.messageStore.byId(m.id)
-
+        const message = this.filteredMessagesInStore[m.id]
         if (!message) {
-          // We haven't yet fetched it, so we don't yet know if it's a dup.
+          // We haven't yet fetched it, so we don't yet know if it's a dup.  We return it, which will fetch it, and
+          // then we'll come back through here.
           ret.push(m)
         } else if (m.id !== this.exclude) {
-          const key = message.fromuser + '|' + message.subject
+          // We don't want our duplicate-detection to be confused by different keywords on different groups, so strip
+          // out the keyword and put in the type.
+          let key = message.fromuser + '|' + message.subject
+          const p = message.subject.indexOf(':')
+
+          if (p !== -1) {
+            key =
+              message.fromuser +
+              '|' +
+              message.type +
+              message.subject.substring(p)
+          }
+
           const already = key in dups
 
           if (!already) {
@@ -338,8 +358,6 @@ export default {
         $state.complete()
       }
     },
-    // Simple throttle.  When we get more than a certain number of outstanding fetches, wait until they are all
-    // finished.  This stops the infinite scroll going beserk.
     wantMessage(m) {
       return (
         (this.selectedType === 'All' || this.selectedType === m.type) &&

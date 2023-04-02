@@ -7,13 +7,7 @@
         </div>
       </div>
       <div class="media-body">
-        <div class="notification-title">
-          You have
-          {{
-            notification.text
-              | pluralize('recent open post', { includeNumber: true })
-          }}
-        </div>
+        <div class="notification-title">You have {{ count }}</div>
         <div class="font-weight-bold introduction">
           What happened? Use <em>My Posts</em> to let us know.
         </div>
@@ -30,6 +24,7 @@
   </div>
 </template>
 <script>
+import pluralize from 'pluralize'
 import { setupNotification } from '../composables/useNotification'
 
 export default {
@@ -43,7 +38,11 @@ export default {
   async setup(props) {
     return await setupNotification(props.id)
   },
-
+  computed: {
+    count() {
+      return pluralize('recent open post', this.notification.text, true)
+    },
+  },
   methods: {
     goto() {
       if (!this.notification?.seen) {

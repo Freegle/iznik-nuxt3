@@ -23,12 +23,6 @@ const config: CapacitorConfig = {
     "preferences": { // Get from iznik-nuxt/mobile/freegle/android/config.xml and package.json
       "CameraUsesGeolocation": "true",
       AndroidLaunchMode: "singleTask"
-      // cordova-plugin-facebook-connect
-      // @havesource/cordova-plugin-push
-      // cordova-plugin-google-signin
-      // ionic-plugin-deeplinks
-      // sentry-cordova
-      // cordova-plugin-geolocation "GPS_REQUIRED": "false"
     }
   },
   android: {
@@ -38,18 +32,14 @@ const config: CapacitorConfig = {
       "@capacitor/browser",
       "@capacitor/device",
       "@capacitor/network",
-      "@capacitor/push-notifications",
+      "@freegle/capacitor-push-notifications",
       "@capawesome/capacitor-badge",
       "@capacitor-community/facebook-login",
       "@codetrix-studio/capacitor-google-auth",
-      //"@capacitor/freegle-nuxt3-fcm",
-      //"@capacitor-community/fcm",
-      //"@capacitor-firebase/messaging",
       "@capacitor/camera",
       "@capacitor/share",
       "capacitor-zoom-android",
       "@capacitor/app",
-      //"@havesource/cordova-plugin-push",
     ],
     buildOptions: { // new creds which are not used. unsigned version needs signed with FREEGLE_KEYSTORE and FREEGLE_KEYSTORE_PASSWORD
       "keystorePath": AndroidKeyStorePath,
@@ -68,7 +58,8 @@ const config: CapacitorConfig = {
       "@capacitor/browser",
       "@capacitor/device",
       "@capacitor/network",
-      "@capacitor/push-notifications",
+      //"@capacitor/push-notifications",
+      "@freegle/capacitor-push-notifications",
       "@capawesome/capacitor-badge",
       "@capacitor-community/facebook-login",
       "@capacitor-community/apple-sign-in",

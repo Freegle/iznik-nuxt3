@@ -8,11 +8,11 @@ export const useGroupStore = defineStore({
     messages: {},
     allGroups: {},
     _remember: {},
-    fetching: {},
   }),
   actions: {
     init(config) {
       this.config = config
+      this.fetching = {}
     },
     async fetch(id, force) {
       if (id) {

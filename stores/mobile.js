@@ -1,12 +1,12 @@
-// app-init.js: 
+// mobile.js: 
 // - This code is run once at app startup - and does nothing on the web
 // - Then handles push notifications and deeplinks
 //
 // Initialise app:
 // - Get device info and id
-// - Set iOS window.open TODO
-// - Enable pinch zoom on Android TODO
-// - Enable deeplinks TODO
+// - Set iOS window.open
+// - Enable pinch zoom on Android
+// - Enable deeplinks
 // - Set up push notifications
 //
 // Ongoing:
@@ -15,14 +15,15 @@
 import { defineStore } from 'pinia'
 import { Device } from '@capacitor/device'
 import { Badge } from '@capawesome/capacitor-badge'
-import { PushNotifications } from '@capacitor/push-notifications'
+//import { PushNotifications } from '@capacitor/push-notifications'
+import { PushNotifications } from '@freegle/capacitor-push-notifications'
 import { useAuthStore } from '~/stores/auth'
 import { AppLauncher } from '@capacitor/app-launcher'
 import api from '~/api'
 //import { FreegleFCM } from '@capacitor/freegle-nuxt3-fcm'
 //import { FCM } from '@capacitor-community/fcm';
 //import { getMessaging, getToken as firebaseGetToken, onMessage, deleteToken, isSupported } from "firebase/messaging";
-//import { FirebaseMessaging } from '@capacitor-firebase/messaging';
+import { FirebaseMessaging } from '@capacitor-firebase/messaging';
 import { ZoomPlugin } from 'capacitor-zoom-android';
 import { App } from '@capacitor/app';
 import { useRouter } from '#imports'
@@ -96,6 +97,12 @@ export const useMobileStore = defineStore({ // Do not persist
       // Tell server now if logged in
       const authStore = useAuthStore()
       authStore.savePushId()
+
+      await FirebaseMessaging.addListener('notificationReceived', event => {
+        console.log('###########notificationReceived', { event });
+      })
+      console.log('====initFirebaseMessaging===E')
+
       //FCM.subscribeTo({ topic: "test" })
       //  .then((r) => alert(`subscribed to topic`))
       //  .catch((err) => console.log(err));
@@ -103,8 +110,8 @@ export const useMobileStore = defineStore({ // Do not persist
       //FCM.getToken()
       //  .then((r) => alert(`Token ${r.token}`))
       //  .catch((err) => console.log(err));
-
-      / * const isNtfSupported = await isSupported()
+      */
+      /* const isNtfSupported = await isSupported()
       if (!isNtfSupported) return
       console.log('====initFCM===2')
 
@@ -147,8 +154,8 @@ export const useMobileStore = defineStore({ // Do not persist
           });
       })
       return
-    } * /
-    },*/
+    } */
+    /*},*/
     /*async subscribeTo(destination) {
       //subscribe to web topic
       const messaging = getMessaging();
@@ -240,10 +247,18 @@ export const useMobileStore = defineStore({ // Do not persist
     // https://developer.android.com/develop/ui/views/notifications
     // https://capacitorjs.com/docs/apis/push-notifications
     async initPushNotifications() {
-      /*if (!this.isiOS) {
+      if (!this.isiOS) {
+        // Delete given Android push channel called PushDefaultForeground
+        // This is created if capacitor.config.ts has plugins:PushNotifications:presentationOptions
+        // OK if already deleted
+        await PushNotifications.deleteChannel({
+          id: 'PushDefaultForeground'
+        })
+        console.log("CHANNEL DELETED: PushDefaultForeground")
+
         // Create our Android push channel
         await PushNotifications.createChannel({
-          id: 'PushPluginChannel',
+          id: 'PushDefaultForeground', // PushPluginChannel
           name: 'Freegle chats',
           description: 'Direct messages with other Freeglers',
           //sound: 'res/raw/unconvinced',
@@ -253,16 +268,8 @@ export const useMobileStore = defineStore({ // Do not persist
           lightColor: '#5ECA24',
           vibration: false
         })
-        console.log("CHANNEL CREATED: PushPluginChannel")
-
-        // Delete given Android push channel called PushDefaultForeground
-        // This is created if capacitor.config.ts has plugins:PushNotifications:presentationOptions
-        // OK if already deleted
-        await PushNotifications.deleteChannel({
-          id: 'PushDefaultForeground'
-        })
-        console.log("CHANNEL DELETED: PushDefaultForeground")
-      }*/
+        console.log("CHANNEL CREATED: PushDefaultForeground")
+      }
 
       let permStatus = await PushNotifications.checkPermissions();
       console.log('checkPermissions:', permStatus)
@@ -279,13 +286,13 @@ export const useMobileStore = defineStore({ // Do not persist
           const authStore = useAuthStore()
           authStore.savePushId()
 
-          /*if (!this.isiOS) {
+          if (!this.isiOS) {
             PushNotifications.listChannels().then(result => {
               for (const channel of result.channels) {
                 console.log("CHANNEL", channel)
               }
             })
-          }*/
+          }
         }
       )
       console.log('addListener registration done')

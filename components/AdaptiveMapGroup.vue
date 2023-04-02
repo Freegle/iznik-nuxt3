@@ -8,6 +8,7 @@
         />
       </div>
       <nuxt-link
+        no-prefetch
         :to="'/explore/' + group.nameshort"
         class="name font-weight-bold"
       >

@@ -480,7 +480,7 @@ export default {
 
     await loadLeaflet()
   },
-  beforeDestroy() {
+  beforeUnmount() {
     this.destroyed = true
   },
   methods: {
@@ -640,7 +640,7 @@ export default {
           }
         } else {
           // We are searching.  Get the list of messages from the server.
-          // eslint-disable-next-line no-lonely-if
+
           const gids = this.groupid
             ? [this.groupid]
             : this.myGroups.map((g) => g.id)

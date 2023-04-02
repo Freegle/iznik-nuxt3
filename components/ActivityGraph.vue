@@ -374,7 +374,7 @@ export default {
   mounted() {
     this.fetch()
   },
-  beforeDestroy() {
+  beforeUnmount() {
     this.destroyed = true
   },
   methods: {

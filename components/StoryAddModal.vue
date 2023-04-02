@@ -56,7 +56,7 @@
               class="bg-white"
               imgtype="Story"
               imgflag="story"
-              @photoProcessed="photoProcessed"
+              @photo-processed="photoProcessed"
             />
           </b-col>
         </b-row>

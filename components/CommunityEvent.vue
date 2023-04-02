@@ -6,6 +6,7 @@
         :title-tag="titleTag"
       >
         <nuxt-link
+          no-prefetch
           :to="'/communityevent/' + event.id"
           class="event__link text-truncate"
         >
@@ -13,6 +14,7 @@
         </nuxt-link>
         <nuxt-link
           v-if="!summary"
+          no-prefetch
           :to="'/communityevent/' + event.id"
           class="event__link small text-muted"
         >

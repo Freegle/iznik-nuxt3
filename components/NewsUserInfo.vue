@@ -1,5 +1,6 @@
 <template>
   <nuxt-link
+    no-prefetch
     :to="'/profile/' + newsfeed.userid"
     class="text-success nodecor"
     :title="'Click to view profile for ' + newsfeed.displayname"

@@ -120,7 +120,7 @@ import { useRoute } from 'vue-router'
 import { buildHead } from '../composables/useBuildHead'
 import { useMiscStore } from '../stores/misc'
 import { useMobileStore } from '../stores/mobile'
-import MainFooter from '../components/MainFooter'
+import MainFooter from '~/components/MainFooter'
 import { useRouter } from '#imports'
 import api from '~/api'
 const VisualiseMap = () => import('~/components/VisualiseMap')
@@ -196,7 +196,7 @@ export default {
       }
     }
   },
-  beforeDestroy() {
+  beforeUnmount() {
     if (this.userWatch) {
       this.userWatch()
     }
@@ -254,15 +254,17 @@ export default {
       this.$router.push('/explore/place/' + JSON.stringify(place))
     },
     play() {
-      this.waitForRef('video', async () => {
-        try {
-          const videoEl = document.querySelector('video')
-          videoEl.muted = true
-          await videoEl.play()
-        } catch (e) {
-          console.log('Video play failed', e)
-        }
-      })
+      if (process.client) {
+        this.waitForRef('video', async () => {
+          try {
+            const videoEl = document.querySelector('video')
+            videoEl.muted = true
+            await videoEl.play()
+          } catch (e) {
+            console.log('Video play failed', e)
+          }
+        })
+      }
     },
   },
 }

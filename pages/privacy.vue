@@ -11,7 +11,7 @@
           Other freeglers can see your name, profile picture and approximate
           location. If you don't want that, you can change it in
           <!-- eslint-disable-next-line-->
-        <nuxt-link to="/settings">Settings</nuxt-link>.
+        <nuxt-link  no-prefetch to="/settings">Settings</nuxt-link>.
         </p>
         <p>
           We try to protect you from spammers and fraudsters. Sometimes our
@@ -68,7 +68,7 @@
           <ExternalLink href="https://www.ghostery.com/">Ghostery</ExternalLink>
             and still use the site (but it helps if you
             <!-- eslint-disable-next-line -->
-          <nuxt-link to="/donate">donate</nuxt-link>).
+          <nuxt-link  no-prefetch to="/donate">donate</nuxt-link>).
           </li>
         </ul>
         <p>Once you log in, you're giving us consent to do the following.</p>
@@ -83,9 +83,9 @@
             <ExternalLink href="https://uk.whatjobs.com/">WhatJobs</ExternalLink
             >, both on the site and in emails. We'd prefer not to, but we don't
             raise enough from
-            <nuxt-link to="/donate"> donations </nuxt-link> alone to keep going.
-            We don't pass them any information at all unless you click on one of
-            the job links, not even your IP your IP address.
+            <nuxt-link no-prefetch to="/donate"> donations </nuxt-link> alone to
+            keep going. We don't pass them any information at all unless you
+            click on one of the job links, not even your IP your IP address.
           </li>
         </ul>
         <h2>Sentry</h2>
@@ -120,14 +120,14 @@
         <p>
           If you want to leave Freegle, please go
           <!-- eslint-disable-next-line -->
-        <nuxt-link to="/unsubscribe">here</nuxt-link>.
+        <nuxt-link  no-prefetch to="/unsubscribe">here</nuxt-link>.
         </p>
         <p>Once you leave, this will delete all your personal data.</p>
         <h2>Got questions?</h2>
         <p>
           Privacy is a complicated and important area, which we take seriously.
           If you have questions or concerns, please
-          <nuxt-link to="/help"> contact us. </nuxt-link>
+          <nuxt-link no-prefetch to="/help"> contact us. </nuxt-link>
         </p>
         <h3>Change History</h3>
         <p>Here are the changes to this page.</p>

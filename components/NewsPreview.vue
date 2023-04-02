@@ -14,14 +14,14 @@
             lazy
             :src="preview.image"
             class="previewimage"
-            @error.native="brokenImage"
+            @error="brokenImage"
           />
           <b-img
             v-if="size === 'sm'"
             lazy
             :src="preview.image"
             class="previewimagesm"
-            @error.native="brokenImage"
+            @error="brokenImage"
           />
         </div>
         <div class="title">
@@ -81,7 +81,7 @@ export default {
       window.open(this.preview.url)
     },
     brokenImage(event) {
-      event.target.src = require('~/static/placeholder.jpg')
+      event.target.src = '/placeholder.jpg'
     },
   },
 }

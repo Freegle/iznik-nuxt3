@@ -40,7 +40,7 @@
     </notice-message>
     <div v-if="supportOrAdmin" class="d-flex justify-content-end">
       <b-button variant="link" class="reply__button" @click="deleteReply">
-        Delete
+        Delete this warning
       </b-button>
       <ConfirmModal
         v-if="showDeleteModal"

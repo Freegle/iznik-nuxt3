@@ -9,9 +9,8 @@
           </VisibleWhen>
         </b-col>
         <b-col cols="12" lg="6" class="p-0">
-          <!--          TODO Microvol-->
-          <!--          <MicroVolunteering />-->
           <AppUpdateAvailable />
+          <MicroVolunteering />
           <div>
             <GlobalWarning />
             <ExpectedRepliesWarning
@@ -66,7 +65,7 @@
                     </li>
                     <li>
                       <!-- eslint-disable-next-line-->
-                      You can change your location in <nuxt-link to="/settings">Settings</nuxt-link>.
+                      You can change your location in <nuxt-link  no-prefetch to="/settings">Settings</nuxt-link>.
                     </li>
                     <li>
                       The <em>Add location</em> link lets you show posts from
@@ -128,7 +127,7 @@ definePageMeta({
   alias: ['/communities'],
 })
 
-// const MicroVolunteering = () => import('~/components/MicroVolunteering.vue')
+const MicroVolunteering = () => import('~/components/MicroVolunteering.vue')
 
 export default {
   components: {
@@ -146,7 +145,7 @@ export default {
       import('~/components/ExpectedRepliesWarning')
     ),
     VisibleWhen,
-    // MicroVolunteering,
+    MicroVolunteering,
   },
   async setup() {
     const route = useRoute()

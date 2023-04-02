@@ -36,12 +36,11 @@
               />
             </b-col>
             <b-col cols="6" md="3">
-              <!--              TODO MINOR The postcode isn't the same height as the inputs.-->
               <PostCode
                 label="Postcode"
                 :find="false"
                 size="lg"
-                :value="postcode.name"
+                :value="postcode?.name"
                 @selected="postcodeSelect"
                 @cleared="postcodeClear"
               />
@@ -84,7 +83,7 @@
             <OurFilePond
               imgtype="Message"
               imgflag="message"
-              @photoProcessed="photoProcessed"
+              @photo-processed="photoProcessed"
             />
           </b-col>
         </b-row>
@@ -158,7 +157,6 @@ export default {
     const groupStore = useGroupStore()
 
     const message = toRaw(await messageStore.fetch(props.id, true))
-    console.log('Message', message)
     const textbody = message.textbody
     const item = message.item.name
 
@@ -231,10 +229,13 @@ export default {
   },
   methods: {
     async save() {
-      if (this.edititem && (this.edittextbody || this.attachments.length)) {
+      if (this.edititem && (this.edittextbody || this.attachments?.length)) {
         const attids = []
-        for (const att of this.attachments) {
-          attids.push(att.id)
+
+        if (this.attachments?.length) {
+          for (const att of this.attachments) {
+            attids.push(att.id)
+          }
         }
 
         // We change both availablenow and available initially.  Probably the user is correcting a mistake in how
@@ -293,3 +294,12 @@ export default {
   },
 }
 </script>
+<style scoped lang="scss">
+:deep(.autocomplete-wrap) {
+  border: 1px solid $color-gray-4 !important;
+
+  input {
+    min-height: calc(1.5em + 1rem) !important;
+  }
+}
+</style>

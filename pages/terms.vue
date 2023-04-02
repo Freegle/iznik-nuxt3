@@ -7,7 +7,7 @@
         <h3>Got questions?</h3>
         <p>
           If you have questions, please
-          <nuxt-link to="/help"> contact us. </nuxt-link>
+          <nuxt-link no-prefetch to="/help"> contact us. </nuxt-link>
         </p>
       </div>
     </div>

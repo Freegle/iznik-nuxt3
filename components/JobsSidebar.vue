@@ -11,7 +11,7 @@
     </NoticeMessage>
     <b-card v-else-if="list.length" variant="white" no-body>
       <b-card-body class="p-0">
-        <nuxt-link to="/jobs">
+        <nuxt-link no-prefetch to="/jobs">
           <h2 class="header--size4 pt-1 ml-3">
             <v-icon icon="briefcase" scale="2" /> Jobs near you
           </h2>
@@ -23,13 +23,13 @@
           <JobOne :id="job.id" :summary="true" />
         </div>
         <infinite-loading key="infinitejobs" @infinite="loadMore">
-          <span slot="no-results">
+          <template #no-results>
             <notice-message v-if="!list?.length">
               We can't find any jobs at the moment.
             </notice-message>
-          </span>
-          <span slot="no-more" />
-          <span slot="spinner" />
+          </template>
+          <template #no-more />
+          <template #spinner />
         </infinite-loading>
         <div class="d-flex justify-content-around mt-2 mb-2">
           <b-button variant="secondary" to="/jobs">

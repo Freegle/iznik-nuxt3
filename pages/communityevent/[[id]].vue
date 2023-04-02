@@ -29,10 +29,10 @@
 </template>
 <script setup>
 import { useRoute } from 'vue-router'
-import NoticeMessage from '../../components/NoticeMessage'
 import { buildHead } from '../../composables/useBuildHead'
 import { useCommunityEventStore } from '../../stores/communityevent'
-import CommunityEvent from '../../components/CommunityEvent'
+import NoticeMessage from '~/components/NoticeMessage'
+import CommunityEvent from '~/components/CommunityEvent'
 import { useRouter } from '#imports'
 
 const runtimeConfig = useRuntimeConfig()
