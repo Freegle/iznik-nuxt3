@@ -24,6 +24,7 @@ export default defineEventHandler(async (event) => {
     { url: '/stories', changefreq: 'weekly', priority: 0.5 },
     { url: '/communityevents', changefreq: 'monthly', priority: 0.1 },
     { url: '/volunteerings', changefreq: 'monthly', priority: 0.1 },
+    { url: '/mobile', changefreq: 'monthly', priority: 0.3 },
     { url: '/about', changefreq: 'monthly', priority: 0.3 },
     { url: '/disclaimer', changefreq: 'monthly', priority: 0.1 },
     { url: '/terms', changefreq: 'monthly', priority: 0.1 },
@@ -32,7 +33,6 @@ export default defineEventHandler(async (event) => {
     { url: '/giftaid', changefreq: 'monthly', priority: 0.1 },
 
     // TODO Councils - separate site?
-    // TODO Pages: mobile, shortlinks, stats, merge, mydata, norfolk
   ]
 
   // Fetch all the groups.

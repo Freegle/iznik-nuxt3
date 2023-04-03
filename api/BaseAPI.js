@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from 'uuid'
 import * as Sentry from '@sentry/browser'
 import { useAuthStore } from '~/stores/auth'
 
@@ -49,9 +50,12 @@ export default class BaseAPI {
           'Iznik ' + JSON.stringify(authStore.auth.persistent)
       }
 
+      // Cloudflare is aggressive about caching, so ensure that we have a cache-busting value in the URL.
+      path += '?cacheBust=' + uuidv4()
+
       if (method === 'GET' && config?.params) {
         // URL encode the parameters
-        path += '?' + new URLSearchParams(config.params)
+        path += '&' + new URLSearchParams(config.params)
       } else if (method !== 'POST') {
         // Any parameters are passed in config.params.
         if (!config?.params) {
@@ -74,7 +78,6 @@ export default class BaseAPI {
 
       const rsp = await fetch(this.config.public.APIv1 + path, {
         ...config,
-        cache: 'no-store',
         body,
         method,
         headers,
@@ -229,9 +232,6 @@ export default class BaseAPI {
     let data = null
 
     try {
-      console.log('APIv2 request ', path)
-      console.log('APIv2 endpoint ', this.config.public.APIv2)
-
       const headers = config.headers ? config.headers : {}
 
       const authStore = useAuthStore()
@@ -246,9 +246,11 @@ export default class BaseAPI {
         headers.Authorization2 = JSON.stringify(authStore.auth.persistent)
       }
 
+      // Cloudflare is aggressive about caching, so ensure that we have a cache-busting value in the URL.
+      path += '?cacheBust=' + uuidv4()
+
       const rsp = await fetch(this.config.public.APIv2 + path, {
         ...config,
-        cache: 'no-store',
         method,
         headers,
       })
