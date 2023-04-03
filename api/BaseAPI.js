@@ -242,6 +242,7 @@ export default class BaseAPI {
         headers.Authorization2 = JSON.stringify(authStore.auth.persistent)
       }
 
+      console.log('APIv2 request ', this.config.public.APIv2, path)
       const rsp = await fetch(this.config.public.APIv2 + path, {
         ...config,
         method,
