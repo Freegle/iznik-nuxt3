@@ -249,12 +249,16 @@ export default class BaseAPI {
       // Cloudflare is aggressive about caching, so ensure that we have a cache-busting value in the URL.
       path += '?cacheBust=' + uuidv4().toString()
 
+      console.log('APIV2 fetch')
+
       const rsp = await fetch(this.config.public.APIv2 + path, {
         ...config,
         method,
         headers,
       })
       status = rsp.status
+      console.log('Got status', status)
+      console.log('Got rsp', rsp)
       data = await rsp.json()
     } catch (e) {
       console.log('Fetch error', path, e?.message)
