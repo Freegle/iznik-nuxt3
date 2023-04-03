@@ -2,7 +2,15 @@ import BaseAPI from '@/api/BaseAPI'
 
 export default class GroupAPI extends BaseAPI {
   async list(params) {
-    return await this.$getv2('/group', params)
+    let ret = null
+    try {
+      ret = await this.$getv2('/group', params)
+    } catch (e) {
+      console.log('List groups exception', e.message)
+      throw e
+    }
+
+    return ret
   }
 
   async fetch(id, log) {
