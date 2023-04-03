@@ -51,7 +51,7 @@ export default class BaseAPI {
       }
 
       // Cloudflare is aggressive about caching, so ensure that we have a cache-busting value in the URL.
-      path += '?cacheBust=' + uuidv4()
+      path += '?cacheBust=' + uuidv4().toString()
 
       if (method === 'GET' && config?.params) {
         // URL encode the parameters
@@ -247,7 +247,7 @@ export default class BaseAPI {
       }
 
       // Cloudflare is aggressive about caching, so ensure that we have a cache-busting value in the URL.
-      path += '?cacheBust=' + uuidv4()
+      path += '?cacheBust=' + uuidv4().toString()
 
       const rsp = await fetch(this.config.public.APIv2 + path, {
         ...config,
