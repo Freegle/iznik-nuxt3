@@ -58,8 +58,6 @@ import SupportLink from './components/SupportLink'
 import ExternalLink from '~/components/ExternalLink'
 import { useError } from '#imports'
 
-const runtimeConfig = useRuntimeConfig()
-
 // Although we have a separate error page which we're supposed to catch and redirect to in something-went-wrong, there
 // seem to be some paths whereby we can end up here.  So handle it here too.
 const error = useError()
