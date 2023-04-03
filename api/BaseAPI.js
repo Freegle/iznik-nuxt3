@@ -74,6 +74,7 @@ export default class BaseAPI {
 
       const rsp = await fetch(this.config.public.APIv1 + path, {
         ...config,
+        cache: 'no-store',
         body,
         method,
         headers,
@@ -247,6 +248,7 @@ export default class BaseAPI {
 
       const rsp = await fetch(this.config.public.APIv2 + path, {
         ...config,
+        cache: 'no-store',
         method,
         headers,
       })
