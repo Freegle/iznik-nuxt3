@@ -99,7 +99,8 @@ export default defineNuxtConfig({
     '/communityevent/**': { swr: 3600, ssr: true },
     '/communityevents/**': { swr: 3600, ssr: true },
     // TODO Enumerate groups and pre-render them.
-    '/explore/**': { swr: 3600, ssr: true },
+    // '/explore/**': { swr: 3600, ssr: true },
+    '/explore/**': { ssr: true },
     '/message/**': { swr: 600, ssr: true },
     '/story/**': { swr: 3600, ssr: true },
     '/shortlink/**': { swr: 600, ssr: true },
