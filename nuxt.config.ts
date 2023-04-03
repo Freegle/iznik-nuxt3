@@ -93,18 +93,18 @@ export default defineNuxtConfig({
     '/settings/**': { ssr: false },
     '/stats/**': { ssr: false },
     '/stories/**': { ssr: false },
-    '/story/**': { ssr: false },
     '/teams': { ssr: false },
 
     // Render on demand - may never be shown in a given build - then cache for a while.
-    '/communityevent/**': { swr: 3600 },
-    '/communityevents/**': { swr: 3600 },
+    '/communityevent/**': { swr: 3600, ssr: true },
+    '/communityevents/**': { swr: 3600, ssr: true },
     // TODO Enumerate groups and pre-render them.
-    '/explore/**': { swr: 3600 },
-    '/message/**': { swr: 600 },
-    '/shortlink/**': { swr: 600 },
-    '/volunteering/**': { swr: 3600 },
-    '/volunteerings/**': { swr: 3600 },
+    '/explore/**': { swr: 3600, ssr: true },
+    '/message/**': { swr: 600, ssr: true },
+    '/story/**': { swr: 3600, ssr: true },
+    '/shortlink/**': { swr: 600, ssr: true },
+    '/volunteering/**': { swr: 3600, ssr: true },
+    '/volunteerings/**': { swr: 3600, ssr: true },
   },
 
   nitro: {
