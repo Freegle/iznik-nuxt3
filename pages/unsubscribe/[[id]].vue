@@ -213,9 +213,7 @@ export default {
     },
     async emailConfirm() {
       if (this.emailValid) {
-        const ret = await this.authStore.unsubscribe({
-          email: this.email.trim(),
-        })
+        const ret = await this.authStore.unsubscribe(this.email.trim())
 
         if (ret.ret === 0) {
           this.emailSent = true

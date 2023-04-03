@@ -47,7 +47,6 @@
   </div>
 </template>
 <script>
-import axios from 'axios'
 const ConfirmModal = () => import('./ConfirmModal.vue')
 
 export default {
@@ -88,19 +87,14 @@ export default {
     removeConfirmed() {
       this.$emit('remove', this.id)
     },
-    rotate(deg) {
-      const runtimeConfig = useRuntimeConfig()
-      const api = runtimeConfig.APIv1
+    async rotate(deg) {
+      await this.imageStore.post({
+        id: this.event.image.id,
+        rotate: deg,
+        bust: Date.now(),
+      })
 
-      axios
-        .post(api + '/image', {
-          id: this.id,
-          rotate: deg,
-          bust: Date.now(),
-        })
-        .then(() => {
-          this.cacheBust = Date.now()
-        })
+      this.cacheBust = Date.now()
     },
     rotateLeft() {
       this.rotate(90)

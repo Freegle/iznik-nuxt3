@@ -43,8 +43,22 @@ export default class SessionAPI extends BaseAPI {
     })
   }
 
+  yahooCodeLogin(yahoocodelogin) {
+    return this.$post('/session', {
+      yahoocodelogin,
+    })
+  }
+
   logout() {
     return this.$del('/session')
+  }
+
+  lostPassword(email) {
+    return this.$post('/session', { action: 'LostPassword', email })
+  }
+
+  unsubscribe(email) {
+    return this.$post('/session', { action: 'Unsubscribe', email })
   }
 
   forget() {

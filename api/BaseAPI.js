@@ -1,5 +1,4 @@
 import * as Sentry from '@sentry/browser'
-import axios from 'axios'
 import { useAuthStore } from '~/stores/auth'
 
 export class APIError extends Error {
@@ -32,11 +31,10 @@ export class SignUpError extends Error {
 
 export default class BaseAPI {
   constructor(config) {
-    this.$axios = axios
     this.config = config
   }
 
-  async $request(method, path, config, logError = true) {
+  async $request(method, path, config, logError = true, body = null) {
     let status = null
     let data = null
 
@@ -51,27 +49,37 @@ export default class BaseAPI {
           'Iznik ' + JSON.stringify(authStore.auth.persistent)
       }
 
-      if (method !== 'POST') {
-        if (!config.params) {
+      if (method === 'GET' && config?.params) {
+        // URL encode the parameters
+        path += '?' + new URLSearchParams(config.params)
+      } else if (method !== 'POST') {
+        // Any parameters are passed in config.params.
+        if (!config?.params) {
           config.params = {}
         }
 
         config.params.modtools = false
-      } else {
+
+        // JSON-encode these for to pass.
+        body = JSON.stringify(config.params)
+      } else if (!config?.formPost) {
+        // Parameters will be passed in config.data.
         if (!config.data) {
           config.data = {}
         }
 
         config.data.modtools = false
+        body = JSON.stringify(config.data)
       }
 
-      const ret = await this.$axios.request({
+      const rsp = await fetch(this.config.public.APIv1 + path, {
         ...config,
+        body,
         method,
         headers,
-        url: this.config.public.APIv1 + path,
       })
-      ;({ status, data } = ret)
+      status = rsp.status
+      data = await rsp.json()
     } catch (e) {
       if (e.message.match(/.*aborted.*/i)) {
         // We've seen requests get aborted immediately after beforeunload().  Makes sense to abort the requests
@@ -165,10 +173,31 @@ export default class BaseAPI {
   }
 
   $post(path, data, logError = true) {
-    return this.$request('POST', path, { data }, logError)
+    return this.$request(
+      'POST',
+      path,
+      {
+        data,
+      },
+      logError
+    )
+  }
+
+  $postForm(path, data, logError = true) {
+    // Don't set Content-Type - see https://stackoverflow.com/questions/39280438/fetch-missing-boundary-in-multipart-form-data-post
+    return this.$request(
+      'POST',
+      path,
+      {
+        formPost: true,
+      },
+      logError,
+      data
+    )
   }
 
   $postOverride(overrideMethod, path, data, logError = true) {
+    console.log('Post override', path, data)
     return this.$request(
       'POST',
       path,
@@ -213,15 +242,15 @@ export default class BaseAPI {
         headers.Authorization2 = JSON.stringify(authStore.auth.persistent)
       }
 
-      const ret = await this.$axios.request({
+      const rsp = await fetch(this.config.public.APIv2 + path, {
         ...config,
         method,
         headers,
-        url: this.config.public.APIv2 + path,
       })
-      ;({ status, data } = ret)
+      status = rsp.status
+      data = await rsp.json()
     } catch (e) {
-      console.log('Axios error', path, e?.message)
+      console.log('Fetch error', path, e?.message)
       if (e.message.match(/.*aborted.*/i)) {
         // We've seen requests get aborted immediately after beforeunload().  Makes sense to abort the requests
         // when you're leaving a page.  No point in rippling those errors up to result in Sentry errors.

@@ -143,7 +143,6 @@
   </b-modal>
 </template>
 <script>
-import axios from 'axios'
 import { useStoryStore } from '../stores/stories'
 import { useComposeStore } from '../stores/compose'
 import modal from '@/mixins/modal'
@@ -198,19 +197,15 @@ export default {
         paththumb: imagethumb,
       }
     },
-    rotate(deg) {
-      const runtimeConfig = useRuntimeConfig()
+    async rotate(deg) {
+      await this.imageStore.post({
+        id: this.event.image.id,
+        rotate: deg,
+        bust: Date.now(),
+        story: true,
+      })
 
-      axios
-        .post(runtimeConfig.public.APIv1 + '/image', {
-          id: this.story.photo.id,
-          rotate: deg,
-          bust: Date.now(),
-          story: true,
-        })
-        .then(() => {
-          this.cacheBust = Date.now()
-        })
+      this.cacheBust = Date.now()
     },
     rotateLeft() {
       this.rotate(90)

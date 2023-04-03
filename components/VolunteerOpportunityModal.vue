@@ -442,7 +442,6 @@
 <script>
 import { defineRule, Form as VForm, Field, ErrorMessage } from 'vee-validate'
 import { required, email, min, max } from '@vee-validate/rules'
-import axios from 'axios'
 import { useVolunteeringStore } from '../stores/volunteering'
 import { useComposeStore } from '../stores/compose'
 import { useUserStore } from '../stores/user'
@@ -766,20 +765,15 @@ export default {
       // We don't do OCR on these - volunteer op photos are much less likely to have useful text than community
       // events.
     },
-    rotate(deg) {
-      const runtimeConfig = useRuntimeConfig()
-      const api = runtimeConfig.APIv1
+    async rotate(deg) {
+      await this.imageStore.post({
+        id: this.event.image.id,
+        rotate: deg,
+        bust: Date.now(),
+        volunteering: true,
+      })
 
-      axios
-        .post(api + '/image', {
-          id: this.volunteering.image.id,
-          rotate: deg,
-          bust: Date.now(),
-          volunteering: true,
-        })
-        .then(() => {
-          this.cacheBust = Date.now()
-        })
+      this.cacheBust = Date.now()
     },
     rotateLeft() {
       this.rotate(90)

@@ -24,11 +24,12 @@ hear about it; you can mail <geeks@ilovefreegle.org>.
 
 # Development
 
-Currently only tested on node v16.13.2 and npm v9.4.0.  Other versions cause issues on Windows builds.
+Currently only tested on node v18.12.0 and npm v8.19.2.  Definitely requires node v17 or later because it relies
+on fetch().
 
 Then install all the dependencies:
 ```
-npm install
+npm install --legacy-peer-deps
 ```
 
 Set some environment variables:

@@ -42,6 +42,10 @@ export default class UserAPI extends BaseAPI {
     return this.$put('/user', { email }, logError)
   }
 
+  signUp(params, logError = true) {
+    return this.$put('/user', params, logError)
+  }
+
   merge(email1, email2, id1, id2, reason) {
     return this.$post('/user', {
       email1,

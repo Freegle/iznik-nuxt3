@@ -320,7 +320,6 @@
 </template>
 <script>
 import ReadMore from 'vue-read-more3/src/ReadMoreComponent'
-import axios from 'axios'
 import dayjs from 'dayjs'
 import { useComposeStore } from '../stores/compose'
 import { useMessageStore } from '../stores/message'
@@ -328,6 +327,7 @@ import { useChatStore } from '../stores/chat'
 import { useGroupStore } from '../stores/group'
 import { useUserStore } from '../stores/user'
 import { useTrystStore } from '../stores/tryst'
+import { useLocationStore } from '../stores/location'
 import { useRouter } from '#imports'
 import MessagePhotosModal from '~/components/MessagePhotosModal'
 import MyMessagePromisedTo from '~/components/MyMessagePromisedTo'
@@ -378,6 +378,7 @@ export default {
     const userStore = useUserStore()
     const trystStore = useTrystStore()
     const composeStore = useComposeStore()
+    const locationStore = useLocationStore()
 
     await messageStore.fetch(props.id)
 
@@ -388,6 +389,7 @@ export default {
       userStore,
       trystStore,
       composeStore,
+      locationStore,
     }
   },
   data() {
@@ -748,12 +750,8 @@ export default {
 
       // Set the current location and nearby groups, too, since we're about to use them
       if (this.message.location) {
-        const runtimeConfig = useRuntimeConfig()
-
-        const loc = await axios.get(runtimeConfig.public.APIv1 + '/locations', {
-          params: {
-            typeahead: this.message.location.name,
-          },
+        const loc = await this.locationStore.fetch({
+          typeahead: this.message.location.name,
         })
 
         await this.composeStore.setPostcode(loc.data.locations[0])

@@ -26,8 +26,8 @@
   </div>
 </template>
 <script>
-import axios from 'axios'
 import { useComposeStore } from '../stores/compose'
+import { useImageStore } from '../stores/image'
 
 export default {
   props: {
@@ -72,9 +72,11 @@ export default {
   },
   setup(props) {
     const composeStore = useComposeStore()
+    const imageStore = useImageStore()
 
     return {
       composeStore,
+      imageStore,
     }
   },
   data() {
@@ -147,35 +149,33 @@ export default {
         data.append('groupid', this.groupid)
       }
 
-      const runtimeConfig = useRuntimeConfig()
+      // TODO MINOR It would be nice to have a progress indicator, but this doesn't immediately appear to be
+      // available using fetch().
+      // onUpLoadProgress: (e) => {
+      //   progress(e.lengthComputable, e.loaded, e.total)
+      // },
+      const ret = await this.imageStore.postForm(data)
 
-      const ret = await axios.post(runtimeConfig.APIv1 + '/image', data, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-        onUpLoadProgress: (e) => {
-          progress(e.lengthComputable, e.loaded, e.total)
-        },
-      })
+      try {
+        if (ret.ret === 0) {
+          this.imageid = ret.id
+          this.imagethumb = ret.paththumb
+          this.image = ret.path
 
-      if (ret.status === 200 && ret.data.ret === 0) {
-        this.imageid = ret.data.id
-        this.imagethumb = ret.data.paththumb
-        this.image = ret.data.path
+          if (this.ocr) {
+            this.ocred = ret.ocr
+          }
 
-        if (this.ocr) {
-          this.ocred = ret.data.ocr
+          if (this.identify) {
+            this.identified = ret.items
+          }
+
+          load(ret.id)
+        } else {
+          error(ret.status === 200 ? ret.status : 'Network error ' + ret.status)
         }
-
-        if (this.identify) {
-          this.identified = ret.data.items
-        }
-
-        load(ret.data.id)
-      } else {
-        error(
-          ret.status === 200 ? ret.data.status : 'Network error ' + ret.status
-        )
+      } catch (e) {
+        error('Network error ' + e.mesage)
       }
 
       return {

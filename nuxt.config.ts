@@ -111,8 +111,9 @@ export default defineNuxtConfig({
     prerender: {
       routes: ['/404.html', '/sitemap.xml'],
 
-      // Don't crawl, else we end up with all the messages.
-      crawlLinks: false,
+      // Don't prerender the messages - too many
+      ignore: ['/message/'],
+      crawlLinks: true,
     },
   },
 
@@ -155,10 +156,6 @@ export default defineNuxtConfig({
     ],
     'floating-vue/nuxt',
   ],
-
-  axios: {
-    proxy: true,
-  },
 
   // Environment variables the client needs.
   runtimeConfig: {

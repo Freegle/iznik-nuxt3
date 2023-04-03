@@ -1,5 +1,4 @@
 import { defineStore } from 'pinia'
-import axios from 'axios'
 import { LoginError, SignUpError } from '../api/BaseAPI'
 import { useComposeStore } from '../stores/compose'
 import api from '~/api'
@@ -154,32 +153,15 @@ export const useAuthStore = defineStore({
       this.loginCount++
     },
     async lostPassword(email) {
-      const runtimeConfig = useRuntimeConfig()
-      const api = runtimeConfig.APIv1
-
-      const res = await axios.post(api + '/session', {
-        action: 'LostPassword',
-        email,
-      })
-
+      const res = await this.$api.session.lostPassword(email)
       return res
     },
-    async unsubscribe(params) {
-      const runtimeConfig = useRuntimeConfig()
-      const api = runtimeConfig.APIv1
-
-      const res = await axios.post(api + '/session', {
-        action: 'Unsubscribe',
-        email: params.email,
-      })
-
+    async unsubscribe(email) {
+      const res = await this.$api.session.unsubscribe(email)
       return res.data
     },
     async signUp(params) {
-      const runtimeConfig = useRuntimeConfig()
-      const api = runtimeConfig.APIv1
-
-      const res = await axios.put(api + '/user', params)
+      const res = await this.$api.user.signUp(params)
       const { ret, status, jwt, persistent } = res.data
 
       if (res.status === 200 && res.data.ret === 0) {
@@ -366,6 +348,14 @@ export const useAuthStore = defineStore({
     async makeEmailPrimary(email) {
       await api(this.config).user.addEmail(this.user?.id, email, true)
       return await this.fetchUser()
+    },
+    async yahooCodeLogin(code) {
+      const runtimeConfig = useRuntimeConfig()
+      const api = runtimeConfig.APIv1
+
+      const res = await await api(this.config).session.yahooCodeLogin(code)
+
+      return res.data
     },
   },
   getters: {
