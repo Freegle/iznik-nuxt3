@@ -248,8 +248,6 @@ export default class BaseAPI {
         headers,
       })
       status = rsp.status
-      console.log('Got status', status)
-      console.log('Got rsp', JSON.stringify(rsp))
       data = await rsp.json()
     } catch (e) {
       console.log('Fetch error', path, e?.message)

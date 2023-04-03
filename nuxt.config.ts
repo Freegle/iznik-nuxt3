@@ -60,6 +60,8 @@ export default defineNuxtConfig({
       // There are potential issues where a deployment happens while a page is partway through loading assets, or
       // later loads assets which are no longer present.  Nuxt3 now has a fallback of reloading the page when
       // it detects a failed chunk load.
+      '/api': { swr: false, cache: false },
+      '/apiv2': { swr: false, cache: false },
       '/': { prerender: true },
       '/explore': { prerender: true },
       '/explore/region/**': { prerender: true },
