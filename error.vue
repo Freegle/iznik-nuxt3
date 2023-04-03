@@ -39,6 +39,7 @@
             <p v-if="error && JSON.stringify(error).length > 2">
               Error was: {{ JSON.stringify(error) }}
             </p>
+            <p>API endpoints {{ APIv1 }} and {{ APIv2 }}.</p>
           </div>
           <p>
             <nuxt-link no-prefetch to="/">Click here</nuxt-link> to go back to
@@ -57,6 +58,10 @@
 import SupportLink from './components/SupportLink'
 import ExternalLink from '~/components/ExternalLink'
 import { useError } from '#imports'
+
+const runtimeConfig = useRuntimeConfig()
+const APIv1 = runtimeConfig.public.APIv1
+const APIv2 = runtimeConfig.public.APIv2
 
 // Although we have a separate error page which we're supposed to catch and redirect to in something-went-wrong, there
 // seem to be some paths whereby we can end up here.  So handle it here too.
