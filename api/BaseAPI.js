@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from 'uuid'
 import * as Sentry from '@sentry/browser'
 import { useAuthStore } from '~/stores/auth'
 
@@ -49,9 +48,6 @@ export default class BaseAPI {
         headers.Authorization =
           'Iznik ' + JSON.stringify(authStore.auth.persistent)
       }
-
-      // Cloudflare is aggressive about caching, so ensure that we have a cache-busting value in the URL.
-      path += '?cacheBust=' + uuidv4().toString()
 
       if (method === 'GET' && config?.params) {
         // URL encode the parameters
@@ -246,11 +242,6 @@ export default class BaseAPI {
         headers.Authorization2 = JSON.stringify(authStore.auth.persistent)
       }
 
-      // Cloudflare is aggressive about caching, so ensure that we have a cache-busting value in the URL.
-      path += '?cacheBust=' + uuidv4().toString()
-
-      console.log('APIV2 fetch')
-
       const rsp = await fetch(this.config.public.APIv2 + path, {
         ...config,
         method,
@@ -258,7 +249,7 @@ export default class BaseAPI {
       })
       status = rsp.status
       console.log('Got status', status)
-      console.log('Got rsp', rsp)
+      console.log('Got rsp', JSON.stringify(rsp))
       data = await rsp.json()
     } catch (e) {
       console.log('Fetch error', path, e?.message)
