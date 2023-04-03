@@ -9,7 +9,7 @@
     "lint": "eslint --fix --ext .js,.jsx,.ts,.vue ."
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=17.9.1"
   },
   "devDependencies": {
     "@capacitor/cli": "^3.4.3",
