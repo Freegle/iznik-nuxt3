@@ -36,7 +36,7 @@
 </template>
 <script>
 import { Field, ErrorMessage } from 'vee-validate'
-import axios from 'axios'
+import { useDomainStore } from '../stores/domain'
 import { ref } from '#imports'
 import { EMAIL_REGEX } from '~/constants'
 
@@ -75,9 +75,11 @@ export default {
     },
   },
   setup(props) {
+    const domainStore = useDomainStore()
     const currentEmail = ref(props.email)
 
     return {
+      domainStore,
       currentEmail,
     }
   },
@@ -100,16 +102,13 @@ export default {
           // Wait for the first dot, as that will be long enough that we don't thrash the server.
           if (domain.includes('.')) {
             this.suggestedDomains = []
-            const runtimeConfig = useRuntimeConfig()
 
-            const ret = await axios.get(runtimeConfig.APIv1 + '/domains', {
-              params: {
-                domain,
-              },
+            const ret = await this.domainStore.fetch({
+              domain,
             })
 
-            if (ret && ret.data && ret.data.ret === 0) {
-              this.suggestedDomains = ret.data.suggestions
+            if (ret && ret.ret === 0) {
+              this.suggestedDomains = ret.suggestions
             }
           }
         }

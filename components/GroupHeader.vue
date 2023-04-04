@@ -68,6 +68,14 @@
       <!-- eslint-disable-next-line -->
       <span v-if="group.description" v-html="group.description"/>
     </div>
+    <div v-if="showGiveFind" class="d-flex justify-content-between flex-wrap">
+      <b-button to="/give" class="mt-1" size="lg" block variant="primary">
+        <v-icon icon="gift" />&nbsp;Give stuff
+      </b-button>
+      <b-button to="/find" class="mt-1" size="lg" block variant="secondary">
+        <v-icon icon="shopping-cart" />&nbsp;Ask for stuff
+      </b-button>
+    </div>
     <div>
       <hr class="mt-2" />
       <h2 class="header--size5 mb-3">
@@ -144,7 +152,6 @@
     </div>
   </b-card>
 </template>
-
 <script>
 import SpinButton from './SpinButton'
 import ChatButton from '~/components/ChatButton'
@@ -163,6 +170,11 @@ export default {
     showJoin: {
       type: Boolean,
       required: true,
+    },
+    showGiveFind: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   setup() {

@@ -23,10 +23,12 @@ import DomainAPI from './DomainAPI.js'
 import DonationsAPI from './DonationsAPI.js'
 import GiftAidAPI from './GiftAidAPI.js'
 import GroupAPI from './GroupAPI.js'
+import ImageAPI from './ImageAPI.js'
 import InvitationAPI from './InvitationAPI.js'
 import IsochroneAPI from './IsochroneAPI.js'
 import JobAPI from './JobAPI.js'
 import LocationAPI from './LocationAPI.js'
+import LogoAPI from './LogoAPI.js'
 import LogsAPI from './LogsAPI.js'
 import MembershipsAPI from './MembershipsAPI.js'
 import MergeAPI from './MergeAPI.js'
@@ -67,10 +69,12 @@ export default (config) => {
     donations: new DonationsAPI(options),
     giftaid: new GiftAidAPI(options),
     group: new GroupAPI(options),
+    image: new ImageAPI(options),
     invitation: new InvitationAPI(options),
     isochrone: new IsochroneAPI(options),
     job: new JobAPI(options),
     location: new LocationAPI(options),
+    logo: new LogoAPI(options),
     logs: new LogsAPI(options),
     memberships: new MembershipsAPI(options),
     merge: new MergeAPI(options),

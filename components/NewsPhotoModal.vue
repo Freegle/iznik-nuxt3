@@ -57,8 +57,8 @@
   </b-modal>
 </template>
 <script>
-import axios from 'axios'
 import { useNewsfeedStore } from '../stores/newsfeed'
+import { useImageStore } from '../stores/image'
 import modal from '@/mixins/modal'
 
 export default {
@@ -107,9 +107,11 @@ export default {
     },
     setup() {
       const newsfeedStore = useNewsfeedStore()
+      const imageStore = useImageStore()
 
       return {
         newsfeedStore,
+        imageStore,
       }
     },
     async rotate(deg) {
@@ -122,11 +124,8 @@ export default {
       data[this.imgflag] = 1
       data.imgtype = this.imgtype
 
-      const runtimeConfig = useRuntimeConfig()
-
-      axios.post(runtimeConfig.public.APIv1 + '/image', data).then(() => {
-        this.cacheBust = Date.now()
-      })
+      await this.imageStore.post(data)
+      this.cacheBust = Date.now()
 
       // Refetch the newsfeed entry to update any values in the parents, via the store.
       await this.newsfeedStore.fetch(this.newsfeedid, true)

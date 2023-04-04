@@ -12,7 +12,6 @@ export default defineEventHandler(async (event) => {
   // eslint-disable-next-line no-undef
   appendResponseHeader(event, 'Content-Type', 'text/xml')
 
-  // An array with your links
   const links = [
     { url: '/', changefreq: 'monthly', priority: 1.0 },
     { url: '/give', changefreq: 'monthly', priority: 1.0 },
@@ -24,6 +23,7 @@ export default defineEventHandler(async (event) => {
     { url: '/stories', changefreq: 'weekly', priority: 0.5 },
     { url: '/communityevents', changefreq: 'monthly', priority: 0.1 },
     { url: '/volunteerings', changefreq: 'monthly', priority: 0.1 },
+    { url: '/mobile', changefreq: 'monthly', priority: 0.3 },
     { url: '/about', changefreq: 'monthly', priority: 0.3 },
     { url: '/disclaimer', changefreq: 'monthly', priority: 0.1 },
     { url: '/terms', changefreq: 'monthly', priority: 0.1 },
@@ -32,7 +32,6 @@ export default defineEventHandler(async (event) => {
     { url: '/giftaid', changefreq: 'monthly', priority: 0.1 },
 
     // TODO Councils - separate site?
-    // TODO Pages: mobile, shortlinks, stats, merge, mydata, norfolk
   ]
 
   // Fetch all the groups.
@@ -40,7 +39,6 @@ export default defineEventHandler(async (event) => {
     const rsp = await fetch(runtimeConfig.public.APIv2 + '/group')
     const groups = await rsp.json()
 
-    // iterate through groups adding to links
     groups.forEach((group) => {
       links.push({
         url: '/explore/' + group.nameshort,

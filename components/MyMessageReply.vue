@@ -77,10 +77,10 @@
             class="align-middle mt-1 mb-1 mr-2"
             @click="unpromise"
           >
-            <v-icon>
+            <div class="stacked">
               <v-icon icon="handshake" />
               <v-icon icon="slash" class="unpromise__slash" />
-            </v-icon>
+            </div>
             Unpromise
           </b-button>
           <b-button
@@ -393,6 +393,24 @@ export default {
       justify-self: end;
       border-top: 0;
     }
+  }
+}
+
+.stacked {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+
+  svg {
+    grid-row: 1 / 2;
+    grid-column: 1 / 2;
+  }
+
+  svg:nth-child(2) {
+    z-index: 10000;
+    color: white;
+    padding-top: 7px;
+    padding-right: 7px;
   }
 }
 </style>

@@ -66,9 +66,9 @@
   </div>
 </template>
 <script>
-import axios from 'axios'
 import { uid } from '../composables/useId'
 import { useAuthStore } from '../stores/auth'
+import { useLocationStore } from '../stores/location'
 import { ref } from '#imports'
 import { useComposeStore } from '~/stores/compose'
 import AutoComplete from '~/components/AutoComplete'
@@ -122,6 +122,7 @@ export default {
   setup(props) {
     const composeStore = useComposeStore()
     const authStore = useAuthStore()
+    const locationStore = useLocationStore()
 
     const wip = ref(props.value)
     const me = authStore.user
@@ -145,6 +146,7 @@ export default {
 
     return {
       composeStore,
+      locationStore,
       wip,
       id,
     }
@@ -216,10 +218,8 @@ export default {
     async select(pc) {
       if (pc) {
         // We have the name.  We need the full postcode.
-        const loc = await axios.get(this.source, {
-          params: {
-            typeahead: pc.name,
-          },
+        const loc = await this.locationStore.fetch({
+          typeahead: pc.name,
         })
 
         if (loc?.data?.locations?.length === 1) {
@@ -238,11 +238,9 @@ export default {
         ) {
           this.locating = true
           navigator.geolocation.getCurrentPosition(async (position) => {
-            const res = await axios.get(this.source, {
-              params: {
-                lat: position.coords.latitude,
-                lng: position.coords.longitude,
-              },
+            const res = await this.locationStore.fetch({
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
             })
 
             if (

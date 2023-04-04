@@ -474,12 +474,12 @@
 // Import login modal synchronously as I've seen an issue where it's not in $refs when you click on the signin button too rapidly.
 // const ChatMenu = () => import('~/components/ChatMenu')
 import { useRoute, useRouter } from 'vue-router'
-import axios from 'axios'
 import pluralize from 'pluralize'
 import { useMiscStore } from '../stores/misc'
 import { useNewsfeedStore } from '../stores/newsfeed'
 import { useMessageStore } from '../stores/message'
 import { useNotificationStore } from '../stores/notification'
+import { useLogoStore } from '../stores/logo'
 import { useAuthStore } from '~/stores/auth'
 import { useCookie } from '#imports'
 import { useMobileStore } from '@/stores/mobile'
@@ -499,6 +499,7 @@ export default {
     const newsfeedStore = useNewsfeedStore()
     const messageStore = useMessageStore()
     const notificationStore = useNotificationStore()
+    const logoStore = useLogoStore()
     const route = useRoute()
     const router = useRouter()
 
@@ -508,6 +509,7 @@ export default {
       newsfeedStore,
       messageStore,
       notificationStore,
+      logoStore,
       route,
       router,
       path: route.path,
@@ -587,10 +589,7 @@ export default {
   mounted() {
     setTimeout(async () => {
       // Look for a custom logo.
-      const runtimeConfig = useRuntimeConfig()
-
-      const api = runtimeConfig.APIv1
-      const res = await axios.get(api + '/logo')
+      const res = await this.logoStore.fetch()
 
       if (res.status === 200) {
         const ret = res.data

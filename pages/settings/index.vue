@@ -636,7 +636,6 @@
 <script>
 import dayjs from 'dayjs'
 import { useRoute } from 'vue-router'
-import axios from 'axios'
 import { useMiscStore } from '../../stores/misc'
 import { useAuthStore } from '../../stores/auth'
 import { buildHead } from '../../composables/useBuildHead'
@@ -1106,17 +1105,12 @@ export default {
       this.uploading = true
     },
     async rotate(deg) {
-      const runtimeConfig = useRuntimeConfig()
-      const api = runtimeConfig.APIv1
-
-      axios.post(api + '/image', {
-        id: this.me.profile.id,
+      await this.imageStore.post({
+        id: this.event.image.id,
         rotate: deg,
         bust: Date.now(),
         user: true,
       })
-
-      await this.fetch()
 
       this.cacheBust = Date.now()
     },

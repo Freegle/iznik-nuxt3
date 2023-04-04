@@ -36,8 +36,14 @@ import { useAuthorityStore } from './stores/authority'
 import { useMobileStore } from './stores/mobile'
 import { useStatsStore } from './stores/stats'
 import { useMicroVolunteeringStore } from './stores/microvolunteering'
+import { useImageStore } from './stores/image'
+import { useDomainStore } from './stores/domain'
+import { useLogoStore } from './stores/logo'
+import { useLocationStore } from './stores/location'
 
 const route = useRoute()
+
+// TODO Fetch retry.
 
 // Don't render the app until we've done everything in here.
 let ready = false
@@ -71,6 +77,10 @@ const noticeboardStore = useNoticeboardStore()
 const mobileStore = useMobileStore()
 const statsStore = useStatsStore()
 const microVolunteeringStore = useMicroVolunteeringStore()
+const imageStore = useImageStore()
+const domainStore = useDomainStore()
+const logoStore = useLogoStore()
+const locationStore = useLocationStore()
 
 groupStore.init(runtimeConfig)
 messageStore.init(runtimeConfig)
@@ -97,6 +107,10 @@ noticeboardStore.init(runtimeConfig)
 mobileStore.init(runtimeConfig)
 statsStore.init(runtimeConfig)
 microVolunteeringStore.init(runtimeConfig)
+imageStore.init(runtimeConfig)
+domainStore.init(runtimeConfig)
+logoStore.init(runtimeConfig)
+locationStore.init(runtimeConfig)
 
 // We use a key to force the whole page to re-render if we have logged in.  This is a sledgehammer way of
 // re-calling all the setup() methods etc.  Perhaps there's a better way to do this.
