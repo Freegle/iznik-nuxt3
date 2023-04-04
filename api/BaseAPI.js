@@ -60,6 +60,11 @@ export default class BaseAPI {
       }
 
       if (method === 'GET' && config?.params) {
+        // Remove falsey values from the params.
+        config.params = Object.fromEntries(
+          Object.entries(config.params).filter(([_, v]) => v)
+        )
+
         // URL encode the parameters
         path += '?' + new URLSearchParams(config.params)
       } else if (method !== 'POST') {
@@ -252,6 +257,11 @@ export default class BaseAPI {
       }
 
       if (method === 'GET' && config?.params) {
+        // Remove falsey values from the params.
+        config.params = Object.fromEntries(
+          Object.entries(config.params).filter(([_, v]) => v)
+        )
+
         // URL encode the parameters
         path += '?' + new URLSearchParams(config.params)
       } else if (method !== 'POST') {
