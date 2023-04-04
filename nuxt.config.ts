@@ -3,8 +3,6 @@ import config from './config'
 // @ts-ignore
 // @ts-ignore
 export default defineNuxtConfig({
-  _cli: false,
-
   // Rendering modes are confusing.
   //
   // - target can be:
