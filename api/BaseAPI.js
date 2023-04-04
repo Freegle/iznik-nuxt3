@@ -232,7 +232,7 @@ export default class BaseAPI {
     return this.$postOverride('DELETE', path, data, logError)
   }
 
-  async $requestv2(method, path, config, logError = true) {
+  async $requestv2(method, path, config, logError = true, body = null) {
     let status = null
     let data = null
 
@@ -251,8 +251,32 @@ export default class BaseAPI {
         headers.Authorization2 = JSON.stringify(authStore.auth.persistent)
       }
 
+      if (method === 'GET' && config?.params) {
+        // URL encode the parameters
+        path += '?' + new URLSearchParams(config.params)
+      } else if (method !== 'POST') {
+        // Any parameters are passed in config.params.
+        if (!config?.params) {
+          config.params = {}
+        }
+
+        config.params.modtools = false
+
+        // JSON-encode these for to pass.
+        body = JSON.stringify(config.params)
+      } else if (!config?.formPost) {
+        // Parameters will be passed in config.data.
+        if (!config.data) {
+          config.data = {}
+        }
+
+        config.data.modtools = false
+        body = JSON.stringify(config.data)
+      }
+
       const rsp = await ourFetch(this.config.public.APIv2 + path, {
         ...config,
+        body,
         method,
         headers,
       })
