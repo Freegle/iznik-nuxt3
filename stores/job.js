@@ -24,7 +24,7 @@ export const useJobStore = defineStore({
 
       return job
     },
-    async fetch(lat, lng, category, force) {
+    async fetch(lat, lng, category = null, force = false) {
       try {
         if (!this.list?.length || force) {
           if (this.fetching) {
