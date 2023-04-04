@@ -107,8 +107,8 @@ export default {
               domain,
             })
 
-            if (ret && ret.data && ret.data.ret === 0) {
-              this.suggestedDomains = ret.data.suggestions
+            if (ret && ret.ret === 0) {
+              this.suggestedDomains = ret.suggestions
             }
           }
         }

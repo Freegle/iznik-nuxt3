@@ -2,7 +2,6 @@ import BaseAPI from '@/api/BaseAPI'
 
 export default class LocationAPI extends BaseAPI {
   fetch(params) {
-    console.log('Get with', params)
     return this.$get('/locations', params)
   }
 
