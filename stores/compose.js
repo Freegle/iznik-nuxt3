@@ -375,6 +375,8 @@ export const useComposeStore = defineStore({
         // We want to clear any messages from our local store that are not fairly recent, otherwise we can confusingly
         // show an old message, which may then get edited to be a new one, leaving replies to the old message pointing
         // at the new one.  I'm looking at you, Craig.
+        //
+        // Also remove messages for other users.
         for (let id = 0; id < this.messages.length; id++) {
           const m = this.messages[id]
 
@@ -382,9 +384,14 @@ export const useComposeStore = defineStore({
             // This can happen for legacy stores.
             this.messages[id].savedAt = Date.now()
           } else if (Date.now() - m.savedAt > 7 * 24 * 60 * 60 * 1000) {
-            this.deleteMessage({
-              id,
-            })
+            this.deleteMessage(id)
+          }
+
+          const myid = useAuthStore().user?.id
+
+          if (m.savedBy && (!myid || m.savedBy !== myid)) {
+            // This is probably not ours.
+            this.deleteMessage(id)
           }
         }
       }
