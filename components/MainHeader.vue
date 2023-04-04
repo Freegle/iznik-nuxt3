@@ -256,6 +256,11 @@
         <!--      </b-nav-brand>-->
       </div>
       <div class="d-flex align-items-center">
+        <div v-if="isApp && loggedIn" class="text-white mr-3">
+            <div class="notifwrapper">
+              <v-icon icon="redo" class="fa-2x" @click="refresh" />
+          </div>
+        </div>
         <NotificationOptions
           v-if="loggedIn"
           v-model:unread-notification-count="unreadNotificationCount"
@@ -477,6 +482,7 @@ import { useMessageStore } from '../stores/message'
 import { useNotificationStore } from '../stores/notification'
 import { useAuthStore } from '~/stores/auth'
 import { useCookie } from '#imports'
+import { useMobileStore } from '@/stores/mobile'
 
 const AboutMeModal = () => import('~/components/AboutMeModal')
 const NotificationOptions = () => import('~/components/NotificationOptions')
@@ -519,6 +525,10 @@ export default {
     }
   },
   computed: {
+    isApp() {
+      const mobileStore = useMobileStore()
+      return mobileStore.isApp
+    },
     homePage() {
       const lastRoute = this.miscStore.get('lasthomepage')
 
@@ -630,6 +640,9 @@ export default {
       this.waitForRef('modal', () => {
         this.$refs.aboutMeModal.show()
       })
+    },
+    refresh() { // IS_APP
+      window.location.reload(true)  // Works, but causes a complete reload from scratch. this.$router.go() doesn't work in iOS app
     },
     maybeReload(route) {
       if (this.router?.currentRoute?.value?.path === route) {
