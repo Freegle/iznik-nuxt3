@@ -31,6 +31,7 @@
   </div>
 </template>
 <script>
+import { useMessageStore } from '../stores/message'
 import PromiseModal from '~/components/PromiseModal'
 import AddToCalendar from '~/components/AddToCalendar'
 
@@ -41,8 +42,8 @@ export default {
       type: Object,
       required: true,
     },
-    message: {
-      type: Object,
+    id: {
+      type: Number,
       required: true,
     },
     replyusers: {
@@ -50,7 +51,17 @@ export default {
       required: true,
     },
   },
+  setup() {
+    const messageStore = useMessageStore()
+
+    return {
+      messageStore,
+    }
+  },
   computed: {
+    message() {
+      return this.messageStore.byId(this.id)
+    },
     promisee() {
       let ret = null
 
