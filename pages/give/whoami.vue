@@ -1,7 +1,9 @@
 <template>
   <client-only>
     <div class="layout fader">
-      <WizardProgress :active-stage="3" class="d-none d-md-flex" />
+      <div class="d-none d-md-flex justify-content-around">
+        <WizardProgress :active-stage="3" class="maxbutt" />
+      </div>
       <h1 class="text-center">Finally, your email address</h1>
       <div class="text-center">
         <p class="text-muted">

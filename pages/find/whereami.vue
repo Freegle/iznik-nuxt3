@@ -2,7 +2,9 @@
   <client-only>
     <div class="layout fader">
       <GlobalWarning />
-      <WizardProgress :active-stage="2" class="d-none d-md-flex" />
+      <div class="d-none d-md-flex justify-content-around">
+        <WizardProgress :active-stage="3" class="maxbutt" />
+      </div>
       <h1 class="text-center">Now, tell us where you are</h1>
       <p class="text-center">
         We'll use this to show your wanted to people nearby. Don't worry, we
