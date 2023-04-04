@@ -408,6 +408,10 @@ export default {
       }
     },
     isochroneBounds(newVal) {
+      if (newVal) {
+        // Make the map show the isochrone view.
+        this.mapObject.flyToBounds(newVal)
+      }
       this.getMessages()
     },
     groups: {

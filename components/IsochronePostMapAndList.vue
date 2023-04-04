@@ -300,7 +300,6 @@ export default {
       joinVisible: false,
       mapMoved: false,
       updatedMessagesOnMap: null,
-      bump: 1,
 
       infiniteId: +new Date(),
 
@@ -535,7 +534,6 @@ export default {
       this.infiniteId++
     },
     isochroneBounds() {
-      this.bump++
       this.infiniteId++
     },
   },
