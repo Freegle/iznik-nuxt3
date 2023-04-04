@@ -6,6 +6,7 @@
       :selected-group="id"
       :bump="bump"
       :exclude="msgid"
+      :show-give-find="showGiveFind"
     />
   </div>
 </template>
@@ -25,6 +26,11 @@ export default {
       type: Number,
       required: false,
       default: null,
+    },
+    showGiveFind: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   async setup(props) {

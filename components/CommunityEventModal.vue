@@ -404,12 +404,12 @@
 <script>
 import { defineRule, Form as VForm, Field, ErrorMessage } from 'vee-validate'
 import { required, email, min, max } from '@vee-validate/rules'
-import axios from 'axios'
 import { useCommunityEventStore } from '../stores/communityevent'
 import { useComposeStore } from '../stores/compose'
 import { useUserStore } from '../stores/user'
 import { uid } from '../composables/useId'
 import { useGroupStore } from '../stores/group'
+import { useImageStore } from '../stores/image'
 import EmailValidator from './EmailValidator'
 import modal from '@/mixins/modal'
 import { twem } from '~/composables/useTwem'
@@ -484,6 +484,7 @@ export default {
     const composeStore = useComposeStore()
     const userStore = useUserStore()
     const groupStore = useGroupStore()
+    const imageStore = useImageStore()
 
     if (props.id) {
       const v = await communityEventStore.fetch(props.id)
@@ -499,6 +500,7 @@ export default {
       composeStore,
       userStore,
       groupStore,
+      imageStore,
     }
   },
   data() {
@@ -754,20 +756,15 @@ export default {
         }
       }
     },
-    rotate(deg) {
-      const runtimeConfig = useRuntimeConfig()
-      const api = runtimeConfig.APIv1
+    async rotate(deg) {
+      await this.imageStore.post({
+        id: this.event.image.id,
+        rotate: deg,
+        bust: Date.now(),
+        communityevent: true,
+      })
 
-      axios
-        .post(api + '/image', {
-          id: this.event.image.id,
-          rotate: deg,
-          bust: Date.now(),
-          communityevent: true,
-        })
-        .then(() => {
-          this.cacheBust = Date.now()
-        })
+      this.cacheBust = Date.now()
     },
     rotateLeft() {
       this.rotate(90)

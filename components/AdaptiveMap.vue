@@ -1,7 +1,7 @@
 <template>
   <div>
     <h2 class="sr-only">Map of offers and wanteds</h2>
-    <div v-if="!loggedIn && showClosest" class="overlapnav w-100">
+    <div v-if="!loggedIn && showClosest" class="overlapnav">
       <div class="d-flex justify-content-around pl-1 pr-1 w-100">
         <JoinWithConfirm
           :id="closestGroups[0].id"
@@ -647,6 +647,9 @@ export default {
   position: fixed;
   top: 0px;
   left: 0px;
+  margin-left: 110px;
+  margin-right: 110px;
+  width: calc(100% - 220px);
   z-index: 1039;
 }
 

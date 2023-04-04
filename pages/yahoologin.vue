@@ -6,14 +6,11 @@
   </b-row>
 </template>
 <script setup>
-import axios from 'axios'
 import { useAuthStore } from '~/stores/auth'
 import { useRoute, useRouter } from '#imports'
 
 const router = useRouter()
 const route = useRoute()
-const runtimeConfig = useRuntimeConfig()
-const API = runtimeConfig.public.APIv1
 
 // We have been redirected here after an attempt to log in with Yahoo from LoginModal.  We should have two
 // url parameters - returnto which we set up, and code which is returned by Yahoo after a successful login
@@ -36,9 +33,7 @@ if (authStore.user) {
   // window.location = returnto
 } else {
   // We have a code.  Use it on the server to log ion.
-  const result = await axios.post(API + '/session', {
-    yahoocodelogin: code,
-  })
+  const result = await authStore.yahooCodeLogin(code)
 
   if (result?.data?.ret === 0) {
     // Success

@@ -11,8 +11,6 @@ import config from './config'
 
 // @ts-ignore
 export default defineNuxtConfig({
-  _cli: false,
-
   // Rendering modes are confusing.
   //
   // - target can be:
@@ -68,7 +66,6 @@ export default defineNuxtConfig({
     // it detects a failed chunk load.
     '/': { prerender: true },
     '/explore': { prerender: true },
-    '/explore/region/**': { prerender: true },
     '/unsubscribe**': { prerender: true },
     '/about': { prerender: true },
     '/disclaimer': { prerender: true },
@@ -100,15 +97,15 @@ export default defineNuxtConfig({
     '/settings/**': { ssr: false },
     '/stats/**': { ssr: false },
     '/stories/**': { ssr: false },
-    '/story/**': { ssr: false },
     '/teams': { ssr: false },
 
     // Render on demand - may never be shown in a given build - then cache for a while.
+    '/explore/region/**': { swr: 3600 },
     '/communityevent/**': { swr: 3600 },
     '/communityevents/**': { swr: 3600 },
-    // TODO Enumerate groups and pre-render them.
     '/explore/**': { swr: 3600 },
     '/message/**': { swr: 600 },
+    '/story/**': { swr: 3600 },
     '/shortlink/**': { swr: 600 },
     '/volunteering/**': { swr: 3600 },
     '/volunteerings/**': { swr: 3600 },
@@ -118,8 +115,9 @@ export default defineNuxtConfig({
     prerender: {
       routes: ['/404.html', '/sitemap.xml'],
 
-      // Don't crawl, else we end up with all the messages.
-      crawlLinks: false,
+      // Don't prerender the messages - too many
+      ignore: ['/message/'],
+      crawlLinks: true,
     },
   },
 
@@ -162,10 +160,6 @@ export default defineNuxtConfig({
     ],
     'floating-vue/nuxt',
   ],
-
-  axios: {
-    proxy: true,
-  },
 
   // Environment variables the client needs.
   runtimeConfig: {

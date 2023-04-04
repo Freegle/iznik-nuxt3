@@ -2,9 +2,15 @@
   <Suspense>
     <div>
       <h2 v-if="group" class="sr-only">Community Information</h2>
-      <GroupHeader v-if="group" :group="group" show-join />
+      <GroupHeader
+        v-if="group"
+        :group="group"
+        show-join
+        :show-give-find="showGiveFind"
+      />
       <JobsTopBar v-if="jobs" />
       <h2 class="sr-only">List of wanteds and offers</h2>
+      Scroll to {{ scrollToMessage }}
       <div v-observe-visibility="visibilityChanged" />
       <div v-if="deDuplicatedMessages?.length">
         <Suspense
@@ -67,9 +73,11 @@
 </template>
 <script>
 import dayjs from 'dayjs'
+import { mapState } from 'pinia'
 import { useGroupStore } from '../stores/group'
 import { useMessageStore } from '../stores/message'
 import { throttleFetches } from '../composables/useThrottle'
+import { useIsochroneStore } from '../stores/isochrone'
 import { ref } from '#imports'
 import InfiniteLoading from '~/components/InfiniteLoading'
 import { useMiscStore } from '~/stores/misc'
@@ -129,6 +137,11 @@ export default {
       required: false,
       default: true,
     },
+    showGiveFind: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   async setup(props) {
     const groupStore = useGroupStore()
@@ -153,8 +166,8 @@ export default {
     let scrollToMessage = null
 
     if (process.client) {
-      scrollToMessage = window?.history?.state?.scrollToMessage
-      if (scrollToMessage) {
+      scrollToMessage = ref(window?.history?.state?.scrollToMessage)
+      if (scrollToMessage.value) {
         const ix = props.messagesForList.findIndex(
           (message) => message.id === scrollToMessage
         )
@@ -186,6 +199,7 @@ export default {
     }
   },
   computed: {
+    ...mapState(useIsochroneStore, { isochroneBounds: 'bounds' }),
     group() {
       let ret = null
 
@@ -329,6 +343,12 @@ export default {
         }
       },
       immediate: true,
+    },
+    isochroneBounds(newVal) {
+      // If we're changing the isochrone view we don't want to then scroll down to a message which becomes
+      // visible.
+      console.log('Reset scrolltomessage')
+      this.scrollToMessage = null
     },
   },
   methods: {

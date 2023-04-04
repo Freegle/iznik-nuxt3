@@ -135,7 +135,7 @@ export default {
           ret.push(props.takenBy)
         }
 
-        if (selectUser.value) {
+        if (selectUser.value >= 0) {
           // Note that the value may be -1 for someone else, so the user may not exist.
           ret.push({
             userid: selectUser.value,
@@ -169,10 +169,12 @@ export default {
 
       if (this.message?.replies) {
         this.message.replies.forEach((u) => {
-          ret.push({
-            userid: u.userid,
-            displayname: u.displayname,
-          })
+          if (u.userid >= 0) {
+            ret.push({
+              userid: u.userid,
+              displayname: u.displayname,
+            })
+          }
         })
       }
 
@@ -189,6 +191,7 @@ export default {
     },
     moreUsersToSelect() {
       // We show the choose if there are some left and we have not got all users plus someone else.
+      console.log('Repliers', this.left, this.repliers)
       return (
         this.left &&
         (this.selectedUsers.length <= this.repliers.length ||

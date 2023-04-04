@@ -174,6 +174,7 @@
               :label="buttonLabel"
               :handler="submit"
               class="ml-2"
+              spinclass="text-white"
               :disabled="type === 'Taken' && !tookUsers.length"
             />
           </div>
@@ -227,7 +228,9 @@ export default {
         : 1
 
       for (const u of this.tookUsers) {
-        left -= u.count
+        if (u.userid > 0) {
+          left -= u.count
+        }
       }
 
       return left

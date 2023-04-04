@@ -10,7 +10,7 @@
       </b-row>
       <b-row v-else class="m-0">
         <b-col cols="12" lg="6" class="p-0" offset-lg="3">
-          <ExploreGroup :id="group.id" :msgid="msgid" />
+          <ExploreGroup :id="group.id" :msgid="msgid" :show-give-find="!me" />
         </b-col>
       </b-row>
     </div>

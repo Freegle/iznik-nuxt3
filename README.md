@@ -24,11 +24,12 @@ hear about it; you can mail <geeks@ilovefreegle.org>.
 
 # Development
 
-Currently only tested on node v16.13.2 and npm v9.4.0.  Other versions cause issues on Windows builds.
+Currently only tested on node v17.9.1 and npm v9.4.0.  Requires node v17 or later because it relies on fetch()
+which hasn't yet been fully backported to v16.  Node v18 is not yet available on Cloudflare (shockingly).
 
 Then install all the dependencies:
 ```
-npm install
+npm install --legacy-peer-deps
 ```
 
 Set some environment variables:

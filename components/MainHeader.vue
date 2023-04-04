@@ -256,6 +256,11 @@
         <!--      </b-nav-brand>-->
       </div>
       <div class="d-flex align-items-center">
+        <div v-if="isApp && loggedIn" class="text-white mr-3">
+            <div class="notifwrapper">
+              <v-icon icon="redo" class="fa-2x" @click="refresh" />
+          </div>
+        </div>
         <NotificationOptions
           v-if="loggedIn"
           v-model:unread-notification-count="unreadNotificationCount"
@@ -469,14 +474,15 @@
 // Import login modal synchronously as I've seen an issue where it's not in $refs when you click on the signin button too rapidly.
 // const ChatMenu = () => import('~/components/ChatMenu')
 import { useRoute, useRouter } from 'vue-router'
-import axios from 'axios'
 import pluralize from 'pluralize'
 import { useMiscStore } from '../stores/misc'
 import { useNewsfeedStore } from '../stores/newsfeed'
 import { useMessageStore } from '../stores/message'
 import { useNotificationStore } from '../stores/notification'
+import { useLogoStore } from '../stores/logo'
 import { useAuthStore } from '~/stores/auth'
 import { useCookie } from '#imports'
+import { useMobileStore } from '@/stores/mobile'
 
 const AboutMeModal = () => import('~/components/AboutMeModal')
 const NotificationOptions = () => import('~/components/NotificationOptions')
@@ -493,6 +499,7 @@ export default {
     const newsfeedStore = useNewsfeedStore()
     const messageStore = useMessageStore()
     const notificationStore = useNotificationStore()
+    const logoStore = useLogoStore()
     const route = useRoute()
     const router = useRouter()
 
@@ -502,6 +509,7 @@ export default {
       newsfeedStore,
       messageStore,
       notificationStore,
+      logoStore,
       route,
       router,
       path: route.path,
@@ -519,6 +527,10 @@ export default {
     }
   },
   computed: {
+    isApp() {
+      const mobileStore = useMobileStore()
+      return mobileStore.isApp
+    },
     homePage() {
       const lastRoute = this.miscStore.get('lasthomepage')
 
@@ -577,10 +589,7 @@ export default {
   mounted() {
     setTimeout(async () => {
       // Look for a custom logo.
-      const runtimeConfig = useRuntimeConfig()
-
-      const api = runtimeConfig.APIv1
-      const res = await axios.get(api + '/logo')
+      const res = await this.logoStore.fetch()
 
       if (res.status === 200) {
         const ret = res.data
@@ -630,6 +639,9 @@ export default {
       this.waitForRef('modal', () => {
         this.$refs.aboutMeModal.show()
       })
+    },
+    refresh() { // IS_APP
+      window.location.reload(true)  // Works, but causes a complete reload from scratch. this.$router.go() doesn't work in iOS app
     },
     maybeReload(route) {
       if (this.router?.currentRoute?.value?.path === route) {
