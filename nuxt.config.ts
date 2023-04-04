@@ -61,7 +61,6 @@ export default defineNuxtConfig({
     // it detects a failed chunk load.
     '/': { prerender: true },
     '/explore': { prerender: true },
-    '/explore/region/**': { prerender: true },
     '/unsubscribe**': { prerender: true },
     '/about': { prerender: true },
     '/disclaimer': { prerender: true },
@@ -96,9 +95,9 @@ export default defineNuxtConfig({
     '/teams': { ssr: false },
 
     // Render on demand - may never be shown in a given build - then cache for a while.
+    '/explore/region/**': { swr: 3600 },
     '/communityevent/**': { swr: 3600 },
     '/communityevents/**': { swr: 3600 },
-    // TODO Enumerate groups and pre-render them.
     '/explore/**': { swr: 3600 },
     '/message/**': { swr: 600 },
     '/story/**': { swr: 3600 },

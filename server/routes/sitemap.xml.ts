@@ -12,7 +12,6 @@ export default defineEventHandler(async (event) => {
   // eslint-disable-next-line no-undef
   appendResponseHeader(event, 'Content-Type', 'text/xml')
 
-  // An array with your links
   const links = [
     { url: '/', changefreq: 'monthly', priority: 1.0 },
     { url: '/give', changefreq: 'monthly', priority: 1.0 },
@@ -40,7 +39,6 @@ export default defineEventHandler(async (event) => {
     const rsp = await fetch(runtimeConfig.public.APIv2 + '/group')
     const groups = await rsp.json()
 
-    // iterate through groups adding to links
     groups.forEach((group) => {
       links.push({
         url: '/explore/' + group.nameshort,
