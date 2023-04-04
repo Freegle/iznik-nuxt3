@@ -61,7 +61,7 @@ export default class BaseAPI {
 
       if (method === 'GET' && config?.params) {
         // URL encode the parameters
-        path += '&' + new URLSearchParams(config.params)
+        path += '?' + new URLSearchParams(config.params)
       } else if (method !== 'POST') {
         // Any parameters are passed in config.params.
         if (!config?.params) {
