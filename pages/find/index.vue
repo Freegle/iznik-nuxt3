@@ -1,9 +1,11 @@
 <template>
   <client-only>
     <div>
+      <div class="d-none d-md-flex justify-content-around">
+        <WizardProgress :active-stage="3" class="maxbutt" />
+      </div>
       <b-row class="m-0">
         <b-col cols="12" lg="8" class="p-0" offset-lg="2">
-          <WizardProgress :active-stage="1" class="d-none d-md-flex" />
           <h1 class="text-center">First, what are you looking for?</h1>
           <ul
             v-for="(id, index) in ids"
@@ -127,5 +129,9 @@ export default {
 .cg {
   flex-basis: 25%;
   flex-grow: 1;
+}
+
+.maxbutt {
+  width: 33vw;
 }
 </style>
