@@ -1,5 +1,15 @@
 import * as Sentry from '@sentry/browser'
+import fetchRetry from 'fetch-retry'
 import { useAuthStore } from '~/stores/auth'
+
+// We add fetch retrying.
+// Note that $fetch and useFetch cause problems on Node v18, so we don't use them.
+const ourFetch = fetchRetry(fetch, {
+  retries: 10,
+  retryDelay: function (attempt, error, response) {
+    return attempt * 1000
+  },
+})
 
 export class APIError extends Error {
   constructor({ request, response }, message) {
@@ -51,7 +61,7 @@ export default class BaseAPI {
 
       if (method === 'GET' && config?.params) {
         // URL encode the parameters
-        path += '&' + new URLSearchParams(config.params)
+        path += '?' + new URLSearchParams(config.params)
       } else if (method !== 'POST') {
         // Any parameters are passed in config.params.
         if (!config?.params) {
@@ -72,7 +82,7 @@ export default class BaseAPI {
         body = JSON.stringify(config.data)
       }
 
-      const rsp = await fetch(this.config.public.APIv1 + path, {
+      const rsp = await ourFetch(this.config.public.APIv1 + path, {
         ...config,
         body,
         method,
@@ -197,7 +207,6 @@ export default class BaseAPI {
   }
 
   $postOverride(overrideMethod, path, data, logError = true) {
-    console.log('Post override', path, data)
     return this.$request(
       'POST',
       path,
@@ -242,7 +251,7 @@ export default class BaseAPI {
         headers.Authorization2 = JSON.stringify(authStore.auth.persistent)
       }
 
-      const rsp = await fetch(this.config.public.APIv2 + path, {
+      const rsp = await ourFetch(this.config.public.APIv2 + path, {
         ...config,
         method,
         headers,

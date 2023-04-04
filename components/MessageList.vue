@@ -2,7 +2,12 @@
   <Suspense>
     <div>
       <h2 v-if="group" class="sr-only">Community Information</h2>
-      <GroupHeader v-if="group" :group="group" show-join />
+      <GroupHeader
+        v-if="group"
+        :group="group"
+        show-join
+        :show-give-find="showGiveFind"
+      />
       <JobsTopBar v-if="jobs" />
       <h2 class="sr-only">List of wanteds and offers</h2>
       <div v-observe-visibility="visibilityChanged" />
@@ -128,6 +133,11 @@ export default {
       type: Boolean,
       required: false,
       default: true,
+    },
+    showGiveFind: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   async setup(props) {

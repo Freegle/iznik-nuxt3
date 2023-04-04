@@ -47,7 +47,7 @@
                   variant="secondary"
                 >
                   <v-icon icon="shopping-cart" />
-                  >&nbsp;Ask for stuff
+                  &nbsp;Ask for stuff
                 </b-button>
               </b-col>
             </b-row>
