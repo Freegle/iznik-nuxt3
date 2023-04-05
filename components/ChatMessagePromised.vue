@@ -110,6 +110,7 @@
             :to="
               (messageIsFromCurrentUser ? '/myposts/' : '/message/') + refmsgid
             "
+            class="nodecor"
           >
             <h4>
               {{ refmsg?.subject }}
