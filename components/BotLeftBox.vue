@@ -1,5 +1,5 @@
 <template>
-  <nav class="bg-transparent pr-2 botleft">
+  <nav class="bg-transparent pr-2">
     <div class="d-flex justify-content-between">
       <div class="d-flex">
         <ExternalLink href="https://www.facebook.com/Freegle/" title="Facebook">
@@ -52,10 +52,5 @@ export default {
 <style scoped lang="scss">
 a {
   color: $color-black !important;
-}
-
-.botleft {
-  position: fixed;
-  bottom: 10px;
 }
 </style>
