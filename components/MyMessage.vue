@@ -758,7 +758,7 @@ export default {
       }
 
       await this.composeStore.setAttachmentsForMessage(
-        this.message.id,
+        0,
         this.message.attachments
       )
 
