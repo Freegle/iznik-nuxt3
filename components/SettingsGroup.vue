@@ -27,7 +27,7 @@
       <b-col v-if="!eventshide" cols="12" sm="6">
         <b-form-group label="Community Event mails:">
           <OurToggle
-            :model-value="eventsallowed"
+            v-model="eventsallowed"
             class="mt-2"
             :height="30"
             :width="100"
@@ -41,7 +41,7 @@
       <b-col v-if="!volunteerhide" cols="12" sm="6">
         <b-form-group label="Volunteer Opportunity mails:">
           <OurToggle
-            :model-value="volunteeringallowed"
+            v-model="volunteeringallowed"
             class="mt-2"
             :height="30"
             :width="100"
@@ -120,6 +120,7 @@ export default {
         return Boolean(this.membership?.eventsallowed)
       },
       async set(newval) {
+        console.log('Set eventsallowed', newval)
         await this.changeValue('eventsallowed', newval ? 1 : 0)
       },
     },

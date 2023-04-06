@@ -53,7 +53,9 @@ export default {
       this.currentValue = newVal
     },
     currentValue(newVal) {
+      // Older calling code uses @change event.
       this.$emit('change', newVal)
+      this.$emit('update:modelValue', newVal)
     },
   },
 }
