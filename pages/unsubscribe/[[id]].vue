@@ -53,7 +53,7 @@
                 class="mb-2"
                 @click="unsubscribe"
               >
-                Unsubscribe completely and delete my account
+                Unsubscribe <span class="d-none d-md-block">completely</span>completely and delete my account
               </b-button>
               <p>If you need help, please mail <SupportLink />.</p>
             </div>
