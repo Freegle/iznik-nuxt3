@@ -90,12 +90,14 @@ jobs:
           command: echo "Install globals"
       - run: sudo npm install -g rimraf
       - run: sudo npm install
+
+      # Fix cache of @freegle/capacitor-push-notifications
       - run: ls -l node_modules/@freegle/capacitor-push-notifications
       - run: sudo npm remove @freegle/capacitor-push-notifications
       - run: sudo npm add https://github.com/Freegle/capacitor-push-notifications.git
       - run: ls -l node_modules/@freegle/capacitor-push-notifications
 
-      # SHow current branch
+      # Show current branch
       - run: git rev-parse --abbrev-ref HEAD
 
 ################
@@ -113,7 +115,7 @@ jobs:
       #- run: npx cap build ios --scheme Freegle
       - run: xcodebuild -workspace ios/App/App.xcworkspace -list
       - run: xcodebuild -list -project ios/App/App.xcodeproj
-      - run: cd ios/App; xcodebuild -configuration Release -workspace App.xcworkspace -scheme Freegle -destination generic/platform=iOS -archivePath App.xcarchive archive
+      - run: cd ios/App; xcodebuild -allowProvisioningUpdates -configuration Release -workspace App.xcworkspace -scheme Freegle -destination generic/platform=iOS -archivePath App.xcarchive archive
       
 ################
 # UPLOAD TO GITHUB AS NEW TAGGED RELEASE
