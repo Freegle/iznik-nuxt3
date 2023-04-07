@@ -644,32 +644,39 @@ export default {
     },
     async getCounts() {
       if (this.myid) {
-        await this.newsfeedStore.fetchCount()
+        try {
+          // We sometimes might not yet have figured out if we're logged in, so catch exceptions otherwise they
+          // cause Nuxt to bail out with JS errors.
+          await this.newsfeedStore.fetchCount()
 
-        let messages = []
+          let messages = []
 
-        if (this.path !== '/profile/' + this.myid) {
-          // Get the messages for the currently logged in user.  This will also speed up the My Posts page.
-          //
-          // We don't do this if we're looking at our own profile otherwise this fetch and the one in ProfileInfo
-          // can interfere with each other.
-          messages = await this.messageStore.fetchByUser(this.myid, true)
-        }
+          if (this.path !== '/profile/' + this.myid) {
+            // Get the messages for the currently logged in user.  This will also speed up the My Posts page.
+            //
+            // We don't do this if we're looking at our own profile otherwise this fetch and the one in ProfileInfo
+            // can interfere with each other.
+            messages = await this.messageStore.fetchByUser(this.myid, true)
+          }
 
-        this.activePostsCount = 0
+          this.activePostsCount = 0
 
-        if (messages) {
-          // Count messages with no outcome
-          this.activePostsCount = messages.filter((msg) => {
-            return !msg.hasoutcome
-          }).length
-        }
+          if (messages) {
+            // Count messages with no outcome
+            this.activePostsCount = messages.filter((msg) => {
+              return !msg.hasoutcome
+            }).length
+          }
 
-        this.unreadNotificationCount = await this.notificationStore.fetchCount()
+          this.unreadNotificationCount =
+            await this.notificationStore.fetchCount()
 
-        if (this.unreadNotificationCount) {
-          // Fetch the notifications too, so that we can be quick if they view them.
-          this.notificationStore.fetchList()
+          if (this.unreadNotificationCount) {
+            // Fetch the notifications too, so that we can be quick if they view them.
+            this.notificationStore.fetchList()
+          }
+        } catch (e) {
+          console.log('Ignore error fetching counts', e)
         }
       }
 
