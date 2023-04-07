@@ -1,22 +1,26 @@
 <template>
-  <div class="sidebar__wrapper pr-3">
-    <CommunityEventSidebar
-      v-if="showCommunityEvents"
-      class="flex-grow-1 sidebar__community-event"
-    />
-    <hr
-      v-if="showCommunityEvents && showVolunteerOpportunities"
-      class="m-0 hr1"
-    />
-    <VolunteerOpportunitySidebar
-      v-if="showVolunteerOpportunities"
-      class="flex-grow-1 sidebar__volunteer-opportunity"
-    />
-    <hr
-      v-if="showCommunityEvents && showVolunteerOpportunities"
-      class="mt-0 hr2"
-    />
-    <BotLeftBox v-if="showBotLeft" class="social-media__wrapper ml-2" />
+  <div class="sidebar__wrapper">
+    <div class="sidebar__info pr-3">
+      <CommunityEventSidebar
+        v-if="showCommunityEvents"
+        class="flex-grow-1 sidebar__community-event"
+      />
+      <hr
+        v-if="showCommunityEvents && showVolunteerOpportunities"
+        class="m-0 hr1"
+      />
+      <VolunteerOpportunitySidebar
+        v-if="showVolunteerOpportunities"
+        class="flex-grow-1 sidebar__volunteer-opportunity"
+      />
+      <hr
+        v-if="showCommunityEvents && showVolunteerOpportunities"
+        class="mt-0 hr2"
+      />
+    </div>
+    <div class="sidebar__botleft align-content-end">
+      <BotLeftBox v-if="showBotLeft" class="social-media__wrapper ml-2" />
+    </div>
   </div>
 </template>
 <script>
@@ -50,13 +54,35 @@ export default {
   },
 }
 </script>
-<style scoped>
+<style scoped lang="scss">
 .sidebar__wrapper {
+  display: grid;
+  grid-template-rows: 1fr;
+  grid-template-columns: 100%;
+  height: 100vh;
+}
+
+.sidebar__info {
+  grid-row: 1 / 2;
+  grid-column: 1 / 2;
   display: grid;
   grid-template-rows: 1fr auto 1fr auto 70px;
   grid-template-columns: 1fr;
   grid-row-gap: 10px;
-  max-height: 100vh;
+  height: calc(100vh - 100px);
+}
+
+.sidebar__botleft {
+  grid-row: 1 / 2;
+  grid-column: 1 / 2;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  height: calc(100vh - 68px);
+
+  .social-media__wrapper {
+    grid-row: 2 / 3;
+    padding-bottom: 10px;
+  }
 }
 
 .sidebar__community-event {
