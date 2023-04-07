@@ -90,7 +90,7 @@ jobs:
           command: echo "Install globals"
       - run: sudo npm install -g rimraf
       - run: sudo npm install
-      - run: ls -l ls -l node_modules/@freegle/capacitor-push-notifications
+      - run: ls -l node_modules/@freegle/capacitor-push-notifications
 
       # SHow current branch
       - run: git rev-parse --abbrev-ref HEAD
