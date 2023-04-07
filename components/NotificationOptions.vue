@@ -192,6 +192,11 @@ export default {
   @include media-breakpoint-up(sm) {
     transform: none;
   }
+
+  @include media-breakpoint-down(md) {
+    width: 300px;
+    right: -51px;
+  }
 }
 
 :deep(.notification-list .dropdown-item) {
@@ -199,6 +204,11 @@ export default {
   max-width: 100%;
   padding-left: 5px;
   overflow-wrap: break-word;
+
+  @include media-breakpoint-down(md) {
+    width: 300px;
+    right: -51px;
+  }
 }
 
 :deep(.dropdown-toggle.show) {

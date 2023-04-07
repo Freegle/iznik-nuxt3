@@ -446,7 +446,7 @@ export default {
   methods: {
     supporterInfo() {
       this.showInfoModal = true
-      this.waitForRef('infoModal', () => {
+      this.waitForRef('supporterInfoModal', () => {
         this.$refs.supporterInfoModal.show()
       })
     },
