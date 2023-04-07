@@ -20,7 +20,7 @@
             <div
               class="d-flex justify-content-between flex-wrap mb-2 mt-3 border-bottom"
             >
-              <form role="search" class="mb-1 mr-1">
+              <form role="search" class="mb-1 mr-1 ml-1 ml-md-0">
                 <label for="search-bar" class="sr-only">Search chats</label>
                 <b-form-input
                   id="search-bar"
@@ -29,7 +29,11 @@
                   class="flex-shrink-1"
                 />
               </form>
-              <b-button variant="primary" class="mb-1" @click="markAllRead">
+              <b-button
+                variant="primary"
+                class="mb-1 ml-1 ml-md-0"
+                @click="markAllRead"
+              >
                 <v-icon icon="check" /> Mark all read
               </b-button>
             </div>
