@@ -91,8 +91,8 @@ jobs:
       - run: sudo npm install -g rimraf
       - run: sudo npm install
       - run: ls -l node_modules/@freegle/capacitor-push-notifications
-      - run: npm remove @freegle/capacitor-push-notifications
-      - run: npm add https://github.com/Freegle/capacitor-push-notifications.git
+      - run: sudo npm remove @freegle/capacitor-push-notifications
+      - run: sudo npm add https://github.com/Freegle/capacitor-push-notifications.git
       - run: ls -l node_modules/@freegle/capacitor-push-notifications
 
       # SHow current branch
