@@ -180,7 +180,6 @@ export default {
     },
   },
   setup(props, { emit }) {
-    console.log('Microvol setup')
     const microVolunteeringStore = useMicroVolunteeringStore()
     const miscStore = useMiscStore()
     const authStore = useAuthStore()
@@ -277,8 +276,6 @@ export default {
       this.task = await this.microVolunteeringStore.challenge({
         types: this.types,
       })
-
-      console.log('Got task', this.task)
 
       if (this.task) {
         this.miscStore.set({

@@ -91,7 +91,7 @@ export default {
       return approvedby
     },
     message() {
-      return this.messageStore.byId(this.id)
+      return this.messageStore?.byId(this.id)
     },
     groups() {
       const ret = {}
