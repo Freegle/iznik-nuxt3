@@ -579,14 +579,10 @@ export default {
   mounted() {
     setTimeout(async () => {
       // Look for a custom logo.
-      const res = await this.logoStore.fetch()
+      const ret = await this.logoStore.fetch()
 
-      if (res.status === 200) {
-        const ret = res.data
-
-        if (ret.ret === 0 && ret.logo) {
-          this.logo = ret.logo.path.replace(/.*logos/, '/logos')
-        }
+      if (ret.ret === 0 && ret.logo) {
+        this.logo = ret.logo.path.replace(/.*logos/, '/logos')
       }
     }, 5000)
 
