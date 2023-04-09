@@ -54,7 +54,7 @@
           Next <v-icon icon="angle-double-right" />
         </b-button>
       </div>
-      <div class="w-100 d-flex justify-content-around">
+      <div class="w-100 d-flex justify-content-around margbott">
         <div class="mt-2 d-none d-md-flex justify-content-between maxbutt">
           <b-button
             variant="secondary"
@@ -158,5 +158,9 @@ select {
 
 .maxbutt {
   width: 33vw;
+}
+
+.margbott {
+  margin-bottom: 50px;
 }
 </style>
