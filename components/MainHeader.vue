@@ -591,12 +591,9 @@ export default {
       // Look for a custom logo.
       const ret = await this.logoStore.fetch()
 
-      console.log("TRY LOGO", ret)
       if (ret.ret === 0 && ret.logo) {
-        console.log("LOGO",ret.logo.path)
         this.logo = ret.logo.path.replace(/.*logos/, '/logos')
         if( this.isApp){
-          console.log("LOGO",ret.logo.path.replace('/images/logos', '/logos').replace('images.ilovefreegle','www.ilovefreegle'))
           this.logo = ret.logo.path.replace('/images/logos', '/logos').replace('images.ilovefreegle','www.ilovefreegle')
         }
       }
