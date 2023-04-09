@@ -10,7 +10,6 @@
       />
       <JobsTopBar v-if="jobs" />
       <h2 class="sr-only">List of wanteds and offers</h2>
-      Scroll to {{ scrollToMessage }}
       <div v-observe-visibility="visibilityChanged" />
       <div v-if="deDuplicatedMessages?.length">
         <Suspense
