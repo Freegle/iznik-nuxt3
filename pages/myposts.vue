@@ -1,7 +1,7 @@
 <template>
   <client-only v-if="me">
     <b-container fluid class="p-0 p-xl-2">
-      <h1 class="sr-only">My posts</h1>
+      <h1 class="visually-hidden">My posts</h1>
       <b-row class="m-0">
         <b-col cols="0" lg="3" class="p-0 pr-1">
           <VisibleWhen :at="['lg', 'xl']">
@@ -77,7 +77,7 @@
                     <div
                       v-for="message in offersShown"
                       :key="'message-' + message.id"
-                      class="p-0 text-left mt-1"
+                      class="p-0 text-start mt-1"
                     >
                       <MyMessage
                         :id="message.id"
@@ -159,7 +159,7 @@
                     <div
                       v-for="message in wantedsShown"
                       :key="'message-' + message.id"
-                      class="p-0 text-left mt-1"
+                      class="p-0 text-start mt-1"
                     >
                       <MyMessage
                         :id="message.id"
@@ -216,7 +216,7 @@
                       v-for="search in searches"
                       :key="'search-' + search.id"
                       :search="search"
-                      class="text-left mt-1 list-group-item bg-white border text-nowrap mr-2"
+                      class="text-start mt-1 list-group-item bg-white border text-nowrap mr-2"
                     />
                   </ul>
                   <div v-else>

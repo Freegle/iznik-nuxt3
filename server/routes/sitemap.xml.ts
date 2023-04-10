@@ -30,8 +30,6 @@ export default defineEventHandler(async (event) => {
     { url: '/privacy', changefreq: 'monthly', priority: 0.1 },
     { url: '/forgot', changefreq: 'monthly', priority: 0.1 },
     { url: '/giftaid', changefreq: 'monthly', priority: 0.1 },
-
-    // TODO Councils - separate site?
   ]
 
   // Fetch all the groups.

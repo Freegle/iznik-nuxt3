@@ -6,7 +6,7 @@
       </b-button>
       <p>This would be a global alert.</p>
     </NoticeMessage>
-    <div v-else class="text-danger text-right clickme" @click="showit">
+    <div v-else class="text-danger text-end clickme" @click="showit">
       Show notice.
     </div>
   </div>

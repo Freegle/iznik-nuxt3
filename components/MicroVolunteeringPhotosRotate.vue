@@ -19,9 +19,9 @@
         name="save"
         variant="primary"
         size="lg"
-        :handler="done"
         label="All photos look good"
         spinclass="text-white"
+        @handle="done"
       />
     </div>
   </div>

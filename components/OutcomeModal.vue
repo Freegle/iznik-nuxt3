@@ -172,10 +172,10 @@
               variant="primary"
               name="save"
               :label="buttonLabel"
-              :handler="submit"
               class="ml-2"
               spinclass="text-white"
               :disabled="type === 'Taken' && !tookUsers.length"
+              @handle="submit"
             />
           </div>
         </div>

@@ -30,7 +30,7 @@
           <div class="d-flex justify-content-between flex-wrap mb-2">
             <div
               v-if="!refmsg.promisecount"
-              class="mr-2 border-light border-right flex-grow-1 text-center"
+              class="mr-2 border-light border-end flex-grow-1 text-center"
             >
               <div class="text-center small text-muted mb-2">
                 Still available?

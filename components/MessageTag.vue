@@ -7,7 +7,7 @@
       'font-weight-bold': true,
       forcebreak: true,
       'text-wrap': true,
-      'text-left': true,
+      'text-start': true,
     }"
   >
     {{ tagForGroup }}

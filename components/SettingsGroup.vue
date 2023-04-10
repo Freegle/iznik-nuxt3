@@ -16,10 +16,10 @@
       <b-col v-if="leave" cols="12" sm="6">
         <SpinButton
           variant="secondary"
-          :handler="leaveGroup"
           name="trash-alt"
           label="Leave"
           class="mb-3"
+          @handle="leaveGroup"
         />
       </b-col>
     </b-row>

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h2 class="sr-only">Map of offers and wanteds</h2>
+    <h2 class="visually-hidden">Map of offers and wanteds</h2>
     <Suspense>
       <PostMap
         v-if="initialBounds"
@@ -38,7 +38,7 @@
     <div v-observe-visibility="mapVisibilityChanged" />
     <div class="rest">
       <div v-if="closestGroups?.length" class="mb-1 border p-2 bg-white">
-        <h2 class="sr-only">Nearby commmunities</h2>
+        <h2 class="visually-hidden">Nearby commmunities</h2>
         <div class="d-flex flex-wrap justify-content-center">
           <div v-for="g in closestGroups" :key="'group-' + g.id">
             <JoinWithConfirm
@@ -62,7 +62,7 @@
           </div>
         </div>
         <div v-if="showGroupList">
-          <h2 class="sr-only">List of communities</h2>
+          <h2 class="visually-hidden">List of communities</h2>
           <AdaptiveMapGroup
             v-for="groupid in groupids"
             :id="groupid"
@@ -84,19 +84,19 @@
         </p>
       </div>
       <div v-else>
-        <h2 class="sr-only">Search Filters</h2>
+        <h2 class="visually-hidden">Search Filters</h2>
         <div variant="info" class="p-2 border border-info bg-white filters">
           <GroupSelect
             v-if="me"
             v-model="selectedGroup"
             label="Communities to view"
-            label-sr-only
+            label-visually-hidden
             all
             :all-my="false"
           />
           <div v-if="me" />
           <div>
-            <label for="typeOptions" class="sr-only"
+            <label for="typeOptions" class="visually-hidden"
               >Type of posts to view</label
             >
             <b-form-select
@@ -141,7 +141,7 @@
           </NoticeMessage>
         </div>
 
-        <h2 class="sr-only">List of wanteds and offers</h2>
+        <h2 class="visually-hidden">List of wanteds and offers</h2>
         <MessageList
           v-if="updatedMessagesOnMap || messagesOnMap.length"
           v-model:visible="postsVisible"

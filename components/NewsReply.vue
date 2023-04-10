@@ -240,7 +240,7 @@
           label="Post"
           iconlast
           spinclass="text-white"
-          :handler="sendReply"
+          @handle="sendReply"
         />
       </div>
     </div>

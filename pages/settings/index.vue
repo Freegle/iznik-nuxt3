@@ -1,7 +1,7 @@
 <template>
   <client-only v-if="me">
     <div>
-      <h1 class="sr-only">Settings</h1>
+      <h1 class="visually-hidden">Settings</h1>
       <b-row class="m-0">
         <b-col cols="0" xl="3" />
         <b-col cols="12" xl="6" class="p-0">
@@ -124,7 +124,7 @@
                 </b-col>
                 <b-col cols="12" xl="6">
                   <b-card no-body>
-                    <b-card-body class="text-left p-0 p-sm-2">
+                    <b-card-body class="text-start p-0 p-sm-2">
                       <div v-if="aboutme">
                         &quot;{{ aboutme }}&quot;
                         <br />
@@ -192,9 +192,9 @@
                   variant="primary"
                   name="save"
                   label="Save"
-                  :handler="saveEmail"
                   spinclass="text-white"
                   class="align-self-end pb-3"
+                  @handle="saveEmail"
                 />
               </div>
               <div
@@ -219,7 +219,7 @@
                   variant="white"
                   name="check"
                   label="Try again"
-                  :handler="unbounce"
+                  @handle="unbounce"
                 />
               </NoticeMessage>
               <b-row>
@@ -244,9 +244,9 @@
                         size="lg"
                         class="mb-2 d-inline"
                         :disabled="!pc"
-                        :handler="savePostcode"
                         name="save"
                         label="Save"
+                        @handle="savePostcode"
                       />
                     </div>
                   </b-form-group>

@@ -34,9 +34,9 @@
             name="check"
             variant="primary"
             size="lg"
-            :handler="putup"
             label="I put up a poster!"
             class="mb-2"
+            @handle="putup"
           />
           <b-button
             variant="secondary"
@@ -50,9 +50,9 @@
             name="times"
             variant="secondary"
             size="lg"
-            :handler="shutup"
             label="Please ask someone else"
             class="mb-2"
+            @handle="shutup"
           />
         </div>
         <b-form>
@@ -67,9 +67,9 @@
           <SpinButton
             variant="secondary"
             name="save"
-            :handler="saveComments"
             label="Save comments"
             class="mt-2"
+            @handle="saveComments"
           />
         </b-form>
         <p class="mt-3">
@@ -78,8 +78,8 @@
         <SpinButton
           variant="secondary"
           name="trash-alt"
-          :handler="dead"
           label="Noticeboard no longer active"
+          @handle="dead"
         />
         <hr />
         <h2 class="mt-2">History</h2>

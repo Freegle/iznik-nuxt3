@@ -174,18 +174,16 @@ export const useAuthStore = defineStore({
       this.loginCount++
     },
     async lostPassword(email) {
-      const res = await this.$api.session.lostPassword(email)
-      return res
+      return await this.$api.session.lostPassword(email)
     },
     async unsubscribe(email) {
-      const res = await this.$api.session.unsubscribe(email)
-      return res.data
+      return await this.$api.session.unsubscribe(email)
     },
     async signUp(params) {
       const res = await this.$api.user.signUp(params)
-      const { ret, status, jwt, persistent } = res.data
+      const { ret, status, jwt, persistent } = res
 
-      if (res.status === 200 && res.data.ret === 0) {
+      if (res.ret === 0) {
         this.forceLogin = false
 
         this.setAuth(jwt, persistent)
@@ -405,12 +403,7 @@ export const useAuthStore = defineStore({
       return await this.fetchUser()
     },
     async yahooCodeLogin(code) {
-      const runtimeConfig = useRuntimeConfig()
-      const api = runtimeConfig.APIv1
-
-      const res = await await api(this.config).session.yahooCodeLogin(code)
-
-      return res.data
+      return await this.$api.session.yahooCodeLogin(code)
     },
   },
   getters: {
