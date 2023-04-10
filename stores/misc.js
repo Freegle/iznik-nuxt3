@@ -21,6 +21,7 @@ export const useMiscStore = defineStore({
     vals: {},
     somethingWentWrong: false,
     visible: true,
+    apiCount: 0,
   }),
   actions: {
     set(params) {
@@ -31,6 +32,9 @@ export const useMiscStore = defineStore({
     },
     setBreakpoint(val) {
       this.breakpoint = val
+    },
+    api(diff) {
+      this.apiCount += diff
     },
   },
   getters: {

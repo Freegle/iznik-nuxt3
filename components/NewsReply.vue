@@ -1,5 +1,8 @@
 <template>
-  <div :class="{ 'bg-info': scrollToThis }">
+  <div
+    v-observe-visibility="visibilityChanged"
+    :class="{ 'bg-info': scrollToThis }"
+  >
     <div class="reply">
       <div
         class="clickme align-top"
@@ -292,6 +295,7 @@
 import pluralize from 'pluralize'
 import { useNewsfeedStore } from '../stores/newsfeed'
 import { useUserStore } from '../stores/user'
+import { useMiscStore } from '../stores/misc'
 import NewsLovesModal from './NewsLovesModal'
 import SpinButton from './SpinButton'
 import NewsEditModal from './NewsEditModal'
@@ -352,10 +356,12 @@ export default {
   setup(props) {
     const newsfeedStore = useNewsfeedStore()
     const userStore = useUserStore()
+    const miscStore = useMiscStore()
 
     return {
       userStore,
       newsfeedStore,
+      miscStore,
     }
   },
   data() {
@@ -371,6 +377,8 @@ export default {
       showDeleteModal: false,
       showLoveModal: false,
       showEditModal: false,
+      hasBecomeVisible: false,
+      isVisible: false,
     }
   },
   computed: {
@@ -419,9 +427,7 @@ export default {
   watch: {
     scrollTo(newVal) {
       if (parseInt(this.scrollTo) === this.replyid && this.$el.scrollIntoView) {
-        this.$nextTick(() => {
-          this.$el.scrollIntoView(false)
-        })
+        this.scrollIntoView()
       }
     },
   },
@@ -555,6 +561,38 @@ export default {
       // The imageid is in this.imageid
       this.imageid = imageid
       this.imagethumb = imagethumb
+    },
+    scrollIntoView() {
+      const api = this.miscStore.apiCount
+
+      if (api) {
+        // Try later
+        setTimeout(this.scrollIntoView, 100)
+      } else {
+        // No outstanding requests, so we can scroll.
+        this.$el.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+          inline: 'nearest',
+        })
+
+        this.$nextTick(() => {
+          if (!this.isVisible) {
+            setTimeout(this.scrollIntoView, 200)
+          } else {
+            this.hasBecomeVisible = true
+          }
+        })
+      }
+    },
+    visibilityChanged(visible) {
+      if (parseInt(this.scrollTo) === this.replyid && !this.hasBecomeVisible) {
+        this.isVisible = visible
+
+        if (!visible) {
+          this.scrollIntoView()
+        }
+      }
     },
   },
 }

@@ -1,6 +1,7 @@
 import * as Sentry from '@sentry/browser'
 import fetchRetry from 'fetch-retry'
 import { useAuthStore } from '~/stores/auth'
+import { useMiscStore } from '~/stores/misc'
 
 // We add fetch retrying.
 // Note that $fetch and useFetch cause problems on Node v18, so we don't use them.
@@ -87,6 +88,8 @@ export default class BaseAPI {
         body = JSON.stringify(config.data)
       }
 
+      useMiscStore().api(1)
+
       const rsp = await ourFetch(this.config.public.APIv1 + path, {
         ...config,
         body,
@@ -95,6 +98,8 @@ export default class BaseAPI {
       })
       status = rsp.status
       data = await rsp.json()
+
+      useMiscStore().api(-1)
     } catch (e) {
       if (e.message.match(/.*aborted.*/i)) {
         // We've seen requests get aborted immediately after beforeunload().  Makes sense to abort the requests
@@ -284,14 +289,19 @@ export default class BaseAPI {
         body = JSON.stringify(config.data)
       }
 
+      useMiscStore().api(1)
+
       const rsp = await ourFetch(this.config.public.APIv2 + path, {
         ...config,
         body,
         method,
         headers,
       })
+
       status = rsp.status
       data = await rsp.json()
+
+      useMiscStore().api(-1)
     } catch (e) {
       console.log('Fetch error', path, e?.message)
       if (e.message.match(/.*aborted.*/i)) {
