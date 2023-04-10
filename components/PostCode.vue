@@ -222,8 +222,8 @@ export default {
           typeahead: pc.name,
         })
 
-        if (loc?.data?.locations?.length === 1) {
-          this.$emit('selected', loc.data.locations[0])
+        if (loc?.locations?.length === 1) {
+          this.$emit('selected', loc.locations[0])
         }
       } else {
         this.$emit('cleared')
@@ -244,15 +244,15 @@ export default {
             })
 
             if (
-              res.data.ret === 0 &&
-              res.data.location &&
-              res.data.location.name &&
+              res.ret === 0 &&
+              res.location &&
+              res.location.name &&
               this.$refs.autocomplete
             ) {
               // Got it - put it in the autocomplete input, and indicate that we've selected it.
-              this.$refs.autocomplete.setValue(res.data.location.name)
+              this.$refs.autocomplete.setValue(res.location.name)
               this.select({
-                name: res.data.location.name,
+                name: res.location.name,
               })
 
               // Show the user we've done this, and make them think.

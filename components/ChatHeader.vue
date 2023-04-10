@@ -15,7 +15,7 @@
           size="xl"
           border
         />
-        <div class="font-weight-bold black text--large name">
+        <div class="font-weight-bold black text--large name pl-1">
           {{ chat.name }}
         </div>
         <div

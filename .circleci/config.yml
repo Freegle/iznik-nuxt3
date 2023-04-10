@@ -112,11 +112,11 @@ jobs:
       - run: npm run generate
       - run: npx cap sync ios
       - run: ls -l ios/App
-      #- run: npx cap build ios --scheme Freegle
-      - run: xcodebuild -workspace ios/App/App.xcworkspace -list
-      - run: xcodebuild -list -project ios/App/App.xcodeproj
-      - run: cd ios/App; xcodebuild CODE_SIGN_STYLE="Manual" PROVISIONING_PROFILE_SPECIFIER="Freegle 0323" DEVELOPMENT_TEAM="$iosDeveloper" -configuration Release -workspace App.xcworkspace -scheme Freegle -destination generic/platform=iOS -archivePath App.xcarchive archive
-      #-allowProvisioningUpdates
+      - run: npx cap build ios --scheme Freegle
+      #- run: xcodebuild -workspace ios/App/App.xcworkspace -list
+      #- run: xcodebuild -list -project ios/App/App.xcodeproj
+      #- run: cd ios/App; xcodebuild CODE_SIGN_STYLE="Manual" PROVISIONING_PROFILE_SPECIFIER="Freegle 0323" DEVELOPMENT_TEAM="$iosDeveloper" -configuration Release -workspace App.xcworkspace -scheme Freegle -destination generic/platform=iOS -archivePath App.xcarchive archive
+      # -allowProvisioningUpdates
       
 ################
 # UPLOAD TO GITHUB AS NEW TAGGED RELEASE
