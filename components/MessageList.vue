@@ -10,7 +10,6 @@
       />
       <JobsTopBar v-if="jobs" />
       <h2 class="sr-only">List of wanteds and offers</h2>
-      Scroll to {{ scrollToMessage }}
       <div v-observe-visibility="visibilityChanged" />
       <div v-if="deDuplicatedMessages?.length">
         <Suspense
@@ -54,14 +53,7 @@
           Sorry, we didn't find anything. Things come and go quickly, though, so
           you could try later. Or you could:
         </p>
-        <div class="d-flex justify-content-start flex-wrap">
-          <b-button to="/give" variant="primary" class="topbutton m-1">
-            <v-icon icon="gift" />&nbsp;Post an OFFER
-          </b-button>
-          <b-button to="/find" variant="primary" class="topbutton m-1">
-            <v-icon icon="shopping-cart" />&nbsp;Post a WANTED
-          </b-button>
-        </div>
+        <GiveAsk />
       </NoticeMessage>
     </div>
     <template #fallback>
@@ -85,6 +77,7 @@ const NoticeMessage = () => import('./NoticeMessage')
 const OurMessage = () => import('~/components/OurMessage.vue')
 const GroupHeader = () => import('~/components/GroupHeader.vue')
 const JobsTopBar = () => import('~/components/JobsTopBar')
+const GiveAsk = () => import('~/components/GiveAsk.vue')
 
 const MIN_TO_SHOW = 10
 
@@ -95,6 +88,7 @@ export default {
     NoticeMessage,
     InfiniteLoading,
     JobsTopBar,
+    GiveAsk,
   },
   props: {
     messagesForList: {
