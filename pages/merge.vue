@@ -67,9 +67,9 @@
               class="mt-2"
               variant="primary"
               size="lg"
-              :handler="combine"
               spinclass="text-white"
               name="angle-double-right"
+              @handle="combine"
             />
             <div v-if="mergeComplete">
               <hr />

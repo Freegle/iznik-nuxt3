@@ -335,23 +335,7 @@ label {
   text-decoration: none;
 }
 
-// Bootstrap 4 class compatibility.  TODO MINOR CSS remove once we've finished the new code and can do search and replace.
-.text-left {
-  @extend .text-start;
-}
-
-.border-left {
-  @extend .border-start
-}
-
-.border-right {
-  @extend .border-end
-}
-
-.sr-only {
-  @extend .visually-hidden
-}
-
+// Bootstrap 4 class compatibility.
 .ml-1 {
   @extend .ms-1
 }

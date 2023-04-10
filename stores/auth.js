@@ -405,12 +405,7 @@ export const useAuthStore = defineStore({
       return await this.fetchUser()
     },
     async yahooCodeLogin(code) {
-      const runtimeConfig = useRuntimeConfig()
-      const api = runtimeConfig.APIv1
-
-      const res = await await api(this.config).session.yahooCodeLogin(code)
-
-      return res.data
+      return await this.$api.session.yahooCodeLogin(code)
     },
   },
   getters: {

@@ -19,13 +19,13 @@
               <b-button
                 variant="primary"
                 class="float-right"
-                @click="showEventModal"
+                @click="openEventModal"
               >
                 <v-icon icon="plus" /> Add a community event
               </b-button>
             </div>
           </div>
-          <h2 class="sr-only">List of community events</h2>
+          <h2 class="visually-hidden">List of community events</h2>
           <div v-for="id in events" :key="'event-' + id" class="mt-2">
             <CommunityEvent :id="id" :filter-group="groupid" :summary="false" />
           </div>
@@ -39,7 +39,11 @@
         </b-col>
         <b-col cols="0" md="3" class="d-none d-md-block" />
       </b-row>
-      <CommunityEventModal ref="eventmodal" :start-edit="true" />
+      <CommunityEventModal
+        v-if="showEventModal"
+        ref="eventmodal"
+        :start-edit="true"
+      />
     </div>
   </client-only>
 </template>
@@ -49,6 +53,7 @@ import { buildHead } from '../../composables/useBuildHead'
 import { useCommunityEventStore } from '../../stores/communityevent'
 import { useGroupStore } from '../../stores/group'
 import { useAuthStore } from '../../stores/auth'
+import { waitForRef } from '~/composables/useWaitForRef'
 import GlobalWarning from '~/components/GlobalWarning'
 import { ref, computed, useRouter } from '#imports'
 import InfiniteLoading from '~/components/InfiniteLoading'
@@ -119,8 +124,12 @@ const loadMore = function ($state) {
 }
 
 const eventmodal = ref(null)
+const showEventModal = ref(false)
 
-const showEventModal = () => {
-  eventmodal.value.show()
+const openEventModal = () => {
+  showEventModal.value = true
+  waitForRef(eventmodal, () => {
+    eventmodal.value.show()
+  })
 }
 </script>

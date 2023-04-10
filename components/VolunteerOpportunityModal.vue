@@ -430,9 +430,9 @@
             v-if="editing"
             variant="primary"
             :disabled="uploadingPhoto"
-            :handler="saveIt"
             name="save"
             :label="volunteering.id ? 'Save Changes' : 'Add Opportunity'"
+            @handle="saveIt"
           />
         </div>
       </div>

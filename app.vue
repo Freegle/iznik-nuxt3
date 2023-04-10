@@ -43,8 +43,6 @@ import { useLocationStore } from './stores/location'
 
 const route = useRoute()
 
-// TODO Fetch retry.
-
 // Don't render the app until we've done everything in here.
 let ready = false
 

@@ -1,7 +1,7 @@
 <template>
   <Suspense>
     <div>
-      <h2 v-if="group" class="sr-only">Community Information</h2>
+      <h2 v-if="group" class="visually-hidden">Community Information</h2>
       <GroupHeader
         v-if="group"
         :group="group"
@@ -9,7 +9,7 @@
         :show-give-find="showGiveFind"
       />
       <JobsTopBar v-if="jobs" />
-      <h2 class="sr-only">List of wanteds and offers</h2>
+      <h2 class="visually-hidden">List of wanteds and offers</h2>
       <div v-observe-visibility="visibilityChanged" />
       <div v-if="deDuplicatedMessages?.length">
         <Suspense

@@ -145,8 +145,8 @@
             variant="primary"
             label="Submit Gift Aid Declaration"
             class="mt-4"
-            :handler="save"
             :disabled="!valid"
+            @handle="save"
           />
           <NoticeMessage v-if="saved" variant="primary" class="mt-2">
             Thank you. We have saved your Gift Aid Declaration. It's very kind
@@ -170,7 +170,7 @@
               variant="white"
               label="Remove Gift Aid Consent"
               class="mt-2 mb-2"
-              :handler="remove"
+              @handle="remove"
             />
           </div>
         </b-col>

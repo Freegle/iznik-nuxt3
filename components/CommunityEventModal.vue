@@ -392,9 +392,9 @@
             v-if="editing"
             variant="primary"
             :disabled="uploadingPhoto"
-            :handler="saveIt"
             name="save"
             :label="event.id ? 'Save Changes' : 'Add Event'"
+            @handle="saveIt"
           />
         </div>
       </div>

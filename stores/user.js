@@ -69,6 +69,9 @@ export const useUserStore = defineStore({
       await api(this.config).user.removeEmail(id, email)
       await this.fetch(id, true)
     },
+    async engaged(engageid) {
+      await api(this.config).user.engaged(engageid)
+    },
   },
   getters: {
     byId: (state) => {

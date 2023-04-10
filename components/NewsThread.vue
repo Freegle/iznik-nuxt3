@@ -180,7 +180,7 @@
               label="Post"
               spinclass="text-white"
               iconlast
-              :handler="sendComment"
+              @handle="sendComment"
             />
           </div>
           <b-img

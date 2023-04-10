@@ -53,7 +53,7 @@
         </b-button>
       </div>
       <div>
-        <label for="chatmessage" class="sr-only">Chat message</label>
+        <label for="chatmessage" class="visually-hidden">Chat message</label>
         <b-form-textarea
           v-if="enterNewLine && !otheruser?.spammer"
           id="chatmessage"
@@ -347,8 +347,6 @@ export default {
         })
       },
     },
-    // TODO MINOR Consider showing handover prompt, but in less annoying way.  Generally could we do more to respond
-    // to chat intelligently, a la ChatGPT?
     expectedreplies() {
       if (this.otheruser?.expectedreplies) {
         pluralize.addIrregularRule('freegler is', 'freeglers are')

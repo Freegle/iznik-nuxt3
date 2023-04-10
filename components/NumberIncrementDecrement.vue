@@ -3,7 +3,7 @@
     <label
       :for="$id('spinbutton')"
       :class="{
-        'sr-only': labelSROnly,
+        'visually-hidden': labelSROnly,
       }"
       >{{ label }}</label
     >
