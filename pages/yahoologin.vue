@@ -52,8 +52,9 @@ if (authStore.user) {
     authStore.setAuth(result.jwt, result.persistent)
 
     if (returnto) {
-      // Go where we want to be.  Make sure we remove the code to avoid us trying to log in again.
-      router.go(returnto)
+      // Go where we want to be.
+      console.log('Return to', returnto)
+      router.push(returnto)
     } else {
       router.push('/')
     }
