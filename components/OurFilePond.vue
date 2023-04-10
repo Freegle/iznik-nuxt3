@@ -149,11 +149,8 @@ export default {
         data.append('groupid', this.groupid)
       }
 
-      // TODO MINOR It would be nice to have a progress indicator, but this doesn't immediately appear to be
-      // available using fetch().
-      // onUpLoadProgress: (e) => {
-      //   progress(e.lengthComputable, e.loaded, e.total)
-      // },
+      // It would be nice to have a progress indicator, but this doesn't immediately appear to be
+      // available using fetch().  So we don't specify onUpLoadProgress.
       const ret = await this.imageStore.postForm(data)
 
       try {

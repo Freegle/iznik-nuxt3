@@ -347,8 +347,6 @@ export default {
         })
       },
     },
-    // TODO MINOR Consider showing handover prompt, but in less annoying way.  Generally could we do more to respond
-    // to chat intelligently, a la ChatGPT?
     expectedreplies() {
       if (this.otheruser?.expectedreplies) {
         pluralize.addIrregularRule('freegler is', 'freeglers are')

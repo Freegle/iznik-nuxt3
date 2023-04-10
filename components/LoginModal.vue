@@ -14,7 +14,7 @@
   >
     <!-- This is required as the default bootstrap component makes the main title an h5 -->
     <template #title>
-      <h2>Let's get freegling! - show {{ showModal }}</h2>
+      <h2>Let's get freegling!</h2>
     </template>
     <p v-if="signUp" class="text-center">
       You'll get emails. Name, approximate location, and profile picture are

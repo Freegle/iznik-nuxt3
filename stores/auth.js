@@ -353,7 +353,7 @@ export const useAuthStore = defineStore({
       const runtimeConfig = useRuntimeConfig()
       const api = runtimeConfig.APIv1
 
-      const res = await await api(this.config).session.yahooCodeLogin(code)
+      const res = await api(this.config).session.yahooCodeLogin(code)
 
       return res.data
     },
