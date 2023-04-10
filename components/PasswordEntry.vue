@@ -36,7 +36,7 @@
           name="save"
           label="Save"
           spinclass="text-white"
-          :handler="savePassword"
+          @handle="savePassword"
         />
       </b-input-group-append>
     </b-input-group>

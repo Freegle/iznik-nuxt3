@@ -69,8 +69,12 @@
         </b-button>
       </div>
     </div>
-    <CommunityEventModal ref="addEvent" :start-edit="true" />
-    <CommunityEventModal :id="event.id" ref="moreInfo" />
+    <CommunityEventModal
+      v-if="showAddEvent"
+      ref="addEvent"
+      :start-edit="true"
+    />
+    <CommunityEventModal v-if="showMoreInfo" :id="event.id" ref="moreInfo" />
   </div>
 </template>
 <script>
@@ -118,6 +122,12 @@ export default {
       groupStore,
     }
   },
+  data: function () {
+    return {
+      showAddEvent: false,
+      showMoreInfo: false,
+    }
+  },
   computed: {
     event() {
       return this.communityEventStore.byId(this.newsfeed.eventid)
@@ -154,10 +164,16 @@ export default {
   },
   methods: {
     moreInfo() {
-      this.$refs.moreInfo.show()
+      this.showMoreInfo = true
+      this.waitForRef('moreInfo', () => {
+        this.$refs.moreInfo.show()
+      })
     },
     addEvent() {
-      this.$refs.addEvent.show()
+      this.showAddEvent = true
+      this.waitForRef('addEvent', () => {
+        this.$refs.addEvent.show()
+      })
     },
     group(groupid) {
       return this.groupStore.get(groupid)

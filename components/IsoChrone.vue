@@ -57,10 +57,10 @@
               v-else-if="isochrone.nickname"
               variant="link"
               button-class="ml-2 p-0 mb-1"
-              :handler="remove"
               confirm
               size="sm"
               label="Remove"
+              @handle="remove"
             />
           </div>
         </label>

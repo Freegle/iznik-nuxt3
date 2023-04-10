@@ -31,9 +31,9 @@
           spinclass="success"
           variant="primary"
           size="lg"
-          :handler="mail"
           label="Mail login link"
           class="mb-2"
+          @handle="mail"
         />
         <p>
           <!-- eslint-disable-next-line -->

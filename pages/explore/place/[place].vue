@@ -5,7 +5,7 @@
         <b-col cols="0" lg="3" class="d-none d-lg-block p-0 pr-1" />
         <b-col cols="12" lg="6" class="p-0">
           <div v-if="place">
-            <h1 class="sr-only">Freegling map near {{ place.name }}</h1>
+            <h1 class="visually-hidden">Freegling map near {{ place.name }}</h1>
             <AdaptiveMap
               v-if="initialBounds"
               :initial-bounds="initialBounds"

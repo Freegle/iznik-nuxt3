@@ -1,7 +1,7 @@
 **This is a WIP rewrite of the front-end client into Nuxt v3.  It's not ready yet, but it's getting there.**
 
 What doesn't exist yet:
-* TODO Some of the minor pages (councils, engage, mydata)
+* TODO Some of the minor pages (mydata)
 * CircleCI/playwright testing.
 
 # iznik-nuxt3

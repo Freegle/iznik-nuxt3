@@ -66,4 +66,10 @@ export default class UserAPI extends BaseAPI {
       id,
     })
   }
+
+  engaged(engageid) {
+    return this.$post('/user', {
+      engageid,
+    })
+  }
 }

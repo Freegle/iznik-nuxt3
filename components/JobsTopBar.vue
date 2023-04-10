@@ -15,7 +15,7 @@
       <donation-button />
     </NoticeMessage>
     <div v-else-if="list.length">
-      <h2 class="sr-only">Jobs</h2>
+      <h2 class="visually-hidden">Jobs</h2>
       <div class="mb-1 text-center small text-muted">
         Jobs near you. Freegle gets a
         <span class="d-none d-md-inline"
