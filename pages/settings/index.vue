@@ -1,7 +1,7 @@
 <template>
   <client-only v-if="me">
     <div>
-      <h1 class="sr-only">Settings</h1>
+      <h1 class="visually-hidden">Settings</h1>
       <b-row class="m-0">
         <b-col cols="0" xl="3" />
         <b-col cols="12" xl="6" class="p-0">
@@ -124,7 +124,7 @@
                 </b-col>
                 <b-col cols="12" xl="6">
                   <b-card no-body>
-                    <b-card-body class="text-left p-0 p-sm-2">
+                    <b-card-body class="text-start p-0 p-sm-2">
                       <div v-if="aboutme">
                         &quot;{{ aboutme }}&quot;
                         <br />

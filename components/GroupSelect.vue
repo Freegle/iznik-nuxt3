@@ -3,7 +3,7 @@
     <label
       v-if="label"
       for="communitieslist"
-      :class="labelSrOnly ? 'sr-only' : ''"
+      :class="labelSrOnly ? 'visually-hidden' : ''"
       >{{ label }}</label
     >
     <b-form-select

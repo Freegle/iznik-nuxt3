@@ -25,7 +25,7 @@
               </b-button>
             </div>
           </div>
-          <h2 class="sr-only">List of community events</h2>
+          <h2 class="visually-hidden">List of community events</h2>
           <div v-for="id in events" :key="'event-' + id" class="mt-2">
             <CommunityEvent :id="id" :filter-group="groupid" :summary="false" />
           </div>

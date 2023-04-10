@@ -28,7 +28,7 @@
               </b-button>
             </div>
           </div>
-          <h2 class="sr-only">List of volunteer opportunities</h2>
+          <h2 class="visually-hidden">List of volunteer opportunities</h2>
           <div
             v-for="id in volunteerings"
             :key="'volunteering-' + id"

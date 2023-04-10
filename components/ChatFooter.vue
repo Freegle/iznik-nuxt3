@@ -53,7 +53,7 @@
         </b-button>
       </div>
       <div>
-        <label for="chatmessage" class="sr-only">Chat message</label>
+        <label for="chatmessage" class="visually-hidden">Chat message</label>
         <b-form-textarea
           v-if="enterNewLine && !otheruser?.spammer"
           id="chatmessage"

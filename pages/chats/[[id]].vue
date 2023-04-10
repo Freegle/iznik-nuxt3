@@ -1,7 +1,7 @@
 <template>
   <client-only v-if="me">
     <div>
-      <h1 class="sr-only">Chats</h1>
+      <h1 class="visually-hidden">Chats</h1>
       <b-row class="m-0">
         <b-col
           id="chatlist"
@@ -21,7 +21,9 @@
               class="d-flex justify-content-between flex-wrap mb-2 mt-3 border-bottom"
             >
               <form role="search" class="mb-1 mr-1 ml-1 ml-md-0">
-                <label for="search-bar" class="sr-only">Search chats</label>
+                <label for="search-bar" class="visually-hidden"
+                  >Search chats</label
+                >
                 <b-form-input
                   id="search-bar"
                   v-model="search"

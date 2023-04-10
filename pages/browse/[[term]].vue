@@ -1,7 +1,7 @@
 <template>
   <client-only v-if="me">
     <b-container fluid class="p-0 p-xl-2">
-      <h1 class="sr-only">Browse items</h1>
+      <h1 class="visually-hidden">Browse items</h1>
       <b-row class="m-0">
         <b-col cols="0" lg="3" class="p-0 pr-1">
           <VisibleWhen :at="['lg', 'xl', 'xxl']">
