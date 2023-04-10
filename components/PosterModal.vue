@@ -37,7 +37,7 @@
         name="save"
         label="Save details"
         variant="primary"
-        :handler="submit"
+        @handle="submit"
       />
     </template>
   </b-modal>

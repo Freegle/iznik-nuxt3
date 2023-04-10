@@ -31,7 +31,7 @@
                 name="trash-alt"
                 label="Delete"
                 variant="secondary"
-                :handler="deleteIt"
+                @handle="deleteIt"
               />
             </b-col>
           </b-row>
@@ -81,9 +81,9 @@
                   name="save"
                   variant="primary"
                   size="lg"
-                  :handler="saveInstructions"
                   label="Save"
                   spinclass="text-white"
+                  @handle="saveInstructions"
                 />
               </b-col>
             </b-row>
@@ -126,7 +126,7 @@
                   label="Add"
                   variant="primary"
                   name="plus"
-                  :handler="add"
+                  @handle="add"
                 />
               </b-col>
             </b-row>

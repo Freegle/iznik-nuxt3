@@ -22,9 +22,9 @@
           <b-input-group-append>
             <SpinButton
               variant="secondary"
-              :handler="setPassword"
               name="save"
               label="Save"
+              @handle="setPassword"
             />
           </b-input-group-append>
         </b-input-group>

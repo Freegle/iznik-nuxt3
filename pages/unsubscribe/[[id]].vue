@@ -72,7 +72,7 @@
                 class="mt-2 mb-2"
                 label="Unsubscribe"
                 spinclass="text-white"
-                :handler="emailConfirm"
+                @handle="emailConfirm"
               />
               <NoticeMessage
                 v-if="emailSent"

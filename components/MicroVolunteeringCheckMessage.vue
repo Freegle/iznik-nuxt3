@@ -20,18 +20,18 @@
         class="mb-1"
         icon="check"
         label="Yes, that looks ok"
-        :handler="approve"
         size="lg"
         spinclass="text-white"
+        @handle="approve"
       />
       <SpinButton
         variant="secondary"
         class="mb-1"
         icon="times"
         label="No, something's not right"
-        :handler="notRight"
         size="lg"
         spinclass="text-white"
+        @handle="notRight"
       />
     </div>
     <div v-if="showComments" class="mt-2">
@@ -57,9 +57,9 @@
           class="mt-2"
           icon="save"
           label="Send your comments"
-          :handler="sendComments"
           size="lg"
           spinclass="text-white"
+          @handle="sendComments"
         />
       </b-form-group>
     </div>

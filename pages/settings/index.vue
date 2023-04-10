@@ -192,9 +192,9 @@
                   variant="primary"
                   name="save"
                   label="Save"
-                  :handler="saveEmail"
                   spinclass="text-white"
                   class="align-self-end pb-3"
+                  @handle="saveEmail"
                 />
               </div>
               <div
@@ -219,7 +219,7 @@
                   variant="white"
                   name="check"
                   label="Try again"
-                  :handler="unbounce"
+                  @handle="unbounce"
                 />
               </NoticeMessage>
               <b-row>
@@ -244,9 +244,9 @@
                         size="lg"
                         class="mb-2 d-inline"
                         :disabled="!pc"
-                        :handler="savePostcode"
                         name="save"
                         label="Save"
+                        @handle="savePostcode"
                       />
                     </div>
                   </b-form-group>
