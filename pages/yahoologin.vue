@@ -33,7 +33,10 @@ if (authStore.user) {
   // window.location = returnto
 } else {
   // We have a code.  Use it on the server to log ion.
+  console.log('Try Yahoo login with code', code)
   const result = await authStore.yahooCodeLogin(code)
+
+  console.log('Returned', result)
 
   if (result?.ret === 0) {
     // Success
@@ -46,6 +49,9 @@ if (authStore.user) {
     } else {
       router.push('/')
     }
+  } else {
+    console.log('Yahoo login failed')
+    authStore.forceLogin = true
   }
 }
 </script>
