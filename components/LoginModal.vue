@@ -239,12 +239,6 @@ export default {
       return this.runtimeConfig.public.GOOGLE_CLIENT_ID
     },
     facebookDisabled() {
-      console.log(
-        'Check Facebook disabled',
-        this.bump,
-        this.showSocialLoginBlocked,
-        window.FB
-      )
       return (
         this.bump &&
         (this.showSocialLoginBlocked || typeof window.FB === 'undefined')

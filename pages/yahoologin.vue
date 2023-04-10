@@ -35,25 +35,34 @@ if (authStore.user) {
   // We have a code.  Use it on the server to log in.
   //
   // Sometimes Yahoo returns an array.  Lord knows why.
-  console.log('Try Yahoo login with code', code)
-  code = typeof code === 'string' ? code : code.pop()
-  const result = await authStore.yahooCodeLogin(code)
+  code = typeof code === 'string' ? [code] : code
 
-  console.log('Returned', result)
+  // Iterate through each code
+  let worked = false
 
-  if (result?.ret === 0) {
-    // Success
-    const authStore = useAuthStore()
-    authStore.setAuth(result.jwt, result.persistent)
+  for (let i = 0; i < code.length && !worked; i++) {
+    console.log('Try Yahoo login with code', code[i])
+    const result = await authStore.yahooCodeLogin(code[i])
 
-    if (returnto) {
-      // Go where we want to be.
-      console.log('Return to', returnto)
-      router.push(returnto)
-    } else {
-      router.push('/')
+    console.log('Returned', result)
+
+    if (result?.ret === 0) {
+      // Success
+      worked = true
+      const authStore = useAuthStore()
+      authStore.setAuth(result.jwt, result.persistent)
+
+      if (returnto) {
+        // Go where we want to be.
+        console.log('Return to', returnto)
+        router.push(returnto)
+      } else {
+        router.push('/')
+      }
     }
-  } else {
+  }
+
+  if (!worked) {
     console.log('Yahoo login failed')
     authStore.forceLogin = true
   }
