@@ -66,8 +66,16 @@
         </b-button>
       </div>
     </div>
-    <VolunteerOpportunityModal ref="addOpportunity" :start-edit="true" />
-    <VolunteerOpportunityModal :id="newsfeed.volunteeringid" ref="moreInfo" />
+    <VolunteerOpportunityModal
+      v-if="showAddOpportunity"
+      ref="addOpportunity"
+      :start-edit="true"
+    />
+    <VolunteerOpportunityModal
+      v-if="showMoreInfo"
+      :id="newsfeed.volunteeringid"
+      ref="moreInfo"
+    />
   </div>
 </template>
 <script>
@@ -116,6 +124,12 @@ export default {
       groupStore,
     }
   },
+  data: function () {
+    return {
+      showAddOpportunity: false,
+      showMoreInfo: false,
+    }
+  },
   computed: {
     volunteering() {
       return this.volunteeringStore.byId(this.newsfeed.volunteeringid)
@@ -123,10 +137,16 @@ export default {
   },
   methods: {
     moreInfo() {
-      this.$refs.moreInfo.show()
+      this.showMoreInfo = true
+      this.waitForRef('moreInfo', () => {
+        this.$refs.moreInfo.show()
+      })
     },
     addOpportunity() {
-      this.$refs.addOpportunity.show()
+      this.showAddOpportunity = true
+      this.waitForRef('addOpportunity', () => {
+        this.$refs.addOpportunity.show()
+      })
     },
     group(groupid) {
       return this.groupStore.get(groupid)

@@ -22,7 +22,7 @@
               <b-button
                 variant="primary"
                 class="float-right"
-                @click="showVolunteerModal"
+                @click="openVolunteerModal"
               >
                 <v-icon icon="plus" /> Add an opportunity
               </b-button>
@@ -50,7 +50,11 @@
         </b-col>
         <b-col cols="0" md="3" class="d-none d-md-block" />
       </b-row>
-      <VolunteerOpportunityModal ref="volunteermodal" :start-edit="true" />
+      <VolunteerOpportunityModal
+        v-if="showVolunteerModal"
+        ref="volunteermodal"
+        :start-edit="true"
+      />
     </div>
   </client-only>
 </template>
@@ -65,6 +69,7 @@ import InfiniteLoading from '~/components/InfiniteLoading'
 import VolunteerOpportunityModal from '~/components/VolunteerOpportunityModal'
 import GroupSelect from '~/components/GroupSelect'
 import VolunteerOpportunity from '~/components/VolunteerOpportunity.vue'
+import { waitForRef } from '~/composables/useWaitForRef'
 
 const runtimeConfig = useRuntimeConfig()
 const volunteeringStore = useVolunteeringStore()
@@ -129,8 +134,11 @@ const loadMore = function ($state) {
 }
 
 const volunteermodal = ref(null)
+const showVolunteerModal = ref(false)
 
-const showVolunteerModal = () => {
-  volunteermodal.value.show()
+const openVolunteerModal = () => {
+  waitForRef(volunteermodal, () => {
+    volunteermodal.value.show()
+  })
 }
 </script>
