@@ -96,8 +96,12 @@
                 : ['md', 'lg', 'xl', 'xxl']
             "
           >
+            <p v-if="!visibleChats?.length" class="ml-2">
+              <span v-if="searching" class="pulsate"> Searching... </span>
+              <span v-else> No chats to show. </span>
+            </p>
             <ChatPane
-              v-if="selectedChatId"
+              v-else-if="selectedChatId"
               :id="selectedChatId"
               :key="'chatpane-' + selectedChatId"
             />
