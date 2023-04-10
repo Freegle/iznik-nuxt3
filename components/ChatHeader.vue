@@ -6,26 +6,35 @@
       "
       class="outer position-relative"
     >
-      <div class="nameinfo pt-1 pb-1 pl-1">
+      <div class="nameinfo pt-1 pb-1 pl-1" @click="showInfo">
         <ProfileImage
           v-if="chat.icon"
           :image="chat.icon"
-          class="mr-1 inline"
+          class="pr-1 profile"
           is-thumbnail
           size="xl"
           border
         />
+        <div class="font-weight-bold black text--large name pl-1">
+          {{ chat.name }}
+        </div>
         <div
-          class="d-flex flex-column align-content-around justify-content-center"
-          @click="showInfo"
+          v-if="otheruser && otheruser.info"
+          class="d-flex flex-column align-content-between pr-1 ratings"
         >
-          <div class="font-weight-bold black text--large">
-            {{ chat.name }}
-          </div>
-          <div
-            v-if="!collapsed && otheruser && otheruser.info"
-            class="userinfo small flex flex-wrap mr-2"
-          >
+          <UserRatings
+            :id="chat.otheruid"
+            :key="'otheruser-' + chat.otheruid"
+            class="mt-1 d-flex justify-content-end"
+            size="sm"
+          />
+          <SupporterInfo v-if="otheruser.supporter" class="align-self-end" />
+        </div>
+        <div
+          v-if="!collapsed && otheruser && otheruser.info"
+          class="userinfo mr-2"
+        >
+          <div class="small flex flex-wrap">
             <div v-if="otheruser.lastaccess" class="d-inline d-md-block">
               <span class="d-none d-md-inline">Last seen</span>
               <span class="d-inline d-md-none">Seen</span>
@@ -43,18 +52,6 @@
               >.
             </div>
           </div>
-        </div>
-        <div
-          v-if="otheruser && otheruser.info"
-          class="d-flex flex-column align-content-between pr-1"
-        >
-          <UserRatings
-            :id="chat.otheruid"
-            :key="'otheruser-' + chat.otheruid"
-            class="mt-1 d-flex justify-content-end"
-            size="sm"
-          />
-          <SupporterInfo v-if="otheruser.supporter" class="align-self-end" />
         </div>
       </div>
       <b-button
@@ -382,6 +379,32 @@ export default {
 .nameinfo {
   display: grid;
   grid-template-columns: auto 1fr 121px;
+
+  .profile {
+    grid-column: 1;
+    grid-row: 1 / 2;
+  }
+
+  .name {
+    grid-column: 2;
+    grid-row: 1 / 2;
+  }
+
+  .ratings {
+    grid-column: 3;
+    grid-row: 1 / 2;
+  }
+
+  .userinfo {
+    grid-column: 2 / 4;
+    grid-row: 2 / 3;
+    color: $colour-info-fg;
+
+    @include media-breakpoint-up(md) {
+      grid-row: 1 / 2;
+      padding-top: 2rem;
+    }
+  }
 }
 
 .hidelink a {
@@ -415,10 +438,6 @@ pre {
   @include media-breakpoint-up(lg) {
     width: 450px;
   }
-}
-
-.userinfo {
-  color: $colour-info-fg;
 }
 
 .actions {

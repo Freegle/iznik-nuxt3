@@ -18,16 +18,7 @@
               :count="me.expectedreplies"
               :chats="me.expectedchats"
             />
-            <div class="bg-white d-block d-xl-none">
-              <div class="d-flex justify-content-between flex-wrap">
-                <b-button to="/give" variant="primary" class="topbutton m-1">
-                  <v-icon icon="gift" />&nbsp;Give
-                </b-button>
-                <b-button to="/find" variant="primary" class="topbutton m-1">
-                  <v-icon icon="shopping-cart" />&nbsp;Ask
-                </b-button>
-              </div>
-            </div>
+            <GiveAsk mobile />
           </div>
           <div v-if="initialBounds">
             <div v-if="browseView === 'mygroups'" class="bg-white mt-2">
@@ -121,6 +112,7 @@ import { useMiscStore } from '~/stores/misc'
 import { useAuthStore } from '~/stores/auth'
 import { useGroupStore } from '~/stores/group'
 import { useIsochroneStore } from '~/stores/isochrone'
+import GiveAsk from '~/components/GiveAsk'
 
 definePageMeta({
   layout: 'login',
@@ -131,6 +123,7 @@ const MicroVolunteering = () => import('~/components/MicroVolunteering.vue')
 
 export default {
   components: {
+    GiveAsk,
     AdaptiveMap: defineAsyncComponent(() => import('~/components/AdaptiveMap')),
     IsochronePostMapAndList: defineAsyncComponent(() =>
       import('~/components/IsochronePostMapAndList')
@@ -403,9 +396,5 @@ export default {
 
 .typeSelect {
   max-width: 33%;
-}
-
-.topbutton {
-  width: 40%;
 }
 </style>

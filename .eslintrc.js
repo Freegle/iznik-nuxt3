@@ -56,5 +56,6 @@ module.exports = {
     useHead: 'readonly',
     computed: 'readonly',
     usePinia: 'readonly',
+    navigateTo: 'readonly',
   },
 }

@@ -96,8 +96,10 @@ export default {
     },
   },
   methods: {
-    brokenProfileImage(event) {
-      event.target.src = '/defaultprofile.png'
+    brokenProfileImage(e) {
+      e.target.src = '/defaultprofile.png'
+      e.preventDefault()
+      e.stopPropagation()
     },
   },
 }

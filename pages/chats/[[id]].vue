@@ -20,7 +20,7 @@
             <div
               class="d-flex justify-content-between flex-wrap mb-2 mt-3 border-bottom"
             >
-              <form role="search" class="mb-1 mr-1">
+              <form role="search" class="mb-1 mr-1 ml-1 ml-md-0">
                 <label for="search-bar" class="sr-only">Search chats</label>
                 <b-form-input
                   id="search-bar"
@@ -29,7 +29,11 @@
                   class="flex-shrink-1"
                 />
               </form>
-              <b-button variant="primary" class="mb-1" @click="markAllRead">
+              <b-button
+                variant="primary"
+                class="mb-1 ml-1 ml-md-0"
+                @click="markAllRead"
+              >
                 <v-icon icon="check" /> Mark all read
               </b-button>
             </div>
@@ -329,14 +333,10 @@ export default {
       this.chatStore.fetchChats()
     },
     gotoChat(id) {
-      try {
-        history.pushState({}, null, '/chats/' + id)
-      } catch (e) {
-        // Some browsers throw exceptions if this is called too frequently.
-        console.log('Ignore replaceState exception', e)
-      }
-
+      // We just replace the route, which is quicker than navigating and re-rendering this page.
       this.selectedChatId = id
+      const router = useRouter()
+      router.replace(id ? '/chats/' + id : '/chats')
     },
     async searchMore() {
       if (this.searching) {
