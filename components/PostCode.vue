@@ -222,8 +222,8 @@ export default {
           typeahead: pc.name,
         })
 
-        if (loc?.data?.locations?.length === 1) {
-          this.$emit('selected', loc.data.locations[0])
+        if (loc?.locations?.length === 1) {
+          this.$emit('selected', loc.locations[0])
         }
       } else {
         this.$emit('cleared')
