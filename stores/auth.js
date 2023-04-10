@@ -350,7 +350,7 @@ export const useAuthStore = defineStore({
       return await this.fetchUser()
     },
     async yahooCodeLogin(code) {
-      return await this.$api.session.yahooCodeLogin(JSON.stringify(code))
+      return await this.$api.session.yahooCodeLogin(code)
     },
   },
   getters: {
