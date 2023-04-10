@@ -1,7 +1,15 @@
 <template>
-  <b-row>
+  <b-row mt-4>
     <b-col class="text-center mt-4">
-      <b-img lazy src="/loader.gif" alt="Loading" width="100px" />
+      <div class="mt-4">
+        <b-img
+          lazy
+          src="/loader.gif"
+          alt="Loading"
+          width="100px"
+          class="mt-4"
+        />
+      </div>
     </b-col>
   </b-row>
 </template>
@@ -9,6 +17,8 @@
 import { useAuthStore } from '~/stores/auth'
 import { useRoute, useRouter } from '#imports'
 
+// Use the empty layout, otherwise we load Google sign-in, which might cause this page to re-render and hit
+// Yahoo twice for the same code.
 definePageMeta({
   layout: 'empty',
 })
