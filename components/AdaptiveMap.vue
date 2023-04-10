@@ -278,7 +278,7 @@ export default {
     let bounds = null
 
     // We might have a preference for which type of posts we view.
-    const postType = authStore.user?.settings.browsePostType
+    const postType = authStore.user?.settings?.browsePostType
     const selectedType = ref(postType || 'All')
 
     const showGroups = ref(props.startOnGroups)

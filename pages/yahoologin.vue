@@ -9,6 +9,11 @@
 import { useAuthStore } from '~/stores/auth'
 import { useRoute, useRouter } from '#imports'
 
+// Specify empty layout otherwise this setup gets called twice which messes up the use of the Yahoo login code.
+definePageMeta({
+  layout: 'empty',
+})
+
 const router = useRouter()
 const route = useRoute()
 
@@ -16,7 +21,7 @@ const route = useRoute()
 // url parameters - returnto which we set up, and code which is returned by Yahoo after a successful login
 
 const returnto = route.query.returnto
-const code = route.query.code
+let code = route.query.code
 
 const authStore = useAuthStore()
 
@@ -32,13 +37,19 @@ if (authStore.user) {
   // Probably they rejected our authorisation.  Just go back to the same page we were at.
   // window.location = returnto
 } else {
-  // We have a code.  Use it on the server to log ion.
+  // We have a code.  Use it on the server to log in.
+  //
+  // Sometimes Yahoo returns an array.  Lord knows why.
+  console.log('Try Yahoo login with code', code)
+  code = typeof code === 'string' ? code : code[0]
   const result = await authStore.yahooCodeLogin(code)
 
-  if (result?.data?.ret === 0) {
+  console.log('Returned', result)
+
+  if (result?.ret === 0) {
     // Success
     const authStore = useAuthStore()
-    authStore.setAuth(result.data.jwt, result.data.persistent)
+    authStore.setAuth(result.jwt, result.persistent)
 
     if (returnto) {
       // Go where we want to be.  Make sure we remove the code to avoid us trying to log in again.
@@ -46,6 +57,9 @@ if (authStore.user) {
     } else {
       router.push('/')
     }
+  } else {
+    console.log('Yahoo login failed')
+    authStore.forceLogin = true
   }
 }
 </script>
