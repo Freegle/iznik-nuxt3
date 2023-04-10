@@ -1,6 +1,6 @@
 <template>
   <b-row>
-    <b-col class="text-center">
+    <b-col class="text-center mt-4">
       <b-img lazy src="/loader.gif" alt="Loading" width="100px" />
     </b-col>
   </b-row>
@@ -8,6 +8,10 @@
 <script setup>
 import { useAuthStore } from '~/stores/auth'
 import { useRoute, useRouter } from '#imports'
+
+definePageMeta({
+  layout: 'empty',
+})
 
 const router = useRouter()
 const route = useRoute()
