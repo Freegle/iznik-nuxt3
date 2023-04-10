@@ -94,10 +94,10 @@ export default {
     async mail() {
       const res = await this.authStore.lostPassword(this.email)
 
-      if (res.data.ret === 0) {
+      if (res.ret === 0) {
         this.response = true
       } else {
-        this.error = res.data.status
+        this.error = res.status
       }
     },
   },
