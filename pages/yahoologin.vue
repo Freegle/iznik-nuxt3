@@ -35,10 +35,10 @@ if (authStore.user) {
   // We have a code.  Use it on the server to log ion.
   const result = await authStore.yahooCodeLogin(code)
 
-  if (result?.data?.ret === 0) {
+  if (result?.ret === 0) {
     // Success
     const authStore = useAuthStore()
-    authStore.setAuth(result.data.jwt, result.data.persistent)
+    authStore.setAuth(result.jwt, result.persistent)
 
     if (returnto) {
       // Go where we want to be.  Make sure we remove the code to avoid us trying to log in again.
