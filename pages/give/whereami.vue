@@ -49,7 +49,7 @@
         </div>
       </div>
       <div class="d-block d-md-none flex-grow-1" />
-      <div class="mt-1 d-block d-md-none">
+      <div class="mt-1 d-block d-md-none margbott">
         <b-button
           variant="primary"
           size="lg"
@@ -164,5 +164,9 @@ select {
 
 .maxbutt {
   width: 33vw;
+}
+
+.margbott {
+  margin-bottom: 50px;
 }
 </style>

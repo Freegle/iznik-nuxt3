@@ -333,14 +333,10 @@ export default {
       this.chatStore.fetchChats()
     },
     gotoChat(id) {
-      try {
-        history.pushState({}, null, '/chats/' + id)
-      } catch (e) {
-        // Some browsers throw exceptions if this is called too frequently.
-        console.log('Ignore replaceState exception', e)
-      }
-
+      // We just replace the route, which is quicker than navigating and re-rendering this page.
       this.selectedChatId = id
+      const router = useRouter()
+      router.replace(id ? '/chats/' + id : '/chats')
     },
     async searchMore() {
       if (this.searching) {

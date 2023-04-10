@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import dayjs from 'dayjs'
 import api from '~/api'
+import { useAuthStore } from '~/stores/auth'
 
 export const useChatStore = defineStore({
   id: 'chat',
@@ -179,7 +180,10 @@ export const useChatStore = defineStore({
       // Don't fetch chats.  We might be called in a loop and once we've completed the caller normally routes.
     },
     async pollForChatUpdates() {
-      if (this.myid) {
+      const authStore = useAuthStore()
+
+      const myid = authStore.user?.id
+      if (myid) {
         await this.fetchChats()
       }
 

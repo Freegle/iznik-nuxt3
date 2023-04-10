@@ -41,7 +41,7 @@
         />
       </div>
       <div class="d-block d-md-none flex-grow-1" />
-      <div class="d-block d-md-none">
+      <div class="d-block d-md-none margbott">
         <b-button
           v-if="emailValid && !submitting"
           variant="primary"
@@ -205,5 +205,9 @@ export default {
 
 .maxbutt {
   width: 33vw;
+}
+
+.margbott {
+  margin-bottom: 50px;
 }
 </style>
