@@ -9,11 +9,6 @@
 import { useAuthStore } from '~/stores/auth'
 import { useRoute, useRouter } from '#imports'
 
-// Specify empty layout otherwise this setup gets called twice which messes up the use of the Yahoo login code.
-definePageMeta({
-  layout: 'empty',
-})
-
 const router = useRouter()
 const route = useRoute()
 
