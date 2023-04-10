@@ -1,7 +1,15 @@
 <template>
-  <b-row>
-    <b-col class="text-center">
-      <b-img lazy src="/loader.gif" alt="Loading" width="100px" />
+  <b-row mt-4>
+    <b-col class="text-center mt-4">
+      <div class="mt-4">
+        <b-img
+          lazy
+          src="/loader.gif"
+          alt="Loading"
+          width="100px"
+          class="mt-4"
+        />
+      </div>
     </b-col>
   </b-row>
 </template>
@@ -9,7 +17,8 @@
 import { useAuthStore } from '~/stores/auth'
 import { useRoute, useRouter } from '#imports'
 
-// Specify empty layout otherwise this setup gets called twice which messes up the use of the Yahoo login code.
+// Use the empty layout, otherwise we load Google sign-in, which might cause this page to re-render and hit
+// Yahoo twice for the same code.
 definePageMeta({
   layout: 'empty',
 })
@@ -40,24 +49,34 @@ if (authStore.user) {
   // We have a code.  Use it on the server to log in.
   //
   // Sometimes Yahoo returns an array.  Lord knows why.
-  console.log('Try Yahoo login with code', code)
-  code = typeof code === 'string' ? code : code[0]
-  const result = await authStore.yahooCodeLogin(code)
+  code = typeof code === 'string' ? [code] : code
 
-  console.log('Returned', result)
+  // Iterate through each code
+  let worked = false
 
-  if (result?.ret === 0) {
-    // Success
-    const authStore = useAuthStore()
-    authStore.setAuth(result.jwt, result.persistent)
+  for (let i = 0; i < code.length && !worked; i++) {
+    console.log('Try Yahoo login with code', code[i])
+    const result = await authStore.yahooCodeLogin(code[i])
 
-    if (returnto) {
-      // Go where we want to be.  Make sure we remove the code to avoid us trying to log in again.
-      router.go(returnto)
-    } else {
-      router.push('/')
+    console.log('Returned', result)
+
+    if (result?.ret === 0) {
+      // Success
+      worked = true
+      const authStore = useAuthStore()
+      authStore.setAuth(result.jwt, result.persistent)
+
+      if (returnto) {
+        // Go where we want to be.
+        console.log('Return to', returnto)
+        router.push(returnto)
+      } else {
+        router.push('/')
+      }
     }
-  } else {
+  }
+
+  if (!worked) {
     console.log('Yahoo login failed')
     authStore.forceLogin = true
   }

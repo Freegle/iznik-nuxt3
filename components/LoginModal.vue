@@ -268,12 +268,6 @@ export default {
     },
     facebookDisabled() {
       if( this.isApp) return false
-      console.log(
-        'Check Facebook disabled',
-        this.bump,
-        this.showSocialLoginBlocked,
-        window.FB
-      )
       return (
         this.bump &&
         (this.showSocialLoginBlocked || typeof window.FB === 'undefined')
