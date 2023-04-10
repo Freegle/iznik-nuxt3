@@ -36,7 +36,7 @@ if (authStore.user) {
   //
   // Sometimes Yahoo returns an array.  Lord knows why.
   console.log('Try Yahoo login with code', code)
-  code = typeof code === 'string' ? code : code[0]
+  code = typeof code === 'string' ? code : code.pop()
   const result = await authStore.yahooCodeLogin(code)
 
   console.log('Returned', result)
