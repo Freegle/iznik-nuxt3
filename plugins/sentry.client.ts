@@ -1,10 +1,12 @@
 import * as Sentry from '@sentry/vue'
 import { Integrations } from '@sentry/tracing'
 import { defineNuxtPlugin, useRuntimeConfig } from '#app'
+import { useRouter } from '#imports'
 
 export default defineNuxtPlugin((nuxtApp) => {
   const config = useRuntimeConfig()
   const { vueApp } = nuxtApp
+  const router = useRouter()
 
   Sentry.init({
     app: [vueApp],
@@ -16,10 +18,8 @@ export default defineNuxtPlugin((nuxtApp) => {
     ],
     integrations: [
       new Integrations.BrowserTracing({
-        routingInstrumentation: Sentry.vueRouterInstrumentation(
-          nuxtApp.$router
-        ),
-        tracingOrigins: ['localhost', 'ilovefreegle.org', /^\//],
+        routingInstrumentation: Sentry.vueRouterInstrumentation(router),
+        tracePropagationTargets: ['localhost', 'ilovefreegle.org', /^\//],
       }),
     ],
     logErrors: false, // Note that this doesn't seem to work with nuxt 3
