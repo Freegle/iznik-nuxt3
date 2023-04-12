@@ -253,9 +253,6 @@ export default class BaseAPI {
     let status = null
     let data = null
 
-    Sentry.captureMessage('Test')
-    console.log('Captured')
-
     try {
       const headers = config.headers ? config.headers : {}
 
