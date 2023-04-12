@@ -96,8 +96,15 @@ export default class BaseAPI {
         method,
         headers,
       })
+
       status = rsp.status
       data = await rsp.json()
+
+      if (data.jwt && data.jwt !== authStore.auth.jwt && data.persistent) {
+        // We've been given a new JWT.  Use it in future.  This can happen after user merge or periodically when
+        // we renew the JWT.
+        authStore.setAuth(data.jwt, data.persistent)
+      }
 
       useMiscStore().api(-1)
     } catch (e) {
