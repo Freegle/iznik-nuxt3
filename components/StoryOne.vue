@@ -39,11 +39,11 @@
       <b-card-body>
         <b-card-text class="pl-4 pr-4">
           <div v-if="story.story" class="preline">
-            <div v-if="story.photo" class="float-right">
+            <div v-if="story.image" class="float-right">
               <b-img
-                v-b-modal="'photoModal-' + story.photo.id"
+                v-b-modal="'photoModal-' + story.image.id"
                 lazy
-                :src="story.photo.path"
+                :src="story.image.path"
                 class="storyphoto clickme"
                 thumbnail
               />
@@ -78,8 +78,8 @@
       </b-card-body>
     </b-card>
     <b-modal
-      v-if="story.photo"
-      :id="'photoModal-' + story.photo.id"
+      v-if="story.image"
+      :id="'photoModal-' + story.image.id"
       ref="photoModal"
       title="Story Photo"
       generator-unable-to-provide-required-alt=""
@@ -88,7 +88,7 @@
       ok-only
     >
       <template #default>
-        <b-img fluid rounded center :src="story.photo.path" />
+        <b-img fluid rounded center :src="story.image.path" />
       </template>
     </b-modal>
     <StoryShareModal v-if="showShare" :id="id" ref="share" />
