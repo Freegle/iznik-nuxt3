@@ -15,7 +15,6 @@
           <b-card-text class="p-2 preline">
             <b-img
               v-if="story?.image"
-              v-b-modal="'photoModal-' + newsfeed.id"
               thumbnail
               rounded
               lazy

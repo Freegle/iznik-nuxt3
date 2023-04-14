@@ -16,12 +16,12 @@
       <b-row v-if="newsfeed.image">
         <b-col>
           <b-img
-            v-b-modal="'photoModal-' + newsfeed.id"
             thumbnail
             rounded
             lazy
             :src="newsfeed.image.paththumb"
             class="clickme"
+            @click="showPhotoModal"
           />
         </b-col>
       </b-row>
@@ -42,7 +42,6 @@
     </div>
     <b-modal
       v-if="newsfeed.image"
-      :id="'photoModal-' + newsfeed.id"
       ref="photoModal"
       title="ChitChat photo"
       generator-unable-to-provide-required-alt=""

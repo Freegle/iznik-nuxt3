@@ -41,11 +41,11 @@
           <div v-if="story.story" class="preline">
             <div v-if="story.image" class="float-right">
               <b-img
-                v-b-modal="'photoModal-' + story.image.id"
                 lazy
                 :src="story.image.path"
                 class="storyphoto clickme"
                 thumbnail
+                @click="showPhotoModal = true"
               />
               <br />
             </div>
@@ -79,8 +79,8 @@
     </b-card>
     <b-modal
       v-if="story.image"
-      :id="'photoModal-' + story.image.id"
       ref="photoModal"
+      v-model="showPhotoModal"
       title="Story Photo"
       generator-unable-to-provide-required-alt=""
       size="lg"
@@ -130,6 +130,7 @@ export default {
   data() {
     return {
       showShare: false,
+      showPhotoModal: false,
     }
   },
   methods: {

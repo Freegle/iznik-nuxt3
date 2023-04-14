@@ -143,7 +143,6 @@
           </NoticeMessage>
           <PasswordEntry v-model="password" :original-password="password" />
           <b-button
-            v-b-modal.add
             block
             size="lg"
             variant="primary"

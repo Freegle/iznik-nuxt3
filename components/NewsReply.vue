@@ -40,11 +40,11 @@
         </span>
         <div v-if="reply.image">
           <b-img
-            v-b-modal="'photoModal-' + replyid"
             rounded
             class="clickme replyphoto mt-2 mb-2"
             generator-unable-to-provide-required-alt=""
             :src="reply.image.paththumb"
+            @click="showReplyPhotoModal = true"
             @error="brokenImage"
           />
         </div>
@@ -263,8 +263,8 @@
     />
     <b-modal
       v-if="reply.image"
-      :id="'photoModal-' + replyid"
       ref="photoModal"
+      v-model="showReplyPhotoModal"
       title="ChitChat photo"
       generator-unable-to-provide-required-alt=""
       size="lg"
@@ -379,6 +379,7 @@ export default {
       showEditModal: false,
       hasBecomeVisible: false,
       isVisible: false,
+      showReplyPhotoModal: false,
     }
   },
   computed: {
