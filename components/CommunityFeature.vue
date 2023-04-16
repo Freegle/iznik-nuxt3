@@ -108,11 +108,10 @@ defineProps({
 const showAdd = ref(false)
 const modal = ref(null)
 
-const showModal = () => {
+const showModal = async () => {
   showAdd.value = true
-  waitForRef(modal, () => {
-    modal.value.show()
-  })
+  await waitForRef(modal)
+  modal.value.show()
 }
 </script>
 <style scoped lang="scss">
