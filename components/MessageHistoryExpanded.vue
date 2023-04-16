@@ -171,12 +171,11 @@ export default {
     },
   },
   methods: {
-    showProfileModal(e) {
+    async showProfileModal(e) {
       this.showProfile = true
 
-      this.waitForRef('profile', () => {
-        this.$refs.profile.show()
-      })
+      await this.waitForRef('profile')
+      this.$refs.profile.show()
     },
   },
 }

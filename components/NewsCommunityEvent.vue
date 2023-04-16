@@ -163,17 +163,15 @@ export default {
     },
   },
   methods: {
-    moreInfo() {
+    async moreInfo() {
       this.showMoreInfo = true
-      this.waitForRef('moreInfo', () => {
-        this.$refs.moreInfo.show()
-      })
+      await this.waitForRef('moreInfo')
+      this.$refs.moreInfo.show()
     },
-    addEvent() {
+    async addEvent() {
       this.showAddEvent = true
-      this.waitForRef('addEvent', () => {
-        this.$refs.addEvent.show()
-      })
+      await this.waitForRef('addEvent')
+      this.$refs.addEvent.show()
     },
     group(groupid) {
       return this.groupStore.get(groupid)

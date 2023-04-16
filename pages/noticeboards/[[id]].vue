@@ -130,12 +130,9 @@ export default {
     await loadLeaflet()
   },
   methods: {
-    added() {
-      console.log('wait for modal')
-      this.waitForRef('modal', () => {
-        console.log('show')
-        this.$refs.modal.show()
-      })
+    async added() {
+      await this.waitForRef('modal')
+      this.$refs.modal.show()
     },
     goto(id) {
       this.$router.push('/noticeboards/' + id)

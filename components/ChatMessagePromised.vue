@@ -283,19 +283,16 @@ export default {
     },
   },
   methods: {
-    unpromise() {
+    async unpromise() {
       this.showRenege = true
-      this.waitForRef('renege', () => {
-        this.$refs.renege.show()
-        fetchOurOffers()
-      })
+      await this.waitForRef('renege')
+      this.$refs.renege.show()
+      fetchOurOffers()
     },
-    changeTime() {
+    async changeTime() {
       this.showPromise = true
-
-      this.waitForRef('promise', () => {
-        this.$refs.promise.show()
-      })
+      await this.waitForRef('promise')
+      this.$refs.promise.show()
     },
     fetchMessages() {
       this.chatStore.fetchMessages(this.chatmessage.chatid)
@@ -305,9 +302,8 @@ export default {
       await messageStore.fetch(this.refmsgid)
 
       this.showOutcome = true
-      this.waitForRef('outcomeModal', () => {
-        this.$refs.outcomeModal.show(type)
-      })
+      await this.waitForRef('outcomeModal')
+      this.$refs.outcomeModal.show(type)
     },
   },
 }

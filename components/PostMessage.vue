@@ -198,7 +198,7 @@ export default {
       this.pondBrowse = false
 
       // Give pond time to render.
-      this.waitForRef('filepond', () => {
+      this.waitForRef('filepond').then(() => {
         ;[...droppedFiles].forEach((f) => {
           this.$refs.filepond.addFile(f)
         })

@@ -438,23 +438,21 @@ export default {
     this.$emit('rendered', this.replyid)
   },
   methods: {
-    showInfo() {
+    async showInfo() {
       this.infoclick = true
-      this.waitForRef('profilemodal', () => {
-        this.$refs.profilemodal.show()
-      })
+      await this.waitForRef('profilemodal')
+      this.$refs.profilemodal.show()
     },
-    replyReply() {
+    async replyReply() {
       console.log('Replying to', this.replyid, this.reply)
       this.replyingTo = this.replyid
       this.showReplyBox = true
 
-      this.waitForRef('replybox', () => {
-        this.$refs.replybox.$el.focus()
+      await this.waitForRef('replybox')
+      this.$refs.replybox.$el.focus()
 
-        // Reply with tag.
-        this.replybox = '@' + this.reply.displayname + ' '
-      })
+      // Reply with tag.
+      this.replybox = '@' + this.reply.displayname + ' '
     },
     focusReply() {
       this.$refs.replybox.focus()
@@ -522,11 +520,10 @@ export default {
 
       el.classList.remove('pulsate')
     },
-    deleteReply() {
+    async deleteReply() {
       this.showDeleteModal = true
-      this.waitForRef('deleteConfirm', () => {
-        this.$refs.deleteConfirm.show()
-      })
+      await this.waitForRef('deleteConfirm')
+      this.$refs.deleteConfirm.show()
     },
     async deleteConfirm() {
       await this.newsfeedStore.delete(this.replyid, this.threadhead)
@@ -534,17 +531,15 @@ export default {
     brokenImage(event) {
       event.target.src = '/defaultprofile.png'
     },
-    showEdit() {
+    async showEdit() {
       this.showEditModal = true
-      this.waitForRef('editModal', () => {
-        this.$refs.editModal.show()
-      })
+      await this.waitForRef('editModal')
+      this.$refs.editModal.show()
     },
-    showLove() {
+    async showLove() {
       this.showLoveModal = true
-      this.waitForRef('loveModal', () => {
-        this.$refs.loveModal.show()
-      })
+      await this.waitForRef('loveModal')
+      this.$refs.loveModal.show()
     },
     filterMatch(name, chunk) {
       // Only match at start of string.

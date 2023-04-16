@@ -169,11 +169,10 @@ export default {
     }
   },
   methods: {
-    promise() {
+    async promise() {
       this.showPromise = true
-      this.waitForRef('promise', () => {
-        this.$refs.promise.show()
-      })
+      await this.waitForRef('promise')
+      this.$refs.promise.show()
     },
     async outcome(type) {
       // Make sure we're up to date.
@@ -181,9 +180,8 @@ export default {
       await messageStore.fetch(this.refmsgid)
 
       this.showOutcome = true
-      this.waitForRef('outcomeModal', () => {
-        this.$refs.outcomeModal.show(type)
-      })
+      await this.waitForRef('outcomeModal')
+      this.$refs.outcomeModal.show(type)
     },
   },
 }

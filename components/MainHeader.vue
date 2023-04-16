@@ -621,9 +621,8 @@ export default {
       await this.fetchMe(true)
 
       this.showAboutMeModal = true
-      this.waitForRef('modal', () => {
-        this.$refs.aboutMeModal.show()
-      })
+      await this.waitForRef('modal')
+      this.$refs.aboutMeModal.show()
     },
     maybeReload(route) {
       if (this.router?.currentRoute?.value?.path === route) {

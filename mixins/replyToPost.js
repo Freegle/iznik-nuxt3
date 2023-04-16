@@ -49,7 +49,7 @@ export default {
       console.log('Execute reply to post', JSON.stringify(this.replyToSend))
 
       if (this.replyToSend) {
-        this.$nextTick(() => {
+        this.$nextTick(async () => {
           // Double-click can result in coming through here after the reply has been sent and cleared.
 
           // Create the chat and send the first message.
@@ -62,23 +62,22 @@ export default {
 
           // Open the chat, which will send the message.  We will either end up with a popup chat, or go to the
           // chat page.  The chat will clear the store.
-          this.waitForRef('replyToPostChatButton', async () => {
-            await this.$refs.replyToPostChatButton.openChat(
-              null,
-              this.replyToSend.replyMessage,
-              this.replyToSend.replyMsgId
-            )
+          await this.waitForRef('replyToPostChatButton')
+          await this.$refs.replyToPostChatButton.openChat(
+            null,
+            this.replyToSend.replyMessage,
+            this.replyToSend.replyMsgId
+          )
 
-            // Clear the store of any message to avoid repeatedly sending it.
-            const replyStore = useReplyStore()
-            replyStore.replyMsgId = null
-            replyStore.replyMessage = null
-            replyStore.replyingAt = Date.now()
+          // Clear the store of any message to avoid repeatedly sending it.
+          const replyStore = useReplyStore()
+          replyStore.replyMsgId = null
+          replyStore.replyMessage = null
+          replyStore.replyingAt = Date.now()
 
-            this.replying = false
+          this.replying = false
 
-            this.$emit('sent')
-          })
+          this.$emit('sent')
         })
       }
     },

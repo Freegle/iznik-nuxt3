@@ -41,13 +41,12 @@ export default {
     }
   },
   methods: {
-    showModal(e) {
-      this.showInfoModal = true
-      this.waitForRef('modal', () => {
-        this.$refs.modal.show()
-      })
+    async showModal(e) {
       e.preventDefault()
       e.stopPropagation()
+      this.showInfoModal = true
+      await this.waitForRef('modal')
+      this.$refs.modal.show()
     },
   },
 }

@@ -127,17 +127,15 @@ export default {
     },
   },
   methods: {
-    showAddModal() {
+    async showAddModal() {
       this.showAdd = true
-      this.waitForRef('addmodal', () => {
-        this.$refs.addmodal.show()
-      })
+      await this.waitForRef('addmodal')
+      this.$refs.addmodal.show()
     },
-    shareStory() {
+    async shareStory() {
       this.showShare = true
-      this.waitForRef('share', () => {
-        this.$refs.share.show()
-      })
+      await this.waitForRef('share')
+      this.$refs.share.show()
     },
   },
 }

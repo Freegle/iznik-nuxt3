@@ -241,11 +241,10 @@ export default {
     },
   },
   methods: {
-    showEventModal() {
+    async showEventModal() {
       this.showModal = true
-      this.waitForRef('eventmodal', () => {
-        this.$refs.eventmodal.show()
-      })
+      await this.waitForRef('eventmodal')
+      this.$refs.eventmodal.show()
     },
   },
 }

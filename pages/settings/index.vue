@@ -946,14 +946,12 @@ export default {
     async addAbout() {
       await this.fetch()
 
-      this.waitForRef('aboutmemodal', () => {
-        this.$refs.aboutmemodal.show()
-      })
+      await this.waitForRef('aboutmemodal')
+      this.$refs.aboutmemodal.show()
     },
-    viewProfile() {
-      this.waitForRef('profilemodal', () => {
-        this.$refs.profilemodal.show()
-      })
+    async viewProfile() {
+      await this.waitForRef('profilemodal')
+      this.$refs.profilemodal.show()
     },
     async changeUseProfile(c, e) {
       const settings = this.me.settings
@@ -982,9 +980,8 @@ export default {
         })
 
         if (data && data.ret === 10) {
-          this.waitForRef('emailconfirm', () => {
-            this.$refs.emailconfirm.show()
-          })
+          await this.waitForRef('emailconfirm')
+          this.$refs.emailconfirm.show()
         }
       }
 
