@@ -16,7 +16,7 @@
         rounded
         :src="newsfeed.image.path"
         class="clickme imgthumb mt-1"
-        @click="showPhotoModal = true"
+        @click="showNewsPhotoModal = true"
       />
     </div>
     <div class="mt-2 d-flex justify-content-between">
@@ -46,8 +46,8 @@
     </div>
     <b-modal
       v-if="newsfeed.image"
-      ref="showPhotoModal"
-      v-model="showPhotoModal"
+      ref="showNewsPhotoModal"
+      v-model="showNewsPhotoModal"
       title="ChitChat photo"
       generator-unable-to-provide-required-alt=""
       size="lg"
@@ -85,7 +85,7 @@ export default {
   extends: NewsBase,
   data: function () {
     return {
-      showPhotoModal: false,
+      showNewsPhotoModal: false,
     }
   },
 }
