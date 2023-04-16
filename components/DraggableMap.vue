@@ -133,75 +133,74 @@ export default {
     idle() {
       this.center = this.mapObject.getCenter()
     },
-    ready() {
+    async ready() {
       const self = this
 
-      this.waitForRef('map', async () => {
-        if (process.client) {
-          this.mapObject = this.$refs.map.leafletObject
+      await this.waitForRef('map')
+      if (process.client) {
+        this.mapObject = this.$refs.map.leafletObject
 
-          const { Geocoder } = await import(
-            'leaflet-control-geocoder/src/control'
-          )
-          const { Photon } = await import(
-            'leaflet-control-geocoder/src/geocoders/photon'
-          )
+        const { Geocoder } = await import(
+          'leaflet-control-geocoder/src/control'
+        )
+        const { Photon } = await import(
+          'leaflet-control-geocoder/src/geocoders/photon'
+        )
 
-          new Geocoder({
-            placeholder: 'Search for a place...',
-            defaultMarkGeocode: false,
-            geocoder: new Photon({
-              geocodingQueryParams: {
-                bbox: '-7.57216793459, 49.959999905, 1.68153079591, 58.6350001085',
-              },
-              nameProperties: [
-                'name',
-                'street',
-                'suburb',
-                'hamlet',
-                'town',
-                'city',
-              ],
-              serviceUrl: this.serviceUrl,
-            }),
-            collapsed: false,
+        new Geocoder({
+          placeholder: 'Search for a place...',
+          defaultMarkGeocode: false,
+          geocoder: new Photon({
+            geocodingQueryParams: {
+              bbox: '-7.57216793459, 49.959999905, 1.68153079591, 58.6350001085',
+            },
+            nameProperties: [
+              'name',
+              'street',
+              'suburb',
+              'hamlet',
+              'town',
+              'city',
+            ],
+            serviceUrl: this.serviceUrl,
+          }),
+          collapsed: false,
+        })
+          .on('markgeocode', function (e) {
+            if (e && e.geocode && e.geocode.bbox) {
+              const bbox = e.geocode.bbox
+
+              const sw = bbox.getSouthWest()
+              const ne = bbox.getNorthEast()
+              console.log('BBOX', bbox, sw, ne)
+
+              const bounds = new window.L.LatLngBounds([
+                [sw.lat, sw.lng],
+                [ne.lat, ne.lng],
+              ]).pad(0.1)
+
+              // For reasons I don't understand, leaflet throws errors if we don't make these local here.
+              const swlat = bounds.getSouthWest().lat
+              const swlng = bounds.getSouthWest().lng
+              const nelat = bounds.getNorthEast().lat
+              const nelng = bounds.getNorthEast().lng
+
+              // Empty out the query box so that the dropdown closes.
+              this.setQuery('')
+              this.zoom = 14
+
+              self.$nextTick(() => {
+                // Move the map to the location we've found.
+                console.log('Fly to', swlat, swlng, nelat, nelng)
+                self.mapObject.flyToBounds([
+                  [swlat, swlng],
+                  [nelat, nelng],
+                ])
+              })
+            }
           })
-            .on('markgeocode', function (e) {
-              if (e && e.geocode && e.geocode.bbox) {
-                const bbox = e.geocode.bbox
-
-                const sw = bbox.getSouthWest()
-                const ne = bbox.getNorthEast()
-                console.log('BBOX', bbox, sw, ne)
-
-                const bounds = new window.L.LatLngBounds([
-                  [sw.lat, sw.lng],
-                  [ne.lat, ne.lng],
-                ]).pad(0.1)
-
-                // For reasons I don't understand, leaflet throws errors if we don't make these local here.
-                const swlat = bounds.getSouthWest().lat
-                const swlng = bounds.getSouthWest().lng
-                const nelat = bounds.getNorthEast().lat
-                const nelng = bounds.getNorthEast().lng
-
-                // Empty out the query box so that the dropdown closes.
-                this.setQuery('')
-                this.zoom = 14
-
-                self.$nextTick(() => {
-                  // Move the map to the location we've found.
-                  console.log('Fly to', swlat, swlng, nelat, nelng)
-                  self.mapObject.flyToBounds([
-                    [swlat, swlng],
-                    [nelat, nelng],
-                  ])
-                })
-              }
-            })
-            .addTo(this.mapObject)
-        }
-      })
+          .addTo(this.mapObject)
+      }
     },
   },
 }

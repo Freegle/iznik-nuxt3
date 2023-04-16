@@ -28,7 +28,7 @@ jobs:
         run: yarn
 
       - name: Build
-        run: npm run build
+        run: export NODE_OPTIONS=--max-old-space-size=8192;npm run build
         env:
           NITRO_PRESET: azure-functions
           IZNIK_API_V1: https://fdapilive.ilovefreegle.org/api

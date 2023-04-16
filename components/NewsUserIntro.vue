@@ -68,13 +68,12 @@ export default {
     }
   },
   methods: {
-    showInfo() {
+    async showInfo() {
       // We use v-if so that the profile modal is not inserted into the DOM until we have clicked, which saves the
       // fetch of the user info.
       this.infoclick = true
-      this.waitForRef('profilemodal', () => {
-        this.$refs.profilemodal.show()
-      })
+      await this.waitForRef('profilemodal')
+      this.$refs.profilemodal.show()
     },
   },
 }

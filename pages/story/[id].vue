@@ -65,7 +65,7 @@ if (invalid) {
 
       story ? 'Freegle Story: ' + story.headline : 'Freegle Stories',
       story.story,
-      story.photo
+      story.image
     )
   )
 }

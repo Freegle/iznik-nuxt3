@@ -231,19 +231,17 @@ export default {
     }
 
     if (this.scrollIntoView) {
-      this.waitForRef('msg', () => {
-        this.$refs.msg.scrollIntoView()
-      })
+      await this.waitForRef('msg')
+      this.$refs.msg.scrollIntoView()
     }
   },
   methods: {
-    expand(zoom) {
+    async expand(zoom) {
       if (!this.message.successful) {
         this.expanded = true
 
-        this.waitForRef('modal', () => {
-          this.$refs.modal.show(zoom)
-        })
+        await this.waitForRef('modal')
+        this.$refs.modal.show(zoom)
 
         this.view()
       }
@@ -251,10 +249,9 @@ export default {
     zoom() {
       this.expand(true)
     },
-    showPhotosModal() {
-      this.waitForRef('photoModal', () => {
-        this.$refs.photoModal.show()
-      })
+    async showPhotosModal() {
+      await this.waitForRef('photoModal')
+      this.$refs.photoModal.show()
     },
     async view() {
       if (this.recordView) {

@@ -12,11 +12,11 @@
     <div>
       <b-img
         v-if="newsfeed.image"
-        v-b-modal="'photoModal-' + newsfeed.id"
         lazy
         rounded
         :src="newsfeed.image.path"
         class="clickme imgthumb mt-1"
+        @click="showNewsPhotoModal = true"
       />
     </div>
     <div class="mt-2 d-flex justify-content-between">
@@ -46,8 +46,8 @@
     </div>
     <b-modal
       v-if="newsfeed.image"
-      :id="'photoModal-' + newsfeed.id"
-      ref="photoModal"
+      ref="showNewsPhotoModal"
+      v-model="showNewsPhotoModal"
       title="ChitChat photo"
       generator-unable-to-provide-required-alt=""
       size="lg"
@@ -83,6 +83,11 @@ export default {
     ReadMore,
   },
   extends: NewsBase,
+  data: function () {
+    return {
+      showNewsPhotoModal: false,
+    }
+  },
 }
 </script>
 <style scoped lang="scss">

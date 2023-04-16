@@ -165,21 +165,20 @@ export default {
       return runtimeConfig.APIv1 + '/locations'
     },
   },
-  mounted() {
-    this.waitForRef('autocomplete', () => {
-      if (this.$refs.autocomplete) {
-        if (this.focus) {
-          // Focus on postcode to grab their attention.
-          this.$refs.autocomplete.$refs.input.focus()
-        }
-
-        // We need some fettling of the input keystrokes.
-        const input = this.$refs.autocomplete.$refs.input
-        input.addEventListener('keydown', this.keydown, false)
-      } else {
-        // Not quite sure how this happens, but it does.
+  async mounted() {
+    await this.waitForRef('autocomplete')
+    if (this.$refs.autocomplete) {
+      if (this.focus) {
+        // Focus on postcode to grab their attention.
+        this.$refs.autocomplete.$refs.input.focus()
       }
-    })
+
+      // We need some fettling of the input keystrokes.
+      const input = this.$refs.autocomplete.$refs.input
+      input.addEventListener('keydown', this.keydown, false)
+    } else {
+      // Not quite sure how this happens, but it does.
+    }
   },
   methods: {
     invalid() {

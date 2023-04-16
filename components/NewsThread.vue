@@ -422,10 +422,9 @@ export default {
         this.scrollDownTo = this.scrollTo
       }
     },
-    focusComment() {
-      this.waitForRef('threadcomment', () => {
-        this.$refs.threadcomment.$el.focus()
-      })
+    async focusComment() {
+      await this.waitForRef('threadcomment')
+      this.$refs.threadcomment.$el.focus()
     },
     focusedComment() {
       this.replyingTo = this.newsfeed.id
@@ -473,11 +472,10 @@ export default {
         this.threadcomment += '\n'
       }
     },
-    show() {
+    async show() {
       this.showEditModal = true
-      this.waitForRef('editModal', () => {
-        this.$refs.editModal.show()
-      })
+      await this.waitForRef('editModal')
+      this.$refs.editModal.show()
     },
     async save() {
       await this.newsfeedStore.edit(
@@ -488,11 +486,10 @@ export default {
 
       this.$refs.editModal.hide()
     },
-    deleteIt() {
+    async deleteIt() {
       this.showDeleteModal = true
-      this.waitForRef('deleteConfirm', () => {
-        this.$refs.deleteConfirm.show()
-      })
+      await this.waitForRef('deleteConfirm')
+      this.$refs.deleteConfirm.show()
     },
     deleteConfirmed() {
       this.newsfeedStore.delete(this.id, this.id)
@@ -500,11 +497,10 @@ export default {
     async unfollow() {
       await this.newsfeedStore.unfollow(this.id)
     },
-    report() {
+    async report() {
       this.showReportModal = true
-      this.waitRef('reportModal', () => {
-        this.$refs.reportModal.show()
-      })
+      await this.waitRef('reportModal')
+      this.$refs.reportModal.show()
     },
     referToOffer() {
       this.referTo('Offer')

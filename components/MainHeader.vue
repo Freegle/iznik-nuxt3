@@ -635,9 +635,8 @@ export default {
       await this.fetchMe(true)
 
       this.showAboutMeModal = true
-      this.waitForRef('modal', () => {
-        this.$refs.aboutMeModal.show()
-      })
+      await this.waitForRef('modal')
+      this.$refs.aboutMeModal.show()
     },
     refresh() { // IS_APP
       window.location.reload(true)  // Works, but causes a complete reload from scratch. this.$router.go() doesn't work in iOS app

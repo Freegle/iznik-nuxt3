@@ -281,11 +281,10 @@ export default {
     },
   },
   methods: {
-    showOpportunityModal() {
+    async showOpportunityModal() {
       this.showModal = true
-      this.waitForRef('opportunitymodal', () => {
-        this.$refs.opportunitymodal.show()
-      })
+      await this.waitForRef('opportunitymodal')
+      this.$refs.opportunitymodal.show()
     },
     async renew() {
       await this.volunteeringStore.renew(this.volunteering.id)

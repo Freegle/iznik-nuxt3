@@ -41,13 +41,12 @@ export default {
     brokenImage(event) {
       event.target.src = '/defaultprofile.png'
     },
-    share() {
+    async share() {
       console.log('Share', this.newsfeed)
       this.newsfeedModal = this.newsfeed
-      this.waitForRef('newsshare', () => {
-        console.log('Got ref')
-        this.$refs.newsshare.show()
-      })
+      await this.waitForRef('newsshare')
+      console.log('Got ref')
+      this.$refs.newsshare.show()
     },
     showPhotoModal() {
       this.$refs.photoModal.show()

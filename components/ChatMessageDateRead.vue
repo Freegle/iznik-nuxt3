@@ -154,11 +154,10 @@ export default {
     },
   },
   methods: {
-    viewOriginal() {
+    async viewOriginal() {
       this.showOriginal = true
-      this.waitForRef('original', () => {
-        this.$refs.original.show()
-      })
+      await this.waitForRef('original')
+      this.$refs.original.show()
     },
   },
 }

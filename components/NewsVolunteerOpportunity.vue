@@ -136,17 +136,15 @@ export default {
     },
   },
   methods: {
-    moreInfo() {
+    async moreInfo() {
       this.showMoreInfo = true
-      this.waitForRef('moreInfo', () => {
-        this.$refs.moreInfo.show()
-      })
+      await this.waitForRef('moreInfo')
+      this.$refs.moreInfo.show()
     },
-    addOpportunity() {
+    async addOpportunity() {
       this.showAddOpportunity = true
-      this.waitForRef('addOpportunity', () => {
-        this.$refs.addOpportunity.show()
-      })
+      await this.waitForRef('addOpportunity')
+      this.$refs.addOpportunity.show()
     },
     group(groupid) {
       return this.groupStore.get(groupid)

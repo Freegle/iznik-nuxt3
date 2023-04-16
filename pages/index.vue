@@ -253,17 +253,16 @@ export default {
 
       this.$router.push('/explore/place/' + JSON.stringify(place))
     },
-    play() {
+    async play() {
       if (process.client) {
-        this.waitForRef('video', async () => {
-          try {
-            const videoEl = document.querySelector('video')
-            videoEl.muted = true
-            await videoEl.play()
-          } catch (e) {
-            console.log('Video play failed', e)
-          }
-        })
+        await this.waitForRef('video')
+        try {
+          const videoEl = document.querySelector('video')
+          videoEl.muted = true
+          await videoEl.play()
+        } catch (e) {
+          console.log('Video play failed', e)
+        }
       }
     },
   },

@@ -96,12 +96,11 @@ export default {
     }
   },
   methods: {
-    click() {
+    async click() {
       if (this.confirm) {
         this.showConfirm = true
-        this.waitForRef('modal', () => {
-          this.$refs.modal.show()
-        })
+        await this.waitForRef('modal')
+        this.$refs.modal.show()
       } else {
         this.doIt()
       }

@@ -334,29 +334,25 @@ export default {
       const router = useRouter()
       router.push('/chats')
     },
-    showhide() {
+    async showhide() {
       this.showChatHide = true
-      this.waitForRef('chathide', () => {
-        this.$refs.chathide.show()
-      })
+      await this.waitForRef('chathide')
+      this.$refs.chathide.show()
     },
-    showblock() {
+    async showblock() {
       this.showChatBlock = true
-      this.waitForRef('chatblock', () => {
-        this.$refs.chatblock.show()
-      })
+      await this.waitForRef('chatblock')
+      this.$refs.chatblock.show()
     },
-    showInfo() {
+    async showInfo() {
       this.showProfile = true
-      this.waitForRef('profile', () => {
-        this.$refs.profile.show()
-      })
+      await this.waitForRef('profile')
+      this.$refs.profile.show()
     },
-    report() {
+    async report() {
       this.showChatReport = true
-      this.waitForRef('chatreport', () => {
-        this.$refs.chatreport.show()
-      })
+      await this.waitForRef('chatreport')
+      this.$refs.chatreport.show()
     },
     async markRead() {
       await this.chatStore.markRead(this.id)

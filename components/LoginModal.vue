@@ -165,7 +165,6 @@
           </NoticeMessage>
           <PasswordEntry v-model="password" :original-password="password" />
           <b-button
-            v-b-modal.add
             block
             size="lg"
             variant="primary"
@@ -787,7 +786,7 @@ export default {
       this.forceLogin = false
       this.$router.push('/forgot')
     },
-    installGoogleSDK() {
+    async installGoogleSDK() {
       if( this.isApp){
         GoogleAuth.initialize()
       } else {
@@ -808,13 +807,12 @@ export default {
           document.getElementById('googleLoginButton')
         )
 
-        this.waitForRef('googleLoginButton', () => {
-          console.log('Found google button ref')
-          window.google.accounts.id.renderButton(
-            document.getElementById('googleLoginButton'),
-            { theme: 'outline', size: 'large', width: '300px' }
-          )
-        })
+        await this.waitForRef('googleLoginButton')
+        console.log('Found google button ref')
+        window.google.accounts.id.renderButton(
+          document.getElementById('googleLoginButton'),
+          { theme: 'outline', size: 'large', width: '300px' }
+        )
       } else {
         console.log('Google not yet fully loaded')
       }

@@ -5,21 +5,24 @@
 // event up a component tree, which is quite clunky.
 //
 // So we have a cheap and cheerful poll timer.
-//
-// TODO MINOR But this should use promises rather than callbacks.  Wait until we've finished the code.
 export default defineNuxtPlugin((nuxtApp) => {
   nuxtApp.vueApp.mixin({
     methods: {
-      waitForRef(name, callback) {
-        // When a component is conditional using a v-if, it sometimes takes more than one tick for it to appear.  So
-        // we have a bit of a timer.
+      waitForRefTimer(name, resolve) {
         if (this.$refs[name]) {
-          callback.apply(this)
+          resolve()
         } else {
           setTimeout(() => {
-            this.waitForRef(name, callback)
+            this.waitForRefTimer(name, resolve)
           }, 100)
         }
+      },
+      waitForRef(name) {
+        // When a component is conditional using a v-if, it sometimes takes more than one tick for it to appear.  So
+        // we have a bit of a timer.
+        return new Promise((resolve) => {
+          this.waitForRefTimer(name, resolve)
+        })
       },
     },
   })

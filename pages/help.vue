@@ -101,7 +101,7 @@
             <p>
               If you're really into privacy or GDPR, you can see what data we
               store about you, and download it,
-              <nuxt-link no-prefetch to="/mydata"> here </nuxt-link>.
+              <nuxt-link no-prefetch to="/mydata">here</nuxt-link>.
             </p>
           </HelpQuestion>
           <HelpQuestion id="app" :matches="matches">
@@ -415,40 +415,38 @@ export default {
       return mobileStore.devicePersistentId;
     },
   },
-  mounted() {
+  async mounted() {
     // Scan the FAQs above and extract the plain text for each one, and then construct a search index.
-    this.waitForRef('faq', () => {
-      const faqs = this.$refs.faq.children
+    await this.waitForRef('faq')
+    const faqs = this.$refs.faq.children
 
-      this.forIndex = []
+    this.forIndex = []
 
-      for (const question of faqs) {
-        try {
-          const questionText = question.children[0].innerText.trim()
-          const answerText = question.children[1].innerText.trim()
+    for (const question of faqs) {
+      try {
+        const questionText = question.children[0].innerText.trim()
+        const answerText = question.children[1].innerText.trim()
 
-          this.forIndex.push({
-            id: question.id,
-            question: questionText,
-            answer: answerText,
-          })
-        } catch (e) {
-          console.error('Malformed FAQ', question)
-        }
+        this.forIndex.push({
+          id: question.id,
+          question: questionText,
+          answer: answerText,
+        })
+      } catch (e) {
+        console.error('Malformed FAQ', question)
       }
+    }
 
-      this.searcher = new Searcher(this.forIndex, {
-        threshold: 0.7,
-        keySelector: (obj) => obj.question + ' ' + obj.answer,
-      })
+    this.searcher = new Searcher(this.forIndex, {
+      threshold: 0.7,
+      keySelector: (obj) => obj.question + ' ' + obj.answer,
     })
   },
   methods: {
-    supporterInfo() {
+    async supporterInfo() {
       this.showInfoModal = true
-      this.waitForRef('supporterInfoModal', () => {
-        this.$refs.supporterInfoModal.show()
-      })
+      await this.waitForRef('supporterInfoModal')
+      this.$refs.supporterInfoModal.show()
     },
     showRateMe() {
       window.localStorage.removeItem('rateappnotagain')

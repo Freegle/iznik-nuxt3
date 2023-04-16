@@ -252,9 +252,8 @@ export default {
       }
 
       if (this.showAboutMe) {
-        this.waitForRef('aboutMeModal', () => {
-          this.$refs.aboutMeModal.show()
-        })
+        await this.waitForRef('aboutMeModal')
+        this.$refs.aboutMeModal.show()
 
         this.miscStore.set({
           key: 'lastaboutmeask',

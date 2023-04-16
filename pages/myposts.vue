@@ -528,10 +528,9 @@ export default {
         $state.loaded()
       }
     },
-    ask(groupid) {
-      this.waitForRef('askmodal', () => {
-        this.$refs.askmodal.show('video')
-      })
+    async ask(groupid) {
+      await this.waitForRef('askmodal')
+      this.$refs.askmodal.show('video')
     },
     postSort(a, b) {
       // Show promised items first, then by most recently posted.

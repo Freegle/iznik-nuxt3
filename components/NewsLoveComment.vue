@@ -91,12 +91,11 @@ export default {
     focusComment() {
       this.$emit('focus-comment')
     },
-    showLove() {
+    async showLove() {
       this.showLoveModal = true
 
-      this.waitForRef('loveModal', () => {
-        this.$refs.loveModal.show()
-      })
+      await this.waitForRef('loveModal')
+      this.$refs.loveModal.show()
     },
   },
 }

@@ -73,7 +73,7 @@
           </b-button>
         </div>
       </div>
-      <div v-if="submitting" class="text-center pt-2 mt-2">
+      <div v-if="submitting" class="d-flex justify-content-around pt-2 mt-2">
         <NoticeMessage v-if="notAllowed" variant="danger">
           You are not allowed to post on this community.
         </NoticeMessage>
@@ -85,7 +85,7 @@
         <b-progress
           v-else
           height="48px"
-          class="mt-2"
+          class="mt-2 w-25"
           animated
           variant="success"
         >

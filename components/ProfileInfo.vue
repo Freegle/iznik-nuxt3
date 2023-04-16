@@ -280,12 +280,11 @@ export default {
 
       return ret
     },
-    supporterInfo() {
+    async supporterInfo() {
       this.showSupporterInfo = true
 
-      this.waitForRef('supporterInfoModal', () => {
-        this.$refs.supporterInfoModal.show()
-      })
+      await this.waitForRef('supporterInfoModal')
+      this.$refs.supporterInfoModal.show()
     },
   },
 }

@@ -103,11 +103,10 @@ export default {
     }
   },
   methods: {
-    showModal() {
+    async showModal() {
       this.showAdd = true
-      this.waitForRef('modal', () => {
-        this.$refs.modal.show()
-      })
+      await this.waitForRef('modal')
+      this.$refs.modal.show()
     },
   },
 }
