@@ -1,12 +1,8 @@
-**This is a WIP rewrite of the front-end client into Nuxt v3.  It's not ready yet, but it's getting there.**
-
-What doesn't exist yet:
-* TODO Some of the minor pages (mydata)
-* CircleCI/playwright testing.
-
 # iznik-nuxt3
 
-Iznik is a platform for online reuse of unwanted items.  The old  version is [here](https://github.com/Freegle/iznik-nuxt).
+Iznik is a platform for online reuse of unwanted items.  This is the front-end client.  
+
+The old  version is [here](https://github.com/Freegle/iznik-nuxt).
 
 The development has been funded by [Freegle](https://www.ilovefreegle.org) for use in the UK,
 but it is an open source platform which can be used or adapted by others.  Other contributors very welcome,

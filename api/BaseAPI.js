@@ -90,7 +90,7 @@ export default class BaseAPI {
 
       useMiscStore().api(1)
 
-      const rsp = await ourFetch(this.config.public.APIv1 + path, {
+      const rsp = await fetch(this.config.public.APIv1 + path, {
         ...config,
         body,
         method,

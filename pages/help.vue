@@ -95,7 +95,7 @@
             <p>
               If you're really into privacy or GDPR, you can see what data we
               store about you, and download it,
-              <nuxt-link no-prefetch to="/mydata"> here </nuxt-link>.
+              <nuxt-link no-prefetch to="/mydata">here</nuxt-link>.
             </p>
           </HelpQuestion>
           <HelpQuestion id="app" :matches="matches">
