@@ -555,11 +555,13 @@ const activePostsCountPlural = ref(() => {
   })
 })
 
+const emit = defineEmits(['update:unreadNotificationCount', 'update:chatCount'])
+
 watch(unreadNotificationCount, (newVal) => {
-  this.$emit('update:unreadNotificationCount', newVal)
+  emit('update:unreadNotificationCount', newVal)
 })
 watch(chatCount, (newValue) => {
-  this.$emit('update:chatCount', newValue)
+  emit('update:chatCount', newValue)
 })
 
 watch(myid, (newVal, oldVal) => {
@@ -572,6 +574,7 @@ watch(myid, (newVal, oldVal) => {
     getCounts()
   }
 })
+
 onMounted(() => {
   setTimeout(async () => {
     // Look for a custom logo.

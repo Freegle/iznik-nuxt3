@@ -130,7 +130,6 @@ const loadMoreNotifications = ($state) => {
 }
 const markAllRead = async () => {
   await notificationStore.allSeen()
-  await notificationStore.fetchCount()
 }
 
 const emit = defineEmits(['update:unreadNotificationCount', 'showAboutMe'])
