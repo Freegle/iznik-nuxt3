@@ -9,10 +9,10 @@ export default class SessionAPI extends BaseAPI {
     return this.$get('/session', params)
   }
 
-  fetchv2(params) {
+  fetchv2(params, log = true) {
     const runtimeConfig = useRuntimeConfig()
     params.webversion = runtimeConfig.public.BUILD_DATE
-    return this.$getv2('/user', params)
+    return this.$getv2('/user', params, log)
   }
 
   save(data) {

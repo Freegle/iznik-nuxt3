@@ -186,7 +186,7 @@ export const useAuthStore = defineStore({
         console.log('Got auth')
         // We have auth info.  The new API can authenticate using either the JWT or the persistent token.
         try {
-          me = await this.$api.session.fetchv2({})
+          me = await this.$api.session.fetchv2({}, false)
           console.log('Done fetchv2')
         } catch (e) {
           // Failed.  This can validly happen with a 404 if the JWT is invalid.
