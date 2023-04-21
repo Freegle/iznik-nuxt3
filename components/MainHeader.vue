@@ -645,7 +645,7 @@ const getCounts = async () => {
     try {
       // We sometimes might not yet have figured out if we're logged in, so catch exceptions otherwise they
       // cause Nuxt to bail out with JS errors.
-      await newsfeedStore.fetchCount()
+      await newsfeedStore.fetchCount(false)
 
       let messages = []
 
