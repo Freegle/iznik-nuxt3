@@ -33,6 +33,11 @@ export default defineNuxtPlugin((nuxtApp) => {
         return null
       }
 
+      // HeadlessChrome triggers an error in Google sign-in.  It's not a real user.
+      if (window.navigator.userAgent.includes('BingPreview')) {
+        return null
+      }
+
       // Check if it is an exception, and if so, log it.
       if (event.exception) {
         console.error(
