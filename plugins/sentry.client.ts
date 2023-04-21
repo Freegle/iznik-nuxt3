@@ -28,6 +28,11 @@ export default defineNuxtPlugin((nuxtApp) => {
     environment: config.ENVIRONMENT || 'dev', // Set environment
     // The following enables exeptions to be logged to console despite logErrors being set to false (preventing them from being passed to the default Vue err handler)
     beforeSend(event, hint) {
+      // Ignore Bing crawler, which seems to abort pre-fetching of some assets.
+      if (window.navigator.userAgent.includes('BingPreview')) {
+        return null
+      }
+
       // Check if it is an exception, and if so, log it.
       if (event.exception) {
         console.error(
