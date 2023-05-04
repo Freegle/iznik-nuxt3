@@ -50,7 +50,7 @@
         <NotificationOne :id="notification.id" @show-modal="showAboutMe" />
         <template #fallback>
           <div class="invisible" style="min-height: 200px">
-            Loading {{ id }}...
+            Loading {{ notification.id }}...
           </div>
         </template>
       </Suspense>
