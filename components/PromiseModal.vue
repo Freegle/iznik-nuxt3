@@ -83,7 +83,7 @@
           >Please add a time.</span
         >
         If you don't want to specify a precise day and time yet, clear the day
-        and click the <em>Promise</em> button. You you can come back here later.
+        and click the <em>Promise</em> button. You can come back here later.
       </p>
     </template>
     <template #footer>
