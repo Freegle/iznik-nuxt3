@@ -581,7 +581,7 @@ onMounted(() => {
     const ret = await logoStore.fetch()
 
     if (ret.ret === 0 && ret.logo) {
-      this.logo = ret.logo.path.replace(/.*logos/, '/logos')
+      logo.value = ret.logo.path.replace(/.*logos/, '/logos')
     }
   }, 5000)
 
