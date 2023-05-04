@@ -66,7 +66,7 @@
             :minutes-step="15"
             :offset="-10"
             menu-class="border-primary shadow-lg"
-            :class="date && !time ? 'border-danger' : ''"
+            :class="formattedDate && !time ? 'border-danger' : ''"
           />
         </div>
         <div class="d-flex flex-column justify-content-center">
@@ -79,7 +79,7 @@
         This is an early/late time. Just saying, in case it's not right.
       </b-alert>
       <p class="mt-2">
-        <span v-if="date && !time" class="text-danger font-weight-bold"
+        <span v-if="formattedDate && !time" class="text-danger font-weight-bold"
           >Please add a time.</span
         >
         If you don't want to specify a precise day and time yet, clear the day
@@ -161,7 +161,7 @@ export default {
         !this.message ||
         // This is fun.  Because && returns one of the values, it doesn't return true or false.  Try hard.
         // eslint-disable-next-line
-        (this.date && !this.time ? true : false)
+        (this.formattedDate && !this.time ? true : false)
       )
     },
     messageOptions() {
