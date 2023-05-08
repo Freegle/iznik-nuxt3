@@ -5,12 +5,17 @@
 // event up a component tree, which is quite clunky.
 //
 // So we have a cheap and cheerful poll timer.
+
 export default defineNuxtPlugin((nuxtApp) => {
   nuxtApp.vueApp.mixin({
     methods: {
       waitForRefTimer(name, resolve) {
         if (this.$refs[name]) {
-          resolve()
+          this.$nextTick(() => {
+            this.$nextTick(() => {
+              resolve()
+            })
+          })
         } else {
           setTimeout(() => {
             this.waitForRefTimer(name, resolve)
