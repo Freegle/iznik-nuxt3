@@ -110,7 +110,7 @@
         </b-button>
         <SpinButton
           variant="primary"
-          :disabled="uploadingPhoto"
+          :disabled="uploadingPhoto || (!edittextbody && !attachments?.length)"
           name="save"
           label="Save"
           spinclass="text-white"
