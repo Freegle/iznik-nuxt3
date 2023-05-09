@@ -44,7 +44,7 @@
                       address.lng +
                       '&z=16'
                     "
-                    class="mt-1"
+                    class="mt-1 small"
                   >
                     View in Google Maps
                   </ExternalLink>
@@ -95,7 +95,7 @@
                       address.lng +
                       '&z=16'
                     "
-                    class="mt-1"
+                    class="mt-1 small"
                   >
                     View in Google Maps
                   </ExternalLink>
