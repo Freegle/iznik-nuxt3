@@ -228,7 +228,7 @@ export default {
         : 1
 
       for (const u of this.tookUsers) {
-        if (u.userid > 0) {
+        if (u.userid >= 0) {
           left -= u.count
         }
       }
