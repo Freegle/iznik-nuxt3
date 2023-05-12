@@ -66,9 +66,13 @@ export default {
     ) {
       // Fetch any approving mod.  No need to wait.
       const message = messageStore.byId(props.id)
-      for (const group of message?.groups) {
-        if (group?.approvedby) {
-          userStore.fetch(group.approvedby)
+
+      if (message) {
+        // Might fail, e.g. network, but we don't much mind if it does - we'd just not show the approving mod.
+        for (const group of message.groups) {
+          if (group?.approvedby) {
+            userStore.fetch(group.approvedby)
+          }
         }
       }
     }

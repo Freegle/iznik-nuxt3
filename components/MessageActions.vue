@@ -73,11 +73,10 @@ export default {
     },
   },
   methods: {
-    share() {
+    async share() {
       this.showShareModal = true
-      this.waitForRef('shareModal', () => {
-        this.$refs.shareModal.show()
-      })
+      await this.waitForRef('shareModal')
+      this.$refs.shareModal.show()
     },
     report() {
       this.$refs.reportModal.show()

@@ -488,74 +488,70 @@ export default {
     this.destroyed = true
   },
   methods: {
-    ready() {
+    async ready() {
       const self = this
 
-      this.waitForRef('map', async () => {
-        this.$emit('update:ready', true)
-        this.mapObject = this.$refs.map.leafletObject
-        this.$refs.map.leafletObject.fitBounds(this.initialBounds)
+      this.waitForRef('map')
+      this.$emit('update:ready', true)
+      this.mapObject = this.$refs.map.leafletObject
+      this.$refs.map.leafletObject.fitBounds(this.initialBounds)
 
-        if (process.client) {
-          const runtimeConfig = useRuntimeConfig()
+      if (process.client) {
+        const runtimeConfig = useRuntimeConfig()
 
-          const { Geocoder } = await import(
-            'leaflet-control-geocoder/src/control'
-          )
-          const { Photon } = await import(
-            'leaflet-control-geocoder/src/geocoders/photon'
-          )
+        const { Geocoder } = await import(
+          'leaflet-control-geocoder/src/control'
+        )
+        const { Photon } = await import(
+          'leaflet-control-geocoder/src/geocoders/photon'
+        )
 
-          new Geocoder({
-            placeholder: 'Search for a place...',
-            defaultMarkGeocode: false,
-            geocoder: new Photon({
-              geocodingQueryParams: {
-                bbox: '-7.57216793459, 49.959999905, 1.68153079591, 58.6350001085',
-              },
-              nameProperties: [
-                'name',
-                'street',
-                'suburb',
-                'hamlet',
-                'town',
-                'city',
-              ],
-              serviceUrl: runtimeConfig.public.GEOCODE,
-            }),
-            collapsed: false,
+        new Geocoder({
+          placeholder: 'Search for a place...',
+          defaultMarkGeocode: false,
+          geocoder: new Photon({
+            geocodingQueryParams: {
+              bbox: '-7.57216793459, 49.959999905, 1.68153079591, 58.6350001085',
+            },
+            nameProperties: [
+              'name',
+              'street',
+              'suburb',
+              'hamlet',
+              'town',
+              'city',
+            ],
+            serviceUrl: runtimeConfig.public.GEOCODE,
+          }),
+          collapsed: false,
+        })
+          .on('markgeocode', async function (e) {
+            if (e && e.geocode && e.geocode.bbox) {
+              // Empty out the query box so that the dropdown closes.  Note that "this" is the control object,
+              // which is why this isn't in a separate method.
+              this.setQuery('')
+
+              // If we don't find anything at this location we will want to zoom out.
+              self.shownMany = false
+
+              // For some reason we need to take a copy of the latlng bounds in the event before passing it to
+              // flyToBounds.
+              const flyTo = e.geocode.bbox
+              const L = await import('leaflet/dist/leaflet-src.esm')
+              const newBounds = new L.LatLngBounds(
+                new L.LatLng(
+                  flyTo.getSouthWest().lat,
+                  flyTo.getSouthWest().lng
+                ),
+                new L.LatLng(flyTo.getNorthEast().lat, flyTo.getNorthEast().lng)
+              )
+              // Move the map to the location we've found.
+              self.$refs.map.leafletObject.flyToBounds(newBounds)
+              self.$emit('searched')
+            }
           })
-            .on('markgeocode', async function (e) {
-              if (e && e.geocode && e.geocode.bbox) {
-                // Empty out the query box so that the dropdown closes.  Note that "this" is the control object,
-                // which is why this isn't in a separate method.
-                this.setQuery('')
-
-                // If we don't find anything at this location we will want to zoom out.
-                self.shownMany = false
-
-                // For some reason we need to take a copy of the latlng bounds in the event before passing it to
-                // flyToBounds.
-                const flyTo = e.geocode.bbox
-                const L = await import('leaflet/dist/leaflet-src.esm')
-                const newBounds = new L.LatLngBounds(
-                  new L.LatLng(
-                    flyTo.getSouthWest().lat,
-                    flyTo.getSouthWest().lng
-                  ),
-                  new L.LatLng(
-                    flyTo.getNorthEast().lat,
-                    flyTo.getNorthEast().lng
-                  )
-                )
-                // Move the map to the location we've found.
-                self.$refs.map.leafletObject.flyToBounds(newBounds)
-                self.$emit('searched')
-              }
-            })
-            .addTo(this.mapObject)
-        }
-      })
+          .addTo(this.mapObject)
+      }
     },
     idle() {
       this.mapIdle++
@@ -743,7 +739,9 @@ export default {
         })
       }
     },
-    goHome() {
+    async goHome() {
+      await loadLeaflet()
+
       if (this.me.lat || this.me.lng) {
         this.mapObject.flyTo(new this.L.LatLng(this.me.lat, this.me.lng))
       }

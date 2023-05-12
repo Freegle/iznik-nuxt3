@@ -23,7 +23,12 @@
               {{ itemDescription }}
             </p>
             <div v-for="id in items" :key="itemKey + id" class="">
-              <component :is="featureComponent" :id="id" :summary="true" />
+              <CommunityEvent
+                v-if="featureComponent === 'CommunityEvent'"
+                :id="id"
+                :summary="true"
+              />
+              <VolunteerOpportunity v-else :id="id" :summary="true" />
             </div>
           </div>
           <p v-else class="text-center p-1">
@@ -32,84 +37,81 @@
         </div>
       </b-card-body>
     </b-card>
-    <component
-      :is="addModalComponent"
-      v-if="showAdd"
-      ref="modal"
-      :start-edit="true"
-    />
+    <div v-if="showAdd">
+      <CommunityEventModal
+        v-if="featureComponent === 'CommunityEvent'"
+        ref="modal"
+        :start-edit="true"
+      />
+      <VolunteerOpportunityModal v-else ref="modal" :start-edit="true" />
+    </div>
   </div>
 </template>
-<script>
-import CommunityEvent from './CommunityEvent'
-import VolunteerOpportunity from './VolunteerOpportunity'
-import CommunityEventModal from '~/components/CommunityEventModal'
-import VolunteerOpportunityModal from '~/components/VolunteerOpportunityModal'
+<script setup>
+import { waitForRef } from '~/composables/useWaitForRef'
+import { ref, defineAsyncComponent } from '#imports'
 
-export default {
-  name: 'CommunityFeature',
-  components: {
-    CommunityEvent,
-    VolunteerOpportunity,
-    CommunityEventModal,
-    VolunteerOpportunityModal,
-  },
+const CommunityEvent = defineAsyncComponent(() => import('./CommunityEvent'))
+const VolunteerOpportunity = defineAsyncComponent(() =>
+  import('./VolunteerOpportunity')
+)
+const CommunityEventModal = defineAsyncComponent(() =>
+  import('./CommunityEventModal')
+)
+const VolunteerOpportunityModal = defineAsyncComponent(() =>
+  import('./VolunteerOpportunityModal')
+)
 
-  props: {
-    items: {
-      type: Array,
-      required: true,
-    },
-    title: {
-      type: String,
-      required: true,
-    },
-    link: {
-      type: String,
-      required: true,
-    },
-    iconName: {
-      type: String,
-      required: true,
-    },
-    addButtonLabel: {
-      type: String,
-      required: true,
-    },
-    itemDescription: {
-      type: String,
-      required: true,
-    },
-    noItemsMessage: {
-      type: String,
-      required: true,
-    },
-    featureComponent: {
-      type: String,
-      required: true,
-    },
-    addModalComponent: {
-      type: String,
-      required: true,
-    },
-    itemKey: {
-      type: String,
-      required: true,
-    },
+defineProps({
+  items: {
+    type: Array,
+    required: true,
   },
-  data() {
-    return {
-      showAdd: false,
-    }
+  title: {
+    type: String,
+    required: true,
   },
-  methods: {
-    showModal() {
-      this.showAdd = true
-      this.waitForRef('modal', () => {
-        this.$refs.modal.show()
-      })
-    },
+  link: {
+    type: String,
+    required: true,
   },
+  iconName: {
+    type: String,
+    required: true,
+  },
+  addButtonLabel: {
+    type: String,
+    required: true,
+  },
+  itemDescription: {
+    type: String,
+    required: true,
+  },
+  noItemsMessage: {
+    type: String,
+    required: true,
+  },
+  featureComponent: {
+    type: String,
+    required: true,
+  },
+  addModalComponent: {
+    type: String,
+    required: true,
+  },
+  itemKey: {
+    type: String,
+    required: true,
+  },
+})
+
+const showAdd = ref(false)
+const modal = ref(null)
+
+const showModal = async () => {
+  showAdd.value = true
+  await waitForRef(modal)
+  modal.value.show()
 }
 </script>
 <style scoped lang="scss">

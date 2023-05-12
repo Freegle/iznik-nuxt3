@@ -48,6 +48,7 @@ module.exports = {
     defineNitroPlugin: 'readonly',
     defineEmits: 'readonly',
     defineNuxtRouteMiddleware: 'readonly',
+    defineEventHandler: 'readonly',
     getCurrentInstance: 'readonly',
     useAsyncData: 'readonly',
     useLazyAsyncData: 'readonly',
@@ -57,5 +58,6 @@ module.exports = {
     computed: 'readonly',
     usePinia: 'readonly',
     navigateTo: 'readonly',
+    sendRedirect: 'readonly',
   },
 }

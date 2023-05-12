@@ -63,7 +63,7 @@
         <b-row>
           <b-col cols="12">
             <div class="mt-2 float-left">
-              <div v-if="story.photo" class="container p-0">
+              <div v-if="story.image" class="container p-0">
                 <div
                   class="clickme rotateleft stacked"
                   label="Rotate left"
@@ -84,9 +84,9 @@
                 </div>
                 <div class="image">
                   <b-img
-                    v-if="story.photo"
+                    v-if="story.image"
                     thumbnail
-                    :src="story.photo.paththumb + '?' + cacheBust"
+                    :src="story.image.paththumb + '?' + cacheBust"
                   />
                   <b-img v-else thumbnail width="250" src="/placeholder.jpg" />
                 </div>
@@ -191,7 +191,7 @@ export default {
       // We have uploaded a photo.  Remove the filepond instance.
       this.uploading = false
 
-      this.story.photo = {
+      this.story.image = {
         id: imageid,
         path: image,
         paththumb: imagethumb,
@@ -217,7 +217,7 @@ export default {
       this.thankyou = false
       this.story.headline = null
       this.story.story = null
-      this.story.photo = null
+      this.story.image = null
       this.showModal = true
     },
     async submit() {
@@ -225,7 +225,7 @@ export default {
         await this.storyStore.add(
           this.story.headline,
           this.story.story,
-          this.story.photo ? this.story.photo.id : null,
+          this.story.image ? this.story.image.id : null,
           this.allowpublic
         )
 

@@ -1,5 +1,8 @@
 <template>
-  <div :class="{ 'bg-info': scrollToThis }">
+  <div
+    v-observe-visibility="visibilityChanged"
+    :class="{ 'bg-info': scrollToThis }"
+  >
     <div class="reply">
       <div
         class="clickme align-top"
@@ -37,11 +40,11 @@
         </span>
         <div v-if="reply.image">
           <b-img
-            v-b-modal="'photoModal-' + replyid"
             rounded
             class="clickme replyphoto mt-2 mb-2"
             generator-unable-to-provide-required-alt=""
             :src="reply.image.paththumb"
+            @click="showReplyPhotoModal = true"
             @error="brokenImage"
           />
         </div>
@@ -260,8 +263,8 @@
     />
     <b-modal
       v-if="reply.image"
-      :id="'photoModal-' + replyid"
       ref="photoModal"
+      v-model="showReplyPhotoModal"
       title="ChitChat photo"
       generator-unable-to-provide-required-alt=""
       size="lg"
@@ -292,6 +295,7 @@
 import pluralize from 'pluralize'
 import { useNewsfeedStore } from '../stores/newsfeed'
 import { useUserStore } from '../stores/user'
+import { useMiscStore } from '../stores/misc'
 import NewsLovesModal from './NewsLovesModal'
 import SpinButton from './SpinButton'
 import NewsEditModal from './NewsEditModal'
@@ -352,10 +356,12 @@ export default {
   setup(props) {
     const newsfeedStore = useNewsfeedStore()
     const userStore = useUserStore()
+    const miscStore = useMiscStore()
 
     return {
       userStore,
       newsfeedStore,
+      miscStore,
     }
   },
   data() {
@@ -371,6 +377,9 @@ export default {
       showDeleteModal: false,
       showLoveModal: false,
       showEditModal: false,
+      hasBecomeVisible: false,
+      isVisible: false,
+      showReplyPhotoModal: false,
     }
   },
   computed: {
@@ -419,9 +428,7 @@ export default {
   watch: {
     scrollTo(newVal) {
       if (parseInt(this.scrollTo) === this.replyid && this.$el.scrollIntoView) {
-        this.$nextTick(() => {
-          this.$el.scrollIntoView(false)
-        })
+        this.scrollIntoView()
       }
     },
   },
@@ -431,23 +438,21 @@ export default {
     this.$emit('rendered', this.replyid)
   },
   methods: {
-    showInfo() {
+    async showInfo() {
       this.infoclick = true
-      this.waitForRef('profilemodal', () => {
-        this.$refs.profilemodal.show()
-      })
+      await this.waitForRef('profilemodal')
+      this.$refs.profilemodal.show()
     },
-    replyReply() {
+    async replyReply() {
       console.log('Replying to', this.replyid, this.reply)
       this.replyingTo = this.replyid
       this.showReplyBox = true
 
-      this.waitForRef('replybox', () => {
-        this.$refs.replybox.$el.focus()
+      await this.waitForRef('replybox')
+      this.$refs.replybox.$el.focus()
 
-        // Reply with tag.
-        this.replybox = '@' + this.reply.displayname + ' '
-      })
+      // Reply with tag.
+      this.replybox = '@' + this.reply.displayname + ' '
     },
     focusReply() {
       this.$refs.replybox.focus()
@@ -515,11 +520,10 @@ export default {
 
       el.classList.remove('pulsate')
     },
-    deleteReply() {
+    async deleteReply() {
       this.showDeleteModal = true
-      this.waitForRef('deleteConfirm', () => {
-        this.$refs.deleteConfirm.show()
-      })
+      await this.waitForRef('deleteConfirm')
+      this.$refs.deleteConfirm.show()
     },
     async deleteConfirm() {
       await this.newsfeedStore.delete(this.replyid, this.threadhead)
@@ -527,17 +531,15 @@ export default {
     brokenImage(event) {
       event.target.src = '/defaultprofile.png'
     },
-    showEdit() {
+    async showEdit() {
       this.showEditModal = true
-      this.waitForRef('editModal', () => {
-        this.$refs.editModal.show()
-      })
+      await this.waitForRef('editModal')
+      this.$refs.editModal.show()
     },
-    showLove() {
+    async showLove() {
       this.showLoveModal = true
-      this.waitForRef('loveModal', () => {
-        this.$refs.loveModal.show()
-      })
+      await this.waitForRef('loveModal')
+      this.$refs.loveModal.show()
     },
     filterMatch(name, chunk) {
       // Only match at start of string.
@@ -555,6 +557,38 @@ export default {
       // The imageid is in this.imageid
       this.imageid = imageid
       this.imagethumb = imagethumb
+    },
+    scrollIntoView() {
+      const api = this.miscStore.apiCount
+
+      if (api) {
+        // Try later
+        setTimeout(this.scrollIntoView, 100)
+      } else {
+        // No outstanding requests, so we can scroll.
+        this.$el.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+          inline: 'nearest',
+        })
+
+        this.$nextTick(() => {
+          if (!this.isVisible) {
+            setTimeout(this.scrollIntoView, 200)
+          } else {
+            this.hasBecomeVisible = true
+          }
+        })
+      }
+    },
+    visibilityChanged(visible) {
+      if (parseInt(this.scrollTo) === this.replyid && !this.hasBecomeVisible) {
+        this.isVisible = visible
+
+        if (!visible) {
+          this.scrollIntoView()
+        }
+      }
     },
   },
 }

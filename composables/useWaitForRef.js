@@ -1,11 +1,17 @@
-export function waitForRef(ref, callback) {
-  // When a component is conditional using a v-if, it sometimes takes more than one tick for it to appear.  So
-  // we have a bit of a timer.
+function waitForRefTimer(ref, resolve) {
   if (ref.value) {
-    callback()
+    resolve()
   } else {
     setTimeout(() => {
-      waitForRef(ref, callback)
+      waitForRefTimer(ref, resolve)
     }, 100)
   }
+}
+
+export function waitForRef(ref) {
+  // When a component is conditional using a v-if, it sometimes takes more than one tick for it to appear.  So
+  // we have a bit of a timer.
+  return new Promise((resolve) => {
+    waitForRefTimer(ref, resolve)
+  })
 }

@@ -642,7 +642,7 @@ export default {
       },
     },
   },
-  mounted() {
+  async mounted() {
     this.expanded = this.expand
 
     if (this.me) {
@@ -663,9 +663,8 @@ export default {
           break
         case 'promise':
           this.showPromiseModal = true
-          this.waitForRef('promiseModal', () => {
-            this.$refs.promiseModal.show()
-          })
+          await this.waitForRef('promiseModal')
+          this.$refs.promiseModal.show()
           break
       }
     }
@@ -674,10 +673,9 @@ export default {
     toggle() {
       this.expanded = !this.expanded
     },
-    showPhotos() {
-      this.waitForRef('photoModal', () => {
-        this.$refs.photoModal.show()
-      })
+    async showPhotos() {
+      await this.waitForRef('photoModal')
+      this.$refs.photoModal.show()
     },
     countUnseen(reply) {
       let unseen = 0
@@ -690,13 +688,12 @@ export default {
 
       return unseen
     },
-    outcome(type) {
+    async outcome(type) {
       this.showOutcomeModal = true
-      this.waitForRef('outcomeModal', () => {
-        this.$refs.outcomeModal.show(type)
-      })
+      await this.waitForRef('outcomeModal')
+      this.$refs.outcomeModal.show(type)
     },
-    share(e) {
+    async share(e) {
       if (e) {
         e.preventDefault()
         e.stopPropagation()
@@ -704,11 +701,10 @@ export default {
       }
 
       this.showShareModal = true
-      this.waitForRef('shareModal', () => {
-        this.$refs.shareModal.show()
-      })
+      await this.waitForRef('shareModal')
+      this.$refs.shareModal.show()
     },
-    edit(e) {
+    async edit(e) {
       if (e) {
         e.preventDefault()
         e.stopPropagation()
@@ -716,9 +712,8 @@ export default {
       }
 
       this.showEditModal = true
-      this.waitForRef('editModal', () => {
-        this.$refs.editModal.show()
-      })
+      await this.waitForRef('editModal')
+      this.$refs.editModal.show()
     },
     async repost(e) {
       if (e) {

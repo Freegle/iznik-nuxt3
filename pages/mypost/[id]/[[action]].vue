@@ -155,10 +155,9 @@ export default {
     })
   },
   methods: {
-    ask(groupid) {
-      this.waitForRef('askmodal', () => {
-        this.$refs.askmodal.show()
-      })
+    async ask(groupid) {
+      await this.waitForRef('askmodal')
+      this.$refs.askmodal.show()
     },
     setGroup() {
       if (this.message?.groups?.length) {

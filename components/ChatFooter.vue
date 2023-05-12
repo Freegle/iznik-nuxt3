@@ -382,10 +382,9 @@ export default {
       await this.chatStore.nudge(this.id)
       this._updateAfterSend()
     },
-    nudge() {
-      this.waitForRef('nudgewarning', () => {
-        this.$refs.nudgewarning.show()
-      })
+    async nudge() {
+      await this.waitForRef('nudgewarning')
+      this.$refs.nudgewarning.show()
     },
     newline() {
       const p = this.$refs.chatarea.selectionStart
@@ -402,54 +401,51 @@ export default {
         this.sendmessage += '\n'
       }
     },
-    addressBook() {
+    async addressBook() {
       this.showAddress = true
 
-      this.waitForRef('addressModal', () => {
-        this.$refs.addressModal.show()
-      })
+      await this.waitForRef('addressModal')
+      this.$refs.addressModal.show()
     },
     photoAdd() {
       // Flag that we're uploading.  This will trigger the render of the filepond instance and subsequently the
       // processed callback below.
       this.uploading = true
     },
-    promise(date) {
+    async promise(date) {
       // Show the modal first, as eye candy.
       this.showPromise = true
 
-      this.waitForRef('promise', () => {
-        this.$refs.promise.show(date)
+      await this.waitForRef('promise')
+      this.$refs.promise.show(date)
 
-        this.$nextTick(async () => {
-          this.ouroffers = await fetchOurOffers()
+      this.$nextTick(async () => {
+        this.ouroffers = await fetchOurOffers()
 
-          // Find the last message referenced in this chat, if any.  That's the most likely one you'd want to promise,
-          // so it should be the default.
-          this.likelymsg = 0
+        // Find the last message referenced in this chat, if any.  That's the most likely one you'd want to promise,
+        // so it should be the default.
+        this.likelymsg = 0
 
-          for (const msg of this.chatmessages) {
-            if (msg.refmsg) {
-              // Check that it's still in our list of messages
-              for (const ours of this.ouroffers) {
-                if (
-                  ours.id === msg.refmsg.id &&
-                  !ours.promised &&
-                  (!ours.outcomes || ours.outcomes.length === 0)
-                ) {
-                  this.likelymsg = msg.refmsg.id
-                }
+        for (const msg of this.chatmessages) {
+          if (msg.refmsg) {
+            // Check that it's still in our list of messages
+            for (const ours of this.ouroffers) {
+              if (
+                ours.id === msg.refmsg.id &&
+                !ours.promised &&
+                (!ours.outcomes || ours.outcomes.length === 0)
+              ) {
+                this.likelymsg = msg.refmsg.id
               }
             }
           }
-        })
+        }
       })
     },
-    showInfo() {
+    async showInfo() {
       this.showProfile = true
-      this.waitForRef('profile', () => {
-        this.$refs.profile.show()
-      })
+      await this.waitForRef('profile')
+      this.$refs.profile.show()
     },
     async send() {
       let msg = this.sendmessage
@@ -480,9 +476,8 @@ export default {
 
         if (RSVP) {
           this.RSVP = true
-          this.waitForRef('rsvp', () => {
-            this.$refs.rsvp.show()
-          })
+          await this.waitForRef('rsvp')
+          this.$refs.rsvp.show()
         } else {
           // We've sent a message.  This would be a good time to do some microvolunteering.
           this.showMicrovolunteering = true

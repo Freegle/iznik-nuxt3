@@ -27,8 +27,8 @@ export const useNewsfeedStore = defineStore({
       this.$reset()
       this.config = init
     },
-    async fetchCount() {
-      const ret = await api(this.config).news.count()
+    async fetchCount(log = true) {
+      const ret = await api(this.config).news.count(log)
       this.count = ret?.count
       return this.count
     },
@@ -149,7 +149,7 @@ export const useNewsfeedStore = defineStore({
       for (const id in state.list) {
         const item = state.list[id]
 
-        if (item.userid && item.displayname) {
+        if (item?.userid && item?.displayname) {
           if (!userids[item.userid]) {
             userids[item.userid] = true
             ret.push({
@@ -159,7 +159,7 @@ export const useNewsfeedStore = defineStore({
           }
         }
 
-        if (item.replies?.length) {
+        if (item?.replies?.length) {
           for (const reply of item.replies) {
             if (reply.userid && reply.displayname) {
               if (!userids[reply.userid]) {

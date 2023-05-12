@@ -15,7 +15,7 @@
             <b-badge
               v-if="message.availableinitially > 1"
               variant="info"
-              class="lg"
+              class="lg ml-2"
             >
               {{ left }} left
             </b-badge>

@@ -23,7 +23,7 @@
                 </b-col>
               </b-row>
             </template>
-            <template #modal-footer>
+            <template #footer>
               <b-button variant="primary" @click="closed"> Close </b-button>
             </template>
           </b-modal>
@@ -53,7 +53,7 @@
                 </b-col>
               </b-row>
             </template>
-            <template #modal-footer>
+            <template #footer>
               <b-button variant="white" @click="closed"> Cancel </b-button>
               <b-button variant="primary" @click="resend">
                 Resend verification mail
@@ -84,7 +84,7 @@
                 </b-col>
               </b-row>
             </template>
-            <template #modal-footer>
+            <template #footer>
               <b-button variant="primary" @click="closed"> Close </b-button>
             </template>
           </b-modal>

@@ -25,12 +25,12 @@
     <div>
       <b-img
         v-if="newsfeed.image"
-        v-b-modal="'photoModal-' + newsfeed.id"
         thumbnail
         rounded
         lazy
         :src="newsfeed.image.paththumb"
         class="clickme"
+        @click="showPhotoModal"
       />
     </div>
     <div class="mt-2 d-flex flex-wrap justify-content-between">
@@ -44,7 +44,6 @@
     </div>
     <b-modal
       v-if="newsfeed.image"
-      :id="'photoModal-' + newsfeed.id"
       ref="photoModal"
       title="ChitChat photo"
       generator-unable-to-provide-required-alt=""

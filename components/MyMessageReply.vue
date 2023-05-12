@@ -276,12 +276,11 @@ export default {
     unpromise() {
       this.$refs.renege.show()
     },
-    showProfileModal() {
+    async showProfileModal() {
       this.showProfile = true
 
-      this.waitForRef('profile', () => {
-        this.$refs.profile.show()
-      })
+      await this.waitForRef('profile')
+      this.$refs.profile.show()
     },
   },
 }

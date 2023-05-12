@@ -5,7 +5,12 @@
   >
     <div class="chatMessage forcebreak chatMessage__owner">
       <div v-if="chatmessage.userid != myid">
-        <ChatMessageSummary v-if="refmsgid" :id="refmsgid" class="mt-1 mb-2" />
+        <ChatMessageSummary
+          v-if="refmsgid"
+          :id="refmsgid"
+          :chatid="chatid"
+          class="mt-1 mb-2"
+        />
         <div>
           <!-- eslint-disable-next-line -->
           <span v-if="(chatmessage.secondsago < 60) || (chatmessage.id > chat.lastmsgseen)" class="prewrap font-weight-bold" v-html="emessage" />
@@ -169,11 +174,10 @@ export default {
     }
   },
   methods: {
-    promise() {
+    async promise() {
       this.showPromise = true
-      this.waitForRef('promise', () => {
-        this.$refs.promise.show()
-      })
+      await this.waitForRef('promise')
+      this.$refs.promise.show()
     },
     async outcome(type) {
       // Make sure we're up to date.
@@ -181,9 +185,8 @@ export default {
       await messageStore.fetch(this.refmsgid)
 
       this.showOutcome = true
-      this.waitForRef('outcomeModal', () => {
-        this.$refs.outcomeModal.show(type)
-      })
+      await this.waitForRef('outcomeModal')
+      this.$refs.outcomeModal.show(type)
     },
   },
 }

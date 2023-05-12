@@ -28,98 +28,96 @@
     <ConfirmModal v-if="confirm && showConfirm" ref="modal" @confirm="doIt" />
   </div>
 </template>
-<script>
-import ConfirmModal from './ConfirmModal'
+<script setup>
+import { ref, defineAsyncComponent } from '#imports'
+import { waitForRef } from '~/composables/useWaitForRef'
 
-export default {
-  components: { ConfirmModal },
-  props: {
-    variant: {
-      type: String,
-      required: true,
-    },
-    name: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    label: {
-      type: String,
-      required: true,
-    },
-    timeout: {
-      type: Number,
-      required: false,
-      default: 5000,
-    },
-    spinclass: {
-      type: String,
-      required: false,
-      default: 'text-success',
-    },
-    disabled: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    size: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    iconlast: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    confirm: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    handlerData: {
-      type: Object,
-      required: false,
-      default: null,
-    },
-    buttonClass: {
-      type: String,
-      required: false,
-      default: null,
-    },
-  },
-  data() {
-    return {
-      doing: false,
-      done: false,
-      showConfirm: false,
-    }
-  },
-  methods: {
-    click() {
-      if (this.confirm) {
-        this.showConfirm = true
-        this.waitForRef('modal', () => {
-          this.$refs.modal.show()
-        })
-      } else {
-        this.doIt()
-      }
-    },
-    async doIt() {
-      if (!this.doing) {
-        this.done = false
-        this.doing = true
+const ConfirmModal = defineAsyncComponent(() => import('./ConfirmModal'))
 
-        await this.$emit('handle', this.handlerData)
-
-        this.doing = false
-        this.done = true
-        setTimeout(() => {
-          this.done = false
-        }, this.timeout)
-      }
-    },
+const props = defineProps({
+  variant: {
+    type: String,
+    required: true,
   },
+  name: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  label: {
+    type: String,
+    required: true,
+  },
+  timeout: {
+    type: Number,
+    required: false,
+    default: 5000,
+  },
+  spinclass: {
+    type: String,
+    required: false,
+    default: 'text-success',
+  },
+  disabled: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  size: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  iconlast: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  confirm: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  handlerData: {
+    type: Object,
+    required: false,
+    default: null,
+  },
+  buttonClass: {
+    type: String,
+    required: false,
+    default: null,
+  },
+})
+
+const doing = ref(false)
+const done = ref(false)
+const showConfirm = ref(false)
+const modal = ref(null)
+
+const click = async () => {
+  if (props.confirm) {
+    showConfirm.value = true
+    await waitForRef(modal)
+    modal.value.show()
+  } else {
+    doIt()
+  }
+}
+
+const emit = defineEmits(['handle'])
+const doIt = async () => {
+  if (!doing.value) {
+    done.value = false
+    doing.value = true
+
+    await emit('handle', props.handlerData)
+
+    doing.value = false
+    done.value = true
+    setTimeout(() => {
+      done.value = false
+    }, props.timeout)
+  }
 }
 </script>

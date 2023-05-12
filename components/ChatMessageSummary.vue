@@ -40,6 +40,22 @@
           </span>
           <span v-else> They are no longer looking for this. </span>
         </notice-message>
+        <div v-if="message.promised">
+          <div v-if="message.fromuser === myid">
+            <notice-message>
+              <div v-if="promisedToThem">
+                You've promised it to this freegler.
+              </div>
+              <div v-else>You've promised it to someone else.</div>
+            </notice-message>
+          </div>
+          <div v-else>
+            <notice-message>
+              <div v-if="message.promisedtoyou">This is promised to you.</div>
+              <div v-else>This is promised to someone else at the moment.</div>
+            </notice-message>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -48,6 +64,7 @@
 // Need to import rather than async otherwise the render doesn't happen and ref isn't set.
 import { useMessageStore } from '../stores/message'
 import { useGroupStore } from '../stores/group'
+import { useChatStore } from '../stores/chat'
 import { useMiscStore } from '~/stores/misc'
 
 const MessageHistory = () => import('~/components/MessageHistory')
@@ -62,6 +79,11 @@ export default {
     id: {
       type: Number,
       required: true,
+    },
+    chatid: {
+      type: Number,
+      required: false,
+      default: null,
     },
   },
   async setup(props) {
@@ -105,6 +127,21 @@ export default {
     },
     sm() {
       return this.miscStore.breakpoint === 'sm'
+    },
+    chat() {
+      const chatStore = useChatStore()
+      return this.chatid ? chatStore.byChatId(this.chatid) : null
+    },
+    promisedToThem() {
+      let ret = false
+
+      for (const p of this.message?.promises) {
+        if (this.chat?.otheruid === p.userid) {
+          ret = true
+        }
+      }
+
+      return ret
     },
   },
   methods: {

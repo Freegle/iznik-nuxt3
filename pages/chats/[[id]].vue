@@ -300,12 +300,11 @@ export default {
       this.showingOlder = true
       this.bump++
     },
-    showHideAll() {
+    async showHideAll() {
       this.showHideAllModal = true
 
-      this.waitForRef('chathideall', () => {
-        this.$refs.chathideall.show()
-      })
+      await this.waitForRef('chathideall')
+      this.$refs.chathideall.show()
     },
     async hideAll() {
       for (let i = 0; i < this.visibleChats.length; i++) {

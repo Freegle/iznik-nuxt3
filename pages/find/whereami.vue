@@ -122,7 +122,7 @@ export default {
   computed: {
     source() {
       const runtimeConfig = useRuntimeConfig()
-      return runtimeConfig.APIv1 + '/locations?typeahead='
+      return runtimeConfig.public.APIv1 + '/locations?typeahead='
     },
   },
   methods: {

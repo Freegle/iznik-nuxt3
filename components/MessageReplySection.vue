@@ -225,12 +225,11 @@ export default {
           // Show the new user modal.
           this.newUserPassword = ret.password
           this.showNewUser = true
-          this.waitForRef('newUserModal', () => {
-            // Now that we are logged in, we can reply.
-            this.$refs.newUserModal.show()
+          await this.waitForRef('newUserModal')
+          // Now that we are logged in, we can reply.
+          this.$refs.newUserModal.show()
 
-            // Once the modal is closed, we will send the reply.
-          })
+          // Once the modal is closed, we will send the reply.
         } else {
           // If anything else happens, then we call sendReply which will force us to log in.  Then the watch will
           // spot that we're logged in and trigger the send, so we don't need to do that here.

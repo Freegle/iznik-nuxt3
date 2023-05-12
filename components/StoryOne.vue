@@ -39,13 +39,13 @@
       <b-card-body>
         <b-card-text class="pl-4 pr-4">
           <div v-if="story.story" class="preline">
-            <div v-if="story.photo" class="float-right">
+            <div v-if="story.image" class="float-right">
               <b-img
-                v-b-modal="'photoModal-' + story.photo.id"
                 lazy
-                :src="story.photo.path"
+                :src="story.image.path"
                 class="storyphoto clickme"
                 thumbnail
+                @click="showPhotoModal = true"
               />
               <br />
             </div>
@@ -78,9 +78,9 @@
       </b-card-body>
     </b-card>
     <b-modal
-      v-if="story.photo"
-      :id="'photoModal-' + story.photo.id"
+      v-if="story.image"
       ref="photoModal"
+      v-model="showPhotoModal"
       title="Story Photo"
       generator-unable-to-provide-required-alt=""
       size="lg"
@@ -88,7 +88,7 @@
       ok-only
     >
       <template #default>
-        <b-img fluid rounded center :src="story.photo.path" />
+        <b-img fluid rounded center :src="story.image.path" />
       </template>
     </b-modal>
     <StoryShareModal v-if="showShare" :id="id" ref="share" />
@@ -130,14 +130,14 @@ export default {
   data() {
     return {
       showShare: false,
+      showPhotoModal: false,
     }
   },
   methods: {
-    share(story) {
+    async share(story) {
       this.showShare = true
-      this.waitForRef('share', () => {
-        this.$refs.share.show()
-      })
+      await this.waitForRef('share')
+      this.$refs.share.show()
     },
     async love() {
       await this.storyStore.love(this.id)
