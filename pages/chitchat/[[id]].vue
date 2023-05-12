@@ -126,7 +126,14 @@
             <NewsThread
               v-for="entry in newsfeedToShow"
               :id="entry.id"
-              :key="'newsfeed-' + entry.id + '-area-' + selectedArea"
+              :key="
+                'newsfeed-' +
+                entry.id +
+                '-area-' +
+                selectedArea +
+                '-' +
+                infiniteId
+              "
               :scroll-to="id"
               @rendered="rendered"
             />
@@ -411,6 +418,7 @@ export default {
       await this.newsfeedStore.reset()
       await this.newsfeedStore.fetchFeed(distance)
       this.infiniteId++
+      this.show = 0
     },
     async postIt() {
       let msg = this.startThread
