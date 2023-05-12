@@ -53,7 +53,7 @@ export default class NewsAPI extends BaseAPI {
     return this.$del('/newsfeed', { id })
   }
 
-  async count(id, type) {
-    return await this.$getv2('/newsfeedcount')
+  async count(log) {
+    return await this.$getv2('/newsfeedcount', {}, log)
   }
 }

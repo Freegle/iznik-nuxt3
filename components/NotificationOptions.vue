@@ -2,6 +2,7 @@
   <component
     :is="notificationType"
     id="notification-list"
+    ref="theel"
     class="white text-center notification-list"
     :class="{ 'mr-2': smallScreen, topstack: true }"
     :variant="smallScreen ? 'transparent' : ''"
@@ -45,7 +46,14 @@
       :key="'notification-' + notification.id"
       link-class="notification-list__item p-1"
     >
-      <NotificationOne :id="notification.id" @show-modal="showAboutMe" />
+      <Suspense>
+        <NotificationOne :id="notification.id" @show-modal="showAboutMe" />
+        <template #fallback>
+          <div class="invisible" style="min-height: 200px">
+            Loading {{ notification.id }}...
+          </div>
+        </template>
+      </Suspense>
     </b-dropdown-item>
     <infinite-loading
       :key="infiniteId"
@@ -61,88 +69,77 @@
     </infinite-loading>
   </component>
 </template>
-<script>
+<script setup>
+import { ref, watch, defineAsyncComponent } from 'vue'
 import { useNotificationStore } from '../stores/notification'
-import InfiniteLoading from '~/components/InfiniteLoading'
 
-const NotificationOne = () => import('~/components/NotificationOne')
+const InfiniteLoading = defineAsyncComponent(() =>
+  import('~/components/InfiniteLoading')
+)
+const NotificationOne = defineAsyncComponent(() =>
+  import('~/components/NotificationOne')
+)
 
-export default {
-  name: 'NotificationOptions',
-  components: {
-    NotificationOne,
-    InfiniteLoading,
-  },
-  props: {
-    distance: {
-      type: Number,
-      required: true,
-    },
-    smallScreen: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-  },
-  setup() {
-    const notificationStore = useNotificationStore()
+const notificationStore = useNotificationStore()
 
-    // await notificationStore.fetchList()
+defineProps({
+  distance: {
+    type: Number,
+    required: true,
+  },
+  smallScreen: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+})
 
-    return {
-      notificationStore,
-    }
-  },
-  data() {
-    return {
-      toShow: 5,
-      infiniteId: 0,
-    }
-  },
-  computed: {
-    notificationType() {
-      return 'b-dropdown'
-    },
-    notifications() {
-      // return first
-      return this.notificationStore.list
-    },
-    notificationsToShow() {
-      return this.notifications.slice(0, this.toShow)
-    },
-    unreadNotificationCount() {
-      return this.notificationStore.count
-    },
-  },
-  watch: {
-    unreadNotificationCount() {
-      this.$emit('update:unreadNotificationCount', this.unreadNotificationCount)
-    },
-  },
-  methods: {
-    async loadLatestNotifications() {
-      // We want to make sure we have the most up to date notifications.
-      this.$el.scrollTop = 0
-      await this.notificationStore.fetchList()
-      this.infiniteId++
-      this.toShow = 5
-    },
-    loadMoreNotifications($state) {
-      if (this.toShow < this.notifications.length) {
-        this.toShow = Math.min(this.notifications.length, this.toShow + 5)
-        $state.loaded()
-      } else {
-        $state.complete()
-      }
-    },
-    async markAllRead() {
-      await this.notificationStore.allSeen()
-      await this.notificationStore.fetchCount()
-    },
-    showAboutMe() {
-      this.$emit('showAboutMe')
-    },
-  },
+const toShow = ref(5)
+const infiniteId = ref(0)
+const notificationType = computed(() => {
+  return 'b-dropdown'
+})
+const notifications = computed(() => {
+  // return first
+  return notificationStore.list
+})
+const notificationsToShow = computed(() => {
+  return notifications.value.slice(0, toShow.value)
+})
+const unreadNotificationCount = computed(() => {
+  return notificationStore.count
+})
+
+const theel = ref(null)
+
+const loadLatestNotifications = async () => {
+  // We want to make sure we have the most up to date notifications.
+  await notificationStore.fetchList()
+  infiniteId.value++
+  toShow.value = 5
+  theel.value.scrollTop = 0
+}
+
+const loadMoreNotifications = ($state) => {
+  if (toShow.value < notifications.value.length) {
+    toShow.value = Math.min(notifications.value.length, toShow.value + 5)
+    $state.loaded()
+  } else {
+    $state.complete()
+  }
+}
+const markAllRead = async () => {
+  await notificationStore.allSeen()
+}
+
+const emit = defineEmits(['update:unreadNotificationCount', 'showAboutMe'])
+
+watch(unreadNotificationCount, (newVal) => {
+  emit('update:unreadNotificationCount', newVal)
+})
+
+const showAboutMe = () => {
+  emit('showAboutMe')
 }
 </script>
 <style scoped lang="scss">

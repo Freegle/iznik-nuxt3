@@ -1,7 +1,11 @@
 <template>
   <client-only>
     <b-row class="m-0">
-      <b-col cols="0" md="3" />
+      <b-col cols="0" md="3">
+        <VisibleWhen :at="['lg', 'xl', 'xxl']">
+          <SidebarLeft />
+        </VisibleWhen>
+      </b-col>
       <b-col cols="12" md="6" class="bg-white pt-4">
         <p v-if="isApp">
           If you like this app - or not - <a href='#' class="d-inline" @click="showRateMe">please leave a review</a>.<br />
@@ -354,10 +358,12 @@ import dayjs from 'dayjs'
 import HelpQuestion from '~/components/HelpQuestion'
 import { buildHead } from '~/composables/useBuildHead'
 import { useMobileStore } from '@/stores/mobile'
+import VisibleWhen from '~/components/VisibleWhen'
 const SupporterInfoModal = () => import('~/components/SupporterInfoModal.vue')
+const SidebarLeft = () => import('~/components/SidebarLeft')
 
 export default {
-  components: { HelpQuestion, SupporterInfoModal },
+  components: { HelpQuestion, SupporterInfoModal, VisibleWhen, SidebarLeft },
   setup() {
     const route = useRoute()
     const runtimeConfig = useRuntimeConfig()

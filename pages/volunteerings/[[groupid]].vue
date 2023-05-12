@@ -136,9 +136,8 @@ const loadMore = function ($state) {
 const volunteermodal = ref(null)
 const showVolunteerModal = ref(false)
 
-const openVolunteerModal = () => {
-  waitForRef(volunteermodal, () => {
-    volunteermodal.value.show()
-  })
+const openVolunteerModal = async () => {
+  await waitForRef(volunteermodal)
+  volunteermodal.value.show()
 }
 </script>

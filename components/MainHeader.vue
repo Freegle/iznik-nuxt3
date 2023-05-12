@@ -257,8 +257,8 @@
       </div>
       <div class="d-flex align-items-center">
         <div v-if="isApp && loggedIn" class="text-white mr-3">
-            <div class="notifwrapper">
-              <v-icon icon="redo" class="fa-2x" @click="refresh" />
+          <div class="notifwrapper">
+            <v-icon icon="redo" class="fa-2x" @click="refresh" />
           </div>
         </div>
         <NotificationOptions
@@ -470,7 +470,7 @@
     <AboutMeModal v-if="showAboutMe" ref="aboutMeModal" />
   </header>
 </template>
-<script>
+<script setup>
 // Import login modal synchronously as I've seen an issue where it's not in $refs when you click on the signin button too rapidly.
 // const ChatMenu = () => import('~/components/ChatMenu')
 import { useRoute, useRouter } from 'vue-router'
@@ -481,224 +481,225 @@ import { useMessageStore } from '../stores/message'
 import { useNotificationStore } from '../stores/notification'
 import { useLogoStore } from '../stores/logo'
 import { useAuthStore } from '~/stores/auth'
-import { useCookie } from '#imports'
+import {
+  ref,
+  watch,
+  computed,
+  useCookie,
+  onMounted,
+  defineAsyncComponent,
+} from '#imports'
+import { waitForRef } from '~/composables/useWaitForRef'
+import { fetchMe } from '~/composables/useMe'
 import { useMobileStore } from '@/stores/mobile'
 
-const AboutMeModal = () => import('~/components/AboutMeModal')
-const NotificationOptions = () => import('~/components/NotificationOptions')
+const AboutMeModal = defineAsyncComponent(() =>
+  import('~/components/AboutMeModal')
+)
+const NotificationOptions = defineAsyncComponent(() =>
+  import('~/components/NotificationOptions')
+)
 
-export default {
-  name: 'MainHeader',
-  components: {
-    NotificationOptions,
-    AboutMeModal,
-  },
-  setup() {
-    const authStore = useAuthStore()
-    const miscStore = useMiscStore()
-    const newsfeedStore = useNewsfeedStore()
-    const messageStore = useMessageStore()
-    const notificationStore = useNotificationStore()
-    const logoStore = useLogoStore()
-    const route = useRoute()
-    const router = useRouter()
+const authStore = useAuthStore()
+const miscStore = useMiscStore()
+const newsfeedStore = useNewsfeedStore()
+const messageStore = useMessageStore()
+const notificationStore = useNotificationStore()
+const logoStore = useLogoStore()
+const route = useRoute()
+const router = useRouter()
 
-    return {
-      miscStore,
-      authStore,
-      newsfeedStore,
-      messageStore,
-      notificationStore,
-      logoStore,
-      route,
-      router,
-      path: route.path,
+const myid = computed(() => authStore.user?.id)
+const distance = ref(1000)
+const logo = ref('/icon.png')
+const unreadNotificationCount = ref(0)
+const chatCount = ref(0)
+const activePostsCount = ref(0)
+const showAboutMeModal = ref(false)
+const aboutMeModal = ref(null)
+const mobileNav = ref(null)
+const countTimer = ref(null)
+
+const isApp = computed(() => {
+  const mobileStore = useMobileStore()
+  return mobileStore.isApp
+})
+
+const homePage = computed(() => {
+  const lastRoute = miscStore.get('lasthomepage')
+
+  let nextroute = '/browse'
+
+  if (lastRoute === 'news') {
+    nextroute = '/chitchat'
+  } else if (lastRoute === 'myposts') {
+    nextroute = '/myposts'
+  }
+
+  return nextroute
+})
+
+const showBackButton = computed(() => {
+  // On mobile we want to show a back button instead of the logo when we're not on one of the "home" routes,
+  // which are /browse, /chitchat, /myposts
+  const route = useRoute()
+
+  return (
+    route.path !== '/browse' &&
+    route.path !== '/chitchat' &&
+    route.path !== '/myposts' &&
+    route.path !== '/'
+  )
+})
+
+const newsCount = computed(() => {
+  return newsfeedStore.count
+})
+
+const newsCountPlural = () => {
+  return pluralize('unread ChitChat post', newsCount.value, true)
+}
+
+const activePostsCountPlural = ref(() => {
+  return pluralize('open post', activePostsCount.value, {
+    includeNumber: true,
+  })
+})
+
+const emit = defineEmits(['update:unreadNotificationCount', 'update:chatCount'])
+
+watch(unreadNotificationCount, (newVal) => {
+  emit('update:unreadNotificationCount', newVal)
+})
+watch(chatCount, (newValue) => {
+  emit('update:chatCount', newValue)
+})
+
+watch(myid, (newVal, oldVal) => {
+  if (newVal && !oldVal) {
+    // Just logged in, update the counts sooner.
+    if (countTimer.value) {
+      clearTimeout(countTimer.value)
     }
-  },
-  data() {
-    return {
-      distance: 1000,
-      logo: '/icon.png',
-      unreadNotificationCount: 0,
-      chatCount: 0,
-      activePostsCount: 0,
-      showAboutMeModal: false,
-      countTimer: null,
+
+    getCounts()
+  }
+})
+
+onMounted(() => {
+  setTimeout(async () => {
+    // Look for a custom logo.
+    const ret = await logoStore.fetch()
+
+    if (ret.ret === 0 && ret.logo) {
+      logo.value = ret.logo.path.replace(/.*logos/, '/logos')
+      if( this.isApp){
+        this.logo = ret.logo.path.replace('/images/logos', '/logos').replace('images.ilovefreegle','www.ilovefreegle')
+      }
     }
-  },
-  computed: {
-    isApp() {
-      const mobileStore = useMobileStore()
-      return mobileStore.isApp
-    },
-    homePage() {
-      const lastRoute = this.miscStore.get('lasthomepage')
+  }, 5000)
 
-      let nextroute = '/browse'
+  getCounts()
+})
 
-      if (lastRoute === 'news') {
-        nextroute = '/chitchat'
-      } else if (lastRoute === 'myposts') {
-        nextroute = '/myposts'
+const requestLogin = () => {
+  authStore.forceLogin = true
+}
+
+const logout = async () => {
+  // Remove all cookies, both client and server.  This seems to be necessary to kill off the PHPSESSID cookie
+  // on the server, which would otherwise keep us logged in despite our efforts.
+  try {
+    const jwtCookie = useCookie('jwt')
+    if (jwtCookie !== null) {
+      jwtCookie.value = null
+    }
+
+    const persistentCookie = useCookie('persistent')
+
+    if (persistentCookie !== null) {
+      persistentCookie.value = null
+    }
+  } catch (e) {
+    console.error('Failed to clear cookies', e)
+  }
+
+  await authStore.logout()
+  authStore.forceLogin = false
+
+  // Go to the landing page.
+  router.push('/', true)
+}
+
+const showAboutMe = async () => {
+  await fetchMe(true)
+
+  showAboutMeModal.value = true
+  await waitForRef('modal')
+  aboutMeModal.value.show()
+}
+
+const refresh = () => { // IS_APP
+  window.location.reload(true)  // Works, but causes a complete reload from scratch. this.$router.go() doesn't work in iOS app
+}
+
+const maybeReload = (route) => {
+  if (router?.currentRoute?.value?.path === route) {
+    // We have clicked to route to the page we're already on.  Force a full refresh.
+    window.location.reload(true)
+  }
+}
+
+const backButton = () => {
+  try {
+    router.back()
+  } catch (e) {
+    router.push('/')
+  }
+}
+
+const getCounts = async () => {
+  if (myid.value) {
+    try {
+      // We sometimes might not yet have figured out if we're logged in, so catch exceptions otherwise they
+      // cause Nuxt to bail out with JS errors.
+      await newsfeedStore.fetchCount(false)
+
+      let messages = []
+
+      if (route.path !== '/profile/' + myid.value) {
+        // Get the messages for the currently logged in user.  This will also speed up the My Posts page.
+        //
+        // We don't do this if we're looking at our own profile otherwise this fetch and the one in ProfileInfo
+        // can interfere with each other.
+        messages = await messageStore.fetchByUser(myid.value, true)
       }
 
-      return nextroute
-    },
-    showBackButton() {
-      // On mobile we want to show a back button instead of the logo when we're not on one of the "home" routes,
-      // which are /browse, /chitchat, /myposts
-      const route = useRoute()
+      activePostsCount.value = 0
 
-      return (
-        route.path !== '/browse' &&
-        route.path !== '/chitchat' &&
-        route.path !== '/myposts' &&
-        route.path !== '/'
-      )
-    },
-    newsCount() {
-      return this.newsfeedStore.count
-    },
-    newsCountPlural() {
-      return pluralize('unread ChitChat post', this.newsCount, true)
-    },
-    activePostsCountPlural() {
-      return pluralize('open post', this.activePostsCount, {
-        includeNumber: true,
-      })
-    },
-  },
-  watch: {
-    unreadNotificationCount() {
-      this.$emit('update:unreadNotificationCount', this.unreadNotificationCount)
-    },
-    chatCount() {
-      this.$emit('update:chatCount', this.chatCount)
-    },
-    myid(newVal, oldVal) {
-      if (newVal && !oldVal) {
-        // Just logged in, update the counts sooner.
-        if (this.countTimer) {
-          clearTimeout(this.countTimer)
-        }
-
-        this.getCounts()
-      }
-    },
-  },
-  mounted() {
-    setTimeout(async () => {
-      // Look for a custom logo.
-      const ret = await this.logoStore.fetch()
-
-      if (ret.ret === 0 && ret.logo) {
-        this.logo = ret.logo.path.replace(/.*logos/, '/logos')
-        if( this.isApp){
-          this.logo = ret.logo.path.replace('/images/logos', '/logos').replace('images.ilovefreegle','www.ilovefreegle')
-        }
-      }
-    }, 5000)
-
-    this.getCounts()
-  },
-  methods: {
-    requestLogin() {
-      const authStore = useAuthStore()
-      authStore.forceLogin = true
-    },
-    async logout() {
-      // Remove all cookies, both client and server.  This seems to be necessary to kill off the PHPSESSID cookie
-      // on the server, which would otherwise keep us logged in despite our efforts.
-      try {
-        const jwtCookie = useCookie('jwt')
-        if (jwtCookie !== null) {
-          jwtCookie.value = null
-        }
-
-        const persistentCookie = useCookie('persistent')
-
-        if (persistentCookie !== null) {
-          persistentCookie.value = null
-        }
-        console.log('Cleared cookies')
-      } catch (e) {
-        console.error('Failed to clear cookies', e)
+      if (messages) {
+        // Count messages with no outcome
+        activePostsCount.value = messages.filter((msg) => {
+          return !msg.hasoutcome
+        }).length
       }
 
-      await this.authStore.logout()
-      this.authStore.forceLogin = false
+      unreadNotificationCount.value = await notificationStore.fetchCount()
 
-      // Go to the landing page.
-      this.router.push('/', true)
-    },
-    async showAboutMe() {
-      await this.fetchMe(true)
-
-      this.showAboutMeModal = true
-      await this.waitForRef('modal')
-      this.$refs.aboutMeModal.show()
-    },
-    refresh() { // IS_APP
-      window.location.reload(true)  // Works, but causes a complete reload from scratch. this.$router.go() doesn't work in iOS app
-    },
-    maybeReload(route) {
-      if (this.router?.currentRoute?.value?.path === route) {
-        // We have clicked to route to the page we're already on.  Force a full refresh.
-        window.location.reload(true)
+      if (unreadNotificationCount.value) {
+        // Fetch the notifications too, so that we can be quick if they view them.
+        notificationStore.fetchList()
       }
-    },
-    backButton() {
-      try {
-        this.router.back()
-      } catch (e) {
-        this.router.push('/')
-      }
-    },
-    async getCounts() {
-      if (this.myid) {
-        try {
-          // We sometimes might not yet have figured out if we're logged in, so catch exceptions otherwise they
-          // cause Nuxt to bail out with JS errors.
-          await this.newsfeedStore.fetchCount()
+    } catch (e) {
+      console.log('Ignore error fetching counts', e)
+    }
+  }
 
-          let messages = []
+  countTimer.value = setTimeout(getCounts, 60000)
+}
 
-          if (this.path !== '/profile/' + this.myid) {
-            // Get the messages for the currently logged in user.  This will also speed up the My Posts page.
-            //
-            // We don't do this if we're looking at our own profile otherwise this fetch and the one in ProfileInfo
-            // can interfere with each other.
-            messages = await this.messageStore.fetchByUser(this.myid, true)
-          }
-
-          this.activePostsCount = 0
-
-          if (messages) {
-            // Count messages with no outcome
-            this.activePostsCount = messages.filter((msg) => {
-              return !msg.hasoutcome
-            }).length
-          }
-
-          this.unreadNotificationCount =
-            await this.notificationStore.fetchCount()
-
-          if (this.unreadNotificationCount) {
-            // Fetch the notifications too, so that we can be quick if they view them.
-            this.notificationStore.fetchList()
-          }
-        } catch (e) {
-          console.log('Ignore error fetching counts', e)
-        }
-      }
-
-      this.countTimer = setTimeout(this.getCounts, 60000)
-    },
-    clickedMobileNav() {
-      console.log('Clicked mobile nav', this.$refs?.mobileNav)
-      this.$refs?.mobileNav?.$el?.click()
-    },
-  },
+const clickedMobileNav = () => {
+  mobileNav?.value.$el?.click()
 }
 </script>
 <style scoped lang="scss">

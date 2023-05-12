@@ -739,7 +739,9 @@ export default {
         })
       }
     },
-    goHome() {
+    async goHome() {
+      await loadLeaflet()
+
       if (this.me.lat || this.me.lng) {
         this.mapObject.flyTo(new this.L.LatLng(this.me.lat, this.me.lng))
       }

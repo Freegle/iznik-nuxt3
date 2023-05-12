@@ -47,11 +47,12 @@
   </div>
 </template>
 <script>
+import { useImageStore } from '../stores/image'
+
 const ConfirmModal = () => import('./ConfirmModal.vue')
 
 export default {
   components: { ConfirmModal },
-
   props: {
     id: {
       type: Number,
@@ -71,6 +72,13 @@ export default {
       default: true,
     },
   },
+  setup() {
+    const imageStore = useImageStore()
+
+    return {
+      imageStore,
+    }
+  },
   data() {
     return {
       cacheBust: Date.now(),
@@ -88,7 +96,7 @@ export default {
     },
     async rotate(deg) {
       await this.imageStore.post({
-        id: this.event.image.id,
+        id: this.id,
         rotate: deg,
         bust: Date.now(),
       })

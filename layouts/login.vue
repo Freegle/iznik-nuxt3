@@ -94,8 +94,21 @@ export default {
       this.bump++
     },
     googleLoaded() {
-      // We need to force the login modal to rerender, otherwise the login button doesn't always show.
-      this.bumpLogin++
+      if (
+        this.$refs.loginModal &&
+        this.$refs.loginModal.showModal &&
+        this.$refs.loginModal.email
+      ) {
+        // The user is entering an email / password so isn't interested in Google sign-in.  And re-rendering would
+        // lose that info.
+        console.log(
+          'Showing login modal - leave well alone',
+          this.$refs.loginModal.email
+        )
+      } else {
+        // We need to force the login modal to rerender, otherwise the login button doesn't always show.
+        this.bumpLogin++
+      }
     },
   },
 }

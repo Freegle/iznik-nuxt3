@@ -203,7 +203,7 @@ export default {
     },
     addressOptions() {
       const ret = []
-      this.addresses.forEach((address) => {
+      this.addresses?.forEach((address) => {
         ret.push({
           value: address.id,
           text: constructSingleLine(address),

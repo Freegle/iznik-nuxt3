@@ -367,14 +367,14 @@ export default {
       return this.composeStore.postcode
     },
     wanteds() {
-      const ret = this.messages.filter(
+      const ret = this.messages?.filter(
         (m) => m.type === 'Wanted' && (this.showOldWanteds || !m.hasoutcome)
       )
       ret.sort(this.postSort)
       return ret
     },
     offers() {
-      const ret = this.messages.filter(
+      const ret = this.messages?.filter(
         (m) => m.type === 'Offer' && (this.showOldOffers || !m.hasoutcome)
       )
       ret.sort(this.postSort)
@@ -443,13 +443,16 @@ export default {
     searches() {
       // Show the searches within the last 90 days, most recent first.  Anything older is less likely to be relevant
       // and it stops it growing forever, forcing them to delete things.
-      let ret = this.searchStore.list
-      const now = dayjs()
-      ret = ret.filter((a) => {
-        const daysago = now.diff(dayjs(a.date), 'day')
-        return daysago <= 90
-      })
-      ret.sort((a, b) => a.daysago - b.daysago)
+      let ret = this.searchStore?.list
+
+      if (ret) {
+        const now = dayjs()
+        ret = ret.filter((a) => {
+          const daysago = now.diff(dayjs(a.date), 'day')
+          return daysago <= 90
+        })
+        ret.sort((a, b) => a.daysago - b.daysago)
+      }
 
       return ret
     },

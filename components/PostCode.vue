@@ -162,7 +162,7 @@ export default {
   computed: {
     source() {
       const runtimeConfig = useRuntimeConfig()
-      return runtimeConfig.APIv1 + '/locations'
+      return runtimeConfig.public.APIv1 + '/locations'
     },
   },
   async mounted() {

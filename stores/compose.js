@@ -472,7 +472,7 @@ export const useComposeStore = defineStore({
 
         for (const message of messages) {
           const atts =
-            message.id in state._attachments
+            message.id in state._attachments && state._attachments[message.id]
               ? Object.values(state._attachments[message.id])
               : []
 

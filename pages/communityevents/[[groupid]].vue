@@ -126,10 +126,9 @@ const loadMore = function ($state) {
 const eventmodal = ref(null)
 const showEventModal = ref(false)
 
-const openEventModal = () => {
+const openEventModal = async () => {
   showEventModal.value = true
-  waitForRef(eventmodal, () => {
-    eventmodal.value.show()
-  })
+  await waitForRef(eventmodal)
+  eventmodal.value.show()
 }
 </script>
