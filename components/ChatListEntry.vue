@@ -92,11 +92,19 @@ export default {
   mounted() {
     if (this.active) {
       window.requestIdleCallback(() => {
-        this.$el.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start',
-          inline: 'nearest',
-        })
+        if (this.$el.scrollIntoViewIfNeeded) {
+          this.$el.scrollIntoViewIfNeeded({
+            behavior: 'instant',
+            block: 'start',
+            inline: 'nearest',
+          })
+        } else {
+          this.$el.scrollIntoView({
+            behavior: 'instant',
+            block: 'start',
+            inline: 'nearest',
+          })
+        }
       })
     }
   },
@@ -123,6 +131,7 @@ export default {
   display: grid;
   grid-template-columns: min-content calc(98% - 30px);
   align-items: center;
+  scroll-padding-top: 10px;
 
   @include media-breakpoint-up(sm) {
     grid-template-columns: min-content calc(98% - 50px);
