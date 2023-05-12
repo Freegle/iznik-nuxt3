@@ -53,9 +53,11 @@
                 }"
                 @click="gotoChat(chat.id)"
               >
-                <ChatListEntry :id="chat.id" />
+                <ChatListEntry
+                  :id="chat.id"
+                  :active="selectedChatId === chat?.id"
+                />
               </div>
-              <!--                :key="bump"-->
               <infinite-loading
                 :identifier="bump"
                 :distance="distance"

@@ -49,6 +49,11 @@ export default {
       type: Number,
       required: true,
     },
+    active: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   setup() {
     const chatStore = useChatStore()
@@ -83,6 +88,17 @@ export default {
       ret = ret.replace(/\\*$/, '') + '...'
       return ret
     },
+  },
+  mounted() {
+    if (this.active) {
+      window.requestIdleCallback(() => {
+        this.$el.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+          inline: 'nearest',
+        })
+      })
+    }
   },
   methods: {
     async fetch() {
