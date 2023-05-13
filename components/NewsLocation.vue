@@ -95,7 +95,7 @@ export default {
           text: 'Show chitchat within 50 miles',
         },
         {
-          value: 0,
+          value: '0',
           text: 'Show chitchat from anywhere',
         },
       ],
