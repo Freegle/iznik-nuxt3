@@ -100,10 +100,8 @@ export const useNewsfeedStore = defineStore({
       })
 
       if (!threadhead) {
-        console.log('New post, fetch feed')
         await this.fetchFeed()
       } else {
-        console.log('Fetch thread head', threadhead)
         await this.fetch(threadhead, true)
       }
 
@@ -117,7 +115,7 @@ export const useNewsfeedStore = defineStore({
       await api(this.config).news.del(id)
 
       if (id !== threadhead) {
-        await this.fetch(threadhead)
+        await this.fetch(threadhead, true)
       } else {
         this.list[id] = null
         this.feed = this.feed.filter((item) => item.id !== id)
