@@ -434,6 +434,10 @@ export default {
 
         // And any image id
         this.imageid = null
+
+        // Show from top.
+        this.infiniteId++
+        this.show = 0
       }
     },
     photoAdd() {
