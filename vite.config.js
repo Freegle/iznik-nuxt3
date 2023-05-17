@@ -26,8 +26,7 @@ export default {
     // Make Lint errors cause build failures.
     eslintPlugin(),
     legacy({
-      // es2015 is the earliest supported by Vite.
-      targets: ['es2015'],
+      // es2015 is the earliest supported by Vite, and is the default.
     }),
   ],
 
