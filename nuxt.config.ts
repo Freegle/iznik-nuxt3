@@ -102,6 +102,9 @@ export default defineNuxtConfig({
     '/shortlink/**': { swr: 600 },
     '/volunteering/**': { swr: 3600 },
     '/volunteerings/**': { swr: 3600 },
+
+    // Proxy from old web client to v1 API:
+    '/api/**': { proxy: config.APIv1 + '/**' },
   },
 
   nitro: {
