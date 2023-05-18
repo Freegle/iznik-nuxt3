@@ -307,8 +307,6 @@ export default class BaseAPI {
 
       status = rsp.status
       data = await rsp.json()
-
-      useMiscStore().api(-1)
     } catch (e) {
       console.log('Fetch error', path, e?.message)
       if (e.message.match(/.*aborted.*/i)) {
@@ -318,6 +316,8 @@ export default class BaseAPI {
         console.log('Aborted - ignore')
         return new Promise(function (resolve) {})
       }
+    } finally {
+      useMiscStore().api(-1)
     }
 
     // HTTP errors are real errors.
