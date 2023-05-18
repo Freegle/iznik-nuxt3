@@ -253,7 +253,7 @@ export default {
       return unseen
     },
     promised() {
-      if (this.message.promisecount) {
+      if (this.message.promisecount && this.message.promises?.length) {
         for (const promise of this.message.promises) {
           if (promise.userid === this.reply.userid) {
             return true
