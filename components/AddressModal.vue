@@ -199,7 +199,7 @@ export default {
   },
   computed: {
     addresses() {
-      return this.addressStore.list
+      return this.addressStore?.list
     },
     addressOptions() {
       const ret = []
