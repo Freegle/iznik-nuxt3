@@ -909,8 +909,8 @@ export default {
   },
   async mounted() {
     await this.update()
-    this.autoreposts = !this.me.settings.autorepostsdisable
-    this.enterNewLine = this.me.settings.enterNewLine
+    this.autoreposts = !this.me?.settings?.autorepostsdisable
+    this.enterNewLine = this.me?.settings?.enterNewLine
 
     setTimeout(this.checkUser, 200)
   },
@@ -1008,8 +1008,8 @@ export default {
       const settings = this.me.settings
       this.savingPostcode = true
 
-      if (!settings.mylocation || settings.mylocation.id !== this.pc.id) {
-        settings.mylocation = this.pc
+      if (!settings?.mylocation || settings?.mylocation.id !== this.pc.id) {
+        settings?.mylocation = this.pc
         await this.authStore.saveAndGet({
           settings,
         })

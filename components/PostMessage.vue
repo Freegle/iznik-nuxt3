@@ -17,9 +17,7 @@
           @drop.prevent="drop"
           @dragover.prevent
         >
-          <span v-if="attachments && attachments.length === 1">
-            Add more photos
-          </span>
+          <span v-if="attachments?.length === 1"> Add more photos </span>
           <span v-else> Add photos </span>
         </b-button>
       </div>

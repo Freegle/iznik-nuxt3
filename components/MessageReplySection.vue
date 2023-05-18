@@ -301,8 +301,8 @@ export default {
     async savePostcode(pc) {
       const settings = this.me.settings
 
-      if (!settings.mylocation || settings.mylocation.id !== pc.id) {
-        settings.mylocation = pc
+      if (!settings?.mylocation || settings?.mylocation.id !== pc.id) {
+        settings?.mylocation = pc
         await this.authStore.saveAndGet({
           settings,
         })

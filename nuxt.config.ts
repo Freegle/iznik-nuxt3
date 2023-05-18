@@ -103,7 +103,7 @@ export default defineNuxtConfig({
     '/volunteering/**': { swr: 3600 },
     '/volunteerings/**': { swr: 3600 },
 
-    // Proxy from old web client to v1 API:
+    // Proxy from old web client to v1 API.  Should be able to remove after 01/06/2023.
     '/api/**': { proxy: config.APIv1 + '/**' },
   },
 

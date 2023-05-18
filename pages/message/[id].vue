@@ -106,7 +106,7 @@ if (message.value) {
       runtimeConfig,
       message.value.subject,
       snip,
-      message.value.attachments && message.value.attachments.length > 0
+      message.value.attachments && message.value.attachments?.length > 0
         ? message.value.attachments[0].path
         : null
     )

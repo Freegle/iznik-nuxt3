@@ -43,7 +43,7 @@
             <div v-else>
               <div class="mb-1 border p-2 bg-white">
                 <NoticeMessage
-                  v-if="!messagesOnMapCount && !me?.settings.mylocation"
+                  v-if="!messagesOnMapCount && !me?.settings?.mylocation"
                   variant="warning"
                 >
                   There are no posts in this area at the moment. You can check
@@ -372,8 +372,8 @@ export default {
     async savePostcode(pc) {
       const settings = this.me.settings
 
-      if (!settings.mylocation || settings.mylocation.id !== pc.id) {
-        settings.mylocation = pc
+      if (!settings?.mylocation || settings?.mylocation.id !== pc.id) {
+        settings?.mylocation = pc
         await this.authStore.saveAndGet({
           settings,
         })

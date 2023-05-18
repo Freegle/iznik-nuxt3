@@ -158,10 +158,10 @@ export default {
     home() {
       let ret = null
 
-      if (this.me && this.me.settings && this.me.settings.mylocation) {
+      if (this.me && this.me.settings && this.me.settings?.mylocation) {
         ret = {
-          lat: this.me.settings.mylocation.lat,
-          lng: this.me.settings.mylocation.lng,
+          lat: this.me.settings?.mylocation.lat,
+          lng: this.me.settings?.mylocation.lng,
         }
       }
 

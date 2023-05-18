@@ -374,9 +374,9 @@ export default {
     },
     wantMessage(m) {
       return (
-        (this.selectedType === 'All' || this.selectedType === m.type) &&
+        (this.selectedType === 'All' || this.selectedType === m?.type) &&
         (!this.selectedGroup ||
-          parseInt(m.groupid) === parseInt(this.selectedGroup))
+          parseInt(m?.groupid) === parseInt(this.selectedGroup))
       )
     },
     visibilityChanged(visible) {

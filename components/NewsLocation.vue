@@ -10,8 +10,8 @@
         <div
           v-if="
             me.settings &&
-            me.settings.mylocation &&
-            me.settings.mylocation.area.name
+            me.settings?.mylocation &&
+            me.settings?.mylocation.area.name
           "
           class="d-block mt-1"
         >
@@ -21,7 +21,7 @@
               'This is where other people will see that you are.  Change your location from Settings.'
             "
             class="ml-1"
-            >{{ me.settings.mylocation.area.name }}</span
+            >{{ me.settings?.mylocation.area.name }}</span
           >
         </div>
       </div>
@@ -29,8 +29,8 @@
         <div
           v-if="
             me.settings &&
-            me.settings.mylocation &&
-            me.settings.mylocation.area.name
+            me.settings?.mylocation &&
+            me.settings?.mylocation.area.name
           "
           class="w-50"
         >
@@ -40,7 +40,7 @@
               'This is where other people will see that you are.  Change your location from Settings.'
             "
             class="ml-1"
-            >{{ me.settings.mylocation.area.name }}</span
+            >{{ me.settings?.mylocation.area.name }}</span
           >
         </div>
         <b-form-select

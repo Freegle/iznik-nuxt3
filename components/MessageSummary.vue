@@ -26,7 +26,7 @@
       />
       <div class="mb-1 header-description">
         <div
-          v-if="!message.attachments || !message.attachments.length"
+          v-if="!message.attachments || !message.attachments?.length"
           class="d-flex d-md-none"
           @click="zoom"
         >
@@ -125,7 +125,7 @@ export default {
     },
     zoom(e) {
       if (this.message) {
-        if (!this.message.attachments || !this.message.attachments.length) {
+        if (!this.message.attachments || !this.message.attachments?.length) {
           // No photos - show the description.
           this.$emit('expand')
         } else {

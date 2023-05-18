@@ -134,7 +134,7 @@ export default {
       return (
         this.message &&
         this.message.attachments &&
-        this.message.attachments.length
+        this.message.attachments?.length
       )
     },
     validPosition() {

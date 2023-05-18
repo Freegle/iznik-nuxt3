@@ -87,7 +87,7 @@
             />
           </b-col>
         </b-row>
-        <b-row v-if="attachments && attachments.length">
+        <b-row v-if="attachments?.length">
           <b-col>
             <div class="d-flex flex-wrap mb-1 mt-2">
               <div

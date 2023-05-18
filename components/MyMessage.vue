@@ -238,11 +238,11 @@
                     >
                       <div class="small">
                         <b-badge
-                          v-if="message.attachments.length > 1"
+                          v-if="message.attachments?.length > 1"
                           class="photobadge"
                           variant="primary"
                         >
-                          {{ message.attachments.length }}
+                          {{ message.attachments?.length }}
                           <v-icon icon="camera" />
                         </b-badge>
                       </div>
