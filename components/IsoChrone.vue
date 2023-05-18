@@ -32,8 +32,8 @@
         <label class="font-weight-bold sliderLabel">
           <div v-if="id">
             <div v-if="isochrone.nickname">
-              Travel time from {{ isochrone.nickname }}:
-              <span class="text-faded">({{ isochrone.location.name }})</span>
+              {{ isochrone.nickname }}:
+              <span class="text-faded">({{ location?.name }})</span>
             </div>
             <div v-else>
               Travel time:
@@ -149,6 +149,7 @@
 </template>
 <script>
 import { mapState } from 'pinia'
+import { useLocationStore } from '../stores/location'
 import { ref } from '#imports'
 import PostCode from '~/components/PostCode'
 import SpinButton from '~/components/SpinButton'
@@ -176,21 +177,46 @@ export default {
       default: false,
     },
   },
-  setup(props) {
+  async setup(props) {
     const isochroneStore = useIsochroneStore()
+    const locationStore = useLocationStore()
 
-    let minutes = 20
-    let transport = 'Drive'
+    let minutes = ref(20)
+    let transport = ref('Drive')
 
     if (props.id) {
       minutes = isochroneStore.get(props.id).minutes
       transport = isochroneStore.get(props.id).transport
     }
 
+    const isochrone = computed(() => {
+      if (props.id) {
+        return isochroneStore.get(props.id)
+      } else {
+        return {
+          minutes: minutes.value,
+          transport: transport.value,
+        }
+      }
+    })
+
+    const location = computed(() => {
+      if (isochrone.value.locationid) {
+        return locationStore.byId(isochrone.value.locationid)
+      }
+    })
+
+    if (isochrone.value.locationid) {
+      await locationStore.fetchv2(isochrone.value.locationid)
+    }
+
     return {
       isochroneStore,
-      minutes: ref(minutes),
-      transport: ref(transport),
+      locationStore,
+      minutes,
+      transport,
+      isochrone,
+      location,
     }
   },
   data() {
@@ -206,16 +232,6 @@ export default {
     ...mapState(useIsochroneStore, ['list']),
     pcname() {
       return this.pc ? this.pc.name : ''
-    },
-    isochrone() {
-      if (this.id) {
-        return this.isochroneStore.get(this.id)
-      } else {
-        return {
-          minutes: this.minutes,
-          transport: this.transport,
-        }
-      }
     },
     showAdd() {
       let ret = false
@@ -240,7 +256,6 @@ export default {
       return ret
     },
   },
-  created() {},
   methods: {
     increment() {
       this.minutes = Math.min(this.minutes + this.step, this.maxMinutes)
