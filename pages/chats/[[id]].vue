@@ -223,7 +223,7 @@ export default {
   },
   computed: {
     filteredChats() {
-      let chats = this.chatStore.list ? this.chatStore.list : []
+      let chats = this.chatStore?.list ? this.chatStore.list : []
 
       if (chats && this.search) {
         const l = this.search.toLowerCase()

@@ -432,7 +432,7 @@ export default {
     unseen() {
       // We want all the chats from replies.  We fetch them in default.vue, here we only need to
       // get them from the store
-      const chats = this.chatStore.list ? this.chatStore.list : []
+      const chats = this.chatStore?.list ? this.chatStore.list : []
 
       let unseen = 0
 
@@ -586,7 +586,7 @@ export default {
     chats() {
       // We want all the chats which reference this message.  We fetch them in myposts, here we only need to
       // get them from the store
-      const chats = this.chatStore.list ? this.chatStore.list : []
+      const chats = this.chatStore?.list ? this.chatStore.list : []
       const ret = chats.filter((c) => {
         return this.message?.refchatids?.includes(c.id)
       })
