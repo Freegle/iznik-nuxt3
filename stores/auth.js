@@ -76,6 +76,10 @@ export const useAuthStore = defineStore({
         this.loggedInEver = true
         this.user = value
 
+        if (!this.user.settings) {
+          this.user.settings = {}
+        }
+
         // Ensure we don't store any password (it shouldn't get persisted anyway, but let's be careful).
         delete this.user.password
 
