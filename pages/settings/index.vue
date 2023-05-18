@@ -1009,7 +1009,7 @@ export default {
       this.savingPostcode = true
 
       if (!settings?.mylocation || settings?.mylocation.id !== this.pc.id) {
-        settings?.mylocation = this.pc
+        settings.mylocation = this.pc
         await this.authStore.saveAndGet({
           settings,
         })

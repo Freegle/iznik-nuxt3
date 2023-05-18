@@ -373,7 +373,7 @@ export default {
       const settings = this.me.settings
 
       if (!settings?.mylocation || settings?.mylocation.id !== pc.id) {
-        settings?.mylocation = pc
+        settings.mylocation = pc
         await this.authStore.saveAndGet({
           settings,
         })
