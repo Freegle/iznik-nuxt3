@@ -10,14 +10,14 @@
     </div>
     <div class="d-flex flex-column">
       <div>
-        <span class="font-weight-bold">{{ fromuser.displayname }}</span>
-        <span v-if="newsfeed.type == 'Noticeboard'"> loves your poster </span>
+        <span class="font-weight-bold">{{ fromuser?.displayname }}</span>
+        <span v-if="newsfeed?.type == 'Noticeboard'"> loves your poster </span>
         <span v-else> loves your post</span>
       </div>
       <div v-if="noticeboardname" class="font-weight-bold">
         &quot;{{ noticeboardname }}&quot;
       </div>
-      <div v-else-if="newsfeed.message" class="font-weight-bold line-clamp-2">
+      <div v-else-if="newsfeed?.message" class="font-weight-bold line-clamp-2">
         "{{ newsfeed.message }}"
       </div>
       <abbr class="small text-muted">{{ notificationago }}</abbr>

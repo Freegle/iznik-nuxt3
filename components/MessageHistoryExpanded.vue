@@ -19,7 +19,7 @@
           @click="showProfileModal"
         >
           <div class="text-muted align-middle decornone d-flex">
-            Posted by {{ fromuser.displayname }}
+            Posted by {{ fromuser?.displayname }}
           </div>
         </div>
         <nuxt-link
@@ -32,13 +32,9 @@
           <v-icon icon="link" /> Connected before
         </nuxt-link>
       </div>
-      <SupporterInfo v-if="fromuser.supporter" class="d-inline" />
+      <SupporterInfo v-if="fromuser?.supporter" class="d-inline" />
       <div
-        v-if="
-          fromuser &&
-          fromuser.info &&
-          fromuser.info.openoffers + fromuser.info.openwanteds > 0
-        "
+        v-if="fromuser?.info?.openoffers + fromuser?.info?.openwanteds > 0"
         @click="showProfileModal"
       >
         <span v-if="fromuser.info.openoffers" class="text-success">

@@ -10,10 +10,10 @@
     </div>
     <div class="d-flex flex-column">
       <div>
-        <span class="font-weight-bold">{{ fromuser.displayname }}</span>
+        <span class="font-weight-bold">{{ fromuser?.displayname }}</span>
         loves your comment:
       </div>
-      <div v-if="newsfeed.message" class="line-clamp-2 font-weight-bold">
+      <div v-if="newsfeed?.message" class="line-clamp-2 font-weight-bold">
         "{{ newsfeed.message }}"
       </div>
       <abbr class="small text-muted">{{ notificationago }}</abbr>
