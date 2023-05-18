@@ -26,7 +26,7 @@
           </p>
         </div>
         <div v-else>
-          <h1 v-if="error.statusCode === 404">
+          <h1 v-if="error?.statusCode === 404">
             <div class="error__heading--main">
               Oh no! That page doesn't seem to exist...
             </div>
