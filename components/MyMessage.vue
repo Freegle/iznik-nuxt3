@@ -586,7 +586,7 @@ export default {
       // get them from the store
       const chats = this.chatStore.list ? this.chatStore.list : []
       const ret = chats.filter((c) => {
-        return this.message.refchatids.includes(c.id)
+        return this.message?.refchatids?.includes(c.id)
       })
 
       return ret
