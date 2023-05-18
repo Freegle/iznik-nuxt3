@@ -91,7 +91,7 @@ export default {
   },
   mounted() {
     if (this.active) {
-      window.requestIdleCallback(() => {
+      const cb = () => {
         if (this.$el.scrollIntoViewIfNeeded) {
           this.$el.scrollIntoViewIfNeeded({
             behavior: 'instant',
@@ -105,7 +105,13 @@ export default {
             inline: 'nearest',
           })
         }
-      })
+      }
+
+      if ('requestIdleCallback' in window) {
+        window.requestIdleCallback(cb)
+      } else {
+        setTimeout(cb, 100)
+      }
     }
   },
   methods: {
