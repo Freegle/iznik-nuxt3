@@ -58,6 +58,9 @@
         :pov="pov"
       />
     </div>
+    <div v-else-if="chatmessage.type === 'ReportedUser'">
+      <chat-message-report :id="id" :chatid="chatid" :pov="pov" />
+    </div>
     <div v-else-if="chatmessage?.type === 'ModMail'">
       <chat-message-mod-mail :id="id" :chatid="chatid" :pov="pov" />
     </div>
@@ -87,6 +90,7 @@ import ChatMessageInterested from './ChatMessageInterested'
 import ChatMessageCompleted from './ChatMessageCompleted'
 import ChatMessagePromised from './ChatMessagePromised'
 import ChatMessageReneged from './ChatMessageReneged'
+import ChatMessageReport from './ChatMessageReport'
 import ChatMessageAddress from './ChatMessageAddress'
 import ChatMessageNudge from './ChatMessageNudge'
 import ChatMessageDateRead from './ChatMessageDateRead'
@@ -106,6 +110,7 @@ export default {
     ChatMessagePromised,
     ChatMessageAddress,
     ChatMessageReneged,
+    ChatMessageReport,
     ChatMessageNudge,
     ChatMessageModMail,
   },
