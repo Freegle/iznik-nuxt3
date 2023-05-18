@@ -141,7 +141,6 @@ export default {
     async doCopy() {
       await navigator.clipboard.writeText(this.message.url)
       this.copied = true
-      this.chose()
     },
   },
 }
