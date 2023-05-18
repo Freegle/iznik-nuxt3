@@ -1,9 +1,7 @@
 <template>
   <div>
     <div
-      v-if="
-        chat && (chat.chattype !== 'User2User' || (otheruser && otheruser.info))
-      "
+      v-if="chat && (chat.chattype !== 'User2User' || otheruser?.info)"
       class="outer position-relative"
     >
       <div class="nameinfo pt-1 pb-1 pl-1" @click="showInfo">

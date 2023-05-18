@@ -45,7 +45,6 @@
     </div>
   </div>
 </template>
-
 <script>
 import { useUserStore } from '../stores/user'
 import ProfileImage from '~/components/ProfileImage'

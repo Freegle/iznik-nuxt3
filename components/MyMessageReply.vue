@@ -77,11 +77,10 @@
             class="align-middle mt-1 mb-1 mr-2"
             @click="unpromise"
           >
-            <div class="stacked">
+            <span class="stacked">
               <v-icon icon="handshake" />
-              <v-icon icon="slash" class="unpromise__slash" />
-            </div>
-            Unpromise
+              <v-icon icon="slash" class="unpromise__slash" /> </span
+            >&nbsp;Unpromise
           </b-button>
           <b-button
             v-else-if="message.type === 'Offer' && !taken && !withdrawn"

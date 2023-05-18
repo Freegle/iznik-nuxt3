@@ -7,7 +7,7 @@
     >
       <div class="d-flex">
         <ProfileImage
-          v-if="fromuser && fromuser.profile"
+          v-if="fromuser?.profile"
           :image="fromuser.profile.paththumb"
           class="mr-1 mb-1 inline"
           is-thumbnail

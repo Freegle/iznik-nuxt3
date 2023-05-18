@@ -2,7 +2,7 @@
   <div class="clickme d-flex" @click="click">
     <div class="d-flex flex-column justify-content-around">
       <ProfileImage
-        :image="fromuser.profile.path"
+        :image="fromuser?.profile?.path"
         class="mr-1 mb-1 ml-1 inline"
         is-thumbnail
         size="lg"
