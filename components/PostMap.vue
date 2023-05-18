@@ -408,7 +408,7 @@ export default {
       }
     },
     isochroneBounds(newVal) {
-      if (newVal) {
+      if (newVal && this.mapObject) {
         // Make the map show the isochrone view.
         this.mapObject.flyToBounds(newVal)
       }

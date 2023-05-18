@@ -221,7 +221,7 @@ export default {
   },
   async mounted() {
     if (this.me) {
-      const lastask = this.miscStore.get('lastaboutmeask')
+      const lastask = this.miscStore?.get('lastaboutmeask')
       const now = new Date().getTime()
 
       if (!lastask || now - lastask > 90 * 24 * 60 * 60 * 1000) {
