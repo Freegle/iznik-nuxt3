@@ -5,9 +5,9 @@ import { reloadNuxtApp } from '#app/composables/chunk'
 
 export default defineNuxtPlugin({
   setup(nuxtApp) {
-    const route = useRoute()
-
     nuxtApp.hook('app:chunkError', ({ error }) => {
+      const route = useRoute()
+
       Sentry.captureMessage(
         'Caught chunk error in ' +
           route?.path +
