@@ -247,7 +247,7 @@ export default {
         ret = true
 
         Object.values(this.list).forEach((i) => {
-          if (i.location.name === this.pc) {
+          if (i.location?.name === this.pc) {
             ret = false
           }
         })
