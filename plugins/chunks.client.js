@@ -8,7 +8,7 @@ import { reloadNuxtApp } from '#app/composables/chunk'
 // This is for the case where your old chunks have gone, e.g. you've deployed a new release on Netlify.
 export default defineNuxtPlugin({
   setup(nuxtApp) {
-    nuxtApp.hook('app:chunkError', ({ error }) => {
+    nuxtApp.hook('app:chunkError', () => {
       // Sentry.captureMessage(
       //   'Caught chunk error in ' +
       //     window?.location?.pathname +
