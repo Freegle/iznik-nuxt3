@@ -10,12 +10,15 @@ export default defineNuxtPlugin({
     nuxtApp.hook('app:chunkError', ({ error }) => {
       Sentry.captureMessage(
         'Caught chunk error in ' +
-          route.path +
+          route?.path +
           ', will reload: ' +
           JSON.stringify(error)
       )
 
-      reloadNuxtApp({ path: route.path, persistState: true })
+      reloadNuxtApp({
+        path: route?.path ? '/' : route.path,
+        persistState: true,
+      })
     })
   },
 })
