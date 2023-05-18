@@ -460,7 +460,7 @@ export default {
     rejected() {
       let rejected = false
 
-      for (const group of this.message.groups) {
+      for (const group of this.message?.groups) {
         if (group.collection === 'Rejected') {
           rejected = true
         }

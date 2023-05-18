@@ -536,14 +536,16 @@ export default {
       }
     },
     async selectedType(newVal) {
-      const settings = this.me.settings
-      settings.browsePostType = newVal
+      if (this.me) {
+        const settings = this.me.settings
+        settings.browsePostType = newVal
 
-      await this.authStore.saveAndGet({
-        settings,
-      })
+        await this.authStore.saveAndGet({
+          settings,
+        })
 
-      this.infiniteId++
+        this.infiniteId++
+      }
     },
     search(newval) {
       if (!newval) {
