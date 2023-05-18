@@ -317,12 +317,17 @@ export default {
       if (this.newsfeedStore) {
         if (this.id) {
           const newsfeed = this.newsfeedStore.byId(this.id)
-          if (newsfeed.id !== newsfeed.threadhead) {
-            // We are loading a specific page for a reply but we want to show the whole thread.
-            return [this.newsfeedStore.byId(newsfeed.threadhead)]
+
+          if (newsfeed) {
+            if (newsfeed.id !== newsfeed.threadhead) {
+              // We are loading a specific page for a reply but we want to show the whole thread.
+              return [this.newsfeedStore.byId(newsfeed.threadhead)]
+            } else {
+              // Show this item.
+              return [this.newsfeedStore.byId(this.id)]
+            }
           } else {
-            // Show this item.
-            return [this.newsfeedStore.byId(this.id)]
+            return []
           }
         } else {
           return this.newsfeed
