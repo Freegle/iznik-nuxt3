@@ -366,17 +366,17 @@ export default {
       return this.composeStore?.postcode
     },
     wanteds() {
-      const ret = this.messages?.filter(
+      let ret = this.messages?.filter(
         (m) => m.type === 'Wanted' && (this.showOldWanteds || !m.hasoutcome)
       )
-      ret.sort(this.postSort)
+      ret = ret ? ret.sort(this.postSort) : []
       return ret
     },
     offers() {
-      const ret = this.messages?.filter(
+      let ret = this.messages?.filter(
         (m) => m.type === 'Offer' && (this.showOldOffers || !m.hasoutcome)
       )
-      ret.sort(this.postSort)
+      ret = ret ? ret.sort(this.postSort) : []
       return ret
     },
     offersShown() {
