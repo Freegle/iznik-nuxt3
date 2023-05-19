@@ -3,7 +3,11 @@
     <div class="layout mb-1">
       <div class="divider" />
       <div class="d-flex flex-column justify-content-start user">
-        <div class="d-flex mr-4 clickme" @click="showProfileModal">
+        <div
+          v-if="replyuser"
+          class="d-flex mr-4 clickme"
+          @click="showProfileModal"
+        >
           <ProfileImage
             :image="replyuser.profile.paththumb"
             class="m-1 d-none d-md-block"
