@@ -14,7 +14,7 @@ export const useUserStore = defineStore({
       this.fetchingLocation = {}
     },
     async emailIsInUse(email) {
-      const ret = await api(this.config).user.fetchByEmail(email)
+      const ret = await api(this.config).user.fetchByEmail(email, false)
       return ret?.user?.id
     },
     async fetch(id, force) {
