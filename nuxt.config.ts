@@ -46,14 +46,6 @@ export default defineNuxtConfig({
   target: 'server',
   ssr: true,
 
-  // This makes Netlify serve assets from the perm link for the build, which avoids missing chunk problems when
-  // a new deploy happens.  See https://github.com/nuxt/nuxt/issues/20950
-  $production: {
-    app: {
-      cdnURL: process.env.DEPLOY_URL,
-    },
-  },
-
   routeRules: {
     // Nuxt3 has some lovely features to do with how routes are generated/cached.  We use:
     //
