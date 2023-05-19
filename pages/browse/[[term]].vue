@@ -204,7 +204,7 @@ export default {
         : 'nearby'
     },
     isochrones() {
-      return this.isochroneStore.list
+      return this.isochroneStore?.list
     },
   },
   watch: {

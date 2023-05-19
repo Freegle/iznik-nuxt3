@@ -114,7 +114,7 @@ export default {
   computed: {
     fromuser() {
       return this.message?.fromuser
-        ? this.userStore.byId(this.message?.fromuser)
+        ? this.userStore?.byId(this.message?.fromuser)
         : null
     },
     milesaway() {
@@ -139,10 +139,10 @@ export default {
         : null
     },
     message() {
-      return this.messageStore.byId(this.id)
+      return this.messageStore?.byId(this.id)
     },
     today() {
-      return dayjs(this.message.date).isSame(dayjs(), 'day')
+      return dayjs(this.message?.date).isSame(dayjs(), 'day')
     },
     groups() {
       const ret = {}

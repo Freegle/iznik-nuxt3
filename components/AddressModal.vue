@@ -222,7 +222,7 @@ export default {
 
       const singles = {}
 
-      if (this.addressStore.properties) {
+      if (this.addressStore?.properties) {
         Object.values(this.addressStore.properties).forEach((address) => {
           if (!singles[address.singleline]) {
             ret.push({

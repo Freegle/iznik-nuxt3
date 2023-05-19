@@ -150,15 +150,15 @@ export default {
   },
   computed: {
     message() {
-      return this.messageStore.byId(this.id)
+      return this.messageStore?.byId(this.id)
     },
     showMap() {
-      return this.message.lat || this.message.lng
+      return this.message?.lat || this.message?.lng
     },
     home() {
       let ret = null
 
-      if (this.me && this.me.settings && this.me.settings?.mylocation) {
+      if (this.me?.settings?.mylocation) {
         ret = {
           lat: this.me.settings?.mylocation.lat,
           lng: this.me.settings?.mylocation.lng,

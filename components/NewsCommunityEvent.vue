@@ -130,7 +130,7 @@ export default {
   },
   computed: {
     event() {
-      return this.communityEventStore.byId(this.newsfeed.eventid)
+      return this.communityEventStore?.byId(this.newsfeed.eventid)
     },
     date() {
       // Similar code to CommunityEvent
@@ -174,7 +174,7 @@ export default {
       this.$refs.addEvent.show()
     },
     group(groupid) {
-      return this.groupStore.get(groupid)
+      return this.groupStore?.get(groupid)
     },
   },
 }

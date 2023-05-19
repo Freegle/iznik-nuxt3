@@ -43,7 +43,7 @@ export default {
   },
   computed: {
     noticeboardname() {
-      if (this.newsfeed.type === 'Noticeboard') {
+      if (this.newsfeed?.type === 'Noticeboard') {
         try {
           return JSON.parse(this.newsfeed.message)?.name
         } catch (e) {

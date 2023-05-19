@@ -47,10 +47,10 @@ export default {
   },
   computed: {
     forUser() {
-      return this.volunteeringStore.forUser
+      return this.volunteeringStore?.forUser
     },
     opportunities() {
-      return this.forUser.slice(0, this.toShow)
+      return this.forUser?.slice(0, this.toShow)
     },
   },
   methods: {

@@ -183,7 +183,7 @@ export default {
     availableUsers() {
       // The users available to select are the ones which are not currently selected (unless that's the user for this
       // one.
-      const ret = this.repliers.filter(
+      const ret = this.repliers?.filter(
         (u) => !this.selectedUsers.find((u2) => u2.userid === u.userid)
       )
 
@@ -191,10 +191,9 @@ export default {
     },
     moreUsersToSelect() {
       // We show the choose if there are some left and we have not got all users plus someone else.
-      console.log('Repliers', this.left, this.repliers)
       return (
         this.left &&
-        (this.selectedUsers.length <= this.repliers.length ||
+        (this.selectedUsers?.length <= this.repliers?.length ||
           !this.selectedUsers.find((u) => !u.userid))
       )
     },

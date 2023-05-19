@@ -519,7 +519,7 @@ export default {
       let ret = null
 
       if (this.id) {
-        ret = this.communityEventStore.byId(this.id)
+        ret = this.communityEventStore?.byId(this.id)
       }
 
       if (!ret) {
@@ -530,8 +530,8 @@ export default {
     },
     groups() {
       const ret = []
-      this.event.groups.forEach((id) => {
-        const group = this.groupStore.get(id)
+      this.event?.groups?.forEach((id) => {
+        const group = this.groupStore?.get(id)
 
         if (group) {
           ret.push(group)
@@ -541,16 +541,16 @@ export default {
       return ret
     },
     user() {
-      return this.userStore.byId(this.event?.userid)
+      return this.userStore?.byId(this.event?.userid)
     },
     uploadingPhoto() {
-      return this.composeStore.uploading
+      return this.composeStore?.uploading
     },
     isExisting() {
-      return Boolean(this.event.id)
+      return Boolean(this.event?.id)
     },
     description() {
-      let desc = this.event.description
+      let desc = this.event?.description
       desc = desc ? twem(desc) : ''
       desc = desc.trim()
       return desc

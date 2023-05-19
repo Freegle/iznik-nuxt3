@@ -265,7 +265,7 @@ export default {
   computed: {
     tryst() {
       return this.otheruser
-        ? this.trystStore.getByUser(this.otheruser.id)
+        ? this.trystStore?.getByUser(this.otheruser.id)
         : null
     },
     takenBy() {

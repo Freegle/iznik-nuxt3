@@ -118,7 +118,7 @@ export default {
   },
   computed: {
     message() {
-      return this.messageStore.byId(this.id)
+      return this.messageStore?.byId(this.id)
     },
     attachment() {
       return this.message?.attachments?.length
@@ -126,11 +126,11 @@ export default {
         : null
     },
     sm() {
-      return this.miscStore.breakpoint === 'sm'
+      return this.miscStore?.breakpoint === 'sm'
     },
     chat() {
       const chatStore = useChatStore()
-      return this.chatid ? chatStore.byChatId(this.chatid) : null
+      return this.chatid ? chatStore?.byChatId(this.chatid) : null
     },
     promisedToThem() {
       let ret = false

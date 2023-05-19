@@ -71,7 +71,7 @@ export default {
   },
   computed: {
     chatmessages() {
-      return this.chatStore.messagesById(this.id)
+      return this.chatStore?.messagesById(this.id)
     },
     mylast() {
       let ret = null

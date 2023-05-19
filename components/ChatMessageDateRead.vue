@@ -150,7 +150,7 @@ export default {
   },
   computed: {
     othermodname() {
-      return this.chatMessageUser ? this.chatMessageUser.displayname : null
+      return this.chatMessageUser?.displayname
     },
   },
   methods: {

@@ -173,7 +173,7 @@ export default {
     phoneNumber() {
       let ret = false
 
-      if (this.chatmessage && this.chatmessage.message) {
+      if (this.chatmessage?.message) {
         const re = /\+(\d\d)[^:]/gm
         const matches = re.exec(this.chatmessage.message)
 

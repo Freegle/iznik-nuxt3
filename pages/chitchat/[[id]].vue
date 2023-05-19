@@ -297,7 +297,7 @@ export default {
       },
     },
     newsfeed() {
-      let ret = Object.values(this.newsfeedStore.feed)
+      let ret = Object.values(this.newsfeedStore?.feed)
 
       // Suppress duplicate posts.
       ret = ret.filter((item, index) => {

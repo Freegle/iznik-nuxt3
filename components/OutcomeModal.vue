@@ -220,7 +220,7 @@ export default {
   },
   computed: {
     message() {
-      return this.messageStore.byId(this.id)
+      return this.messageStore?.byId(this.id)
     },
     left() {
       let left = this.message.availablenow ? this.message.availablenow : 1

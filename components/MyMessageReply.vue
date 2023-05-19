@@ -229,10 +229,10 @@ export default {
   },
   computed: {
     chat() {
-      return this.chatStore.toUser(this.reply.userid)
+      return this.chatStore?.toUser(this.reply.userid)
     },
     replyuser() {
-      return this.userStore.byId(this.reply.userid)
+      return this.userStore?.byId(this.reply.userid)
     },
     replyago() {
       return timeago(this.chat?.lastdate)
@@ -245,7 +245,7 @@ export default {
       let unseen = 0
 
       for (const chat of this.chats) {
-        if (chat.id === this.reply.chatid) {
+        if (chat.id === this.reply?.chatid) {
           unseen += chat.unseen
         }
       }
@@ -253,7 +253,7 @@ export default {
       return unseen
     },
     promised() {
-      if (this.message.promisecount && this.message.promises?.length) {
+      if (this.message?.promisecount && this.message.promises?.length) {
         for (const promise of this.message.promises) {
           if (promise.userid === this.reply.userid) {
             return true

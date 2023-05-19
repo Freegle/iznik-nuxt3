@@ -132,7 +132,7 @@ export default {
   },
   computed: {
     volunteering() {
-      return this.volunteeringStore.byId(this.newsfeed.volunteeringid)
+      return this.volunteeringStore?.byId(this.newsfeed.volunteeringid)
     },
   },
   methods: {
@@ -147,7 +147,7 @@ export default {
       this.$refs.addOpportunity.show()
     },
     group(groupid) {
-      return this.groupStore.get(groupid)
+      return this.groupStore?.get(groupid)
     },
   },
 }

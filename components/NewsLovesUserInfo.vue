@@ -65,10 +65,10 @@ export default {
   },
   computed: {
     user() {
-      return this.userStore.byId(this.id)
+      return this.userStore?.byId(this.id)
     },
     publicLocation() {
-      return this.id ? this.userStore.publicLocationById(this.id) : null
+      return this.id ? this.userStore?.publicLocationById(this.id) : null
     },
     openoffers() {
       let ret = null

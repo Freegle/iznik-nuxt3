@@ -266,7 +266,7 @@ export default {
   },
   computed: {
     totalWeight() {
-      const weights = this.statsStore.Weight
+      const weights = this.statsStore?.Weight
       let total = 0
       const now = dayjs()
 

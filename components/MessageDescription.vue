@@ -42,7 +42,7 @@ export default {
       }
     },
     message() {
-      return this.messageStore.byId(this.id)
+      return this.messageStore?.byId(this.id)
     },
     textbody() {
       return this.message ? twem(this.message.textbody) : null

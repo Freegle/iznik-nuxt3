@@ -186,7 +186,7 @@ export default {
       return uid('posttype-')
     },
     uploadingPhoto() {
-      return this.composeStore.uploading
+      return this.composeStore?.uploading
     },
     placeholder() {
       return this.message && this.type === 'Offer'
@@ -200,7 +200,7 @@ export default {
       return this.message?.groups?.[0]?.groupid
     },
     group() {
-      return this.groupStore.get(this.groupid)
+      return this.groupStore?.get(this.groupid)
     },
     typeOptions() {
       return [

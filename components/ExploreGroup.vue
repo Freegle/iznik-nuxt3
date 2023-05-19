@@ -45,7 +45,7 @@ export default {
   },
   computed: {
     messages() {
-      return this.groupStore.getMessages(this.id)
+      return this.groupStore?.getMessages(this.id)
     },
     messagesToShow() {
       const ids = this.messages ? this.messages.slice(0, this.toShow) : []
@@ -54,12 +54,12 @@ export default {
       })
     },
     group() {
-      return this.groupStore.get(this.id)
+      return this.groupStore?.get(this.id)
     },
     closed() {
       let ret = false
 
-      if (this.group && this.group.settings && this.group.settings.closed) {
+      if (this.group?.settings?.closed) {
         ret = true
       }
 

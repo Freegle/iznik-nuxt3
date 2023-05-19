@@ -89,7 +89,7 @@ export default {
   },
   computed: {
     reply() {
-      return this.newsfeedStore.byId(this.id)
+      return this.newsfeedStore?.byId(this.id)
     },
   },
   methods: {

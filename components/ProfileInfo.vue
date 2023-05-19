@@ -224,10 +224,10 @@ export default {
   },
   computed: {
     user() {
-      return this.id ? this.userStore.byId(this.id) : null
+      return this.id ? this.userStore?.byId(this.id) : null
     },
     publicLocation() {
-      return this.id ? this.userStore.publicLocationById(this.id) : null
+      return this.id ? this.userStore?.publicLocationById(this.id) : null
     },
     activeOffers() {
       return this.active('Offer')

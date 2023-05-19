@@ -85,7 +85,7 @@ export default {
       return ret
     },
     user() {
-      return this.id ? this.userStore.byId(this.id) : null
+      return this.id ? this.userStore?.byId(this.id) : null
     },
   },
 }

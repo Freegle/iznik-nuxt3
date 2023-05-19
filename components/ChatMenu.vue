@@ -42,7 +42,7 @@ export default {
     },
     chatCount() {
       // Don't show so many that the layout breaks.
-      return Math.min(99, this.chatStore.unreadCount)
+      return Math.min(99, this.chatStore?.unreadCount)
     },
   },
   watch: {

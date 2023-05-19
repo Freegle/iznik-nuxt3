@@ -49,7 +49,7 @@ export default {
   },
   computed: {
     newsfeed() {
-      return this.newsfeedStore.byId(this.id)
+      return this.newsfeedStore?.byId(this.id)
     },
     openoffers() {
       let ret = null

@@ -363,7 +363,7 @@ export default {
   },
   computed: {
     postcode() {
-      return this.composeStore.postcode
+      return this.composeStore?.postcode
     },
     wanteds() {
       const ret = this.messages?.filter(

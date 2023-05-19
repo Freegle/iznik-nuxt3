@@ -66,7 +66,7 @@ export default {
   },
   methods: {
     async join() {
-      const group = this.groupStore.get(this.id)
+      const group = this.groupStore?.get(this.id)
 
       await this.authStore.joinGroup({
         userid: this.myid,

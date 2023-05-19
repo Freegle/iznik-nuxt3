@@ -198,9 +198,9 @@ export default {
       let ret = null
 
       if (this.selectedGroup) {
-        ret = this.groupStore.get(this.selectedGroup)
+        ret = this.groupStore?.get(this.selectedGroup)
       } else if (this.myGroups && this.myGroups.length === 1) {
-        ret = this.groupStore.get(this.myGroups[0].id)
+        ret = this.groupStore?.get(this.myGroups[0].id)
       }
 
       return ret
@@ -267,8 +267,8 @@ export default {
     filteredMessagesInStore() {
       const ret = {}
 
-      this.filteredMessagesToShow.forEach((m) => {
-        ret[m.id] = this.messageStore.byId(m.id)
+      this.filteredMessagesToShow?.forEach((m) => {
+        ret[m.id] = this.messageStore?.byId(m.id)
       })
 
       return ret
@@ -341,7 +341,6 @@ export default {
     isochroneBounds(newVal) {
       // If we're changing the isochrone view we don't want to then scroll down to a message which becomes
       // visible.
-      console.log('Reset scrolltomessage')
       this.scrollToMessage = null
     },
   },

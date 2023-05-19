@@ -406,14 +406,14 @@ export default {
   },
   computed: {
     message() {
-      return this.messageStore.byId(this.id)
+      return this.messageStore?.byId(this.id)
     },
     groups() {
       const ret = {}
 
       if (this.message) {
         this.message.groups.forEach((g) => {
-          const thegroup = this.groupStore.get(g.groupid)
+          const thegroup = this.groupStore?.get(g.groupid)
 
           if (thegroup) {
             ret[g.groupid] = thegroup
@@ -498,7 +498,7 @@ export default {
 
       if (this.replyusers?.length > 1) {
         this.replyusers.forEach((uid) => {
-          const u = this.userStore.byId(uid)
+          const u = this.userStore?.byId(uid)
 
           if (u && (dist === null || (u.info && u?.info.milesaway < dist))) {
             dist = u.info.milesaway
@@ -515,7 +515,7 @@ export default {
 
       if (this.replyusers?.length > 1) {
         this.replyusers.forEach((uid) => {
-          const u = this.userStore.byId(uid)
+          const u = this.userStore?.byId(uid)
 
           if (u && u.info?.ratings?.Up + u.info?.ratings?.Down > 2) {
             const thisrating =
@@ -541,7 +541,7 @@ export default {
 
       if (this.replyusers?.length > 1) {
         this.replyusers.forEach((uid) => {
-          const u = this.userStore.byId(uid)
+          const u = this.userStore?.byId(uid)
 
           if (
             u &&
@@ -598,10 +598,10 @@ export default {
 
       if (this.expanded && this.message.promises?.length) {
         this.message.promises.forEach((p) => {
-          const user = this.userStore.byId(p.userid)
+          const user = this.userStore?.byId(p.userid)
 
           if (user) {
-            const tryst = this.trystStore.getByUser(p.userid)
+            const tryst = this.trystStore?.getByUser(p.userid)
             const date = tryst
               ? dayjs(tryst.arrangedfor).format('dddd Do HH:mm a')
               : null

@@ -544,7 +544,7 @@ export default {
       let ret = null
 
       if (this.id) {
-        ret = this.volunteeringStore.byId(this.id)
+        ret = this.volunteeringStore?.byId(this.id)
       }
 
       if (!ret) {
@@ -555,8 +555,8 @@ export default {
     },
     groups() {
       const ret = []
-      this.volunteering.groups.forEach((id) => {
-        const group = this.groupStore.get(id)
+      this.volunteering?.groups?.forEach((id) => {
+        const group = this.groupStore?.get(id)
 
         if (group) {
           ret.push(group)
@@ -566,16 +566,16 @@ export default {
       return ret
     },
     user() {
-      return this.userStore.byId(this.volunteering?.userid)
+      return this.userStore?.byId(this.volunteering?.userid)
     },
     uploadingPhoto() {
-      return this.composeStore.uploading
+      return this.composeStore?.uploading
     },
     isExisting() {
-      return Boolean(this.volunteering.id)
+      return Boolean(this.volunteering?.id)
     },
     description() {
-      let desc = this.volunteering.description
+      let desc = this.volunteering?.description
       desc = desc ? twem(desc) : ''
       desc = desc.trim()
       return desc

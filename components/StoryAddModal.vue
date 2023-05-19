@@ -178,7 +178,7 @@ export default {
   },
   computed: {
     uploadingPhoto() {
-      return this.composeStore.uploading
+      return this.composeStore?.uploading
     },
   },
   methods: {

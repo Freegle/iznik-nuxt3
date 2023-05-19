@@ -282,7 +282,7 @@ export default {
   computed: {
     collapsed: {
       get() {
-        return this.miscStore.get('chatinfoheader')
+        return this.miscStore?.get('chatinfoheader')
       },
       set(newVal) {
         this.miscStore.set({
@@ -295,7 +295,7 @@ export default {
       let ret = null
       let secs = null
 
-      if (this.otheruser && this.otheruser.info) {
+      if (this.otheruser?.info) {
         secs = this.otheruser.info.replytime
       }
 

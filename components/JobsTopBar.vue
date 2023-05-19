@@ -73,11 +73,15 @@ export default {
   computed: {
     ...mapState(useJobStore, ['blocked']),
     list() {
-      return this.prioritise(this.jobStore.list, 3)
+      return this.prioritise(this.jobStore?.list, 3)
     },
   },
   methods: {
     prioritise(jobs, len) {
+      if (!jobs) {
+        return []
+      }
+
       // We want to show jobs with the ones with the highest CPC first, because that will generate the most
       // for us.  But if the CPC is the same, then we can randomise the order - perhaps increasing the
       // chances of a click.

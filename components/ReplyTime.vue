@@ -29,7 +29,7 @@ export default {
   },
   computed: {
     user() {
-      return this.id ? this.userStore.byId(this.id) : null
+      return this.id ? this.userStore?.byId(this.id) : null
     },
     replytime() {
       if (this.user && this.user.info && this.user.info.replytime) {

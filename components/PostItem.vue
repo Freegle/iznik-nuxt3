@@ -150,7 +150,7 @@ export default {
     item: {
       get() {
         if (!this.edit) {
-          const msg = this.composeStore.message(this.id)
+          const msg = this.composeStore?.message(this.id)
           return msg?.item
         } else {
           return this.edititem
@@ -205,10 +205,10 @@ export default {
     duplicate() {
       let ret = null
 
-      const messages = this.messageStore.all
+      const messages = this.messageStore?.all
 
       // This may be a repost, in which case we don't want to flag the original.
-      const composing = this.composeStore.message(this.id)
+      const composing = this.composeStore?.message(this.id)
 
       const repostof = composing?.repostof
 
