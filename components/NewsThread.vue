@@ -499,7 +499,7 @@ export default {
     },
     async report() {
       this.showReportModal = true
-      await this.waitRef('reportModal')
+      await this.waitForRef('reportModal')
       this.$refs.reportModal.show()
     },
     referToOffer() {
