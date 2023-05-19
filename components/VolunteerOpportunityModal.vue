@@ -372,44 +372,9 @@
       </div>
     </template>
     <template #footer>
-      <div v-if="added">
-        <b-button
-          variant="white"
-          class="float-right"
-          :disabled="uploadingPhoto"
-          @click="hide"
-        >
-          Close
-        </b-button>
-      </div>
-      <div v-else>
-        <div
-          v-if="volunteering.canmodify"
-          class="w-100 d-flex justify-content-between"
-        >
+      <div class="w-100 d-flex justify-content-between">
+        <template v-if="added">
           <b-button
-            v-if="!editing"
-            variant="white"
-            class="float-left"
-            :disabled="uploadingPhoto"
-            @click="editing = true"
-          >
-            <v-icon icon="pen" />
-            Edit
-          </b-button>
-          <b-button
-            variant="white"
-            class="float-left ml-1"
-            :disabled="uploadingPhoto"
-            @click="deleteIt"
-          >
-            <v-icon icon="trash-alt" />
-            Delete
-          </b-button>
-        </div>
-        <div class="w-100 d-flex justify-content-between">
-          <b-button
-            v-if="!editing"
             variant="white"
             class="float-right"
             :disabled="uploadingPhoto"
@@ -417,24 +382,56 @@
           >
             Close
           </b-button>
-          <b-button
-            v-if="editing"
-            variant="white"
-            class="float-right mr-1"
-            :disabled="uploadingPhoto"
-            @click="dontSave"
-          >
-            Hide
-          </b-button>
-          <SpinButton
-            v-if="editing"
-            variant="primary"
-            :disabled="uploadingPhoto"
-            name="save"
-            :label="volunteering.id ? 'Save Changes' : 'Add Opportunity'"
-            @handle="saveIt"
-          />
-        </div>
+        </template>
+        <template v-else>
+          <template v-if="canmodify">
+            <b-button
+              v-if="!editing"
+              variant="white"
+              class="float-left"
+              :disabled="uploadingPhoto"
+              @click="editing = true"
+            >
+              <v-icon icon="pen" />
+              Edit
+            </b-button>
+            <b-button
+              variant="white"
+              class="float-left ml-1"
+              :disabled="uploadingPhoto"
+              @click="deleteIt"
+            >
+              <v-icon icon="trash-alt" />
+              Delete
+            </b-button>
+            <b-button
+              v-if="!editing"
+              variant="white"
+              class="float-right"
+              :disabled="uploadingPhoto"
+              @click="hide"
+            >
+              Close
+            </b-button>
+            <b-button
+              v-if="editing"
+              variant="white"
+              class="float-right mr-1"
+              :disabled="uploadingPhoto"
+              @click="dontSave"
+            >
+              Hide
+            </b-button>
+            <SpinButton
+              v-if="editing"
+              variant="primary"
+              :disabled="uploadingPhoto"
+              name="save"
+              :label="volunteering.id ? 'Save Changes' : 'Add Opportunity'"
+              @handle="saveIt"
+            />
+          </template>
+        </template>
       </div>
     </template>
   </b-modal>
@@ -477,7 +474,6 @@ function initialVolunteering() {
     contactemail: null,
     contactphone: null,
     contacturl: null,
-    canmodify: null,
   }
 }
 
@@ -552,6 +548,9 @@ export default {
       }
 
       return ret
+    },
+    canmodify() {
+      return this.volunteering?.userid === this.myid
     },
     groups() {
       const ret = []
