@@ -105,6 +105,15 @@ export default defineNuxtConfig({
 
     // Proxy from old web client to v1 API.  Should be able to remove after 01/06/2023.
     '/api/**': { proxy: config.APIv1 + '/**', cors: true },
+
+    // Allow CORS for chunk fetches - required for Netlify hosting.
+    '/_nuxt/**': {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers':
+          'Origin, X-Requested-With, Content-Type, Accept, Authorization',
+      },
+    },
   },
 
   nitro: {
