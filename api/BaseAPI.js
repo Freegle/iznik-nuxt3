@@ -8,6 +8,7 @@ import { useMiscStore } from '~/stores/misc'
 const ourFetch = fetchRetry(fetch, {
   retries: 10,
   retryDelay: function (attempt, error, response) {
+    console.log('API retry', attempt, error, response)
     return attempt * 1000
   },
 })
@@ -90,7 +91,7 @@ export default class BaseAPI {
 
       useMiscStore().api(1)
 
-      const rsp = await fetch(this.config.public.APIv1 + path, {
+      const rsp = await ourFetch(this.config.public.APIv1 + path, {
         ...config,
         body,
         method,
