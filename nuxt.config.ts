@@ -191,6 +191,8 @@ export default defineNuxtConfig({
       IMAGE_SITE: config.IMAGE_SITE,
       SENTRY_DSN: config.SENTRY_DSN,
       BUILD_DATE: new Date().toISOString(),
+      NETLIFY_DEPLOY_ID: process.env.DEPLOY_ID,
+      NETLIFY_SITE_NAME: process.env.SITE_NAME,
     },
   },
 
