@@ -14,6 +14,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     // Some errors seem benign, and so we ignore them on the client side rather than clutter our sentry logs.
     ignoreErrors: [
       'ResizeObserver loop limit exceeded', // Benign - see https://stackoverflow.com/questions/49384120/resizeobserver-loop-limit-exceeded
+      'ResizeObserver loop completed with undelivered notifications.',
       'Navigation cancelled from ', // This can happen if someone clicks twice in quick succession
     ],
     integrations: [
@@ -26,7 +27,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     tracesSampleRate: config.SENTRY_TRACES_SAMPLE_RATE || 1.0, // Sentry recommends adjusting this value in production
     debug: config.SENTRY_ENABLE_DEBUG || false, // Enable debug mode
     environment: config.ENVIRONMENT || 'dev', // Set environment
-    // The following enables exeptions to be logged to console despite logErrors being set to false (preventing them from being passed to the default Vue err handler)
+    // The following enables exceptions to be logged to console despite logErrors being set to false (preventing them from being passed to the default Vue err handler)
     beforeSend(event, hint) {
       // Ignore Bing crawler, which seems to abort pre-fetching of some assets.
       if (window.navigator.userAgent.includes('BingPreview')) {
@@ -34,7 +35,7 @@ export default defineNuxtPlugin((nuxtApp) => {
       }
 
       // HeadlessChrome triggers an error in Google sign-in.  It's not a real user.
-      if (window.navigator.userAgent.includes('BingPreview')) {
+      if (window.navigator.userAgent.includes('HeadlessChrome')) {
         return null
       }
 
