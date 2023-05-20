@@ -691,7 +691,7 @@ const getCounts = async () => {
           const data = await response.json()
           console.log("Netlify's response", data)
 
-          if (data.deploy_id) {
+          if (data?.deploy_id) {
             console.log(
               'Compare current code vs latest deploy',
               data.deploy_id,
@@ -701,7 +701,7 @@ const getCounts = async () => {
             if (data.deploy_id !== runtimeConfig.public.NETLIFY_DEPLOY_ID) {
               // We're not on the latest deploy, so show a warning.
               console.log(
-                'Need to reload',
+                'Code has changed on Netlify - need to reload',
                 data.deploy_id,
                 runtimeConfig.public.NETLIFY_DEPLOY_ID
               )
