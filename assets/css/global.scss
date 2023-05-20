@@ -486,3 +486,41 @@ label {
 .verytop {
   z-index: 10000;
 }
+
+.error__wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 75vh;
+
+  @include media-breakpoint-up(md) {
+    flex-direction: row;
+  }
+
+  .error__image {
+    background-image: url('/error-page-image.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 50%;
+    height: 100%;
+
+    @include media-breakpoint-up(md) {
+      width: 25%;
+    }
+  }
+
+  .error {
+    max-width: 600px;
+    text-align: center;
+  }
+
+  .error__heading--main {
+    font-size: 2.5rem;
+  }
+
+  .error__heading--sub {
+    font-size: 1.8rem;
+  }
+}

@@ -58,51 +58,6 @@ import SupportLink from './components/SupportLink'
 import ExternalLink from '~/components/ExternalLink'
 import { useError } from '#imports'
 
-// Although we have a separate error page which we're supposed to catch and redirect to in something-went-wrong, there
-// seem to be some paths whereby we can end up here.  So handle it here too.
 const error = useError()
 const maintenance = error?.value?.message === 'Maintenance error'
 </script>
-<style scoped lang="scss">
-@import '~bootstrap/scss/functions';
-@import '~bootstrap/scss/variables';
-@import '~bootstrap/scss/mixins/_breakpoints';
-
-.error__wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 75vh;
-
-  @include media-breakpoint-up(md) {
-    flex-direction: row;
-  }
-}
-
-.error__image {
-  background-image: url('/error-page-image.png');
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  width: 50%;
-  height: 100%;
-
-  @include media-breakpoint-up(md) {
-    width: 25%;
-  }
-}
-
-.error {
-  max-width: 600px;
-  text-align: center;
-}
-
-.error__heading--main {
-  font-size: 2.5rem;
-}
-
-.error__heading--sub {
-  font-size: 1.8rem;
-}
-</style>
