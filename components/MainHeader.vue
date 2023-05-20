@@ -676,7 +676,7 @@ const getCounts = async () => {
 
       const runtimeConfig = useRuntimeConfig()
 
-      if (runtimeConfig.public.DEPLOY_ID) {
+      if (runtimeConfig.public.NETLIFY_DEPLOY_ID) {
         try {
           console.log(
             'Check Netlify updates',
