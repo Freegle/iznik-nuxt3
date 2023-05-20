@@ -2,6 +2,9 @@
 /sw.js* / 404!
 /robots.txt / 404!
 /img* / 404!
+/timg* / 404!
 /gimg* / 404!
+/tgimg* / 404!
 /uimg* / 404!
+/tuimg* / 404!
 /.well-known/* / 404!
