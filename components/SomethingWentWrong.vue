@@ -20,8 +20,8 @@
       show
     >
       <p>
-        The website has been updated. Please reload this page to pick up the
-        latest version.
+        The website has been updated with fixes and improvements. Please reload
+        this page to pick up the latest version.
       </p>
       <b-button variant="primary" @click="reload"> Reload now </b-button>
     </NoticeMessage>

@@ -676,36 +676,41 @@ const getCounts = async () => {
 
       const runtimeConfig = useRuntimeConfig()
 
-      // if (runtimeConfig.public.DEPLOY_ID) {
-      try {
-        console.log(
-          'Check Netlify updates',
-          runtimeConfig.public.NETLIFY_DEPLOY_ID,
-          runtimeConfig.public.NETLIFY_SITE_NAME
-        )
-
-        const response = await fetch(
-          `https://api.netlify.com/api/v1/sites/${runtimeConfig.public.NETLIFY_SITE_NAME}.netlify.com`
-        )
-
-        const data = await response.json()
-        console.log("Netlify's response", data)
-
-        if (data.deploy_id) {
+      if (runtimeConfig.public.DEPLOY_ID) {
+        try {
           console.log(
-            'Compare current code vs latest deploy',
-            data.deploy_id,
-            runtimeConfig.public.NETLIFY_DEPLOY_ID
+            'Check Netlify updates',
+            runtimeConfig.public.NETLIFY_DEPLOY_ID,
+            runtimeConfig.public.NETLIFY_SITE_NAME
           )
 
-          if (data.deploy_id !== runtimeConfig.public.NETLIFY_DEPLOY_ID) {
-            // We're not on the latest deploy, so show a warning.
-            console.log('Need to reload')
-            // useMiscStore().needToReload = true
+          const response = await fetch(
+            `https://api.netlify.com/api/v1/sites/${runtimeConfig.public.NETLIFY_SITE_NAME}.netlify.com`
+          )
+
+          const data = await response.json()
+          console.log("Netlify's response", data)
+
+          if (data.deploy_id) {
+            console.log(
+              'Compare current code vs latest deploy',
+              data.deploy_id,
+              runtimeConfig.public.NETLIFY_DEPLOY_ID
+            )
+
+            if (data.deploy_id !== runtimeConfig.public.NETLIFY_DEPLOY_ID) {
+              // We're not on the latest deploy, so show a warning.
+              console.log(
+                'Need to reload',
+                data.deploy_id,
+                runtimeConfig.public.NETLIFY_DEPLOY_ID
+              )
+              useMiscStore().needToReload = true
+            }
           }
+        } catch (e) {
+          console.log('Failed to fetch deploy info', e)
         }
-      } catch (e) {
-        console.log('Failed to fetch deploy info', e)
       }
     } catch (e) {
       console.log('Ignore error fetching counts', e)
