@@ -49,7 +49,7 @@ export default {
     const locationStore = useLocationStore()
     const me = authStore.user
 
-    console.log('me', me)
+    // Sometimes the settings are wrong and don't contain the full area.
     const areaname = ref(me?.settings?.mylocation?.area?.name)
     const areaid = computed(() => me?.settings?.mylocation?.areaid)
 
