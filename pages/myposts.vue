@@ -487,7 +487,7 @@ export default {
       if (outcome === 'Taken' || outcome === 'Received') {
         // If someone has set up a regular donation, then we don't ask them to donate again.  Wouldn't be fair to
         // pester them.
-        if (!this.me.donorrecurring && canask) {
+        if (!this.me?.donorrecurring && canask) {
           this.donationGroup = groupid
           this.ask()
 
