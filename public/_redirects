@@ -1,0 +1,6 @@
+# Return 404 for requests from old code.  This avoids the function call, which costs.
+/api/* / 404!
+/sw.js* / 404!
+/robots.txt / 404!
+/gimg* / 404!
+/uimg* / 404!
