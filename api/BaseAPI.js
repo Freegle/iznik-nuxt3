@@ -113,8 +113,6 @@ export default class BaseAPI {
         // we renew the JWT.
         authStore.setAuth(data.jwt, data.persistent)
       }
-
-      useMiscStore().api(-1)
     } catch (e) {
       if (e.message.match(/.*aborted.*/i)) {
         // We've seen requests get aborted immediately after beforeunload().  Makes sense to abort the requests
@@ -123,6 +121,8 @@ export default class BaseAPI {
         console.log('Aborted - ignore')
         return new Promise(function (resolve) {})
       }
+    } finally {
+      useMiscStore().api(-1)
     }
 
     // HTTP errors are real errors.

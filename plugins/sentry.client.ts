@@ -10,7 +10,7 @@ export default defineNuxtPlugin((nuxtApp) => {
 
   Sentry.init({
     app: [vueApp],
-    dsn: config.SENTRY_DSN,
+    dsn: config.public.SENTRY_DSN,
     // Some errors seem benign, and so we ignore them on the client side rather than clutter our sentry logs.
     ignoreErrors: [
       'ResizeObserver loop limit exceeded', // Benign - see https://stackoverflow.com/questions/49384120/resizeobserver-loop-limit-exceeded
@@ -24,9 +24,9 @@ export default defineNuxtPlugin((nuxtApp) => {
       }),
     ],
     logErrors: false, // Note that this doesn't seem to work with nuxt 3
-    tracesSampleRate: config.SENTRY_TRACES_SAMPLE_RATE || 1.0, // Sentry recommends adjusting this value in production
-    debug: config.SENTRY_ENABLE_DEBUG || false, // Enable debug mode
-    environment: config.ENVIRONMENT || 'dev', // Set environment
+    tracesSampleRate: config.public.SENTRY_TRACES_SAMPLE_RATE || 1.0, // Sentry recommends adjusting this value in production
+    debug: config.public.SENTRY_ENABLE_DEBUG || false, // Enable debug mode
+    environment: config.public.ENVIRONMENT || 'dev', // Set environment
     // The following enables exceptions to be logged to console despite logErrors being set to false (preventing them from being passed to the default Vue err handler)
     beforeSend(event, hint) {
       // Ignore Bing crawler, which seems to abort pre-fetching of some assets.
