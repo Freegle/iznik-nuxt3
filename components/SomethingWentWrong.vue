@@ -80,6 +80,6 @@ export default {
   position: fixed;
   bottom: 0;
   width: 100%;
-  z-index: 1000;
+  z-index: 10000;
 }
 </style>
