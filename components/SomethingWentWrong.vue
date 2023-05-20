@@ -13,25 +13,44 @@
         screenshot and contact <SupportLink />
       </p>
     </NoticeMessage>
+    <NoticeMessage
+      v-if="showReload"
+      variant="info"
+      class="posit text-center"
+      show
+    >
+      <p>
+        The website has been updated. Please reload this page to pick up the
+        latest version.
+      </p>
+      <b-button variant="primary" @click="reload"> Reload now </b-button>
+    </NoticeMessage>
   </div>
 </template>
 <script>
+import NoticeMessage from './NoticeMessage'
 import { useMiscStore } from '~/stores/misc'
 import SupportLink from '~/components/SupportLink'
 
 export default {
   components: {
+    NoticeMessage,
     SupportLink,
   },
   data() {
     return {
       showError: false,
+      showReload: false,
     }
   },
   computed: {
     somethingWentWrong() {
       const miscStore = useMiscStore()
       return miscStore.somethingWentWrong
+    },
+    needToReload() {
+      const miscStore = useMiscStore()
+      return miscStore.needToReload
     },
   },
   watch: {
@@ -42,6 +61,16 @@ export default {
           this.showError = false
         }, 10000)
       }
+    },
+    needToReload(newVal) {
+      if (newVal) {
+        this.showReload = true
+      }
+    },
+  },
+  methods: {
+    reload() {
+      window.location.reload()
     },
   },
 }

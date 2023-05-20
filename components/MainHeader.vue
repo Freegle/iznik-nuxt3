@@ -685,7 +685,7 @@ const getCounts = async () => {
         )
 
         const response = await fetch(
-          `https://api.netlify.com/api/v1/deploys/${runtimeConfig.public.NETLIFY_SITE_NAME}.netlify.com`
+          `https://api.netlify.com/api/v1/sites/${runtimeConfig.public.NETLIFY_SITE_NAME}.netlify.com`
         )
 
         const data = await response.json()
@@ -701,6 +701,7 @@ const getCounts = async () => {
           if (data.deploy_id !== runtimeConfig.public.NETLIFY_DEPLOY_ID) {
             // We're not on the latest deploy, so show a warning.
             console.log('Need to reload')
+            // useMiscStore().needToReload = true
           }
         }
       } catch (e) {

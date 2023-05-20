@@ -20,6 +20,7 @@ export const useMiscStore = defineStore({
     breakpoint: null,
     vals: {},
     somethingWentWrong: false,
+    needToReload: false,
     visible: true,
     apiCount: 0,
   }),
