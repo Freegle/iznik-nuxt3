@@ -42,11 +42,9 @@ export default {
       // start rendering the page.  This will be quicker than waiting for GoogleOneTap to load on the client and tell us
       // whether or not we can log in that way.
       let user = null
-      console.log('Login layout, fetch user')
 
       try {
         user = await authStore.fetchUser()
-        console.log('Fetched user')
       } catch (e) {
         console.log('Error fetching user', e)
       }

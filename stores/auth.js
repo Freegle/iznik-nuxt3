@@ -196,13 +196,10 @@ export const useAuthStore = defineStore({
       let me = null
       let groups = null
 
-      console.log('Consider got auth')
       if (this.auth.jwt || this.auth.persistent) {
-        console.log('Got auth')
         // We have auth info.  The new API can authenticate using either the JWT or the persistent token.
         try {
           me = await this.$api.session.fetchv2({}, false)
-          console.log('Done fetchv2')
         } catch (e) {
           // Failed.  This can validly happen with a 404 if the JWT is invalid.
           console.log('Exception fetching user')
@@ -213,21 +210,17 @@ export const useAuthStore = defineStore({
           delete me.memberships
 
           if (!this.auth.jwt && process.client) {
-            console.log('Pick up jwt for later')
             // Pick up the JWT for later from the old API.  No need to wait, though.
             this.$api.session
               .fetch({
                 components: ['me'],
               })
               .then((ret) => {
-                console.log('got', ret)
                 let persistent = null
                 let jwt = null
 
                 if (ret) {
                   ;({ me, persistent, jwt } = ret)
-                  console.log('Decode', jwt)
-
                   if (me) {
                     this.setAuth(jwt, persistent)
                   }
@@ -239,7 +232,6 @@ export const useAuthStore = defineStore({
 
       if (!me) {
         // Try the older API which will authenticate via the persistent token and PHP session.
-        console.log('Try older')
         const ret = await this.$api.session.fetch({
           components: ['me'],
         })
