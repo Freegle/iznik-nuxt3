@@ -26,16 +26,25 @@
             </div>
           </div>
           <h2 class="visually-hidden">List of community events</h2>
-          <div v-for="id in events" :key="'event-' + id" class="mt-2">
-            <CommunityEvent :id="id" :filter-group="groupid" :summary="false" />
+          <div v-if="forUser?.length">
+            <div v-for="id in events" :key="'event-' + id" class="mt-2">
+              <CommunityEvent
+                :id="id"
+                :filter-group="groupid"
+                :summary="false"
+              />
+            </div>
+            <infinite-loading
+              :key="'infinite-' + groupid"
+              :identifier="infiniteId"
+              force-use-infinite-wrapper="body"
+              :distance="1000"
+              @infinite="loadMore"
+            />
           </div>
-          <infinite-loading
-            :key="'infinite-' + groupid"
-            :identifier="infiniteId"
-            force-use-infinite-wrapper="body"
-            :distance="1000"
-            @infinite="loadMore"
-          />
+          <div v-else>
+            <NoticeMessage>No events at the moment.</NoticeMessage>
+          </div>
         </b-col>
         <b-col cols="0" md="3" class="d-none d-md-block" />
       </b-row>
@@ -53,6 +62,7 @@ import { buildHead } from '../../composables/useBuildHead'
 import { useCommunityEventStore } from '../../stores/communityevent'
 import { useGroupStore } from '../../stores/group'
 import { useAuthStore } from '../../stores/auth'
+import NoticeMessage from '../../components/NoticeMessage'
 import { waitForRef } from '~/composables/useWaitForRef'
 import GlobalWarning from '~/components/GlobalWarning'
 import { ref, computed, useRouter } from '#imports'

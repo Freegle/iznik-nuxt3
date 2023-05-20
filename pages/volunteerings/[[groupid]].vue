@@ -29,24 +29,29 @@
             </div>
           </div>
           <h2 class="visually-hidden">List of volunteer opportunities</h2>
-          <div
-            v-for="id in volunteerings"
-            :key="'volunteering-' + id"
-            class="mt-2"
-          >
-            <VolunteerOpportunity
-              :id="id"
-              :filter-group="groupid"
-              :summary="false"
+          <div v-if="forUser?.length">
+            <div
+              v-for="id in volunteerings"
+              :key="'volunteering-' + id"
+              class="mt-2"
+            >
+              <VolunteerOpportunity
+                :id="id"
+                :filter-group="groupid"
+                :summary="false"
+              />
+            </div>
+            <infinite-loading
+              :key="'infinite-' + groupid"
+              :identifier="infiniteId"
+              force-use-infinite-wrapper="body"
+              :distance="1000"
+              @infinite="loadMore"
             />
           </div>
-          <infinite-loading
-            :key="'infinite-' + groupid"
-            :identifier="infiniteId"
-            force-use-infinite-wrapper="body"
-            :distance="1000"
-            @infinite="loadMore"
-          />
+          <div v-else>
+            <NoticeMessage>No opportunities at the moment.</NoticeMessage>
+          </div>
         </b-col>
         <b-col cols="0" md="3" class="d-none d-md-block" />
       </b-row>
