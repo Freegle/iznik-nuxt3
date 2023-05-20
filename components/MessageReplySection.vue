@@ -281,10 +281,7 @@ export default {
           if (!found) {
             // Not currently a member.
             console.log('Need to join')
-            await this.authStore.joinGroup({
-              userid: this.myid,
-              groupid: tojoin,
-            })
+            await this.authStore.joinGroup(this.myid, tojoin)
           }
 
           // Now we can send the reply via chat.

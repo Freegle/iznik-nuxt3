@@ -68,10 +68,7 @@ export default {
     async join() {
       const group = this.groupStore?.get(this.id)
 
-      await this.authStore.joinGroup({
-        userid: this.myid,
-        groupid: this.id,
-      })
+      await this.authStore.joinGroup(this.myid, this.id)
 
       // Route back.
       const router = useRouter()
