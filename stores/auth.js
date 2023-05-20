@@ -76,8 +76,19 @@ export const useAuthStore = defineStore({
         this.loggedInEver = true
         this.user = value
 
+        // Ensure we have a basic set of settings.
         if (!this.user.settings) {
           this.user.settings = {}
+        }
+
+        if (!this.user.settings.notifications) {
+          this.user.settings.notifications = {
+            email: true,
+            emailmine: false,
+            push: true,
+            facebook: true,
+            app: true,
+          }
         }
 
         // Ensure we don't store any password (it shouldn't get persisted anyway, but let's be careful).
