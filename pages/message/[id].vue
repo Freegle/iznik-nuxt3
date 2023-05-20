@@ -78,6 +78,7 @@ import { buildHead } from '../../composables/useBuildHead'
 import { useMessageStore } from '~/stores/message'
 import { twem } from '~/composables/useTwem'
 import MyMessage from '~/components/MyMessage'
+import { ref } from '#imports'
 
 const runtimeConfig = useRuntimeConfig()
 const route = useRoute()
@@ -86,7 +87,16 @@ const messageStore = useMessageStore()
 // We don't use lazy because we want the page to be rendered for SEO.
 const id = parseInt(route.params.id)
 
-await messageStore.fetch(id)
+const error = ref(false)
+
+try {
+  await messageStore.fetch(id)
+} catch (e) {
+  // Likely to be because the message doesn't exist.
+  console.log('Message fetch failed', e)
+  error.value = true
+}
+
 const message = computed(() => {
   return messageStore.byId(id)
 })
