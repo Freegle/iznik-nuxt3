@@ -5,6 +5,10 @@
         <v-icon icon="cog" scale="4" />
         Sorry - we're doing some maintenance
       </h1>
+      <NoticeMessage variant="danger">
+        You might see this page if you are using an old version of the app or
+        website. Please update your app or clear your browser cache.
+      </NoticeMessage>
       <p>
         We're doing some maintenance work just now - one on't cross beams gone
         owt askew on treadle, the dilithium crystals need polishing, the server
@@ -28,6 +32,7 @@
 </template>
 <script setup>
 import { useRoute } from 'vue-router'
+import NoticeMessage from '../components/NoticeMessage'
 import { buildHead } from '~/composables/useBuildHead'
 import ExternalLink from '~/components/ExternalLink'
 
