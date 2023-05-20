@@ -8,8 +8,10 @@ import { useMiscStore } from '~/stores/misc'
 const ourFetch = fetchRetry(fetch, {
   retries: 10,
   retryOn: (attempt, error, response) => {
-    console.log('API retry', attempt, error, response)
-    return true
+    if (error !== null || response.status >= 400) {
+      console.log('API retry', attempt, error, response)
+      return true
+    }
   },
   retryDelay: function (attempt, error, response) {
     return attempt * 1000
