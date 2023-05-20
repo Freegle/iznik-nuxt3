@@ -1,0 +1,15 @@
+# Return 404 for requests from old code.  This avoids the function call, which costs.
+[[redirects]]
+from = "/api/*"
+to = "/"
+status = 404
+
+[[redirects]]
+from = "/sw.js*"
+to = "/"
+status = 404
+
+[[redirects]]
+from = "/robots.txt"
+to = "/"
+status = 404

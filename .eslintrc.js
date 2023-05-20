@@ -59,5 +59,6 @@ module.exports = {
     usePinia: 'readonly',
     navigateTo: 'readonly',
     sendRedirect: 'readonly',
+    setResponseStatus: 'readonly',
   },
 }
