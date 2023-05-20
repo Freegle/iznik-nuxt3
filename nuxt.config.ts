@@ -111,6 +111,10 @@ export default defineNuxtConfig({
     '/volunteering/**': { swr: 3600 },
     '/volunteerings/**': { swr: 3600 },
 
+    // Proxy from old client to v1 API.  This is almost all the app, which will then pick up the minimum required
+    // app version and ask people to upgrade.
+    '/api/**': { proxy: config.APIv1 + '/**' },
+
     // Allow CORS for chunk fetches - required for Netlify hosting.
     '/_nuxt/**': {
       headers: {
