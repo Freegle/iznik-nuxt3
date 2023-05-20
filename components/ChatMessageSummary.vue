@@ -135,9 +135,11 @@ export default {
     promisedToThem() {
       let ret = false
 
-      for (const p of this.message?.promises) {
-        if (this.chat?.otheruid === p.userid) {
-          ret = true
+      if (this.message?.promises) {
+        for (const p of this.message?.promises) {
+          if (this.chat?.otheruid === p.userid) {
+            ret = true
+          }
         }
       }
 

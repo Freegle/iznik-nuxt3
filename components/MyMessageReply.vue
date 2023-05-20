@@ -273,10 +273,12 @@ export default {
       const router = useRouter()
       router.push('/chats/' + this.chat?.id)
     },
-    promise() {
+    async promise() {
+      await this.waitForRef('promise ')
       this.$refs.promise.show()
     },
-    unpromise() {
+    async unpromise() {
+      await this.waitForRef('renege')
       this.$refs.renege.show()
     },
     async showProfileModal() {
