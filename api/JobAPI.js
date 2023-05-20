@@ -14,8 +14,8 @@ export default class JobAPI extends BaseAPI {
     return await this.$getv2('/job', params, false)
   }
 
-  async fetchOnev2(id) {
-    return await this.$getv2('/job/' + id)
+  async fetchOnev2(id, logError) {
+    return await this.$getv2('/job/' + id, {}, logError)
   }
 
   async log(params) {

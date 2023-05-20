@@ -16,7 +16,7 @@ export const useJobStore = defineStore({
       let job = null
 
       try {
-        job = await api(this.config).job.fetchOnev2(id)
+        job = await api(this.config).job.fetchOnev2(id, false)
       } catch (e) {
         console.log('Jobs fetch failed - perhaps ad blocked', e)
         this.blocked = true
