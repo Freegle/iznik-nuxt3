@@ -7,40 +7,26 @@
           :options="areaOptions"
           class="d-block"
         />
-        <div
-          v-if="
-            me.settings &&
-            me.settings?.mylocation &&
-            me.settings?.mylocation.area.name
-          "
-          class="d-block mt-1"
-        >
+        <div v-if="areaname" class="d-block mt-1">
           <v-icon icon="map-marker-alt" />
           <span
             v-b-tooltip="
               'This is where other people will see that you are.  Change your location from Settings.'
             "
             class="ml-1"
-            >{{ me.settings?.mylocation.area.name }}</span
+            >{{ areaname }}</span
           >
         </div>
       </div>
       <div class="d-none d-sm-flex align-items-center">
-        <div
-          v-if="
-            me.settings &&
-            me.settings?.mylocation &&
-            me.settings?.mylocation.area.name
-          "
-          class="w-50"
-        >
+        <div v-if="areaname" class="w-50">
           <v-icon icon="map-marker-alt" />
           <span
             v-b-tooltip="
               'This is where other people will see that you are.  Change your location from Settings.'
             "
             class="ml-1"
-            >{{ me.settings?.mylocation.area.name }}</span
+            >{{ areaname }}</span
           >
         </div>
         <b-form-select
@@ -54,13 +40,27 @@
 </template>
 <script>
 import { useAuthStore } from '../stores/auth'
+import { useLocationStore } from '../stores/location'
+import { ref } from '#imports'
 
 export default {
-  setup() {
+  async setup() {
     const authStore = useAuthStore()
+    const locationStore = useLocationStore()
+    const me = authStore.user
+
+    console.log('me', me)
+    const areaname = ref(me?.settings?.mylocation?.area?.name)
+    const areaid = computed(() => me?.settings?.mylocation?.areaid)
+
+    if (!areaname.value && areaid.value) {
+      const loc = await locationStore.fetchv2(areaid.value)
+      areaname.value = loc.name
+    }
 
     return {
       authStore,
+      areaname,
     }
   },
   data() {

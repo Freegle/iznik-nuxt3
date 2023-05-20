@@ -13,7 +13,6 @@
       <div v-else>
         <b-row>
           <b-col>
-            {{ story }}
             <p>First, please could we have a quick summary?</p>
             <b-form-input
               v-model="story.headline"
