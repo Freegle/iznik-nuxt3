@@ -7,8 +7,11 @@ import { useMiscStore } from '~/stores/misc'
 // Note that $fetch and useFetch cause problems on Node v18, so we don't use them.
 const ourFetch = fetchRetry(fetch, {
   retries: 10,
-  retryDelay: function (attempt, error, response) {
+  retryOn: (attempt, error, response) => {
     console.log('API retry', attempt, error, response)
+    return true
+  },
+  retryDelay: function (attempt, error, response) {
     return attempt * 1000
   },
 })
