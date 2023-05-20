@@ -39,6 +39,11 @@ export default defineNuxtPlugin((nuxtApp) => {
         return null
       }
 
+      // YisouSpider doesn't support some JS features, so we ignore it.
+      if (window.navigator.userAgent.includes('Yisou')) {
+        return null
+      }
+
       // Check if it is an exception, and if so, log it.
       if (event.exception) {
         console.error(
