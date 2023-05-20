@@ -82,16 +82,18 @@ const groupStore = useGroupStore()
 const authStore = useAuthStore()
 
 const route = useRoute()
-const groupid = parseInt(route.params.groupid)
+const groupid = ref(parseInt(route.params.groupid))
 
 let name
 let image
 
-if (groupid) {
-  const group = await groupStore.fetch(groupid)
+if (groupid.value) {
+  const group = await groupStore.fetch(groupid.value)
   name = 'Volunteer Opportunities for ' + group.namedisplay
   image = group?.profile
 } else {
+  groupid.value = '0'
+
   if (authStore.user) {
     // We are logged in, so we can fetch the ops for our groups.
     await volunteeringStore.fetchList()
