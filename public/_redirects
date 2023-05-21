@@ -25,5 +25,4 @@
 # Old endpoints.
 /mygroups* /browse:splat 200!
 /how-it-works /help 301!
-
-
+/contact /help 301!
