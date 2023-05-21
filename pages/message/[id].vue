@@ -7,7 +7,7 @@
         <b-col cols="12" xl="6" class="p-0">
           <div
             v-if="
-              error ||
+              failed ||
               (message &&
                 ((message.outcomes && message.outcomes.length > 0) ||
                   message.deleted ||
@@ -87,14 +87,15 @@ const messageStore = useMessageStore()
 // We don't use lazy because we want the page to be rendered for SEO.
 const id = parseInt(route.params.id)
 
-const error = ref(false)
+const failed = ref(false)
 
 try {
   await messageStore.fetch(id)
+  console.log('Fetched message')
 } catch (e) {
   // Likely to be because the message doesn't exist.
   console.log('Message fetch failed', e)
-  error.value = true
+  failed.value = true
 }
 
 const message = computed(() => {
