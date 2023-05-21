@@ -115,6 +115,9 @@ export default defineNuxtConfig({
     // app version and ask people to upgrade.
     '/api/**': { proxy: config.APIv1 + '/**' },
 
+    // This has changed on PayPal but we keep the proxy here to handle older IPNs which have not yet been delivered.
+    '/donateipn.php': { proxy: config.APIv1 + '/donateipn.php' },
+
     // Allow CORS for chunk fetches - required for Netlify hosting.
     '/_nuxt/**': {
       headers: {
