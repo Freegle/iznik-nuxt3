@@ -1,5 +1,9 @@
 import * as Sentry from '@sentry/vue'
 import { Integrations } from '@sentry/tracing'
+import {
+  HttpClient as HttpClientIntegration,
+  ExtraErrorData as ExtraErrorDataIntegration,
+} from '@sentry/integrations'
 import { defineNuxtPlugin, useRuntimeConfig } from '#app'
 import { useRouter } from '#imports'
 
@@ -22,6 +26,8 @@ export default defineNuxtPlugin((nuxtApp) => {
         routingInstrumentation: Sentry.vueRouterInstrumentation(router),
         tracePropagationTargets: ['localhost', 'ilovefreegle.org', /^\//],
       }),
+      new HttpClientIntegration(),
+      new ExtraErrorDataIntegration(),
     ],
     logErrors: false, // Note that this doesn't seem to work with nuxt 3
     tracesSampleRate: config.public.SENTRY_TRACES_SAMPLE_RATE || 1.0, // Sentry recommends adjusting this value in production
