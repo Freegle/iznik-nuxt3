@@ -483,6 +483,10 @@ label {
   object-fit: cover
 }
 
+.neartop {
+  z-index: 5000;
+}
+
 .verytop {
   z-index: 10000;
 }

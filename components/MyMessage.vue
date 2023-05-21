@@ -113,7 +113,7 @@
               </div>
             </div>
             <hr class="" />
-            <div class="d-flex justify-content-between flex-wrap mt-1">
+            <div class="d-flex justify-content-between flex-wrap mt-1 neartop">
               <b-button
                 v-if="rejected && message.location && message.item"
                 variant="warning"
