@@ -111,13 +111,6 @@ export default defineNuxtConfig({
     '/volunteering/**': { swr: 3600 },
     '/volunteerings/**': { swr: 3600 },
 
-    // Proxy from old client to v1 API.  This is almost all the app, which will then pick up the minimum required
-    // app version and ask people to upgrade.
-    '/api/**': { proxy: config.APIv1 + '/**' },
-
-    // This has changed on PayPal but we keep the proxy here to handle older IPNs which have not yet been delivered.
-    '/donateipn.php': { proxy: config.APIv1 + '/donateipn.php' },
-
     // Allow CORS for chunk fetches - required for Netlify hosting.
     '/_nuxt/**': {
       headers: {
