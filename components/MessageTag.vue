@@ -63,17 +63,20 @@ export default {
 
       this.message?.groups?.forEach((g) => {
         const group = this.groupStore?.get(g.groupid)
-        switch (this.message?.type) {
-          case 'Offer':
-            ret = group.settings?.keywords?.offer
-              ? group.settings.keywords.offer
-              : 'OFFER'
-            break
-          case 'Wanted':
-            ret = group.settings?.keywords?.wanted
-              ? group.settings.keywords.wanted
-              : 'WANTED'
-            break
+
+        if (grouo) {
+          switch (this.message?.type) {
+            case 'Offer':
+              ret = group.settings?.keywords?.offer
+                ? group.settings.keywords.offer
+                : 'OFFER'
+              break
+            case 'Wanted':
+              ret = group.settings?.keywords?.wanted
+                ? group.settings.keywords.wanted
+                : 'WANTED'
+              break
+          }
         }
       })
 

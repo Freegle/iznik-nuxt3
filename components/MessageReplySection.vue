@@ -155,9 +155,11 @@ export default {
       default: null,
     },
   },
-  setup() {
+  async setup(props) {
     const messageStore = useMessageStore()
     const authStore = useAuthStore()
+
+    await messageStore.fetch(props.id)
 
     return {
       messageStore,
