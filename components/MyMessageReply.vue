@@ -43,19 +43,19 @@
           </b-badge>
         </div>
         <SupporterInfo
-          v-if="replyuser.supporter"
+          v-if="replyuser?.supporter"
           class="mt-1 mr-1 d-flex flex-column justify-content-center"
         />
       </div>
       <div
         class="pl-1 flex-shrink-1 ratings d-flex d-md-none justify-content-end"
       >
-        <UserRatings :id="replyuser.id" size="sm" />
+        <UserRatings :id="replyuser?.id" size="sm" />
       </div>
       <div
         class="pl-1 flex-shrink-1 ratings d-none d-md-flex justify-content-end w-100 pr-1"
       >
-        <UserRatings :id="replyuser.id" />
+        <UserRatings :id="replyuser?.id" />
       </div>
       <div class="d-flex flex-column justify-content-center wrote">
         <div>
@@ -115,14 +115,14 @@
       :messages="[message]"
       :selected-message="message.id"
       :users="[replyuser]"
-      :selected-user="replyuser.id"
+      :selected-user="replyuser?.id"
     />
     <RenegeModal
       ref="renege"
       :messages="[message]"
       :selected-message="message.id"
       :users="[replyuser]"
-      :selected-user="replyuser.id"
+      :selected-user="replyuser?.id"
     />
     <ProfileModal
       v-if="showProfile && reply && replyuser"
