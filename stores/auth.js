@@ -174,7 +174,7 @@ export const useAuthStore = defineStore({
       return await this.$api.session.unsubscribe(email)
     },
     async signUp(params) {
-      const res = await this.$api.user.signUp(params)
+      const res = await this.$api.user.signUp(params, false)
       const { ret, status, jwt, persistent } = res
 
       if (res.ret === 0) {
