@@ -64,7 +64,7 @@ export default {
       this.message?.groups?.forEach((g) => {
         const group = this.groupStore?.get(g.groupid)
 
-        if (grouo) {
+        if (group) {
           switch (this.message?.type) {
             case 'Offer':
               ret = group.settings?.keywords?.offer
