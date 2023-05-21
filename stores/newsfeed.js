@@ -55,7 +55,12 @@ export const useNewsfeedStore = defineStore({
           }
 
           if (!this.fetching[id]) {
-            this.fetching[id] = api(this.config).news.fetch(id, null, lovelist)
+            this.fetching[id] = api(this.config).news.fetch(
+              id,
+              null,
+              lovelist,
+              false
+            )
           }
 
           const ret = await this.fetching[id]

@@ -1,6 +1,6 @@
 <template>
   <client-only v-if="me">
-    <b-container v-if="me" fluid class="p-0">
+    <b-container fluid class="p-0">
       <b-row class="m-0">
         <b-col cols="0" lg="3" class="p-0 pr-1">
           <VisibleWhen :at="['lg', 'xl', 'xxl']">
@@ -123,6 +123,9 @@
             Sorry, this thread isn't around any more.
           </NoticeMessage>
           <div class="p-0 pt-1 mb-1">
+            <NoticeMessage v-if="id && !newsfeed.length" class="mt-2">
+              Sorry, this thread isn't around any more.
+            </NoticeMessage>
             <NewsThread
               v-for="entry in newsfeedToShow"
               :id="entry.id"
