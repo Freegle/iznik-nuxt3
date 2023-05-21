@@ -14,7 +14,7 @@
       </p>
     </NoticeMessage>
     <NoticeMessage
-      v-if="showReload"
+      v-if="showReload && !snoozeReload"
       variant="info"
       class="posit text-center"
       show
@@ -23,7 +23,10 @@
         The website has been updated with fixes and improvements. Please reload
         this page to pick up the latest version.
       </p>
-      <b-button variant="primary" @click="reload"> Reload now </b-button>
+      <div class="d-flex justify-content-around">
+        <b-button variant="white" @click="snooze">Not just now </b-button>
+        <b-button variant="primary" @click="reload"> Reload now </b-button>
+      </div>
     </NoticeMessage>
   </div>
 </template>
@@ -41,6 +44,8 @@ export default {
     return {
       showError: false,
       showReload: false,
+      snoozeReload: false,
+      snoozeTimer: null,
     }
   },
   computed: {
@@ -68,9 +73,21 @@ export default {
       }
     },
   },
+  beforeUnmount() {
+    if (this.snoozeTimer) {
+      clearTimeout(this.snoozeTimer)
+    }
+  },
   methods: {
     reload() {
       window.location.reload()
+    },
+    snooze() {
+      this.snoozeReload = true
+
+      this.snoozeTimer = setTimeout(() => {
+        this.snoozeReload = false
+      }, 120000)
     },
   },
 }
