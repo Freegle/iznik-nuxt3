@@ -91,7 +91,6 @@ const failed = ref(false)
 
 try {
   await messageStore.fetch(id)
-  console.log('Fetched message')
 } catch (e) {
   // Likely to be because the message doesn't exist.
   console.log('Message fetch failed', e)

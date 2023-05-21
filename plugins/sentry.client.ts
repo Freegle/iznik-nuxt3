@@ -20,6 +20,9 @@ export default defineNuxtPlugin((nuxtApp) => {
       'ResizeObserver loop limit exceeded', // Benign - see https://stackoverflow.com/questions/49384120/resizeobserver-loop-limit-exceeded
       'ResizeObserver loop completed with undelivered notifications.',
       'Navigation cancelled from ', // This can happen if someone clicks twice in quick succession
+
+      // Leaflet errors.
+      'Map container not found',
     ],
     integrations: [
       new Integrations.BrowserTracing({
@@ -69,6 +72,12 @@ export default defineNuxtPlugin((nuxtApp) => {
           // There's basically no info to report, so there's nothing we can do.  Suppress it.
           console.log('No info - suppress exception')
           return null
+        } else if (hint.originalException.stack) {
+          // Leaflet produces all sorts of errors, which are not really our fault and don't affect the user.
+          if (hint.originalException.stack.includes('leaflet')) {
+            console.log('Leaflet in stack - suppress exception')
+            return null
+          }
         } else if (
           hint.originalException.toString().match(/Down for maintenance/)
         ) {
