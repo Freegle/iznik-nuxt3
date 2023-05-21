@@ -144,6 +144,7 @@ const volunteermodal = ref(null)
 const showVolunteerModal = ref(false)
 
 const openVolunteerModal = async () => {
+  showVolunteerModal.value = true
   await waitForRef(volunteermodal)
   volunteermodal.value.show()
 }
