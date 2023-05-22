@@ -57,8 +57,11 @@ export default {
       required: true,
     },
   },
-  setup() {
+  setup(props) {
     const groupStore = useGroupStore()
+
+    // Fetch the full group so that we get the tagline.
+    groupStore.fetch(props.id, true)
 
     return {
       groupStore,
