@@ -609,7 +609,10 @@ export default {
       }
     },
     groupsChanged(groupids) {
-      this.groupsInMap = groupids
+      // When we're showing a region, we want to keep listing all the same groups even if we zoom about.
+      if (!this.region) {
+        this.groupsInMap = groupids
+      }
     },
     doSearch() {
       if (this.search) {
@@ -638,6 +641,7 @@ export default {
 .postcode {
   position: absolute;
   top: 0px;
+
   right: 0px;
   z-index: 20000;
 }
