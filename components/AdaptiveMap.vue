@@ -282,13 +282,45 @@ export default {
     const selectedType = ref(postType || 'All')
 
     const showGroups = ref(props.startOnGroups)
-    const groupids = ref(props.initialGroupIds)
     const swlat = ref(props.initialBounds[0][0])
     const swlng = ref(props.initialBounds[0][1])
     const nelat = ref(props.initialBounds[1][0])
     const nelng = ref(props.initialBounds[1][1])
     const search = ref(props.initialSearch)
     const searchOn = ref(props.initialSearch)
+    const groupsInMap = ref(null)
+
+    const groupids = computed(() => {
+      const gids = props.initialGroupIds
+
+      const allGroups = Object.values(groupStore.list)
+
+      // Find groups from allGroups with an id in groupids
+      const groups = allGroups.filter((group) => {
+        if (groupsInMap.value) {
+          return groupsInMap.value.includes(group.id)
+        }
+
+        return gids.includes(group.id)
+      })
+
+      // Sort groups by namedisplay case-insensitive ascending
+      groups.sort((a, b) => {
+        const nameA = a.namedisplay.toUpperCase()
+        const nameB = b.namedisplay.toUpperCase()
+        if (nameA < nameB) {
+          return -1
+        }
+        if (nameA > nameB) {
+          return 1
+        }
+
+        // names must be equal
+        return 0
+      })
+
+      return groups.map((group) => group.id)
+    })
 
     if (process.client) {
       const L = await import('leaflet/dist/leaflet-src.esm')
@@ -317,6 +349,7 @@ export default {
       nelng,
       search,
       searchOn,
+      groupsInMap,
     }
   },
   data() {
@@ -576,7 +609,7 @@ export default {
       }
     },
     groupsChanged(groupids) {
-      this.groupids = groupids
+      this.groupsInMap = groupids
     },
     doSearch() {
       if (this.search) {
