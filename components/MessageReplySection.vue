@@ -269,6 +269,9 @@ export default {
           let found = false
           let tojoin = null
 
+          // We shouldn't need to fetch, but we've seen a Sentry issue.
+          await this.messageStore.fetch(this.id)
+
           for (const messageGroup of this.message.groups) {
             tojoin = messageGroup.groupid
             Object.keys(this.myGroups).forEach((key) => {
