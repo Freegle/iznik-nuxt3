@@ -699,13 +699,23 @@ const getCounts = async () => {
             )
 
             if (data.deploy_id !== runtimeConfig.public.NETLIFY_DEPLOY_ID) {
-              // We're not on the latest deploy, so show a warning.
               console.log(
                 'Code has changed on Netlify - need to reload',
                 data.deploy_id,
                 runtimeConfig.public.NETLIFY_DEPLOY_ID
               )
-              useMiscStore().needToReload = true
+
+              const deployDate = new Date(data.published_deploy.published_at)
+
+              // Check it's not too soon to nag.  This stops annoyances when we have lots of releases in a short
+              // time.
+              if (deployDate.getTime() < Date.now() - 12 * 60 * 60 * 1000) {
+                // We're not on the latest deploy, so show a warning.
+                console.log('Prompt to reload')
+                useMiscStore().needToReload = true
+              } else {
+                console.log('Too soon to prompy')
+              }
             }
           }
         } catch (e) {
