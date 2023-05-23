@@ -59,7 +59,6 @@
             <GlobalWarning />
             <OurMessage
               :id="id"
-              ref="message"
               :start-expanded="true"
               hide-close
               record-view
