@@ -55,10 +55,12 @@ export const useVolunteeringStore = defineStore({
     async setDates(params) {
       const promises = []
 
-      for (const date of params.olddates) {
-        promises.push(
-          api(this.config).volunteering.removeDate(params.id, date.id)
-        )
+      if (params.olddates) {
+        for (const date of params.olddates) {
+          promises.push(
+            api(this.config).volunteering.removeDate(params.id, date.id)
+          )
+        }
       }
 
       for (const date of params.newdates) {
