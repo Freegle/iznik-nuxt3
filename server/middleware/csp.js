@@ -1,3 +1,4 @@
+// CSP.  See also _hedaers.
 export default defineEventHandler((event) => {
   event.node.res.setHeader(
     'Content-Security-Policy-Report-Only',
