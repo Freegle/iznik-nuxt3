@@ -147,8 +147,11 @@ export default {
     'current.starttime'() {
       this.$nextTick(this.updateEndTime)
     },
-    current(newVal) {
-      this.$emit('update:modelValue', newVal)
+    current: {
+      handler: function (newVal) {
+        this.$emit('update:modelValue', newVal)
+      },
+      deep: true,
     },
   },
   methods: {

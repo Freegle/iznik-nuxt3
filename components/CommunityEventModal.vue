@@ -116,7 +116,6 @@
           <b-row>
             <b-col cols="12" md="6">
               <b-form-group label="For which community?" :state="true">
-                Groupid {{ groupid }}
                 <GroupSelect v-model="groupid" :systemwide="true" />
                 <p v-if="showGroupError" class="text-danger font-weight-bold">
                   Please select a community.
