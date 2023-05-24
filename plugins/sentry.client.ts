@@ -23,6 +23,12 @@ export default defineNuxtPlugin((nuxtApp) => {
 
       // Leaflet errors.
       'Map container not found',
+
+      // These are very commonly errors caused by fetch() being aborted during page navigation.  See for example
+      // https://forum.sentry.io/t/typeerror-failed-to-fetch-reported-over-and-overe/8447
+      'TypeError: Failed to fetch',
+      'TypeError: NetworkError when attempting to fetch resource.',
+      'TypeError: Unable to preload',
     ],
     integrations: [
       new Integrations.BrowserTracing({

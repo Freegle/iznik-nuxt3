@@ -678,43 +678,21 @@ const getCounts = async () => {
 
       if (runtimeConfig.public.NETLIFY_DEPLOY_ID) {
         try {
-          console.log(
-            'Check Netlify updates',
-            runtimeConfig.public.NETLIFY_DEPLOY_ID,
-            runtimeConfig.public.NETLIFY_SITE_NAME
-          )
-
           const response = await fetch(
             `https://api.netlify.com/api/v1/sites/${runtimeConfig.public.NETLIFY_SITE_NAME}.netlify.com`
           )
 
           const data = await response.json()
-          console.log("Netlify's response", data)
 
           if (data?.deploy_id) {
-            console.log(
-              'Compare current code vs latest deploy',
-              data.deploy_id,
-              runtimeConfig.public.NETLIFY_DEPLOY_ID
-            )
-
             if (data.deploy_id !== runtimeConfig.public.NETLIFY_DEPLOY_ID) {
-              console.log(
-                'Code has changed on Netlify - need to reload',
-                data.deploy_id,
-                runtimeConfig.public.NETLIFY_DEPLOY_ID
-              )
-
               const deployDate = new Date(data.published_deploy.published_at)
 
               // Check it's not too soon to nag.  This stops annoyances when we have lots of releases in a short
               // time.
               if (deployDate.getTime() < Date.now() - 12 * 60 * 60 * 1000) {
                 // We're not on the latest deploy, so show a warning.
-                console.log('Prompt to reload')
                 useMiscStore().needToReload = true
-              } else {
-                console.log('Too soon to prompy')
               }
             }
           }
