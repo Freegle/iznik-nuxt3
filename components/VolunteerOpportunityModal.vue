@@ -691,15 +691,15 @@ export default {
           //
           // Checking for groupid > 0 allows systemwide opportunities.
           if (this.groupid > 0) {
-            await volunteeringStore.addGroup(id, this.groupid)
+            await this.volunteeringStore.addGroup(id, this.groupid)
           }
 
           if (oldgroupid) {
-            await volunteeringStore.removeGroup(id, oldgroupid)
+            await this.volunteeringStore.removeGroup(id, oldgroupid)
           }
         }
 
-        await volunteeringStore.setDates({
+        await this.volunteeringStore.setDates({
           id,
           olddates: wip.dates,
           newdates: wip.dates,
