@@ -101,7 +101,7 @@ export default {
     },
   },
   setup(props) {
-    const current = ref(props.modelValue)
+    const current = ref(JSON.parse(JSON.stringify(props.modelValue)))
 
     return {
       current,

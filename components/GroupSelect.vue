@@ -42,7 +42,7 @@ export default {
       required: false,
       default: false,
     },
-    value: {
+    modelValue: {
       type: Number,
       default: 0,
     },
@@ -120,7 +120,7 @@ export default {
   computed: {
     selectedGroup: {
       get() {
-        return this.value
+        return this.modelValue
       },
       set(val) {
         this.$emit('update:modelValue', val)

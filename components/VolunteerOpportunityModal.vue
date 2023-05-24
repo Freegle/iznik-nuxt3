@@ -133,16 +133,8 @@
         <VForm v-else-if="volunteering" ref="form">
           <b-row>
             <b-col cols="12" md="6">
-              <b-form-group
-                ref="groupid"
-                label="For which community?"
-                :state="true"
-              >
-                <GroupRememberSelect
-                  v-model="groupid"
-                  remember="editopportunity"
-                  :systemwide="true"
-                />
+              <b-form-group label="For which community?" :state="true">
+                <GroupSelect v-model="groupid" :systemwide="true" />
                 <p v-if="showGroupError" class="text-danger font-weight-bold">
                   Please select a community.
                 </p>
@@ -428,6 +420,7 @@
               :disabled="uploadingPhoto"
               name="save"
               :label="volunteering.id ? 'Save Changes' : 'Add Opportunity'"
+              spinclass="textWhite"
               @handle="saveIt"
             />
           </template>
@@ -446,7 +439,8 @@ import { useGroupStore } from '../stores/group'
 import EmailValidator from './EmailValidator'
 import modal from '@/mixins/modal'
 import { twem } from '~/composables/useTwem'
-const GroupRememberSelect = () => import('~/components/GroupRememberSelect')
+import { ref } from '#imports'
+const GroupSelect = () => import('~/components/GroupSelect')
 const OurFilePond = () => import('~/components/OurFilePond')
 const StartEndCollection = () => import('~/components/StartEndCollection')
 const NoticeMessage = () => import('~/components/NoticeMessage')
@@ -480,7 +474,7 @@ function initialVolunteering() {
 export default {
   components: {
     EmailValidator,
-    GroupRememberSelect,
+    GroupSelect,
     OurFilePond,
     StartEndCollection,
     NoticeMessage,
@@ -508,12 +502,14 @@ export default {
     const composeStore = useComposeStore()
     const userStore = useUserStore()
     const groupStore = useGroupStore()
+    const groupid = ref(null)
 
     if (props.id) {
       const v = await volunteeringStore.fetch(props.id)
       await userStore.fetch(v.userid)
 
       v.groups?.forEach(async (id) => {
+        groupid.value = id
         await groupStore.fetch(id)
       })
     }
@@ -523,13 +519,13 @@ export default {
       composeStore,
       userStore,
       groupStore,
+      groupid,
     }
   },
   data() {
     return {
       editing: false,
       added: false,
-      groupid: null,
       cacheBust: Date.now(),
       uploading: false,
       showGroupError: false,

@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import dayjs from 'dayjs'
 import api from '~/api'
 import { addStrings, earliestDate } from '~/composables/useTimeFormat'
 
@@ -22,8 +23,19 @@ export const useVolunteeringStore = defineStore({
             this.fetching[id] = api(this.config).volunteering.fetch(id)
             let item = await this.fetching[id]
             item = addStrings(item)
-            item.earliestDate = earliestDate(item.dates)
-            item.earliestDateOfAll = earliestDate(item.dates, true)
+
+            if (item.dates) {
+              // API returns dates in ISO8601 but our code wants them split into date and time
+              item.earliestDate = earliestDate(item.dates)
+              item.earliestDateOfAll = earliestDate(item.dates, true)
+              item.dates.forEach((date, index) => {
+                item.dates[index].starttime = dayjs(date.start).format('HH:mm')
+                item.dates[index].start = dayjs(date.start).format('YYYY-MM-DD')
+                item.dates[index].endtime = dayjs(date.end).format('HH:mm')
+                item.dates[index].end = dayjs(date.end).format('YYYY-MM-DD')
+              })
+            }
+
             this.list[id] = item
             this.fetching[id] = null
           }

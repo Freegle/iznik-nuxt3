@@ -115,16 +115,9 @@
         <VForm v-else-if="event" ref="form">
           <b-row>
             <b-col cols="12" md="6">
-              <b-form-group
-                ref="groupid"
-                label="For which community?"
-                :state="true"
-              >
-                <GroupRememberSelect
-                  v-model="groupid"
-                  remember="editevent"
-                  :systemwide="true"
-                />
+              <b-form-group label="For which community?" :state="true">
+                Groupid {{ groupid }}
+                <GroupSelect v-model="groupid" :systemwide="true" />
                 <p v-if="showGroupError" class="text-danger font-weight-bold">
                   Please select a community.
                 </p>
@@ -391,6 +384,7 @@
             :disabled="uploadingPhoto"
             name="save"
             :label="event.id ? 'Save Changes' : 'Add Event'"
+            spinclass="textWhite"
             @handle="saveIt"
           />
         </template>
@@ -408,10 +402,11 @@ import { uid } from '../composables/useId'
 import { useGroupStore } from '../stores/group'
 import { useImageStore } from '../stores/image'
 import EmailValidator from './EmailValidator'
+import { ref } from '#imports'
 import modal from '@/mixins/modal'
 import { twem } from '~/composables/useTwem'
 
-const GroupRememberSelect = () => import('~/components/GroupRememberSelect')
+const GroupSelect = () => import('~/components/GroupSelect')
 const OurFilePond = () => import('~/components/OurFilePond')
 const StartEndCollection = () => import('~/components/StartEndCollection')
 const NoticeMessage = () => import('~/components/NoticeMessage')
@@ -452,7 +447,7 @@ function initialEvent() {
 export default {
   components: {
     EmailValidator,
-    GroupRememberSelect,
+    GroupSelect,
     OurFilePond,
     StartEndCollection,
     NoticeMessage,
@@ -481,12 +476,14 @@ export default {
     const userStore = useUserStore()
     const groupStore = useGroupStore()
     const imageStore = useImageStore()
+    const groupid = ref(null)
 
     if (props.id) {
       const v = await communityEventStore.fetch(props.id)
       await userStore.fetch(v.userid)
 
       v.groups?.forEach(async (id) => {
+        groupid.value = id
         await groupStore.fetch(id)
       })
     }
@@ -497,13 +494,13 @@ export default {
       userStore,
       groupStore,
       imageStore,
+      groupid,
     }
   },
   data() {
     return {
       editing: false,
       added: false,
-      groupid: null,
       cacheBust: Date.now(),
       uploading: false,
       showGroupError: false,
@@ -654,6 +651,7 @@ export default {
         return
       }
 
+      console.log('Existing?', this.isExisting)
       if (this.isExisting) {
         const { id } = this.event
         // This is an edit.
@@ -685,6 +683,7 @@ export default {
           newdates: this.event.dates,
         })
 
+        console.log('Save', JSON.stringify(this.event))
         await this.communityEventStore.save(this.event)
 
         this.added = true
