@@ -53,7 +53,7 @@ export default defineNuxtConfig({
   // do that and then the _redirects file will proxy it to the correct location.
   $production: {
     app: {
-      cdnURL: '/netlify/' + process.env.DEPLOY_ID,
+      cdnURL: '/netlify/' + process.env.DEPLOY_URL?.replace('https://', ''),
     },
   },
 
