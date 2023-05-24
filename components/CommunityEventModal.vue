@@ -97,7 +97,7 @@
               </ExternalLink>
             </b-col>
           </b-row>
-          <b-row v-if="event.phone">
+          <b-row v-if="event.contactphone">
             <b-col cols="4" md="3" class="field"> Contact phone</b-col>
             <b-col cols="8" md="9">
               {{ event.contactphone }}
