@@ -654,7 +654,10 @@ export default {
       console.log('Existing?', this.isExisting)
       if (this.isExisting) {
         const { id } = this.event
-        // This is an edit.
+
+        // This is an edit.  Save the event first because we will refetch it during the saves and would lose changes.
+        await this.communityEventStore.save(this.event)
+
         if (this.shouldUpdatePhoto) {
           await this.communityEventStore.setPhoto(id, this.event.image.id)
         }
@@ -682,9 +685,6 @@ export default {
           olddates: this.event.dates,
           newdates: this.event.dates,
         })
-
-        console.log('Save', JSON.stringify(this.event))
-        await this.communityEventStore.save(this.event)
 
         this.added = true
       } else {

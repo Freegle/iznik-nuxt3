@@ -671,7 +671,10 @@ export default {
 
       if (this.isExisting) {
         const { id } = this.volunteering
-        // This is an edit.
+
+        // This is an edit.  Save the event first because we will refetch it during the saves and would lose changes.
+        await this.volunteeringStore.save(this.volunteering)
+
         if (this.shouldUpdatePhoto) {
           await this.volunteeringStore.setPhoto(id, this.volunteering.image.id)
         }
@@ -699,8 +702,6 @@ export default {
           olddates: this.volunteering.dates,
           newdates: this.volunteering.dates,
         })
-
-        await this.volunteeringStore.save(this.volunteering)
 
         this.added = true
       } else {
