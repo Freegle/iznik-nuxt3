@@ -488,6 +488,8 @@ export default {
       })
     }
 
+    const oldPhoto = ref(communityEventStore.byId(props.id)?.image)
+
     return {
       communityEventStore,
       composeStore,
@@ -495,6 +497,7 @@ export default {
       groupStore,
       imageStore,
       groupid,
+      oldPhoto,
     }
   },
   data() {
@@ -563,11 +566,6 @@ export default {
       }
 
       return ret
-    },
-    shouldUpdatePhoto() {
-      const { photo: oldPhoto } = this.event
-      const { photo: newPhoto } = this.event
-      return newPhoto && (oldPhoto ? newPhoto.id !== oldPhoto.id : true)
     },
   },
   methods: {
@@ -651,21 +649,23 @@ export default {
         return
       }
 
-      console.log('Existing?', this.isExisting)
       if (this.isExisting) {
         const { id } = this.event
 
-        // This is an edit.  Save the event first because we will refetch it during the saves and would lose changes.
-        await this.communityEventStore.save(this.event)
+        // Save the WIP event before we start making changes, otherwise the saves will update the store and hence
+        // what we're looking at.
+        const wip = JSON.parse(JSON.stringify(this.event))
+        let shouldUpdatePhoto = null
 
-        if (this.shouldUpdatePhoto) {
-          await this.communityEventStore.setPhoto(id, this.event.image.id)
+        if (wip.image?.id !== this.oldPhoto?.id) {
+          shouldUpdatePhoto = wip.image.id
         }
 
-        const oldgroupid =
-          this.event.groups && this.event.groups.length
-            ? this.event.groups[0]
-            : null
+        if (shouldUpdatePhoto) {
+          await this.communityEventStore.setPhoto(id, shouldUpdatePhoto)
+        }
+
+        const oldgroupid = wip.groups?.length ? wip.groups[0] : null
 
         if (this.groupid !== oldgroupid) {
           // Save the new group, then remove the old group, so it won't get stranded.
@@ -682,9 +682,11 @@ export default {
 
         await this.communityEventStore.setDates({
           id,
-          olddates: this.event.dates,
-          newdates: this.event.dates,
+          olddates: wip.dates,
+          newdates: wip.dates,
         })
+
+        await this.communityEventStore.save(wip)
 
         this.added = true
       } else {

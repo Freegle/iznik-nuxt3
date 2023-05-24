@@ -514,12 +514,15 @@ export default {
       })
     }
 
+    const oldPhoto = ref(volunteeringStore.byId(props.id)?.image)
+
     return {
       volunteeringStore,
       composeStore,
       userStore,
       groupStore,
       groupid,
+      oldPhoto,
     }
   },
   data() {
@@ -587,11 +590,6 @@ export default {
       }
 
       return ret
-    },
-    shouldUpdatePhoto() {
-      const { photo: oldPhoto } = this.volunteering
-      const { photo: newPhoto } = this.volunteering
-      return newPhoto && (oldPhoto ? newPhoto.id !== oldPhoto.id : true)
     },
   },
   methods: {
@@ -672,36 +670,42 @@ export default {
       if (this.isExisting) {
         const { id } = this.volunteering
 
-        // This is an edit.  Save the event first because we will refetch it during the saves and would lose changes.
-        await this.volunteeringStore.save(this.volunteering)
+        // Save the WIP volop before we start making changes, otherwise the saves will update the store and hence
+        // what we're looking at.
+        const wip = JSON.parse(JSON.stringify(this.event))
+        let shouldUpdatePhoto = null
 
-        if (this.shouldUpdatePhoto) {
-          await this.volunteeringStore.setPhoto(id, this.volunteering.image.id)
+        if (wip.image?.id !== this.oldPhoto?.id) {
+          shouldUpdatePhoto = wip.image.id
+        }
+
+        if (shouldUpdatePhoto) {
+          await this.volunteeringStore.setPhoto(id, shouldUpdatePhoto)
         }
 
         const oldgroupid =
-          this.volunteering.groups && this.volunteering.groups.length
-            ? this.volunteering.groups[0]
-            : null
+          wip.groups && wip.groups.length ? wip.groups[0] : null
 
         if (this.groupid !== oldgroupid) {
           // Save the new group, then remove the old group, so it won't get stranded.
           //
           // Checking for groupid > 0 allows systemwide opportunities.
           if (this.groupid > 0) {
-            await this.volunteeringStore.addGroup(id, this.groupid)
+            await volunteeringStore.addGroup(id, this.groupid)
           }
 
           if (oldgroupid) {
-            await this.volunteeringStore.removeGroup(id, oldgroupid)
+            await volunteeringStore.removeGroup(id, oldgroupid)
           }
         }
 
-        await this.volunteeringStore.setDates({
+        await volunteeringStore.setDates({
           id,
-          olddates: this.volunteering.dates,
-          newdates: this.volunteering.dates,
+          olddates: wip.dates,
+          newdates: wip.dates,
         })
+
+        await this.volunteeringStore.save(wip)
 
         this.added = true
       } else {

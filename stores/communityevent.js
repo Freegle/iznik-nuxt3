@@ -60,7 +60,8 @@ export const useCommunityEventStore = defineStore({
       await this.fetch(id, true)
     },
     async delete(id) {
-      await api(this.config).address.del(id)
+      await api(this.config).communityevent.del(id)
+      this.list[id] = null
     },
     async setDates(params) {
       const promises = []
