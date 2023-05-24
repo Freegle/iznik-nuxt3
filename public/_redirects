@@ -1,3 +1,6 @@
+# Proxy requests to the permlink scripts to the appropriate full Netlify url.
+/netlify/* https://:splat--golden-caramel-d2c3a7.netlify.com/:splat 200!
+
 # Twilio status needs proxying to the API endpoint.
 /twilio/status.php https://fdapilive.ilovefreegle.org/twilio/status.php 200!
 
