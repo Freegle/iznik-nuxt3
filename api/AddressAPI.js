@@ -9,6 +9,10 @@ export default class AddressAPI extends BaseAPI {
     return this.$getv2('/address')
   }
 
+  fetchByIdv2(id, logError = true) {
+    return this.$getv2('/address/' + id, [], logError)
+  }
+
   add(data) {
     return this.$put('/address', data)
   }

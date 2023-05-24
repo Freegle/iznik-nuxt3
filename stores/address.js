@@ -12,8 +12,17 @@ export const useAddressStore = defineStore({
     init(config) {
       this.config = config
     },
-    async fetch() {
-      if (this.fetching) {
+    async fetch(id) {
+      if (id) {
+        // Specific address which may or may not be ours.  If it's not, we'll get an error, which is a bug.  But we
+        // also get an error if it's been deleted.  So don't log
+        try {
+          return await api(this.config).address.fetchByIdv2(id, false)
+        } catch (e) {
+          console.log('Failed to get address', e)
+          return null
+        }
+      } else if (this.fetching) {
         await this.fetching
       } else {
         this.fetching = api(this.config).address.fetchv2()
@@ -46,6 +55,7 @@ export const useAddressStore = defineStore({
   },
   getters: {
     get: (state) => (id) => {
+      console.log(state.list)
       return state.list.find((i) => i.id === id)
     },
   },
