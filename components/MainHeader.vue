@@ -37,7 +37,7 @@
               id="menu-option-mygroups"
               no-prefetch
               class="nav-link text-center small p-0 ml-2"
-              to="/browse"
+              to="/"
               @mousedown="maybeReload('/browse')"
             >
               <v-icon icon="eye" class="fa-2x" />
