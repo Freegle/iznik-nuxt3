@@ -43,7 +43,7 @@
 </template>
 <script>
 import { useMiscStore } from '../stores/misc'
-import { useUserStore } from '../stores/user'
+import { useAuthStore } from '../stores/auth'
 import modal from '@/mixins/modal'
 import DonationButton from '~/components/DonationButton'
 
@@ -58,10 +58,7 @@ export default {
         value: Date.now(),
       })
 
-      useUserStore().edit({
-        id: this.myid,
-        trustlevel: 'Basic',
-      })
+      useAuthStore().saveMicrovolunteering('Basic')
     },
   },
 }
