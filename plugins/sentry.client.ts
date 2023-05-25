@@ -73,91 +73,84 @@ export default defineNuxtPlugin((nuxtApp) => {
 
       // Check if it is an exception, and if so, log it.
       if (event.exception) {
-        console.error(
-          `[Exeption handled by Sentry]: (${hint.originalException})`,
-          { event, hint }
-        )
+        console.error(`[Exeption for Sentry]: (${hint.originalException})`, {
+          event,
+          hint,
+        })
       }
 
       if (hint) {
+        const originalException = hint?.originalException
+        const originalExceptionString = originalException?.toString()
+        const originalExceptionStack = originalException?.stack
+        const originalExceptionMessage = originalException?.message
+        const originalExceptionName = originalException?.name
+
+        // Add some more detail if we can.
+        if (originalException instanceof Event) {
+          event.extra.isTrusted = originalException.isTrusted
+          event.extra.detail = originalException.detail
+          event.extra.type = originalException.type
+        }
+
         console.log(
           'Original exception was',
-          hint.originalException,
-          typeof hint.originalException
+          originalException,
+          typeof originalException,
+          originalExceptionString,
+          originalExceptionStack,
+          originalExceptionMessage
         )
 
-        if (!hint.originalException) {
+        if (!originalException) {
           // There's basically no info to report, so there's nothing we can do.  Suppress it.
           console.log('No info - suppress exception')
           return null
-        } else if (hint.originalException.stack) {
+        } else if (originalExceptionStack?.includes('leaflet')) {
           // Leaflet produces all sorts of errors, which are not really our fault and don't affect the user.
-          if (hint.originalException.stack.includes('leaflet')) {
-            console.log('Leaflet in stack - suppress exception')
-            return null
-          }
-        } else if (
-          hint.originalException.toString().match(/Down for maintenance/)
-        ) {
-          console.log('Maintenance - suppress exception', this)
+          console.log('Leaflet in stack - suppress exception')
           return null
         } else if (
-          hint.originalException.name &&
-          hint.originalException.name === 'TypeError'
+          originalExceptionStack?.includes('bootstrap-vue-next') &&
+          originalExceptionString.match('removeAttribute')
         ) {
+          console.log('Suppress Bootstrap tooltip exception')
+          return null
+        } else if (originalExceptionString.match(/Down for maintenance/)) {
+          console.log('Maintenance - suppress exception', this)
+          return null
+        } else if (originalExceptionName === 'TypeError') {
           console.log('TypeError')
-          if (hint.originalException.message) {
-            console.log('Message', hint.originalException.message)
-
-            if (
-              hint.originalException.message.match(/leaflet/) ||
-              hint.originalException.message.match(/getPosition/)
-            ) {
-              // Leaflet produces all sorts of errors, which are not really our fault and don't affect the user.
-              console.log('Suppress leaflet exception')
-              return null
-            } else if (
-              hint.originalException.message.match(
-                /can't redefine non-configurable property "userAgent"/
-              )
-            ) {
-              // This exception happens a lot, and the best guess I can find is that it is a bugged browser
-              // extension.
-              console.log('Suppress userAgent')
-              return null
-            } else if (hint.originalException.message.match(/cancelled/)) {
-              // This probably happens due to the user changing their mind and navigating away immediately.
-              console.log('Suppress cancelled')
-              return null
-            }
+          if (
+            originalExceptionMessage.match(/leaflet/) ||
+            originalExceptionMessage.match(/getPosition/)
+          ) {
+            // Leaflet produces all sorts of errors, which are not really our fault and don't affect the user.
+            console.log('Suppress leaflet exception')
+            return null
+          } else if (
+            originalExceptionMessage.match(
+              /can't redefine non-configurable property "userAgent"/
+            )
+          ) {
+            // This exception happens a lot, and the best guess I can find is that it is a bugged browser
+            // extension.
+            console.log('Suppress userAgent')
+            return null
+          } else if (originalExceptionMessage.match(/cancelled/)) {
+            // This probably happens due to the user changing their mind and navigating away immediately.
+            console.log('Suppress cancelled')
+            return null
           }
-        } else if (
-          hint.originalException.name &&
-          hint.originalException.name === 'ReferenceError'
-        ) {
+        } else if (originalExceptionName === 'ReferenceError') {
           console.log('ReferenceError')
-          if (hint.originalException.message) {
-            console.log('Message', hint.originalException.message)
-
-            if (
-              hint.originalException.message.match(
-                /Can't find variable: fieldset/
-              )
-            ) {
-              // This happens because of an old bug which is now fixed:
-              // https://codereview.chromium.org/2343013005
-              console.log('Old Chrome fieldset bug')
-              return null
-            }
+          if (originalExceptionMessage.match(/Can't find variable: fieldset/)) {
+            // This happens because of an old bug which is now fixed:
+            // https://codereview.chromium.org/2343013005
+            console.log('Old Chrome fieldset bug')
+            return null
           }
         }
-      }
-
-      // Add some more detail if we can.
-      if (hint && hint.originalException instanceof Event) {
-        event.extra.isTrusted = hint.originalException.isTrusted
-        event.extra.detail = hint.originalException.detail
-        event.extra.type = hint.originalException.type
       }
 
       // Continue sending to Sentry
