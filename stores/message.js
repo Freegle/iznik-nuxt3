@@ -175,7 +175,10 @@ export const useMessageStore = defineStore({
     async update(params) {
       const data = await api(this.config).message.update(params)
 
-      if (!data.deleted) {
+      if (data.deleted) {
+        // This can happen if we withdraw a post while it is pending.
+        delete this.list[params.id]
+      } else {
         // Fetch back the updated version.
         await this.fetch(params.id, true)
       }
