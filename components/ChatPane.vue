@@ -82,7 +82,8 @@ export default {
       if (!chatStore.byChatId(props.id)) {
         // It might be an old chat which doesn't appear in our recent ones, but which we are specifically trying
         // to go to.  Fetch all the chats.
-        await chatStore.fetchChats('2009-09-11')
+        chatStore.searchSince = '2009-09-11'
+        await chatStore.fetchChats()
       }
 
       if (chat?.value) {
@@ -138,7 +139,8 @@ export default {
           if (!this.chatStore.byChatId(this.id)) {
             // It might be an old chat which doesn't appear in our recent ones, but which we are specifically trying
             // to go to.  Fetch all the chats.
-            await this.chatStore.fetchChats('2009-09-11')
+            this.chatStore.searchSince = '2009-09-11'
+            await this.chatStore.fetchChats()
           }
 
           this.chatStore.fetchMessages(this.id)

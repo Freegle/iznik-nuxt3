@@ -10,14 +10,17 @@ export const useChatStore = defineStore({
     listByChatId: {},
     listByChatMessageId: {},
     messages: {},
+    searchSince: null,
   }),
   actions: {
     init(config) {
       this.config = config
     },
-    async fetchChats(since, search) {
-      if (since) {
-        since = dayjs(since).toISOString()
+    async fetchChats(search) {
+      let since = null
+
+      if (this.searchSince) {
+        since = dayjs(this.searchSince).toISOString()
       }
 
       const chats = await api(this.config).chat.listChats(since, search)
