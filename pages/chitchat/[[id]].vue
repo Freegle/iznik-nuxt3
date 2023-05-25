@@ -116,14 +116,8 @@
             </b-card>
           </div>
           <NewsLocation v-if="!id" class="p-2" @changed="areaChange" />
-          <NoticeMessage
-            v-if="id && newsfeed && newsfeed.length && !newsfeed[0].visible"
-            class="mt-2"
-          >
-            Sorry, this thread isn't around any more.
-          </NoticeMessage>
           <div class="p-0 pt-1 mb-1">
-            <NoticeMessage v-if="id && !newsfeed.length" class="mt-2">
+            <NoticeMessage v-if="error" class="mt-2">
               Sorry, this thread isn't around any more.
             </NoticeMessage>
             <NewsThread
@@ -171,6 +165,7 @@ import AutoHeightTextarea from '~/components/AutoHeightTextarea'
 import InfiniteLoading from '~/components/InfiniteLoading'
 import NewsThread from '~/components/NewsThread.vue'
 import { untwem } from '~/composables/useTwem'
+import { ref } from '#imports'
 
 const OurFilePond = () => import('~/components/OurFilePond')
 const SidebarLeft = () => import('~/components/SidebarLeft')
@@ -236,13 +231,23 @@ export default {
     const me = authStore.user
     const settings = me?.settings
     const distance = settings?.newsfeedarea || 0
+    const error = ref(false)
 
     if (me) {
       if (id) {
         const newsfeed = await newsfeedStore.fetch(id)
 
-        if (newsfeed?.id !== newsfeed?.threadhead) {
-          await newsfeedStore.fetch(newsfeed.threadhead)
+        if (!newsfeed?.id) {
+          console.log('error')
+          error.value = true
+        } else if (newsfeed?.id !== newsfeed?.threadhead) {
+          const fetched = await newsfeedStore.fetch(newsfeed.threadhead)
+          console.log('Fetched', fetched)
+
+          if (!fetched?.id) {
+            console.log('error')
+            error.value = true
+          }
         }
       } else {
         await newsfeedStore.fetchFeed(distance)
@@ -265,6 +270,7 @@ export default {
       newsfeedStore,
       miscStore,
       id,
+      error,
       infiniteId: new Date().getTime(),
     }
   },
