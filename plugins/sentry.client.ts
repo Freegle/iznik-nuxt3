@@ -6,11 +6,17 @@ import {
 } from '@sentry/integrations'
 import { defineNuxtPlugin, useRuntimeConfig } from '#app'
 import { useRouter } from '#imports'
+import { useMiscStore } from '~/stores/misc'
 
 export default defineNuxtPlugin((nuxtApp) => {
   const config = useRuntimeConfig()
   const { vueApp } = nuxtApp
   const router = useRouter()
+
+  window.onbeforeunload = function () {
+    console.log('Window unloading...')
+    useMiscStore().unloading = true
+  }
 
   Sentry.init({
     app: [vueApp],
@@ -44,6 +50,12 @@ export default defineNuxtPlugin((nuxtApp) => {
     environment: config.public.ENVIRONMENT || 'dev', // Set environment
     // The following enables exceptions to be logged to console despite logErrors being set to false (preventing them from being passed to the default Vue err handler)
     beforeSend(event, hint) {
+      if (useMiscStore()?.unloading) {
+        // All network requests are aborted during unload, and so we'll get spurious errors.  Ignore them.
+        console.log('Ignore error in unload')
+        return null
+      }
+
       // Ignore Bing crawler, which seems to abort pre-fetching of some assets.
       if (window.navigator.userAgent.includes('BingPreview')) {
         return null

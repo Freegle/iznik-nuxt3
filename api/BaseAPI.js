@@ -8,6 +8,12 @@ import { useMiscStore } from '~/stores/misc'
 const ourFetch = fetchRetry(fetch, {
   retries: 10,
   retryOn: (attempt, error, response) => {
+    if (useMiscStore()?.unloading) {
+      // Don't retry if we're unloading.
+      console.log("Unloading - don't retry")
+      return false
+    }
+
     // Retry on pretty much anything except errors which can legitimately be returned by the API server.  These are
     // the low 400s.
     if (error !== null || response?.status > 404) {

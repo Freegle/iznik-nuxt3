@@ -23,6 +23,7 @@ export const useMiscStore = defineStore({
     needToReload: false,
     visible: true,
     apiCount: 0,
+    unloading: false,
   }),
   actions: {
     set(params) {
