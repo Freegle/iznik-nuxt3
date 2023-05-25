@@ -81,10 +81,12 @@
             class="align-middle mt-1 mb-1 mr-2"
             @click="unpromise"
           >
-            <span class="stacked">
-              <v-icon icon="handshake" />
-              <v-icon icon="slash" class="unpromise__slash" /> </span
-            >&nbsp;Unpromise
+            <div class="d-flex">
+              <span class="stacked">
+                <v-icon icon="handshake" />
+                <v-icon icon="slash" class="unpromise__slash" /> </span
+              >&nbsp;Unpromise
+            </div>
           </b-button>
           <b-button
             v-else-if="message.type === 'Offer' && !taken && !withdrawn"
@@ -312,6 +314,7 @@ export default {
 
 .unpromise__slash {
   transform: rotate(180deg);
+  transform: translate(2px, -7px);
   color: $color-red;
 }
 
