@@ -43,6 +43,7 @@
               type="text"
               placeholder="No day yet"
               autocomplete="off"
+              class="d-none"
             />
             <b-input-group-append>
               <b-form-input
@@ -63,7 +64,7 @@
             v-model="time"
             type="time"
             placeholder="Choose a time"
-            :minutes-step="15"
+            step="900"
             :offset="-10"
             menu-class="border-primary shadow-lg"
             :class="formattedDate && !time ? 'border-danger' : ''"
