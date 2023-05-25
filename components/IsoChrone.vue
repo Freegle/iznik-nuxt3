@@ -126,6 +126,7 @@
       <div v-if="!id">
         <b-button
           v-if="showAdd"
+          :disabled="!pc?.id"
           variant="primary"
           size="lg"
           class="mt-2"
