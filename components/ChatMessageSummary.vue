@@ -1,6 +1,11 @@
 <template>
   <div>
-    <div v-if="!message">{{ id }} A message that no longer exists.</div>
+    <div v-if="!message" class="text-muted small">
+      This chat message refers to a post (<v-icon
+        icon="hashtag"
+        class="text-muted fa-0-8x"
+      />{{ id }}) that no longer exists.
+    </div>
     <div v-else>
       <div class="clickme" @click="click">
         <div class="messagecard p-2">
