@@ -111,6 +111,7 @@
       </div>
     </div>
     <PromiseModal
+      v-if="replyuser"
       ref="promise"
       :messages="[message]"
       :selected-message="message.id"
@@ -118,6 +119,7 @@
       :selected-user="replyuser?.id"
     />
     <RenegeModal
+      v-if="replyuser"
       ref="renege"
       :messages="[message]"
       :selected-message="message.id"
