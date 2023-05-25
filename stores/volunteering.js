@@ -20,7 +20,7 @@ export const useVolunteeringStore = defineStore({
           if (this.fetching[id]) {
             await this.fetching[id]
           } else {
-            this.fetching[id] = api(this.config).volunteering.fetch(id)
+            this.fetching[id] = api(this.config).volunteering.fetch(id, false)
             let item = await this.fetching[id]
             item = addStrings(item)
 

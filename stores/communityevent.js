@@ -20,7 +20,7 @@ export const useCommunityEventStore = defineStore({
           if (this.fetching[id]) {
             await this.fetching[id]
           } else {
-            this.fetching[id] = api(this.config).communityevent.fetch(id)
+            this.fetching[id] = api(this.config).communityevent.fetch(id, false)
             let item = await this.fetching[id]
             item = addStrings(item)
 
