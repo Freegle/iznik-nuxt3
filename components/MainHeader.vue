@@ -37,7 +37,7 @@
               id="menu-option-mygroups"
               no-prefetch
               class="nav-link text-center small p-0 ml-2"
-              to="/"
+              to="/browse"
               @mousedown="maybeReload('/browse')"
             >
               <v-icon icon="eye" class="fa-2x" />
@@ -518,12 +518,16 @@ const countTimer = ref(null)
 const homePage = computed(() => {
   const lastRoute = miscStore.get('lasthomepage')
 
-  let nextroute = '/browse'
+  let nextroute = '/'
 
-  if (lastRoute === 'news') {
-    nextroute = '/chitchat'
-  } else if (lastRoute === 'myposts') {
-    nextroute = '/myposts'
+  if (authStore.user) {
+    nextroute = '/browse'
+
+    if (lastRoute === 'news') {
+      nextroute = '/chitchat'
+    } else if (lastRoute === 'myposts') {
+      nextroute = '/myposts'
+    }
   }
 
   return nextroute
