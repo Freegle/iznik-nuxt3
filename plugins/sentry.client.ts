@@ -111,25 +111,27 @@ export default defineNuxtPlugin((nuxtApp) => {
           console.log('Leaflet in stack - suppress exception')
           return null
         } else if (
-          originalExceptionStack?.includes('bootstrap-vue-next') &&
-          originalExceptionString.match('removeAttribute')
+          (originalExceptionStack?.includes('bootstrap-vue-next') &&
+            originalExceptionString?.match('removeAttribute')) ||
+          originalExceptionStack?.match('_isWithActiveTrigger ')
         ) {
+          // This seems to be a bug in bootstrap, and doesn't affect the user.
           console.log('Suppress Bootstrap tooltip exception')
           return null
-        } else if (originalExceptionString.match(/Down for maintenance/)) {
+        } else if (originalExceptionString?.match(/Down for maintenance/)) {
           console.log('Maintenance - suppress exception', this)
           return null
         } else if (originalExceptionName === 'TypeError') {
           console.log('TypeError')
           if (
-            originalExceptionMessage.match(/leaflet/) ||
-            originalExceptionMessage.match(/getPosition/)
+            originalExceptionMessage?.match(/leaflet/) ||
+            originalExceptionMessage?.match(/getPosition/)
           ) {
             // Leaflet produces all sorts of errors, which are not really our fault and don't affect the user.
             console.log('Suppress leaflet exception')
             return null
           } else if (
-            originalExceptionMessage.match(
+            originalExceptionMessage?.match(
               /can't redefine non-configurable property "userAgent"/
             )
           ) {
@@ -137,14 +139,16 @@ export default defineNuxtPlugin((nuxtApp) => {
             // extension.
             console.log('Suppress userAgent')
             return null
-          } else if (originalExceptionMessage.match(/cancelled/)) {
+          } else if (originalExceptionMessage?.match(/cancelled/)) {
             // This probably happens due to the user changing their mind and navigating away immediately.
             console.log('Suppress cancelled')
             return null
           }
         } else if (originalExceptionName === 'ReferenceError') {
           console.log('ReferenceError')
-          if (originalExceptionMessage.match(/Can't find variable: fieldset/)) {
+          if (
+            originalExceptionMessage?.match(/Can't find variable: fieldset/)
+          ) {
             // This happens because of an old bug which is now fixed:
             // https://codereview.chromium.org/2343013005
             console.log('Old Chrome fieldset bug')
