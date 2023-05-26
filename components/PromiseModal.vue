@@ -71,8 +71,15 @@
           />
         </div>
         <div class="d-flex flex-column justify-content-center">
-          <b-button v-if="time" variant="link" @click="deleteTryst">
+          <b-button
+            v-if="time && tryst?.id"
+            variant="link"
+            @click="deleteTryst"
+          >
             Cancel
+          </b-button>
+          <b-button v-else-if="date || time" variant="link" @click="clearTryst">
+            Clear
           </b-button>
         </div>
       </div>
@@ -323,6 +330,10 @@ export default {
     },
     deleteTryst() {
       this.trystStore.delete(this.tryst.id)
+    },
+    clearTryst() {
+      this.date = null
+      this.time = null
     },
     considerOddTime() {
       this.showOddTime =

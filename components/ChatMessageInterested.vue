@@ -53,14 +53,14 @@
                   variant="secondary"
                   size="sm"
                   class="mr-1"
-                  @click="outcome('Taken')"
+                  @click="outcome('Taken', $event)"
                 >
                   Mark as TAKEN
                 </b-button>
                 <b-button
                   variant="secondary"
                   size="sm"
-                  @click="outcome('Withdrawn')"
+                  @click="outcome('Withdrawn', $event)"
                 >
                   Withdraw
                 </b-button>
@@ -74,7 +74,8 @@
             @outcome="fetchMessage"
           />
           <PromiseModal
-            ref="showPromise && promise"
+            v-if="showPromise"
+            ref="promiseModal"
             :messages="[refmsg]"
             :selected-message="refmsg.id"
             :users="otheruser ? [otheruser] : []"
@@ -174,12 +175,22 @@ export default {
     }
   },
   methods: {
-    async promise() {
+    async promise(e) {
+      if (e) {
+        e.preventDefault()
+        e.stopPropagation()
+      }
+
       this.showPromise = true
-      await this.waitForRef('promise')
-      this.$refs.promise.show()
+      await this.waitForRef('promiseModal')
+      this.$refs.promiseModal.show()
     },
-    async outcome(type) {
+    async outcome(type, e) {
+      if (e) {
+        e.preventDefault()
+        e.stopPropagation()
+      }
+
       // Make sure we're up to date.
       const messageStore = useMessageStore()
       await messageStore.fetch(this.refmsgid)
