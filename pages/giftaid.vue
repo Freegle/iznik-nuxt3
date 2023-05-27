@@ -79,7 +79,7 @@
             </b-form-group>
             <b-form-group
               id="homeaddresslabel"
-              label="Your home address"
+              label="Your home postal address"
               label-for="homeaddress"
               label-class="label"
             >
@@ -98,6 +98,9 @@
                 </div>
               </div>
               <p><strong>Please make sure you include a postcode.</strong></p>
+              <p v-if="emailByMistake" class="text-danger">
+                This should be a postal address, not an email address.
+              </p>
               <b-form-textarea
                 id="homeaddress"
                 v-model="homeaddress"
@@ -233,6 +236,10 @@ export default {
       set: (value) => (giftAidStore.giftaid.homeaddress = value),
     })
 
+    const emailByMistake = computed(() => {
+      return homeaddress.value?.includes('@')
+    })
+
     const giftAidAllowed = period.value !== 'Declined'
 
     const oldoptions = computed(() => {
@@ -260,6 +267,7 @@ export default {
       homeaddress,
       giftAidAllowed: ref(giftAidAllowed),
       oldoptions,
+      emailByMistake,
     }
   },
   data() {
@@ -269,7 +277,9 @@ export default {
   },
   computed: {
     valid() {
-      return this.period && this.fullname && this.homeaddress
+      return (
+        this.period && this.fullname && this.homeaddress && !this.emailByMistake
+      )
     },
     nameInvalid() {
       return !this.fullname || !this.fullname.includes(' ')
