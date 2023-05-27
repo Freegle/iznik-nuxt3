@@ -42,7 +42,8 @@ export function calculateMapHeight(heightFraction) {
 
 export async function loadLeaflet() {
   if (process.client && !window.L) {
-    window.L = await import('leaflet/dist/leaflet-src.esm')
+    // Rebuild the object to avoid "not extensible" issues when loading old-fashioned leaflet plugins.
+    window.L = { ...(await import('leaflet/dist/leaflet-src.esm')) }
     window.L.Map.addInitHook(
       'addHandler',
       'gestureHandling',
