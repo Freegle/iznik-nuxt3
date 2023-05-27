@@ -288,6 +288,18 @@ export default {
       return !this.homeaddress || !this.homeaddress.includes(' ')
     },
   },
+  watch: {
+    giftAidAllowed: {
+      handler: function (newVal) {
+        if (!newVal) {
+          this.giftaid.period = 'Declined'
+        } else {
+          this.giftaid.period = 'Past4YearsAndFuture'
+        }
+      },
+      immediate: true,
+    },
+  },
   methods: {
     async save() {
       await this.giftAidStore.save()
