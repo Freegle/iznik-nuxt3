@@ -237,7 +237,7 @@
               <div class="row">
                 <div class="col-sm-6">Send Facebook notifications:</div>
                 <div class="col-sm-6">
-                  {{ status.data.Notifications.Send_Facebook_notifications }}
+                  {{ status.data.Notifications?.Send_Facebook_notifications }}
                 </div>
               </div>
               <div class="row">
@@ -245,7 +245,7 @@
                   Send notifications for Android/IOS apps:
                 </div>
                 <div class="col-sm-6">
-                  {{ status.data.Notifications.Send_notifications_for_apps }}
+                  {{ status.data.Notifications?.Send_notifications_for_apps }}
                 </div>
               </div>
               <div class="row">
@@ -255,7 +255,7 @@
                 <div class="col-sm-6">
                   {{
                     status.data.Notifications
-                      .Send_push_notifications_to_web_browsers
+                      ?.Send_push_notifications_to_web_browsers
                   }}
                 </div>
               </div>
@@ -264,7 +264,9 @@
                   Send email notifications of mod work:
                 </div>
                 <div class="col-sm-6">
-                  {{ status.data.Send_notifications_of_mod_work }}
+                  {{
+                    status.data.Notifications?.Send_notifications_of_mod_work
+                  }}
                 </div>
               </div>
               <div class="row">
@@ -274,7 +276,7 @@
                 <div class="col-sm-6">
                   {{
                     status.data.Notifications
-                      .Send_email_notifications_for_chat_messages
+                      .?Send_email_notifications_for_chat_messages
                   }}
                 </div>
               </div>
@@ -285,7 +287,7 @@
                 <div class="col-sm-6">
                   {{
                     status.data.Notifications
-                      .Send_email_notifications_of_chat_messages_you_send
+                      .?Send_email_notifications_of_chat_messages_you_send
                   }}
                 </div>
               </div>
@@ -296,7 +298,7 @@
                 <div class="col-sm-6">
                   {{
                     status.data.Notifications
-                      .Send_emails_about_notifications_on_the_site
+                      .?Send_emails_about_notifications_on_the_site
                   }}
                 </div>
               </div>
