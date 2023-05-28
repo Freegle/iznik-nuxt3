@@ -269,8 +269,8 @@ export default {
           let found = false
           let tojoin = null
 
-          // We shouldn't need to fetch, but we've seen a Sentry issue.
-          const msg = await this.messageStore.fetch(this.id)
+          // We shouldn't need to fetch, but we've seen a Sentry issue where the message groups are not valid.
+          const msg = await this.messageStore.fetch(this.id, true)
 
           for (const messageGroup of msg.groups) {
             tojoin = messageGroup.groupid
