@@ -276,7 +276,7 @@
                 <div class="col-sm-6">
                   {{
                     status.data.Notifications
-                      .?Send_email_notifications_for_chat_messages
+                      ?.Send_email_notifications_for_chat_messages
                   }}
                 </div>
               </div>
@@ -287,7 +287,7 @@
                 <div class="col-sm-6">
                   {{
                     status.data.Notifications
-                      .?Send_email_notifications_of_chat_messages_you_send
+                      ?.Send_email_notifications_of_chat_messages_you_send
                   }}
                 </div>
               </div>
@@ -298,7 +298,7 @@
                 <div class="col-sm-6">
                   {{
                     status.data.Notifications
-                      .?Send_emails_about_notifications_on_the_site
+                      ?.Send_emails_about_notifications_on_the_site
                   }}
                 </div>
               </div>
