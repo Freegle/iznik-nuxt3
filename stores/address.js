@@ -44,7 +44,7 @@ export const useAddressStore = defineStore({
     },
     async delete(id) {
       await api(this.config).address.del(id)
-      delete this.listById(id)
+      delete this.listById[id]
       await this.fetch()
     },
     async fetchProperties(postcodeid) {
