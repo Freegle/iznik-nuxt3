@@ -56,18 +56,19 @@ export default defineNuxtPlugin((nuxtApp) => {
         return null
       }
 
-      // Ignore Bing crawler, which seems to abort pre-fetching of some assets.
-      if (window.navigator.userAgent.includes('BingPreview')) {
+      // Ignore crawlers, which seems to abort pre-fetching of some assets.
+      const userAgent = window.navigator.userAgent?.toLowerCase()
+
+      if (
+        userAgent.includes('bingpreview') ||
+        userAgent.includes('linespider') ||
+        userAgent.includes('yisou')
+      ) {
         return null
       }
 
       // HeadlessChrome triggers an error in Google sign-in.  It's not a real user.
-      if (window.navigator.userAgent.includes('HeadlessChrome')) {
-        return null
-      }
-
-      // YisouSpider doesn't support some JS features, so we ignore it.
-      if (window.navigator.userAgent.includes('Yisou')) {
+      if (userAgent.includes('headlesschrome')) {
         return null
       }
 
