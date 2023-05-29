@@ -654,11 +654,17 @@ const getCounts = async () => {
 
       let messages = []
 
-      if (route.path !== '/profile/' + myid.value) {
+      if (
+        route.path !== '/profile/' + myid.value &&
+        !route.path.includes('/unsubscribe')
+      ) {
         // Get the messages for the currently logged in user.  This will also speed up the My Posts page.
         //
         // We don't do this if we're looking at our own profile otherwise this fetch and the one in ProfileInfo
         // can interfere with each other.
+        //
+        // We also don't do this on unsubscribe pages as there are timing windows which can lead to the call
+        // failing and consequent Sentry errors.
         messages = await messageStore.fetchByUser(myid.value, true)
       }
 
