@@ -8,14 +8,12 @@ const defaultOffer = {
   type: 'Offer',
   text: '',
   attachments: [],
-  clientOnly: true,
 }
 const defaultWanted = {
   id: 1,
   type: 'Wanted',
   text: '',
   attachments: [],
-  clientOnly: true,
 }
 
 export const useComposeStore = defineStore({
@@ -207,6 +205,7 @@ export const useComposeStore = defineStore({
       message.savedBy = me ? me.id : null
 
       this.messages[id] = message
+      console.log('Set message', id, message.id)
 
       if (message && message.submitted) {
         this.lastSubmitted = Math.max(
@@ -214,9 +213,6 @@ export const useComposeStore = defineStore({
           message.id
         )
       }
-    },
-    setClientOnly(id) {
-      this.messages[id].clientonly = true
     },
     setType(params) {
       const id = params.id
@@ -272,7 +268,7 @@ export const useComposeStore = defineStore({
       // and then submit them.
       const results = []
       const messages = this.messages
-      console.log('Submit', messages, params.type)
+      console.log('Submit', JSON.parse(JSON.stringify(messages)), params.type)
 
       this.calculateSteps(params.type)
 
@@ -287,6 +283,8 @@ export const useComposeStore = defineStore({
           console.log(
             'Submit message',
             id,
+            message.id,
+            message.repostof,
             this.email,
             message,
             this._attachments[message.id]
@@ -294,7 +292,7 @@ export const useComposeStore = defineStore({
 
           let result
 
-          if (message.clientonly || message.id < 100) {
+          if (!message.repostof) {
             // This is a draft we have composed on the client, which doesn't have a corresponding server message yet.
             // We need to:
             // - create a drafted
@@ -314,7 +312,7 @@ export const useComposeStore = defineStore({
             // This is one of our existing messages which we are reposting.  We need to convert it back to a draft,
             // edit it (to update it from our client data), and then submit.
             console.log('Existing message')
-            const id = message.id
+            const id = message.repostof
             await this.backToDraft(id)
 
             const attids = []
