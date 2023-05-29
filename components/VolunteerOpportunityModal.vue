@@ -396,34 +396,34 @@
               <v-icon icon="trash-alt" />
               Delete
             </b-button>
-            <b-button
-              v-if="!editing"
-              variant="white"
-              class="float-right"
-              :disabled="uploadingPhoto"
-              @click="hide"
-            >
-              Close
-            </b-button>
-            <b-button
-              v-if="editing"
-              variant="white"
-              class="float-right mr-1"
-              :disabled="uploadingPhoto"
-              @click="dontSave"
-            >
-              Hide
-            </b-button>
-            <SpinButton
-              v-if="editing"
-              variant="primary"
-              :disabled="uploadingPhoto"
-              name="save"
-              :label="volunteering.id ? 'Save Changes' : 'Add Opportunity'"
-              spinclass="textWhite"
-              @handle="saveIt"
-            />
           </template>
+          <b-button
+            v-if="!editing"
+            variant="white"
+            class="float-right"
+            :disabled="uploadingPhoto"
+            @click="hide"
+          >
+            Close
+          </b-button>
+          <b-button
+            v-if="editing"
+            variant="white"
+            class="float-right mr-1"
+            :disabled="uploadingPhoto"
+            @click="dontSave"
+          >
+            Hide
+          </b-button>
+          <SpinButton
+            v-if="editing"
+            variant="primary"
+            :disabled="uploadingPhoto"
+            name="save"
+            :label="volunteering.id ? 'Save Changes' : 'Add Opportunity'"
+            spinclass="textWhite"
+            @handle="saveIt"
+          />
         </template>
       </div>
     </template>
@@ -437,6 +437,7 @@ import { useComposeStore } from '../stores/compose'
 import { useUserStore } from '../stores/user'
 import { useGroupStore } from '../stores/group'
 import EmailValidator from './EmailValidator'
+import SpinButton from '~/components/SpinButton.vue'
 import modal from '@/mixins/modal'
 import { twem } from '~/composables/useTwem'
 import { ref } from '#imports'
@@ -474,6 +475,7 @@ function initialVolunteering() {
 export default {
   components: {
     EmailValidator,
+    SpinButton,
     GroupSelect,
     OurFilePond,
     StartEndCollection,
@@ -672,7 +674,7 @@ export default {
 
         // Save the WIP volop before we start making changes, otherwise the saves will update the store and hence
         // what we're looking at.
-        const wip = JSON.parse(JSON.stringify(this.event))
+        const wip = JSON.parse(JSON.stringify(this.volunteering))
         let shouldUpdatePhoto = null
 
         if (wip.image?.id !== this.oldPhoto?.id) {
@@ -767,7 +769,7 @@ export default {
     },
     async rotate(deg) {
       await this.imageStore.post({
-        id: this.event.image.id,
+        id: this.volunteering.image.id,
         rotate: deg,
         bust: Date.now(),
         volunteering: true,
