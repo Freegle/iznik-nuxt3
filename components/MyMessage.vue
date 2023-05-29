@@ -734,7 +734,7 @@ export default {
         {
           id: this.message.id,
           savedBy: this.message.fromuser,
-          item: this.message.item.name.trim(),
+          item: this.message.item?.name.trim(),
           description: this.message.textbody
             ? this.message.textbody.trim()
             : null,
