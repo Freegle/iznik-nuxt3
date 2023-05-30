@@ -44,7 +44,7 @@
             class="clickme replyphoto mt-2 mb-2"
             generator-unable-to-provide-required-alt=""
             :src="reply.image.paththumb"
-            @click="showReplyPhotoModal = true"
+            @click="showReplyPhotoModal"
             @error="brokenImage"
           />
         </div>
@@ -261,20 +261,15 @@
       imgflag="newsfeed"
       @photo-processed="photoProcessed"
     />
-    <b-modal
+    <NewsPhotoModal
       v-if="reply.image"
-      ref="photoModal"
-      v-model="showReplyPhotoModal"
-      title="ChitChat photo"
-      generator-unable-to-provide-required-alt=""
-      size="lg"
-      no-stacking
-      hide-footer
-    >
-      <template #default>
-        <b-img fluid rounded center :src="reply.image.path" />
-      </template>
-    </b-modal>
+      :id="reply.image.id"
+      ref="replyPhotoModal"
+      :newsfeedid="reply.id"
+      :src="reply.image.path"
+      imgtype="Newsfeed"
+      imgflag="Newsfeed"
+    />
     <ProfileModal v-if="infoclick" :id="userid" ref="profilemodal" />
     <NewsLovesModal v-if="showLoveModal" :id="replyid" ref="loveModal" />
     <NewsEditModal
@@ -379,7 +374,6 @@ export default {
       showEditModal: false,
       hasBecomeVisible: false,
       isVisible: false,
-      showReplyPhotoModal: false,
     }
   },
   computed: {
@@ -589,6 +583,9 @@ export default {
           this.scrollIntoView()
         }
       }
+    },
+    showReplyPhotoModal() {
+      this.$refs.replHhotoModal.show()
     },
   },
 }

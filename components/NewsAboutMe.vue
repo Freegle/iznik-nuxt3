@@ -40,19 +40,15 @@
         <AboutMeModal v-if="showAboutMe" ref="modal" />
       </div>
     </div>
-    <b-modal
+    <NewsPhotoModal
       v-if="newsfeed.image"
+      :id="newsfeed.image.id"
       ref="photoModal"
-      title="ChitChat photo"
-      generator-unable-to-provide-required-alt=""
-      size="lg"
-      no-stacking
-      ok-only
-    >
-      <template #default>
-        <b-img fluid rounded center :src="newsfeed.image.path" />
-      </template>
-    </b-modal>
+      :newsfeedid="newsfeed.id"
+      :src="newsfeed.image.path"
+      imgtype="Newsfeed"
+      imgflag="Newsfeed"
+    />
   </div>
 </template>
 <script>
