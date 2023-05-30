@@ -25,11 +25,10 @@
     <div>
       <b-img
         v-if="newsfeed.image"
-        thumbnail
         rounded
         lazy
         :src="newsfeed.image.paththumb"
-        class="clickme"
+        class="clickme imgthumb mt-1"
         @click="showPhotoModal"
       />
     </div>
@@ -73,3 +72,16 @@ export default {
   extends: NewsBase,
 }
 </script>
+<style scoped lang="scss">
+@import '~bootstrap/scss/functions';
+@import '~bootstrap/scss/variables';
+@import '~bootstrap/scss/mixins/_breakpoints';
+
+.imgthumb {
+  width: 100%;
+
+  @include media-breakpoint-up(md) {
+    width: 400px;
+  }
+}
+</style>
