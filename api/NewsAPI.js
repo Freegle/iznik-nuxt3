@@ -50,7 +50,7 @@ export default class NewsAPI extends BaseAPI {
   }
 
   async seen(id) {
-    await this.$post('/newsfeed', { id, action: 'Seen' })
+    await this.$post('/newsfeed?bump=' + id, { id, action: 'Seen' })
   }
 
   del(id) {
