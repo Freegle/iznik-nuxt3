@@ -54,12 +54,13 @@ try {
     buildHead(
       route,
       runtimeConfig,
-      volunteering.value.title,
-      volunteering.value.description,
-      volunteering.value.image ? volunteering.value.image.path : null
+      volunteering.title,
+      volunteering.description,
+      volunteering.image ? volunteering.image.path : null
     )
   )
 } catch (e) {
+  console.log('Failed to fetch', id, e)
   invalid = true
   buildHead(
     route,
