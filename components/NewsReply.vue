@@ -585,7 +585,7 @@ export default {
       }
     },
     showReplyPhotoModal() {
-      this.$refs.replHhotoModal.show()
+      this.$refs.replyPhotoModal.show()
     },
   },
 }
