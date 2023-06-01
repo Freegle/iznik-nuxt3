@@ -23,6 +23,7 @@
   </div>
 </template>
 <script>
+import { useNewsfeedStore } from '../stores/newsfeed'
 import modal from '@/mixins/modal'
 
 export default {
@@ -32,6 +33,13 @@ export default {
       type: Number,
       required: true,
     },
+  },
+  setup() {
+    const newsfeedStore = useNewsfeedStore()
+
+    return {
+      newsfeedStore,
+    }
   },
   data() {
     return {
