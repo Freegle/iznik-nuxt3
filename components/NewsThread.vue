@@ -212,7 +212,7 @@
     <NewsReportModal
       v-if="showReportModal"
       :id="newsfeed.id"
-      ref="reportmodal"
+      ref="reportModal"
     />
     <ConfirmModal
       v-if="showDeleteModal"
