@@ -322,6 +322,12 @@ form {
   }
 }
 
+.modal-content {
+  // Need to make this scrollable so that e.g. login modal can all be accessed on screens with small height.
+  overflow-y: auto !important;
+  max-height: 100% !important;
+}
+
 label {
   font-weight: bold !important;
 }
