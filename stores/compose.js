@@ -107,6 +107,13 @@ export const useComposeStore = defineStore({
         return data.ret !== 8 && data.ret !== 9
       })
       console.log('Returned', ret)
+
+      if (ret.ret === 0) {
+        // Fetch the submitted message - if we're on My Posts, for example, we want to update what we see.
+        const messageStore = useMessageStore()
+        messageStore.fetch(id, true)
+      }
+
       this._progress++
       return ret
     },
