@@ -387,7 +387,7 @@
                               thumbnail
                               alt="Community profile picture"
                               :src="group.profile"
-                              class="float-right groupprofile"
+                              class="groupprofile"
                             />
                           </nuxt-link>
                           <nuxt-link

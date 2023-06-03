@@ -11,7 +11,7 @@
       >
         <ProfileImage
           :image="reply.profile?.paththumb"
-          class="ml-1 mr-2 mt-1 mb-1 inline float-left"
+          class="ml-1 mr-2 mt-1 mb-1 inline"
           :is-moderator="Boolean(reply.showmod && reply.replyto === threadhead)"
           :size="reply.replyto !== threadhead ? 'sm' : 'md'"
           :lazy="false"
@@ -168,7 +168,7 @@
               <ProfileImage
                 v-if="me.profile.path"
                 :image="me.profile.path"
-                class="m-0 inline float-left"
+                class="m-0 inline"
                 is-thumbnail
                 size="sm"
               />
@@ -206,7 +206,7 @@
                 <ProfileImage
                   v-if="me.profile.path"
                   :image="me.profile.path"
-                  class="m-0 inline float-left"
+                  class="m-0 inline"
                   is-thumbnail
                   size="sm"
                 />

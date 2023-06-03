@@ -19,18 +19,13 @@
                 <GroupSelect
                   v-if="loggedIn"
                   :value="groupid"
-                  class="float-left"
                   all
                   :restrict="false"
                   @update:model-value="changeGroup"
                 />
               </b-col>
               <b-col>
-                <b-button
-                  variant="primary"
-                  class="float-right"
-                  @click="showAddModal"
-                >
+                <b-button variant="primary" @click="showAddModal">
                   <v-icon icon="book-open" /> Tell us your story!
                 </b-button>
               </b-col>

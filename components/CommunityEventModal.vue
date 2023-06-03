@@ -154,7 +154,7 @@
               </b-form-group>
             </b-col>
             <b-col v-if="enabled" cols="12" md="6">
-              <div v-if="event.image" class="float-right container">
+              <div v-if="event.image" class="container">
                 <div
                   class="clickme rotateleft stacked"
                   label="Rotate left"
@@ -187,11 +187,7 @@
           <span v-if="enabled">
             <b-row>
               <b-col>
-                <b-button
-                  variant="primary"
-                  class="mt-1 float-right"
-                  @click="photoAdd"
-                >
+                <b-button variant="primary" class="mt-1" @click="photoAdd">
                   <v-icon icon="camera" /> Upload photo
                 </b-button>
               </b-col>
@@ -328,12 +324,7 @@
     <template #footer>
       <div class="w-100 d-flex justify-content-between">
         <template v-if="added">
-          <b-button
-            variant="white"
-            class="float-right"
-            :disabled="uploadingPhoto"
-            @click="hide"
-          >
+          <b-button variant="white" :disabled="uploadingPhoto" @click="hide">
             Close
           </b-button>
         </template>
@@ -342,7 +333,6 @@
             <b-button
               v-if="!editing"
               variant="white"
-              class="float-left"
               :disabled="uploadingPhoto"
               @click="editing = true"
             >
@@ -351,7 +341,6 @@
             </b-button>
             <b-button
               variant="white"
-              class="float-left ml-1"
               :disabled="uploadingPhoto"
               @click="deleteIt"
             >
@@ -362,7 +351,6 @@
           <b-button
             v-if="!editing"
             variant="white"
-            class="float-right"
             :disabled="uploadingPhoto"
             @click="hide"
           >
@@ -371,7 +359,6 @@
           <b-button
             v-if="editing"
             variant="white"
-            class="float-right mr-1"
             :disabled="uploadingPhoto"
             @click="dontSave"
           >

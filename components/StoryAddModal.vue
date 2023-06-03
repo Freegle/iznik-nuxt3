@@ -61,7 +61,7 @@
         </b-row>
         <b-row>
           <b-col cols="12">
-            <div class="mt-2 float-left">
+            <div class="mt-2">
               <div v-if="story.image" class="container p-0">
                 <div
                   class="clickme rotateleft stacked"

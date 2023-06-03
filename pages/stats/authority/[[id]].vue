@@ -15,7 +15,7 @@
             <b-img
               thumbnail
               src="/icon.png"
-              class="titlelogo float-right"
+              class="titlelogo"
               @click="toggle"
             />
             <h2>Freegle in {{ authority.name }}</h2>

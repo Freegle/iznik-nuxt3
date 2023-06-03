@@ -37,7 +37,7 @@
                     <v-icon icon="gift" scale="2" /> Your OFFERs
                   </h2>
                   <span v-if="oldOfferCount > 0">
-                    <span v-if="showOldOffers" class="float-right">
+                    <span v-if="showOldOffers">
                       <b-button
                         variant="secondary"
                         title="Show old OFFERs"
@@ -46,7 +46,7 @@
                         Hide {{ oldOfferCountStr }}
                       </b-button>
                     </span>
-                    <span v-else class="float-right">
+                    <span v-else>
                       <b-button variant="secondary" @click="toggleOldOffer">
                         +{{ oldOfferCountStr }}
                       </b-button>
@@ -126,7 +126,7 @@
                     <v-icon icon="shopping-cart" scale="2" /> Your WANTEDs
                   </h2>
                   <span v-if="oldWantedCount > 0">
-                    <span v-if="showOldWanteds" class="float-right">
+                    <span v-if="showOldWanteds">
                       <b-button
                         variant="secondary"
                         title="Show old WANTEDs"
@@ -135,7 +135,7 @@
                         Hide {{ oldWantedCountStr }}
                       </b-button>
                     </span>
-                    <span v-else class="float-right">
+                    <span v-else>
                       <b-button variant="secondary" @click="toggleOldWanted">
                         +{{ oldWantedCountStr }}
                       </b-button>
