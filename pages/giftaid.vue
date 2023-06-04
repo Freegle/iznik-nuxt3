@@ -198,7 +198,7 @@ definePageMeta({
 
 export default {
   components: { SpinButton, NoticeMessage, OurToggle },
-  async setup() {
+  setup() {
     const runtimeConfig = useRuntimeConfig()
     const route = useRoute()
 
@@ -215,9 +215,6 @@ export default {
     const giftAidStore = useGiftAidStore()
 
     const addresses = computed(() => addressStore.addresses)
-    await addressStore.fetch()
-
-    await giftAidStore.fetch()
 
     const giftaid = computed(() => giftAidStore.giftaid)
     const period = computed({
@@ -289,8 +286,17 @@ export default {
     },
   },
   watch: {
+    me: {
+      immediate: true,
+      async handler(newVal) {
+        if (newVal) {
+          await this.addressStore.fetch()
+          await this.giftAidStore.fetch()
+        }
+      },
+    },
     giftAidAllowed: {
-      handler: function (newVal) {
+      handler: function (newVal, oldVal) {
         if (!newVal) {
           this.giftaid.period = 'Declined'
         } else {
