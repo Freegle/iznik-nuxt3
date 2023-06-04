@@ -122,6 +122,11 @@ export default defineNuxtPlugin((nuxtApp) => {
         } else if (originalExceptionString?.match(/Down for maintenance/)) {
           console.log('Maintenance - suppress exception', this)
           return null
+        } else if (
+          originalExceptionString?.match(/Attempt to use history.replaceState/)
+        ) {
+          console.log('History.repalceState too often')
+          return null
         } else if (originalExceptionName === 'TypeError') {
           console.log('TypeError')
           if (
