@@ -17,7 +17,7 @@
             "
             class="bg-white p-2"
           >
-            <h1>Sorry, that message isn't around any more.</h1>
+            <h1>Sorry, that post isn't around any more.</h1>
             <div>
               <p>
                 If it was an OFFER, it's probably been TAKEN. If it was a

@@ -25,7 +25,7 @@
           </div>
           <div v-if="missing">
             <NoticeMessage variant="danger" class="mt-1">
-              Sorry, we couldn't find that message. Perhaps it's been deleted,
+              Sorry, we couldn't find that post. Perhaps it's been deleted,
               or perhaps the link you clicked on is wrong?
             </NoticeMessage>
             <div class="text-center">
