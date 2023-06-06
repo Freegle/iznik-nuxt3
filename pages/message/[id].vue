@@ -124,6 +124,9 @@ if (message.value) {
 
 onMounted(async () => {
   // We've seen pages get stuck serving old cached data.  Not sure whether this is our fault or a Netlify caching issue.
-  await messageStore.fetch(id, true)
+  //
+  // Fetching again here will reload if the message was added to the cache a while ago - which will be the case in
+  // an old cached page because the hydrated store will contain the message addition time.
+  await messageStore.fetch(id)
 })
 </script>

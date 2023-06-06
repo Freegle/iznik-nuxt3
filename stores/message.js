@@ -24,7 +24,13 @@ export const useMessageStore = defineStore({
     async fetch(id, force) {
       id = parseInt(id)
 
-      if (force || !this.list[id]) {
+      // Refetch after 10 minutes in case the state has changed.
+      const now = Math.round(Date.now() / 1000)
+      const expired = this.list[id]?.addedToCache
+        ? now - this.list[id].addedToCache > 600
+        : false
+
+      if (force || !this.list[id] || expired) {
         if (this.fetching[id]) {
           // Already fetching
           await this.fetching[id]
@@ -37,6 +43,7 @@ export const useMessageStore = defineStore({
           this.fetching[id] = null
 
           if (message) {
+            message.addedToCache = Math.round(Date.now() / 1000)
             this.list[id] = message
           }
         }
