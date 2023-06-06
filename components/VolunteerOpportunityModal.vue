@@ -403,7 +403,7 @@
             Hide
           </b-button>
           <SpinButton
-            v-if="editing"
+            v-if="editing && enabled"
             variant="primary"
             :disabled="uploadingPhoto"
             name="save"
@@ -568,13 +568,13 @@ export default {
       return desc
     },
     enabled() {
-      const group = this.myGroup(this.groupid)
+      const group = this.groupStore.get(this.groupid)
 
       let ret = true
 
-      if (group) {
-        if ('volunteeringallowed' in group) {
-          ret = group.volunteeringallowed
+      if (group?.settings) {
+        if ('volunteering' in group.settings) {
+          ret = group.settings.volunteering
         }
       }
 

@@ -205,7 +205,7 @@
             </b-row>
 
             <b-form-group
-              ref="volunteering__description"
+              ref="eventEdit__description"
               label="What is it?"
               label-for="description"
               :state="true"
@@ -228,7 +228,7 @@
               />
             </b-form-group>
             <b-form-group
-              ref="volunteering__location"
+              ref="eventEdit__location"
               label="Where is it?"
               label-for="location"
               :state="true"
@@ -260,7 +260,7 @@
               </p>
             </b-form-group>
             <b-form-group
-              ref="volunteering__contactname"
+              ref="eventEdit__contactname"
               label="Contact name:"
               label-for="contactname"
               :state="true"
@@ -316,7 +316,7 @@
           </span>
           <NoticeMessage v-else variant="warning" class="mt-2">
             <v-icon icon="info-circle" />&nbsp;This community has chosen not to
-            allow Volunteer Opportunities.
+            allow Community Events.
           </NoticeMessage>
         </VForm>
       </div>
@@ -365,7 +365,7 @@
             Hide
           </b-button>
           <SpinButton
-            v-if="editing"
+            v-if="editing && enabled"
             variant="primary"
             :disabled="uploadingPhoto"
             name="save"
@@ -541,13 +541,13 @@ export default {
       return desc
     },
     enabled() {
-      const group = this.myGroup(this.groupid)
+      const group = this.groupStore.get(this.groupid)
 
       let ret = true
 
-      if (group) {
-        if ('volunteeringallowed' in group) {
-          ret = group.volunteeringallowed
+      if (group?.settings) {
+        if ('communityevents' in group.settings) {
+          ret = group.settings.communityevents
         }
       }
 
