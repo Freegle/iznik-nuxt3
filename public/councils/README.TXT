@@ -1,0 +1,1 @@
+This is a workaround until these assets are uploaded to WordPress.
