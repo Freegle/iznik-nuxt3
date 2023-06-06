@@ -25,8 +25,8 @@
           </div>
           <div v-if="missing">
             <NoticeMessage variant="danger" class="mt-1">
-              Sorry, we couldn't find that post. Perhaps it's been deleted,
-              or perhaps the link you clicked on is wrong?
+              Sorry, we couldn't find that post. Perhaps it's been deleted, or
+              perhaps the link you clicked on is wrong?
             </NoticeMessage>
             <div class="text-center">
               <b-button variant="primary" size="lg" class="mt-2" to="/myposts">

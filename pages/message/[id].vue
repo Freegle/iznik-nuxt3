@@ -77,7 +77,7 @@ import { buildHead } from '../../composables/useBuildHead'
 import { useMessageStore } from '~/stores/message'
 import { twem } from '~/composables/useTwem'
 import MyMessage from '~/components/MyMessage'
-import { ref } from '#imports'
+import { ref, onMounted } from '#imports'
 
 const runtimeConfig = useRuntimeConfig()
 const route = useRoute()
@@ -87,6 +87,8 @@ const messageStore = useMessageStore()
 const id = parseInt(route.params.id)
 
 const failed = ref(false)
+
+const SSR = process.server
 
 try {
   await messageStore.fetch(id)
@@ -121,4 +123,12 @@ if (message.value) {
     )
   )
 }
+
+onMounted(async () => {
+  console.log('Fetch on mounted', SSR)
+  if (SSR) {
+    // We've seen pages get stuck serving old cached data.  Not sure whether this is our fault or a Netlify caching issue.
+    await messageStore.fetch(id, true)
+  }
+})
 </script>
