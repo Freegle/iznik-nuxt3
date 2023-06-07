@@ -23,7 +23,11 @@ export default defineNuxtPlugin((nuxtApp) => {
           })
         } else {
           setTimeout(() => {
-            this.waitForRefTimer(name, resolve)
+            // Don't callback if the window is unloading - the ref may be removed under our feet which causes a
+            // Sentry error.
+            if (!useMiscStore()?.unloading) {
+              this.waitForRefTimer(name, resolve)
+            }
           }, 100)
         }
       },
