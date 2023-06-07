@@ -4,7 +4,8 @@
       <b-form-group class="mr-2" :label="label" :description="description">
         <b-input-group>
           <b-form-input
-            v-model="me?.phone"
+            v-if="me"
+            v-model="me.phone"
             placeholder="Your mobile"
             :size="size"
             lazy
