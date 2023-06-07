@@ -4,7 +4,7 @@
       <b-form-group class="mr-2" :label="label" :description="description">
         <b-input-group>
           <b-form-input
-            v-model="me.phone"
+            v-model="me?.phone"
             placeholder="Your mobile"
             :size="size"
             lazy
@@ -32,7 +32,7 @@
         </p>
       </b-form-group>
       <b-button
-        v-if="!hideRemove && me.phone"
+        v-if="!hideRemove && me?.phone"
         variant="link"
         class="align-self-start"
         size="sm"
