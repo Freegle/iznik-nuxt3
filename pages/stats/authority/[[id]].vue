@@ -244,7 +244,7 @@
                   class="titlelogo float-end"
                   @click="toggle"
                 />
-                <span class="text--largest">
+                <span class="text--largest mr-2">
                   {{ authority.name }}
                 </span>
                 <div class="d-inline-block align-top pt-2">
