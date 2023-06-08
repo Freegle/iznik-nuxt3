@@ -3,6 +3,8 @@ import fetchRetry from 'fetch-retry'
 import { useAuthStore } from '~/stores/auth'
 import { useMiscStore } from '~/stores/misc'
 
+let timer = 0
+
 // We add fetch retrying.
 // Note that $fetch and useFetch cause problems on Node v18, so we don't use them.
 const ourFetch = fetchRetry(fetch, {
@@ -264,6 +266,12 @@ export default class BaseAPI {
   }
 
   async $requestv2(method, path, config, logError = true, body = null) {
+    timer++
+    const timerLabel = path + ' api-' + timer
+
+    console.log('Start ', timerLabel)
+    console.time(timerLabel)
+
     let status = null
     let data = null
 
@@ -391,6 +399,8 @@ export default class BaseAPI {
         message
       )
     }
+
+    console.timeEnd(timerLabel)
 
     return data
   }
