@@ -30,7 +30,11 @@
       rows="5"
       max-rows="8"
       placeholder="Anything else we need to know?  Need to ask permission? If it's locked, how do you get access?"
+      class="mb-2"
     />
+    <b-form-checkbox v-model="active">
+      <span class="text-muted"> This noticeboard is active </span>
+    </b-form-checkbox>
     <template #footer>
       <b-button variant="white" @click="hide"> Cancel </b-button>
       <SpinButton
@@ -68,6 +72,7 @@ export default {
       name: null,
       description: null,
       loaded: false,
+      active: true,
     }
   },
   methods: {
@@ -77,10 +82,19 @@ export default {
 
         // There's a server oddity which means we need to add this and then edit in the name/description.
         console.log('Add attempt', cent, this.name, this.description)
-        const id = await this.noticeboardStore.add(cent.lat, cent.lng)
+        const id = await this.noticeboardStore.add(
+          cent.lat,
+          cent.lng,
+          this.active
+        )
 
         if (id) {
-          await this.noticeboardStore.edit(id, this.name, this.description)
+          await this.noticeboardStore.edit(
+            id,
+            this.name,
+            this.description,
+            this.active
+          )
 
           this.name = null
           this.description = null

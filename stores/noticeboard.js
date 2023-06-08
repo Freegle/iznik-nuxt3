@@ -10,17 +10,19 @@ export const useNoticeboardStore = defineStore({
     init(config) {
       this.config = config
     },
-    async add(lat, lng) {
+    async add(lat, lng, active) {
       return await api(this.config).noticeboard.add({
         lat,
         lng,
+        active,
       })
     },
-    async edit(id, name, description) {
+    async edit(id, name, description, active) {
       await api(this.config).noticeboard.save({
         id,
         name,
         description,
+        active,
       })
     },
     async fetch(id) {

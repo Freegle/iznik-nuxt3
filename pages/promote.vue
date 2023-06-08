@@ -26,6 +26,12 @@
         <li><strong>Tell your story</strong>.</li>
       </ul>
       <h3 class="header--size3">Put up a poster</h3>
+      <div class="d-block d-md-none pt-2">
+        <b-button variant="primary" size="lg" class="mb-1" @click="added">
+          I put up a poster!
+        </b-button>
+        <hr />
+      </div>
       <p>
         This is an A4 poster with tear-off strips - good for noticeboards in
         cafes, community venues, or at work.
@@ -121,19 +127,21 @@
           </a>
         </div>
       </div>
-      <p>
-        You can help even more by letting us know where you put up posters. Once
-        we know where it is, then we can encourage other freeglers to put one up
-        there in future. <strong>Please do this!</strong>
-      </p>
-      <b-button variant="primary" size="lg" class="mb-1" @click="added">
-        I put up a poster!
-      </b-button>
-      <p>
-        You can see where people have put up posters
-        <nuxt-link no-prefetch to="/noticeboards">here</nuxt-link>.
-      </p>
-      <hr />
+      <div class="d-none d-md-block">
+        <p>
+          You can help even more by letting us know where you put up posters.
+          Once we know where it is, then we can encourage other freeglers to put
+          one up there in future. <strong>Please do this!</strong>
+        </p>
+        <b-button variant="primary" size="lg" class="mb-1" @click="added">
+          I put up a poster!
+        </b-button>
+        <p>
+          You can see where people have put up posters
+          <nuxt-link no-prefetch to="/noticeboards">here</nuxt-link>.
+        </p>
+        <hr />
+      </div>
       <h2 class="header--size3">Business Cards</h2>
       <p>
         You can get little "business cards" to hand out to people or put on

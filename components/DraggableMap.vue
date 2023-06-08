@@ -7,16 +7,14 @@
             <b-button
               variant="secondary"
               size="lg"
-              class="mb-2 ml-2"
+              class="mb-2 ml-0 ml-md-2"
               title="Find my location"
               @click="findLoc"
             >
               <v-icon v-if="locating" icon="sync" class="fa-spin" />
               <v-icon v-else-if="locationFailed" icon="exclamation-triangle" />
               <v-icon v-else icon="map-marker-alt" />
-              <span class="d-none d-sm-inline-block"
-                >&nbsp;Find my location</span
-              >
+              &nbsp;Find my location
             </b-button>
           </div>
           <l-map
