@@ -132,9 +132,6 @@
               />
             </b-form-group>
           </div>
-          <div id="debugging" class="d-none">
-            Email {{ email }} valid {{ emailValid }} error {{ emailError }}
-          </div>
           <EmailValidator
             ref="email"
             v-model:email="email"
@@ -303,13 +300,6 @@ export default {
       return this.nativeBump && this.buttonClicked && !this.lastname
     },
     emailError() {
-      console.log(
-        'Compute emailError',
-        this.nativeBump,
-        this.buttonClicked,
-        this.email,
-        this.emailValid
-      )
       return (
         this.nativeBump &&
         this.buttonClicked &&
@@ -416,14 +406,6 @@ export default {
       // (so we've forgotten that they've previously signed in) and hasn't noticed that they need to switch.
       const confused =
         !this.firstname && !this.lastname && this.email && this.password
-
-      console.log(
-        'Logging in with ',
-        this.email,
-        this.password,
-        confused,
-        this.signUp
-      )
 
       if (!confused && this.signUp) {
         if (
