@@ -96,7 +96,7 @@
             v-if="me"
             v-model="selectedGroup"
             label="Communities to view"
-            label-visually-hidden
+            label-sr-only
             all
             all-my
           />
