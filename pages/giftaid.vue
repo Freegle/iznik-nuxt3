@@ -219,8 +219,12 @@ export default {
     const giftaid = computed(() => giftAidStore.giftaid)
     const period = computed({
       get: () =>
-        giftAidStore.period ? giftAidStore.period : 'Past4YearsAndFuture',
-      set: (value) => (giftAidStore.period = value),
+        giftAidStore.giftaid.period
+          ? giftAidStore.giftaid.period
+          : 'Past4YearsAndFuture',
+      set: (value) => {
+        giftAidStore.giftaid.period = value
+      },
     })
 
     const fullname = computed({
@@ -292,15 +296,22 @@ export default {
         if (newVal) {
           await this.addressStore.fetch()
           await this.giftAidStore.fetch()
+
+          if (!Object.hasOwn(this.giftaid, 'period')) {
+            // We fetched no gift aid info so set it to the default.
+            this.giftaid.period = this.giftAidAllowed
+              ? 'Past4YearsAndFuture'
+              : 'Declined'
+          }
         }
       },
     },
     giftAidAllowed: {
-      handler: function (newVal, oldVal) {
+      handler: function (newVal) {
         if (!newVal) {
-          this.giftaid.period = 'Declined'
+          this.period = 'Declined'
         } else {
-          this.giftaid.period = 'Past4YearsAndFuture'
+          this.period = 'Past4YearsAndFuture'
         }
       },
       immediate: true,
@@ -313,7 +324,7 @@ export default {
     },
     async remove() {
       await this.giftAidStore.remove()
-      this.period = 'Since'
+      this.period = 'Past4YearsAndFuture'
       this.fullname = null
       this.homeaddress = null
     },
