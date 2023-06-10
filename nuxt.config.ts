@@ -121,9 +121,6 @@ export default defineNuxtConfig({
         'Access-Control-Allow-Headers':
           'Origin, X-Requested-With, Content-Type, Accept, Authorization',
       },
-
-      // Redirects
-      '/sitemap': { redirect: '/sitemap.xml' },
     },
   },
 
