@@ -127,6 +127,10 @@ onMounted(async () => {
   //
   // Fetching again here will reload if the message was added to the cache a while ago - which will be the case in
   // an old cached page because the hydrated store will contain the message addition time.
-  await messageStore.fetch(id)
+  try {
+    await messageStore.fetch(id)
+  } catch (e) {
+    console.log('Message fetch on mount failed', e)
+  }
 })
 </script>
