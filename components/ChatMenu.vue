@@ -64,10 +64,18 @@ export default {
 }
 </script>
 <style scoped lang="scss">
+@import '~bootstrap/scss/functions';
+@import '~bootstrap/scss/variables';
+@import '~bootstrap/scss/mixins/_breakpoints';
+
 .chatbadge {
   position: absolute;
   top: 0px;
-  left: 25px;
+  left: 18px;
+
+  @include media-breakpoint-up(xl) {
+    left: 22px;
+  }
 }
 
 .chat__icon {
