@@ -50,7 +50,7 @@
       <div
         class="pl-1 flex-shrink-1 ratings d-flex d-md-none justify-content-end"
       >
-        <UserRatings :id="replyuser?.id" size="sm" />
+        <UserRatings v-if="replyuser?.id" :id="replyuser?.id" size="sm" />
       </div>
       <div
         class="pl-1 flex-shrink-1 ratings d-none d-md-flex justify-content-end w-100 pr-1"

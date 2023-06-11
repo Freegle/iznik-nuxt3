@@ -62,7 +62,7 @@ export default {
     GlobalWarning,
     DonationAskModal,
   },
-  async setup() {
+  async setup(props) {
     const runtimeConfig = useRuntimeConfig()
     const route = useRoute()
     const id = parseInt(route.params.id)
@@ -105,12 +105,12 @@ export default {
           // we've seen people click the button in the email a lot and then bail out.
           let outcome = null
 
-          if (this.action === 'repost') {
+          if (props.action === 'repost') {
             outcome = 'Repost'
-          } else if (this.action === 'withdraw') {
+          } else if (props.action === 'withdraw') {
             outcome = 'Withdrawn'
-          } else if (this.action === 'completed') {
-            outcome = this.message.type === 'Offer' ? 'Taken' : 'Received'
+          } else if (props.action === 'completed') {
+            outcome = props.message.type === 'Offer' ? 'Taken' : 'Received'
           }
 
           if (outcome) {
