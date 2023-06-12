@@ -40,12 +40,24 @@ export const useMessageStore = defineStore({
           this.fetching[id] = api(this.config).message.fetch(id, false)
           this.fetchingCount--
 
-          const message = await this.fetching[id]
-          this.fetching[id] = null
+          try {
+            const message = await this.fetching[id]
+            this.fetching[id] = null
 
-          if (message) {
-            message.addedToCache = Math.round(Date.now() / 1000)
-            this.list[id] = message
+            if (message) {
+              message.addedToCache = Math.round(Date.now() / 1000)
+              this.list[id] = message
+            }
+          } catch (e) {
+            console.log('Failed to fetch message', e)
+            this.fetching[id] = null
+
+            if (e instanceof APIError && e.response.status === 404) {
+              // This can validly happen if a message is deleted under our feet.
+              console.log('Ignore 404 error')
+            } else {
+              throw e
+            }
           }
         }
       }
