@@ -120,27 +120,29 @@
             <NoticeMessage v-if="error" class="mt-2">
               Sorry, this thread isn't around any more.
             </NoticeMessage>
-            <NewsThread
-              v-for="entry in newsfeedToShow"
-              :id="entry.id"
-              :key="
-                'newsfeed-' +
-                entry.id +
-                '-area-' +
-                selectedArea +
-                '-' +
-                infiniteId
-              "
-              :scroll-to="id"
-              @rendered="rendered"
-            />
-            <infinite-loading
-              v-if="newsfeed.length"
-              :identifier="infiniteId"
-              force-use-infinite-wrapper="body"
-              :distance="distance"
-              @infinite="loadMore"
-            />
+            <div v-else>
+              <NewsThread
+                v-for="entry in newsfeedToShow"
+                :id="entry.id"
+                :key="
+                  'newsfeed-' +
+                  entry.id +
+                  '-area-' +
+                  selectedArea +
+                  '-' +
+                  infiniteId
+                "
+                :scroll-to="id"
+                @rendered="rendered"
+              />
+              <infinite-loading
+                v-if="newsfeed.length"
+                :identifier="infiniteId"
+                force-use-infinite-wrapper="body"
+                :distance="distance"
+                @infinite="loadMore"
+              />
+            </div>
           </div>
         </b-col>
         <b-col cols="0" lg="3" class="p-0 pl-1">
@@ -237,15 +239,12 @@ export default {
       if (id) {
         const newsfeed = await newsfeedStore.fetch(id)
 
-        if (!newsfeed?.id) {
-          console.log('error')
+        if (!newsfeed?.id || newsfeed?.deleted) {
           error.value = true
         } else if (newsfeed?.id !== newsfeed?.threadhead) {
           const fetched = await newsfeedStore.fetch(newsfeed.threadhead)
-          console.log('Fetched', fetched)
 
-          if (!fetched?.id) {
-            console.log('error')
+          if (!fetched?.id || fetched?.deleted) {
             error.value = true
           }
         }
