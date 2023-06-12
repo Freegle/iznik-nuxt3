@@ -3,6 +3,7 @@ import dayjs from 'dayjs'
 import api from '~/api'
 import { GROUP_REPOSTS, MESSAGE_EXPIRE_TIME } from '~/constants'
 import { useGroupStore } from '~/stores/group'
+import { APIError } from '~/api/BaseAPI'
 
 export const useMessageStore = defineStore({
   id: 'message',
@@ -65,19 +66,29 @@ export const useMessageStore = defineStore({
 
       if (left.length) {
         this.fetchingCount++
-        const msgs = await api(this.config).message.fetch(left.join(','))
+        try {
+          const msgs = await api(this.config).message.fetch(left.join(','))
 
-        if (msgs && msgs.forEach) {
-          msgs.forEach((msg) => {
-            this.list[msg.id] = msg
-          })
+          if (msgs && msgs.forEach) {
+            msgs.forEach((msg) => {
+              this.list[msg.id] = msg
+            })
 
-          this.fetchingCount--
-        } else if (typeof msgs === 'object') {
-          this.list[msgs.id] = msgs
-          this.fetchingCount--
-        } else {
-          console.error('Failed to fetch', msgs)
+            this.fetchingCount--
+          } else if (typeof msgs === 'object') {
+            this.list[msgs.id] = msgs
+            this.fetchingCount--
+          } else {
+            console.error('Failed to fetch', msgs)
+          }
+        } catch (e) {
+          console.log('Failed to fetch messages', e)
+          if (e instanceof APIError && e.response.status === 404) {
+            // This can validly happen if a message is deleted under our feet.
+            console.log('Ignore 404 error')
+          } else {
+            throw e
+          }
         }
       }
     },
