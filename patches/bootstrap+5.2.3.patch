@@ -1,8 +1,22 @@
 diff --git a/node_modules/bootstrap/dist/js/bootstrap.bundle.js b/node_modules/bootstrap/dist/js/bootstrap.bundle.js
-index 67ab056..c56ae5e 100644
+index 67ab056..4c69ba7 100644
 --- a/node_modules/bootstrap/dist/js/bootstrap.bundle.js
 +++ b/node_modules/bootstrap/dist/js/bootstrap.bundle.js
-@@ -6041,6 +6041,10 @@
+@@ -5789,9 +5789,10 @@
+           this._disposePopper();
+         }
+ 
+-        this._element.removeAttribute('aria-describedby');
+-
+-        EventHandler.trigger(this._element, this.constructor.eventName(EVENT_HIDDEN$2));
++        if (this._element) {
++          this._element.removeAttribute('aria-describedby');
++          EventHandler.trigger(this._element, this.constructor.eventName(EVENT_HIDDEN$2));
++        }
+       };
+ 
+       this._queueCallback(complete, this.tip, this._isAnimated());
+@@ -6041,6 +6042,10 @@
      }
  
      _isWithActiveTrigger() {
@@ -26,10 +40,24 @@ index 819659b..5d73e13 100644
  //# sourceMappingURL=bootstrap.bundle.min.js.map
 \ No newline at end of file
 diff --git a/node_modules/bootstrap/dist/js/bootstrap.esm.js b/node_modules/bootstrap/dist/js/bootstrap.esm.js
-index 87a487e..dc689c5 100644
+index 87a487e..70862b6 100644
 --- a/node_modules/bootstrap/dist/js/bootstrap.esm.js
 +++ b/node_modules/bootstrap/dist/js/bootstrap.esm.js
-@@ -4191,6 +4191,10 @@ class Tooltip extends BaseComponent {
+@@ -3939,9 +3939,10 @@ class Tooltip extends BaseComponent {
+         this._disposePopper();
+       }
+ 
+-      this._element.removeAttribute('aria-describedby');
+-
+-      EventHandler.trigger(this._element, this.constructor.eventName(EVENT_HIDDEN$2));
++      if (this._element) {
++        this._element.removeAttribute('aria-describedby');
++        EventHandler.trigger(this._element, this.constructor.eventName(EVENT_HIDDEN$2));
++      }
+     };
+ 
+     this._queueCallback(complete, this.tip, this._isAnimated());
+@@ -4191,6 +4192,10 @@ class Tooltip extends BaseComponent {
    }
  
    _isWithActiveTrigger() {
@@ -53,10 +81,24 @@ index c124979..260bc6d 100644
  //# sourceMappingURL=bootstrap.esm.min.js.map
 \ No newline at end of file
 diff --git a/node_modules/bootstrap/dist/js/bootstrap.js b/node_modules/bootstrap/dist/js/bootstrap.js
-index 9ccfb0b..66db717 100644
+index 9ccfb0b..fcfe112 100644
 --- a/node_modules/bootstrap/dist/js/bootstrap.js
 +++ b/node_modules/bootstrap/dist/js/bootstrap.js
-@@ -4215,6 +4215,10 @@
+@@ -3963,9 +3963,11 @@
+           this._disposePopper();
+         }
+ 
+-        this._element.removeAttribute('aria-describedby');
++        if (this._element) {
++          this._element.removeAttribute('aria-describedby');
++          EventHandler.trigger(this._element, this.constructor.eventName(EVENT_HIDDEN$2));
++        }
+ 
+-        EventHandler.trigger(this._element, this.constructor.eventName(EVENT_HIDDEN$2));
+       };
+ 
+       this._queueCallback(complete, this.tip, this._isAnimated());
+@@ -4215,6 +4217,10 @@
      }
  
      _isWithActiveTrigger() {
@@ -80,10 +122,24 @@ index 0317143..35fc2c8 100644
  //# sourceMappingURL=bootstrap.min.js.map
 \ No newline at end of file
 diff --git a/node_modules/bootstrap/js/dist/tooltip.js b/node_modules/bootstrap/js/dist/tooltip.js
-index 5e86b8e..44da74f 100644
+index 5e86b8e..057e599 100644
 --- a/node_modules/bootstrap/js/dist/tooltip.js
 +++ b/node_modules/bootstrap/js/dist/tooltip.js
-@@ -543,6 +543,10 @@
+@@ -291,9 +291,10 @@
+           this._disposePopper();
+         }
+ 
+-        this._element.removeAttribute('aria-describedby');
+-
+-        EventHandler__default.default.trigger(this._element, this.constructor.eventName(EVENT_HIDDEN));
++        if (this._element) {
++          this._element.removeAttribute('aria-describedby');
++          EventHandler__default.default.trigger(this._element, this.constructor.eventName(EVENT_HIDDEN));
++        }
+       };
+ 
+       this._queueCallback(complete, this.tip, this._isAnimated());
+@@ -543,6 +544,10 @@
      }
  
      _isWithActiveTrigger() {
@@ -95,10 +151,23 @@ index 5e86b8e..44da74f 100644
      }
  
 diff --git a/node_modules/bootstrap/js/src/tooltip.js b/node_modules/bootstrap/js/src/tooltip.js
-index 748a0e1..ba6ddd1 100644
+index 748a0e1..b2543a0 100644
 --- a/node_modules/bootstrap/js/src/tooltip.js
 +++ b/node_modules/bootstrap/js/src/tooltip.js
-@@ -533,6 +533,10 @@ class Tooltip extends BaseComponent {
+@@ -273,8 +273,10 @@ class Tooltip extends BaseComponent {
+         this._disposePopper()
+       }
+ 
+-      this._element.removeAttribute('aria-describedby')
+-      EventHandler.trigger(this._element, this.constructor.eventName(EVENT_HIDDEN))
++      if (this._element) {
++        this._element.removeAttribute('aria-describedby')
++        EventHandler.trigger(this._element, this.constructor.eventName(EVENT_HIDDEN))
++      }
+     }
+ 
+     this._queueCallback(complete, this.tip, this._isAnimated())
+@@ -533,6 +535,10 @@ class Tooltip extends BaseComponent {
    }
  
    _isWithActiveTrigger() {
