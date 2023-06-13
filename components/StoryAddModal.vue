@@ -105,15 +105,18 @@
               If you don't want us to do this, that's fine - we'll just show it
               to your local volunteers.
             </p>
-            <div class="bg-info text-center p-2">
-              <b-form-radio-group v-model="allowpublic">
-                <b-form-radio name="allowpublic" value="1">
-                  Yes, you can share this
-                </b-form-radio>
-                <b-form-radio name="allowpublic" value="0">
-                  No, keep it private
-                </b-form-radio>
-              </b-form-radio-group>
+            Public {{ allowpublic }}
+            <div class="bg-info text-center p-2 d-flex justify-content-center">
+              <div class="d-flex flex-column">
+                <b-form-checkbox
+                  v-model="allowpublic"
+                  size="lg"
+                  name="allowpublic"
+                  class="ml-2"
+                >
+                  &nbsp;<v-icon icon="arrow-left" /> Yes, you can share this
+                </b-form-checkbox>
+              </div>
             </div>
           </b-col>
         </b-row>
@@ -164,7 +167,7 @@ export default {
   },
   data() {
     return {
-      allowpublic: 0,
+      allowpublic: false,
       uploading: false,
       story: {
         headline: null,
