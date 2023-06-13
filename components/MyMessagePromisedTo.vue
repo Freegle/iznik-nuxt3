@@ -2,12 +2,18 @@
   <div>
     <div class="d-flex flex-wrap">
       <div v-if="promise.id === myid">
-        <!--                        This can happen with TN.  It means it's promised, but we don't know who to.-->
+        <!-- This can happen with TN.  It means it's promised, but we don't know who to.-->
         <v-icon icon="handshake" class="fa-fw mt-1" />&nbsp;Promised
       </div>
       <div v-else>
         <!-- eslint-disable-next-line-->
         <v-icon icon="handshake" class="fa-fw mt-1" />&nbsp;Promised to <strong>{{ promise.name }}</strong><span v-if="promise.trystdate">,</span>
+        <b-btn
+          variant="link"
+          class="ml-2 text--smallest text-black"
+          @click="unpromise"
+          >(Unpromise)</b-btn
+        >
       </div>
       <div v-if="promise.trystdate" class="d-flex">
         handover <span class="d-none d-md-inline">arranged for</span
@@ -24,19 +30,29 @@
         ref="promiseModalChange"
         :messages="[message]"
         :selected-message="message.id"
-        :users="replyusers"
+        :users="[replyusers]"
         :selected-user="promisee"
       />
     </div>
+    <RenegeModal
+      v-if="promise.id !== myid"
+      ref="renegeModal"
+      :messages="[message.id]"
+      :selected-message="message.id"
+      :users="[promiseeUser]"
+      :selected-user="promisee"
+    />
   </div>
 </template>
 <script>
 import { useMessageStore } from '../stores/message'
+import { useUserStore } from '../stores/user'
+import RenegeModal from './RenegeModal'
 import PromiseModal from '~/components/PromiseModal'
 import AddToCalendar from '~/components/AddToCalendar'
 
 export default {
-  components: { PromiseModal, AddToCalendar },
+  components: { PromiseModal, RenegeModal, AddToCalendar },
   props: {
     promise: {
       type: Object,
@@ -53,9 +69,11 @@ export default {
   },
   setup() {
     const messageStore = useMessageStore()
+    const userStore = useUserStore()
 
     return {
       messageStore,
+      userStore,
     }
   },
   computed: {
@@ -63,18 +81,10 @@ export default {
       return this.messageStore?.byId(this.id)
     },
     promisee() {
-      let ret = null
-
-      console.log('Trst', this.promise)
-      if (this.promise.tryst) {
-        if (this.promise.tryst.user1 === this.myid) {
-          ret = this.promise.tryst.user2
-        } else {
-          ret = this.promise.tryst.user1
-        }
-      }
-
-      return ret
+      return this.promise?.id
+    },
+    promiseeUser() {
+      return this.userStore.byId(this.promisee)
     },
   },
   methods: {
@@ -83,6 +93,15 @@ export default {
       e.preventDefault()
       e.stopPropagation()
       this.$refs.promiseModalChange.show()
+    },
+    async unpromise(e) {
+      e.preventDefault()
+      e.stopPropagation()
+      console.log('Renege', this.message, this.promise)
+      await this.waitForRef('renegeModal')
+      console.log('Got modal')
+      this.$refs.renegeModal.show()
+      console.log('Shown')
     },
   },
 }
