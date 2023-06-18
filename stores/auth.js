@@ -81,6 +81,21 @@ export const useAuthStore = defineStore({
         this.loggedInEver = true
         this.user = value
 
+        // Ensure we have a basic set of settings.
+        if (!this.user.settings) {
+          this.user.settings = {}
+        }
+
+        if (!this.user.settings.notifications) {
+          this.user.settings.notifications = {
+            email: true,
+            emailmine: false,
+            push: true,
+            facebook: true,
+            app: true,
+          }
+        }
+
         // Ensure we don't store any password (it shouldn't get persisted anyway, but let's be careful).
         delete this.user.password
 
@@ -180,7 +195,7 @@ export const useAuthStore = defineStore({
       return await this.$api.session.unsubscribe(email)
     },
     async signUp(params) {
-      const res = await this.$api.user.signUp(params)
+      const res = await this.$api.user.signUp(params, false)
       const { ret, status, jwt, persistent } = res
 
       if (res.ret === 0) {
@@ -202,13 +217,10 @@ export const useAuthStore = defineStore({
       let me = null
       let groups = null
 
-      console.log('Consider got auth')
       if (this.auth.jwt || this.auth.persistent) {
-        console.log('Got auth')
         // We have auth info.  The new API can authenticate using either the JWT or the persistent token.
         try {
           me = await this.$api.session.fetchv2({}, false)
-          console.log('Done fetchv2')
         } catch (e) {
           // Failed.  This can validly happen with a 404 if the JWT is invalid.
           console.log('Exception fetching user')
@@ -219,21 +231,17 @@ export const useAuthStore = defineStore({
           delete me.memberships
 
           if (!this.auth.jwt && process.client) {
-            console.log('Pick up jwt for later')
             // Pick up the JWT for later from the old API.  No need to wait, though.
             this.$api.session
               .fetch({
                 components: ['me'],
               })
               .then((ret) => {
-                console.log('got', ret)
                 let persistent = null
                 let jwt = null
 
                 if (ret) {
                   ;({ me, persistent, jwt } = ret)
-                  console.log('Decode', jwt)
-
                   if (me) {
                     this.setAuth(jwt, persistent)
                   }
@@ -245,7 +253,6 @@ export const useAuthStore = defineStore({
 
       if (!me) {
         // Try the older API which will authenticate via the persistent token and PHP session.
-        console.log('Try older')
         const ret = await this.$api.session.fetch({
           components: ['me'],
         })

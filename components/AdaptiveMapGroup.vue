@@ -66,7 +66,7 @@ export default {
   },
   computed: {
     group() {
-      return this.groupStore.get(this.id)
+      return this.groupStore?.get(this.id)
     },
   },
 }

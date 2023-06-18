@@ -41,7 +41,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     console.error('Unhandled promise rejection', event)
     const reason = event?.reason?.message
 
-    if (reason.includes('Maintenance error')) {
+    if (reason?.includes('Maintenance error')) {
       // The API may throw this, and it may not get caught.
       const router = useRouter()
       router.push('/maintenance')

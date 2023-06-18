@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div :class="reply?.deleted ? 'strike' : ''">
     <notice-message v-if="type === 'ReferToOffer'">
       <p>If you're giving away something, then please:</p>
       <b-button variant="primary" to="/give" class="mb-1">
@@ -38,7 +38,10 @@
         Go to My Posts
       </b-button>
     </notice-message>
-    <div v-if="supportOrAdmin" class="d-flex justify-content-end">
+    <div
+      v-if="supportOrAdmin && !reply?.deleted"
+      class="d-flex justify-content-end"
+    >
       <b-button variant="link" class="reply__button" @click="deleteReply">
         Delete this warning
       </b-button>
@@ -84,6 +87,11 @@ export default {
       showDeleteModal: false,
     }
   },
+  computed: {
+    reply() {
+      return this.newsfeedStore?.byId(this.id)
+    },
+  },
   methods: {
     async deleteReply() {
       this.showDeleteModal = true
@@ -104,5 +112,9 @@ export default {
 .reply__button {
   margin-left: 3px;
   margin-right: 3px;
+}
+
+:deep(.strike) {
+  text-decoration: line-through;
 }
 </style>

@@ -220,15 +220,13 @@ export default {
   },
   computed: {
     message() {
-      return this.messageStore.byId(this.id)
+      return this.messageStore?.byId(this.id)
     },
     left() {
-      let left = this.message.availableinitially
-        ? this.message.availableinitially
-        : 1
+      let left = this.message.availablenow ? this.message.availablenow : 1
 
       for (const u of this.tookUsers) {
-        if (u.userid > 0) {
+        if (u.userid >= 0) {
           left -= u.count
         }
       }

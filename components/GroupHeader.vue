@@ -186,7 +186,7 @@ export default {
   },
   computed: {
     amAMember() {
-      return this.authStore.member(this.group?.id)
+      return this.authStore?.member(this.group?.id)
     },
   },
   methods: {

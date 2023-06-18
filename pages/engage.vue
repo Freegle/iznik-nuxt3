@@ -28,7 +28,7 @@ export default {
   async mounted() {
     // Record the engagement.
     if (this.engageid) {
-      await this.userStore.engaged(this.engageid)
+      await this.userStore?.engaged(this.engageid)
     }
 
     // Now route on to where we were supposed to go.

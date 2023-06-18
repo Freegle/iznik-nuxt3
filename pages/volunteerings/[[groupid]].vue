@@ -29,24 +29,29 @@
             </div>
           </div>
           <h2 class="visually-hidden">List of volunteer opportunities</h2>
-          <div
-            v-for="id in volunteerings"
-            :key="'volunteering-' + id"
-            class="mt-2"
-          >
-            <VolunteerOpportunity
-              :id="id"
-              :filter-group="groupid"
-              :summary="false"
+          <div v-if="forUser?.length">
+            <div
+              v-for="id in volunteerings"
+              :key="'volunteering-' + id"
+              class="mt-2"
+            >
+              <VolunteerOpportunity
+                :id="id"
+                :filter-group="groupid"
+                :summary="false"
+              />
+            </div>
+            <infinite-loading
+              :key="'infinite-' + groupid"
+              :identifier="infiniteId"
+              force-use-infinite-wrapper="body"
+              :distance="1000"
+              @infinite="loadMore"
             />
           </div>
-          <infinite-loading
-            :key="'infinite-' + groupid"
-            :identifier="infiniteId"
-            force-use-infinite-wrapper="body"
-            :distance="1000"
-            @infinite="loadMore"
-          />
+          <div v-else>
+            <NoticeMessage>No opportunities at the moment.</NoticeMessage>
+          </div>
         </b-col>
         <b-col cols="0" md="3" class="d-none d-md-block" />
       </b-row>
@@ -77,16 +82,18 @@ const groupStore = useGroupStore()
 const authStore = useAuthStore()
 
 const route = useRoute()
-const groupid = parseInt(route.params.groupid)
+const groupid = ref(parseInt(route.params.groupid))
 
 let name
 let image
 
-if (groupid) {
-  const group = await groupStore.fetch(groupid)
+if (groupid.value) {
+  const group = await groupStore.fetch(groupid.value)
   name = 'Volunteer Opportunities for ' + group.namedisplay
   image = group?.profile
 } else {
+  groupid.value = '0'
+
   if (authStore.user) {
     // We are logged in, so we can fetch the ops for our groups.
     await volunteeringStore.fetchList()
@@ -137,6 +144,7 @@ const volunteermodal = ref(null)
 const showVolunteerModal = ref(false)
 
 const openVolunteerModal = async () => {
+  showVolunteerModal.value = true
   await waitForRef(volunteermodal)
   volunteermodal.value.show()
 }

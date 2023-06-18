@@ -1,6 +1,6 @@
 <template>
   <client-only v-if="me">
-    <b-container v-if="me" fluid class="p-0">
+    <b-container fluid class="p-0">
       <b-row class="m-0">
         <b-col cols="0" lg="3" class="p-0 pr-1">
           <VisibleWhen :at="['lg', 'xl', 'xxl']">
@@ -123,10 +123,20 @@
             Sorry, this thread isn't around any more.
           </NoticeMessage>
           <div class="p-0 pt-1 mb-1">
+            <NoticeMessage v-if="id && !newsfeed.length" class="mt-2">
+              Sorry, this thread isn't around any more.
+            </NoticeMessage>
             <NewsThread
               v-for="entry in newsfeedToShow"
               :id="entry.id"
-              :key="'newsfeed-' + entry.id + '-area-' + selectedArea"
+              :key="
+                'newsfeed-' +
+                entry.id +
+                '-area-' +
+                selectedArea +
+                '-' +
+                infiniteId
+              "
               :scroll-to="id"
               @rendered="rendered"
             />
@@ -290,7 +300,7 @@ export default {
       },
     },
     newsfeed() {
-      let ret = Object.values(this.newsfeedStore.feed)
+      let ret = Object.values(this.newsfeedStore?.feed)
 
       // Suppress duplicate posts.
       ret = ret.filter((item, index) => {
@@ -307,20 +317,29 @@ export default {
       return ret
     },
     newsfeedToShow() {
-      if (this.id) {
-        const newsfeed = this.newsfeedStore.byId(this.id)
-        if (newsfeed.id !== newsfeed.threadhead) {
-          // We are loading a specific page for a reply but we want to show the whole thread.
-          return [this.newsfeedStore.byId(newsfeed.threadhead)]
+      if (this.newsfeedStore) {
+        if (this.id) {
+          const newsfeed = this.newsfeedStore.byId(this.id)
+
+          if (newsfeed) {
+            if (newsfeed.id !== newsfeed.threadhead) {
+              // We are loading a specific page for a reply but we want to show the whole thread.
+              return [this.newsfeedStore.byId(newsfeed.threadhead)]
+            } else {
+              // Show this item.
+              return [this.newsfeedStore.byId(this.id)]
+            }
+          } else {
+            return []
+          }
         } else {
-          // Show this item.
-          return [this.newsfeedStore.byId(this.id)]
+          return this.newsfeed
+            .slice(0, this.show)
+            .filter((entry) => !entry.unfollowed)
         }
-      } else {
-        return this.newsfeed
-          .slice(0, this.show)
-          .filter((entry) => !entry.unfollowed)
       }
+
+      return []
     },
   },
   beforeCreate() {
@@ -411,6 +430,7 @@ export default {
       await this.newsfeedStore.reset()
       await this.newsfeedStore.fetchFeed(distance)
       this.infiniteId++
+      this.show = 0
     },
     async postIt() {
       let msg = this.startThread
@@ -426,6 +446,10 @@ export default {
 
         // And any image id
         this.imageid = null
+
+        // Show from top.
+        this.infiniteId++
+        this.show = 0
       }
     },
     photoAdd() {

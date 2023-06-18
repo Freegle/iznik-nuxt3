@@ -6,7 +6,7 @@
       img-width="100%"
       :interval="0"
       no-touch
-      :controls="attachments.length > 1"
+      :controls="attachments?.length > 1"
     >
       <b-carousel-slide
         v-for="(attachment, index) in attachments"

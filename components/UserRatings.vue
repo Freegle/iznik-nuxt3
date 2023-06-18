@@ -143,7 +143,7 @@ export default {
       let ret = null
 
       if (this.id) {
-        const user = this.userStore.byId(this.id)
+        const user = this.userStore?.byId(this.id)
 
         if (user && user.info) {
           ret = user

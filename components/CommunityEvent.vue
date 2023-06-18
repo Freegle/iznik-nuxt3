@@ -186,7 +186,7 @@ export default {
   },
   computed: {
     event() {
-      const v = this.communityEventStore.byId(this.id)
+      const v = this.communityEventStore?.byId(this.id)
 
       if (v) {
         if (!this.filterGroup) {
@@ -202,8 +202,8 @@ export default {
     },
     groups() {
       const ret = []
-      this.event.groups.forEach((id) => {
-        const group = this.groupStore.get(id)
+      this.event?.groups?.forEach((id) => {
+        const group = this.groupStore?.get(id)
 
         if (group) {
           ret.push(group)
@@ -213,17 +213,17 @@ export default {
       return ret
     },
     user() {
-      return this.userStore.byId(this.event?.userid)
+      return this.userStore?.byId(this.event?.userid)
     },
     description() {
-      let desc = this.event.description
+      let desc = this.event?.description
       desc = desc ? twem(desc) : ''
       desc = desc.trim()
       return desc
     },
     warning() {
-      const added = new Date(this.event.added).getTime()
-      const renewed = new Date(this.event.renewed).getTime()
+      const added = new Date(this.event?.added).getTime()
+      const renewed = new Date(this.event?.renewed).getTime()
       const now = Date.now()
 
       let warn = false
@@ -237,7 +237,7 @@ export default {
       return warn
     },
     mine() {
-      return this.user.id === this.myid
+      return this.user?.id === this.myid
     },
   },
   methods: {

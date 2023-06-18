@@ -86,7 +86,7 @@ export default {
       if (this.mod) {
         for (const group of this.message?.groups) {
           if (group?.approvedby) {
-            const mod = this.userStore.byId(group.approvedby)
+            const mod = this.userStore?.byId(group.approvedby)
             approvedby = mod?.displayname
           }
         }
@@ -101,7 +101,7 @@ export default {
       const ret = {}
 
       this.message?.groups.forEach((g) => {
-        const thegroup = this.groupStore.get(g.groupid)
+        const thegroup = this.groupStore?.get(g.groupid)
 
         if (thegroup) {
           ret[g.groupid] = thegroup

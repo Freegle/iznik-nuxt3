@@ -13,7 +13,6 @@
       <div v-else>
         <b-row>
           <b-col>
-            {{ story }}
             <p>First, please could we have a quick summary?</p>
             <b-form-input
               v-model="story.headline"
@@ -178,7 +177,7 @@ export default {
   },
   computed: {
     uploadingPhoto() {
-      return this.composeStore.uploading
+      return this.composeStore?.uploading
     },
   },
   methods: {

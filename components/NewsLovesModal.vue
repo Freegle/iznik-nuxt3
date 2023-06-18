@@ -48,7 +48,7 @@ export default {
   },
   computed: {
     newsfeed() {
-      return this.newsfeedStore.byId(this.id)
+      return this.newsfeedStore?.byId(this.id)
     },
     title() {
       let ret = null

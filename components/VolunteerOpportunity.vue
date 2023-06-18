@@ -226,7 +226,7 @@ export default {
   },
   computed: {
     volunteering() {
-      const v = this.volunteeringStore.byId(this.id)
+      const v = this.volunteeringStore?.byId(this.id)
 
       if (v) {
         if (!this.filterGroup) {
@@ -242,8 +242,8 @@ export default {
     },
     groups() {
       const ret = []
-      this.volunteering.groups.forEach((id) => {
-        const group = this.groupStore.get(id)
+      this.volunteering?.groups?.forEach((id) => {
+        const group = this.groupStore?.get(id)
 
         if (group) {
           ret.push(group)
@@ -253,17 +253,17 @@ export default {
       return ret
     },
     user() {
-      return this.userStore.byId(this.volunteering?.userid)
+      return this.userStore?.byId(this.volunteering?.userid)
     },
     description() {
-      let desc = this.volunteering.description
+      let desc = this.volunteering?.description
       desc = desc ? twem(desc) : ''
       desc = desc.trim()
       return desc
     },
     warning() {
-      const added = new Date(this.volunteering.added).getTime()
-      const renewed = new Date(this.volunteering.renewed).getTime()
+      const added = new Date(this.volunteering?.added).getTime()
+      const renewed = new Date(this.volunteering?.renewed).getTime()
       const now = Date.now()
 
       let warn = false

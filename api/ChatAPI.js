@@ -12,8 +12,8 @@ export default class ChatAPI extends BaseAPI {
     })
   }
 
-  fetchChat(chatid) {
-    return this.$getv2('/chat/' + chatid)
+  fetchChat(chatid, logError) {
+    return this.$getv2('/chat/' + chatid, {}, logError)
   }
 
   markRead(chatid, lastmsg, allowback) {

@@ -7,7 +7,7 @@
     >
       <div class="d-flex">
         <ProfileImage
-          v-if="fromuser && fromuser.profile"
+          v-if="fromuser?.profile"
           :image="fromuser.profile.paththumb"
           class="mr-1 mb-1 inline"
           is-thumbnail
@@ -19,7 +19,7 @@
           @click="showProfileModal"
         >
           <div class="text-muted align-middle decornone d-flex">
-            Posted by {{ fromuser.displayname }}
+            Posted by {{ fromuser?.displayname }}
           </div>
         </div>
         <nuxt-link
@@ -32,13 +32,9 @@
           <v-icon icon="link" /> Connected before
         </nuxt-link>
       </div>
-      <SupporterInfo v-if="fromuser.supporter" class="d-inline" />
+      <SupporterInfo v-if="fromuser?.supporter" class="d-inline" />
       <div
-        v-if="
-          fromuser &&
-          fromuser.info &&
-          fromuser.info.openoffers + fromuser.info.openwanteds > 0
-        "
+        v-if="fromuser?.info?.openoffers + fromuser?.info?.openwanteds > 0"
         @click="showProfileModal"
       >
         <span v-if="fromuser.info.openoffers" class="text-success">
@@ -118,7 +114,7 @@ export default {
   computed: {
     fromuser() {
       return this.message?.fromuser
-        ? this.userStore.byId(this.message?.fromuser)
+        ? this.userStore?.byId(this.message?.fromuser)
         : null
     },
     milesaway() {
@@ -143,10 +139,10 @@ export default {
         : null
     },
     message() {
-      return this.messageStore.byId(this.id)
+      return this.messageStore?.byId(this.id)
     },
     today() {
-      return dayjs(this.message.date).isSame(dayjs(), 'day')
+      return dayjs(this.message?.date).isSame(dayjs(), 'day')
     },
     groups() {
       const ret = {}

@@ -1,5 +1,5 @@
 export default defineEventHandler((event) => {
-  // Redirect /councils to separate microsite.
+  // Redirect /councils to separate microsite.  Failed to get this working using routeRules.
   const to = event?.node?.req?.url
 
   // Regex match /councils/any-thing-here and capture the slug

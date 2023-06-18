@@ -29,7 +29,7 @@ export default {
   computed: {
     group: {
       get() {
-        let ret = this.composeStore.group
+        let ret = this.composeStore?.group
 
         if (!ret) {
           if (this.postcode?.groupsnear) {
@@ -44,7 +44,7 @@ export default {
       },
     },
     postcode() {
-      return this.composeStore.postcode
+      return this.composeStore?.postcode
     },
     groupOptions() {
       const ret = []

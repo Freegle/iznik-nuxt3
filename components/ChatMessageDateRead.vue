@@ -65,7 +65,7 @@
       >
         <v-icon icon="check" class="text-muted" />
       </span>
-      <span v-if="chat.chattype === 'User2Mod'">
+      <span v-if="chat.chattype === 'User2Mod'" class="ml-1">
         <span v-if="chatmessage?.userid === me.id"> You </span>
         <span v-else-if="othermodname">
           {{ othermodname }}
@@ -150,7 +150,7 @@ export default {
   },
   computed: {
     othermodname() {
-      return this.chatMessageUser ? this.chatMessageUser.displayname : null
+      return this.chatMessageUser?.displayname
     },
   },
   methods: {

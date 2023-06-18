@@ -339,10 +339,10 @@ export default {
       },
     },
     newsfeed() {
-      return this.newsfeedStore.byId(this.id)
+      return this.newsfeedStore?.byId(this.id)
     },
     tagusers() {
-      return this.newsfeedStore.tagusers?.map((u) => u.displayname)
+      return this.newsfeedStore?.tagusers?.map((u) => u.displayname)
     },
     mod() {
       const me = this.me
@@ -499,7 +499,7 @@ export default {
     },
     async report() {
       this.showReportModal = true
-      await this.waitRef('reportModal')
+      await this.waitForRef('reportModal')
       this.$refs.reportModal.show()
     },
     referToOffer() {

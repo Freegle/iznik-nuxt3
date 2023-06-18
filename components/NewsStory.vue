@@ -115,7 +115,7 @@ export default {
   },
   computed: {
     story() {
-      return this.storyStore.byId(this.newsfeed?.storyid)
+      return this.storyStore?.byId(this.newsfeed?.storyid)
     },
     body() {
       let story = twem(this.story?.story)

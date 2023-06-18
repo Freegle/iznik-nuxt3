@@ -136,7 +136,7 @@ export default {
     }
   },
   async mounted() {
-    this.email = this.me.email
+    this.email = this.me?.email
 
     try {
       await this.authStore.saveAndGet({

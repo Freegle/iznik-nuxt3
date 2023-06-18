@@ -86,9 +86,9 @@ export default {
     info() {
       let info = {}
       try {
-        info = JSON.parse(this.newsfeed.message)
+        info = JSON.parse(this.newsfeed?.message)
 
-        if (info.description) {
+        if (info?.description) {
           const desc = twem(info.description)
           info.description = desc
         }

@@ -199,7 +199,7 @@ export default {
   },
   computed: {
     addresses() {
-      return this.addressStore.list
+      return this.addressStore?.list
     },
     addressOptions() {
       const ret = []
@@ -222,7 +222,7 @@ export default {
 
       const singles = {}
 
-      if (this.addressStore.properties) {
+      if (this.addressStore?.properties) {
         Object.values(this.addressStore.properties).forEach((address) => {
           if (!singles[address.singleline]) {
             ret.push({

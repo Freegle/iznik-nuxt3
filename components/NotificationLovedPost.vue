@@ -2,7 +2,7 @@
   <div class="clickme d-flex" @click="click">
     <div class="d-flex flex-column justify-content-around">
       <ProfileImage
-        :image="fromuser.profile.path"
+        :image="fromuser?.profile?.path"
         class="mr-1 mb-1 ml-1 inline"
         is-thumbnail
         size="lg"
@@ -10,14 +10,14 @@
     </div>
     <div class="d-flex flex-column">
       <div>
-        <span class="font-weight-bold">{{ fromuser.displayname }}</span>
-        <span v-if="newsfeed.type == 'Noticeboard'"> loves your poster </span>
+        <span class="font-weight-bold">{{ fromuser?.displayname }}</span>
+        <span v-if="newsfeed?.type == 'Noticeboard'"> loves your poster </span>
         <span v-else> loves your post</span>
       </div>
       <div v-if="noticeboardname" class="font-weight-bold">
         &quot;{{ noticeboardname }}&quot;
       </div>
-      <div v-else-if="newsfeed.message" class="font-weight-bold line-clamp-2">
+      <div v-else-if="newsfeed?.message" class="font-weight-bold line-clamp-2">
         "{{ newsfeed.message }}"
       </div>
       <abbr class="small text-muted">{{ notificationago }}</abbr>
@@ -43,7 +43,7 @@ export default {
   },
   computed: {
     noticeboardname() {
-      if (this.newsfeed.type === 'Noticeboard') {
+      if (this.newsfeed?.type === 'Noticeboard') {
         try {
           return JSON.parse(this.newsfeed.message)?.name
         } catch (e) {

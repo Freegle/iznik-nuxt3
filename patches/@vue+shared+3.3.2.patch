@@ -1,0 +1,26 @@
+diff --git a/node_modules/@vue/shared/dist/shared.cjs.js b/node_modules/@vue/shared/dist/shared.cjs.js
+index 1f686c1..cd17ef0 100644
+--- a/node_modules/@vue/shared/dist/shared.cjs.js
++++ b/node_modules/@vue/shared/dist/shared.cjs.js
+@@ -331,7 +331,7 @@ function escapeHtml(string) {
+ }
+ const commentStripRE = /^-?>|<!--|-->|--!>|<!-$/g;
+ function escapeHtmlComment(src) {
+-  return src.replace(commentStripRE, "");
++  return src.replace ? src.replace(commentStripRE, "") : '';
+ }
+ 
+ function looseCompareArrays(a, b) {
+diff --git a/node_modules/@vue/shared/dist/shared.cjs.prod.js b/node_modules/@vue/shared/dist/shared.cjs.prod.js
+index ca8322a..104f476 100644
+--- a/node_modules/@vue/shared/dist/shared.cjs.prod.js
++++ b/node_modules/@vue/shared/dist/shared.cjs.prod.js
+@@ -331,7 +331,7 @@ function escapeHtml(string) {
+ }
+ const commentStripRE = /^-?>|<!--|-->|--!>|<!-$/g;
+ function escapeHtmlComment(src) {
+-  return src.replace(commentStripRE, "");
++  return src.replace ? src.replace(commentStripRE, "") : '';
+ }
+ 
+ function looseCompareArrays(a, b) {

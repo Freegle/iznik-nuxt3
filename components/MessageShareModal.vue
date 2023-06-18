@@ -134,7 +134,7 @@ export default {
       return mobileStore.isApp
     },
     message() {
-      return this.messageStore.byId(this.id)
+      return this.messageStore?.byId(this.id)
     },
   },
   methods: {
@@ -160,7 +160,6 @@ export default {
     async doCopy() {
       await navigator.clipboard.writeText(this.message.url)
       this.copied = true
-      this.chose()
     },
   },
 }

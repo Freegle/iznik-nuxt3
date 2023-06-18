@@ -334,42 +334,39 @@
       </div>
     </template>
     <template #footer>
-      <div v-if="added">
-        <b-button
-          variant="white"
-          class="float-right"
-          :disabled="uploadingPhoto"
-          @click="hide"
-        >
-          Close
-        </b-button>
-      </div>
-      <div v-else>
-        <div
-          v-if="event.canmodify"
-          class="w-100 d-flex justify-content-between"
-        >
-          <b-button
-            v-if="!editing"
-            variant="white"
-            class="float-left"
-            :disabled="uploadingPhoto"
-            @click="editing = true"
-          >
-            <v-icon icon="pen" />
-            Edit
-          </b-button>
+      <div class="w-100 d-flex justify-content-between">
+        <template v-if="added">
           <b-button
             variant="white"
-            class="float-left ml-1"
+            class="float-right"
             :disabled="uploadingPhoto"
-            @click="deleteIt"
+            @click="hide"
           >
-            <v-icon icon="trash-alt" />
-            Delete
+            Close
           </b-button>
-        </div>
-        <div class="w-100 d-flex justify-content-between">
+        </template>
+        <template v-else>
+          <template v-if="canmodify">
+            <b-button
+              v-if="!editing"
+              variant="white"
+              class="float-left"
+              :disabled="uploadingPhoto"
+              @click="editing = true"
+            >
+              <v-icon icon="pen" />
+              Edit
+            </b-button>
+            <b-button
+              variant="white"
+              class="float-left ml-1"
+              :disabled="uploadingPhoto"
+              @click="deleteIt"
+            >
+              <v-icon icon="trash-alt" />
+              Delete
+            </b-button>
+          </template>
           <b-button
             v-if="!editing"
             variant="white"
@@ -396,7 +393,7 @@
             :label="event.id ? 'Save Changes' : 'Add Event'"
             @handle="saveIt"
           />
-        </div>
+        </template>
       </div>
     </template>
   </b-modal>
@@ -450,7 +447,6 @@ function initialEvent() {
     contactemail: null,
     contactphone: null,
     contacturl: null,
-    canmodify: null,
   }
 }
 export default {
@@ -519,7 +515,7 @@ export default {
       let ret = null
 
       if (this.id) {
-        ret = this.communityEventStore.byId(this.id)
+        ret = this.communityEventStore?.byId(this.id)
       }
 
       if (!ret) {
@@ -528,10 +524,13 @@ export default {
 
       return ret
     },
+    canmodify() {
+      return this.event?.userid === this.myid
+    },
     groups() {
       const ret = []
-      this.event.groups.forEach((id) => {
-        const group = this.groupStore.get(id)
+      this.event?.groups?.forEach((id) => {
+        const group = this.groupStore?.get(id)
 
         if (group) {
           ret.push(group)
@@ -541,16 +540,16 @@ export default {
       return ret
     },
     user() {
-      return this.userStore.byId(this.event?.userid)
+      return this.userStore?.byId(this.event?.userid)
     },
     uploadingPhoto() {
-      return this.composeStore.uploading
+      return this.composeStore?.uploading
     },
     isExisting() {
-      return Boolean(this.event.id)
+      return Boolean(this.event?.id)
     },
     description() {
-      let desc = this.event.description
+      let desc = this.event?.description
       desc = desc ? twem(desc) : ''
       desc = desc.trim()
       return desc

@@ -335,7 +335,7 @@ export default {
           return this.updatedMessagesOnMap
         } else {
           // See if we have some from the isochrone, which we will have fetched in browse/index.
-          return this.isochroneStore.messageList ?? []
+          return this.isochroneStore?.messageList ?? []
         }
       },
       set(newVal) {
@@ -346,7 +346,7 @@ export default {
       const regions = []
 
       try {
-        const allGroups = this.groupStore.list
+        const allGroups = this.groupStore?.list
 
         for (const ix in allGroups) {
           const group = allGroups[ix]

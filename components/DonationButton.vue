@@ -71,24 +71,33 @@ export default {
     },
   },
   mounted() {
-    const self = this
-    // eslint-disable-next-line no-undef
-    PayPal.Donation.Button({
-      env: 'production',
-      hosted_button_id: this.buttonId,
-      image: {
-        src: '/pp_cc_mark_37x23.jpg',
-        title: 'Donate ' + (this.show ? this.show : '') + ' with PayPal',
-        alt: 'Donate ' + (this.show ? this.show : '') + ' with PayPal',
-      },
-      onComplete(params) {
-        // Because we get a callback we can record the actual amount donated.
-        console.log('Donation completed with', params)
-        self.$emit('clicked', params.amt)
-      },
-    }).render('#' + this.uniqueId)
+    this.checkPayPalLoaded()
   },
   methods: {
+    checkPayPalLoaded() {
+      if (window.PayPal) {
+        this.makeButton()
+      } else {
+        setTimeout(this.checkPayPalLoaded, 100)
+      }
+    },
+    makeButton() {
+      const self = this
+      window.PayPal.Donation.Button({
+        env: 'production',
+        hosted_button_id: this.buttonId,
+        image: {
+          src: '/pp_cc_mark_37x23.jpg',
+          title: 'Donate ' + (this.show ? this.show : '') + ' with PayPal',
+          alt: 'Donate ' + (this.show ? this.show : '') + ' with PayPal',
+        },
+        onComplete(params) {
+          // Because we get a callback we can record the actual amount donated.
+          console.log('Donation completed with', params)
+          self.$emit('clicked', params.amt)
+        },
+      }).render('#' + this.uniqueId)
+    },
     suppress(e) {
       // Stop clicking on the PayPal button itself triggering the button click which will click the PayPal button.
       e.stopPropagation()

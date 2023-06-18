@@ -49,6 +49,11 @@ export default {
       type: Number,
       required: true,
     },
+    active: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   setup() {
     const chatStore = useChatStore()
@@ -84,6 +89,31 @@ export default {
       return ret
     },
   },
+  mounted() {
+    if (this.active) {
+      const cb = () => {
+        if (this.$el.scrollIntoViewIfNeeded) {
+          this.$el.scrollIntoViewIfNeeded({
+            behavior: 'instant',
+            block: 'start',
+            inline: 'nearest',
+          })
+        } else {
+          this.$el.scrollIntoView({
+            behavior: 'instant',
+            block: 'start',
+            inline: 'nearest',
+          })
+        }
+      }
+
+      if ('requestIdleCallback' in window) {
+        window.requestIdleCallback(cb)
+      } else {
+        setTimeout(cb, 100)
+      }
+    }
+  },
   methods: {
     async fetch() {
       this.fetched = true
@@ -107,6 +137,7 @@ export default {
   display: grid;
   grid-template-columns: min-content calc(98% - 30px);
   align-items: center;
+  scroll-padding-top: 10px;
 
   @include media-breakpoint-up(sm) {
     grid-template-columns: min-content calc(98% - 50px);
