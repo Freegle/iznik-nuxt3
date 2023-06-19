@@ -53,7 +53,7 @@
           Sorry, we didn't find anything. Things come and go quickly, though, so
           you could try later. Or you could:
         </p>
-        <GiveAsk />
+        <GiveAsk class="bg-info" />
       </NoticeMessage>
     </div>
     <template #fallback>
