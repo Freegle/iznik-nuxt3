@@ -42,8 +42,8 @@ workflows:
             branches:
               only:
                 - app-publish
-          requires:
-            - HoldAndroid
+          #requires:
+          #  - HoldAndroid
 
 ################
 ################ APPLE
