@@ -44,7 +44,6 @@
               </div>
               <div v-if="chatmessage.refmsgid">
                 <hr />
-                {{ chatmessage.refmsg }}
                 <p>
                   If you have been asked to edit and resend this message, you
                   can do so here:
@@ -62,6 +61,7 @@
 </template>
 <script>
 import { useComposeStore } from '../stores/compose'
+import { fetchReferencedMessage } from '../composables/useChat'
 import ChatBase from '~/components/ChatBase'
 import ProfileImage from '~/components/ProfileImage'
 
@@ -70,8 +70,10 @@ export default {
     ProfileImage,
   },
   extends: ChatBase,
-  setup() {
+  async setup(props) {
     const composeStore = useComposeStore()
+
+    await fetchReferencedMessage(props.chatid, props.id)
 
     return { composeStore }
   },
@@ -85,7 +87,7 @@ export default {
   },
   methods: {
     async repost() {
-      const message = this.composeStore.message(this.chatmessage.refmsg.id)
+      const message = this.refmsg
 
       // Remove any partially composed messages we currently have, because they'll be confusing.
       await this.composeStore.clearMessages()

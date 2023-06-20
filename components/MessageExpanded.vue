@@ -128,13 +128,13 @@ export default {
   },
   computed: {
     message() {
-      return this.messageStore.byId(this.id)
+      return this.messageStore?.byId(this.id)
     },
     gotAttachments() {
       return (
         this.message &&
         this.message.attachments &&
-        this.message.attachments.length
+        this.message.attachments?.length
       )
     },
     validPosition() {

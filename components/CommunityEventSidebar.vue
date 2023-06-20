@@ -48,10 +48,10 @@ export default {
   },
   computed: {
     forUser() {
-      return this.communityEventStore.forUser
+      return this.communityEventStore?.forUser
     },
     events() {
-      return this.forUser.slice(0, this.toShow)
+      return this.forUser?.slice(0, this.toShow)
     },
   },
   methods: {

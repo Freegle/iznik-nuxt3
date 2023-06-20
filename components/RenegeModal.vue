@@ -114,7 +114,7 @@ export default {
         }
 
         for (const id of this.messages) {
-          const message = this.messageStore.byId(id)
+          const message = this.messageStore?.byId(id)
 
           if (message) {
             options.push({
@@ -164,7 +164,7 @@ export default {
     },
     tryst() {
       return this.selectedUser
-        ? this.trystStore.getByUser(this.selectedUser)
+        ? this.trystStore?.getByUser(this.selectedUser)
         : null
     },
   },

@@ -3,7 +3,11 @@
     <div class="layout mb-1">
       <div class="divider" />
       <div class="d-flex flex-column justify-content-start user">
-        <div class="d-flex mr-4 clickme" @click="showProfileModal">
+        <div
+          v-if="replyuser"
+          class="d-flex mr-4 clickme"
+          @click="showProfileModal"
+        >
           <ProfileImage
             :image="replyuser.profile.paththumb"
             class="m-1 d-none d-md-block"
@@ -39,19 +43,19 @@
           </b-badge>
         </div>
         <SupporterInfo
-          v-if="replyuser.supporter"
+          v-if="replyuser?.supporter"
           class="mt-1 mr-1 d-flex flex-column justify-content-center"
         />
       </div>
       <div
         class="pl-1 flex-shrink-1 ratings d-flex d-md-none justify-content-end"
       >
-        <UserRatings :id="replyuser.id" size="sm" />
+        <UserRatings :id="replyuser?.id" size="sm" />
       </div>
       <div
         class="pl-1 flex-shrink-1 ratings d-none d-md-flex justify-content-end w-100 pr-1"
       >
-        <UserRatings :id="replyuser.id" />
+        <UserRatings :id="replyuser?.id" />
       </div>
       <div class="d-flex flex-column justify-content-center wrote">
         <div>
@@ -77,11 +81,10 @@
             class="align-middle mt-1 mb-1 mr-2"
             @click="unpromise"
           >
-            <div class="stacked">
+            <span class="stacked">
               <v-icon icon="handshake" />
-              <v-icon icon="slash" class="unpromise__slash" />
-            </div>
-            Unpromise
+              <v-icon icon="slash" class="unpromise__slash" /> </span
+            >&nbsp;Unpromise
           </b-button>
           <b-button
             v-else-if="message.type === 'Offer' && !taken && !withdrawn"
@@ -112,14 +115,14 @@
       :messages="[message]"
       :selected-message="message.id"
       :users="[replyuser]"
-      :selected-user="replyuser.id"
+      :selected-user="replyuser?.id"
     />
     <RenegeModal
       ref="renege"
       :messages="[message]"
       :selected-message="message.id"
       :users="[replyuser]"
-      :selected-user="replyuser.id"
+      :selected-user="replyuser?.id"
     />
     <ProfileModal
       v-if="showProfile && reply && replyuser"
@@ -230,10 +233,10 @@ export default {
   },
   computed: {
     chat() {
-      return this.chatStore.toUser(this.reply.userid)
+      return this.chatStore?.toUser(this.reply.userid)
     },
     replyuser() {
-      return this.userStore.byId(this.reply.userid)
+      return this.userStore?.byId(this.reply.userid)
     },
     replyago() {
       return timeago(this.chat?.lastdate)
@@ -246,7 +249,7 @@ export default {
       let unseen = 0
 
       for (const chat of this.chats) {
-        if (chat.id === this.reply.chatid) {
+        if (chat.id === this.reply?.chatid) {
           unseen += chat.unseen
         }
       }
@@ -254,7 +257,7 @@ export default {
       return unseen
     },
     promised() {
-      if (this.message.promisecount) {
+      if (this.message?.promisecount && this.message.promises?.length) {
         for (const promise of this.message.promises) {
           if (promise.userid === this.reply.userid) {
             return true
@@ -270,10 +273,12 @@ export default {
       const router = useRouter()
       router.push('/chats/' + this.chat?.id)
     },
-    promise() {
+    async promise() {
+      await this.waitForRef('promise ')
       this.$refs.promise.show()
     },
-    unpromise() {
+    async unpromise() {
+      await this.waitForRef('renege')
       this.$refs.renege.show()
     },
     async showProfileModal() {

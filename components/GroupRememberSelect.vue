@@ -53,7 +53,7 @@ export default {
   },
   computed: {
     rememberedValue() {
-      return this.groupStore.remembered(this.remember)
+      return this.groupStore?.remembered(this.remember)
     },
     selectValue: {
       get() {

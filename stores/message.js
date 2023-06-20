@@ -30,7 +30,7 @@ export const useMessageStore = defineStore({
           await this.fetching[id]
         } else {
           this.fetchingCount++
-          this.fetching[id] = api(this.config).message.fetch(id)
+          this.fetching[id] = api(this.config).message.fetch(id, false)
           this.fetchingCount--
 
           const message = await this.fetching[id]

@@ -8,6 +8,14 @@ import { useMiscStore } from '~/stores/misc'
 // Note that $fetch and useFetch cause problems on Node v18, so we don't use them.
 const ourFetch = fetchRetry(fetch, {
   retries: 10,
+  retryOn: (attempt, error, response) => {
+    // Retry on pretty much anything except errors which can legitimately be returned by the API server.  These are
+    // the low 400s.
+    if (error !== null || response?.status > 404) {
+      console.log('API retry', attempt, error, response)
+      return true
+    }
+  },
   retryDelay: function (attempt, error, response) {
     return attempt * 1000
   },
@@ -94,7 +102,7 @@ export default class BaseAPI {
 
       useMiscStore().api(1)
 
-      const rsp = await fetch(this.config.public.APIv1 + path, {
+      const rsp = await ourFetch(this.config.public.APIv1 + path, {
         ...config,
         body,
         method,
@@ -109,8 +117,6 @@ export default class BaseAPI {
         // we renew the JWT.
         authStore.setAuth(data.jwt, data.persistent)
       }
-
-      useMiscStore().api(-1)
     } catch (e) {
       if (e.message.match(/.*aborted.*/i)) {
         // We've seen requests get aborted immediately after beforeunload().  Makes sense to abort the requests
@@ -119,6 +125,8 @@ export default class BaseAPI {
         console.log('Aborted - ignore')
         return new Promise(function (resolve) {})
       }
+    } finally {
+      useMiscStore().api(-1)
     }
 
     // HTTP errors are real errors.
@@ -311,8 +319,6 @@ export default class BaseAPI {
 
       status = rsp.status
       data = await rsp.json()
-
-      useMiscStore().api(-1)
     } catch (e) {
       console.log('Fetch error', path, e?.message)
       if (e.message.match(/.*aborted.*/i)) {
@@ -322,6 +328,8 @@ export default class BaseAPI {
         console.log('Aborted - ignore')
         return new Promise(function (resolve) {})
       }
+    } finally {
+      useMiscStore().api(-1)
     }
 
     // HTTP errors are real errors.

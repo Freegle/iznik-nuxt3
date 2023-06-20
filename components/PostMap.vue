@@ -249,7 +249,7 @@ export default {
       }
     },
     mapHidden() {
-      return this.canHide && this.miscStore.get('hidepostmap')
+      return this.canHide && this.miscStore?.get('hidepostmap')
     },
     showMessages() {
       // We're zoomed in far enough or we're forcing ourselves to show them (but not so that it's silly)
@@ -281,7 +281,7 @@ export default {
       return false
     },
     allGroups() {
-      return this.groupStore.list
+      return this.groupStore?.list
     },
     groupsInBounds() {
       const ret = []
@@ -344,7 +344,7 @@ export default {
         : []
     },
     isochrones() {
-      return this.isochroneStore.list
+      return this.isochroneStore?.list
     },
     isochroneGEOJSONs() {
       const ret = []
@@ -408,7 +408,7 @@ export default {
       }
     },
     isochroneBounds(newVal) {
-      if (newVal) {
+      if (newVal && this.mapObject) {
         // Make the map show the isochrone view.
         this.mapObject.flyToBounds(newVal)
       }

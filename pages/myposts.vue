@@ -364,20 +364,20 @@ export default {
   },
   computed: {
     postcode() {
-      return this.composeStore.postcode
+      return this.composeStore?.postcode
     },
     wanteds() {
-      const ret = this.messages?.filter(
+      let ret = this.messages?.filter(
         (m) => m.type === 'Wanted' && (this.showOldWanteds || !m.hasoutcome)
       )
-      ret.sort(this.postSort)
+      ret = ret ? ret.sort(this.postSort) : []
       return ret
     },
     offers() {
-      const ret = this.messages?.filter(
+      let ret = this.messages?.filter(
         (m) => m.type === 'Offer' && (this.showOldOffers || !m.hasoutcome)
       )
-      ret.sort(this.postSort)
+      ret = ret ? ret.sort(this.postSort) : []
       return ret
     },
     offersShown() {
@@ -488,7 +488,7 @@ export default {
       if (outcome === 'Taken' || outcome === 'Received') {
         // If someone has set up a regular donation, then we don't ask them to donate again.  Wouldn't be fair to
         // pester them.
-        if (!this.me.donorrecurring && canask) {
+        if (!this.me?.donorrecurring && canask) {
           this.donationGroup = groupid
           this.ask()
 

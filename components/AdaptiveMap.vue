@@ -361,27 +361,25 @@ export default {
   },
   computed: {
     showClosest() {
-      return (
-        this.closestGroups &&
-        this.closestGroups.length &&
-        this.closestGroups.length < 20
-      )
+      return this.closestGroups?.length && this.closestGroups.length < 20
     },
     regions() {
       const regions = []
 
       try {
-        const allGroups = this.groupStore.list
+        const allGroups = this.groupStore?.list
 
-        for (const ix in allGroups) {
-          const group = allGroups[ix]
+        if (allGroups) {
+          for (const ix in allGroups) {
+            const group = allGroups[ix]
 
-          if (group.region && !regions.includes(group.region)) {
-            regions.push(group.region)
+            if (group.region && !regions.includes(group.region)) {
+              regions.push(group.region)
+            }
           }
-        }
 
-        regions.sort()
+          regions.sort()
+        }
       } catch (e) {
         console.error('Exception', e)
       }
@@ -474,7 +472,7 @@ export default {
       const ret = []
 
       if (this.centre) {
-        const allGroups = this.groupStore.list
+        const allGroups = this.groupStore?.list
 
         for (const ix in allGroups) {
           const group = allGroups[ix]
@@ -487,7 +485,7 @@ export default {
                 this.bounds.contains([group.altlat, group.altlng]))
             ) {
               // Are we already a member?
-              const member = this.authStore.member(group.id)
+              const member = this.authStore?.member(group.id)
 
               if (!member) {
                 // Visible group?
@@ -536,14 +534,16 @@ export default {
       }
     },
     async selectedType(newVal) {
-      const settings = this.me.settings
-      settings.browsePostType = newVal
+      if (this.me) {
+        const settings = this.me.settings
+        settings.browsePostType = newVal
 
-      await this.authStore.saveAndGet({
-        settings,
-      })
+        await this.authStore.saveAndGet({
+          settings,
+        })
 
-      this.infiniteId++
+        this.infiniteId++
+      }
     },
     search(newval) {
       if (!newval) {

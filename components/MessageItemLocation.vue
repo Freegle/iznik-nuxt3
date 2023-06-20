@@ -73,7 +73,7 @@ export default {
   },
   computed: {
     message() {
-      return this.messageStore.byId(this.id)
+      return this.messageStore?.byId(this.id)
     },
     subject() {
       return this.message ? this.message.subject : null

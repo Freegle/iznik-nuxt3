@@ -117,7 +117,7 @@ export default {
   computed: {
     notVisible() {
       let ret = false
-      if (this.id && !this.chatStore.byChatId(this.id)) {
+      if (this.id && !this.chatStore?.byChatId(this.id)) {
         // This isn't a chat we can see.
         ret = true
       }

@@ -45,7 +45,6 @@
     </div>
   </div>
 </template>
-
 <script>
 import { useUserStore } from '../stores/user'
 import ProfileImage from '~/components/ProfileImage'
@@ -86,7 +85,7 @@ export default {
       return ret
     },
     user() {
-      return this.id ? this.userStore.byId(this.id) : null
+      return this.id ? this.userStore?.byId(this.id) : null
     },
   },
 }

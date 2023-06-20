@@ -224,12 +224,12 @@ export default {
     })
 
     const fullname = computed({
-      get: () => giftAidStore.giftaid.fullname,
+      get: () => giftAidStore.giftaid?.fullname,
       set: (value) => (giftAidStore.giftaid.fullname = value),
     })
 
     const homeaddress = computed({
-      get: () => giftAidStore.giftaid.homeaddress,
+      get: () => giftAidStore.giftaid?.homeaddress,
       set: (value) => (giftAidStore.giftaid.homeaddress = value),
     })
 

@@ -390,10 +390,10 @@ export default {
       return this.reply?.userid
     },
     reply() {
-      return this.newsfeedStore.byId(this.replyid)
+      return this.newsfeedStore?.byId(this.replyid)
     },
     tagusers() {
-      return this.newsfeedStore.tagusers?.map((u) => u.displayname)
+      return this.newsfeedStore?.tagusers?.map((u) => u.displayname)
     },
     mod() {
       const me = this.me

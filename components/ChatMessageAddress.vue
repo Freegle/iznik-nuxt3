@@ -141,7 +141,7 @@ export default {
     address() {
       // The addressid is (wrongly) stored in the message.
       if (this.chatmessage?.message) {
-        return this.addressStore.get(parseInt(this.chatmessage.message))
+        return this.addressStore?.get(parseInt(this.chatmessage.message))
       }
 
       return null

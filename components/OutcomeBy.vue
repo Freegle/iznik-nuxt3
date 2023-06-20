@@ -13,7 +13,7 @@
       </label>
     </div>
     <div
-      v-for="user in selectedUsers"
+      v-for="user in currentlySelectedUsers"
       :key="'selected-' + user.userid"
       class="layout mb-2 mt-1"
     >
@@ -76,7 +76,6 @@
 import { useMessageStore } from '../stores/message'
 import UserRatings from './UserRatings'
 import NumberIncrementDecrement from './NumberIncrementDecrement'
-import { useUserStore } from '~/stores/user'
 import { ref } from '#imports'
 
 export default {
@@ -111,7 +110,6 @@ export default {
   },
   async setup(props) {
     const messageStore = useMessageStore()
-    const userStore = useUserStore()
 
     if (props.msgid) {
       await messageStore.fetch(props.msgid)
@@ -123,7 +121,7 @@ export default {
 
     const selectUser = ref(-1)
 
-    const selectedUsers = computed(() => {
+    const initiallySelectedUsers = computed(() => {
       let ret = []
 
       if (props.msgid) {
@@ -134,23 +132,17 @@ export default {
         if (props.takenBy) {
           ret.push(props.takenBy)
         }
-
-        if (selectUser.value >= 0) {
-          // Note that the value may be -1 for someone else, so the user may not exist.
-          ret.push({
-            userid: selectUser.value,
-            displayname: userStore.byId(selectUser.value)?.displayname,
-            count: 1,
-          })
-        }
       }
 
       return ret
     })
 
+    const currentlySelectedUsers = ref(initiallySelectedUsers.value)
+
     return {
       messageStore,
-      selectedUsers,
+      initiallySelectedUsers,
+      currentlySelectedUsers,
       selectUser,
       message,
     }
@@ -183,24 +175,23 @@ export default {
     availableUsers() {
       // The users available to select are the ones which are not currently selected (unless that's the user for this
       // one.
-      const ret = this.repliers.filter(
-        (u) => !this.selectedUsers.find((u2) => u2.userid === u.userid)
+      const ret = this.repliers?.filter(
+        (u) => !this.currentlySelectedUsers.find((u2) => u2.userid === u.userid)
       )
 
       return ret
     },
     moreUsersToSelect() {
       // We show the choose if there are some left and we have not got all users plus someone else.
-      console.log('Repliers', this.left, this.repliers)
       return (
         this.left &&
-        (this.selectedUsers.length <= this.repliers.length ||
-          !this.selectedUsers.find((u) => !u.userid))
+        (this.currentlySelectedUsers?.length <= this.repliers?.length ||
+          !this.currentlySelectedUsers.find((u) => !u.userid))
       )
     },
     sortedSelectors() {
       // Want Someone Else at the end, and alphabetic otherwise.
-      const ret = JSON.parse(JSON.stringify(this.selectedUsers))
+      const ret = JSON.parse(JSON.stringify(this.currentlySelectedUsers))
       return ret.sort((a, b) => {
         if (a.userid && !b.userid) {
           return -1
@@ -215,7 +206,7 @@ export default {
     },
   },
   watch: {
-    selectedUsers: {
+    currentlySelectedUsers: {
       handler(newVal) {
         this.$emit('tookUsers', newVal)
       },
@@ -225,17 +216,20 @@ export default {
   methods: {
     selected(userid) {
       if (userid === 0) {
-        this.selectedUsers.push({
+        this.currentlySelectedUsers.push({
           userid: null,
           count: 1,
         })
       } else if (userid > 0) {
         const user = this.availableUsers.find((u) => u.userid === userid)
+        console.log('Found', user)
         user.count = 1
-        this.selectedUsers.push(user)
+        this.currentlySelectedUsers.push(user)
       }
 
-      this.selectUser = -1
+      this.$nextTick(() => {
+        this.selectUser = -1
+      })
     },
     userOptions(small) {
       const options = []
@@ -243,7 +237,7 @@ export default {
       options.push({
         value: -1,
         html:
-          this.selectedUsers.length >= 1
+          this.currentlySelectedUsers.length >= 1
             ? '<em>-- Add someone --</em>'
             : this.userOptionsChoose(small),
       })
@@ -255,7 +249,7 @@ export default {
         })
       }
 
-      if (!this.selectedUsers.find((u) => u.userid === null)) {
+      if (!this.currentlySelectedUsers.find((u) => u.userid === null)) {
         options.push({
           value: 0,
           html:

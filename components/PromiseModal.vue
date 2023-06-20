@@ -221,7 +221,7 @@ export default {
     },
     tryst() {
       return this.currentlySelected
-        ? this.trystStore.getByUser(this.currentlySelected)
+        ? this.trystStore?.getByUser(this.currentlySelected)
         : null
     },
   },

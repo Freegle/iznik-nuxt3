@@ -76,7 +76,7 @@ export default {
     },
     refmsg() {
       const messageStore = useMessageStore()
-      return this.refmsgid ? messageStore.byId(this.refmsgid) : null
+      return this.refmsgid ? messageStore?.byId(this.refmsgid) : null
     },
     // We override the normal methods because we might have an explicit point-of-view to honour.
     me() {

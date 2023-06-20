@@ -155,9 +155,11 @@ export default {
       default: null,
     },
   },
-  setup() {
+  async setup(props) {
     const messageStore = useMessageStore()
     const authStore = useAuthStore()
+
+    await messageStore.fetch(props.id)
 
     return {
       messageStore,
@@ -176,7 +178,7 @@ export default {
   },
   computed: {
     message() {
-      return this.messageStore.byId(this.id)
+      return this.messageStore?.byId(this.id)
     },
     stillAvailable() {
       return (
@@ -281,10 +283,7 @@ export default {
           if (!found) {
             // Not currently a member.
             console.log('Need to join')
-            await this.authStore.joinGroup({
-              userid: this.myid,
-              groupid: tojoin,
-            })
+            await this.authStore.joinGroup(this.myid, tojoin)
           }
 
           // Now we can send the reply via chat.
@@ -301,7 +300,7 @@ export default {
     async savePostcode(pc) {
       const settings = this.me.settings
 
-      if (!settings.mylocation || settings.mylocation.id !== pc.id) {
+      if (!settings?.mylocation || settings?.mylocation.id !== pc.id) {
         settings.mylocation = pc
         await this.authStore.saveAndGet({
           settings,

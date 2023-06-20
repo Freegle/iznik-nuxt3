@@ -13,25 +13,49 @@
         screenshot and contact <SupportLink />
       </p>
     </NoticeMessage>
+    <NoticeMessage
+      v-if="showReload && !snoozeReload"
+      variant="info"
+      class="posit text-center"
+      show
+    >
+      <p>
+        The website has been updated with fixes and improvements. Please reload
+        this page to pick up the latest version.
+      </p>
+      <div class="d-flex justify-content-around">
+        <b-button variant="white" @click="snooze">Not just now </b-button>
+        <b-button variant="primary" @click="reload"> Reload now </b-button>
+      </div>
+    </NoticeMessage>
   </div>
 </template>
 <script>
+import NoticeMessage from './NoticeMessage'
 import { useMiscStore } from '~/stores/misc'
 import SupportLink from '~/components/SupportLink'
 
 export default {
   components: {
+    NoticeMessage,
     SupportLink,
   },
   data() {
     return {
       showError: false,
+      showReload: false,
+      snoozeReload: false,
+      snoozeTimer: null,
     }
   },
   computed: {
     somethingWentWrong() {
       const miscStore = useMiscStore()
       return miscStore.somethingWentWrong
+    },
+    needToReload() {
+      const miscStore = useMiscStore()
+      return miscStore.needToReload
     },
   },
   watch: {
@@ -43,6 +67,28 @@ export default {
         }, 10000)
       }
     },
+    needToReload(newVal) {
+      if (newVal) {
+        this.showReload = true
+      }
+    },
+  },
+  beforeUnmount() {
+    if (this.snoozeTimer) {
+      clearTimeout(this.snoozeTimer)
+    }
+  },
+  methods: {
+    reload() {
+      window.location.reload()
+    },
+    snooze() {
+      this.snoozeReload = true
+
+      this.snoozeTimer = setTimeout(() => {
+        this.snoozeReload = false
+      }, 120000)
+    },
   },
 }
 </script>
@@ -51,6 +97,6 @@ export default {
   position: fixed;
   bottom: 0;
   width: 100%;
-  z-index: 1000;
+  z-index: 10000;
 }
 </style>

@@ -95,6 +95,8 @@ export default {
     currentEmail: {
       immediate: true,
       async handler(newVal) {
+        this.$emit('update:email', newVal)
+
         if (newVal && newVal.includes('@')) {
           // Ask the server to spot typos in this domain.
           const domain = newVal.substring(newVal.indexOf('@') + 1)
@@ -113,7 +115,6 @@ export default {
           }
         }
 
-        this.$emit('update:email', newVal)
         const validate = await this.$refs.email?.validate()
         if (validate) {
           this.$emit('update:valid', validate.valid)

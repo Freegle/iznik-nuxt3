@@ -113,7 +113,7 @@
               </div>
             </div>
             <hr class="" />
-            <div class="d-flex justify-content-between flex-wrap mt-1">
+            <div class="d-flex justify-content-between flex-wrap mt-1 neartop">
               <b-button
                 v-if="rejected && message.location && message.item"
                 variant="warning"
@@ -238,11 +238,11 @@
                     >
                       <div class="small">
                         <b-badge
-                          v-if="message.attachments.length > 1"
+                          v-if="message.attachments?.length > 1"
                           class="photobadge"
                           variant="primary"
                         >
-                          {{ message.attachments.length }}
+                          {{ message.attachments?.length }}
                           <v-icon icon="camera" />
                         </b-badge>
                       </div>
@@ -406,14 +406,14 @@ export default {
   },
   computed: {
     message() {
-      return this.messageStore.byId(this.id)
+      return this.messageStore?.byId(this.id)
     },
     groups() {
       const ret = {}
 
       if (this.message) {
         this.message.groups.forEach((g) => {
-          const thegroup = this.groupStore.get(g.groupid)
+          const thegroup = this.groupStore?.get(g.groupid)
 
           if (thegroup) {
             ret[g.groupid] = thegroup
@@ -432,7 +432,7 @@ export default {
     unseen() {
       // We want all the chats from replies.  We fetch them in default.vue, here we only need to
       // get them from the store
-      const chats = this.chatStore.list ? this.chatStore.list : []
+      const chats = this.chatStore?.list ? this.chatStore.list : []
 
       let unseen = 0
 
@@ -460,9 +460,11 @@ export default {
     rejected() {
       let rejected = false
 
-      for (const group of this.message.groups) {
-        if (group.collection === 'Rejected') {
-          rejected = true
+      if (this.message?.groups) {
+        for (const group of this.message.groups) {
+          if (group.collection === 'Rejected') {
+            rejected = true
+          }
         }
       }
 
@@ -496,7 +498,7 @@ export default {
 
       if (this.replyusers?.length > 1) {
         this.replyusers.forEach((uid) => {
-          const u = this.userStore.byId(uid)
+          const u = this.userStore?.byId(uid)
 
           if (u && (dist === null || (u.info && u?.info.milesaway < dist))) {
             dist = u.info.milesaway
@@ -513,7 +515,7 @@ export default {
 
       if (this.replyusers?.length > 1) {
         this.replyusers.forEach((uid) => {
-          const u = this.userStore.byId(uid)
+          const u = this.userStore?.byId(uid)
 
           if (u && u.info?.ratings?.Up + u.info?.ratings?.Down > 2) {
             const thisrating =
@@ -539,7 +541,7 @@ export default {
 
       if (this.replyusers?.length > 1) {
         this.replyusers.forEach((uid) => {
-          const u = this.userStore.byId(uid)
+          const u = this.userStore?.byId(uid)
 
           if (
             u &&
@@ -584,9 +586,9 @@ export default {
     chats() {
       // We want all the chats which reference this message.  We fetch them in myposts, here we only need to
       // get them from the store
-      const chats = this.chatStore.list ? this.chatStore.list : []
+      const chats = this.chatStore?.list ? this.chatStore.list : []
       const ret = chats.filter((c) => {
-        return this.message.refchatids.includes(c.id)
+        return this.message?.refchatids?.includes(c.id)
       })
 
       return ret
@@ -596,10 +598,10 @@ export default {
 
       if (this.expanded && this.message.promises?.length) {
         this.message.promises.forEach((p) => {
-          const user = this.userStore.byId(p.userid)
+          const user = this.userStore?.byId(p.userid)
 
           if (user) {
-            const tryst = this.trystStore.getByUser(p.userid)
+            const tryst = this.trystStore?.getByUser(p.userid)
             const date = tryst
               ? dayjs(tryst.arrangedfor).format('dddd Do HH:mm a')
               : null

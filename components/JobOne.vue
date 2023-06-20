@@ -82,7 +82,7 @@ export default {
   },
   computed: {
     job() {
-      return this.jobStore.byId(this.id)
+      return this.jobStore?.byId(this.id)
     },
     title() {
       if (!this.job?.title) {

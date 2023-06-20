@@ -10,6 +10,7 @@
   </div>
 </template>
 <script>
+import { useMiscStore } from '../stores/misc'
 import LayoutCommon from '~/components/LayoutCommon'
 import { ref } from '#imports'
 import { useAuthStore } from '~/stores/auth'
@@ -30,7 +31,14 @@ export default {
     const googleReady = ref(false)
     const authStore = useAuthStore()
     const jwt = authStore.auth.jwt
+    const miscStore = useMiscStore()
     const persistent = authStore.auth.persistent
+
+    if (process.client) {
+      // Ensure we don't wrongly think we have some outstanding requests if the server happened to start some.  This
+      // would break waitForRef.
+      miscStore.apiCount = 0
+    }
 
     if (jwt || persistent) {
       // We have some credentials, which may or may not be valid on the server.  If they are, then we can crack on and

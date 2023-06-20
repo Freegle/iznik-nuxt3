@@ -81,9 +81,7 @@
             "
           >
             <b-img
-              v-if="
-                refmsg && refmsg.attachments && refmsg.attachments.length > 0
-              "
+              v-if="refmsg && refmsg.attachments?.length > 0"
               class="float-end"
               rounded
               thumbnail
@@ -267,7 +265,7 @@ export default {
   computed: {
     tryst() {
       return this.otheruser
-        ? this.trystStore.getByUser(this.otheruser.id)
+        ? this.trystStore?.getByUser(this.otheruser.id)
         : null
     },
     takenBy() {

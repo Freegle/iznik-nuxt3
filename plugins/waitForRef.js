@@ -6,11 +6,16 @@
 //
 // So we have a cheap and cheerful poll timer.
 
+import { useMiscStore } from '~/stores/misc'
+
 export default defineNuxtPlugin((nuxtApp) => {
   nuxtApp.vueApp.mixin({
     methods: {
       waitForRefTimer(name, resolve) {
-        if (this.$refs[name]) {
+        // Wait for no API calls.  This helps with async setup of components.  We think that the ref can exist while
+        // the setup() method is still running (asynchronously) and therefore the ref is not really ready yet.
+        const api = useMiscStore().apiCount
+        if (this.$refs[name] && !api) {
           this.$nextTick(() => {
             this.$nextTick(() => {
               resolve()

@@ -149,7 +149,7 @@ export default {
   },
   computed: {
     item() {
-      return this.list.length ? this.list[0] : null
+      return this.list?.length ? this.list[0] : null
     },
     text() {
       return this.thanksText[

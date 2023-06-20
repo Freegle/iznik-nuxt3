@@ -7,7 +7,7 @@
         <b-col cols="12" xl="6" class="p-0">
           <div
             v-if="
-              error ||
+              failed ||
               (message &&
                 ((message.outcomes && message.outcomes.length > 0) ||
                   message.deleted ||
@@ -78,6 +78,7 @@ import { buildHead } from '../../composables/useBuildHead'
 import { useMessageStore } from '~/stores/message'
 import { twem } from '~/composables/useTwem'
 import MyMessage from '~/components/MyMessage'
+import { ref } from '#imports'
 
 const runtimeConfig = useRuntimeConfig()
 const route = useRoute()
@@ -86,7 +87,16 @@ const messageStore = useMessageStore()
 // We don't use lazy because we want the page to be rendered for SEO.
 const id = parseInt(route.params.id)
 
-await messageStore.fetch(id)
+const failed = ref(false)
+
+try {
+  await messageStore.fetch(id)
+} catch (e) {
+  // Likely to be because the message doesn't exist.
+  console.log('Message fetch failed', e)
+  failed.value = true
+}
+
 const message = computed(() => {
   return messageStore.byId(id)
 })
@@ -106,7 +116,7 @@ if (message.value) {
       runtimeConfig,
       message.value.subject,
       snip,
-      message.value.attachments && message.value.attachments.length > 0
+      message.value.attachments && message.value.attachments?.length > 0
         ? message.value.attachments[0].path
         : null
     )

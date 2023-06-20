@@ -106,7 +106,7 @@ const sortedStories = computed(() => {
 const addmodal = ref(null)
 
 const showAddModal = function () {
-  addmodal.show()
+  addmodal.value.show()
 }
 
 const changeGroup = function (newval) {

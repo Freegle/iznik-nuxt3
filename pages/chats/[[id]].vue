@@ -53,9 +53,11 @@
                 }"
                 @click="gotoChat(chat.id)"
               >
-                <ChatListEntry :id="chat.id" />
+                <ChatListEntry
+                  :id="chat.id"
+                  :active="selectedChatId === chat?.id"
+                />
               </div>
-              <!--                :key="bump"-->
               <infinite-loading
                 :identifier="bump"
                 :distance="distance"
@@ -129,8 +131,8 @@ import dayjs from 'dayjs'
 
 import { buildHead } from '../../composables/useBuildHead'
 import { useAuthStore } from '../../stores/auth'
+import { ref, useRoute, useRouter } from '#imports'
 import VisibleWhen from '~/components/VisibleWhen'
-import { useRoute, useRouter } from '#imports'
 import InfiniteLoading from '~/components/InfiniteLoading'
 import { useChatStore } from '~/stores/chat'
 import SidebarRight from '~/components/SidebarRight'
@@ -170,6 +172,7 @@ export default {
     const chatStore = useChatStore()
     const authStore = useAuthStore()
     const myid = authStore.user?.id
+    const showChats = ref(20)
 
     if (myid) {
       const route = useRoute()
@@ -193,16 +196,22 @@ export default {
         // We have the chat, but maybe it's not quite up to date (e.g. a new message).  So fetch, but don't wait.
         chatStore.fetchChat(id)
       }
+
+      if (id) {
+        // Find id in the list of chats.
+        const index = chatStore.list.findIndex((c) => c.id === id)
+        showChats.value = Math.max(showChats.value, index + 1)
+        console.log('Show', showChats.value)
+      }
     }
 
-    return { chatStore }
+    return { chatStore, showChats }
   },
   data() {
     return {
       showingOlder: false,
       showHideAllModal: false,
       minShowChats: 20,
-      showChats: 20,
       search: null,
       searching: false,
       complete: false,
@@ -214,7 +223,7 @@ export default {
   },
   computed: {
     filteredChats() {
-      let chats = this.chatStore.list ? this.chatStore.list : []
+      let chats = this.chatStore?.list ? this.chatStore.list : []
 
       if (chats && this.search) {
         const l = this.search.toLowerCase()

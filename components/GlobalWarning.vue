@@ -23,7 +23,7 @@ export default {
   },
   computed: {
     show() {
-      return !this.miscStore.get('hideglobalwarning')
+      return !this.miscStore?.get('hideglobalwarning')
     },
   },
   methods: {

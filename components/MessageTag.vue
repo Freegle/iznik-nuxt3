@@ -53,27 +53,30 @@ export default {
   },
   computed: {
     message() {
-      return this.messageStore.byId(this.id)
+      return this.messageStore?.byId(this.id)
     },
     group() {
-      return this.groupStore.get(this.message.groups[0].groupid)
+      return this.groupStore?.get(this.message.groups[0].groupid)
     },
     tagForGroup() {
       let ret = null
 
       this.message?.groups?.forEach((g) => {
-        const group = this.groupStore.get(g.groupid)
-        switch (this.message?.type) {
-          case 'Offer':
-            ret = group.settings?.keywords?.offer
-              ? group.settings.keywords.offer
-              : 'OFFER'
-            break
-          case 'Wanted':
-            ret = group.settings?.keywords?.wanted
-              ? group.settings.keywords.wanted
-              : 'WANTED'
-            break
+        const group = this.groupStore?.get(g.groupid)
+
+        if (group) {
+          switch (this.message?.type) {
+            case 'Offer':
+              ret = group.settings?.keywords?.offer
+                ? group.settings.keywords.offer
+                : 'OFFER'
+              break
+            case 'Wanted':
+              ret = group.settings?.keywords?.wanted
+                ? group.settings.keywords.wanted
+                : 'WANTED'
+              break
+          }
         }
       })
 

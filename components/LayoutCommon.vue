@@ -95,6 +95,7 @@ export default {
 
       $sentrySetContext('builddate', {
         buildDate: runtimeConfig.public.BUILD_DATE,
+        deployId: runtimeConfig.public.DEPLOY_ID,
       })
 
       if (this.me) {

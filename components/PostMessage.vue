@@ -17,9 +17,7 @@
           @drop.prevent="drop"
           @dragover.prevent
         >
-          <span v-if="attachments && attachments.length === 1">
-            Add more photos
-          </span>
+          <span v-if="attachments?.length === 1"> Add more photos </span>
           <span v-else> Add photos </span>
         </b-button>
       </div>
@@ -125,7 +123,7 @@ export default {
   computed: {
     availablenow: {
       get() {
-        const msg = this.composeStore.message(this.id)
+        const msg = this.composeStore?.message(this.id)
         return msg &&
           'availablenow' in msg &&
           typeof msg.availablenow !== 'undefined'
@@ -138,7 +136,7 @@ export default {
     },
     description: {
       get() {
-        const msg = this.composeStore.message(this.id)
+        const msg = this.composeStore?.message(this.id)
         return msg?.description
       },
       set(newValue) {
@@ -149,7 +147,7 @@ export default {
       },
     },
     attachments() {
-      return this.composeStore.attachments(this.id)
+      return this.composeStore?.attachments(this.id)
     },
     placeholder() {
       return this.type === 'Offer'

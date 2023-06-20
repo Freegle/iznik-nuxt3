@@ -117,7 +117,7 @@ export default {
     ...mapState(useDonationStore, ['target', 'raised']),
     groupname() {
       if (this.groupid && !this.targetMet) {
-        const group = this.groupStore.get(this.groupid)
+        const group = this.groupStore?.get(this.groupid)
 
         return group?.namedisplay
       }

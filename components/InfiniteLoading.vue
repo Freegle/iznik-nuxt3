@@ -114,7 +114,7 @@ export default {
       this.state = 'error'
     },
     stopObserver() {
-      this.complete = true
+      this.complete()
     },
   },
 }

@@ -142,8 +142,7 @@ export function setup(type) {
       const em = email.value + ''
 
       if (email && me) {
-        ret = !me.emails.find((e) => {
-          console.log('Compare', em, e.email)
+        ret = !me.emails?.find((e) => {
           return (
             em
               .toLowerCase()

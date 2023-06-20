@@ -40,7 +40,7 @@ export default {
   },
   computed: {
     count() {
-      return pluralize('recent open post', this.notification.text, true)
+      return pluralize('recent open post', this.notification?.text, true)
     },
   },
   methods: {
