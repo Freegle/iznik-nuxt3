@@ -269,7 +269,10 @@ export default {
           let found = false
           let tojoin = null
 
-          for (const messageGroup of this.message.groups) {
+          // We shouldn't need to fetch, but we've seen a Sentry issue where the message groups are not valid.
+          const msg = await this.messageStore.fetch(this.id, true)
+
+          for (const messageGroup of msg.groups) {
             tojoin = messageGroup.groupid
             Object.keys(this.myGroups).forEach((key) => {
               const group = this.myGroups[key]
@@ -282,7 +285,6 @@ export default {
 
           if (!found) {
             // Not currently a member.
-            console.log('Need to join')
             await this.authStore.joinGroup(this.myid, tojoin)
           }
 

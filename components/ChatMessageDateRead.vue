@@ -71,7 +71,7 @@
           {{ othermodname }}
         </span>
         <span v-else>
-          <v-icon icon="hashtag" class="text-muted" scale="0.5" />{{
+          <v-icon icon="hashtag" class="text-muted fa-0-8x" />{{
             chatmessage?.userid
           }}
         </span>

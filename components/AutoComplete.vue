@@ -465,7 +465,7 @@ export default {
       // Force the list to show.
       this.showList = true
       this.startTimer()
-      let value = this.$refs.input.value
+      let value = this.$refs.input?.value
       if (value) {
         this.getData(value)
       }

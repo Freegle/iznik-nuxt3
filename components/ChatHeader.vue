@@ -98,10 +98,7 @@
               View profile
             </b-button>
           </div>
-          <div
-            v-if="chat.chattype === 'User2User' || chat.chattype === 'User2Mod'"
-            class="mr-2"
-          >
+          <div v-if="chat.chattype === 'User2User' || !unseen" class="mr-2">
             <b-button
               v-b-tooltip="
                 'Don\'t show this chat unless there\'s a new message'

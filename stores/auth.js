@@ -220,7 +220,12 @@ export const useAuthStore = defineStore({
       if (this.auth.jwt || this.auth.persistent) {
         // We have auth info.  The new API can authenticate using either the JWT or the persistent token.
         try {
-          me = await this.$api.session.fetchv2({}, false)
+          me = await this.$api.session.fetchv2(
+            {
+              webversion: this.config.public.BUILD_DATE,
+            },
+            false
+          )
         } catch (e) {
           // Failed.  This can validly happen with a 404 if the JWT is invalid.
           console.log('Exception fetching user')
@@ -234,6 +239,7 @@ export const useAuthStore = defineStore({
             // Pick up the JWT for later from the old API.  No need to wait, though.
             this.$api.session
               .fetch({
+                webversion: this.config.public.BUILD_DATE,
                 components: ['me'],
               })
               .then((ret) => {
@@ -254,6 +260,7 @@ export const useAuthStore = defineStore({
       if (!me) {
         // Try the older API which will authenticate via the persistent token and PHP session.
         const ret = await this.$api.session.fetch({
+          webversion: this.config.public.BUILD_DATE,
           components: ['me'],
         })
 
@@ -270,7 +277,9 @@ export const useAuthStore = defineStore({
           if (jwt) {
             // Now use the JWT on the new API.
             try {
-              me = await this.$api.session.fetchv2({})
+              me = await this.$api.session.fetchv2({
+                webversion: this.config.public.BUILD_DATE,
+              })
             } catch (e) {
               console.log('exception')
             }
@@ -411,6 +420,12 @@ export const useAuthStore = defineStore({
     },
     async yahooCodeLogin(code) {
       return await this.$api.session.yahooCodeLogin(code)
+    },
+    async removeEmail(email) {
+      if (this.user) {
+        await api(this.config).user.removeEmail(this.user.id, email)
+        await this.fetchUser()
+      }
     },
   },
   getters: {

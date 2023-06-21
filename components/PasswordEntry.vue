@@ -4,7 +4,10 @@
     label-for="password"
     class="font-weight-bold"
   >
-    <b-input-group id="input-password">
+    <b-input-group
+      id="input-password"
+      :class="errorBorder ? ' border-danger' : ''"
+    >
       <b-form-input
         id="password"
         v-model="password"
@@ -66,6 +69,11 @@ export default {
       required: false,
       default: 'Choose password',
     },
+    errorBorder: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
     return {
@@ -92,6 +100,8 @@ export default {
 }
 </script>
 <style scoped lang="scss">
+@import 'assets/css/_color-vars.scss';
+
 /* These classes are to give the complete password group of elements a focus indicator */
 /* when the individual password input element gets focus.  It should not display for the */
 /* other two individual elements */
@@ -117,5 +127,17 @@ export default {
 
 .superimpose {
   transform: translate(-1.5em, -0.5em);
+}
+
+:deep(.border-danger) {
+  input {
+    border: 1px solid $color-red !important;
+    border-right-style: none !important;
+  }
+
+  .showpassword__button {
+    border: 1px solid $color-red !important;
+    border-left-style: none !important;
+  }
 }
 </style>

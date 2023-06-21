@@ -11,7 +11,7 @@
             <DonationThermometer
               v-if="false"
               ref="thermo"
-              class="float-right text-center"
+              class="text-center"
             />
             <p>
               Thank you! It's nice of you to even think about supporting us.

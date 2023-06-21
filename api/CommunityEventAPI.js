@@ -1,8 +1,8 @@
 import BaseAPI from '@/api/BaseAPI'
 
 export default class CommunityEventAPI extends BaseAPI {
-  fetch(id) {
-    return this.$getv2('/communityevent/' + id)
+  fetch(id, logError = true) {
+    return this.$getv2('/communityevent/' + id, {}, logError)
   }
 
   list(id) {

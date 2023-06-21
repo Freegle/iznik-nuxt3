@@ -79,7 +79,7 @@
             </b-form-group>
             <b-form-group
               id="homeaddresslabel"
-              label="Your home address"
+              label="Your home postal address"
               label-for="homeaddress"
               label-class="label"
             >
@@ -98,6 +98,9 @@
                 </div>
               </div>
               <p><strong>Please make sure you include a postcode.</strong></p>
+              <p v-if="emailByMistake" class="text-danger">
+                This should be a postal address, not an email address.
+              </p>
               <b-form-textarea
                 id="homeaddress"
                 v-model="homeaddress"
@@ -195,7 +198,7 @@ definePageMeta({
 
 export default {
   components: { SpinButton, NoticeMessage, OurToggle },
-  async setup() {
+  setup() {
     const runtimeConfig = useRuntimeConfig()
     const route = useRoute()
 
@@ -212,15 +215,16 @@ export default {
     const giftAidStore = useGiftAidStore()
 
     const addresses = computed(() => addressStore.addresses)
-    await addressStore.fetch()
-
-    await giftAidStore.fetch()
 
     const giftaid = computed(() => giftAidStore.giftaid)
     const period = computed({
       get: () =>
-        giftAidStore.period ? giftAidStore.period : 'Past4YearsAndFuture',
-      set: (value) => (giftAidStore.period = value),
+        giftAidStore.giftaid.period
+          ? giftAidStore.giftaid.period
+          : 'Past4YearsAndFuture',
+      set: (value) => {
+        giftAidStore.giftaid.period = value
+      },
     })
 
     const fullname = computed({
@@ -231,6 +235,10 @@ export default {
     const homeaddress = computed({
       get: () => giftAidStore.giftaid?.homeaddress,
       set: (value) => (giftAidStore.giftaid.homeaddress = value),
+    })
+
+    const emailByMistake = computed(() => {
+      return homeaddress.value?.includes('@')
     })
 
     const giftAidAllowed = period.value !== 'Declined'
@@ -260,6 +268,7 @@ export default {
       homeaddress,
       giftAidAllowed: ref(giftAidAllowed),
       oldoptions,
+      emailByMistake,
     }
   },
   data() {
@@ -269,13 +278,43 @@ export default {
   },
   computed: {
     valid() {
-      return this.period && this.fullname && this.homeaddress
+      return (
+        this.period && this.fullname && this.homeaddress && !this.emailByMistake
+      )
     },
     nameInvalid() {
       return !this.fullname || !this.fullname.includes(' ')
     },
     addressInvalid() {
       return !this.homeaddress || !this.homeaddress.includes(' ')
+    },
+  },
+  watch: {
+    me: {
+      immediate: true,
+      async handler(newVal) {
+        if (newVal) {
+          await this.addressStore.fetch()
+          await this.giftAidStore.fetch()
+
+          if (!Object.hasOwn(this.giftaid, 'period')) {
+            // We fetched no gift aid info so set it to the default.
+            this.giftaid.period = this.giftAidAllowed
+              ? 'Past4YearsAndFuture'
+              : 'Declined'
+          }
+        }
+      },
+    },
+    giftAidAllowed: {
+      handler: function (newVal) {
+        if (!newVal) {
+          this.period = 'Declined'
+        } else {
+          this.period = 'Past4YearsAndFuture'
+        }
+      },
+      immediate: true,
     },
   },
   methods: {
@@ -285,7 +324,7 @@ export default {
     },
     async remove() {
       await this.giftAidStore.remove()
-      this.period = 'Since'
+      this.period = 'Past4YearsAndFuture'
       this.fullname = null
       this.homeaddress = null
     },

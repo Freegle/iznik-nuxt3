@@ -5,6 +5,7 @@ export const useAddressStore = defineStore({
   id: 'address',
   state: () => ({
     list: [],
+    listById: {},
     fetching: null,
     properties: {},
   }),
@@ -12,18 +13,38 @@ export const useAddressStore = defineStore({
     init(config) {
       this.config = config
     },
-    async fetch() {
-      if (this.fetching) {
+    async fetch(id, force) {
+      if (id) {
+        // Specific address which may or may not be ours.  If it's not, we'll get an error, which is a bug.  But we
+        // also get an error if it's been deleted.  So don't log
+        try {
+          if (!this.listById[id] || force) {
+            this.listById[id] = await api(this.config).address.fetchByIdv2(
+              id,
+              false
+            )
+          }
+          return this.listById[id]
+        } catch (e) {
+          console.log('Failed to get address', e)
+          return null
+        }
+      } else if (this.fetching) {
         await this.fetching
       } else {
         this.fetching = api(this.config).address.fetchv2()
         this.list = await this.fetching
+
+        this.list.forEach((address) => {
+          this.listById[address.id] = address
+        })
+
         this.fetching = null
       }
     },
     async delete(id) {
       await api(this.config).address.del(id)
-
+      delete this.listById[id]
       await this.fetch()
     },
     async fetchProperties(postcodeid) {
@@ -37,6 +58,7 @@ export const useAddressStore = defineStore({
     },
     async update(params) {
       await api(this.config).address.update(params)
+      this.fetch(params.id, true)
     },
     async add(params) {
       const { id } = await api(this.config).address.add(params)
@@ -46,7 +68,7 @@ export const useAddressStore = defineStore({
   },
   getters: {
     get: (state) => (id) => {
-      return state.list.find((i) => i.id === id)
+      return state.listById(id)
     },
   },
 })

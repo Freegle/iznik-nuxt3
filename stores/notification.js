@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import api from '~/api'
+import { APIError } from '~/api/BaseAPI'
 
 export const useNotificationStore = defineStore({
   id: 'notification',
@@ -13,9 +14,23 @@ export const useNotificationStore = defineStore({
       this.config = config
     },
     async fetchCount() {
-      const ret = await api(this.config).notification.count()
-      this.count = ret?.count
-      return this.count
+      try {
+        const ret = await api(this.config).notification.count()
+        this.count = ret?.count
+        return this.count
+      } catch (e) {
+        console.log('Notification fetch failed', e)
+        if (e instanceof APIError) {
+          console.log('API error, status', e?.response?.status)
+
+          if (e?.response?.status === 401) {
+            // 401 can happen because of timing windows.  Don't want to log it to Sentry.
+            console.log('Ignore unauthorised for notification count')
+          } else {
+            throw e
+          }
+        }
+      }
     },
     async fetchList() {
       this.list = await api(this.config).notification.list()

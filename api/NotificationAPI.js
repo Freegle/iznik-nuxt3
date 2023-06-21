@@ -2,7 +2,7 @@ import BaseAPI from '@/api/BaseAPI'
 
 export default class NotificationAPI extends BaseAPI {
   count() {
-    return this.$getv2('/notification/count')
+    return this.$getv2('/notification/count', {}, false)
   }
 
   list() {

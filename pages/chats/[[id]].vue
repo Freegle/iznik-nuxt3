@@ -209,7 +209,6 @@ export default {
   },
   data() {
     return {
-      showingOlder: false,
       showHideAllModal: false,
       minShowChats: 20,
       search: null,
@@ -217,11 +216,13 @@ export default {
       complete: false,
       bump: 1,
       distance: 1000,
-      searchSince: '2009-09-11',
       selectedChatId: null,
     }
   },
   computed: {
+    showingOlder() {
+      return this.chatStore.searchSince !== null
+    },
     filteredChats() {
       let chats = this.chatStore?.list ? this.chatStore.list : []
 
@@ -288,7 +289,7 @@ export default {
 
       if (!newVal) {
         // Force a refresh to remove any old chats.
-        this.chatStore.fetchChats(this.searchSince)
+        this.chatStore.fetchChats()
       } else if (newVal.length > 2) {
         // Force a server search to pick up old chats or more subtle matches.
         this.searchMore()
@@ -303,10 +304,13 @@ export default {
       this.selectedChatId = route.params.id ? parseInt(route.params.id) : 0
     }
   },
+  beforeUnmount() {
+    this.chatStore.searchSince = null
+  },
   methods: {
     async fetchOlder() {
-      await this.chatStore.fetchChats(this.searchSince)
-      this.showingOlder = true
+      this.chatStore.searchSince = '2009-09-11'
+      await this.chatStore.fetchChats()
       this.bump++
     },
     async showHideAll() {
@@ -359,7 +363,7 @@ export default {
       } else {
         this.searching = this.search
 
-        await this.chatStore.fetchChats(this.searchSince, this.search)
+        await this.chatStore.fetchChats(this.search)
 
         this.showChats = this.minShowChats
         this.bump++

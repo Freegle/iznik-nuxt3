@@ -19,11 +19,7 @@
                 :value="groupid"
                 @update:model-value="changeGroup"
               />
-              <b-button
-                variant="primary"
-                class="float-right"
-                @click="openVolunteerModal"
-              >
+              <b-button variant="primary" @click="openVolunteerModal">
                 <v-icon icon="plus" /> Add an opportunity
               </b-button>
             </div>

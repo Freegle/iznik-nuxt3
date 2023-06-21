@@ -127,7 +127,10 @@
                 ref="firstname"
                 v-model="firstname"
                 name="firstname"
-                class="mb-3"
+                :class="{
+                  'mb-3': true,
+                  'border-danger': firstNameError,
+                }"
                 autocomplete="given-name"
                 placeholder="Your first name"
               />
@@ -142,7 +145,10 @@
                 ref="lastname"
                 v-model="lastname"
                 name="lastname"
-                class="mb-3"
+                :class="{
+                  'mb-3': true,
+                  'border-danger': lastNameError,
+                }"
                 autocomplete="family-name"
                 placeholder="Your last or family name"
               />
@@ -154,6 +160,7 @@
             v-model:valid="emailValid"
             size="md"
             label="Your email address"
+            :input-class="emailError ? 'border-danger' : ''"
           />
           <NoticeMessage v-if="referToGoogleButton">
             Please use the <em>Continue with Google</em> button to log in. That
@@ -163,7 +170,12 @@
             Please use the <em>Continue with Yahoo</em> button to log in. That
             way you don't need to remember a password on this site.
           </NoticeMessage>
-          <PasswordEntry v-model="password" :original-password="password" />
+          <PasswordEntry
+            v-model="password"
+            :original-password="password"
+            :error-border="passwordError"
+            :placeholder="signUp ? 'Choose password' : 'Your password'"
+          />
           <b-button
             block
             size="lg"
@@ -171,13 +183,12 @@
             class="mb-2 mt-2 w-100"
             type="submit"
             value="login"
-            :disabled="nativeDisabled"
           >
             <span v-if="!signUp"> Log in to Freegle </span>
             <span v-else> Register on Freegle </span>
           </b-button>
           <b-alert v-if="nativeLoginError" variant="danger" :model-value="true">
-            Login Failed: {{ nativeLoginError }}
+            {{ nativeLoginError }}
           </b-alert>
           <div v-if="!signUp" class="text-center">
             <nuxt-link no-prefetch to="/forgot" class="nodecor" @click="forgot">
@@ -259,6 +270,7 @@ export default {
       showSocialLoginBlocked: false,
       nativeBump: 1,
       timerElapsed: false,
+      buttonClicked: false,
     }
   },
   computed: {
@@ -316,8 +328,21 @@ export default {
     referToYahooButton() {
       return this.email && this.email.toLowerCase().includes('yahoo')
     },
-    nativeDisabled() {
-      return this.nativeBump && (!this.emailValid || !this.password)
+    firstNameError() {
+      return this.nativeBump && this.buttonClicked && !this.firstname
+    },
+    lastNameError() {
+      return this.nativeBump && this.buttonClicked && !this.lastname
+    },
+    emailError() {
+      return (
+        this.nativeBump &&
+        this.buttonClicked &&
+        (!this.email || !this.emailValid)
+      )
+    },
+    passwordError() {
+      return this.nativeBump && this.buttonClicked && !this.password
     },
     isApp() {
       const mobileStore = useMobileStore()
@@ -401,11 +426,11 @@ export default {
       }
     },
     show() {
-      console.log('show modal')
       this.pleaseShowModal = true
       this.nativeLoginError = null
       this.socialLoginError = null
       this.loginWaitMessage = null
+      this.buttonClicked = false
 
       setTimeout(() => {
         this.timerElapsed = true
@@ -423,6 +448,7 @@ export default {
       this.nativeLoginError = null
       this.socialLoginError = null
       this.loginWaitMessage = null
+      this.buttonClicked = true
       e.preventDefault()
       e.stopPropagation()
 

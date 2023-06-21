@@ -25,11 +25,10 @@
     <div>
       <b-img
         v-if="newsfeed.image"
-        thumbnail
         rounded
         lazy
         :src="newsfeed.image.paththumb"
-        class="clickme"
+        class="clickme imgthumb mt-1"
         @click="showPhotoModal"
       />
     </div>
@@ -42,19 +41,15 @@
         <v-icon icon="share-alt" /> Share
       </b-button>
     </div>
-    <b-modal
+    <NewsPhotoModal
       v-if="newsfeed.image"
+      :id="newsfeed.image.id"
       ref="photoModal"
-      title="ChitChat photo"
-      generator-unable-to-provide-required-alt=""
-      size="lg"
-      no-stacking
-      ok-only
-    >
-      <template #default>
-        <b-img fluid rounded center :src="newsfeed.image.path" />
-      </template>
-    </b-modal>
+      :newsfeedid="newsfeed.id"
+      :src="newsfeed.image.path"
+      imgtype="Newsfeed"
+      imgflag="Newsfeed"
+    />
     <NewsShareModal
       v-if="newsfeedModal"
       ref="newsshare"
@@ -77,3 +72,16 @@ export default {
   extends: NewsBase,
 }
 </script>
+<style scoped lang="scss">
+@import '~bootstrap/scss/functions';
+@import '~bootstrap/scss/variables';
+@import '~bootstrap/scss/mixins/_breakpoints';
+
+.imgthumb {
+  width: 100%;
+
+  @include media-breakpoint-up(md) {
+    width: 400px;
+  }
+}
+</style>

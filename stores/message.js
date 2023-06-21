@@ -3,6 +3,7 @@ import dayjs from 'dayjs'
 import api from '~/api'
 import { GROUP_REPOSTS, MESSAGE_EXPIRE_TIME } from '~/constants'
 import { useGroupStore } from '~/stores/group'
+import { APIError } from '~/api/BaseAPI'
 
 export const useMessageStore = defineStore({
   id: 'message',
@@ -24,7 +25,13 @@ export const useMessageStore = defineStore({
     async fetch(id, force) {
       id = parseInt(id)
 
-      if (force || !this.list[id]) {
+      // Refetch after 10 minutes in case the state has changed.
+      const now = Math.round(Date.now() / 1000)
+      const expired = this.list[id]?.addedToCache
+        ? now - this.list[id].addedToCache > 600
+        : false
+
+      if (force || !this.list[id] || expired) {
         if (this.fetching[id]) {
           // Already fetching
           await this.fetching[id]
@@ -33,11 +40,24 @@ export const useMessageStore = defineStore({
           this.fetching[id] = api(this.config).message.fetch(id, false)
           this.fetchingCount--
 
-          const message = await this.fetching[id]
-          this.fetching[id] = null
+          try {
+            const message = await this.fetching[id]
+            this.fetching[id] = null
 
-          if (message) {
-            this.list[id] = message
+            if (message) {
+              message.addedToCache = Math.round(Date.now() / 1000)
+              this.list[id] = message
+            }
+          } catch (e) {
+            console.log('Failed to fetch message', e)
+            this.fetching[id] = null
+
+            if (e instanceof APIError && e.response.status === 404) {
+              // This can validly happen if a message is deleted under our feet.
+              console.log('Ignore 404 error')
+            } else {
+              throw e
+            }
           }
         }
       }
@@ -58,19 +78,29 @@ export const useMessageStore = defineStore({
 
       if (left.length) {
         this.fetchingCount++
-        const msgs = await api(this.config).message.fetch(left.join(','))
+        try {
+          const msgs = await api(this.config).message.fetch(left.join(','))
 
-        if (msgs && msgs.forEach) {
-          msgs.forEach((msg) => {
-            this.list[msg.id] = msg
-          })
+          if (msgs && msgs.forEach) {
+            msgs.forEach((msg) => {
+              this.list[msg.id] = msg
+            })
 
-          this.fetchingCount--
-        } else if (typeof msgs === 'object') {
-          this.list[msgs.id] = msgs
-          this.fetchingCount--
-        } else {
-          console.error('Failed to fetch', msgs)
+            this.fetchingCount--
+          } else if (typeof msgs === 'object') {
+            this.list[msgs.id] = msgs
+            this.fetchingCount--
+          } else {
+            console.error('Failed to fetch', msgs)
+          }
+        } catch (e) {
+          console.log('Failed to fetch messages', e)
+          if (e instanceof APIError && e.response.status === 404) {
+            // This can validly happen if a message is deleted under our feet.
+            console.log('Ignore 404 error')
+          } else {
+            throw e
+          }
         }
       }
     },
@@ -175,7 +205,10 @@ export const useMessageStore = defineStore({
     async update(params) {
       const data = await api(this.config).message.update(params)
 
-      if (!data.deleted) {
+      if (data.deleted) {
+        // This can happen if we withdraw a post while it is pending.
+        delete this.list[params.id]
+      } else {
         // Fetch back the updated version.
         await this.fetch(params.id, true)
       }

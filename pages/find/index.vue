@@ -68,7 +68,7 @@
                   Next <v-icon icon="angle-double-right" />
                 </b-button>
               </div>
-              <div class="d-none d-md-flex justify-content-end">
+              <div class="d-none d-md-flex justify-content-end mb-2">
                 <b-button
                   variant="primary"
                   size="lg"

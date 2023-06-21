@@ -55,7 +55,7 @@ export const useStoryStore = defineStore({
         headline,
         story,
         photo,
-        allowpublic,
+        public: allowpublic,
       })
     },
     async love(id) {

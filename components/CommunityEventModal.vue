@@ -97,7 +97,7 @@
               </ExternalLink>
             </b-col>
           </b-row>
-          <b-row v-if="event.phone">
+          <b-row v-if="event.contactphone">
             <b-col cols="4" md="3" class="field"> Contact phone</b-col>
             <b-col cols="8" md="9">
               {{ event.contactphone }}
@@ -115,16 +115,8 @@
         <VForm v-else-if="event" ref="form">
           <b-row>
             <b-col cols="12" md="6">
-              <b-form-group
-                ref="groupid"
-                label="For which community?"
-                :state="true"
-              >
-                <GroupRememberSelect
-                  v-model="groupid"
-                  remember="editevent"
-                  :systemwide="true"
-                />
+              <b-form-group label="For which community?" :state="true">
+                <GroupSelect v-model="groupid" :systemwide="true" />
                 <p v-if="showGroupError" class="text-danger font-weight-bold">
                   Please select a community.
                 </p>
@@ -162,7 +154,7 @@
               </b-form-group>
             </b-col>
             <b-col v-if="enabled" cols="12" md="6">
-              <div v-if="event.image" class="float-right container">
+              <div v-if="event.image" class="container">
                 <div
                   class="clickme rotateleft stacked"
                   label="Rotate left"
@@ -195,11 +187,7 @@
           <span v-if="enabled">
             <b-row>
               <b-col>
-                <b-button
-                  variant="primary"
-                  class="mt-1 float-right"
-                  @click="photoAdd"
-                >
+                <b-button variant="primary" class="mt-1" @click="photoAdd">
                   <v-icon icon="camera" /> Upload photo
                 </b-button>
               </b-col>
@@ -217,7 +205,7 @@
             </b-row>
 
             <b-form-group
-              ref="volunteering__description"
+              ref="eventEdit__description"
               label="What is it?"
               label-for="description"
               :state="true"
@@ -240,7 +228,7 @@
               />
             </b-form-group>
             <b-form-group
-              ref="volunteering__location"
+              ref="eventEdit__location"
               label="Where is it?"
               label-for="location"
               :state="true"
@@ -272,7 +260,7 @@
               </p>
             </b-form-group>
             <b-form-group
-              ref="volunteering__contactname"
+              ref="eventEdit__contactname"
               label="Contact name:"
               label-for="contactname"
               :state="true"
@@ -328,7 +316,7 @@
           </span>
           <NoticeMessage v-else variant="warning" class="mt-2">
             <v-icon icon="info-circle" />&nbsp;This community has chosen not to
-            allow Volunteer Opportunities.
+            allow Community Events.
           </NoticeMessage>
         </VForm>
       </div>
@@ -336,12 +324,7 @@
     <template #footer>
       <div class="w-100 d-flex justify-content-between">
         <template v-if="added">
-          <b-button
-            variant="white"
-            class="float-right"
-            :disabled="uploadingPhoto"
-            @click="hide"
-          >
+          <b-button variant="white" :disabled="uploadingPhoto" @click="hide">
             Close
           </b-button>
         </template>
@@ -350,7 +333,6 @@
             <b-button
               v-if="!editing"
               variant="white"
-              class="float-left"
               :disabled="uploadingPhoto"
               @click="editing = true"
             >
@@ -359,7 +341,6 @@
             </b-button>
             <b-button
               variant="white"
-              class="float-left ml-1"
               :disabled="uploadingPhoto"
               @click="deleteIt"
             >
@@ -370,7 +351,6 @@
           <b-button
             v-if="!editing"
             variant="white"
-            class="float-right"
             :disabled="uploadingPhoto"
             @click="hide"
           >
@@ -379,18 +359,18 @@
           <b-button
             v-if="editing"
             variant="white"
-            class="float-right mr-1"
             :disabled="uploadingPhoto"
             @click="dontSave"
           >
             Hide
           </b-button>
           <SpinButton
-            v-if="editing"
+            v-if="editing && enabled"
             variant="primary"
             :disabled="uploadingPhoto"
             name="save"
             :label="event.id ? 'Save Changes' : 'Add Event'"
+            spinclass="textWhite"
             @handle="saveIt"
           />
         </template>
@@ -408,10 +388,11 @@ import { uid } from '../composables/useId'
 import { useGroupStore } from '../stores/group'
 import { useImageStore } from '../stores/image'
 import EmailValidator from './EmailValidator'
+import { ref } from '#imports'
 import modal from '@/mixins/modal'
 import { twem } from '~/composables/useTwem'
 
-const GroupRememberSelect = () => import('~/components/GroupRememberSelect')
+const GroupSelect = () => import('~/components/GroupSelect')
 const OurFilePond = () => import('~/components/OurFilePond')
 const StartEndCollection = () => import('~/components/StartEndCollection')
 const NoticeMessage = () => import('~/components/NoticeMessage')
@@ -452,7 +433,7 @@ function initialEvent() {
 export default {
   components: {
     EmailValidator,
-    GroupRememberSelect,
+    GroupSelect,
     OurFilePond,
     StartEndCollection,
     NoticeMessage,
@@ -481,15 +462,19 @@ export default {
     const userStore = useUserStore()
     const groupStore = useGroupStore()
     const imageStore = useImageStore()
+    const groupid = ref(null)
 
     if (props.id) {
       const v = await communityEventStore.fetch(props.id)
       await userStore.fetch(v.userid)
 
       v.groups?.forEach(async (id) => {
+        groupid.value = id
         await groupStore.fetch(id)
       })
     }
+
+    const oldPhoto = ref(communityEventStore.byId(props.id)?.image)
 
     return {
       communityEventStore,
@@ -497,13 +482,14 @@ export default {
       userStore,
       groupStore,
       imageStore,
+      groupid,
+      oldPhoto,
     }
   },
   data() {
     return {
       editing: false,
       added: false,
-      groupid: null,
       cacheBust: Date.now(),
       uploading: false,
       showGroupError: false,
@@ -555,22 +541,17 @@ export default {
       return desc
     },
     enabled() {
-      const group = this.myGroup(this.groupid)
+      const group = this.groupStore.get(this.groupid)
 
       let ret = true
 
-      if (group) {
-        if ('volunteeringallowed' in group) {
-          ret = group.volunteeringallowed
+      if (group?.settings) {
+        if ('communityevents' in group.settings) {
+          ret = group.settings.communityevents
         }
       }
 
       return ret
-    },
-    shouldUpdatePhoto() {
-      const { photo: oldPhoto } = this.event
-      const { photo: newPhoto } = this.event
-      return newPhoto && (oldPhoto ? newPhoto.id !== oldPhoto.id : true)
     },
   },
   methods: {
@@ -656,15 +637,21 @@ export default {
 
       if (this.isExisting) {
         const { id } = this.event
-        // This is an edit.
-        if (this.shouldUpdatePhoto) {
-          await this.communityEventStore.setPhoto(id, this.event.image.id)
+
+        // Save the WIP event before we start making changes, otherwise the saves will update the store and hence
+        // what we're looking at.
+        const wip = JSON.parse(JSON.stringify(this.event))
+        let shouldUpdatePhoto = null
+
+        if (wip.image?.id !== this.oldPhoto?.id) {
+          shouldUpdatePhoto = wip.image.id
         }
 
-        const oldgroupid =
-          this.event.groups && this.event.groups.length
-            ? this.event.groups[0]
-            : null
+        if (shouldUpdatePhoto) {
+          await this.communityEventStore.setPhoto(id, shouldUpdatePhoto)
+        }
+
+        const oldgroupid = wip.groups?.length ? wip.groups[0] : null
 
         if (this.groupid !== oldgroupid) {
           // Save the new group, then remove the old group, so it won't get stranded.
@@ -681,11 +668,11 @@ export default {
 
         await this.communityEventStore.setDates({
           id,
-          olddates: this.event.dates,
-          newdates: this.event.dates,
+          olddates: wip.dates,
+          newdates: wip.dates,
         })
 
-        await this.communityEventStore.save(this.event)
+        await this.communityEventStore.save(wip)
 
         this.added = true
       } else {

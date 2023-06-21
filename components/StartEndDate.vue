@@ -101,7 +101,7 @@ export default {
     },
   },
   setup(props) {
-    const current = ref(props.modelValue)
+    const current = ref(JSON.parse(JSON.stringify(props.modelValue)))
 
     return {
       current,
@@ -147,8 +147,11 @@ export default {
     'current.starttime'() {
       this.$nextTick(this.updateEndTime)
     },
-    current(newVal) {
-      this.$emit('update:modelValue', newVal)
+    current: {
+      handler: function (newVal) {
+        this.$emit('update:modelValue', newVal)
+      },
+      deep: true,
     },
   },
   methods: {

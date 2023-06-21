@@ -16,7 +16,7 @@
   >
     <template #button-content>
       <div
-        class="position-relative"
+        class="position-relative me-2 me-xl-0"
         :class="{ 'text-center small': !smallScreen }"
       >
         <v-icon icon="bell" class="fa-2 notification-list__icon" />

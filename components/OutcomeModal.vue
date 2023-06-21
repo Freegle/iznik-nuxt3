@@ -311,7 +311,6 @@ export default {
             comment: this.comments,
           })
 
-          this.fetchMe(['openposts'])
           this.hide()
         } else {
           // We are recording some partial results for the post.

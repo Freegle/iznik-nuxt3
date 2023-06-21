@@ -529,12 +529,16 @@ const isApp = computed(() => {
 const homePage = computed(() => {
   const lastRoute = miscStore.get('lasthomepage')
 
-  let nextroute = '/browse'
+  let nextroute = '/'
 
-  if (lastRoute === 'news') {
-    nextroute = '/chitchat'
-  } else if (lastRoute === 'myposts') {
-    nextroute = '/myposts'
+  if (authStore.user) {
+    nextroute = '/browse'
+
+    if (lastRoute === 'news') {
+      nextroute = '/chitchat'
+    } else if (lastRoute === 'myposts') {
+      nextroute = '/myposts'
+    }
   }
 
   return nextroute
@@ -588,17 +592,30 @@ watch(myid, (newVal, oldVal) => {
 })
 
 onMounted(() => {
-  setTimeout(async () => {
-    // Look for a custom logo.
+  async function getlogo(){
     const ret = await logoStore.fetch()
 
     if (ret.ret === 0 && ret.logo) {
       logo.value = ret.logo.path.replace(/.*logos/, '/logos')
-      if( this.isApp){
+      //if( this.isApp){
         this.logo = ret.logo.path.replace('/images/logos', '/logos').replace('images.ilovefreegle','www.ilovefreegle')
-      }
+      //}
     }
-  }, 5000)
+  }
+  setTimeout(getlogo,5000)
+  /*setTimeout(async () => {
+    // Look for a custom logo.
+    console.log('fetching logo')
+    const ret = await logoStore.fetch()
+
+    if (ret.ret === 0 && ret.logo) {
+      console.log('got logo',ret.logo.path)
+      logo.value = ret.logo.path.replace(/.*logos/, '/logos')
+      //if( this.isApp){
+        this.logo = ret.logo.path.replace('/images/logos', '/logos').replace('images.ilovefreegle','www.ilovefreegle')
+      //}
+    }
+  }, 5000)*/
 
   getCounts()
 })
@@ -668,11 +685,17 @@ const getCounts = async () => {
 
       let messages = []
 
-      if (route.path !== '/profile/' + myid.value) {
+      if (
+        route.path !== '/profile/' + myid.value &&
+        !route.path.includes('/unsubscribe')
+      ) {
         // Get the messages for the currently logged in user.  This will also speed up the My Posts page.
         //
         // We don't do this if we're looking at our own profile otherwise this fetch and the one in ProfileInfo
         // can interfere with each other.
+        //
+        // We also don't do this on unsubscribe pages as there are timing windows which can lead to the call
+        // failing and consequent Sentry errors.
         messages = await messageStore.fetchByUser(myid.value, true)
       }
 
@@ -696,34 +719,22 @@ const getCounts = async () => {
 
       if (runtimeConfig.public.NETLIFY_DEPLOY_ID) {
         try {
-          console.log(
-            'Check Netlify updates',
-            runtimeConfig.public.NETLIFY_DEPLOY_ID,
-            runtimeConfig.public.NETLIFY_SITE_NAME
-          )
-
           const response = await fetch(
             `https://api.netlify.com/api/v1/sites/${runtimeConfig.public.NETLIFY_SITE_NAME}.netlify.com`
           )
 
           const data = await response.json()
-          console.log("Netlify's response", data)
 
           if (data?.deploy_id) {
-            console.log(
-              'Compare current code vs latest deploy',
-              data.deploy_id,
-              runtimeConfig.public.NETLIFY_DEPLOY_ID
-            )
-
             if (data.deploy_id !== runtimeConfig.public.NETLIFY_DEPLOY_ID) {
-              // We're not on the latest deploy, so show a warning.
-              console.log(
-                'Code has changed on Netlify - need to reload',
-                data.deploy_id,
-                runtimeConfig.public.NETLIFY_DEPLOY_ID
-              )
-              useMiscStore().needToReload = true
+              const deployDate = new Date(data.published_deploy.published_at)
+
+              // Check it's not too soon to nag.  This stops annoyances when we have lots of releases in a short
+              // time.
+              if (deployDate.getTime() < Date.now() - 12 * 60 * 60 * 1000) {
+                // We're not on the latest deploy, so show a warning.
+                useMiscStore().needToReload = true
+              }
             }
           }
         } catch (e) {

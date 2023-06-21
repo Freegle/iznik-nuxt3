@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import dayjs from 'dayjs'
 import api from '~/api'
 import { addStrings, earliestDate } from '~/composables/useTimeFormat'
 
@@ -19,11 +20,22 @@ export const useVolunteeringStore = defineStore({
           if (this.fetching[id]) {
             await this.fetching[id]
           } else {
-            this.fetching[id] = api(this.config).volunteering.fetch(id)
+            this.fetching[id] = api(this.config).volunteering.fetch(id, false)
             let item = await this.fetching[id]
             item = addStrings(item)
-            item.earliestDate = earliestDate(item.dates)
-            item.earliestDateOfAll = earliestDate(item.dates, true)
+
+            if (item.dates) {
+              // API returns dates in ISO8601 but our code wants them split into date and time
+              item.earliestDate = earliestDate(item.dates)
+              item.earliestDateOfAll = earliestDate(item.dates, true)
+              item.dates.forEach((date, index) => {
+                item.dates[index].starttime = dayjs(date.start).format('HH:mm')
+                item.dates[index].start = dayjs(date.start).format('YYYY-MM-DD')
+                item.dates[index].endtime = dayjs(date.end).format('HH:mm')
+                item.dates[index].end = dayjs(date.end).format('YYYY-MM-DD')
+              })
+            }
+
             this.list[id] = item
             this.fetching[id] = null
           }
@@ -50,15 +62,18 @@ export const useVolunteeringStore = defineStore({
       await this.fetch(id, true)
     },
     async delete(id) {
-      await api(this.config).address.del(id)
+      await api(this.config).volunteering.del(id)
+      this.list[id] = null
     },
     async setDates(params) {
       const promises = []
 
-      for (const date of params.olddates) {
-        promises.push(
-          api(this.config).volunteering.removeDate(params.id, date.id)
-        )
+      if (params.olddates) {
+        for (const date of params.olddates) {
+          promises.push(
+            api(this.config).volunteering.removeDate(params.id, date.id)
+          )
+        }
       }
 
       for (const date of params.newdates) {

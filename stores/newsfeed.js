@@ -33,27 +33,32 @@ export const useNewsfeedStore = defineStore({
       return this.count
     },
     addItems(items) {
+      const prevMax = this.maxSeen
+
       items.forEach((item) => {
+        if (item.id > this.maxSeen) {
+          this.maxSeen = item.id
+        }
+
         this.list[item.id] = item
 
         if (item.replies?.length) {
           this.addItems(item.replies)
         }
       })
+
+      if (this.maxSeen > prevMax) {
+        api(this.config).news.seen(this.maxSeen)
+        this.fetchCount()
+      }
     },
     async fetchFeed(distance) {
       this.feed = await api(this.config).news.fetch(null, distance)
       return this.feed
     },
     async fetch(id, force, lovelist) {
-      const prevMax = this.maxSeen
-
       try {
         if (!this.list[id] || force) {
-          if (id > this.maxSeen) {
-            this.maxSeen = id
-          }
-
           if (!this.fetching[id]) {
             this.fetching[id] = api(this.config).news.fetch(
               id,
@@ -74,10 +79,6 @@ export const useNewsfeedStore = defineStore({
         }
       } catch (e) {
         console.log('Fetch of newsfeed failed', id, e)
-      }
-
-      if (this.maxSeen > prevMax) {
-        api(this.config).news.seen(this.maxSeen)
       }
 
       return this.list[id]
