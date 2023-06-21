@@ -10,17 +10,24 @@ export const useChatStore = defineStore({
     listByChatId: {},
     listByChatMessageId: {},
     messages: {},
+    searchSince: null,
   }),
   actions: {
     init(config) {
       this.config = config
     },
-    async fetchChats(since, search) {
-      if (since) {
-        since = dayjs(since).toISOString()
+    async fetchChats(search, logError) {
+      let since = null
+
+      if (this.searchSince) {
+        since = dayjs(this.searchSince).toISOString()
       }
 
-      const chats = await api(this.config).chat.listChats(since, search)
+      const chats = await api(this.config).chat.listChats(
+        since,
+        search,
+        logError
+      )
       this.list = chats
 
       chats.forEach((c) => {
@@ -184,7 +191,8 @@ export const useChatStore = defineStore({
 
       const myid = authStore.user?.id
       if (myid) {
-        await this.fetchChats()
+        // Don't want to log any errors to Sentry - they can happen due to timing windows.
+        await this.fetchChats(null, false)
       }
 
       setTimeout(this.pollForChatUpdates, 30000)

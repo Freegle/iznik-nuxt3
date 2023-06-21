@@ -4,14 +4,14 @@ import api from '~/api'
 export const useGiftAidStore = defineStore({
   id: 'giftaid',
   state: () => ({
-    giftaid: null,
+    giftaid: {},
   }),
   actions: {
     init(config) {
       this.config = config
     },
     async fetch() {
-      this.giftaid = await api(this.config).giftaid.get()
+      this.giftaid = (await api(this.config).giftaid.get()) || {}
       return this.giftaid
     },
     async save() {

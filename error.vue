@@ -60,4 +60,15 @@ import { useError } from '#imports'
 
 const error = useError()
 const maintenance = error?.value?.message === 'Maintenance error'
+
+// Check if error contains "Failed to fetch"
+const importError = error?.value?.message.includes(
+  'Failed to fetch dynamically imported module'
+)
+
+if (importError) {
+  // This can happen when a page load is cancelled by the user, sometimes.  Reload.
+  console.log('Import of dynamic module error - reload')
+  window.location.reload()
+}
 </script>

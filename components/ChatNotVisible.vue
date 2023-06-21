@@ -1,6 +1,6 @@
 <template>
   <b-alert variant="danger" class="mt-2" :model-value="true">
-    <h3>That chat isn't visible to you.</h3>
+    <h3>That chat isn't for this account.</h3>
     <p>
       Please check your email in
       <!-- eslint-disable-next-line-->

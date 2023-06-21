@@ -115,7 +115,7 @@
               </ExternalLink>
             </b-col>
           </b-row>
-          <b-row v-if="volunteering.phone">
+          <b-row v-if="volunteering.contactphone">
             <b-col cols="4" md="3" class="field"> Contact phone</b-col>
             <b-col cols="8" md="9">
               {{ volunteering.contactphone }}
@@ -133,16 +133,8 @@
         <VForm v-else-if="volunteering" ref="form">
           <b-row>
             <b-col cols="12" md="6">
-              <b-form-group
-                ref="groupid"
-                label="For which community?"
-                :state="true"
-              >
-                <GroupRememberSelect
-                  v-model="groupid"
-                  remember="editopportunity"
-                  :systemwide="true"
-                />
+              <b-form-group label="For which community?" :state="true">
+                <GroupSelect v-model="groupid" :systemwide="true" />
                 <p v-if="showGroupError" class="text-danger font-weight-bold">
                   Please select a community.
                 </p>
@@ -180,7 +172,7 @@
               </b-form-group>
             </b-col>
             <b-col v-if="enabled" cols="12" md="6">
-              <div v-if="volunteering.image" class="float-right container">
+              <div v-if="volunteering.image" class="container">
                 <div
                   class="clickme rotateleft stacked"
                   label="Rotate left"
@@ -213,11 +205,7 @@
           <span v-if="enabled">
             <b-row>
               <b-col>
-                <b-button
-                  variant="primary"
-                  class="mt-1 float-right"
-                  @click="photoAdd"
-                >
+                <b-button variant="primary" class="mt-1" @click="photoAdd">
                   <v-icon icon="camera" /> Upload photo
                 </b-button>
               </b-col>
@@ -374,12 +362,7 @@
     <template #footer>
       <div class="w-100 d-flex justify-content-between">
         <template v-if="added">
-          <b-button
-            variant="white"
-            class="float-right"
-            :disabled="uploadingPhoto"
-            @click="hide"
-          >
+          <b-button variant="white" :disabled="uploadingPhoto" @click="hide">
             Close
           </b-button>
         </template>
@@ -388,7 +371,6 @@
             <b-button
               v-if="!editing"
               variant="white"
-              class="float-left"
               :disabled="uploadingPhoto"
               @click="editing = true"
             >
@@ -397,40 +379,38 @@
             </b-button>
             <b-button
               variant="white"
-              class="float-left ml-1"
               :disabled="uploadingPhoto"
               @click="deleteIt"
             >
               <v-icon icon="trash-alt" />
               Delete
             </b-button>
-            <b-button
-              v-if="!editing"
-              variant="white"
-              class="float-right"
-              :disabled="uploadingPhoto"
-              @click="hide"
-            >
-              Close
-            </b-button>
-            <b-button
-              v-if="editing"
-              variant="white"
-              class="float-right mr-1"
-              :disabled="uploadingPhoto"
-              @click="dontSave"
-            >
-              Hide
-            </b-button>
-            <SpinButton
-              v-if="editing"
-              variant="primary"
-              :disabled="uploadingPhoto"
-              name="save"
-              :label="volunteering.id ? 'Save Changes' : 'Add Opportunity'"
-              @handle="saveIt"
-            />
           </template>
+          <b-button
+            v-if="!editing"
+            variant="white"
+            :disabled="uploadingPhoto"
+            @click="hide"
+          >
+            Close
+          </b-button>
+          <b-button
+            v-if="editing"
+            variant="white"
+            :disabled="uploadingPhoto"
+            @click="dontSave"
+          >
+            Hide
+          </b-button>
+          <SpinButton
+            v-if="editing && enabled"
+            variant="primary"
+            :disabled="uploadingPhoto"
+            name="save"
+            :label="volunteering.id ? 'Save Changes' : 'Add Opportunity'"
+            spinclass="textWhite"
+            @handle="saveIt"
+          />
         </template>
       </div>
     </template>
@@ -444,9 +424,11 @@ import { useComposeStore } from '../stores/compose'
 import { useUserStore } from '../stores/user'
 import { useGroupStore } from '../stores/group'
 import EmailValidator from './EmailValidator'
+import SpinButton from '~/components/SpinButton.vue'
 import modal from '@/mixins/modal'
 import { twem } from '~/composables/useTwem'
-const GroupRememberSelect = () => import('~/components/GroupRememberSelect')
+import { ref } from '#imports'
+const GroupSelect = () => import('~/components/GroupSelect')
 const OurFilePond = () => import('~/components/OurFilePond')
 const StartEndCollection = () => import('~/components/StartEndCollection')
 const NoticeMessage = () => import('~/components/NoticeMessage')
@@ -480,7 +462,8 @@ function initialVolunteering() {
 export default {
   components: {
     EmailValidator,
-    GroupRememberSelect,
+    SpinButton,
+    GroupSelect,
     OurFilePond,
     StartEndCollection,
     NoticeMessage,
@@ -508,28 +491,33 @@ export default {
     const composeStore = useComposeStore()
     const userStore = useUserStore()
     const groupStore = useGroupStore()
+    const groupid = ref(null)
 
     if (props.id) {
       const v = await volunteeringStore.fetch(props.id)
       await userStore.fetch(v.userid)
 
       v.groups?.forEach(async (id) => {
+        groupid.value = id
         await groupStore.fetch(id)
       })
     }
+
+    const oldPhoto = ref(volunteeringStore.byId(props.id)?.image)
 
     return {
       volunteeringStore,
       composeStore,
       userStore,
       groupStore,
+      groupid,
+      oldPhoto,
     }
   },
   data() {
     return {
       editing: false,
       added: false,
-      groupid: null,
       cacheBust: Date.now(),
       uploading: false,
       showGroupError: false,
@@ -580,22 +568,17 @@ export default {
       return desc
     },
     enabled() {
-      const group = this.myGroup(this.groupid)
+      const group = this.groupStore.get(this.groupid)
 
       let ret = true
 
-      if (group) {
-        if ('volunteeringallowed' in group) {
-          ret = group.volunteeringallowed
+      if (group?.settings) {
+        if ('volunteering' in group.settings) {
+          ret = group.settings.volunteering
         }
       }
 
       return ret
-    },
-    shouldUpdatePhoto() {
-      const { photo: oldPhoto } = this.volunteering
-      const { photo: newPhoto } = this.volunteering
-      return newPhoto && (oldPhoto ? newPhoto.id !== oldPhoto.id : true)
     },
   },
   methods: {
@@ -675,15 +658,22 @@ export default {
 
       if (this.isExisting) {
         const { id } = this.volunteering
-        // This is an edit.
-        if (this.shouldUpdatePhoto) {
-          await this.volunteeringStore.setPhoto(id, this.volunteering.image.id)
+
+        // Save the WIP volop before we start making changes, otherwise the saves will update the store and hence
+        // what we're looking at.
+        const wip = JSON.parse(JSON.stringify(this.volunteering))
+        let shouldUpdatePhoto = null
+
+        if (wip.image?.id !== this.oldPhoto?.id) {
+          shouldUpdatePhoto = wip.image.id
+        }
+
+        if (shouldUpdatePhoto) {
+          await this.volunteeringStore.setPhoto(id, shouldUpdatePhoto)
         }
 
         const oldgroupid =
-          this.volunteering.groups && this.volunteering.groups.length
-            ? this.volunteering.groups[0]
-            : null
+          wip.groups && wip.groups.length ? wip.groups[0] : null
 
         if (this.groupid !== oldgroupid) {
           // Save the new group, then remove the old group, so it won't get stranded.
@@ -700,11 +690,11 @@ export default {
 
         await this.volunteeringStore.setDates({
           id,
-          olddates: this.volunteering.dates,
-          newdates: this.volunteering.dates,
+          olddates: wip.dates,
+          newdates: wip.dates,
         })
 
-        await this.volunteeringStore.save(this.volunteering)
+        await this.volunteeringStore.save(wip)
 
         this.added = true
       } else {
@@ -766,7 +756,7 @@ export default {
     },
     async rotate(deg) {
       await this.imageStore.post({
-        id: this.event.image.id,
+        id: this.volunteering.image.id,
         rotate: deg,
         bust: Date.now(),
         volunteering: true,

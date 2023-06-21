@@ -4,11 +4,19 @@ import { useAuthStore } from '~/stores/auth'
 import { useMobileStore } from '~/stores/mobile'
 import { useMiscStore } from '~/stores/misc'
 
+let timer = 0
+
 // We add fetch retrying.
 // Note that $fetch and useFetch cause problems on Node v18, so we don't use them.
 const ourFetch = fetchRetry(fetch, {
   retries: 10,
   retryOn: (attempt, error, response) => {
+    if (useMiscStore()?.unloading) {
+      // Don't retry if we're unloading.
+      console.log("Unloading - don't retry")
+      return false
+    }
+
     // Retry on pretty much anything except errors which can legitimately be returned by the API server.  These are
     // the low 400s.
     if (error !== null || response?.status > 404) {
@@ -262,6 +270,12 @@ export default class BaseAPI {
   }
 
   async $requestv2(method, path, config, logError = true, body = null) {
+    timer++
+    const timerLabel = path + ' api-' + timer
+
+    console.log('Start ', timerLabel)
+    console.time(timerLabel)
+
     let status = null
     let data = null
 
@@ -344,7 +358,7 @@ export default class BaseAPI {
     //   probably do the right thing.
     // - otherwise throw an exception.
     if (status !== 200 || !data) {
-      const statusstr = data && data.status ? data.status : 'Unknown'
+      const statusstr = status.toString()
 
       // Whether or not we log this error to Sentry depends.  Most errors are worth logging, because they're unexpected.
       // But some API calls are expected to fail, and throw an exception which is then handled in the code.  We don't
@@ -389,6 +403,8 @@ export default class BaseAPI {
         message
       )
     }
+
+    console.timeEnd(timerLabel)
 
     return data
   }

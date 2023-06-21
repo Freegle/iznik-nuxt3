@@ -37,7 +37,7 @@
             </div>
             <div v-else>
               Travel time:
-              <span v-if="myLocation" class="text-faded">
+              <span v-if="myLocation?.name" class="text-faded">
                 (from {{ myLocation.name }})</span
               >
             </div>
@@ -126,6 +126,7 @@
       <div v-if="!id">
         <b-button
           v-if="showAdd"
+          :disabled="!pc?.id"
           variant="primary"
           size="lg"
           class="mt-2"

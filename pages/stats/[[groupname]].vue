@@ -138,7 +138,7 @@ export default {
     GChart,
     GroupHeader,
   },
-  setup() {
+  async setup() {
     const groupStore = useGroupStore()
     const statsStore = useStatsStore()
     const runtimeConfig = useRuntimeConfig()
@@ -153,6 +153,8 @@ export default {
     })
 
     if (groupname) {
+      await groupStore.fetch(groupname, true)
+
       useHead(
         buildHead(
           route,
@@ -401,6 +403,7 @@ export default {
     this.end = dayjs().subtract(1, 'month').endOf('month')
 
     await this.statsStore.clear()
+    console.log('Mounted', this.groupid)
     await this.statsStore.fetch({
       group: this.groupid,
       grouptype: 'Freegle',

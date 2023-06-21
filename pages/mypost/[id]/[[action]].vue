@@ -25,8 +25,8 @@
           </div>
           <div v-if="missing">
             <NoticeMessage variant="danger" class="mt-1">
-              Sorry, we couldn't find that message. Perhaps it's been deleted,
-              or perhaps the link you clicked on is wrong?
+              Sorry, we couldn't find that post. Perhaps it's been deleted, or
+              perhaps the link you clicked on is wrong?
             </NoticeMessage>
             <div class="text-center">
               <b-button variant="primary" size="lg" class="mt-2" to="/myposts">
@@ -62,7 +62,7 @@ export default {
     GlobalWarning,
     DonationAskModal,
   },
-  async setup() {
+  async setup(props) {
     const runtimeConfig = useRuntimeConfig()
     const route = useRoute()
     const id = parseInt(route.params.id)
@@ -105,12 +105,12 @@ export default {
           // we've seen people click the button in the email a lot and then bail out.
           let outcome = null
 
-          if (this.action === 'repost') {
+          if (props.action === 'repost') {
             outcome = 'Repost'
-          } else if (this.action === 'withdraw') {
+          } else if (props.action === 'withdraw') {
             outcome = 'Withdrawn'
-          } else if (this.action === 'completed') {
-            outcome = this.message.type === 'Offer' ? 'Taken' : 'Received'
+          } else if (props.action === 'completed') {
+            outcome = props.message.type === 'Offer' ? 'Taken' : 'Received'
           }
 
           if (outcome) {

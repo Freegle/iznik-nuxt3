@@ -39,7 +39,7 @@
       <b-card-body>
         <b-card-text class="pl-4 pr-4">
           <div v-if="story.story" class="preline">
-            <div v-if="story.image" class="float-right">
+            <div v-if="story.image">
               <b-img
                 lazy
                 :src="story.image.path"

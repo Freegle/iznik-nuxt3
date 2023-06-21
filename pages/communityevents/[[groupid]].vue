@@ -16,11 +16,7 @@
                 :value="groupid"
                 @update:model-value="changeGroup"
               />
-              <b-button
-                variant="primary"
-                class="float-right"
-                @click="openEventModal"
-              >
+              <b-button variant="primary" @click="openEventModal">
                 <v-icon icon="plus" /> Add a community event
               </b-button>
             </div>

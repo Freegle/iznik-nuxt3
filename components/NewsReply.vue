@@ -11,7 +11,7 @@
       >
         <ProfileImage
           :image="reply.profile?.paththumb"
-          class="ml-1 mr-2 mt-1 mb-1 inline float-left"
+          class="ml-1 mr-2 mt-1 mb-1 inline"
           :is-moderator="Boolean(reply.showmod && reply.replyto === threadhead)"
           :size="reply.replyto !== threadhead ? 'sm' : 'md'"
           :lazy="false"
@@ -44,7 +44,7 @@
             class="clickme replyphoto mt-2 mb-2"
             generator-unable-to-provide-required-alt=""
             :src="reply.image.paththumb"
-            @click="showReplyPhotoModal = true"
+            @click="showReplyPhotoModal"
             @error="brokenImage"
           />
         </div>
@@ -168,7 +168,7 @@
               <ProfileImage
                 v-if="me.profile.path"
                 :image="me.profile.path"
-                class="m-0 inline float-left"
+                class="m-0 inline"
                 is-thumbnail
                 size="sm"
               />
@@ -206,7 +206,7 @@
                 <ProfileImage
                   v-if="me.profile.path"
                   :image="me.profile.path"
-                  class="m-0 inline float-left"
+                  class="m-0 inline"
                   is-thumbnail
                   size="sm"
                 />
@@ -261,20 +261,15 @@
       imgflag="newsfeed"
       @photo-processed="photoProcessed"
     />
-    <b-modal
+    <NewsPhotoModal
       v-if="reply.image"
-      ref="photoModal"
-      v-model="showReplyPhotoModal"
-      title="ChitChat photo"
-      generator-unable-to-provide-required-alt=""
-      size="lg"
-      no-stacking
-      hide-footer
-    >
-      <template #default>
-        <b-img fluid rounded center :src="reply.image.path" />
-      </template>
-    </b-modal>
+      :id="reply.image.id"
+      ref="replyPhotoModal"
+      :newsfeedid="reply.id"
+      :src="reply.image.path"
+      imgtype="Newsfeed"
+      imgflag="Newsfeed"
+    />
     <ProfileModal v-if="infoclick" :id="userid" ref="profilemodal" />
     <NewsLovesModal v-if="showLoveModal" :id="replyid" ref="loveModal" />
     <NewsEditModal
@@ -379,7 +374,6 @@ export default {
       showEditModal: false,
       hasBecomeVisible: false,
       isVisible: false,
-      showReplyPhotoModal: false,
     }
   },
   computed: {
@@ -589,6 +583,9 @@ export default {
           this.scrollIntoView()
         }
       }
+    },
+    showReplyPhotoModal() {
+      this.$refs.replyPhotoModal.show()
     },
   },
 }

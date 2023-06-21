@@ -40,6 +40,7 @@ import { useImageStore } from './stores/image'
 import { useDomainStore } from './stores/domain'
 import { useLogoStore } from './stores/logo'
 import { useLocationStore } from './stores/location'
+import { useShortlinkStore } from './stores/shortlinks'
 
 const route = useRoute()
 
@@ -83,6 +84,7 @@ const imageStore = useImageStore()
 const domainStore = useDomainStore()
 const logoStore = useLogoStore()
 const locationStore = useLocationStore()
+const shortlinkStore = useShortlinkStore()
 
 groupStore.init(runtimeConfig)
 messageStore.init(runtimeConfig)
@@ -113,6 +115,7 @@ imageStore.init(runtimeConfig)
 domainStore.init(runtimeConfig)
 logoStore.init(runtimeConfig)
 locationStore.init(runtimeConfig)
+shortlinkStore.init(runtimeConfig)
 
 // We use a key to force the whole page to re-render if we have logged in.  This is a sledgehammer way of
 // re-calling all the setup() methods etc.  Perhaps there's a better way to do this.

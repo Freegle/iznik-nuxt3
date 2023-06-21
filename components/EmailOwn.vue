@@ -16,7 +16,6 @@
 </template>
 <script>
 import { useAuthStore } from '~/stores/auth'
-import { useUserStore } from '~/stores/user'
 
 export default {
   props: {
@@ -25,14 +24,19 @@ export default {
       required: true,
     },
   },
+  setup() {
+    const authStore = useAuthStore()
+
+    return {
+      authStore,
+    }
+  },
   methods: {
     async deleteIt() {
-      const userStore = useUserStore()
-      await userStore.removeEmail(this.myid, this.email.email)
+      await this.authStore.removeEmail(this.email.email)
     },
     async makePrimary() {
-      const authStore = useAuthStore()
-      await authStore.makeEmailPrimary(this.email.email)
+      await this.authStore.makeEmailPrimary(this.email.email)
     },
   },
 }

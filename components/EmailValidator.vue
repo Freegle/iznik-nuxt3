@@ -12,7 +12,7 @@
         :rules="validateEmail"
         type="email"
         name="email"
-        :class="'email form-control input-' + size"
+        :class="'email form-control input-' + size + ' ' + inputClass"
         :center="center"
         autocomplete="username email"
         :placeholder="'Email address ' + (required ? '' : '(Optional)')"
@@ -72,6 +72,11 @@ export default {
       type: String,
       required: false,
       default: "What's your email address?",
+    },
+    inputClass: {
+      type: String,
+      required: false,
+      default: '',
     },
   },
   setup(props) {

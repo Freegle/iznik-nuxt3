@@ -101,7 +101,7 @@
                     <ProfileImage
                       v-if="me.profile.path"
                       :image="me.profile.path"
-                      class="m-0 inline float-left"
+                      class="m-0 inline"
                       is-thumbnail
                       size="sm"
                       :lazy="false"
@@ -140,7 +140,7 @@
                     <ProfileImage
                       v-if="me.profile.path"
                       :image="me.profile.path"
-                      class="m-0 inline float-left"
+                      class="m-0 inline"
                       is-thumbnail
                       size="sm"
                     />
@@ -212,7 +212,7 @@
     <NewsReportModal
       v-if="showReportModal"
       :id="newsfeed.id"
-      ref="reportmodal"
+      ref="reportModal"
     />
     <ConfirmModal
       v-if="showDeleteModal"

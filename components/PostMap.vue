@@ -529,6 +529,7 @@ export default {
             if (e && e.geocode && e.geocode.bbox) {
               // Empty out the query box so that the dropdown closes.  Note that "this" is the control object,
               // which is why this isn't in a separate method.
+              console.log('Selected', e)
               this.setQuery('')
 
               // If we don't find anything at this location we will want to zoom out.

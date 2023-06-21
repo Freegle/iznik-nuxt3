@@ -58,9 +58,9 @@ try {
     buildHead(
       route,
       runtimeConfig,
-      event.value.title,
-      event.value.description,
-      event.value.image ? event.value.image.path : null
+      event.title,
+      event.description,
+      event.image ? event.image.path : null
     )
   )
 } catch (e) {

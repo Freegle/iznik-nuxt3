@@ -3,7 +3,9 @@ import api from '~/api'
 
 export const useStatsStore = defineStore({
   id: 'stats',
-  state: () => ({}),
+  state: () => ({
+    heatmap: {},
+  }),
   actions: {
     init(config) {
       this.config = config
@@ -14,6 +16,10 @@ export const useStatsStore = defineStore({
       for (const type in stats) {
         this[type] = stats[type]
       }
+    },
+    async fetchHeatmap() {
+      this.heatmap = await api(this.config).dashboard.fetchHeatmap()
+      return this.heatmap
     },
     clear() {
       this.$reset()

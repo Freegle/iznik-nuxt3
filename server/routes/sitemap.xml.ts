@@ -5,7 +5,6 @@ import { SitemapStream, streamToPromise } from 'sitemap'
 // So far as I can tell Nuxt3 isn't evolved enough for use with a sitemap, so we have to do this
 // manually.
 
-// eslint-disable-next-line no-undef
 export default defineEventHandler(async (event) => {
   const runtimeConfig = useRuntimeConfig()
 

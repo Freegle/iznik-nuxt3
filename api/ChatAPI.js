@@ -5,11 +5,15 @@ export default class ChatAPI extends BaseAPI {
     return this.$getv2(`/chat/${chatid}/message`)
   }
 
-  async listChats(since, search) {
-    return await this.$getv2('/chat', {
-      since,
-      search,
-    })
+  async listChats(since, search, logError) {
+    return await this.$getv2(
+      '/chat',
+      {
+        since,
+        search,
+      },
+      logError
+    )
   }
 
   fetchChat(chatid, logError) {
@@ -52,40 +56,6 @@ export default class ChatAPI extends BaseAPI {
 
   blockChat(chatid) {
     return this.$post('/chatrooms', { id: chatid, status: 'Blocked' })
-  }
-
-  unseenCount(chatid) {
-    return this.$get('/chatrooms', {
-      count: true,
-      chattypes: ['User2User', 'User2Mod'],
-    })
-  }
-
-  hold(msgid) {
-    return this.$post('/chatmessages', { id: msgid, action: 'Hold' })
-  }
-
-  release(msgid) {
-    return this.$post('/chatmessages', { id: msgid, action: 'Release' })
-  }
-
-  redact(msgid) {
-    return this.$post('/chatmessages', { id: msgid, action: 'Redact' })
-  }
-
-  reject(msgid) {
-    return this.$post('/chatmessages', { id: msgid, action: 'Reject' })
-  }
-
-  approve(msgid) {
-    return this.$post('/chatmessages', { id: msgid, action: 'Approve' })
-  }
-
-  whitelist(msgid) {
-    return this.$post('/chatmessages', {
-      id: msgid,
-      action: 'ApproveAllFuture',
-    })
   }
 
   rsvp(id, chatid, value) {

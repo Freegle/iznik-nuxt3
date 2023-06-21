@@ -23,12 +23,7 @@
                   Download poster
                 </b-button>
               </ExternalLink>
-              <b-button
-                variant="secondary"
-                size="lg"
-                class="float-right"
-                @click="added"
-              >
+              <b-button variant="secondary" size="lg" @click="added">
                 I put up a poster!
               </b-button>
             </div>

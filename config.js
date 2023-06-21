@@ -3,7 +3,7 @@ export default {
   APIv1: process.env.IZNIK_API_V1 || 'https://fdapilive.ilovefreegle.org/api',
 
   // New style API, for fast read ops.
-  APIv2: process.env.IZNIK_API_V2 || 'https://api.ilovefreegle.org:8192/apiv2',
+  APIv2: process.env.IZNIK_API_V2 || 'https://api.ilovefreegle.org/apiv2',
 
   // This is where the user site is.
   USER_SITE: 'https://www.ilovefreegle.org',
@@ -34,5 +34,5 @@ export default {
     'https://63f870e6c729477ebca4098a0b07fd3a@o118493.ingest.sentry.io/4504083802226688',
 
   ISAPP: process.env.IZNIK_NUXT3_IS_APP === 'true',
-  MOBILE_VERSION: '3.0.1',
+  MOBILE_VERSION: '3.0.2',
 }

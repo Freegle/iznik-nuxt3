@@ -1,3 +1,17 @@
+# Proxy requests to the permlink scripts to the appropriate full Netlify url.  This works in conjunction with cdnUrl
+# in nuxt.config.ts.
+/netlify/* https://:splat 200!
+
+# Twilio status needs proxying to the API endpoint.
+/twilio/status.php https://fdapilive.ilovefreegle.org/twilio/status.php 200!
+
+# PayPal similarly.  This has been updated on PayPal so should fade away.
+/donateipn.php https://fdapilive.ilovefreegle.org/donateipn.php 200!
+
+/apple-touch-icon.png /icons/apple-touch-icon.png
+/apple-touch-icon-precomposed.png /icons/apple-touch-icon.png
+/favicon.ico /icons/favicon.ico
+
 # Return 404 for requests from old code.  This avoids the function call, which costs.
 /sw.js* / 404!
 /robots.txt / 404!
@@ -8,5 +22,11 @@
 /uimg* / 404!
 /tuimg* / 404!
 /.well-known/* / 404!
-/apple-touch-icon.png /icons/apple-touch-icon.png
-/apple-touch-icon-precomposed.png /icons/apple-touch-icon.png
+
+# Proxy old /api endpoint which is still used by apps which haven't updated.
+/api* https://fdapilive.ilovefreegle.org/api/:splat 200!
+
+# Old endpoints.
+/mygroups* /browse:splat 200!
+/how-it-works /help 301!
+/contact /help 301!

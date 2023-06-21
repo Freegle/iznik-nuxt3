@@ -17,7 +17,7 @@
             "
             class="bg-white p-2"
           >
-            <h1>Sorry, that message isn't around any more.</h1>
+            <h1>Sorry, that post isn't around any more.</h1>
             <div>
               <p>
                 If it was an OFFER, it's probably been TAKEN. If it was a
@@ -59,7 +59,6 @@
             <GlobalWarning />
             <OurMessage
               :id="id"
-              ref="message"
               :start-expanded="true"
               hide-close
               record-view
@@ -78,7 +77,7 @@ import { buildHead } from '../../composables/useBuildHead'
 import { useMessageStore } from '~/stores/message'
 import { twem } from '~/composables/useTwem'
 import MyMessage from '~/components/MyMessage'
-import { ref } from '#imports'
+import { ref, onMounted } from '#imports'
 
 const runtimeConfig = useRuntimeConfig()
 const route = useRoute()
@@ -122,4 +121,16 @@ if (message.value) {
     )
   )
 }
+
+onMounted(async () => {
+  // We've seen pages get stuck serving old cached data.  Not sure whether this is our fault or a Netlify caching issue.
+  //
+  // Fetching again here will reload if the message was added to the cache a while ago - which will be the case in
+  // an old cached page because the hydrated store will contain the message addition time.
+  try {
+    await messageStore.fetch(id)
+  } catch (e) {
+    console.log('Message fetch on mount failed', e)
+  }
+})
 </script>

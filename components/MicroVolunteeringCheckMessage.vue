@@ -116,7 +116,6 @@ export default {
       })
 
       this.$emit('next')
-      this.considerNext()
     },
     async approve() {
       // Approved -  that's it.

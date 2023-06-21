@@ -165,7 +165,9 @@ export default {
             notificationStore.fetchCount()
 
             const chatStore = useChatStore()
-            chatStore.fetchChats()
+
+            // Don't log as we might have been logged out since we were last active.
+            chatStore.fetchChats(null, false)
           }
         })
       }

@@ -15,7 +15,7 @@
             <b-img
               thumbnail
               src="/icon.png"
-              class="titlelogo float-right"
+              class="titlelogo"
               @click="toggle"
             />
             <h2>Freegle in {{ authority.name }}</h2>
@@ -244,7 +244,7 @@
                   class="titlelogo float-end"
                   @click="toggle"
                 />
-                <span class="text--largest">
+                <span class="text--largest mr-2">
                   {{ authority.name }}
                 </span>
                 <div class="d-inline-block align-top pt-2">

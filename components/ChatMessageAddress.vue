@@ -110,15 +110,17 @@
 </template>
 <script>
 import { useAddressStore } from '../stores/address'
+import { useChatStore } from '../stores/chat'
 import ExternalLink from './ExternalLink'
 import ChatBase from '~/components/ChatBase'
 import { constructMultiLine } from '~/composables/usePAF'
 import { attribution, osmtile } from '~/composables/useMap'
+import { ref } from '#imports'
 
 export default {
   components: { ExternalLink },
   extends: ChatBase,
-  async setup() {
+  async setup(props) {
     let L = null
 
     if (process.client) {
@@ -127,25 +129,25 @@ export default {
 
     // Make sure we have the addresses.
     const addressStore = useAddressStore()
+    const chatStore = useChatStore()
 
-    await addressStore.fetch()
+    // The addressid is (wrongly) stored in the message.
+    const chatmsg = chatStore.messageById(props.id)
+    const addressid = ref(parseInt(chatmsg?.message))
+
+    const address = await addressStore.fetch(addressid.value)
+    console.log('FEtched address', address)
 
     return {
       addressStore,
       L,
       osmtile: osmtile(),
       attribution: attribution(),
+      addressid,
+      address: ref(address),
     }
   },
   computed: {
-    address() {
-      // The addressid is (wrongly) stored in the message.
-      if (this.chatmessage?.message) {
-        return this.addressStore?.get(parseInt(this.chatmessage.message))
-      }
-
-      return null
-    },
     multiline() {
       return constructMultiLine(this.address)
     },
