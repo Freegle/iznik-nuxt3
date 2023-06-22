@@ -1,6 +1,8 @@
 <template>
   <div class="w-100 d-flex justify-content-center text-center">
-    <b-img lazy src="/loader.gif" alt="Loading" width="100px" />
+    <client-only>
+      <b-img lazy src="/loader.gif" alt="Loading" width="100px" />
+    </client-only>
   </div>
 </template>
 <script>
