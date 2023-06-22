@@ -74,23 +74,24 @@
         </div>
       </div>
       <div v-if="submitting" class="d-flex justify-content-around pt-2 mt-2">
+        <b-progress height="48px" class="mt-2 w-25" animated variant="success">
+          <b-progress-bar :value="progress" />
+        </b-progress>
+      </div>
+      <div v-else class="d-flex justify-content-around pt-2 mt-2">
         <NoticeMessage v-if="notAllowed" variant="danger">
           You are not allowed to post on this community.
         </NoticeMessage>
+        <NoticeMessage v-else-if="unvalidatedEmail" variant="danger">
+          You tried to post using an email address which has not yet been
+          validated. Please check your mailbox (including spam) and validate the
+          email, then try again.
+        </NoticeMessage>
         <NoticeMessage v-else-if="wentWrong" variant="danger">
           <!-- eslint-disable-next-line -->
-                Something went wrong.  Please try again, and if this keeps happening then contact
+          Something went wrong.  Please try again, and if this keeps happening then contact
           <SupportLink />.
         </NoticeMessage>
-        <b-progress
-          v-else
-          height="48px"
-          class="mt-2 w-25"
-          animated
-          variant="success"
-        >
-          <b-progress-bar :value="progress" />
-        </b-progress>
       </div>
     </div>
   </client-only>
