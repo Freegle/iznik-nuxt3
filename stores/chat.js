@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import dayjs from 'dayjs'
 import api from '~/api'
 import { useAuthStore } from '~/stores/auth'
+import { useMessageStore } from '~/stores/message'
 
 export const useChatStore = defineStore({
   id: 'chat',
@@ -111,6 +112,11 @@ export const useChatStore = defineStore({
 
       // Get the latest messages back.
       this.fetchMessages(chatid)
+
+      if (refmsgid) {
+        // The message might have changed (e.g. number of replies).
+        useMessageStore().fetch(refmsgid, true)
+      }
     },
     async report(chatid, reason, comments, refchatid) {
       await api(this.config).chat.send({
