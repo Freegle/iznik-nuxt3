@@ -8,8 +8,9 @@
           <div
             v-if="
               failed ||
+              !message ||
               (message &&
-                ((message.outcomes && message.outcomes.length > 0) ||
+                (message.outcomes?.length > 0 ||
                   message.deleted ||
                   (message.groups &&
                     message.groups.length &&
