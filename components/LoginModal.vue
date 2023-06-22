@@ -16,6 +16,15 @@
     <template #title>
       <h2>Let's get freegling!</h2>
     </template>
+    <div v-if="signUp" class="d-flex justify-content-around mb-2">
+      <b-button
+        variant="link"
+        class="font-weight-bold pl-1 py-0 border-0 align-top d-block d-md-none"
+        @click="clickShowSignIn"
+      >
+        Already a freegler? Log in
+      </b-button>
+    </div>
     <p v-if="signUp" class="text-center">
       You'll get emails. Name, approximate location, and profile picture are
       public - you can hide your real name and picture from Settings. Logging in
@@ -175,22 +184,22 @@
             <p class="mb-0 text-center">
               <b-button
                 variant="link"
-                class="pl-1 pr-0 py-0 border-0 align-top"
+                class="ps-1 pe-0 py-0 border-0 align-top"
                 @click="clickShowSignUp"
               >
                 New freegler? Register
               </b-button>
             </p>
           </div>
-          <p v-if="signUp" class="text-center font-weight-bold">
+          <div v-if="signUp" class="d-flex justify-content-around">
             <b-button
               variant="link"
-              class="font-weight-bold pl-1 py-0 border-0 align-top"
+              class="font-weight-bold pl-1 py-0 border-0 align-top d-none d-md-block"
               @click="clickShowSignIn"
             >
               Already a freegler? Log in
             </b-button>
-          </p>
+          </div>
         </b-form>
       </div>
     </div>
