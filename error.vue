@@ -54,6 +54,7 @@
   </div>
 </template>
 <script setup>
+import * as Sentry from '@sentry/browser'
 import SupportLink from './components/SupportLink'
 import ExternalLink from '~/components/ExternalLink'
 import { useError } from '#imports'
@@ -61,14 +62,17 @@ import { useError } from '#imports'
 const error = useError()
 const maintenance = error?.value?.message === 'Maintenance error'
 
-// Check if error contains "Failed to fetch"
-const importError = error?.value?.message.includes(
-  'Failed to fetch dynamically imported module'
-)
+const importError =
+  error?.value?.message.includes(
+    'Failed to fetch dynamically imported module'
+  ) || error?.value?.message.includes('Importing a module script failed')
 
 if (importError) {
   // This can happen when a page load is cancelled by the user, sometimes.  Reload.
-  console.log('Import of dynamic module error - reload')
+  console.log('Import of module error - reload')
+  Sentry.captureMessage(
+    'Import of module error - reload ' + error?.value?.message
+  )
   window.location.reload()
 }
 </script>
