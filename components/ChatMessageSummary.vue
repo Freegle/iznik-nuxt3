@@ -34,9 +34,7 @@
           </div>
         </div>
         <notice-message
-          v-if="
-            (message.outcomes && message.outcomes.length) || message.deleted
-          "
+          v-if="message.outcomes?.length || message.deleted"
           class="mt-2 mb-2"
         >
           <v-icon icon="info-circle" />
