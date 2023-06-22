@@ -45,7 +45,7 @@
           </span>
           <span v-else> They are no longer looking for this. </span>
         </notice-message>
-        <div v-if="message.promised">
+        <div v-else-if="message.promised">
           <div v-if="message.fromuser === myid">
             <notice-message>
               <div v-if="promisedToThem">
