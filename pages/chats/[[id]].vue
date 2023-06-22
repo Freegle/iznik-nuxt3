@@ -180,7 +180,7 @@ export default {
       const id = route.params.id ? parseInt(route.params.id) : 0
 
       // Fetch the list of chats.
-      await chatStore.fetchChats()
+      await chatStore.fetchChats(null, true, !!id)
 
       // Is this chat in the list?
       let chat = chatStore.byChatId(id)

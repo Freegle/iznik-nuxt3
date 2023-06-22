@@ -18,7 +18,10 @@
           <SupporterInfo v-if="chat.supporter" class="mr-3 mb-1 small" />
         </div>
         <div class="small text-muted" :title="dateFormatted">
-          {{ timeago(chat.lastdate) }}
+          <span v-if="chat.lastdate">
+            {{ timeago(chat.lastdate) }}
+          </span>
+          <span v-else> &nbsp; </span>
         </div>
         <div>
           <b-badge v-if="chat.replyexpected" variant="danger">

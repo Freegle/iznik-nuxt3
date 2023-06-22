@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import dayjs from 'dayjs'
+import { useRoute } from 'vue-router'
 import api from '~/api'
 import { useAuthStore } from '~/stores/auth'
 import { useMessageStore } from '~/stores/message'
@@ -16,8 +17,9 @@ export const useChatStore = defineStore({
   actions: {
     init(config) {
       this.config = config
+      this.route = useRoute()
     },
-    async fetchChats(search, logError) {
+    async fetchChats(search, logError, empty) {
       let since = null
 
       if (this.searchSince) {
@@ -27,7 +29,8 @@ export const useChatStore = defineStore({
       const chats = await api(this.config).chat.listChats(
         since,
         search,
-        logError
+        logError,
+        empty
       )
       this.list = chats
 
@@ -197,8 +200,12 @@ export const useChatStore = defineStore({
 
       const myid = authStore.user?.id
       if (myid) {
+        // If we are looking at a specific chat then we want to make sure we don't lose it by polling to exclude
+        // empty chats.
+        const empty = this.route?.path?.startsWith('/chats/')
+
         // Don't want to log any errors to Sentry - they can happen due to timing windows.
-        await this.fetchChats(null, false)
+        await this.fetchChats(null, false, empty)
       }
 
       setTimeout(this.pollForChatUpdates, 30000)
