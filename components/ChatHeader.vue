@@ -4,16 +4,17 @@
       v-if="chat && (chat.chattype !== 'User2User' || otheruser?.info)"
       class="outer position-relative"
     >
-      <div class="nameinfo pt-1 pb-1 pl-1" @click="showInfo">
+      <div class="nameinfo pt-1 pb-1 pl-1">
         <ProfileImage
           v-if="chat.icon"
           :image="chat.icon"
-          class="pr-1 profile"
+          class="pr-1 profile clickme"
           is-thumbnail
           size="xl"
           border
+          @click="showInfo"
         />
-        <div class="font-weight-bold black text--large name pl-1">
+        <div class="name font-weight-bold black text--large pl-1">
           {{ chat.name }}
         </div>
         <div
