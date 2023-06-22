@@ -716,7 +716,7 @@ $color-yahoo: #6b0094;
 .social-button {
   display: flex;
   align-items: center;
-  min-width: 250px;
+  min-width: 315px;
   border-radius: 3px;
   padding: 0;
   margin: 0 auto 20px;
@@ -745,9 +745,9 @@ $color-yahoo: #6b0094;
 
 .social-button--google {
   border: 2px solid $color-google;
-  background-color: #dadce0;
+  background-color: $color-white;
   width: 100%;
-  min-height: 44px;
+  min-height: 47px;
 }
 
 :deep(.social-button--google > div) {
