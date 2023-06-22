@@ -28,6 +28,8 @@ export default {
   },
   methods: {
     async download(e) {
+      // https://www.npmjs.com/package/save-file
+      console.log("AddToCalendar download")
       e.preventDefault()
       e.stopPropagation()
       const blob = new Blob([this.ics], { type: 'text/calendar;charset=utf-8' })
