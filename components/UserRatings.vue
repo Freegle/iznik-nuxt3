@@ -32,6 +32,20 @@
       </b-button>
     </span>
     <b-modal
+      v-model="showRemove"
+      title="Removing a rating"
+      ok-title="Remove rating"
+      @ok="removeRating"
+    >
+      <p>
+        You've already given this freegler a
+        <span v-if="user?.info?.ratings?.Mine === 'Up'"> thumbs up </span>
+        <span v-if="user?.info?.ratings?.Mine === 'Down'"> thumbs down </span>
+        rating. You can only rate each freegler once.
+      </p>
+      <p>You can remove your rating if you wish, or cancel.</p>
+    </b-modal>
+    <b-modal
       v-model="showDown"
       title="Giving a Thumbs Down..."
       ok-title="Submit"
@@ -133,6 +147,7 @@ export default {
   data() {
     return {
       showDown: false,
+      showRemove: false,
       reason: null,
       text: null,
       showError: false,
@@ -184,16 +199,20 @@ export default {
     async up() {
       this.showDown = false
       if (this.user.info.ratings.Mine === 'Up') {
-        await this.rate(null)
+        this.showRemove = true
       } else {
         await this.rate('Up')
       }
     },
-    async down() {
+    async removeRating() {
+      this.showRemove = false
+      await this.rate(null)
+    },
+    down() {
       this.showDown = false
 
       if (this.user.info.ratings.Mine === 'Down') {
-        await this.rate(null)
+        this.showRemove = true
       } else {
         this.showDown = true
       }
