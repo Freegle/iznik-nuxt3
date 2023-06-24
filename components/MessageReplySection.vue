@@ -37,18 +37,26 @@
           class="flex-grow-1"
         />
       </b-form-group>
+      <p v-if="me && !alreadyAMember" class="text--small text-muted">
+        You're not yet a member of this community; we'll join you. Change emails
+        or leave communities from
+        <em>Settings</em>.
+      </p>
       <div v-if="!me">
         <NewFreegler />
       </div>
       <div v-else>
         <div class="d-flex justify-content-between flex-wrap">
           <b-form-group
-            class="flex-grow-1"
+            class="flex-grow-1 nobot"
             label="Your postcode:"
             :label-for="'replytomessage-' + message.id"
             description=""
           >
             <PostCode @selected="savePostcode" />
+            <div class="text-muted text--small mt-1">
+              <v-icon icon="lock" /> Other freeglers won't see this.
+            </div>
           </b-form-group>
           <SettingsPhone
             v-if="me"
@@ -59,11 +67,21 @@
             input-class="phone"
           />
         </div>
-        <p class="text--small text-muted">
-          We ask for your postcode so that we know how far away you are - the
-          closer the better. Your mobile is optional - we can notify you by text
-          (SMS) so you don't miss replies. We won't show it to the other
-          freegler.
+        <p class="text-muted">
+          <b-button
+            v-if="!showWhyAsk"
+            size="sm"
+            variant="link"
+            @click="showWhyAsk = true"
+          >
+            Why do we ask for this?
+          </b-button>
+          <span v-if="showWhyAsk">
+            We ask for your postcode so that we know how far away you are - the
+            closer the better. Your mobile is optional - we can notify you by
+            text (SMS) so you don't miss replies. We won't show either of these
+            to the other freegler, but we will show an approximate distance.
+          </span>
         </p>
       </div>
     </div>
@@ -174,6 +192,7 @@ export default {
       emailValid: false,
       showNewUser: false,
       newUserPassword: null,
+      showWhyAsk: false,
     }
   },
   computed: {
@@ -193,6 +212,21 @@ export default {
     },
     fromme() {
       return this.message?.fromuser === this.myid
+    },
+    alreadyAMember() {
+      let found = false
+
+      for (const messageGroup of this.message?.groups) {
+        Object.keys(this.myGroups).forEach((key) => {
+          const group = this.myGroups[key]
+
+          if (messageGroup.groupid === group.id) {
+            found = true
+          }
+        })
+      }
+
+      return found
     },
     ...mapWritableState(useAuthStore, ['loggedInEver', 'forceLogin']),
   },
@@ -325,5 +359,9 @@ export default {
 
 :deep(.phone) {
   border: 2px solid $color-gray--normal !important;
+}
+
+.nobot {
+  margin-bottom: 0 !important;
 }
 </style>

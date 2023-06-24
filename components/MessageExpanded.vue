@@ -41,7 +41,6 @@
           class="messagemap"
           :height="150"
         />
-        <div v-else style="height: 150px" />
       </div>
       <MessageHistoryExpanded :id="id" class="d-block d-md-none mt-2 mt-md-0" />
       <MessageReplySection
