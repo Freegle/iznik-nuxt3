@@ -54,8 +54,7 @@
   </div>
 </template>
 <script setup>
-import * as Sentry from '@sentry/browser'
-import SupportLink from './components/SupportLink'
+import SupportLink from '~/components/SupportLink'
 import ExternalLink from '~/components/ExternalLink'
 import { useError } from '#imports'
 
@@ -70,9 +69,6 @@ const importError =
 if (importError) {
   // This can happen when a page load is cancelled by the user, sometimes.  Reload.
   console.log('Import of module error - reload')
-  Sentry.captureMessage(
-    'Import of module error - reload ' + error?.value?.message
-  )
   window.location.reload()
 }
 </script>
