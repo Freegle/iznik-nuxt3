@@ -118,8 +118,10 @@ export const useAuthStore = defineStore({
 
           this.userlist.unshift(id)
 
-          // Logged in as multiple users.  Let the server know.
-          await this.$api.session.related(this.userlist)
+          if (this.userlist.length > 1) {
+            // Logged in as multiple users.  Let the server know.
+            await this.$api.session.related(this.userlist)
+          }
         }
       }
     },
