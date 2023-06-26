@@ -101,6 +101,7 @@ export function setup(type) {
     submitting: ref(false),
     invalid: ref(false),
     notAllowed: ref(false),
+    unvalidatedEmail: ref(false),
     wentWrong: ref(false),
     initialPostcode: ref(initialPostcode),
     group,
@@ -233,6 +234,9 @@ export async function freegleIt(type, router) {
   const authStore = useAuthStore()
 
   this.submitting = true
+  this.unvalidatedEmail = false
+  this.wentWrong = false
+  this.notAllowed = false
 
   try {
     const results = await composeStore.submit({
@@ -279,8 +283,11 @@ export async function freegleIt(type, router) {
       })
     }
   } catch (e) {
-    console.log('Submit failed', e)
-    if (e.message.includes('Not allowed to post on this group')) {
+    console.log('Submit failed', e, e.response.data.ret)
+    if (e.message.includes('Unvalidated email')) {
+      console.log('unvalidated')
+      this.unvalidatedEmail = true
+    } else if (e.message.includes('Not allowed to post on this group')) {
       this.notAllowed = true
     } else {
       this.wentWrong = true

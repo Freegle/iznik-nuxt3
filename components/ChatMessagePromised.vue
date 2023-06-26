@@ -43,6 +43,16 @@
             </h4>
           </nuxt-link>
           <AddToCalendar v-if="tryst" :ics="tryst.ics" class="mr-2" />
+          <notice-message
+            v-if="refmsg.outcomes?.length || refmsg.deleted"
+            class="mt-2 mb-2"
+          >
+            <v-icon icon="info-circle" />
+            <span v-if="refmsg.type === 'Offer'">
+              This is no longer available.
+            </span>
+            <span v-else> They are no longer looking for this. </span>
+          </notice-message>
         </b-card-title>
         <b-card-text>
           <div :class="emessage ? 'media-body chatMessage' : 'media-body'">

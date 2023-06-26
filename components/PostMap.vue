@@ -10,21 +10,6 @@
         class="w-100 position-relative mb-1"
       >
         <div class="mapbox">
-          <!--          <vue3-draggable-resizable-->
-          <!--            :class="{-->
-          <!--              'd-none': mapHidden,-->
-          <!--            }"-->
-          <!--            :h="mapHeight"-->
-          <!--            w="auto"-->
-          <!--            :handles="['bl', 'br']"-->
-          <!--            :parent="false"-->
-          <!--            :draggable="false"-->
-          <!--            resizeable-->
-          <!--            resize-axis="y"-->
-          <!--            active-->
-          <!--            prevent-deactivation-->
-          <!--            @resizestop="onResize"-->
-          <!--          >-->
           <l-map
             ref="map"
             v-model:bounds="bounds"
@@ -38,6 +23,7 @@
             @update:bounds="idle"
             @zoomend="idle"
             @moveend="idle"
+            @dragend="dragEnd"
           >
             <div
               class="leaflet-top leaflet-right d-flex flex-column justify-content-center"
@@ -99,7 +85,6 @@
               />
             </div>
           </l-map>
-          <!--          </vue3-draggable-resizable>-->
         </div>
       </div>
     </div>
@@ -394,10 +379,6 @@ export default {
   },
   watch: {
     bounds(newVal, oldVal) {
-      if (oldVal !== null) {
-        this.moved = true
-      }
-
       this.getMessages()
     },
     zoom(newVal) {
@@ -563,12 +544,6 @@ export default {
           const bounds = this.mapObject.getBounds().toBBoxString()
 
           if (bounds !== this.lastBounds) {
-            if (this.lastBounds !== null) {
-              // The map has now moved from the initial position.
-              this.$emit('update:moved', true)
-              this.moved = true
-            }
-
             this.lastBounds = bounds
 
             if (this.showMessages) {
@@ -764,6 +739,11 @@ export default {
         [bounds.getSouthWest().lat, bounds.getSouthWest().lng],
         [bounds.getNorthEast().lat, bounds.getNorthEast().lng],
       ]
+    },
+    dragEnd(e) {
+      this.moved = true
+      this.$emit('update:moved', true)
+      this.idle()
     },
   },
 }

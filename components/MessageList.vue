@@ -48,13 +48,6 @@
           </div>
         </template>
       </infinite-loading>
-      <NoticeMessage v-if="!loading && !messagesForList?.length">
-        <p>
-          Sorry, we didn't find anything. Things come and go quickly, though, so
-          you could try later. Or you could:
-        </p>
-        <GiveAsk class="bg-info" />
-      </NoticeMessage>
     </div>
     <template #fallback>
       <div class="text-center">
@@ -73,11 +66,9 @@ import { useIsochroneStore } from '../stores/isochrone'
 import { ref } from '#imports'
 import InfiniteLoading from '~/components/InfiniteLoading'
 import { useMiscStore } from '~/stores/misc'
-const NoticeMessage = () => import('./NoticeMessage')
 const OurMessage = () => import('~/components/OurMessage.vue')
 const GroupHeader = () => import('~/components/GroupHeader.vue')
 const JobsTopBar = () => import('~/components/JobsTopBar')
-const GiveAsk = () => import('~/components/GiveAsk.vue')
 
 const MIN_TO_SHOW = 10
 
@@ -85,10 +76,8 @@ export default {
   components: {
     OurMessage,
     GroupHeader,
-    NoticeMessage,
     InfiniteLoading,
     JobsTopBar,
-    GiveAsk,
   },
   props: {
     messagesForList: {
@@ -309,6 +298,9 @@ export default {
 
       return ret
     },
+    noneFound() {
+      return !this.loading && !this.messagesForList?.length
+    },
   },
   watch: {
     toShow: {
@@ -342,6 +334,9 @@ export default {
       // If we're changing the isochrone view we don't want to then scroll down to a message which becomes
       // visible.
       this.scrollToMessage = null
+    },
+    noneFound(newVal) {
+      this.$emit('update:none', newVal)
     },
   },
   methods: {
