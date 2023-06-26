@@ -60,13 +60,13 @@
       </div>
     </div>
     <div class="group-description">
-      <p v-if="!group.description">
+      <p v-if="!description">
         Give and get stuff for free with {{ group.namedisplay }}. Offer things
         you don't need, and ask for things you'd like. Don't just recycle -
         reuse with Freegle!
       </p>
       <!-- eslint-disable-next-line -->
-      <span v-if="group.description" v-html="group.description"/>
+      <span v-else="description" v-html="description"/>
     </div>
     <div v-if="showGiveFind" class="d-flex justify-content-between flex-wrap">
       <b-button to="/give" class="mt-1" size="lg" block variant="primary">
@@ -187,6 +187,18 @@ export default {
   computed: {
     amAMember() {
       return this.authStore?.member(this.group?.id)
+    },
+    description() {
+      let description = this.group?.description
+
+      if (description) {
+        // Remove some whitespace which appears in some group descriptions.
+        description = description.replace(/<p><br><\/p>/g, '')
+        description = description.replace(/<p><\/p>/g, '')
+      }
+
+      console.log('Return', description)
+      return description
     },
   },
   methods: {

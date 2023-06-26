@@ -132,24 +132,30 @@
             </b-input-group>
           </div>
         </div>
-        <div
-          v-if="
+        <NoticeMessage v-if="noneFound">
+          <p>
+            Sorry, we didn't find anything. Things come and go quickly, though,
+            so you could try later. Or you could:
+          </p>
+          <GiveAsk class="bg-info" />
+        </NoticeMessage>
+        <NoticeMessage
+          v-else-if="
             mapVisible && !postsVisible && messagesOnMap && messagesOnMap.length
           "
-          class="d-flex justify-content-center mt-1 mb-1"
+          variant="info"
         >
-          <NoticeMessage variant="info">
-            <v-icon icon="angle-double-down" class="pulsate" />
-            Scroll down to see
-            <span v-if="searchOn"
-              >results for "<strong>{{ searchOn }}</strong
-              >"</span
-            ><span v-else>the posts</span>.
-            <v-icon icon="angle-double-down" class="pulsate" />
-          </NoticeMessage>
-        </div>
+          <v-icon icon="angle-double-down" class="pulsate" />
+          Scroll down to see
+          <span v-if="searchOn"
+            >results for "<strong>{{ searchOn }}</strong
+            >"</span
+          ><span v-else>the posts</span>.
+          <v-icon icon="angle-double-down" class="pulsate" />
+        </NoticeMessage>
         <MessageList
           v-model:visible="postsVisible"
+          v-model:none="noneFound"
           :selected-group="selectedGroup"
           :selected-type="selectedType"
           :messages-for-list="filteredMessages"
@@ -390,6 +396,7 @@ export default {
       ],
       selectedGroup: 0,
       context: null,
+      none: false,
     }
   },
   computed: {
