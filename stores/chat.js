@@ -74,8 +74,10 @@ export const useChatStore = defineStore({
       if (chat?.unseen > 0) {
         // Cheat and set the value rather than fetch from the search.  This speeds things up a lot, and when we
         // use this we expect to then call fetchChats after we've finished.
-        api(this.config).chat.markRead(id, chat.lastmsg, false)
+        //
+        // Set it in the store first so that the UI updates immediately.
         this.listByChatId[id].unseen = 0
+        api(this.config).chat.markRead(id, chat.lastmsg, false)
       }
     },
     async markUnread(chatid, prevmsgid) {
