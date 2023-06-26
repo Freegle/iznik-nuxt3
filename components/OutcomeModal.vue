@@ -61,6 +61,23 @@
           />
         </div>
         <div v-if="showCompletion">
+          <div
+            v-if="
+              type === 'Taken' && tookUsers?.length && otherRepliers?.length
+            "
+          >
+            <label class="strong">
+              Message for other people who replied (optional):
+            </label>
+            <b-form-textarea
+              v-model="completionMessage"
+              :rows="3"
+              :max-rows="6"
+              class="mt-1"
+              placeholder="e.g. Thanks for the interest. Sorry, this went to someone else."
+            />
+          </div>
+          <hr class="mb-0" />
           <div>
             <label class="mt-3 strong">
               How do you feel about freegling just now?
@@ -185,6 +202,7 @@
 </template>
 <script>
 import { useMessageStore } from '../stores/message'
+import { useChatStore } from '../stores/chat'
 import OutcomeBy from './OutcomeBy'
 import SpinButton from './SpinButton'
 import modal from '@/mixins/modal'
@@ -206,7 +224,9 @@ export default {
   },
   setup() {
     const messageStore = useMessageStore()
-    return { messageStore }
+    const chatStore = useChatStore()
+
+    return { messageStore, chatStore }
   },
   data() {
     return {
@@ -216,6 +236,7 @@ export default {
       tookUsers: [],
       selectedUser: null,
       chooseError: false,
+      completionMessage: null,
     }
   },
   computed: {
@@ -240,6 +261,33 @@ export default {
         this.message.availableinitially === 1 ||
         this.left === 0
       )
+    },
+    otherRepliers() {
+      const ret = []
+
+      if (this.message?.replies) {
+        this.message.replies.forEach((u) => {
+          if (u.userid > 0) {
+            let found = false
+
+            for (const t of this.tookUsers) {
+              if (t.userid === u.userid) {
+                found = true
+                break
+              }
+            }
+
+            if (!found) {
+              ret.push({
+                userid: u.userid,
+                displayname: u.displayname,
+              })
+            }
+          }
+        })
+      }
+
+      return ret
     },
     submitDisabled() {
       const ret =
@@ -311,6 +359,18 @@ export default {
             comment: this.comments,
           })
 
+          if (this.type === 'Taken' && this.completionMessage) {
+            // Send a message to the other repliers.
+            this.otherRepliers.forEach(async (u) => {
+              const chatid = await this.chatStore.openChatToUser({
+                userid: u.userid,
+                chattype: 'User2User',
+              })
+
+              await this.chatStore.send(chatid, this.completionMessage)
+            })
+          }
+
           this.hide()
         } else {
           // We are recording some partial results for the post.
@@ -319,12 +379,10 @@ export default {
         }
       }
     },
-
     show(type) {
       this.showModal = true
       this.type = type
     },
-
     hide() {
       // We're having trouble capturing events from this modal, so use root as a bus.
       this.$bus.$emit('outcome', {
