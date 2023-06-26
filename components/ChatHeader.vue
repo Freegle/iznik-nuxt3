@@ -317,6 +317,13 @@ export default {
       return ret
     },
   },
+  watch: {
+    unseen() {
+      // Make sure the chat is up to date.  This helps in the case where pollForChatUpdates picks up a new
+      // message and so we show that the chat has unread messages, but we haven't yet
+      this.chatStore.fetchMessages(this.id)
+    },
+  },
   methods: {
     async hide() {
       console.log('Hide chat')
