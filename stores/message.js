@@ -34,7 +34,17 @@ export const useMessageStore = defineStore({
       if (force || !this.list[id] || expired) {
         if (this.fetching[id]) {
           // Already fetching
-          await this.fetching[id]
+          try {
+            await this.fetching[id]
+          } catch (e) {
+            console.log('Failed to fetch message', e)
+            if (e instanceof APIError && e.response.status === 404) {
+              // This can validly happen if a message is deleted under our feet.
+              console.log('Ignore 404 error')
+            } else {
+              throw e
+            }
+          }
         } else {
           this.fetchingCount++
           this.fetching[id] = api(this.config).message.fetch(id, false)

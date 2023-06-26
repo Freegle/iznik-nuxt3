@@ -126,8 +126,15 @@
             </b-input-group>
           </div>
         </div>
+        <NoticeMessage v-if="noneFound">
+          <p>
+            Sorry, we didn't find anything. Things come and go quickly, though,
+            so you could try later. Or you could:
+          </p>
+          <GiveAsk class="bg-info" />
+        </NoticeMessage>
         <div
-          v-if="!postsVisible && messagesOnMap?.length"
+          v-else-if="!postsVisible && messagesOnMap?.length"
           class="d-flex justify-content-center mt-1 mb-1"
         >
           <NoticeMessage variant="info">
@@ -140,11 +147,11 @@
             <v-icon icon="angle-double-down" class="pulsate" />
           </NoticeMessage>
         </div>
-
         <h2 class="visually-hidden">List of wanteds and offers</h2>
         <MessageList
           v-if="updatedMessagesOnMap || messagesOnMap.length"
           v-model:visible="postsVisible"
+          v-model:none="noneFound"
           :selected-group="selectedGroup"
           :selected-type="selectedType"
           :messages-for-list="filteredMessages"
@@ -321,6 +328,7 @@ export default {
       ],
       selectedGroup: null,
       context: null,
+      noneFound: false,
     }
   },
   computed: {

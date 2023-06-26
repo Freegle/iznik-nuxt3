@@ -1,7 +1,9 @@
 import { defineStore } from 'pinia'
 import dayjs from 'dayjs'
+import { useRoute } from 'vue-router'
 import api from '~/api'
 import { useAuthStore } from '~/stores/auth'
+import { useMessageStore } from '~/stores/message'
 
 export const useChatStore = defineStore({
   id: 'chat',
@@ -15,8 +17,9 @@ export const useChatStore = defineStore({
   actions: {
     init(config) {
       this.config = config
+      this.route = useRoute()
     },
-    async fetchChats(search, logError) {
+    async fetchChats(search, logError, empty) {
       let since = null
 
       if (this.searchSince) {
@@ -26,7 +29,8 @@ export const useChatStore = defineStore({
       const chats = await api(this.config).chat.listChats(
         since,
         search,
-        logError
+        logError,
+        empty
       )
       this.list = chats
 
@@ -70,8 +74,10 @@ export const useChatStore = defineStore({
       if (chat?.unseen > 0) {
         // Cheat and set the value rather than fetch from the search.  This speeds things up a lot, and when we
         // use this we expect to then call fetchChats after we've finished.
-        api(this.config).chat.markRead(id, chat.lastmsg, false)
+        //
+        // Set it in the store first so that the UI updates immediately.
         this.listByChatId[id].unseen = 0
+        api(this.config).chat.markRead(id, chat.lastmsg, false)
       }
     },
     async markUnread(chatid, prevmsgid) {
@@ -111,6 +117,11 @@ export const useChatStore = defineStore({
 
       // Get the latest messages back.
       this.fetchMessages(chatid)
+
+      if (refmsgid) {
+        // The message might have changed (e.g. number of replies).
+        useMessageStore().fetch(refmsgid, true)
+      }
     },
     async report(chatid, reason, comments, refchatid) {
       await api(this.config).chat.send({
@@ -191,8 +202,12 @@ export const useChatStore = defineStore({
 
       const myid = authStore.user?.id
       if (myid) {
+        // If we are looking at a specific chat then we want to make sure we don't lose it by polling to exclude
+        // empty chats.
+        const empty = this.route?.path?.startsWith('/chats/')
+
         // Don't want to log any errors to Sentry - they can happen due to timing windows.
-        await this.fetchChats(null, false)
+        await this.fetchChats(null, false, empty)
       }
 
       setTimeout(this.pollForChatUpdates, 30000)

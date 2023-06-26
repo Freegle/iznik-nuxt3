@@ -216,7 +216,7 @@ export default {
     },
   },
   async mounted() {
-    if (this.startExpanded) {
+    if (this.startExpanded && this.message) {
       this.view()
     }
 

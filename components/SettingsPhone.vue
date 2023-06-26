@@ -1,7 +1,11 @@
 <template>
   <div>
     <div class="d-flex flex-wrap align-content-center">
-      <b-form-group class="mr-2" :label="label" :description="description">
+      <b-form-group
+        class="nobot mr-2"
+        :label="label"
+        :description="description"
+      >
         <b-input-group>
           <b-form-input
             v-if="me"
@@ -28,9 +32,9 @@
             </b-button>
           </b-input-group-append>
         </b-input-group>
-        <p class="text-muted mt-1">
+        <div class="text-muted mt-1 mb-1 text--small">
           <v-icon icon="lock" /> Other freeglers won't see this.
-        </p>
+        </div>
       </b-form-group>
       <b-button
         v-if="!hideRemove && me?.phone"
@@ -142,3 +146,8 @@ export default {
   },
 }
 </script>
+<style scoped lang="scss">
+.nobot {
+  margin-bottom: 0 !important;
+}
+</style>

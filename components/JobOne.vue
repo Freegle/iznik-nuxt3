@@ -120,7 +120,7 @@ export default {
       return val
         .replace(/\\n/g, '\n')
         .replace(/<br>/g, '\n')
-        .replace('Â£', '£')
+        .replace(/Â£/g, '£')
         .trim()
         .normalize('NFD')
         .replace(/[\u0300-\u036F]/g, '')

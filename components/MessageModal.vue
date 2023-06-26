@@ -17,6 +17,16 @@
             />
             <hr />
             <div class="d-flex justify-content-between p-2 mb-2 p-md-0 mb-md-0">
+              <div class="w-50 pl-2">
+                <b-button
+                  size="lg"
+                  variant="primary"
+                  block
+                  @click="showImages = false"
+                >
+                  View description
+                </b-button>
+              </div>
               <div class="pr-2 w-50">
                 <b-button
                   variant="secondary"
@@ -28,15 +38,6 @@
                   Close
                 </b-button>
               </div>
-              <b-button
-                size="lg"
-                variant="primary"
-                block
-                class="w-50 pl-2"
-                @click="showImages = false"
-              >
-                View description
-              </b-button>
             </div>
           </div>
           <MessageExpanded

@@ -525,7 +525,7 @@
                 We can send SMS alerts to your phone when you have a new message
                 on Freegle or a handover soon.
               </p>
-              <SettingsPhone />
+              <SettingsPhone class="mb-3" />
               <div v-if="me.phone">
                 <NoticeMessage
                   v-if="

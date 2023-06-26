@@ -4,7 +4,7 @@
       <b-col cols="12" sm="6">
         <b-form-group :label="label">
           <b-form-select
-            v-model="emailfrequency"
+            v-model="emailfreq"
             :class="highlightEmailFrequencyIfOn"
           >
             <option value="-1">Immediately</option>
@@ -64,6 +64,11 @@ export default {
     OurToggle,
   },
   props: {
+    emailfrequency: {
+      type: Number,
+      required: false,
+      default: null,
+    },
     groupid: {
       type: Number,
       required: false,
@@ -103,13 +108,13 @@ export default {
     }
   },
   computed: {
-    emailfrequency: {
+    emailfreq: {
       get() {
         if (this.membership) {
           return this.membership.emailfrequency.toString()
         }
 
-        return null
+        return this.emailfrequency
       },
       async set(newval) {
         await this.changeValue('emailfrequency', newval)
