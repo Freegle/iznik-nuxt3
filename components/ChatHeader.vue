@@ -46,6 +46,7 @@
               <strong class="ml-1">{{ replytime }}</strong
               >.
             </div>
+            <br class="d-block d-md-none" />
             <div v-if="milesaway" class="d-inline d-md-block">
               About <strong>{{ milesstring }}</strong
               >.
@@ -388,13 +389,16 @@ export default {
   }
 
   .userinfo {
-    grid-column: 2 / 4;
+    grid-column: 1 / 4;
     grid-row: 2 / 3;
     color: $colour-info-fg;
+    padding-top: 0.5rem;
 
     @include media-breakpoint-up(md) {
       grid-row: 1 / 2;
+      grid-column: 2 / 4;
       padding-top: 2rem;
+      padding-left: 0.25rem;
     }
   }
 }
