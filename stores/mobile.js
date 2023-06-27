@@ -386,7 +386,9 @@ export const useMobileStore = defineStore({ // Do not persist
       //console.log('push notification', notificationType)
       console.log(notification)
       const data = notification.data
-      // const foreground = data.foreground.toString() === 'true' // Was first called in foreground or background
+      let foreground = false
+      if( 'foreground' in data) foreground = data.foreground
+
       // let msgid = new Date().getTime() // Can't tell if double event if notId not given
       let msgid = 0
       if ('notId' in data) {
@@ -449,7 +451,7 @@ export const useMobileStore = defineStore({ // Do not persist
         })
       }*/
 
-      if (this.route) {
+      if (this.route && !foreground) {
         this.route = this.route.replace('/chat/', '/chats/') // Match redirects in nuxt.config.js
         console.log('router.currentRoute', router.currentRoute)
         if (router.currentRoute.path !== this.route) {
