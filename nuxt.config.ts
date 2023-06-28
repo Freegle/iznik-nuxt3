@@ -1,4 +1,8 @@
 import config from './config'
+import path from 'path-browserify'
+import { VitePWA } from 'vite-plugin-pwa'
+import eslintPlugin from 'vite-plugin-eslint'
+import legacy from '@vitejs/plugin-legacy'
 
 // Mobile version change:
 // - config.js: MOBILE_VERSION eg 3.0.0
@@ -50,8 +54,10 @@ export default defineNuxtConfig({
   // - For historical reasons and preference we use the options API everywhere else.
   //
   // Sometimes when debugging it's useful to set ssr: false, because the errors are clearer when generated on the client.
+  // @ts-ignore
   target: config.ISAPP ? 'static' : 'server',
   ssr: !config.ISAPP,
+  spaLoadingTemplate: false,
 
   // This makes Netlify serve assets from the perm link for the build, which avoids missing chunk problems when
   // a new deploy happens.  See https://github.com/nuxt/nuxt/issues/20950.

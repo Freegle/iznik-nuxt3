@@ -16,6 +16,16 @@
       <br v-if="info.name && info.description" />
       <em v-if="info.description">"{{ info.description.trim() }}"</em>
     </notice-message>
+    <div v-if="info.photo" class="noticeboard__photo">
+      <b-img
+        v-if="info.photo"
+        rounded
+        lazy
+        :src="photo"
+        class="clickme mt-2 mt-md-0 w-100"
+        @click="moreInfo"
+      />
+    </div>
     <p class="mt-1">
       <strong>We need your help to get more people freegling</strong>. Could you
       put one up too?
@@ -76,10 +86,13 @@ export default {
       L = await import('leaflet/dist/leaflet-src.esm')
     }
 
+    const runtimeConfig = useRuntimeConfig()
+
     return {
       L,
       osmtile: osmtile(),
       attribution: attribution(),
+      runtimeConfig,
     }
   },
   computed: {
@@ -97,6 +110,16 @@ export default {
       }
 
       return info
+    },
+    photo() {
+      let ret = null
+
+      if (this.info) {
+        const id = this.info.photo
+        ret = this.runtimeConfig?.public?.IMAGE_SITE + '/bimg_' + id + '.jpg'
+      }
+
+      return ret
     },
   },
 }

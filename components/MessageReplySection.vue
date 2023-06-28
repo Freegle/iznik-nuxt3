@@ -216,14 +216,16 @@ export default {
     alreadyAMember() {
       let found = false
 
-      for (const messageGroup of this.message?.groups) {
-        Object.keys(this.myGroups).forEach((key) => {
-          const group = this.myGroups[key]
+      if (this.message?.groups) {
+        for (const messageGroup of this.message?.groups) {
+          Object.keys(this.myGroups).forEach((key) => {
+            const group = this.myGroups[key]
 
-          if (messageGroup.groupid === group.id) {
-            found = true
-          }
-        })
+            if (messageGroup.groupid === group.id) {
+              found = true
+            }
+          })
+        }
       }
 
       return found

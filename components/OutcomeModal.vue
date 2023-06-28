@@ -361,19 +361,8 @@ export default {
             outcome: this.type,
             happiness: this.happiness,
             comment: this.comments,
+            message: this.completionMessage
           })
-
-          if (this.type === 'Taken' && this.completionMessage) {
-            // Send a message to the other repliers.
-            this.otherRepliers.forEach(async (u) => {
-              const chatid = await this.chatStore.openChatToUser({
-                userid: u.userid,
-                chattype: 'User2User',
-              })
-
-              await this.chatStore.send(chatid, this.completionMessage)
-            })
-          }
 
           this.hide()
         } else {
@@ -407,9 +396,9 @@ export default {
 }
 </script>
 <style scoped lang="scss">
-@import '~bootstrap/scss/functions';
-@import '~bootstrap/scss/variables';
-@import '~bootstrap/scss/mixins/_breakpoints';
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
 
 @include media-breakpoint-down(md) {
   :deep(.maxWidth) {
