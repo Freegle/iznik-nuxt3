@@ -77,7 +77,7 @@
               placeholder="e.g. Thanks for the interest. Sorry, this went to someone else."
             />
             <p class="mt-1 text-muted small">
-              <v-icon icon="lock" /> We'll send this privately in Chat to each
+              <v-icon icon="lock" /> We'll send this same message privately in Chat to each
               other freegler who replied to your post.
             </p>
           </div>
