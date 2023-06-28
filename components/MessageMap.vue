@@ -88,7 +88,7 @@ export default {
   },
   methods: {
     idle(themap) {
-      if (this.home) {
+      if (this.home?.lat || this.home?.lng) {
         // We want to show both the centre and the marker.
         // eslint-disable-next-line new-cap
         const fg = new this.L.featureGroup([
@@ -98,7 +98,10 @@ export default {
           new this.L.marker([this.home.lat, this.home.lng]),
         ])
 
-        themap.fitBounds(fg.getBounds().pad(0.1))
+        let fitTo = fg.getBounds().pad(0.1)
+        if (fitTo.isValid()) {
+          themap.fitBounds(fitTo)
+        }
       } else {
         // eslint-disable-next-line new-cap
         const fg = new this.L.featureGroup([
