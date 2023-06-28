@@ -27,6 +27,8 @@ import { FirebaseMessaging } from '@capacitor-firebase/messaging';
 import { ZoomPlugin } from 'capacitor-zoom-android';
 import { App } from '@capacitor/app';
 import { useRouter } from '#imports'
+import { useChatStore } from '~/stores/chat'
+import { useNotificationStore } from '~/stores/notification'
 
 export const useMobileStore = defineStore({ // Do not persist
   id: 'mobile',
@@ -67,6 +69,7 @@ export const useMobileStore = defineStore({ // Do not persist
       await this.initDeepLinks()
       await this.initPushNotifications()
       await this.checkForAppUpdate()
+      await this.initWakeUpActions()
       //await this.initFirebaseMessaging()
       /*if (!this.isiOS) {
         try {
@@ -213,6 +216,26 @@ export const useMobileStore = defineStore({ // Do not persist
         }
       }
       return urlParams
+    },
+
+    //////////////
+    // https://capacitorjs.com/docs/apis/app#addlistenerresume
+    async initWakeUpActions() {
+      if (process.client) {
+        App.addListener('resume', async event => {
+          // We have become visible.  Refetch our notification count and chat count, which are the two key things which
+          // produce red badges people should click on.
+          try {
+            const notificationStore = useNotificationStore()
+            notificationStore.fetchCount()
+
+            const chatStore = useChatStore()
+
+            // Don't log as we might have been logged out since we were last active.
+            chatStore.fetchChats(null, false)
+          } catch (e){}
+        })
+      }
     },
 
     //////////////

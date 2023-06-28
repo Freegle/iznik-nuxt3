@@ -17,12 +17,13 @@ export const useNoticeboardStore = defineStore({
         active,
       })
     },
-    async edit(id, name, description, active) {
+    async edit(id, name, description, active, photoid) {
       await api(this.config).noticeboard.save({
         id,
         name,
         description,
         active,
+        photoid,
       })
     },
     async fetch(id) {

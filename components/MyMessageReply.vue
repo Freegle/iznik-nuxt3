@@ -278,7 +278,7 @@ export default {
       router.push('/chats/' + this.chat?.id)
     },
     async promise() {
-      await this.waitForRef('promise ')
+      await this.waitForRef('promise')
       this.$refs.promise.show()
     },
     async unpromise() {
@@ -295,9 +295,9 @@ export default {
 }
 </script>
 <style scoped lang="scss">
-@import '~bootstrap/scss/functions';
-@import '~bootstrap/scss/variables';
-@import '~bootstrap/scss/mixins/_breakpoints';
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
 
 .snippet {
   border: 1px solid $color-gray--light;
