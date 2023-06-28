@@ -87,7 +87,7 @@
               </div>
               <div v-else>
                 <v-icon icon="info-circle" />
-                <span v-if="refmsg.type === 'Offer'">
+                <span v-if="refmsg?.type === 'Offer'">
                   We've let them know this is no longer available.
                 </span>
                 <span v-else> This has now been received. </span>
