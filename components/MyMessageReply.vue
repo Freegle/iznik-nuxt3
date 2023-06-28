@@ -278,7 +278,7 @@ export default {
       router.push('/chats/' + this.chat?.id)
     },
     async promise() {
-      await this.waitForRef('promise ')
+      await this.waitForRef('promise')
       this.$refs.promise.show()
     },
     async unpromise() {
