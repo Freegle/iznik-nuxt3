@@ -27,6 +27,7 @@
 <script>
 import { setupNotification } from '../composables/useNotification'
 import ProfileImage from '~/components/ProfileImage'
+import { useNewsfeedStore } from '../stores/newsfeed'
 
 export default {
   components: {
@@ -56,6 +57,8 @@ export default {
   },
   methods: {
     click() {
+      // Make sure we have the up to date iem in the store fairly soon.
+      useNewsfeedStore().fetch(this.newsfeed.id, true)
       this.$router.push('/chitchat/' + this.newsfeed.id)
     },
   },
