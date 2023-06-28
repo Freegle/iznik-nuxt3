@@ -1,6 +1,9 @@
 import config from './config'
+import path from 'path-browserify'
+import { VitePWA } from 'vite-plugin-pwa'
+import eslintPlugin from 'vite-plugin-eslint'
+import legacy from '@vitejs/plugin-legacy'
 
-// @ts-ignore
 // @ts-ignore
 export default defineNuxtConfig({
   // Rendering modes are confusing.
@@ -45,6 +48,7 @@ export default defineNuxtConfig({
   // @ts-ignore
   target: 'server',
   ssr: true,
+  spaLoadingTemplate: false,
 
   // This makes Netlify serve assets from the perm link for the build, which avoids missing chunk problems when
   // a new deploy happens.  See https://github.com/nuxt/nuxt/issues/20950.
