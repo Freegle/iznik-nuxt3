@@ -154,11 +154,14 @@ export default {
     },
     monitorTabVisibility() {
       if (process.client) {
+        // console.log('---monitorTabVisibility')
         document.addEventListener('visibilitychange', () => {
+          console.log('---visibilitychange')
           const miscStore = useMiscStore()
           miscStore.visible = !document.hidden
 
           if (this.me && !document.hidden) {
+            // console.log('---visibilitychange CHANGED')
             // We have become visible.  Refetch our notification count and chat count, which are the two key things which
             // produce red badges people should click on.
             const notificationStore = useNotificationStore()
