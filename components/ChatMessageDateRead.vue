@@ -31,6 +31,7 @@
       <b-badge
         v-if="chatmessage?.replyexpected && !chatmessage?.replyreceived"
         variant="danger"
+        class="ml-1"
       >
         RSVP - reply expected
       </b-badge>
@@ -96,6 +97,7 @@
       <b-badge
         v-if="chatmessage?.replyexpected && !chatmessage?.replyreceived"
         variant="info"
+        class="ml-1"
       >
         RSVP - reply requested
       </b-badge>

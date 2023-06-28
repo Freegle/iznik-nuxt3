@@ -67,8 +67,7 @@
       />
     </div>
     <p class="mt-1 text-muted small">
-      We'll let anyone else who replied know, and it helps us identify reliable
-      freeglers.
+      This helps us identify reliable freeglers.
     </p>
   </div>
 </template>
@@ -222,7 +221,6 @@ export default {
         })
       } else if (userid > 0) {
         const user = this.availableUsers.find((u) => u.userid === userid)
-        console.log('Found', user)
         user.count = 1
         this.currentlySelectedUsers.push(user)
       }

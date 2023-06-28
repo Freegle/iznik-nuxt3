@@ -376,14 +376,6 @@ export const useAuthStore = defineStore({
       await this.fetchUser()
       return this.user
     },
-    async addRelatedUserUser(params) {
-      this.addRelatedUser(params.id)
-
-      if (this.userlist.length > 1) {
-        // Logged in as multiple users.  Let the server know.
-        await this.$api.session.related(this.userlist)
-      }
-    },
     async savePushId(){
       const mobileStore = useMobileStore()
       // Tell server our push notification id if logged in
