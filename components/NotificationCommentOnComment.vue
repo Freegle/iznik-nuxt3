@@ -23,6 +23,7 @@
 <script>
 import { setupNotification } from '../composables/useNotification'
 import ProfileImage from '~/components/ProfileImage'
+import { useNewsfeedStore } from '../stores/newsfeed'
 
 export default {
   components: {
@@ -35,6 +36,8 @@ export default {
     },
   },
   async setup(props) {
+    // Make sure we have the up to date iem in the store fairly soon.
+    useNewsfeedStore().fetch(this.newsfeed.id, true)
     return await setupNotification(props.id)
   },
 }

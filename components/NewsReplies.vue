@@ -22,7 +22,7 @@
     </div>
     <div
       v-for="reply in repliestoshow"
-      :key="'newsfeed-' + reply.id"
+      :key="'newsfeed-' + reply?.id"
       class="lines"
     >
       <NewsRefer
