@@ -184,6 +184,8 @@ jobs:
       - run: npm install
       - run: npm install -g rimraf
 
+      - run: cat node_modules/@freegle/capacitor-push-notifications/android/src/main/java/com/capacitorjs/plugins/pushnotifications/PushNotificationsPlugin.java
+
 ################
       - run:
           name: == Decrypt secrets 
