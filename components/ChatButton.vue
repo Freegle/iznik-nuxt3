@@ -130,9 +130,12 @@ export default {
             console.log('Sent')
 
             if (firstmsgid) {
-              // Refresh the message so that our reply will show.
-              await this.chatStore.fetchMessages(chatid, true)
+              // Update the message so that the reply count is updated.  No need to wait.
+              this.messageStore.fetch(firstmsgid, true)
             }
+
+            // Refresh the message so that our reply will show.
+            await this.chatStore.fetchMessages(chatid, true)
 
             this.$emit('sent')
           }
