@@ -83,9 +83,11 @@ export default {
   },
   setup() {
     const chatStore = useChatStore()
+    const messageStore = useMessageStore()
 
     return {
       chatStore,
+      messageStore,
     }
   },
   methods: {
