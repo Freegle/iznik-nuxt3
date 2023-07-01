@@ -154,7 +154,7 @@ export default {
       this.imageBroken = true
     },
     click() {
-      if (this.message.fromuser === this.myid) {
+      if (this.myid && this.message.fromuser === this.myid) {
         this.$router.push('/mypost/' + this.id)
       } else {
         this.$router.push('/message/' + this.id)
