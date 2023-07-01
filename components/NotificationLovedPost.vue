@@ -26,8 +26,8 @@
 </template>
 <script>
 import { setupNotification } from '../composables/useNotification'
-import ProfileImage from '~/components/ProfileImage'
 import { useNewsfeedStore } from '../stores/newsfeed'
+import ProfileImage from '~/components/ProfileImage'
 
 export default {
   components: {

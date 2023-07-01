@@ -29,8 +29,8 @@
                   <div class="small">
                     <v-icon icon="info-circle" />
                     <span v-if="refmsg?.type === 'Offer'">
-                    This is no longer available.
-                  </span>
+                      This is no longer available.
+                    </span>
                     <span v-else> Thanks, this has now been received. </span>
                   </div>
                 </NoticeMessage>
@@ -44,7 +44,9 @@
                   This is no longer available.
                 </span>
                 <span v-else> Thanks, this has now been received. </span>
-                <div class="text-muted small">This is an automated message.</div>
+                <div class="text-muted small">
+                  This is an automated message.
+                </div>
               </div>
             </b-card-text>
           </b-card>
@@ -76,8 +78,8 @@
                   <div class="text-muted small">
                     <v-icon icon="info-circle" />
                     <span v-if="refmsg?.type === 'Offer'">
-                    This is no longer available.
-                  </span>
+                      This is no longer available.
+                    </span>
                     <span v-else> Thanks, this has now been received. </span>
                   </div>
                 </NoticeMessage>
@@ -91,7 +93,9 @@
                   We've let them know this is no longer available.
                 </span>
                 <span v-else> This has now been received. </span>
-                <div class="text-muted small">This is an automated message.</div>
+                <div class="text-muted small">
+                  This is an automated message.
+                </div>
               </div>
             </b-card-text>
           </b-card>
@@ -101,11 +105,11 @@
   </div>
 </template>
 <script>
-import ChatBase from '~/components/ChatBase'
 import NoticeMessage from './NoticeMessage'
+import ChatBase from '~/components/ChatBase'
 
 export default {
-  components: {NoticeMessage},
+  components: { NoticeMessage },
   extends: ChatBase,
 }
 </script>

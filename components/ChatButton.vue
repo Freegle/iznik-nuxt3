@@ -31,7 +31,6 @@
 </template>
 <script>
 import { useChatStore } from '../stores/chat'
-import { useMessageStore } from '../stores/message'
 import { useRouter } from '#imports'
 
 export default {
