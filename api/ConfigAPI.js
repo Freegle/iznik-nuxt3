@@ -2,7 +2,7 @@ import BaseAPI from '@/api/BaseAPI'
 
 export default class ConfigAPI extends BaseAPI {
   async get(params) {
-    const ret = await this.$get('/config', params)
-    return ret.values
+    // https://api.ilovefreegle.org/apiv2/config/app_fd_version_android_latest etc
+    return await this.$getv2('/config/' + params.key)
   }
 }
