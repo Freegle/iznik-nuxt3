@@ -110,5 +110,7 @@
   <false/>
   <key>FacebookAdvertiserIDCollectionEnabled</key>
   <false/>
+  <key>ITSAppUsesNonExemptEncryption</key>
+  <false/>
 </dict>
 </plist>
