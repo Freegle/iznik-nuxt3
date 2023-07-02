@@ -131,7 +131,7 @@ export default {
         var imageData = image.dataUrl;
         console.log("takeAppPhoto",imageData)
 
-        this.$refs.pond.addFile(image.dataUrl);
+        // this.$refs.pond.addFile(image.dataUrl);
       }
       catch(e) {
         console.log("takeAppPhoto error",e)
