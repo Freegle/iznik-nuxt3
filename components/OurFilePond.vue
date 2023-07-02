@@ -141,6 +141,7 @@ export default {
     photoInit() {
       const mobileStore = useMobileStore()
       if (mobileStore.isApp) {
+        this.takeAppPhoto()
         if (mobileStore.isiOS) {
           if (this.browse) {
             this.$refs.pond.browse()
@@ -149,7 +150,6 @@ export default {
           setTimeout(() => { // this.$nextTick didn't work
             const takePhoto = this.$el.querySelector('.take-photo')
             if( takePhoto){
-            this.takeAppPhoto()
             takePhoto.addEventListener('click', e => {
               this.takeAppPhoto()
               e.preventDefault()

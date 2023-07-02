@@ -82,7 +82,9 @@ export const useMobileStore = defineStore({ // Do not persist
           console.log("PHDCC ZZZ ", e.message)
         }
       }*/
-      Capacitor.Plugins.ZoomPlugin.enableZoom()
+      if (!this.isiOS) {
+        Capacitor.Plugins.ZoomPlugin.enableZoom()
+      }
     },
 
     /*async initFirebaseMessaging() {
