@@ -72,11 +72,7 @@ export default {
       if (chatid) {
         await this.chatStore.send(
           chatid,
-          "I'd like you to merge my accounts " +
-            this.ours +
-            ' and ' +
-            this.theirs +
-            " please. You can email me at both addresses to confirm that they're both mine.",
+            "I'd like you to merge my account " + this.ours + " into " + this.theirs + " please, with " + this.theirs + " as the primary email. You can email me at both addresses to confirm that they're both mine.",
           null,
           null,
           null
