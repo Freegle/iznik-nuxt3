@@ -112,5 +112,9 @@
   <false/>
   <key>ITSAppUsesNonExemptEncryption</key>
   <false/>
+  <key>UIFileSharingEnabled</key>
+  <string>YES</string>
+  <key>LSSupportsOpeningDocumentsInPlace</key>
+  <string>YES</string>
 </dict>
 </plist>
