@@ -4,13 +4,13 @@
       <MainHeader />
     </client-only>
     <NuxtLayout v-if="ready">
-      <NuxtPage :key="loginCount" />
+      <NuxtPage />
     </NuxtLayout>
   </div>
 </template>
 <script setup>
 import { useRoute } from 'vue-router'
-import { computed } from 'vue'
+import { computed, watch, nextTick, reloadNuxtApp } from '#imports'
 import { useNoticeboardStore } from './stores/noticeboard'
 import { useAuthStore } from './stores/auth'
 import { useGroupStore } from './stores/group'
@@ -114,10 +114,20 @@ logoStore.init(runtimeConfig)
 locationStore.init(runtimeConfig)
 shortlinkStore.init(runtimeConfig)
 
-// We use a key to force the whole page to re-render if we have logged in.  This is a sledgehammer way of
-// re-calling all the setup() methods etc.  Perhaps there's a better way to do this.
+// We use a key to force the whole page to re-load if we have logged in.  This is a sledgehammer way of
+// re-calling all the setup() methods etc.  Perhaps there's a better way to do this, but using a key on
+// NuxtPage results in errors which can cause the JS to bomb out.
+let loginKey = ref(0)
+
 const loginCount = computed(() => {
   return authStore.loginCount
+})
+
+watch(loginCount, async () => {
+  await reloadNuxtApp({
+    force: true,
+    persistState: false
+  })
 })
 
 try {
