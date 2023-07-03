@@ -124,10 +124,12 @@ const loginCount = computed(() => {
 })
 
 watch(loginCount, async () => {
-  await reloadNuxtApp({
-    force: true,
-    persistState: false
-  })
+  if (!route.query.k) {
+    await reloadNuxtApp({
+      force: true,
+      persistState: false
+    })
+  }
 })
 
 try {
