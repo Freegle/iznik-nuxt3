@@ -67,6 +67,7 @@
     "bootstrap": "5.2.3",
     "bootstrap-vue-next": "^0.7.3",
     "capacitor-zoom-android": "^1.0.0",
+    "cordova-plugin-calendar": "^5.1.6",
     "cordova-plugin-inappbrowser": "^5.0.0",
     "dayjs": "^1.11.0",
     "eslint-plugin-import": "^2.27.5",
