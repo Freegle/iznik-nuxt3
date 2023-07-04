@@ -116,5 +116,7 @@
   <string>YES</string>
   <key>LSSupportsOpeningDocumentsInPlace</key>
   <string>YES</string>
+  <key>NSCalendarsUsageDescription</key>
+  <string>To save Freegle handover appointments to your calendar</string>
 </dict>
 </plist>
