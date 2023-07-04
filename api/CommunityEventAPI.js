@@ -9,6 +9,10 @@ export default class CommunityEventAPI extends BaseAPI {
     return this.$getv2('/communityevent')
   }
 
+  listGroup(id) {
+    return this.$getv2('/communityevent/group/' + id)
+  }
+
   save(data) {
     return this.$patch('/communityevent', data)
   }

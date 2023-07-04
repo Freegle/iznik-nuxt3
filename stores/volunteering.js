@@ -8,6 +8,7 @@ export const useVolunteeringStore = defineStore({
   state: () => ({
     list: {},
     forUser: [],
+    forGroup: [],
   }),
   actions: {
     init(config) {
@@ -48,6 +49,9 @@ export const useVolunteeringStore = defineStore({
     },
     async fetchList(id) {
       this.forUser = await api(this.config).volunteering.list(id)
+    },
+    async fetchGroup(id) {
+      this.forGroup = await api(this.config).volunteering.listGroup(id)
     },
     async setPhoto(id, photoid) {
       await api(this.config).volunteering.setPhoto(id, photoid)
