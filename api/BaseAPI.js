@@ -173,7 +173,7 @@ export default class BaseAPI {
         console.log('Log it?', log)
 
         if (log) {
-          Sentry.captureException(
+          Sentry.captureMessage(
             'API request failed ' +
               path +
               ' returned HTTP ' +
@@ -368,7 +368,7 @@ export default class BaseAPI {
       const log = typeof logError === 'function' ? logError(data) : logError
 
       if (log) {
-        Sentry.captureException(
+        Sentry.captureMessage(
           'API request failed ' +
             path +
             ' returned HTTP ' +

@@ -36,14 +36,14 @@
         <EmailBelongsToSomeoneElse
           v-if="emailValid && emailBelongsToSomeoneElse"
           class="mb-2"
-          :ours="me?.email"
+          :ours="me?.email ? me.email : ('#' + myid)"
           :theirs="email"
         />
       </div>
       <div class="d-block d-md-none flex-grow-1" />
       <div class="d-block d-md-none margbott">
         <b-button
-          v-if="emailValid && !submitting"
+          v-if="emailValid && !submitting && !emailBelongsToSomeoneElse"
           variant="primary"
           size="lg"
           block
@@ -64,7 +64,7 @@
             <v-icon icon="angle-double-left" /> Back
           </b-button>
           <b-button
-            v-if="emailValid && !submitting"
+            v-if="emailValid && !submitting && !emailBelongsToSomeoneElse"
             variant="primary"
             size="lg"
             @click="next"

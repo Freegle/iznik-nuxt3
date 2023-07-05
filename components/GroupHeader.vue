@@ -197,7 +197,6 @@ export default {
         description = description.replace(/<p><\/p>/g, '')
       }
 
-      console.log('Return', description)
       return description
     },
   },

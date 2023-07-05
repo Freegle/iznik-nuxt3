@@ -125,6 +125,11 @@ export default {
       required: false,
       default: false,
     },
+    none: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   async setup(props) {
     const groupStore = useGroupStore()

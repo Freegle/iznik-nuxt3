@@ -9,6 +9,10 @@ export default class VolunteeringAPI extends BaseAPI {
     return this.$getv2('/volunteering')
   }
 
+  listGroup(id) {
+    return this.$getv2('/volunteering/group/' + id)
+  }
+
   save(data) {
     return this.$patch('/volunteering', data)
   }

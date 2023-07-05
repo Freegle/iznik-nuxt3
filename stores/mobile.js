@@ -82,7 +82,9 @@ export const useMobileStore = defineStore({ // Do not persist
           console.log("PHDCC ZZZ ", e.message)
         }
       }*/
-      Capacitor.Plugins.ZoomPlugin.enableZoom()
+      if (!this.isiOS) {
+        Capacitor.Plugins.ZoomPlugin.enableZoom()
+      }
     },
 
     /*async initFirebaseMessaging() {
@@ -503,6 +505,12 @@ export const useMobileStore = defineStore({ // Do not persist
     },
     //////////////
     async checkForAppUpdate($api, $axios, store, router) {
+      // https://api.ilovefreegle.org/apiv2/config/app_fd_version_android_latest
+      // https://api.ilovefreegle.org/apiv2/config/app_fd_version_android_required
+      // https://api.ilovefreegle.org/apiv2/config/app_fd_version_ios_latest
+      // https://api.ilovefreegle.org/apiv2/config/app_fd_version_ios_required
+
+
       const requiredKey = this.isiOS ? 'app_fd_version_ios_required' : 'app_fd_version_android_required'
       const latestKey = this.isiOS ? 'app_fd_version_ios_latest' : 'app_fd_version_android_latest'
 

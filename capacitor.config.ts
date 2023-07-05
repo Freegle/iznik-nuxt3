@@ -27,6 +27,7 @@ const config: CapacitorConfig = {
   },
   android: {
     includePlugins: [
+      "cordova-plugin-calendar",
       "cordova-plugin-inappbrowser",
       "@capacitor/app-launcher",
       "@capacitor/browser",
@@ -53,6 +54,7 @@ const config: CapacitorConfig = {
   	scheme: 'App', // Freegle
     contentInset: 'automatic',
     includePlugins: [
+      "cordova-plugin-calendar",
       "cordova-plugin-inappbrowser",
       "@capacitor/app-launcher",
       "@capacitor/browser",

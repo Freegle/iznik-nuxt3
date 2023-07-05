@@ -11,8 +11,7 @@
   "engines": {
     "node": ">=17.9.1"
   },
-  "comments":{
-  },
+  "comments": {},
   "devDependencies": {
     "@capacitor/cli": "^4.0.0",
     "@nuxtjs/eslint-config": "^12.0.0",
@@ -44,13 +43,13 @@
     "@capacitor/network": "^4.0.0",
     "@capacitor/share": "^4.0.0",
     "@capawesome/capacitor-badge": "^2.0.0",
-    "@freegle/capacitor-push-notifications": "github:Freegle/capacitor-push-notifications",
     "@chenfengyuan/vue-number-input": "^2.0.1",
     "@codetrix-studio/capacitor-google-auth": "3.2.2",
     "@fortawesome/fontawesome-svg-core": "^6.4.0",
     "@fortawesome/free-brands-svg-icons": "^6.2.0",
     "@fortawesome/free-solid-svg-icons": "^6.1.1",
     "@fortawesome/vue-fontawesome": "^3.0.0-5",
+    "@freegle/capacitor-push-notifications": "github:Freegle/capacitor-push-notifications",
     "@nuxtjs/sentry": "^5.1.7",
     "@pinia/nuxt": "0.4.6",
     "@popperjs/core": "^2.11.4",
@@ -68,6 +67,7 @@
     "bootstrap": "5.2.3",
     "bootstrap-vue-next": "^0.7.3",
     "capacitor-zoom-android": "^1.0.0",
+    "cordova-plugin-calendar": "^5.1.6",
     "cordova-plugin-inappbrowser": "^5.0.0",
     "dayjs": "^1.11.0",
     "eslint-plugin-import": "^2.27.5",

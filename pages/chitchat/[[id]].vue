@@ -123,10 +123,10 @@
             <div v-else>
               <NewsThread
                 v-for="entry in newsfeedToShow"
-                :id="entry.id"
+                :id="entry?.id"
                 :key="
                   'newsfeed-' +
-                  entry.id +
+                  entry?.id +
                   '-area-' +
                   selectedArea +
                   '-' +

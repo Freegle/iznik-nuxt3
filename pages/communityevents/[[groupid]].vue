@@ -16,13 +16,16 @@
                 :value="groupid"
                 @update:model-value="changeGroup"
               />
-              <b-button variant="primary" @click="openEventModal">
+              <b-button variant="primary" @click="openEventModal" v-if="me">
                 <v-icon icon="plus" /> Add a community event
               </b-button>
+              <NoticeMessage variant="info" v-else>
+                Please sign in and join a community to add an event.
+              </NoticeMessage>
             </div>
           </div>
           <h2 class="visually-hidden">List of community events</h2>
-          <div v-if="forUser?.length">
+          <div v-if="allOfEm?.length">
             <div v-for="id in events" :key="'event-' + id" class="mt-2">
               <CommunityEvent
                 :id="id"
@@ -39,7 +42,7 @@
             />
           </div>
           <div v-else>
-            <NoticeMessage>No events at the moment.</NoticeMessage>
+            <NoticeMessage variant="warning">No events at the moment.</NoticeMessage>
           </div>
         </b-col>
         <b-col cols="0" md="3" class="d-none d-md-block" />
@@ -82,6 +85,8 @@ if (groupid.value) {
   const group = await groupStore.fetch(groupid.value)
   name = 'Community Events for ' + group.namedisplay
   image = group?.profile
+
+  await communityEventStore.fetchGroup(groupid.value)
 } else {
   groupid.value = '0'
 
@@ -110,12 +115,16 @@ useHead(
 const toShow = ref(0)
 const infiniteId = ref(new Date().toString())
 
-const forUser = computed(() => {
-  return communityEventStore.forUser
+const allOfEm = computed(() => {
+  if (groupid.value) {
+    return communityEventStore.forGroup
+  } else {
+    return communityEventStore.allOfEm
+  }
 })
 
 const events = computed(() => {
-  return forUser.value.slice(0, toShow.value)
+    return allOfEm.value.slice(0, toShow.value)
 })
 
 const changeGroup = function (newval) {
@@ -123,7 +132,7 @@ const changeGroup = function (newval) {
   router.push(newval ? '/communityevents/' + newval : '/communityevents')
 }
 const loadMore = function ($state) {
-  if (toShow.value < forUser.value.length) {
+  if (toShow.value < allOfEm.value.length) {
     toShow.value++
     $state.loaded()
   } else {
