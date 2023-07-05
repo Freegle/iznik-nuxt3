@@ -1,8 +1,8 @@
-import config from './config'
 import path from 'path-browserify'
 import { VitePWA } from 'vite-plugin-pwa'
 import eslintPlugin from 'vite-plugin-eslint'
 import legacy from '@vitejs/plugin-legacy'
+import config from './config'
 
 // Mobile version change:
 // - config.js: MOBILE_VERSION eg 3.0.0

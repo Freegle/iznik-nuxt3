@@ -8,6 +8,7 @@ export const useCommunityEventStore = defineStore({
   state: () => ({
     list: {},
     forUser: [],
+    forGroup: [],
   }),
   actions: {
     init(config) {
@@ -48,6 +49,9 @@ export const useCommunityEventStore = defineStore({
     },
     async fetchList(id) {
       this.forUser = await api(this.config).communityevent.list(id)
+    },
+    async fetchGroup(id) {
+      this.forGroup = await api(this.config).communityevent.listGroup(id)
     },
     async setPhoto(id, photoid) {
       await api(this.config).communityevent.setPhoto(id, photoid)

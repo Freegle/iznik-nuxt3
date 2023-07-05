@@ -98,7 +98,7 @@ export default {
           new this.L.marker([this.home.lat, this.home.lng]),
         ])
 
-        let fitTo = fg.getBounds().pad(0.1)
+        const fitTo = fg.getBounds().pad(0.1)
         if (fitTo.isValid()) {
           themap.fitBounds(fitTo)
         }

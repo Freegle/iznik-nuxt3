@@ -48,6 +48,11 @@ export default {
       required: false,
       default: 5,
     },
+    maxZoom: {
+      type: Number,
+      required: false,
+      default: MAX_MAP_ZOOM,
+    }
   },
   async setup() {
     const runtimeConfig = useRuntimeConfig()
@@ -73,7 +78,6 @@ export default {
       mapObject: null,
       center: [53.945, -2.5209],
       zoom: 14,
-      maxZoom: MAX_MAP_ZOOM,
     }
   },
   computed: {

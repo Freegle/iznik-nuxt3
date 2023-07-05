@@ -17,18 +17,19 @@ export default {
     info: {
       type: String,
       required: false,
-      default: ''
-    }
+      default: '',
+    },
   },
   computed: {
     href() {
-      const infostr = this.info ? ('%0D%0A%0D%0A' + this.info) : ''
+      const infostr = this.info ? '%0D%0A%0D%0A' + this.info : ''
       if (this.myid) {
-
         return (
           'mailto:' +
           this.email +
-          '?body=' + infostr + '%0D%0A%0D%0ANote to support: this freegler was logged in as user id: #' +
+          '?body=' +
+          infostr +
+          '%0D%0A%0D%0ANote to support: this freegler was logged in as user id: #' +
           this.myid +
           '.'
         )
@@ -36,7 +37,9 @@ export default {
         return (
           'mailto:' +
           this.email +
-          '?body=' + infostr + '%0D%0A%0D%0ANote to support: this freegler was not logged in when contacting Support to send this mail.'
+          '?body=' +
+          infostr +
+          '%0D%0A%0D%0ANote to support: this freegler was not logged in when contacting Support to send this mail.'
         )
       }
     },

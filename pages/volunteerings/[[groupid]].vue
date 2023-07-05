@@ -19,13 +19,16 @@
                 :value="groupid"
                 @update:model-value="changeGroup"
               />
-              <b-button variant="primary" @click="openVolunteerModal">
+              <b-button variant="primary" @click="openVolunteerModal" v-if="me">
                 <v-icon icon="plus" /> Add an opportunity
               </b-button>
+              <NoticeMessage variant="info" v-else>
+                Please sign in and join a community to add an event.
+              </NoticeMessage>
             </div>
           </div>
           <h2 class="visually-hidden">List of volunteer opportunities</h2>
-          <div v-if="forUser?.length">
+          <div v-if="allOfEm?.length">
             <div
               v-for="id in volunteerings"
               :key="'volunteering-' + id"
@@ -87,6 +90,8 @@ if (groupid.value) {
   const group = await groupStore.fetch(groupid.value)
   name = 'Volunteer Opportunities for ' + group.namedisplay
   image = group?.profile
+
+  await volunteeringStore.fetchGroup(groupid.value)
 } else {
   groupid.value = '0'
 
@@ -115,12 +120,16 @@ useHead(
 const toShow = ref(0)
 const infiniteId = ref(new Date().toString())
 
-const forUser = computed(() => {
-  return volunteeringStore.forUser
+const allOfEm = computed(() => {
+  if (groupid.value) {
+    return volunteeringStore.forGroup
+  } else {
+    return volunteeringStore.allOfEm
+  }
 })
 
 const volunteerings = computed(() => {
-  return forUser.value.slice(0, toShow.value)
+  return allOfEm.value.slice(0, toShow.value)
 })
 
 const changeGroup = function (newval) {
@@ -128,7 +137,7 @@ const changeGroup = function (newval) {
   router.push(newval ? '/volunteerings/' + newval : '/volunteerings')
 }
 const loadMore = function ($state) {
-  if (toShow.value < forUser.value.length) {
+  if (toShow.value < allOfEm.value.length) {
     toShow.value++
     $state.loaded()
   } else {
