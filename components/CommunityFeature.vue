@@ -110,7 +110,7 @@ const modal = ref(null)
 
 const showModal = async () => {
   showAdd.value = true
-  await waitForRef(modal)
+  await waitForRef(modal.value)
   modal.value.show()
 }
 </script>
