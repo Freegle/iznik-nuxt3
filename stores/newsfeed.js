@@ -111,7 +111,6 @@ export const useNewsfeedStore = defineStore({
         message = message.trim()
       }
 
-      console.log('Reply to', replyto, threadhead)
       const id = await api(this.config).news.send({
         message,
         replyto,

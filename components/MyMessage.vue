@@ -470,6 +470,18 @@ export default {
 
       return rejected
     },
+    promisedUserids() {
+      const ret = []
+
+      if (this.message?.promisecount && this.message.promises?.length) {
+        for (const promise of this.message.promises) {
+          ret.push(promise.userid)
+        }
+      }
+
+      return ret
+    },
+
     replies() {
       // Show the replies with unseen messages first, then most recent
       // console.log('Sort replies', this.message.replies, this)
@@ -481,8 +493,14 @@ export default {
           const bunseen = self.countUnseen(b)
           const adate = new Date(a.date).getTime()
           const bdate = new Date(b.date).getTime()
+          const promisea = this.promisedUserids.includes(a.userid)
+          const promiseb = this.promisedUserids.includes(b.userid)
 
-          if (aunseen !== bunseen) {
+          if (promisea && !promiseb) {
+            return -1
+          } else if (promiseb && !promisea) {
+            return 1
+          } else if (aunseen !== bunseen) {
             return bunseen - aunseen
           } else {
             return bdate - adate
