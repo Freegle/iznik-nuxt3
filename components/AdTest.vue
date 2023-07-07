@@ -56,6 +56,8 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   console.log('Destroy slot', uniqueid.value)
-  window.googletag.destroySlots([slot])
+  if (window.googletag?.destroySlots) {
+    window.googletag.destroySlots([slot])
+  }
 })
 </script>
