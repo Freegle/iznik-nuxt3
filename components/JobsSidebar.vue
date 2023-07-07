@@ -1,5 +1,8 @@
 <template>
   <aside v-if="location">
+    <client-only>
+      <AdTest />
+    </client-only>
     <NoticeMessage v-if="blocked" variant="warning" class="d-none">
       <h3>Please help keep Freegle running</h3>
       <p>
@@ -45,12 +48,14 @@ import { mapState } from 'pinia'
 import { useJobStore } from '../stores/job'
 import { useAuthStore } from '../stores/auth'
 import JobOne from './JobOne'
+import AdTest from './AdTest'
 import InfiniteLoading from '~/components/InfiniteLoading'
 const NoticeMessage = () => import('~/components/NoticeMessage')
 const DonationButton = () => import('~/components/DonationButton')
 
 export default {
   components: {
+    AdTest,
     JobOne,
     NoticeMessage,
     InfiniteLoading,
