@@ -79,7 +79,7 @@ export default {
       buildHead(
         route,
         runtimeConfig,
-        'Vote for Freegle',
+        'PayPal Competition',
         'Help Freegle win much-needed funds!'
       )
     )
