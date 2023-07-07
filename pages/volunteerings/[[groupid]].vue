@@ -93,7 +93,7 @@ if (groupid.value) {
 
   await volunteeringStore.fetchGroup(groupid.value)
 } else {
-  groupid.value = '0'
+  groupid.value = 0
 
   if (authStore.user) {
     // We are logged in, so we can fetch the ops for our groups.
@@ -124,7 +124,7 @@ const allOfEm = computed(() => {
   if (groupid.value) {
     return volunteeringStore.forGroup
   } else {
-    return volunteeringStore.allOfEm
+    return volunteeringStore.forUser
   }
 })
 
