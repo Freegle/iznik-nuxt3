@@ -23,7 +23,6 @@ import api from '~/api'
 //import { FreegleFCM } from '@capacitor/freegle-nuxt3-fcm'
 //import { FCM } from '@capacitor-community/fcm';
 //import { getMessaging, getToken as firebaseGetToken, onMessage, deleteToken, isSupported } from "firebase/messaging";
-import { FirebaseMessaging } from '@capacitor-firebase/messaging';
 import { ZoomPlugin } from 'capacitor-zoom-android';
 import { App } from '@capacitor/app';
 import { useRouter } from '#imports'
