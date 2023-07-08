@@ -32,7 +32,6 @@
   "dependencies": {
     "@capacitor-community/apple-sign-in": "^4.0.0",
     "@capacitor-community/facebook-login": "^4.0.0",
-    "@capacitor-firebase/messaging": "^1.0.0",
     "@capacitor/android": "4.8.0",
     "@capacitor/app": "^4.0.0",
     "@capacitor/app-launcher": "^4.0.0",
@@ -81,7 +80,6 @@
     "filepond-plugin-image-preview": "^4.6.11",
     "filepond-plugin-image-resize": "^2.0.10",
     "filepond-plugin-image-transform": "^3.8.7",
-    "firebase": "^9.19.0",
     "floating-vue": "^2.0.0-beta.16",
     "jwt-decode": "^3.1.2",
     "leaflet": "^1.8.0",

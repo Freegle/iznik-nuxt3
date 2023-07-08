@@ -8,11 +8,11 @@
       <div v-else>
         <!-- eslint-disable-next-line-->
         <v-icon icon="handshake" class="fa-fw mt-1" />&nbsp;Promised to <strong>{{ promise.name }}</strong><span v-if="promise.trystdate">,</span>
-        <b-btn
+        <b-button
           variant="link"
           class="ml-2 text--smallest text-black"
           @click="unpromise"
-          >(Unpromise)</b-btn
+          >(Unpromise)</b-button
         >
       </div>
       <div v-if="promise.trystdate" class="d-flex">

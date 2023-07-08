@@ -76,6 +76,20 @@ export const useNewsfeedStore = defineStore({
 
             this.addItems([ret])
           }
+        } else if (this.list[id]) {
+          // We have it in the store, but we should kick off a fetch anyway to update it.
+          if (!this.fetching[id]) {
+            this.fetching[id] = api(this.config)
+              .news.fetch(id, null, lovelist, false)
+              .then((ret) => {
+                this.fetching[id] = null
+                if (ret?.id) {
+                  this.list[id] = ret
+
+                  this.addItems([ret])
+                }
+              })
+          }
         }
       } catch (e) {
         console.log('Fetch of newsfeed failed', id, e)
@@ -97,7 +111,6 @@ export const useNewsfeedStore = defineStore({
         message = message.trim()
       }
 
-      console.log('Reply to', replyto, threadhead)
       const id = await api(this.config).news.send({
         message,
         replyto,

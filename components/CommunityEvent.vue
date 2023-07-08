@@ -165,11 +165,14 @@ export default {
 
     if (props.id) {
       const v = await communityEventStore.fetch(props.id)
-      await userStore.fetch(v.userid)
 
-      v.groups?.forEach(async (id) => {
-        await groupStore.fetch(id)
-      })
+      if (v) {
+        await userStore.fetch(v.userid)
+
+        v.groups?.forEach(async (id) => {
+          await groupStore.fetch(id)
+        })
+      }
     }
 
     return {

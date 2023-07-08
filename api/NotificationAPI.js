@@ -2,11 +2,13 @@ import BaseAPI from '@/api/BaseAPI'
 
 export default class NotificationAPI extends BaseAPI {
   count() {
+    // Don't log errors - this can happen due to timing windows.
     return this.$getv2('/notification/count', {}, false)
   }
 
   list() {
-    return this.$getv2('/notification')
+    // Don't log errors - this can happen due to timing windows.
+    return this.$getv2('/notification', {}, false)
   }
 
   seen(id) {

@@ -16,10 +16,10 @@
                 :value="groupid"
                 @update:model-value="changeGroup"
               />
-              <b-button variant="primary" @click="openEventModal" v-if="me">
+              <b-button v-if="me" variant="primary" @click="openEventModal">
                 <v-icon icon="plus" /> Add a community event
               </b-button>
-              <NoticeMessage variant="info" v-else>
+              <NoticeMessage v-else variant="info">
                 Please sign in and join a community to add an event.
               </NoticeMessage>
             </div>
@@ -42,7 +42,9 @@
             />
           </div>
           <div v-else>
-            <NoticeMessage variant="warning">No events at the moment.</NoticeMessage>
+            <NoticeMessage variant="warning"
+              >No events at the moment.</NoticeMessage
+            >
           </div>
         </b-col>
         <b-col cols="0" md="3" class="d-none d-md-block" />
@@ -88,7 +90,7 @@ if (groupid.value) {
 
   await communityEventStore.fetchGroup(groupid.value)
 } else {
-  groupid.value = '0'
+  groupid.value = 0
 
   if (authStore.user) {
     // We are logged in, so we can fetch the events for our groups.
@@ -119,12 +121,12 @@ const allOfEm = computed(() => {
   if (groupid.value) {
     return communityEventStore.forGroup
   } else {
-    return communityEventStore.allOfEm
+    return communityEventStore.forUser
   }
 })
 
 const events = computed(() => {
-    return allOfEm.value.slice(0, toShow.value)
+  return allOfEm.value.slice(0, toShow.value)
 })
 
 const changeGroup = function (newval) {

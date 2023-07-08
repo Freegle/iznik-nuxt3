@@ -205,11 +205,13 @@ export default {
 
     if (props.id) {
       const v = await volunteeringStore.fetch(props.id)
-      await userStore.fetch(v.userid)
+      if (v) {
+        await userStore.fetch(v.userid)
 
-      v.groups?.forEach(async (id) => {
-        await groupStore.fetch(id)
-      })
+        v.groups?.forEach(async (id) => {
+          await groupStore.fetch(id)
+        })
+      }
     }
 
     return {
