@@ -87,7 +87,7 @@
           :class="newsfeed.deleted ? 'strike mr-1' : 'mr-1'"
           @rendered="rendered"
         />
-        <span v-if="!newsfeed.closed">
+        <span v-if="!newsfeed?.closed">
           <div v-if="enterNewLine">
             <OurAtTa
               ref="at"

@@ -295,18 +295,20 @@ export default {
       this.pc = null
     },
     async add() {
-      await this.isochroneStore.add({
-        minutes: this.minutes,
-        transport: this.transport,
-        locationid: this.pc.id,
-        nickname: this.nickname,
-      })
+      if (this.pc) {
+        await this.isochroneStore.add({
+          minutes: this.minutes,
+          transport: this.transport,
+          locationid: this.pc.id,
+          nickname: this.nickname,
+        })
 
-      this.minutes = 25
-      this.transport = null
-      this.pc = null
-      this.nickname = null
-      this.$emit('added')
+        this.minutes = 25
+        this.transport = null
+        this.pc = null
+        this.nickname = null
+        this.$emit('added')
+      }
     },
     remove() {
       this.isochroneStore.delete({
