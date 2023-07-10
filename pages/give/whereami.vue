@@ -27,8 +27,11 @@
           </nuxt-link>
         </transition>
       </div>
-      <div v-if="postcodeValid && noGroups">
-        <NoticeMessage variant="info" class="mt-2">
+      <div
+        v-if="postcodeValid && noGroups"
+        class="d-flex justify-content-around"
+      >
+        <NoticeMessage variant="info" class="mt-2 flex-shrink-1">
           We're really sorry, but there are no communities near there. If you'd
           like to start one, please
           <ExternalLink href="mailto:newgroups@ilovefreegle.org">
