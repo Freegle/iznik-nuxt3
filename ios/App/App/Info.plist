@@ -113,9 +113,9 @@
   <key>ITSAppUsesNonExemptEncryption</key>
   <false/>
   <key>UIFileSharingEnabled</key>
-  <string>YES</string>
+  <true/>
   <key>LSSupportsOpeningDocumentsInPlace</key>
-  <string>YES</string>
+  <true/>
   <key>NSCalendarsUsageDescription</key>
   <string>To save Freegle handover appointments to your calendar</string>
 </dict>
