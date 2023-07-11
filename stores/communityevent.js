@@ -23,7 +23,7 @@ export const useCommunityEventStore = defineStore({
           } else {
             this.fetching[id] = api(this.config).communityevent.fetch(id, false)
             let item = await this.fetching[id]
-            item = addStrings(item)
+            item = addStrings(item, true)
 
             // API returns dates in ISO8601 but our code wants them split into date and time
             if (item.dates) {

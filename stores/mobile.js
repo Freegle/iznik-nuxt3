@@ -411,7 +411,10 @@ export const useMobileStore = defineStore({ // Do not persist
       console.log(notification)
       const data = notification.data
       let foreground = false
-      if( 'foreground' in data) foreground = data.foreground
+      if( 'foreground' in data){
+        console.log('--- FOREGROUND',data.foreground)
+        foreground = data.foreground
+      } else console.log('--- FOREGROUND NOT SET')
 
       // let msgid = new Date().getTime() // Can't tell if double event if notId not given
       let msgid = 0
@@ -475,7 +478,18 @@ export const useMobileStore = defineStore({ // Do not persist
         })
       }*/
 
-      if (this.route && !foreground) {
+      const appState = await App.getState() // isActive true at startup and when app active; false when in background
+      const active = appState ? appState.isActive : false
+      let okToMove = false
+      if( this.isiOS){
+        okToMove = !active // Do not have push foreground flag, so: do not move if active, even if just started
+      } else { // isAndroid
+        okToMove = (!foreground && active) || // Just started
+                   (foreground && !active)   // foreground && activeIn background
+      }
+      console.log('this.isiOS',this.isiOS, 'active', active, 'okToMove', okToMove)
+      
+      if (this.route && okToMove) {
         this.route = this.route.replace('/chat/', '/chats/') // Match redirects in nuxt.config.js
         console.log('router.currentRoute', router.currentRoute)
         if (router.currentRoute.path !== this.route) {
