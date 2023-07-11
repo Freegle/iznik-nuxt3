@@ -29,21 +29,32 @@ export function earliestDate(dates, ofall) {
   return earliestDate
 }
 
-export function addStrings(item) {
+export function addStrings(item, times) {
   // Add human readable versions of each date range.
   if (item) {
     for (let i = 0; i < item?.dates?.length; i++) {
       const date = item.dates[i]
       const startm = dayjs(date.start)
       let endm = dayjs(date.end)
-      endm = endm.isSame(startm, 'day')
-        ? endm.format('HH:mm')
-        : endm.format('ddd, Do MMM HH:mm')
 
-      item.dates[i].string = {
-        start: startm.format('ddd, Do MMM HH:mm'),
-        end: endm,
-        past: Date.now() > new Date(date.start),
+      if (times) {
+        endm = endm.isSame(startm, 'day')
+          ? endm.format('HH:mm')
+          : endm.format('ddd, Do MMM HH:mm')
+
+        item.dates[i].string = {
+          start: startm.format('ddd, Do MMM HH:mm'),
+          end: endm,
+          past: Date.now() > new Date(date.start),
+        }
+      } else {
+        endm = endm.format('ddd, Do MMM')
+
+        item.dates[i].string = {
+          start: startm.format('ddd, Do MMM'),
+          end: endm,
+          past: Date.now() > new Date(date.start),
+        }
       }
     }
   }

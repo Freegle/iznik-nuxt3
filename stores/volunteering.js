@@ -23,7 +23,7 @@ export const useVolunteeringStore = defineStore({
           } else {
             this.fetching[id] = api(this.config).volunteering.fetch(id, false)
             let item = await this.fetching[id]
-            item = addStrings(item)
+            item = addStrings(item, false)
 
             if (item.dates) {
               // API returns dates in ISO8601 but our code wants them split into date and time
