@@ -217,7 +217,7 @@ export default {
           m.fromuser &&
           m.fromuser === this.myid &&
           m.type === this.type &&
-          m.item &&
+          m.item?.name &&
           this.item &&
           m.item.name.toLowerCase() === this.item.toLowerCase() &&
           m.id !== this.id &&
