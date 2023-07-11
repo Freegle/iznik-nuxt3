@@ -158,7 +158,7 @@ export default {
 
     const message = toRaw(await messageStore.fetch(props.id, true))
     const textbody = message.textbody
-    const item = message.item.name
+    const item = message.item?.name
 
     return {
       messageStore,
