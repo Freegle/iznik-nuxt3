@@ -33,9 +33,9 @@
           </p>
           <b-img lazy fluid src="/donate/PayPalFavourite.gif" />
           <p>
-            Once you've done that, then next time you pay for something online
-            using PayPal, you'll see Freegle as the charity to donate £1 to at
-            checkout.
+            Once you've done that (or if you already did in the past), then next
+            time you pay for something online using PayPal, you'll see Freegle
+            as the charity to donate £1 to at checkout.
             <b
               >If you can afford it, please do so - PayPal will match your
               donation!</b
