@@ -563,141 +563,143 @@ export default {
       let messages = []
       this.$emit('update:loading', true)
 
+      let bounds = new window.L.LatLngBounds(this.initialBounds)
+
       if (this.mapObject) {
         // Get the messages from the server which are in the bounds of the map.
-        const bounds = this.mapObject.getBounds()
+        bounds = this.mapObject.getBounds()
 
         if (this.mapObject.getZoom() < this.minZoom) {
           // The parent may  replace us with something else at this point, e.g. with a group map.  But maybe not.
           // Their call.
-          this.$emit('minzoom', this.mapObject.getBounds())
+          this.$emit('minzoom', this.mapObject.getZoom())
         }
+      }
 
-        const swlat = bounds.getSouthWest().lat
-        const swlng = bounds.getSouthWest().lng
-        const nelat = bounds.getNorthEast().lat
-        const nelng = bounds.getNorthEast().lng
-        let params = null
+      const swlat = bounds.getSouthWest().lat
+      const swlng = bounds.getSouthWest().lng
+      const nelat = bounds.getNorthEast().lat
+      const nelng = bounds.getNorthEast().lng
+      let params = null
 
-        if (!this.search) {
-          if (this.showIsochrones && !this.moved) {
-            // The default view unless we've moved the map is the messages in the isochrones.
-            if (this.isochrones?.length) {
-              // We have some.
-              messages = await this.isochroneStore.fetchMessages()
+      if (!this.search) {
+        if (this.showIsochrones && !this.moved) {
+          // The default view unless we've moved the map is the messages in the isochrones.
+          if (this.isochrones?.length) {
+            // We have some.
+            messages = await this.isochroneStore.fetchMessages()
 
-              // Fetch the messages in bounds too, so that we can show those as secondary.
-              this.messageStore
-                .fetchInBounds(swlat, swlng, nelat, nelng, this.groupid)
-                .then((res) => {
-                  this.secondaryMessageList = res
-                })
-            } else {
-              // We don't, which will be because we don't have a location.  Use the bounding boxes of the groups we
-              // are in.
-              const groupbounds = this.myGroupsBoundingBox
-              messages = await this.messageStore.fetchInBounds(
-                groupbounds[0][0],
-                groupbounds[0][1],
-                groupbounds[1][0],
-                groupbounds[1][1],
-                this.groupid
-              )
-            }
+            // Fetch the messages in bounds too, so that we can show those as secondary.
+            this.messageStore
+              .fetchInBounds(swlat, swlng, nelat, nelng, this.groupid)
+              .then((res) => {
+                this.secondaryMessageList = res
+              })
           } else {
-            // Get the messages in the map view.
+            // We don't, which will be because we don't have a location.  Use the bounding boxes of the groups we
+            // are in.
+            const groupbounds = this.myGroupsBoundingBox
             messages = await this.messageStore.fetchInBounds(
-              swlat,
-              swlng,
-              nelat,
-              nelng,
+              groupbounds[0][0],
+              groupbounds[0][1],
+              groupbounds[1][0],
+              groupbounds[1][1],
               this.groupid
             )
           }
         } else {
-          // We are searching.  Get the list of messages from the server.
+          // Get the messages in the map view.
+          messages = await this.messageStore.fetchInBounds(
+            swlat,
+            swlng,
+            nelat,
+            nelng,
+            this.groupid
+          )
+        }
+      } else {
+        // We are searching.  Get the list of messages from the server.
 
-          const gids = this.groupid
-            ? [this.groupid]
-            : this.myGroups.map((g) => g.id)
+        const gids = this.groupid
+          ? [this.groupid]
+          : this.myGroups.map((g) => g.id)
 
-          if (this.searchOnGroups && gids.length) {
-            // Got some groups to search on.
-            params = {
-              messagetype: this.type,
-              search: this.search,
-              groupids: gids,
-            }
-          } else {
-            // Use the box.
-            params = {
-              messagetype: this.type,
-              search: this.search,
-              groupids: gids.join(','),
-              swlat,
-              swlng,
-              nelat,
-              nelng,
-            }
+        if (this.searchOnGroups && gids.length) {
+          // Got some groups to search on.
+          params = {
+            messagetype: this.type,
+            search: this.search,
+            groupids: gids,
           }
-
-          const ret = await this.messageStore.search(params)
-
-          if (ret && !this.destroyed) {
-            messages = ret
+        } else {
+          // Use the box.
+          params = {
+            messagetype: this.type,
+            search: this.search,
+            groupids: gids.join(','),
+            swlat,
+            swlng,
+            nelat,
+            nelng,
           }
         }
 
-        if (messages?.length) {
-          if (this.groupid) {
-            messages = messages.filter((m) => {
-              return m.groupid === this.groupid
-            })
-          }
+        const ret = await this.messageStore.search(params)
 
-          if (this.type !== 'All') {
-            messages = messages.filter((m) => {
-              return m.type === this.type
-            })
-          }
-
-          let countInBounds = 0
-
-          messages.forEach((m) => {
-            if (
-              swlat <= m.lat &&
-              m.lat <= nelat &&
-              swlng <= m.lng &&
-              m.lng <= nelng
-            ) {
-              countInBounds++
-            }
-          })
-
-          if (countInBounds >= this.manyToShow) {
-            // We have seen lots, so we don't need to do the auto zoom out thing now.
-            this.shownMany = true
-          } else if (
-            !this.search &&
-            this.showMany &&
-            countInBounds < this.manyToShow &&
-            !this.shownMany
-          ) {
-            // If we haven't got more than 1 message at this zoom level, zoom out.  That means we'll always show at
-            // least something.  This is useful when we search for a specific place.
-            const currzoom = this.mapObject.getZoom()
-            if (currzoom > this.minZoom) {
-              this.mapObject.setZoom(currzoom - 1)
-            } else {
-              this.shownMany = true
-            }
-          }
+        if (ret && !this.destroyed) {
+          messages = ret
         }
-
-        this.messageList = messages || []
-        this.$emit('messages', this.messageList)
-        this.$emit('update:loading', false)
       }
+
+      if (messages?.length) {
+        if (this.groupid) {
+          messages = messages.filter((m) => {
+            return m.groupid === this.groupid
+          })
+        }
+
+        if (this.type !== 'All') {
+          messages = messages.filter((m) => {
+            return m.type === this.type
+          })
+        }
+
+        let countInBounds = 0
+
+        messages.forEach((m) => {
+          if (
+            swlat <= m.lat &&
+            m.lat <= nelat &&
+            swlng <= m.lng &&
+            m.lng <= nelng
+          ) {
+            countInBounds++
+          }
+        })
+
+        if (countInBounds >= this.manyToShow) {
+          // We have seen lots, so we don't need to do the auto zoom out thing now.
+          this.shownMany = true
+        } else if (
+          !this.search &&
+          this.showMany &&
+          countInBounds < this.manyToShow &&
+          !this.shownMany
+        ) {
+          // If we haven't got more than 1 message at this zoom level, zoom out.  That means we'll always show at
+          // least something.  This is useful when we search for a specific place.
+          const currzoom = this.mapObject.getZoom()
+          if (currzoom > this.minZoom) {
+            this.mapObject.setZoom(currzoom - 1)
+          } else {
+            this.shownMany = true
+          }
+        }
+      }
+
+      this.messageList = messages || []
+      this.$emit('messages', this.messageList)
+      this.$emit('update:loading', false)
 
       return cloneDeep(messages)
     },
