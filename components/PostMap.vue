@@ -44,7 +44,7 @@
                 :markers="messagesForMap"
                 :map="mapObject"
                 tag="post"
-                @click="idle"
+                @click="clusterClick"
               />
               <ClusterMarker
                 v-if="!moved"
@@ -52,7 +52,7 @@
                 :map="mapObject"
                 tag="post"
                 css-class="fadedMarker"
-                @click="idle"
+                @click="clusterClick"
               />
               <l-marker
                 v-if="me?.settings?.mylocation && (me.lat || me.lng)"
@@ -534,6 +534,10 @@ export default {
           })
           .addTo(this.mapObject)
       }
+    },
+    clusterClick() {
+      this.moved = true
+      this.idle()
     },
     idle() {
       this.mapIdle++
