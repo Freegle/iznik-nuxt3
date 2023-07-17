@@ -201,7 +201,6 @@ export default {
         // Find id in the list of chats.
         const index = chatStore.list.findIndex((c) => c.id === id)
         showChats.value = Math.max(showChats.value, index + 1)
-        console.log('Show', showChats.value)
       }
     }
 
