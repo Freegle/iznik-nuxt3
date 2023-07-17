@@ -9,7 +9,7 @@
   >
     <template #title>
       <div class="w-100 coverphoto">
-        <ProfileHeader :id="id" class="flex-grow-1 px-3 py-2" />
+        <ProfileHeader :id="id" class="flex-grow-1 px-3 py-2" :close-on-message="closeOnMessage" @close="hide" />
       </div>
     </template>
     <template #default>
@@ -38,6 +38,11 @@ export default {
       type: Number,
       required: false,
       default: 0,
+    },
+    closeOnMessage: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   async setup(props) {
