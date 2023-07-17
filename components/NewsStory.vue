@@ -119,7 +119,7 @@ export default {
     },
     body() {
       let story = twem(this.story?.story)
-      story = story.trim()
+      story = story?.trim()
       return story
     },
     headline() {
