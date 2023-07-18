@@ -397,6 +397,7 @@ export default {
       selectedGroup: 0,
       context: null,
       none: false,
+      noneFound: false,
     }
   },
   computed: {

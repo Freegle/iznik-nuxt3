@@ -202,7 +202,7 @@
           :chatid="chat.id"
           @confirm="hide"
         />
-        <ProfileModal v-if="showProfile" :id="otheruser.id" ref="profile" />
+        <ProfileModal v-if="showProfile" :id="otheruser.id" ref="profile" close-on-message />
       </div>
       <ChatHideModal
         v-if="

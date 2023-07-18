@@ -1,7 +1,7 @@
 <template>
   <aside v-if="location">
     <client-only>
-      <AdTest />
+      <AdTest square />
     </client-only>
     <NoticeMessage v-if="blocked" variant="warning" class="d-none">
       <h3>Please help keep Freegle running</h3>

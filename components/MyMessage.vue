@@ -328,6 +328,7 @@ import { useGroupStore } from '../stores/group'
 import { useUserStore } from '../stores/user'
 import { useTrystStore } from '../stores/tryst'
 import { useLocationStore } from '../stores/location'
+import { milesAway } from '../composables/useDistance'
 import { useRouter } from '#imports'
 import MessagePhotosModal from '~/components/MessagePhotosModal'
 import MyMessagePromisedTo from '~/components/MyMessagePromisedTo'
@@ -514,13 +515,17 @@ export default {
       let ret = null
       let dist = null
 
-      if (this.replyusers?.length > 1) {
+      if (this.replyusers?.length > 1 && this.me) {
         this.replyusers.forEach((uid) => {
           const u = this.userStore?.byId(uid)
 
-          if (u && (dist === null || (u.info && u?.info.milesaway < dist))) {
-            dist = u.info.milesaway
-            ret = u.id
+          if (u) {
+            const milesaway = milesAway(u.lat, u.lng, this.me.lat, this.me.lng)
+
+            if (dist === null || milesaway < dist) {
+              dist = milesaway
+              ret = u.id
+            }
           }
         })
       }

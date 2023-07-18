@@ -1,86 +1,62 @@
 <template>
   <NoticeMessage>
-    <p>
-      You are logged in with
-      <!-- eslint-disable-next-line -->
-      <strong v-if="ours">{{ ours }}</strong><strong v-else>as <v-icon icon="hashtag" class="text-muted fa-0-8x" />{{ myid }}</strong>, but <strong>{{ theirs }}</strong> belongs to another account.
-    </p>
-    <p>
-      If they are both yours, you can ask the
-      {{ group?.namedisplay }} volunteers to merge your accounts.
-    </p>
-    <b-button
-      v-if="groupid"
-      size="lg"
-      class="mb-2"
-      variant="white"
-      @click="requestMerge"
-      >Request merge</b-button
-    >
-    <SupportLink
-      v-else
-      size="lg"
-      :info="'Requesting merge of ' + ours + ' and ' + theirs"
-      text="Request merge"
-    />
+    <div v-if="showConfirm">
+      <p>We've sent you a verification mail.</p>
+      <p>Don't forget to check your spam folder!</p>
+      <p>
+        Once you've merged the accounts, you can come back here to continue your
+        post.
+      </p>
+    </div>
+    <div v-else>
+      <p>
+        {{ theirs }} belongs to a different account from the one you're using
+        right now.
+        <span v-if="me.email"> ({{ me.email }}) </span>
+        . But don't worry! You probably have two acounts, and we can merge them
+        together.
+      </p>
+      <p>
+        Click this button and we'll send an email to {{ theirs }} to confirm
+        that you want to merge the accounts.
+      </p>
+      <b-button size="lg" class="mb-2" variant="white" @click="requestMerge"
+        >Request merge</b-button
+      >
+    </div>
   </NoticeMessage>
 </template>
 <script>
-import { computed } from 'vue'
-import { useComposeStore } from '../stores/compose'
-import { useGroupStore } from '../stores/group'
-import { useChatStore } from '../stores/chat'
+import { useAuthStore } from '../stores/auth'
 import NoticeMessage from './NoticeMessage'
-import SupportLink from '~/components/SupportLink'
 
 export default {
-  components: { NoticeMessage, SupportLink },
+  components: { NoticeMessage },
   props: {
-    ours: {
-      type: String,
-      required: true,
-    },
     theirs: {
       type: String,
       required: true,
     },
   },
   setup() {
-    const composeStore = useComposeStore()
-    const groupStore = useGroupStore()
-    const chatStore = useChatStore()
+    const authStore = useAuthStore()
 
-    const groupid = computed(() => {
-      return composeStore.group
-    })
-
-    if (groupid.value) {
-      groupStore.fetch(groupid.value)
-    }
-
-    return { composeStore, groupStore, chatStore, groupid }
+    return { authStore }
   },
-  computed: {
-    group() {
-      return this.groupStore.get(this.groupid)
-    },
+  data: function () {
+    return {
+      showConfirm: false,
+    }
   },
   methods: {
     async requestMerge() {
-      const chatid = await this.chatStore.openChatToMods(this.groupid)
+      const data = await this.authStore.saveEmail({
+        email: this.theirs,
+      })
 
-      if (chatid) {
-        await this.chatStore.send(
-          chatid,
-            "I'd like you to merge my account " + this.ours + " into " + this.theirs + " please, with " + this.theirs + " as the primary email. You can email me at both addresses to confirm that they're both mine.",
-          null,
-          null,
-          null
-        )
+      console.log('data', data)
 
-        const router = useRouter()
-        router.push('/chats/' + chatid)
-      }
+      this.showConfirm = true
     },
   },
 }
