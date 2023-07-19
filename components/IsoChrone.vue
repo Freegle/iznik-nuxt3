@@ -82,7 +82,6 @@
             :max="maxMinutes"
             :step="step"
             class="pt-2"
-            @change="changeMinutes"
           />
           <b-button
             variant="white"
@@ -182,12 +181,12 @@ export default {
     const isochroneStore = useIsochroneStore()
     const locationStore = useLocationStore()
 
-    let minutes = ref(20)
-    let transport = ref('Drive')
+    const minutes = ref(20)
+    const transport = ref('Drive')
 
     if (props.id) {
-      minutes = isochroneStore.get(props.id).minutes
-      transport = isochroneStore.get(props.id).transport
+      minutes.value = isochroneStore.get(props.id).minutes
+      transport.value = isochroneStore.get(props.id).transport
     }
 
     const isochrone = computed(() => {
@@ -255,6 +254,12 @@ export default {
       }
 
       return ret
+    },
+  },
+  watch: {
+    minutes(newVal) {
+      console.log('watch', newVal)
+      this.changeMinutes(newVal)
     },
   },
   methods: {
