@@ -228,7 +228,7 @@ export default {
         // Not asked too recently.
         await this.fetchMe(true)
 
-        if (this.me && (!this.me.aboutme || !this.me.aboutme.text)) {
+        if (!this.me.aboutme || !this.me.aboutme.text) {
           // We have not yet provided one.
           const daysago = dayjs().diff(dayjs(this.me.added), 'days')
 
