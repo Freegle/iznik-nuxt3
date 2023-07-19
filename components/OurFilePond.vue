@@ -11,7 +11,7 @@
       image-resize-target-width="800"
       image-resize-target-height="800"
       image-crop-aspect-ratio="1"
-      label-idle='Drag & Drop photos or <span class="btn btn-white ction"> Browse </span>'
+      label-idle='Drag & drop photos here or <span class="btn btn-white ction"> Browse </span>'
       :server="{ process, revert, restore, load, fetch }"
       :drop-on-element="false"
       :drop-on-page="true"
