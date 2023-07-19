@@ -36,6 +36,7 @@ export default {
         'firefox >= 67',
       ],
       ignoreBrowserslistConfig: true,
+      renderLegacyChunks: false,
       modernPolyfills: ['es/global-this'],
     }),
   ],
