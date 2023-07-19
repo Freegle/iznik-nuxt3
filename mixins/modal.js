@@ -1,3 +1,5 @@
+import { useRouter } from '#imports'
+
 export default {
   data() {
     return {
@@ -12,7 +14,8 @@ export default {
     // This is a bit of a hack, but there doesn't seem to be a good way to do it.  If we have routed to a chat
     // from within a modal then make sure we route to it - this is a case that happens if you Message someone from
     // a modal on mobile.
-    this.unregisterRouterGuard = this.$router.beforeEach((to, from, next) => {
+    const router = useRouter()
+    this.unregisterRouterGuard = router.beforeEach((to, from, next) => {
       if (!to.path.includes('/chats')) {
         this.back(next)
       } else {
