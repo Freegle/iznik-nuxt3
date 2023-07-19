@@ -71,7 +71,7 @@
             </div>
           </div>
           <notice-message v-else variant="danger">
-            Unknown item type {{ newsfeed.type }}
+            Unknown item type {{ newsfeed?.type }}
           </notice-message>
         </b-card-text>
       </b-card-body>
