@@ -149,11 +149,6 @@ export default defineNuxtConfig({
     emitRouteChunkError: 'reload',
   },
 
-  build: {
-    // Transpile everything, otherwise we have issues with Safari 12 which we cannot diagnose.
-    transpile: [() => true],
-  },
-
   webpack: {
     // Reduce size of CSS initial load.
     extractCSS: true,
