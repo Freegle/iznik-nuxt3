@@ -26,7 +26,7 @@ export default {
     // Make Lint errors cause build failures.
     eslintPlugin(),
     legacy({
-      targets: ['> 0.5%, last 2 versions, Firefox ESR, not dead'],
+      targets: ['es2015'],
     }),
   ],
 
