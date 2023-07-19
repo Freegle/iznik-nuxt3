@@ -52,9 +52,7 @@ export function setup(type) {
   })
 
   const route = useRoute()
-  const initialPostcode = route.query.postcode
-    ? route.query.postcode
-    : composeStore.postcode?.name
+  const initialPostcode = route.query.postcode ?? composeStore.postcode?.name
 
   // We want to refetch the group in case its closed status has changed.
   const groupid = composeStore.group
