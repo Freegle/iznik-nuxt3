@@ -6,6 +6,9 @@ import config from './config'
 
 export default {
   debug: true,
+  build: {
+    target: 'es2015',
+  },
 
   // Make the ~ and @ aliases work in Vite as per https://github.com/vitejs/vite/issues/382.
   resolve: {
@@ -26,7 +29,15 @@ export default {
     // Make Lint errors cause build failures.
     eslintPlugin(),
     legacy({
-      targets: ['> 0.5%, last 2 versions, Firefox ESR, not dead'],
+      targets: [
+        'chrome >= 64',
+        'edge >= 79',
+        'safari >= 11.1',
+        'firefox >= 67',
+      ],
+      ignoreBrowserslistConfig: true,
+      renderLegacyChunks: false,
+      modernPolyfills: ['es/global-this'],
     }),
   ],
 
