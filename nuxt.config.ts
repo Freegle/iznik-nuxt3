@@ -13,7 +13,7 @@ export default defineNuxtConfig({
   //   - server: requires a node server.
   // - ssr can be:
   //   - true: renders at
-  //     - generate time for target: static, or
+  //     - generate time for https://github.com/nuxt/framework/discussions/4523: static, or
   //     - in node server for target: server)
   //   - false: renders on client.
   //
@@ -150,15 +150,8 @@ export default defineNuxtConfig({
   },
 
   build: {
-    // Need to transpile otherwise SSR fails - see https://github.com/nuxt/framework/discussions/4523.
-    transpile: [
-      /bootstrap-vue-3/,
-      /vue3-lazyload/,
-      /vue-image-zoomer/,
-      /vue3-draggable-resizable/,
-      /pinia-plugin-persist/,
-      /vue-social-sharing/,
-    ],
+    // Transpile everything, otherwise we have issues with Safari 12 which we cannot diagnose.
+    transpile: [() => true],
   },
 
   webpack: {
