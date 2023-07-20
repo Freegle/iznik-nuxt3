@@ -33,15 +33,8 @@ export default class ChatAPI extends BaseAPI {
     return this.$put('/chat/rooms', params, logError)
   }
 
-  send(data) {
-    return this.$post('/chatmessages', data, function (data) {
-      if (data && data.ret === 4) {
-        // Don't log errors for banned users - handled elsewhere.
-        return false
-      } else {
-        return true
-      }
-    })
+  async send(data) {
+    return await this.$postv2('/chat/' + data.roomid + '/message', data)
   }
 
   nudge(chatid) {

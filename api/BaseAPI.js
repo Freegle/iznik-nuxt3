@@ -226,6 +226,23 @@ export default class BaseAPI {
     )
   }
 
+  $postv2(path, data, logError = true) {
+    const authStore = useAuthStore()
+
+    return this.$requestv2(
+      'POST',
+      path,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Iznik ' + JSON.stringify(authStore.auth?.persistent),
+        },
+        data,
+      },
+      logError
+    )
+  }
+
   $postForm(path, data, logError = true) {
     // Don't set Content-Type - see https://stackoverflow.com/questions/39280438/fetch-missing-boundary-in-multipart-form-data-post
     return this.$request(
