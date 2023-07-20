@@ -279,9 +279,6 @@ export default {
     },
   },
   watch: {
-    id(newVal) {
-      console.log('id changed', newVal)
-    },
     search(newVal, oldVal) {
       this.showChats = this.minShowChats
       this.bump++
@@ -304,7 +301,9 @@ export default {
     }
   },
   beforeUnmount() {
-    this.chatStore.searchSince = null
+    if (this.chatStore) {
+      this.chatStore.searchSince = null
+    }
   },
   methods: {
     async fetchOlder() {

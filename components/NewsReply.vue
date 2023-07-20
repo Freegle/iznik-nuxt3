@@ -435,6 +435,7 @@ export default {
     async showInfo() {
       this.infoclick = true
       await this.waitForRef('profilemodal')
+      console.log('Refs', this.$refs)
       this.$refs.profilemodal.show()
     },
     async replyReply() {

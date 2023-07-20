@@ -73,6 +73,7 @@ export default {
       // fetch of the user info.
       this.infoclick = true
       await this.waitForRef('profilemodal')
+      console.log('Refs2', this.$refs)
       this.$refs.profilemodal.show()
     },
   },
