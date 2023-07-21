@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { nextTick } from 'vue'
 import api from '~/api'
 
 export const useUserStore = defineStore({
@@ -23,6 +24,7 @@ export const useUserStore = defineStore({
       if (force || !this.list[id]) {
         if (this.fetching[id]) {
           await this.fetching[id]
+          await nextTick()
         } else {
           this.fetching[id] = api(this.config).user.fetch(id)
           const user = await this.fetching[id]
@@ -43,6 +45,7 @@ export const useUserStore = defineStore({
       if (force || !this.locationList[id]) {
         if (this.fetchingLocation[id]) {
           await this.fetchingLocation[id]
+          await nextTick()
         } else {
           this.fetchingLocation[id] = api(this.config).user.fetchPublicLocation(
             id

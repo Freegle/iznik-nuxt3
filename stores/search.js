@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { nextTick } from 'vue'
 import api from '~/api'
 
 export const useSearchStore = defineStore({
@@ -14,6 +15,7 @@ export const useSearchStore = defineStore({
     async fetch(userid) {
       if (this.fetching) {
         await this.fetching
+        await nextTick()
       } else {
         this.fetching = api(this.config).usersearch.fetch(userid)
         this.list = await this.fetching

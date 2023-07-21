@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { nextTick } from 'vue'
 import api from '~/api'
 
 export const useTeamStore = defineStore({
@@ -14,6 +15,7 @@ export const useTeamStore = defineStore({
     async fetch(team) {
       if (team in this.fetching) {
         await this.fetching[team]
+        await nextTick()
       } else {
         this.fetching[team] = api(this.config).team.fetch({
           name: team,

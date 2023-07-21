@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { nextTick } from 'vue'
 import api from '~/api'
 
 export const useAddressStore = defineStore({
@@ -31,6 +32,7 @@ export const useAddressStore = defineStore({
         }
       } else if (this.fetching) {
         await this.fetching
+        await nextTick()
       } else {
         this.fetching = api(this.config).address.fetchv2()
         this.list = await this.fetching
