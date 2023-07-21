@@ -1,6 +1,6 @@
 function waitForRefTimer(ref, resolve) {
   if (ref.value) {
-    resolve()
+    resolve(ref.value)
   } else {
     setTimeout(() => {
       waitForRefTimer(ref, resolve)

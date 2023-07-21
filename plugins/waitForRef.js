@@ -16,11 +16,7 @@ export default defineNuxtPlugin((nuxtApp) => {
         // the setup() method is still running (asynchronously) and therefore the ref is not really ready yet.
         const api = useMiscStore().apiCount
         if (this.$refs[name] && !api) {
-          this.$nextTick(() => {
-            this.$nextTick(() => {
-              resolve()
-            })
-          })
+          resolve(this.$refs[name])
         } else {
           setTimeout(() => {
             // Don't callback if the window is unloading - the ref may be removed under our feet which causes a

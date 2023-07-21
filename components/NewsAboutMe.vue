@@ -76,8 +76,8 @@ export default {
       await this.fetchMe(['me'], true)
 
       this.showAboutMe = true
-      await this.waitForRef('modal')
-      this.$refs.modal.show()
+      const m = await this.waitForRef('modal')
+      m.show()
     },
   },
 }
