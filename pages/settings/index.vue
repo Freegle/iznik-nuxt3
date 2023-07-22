@@ -340,25 +340,31 @@
                       </b-form-select-option>
                     </b-form-select>
                   </b-form-group>
-                  <NoticeMessage
-                    v-if="simpleEmailSetting === 'None'"
-                    variant="danger"
-                    class="mb-1"
-                  >
-                    If people message you, you won't get any emails. Please make
-                    sure you check Chats regularly so that you don't miss
-                    anything.
-                  </NoticeMessage>
-                  <div v-if="simpleEmailSetting !== 'None'">
-                    <SettingsGroup
-                      v-model:emailfrequency="emailSimple"
-                      eventshide
-                      volunteerhide
-                      label="Choose OFFER/WANTED frequency:"
-                    />
-                    <SettingsEmailInfo
-                      v-model:simple-email-setting="simpleEmailSetting"
-                    />
+                  <p v-if="myGroups?.length === 0">
+                    You can set your email settings once you have joined a
+                    community.
+                  </p>
+                  <div v-else>
+                    <NoticeMessage
+                      v-if="simpleEmailSetting === 'None'"
+                      variant="danger"
+                      class="mb-1"
+                    >
+                      If people message you, you won't get any emails. Please
+                      make sure you check Chats regularly so that you don't miss
+                      anything.
+                    </NoticeMessage>
+                    <div v-if="simpleEmailSetting !== 'None'">
+                      <SettingsGroup
+                        v-model:emailfrequency="emailSimple"
+                        eventshide
+                        volunteerhide
+                        label="Choose OFFER/WANTED frequency:"
+                      />
+                      <SettingsEmailInfo
+                        v-model:simple-email-setting="simpleEmailSetting"
+                      />
+                    </div>
                   </div>
                   <b-button
                     v-if="!showAdvanced"
