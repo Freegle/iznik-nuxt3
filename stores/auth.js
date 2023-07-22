@@ -128,15 +128,28 @@ export const useAuthStore = defineStore({
     clearRelated() {
       this.userlist = []
     },
-    async logout() {
-      try {
-        console.log('Disable Google autoselect')
-        window?.google?.accounts?.id?.disableAutoSelect()
-      } catch (e) {
-        console.log('Ignore Google autoselect error', e)
+    disableGoogleAutoselect() {
+      if (
+        window &&
+        window.google &&
+        window.google.accounts &&
+        window.google.accounts.id
+      ) {
+        try {
+          console.log('Disable Google autoselect')
+          window?.google?.accounts?.id?.disableAutoSelect()
+        } catch (e) {
+          console.log('Ignore Google autoselect error', e)
+        }
+      } else {
+        console.log("Google not yet loaded so can't disable")
+        setTimeout(this.disableGoogleAutoselect, 100)
       }
-
+    },
+    async logout() {
       await this.$api.session.logout()
+
+      this.disableGoogleAutoselect()
 
       // We are going to reset the store, but there are a few things we want to preserve.
       const loginCount = this.loginCount
