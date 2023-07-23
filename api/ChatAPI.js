@@ -5,13 +5,13 @@ export default class ChatAPI extends BaseAPI {
     return this.$getv2(`/chat/${chatid}/message`)
   }
 
-  async listChats(since, search, logError, empty) {
+  async listChats(since, search, keepChat, logError) {
     return await this.$getv2(
       '/chat',
       {
         since,
         search,
-        empty,
+        keepChat,
       },
       logError
     )

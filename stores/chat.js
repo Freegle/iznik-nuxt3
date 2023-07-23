@@ -19,7 +19,7 @@ export const useChatStore = defineStore({
       this.config = config
       this.route = useRoute()
     },
-    async fetchChats(search, logError, empty) {
+    async fetchChats(search, logError, keepChat) {
       let since = null
 
       if (this.searchSince) {
@@ -29,9 +29,10 @@ export const useChatStore = defineStore({
       const chats = await api(this.config).chat.listChats(
         since,
         search,
-        logError,
-        empty
+        keepChat,
+        logError
       )
+
       this.list = chats
 
       chats.forEach((c) => {
@@ -202,12 +203,16 @@ export const useChatStore = defineStore({
 
       const myid = authStore.user?.id
       if (myid) {
-        // If we are looking at a specific chat then we want to make sure we don't lose it by polling to exclude
-        // empty chats.
-        const empty = this.route?.path?.startsWith('/chats/')
+        // If we are looking at a specific chat then we want to make sure we don't lose it by polling
+        let keepChat = null
+
+        if (this.route?.path?.startsWith('/chats/')) {
+          // Get id after /chats/
+          keepChat = parseInt(this.route.path.substring(7))
+        }
 
         // Don't want to log any errors to Sentry - they can happen due to timing windows.
-        await this.fetchChats(null, false, empty)
+        await this.fetchChats(null, false, keepChat)
       }
 
       setTimeout(this.pollForChatUpdates, 30000)
