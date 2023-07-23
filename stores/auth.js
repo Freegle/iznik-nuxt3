@@ -358,10 +358,11 @@ export const useAuthStore = defineStore({
       await this.fetchUser()
       return this.user
     },
-    async joinGroup(userid, groupid) {
+    async joinGroup(userid, groupid, manual) {
       await this.$api.memberships.joinGroup({
         userid,
         groupid,
+        manual,
       })
       await this.fetchUser()
       return this.user

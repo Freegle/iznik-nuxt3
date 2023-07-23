@@ -321,7 +321,7 @@ export default {
 
           if (!found) {
             // Not currently a member.
-            await this.authStore.joinGroup(this.myid, tojoin)
+            await this.authStore.joinGroup(this.myid, tojoin, false)
           }
 
           // Now we can send the reply via chat.
