@@ -123,7 +123,7 @@
     <RenegeModal
       v-if="replyuser"
       ref="renege"
-      :messages="[message]"
+      :messages="[message.id]"
       :selected-message="message.id"
       :users="[replyuser]"
       :selected-user="replyuser?.id"
