@@ -12,7 +12,7 @@
       <p>
         {{ theirs }} belongs to a different account from the one you're using
         right now.
-        <span v-if="me.email"> ({{ me.email }}) </span>
+        <span v-if="me?.email"> ({{ me.email }}) </span>
         . But don't worry! You probably have two acounts, and we can merge them
         together.
       </p>
@@ -54,7 +54,7 @@ export default {
         email: this.theirs,
       })
 
-      console.log('data', data)
+      console.log('Merge data', data)
 
       this.showConfirm = true
     },
