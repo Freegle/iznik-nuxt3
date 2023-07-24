@@ -24,7 +24,11 @@
                   <span v-else>
                     {{ message.subject }}
                   </span>
-                  <b-badge v-if="message.availableinitially > 1" variant="info">
+                  <b-badge
+                    v-if="message.availableinitially > 1"
+                    variant="info"
+                    class="ml-1"
+                  >
                     {{ message.availablenow ? message.availablenow : '0' }} left
                   </b-badge>
                   <span v-if="rejected" class="text-danger">
