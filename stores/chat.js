@@ -179,12 +179,18 @@ export const useChatStore = defineStore({
       return id
     },
     async openChatToUser(params) {
-      // We might have a type override.  Otherwise open a user chat on FD and mod chat on MT.
-      const id = await this.openChat({
+      // We might have a type override.
+      const data = {
         chattype: params.chattype ? params.chattype : 'User2User',
         groupid: params.groupid,
         userid: params.userid,
-      })
+      }
+
+      if ('updateRoster' in params) {
+        data.updateRoster = params.updateRoster
+      }
+
+      const id = await this.openChat(data)
 
       return id
     },

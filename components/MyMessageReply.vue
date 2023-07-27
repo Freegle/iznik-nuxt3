@@ -214,10 +214,13 @@ export default {
     const chat = chatStore.toUser(props.reply.userid)
 
     if (!chat) {
-      // Probably an old reply that isn't fetched in the default chat list.  Fetch it.
+      // A chat that isn't fetched in the default chat list - maybe old, maybe closed.  We want to fetch it, but
+      // we don't want to update the roster - otherwise the act of viewing this reply will cause the chat to become
+      // active again.
       promises.push(
         chatStore.openChatToUser({
           userid: props.reply.userid,
+          updateRoster: false,
         })
       )
     }
