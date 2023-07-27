@@ -2,8 +2,7 @@
   <div class="clickme" title="Click to see their profile" @click="showInfo">
     <div class="d-flex clickme">
       <ProfileImage
-        v-if="newsfeed.profile?.path"
-        :image="newsfeed.profile.path"
+        :image="newsfeed?.profile?.path"
         class="ml-1 mb-1 inline"
         is-thumbnail
         :is-moderator="Boolean(newsfeed.showmod)"
