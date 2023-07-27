@@ -50,7 +50,7 @@ export const useCommunityEventStore = defineStore({
       return this.list[id]
     },
     async fetchList(id) {
-      this.forUser = await api(this.config).communityevent.list(id)
+      this.forUser = (await api(this.config).communityevent.list(id)) || []
     },
     async fetchGroup(id) {
       this.forGroup = await api(this.config).communityevent.listGroup(id)
