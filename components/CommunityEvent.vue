@@ -247,7 +247,7 @@ export default {
     async showEventModal() {
       this.showModal = true
       await this.waitForRef('eventmodal')
-      this.$refs.eventmodal.show()
+      this.$refs.eventmodal?.show()
     },
   },
 }

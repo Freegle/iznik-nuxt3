@@ -265,7 +265,7 @@ export default {
           this.showNewUser = true
           await this.waitForRef('newUserModal')
           // Now that we are logged in, we can reply.
-          this.$refs.newUserModal.show()
+          this.$refs.newUserModal?.show()
 
           // Once the modal is closed, we will send the reply.
         } else {

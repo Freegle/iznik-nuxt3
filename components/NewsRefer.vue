@@ -96,7 +96,7 @@ export default {
     async deleteReply() {
       this.showDeleteModal = true
       await this.waitForRef('deleteConfirm')
-      this.$refs.deleteConfirm.show()
+      this.$refs.deleteConfirm?.show()
     },
     async deleteConfirm() {
       await this.newsfeedStore.delete(this.id, this.threadhead)

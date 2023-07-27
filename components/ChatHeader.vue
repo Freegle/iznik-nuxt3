@@ -202,7 +202,12 @@
           :chatid="chat.id"
           @confirm="hide"
         />
-        <ProfileModal v-if="showProfile" :id="otheruser.id" ref="profile" close-on-message />
+        <ProfileModal
+          v-if="showProfile"
+          :id="otheruser.id"
+          ref="profile"
+          close-on-message
+        />
       </div>
       <ChatHideModal
         v-if="
@@ -341,22 +346,22 @@ export default {
     async showhide() {
       this.showChatHide = true
       await this.waitForRef('chathide')
-      this.$refs.chathide.show()
+      this.$refs.chathide?.show()
     },
     async showblock() {
       this.showChatBlock = true
       await this.waitForRef('chatblock')
-      this.$refs.chatblock.show()
+      this.$refs.chatblock?.show()
     },
     async showInfo() {
       this.showProfile = true
       await this.waitForRef('profile')
-      this.$refs.profile.show()
+      this.$refs.profile?.show()
     },
     async report() {
       this.showChatReport = true
       await this.waitForRef('chatreport')
-      this.$refs.chatreport.show()
+      this.$refs.chatreport?.show()
     },
     async markRead() {
       await this.chatStore.markRead(this.id)

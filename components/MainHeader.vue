@@ -627,7 +627,7 @@ const showAboutMe = async () => {
 
   showAboutMeModal.value = true
   await waitForRef('modal')
-  aboutMeModal.value.show()
+  aboutMeModal.value?.show()
 }
 
 const maybeReload = (route) => {

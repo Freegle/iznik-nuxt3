@@ -72,7 +72,7 @@ export default {
       // fetch of the user info.
       this.infoclick = true
       const m = await this.waitForRef('profilemodal')
-      m.show()
+      m?.show()
     },
   },
 }

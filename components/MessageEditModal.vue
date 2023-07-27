@@ -223,7 +223,7 @@ export default {
     count(newVal) {
       if (newVal === 0) {
         this.hide()
-        this.$refs.outcomeModal.show()
+        this.$refs.outcomeModal?.show()
       }
     },
   },

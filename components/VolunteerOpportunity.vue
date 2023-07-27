@@ -286,7 +286,7 @@ export default {
     async showOpportunityModal() {
       this.showModal = true
       await this.waitForRef('opportunitymodal')
-      this.$refs.opportunitymodal.show()
+      this.$refs.opportunitymodal?.show()
     },
     async renew() {
       await this.volunteeringStore.renew(this.volunteering.id)

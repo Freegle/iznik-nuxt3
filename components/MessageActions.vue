@@ -76,10 +76,10 @@ export default {
     async share() {
       this.showShareModal = true
       await this.waitForRef('shareModal')
-      this.$refs.shareModal.show()
+      this.$refs.shareModal?.show()
     },
     report() {
-      this.$refs.reportModal.show()
+      this.$refs.reportModal?.show()
     },
     goto() {
       console.log('Goto', this.id)

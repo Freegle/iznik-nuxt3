@@ -166,12 +166,12 @@ export default {
     async moreInfo() {
       this.showMoreInfo = true
       await this.waitForRef('moreInfo')
-      this.$refs.moreInfo.show()
+      this.$refs.moreInfo?.show()
     },
     async addEvent() {
       this.showAddEvent = true
       await this.waitForRef('addEvent')
-      this.$refs.addEvent.show()
+      this.$refs.addEvent?.show()
     },
     group(groupid) {
       return this.groupStore?.get(groupid)

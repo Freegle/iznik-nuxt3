@@ -282,17 +282,17 @@ export default {
     },
     async promise() {
       await this.waitForRef('promise')
-      this.$refs.promise.show()
+      this.$refs.promise?.show()
     },
     async unpromise() {
       await this.waitForRef('renege')
-      this.$refs.renege.show()
+      this.$refs.renege?.show()
     },
     async showProfileModal() {
       this.showProfile = true
 
       await this.waitForRef('profile')
-      this.$refs.profile.show()
+      this.$refs.profile?.show()
     },
   },
 }
