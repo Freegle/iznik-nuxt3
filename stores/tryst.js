@@ -58,12 +58,14 @@ export const useTrystStore = defineStore({
       return state.list.find((i) => i.id === id)
     },
     getByUser: (state) => (userid) => {
-      return Object.values(state.list).find((i) => {
-        return (
-          parseInt(i.user1) === parseInt(userid) ||
-          parseInt(i.user2) === parseInt(userid)
-        )
-      })
+      if (state.list) {
+        return Object.values(state.list).find((i) => {
+          return (
+            parseInt(i.user1) === parseInt(userid) ||
+            parseInt(i.user2) === parseInt(userid)
+          )
+        })
+      }
     },
   },
 })
