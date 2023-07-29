@@ -1,10 +1,12 @@
 function waitForRefTimer(ref, resolve) {
-  if (ref.value) {
-    resolve()
-  } else {
-    setTimeout(() => {
-      waitForRefTimer(ref, resolve)
-    }, 100)
+  if (ref) {
+    if (ref.value) {
+      resolve(ref.value)
+    } else {
+      setTimeout(() => {
+        waitForRefTimer(ref, resolve)
+      }, 100)
+    }
   }
 }
 

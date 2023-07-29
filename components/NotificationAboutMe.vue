@@ -8,7 +8,7 @@
         size="lg"
       />
     </div>
-    <div class="d-flex flex-column">
+    <div class="d-flex flex-column" @click="showModal">
       <div>Tell us about yourself!</div>
       <div v-if="notification.text">
         Click to introduce yourself to other freeglers by telling us a bit about

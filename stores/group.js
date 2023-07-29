@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { nextTick } from 'vue'
 import api from '~/api'
 
 export const useGroupStore = defineStore({
@@ -45,6 +46,7 @@ export const useGroupStore = defineStore({
           if (this.fetching[id]) {
             // Already fetching
             await this.fetching[id]
+            await nextTick()
           } else {
             this.fetching[id] = api(this.config).group.fetch(
               id,

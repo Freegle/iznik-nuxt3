@@ -5,13 +5,13 @@ export default class ChatAPI extends BaseAPI {
     return this.$getv2(`/chat/${chatid}/message`)
   }
 
-  async listChats(since, search, logError, empty) {
+  async listChats(since, search, keepChat, logError) {
     return await this.$getv2(
       '/chat',
       {
         since,
         search,
-        empty,
+        keepChat,
       },
       logError
     )
@@ -33,15 +33,8 @@ export default class ChatAPI extends BaseAPI {
     return this.$put('/chat/rooms', params, logError)
   }
 
-  send(data) {
-    return this.$post('/chatmessages', data, function (data) {
-      if (data && data.ret === 4) {
-        // Don't log errors for banned users - handled elsewhere.
-        return false
-      } else {
-        return true
-      }
-    })
+  async send(data) {
+    return await this.$postv2('/chat/' + data.roomid + '/message', data)
   }
 
   nudge(chatid) {

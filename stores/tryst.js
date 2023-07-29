@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { nextTick } from 'vue'
 import api from '~/api'
 
 export const useTrystStore = defineStore({
@@ -16,6 +17,7 @@ export const useTrystStore = defineStore({
     async fetch() {
       if (this.fetching) {
         await this.fetching
+        await nextTick()
       } else {
         this.fetching = api(this.config).tryst.fetch()
         const { trysts } = await this.fetching
@@ -56,12 +58,14 @@ export const useTrystStore = defineStore({
       return state.list.find((i) => i.id === id)
     },
     getByUser: (state) => (userid) => {
-      return Object.values(state.list).find((i) => {
-        return (
-          parseInt(i.user1) === parseInt(userid) ||
-          parseInt(i.user2) === parseInt(userid)
-        )
-      })
+      if (state.list) {
+        return Object.values(state.list).find((i) => {
+          return (
+            parseInt(i.user1) === parseInt(userid) ||
+            parseInt(i.user2) === parseInt(userid)
+          )
+        })
+      }
     },
   },
 })

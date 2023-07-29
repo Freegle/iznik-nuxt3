@@ -24,7 +24,11 @@
                   <span v-else>
                     {{ message.subject }}
                   </span>
-                  <b-badge v-if="message.availableinitially > 1" variant="info">
+                  <b-badge
+                    v-if="message.availableinitially > 1"
+                    variant="info"
+                    class="ml-1"
+                  >
                     {{ message.availablenow ? message.availablenow : '0' }} left
                   </b-badge>
                   <span v-if="rejected" class="text-danger">
@@ -689,7 +693,7 @@ export default {
         case 'promise':
           this.showPromiseModal = true
           await this.waitForRef('promiseModal')
-          this.$refs.promiseModal.show()
+          this.$refs.promiseModal?.show()
           break
       }
     }
@@ -700,7 +704,7 @@ export default {
     },
     async showPhotos() {
       await this.waitForRef('photoModal')
-      this.$refs.photoModal.show()
+      this.$refs.photoModal?.show()
     },
     countUnseen(reply) {
       let unseen = 0
@@ -727,7 +731,7 @@ export default {
 
       this.showShareModal = true
       await this.waitForRef('shareModal')
-      this.$refs.shareModal.show()
+      this.$refs.shareModal?.show()
     },
     async edit(e) {
       if (e) {
@@ -738,7 +742,7 @@ export default {
 
       this.showEditModal = true
       await this.waitForRef('editModal')
-      this.$refs.editModal.show()
+      this.$refs.editModal?.show()
     },
     async repost(e) {
       if (e) {

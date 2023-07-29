@@ -276,6 +276,7 @@ export default {
       if (this.currentlySelected > 0) {
         await this.messageStore.promise(this.message, this.currentlySelected)
 
+        console.log('Date arranged for', this.time, this.date)
         const arrangedfor =
           this.time && this.date
             ? dayjs(this.date + ' ' + this.time).toISOString()

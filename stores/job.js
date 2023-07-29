@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { nextTick } from 'vue'
 import api from '~/api'
 
 export const useJobStore = defineStore({
@@ -29,6 +30,7 @@ export const useJobStore = defineStore({
         if (!this.list?.length || force) {
           if (this.fetching) {
             await this.fetching
+            await nextTick()
           } else {
             this.fetching = api(this.config).job.fetchv2(lat, lng, category)
             this.list = await this.fetching

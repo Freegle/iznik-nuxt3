@@ -434,8 +434,8 @@ export default {
   methods: {
     async showInfo() {
       this.infoclick = true
-      await this.waitForRef('profilemodal')
-      this.$refs.profilemodal.show()
+      const m = await this.waitForRef('profilemodal')
+      m?.show()
     },
     async replyReply() {
       console.log('Replying to', this.replyid, this.reply)
@@ -517,7 +517,7 @@ export default {
     async deleteReply() {
       this.showDeleteModal = true
       await this.waitForRef('deleteConfirm')
-      this.$refs.deleteConfirm.show()
+      this.$refs.deleteConfirm?.show()
     },
     async deleteConfirm() {
       await this.newsfeedStore.delete(this.replyid, this.threadhead)
@@ -528,12 +528,12 @@ export default {
     async showEdit() {
       this.showEditModal = true
       await this.waitForRef('editModal')
-      this.$refs.editModal.show()
+      this.$refs.editModal?.show()
     },
     async showLove() {
       this.showLoveModal = true
       await this.waitForRef('loveModal')
-      this.$refs.loveModal.show()
+      this.$refs.loveModal?.show()
     },
     filterMatch(name, chunk) {
       // Only match at start of string.
@@ -585,7 +585,7 @@ export default {
       }
     },
     showReplyPhotoModal() {
-      this.$refs.replyPhotoModal.show()
+      this.$refs.replyPhotoModal?.show()
     },
   },
 }

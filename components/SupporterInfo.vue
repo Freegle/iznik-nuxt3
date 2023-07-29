@@ -46,7 +46,7 @@ export default {
       e.stopPropagation()
       this.showInfoModal = true
       await this.waitForRef('modal')
-      this.$refs.modal.show()
+      this.$refs.modal?.show()
     },
   },
 }

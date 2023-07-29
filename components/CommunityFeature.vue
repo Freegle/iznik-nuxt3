@@ -111,7 +111,7 @@ const modal = ref(null)
 const showModal = async () => {
   showAdd.value = true
   await waitForRef(modal.value)
-  modal.value.show()
+  modal.value?.show()
 }
 </script>
 <style scoped lang="scss">

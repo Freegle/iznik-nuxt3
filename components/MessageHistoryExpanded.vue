@@ -171,7 +171,7 @@ export default {
       this.showProfile = true
 
       await this.waitForRef('profile')
-      this.$refs.profile.show()
+      this.$refs.profile?.show()
     },
   },
 }

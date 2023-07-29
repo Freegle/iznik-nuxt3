@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { nextTick } from 'vue'
 import api from '~/api'
 
 export const useNewsfeedStore = defineStore({
@@ -69,6 +70,7 @@ export const useNewsfeedStore = defineStore({
           }
 
           const ret = await this.fetching[id]
+          await nextTick()
           this.fetching[id] = null
 
           if (ret?.id) {

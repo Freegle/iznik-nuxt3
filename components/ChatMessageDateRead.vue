@@ -159,7 +159,7 @@ export default {
     async viewOriginal() {
       this.showOriginal = true
       await this.waitForRef('original')
-      this.$refs.original.show()
+      this.$refs.original?.show()
     },
   },
 }

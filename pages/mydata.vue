@@ -923,12 +923,6 @@ export default {
       }
     },
     showEvent(id) {
-      console.log(
-        'Refs',
-        this.$refs['eventmodal-' + id],
-        id,
-        'eventmodal-' + id
-      )
       this.$refs['eventmodal-' + id].show()
     },
     download() {

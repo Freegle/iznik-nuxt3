@@ -46,10 +46,10 @@ export default {
       this.newsfeedModal = this.newsfeed
       await this.waitForRef('newsshare')
       console.log('Got ref')
-      this.$refs.newsshare.show()
+      this.$refs.newsshare?.show()
     },
     showPhotoModal() {
-      this.$refs.photoModal.show()
+      this.$refs.photoModal?.show()
     },
   },
 }

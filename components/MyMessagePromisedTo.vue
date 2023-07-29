@@ -92,7 +92,7 @@ export default {
       console.log('Change', this.$refs)
       e.preventDefault()
       e.stopPropagation()
-      this.$refs.promiseModalChange.show()
+      this.$refs.promiseModalChange?.show()
     },
     async unpromise(e) {
       e.preventDefault()
@@ -100,7 +100,7 @@ export default {
       console.log('Renege', this.message, this.promise)
       await this.waitForRef('renegeModal')
       console.log('Got modal')
-      this.$refs.renegeModal.show()
+      this.$refs.renegeModal?.show()
       console.log('Shown')
     },
   },

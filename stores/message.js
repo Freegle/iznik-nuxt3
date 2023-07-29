@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import dayjs from 'dayjs'
+import { nextTick } from 'vue'
 import api from '~/api'
 import { GROUP_REPOSTS, MESSAGE_EXPIRE_TIME } from '~/constants'
 import { useGroupStore } from '~/stores/group'
@@ -36,6 +37,7 @@ export const useMessageStore = defineStore({
           // Already fetching
           try {
             await this.fetching[id]
+            await nextTick()
           } catch (e) {
             console.log('Failed to fetch message', e)
             if (e instanceof APIError && e.response.status === 404) {
@@ -51,12 +53,11 @@ export const useMessageStore = defineStore({
           this.fetchingCount--
 
           try {
-            const message = await this.fetching[id]
+            this.list[id] = await this.fetching[id]
             this.fetching[id] = null
 
-            if (message) {
-              message.addedToCache = Math.round(Date.now() / 1000)
-              this.list[id] = message
+            if (this.list[id]) {
+              this.list[id].addedToCache = Math.round(Date.now() / 1000)
             }
           } catch (e) {
             console.log('Failed to fetch message', e)
@@ -140,6 +141,7 @@ export const useMessageStore = defineStore({
 
       if (this.fetchingMyGroups) {
         ret = await this.fetchingMyGroups
+        await nextTick()
       } else {
         this.fetchingMyGroups = api(this.config).message.mygroups()
         ret = await this.fetchingMyGroups

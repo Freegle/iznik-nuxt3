@@ -99,7 +99,7 @@ const click = async () => {
   if (props.confirm) {
     showConfirm.value = true
     await waitForRef(modal)
-    modal.value.show()
+    modal.value?.show()
   } else {
     doIt()
   }

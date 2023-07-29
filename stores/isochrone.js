@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { nextTick } from 'vue'
 import api from '~/api'
 
 export const useIsochroneStore = defineStore({
@@ -21,6 +22,7 @@ export const useIsochroneStore = defineStore({
       if (!this.list?.length || force) {
         if (this.fetchingIsochrones) {
           await this.fetchingIsochrones
+          await nextTick()
         } else {
           this.fetchingIsochrones = api(this.config).isochrone.fetchv2()
           this.list = await this.fetchingIsochrones
@@ -42,6 +44,7 @@ export const useIsochroneStore = defineStore({
       if (force || !this.messageList?.length) {
         if (this.fetchingMessages) {
           await this.fetchingMessages
+          await nextTick()
         } else {
           this.fetchingMessages = api(this.config).isochrone.fetchMessages()
           this.messageList = await this.fetchingMessages
