@@ -123,7 +123,7 @@
     <RenegeModal
       v-if="replyuser"
       ref="renege"
-      :messages="[message]"
+      :messages="[message.id]"
       :selected-message="message.id"
       :users="[replyuser]"
       :selected-user="replyuser?.id"
@@ -214,10 +214,13 @@ export default {
     const chat = chatStore.toUser(props.reply.userid)
 
     if (!chat) {
-      // Probably an old reply that isn't fetched in the default chat list.  Fetch it.
+      // A chat that isn't fetched in the default chat list - maybe old, maybe closed.  We want to fetch it, but
+      // we don't want to update the roster - otherwise the act of viewing this reply will cause the chat to become
+      // active again.
       promises.push(
         chatStore.openChatToUser({
           userid: props.reply.userid,
+          updateRoster: false,
         })
       )
     }
@@ -279,17 +282,17 @@ export default {
     },
     async promise() {
       await this.waitForRef('promise')
-      this.$refs.promise.show()
+      this.$refs.promise?.show()
     },
     async unpromise() {
       await this.waitForRef('renege')
-      this.$refs.renege.show()
+      this.$refs.renege?.show()
     },
     async showProfileModal() {
       this.showProfile = true
 
       await this.waitForRef('profile')
-      this.$refs.profile.show()
+      this.$refs.profile?.show()
     },
   },
 }

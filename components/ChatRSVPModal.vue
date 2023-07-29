@@ -1,5 +1,6 @@
 <template>
   <b-modal
+    v-if="user"
     id="chatrsvpmodal"
     v-model="showModal"
     :title="chaseup ? 'Shall we chase them up?' : 'Do you expect a reply?'"

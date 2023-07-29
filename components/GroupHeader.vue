@@ -215,7 +215,7 @@ export default {
       } else {
         this.joiningOrLeaving = true
 
-        await this.authStore.joinGroup(this.myid, this.group.id)
+        await this.authStore.joinGroup(this.myid, this.group.id, true)
 
         this.joiningOrLeaving = false
       }

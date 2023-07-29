@@ -2,7 +2,7 @@
   <div class="d-flex mt-1 justify-content-between">
     <div class="flex-grow-1">
       <b-button
-        v-if="message.groups && message.groups.length"
+        v-if="loggedIn && message.groups && message.groups.length"
         variant="link"
         class="grey p-0 mr-4"
         size="sm"
@@ -76,10 +76,10 @@ export default {
     async share() {
       this.showShareModal = true
       await this.waitForRef('shareModal')
-      this.$refs.shareModal.show()
+      this.$refs.shareModal?.show()
     },
     report() {
-      this.$refs.reportModal.show()
+      this.$refs.reportModal?.show()
     },
     goto() {
       console.log('Goto', this.id)

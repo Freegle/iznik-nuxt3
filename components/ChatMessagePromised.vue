@@ -294,13 +294,13 @@ export default {
     async unpromise() {
       this.showRenege = true
       await this.waitForRef('renege')
-      this.$refs.renege.show()
+      this.$refs.renege?.show()
       fetchOurOffers()
     },
     async changeTime() {
       this.showPromise = true
       await this.waitForRef('promise')
-      this.$refs.promise.show()
+      this.$refs.promise?.show()
     },
     fetchMessages() {
       this.chatStore.fetchMessages(this.chatmessage.chatid)

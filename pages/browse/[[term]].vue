@@ -73,7 +73,7 @@
                 <IsoChrones />
                 <div class="small mt-1">
                   <!-- eslint-disable-next-line-->
-                  Show posts from <b-button variant="link" size="sm" class="mb-1 p-0" @click="showPostsFromMyGroups">all my communities</b-button> instead.
+                  Show all posts from <b-button variant="link" size="sm" class="mb-1 p-0" @click="showPostsFromMyGroups">my communities</b-button> instead.
                 </div>
               </div>
               <IsochronePostMapAndList
@@ -229,7 +229,7 @@ export default {
         // Not asked too recently.
         await this.fetchMe(true)
 
-        if (this.me && (!this.me.aboutme || !this.me.aboutme.text)) {
+        if (!this.me.aboutme || !this.me.aboutme.text) {
           // We have not yet provided one.
           const daysago = dayjs().diff(dayjs(this.me.added), 'days')
 

@@ -36,7 +36,6 @@
         <EmailBelongsToSomeoneElse
           v-if="emailValid && emailBelongsToSomeoneElse"
           class="mb-2"
-          :ours="me?.email ? me.email : ('#' + myid)"
           :theirs="email"
         />
       </div>

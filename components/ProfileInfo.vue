@@ -284,7 +284,7 @@ export default {
       this.showSupporterInfo = true
 
       await this.waitForRef('supporterInfoModal')
-      this.$refs.supporterInfoModal.show()
+      this.$refs.supporterInfoModal?.show()
     },
   },
 }

@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { nextTick } from 'vue'
 import api from '~/api'
 
 export const useStoryStore = defineStore({
@@ -15,6 +16,7 @@ export const useStoryStore = defineStore({
       if (force || !this.list[id]) {
         if (this.fetching[id]) {
           await this.fetching[id]
+          await nextTick()
         } else {
           this.fetching[id] = api(this.config).stories.fetchv2(id)
           this.list[id] = await this.fetching[id]

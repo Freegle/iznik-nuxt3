@@ -71,7 +71,7 @@
             </div>
           </div>
           <notice-message v-else variant="danger">
-            Unknown item type {{ newsfeed.type }}
+            Unknown item type {{ newsfeed?.type }}
           </notice-message>
         </b-card-text>
       </b-card-body>
@@ -475,7 +475,7 @@ export default {
     async show() {
       this.showEditModal = true
       await this.waitForRef('editModal')
-      this.$refs.editModal.show()
+      this.$refs.editModal?.show()
     },
     async save() {
       await this.newsfeedStore.edit(
@@ -489,7 +489,7 @@ export default {
     async deleteIt() {
       this.showDeleteModal = true
       await this.waitForRef('deleteConfirm')
-      this.$refs.deleteConfirm.show()
+      this.$refs.deleteConfirm?.show()
     },
     deleteConfirmed() {
       this.newsfeedStore.delete(this.id, this.id)
@@ -500,7 +500,7 @@ export default {
     async report() {
       this.showReportModal = true
       await this.waitForRef('reportModal')
-      this.$refs.reportModal.show()
+      this.$refs.reportModal?.show()
     },
     referToOffer() {
       this.referTo('Offer')

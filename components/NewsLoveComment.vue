@@ -95,7 +95,7 @@ export default {
       this.showLoveModal = true
 
       await this.waitForRef('loveModal')
-      this.$refs.loveModal.show()
+      this.$refs.loveModal?.show()
     },
   },
 }

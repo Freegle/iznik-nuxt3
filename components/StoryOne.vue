@@ -137,7 +137,7 @@ export default {
     async share(story) {
       this.showShare = true
       await this.waitForRef('share')
-      this.$refs.share.show()
+      this.$refs.share?.show()
     },
     async love() {
       await this.storyStore.love(this.id)

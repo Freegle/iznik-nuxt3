@@ -251,7 +251,7 @@ export default {
     },
     async showPhotosModal() {
       await this.waitForRef('photoModal')
-      this.$refs.photoModal.show()
+      this.$refs.photoModal?.show()
     },
     async view() {
       if (this.recordView) {

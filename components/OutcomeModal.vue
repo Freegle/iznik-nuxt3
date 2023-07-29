@@ -321,7 +321,7 @@ export default {
   },
   mounted() {
     if (this.$refs.userselect) {
-      this.$refs.userselect.show()
+      this.$refs.userselect?.show()
     }
   },
   methods: {

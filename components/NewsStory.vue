@@ -119,7 +119,7 @@ export default {
     },
     body() {
       let story = twem(this.story?.story)
-      story = story.trim()
+      story = story?.trim()
       return story
     },
     headline() {
@@ -130,12 +130,12 @@ export default {
     async showAddModal() {
       this.showAdd = true
       await this.waitForRef('addmodal')
-      this.$refs.addmodal.show()
+      this.$refs.addmodal?.show()
     },
     async shareStory() {
       this.showShare = true
       await this.waitForRef('share')
-      this.$refs.share.show()
+      this.$refs.share?.show()
     },
   },
 }

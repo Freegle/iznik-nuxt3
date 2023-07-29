@@ -22,7 +22,7 @@ export default defineNuxtConfig({
   //   - server: requires a node server.
   // - ssr can be:
   //   - true: renders at
-  //     - generate time for target: static, or
+  //     - generate time for https://github.com/nuxt/framework/discussions/4523: static, or
   //     - in node server for target: server)
   //   - false: renders on client.
   //
@@ -75,7 +75,7 @@ export default defineNuxtConfig({
     //
     // prerender: true - this will be generated at build time.
     // static: true - this is generated on demand, and then cached until the next build
-    // swr: 'time' - this is generated on demand each 'time' period.
+    // isr: 'time' - this is generated on demand each 'time' period.
     // ssr: false - this is client-side rendered.
     //
     // There are potential issues where a deployment happens while a page is partway through loading assets, or
@@ -117,15 +117,15 @@ export default defineNuxtConfig({
     '/teams': { ssr: false },
 
     // Render on demand - may never be shown in a given build - then cache for a while.
-    '/explore/region/**': { swr: 3600 },
-    '/communityevent/**': { swr: 3600 },
-    '/communityevents/**': { swr: 3600 },
-    '/explore/**': { swr: 3600 },
-    '/message/**': { swr: 600 },
-    '/story/**': { swr: 3600 },
-    '/shortlink/**': { swr: 600 },
-    '/volunteering/**': { swr: 3600 },
-    '/volunteerings/**': { swr: 3600 },
+    '/explore/region/**': { isr: 3600 },
+    '/communityevent/**': { isr: 3600 },
+    '/communityevents/**': { isr: 3600 },
+    '/explore/**': { isr: 3600 },
+    '/message/**': { isr: 600 },
+    '/story/**': { isr: 3600 },
+    '/shortlink/**': { isr: 600 },
+    '/volunteering/**': { isr: 3600 },
+    '/volunteerings/**': { isr: 3600 },
 
     // Allow CORS for chunk fetches - required for Netlify hosting.
     '/_nuxt/**': {
@@ -156,18 +156,6 @@ export default defineNuxtConfig({
 
   experimental: {
     emitRouteChunkError: 'reload',
-  },
-
-  build: {
-    // Need to transpile otherwise SSR fails - see https://github.com/nuxt/framework/discussions/4523.
-    transpile: [
-      /bootstrap-vue-3/,
-      /vue3-lazyload/,
-      /vue-image-zoomer/,
-      /vue3-draggable-resizable/,
-      /pinia-plugin-persist/,
-      /vue-social-sharing/,
-    ],
   },
 
   webpack: {

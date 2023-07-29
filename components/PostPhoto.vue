@@ -89,7 +89,7 @@ export default {
     async remove() {
       this.confirm = true
       await this.waitForRef('confirm')
-      this.$refs.confirm.show()
+      this.$refs.confirm?.show()
     },
     removeConfirmed() {
       this.$emit('remove', this.id)

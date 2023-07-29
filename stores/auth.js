@@ -133,14 +133,31 @@ export const useAuthStore = defineStore({
     clearRelated() {
       this.userlist = []
     },
+    disableGoogleAutoselect() {
+      if (
+        window &&
+        window.google &&
+        window.google.accounts &&
+        window.google.accounts.id
+      ) {
+        try {
+          console.log('Disable Google autoselect')
+          window?.google?.accounts?.id?.disableAutoSelect()
+        } catch (e) {
+          console.log('Ignore Google autoselect error', e)
+        }
+      } else {
+        console.log("Google not yet loaded so can't disable")
+        setTimeout(this.disableGoogleAutoselect, 100)
+      }
+    },
     async logout() {
       const mobileStore = useMobileStore()
-      try {
-        console.log('Disable Google autoselect')
-        window?.google?.accounts?.id?.disableAutoSelect()
-      } catch (e) {
-        console.log('Ignore Google autoselect error', e)
-      }
+
+      await this.$api.session.logout()
+
+      this.disableGoogleAutoselect()
+
       if( mobileStore.isApp){
         try {
           await FacebookLogin.logout();
@@ -156,9 +173,6 @@ export const useAuthStore = defineStore({
 
         this.logoutPushId()
       }
-
-      await this.$api.session.logout()
-
       // We are going to reset the store, but there are a few things we want to preserve.
       const loginCount = this.loginCount
       const config = this.config
@@ -368,10 +382,11 @@ export const useAuthStore = defineStore({
       await this.fetchUser()
       return this.user
     },
-    async joinGroup(userid, groupid) {
+    async joinGroup(userid, groupid, manual) {
       await this.$api.memberships.joinGroup({
         userid,
         groupid,
+        manual,
       })
       await this.fetchUser()
       return this.user

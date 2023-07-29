@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import dayjs from 'dayjs'
+import { nextTick } from 'vue'
 import api from '~/api'
 import { addStrings, earliestDate } from '~/composables/useTimeFormat'
 
@@ -20,6 +21,7 @@ export const useVolunteeringStore = defineStore({
         if (force || !this.list[id]) {
           if (this.fetching[id]) {
             await this.fetching[id]
+            await nextTick()
           } else {
             this.fetching[id] = api(this.config).volunteering.fetch(id, false)
             let item = await this.fetching[id]
@@ -48,7 +50,7 @@ export const useVolunteeringStore = defineStore({
       return this.list[id]
     },
     async fetchList(id) {
-      this.forUser = await api(this.config).volunteering.list(id)
+      this.forUser = (await api(this.config).volunteering.list(id)) || []
     },
     async fetchGroup(id) {
       this.forGroup = await api(this.config).volunteering.listGroup(id)

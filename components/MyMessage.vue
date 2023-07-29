@@ -24,7 +24,11 @@
                   <span v-else>
                     {{ message.subject }}
                   </span>
-                  <b-badge v-if="message.availableinitially > 1" variant="info">
+                  <b-badge
+                    v-if="message.availableinitially > 1"
+                    variant="info"
+                    class="ml-1"
+                  >
                     {{ message.availablenow ? message.availablenow : '0' }} left
                   </b-badge>
                   <span v-if="rejected" class="text-danger">
@@ -328,6 +332,7 @@ import { useGroupStore } from '../stores/group'
 import { useUserStore } from '../stores/user'
 import { useTrystStore } from '../stores/tryst'
 import { useLocationStore } from '../stores/location'
+import { milesAway } from '../composables/useDistance'
 import { useRouter } from '#imports'
 import MessagePhotosModal from '~/components/MessagePhotosModal'
 import MyMessagePromisedTo from '~/components/MyMessagePromisedTo'
@@ -514,13 +519,17 @@ export default {
       let ret = null
       let dist = null
 
-      if (this.replyusers?.length > 1) {
+      if (this.replyusers?.length > 1 && this.me) {
         this.replyusers.forEach((uid) => {
           const u = this.userStore?.byId(uid)
 
-          if (u && (dist === null || (u.info && u?.info.milesaway < dist))) {
-            dist = u.info.milesaway
-            ret = u.id
+          if (u) {
+            const milesaway = milesAway(u.lat, u.lng, this.me.lat, this.me.lng)
+
+            if (dist === null || milesaway < dist) {
+              dist = milesaway
+              ret = u.id
+            }
           }
         })
       }
@@ -684,7 +693,7 @@ export default {
         case 'promise':
           this.showPromiseModal = true
           await this.waitForRef('promiseModal')
-          this.$refs.promiseModal.show()
+          this.$refs.promiseModal?.show()
           break
       }
     }
@@ -695,7 +704,7 @@ export default {
     },
     async showPhotos() {
       await this.waitForRef('photoModal')
-      this.$refs.photoModal.show()
+      this.$refs.photoModal?.show()
     },
     countUnseen(reply) {
       let unseen = 0
@@ -722,7 +731,7 @@ export default {
 
       this.showShareModal = true
       await this.waitForRef('shareModal')
-      this.$refs.shareModal.show()
+      this.$refs.shareModal?.show()
     },
     async edit(e) {
       if (e) {
@@ -733,7 +742,7 @@ export default {
 
       this.showEditModal = true
       await this.waitForRef('editModal')
-      this.$refs.editModal.show()
+      this.$refs.editModal?.show()
     },
     async repost(e) {
       if (e) {

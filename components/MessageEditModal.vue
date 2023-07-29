@@ -158,7 +158,7 @@ export default {
 
     const message = toRaw(await messageStore.fetch(props.id, true))
     const textbody = message.textbody
-    const item = message.item.name
+    const item = message.item?.name
 
     return {
       messageStore,
@@ -223,7 +223,7 @@ export default {
     count(newVal) {
       if (newVal === 0) {
         this.hide()
-        this.$refs.outcomeModal.show()
+        this.$refs.outcomeModal?.show()
       }
     },
   },

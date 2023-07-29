@@ -180,7 +180,7 @@ export default {
       const id = route.params.id ? parseInt(route.params.id) : 0
 
       // Fetch the list of chats.
-      await chatStore.fetchChats(null, true, !!id)
+      await chatStore.fetchChats(null, true, id)
 
       // Is this chat in the list?
       let chat = chatStore.byChatId(id)
@@ -201,7 +201,6 @@ export default {
         // Find id in the list of chats.
         const index = chatStore.list.findIndex((c) => c.id === id)
         showChats.value = Math.max(showChats.value, index + 1)
-        console.log('Show', showChats.value)
       }
     }
 
@@ -280,9 +279,6 @@ export default {
     },
   },
   watch: {
-    id(newVal) {
-      console.log('id changed', newVal)
-    },
     search(newVal, oldVal) {
       this.showChats = this.minShowChats
       this.bump++
@@ -305,7 +301,9 @@ export default {
     }
   },
   beforeUnmount() {
-    this.chatStore.searchSince = null
+    if (this.chatStore) {
+      this.chatStore.searchSince = null
+    }
   },
   methods: {
     async fetchOlder() {
@@ -373,7 +371,8 @@ export default {
           const val2 = this.searchlast
           this.searching = this.searchlast
           this.searchlast = null
-          await this.chatStore.fetchChats(this.searchSince, val2)
+          this.chatStore.searchSince = this.searchSince
+          await this.chatStore.fetchChats(val2)
           this.showChats = this.minShowChats
           this.bump++
         }

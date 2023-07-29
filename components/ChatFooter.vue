@@ -384,7 +384,7 @@ export default {
     },
     async nudge() {
       await this.waitForRef('nudgewarning')
-      this.$refs.nudgewarning.show()
+      this.$refs.nudgewarning?.show()
     },
     newline() {
       const p = this.$refs.chatarea.selectionStart
@@ -405,7 +405,7 @@ export default {
       this.showAddress = true
 
       await this.waitForRef('addressModal')
-      this.$refs.addressModal.show()
+      this.$refs.addressModal?.show()
     },
     photoAdd() {
       // Flag that we're uploading.  This will trigger the render of the filepond instance and subsequently the
@@ -445,7 +445,7 @@ export default {
     async showInfo() {
       this.showProfile = true
       await this.waitForRef('profile')
-      this.$refs.profile.show()
+      this.$refs.profile?.show()
     },
     async send() {
       let msg = this.sendmessage
@@ -477,7 +477,7 @@ export default {
         if (RSVP) {
           this.RSVP = true
           await this.waitForRef('rsvp')
-          this.$refs.rsvp.show()
+          this.$refs.rsvp?.show()
         } else {
           // We've sent a message.  This would be a good time to do some microvolunteering.
           this.showMicrovolunteering = true

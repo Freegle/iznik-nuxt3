@@ -26,8 +26,18 @@
           #{{ id }}
         </div>
         <div class="d-flex flex-row flex-lg-column align-items-baseline">
+          <b-button
+            v-if="closeOnMessage"
+            size="sm"
+            variant="secondary"
+            class="mb-1 order-1 order-lg-0 align-self-lg-center d-inline-block d-sm-none'"
+            @click="$emit('close')"
+          >
+            <v-icon icon="comments" />
+            Message
+          </b-button>
           <ChatButton
-            v-if="myid && id !== myid"
+            v-else-if="myid && id !== myid"
             :userid="id"
             size="sm"
             title="Message"
@@ -61,6 +71,11 @@ export default {
     id: {
       type: Number,
       required: true,
+    },
+    closeOnMessage: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   setup(props) {

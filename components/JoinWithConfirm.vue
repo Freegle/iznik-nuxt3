@@ -58,7 +58,7 @@ export default {
     async confirm() {
       this.showConfirm = true
       await this.waitForRef('joinConfirm')
-      this.$refs.joinConfirm.show()
+      this.$refs.joinConfirm?.show()
     },
     confirmed() {
       const router = useRouter()

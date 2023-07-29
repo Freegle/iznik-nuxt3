@@ -139,12 +139,12 @@ export default {
     async moreInfo() {
       this.showMoreInfo = true
       await this.waitForRef('moreInfo')
-      this.$refs.moreInfo.show()
+      this.$refs.moreInfo?.show()
     },
     async addOpportunity() {
       this.showAddOpportunity = true
       await this.waitForRef('addOpportunity')
-      this.$refs.addOpportunity.show()
+      this.$refs.addOpportunity?.show()
     },
     group(groupid) {
       return this.groupStore?.get(groupid)
