@@ -151,6 +151,7 @@ export default {
     async show() {
       try {
         await this.messageStore.fetch(this.id, true)
+        if( this.isApp) this.shareApp(); else
         this.showModal = true
       } catch (e) {
         // Must no longer exist on server.
