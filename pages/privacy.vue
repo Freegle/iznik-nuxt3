@@ -101,21 +101,6 @@
           <!-- eslint-disable-next-line -->
         <ExternalLink href="https://sentry.io/privacy/">here</ExternalLink>.
         </p>
-        <h2>Inspectlet</h2>
-        <p>
-          On a small random fraction of sessions, we use
-          <ExternalLink href="https://www.inspectlet.com/"
-            >Inspectlet</ExternalLink
-          >. This helps us work out which bits of the website are working well
-          for freeglers, and which aren't. You can read their privacy policy
-          <ExternalLink
-            href="https://docs.inspectlet.com/hc/en-us/articles/360002994432-Privacy-Impact-Assessment-under-GDPR"
-            >here</ExternalLink
-          >, and opt out of this
-          <ExternalLink href="https://www.inspectlet.com/optout"
-            >here</ExternalLink
-          >.
-        </p>
         <h2>Deleting your data</h2>
         <p>
           If you want to leave Freegle, please go
@@ -132,6 +117,7 @@
         <h3>Change History</h3>
         <p>Here are the changes to this page.</p>
         <ul class>
+          <li>31/07/2023: Remove Inspectlet, which we no longer use.</li>
           <li>
             04/02/2023: Removed Google Analytics, which we no longer use. Add
             mention of cookies.
