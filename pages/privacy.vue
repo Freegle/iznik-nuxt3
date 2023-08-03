@@ -47,10 +47,6 @@
         </p>
         <ul>
           <li>
-            We store a session cookie. That's strictly necessary for the site to
-            function, and does not require consent.
-          </li>
-          <li>
             We store some information in your browser's local storage, because
             of the way the site works. There's not much in it except if you're
             trying to reply to a post. That's like the "shopping cart" example
@@ -69,6 +65,11 @@
             and still use the site (but it helps if you
             <!-- eslint-disable-next-line -->
           <nuxt-link  no-prefetch to="/donate">donate</nuxt-link>).
+          </li>
+          <li>
+            We use Google Analytics to collect information about how people use
+            the site. We've configured this to disable storage of information,
+            so it doesn't store any cookies.
           </li>
         </ul>
         <p>Once you log in, you're giving us consent to do the following.</p>
@@ -117,6 +118,10 @@
         <h3>Change History</h3>
         <p>Here are the changes to this page.</p>
         <ul class>
+          <li>
+            03/08/2023: Added back in Google Analytics. Remove mention of
+            session cookie, which is no longer stored.
+          </li>
           <li>31/07/2023: Remove Inspectlet, which we no longer use.</li>
           <li>
             04/02/2023: Removed Google Analytics, which we no longer use. Add

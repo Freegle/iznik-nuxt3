@@ -186,6 +186,7 @@ export default defineNuxtConfig({
       BUILD_DATE: new Date().toISOString(),
       NETLIFY_DEPLOY_ID: process.env.DEPLOY_ID,
       NETLIFY_SITE_NAME: process.env.SITE_NAME,
+      GOOGLE_ANALYTICS_ID: process.env.GOOGLE_ANALYTICS_ID,
     },
   },
 
@@ -299,5 +300,11 @@ export default defineNuxtConfig({
         { hid: 'twitter:site', name: 'twitter:site', content: 'thisisfreegle' },
       ],
     },
+  },
+
+  gtag: {
+    // We disable initial consent so that Google won't add any cookies.
+    id: 'G-397053401',
+    initialConsent: false,
   },
 })
