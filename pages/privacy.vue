@@ -47,10 +47,6 @@
         </p>
         <ul>
           <li>
-            We store a session cookie. That's strictly necessary for the site to
-            function, and does not require consent.
-          </li>
-          <li>
             We store some information in your browser's local storage, because
             of the way the site works. There's not much in it except if you're
             trying to reply to a post. That's like the "shopping cart" example
@@ -117,6 +113,7 @@
         <h3>Change History</h3>
         <p>Here are the changes to this page.</p>
         <ul class>
+          <li>03/08/2023: Remove session cookie, which is no longer used.</li>
           <li>31/07/2023: Remove Inspectlet, which we no longer use.</li>
           <li>
             04/02/2023: Removed Google Analytics, which we no longer use. Add
