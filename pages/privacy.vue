@@ -66,6 +66,13 @@
             <!-- eslint-disable-next-line -->
           <nuxt-link  no-prefetch to="/donate">donate</nuxt-link>).
           </li>
+          <li>
+            We use
+            <ExternalLink href="https://matomo.org">Matomo</ExternalLink> to
+            collect information about how people use the site. This is similar
+            to Google Analytics, but more privacy-safe. We have configured this
+            not to use any cookies.
+          </li>
         </ul>
         <p>Once you log in, you're giving us consent to do the following.</p>
         <ul>
