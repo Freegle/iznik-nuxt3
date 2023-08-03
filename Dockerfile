@@ -2,8 +2,8 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-ENV IZNIK_API_V1=https://apiv1.localhost/api \
-    IZNIK_API_V2=https://apiv2.localhost/api
+ENV IZNIK_API_V1=http://apiv1.localhost/api \
+    IZNIK_API_V2=http://apiv2.localhost/api
 
 RUN apk update && apk add git \
     && git clone https://github.com/Freegle/iznik-nuxt3.git
