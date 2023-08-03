@@ -11,4 +11,5 @@ RUN apk update && apk add git \
 CMD cd iznik-nuxt3 \
     && git pull \
     && yes | npm install -y --legacy-peer-deps \
-    && export NODE_OPTIONS=--max-old-space-size=8192;export HOST=0; npm run dev
+    && export NODE_OPTIONS=--max-old-space-size=8192;npm run build \
+    && export HOST=0; npm run start
