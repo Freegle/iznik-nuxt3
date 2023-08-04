@@ -111,6 +111,7 @@
     "vue-highlight-words": "^3.0.0",
     "vue-inner-image-zoom": "^2.0.0",
     "vue-json-pretty": "^2.2.4",
+    "vue-matomo": "^4.2.0",
     "vue-plugin-load-script": "^2.1.1",
     "vue-read-more3": "^1.2.2",
     "vue-simple-context-menu": "^4.0.4",

@@ -35,7 +35,6 @@
         ref="filepond"
         imgtype="Message"
         imgflag="message"
-        :identify="true"
         :browse="pondBrowse"
         :multiple="true"
         @photo-processed="photoProcessed"
@@ -161,7 +160,7 @@ export default {
       // init callback below.
       this.uploading = true
     },
-    photoProcessed(imageid, imagethumb, image, ocr, suggestions) {
+    photoProcessed(imageid, imagethumb, image) {
       // We have uploaded a photo.  Remove the filepond instance.
       const att = {
         id: imageid,

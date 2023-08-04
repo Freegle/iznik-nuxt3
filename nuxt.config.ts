@@ -195,6 +195,7 @@ export default defineNuxtConfig({
       MOBILE_VERSION: config.MOBILE_VERSION,
       NETLIFY_DEPLOY_ID: process.env.DEPLOY_ID,
       NETLIFY_SITE_NAME: process.env.SITE_NAME,
+      MATOMO_HOST: process.env.MATOMO_HOST,
     },
   },
 

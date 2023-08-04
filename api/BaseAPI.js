@@ -78,6 +78,9 @@ export default class BaseAPI {
           'Iznik ' + JSON.stringify(authStore.auth.persistent)
       }
 
+      headers['Cache-Control'] =
+        'max-age=0, must-revalidate, no-cache, no-store, private'
+
       if (method === 'GET' && config?.params) {
         // Remove falsey values from the params.
         config.params = Object.fromEntries(
@@ -310,6 +313,9 @@ export default class BaseAPI {
         // The JWT is quick but short-lived; use the persistent token as a fallback.
         headers.Authorization2 = JSON.stringify(authStore.auth.persistent)
       }
+
+      headers['Cache-Control'] =
+        'max-age=0, must-revalidate, no-cache, no-store, private'
 
       if (method === 'GET' && config?.params) {
         // Remove falsey values from the params.

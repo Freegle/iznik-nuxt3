@@ -68,11 +68,15 @@ export const useAuthStore = defineStore({
 
       if (process.client) {
         // Store the values in cookies.  This means they are accessible during SSR.
-        const j = useCookie('jwt')
-        const p = useCookie('persistent')
-        j.value = jwt
-        p.value = JSON.stringify(persistent)
-        console.log('Saved jwt and persistent cookies')
+        if (jwt) {
+          const j = useCookie('jwt')
+          j.value = jwt
+        }
+
+        if (persistent) {
+          const p = useCookie('persistent')
+          p.value = JSON.stringify(persistent)
+        }
       }
     },
     setUser(value) {
