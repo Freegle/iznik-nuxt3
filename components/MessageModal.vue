@@ -12,6 +12,7 @@
         <div v-if="message">
           <div v-if="showImages">
             <ImageCarousel
+              v-if="message?.attachments?.length"
               :message-id="id"
               :attachments="message.attachments"
             />
