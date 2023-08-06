@@ -444,6 +444,8 @@ export default {
               [swlat, swlng],
               [nelat, nelng],
             ])
+
+            this.moved = true
           } catch (e) {
             console.log('WKT error', location, e)
           }
