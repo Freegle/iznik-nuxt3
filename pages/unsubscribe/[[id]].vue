@@ -59,7 +59,7 @@
             </div>
             <div v-else>
               <h4>Please enter your email address</h4>
-              <p>We'll email you to confirm.</p>
+              <p>We'll email you to confirm that you want to leave Freegle.</p>
               <EmailValidator
                 v-model:email="email"
                 v-model:valid="emailValid"
@@ -70,7 +70,7 @@
                 name="trash-alt"
                 variant="primary"
                 class="mt-2 mb-2"
-                label="Unsubscribe"
+                label="Unsubscribe completely and delete my account"
                 spinclass="text-white"
                 @handle="emailConfirm"
               />

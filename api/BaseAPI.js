@@ -4,6 +4,8 @@ import { useAuthStore } from '~/stores/auth'
 import { useMobileStore } from '~/stores/mobile'
 import { useMiscStore } from '~/stores/misc'
 
+let requestId = 0
+
 // let timer = 0
 
 // We add fetch retrying.
@@ -78,6 +80,17 @@ export default class BaseAPI {
           'Iznik ' + JSON.stringify(authStore.auth.persistent)
       }
 
+      const loggedInAs = authStore.user?.id
+
+      if (loggedInAs) {
+        // Add the user ID as a query parameter to the path, checking whether there already are any
+        // query parameters.
+        path += (path.includes('?') ? '&' : '?') + 'loggedInAs=' + loggedInAs
+      }
+
+      // Add requestId to the path, checking whether there already are any query parameters.
+      path += (path.includes('?') ? '&' : '?') + 'requestid=' + requestId++
+
       headers['Cache-Control'] =
         'max-age=0, must-revalidate, no-cache, no-store, private'
 
@@ -87,8 +100,12 @@ export default class BaseAPI {
           Object.entries(config.params).filter(([_, v]) => v)
         )
 
-        // URL encode the parameters
-        path += '?' + new URLSearchParams(config.params)
+        // URL encode the parameters if any
+        const urlParams = new URLSearchParams(config.params).toString()
+
+        if (urlParams.length) {
+          path += '&' + urlParams
+        }
       } else if (method !== 'POST') {
         // Any parameters are passed in config.params.
         if (!config?.params) {
@@ -314,6 +331,17 @@ export default class BaseAPI {
         headers.Authorization2 = JSON.stringify(authStore.auth.persistent)
       }
 
+      const loggedInAs = authStore.user?.id
+
+      if (loggedInAs) {
+        // Add the user ID as a query parameter to the path, checking whether there already are any
+        // query parameters.
+        path += (path.includes('?') ? '&' : '?') + 'loggedInAs=' + loggedInAs
+      }
+
+      // Add requestId to the path, checking whether there already are any query parameters.
+      path += (path.includes('?') ? '&' : '?') + 'requestid=' + requestId++
+
       headers['Cache-Control'] =
         'max-age=0, must-revalidate, no-cache, no-store, private'
 
@@ -323,8 +351,12 @@ export default class BaseAPI {
           Object.entries(config.params).filter(([_, v]) => v)
         )
 
-        // URL encode the parameters
-        path += '?' + new URLSearchParams(config.params)
+        // URL encode the parameters if any
+        const urlParams = new URLSearchParams(config.params).toString()
+
+        if (urlParams.length) {
+          path += '&' + urlParams
+        }
       } else if (method !== 'POST') {
         // Any parameters are passed in config.params.
         if (!config?.params) {

@@ -10,6 +10,7 @@
     ok-title="Close"
   >
     <ImageCarousel
+      v-if="message?.attachments?.length"
       :message-id="message.id"
       :attachments="message.attachments"
     />
