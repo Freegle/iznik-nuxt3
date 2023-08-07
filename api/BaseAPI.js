@@ -83,7 +83,7 @@ export default class BaseAPI {
       if (loggedInAs) {
         // Add the user ID as a query parameter to the path, checking whether there already are any
         // query parameters.
-        path += (path.includes('?') ? '&' : '?') + 'userid=' + loggedInAs
+        path += (path.includes('?') ? '&' : '?') + 'loggedInAs=' + loggedInAs
       }
 
       // Add requestId to the path, checking whether there already are any query parameters.
@@ -332,7 +332,7 @@ export default class BaseAPI {
       if (loggedInAs) {
         // Add the user ID as a query parameter to the path, checking whether there already are any
         // query parameters.
-        path += (path.includes('?') ? '&' : '?') + 'userid=' + loggedInAs
+        path += (path.includes('?') ? '&' : '?') + 'loggedInAs=' + loggedInAs
       }
 
       // Add requestId to the path, checking whether there already are any query parameters.
