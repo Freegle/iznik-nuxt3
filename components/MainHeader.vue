@@ -476,14 +476,7 @@ import { useMessageStore } from '../stores/message'
 import { useNotificationStore } from '../stores/notification'
 import { useLogoStore } from '../stores/logo'
 import { useAuthStore } from '~/stores/auth'
-import {
-  ref,
-  watch,
-  computed,
-  useCookie,
-  onMounted,
-  defineAsyncComponent,
-} from '#imports'
+import { ref, watch, computed, onMounted, defineAsyncComponent } from '#imports'
 import { waitForRef } from '~/composables/useWaitForRef'
 import { fetchMe } from '~/composables/useMe'
 import { useRuntimeConfig } from '#app'
@@ -598,23 +591,6 @@ const requestLogin = () => {
 }
 
 const logout = async () => {
-  // Remove all cookies, both client and server.  This seems to be necessary to kill off the PHPSESSID cookie
-  // on the server, which would otherwise keep us logged in despite our efforts.
-  try {
-    const jwtCookie = useCookie('jwt')
-    if (jwtCookie !== null) {
-      jwtCookie.value = null
-    }
-
-    const persistentCookie = useCookie('persistent')
-
-    if (persistentCookie !== null) {
-      persistentCookie.value = null
-    }
-  } catch (e) {
-    console.error('Failed to clear cookies', e)
-  }
-
   await authStore.logout()
   authStore.forceLogin = false
 

@@ -2,7 +2,6 @@ import { defineStore } from 'pinia'
 import { LoginError, SignUpError } from '../api/BaseAPI'
 import { useComposeStore } from '../stores/compose'
 import api from '~/api'
-import { useCookie } from '#imports'
 
 export const useAuthStore = defineStore({
   id: 'auth',
@@ -44,36 +43,13 @@ export const useAuthStore = defineStore({
       this.config = config
       this.$api = api(config)
 
-      // See if we have auth info in cookies.  This is useful to know early on during SSR because we can return
-      // info to the client, which means we won't flicker from the logged out to logged in views.
-      const jwt = useCookie('jwt')?.value
-      if (!this.auth.jwt && jwt) {
-        console.log('Got JWT cookie', jwt)
-        this.auth.jwt = jwt
-      }
-
-      const persistent = useCookie('persistent')?.value
-      if (!this.auth.persistent && persistent) {
-        console.log('Got persistent cookie', persistent)
-        this.auth.persistent = persistent
-      }
+      // Don't get auth info via cookies.  That would mean that we rendered the page in SSR logged in, which
+      // sounds good, but we would then return the store to the client for hydration.  That would include the
+      // auth section which might lead to us being logged in as the wrong user.
     },
     setAuth(jwt, persistent) {
       this.auth.jwt = jwt
       this.auth.persistent = persistent
-
-      if (process.client) {
-        // Store the values in cookies.  This means they are accessible during SSR.
-        if (jwt) {
-          const j = useCookie('jwt')
-          j.value = jwt
-        }
-
-        if (persistent) {
-          const p = useCookie('persistent')
-          p.value = JSON.stringify(persistent)
-        }
-      }
     },
     setUser(value) {
       if (value) {
