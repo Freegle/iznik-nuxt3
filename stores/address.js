@@ -36,6 +36,7 @@ export const useAddressStore = defineStore({
       } else {
         this.fetching = api(this.config).address.fetchv2()
         this.list = await this.fetching
+        this.list = this.list || []
 
         this.list.forEach((address) => {
           this.listById[address.id] = address

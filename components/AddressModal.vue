@@ -330,7 +330,7 @@ export default {
 
       this.selectFirst()
 
-      if (this.addresses.length === 0) {
+      if (this.addresses?.length === 0) {
         this.showAdd = true
       }
     },
