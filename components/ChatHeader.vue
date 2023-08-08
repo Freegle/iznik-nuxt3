@@ -345,23 +345,23 @@ export default {
     },
     async showhide() {
       this.showChatHide = true
-      await this.waitForRef('chathide')
-      this.$refs.chathide?.show()
+      const m = await this.waitForRef('chathide')
+      m?.show()
     },
     async showblock() {
       this.showChatBlock = true
-      await this.waitForRef('chatblock')
-      this.$refs.chatblock?.show()
+      const m = await this.waitForRef('chatblock')
+      m?.show()
     },
     async showInfo() {
       this.showProfile = true
-      await this.waitForRef('profile')
-      this.$refs.profile?.show()
+      const m = await this.waitForRef('profile')
+      m?.show()
     },
     async report() {
       this.showChatReport = true
-      await this.waitForRef('chatreport')
-      this.$refs.chatreport?.show()
+      const m = await this.waitForRef('chatreport')
+      m?.show()
     },
     async markRead() {
       await this.chatStore.markRead(this.id)

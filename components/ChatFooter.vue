@@ -444,8 +444,8 @@ export default {
     },
     async showInfo() {
       this.showProfile = true
-      await this.waitForRef('profile')
-      this.$refs.profile?.show()
+      const m = await this.waitForRef('profile')
+      m?.show()
     },
     async send() {
       let msg = this.sendmessage
