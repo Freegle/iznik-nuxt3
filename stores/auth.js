@@ -147,18 +147,26 @@ export const useAuthStore = defineStore({
       return ret
     },
     async login(params) {
-      const res = await this.$api.session.login(params)
-      const { ret, status, persistent, jwt } = res
+      try {
+        const res = await this.$api.session.login(params)
+        const { ret, status, persistent, jwt } = res
 
-      if (ret === 0) {
-        // Successful login.
-        this.setAuth(jwt, persistent)
+        if (ret === 0) {
+          // Successful login.
+          this.setAuth(jwt, persistent)
 
-        // Login succeeded.  Get the user from the new API.
-        await this.fetchUser()
-      } else {
-        // Login failed.
-        throw new LoginError(ret, status)
+          // Login succeeded.  Get the user from the new API.
+          await this.fetchUser()
+        } else {
+          // Login failed.
+          throw new LoginError(ret, status)
+        }
+      } catch (e) {
+        if (e.response?.data?.ret) {
+          throw new LoginError(e.response?.data?.ret, e.response?.data?.status)
+        } else {
+          throw e
+        }
       }
 
       this.loginCount++
