@@ -103,7 +103,7 @@ export default {
       e.stopPropagation()
     },
     clicked() {
-      this.$refs.paypalbutton.firstChild.click()
+      this.$refs.paypalbutton?.firstChild?.click()
     },
     async donateMonthly() {
       await this.$refs.donateform.submit()
