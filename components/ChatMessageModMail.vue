@@ -89,28 +89,30 @@ export default {
     async repost() {
       const message = this.refmsg
 
-      // Remove any partially composed messages we currently have, because they'll be confusing.
-      await this.composeStore.clearMessages()
+      if (message) {
+        // Remove any partially composed messages we currently have, because they'll be confusing.
+        await this.composeStore.clearMessages()
 
-      // Add this message to the compose store so that it will show up on the compose page.
-      await this.composeStore.setMessage(
-        0,
-        {
-          type: message.type,
-          item: message.item.name.trim(),
-          description: message.textbody.trim(),
-          availablenow: message.availablenow,
-          repostof: this.chatmessage.refmsgid,
-        },
-        this.me
-      )
+        // Add this message to the compose store so that it will show up on the compose page.
+        await this.composeStore.setMessage(
+          0,
+          {
+            type: message.type,
+            item: message.item.name.trim(),
+            description: message.textbody.trim(),
+            availablenow: message.availablenow,
+            repostof: this.chatmessage.refmsgid,
+          },
+          this.me
+        )
 
-      await this.composeStore.setAttachmentsForMessage(
-        message.id,
-        message.attachments
-      )
+        await this.composeStore.setAttachmentsForMessage(
+          message.id,
+          message.attachments
+        )
 
-      this.$router.push(message.type === 'Offer' ? '/give' : 'find')
+        this.$router.push(message.type === 'Offer' ? '/give' : 'find')
+      }
     },
   },
 }
