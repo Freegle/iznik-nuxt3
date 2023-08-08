@@ -209,7 +209,7 @@ export const useMessageStore = defineStore({
         messages = this.byUserList[userid]
       }
 
-      return messages
+      return messages || []
     },
     async view(id) {
       await api(this.config).message.view(id)
