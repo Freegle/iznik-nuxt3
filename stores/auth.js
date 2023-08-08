@@ -297,6 +297,7 @@ export const useAuthStore = defineStore({
       } else {
         // Any auth info must be invalid.
         this.setAuth(null, null)
+        this.setUser(null)
       }
 
       this.loginStateKnown = true
