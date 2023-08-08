@@ -308,25 +308,27 @@ export default {
           // We shouldn't need to fetch, but we've seen a Sentry issue where the message groups are not valid.
           const msg = await this.messageStore.fetch(this.id, true)
 
-          for (const messageGroup of msg.groups) {
-            tojoin = messageGroup.groupid
-            Object.keys(this.myGroups).forEach((key) => {
-              const group = this.myGroups[key]
+          if (msg) {
+            for (const messageGroup of msg.groups) {
+              tojoin = messageGroup.groupid
+              Object.keys(this.myGroups).forEach((key) => {
+                const group = this.myGroups[key]
 
-              if (messageGroup.groupid === group.id) {
-                found = true
-              }
-            })
+                if (messageGroup.groupid === group.id) {
+                  found = true
+                }
+              })
+            }
+
+            if (!found) {
+              // Not currently a member.
+              await this.authStore.joinGroup(this.myid, tojoin, false)
+            }
+
+            // Now we can send the reply via chat.
+            await this.$nextTick()
+            await this.replyToPost()
           }
-
-          if (!found) {
-            // Not currently a member.
-            await this.authStore.joinGroup(this.myid, tojoin, false)
-          }
-
-          // Now we can send the reply via chat.
-          await this.$nextTick()
-          await this.replyToPost()
         } else {
           // We're not logged in yet.  We need to force a log in.  Once that completes then either the watch in here
           // or default.vue will spot we have a reply to send and make it happen.
