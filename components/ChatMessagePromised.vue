@@ -299,8 +299,8 @@ export default {
     },
     async changeTime() {
       this.showPromise = true
-      await this.waitForRef('promise')
-      this.$refs.promise?.show()
+      const m = await this.waitForRef('promise')
+      m?.show()
     },
     fetchMessages() {
       this.chatStore.fetchMessages(this.chatmessage.chatid)

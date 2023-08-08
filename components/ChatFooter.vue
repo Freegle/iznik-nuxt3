@@ -416,8 +416,8 @@ export default {
       // Show the modal first, as eye candy.
       this.showPromise = true
 
-      await this.waitForRef('promise')
-      this.$refs.promise.show(date)
+      const m = await this.waitForRef('promise')
+      m?.show(date)
 
       this.$nextTick(async () => {
         this.ouroffers = await fetchOurOffers()
