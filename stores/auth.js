@@ -177,7 +177,18 @@ export const useAuthStore = defineStore({
       return await this.$api.session.lostPassword(email)
     },
     async unsubscribe(email) {
-      return await this.$api.session.unsubscribe(email)
+      return await this.$api.session.unsubscribe(email, function (data) {
+        let logIt
+
+        if (data && data.ret === 2) {
+          // Don't log errors if the email is not recognised.
+          logIt = false
+        } else {
+          logIt = true
+        }
+
+        return logIt
+      })
     },
     async signUp(params) {
       const res = await this.$api.user.signUp(params, false)
@@ -314,7 +325,19 @@ export const useAuthStore = defineStore({
       return data
     },
     async saveEmail(params) {
-      const data = await this.$api.session.save(params)
+      const data = await this.$api.session.save(params, function (data) {
+        let logIt
+
+        if (data && data.ret === 10) {
+          // Don't log errors for verification mails
+          logIt = false
+        } else {
+          logIt = true
+        }
+
+        return logIt
+      })
+
       await this.fetchUser()
       return data
     },
