@@ -10,12 +10,14 @@
       <donation-button />
     </NoticeMessage>
     <div v-else>
-      <ExternalAd
-        ad-unit-path="/22794232631/freegle_product"
-        :dimensions="[300, 250]"
-        div-id="div-gpt-ad-1690904332895-0"
-        class="mt-2"
-      />
+      <VisibleWhen :not="['xs', 'sm']">
+        <ExternalAd
+          ad-unit-path="/22794232631/freegle_product"
+          :dimensions="[300, 250]"
+          div-id="div-gpt-ad-1690904332895-0"
+          class="mt-2"
+        />
+      </VisibleWhen>
       <b-card v-if="list.length" variant="white" no-body>
         <b-card-body class="p-0">
           <nuxt-link no-prefetch to="/jobs">
