@@ -41,7 +41,7 @@
           class="messagemap flex-grow-1"
           :height="breakpoint === 'xs' || breakpoint === 'sm' ? 150 : 250"
         />
-        <VisibleWhen :not="['xs', 'sm']">
+        <VisibleWhen :not="['xs', 'sm']" style="width: 300px">
           <ExternalAd
             ad-unit-path="/22794232631/freegle_product"
             :dimensions="[300, 250]"
