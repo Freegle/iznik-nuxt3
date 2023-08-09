@@ -67,7 +67,15 @@
             />
           </div>
         </b-col>
-        <b-col cols="0" xl="3" class="d-none d-xl-block" />
+        <b-col cols="0" xl="3" class="d-none d-xl-block">
+          <client-only>
+            <ExternalAd
+              ad-unit-path="/22794232631/freegle_productemail"
+              :dimensions="[300, 250]"
+              div-id="div-gpt-ad-1690904387964-0"
+            />
+          </client-only>
+        </b-col>
       </b-row>
     </b-col>
   </client-only>
@@ -75,6 +83,7 @@
 <script setup>
 import { useRoute } from 'vue-router'
 import { buildHead } from '../../composables/useBuildHead'
+import ExternalAd from '../../components/ExternalAd'
 import { useMessageStore } from '~/stores/message'
 import { twem } from '~/composables/useTwem'
 import MyMessage from '~/components/MyMessage'

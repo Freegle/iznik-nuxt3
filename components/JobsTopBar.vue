@@ -34,9 +34,6 @@
           />
         </li>
       </ul>
-      <client-only>
-        <!--        <AdTest :key="'adbanner-' + miscStore.breakpoint" banner />-->
-      </client-only>
     </div>
   </div>
 </template>
@@ -45,14 +42,12 @@ import { mapState } from 'pinia'
 import { useJobStore } from '../stores/job'
 import { useAuthStore } from '../stores/auth'
 import { useMiscStore } from '../stores/misc'
-// import AdTest from './AdTest'
 const JobOne = () => import('./JobOne')
 const NoticeMessage = () => import('./NoticeMessage')
 const DonationButton = () => import('./DonationButton')
 
 export default {
   components: {
-    // AdTest,
     NoticeMessage,
     JobOne,
     DonationButton,

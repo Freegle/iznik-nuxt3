@@ -11,8 +11,8 @@ export default class SessionAPI extends BaseAPI {
     return this.$getv2('/user', params, log)
   }
 
-  save(data) {
-    return this.$patch('/session', data)
+  save(data, log) {
+    return this.$patch('/session', data, log)
   }
 
   login({

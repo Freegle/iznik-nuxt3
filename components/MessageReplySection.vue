@@ -45,7 +45,7 @@
       <div v-if="!me">
         <NewFreegler />
       </div>
-      <div v-else>
+      <div v-else-if="reply?.length > 0">
         <div class="d-flex justify-content-between flex-wrap">
           <b-form-group
             class="flex-grow-1 nobot"
