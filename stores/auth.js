@@ -331,7 +331,18 @@ export const useAuthStore = defineStore({
       this.user.bouncing = 0
     },
     async saveAndGet(params) {
-      await this.$api.session.save(params)
+      await this.$api.session.save(params, function (data) {
+        let logIt
+
+        if (data && data.ret === 10) {
+          // Don't log errors for verification mails
+          logIt = false
+        } else {
+          logIt = true
+        }
+
+        return logIt
+      })
       await this.fetchUser()
       return this.user
     },
