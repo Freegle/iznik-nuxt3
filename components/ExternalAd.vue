@@ -72,6 +72,7 @@ onMounted(async () => {
 
   window.googletag = window.googletag || { cmd: [] }
   window.googletag.cmd.push(function () {
+    window.googletag.pubads().collapseEmptyDivs()
     console.log('Define slot', uniqueid.value, [props.dimensions], props.divId)
     slot = window.googletag
       .defineSlot(uniqueid.value, [props.dimensions], props.divId)

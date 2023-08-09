@@ -45,7 +45,7 @@
           <ExternalAd
             ad-unit-path="/22794232631/freegle_product"
             :dimensions="[300, 250]"
-            div-id="div-gpt-ad-1690904332895-0"
+            :div-id="'div-gpt-ad-1690904332895-' + id"
             class="mt-2"
           />
         </VisibleWhen>
