@@ -100,8 +100,10 @@ export const useAuthStore = defineStore({
           this.userlist.unshift(id)
 
           if (this.userlist.length > 1) {
-            // Logged in as multiple users.  Let the server know.
-            await this.$api.session.related(this.userlist)
+            try {
+              // Logged in as multiple users.  Let the server know.  This can fail, but we don't care.
+              await this.$api.session.related(this.userlist)
+            } catch (e) {}
           }
         }
       }
