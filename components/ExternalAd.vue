@@ -15,7 +15,7 @@
         }"
       />
     </div>
-    <p class="text-center textsize">
+    <p v-if="adShown" class="text-center textsize">
       Advertisement. These help Freegle keep going.
     </p>
   </div>
@@ -86,9 +86,32 @@ onMounted(async () => {
   })
 })
 
+const adShown = ref(true)
+
+function checkSize() {
+  // Get size of the div
+  const div = document.getElementById(props.divId)
+  if (div) {
+    const rect = div.getBoundingClientRect()
+    const height = rect.height
+
+    if (height < 50) {
+      adShown.value = false
+    } else {
+      setTimeout(checkSize, 500)
+    }
+  }
+}
+
+const sizeTimer = setTimeout(checkSize, 500)
+
 onBeforeUnmount(() => {
   if (window.googletag?.destroySlots) {
     window.googletag.destroySlots([slot])
+  }
+
+  if (sizeTimer) {
+    clearTimeout(sizeTimer)
   }
 })
 </script>
