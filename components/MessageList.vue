@@ -25,7 +25,10 @@
             @visible="messageVisible"
           />
         </div>
-        <VisibleWhen :at="['xs', 'sm']">
+        <VisibleWhen
+          v-if="deDuplicatedMessages.length"
+          :at="['xs', 'sm', 'md', 'lg']"
+        >
           <ExternalAd
             ad-unit-path="/22794232631/freegle_product"
             :dimensions="[300, 250]"
