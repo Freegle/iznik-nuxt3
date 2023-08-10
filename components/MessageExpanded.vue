@@ -46,11 +46,19 @@
             ad-unit-path="/22794232631/freegle_product"
             :dimensions="[300, 250]"
             :div-id="'div-gpt-ad-1690904332895-' + id"
-            class="mt-2"
           />
         </VisibleWhen>
       </div>
       <MessageHistoryExpanded :id="id" class="d-block d-md-none mt-2 mt-md-0" />
+      <VisibleWhen :at="['xs', 'sm']">
+        <div class="d-flex justify-content-around mt-2">
+          <ExternalAd
+            ad-unit-path="/22794232631/freegle_product"
+            :dimensions="[300, 250]"
+            :div-id="'div-gpt-ad-1690904332895-' + id"
+          />
+        </div>
+      </VisibleWhen>
       <MessageReplySection
         v-if="replyable && !replied"
         :id="id"
