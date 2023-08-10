@@ -12,8 +12,29 @@
       <h2 class="visually-hidden">List of wanteds and offers</h2>
       <div v-observe-visibility="visibilityChanged" />
       <div v-if="deDuplicatedMessages?.length">
+        <div
+          :id="'messagewrapper-' + deDuplicatedMessages[0].id"
+          :ref="'messagewrapper-' + deDuplicatedMessages[0].id"
+          class="p-0"
+        >
+          <OurMessage
+            :id="deDuplicatedMessages[0].id"
+            :matchedon="deDuplicatedMessages[0].matchedon"
+            record-view
+            :scroll-into-view="scrollToMessage === deDuplicatedMessages[0].id"
+            @visible="messageVisible"
+          />
+        </div>
+        <VisibleWhen :at="['xs', 'sm']">
+          <ExternalAd
+            ad-unit-path="/22794232631/freegle_product"
+            :dimensions="[300, 250]"
+            div-id="div-gpt-ad-1690904332895-0"
+            class="mt-2"
+          />
+        </VisibleWhen>
         <Suspense
-          v-for="message in deDuplicatedMessages"
+          v-for="message in deDuplicatedMessages.slice(1)"
           :key="'messagelist-' + message.id"
         >
           <div

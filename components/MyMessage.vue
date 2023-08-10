@@ -741,8 +741,8 @@ export default {
       }
 
       this.showEditModal = true
-      await this.waitForRef('editModal')
-      this.$refs.editModal?.show()
+      const m = await this.waitForRef('editModal')
+      m?.show()
     },
     async repost(e) {
       if (e) {

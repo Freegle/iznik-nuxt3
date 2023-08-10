@@ -47,37 +47,14 @@ export const useAuthStore = defineStore({
       this.config = config
       this.$api = api(config)
 
-      // See if we have auth info in cookies.  This is useful to know early on during SSR because we can return
-      // info to the client, which means we won't flicker from the logged out to logged in views.
-      const jwt = useCookie('jwt')?.value
-      if (!this.auth.jwt && jwt) {
-        console.log('Got JWT cookie', jwt)
-        this.auth.jwt = jwt
-      }
-
-      const persistent = useCookie('persistent')?.value
-      if (!this.auth.persistent && persistent) {
-        console.log('Got persistent cookie', persistent)
-        this.auth.persistent = persistent
-      }
+      // Don't get auth info via cookies.  That would mean that we rendered the page in SSR logged in, which
+      // sounds good, but we would then return the store to the client for hydration.  That would include the
+      // auth section which might lead to us being logged in as the wrong user.
     },
     setAuth(jwt, persistent) {
       console.log('Saving jwt and persistent')
       this.auth.jwt = jwt
       this.auth.persistent = persistent
-
-      if (process.client) {
-        // Store the values in cookies.  This means they are accessible during SSR.
-        if (jwt) {
-          const j = useCookie('jwt')
-          j.value = jwt
-        }
-
-        if (persistent) {
-          const p = useCookie('persistent')
-          p.value = JSON.stringify(persistent)
-        }
-      }
     },
     setUser(value) {
       if (value) {
@@ -128,8 +105,10 @@ export const useAuthStore = defineStore({
           this.userlist.unshift(id)
 
           if (this.userlist.length > 1) {
-            // Logged in as multiple users.  Let the server know.
-            await this.$api.session.related(this.userlist)
+            try {
+              // Logged in as multiple users.  Let the server know.  This can fail, but we don't care.
+              await this.$api.session.related(this.userlist)
+            } catch (e) {}
           }
         }
       }
@@ -192,18 +171,26 @@ export const useAuthStore = defineStore({
       return ret
     },
     async login(params) {
-      const res = await this.$api.session.login(params)
-      const { ret, status, persistent, jwt } = res
+      try {
+        const res = await this.$api.session.login(params)
+        const { ret, status, persistent, jwt } = res
 
-      if (ret === 0) {
-        // Successful login.
-        this.setAuth(jwt, persistent)
+        if (ret === 0) {
+          // Successful login.
+          this.setAuth(jwt, persistent)
 
-        // Login succeeded.  Get the user from the new API.
-        await this.fetchUser()
-      } else {
-        // Login failed.
-        throw new LoginError(ret, status)
+          // Login succeeded.  Get the user from the new API.
+          await this.fetchUser()
+        } else {
+          // Login failed.
+          throw new LoginError(ret, status)
+        }
+      } catch (e) {
+        if (e.response?.data?.ret) {
+          throw new LoginError(e.response?.data?.ret, e.response?.data?.status)
+        } else {
+          throw e
+        }
       }
 
       this.loginCount++
@@ -212,7 +199,18 @@ export const useAuthStore = defineStore({
       return await this.$api.session.lostPassword(email)
     },
     async unsubscribe(email) {
-      return await this.$api.session.unsubscribe(email)
+      return await this.$api.session.unsubscribe(email, function (data) {
+        let logIt
+
+        if (data && data.ret === 2) {
+          // Don't log errors if the email is not recognised.
+          logIt = false
+        } else {
+          logIt = true
+        }
+
+        return logIt
+      })
     },
     async signUp(params) {
       const res = await this.$api.user.signUp(params, false)
@@ -336,6 +334,7 @@ export const useAuthStore = defineStore({
       } else {
         // Any auth info must be invalid.
         this.setAuth(null, null)
+        this.setUser(null)
       }
 
       this.loginStateKnown = true
@@ -350,7 +349,19 @@ export const useAuthStore = defineStore({
       return data
     },
     async saveEmail(params) {
-      const data = await this.$api.session.save(params)
+      const data = await this.$api.session.save(params, function (data) {
+        let logIt
+
+        if (data && data.ret === 10) {
+          // Don't log errors for verification mails
+          logIt = false
+        } else {
+          logIt = true
+        }
+
+        return logIt
+      })
+
       await this.fetchUser()
       return data
     },
@@ -367,7 +378,18 @@ export const useAuthStore = defineStore({
       this.user.bouncing = 0
     },
     async saveAndGet(params) {
-      await this.$api.session.save(params)
+      await this.$api.session.save(params, function (data) {
+        let logIt
+
+        if (data && data.ret === 10) {
+          // Don't log errors for verification mails
+          logIt = false
+        } else {
+          logIt = true
+        }
+
+        return logIt
+      })
       await this.fetchUser()
       return this.user
     },

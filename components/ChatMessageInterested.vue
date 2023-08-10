@@ -182,8 +182,8 @@ export default {
       }
 
       this.showPromise = true
-      await this.waitForRef('promiseModal')
-      this.$refs.promiseModal?.show()
+      const m = await this.waitForRef('promiseModal')
+      m?.show()
     },
     async outcome(type, e) {
       if (e) {

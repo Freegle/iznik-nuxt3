@@ -140,6 +140,21 @@ export default class BaseAPI {
       status = rsp.status
       data = await rsp.json()
 
+      if (status === 200 && !data) {
+        // We've seen this sometimes, and we think it may be caused by a network error.
+        console.log('200 success in v1 but no data, retry')
+        await new Promise((resolve) => setTimeout(resolve, 10000))
+        const rsp = await ourFetch(this.config.public.APIv1 + path, {
+          ...config,
+          body,
+          method,
+          headers,
+        })
+
+        status = rsp.status
+        data = await rsp.json()
+      }
+
       if (data.jwt && data.jwt !== authStore.auth.jwt && data.persistent) {
         // We've been given a new JWT.  Use it in future.  This can happen after user merge or periodically when
         // we renew the JWT.
@@ -388,6 +403,21 @@ export default class BaseAPI {
 
       status = rsp.status
       data = await rsp.json()
+
+      if (status === 200 && !data) {
+        // We've seen this sometimes, and we think it may be caused by a network error.
+        console.log('200 success in v2 but no data, retry')
+        await new Promise((resolve) => setTimeout(resolve, 10000))
+        const rsp = await ourFetch(this.config.public.APIv2 + path, {
+          ...config,
+          body,
+          method,
+          headers,
+        })
+
+        status = rsp.status
+        data = await rsp.json()
+      }
     } catch (e) {
       console.log('Fetch error', path, e?.message)
       if (e.message.match(/.*aborted.*/i)) {

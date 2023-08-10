@@ -10,7 +10,6 @@
 </template>
 <script setup>
 import { useRoute } from 'vue-router'
-import { computed, watch, nextTick, reloadNuxtApp } from '#imports'
 import { useNoticeboardStore } from './stores/noticeboard'
 import { useAuthStore } from './stores/auth'
 import { useGroupStore } from './stores/group'
@@ -41,6 +40,7 @@ import { useDomainStore } from './stores/domain'
 import { useLogoStore } from './stores/logo'
 import { useLocationStore } from './stores/location'
 import { useShortlinkStore } from './stores/shortlinks'
+import { computed, watch, reloadNuxtApp } from '#imports'
 
 const route = useRoute()
 
@@ -117,11 +117,6 @@ logoStore.init(runtimeConfig)
 locationStore.init(runtimeConfig)
 shortlinkStore.init(runtimeConfig)
 
-// We use a key to force the whole page to re-load if we have logged in.  This is a sledgehammer way of
-// re-calling all the setup() methods etc.  Perhaps there's a better way to do this, but using a key on
-// NuxtPage results in errors which can cause the JS to bomb out.
-let loginKey = ref(0)
-
 const loginCount = computed(() => {
   return authStore.loginCount
 })
@@ -130,7 +125,7 @@ watch(loginCount, async () => {
   if (!route.query.k) {
     await reloadNuxtApp({
       force: true,
-      persistState: false
+      persistState: false,
     })
   }
 })

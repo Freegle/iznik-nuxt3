@@ -67,7 +67,7 @@
             />
           </div>
         </b-col>
-        <b-col cols="0" xl="3" class="d-none d-xl-block" />
+        <b-col cols="0" xl="3" class="d-none d-xl-block"> </b-col>
       </b-row>
     </b-col>
   </client-only>

@@ -49,6 +49,7 @@
             :hide-close="hideClose"
             :actions="actions"
             :show-map="modalShown"
+            :show-ad="modalShown"
             class="ml-md-2 mr-md-2 mt-md-2 ml-0 mr-0 mt-0"
             @close="hide"
             @zoom="showImages = true"

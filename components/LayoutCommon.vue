@@ -38,6 +38,7 @@
   </div>
 </template>
 <script>
+import { useAuthStore } from '../stores/auth'
 import SomethingWentWrong from './SomethingWentWrong'
 import { useNotificationStore } from '~/stores/notification'
 import { useMessageStore } from '~/stores/message'
@@ -154,20 +155,27 @@ export default {
     },
     monitorTabVisibility() {
       if (process.client) {
-        document.addEventListener('visibilitychange', () => {
+        document.addEventListener('visibilitychange', async () => {
           const miscStore = useMiscStore()
           miscStore.visible = !document.hidden
 
           if (this.me && !document.hidden) {
-            // We have become visible.  Refetch our notification count and chat count, which are the two key things which
-            // produce red badges people should click on.
-            const notificationStore = useNotificationStore()
-            notificationStore.fetchCount()
+            try {
+              // We have become visible.  Refetch our notification count and chat count, which are the two key things which
+              // produce red badges people should click on.
+              const notificationStore = useNotificationStore()
+              notificationStore.fetchCount()
 
-            const chatStore = useChatStore()
+              const chatStore = useChatStore()
 
-            // Don't log as we might have been logged out since we were last active.
-            chatStore.fetchChats(null, false)
+              // Don't log as we might have been logged out since we were last active.
+              await chatStore.fetchChats(null, false)
+            } catch (e) {
+              // If we failed to fetch the chats, double-check we're logged in by fetching the user. If that
+              // fails it'll log us out, which reduces our ability to start doing stuff in the mean time.
+              const authStore = useAuthStore()
+              authStore.fetchUser()
+            }
           }
         })
       }

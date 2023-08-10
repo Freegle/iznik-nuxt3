@@ -1,8 +1,5 @@
 <template>
   <aside v-if="location">
-    <client-only>
-      <!--      <AdTest square />-->
-    </client-only>
     <NoticeMessage v-if="blocked" variant="warning" class="d-none">
       <h3>Please help keep Freegle running</h3>
       <p>
@@ -12,35 +9,45 @@
       </p>
       <donation-button />
     </NoticeMessage>
-    <b-card v-else-if="list.length" variant="white" no-body>
-      <b-card-body class="p-0">
-        <nuxt-link no-prefetch to="/jobs">
-          <h2 class="header--size4 pt-1 ml-3">
-            <v-icon icon="briefcase" scale="2" /> Jobs near you
-          </h2>
-        </nuxt-link>
-        <p class="text-center small">
-          Freegle gets a small amount if you are interested and click.
-        </p>
-        <div v-for="job in visibleJobs" :key="'job-' + job.job_reference">
-          <JobOne :id="job.id" :summary="true" />
-        </div>
-        <infinite-loading key="infinitejobs" @infinite="loadMore">
-          <template #no-results>
-            <notice-message v-if="!list?.length">
-              We can't find any jobs at the moment.
-            </notice-message>
-          </template>
-          <template #no-more />
-          <template #spinner />
-        </infinite-loading>
-        <div class="d-flex justify-content-around mt-2 mb-2">
-          <b-button variant="secondary" to="/jobs">
-            <v-icon icon="search" /> View more jobs
-          </b-button>
-        </div>
-      </b-card-body>
-    </b-card>
+    <div v-else>
+      <VisibleWhen :not="['xs', 'sm']">
+        <ExternalAd
+          ad-unit-path="/22794232631/freegle_product"
+          :dimensions="[300, 250]"
+          div-id="div-gpt-ad-1690904332895-0"
+          class="mt-2"
+        />
+      </VisibleWhen>
+      <b-card v-if="list.length" variant="white" no-body>
+        <b-card-body class="p-0">
+          <nuxt-link no-prefetch to="/jobs">
+            <h2 class="header--size4 pt-1 ml-3">
+              <v-icon icon="briefcase" scale="2" /> Jobs near you
+            </h2>
+          </nuxt-link>
+          <p class="text-center small">
+            Freegle gets a small amount if you are interested and click.
+          </p>
+          <div v-for="job in visibleJobs" :key="'job-' + job.job_reference">
+            <JobOne :id="job.id" :summary="true" />
+          </div>
+          <infinite-loading key="infinitejobs" @infinite="loadMore">
+            <template #no-results>
+              <notice-message v-if="!list?.length">
+                We can't find any jobs at the moment.
+              </notice-message>
+            </template>
+            <template #no-more />
+            <template #spinner />
+          </infinite-loading>
+          <div class="d-flex justify-content-around mt-2 mb-2">
+            <b-button variant="secondary" to="/jobs">
+              <v-icon icon="search" /> View more jobs
+            </b-button>
+          </div>
+        </b-card-body>
+      </b-card>
+    </div>
   </aside>
 </template>
 <script>
@@ -48,14 +55,12 @@ import { mapState } from 'pinia'
 import { useJobStore } from '../stores/job'
 import { useAuthStore } from '../stores/auth'
 import JobOne from './JobOne'
-// import AdTest from './AdTest'
 import InfiniteLoading from '~/components/InfiniteLoading'
 const NoticeMessage = () => import('~/components/NoticeMessage')
 const DonationButton = () => import('~/components/DonationButton')
 
 export default {
   components: {
-    // AdTest,
     JobOne,
     NoticeMessage,
     InfiniteLoading,

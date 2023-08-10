@@ -76,7 +76,7 @@ export default {
     chartData() {
       const ret = [['Date', 'Count']]
 
-      if (this.shortlink) {
+      if (this.shortlink?.clickhistory) {
         for (const date of this.shortlink.clickhistory) {
           ret.push([new Date(date.date), date.count])
         }

@@ -54,33 +54,43 @@
       </div>
       <div>
         <label for="chatmessage" class="visually-hidden">Chat message</label>
-        <b-form-textarea
-          v-if="enterNewLine && !otheruser?.spammer"
-          id="chatmessage"
-          ref="chatarea"
-          v-model="sendmessage"
-          placeholder="Type here..."
-          enterkeyhint="enter"
-          rows="3"
-          max-rows="8"
-          @focus="markRead"
-        />
-        <b-form-textarea
-          v-else-if="!otheruser?.spammer"
-          id="chatmessage"
-          ref="chatarea"
-          v-model="sendmessage"
-          placeholder="Type here..."
-          rows="3"
-          max-rows="8"
-          enterkeyhint="send"
-          autocapitalize="none"
-          @keydown.enter.exact.prevent
-          @keyup.enter.exact="send"
-          @keydown.enter.shift.exact.prevent="newline"
-          @keydown.alt.shift.exact.prevent="newline"
-          @focus="markRead"
-        />
+        <div v-if="!imagethumb">
+          <b-form-textarea
+            v-if="enterNewLine && !otheruser?.spammer"
+            id="chatmessage"
+            ref="chatarea"
+            v-model="sendmessage"
+            placeholder="Type here..."
+            enterkeyhint="enter"
+            rows="3"
+            max-rows="8"
+            @focus="markRead"
+          />
+          <b-form-textarea
+            v-else-if="!otheruser?.spammer"
+            id="chatmessage"
+            ref="chatarea"
+            v-model="sendmessage"
+            placeholder="Type here..."
+            rows="3"
+            max-rows="8"
+            enterkeyhint="send"
+            autocapitalize="none"
+            @keydown.enter.exact.prevent
+            @keyup.enter.exact="send"
+            @keydown.enter.shift.exact.prevent="newline"
+            @keydown.alt.shift.exact.prevent="newline"
+            @focus="markRead"
+          />
+        </div>
+        <div v-else class="d-flex justify-content-end pt-2 pb-2">
+          <b-img :src="imagethumb" fluid />
+          <div>
+            <b-button title="Remove photo" @click="removeImage">
+              <v-icon icon="times-circle" scale="1.5" />
+            </b-button>
+          </div>
+        </div>
       </div>
     </div>
     <div v-if="!otheruser?.spammer" class="bg-white pt-1 pb-1">
@@ -315,6 +325,8 @@ export default {
       typingLastMessage: null,
       typingTimer: null,
       ouroffers: [],
+      imagethumb: null,
+      imageid: null,
     }
   },
   computed: {
@@ -416,8 +428,8 @@ export default {
       // Show the modal first, as eye candy.
       this.showPromise = true
 
-      await this.waitForRef('promise')
-      this.$refs.promise.show(date)
+      const m = await this.waitForRef('promise')
+      m?.show(date)
 
       this.$nextTick(async () => {
         this.ouroffers = await fetchOurOffers()
@@ -444,43 +456,53 @@ export default {
     },
     async showInfo() {
       this.showProfile = true
-      await this.waitForRef('profile')
-      this.$refs.profile?.show()
+      const m = await this.waitForRef('profile')
+      m?.show()
     },
     async send() {
-      let msg = this.sendmessage
-
-      if (msg) {
+      if (this.imageid) {
         this.sending = true
 
-        // If the current last message in this chat is an "interested" from the other party, then we're going to ask
-        // if they expect a reply.
-        const RSVP =
-          this.chatmessages.length &&
-          this.chatmessages[this.chatmessages.length - 1].type ===
-            'Interested' &&
-          this.chatmessages[this.chatmessages.length - 1].userid !==
-            this.myid &&
-          this.chat.chattype === 'User2User'
-
-        // Encode up any emojis.
-        msg = untwem(msg)
-
-        // Send it
-        await this.chatStore.send(this.id, msg)
-
-        // Clear the message now it's sent.
-        this.sendmessage = ''
-
+        await this.chatStore.send(this.id, null, null, this.imageid)
         await this._updateAfterSend()
+        this.sending = false
+        this.imagethumb = null
+        this.imageid = null
+      } else {
+        let msg = this.sendmessage
 
-        if (RSVP) {
-          this.RSVP = true
-          await this.waitForRef('rsvp')
-          this.$refs.rsvp?.show()
-        } else {
-          // We've sent a message.  This would be a good time to do some microvolunteering.
-          this.showMicrovolunteering = true
+        if (msg) {
+          this.sending = true
+
+          // If the current last message in this chat is an "interested" from the other party, then we're going to ask
+          // if they expect a reply.
+          const RSVP =
+            this.chatmessages.length &&
+            this.chatmessages[this.chatmessages.length - 1].type ===
+              'Interested' &&
+            this.chatmessages[this.chatmessages.length - 1].userid !==
+              this.myid &&
+            this.chat.chattype === 'User2User'
+
+          // Encode up any emojis.
+          msg = untwem(msg)
+
+          // Send it
+          await this.chatStore.send(this.id, msg)
+
+          // Clear the message now it's sent.
+          this.sendmessage = ''
+
+          await this._updateAfterSend()
+
+          if (RSVP) {
+            this.RSVP = true
+            await this.waitForRef('rsvp')
+            this.$refs.rsvp?.show()
+          } else {
+            // We've sent a message.  This would be a good time to do some microvolunteering.
+            this.showMicrovolunteering = true
+          }
         }
 
         // Start the timer which indicates we may still be typing.
@@ -510,7 +532,7 @@ export default {
       await this.chatStore.send(this.id, null, id)
       await this._updateAfterSend
     },
-    async photoProcessed(imageid, imagethumb, image) {
+    photoProcessed(imageid, imagethumb, image) {
       // We have uploaded a photo.  Remove the filepond instance.
       this.uploading = false
 
@@ -518,8 +540,12 @@ export default {
       this.chatBusy = true
 
       // We have uploaded a photo.  Post a chatmessage referencing it.
-      await this.chatStore.send(this.id, null, null, imageid)
-      await this._updateAfterSend()
+      this.imagethumb = imagethumb
+      this.imageid = imageid
+    },
+    removeImage() {
+      this.imageid = null
+      this.imagethumb = null
     },
   },
 }

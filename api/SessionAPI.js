@@ -11,8 +11,8 @@ export default class SessionAPI extends BaseAPI {
     return this.$getv2('/user', params, log)
   }
 
-  save(data) {
-    return this.$patch('/session', data)
+  save(data, log) {
+    return this.$patch('/session', data, log)
   }
 
   login({
@@ -63,8 +63,8 @@ export default class SessionAPI extends BaseAPI {
     return this.$post('/session', { action: 'LostPassword', email })
   }
 
-  unsubscribe(email) {
-    return this.$post('/session', { action: 'Unsubscribe', email })
+  unsubscribe(email, log) {
+    return this.$post('/session', { action: 'Unsubscribe', email }, log)
   }
 
   forget() {

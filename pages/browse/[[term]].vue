@@ -96,7 +96,16 @@
             :review="reviewAboutMe"
           />
         </b-col>
-        <b-col cols="0" lg="3" class="p-0 pl-1"> </b-col>
+        <b-col cols="0" lg="3" class="p-0 pl-1">
+          <VisibleWhen :not="['xs', 'sm']">
+            <ExternalAd
+              ad-unit-path="/22794232631/freegle_product"
+              :dimensions="[300, 250]"
+              div-id="div-gpt-ad-1690904332895-0"
+              class="mt-2"
+            />
+          </VisibleWhen>
+        </b-col>
       </b-row>
     </b-container>
   </client-only>

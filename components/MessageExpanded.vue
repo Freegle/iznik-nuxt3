@@ -33,16 +33,32 @@
       />
       <MessageTextBody :id="id" />
       <MessageReplyInfo :message="message" />
-      <div v-if="validPosition" class="mt-2">
+      <div v-if="validPosition" class="mt-2 d-flex">
         <MessageMap
           v-if="showMap"
           :home="home"
           :position="{ lat: message.lat, lng: message.lng }"
-          class="messagemap"
-          :height="150"
+          class="messagemap flex-grow-1"
+          :height="breakpoint === 'xs' || breakpoint === 'sm' ? 150 : 250"
         />
+        <VisibleWhen :not="['xs', 'sm']" style="width: 300px">
+          <ExternalAd
+            ad-unit-path="/22794232631/freegle_product"
+            :dimensions="[300, 250]"
+            :div-id="'div-gpt-ad-1690904332895-' + id"
+          />
+        </VisibleWhen>
       </div>
       <MessageHistoryExpanded :id="id" class="d-block d-md-none mt-2 mt-md-0" />
+      <VisibleWhen :at="['xs', 'sm']">
+        <div class="d-flex justify-content-around mt-2">
+          <ExternalAd
+            ad-unit-path="/22794232631/freegle_product"
+            :dimensions="[300, 250]"
+            :div-id="'div-gpt-ad-1690904332895-' + id"
+          />
+        </div>
+      </VisibleWhen>
       <MessageReplySection
         v-if="replyable && !replied"
         :id="id"
@@ -68,6 +84,7 @@
 import { useReplyStore } from '../stores/reply'
 import MessageReplyInfo from './MessageReplyInfo'
 import { useMessageStore } from '~/stores/message'
+import { useMiscStore } from '~/stores/misc'
 import MessagePromised from '~/components/MessagePromised'
 import MessageActions from '~/components/MessageActions'
 import MessageTextBody from '~/components/MessageTextBody'
@@ -100,6 +117,11 @@ export default {
       required: false,
       default: true,
     },
+    showAd: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
     hideClose: {
       type: Boolean,
       required: false,
@@ -126,6 +148,10 @@ export default {
     }
   },
   computed: {
+    breakpoint() {
+      const store = useMiscStore()
+      return store.getBreakpoint
+    },
     message() {
       return this.messageStore?.byId(this.id)
     },
