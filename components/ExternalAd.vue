@@ -101,6 +101,7 @@ let shownFirst = false
 
 async function visibilityChanged(visible) {
   if (visible && !shownFirst) {
+    console.log('Ad now visible')
     isVisible.value = visible
     shownFirst = true
 

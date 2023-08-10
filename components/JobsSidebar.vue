@@ -10,7 +10,7 @@
       <donation-button />
     </NoticeMessage>
     <div v-else>
-      <VisibleWhen :not="['xs', 'sm']">
+      <VisibleWhen :not="['xs', 'sm', 'md', 'lg']">
         <ExternalAd
           ad-unit-path="/22794232631/freegle_product"
           :dimensions="[300, 250]"
