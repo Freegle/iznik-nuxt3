@@ -87,7 +87,11 @@
                 variant="warning"
                 class="mt-2 mb-2"
               >
-                We don't recognise that email address. Please email
+                <span v-if="unknown"
+                  >We don't recognise that email address.</span
+                >
+                <span v-else>Something went wrong.</span>
+                Please email
                 <SupportLink /> and they'll help you out.
               </NoticeMessage>
             </div>
@@ -161,6 +165,7 @@ export default {
       emailProblem: false,
       wrongUser: false,
       left: null,
+      unknown: false,
     }
   },
   computed: {
@@ -206,6 +211,7 @@ export default {
       const ret = await this.authStore.forget()
 
       if (ret) {
+        this.unknown = ret?.ret === 2
         this.$refs.forgetfail.show()
       } else {
         useRouter().push('/unsubscribe/unsubscribed')
@@ -214,12 +220,9 @@ export default {
     async emailConfirm() {
       if (this.emailValid) {
         const ret = await this.authStore.unsubscribe(this.email.trim())
-
-        if (ret.ret === 0) {
-          this.emailSent = true
-        } else {
-          this.emailProblem = true
-        }
+        this.emailProblem = !ret.worked
+        this.unknown = ret.unknown
+        this.emailSent = ret.worked
       }
     },
   },
