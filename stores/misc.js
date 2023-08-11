@@ -49,9 +49,21 @@ export const useMiscStore = defineStore({
         this.checkOnline()
       }
     },
+    fetchWithTimeout(url, options, timeout = 7000) {
+      return Promise.race([
+        fetch(url, options),
+        new Promise((resolve, reject) =>
+          setTimeout(() => reject(new Error('timeout')), timeout)
+        ),
+      ])
+    },
     async checkOnline() {
       try {
-        const response = await fetch(this.config.public.APIv2 + '/online')
+        const response = await this.fetchWithTimeout(
+          this.config.public.APIv2 + '/online',
+          null,
+          5000
+        )
         const rsp = await response.json()
 
         if (!this.online) {
@@ -65,7 +77,10 @@ export const useMiscStore = defineStore({
         }
       }
 
-      this.onlineTimer = setTimeout(this.checkOnline, 1000)
+      this.onlineTimer = setTimeout(
+        this.checkOnline,
+        this.visible ? 1000 : 30000
+      )
     },
     waitForOnline() {
       if (this.online) {
