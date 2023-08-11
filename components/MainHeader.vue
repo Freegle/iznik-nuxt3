@@ -246,8 +246,7 @@
         </b-button>
       </b-navbar-brand>
       <div v-else class="p-0">
-        <!--      <b-nav-brand v-else to="/" class="p-0">-->
-        <OfflineIndicator v-if="online" />
+        <OfflineIndicator v-if="!online" />
         <b-img
           v-else
           class="logo mr-2"
@@ -257,7 +256,6 @@
           :src="logo"
           alt="Home"
         />
-        <!--      </b-nav-brand>-->
       </div>
       <div class="d-flex align-items-center">
         <NotificationOptions
