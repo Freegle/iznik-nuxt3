@@ -3,6 +3,7 @@
     v-if="user"
     id="chatrsvpmodal"
     v-model="showModal"
+    scrollable
     :title="chaseup ? 'Shall we chase them up?' : 'Do you expect a reply?'"
     no-stacking
     no-close-on-backdrop

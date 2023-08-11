@@ -2,6 +2,7 @@
   <b-modal
     id="blockmodal"
     v-model="showModal"
+    scrollable
     :title="'Block ' + user.displayname"
     no-stacking
   >

@@ -3,6 +3,7 @@
     <b-modal
       :id="'newsReportModal-' + id"
       v-model="showModal"
+      scrollable
       title="Report a post"
       size="lg"
       no-stacking

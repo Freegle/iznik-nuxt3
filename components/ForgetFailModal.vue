@@ -2,6 +2,7 @@
   <b-modal
     id="forgetfailmodal"
     v-model="showModal"
+    scrollable
     title="Sorry, that didn't work"
     no-stacking
   >

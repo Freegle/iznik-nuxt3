@@ -3,6 +3,7 @@
     <b-modal
       id="messagemodal"
       v-model="showModal"
+      scrollable
       size="lg"
       class="hide-footer"
       body-class="p-0 p-md-3"

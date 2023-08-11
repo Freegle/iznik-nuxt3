@@ -3,6 +3,7 @@
     id="posterAddModal"
     ref="posterAddModal"
     v-model="showModal"
+    scrollable
     title="Thanks!"
     no-stacking
     visible
@@ -14,7 +15,13 @@
       Please drag/zoom the map until the marker shows where the poster is.
     </notice-message>
     <client-only>
-      <DraggableMap v-if="loaded" ref="map" :initial-zoom="7" class="mb-2" :max-zoom="17" />
+      <DraggableMap
+        v-if="loaded"
+        ref="map"
+        :initial-zoom="7"
+        class="mb-2"
+        :max-zoom="17"
+      />
     </client-only>
     <h4>Please add more info</h4>
     <b-form-input

@@ -81,6 +81,7 @@
       v-if="story.image"
       ref="photoModal"
       v-model="showPhotoModal"
+      scrollable
       title="Story Photo"
       generator-unable-to-provide-required-alt=""
       size="lg"

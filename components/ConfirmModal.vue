@@ -1,5 +1,5 @@
 <template>
-  <b-modal id="confirmmodal" v-model="showModal" :title="title">
+  <b-modal id="confirmmodal" v-model="showModal" scrollable :title="title">
     <template #default>
       <!-- eslint-disable-next-line -->
       <div v-html="message" />

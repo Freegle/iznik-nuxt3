@@ -33,6 +33,7 @@
     </span>
     <b-modal
       v-model="showRemove"
+      scrollable
       title="Removing a rating"
       ok-title="Remove rating"
       @ok="removeRating"
@@ -47,6 +48,7 @@
     </b-modal>
     <b-modal
       v-model="showDown"
+      scrollable
       title="Giving a Thumbs Down..."
       ok-title="Submit"
       @ok="doSomeoneDown"

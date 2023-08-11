@@ -3,6 +3,7 @@
     <b-modal
       id="addressmodal"
       v-model="showModal"
+      scrollable
       :title="choose ? 'Please choose an address' : 'Address Book'"
       :alt="choose ? 'Please choose an address' : 'Address Book'"
       size="lg"

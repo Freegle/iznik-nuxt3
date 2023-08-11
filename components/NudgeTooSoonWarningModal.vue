@@ -2,6 +2,7 @@
   <b-modal
     id="nudgetoosoonwarningmodal"
     v-model="showModal"
+    scrollable
     title="Nudging"
     no-stacking
   >

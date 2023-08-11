@@ -2,6 +2,7 @@
   <b-modal
     id="aboutmemodal"
     v-model="showModal"
+    scrollable
     :title="
       !review
         ? 'Why not complete your public profile?'

@@ -48,6 +48,7 @@
       v-if="newsfeed.image"
       ref="showNewsPhotoModal"
       v-model="showNewsPhotoModal"
+      scrollable
       title="ChitChat photo"
       generator-unable-to-provide-required-alt=""
       size="lg"

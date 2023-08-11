@@ -1,5 +1,11 @@
 <template>
-  <b-modal id="blockmodal" v-model="showModal" :title="title" no-stacking>
+  <b-modal
+    id="blockmodal"
+    v-model="showModal"
+    scrollable
+    :title="title"
+    no-stacking
+  >
     <template #default>
       <b-row>
         <b-col>

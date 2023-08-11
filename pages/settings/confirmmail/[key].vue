@@ -7,6 +7,7 @@
           <b-modal
             id="successmodal"
             v-model="succeeded"
+            scrollable
             title="Verification Succeeded"
             no-stacking
           >
@@ -30,6 +31,7 @@
           <b-modal
             id="failuremodal"
             v-model="failed"
+            scrollable
             title="Verification Failed"
             no-stacking
           >
@@ -63,6 +65,7 @@
           <b-modal
             id="retrymodal"
             v-model="resent"
+            scrollable
             title="Verification Sent"
             no-stacking
           >

@@ -2,6 +2,7 @@
   <b-modal
     :id="'newsPhotoModal-' + id"
     v-model="showModal"
+    scrollable
     title="ChitChat photo"
     size="lg"
     no-stacking

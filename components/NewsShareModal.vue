@@ -3,6 +3,7 @@
     <b-modal
       :id="'newsShareModal-' + newsfeed.id"
       v-model="showModal"
+      scrollable
       title="Share chitchat"
       size="lg"
       no-stacking

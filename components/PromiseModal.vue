@@ -2,6 +2,7 @@
   <b-modal
     id="promisemodal"
     v-model="showModal"
+    scrollable
     title="Promise something to someone"
     size="lg"
     no-stacking

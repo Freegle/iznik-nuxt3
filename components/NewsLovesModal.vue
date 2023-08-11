@@ -3,6 +3,7 @@
     <b-modal
       :id="'newsLovesModal-' + id"
       v-model="showModal"
+      scrollable
       :title="title"
       no-stacking
     >

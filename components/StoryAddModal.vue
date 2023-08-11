@@ -2,6 +2,7 @@
   <b-modal
     id="storyaddemodal"
     v-model="showModal"
+    scrollable
     :title="thankyou ? 'Thank you!' : 'Your Story'"
     size="lg"
     no-stacking

@@ -11,6 +11,7 @@
     :no-close-on-esc="forceLogin"
     hide-footer
     modal-class="verytop"
+    scrollable
   >
     <!-- This is required as the default bootstrap component makes the main title an h5 -->
     <template #title>
