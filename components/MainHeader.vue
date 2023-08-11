@@ -235,7 +235,8 @@
       class="ourBack d-flex justify-content-between d-xl-none"
       fixed="top"
     >
-      <b-navbar-brand v-if="showBackButton" class="p-0">
+      <OfflineIndicator v-if="!online" />
+      <b-navbar-brand v-else-if="showBackButton" class="p-0">
         <b-button
           ref="backButton"
           variant="white"
@@ -246,9 +247,7 @@
         </b-button>
       </b-navbar-brand>
       <div v-else class="p-0">
-        <OfflineIndicator v-if="!online" />
         <b-img
-          v-else
           class="logo mr-2"
           height="58"
           width="58"
