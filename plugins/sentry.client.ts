@@ -61,6 +61,7 @@ export default defineNuxtPlugin((nuxtApp) => {
 
       if (
         userAgent.includes('bingpreview') ||
+        userAgent.includes('bingbot') ||
         userAgent.includes('linespider') ||
         userAgent.includes('yisou')
       ) {
