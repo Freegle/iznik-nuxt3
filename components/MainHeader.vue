@@ -247,7 +247,9 @@
       </b-navbar-brand>
       <div v-else class="p-0">
         <!--      <b-nav-brand v-else to="/" class="p-0">-->
+        <OfflineIndicator v-if="online" />
         <b-img
+          v-else
           class="logo mr-2"
           height="58"
           width="58"

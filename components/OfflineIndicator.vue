@@ -2,11 +2,13 @@
   <div class="pulsate">
     <div class="d-flex justify-content-around">
       <div class="stacked" title="Network is offline">
-        <v-icon icon="cloud" size="2x" />
-        <v-icon icon="ban" class="ml-3 mt-1 text-danger" />
+        <v-icon icon="cloud" class="text-white" size="2x" />
+        <v-icon icon="ban" class="marg mt-1 text-danger" />
       </div>
     </div>
-    <div class="d-flex justify-content-around text--smallest mb-1">Offline</div>
+    <div class="d-flex justify-content-around text--smallest text-white mb-1">
+      Offline
+    </div>
   </div>
 </template>
 <style scoped lang="scss">
@@ -31,6 +33,9 @@
 .pulsate {
   width: 66px;
   height: 58px;
-  padding: 0px;
+}
+
+.marg {
+  margin-left: 12px;
 }
 </style>
