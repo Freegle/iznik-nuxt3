@@ -11,8 +11,11 @@ let requestId = 0
 // Note that $fetch and useFetch cause problems on Node v18, so we don't use them.
 const ourFetch = fetchRetry(fetch, {
   retries: 10,
-  retryOn: (attempt, error, response) => {
-    if (useMiscStore()?.unloading) {
+  retryOn: async (attempt, error, response) => {
+    const miscStore = useMiscStore()
+    await miscStore.waitForOnline()
+
+    if (miscStore?.unloading) {
       // Don't retry if we're unloading.
       console.log("Unloading - don't retry")
       return false
@@ -124,7 +127,9 @@ export default class BaseAPI {
         body = JSON.stringify(config.data)
       }
 
-      useMiscStore().api(1)
+      const miscStore = useMiscStore()
+      await miscStore.waitForOnline()
+      miscStore.api(1)
 
       const rsp = await ourFetch(this.config.public.APIv1 + path, {
         ...config,
@@ -388,7 +393,9 @@ export default class BaseAPI {
         body = JSON.stringify(config.data)
       }
 
-      useMiscStore().api(1)
+      const miscStore = useMiscStore()
+      await miscStore.waitForOnline()
+      miscStore.api(1)
 
       const rsp = await ourFetch(this.config.public.APIv2 + path, {
         ...config,

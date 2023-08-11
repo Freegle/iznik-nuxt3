@@ -24,8 +24,13 @@ export const useMiscStore = defineStore({
     visible: true,
     apiCount: 0,
     unloading: false,
+    onlineTimer: null,
+    online: true,
   }),
   actions: {
+    init(config) {
+      this.config = config
+    },
     set(params) {
       this.vals[params.key] = params.value
     },
@@ -37,6 +42,45 @@ export const useMiscStore = defineStore({
     },
     api(diff) {
       this.apiCount += diff
+    },
+    startOnlineCheck() {
+      // navigator.onLine is not reliable, so we ping the server.
+      if (!this.onlineTimer) {
+        this.checkOnline()
+      }
+    },
+    async checkOnline() {
+      try {
+        const response = await fetch(this.config.public.APIv2 + '/online')
+        const rsp = await response.json()
+
+        if (!this.online) {
+          console.log('Back online')
+          this.online = rsp.online
+        }
+      } catch (e) {
+        if (this.online) {
+          console.log('Gone offline')
+          this.online = false
+        }
+      }
+
+      this.onlineTimer = setTimeout(this.checkOnline, 1000)
+    },
+    waitForOnline() {
+      if (this.online) {
+        return
+      }
+
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          if (this.online) {
+            resolve()
+          } else {
+            this.waitForOnline().then(resolve)
+          }
+        }, 1000)
+      })
     },
   },
   getters: {

@@ -7,7 +7,9 @@
       fixed="top"
     >
       <nuxt-link :to="homePage" class="navbar-brand p-0" no-prefetch>
+        <OfflineIndicator v-if="!online" />
         <b-img
+          v-else
           class="logo mr-2"
           height="58"
           width="58"
@@ -475,6 +477,7 @@ import { useNewsfeedStore } from '../stores/newsfeed'
 import { useMessageStore } from '../stores/message'
 import { useNotificationStore } from '../stores/notification'
 import { useLogoStore } from '../stores/logo'
+import OfflineIndicator from './OfflineIndicator'
 import { useAuthStore } from '~/stores/auth'
 import { ref, watch, computed, onMounted, defineAsyncComponent } from '#imports'
 import { waitForRef } from '~/composables/useWaitForRef'
@@ -497,6 +500,7 @@ const logoStore = useLogoStore()
 const route = useRoute()
 const router = useRouter()
 
+const online = computed(() => miscStore.online)
 const myid = computed(() => authStore.user?.id)
 const distance = ref(1000)
 const logo = ref('/icon.png')
