@@ -138,9 +138,11 @@ export const useAuthStore = defineStore({
       const loginCount = this.loginCount
       const config = this.config
       const api = this.$api
+      const loggedInEver = this.loggedInEver
       this.$reset()
       this.loginCount = loginCount
       this.config = config
+      this.loggedInEver = loggedInEver
       this.$api = api
     },
     async forget() {
