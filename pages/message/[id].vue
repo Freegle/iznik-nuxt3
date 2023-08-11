@@ -63,6 +63,7 @@
               :start-expanded="true"
               hide-close
               record-view
+              message-page
               @not-found="error = true"
             />
           </div>

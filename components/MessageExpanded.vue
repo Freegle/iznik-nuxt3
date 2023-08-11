@@ -43,9 +43,9 @@
         />
         <VisibleWhen :not="['xs', 'sm']" style="width: 300px">
           <ExternalAd
-            ad-unit-path="/22794232631/freegle_product"
+            :ad-unit-path="adUnit"
             :dimensions="[300, 250]"
-            :div-id="'div-gpt-ad-1690904332895-' + id"
+            :div-id="adId"
           />
         </VisibleWhen>
       </div>
@@ -53,9 +53,9 @@
       <VisibleWhen :at="['xs', 'sm']">
         <div class="d-flex justify-content-around mt-2">
           <ExternalAd
-            ad-unit-path="/22794232631/freegle_product"
+            :ad-unit-path="adUnit"
             :dimensions="[300, 250]"
-            :div-id="'div-gpt-ad-1690904332895-' + id"
+            :div-id="adId"
           />
         </div>
       </VisibleWhen>
@@ -137,6 +137,11 @@ export default {
       required: false,
       default: true,
     },
+    messagePage: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   setup() {
     const messageStore = useMessageStore()
@@ -204,6 +209,18 @@ export default {
       }
 
       return ret
+    },
+    adUnit() {
+      return this.messagePage
+        ? '/22794232631/freegle_productemail'
+        : '/22794232631/freegle_product'
+    },
+    adId() {
+      return (
+        (this.messagePage
+          ? 'div-gpt-ad-1690904387964'
+          : 'div-gpt-ad-1690904332895-') + this.id
+      )
     },
   },
   methods: {
