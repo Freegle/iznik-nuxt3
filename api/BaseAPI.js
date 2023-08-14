@@ -15,8 +15,8 @@ const ourFetch = fetchRetry(fetch, {
     const miscStore = useMiscStore()
     await miscStore.waitForOnline()
 
-    if (miscStore?.unloading) {
-      // Don't retry if we're unloading.
+    if (miscStore?.unloading || !miscStore?.online) {
+      // Don't retry if we're unloading or not online.
       console.log("Unloading - don't retry")
       return false
     }
