@@ -117,11 +117,6 @@ export default {
       required: false,
       default: true,
     },
-    showAd: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
     hideClose: {
       type: Boolean,
       required: false,
@@ -143,7 +138,7 @@ export default {
       default: false,
     },
   },
-  setup() {
+  setup(props) {
     const messageStore = useMessageStore()
     return { messageStore }
   },
