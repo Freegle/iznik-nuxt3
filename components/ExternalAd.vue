@@ -77,7 +77,7 @@ function checkSize() {
     const height = rect.height
 
     if (height < 50) {
-      adShown.value = false
+      // adShown.value = false
     } else {
       setTimeout(checkSize, 500)
     }
