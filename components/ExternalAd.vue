@@ -78,6 +78,8 @@ onBeforeUnmount(() => {
 const isVisible = ref(false)
 let shownFirst = false
 
+const emit = defineEmits(['rendered'])
+
 async function visibilityChanged(visible) {
   if (visible && !shownFirst) {
     isVisible.value = visible
@@ -93,9 +95,12 @@ async function visibilityChanged(visible) {
         .addService(window.googletag.pubads())
 
       window.googletag.pubads().addEventListener('slotRenderEnded', (event) => {
-        if (event?.slot === slot && event?.slot?.isEmpty) {
+        console.log('Slot rendered', event)
+        if (event?.slot === slot && event?.isEmpty) {
           adShown.value = false
         }
+
+        emit('rendered', adShown.value)
       })
 
       window.googletag.pubads().enableSingleRequest()

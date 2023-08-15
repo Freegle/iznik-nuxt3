@@ -35,27 +35,29 @@
       <MessageReplyInfo :message="message" />
       <div v-if="validPosition" class="mt-2 d-flex">
         <MessageMap
-          v-if="showMap"
+          v-if="showMap && adRendered"
           :home="home"
           :position="{ lat: message.lat, lng: message.lng }"
           class="messagemap flex-grow-1"
           :height="breakpoint === 'xs' || breakpoint === 'sm' ? 150 : 250"
         />
-        <VisibleWhen :not="['xs', 'sm']" style="width: 300px">
+        <VisibleWhen v-if="showAd" :not="['xs', 'sm']" style="width: 300px">
           <ExternalAd
             :ad-unit-path="adUnit"
             :dimensions="[300, 250]"
             :div-id="adId"
+            @rendered="adRendered = true"
           />
         </VisibleWhen>
       </div>
       <MessageHistoryExpanded :id="id" class="d-block d-md-none mt-2 mt-md-0" />
-      <VisibleWhen :at="['xs', 'sm']">
+      <VisibleWhen v-if="showAd" :at="['xs', 'sm']">
         <div class="d-flex justify-content-around mt-2">
           <ExternalAd
             :ad-unit-path="adUnit"
             :dimensions="[300, 250]"
             :div-id="adId"
+            @rendered="adRendered = true"
           />
         </div>
       </VisibleWhen>
@@ -117,6 +119,11 @@ export default {
       required: false,
       default: true,
     },
+    showAd: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
     hideClose: {
       type: Boolean,
       required: false,
@@ -145,6 +152,7 @@ export default {
   data() {
     return {
       replied: false,
+      adRendered: false,
     }
   },
   computed: {
