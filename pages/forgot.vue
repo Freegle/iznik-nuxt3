@@ -12,12 +12,22 @@
           set up for Freegle, then enter your email address and we'll mail you a
           link so that you can log in.
         </p>
-        <b-alert variant="danger" :model-value="error">
-          {{ error }}
-        </b-alert>
-        <b-alert variant="warning" :model-value="response">
+        <b-alert variant="warning" :model-value="worked">
           We've sent you a link to log in. If you don't see it, please check
           your spam folder!
+        </b-alert>
+        <b-alert variant="danger" :model-value="error">
+          Something went wrong. If this happens again, please contact
+          <ExternalLink href="mailto:support@ilovefreegle.org"
+            >support@ilovefreegle.org</ExternalLink
+          >.
+        </b-alert>
+        <b-alert variant="danger" :model-value="unknown">
+          We don't know that email address. If you have trouble finding your
+          account, please mail
+          <ExternalLink href="mailto:support@ilovefreegle.org"
+            >support@ilovefreegle.org</ExternalLink
+          >.
         </b-alert>
         <EmailValidator
           ref="email"
@@ -26,7 +36,7 @@
           size="lg"
         />
         <SpinButton
-          v-if="emailValid && !response"
+          v-if="emailValid && !worked"
           name="envelope"
           spinclass="success"
           variant="primary"
@@ -80,9 +90,10 @@ export default {
   data() {
     return {
       error: null,
+      worked: false,
+      unknown: false,
       email: null,
       emailValid: false,
-      response: false,
     }
   },
   mounted() {
@@ -92,13 +103,15 @@ export default {
   },
   methods: {
     async mail() {
-      const res = await this.authStore.lostPassword(this.email)
+      this.error = null
+      this.worked = false
+      this.unknown = false
 
-      if (res.ret === 0) {
-        this.response = true
-      } else {
-        this.error = res.status
-      }
+      const ret = await this.authStore.lostPassword(this.email)
+
+      this.error = !ret.worked && !ret.unknown
+      this.unknown = ret.unknown
+      this.worked = ret.worked
     },
   },
 }

@@ -176,7 +176,30 @@ export const useAuthStore = defineStore({
       this.loginCount++
     },
     async lostPassword(email) {
-      return await this.$api.session.lostPassword(email)
+      let unknown = false
+      let worked = false
+
+      try {
+        await this.$api.session.lostPassword(email, function (data) {
+          let logIt
+
+          if (data && data.ret === 2) {
+            // Don't log errors if the email is not recognised.
+            logIt = false
+            unknown = true
+          } else {
+            logIt = true
+          }
+
+          return logIt
+        })
+
+        worked = true
+      } catch (e) {
+        console.log('Lost password error', e)
+      }
+
+      return { unknown, worked }
     },
     async unsubscribe(email) {
       let unknown = false
