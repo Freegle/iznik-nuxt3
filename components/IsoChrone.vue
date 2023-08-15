@@ -300,7 +300,7 @@ export default {
       this.pc = null
     },
     async add() {
-      if (this.pc) {
+      if (this.pc?.id) {
         await this.isochroneStore.add({
           minutes: this.minutes,
           transport: this.transport,
