@@ -9,7 +9,7 @@
       <b-col cols="12" md="6" class="bg-white pt-4">
         <p v-if="isApp">
           If you like this app - or not - <a href='#' class="d-inline" @click="showRateMe">please leave a review</a>.<br />
-          Mobile app version: {{ mobileVersion }}.
+          Mobile app version: {{ mobileVersion }}, built {{ version }}
           <span style="display:none;">{{ mobileInfo }}</span>
         </p>
         <RateAppModal v-if="isApp" ref="rateappmodal" />
@@ -416,7 +416,7 @@ export default {
       const runtimeConfig = useRuntimeConfig()
       return runtimeConfig.public.MOBILE_VERSION
     },
-     mobileInfo() {
+    mobileInfo() {
       const mobileStore = useMobileStore()
       return mobileStore.devicePersistentId;
     },
