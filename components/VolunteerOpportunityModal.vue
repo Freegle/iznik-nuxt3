@@ -1,5 +1,11 @@
 <template>
-  <b-modal id="profilemodal" v-model="showModal" size="lg" no-stacking>
+  <b-modal
+    id="profilemodal"
+    v-model="showModal"
+    scrollable
+    size="lg"
+    no-stacking
+  >
     <template #header>
       <h4 v-if="added">Your opportunity has been added</h4>
       <h4 v-else-if="editing">

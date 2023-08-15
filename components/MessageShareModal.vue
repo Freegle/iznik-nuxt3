@@ -1,5 +1,11 @@
 <template>
-  <b-modal id="sharemodal" v-model="showModal" title="Share a post" size="lg">
+  <b-modal
+    id="sharemodal"
+    v-model="showModal"
+    scrollable
+    title="Share a post"
+    size="lg"
+  >
     <template #default>
       <div v-if="message">
         <h3>

@@ -26,6 +26,7 @@
           :actions="actions"
           :show-map="true"
           class="bg-white p-2"
+          :message-page="messagePage"
           @zoom="showPhotosModal"
         />
         <MessagePhotosModal :id="message.id" ref="photoModal" />
@@ -106,6 +107,11 @@ export default {
       required: true,
     },
     scrollIntoView: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    messagePage: {
       type: Boolean,
       required: false,
       default: false,

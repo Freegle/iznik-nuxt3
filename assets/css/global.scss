@@ -256,12 +256,11 @@ legend {
 }
 
 .pulsate {
-  -webkit-animation: pulsate 1s ease-out;
-  -webkit-animation-iteration-count: infinite;
   opacity: 0.5;
+  animation: pulsate 1.5s infinite;
 }
 
-@-webkit-keyframes pulsate {
+@keyframes pulsate {
   0% {
     opacity: 0.25;
   }

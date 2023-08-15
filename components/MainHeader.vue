@@ -7,7 +7,9 @@
       fixed="top"
     >
       <nuxt-link :to="homePage" class="navbar-brand p-0" no-prefetch>
+        <OfflineIndicator v-if="!online" />
         <b-img
+          v-else
           class="logo mr-2"
           height="58"
           width="58"
@@ -233,7 +235,8 @@
       class="ourBack d-flex justify-content-between d-xl-none"
       fixed="top"
     >
-      <b-navbar-brand v-if="showBackButton" class="p-0">
+      <OfflineIndicator v-if="!online" />
+      <b-navbar-brand v-else-if="showBackButton" class="p-0">
         <b-button
           ref="backButton"
           variant="white"
@@ -244,7 +247,6 @@
         </b-button>
       </b-navbar-brand>
       <div v-else class="p-0">
-        <!--      <b-nav-brand v-else to="/" class="p-0">-->
         <b-img
           class="logo mr-2"
           height="58"
@@ -253,7 +255,6 @@
           :src="logo"
           alt="Home"
         />
-        <!--      </b-nav-brand>-->
       </div>
       <div class="d-flex align-items-center">
         <div v-if="isApp && loggedIn" class="text-white mr-3">
@@ -480,6 +481,7 @@ import { useNewsfeedStore } from '../stores/newsfeed'
 import { useMessageStore } from '../stores/message'
 import { useNotificationStore } from '../stores/notification'
 import { useLogoStore } from '../stores/logo'
+import OfflineIndicator from './OfflineIndicator'
 import { useAuthStore } from '~/stores/auth'
 import { ref, watch, computed, onMounted, defineAsyncComponent } from '#imports'
 import { waitForRef } from '~/composables/useWaitForRef'
@@ -503,6 +505,7 @@ const logoStore = useLogoStore()
 const route = useRoute()
 const router = useRouter()
 
+const online = computed(() => miscStore.online)
 const myid = computed(() => authStore.user?.id)
 const distance = ref(1000)
 const logo = ref('/icon.png')

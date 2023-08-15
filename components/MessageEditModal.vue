@@ -4,6 +4,7 @@
       v-if="message"
       id="aboutmemodal"
       v-model="showModal"
+      scrollable
       size="lg"
       title-class="w-100"
     >

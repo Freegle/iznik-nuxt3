@@ -2,6 +2,7 @@
   <b-modal
     id="chatreportmodal"
     v-model="showModal"
+    scrollable
     title="Oh dear..."
     size="lg"
     no-stacking

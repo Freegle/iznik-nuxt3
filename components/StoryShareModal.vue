@@ -3,6 +3,7 @@
     <b-modal
       :id="'storyShareModal-' + story?.id"
       v-model="showModal"
+      scrollable
       :title="'Share &quot;' + story?.headline + '&quot;'"
       size="lg"
       no-stacking

@@ -3,6 +3,7 @@
     <b-modal
       id="donationaskmodal"
       v-model="showModal"
+      scrollable
       :title="'Please help keep ' + groupname + ' running'"
       size="lg"
       no-stacking

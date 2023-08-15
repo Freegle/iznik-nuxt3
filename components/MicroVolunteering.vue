@@ -3,6 +3,7 @@
     <client-only v-if="me">
       <b-modal
         v-model="showInvite"
+        scrollable
         variant="info"
         size="lg"
         no-stacking
@@ -55,6 +56,7 @@
       </b-modal>
       <b-modal
         v-model="showTask"
+        scrollable
         variant="info"
         size="lg"
         :no-close-on-backdrop="force"

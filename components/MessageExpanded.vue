@@ -35,27 +35,29 @@
       <MessageReplyInfo :message="message" />
       <div v-if="validPosition" class="mt-2 d-flex">
         <MessageMap
-          v-if="showMap"
+          v-if="showMap && adRendered"
           :home="home"
           :position="{ lat: message.lat, lng: message.lng }"
           class="messagemap flex-grow-1"
           :height="breakpoint === 'xs' || breakpoint === 'sm' ? 150 : 250"
         />
-        <VisibleWhen :not="['xs', 'sm']" style="width: 300px">
+        <VisibleWhen v-if="showAd" :not="['xs', 'sm']" style="width: 300px">
           <ExternalAd
-            ad-unit-path="/22794232631/freegle_product"
+            :ad-unit-path="adUnit"
             :dimensions="[300, 250]"
-            :div-id="'div-gpt-ad-1690904332895-' + id"
+            :div-id="adId"
+            @rendered="adRendered = true"
           />
         </VisibleWhen>
       </div>
       <MessageHistoryExpanded :id="id" class="d-block d-md-none mt-2 mt-md-0" />
-      <VisibleWhen :at="['xs', 'sm']">
+      <VisibleWhen v-if="showAd" :at="['xs', 'sm']">
         <div class="d-flex justify-content-around mt-2">
           <ExternalAd
-            ad-unit-path="/22794232631/freegle_product"
+            :ad-unit-path="adUnit"
             :dimensions="[300, 250]"
-            :div-id="'div-gpt-ad-1690904332895-' + id"
+            :div-id="adId"
+            @rendered="adRendered = true"
           />
         </div>
       </VisibleWhen>
@@ -137,14 +139,20 @@ export default {
       required: false,
       default: true,
     },
+    messagePage: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
-  setup() {
+  setup(props) {
     const messageStore = useMessageStore()
     return { messageStore }
   },
   data() {
     return {
       replied: false,
+      adRendered: false,
     }
   },
   computed: {
@@ -204,6 +212,18 @@ export default {
       }
 
       return ret
+    },
+    adUnit() {
+      return this.messagePage
+        ? '/22794232631/freegle_productemail'
+        : '/22794232631/freegle_product'
+    },
+    adId() {
+      return (
+        (this.messagePage
+          ? 'div-gpt-ad-1690904387964'
+          : 'div-gpt-ad-1690904332895-') + this.id
+      )
     },
   },
   methods: {

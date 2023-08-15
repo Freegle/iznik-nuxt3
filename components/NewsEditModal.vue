@@ -3,6 +3,7 @@
     :id="'newsEdit-' + id"
     ref="editModal"
     v-model="showModal"
+    scrollable
     title="Edit your post"
     size="lg"
     no-stacking

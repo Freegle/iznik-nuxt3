@@ -123,6 +123,7 @@
       v-if="showNewUser"
       id="newUserModal"
       ref="newUserModal"
+      scrollable
       ok-only
       ok-title="Close and Continue"
       title="Welcome to Freegle!"

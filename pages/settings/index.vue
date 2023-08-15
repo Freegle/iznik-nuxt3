@@ -1011,21 +1011,23 @@ export default {
       }, 2000)
     },
     async savePostcode() {
-      const settings = this.me.settings
-      this.savingPostcode = true
+      if (this.pc?.id) {
+        const settings = this.me.settings
+        this.savingPostcode = true
 
-      if (!settings?.mylocation || settings?.mylocation.id !== this.pc.id) {
-        settings.mylocation = this.pc
-        await this.authStore.saveAndGet({
-          settings,
-        })
+        if (!settings?.mylocation || settings?.mylocation.id !== this.pc.id) {
+          settings.mylocation = this.pc
+          await this.authStore.saveAndGet({
+            settings,
+          })
+        }
+
+        this.savingPostcode = false
+        this.savedPostcode = true
+        setTimeout(() => {
+          this.savedPostcode = false
+        }, 2000)
       }
-
-      this.savingPostcode = false
-      this.savedPostcode = true
-      setTimeout(() => {
-        this.savedPostcode = false
-      }, 2000)
     },
     toggleAdvanced(e) {
       e.preventDefault()

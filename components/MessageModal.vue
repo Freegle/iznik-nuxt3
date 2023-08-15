@@ -3,6 +3,7 @@
     <b-modal
       id="messagemodal"
       v-model="showModal"
+      scrollable
       size="lg"
       class="hide-footer"
       body-class="p-0 p-md-3"
@@ -42,7 +43,7 @@
             </div>
           </div>
           <MessageExpanded
-            v-else
+            v-else-if="bumpMessage"
             :id="id"
             :key="bumpMessage"
             :replyable="replyable"
@@ -104,7 +105,7 @@ export default {
     return {
       modalShown: false,
       showImages: false,
-      bumpMessage: 1,
+      bumpMessage: 0,
     }
   },
   computed: {

@@ -3,6 +3,7 @@
     v-if="message"
     id="photoModal"
     v-model="showModal"
+    scrollable
     :title="message.subject"
     size="lg"
     ok-only

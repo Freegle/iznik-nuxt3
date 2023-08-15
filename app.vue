@@ -40,6 +40,7 @@ import { useDomainStore } from './stores/domain'
 import { useLogoStore } from './stores/logo'
 import { useLocationStore } from './stores/location'
 import { useShortlinkStore } from './stores/shortlinks'
+import { useMiscStore } from './stores/misc'
 import { computed, watch, reloadNuxtApp } from '#imports'
 
 const route = useRoute()
@@ -55,6 +56,7 @@ let ready = false
 // this is, but we don't expect the config to change, so we take a copy here.
 const runtimeConfig = JSON.parse(JSON.stringify(useRuntimeConfig()))
 
+const miscStore = useMiscStore()
 const groupStore = useGroupStore()
 const messageStore = useMessageStore()
 const authStore = useAuthStore()
@@ -86,6 +88,7 @@ const logoStore = useLogoStore()
 const locationStore = useLocationStore()
 const shortlinkStore = useShortlinkStore()
 
+miscStore.init(runtimeConfig)
 groupStore.init(runtimeConfig)
 messageStore.init(runtimeConfig)
 authStore.init(runtimeConfig)

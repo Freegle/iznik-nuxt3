@@ -3,6 +3,7 @@
     <b-modal
       id="supportermodal"
       v-model="showModal"
+      scrollable
       title="What are Freegle Supporters?"
     >
       <template #default>

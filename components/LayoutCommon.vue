@@ -81,6 +81,10 @@ export default {
       // We have an animation on the loader so that it only becomes visible after ~10s.  That prevents page flicker
       // if we manage to get up and running rapidly.
       this.showLoader = false
+
+      // Start online checker
+      const miscStore = useMiscStore()
+      miscStore.startOnlineCheck()
     }
 
     if (this.me) {

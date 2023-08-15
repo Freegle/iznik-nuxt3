@@ -69,39 +69,19 @@ let slot = null
 
 const adShown = ref(true)
 
-function checkSize() {
-  // Get size of the div
-  const div = document.getElementById(props.divId)
-  if (div) {
-    const rect = div.getBoundingClientRect()
-    const height = rect.height
-
-    if (height < 50) {
-      adShown.value = false
-    } else {
-      setTimeout(checkSize, 500)
-    }
-  }
-}
-
-const sizeTimer = setTimeout(checkSize, 500)
-
 onBeforeUnmount(() => {
   if (window.googletag?.destroySlots) {
     window.googletag.destroySlots([slot])
-  }
-
-  if (sizeTimer) {
-    clearTimeout(sizeTimer)
   }
 })
 
 const isVisible = ref(false)
 let shownFirst = false
 
+const emit = defineEmits(['rendered'])
+
 async function visibilityChanged(visible) {
   if (visible && !shownFirst) {
-    console.log('Ad now visible')
     isVisible.value = visible
     shownFirst = true
 
@@ -113,6 +93,16 @@ async function visibilityChanged(visible) {
       slot = window.googletag
         .defineSlot(uniqueid.value, [props.dimensions], props.divId)
         .addService(window.googletag.pubads())
+
+      window.googletag.pubads().addEventListener('slotRenderEnded', (event) => {
+        console.log('Slot rendered', event)
+        if (event?.slot === slot && event?.isEmpty) {
+          adShown.value = false
+        }
+
+        emit('rendered', adShown.value)
+      })
+
       window.googletag.pubads().enableSingleRequest()
       window.googletag.enableServices()
     })

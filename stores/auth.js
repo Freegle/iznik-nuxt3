@@ -160,9 +160,11 @@ export const useAuthStore = defineStore({
       const loginCount = this.loginCount
       const config = this.config
       const api = this.$api
+      const loggedInEver = this.loggedInEver
       this.$reset()
       this.loginCount = loginCount
       this.config = config
+      this.loggedInEver = loggedInEver
       this.$api = api
     },
     async forget() {
@@ -199,18 +201,30 @@ export const useAuthStore = defineStore({
       return await this.$api.session.lostPassword(email)
     },
     async unsubscribe(email) {
-      return await this.$api.session.unsubscribe(email, function (data) {
-        let logIt
+      let unknown = false
+      let worked = false
 
-        if (data && data.ret === 2) {
-          // Don't log errors if the email is not recognised.
-          logIt = false
-        } else {
-          logIt = true
-        }
+      try {
+        await this.$api.session.unsubscribe(email, function (data) {
+          let logIt
 
-        return logIt
-      })
+          if (data && data.ret === 2) {
+            // Don't log errors if the email is not recognised.
+            logIt = false
+            unknown = true
+          } else {
+            logIt = true
+          }
+
+          return logIt
+        })
+
+        worked = true
+      } catch (e) {
+        console.log('Unsubscribe error', e)
+      }
+
+      return { unknown, worked }
     },
     async signUp(params) {
       const res = await this.$api.user.signUp(params, false)

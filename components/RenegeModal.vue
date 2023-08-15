@@ -2,6 +2,7 @@
   <b-modal
     id="promisemodal"
     v-model="showModal"
+    scrollable
     title="Remove a promise"
     size="lg"
   >

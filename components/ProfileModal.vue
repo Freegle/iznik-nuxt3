@@ -2,6 +2,7 @@
   <b-modal
     id="profilemodal"
     v-model="showModal"
+    scrollable
     size="lg"
     title-class="w-100"
     header-class="p-0"
@@ -9,7 +10,12 @@
   >
     <template #title>
       <div class="w-100 coverphoto">
-        <ProfileHeader :id="id" class="flex-grow-1 px-3 py-2" :close-on-message="closeOnMessage" @close="hide" />
+        <ProfileHeader
+          :id="id"
+          class="flex-grow-1 px-3 py-2"
+          :close-on-message="closeOnMessage"
+          @close="hide"
+        />
       </div>
     </template>
     <template #default>

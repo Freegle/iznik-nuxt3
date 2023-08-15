@@ -31,7 +31,14 @@
       size="sm"
       class="ml-1 mb-1 mt-1 inline"
     />
-    <b-modal ref="photoModal" v-model="zoom" size="lg" no-stacking ok-only>
+    <b-modal
+      ref="photoModal"
+      v-model="zoom"
+      scrollable
+      size="lg"
+      no-stacking
+      ok-only
+    >
       <template #default>
         <b-img
           v-if="chatmessage.image"

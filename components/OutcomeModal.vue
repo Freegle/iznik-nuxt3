@@ -4,6 +4,7 @@
       v-if="message"
       id="promisemodal"
       v-model="showModal"
+      scrollable
       size="lg"
       no-stacking
       dialog-class="maxWidth"

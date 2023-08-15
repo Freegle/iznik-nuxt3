@@ -3,6 +3,7 @@
     id="emailConfirmModal"
     ref="emailConfirmModal"
     v-model="showModal"
+    scrollable
     title="Please check your mailbox"
     no-stacking
     size="lg"

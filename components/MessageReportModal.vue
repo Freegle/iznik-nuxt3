@@ -3,6 +3,7 @@
     <b-modal
       :id="'messageReportModal-' + message.id"
       v-model="showModal"
+      scrollable
       :title="'Report ' + message.subject"
       size="lg"
     >
