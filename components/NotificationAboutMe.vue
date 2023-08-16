@@ -1,5 +1,5 @@
 <template>
-  <div class="clickme d-flex">
+  <div class="clickme d-flex" @click="showModal">
     <div class="d-flex flex-column justify-content-around">
       <ProfileImage
         image="/icon.png"
@@ -8,7 +8,7 @@
         size="lg"
       />
     </div>
-    <div class="d-flex flex-column" @click="showModal">
+    <div class="d-flex flex-column">
       <div>Tell us about yourself!</div>
       <div v-if="notification.text">
         Click to introduce yourself to other freeglers by telling us a bit about
