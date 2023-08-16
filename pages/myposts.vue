@@ -4,10 +4,9 @@
       <h1 class="visually-hidden">My posts</h1>
       <b-row class="m-0">
         <b-col cols="0" lg="3" class="p-0 pr-1">
-          <!--          <VisibleWhen :at="['lg', 'xl']">-->
-          <!--            <SidebarLeft />-->
-          <!--          </VisibleWhen>-->
-          MISSING SIDEBAR LEFT
+          <VisibleWhen :at="['lg', 'xl']">
+            <SidebarLeft />
+          </VisibleWhen>
         </b-col>
         <b-col cols="12" lg="6" class="p-0">
           <ExpectedRepliesWarning
@@ -86,6 +85,7 @@
                       :key="'message-' + message.id"
                       class="p-0 text-start mt-1"
                     >
+                      HERE
                       <MyMessage
                         :id="message.id"
                         :show-old="showOldOffers"
@@ -247,8 +247,7 @@
         </b-col>
         <b-col cols="0" lg="3" class="p-0 pl-1">
           <VisibleWhen :at="['lg', 'xl']">
-            <!--            <SidebarRight show-job-opportunities />-->
-            MISSING SIDEBAR RIGHT
+            <SidebarRight show-job-opportunities />
           </VisibleWhen>
         </b-col>
       </b-row>
@@ -258,31 +257,49 @@
 </template>
 
 <script setup>
-// import { watch } from 'vue'
-// import { useRoute } from 'vue-router'
+import { useRoute } from 'vue-router'
 import pluralize from 'pluralize'
 import dayjs from 'dayjs'
 import { useAuthStore } from '../stores/auth'
 import { useMessageStore } from '../stores/message'
 import { useMiscStore } from '../stores/misc'
 import { useSearchStore } from '../stores/search'
-// import { buildHead } from '~/composables/useBuildHead'
+import { buildHead } from '~/composables/useBuildHead'
 
 import VisibleWhen from '~/components/VisibleWhen'
 import InfiniteLoading from '~/components/InfiniteLoading'
-// const SidebarLeft = () => import('~/components/SidebarLeft')
-// const SidebarRight = () => import('~/components/SidebarRight')
-const ExpectedRepliesWarning = () =>
-  import('~/components/ExpectedRepliesWarning')
-const JobsTopBar = () => import('~/components/JobsTopBar')
-const MyMessage = () => import('~/components/MyMessage.vue')
-const UserSearch = () => import('~/components/UserSearch.vue')
-const DonationAskModal = () => import('~/components/DonationAskModal')
+import SidebarLeft from '~/components/SidebarLeft'
+import SidebarRight from '~/components/SidebarRight'
+import ExpectedRepliesWarning from '~/components/ExpectedRepliesWarning'
+import JobsTopBar from '~/components/JobsTopBar'
+import MyMessage from '~/components/MyMessage.vue'
+import UserSearch from '~/components/UserSearch.vue'
+import DonationAskModal from '~/components/DonationAskModal'
 
 const authStore = useAuthStore()
 const messageStore = useMessageStore()
 const searchStore = useSearchStore()
 const miscStore = useMiscStore()
+
+const runtimeConfig = useRuntimeConfig()
+const route = useRoute()
+
+definePageMeta({
+  layout: 'login',
+})
+
+useHead(
+  buildHead(
+    route,
+    runtimeConfig,
+    'My Posts',
+    "See OFFERs/WANTEDs that you've posted, and replies to them.",
+    null,
+    {
+      class: 'overflow-y-scroll',
+    }
+  )
+)
 
 const askmodal = ref()
 
@@ -375,9 +392,9 @@ const activeOfferCount = computed(() => {
 
 const offersToShow = ref(0)
 
-const offersShown = () => {
-  return offers.slice(0, offersToShow.value)
-}
+const offersShown = computed(() => {
+  return offers.value.slice(0, offersToShow.value)
+})
 
 async function loadMoreOffers($state) {
   offersToShow.value++
@@ -391,8 +408,6 @@ async function loadMoreOffers($state) {
     $state.loaded()
   }
 }
-
-/// ////////////////////////// WANTEDS /////////////////////////////////
 
 const busyWanteds = ref(true)
 const showOldWanteds = ref(false)
@@ -486,48 +501,4 @@ async function ask(groupid) {
   await waitForRef('askmodal')
   askmodal.value.show('video')
 }
-
-//
-// const runtimeConfig = useRuntimeConfig()
-// const route = useRoute()
-//
-// definePageMeta({
-//   layout: 'login',
-// })
-//
-// useHead(
-//   buildHead(
-//     route,
-//     runtimeConfig,
-//     'My Posts',
-//     "See OFFERs/WANTEDs that you've posted, and replies to them.",
-//     null,
-//     {
-//       class: 'overflow-y-scroll',
-//     }
-//   )
-// )
-//
-
-//
-//
-// // We want this to be our next home page.
-// const existingHomepage = miscStore.get('lasthomepage')
-//
-// if (existingHomepage !== 'myposts') {
-//   miscStore.set({
-//     key: 'lasthomepage',
-//     value: 'myposts',
-//   })
-// }
-//
-
-//
-// // We might have parameters from just having posted.
-// const newuser = route.params.newuser
-// const newpassword = route.params.newpassword
-
-//
-
-//
 </script>
