@@ -15,11 +15,7 @@
             :chats="me.expectedchats"
           />
           <div v-if="!me" class="d-flex justify-content-center mt-4 flex-wrap">
-            <b-button
-              variant="primary"
-              size="lg"
-              @click="authStore.forceLogin = true"
-            >
+            <b-button variant="primary" size="lg" @click="forceLogin">
               Log in to continue <v-icon icon="angle-double-right" />
             </b-button>
           </div>
@@ -45,16 +41,13 @@
                       <b-button
                         variant="secondary"
                         title="Show old OFFERs"
-                        @click="showOldOffers = !showOldOffers"
+                        @click="toggleOldOffers"
                       >
                         Hide {{ oldOfferCountStr }}
                       </b-button>
                     </span>
                     <span v-else>
-                      <b-button
-                        variant="secondary"
-                        @click="showOldOffers = !showOldOffers"
-                      >
+                      <b-button variant="secondary" @click="toggleOldOffers">
                         +{{ oldOfferCountStr }}
                       </b-button>
                     </span>
@@ -137,16 +130,13 @@
                       <b-button
                         variant="secondary"
                         title="Show old WANTEDs"
-                        @click="showOldWanteds = !showOldWanteds"
+                        @click="toggleOldWanteds"
                       >
                         Hide {{ oldWantedCountStr }}
                       </b-button>
                     </span>
                     <span v-else>
-                      <b-button
-                        variant="secondary"
-                        @click="showOldWanteds = !showOldWanteds"
-                      >
+                      <b-button variant="secondary" @click="toggleOldWanteds">
                         +{{ oldWantedCountStr }}
                       </b-button>
                     </span>
@@ -408,6 +398,10 @@ async function loadMoreOffers($state) {
   }
 }
 
+function toggleOldOffers() {
+  showOldOffers.value = !showOldOffers.value
+}
+
 const busyWanteds = ref(true)
 const showOldWanteds = ref(false)
 
@@ -461,6 +455,10 @@ async function loadMoreWanteds($state) {
   }
 }
 
+function toggleOldWanteds() {
+  showOldWanteds.value = !showOldWanteds.value
+}
+
 function sortPosts(a, b) {
   // Show promised items first, then by most recently posted.
 
@@ -499,5 +497,9 @@ const donationGroup = ref(null)
 async function ask(groupid) {
   await waitForRef('askmodal')
   askmodal.value.show('video')
+}
+
+function forceLogin() {
+  authStore.forceLogin = true
 }
 </script>
