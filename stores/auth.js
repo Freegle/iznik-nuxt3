@@ -362,20 +362,33 @@ export const useAuthStore = defineStore({
       return data
     },
     async saveEmail(params) {
-      const data = await this.$api.session.save(params, function (data) {
-        let logIt
+      let data = null
 
-        if (data && data.ret === 10) {
-          // Don't log errors for verification mails
-          logIt = false
+      try {
+        data = await this.$api.session.save(params, function (data) {
+          let logIt
+
+          if (data && data.ret === 10) {
+            // Don't log errors for verification mails
+            logIt = false
+          } else {
+            logIt = true
+          }
+
+          return logIt
+        })
+
+        await this.fetchUser()
+      } catch (e) {
+        console.log('Save email error', e.response)
+        if (e?.response?.data?.ret === 10) {
+          // Return the error code for the verification mail.
+          data = e?.response?.data
         } else {
-          logIt = true
+          throw e
         }
+      }
 
-        return logIt
-      })
-
-      await this.fetchUser()
       return data
     },
     async saveMicrovolunteering(value) {
