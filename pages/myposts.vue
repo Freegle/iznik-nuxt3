@@ -267,8 +267,8 @@ import DonationAskModal from '~/components/DonationAskModal'
 
 const authStore = useAuthStore()
 const messageStore = useMessageStore()
-const searchStore = useSearchStore()
 const miscStore = useMiscStore()
+const searchStore = useSearchStore()
 
 const runtimeConfig = useRuntimeConfig()
 const route = useRoute()
@@ -289,6 +289,16 @@ useHead(
     }
   )
 )
+
+// save this page as the favorite one, so that the user is automatically redirected here the next time they load the app
+const existingHomepage = miscStore.get('lasthomepage')
+
+if (existingHomepage !== 'myposts') {
+  miscStore.set({
+    key: 'lasthomepage',
+    value: 'myposts',
+  })
+}
 
 const askmodal = ref()
 
