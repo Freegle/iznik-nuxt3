@@ -85,7 +85,6 @@
                       :key="'message-' + message.id"
                       class="p-0 text-start mt-1"
                     >
-                      HERE
                       <MyMessage
                         :id="message.id"
                         :show-old="showOldOffers"
