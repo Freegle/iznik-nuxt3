@@ -52,19 +52,26 @@ export const useChatStore = defineStore({
         this.listByChatId[id] = chat
       }
     },
-    async fetchMessages(id) {
+    async fetchMessages(id, force) {
       const messages = await api(this.config).chat.fetchMessages(id)
 
-      // Update the store with care - we want to pick up new/changed messages but we don't want to trigger
-      // unnecessary reactivity updates if we have fetched a message that is already in the cache.
-      //
-      // Chat messages are immutable.
-      if (this.messages[id]?.length !== messages.length) {
+      const update = () => {
         this.messages[id] = messages
 
         messages.forEach((m) => {
           this.listByChatMessageId[m.id] = m
         })
+      }
+
+      // Update the store with care - we want to pick up new/changed messages but we don't want to trigger
+      // unnecessary reactivity updates if we have fetched a message that is already in the cache. The `force` argument
+      // skips the check.
+      //
+      // Chat messages are immutable.
+      if (this.messages[id]?.length !== messages.length) {
+        update()
+      } else if (force) {
+        update()
       }
 
       return messages
@@ -87,7 +94,7 @@ export const useChatStore = defineStore({
     },
     async deleteMessage(chatId, messageId) {
       await api(this.config).chat.deleteMessage(messageId)
-      this.fetchMessages(chatId)
+      this.fetchMessages(chatId, true)
     },
     async nudge(id) {
       await api(this.config).chat.nudge(id)
