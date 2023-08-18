@@ -7,16 +7,14 @@
     no-stacking
   >
     <template #default>
-      <b-row>
-        <b-col>
-          <p>
-            We will delete it from our systems, but it's possible that the other
-            freegler may have received the message by email (which we can't
-            delete).
-          </p>
-          <p>Are you sure you want to delete the message?</p>
-        </b-col>
-      </b-row>
+      <p>
+        We will delete this from our system, so you will no longer see it here.
+      </p>
+      <p>
+        The other freegler may have received the message by email - we can't
+        delete that.
+      </p>
+      <p>Are you sure you want to delete the message?</p>
     </template>
     <template #footer>
       <b-button variant="white" @click="hide"> Cancel </b-button>
