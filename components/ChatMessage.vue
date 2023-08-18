@@ -121,6 +121,7 @@ import ChatMessageModMail from './ChatMessageModMail'
 import ForgetFailModal from '~/components/ForgetFailModal.vue'
 import GeneralSuccessModal from '~/components/GeneralSuccessModal.vue'
 import ConfirmModal from '~/components/ConfirmModal.vue'
+import ChatMessageWarning from '~/components/ChatMessageWarning'
 import 'vue-simple-context-menu/dist/vue-simple-context-menu.css'
 
 // System chat message doesn't seem to be used;
@@ -129,6 +130,7 @@ export default {
     ConfirmModal,
     ForgetFailModal,
     GeneralSuccessModal,
+    ChatMessageWarning,
     ChatMessageDateRead,
     ChatMessageText,
     ChatMessageImage,
