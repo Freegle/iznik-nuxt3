@@ -33,7 +33,7 @@
     </template>
 
     <b-card-body class="p-1 p-lg-3">
-      <b-card-text class="text-center">
+      <b-card-text class="restricted-height text-center">
         <p v-if="activePosts.length > 0" class="text-muted">
           <template v-if="props.type === 'Offer'">
             Stuff you're giving away.
@@ -62,9 +62,8 @@
             />
           </div>
           <InfiniteLoading
-            :key="visiblePosts.length"
             :distance="1000"
-            @infinite="emit('load-more')"
+            @infinite="emit('load-more', $event)"
           />
         </div>
         <div v-else>
@@ -142,3 +141,10 @@ const visiblePosts = computed(() => {
   })
 })
 </script>
+
+<style scoped>
+.restricted-height {
+  height: 300px;
+  overflow-y: auto;
+}
+</style>

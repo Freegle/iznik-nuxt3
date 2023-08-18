@@ -201,29 +201,37 @@ onMounted(() => {
   })
 })
 
+const offersToShow = ref(1)
 const offers = computed(() => {
-  return messages.value.filter((message) => message.type === 'Offer')
+  return messages.value
+    .filter((message) => message.type === 'Offer')
+    .slice(0, offersToShow.value)
 })
 
-async function loadMoreOffers($state) {
-  if (offers.value.length - 1 > offers.value.length) {
-    // $state.complete()
-  } else {
-    await messageStore.fetch(offers.value[offers.value.length - 1].id)
-    // $state.loaded()
+function loadMoreOffers($state) {
+  offersToShow.value++
+  $state.loaded()
+
+  if (offersToShow.value > offers.value.length) {
+    offersToShow.value = offers.value.length
+    $state.complete()
   }
 }
 
+const wantedsToShow = ref(1)
 const wanteds = computed(() => {
-  return messages.value.filter((message) => message.type === 'Wanted')
+  return messages.value
+    .filter((message) => message.type === 'Wanted')
+    .slice(0, wantedsToShow.value)
 })
 
-async function loadMoreWanteds($state) {
-  if (wanteds.value.length - 1 > wanteds.value.length) {
-    // $state.complete()
-  } else {
-    await messageStore.fetch(wanteds.value[wanteds.value.length - 1].id)
-    // $state.loaded()
+function loadMoreWanteds($state) {
+  wantedsToShow.value++
+  $state.loaded()
+
+  if (wantedsToShow.value > wanteds.value.length) {
+    wantedsToShow.value = wanteds.value.length
+    $state.complete()
   }
 }
 
