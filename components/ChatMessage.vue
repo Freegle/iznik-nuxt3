@@ -1,5 +1,5 @@
 <template>
-  <div :class="selected ? 'selected' : ''" @click="toggleSelection">
+  <div :class="selected ? 'selected' : ''" @click="selectMe">
     <div v-if="chatmessage?.type === 'Default'">
       <chat-message-text
         :id="id"
@@ -84,7 +84,16 @@
       >
         Mark unread
       </b-button>
-      <b-button v-else variant="link" @click="deleteMessage"> Delete </b-button>
+      <b-button v-else variant="link" @click="showDeleteMessageModal">
+        Delete
+      </b-button>
+      <ChatMessageDeleteModal
+        v-if="deleteMessageModalOpened"
+        ref="deleteMessageModal"
+        :chat-id="chatid"
+        :message-id="chatmessage.id"
+        @confirm="deleteMessage"
+      />
     </div>
   </div>
 </template>
@@ -102,6 +111,7 @@ import ChatMessageAddress from './ChatMessageAddress'
 import ChatMessageNudge from './ChatMessageNudge'
 import ChatMessageDateRead from './ChatMessageDateRead'
 import ChatMessageModMail from './ChatMessageModMail'
+import ChatMessageDeleteModal from '~/components/ChatMessageDeleteModal.vue'
 import ChatMessageWarning from '~/components/ChatMessageWarning'
 import 'vue-simple-context-menu/dist/vue-simple-context-menu.css'
 
@@ -120,6 +130,7 @@ export default {
     ChatMessageReport,
     ChatMessageNudge,
     ChatMessageModMail,
+    ChatMessageDeleteModal,
   },
   props: {
     chatid: {
@@ -174,6 +185,7 @@ export default {
           name: 'Mark unread',
         },
       ],
+      deleteMessageModalOpened: false,
     }
   },
   computed: {
@@ -197,13 +209,18 @@ export default {
     },
   },
   methods: {
-    toggleSelection() {
-      this.selected = !this.selected
+    selectMe() {
+      this.selected = true
     },
     async markUnread() {
       console.log('Mark unread', this.chatid, this.prevmessage)
       await this.chatStore.markUnread(this.chatid, this.prevmessage)
       this.selected = false
+    },
+    async showDeleteMessageModal() {
+      this.deleteMessageModalOpened = true
+      const m = await this.waitForRef('deleteMessageModal')
+      m?.show()
     },
     async deleteMessage() {
       await this.chatStore.deleteMessage(this.chatid, this.chatmessage.id)
