@@ -82,7 +82,7 @@
       :title="deleteMessageSucceeded ? 'Success' : 'Sorry, that didn\'t work'"
     >
       <template v-if="deleteMessageSucceeded">
-        Successfully deleted the message!
+        <p>Successfully deleted the message!</p>
       </template>
       <template v-else>
         <p>Please contact <SupportLink /> if you need further help.</p>
@@ -129,14 +129,13 @@ import ChatMessageDateRead from './ChatMessageDateRead'
 import ChatMessageModMail from './ChatMessageModMail'
 import ResultModal from '~/components/ResultModal.vue'
 import ConfirmModal from '~/components/ConfirmModal.vue'
+import SupportLink from '~/components/SupportLink.vue'
 import ChatMessageWarning from '~/components/ChatMessageWarning'
 import 'vue-simple-context-menu/dist/vue-simple-context-menu.css'
-import SupportLink from '~/components/SupportLink.vue'
 
 // System chat message doesn't seem to be used;
 export default {
   components: {
-    SupportLink,
     ResultModal,
     ConfirmModal,
     ChatMessageWarning,
@@ -151,6 +150,7 @@ export default {
     ChatMessageReport,
     ChatMessageNudge,
     ChatMessageModMail,
+    SupportLink,
   },
   props: {
     chatid: {
