@@ -41,13 +41,13 @@
                       <b-button
                         variant="secondary"
                         title="Show old OFFERs"
-                        @click="toggleOldOffer"
+                        @click="toggleOldOffers"
                       >
                         Hide {{ oldOfferCountStr }}
                       </b-button>
                     </span>
                     <span v-else>
-                      <b-button variant="secondary" @click="toggleOldOffer">
+                      <b-button variant="secondary" @click="toggleOldOffers">
                         +{{ oldOfferCountStr }}
                       </b-button>
                     </span>
@@ -84,7 +84,7 @@
                         :expand="expand"
                       />
                     </div>
-                    <infinite-loading
+                    <InfiniteLoading
                       :key="infiniteIdOffers"
                       :distance="distance"
                       @infinite="loadMoreOffers"
@@ -130,13 +130,13 @@
                       <b-button
                         variant="secondary"
                         title="Show old WANTEDs"
-                        @click="toggleOldWanted"
+                        @click="toggleOldWanteds"
                       >
                         Hide {{ oldWantedCountStr }}
                       </b-button>
                     </span>
                     <span v-else>
-                      <b-button variant="secondary" @click="toggleOldWanted">
+                      <b-button variant="secondary" @click="toggleOldWanteds">
                         +{{ oldWantedCountStr }}
                       </b-button>
                     </span>
@@ -244,314 +244,272 @@
     </b-container>
   </client-only>
 </template>
-<script>
+
+<script setup>
 import { useRoute } from 'vue-router'
 import pluralize from 'pluralize'
 import dayjs from 'dayjs'
-import { useGroupStore } from '../stores/group'
 import { useAuthStore } from '../stores/auth'
 import { useMessageStore } from '../stores/message'
 import { useMiscStore } from '../stores/misc'
-import { useComposeStore } from '../stores/compose'
 import { useSearchStore } from '../stores/search'
-import VisibleWhen from '~/components/VisibleWhen'
 import { buildHead } from '~/composables/useBuildHead'
+
+import VisibleWhen from '~/components/VisibleWhen'
 import InfiniteLoading from '~/components/InfiniteLoading'
-const JobsTopBar = () => import('~/components/JobsTopBar')
-const MyMessage = () => import('~/components/MyMessage.vue')
-const SidebarLeft = () => import('~/components/SidebarLeft')
-const SidebarRight = () => import('~/components/SidebarRight')
-const DonationAskModal = () => import('~/components/DonationAskModal')
-const ExpectedRepliesWarning = () =>
-  import('~/components/ExpectedRepliesWarning')
+import SidebarLeft from '~/components/SidebarLeft'
+import SidebarRight from '~/components/SidebarRight'
+import ExpectedRepliesWarning from '~/components/ExpectedRepliesWarning'
+import JobsTopBar from '~/components/JobsTopBar'
+import MyMessage from '~/components/MyMessage.vue'
+import UserSearch from '~/components/UserSearch.vue'
+import DonationAskModal from '~/components/DonationAskModal'
+
+const authStore = useAuthStore()
+const messageStore = useMessageStore()
+const miscStore = useMiscStore()
+const searchStore = useSearchStore()
+
+const runtimeConfig = useRuntimeConfig()
+const route = useRoute()
 
 definePageMeta({
   layout: 'login',
 })
 
-export default {
-  components: {
-    VisibleWhen,
-    JobsTopBar,
-    MyMessage,
-    SidebarLeft,
-    SidebarRight,
-    DonationAskModal,
-    ExpectedRepliesWarning,
-    InfiniteLoading,
-  },
-  mixins: [buildHead],
-  async setup() {
-    const runtimeConfig = useRuntimeConfig()
-    const route = useRoute()
+useHead(
+  buildHead(
+    route,
+    runtimeConfig,
+    'My Posts',
+    "See OFFERs/WANTEDs that you've posted, and replies to them.",
+    null,
+    {
+      class: 'overflow-y-scroll',
+    }
+  )
+)
 
-    useHead(
-      buildHead(
-        route,
-        runtimeConfig,
-        'My Posts',
-        "See OFFERs/WANTEDs that you've posted, and replies to them.",
-        null,
-        {
-          class: 'overflow-y-scroll',
-        }
+// save this page as the favorite one, so that the user is automatically redirected here the next time they load the app
+const existingHomepage = miscStore.get('lasthomepage')
+
+if (existingHomepage !== 'myposts') {
+  miscStore.set({
+    key: 'lasthomepage',
+    value: 'myposts',
+  })
+}
+
+const askmodal = ref()
+
+const myid = authStore.user?.id
+
+let messages = []
+let expand = false
+
+if (myid) {
+  messages = await messageStore.fetchByUser(myid, false, true)
+  expand = messages.length <= 5
+
+  // No need to wait for searches - often below the fold.
+  searchStore.fetch(myid)
+}
+
+const distance = ref(1000)
+
+const busyOffers = ref(true)
+const showOldOffers = ref(false)
+
+const offers = computed(() => {
+  return (
+    messages
+      ?.filter(
+        (message) =>
+          message.type === 'Offer' &&
+          (showOldOffers.value || !message.hasoutcome)
       )
-    )
+      .sort(sortPosts) ?? []
+  )
+})
 
-    const authStore = useAuthStore()
-    const messageStore = useMessageStore()
-    const groupStore = useGroupStore()
-    const miscStore = useMiscStore()
-    const composeStore = useComposeStore()
-    const searchStore = useSearchStore()
+const infiniteIdOffers = ref(1)
+watch(offers, () => infiniteIdOffers.value++)
 
-    // We want this to be our next home page.
-    const existingHomepage = miscStore.get('lasthomepage')
+const oldOfferCount = computed(() => {
+  return messages.filter(
+    (message) => message.type === 'Offer' && message.hasoutcome
+  ).length
+})
 
-    if (existingHomepage !== 'myposts') {
-      miscStore.set({
-        key: 'lasthomepage',
-        value: 'myposts',
-      })
-    }
+const oldOfferCountStr = computed(() => {
+  return pluralize('old OFFER', oldOfferCount.value, true)
+})
 
-    // We might have parameters from just having posted.
-    const newuser = route.params.newuser
-    const newpassword = route.params.newpassword
+const activeOfferCount = computed(() => {
+  return messages.filter(
+    (message) => message.type === 'Offer' && !message.hasoutcome
+  ).length
+})
 
-    const myid = authStore.user?.id
+const offersToShow = ref(0)
 
-    let messages = []
-    let expand = false
+const offersShown = computed(() => {
+  return offers.value.slice(0, offersToShow.value)
+})
 
-    if (myid) {
-      messages = await messageStore.fetchByUser(myid, false, true)
-      expand = messages.length <= 5
+async function loadMoreOffers($state) {
+  offersToShow.value++
 
-      // No need to wait for searches - often below the fold.
-      searchStore.fetch(myid)
-    }
+  if (offersToShow.value > offers.value.length) {
+    offersToShow.value = offers.value.length
+    busyOffers.value = false
+    $state.complete()
+  } else {
+    await messageStore.fetch(offers.value[offersToShow.value - 1].id)
+    $state.loaded()
+  }
+}
 
-    return {
-      authStore,
-      groupStore,
-      messageStore,
-      miscStore,
-      composeStore,
-      searchStore,
-      newuser,
-      newpassword,
-      messages,
-      expand,
-    }
-  },
-  data() {
-    return {
-      id: null,
-      busyOffers: true,
-      busyWanteds: true,
-      context: null,
-      showOldOffers: false,
-      showOldWanteds: false,
-      offersToShow: 0,
-      wantedsToShow: 0,
-      infiniteIdOffers: 1,
-      infiniteIdWanteds: 1,
-      distance: 1000,
-      donationGroup: null,
-    }
-  },
-  computed: {
-    postcode() {
-      return this.composeStore?.postcode
-    },
-    wanteds() {
-      let ret = this.messages?.filter(
-        (m) => m.type === 'Wanted' && (this.showOldWanteds || !m.hasoutcome)
-      )
-      ret = ret ? ret.sort(this.postSort) : []
-      return ret
-    },
-    offers() {
-      let ret = this.messages?.filter(
-        (m) => m.type === 'Offer' && (this.showOldOffers || !m.hasoutcome)
-      )
-      ret = ret ? ret.sort(this.postSort) : []
-      return ret
-    },
-    offersShown() {
-      return this.offers.slice(0, this.offersToShow)
-    },
-    wantedsShown() {
-      return this.wanteds.slice(0, this.wantedsToShow)
-    },
-    oldOfferCount() {
-      let count = 0
+function toggleOldOffers() {
+  showOldOffers.value = !showOldOffers.value
+}
 
-      if (this.messages) {
-        for (const message of this.messages) {
-          if (message.type === 'Offer' && message.hasoutcome) {
-            count++
-          }
-        }
-      }
+const { $bus } = useNuxtApp()
+onMounted(() => {
+  const lastAsk = miscStore.get('lastdonationask')
+  let canAsk =
+    !lastAsk || new Date().getTime() - lastAsk > 60 * 60 * 1000 * 24 * 7
 
-      return count
-    },
-    oldOfferCountStr() {
-      return pluralize('old OFFER', this.oldOfferCount, true)
-    },
-    oldWantedCount() {
-      let count = 0
+  // Donation ask on Browse page is only used when we have a specific push.
+  canAsk = false
 
-      if (this.messages) {
-        for (const message of this.messages) {
-          if (message.type === 'Wanted' && message.hasoutcome) {
-            count++
-          }
-        }
-      }
+  if (canAsk) {
+    ask()
 
-      return count
-    },
-    oldWantedCountStr() {
-      return pluralize('old WANTED', this.oldWantedCount, true)
-    },
-    activeOfferCount() {
-      let count = 0
-
-      for (const message of this.messages) {
-        if (message.type === 'Offer' && !message.hasoutcome) {
-          count++
-        }
-      }
-
-      return count
-    },
-    activeWantedCount() {
-      let count = 0
-
-      for (const message of this.messages) {
-        if (message.type === 'Wanted' && !message.hasoutcome) {
-          count++
-        }
-      }
-
-      return count
-    },
-    searches() {
-      // Show the searches within the last 90 days, most recent first.  Anything older is less likely to be relevant
-      // and it stops it growing forever, forcing them to delete things.
-      let ret = this.searchStore?.list
-
-      if (ret) {
-        const now = dayjs()
-        ret = ret.filter((a) => {
-          const daysago = now.diff(dayjs(a.date), 'day')
-          return daysago <= 90
-        })
-        ret.sort((a, b) => a.daysago - b.daysago)
-      }
-
-      return ret
-    },
-  },
-  watch: {
-    offers() {
-      this.infiniteIdOffers++
-    },
-    wanteds() {
-      this.infiniteIdWanteds++
-    },
-  },
-  mounted() {
-    const lastask = this.miscStore.get('lastdonationask')
-    let canask =
-      !lastask || new Date().getTime() - lastask > 60 * 60 * 1000 * 24 * 7
-
-    // Donation ask on Browse page is only used when we have a specific push.
-    canask = false
-
-    if (canask) {
-      this.ask()
-
-      this.miscStore.set({
-        key: 'lastdonationask',
-        value: new Date().getTime(),
-      })
-    }
-
-    this.$bus.$on('outcome', (params) => {
-      const { groupid, outcome } = params
-
-      if (outcome === 'Taken' || outcome === 'Received') {
-        // If someone has set up a regular donation, then we don't ask them to donate again.  Wouldn't be fair to
-        // pester them.
-        if (!this.me?.donorrecurring && canask) {
-          this.donationGroup = groupid
-          this.ask()
-
-          this.miscStore.set({
-            key: 'lastdonationask',
-            value: new Date().getTime(),
-          })
-        }
-      }
+    miscStore.set({
+      key: 'lastdonationask',
+      value: new Date().getTime(),
     })
-  },
-  methods: {
-    toggleOldOffer() {
-      this.showOldOffers = !this.showOldOffers
-    },
-    toggleOldWanted() {
-      this.showOldWanteds = !this.showOldWanteds
-    },
-    async loadMoreOffers($state) {
-      this.offersToShow++
+  }
 
-      if (this.offersToShow > this.offers.length) {
-        this.offersToShow = this.offers.length
-        this.busyOffers = false
-        $state.complete()
-      } else {
-        await this.messageStore.fetch(this.offers[this.offersToShow - 1].id)
-        $state.loaded()
-      }
-    },
-    async loadMoreWanteds($state) {
-      this.wantedsToShow++
+  $bus.$on('outcome', (params) => {
+    const { groupid, outcome } = params
 
-      if (this.wantedsToShow > this.wanteds.length) {
-        this.wantedsToShow = this.wanteds.length
-        this.busyWanteds = false
-        $state.complete()
-      } else {
-        await this.messageStore.fetch(this.wanteds[this.wantedsToShow - 1].id)
-        $state.loaded()
-      }
-    },
-    async ask(groupid) {
-      await this.waitForRef('askmodal')
-      this.$refs.askmodal.show('video')
-    },
-    postSort(a, b) {
-      // Show promised items first, then by most recently posted.
-      const showOld =
-        a.type === 'Offer' ? this.showOldOffers : this.showOldWanteds
+    if (outcome === 'Taken' || outcome === 'Received') {
+      // If someone has set up a regular donation, then we don't ask them to donate again.  Wouldn't be fair to
+      // pester them.
 
-      if (!showOld && a.promised && !b.promised) {
-        return -1
-      } else if (!showOld && b.promised && !a.promised) {
-        return 1
-      } else {
-        const adate = a.arrival
-        const bdate = b.arrival
-        return new Date(bdate).getTime() - new Date(adate).getTime()
+      if (!me?.donorrecurring && canAsk) {
+        donationGroup.value = groupid
+        ask()
+
+        miscStore.set({
+          key: 'lastdonationask',
+          value: new Date().getTime(),
+        })
       }
-    },
-    forceLogin() {
-      this.authStore.forceLogin = true
-    },
-  },
+    }
+  })
+})
+
+const busyWanteds = ref(true)
+const showOldWanteds = ref(false)
+
+const wanteds = computed(() => {
+  return (
+    messages
+      ?.filter(
+        (message) =>
+          message.type === 'Wanted' &&
+          (showOldOffers.value || !message.hasoutcome)
+      )
+      .sort(sortPosts) ?? []
+  )
+})
+
+const infiniteIdWanteds = ref(1)
+watch(wanteds, () => infiniteIdWanteds.value++)
+
+const oldWantedCount = computed(() => {
+  return messages.filter(
+    (message) => message.type === 'Wanted' && message.hasoutcome
+  ).length
+})
+
+const oldWantedCountStr = computed(() => {
+  return pluralize('old WANTED', oldWantedCount.value, true)
+})
+
+const activeWantedCount = computed(() => {
+  return messages.filter(
+    (message) => message.type === 'Wanted' && !message.hasoutcome
+  ).length
+})
+
+const wantedsToShow = ref(1)
+
+const wantedsShown = computed(() => {
+  return wanteds.value.slice(0, wantedsToShow.value)
+})
+
+async function loadMoreWanteds($state) {
+  wantedsToShow.value++
+
+  if (wantedsToShow.value > wanteds.value.length) {
+    wantedsToShow.value = wanteds.value.length
+    busyWanteds.value = false
+    $state.complete()
+  } else {
+    await messageStore.fetch(wanteds.value[wantedsToShow.value - 1].id)
+    $state.loaded()
+  }
+}
+
+function toggleOldWanteds() {
+  showOldWanteds.value = !showOldWanteds.value
+}
+
+function sortPosts(a, b) {
+  // Show promised items first, then by most recently posted.
+
+  const showOld =
+    a.type === 'Offer' ? showOldOffers.value : showOldWanteds.value
+
+  if (!showOld && a.promised && !b.promised) {
+    return -1
+  } else if (!showOld && b.promised && !a.promised) {
+    return 1
+  } else {
+    return new Date(b.arrival).getTime() - new Date(a.arrival).getTime()
+  }
+}
+
+const searches = computed(() => {
+  // Show the searches within the last 90 days, most recent first. Anything older is less likely to be relevant
+  // and it stops it growing forever, forcing them to delete things.
+
+  let ret = searchStore?.list
+
+  if (ret) {
+    const now = dayjs()
+    ret = ret.filter((a) => {
+      const daysago = now.diff(dayjs(a.date), 'day')
+      return daysago <= 90
+    })
+    ret.sort((a, b) => a.daysago - b.daysago)
+  }
+
+  return ret
+})
+
+const donationGroup = ref(null)
+
+async function ask(groupid) {
+  await waitForRef('askmodal')
+  askmodal.value.show('video')
+}
+
+function forceLogin() {
+  authStore.forceLogin = true
 }
 </script>
