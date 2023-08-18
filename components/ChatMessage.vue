@@ -77,11 +77,17 @@
     <chat-message-warning v-if="phoneNumber" />
     <chat-message-date-read :id="id" :chatid="chatid" :last="last" :pov="pov" />
 
-    <GeneralSuccessModal
-      ref="deleteMessageSuccessModal"
-      message="Successfully deleted the message!"
-    />
-    <ForgetFailModal ref="deleteMessageFailModal" />
+    <ResultModal
+      ref="deleteMessageResultModal"
+      :title="deleteMessageSucceeded ? 'Success' : 'Sorry, that didn\'t work'"
+    >
+      <template v-if="deleteMessageSucceeded">
+        Successfully deleted the message!
+      </template>
+      <template v-else>
+        <p>Please contact <SupportLink /> if you need further help.</p>
+      </template>
+    </ResultModal>
     <div v-if="selected">
       <b-button
         v-if="chatmessage?.userid !== myid"
@@ -93,7 +99,7 @@
       <b-button v-else variant="link" @click="showDeleteMessageModal">
         Delete
       </b-button>
-      <ConfirmModal ref="deleteMessageModal" @confirm="deleteMessage">
+      <ConfirmModal ref="confirmDeleteMessageModal" @confirm="deleteMessage">
         <p>
           We will delete it from our systems, but it's possible that the other
           freegler may have received the message by email (which we can't
@@ -118,18 +124,18 @@ import ChatMessageAddress from './ChatMessageAddress'
 import ChatMessageNudge from './ChatMessageNudge'
 import ChatMessageDateRead from './ChatMessageDateRead'
 import ChatMessageModMail from './ChatMessageModMail'
-import ForgetFailModal from '~/components/ForgetFailModal.vue'
-import GeneralSuccessModal from '~/components/GeneralSuccessModal.vue'
+import ResultModal from '~/components/ResultModal.vue'
 import ConfirmModal from '~/components/ConfirmModal.vue'
 import ChatMessageWarning from '~/components/ChatMessageWarning'
 import 'vue-simple-context-menu/dist/vue-simple-context-menu.css'
+import SupportLink from '~/components/SupportLink.vue'
 
 // System chat message doesn't seem to be used;
 export default {
   components: {
+    SupportLink,
+    ResultModal,
     ConfirmModal,
-    ForgetFailModal,
-    GeneralSuccessModal,
     ChatMessageWarning,
     ChatMessageDateRead,
     ChatMessageText,
@@ -196,6 +202,7 @@ export default {
           name: 'Mark unread',
         },
       ],
+      deleteMessageSucceeded: null,
     }
   },
   computed: {
@@ -236,7 +243,7 @@ export default {
       this.selected = false
     },
     async showDeleteMessageModal() {
-      const m = await this.waitForRef('deleteMessageModal')
+      const m = await this.waitForRef('confirmDeleteMessageModal')
       m?.show()
     },
     async deleteMessage() {
@@ -244,10 +251,11 @@ export default {
         await this.chatStore.deleteMessage(this.chatid, this.chatmessage.id)
         this.selected = false
 
-        const m = await this.waitForRef('deleteMessageSuccessModal')
-        m?.show()
+        this.deleteMessageSucceeded = true
       } catch (err) {
-        const m = await this.waitForRef('deleteMessageFailModal')
+        this.deleteMessageSucceeded = false
+      } finally {
+        const m = await this.waitForRef('deleteMessageResultModal')
         m?.show()
       }
     },

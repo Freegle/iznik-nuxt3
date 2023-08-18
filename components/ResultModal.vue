@@ -1,17 +1,10 @@
 <template>
-  <b-modal
-    id="general-success-modal"
-    v-model="showModal"
-    scrollable
-    :title="title"
-    no-stacking
-  >
+  <b-modal id="result-modal" v-model="showModal" scrollable :title="title">
     <template #default>
-      <b-row>
-        <b-col>
-          <p>{{ message }}</p>
-        </b-col>
-      </b-row>
+      <slot name="default">
+        <!-- eslint-disable-next-line -->
+        <div v-html="message" />
+      </slot>
     </template>
     <template #footer>
       <b-button variant="white" @click="hide"> Close </b-button>
@@ -26,12 +19,18 @@ export default {
   props: {
     title: {
       type: String,
-      default: 'Success',
+      required: true,
     },
     message: {
       type: String,
-      default: 'Successfully performed the requested action!',
+      required: false,
+      default: '',
     },
+  },
+  data() {
+    return {
+      showModal: false,
+    }
   },
   methods: {
     confirm() {
