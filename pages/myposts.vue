@@ -254,6 +254,8 @@ import { useMessageStore } from '../stores/message'
 import { useMiscStore } from '../stores/misc'
 import { useSearchStore } from '../stores/search'
 import { buildHead } from '~/composables/useBuildHead'
+import { ref, watch, onMounted } from '#imports'
+import { waitForRef } from '~/composables/useWaitForRef'
 
 import VisibleWhen from '~/components/VisibleWhen'
 import InfiniteLoading from '~/components/InfiniteLoading'
@@ -302,6 +304,7 @@ if (existingHomepage !== 'myposts') {
 
 const askmodal = ref()
 
+const me = authStore.user
 const myid = authStore.user?.id
 
 let messages = []
