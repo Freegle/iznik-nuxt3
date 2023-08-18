@@ -76,6 +76,12 @@
     </div>
     <chat-message-warning v-if="phoneNumber" />
     <chat-message-date-read :id="id" :chatid="chatid" :last="last" :pov="pov" />
+
+    <GeneralSuccessModal
+      ref="deleteMessageSuccessModal"
+      message="Successfully deleted the message!"
+    />
+    <ForgetFailModal ref="deleteMessageFailModal" />
     <div v-if="selected">
       <b-button
         v-if="chatmessage?.userid !== myid"
@@ -88,7 +94,6 @@
         Delete
       </b-button>
       <ChatMessageDeleteModal
-        v-if="deleteMessageModalOpened"
         ref="deleteMessageModal"
         :chat-id="chatid"
         :message-id="chatmessage.id"
@@ -114,10 +119,14 @@ import ChatMessageModMail from './ChatMessageModMail'
 import ChatMessageDeleteModal from '~/components/ChatMessageDeleteModal.vue'
 import ChatMessageWarning from '~/components/ChatMessageWarning'
 import 'vue-simple-context-menu/dist/vue-simple-context-menu.css'
+import GeneralSuccessModal from '~/components/GeneralSuccessModal.vue'
+import ForgetFailModal from '~/components/ForgetFailModal.vue'
 
 // System chat message doesn't seem to be used;
 export default {
   components: {
+    ForgetFailModal,
+    GeneralSuccessModal,
     ChatMessageWarning,
     ChatMessageDateRead,
     ChatMessageText,
@@ -185,7 +194,6 @@ export default {
           name: 'Mark unread',
         },
       ],
-      deleteMessageModalOpened: false,
     }
   },
   computed: {
@@ -226,13 +234,21 @@ export default {
       this.selected = false
     },
     async showDeleteMessageModal() {
-      this.deleteMessageModalOpened = true
       const m = await this.waitForRef('deleteMessageModal')
       m?.show()
     },
     async deleteMessage() {
-      await this.chatStore.deleteMessage(this.chatid, this.chatmessage.id)
-      this.selected = false
+      try {
+        await this.chatStore.deleteMessage(this.chatid, this.chatmessage.id)
+        this.selected = false
+
+        console.log('awaiting')
+        const m = await this.waitForRef('deleteMessageSuccessModal')
+        m?.show()
+      } catch (err) {
+        const m = await this.waitForRef('deleteMessageFailModal')
+        m?.show()
+      }
     },
   },
 }
