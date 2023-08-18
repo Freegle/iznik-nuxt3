@@ -55,17 +55,11 @@ export const useChatStore = defineStore({
     async fetchMessages(id) {
       const messages = await api(this.config).chat.fetchMessages(id)
 
-      // Update the store with care - we want to pick up new/changed messages but we don't want to trigger
-      // unnecessary reactivity updates if we have fetched a message that is already in the cache.
-      //
-      // Chat messages are immutable.
-      if (this.messages[id]?.length !== messages.length) {
-        this.messages[id] = messages
+      this.messages[id] = messages
 
-        messages.forEach((m) => {
-          this.listByChatMessageId[m.id] = m
-        })
-      }
+      messages.forEach((m) => {
+        this.listByChatMessageId[m.id] = m
+      })
 
       return messages
     },
