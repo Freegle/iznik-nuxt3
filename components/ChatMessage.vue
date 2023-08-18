@@ -101,9 +101,12 @@
       </b-button>
       <ConfirmModal ref="confirmDeleteMessageModal" @confirm="deleteMessage">
         <p>
-          We will delete it from our systems, but it's possible that the other
-          freegler may have received the message by email (which we can't
-          delete).
+          We will delete this from our system, so you will no longer see it
+          here.
+        </p>
+        <p>
+          The other freegler may have received the message by email - we can't
+          delete that.
         </p>
         <p>Are you sure you want to delete the message?</p>
       </ConfirmModal>
