@@ -29,6 +29,10 @@ export default class ChatAPI extends BaseAPI {
     })
   }
 
+  deleteMessage(messageId) {
+    return this.$del(`/chatmessage?id=${messageId}`)
+  }
+
   openChat(params, logError) {
     return this.$put('/chat/rooms', params, logError)
   }

@@ -1,5 +1,5 @@
 <template>
-  <div :class="selected ? 'selected' : ''" @click="selectMe">
+  <div :class="selected ? 'selected' : ''" @click="toggleSelection">
     <div v-if="chatmessage?.type === 'Default'">
       <chat-message-text
         :id="id"
@@ -77,7 +77,14 @@
     <chat-message-warning v-if="phoneNumber" />
     <chat-message-date-read :id="id" :chatid="chatid" :last="last" :pov="pov" />
     <div v-if="selected">
-      <b-button variant="link" @click="markUnread"> Mark unread </b-button>
+      <b-button
+        v-if="chatmessage?.userid !== myid"
+        variant="link"
+        @click="markUnread"
+      >
+        Mark unread
+      </b-button>
+      <b-button v-else variant="link" @click="deleteMessage"> Delete </b-button>
     </div>
   </div>
 </template>
@@ -190,15 +197,16 @@ export default {
     },
   },
   methods: {
-    selectMe() {
-      if (this.chatmessage?.userid !== this.myid) {
-        this.selected = true
-      }
+    toggleSelection() {
+      this.selected = !this.selected
     },
     async markUnread() {
       console.log('Mark unread', this.chatid, this.prevmessage)
       await this.chatStore.markUnread(this.chatid, this.prevmessage)
       this.selected = false
+    },
+    async deleteMessage() {
+      await this.chatStore.deleteMessage(this.chatid, this.chatmessage.id)
     },
   },
 }

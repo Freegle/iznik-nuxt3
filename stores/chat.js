@@ -85,6 +85,10 @@ export const useChatStore = defineStore({
       await api(this.config).chat.markRead(chatid, prevmsgid, true)
       await this.fetchChat(chatid)
     },
+    async deleteMessage(chatid, messageId) {
+      await api(this.config).chat.deleteMessage(messageId)
+      await this.fetchChat(chatid)
+    },
     async nudge(id) {
       await api(this.config).chat.nudge(id)
       this.fetchMessages(id)
