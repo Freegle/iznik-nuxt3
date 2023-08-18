@@ -82,7 +82,7 @@
       :title="deleteMessageSucceeded ? 'Success' : 'Sorry, that didn\'t work'"
     >
       <template v-if="deleteMessageSucceeded">
-        <p>Successfully deleted the message!</p>
+        <p>We've deleted your chat message.</p>
       </template>
       <template v-else>
         <p>Please contact <SupportLink /> if you need further help.</p>
