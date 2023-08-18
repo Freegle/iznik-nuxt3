@@ -93,12 +93,14 @@
       <b-button v-else variant="link" @click="showDeleteMessageModal">
         Delete
       </b-button>
-      <ChatMessageDeleteModal
-        ref="deleteMessageModal"
-        :chat-id="chatid"
-        :message-id="chatmessage.id"
-        @confirm="deleteMessage"
-      />
+      <ConfirmModal ref="deleteMessageModal" @confirm="deleteMessage">
+        <p>
+          We will delete it from our systems, but it's possible that the other
+          freegler may have received the message by email (which we can't
+          delete).
+        </p>
+        <p>Are you sure you want to delete the message?</p>
+      </ConfirmModal>
     </div>
   </div>
 </template>
@@ -118,13 +120,14 @@ import ChatMessageDateRead from './ChatMessageDateRead'
 import ChatMessageModMail from './ChatMessageModMail'
 import ForgetFailModal from '~/components/ForgetFailModal.vue'
 import GeneralSuccessModal from '~/components/GeneralSuccessModal.vue'
-import ChatMessageDeleteModal from '~/components/ChatMessageDeleteModal.vue'
+import ConfirmModal from '~/components/ConfirmModal.vue'
 import ChatMessageWarning from '~/components/ChatMessageWarning'
 import 'vue-simple-context-menu/dist/vue-simple-context-menu.css'
 
 // System chat message doesn't seem to be used;
 export default {
   components: {
+    ConfirmModal,
     ForgetFailModal,
     GeneralSuccessModal,
     ChatMessageWarning,
@@ -139,7 +142,6 @@ export default {
     ChatMessageReport,
     ChatMessageNudge,
     ChatMessageModMail,
-    ChatMessageDeleteModal,
   },
   props: {
     chatid: {
