@@ -66,6 +66,8 @@ export const useChatStore = defineStore({
       // Update the store with care - we want to pick up new/changed messages but we don't want to trigger
       // unnecessary reactivity updates if we have fetched a message that is already in the cache. The `force` argument
       // skips the check.
+      //
+      // Chat messages usually don't change; if they do then you need to use the force parameter
       if (this.messages[id]?.length !== messages.length) {
         update()
       } else if (force) {
