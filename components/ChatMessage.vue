@@ -116,11 +116,11 @@ import ChatMessageAddress from './ChatMessageAddress'
 import ChatMessageNudge from './ChatMessageNudge'
 import ChatMessageDateRead from './ChatMessageDateRead'
 import ChatMessageModMail from './ChatMessageModMail'
+import ForgetFailModal from '~/components/ForgetFailModal.vue'
+import GeneralSuccessModal from '~/components/GeneralSuccessModal.vue'
 import ChatMessageDeleteModal from '~/components/ChatMessageDeleteModal.vue'
 import ChatMessageWarning from '~/components/ChatMessageWarning'
 import 'vue-simple-context-menu/dist/vue-simple-context-menu.css'
-import GeneralSuccessModal from '~/components/GeneralSuccessModal.vue'
-import ForgetFailModal from '~/components/ForgetFailModal.vue'
 
 // System chat message doesn't seem to be used;
 export default {
@@ -242,7 +242,6 @@ export default {
         await this.chatStore.deleteMessage(this.chatid, this.chatmessage.id)
         this.selected = false
 
-        console.log('awaiting')
         const m = await this.waitForRef('deleteMessageSuccessModal')
         m?.show()
       } catch (err) {
