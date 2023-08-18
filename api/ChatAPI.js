@@ -30,7 +30,7 @@ export default class ChatAPI extends BaseAPI {
   }
 
   deleteMessage(messageId) {
-    return this.$del(`/chatmessage?id=${messageId}`)
+    return this.$del(`/chatmessages?id=${messageId}`)
   }
 
   openChat(params, logError) {
