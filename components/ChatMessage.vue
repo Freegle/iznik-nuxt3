@@ -76,8 +76,40 @@
     </div>
     <chat-message-warning v-if="phoneNumber" />
     <chat-message-date-read :id="id" :chatid="chatid" :last="last" :pov="pov" />
+
+    <ResultModal
+      ref="deleteMessageResultModal"
+      :title="deleteMessageSucceeded ? 'Success' : 'Sorry, that didn\'t work'"
+    >
+      <template v-if="deleteMessageSucceeded">
+        <p>Successfully deleted the message!</p>
+      </template>
+      <template v-else>
+        <p>Please contact <SupportLink /> if you need further help.</p>
+      </template>
+    </ResultModal>
     <div v-if="selected">
-      <b-button variant="link" @click="markUnread"> Mark unread </b-button>
+      <b-button
+        v-if="chatmessage?.userid !== myid"
+        variant="link"
+        @click="markUnread"
+      >
+        Mark unread
+      </b-button>
+      <b-button v-else variant="link" @click="showDeleteMessageModal">
+        Delete
+      </b-button>
+      <ConfirmModal ref="confirmDeleteMessageModal" @confirm="deleteMessage">
+        <p>
+          We will delete this from our system, so you will no longer see it
+          here.
+        </p>
+        <p>
+          The other freegler may have received the message by email - we can't
+          delete that.
+        </p>
+        <p>Are you sure you want to delete the message?</p>
+      </ConfirmModal>
     </div>
   </div>
 </template>
@@ -95,12 +127,17 @@ import ChatMessageAddress from './ChatMessageAddress'
 import ChatMessageNudge from './ChatMessageNudge'
 import ChatMessageDateRead from './ChatMessageDateRead'
 import ChatMessageModMail from './ChatMessageModMail'
+import ResultModal from '~/components/ResultModal.vue'
+import ConfirmModal from '~/components/ConfirmModal.vue'
+import SupportLink from '~/components/SupportLink.vue'
 import ChatMessageWarning from '~/components/ChatMessageWarning'
 import 'vue-simple-context-menu/dist/vue-simple-context-menu.css'
 
 // System chat message doesn't seem to be used;
 export default {
   components: {
+    ResultModal,
+    ConfirmModal,
     ChatMessageWarning,
     ChatMessageDateRead,
     ChatMessageText,
@@ -113,6 +150,7 @@ export default {
     ChatMessageReport,
     ChatMessageNudge,
     ChatMessageModMail,
+    SupportLink,
   },
   props: {
     chatid: {
@@ -167,6 +205,7 @@ export default {
           name: 'Mark unread',
         },
       ],
+      deleteMessageSucceeded: null,
     }
   },
   computed: {
@@ -188,17 +227,40 @@ export default {
 
       return ret
     },
+    isMessageDeleted() {
+      // there should ideally be a flag on the message object indicating whether it's deleted or not, but for now we're
+      // instead checking the message contents. If it's "(Message deleted)", then we treat the message as deleted.
+      // Though that's obviously not ideal since a user can manually send a message with the same contents and it'd be
+      // still considered deleted
+
+      return this.chatmessage.message === '(Message deleted)'
+    },
   },
   methods: {
     selectMe() {
-      if (this.chatmessage?.userid !== this.myid) {
-        this.selected = true
-      }
+      if (!this.isMessageDeleted) this.selected = true
     },
     async markUnread() {
       console.log('Mark unread', this.chatid, this.prevmessage)
       await this.chatStore.markUnread(this.chatid, this.prevmessage)
       this.selected = false
+    },
+    async showDeleteMessageModal() {
+      const m = await this.waitForRef('confirmDeleteMessageModal')
+      m?.show()
+    },
+    async deleteMessage() {
+      try {
+        await this.chatStore.deleteMessage(this.chatid, this.chatmessage.id)
+        this.selected = false
+
+        this.deleteMessageSucceeded = true
+      } catch (err) {
+        this.deleteMessageSucceeded = false
+      } finally {
+        const m = await this.waitForRef('deleteMessageResultModal')
+        m?.show()
+      }
     },
   },
 }
