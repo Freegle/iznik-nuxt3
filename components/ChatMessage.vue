@@ -207,10 +207,18 @@ export default {
 
       return ret
     },
+    isMessageDeleted() {
+      // there should ideally be a flag on the message object indicating whether it's deleted or not, but for now we're
+      // instead checking the message contents. If it's "(Message deleted)", then we treat the message as deleted.
+      // Though that's obviously not ideal since a user can manually send a message with the same contents and it'd be
+      // still considered deleted
+
+      return this.chatmessage.message === '(Message deleted)'
+    },
   },
   methods: {
     selectMe() {
-      this.selected = true
+      if (!this.isMessageDeleted) this.selected = true
     },
     async markUnread() {
       console.log('Mark unread', this.chatid, this.prevmessage)
@@ -224,6 +232,7 @@ export default {
     },
     async deleteMessage() {
       await this.chatStore.deleteMessage(this.chatid, this.chatmessage.id)
+      this.selected = false
     },
   },
 }
