@@ -98,7 +98,7 @@ export default {
           0,
           {
             type: message.type,
-            item: message.item.name.trim(),
+            item: message.item?.name?.trim(),
             description: message.textbody.trim(),
             availablenow: message.availablenow,
             repostof: this.chatmessage.refmsgid,
