@@ -3,9 +3,9 @@
     <MessageAttachments
       v-if="gotAttachments"
       :id="id"
-      :attachments="message.attachments"
+      :attachments="message?.attachments"
       class="image-wrapper"
-      :disabled="message.successful"
+      :disabled="message?.successful"
       show-zoom
       @zoom="$emit('zoom')"
     />
