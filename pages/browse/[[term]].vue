@@ -97,7 +97,7 @@
         </b-col>
         <b-col cols="0" lg="3" class="p-0 pl-1">
           <VisibleWhen :not="['xs', 'sm', 'md', 'lg']">
-            <ExternalAd
+            <ExternalDa
               ad-unit-path="/22794232631/freegle_home"
               :dimensions="[300, 250]"
               div-id="div-gpt-ad-1690904271564-0"

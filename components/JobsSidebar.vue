@@ -11,7 +11,7 @@
     </NoticeMessage>
     <div v-else>
       <VisibleWhen :not="['xs', 'sm', 'md', 'lg']">
-        <ExternalAd
+        <ExternalDa
           ad-unit-path="/22794232631/freegle_home"
           :dimensions="[300, 250]"
           div-id="div-gpt-ad-1690904271564-0"
@@ -58,6 +58,7 @@ import JobOne from './JobOne'
 import InfiniteLoading from '~/components/InfiniteLoading'
 const NoticeMessage = () => import('~/components/NoticeMessage')
 const DonationButton = () => import('~/components/DonationButton')
+const ExternalDa = () => import('~/components/ExternalDa')
 
 export default {
   components: {
@@ -65,6 +66,7 @@ export default {
     NoticeMessage,
     InfiniteLoading,
     DonationButton,
+    ExternalDa,
   },
   async setup() {
     const jobStore = useJobStore()

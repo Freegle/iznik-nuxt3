@@ -29,7 +29,7 @@
           v-if="deDuplicatedMessages.length"
           :at="['xs', 'sm', 'md', 'lg']"
         >
-          <ExternalAd
+          <ExternalDa
             ad-unit-path="/22794232631/freegle_product"
             :dimensions="[300, 250]"
             div-id="div-gpt-ad-1690904332895-0"
