@@ -28,6 +28,8 @@
               v-if="offers"
               type="Offer"
               :posts="offers"
+              :loading="offersLoading"
+              :default-expanded="messages.length <= 5"
               @load-more="loadMoreOffers"
             />
 
@@ -35,6 +37,8 @@
               v-if="wanteds"
               type="Wanted"
               :posts="wanteds"
+              :loading="wantedsLoading"
+              :default-expanded="messages.length <= 5"
               @load-more="loadMoreWanteds"
             />
 
@@ -149,19 +153,7 @@ if (existingHomepage !== 'myposts') {
 }
 
 const askmodal = ref()
-
 const myid = authStore.user?.id
-
-const messages = ref([])
-let expand = false
-
-if (myid) {
-  messages.value = await messageStore.fetchByUser(myid, false, true)
-  expand = messages.value.length <= 5
-
-  // No need to wait for searches - often below the fold.
-  searchStore.fetch(myid)
-}
 
 const { $bus } = useNuxtApp()
 onMounted(() => {
@@ -201,39 +193,74 @@ onMounted(() => {
   })
 })
 
-const offersToShow = ref(1)
+/// //////////////////////////////////////////////
+const messages = ref([])
+
+const offersLoading = ref(true)
+const wantedsLoading = ref(true)
+
+if (myid) {
+  offersLoading.value = true
+  wantedsLoading.value = true
+
+  messages.value = await messageStore.fetchByUser(myid, false, true)
+
+  offersLoading.value = false
+  wantedsLoading.value = false
+
+  // No need to wait for searches - often below the fold.
+  searchStore.fetch(myid)
+}
+
+const shownOffersCount = ref(1)
 const offers = computed(() => {
-  return messages.value
-    .filter((message) => message.type === 'Offer')
-    .slice(0, offersToShow.value)
+  return messages.value.filter((message) => message.type === 'Offer')
 })
 
-function loadMoreOffers($state) {
-  offersToShow.value++
-  $state.loaded()
+async function loadMoreOffers(infiniteLoaderInstance) {
+  shownOffersCount.value++
 
-  if (offersToShow.value > offers.value.length) {
-    offersToShow.value = offers.value.length
-    $state.complete()
+  if (shownOffersCount.value > offers.value.length) {
+    shownOffersCount.value = offers.value.length
+
+    infiniteLoaderInstance.complete()
+  } else {
+    // only show the loading indicator when loading the active offers
+    if (!offers.value[shownOffersCount.value - 1].hasoutcome)
+      offersLoading.value = true
+
+    await messageStore.fetch(offers.value[shownOffersCount.value - 1].id)
+
+    offersLoading.value = false
+    infiniteLoaderInstance.loaded()
   }
 }
 
-const wantedsToShow = ref(1)
+const shownWantedsCount = ref(1)
 const wanteds = computed(() => {
-  return messages.value
-    .filter((message) => message.type === 'Wanted')
-    .slice(0, wantedsToShow.value)
+  return messages.value.filter((message) => message.type === 'Wanted')
 })
 
-function loadMoreWanteds($state) {
-  wantedsToShow.value++
-  $state.loaded()
+async function loadMoreWanteds(infiniteLoaderInstance) {
+  shownWantedsCount.value++
 
-  if (wantedsToShow.value > wanteds.value.length) {
-    wantedsToShow.value = wanteds.value.length
-    $state.complete()
+  if (shownWantedsCount.value > wanteds.value.length) {
+    shownWantedsCount.value = wanteds.value.length
+
+    infiniteLoaderInstance.complete()
+  } else {
+    // only show the loading indicator when loading the active wanteds
+    if (!wanteds.value[shownWantedsCount.value - 1].hasoutcome)
+      wantedsLoading.value = true
+
+    await messageStore.fetch(wanteds.value[shownWantedsCount.value - 1].id)
+
+    wantedsLoading.value = false
+    infiniteLoaderInstance.loaded()
   }
 }
+
+/// /////////////////////////////////////////////
 
 const searches = computed(() => {
   // Show the searches within the last 90 days, most recent first. Anything older is less likely to be relevant

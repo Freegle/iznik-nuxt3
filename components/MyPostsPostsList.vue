@@ -42,14 +42,7 @@
             Stuff you're trying to find.
           </template>
         </p>
-        <b-img
-          v-if="props.loading"
-          lazy
-          src="/loader.gif"
-          alt="Loading..."
-          width="100px"
-        />
-        <div v-else-if="visiblePosts.length > 0">
+        <div v-if="visiblePosts.length > 0">
           <div
             v-for="post in visiblePosts"
             :key="'post-' + post.id"
@@ -61,8 +54,15 @@
               :expand="oldPosts.includes(post)"
             />
           </div>
+          <b-img
+            v-if="props.loading"
+            lazy
+            src="/loader.gif"
+            alt="Loading..."
+            width="100px"
+          />
           <InfiniteLoading
-            :distance="1000"
+            :distance="scrollboxHeight"
             @infinite="emit('load-more', $event)"
           />
         </div>
@@ -93,7 +93,8 @@ import InfiniteLoading from '~/components/InfiniteLoading.vue'
 const props = defineProps({
   type: { type: String, required: true },
   posts: { type: Array, required: true },
-  loading: { type: Boolean },
+  loading: { type: Boolean, required: true },
+  defaultExpanded: { type: Boolean, required: true },
 })
 
 const emit = defineEmits(['load-more'])
@@ -101,6 +102,8 @@ const emit = defineEmits(['load-more'])
 const listHeaderText = computed(() => {
   return `Your ${props.type.toUpperCase()}s`
 })
+
+const scrollboxHeight = ref(1000)
 
 const showOldPosts = ref(false)
 function toggleShowOldPosts() {
@@ -144,7 +147,8 @@ const visiblePosts = computed(() => {
 
 <style scoped>
 .restricted-height {
-  height: 300px;
+  max-height: v-bind('scrollboxHeight + "px"');
+  overflow-x: hidden;
   overflow-y: auto;
 }
 </style>
