@@ -463,10 +463,7 @@
         </b-nav>
       </b-collapse>
     </b-navbar>
-    <AboutMeModal
-      v-if="showAboutMeModal"
-      ref="aboutMeModal"
-    />
+    <AboutMeModal v-if="showAboutMeModal" ref="aboutMeModal" />
   </header>
 </template>
 <script setup>

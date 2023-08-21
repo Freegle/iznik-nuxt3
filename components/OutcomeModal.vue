@@ -14,7 +14,7 @@
           {{ message.subject }}
           <div>
             <b-badge
-              v-if="message.availableinitially > 1"
+              v-if="message.availablenow > 1"
               variant="info"
               class="lg ml-2"
             >
@@ -48,9 +48,9 @@
         </NoticeMessage>
         <div v-if="type === 'Taken'">
           <OutcomeBy
-            :availableinitially="
-              typeof message.availableinitially === 'number'
-                ? message.availableinitially
+            :availablenow="
+              typeof message.availablenow === 'number'
+                ? message.availablenow
                 : 1
             "
             :type="type"
