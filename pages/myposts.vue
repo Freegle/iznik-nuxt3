@@ -29,7 +29,7 @@
               type="Offer"
               :posts="offers"
               :loading="offersLoading"
-              :default-expanded="messages.length <= 5"
+              :default-expanded="posts.length <= 5"
               @load-more="loadMoreOffers"
             />
 
@@ -38,7 +38,7 @@
               type="Wanted"
               :posts="wanteds"
               :loading="wantedsLoading"
-              :default-expanded="messages.length <= 5"
+              :default-expanded="posts.length <= 5"
               @load-more="loadMoreWanteds"
             />
 
@@ -194,7 +194,8 @@ onMounted(() => {
 })
 
 /// //////////////////////////////////////////////
-const messages = ref([])
+// `posts` holds both OFFERs and WANTEDs (both old and active)
+const posts = ref([])
 
 const offersLoading = ref(true)
 const wantedsLoading = ref(true)
@@ -203,7 +204,7 @@ if (myid) {
   offersLoading.value = true
   wantedsLoading.value = true
 
-  messages.value = await messageStore.fetchByUser(myid, false, true)
+  posts.value = await messageStore.fetchByUser(myid, false, true)
 
   offersLoading.value = false
   wantedsLoading.value = false
@@ -214,7 +215,7 @@ if (myid) {
 
 const shownOffersCount = ref(1)
 const offers = computed(() => {
-  return messages.value.filter((message) => message.type === 'Offer')
+  return posts.value.filter((message) => message.type === 'Offer')
 })
 
 async function loadMoreOffers(infiniteLoaderInstance) {
@@ -238,7 +239,7 @@ async function loadMoreOffers(infiniteLoaderInstance) {
 
 const shownWantedsCount = ref(1)
 const wanteds = computed(() => {
-  return messages.value.filter((message) => message.type === 'Wanted')
+  return posts.value.filter((message) => message.type === 'Wanted')
 })
 
 async function loadMoreWanteds(infiniteLoaderInstance) {
