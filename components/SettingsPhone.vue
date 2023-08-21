@@ -100,11 +100,13 @@ export default {
   },
   computed: {
     notMobile() {
+      if (!this.me?.phone) {
+        return false
+      }
+
       return (
-        this.me &&
-        this.me.phone &&
-        (this.me.phone + '').includes('447') &&
-        (this.me.phone + '').includes('07')
+        !(this.me.phone + '').startsWith('+447') &&
+        !(this.me.phone + '').startsWith('07')
       )
     },
     phone() {
