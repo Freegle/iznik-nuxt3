@@ -14,7 +14,7 @@ export function useModal(emit) {
   // a modal on mobile.
   const unregisterRouterGuard = router.beforeEach((to, from, next) => {
     if (!to.path.includes('/chats')) {
-      back.value(next)
+      back(next)
     } else {
       // It's to a chat.
       next()
