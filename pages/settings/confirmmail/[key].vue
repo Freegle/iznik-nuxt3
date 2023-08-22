@@ -157,11 +157,13 @@ export default {
       router.push('/chitchat')
     },
     async resend() {
-      await this.authStore.saveAndGet({
-        email: this.email,
+      const data = await this.authStore.saveEmail({
+        email: this.me.email,
       })
 
-      this.resent = true
+      if (data && (data.ret === 0 || data.ret === 10)) {
+        this.resent = true
+      }
     },
   },
 }
