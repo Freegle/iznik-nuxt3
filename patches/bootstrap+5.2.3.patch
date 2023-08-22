@@ -1,11 +1,28 @@
 diff --git a/node_modules/bootstrap/dist/js/bootstrap.bundle.js b/node_modules/bootstrap/dist/js/bootstrap.bundle.js
-index 67ab056..3060cce 100644
+index 67ab056..0705cd2 100644
 --- a/node_modules/bootstrap/dist/js/bootstrap.bundle.js
 +++ b/node_modules/bootstrap/dist/js/bootstrap.bundle.js
-@@ -5789,9 +5789,10 @@
+@@ -5683,10 +5683,13 @@
+ 
+     dispose() {
+       clearTimeout(this._timeout);
+-      EventHandler.off(this._element.closest(SELECTOR_MODAL), EVENT_MODAL_HIDE, this._hideModalHandler);
+       
+-      if (this._element.getAttribute('data-bs-original-title')) {
+-        this._element.setAttribute('title', this._element.getAttribute('data-bs-original-title'));
++      if (this._element) {
++        EventHandler.off(this._element.closest(SELECTOR_MODAL), EVENT_MODAL_HIDE, this._hideModalHandler);
++
++        if (this._element.getAttribute('data-bs-original-title')) {
++          this._element.setAttribute('title', this._element.getAttribute('data-bs-original-title'));
++        }
+       }
+ 
+       this._disposePopper();
+@@ -5789,9 +5792,10 @@
            this._disposePopper();
          }
-
+ 
 -        this._element.removeAttribute('aria-describedby');
 -
 -        EventHandler.trigger(this._element, this.constructor.eventName(EVENT_HIDDEN$2));
@@ -14,16 +31,33 @@ index 67ab056..3060cce 100644
 +          EventHandler.trigger(this._element, this.constructor.eventName(EVENT_HIDDEN$2));
 +        }
        };
-
+ 
        this._queueCallback(complete, this.tip, this._isAnimated());
 diff --git a/node_modules/bootstrap/dist/js/bootstrap.esm.js b/node_modules/bootstrap/dist/js/bootstrap.esm.js
-index 87a487e..7f5eb42 100644
+index 87a487e..bb24420 100644
 --- a/node_modules/bootstrap/dist/js/bootstrap.esm.js
 +++ b/node_modules/bootstrap/dist/js/bootstrap.esm.js
-@@ -3939,9 +3939,10 @@ class Tooltip extends BaseComponent {
+@@ -3833,10 +3833,13 @@ class Tooltip extends BaseComponent {
+ 
+   dispose() {
+     clearTimeout(this._timeout);
+-    EventHandler.off(this._element.closest(SELECTOR_MODAL), EVENT_MODAL_HIDE, this._hideModalHandler);
+     
+-    if (this._element.getAttribute('data-bs-original-title')) {
+-      this._element.setAttribute('title', this._element.getAttribute('data-bs-original-title'));
++    if (this._element) {
++      EventHandler.off(this._element.closest(SELECTOR_MODAL), EVENT_MODAL_HIDE, this._hideModalHandler);
++
++      if (this._element.getAttribute('data-bs-original-title')) {
++        this._element.setAttribute('title', this._element.getAttribute('data-bs-original-title'));
++      }
+     }
+ 
+     this._disposePopper();
+@@ -3939,9 +3942,10 @@ class Tooltip extends BaseComponent {
          this._disposePopper();
        }
-
+ 
 -      this._element.removeAttribute('aria-describedby');
 -
 -      EventHandler.trigger(this._element, this.constructor.eventName(EVENT_HIDDEN$2));
@@ -32,16 +66,53 @@ index 87a487e..7f5eb42 100644
 +        EventHandler.trigger(this._element, this.constructor.eventName(EVENT_HIDDEN$2));
 +      }
      };
-
+ 
      this._queueCallback(complete, this.tip, this._isAnimated());
+diff --git a/node_modules/bootstrap/dist/js/bootstrap.js b/node_modules/bootstrap/dist/js/bootstrap.js
+index 9ccfb0b..441d080 100644
+--- a/node_modules/bootstrap/dist/js/bootstrap.js
++++ b/node_modules/bootstrap/dist/js/bootstrap.js
+@@ -3857,10 +3857,13 @@
+ 
+     dispose() {
+       clearTimeout(this._timeout);
+-      EventHandler.off(this._element.closest(SELECTOR_MODAL), EVENT_MODAL_HIDE, this._hideModalHandler);
+ 
+-      if (this._element.getAttribute('data-bs-original-title')) {
+-        this._element.setAttribute('title', this._element.getAttribute('data-bs-original-title'));
++      if (this._element) {
++        EventHandler.off(this._element.closest(SELECTOR_MODAL), EVENT_MODAL_HIDE, this._hideModalHandler);
++
++        if (this._element.getAttribute('data-bs-original-title')) {
++          this._element.setAttribute('title', this._element.getAttribute('data-bs-original-title'));
++        }
+       }
+ 
+       this._disposePopper();
 diff --git a/node_modules/bootstrap/js/dist/tooltip.js b/node_modules/bootstrap/js/dist/tooltip.js
-index 5e86b8e..2e31ccd 100644
+index 5e86b8e..c72f3e0 100644
 --- a/node_modules/bootstrap/js/dist/tooltip.js
 +++ b/node_modules/bootstrap/js/dist/tooltip.js
-@@ -291,9 +291,10 @@
+@@ -185,10 +185,12 @@
+ 
+     dispose() {
+       clearTimeout(this._timeout);
+-      EventHandler__default.default.off(this._element.closest(SELECTOR_MODAL), EVENT_MODAL_HIDE, this._hideModalHandler);
++      if (this._element) {
++        EventHandler__default.default.off(this._element.closest(SELECTOR_MODAL), EVENT_MODAL_HIDE, this._hideModalHandler);
+ 
+-      if (this._element.getAttribute('data-bs-original-title')) {
+-        this._element.setAttribute('title', this._element.getAttribute('data-bs-original-title'));
++        if (this._element.getAttribute('data-bs-original-title')) {
++          this._element.setAttribute('title', this._element.getAttribute('data-bs-original-title'));
++        }
+       }
+ 
+       this._disposePopper();
+@@ -291,9 +293,10 @@
            this._disposePopper();
          }
-
+ 
 -        this._element.removeAttribute('aria-describedby');
 -
 -        EventHandler__default.default.trigger(this._element, this.constructor.eventName(EVENT_HIDDEN));
@@ -50,16 +121,32 @@ index 5e86b8e..2e31ccd 100644
 +          EventHandler__default.default.trigger(this._element, this.constructor.eventName(EVENT_HIDDEN));
 +        }
        };
-
+ 
        this._queueCallback(complete, this.tip, this._isAnimated());
 diff --git a/node_modules/bootstrap/js/src/tooltip.js b/node_modules/bootstrap/js/src/tooltip.js
-index 748a0e1..4e7c0ba 100644
+index 748a0e1..54e5254 100644
 --- a/node_modules/bootstrap/js/src/tooltip.js
 +++ b/node_modules/bootstrap/js/src/tooltip.js
-@@ -273,8 +273,10 @@ class Tooltip extends BaseComponent {
+@@ -170,10 +170,12 @@ class Tooltip extends BaseComponent {
+   dispose() {
+     clearTimeout(this._timeout)
+ 
+-    EventHandler.off(this._element.closest(SELECTOR_MODAL), EVENT_MODAL_HIDE, this._hideModalHandler)
++    if (this._element) {
++      EventHandler.off(this._element.closest(SELECTOR_MODAL), EVENT_MODAL_HIDE, this._hideModalHandler)
+ 
+-    if (this._element.getAttribute('data-bs-original-title')) {
+-      this._element.setAttribute('title', this._element.getAttribute('data-bs-original-title'))
++      if (this._element.getAttribute('data-bs-original-title')) {
++        this._element.setAttribute('title', this._element.getAttribute('data-bs-original-title'))
++      }
+     }
+ 
+     this._disposePopper()
+@@ -273,8 +275,10 @@ class Tooltip extends BaseComponent {
          this._disposePopper()
        }
-
+ 
 -      this._element.removeAttribute('aria-describedby')
 -      EventHandler.trigger(this._element, this.constructor.eventName(EVENT_HIDDEN))
 +      if (this._element) {
@@ -67,5 +154,5 @@ index 748a0e1..4e7c0ba 100644
 +        EventHandler.trigger(this._element, this.constructor.eventName(EVENT_HIDDEN))
 +      }
      }
-
+ 
      this._queueCallback(complete, this.tip, this._isAnimated())
