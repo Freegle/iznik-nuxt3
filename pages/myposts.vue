@@ -94,7 +94,7 @@
           </VisibleWhen>
         </b-col>
       </b-row>
-      <DonationAskModal ref="askmodal" :groupid="donationGroup" />
+      <DonationAskModal requested-variant="video" />
     </b-container>
   </client-only>
 </template>
@@ -152,48 +152,8 @@ if (existingHomepage !== 'myposts') {
   })
 }
 
-const askmodal = ref()
 const myid = authStore.user?.id
 
-const { $bus } = useNuxtApp()
-onMounted(() => {
-  const lastAsk = miscStore.get('lastdonationask')
-  let canAsk =
-    !lastAsk || new Date().getTime() - lastAsk > 60 * 60 * 1000 * 24 * 7
-
-  // Donation ask on Browse page is only used when we have a specific push.
-  canAsk = false
-
-  if (canAsk) {
-    ask()
-
-    miscStore.set({
-      key: 'lastdonationask',
-      value: new Date().getTime(),
-    })
-  }
-
-  $bus.$on('outcome', (params) => {
-    const { groupid, outcome } = params
-
-    if (outcome === 'Taken' || outcome === 'Received') {
-      // If someone has set up a regular donation, then we don't ask them to donate again.  Wouldn't be fair to
-      // pester them.
-
-      if (!me?.donorrecurring && canAsk) {
-        donationGroup.value = groupid
-        ask()
-
-        miscStore.set({
-          key: 'lastdonationask',
-          value: new Date().getTime(),
-        })
-      }
-    }
-  })
-})
-
-/// //////////////////////////////////////////////
 // `posts` holds both OFFERs and WANTEDs (both old and active)
 const posts = ref([])
 
@@ -280,13 +240,6 @@ const searches = computed(() => {
 
   return ret
 })
-
-const donationGroup = ref(null)
-
-async function ask(groupid) {
-  await waitForRef('askmodal')
-  askmodal.value.show('video')
-}
 
 function forceLogin() {
   authStore.forceLogin = true
