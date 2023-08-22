@@ -88,7 +88,7 @@ const runtimeConfig = useRuntimeConfig()
 const api = Api(runtimeConfig)
 
 const props = defineProps({
-  requestedVariant: { type: String, required: true },
+  requestedVariant: { type: String, default: '' },
 })
 
 const emit = defineEmits(['hide'])
