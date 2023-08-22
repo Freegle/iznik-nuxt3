@@ -426,6 +426,12 @@ export default class BaseAPI {
 
         status = rsp.status
         data = await rsp.json()
+      } else if (status === 401) {
+        // Not authorised - our JWT and/or persistent token must be wrong.  Clear them.  This may force a login, or
+        // not, depending on whether the page requires it.
+        console.log('Not authorised - force logged out')
+        authStore.setAuth(null, null)
+        authStore.setUser(null)
       }
     } catch (e) {
       console.log('Fetch error', path, e?.message)
