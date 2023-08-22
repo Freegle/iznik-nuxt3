@@ -15,18 +15,8 @@ export default class SessionAPI extends BaseAPI {
     return this.$patch('/session', data, log)
   }
 
-  login({
-    email,
-    password,
-    fblogin,
-    fbaccesstoken,
-    googlelogin,
-    googleauthcode,
-    googlejwt,
-    u,
-    k,
-  }) {
-    return this.$post('/session', {
+  login(
+    {
       email,
       password,
       fblogin,
@@ -36,7 +26,24 @@ export default class SessionAPI extends BaseAPI {
       googlejwt,
       u,
       k,
-    })
+    },
+    log
+  ) {
+    return this.$post(
+      '/session',
+      {
+        email,
+        password,
+        fblogin,
+        fbaccesstoken,
+        googlelogin,
+        googleauthcode,
+        googlejwt,
+        u,
+        k,
+      },
+      log
+    )
   }
 
   yahooCodeLogin(yahoocodelogin) {

@@ -152,7 +152,19 @@ export const useAuthStore = defineStore({
     },
     async login(params) {
       try {
-        const res = await this.$api.session.login(params)
+        const res = await this.$api.session.login(params, function (data) {
+          let logIt
+
+          if (data && data.ret === 3) {
+            // Don't log errors for wrong password.
+            logIt = false
+          } else {
+            logIt = true
+          }
+
+          return logIt
+        })
+
         const { ret, status, persistent, jwt } = res
 
         if (ret === 0) {
