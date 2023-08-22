@@ -42,50 +42,7 @@
               @load-more="loadMoreWanteds"
             />
 
-            <b-card
-              class="mt-2"
-              border-variant="info"
-              header="info"
-              header-bg-variant="info"
-              header-text-variant="white"
-              no-body
-            >
-              <template #header>
-                <h2 class="d-inline header--size3">
-                  <v-icon icon="search" scale="2" /> Your Searches
-                </h2>
-              </template>
-              <b-card-body class="p-1 p-lg-3">
-                <b-card-text class="text-center">
-                  <p v-if="searches?.length > 0" class="text-muted">
-                    What you've recently searched for - click to search again.
-                    These are also email alerts - we'll mail you matching posts.
-                  </p>
-                  <ul
-                    v-if="searches?.length"
-                    class="list-group list-group-horizontal flex-wrap"
-                  >
-                    <UserSearch
-                      v-for="search in searches"
-                      :key="'search-' + search.id"
-                      :search="search"
-                      class="text-start mt-1 list-group-item bg-white border text-nowrap mr-2"
-                    />
-                  </ul>
-                  <div v-else>
-                    <p>Nothing here yet. Why not...</p>
-                    <b-button
-                      to="/find"
-                      class="mt-1"
-                      size="lg"
-                      variant="secondary"
-                    >
-                      <v-icon icon="shopping-cart" />&nbsp;Ask for stuff
-                    </b-button>
-                  </div>
-                </b-card-text>
-              </b-card-body>
-            </b-card>
+            <MyPostsSearchesList />
           </div>
         </b-col>
         <b-col cols="0" lg="3" class="p-0 pl-1">
@@ -101,12 +58,11 @@
 
 <script setup>
 import { useRoute } from 'vue-router'
-import dayjs from 'dayjs'
 import { useAuthStore } from '../stores/auth'
 import { useMessageStore } from '../stores/message'
-import { useMiscStore } from '../stores/misc'
 import { useSearchStore } from '../stores/search'
 import { buildHead } from '~/composables/useBuildHead'
+import { useFavoritePage } from '~/composables/useFavoritePage'
 
 import VisibleWhen from '~/components/VisibleWhen'
 import SidebarLeft from '~/components/SidebarLeft'
@@ -114,12 +70,11 @@ import SidebarRight from '~/components/SidebarRight'
 import ExpectedRepliesWarning from '~/components/ExpectedRepliesWarning'
 import JobsTopBar from '~/components/JobsTopBar'
 import MyPostsPostsList from '~/components/MyPostsPostsList.vue'
-import UserSearch from '~/components/UserSearch.vue'
+import MyPostsSearchesList from '~/components/MyPostsSearchesList.vue'
 import DonationAskModal from '~/components/DonationAskModal'
 
 const authStore = useAuthStore()
 const messageStore = useMessageStore()
-const miscStore = useMiscStore()
 const searchStore = useSearchStore()
 
 const runtimeConfig = useRuntimeConfig()
@@ -142,15 +97,7 @@ useHead(
   )
 )
 
-// save this page as the favorite one, so that the user is automatically redirected here the next time they load the app
-const existingHomepage = miscStore.get('lasthomepage')
-
-if (existingHomepage !== 'myposts') {
-  miscStore.set({
-    key: 'lasthomepage',
-    value: 'myposts',
-  })
-}
+useFavoritePage('myposts')
 
 const myid = authStore.user?.id
 
@@ -220,26 +167,6 @@ async function loadMoreWanteds(infiniteLoaderInstance) {
     infiniteLoaderInstance.loaded()
   }
 }
-
-/// /////////////////////////////////////////////
-
-const searches = computed(() => {
-  // Show the searches within the last 90 days, most recent first. Anything older is less likely to be relevant
-  // and it stops it growing forever, forcing them to delete things.
-
-  let ret = searchStore?.list
-
-  if (ret) {
-    const now = dayjs()
-    ret = ret.filter((a) => {
-      const daysago = now.diff(dayjs(a.date), 'day')
-      return daysago <= 90
-    })
-    ret.sort((a, b) => a.daysago - b.daysago)
-  }
-
-  return ret
-})
 
 function forceLogin() {
   authStore.forceLogin = true
