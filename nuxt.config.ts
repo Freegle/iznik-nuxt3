@@ -298,6 +298,11 @@ export default defineNuxtConfig({
           content: 'summary_large_image',
         },
         { hid: 'twitter:site', name: 'twitter:site', content: 'thisisfreegle' },
+        {
+          hid: 'OMG-Verify-V1',
+          name: 'OMG-Verify-V1',
+          content: '954a2917-d603-4df4-8802-f6a78846a9c0',
+        },
       ],
     },
   },
