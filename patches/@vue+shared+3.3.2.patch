@@ -1,5 +1,5 @@
 diff --git a/node_modules/@vue/shared/dist/shared.cjs.js b/node_modules/@vue/shared/dist/shared.cjs.js
-index 55bf448..43c05fb 100644
+index 1f686c1..cd17ef0 100644
 --- a/node_modules/@vue/shared/dist/shared.cjs.js
 +++ b/node_modules/@vue/shared/dist/shared.cjs.js
 @@ -331,7 +331,7 @@ function escapeHtml(string) {
@@ -12,7 +12,7 @@ index 55bf448..43c05fb 100644
  
  function looseCompareArrays(a, b) {
 diff --git a/node_modules/@vue/shared/dist/shared.cjs.prod.js b/node_modules/@vue/shared/dist/shared.cjs.prod.js
-index 3119720..092340b 100644
+index ca8322a..104f476 100644
 --- a/node_modules/@vue/shared/dist/shared.cjs.prod.js
 +++ b/node_modules/@vue/shared/dist/shared.cjs.prod.js
 @@ -331,7 +331,7 @@ function escapeHtml(string) {
