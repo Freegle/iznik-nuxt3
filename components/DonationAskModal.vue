@@ -112,6 +112,8 @@ const targetMet = computed(() => {
   return groupId.value && raised.value > target.value
 })
 
+ask()
+
 function ask() {
   show(props.requestedVariant)
 
@@ -124,10 +126,6 @@ function ask() {
 const lastAsk = miscStore.get('lastdonationask')
 const canAsk =
   !lastAsk || new Date().getTime() - lastAsk > 60 * 60 * 1000 * 24 * 7
-
-if (canAsk) {
-  ask()
-}
 
 const { $bus } = useNuxtApp()
 $bus.$on('outcome', (params) => {
@@ -183,7 +181,7 @@ function score(value) {
 </script>
 
 <style>
-#donationaskmodal {
-  opacity: 1;
-}
+//#donationaskmodal {
+//  opacity: 1;
+//}
 </style>
