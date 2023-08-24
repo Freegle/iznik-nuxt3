@@ -125,9 +125,6 @@ const lastAsk = miscStore.get('lastdonationask')
 const canAsk =
   !lastAsk || new Date().getTime() - lastAsk > 60 * 60 * 1000 * 24 * 7
 
-// Donation ask on Browse page is only used when we have a specific push.
-// canAsk = false // Why is this?
-
 if (canAsk) {
   ask()
 }
