@@ -51,7 +51,7 @@
           </VisibleWhen>
         </b-col>
       </b-row>
-      <DonationAskModal requested-variant="video" />
+      <DonationAskModal />
     </b-container>
   </client-only>
 </template>
