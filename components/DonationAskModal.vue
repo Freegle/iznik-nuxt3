@@ -1,70 +1,69 @@
 <template>
-  <div>
-    <b-modal
-      id="donationaskmodal"
-      v-model="showModal"
-      scrollable
-      :title="'Please help keep ' + groupName + ' running'"
-      size="lg"
-      no-stacking
-    >
-      <template #default>
-        <div v-if="variant === 'video'">
-          <DonationAskVideo
-            :groupid="groupId"
-            :groupname="groupName"
-            :target="target"
-            :raised="raised"
-            :target-met="targetMet"
-            @score="score"
-          />
-        </div>
-        <div v-else-if="variant === 'quote'">
-          <DonationAskQuote
-            :groupid="groupId"
-            :groupname="groupName"
-            :target="target"
-            :raised="raised"
-            :target-met="targetMet"
-            @score="score"
-          />
-        </div>
-        <div v-else-if="variant === 'buttons2510'">
-          <DonationAskButtons2510
-            :groupid="groupId"
-            :groupname="groupName"
-            :target="target"
-            :raised="raised"
-            :target-met="targetMet"
-            @score="score"
-          />
-        </div>
-        <div v-else-if="variant === 'buttons51025'">
-          <DonationAskButtons51025
-            :groupid="groupId"
-            :groupname="groupName"
-            :target="target"
-            :raised="raised"
-            :target-met="targetMet"
-            @score="score"
-          />
-        </div>
-        <div v-else>
-          <DonationAskWhatYouCan
-            :groupname="groupName"
-            :groupid="groupId"
-            :target="target"
-            :raised="raised"
-            :target-met="targetMet"
-            @score="score"
-          />
-        </div>
-      </template>
-      <template #footer>
-        <b-button variant="secondary" @click="hide">Close</b-button>
-      </template>
-    </b-modal>
-  </div>
+  <b-modal
+    id="donationaskmodal"
+    v-model="showModal"
+    scrollable
+    :title="'Please help keep ' + groupName + ' running'"
+    size="lg"
+    no-stacking
+    no-fade
+  >
+    <template #default>
+      <div v-if="variant === 'video'">
+        <DonationAskVideo
+          :groupid="groupId"
+          :groupname="groupName"
+          :target="target"
+          :raised="raised"
+          :target-met="targetMet"
+          @score="score"
+        />
+      </div>
+      <div v-else-if="variant === 'quote'">
+        <DonationAskQuote
+          :groupid="groupId"
+          :groupname="groupName"
+          :target="target"
+          :raised="raised"
+          :target-met="targetMet"
+          @score="score"
+        />
+      </div>
+      <div v-else-if="variant === 'buttons2510'">
+        <DonationAskButtons2510
+          :groupid="groupId"
+          :groupname="groupName"
+          :target="target"
+          :raised="raised"
+          :target-met="targetMet"
+          @score="score"
+        />
+      </div>
+      <div v-else-if="variant === 'buttons51025'">
+        <DonationAskButtons51025
+          :groupid="groupId"
+          :groupname="groupName"
+          :target="target"
+          :raised="raised"
+          :target-met="targetMet"
+          @score="score"
+        />
+      </div>
+      <div v-else>
+        <DonationAskWhatYouCan
+          :groupname="groupName"
+          :groupid="groupId"
+          :target="target"
+          :raised="raised"
+          :target-met="targetMet"
+          @score="score"
+        />
+      </div>
+    </template>
+    <template #footer>
+      <b-button variant="secondary" @click="hide">Close</b-button>
+    </template>
+  </b-modal>
 </template>
 
 <script setup>
