@@ -128,20 +128,18 @@ const activePosts = computed(() => {
 })
 
 const visiblePosts = computed(() => {
-  return (
-    showOldPosts.value
-      ? activePosts.value.concat(oldPosts.value)
-      : activePosts.value
-  ).toSorted((a, b) => {
-    // promised items first, then by most recently posted
-    if (!showOldPosts.value && a.promised && !b.promised) {
-      return -1
-    } else if (!showOldPosts.value && b.promised && !a.promised) {
-      return 1
-    } else {
-      return new Date(b.arrival).getTime() - new Date(a.arrival).getTime()
+  return (showOldPosts.value ? props.posts : activePosts.value).toSorted(
+    (a, b) => {
+      // promised items first, then by most recently posted
+      if (!showOldPosts.value && a.promised && !b.promised) {
+        return -1
+      } else if (!showOldPosts.value && b.promised && !a.promised) {
+        return 1
+      } else {
+        return new Date(b.arrival).getTime() - new Date(a.arrival).getTime()
+      }
     }
-  })
+  )
 })
 </script>
 
