@@ -16,3 +16,6 @@ static/sw.js
 
 # OSx files
 .DS_Store
+
+# Sentry Auth Token
+.env.sentry-build-plugin

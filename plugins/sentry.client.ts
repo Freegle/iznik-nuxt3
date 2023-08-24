@@ -150,6 +150,14 @@ export default defineNuxtPlugin((nuxtApp) => {
             // This probably happens due to the user changing their mind and navigating away immediately.
             console.log('Suppress cancelled')
             return null
+          } else if (originalExceptionString?.match(/Object.checkLanguage/)) {
+            // Some auto translation thing.
+            console.log('Translate exception cancelled')
+            return null
+          } else if (originalExceptionString?.match(/\/js\/gpt/)) {
+            // Error inside Google Ads.
+            console.log('Ad error ignored')
+            return null
           }
         } else if (originalExceptionName === 'ReferenceError') {
           console.log('ReferenceError')

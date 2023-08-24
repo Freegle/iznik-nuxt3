@@ -52,7 +52,7 @@ export default {
       type: Number,
       required: false,
       default: MAX_MAP_ZOOM,
-    }
+    },
   },
   async setup() {
     const runtimeConfig = useRuntimeConfig()
