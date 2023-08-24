@@ -69,6 +69,7 @@
 
 <script setup>
 import { storeToRefs } from 'pinia'
+import { useAuthStore } from '~/stores/auth'
 import { useGroupStore } from '~/stores/group'
 import { useDonationStore } from '~/stores/donations'
 import { useMiscStore } from '~/stores/misc'
@@ -81,6 +82,7 @@ import DonationAskButtons51025 from '~/components/DonationAskButtons51025.vue'
 import DonationAskWhatYouCan from '~/components/DonationAskWhatYouCan.vue'
 import Api from '~/api'
 
+const authStore = useAuthStore()
 const groupStore = useGroupStore()
 const donationStore = useDonationStore()
 const miscStore = useMiscStore()
@@ -96,6 +98,7 @@ const emit = defineEmits(['hide'])
 const variant = ref(null)
 const { showModal, hide } = useModal(emit)
 
+const me = authStore.user
 const groupId = ref(null)
 
 const groupName = computed(() => {
@@ -111,8 +114,6 @@ const { raised, target } = storeToRefs(donationStore)
 const targetMet = computed(() => {
   return groupId.value && raised.value > target.value
 })
-
-ask()
 
 function ask() {
   show(props.requestedVariant)
@@ -179,9 +180,3 @@ function score(value) {
   })
 }
 </script>
-
-<style>
-//#donationaskmodal {
-//  opacity: 1;
-//}
-</style>
