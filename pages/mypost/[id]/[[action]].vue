@@ -36,7 +36,7 @@
           </div>
         </b-col>
       </b-row>
-      <DonationAskModal ref="askmodal" :groupid="donationGroup" />
+      <DonationAskModal />
     </b-container>
   </client-only>
 </template>
@@ -135,7 +135,6 @@ export default {
   },
   data() {
     return {
-      donationGroup: null,
       contactGroup: null,
     }
   },
@@ -144,21 +143,7 @@ export default {
       return this.messageStore?.byId(this.id)
     },
   },
-  mounted() {
-    this.$bus.$on('outcome', (params) => {
-      const { groupid, outcome } = params
-
-      if (outcome === 'Taken' || outcome === 'Received') {
-        this.donationGroup = groupid
-        this.ask()
-      }
-    })
-  },
   methods: {
-    async ask(groupid) {
-      await this.waitForRef('askmodal')
-      this.$refs.askmodal.show()
-    },
     setGroup() {
       if (this.message?.groups?.length) {
         this.contactGroup = this.message.groups[0].id

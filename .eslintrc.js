@@ -55,6 +55,7 @@ module.exports = {
     createApp: 'readonly',
     useNuxtApp: 'readonly',
     useHead: 'readonly',
+    ref: 'readonly',
     computed: 'readonly',
     usePinia: 'readonly',
     navigateTo: 'readonly',
