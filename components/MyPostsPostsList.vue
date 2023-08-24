@@ -145,7 +145,7 @@ const visiblePosts = computed(() => {
 
 <style scoped>
 .restricted-height {
-  max-height: v-bind('scrollboxHeight + "px"');
+  max-height: 100vh;
   overflow-x: hidden;
   overflow-y: auto;
 }
