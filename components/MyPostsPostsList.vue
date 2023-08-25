@@ -131,7 +131,7 @@ const visiblePosts = computed(() => {
   let posts = showOldPosts.value ? props.posts : activePosts.value
   posts = posts || []
 
-  return posts.toSorted((a, b) => {
+  return posts.sort((a, b) => {
     // promised items first, then by most recently posted
     if (!showOldPosts.value && a.promised && !b.promised) {
       return -1
