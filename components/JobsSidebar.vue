@@ -10,14 +10,6 @@
       <donation-button />
     </NoticeMessage>
     <div v-else>
-      <VisibleWhen :not="['xs', 'sm', 'md', 'lg']">
-        <ExternalDa
-          ad-unit-path="/22794232631/freegle_home"
-          :dimensions="[300, 250]"
-          div-id="div-gpt-ad-1690904271564-0"
-          class="mt-2"
-        />
-      </VisibleWhen>
       <b-card v-if="list.length" variant="white" no-body>
         <b-card-body class="p-0">
           <nuxt-link no-prefetch to="/jobs">
@@ -58,7 +50,6 @@ import JobOne from './JobOne'
 import InfiniteLoading from '~/components/InfiniteLoading'
 const NoticeMessage = () => import('~/components/NoticeMessage')
 const DonationButton = () => import('~/components/DonationButton')
-const ExternalDa = () => import('~/components/ExternalDa')
 
 export default {
   components: {
@@ -66,7 +57,6 @@ export default {
     NoticeMessage,
     InfiniteLoading,
     DonationButton,
-    ExternalDa,
   },
   async setup() {
     const jobStore = useJobStore()

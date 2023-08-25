@@ -27,12 +27,23 @@
         </div>
         <VisibleWhen
           v-if="deDuplicatedMessages.length"
+          :not="['xs', 'sm', 'md', 'lg']"
+        >
+          <ExternalDa
+            ad-unit-path="/22794232631/freegle_feed_desktop"
+            :dimensions="[728, 90]"
+            div-id="div-gpt-ad-1692867153277-0"
+            class="mt-2"
+          />
+        </VisibleWhen>
+        <VisibleWhen
+          v-if="deDuplicatedMessages.length"
           :at="['xs', 'sm', 'md', 'lg']"
         >
           <ExternalDa
-            ad-unit-path="/22794232631/freegle_product"
+            ad-unit-path="/22794232631/freegle_feed_app"
             :dimensions="[300, 250]"
-            div-id="div-gpt-ad-1690904332895-0"
+            div-id="div-gpt-ad-1692867324381-0"
             class="mt-2"
           />
         </VisibleWhen>
@@ -45,13 +56,26 @@
             :ref="'messagewrapper-' + message.id"
             class="p-0"
           >
-            <OurMessage
-              :id="message.id"
-              :matchedon="message.matchedon"
-              record-view
-              :scroll-into-view="scrollToMessage === message.id"
-              @visible="messageVisible"
-            />
+            <VisibleWhen :at="['xs', 'sm', 'md', 'lg']">
+              <OurMessage
+                :id="message.id"
+                :matchedon="message.matchedon"
+                record-view
+                :scroll-into-view="scrollToMessage === message.id"
+                @visible="messageVisible"
+              />
+            </VisibleWhen>
+            <VisibleWhen :not="['xs', 'sm', 'md', 'lg']">
+              <OurMessage
+                :id="message.id"
+                :matchedon="message.matchedon"
+                record-view
+                :scroll-into-view="scrollToMessage === message.id"
+                ad-unit-path="/22794232631/freegle_product"
+                ad-id="div-gpt-ad-1691925699378-0"
+                @visible="messageVisible"
+              />
+            </VisibleWhen>
           </div>
           <template #fallback>
             <div class="invisible">Loading {{ message.id }}...</div>
