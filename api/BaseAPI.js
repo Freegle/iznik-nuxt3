@@ -9,14 +9,20 @@ let requestId = 0
 // let timer = 0
 
 // We add fetch retrying.
+//
 // Note that $fetch and useFetch cause problems on Node v18, so we don't use them.
 const ourFetch = fetchRetry(fetch, {
-  retries: 10,
+  // We set the number of retries very high.  Normally this won't apply because we check attempt > 10 below.
+  // But having this high means that if we detect that we are offline after the 9th retry, then fetchRetry won't
+  // fail on us; we'll come into retryOn and hang on the await.
+  retries: 100,
   retryOn: async (attempt, error, response) => {
     const miscStore = useMiscStore()
     await miscStore.waitForOnline()
 
-    if (miscStore?.unloading || !miscStore?.online) {
+    if (attempt > 10) {
+      console.log('Too many retries - give up')
+    } else if (miscStore?.unloading || !miscStore?.online) {
       // Don't retry if we're unloading or not online.
       console.log("Unloading - don't retry")
       return false
@@ -424,6 +430,12 @@ export default class BaseAPI {
 
         status = rsp.status
         data = await rsp.json()
+      } else if (status === 401) {
+        // Not authorised - our JWT and/or persistent token must be wrong.  Clear them.  This may force a login, or
+        // not, depending on whether the page requires it.
+        console.log('Not authorised - force logged out')
+        authStore.setAuth(null, null)
+        authStore.setUser(null)
       }
     } catch (e) {
       console.log('Fetch error', path, e?.message)

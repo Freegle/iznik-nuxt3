@@ -174,7 +174,19 @@ export const useAuthStore = defineStore({
     },
     async login(params) {
       try {
-        const res = await this.$api.session.login(params)
+        const res = await this.$api.session.login(params, function (data) {
+          let logIt
+
+          if (data && data.ret === 3) {
+            // Don't log errors for wrong password.
+            logIt = false
+          } else {
+            logIt = true
+          }
+
+          return logIt
+        })
+
         const { ret, status, persistent, jwt } = res
 
         if (ret === 0) {
@@ -198,7 +210,30 @@ export const useAuthStore = defineStore({
       this.loginCount++
     },
     async lostPassword(email) {
-      return await this.$api.session.lostPassword(email)
+      let unknown = false
+      let worked = false
+
+      try {
+        await this.$api.session.lostPassword(email, function (data) {
+          let logIt
+
+          if (data && data.ret === 2) {
+            // Don't log errors if the email is not recognised.
+            logIt = false
+            unknown = true
+          } else {
+            logIt = true
+          }
+
+          return logIt
+        })
+
+        worked = true
+      } catch (e) {
+        console.log('Lost password error', e)
+      }
+
+      return { unknown, worked }
     },
     async unsubscribe(email) {
       let unknown = false
@@ -363,20 +398,33 @@ export const useAuthStore = defineStore({
       return data
     },
     async saveEmail(params) {
-      const data = await this.$api.session.save(params, function (data) {
-        let logIt
+      let data = null
 
-        if (data && data.ret === 10) {
-          // Don't log errors for verification mails
-          logIt = false
+      try {
+        data = await this.$api.session.save(params, function (data) {
+          let logIt
+
+          if (data && data.ret === 10) {
+            // Don't log errors for verification mails
+            logIt = false
+          } else {
+            logIt = true
+          }
+
+          return logIt
+        })
+
+        await this.fetchUser()
+      } catch (e) {
+        console.log('Save email error', e.response)
+        if (e?.response?.data?.ret === 10) {
+          // Return the error code for the verification mail.
+          data = e?.response?.data
         } else {
-          logIt = true
+          throw e
         }
+      }
 
-        return logIt
-      })
-
-      await this.fetchUser()
       return data
     },
     async saveMicrovolunteering(value) {

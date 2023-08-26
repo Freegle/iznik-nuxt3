@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="availableinitially > 1">
+    <div v-if="availablenow > 1">
       <p>
         If you gave these to more than one person, please list each of them
         here.
@@ -24,7 +24,7 @@
         {{ user.displayname }}
       </span>
       <span v-else class="text--large font-weight-bold mt-1 text-start select">
-        <span v-if="availableinitially === 1">Someone else</span>
+        <span v-if="availablenow === 1">Someone else</span>
         <span v-else>Other people</span>
       </span>
       <div class="ratings">
@@ -35,7 +35,7 @@
           <UserRatings v-if="user.userid > 0" :id="user.userid" size="md" />
         </div>
       </div>
-      <div :class="'ml-1 took ' + (availableinitially <= 1 ? 'd-none' : '')">
+      <div :class="'ml-1 took ' + (availablenow <= 1 ? 'd-none' : '')">
         <NumberIncrementDecrement
           v-model="user.count"
           label="Number taken"
@@ -84,7 +84,7 @@ export default {
       type: String,
       required: true,
     },
-    availableinitially: {
+    availablenow: {
       type: Number,
       required: true,
     },
@@ -251,7 +251,7 @@ export default {
         options.push({
           value: 0,
           html:
-            this.availableinitially === 1
+            this.availablenow === 1
               ? '<em>Someone else</em>'
               : '<em>Other people</em>',
         })

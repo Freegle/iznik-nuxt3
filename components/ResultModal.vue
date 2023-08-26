@@ -1,5 +1,5 @@
 <template>
-  <b-modal id="confirmmodal" v-model="showModal" scrollable :title="title">
+  <b-modal id="result-modal" v-model="showModal" scrollable :title="title">
     <template #default>
       <slot name="default">
         <!-- eslint-disable-next-line -->
@@ -7,8 +7,7 @@
       </slot>
     </template>
     <template #footer>
-      <b-button variant="white" @click="hide"> Cancel </b-button>
-      <b-button variant="primary" @click="confirm"> Confirm </b-button>
+      <b-button variant="white" @click="hide"> Close </b-button>
     </template>
   </b-modal>
 </template>
@@ -20,13 +19,12 @@ export default {
   props: {
     title: {
       type: String,
-      required: false,
-      default: 'Are you sure?',
+      required: true,
     },
     message: {
       type: String,
       required: false,
-      default: '<p>Are you sure you want to do this?</p>',
+      default: '',
     },
   },
   data() {

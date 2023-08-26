@@ -297,7 +297,7 @@ export default {
           await this.addressStore.fetch()
           await this.giftAidStore.fetch()
 
-          if (!Object.hasOwn(this.giftaid, 'period')) {
+          if (!this.giftaid?.period) {
             // We fetched no gift aid info so set it to the default.
             this.giftaid.period = this.giftAidAllowed
               ? 'Past4YearsAndFuture'

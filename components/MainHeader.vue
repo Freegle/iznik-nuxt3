@@ -267,7 +267,7 @@
           v-model:unread-notification-count="unreadNotificationCount"
           :distance="distance"
           :small-screen="true"
-          @show-about-me="showAboutMeModal"
+          @show-about-me="showAboutMe"
         />
         <ChatMenu
           v-if="loggedIn"
@@ -468,7 +468,7 @@
         </b-nav>
       </b-collapse>
     </b-navbar>
-    <AboutMeModal v-if="showAboutMe" ref="aboutMeModal" />
+    <AboutMeModal v-if="showAboutMeModal" ref="aboutMeModal" />
   </header>
 </template>
 <script setup>
@@ -632,7 +632,7 @@ const showAboutMe = async () => {
   await fetchMe(true)
 
   showAboutMeModal.value = true
-  await waitForRef('modal')
+  await waitForRef(aboutMeModal)
   aboutMeModal.value?.show()
 }
 

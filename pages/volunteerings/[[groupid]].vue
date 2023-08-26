@@ -19,10 +19,10 @@
                 :value="groupid"
                 @update:model-value="changeGroup"
               />
-              <b-button variant="primary" @click="openVolunteerModal" v-if="me">
+              <b-button v-if="me" variant="primary" @click="openVolunteerModal">
                 <v-icon icon="plus" /> Add an opportunity
               </b-button>
-              <NoticeMessage variant="info" v-else>
+              <NoticeMessage v-else variant="info">
                 Please sign in and join a community to add an event.
               </NoticeMessage>
             </div>

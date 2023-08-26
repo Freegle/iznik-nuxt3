@@ -5,10 +5,6 @@ on:
   push:
     branches:
       - master
-  pull_request:
-    types: [opened, synchronize, reopened, closed]
-    branches:
-      - master
 jobs:
   deploy:
     runs-on: ${{ matrix.os }}

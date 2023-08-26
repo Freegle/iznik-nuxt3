@@ -152,12 +152,14 @@ export default {
       required: true,
     },
   },
-  async setup(props) {
+  setup(props) {
     const messageStore = useMessageStore()
     const composeStore = useComposeStore()
     const groupStore = useGroupStore()
 
-    const message = toRaw(await messageStore.fetch(props.id, true))
+    // Message was fetched by parent.  This allows us to avoid an async setup, which causes problems where waitForRef
+    // returns before the component fully exists and therefore show() fails.
+    const message = toRaw(messageStore.byId(props.id))
     const textbody = message.textbody
     const item = message.item?.name
 

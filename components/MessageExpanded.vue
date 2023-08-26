@@ -3,9 +3,9 @@
     <MessageAttachments
       v-if="gotAttachments"
       :id="id"
-      :attachments="message.attachments"
+      :attachments="message?.attachments"
       class="image-wrapper"
-      :disabled="message.successful"
+      :disabled="message?.successful"
       show-zoom
       @zoom="$emit('zoom')"
     />
@@ -42,7 +42,7 @@
           :height="breakpoint === 'xs' || breakpoint === 'sm' ? 150 : 250"
         />
         <VisibleWhen v-if="showAd" :not="['xs', 'sm']" style="width: 300px">
-          <ExternalAd
+          <ExternalDa
             :ad-unit-path="adUnit"
             :dimensions="[300, 250]"
             :div-id="adId"
@@ -53,7 +53,7 @@
       <MessageHistoryExpanded :id="id" class="d-block d-md-none mt-2 mt-md-0" />
       <VisibleWhen v-if="showAd" :at="['xs', 'sm']">
         <div class="d-flex justify-content-around mt-2">
-          <ExternalAd
+          <ExternalDa
             :ad-unit-path="adUnit"
             :dimensions="[300, 250]"
             :div-id="adId"

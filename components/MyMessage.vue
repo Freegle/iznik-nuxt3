@@ -740,6 +740,7 @@ export default {
         e.stopImmediatePropagation()
       }
 
+      await this.messageStore.fetch(this.id, true)
       this.showEditModal = true
       const m = await this.waitForRef('editModal')
       m?.show()
