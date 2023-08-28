@@ -136,7 +136,6 @@ export default {
     const addressid = ref(parseInt(chatmsg?.message))
 
     const address = await addressStore.fetch(addressid.value)
-    console.log('FEtched address', address)
 
     return {
       addressStore,
