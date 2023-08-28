@@ -1,5 +1,5 @@
 <template>
-  <div class="clickme d-flex" @click="click">
+  <div v-if="fromuser" class="clickme d-flex" @click="click">
     <div class="d-flex flex-column justify-content-around">
       <ProfileImage
         :image="fromuser?.profile?.path"
