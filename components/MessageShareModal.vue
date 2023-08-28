@@ -22,7 +22,11 @@
           </p>
         </NoticeMessage>
         <p class="mt-1">You can share using these buttons:</p>
-        <b-list-group horizontal class="flex-wrap">
+        <b-list-group
+          :key="'messageshare-' + bump"
+          horizontal
+          class="flex-wrap"
+        >
           <b-list-group-item>
             <ShareNetwork
               network="facebook"
@@ -30,6 +34,7 @@
               :title="message.subject"
               :description="message.textbody"
               hashtags="freegle,free,reuse"
+              @open="opened"
             >
               <b-button variant="secondary" class="mt-1 facebook">
                 <v-icon :icon="['fab', 'facebook']" /> Facebook
@@ -43,6 +48,7 @@
               :title="message.subject"
               :description="message.textbody"
               hashtags="freegle,free,reuse"
+              @open="opened"
             >
               <b-button variant="secondary" class="mt-1 twitter">
                 <v-icon :icon="['fab', 'twitter']" /> Twitter
@@ -56,6 +62,7 @@
               :title="message.subject"
               :description="message.textbody"
               hashtags="freegle,free,reuse"
+              @open="opened"
             >
               <b-button variant="secondary" class="mt-1 whatsapp">
                 <v-icon :icon="['fab', 'whatsapp']" /> Whatsapp
@@ -69,6 +76,7 @@
               :title="message.subject"
               :description="message.textbody"
               hashtags="freegle,free,reuse"
+              @open="opened"
             >
               <b-button variant="secondary" class="mt-1 gmail">
                 <v-icon icon="envelope" /> Email
@@ -127,6 +135,7 @@ export default {
   data() {
     return {
       copied: false,
+      bump: 0,
     }
   },
   computed: {
@@ -147,6 +156,9 @@ export default {
     async doCopy() {
       await navigator.clipboard.writeText(this.message.url)
       this.copied = true
+    },
+    opened() {
+      this.bump++
     },
   },
 }

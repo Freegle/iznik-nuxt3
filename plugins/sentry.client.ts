@@ -169,6 +169,14 @@ export default defineNuxtPlugin((nuxtApp) => {
             console.log('Old Chrome fieldset bug')
             return null
           }
+        } else if (originalExceptionName === 'SecurityError') {
+          if (
+            originalExceptionMessage?.match('Blocked a frame') &&
+            originalExceptionStack?.match('isRef')
+          ) {
+            // See https://stackoverflow.com/questions/39081098/close-a-window-opened-with-window-open-after-clicking-a-button
+            console.log('Suppress error caused by a bug in vue-social-sharing.')
+          }
         }
       }
 

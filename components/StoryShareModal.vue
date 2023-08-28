@@ -14,7 +14,11 @@
         </p>
         <div>
           <p>You can share using these buttons:</p>
-          <b-list-group horizontal class="flex-wrap">
+          <b-list-group
+            :key="'storyshare-' + bump"
+            horizontal
+            class="flex-wrap"
+          >
             <b-list-group-item>
               <ShareNetwork
                 network="facebook"
@@ -22,6 +26,7 @@
                 :title="'Sharing ' + story.headline"
                 :description="story.story"
                 hashtags="freegle,free,reuse"
+                @open="opened"
               >
                 <b-button variant="secondary" class="mt-1 facebook">
                   <v-icon :icon="['fab', 'facebook']" /> Facebook
@@ -35,6 +40,7 @@
                 :title="'Sharing ' + story.headline"
                 :description="story.story"
                 hashtags="freegle,free,reuse"
+                @open="opened"
               >
                 <b-button variant="secondary" class="mt-1 twitter">
                   <v-icon :icon="['fab', 'twitter']" /> Twitter
@@ -48,6 +54,7 @@
                 :title="'Sharing ' + story.headline"
                 :description="story.story"
                 hashtags="freegle,free,reuse"
+                @open="opened"
               >
                 <b-button variant="secondary" class="mt-1 whatsapp">
                   <v-icon :icon="['fab', 'whatsapp']" /> Whatsapp
@@ -61,6 +68,7 @@
                 :title="'Sharing ' + story.headline"
                 :description="story.story"
                 hashtags="freegle,free,reuse"
+                @open="opened"
               >
                 <b-button variant="secondary" class="mt-1 gmail">
                   <v-icon icon="envelope" /> Email
@@ -113,6 +121,7 @@ export default {
   data() {
     return {
       copied: false,
+      bump: 0,
     }
   },
   computed: {
@@ -133,6 +142,9 @@ export default {
     async doCopy() {
       await navigator.clipboard.writeText(this.story.url)
       this.copied = true
+    },
+    opened() {
+      this.bump++
     },
   },
 }
