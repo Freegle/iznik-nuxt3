@@ -10,7 +10,7 @@
             style="width: 300px"
           >
             <ExternalDa
-              ad-unit-path="/22794232631/freegle_home"
+              ad-unit-path="/22794232631/freegle_home_left"
               :dimensions="[300, 250]"
               div-id="div-gpt-ad-1691925450433-0"
               class="mt-2"
