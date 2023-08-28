@@ -1,4 +1,4 @@
-import { sentryVitePlugin } from "@sentry/vite-plugin";
+import { sentryVitePlugin } from '@sentry/vite-plugin'
 import path from 'path-browserify'
 import eslintPlugin from 'vite-plugin-eslint'
 import legacy from '@vitejs/plugin-legacy'
@@ -30,9 +30,9 @@ export default {
       targets: ['es2015'],
     }),
     sentryVitePlugin({
-      org: "freegle",
-      project: "nuxt3"
-    })
+      org: 'freegle',
+      project: 'nuxt3',
+    }),
   ],
 
   server: {
