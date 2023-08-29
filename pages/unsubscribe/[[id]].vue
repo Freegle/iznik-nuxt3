@@ -71,12 +71,17 @@
                 v-model:valid="emailValid"
                 label=""
               />
+              <nuxt-link to="/settings" no-prefetch class="mb-2 mr-2">
+                <b-button size="lg" variant="primary">
+                  Get fewer emails
+                </b-button>
+              </nuxt-link>
               <SpinButton
                 size="lg"
                 name="trash-alt"
-                variant="primary"
-                class="mt-2 mb-2"
-                label="Unsubscribe completely and delete my account"
+                variant="danger"
+                class="mb-2"
+                label="Leave Freegle completely"
                 spinclass="text-white"
                 @handle="emailConfirm"
               />
