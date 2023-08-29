@@ -45,16 +45,22 @@
               <NoticeMessage v-if="left" class="mt-2 mb-2" variant="info">
                 We've removed you from {{ left }}.
               </NoticeMessage>
-              <p>Or you can leave Freegle entirely:</p>
-              <b-button
-                v-if="!groupid"
-                size="lg"
-                variant="primary"
-                class="mb-2"
-                @click="unsubscribe"
-              >
-                Unsubscribe completely and delete my account
-              </b-button>
+              <template v-if="!groupid">
+                <p>Or you can leave Freegle entirely:</p>
+                <nuxt-link to="/settings" no-prefetch>
+                  <b-button size="lg" variant="primary" class="mb-2 mr-2">
+                    Get fewer emails
+                  </b-button>
+                </nuxt-link>
+                <b-button
+                  size="lg"
+                  variant="danger"
+                  class="mb-2"
+                  @click="unsubscribe"
+                >
+                  Leave Freegle completely
+                </b-button>
+              </template>
               <p>If you need help, please mail <SupportLink />.</p>
             </div>
             <div v-else>
