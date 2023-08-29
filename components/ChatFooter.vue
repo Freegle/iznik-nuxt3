@@ -260,6 +260,7 @@ import { useMiscStore } from '../stores/misc'
 import { useMessageStore } from '../stores/message'
 import { fetchOurOffers } from '../composables/useThrottle'
 import { useAuthStore } from '../stores/auth'
+import { useAddressStore } from '../stores/address'
 import { untwem } from '~/composables/useTwem'
 
 // Don't use dynamic imports because it stops us being able to scroll to the bottom after render.
@@ -295,6 +296,7 @@ export default {
     const authStore = useAuthStore()
     const miscStore = useMiscStore()
     const messageStore = useMessageStore()
+    const addressStore = useAddressStore()
 
     const { chat, otheruser, tooSoonToNudge, chatStore, chatmessages } =
       await setupChat(props.id)
@@ -306,6 +308,7 @@ export default {
       miscStore,
       chatStore,
       messageStore,
+      addressStore,
       chatmessages,
       authStore,
     }
@@ -414,6 +417,9 @@ export default {
       }
     },
     async addressBook() {
+      // Fetch the address book here to avoid an async setup which causes issues with waitForRef.
+      await this.addressStore.fetch()
+
       this.showAddress = true
 
       await this.waitForRef('addressModal')

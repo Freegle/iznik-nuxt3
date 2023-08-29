@@ -17,7 +17,7 @@
         </b-button>
         <div v-if="!isApp">
           <p>You can share using these buttons:</p>
-          <b-list-group horizontal class="flex-wrap">
+          <b-list-group :key="'newsshare-' + bump" horizontal class="flex-wrap">
             <b-list-group-item>
               <ShareNetwork
                 network="facebook"
@@ -25,6 +25,7 @@
                 :title="newsfeed.message"
                 hashtags="freegle,free,reuse"
                 :description="newsfeed.message"
+                @open="opened"
               >
                 <b-button variant="secondary" class="mt-1 facebook">
                   <v-icon :icon="['fab', 'facebook']" /> Facebook
@@ -38,6 +39,7 @@
                 :title="newsfeed.message"
                 hashtags="freegle,free,reuse"
                 :description="newsfeed.message"
+                @open="opened"
               >
                 <b-button variant="secondary" class="mt-1 twitter">
                   <v-icon :icon="['fab', 'twitter']" /> Twitter
@@ -51,6 +53,7 @@
                 :title="newsfeed.message"
                 hashtags="freegle,free,reuse"
                 :description="newsfeed.message"
+                @open="opened"
               >
                 <b-button variant="secondary" class="mt-1 whatsapp">
                   <v-icon :icon="['fab', 'whatsapp']" /> Whatsapp
@@ -64,6 +67,7 @@
                 :title="newsfeed.message"
                 hashtags="freegle,free,reuse"
                 :description="newsfeed.message"
+                @open="opened"
               >
                 <b-button variant="secondary" class="mt-1 gmail">
                   <v-icon icon="envelope" /> Email
@@ -76,6 +80,7 @@
                 size="md"
                 class="mt-1 mb-1"
                 @click="doCopy"
+                @open="opened"
               >
                 <v-icon v-if="copied" icon="check" />
                 <v-icon v-else icon="clipboard" />
@@ -107,6 +112,7 @@ export default {
   data() {
     return {
       copied: false,
+      bump: 0,
     }
   },
   computed: {
@@ -138,6 +144,9 @@ export default {
     async doCopy() {
       await navigator.clipboard.writeText(this.url)
       this.copied = true
+    },
+    opened() {
+      this.bump++
     },
   },
 }

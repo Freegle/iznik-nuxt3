@@ -30,8 +30,8 @@
       >
         <b-button variant="secondary" size="lg" class="facebook">
           <v-icon :icon="['fab', 'facebook']" /> Share on Facebook
-        </b-button> </ShareNetwork
-      >>
+        </b-button>
+      </ShareNetwork>
     </div>
   </div>
 </template>

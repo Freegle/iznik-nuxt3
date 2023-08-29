@@ -16,6 +16,8 @@
         class="slide"
       >
         <inner-image-zoom
+          :key="'image-' + attachment.id + '-' + imagekey"
+          class="zind"
           zoom-type="click"
           :src="attachment.path"
           :alt="'Message photo ' + index"
@@ -50,3 +52,17 @@ export default {
   },
 }
 </script>
+<style scoped lang="scss">
+:deep(.carousel-control-prev) {
+  z-index: 11000 !important;
+}
+
+:deep(.carousel-control-next) {
+  z-index: 11000 !important;
+}
+
+:deep(.iiz__btn) {
+  z-index: 11001;
+  right: 50%;
+}
+</style>

@@ -645,6 +645,7 @@ import { useRoute } from 'vue-router'
 import { useMiscStore } from '../../stores/misc'
 import { useAuthStore } from '../../stores/auth'
 import { buildHead } from '../../composables/useBuildHead'
+import { useAddressStore } from '../../stores/address'
 import EmailOwn from '~/components/EmailOwn'
 import EmailValidator from '~/components/EmailValidator'
 import SettingsEmailInfo from '~/components/SettingsEmailInfo'
@@ -691,6 +692,7 @@ export default {
   setup() {
     const runtimeConfig = useRuntimeConfig()
     const route = useRoute()
+
     useHead(
       buildHead(
         route,
@@ -706,10 +708,12 @@ export default {
 
     const miscStore = useMiscStore()
     const authStore = useAuthStore()
+    const addressStore = useAddressStore()
 
     return {
       miscStore,
       authStore,
+      addressStore,
     }
   },
   data() {
@@ -1097,7 +1101,10 @@ export default {
     async leaveGroup(id) {
       await this.authStore.leaveGroup(this.myid, id)
     },
-    addressBook() {
+    async addressBook() {
+      // Fetch the address book here to avoid an async setup which causes issues with waitForRef.
+      await this.addressStore.fetch()
+
       this.$refs.addressModal.show()
     },
     photoProcessed(imageid, imagethumb, image) {

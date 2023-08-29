@@ -71,6 +71,7 @@
 </template>
 <script setup>
 import { ref, watch, defineAsyncComponent } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useNotificationStore } from '../stores/notification'
 
 const InfiniteLoading = defineAsyncComponent(() =>
@@ -106,9 +107,9 @@ const notifications = computed(() => {
 const notificationsToShow = computed(() => {
   return notifications.value.slice(0, toShow.value)
 })
-const unreadNotificationCount = computed(() => {
-  return notificationStore.count
-})
+
+const { count } = storeToRefs(notificationStore)
+const unreadNotificationCount = count
 
 const theel = ref(null)
 

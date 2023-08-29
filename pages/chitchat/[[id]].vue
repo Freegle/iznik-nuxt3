@@ -237,7 +237,8 @@ export default {
 
     if (me) {
       if (id) {
-        const newsfeed = await newsfeedStore.fetch(id)
+        // Force as there may be changes since we loaded what was in the store.
+        const newsfeed = await newsfeedStore.fetch(id, true)
 
         if (!newsfeed?.id || newsfeed?.deleted) {
           error.value = true

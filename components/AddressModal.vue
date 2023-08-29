@@ -175,11 +175,9 @@ export default {
       default: false,
     },
   },
-  async setup() {
+  setup() {
     const addressStore = useAddressStore()
     const authStore = useAuthStore()
-
-    await addressStore.fetch()
 
     return {
       authStore,

@@ -40,7 +40,7 @@
         We'll match you with someone local. All completely free.
       </p>
       <client-only>
-        <div class="d-flex buttons">
+        <div class="d-flex justify-content-between justify-content-lg-start">
           <b-button
             variant="primary"
             size="lg"
@@ -71,7 +71,9 @@
         Just looking?
       </h2>
       <client-only>
-        <div class="d-flex centresmall flex-wrap">
+        <div
+          class="d-flex justify-content-around justify-content-lg-start flex-wrap"
+        >
           <PlaceAutocomplete
             class="mb-2"
             labeltext="See what's being freegled near you."
@@ -368,22 +370,6 @@ export default {
 
 .iconlarge {
   min-width: 48px;
-}
-
-.buttons {
-  justify-content: start;
-
-  @include media-breakpoint-down(md) {
-    justify-content: space-between;
-  }
-}
-
-.centresmall {
-  justify-content: start !important;
-
-  @include media-breakpoint-down(md) {
-    justify-content: center !important;
-  }
 }
 
 .explore {

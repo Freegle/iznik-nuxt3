@@ -177,8 +177,8 @@ export const useAuthStore = defineStore({
         const res = await this.$api.session.login(params, function (data) {
           let logIt
 
-          if (data && data.ret === 3) {
-            // Don't log errors for wrong password.
+          if (data && (data.ret === 2 || data.ret === 3)) {
+            // Don't log errors for wrong email/password.
             logIt = false
           } else {
             logIt = true
