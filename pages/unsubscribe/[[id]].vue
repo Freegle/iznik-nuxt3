@@ -113,7 +113,7 @@
       <ConfirmModal
         ref="confirm"
         title="Permanently delete your account?"
-        message="<p>This will delete all your personal data, chats and community memberships.</p><p><strong>It's permanent - you can't undo it or get your data back.</strong></p><p>If you just want to leave one community, please <em>Cancel</em> and go to Settings.</p>"
+        message="<p>This will delete all your personal data, chats and community memberships.</p><p><strong>It's permanent - you can't undo it or get your data back.</strong></p><p>If you just want to leave one community, please <em>Cancel</em> and select the community from the drop-down list.</p>"
         @confirm="forget"
       />
       <ForgetFailModal ref="forgetfail" />
