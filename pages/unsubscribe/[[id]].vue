@@ -40,7 +40,10 @@
                 We've removed you from {{ left }}.
               </NoticeMessage>
               <template v-if="!groupid">
-                <p>Or you can leave Freegle entirely:</p>
+                <p>
+                  You can get fewer emails and stay a member, or you can leave
+                  Freegle completely
+                </p>
                 <nuxt-link to="/settings" no-prefetch>
                   <b-button size="lg" variant="primary" class="mb-2 mr-2">
                     Get fewer emails
