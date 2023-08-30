@@ -46,18 +46,27 @@
         <NewFreegler />
       </div>
       <div v-else-if="reply?.length > 0">
-        <b-form-group
-          class="flex-grow-1 nobot"
-          label="Your postcode:"
-          :label-for="'replytomessage-' + message.id"
-          description=""
-        >
-          <PostCode @selected="savePostcode" />
-
-          <div class="text-muted text--small mt-1">
-            <v-icon icon="lock" /> Other freeglers won't see this.
-          </div>
-        </b-form-group>
+        <div class="d-flex justify-content-between flex-wrap">
+          <b-form-group
+            class="flex-grow-1 nobot"
+            label="Your postcode:"
+            :label-for="'replytomessage-' + message.id"
+            description=""
+          >
+            <PostCode @selected="savePostcode" />
+            <div class="text-muted text--small mt-1">
+              <v-icon icon="lock" /> Other freeglers won't see this.
+            </div>
+          </b-form-group>
+          <SettingsPhone
+            v-if="me"
+            label="Your mobile:"
+            size="lg"
+            hide-remove
+            auto-save
+            input-class="phone"
+          />
+        </div>
         <p class="text-muted">
           <b-button
             v-if="!showWhyAsk"
@@ -69,8 +78,9 @@
           </b-button>
           <span v-if="showWhyAsk">
             We ask for your postcode so that we know how far away you are - the
-            closer the better. We won't show this to the other freegler, but we
-            will show an approximate distance.
+            closer the better. Your mobile is optional - we can notify you by
+            text (SMS) so you don't miss replies. We won't show either of these
+            to the other freegler, but we will show an approximate distance.
           </span>
         </p>
       </div>
@@ -134,19 +144,19 @@ import { useAuthStore } from '../stores/auth'
 import { useReplyStore } from '../stores/reply'
 import replyToPost from '@/mixins/replyToPost'
 import MessageStillAvailable from '~/components/MessageStillAvailable'
+import SettingsPhone from '~/components/SettingsPhone'
 import PostCode from '~/components/PostCode'
 import EmailValidator from '~/components/EmailValidator'
 import NewUserInfo from '~/components/NewUserInfo'
 import ChatButton from '~/components/ChatButton'
-import MessageReplyAskTelModal from '~/components/MessageReplyAskTelModal.vue'
 
 const NewFreegler = () => import('~/components/NewFreegler')
 
 export default {
   components: {
-    MessageReplyAskTelModal,
     ChatButton,
     MessageStillAvailable,
+    SettingsPhone,
     PostCode,
     EmailValidator,
     NewFreegler,
