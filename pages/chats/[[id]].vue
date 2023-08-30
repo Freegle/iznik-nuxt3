@@ -1,5 +1,7 @@
 <template>
   <client-only v-if="me">
+    <ContactDetailsAskModal ref="contactDetailsAskModal" />
+
     <div>
       <h1 class="visually-hidden">Chats</h1>
       <b-row class="m-0">
@@ -140,6 +142,7 @@ import SidebarRight from '~/components/SidebarRight'
 // We can't use async on ChatListEntry else the infinite scroll kicks in and tries to load everything while we are
 // still waiting for the import to complete.
 import ChatListEntry from '~/components/ChatListEntry.vue'
+import ContactDetailsAskModal from '~/components/ContactDetailsAskModal.vue'
 
 const ChatHideModal = () => import('~/components/ChatHideModal')
 
@@ -152,6 +155,7 @@ export default {
     VisibleWhen,
     SidebarRight,
     ChatListEntry,
+    ContactDetailsAskModal,
     ChatHideModal,
     InfiniteLoading,
   },
@@ -173,6 +177,24 @@ export default {
     const authStore = useAuthStore()
     const myid = authStore.user?.id
     const showChats = ref(20)
+
+    const contactDetailsAskModal = ref()
+
+    watch(
+      contactDetailsAskModal,
+      () => {
+        // when the contact-details-ask-modal is ready and there's a flag in the chat store to show the modal,
+        // show it and reset the flag
+        if (
+          contactDetailsAskModal.value &&
+          chatStore.showContactDetailsAskModal
+        ) {
+          contactDetailsAskModal.value.show()
+          chatStore.showContactDetailsAskModal = false
+        }
+      },
+      { immediate: true, deep: true }
+    )
 
     if (myid) {
       const route = useRoute()
@@ -204,7 +226,7 @@ export default {
       }
     }
 
-    return { chatStore, showChats }
+    return { contactDetailsAskModal, chatStore, showChats }
   },
   data() {
     return {
