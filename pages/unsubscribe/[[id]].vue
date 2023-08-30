@@ -20,12 +20,6 @@
               We'd love you to stay, but sometimes if you love someone, you have
               to let them go.
             </p>
-            <notice-message class="mb-3">
-              Too many emails? Don't leave! Go to
-              <!-- eslint-disable-next-line-->
-            <nuxt-link  no-prefetch to="/settings">Settings</nuxt-link>
-              and adjust your Email Settings.
-            </notice-message>
             <div v-if="loggedIn">
               <div v-if="groupCount" class="mt-2">
                 <p>You can leave individual communities:</p>
