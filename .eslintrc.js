@@ -57,6 +57,8 @@ module.exports = {
     useHead: 'readonly',
     ref: 'readonly',
     computed: 'readonly',
+    watch: 'readonly',
+    onMounted: 'readonly',
     usePinia: 'readonly',
     navigateTo: 'readonly',
     sendRedirect: 'readonly',
