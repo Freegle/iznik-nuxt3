@@ -46,7 +46,8 @@
                 </p>
                 <nuxt-link to="/settings" no-prefetch>
                   <b-button size="lg" variant="primary" class="mb-2 mr-2">
-                    Get fewer emails
+                    <v-icon icon="cog" />
+                    <span class="ml-1"> Get fewer emails </span>
                   </b-button>
                 </nuxt-link>
                 <b-button
@@ -55,7 +56,8 @@
                   class="mb-2"
                   @click="unsubscribe"
                 >
-                  Leave Freegle completely
+                  <v-icon icon="trash-alt" />
+                  <span class="ml-1"> Leave Freegle completely </span>
                 </b-button>
               </template>
               <p>If you need help, please mail <SupportLink />.</p>
@@ -70,7 +72,8 @@
               />
               <nuxt-link to="/settings" no-prefetch class="mb-2 mr-2">
                 <b-button size="lg" variant="primary">
-                  Get fewer emails
+                  <v-icon icon="cog" />
+                  <span class="ml-1"> Get fewer emails </span>
                 </b-button>
               </nuxt-link>
               <SpinButton
