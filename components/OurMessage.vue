@@ -249,7 +249,7 @@ export default {
   },
   methods: {
     async expand(zoom) {
-      if (!this.message.successful) {
+      if (!this.message?.successful) {
         this.expanded = true
 
         await this.waitForRef('modal')
