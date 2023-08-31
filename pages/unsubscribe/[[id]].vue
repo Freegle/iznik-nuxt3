@@ -20,12 +20,6 @@
               We'd love you to stay, but sometimes if you love someone, you have
               to let them go.
             </p>
-            <notice-message class="mb-3">
-              Too many emails? Don't leave! Go to
-              <!-- eslint-disable-next-line-->
-            <nuxt-link  no-prefetch to="/settings">Settings</nuxt-link>
-              and adjust your Email Settings.
-            </notice-message>
             <div v-if="loggedIn">
               <div v-if="groupCount" class="mt-2">
                 <p>You can leave individual communities:</p>
@@ -45,16 +39,27 @@
               <NoticeMessage v-if="left" class="mt-2 mb-2" variant="info">
                 We've removed you from {{ left }}.
               </NoticeMessage>
-              <p>Or you can leave Freegle entirely:</p>
-              <b-button
-                v-if="!groupid"
-                size="lg"
-                variant="primary"
-                class="mb-2"
-                @click="unsubscribe"
-              >
-                Unsubscribe completely and delete my account
-              </b-button>
+              <template v-if="!groupid">
+                <p>
+                  You can get fewer emails and stay a member, or you can leave
+                  Freegle completely:
+                </p>
+                <nuxt-link to="/settings" no-prefetch>
+                  <b-button size="lg" variant="primary" class="mb-2 mr-2">
+                    <v-icon icon="cog" />
+                    <span class="ml-1"> Get fewer emails </span>
+                  </b-button>
+                </nuxt-link>
+                <b-button
+                  size="lg"
+                  variant="danger"
+                  class="mb-2"
+                  @click="unsubscribe"
+                >
+                  <v-icon icon="trash-alt" />
+                  <span class="ml-1"> Leave Freegle completely </span>
+                </b-button>
+              </template>
               <p>If you need help, please mail <SupportLink />.</p>
             </div>
             <div v-else>
@@ -65,12 +70,18 @@
                 v-model:valid="emailValid"
                 label=""
               />
+              <nuxt-link to="/settings" no-prefetch class="mb-2 mr-2">
+                <b-button size="lg" variant="primary">
+                  <v-icon icon="cog" />
+                  <span class="ml-1"> Get fewer emails </span>
+                </b-button>
+              </nuxt-link>
               <SpinButton
                 size="lg"
                 name="trash-alt"
-                variant="primary"
-                class="mt-2 mb-2"
-                label="Unsubscribe completely and delete my account"
+                variant="danger"
+                class="mb-2"
+                label="Leave Freegle completely"
                 spinclass="text-white"
                 @handle="emailConfirm"
               />
@@ -102,7 +113,7 @@
       <ConfirmModal
         ref="confirm"
         title="Permanently delete your account?"
-        message="<p>This will delete all your personal data, chats and community memberships.</p><p><strong>It's permanent - you can't undo it or get your data back.</strong></p><p>If you just want to leave one community, please <em>Cancel</em> and go to Settings.</p>"
+        message="<p>This will delete all your personal data, chats and community memberships.</p><p><strong>It's permanent - you can't undo it or get your data back.</strong></p><p>If you just want to leave one community, please <em>Cancel</em> and select the community from the drop-down list.</p>"
         @confirm="forget"
       />
       <ForgetFailModal ref="forgetfail" />
