@@ -3,7 +3,20 @@
     <b-col>
       <MicroVolunteering />
       <b-row class="m-0">
-        <b-col cols="0" xl="3" class="d-none d-xl-block" />
+        <b-col cols="0" xl="3" class="d-none d-xl-block">
+          <VisibleWhen
+            :not="['xs', 'sm', 'md', 'lg']"
+            class="position-fixed verytop"
+            style="width: 300px"
+          >
+            <ExternalDa
+              ad-unit-path="/22794232631/freegle_productemail"
+              :dimensions="[300, 250]"
+              div-id="div-gpt-ad-1691925773522-0"
+              class="mt-2"
+            />
+          </VisibleWhen>
+        </b-col>
         <b-col cols="12" xl="6" class="p-0">
           <div
             v-if="
@@ -58,17 +71,44 @@
           </div>
           <div v-else class="botpad">
             <GlobalWarning />
-            <OurMessage
-              :id="id"
-              :start-expanded="true"
-              hide-close
-              record-view
-              message-page
-              @not-found="error = true"
-            />
+            <VisibleWhen :at="['xs', 'sm', 'md', 'lg']">
+              <OurMessage
+                :id="id"
+                :start-expanded="true"
+                hide-close
+                record-view
+                message-page
+                ad-unit-path="/22794232631/freegle_productemail"
+                ad-id="div-gpt-ad-1691925773522-2"
+                @not-found="error = true"
+              />
+            </VisibleWhen>
+            <VisibleWhen :not="['xs', 'sm', 'md', 'lg']">
+              <OurMessage
+                :id="id"
+                :start-expanded="true"
+                hide-close
+                record-view
+                message-page
+                @not-found="error = true"
+              />
+            </VisibleWhen>
           </div>
         </b-col>
-        <b-col cols="0" xl="3" class="d-none d-xl-block"> </b-col>
+        <b-col cols="0" xl="3" class="d-none d-xl-block">
+          <VisibleWhen
+            :not="['xs', 'sm', 'md', 'lg']"
+            class="position-fixed verytop"
+            style="width: 300px"
+          >
+            <ExternalDa
+              ad-unit-path="/22794232631/freegle_productemail"
+              :dimensions="[300, 250]"
+              div-id="div-gpt-ad-1691925773522-1"
+              class="mt-2"
+            />
+          </VisibleWhen>
+        </b-col>
       </b-row>
     </b-col>
   </client-only>

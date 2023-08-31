@@ -4,6 +4,18 @@
       <h1 class="visually-hidden">My posts</h1>
       <b-row class="m-0">
         <b-col cols="0" lg="3" class="p-0 pr-1">
+          <VisibleWhen
+            :not="['xs', 'sm', 'md', 'lg']"
+            class="position-fixed verytop"
+            style="width: 300px"
+          >
+            <ExternalDa
+              ad-unit-path="/22794232631/freegle_myposts_desktop"
+              :dimensions="[300, 250]"
+              div-id="div-gpt-ad-1692868003771-0"
+              class="mt-2"
+            />
+          </VisibleWhen>
           <VisibleWhen :at="['lg', 'xl']">
             <SidebarLeft />
           </VisibleWhen>
@@ -47,6 +59,18 @@
           </div>
         </b-col>
         <b-col cols="0" lg="3" class="p-0 pl-1">
+          <VisibleWhen
+            :not="['xs', 'sm', 'md', 'lg']"
+            class="position-fixed verytop"
+            style="width: 300px"
+          >
+            <ExternalDa
+              ad-unit-path="/22794232631/freegle_myposts_desktop"
+              :dimensions="[300, 250]"
+              div-id="div-gpt-ad-1692868003771-1"
+              class="mt-2"
+            />
+          </VisibleWhen>
           <VisibleWhen :at="['lg', 'xl']">
             <SidebarRight show-job-opportunities />
           </VisibleWhen>

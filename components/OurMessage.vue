@@ -26,7 +26,8 @@
           :actions="actions"
           :show-map="true"
           class="bg-white p-2"
-          :message-page="messagePage"
+          :ad-unit-path="adUnit"
+          :ad-id="adId"
           @zoom="showPhotosModal"
         />
         <MessagePhotosModal :id="message.id" ref="photoModal" />
@@ -111,10 +112,15 @@ export default {
       required: false,
       default: false,
     },
-    messagePage: {
-      type: Boolean,
+    adUnitPath: {
+      type: String,
       required: false,
-      default: false,
+      default: null,
+    },
+    adId: {
+      type: String,
+      required: false,
+      default: null,
     },
   },
   emits: ['notFound', 'view', 'visible'],
