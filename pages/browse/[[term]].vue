@@ -113,7 +113,7 @@
             <VisibleWhen
               :not="['xs', 'sm', 'md', 'lg']"
               class="position-fixed verytop"
-              style="width: 300px"
+              style="right: 5px"
             >
               <ExternalDa
                 ad-unit-path="/22794232631/freegle_home"

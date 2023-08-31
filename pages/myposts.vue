@@ -62,17 +62,16 @@
           <VisibleWhen
             :not="['xs', 'sm', 'md', 'lg']"
             class="position-fixed verytop"
+            style="right: 5px"
           >
-            <div class="d-flex justify-content-end">
-              <ExternalDa
-                ad-unit-path="/22794232631/freegle_myposts_desktop"
-                :dimensions="[300, 250]"
-                div-id="div-gpt-ad-1692868003771-1"
-                class="mt-2"
-                style="width: 300px"
-                @rendered="adRendered2"
-              />
-            </div>
+            <ExternalDa
+              ad-unit-path="/22794232631/freegle_myposts_desktop"
+              :dimensions="[300, 250]"
+              div-id="div-gpt-ad-1692868003771-1"
+              class="mt-2"
+              style="width: 300px"
+              @rendered="adRendered2"
+            />
           </VisibleWhen>
           <VisibleWhen :at="['lg', 'xl', 'xxl']">
             <SidebarRight class="martop2" show-job-opportunities />
