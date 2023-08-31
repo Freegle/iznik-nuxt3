@@ -14,11 +14,10 @@
               :dimensions="[300, 250]"
               div-id="div-gpt-ad-1691925450433-0"
               class="mt-2"
-              @rendered="adRendered1"
             />
           </VisibleWhen>
           <VisibleWhen :at="['lg', 'xl', 'xxl']">
-            <SidebarLeft class="martop1" />
+            <SidebarLeft />
           </VisibleWhen>
         </b-col>
         <b-col cols="12" lg="6" class="p-0">
@@ -216,6 +215,7 @@ export default {
       groupStore,
       isochroneStore,
       searchTerm,
+      martop1,
     }
   },
   data() {
@@ -412,9 +412,6 @@ export default {
         await this.isochroneStore.fetch()
       }
     },
-    adRendered1(visible) {
-      this.martop1 = visible ? '285px' : '0px'
-    },
   },
 }
 </script>
@@ -427,9 +424,5 @@ export default {
 
 .typeSelect {
   max-width: 33%;
-}
-
-.martop1 {
-  margin-top: v-bind(martop1);
 }
 </style>

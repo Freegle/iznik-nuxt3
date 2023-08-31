@@ -14,11 +14,10 @@
               :dimensions="[300, 250]"
               div-id="div-gpt-ad-1692868003771-0"
               class="mt-2"
-              @rendered="adRendered1"
             />
           </VisibleWhen>
-          <VisibleWhen :at="['lg', 'xl']">
-            <SidebarLeft class="martop1" />
+          <VisibleWhen :at="['lg', 'xl', 'xxl']">
+            <SidebarLeft />
           </VisibleWhen>
         </b-col>
         <b-col cols="12" lg="6" class="p-0">
@@ -199,12 +198,6 @@ function forceLogin() {
   authStore.forceLogin = true
 }
 
-const martop1 = ref('285px')
-
-function adRendered1(visible) {
-  martop1.value = visible ? '285px' : '0px'
-}
-
 const martop2 = ref('285px')
 
 function adRendered2(visible) {
@@ -212,10 +205,6 @@ function adRendered2(visible) {
 }
 </script>
 <style scoped lang="scss">
-.martop1 {
-  margin-top: v-bind(martop1);
-}
-
 .martop2 {
   margin-top: v-bind(martop2);
 }
