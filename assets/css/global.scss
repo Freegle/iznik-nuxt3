@@ -533,3 +533,15 @@ label {
     font-size: 1.8rem;
   }
 }
+
+.modal-fade {
+  z-index: 1055 !important;
+}
+
+.modal {
+  z-index: 1057 !important;
+}
+
+.modal-above-fade {
+  z-index: 1056 !important;
+}
