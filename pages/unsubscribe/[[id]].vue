@@ -42,7 +42,7 @@
               <template v-if="!groupid">
                 <p>
                   You can get fewer emails and stay a member, or you can leave
-                  Freegle completely
+                  Freegle completely:
                 </p>
                 <nuxt-link to="/settings" no-prefetch>
                   <b-button size="lg" variant="primary" class="mb-2 mr-2">
