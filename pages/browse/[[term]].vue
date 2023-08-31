@@ -6,7 +6,7 @@
         <b-col cols="0" lg="3" class="p-0 pr-1">
           <VisibleWhen
             :not="['xs', 'sm', 'md', 'lg']"
-            class="position-fixed verytop"
+            class="position-fixed modal-above-fade"
             style="width: 300px"
           >
             <ExternalDa
@@ -109,18 +109,20 @@
           />
         </b-col>
         <b-col cols="0" lg="3" class="p-0 pl-1">
-          <VisibleWhen
-            :not="['xs', 'sm', 'md', 'lg']"
-            class="position-fixed verytop"
-            style="width: 300px"
-          >
-            <ExternalDa
-              ad-unit-path="/22794232631/freegle_home"
-              :dimensions="[300, 250]"
-              div-id="div-gpt-ad-1691925450433-1"
-              class="mt-2"
-            />
-          </VisibleWhen>
+          <div class="d-flex justify-content-end">
+            <VisibleWhen
+              :not="['xs', 'sm', 'md', 'lg']"
+              class="position-fixed modal-above-fade"
+              style="right: 5px"
+            >
+              <ExternalDa
+                ad-unit-path="/22794232631/freegle_home"
+                :dimensions="[300, 250]"
+                div-id="div-gpt-ad-1691925450433-1"
+                class="mt-2"
+              />
+            </VisibleWhen>
+          </div>
         </b-col>
       </b-row>
     </b-container>
@@ -204,6 +206,8 @@ export default {
     // Doing this now slows down the load, but reduces flicker.
     await groupStore.fetch()
 
+    const martop1 = ref('285px')
+
     return {
       route,
       router,
@@ -212,6 +216,7 @@ export default {
       groupStore,
       isochroneStore,
       searchTerm,
+      martop1,
     }
   },
   data() {

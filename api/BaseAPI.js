@@ -473,12 +473,14 @@ export default class BaseAPI {
 
       if (log) {
         Sentry.captureMessage(
-          'API request failed ' +
+          'API2 request failed ' +
             path +
             ' returned HTTP ' +
             status +
             ' status ' +
-            statusstr
+            statusstr +
+            ' data length ' +
+            (data ? data.length : 0)
         )
       }
 
