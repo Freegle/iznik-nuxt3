@@ -18,9 +18,9 @@
     <p v-if="isVisible && adShown" class="text-center textsize">
       Advertisement. These help Freegle keep going.
     </p>
-    <div class="bg-white">
-      Path {{ adUnitPath }} id {{ divId }} dimensions {{ dimensions }}
-    </div>
+    <!--    <div class="bg-white">-->
+    <!--      Path {{ adUnitPath }} id {{ divId }} dimensions {{ dimensions }}-->
+    <!--    </div>-->
   </div>
 </template>
 <script setup>
