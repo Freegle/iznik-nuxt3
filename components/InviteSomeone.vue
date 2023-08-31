@@ -175,13 +175,16 @@ export default {
   },
   methods: {
     async inviteApp(){
-      await Share.share({
-        title: 'Try out Freegle for free stuff',
-        text: 'Hi - I\'m using Freegle to give and get things for free.  Check it out!',
-        url: 'https://www.ilovefreegle.org',
-        dialogTitle: 'Share now...',
-      })
-
+      try {
+        await Share.share({
+          title: 'Try out Freegle for free stuff',
+          text: 'Hi - I\'m using Freegle to give and get things for free.  Check it out!',
+          url: 'https://www.ilovefreegle.org',
+          dialogTitle: 'Share now...',
+        })
+      } catch( e){
+        console.log('Share exception', e.message)
+      }
     },
     async getContacts() {
       if( this.isApp) return

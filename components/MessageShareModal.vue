@@ -152,18 +152,20 @@ export default {
     async shareApp(){
       const href = this.message.url
       const subject = 'Sharing ' + this.message.subject
-      await Share.share({
-        title: subject,
-        text: this.message.textbody + "\n\n",  // not supported on some apps (Facebook, Instagram)
-        url: href,
-        dialogTitle: 'Share now...',
-      })
+      try{
+        await Share.share({
+          title: subject,
+          text: this.message.textbody + "\n\n",  // not supported on some apps (Facebook, Instagram)
+          url: href,
+          dialogTitle: 'Share now...',
+        })
+      } catch( e){
+        console.log('Share exception', e.message)
+      }
     },
     async show() {
       try {
-        console.log('show AAA')
         await this.messageStore.fetch(this.id, true)
-        console.log('show BBB', this.isApp)
         if( this.isApp) this.shareApp(); else
         this.showModal = true
       } catch (e) {

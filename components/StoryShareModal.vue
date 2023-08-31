@@ -142,12 +142,16 @@ export default {
     async shareApp(){
       const href = this.story.url
       const subject = 'Sharing ' + this.story.headline
-      await Share.share({
-        title: subject,
-        text: this.story.story + "\n\n",  // not supported on some apps (Facebook, Instagram)
-        url: href,
-        dialogTitle: 'Share now...',
-      })
+      try {
+        await Share.share({
+          title: subject,
+          text: this.story.story + "\n\n",  // not supported on some apps (Facebook, Instagram)
+          url: href,
+          dialogTitle: 'Share now...',
+        })
+      } catch( e){
+        console.log('Share exception', e.message)
+      }
     },
     async show() {
       try {

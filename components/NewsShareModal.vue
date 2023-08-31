@@ -134,12 +134,16 @@ export default {
     async shareApp(){
       const href = this.url
       const subject = 'Sharing Freegle chitchat'
-      await Share.share({
-        title: subject,
-        text: this.newsfeed.message + "\n\n",  // not supported on some apps (Facebook, Instagram)
-        url: href,
-        dialogTitle: 'Share now...',
-      })
+      try {
+        await Share.share({
+          title: subject,
+          text: this.newsfeed.message + "\n\n",  // not supported on some apps (Facebook, Instagram)
+          url: href,
+          dialogTitle: 'Share now...',
+        })
+      } catch( e){
+        console.log('Share exception', e.message)
+      }
     },
     async doCopy() {
       await navigator.clipboard.writeText(this.url)
