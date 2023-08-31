@@ -161,7 +161,9 @@ export default {
     },
     async show() {
       try {
+        console.log('show AAA')
         await this.messageStore.fetch(this.id, true)
+        console.log('show BBB', this.isApp)
         if( this.isApp) this.shareApp(); else
         this.showModal = true
       } catch (e) {

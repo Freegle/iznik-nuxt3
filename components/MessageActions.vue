@@ -75,7 +75,9 @@ export default {
   methods: {
     async share() {
       this.showShareModal = true
+      console.log('share AAA')
       await this.waitForRef('shareModal')
+      console.log('share BBB')
       this.$refs.shareModal?.show()
     },
     report() {
