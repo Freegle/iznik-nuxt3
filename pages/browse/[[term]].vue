@@ -14,10 +14,11 @@
               :dimensions="[300, 250]"
               div-id="div-gpt-ad-1691925450433-0"
               class="mt-2"
+              @rendered="adRendered1"
             />
           </VisibleWhen>
           <VisibleWhen :at="['lg', 'xl', 'xxl']">
-            <SidebarLeft />
+            <SidebarLeft class="martop1" />
           </VisibleWhen>
         </b-col>
         <b-col cols="12" lg="6" class="p-0">
@@ -108,18 +109,20 @@
           />
         </b-col>
         <b-col cols="0" lg="3" class="p-0 pl-1">
-          <VisibleWhen
-            :not="['xs', 'sm', 'md', 'lg']"
-            class="position-fixed verytop"
-            style="width: 300px"
-          >
-            <ExternalDa
-              ad-unit-path="/22794232631/freegle_home"
-              :dimensions="[300, 250]"
-              div-id="div-gpt-ad-1691925450433-1"
-              class="mt-2"
-            />
-          </VisibleWhen>
+          <div class="d-flex justify-content-end">
+            <VisibleWhen
+              :not="['xs', 'sm', 'md', 'lg']"
+              class="position-fixed verytop"
+              style="width: 300px"
+            >
+              <ExternalDa
+                ad-unit-path="/22794232631/freegle_home"
+                :dimensions="[300, 250]"
+                div-id="div-gpt-ad-1691925450433-1"
+                class="mt-2"
+              />
+            </VisibleWhen>
+          </div>
         </b-col>
       </b-row>
     </b-container>
@@ -202,6 +205,8 @@ export default {
     // Also get all the groups.  This allows us to suggest other groups to join from within the map.
     // Doing this now slows down the load, but reduces flicker.
     await groupStore.fetch()
+
+    const martop1 = ref('285px')
 
     return {
       route,
@@ -407,6 +412,9 @@ export default {
         await this.isochroneStore.fetch()
       }
     },
+    adRendered1(visible) {
+      this.martop1 = visible ? '285px' : '0px'
+    },
   },
 }
 </script>
@@ -419,5 +427,9 @@ export default {
 
 .typeSelect {
   max-width: 33%;
+}
+
+.martop1 {
+  margin-top: v-bind(martop1);
 }
 </style>

@@ -84,6 +84,7 @@ let shownFirst = false
 const emit = defineEmits(['rendered'])
 
 async function visibilityChanged(visible) {
+  console.log('Change', visible, shownFirst)
   if (visible && !shownFirst) {
     isVisible.value = visible
     shownFirst = true

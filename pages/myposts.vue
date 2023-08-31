@@ -14,10 +14,11 @@
               :dimensions="[300, 250]"
               div-id="div-gpt-ad-1692868003771-0"
               class="mt-2"
+              @rendered="adRendered1"
             />
           </VisibleWhen>
           <VisibleWhen :at="['lg', 'xl']">
-            <SidebarLeft />
+            <SidebarLeft class="martop1" />
           </VisibleWhen>
         </b-col>
         <b-col cols="12" lg="6" class="p-0">
@@ -61,17 +62,20 @@
           <VisibleWhen
             :not="['xs', 'sm', 'md', 'lg']"
             class="position-fixed verytop"
-            style="width: 300px"
           >
-            <ExternalDa
-              ad-unit-path="/22794232631/freegle_myposts_desktop"
-              :dimensions="[300, 250]"
-              div-id="div-gpt-ad-1692868003771-1"
-              class="mt-2"
-            />
+            <div class="d-flex justify-content-end">
+              <ExternalDa
+                ad-unit-path="/22794232631/freegle_myposts_desktop"
+                :dimensions="[300, 250]"
+                div-id="div-gpt-ad-1692868003771-1"
+                class="mt-2"
+                style="width: 300px"
+                @rendered="adRendered2"
+              />
+            </div>
           </VisibleWhen>
-          <VisibleWhen :at="['lg', 'xl']">
-            <SidebarRight show-job-opportunities />
+          <VisibleWhen :at="['lg', 'xl', 'xxl']">
+            <SidebarRight class="martop2" show-job-opportunities />
           </VisibleWhen>
         </b-col>
       </b-row>
@@ -195,4 +199,25 @@ async function loadMoreWanteds(infiniteLoaderInstance) {
 function forceLogin() {
   authStore.forceLogin = true
 }
+
+const martop1 = ref('285px')
+
+function adRendered1(visible) {
+  martop1.value = visible ? '285px' : '0px'
+}
+
+const martop2 = ref('285px')
+
+function adRendered2(visible) {
+  martop2.value = visible ? '285px' : '0px'
+}
 </script>
+<style scoped lang="scss">
+.martop1 {
+  margin-top: v-bind(martop1);
+}
+
+.martop2 {
+  margin-top: v-bind(martop2);
+}
+</style>
