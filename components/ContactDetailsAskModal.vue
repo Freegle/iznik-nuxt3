@@ -8,6 +8,16 @@
     no-fade
   >
     <div class="d-flex justify-content-between flex-wrap">
+      <p class="text-muted">
+        We ask for your postcode so that we know how far away you are - the
+        closer the better. Your mobile is optional - we can notify you by text
+        (SMS) so you don't miss replies.
+      </p>
+      <p class="text-muted">
+        <strong>We won't show either of these</strong> to the other freegler,
+        but we will show an approximate distance.
+      </p>
+
       <b-form-group
         class="flex-grow-1 nobot"
         label="Your postcode:"
@@ -28,22 +38,6 @@
         input-class="phone"
       />
     </div>
-    <p class="text-muted">
-      <b-button
-        v-if="!showWhyAsk"
-        size="sm"
-        variant="link"
-        @click="showWhyAsk = true"
-      >
-        Why do we ask for this?
-      </b-button>
-      <span v-if="showWhyAsk">
-        We ask for your postcode so that we know how far away you are - the
-        closer the better. Your mobile is optional - we can notify you by text
-        (SMS) so you don't miss replies. We won't show either of these to the
-        other freegler, but we will show an approximate distance.
-      </span>
-    </p>
   </b-modal>
 </template>
 
@@ -71,8 +65,6 @@ async function savePostcode(pc) {
     })
   }
 }
-
-const showWhyAsk = ref(false)
 
 defineExpose({ show })
 </script>
