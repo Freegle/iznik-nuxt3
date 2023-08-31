@@ -5,19 +5,14 @@
     <div>
       <h1 class="visually-hidden">Chats</h1>
       <b-row class="m-0">
-        <b-col
-          id="chatlist"
-          cols="12"
-          md="4"
-          xl="3"
-          class="chatlist p-0 bg-white"
-        >
+        <b-col cols="12" md="4" xl="3" class="p-0 bg-white chatlistcol">
           <VisibleWhen
             :at="
               selectedChatId
                 ? ['md', 'lg', 'xl', 'xxl']
                 : ['xs', 'sm', 'md', 'lg', 'xl', 'xxl']
             "
+            class="chatlist"
           >
             <div
               class="d-flex justify-content-between flex-wrap mb-2 mt-3 border-bottom"
@@ -91,6 +86,18 @@
               </b-button>
             </div>
           </VisibleWhen>
+          <VisibleWhen
+            v-if="!selectedChatId"
+            :at="['xs', 'sm', 'md', 'lg']"
+            class="chatda"
+          >
+            <ExternalDa
+              ad-unit-path="/22794232631/freegle_chat_app"
+              :dimensions="[300, 50]"
+              div-id="div-gpt-ad-1691925773522-0"
+              class="mt-2 position-fixed bottom-0"
+            />
+          </VisibleWhen>
         </b-col>
         <b-col cols="12" md="8" xl="6" class="chatback p-0">
           <VisibleWhen
@@ -116,6 +123,12 @@
         </b-col>
         <b-col cols="0" xl="3" class="p-0 pl-1">
           <VisibleWhen :at="['xl', 'xxl']">
+            <ExternalDa
+              ad-unit-path="/22794232631/freegle_chat_desktop"
+              :dimensions="[300, 250]"
+              div-id="div-gpt-ad-1692867596111-0"
+              class="mt-2"
+            />
             <SidebarRight :show-job-opportunities="true" />
           </VisibleWhen>
         </b-col>
@@ -406,6 +419,10 @@ export default {
 }
 </script>
 <style scoped lang="scss">
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
+
 .chatback {
   background-color: $color-yellow--light;
 }
@@ -418,8 +435,19 @@ export default {
   background-color: $color-gray--lighter;
 }
 
+.chatlistcol {
+  min-height: calc(100vh - 74px);
+  display: flex;
+  flex-direction: column;
+}
+
 .chatlist {
-  max-height: calc(100vh - 74px);
+  max-height: calc(100vh - 124px);
+
+  @include media-breakpoint-up(xl) {
+    min-height: calc(100vh - 74px);
+  }
+
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-gutter: stable;
