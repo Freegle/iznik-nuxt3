@@ -24,6 +24,7 @@
   </div>
 </template>
 <script setup>
+import { onUnmounted } from 'vue'
 import { useMiscStore } from '../stores/misc'
 import { ref, computed, onBeforeUnmount } from '#imports'
 import { waitForRef } from '~/composables/useWaitForRef'
@@ -72,7 +73,13 @@ let slot = null
 
 const adShown = ref(true)
 
+const timer = ref(null)
+
 onBeforeUnmount(() => {
+  if (timer.value) {
+    clearTimeout(timer)
+  }
+
   if (window.googletag?.destroySlots) {
     window.googletag.destroySlots([slot])
   }
@@ -103,9 +110,16 @@ async function visibilityChanged(visible) {
         }
 
         emit('rendered', adShown.value)
+
+        // We refresh the ad slot.  This increases views.  Google doesn't like it if this is more frequent than
+        // every 30s.
+        if (!timer.value) {
+          timer.value = setTimeout(() => {
+            window.googletag.pubads().refresh([slot])
+          }, 45000)
+        }
       })
 
-      window.googletag.pubads().enableSingleRequest()
       window.googletag.enableServices()
     })
 
