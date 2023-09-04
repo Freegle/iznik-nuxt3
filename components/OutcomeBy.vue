@@ -53,8 +53,10 @@
         :options="userOptions(false)"
         size="lg"
         :class="'font-weight-bold ' + (chooseError ? 'text-danger' : '')"
+        :state="invalid ? false : null"
         @change="selected"
       />
+      <p v-if="invalid" class="invalid-feedback">Please, select something</p>
     </div>
     <div class="d-block d-md-none">
       <b-form-select
@@ -63,8 +65,10 @@
         :options="userOptions(true)"
         size="lg"
         :class="'font-weight-bold ' + (chooseError ? 'text-danger' : '')"
+        :state="invalid ? false : null"
         @change="selected"
       />
+      <p v-if="invalid" class="invalid-feedback">Please, select something</p>
     </div>
     <p class="mt-1 text-muted small">
       This helps us identify reliable freeglers.
@@ -102,6 +106,11 @@ export default {
       default: null,
     },
     chooseError: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    invalid: {
       type: Boolean,
       required: false,
       default: false,

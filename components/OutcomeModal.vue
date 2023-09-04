@@ -58,6 +58,7 @@
             :left="left"
             :taken-by="takenBy"
             :choose-error="chooseError"
+            :invalid="submittedWithNoSelectedUser"
             @took-users="tookUsers = $event"
           />
         </div>
@@ -196,7 +197,6 @@
               :label="buttonLabel"
               class="ml-2"
               spinclass="text-white"
-              :disabled="type === 'Taken' && !tookUsers.length"
               @handle="submit"
             />
           </div>
@@ -241,6 +241,7 @@ export default {
       tookUsers: [],
       selectedUser: null,
       chooseError: false,
+      submittedWithNoSelectedUser: false,
       completionMessage: null,
     }
   },
@@ -327,6 +328,9 @@ export default {
   },
   methods: {
     async submit() {
+      if (this.type === 'Taken' && !this.tookUsers.length)
+        return (this.submittedWithNoSelectedUser = true)
+
       let complete = false
       this.chooseError = false
 
