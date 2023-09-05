@@ -90,7 +90,9 @@
     </ConfirmModal>
     <ResultModal
       ref="deleteMessageResultModal"
-      :title="deleteMessageSucceeded ? 'Success' : 'Sorry, that didn\'t work'"
+      :title="
+        deleteMessageSucceeded ? 'Delete Succeeded' : 'Sorry, that didn\'t work'
+      "
     >
       <template v-if="deleteMessageSucceeded">
         <p>We've deleted your chat message.</p>
