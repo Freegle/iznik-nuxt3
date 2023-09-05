@@ -28,7 +28,6 @@ import { useMiscStore } from '../stores/misc'
 import { ref, computed, onBeforeUnmount } from '#imports'
 import { waitForRef } from '~/composables/useWaitForRef'
 
-console.log('ExternalDA setup')
 const props = defineProps({
   adUnitPath: {
     type: String,
@@ -49,7 +48,6 @@ const breakpoint = computed(() => {
   return miscStore.breakpoint
 })
 
-console.log('Get unique id')
 const uniqueid = ref(props.adUnitPath)
 
 const p = new Promise((resolve, reject) => {
@@ -77,9 +75,7 @@ const p = new Promise((resolve, reject) => {
   }
 })
 
-console.log('Wait for script load')
 await p
-console.log('Loaded')
 
 let slot = null
 
@@ -104,7 +100,6 @@ onBeforeUnmount(() => {
 const isVisible = ref(false)
 let shownFirst = false
 
-console.log('Define emits.')
 const emit = defineEmits(['rendered'])
 
 async function visibilityChanged(visible) {
@@ -151,8 +146,6 @@ async function visibilityChanged(visible) {
     console.log('Exception in visibilityChanged', e)
   }
 }
-
-console.log('Finished')
 </script>
 <style scoped lang="scss">
 .textsize {
