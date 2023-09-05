@@ -56,14 +56,18 @@ const p = new Promise((resolve, reject) => {
   if (already) {
     resolve()
   } else {
-    const s = document.createElement('script')
-    s.setAttribute(
-      'src',
-      'https://securepubads.g.doubleclick.net/tag/js/gpt.js'
-    )
-    s.id = 'gpt-script'
-    s.onload = () => resolve()
-    document.head.appendChild(s)
+    try {
+      const s = document.createElement('script')
+      s.setAttribute(
+        'src',
+        'https://securepubads.g.doubleclick.net/tag/js/gpt.js'
+      )
+      s.id = 'gpt-script'
+      s.onload = () => resolve()
+      document.head.appendChild(s)
+    } catch (e) {
+      console.log('Load of Google ad script failed', e)
+    }
   }
 })
 
