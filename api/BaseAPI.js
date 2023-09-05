@@ -32,8 +32,6 @@ const ourFetch = fetchRetry(fetch, {
     //
     // Some browsers don't return much info from fetch(), deliberately, and just say "Load failed".  So retry those.
     // https://stackoverflow.com/questions/71280168/javascript-typeerror-load-failed-error-when-calling-fetch-on-ios
-    console.log('Consider retry', response?.status, response?.statusText)
-
     if (
       error !== null ||
       response?.status > 404 ||
