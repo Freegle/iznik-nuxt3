@@ -13,6 +13,7 @@
       :id="id"
       :chatid="chatid"
       :pov="pov"
+      @delete="showDeleteMessageModal"
     />
     <div v-else-if="chatmessage?.type === 'Interested'">
       <chat-message-interested
@@ -77,9 +78,21 @@
     <chat-message-warning v-if="phoneNumber" />
     <chat-message-date-read :id="id" :chatid="chatid" :last="last" :pov="pov" />
 
+    <ConfirmModal ref="confirmDeleteMessageModal" @confirm="deleteMessage">
+      <p>
+        We will delete this from our system, so you will no longer see it here.
+      </p>
+      <p>
+        The other freegler may have received the message by email - we can't
+        delete that.
+      </p>
+      <p>Are you sure you want to delete the message?</p>
+    </ConfirmModal>
     <ResultModal
       ref="deleteMessageResultModal"
-      :title="deleteMessageSucceeded ? 'Success' : 'Sorry, that didn\'t work'"
+      :title="
+        deleteMessageSucceeded ? 'Delete Succeeded' : 'Sorry, that didn\'t work'
+      "
     >
       <template v-if="deleteMessageSucceeded">
         <p>We've deleted your chat message.</p>
@@ -99,17 +112,6 @@
       <b-button v-else variant="link" @click="showDeleteMessageModal">
         Delete
       </b-button>
-      <ConfirmModal ref="confirmDeleteMessageModal" @confirm="deleteMessage">
-        <p>
-          We will delete this from our system, so you will no longer see it
-          here.
-        </p>
-        <p>
-          The other freegler may have received the message by email - we can't
-          delete that.
-        </p>
-        <p>Are you sure you want to delete the message?</p>
-      </ConfirmModal>
     </div>
   </div>
 </template>
@@ -238,7 +240,9 @@ export default {
   },
   methods: {
     selectMe() {
-      if (!this.isMessageDeleted) this.selected = true
+      // don't allow to select deleted messages and messages consisting of a single image
+      if (!this.isMessageDeleted && !this.chatmessage.imageid)
+        this.selected = true
     },
     async markUnread() {
       console.log('Mark unread', this.chatid, this.prevmessage)
