@@ -76,7 +76,11 @@
               :placeholder="placeholder"
               rows="8"
               class="mt-2"
+              :state="triedToSave ? !isSaveButtonDisabled : null"
             />
+            <p class="invalid-feedback">
+              You must provide a description or attachments
+            </p>
           </b-col>
         </b-row>
         <b-row v-if="uploading" class="bg-white">
@@ -111,7 +115,7 @@
         </b-button>
         <SpinButton
           variant="primary"
-          :disabled="uploadingPhoto || (!edittextbody && !attachments?.length)"
+          :disabled="uploadingPhoto"
           name="save"
           label="Save"
           spinclass="text-white"
@@ -182,6 +186,7 @@ export default {
       uploading: false,
       myFiles: [],
       image: null,
+      triedToSave: false,
     }
   },
   computed: {
@@ -221,6 +226,9 @@ export default {
         },
       ]
     },
+    isSaveButtonDisabled() {
+      return !this.edittextbody && !this.attachments?.length
+    },
   },
   watch: {
     count(newVal) {
@@ -232,6 +240,9 @@ export default {
   },
   methods: {
     async save() {
+      this.triedToSave = true
+      if (this.isSaveButtonDisabled) return
+
       if (this.edititem && (this.edittextbody || this.attachments?.length)) {
         const attids = []
 
