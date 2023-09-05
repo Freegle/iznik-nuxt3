@@ -65,6 +65,10 @@ const p = new Promise((resolve, reject) => {
       )
       s.id = 'gpt-script'
       s.onload = () => resolve()
+      s.onerror = () => {
+        console.log('Google ad script blocked')
+        reject(new Error('Google ad script blocked'))
+      }
       document.head.appendChild(s)
     }
   } catch (e) {
