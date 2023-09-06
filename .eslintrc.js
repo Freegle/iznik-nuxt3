@@ -39,6 +39,7 @@ module.exports = {
   ],
   globals: {
     process: 'readonly',
+    defineAsyncComponent: 'readonly',
     defineExpose: 'readonly',
     defineProps: 'readonly',
     definePageMeta: 'readonly',

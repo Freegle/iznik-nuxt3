@@ -1,7 +1,7 @@
 <template>
   <b-modal
     id="contact-details-ask-modal"
-    v-model="showModal"
+    v-model="show"
     scrollable
     size="lg"
     no-stacking
@@ -51,9 +51,13 @@ import SettingsPhone from '~/components/SettingsPhone.vue'
 const authStore = useAuthStore()
 const me = storeToRefs(authStore).user
 
-const emit = defineEmits(['hide'])
+const props = defineProps({
+  modelValue: { type: Boolean, required: true },
+})
 
-const { showModal, show } = useModal(emit)
+const emit = defineEmits(['update:modelValue'])
+
+const { show } = useModal(props, emit)
 
 async function savePostcode(pc) {
   const settings = me.value.settings
@@ -65,6 +69,4 @@ async function savePostcode(pc) {
     })
   }
 }
-
-defineExpose({ show })
 </script>
