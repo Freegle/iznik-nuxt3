@@ -3,13 +3,7 @@
     <div>
       <h1 class="visually-hidden">Chats</h1>
       <b-row class="m-0">
-        <b-col
-          id="chatlist"
-          cols="12"
-          md="4"
-          xl="3"
-          class="chatlist p-0 bg-white"
-        >
+        <b-col id="chatlist" cols="12" md="4" xl="3" class="p-0 bg-white">
           <VisibleWhen
             :at="
               selectedChatId
@@ -17,76 +11,94 @@
                 : ['xs', 'sm', 'md', 'lg', 'xl', 'xxl']
             "
           >
-            <div
-              class="d-flex justify-content-between flex-wrap mb-2 mt-3 border-bottom"
-            >
-              <form role="search" class="mb-1 mr-1 ml-1 ml-md-0">
-                <label for="search-bar" class="visually-hidden"
-                  >Search chats</label
+            <div class="chatlist">
+              <div class="notda">
+                <div
+                  class="d-flex justify-content-between flex-wrap mb-2 mt-3 border-bottom"
                 >
-                <b-form-input
-                  id="search-bar"
-                  v-model="search"
-                  placeholder="Search chats"
-                  class="flex-shrink-1"
-                />
-              </form>
-              <b-button
-                variant="primary"
-                class="mb-1 ml-1 ml-md-0"
-                @click="markAllRead"
-              >
-                <v-icon icon="check" /> Mark all read
-              </b-button>
-            </div>
-            <p v-if="!visibleChats?.length" class="ml-2">
-              <span v-if="searching" class="pulsate"> Searching... </span>
-              <span v-else> No chats to show. </span>
-            </p>
-            <div v-else>
-              <div
-                v-for="chat in visibleChats"
-                :key="'chat-' + chat.id"
-                :class="{
-                  chat: true,
-                  active: selectedChatId === chat?.id,
-                }"
-                @click="gotoChat(chat.id)"
-              >
-                <ChatListEntry
-                  :id="chat.id"
-                  :active="selectedChatId === chat?.id"
-                />
+                  <form role="search" class="mb-1 mr-1 ml-1 ml-md-0">
+                    <label for="search-bar" class="visually-hidden"
+                      >Search chats</label
+                    >
+                    <b-form-input
+                      id="search-bar"
+                      v-model="search"
+                      placeholder="Search chats"
+                      class="flex-shrink-1"
+                    />
+                  </form>
+                  <b-button
+                    variant="primary"
+                    class="mb-1 ml-1 ml-md-0"
+                    @click="markAllRead"
+                  >
+                    <v-icon icon="check" /> Mark all read
+                  </b-button>
+                </div>
+                <p v-if="!visibleChats?.length" class="ml-2">
+                  <span v-if="searching" class="pulsate"> Searching... </span>
+                  <span v-else> No chats to show. </span>
+                </p>
+                <div v-else>
+                  <div
+                    v-for="chat in visibleChats"
+                    :key="'chat-' + chat.id"
+                    :class="{
+                      chat: true,
+                      active: selectedChatId === chat?.id,
+                    }"
+                    @click="gotoChat(chat.id)"
+                  >
+                    <ChatListEntry
+                      :id="chat.id"
+                      :active="selectedChatId === chat?.id"
+                    />
+                  </div>
+                  <infinite-loading
+                    :identifier="bump"
+                    :distance="distance"
+                    @infinite="loadMore"
+                  >
+                    <template #error>&nbsp;</template>
+                    <template #complete>&nbsp;</template>
+                    <template #spinner>&nbsp;</template>
+                  </infinite-loading>
+                </div>
+                <div class="d-flex justify-content-around">
+                  <b-button
+                    v-if="
+                      !search && mightBeOldChats && complete && !showingOlder
+                    "
+                    variant="link"
+                    size="sm"
+                    @click="fetchOlder"
+                  >
+                    Show older chats
+                  </b-button>
+                </div>
+                <div class="d-flex justify-content-around mt-2">
+                  <b-button
+                    v-if="complete && visibleChats && visibleChats.length"
+                    variant="link"
+                    size="sm"
+                    @click="showHideAll"
+                  >
+                    Hide all chats
+                  </b-button>
+                </div>
               </div>
-              <infinite-loading
-                :identifier="bump"
-                :distance="distance"
-                @infinite="loadMore"
+              <VisibleWhen
+                v-if="!selectedChatId"
+                :at="['xs', 'sm', 'md', 'lg']"
+                class="chatda"
               >
-                <template #error>&nbsp;</template>
-                <template #complete>&nbsp;</template>
-                <template #spinner>&nbsp;</template>
-              </infinite-loading>
-            </div>
-            <div class="d-flex justify-content-around">
-              <b-button
-                v-if="!search && mightBeOldChats && complete && !showingOlder"
-                variant="link"
-                size="sm"
-                @click="fetchOlder"
-              >
-                Show older chats
-              </b-button>
-            </div>
-            <div class="d-flex justify-content-around mt-2">
-              <b-button
-                v-if="complete && visibleChats && visibleChats.length"
-                variant="link"
-                size="sm"
-                @click="showHideAll"
-              >
-                Hide all chats
-              </b-button>
+                <ExternalDa
+                  ad-unit-path="/22794232631/freegle_chat_app"
+                  :dimensions="[300, 50]"
+                  div-id="div-gpt-ad-1691925773522-0"
+                  class="mt-2"
+                />
+              </VisibleWhen>
             </div>
           </VisibleWhen>
         </b-col>
@@ -114,6 +126,12 @@
         </b-col>
         <b-col cols="0" xl="3" class="p-0 pl-1">
           <VisibleWhen :at="['xl', 'xxl']">
+            <ExternalDa
+              ad-unit-path="/22794232631/freegle_chat_desktop"
+              :dimensions="[300, 250]"
+              div-id="div-gpt-ad-1692867596111-0"
+              class="mt-2"
+            />
             <SidebarRight :show-job-opportunities="true" />
           </VisibleWhen>
         </b-col>
@@ -397,9 +415,22 @@ export default {
 }
 
 .chatlist {
-  max-height: calc(100vh - 74px);
-  overflow-y: auto;
-  overflow-x: hidden;
-  scrollbar-gutter: stable;
+  height: calc(100vh - 75px);
+  display: flex;
+  flex-direction: column;
+
+  .notda {
+    flex-shrink: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    scrollbar-gutter: stable;
+  }
+
+  .chatda {
+    display: flex;
+    flex-direction: column;
+  }
 }
 </style>

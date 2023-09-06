@@ -18,6 +18,9 @@
     <p v-if="isVisible && adShown" class="text-center textsize">
       Advertisement. These help Freegle keep going.
     </p>
+    <!--    <div class="bg-white">-->
+    <!--      Path {{ adUnitPath }} id {{ divId }} dimensions {{ dimensions }}-->
+    <!--    </div>-->
   </div>
 </template>
 <script setup>
@@ -48,18 +51,27 @@ const breakpoint = computed(() => {
 const uniqueid = ref(props.adUnitPath)
 
 const p = new Promise((resolve, reject) => {
-  const already = document.getElementById('gpt-script')
-  if (already) {
+  try {
+    const already = document.getElementById('gpt-script')
+    if (already) {
+      resolve()
+    } else {
+      const s = document.createElement('script')
+      s.setAttribute(
+        'src',
+        'https://securepubads.g.doubleclick.net/tag/js/gpt.js'
+      )
+      s.id = 'gpt-script'
+      s.onload = () => resolve()
+      s.onerror = () => {
+        console.log('Google ad script blocked')
+        reject(new Error('Google ad script blocked'))
+      }
+      document.head.appendChild(s)
+    }
+  } catch (e) {
+    console.log('Load of Google ad script failed', e)
     resolve()
-  } else {
-    const s = document.createElement('script')
-    s.setAttribute(
-      'src',
-      'https://securepubads.g.doubleclick.net/tag/js/gpt.js'
-    )
-    s.id = 'gpt-script'
-    s.onload = () => resolve()
-    document.head.appendChild(s)
   }
 })
 
@@ -69,9 +81,19 @@ let slot = null
 
 const adShown = ref(true)
 
+const timer = ref(null)
+
 onBeforeUnmount(() => {
-  if (window.googletag?.destroySlots) {
-    window.googletag.destroySlots([slot])
+  try {
+    if (timer.value) {
+      clearTimeout(timer)
+    }
+
+    if (window.googletag?.destroySlots) {
+      window.googletag.destroySlots([slot])
+    }
+  } catch (e) {
+    console.log('Exception in onBeforeUnmount', e)
   }
 })
 
@@ -81,35 +103,47 @@ let shownFirst = false
 const emit = defineEmits(['rendered'])
 
 async function visibilityChanged(visible) {
-  if (visible && !shownFirst) {
-    isVisible.value = visible
-    shownFirst = true
+  try {
+    if (visible && !shownFirst) {
+      isVisible.value = visible
+      shownFirst = true
 
-    await waitForRef(uniqueid)
+      await waitForRef(uniqueid)
 
-    window.googletag = window.googletag || { cmd: [] }
-    window.googletag.cmd.push(function () {
-      window.googletag.pubads().collapseEmptyDivs()
-      slot = window.googletag
-        .defineSlot(uniqueid.value, [props.dimensions], props.divId)
-        .addService(window.googletag.pubads())
+      window.googletag = window.googletag || { cmd: [] }
+      window.googletag.cmd.push(function () {
+        window.googletag.pubads().collapseEmptyDivs()
+        slot = window.googletag
+          .defineSlot(uniqueid.value, [props.dimensions], props.divId)
+          .addService(window.googletag.pubads())
 
-      window.googletag.pubads().addEventListener('slotRenderEnded', (event) => {
-        console.log('Slot rendered', event)
-        if (event?.slot === slot && event?.isEmpty) {
-          adShown.value = false
-        }
+        window.googletag
+          .pubads()
+          .addEventListener('slotRenderEnded', (event) => {
+            if (event?.slot === slot && event?.isEmpty) {
+              adShown.value = false
+            }
 
-        emit('rendered', adShown.value)
+            emit('rendered', adShown.value)
+
+            // We refresh the ad slot.  This increases views.  Google doesn't like it if this is more frequent than
+            // every 30s.
+            if (!timer.value) {
+              timer.value = setTimeout(() => {
+                window.googletag.pubads().refresh([slot])
+              }, 45000)
+            }
+          })
+
+        window.googletag.enableServices()
       })
 
-      window.googletag.pubads().enableSingleRequest()
-      window.googletag.enableServices()
-    })
-
-    window.googletag.cmd.push(function () {
-      window.googletag.display(props.divId)
-    })
+      window.googletag.cmd.push(function () {
+        window.googletag.display(props.divId)
+      })
+    }
+  } catch (e) {
+    console.log('Exception in visibilityChanged', e)
   }
 }
 </script>

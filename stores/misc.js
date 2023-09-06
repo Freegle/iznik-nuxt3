@@ -42,6 +42,11 @@ export const useMiscStore = defineStore({
     },
     api(diff) {
       this.apiCount += diff
+
+      if (this.apiCount < 0) {
+        console.error('API count went negative')
+        this.apiCount = 0
+      }
     },
     startOnlineCheck() {
       // navigator.onLine is not reliable, so we ping the server.

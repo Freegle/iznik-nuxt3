@@ -29,7 +29,15 @@ const ourFetch = fetchRetry(fetch, {
 
     // Retry on pretty much anything except errors which can legitimately be returned by the API server.  These are
     // the low 400s.
-    if (error !== null || response?.status > 404) {
+    //
+    // Some browsers don't return much info from fetch(), deliberately, and just say "Load failed".  So retry those.
+    // https://stackoverflow.com/questions/71280168/javascript-typeerror-load-failed-error-when-calling-fetch-on-ios
+    if (
+      error !== null ||
+      response?.status > 404 ||
+      (response?.status === 200 &&
+        response?.statusText.toLowerCase().includes('load failed'))
+    ) {
       console.log('API retry', attempt, error, response)
       return true
     }
@@ -469,12 +477,14 @@ export default class BaseAPI {
 
       if (log) {
         Sentry.captureMessage(
-          'API request failed ' +
+          'API2 request failed ' +
             path +
             ' returned HTTP ' +
             status +
             ' status ' +
-            statusstr
+            statusstr +
+            ' data length ' +
+            (data ? data.length : 0)
         )
       }
 

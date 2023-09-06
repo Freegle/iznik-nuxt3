@@ -50,6 +50,9 @@
         />
       </template>
       <template #footer>
+        <b-button variant="outline-danger" @click="$emit('delete')">
+          Delete
+        </b-button>
         <b-button variant="white" @click="zoom = false"> Close </b-button>
       </template>
     </b-modal>
@@ -65,6 +68,7 @@ export default {
     ProfileImage,
   },
   extends: ChatBase,
+  emits: ['delete'],
   data() {
     return {
       zoom: false,

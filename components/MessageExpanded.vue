@@ -41,22 +41,15 @@
           class="messagemap flex-grow-1"
           :height="breakpoint === 'xs' || breakpoint === 'sm' ? 150 : 250"
         />
-        <VisibleWhen v-if="showAd" :not="['xs', 'sm']" style="width: 300px">
-          <ExternalDa
-            :ad-unit-path="adUnit"
-            :dimensions="[300, 250]"
-            :div-id="adId"
-            @rendered="adRendered = true"
-          />
-        </VisibleWhen>
       </div>
       <MessageHistoryExpanded :id="id" class="d-block d-md-none mt-2 mt-md-0" />
-      <VisibleWhen v-if="showAd" :at="['xs', 'sm']">
+      <VisibleWhen v-if="showAd && adId" :at="['xs', 'sm']">
         <div class="d-flex justify-content-around mt-2">
           <ExternalDa
-            :ad-unit-path="adUnit"
+            :ad-unit-path="adUnitPath"
+            :ad-id="adId"
             :dimensions="[300, 250]"
-            :div-id="adId"
+            :div-id="adId + '-' + id"
             @rendered="adRendered = true"
           />
         </div>
@@ -139,10 +132,15 @@ export default {
       required: false,
       default: true,
     },
-    messagePage: {
-      type: Boolean,
+    adUnitPath: {
+      type: String,
       required: false,
-      default: false,
+      default: null,
+    },
+    adId: {
+      type: String,
+      required: false,
+      default: null,
     },
   },
   setup(props) {
@@ -212,18 +210,6 @@ export default {
       }
 
       return ret
-    },
-    adUnit() {
-      return this.messagePage
-        ? '/22794232631/freegle_productemail'
-        : '/22794232631/freegle_product'
-    },
-    adId() {
-      return (
-        (this.messagePage
-          ? 'div-gpt-ad-1690904387964'
-          : 'div-gpt-ad-1690904332895-') + this.id
-      )
     },
   },
   methods: {

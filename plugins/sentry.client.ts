@@ -123,6 +123,9 @@ export default defineNuxtPlugin((nuxtApp) => {
         } else if (originalExceptionString?.match(/Down for maintenance/)) {
           console.log('Maintenance - suppress exception', this)
           return null
+        } else if (originalExceptionString?.match(/Google ad script blocked/)) {
+          console.log('AdBlocker - no need to log.', this)
+          return null
         } else if (
           originalExceptionString?.match(/Attempt to use history.replaceState/)
         ) {
