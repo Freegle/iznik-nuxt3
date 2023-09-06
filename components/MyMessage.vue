@@ -180,7 +180,7 @@
               >
                 <v-icon class="d-none d-sm-inline" icon="sync" /> Repost
               </b-button>
-              <b-button
+              <div
                 v-else-if="
                   !rejected &&
                   !taken &&
@@ -189,14 +189,24 @@
                   message.location &&
                   message.item
                 "
-                variant="secondary"
-                disabled
-                class="mr-2 mb-1"
-                title="You will be able to repost this soon"
+                class="position-relative"
               >
-                <v-icon class="d-none d-sm-inline" icon="sync" /> Repost
-                <span class="small">{{ timeago(message.repostat) }}</span>
-              </b-button>
+                <b-button
+                  variant="secondary"
+                  class="mr-2 mb-1"
+                  title="You will be able to repost this soon"
+                  @click.stop="repostWhenUnavailable"
+                >
+                  <v-icon class="d-none d-sm-inline" icon="sync" /> Repost
+                  <span class="small">{{ timeago(message.repostat) }}</span>
+                </b-button>
+                <p
+                  class="invalid-feedback position-absolute text-center"
+                  :style="{ display: triedToRepost ? 'block' : 'hidden' }"
+                >
+                  Can't repost now
+                </p>
+              </div>
               <b-button
                 v-if="!rejected"
                 variant="secondary"
@@ -407,6 +417,7 @@ export default {
       showShareModal: false,
       showPromiseModal: false,
       broken: false,
+      triedToRepost: false,
     }
   },
   computed: {
@@ -789,6 +800,9 @@ export default {
 
       const router = useRouter()
       router.push(this.message.type === 'Offer' ? '/give' : '/find')
+    },
+    repostWhenUnavailable() {
+      this.triedToRepost = true
     },
     hasOutcome(val) {
       let ret = false
