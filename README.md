@@ -53,8 +53,8 @@ Briefly:
   that nice reactive stuff), with a standard folder layout, SSR/static site generation and Pinia as a replacement 
   for Vuex.
 * [Bootstrap Vue Next](https://github.com/bootstrap-vue/bootstrap-vue-next/), which is Bootstrap v5 for Vue 3 / Nuxt 3.
-* Continuous Delivery via Azure.
-* Capacitor app (WIP).
+* Continuous Delivery via Netlify.
+* Capacitor app.
 
 <img src="http://www.browserstack.com/images/layout/browserstack-logo-600x315.png" width="280"/>
 
