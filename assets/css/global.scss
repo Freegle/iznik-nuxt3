@@ -533,3 +533,11 @@ label {
     font-size: 1.8rem;
   }
 }
+
+.modal-above-fade {
+  // We can't get this quite how we'd like.  We'd like these ads to appear above the modal fade, and below the modal content.
+  // But we can't do that, because of the way that position: fixed locks the z-index of the children.  That means the
+  // effective z-index of the fade and the modal contents is the same.  So we do this, which will occasionally overlap
+  // the modal contents in an annoying way.  It would be nice to figure out something better.
+  z-index: 1056 !important;
+}

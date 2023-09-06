@@ -99,15 +99,15 @@ export default {
     classes() {
       const ret = {
         messagecard: true,
-        freegled: this.message.successful,
+        freegled: this.message?.successful,
         offer: this.message.type === 'Offer',
         wanted: this.message.type === 'Wanted',
-        clickme: !this.message.successful,
+        clickme: !this.message?.successful,
         promisedfade:
-          this.message.promised &&
+          this.message?.promised &&
           this.replyable &&
-          !this.message.promisedtome &&
-          !this.message.successful,
+          !this.message?.promisedtome &&
+          !this.message?.successful,
         'p-2': true,
         'p-sm-3': true,
       }

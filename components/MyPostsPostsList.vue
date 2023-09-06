@@ -74,9 +74,16 @@
           </b-row>
           <b-row>
             <b-col class="text-center">
-              <b-button to="/give" class="mt-1" size="lg" variant="primary">
-                <v-icon icon="gift" />&nbsp;{{ props.type }} something
-              </b-button>
+              <template v-if="props.type === 'Offer'">
+                <b-button to="/give" class="mt-1" size="lg" variant="primary">
+                  <v-icon icon="gift" />&nbsp;OFFER something
+                </b-button>
+              </template>
+              <template v-else-if="props.type === 'Wanted'">
+                <b-button to="/find" class="mt-1" size="lg" variant="primary">
+                  <v-icon icon="shopping-cart" />&nbsp;Ask for something
+                </b-button>
+              </template>
             </b-col>
           </b-row>
         </div>

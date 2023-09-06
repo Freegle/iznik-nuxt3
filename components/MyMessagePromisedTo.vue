@@ -89,7 +89,6 @@ export default {
   },
   methods: {
     changeTime(e) {
-      console.log('Change', this.$refs)
       e.preventDefault()
       e.stopPropagation()
       this.$refs.promiseModalChange?.show()

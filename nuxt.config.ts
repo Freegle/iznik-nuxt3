@@ -303,6 +303,11 @@ export default defineNuxtConfig({
           name: 'OMG-Verify-V1',
           content: '954a2917-d603-4df4-8802-f6a78846a9c0',
         },
+        {
+          hid: 'Awin',
+          name: 'Awin',
+          content: 'Awin',
+        },
       ],
     },
   },
