@@ -42,6 +42,7 @@
               :posts="offers"
               :loading="offersLoading"
               :default-expanded="posts.length <= 5"
+              :show="shownOffersCount"
               @load-more="loadMoreOffers"
             />
 
@@ -51,6 +52,7 @@
               :posts="wanteds"
               :loading="wantedsLoading"
               :default-expanded="posts.length <= 5"
+              :show="shownWantedsCount"
               @load-more="loadMoreWanteds"
             />
 

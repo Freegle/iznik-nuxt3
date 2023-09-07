@@ -51,7 +51,7 @@
             <MyMessage
               :id="post.id"
               :show-old="showOldPosts"
-              :expand="oldPosts.includes(post)"
+              :expand="defaultExpanded"
             />
           </div>
           <b-img
@@ -102,6 +102,7 @@ const props = defineProps({
   posts: { type: Array, required: true },
   loading: { type: Boolean, required: true },
   defaultExpanded: { type: Boolean, required: true },
+  show: { type: Number, required: true },
 })
 
 const emit = defineEmits(['load-more'])
@@ -138,16 +139,18 @@ const visiblePosts = computed(() => {
   let posts = showOldPosts.value ? props.posts : activePosts.value
   posts = posts || []
 
-  return posts.sort((a, b) => {
-    // promised items first, then by most recently posted
-    if (!showOldPosts.value && a.promised && !b.promised) {
-      return -1
-    } else if (!showOldPosts.value && b.promised && !a.promised) {
-      return 1
-    } else {
-      return new Date(b.arrival).getTime() - new Date(a.arrival).getTime()
-    }
-  })
+  return posts
+    .sort((a, b) => {
+      // promised items first, then by most recently posted
+      if (!showOldPosts.value && a.promised && !b.promised) {
+        return -1
+      } else if (!showOldPosts.value && b.promised && !a.promised) {
+        return 1
+      } else {
+        return new Date(b.arrival).getTime() - new Date(a.arrival).getTime()
+      }
+    })
+    .slice(0, props.show)
 })
 </script>
 
