@@ -1,5 +1,7 @@
 <template>
   <client-only v-if="me">
+    <DonationAskModal />
+
     <b-container fluid class="p-0 p-xl-2">
       <h1 class="visually-hidden">My posts</h1>
       <b-row class="m-0">
@@ -79,7 +81,6 @@
           </VisibleWhen>
         </b-col>
       </b-row>
-      <DonationAskModal />
     </b-container>
   </client-only>
 </template>

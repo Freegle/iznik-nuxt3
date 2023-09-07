@@ -61,7 +61,7 @@
       </div>
     </template>
     <template #footer>
-      <b-button variant="secondary" @click="hide">Close</b-button>
+      <b-button variant="secondary" @click="showModal = false">Close</b-button>
     </template>
   </b-modal>
 </template>
@@ -95,7 +95,7 @@ const props = defineProps({
 const emit = defineEmits(['hide'])
 
 const variant = ref(null)
-const { showModal, hide } = useModal(emit)
+const { show: showModal } = useModal(emit)
 
 const me = authStore.user
 const groupId = ref(null)
