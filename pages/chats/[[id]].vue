@@ -9,6 +9,9 @@
       <h1 class="visually-hidden">Chats</h1>
       <b-row class="m-0">
         <b-col id="chatlist" cols="12" md="4" xl="3" class="p-0 bg-white">
+          <b-button @click="ask"
+            >Show contact details {{ showContactDetailsAskModal }}</b-button
+          >
           <VisibleWhen
             :at="
               selectedChatId
@@ -152,6 +155,7 @@
 <script>
 import dayjs from 'dayjs'
 
+import { storeToRefs } from 'pinia'
 import { buildHead } from '../../composables/useBuildHead'
 import { useAuthStore } from '../../stores/auth'
 import { ref, useRoute, useRouter } from '#imports'
@@ -201,9 +205,10 @@ export default {
     const myid = authStore.user?.id
     const showChats = ref(20)
 
-    // when there's a flag in the chat store to show the modal, show it and reset the flag
-    const showContactDetailsAskModal = ref(chatStore.showContactDetailsAskModal)
-    chatStore.showContactDetailsAskModal = false
+    // When there's a flag in the chat store to show the modal.  Don't reset the value in the store here otherwise
+    // reactivity will stop the modal being shown.
+    const showContactDetailsAskModal =
+      storeToRefs(chatStore).showContactDetailsAskModal
 
     if (myid) {
       const route = useRoute()
@@ -410,6 +415,10 @@ export default {
 
         this.searching = null
       }
+    },
+    ask() {
+      // TODO Remove this and the button after testing.
+      this.chatStore.showContactDetailsAskModal = true
     },
   },
 }

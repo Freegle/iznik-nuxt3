@@ -13,6 +13,7 @@ export const useChatStore = defineStore({
     listByChatMessageId: {},
     messages: {},
     searchSince: null,
+    showContactDetailsAskModal: false,
   }),
   actions: {
     init(config) {

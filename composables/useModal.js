@@ -12,7 +12,9 @@ export function useModal(props, emit) {
   watch(
     () => props.modelValue,
     (value) => {
-      show.value = value
+      nextTick().then(() => {
+        show.value = true
+      })
     }
   )
 
