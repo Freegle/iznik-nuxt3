@@ -5,15 +5,11 @@ export function useModal(props, emit) {
   // the modals are hidden by default
   const show = ref(false)
 
-  watch(show, (value) => {
-    emit('update:modelValue', value)
-  })
-
   watch(
     () => props.modelValue,
     (value) => {
       nextTick().then(() => {
-        show.value = true
+        show.value = value
       })
     }
   )

@@ -5,6 +5,7 @@
     scrollable
     size="lg"
     no-stacking
+    @hidden="show = false"
   >
     <div class="d-flex justify-content-between flex-wrap">
       <p class="text-muted">
