@@ -1,7 +1,6 @@
 <template>
   <b-modal
-    id="aboutmemodal"
-    v-model="show"
+    ref="modal"
     scrollable
     :title="
       !review
@@ -10,7 +9,6 @@
     "
     size="lg"
     no-stacking
-    no-fade
   >
     <template #default>
       <notice-message v-if="review" type="info">
@@ -55,8 +53,8 @@
 </template>
 
 <script setup>
-import { useAuthStore } from '../stores/auth'
 import NoticeMessage from './NoticeMessage'
+import { useAuthStore } from '~/stores/auth'
 import { useModal } from '~/composables/useModal'
 
 const authStore = useAuthStore()
@@ -65,13 +63,14 @@ const props = defineProps({
   review: { type: Boolean, required: false, default: false },
 })
 
-const { show } = useModal(props)
+const emit = defineEmits(['dataChange'])
+
+const { modal } = useModal(props)
 
 const text = ref(null)
 
 async function save() {
-  await authStore.saveAboutMe(this.text)
-  this.$emit('datachange')
-  this.show = false
+  await authStore.saveAboutMe(text.value)
+  emit('dataChange')
 }
 </script>

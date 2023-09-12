@@ -632,10 +632,10 @@
         </b-col>
         <b-col cols="0" xl="3" />
       </b-row>
-      <AboutMeModal
+      <about-me-modal
         v-if="showAboutMeModal"
-        v-model="showAboutMeModal"
-        @datachange="update"
+        @hidden="showAboutMeModal = false"
+        @data-change="update"
       />
       <ProfileModal :id="me ? me.id : null" ref="profilemodal" />
       <EmailConfirmModal ref="emailconfirm" />
