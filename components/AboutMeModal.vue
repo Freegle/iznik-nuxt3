@@ -1,7 +1,7 @@
 <template>
   <b-modal
     id="aboutmemodal"
-    v-model="showModal"
+    v-model="show"
     scrollable
     :title="
       !review
@@ -10,6 +10,7 @@
     "
     size="lg"
     no-stacking
+    no-fade
   >
     <template #default>
       <notice-message v-if="review" type="info">
@@ -47,42 +48,30 @@
       </notice-message>
     </template>
     <template #footer>
-      <b-button variant="white" @click="hide"> Cancel </b-button>
+      <b-button variant="white" @click="show = false"> Cancel </b-button>
       <b-button variant="primary" @click="save"> Save </b-button>
     </template>
   </b-modal>
 </template>
-<script>
+
+<script setup>
 import { useAuthStore } from '../stores/auth'
 import NoticeMessage from './NoticeMessage'
-import modal from '@/mixins/modal'
+import { useModal } from '~/composables/useModal'
 
-export default {
-  components: { NoticeMessage },
-  mixins: [modal],
-  props: {
-    review: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-  },
-  data() {
-    return {
-      text: null,
-    }
-  },
-  methods: {
-    show() {
-      this.text = this.me?.aboutme?.text ? this.me.aboutme.text : null
-      this.showModal = true
-    },
-    async save() {
-      const authStore = useAuthStore()
-      await authStore.saveAboutMe(this.text)
-      this.$emit('datachange')
-      this.hide()
-    },
-  },
+const authStore = useAuthStore()
+
+const props = defineProps({
+  review: { type: Boolean, required: false, default: false },
+})
+
+const { show } = useModal(props)
+
+const text = ref(null)
+
+async function save() {
+  await authStore.saveAboutMe(this.text)
+  this.$emit('datachange')
+  this.show = false
 }
 </script>
