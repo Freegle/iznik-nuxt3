@@ -1,7 +1,7 @@
 import { nextTick, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 
-export function useModal(props, emit) {
+export function useModal(props) {
   // the modals are hidden by default
   const show = ref(false)
 

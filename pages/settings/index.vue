@@ -632,7 +632,11 @@
         </b-col>
         <b-col cols="0" xl="3" />
       </b-row>
-      <AboutMeModal ref="aboutmemodal" @datachange="update" />
+      <AboutMeModal
+        v-if="showAboutMeModal"
+        v-model="showAboutMeModal"
+        @datachange="update"
+      />
       <ProfileModal :id="me ? me.id : null" ref="profilemodal" />
       <EmailConfirmModal ref="emailconfirm" />
       <AddressModal ref="addressModal" />
@@ -653,9 +657,8 @@ import SettingsPhone from '~/components/SettingsPhone'
 import SupporterInfo from '~/components/SupporterInfo'
 import EmailConfirmModal from '~/components/EmailConfirmModal'
 import ProfileImage from '~/components/ProfileImage'
-import PostCode from '~/components/PostCode'
 
-import AboutMeModal from '~/components/AboutMeModal'
+import PostCode from '~/components/PostCode'
 import AddressModal from '~/components/AddressModal'
 import ProfileModal from '~/components/ProfileModal'
 import SettingsGroup from '~/components/SettingsGroup'
@@ -664,6 +667,9 @@ import OurFilePond from '~/components/OurFilePond'
 import OurToggle from '~/components/OurToggle'
 import DonationButton from '~/components/DonationButton'
 import PasswordEntry from '~/components/PasswordEntry'
+const AboutMeModal = defineAsyncComponent(() =>
+  import('~/components/AboutMeModal')
+)
 
 definePageMeta({
   layout: 'login',
@@ -728,6 +734,7 @@ export default {
       userTimer: null,
       autoreposts: true,
       enterNewLine: false,
+      showAboutMeModal: false,
     }
   },
   computed: {
@@ -955,9 +962,7 @@ export default {
     },
     async addAbout() {
       await this.fetch()
-
-      await this.waitForRef('aboutmemodal')
-      this.$refs.aboutmemodal.show()
+      this.showAboutMeModal = true
     },
     async viewProfile() {
       await this.waitForRef('profilemodal')
