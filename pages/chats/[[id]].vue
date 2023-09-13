@@ -2,7 +2,7 @@
   <client-only v-if="me">
     <ContactDetailsAskModal
       v-if="showContactDetailsAskModal"
-      v-model="showContactDetailsAskModal"
+      @hidden="showContactDetailsAskModal = false"
     />
 
     <div>
