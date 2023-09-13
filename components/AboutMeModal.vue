@@ -3,7 +3,7 @@
     ref="modal"
     scrollable
     :title="
-      !review
+      !props.review
         ? 'Why not complete your public profile?'
         : 'Please review your public profile'
     "
@@ -11,7 +11,7 @@
     no-stacking
   >
     <template #default>
-      <notice-message v-if="review" type="info">
+      <notice-message v-if="props.review" type="info">
         You added this a while ago - can you just check it still applies? If it
         does, just click <em>Cancel</em>. If you want to change it, edit it and
         click <em>Save</em>.
