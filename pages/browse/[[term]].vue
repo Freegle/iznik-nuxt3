@@ -280,7 +280,7 @@ export default {
         }
       }
 
-      if (this.showAboutMe) {
+      if (this.showAboutMeModal) {
         this.miscStore.set({
           key: 'lastaboutmeask',
           value: now,

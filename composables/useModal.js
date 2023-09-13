@@ -7,6 +7,10 @@ export function useModal() {
     modal.value.show()
   })
 
+  function hide() {
+    modal.value.hide()
+  }
+
   const unregisterNavigationGuard = useRouter().beforeEach((to, from, next) => {
     // TODO
     next()
@@ -14,5 +18,5 @@ export function useModal() {
 
   onUnmounted(unregisterNavigationGuard)
 
-  return { modal }
+  return { modal, hide }
 }

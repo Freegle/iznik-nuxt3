@@ -37,7 +37,10 @@
         <b-button variant="primary" size="sm" @click="showModal">
           <v-icon icon="user" /> Introduce yourself to everyone
         </b-button>
-        <AboutMeModal v-if="showAboutMe" ref="modal" />
+        <about-me-modal
+          v-if="showAboutMeModal"
+          @hidden="showAboutMeModal = false"
+        />
       </div>
     </div>
     <NewsPhotoModal
@@ -53,10 +56,11 @@
 </template>
 <script>
 import ReadMore from 'vue-read-more3/src/ReadMoreComponent'
+import { defineAsyncComponent } from 'vue'
 import NewsBase from '~/components/NewsBase'
 import NewsUserIntro from '~/components/NewsUserIntro'
 import NewsLoveComment from '~/components/NewsLoveComment'
-const AboutMeModal = () => import('./AboutMeModal')
+const AboutMeModal = defineAsyncComponent(() => import('./AboutMeModal'))
 
 export default {
   components: {
@@ -68,16 +72,13 @@ export default {
   extends: NewsBase,
   data() {
     return {
-      showAboutMe: false,
+      showAboutMeModal: false,
     }
   },
   methods: {
     async showModal() {
       await this.fetchMe(['me'], true)
-
-      this.showAboutMe = true
-      const m = await this.waitForRef('modal')
-      m?.show()
+      this.showAboutMeModal = true
     },
   },
 }

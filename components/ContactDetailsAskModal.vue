@@ -1,12 +1,5 @@
 <template>
-  <b-modal
-    id="contact-details-ask-modal"
-    v-model="show"
-    scrollable
-    size="lg"
-    no-stacking
-    @hidden="show = false"
-  >
+  <b-modal ref="modal" scrollable size="lg" no-stacking>
     <div class="d-flex justify-content-between flex-wrap">
       <p class="text-muted">
         We ask for your postcode so that we know how far away you are - the
@@ -51,13 +44,7 @@ import SettingsPhone from '~/components/SettingsPhone.vue'
 const authStore = useAuthStore()
 const me = storeToRefs(authStore).user
 
-const props = defineProps({
-  modelValue: { type: Boolean, required: true },
-})
-
-const emit = defineEmits(['update:modelValue'])
-
-const { show } = useModal(props, emit)
+const { modal } = useModal()
 
 async function savePostcode(pc) {
   const settings = me.value.settings

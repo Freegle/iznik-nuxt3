@@ -46,7 +46,7 @@
       </notice-message>
     </template>
     <template #footer>
-      <b-button variant="white" @click="show = false"> Cancel </b-button>
+      <b-button variant="white" @click="hide"> Cancel </b-button>
       <b-button variant="primary" @click="save"> Save </b-button>
     </template>
   </b-modal>
@@ -65,7 +65,7 @@ const props = defineProps({
 
 const emit = defineEmits(['dataChange'])
 
-const { modal } = useModal()
+const { modal, hide } = useModal()
 
 const text = ref(null)
 
