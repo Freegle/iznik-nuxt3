@@ -65,7 +65,7 @@ const props = defineProps({
 
 const emit = defineEmits(['dataChange'])
 
-const { modal } = useModal(props)
+const { modal } = useModal()
 
 const text = ref(null)
 
