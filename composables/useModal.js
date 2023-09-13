@@ -4,8 +4,12 @@ export function useModal() {
   const modal = ref()
 
   onMounted(() => {
-    modal.value.show()
+    show()
   })
+
+  function show() {
+    modal.value.show()
+  }
 
   function hide() {
     modal.value.hide()
@@ -18,5 +22,5 @@ export function useModal() {
 
   onUnmounted(unregisterNavigationGuard)
 
-  return { modal, hide }
+  return { modal, show, hide }
 }
