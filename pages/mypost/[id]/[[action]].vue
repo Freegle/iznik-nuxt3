@@ -54,7 +54,9 @@ import NoticeMessage from '~/components/NoticeMessage'
 import GlobalWarning from '~/components/GlobalWarning'
 import { useDonationAskModal } from '~/composables/useDonationAskModal'
 const MyMessage = () => import('~/components/MyMessage.vue')
-const DonationAskModal = () => import('~/components/DonationAskModal')
+const DonationAskModal = defineAsyncComponent(() =>
+  import('~/components/DonationAskModal')
+)
 
 definePageMeta({
   layout: 'login',

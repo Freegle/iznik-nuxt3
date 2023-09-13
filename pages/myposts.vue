@@ -90,7 +90,6 @@
 
 <script setup>
 import { useRoute } from 'vue-router'
-import { defineAsyncComponent } from 'vue'
 import { useAuthStore } from '../stores/auth'
 import { useMessageStore } from '../stores/message'
 import { useSearchStore } from '../stores/search'
