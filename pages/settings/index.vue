@@ -971,7 +971,7 @@ export default {
       await this.fetch()
       this.showAboutMeModal = true
     },
-    async viewProfile() {
+    viewProfile() {
       this.showProfileModal = true
     },
     async changeUseProfile(c, e) {
