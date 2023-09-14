@@ -270,7 +270,11 @@
       imgtype="Newsfeed"
       imgflag="Newsfeed"
     />
-    <ProfileModal v-if="infoclick" :id="userid" ref="profilemodal" />
+    <ProfileModal
+      v-if="showProfileModal"
+      :id="userid"
+      @hidden="showProfileModal = false"
+    />
     <NewsLovesModal v-if="showLoveModal" :id="replyid" ref="loveModal" />
     <NewsEditModal
       v-if="showEditModal"
@@ -302,7 +306,9 @@ import ChatButton from '~/components/ChatButton'
 import NewsPreview from '~/components/NewsPreview'
 import ProfileImage from '~/components/ProfileImage'
 
-const ProfileModal = () => import('~/components/ProfileModal')
+const ProfileModal = defineAsyncComponent(() =>
+  import('~/components/ProfileModal')
+)
 const ConfirmModal = () => import('~/components/ConfirmModal.vue')
 const NewsReplies = () => import('~/components/NewsReplies.vue')
 const OurFilePond = () => import('~/components/OurFilePond')
@@ -364,7 +370,6 @@ export default {
       showReplyBox: false,
       replyingTo: null,
       replybox: null,
-      infoclick: false,
       showAllReplies: false,
       uploading: false,
       imageid: null,
@@ -374,6 +379,7 @@ export default {
       showEditModal: false,
       hasBecomeVisible: false,
       isVisible: false,
+      showProfileModal: false,
     }
   },
   computed: {
@@ -432,10 +438,8 @@ export default {
     this.$emit('rendered', this.replyid)
   },
   methods: {
-    async showInfo() {
-      this.infoclick = true
-      const m = await this.waitForRef('profilemodal')
-      m?.show()
+    showInfo() {
+      this.showProfileModal = true
     },
     async replyReply() {
       console.log('Replying to', this.replyid, this.reply)
