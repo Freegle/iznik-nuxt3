@@ -131,7 +131,7 @@
     <ProfileModal
       v-if="showProfile && reply && replyuser"
       :id="replyuser.id"
-      ref="profile"
+      @hidden="showProfile = false"
     />
   </div>
 </template>
@@ -147,7 +147,9 @@ import { timeago, datelocale } from '~/composables/useTimeFormat'
 const PromiseModal = () => import('./PromiseModal')
 const RenegeModal = () => import('./RenegeModal')
 const UserRatings = () => import('~/components/UserRatings')
-const ProfileModal = () => import('~/components/ProfileModal')
+const ProfileModal = defineAsyncComponent(() =>
+  import('~/components/ProfileModal')
+)
 
 export default {
   components: {
@@ -288,11 +290,8 @@ export default {
       await this.waitForRef('renege')
       this.$refs.renege?.show()
     },
-    async showProfileModal() {
+    showProfileModal() {
       this.showProfile = true
-
-      await this.waitForRef('profile')
-      this.$refs.profile?.show()
     },
   },
 }
