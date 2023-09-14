@@ -203,10 +203,10 @@
           @confirm="hide"
         />
         <ProfileModal
-          v-if="showProfile"
+          v-if="showProfileModal"
           :id="otheruser.id"
-          ref="profile"
           close-on-message
+          @hidden="showProfileModal = false"
         />
       </div>
       <ChatHideModal
@@ -228,6 +228,7 @@
   </div>
 </template>
 <script>
+import { defineAsyncComponent } from 'vue'
 import { useChatStore } from '../stores/chat'
 import { setupChat } from '../composables/useChat'
 import ProfileImage from './ProfileImage'
@@ -239,7 +240,9 @@ const ChatBlockModal = () => import('./ChatBlockModal')
 const ChatHideModal = () => import('./ChatHideModal')
 const UserRatings = () => import('~/components/UserRatings')
 const ChatReportModal = () => import('~/components/ChatReportModal')
-const ProfileModal = () => import('~/components/ProfileModal')
+const ProfileModal = defineAsyncComponent(() =>
+  import('~/components/ProfileModal')
+)
 
 export default {
   components: {
@@ -277,7 +280,7 @@ export default {
   },
   data() {
     return {
-      showProfile: false,
+      showProfileModal: false,
       showChatHide: false,
       showChatBlock: false,
       showChatReport: false,
@@ -353,10 +356,8 @@ export default {
       const m = await this.waitForRef('chatblock')
       m?.show()
     },
-    async showInfo() {
-      this.showProfile = true
-      const m = await this.waitForRef('profile')
-      m?.show()
+    showInfo() {
+      this.showProfileModal = true
     },
     async report() {
       this.showChatReport = true
