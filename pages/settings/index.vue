@@ -637,7 +637,11 @@
         @hidden="showAboutMeModal = false"
         @data-change="update"
       />
-      <ProfileModal :id="me ? me.id : null" ref="profilemodal" />
+      <ProfileModal
+        v-if="showProfileModal"
+        :id="me ? me.id : null"
+        @hidden="showProfileModal = false"
+      />
       <EmailConfirmModal ref="emailconfirm" />
       <AddressModal ref="addressModal" />
     </div>
@@ -660,7 +664,6 @@ import ProfileImage from '~/components/ProfileImage'
 
 import PostCode from '~/components/PostCode'
 import AddressModal from '~/components/AddressModal'
-import ProfileModal from '~/components/ProfileModal'
 import SettingsGroup from '~/components/SettingsGroup'
 import NoticeMessage from '~/components/NoticeMessage'
 import OurFilePond from '~/components/OurFilePond'
@@ -669,6 +672,9 @@ import DonationButton from '~/components/DonationButton'
 import PasswordEntry from '~/components/PasswordEntry'
 const AboutMeModal = defineAsyncComponent(() =>
   import('~/components/AboutMeModal')
+)
+const ProfileModal = defineAsyncComponent(() =>
+  import('~/components/ProfileModal')
 )
 
 definePageMeta({
@@ -735,6 +741,7 @@ export default {
       autoreposts: true,
       enterNewLine: false,
       showAboutMeModal: false,
+      showProfileModal: false,
     }
   },
   computed: {
@@ -965,8 +972,7 @@ export default {
       this.showAboutMeModal = true
     },
     async viewProfile() {
-      await this.waitForRef('profilemodal')
-      this.$refs.profilemodal.show()
+      this.showProfileModal = true
     },
     async changeUseProfile(c, e) {
       const settings = this.me.settings
