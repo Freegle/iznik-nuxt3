@@ -236,9 +236,9 @@
       @hide="fetchMessages"
     />
     <ProfileModal
-      v-if="showProfile && otheruser"
+      v-if="showProfileModal && otheruser"
       :id="otheruser ? otheruser.id : null"
-      ref="profile"
+      @hidden="showProfileModal = false"
     />
     <AddressModal
       v-if="showAddress"
@@ -255,6 +255,7 @@
 </template>
 <script>
 import pluralize from 'pluralize'
+import { defineAsyncComponent } from 'vue'
 import { setupChat } from '../composables/useChat'
 import { useMiscStore } from '../stores/misc'
 import { useMessageStore } from '../stores/message'
@@ -267,7 +268,9 @@ import { untwem } from '~/composables/useTwem'
 const OurFilePond = () => import('~/components/OurFilePond')
 const UserRatings = () => import('~/components/UserRatings')
 const PromiseModal = () => import('~/components/PromiseModal')
-const ProfileModal = () => import('~/components/ProfileModal')
+const ProfileModal = defineAsyncComponent(() =>
+  import('~/components/ProfileModal')
+)
 const AddressModal = () => import('~/components/AddressModal')
 const NoticeMessage = () => import('~/components/NoticeMessage')
 const ChatRSVPModal = () => import('~/components/ChatRSVPModal')
@@ -320,7 +323,7 @@ export default {
       showMicrovolunteering: false,
       showNotices: true,
       showPromise: false,
-      showProfile: false,
+      showProfileModal: false,
       showAddress: false,
       sendmessage: null,
       RSVP: false,
@@ -460,10 +463,8 @@ export default {
         }
       })
     },
-    async showInfo() {
-      this.showProfile = true
-      const m = await this.waitForRef('profile')
-      m?.show()
+    showInfo() {
+      this.showProfileModal = true
     },
     async send() {
       if (this.imageid) {
