@@ -38,19 +38,20 @@
       </b-card-body>
     </b-card>
     <div v-if="showAdd">
-      <CommunityEventModal
-        v-if="featureComponent === 'CommunityEvent'"
-        ref="modal"
-        :start-edit="true"
-      />
-      <VolunteerOpportunityModal v-else ref="modal" :start-edit="true" />
+      <template v-if="featureComponent === 'CommunityEvent'">
+        <CommunityEventModal
+          v-if="modalShown"
+          :start-edit="true"
+          @hidden="modalShown = false"
+        />
+      </template>
+      <template v-else>
+        <VolunteerOpportunityModal ref="modal" :start-edit="true" />
+      </template>
     </div>
   </div>
 </template>
 <script setup>
-import { waitForRef } from '~/composables/useWaitForRef'
-import { ref, defineAsyncComponent } from '#imports'
-
 const CommunityEvent = defineAsyncComponent(() => import('./CommunityEvent'))
 const VolunteerOpportunity = defineAsyncComponent(() =>
   import('./VolunteerOpportunity')
@@ -107,11 +108,11 @@ defineProps({
 
 const showAdd = ref(false)
 const modal = ref('modal')
+const modalShown = ref(false)
 
-const showModal = async () => {
+function showModal() {
   showAdd.value = true
-  await waitForRef(modal, 'show')
-  modal.value?.show()
+  modalShown.value = true
 }
 </script>
 <style scoped lang="scss">
