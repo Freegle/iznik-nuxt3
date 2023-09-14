@@ -1,5 +1,5 @@
 <template>
-  <b-modal ref="modal" scrollable size="lg" no-stacking>
+  <b-modal ref="modal" scrollable title="Contact details" size="lg" no-stacking>
     <div class="d-flex justify-content-between flex-wrap">
       <p class="text-muted">
         We ask for your postcode so that we know how far away you are - the
