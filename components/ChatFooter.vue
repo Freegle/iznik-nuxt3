@@ -255,7 +255,6 @@
 </template>
 <script>
 import pluralize from 'pluralize'
-import { defineAsyncComponent } from 'vue'
 import { setupChat } from '../composables/useChat'
 import { useMiscStore } from '../stores/misc'
 import { useMessageStore } from '../stores/message'

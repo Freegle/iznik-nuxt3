@@ -228,7 +228,6 @@
   </div>
 </template>
 <script>
-import { defineAsyncComponent } from 'vue'
 import { useChatStore } from '../stores/chat'
 import { setupChat } from '../composables/useChat'
 import ProfileImage from './ProfileImage'
