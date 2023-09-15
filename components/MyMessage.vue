@@ -312,7 +312,11 @@
       :id="message.id"
       ref="shareModal"
     />
-    <MessageEditModal v-if="showEditModal" :id="id" ref="editModal" />
+    <MessageEditModal
+      v-if="showEditModal"
+      :id="id"
+      @hidden="showEditModal = false"
+    />
     <PromiseModal
       v-if="showPromiseModal"
       ref="promiseModal"
@@ -340,8 +344,10 @@ import PromiseModal from '~/components/PromiseModal'
 const MyMessageReply = () => import('./MyMessageReply.vue')
 const MessageShareModal = () => import('./MessageShareModal')
 const OutcomeModal = () => import('./OutcomeModal')
-const MessageEditModal = () => import('./MessageEditModal')
 const NoticeMessage = () => import('~/components/NoticeMessage')
+const MessageEditModal = defineAsyncComponent(() =>
+  import('./MessageEditModal')
+)
 
 export default {
   components: {
@@ -742,8 +748,6 @@ export default {
 
       await this.messageStore.fetch(this.id, true)
       this.showEditModal = true
-      const m = await this.waitForRef('editModal')
-      m?.show()
     },
     async repost(e) {
       if (e) {
