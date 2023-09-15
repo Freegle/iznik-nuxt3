@@ -37,18 +37,21 @@
         </div>
       </b-card-body>
     </b-card>
-    <div v-if="showAdd">
-      <template v-if="featureComponent === 'CommunityEvent'">
-        <CommunityEventModal
-          v-if="modalShown"
-          :start-edit="true"
-          @hidden="modalShown = false"
-        />
-      </template>
-      <template v-else>
-        <VolunteerOpportunityModal ref="modal" :start-edit="true" />
-      </template>
-    </div>
+
+    <template v-if="featureComponent === 'CommunityEvent'">
+      <CommunityEventModal
+        v-if="modalShown"
+        :start-edit="true"
+        @hidden="modalShown = false"
+      />
+    </template>
+    <template v-else>
+      <VolunteerOpportunityModal
+        v-if="modalShown"
+        :start-edit="true"
+        @hidden="modalShown = false"
+      />
+    </template>
   </div>
 </template>
 <script setup>
@@ -106,12 +109,9 @@ defineProps({
   },
 })
 
-const showAdd = ref(false)
-const modal = ref('modal')
 const modalShown = ref(false)
 
 function showModal() {
-  showAdd.value = true
   modalShown.value = true
 }
 </script>
