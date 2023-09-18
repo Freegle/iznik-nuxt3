@@ -70,8 +70,9 @@
           <OutcomeModal
             v-if="showOutcome && refmsgid"
             :id="refmsgid"
-            ref="outcomeModal"
+            :type="outcomeType"
             @outcome="fetchMessage"
+            @hidden="showOutcome = false"
           />
           <PromiseModal
             v-if="showPromise"
@@ -153,7 +154,8 @@ import { useMessageStore } from '../stores/message'
 import ChatBase from '~/components/ChatBase'
 import ProfileImage from '~/components/ProfileImage'
 import ChatMessageSummary from '~/components/ChatMessageSummary'
-const OutcomeModal = () => import('~/components/OutcomeModal')
+const OutcomeModal = () =>
+  defineAsyncComponent(() => import('~/components/OutcomeModal'))
 const PromiseModal = () => import('~/components/PromiseModal')
 
 export default {
@@ -171,6 +173,7 @@ export default {
   data() {
     return {
       showOutcome: false,
+      outcomeType: null,
       showPromise: false,
     }
   },
@@ -196,8 +199,7 @@ export default {
       await messageStore.fetch(this.refmsgid)
 
       this.showOutcome = true
-      await this.waitForRef('outcomeModal')
-      this.$refs.outcomeModal.show(type)
+      this.outcomeType = type
     },
   },
 }

@@ -119,7 +119,7 @@
 </template>
 
 <script>
-import { defineAsyncComponent, ref, toRaw } from 'vue'
+import { ref, toRaw } from 'vue'
 import { useMessageStore } from '../stores/message'
 import { useComposeStore } from '../stores/compose'
 import { useGroupStore } from '../stores/group'
