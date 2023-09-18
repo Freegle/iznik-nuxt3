@@ -284,9 +284,9 @@
     />
     <ConfirmModal
       v-if="showDeleteModal"
-      ref="deleteConfirm"
       :title="'Delete reply from ' + reply.displayname"
       @confirm="deleteConfirm"
+      @hidden="showDeleteModal = false"
     />
   </div>
 </template>
@@ -309,7 +309,9 @@ import ProfileImage from '~/components/ProfileImage'
 const ProfileModal = defineAsyncComponent(() =>
   import('~/components/ProfileModal')
 )
-const ConfirmModal = () => import('~/components/ConfirmModal.vue')
+const ConfirmModal = defineAsyncComponent(() =>
+  import('~/components/ConfirmModal.vue')
+)
 const NewsReplies = () => import('~/components/NewsReplies.vue')
 const OurFilePond = () => import('~/components/OurFilePond')
 const OurAtTa = () => import('~/components/OurAtTa')
@@ -520,8 +522,6 @@ export default {
     },
     async deleteReply() {
       this.showDeleteModal = true
-      await this.waitForRef('deleteConfirm')
-      this.$refs.deleteConfirm?.show()
     },
     async deleteConfirm() {
       await this.newsfeedStore.delete(this.replyid, this.threadhead)
