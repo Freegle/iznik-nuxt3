@@ -111,10 +111,11 @@
         <b-col cols="0" md="3" />
       </b-row>
       <ConfirmModal
-        ref="confirm"
+        v-if="showConfirmModal"
         title="Permanently delete your account?"
         message="<p>This will delete all your personal data, chats and community memberships.</p><p><strong>It's permanent - you can't undo it or get your data back.</strong></p><p>If you just want to leave one community, please <em>Cancel</em> and select the community from the drop-down list.</p>"
         @confirm="forget"
+        @hidden="showConfirmModal = false"
       />
       <ForgetFailModal
         v-if="showForgetFailModal"
@@ -133,7 +134,8 @@ const ForgetFailModal = defineAsyncComponent(() =>
   import('~/components/ForgetFailModal')
 )
 const GroupSelect = () => import('~/components/GroupSelect.vue')
-const ConfirmModal = () => import('~/components/ConfirmModal.vue')
+const ConfirmModal = () =>
+  defineAsyncComponent(() => import('~/components/ConfirmModal.vue'))
 const NoticeMessage = () => import('~/components/NoticeMessage')
 const ExternalLink = () => import('~/components/ExternalLink')
 
@@ -183,6 +185,7 @@ export default {
       left: null,
       unknown: false,
       showForgetFailModal: false,
+      showConfirmModal: false,
     }
   },
   computed: {
@@ -212,7 +215,7 @@ export default {
         this.authStore.loggedInEver = true
         this.authStore.forceLogin = true
       } else {
-        this.$refs.confirm.show()
+        this.showConfirmModal = true
       }
     },
     async leave() {
