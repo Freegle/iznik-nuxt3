@@ -78,7 +78,11 @@
     <chat-message-warning v-if="phoneNumber" />
     <chat-message-date-read :id="id" :chatid="chatid" :last="last" :pov="pov" />
 
-    <ConfirmModal ref="confirmDeleteMessageModal" @confirm="deleteMessage">
+    <ConfirmModal
+      v-if="showConfirmModal"
+      @confirm="deleteMessage"
+      @hidden="showConfirmModal = false"
+    >
       <p>
         We will delete this from our system, so you will no longer see it here.
       </p>
@@ -130,10 +134,13 @@ import ChatMessageNudge from './ChatMessageNudge'
 import ChatMessageDateRead from './ChatMessageDateRead'
 import ChatMessageModMail from './ChatMessageModMail'
 import ResultModal from '~/components/ResultModal.vue'
-import ConfirmModal from '~/components/ConfirmModal.vue'
 import SupportLink from '~/components/SupportLink.vue'
 import ChatMessageWarning from '~/components/ChatMessageWarning'
 import 'vue-simple-context-menu/dist/vue-simple-context-menu.css'
+import { defineAsyncComponent } from 'vue'
+const ConfirmModal = defineAsyncComponent(() =>
+  import('~/components/ConfirmModal.vue')
+)
 
 // System chat message doesn't seem to be used;
 export default {
@@ -208,6 +215,7 @@ export default {
         },
       ],
       deleteMessageSucceeded: null,
+      showConfirmModal: false,
     }
   },
   computed: {
@@ -250,8 +258,7 @@ export default {
       this.selected = false
     },
     async showDeleteMessageModal() {
-      const m = await this.waitForRef('confirmDeleteMessageModal')
-      m?.show()
+      this.showConfirmModal = true
     },
     async deleteMessage() {
       try {
