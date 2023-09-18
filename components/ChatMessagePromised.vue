@@ -221,23 +221,27 @@
     <OutcomeModal
       v-if="showOutcome && refmsgid"
       :id="refmsgid"
-      ref="outcomeModal"
       :taken-by="takenBy"
+      :type="outcomeType"
       @outcome="fetchMessage"
+      @hidden="showOutcome = false"
     />
   </div>
 </template>
 <script>
+import { defineAsyncComponent } from 'vue'
 import { useTrystStore } from '../stores/tryst'
 import { fetchOurOffers } from '../composables/useThrottle'
 import { useChatStore } from '../stores/chat'
 import { fetchReferencedMessage } from '../composables/useChat'
 import { useMessageStore } from '../stores/message'
 import DateFormatted from './DateFormatted'
-import OutcomeModal from '~/components/OutcomeModal'
 import AddToCalendar from '~/components/AddToCalendar'
 import ChatBase from '~/components/ChatBase'
 import ProfileImage from '~/components/ProfileImage'
+const OutcomeModal = defineAsyncComponent(() =>
+  import('~/components/OutcomeModal')
+)
 
 const RenegeModal = () => import('./RenegeModal')
 const PromiseModal = () => import('~/components/PromiseModal')
@@ -269,6 +273,7 @@ export default {
     return {
       showRenege: false,
       showOutcome: false,
+      outcomeType: null,
       showPromise: false,
     }
   },
@@ -310,8 +315,7 @@ export default {
       await messageStore.fetch(this.refmsgid)
 
       this.showOutcome = true
-      await this.waitForRef('outcomeModal')
-      this.$refs.outcomeModal.show(type)
+      this.outcomeType = type
     },
   },
 }
