@@ -116,7 +116,10 @@
         message="<p>This will delete all your personal data, chats and community memberships.</p><p><strong>It's permanent - you can't undo it or get your data back.</strong></p><p>If you just want to leave one community, please <em>Cancel</em> and select the community from the drop-down list.</p>"
         @confirm="forget"
       />
-      <ForgetFailModal ref="forgetfail" />
+      <ForgetFailModal
+        v-if="showForgetFailModal"
+        @hidden="showForgetFailModal = false"
+      />
     </div>
   </client-only>
 </template>
@@ -126,7 +129,9 @@ import { useAuthStore } from '../../stores/auth'
 import SpinButton from '~/components/SpinButton'
 import EmailValidator from '~/components/EmailValidator'
 import { useRoute, useRouter } from '#imports'
-import ForgetFailModal from '~/components/ForgetFailModal'
+const ForgetFailModal = defineAsyncComponent(() =>
+  import('~/components/ForgetFailModal')
+)
 const GroupSelect = () => import('~/components/GroupSelect.vue')
 const ConfirmModal = () => import('~/components/ConfirmModal.vue')
 const NoticeMessage = () => import('~/components/NoticeMessage')
@@ -177,6 +182,7 @@ export default {
       wrongUser: false,
       left: null,
       unknown: false,
+      showForgetFailModal: false,
     }
   },
   computed: {
@@ -223,7 +229,7 @@ export default {
 
       if (ret) {
         this.unknown = ret?.ret === 2
-        this.$refs.forgetfail.show()
+        this.showForgetFailModal = true
       } else {
         useRouter().push('/unsubscribe/unsubscribed')
       }
