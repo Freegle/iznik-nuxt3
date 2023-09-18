@@ -40,16 +40,17 @@
     />
     <ConfirmModal
       v-if="confirm"
-      ref="confirm"
       :title="'Delete this photo?'"
       @confirm="removeConfirmed"
+      @hidden="confirm = false"
     />
   </div>
 </template>
+
 <script>
 import { useImageStore } from '../stores/image'
-
-const ConfirmModal = () => import('./ConfirmModal.vue')
+const ConfirmModal = () =>
+  defineAsyncComponent(() => import('./ConfirmModal.vue'))
 
 export default {
   components: { ConfirmModal },
@@ -86,10 +87,8 @@ export default {
     }
   },
   methods: {
-    async remove() {
+    remove() {
       this.confirm = true
-      await this.waitForRef('confirm')
-      this.$refs.confirm?.show()
     },
     removeConfirmed() {
       this.$emit('remove', this.id)
