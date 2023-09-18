@@ -643,7 +643,10 @@
         @hidden="showProfileModal = false"
       />
       <EmailConfirmModal ref="emailconfirm" />
-      <AddressModal ref="addressModal" />
+      <AddressModal
+        v-if="showAddressModal"
+        @hidden="showAddressModal = false"
+      />
     </div>
   </client-only>
 </template>
@@ -663,13 +666,15 @@ import EmailConfirmModal from '~/components/EmailConfirmModal'
 import ProfileImage from '~/components/ProfileImage'
 
 import PostCode from '~/components/PostCode'
-import AddressModal from '~/components/AddressModal'
 import SettingsGroup from '~/components/SettingsGroup'
 import NoticeMessage from '~/components/NoticeMessage'
 import OurFilePond from '~/components/OurFilePond'
 import OurToggle from '~/components/OurToggle'
 import DonationButton from '~/components/DonationButton'
 import PasswordEntry from '~/components/PasswordEntry'
+const AddressModal = defineAsyncComponent(() =>
+  import('~/components/AddressModal')
+)
 const AboutMeModal = defineAsyncComponent(() =>
   import('~/components/AboutMeModal')
 )
@@ -740,6 +745,7 @@ export default {
       userTimer: null,
       autoreposts: true,
       enterNewLine: false,
+      showAddressModal: false,
       showAboutMeModal: false,
       showProfileModal: false,
     }
@@ -1115,8 +1121,7 @@ export default {
     async addressBook() {
       // Fetch the address book here to avoid an async setup which causes issues with waitForRef.
       await this.addressStore.fetch()
-
-      this.$refs.addressModal.show()
+      this.showAddressModal = true
     },
     photoProcessed(imageid, imagethumb, image) {
       // We have uploaded a photo.  Remove the filepond instance.

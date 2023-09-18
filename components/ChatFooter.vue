@@ -242,10 +242,10 @@
     />
     <AddressModal
       v-if="showAddress"
-      ref="addressModal"
       :choose="true"
       t-o-d-o
       @chosen="sendAddress"
+      @hidden="showAddress = false"
     />
     <ChatRSVPModal v-if="RSVP" :id="id" ref="rsvp" :user="otheruser" />
     <NudgeTooSoonWarningModal ref="nudgetoosoonwarning" @confirm="doNudge" />
@@ -270,7 +270,9 @@ const PromiseModal = () => import('~/components/PromiseModal')
 const ProfileModal = defineAsyncComponent(() =>
   import('~/components/ProfileModal')
 )
-const AddressModal = () => import('~/components/AddressModal')
+const AddressModal = defineAsyncComponent(() =>
+  import('~/components/AddressModal')
+)
 const NoticeMessage = () => import('~/components/NoticeMessage')
 const ChatRSVPModal = () => import('~/components/ChatRSVPModal')
 const NudgeWarningModal = () => import('~/components/NudgeWarningModal')
@@ -423,9 +425,6 @@ export default {
       await this.addressStore.fetch()
 
       this.showAddress = true
-
-      await this.waitForRef('addressModal')
-      this.$refs.addressModal?.show()
     },
     photoAdd() {
       // Flag that we're uploading.  This will trigger the render of the filepond instance and subsequently the
