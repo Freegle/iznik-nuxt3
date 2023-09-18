@@ -304,8 +304,9 @@
     <OutcomeModal
       v-if="showOutcomeModal"
       :id="id"
-      ref="outcomeModal"
+      :type="outcomeType"
       @outcome="hide = true"
+      @hidden="showOutcomeModal = false"
     />
     <MessageShareModal
       v-if="showShareModal"
@@ -343,7 +344,7 @@ import MyMessagePromisedTo from '~/components/MyMessagePromisedTo'
 import PromiseModal from '~/components/PromiseModal'
 const MyMessageReply = () => import('./MyMessageReply.vue')
 const MessageShareModal = () => import('./MessageShareModal')
-const OutcomeModal = () => import('./OutcomeModal')
+const OutcomeModal = () => defineAsyncComponent(() => import('./OutcomeModal'))
 const NoticeMessage = () => import('~/components/NoticeMessage')
 const MessageEditModal = defineAsyncComponent(() =>
   import('./MessageEditModal')
@@ -409,6 +410,7 @@ export default {
       expanded: false,
       hide: false,
       showOutcomeModal: false,
+      outcomeType: null,
       showEditModal: false,
       showShareModal: false,
       showPromiseModal: false,
@@ -725,8 +727,7 @@ export default {
     },
     async outcome(type) {
       this.showOutcomeModal = true
-      await this.waitForRef('outcomeModal')
-      this.$refs.outcomeModal.show(type)
+      this.outcomeType = type
     },
     async share(e) {
       if (e) {
