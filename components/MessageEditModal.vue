@@ -109,24 +109,30 @@
         spinclass="text-white"
         @click="save"
       />
-      <OutcomeModal :id="id" ref="outcomeModal" />
+      <OutcomeModal
+        v-if="showOutcomeModal"
+        :id="id"
+        @hidden="showOutcomeModal = false"
+      />
     </template>
   </b-modal>
 </template>
 
 <script>
-import { ref, toRaw } from 'vue'
+import { defineAsyncComponent, ref, toRaw } from 'vue'
 import { useMessageStore } from '../stores/message'
 import { useComposeStore } from '../stores/compose'
 import { useGroupStore } from '../stores/group'
 import { uid } from '../composables/useId'
 import NumberIncrementDecrement from './NumberIncrementDecrement'
-import OutcomeModal from '~/components/OutcomeModal'
 import PostCode from '~/components/PostCode'
 import { useModal } from '~/composables/useModal'
 const OurFilePond = () => import('~/components/OurFilePond')
 const PostItem = () => import('./PostItem')
 const PostPhoto = () => import('./PostPhoto')
+const OutcomeModal = defineAsyncComponent(() =>
+  import('~/components/OutcomeModal')
+)
 
 export default {
   components: {
@@ -177,6 +183,7 @@ export default {
       uploading: false,
       myFiles: [],
       image: null,
+      showOutcomeModal: false,
     }
   },
   computed: {
@@ -221,7 +228,7 @@ export default {
     count(newVal) {
       if (newVal === 0) {
         this.hide()
-        this.$refs.outcomeModal?.show()
+        this.showOutcomeModal = true
       }
     },
   },
