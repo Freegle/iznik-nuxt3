@@ -1,10 +1,10 @@
 <template>
   <b-modal
-    id="promisemodal"
-    v-model="showModal"
+    ref="modal"
     scrollable
     title="Remove a promise"
     size="lg"
+    @shown="onShow"
   >
     <template #default>
       <notice-message class="mb-3">
@@ -50,7 +50,7 @@
 <script>
 import { useTrystStore } from '../stores/tryst'
 import { useMessageStore } from '../stores/message'
-import modal from '@/mixins/modal'
+import { useModal } from '~/composables/useModal'
 import UserRatings from '~/components/UserRatings'
 import DateFormatted from '~/components/DateFormatted'
 
@@ -62,7 +62,6 @@ export default {
     UserRatings,
     DateFormatted,
   },
-  mixins: [modal],
   props: {
     messages: {
       validator: (prop) => typeof prop === 'object' || prop === null,
@@ -87,11 +86,15 @@ export default {
     const trystStore = useTrystStore()
     const messageStore = useMessageStore()
 
+    const { modal, hide } = useModal()
+
     await trystStore.fetch()
 
     return {
       trystStore,
       messageStore,
+      modal,
+      hide,
     }
   },
   data() {
@@ -170,8 +173,7 @@ export default {
     },
   },
   methods: {
-    show() {
-      this.showModal = true
+    onShow() {
       this.message = this.selectedMessage
       this.user = this.selectedUser
     },

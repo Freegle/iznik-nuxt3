@@ -36,23 +36,23 @@
       />
     </div>
     <RenegeModal
-      v-if="promise.id !== myid"
-      ref="renegeModal"
+      v-if="promise.id !== myid && showRenegeModal"
       :messages="[message.id]"
       :selected-message="message.id"
       :users="[promiseeUser]"
       :selected-user="promisee"
+      @hidden="showRenegeModal = false"
     />
   </div>
 </template>
 <script>
 import { useMessageStore } from '../stores/message'
 import { useUserStore } from '../stores/user'
-import RenegeModal from './RenegeModal'
 import AddToCalendar from '~/components/AddToCalendar'
 const PromiseModal = defineAsyncComponent(() =>
   import('~/components/PromiseModal')
 )
+const RenegeModal = defineAsyncComponent(() => import('./RenegeModal'))
 
 export default {
   components: { PromiseModal, RenegeModal, AddToCalendar },
@@ -82,6 +82,7 @@ export default {
   data() {
     return {
       showPromiseModal: false,
+      showRenegeModal: false,
     }
   },
   computed: {
@@ -101,13 +102,11 @@ export default {
       e.stopPropagation()
       this.showPromiseModal = true
     },
-    async unpromise(e) {
+    unpromise(e) {
       e.preventDefault()
       e.stopPropagation()
       console.log('Renege', this.message, this.promise)
-      await this.waitForRef('renegeModal')
-      console.log('Got modal')
-      this.$refs.renegeModal?.show()
+      this.showRenegeModal = true
       console.log('Shown')
     },
   },
