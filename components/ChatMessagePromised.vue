@@ -175,11 +175,11 @@
           </div>
           <PromiseModal
             v-if="showPromise"
-            ref="promise"
             :messages="[refmsg]"
             :selected-message="refmsgid"
             :users="otheruser ? [otheruser] : []"
             :selected-user="otheruser ? otheruser.id : null"
+            @hidden="showPromise = false"
           />
         </b-card-title>
         <b-card-text>
@@ -243,7 +243,9 @@ const OutcomeModal = defineAsyncComponent(() =>
 )
 
 const RenegeModal = () => import('./RenegeModal')
-const PromiseModal = () => import('~/components/PromiseModal')
+const PromiseModal = defineAsyncComponent(() =>
+  import('~/components/PromiseModal')
+)
 
 export default {
   components: {
@@ -301,10 +303,8 @@ export default {
       this.$refs.renege?.show()
       fetchOurOffers()
     },
-    async changeTime() {
+    changeTime() {
       this.showPromise = true
-      const m = await this.waitForRef('promise')
-      m?.show()
     },
     fetchMessages() {
       this.chatStore.fetchMessages(this.chatmessage.chatid)
