@@ -228,12 +228,12 @@
     </div>
     <PromiseModal
       v-if="showPromise"
-      ref="promise"
       :messages="ouroffers"
       :selected-message="likelymsg ? likelymsg : 0"
       :users="otheruser ? [otheruser] : []"
       :selected-user="otheruser ? otheruser.id : null"
       @hide="fetchMessages"
+      @hidden="showPromise = false"
     />
     <ProfileModal
       v-if="showProfileModal && otheruser"
@@ -266,7 +266,8 @@ import { untwem } from '~/composables/useTwem'
 // Don't use dynamic imports because it stops us being able to scroll to the bottom after render.
 const OurFilePond = () => import('~/components/OurFilePond')
 const UserRatings = () => import('~/components/UserRatings')
-const PromiseModal = () => import('~/components/PromiseModal')
+const PromiseModal = () =>
+  defineAsyncComponent(() => import('~/components/PromiseModal'))
 const ProfileModal = defineAsyncComponent(() =>
   import('~/components/ProfileModal')
 )
@@ -431,12 +432,9 @@ export default {
       // processed callback below.
       this.uploading = true
     },
-    async promise(date) {
+    promise(date) {
       // Show the modal first, as eye candy.
       this.showPromise = true
-
-      const m = await this.waitForRef('promise')
-      m?.show(date)
 
       this.$nextTick(async () => {
         this.ouroffers = await fetchOurOffers()
