@@ -76,11 +76,11 @@
           />
           <PromiseModal
             v-if="showPromise"
-            ref="promiseModal"
             :messages="[refmsg]"
             :selected-message="refmsg.id"
             :users="otheruser ? [otheruser] : []"
             :selected-user="otheruser ? otheruser.id : null"
+            @hidden="showPromise = false"
           />
         </div>
       </div>
@@ -156,7 +156,9 @@ import ProfileImage from '~/components/ProfileImage'
 import ChatMessageSummary from '~/components/ChatMessageSummary'
 const OutcomeModal = () =>
   defineAsyncComponent(() => import('~/components/OutcomeModal'))
-const PromiseModal = () => import('~/components/PromiseModal')
+const PromiseModal = defineAsyncComponent(
+  () => () => import('~/components/PromiseModal')
+)
 
 export default {
   components: {
@@ -178,15 +180,13 @@ export default {
     }
   },
   methods: {
-    async promise(e) {
+    promise(e) {
       if (e) {
         e.preventDefault()
         e.stopPropagation()
       }
 
       this.showPromise = true
-      const m = await this.waitForRef('promiseModal')
-      m?.show()
     },
     async outcome(type, e) {
       if (e) {
