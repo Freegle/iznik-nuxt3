@@ -121,12 +121,12 @@
       @hidden="showPromiseModal = false"
     />
     <RenegeModal
-      v-if="replyuser"
-      ref="renege"
+      v-if="replyuser && showRenegeModal"
       :messages="[message.id]"
       :selected-message="message.id"
       :users="[replyuser]"
       :selected-user="replyuser?.id"
+      @hidden="showRenegeModal = false"
     />
     <ProfileModal
       v-if="showProfile && reply && replyuser"
@@ -144,9 +144,9 @@ import SupporterInfo from '~/components/SupporterInfo'
 import ProfileImage from '~/components/ProfileImage'
 import { timeago, datelocale } from '~/composables/useTimeFormat'
 
-const RenegeModal = () => import('./RenegeModal')
 const UserRatings = () => import('~/components/UserRatings')
 const PromiseModal = defineAsyncComponent(() => import('./PromiseModal'))
+const RenegeModal = defineAsyncComponent(() => import('./RenegeModal'))
 const ProfileModal = defineAsyncComponent(() =>
   import('~/components/ProfileModal')
 )
@@ -239,6 +239,7 @@ export default {
     return {
       showProfile: false,
       showPromiseModal: false,
+      showRenegeModal: false,
     }
   },
   computed: {
@@ -287,8 +288,7 @@ export default {
       this.showPromiseModal = true
     },
     async unpromise() {
-      await this.waitForRef('renege')
-      this.$refs.renege?.show()
+      this.showRenegeModal = true
     },
     showProfileModal() {
       this.showProfile = true
