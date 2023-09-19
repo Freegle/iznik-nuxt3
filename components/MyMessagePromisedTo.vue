@@ -27,11 +27,12 @@
         Change time
       </b-button>
       <PromiseModal
-        ref="promiseModalChange"
+        v-if="showPromiseModal"
         :messages="[message]"
         :selected-message="message.id"
         :users="[replyusers]"
         :selected-user="promisee"
+        @hidden="showPromiseModal = false"
       />
     </div>
     <RenegeModal
@@ -48,8 +49,10 @@
 import { useMessageStore } from '../stores/message'
 import { useUserStore } from '../stores/user'
 import RenegeModal from './RenegeModal'
-import PromiseModal from '~/components/PromiseModal'
 import AddToCalendar from '~/components/AddToCalendar'
+const PromiseModal = defineAsyncComponent(() =>
+  import('~/components/PromiseModal')
+)
 
 export default {
   components: { PromiseModal, RenegeModal, AddToCalendar },
@@ -76,6 +79,11 @@ export default {
       userStore,
     }
   },
+  data() {
+    return {
+      showPromiseModal: false,
+    }
+  },
   computed: {
     message() {
       return this.messageStore?.byId(this.id)
@@ -91,7 +99,7 @@ export default {
     changeTime(e) {
       e.preventDefault()
       e.stopPropagation()
-      this.$refs.promiseModalChange?.show()
+      this.showPromiseModal = true
     },
     async unpromise(e) {
       e.preventDefault()
