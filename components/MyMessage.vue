@@ -725,7 +725,7 @@ export default {
 
       return unseen
     },
-    async outcome(type) {
+    outcome(type) {
       this.showOutcomeModal = true
       this.outcomeType = type
     },
