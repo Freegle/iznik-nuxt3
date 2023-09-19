@@ -63,6 +63,7 @@
       v-if="newsfeedModal"
       ref="newsshare"
       :newsfeed="newsfeedModal"
+      @hidden="newsfeedModal = false"
     />
   </div>
 </template>
@@ -73,7 +74,9 @@ import NewsBase from '~/components/NewsBase'
 import NewsUserIntro from '~/components/NewsUserIntro'
 
 import NewsLoveComment from '~/components/NewsLoveComment'
-const NewsShareModal = () => import('~/components/NewsShareModal')
+const NewsShareModal = defineAsyncComponent(() =>
+  import('~/components/NewsShareModal')
+)
 
 export default {
   components: {
