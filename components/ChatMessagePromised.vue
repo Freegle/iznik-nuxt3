@@ -211,12 +211,12 @@
     </div>
     <RenegeModal
       v-if="showRenege && refmsgid"
-      ref="renege"
       :messages="[refmsgid]"
       :selected-message="refmsgid"
       :users="[otheruser]"
       :selected-user="otheruser.id"
       @hide="fetchMessages"
+      @hidden="showRenege = false"
     />
     <OutcomeModal
       v-if="showOutcome && refmsgid"
@@ -242,7 +242,7 @@ const OutcomeModal = defineAsyncComponent(() =>
   import('~/components/OutcomeModal')
 )
 
-const RenegeModal = () => import('./RenegeModal')
+const RenegeModal = defineAsyncComponent(() => import('./RenegeModal'))
 const PromiseModal = defineAsyncComponent(() =>
   import('~/components/PromiseModal')
 )
@@ -297,10 +297,8 @@ export default {
     },
   },
   methods: {
-    async unpromise() {
+    unpromise() {
       this.showRenege = true
-      await this.waitForRef('renege')
-      this.$refs.renege?.show()
       fetchOurOffers()
     },
     changeTime() {
