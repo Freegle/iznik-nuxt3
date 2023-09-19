@@ -51,17 +51,21 @@
       imgflag="Newsfeed"
     />
     <NewsShareModal
-      v-if="newsfeedModal"
+      v-if="showNewsfeedModal"
       ref="newsshare"
-      :newsfeed="newsfeedModal"
+      :newsfeed="showNewsfeedModal"
+      @hidden="showNewsfeedModal = false"
     />
   </div>
 </template>
+
 <script>
 import NewsBase from '~/components/NewsBase'
 import NewsLoveComment from '~/components/NewsLoveComment'
 import ProfileImage from '~/components/ProfileImage'
-const NewsShareModal = () => import('~/components/NewsShareModal')
+const NewsShareModal = defineAsyncComponent(() =>
+  import('~/components/NewsShareModal')
+)
 
 export default {
   components: {
@@ -70,6 +74,11 @@ export default {
     ProfileImage,
   },
   extends: NewsBase,
+  data() {
+    return {
+      showNewsfeedModal: false,
+    }
+  },
 }
 </script>
 <style scoped lang="scss">
