@@ -320,10 +320,10 @@
     />
     <PromiseModal
       v-if="showPromiseModal"
-      ref="promiseModal"
       :messages="[message]"
       :selected-message="message.id"
       :users="replyusers"
+      @hidden="showPromiseModal = false"
     />
   </div>
 </template>
@@ -341,11 +341,13 @@ import { milesAway } from '../composables/useDistance'
 import { useRouter } from '#imports'
 import MessagePhotosModal from '~/components/MessagePhotosModal'
 import MyMessagePromisedTo from '~/components/MyMessagePromisedTo'
-import PromiseModal from '~/components/PromiseModal'
 const MyMessageReply = () => import('./MyMessageReply.vue')
 const MessageShareModal = () => import('./MessageShareModal')
-const OutcomeModal = () => defineAsyncComponent(() => import('./OutcomeModal'))
 const NoticeMessage = () => import('~/components/NoticeMessage')
+const PromiseModal = defineAsyncComponent(() =>
+  import('~/components/PromiseModal')
+)
+const OutcomeModal = () => defineAsyncComponent(() => import('./OutcomeModal'))
 const MessageEditModal = defineAsyncComponent(() =>
   import('./MessageEditModal')
 )
@@ -679,7 +681,7 @@ export default {
       },
     },
   },
-  async mounted() {
+  mounted() {
     this.expanded = this.expand
 
     if (this.me) {
@@ -700,8 +702,6 @@ export default {
           break
         case 'promise':
           this.showPromiseModal = true
-          await this.waitForRef('promiseModal')
-          this.$refs.promiseModal?.show()
           break
       }
     }
