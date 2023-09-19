@@ -38,8 +38,7 @@
         <h2>Cookies and Tracking</h2>
         <p>
           You'll have seen lots of irritating popups on websites about consent
-          for cookies. We don't have one of those because we don't store any
-          data for logged out visitors which would require that consent.
+          for cookies. We have one of those too.  Sorry, but it's the law.
         </p>
         <p>
           Here are some technical details on what happens when you're logged
@@ -89,6 +88,12 @@
             <nuxt-link no-prefetch to="/donate"> donations </nuxt-link> alone to
             keep going. We don't pass them any information at all unless you
             click on one of the job links, not even your IP your IP address.
+          </li>
+          <li>
+            We show ads from selected partners, using Google's advertising service.
+            You can read more about what Google stores
+            <ExternalLink href="https://business.safety.google/adscookies/">here</ExternalLink>.
+            The income from these ads helps us keep going.
           </li>
         </ul>
         <h2>Sentry</h2>
