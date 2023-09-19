@@ -59,17 +59,21 @@
       v-if="newsfeedModal"
       ref="newsshare"
       :newsfeed="newsfeedModal"
+      @hidden="newsfeedModal = false"
     />
   </div>
 </template>
 <script>
+import { defineAsyncComponent } from 'vue'
 import { twem } from '~/composables/useTwem'
 import NewsBase from '~/components/NewsBase'
 import NewsUserIntro from '~/components/NewsUserIntro'
 import NewsLoveComment from '~/components/NewsLoveComment'
 import NoticeMessage from '~/components/NoticeMessage'
 import { attribution, osmtile } from '~/composables/useMap'
-const NewsShareModal = () => import('~/components/NewsShareModal')
+const NewsShareModal = defineAsyncComponent(() =>
+  import('~/components/NewsShareModal')
+)
 
 export default {
   components: {
