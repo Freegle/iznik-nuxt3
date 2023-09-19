@@ -389,7 +389,6 @@ import { useGroupStore } from '../stores/group'
 import { useImageStore } from '../stores/image'
 import EmailValidator from './EmailValidator'
 import { ref } from '#imports'
-import modal from '@/mixins/modal'
 import { twem } from '~/composables/useTwem'
 import { useModal } from '~/composables/useModal'
 
@@ -444,7 +443,6 @@ export default {
     Field,
     ErrorMessage,
   },
-  mixins: [modal],
   props: {
     id: {
       type: Number,
@@ -465,6 +463,8 @@ export default {
     const imageStore = useImageStore()
     const groupid = ref(null)
 
+    const { modal, hide } = useModal()
+
     if (props.id) {
       const v = await communityEventStore.fetch(props.id)
       await userStore.fetch(v.userid)
@@ -476,8 +476,6 @@ export default {
     }
 
     const oldPhoto = ref(communityEventStore.byId(props.id)?.image)
-
-    const { modal, hide } = useModal()
 
     const editing = ref(props.startEdit)
     const added = ref(false)

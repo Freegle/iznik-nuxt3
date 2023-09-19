@@ -425,7 +425,6 @@ import { useUserStore } from '../stores/user'
 import { useGroupStore } from '../stores/group'
 import EmailValidator from './EmailValidator'
 import SpinButton from '~/components/SpinButton.vue'
-import modal from '@/mixins/modal'
 import { twem } from '~/composables/useTwem'
 import { ref } from '#imports'
 import { useModal } from '~/composables/useModal'
@@ -474,7 +473,6 @@ export default {
     Field,
     ErrorMessage,
   },
-  mixins: [modal],
   props: {
     id: {
       type: Number,
@@ -494,6 +492,8 @@ export default {
     const groupStore = useGroupStore()
     const groupid = ref(null)
 
+    const { modal, hide } = useModal()
+
     if (props.id) {
       const v = await volunteeringStore.fetch(props.id)
       await userStore.fetch(v.userid)
@@ -505,8 +505,6 @@ export default {
     }
 
     const oldPhoto = ref(volunteeringStore.byId(props.id)?.image)
-
-    const { modal, hide } = useModal()
 
     const editing = ref(props.startEdit)
     const added = ref(false)
