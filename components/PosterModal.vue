@@ -1,8 +1,7 @@
 <template>
   <b-modal
     id="posterAddModal"
-    ref="posterAddModal"
-    v-model="showModal"
+    ref="modal"
     scrollable
     title="Thanks!"
     no-stacking
@@ -100,7 +99,7 @@
 import { useImageStore } from '../stores/image'
 import SpinButton from '~/components/SpinButton'
 import { useNoticeboardStore } from '~/stores/noticeboard'
-import modal from '@/mixins/modal'
+import { useModal } from '~/composables/useModal'
 
 const NoticeMessage = () => import('~/components/NoticeMessage')
 const DraggableMap = () => import('~/components/DraggableMap')
@@ -113,14 +112,18 @@ export default {
     SpinButton,
     OurFilePond,
   },
-  mixins: [modal],
+  emits: ['hidden'],
   setup() {
     const noticeboardStore = useNoticeboardStore()
     const imageStore = useImageStore()
 
+    const { modal, hide } = useModal()
+
     return {
       noticeboardStore,
       imageStore,
+      modal,
+      hide,
     }
   },
   data() {
@@ -167,6 +170,7 @@ export default {
     },
     hidden() {
       this.loaded = false
+      this.$emit('hidden')
     },
     photoAdd() {
       // Flag that we're uploading.  This will trigger the render of the filepond instance and subsequently the
