@@ -113,12 +113,12 @@
       </div>
     </div>
     <PromiseModal
-      v-if="replyuser"
-      ref="promise"
+      v-if="replyuser && showPromiseModal"
       :messages="[message]"
       :selected-message="message.id"
       :users="[replyuser]"
       :selected-user="replyuser?.id"
+      @hidden="showPromiseModal = false"
     />
     <RenegeModal
       v-if="replyuser"
@@ -144,9 +144,9 @@ import SupporterInfo from '~/components/SupporterInfo'
 import ProfileImage from '~/components/ProfileImage'
 import { timeago, datelocale } from '~/composables/useTimeFormat'
 
-const PromiseModal = () => import('./PromiseModal')
 const RenegeModal = () => import('./RenegeModal')
 const UserRatings = () => import('~/components/UserRatings')
+const PromiseModal = defineAsyncComponent(() => import('./PromiseModal'))
 const ProfileModal = defineAsyncComponent(() =>
   import('~/components/ProfileModal')
 )
@@ -238,6 +238,7 @@ export default {
   data() {
     return {
       showProfile: false,
+      showPromiseModal: false,
     }
   },
   computed: {
@@ -282,9 +283,8 @@ export default {
       const router = useRouter()
       router.push('/chats/' + this.chat?.id)
     },
-    async promise() {
-      await this.waitForRef('promise')
-      this.$refs.promise?.show()
+    promise() {
+      this.showPromiseModal = true
     },
     async unpromise() {
       await this.waitForRef('renege')
