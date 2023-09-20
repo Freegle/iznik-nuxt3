@@ -164,7 +164,7 @@ export default defineNuxtConfig({
   cookieControl: {
     cookieNameIsConsentGiven: 'cookieConsent_c',
     cookieNameCookiesEnabledIds: 'cookieConsent_e',
-    isAcceptNecessaryButtonEnabled: false,
+    isAcceptNecessaryButtonEnabled: true,
     isControlButtonEnabled: false,
     colors: {
       barBackground: 'white',
@@ -176,7 +176,8 @@ export default defineNuxtConfig({
     },
     localeTexts: {
       en: {
-        accept: 'Accept all cookies',
+        accept: 'Accept all',
+        decline: 'Reject non-essential',
         manageCookies: 'Manage settings'
       }
     },
