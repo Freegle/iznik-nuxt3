@@ -311,7 +311,7 @@
     <MessageShareModal
       v-if="showShareModal"
       :id="message.id"
-      ref="shareModal"
+      @hidden="showShareModal = false"
     />
     <MessageEditModal
       v-if="showEditModal"
@@ -342,7 +342,9 @@ import { useRouter } from '#imports'
 import MessagePhotosModal from '~/components/MessagePhotosModal'
 import MyMessagePromisedTo from '~/components/MyMessagePromisedTo'
 const MyMessageReply = () => import('./MyMessageReply.vue')
-const MessageShareModal = () => import('./MessageShareModal')
+const MessageShareModal = defineAsyncComponent(() =>
+  import('./MessageShareModal')
+)
 const NoticeMessage = () => import('~/components/NoticeMessage')
 const PromiseModal = defineAsyncComponent(() =>
   import('~/components/PromiseModal')
@@ -729,7 +731,7 @@ export default {
       this.showOutcomeModal = true
       this.outcomeType = type
     },
-    async share(e) {
+    share(e) {
       if (e) {
         e.preventDefault()
         e.stopPropagation()
@@ -737,8 +739,6 @@ export default {
       }
 
       this.showShareModal = true
-      await this.waitForRef('shareModal')
-      this.$refs.shareModal?.show()
     },
     async edit(e) {
       if (e) {
