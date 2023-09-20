@@ -38,14 +38,20 @@
       :id="message.id"
       ref="shareModal"
     />
-    <MessageReportModal :id="id" ref="reportModal" />
+    <MessageReportModal
+      v-if="showMessageReportModal"
+      :id="id"
+      @hidden="showMessageReportModal = false"
+    />
   </div>
 </template>
 <script>
 import { useRouter } from '#imports'
 import { useMessageStore } from '~/stores/message'
 const MessageShareModal = () => import('./MessageShareModal')
-const MessageReportModal = () => import('./MessageReportModal')
+const MessageReportModal = defineAsyncComponent(() =>
+  import('./MessageReportModal')
+)
 
 export default {
   components: {
@@ -65,6 +71,7 @@ export default {
   data() {
     return {
       showShareModal: false,
+      showMessageReportModal: false,
     }
   },
   computed: {
@@ -79,7 +86,7 @@ export default {
       this.$refs.shareModal?.show()
     },
     report() {
-      this.$refs.reportModal?.show()
+      this.showMessageReportModal = true
     },
     goto() {
       console.log('Goto', this.id)
