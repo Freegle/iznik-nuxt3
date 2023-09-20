@@ -159,6 +159,7 @@
               <SupporterInfoModal
                 v-if="showInfoModal"
                 ref="supporterInfoModal"
+                @hidden="showInfoModal = false"
               />
               <p>
                 If you'd like to spread the word you can download a poster or
@@ -347,7 +348,9 @@ import dayjs from 'dayjs'
 import HelpQuestion from '~/components/HelpQuestion'
 import { buildHead } from '~/composables/useBuildHead'
 import VisibleWhen from '~/components/VisibleWhen'
-const SupporterInfoModal = () => import('~/components/SupporterInfoModal.vue')
+const SupporterInfoModal = defineAsyncComponent(() =>
+  import('~/components/SupporterInfoModal.vue')
+)
 const SidebarLeft = () => import('~/components/SidebarLeft')
 
 export default {
@@ -423,8 +426,6 @@ export default {
   methods: {
     async supporterInfo() {
       this.showInfoModal = true
-      await this.waitForRef('supporterInfoModal')
-      this.$refs.supporterInfoModal.show()
     },
   },
 }
