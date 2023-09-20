@@ -296,9 +296,9 @@
         </b-collapse>
       </b-card>
       <MessagePhotosModal
-        v-if="expanded && message.attachments?.length"
+        v-if="showMessagePhotosModal && expanded && message.attachments?.length"
         :id="message.id"
-        ref="photoModal"
+        @hidden="showMessagePhotosModal = false"
       />
     </div>
     <OutcomeModal
@@ -339,9 +339,11 @@ import { useTrystStore } from '../stores/tryst'
 import { useLocationStore } from '../stores/location'
 import { milesAway } from '../composables/useDistance'
 import { useRouter } from '#imports'
-import MessagePhotosModal from '~/components/MessagePhotosModal'
 import MyMessagePromisedTo from '~/components/MyMessagePromisedTo'
 const MyMessageReply = () => import('./MyMessageReply.vue')
+const MessagePhotosModal = defineAsyncComponent(() =>
+  import('~/components/MessagePhotosModal')
+)
 const MessageShareModal = defineAsyncComponent(() =>
   import('./MessageShareModal')
 )
@@ -418,6 +420,7 @@ export default {
       showEditModal: false,
       showShareModal: false,
       showPromiseModal: false,
+      showMessagePhotosModal: false,
       broken: false,
     }
   },
@@ -712,9 +715,8 @@ export default {
     toggle() {
       this.expanded = !this.expanded
     },
-    async showPhotos() {
-      await this.waitForRef('photoModal')
-      this.$refs.photoModal?.show()
+    showPhotos() {
+      this.showMessagePhotosModal = true
     },
     countUnseen(reply) {
       let unseen = 0

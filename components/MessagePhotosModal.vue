@@ -1,8 +1,6 @@
 <template>
   <b-modal
-    v-if="message"
-    id="photoModal"
-    v-model="showModal"
+    ref="modal"
     scrollable
     :title="message.subject"
     size="lg"
@@ -17,30 +15,26 @@
     />
   </b-modal>
 </template>
-<script>
+
+<script setup>
 import { useMessageStore } from '../stores/message'
-import modal from '@/mixins/modal'
+import { useModal } from '~/composables/useModal'
 import ImageCarousel from '~/components/ImageCarousel'
 
-export default {
-  components: { ImageCarousel },
-  mixins: [modal],
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  setup() {
-    const messageStore = useMessageStore()
-    return { messageStore }
-  },
-  computed: {
-    message() {
-      return this.messageStore?.byId(this.id)
-    },
-  },
-}
+})
+
+const messageStore = useMessageStore()
+
+const { modal } = useModal()
+
+const message = computed(() => {
+  return messageStore?.byId(props.id)
+})
 </script>
 <style scoped lang="scss">
 :deep(.carousel-caption) {
