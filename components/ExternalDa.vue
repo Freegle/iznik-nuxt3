@@ -3,7 +3,7 @@
   If you don't like ads, then you can use an ad blocker.  Plus you could donate to us
   at https://www.ilovefreegle.org/donate - if we got enough donations we would be delighted not to show ads.
    -->
-  <div v-observe-visibility="visibilityChanged">
+  <div v-observe-visibility="visibilityChanged" v-if="allowed">
     <div v-if="isVisible" class="d-flex w-100 justify-content-around">
       <div
         :id="divId"
@@ -46,6 +46,11 @@ const props = defineProps({
 const breakpoint = computed(() => {
   const miscStore = useMiscStore()
   return miscStore.breakpoint
+})
+
+const allowed = computed(() => {
+  const miscStore = useMiscStore()
+  return miscStore.optionalConsent
 })
 
 const uniqueid = ref(props.adUnitPath)
