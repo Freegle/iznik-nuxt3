@@ -92,14 +92,17 @@
         <b-img fluid rounded center :src="story.image.path" />
       </template>
     </b-modal>
-    <StoryShareModal v-if="showShare" :id="id" ref="share" />
+    <StoryShareModal v-if="showShare" :id="id" @hidden="showShare = false" />
   </div>
 </template>
 <script>
 import ReadMore from 'vue-read-more3/src/ReadMoreComponent'
+import { defineAsyncComponent } from 'vue'
 import { useStoryStore } from '../stores/stories'
 import { useUserStore } from '../stores/user'
-import StoryShareModal from '~/components/StoryShareModal'
+const StoryShareModal = defineAsyncComponent(() =>
+  import('~/components/StoryShareModal')
+)
 
 export default {
   components: {
@@ -135,10 +138,8 @@ export default {
     }
   },
   methods: {
-    async share(story) {
+    share() {
       this.showShare = true
-      await this.waitForRef('share')
-      this.$refs.share?.show()
     },
     async love() {
       await this.storyStore.love(this.id)
