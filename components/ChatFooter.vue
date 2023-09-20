@@ -248,7 +248,11 @@
       @hidden="showAddress = false"
     />
     <ChatRSVPModal v-if="RSVP" :id="id" ref="rsvp" :user="otheruser" />
-    <NudgeTooSoonWarningModal ref="nudgetoosoonwarning" @confirm="doNudge" />
+    <NudgeTooSoonWarningModal
+      v-if="showNudgeTooSoonWarningModal"
+      @confirm="doNudge"
+      @hidden="showNudgeTooSoonWarningModal = false"
+    />
     <NudgeWarningModal ref="nudgewarning" @confirm="doNudge" />
     <MicroVolunteering v-if="showMicrovolunteering" />
   </div>
@@ -277,8 +281,9 @@ const AddressModal = defineAsyncComponent(() =>
 const NoticeMessage = () => import('~/components/NoticeMessage')
 const ChatRSVPModal = () => import('~/components/ChatRSVPModal')
 const NudgeWarningModal = () => import('~/components/NudgeWarningModal')
-const NudgeTooSoonWarningModal = () =>
+const NudgeTooSoonWarningModal = defineAsyncComponent(() =>
   import('~/components/NudgeTooSoonWarningModal')
+)
 const MicroVolunteering = () => import('~/components/MicroVolunteering')
 
 export default {
@@ -335,6 +340,7 @@ export default {
       ouroffers: [],
       imagethumb: null,
       imageid: null,
+      showNudgeTooSoonWarningModal: false,
     }
   },
   computed: {
