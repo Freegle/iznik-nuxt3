@@ -28,7 +28,7 @@
 <script>
 import { useComposeStore } from '../stores/compose'
 import { useMobileStore } from '@/stores/mobile'
-import { Camera, CameraResultType } from '@capacitor/camera';
+import { Camera, CameraSource, CameraResultType } from '@capacitor/camera'
 import { useImageStore } from '../stores/image'
 
 export default {
@@ -125,10 +125,11 @@ export default {
           //allowEditing: true,
           width: 1200,
           height: 1200,
+          source: CameraSource.Camera,
           resultType: CameraResultType.DataUrl
         })
 
-        this.$refs.pond.addFile(image.dataUrl);
+        this.$refs.pond.addFile(image.dataUrl)
       }
       catch(e) {
         console.log("takeAppPhoto error",e)
@@ -138,7 +139,7 @@ export default {
     photoInit() {
       const mobileStore = useMobileStore()
       if (mobileStore.isApp) {
-        this.takeAppPhoto()
+        // this.takeAppPhoto()
         if (mobileStore.isiOS) {
           if (this.browse) {
             this.$refs.pond.browse()
@@ -147,12 +148,12 @@ export default {
           setTimeout(() => { // this.$nextTick didn't work
             const takePhoto = this.$el.querySelector('.take-photo')
             if( takePhoto){
-            takePhoto.addEventListener('click', e => {
-              this.takeAppPhoto()
-              e.preventDefault()
-              return false
-            })
-          }
+              takePhoto.addEventListener('click', e => {
+                this.takeAppPhoto()
+                e.preventDefault()
+                return false
+              })
+            }
           }, 300)
         }
         if (this.browse) {

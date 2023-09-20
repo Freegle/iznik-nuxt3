@@ -20,9 +20,6 @@ import { PushNotifications } from '@freegle/capacitor-push-notifications'
 import { useAuthStore } from '~/stores/auth'
 import { AppLauncher } from '@capacitor/app-launcher'
 import api from '~/api'
-//import { FreegleFCM } from '@capacitor/freegle-nuxt3-fcm'
-//import { FCM } from '@capacitor-community/fcm';
-//import { getMessaging, getToken as firebaseGetToken, onMessage, deleteToken, isSupported } from "firebase/messaging";
 import { ZoomPlugin } from 'capacitor-zoom-android';
 import { App } from '@capacitor/app';
 import { useRouter } from '#imports'
@@ -69,110 +66,10 @@ export const useMobileStore = defineStore({ // Do not persist
       await this.initPushNotifications()
       await this.checkForAppUpdate()
       await this.initWakeUpActions()
-      //await this.initFirebaseMessaging()
-      /*if (!this.isiOS) {
-        try {
-          console.log("PHDCC AAA")
-          console.log("PHDCC BBB", FreegleFCM)
-          //const rv = FreegleFCM.echo("PHDCC") 32496365
-          console.log("PHDCC rv", rv)
-          //FreegleFCM.doSomething(1.0,2.0)
-        } catch (e) {
-          console.log("PHDCC ZZZ ", e.message)
-        }
-      }*/
       if (!this.isiOS) {
         Capacitor.Plugins.ZoomPlugin.enableZoom()
       }
     },
-
-    /*async initFirebaseMessaging() {
-      // https://www.npmjs.com/package/@capacitor-firebase/messaging
-      // https://github.com/capawesome-team/capacitor-firebase/tree/main/packages/messaging
-      console.log('====initFirebaseMessaging===')
-      let result = await FirebaseMessaging.checkPermissions();
-      console.log('====initFirebaseMessaging===A', result)
-      result = await FirebaseMessaging.requestPermissions();
-      console.log('====initFirebaseMessaging===B', result)
-      result = await FirebaseMessaging.getToken();
-      console.log('====initFirebaseMessaging===C', result)
-      this.mobilePushId = result.token
-      console.log('====initFirebaseMessaging===D', result.token)
-      // Tell server now if logged in
-      const authStore = useAuthStore()
-      authStore.savePushId()
-
-      await FirebaseMessaging.addListener('notificationReceived', event => {
-        console.log('###########notificationReceived', { event });
-      })
-      console.log('====initFirebaseMessaging===E')
-
-      //FCM.subscribeTo({ topic: "test" })
-      //  .then((r) => alert(`subscribed to topic`))
-      //  .catch((err) => console.log(err));
-
-      //FCM.getToken()
-      //  .then((r) => alert(`Token ${r.token}`))
-      //  .catch((err) => console.log(err));
-      */
-      /* const isNtfSupported = await isSupported()
-      if (!isNtfSupported) return
-      console.log('====initFCM===2')
-
-      // web notifications
-      Notification.requestPermission().then(function (permission) {
-        console.log('====initFCM===', permission)
-        if (permission === 'granted') {
-          subscribeTo(destination);
-        } else {
-          // Show some error
-        }
-      });
-
-      console.log('====initFCM===3')
-      const messaging = getMessaging();
-      console.log('====initFCM===4')
-
-      onMessage(messaging, (payload) => {
-        console.log('====initFCM===5')
-        let notification = payload.data;
-
-        const notificationOptions = {
-          badge: notification?.largeIco,
-          body: notification?.body,
-          icon: notification?.largeIcon
-        };
-
-        const title = notification?.title || "";
-
-        // show notification
-        navigator.serviceWorker
-          .getRegistrations()
-          .then((registration) => {
-            console.log('====initFCM===6')
-            if (notification?.sound) {
-              const audio = new Audio(`/notifications/${notification?.sound}`)
-              audio.play()
-            }
-            registration[0].showNotification(title, notificationOptions);
-          });
-      })
-      return
-    } */
-    /*},*/
-    /*async subscribeTo(destination) {
-      //subscribe to web topic
-      const messaging = getMessaging();
-      firebaseGetToken(messaging, { vapidKey: process.env.REACT_APP_FIREBASE_VAPID_KEY }).then(
-        async (token) => {
-          if (token) {
-            await myAxios.post("/api/notifications/subscribe-to-topic", { token, destination });
-          }
-        }).catch((err) => {
-          console.log('An error occurred while retrieving token. ', err);
-        });
-      return
-    }*/
 
     //////////////
     async getDeviceInfo() {
