@@ -253,7 +253,11 @@
       @confirm="doNudge"
       @hidden="showNudgeTooSoonWarningModal = false"
     />
-    <NudgeWarningModal ref="nudgewarning" @confirm="doNudge" />
+    <NudgeWarningModal
+      v-if="showNudgeWarningModal"
+      @confirm="doNudge"
+      @hidden="showNudgeWarningModal = false"
+    />
     <MicroVolunteering v-if="showMicrovolunteering" />
   </div>
 </template>
@@ -280,7 +284,9 @@ const AddressModal = defineAsyncComponent(() =>
 )
 const NoticeMessage = () => import('~/components/NoticeMessage')
 const ChatRSVPModal = () => import('~/components/ChatRSVPModal')
-const NudgeWarningModal = () => import('~/components/NudgeWarningModal')
+const NudgeWarningModal = defineAsyncComponent(() =>
+  import('~/components/NudgeWarningModal')
+)
 const NudgeTooSoonWarningModal = defineAsyncComponent(() =>
   import('~/components/NudgeTooSoonWarningModal')
 )
@@ -341,6 +347,7 @@ export default {
       imagethumb: null,
       imageid: null,
       showNudgeTooSoonWarningModal: false,
+      showNudgeWarningModal: false,
     }
   },
   computed: {
@@ -408,9 +415,8 @@ export default {
       await this.chatStore.nudge(this.id)
       this._updateAfterSend()
     },
-    async nudge() {
-      await this.waitForRef('nudgewarning')
-      this.$refs.nudgewarning?.show()
+    nudge() {
+      this.showNudgeWarningModal = true
     },
     newline() {
       const p = this.$refs.chatarea.selectionStart
