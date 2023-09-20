@@ -69,7 +69,7 @@
       imgtype="Story"
       imgflag="story"
     />
-    <StoryAddModal v-if="showAdd" ref="addmodal" />
+    <StoryAddModal v-if="showAdd" @hidden="showAdd = false" />
     <StoryShareModal v-if="showShare" :id="newsfeed.storyid" ref="share" />
   </div>
 </template>
@@ -83,7 +83,9 @@ import NewsBase from '~/components/NewsBase'
 import NewsUserIntro from '~/components/NewsUserIntro'
 import NewsLoveComment from '~/components/NewsLoveComment'
 import NewsPhotoModal from '~/components/NewsPhotoModal'
-const StoryAddModal = () => import('~/components/StoryAddModal')
+const StoryAddModal = defineAsyncComponent(() =>
+  import('~/components/StoryAddModal')
+)
 const StoryShareModal = () => import('~/components/StoryShareModal')
 
 export default {
@@ -127,10 +129,8 @@ export default {
     },
   },
   methods: {
-    async showAddModal() {
+    showAddModal() {
       this.showAdd = true
-      await this.waitForRef('addmodal')
-      this.$refs.addmodal?.show()
     },
     async shareStory() {
       this.showShare = true
