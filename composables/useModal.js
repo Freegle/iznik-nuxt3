@@ -12,7 +12,7 @@ export function useModal() {
   }
 
   function hide() {
-    modal.value.hide()
+    modal.value?.hide()
   }
 
   const unregisterNavigationGuard = useRouter().beforeEach((to, from, next) => {
