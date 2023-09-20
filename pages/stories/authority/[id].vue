@@ -28,7 +28,10 @@
         </b-col>
         <b-col cols="0" md="3" class="d-none d-md-block" />
       </b-row>
-      <StoryAddModal ref="addmodal" />
+      <StoryAddModal
+        v-if="showStoryAddModal"
+        @hidden="showStoryAddModal = false"
+      />
     </div>
   </client-only>
 </template>
@@ -37,8 +40,9 @@ import { useStoryStore } from '~/stores/stories'
 import { buildHead } from '~/composables/useBuildHead'
 import { useAuthorityStore } from '~/stores/authority'
 import StoryOne from '~/components/StoryOne'
-import StoryAddModal from '~/components/StoryAddModal'
-import { ref, computed, useRoute } from '#imports'
+const StoryAddModal = defineAsyncComponent(() =>
+  import('~/components/StoryAddModal')
+)
 
 const LIMIT = 20
 
@@ -74,8 +78,9 @@ const sortedStories = computed(() => {
   })
 })
 
-const addmodal = ref(null)
+const showStoryAddModal = ref(false)
+
 const showAddModal = () => {
-  addmodal.value.show()
+  showStoryAddModal.value = true
 }
 </script>
