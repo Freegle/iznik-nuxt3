@@ -36,7 +36,7 @@
     <MessageShareModal
       v-if="showShareModal && message.url"
       :id="message.id"
-      ref="shareModal"
+      @hidden="showShareModal = false"
     />
     <MessageReportModal
       v-if="showMessageReportModal"
@@ -48,7 +48,9 @@
 <script>
 import { useRouter } from '#imports'
 import { useMessageStore } from '~/stores/message'
-const MessageShareModal = () => import('./MessageShareModal')
+const MessageShareModal = defineAsyncComponent(() =>
+  import('./MessageShareModal')
+)
 const MessageReportModal = defineAsyncComponent(() =>
   import('./MessageReportModal')
 )
@@ -80,10 +82,8 @@ export default {
     },
   },
   methods: {
-    async share() {
+    share() {
       this.showShareModal = true
-      await this.waitForRef('shareModal')
-      this.$refs.shareModal?.show()
     },
     report() {
       this.showMessageReportModal = true
