@@ -212,7 +212,7 @@
     <NewsReportModal
       v-if="showReportModal"
       :id="newsfeed.id"
-      ref="reportModal"
+      @hidden="showReportModal = false"
     />
     <ConfirmModal
       v-if="showDeleteModal"
@@ -223,8 +223,8 @@
   </div>
 </template>
 <script>
+import { defineAsyncComponent } from 'vue'
 import { useNewsfeedStore } from '../stores/newsfeed'
-import NewsReportModal from './NewsReportModal'
 import SpinButton from './SpinButton'
 import AutoHeightTextarea from './AutoHeightTextarea'
 import NewsReplies from '~/components/NewsReplies'
@@ -243,6 +243,7 @@ import NoticeMessage from '~/components/NoticeMessage'
 import NewsPreview from '~/components/NewsPreview'
 import ProfileImage from '~/components/ProfileImage'
 
+const NewsReportModal = defineAsyncComponent(() => import('./NewsReportModal'))
 const ConfirmModal = () =>
   defineAsyncComponent(() => import('~/components/ConfirmModal.vue'))
 const OurFilePond = () => import('~/components/OurFilePond')
@@ -496,10 +497,8 @@ export default {
     async unfollow() {
       await this.newsfeedStore.unfollow(this.id)
     },
-    async report() {
+    report() {
       this.showReportModal = true
-      await this.waitForRef('reportModal')
-      this.$refs.reportModal?.show()
     },
     referToOffer() {
       this.referTo('Offer')
