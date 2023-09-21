@@ -642,7 +642,10 @@
         :id="me ? me.id : null"
         @hidden="showProfileModal = false"
       />
-      <EmailConfirmModal ref="emailconfirm" />
+      <EmailConfirmModal
+        v-if="showEmailConfirmModal"
+        @hidden="showEmailConfirmModal = false"
+      />
       <AddressModal
         v-if="showAddressModal"
         @hidden="showAddressModal = false"
@@ -662,16 +665,18 @@ import EmailValidator from '~/components/EmailValidator'
 import SettingsEmailInfo from '~/components/SettingsEmailInfo'
 import SettingsPhone from '~/components/SettingsPhone'
 import SupporterInfo from '~/components/SupporterInfo'
-import EmailConfirmModal from '~/components/EmailConfirmModal'
 import ProfileImage from '~/components/ProfileImage'
-
 import PostCode from '~/components/PostCode'
+
 import SettingsGroup from '~/components/SettingsGroup'
 import NoticeMessage from '~/components/NoticeMessage'
 import OurFilePond from '~/components/OurFilePond'
 import OurToggle from '~/components/OurToggle'
 import DonationButton from '~/components/DonationButton'
 import PasswordEntry from '~/components/PasswordEntry'
+const EmailConfirmModal = defineAsyncComponent(() =>
+  import('~/components/EmailConfirmModal')
+)
 const AddressModal = defineAsyncComponent(() =>
   import('~/components/AddressModal')
 )
@@ -748,6 +753,7 @@ export default {
       showAddressModal: false,
       showAboutMeModal: false,
       showProfileModal: false,
+      showEmailConfirmModal: false,
     }
   },
   computed: {
@@ -1007,8 +1013,7 @@ export default {
         })
 
         if (data && data.ret === 10) {
-          await this.waitForRef('emailconfirm')
-          this.$refs.emailconfirm.show()
+          this.showEmailConfirmModal = true
         }
       }
 
