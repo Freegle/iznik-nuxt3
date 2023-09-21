@@ -61,13 +61,13 @@
       </div>
     </div>
     <NewsPhotoModal
-      v-if="story?.image"
+      v-if="showNewsPhotoModal && story?.image"
       :id="story.image.id"
-      ref="photoModal"
       :newsfeedid="newsfeed.id"
       :src="story.image.path"
       imgtype="Story"
       imgflag="story"
+      @hidden="showNewsPhotoModal = false"
     />
     <StoryAddModal v-if="showAdd" @hidden="showAdd = false" />
     <StoryShareModal
@@ -86,7 +86,9 @@ import NewsBase from '~/components/NewsBase'
 
 import NewsUserIntro from '~/components/NewsUserIntro'
 import NewsLoveComment from '~/components/NewsLoveComment'
-import NewsPhotoModal from '~/components/NewsPhotoModal'
+const NewsPhotoModal = defineAsyncComponent(() =>
+  import('~/components/NewsPhotoModal')
+)
 const StoryAddModal = defineAsyncComponent(() =>
   import('~/components/StoryAddModal')
 )
@@ -119,6 +121,7 @@ export default {
     return {
       showShare: false,
       showAdd: false,
+      showNewsPhotoModal: false,
     }
   },
   computed: {
