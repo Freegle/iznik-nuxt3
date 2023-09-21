@@ -99,7 +99,12 @@ export default {
       // Wait for the next tick otherwise if the event handlers return synchronously we may not end up triggering
       // the watch.
       await this.$nextTick()
-      this.$emit('infinite', this)
+      try {
+        this.$emit('infinite', this)
+      } catch (e) {
+        console.error('Error in infinite handler', e)
+        this.complete()
+      }
     },
     loading() {
       this.state = 'loading'
