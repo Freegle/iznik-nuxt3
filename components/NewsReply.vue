@@ -279,8 +279,8 @@
     <NewsEditModal
       v-if="showEditModal"
       :id="replyid"
-      ref="editModal"
       :threadhead="threadhead"
+      @hidden="showEditModal = false"
     />
     <ConfirmModal
       v-if="showDeleteModal"
@@ -297,15 +297,15 @@ import { useUserStore } from '../stores/user'
 import { useMiscStore } from '../stores/misc'
 import NewsLovesModal from './NewsLovesModal'
 import SpinButton from './SpinButton'
-import NewsEditModal from './NewsEditModal'
 import { twem, untwem } from '~/composables/useTwem'
-
 import NewsUserInfo from '~/components/NewsUserInfo'
+
 import NewsHighlight from '~/components/NewsHighlight'
 import ChatButton from '~/components/ChatButton'
 import NewsPreview from '~/components/NewsPreview'
 import ProfileImage from '~/components/ProfileImage'
 
+const NewsEditModal = defineAsyncComponent(() => import('./NewsEditModal'))
 const ProfileModal = defineAsyncComponent(() =>
   import('~/components/ProfileModal')
 )
@@ -520,7 +520,7 @@ export default {
 
       el.classList.remove('pulsate')
     },
-    async deleteReply() {
+    deleteReply() {
       this.showDeleteModal = true
     },
     async deleteConfirm() {
@@ -529,10 +529,8 @@ export default {
     brokenImage(event) {
       event.target.src = '/defaultprofile.png'
     },
-    async showEdit() {
+    showEdit() {
       this.showEditModal = true
-      await this.waitForRef('editModal')
-      this.$refs.editModal?.show()
     },
     async showLove() {
       this.showLoveModal = true

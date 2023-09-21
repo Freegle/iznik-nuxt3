@@ -1,12 +1,12 @@
 <template>
   <b-modal
     :id="'newsEdit-' + id"
-    ref="editModal"
-    v-model="showModal"
+    ref="modal"
     scrollable
     title="Edit your post"
     size="lg"
     no-stacking
+    @shown="onShow"
   >
     <b-form-textarea
       ref="editText"
@@ -24,11 +24,9 @@
 </template>
 <script>
 import { useNewsfeedStore } from '../stores/newsfeed'
-import modal from '@/mixins/modal'
+import { useModal } from '~/composables/useModal'
 
 export default {
-  components: {},
-  mixins: [modal],
   props: {
     id: {
       type: Number,
@@ -42,8 +40,12 @@ export default {
   setup() {
     const newsfeedStore = useNewsfeedStore()
 
+    const { modal, hide } = useModal()
+
     return {
       newsfeedStore,
+      modal,
+      hide,
     }
   },
   data() {
@@ -52,17 +54,13 @@ export default {
       message: null,
     }
   },
-  computed: {},
   methods: {
-    async show() {
+    async onShow() {
       // Make sure we're up to date.
       const newsfeed = await this.newsfeedStore.fetch(this.id, true)
       this.message = newsfeed.message
-      this.showModal = true
     },
-    hide() {
-      this.showModal = false
-    },
+
     async save() {
       await this.newsfeedStore.edit(this.id, this.message, this.threadhead)
 
