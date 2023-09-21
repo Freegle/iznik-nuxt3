@@ -11,11 +11,7 @@
       <JobsTopBar v-if="jobs" />
       <h2 class="visually-hidden">
         List of wanteds and offers
-        {{
-          deDuplicatedMessages?.length
-            ? deDuplicatedMessages?.length
-            : 'No messages'
-        }}
+        {{ 'Length ' + deDuplicatedMessages?.length }}
       </h2>
       <div id="visobserver" v-observe-visibility="visibilityChanged" />
       <div v-if="deDuplicatedMessages?.length" id="messageList">
@@ -186,7 +182,7 @@ export default {
       default: false,
     },
   },
-  setup(props) {
+  async setup(props) {
     const groupStore = useGroupStore()
     const messageStore = useMessageStore()
     const miscStore = useMiscStore()
@@ -196,14 +192,17 @@ export default {
     // Get the initial messages to show in a single call.  There will be a delay during which we will see the
     // loader, but it's better to fetch a screenful than have the loader sliding down
     // the screen.  Once we've loaded then the loader will be shown by the infinite scroll, but we will normally
-    // not see if because of prefetching.
-    // const initialIds = props.messagesForList
-    //   ?.slice(0, MIN_TO_SHOW)
-    //   .map((message) => message.id)
-    //
-    // if (initialIds?.length) {
-    //   await messageStore.fetchMultiple(initialIds)
-    // }
+    // not see it because of prefetching.
+    console.log('Fetch initial messages')
+    const initialIds = props.messagesForList
+      ?.slice(0, MIN_TO_SHOW)
+      .map((message) => message.id)
+
+    if (initialIds?.length) {
+      await messageStore.fetchMultiple(initialIds)
+    }
+
+    console.log('Fetched initial messages')
 
     const toShow = ref(MIN_TO_SHOW)
     let scrollToMessage = null
