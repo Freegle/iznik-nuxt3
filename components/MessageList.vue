@@ -10,7 +10,12 @@
       />
       <JobsTopBar v-if="jobs" />
       <h2 class="visually-hidden">
-        List of wanteds and offers {{ deDuplicatedMessages?.length }}
+        List of wanteds and offers
+        {{
+          deDuplicatedMessages?.length
+            ? deDuplicatedMessages?.length
+            : 'No messages'
+        }}
       </h2>
       <div id="visobserver" v-observe-visibility="visibilityChanged" />
       <div v-if="deDuplicatedMessages?.length" id="messageList">
