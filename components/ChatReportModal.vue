@@ -1,12 +1,5 @@
 <template>
-  <b-modal
-    id="chatreportmodal"
-    v-model="showModal"
-    scrollable
-    title="Oh dear..."
-    size="lg"
-    no-stacking
-  >
+  <b-modal ref="modal" scrollable title="Oh dear..." size="lg" no-stacking>
     <template #default>
       <b-row>
         <b-col>
@@ -36,13 +29,12 @@
 <script>
 import { useChatStore } from '../stores/chat'
 import GroupSelect from './GroupSelect'
-import modal from '@/mixins/modal'
+import { useModal } from '~/composables/useModal'
 
 export default {
   components: {
     GroupSelect,
   },
-  mixins: [modal],
   props: {
     user: {
       type: Object,
@@ -56,8 +48,12 @@ export default {
   setup() {
     const chatStore = useChatStore()
 
+    const { modal, hide } = useModal()
+
     return {
       chatStore,
+      modal,
+      hide,
     }
   },
   data() {

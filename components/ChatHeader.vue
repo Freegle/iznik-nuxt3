@@ -197,10 +197,10 @@
         <ChatReportModal
           v-if="showChatReport && chat.chattype === 'User2User'"
           :id="'report-' + id"
-          ref="chatreport"
           :user="otheruser"
           :chatid="chat.id"
           @confirm="hide"
+          @hidden="showChatReport = false"
         />
         <ProfileModal
           v-if="showProfileModal"
@@ -238,7 +238,9 @@ import SupporterInfo from '~/components/SupporterInfo'
 const ChatBlockModal = () => import('./ChatBlockModal')
 const ChatHideModal = () => import('./ChatHideModal')
 const UserRatings = () => import('~/components/UserRatings')
-const ChatReportModal = () => import('~/components/ChatReportModal')
+const ChatReportModal = defineAsyncComponent(() =>
+  import('~/components/ChatReportModal')
+)
 const ProfileModal = defineAsyncComponent(() =>
   import('~/components/ProfileModal')
 )
@@ -358,10 +360,8 @@ export default {
     showInfo() {
       this.showProfileModal = true
     },
-    async report() {
+    report() {
       this.showChatReport = true
-      const m = await this.waitForRef('chatreport')
-      m?.show()
     },
     async markRead() {
       await this.chatStore.markRead(this.id)
