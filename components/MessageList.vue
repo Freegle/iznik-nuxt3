@@ -197,13 +197,13 @@ export default {
     // loader, but it's better to fetch a screenful than have the loader sliding down
     // the screen.  Once we've loaded then the loader will be shown by the infinite scroll, but we will normally
     // not see if because of prefetching.
-    const initialIds = props.messagesForList
-      ?.slice(0, MIN_TO_SHOW)
-      .map((message) => message.id)
-
-    if (initialIds?.length) {
-      await messageStore.fetchMultiple(initialIds)
-    }
+    // const initialIds = props.messagesForList
+    //   ?.slice(0, MIN_TO_SHOW)
+    //   .map((message) => message.id)
+    //
+    // if (initialIds?.length) {
+    //   await messageStore.fetchMultiple(initialIds)
+    // }
 
     const toShow = ref(MIN_TO_SHOW)
     let scrollToMessage = null
