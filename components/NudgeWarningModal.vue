@@ -1,7 +1,7 @@
 <template>
   <b-modal
     id="nudgewarningmodal"
-    v-model="showModal"
+    ref="modal"
     scrollable
     title="Nudging"
     no-stacking
@@ -25,16 +25,16 @@
     </template>
   </b-modal>
 </template>
-<script>
-import modal from '@/mixins/modal'
 
-export default {
-  mixins: [modal],
-  methods: {
-    confirm() {
-      this.$emit('confirm')
-      this.hide()
-    },
-  },
+<script setup>
+import { useModal } from '~/composables/useModal'
+
+const emit = defineEmits(['confirm'])
+
+const { modal, hide } = useModal()
+
+function confirm() {
+  emit('confirm')
+  hide()
 }
 </script>
