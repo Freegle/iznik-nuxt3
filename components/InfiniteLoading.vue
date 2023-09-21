@@ -94,40 +94,26 @@ export default {
       this.visible = isVisible
     },
     async emit() {
-      console.log('Emit')
       this.loading()
 
       // Wait for the next tick otherwise if the event handlers return synchronously we may not end up triggering
       // the watch.
       await this.$nextTick()
-      console.log('Emit await')
-      try {
-        console.log('Emit infinite')
-        this.$emit('infinite', this)
-        console.log('Emitted infinite')
-      } catch (e) {
-        console.error('Error in infinite handler', e)
-        this.complete()
-      }
+      this.$emit('infinite', this)
     },
     loading() {
-      console.log('...loading')
       this.state = 'loading'
     },
     loaded() {
-      console.log('...loaded')
       this.state = 'loaded'
     },
     complete() {
-      console.log('...complete')
       this.state = 'complete'
     },
     error() {
-      console.log('...error')
       this.state = 'error'
     },
     stopObserver() {
-      console.log('...stop observer')
       this.complete()
     },
   },

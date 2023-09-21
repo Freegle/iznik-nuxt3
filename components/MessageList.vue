@@ -81,22 +81,20 @@
         </template>
       </Suspense>
     </div>
-    <client-only>
-      <infinite-loading
-        v-if="showInfinite && messagesForList?.length"
-        :identifier="infiniteId"
-        :distance="distance"
-        @infinite="loadMore"
-      >
-        <template #error>&nbsp;</template>
-        <template #complete>&nbsp;</template>
-        <template #spinner>
-          <div class="text-center loading-spinner">
-            <b-img lazy src="/loader.gif" alt="Loading" width="100px" />
-          </div>
-        </template>
-      </infinite-loading>
-    </client-only>
+    <infinite-loading
+      v-if="messagesForList?.length"
+      :identifier="infiniteId"
+      :distance="distance"
+      @infinite="loadMore"
+    >
+      <template #error>&nbsp;</template>
+      <template #complete>&nbsp;</template>
+      <template #spinner>
+        <div class="text-center">
+          <b-img lazy src="/loader.gif" alt="Loading" width="100px" />
+        </div>
+      </template>
+    </infinite-loading>
   </div>
 </template>
 <script>
@@ -185,7 +183,6 @@ export default {
     // loader, but it's better to fetch a screenful than have the loader sliding down
     // the screen.  Once we've loaded then the loader will be shown by the infinite scroll, but we will normally
     // not see it because of prefetching.
-    console.log('Fetch initial messages')
     const initialIds = props.messagesForList
       ?.slice(0, MIN_TO_SHOW)
       .map((message) => message.id)
@@ -193,8 +190,6 @@ export default {
     if (initialIds?.length) {
       await messageStore.fetchMultiple(initialIds)
     }
-
-    console.log('Fetched initial messages')
 
     const toShow = ref(MIN_TO_SHOW)
     let scrollToMessage = null
@@ -212,7 +207,7 @@ export default {
       }
     }
 
-    const ret = {
+    return {
       infiniteId: ref(props.bump),
       myGroups,
       groupStore,
@@ -221,10 +216,6 @@ export default {
       toShow,
       scrollToMessage,
     }
-
-    console.log("returning from setup")
-
-    return ret
   },
   data() {
     return {
@@ -234,7 +225,6 @@ export default {
       maxMessageVisible: 0,
       ensuredMessageVisible: false,
       emitted: false,
-      showInfinite: false,
     }
   },
   computed: {
@@ -352,7 +342,6 @@ export default {
         }
       })
 
-      console.log('Dedup messages', this.filteredMessagesToShow, ret)
       return ret
     },
     noneFound() {
@@ -362,7 +351,6 @@ export default {
   watch: {
     toShow: {
       async handler(newVal) {
-        console.log('toShow changed', newVal, this.prefetched)
         if (newVal + 5 > this.prefetched) {
           // We want to prefetch some messages so that they are ready in store for if/when we scroll down and want to
           // add them to the DOM.
@@ -380,20 +368,11 @@ export default {
             this.prefetched = i
           }
 
-          console.log('ids', ids)
-
           if (ids.length) {
-            console.log('Throttle')
             await throttleFetches()
-            console.log('Throttle')
             await this.messageStore.fetchMultiple(ids)
-            console.log('Fetched')
           }
         }
-
-        // Add the infinite loader after we've loaded the first chunk.
-        console.log('Add infinite loader')
-        this.showInfinite = true
       },
       immediate: true,
     },
@@ -408,7 +387,6 @@ export default {
   },
   methods: {
     async loadMore($state) {
-      console.log('Load more', this)
       do {
         this.toShow++
       } while (
@@ -420,22 +398,17 @@ export default {
         this.toShow <= this.messagesForList?.length &&
         this.wantMessage(this.messagesForList[this.toShow])
       ) {
-        console.log('Need another')
         // We need another message.
         const m = this.messagesForList[this.toShow - 1]
 
         // We always want to trigger a fetch to the store, because the store will decide whether a cached message
         // needs refreshing.
-        console.log('Wait for throttle')
         await throttleFetches()
-        console.log('Fetch')
         await this.messageStore.fetch(m.id)
-        console.log('Fetched')
 
         $state.loaded()
       } else {
         // We're showing all the messages
-        console.log('Complete')
         $state.complete()
       }
     },
