@@ -9,7 +9,9 @@
         :show-give-find="showGiveFind"
       />
       <JobsTopBar v-if="jobs" />
-      <h2 class="visually-hidden">List of wanteds and offers</h2>
+      <h2 class="visually-hidden">
+        List of wanteds and offers {{ deDuplicatedMessages?.length }}
+      </h2>
       <div v-observe-visibility="visibilityChanged" />
       <div v-if="deDuplicatedMessages?.length">
         <div
