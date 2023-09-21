@@ -1,8 +1,6 @@
 <template>
   <b-modal
-    v-if="user"
-    id="chatrsvpmodal"
-    v-model="showModal"
+    ref="modal"
     scrollable
     :title="chaseup ? 'Shall we chase them up?' : 'Do you expect a reply?'"
     no-stacking
@@ -43,11 +41,10 @@
 </template>
 <script>
 import { useChatStore } from '../stores/chat'
-import modal from '@/mixins/modal'
+import { useModal } from '~/composables/useModal'
 
 export default {
   components: {},
-  mixins: [modal],
   props: {
     id: {
       type: Number,
@@ -61,8 +58,12 @@ export default {
   setup() {
     const chatStore = useChatStore()
 
+    const { modal, hide } = useModal()
+
     return {
       chatStore,
+      modal,
+      hide,
     }
   },
   data() {

@@ -247,7 +247,13 @@
       @chosen="sendAddress"
       @hidden="showAddress = false"
     />
-    <ChatRSVPModal v-if="RSVP" :id="id" ref="rsvp" :user="otheruser" />
+    <ChatRSVPModal
+      v-if="RSVP"
+      :id="id"
+      ref="rsvp"
+      :user="otheruser"
+      @hidden="RSVP = false"
+    />
     <NudgeTooSoonWarningModal
       v-if="showNudgeTooSoonWarningModal"
       @confirm="doNudge"
@@ -283,7 +289,9 @@ const AddressModal = defineAsyncComponent(() =>
   import('~/components/AddressModal')
 )
 const NoticeMessage = () => import('~/components/NoticeMessage')
-const ChatRSVPModal = () => import('~/components/ChatRSVPModal')
+const ChatRSVPModal = defineAsyncComponent(() =>
+  import('~/components/ChatRSVPModal')
+)
 const NudgeWarningModal = defineAsyncComponent(() =>
   import('~/components/NudgeWarningModal')
 )
@@ -512,8 +520,6 @@ export default {
 
           if (RSVP) {
             this.RSVP = true
-            await this.waitForRef('rsvp')
-            this.$refs.rsvp?.show()
           } else {
             // We've sent a message.  This would be a good time to do some microvolunteering.
             this.showMicrovolunteering = true
