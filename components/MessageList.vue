@@ -82,21 +82,22 @@
           </template>
         </Suspense>
       </div>
-      <div :id="'infinite-' + infiniteId" />
-      <infinite-loading
-        v-if="showInfinite && messagesForList?.length"
-        :identifier="infiniteId"
-        :distance="distance"
-        @infinite="loadMore"
-      >
-        <template #error>&nbsp;</template>
-        <template #complete>&nbsp;</template>
-        <template #spinner>
-          <div class="text-center">
-            <b-img lazy src="/loader.gif" alt="Loading" width="100px" />
-          </div>
-        </template>
-      </infinite-loading>
+      <client-only>
+        <infinite-loading
+          v-if="showInfinite && messagesForList?.length"
+          :identifier="infiniteId"
+          :distance="distance"
+          @infinite="loadMore"
+        >
+          <template #error>&nbsp;</template>
+          <template #complete>&nbsp;</template>
+          <template #spinner>
+            <div class="text-center">
+              <b-img lazy src="/loader.gif" alt="Loading" width="100px" />
+            </div>
+          </template>
+        </infinite-loading>
+      </client-only>
     </div>
     <template #fallback>
       <div class="text-center">
@@ -393,7 +394,8 @@ export default {
           }
         }
 
-        // Add the inifnite loader after we've loaded the first chunk.
+        // Add the infinite loader after we've loaded the first chunk.
+        console.log('Add infinite loader')
         this.showInfinite = true
       },
       immediate: true,
