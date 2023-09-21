@@ -6,13 +6,16 @@ import { OWN_POSTS_AGE } from '~/constants'
 // Simple throttle.  When we get more than a certain number of outstanding fetches, wait until they are all
 // finished.  This stops the infinite scroll going beserk.
 export function throttleFetches() {
+  console.log('Throttle fetches')
   const messageStore = useMessageStore()
 
   const fetching = messageStore.fetchingCount
 
   if (fetching < 5) {
+    console.log('Ok to proceed')
     return Promise.resolve()
   } else {
+    console.log('Wait for previous)')
     return new Promise((resolve) => {
       checkThrottle(resolve)
     })
@@ -20,13 +23,17 @@ export function throttleFetches() {
 }
 
 export function checkThrottle(resolve) {
+  console.log('Check throttle')
   const messageStore = useMessageStore()
 
   const fetching = messageStore.fetchingCount
+  console.log('Fetching', fetching)
 
   if (fetching === 0) {
+    console.log('Resolve')
     resolve()
   } else {
+    console.log('Wait')
     setTimeout(checkThrottle, 100, resolve)
   }
 }

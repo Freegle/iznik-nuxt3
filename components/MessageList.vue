@@ -394,6 +394,7 @@ export default {
   },
   methods: {
     async loadMore($state) {
+      console.log('Load more', this.toShow)
       do {
         this.toShow++
       } while (
@@ -405,17 +406,22 @@ export default {
         this.toShow <= this.messagesForList?.length &&
         this.wantMessage(this.messagesForList[this.toShow])
       ) {
+        console.log('Need another')
         // We need another message.
         const m = this.messagesForList[this.toShow - 1]
 
         // We always want to trigger a fetch to the store, because the store will decide whether a cached message
         // needs refreshing.
+        console.log('Wait for throttle')
         await throttleFetches()
+        console.log('Fetch')
         await this.messageStore.fetch(m.id)
+        console.log('Fetched')
 
         $state.loaded()
       } else {
         // We're showing all the messages
+        console.log('Complete')
         $state.complete()
       }
     },
