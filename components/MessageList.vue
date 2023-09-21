@@ -349,6 +349,7 @@ export default {
         }
       })
 
+      console.log('Dedup messages', this.filteredMessagesToShow, ret)
       return ret
     },
     noneFound() {
@@ -358,6 +359,7 @@ export default {
   watch: {
     toShow: {
       async handler(newVal) {
+        console.log('toShow changed', toShow, this.prefetched)
         if (newVal + 5 > this.prefetched) {
           // We want to prefetch some messages so that they are ready in store for if/when we scroll down and want to
           // add them to the DOM.
@@ -375,9 +377,14 @@ export default {
             this.prefetched = i
           }
 
+          console.log('ids', ids)
+
           if (ids.length) {
+            console.log('Throttle')
             await throttleFetches()
+            console.log('Throttle')
             await this.messageStore.fetchMultiple(ids)
+            console.log('Fetched')
           }
         }
       },
