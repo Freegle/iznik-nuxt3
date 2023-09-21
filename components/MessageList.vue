@@ -186,7 +186,7 @@ export default {
       default: false,
     },
   },
-  async setup(props) {
+  setup(props) {
     const groupStore = useGroupStore()
     const messageStore = useMessageStore()
     const miscStore = useMiscStore()
