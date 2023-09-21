@@ -146,8 +146,8 @@
       </b-row>
       <ChatHideModal
         v-if="showHideAllModal"
-        ref="chathideall"
         @confirm="hideAll"
+        @hidden="showHideAllModal = false"
       />
     </div>
   </client-only>
@@ -171,7 +171,9 @@ const ContactDetailsAskModal = defineAsyncComponent(() =>
   import('~/components/ContactDetailsAskModal.vue')
 )
 
-const ChatHideModal = () => import('~/components/ChatHideModal')
+const ChatHideModal = defineAsyncComponent(() =>
+  import('~/components/ChatHideModal')
+)
 
 definePageMeta({
   layout: 'login',
@@ -347,11 +349,8 @@ export default {
       await this.chatStore.fetchChats()
       this.bump++
     },
-    async showHideAll() {
+    showHideAll() {
       this.showHideAllModal = true
-
-      await this.waitForRef('chathideall')
-      this.$refs.chathideall.show()
     },
     async hideAll() {
       for (let i = 0; i < this.visibleChats.length; i++) {
