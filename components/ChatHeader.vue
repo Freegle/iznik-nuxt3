@@ -190,9 +190,9 @@
         <ChatBlockModal
           v-if="showChatBlock && chat.chattype === 'User2User'"
           :id="id"
-          ref="chatblock"
           :user="otheruser"
           @confirm="block"
+          @hidden="showChatBlock = false"
         />
         <ChatReportModal
           v-if="showChatReport && chat.chattype === 'User2User'"
@@ -235,7 +235,7 @@ import { useRouter } from '#imports'
 import { useMiscStore } from '~/stores/misc'
 import SupporterInfo from '~/components/SupporterInfo'
 
-const ChatBlockModal = () => import('./ChatBlockModal')
+const ChatBlockModal = defineAsyncComponent(() => import('./ChatBlockModal'))
 const ChatHideModal = () => import('./ChatHideModal')
 const UserRatings = () => import('~/components/UserRatings')
 const ChatReportModal = defineAsyncComponent(() =>
@@ -352,10 +352,8 @@ export default {
       const m = await this.waitForRef('chathide')
       m?.show()
     },
-    async showblock() {
+    showblock() {
       this.showChatBlock = true
-      const m = await this.waitForRef('chatblock')
-      m?.show()
     },
     showInfo() {
       this.showProfileModal = true
