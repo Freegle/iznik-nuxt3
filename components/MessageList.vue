@@ -359,7 +359,7 @@ export default {
   watch: {
     toShow: {
       async handler(newVal) {
-        console.log('toShow changed', toShow, this.prefetched)
+        console.log('toShow changed', newVal, this.prefetched)
         if (newVal + 5 > this.prefetched) {
           // We want to prefetch some messages so that they are ready in store for if/when we scroll down and want to
           // add them to the DOM.
