@@ -275,7 +275,11 @@
       :id="userid"
       @hidden="showProfileModal = false"
     />
-    <NewsLovesModal v-if="showLoveModal" :id="replyid" ref="loveModal" />
+    <NewsLovesModal
+      v-if="showLoveModal"
+      :id="replyid"
+      @hidden="showLoveModal = false"
+    />
     <NewsEditModal
       v-if="showEditModal"
       :id="replyid"
@@ -295,16 +299,16 @@ import pluralize from 'pluralize'
 import { useNewsfeedStore } from '../stores/newsfeed'
 import { useUserStore } from '../stores/user'
 import { useMiscStore } from '../stores/misc'
-import NewsLovesModal from './NewsLovesModal'
 import SpinButton from './SpinButton'
 import { twem, untwem } from '~/composables/useTwem'
 import NewsUserInfo from '~/components/NewsUserInfo'
-
 import NewsHighlight from '~/components/NewsHighlight'
+
 import ChatButton from '~/components/ChatButton'
 import NewsPreview from '~/components/NewsPreview'
 import ProfileImage from '~/components/ProfileImage'
 
+const NewsLovesModal = defineAsyncComponent(() => import('./NewsLovesModal'))
 const NewsEditModal = defineAsyncComponent(() => import('./NewsEditModal'))
 const ProfileModal = defineAsyncComponent(() =>
   import('~/components/ProfileModal')
@@ -532,10 +536,8 @@ export default {
     showEdit() {
       this.showEditModal = true
     },
-    async showLove() {
+    showLove() {
       this.showLoveModal = true
-      await this.waitForRef('loveModal')
-      this.$refs.loveModal?.show()
     },
     filterMatch(name, chunk) {
       // Only match at start of string.
