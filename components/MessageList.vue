@@ -9,10 +9,7 @@
         :show-give-find="showGiveFind"
       />
       <JobsTopBar v-if="jobs" />
-      <h2 class="visually-hidden">
-        List of wanteds and offers
-        {{ 'Length ' + deDuplicatedMessages?.length }}
-      </h2>
+      <h2 class="visually-hidden">List of wanteds and offers</h2>
       <div id="visobserver" v-observe-visibility="visibilityChanged" />
       <div v-if="deDuplicatedMessages?.length" id="messageList">
         <div
@@ -85,8 +82,9 @@
           </template>
         </Suspense>
       </div>
+      <div :id="'infinite-' + infiniteId" />
       <infinite-loading
-        v-if="messagesForList?.length"
+        v-if="showInfinite && messagesForList?.length"
         :identifier="infiniteId"
         :distance="distance"
         @infinite="loadMore"
@@ -238,6 +236,7 @@ export default {
       maxMessageVisible: 0,
       ensuredMessageVisible: false,
       emitted: false,
+      showInfinite: false,
     }
   },
   computed: {
@@ -393,6 +392,9 @@ export default {
             console.log('Fetched')
           }
         }
+
+        // Add the inifnite loader after we've loaded the first chunk.
+        this.showInfinite = true
       },
       immediate: true,
     },
