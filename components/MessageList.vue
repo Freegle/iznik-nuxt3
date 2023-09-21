@@ -404,10 +404,6 @@ export default {
     noneFound(newVal) {
       this.$emit('update:none', newVal)
     },
-    bump(newVal) {
-      console.log('Props bump', newVal)
-      this.infiniteId++
-    },
   },
   methods: {
     async loadMore($state) {
