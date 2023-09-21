@@ -200,21 +200,5 @@ if (process.client) {
   })
 }
 
-const {
-  cookiesEnabledIds,
-} = useCookieControl()
-
-// We ripple the cookie consent through to the store.
-watch(
-    () => cookiesEnabledIds.value,
-    (current, previous) => {
-      miscStore.optionalConsent = current?.includes('optional')
-    },
-    {
-      deep: true,
-      immediate: true
-    },
-)
-
 ready = true
 </script>

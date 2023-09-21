@@ -156,49 +156,7 @@ export default defineNuxtConfig({
     extractCSS: true,
   },
 
-  modules: [
-      '@pinia/nuxt',
-      '@dargmuesli/nuxt-cookie-control'
-  ],
-
-  cookieControl: {
-    cookieNameIsConsentGiven: 'cookieConsent_c',
-    cookieNameCookiesEnabledIds: 'cookieConsent_e',
-    isAcceptNecessaryButtonEnabled: false,
-    isControlButtonEnabled: false,
-    colors: {
-      barBackground: 'white',
-      barTextColor: 'black',
-      barButtonBackground: 'black',
-      barButtonColor: 'white',
-      barButtonHoverBackground: 'grey',
-      barButtonHoverColor: 'white',
-    },
-    localeTexts: {
-      en: {
-        accept: 'Accept all cookies',
-        manageCookies: 'Manage settings'
-      }
-    },
-    cookies: {
-      necessary: [
-        {
-          name: 'Necessary',
-          description: 'These cookies are strictly necessary for the site to work - for logging in, ' +
-              'replying to posts, remembering your cookie ' +
-              'preferences, and offering the social signin buttons from Facebook and Google.'
-        },
-      ],
-      optional: [
-        {
-          name: 'Optional',
-          description: 'These cookies help us make the site better by understanding how people are using it or ' +
-              'when they have problems.  We also use them to offer advertisements which help keep Freegle going.  You ' +
-              'can turn these off.'
-        },
-      ],
-    },
-  },
+  modules: ['@pinia/nuxt'],
 
   buildModules: [
     [
@@ -255,6 +213,11 @@ export default defineNuxtConfig({
   app: {
     head: {
       title: "Freegle - Don't throw it away, give it away!",
+      script: [
+        {
+          src: 'https://cdn-cookieyes.com/client_data/fd4582b38fa7a9f269114304/script.js'
+        }
+      ],
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },

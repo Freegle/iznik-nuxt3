@@ -34,16 +34,6 @@
       <BreakpointFettler />
       <div id="here" />
       <SomethingWentWrong />
-      <CookieControl>
-        <template #bar>
-          <h3>Cookies and Privacy</h3>
-          <p>
-            Some cookies are strictly necessary to make our website work.  Others help us make it better,
-            fix problems, or raise funds to keep us going.  Please choose what you'd like - you're in control.
-          </p>
-          <nuxt-link to="/privacy">Read our privacy policy</nuxt-link>
-        </template>
-      </CookieControl>
     </client-only>
   </div>
 </template>

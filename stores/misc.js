@@ -11,7 +11,7 @@ export const useMiscStore = defineStore({
             // These are sticky preferences.
             {
               storage: localStorage,
-              paths: ['vals', 'optionalConsent'],
+              paths: ['vals'],
             },
           ],
   },
@@ -26,7 +26,6 @@ export const useMiscStore = defineStore({
     unloading: false,
     onlineTimer: null,
     online: true,
-    optionalConsent: false,
   }),
   actions: {
     init(config) {
