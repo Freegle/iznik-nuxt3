@@ -12,8 +12,8 @@
       <h2 class="visually-hidden">
         List of wanteds and offers {{ deDuplicatedMessages?.length }}
       </h2>
-      <div v-observe-visibility="visibilityChanged" />
-      <div v-if="deDuplicatedMessages?.length">
+      <div id="visobserver" v-observe-visibility="visibilityChanged" />
+      <div v-if="deDuplicatedMessages?.length" id="messageList">
         <div
           :id="'messagewrapper-' + deDuplicatedMessages[0].id"
           :ref="'messagewrapper-' + deDuplicatedMessages[0].id"
@@ -399,6 +399,10 @@ export default {
     },
     noneFound(newVal) {
       this.$emit('update:none', newVal)
+    },
+    bump(newVal) {
+      console.log('Props bump', newVal)
+      this.infiniteId++
     },
   },
   methods: {
