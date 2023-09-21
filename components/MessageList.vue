@@ -92,7 +92,7 @@
           <template #error>&nbsp;</template>
           <template #complete>&nbsp;</template>
           <template #spinner>
-            <div class="text-center">
+            <div class="text-center loading-spinner">
               <b-img lazy src="/loader.gif" alt="Loading" width="100px" />
             </div>
           </template>
@@ -100,7 +100,7 @@
       </client-only>
     </div>
     <template #fallback>
-      <div class="text-center">
+      <div class="text-center fallback">
         <b-img lazy src="/loader.gif" alt="Loading" width="100px" />
       </div>
     </template>
