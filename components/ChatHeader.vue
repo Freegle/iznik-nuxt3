@@ -215,9 +215,9 @@
           (chat.chattype === 'User2User' || chat.chattype === 'User2Mod')
         "
         :id="id"
-        ref="chathide"
         :user="otheruser"
         @confirm="hide"
+        @hidden="showChatHide = false"
       />
     </div>
     <div v-else class="w-100">
@@ -236,7 +236,7 @@ import { useMiscStore } from '~/stores/misc'
 import SupporterInfo from '~/components/SupporterInfo'
 
 const ChatBlockModal = defineAsyncComponent(() => import('./ChatBlockModal'))
-const ChatHideModal = () => import('./ChatHideModal')
+const ChatHideModal = defineAsyncComponent(() => import('./ChatHideModal'))
 const UserRatings = () => import('~/components/UserRatings')
 const ChatReportModal = defineAsyncComponent(() =>
   import('~/components/ChatReportModal')
@@ -349,8 +349,6 @@ export default {
     },
     async showhide() {
       this.showChatHide = true
-      const m = await this.waitForRef('chathide')
-      m?.show()
     },
     showblock() {
       this.showChatBlock = true
