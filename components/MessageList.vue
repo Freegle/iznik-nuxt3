@@ -411,7 +411,7 @@ export default {
   },
   methods: {
     async loadMore($state) {
-      console.log('Load more', this.toShow)
+      console.log('Load more', this)
       do {
         this.toShow++
       } while (
