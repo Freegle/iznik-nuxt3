@@ -20,6 +20,7 @@
                 :min-zoom="5"
                 :max-zoom="17"
                 :bounds="bounds"
+                @ready="setBounds"
               >
                 <l-tile-layer :url="osmtile()" :attribution="attribution()" />
                 <l-marker
@@ -56,10 +57,8 @@
 </template>
 <script setup>
 import Wkt from 'wicket'
-import { nextTick } from 'vue'
 import { onMounted, useRouter, useRoute } from '#imports'
 import { loadLeaflet, attribution, osmtile } from '~/composables/useMap'
-import { waitForRef } from '~/composables/useWaitForRef'
 import { buildHead } from '~/composables/useBuildHead'
 import { useNoticeboardStore } from '~/stores/noticeboard'
 import { useAuthorityStore } from '~/stores/authority'
@@ -110,9 +109,11 @@ const bounds = ref(null)
 
 onMounted(async () => {
   await loadLeaflet()
-  await waitForRef(map)
-  bounds.value = new L.geoJSON(authorityArea).getBounds().pad(0.1)
 })
+
+const setBounds = () => {
+  bounds.value = new L.geoJSON(authorityArea).getBounds().pad(0.1)
+}
 
 function goto(id) {
   const router = useRouter()
