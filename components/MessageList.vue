@@ -1,108 +1,101 @@
 <template>
-  <Suspense>
-    <div>
-      <h2 v-if="group" class="visually-hidden">Community Information</h2>
-      <GroupHeader
-        v-if="group"
-        :group="group"
-        show-join
-        :show-give-find="showGiveFind"
-      />
-      <JobsTopBar v-if="jobs" />
-      <h2 class="visually-hidden">List of wanteds and offers</h2>
-      <div id="visobserver" v-observe-visibility="visibilityChanged" />
-      <div v-if="deDuplicatedMessages?.length" id="messageList">
+  <div>
+    <h2 v-if="group" class="visually-hidden">Community Information</h2>
+    <GroupHeader
+      v-if="group"
+      :group="group"
+      show-join
+      :show-give-find="showGiveFind"
+    />
+    <JobsTopBar v-if="jobs" />
+    <h2 class="visually-hidden">List of wanteds and offers</h2>
+    <div id="visobserver" v-observe-visibility="visibilityChanged" />
+    <div v-if="deDuplicatedMessages?.length" id="messageList">
+      <div
+        :id="'messagewrapper-' + deDuplicatedMessages[0].id"
+        :ref="'messagewrapper-' + deDuplicatedMessages[0].id"
+        class="p-0"
+      >
+        <OurMessage
+          :id="deDuplicatedMessages[0].id"
+          :matchedon="deDuplicatedMessages[0].matchedon"
+          record-view
+          :scroll-into-view="scrollToMessage === deDuplicatedMessages[0].id"
+          @visible="messageVisible"
+        />
+      </div>
+      <VisibleWhen
+        v-if="deDuplicatedMessages.length"
+        :not="['xs', 'sm', 'md', 'lg']"
+      >
+        <ExternalDa
+          ad-unit-path="/22794232631/freegle_feed_desktop"
+          :dimensions="[728, 90]"
+          div-id="div-gpt-ad-1692867153277-0"
+          class="mt-2"
+        />
+      </VisibleWhen>
+      <VisibleWhen
+        v-if="deDuplicatedMessages.length"
+        :at="['xs', 'sm', 'md', 'lg']"
+      >
+        <ExternalDa
+          ad-unit-path="/22794232631/freegle_feed_app"
+          :dimensions="[300, 250]"
+          div-id="div-gpt-ad-1692867324381-0"
+          class="mt-2"
+        />
+      </VisibleWhen>
+      <Suspense
+        v-for="message in deDuplicatedMessages.slice(1)"
+        :key="'messagelist-' + message.id"
+      >
         <div
-          :id="'messagewrapper-' + deDuplicatedMessages[0].id"
-          :ref="'messagewrapper-' + deDuplicatedMessages[0].id"
+          :id="'messagewrapper-' + message.id"
+          :ref="'messagewrapper-' + message.id"
           class="p-0"
         >
-          <OurMessage
-            :id="deDuplicatedMessages[0].id"
-            :matchedon="deDuplicatedMessages[0].matchedon"
-            record-view
-            :scroll-into-view="scrollToMessage === deDuplicatedMessages[0].id"
-            @visible="messageVisible"
-          />
+          <VisibleWhen :at="['xs', 'sm', 'md', 'lg']">
+            <OurMessage
+              :id="message.id"
+              :matchedon="message.matchedon"
+              record-view
+              :scroll-into-view="scrollToMessage === message.id"
+              @visible="messageVisible"
+            />
+          </VisibleWhen>
+          <VisibleWhen :not="['xs', 'sm', 'md', 'lg']">
+            <OurMessage
+              :id="message.id"
+              :matchedon="message.matchedon"
+              record-view
+              :scroll-into-view="scrollToMessage === message.id"
+              ad-unit-path="/22794232631/freegle_product"
+              ad-id="div-gpt-ad-1691925699378-0"
+              @visible="messageVisible"
+            />
+          </VisibleWhen>
         </div>
-        <VisibleWhen
-          v-if="deDuplicatedMessages.length"
-          :not="['xs', 'sm', 'md', 'lg']"
-        >
-          <ExternalDa
-            ad-unit-path="/22794232631/freegle_feed_desktop"
-            :dimensions="[728, 90]"
-            div-id="div-gpt-ad-1692867153277-0"
-            class="mt-2"
-          />
-        </VisibleWhen>
-        <VisibleWhen
-          v-if="deDuplicatedMessages.length"
-          :at="['xs', 'sm', 'md', 'lg']"
-        >
-          <ExternalDa
-            ad-unit-path="/22794232631/freegle_feed_app"
-            :dimensions="[300, 250]"
-            div-id="div-gpt-ad-1692867324381-0"
-            class="mt-2"
-          />
-        </VisibleWhen>
-        <Suspense
-          v-for="message in deDuplicatedMessages.slice(1)"
-          :key="'messagelist-' + message.id"
-        >
-          <div
-            :id="'messagewrapper-' + message.id"
-            :ref="'messagewrapper-' + message.id"
-            class="p-0"
-          >
-            <VisibleWhen :at="['xs', 'sm', 'md', 'lg']">
-              <OurMessage
-                :id="message.id"
-                :matchedon="message.matchedon"
-                record-view
-                :scroll-into-view="scrollToMessage === message.id"
-                @visible="messageVisible"
-              />
-            </VisibleWhen>
-            <VisibleWhen :not="['xs', 'sm', 'md', 'lg']">
-              <OurMessage
-                :id="message.id"
-                :matchedon="message.matchedon"
-                record-view
-                :scroll-into-view="scrollToMessage === message.id"
-                ad-unit-path="/22794232631/freegle_product"
-                ad-id="div-gpt-ad-1691925699378-0"
-                @visible="messageVisible"
-              />
-            </VisibleWhen>
-          </div>
-          <template #fallback>
-            <div class="invisible">Loading {{ message.id }}...</div>
-          </template>
-        </Suspense>
-      </div>
-      <infinite-loading
-        v-if="showInfinite && messagesForList?.length"
-        :identifier="infiniteId"
-        :distance="distance"
-        @infinite="loadMore"
-      >
-        <template #error>&nbsp;</template>
-        <template #complete>&nbsp;</template>
-        <template #spinner>
-          <div class="text-center">
-            <b-img lazy src="/loader.gif" alt="Loading" width="100px" />
-          </div>
+        <template #fallback>
+          <div class="invisible">Loading {{ message.id }}...</div>
         </template>
-      </infinite-loading>
+      </Suspense>
     </div>
-    <template #fallback>
-      <div class="text-center">
-        <b-img lazy src="/loader.gif" alt="Loading" width="100px" />
-      </div>
-    </template>
-  </Suspense>
+    <infinite-loading
+      v-if="messagesForList?.length"
+      :identifier="infiniteId"
+      :distance="distance"
+      @infinite="loadMore"
+    >
+      <template #error>&nbsp;</template>
+      <template #complete>&nbsp;</template>
+      <template #spinner>
+        <div class="text-center">
+          <b-img lazy src="/loader.gif" alt="Loading" width="100px" />
+        </div>
+      </template>
+    </infinite-loading>
+  </div>
 </template>
 <script>
 import dayjs from 'dayjs'
@@ -190,7 +183,6 @@ export default {
     // loader, but it's better to fetch a screenful than have the loader sliding down
     // the screen.  Once we've loaded then the loader will be shown by the infinite scroll, but we will normally
     // not see it because of prefetching.
-    console.log('Fetch initial messages')
     const initialIds = props.messagesForList
       ?.slice(0, MIN_TO_SHOW)
       .map((message) => message.id)
@@ -198,8 +190,6 @@ export default {
     if (initialIds?.length) {
       await messageStore.fetchMultiple(initialIds)
     }
-
-    console.log('Fetched initial messages')
 
     const toShow = ref(MIN_TO_SHOW)
     let scrollToMessage = null
@@ -235,7 +225,6 @@ export default {
       maxMessageVisible: 0,
       ensuredMessageVisible: false,
       emitted: false,
-      showInfinite: false,
     }
   },
   computed: {
@@ -353,7 +342,6 @@ export default {
         }
       })
 
-      console.log('Dedup messages', this.filteredMessagesToShow, ret)
       return ret
     },
     noneFound() {
@@ -363,7 +351,6 @@ export default {
   watch: {
     toShow: {
       async handler(newVal) {
-        console.log('toShow changed', newVal, this.prefetched)
         if (newVal + 5 > this.prefetched) {
           // We want to prefetch some messages so that they are ready in store for if/when we scroll down and want to
           // add them to the DOM.
@@ -381,20 +368,11 @@ export default {
             this.prefetched = i
           }
 
-          console.log('ids', ids)
-
           if (ids.length) {
-            console.log('Throttle')
             await throttleFetches()
-            console.log('Throttle')
             await this.messageStore.fetchMultiple(ids)
-            console.log('Fetched')
           }
         }
-
-        // Add the infinite loader after we've loaded the first chunk.
-        console.log('Add infinite loader')
-        this.showInfinite = true
       },
       immediate: true,
     },
@@ -409,7 +387,6 @@ export default {
   },
   methods: {
     async loadMore($state) {
-      console.log('Load more', this.toShow)
       do {
         this.toShow++
       } while (
@@ -421,22 +398,17 @@ export default {
         this.toShow <= this.messagesForList?.length &&
         this.wantMessage(this.messagesForList[this.toShow])
       ) {
-        console.log('Need another')
         // We need another message.
         const m = this.messagesForList[this.toShow - 1]
 
         // We always want to trigger a fetch to the store, because the store will decide whether a cached message
         // needs refreshing.
-        console.log('Wait for throttle')
         await throttleFetches()
-        console.log('Fetch')
         await this.messageStore.fetch(m.id)
-        console.log('Fetched')
 
         $state.loaded()
       } else {
         // We're showing all the messages
-        console.log('Complete')
         $state.complete()
       }
     },
