@@ -112,6 +112,10 @@ export default defineNuxtPlugin((nuxtApp) => {
           // Leaflet produces all sorts of errors, which are not really our fault and don't affect the user.
           console.log('Leaflet in stack - suppress exception')
           return null
+        } else if (originalExceptionStack?.includes('/gpt/')) {
+          // Google ads are not our problem.
+          console.log('Google ads - suppress exception')
+          return null
         } else if (
           (originalExceptionStack?.includes('bootstrap-vue-next') &&
             originalExceptionString?.match('removeAttribute')) ||
@@ -122,6 +126,9 @@ export default defineNuxtPlugin((nuxtApp) => {
           return null
         } else if (originalExceptionString?.match(/Down for maintenance/)) {
           console.log('Maintenance - suppress exception', this)
+          return null
+        } else if (originalExceptionString?.match(/Google ad script blocked/)) {
+          console.log('AdBlocker - no need to log.', this)
           return null
         } else if (
           originalExceptionString?.match(/Attempt to use history.replaceState/)

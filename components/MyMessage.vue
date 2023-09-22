@@ -185,7 +185,7 @@
                   !rejected &&
                   !taken &&
                   !received &&
-                  message.canrepostat &&
+                  message.repostat &&
                   message.location &&
                   message.item
                 "
@@ -195,7 +195,7 @@
                 title="You will be able to repost this soon"
               >
                 <v-icon class="d-none d-sm-inline" icon="sync" /> Repost
-                <span class="small">{{ timeago(message.canrepostat) }}</span>
+                <span class="small">{{ timeago(message.repostat) }}</span>
               </b-button>
               <b-button
                 v-if="!rejected"

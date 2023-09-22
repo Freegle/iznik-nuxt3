@@ -51,7 +51,7 @@
             <MyMessage
               :id="post.id"
               :show-old="showOldPosts"
-              :expand="oldPosts.includes(post)"
+              :expand="defaultExpanded"
             />
           </div>
           <b-img
@@ -74,9 +74,16 @@
           </b-row>
           <b-row>
             <b-col class="text-center">
-              <b-button to="/give" class="mt-1" size="lg" variant="primary">
-                <v-icon icon="gift" />&nbsp;{{ props.type }} something
-              </b-button>
+              <template v-if="props.type === 'Offer'">
+                <b-button to="/give" class="mt-1" size="lg" variant="primary">
+                  <v-icon icon="gift" />&nbsp;OFFER something
+                </b-button>
+              </template>
+              <template v-else-if="props.type === 'Wanted'">
+                <b-button to="/find" class="mt-1" size="lg" variant="primary">
+                  <v-icon icon="shopping-cart" />&nbsp;Ask for something
+                </b-button>
+              </template>
             </b-col>
           </b-row>
         </div>
@@ -95,6 +102,7 @@ const props = defineProps({
   posts: { type: Array, required: true },
   loading: { type: Boolean, required: true },
   defaultExpanded: { type: Boolean, required: true },
+  show: { type: Number, required: true },
 })
 
 const emit = defineEmits(['load-more'])
@@ -131,16 +139,18 @@ const visiblePosts = computed(() => {
   let posts = showOldPosts.value ? props.posts : activePosts.value
   posts = posts || []
 
-  return posts.sort((a, b) => {
-    // promised items first, then by most recently posted
-    if (!showOldPosts.value && a.promised && !b.promised) {
-      return -1
-    } else if (!showOldPosts.value && b.promised && !a.promised) {
-      return 1
-    } else {
-      return new Date(b.arrival).getTime() - new Date(a.arrival).getTime()
-    }
-  })
+  return posts
+    .sort((a, b) => {
+      // promised items first, then by most recently posted
+      if (!showOldPosts.value && a.promised && !b.promised) {
+        return -1
+      } else if (!showOldPosts.value && b.promised && !a.promised) {
+        return 1
+      } else {
+        return new Date(b.arrival).getTime() - new Date(a.arrival).getTime()
+      }
+    })
+    .slice(0, props.show)
 })
 </script>
 

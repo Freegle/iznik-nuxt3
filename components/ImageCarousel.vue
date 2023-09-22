@@ -16,7 +16,7 @@
         class="slide"
       >
         <inner-image-zoom
-          :key="'image-' + attachment.id + '-' + imagekey"
+          :key="'image-' + attachment.id"
           class="zind"
           zoom-type="click"
           :src="attachment.path"
