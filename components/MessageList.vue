@@ -82,22 +82,20 @@
           </template>
         </Suspense>
       </div>
-      <client-only>
-        <infinite-loading
-          v-if="showInfinite && messagesForList?.length"
-          :identifier="infiniteId"
-          :distance="distance"
-          @infinite="loadMore"
-        >
-          <template #error>&nbsp;</template>
-          <template #complete>&nbsp;</template>
-          <template #spinner>
-            <div class="text-center">
-              <b-img lazy src="/loader.gif" alt="Loading" width="100px" />
-            </div>
-          </template>
-        </infinite-loading>
-      </client-only>
+      <infinite-loading
+        v-if="showInfinite && messagesForList?.length"
+        :identifier="infiniteId"
+        :distance="distance"
+        @infinite="loadMore"
+      >
+        <template #error>&nbsp;</template>
+        <template #complete>&nbsp;</template>
+        <template #spinner>
+          <div class="text-center">
+            <b-img lazy src="/loader.gif" alt="Loading" width="100px" />
+          </div>
+        </template>
+      </infinite-loading>
     </div>
     <template #fallback>
       <div class="text-center">
