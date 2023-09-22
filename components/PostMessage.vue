@@ -36,7 +36,7 @@
         imgtype="Message"
         imgflag="message"
         :browse="pondBrowse"
-        :multiple="true"
+        :multiple="false"
         @photo-processed="photoProcessed"
         @all-processed="allProcessed"
         @init="hidePhotoButton"
