@@ -36,7 +36,7 @@
         imgtype="Message"
         imgflag="message"
         :browse="pondBrowse"
-        :multiple="false"
+        :multiple="singleInAndroidApp"
         @photo-processed="photoProcessed"
         @all-processed="allProcessed"
         @init="hidePhotoButton"
@@ -77,6 +77,7 @@
 import { uid } from '../composables/useId'
 import { useComposeStore } from '../stores/compose'
 import { useMessageStore } from '../stores/message'
+import { useMobileStore } from '@/stores/mobile'
 import NumberIncrementDecrement from './NumberIncrementDecrement'
 const OurFilePond = () => import('~/components/OurFilePond')
 const PostPhoto = () => import('~/components/PostPhoto')
@@ -153,6 +154,11 @@ export default {
         ? "e.g. colour, condition, size, whether it's working etc."
         : "Explain what you're looking for, and why you'd like it."
     },
+    singleInAndroidApp(){
+      const mobileStore = useMobileStore()
+      if( mobileStore.isApp) return mobileStore.isiOS
+      return true
+    }
   },
   methods: {
     photoAdd() {
