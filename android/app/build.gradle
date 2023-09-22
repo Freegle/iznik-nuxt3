@@ -6,7 +6,7 @@ android {
         applicationId "org.ilovefreegle.direct"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1219
+        versionCode 1220
         versionName "3.0.17"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
