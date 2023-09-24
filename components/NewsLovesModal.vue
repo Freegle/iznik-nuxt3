@@ -13,6 +13,7 @@
           :id="love.userid"
           :key="'love-' + love.userid"
           class="mt-2"
+          @goto="goToProfile(love.userid)"
         />
       </div>
       <template #footer>
