@@ -26,7 +26,6 @@
 <script setup>
 import { useMiscStore } from '../stores/misc'
 import { ref, computed, onBeforeUnmount } from '#imports'
-import { waitForRef } from '~/composables/useWaitForRef'
 
 const props = defineProps({
   adUnitPath: {
@@ -102,13 +101,11 @@ let shownFirst = false
 
 const emit = defineEmits(['rendered'])
 
-async function visibilityChanged(visible) {
+function visibilityChanged(visible) {
   try {
     if (visible && !shownFirst) {
       isVisible.value = visible
       shownFirst = true
-
-      await waitForRef(uniqueid)
 
       window.googletag = window.googletag || { cmd: [] }
       window.googletag.cmd.push(function () {
