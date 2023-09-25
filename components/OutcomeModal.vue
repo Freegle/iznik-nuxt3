@@ -328,8 +328,11 @@ export default {
   },
   methods: {
     async submit() {
-      if (this.type === 'Taken' && !this.tookUsers.length)
+      if (this.type === 'Taken' && !this.tookUsers.length) {
         return (this.submittedWithNoSelectedUser = true)
+      } else {
+        this.submittedWithNoSelectedUser = false
+      }
 
       let complete = false
       this.chooseError = false

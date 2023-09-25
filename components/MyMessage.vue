@@ -201,10 +201,10 @@
                   <span class="small">{{ timeago(message.repostat) }}</span>
                 </b-button>
                 <p
-                  class="invalid-feedback position-absolute text-center"
+                  class="invalid-feedback position-absolute bg-white text-center"
                   :style="{ display: triedToRepost ? 'block' : 'hidden' }"
                 >
-                  Can't repost now
+                  You can't repost until {{ datetimeshort(message.repostat) }}
                 </p>
               </div>
               <b-button
@@ -343,6 +343,7 @@ import { useUserStore } from '../stores/user'
 import { useTrystStore } from '../stores/tryst'
 import { useLocationStore } from '../stores/location'
 import { milesAway } from '../composables/useDistance'
+import { datetimeshort } from '../composables/useTimeFormat'
 import { useRouter } from '#imports'
 import MessagePhotosModal from '~/components/MessagePhotosModal'
 import MyMessagePromisedTo from '~/components/MyMessagePromisedTo'
@@ -710,6 +711,7 @@ export default {
     }
   },
   methods: {
+    datetimeshort,
     toggle() {
       this.expanded = !this.expanded
     },

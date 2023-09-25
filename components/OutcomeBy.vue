@@ -56,7 +56,9 @@
         :state="invalid ? false : null"
         @change="selected"
       />
-      <p v-if="invalid" class="invalid-feedback">Please, select something</p>
+      <p v-if="invalid" class="invalid-feedback">
+        Please select someone from the list above.
+      </p>
     </div>
     <div class="d-block d-md-none">
       <b-form-select
@@ -68,7 +70,9 @@
         :state="invalid ? false : null"
         @change="selected"
       />
-      <p v-if="invalid" class="invalid-feedback">Please, select something</p>
+      <p v-if="invalid" class="invalid-feedback">
+        Please select someone from the list above.
+      </p>
     </div>
     <p class="mt-1 text-muted small">
       This helps us identify reliable freeglers.

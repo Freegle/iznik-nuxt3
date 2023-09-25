@@ -79,7 +79,7 @@
               :state="triedToSave ? !isSaveButtonDisabled : null"
             />
             <p class="invalid-feedback">
-              You must provide a description or attachments
+              Please provide either a description or a photo.
             </p>
           </b-col>
         </b-row>
