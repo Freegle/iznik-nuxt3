@@ -840,4 +840,10 @@ img.attachment {
 :deep(.btn-content) {
   width: 100%;
 }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
 </style>
