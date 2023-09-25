@@ -38,14 +38,17 @@
         <h2>Cookies and Tracking</h2>
         <p>
           You'll have seen lots of irritating popups on websites about consent
-          for cookies. We don't have one of those because we don't store any
-          data for logged out visitors which would require that consent.
+          for cookies. We have one of those too. Sorry, but it's the law.
         </p>
         <p>
           Here are some technical details on what happens when you're logged
           out.
         </p>
         <ul>
+          <li>
+            We store cookies for sessions and for your cookie consent itself.
+            Those are necessary for the site to function.
+          </li>
           <li>
             We store some information in your browser's local storage, because
             of the way the site works. There's not much in it except if you're
@@ -90,6 +93,13 @@
             keep going. We don't pass them any information at all unless you
             click on one of the job links, not even your IP your IP address.
           </li>
+          <li>
+            We show ads from selected partners, using Google's advertising
+            service. You can read more about what Google stores
+            <ExternalLink href="https://business.safety.google/adscookies/"
+              >here</ExternalLink
+            >. The income from these ads helps us keep going.
+          </li>
         </ul>
         <h2>Sentry</h2>
         <p>
@@ -120,6 +130,10 @@
         <h3>Change History</h3>
         <p>Here are the changes to this page.</p>
         <ul class>
+          <li>
+            19/09/2023: We now have a cookie consent banner. Reinstate session
+            coookie, which is in fact used sometimes.
+          </li>
           <li>03/08/2023: Remove session cookie, which is no longer used.</li>
           <li>31/07/2023: Remove Inspectlet, which we no longer use.</li>
           <li>
