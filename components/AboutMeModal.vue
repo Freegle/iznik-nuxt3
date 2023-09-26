@@ -67,10 +67,11 @@ const emit = defineEmits(['dataChange'])
 
 const { modal, hide } = useModal()
 
-const text = ref(null)
+const text = ref(authStore.user.aboutme.text)
 
 async function save() {
   await authStore.saveAboutMe(text.value)
   emit('dataChange')
+  hide()
 }
 </script>
