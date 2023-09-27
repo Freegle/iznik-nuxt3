@@ -383,6 +383,7 @@ export default {
     cancel() {
       this.tookUsers = []
       this.happiness = null
+      this.hide()
     },
   },
 }
