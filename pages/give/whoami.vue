@@ -6,38 +6,41 @@
       </div>
       <h1 class="text-center">Finally, your email address</h1>
       <div class="text-center">
-        <p class="text-muted">
-          We need your email address to let you know when you have replies. We
-          won't give your email to anyone else.
-        </p>
-        <p class="text-muted">
-          You will get emails from us, which you can control or turn off from
-          Settings. Read
-          <nuxt-link no-prefetch target="_blank" to="/terms">
-            Terms of Use
-          </nuxt-link>
-          and
-          <nuxt-link no-prefetch target="_blank" to="/privacy">
-            Privacy
-          </nuxt-link>
-          for details.
-        </p>
-        <p class="text-muted">
-          We may show this post to people who are not yet members of Freegle.
-          This helps the community grow by showing people what's happening and
-          encouraging them to join.
-        </p>
-        <EmailValidator
-          v-model:email="email"
-          v-model:valid="emailValid"
-          center
-          class="align-items-center font-weight-bold"
-        />
-        <EmailBelongsToSomeoneElse
-          v-if="emailValid && emailBelongsToSomeoneElse"
-          class="mb-2"
-          :theirs="email"
-        />
+        <PostLoggedInEmail v-if="loggedIn" />
+        <div v-else>
+          <p>
+            We need your email address to let you know when you have replies. We
+            won't give your email to anyone else.
+          </p>
+          <p>
+            You will get emails from us, which you can control or turn off from
+            Settings. Read
+            <nuxt-link no-prefetch target="_blank" to="/terms">
+              Terms of Use
+            </nuxt-link>
+            and
+            <nuxt-link no-prefetch target="_blank" to="/privacy">
+              Privacy
+            </nuxt-link>
+            for details.
+          </p>
+          <p>
+            We may show this post to people who are not yet members of Freegle.
+            This helps the community grow by showing people what's happening and
+            encouraging them to join.
+          </p>
+          <EmailValidator
+            v-model:email="email"
+            v-model:valid="emailValid"
+            center
+            class="align-items-center font-weight-bold"
+          />
+          <EmailBelongsToSomeoneElse
+            v-if="emailValid && emailBelongsToSomeoneElse"
+            class="mb-2"
+            :theirs="email"
+          />
+        </div>
       </div>
       <div class="d-block d-md-none flex-grow-1" />
       <div class="d-block d-md-none margbott">
@@ -106,6 +109,7 @@ import EmailValidator from '~/components/EmailValidator'
 import NoticeMessage from '~/components/NoticeMessage'
 import SupportLink from '~/components/ExternalLink'
 import EmailBelongsToSomeoneElse from '~/components/EmailBelongsToSomeoneElse'
+import PostLoggedInEmail from '~/components/PostLoggedInEmail'
 import { setup, freegleIt } from '~/composables/useCompose'
 import WizardProgress from '~/components/WizardProgress'
 
@@ -116,6 +120,7 @@ export default {
     EmailBelongsToSomeoneElse,
     EmailValidator,
     WizardProgress,
+    PostLoggedInEmail,
   },
   async setup() {
     const runtimeConfig = useRuntimeConfig()
@@ -152,6 +157,11 @@ export default {
 
     if (!this.postcodeValid) {
       router.push('/give/whereami')
+    }
+
+    if (this.loggedIn) {
+      this.email = this.me.email
+      this.emailValid = this.email?.length
     }
   },
   methods: {

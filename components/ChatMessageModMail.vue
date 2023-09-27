@@ -42,7 +42,7 @@
                   />
                 </span>
               </div>
-              <div v-if="chatmessage.refmsgid">
+              <div v-if="chatmessage.refmsgid && refmsg">
                 <hr />
                 <p>
                   If you have been asked to edit and resend this message, you
@@ -64,6 +64,7 @@ import { useComposeStore } from '../stores/compose'
 import { fetchReferencedMessage } from '../composables/useChat'
 import ChatBase from '~/components/ChatBase'
 import ProfileImage from '~/components/ProfileImage'
+import { useRouter } from '#imports'
 
 export default {
   components: {
@@ -111,7 +112,8 @@ export default {
           message.attachments
         )
 
-        this.$router.push(message.type === 'Offer' ? '/give' : 'find')
+        const router = useRouter()
+        router.push(message.type === 'Offer' ? '/give' : '/find')
       }
     },
   },

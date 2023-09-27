@@ -1,10 +1,9 @@
 <template>
-  <nuxt-link
+  <div
     v-if="user"
-    no-prefetch
-    :to="'/profile/' + user.userid"
-    class="text-success nodecor"
+    class="text-success nodecor clickme"
     :title="'Click to view profile for ' + user.displayname"
+    @click="goto"
   >
     <div class="d-flex">
       <ProfileImage
@@ -38,7 +37,7 @@
         </span>
       </div>
     </div>
-  </nuxt-link>
+  </div>
 </template>
 <script>
 import pluralize from 'pluralize'
@@ -87,6 +86,11 @@ export default {
       }
 
       return ret
+    },
+  },
+  methods: {
+    goto(e) {
+      this.$emit('goto')
     },
   },
 }
