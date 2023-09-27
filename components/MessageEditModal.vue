@@ -260,7 +260,10 @@ export default {
           availableinitially: this.availablenow,
         }
 
+        console.log(this.message.id, this.message.item.id)
         await this.messageStore.patch(params)
+        // await new Promise((resolve) => setTimeout(resolve, 1000))
+        console.log(this.message.id, this.message.item.id)
 
         this.hide()
       }
