@@ -374,6 +374,7 @@ export default {
       }
     },
     show(type) {
+      this.reset()
       this.showModal = true
       this.type = type
     },
@@ -384,14 +385,22 @@ export default {
         outcome: this.type,
       })
 
+      this.reset()
       this.showModal = false
-      this.tookUsers = []
-      this.happiness = null
     },
     cancel() {
+      this.reset()
       this.showModal = false
+    },
+    reset() {
       this.tookUsers = []
       this.happiness = null
+      this.type = null
+      this.happiness = null
+      this.comments = null
+      this.selectedUser = null
+      this.chooseError = false
+      this.completionMessage = null
     },
   },
 }
