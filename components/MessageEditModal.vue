@@ -109,11 +109,6 @@
         spinclass="text-white"
         @click="save"
       />
-      <OutcomeModal
-        v-if="showOutcomeModal"
-        :id="id"
-        @hidden="showOutcomeModal = false"
-      />
     </template>
   </b-modal>
 </template>
@@ -130,13 +125,9 @@ import { useModal } from '~/composables/useModal'
 const OurFilePond = () => import('~/components/OurFilePond')
 const PostItem = () => import('./PostItem')
 const PostPhoto = () => import('./PostPhoto')
-const OutcomeModal = defineAsyncComponent(() =>
-  import('~/components/OutcomeModal')
-)
 
 export default {
   components: {
-    OutcomeModal,
     NumberIncrementDecrement,
     OurFilePond,
     PostCode,
@@ -183,7 +174,6 @@ export default {
       uploading: false,
       myFiles: [],
       image: null,
-      showOutcomeModal: false,
     }
   },
   computed: {
@@ -222,14 +212,6 @@ export default {
             : 'WANTED',
         },
       ]
-    },
-  },
-  watch: {
-    count(newVal) {
-      if (newVal === 0) {
-        this.hide()
-        this.showOutcomeModal = true
-      }
     },
   },
   methods: {
