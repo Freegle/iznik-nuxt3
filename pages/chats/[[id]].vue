@@ -9,9 +9,6 @@
       <h1 class="visually-hidden">Chats</h1>
       <b-row class="m-0">
         <b-col id="chatlist" cols="12" md="4" xl="3" class="p-0 bg-white">
-          <b-button @click="ask"
-            >Show contact details {{ showContactDetailsAskModal }}</b-button
-          >
           <VisibleWhen
             :at="
               selectedChatId
@@ -414,10 +411,6 @@ export default {
 
         this.searching = null
       }
-    },
-    ask() {
-      // TODO Remove this and the button after testing.
-      this.chatStore.showContactDetailsAskModal = true
     },
   },
 }
