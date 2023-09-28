@@ -347,7 +347,7 @@ export default {
       const router = useRouter()
       router.push('/chats')
     },
-    async showhide() {
+    showhide() {
       this.showChatHide = true
     },
     showblock() {
