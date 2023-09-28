@@ -1,40 +1,33 @@
 <template>
   <div>
     <h2 class="visually-hidden">Map of offers and wanteds</h2>
-    <Suspense>
-      <PostMap
-        v-if="initialBounds"
-        v-model:ready="mapready"
-        v-model:bounds="bounds"
-        v-model:show-groups="showGroups"
-        v-model:moved="mapMoved"
-        v-model:zoom="zoom"
-        v-model:centre="centre"
-        v-model:loading="loading"
-        show-isochrones
-        :initial-bounds="initialBounds"
-        :height-fraction="heightFraction"
-        :min-zoom="minZoom"
-        :max-zoom="maxZoom"
-        :post-zoom="10"
-        :force-messages="forceMessages"
-        :type="selectedType"
-        :search="searchOn"
-        :search-on-groups="!mapMoved"
-        :show-many="showMany"
-        :groupid="selectedGroup"
-        :region="region"
-        :can-hide="canHide"
-        @searched="selectedGroup = 0"
-        @messages="messagesChanged($event)"
-        @groups="groupsChanged($event)"
-      />
-      <template #fallback>
-        <div class="invisible" :style="'min-height: ' + mapHeight + 'px'">
-          Loading map...
-        </div>
-      </template>
-    </Suspense>
+    <PostMap
+      v-if="initialBounds"
+      v-model:ready="mapready"
+      v-model:bounds="bounds"
+      v-model:show-groups="showGroups"
+      v-model:moved="mapMoved"
+      v-model:zoom="zoom"
+      v-model:centre="centre"
+      v-model:loading="loading"
+      show-isochrones
+      :initial-bounds="initialBounds"
+      :height-fraction="heightFraction"
+      :min-zoom="minZoom"
+      :max-zoom="maxZoom"
+      :post-zoom="10"
+      :force-messages="forceMessages"
+      :type="selectedType"
+      :search="searchOn"
+      :search-on-groups="!mapMoved"
+      :show-many="showMany"
+      :groupid="selectedGroup"
+      :region="region"
+      :can-hide="canHide"
+      @searched="selectedGroup = 0"
+      @messages="messagesChanged($event)"
+      @groups="groupsChanged($event)"
+    />
     <div v-observe-visibility="mapVisibilityChanged" />
     <div class="rest">
       <div v-if="closestGroups?.length" class="mb-1 border p-2 bg-white">

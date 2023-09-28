@@ -46,14 +46,7 @@
       :key="'notification-' + notification.id"
       link-class="notification-list__item p-1"
     >
-      <Suspense>
-        <NotificationOne :id="notification.id" @show-modal="showAboutMe" />
-        <template #fallback>
-          <div class="invisible" style="min-height: 200px">
-            Loading {{ notification.id }}...
-          </div>
-        </template>
-      </Suspense>
+      <NotificationOne :id="notification.id" @show-modal="showAboutMe" />
     </b-dropdown-item>
     <infinite-loading
       :key="infiniteId"
