@@ -639,7 +639,7 @@
         </b-col>
         <b-col cols="0" xl="3" />
       </b-row>
-      <about-me-modal
+      <AboutMeModal
         v-if="showAboutMeModal"
         @hidden="showAboutMeModal = false"
         @data-change="update"
