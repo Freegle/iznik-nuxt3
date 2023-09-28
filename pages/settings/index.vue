@@ -832,7 +832,7 @@ export default {
       // - Basic.  OFFER/WANTED, chat messages,
       // - Full.  OFFER/WANTED, community event, volunteer ops, chitchat, notifications,
       get() {
-        return this.me.settings?.simplemail
+        return this.me?.settings?.simplemail
           ? this.me.settings.simplemail
           : 'Full'
       },
