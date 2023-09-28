@@ -326,7 +326,6 @@ export default {
     onShow() {
       this.showMap = true
       // Fetch the current addresses before opening the modal.
-      this.showModal = true
 
       this.selectFirst()
 
@@ -335,7 +334,6 @@ export default {
       }
     },
     onHide() {
-      this.showModal = false
       this.showAdd = false
       this.showMap = false
       this.$emit('hidden')
