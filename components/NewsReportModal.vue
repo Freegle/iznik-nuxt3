@@ -1,7 +1,7 @@
 <template>
   <b-modal
     :id="'newsReportModal-' + id"
-    re="modal"
+    ref="modal"
     scrollable
     title="Report a post"
     size="lg"
