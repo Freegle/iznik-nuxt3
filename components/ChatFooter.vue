@@ -127,9 +127,8 @@
               'You need to wait a day since the last message before nudging.'
             "
             class="d-inline"
-            @click="nudgeTooSoon"
           >
-            <b-button variant="secondary" class="mr-2" disabled>
+            <b-button variant="secondary" class="mr-2" @click="nudgeTooSoon">
               <v-icon icon="bell" class="fa-fw" />&nbsp;Nudge
             </b-button>
           </div>
@@ -425,6 +424,9 @@ export default {
     },
     nudge() {
       this.showNudgeWarningModal = true
+    },
+    nudgeTooSoon() {
+      this.showNudgeTooSoonWarningModal = true
     },
     newline() {
       const p = this.$refs.chatarea.selectionStart

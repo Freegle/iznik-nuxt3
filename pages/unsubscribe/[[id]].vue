@@ -69,6 +69,7 @@
                 v-model:email="email"
                 v-model:valid="emailValid"
                 label=""
+                class="mb-2"
               />
               <nuxt-link to="/settings" no-prefetch class="mb-2 mr-2">
                 <b-button size="lg" variant="primary">
