@@ -121,7 +121,6 @@ export default {
     return {
       showShare: false,
       showAdd: false,
-      showNewsPhotoModal: false,
     }
   },
   computed: {
