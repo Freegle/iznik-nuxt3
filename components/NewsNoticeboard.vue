@@ -56,10 +56,9 @@
       </nuxt-link>
     </div>
     <NewsShareModal
-      v-if="newsfeedModal"
-      ref="newsshare"
-      :newsfeed="newsfeedModal"
-      @hidden="newsfeedModal = false"
+      v-if="showNewsShareModal"
+      :newsfeed="newsfeed.storyid"
+      @hidden="showNewsShareModal = false"
     />
   </div>
 </template>

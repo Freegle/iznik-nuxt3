@@ -60,10 +60,9 @@
       </template>
     </b-modal>
     <NewsShareModal
-      v-if="newsfeedModal"
-      ref="newsshare"
-      :newsfeed="newsfeedModal"
-      @hidden="newsfeedModal = false"
+      v-if="showNewsShareModal"
+      :id="newsfeed.storyid"
+      @hidden="showNewsShareModal = false"
     />
   </div>
 </template>

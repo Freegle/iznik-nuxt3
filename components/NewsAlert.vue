@@ -51,10 +51,9 @@
       @hidden="showNewsPhotoModal = false"
     />
     <NewsShareModal
-      v-if="showNewsfeedModal"
-      ref="newsshare"
-      :newsfeed="showNewsfeedModal"
-      @hidden="showNewsfeedModal = false"
+      v-if="showNewsShareModal"
+      :newsfeed="newsfeed.storyid"
+      @hidden="showNewsShareModal = false"
     />
   </div>
 </template>
@@ -78,11 +77,6 @@ export default {
     NewsPhotoModal,
   },
   extends: NewsBase,
-  data() {
-    return {
-      showNewsfeedModal: false,
-    }
-  },
 }
 </script>
 <style scoped lang="scss">
