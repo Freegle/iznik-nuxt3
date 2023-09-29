@@ -85,6 +85,19 @@ export default {
       required: true,
     },
   },
+  setup() {
+    const newsfeedStore = useNewsfeedStore()
+    const imageStore = useImageStore()
+
+    const { modal, hide } = useModal()
+
+    return {
+      newsfeedStore,
+      imageStore,
+      modal,
+      hide,
+    }
+  },
   data() {
     return {
       cacheBust: Date.now(),
@@ -104,19 +117,6 @@ export default {
   methods: {
     remove() {
       this.$emit('remove', this.id)
-    },
-    setup() {
-      const newsfeedStore = useNewsfeedStore()
-      const imageStore = useImageStore()
-
-      const { modal, hide } = useModal()
-
-      return {
-        newsfeedStore,
-        imageStore,
-        modal,
-        hide,
-      }
     },
     async rotate(deg) {
       const data = {
