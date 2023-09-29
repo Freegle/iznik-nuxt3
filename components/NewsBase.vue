@@ -19,6 +19,7 @@ export default {
       replyingTo: null,
       threadcomment: null,
       newsfeedModal: null,
+      showNewsPhotoModal: false,
     }
   },
   computed: {
@@ -49,7 +50,7 @@ export default {
       this.$refs.newsshare?.show()
     },
     showPhotoModal() {
-      this.$refs.photoModal?.show()
+      this.showNewsPhotoModal = true
     },
   },
 }
