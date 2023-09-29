@@ -223,7 +223,6 @@
   </div>
 </template>
 <script>
-import { defineAsyncComponent } from 'vue'
 import { useNewsfeedStore } from '../stores/newsfeed'
 import SpinButton from './SpinButton'
 import AutoHeightTextarea from './AutoHeightTextarea'
