@@ -52,7 +52,7 @@
     />
     <NewsShareModal
       v-if="showNewsShareModal"
-      :newsfeed="newsfeed.storyid"
+      :newsfeed="newsfeed"
       @hidden="showNewsShareModal = false"
     />
   </div>

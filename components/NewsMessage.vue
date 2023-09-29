@@ -61,7 +61,7 @@
     </b-modal>
     <NewsShareModal
       v-if="showNewsShareModal"
-      :id="newsfeed.storyid"
+      :newsfeed="newsfeed"
       @hidden="showNewsShareModal = false"
     />
   </div>
