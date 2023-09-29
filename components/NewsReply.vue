@@ -262,13 +262,13 @@
       @photo-processed="photoProcessed"
     />
     <NewsPhotoModal
-      v-if="reply.image"
+      v-if="showNewsPhotoModal && reply.image"
       :id="reply.image.id"
-      ref="replyPhotoModal"
       :newsfeedid="reply.id"
       :src="reply.image.path"
       imgtype="Newsfeed"
       imgflag="Newsfeed"
+      @hidden="showNewsPhotoModal = false"
     />
     <ProfileModal
       v-if="showProfileModal"
@@ -308,6 +308,9 @@ import ChatButton from '~/components/ChatButton'
 import NewsPreview from '~/components/NewsPreview'
 import ProfileImage from '~/components/ProfileImage'
 
+const NewsPhotoModal = defineAsyncComponent(() =>
+  import('./NewsPhotoModal.vue')
+)
 const NewsLovesModal = defineAsyncComponent(() => import('./NewsLovesModal'))
 const NewsEditModal = defineAsyncComponent(() => import('./NewsEditModal'))
 const ProfileModal = defineAsyncComponent(() =>
@@ -323,6 +326,7 @@ const OurAtTa = () => import('~/components/OurAtTa')
 export default {
   name: 'NewsReply',
   components: {
+    NewsPhotoModal,
     NewsEditModal,
     NewsReplies,
     SpinButton,
@@ -360,7 +364,7 @@ export default {
       required: true,
     },
   },
-  setup(props) {
+  setup() {
     const newsfeedStore = useNewsfeedStore()
     const userStore = useUserStore()
     const miscStore = useMiscStore()
@@ -386,6 +390,7 @@ export default {
       hasBecomeVisible: false,
       isVisible: false,
       showProfileModal: false,
+      showNewsPhotoModal: false,
     }
   },
   computed: {
@@ -589,7 +594,7 @@ export default {
       }
     },
     showReplyPhotoModal() {
-      this.$refs.replyPhotoModal?.show()
+      this.showNewsPhotoModal = true
     },
   },
 }
