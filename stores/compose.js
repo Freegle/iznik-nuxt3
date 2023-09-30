@@ -40,7 +40,6 @@ export const useComposeStore = defineStore({
     postcode: null,
     group: null,
     messages: [],
-    _attachments: {},
     attachmentBump: 1,
     _progress: 1,
     max: 4,
@@ -76,9 +75,10 @@ export const useComposeStore = defineStore({
     async createDraft(message, email) {
       const attids = []
 
-      if (this._attachments[message.id]) {
-        for (const att in this._attachments[message.id]) {
-          attids.push(this._attachments[message.id][att].id)
+      // extract id from message.attachments
+      if (message.attachments) {
+        for (const attachment of message.attachments) {
+          attids.push(attachment.id)
         }
       }
 
@@ -245,25 +245,27 @@ export const useComposeStore = defineStore({
       this.messages[id].savedAt = Date.now()
     },
     addAttachment(params) {
-      this._attachments[params.id] = this._attachments[params.id]
-        ? this._attachments[params.id]
+      console.log('Add attachment', params, this.messages[params.id])
+      this.messages[params.id].attachments = this.messages[params.id]
+        .attachments
+        ? this.messages[params.id].attachments
         : []
-      this._attachments[params.id].push(params.attachment)
+      this.messages[params.id].attachments.push(params.attachment)
       this.attachmentBump++
     },
     setAttachmentsForMessage(id, attachments) {
-      this._attachments[id] = attachments
+      this.messages[id].attachments = attachments
     },
     removeAttachment(params) {
-      const newAtts = this._attachments[params.id].filter((obj) => {
+      const newAtts = this.messages[params.id].attachments.filter((obj) => {
         return parseInt(obj.id) !== parseInt(params.photoid)
       })
 
-      this._attachments[params.id] = newAtts
+      this.messages[params.id].attachments = newAtts
     },
     deleteMessage(id) {
       this.messages = this.messages.filter((m) => m.id !== id)
-      this._attachments[id] = []
+      this.messages[id].attachments = []
     },
     async submit(params) {
       // This is the most important bit of code in the client :-).  We have our messages in the compose store.
@@ -294,7 +296,7 @@ export const useComposeStore = defineStore({
             message.repostof,
             this.email,
             message,
-            this._attachments[message.id]
+            this.messages[message.id].attachments
           )
 
           let result
@@ -324,9 +326,9 @@ export const useComposeStore = defineStore({
 
             const attids = []
 
-            if (this._attachments[message.id]) {
-              for (const att in this._attachments[message.id]) {
-                attids.push(this._attachments[message.id][att].id)
+            if (this.messages[messages.id].attachments) {
+              for (const att in this.messages[message.id].attachments) {
+                attids.push(this.messages[message.id].attachments[att].id)
               }
             }
 
@@ -403,7 +405,6 @@ export const useComposeStore = defineStore({
     },
     clearMessages() {
       this.messages = []
-      this._attachments = {}
     },
   },
   getters: {
@@ -457,8 +458,8 @@ export const useComposeStore = defineStore({
       return ret
     },
     attachments: (state) => (id) => {
-      return state.attachmentBump && state._attachments[id]
-        ? state._attachments[id]
+      return state.attachmentBump && state.messages[id]?.attachments
+        ? state.messages[id].attachments
         : []
     },
     progress: (state) => {
@@ -476,10 +477,7 @@ export const useComposeStore = defineStore({
         valid = true
 
         for (const message of messages) {
-          const atts =
-            message.id in state._attachments && state._attachments[message.id]
-              ? Object.values(state._attachments[message.id])
-              : []
+          const atts = message.attachments ? message.attachments : []
 
           // A message is valid if there is an item, and either a description or a photo.
           if (
