@@ -91,6 +91,18 @@ export default {
       // Get chats and poll regularly for new ones
       const chatStore = useChatStore()
       chatStore.pollForChatUpdates()
+    } else if (process.client) {
+      // We only add the cookie banner for logged out users.  This reduces costs.  For logged-in users, we assume
+      // they have already seen the banner and specified a preference if they care.
+      //
+      // Add 'https://cdn-cookieyes.com/client_data/fd4582b38fa7a9f269114304/script.js' to head
+      const script = document.createElement('script')
+      script.setAttribute(
+        'src',
+        'https://cdn-cookieyes.com/client_data/fd4582b38fa7a9f269114304/script.js'
+      )
+
+      document.head.appendChild(script)
     }
 
     try {
