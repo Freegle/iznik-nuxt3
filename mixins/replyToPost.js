@@ -61,7 +61,6 @@ export default {
           )
 
           // Open the chat, which will send the message and go to the chat.  The chat will clear the store.
-          await this.waitForRef('replyToPostChatButton')
           await this.$refs.replyToPostChatButton.openChat(
             null,
             this.replyToSend.replyMessage,

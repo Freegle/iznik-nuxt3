@@ -220,7 +220,7 @@ export default {
           // Show the new user modal.
           this.newUserPassword = ret.password
           this.showNewUser = true
-          await this.waitForRef('newUserModal')
+
           // Now that we are logged in, we can reply.
           this.$refs.newUserModal?.show()
 
