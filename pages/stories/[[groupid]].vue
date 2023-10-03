@@ -41,7 +41,10 @@
         </b-col>
         <b-col cols="0" md="3" class="d-none d-md-block" />
       </b-row>
-      <StoryAddModal ref="addmodal" />
+      <StoryAddModal
+        v-if="showStoryAddModal"
+        @hidden="showStoryAddModal = false"
+      />
     </div>
   </client-only>
 </template>
@@ -51,8 +54,9 @@ import { buildHead } from '../../composables/useBuildHead'
 import { useGroupStore } from '../../stores/group'
 import GroupSelect from '~/components/GroupSelect'
 import StoryOne from '~/components/StoryOne'
-import StoryAddModal from '~/components/StoryAddModal'
-import { ref, computed, useRoute, useRouter } from '#imports'
+const StoryAddModal = defineAsyncComponent(() =>
+  import('~/components/StoryAddModal')
+)
 
 const LIMIT = 20
 
@@ -98,10 +102,10 @@ const sortedStories = computed(() => {
   return []
 })
 
-const addmodal = ref(null)
+const showStoryAddModal = ref(false)
 
 const showAddModal = function () {
-  addmodal.value.show()
+  showStoryAddModal.value = true
 }
 
 const changeGroup = function (newval) {

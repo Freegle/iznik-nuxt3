@@ -57,7 +57,7 @@
       <b-col cols="0" md="3" class="d-none d-md-block" />
     </b-row>
     <client-only>
-      <PosterModal ref="modal" />
+      <PosterModal v-if="showPosterModal" @hidden="showPosterModal = false" />
     </client-only>
   </div>
 </template>
@@ -68,7 +68,9 @@ import { loadLeaflet, attribution, osmtile } from '~/composables/useMap'
 import NoticeboardDetails from '~/components/NoticeboardDetails'
 import { buildHead } from '~/composables/useBuildHead'
 import { useNoticeboardStore } from '~/stores/noticeboard'
-import PosterModal from '~/components/PosterModal'
+const PosterModal = defineAsyncComponent(() =>
+  import('~/components/PosterModal')
+)
 
 const runtimeConfig = useRuntimeConfig()
 const route = useRoute()
@@ -118,6 +120,7 @@ export default {
   data() {
     return {
       center: [53.945, -2.5209],
+      showPosterModal: false,
     }
   },
   computed: {},
@@ -125,9 +128,8 @@ export default {
     await loadLeaflet()
   },
   methods: {
-    async added() {
-      await this.waitForRef('modal')
-      this.$refs.modal.show()
+    added() {
+      this.showPosterModal = true
     },
     goto(id) {
       this.$router.push('/noticeboards/' + id)

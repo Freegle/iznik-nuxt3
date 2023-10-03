@@ -316,8 +316,24 @@
                     of Freegle.
                   </span>
                 </p>
+                <NoticeMessage
+                  v-if="
+                    simpleEmailSetting === 'None' || !notificationSettings.email
+                  "
+                  variant="danger"
+                  class="mb-1"
+                >
+                  <p>
+                    If people message you, you won't get any emails. Please make
+                    sure you check Chats regularly so that you don't miss
+                    anything.
+                  </p>
+                  <p v-if="simpleEmailSetting !== 'None'">
+                    You can change this below in "Mail me replies".
+                  </p>
+                </NoticeMessage>
                 <notice-message
-                  v-if="simpleEmailSetting !== 'None'"
+                  v-else-if="simpleEmailSetting !== 'None'"
                   variant="warning"
                   class="mb-2"
                 >
@@ -345,15 +361,6 @@
                     community.
                   </p>
                   <div v-else>
-                    <NoticeMessage
-                      v-if="simpleEmailSetting === 'None'"
-                      variant="danger"
-                      class="mb-1"
-                    >
-                      If people message you, you won't get any emails. Please
-                      make sure you check Chats regularly so that you don't miss
-                      anything.
-                    </NoticeMessage>
                     <div v-if="simpleEmailSetting !== 'None'">
                       <SettingsGroup
                         v-model:emailfrequency="emailSimple"
@@ -632,10 +639,24 @@
         </b-col>
         <b-col cols="0" xl="3" />
       </b-row>
-      <AboutMeModal ref="aboutmemodal" @datachange="update" />
-      <ProfileModal :id="me ? me.id : null" ref="profilemodal" />
-      <EmailConfirmModal ref="emailconfirm" />
-      <AddressModal ref="addressModal" />
+      <AboutMeModal
+        v-if="showAboutMeModal"
+        @hidden="showAboutMeModal = false"
+        @data-change="update"
+      />
+      <ProfileModal
+        v-if="showProfileModal"
+        :id="me ? me.id : null"
+        @hidden="showProfileModal = false"
+      />
+      <EmailConfirmModal
+        v-if="showEmailConfirmModal"
+        @hidden="showEmailConfirmModal = false"
+      />
+      <AddressModal
+        v-if="showAddressModal"
+        @hidden="showAddressModal = false"
+      />
     </div>
   </client-only>
 </template>
@@ -651,19 +672,27 @@ import EmailValidator from '~/components/EmailValidator'
 import SettingsEmailInfo from '~/components/SettingsEmailInfo'
 import SettingsPhone from '~/components/SettingsPhone'
 import SupporterInfo from '~/components/SupporterInfo'
-import EmailConfirmModal from '~/components/EmailConfirmModal'
 import ProfileImage from '~/components/ProfileImage'
 import PostCode from '~/components/PostCode'
 
-import AboutMeModal from '~/components/AboutMeModal'
-import AddressModal from '~/components/AddressModal'
-import ProfileModal from '~/components/ProfileModal'
 import SettingsGroup from '~/components/SettingsGroup'
 import NoticeMessage from '~/components/NoticeMessage'
 import OurFilePond from '~/components/OurFilePond'
 import OurToggle from '~/components/OurToggle'
 import DonationButton from '~/components/DonationButton'
 import PasswordEntry from '~/components/PasswordEntry'
+const EmailConfirmModal = defineAsyncComponent(() =>
+  import('~/components/EmailConfirmModal')
+)
+const AddressModal = defineAsyncComponent(() =>
+  import('~/components/AddressModal')
+)
+const AboutMeModal = defineAsyncComponent(() =>
+  import('~/components/AboutMeModal')
+)
+const ProfileModal = defineAsyncComponent(() =>
+  import('~/components/ProfileModal')
+)
 
 definePageMeta({
   layout: 'login',
@@ -728,6 +757,10 @@ export default {
       userTimer: null,
       autoreposts: true,
       enterNewLine: false,
+      showAddressModal: false,
+      showAboutMeModal: false,
+      showProfileModal: false,
+      showEmailConfirmModal: false,
     }
   },
   computed: {
@@ -825,7 +858,7 @@ export default {
       // - Basic.  OFFER/WANTED, chat messages,
       // - Full.  OFFER/WANTED, community event, volunteer ops, chitchat, notifications,
       get() {
-        return this.me.settings?.simplemail
+        return this.me?.settings?.simplemail
           ? this.me.settings.simplemail
           : 'Full'
       },
@@ -887,7 +920,6 @@ export default {
         return simple.emailFrequency
       },
       set(newValue) {
-        console.log('Change email simple', newValue)
         this.changeAllGroups('emailfrequency', newValue)
       },
     },
@@ -922,6 +954,17 @@ export default {
     this.autoreposts = !this.me?.settings?.autorepostsdisable
     this.enterNewLine = this.me?.settings?.enterNewLine
 
+    if (
+      this.simpleEmailSetting === 'Full' ||
+      this.simpleEmailSetting === 'Basic'
+    ) {
+      // Double check that we have chat notification emails enabled, as we should for this setting.
+      // If we don't then force display to advanced so that they can change this.
+      if (!this.notificationSettings.email) {
+        this.showAdvanced = true
+      }
+    }
+
     setTimeout(this.checkUser, 200)
   },
   methods: {
@@ -955,13 +998,10 @@ export default {
     },
     async addAbout() {
       await this.fetch()
-
-      await this.waitForRef('aboutmemodal')
-      this.$refs.aboutmemodal.show()
+      this.showAboutMeModal = true
     },
-    async viewProfile() {
-      await this.waitForRef('profilemodal')
-      this.$refs.profilemodal.show()
+    viewProfile() {
+      this.showProfileModal = true
     },
     async changeUseProfile(c, e) {
       const settings = this.me.settings
@@ -990,8 +1030,7 @@ export default {
         })
 
         if (data && data.ret === 10) {
-          await this.waitForRef('emailconfirm')
-          this.$refs.emailconfirm.show()
+          this.showEmailConfirmModal = true
         }
       }
 
@@ -1104,8 +1143,7 @@ export default {
     async addressBook() {
       // Fetch the address book here to avoid an async setup which causes issues with waitForRef.
       await this.addressStore.fetch()
-
-      this.$refs.addressModal.show()
+      this.showAddressModal = true
     },
     photoProcessed(imageid, imagethumb, image) {
       // We have uploaded a photo.  Remove the filepond instance.

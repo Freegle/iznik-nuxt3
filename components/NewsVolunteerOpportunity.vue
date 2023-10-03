@@ -68,13 +68,13 @@
     </div>
     <VolunteerOpportunityModal
       v-if="showAddOpportunity"
-      ref="addOpportunity"
       :start-edit="true"
+      @hidden="showAddOpportunity"
     />
     <VolunteerOpportunityModal
       v-if="showMoreInfo"
       :id="newsfeed.volunteeringid"
-      ref="moreInfo"
+      @hidden="showMoreInfo = false"
     />
   </div>
 </template>
@@ -86,7 +86,9 @@ import { useGroupStore } from '../stores/group'
 import NewsBase from '~/components/NewsBase'
 import NewsLoveComment from '~/components/NewsLoveComment'
 import ProfileImage from '~/components/ProfileImage'
-const VolunteerOpportunityModal = () => import('./VolunteerOpportunityModal')
+const VolunteerOpportunityModal = defineAsyncComponent(() =>
+  import('./VolunteerOpportunityModal')
+)
 
 export default {
   components: {
@@ -136,15 +138,11 @@ export default {
     },
   },
   methods: {
-    async moreInfo() {
+    moreInfo() {
       this.showMoreInfo = true
-      await this.waitForRef('moreInfo')
-      this.$refs.moreInfo?.show()
     },
-    async addOpportunity() {
+    addOpportunity() {
       this.showAddOpportunity = true
-      await this.waitForRef('addOpportunity')
-      this.$refs.addOpportunity?.show()
     },
     group(groupid) {
       return this.groupStore?.get(groupid)

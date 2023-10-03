@@ -1,221 +1,214 @@
 <template>
-  <div>
-    <b-modal
-      v-if="message"
-      id="promisemodal"
-      v-model="showModal"
-      scrollable
-      size="lg"
-      no-stacking
-      dialog-class="maxWidth"
-    >
-      <template #title>
-        <h3 class="d-flex justify-content-between">
-          {{ message.subject }}
-          <div>
-            <b-badge
-              v-if="message.availablenow > 1"
-              variant="info"
-              class="lg ml-2"
-            >
-              {{ left }} left
-            </b-badge>
-          </div>
-        </h3>
-      </template>
-      <template #default>
-        <NoticeMessage v-if="type === 'Withdrawn'" variant="info">
-          <p>
-            If everything worked out OK, then use
-            <strong
-              >Mark as <span v-if="message.type === 'Offer'">TAKEN</span
-              ><span v-else>RECEIVED</span></strong
-            >
-            to let us know.
-          </p>
-          <div v-if="message.type === 'Offer'">
-            <p>
-              Only use <strong>Withdraw</strong> if you didn't manage to pass on
-              this item on Freegle, and it's no longer available.
-            </p>
-          </div>
-          <div v-else>
-            <p>
-              Only use <strong>Withdraw</strong> if you are no longer looking
-              for this item.
-            </p>
-          </div>
-        </NoticeMessage>
-        <div v-if="type === 'Taken'">
-          <OutcomeBy
-            :availablenow="
-              typeof message.availablenow === 'number'
-                ? message.availablenow
-                : 1
-            "
-            :type="type"
-            :msgid="message.id"
-            :left="left"
-            :taken-by="takenBy"
-            :choose-error="chooseError"
-            :invalid="submittedWithNoSelectedUser"
-            @took-users="tookUsers = $event"
-          />
+  <b-modal
+    ref="modal"
+    scrollable
+    size="lg"
+    no-stacking
+    dialog-class="maxWidth"
+    @hidden="onHide"
+  >
+    <template #title>
+      <h3 class="d-flex justify-content-between">
+        {{ message.subject }}
+        <div>
+          <b-badge
+            v-if="message.availablenow > 1"
+            variant="info"
+            class="lg ml-2"
+          >
+            {{ left }} left
+          </b-badge>
         </div>
-        <div v-if="showCompletion">
-          <div
-            v-if="
-              type === 'Taken' && tookUsers?.length && otherRepliers?.length
-            "
+      </h3>
+    </template>
+    <template #default>
+      <NoticeMessage v-if="type === 'Withdrawn'" variant="info">
+        <p>
+          If everything worked out OK, then use
+          <strong
+            >Mark as <span v-if="message.type === 'Offer'">TAKEN</span
+            ><span v-else>RECEIVED</span></strong
           >
-            <label class="strong">
-              Message for other people who replied (optional):
-            </label>
-            <b-form-textarea
-              v-model="completionMessage"
-              :rows="3"
-              :max-rows="6"
-              class="mt-1"
-              placeholder="e.g. Thanks for the interest. Sorry, this went to someone else."
-            />
-            <p class="mt-1 text-muted small">
-              <v-icon icon="lock" /> We'll send this same message privately in
-              Chat to each other freegler who replied to your post.
-            </p>
-          </div>
-          <hr class="mb-0" />
-          <div>
-            <label class="mt-3 strong">
-              How do you feel about freegling just now?
-            </label>
-            <b-button-group class="d-none d-md-block mt-1">
-              <b-button
-                :pressed="happiness === 'Happy'"
-                :variant="happiness === 'Happy' ? 'info' : 'primary'"
-                size="lg"
-                class="shadow-none"
-                @click="happiness = 'Happy'"
-              >
-                <v-icon icon="smile" scale="2" /> Happy
-              </b-button>
-              <b-button
-                :pressed="happiness === 'Fine'"
-                :variant="happiness === 'Fine' ? 'info' : 'white'"
-                size="lg"
-                class="shadow-none"
-                @click="happiness = 'Fine'"
-              >
-                <v-icon icon="meh" scale="2" color="grey" /> Fine
-              </b-button>
-              <b-button
-                :pressed="happiness === 'Unhappy'"
-                :variant="happiness === 'Unhappy' ? 'info' : 'danger'"
-                size="lg"
-                class="shadow-none"
-                @click="happiness = 'Unhappy'"
-              >
-                <v-icon icon="frown" scale="2" /> Sad
-              </b-button>
-            </b-button-group>
-            <b-button-group class="d-block d-md-none">
-              <b-button
-                :pressed="happiness === 'Happy'"
-                :variant="happiness === 'Happy' ? 'info' : 'primary'"
-                size="md"
-                class="shadow-none"
-                @click="happiness = 'Happy'"
-              >
-                <v-icon icon="smile" scale="2" /> Happy
-              </b-button>
-              <b-button
-                :pressed="happiness === 'Fine'"
-                :variant="happiness === 'Fine' ? 'info' : 'white'"
-                size="md"
-                class="shadow-none"
-                @click="happiness = 'Fine'"
-              >
-                <v-icon icon="meh" scale="2" color="grey" /> Fine
-              </b-button>
-              <b-button
-                :pressed="happiness === 'Unhappy'"
-                :variant="happiness === 'Unhappy' ? 'info' : 'danger'"
-                size="md"
-                class="shadow-none"
-                @click="happiness = 'Unhappy'"
-              >
-                <v-icon icon="frown" scale="2" /> Sad
-              </b-button>
-            </b-button-group>
-          </div>
-          <NoticeMessage
-            v-if="happiness !== null && type === 'Taken'"
-            class="mt-2"
-          >
-            You can use the thumbs up/down buttons above to say how things went
-            with other freeglers.
-          </NoticeMessage>
-          <div>
-            <label class="mt-4 strong"> It went well/badly because: </label>
-            <b-form-textarea
-              v-model="comments"
-              rows="3"
-              max-rows="6"
-              class="border-primary mt-1"
-            />
-            <div class="text-muted small mt-2">
-              <span
-                v-if="
-                  happiness === null ||
-                  happiness === 'Happy' ||
-                  happiness === 'Fine'
-                "
-              >
-                <v-icon icon="globe-europe" /> Your comments may be public
-              </span>
-              <span v-if="happiness === 'Unhappy'">
-                <v-icon icon="lock" /> Your comments will only go to our
-                volunteers
-              </span>
-            </div>
-          </div>
+          to let us know.
+        </p>
+        <div v-if="message.type === 'Offer'">
+          <p>
+            Only use <strong>Withdraw</strong> if you didn't manage to pass on
+            this item on Freegle, and it's no longer available.
+          </p>
+        </div>
+        <div v-else>
+          <p>
+            Only use <strong>Withdraw</strong> if you are no longer looking for
+            this item.
+          </p>
+        </div>
+      </NoticeMessage>
+      <div v-if="type === 'Taken'">
+        <OutcomeBy
+          :availablenow="
+            typeof message.availablenow === 'number' ? message.availablenow : 1
+          "
+          :type="type"
+          :msgid="message.id"
+          :left="left"
+          :taken-by="takenBy"
+          :choose-error="chooseError"
+          @took-users="tookUsers = $event"
+        />
+      </div>
+      <div v-if="showCompletion">
+        <div
+          v-if="type === 'Taken' && tookUsers?.length && otherRepliers?.length"
+        >
+          <label class="strong">
+            Message for other people who replied (optional):
+          </label>
+          <b-form-textarea
+            v-model="completionMessage"
+            :rows="3"
+            :max-rows="6"
+            class="mt-1"
+            placeholder="e.g. Thanks for the interest. Sorry, this went to someone else."
+          />
+          <p class="mt-1 text-muted small">
+            <v-icon icon="lock" /> We'll send this same message privately in
+            Chat to each other freegler who replied to your post.
+          </p>
+        </div>
+        <hr class="mb-0" />
+        <div>
+          <label class="mt-3 strong">
+            How do you feel about freegling just now?
+          </label>
+          <b-button-group class="d-none d-md-block mt-1">
+            <b-button
+              :pressed="happiness === 'Happy'"
+              :variant="happiness === 'Happy' ? 'info' : 'primary'"
+              size="lg"
+              class="shadow-none"
+              @click="happiness = 'Happy'"
+            >
+              <v-icon icon="smile" scale="2" /> Happy
+            </b-button>
+            <b-button
+              :pressed="happiness === 'Fine'"
+              :variant="happiness === 'Fine' ? 'info' : 'white'"
+              size="lg"
+              class="shadow-none"
+              @click="happiness = 'Fine'"
+            >
+              <v-icon icon="meh" scale="2" color="grey" /> Fine
+            </b-button>
+            <b-button
+              :pressed="happiness === 'Unhappy'"
+              :variant="happiness === 'Unhappy' ? 'info' : 'danger'"
+              size="lg"
+              class="shadow-none"
+              @click="happiness = 'Unhappy'"
+            >
+              <v-icon icon="frown" scale="2" /> Sad
+            </b-button>
+          </b-button-group>
+          <b-button-group class="d-block d-md-none">
+            <b-button
+              :pressed="happiness === 'Happy'"
+              :variant="happiness === 'Happy' ? 'info' : 'primary'"
+              size="md"
+              class="shadow-none"
+              @click="happiness = 'Happy'"
+            >
+              <v-icon icon="smile" scale="2" /> Happy
+            </b-button>
+            <b-button
+              :pressed="happiness === 'Fine'"
+              :variant="happiness === 'Fine' ? 'info' : 'white'"
+              size="md"
+              class="shadow-none"
+              @click="happiness = 'Fine'"
+            >
+              <v-icon icon="meh" scale="2" color="grey" /> Fine
+            </b-button>
+            <b-button
+              :pressed="happiness === 'Unhappy'"
+              :variant="happiness === 'Unhappy' ? 'info' : 'danger'"
+              size="md"
+              class="shadow-none"
+              @click="happiness = 'Unhappy'"
+            >
+              <v-icon icon="frown" scale="2" /> Sad
+            </b-button>
+          </b-button-group>
         </div>
         <NoticeMessage
-          v-if="message.availableinitially > 1 && left > 0"
-          variant="warning"
+          v-if="happiness !== null && type === 'Taken'"
+          class="mt-2"
         >
-          There will still be some left. If you're giving them all away now,
-          please adjust the numbers above.
+          You can use the thumbs up/down buttons above to say how things went
+          with other freeglers.
         </NoticeMessage>
-      </template>
-      <template #footer>
         <div>
-          <div class="d-flex flex-wrap justify-content-end">
-            <b-button variant="secondary" @click="cancel"> Cancel </b-button>
-            <SpinButton
-              variant="primary"
-              name="save"
-              :label="buttonLabel"
-              class="ml-2"
-              spinclass="text-white"
-              @handle="submit"
-            />
+          <label class="mt-4 strong"> It went well/badly because: </label>
+          <b-form-textarea
+            v-model="comments"
+            rows="3"
+            max-rows="6"
+            class="border-primary mt-1"
+          />
+          <div class="text-muted small mt-2">
+            <span
+              v-if="
+                happiness === null ||
+                happiness === 'Happy' ||
+                happiness === 'Fine'
+              "
+            >
+              <v-icon icon="globe-europe" /> Your comments may be public
+            </span>
+            <span v-if="happiness === 'Unhappy'">
+              <v-icon icon="lock" /> Your comments will only go to our
+              volunteers
+            </span>
           </div>
         </div>
-      </template>
-    </b-modal>
-  </div>
+      </div>
+      <NoticeMessage
+        v-if="message.availableinitially > 1 && left > 0"
+        variant="warning"
+      >
+        There will still be some left. If you're giving them all away now,
+        please adjust the numbers above.
+      </NoticeMessage>
+    </template>
+    <template #footer>
+      <div>
+        <div class="d-flex flex-wrap justify-content-end">
+          <b-button variant="secondary" @click="cancel"> Cancel </b-button>
+          <SpinButton
+            variant="primary"
+            name="save"
+            :label="buttonLabel"
+            class="ml-2"
+            spinclass="text-white"
+            :disabled="type === 'Taken' && !tookUsers.length"
+            @handle="submit"
+          />
+        </div>
+      </div>
+    </template>
+  </b-modal>
 </template>
+
 <script>
 import { useMessageStore } from '../stores/message'
 import { useChatStore } from '../stores/chat'
 import OutcomeBy from './OutcomeBy'
 import SpinButton from './SpinButton'
-import modal from '@/mixins/modal'
 import NoticeMessage from '~/components/NoticeMessage'
+import { useModal } from '~/composables/useModal'
 
 export default {
   components: { NoticeMessage, SpinButton, OutcomeBy },
-  mixins: [modal],
   props: {
     id: {
       type: Number,
@@ -226,22 +219,28 @@ export default {
       required: false,
       default: null,
     },
+    type: {
+      type: String,
+      required: false,
+      default: null,
+    },
   },
+  emit: ['hidden'],
   setup() {
     const messageStore = useMessageStore()
     const chatStore = useChatStore()
 
-    return { messageStore, chatStore }
+    const { modal, hide } = useModal()
+
+    return { messageStore, chatStore, modal, hide }
   },
   data() {
     return {
-      type: null,
       happiness: null,
       comments: null,
       tookUsers: [],
       selectedUser: null,
       chooseError: false,
-      submittedWithNoSelectedUser: false,
       completionMessage: null,
     }
   },
@@ -321,19 +320,8 @@ export default {
       }
     },
   },
-  mounted() {
-    if (this.$refs.userselect) {
-      this.$refs.userselect?.show()
-    }
-  },
   methods: {
     async submit() {
-      if (this.type === 'Taken' && !this.tookUsers.length) {
-        return (this.submittedWithNoSelectedUser = true)
-      } else {
-        this.submittedWithNoSelectedUser = false
-      }
-
       let complete = false
       this.chooseError = false
 
@@ -373,32 +361,24 @@ export default {
           })
 
           this.hide()
-        } else {
-          // We are recording some partial results for the post.
-          // Don't call hide as that will trigger donation ask.
-          this.showModal = false
         }
       }
     },
-    show(type) {
-      this.showModal = true
-      this.type = type
-    },
-    hide() {
+    onHide() {
       // We're having trouble capturing events from this modal, so use root as a bus.
       this.$bus.$emit('outcome', {
         groupid: this.groupid,
         outcome: this.type,
       })
 
-      this.showModal = false
       this.tookUsers = []
       this.happiness = null
+      this.$emit('hidden')
     },
     cancel() {
-      this.showModal = false
       this.tookUsers = []
       this.happiness = null
+      this.hide()
     },
   },
 }

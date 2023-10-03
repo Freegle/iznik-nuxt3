@@ -1,11 +1,11 @@
 <template>
   <b-modal
-    id="storyaddemodal"
-    v-model="showModal"
+    ref="modal"
     scrollable
     :title="thankyou ? 'Thank you!' : 'Your Story'"
     size="lg"
     no-stacking
+    @shown="onShow"
   >
     <template #default>
       <div v-if="thankyou">
@@ -148,22 +148,25 @@
 <script>
 import { useStoryStore } from '../stores/stories'
 import { useComposeStore } from '../stores/compose'
-import modal from '@/mixins/modal'
+import { useModal } from '~/composables/useModal'
 const OurFilePond = () => import('~/components/OurFilePond')
 
 export default {
   components: {
     OurFilePond,
   },
-  mixins: [modal],
   props: {},
   setup() {
     const storyStore = useStoryStore()
     const composeStore = useComposeStore()
 
+    const { modal, hide } = useModal()
+
     return {
       storyStore,
       composeStore,
+      modal,
+      hide,
     }
   },
   data() {
@@ -216,12 +219,11 @@ export default {
     rotateRight() {
       this.rotate(-90)
     },
-    show(type) {
+    onShow() {
       this.thankyou = false
       this.story.headline = null
       this.story.story = null
       this.story.image = null
-      this.showModal = true
     },
     async submit() {
       if (this.story.headline && this.story.story) {

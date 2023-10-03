@@ -1,9 +1,9 @@
 <template>
-  <b-modal id="confirmmodal" v-model="showModal" scrollable :title="title">
+  <b-modal ref="modal" scrollable :title="props.title">
     <template #default>
       <slot name="default">
         <!-- eslint-disable-next-line -->
-        <div v-html="message" />
+        <div v-html="props.message" />
       </slot>
     </template>
     <template #footer>
@@ -12,33 +12,29 @@
     </template>
   </b-modal>
 </template>
-<script>
-import modal from '@/mixins/modal'
 
-export default {
-  mixins: [modal],
-  props: {
-    title: {
-      type: String,
-      required: false,
-      default: 'Are you sure?',
-    },
-    message: {
-      type: String,
-      required: false,
-      default: '<p>Are you sure you want to do this?</p>',
-    },
+<script setup>
+import { useModal } from '~/composables/useModal'
+
+const props = defineProps({
+  title: {
+    type: String,
+    required: false,
+    default: 'Are you sure?',
   },
-  data() {
-    return {
-      showModal: false,
-    }
+  message: {
+    type: String,
+    required: false,
+    default: '<p>Are you sure you want to do this?</p>',
   },
-  methods: {
-    confirm() {
-      this.$emit('confirm')
-      this.hide()
-    },
-  },
+})
+
+const emit = defineEmits('confirm')
+
+const { modal, hide } = useModal()
+
+function confirm() {
+  emit('confirm')
+  hide()
 }
 </script>

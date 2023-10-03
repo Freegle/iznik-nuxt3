@@ -45,45 +45,6 @@
       <div v-if="!me">
         <NewFreegler />
       </div>
-      <div v-else-if="reply?.length > 0">
-        <div class="d-flex justify-content-between flex-wrap">
-          <b-form-group
-            class="flex-grow-1 nobot"
-            label="Your postcode:"
-            :label-for="'replytomessage-' + message.id"
-            description=""
-          >
-            <PostCode @selected="savePostcode" />
-            <div class="text-muted text--small mt-1">
-              <v-icon icon="lock" /> Other freeglers won't see this.
-            </div>
-          </b-form-group>
-          <SettingsPhone
-            v-if="me"
-            label="Your mobile:"
-            size="lg"
-            hide-remove
-            auto-save
-            input-class="phone"
-          />
-        </div>
-        <p class="text-muted">
-          <b-button
-            v-if="!showWhyAsk"
-            size="sm"
-            variant="link"
-            @click="showWhyAsk = true"
-          >
-            Why do we ask for this?
-          </b-button>
-          <span v-if="showWhyAsk">
-            We ask for your postcode so that we know how far away you are - the
-            closer the better. Your mobile is optional - we can notify you by
-            text (SMS) so you don't miss replies. We won't show either of these
-            to the other freegler, but we will show an approximate distance.
-          </span>
-        </p>
-      </div>
     </div>
     <hr />
     <div class="d-flex justify-content-between">
@@ -144,8 +105,6 @@ import { useAuthStore } from '../stores/auth'
 import { useReplyStore } from '../stores/reply'
 import replyToPost from '@/mixins/replyToPost'
 import MessageStillAvailable from '~/components/MessageStillAvailable'
-import SettingsPhone from '~/components/SettingsPhone'
-import PostCode from '~/components/PostCode'
 import EmailValidator from '~/components/EmailValidator'
 import NewUserInfo from '~/components/NewUserInfo'
 import ChatButton from '~/components/ChatButton'
@@ -156,8 +115,6 @@ export default {
   components: {
     ChatButton,
     MessageStillAvailable,
-    SettingsPhone,
-    PostCode,
     EmailValidator,
     NewFreegler,
     NewUserInfo,
@@ -193,7 +150,6 @@ export default {
       emailValid: false,
       showNewUser: false,
       newUserPassword: null,
-      showWhyAsk: false,
     }
   },
   computed: {
@@ -336,16 +292,6 @@ export default {
           console.log('Force login')
           this.forceLogin = true
         }
-      }
-    },
-    async savePostcode(pc) {
-      const settings = this.me.settings
-
-      if (!settings?.mylocation || settings?.mylocation.id !== pc.id) {
-        settings.mylocation = pc
-        await this.authStore.saveAndGet({
-          settings,
-        })
       }
     },
     close() {

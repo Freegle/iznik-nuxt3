@@ -1,8 +1,6 @@
 <template>
   <b-modal
-    id="emailConfirmModal"
-    ref="emailConfirmModal"
-    v-model="showModal"
+    ref="modal"
     scrollable
     title="Please check your mailbox"
     no-stacking
@@ -15,10 +13,9 @@
     </template>
   </b-modal>
 </template>
-<script>
-import modal from '@/mixins/modal'
 
-export default {
-  mixins: [modal],
-}
+<script setup>
+import { useModal } from '~/composables/useModal'
+
+const { modal, hide } = useModal()
 </script>

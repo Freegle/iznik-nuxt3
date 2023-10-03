@@ -1,9 +1,8 @@
 <template>
   <b-modal
-    id="blockmodal"
-    v-model="showModal"
+    ref="modal"
     scrollable
-    :title="'Block ' + user.displayname"
+    :title="'Block ' + props.user.displayname"
     no-stacking
   >
     <template #default>
@@ -23,36 +22,27 @@
     </template>
   </b-modal>
 </template>
-<script>
-export default {
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-    user: {
-      type: Object,
-      required: true,
-    },
-  },
-  data() {
-    return {
-      showModal: false,
-    }
-  },
-  methods: {
-    show() {
-      this.showModal = true
-    },
 
-    hide() {
-      this.showModal = false
-    },
+<script setup>
+import { useModal } from '~/composables/useModal'
 
-    confirm() {
-      this.$emit('confirm')
-      this.hide()
-    },
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
+  user: {
+    type: Object,
+    required: true,
+  },
+})
+
+const { modal, hide } = useModal()
+
+const emit = defineEmits(['confirm'])
+
+function confirm() {
+  emit('confirm')
+  hide()
 }
 </script>

@@ -1,10 +1,9 @@
 <template>
   <b-modal
-    id="aboutmemodal"
-    v-model="showModal"
+    ref="modal"
     scrollable
     :title="
-      !review
+      !props.review
         ? 'Why not complete your public profile?'
         : 'Please review your public profile'
     "
@@ -12,7 +11,7 @@
     no-stacking
   >
     <template #default>
-      <notice-message v-if="review" type="info">
+      <notice-message v-if="props.review" type="info">
         You added this a while ago - can you just check it still applies? If it
         does, just click <em>Cancel</em>. If you want to change it, edit it and
         click <em>Save</em>.
@@ -52,37 +51,27 @@
     </template>
   </b-modal>
 </template>
-<script>
-import { useAuthStore } from '../stores/auth'
-import NoticeMessage from './NoticeMessage'
-import modal from '@/mixins/modal'
 
-export default {
-  components: { NoticeMessage },
-  mixins: [modal],
-  props: {
-    review: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-  },
-  data() {
-    return {
-      text: null,
-    }
-  },
-  methods: {
-    show() {
-      this.text = this.me?.aboutme?.text ? this.me.aboutme.text : null
-      this.showModal = true
-    },
-    async save() {
-      const authStore = useAuthStore()
-      await authStore.saveAboutMe(this.text)
-      this.$emit('datachange')
-      this.hide()
-    },
-  },
+<script setup>
+import NoticeMessage from './NoticeMessage'
+import { useAuthStore } from '~/stores/auth'
+import { useModal } from '~/composables/useModal'
+
+const authStore = useAuthStore()
+
+const props = defineProps({
+  review: { type: Boolean, required: false, default: false },
+})
+
+const emit = defineEmits(['dataChange'])
+
+const { modal, hide } = useModal()
+
+const text = ref(authStore.user.aboutme.text)
+
+async function save() {
+  await authStore.saveAboutMe(text.value)
+  emit('dataChange')
+  hide()
 }
 </script>

@@ -68,7 +68,7 @@
     <ProfileModal
       v-if="showProfile && message && fromuser"
       :id="fromuser.id"
-      ref="profile"
+      @hidden="showProfile = false"
     />
   </div>
 </template>
@@ -81,7 +81,9 @@ import ProfileImage from '~/components/ProfileImage'
 import { useMessageStore } from '~/stores/message'
 import { useGroupStore } from '~/stores/group'
 import { timeago } from '~/composables/useTimeFormat'
-const ProfileModal = () => import('~/components/ProfileModal')
+const ProfileModal = defineAsyncComponent(() =>
+  import('~/components/ProfileModal')
+)
 
 export default {
   name: 'MessageHistory',
@@ -167,11 +169,8 @@ export default {
     },
   },
   methods: {
-    async showProfileModal(e) {
+    showProfileModal() {
       this.showProfile = true
-
-      await this.waitForRef('profile')
-      this.$refs.profile?.show()
     },
   },
 }

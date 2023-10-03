@@ -1,68 +1,70 @@
 <template>
-  <Suspense>
+  <div
+    v-if="message"
+    :id="'msg-' + id"
+    ref="msg"
+    class="position-relative ms-2 me-2 ms-sm-0 me-sm-0"
+    itemscope
+    itemtype="http://schema.org/Product"
+  >
     <div
-      v-if="message"
-      :id="'msg-' + id"
-      ref="msg"
-      class="position-relative ms-2 me-2 ms-sm-0 me-sm-0"
+      itemprop="offers"
       itemscope
-      itemtype="http://schema.org/Product"
+      itemtype="http://schema.org/Offer"
+      class="d-none"
     >
-      <div
-        itemprop="offers"
-        itemscope
-        itemtype="http://schema.org/Offer"
-        class="d-none"
-      >
-        <meta itemprop="priceCurrency" content="GBP" />
-        <span itemprop="price">0</span> |
-        <span itemprop="availability">Instock</span>
-      </div>
-      <div v-if="startExpanded">
-        <MessageExpanded
-          :id="message.id"
-          :replyable="replyable"
-          :hide-close="hideClose"
-          :actions="actions"
-          :show-map="true"
-          class="bg-white p-2"
-          :ad-unit-path="adUnit"
-          :ad-id="adId"
-          @zoom="showPhotosModal"
-        />
-        <MessagePhotosModal :id="message.id" ref="photoModal" />
-      </div>
-      <div v-else>
-        <MessageSummary
-          :id="message.id"
-          :expand-button-text="expandButtonText"
-          :replyable="replyable"
-          class="mt-3"
-          :matchedon="matchedon"
-          @expand="expand"
-          @zoom="zoom"
-        />
-        <MessageModal
-          v-if="expanded"
-          :id="message.id"
-          ref="modal"
-          :replyable="replyable"
-          :hide-close="hideClose"
-          :actions="actions"
-        />
-      </div>
-      <div v-observe-visibility="visibilityChanged" />
+      <meta itemprop="priceCurrency" content="GBP" />
+      <span itemprop="price">0</span> |
+      <span itemprop="availability">Instock</span>
     </div>
-    <template #fallback>
-      <div class="invisible">Loading {{ id }}...</div>
-    </template>
-  </Suspense>
+    <div v-if="startExpanded">
+      <MessageExpanded
+        :id="message.id"
+        :replyable="replyable"
+        :hide-close="hideClose"
+        :actions="actions"
+        :show-map="true"
+        class="bg-white p-2"
+        :ad-unit-path="adUnitPath"
+        :ad-id="adId"
+        @zoom="showPhotosModal"
+      />
+      <MessagePhotosModal
+        v-if="showMessagePhotosModal && message.attachments?.length"
+        :id="message.id"
+        @hidden="showMessagePhotosModal = false"
+      />
+    </div>
+    <div v-else>
+      <MessageSummary
+        :id="message.id"
+        :expand-button-text="expandButtonText"
+        :replyable="replyable"
+        class="mt-3"
+        :matchedon="matchedon"
+        @expand="expand"
+        @zoom="zoom"
+      />
+      <MessageModal
+        v-if="expanded"
+        :id="message.id"
+        v-model:showImages="showImages"
+        :replyable="replyable"
+        :hide-close="hideClose"
+        :actions="actions"
+        @hidden="expanded = false"
+      />
+    </div>
+    <div v-observe-visibility="visibilityChanged" />
+  </div>
 </template>
+
 <script>
 import { useMessageStore } from '../stores/message'
-import MessageModal from '~/components/MessageModal'
-
 import { useGroupStore } from '~/stores/group'
+const MessageModal = defineAsyncComponent(() =>
+  import('~/components/MessageModal')
+)
 
 export default {
   components: {
@@ -158,6 +160,8 @@ export default {
     return {
       expanded: false,
       reply: null,
+      showImages: false,
+      showMessagePhotosModal: false,
     }
   },
   computed: {
@@ -248,22 +252,19 @@ export default {
     }
   },
   methods: {
-    async expand(zoom) {
+    expand() {
       if (!this.message?.successful) {
         this.expanded = true
-
-        await this.waitForRef('modal')
-        this.$refs.modal.show(zoom)
 
         this.view()
       }
     },
     zoom() {
-      this.expand(true)
+      this.showImages = true
+      this.expand()
     },
-    async showPhotosModal() {
-      await this.waitForRef('photoModal')
-      this.$refs.photoModal?.show()
+    showPhotosModal() {
+      this.showMessagePhotosModal = true
     },
     async view() {
       if (this.recordView) {

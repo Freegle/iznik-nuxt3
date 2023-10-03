@@ -69,6 +69,7 @@
                 v-model:email="email"
                 v-model:valid="emailValid"
                 label=""
+                class="mb-2"
               />
               <nuxt-link to="/settings" no-prefetch class="mb-2 mr-2">
                 <b-button size="lg" variant="primary">
@@ -111,12 +112,16 @@
         <b-col cols="0" md="3" />
       </b-row>
       <ConfirmModal
-        ref="confirm"
+        v-if="showConfirmModal"
         title="Permanently delete your account?"
         message="<p>This will delete all your personal data, chats and community memberships.</p><p><strong>It's permanent - you can't undo it or get your data back.</strong></p><p>If you just want to leave one community, please <em>Cancel</em> and select the community from the drop-down list.</p>"
         @confirm="forget"
+        @hidden="showConfirmModal = false"
       />
-      <ForgetFailModal ref="forgetfail" />
+      <ForgetFailModal
+        v-if="showForgetFailModal"
+        @hidden="showForgetFailModal = false"
+      />
     </div>
   </client-only>
 </template>
@@ -126,9 +131,12 @@ import { useAuthStore } from '../../stores/auth'
 import SpinButton from '~/components/SpinButton'
 import EmailValidator from '~/components/EmailValidator'
 import { useRoute, useRouter } from '#imports'
-import ForgetFailModal from '~/components/ForgetFailModal'
+const ForgetFailModal = defineAsyncComponent(() =>
+  import('~/components/ForgetFailModal')
+)
 const GroupSelect = () => import('~/components/GroupSelect.vue')
-const ConfirmModal = () => import('~/components/ConfirmModal.vue')
+const ConfirmModal = () =>
+  defineAsyncComponent(() => import('~/components/ConfirmModal.vue'))
 const NoticeMessage = () => import('~/components/NoticeMessage')
 const ExternalLink = () => import('~/components/ExternalLink')
 
@@ -177,6 +185,8 @@ export default {
       wrongUser: false,
       left: null,
       unknown: false,
+      showForgetFailModal: false,
+      showConfirmModal: false,
     }
   },
   computed: {
@@ -206,7 +216,7 @@ export default {
         this.authStore.loggedInEver = true
         this.authStore.forceLogin = true
       } else {
-        this.$refs.confirm.show()
+        this.showConfirmModal = true
       }
     },
     async leave() {
@@ -223,7 +233,7 @@ export default {
 
       if (ret) {
         this.unknown = ret?.ret === 2
-        this.$refs.forgetfail.show()
+        this.showForgetFailModal = true
       } else {
         useRouter().push('/unsubscribe/unsubscribed')
       }

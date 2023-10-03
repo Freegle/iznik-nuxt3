@@ -112,6 +112,10 @@ export default defineNuxtPlugin((nuxtApp) => {
           // Leaflet produces all sorts of errors, which are not really our fault and don't affect the user.
           console.log('Leaflet in stack - suppress exception')
           return null
+        } else if (originalExceptionStack?.includes('/gpt/')) {
+          // Google ads are not our problem.
+          console.log('Google ads - suppress exception')
+          return null
         } else if (
           (originalExceptionStack?.includes('bootstrap-vue-next') &&
             originalExceptionString?.match('removeAttribute')) ||

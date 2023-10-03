@@ -18,7 +18,8 @@ export default {
     return {
       replyingTo: null,
       threadcomment: null,
-      newsfeedModal: null,
+      showNewsPhotoModal: false,
+      showNewsShareModal: false,
     }
   },
   computed: {
@@ -41,15 +42,11 @@ export default {
     brokenImage(event) {
       event.target.src = '/defaultprofile.png'
     },
-    async share() {
-      console.log('Share', this.newsfeed)
-      this.newsfeedModal = this.newsfeed
-      await this.waitForRef('newsshare')
-      console.log('Got ref')
-      this.$refs.newsshare?.show()
+    share() {
+      this.showNewsShareModal = true
     },
     showPhotoModal() {
-      this.$refs.photoModal?.show()
+      this.showNewsPhotoModal = true
     },
   },
 }

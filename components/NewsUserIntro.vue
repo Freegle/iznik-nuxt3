@@ -26,14 +26,19 @@
       their introductions appear automatically on here, and also show to other
       freeglers in chats.)
     </div>
-    <ProfileModal v-if="infoclick" :id="userid" ref="profilemodal" />
+    <ProfileModal
+      v-if="showProfileModal"
+      :id="userid"
+      @hidden="showProfileModal = false"
+    />
   </div>
 </template>
 <script>
-// Use import rather than async otherwise we have trouble with refs.
-import ProfileModal from '~/components/ProfileModal'
 import NewsUserInfo from '~/components/NewsUserInfo'
 import ProfileImage from '~/components/ProfileImage'
+const ProfileModal = defineAsyncComponent(() =>
+  import('~/components/ProfileModal')
+)
 
 export default {
   components: {
@@ -63,16 +68,12 @@ export default {
   },
   data() {
     return {
-      infoclick: false,
+      showProfileModal: false,
     }
   },
   methods: {
-    async showInfo() {
-      // We use v-if so that the profile modal is not inserted into the DOM until we have clicked, which saves the
-      // fetch of the user info.
-      this.infoclick = true
-      const m = await this.waitForRef('profilemodal')
-      m?.show()
+    showInfo() {
+      this.showProfileModal = true
     },
   },
 }

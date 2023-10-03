@@ -206,25 +206,23 @@
     <NewsEditModal
       v-if="showEditModal"
       :id="id"
-      ref="editModal"
       :threadhead="newsfeed?.threadhead"
     />
     <NewsReportModal
       v-if="showReportModal"
       :id="newsfeed.id"
-      ref="reportModal"
+      @hidden="showReportModal = false"
     />
     <ConfirmModal
       v-if="showDeleteModal"
-      ref="deleteConfirm"
       :title="'Delete thread started by ' + starter"
       @confirm="deleteConfirmed"
+      @hidden="showDeleteModal = false"
     />
   </div>
 </template>
 <script>
 import { useNewsfeedStore } from '../stores/newsfeed'
-import NewsReportModal from './NewsReportModal'
 import SpinButton from './SpinButton'
 import AutoHeightTextarea from './AutoHeightTextarea'
 import NewsReplies from '~/components/NewsReplies'
@@ -243,7 +241,9 @@ import NoticeMessage from '~/components/NoticeMessage'
 import NewsPreview from '~/components/NewsPreview'
 import ProfileImage from '~/components/ProfileImage'
 
-const ConfirmModal = () => import('~/components/ConfirmModal.vue')
+const NewsReportModal = defineAsyncComponent(() => import('./NewsReportModal'))
+const ConfirmModal = () =>
+  defineAsyncComponent(() => import('~/components/ConfirmModal.vue'))
 const OurFilePond = () => import('~/components/OurFilePond')
 const OurAtTa = () => import('~/components/OurAtTa')
 
@@ -474,8 +474,6 @@ export default {
     },
     async show() {
       this.showEditModal = true
-      await this.waitForRef('editModal')
-      this.$refs.editModal?.show()
     },
     async save() {
       await this.newsfeedStore.edit(
@@ -486,10 +484,8 @@ export default {
 
       this.$refs.editModal.hide()
     },
-    async deleteIt() {
+    deleteIt() {
       this.showDeleteModal = true
-      await this.waitForRef('deleteConfirm')
-      this.$refs.deleteConfirm?.show()
     },
     deleteConfirmed() {
       this.newsfeedStore.delete(this.id, this.id)
@@ -497,10 +493,8 @@ export default {
     async unfollow() {
       await this.newsfeedStore.unfollow(this.id)
     },
-    async report() {
+    report() {
       this.showReportModal = true
-      await this.waitForRef('reportModal')
-      this.$refs.reportModal?.show()
     },
     referToOffer() {
       this.referTo('Offer')

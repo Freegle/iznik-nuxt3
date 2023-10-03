@@ -1,11 +1,11 @@
 <template>
   <b-modal
-    id="promisemodal"
-    v-model="showModal"
+    ref="modal"
     scrollable
     title="Promise something to someone"
     size="lg"
     no-stacking
+    @shown="onShow"
   >
     <template #default>
       <notice-message class="mb-3">
@@ -107,7 +107,7 @@
 import dayjs from 'dayjs'
 import { useTrystStore } from '../stores/tryst'
 import { useMessageStore } from '../stores/message'
-import modal from '@/mixins/modal'
+import { useModal } from '~/composables/useModal'
 
 const NoticeMessage = () => import('~/components/NoticeMessage')
 
@@ -115,7 +115,7 @@ export default {
   components: {
     NoticeMessage,
   },
-  mixins: [modal],
+
   props: {
     messages: {
       validator: (prop) => typeof prop === 'object' || prop === null,
@@ -139,10 +139,13 @@ export default {
   setup() {
     const trystStore = useTrystStore()
     const messageStore = useMessageStore()
+    const { modal, hide } = useModal()
 
     return {
       trystStore,
       messageStore,
+      modal,
+      hide,
     }
   },
   data() {
@@ -278,6 +281,12 @@ export default {
         await this.messageStore.promise(this.message, this.currentlySelected)
 
         console.log('Date arranged for', this.time, this.date)
+
+        if (this.time && !this.time.includes(':')) {
+          // We've seen in Sentry that this can happen - looks like if someone types into the hours but not the minutes.
+          this.time = this.time + ':00'
+        }
+
         const arrangedfor =
           this.time && this.date
             ? dayjs(this.date + ' ' + this.time).toISOString()
@@ -300,8 +309,7 @@ export default {
         this.hide()
       }
     },
-    async show(date) {
-      this.showModal = true
+    async onShow(date) {
       this.message = this.selectedMessage
 
       this.currentlySelected = null

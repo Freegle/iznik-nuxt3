@@ -71,14 +71,19 @@
     </div>
     <CommunityEventModal
       v-if="showAddEvent"
-      ref="addEvent"
       :start-edit="true"
+      @hidden="showAddEvent = false"
     />
-    <CommunityEventModal v-if="showMoreInfo" :id="event.id" ref="moreInfo" />
+    <CommunityEventModal
+      v-if="showMoreInfo"
+      :id="event.id"
+      @hidden="showMoreInfo = false"
+    />
   </div>
 </template>
 <script>
 import dayjs from 'dayjs'
+import { defineAsyncComponent } from 'vue'
 import { useCommunityEventStore } from '../stores/communityevent'
 import { useNewsfeedStore } from '../stores/newsfeed'
 import { useUserStore } from '../stores/user'
@@ -86,7 +91,9 @@ import { useGroupStore } from '../stores/group'
 import ProfileImage from '~/components/ProfileImage'
 import NewsLoveComment from '~/components/NewsLoveComment'
 import NewsBase from '~/components/NewsBase'
-const CommunityEventModal = () => import('~/components/CommunityEventModal')
+const CommunityEventModal = defineAsyncComponent(() =>
+  import('~/components/CommunityEventModal')
+)
 
 export default {
   components: {
@@ -163,15 +170,11 @@ export default {
     },
   },
   methods: {
-    async moreInfo() {
+    moreInfo() {
       this.showMoreInfo = true
-      await this.waitForRef('moreInfo')
-      this.$refs.moreInfo?.show()
     },
-    async addEvent() {
+    addEvent() {
       this.showAddEvent = true
-      await this.waitForRef('addEvent')
-      this.$refs.addEvent?.show()
     },
     group(groupid) {
       return this.groupStore?.get(groupid)

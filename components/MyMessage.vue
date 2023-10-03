@@ -306,29 +306,34 @@
         </b-collapse>
       </b-card>
       <MessagePhotosModal
-        v-if="expanded && message.attachments?.length"
+        v-if="showMessagePhotosModal && expanded && message.attachments?.length"
         :id="message.id"
-        ref="photoModal"
+        @hidden="showMessagePhotosModal = false"
       />
     </div>
     <OutcomeModal
       v-if="showOutcomeModal"
       :id="id"
-      ref="outcomeModal"
+      :type="outcomeType"
       @outcome="hide = true"
+      @hidden="showOutcomeModal = false"
     />
     <MessageShareModal
       v-if="showShareModal"
       :id="message.id"
-      ref="shareModal"
+      @hidden="showShareModal = false"
     />
-    <MessageEditModal v-if="showEditModal" :id="id" ref="editModal" />
+    <MessageEditModal
+      v-if="showEditModal"
+      :id="id"
+      @hidden="showEditModal = false"
+    />
     <PromiseModal
       v-if="showPromiseModal"
-      ref="promiseModal"
       :messages="[message]"
       :selected-message="message.id"
       :users="replyusers"
+      @hidden="showPromiseModal = false"
     />
   </div>
 </template>
@@ -345,14 +350,22 @@ import { useLocationStore } from '../stores/location'
 import { milesAway } from '../composables/useDistance'
 import { datetimeshort } from '../composables/useTimeFormat'
 import { useRouter } from '#imports'
-import MessagePhotosModal from '~/components/MessagePhotosModal'
 import MyMessagePromisedTo from '~/components/MyMessagePromisedTo'
-import PromiseModal from '~/components/PromiseModal'
 const MyMessageReply = () => import('./MyMessageReply.vue')
-const MessageShareModal = () => import('./MessageShareModal')
-const OutcomeModal = () => import('./OutcomeModal')
-const MessageEditModal = () => import('./MessageEditModal')
+const MessagePhotosModal = defineAsyncComponent(() =>
+  import('~/components/MessagePhotosModal')
+)
+const MessageShareModal = defineAsyncComponent(() =>
+  import('./MessageShareModal')
+)
 const NoticeMessage = () => import('~/components/NoticeMessage')
+const PromiseModal = defineAsyncComponent(() =>
+  import('~/components/PromiseModal')
+)
+const OutcomeModal = () => defineAsyncComponent(() => import('./OutcomeModal'))
+const MessageEditModal = defineAsyncComponent(() =>
+  import('./MessageEditModal')
+)
 
 export default {
   components: {
@@ -414,9 +427,11 @@ export default {
       expanded: false,
       hide: false,
       showOutcomeModal: false,
+      outcomeType: null,
       showEditModal: false,
       showShareModal: false,
       showPromiseModal: false,
+      showMessagePhotosModal: false,
       broken: false,
       triedToRepost: false,
     }
@@ -683,7 +698,7 @@ export default {
       },
     },
   },
-  async mounted() {
+  mounted() {
     this.expanded = this.expand
 
     if (this.me) {
@@ -704,8 +719,6 @@ export default {
           break
         case 'promise':
           this.showPromiseModal = true
-          await this.waitForRef('promiseModal')
-          this.$refs.promiseModal?.show()
           break
       }
     }
@@ -715,9 +728,8 @@ export default {
     toggle() {
       this.expanded = !this.expanded
     },
-    async showPhotos() {
-      await this.waitForRef('photoModal')
-      this.$refs.photoModal?.show()
+    showPhotos() {
+      this.showMessagePhotosModal = true
     },
     countUnseen(reply) {
       let unseen = 0
@@ -730,12 +742,11 @@ export default {
 
       return unseen
     },
-    async outcome(type) {
+    outcome(type) {
       this.showOutcomeModal = true
-      await this.waitForRef('outcomeModal')
-      this.$refs.outcomeModal.show(type)
+      this.outcomeType = type
     },
-    async share(e) {
+    share(e) {
       if (e) {
         e.preventDefault()
         e.stopPropagation()
@@ -743,8 +754,6 @@ export default {
       }
 
       this.showShareModal = true
-      await this.waitForRef('shareModal')
-      this.$refs.shareModal?.show()
     },
     async edit(e) {
       if (e) {
@@ -755,8 +764,6 @@ export default {
 
       await this.messageStore.fetch(this.id, true)
       this.showEditModal = true
-      const m = await this.waitForRef('editModal')
-      m?.show()
     },
     async repost(e) {
       if (e) {
@@ -855,5 +862,11 @@ img.attachment {
 
 :deep(.btn-content) {
   width: 100%;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 </style>
