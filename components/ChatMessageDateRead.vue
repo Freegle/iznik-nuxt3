@@ -14,19 +14,6 @@
         :title="datetimeshort(chatmessage?.date)"
       >
         {{ timeadapt(chatmessage?.date) }}
-        <span v-if="chatmessage?.reviewrequired" class="text-danger small">
-          Pending review
-        </span>
-        <span
-          v-if="mod && chatmessage?.bymailid"
-          class="btn btn-sm mb-2 btn-white clickme"
-          :title="
-            'Received by email #' + chatmessage?.bymailid + ' click to view'
-          "
-          @click="viewOriginal"
-        >
-          <v-icon icon="info-circle" /> View original email
-        </span>
       </span>
       <b-badge
         v-if="chatmessage?.replyexpected && !chatmessage?.replyreceived"
@@ -146,20 +133,12 @@ export default {
   },
   data() {
     return {
-      showOriginal: false,
       dePlural: /^1 (.*)s/,
     }
   },
   computed: {
     othermodname() {
       return this.chatMessageUser?.displayname
-    },
-  },
-  methods: {
-    async viewOriginal() {
-      this.showOriginal = true
-      await this.waitForRef('original')
-      this.$refs.original?.show()
     },
   },
 }
