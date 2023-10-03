@@ -206,7 +206,6 @@
     <NewsEditModal
       v-if="showEditModal"
       :id="id"
-      ref="editModal"
       :threadhead="newsfeed?.threadhead"
     />
     <NewsReportModal
@@ -475,8 +474,6 @@ export default {
     },
     async show() {
       this.showEditModal = true
-      await this.waitForRef('editModal')
-      this.$refs.editModal?.show()
     },
     async save() {
       await this.newsfeedStore.edit(
