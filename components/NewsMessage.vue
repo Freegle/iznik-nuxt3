@@ -45,8 +45,7 @@
       </div>
     </div>
     <b-modal
-      v-if="newsfeed.image"
-      ref="showNewsPhotoModal"
+      v-if="showNewsPhotoModal && newsfeed.image"
       v-model="showNewsPhotoModal"
       scrollable
       title="ChitChat photo"
@@ -54,16 +53,16 @@
       size="lg"
       no-stacking
       hide-footer
+      @hidden="showNewsPhotoModal = false"
     >
       <template #default>
         <b-img fluid rounded center :src="newsfeed.image.path" />
       </template>
     </b-modal>
     <NewsShareModal
-      v-if="newsfeedModal"
-      ref="newsshare"
-      :newsfeed="newsfeedModal"
-      @hidden="newsfeedModal = false"
+      v-if="showNewsShareModal"
+      :newsfeed="newsfeed"
+      @hidden="showNewsShareModal = false"
     />
   </div>
 </template>
@@ -87,11 +86,6 @@ export default {
     ReadMore,
   },
   extends: NewsBase,
-  data: function () {
-    return {
-      showNewsPhotoModal: false,
-    }
-  },
 }
 </script>
 <style scoped lang="scss">

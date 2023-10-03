@@ -36,13 +36,13 @@ export default {
       required: true,
     },
   },
-  async setup() {
+  async setup(props) {
     const newsfeedStore = useNewsfeedStore()
     const userStore = useUserStore()
 
     const { modal, hide } = useModal()
 
-    await this.newsfeedStore.fetch(this.id, true, true)
+    await newsfeedStore.fetch(props.id, true, true)
 
     return {
       newsfeedStore,

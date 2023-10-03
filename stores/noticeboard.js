@@ -43,6 +43,23 @@ export const useNoticeboardStore = defineStore({
 
       return this.list
     },
+    async fetchAuthority(authorityid) {
+      const { noticeboard, noticeboards } = await api(
+        this.config
+      ).noticeboard.fetch({
+        authorityid,
+      })
+
+      if (noticeboard) {
+        this.list[id] = noticeboard
+      } else {
+        for (const item of noticeboards) {
+          this.list[item.id] = item
+        }
+      }
+
+      return this.list
+    },
     async refresh(id) {
       await api(this.config).noticeboard.action({
         action: 'Refreshed',

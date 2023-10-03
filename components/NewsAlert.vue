@@ -42,19 +42,18 @@
       </b-button>
     </div>
     <NewsPhotoModal
-      v-if="newsfeed.image"
+      v-if="showNewsPhotoModal && newsfeed.image"
       :id="newsfeed.image.id"
-      ref="photoModal"
       :newsfeedid="newsfeed.id"
       :src="newsfeed.image.path"
       imgtype="Newsfeed"
       imgflag="Newsfeed"
+      @hidden="showNewsPhotoModal = false"
     />
     <NewsShareModal
-      v-if="showNewsfeedModal"
-      ref="newsshare"
-      :newsfeed="showNewsfeedModal"
-      @hidden="showNewsfeedModal = false"
+      v-if="showNewsShareModal"
+      :newsfeed="newsfeed"
+      @hidden="showNewsShareModal = false"
     />
   </div>
 </template>
@@ -66,19 +65,18 @@ import ProfileImage from '~/components/ProfileImage'
 const NewsShareModal = defineAsyncComponent(() =>
   import('~/components/NewsShareModal')
 )
+const NewsPhotoModal = defineAsyncComponent(() =>
+  import('~/components/NewsPhotoModal.vue')
+)
 
 export default {
   components: {
     NewsShareModal,
     NewsLoveComment,
     ProfileImage,
+    NewsPhotoModal,
   },
   extends: NewsBase,
-  data() {
-    return {
-      showNewsfeedModal: false,
-    }
-  },
 }
 </script>
 <style scoped lang="scss">

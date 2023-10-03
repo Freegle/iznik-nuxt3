@@ -320,11 +320,6 @@ export default {
       }
     },
   },
-  mounted() {
-    if (this.$refs.userselect) {
-      this.$refs.userselect?.show()
-    }
-  },
   methods: {
     async submit() {
       let complete = false
@@ -383,6 +378,7 @@ export default {
     cancel() {
       this.tookUsers = []
       this.happiness = null
+      this.hide()
     },
   },
 }

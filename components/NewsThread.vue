@@ -206,7 +206,6 @@
     <NewsEditModal
       v-if="showEditModal"
       :id="id"
-      ref="editModal"
       :threadhead="newsfeed?.threadhead"
     />
     <NewsReportModal
@@ -223,7 +222,6 @@
   </div>
 </template>
 <script>
-import { defineAsyncComponent } from 'vue'
 import { useNewsfeedStore } from '../stores/newsfeed'
 import SpinButton from './SpinButton'
 import AutoHeightTextarea from './AutoHeightTextarea'
@@ -476,8 +474,6 @@ export default {
     },
     async show() {
       this.showEditModal = true
-      await this.waitForRef('editModal')
-      this.$refs.editModal?.show()
     },
     async save() {
       await this.newsfeedStore.edit(

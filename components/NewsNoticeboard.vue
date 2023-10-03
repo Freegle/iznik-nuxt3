@@ -45,21 +45,15 @@
         @focus-comment="$emit('focus-comment')"
       />
       <nuxt-link no-prefetch to="/promote">
-        <b-button
-          variant="secondary"
-          size="sm"
-          class="d-inline-block"
-          @click="share"
-        >
+        <b-button variant="secondary" size="sm" class="d-inline-block">
           <v-icon icon="bullhorn" /> Put up a poster
         </b-button>
       </nuxt-link>
     </div>
     <NewsShareModal
-      v-if="newsfeedModal"
-      ref="newsshare"
-      :newsfeed="newsfeedModal"
-      @hidden="newsfeedModal = false"
+      v-if="showNewsShareModal"
+      :newsfeed="newsfeed"
+      @hidden="showNewsShareModal = false"
     />
   </div>
 </template>

@@ -20,7 +20,7 @@
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.0.0",
     "lint": "^1.1.2",
-    "nuxt": "^3.6.1",
+    "nuxt": "^3.7.3",
     "prettier": "^2.6.2",
     "sass": "1.64.2",
     "sitemap": "^7.1.1",

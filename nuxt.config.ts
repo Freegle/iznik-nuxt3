@@ -149,6 +149,7 @@ export default defineNuxtConfig({
 
   experimental: {
     emitRouteChunkError: 'reload',
+    asyncContext: true,
   },
 
   webpack: {
@@ -213,11 +214,6 @@ export default defineNuxtConfig({
   app: {
     head: {
       title: "Freegle - Don't throw it away, give it away!",
-      script: [
-        {
-          src: 'https://cdn-cookieyes.com/client_data/fd4582b38fa7a9f269114304/script.js'
-        }
-      ],
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },

@@ -1,108 +1,98 @@
 <template>
-  <Suspense>
-    <div>
-      <h2 v-if="group" class="visually-hidden">Community Information</h2>
-      <GroupHeader
-        v-if="group"
-        :group="group"
-        show-join
-        :show-give-find="showGiveFind"
-      />
-      <JobsTopBar v-if="jobs" />
-      <h2 class="visually-hidden">List of wanteds and offers</h2>
-      <div v-observe-visibility="visibilityChanged" />
-      <div v-if="deDuplicatedMessages?.length">
+  <div>
+    <h2 v-if="group" class="visually-hidden">Community Information</h2>
+    <GroupHeader
+      v-if="group"
+      :group="group"
+      show-join
+      :show-give-find="showGiveFind"
+    />
+    <JobsTopBar v-if="jobs" />
+    <h2 class="visually-hidden">List of wanteds and offers</h2>
+    <div id="visobserver" v-observe-visibility="visibilityChanged" />
+    <div v-if="deDuplicatedMessages?.length" id="messageList">
+      <div
+        :id="'messagewrapper-' + deDuplicatedMessages[0].id"
+        :ref="'messagewrapper-' + deDuplicatedMessages[0].id"
+        class="p-0"
+      >
+        <OurMessage
+          :id="deDuplicatedMessages[0].id"
+          :matchedon="deDuplicatedMessages[0].matchedon"
+          record-view
+          :scroll-into-view="scrollToMessage === deDuplicatedMessages[0].id"
+          @visible="messageVisible"
+        />
+      </div>
+      <VisibleWhen
+        v-if="deDuplicatedMessages.length"
+        :not="['xs', 'sm', 'md', 'lg']"
+      >
+        <ExternalDa
+          ad-unit-path="/22794232631/freegle_feed_desktop"
+          :dimensions="[728, 90]"
+          div-id="div-gpt-ad-1692867153277-0"
+          class="mt-2"
+        />
+      </VisibleWhen>
+      <VisibleWhen
+        v-if="deDuplicatedMessages.length"
+        :at="['xs', 'sm', 'md', 'lg']"
+      >
+        <ExternalDa
+          ad-unit-path="/22794232631/freegle_feed_app"
+          :dimensions="[300, 250]"
+          div-id="div-gpt-ad-1692867324381-0"
+          class="mt-2"
+        />
+      </VisibleWhen>
+      <div
+        v-for="message in deDuplicatedMessages.slice(1)"
+        :key="'messagelist-' + message.id"
+      >
         <div
-          :id="'messagewrapper-' + deDuplicatedMessages[0].id"
-          :ref="'messagewrapper-' + deDuplicatedMessages[0].id"
+          :id="'messagewrapper-' + message.id"
+          :ref="'messagewrapper-' + message.id"
           class="p-0"
         >
-          <OurMessage
-            :id="deDuplicatedMessages[0].id"
-            :matchedon="deDuplicatedMessages[0].matchedon"
-            record-view
-            :scroll-into-view="scrollToMessage === deDuplicatedMessages[0].id"
-            @visible="messageVisible"
-          />
+          <VisibleWhen :at="['xs', 'sm', 'md', 'lg']">
+            <OurMessage
+              :id="message.id"
+              :matchedon="message.matchedon"
+              record-view
+              :scroll-into-view="scrollToMessage === message.id"
+              @visible="messageVisible"
+            />
+          </VisibleWhen>
+          <VisibleWhen :not="['xs', 'sm', 'md', 'lg']">
+            <OurMessage
+              :id="message.id"
+              :matchedon="message.matchedon"
+              record-view
+              :scroll-into-view="scrollToMessage === message.id"
+              ad-unit-path="/22794232631/freegle_product"
+              ad-id="div-gpt-ad-1691925699378-0"
+              @visible="messageVisible"
+            />
+          </VisibleWhen>
         </div>
-        <VisibleWhen
-          v-if="deDuplicatedMessages.length"
-          :not="['xs', 'sm', 'md', 'lg']"
-        >
-          <ExternalDa
-            ad-unit-path="/22794232631/freegle_feed_desktop"
-            :dimensions="[728, 90]"
-            div-id="div-gpt-ad-1692867153277-0"
-            class="mt-2"
-          />
-        </VisibleWhen>
-        <VisibleWhen
-          v-if="deDuplicatedMessages.length"
-          :at="['xs', 'sm', 'md', 'lg']"
-        >
-          <ExternalDa
-            ad-unit-path="/22794232631/freegle_feed_app"
-            :dimensions="[300, 250]"
-            div-id="div-gpt-ad-1692867324381-0"
-            class="mt-2"
-          />
-        </VisibleWhen>
-        <Suspense
-          v-for="message in deDuplicatedMessages.slice(1)"
-          :key="'messagelist-' + message.id"
-        >
-          <div
-            :id="'messagewrapper-' + message.id"
-            :ref="'messagewrapper-' + message.id"
-            class="p-0"
-          >
-            <VisibleWhen :at="['xs', 'sm', 'md', 'lg']">
-              <OurMessage
-                :id="message.id"
-                :matchedon="message.matchedon"
-                record-view
-                :scroll-into-view="scrollToMessage === message.id"
-                @visible="messageVisible"
-              />
-            </VisibleWhen>
-            <VisibleWhen :not="['xs', 'sm', 'md', 'lg']">
-              <OurMessage
-                :id="message.id"
-                :matchedon="message.matchedon"
-                record-view
-                :scroll-into-view="scrollToMessage === message.id"
-                ad-unit-path="/22794232631/freegle_product"
-                ad-id="div-gpt-ad-1691925699378-0"
-                @visible="messageVisible"
-              />
-            </VisibleWhen>
-          </div>
-          <template #fallback>
-            <div class="invisible">Loading {{ message.id }}...</div>
-          </template>
-        </Suspense>
       </div>
-      <infinite-loading
-        v-if="messagesForList?.length"
-        :identifier="infiniteId"
-        :distance="distance"
-        @infinite="loadMore"
-      >
-        <template #error>&nbsp;</template>
-        <template #complete>&nbsp;</template>
-        <template #spinner>
-          <div class="text-center">
-            <b-img lazy src="/loader.gif" alt="Loading" width="100px" />
-          </div>
-        </template>
-      </infinite-loading>
     </div>
-    <template #fallback>
-      <div class="text-center">
-        <b-img lazy src="/loader.gif" alt="Loading" width="100px" />
-      </div>
-    </template>
-  </Suspense>
+    <infinite-loading
+      v-if="messagesForList?.length"
+      :identifier="infiniteId"
+      :distance="distance"
+      @infinite="loadMore"
+    >
+      <template #error>&nbsp;</template>
+      <template #complete>&nbsp;</template>
+      <template #spinner>
+        <div class="text-center">
+          <b-img lazy src="/loader.gif" alt="Loading" width="100px" />
+        </div>
+      </template>
+    </infinite-loading>
+  </div>
 </template>
 <script>
 import dayjs from 'dayjs'
@@ -189,7 +179,7 @@ export default {
     // Get the initial messages to show in a single call.  There will be a delay during which we will see the
     // loader, but it's better to fetch a screenful than have the loader sliding down
     // the screen.  Once we've loaded then the loader will be shown by the infinite scroll, but we will normally
-    // not see if because of prefetching.
+    // not see it because of prefetching.
     const initialIds = props.messagesForList
       ?.slice(0, MIN_TO_SHOW)
       .map((message) => message.id)

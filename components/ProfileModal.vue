@@ -12,7 +12,7 @@
         <ProfileHeader
           :id="id"
           class="flex-grow-1 px-3 py-2"
-          :close-on-message="closeOnMessage"
+          :close-on-message="props.closeOnMessage"
           @close="hide"
         />
       </div>
@@ -29,6 +29,7 @@
 <script setup>
 import { useUserStore } from '~/stores/user'
 import { useModal } from '~/composables/useModal'
+
 const ProfileInfo = defineAsyncComponent(() =>
   import('~/components/ProfileInfo')
 )

@@ -37,20 +37,20 @@
         <b-button variant="primary" size="sm" @click="showModal">
           <v-icon icon="user" /> Introduce yourself to everyone
         </b-button>
-        <about-me-modal
+        <AboutMeModal
           v-if="showAboutMeModal"
           @hidden="showAboutMeModal = false"
         />
       </div>
     </div>
     <NewsPhotoModal
-      v-if="newsfeed.image"
+      v-if="showNewsPhotoModal && newsfeed.image"
       :id="newsfeed.image.id"
-      ref="photoModal"
       :newsfeedid="newsfeed.id"
       :src="newsfeed.image.path"
       imgtype="Newsfeed"
       imgflag="Newsfeed"
+      @hidden="showNewsPhotoModal = false"
     />
   </div>
 </template>
@@ -60,10 +60,14 @@ import NewsBase from '~/components/NewsBase'
 import NewsUserIntro from '~/components/NewsUserIntro'
 import NewsLoveComment from '~/components/NewsLoveComment'
 const AboutMeModal = defineAsyncComponent(() => import('./AboutMeModal'))
+const NewsPhotoModal = defineAsyncComponent(() =>
+  import('./NewsPhotoModal.vue')
+)
 
 export default {
   components: {
     AboutMeModal,
+    NewsPhotoModal,
     NewsUserIntro,
     NewsLoveComment,
     ReadMore,

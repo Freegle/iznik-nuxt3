@@ -113,7 +113,7 @@ export default {
       await this.storyStore.fetch(this.id, true)
     } catch (e) {
       // Must no longer exist on server.
-      this.hide()
+      hide()
     }
 
     return {

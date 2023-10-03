@@ -42,7 +42,7 @@
           variant="link"
           size="sm"
           class="d-inline-block mr-1"
-          @click="shareStory"
+          @click="share"
         >
           <v-icon icon="share-alt" /><span class="d-none d-inline-block-md">
             Share</span
@@ -71,9 +71,9 @@
     />
     <StoryAddModal v-if="showAdd" @hidden="showAdd = false" />
     <StoryShareModal
-      v-if="showShare"
+      v-if="showNewsShareModal"
       :id="newsfeed.storyid"
-      @hidden="showShare = false"
+      @hidden="showNewsShareModal = false"
     />
   </div>
 </template>
@@ -119,9 +119,7 @@ export default {
   },
   data() {
     return {
-      showShare: false,
       showAdd: false,
-      showNewsPhotoModal: false,
     }
   },
   computed: {
@@ -140,9 +138,6 @@ export default {
   methods: {
     showAddModal() {
       this.showAdd = true
-    },
-    shareStory() {
-      this.showShare = true
     },
   },
 }

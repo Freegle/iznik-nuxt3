@@ -12,6 +12,7 @@ export default defineNuxtPlugin((nuxtApp) => {
         router: nuxtApp.$router,
         host,
         siteId: 1,
+        trackerFileName: 'piwik',
       })
     } catch (e) {
       console.log('Matomo load failed', e)

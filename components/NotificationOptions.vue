@@ -46,14 +46,7 @@
       :key="'notification-' + notification.id"
       link-class="notification-list__item p-1"
     >
-      <Suspense>
-        <NotificationOne :id="notification.id" @show-modal="showAboutMe" />
-        <template #fallback>
-          <div class="invisible" style="min-height: 200px">
-            Loading {{ notification.id }}...
-          </div>
-        </template>
-      </Suspense>
+      <NotificationOne :id="notification.id" @show-modal="showAboutMe" />
     </b-dropdown-item>
     <infinite-loading
       :key="infiniteId"
@@ -179,7 +172,7 @@ const showAboutMe = () => {
 
 :deep(.notification-list__dropdown-menu) {
   height: 500px;
-  width: min(400px, 100vw);
+  width: min(400px, 100vw) !important;
   overflow-y: auto;
 
   // The offset property of the b-dropdown doesn't function when contained
@@ -198,7 +191,7 @@ const showAboutMe = () => {
 }
 
 :deep(.notification-list .dropdown-item) {
-  width: min(400px, 100vw);
+  width: min(400px, 100vw) !important;
   max-width: 100%;
   padding-left: 5px;
   overflow-wrap: break-word;
