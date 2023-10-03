@@ -45,8 +45,7 @@
       </div>
     </div>
     <b-modal
-      v-if="newsfeed.image"
-      ref="showNewsPhotoModal"
+      v-if="showNewsPhotoModal && newsfeed.image"
       v-model="showNewsPhotoModal"
       scrollable
       title="ChitChat photo"
@@ -54,15 +53,16 @@
       size="lg"
       no-stacking
       hide-footer
+      @hidden="showNewsPhotoModal = false"
     >
       <template #default>
         <b-img fluid rounded center :src="newsfeed.image.path" />
       </template>
     </b-modal>
     <NewsShareModal
-      v-if="newsfeedModal"
-      ref="newsshare"
-      :newsfeed="newsfeedModal"
+      v-if="showNewsShareModal"
+      :newsfeed="newsfeed"
+      @hidden="showNewsShareModal = false"
     />
   </div>
 </template>
@@ -73,7 +73,9 @@ import NewsBase from '~/components/NewsBase'
 import NewsUserIntro from '~/components/NewsUserIntro'
 
 import NewsLoveComment from '~/components/NewsLoveComment'
-const NewsShareModal = () => import('~/components/NewsShareModal')
+const NewsShareModal = defineAsyncComponent(() =>
+  import('~/components/NewsShareModal')
+)
 
 export default {
   components: {
@@ -84,11 +86,6 @@ export default {
     ReadMore,
   },
   extends: NewsBase,
-  data: function () {
-    return {
-      showNewsPhotoModal: false,
-    }
-  },
 }
 </script>
 <style scoped lang="scss">

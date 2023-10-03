@@ -27,7 +27,11 @@
         >
           Find out more
         </b-button>
-        <SupporterInfoModal v-if="showSupporterInfo" ref="supporterInfoModal" />
+        <SupporterInfoModal
+          v-if="showSupporterInfo"
+          ref="supporterInfoModal"
+          @hidden="showSupporterInfo = false"
+        />
       </NoticeMessage>
       <b-card v-if="aboutme" variant="white" class="mt-2">
         <b-card-body sub-title="" class="p-0">
@@ -173,7 +177,9 @@ import { twem } from '~/composables/useTwem'
 import ReplyTime from '~/components/ReplyTime'
 import ProfileHeader from '~/components/ProfileHeader'
 const MessageList = () => import('~/components/MessageList.vue')
-const SupporterInfoModal = () => import('~/components/SupporterInfoModal.vue')
+const SupporterInfoModal = defineAsyncComponent(() =>
+  import('~/components/SupporterInfoModal.vue')
+)
 
 export default {
   components: {
@@ -282,9 +288,6 @@ export default {
     },
     async supporterInfo() {
       this.showSupporterInfo = true
-
-      await this.waitForRef('supporterInfoModal')
-      this.$refs.supporterInfoModal?.show()
     },
   },
 }

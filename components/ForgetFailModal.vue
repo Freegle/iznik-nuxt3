@@ -1,11 +1,5 @@
 <template>
-  <b-modal
-    id="forgetfailmodal"
-    v-model="showModal"
-    scrollable
-    title="Sorry, that didn't work"
-    no-stacking
-  >
+  <b-modal ref="modal" scrollable title="Sorry, that didn't work" no-stacking>
     <template #default>
       <b-row>
         <b-col>
@@ -18,18 +12,12 @@
     </template>
   </b-modal>
 </template>
-<script>
-import modal from '@/mixins/modal'
+
+<script setup>
+import { useModal } from '~/composables/useModal'
 import SupportLink from '~/components/SupportLink'
 
-export default {
-  components: { SupportLink },
-  mixins: [modal],
-  methods: {
-    confirm() {
-      this.$emit('confirm')
-      this.hide()
-    },
-  },
-}
+defineEmits(['confirm'])
+
+const { modal, hide } = useModal()
 </script>

@@ -1,51 +1,54 @@
 <template>
-  <span>
-    <b-modal
-      :id="'newsLovesModal-' + id"
-      v-model="showModal"
-      scrollable
-      :title="title"
-      no-stacking
-    >
-      <div v-if="newsfeed" class="p-0">
-        <NewsLovesUserInfo
-          v-for="love in newsfeed.lovelist"
-          :id="love.userid"
-          :key="'love-' + love.userid"
-          class="mt-2"
-          @goto="goToProfile(love.userid)"
-        />
-      </div>
-      <template #footer>
-        <b-button variant="white" @click="hide"> Close </b-button>
-      </template>
-    </b-modal>
-  </span>
+  <b-modal
+    :id="'newsLovesModal-' + id"
+    ref="modal"
+    scrollable
+    :title="title"
+    no-stacking
+  >
+    <div v-if="newsfeed" class="p-0">
+      <NewsLovesUserInfo
+        v-for="love in newsfeed.lovelist"
+        :id="love.userid"
+        :key="'love-' + love.userid"
+        class="mt-2"
+      />
+    </div>
+    <template #footer>
+      <b-button variant="white" @click="hide"> Close </b-button>
+    </template>
+  </b-modal>
 </template>
+
 <script>
 import { useNewsfeedStore } from '../stores/newsfeed'
 import { useUserStore } from '../stores/user'
 import NewsLovesUserInfo from './NewsLovesUserInfo'
-import modal from '@/mixins/modal'
+import { useModal } from '~/composables/useModal'
 
 export default {
   components: {
     NewsLovesUserInfo,
   },
-  mixins: [modal],
   props: {
     id: {
       type: Number,
       required: true,
     },
   },
-  setup() {
+  async setup(props) {
     const newsfeedStore = useNewsfeedStore()
     const userStore = useUserStore()
+
+    const { modal, hide } = useModal()
+
+    await newsfeedStore.fetch(props.id, true, true)
 
     return {
       newsfeedStore,
       userStore,
+      modal,
+      hide,
     }
   },
   computed: {
@@ -69,12 +72,7 @@ export default {
     },
   },
   methods: {
-    async show() {
-      await this.newsfeedStore.fetch(this.id, true, true)
-      this.showModal = true
-    },
     goToProfile(id) {
-      this.showModal = false
       this.$nextTick(() => {
         this.$router.push('/profile/' + id)
       })

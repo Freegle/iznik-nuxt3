@@ -10,17 +10,16 @@
     </b-button>
     <ConfirmModal
       v-if="showConfirm"
-      ref="joinConfirm"
       :title="'Join ' + name + '?'"
       message="You'll get emails with posts from this community, and you'll be able to reply to things you're interested in."
       @confirm="confirmed"
+      @hidden="showConfirm = false"
     />
   </div>
 </template>
 <script>
 import { useRouter } from '#imports'
-
-const ConfirmModal = () => import('./ConfirmModal')
+const ConfirmModal = defineAsyncComponent(() => import('./ConfirmModal'))
 
 export default {
   components: { ConfirmModal },
@@ -55,10 +54,8 @@ export default {
     }
   },
   methods: {
-    async confirm() {
+    confirm() {
       this.showConfirm = true
-      await this.waitForRef('joinConfirm')
-      this.$refs.joinConfirm?.show()
     },
     confirmed() {
       const router = useRouter()

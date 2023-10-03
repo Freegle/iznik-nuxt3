@@ -101,10 +101,10 @@
               />
             </div>
           </div>
-          <AboutMeModal
-            v-if="showAboutMe"
-            ref="aboutMeModal"
+          <about-me-modal
+            v-if="showAboutMeModal"
             :review="reviewAboutMe"
+            @hidden="showAboutMeModal = false"
           />
         </b-col>
         <b-col cols="0" lg="3" class="p-0 pl-1">
@@ -222,7 +222,7 @@ export default {
     return {
       initialBounds: null,
       bump: 1,
-      showAboutMe: false,
+      showAboutMeModal: false,
       reviewAboutMe: false,
       messagesOnMapCount: 0,
     }
@@ -264,7 +264,7 @@ export default {
 
           if (daysago > 7) {
             // Nudge to ask people to to introduce themselves.
-            this.showAboutMe = true
+            this.showAboutMeModal = true
           }
         } else {
           const monthsago = dayjs().diff(
@@ -274,16 +274,13 @@ export default {
 
           if (monthsago >= 6) {
             // Old.  Ask them to review it.
-            this.showAboutMe = true
+            this.showAboutMeModal = true
             this.reviewAboutMe = true
           }
         }
       }
 
-      if (this.showAboutMe) {
-        await this.waitForRef('aboutMeModal')
-        this.$refs.aboutMeModal.show()
-
+      if (this.showAboutMeModal) {
         this.miscStore.set({
           key: 'lastaboutmeask',
           value: now,

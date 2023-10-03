@@ -47,17 +47,20 @@
       </b-button>
       <ConfirmModal
         v-if="showDeleteModal"
-        ref="deleteConfirm"
         title="Delete refer from"
         @confirm="deleteConfirm"
+        @hidden="showDeleteModal = false"
       />
     </div>
   </div>
 </template>
+
 <script>
 import { useNewsfeedStore } from '../stores/newsfeed'
 import NoticeMessage from './NoticeMessage'
-const ConfirmModal = () => import('~/components/ConfirmModal.vue')
+const ConfirmModal = defineAsyncComponent(() =>
+  import('~/components/ConfirmModal.vue')
+)
 
 export default {
   components: { NoticeMessage, ConfirmModal },
@@ -93,10 +96,8 @@ export default {
     },
   },
   methods: {
-    async deleteReply() {
+    deleteReply() {
       this.showDeleteModal = true
-      await this.waitForRef('deleteConfirm')
-      this.$refs.deleteConfirm?.show()
     },
     async deleteConfirm() {
       await this.newsfeedStore.delete(this.id, this.threadhead)

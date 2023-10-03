@@ -1,5 +1,10 @@
 <template>
   <client-only v-if="me">
+    <DonationAskModal
+      v-if="showDonationAskModal"
+      @hidden="showDonationAskModal = false"
+    />
+
     <b-container fluid class="p-0 p-xl-2">
       <h1 class="visually-hidden">My posts</h1>
       <b-row class="m-0">
@@ -79,7 +84,6 @@
           </VisibleWhen>
         </b-col>
       </b-row>
-      <DonationAskModal />
     </b-container>
   </client-only>
 </template>
@@ -99,7 +103,10 @@ import ExpectedRepliesWarning from '~/components/ExpectedRepliesWarning'
 import JobsTopBar from '~/components/JobsTopBar'
 import MyPostsPostsList from '~/components/MyPostsPostsList.vue'
 import MyPostsSearchesList from '~/components/MyPostsSearchesList.vue'
-import DonationAskModal from '~/components/DonationAskModal'
+import { useDonationAskModal } from '~/composables/useDonationAskModal'
+const DonationAskModal = defineAsyncComponent(() =>
+  import('~/components/DonationAskModal')
+)
 
 const authStore = useAuthStore()
 const messageStore = useMessageStore()
@@ -126,6 +133,8 @@ useHead(
 )
 
 useFavoritePage('myposts')
+
+const { showDonationAskModal } = useDonationAskModal()
 
 const myid = authStore.user?.id
 

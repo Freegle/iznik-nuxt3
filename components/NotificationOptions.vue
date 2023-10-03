@@ -179,7 +179,7 @@ const showAboutMe = () => {
 
 :deep(.notification-list__dropdown-menu) {
   height: 500px;
-  width: min(400px, 100vw);
+  width: min(400px, 100vw) !important;
   overflow-y: auto;
 
   // The offset property of the b-dropdown doesn't function when contained
@@ -198,7 +198,7 @@ const showAboutMe = () => {
 }
 
 :deep(.notification-list .dropdown-item) {
-  width: min(400px, 100vw);
+  width: min(400px, 100vw) !important;
   max-width: 100%;
   padding-left: 5px;
   overflow-wrap: break-word;

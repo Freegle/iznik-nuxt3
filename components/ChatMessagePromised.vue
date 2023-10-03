@@ -175,11 +175,11 @@
           </div>
           <PromiseModal
             v-if="showPromise"
-            ref="promise"
             :messages="[refmsg]"
             :selected-message="refmsgid"
             :users="otheruser ? [otheruser] : []"
             :selected-user="otheruser ? otheruser.id : null"
+            @hidden="showPromise = false"
           />
         </b-card-title>
         <b-card-text>
@@ -211,19 +211,20 @@
     </div>
     <RenegeModal
       v-if="showRenege && refmsgid"
-      ref="renege"
       :messages="[refmsgid]"
       :selected-message="refmsgid"
       :users="[otheruser]"
       :selected-user="otheruser.id"
       @hide="fetchMessages"
+      @hidden="showRenege = false"
     />
     <OutcomeModal
       v-if="showOutcome && refmsgid"
       :id="refmsgid"
-      ref="outcomeModal"
       :taken-by="takenBy"
+      :type="outcomeType"
       @outcome="fetchMessage"
+      @hidden="showOutcome = false"
     />
   </div>
 </template>
@@ -234,13 +235,17 @@ import { useChatStore } from '../stores/chat'
 import { fetchReferencedMessage } from '../composables/useChat'
 import { useMessageStore } from '../stores/message'
 import DateFormatted from './DateFormatted'
-import OutcomeModal from '~/components/OutcomeModal'
 import AddToCalendar from '~/components/AddToCalendar'
 import ChatBase from '~/components/ChatBase'
 import ProfileImage from '~/components/ProfileImage'
+const OutcomeModal = defineAsyncComponent(() =>
+  import('~/components/OutcomeModal')
+)
 
-const RenegeModal = () => import('./RenegeModal')
-const PromiseModal = () => import('~/components/PromiseModal')
+const RenegeModal = defineAsyncComponent(() => import('./RenegeModal'))
+const PromiseModal = defineAsyncComponent(() =>
+  import('~/components/PromiseModal')
+)
 
 export default {
   components: {
@@ -269,6 +274,7 @@ export default {
     return {
       showRenege: false,
       showOutcome: false,
+      outcomeType: null,
       showPromise: false,
     }
   },
@@ -291,16 +297,12 @@ export default {
     },
   },
   methods: {
-    async unpromise() {
+    unpromise() {
       this.showRenege = true
-      await this.waitForRef('renege')
-      this.$refs.renege?.show()
       fetchOurOffers()
     },
-    async changeTime() {
+    changeTime() {
       this.showPromise = true
-      const m = await this.waitForRef('promise')
-      m?.show()
     },
     fetchMessages() {
       this.chatStore.fetchMessages(this.chatmessage.chatid)
@@ -310,8 +312,7 @@ export default {
       await messageStore.fetch(this.refmsgid)
 
       this.showOutcome = true
-      await this.waitForRef('outcomeModal')
-      this.$refs.outcomeModal.show(type)
+      this.outcomeType = type
     },
   },
 }

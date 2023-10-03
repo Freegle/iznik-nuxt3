@@ -159,7 +159,7 @@
     <VolunteerOpportunityModal
       v-if="showModal"
       :id="id"
-      ref="opportunitymodal"
+      @hidden="showModal = false"
     />
   </div>
 </template>
@@ -170,7 +170,9 @@ import { useUserStore } from '../stores/user'
 import { useGroupStore } from '../stores/group'
 import NoticeMessage from './NoticeMessage'
 import { twem } from '~/composables/useTwem'
-const VolunteerOpportunityModal = () => import('./VolunteerOpportunityModal')
+const VolunteerOpportunityModal = defineAsyncComponent(() =>
+  import('./VolunteerOpportunityModal')
+)
 
 export default {
   components: {
@@ -283,10 +285,8 @@ export default {
     },
   },
   methods: {
-    async showOpportunityModal() {
+    showOpportunityModal() {
       this.showModal = true
-      await this.waitForRef('opportunitymodal')
-      this.$refs.opportunitymodal?.show()
     },
     async renew() {
       await this.volunteeringStore.renew(this.volunteering.id)

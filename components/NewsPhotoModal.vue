@@ -1,7 +1,7 @@
 <template>
   <b-modal
     :id="'newsPhotoModal-' + id"
-    v-model="showModal"
+    ref="modal"
     scrollable
     title="ChitChat photo"
     size="lg"
@@ -60,10 +60,9 @@
 <script>
 import { useNewsfeedStore } from '../stores/newsfeed'
 import { useImageStore } from '../stores/image'
-import modal from '@/mixins/modal'
+import { useModal } from '~/composables/useModal'
 
 export default {
-  mixins: [modal],
   props: {
     id: {
       type: Number,
@@ -86,6 +85,19 @@ export default {
       required: true,
     },
   },
+  setup() {
+    const newsfeedStore = useNewsfeedStore()
+    const imageStore = useImageStore()
+
+    const { modal, hide } = useModal()
+
+    return {
+      newsfeedStore,
+      imageStore,
+      modal,
+      hide,
+    }
+  },
   data() {
     return {
       cacheBust: Date.now(),
@@ -105,15 +117,6 @@ export default {
   methods: {
     remove() {
       this.$emit('remove', this.id)
-    },
-    setup() {
-      const newsfeedStore = useNewsfeedStore()
-      const imageStore = useImageStore()
-
-      return {
-        newsfeedStore,
-        imageStore,
-      }
     },
     async rotate(deg) {
       const data = {

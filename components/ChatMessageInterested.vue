@@ -70,16 +70,17 @@
           <OutcomeModal
             v-if="showOutcome && refmsgid"
             :id="refmsgid"
-            ref="outcomeModal"
+            :type="outcomeType"
             @outcome="fetchMessage"
+            @hidden="showOutcome = false"
           />
           <PromiseModal
             v-if="showPromise"
-            ref="promiseModal"
             :messages="[refmsg]"
             :selected-message="refmsg.id"
             :users="otheruser ? [otheruser] : []"
             :selected-user="otheruser ? otheruser.id : null"
+            @hidden="showPromise = false"
           />
         </div>
       </div>
@@ -153,8 +154,11 @@ import { useMessageStore } from '../stores/message'
 import ChatBase from '~/components/ChatBase'
 import ProfileImage from '~/components/ProfileImage'
 import ChatMessageSummary from '~/components/ChatMessageSummary'
-const OutcomeModal = () => import('~/components/OutcomeModal')
-const PromiseModal = () => import('~/components/PromiseModal')
+const OutcomeModal = () =>
+  defineAsyncComponent(() => import('~/components/OutcomeModal'))
+const PromiseModal = defineAsyncComponent(
+  () => () => import('~/components/PromiseModal')
+)
 
 export default {
   components: {
@@ -171,19 +175,18 @@ export default {
   data() {
     return {
       showOutcome: false,
+      outcomeType: null,
       showPromise: false,
     }
   },
   methods: {
-    async promise(e) {
+    promise(e) {
       if (e) {
         e.preventDefault()
         e.stopPropagation()
       }
 
       this.showPromise = true
-      const m = await this.waitForRef('promiseModal')
-      m?.show()
     },
     async outcome(type, e) {
       if (e) {
@@ -196,8 +199,7 @@ export default {
       await messageStore.fetch(this.refmsgid)
 
       this.showOutcome = true
-      await this.waitForRef('outcomeModal')
-      this.$refs.outcomeModal.show(type)
+      this.outcomeType = type
     },
   },
 }

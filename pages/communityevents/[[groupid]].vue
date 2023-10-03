@@ -51,8 +51,8 @@
       </b-row>
       <CommunityEventModal
         v-if="showEventModal"
-        ref="eventmodal"
         :start-edit="true"
+        @hidden="showEventModal = false"
       />
     </div>
   </client-only>
@@ -64,13 +64,14 @@ import { useCommunityEventStore } from '../../stores/communityevent'
 import { useGroupStore } from '../../stores/group'
 import { useAuthStore } from '../../stores/auth'
 import NoticeMessage from '../../components/NoticeMessage'
-import { waitForRef } from '~/composables/useWaitForRef'
 import GlobalWarning from '~/components/GlobalWarning'
 import { ref, computed, useRouter } from '#imports'
 import InfiniteLoading from '~/components/InfiniteLoading'
-import CommunityEventModal from '~/components/CommunityEventModal'
 import GroupSelect from '~/components/GroupSelect'
 import CommunityEvent from '~/components/CommunityEvent.vue'
+const CommunityEventModal = defineAsyncComponent(() =>
+  import('~/components/CommunityEventModal')
+)
 
 const runtimeConfig = useRuntimeConfig()
 const communityEventStore = useCommunityEventStore()
@@ -142,12 +143,9 @@ const loadMore = function ($state) {
   }
 }
 
-const eventmodal = ref(null)
 const showEventModal = ref(false)
 
-const openEventModal = async () => {
+function openEventModal() {
   showEventModal.value = true
-  await waitForRef(eventmodal)
-  eventmodal.value.show()
 }
 </script>

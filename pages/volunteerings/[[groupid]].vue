@@ -56,13 +56,14 @@
       </b-row>
       <VolunteerOpportunityModal
         v-if="showVolunteerModal"
-        ref="volunteermodal"
         :start-edit="true"
+        @hidden="showVolunteerModal = false"
       />
     </div>
   </client-only>
 </template>
 <script setup>
+import { defineAsyncComponent } from 'vue'
 import { buildHead } from '../../composables/useBuildHead'
 import { useVolunteeringStore } from '../../stores/volunteering'
 import { useGroupStore } from '../../stores/group'
@@ -70,10 +71,11 @@ import { useAuthStore } from '../../stores/auth'
 import GlobalWarning from '~/components/GlobalWarning'
 import { ref, computed, useRoute, useRouter } from '#imports'
 import InfiniteLoading from '~/components/InfiniteLoading'
-import VolunteerOpportunityModal from '~/components/VolunteerOpportunityModal'
 import GroupSelect from '~/components/GroupSelect'
 import VolunteerOpportunity from '~/components/VolunteerOpportunity.vue'
-import { waitForRef } from '~/composables/useWaitForRef'
+const VolunteerOpportunityModal = defineAsyncComponent(() =>
+  import('~/components/VolunteerOpportunityModal')
+)
 
 const runtimeConfig = useRuntimeConfig()
 const volunteeringStore = useVolunteeringStore()
@@ -145,12 +147,9 @@ const loadMore = function ($state) {
   }
 }
 
-const volunteermodal = ref(null)
 const showVolunteerModal = ref(false)
 
-const openVolunteerModal = async () => {
+function openVolunteerModal() {
   showVolunteerModal.value = true
-  await waitForRef(volunteermodal)
-  volunteermodal.value.show()
 }
 </script>

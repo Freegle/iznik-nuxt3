@@ -639,10 +639,24 @@
         </b-col>
         <b-col cols="0" xl="3" />
       </b-row>
-      <AboutMeModal ref="aboutmemodal" @datachange="update" />
-      <ProfileModal :id="me ? me.id : null" ref="profilemodal" />
-      <EmailConfirmModal ref="emailconfirm" />
-      <AddressModal ref="addressModal" />
+      <AboutMeModal
+        v-if="showAboutMeModal"
+        @hidden="showAboutMeModal = false"
+        @data-change="update"
+      />
+      <ProfileModal
+        v-if="showProfileModal"
+        :id="me ? me.id : null"
+        @hidden="showProfileModal = false"
+      />
+      <EmailConfirmModal
+        v-if="showEmailConfirmModal"
+        @hidden="showEmailConfirmModal = false"
+      />
+      <AddressModal
+        v-if="showAddressModal"
+        @hidden="showAddressModal = false"
+      />
     </div>
   </client-only>
 </template>
@@ -658,19 +672,27 @@ import EmailValidator from '~/components/EmailValidator'
 import SettingsEmailInfo from '~/components/SettingsEmailInfo'
 import SettingsPhone from '~/components/SettingsPhone'
 import SupporterInfo from '~/components/SupporterInfo'
-import EmailConfirmModal from '~/components/EmailConfirmModal'
 import ProfileImage from '~/components/ProfileImage'
 import PostCode from '~/components/PostCode'
 
-import AboutMeModal from '~/components/AboutMeModal'
-import AddressModal from '~/components/AddressModal'
-import ProfileModal from '~/components/ProfileModal'
 import SettingsGroup from '~/components/SettingsGroup'
 import NoticeMessage from '~/components/NoticeMessage'
 import OurFilePond from '~/components/OurFilePond'
 import OurToggle from '~/components/OurToggle'
 import DonationButton from '~/components/DonationButton'
 import PasswordEntry from '~/components/PasswordEntry'
+const EmailConfirmModal = defineAsyncComponent(() =>
+  import('~/components/EmailConfirmModal')
+)
+const AddressModal = defineAsyncComponent(() =>
+  import('~/components/AddressModal')
+)
+const AboutMeModal = defineAsyncComponent(() =>
+  import('~/components/AboutMeModal')
+)
+const ProfileModal = defineAsyncComponent(() =>
+  import('~/components/ProfileModal')
+)
 
 definePageMeta({
   layout: 'login',
@@ -735,6 +757,10 @@ export default {
       userTimer: null,
       autoreposts: true,
       enterNewLine: false,
+      showAddressModal: false,
+      showAboutMeModal: false,
+      showProfileModal: false,
+      showEmailConfirmModal: false,
     }
   },
   computed: {
@@ -972,13 +998,10 @@ export default {
     },
     async addAbout() {
       await this.fetch()
-
-      await this.waitForRef('aboutmemodal')
-      this.$refs.aboutmemodal.show()
+      this.showAboutMeModal = true
     },
-    async viewProfile() {
-      await this.waitForRef('profilemodal')
-      this.$refs.profilemodal.show()
+    viewProfile() {
+      this.showProfileModal = true
     },
     async changeUseProfile(c, e) {
       const settings = this.me.settings
@@ -1007,8 +1030,7 @@ export default {
         })
 
         if (data && data.ret === 10) {
-          await this.waitForRef('emailconfirm')
-          this.$refs.emailconfirm.show()
+          this.showEmailConfirmModal = true
         }
       }
 
@@ -1121,8 +1143,7 @@ export default {
     async addressBook() {
       // Fetch the address book here to avoid an async setup which causes issues with waitForRef.
       await this.addressStore.fetch()
-
-      this.$refs.addressModal.show()
+      this.showAddressModal = true
     },
     photoProcessed(imageid, imagethumb, image) {
       // We have uploaded a photo.  Remove the filepond instance.

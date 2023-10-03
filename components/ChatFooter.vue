@@ -127,9 +127,8 @@
               'You need to wait a day since the last message before nudging.'
             "
             class="d-inline"
-            @click="nudgeTooSoon"
           >
-            <b-button variant="secondary" class="mr-2" disabled>
+            <b-button variant="secondary" class="mr-2" @click="nudgeTooSoon">
               <v-icon icon="bell" class="fa-fw" />&nbsp;Nudge
             </b-button>
           </div>
@@ -228,28 +227,42 @@
     </div>
     <PromiseModal
       v-if="showPromise"
-      ref="promise"
       :messages="ouroffers"
       :selected-message="likelymsg ? likelymsg : 0"
       :users="otheruser ? [otheruser] : []"
       :selected-user="otheruser ? otheruser.id : null"
       @hide="fetchMessages"
+      @hidden="showPromise = false"
     />
     <ProfileModal
-      v-if="showProfile && otheruser"
+      v-if="showProfileModal && otheruser"
       :id="otheruser ? otheruser.id : null"
-      ref="profile"
+      @hidden="showProfileModal = false"
     />
     <AddressModal
       v-if="showAddress"
-      ref="addressModal"
       :choose="true"
       t-o-d-o
       @chosen="sendAddress"
+      @hidden="showAddress = false"
     />
-    <ChatRSVPModal v-if="RSVP" :id="id" ref="rsvp" :user="otheruser" />
-    <NudgeTooSoonWarningModal ref="nudgetoosoonwarning" @confirm="doNudge" />
-    <NudgeWarningModal ref="nudgewarning" @confirm="doNudge" />
+    <ChatRSVPModal
+      v-if="RSVP"
+      :id="id"
+      ref="rsvp"
+      :user="otheruser"
+      @hidden="RSVP = false"
+    />
+    <NudgeTooSoonWarningModal
+      v-if="showNudgeTooSoonWarningModal"
+      @confirm="doNudge"
+      @hidden="showNudgeTooSoonWarningModal = false"
+    />
+    <NudgeWarningModal
+      v-if="showNudgeWarningModal"
+      @confirm="doNudge"
+      @hidden="showNudgeWarningModal = false"
+    />
     <MicroVolunteering v-if="showMicrovolunteering" />
   </div>
 </template>
@@ -266,14 +279,24 @@ import { untwem } from '~/composables/useTwem'
 // Don't use dynamic imports because it stops us being able to scroll to the bottom after render.
 const OurFilePond = () => import('~/components/OurFilePond')
 const UserRatings = () => import('~/components/UserRatings')
-const PromiseModal = () => import('~/components/PromiseModal')
-const ProfileModal = () => import('~/components/ProfileModal')
-const AddressModal = () => import('~/components/AddressModal')
+const PromiseModal = () =>
+  defineAsyncComponent(() => import('~/components/PromiseModal'))
+const ProfileModal = defineAsyncComponent(() =>
+  import('~/components/ProfileModal')
+)
+const AddressModal = defineAsyncComponent(() =>
+  import('~/components/AddressModal')
+)
 const NoticeMessage = () => import('~/components/NoticeMessage')
-const ChatRSVPModal = () => import('~/components/ChatRSVPModal')
-const NudgeWarningModal = () => import('~/components/NudgeWarningModal')
-const NudgeTooSoonWarningModal = () =>
+const ChatRSVPModal = defineAsyncComponent(() =>
+  import('~/components/ChatRSVPModal')
+)
+const NudgeWarningModal = defineAsyncComponent(() =>
+  import('~/components/NudgeWarningModal')
+)
+const NudgeTooSoonWarningModal = defineAsyncComponent(() =>
   import('~/components/NudgeTooSoonWarningModal')
+)
 const MicroVolunteering = () => import('~/components/MicroVolunteering')
 
 export default {
@@ -320,7 +343,7 @@ export default {
       showMicrovolunteering: false,
       showNotices: true,
       showPromise: false,
-      showProfile: false,
+      showProfileModal: false,
       showAddress: false,
       sendmessage: null,
       RSVP: false,
@@ -330,6 +353,8 @@ export default {
       ouroffers: [],
       imagethumb: null,
       imageid: null,
+      showNudgeTooSoonWarningModal: false,
+      showNudgeWarningModal: false,
     }
   },
   computed: {
@@ -397,9 +422,11 @@ export default {
       await this.chatStore.nudge(this.id)
       this._updateAfterSend()
     },
-    async nudge() {
-      await this.waitForRef('nudgewarning')
-      this.$refs.nudgewarning?.show()
+    nudge() {
+      this.showNudgeWarningModal = true
+    },
+    nudgeTooSoon() {
+      this.showNudgeTooSoonWarningModal = true
     },
     newline() {
       const p = this.$refs.chatarea.selectionStart
@@ -421,21 +448,15 @@ export default {
       await this.addressStore.fetch()
 
       this.showAddress = true
-
-      await this.waitForRef('addressModal')
-      this.$refs.addressModal?.show()
     },
     photoAdd() {
       // Flag that we're uploading.  This will trigger the render of the filepond instance and subsequently the
       // processed callback below.
       this.uploading = true
     },
-    async promise(date) {
+    promise(date) {
       // Show the modal first, as eye candy.
       this.showPromise = true
-
-      const m = await this.waitForRef('promise')
-      m?.show(date)
 
       this.$nextTick(async () => {
         this.ouroffers = await fetchOurOffers()
@@ -460,10 +481,8 @@ export default {
         }
       })
     },
-    async showInfo() {
-      this.showProfile = true
-      const m = await this.waitForRef('profile')
-      m?.show()
+    showInfo() {
+      this.showProfileModal = true
     },
     async send() {
       if (this.imageid) {
@@ -503,8 +522,6 @@ export default {
 
           if (RSVP) {
             this.RSVP = true
-            await this.waitForRef('rsvp')
-            this.$refs.rsvp?.show()
           } else {
             // We've sent a message.  This would be a good time to do some microvolunteering.
             this.showMicrovolunteering = true
