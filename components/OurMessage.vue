@@ -29,7 +29,11 @@
         :ad-id="adId"
         @zoom="showPhotosModal"
       />
-      <MessagePhotosModal :id="message.id" ref="photoModal" />
+      <MessagePhotosModal
+        v-if="showMessagePhotosModal && message.attachments?.length"
+        :id="message.id"
+        @hidden="showMessagePhotosModal = false"
+      />
     </div>
     <div v-else>
       <MessageSummary
@@ -44,11 +48,11 @@
       <MessageModal
         v-if="expanded"
         :id="message.id"
-          v-model:showImages="showImages"
+        v-model:showImages="showImages"
         :replyable="replyable"
         :hide-close="hideClose"
         :actions="actions"
-          @hidden="expanded = false"
+        @hidden="expanded = false"
       />
     </div>
     <div v-observe-visibility="visibilityChanged" />
@@ -157,6 +161,7 @@ export default {
       expanded: false,
       reply: null,
       showImages: false,
+      showMessagePhotosModal: false,
     }
   },
   computed: {
@@ -258,9 +263,8 @@ export default {
       this.showImages = true
       this.expand()
     },
-    async showPhotosModal() {
-      await this.waitForRef('photoModal')
-      this.$refs.photoModal?.show()
+    showPhotosModal() {
+      this.showMessagePhotosModal = true
     },
     async view() {
       if (this.recordView) {
