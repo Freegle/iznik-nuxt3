@@ -191,10 +191,14 @@ if (process.client) {
     titleTemplate: (titleChunk) => {
       const totalCount = notificationCount.value + chatCount.value
 
-      if (titleChunk.charAt(0) !== '(' && totalCount.value > 0) {
-        return '(' + totalCount.value + ') ' + titleChunk
+      if (titleChunk) {
+        if (titleChunk.charAt(0) !== '(' && totalCount.value > 0) {
+          return '(' + totalCount.value + ') ' + titleChunk
+        } else {
+          return titleChunk
+        }
       } else {
-        return titleChunk
+        return null
       }
     },
   })
