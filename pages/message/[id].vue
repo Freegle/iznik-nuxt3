@@ -77,7 +77,6 @@
                 :start-expanded="true"
                 hide-close
                 record-view
-                message-page
                 ad-unit-path="/22794232631/freegle_productemail"
                 ad-id="div-gpt-ad-1691925773522-2"
                 @not-found="error = true"
@@ -89,7 +88,6 @@
                 :start-expanded="true"
                 hide-close
                 record-view
-                message-page
                 @not-found="error = true"
               />
             </VisibleWhen>

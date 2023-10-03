@@ -12,7 +12,7 @@
         }"
       >
         <div class="pt-1 mb-1 w-100 itemwrapper">
-          <Suspense
+          <div
             v-for="(chatmessage, index) in chatmessages"
             :key="'chatmessage-' + chatmessage.id"
           >
@@ -30,13 +30,7 @@
               "
               class="mb-1"
             />
-
-            <template #fallback>
-              <div class="invisible" style="min-height: 101px">
-                Loading {{ chatmessage.id }}...
-              </div>
-            </template>
-          </Suspense>
+          </div>
           <div v-observe-visibility="topChanged" />
         </div>
       </div>

@@ -46,7 +46,7 @@
           class="mt-2"
         />
       </VisibleWhen>
-      <Suspense
+      <div
         v-for="message in deDuplicatedMessages.slice(1)"
         :key="'messagelist-' + message.id"
       >
@@ -76,10 +76,7 @@
             />
           </VisibleWhen>
         </div>
-        <template #fallback>
-          <div class="invisible">Loading {{ message.id }}...</div>
-        </template>
-      </Suspense>
+      </div>
     </div>
     <infinite-loading
       v-if="messagesForList?.length"

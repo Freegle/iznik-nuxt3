@@ -278,6 +278,12 @@ export default {
         await this.messageStore.promise(this.message, this.currentlySelected)
 
         console.log('Date arranged for', this.time, this.date)
+
+        if (this.time && !this.time.includes(':')) {
+          // We've seen in Sentry that this can happen - looks like if someone types into the hours but not the minutes.
+          this.time = this.time + ':00'
+        }
+
         const arrangedfor =
           this.time && this.date
             ? dayjs(this.date + ' ' + this.time).toISOString()

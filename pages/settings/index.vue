@@ -316,8 +316,24 @@
                     of Freegle.
                   </span>
                 </p>
+                <NoticeMessage
+                  v-if="
+                    simpleEmailSetting === 'None' || !notificationSettings.email
+                  "
+                  variant="danger"
+                  class="mb-1"
+                >
+                  <p>
+                    If people message you, you won't get any emails. Please make
+                    sure you check Chats regularly so that you don't miss
+                    anything.
+                  </p>
+                  <p v-if="simpleEmailSetting !== 'None'">
+                    You can change this below in "Mail me replies".
+                  </p>
+                </NoticeMessage>
                 <notice-message
-                  v-if="simpleEmailSetting !== 'None'"
+                  v-else-if="simpleEmailSetting !== 'None'"
                   variant="warning"
                   class="mb-2"
                 >
@@ -345,15 +361,6 @@
                     community.
                   </p>
                   <div v-else>
-                    <NoticeMessage
-                      v-if="simpleEmailSetting === 'None'"
-                      variant="danger"
-                      class="mb-1"
-                    >
-                      If people message you, you won't get any emails. Please
-                      make sure you check Chats regularly so that you don't miss
-                      anything.
-                    </NoticeMessage>
                     <div v-if="simpleEmailSetting !== 'None'">
                       <SettingsGroup
                         v-model:emailfrequency="emailSimple"
@@ -825,7 +832,7 @@ export default {
       // - Basic.  OFFER/WANTED, chat messages,
       // - Full.  OFFER/WANTED, community event, volunteer ops, chitchat, notifications,
       get() {
-        return this.me.settings?.simplemail
+        return this.me?.settings?.simplemail
           ? this.me.settings.simplemail
           : 'Full'
       },
@@ -887,7 +894,6 @@ export default {
         return simple.emailFrequency
       },
       set(newValue) {
-        console.log('Change email simple', newValue)
         this.changeAllGroups('emailfrequency', newValue)
       },
     },
@@ -921,6 +927,17 @@ export default {
     await this.update()
     this.autoreposts = !this.me?.settings?.autorepostsdisable
     this.enterNewLine = this.me?.settings?.enterNewLine
+
+    if (
+      this.simpleEmailSetting === 'Full' ||
+      this.simpleEmailSetting === 'Basic'
+    ) {
+      // Double check that we have chat notification emails enabled, as we should for this setting.
+      // If we don't then force display to advanced so that they can change this.
+      if (!this.notificationSettings.email) {
+        this.showAdvanced = true
+      }
+    }
 
     setTimeout(this.checkUser, 200)
   },
