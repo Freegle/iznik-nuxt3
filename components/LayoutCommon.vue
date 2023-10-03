@@ -96,13 +96,20 @@ export default {
       // they have already seen the banner and specified a preference if they care.
       //
       // Add 'https://cdn-cookieyes.com/client_data/fd4582b38fa7a9f269114304/script.js' to head
-      const script = document.createElement('script')
-      script.setAttribute(
-        'src',
-        'https://cdn-cookieyes.com/client_data/fd4582b38fa7a9f269114304/script.js'
-      )
+      //
+      // Check if cookie script already present
+      const cookieScript = document.getElementById('cookieyes')
 
-      document.head.appendChild(script)
+      if (!cookieScript) {
+        const script = document.createElement('script')
+        script.id = 'cookieyes'
+        script.setAttribute(
+          'src',
+          'https://cdn-cookieyes.com/client_data/fd4582b38fa7a9f269114304/script.js'
+        )
+
+        document.head.appendChild(script)
+      }
     }
 
     try {
