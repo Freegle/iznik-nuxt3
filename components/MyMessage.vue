@@ -810,8 +810,15 @@ export default {
       const router = useRouter()
       router.push(this.message.type === 'Offer' ? '/give' : '/find')
     },
-    repostWhenUnavailable() {
+    async repostWhenUnavailable() {
       this.triedToRepost = true
+
+      // see https://github.com/Freegle/iznik-nuxt3/pull/22/files#r1336096366
+      await this.messageStore.fetch(this.id, true)
+      if (this.message.canrepost) {
+        await this.repost()
+        this.triedToRepost = false
+      }
     },
     hasOutcome(val) {
       let ret = false
