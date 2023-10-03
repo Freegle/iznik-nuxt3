@@ -122,7 +122,6 @@ export default {
   methods: {
     oneOfMyGroups(groupid) {
       return this.myGroups.find((g) => {
-        console.log('Compare', g.id, groupid)
         return g.id === groupid
       })
     },
