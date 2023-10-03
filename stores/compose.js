@@ -246,6 +246,7 @@ export const useComposeStore = defineStore({
     },
     addAttachment(params) {
       console.log('Add attachment', params, this.messages[params.id])
+      this.ensureMessage(params.id)
       this.messages[params.id].attachments = this.messages[params.id]
         .attachments
         ? this.messages[params.id].attachments
@@ -254,6 +255,7 @@ export const useComposeStore = defineStore({
       this.attachmentBump++
     },
     setAttachmentsForMessage(id, attachments) {
+      this.ensureMessage(id)
       this.messages[id].attachments = attachments
     },
     removeAttachment(params) {
