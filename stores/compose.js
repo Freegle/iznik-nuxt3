@@ -265,7 +265,6 @@ export const useComposeStore = defineStore({
     },
     deleteMessage(id) {
       this.messages = this.messages.filter((m) => m.id !== id)
-      this.messages[id].attachments = []
     },
     async submit(params) {
       // This is the most important bit of code in the client :-).  We have our messages in the compose store.
