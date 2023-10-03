@@ -1,5 +1,10 @@
 <template>
   <client-only v-if="me">
+    <ContactDetailsAskModal
+      v-if="showContactDetailsAskModal"
+      @hidden="showContactDetailsAskModal = false"
+    />
+
     <div>
       <h1 class="visually-hidden">Chats</h1>
       <b-row class="m-0">
@@ -138,8 +143,8 @@
       </b-row>
       <ChatHideModal
         v-if="showHideAllModal"
-        ref="chathideall"
         @confirm="hideAll"
+        @hidden="showHideAllModal = false"
       />
     </div>
   </client-only>
@@ -147,6 +152,7 @@
 <script>
 import dayjs from 'dayjs'
 
+import { storeToRefs } from 'pinia'
 import { buildHead } from '../../composables/useBuildHead'
 import { useAuthStore } from '../../stores/auth'
 import { ref, useRoute, useRouter } from '#imports'
@@ -158,8 +164,13 @@ import SidebarRight from '~/components/SidebarRight'
 // We can't use async on ChatListEntry else the infinite scroll kicks in and tries to load everything while we are
 // still waiting for the import to complete.
 import ChatListEntry from '~/components/ChatListEntry.vue'
+const ContactDetailsAskModal = defineAsyncComponent(() =>
+  import('~/components/ContactDetailsAskModal.vue')
+)
 
-const ChatHideModal = () => import('~/components/ChatHideModal')
+const ChatHideModal = defineAsyncComponent(() =>
+  import('~/components/ChatHideModal')
+)
 
 definePageMeta({
   layout: 'login',
@@ -170,6 +181,7 @@ export default {
     VisibleWhen,
     SidebarRight,
     ChatListEntry,
+    ContactDetailsAskModal,
     ChatHideModal,
     InfiniteLoading,
   },
@@ -191,6 +203,11 @@ export default {
     const authStore = useAuthStore()
     const myid = authStore.user?.id
     const showChats = ref(20)
+
+    // When there's a flag in the chat store to show the modal.  Don't reset the value in the store here otherwise
+    // reactivity will stop the modal being shown.
+    const showContactDetailsAskModal =
+      storeToRefs(chatStore).showContactDetailsAskModal
 
     if (myid) {
       const route = useRoute()
@@ -222,7 +239,7 @@ export default {
       }
     }
 
-    return { chatStore, showChats }
+    return { showContactDetailsAskModal, chatStore, showChats }
   },
   data() {
     return {
@@ -329,11 +346,8 @@ export default {
       await this.chatStore.fetchChats()
       this.bump++
     },
-    async showHideAll() {
+    showHideAll() {
       this.showHideAllModal = true
-
-      await this.waitForRef('chathideall')
-      this.$refs.chathideall.show()
     },
     async hideAll() {
       for (let i = 0; i < this.visibleChats.length; i++) {

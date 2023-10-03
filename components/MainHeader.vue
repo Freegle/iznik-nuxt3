@@ -463,7 +463,10 @@
         </b-nav>
       </b-collapse>
     </b-navbar>
-    <AboutMeModal v-if="showAboutMeModal" ref="aboutMeModal" />
+    <about-me-modal
+      v-if="showAboutMeModal"
+      @hidden="showAboutMeModal = false"
+    />
   </header>
 </template>
 <script setup>
@@ -478,8 +481,6 @@ import { useNotificationStore } from '../stores/notification'
 import { useLogoStore } from '../stores/logo'
 import OfflineIndicator from './OfflineIndicator'
 import { useAuthStore } from '~/stores/auth'
-import { ref, watch, computed, onMounted, defineAsyncComponent } from '#imports'
-import { waitForRef } from '~/composables/useWaitForRef'
 import { fetchMe } from '~/composables/useMe'
 import { useRuntimeConfig } from '#app'
 
@@ -507,7 +508,6 @@ const unreadNotificationCount = ref(0)
 const chatCount = ref(0)
 const activePostsCount = ref(0)
 const showAboutMeModal = ref(false)
-const aboutMeModal = ref(null)
 const mobileNav = ref(null)
 const countTimer = ref(null)
 
@@ -603,10 +603,7 @@ const logout = async () => {
 
 const showAboutMe = async () => {
   await fetchMe(true)
-
   showAboutMeModal.value = true
-  await waitForRef(aboutMeModal)
-  aboutMeModal.value?.show()
 }
 
 const maybeReload = (route) => {

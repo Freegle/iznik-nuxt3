@@ -1,11 +1,5 @@
 <template>
-  <b-modal
-    id="nudgetoosoonwarningmodal"
-    v-model="showModal"
-    scrollable
-    title="Nudging"
-    no-stacking
-  >
+  <b-modal ref="modal" scrollable title="Nudging" no-stacking>
     <template #default>
       <p>
         It's too soon to nudge - you need to wait 24 hours after the last
@@ -21,21 +15,9 @@
     </template>
   </b-modal>
 </template>
-<script>
-export default {
-  data() {
-    return {
-      showModal: false,
-    }
-  },
-  methods: {
-    show(type) {
-      this.showModal = true
-    },
 
-    hide() {
-      this.showModal = false
-    },
-  },
-}
+<script setup>
+import { useModal } from '~/composables/useModal'
+
+const { modal, hide } = useModal()
 </script>

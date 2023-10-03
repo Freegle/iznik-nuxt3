@@ -1,11 +1,5 @@
 <template>
-  <b-modal
-    id="profilemodal"
-    v-model="showModal"
-    scrollable
-    size="lg"
-    no-stacking
-  >
+  <b-modal ref="modal" scrollable size="lg" no-stacking>
     <template #header>
       <h4 v-if="added">Your event has been added</h4>
       <h4 v-else-if="editing">
@@ -395,8 +389,8 @@ import { useGroupStore } from '../stores/group'
 import { useImageStore } from '../stores/image'
 import EmailValidator from './EmailValidator'
 import { ref } from '#imports'
-import modal from '@/mixins/modal'
 import { twem } from '~/composables/useTwem'
+import { useModal } from '~/composables/useModal'
 
 const GroupSelect = () => import('~/components/GroupSelect')
 const OurFilePond = () => import('~/components/OurFilePond')
@@ -449,7 +443,6 @@ export default {
     Field,
     ErrorMessage,
   },
-  mixins: [modal],
   props: {
     id: {
       type: Number,
@@ -470,6 +463,8 @@ export default {
     const imageStore = useImageStore()
     const groupid = ref(null)
 
+    const { modal, hide } = useModal()
+
     if (props.id) {
       const v = await communityEventStore.fetch(props.id)
       await userStore.fetch(v.userid)
@@ -482,6 +477,9 @@ export default {
 
     const oldPhoto = ref(communityEventStore.byId(props.id)?.image)
 
+    const editing = ref(props.startEdit)
+    const added = ref(false)
+
     return {
       communityEventStore,
       composeStore,
@@ -490,12 +488,14 @@ export default {
       imageStore,
       groupid,
       oldPhoto,
+      modal,
+      hide,
+      editing,
+      added,
     }
   },
   data() {
     return {
-      editing: false,
-      added: false,
       cacheBust: Date.now(),
       uploading: false,
       showGroupError: false,
@@ -561,19 +561,6 @@ export default {
     },
   },
   methods: {
-    show() {
-      this.editing = this.startEdit
-      this.added = false
-      this.showModal = true
-      if (this.event?.groups?.length > 0) {
-        this.groupid = this.event.groups[0]
-      }
-    },
-    hide() {
-      this.editing = false
-      this.uploading = false
-      this.showModal = false
-    },
     validateTitle(value) {
       if (!value) {
         return 'Please enter a title.'

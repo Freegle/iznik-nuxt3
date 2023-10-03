@@ -42,7 +42,7 @@
           variant="link"
           size="sm"
           class="d-inline-block mr-1"
-          @click="shareStory"
+          @click="share"
         >
           <v-icon icon="share-alt" /><span class="d-none d-inline-block-md">
             Share</span
@@ -61,16 +61,20 @@
       </div>
     </div>
     <NewsPhotoModal
-      v-if="story?.image"
+      v-if="showNewsPhotoModal && story?.image"
       :id="story.image.id"
-      ref="photoModal"
       :newsfeedid="newsfeed.id"
       :src="story.image.path"
       imgtype="Story"
       imgflag="story"
+      @hidden="showNewsPhotoModal = false"
     />
-    <StoryAddModal v-if="showAdd" ref="addmodal" />
-    <StoryShareModal v-if="showShare" :id="newsfeed.storyid" ref="share" />
+    <StoryAddModal v-if="showAdd" @hidden="showAdd = false" />
+    <StoryShareModal
+      v-if="showNewsShareModal"
+      :id="newsfeed.storyid"
+      @hidden="showNewsShareModal = false"
+    />
   </div>
 </template>
 <script>
@@ -82,9 +86,15 @@ import NewsBase from '~/components/NewsBase'
 
 import NewsUserIntro from '~/components/NewsUserIntro'
 import NewsLoveComment from '~/components/NewsLoveComment'
-import NewsPhotoModal from '~/components/NewsPhotoModal'
-const StoryAddModal = () => import('~/components/StoryAddModal')
-const StoryShareModal = () => import('~/components/StoryShareModal')
+const NewsPhotoModal = defineAsyncComponent(() =>
+  import('~/components/NewsPhotoModal')
+)
+const StoryAddModal = defineAsyncComponent(() =>
+  import('~/components/StoryAddModal')
+)
+const StoryShareModal = defineAsyncComponent(() =>
+  import('~/components/StoryShareModal')
+)
 
 export default {
   components: {
@@ -109,7 +119,6 @@ export default {
   },
   data() {
     return {
-      showShare: false,
       showAdd: false,
     }
   },
@@ -127,15 +136,8 @@ export default {
     },
   },
   methods: {
-    async showAddModal() {
+    showAddModal() {
       this.showAdd = true
-      await this.waitForRef('addmodal')
-      this.$refs.addmodal?.show()
-    },
-    async shareStory() {
-      this.showShare = true
-      await this.waitForRef('share')
-      this.$refs.share?.show()
     },
   },
 }

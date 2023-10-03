@@ -262,27 +262,35 @@
       @photo-processed="photoProcessed"
     />
     <NewsPhotoModal
-      v-if="reply.image"
+      v-if="showNewsPhotoModal && reply.image"
       :id="reply.image.id"
-      ref="replyPhotoModal"
       :newsfeedid="reply.id"
       :src="reply.image.path"
       imgtype="Newsfeed"
       imgflag="Newsfeed"
+      @hidden="showNewsPhotoModal = false"
     />
-    <ProfileModal v-if="infoclick" :id="userid" ref="profilemodal" />
-    <NewsLovesModal v-if="showLoveModal" :id="replyid" ref="loveModal" />
+    <ProfileModal
+      v-if="showProfileModal"
+      :id="userid"
+      @hidden="showProfileModal = false"
+    />
+    <NewsLovesModal
+      v-if="showLoveModal"
+      :id="replyid"
+      @hidden="showLoveModal = false"
+    />
     <NewsEditModal
       v-if="showEditModal"
       :id="replyid"
-      ref="editModal"
       :threadhead="threadhead"
+      @hidden="showEditModal = false"
     />
     <ConfirmModal
       v-if="showDeleteModal"
-      ref="deleteConfirm"
       :title="'Delete reply from ' + reply.displayname"
       @confirm="deleteConfirm"
+      @hidden="showDeleteModal = false"
     />
   </div>
 </template>
@@ -291,19 +299,26 @@ import pluralize from 'pluralize'
 import { useNewsfeedStore } from '../stores/newsfeed'
 import { useUserStore } from '../stores/user'
 import { useMiscStore } from '../stores/misc'
-import NewsLovesModal from './NewsLovesModal'
 import SpinButton from './SpinButton'
-import NewsEditModal from './NewsEditModal'
 import { twem, untwem } from '~/composables/useTwem'
-
 import NewsUserInfo from '~/components/NewsUserInfo'
 import NewsHighlight from '~/components/NewsHighlight'
+
 import ChatButton from '~/components/ChatButton'
 import NewsPreview from '~/components/NewsPreview'
 import ProfileImage from '~/components/ProfileImage'
 
-const ProfileModal = () => import('~/components/ProfileModal')
-const ConfirmModal = () => import('~/components/ConfirmModal.vue')
+const NewsPhotoModal = defineAsyncComponent(() =>
+  import('./NewsPhotoModal.vue')
+)
+const NewsLovesModal = defineAsyncComponent(() => import('./NewsLovesModal'))
+const NewsEditModal = defineAsyncComponent(() => import('./NewsEditModal'))
+const ProfileModal = defineAsyncComponent(() =>
+  import('~/components/ProfileModal')
+)
+const ConfirmModal = defineAsyncComponent(() =>
+  import('~/components/ConfirmModal.vue')
+)
 const NewsReplies = () => import('~/components/NewsReplies.vue')
 const OurFilePond = () => import('~/components/OurFilePond')
 const OurAtTa = () => import('~/components/OurAtTa')
@@ -311,6 +326,7 @@ const OurAtTa = () => import('~/components/OurAtTa')
 export default {
   name: 'NewsReply',
   components: {
+    NewsPhotoModal,
     NewsEditModal,
     NewsReplies,
     SpinButton,
@@ -348,7 +364,7 @@ export default {
       required: true,
     },
   },
-  setup(props) {
+  setup() {
     const newsfeedStore = useNewsfeedStore()
     const userStore = useUserStore()
     const miscStore = useMiscStore()
@@ -364,7 +380,6 @@ export default {
       showReplyBox: false,
       replyingTo: null,
       replybox: null,
-      infoclick: false,
       showAllReplies: false,
       uploading: false,
       imageid: null,
@@ -374,6 +389,8 @@ export default {
       showEditModal: false,
       hasBecomeVisible: false,
       isVisible: false,
+      showProfileModal: false,
+      showNewsPhotoModal: false,
     }
   },
   computed: {
@@ -432,10 +449,8 @@ export default {
     this.$emit('rendered', this.replyid)
   },
   methods: {
-    async showInfo() {
-      this.infoclick = true
-      const m = await this.waitForRef('profilemodal')
-      m?.show()
+    showInfo() {
+      this.showProfileModal = true
     },
     async replyReply() {
       console.log('Replying to', this.replyid, this.reply)
@@ -514,10 +529,8 @@ export default {
 
       el.classList.remove('pulsate')
     },
-    async deleteReply() {
+    deleteReply() {
       this.showDeleteModal = true
-      await this.waitForRef('deleteConfirm')
-      this.$refs.deleteConfirm?.show()
     },
     async deleteConfirm() {
       await this.newsfeedStore.delete(this.replyid, this.threadhead)
@@ -525,15 +538,11 @@ export default {
     brokenImage(event) {
       event.target.src = '/defaultprofile.png'
     },
-    async showEdit() {
+    showEdit() {
       this.showEditModal = true
-      await this.waitForRef('editModal')
-      this.$refs.editModal?.show()
     },
-    async showLove() {
+    showLove() {
       this.showLoveModal = true
-      await this.waitForRef('loveModal')
-      this.$refs.loveModal?.show()
     },
     filterMatch(name, chunk) {
       // Only match at start of string.
@@ -585,7 +594,7 @@ export default {
       }
     },
     showReplyPhotoModal() {
-      this.$refs.replyPhotoModal?.show()
+      this.showNewsPhotoModal = true
     },
   },
 }

@@ -1,11 +1,5 @@
 <template>
-  <b-modal
-    id="profilemodal"
-    v-model="showModal"
-    scrollable
-    size="lg"
-    no-stacking
-  >
+  <b-modal ref="modal" scrollable size="lg" no-stacking>
     <template #header>
       <h4 v-if="added">Your opportunity has been added</h4>
       <h4 v-else-if="editing">
@@ -431,9 +425,9 @@ import { useUserStore } from '../stores/user'
 import { useGroupStore } from '../stores/group'
 import EmailValidator from './EmailValidator'
 import SpinButton from '~/components/SpinButton.vue'
-import modal from '@/mixins/modal'
 import { twem } from '~/composables/useTwem'
 import { ref } from '#imports'
+import { useModal } from '~/composables/useModal'
 const GroupSelect = () => import('~/components/GroupSelect')
 const OurFilePond = () => import('~/components/OurFilePond')
 const StartEndCollection = () => import('~/components/StartEndCollection')
@@ -479,7 +473,6 @@ export default {
     Field,
     ErrorMessage,
   },
-  mixins: [modal],
   props: {
     id: {
       type: Number,
@@ -499,6 +492,8 @@ export default {
     const groupStore = useGroupStore()
     const groupid = ref(null)
 
+    const { modal, hide } = useModal()
+
     if (props.id) {
       const v = await volunteeringStore.fetch(props.id)
       await userStore.fetch(v.userid)
@@ -511,6 +506,9 @@ export default {
 
     const oldPhoto = ref(volunteeringStore.byId(props.id)?.image)
 
+    const editing = ref(props.startEdit)
+    const added = ref(false)
+
     return {
       volunteeringStore,
       composeStore,
@@ -518,12 +516,14 @@ export default {
       groupStore,
       groupid,
       oldPhoto,
+      modal,
+      hide,
+      editing,
+      added,
     }
   },
   data() {
     return {
-      editing: false,
-      added: false,
       cacheBust: Date.now(),
       uploading: false,
       showGroupError: false,
@@ -588,19 +588,6 @@ export default {
     },
   },
   methods: {
-    show() {
-      this.editing = this.startEdit
-      this.added = false
-      this.showModal = true
-      if (this.volunteering?.groups?.length > 0) {
-        this.groupid = this.volunteering.groups[0]
-      }
-    },
-    hide() {
-      this.editing = false
-      this.uploading = false
-      this.showModal = false
-    },
     validateTitle(value) {
       if (!value) {
         return 'Please enter a title.'

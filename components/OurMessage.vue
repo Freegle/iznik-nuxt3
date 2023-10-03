@@ -44,20 +44,23 @@
       <MessageModal
         v-if="expanded"
         :id="message.id"
-        ref="modal"
+          v-model:showImages="showImages"
         :replyable="replyable"
         :hide-close="hideClose"
         :actions="actions"
+          @hidden="expanded = false"
       />
     </div>
     <div v-observe-visibility="visibilityChanged" />
   </div>
 </template>
+
 <script>
 import { useMessageStore } from '../stores/message'
-import MessageModal from '~/components/MessageModal'
-
 import { useGroupStore } from '~/stores/group'
+const MessageModal = defineAsyncComponent(() =>
+  import('~/components/MessageModal')
+)
 
 export default {
   components: {
@@ -153,6 +156,7 @@ export default {
     return {
       expanded: false,
       reply: null,
+      showImages: false,
     }
   },
   computed: {
@@ -243,18 +247,16 @@ export default {
     }
   },
   methods: {
-    async expand(zoom) {
+    expand() {
       if (!this.message?.successful) {
         this.expanded = true
-
-        await this.waitForRef('modal')
-        this.$refs.modal.show(zoom)
 
         this.view()
       }
     },
     zoom() {
-      this.expand(true)
+      this.showImages = true
+      this.expand()
     },
     async showPhotosModal() {
       await this.waitForRef('photoModal')

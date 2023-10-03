@@ -15,11 +15,17 @@
       <v-icon icon="trophy" />
       Supporter
     </b-badge>
-    <SupporterInfoModal v-if="showInfoModal" ref="modal" />
+    <SupporterInfoModal
+      v-if="showInfoModal"
+      ref="modal"
+      @hidden="showInfoModal = false"
+    />
   </div>
 </template>
 <script>
-const SupporterInfoModal = () => import('~/components/SupporterInfoModal.vue')
+const SupporterInfoModal = defineAsyncComponent(() =>
+  import('~/components/SupporterInfoModal.vue')
+)
 
 export default {
   components: { SupporterInfoModal },
@@ -41,12 +47,10 @@ export default {
     }
   },
   methods: {
-    async showModal(e) {
+    showModal(e) {
       e.preventDefault()
       e.stopPropagation()
       this.showInfoModal = true
-      await this.waitForRef('modal')
-      this.$refs.modal?.show()
     },
   },
 }
