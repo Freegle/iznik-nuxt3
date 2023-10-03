@@ -285,12 +285,16 @@ export async function freegleIt(type, router) {
       })
     }
   } catch (e) {
-    console.log('Submit failed', e, e.response.data.ret)
-    if (e.message.includes('Unvalidated email')) {
-      console.log('unvalidated')
-      this.unvalidatedEmail = true
-    } else if (e.message.includes('Not allowed to post on this group')) {
-      this.notAllowed = true
+    console.log('Submit failed', e, e?.response?.data?.ret)
+    if (e?.message) {
+      if (e.message.includes('Unvalidated email')) {
+        console.log('unvalidated')
+        this.unvalidatedEmail = true
+      } else if (e.message.includes('Not allowed to post on this group')) {
+        this.notAllowed = true
+      } else {
+        this.wentWrong = true
+      }
     } else {
       this.wentWrong = true
     }
