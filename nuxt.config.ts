@@ -2,7 +2,6 @@ import path from 'path-browserify'
 import { VitePWA } from 'vite-plugin-pwa'
 import eslintPlugin from 'vite-plugin-eslint'
 import legacy from '@vitejs/plugin-legacy'
-import 'core-js/actual/array/to-sorted'
 import config from './config'
 
 // @ts-ignore

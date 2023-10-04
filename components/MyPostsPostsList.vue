@@ -96,6 +96,7 @@
 import pluralize from 'pluralize'
 import MyMessage from '~/components/MyMessage.vue'
 import InfiniteLoading from '~/components/InfiniteLoading.vue'
+import 'core-js/actual/array/to-sorted'
 
 const props = defineProps({
   type: { type: String, required: true },
