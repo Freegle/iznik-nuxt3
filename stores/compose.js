@@ -321,15 +321,14 @@ export const useComposeStore = defineStore({
           } else {
             // This is one of our existing messages which we are reposting.  We need to convert it back to a draft,
             // edit it (to update it from our client data), and then submit.
-            console.log('Existing message')
             const id = message.repostof
             await this.backToDraft(id)
 
             const attids = []
 
-            if (this.messages[messages.id].attachments) {
-              for (const att in this.messages[message.id].attachments) {
-                attids.push(this.messages[message.id].attachments[att].id)
+            if (message.attachments) {
+              for (const att in message.attachments) {
+                attids.push(message.attachments[att].id)
               }
             }
 
