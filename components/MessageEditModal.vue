@@ -1,127 +1,120 @@
 <template>
-  <div>
-    <b-modal ref="modal" scrollable size="lg" title-class="w-100">
-      <template #title>
-        <div class="d-flex flex-wrap justify-content-between w-100">
-          <em>{{ message.subject }}</em>
-        </div>
-      </template>
-      <template #default>
-        <div v-if="message.location">
-          <b-row>
-            <b-col cols="6" md="3">
-              <div class="d-flex flex-column">
-                <label :for="uniqueId"> Type </label>
-                <b-form-select
-                  :id="uniqueId"
-                  v-model="type"
-                  :options="typeOptions"
-                  size="lg"
-                />
-              </div>
-            </b-col>
-            <b-col cols="6">
-              <PostItem
-                :id="id"
-                ref="item"
-                v-model:edititem="edititem"
-                :type="type"
-                edit
-              />
-            </b-col>
-            <b-col cols="6" md="3">
-              <PostCode
-                label="Postcode"
-                :find="false"
-                size="lg"
-                :value="postcode?.name"
-                @selected="postcodeSelect"
-                @cleared="postcodeClear"
-              />
-            </b-col>
-          </b-row>
-        </div>
-        <div v-else>
-          <b-row>
-            <b-col cols="6">
-              <b-form-input v-model="message.subject" />
-            </b-col>
-          </b-row>
-        </div>
+  <b-modal ref="modal" scrollable size="lg" title-class="w-100">
+    <template #title>
+      <div class="d-flex flex-wrap justify-content-between w-100">
+        <em>{{ message.subject }}</em>
+      </div>
+    </template>
+    <template #default>
+      <div v-if="message.location">
         <b-row>
           <b-col cols="6" md="3">
-            <NumberIncrementDecrement
-              v-if="message.type === 'Offer'"
-              v-model="availablenow"
-              label="Quantity"
-              append-text=" available"
-              class="count mt-3"
-              size="md"
-              :min="1"
-            />
-          </b-col>
-        </b-row>
-        <b-row>
-          <b-col>
-            <b-form-textarea
-              ref="textbody"
-              v-model="edittextbody"
-              :placeholder="placeholder"
-              rows="8"
-              class="mt-2"
-              :state="triedToSave ? !isSaveButtonDisabled : null"
-            />
-            <p class="invalid-feedback">
-              Please provide either a description or a photo.
-            </p>
-          </b-col>
-        </b-row>
-        <b-row v-if="uploading" class="bg-white">
-          <b-col class="p-0">
-            <OurFilePond
-              imgtype="Message"
-              imgflag="message"
-              @photo-processed="photoProcessed"
-            />
-          </b-col>
-        </b-row>
-        <b-row v-if="attachments?.length">
-          <b-col>
-            <div class="d-flex flex-wrap mb-1 mt-2">
-              <div
-                v-for="att in attachments"
-                :key="'image-' + att.id"
-                class="bg-transparent p-0"
-              >
-                <PostPhoto v-bind="att" @remove="removePhoto" />
-              </div>
+            <div class="d-flex flex-column">
+              <label :for="uniqueId"> Type </label>
+              <b-form-select
+                :id="uniqueId"
+                v-model="type"
+                :options="typeOptions"
+                size="lg"
+              />
             </div>
           </b-col>
+          <b-col cols="6">
+            <PostItem
+              :id="id"
+              ref="item"
+              v-model:edititem="edititem"
+              :type="type"
+              edit
+            />
+          </b-col>
+          <b-col cols="6" md="3">
+            <PostCode
+              label="Postcode"
+              :find="false"
+              size="lg"
+              :value="postcode?.name"
+              @selected="postcodeSelect"
+              @cleared="postcodeClear"
+            />
+          </b-col>
         </b-row>
-      </template>
-      <template #footer>
-        <b-button variant="secondary" class="mr-auto" @click="photoAdd">
-          <v-icon icon="camera" />&nbsp;Add photo
-        </b-button>
-        <b-button variant="white" :disabled="uploadingPhoto" @click="hide">
-          Cancel
-        </b-button>
-        <SpinButton
-          variant="primary"
-          :disabled="uploadingPhoto || (!edittextbody && !attachments?.length)"
-          name="save"
-          label="Save"
-          spinclass="text-white"
-          @click="save"
-        />
-      </template>
-    </b-modal>
-    <OutcomeModal
-      v-if="showOutcomeModal"
-      :id="id"
-      @hidden="showOutcomeModal = false"
-    />
-  </div>
+      </div>
+      <div v-else>
+        <b-row>
+          <b-col cols="6">
+            <b-form-input v-model="message.subject" />
+          </b-col>
+        </b-row>
+      </div>
+      <b-row>
+        <b-col cols="6" md="3">
+          <NumberIncrementDecrement
+            v-if="message.type === 'Offer'"
+            v-model="availablenow"
+            label="Quantity"
+            append-text=" available"
+            class="count mt-3"
+            size="md"
+            :min="1"
+          />
+        </b-col>
+      </b-row>
+      <b-row>
+        <b-col>
+          <b-form-textarea
+            ref="textbody"
+            v-model="edittextbody"
+            :placeholder="placeholder"
+            rows="8"
+            class="mt-2"
+            :state="triedToSave ? !isSaveButtonDisabled : null"
+          />
+          <p class="invalid-feedback">
+            Please provide either a description or a photo.
+          </p>
+        </b-col>
+      </b-row>
+      <b-row v-if="uploading" class="bg-white">
+        <b-col class="p-0">
+          <OurFilePond
+            imgtype="Message"
+            imgflag="message"
+            @photo-processed="photoProcessed"
+          />
+        </b-col>
+      </b-row>
+      <b-row v-if="attachments?.length">
+        <b-col>
+          <div class="d-flex flex-wrap mb-1 mt-2">
+            <div
+              v-for="att in attachments"
+              :key="'image-' + att.id"
+              class="bg-transparent p-0"
+            >
+              <PostPhoto v-bind="att" @remove="removePhoto" />
+            </div>
+          </div>
+        </b-col>
+      </b-row>
+    </template>
+    <template #footer>
+      <b-button variant="secondary" class="mr-auto" @click="photoAdd">
+        <v-icon icon="camera" />&nbsp;Add photo
+      </b-button>
+      <b-button variant="white" :disabled="uploadingPhoto" @click="hide">
+        Cancel
+      </b-button>
+      <SpinButton
+        variant="primary"
+        :disabled="uploadingPhoto || (!edittextbody && !attachments?.length)"
+        name="save"
+        label="Save"
+        spinclass="text-white"
+        @click="save"
+      />
+    </template>
+  </b-modal>
 </template>
 
 <script>
@@ -131,7 +124,6 @@ import { useComposeStore } from '../stores/compose'
 import { useGroupStore } from '../stores/group'
 import { uid } from '../composables/useId'
 import NumberIncrementDecrement from './NumberIncrementDecrement'
-import OutcomeModal from '~/components/OutcomeModal'
 import PostCode from '~/components/PostCode'
 import { useModal } from '~/composables/useModal'
 const OurFilePond = () => import('~/components/OurFilePond')
@@ -140,7 +132,6 @@ const PostPhoto = () => import('./PostPhoto')
 
 export default {
   components: {
-    OutcomeModal,
     NumberIncrementDecrement,
     OurFilePond,
     PostCode,
@@ -188,7 +179,6 @@ export default {
       myFiles: [],
       image: null,
       triedToSave: false,
-      showOutcomeModal: false,
     }
   },
   computed: {
@@ -230,14 +220,6 @@ export default {
     },
     isSaveButtonDisabled() {
       return !this.edittextbody && !this.attachments?.length
-    },
-  },
-  watch: {
-    count(newVal) {
-      if (newVal === 0) {
-        this.hide()
-        this.showOutcomeModal = true
-      }
     },
   },
   methods: {
