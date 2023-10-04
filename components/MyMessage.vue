@@ -813,11 +813,14 @@ export default {
     async repostWhenUnavailable() {
       this.triedToRepost = true
 
-      // see https://github.com/Freegle/iznik-nuxt3/pull/22/files#r1336096366
       await this.messageStore.fetch(this.id, true)
+
       if (this.message.canrepost) {
-        await this.repost()
+        // when trying to repost when it's forbidden, the fetch above would update the post, and if the post is allowed
+        // to be reposted now, we reset the blocking flag and reposting. This can happen if time passes while you stay
+        // on the page without refreshing it
         this.triedToRepost = false
+        await this.repost()
       }
     },
     hasOutcome(val) {
