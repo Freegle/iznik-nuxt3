@@ -202,7 +202,7 @@
                 </b-button>
                 <p
                   class="invalid-feedback position-absolute bg-white text-center"
-                  :style="{ display: triedToRepost ? 'block' : 'hidden' }"
+                  :class="triedToRepost ? 'd-block' : 'd-none'"
                 >
                   You can't repost until {{ datetimeshort(message.repostat) }}
                 </p>
