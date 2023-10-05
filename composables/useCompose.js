@@ -295,6 +295,4 @@ export async function freegleIt(type, router) {
       this.wentWrong = true
     }
   }
-
-  this.submitting = false
 }
