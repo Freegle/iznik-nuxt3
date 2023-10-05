@@ -180,7 +180,7 @@
               >
                 <v-icon class="d-none d-sm-inline" icon="sync" /> Repost
               </b-button>
-              <b-button
+              <div
                 v-else-if="
                   !rejected &&
                   !taken &&
@@ -189,14 +189,24 @@
                   message.location &&
                   message.item
                 "
-                variant="secondary"
-                disabled
-                class="mr-2 mb-1"
-                title="You will be able to repost this soon"
+                class="position-relative"
               >
-                <v-icon class="d-none d-sm-inline" icon="sync" /> Repost
-                <span class="small">{{ timeago(message.repostat) }}</span>
-              </b-button>
+                <b-button
+                  variant="secondary"
+                  class="mr-2 mb-1"
+                  title="You will be able to repost this soon"
+                  @click.stop="repostWhenUnavailable"
+                >
+                  <v-icon class="d-none d-sm-inline" icon="sync" /> Repost
+                  <span class="small">{{ timeago(message.repostat) }}</span>
+                </b-button>
+                <p
+                  class="invalid-feedback position-absolute bg-white text-center"
+                  :class="triedToRepost ? 'd-block' : 'd-none'"
+                >
+                  You can't repost until {{ datetimeshort(message.repostat) }}
+                </p>
+              </div>
               <b-button
                 v-if="!rejected"
                 variant="secondary"
@@ -338,6 +348,7 @@ import { useUserStore } from '../stores/user'
 import { useTrystStore } from '../stores/tryst'
 import { useLocationStore } from '../stores/location'
 import { milesAway } from '../composables/useDistance'
+import { datetimeshort } from '../composables/useTimeFormat'
 import { useRouter } from '#imports'
 import MyMessagePromisedTo from '~/components/MyMessagePromisedTo'
 const MyMessageReply = () => import('./MyMessageReply.vue')
@@ -422,6 +433,7 @@ export default {
       showPromiseModal: false,
       showMessagePhotosModal: false,
       broken: false,
+      triedToRepost: false,
     }
   },
   computed: {
@@ -712,6 +724,7 @@ export default {
     }
   },
   methods: {
+    datetimeshort,
     toggle() {
       this.expanded = !this.expanded
     },
@@ -796,6 +809,19 @@ export default {
 
       const router = useRouter()
       router.push(this.message.type === 'Offer' ? '/give' : '/find')
+    },
+    async repostWhenUnavailable() {
+      this.triedToRepost = true
+
+      await this.messageStore.fetch(this.id, true)
+
+      if (this.message.canrepost) {
+        // when trying to repost when it's forbidden, the fetch above would update the post, and if the post is allowed
+        // to be reposted now, we reset the blocking flag and reposting. This can happen if time passes while you stay
+        // on the page without refreshing it
+        this.triedToRepost = false
+        await this.repost()
+      }
     },
     hasOutcome(val) {
       let ret = false

@@ -41,6 +41,8 @@ import { useLocationStore } from './stores/location'
 import { useShortlinkStore } from './stores/shortlinks'
 import { useMiscStore } from './stores/misc'
 import { computed, watch, reloadNuxtApp } from '#imports'
+// polyfills
+import 'core-js/actual/array/to-sorted'
 
 const route = useRoute()
 
