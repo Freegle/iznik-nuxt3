@@ -68,7 +68,11 @@
             :placeholder="placeholder"
             rows="8"
             class="mt-2"
+            :state="triedToSave ? !isSaveButtonDisabled : null"
           />
+          <p class="invalid-feedback">
+            Please provide either a description or a photo.
+          </p>
         </b-col>
       </b-row>
       <b-row v-if="uploading" class="bg-white">
@@ -174,6 +178,7 @@ export default {
       uploading: false,
       myFiles: [],
       image: null,
+      triedToSave: false,
     }
   },
   computed: {
@@ -213,9 +218,15 @@ export default {
         },
       ]
     },
+    isSaveButtonDisabled() {
+      return !this.edittextbody && !this.attachments?.length
+    },
   },
   methods: {
     async save() {
+      this.triedToSave = true
+      if (this.isSaveButtonDisabled) return
+
       if (this.edititem && (this.edittextbody || this.attachments?.length)) {
         const attids = []
 

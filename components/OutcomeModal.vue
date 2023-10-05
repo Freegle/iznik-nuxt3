@@ -54,6 +54,7 @@
           :left="left"
           :taken-by="takenBy"
           :choose-error="chooseError"
+          :invalid="submittedWithNoSelectedUser"
           @took-users="tookUsers = $event"
         />
       </div>
@@ -241,6 +242,7 @@ export default {
       tookUsers: [],
       selectedUser: null,
       chooseError: false,
+      submittedWithNoSelectedUser: false,
       completionMessage: null,
     }
   },
@@ -322,6 +324,12 @@ export default {
   },
   methods: {
     async submit() {
+      if (this.type === 'Taken' && !this.tookUsers.length) {
+        return (this.submittedWithNoSelectedUser = true)
+      } else {
+        this.submittedWithNoSelectedUser = false
+      }
+
       let complete = false
       this.chooseError = false
 
