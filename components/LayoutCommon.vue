@@ -94,21 +94,18 @@ export default {
     } else if (process.client) {
       // We only add the cookie banner for logged out users.  This reduces costs.  For logged-in users, we assume
       // they have already seen the banner and specified a preference if they care.
-      //
-      // Add 'https://cdn-cookieyes.com/client_data/fd4582b38fa7a9f269114304/script.js' to head
-      //
-      // Check if cookie script already present
-      const cookieScript = document.getElementById('cookieyes')
+      const runtimeConfig = useRuntimeConfig()
 
-      if (!cookieScript) {
-        const script = document.createElement('script')
-        script.id = 'cookieyes'
-        script.setAttribute(
-          'src',
-          'https://cdn-cookieyes.com/client_data/fd4582b38fa7a9f269114304/script.js'
-        )
+      if (runtimeConfig.public.COOKIEYES) {
+        const cookieScript = document.getElementById('cookieyes')
 
-        document.head.appendChild(script)
+        if (!cookieScript) {
+          const script = document.createElement('script')
+          script.id = 'cookieyes'
+          script.setAttribute('src', runtimeConfig.public.COOKIEYES)
+
+          document.head.appendChild(script)
+        }
       }
     }
 
