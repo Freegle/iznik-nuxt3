@@ -96,7 +96,13 @@ export default {
       // they have already seen the banner and specified a preference if they care.
       const runtimeConfig = useRuntimeConfig()
 
+      console.log(
+        'Consider adding cookie banner',
+        runtimeConfig.public.COOKIEYES
+      )
+
       if (runtimeConfig.public.COOKIEYES) {
+        console.log('Add it')
         const cookieScript = document.getElementById('cookieyes')
 
         if (!cookieScript) {
@@ -106,6 +112,8 @@ export default {
 
           document.head.appendChild(script)
         }
+      } else {
+        console.log('No cookie banner')
       }
     }
 
