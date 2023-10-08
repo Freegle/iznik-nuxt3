@@ -5,6 +5,7 @@ export const useNoticeboardStore = defineStore({
   id: 'noticeboard',
   state: () => ({
     list: {},
+    members: [],
   }),
   actions: {
     init(config) {
@@ -44,18 +45,20 @@ export const useNoticeboardStore = defineStore({
       return this.list
     },
     async fetchAuthority(authorityid) {
-      const { noticeboard, noticeboards } = await api(
+      const { noticeboard, noticeboards, members } = await api(
         this.config
       ).noticeboard.fetch({
         authorityid,
       })
 
       if (noticeboard) {
-        this.list[id] = noticeboard
+        this.list[authorityid] = noticeboard
       } else {
         for (const item of noticeboards) {
           this.list[item.id] = item
         }
+
+        this.members = members
       }
 
       return this.list

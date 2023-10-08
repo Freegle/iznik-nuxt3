@@ -43,6 +43,14 @@
                     }"
                   />
                 </l-marker>
+                <l-marker
+                  v-for="n in members"
+                  :key="'member-' + n.id"
+                  :lat-lng="[n.lat, n.lng]"
+                  :interactive="false"
+                >
+                  <l-icon icon-url="/blurmarker.png" :icon-size="[15, 15]" />
+                </l-marker>
               </l-map>
             </client-only>
           </div>
@@ -71,6 +79,7 @@ await noticeboardStore.clear()
 const authority = await authorityStore.fetch(id)
 
 const noticeboards = computed(() => noticeboardStore.list)
+const members = computed(() => noticeboardStore.members)
 
 await noticeboardStore.fetchAuthority(id)
 
