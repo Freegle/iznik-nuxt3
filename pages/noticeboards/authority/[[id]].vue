@@ -50,9 +50,6 @@
       </b-col>
       <b-col cols="0" md="3" class="d-none d-md-block" />
     </b-row>
-    <client-only>
-      <PosterModal ref="modal" />
-    </client-only>
   </div>
 </template>
 <script setup>
@@ -62,7 +59,6 @@ import { loadLeaflet, attribution, osmtile } from '~/composables/useMap'
 import { buildHead } from '~/composables/useBuildHead'
 import { useNoticeboardStore } from '~/stores/noticeboard'
 import { useAuthorityStore } from '~/stores/authority'
-import PosterModal from '~/components/PosterModal'
 
 const runtimeConfig = useRuntimeConfig()
 const route = useRoute()
