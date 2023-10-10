@@ -258,24 +258,26 @@ export default {
         // Not asked too recently.
         await this.fetchMe(true)
 
-        if (!this.me.aboutme || !this.me.aboutme.text) {
-          // We have not yet provided one.
-          const daysago = dayjs().diff(dayjs(this.me.added), 'days')
+        if (this.me) {
+          if (!this.me.aboutme || !this.me.aboutme.text) {
+            // We have not yet provided one.
+            const daysago = dayjs().diff(dayjs(this.me.added), 'days')
 
-          if (daysago > 7) {
-            // Nudge to ask people to to introduce themselves.
-            this.showAboutMeModal = true
-          }
-        } else {
-          const monthsago = dayjs().diff(
-            dayjs(this.me.aboutme.timestamp),
-            'months'
-          )
+            if (daysago > 7) {
+              // Nudge to ask people to to introduce themselves.
+              this.showAboutMeModal = true
+            }
+          } else {
+            const monthsago = dayjs().diff(
+              dayjs(this.me.aboutme.timestamp),
+              'months'
+            )
 
-          if (monthsago >= 6) {
-            // Old.  Ask them to review it.
-            this.showAboutMeModal = true
-            this.reviewAboutMe = true
+            if (monthsago >= 6) {
+              // Old.  Ask them to review it.
+              this.showAboutMeModal = true
+              this.reviewAboutMe = true
+            }
           }
         }
       }
