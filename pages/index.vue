@@ -176,7 +176,9 @@ export default {
             uid: 'landing',
           })
 
-          this.type = type.variant
+          if (type?.variant) {
+            this.type = type.variant
+          }
         } catch (e) {
           console.error(e)
         }

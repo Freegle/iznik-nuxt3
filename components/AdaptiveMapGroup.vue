@@ -28,7 +28,11 @@
       </div>
       <div class="join">
         <div>
-          <b-button variant="primary" :to="'/explore/join/' + group.id">
+          <b-button
+            v-if="!oneOfMyGroups(group.id)"
+            variant="primary"
+            :to="'/explore/join/' + group.id"
+          >
             Join
           </b-button>
         </div>
