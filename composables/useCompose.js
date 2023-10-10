@@ -235,10 +235,6 @@ export async function freegleIt(type, router) {
   const messageStore = useMessageStore()
   const authStore = useAuthStore()
 
-  // notice that the `submitting` flag is *not* reset on success here. That's not a bug and is intentional since
-  // otherwise the flag would be reset after the router navigation is ready to proceed, but before the component to
-  // proceed to would be loaded, therefore the button which visibility relies on the flag would reappear for a short
-  // amount of time
   this.submitting = true
   this.unvalidatedEmail = false
   this.wentWrong = false
@@ -292,13 +288,19 @@ export async function freegleIt(type, router) {
     console.log('Submit failed', e, e.response.data.ret)
     this.submitting = false
 
-    if (e.message.includes('Unvalidated email')) {
-      console.log('unvalidated')
-      this.unvalidatedEmail = true
-    } else if (e.message.includes('Not allowed to post on this group')) {
-      this.notAllowed = true
+    if (e?.message) {
+      if (e.message.includes('Unvalidated email')) {
+        console.log('unvalidated')
+        this.unvalidatedEmail = true
+      } else if (e.message.includes('Not allowed to post on this group')) {
+        this.notAllowed = true
+      } else {
+        this.wentWrong = true
+      }
     } else {
       this.wentWrong = true
     }
   }
+
+  this.submitting = false
 }

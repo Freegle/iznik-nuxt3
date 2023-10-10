@@ -32,4 +32,7 @@ export default {
 
   SENTRY_DSN:
     'https://63f870e6c729477ebca4098a0b07fd3a@o118493.ingest.sentry.io/4504083802226688',
+
+  // Cookie banner for this site.
+  COOKIEYES: process.env.COOKIEYES || null,
 }

@@ -60,8 +60,13 @@ export default {
   },
   mounted() {
     if (this.me) {
-      // Logged in on load - join
-      this.join()
+      if (!this.oneOfMyGroups(this.id)) {
+        // Logged in on load - join
+        this.join()
+      } else {
+        const router = useRouter()
+        router.go(-1)
+      }
     }
   },
   methods: {
