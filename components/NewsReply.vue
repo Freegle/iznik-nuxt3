@@ -452,11 +452,11 @@ export default {
     showInfo() {
       this.showProfileModal = true
     },
-    replyReply() {
-      console.log('Replying to', this.replyid, this.reply)
+    async replyReply() {
       this.replyingTo = this.replyid
       this.showReplyBox = true
 
+      await this.$nextTick()
       this.$refs.replybox.$el.focus()
 
       // Reply with tag.
