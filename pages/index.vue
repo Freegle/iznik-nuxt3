@@ -252,7 +252,6 @@ export default {
     },
     async play() {
       if (process.client) {
-        await this.waitForRef('video')
         try {
           const videoEl = document.querySelector('video')
           videoEl.muted = true

@@ -619,7 +619,7 @@ export default {
       this.forceLogin = false
       this.$router.push('/forgot')
     },
-    async installGoogleSDK() {
+    installGoogleSDK() {
       if (
         window &&
         window.google &&
@@ -637,7 +637,6 @@ export default {
           document.getElementById('googleLoginButton')
         )
 
-        await this.waitForRef('googleLoginButton')
         console.log('Found google button ref')
         window.google.accounts.id.renderButton(
           document.getElementById('googleLoginButton'),

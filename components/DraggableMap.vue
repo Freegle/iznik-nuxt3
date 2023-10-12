@@ -138,7 +138,6 @@ export default {
     async ready() {
       const self = this
 
-      await this.waitForRef('map')
       if (process.client) {
         this.mapObject = this.$refs.map.leafletObject
 

@@ -474,7 +474,6 @@ export default {
     async ready() {
       const self = this
 
-      this.waitForRef('map')
       this.$emit('update:ready', true)
       this.mapObject = this.$refs.map.leafletObject
       this.$refs.map.leafletObject.fitBounds(this.initialBounds)

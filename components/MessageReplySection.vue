@@ -100,6 +100,7 @@
 </template>
 <script>
 import { mapWritableState } from 'pinia'
+import { nextTick } from 'vue'
 import { useMessageStore } from '../stores/message'
 import { useAuthStore } from '../stores/auth'
 import { useReplyStore } from '../stores/reply'
@@ -220,7 +221,9 @@ export default {
           // Show the new user modal.
           this.newUserPassword = ret.password
           this.showNewUser = true
-          await this.waitForRef('newUserModal')
+
+          await nextTick()
+
           // Now that we are logged in, we can reply.
           this.$refs.newUserModal?.show()
 

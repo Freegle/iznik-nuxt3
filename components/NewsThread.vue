@@ -422,8 +422,7 @@ export default {
         this.scrollDownTo = this.scrollTo
       }
     },
-    async focusComment() {
-      await this.waitForRef('threadcomment')
+    focusComment() {
       this.$refs.threadcomment.$el.focus()
     },
     focusedComment() {
@@ -472,7 +471,7 @@ export default {
         this.threadcomment += '\n'
       }
     },
-    async show() {
+    show() {
       this.showEditModal = true
     },
     async save() {
