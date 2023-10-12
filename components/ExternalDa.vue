@@ -24,6 +24,7 @@
   </div>
 </template>
 <script setup>
+import { nextTick } from 'vue'
 import { useMiscStore } from '../stores/misc'
 import { ref, computed, onBeforeUnmount } from '#imports'
 
@@ -101,11 +102,13 @@ let shownFirst = false
 
 const emit = defineEmits(['rendered'])
 
-function visibilityChanged(visible) {
+async function visibilityChanged(visible) {
   try {
     if (visible && !shownFirst) {
       isVisible.value = visible
       shownFirst = true
+
+      await nextTick()
 
       window.googletag = window.googletag || { cmd: [] }
       window.googletag.cmd.push(function () {

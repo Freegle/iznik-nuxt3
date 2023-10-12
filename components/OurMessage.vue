@@ -247,9 +247,8 @@ export default {
     }
 
     if (this.scrollIntoView) {
-      this.$nextTick(() => {
-        this.$refs.msg.scrollIntoView()
-      })
+      await this.$nextTick()
+      this.$refs.msg.scrollIntoView()
     }
   },
   methods: {
