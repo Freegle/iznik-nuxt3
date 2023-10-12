@@ -200,7 +200,7 @@ export const useMessageStore = defineStore({
           }
         }
 
-        if (Array.isArray(this.byUserList[userid])) {
+        if (Array.isArray(this.byUserList[userid]) && active) {
           findByIdAndUpdate(messages)
         } else {
           this.byUserList[userid] = messages
@@ -218,7 +218,7 @@ export const useMessageStore = defineStore({
             }
           }
 
-          if (Array.isArray(this.byUserList[userid])) {
+          if (Array.isArray(this.byUserList[userid]) && active) {
             findByIdAndUpdate(msgs)
           } else {
             this.byUserList[userid] = msgs
