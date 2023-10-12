@@ -5,6 +5,7 @@ import api from '~/api'
 import { GROUP_REPOSTS, MESSAGE_EXPIRE_TIME } from '~/constants'
 import { useGroupStore } from '~/stores/group'
 import { APIError } from '~/api/BaseAPI'
+import { useAuthStore } from '~/stores/auth';
 
 export const useMessageStore = defineStore({
   id: 'message',
@@ -173,6 +174,16 @@ export const useMessageStore = defineStore({
     },
     async fetchByUser(userid, active, force) {
       let messages = []
+      const findByIdAndUpdate = (messages) => {
+        messages.forEach((message) => {
+          const i = this.byUserList[userid].findIndex(curMessage => curMessage.id === message.id)
+          if (i !== -1) {
+            this.byUserList[userid][i] = message
+          } else {
+            this.byUserList[userid].push(message)
+          }
+        })
+      }
 
       const promise = api(this.config).message.fetchByUser(userid, active)
 
@@ -189,7 +200,11 @@ export const useMessageStore = defineStore({
           }
         }
 
-        this.byUserList[userid] = messages
+        if (Array.isArray(this.byUserList[userid])) {
+          findByIdAndUpdate(messages)
+        } else {
+          this.byUserList[userid] = messages
+        }
       } else if (this.byUserList[userid]) {
         // Fetch but don't wait
         promise.then(async (msgs) => {
@@ -203,7 +218,11 @@ export const useMessageStore = defineStore({
             }
           }
 
-          this.byUserList[userid] = msgs
+          if (Array.isArray(this.byUserList[userid])) {
+            findByIdAndUpdate(msgs)
+          } else {
+            this.byUserList[userid] = msgs
+          }
         })
 
         messages = this.byUserList[userid]
@@ -215,14 +234,36 @@ export const useMessageStore = defineStore({
       await api(this.config).message.view(id)
     },
     async update(params) {
+      const authStore = useAuthStore()
+      const userUid = authStore.user?.id
+      const removeFromUserList = (id) => {
+        const index = this.byUserList[userUid].findIndex(curMessage => curMessage.id === id)
+        if (index !== -1) {
+          this.byUserList[userUid] = [
+            ...this.byUserList[userUid].slice(0, index),
+            ...this.byUserList[userUid].slice(index + 1)
+          ]
+        }
+      }
+
       const data = await api(this.config).message.update(params)
 
       if (data.deleted) {
         // This can happen if we withdraw a post while it is pending.
         delete this.list[params.id]
+        if (userUid && this.byUserList[userUid]) {
+          removeFromUserList(params.id)
+        }
       } else {
         // Fetch back the updated version.
-        await this.fetch(params.id, true)
+        const message = await this.fetch(params.id, true)
+        this.list[params.id] = message
+        if (userUid && this.byUserList[userUid]) {
+          const index = this.byUserList[userUid].findIndex(curMessage => curMessage.id === params.id)
+          if (index !== -1) {
+            this.byUserList[userUid][index] = message
+          }
+        }
       }
 
       return data
