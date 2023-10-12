@@ -183,8 +183,6 @@
               <div
                 v-else-if="
                   !rejected &&
-                  !taken &&
-                  !received &&
                   message.repostat &&
                   message.location &&
                   message.item
