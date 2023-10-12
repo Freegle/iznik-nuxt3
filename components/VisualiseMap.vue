@@ -180,22 +180,20 @@ export default {
               setTimeout(() => {
                 // Show the reply text.
                 this.showReplies = true
-                setTimeout(async () => {
+                setTimeout(() => {
                   // Collect - move the touser to the fromuser's location, stop showing the other replies.
                   this.showOthers = false
                   this.showReplies = false
-                  await this.waitForRef('touser')
                   this.$refs.touser.setLatLng(
                     this.item.fromlat,
                     this.item.fromlng
                   )
-                  setTimeout(async () => {
+                  setTimeout(() => {
                     if (this.$refs.touser && this.item) {
                       this.$refs.touser.setLatLng(
                         this.item.tolat,
                         this.item.tolng
                       )
-                      await this.waitForRef('message')
                       this.$refs.message.setLatLng(
                         this.item.tolat,
                         this.item.tolng

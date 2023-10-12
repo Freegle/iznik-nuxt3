@@ -247,7 +247,7 @@ export default {
     }
 
     if (this.scrollIntoView) {
-      await this.waitForRef('msg')
+      await this.$nextTick()
       this.$refs.msg.scrollIntoView()
     }
   },

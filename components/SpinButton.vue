@@ -34,7 +34,6 @@
 </template>
 <script setup>
 import { ref, defineAsyncComponent } from '#imports'
-import { waitForRef } from '~/composables/useWaitForRef'
 
 const ConfirmModal = defineAsyncComponent(() => import('./ConfirmModal'))
 

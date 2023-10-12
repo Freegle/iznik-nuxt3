@@ -24,9 +24,9 @@
   </div>
 </template>
 <script setup>
+import { nextTick } from 'vue'
 import { useMiscStore } from '../stores/misc'
 import { ref, computed, onBeforeUnmount } from '#imports'
-import { waitForRef } from '~/composables/useWaitForRef'
 
 const props = defineProps({
   adUnitPath: {
@@ -108,7 +108,7 @@ async function visibilityChanged(visible) {
       isVisible.value = visible
       shownFirst = true
 
-      await waitForRef(uniqueid)
+      await nextTick()
 
       window.googletag = window.googletag || { cmd: [] }
       window.googletag.cmd.push(function () {
