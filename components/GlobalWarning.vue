@@ -1,15 +1,10 @@
 <template>
   <div v-if="true">
-    <NoticeMessage
-      v-if="show"
-      variant="info"
-      class="d-flex justify-content-between"
-    >
+    <NoticeMessage v-if="show" variant="info">
       <div class="d-flex justify-content-between">
         <b-img
           src="/national_reuse_day_2023_Logo_round_500x500px.png"
-          style="width: 125px; height: 125px"
-          class="mr-2"
+          class="mr-2 float-start logo"
         />
         <div>
           <p>
@@ -18,16 +13,18 @@
             celebrate all things #Reuse, organised by Freegle, the reuse
             experts.
           </p>
-          <ExternalLink
-            href="https://mailchi.mp/896a4360914b/freegle-bites-april-17353736"
-          >
-            <b-button variant="white" class="mt-2">
-              Find out how to get involved
-            </b-button>
-          </ExternalLink>
         </div>
       </div>
-      <b-button variant="link" @click="hideit"> Hide this </b-button>
+      <div class="d-flex justify-content-between flex-wrap">
+        <ExternalLink
+          href="https://mailchi.mp/896a4360914b/freegle-bites-april-17353736"
+        >
+          <b-button variant="white" class="mt-2">
+            Find out how to get involved
+          </b-button>
+        </ExternalLink>
+        <b-button variant="link" @click="hideit"> Hide this </b-button>
+      </div>
     </NoticeMessage>
     <div v-else class="text-danger text-end clickme" @click="showit">
       Show notice.
@@ -66,3 +63,17 @@ export default {
   },
 }
 </script>
+<style scoped lang="scss">
+@import 'bootstrap/scss/_functions.scss';
+@import 'bootstrap/scss/_variables.scss';
+@import 'bootstrap/scss/mixins/_breakpoints.scss';
+
+.logo {
+  width: 75px;
+  height: 75px;
+  @include media-breakpoint-up(md) {
+    width: 125px;
+    height: 125px;
+  }
+}
+</style>
