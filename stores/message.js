@@ -15,6 +15,7 @@ export const useMessageStore = defineStore({
 
     // In bounds
     bounds: {},
+    activePostsCounter: 0,
   }),
   actions: {
     init(config) {
@@ -236,23 +237,13 @@ export const useMessageStore = defineStore({
     async update(params) {
       const authStore = useAuthStore()
       const userUid = authStore.user?.id
-      const removeFromUserList = (id) => {
-        const index = this.byUserList[userUid].findIndex(curMessage => curMessage.id === id)
-        if (index !== -1) {
-          this.byUserList[userUid] = [
-            ...this.byUserList[userUid].slice(0, index),
-            ...this.byUserList[userUid].slice(index + 1)
-          ]
-        }
-      }
-
       const data = await api(this.config).message.update(params)
 
       if (data.deleted) {
         // This can happen if we withdraw a post while it is pending.
         delete this.list[params.id]
         if (userUid && this.byUserList[userUid]) {
-          removeFromUserList(params.id)
+          this.byUserList[userUid] = this.byUserList[userUid].filter(message => message.id !== params.id);
         }
       } else {
         // Fetch back the updated version.
@@ -314,6 +305,21 @@ export const useMessageStore = defineStore({
     },
     async intend(id, outcome) {
       await api(this.config).message.intend(id, outcome)
+    },
+    async fetchActivePostCount() {
+      const authStore = useAuthStore()
+      const userUid = authStore.user?.id
+
+      return api(this.config).message.fetchByUser(userUid, false)
+        .then(async (msgs) => {
+          for (const message of msgs) {
+            if (!message.hasoutcome) {
+              message.hasoutcome =  await this.hasExpired(message)
+            }
+          }
+          return msgs;
+        })
+        .then((messages) => { this.activePostsCounter = messages ? messages.filter(m => !m.hasoutcome).length : 0 })
     },
   },
   getters: {
