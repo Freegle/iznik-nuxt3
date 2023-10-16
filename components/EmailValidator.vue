@@ -6,18 +6,20 @@
       label-class="mt-0"
       :state="true"
     >
-      <Field
-        ref="email"
-        v-model="currentEmail"
-        :rules="validateEmail"
-        type="email"
-        name="email"
-        :class="'email form-control input-' + size + ' ' + inputClass"
-        :center="center"
-        autocomplete="username email"
-        :placeholder="'Email address ' + (required ? '' : '(Optional)')"
-      />
-      <ErrorMessage name="email" class="text-danger font-weight-bold" />
+      <Form ref="form">
+        <Field
+          ref="email"
+          v-model="currentEmail"
+          :rules="validateEmail"
+          type="email"
+          name="email"
+          :class="'email form-control input-' + size + ' ' + inputClass"
+          :center="center"
+          autocomplete="username email"
+          :placeholder="'Email address ' + (required ? '' : '(Optional)')"
+        />
+        <ErrorMessage name="email" class="text-danger font-weight-bold" />
+      </Form>
     </b-form-group>
     <div
       v-if="suggestedDomains && suggestedDomains.length"
@@ -35,13 +37,13 @@
   </div>
 </template>
 <script>
-import { Field, ErrorMessage } from 'vee-validate'
+import { Field, ErrorMessage, Form } from 'vee-validate'
 import { useDomainStore } from '../stores/domain'
 import { ref } from '#imports'
 import { EMAIL_REGEX } from '~/constants'
 
 export default {
-  components: { Field, ErrorMessage },
+  components: { Field, ErrorMessage, Form },
   props: {
     email: {
       type: String,
@@ -77,6 +79,10 @@ export default {
       type: String,
       required: false,
       default: '',
+    },
+    validateDomain: {
+      type: Boolean,
+      default: true,
     },
   },
   setup(props) {
@@ -120,15 +126,24 @@ export default {
           }
         }
 
-        const validate = await this.$refs.email?.validate()
-        if (validate) {
-          this.$emit('update:valid', validate.valid)
+        const meta = this.$refs.form?.getMeta();
+        if (meta) {
+          this.$emit('update:valid', meta.valid)
         }
       },
     },
   },
   methods: {
-    validateEmail(value) {
+    async checkValidDomain(value) {
+      const domain = value.substring(value.indexOf('@') + 1)
+      const url = new URL('https://dns.google/resolve');
+      url.search = new URLSearchParams({ name: domain }).toString();
+      const googleResponse = await fetch(url).then(response => response);
+      const { Status: status } = await googleResponse.json();
+
+      return status === 0;
+    },
+    async validateEmail(value) {
       if (!value && !this.required) {
         return true
       }
@@ -139,6 +154,11 @@ export default {
 
       if (!new RegExp(EMAIL_REGEX).test(value)) {
         return 'Please enter a valid email address.'
+      }
+
+      if (this.validateDomain) {
+        const result = await this.checkValidDomain(value);
+        return result || 'Invalid email domain';
       }
 
       return true
