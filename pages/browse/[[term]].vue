@@ -140,11 +140,6 @@ import { useGroupStore } from '~/stores/group'
 import { useIsochroneStore } from '~/stores/isochrone'
 import GiveAsk from '~/components/GiveAsk'
 
-definePageMeta({
-  layout: 'login',
-  alias: ['/communities'],
-})
-
 const MicroVolunteering = () => import('~/components/MicroVolunteering.vue')
 
 export default {
@@ -167,6 +162,10 @@ export default {
     MicroVolunteering,
   },
   async setup() {
+    definePageMeta({
+      layout: 'login',
+      alias: ['/communities'],
+    })
     const route = useRoute()
     const runtimeConfig = useRuntimeConfig()
 

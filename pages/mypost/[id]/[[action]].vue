@@ -58,10 +58,6 @@ const DonationAskModal = defineAsyncComponent(() =>
   import('~/components/DonationAskModal')
 )
 
-definePageMeta({
-  layout: 'login',
-})
-
 export default {
   components: {
     NoticeMessage,
@@ -70,6 +66,9 @@ export default {
     DonationAskModal,
   },
   async setup(props) {
+    definePageMeta({
+      layout: 'login',
+    })
     const runtimeConfig = useRuntimeConfig()
     const route = useRoute()
     const id = parseInt(route.params.id)
