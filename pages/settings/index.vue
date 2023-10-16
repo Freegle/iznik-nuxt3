@@ -694,10 +694,6 @@ const ProfileModal = defineAsyncComponent(() =>
   import('~/components/ProfileModal')
 )
 
-definePageMeta({
-  layout: 'login',
-})
-
 export default {
   components: {
     SettingsEmailInfo,
@@ -719,6 +715,9 @@ export default {
     PasswordEntry,
   },
   setup() {
+    definePageMeta({
+      layout: 'login',
+    })
     const runtimeConfig = useRuntimeConfig()
     const route = useRoute()
 

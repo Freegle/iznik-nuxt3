@@ -172,10 +172,6 @@ const ChatHideModal = defineAsyncComponent(() =>
   import('~/components/ChatHideModal')
 )
 
-definePageMeta({
-  layout: 'login',
-})
-
 export default {
   components: {
     VisibleWhen,
@@ -186,6 +182,9 @@ export default {
     InfiniteLoading,
   },
   async setup(props) {
+    definePageMeta({
+      layout: 'login',
+    })
     const route = useRoute
     const runtimeConfig = useRuntimeConfig()
 

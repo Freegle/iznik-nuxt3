@@ -224,14 +224,13 @@ import { buildHead } from '~/composables/useBuildHead'
 const PosterModal = defineAsyncComponent(() =>
   import('~/components/PosterModal')
 )
-
-definePageMeta({
-  layout: 'login',
-})
-
 export default {
   components: { InviteSomeone, PosterModal },
   setup() {
+    definePageMeta({
+      layout: 'login',
+    })
+
     const runtimeConfig = useRuntimeConfig()
     const route = useRoute()
 

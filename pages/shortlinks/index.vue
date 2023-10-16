@@ -68,13 +68,12 @@ import { useGroupStore } from '../../stores/group'
 import ShortLink from '../../components/ShortLink'
 import SpinButton from '~/components/SpinButton'
 
-definePageMeta({
-  layout: 'login',
-})
-
 export default {
   components: { ShortLink, NoticeMessage, ShortLinks, SpinButton },
   async setup() {
+    definePageMeta({
+      layout: 'login',
+    })
     const shortlinkStore = useShortlinkStore()
     const groupStore = useGroupStore()
     await shortlinkStore.fetch()
