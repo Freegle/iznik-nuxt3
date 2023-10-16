@@ -96,29 +96,11 @@
         </b-row>
         <b-row>
           <b-col>
-            <h3 class="mt-2">Can we share?</h3>
-            <p>
-              Finally, click to let us know whether it's ok for us to share your
-              story - on here, on social media and so on. This helps get more
-              people freegling. We won't use your name or email address.
-            </p>
-            <p>
-              If you don't want us to do this, that's fine - we'll just show it
-              to your local volunteers.
-            </p>
-            Public {{ allowpublic }}
-            <div class="bg-info text-center p-2 d-flex justify-content-center">
-              <div class="d-flex flex-column">
-                <b-form-checkbox
-                  v-model="allowpublic"
-                  size="lg"
-                  name="allowpublic"
-                  class="ml-2"
-                >
-                  &nbsp;<v-icon icon="arrow-left" /> Yes, you can share this
-                </b-form-checkbox>
-              </div>
-            </div>
+            <NoticeMessage variant="info">
+              We may share your story - on here, on social media and so on. This
+              helps get more people freegling. We won't use your name or email
+              address.
+            </NoticeMessage>
           </b-col>
         </b-row>
       </div>
@@ -148,11 +130,13 @@
 <script>
 import { useStoryStore } from '../stores/stories'
 import { useComposeStore } from '../stores/compose'
+import NoticeMessage from './NoticeMessage'
 import { useModal } from '~/composables/useModal'
 const OurFilePond = () => import('~/components/OurFilePond')
 
 export default {
   components: {
+    NoticeMessage,
     OurFilePond,
   },
   props: {},
@@ -171,7 +155,6 @@ export default {
   },
   data() {
     return {
-      allowpublic: false,
       uploading: false,
       story: {
         headline: null,
@@ -231,7 +214,7 @@ export default {
           this.story.headline,
           this.story.story,
           this.story.image ? this.story.image.id : null,
-          this.allowpublic
+          true
         )
 
         this.thankyou = true
