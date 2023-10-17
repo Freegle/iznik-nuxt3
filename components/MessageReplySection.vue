@@ -12,11 +12,12 @@
       <MessageStillAvailable v-if="stillAvailable" class="mb-1 mt-1" />
       <NoticeMessage
         v-if="milesaway > 37 && message.type === 'Offer'"
-        variant="warning"
+        variant="danger"
         class="mt-2 mb-1"
       >
         <!--  The 37 miles figure comes from research from someone we shall call Clement. -->
-        This item is {{ milesaway }} miles away. Before replying, are you sure you can collect?
+        This item is {{ milesaway }} miles away. Before replying, are you sure
+        you can collect from there?
       </NoticeMessage>
       <b-form-group
         class="flex-grow-1"
