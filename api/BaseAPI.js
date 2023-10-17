@@ -21,6 +21,7 @@ const ourFetch = fetchRetry(fetch, {
 
     if (attempt > 10) {
       console.log('Too many retries - give up')
+      return false
     } else if (miscStore?.unloading || !miscStore?.online) {
       // Don't retry if we're unloading or not online.
       console.log("Unloading - don't retry")
