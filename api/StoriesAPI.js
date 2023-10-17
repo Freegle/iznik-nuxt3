@@ -5,6 +5,16 @@ export default class StoriesAPI extends BaseAPI {
     return this.$getv2('/story/' + id)
   }
 
+  listv2(limit) {
+    return this.$getv2('/story' + (limit ? '?limit=' + limit : ''))
+  }
+
+  byGroupv2(groupid, limit) {
+    return this.$getv2(
+      '/story/group/' + groupid + (limit ? '?limit=' + limit : '')
+    )
+  }
+
   fetch(params) {
     return this.$get('/stories', params)
   }

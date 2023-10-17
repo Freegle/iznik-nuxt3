@@ -2,7 +2,7 @@
   <div>
     <b-card no-body variant="success">
       <b-card-header>
-        <div class="d-flex justify-content-between">
+        <div v-if="story" class="d-flex justify-content-between">
           <div>&quot;{{ story.headline }}&quot;</div>
           <div>
             <span v-if="story.likes">
@@ -38,41 +38,43 @@
       </b-card-header>
       <b-card-body>
         <b-card-text class="pl-4 pr-4">
-          <div v-if="story.story" class="preline">
-            <div v-if="story.image">
-              <b-img
-                lazy
-                :src="story.image.path"
-                class="storyphoto clickme"
-                thumbnail
-                @click="showPhotoModal = true"
+          <div v-if="story">
+            <div v-if="story.story" class="preline">
+              <div v-if="story.image">
+                <b-img
+                  lazy
+                  :src="story.image.path"
+                  class="storyphoto clickme"
+                  thumbnail
+                  @click="showPhotoModal = true"
+                />
+                <br />
+              </div>
+              <read-more
+                v-if="story.story"
+                :text="story.story"
+                :max-chars="300"
               />
-              <br />
             </div>
-            <read-more
-              v-if="story.story"
-              :text="story.story"
-              :max-chars="300"
-            />
-          </div>
-          <div class="text-muted small d-flex justify-content-between">
-            <span>
-              {{ timeago(story.date) }}
-              <span v-if="user?.displayname"> by {{ user.displayname }}</span>
-              <span v-if="userLocation?.display">
-                in {{ userLocation.display }}
+            <div class="text-muted small d-flex justify-content-between">
+              <span>
+                {{ timeago(story.date) }}
+                <span v-if="user?.displayname"> by {{ user.displayname }}</span>
+                <span v-if="userLocation?.display">
+                  in {{ userLocation.display }}
+                </span>
+                <span v-else-if="userLocation.groupname">
+                  {{ publicLocation.groupname }}
+                </span>
               </span>
-              <span v-else-if="userLocation.groupname">
-                {{ publicLocation.groupname }}
-              </span>
-            </span>
-            <nuxt-link
-              no-prefetch
-              :to="'/story/' + story.id"
-              class="text-muted nodecor"
-            >
-              #{{ story.id }}
-            </nuxt-link>
+              <nuxt-link
+                no-prefetch
+                :to="'/story/' + story.id"
+                class="text-muted nodecor"
+              >
+                #{{ story.id }}
+              </nuxt-link>
+            </div>
           </div>
         </b-card-text>
       </b-card-body>
