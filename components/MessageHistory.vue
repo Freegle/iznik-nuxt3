@@ -9,7 +9,7 @@
       <nuxt-link
         v-if="group.groupid in groups"
         no-prefetch
-        :to="'/explore/' + groups[group.groupid].exploreLink"
+        :to="'/explore/' + groups[group.groupid].exploreLink + '?noguard=true'"
         :title="'Click to view ' + groups[group.groupid].namedisplay"
       >
         {{ groups[group.groupid].namedisplay }}
