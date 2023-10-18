@@ -6,7 +6,7 @@
       label-class="mt-0"
       :state="true"
     >
-      <Form ref="form">
+      <Form ref="form" as="">
         <Field
           ref="email"
           v-model="currentEmail"
@@ -80,10 +80,6 @@ export default {
       required: false,
       default: '',
     },
-    validateDomain: {
-      type: Boolean,
-      default: true,
-    },
   },
   setup(props) {
     const domainStore = useDomainStore()
@@ -135,13 +131,19 @@ export default {
   },
   methods: {
     async checkValidDomain(value) {
-      const domain = value.substring(value.indexOf('@') + 1)
-      const url = new URL('https://dns.google/resolve');
-      url.search = new URLSearchParams({ name: domain }).toString();
-      const googleResponse = await fetch(url).then(response => response);
-      const { Status: status } = await googleResponse.json();
+      let isValidDomain = true;
+      try {
+        const domain = value.substring(value.indexOf('@') + 1)
+        const url = new URL('https://dns.googlee/resolve');
+        url.search = new URLSearchParams({ name: domain }).toString();
+        const googleResponse = await fetch(url).then(response => response);
+        const { Status: status } = await googleResponse.json();
 
-      return status === 0;
+        isValidDomain = status === 0;
+      } catch (_) {
+        // if something doesn't work with google domain check we ignore this check
+      }
+      return isValidDomain;
     },
     async validateEmail(value) {
       if (!value && !this.required) {
@@ -156,12 +158,8 @@ export default {
         return 'Please enter a valid email address.'
       }
 
-      if (this.validateDomain) {
-        const result = await this.checkValidDomain(value);
-        return result || 'Invalid email domain';
-      }
-
-      return true
+      const isValidDomain = await this.checkValidDomain(value);
+      return isValidDomain || 'Please check your email domain - maybe you\'ve made a typo?';
     },
   },
 }
