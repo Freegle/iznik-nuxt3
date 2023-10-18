@@ -175,16 +175,6 @@ export const useMessageStore = defineStore({
     },
     async fetchByUser(userid, active, force) {
       let messages = []
-      const findByIdAndUpdate = (messages) => {
-        messages.forEach((message) => {
-          const i = this.byUserList[userid].findIndex(curMessage => curMessage.id === message.id)
-          if (i !== -1) {
-            this.byUserList[userid][i] = message
-          } else {
-            this.byUserList[userid].push(message)
-          }
-        })
-      }
 
       const promise = api(this.config).message.fetchByUser(userid, active)
 
@@ -200,12 +190,7 @@ export const useMessageStore = defineStore({
             }
           }
         }
-
-        if (Array.isArray(this.byUserList[userid]) && active) {
-          findByIdAndUpdate(messages)
-        } else {
-          this.byUserList[userid] = messages
-        }
+        this.byUserList[userid] = messages
       } else if (this.byUserList[userid]) {
         // Fetch but don't wait
         promise.then(async (msgs) => {
@@ -218,12 +203,7 @@ export const useMessageStore = defineStore({
               }
             }
           }
-
-          if (Array.isArray(this.byUserList[userid]) && active) {
-            findByIdAndUpdate(msgs)
-          } else {
-            this.byUserList[userid] = msgs
-          }
+          this.byUserList[userid] = msgs
         })
 
         messages = this.byUserList[userid]
@@ -310,16 +290,8 @@ export const useMessageStore = defineStore({
       const authStore = useAuthStore()
       const userUid = authStore.user?.id
 
-      return api(this.config).message.fetchByUser(userUid, false)
-        .then(async (msgs) => {
-          for (const message of msgs) {
-            if (!message.hasoutcome) {
-              message.hasoutcome =  await this.hasExpired(message)
-            }
-          }
-          return msgs;
-        })
-        .then((messages) => { this.activePostsCounter = messages ? messages.filter(m => !m.hasoutcome).length : 0 })
+      const activeMessages = await api(this.config).message.fetchByUser(userUid, true);
+      this.activePostsCounter = Array.isArray(activeMessages) ? activeMessages.length : 0;
     },
   },
   getters: {
