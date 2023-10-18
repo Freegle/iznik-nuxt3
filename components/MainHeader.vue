@@ -506,7 +506,7 @@ const distance = ref(1000)
 const logo = ref('/icon.png')
 const unreadNotificationCount = ref(0)
 const chatCount = ref(0)
-const activePostsCount = ref(0)
+const activePostsCount = computed(() => messageStore.activePostsCounter)
 const showAboutMeModal = ref(false)
 const mobileNav = ref(null)
 const countTimer = ref(null)
@@ -628,8 +628,6 @@ const getCounts = async () => {
       // cause Nuxt to bail out with JS errors.
       await newsfeedStore.fetchCount(false)
 
-      let messages = []
-
       if (
         route.path !== '/profile/' + myid.value &&
         !route.path.includes('/unsubscribe')
@@ -641,16 +639,7 @@ const getCounts = async () => {
         //
         // We also don't do this on unsubscribe pages as there are timing windows which can lead to the call
         // failing and consequent Sentry errors.
-        messages = await messageStore.fetchByUser(myid.value, true)
-      }
-
-      activePostsCount.value = 0
-
-      if (messages) {
-        // Count messages with no outcome
-        activePostsCount.value = messages.filter((msg) => {
-          return !msg.hasoutcome
-        }).length
+        await messageStore.fetchActivePostCount();
       }
 
       unreadNotificationCount.value = await notificationStore.fetchCount()
