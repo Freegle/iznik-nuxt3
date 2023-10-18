@@ -190,7 +190,11 @@ export default {
                       this.item.fromlng
                     )
                     setTimeout(() => {
-                      if (this.$refs.touser && this.item) {
+                      if (
+                        this.$refs.touser &&
+                        this.item &&
+                        this.$refs.message
+                      ) {
                         this.$refs.touser.setLatLng(
                           this.item.tolat,
                           this.item.tolng
