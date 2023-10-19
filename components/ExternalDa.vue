@@ -130,7 +130,10 @@ async function visibilityChanged(visible) {
             // every 30s.
             if (!timer.value) {
               timer.value = setTimeout(() => {
-                if (window.googletag?.pubads) {
+                if (
+                  window.googletag?.pubads &&
+                  typeof window.googletag?.pubads === 'function'
+                ) {
                   window.googletag.pubads().refresh([slot])
                 }
               }, 45000)
