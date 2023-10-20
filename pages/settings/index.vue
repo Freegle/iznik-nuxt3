@@ -188,14 +188,15 @@
                   size="md"
                   label="Your primary email address:"
                 />
-                <SpinButton
-                  variant="primary"
-                  name="save"
-                  label="Save"
-                  spinclass="text-white"
-                  class="align-self-end pb-3"
-                  @handle="saveEmail"
-                />
+                <div class="d-flex flex-column justify-content-end">
+                  <SpinButton
+                    variant="primary"
+                    name="save"
+                    label="Save"
+                    spinclass="text-white"
+                    @handle="saveEmail"
+                  />
+                </div>
               </div>
               <div
                 v-if="otheremails.length"
