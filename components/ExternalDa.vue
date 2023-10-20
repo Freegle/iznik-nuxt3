@@ -132,7 +132,8 @@ async function visibilityChanged(visible) {
               timer.value = setTimeout(() => {
                 if (
                   window.googletag?.pubads &&
-                  typeof window.googletag?.pubads === 'function'
+                  typeof window.googletag?.pubads === 'function' &&
+                  typeof window.googletag?.pubads().refresh === 'function'
                 ) {
                   window.googletag.pubads().refresh([slot])
                 }
