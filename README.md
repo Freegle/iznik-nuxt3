@@ -21,7 +21,7 @@ hear about it; you can mail <geeks@ilovefreegle.org>.
 # Development
 
 Currently only tested on node v17.9.1 and npm v9.4.0.  Requires node v17 or later because it relies on fetch()
-which hasn't yet been fully backported to v16.  Node v18 is not yet available on Cloudflare (shockingly).
+which hasn't yet been fully backported to v16.
 
 Then install all the dependencies:
 ```
