@@ -194,6 +194,7 @@
                     name="save"
                     label="Save"
                     spinclass="text-white"
+                    :disabled="!emailValid"
                     @handle="saveEmail"
                   />
                 </div>
