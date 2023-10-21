@@ -186,8 +186,9 @@ export default defineNuxtPlugin((nuxtApp) => {
           }
         } else if (originalExceptionName === 'SecurityError') {
           if (
-            originalExceptionMessage?.match('Blocked a frame') &&
-            originalExceptionStack?.match('isRef')
+            (originalExceptionMessage?.match('Blocked a frame') &&
+              originalExceptionStack?.match('isRef')) ||
+            originalExceptionStack?.match('popupInterval')
           ) {
             // See https://stackoverflow.com/questions/39081098/close-a-window-opened-with-window-open-after-clicking-a-button
             console.log('Suppress error caused by a bug in vue-social-sharing.')
