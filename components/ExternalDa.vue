@@ -135,10 +135,17 @@ async function visibilityChanged(visible) {
                 }
               }, 45000)
             }
-          })
+          }).addEventListener("slotVisibilityChanged", (event) => {
+            const slot = event.slot;
+            console.group("Visibility of slot", slot.getSlotElementId(), "changed.");
+
+            // Log details of the event.
+            console.log("Visible area:", `${event.inViewPercentage}%`);
+            console.groupEnd();
+          });
 
         window.googletag.enableServices()
-      })
+      });
 
       window.googletag.cmd.push(function () {
         window.googletag.display(props.divId)
