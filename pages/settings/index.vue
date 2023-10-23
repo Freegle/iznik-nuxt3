@@ -616,7 +616,7 @@
                 />
               </b-form-group>
               <b-form-group>
-                <h3 class="header--size5 header5__color">Auto-reposts</h3>
+                <h3 class="header--size5 header5__color mt-2">Auto-reposts</h3>
                 <p>
                   In most Freegle communities, your OFFER/WANTED posts will be
                   automatically reposted (or "bumped") unless you've marked them
