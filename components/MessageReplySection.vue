@@ -286,7 +286,7 @@ export default {
           // We shouldn't need to fetch, but we've seen a Sentry issue where the message groups are not valid.
           const msg = await this.messageStore.fetch(this.id, true)
 
-          if (msg) {
+          if (msg?.groups) {
             for (const messageGroup of msg.groups) {
               tojoin = messageGroup.groupid
               Object.keys(this.myGroups).forEach((key) => {

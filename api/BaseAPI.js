@@ -467,7 +467,7 @@ export default class BaseAPI {
     //   probably do the right thing.
     // - otherwise throw an exception.
     if (status !== 200 || !data) {
-      const statusstr = status.toString()
+      const statusstr = status?.toString()
 
       // Whether or not we log this error to Sentry depends.  Most errors are worth logging, because they're unexpected.
       // But some API calls are expected to fail, and throw an exception which is then handled in the code.  We don't
