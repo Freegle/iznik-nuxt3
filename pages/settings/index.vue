@@ -543,7 +543,15 @@
               <SettingsPhone class="mb-3" />
               <div v-if="me.phone">
                 <NoticeMessage
-                  v-if="
+                  v-if="!notificationSettings.email"
+                  variant="warning"
+                  class="mb-2"
+                >
+                  Email notifications must be turned on for SMS alerts to be
+                  sent.
+                </NoticeMessage>
+                <NoticeMessage
+                  v-else-if="
                     me.phonelastsent &&
                     (!me.phonelastclicked ||
                       me.phonelastclicked < me.phonelastsent)
