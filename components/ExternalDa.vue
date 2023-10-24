@@ -24,6 +24,7 @@
   </div>
 </template>
 <script setup>
+import * as Sentry from '@sentry/vue';
 import { nextTick } from 'vue'
 import { useMiscStore } from '../stores/misc'
 import { ref, computed, onBeforeUnmount } from '#imports'
@@ -136,12 +137,9 @@ async function visibilityChanged(visible) {
               }, 45000)
             }
           }).addEventListener("slotVisibilityChanged", (event) => {
-            const slot = event.slot;
-            console.group("Visibility of slot", slot.getSlotElementId(), "changed.");
-
-            // Log details of the event.
-            console.log("Visible area:", `${event.inViewPercentage}%`);
-            console.groupEnd();
+            if (event.inViewPercentage < 51) {
+              Sentry.captureMessage(`Visibility of slot ${event.slot.getSlotElementId()} changed. New visibility: ${event.inViewPercentage}%.Viewport size: ${window.innerWidth}x${window.innerHeight}`);
+            }
           });
 
         window.googletag.enableServices()
