@@ -1,6 +1,6 @@
 <template>
-  <div v-if="true">
-    <NoticeMessage v-if="show && false" variant="info">
+  <div v-if="false">
+    <NoticeMessage v-if="show" variant="info">
       <div class="d-flex justify-content-between">
         <b-img
           src="/national_reuse_day_2023_Logo_round_500x500px.png"
