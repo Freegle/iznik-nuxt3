@@ -346,10 +346,9 @@ export default class BaseAPI {
 
     let status = null
     let data = null
+    const headers = config.headers ? config.headers : {}
 
     try {
-      const headers = config.headers ? config.headers : {}
-
       const authStore = useAuthStore()
 
       if (authStore?.auth?.jwt) {
@@ -450,6 +449,23 @@ export default class BaseAPI {
         // Swallow these by returning a problem that never resolves.  Possible memory leak but it's a rare case.
         console.log('Aborted - ignore')
         return new Promise(function (resolve) {})
+      } else if (e.message.match(/Load failed/i)) {
+        // As well as the case above where we called in retryOn, we've also seen this in an exception.
+        try {
+          console.log('Retry load failed.')
+          await new Promise((resolve) => setTimeout(resolve, 10000))
+          const rsp = await ourFetch(this.config.public.APIv2 + path, {
+            ...config,
+            body,
+            method,
+            headers,
+          })
+
+          status = rsp.status
+          data = await rsp.json()
+        } catch (e) {
+          console.log('Load failed retry failed', path, e?.message)
+        }
       }
     } finally {
       useMiscStore().api(-1)
