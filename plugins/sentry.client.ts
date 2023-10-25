@@ -141,7 +141,7 @@ export default defineNuxtPlugin((nuxtApp) => {
         } else if (
           originalExceptionString?.match(/Attempt to use history.replaceState/)
         ) {
-          console.log('History.repalceState too often')
+          console.log('History.replaceState too often')
           return null
         } else if (originalExceptionName === 'TypeError') {
           console.log('TypeError')
@@ -192,7 +192,17 @@ export default defineNuxtPlugin((nuxtApp) => {
           ) {
             // See https://stackoverflow.com/questions/39081098/close-a-window-opened-with-window-open-after-clicking-a-button
             console.log('Suppress error caused by a bug in vue-social-sharing.')
+            return null
           }
+        } else if (
+          originalExceptionStack?.includes('_.ae') &&
+          originalExceptionStack?.includes('/gsi/client')
+        ) {
+          // This is an error in Google One Tap sign-in, often preceded by a console log about malformed JSON
+          // response.  It's possible that it relates to multiple account sign in.  I've failed to reproduce it, and
+          // it's not really clear that it's our fault so there's no point beating ourselves up about it.
+          console.log('Suppress odd Google One Tap error')
+          return null
         }
       }
 
