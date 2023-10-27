@@ -167,6 +167,8 @@ export const useMobileStore = defineStore({ // Do not persist
     //////////////
     // https://developer.android.com/develop/ui/views/notifications
     // https://capacitorjs.com/docs/apis/push-notifications
+    // Uses amended @freegle/capacitor-push-notifications plugin which is here: https://github.com/Freegle/capacitor-push-notifications
+    // node_modules\@freegle\capacitor-push-notifications\android\src\main\java\com\capacitorjs\plugins\pushnotifications\MessagingService.java
     async initPushNotifications() {
       if (!this.isiOS) {
         // Delete given Android push channel called PushDefaultForeground
