@@ -7,27 +7,25 @@ export function fetchRetry(fetch) {
     return attempt * 1000
   }
 
-  const retryOn = async (attempt, error, response) => {
+  const retryOn = async function (attempt, error, response) {
     // No point retrying until we know we are back online.
     const miscStore = useMiscStore()
     await miscStore.waitForOnline()
 
-    console.log('Consider retry', attempt, error, response)
-
     if (attempt > 10) {
-      console.log('Too many retries - give up')
-      return [false, false]
+      return [false, false, null, new Error('Too many retries, give up')]
     }
 
     if (miscStore?.unloading) {
       // Don't retry if we're unloading.
       console.log("Unloading - don't retry")
-      return [false, false]
+      return [false, false, null, new Error('Unloading, no retry')]
     }
 
     // Some browsers don't return much info from fetch(), deliberately, and just say "Load failed".  So retry those.
     // https://stackoverflow.com/questions/71280168/javascript-typeerror-load-failed-error-when-calling-fetch-on-ios
-    if (response?.statusText.toLowerCase().includes('load failed')) {
+    const blandErrors = ['load failed', 'failed to fetch']
+    if (blandErrors.includes(response?.statusText.toLowerCase())) {
       console.log('Load failed - retry')
       return [true, false]
     }
@@ -49,57 +47,55 @@ export function fetchRetry(fetch) {
           return [true, false]
         } else {
           // 200 response with valid JSON.  This is the rule not the exception.
-          return [false, true]
+          return [false, true, data]
         }
       } catch (e) {
         // JSON parse failed.  That shouldn't happen, so retry.
         return [true, false]
       }
+    } else {
+      // Some error that we aren't supposed to retry.
+      return [
+        false,
+        false,
+        null,
+        error || new Error('Request failed with ' + response?.status),
+      ]
     }
   }
 
   return function (input, init) {
     return new Promise(function (resolve, reject) {
       const wrappedFetch = async function (attempt) {
-        // As of node 18, this is no longer needed since node comes with native support for fetch:
-        /* istanbul ignore next */
-        const _input =
-          typeof Request !== 'undefined' && input instanceof Request
-            ? input.clone()
-            : input
+        let response = null
+        let error = null
+        let doRetry = false
+        let success = false
+        let data = null
 
         try {
-          const response = await fetch(_input, init)
+          response = await fetch(input, init)
+        } catch (e) {
+          console.log('Error in attempt', e)
+          error = e
+        }
 
-          try {
-            return Promise.resolve(retryOn(attempt, null, response))
-              .then(function (retryOnResponse) {
-                if (retryOnResponse) {
-                  retry(attempt, null, response)
-                } else {
-                  resolve(response)
-                }
-              })
-              .catch(reject)
-          } catch (error) {
-            reject(error)
-          }
-        } catch (error) {
-          try {
-            Promise.resolve(retryOn(attempt, error, null))
-              .then(function (retryOnResponse) {
-                if (retryOnResponse) {
-                  retry(attempt, error, null)
-                } else {
-                  reject(error)
-                }
-              })
-              .catch(function (error) {
-                reject(error)
-              })
-          } catch (error) {
-            reject(error)
-          }
+        // We might retry in a variety of circumstances, including apparent success.
+        ;[doRetry, success, data, error] = await retryOn(
+          attempt,
+          error,
+          response
+        )
+
+        if (success) {
+          // We have to pass the data because .json() can only be called once.
+          response.data = data
+          resolve(response)
+        } else if (doRetry) {
+          console.log('Retry')
+          retry(attempt, null, response)
+        } else {
+          reject(error)
         }
       }
 

@@ -11,7 +11,6 @@ let requestId = 0
 //
 // Note that $fetch and useFetch cause problems on Node v18, so we don't use them.
 const ourFetch = fetchRetry(fetch)
-
 export class APIError extends Error {
   constructor({ request, response }, message) {
     super(message)
@@ -118,7 +117,7 @@ export default class BaseAPI {
       })
 
       status = rsp.status
-      data = await rsp.json()
+      data = await rsp.data
 
       if (data.jwt && data.jwt !== authStore.auth.jwt && data.persistent) {
         // We've been given a new JWT.  Use it in future.  This can happen after user merge or periodically when
@@ -368,22 +367,9 @@ export default class BaseAPI {
       })
 
       status = rsp.status
-      data = await rsp.json()
+      data = await rsp.data
 
-      if (status === 200 && !data) {
-        // We've seen this sometimes, and we think it may be caused by a network error.
-        console.log('200 success in v2 but no data, retry')
-        await new Promise((resolve) => setTimeout(resolve, 10000))
-        const rsp = await ourFetch(this.config.public.APIv2 + path, {
-          ...config,
-          body,
-          method,
-          headers,
-        })
-
-        status = rsp.status
-        data = await rsp.json()
-      } else if (status === 401) {
+      if (status === 401) {
         // Not authorised - our JWT and/or persistent token must be wrong.  Clear them.  This may force a login, or
         // not, depending on whether the page requires it.
         console.log('Not authorised - force logged out')
@@ -422,16 +408,13 @@ export default class BaseAPI {
 
     // HTTP errors are real errors.
     //
-    // We've sometimes seen 200 response codes with no returned data (I saw this myself on a train with flaky
-    // signal).  So that's an error if it happens.
-    //
     // data.ret holds the server error.
     // - 1 means not logged in, and that's ok.
     // - POSTs to session can return errors we want to handle.
     // - 999 can happen if people double-click, and we should just quietly drop it because the first click will
     //   probably do the right thing.
     // - otherwise throw an exception.
-    if (status !== 200 || !data) {
+    if (status !== 200) {
       const statusstr = status?.toString()
 
       // Whether or not we log this error to Sentry depends.  Most errors are worth logging, because they're unexpected.
