@@ -108,16 +108,12 @@ export default class BaseAPI {
       const miscStore = useMiscStore()
       await miscStore.waitForOnline()
       miscStore.api(1)
-
-      const rsp = await ourFetch(this.config.public.APIv1 + path, {
+      ;[status, data] = await ourFetch(this.config.public.APIv1 + path, {
         ...config,
         body,
         method,
         headers,
       })
-
-      status = rsp.status
-      data = await rsp.data
 
       if (data.jwt && data.jwt !== authStore.auth.jwt && data.persistent) {
         // We've been given a new JWT.  Use it in future.  This can happen after user merge or periodically when
@@ -358,16 +354,12 @@ export default class BaseAPI {
       const miscStore = useMiscStore()
       await miscStore.waitForOnline()
       miscStore.api(1)
-
-      const rsp = await ourFetch(this.config.public.APIv2 + path, {
+      ;[status, data] = await ourFetch(this.config.public.APIv2 + path, {
         ...config,
         body,
         method,
         headers,
       })
-
-      status = rsp.status
-      data = await rsp.data
 
       if (status === 401) {
         // Not authorised - our JWT and/or persistent token must be wrong.  Clear them.  This may force a login, or
@@ -389,15 +381,12 @@ export default class BaseAPI {
         try {
           console.log('Retry load failed.')
           await new Promise((resolve) => setTimeout(resolve, 10000))
-          const rsp = await ourFetch(this.config.public.APIv2 + path, {
+          ;[status, data] = await ourFetch(this.config.public.APIv2 + path, {
             ...config,
             body,
             method,
             headers,
           })
-
-          status = rsp.status
-          data = await rsp.json()
         } catch (e) {
           console.log('Load failed retry failed', path, e?.message)
         }

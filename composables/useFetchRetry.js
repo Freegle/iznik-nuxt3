@@ -39,7 +39,7 @@ export function fetchRetry(fetch) {
 
     if (response?.status === 200) {
       try {
-        const data = response.json()
+        const data = await response.json()
 
         if (!data) {
           // We've seen 200 responses with no data, which is never valid for us, so retry.
@@ -89,8 +89,7 @@ export function fetchRetry(fetch) {
 
         if (success) {
           // We have to pass the data because .json() can only be called once.
-          response.data = data
-          resolve(response)
+          resolve([response.status, data])
         } else if (doRetry) {
           console.log('Retry')
           retry(attempt, null, response)
