@@ -4,7 +4,8 @@
       :variant="variant"
       :disabled="disabled"
       :size="size"
-      :class="buttonClass"
+      :class="[buttonClass, transparent && 'transbord']"
+      :tabindex="tabindex"
       @click="click"
     >
       <span v-if="iconlast">
@@ -14,11 +15,11 @@
         <span v-if="name">
           <v-icon v-if="done" icon="check" :class="spinclass + ' fa-fw'" />
           <v-icon
-            v-else-if="doing"
+            v-else-if="spinnerVisible"
             icon="sync"
             :class="'fa-fw fa-spin ' + spinclass"
           />
-          <v-icon v-else class="fa-fw" :icon="name" />&nbsp;
+          <v-icon v-else-if="!spinnerOnly" class="fa-fw" :icon="name" />&nbsp;
         </span>
         <span v-if="!iconlast" class="ml-1">
           {{ label }}
@@ -34,6 +35,7 @@
 </template>
 <script setup>
 import { ref, defineAsyncComponent } from '#imports'
+import { computed } from 'vue';
 
 const ConfirmModal = defineAsyncComponent(() => import('./ConfirmModal'))
 
@@ -91,6 +93,25 @@ const props = defineProps({
     required: false,
     default: null,
   },
+  showSpinner: {
+    type: Boolean,
+    default: false,
+    required: false,
+  },
+  spinnerOnly: {
+    type: Boolean,
+    default: false,
+    required: false,
+  },
+  tabindex: {
+    type: Number,
+    default: 0,
+  },
+  transparent: {
+    type: Boolean,
+    default: false,
+    required: false,
+  },
 })
 
 const emit = defineEmits(['handle'])
@@ -99,6 +120,7 @@ const doing = ref(false)
 const done = ref(false)
 const showConfirm = ref(false)
 
+const spinnerVisible = computed(() => props.showSpinner || doing.value)
 const click = () => {
   if (props.confirm) {
     showConfirm.value = true
@@ -122,3 +144,9 @@ const doIt = async () => {
   }
 }
 </script>
+
+<style scoped lang="scss">
+.transbord {
+  border-color: transparent !important;
+}
+</style>

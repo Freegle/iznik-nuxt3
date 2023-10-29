@@ -20,15 +20,17 @@
           @focus="handleFocus"
         />
         <b-input-group-append>
-          <b-button variant="white" class="transbord p-0 pr-2" tabindex="-1">
-            <v-icon
-              icon="sync"
-              :class="
-                'text-success fa-spin ' +
-                (ajaxInProgress ? 'visible' : 'invisible')
-              "
-            />
-          </b-button>
+          <SpinButton
+            name="sync"
+            variant="white"
+            size="md"
+            button-class="transbord p-0 pr-2 h-100"
+            label=""
+            :spinclass="spinIconClassName"
+            :show-spinner="!!ajaxInProgress"
+            :tabindex="-1"
+            spinner-only
+          />
         </b-input-group-append>
       </b-input-group>
       <b-button
@@ -105,9 +107,11 @@
 
 import cloneDeep from 'lodash.clonedeep'
 import Highlighter from 'vue-highlight-words'
+import SpinButton from './SpinButton';
 
 export default {
   components: {
+    SpinButton,
     Highlighter
   },
   props: {
@@ -256,6 +260,9 @@ export default {
   computed: {
     faSearch() {
       return faSearch
+    },
+    spinIconClassName() {
+      return `text-success ${this.ajaxInProgress ? 'visible' : 'invisible' }`
     },
     wrapClass() {
       let border
