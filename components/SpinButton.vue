@@ -13,12 +13,12 @@
       </span>
       <span>
         <span v-if="name">
-          <v-icon v-if="done" icon="check" :class="spinclass + ' fa-fw'" />
           <v-icon
-            v-else-if="spinnerVisible"
+            v-if="spinnerVisible"
             icon="sync"
             :class="'fa-fw fa-spin ' + spinclass"
           />
+          <v-icon v-else-if="done" :icon="doneIcon" :class="spinclass + ' fa-fw'" />
           <v-icon v-else-if="!spinnerOnly" class="fa-fw" :icon="name" />&nbsp;
         </span>
         <span v-if="!iconlast" class="ml-1">
@@ -111,6 +111,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
     required: false,
+  },
+  doneIcon: {
+    type: String,
+    default: 'check',
   },
 })
 
