@@ -1,16 +1,31 @@
 <template>
   <div v-if="newsfeed" class="d-flex align-items-center mt-1">
-    <b-button v-if="!newsfeed.loved" variant="link" size="sm" @click="love">
-      <v-icon v-if="loving" icon="sync" class="fa-spin text-success" />
-      <v-icon v-else icon="heart" />
-      <span class="d-none d-sm-inline ml-1">Love this</span>
-    </b-button>
-    <b-button v-if="newsfeed.loved" variant="link" size="sm" @click="unlove">
-      <v-icon icon="heart" class="text-danger" /><span
-        class="d-none d-sm-inline"
-        >&nbsp;Unlove this</span
-      >
-    </b-button>
+    <spin-button
+      v-if="!newsfeed.loved"
+      variant="link"
+      size="sm"
+      @handle="love"
+      :show-spinner="loving"
+      name="heart"
+      done-icon="heart"
+      icon-class=""
+      label=""
+    >
+      <span class="d-none d-sm-inline">Love this</span>
+    </spin-button>
+    <spin-button
+      v-if="newsfeed.loved"
+      variant="link"
+      size="sm"
+      @handle="unlove"
+      :show-spinner="loving"
+      name="heart"
+      done-icon="heart"
+      icon-class="text-danger"
+      label=""
+    >
+      <span class="d-none d-sm-inline">Unlove this</span>
+    </spin-button>
     <b-button
       v-if="!newsfeed.closed"
       variant="link"
@@ -41,10 +56,12 @@
 import pluralize from 'pluralize'
 import { defineAsyncComponent } from 'vue'
 import { useNewsfeedStore } from '../stores/newsfeed'
+import SpinButton from "./SpinButton";
 const NewsLovesModal = defineAsyncComponent(() => import('./NewsLovesModal'))
 
 export default {
   components: {
+    SpinButton,
     NewsLovesModal,
   },
   props: {
