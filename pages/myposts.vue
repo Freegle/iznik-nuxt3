@@ -139,7 +139,7 @@ const { showDonationAskModal } = useDonationAskModal()
 const myid = authStore.user?.id
 
 // `posts` holds both OFFERs and WANTEDs (both old and active)
-const posts = computed(() => messageStore.byUserList[myid] || {})
+const posts = computed(() => messageStore.byUserList[myid] || [])
 
 const offersLoading = ref(true)
 const wantedsLoading = ref(true)
