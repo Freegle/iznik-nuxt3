@@ -53,6 +53,7 @@
             variant="secondary"
             label=""
             spinclass=""
+            iconclass=""
             button-class="tweakHeight"
             button-title="Find my device's location instead of typing a postcode"
             :done-icon="locationFailed ? 'exclamation-triangle' : 'map-marker-alt'"
