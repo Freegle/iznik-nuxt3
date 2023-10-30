@@ -5,7 +5,7 @@ import api from '~/api'
 import { GROUP_REPOSTS, MESSAGE_EXPIRE_TIME } from '~/constants'
 import { useGroupStore } from '~/stores/group'
 import { APIError } from '~/api/BaseAPI'
-import { useAuthStore } from '~/stores/auth';
+import { useAuthStore } from '~/stores/auth'
 
 export const useMessageStore = defineStore({
   id: 'message',
@@ -223,14 +223,18 @@ export const useMessageStore = defineStore({
         // This can happen if we withdraw a post while it is pending.
         delete this.list[params.id]
         if (userUid && this.byUserList[userUid]) {
-          this.byUserList[userUid] = this.byUserList[userUid].filter(message => message.id !== params.id);
+          this.byUserList[userUid] = this.byUserList[userUid].filter(
+            (message) => message.id !== params.id
+          )
         }
       } else {
         // Fetch back the updated version.
         const message = await this.fetch(params.id, true)
         this.list[params.id] = message
         if (userUid && this.byUserList[userUid]) {
-          const index = this.byUserList[userUid].findIndex(curMessage => curMessage.id === params.id)
+          const index = this.byUserList[userUid].findIndex(
+            (curMessage) => curMessage.id === params.id
+          )
           if (index !== -1) {
             this.byUserList[userUid][index] = message
           }
@@ -290,8 +294,13 @@ export const useMessageStore = defineStore({
       const authStore = useAuthStore()
       const userUid = authStore.user?.id
 
-      const activeMessages = await api(this.config).message.fetchByUser(userUid, true);
-      this.activePostsCounter = Array.isArray(activeMessages) ? activeMessages.length : 0;
+      const activeMessages = await api(this.config).message.fetchByUser(
+        userUid,
+        true
+      )
+      this.activePostsCounter = Array.isArray(activeMessages)
+        ? activeMessages.length
+        : 0
     },
   },
   getters: {

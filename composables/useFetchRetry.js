@@ -1,6 +1,13 @@
 // Originally based on https://github.com/jonbern/fetch-retry, but reworked for our purposes.
 import { useMiscStore } from '~/stores/misc'
 
+class FetchError extends Error {
+  constructor(message, response) {
+    super(message)
+    this.response = response
+  }
+}
+
 export function fetchRetry(fetch) {
   const retryDelay = function (attempt, error, response) {
     // Slowly back off for longer each time.
@@ -55,12 +62,14 @@ export function fetchRetry(fetch) {
       }
     } else {
       // Some error that we aren't supposed to retry.
-      return [
-        false,
-        false,
-        null,
-        error || new Error('Request failed with ' + response?.status),
-      ]
+      if (!error) {
+        error = new FetchError(
+          'Request failed with ' + response?.status,
+          response
+        )
+      }
+
+      return [false, false, null, error]
     }
   }
 
