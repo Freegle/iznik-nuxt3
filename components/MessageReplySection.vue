@@ -63,30 +63,36 @@
         </b-button>
       </div>
       <div v-if="!fromme" class="pl-2 w-50 justify-content-end d-flex">
-        <b-button
+        <spin-button
           v-if="!me"
-          size="lg"
           variant="primary"
+          size="lg"
+          done-icon="angle-double-right"
+          name="angle-double-right"
+          spinclass="text-white"
+          icon-class=""
+          :show-spinner="replying"
           :disabled="disableSend"
-          block
-          @click="registerOrSend"
+          iconlast
+          @handle="registerOrSend"
         >
           Send <span class="d-none d-md-inline">your</span> reply
-          <v-icon v-if="replying" icon="sync" class="fa-spin" />
-          <v-icon v-else icon="angle-double-right" />&nbsp;
-        </b-button>
-        <b-button
+        </spin-button>
+        <spin-button
           v-else
-          size="lg"
           variant="primary"
-          block
+          size="lg"
+          done-icon="angle-double-right"
+          name="angle-double-right"
+          spinclass="text-white"
+          icon-class=""
+          :show-spinner="replying"
           :disabled="disableSend"
-          @click="sendReply"
+          iconlast
+          @handle="sendReply"
         >
           Send <span class="d-none d-md-inline">your</span> reply
-          <v-icon v-if="replying" icon="sync" class="fa-spin" />
-          <v-icon v-else icon="angle-double-right" />&nbsp;
-        </b-button>
+        </spin-button>
       </div>
     </div>
     <b-modal

@@ -9,8 +9,10 @@
       :title="buttonTitle"
       @click="click"
     >
-      <span v-if="iconlast">
-        {{ label }}
+      <span v-if="iconlast && (label || $slots.default)">
+        <slot>
+          {{ label }}
+        </slot>
       </span>
       <span>
         <span v-if="name || spinnerOnly">
@@ -22,8 +24,8 @@
           <v-icon v-else-if="done" :icon="doneIcon" :class="[spinclass, iconClass]" />
           <v-icon v-else-if="!spinnerOnly" :class="iconClass" :icon="name" />&nbsp;
         </span>
-        <span v-if="!iconlast" class="ml-1">
-          {{ label }}
+        <span v-if="!iconlast && (label || $slots.default)" class="ml-1">
+          <slot>{{ label }}</slot>
         </span>
       </span>
     </b-button>
