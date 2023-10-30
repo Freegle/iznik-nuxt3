@@ -133,16 +133,21 @@
             </b-button>
           </div>
         </span>
-        <b-button variant="primary" class="float-end ml-2 mr-2" @click="send">
-          Send&nbsp;
-          <v-icon
-            v-if="sending"
-            icon="sync"
-            class="fa-spin"
-            title="Sending..."
-          />
-          <v-icon v-else icon="angle-double-right" title="Send" />
-        </b-button>
+        <spin-button
+          size="md"
+          variant="primary"
+          button-class="h-100"
+          class="float-end ml-2 mr-2"
+          button-title="Sending..."
+          done-icon="angle-double-right"
+          label="Send&nbsp;"
+          name="angle-double-right"
+          spinclass="text-white"
+          icon-class=""
+          :show-spinner="sending"
+          iconlast
+          @handle="send"
+        />
         <b-button
           v-b-tooltip="'Upload a photo'"
           variant="secondary"
@@ -213,16 +218,19 @@
           <v-icon scale="2" icon="camera" class="fa-mob" />
           <div class="mobtext text--smallest">Photo</div>
         </div>
-        <b-button variant="primary" @click="send">
-          Send
-          <v-icon
-            v-if="sending"
-            icon="sync"
-            class="fa-spin"
-            title="Sending..."
-          />
-          <v-icon v-else icon="angle-double-right" title="Send" />
-        </b-button>
+        <spin-button
+          variant="primary"
+          size="md"
+          button-class="h-100"
+          done-icon="angle-double-right"
+          label="Send&nbsp;"
+          name="angle-double-right"
+          spinclass="text-white"
+          icon-class=""
+          :show-spinner="sending"
+          iconlast
+          @handle="send"
+        />
       </div>
     </div>
     <PromiseModal
@@ -275,6 +283,7 @@ import { fetchOurOffers } from '../composables/useThrottle'
 import { useAuthStore } from '../stores/auth'
 import { useAddressStore } from '../stores/address'
 import { untwem } from '~/composables/useTwem'
+import SpinButton from "./SpinButton";
 
 // Don't use dynamic imports because it stops us being able to scroll to the bottom after render.
 const OurFilePond = () => import('~/components/OurFilePond')
@@ -301,6 +310,7 @@ const MicroVolunteering = () => import('~/components/MicroVolunteering')
 
 export default {
   components: {
+    SpinButton,
     NudgeTooSoonWarningModal,
     NudgeWarningModal,
     UserRatings,
