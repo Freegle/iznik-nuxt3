@@ -4,18 +4,27 @@
       <v-icon icon="search" /> {{ search.term }}
       <span class="text-muted small">{{ searchAgo }}</span>
     </b-button>
-    <span class="ml-3 d-inline clickme" @click="deleteSearch">
-      <v-icon v-if="removing" icon="sync" class="text-success fa-spin" />
-      <v-icon v-else icon="trash-alt" title="Delete this search" />
-    </span>
+    <spin-button
+      transparent
+      variant="white"
+      class="ml-3 d-inline"
+      name="trash-alt"
+      done-icon="trash-alt"
+      label=""
+      icon-class=""
+      :show-spinner="removing"
+      @handle="deleteSearch"
+    />
   </div>
 </template>
 <script>
 import dayjs from 'dayjs'
 import pluralize from 'pluralize'
 import { useSearchStore } from '../stores/search'
+import SpinButton from "./SpinButton";
 
 export default {
+  components: {SpinButton},
   props: {
     search: {
       type: Object,
@@ -43,7 +52,9 @@ export default {
   },
   methods: {
     async deleteSearch() {
+      this.removing = true;
       await this.searchStore.delete(this.search.id, this.myid)
+      this.removing = false;
       this.removed = true
 
       setTimeout(() => {
