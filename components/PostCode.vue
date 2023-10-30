@@ -49,17 +49,18 @@
           :skidding="-50"
         />
         <div v-if="find && !wip">
-          <b-button
+          <spin-button
             variant="secondary"
+            label=""
+            spinclass=""
+            button-class="tweakHeight"
+            button-title="Find my device's location instead of typing a postcode"
+            :done-icon="locationFailed ? 'exclamation-triangle' : 'map-marker-alt'"
+            :name="locationFailed ? 'exclamation-triangle' : 'map-marker-alt'"
             :size="size"
-            title="Find my device's location instead of typing a postcode"
-            class="tweakHeight"
-            @click="findLoc"
-          >
-            <v-icon v-if="locating" icon="sync" class="fa-spin" />
-            <v-icon v-else-if="locationFailed" icon="exclamation-triangle" />
-            <v-icon v-else icon="map-marker-alt" />
-          </b-button>
+            :show-spinner="locating"
+            @handle="findLoc"
+          />
         </div>
       </div>
     </div>
@@ -72,9 +73,11 @@ import { useLocationStore } from '../stores/location'
 import { ref } from '#imports'
 import { useComposeStore } from '~/stores/compose'
 import AutoComplete from '~/components/AutoComplete'
+import SpinButton from "./SpinButton";
 
 export default {
   components: {
+    SpinButton,
     AutoComplete,
   },
   props: {
@@ -255,7 +258,7 @@ export default {
             ) {
               // Got it - put it in the autocomplete input, and indicate that we've selected it.
               this.$refs.autocomplete.setValue(res.location.name)
-              this.select({
+              await this.select({
                 name: res.location.name,
               })
 
@@ -265,6 +268,7 @@ export default {
             } else {
               this.locationFailed = true
             }
+            this.locating = false
           })
         } else {
           console.log('Navigation not supported.  ')
@@ -275,7 +279,6 @@ export default {
         this.locationFailed = true
       }
 
-      this.locating = false
     },
   },
 }
@@ -292,9 +295,5 @@ export default {
 
 :deep(.popover) {
   background-color: black;
-}
-
-.tweakHeight {
-  line-height: 1.7em;
 }
 </style>

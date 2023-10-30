@@ -6,13 +6,14 @@
       :size="size"
       :class="[buttonClass, transparent && 'transbord']"
       :tabindex="tabindex"
+      :title="buttonTitle"
       @click="click"
     >
       <span v-if="iconlast">
         {{ label }}
       </span>
       <span>
-        <span v-if="name">
+        <span v-if="name || spinnerOnly">
           <v-icon
             v-if="spinnerVisible"
             icon="sync"
@@ -116,6 +117,10 @@ const props = defineProps({
     type: String,
     default: 'check',
   },
+  buttonTitle: {
+    type: String,
+    default: '',
+  },
 })
 
 const emit = defineEmits(['handle'])
@@ -152,5 +157,9 @@ const doIt = async () => {
 <style scoped lang="scss">
 .transbord {
   border-color: transparent !important;
+}
+
+.tweakHeight {
+  line-height: 1.7em;
 }
 </style>

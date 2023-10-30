@@ -21,7 +21,6 @@
         />
         <b-input-group-append>
           <SpinButton
-            name="sync"
             variant="white"
             size="md"
             button-class="transbord p-0 pr-2 h-100"
