@@ -134,7 +134,7 @@ export default {
       let isValidDomain = true;
       try {
         const domain = value.substring(value.indexOf('@') + 1)
-        const url = new URL('https://dns.googlee/resolve');
+        const url = new URL('https://dns.google/resolve');
         url.search = new URLSearchParams({ name: domain }).toString();
         const googleResponse = await fetch(url).then(response => response);
         const { Status: status } = await googleResponse.json();
