@@ -511,6 +511,7 @@ export default {
     },
     closestGroups() {
       const ret = []
+      const distances = {}
 
       if (this.centre) {
         const allGroups = this.groupStore?.list
@@ -532,7 +533,7 @@ export default {
                 // Visible group?
                 if (group.onmap && group.publish) {
                   // How far away?
-                  group.distance = getDistance(
+                  distances[group.id] = getDistance(
                     [this.centre.lat, this.centre.lng],
                     [group.lat, group.lng]
                   )
@@ -540,17 +541,17 @@ export default {
                   // Allowed to show?
                   if (
                     !group.showjoin ||
-                    group.distance <= group.showjoin * 1609.34
+                    distances[group.id] <= group.showjoin * 1609.34
                   ) {
                     ret.push(group)
                   } else if (group.altlat || group.altlng) {
                     // A few groups have two centres because they are large.
-                    group.distance = getDistance(
+                    distances[group.id] = getDistance(
                       [this.centre.lat, this.centre.lng],
                       [group.altlat, group.altlng]
                     )
 
-                    if (group.distance <= group.showjoin * 1609.34) {
+                    if (distances[group.id] <= group.showjoin * 1609.34) {
                       ret.push(group)
                     }
                   }
@@ -561,7 +562,7 @@ export default {
         }
 
         ret.sort((a, b) => {
-          return a.distance - b.distance
+          return distances[a.id] - distances[b.id]
         })
       }
 

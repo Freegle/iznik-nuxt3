@@ -1,5 +1,5 @@
 <template>
-  <div v-if="true">
+  <div v-if="false">
     <NoticeMessage v-if="show" variant="info">
       <div class="d-flex justify-content-between">
         <b-img

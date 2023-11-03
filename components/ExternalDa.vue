@@ -24,7 +24,7 @@
   </div>
 </template>
 <script setup>
-import * as Sentry from '@sentry/vue';
+import * as Sentry from '@sentry/vue'
 import { nextTick } from 'vue'
 import { useMiscStore } from '../stores/misc'
 import { ref, computed, onBeforeUnmount } from '#imports'
@@ -131,19 +131,28 @@ async function visibilityChanged(visible) {
             // every 30s.
             if (!timer.value) {
               timer.value = setTimeout(() => {
-                if (window.googletag?.pubads) {
+                if (
+                  window.googletag?.pubads &&
+                  typeof window.googletag?.pubads === 'function' &&
+                  typeof window.googletag?.pubads().refresh === 'function'
+                ) {
                   window.googletag.pubads().refresh([slot])
                 }
               }, 45000)
             }
-          }).addEventListener("slotVisibilityChanged", (event) => {
+          })
+          .addEventListener('slotVisibilityChanged', (event) => {
             if (event.inViewPercentage < 51) {
-              Sentry.captureMessage(`Visibility of slot ${event.slot.getSlotElementId()} changed. New visibility: ${event.inViewPercentage}%.Viewport size: ${window.innerWidth}x${window.innerHeight}`);
+              console.log(
+                `Visibility of slot ${event.slot.getSlotElementId()} changed. New visibility: ${
+                  event.inViewPercentage
+                }%.Viewport size: ${window.innerWidth}x${window.innerHeight}`
+              )
             }
-          });
+          })
 
         window.googletag.enableServices()
-      });
+      })
 
       window.googletag.cmd.push(function () {
         window.googletag.display(props.divId)

@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/browser'
-import fetchRetry from 'fetch-retry'
+import { fetchRetry } from '~/composables/useFetchRetry'
 import { useAuthStore } from '~/stores/auth'
 import { useMiscStore } from '~/stores/misc'
 
@@ -10,44 +10,7 @@ let requestId = 0
 // We add fetch retrying.
 //
 // Note that $fetch and useFetch cause problems on Node v18, so we don't use them.
-const ourFetch = fetchRetry(fetch, {
-  // We set the number of retries very high.  Normally this won't apply because we check attempt > 10 below.
-  // But having this high means that if we detect that we are offline after the 9th retry, then fetchRetry won't
-  // fail on us; we'll come into retryOn and hang on the await.
-  retries: 100,
-  retryOn: async (attempt, error, response) => {
-    const miscStore = useMiscStore()
-    await miscStore.waitForOnline()
-
-    if (attempt > 10) {
-      console.log('Too many retries - give up')
-      return false
-    } else if (miscStore?.unloading || !miscStore?.online) {
-      // Don't retry if we're unloading or not online.
-      console.log("Unloading - don't retry")
-      return false
-    }
-
-    // Retry on pretty much anything except errors which can legitimately be returned by the API server.  These are
-    // the low 400s.
-    //
-    // Some browsers don't return much info from fetch(), deliberately, and just say "Load failed".  So retry those.
-    // https://stackoverflow.com/questions/71280168/javascript-typeerror-load-failed-error-when-calling-fetch-on-ios
-    if (
-      error !== null ||
-      response?.status > 404 ||
-      (response?.status === 200 &&
-        response?.statusText.toLowerCase().includes('load failed'))
-    ) {
-      console.log('API retry', attempt, error, response)
-      return true
-    }
-  },
-  retryDelay: function (attempt, error, response) {
-    return attempt * 1000
-  },
-})
-
+const ourFetch = fetchRetry(fetch)
 export class APIError extends Error {
   constructor({ request, response }, message) {
     super(message)
@@ -145,31 +108,12 @@ export default class BaseAPI {
       const miscStore = useMiscStore()
       await miscStore.waitForOnline()
       miscStore.api(1)
-
-      const rsp = await ourFetch(this.config.public.APIv1 + path, {
+      ;[status, data] = await ourFetch(this.config.public.APIv1 + path, {
         ...config,
         body,
         method,
         headers,
       })
-
-      status = rsp.status
-      data = await rsp.json()
-
-      if (status === 200 && !data) {
-        // We've seen this sometimes, and we think it may be caused by a network error.
-        console.log('200 success in v1 but no data, retry')
-        await new Promise((resolve) => setTimeout(resolve, 10000))
-        const rsp = await ourFetch(this.config.public.APIv1 + path, {
-          ...config,
-          body,
-          method,
-          headers,
-        })
-
-        status = rsp.status
-        data = await rsp.json()
-      }
 
       if (data.jwt && data.jwt !== authStore.auth.jwt && data.persistent) {
         // We've been given a new JWT.  Use it in future.  This can happen after user merge or periodically when
@@ -346,10 +290,9 @@ export default class BaseAPI {
 
     let status = null
     let data = null
+    const headers = config.headers ? config.headers : {}
 
     try {
-      const headers = config.headers ? config.headers : {}
-
       const authStore = useAuthStore()
 
       if (authStore?.auth?.jwt) {
@@ -411,31 +354,14 @@ export default class BaseAPI {
       const miscStore = useMiscStore()
       await miscStore.waitForOnline()
       miscStore.api(1)
-
-      const rsp = await ourFetch(this.config.public.APIv2 + path, {
+      ;[status, data] = await ourFetch(this.config.public.APIv2 + path, {
         ...config,
         body,
         method,
         headers,
       })
 
-      status = rsp.status
-      data = await rsp.json()
-
-      if (status === 200 && !data) {
-        // We've seen this sometimes, and we think it may be caused by a network error.
-        console.log('200 success in v2 but no data, retry')
-        await new Promise((resolve) => setTimeout(resolve, 10000))
-        const rsp = await ourFetch(this.config.public.APIv2 + path, {
-          ...config,
-          body,
-          method,
-          headers,
-        })
-
-        status = rsp.status
-        data = await rsp.json()
-      } else if (status === 401) {
+      if (status === 401) {
         // Not authorised - our JWT and/or persistent token must be wrong.  Clear them.  This may force a login, or
         // not, depending on whether the page requires it.
         console.log('Not authorised - force logged out')
@@ -450,6 +376,20 @@ export default class BaseAPI {
         // Swallow these by returning a problem that never resolves.  Possible memory leak but it's a rare case.
         console.log('Aborted - ignore')
         return new Promise(function (resolve) {})
+      } else if (e.message.match(/Load failed/i)) {
+        // As well as the case above where we called in retryOn, we've also seen this in an exception.
+        try {
+          console.log('Retry load failed.')
+          await new Promise((resolve) => setTimeout(resolve, 10000))
+          ;[status, data] = await ourFetch(this.config.public.APIv2 + path, {
+            ...config,
+            body,
+            method,
+            headers,
+          })
+        } catch (e) {
+          console.log('Load failed retry failed', path, e?.message)
+        }
       }
     } finally {
       useMiscStore().api(-1)
@@ -457,17 +397,14 @@ export default class BaseAPI {
 
     // HTTP errors are real errors.
     //
-    // We've sometimes seen 200 response codes with no returned data (I saw this myself on a train with flaky
-    // signal).  So that's an error if it happens.
-    //
     // data.ret holds the server error.
     // - 1 means not logged in, and that's ok.
     // - POSTs to session can return errors we want to handle.
     // - 999 can happen if people double-click, and we should just quietly drop it because the first click will
     //   probably do the right thing.
     // - otherwise throw an exception.
-    if (status !== 200 || !data) {
-      const statusstr = status.toString()
+    if (status !== 200) {
+      const statusstr = status?.toString()
 
       // Whether or not we log this error to Sentry depends.  Most errors are worth logging, because they're unexpected.
       // But some API calls are expected to fail, and throw an exception which is then handled in the code.  We don't
