@@ -56,7 +56,7 @@
 import pluralize from 'pluralize'
 import { defineAsyncComponent } from 'vue'
 import { useNewsfeedStore } from '../stores/newsfeed'
-import SpinButton from "./SpinButton";
+import SpinButton from './SpinButton'
 const NewsLovesModal = defineAsyncComponent(() => import('./NewsLovesModal'))
 
 export default {

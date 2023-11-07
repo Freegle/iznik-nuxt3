@@ -247,32 +247,35 @@ export default {
           navigator.geolocation.getCurrentPosition
         ) {
           this.locating = true
-          navigator.geolocation.getCurrentPosition(async (position) => {
-            const res = await this.locationStore.fetch({
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-            })
-
-            if (
-              res.ret === 0 &&
-              res.location &&
-              res.location.name &&
-              this.$refs.autocomplete
-            ) {
-              // Got it - put it in the autocomplete input, and indicate that we've selected it.
-              this.$refs.autocomplete.setValue(res.location.name)
-              await this.select({
-                name: res.location.name,
+          navigator.geolocation.getCurrentPosition(
+            async (position) => {
+              const res = await this.locationStore.fetch({
+                lat: position.coords.latitude,
+                lng: position.coords.longitude,
               })
 
-              // Show the user we've done this, and make them think.
-              this.showLocated = true
-              setTimeout(() => (this.showLocated = false), 10000)
-            } else {
-              this.locationFailed = true
-            }
-            this.locating = false
-          })
+              if (
+                res.ret === 0 &&
+                res.location &&
+                res.location.name &&
+                this.$refs.autocomplete
+              ) {
+                // Got it - put it in the autocomplete input, and indicate that we've selected it.
+                this.$refs.autocomplete.setValue(res.location.name)
+                await this.select({
+                  name: res.location.name,
+                })
+
+                // Show the user we've done this, and make them think.
+                this.showLocated = true
+                setTimeout(() => (this.showLocated = false), 10000)
+              } else {
+                this.locationFailed = true
+              }
+              this.locating = false
+            },
+            () => (this.locating = false)
+          )
         } else {
           console.log('Navigation not supported.  ')
           this.locationFailed = true
