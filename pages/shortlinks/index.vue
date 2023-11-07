@@ -162,7 +162,7 @@ export default {
               'Failed to create.  Please make sure the link name is unique.'
           }
         } catch (e) {
-          if (e.response && e.response.data) {
+          if (e?.response?.data) {
             // Duplicate
             this.error = e.response.data.status
           }

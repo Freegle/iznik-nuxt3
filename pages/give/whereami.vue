@@ -5,7 +5,7 @@
       <div class="d-none d-md-flex justify-content-around">
         <WizardProgress :active-stage="3" class="maxbutt" />
       </div>
-      <h1 class="text-center">Now, tell us where you are</h1>
+      <h1 class="text-center">Now, tell us where it is</h1>
       <p class="text-center">
         We'll use this to show your offer to people nearby. Don't worry, we
         won't give other people your postcode.

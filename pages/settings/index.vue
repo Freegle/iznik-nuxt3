@@ -188,14 +188,16 @@
                   size="md"
                   label="Your primary email address:"
                 />
-                <SpinButton
-                  variant="primary"
-                  name="save"
-                  label="Save"
-                  spinclass="text-white"
-                  class="align-self-end pb-3"
-                  @handle="saveEmail"
-                />
+                <div class="d-flex flex-column justify-content-end">
+                  <SpinButton
+                    variant="primary"
+                    name="save"
+                    label="Save"
+                    spinclass="text-white"
+                    :disabled="!emailValid"
+                    @handle="saveEmail"
+                  />
+                </div>
               </div>
               <div
                 v-if="otheremails.length"
@@ -541,7 +543,15 @@
               <SettingsPhone class="mb-3" />
               <div v-if="me.phone">
                 <NoticeMessage
-                  v-if="
+                  v-if="!notificationSettings.email"
+                  variant="warning"
+                  class="mb-2"
+                >
+                  Email notifications must be turned on for SMS alerts to be
+                  sent.
+                </NoticeMessage>
+                <NoticeMessage
+                  v-else-if="
                     me.phonelastsent &&
                     (!me.phonelastclicked ||
                       me.phonelastclicked < me.phonelastsent)
@@ -614,7 +624,7 @@
                 />
               </b-form-group>
               <b-form-group>
-                <h3 class="header--size5 header5__color">Auto-reposts</h3>
+                <h3 class="header--size5 header5__color mt-2">Auto-reposts</h3>
                 <p>
                   In most Freegle communities, your OFFER/WANTED posts will be
                   automatically reposted (or "bumped") unless you've marked them

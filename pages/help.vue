@@ -396,8 +396,9 @@ export default {
       return date.format('Do MMMM, YYYY') + ' at ' + date.format('HH:mm')
     },
   },
-  mounted() {
+  async mounted() {
     // Scan the FAQs above and extract the plain text for each one, and then construct a search index.
+    await this.$nextTick()
     const faqs = this.$refs.faq.children
 
     this.forIndex = []

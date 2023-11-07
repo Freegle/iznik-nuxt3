@@ -77,10 +77,8 @@ import { useGroupStore } from '~/stores/group'
 import { useDonationStore } from '~/stores/donations'
 import Api from '~/api'
 
-const runtimeConfig = useRuntimeConfig()
 const groupStore = useGroupStore()
 const donationStore = useDonationStore()
-const api = Api(runtimeConfig)
 
 const { modal, hide } = useModal()
 const { variant, groupId } = useDonationAskModal()
@@ -100,6 +98,9 @@ const targetMet = computed(() => {
 })
 
 function score(value) {
+  const runtimeConfig = useRuntimeConfig()
+  const api = Api(runtimeConfig)
+
   api.bandit.chosen({
     uid: 'donation',
     variant: variant.value,

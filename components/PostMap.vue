@@ -379,7 +379,14 @@ export default {
   },
   watch: {
     bounds(newVal, oldVal) {
-      this.getMessages()
+      if (!this.showGroups) {
+        this.getMessages()
+      }
+    },
+    showGroups(newVal) {
+      if (!newVal) {
+        this.getMessages()
+      }
     },
     zoom(newVal) {
       if (newVal < this.postZoom && !this.forceMessages) {

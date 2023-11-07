@@ -66,7 +66,7 @@ const StoryAddModal = defineAsyncComponent(() =>
   import('~/components/StoryAddModal')
 )
 
-const LIMIT = 20
+const LIMIT = 100
 
 const runtimeConfig = useRuntimeConfig()
 const route = useRoute()
@@ -129,7 +129,7 @@ const storiesToShow = computed(() => {
 function loadMore(infiniteLoaderInstance) {
   toShow.value++
 
-  if (toShow >= stories.value.length) {
+  if (toShow.value >= stories.value.length) {
     infiniteLoaderInstance.complete()
   } else {
     infiniteLoaderInstance.loaded()

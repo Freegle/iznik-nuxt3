@@ -1,5 +1,5 @@
 <template>
-  <div :id="'msg-' + id" class="position-relative">
+  <div v-if="message" :id="'msg-' + id" class="position-relative">
     <template v-if="message.successful">
       <MessageFreegled :id="id" />
     </template>

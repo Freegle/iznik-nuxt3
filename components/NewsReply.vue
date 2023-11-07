@@ -55,7 +55,7 @@
           <span class="text-muted small mr-1">
             {{ timeago(reply.added) }}
           </span>
-          <NewsUserInfo :id="replyid" class="mr-1" />
+          <NewsUserInfo :id="id" class="mr-1" />
           &bull;
           <b-button
             variant="link"
@@ -148,10 +148,10 @@
       </div>
     </div>
     <NewsReplies
+      v-if="reply?.replies?.length"
       :id="id"
       :threadhead="threadhead"
       :scroll-to="scrollTo"
-      :reply-ids="reply.replies.map((r) => r.id)"
       :reply-to="reply.id"
       :depth="depth + 1"
     />
@@ -277,12 +277,12 @@
     />
     <NewsLovesModal
       v-if="showLoveModal"
-      :id="replyid"
+      :id="id"
       @hidden="showLoveModal = false"
     />
     <NewsEditModal
       v-if="showEditModal"
-      :id="replyid"
+      :id="id"
       :threadhead="threadhead"
       @hidden="showEditModal = false"
     />
@@ -350,10 +350,6 @@ export default {
       type: Number,
       required: true,
     },
-    replyid: {
-      type: Number,
-      required: true,
-    },
     scrollTo: {
       type: String,
       required: false,
@@ -401,7 +397,10 @@ export default {
       return this.reply?.userid
     },
     reply() {
-      return this.newsfeedStore?.byId(this.replyid)
+      return this.newsfeedStore?.byId(this.id)
+    },
+    ids() {
+      return this.reply?.replies
     },
     tagusers() {
       return this.newsfeedStore?.tagusers?.map((u) => u.displayname)
@@ -426,7 +425,7 @@ export default {
       return ret
     },
     scrollToThis() {
-      return parseInt(this.scrollTo) === this.replyid
+      return parseInt(this.scrollTo) === this.id
     },
     getShowLovesLabel() {
       return (
@@ -438,7 +437,7 @@ export default {
   },
   watch: {
     scrollTo(newVal) {
-      if (parseInt(this.scrollTo) === this.replyid && this.$el.scrollIntoView) {
+      if (parseInt(this.scrollTo) === this.id && this.$el.scrollIntoView) {
         this.scrollIntoView()
       }
     },
@@ -446,14 +445,14 @@ export default {
   mounted() {
     // This will get propogated up the stack so that we know if the reply to which we'd like to scroll has been
     // rendered.  We'll then come through the watch above.
-    this.$emit('rendered', this.replyid)
+    this.$emit('rendered', this.id)
   },
   methods: {
     showInfo() {
       this.showProfileModal = true
     },
     async replyReply() {
-      this.replyingTo = this.replyid
+      this.replyingTo = this.id
       this.showReplyBox = true
 
       await this.$nextTick()
@@ -466,7 +465,7 @@ export default {
       this.$refs.replybox.focus()
     },
     focusedReply() {
-      this.replyingTo = this.replyid
+      this.replyingTo = this.id
     },
     async sendReply(e) {
       if (e) {
@@ -516,7 +515,7 @@ export default {
       const el = e.target
       el.classList.add('pulsate')
 
-      await this.newsfeedStore.love(this.replyid, this.threadhead)
+      await this.newsfeedStore.love(this.id, this.threadhead)
 
       el.classList.remove('pulsate')
     },
@@ -524,7 +523,7 @@ export default {
       const el = e.target
       el.classList.add('pulsate')
 
-      await this.newsfeedStore.unlove(this.replyid, this.threadhead)
+      await this.newsfeedStore.unlove(this.id, this.threadhead)
 
       el.classList.remove('pulsate')
     },
@@ -532,7 +531,7 @@ export default {
       this.showDeleteModal = true
     },
     async deleteConfirm() {
-      await this.newsfeedStore.delete(this.replyid, this.threadhead)
+      await this.newsfeedStore.delete(this.id, this.threadhead)
     },
     brokenImage(event) {
       event.target.src = '/defaultprofile.png'
@@ -584,7 +583,7 @@ export default {
       }
     },
     visibilityChanged(visible) {
-      if (parseInt(this.scrollTo) === this.replyid && !this.hasBecomeVisible) {
+      if (parseInt(this.scrollTo) === this.id && !this.hasBecomeVisible) {
         this.isVisible = visible
 
         if (!visible) {

@@ -285,7 +285,7 @@ export async function freegleIt(type, router) {
       })
     }
   } catch (e) {
-    console.log('Submit failed', e, e.response.data.ret)
+    console.log('Submit failed', e, e?.response?.data?.ret)
     this.submitting = false
 
     if (e?.message) {
