@@ -133,7 +133,7 @@
             </b-button>
           </div>
         </span>
-        <spin-button
+        <SpinButton
           size="md"
           variant="primary"
           button-class="h-100"
@@ -218,7 +218,7 @@
           <v-icon scale="2" icon="camera" class="fa-mob" />
           <div class="mobtext text--smallest">Photo</div>
         </div>
-        <spin-button
+        <SpinButton
           variant="primary"
           size="md"
           button-class="h-100"
@@ -282,8 +282,8 @@ import { useMessageStore } from '../stores/message'
 import { fetchOurOffers } from '../composables/useThrottle'
 import { useAuthStore } from '../stores/auth'
 import { useAddressStore } from '../stores/address'
+import SpinButton from './SpinButton'
 import { untwem } from '~/composables/useTwem'
-import SpinButton from "./SpinButton";
 
 // Don't use dynamic imports because it stops us being able to scroll to the bottom after render.
 const OurFilePond = () => import('~/components/OurFilePond')

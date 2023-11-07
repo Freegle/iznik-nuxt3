@@ -16,7 +16,7 @@
             :class="inputClass"
           />
           <b-input-group-append v-if="!autoSave">
-            <spin-button
+            <SpinButton
               :disabled="notMobile"
               variant="white"
               size="md"
@@ -47,10 +47,10 @@
 </template>
 <script>
 import { useAuthStore } from '../stores/auth'
-import SpinButton from "./SpinButton";
+import SpinButton from './SpinButton'
 
 export default {
-  components: {SpinButton},
+  components: { SpinButton },
   props: {
     size: {
       type: String,
