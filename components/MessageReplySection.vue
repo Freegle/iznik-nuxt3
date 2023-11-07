@@ -63,7 +63,7 @@
         </b-button>
       </div>
       <div v-if="!fromme" class="pl-2 w-50 justify-content-end d-flex">
-        <spin-button
+        <SpinButton
           v-if="!me"
           variant="primary"
           size="lg"
@@ -77,8 +77,8 @@
           @handle="registerOrSend"
         >
           Send <span class="d-none d-md-inline">your</span> reply
-        </spin-button>
-        <spin-button
+        </SpinButton>
+        <SpinButton
           v-else
           variant="primary"
           size="lg"
@@ -92,7 +92,7 @@
           @handle="sendReply"
         >
           Send <span class="d-none d-md-inline">your</span> reply
-        </spin-button>
+        </SpinButton>
       </div>
     </div>
     <b-modal

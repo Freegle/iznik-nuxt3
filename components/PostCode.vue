@@ -49,14 +49,16 @@
           :skidding="-50"
         />
         <div v-if="find && !wip">
-          <spin-button
+          <SpinButton
             variant="secondary"
             label=""
             spinclass=""
             iconclass=""
             button-class="tweakHeight"
             button-title="Find my device's location instead of typing a postcode"
-            :done-icon="locationFailed ? 'exclamation-triangle' : 'map-marker-alt'"
+            :done-icon="
+              locationFailed ? 'exclamation-triangle' : 'map-marker-alt'
+            "
             :name="locationFailed ? 'exclamation-triangle' : 'map-marker-alt'"
             :size="size"
             :show-spinner="locating"
@@ -71,10 +73,10 @@
 import { uid } from '../composables/useId'
 import { useAuthStore } from '../stores/auth'
 import { useLocationStore } from '../stores/location'
+import SpinButton from './SpinButton'
 import { ref } from '#imports'
 import { useComposeStore } from '~/stores/compose'
 import AutoComplete from '~/components/AutoComplete'
-import SpinButton from "./SpinButton";
 
 export default {
   components: {
@@ -279,7 +281,6 @@ export default {
         console.error('Find location failed with', e)
         this.locationFailed = true
       }
-
     },
   },
 }
