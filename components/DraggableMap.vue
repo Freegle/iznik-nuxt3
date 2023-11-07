@@ -118,14 +118,17 @@ export default {
           navigator.geolocation.getCurrentPosition
         ) {
           this.locating = true
-          navigator.geolocation.getCurrentPosition((position) => {
-            // Show close to where we think they are.
-            this.locating = false
-            this.mapObject.flyTo(
-              [position.coords.latitude, position.coords.longitude],
-              16
-            )
-          })
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              // Show close to where we think they are.
+              this.locating = false
+              this.mapObject.flyTo(
+                [position.coords.latitude, position.coords.longitude],
+                16
+              )
+            },
+            () => (this.locating = false)
+          )
         } else {
           console.log('Navigation not supported.  ')
           this.locationFailed = true
