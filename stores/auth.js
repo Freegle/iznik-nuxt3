@@ -139,7 +139,9 @@ export const useAuthStore = defineStore({
 
       await this.$api.session.logout()
 
-      this.disableGoogleAutoselect()
+      if( !mobileStore.isApp){
+        this.disableGoogleAutoselect()
+      }
 
       if( mobileStore.isApp){
         try {

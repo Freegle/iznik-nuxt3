@@ -15,8 +15,8 @@
 import { defineStore } from 'pinia'
 import { Device } from '@capacitor/device'
 import { Badge } from '@capawesome/capacitor-badge'
-//import { PushNotifications } from '@capacitor/push-notifications'
-import { PushNotifications } from '@freegle/capacitor-push-notifications'
+import { PushNotifications } from '@capacitor/push-notifications'
+//import { PushNotifications } from '@freegle/capacitor-push-notifications'
 import { useAuthStore } from '~/stores/auth'
 import { AppLauncher } from '@capacitor/app-launcher'
 import api from '~/api'
@@ -80,7 +80,7 @@ export const useMobileStore = defineStore({ // Do not persist
       this.osVersion = deviceinfo.osVersion
       const deviceid = await Device.getId()
       console.log('deviceid', deviceid)
-      this.devicePersistentId = deviceid.uuid
+      this.devicePersistentId = deviceid.identifier
     },
     //////////////
     async fixIOSwindowOpen() {

@@ -27,19 +27,20 @@ const config: CapacitorConfig = {
   },
   android: {
     includePlugins: [
-      "cordova-plugin-calendar",
-      "cordova-plugin-inappbrowser",
-      "@capacitor/app-launcher",
+      "cordova-plugin-calendar", // C5 OK
+      "cordova-plugin-inappbrowser", // C5 OK
+      "@capacitor/app-launcher", // C5 OK
       "@capacitor/browser",
-      "@capacitor/device",
+      "@capacitor/device", // C5 OK
       "@capacitor/network",
-      "@freegle/capacitor-push-notifications",
+      // "@freegle/capacitor-push-notifications",
+      "@capacitor/push-notifications",
       "@capawesome/capacitor-badge",
-      "@capacitor-community/facebook-login",
-      "@codetrix-studio/capacitor-google-auth",
+      "@capacitor-community/facebook-login", // C5 OK
+      "@codetrix-studio/capacitor-google-auth", // C5 OK
       "@capacitor/camera",
       "@capacitor/share",
-      "capacitor-zoom-android",
+      "capacitor-zoom-android", // C5 OK
       "@capacitor/app",
     ],
     buildOptions: { // new creds which are not used. unsigned version needs signed with FREEGLE_KEYSTORE and FREEGLE_KEYSTORE_PASSWORD
@@ -60,8 +61,8 @@ const config: CapacitorConfig = {
       "@capacitor/browser",
       "@capacitor/device",
       "@capacitor/network",
-      //"@capacitor/push-notifications",
-      "@freegle/capacitor-push-notifications",
+      "@capacitor/push-notifications",
+      // "@freegle/capacitor-push-notifications",
       "@capawesome/capacitor-badge",
       "@capacitor-community/facebook-login",
       "@capacitor-community/apple-sign-in",

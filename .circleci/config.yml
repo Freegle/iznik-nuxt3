@@ -91,11 +91,11 @@ jobs:
       - run: sudo npm install -g rimraf
       - run: sudo npm install
 
-      # Fix cache of @freegle/capacitor-push-notifications
-      - run: ls -l node_modules/@freegle/capacitor-push-notifications
-      - run: sudo npm remove @freegle/capacitor-push-notifications
-      - run: sudo npm add https://github.com/Freegle/capacitor-push-notifications.git
-      - run: ls -l node_modules/@freegle/capacitor-push-notifications
+      ### Fix cache of @freegle/capacitor-push-notifications
+      ##- run: ls -l node_modules/@freegle/capacitor-push-notifications
+      ##- run: sudo npm remove @freegle/capacitor-push-notifications
+      ##- run: sudo npm add https://github.com/Freegle/capacitor-push-notifications.git
+      ##- run: ls -l node_modules/@freegle/capacitor-push-notifications
 
       # Show current branch
       - run: git rev-parse --abbrev-ref HEAD
@@ -184,7 +184,7 @@ jobs:
       - run: npm install
       - run: npm install -g rimraf
 
-      - run: cat node_modules/@freegle/capacitor-push-notifications/android/src/main/java/com/capacitorjs/plugins/pushnotifications/PushNotificationsPlugin.java
+      ##- run: cat node_modules/@freegle/capacitor-push-notifications/android/src/main/java/com/capacitorjs/plugins/pushnotifications/PushNotificationsPlugin.java
 
 ################
       - run:
