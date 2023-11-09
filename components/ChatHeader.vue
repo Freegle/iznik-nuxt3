@@ -6,7 +6,7 @@
     >
       <div class="nameinfo pt-1 pb-1 pl-1">
         <ProfileImage
-          v-if="chat.icon"
+          v-if="!collapsed && chat.icon"
           :image="chat.icon"
           class="pr-1 profile clickme"
           is-thumbnail
@@ -190,23 +190,23 @@
         <ChatBlockModal
           v-if="showChatBlock && chat.chattype === 'User2User'"
           :id="id"
-          ref="chatblock"
           :user="otheruser"
           @confirm="block"
+          @hidden="showChatBlock = false"
         />
         <ChatReportModal
           v-if="showChatReport && chat.chattype === 'User2User'"
           :id="'report-' + id"
-          ref="chatreport"
           :user="otheruser"
           :chatid="chat.id"
           @confirm="hide"
+          @hidden="showChatReport = false"
         />
         <ProfileModal
-          v-if="showProfile"
+          v-if="showProfileModal"
           :id="otheruser.id"
-          ref="profile"
           close-on-message
+          @hidden="showProfileModal = false"
         />
       </div>
       <ChatHideModal
@@ -215,9 +215,9 @@
           (chat.chattype === 'User2User' || chat.chattype === 'User2Mod')
         "
         :id="id"
-        ref="chathide"
         :user="otheruser"
         @confirm="hide"
+        @hidden="showChatHide = false"
       />
     </div>
     <div v-else class="w-100">
@@ -235,11 +235,15 @@ import { useRouter } from '#imports'
 import { useMiscStore } from '~/stores/misc'
 import SupporterInfo from '~/components/SupporterInfo'
 
-const ChatBlockModal = () => import('./ChatBlockModal')
-const ChatHideModal = () => import('./ChatHideModal')
+const ChatBlockModal = defineAsyncComponent(() => import('./ChatBlockModal'))
+const ChatHideModal = defineAsyncComponent(() => import('./ChatHideModal'))
 const UserRatings = () => import('~/components/UserRatings')
-const ChatReportModal = () => import('~/components/ChatReportModal')
-const ProfileModal = () => import('~/components/ProfileModal')
+const ChatReportModal = defineAsyncComponent(() =>
+  import('~/components/ChatReportModal')
+)
+const ProfileModal = defineAsyncComponent(() =>
+  import('~/components/ProfileModal')
+)
 
 export default {
   components: {
@@ -277,7 +281,7 @@ export default {
   },
   data() {
     return {
-      showProfile: false,
+      showProfileModal: false,
       showChatHide: false,
       showChatBlock: false,
       showChatReport: false,
@@ -343,25 +347,17 @@ export default {
       const router = useRouter()
       router.push('/chats')
     },
-    async showhide() {
+    showhide() {
       this.showChatHide = true
-      const m = await this.waitForRef('chathide')
-      m?.show()
     },
-    async showblock() {
+    showblock() {
       this.showChatBlock = true
-      const m = await this.waitForRef('chatblock')
-      m?.show()
     },
-    async showInfo() {
-      this.showProfile = true
-      const m = await this.waitForRef('profile')
-      m?.show()
+    showInfo() {
+      this.showProfileModal = true
     },
-    async report() {
+    report() {
       this.showChatReport = true
-      const m = await this.waitForRef('chatreport')
-      m?.show()
     },
     async markRead() {
       await this.chatStore.markRead(this.id)

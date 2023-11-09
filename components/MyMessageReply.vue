@@ -113,25 +113,25 @@
       </div>
     </div>
     <PromiseModal
-      v-if="replyuser"
-      ref="promise"
+      v-if="replyuser && showPromiseModal"
       :messages="[message]"
       :selected-message="message.id"
       :users="[replyuser]"
       :selected-user="replyuser?.id"
+      @hidden="showPromiseModal = false"
     />
     <RenegeModal
-      v-if="replyuser"
-      ref="renege"
+      v-if="replyuser && showRenegeModal"
       :messages="[message.id]"
       :selected-message="message.id"
       :users="[replyuser]"
       :selected-user="replyuser?.id"
+      @hidden="showRenegeModal = false"
     />
     <ProfileModal
       v-if="showProfile && reply && replyuser"
       :id="replyuser.id"
-      ref="profile"
+      @hidden="showProfile = false"
     />
   </div>
 </template>
@@ -144,10 +144,12 @@ import SupporterInfo from '~/components/SupporterInfo'
 import ProfileImage from '~/components/ProfileImage'
 import { timeago, datelocale } from '~/composables/useTimeFormat'
 
-const PromiseModal = () => import('./PromiseModal')
-const RenegeModal = () => import('./RenegeModal')
 const UserRatings = () => import('~/components/UserRatings')
-const ProfileModal = () => import('~/components/ProfileModal')
+const PromiseModal = defineAsyncComponent(() => import('./PromiseModal'))
+const RenegeModal = defineAsyncComponent(() => import('./RenegeModal'))
+const ProfileModal = defineAsyncComponent(() =>
+  import('~/components/ProfileModal')
+)
 
 export default {
   components: {
@@ -236,6 +238,8 @@ export default {
   data() {
     return {
       showProfile: false,
+      showPromiseModal: false,
+      showRenegeModal: false,
     }
   },
   computed: {
@@ -280,19 +284,14 @@ export default {
       const router = useRouter()
       router.push('/chats/' + this.chat?.id)
     },
-    async promise() {
-      await this.waitForRef('promise')
-      this.$refs.promise?.show()
+    promise() {
+      this.showPromiseModal = true
     },
     async unpromise() {
-      await this.waitForRef('renege')
-      this.$refs.renege?.show()
+      this.showRenegeModal = true
     },
-    async showProfileModal() {
+    showProfileModal() {
       this.showProfile = true
-
-      await this.waitForRef('profile')
-      this.$refs.profile?.show()
     },
   },
 }

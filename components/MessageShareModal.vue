@@ -1,11 +1,5 @@
 <template>
-  <b-modal
-    id="sharemodal"
-    v-model="showModal"
-    scrollable
-    title="Share a post"
-    size="lg"
-  >
+  <b-modal ref="modal" scrollable title="Share a post" size="lg">
     <template #default>
       <div v-if="message">
         <h3>
@@ -108,13 +102,12 @@
 <script>
 import { useMessageStore } from '../stores/message'
 import NoticeMessage from './NoticeMessage'
-import modal from '@/mixins/modal'
 import { useMobileStore } from '@/stores/mobile'
 import { Share } from '@capacitor/share';
+import { useModal } from '~/composables/useModal'
 
 export default {
   components: { NoticeMessage },
-  mixins: [modal],
   props: {
     id: {
       type: Number,
@@ -126,11 +119,22 @@ export default {
       default: false,
     },
   },
-  setup() {
+  async setup() {
     const messageStore = useMessageStore()
+
+    const { modal, hide } = useModal()
+
+    try {
+      await messageStore.fetch(this.id, true)
+    } catch (e) {
+      // Must no longer exist on server.
+      hide()
+    }
 
     return {
       messageStore,
+      modal,
+      hide,
     }
   },
   data() {

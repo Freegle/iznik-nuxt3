@@ -54,16 +54,43 @@ export const useMiscStore = defineStore({
         this.checkOnline()
       }
     },
-    fetchWithTimeout(url, options, timeout = 7000) {
-      return Promise.race([
-        fetch(url, options),
-        new Promise((resolve, reject) =>
-          setTimeout(() => {
-            console.log('Request timed out', url)
-            reject(new Error('timeout'))
-          }, timeout)
-        ),
-      ])
+    async fetchWithTimeout(url, options, timeout = 7000) {
+      const controller = new AbortController()
+      const signal = controller.signal
+      options = options || {}
+      options.signal = signal
+
+      const p = fetch(url, options)
+      let timedout = false
+      let ret = null
+
+      let timer = setTimeout(() => {
+        console.log('Request timed out', url)
+        timedout = true
+        controller.abort()
+      }, timeout)
+
+      try {
+        ret = await p
+
+        if (timer) {
+          clearTimeout(timer)
+          timer = null
+        }
+
+        return ret
+      } catch (e) {
+        if (timer) {
+          clearTimeout(timer)
+          timer = null
+        }
+
+        if (timedout) {
+          throw new Error('timeout')
+        } else {
+          throw e
+        }
+      }
     },
     async checkOnline() {
       try {
@@ -72,15 +99,22 @@ export const useMiscStore = defineStore({
           null,
           5000
         )
-        const rsp = await response.json()
 
-        if (!this.online) {
-          console.log('Back online')
-          this.online = rsp.online
+        if (response?.status === 200) {
+          const rsp = await response.json()
+
+          if (!this.online) {
+            console.log('Back online')
+            this.online = rsp.online
+          }
+        } else {
+          // Null response happens when we time out
+          console.log('Offline', response)
+          this.online = false
         }
       } catch (e) {
         if (this.online) {
-          console.log('Gone offline')
+          console.log('Gone offline', e)
           this.online = false
         }
       }

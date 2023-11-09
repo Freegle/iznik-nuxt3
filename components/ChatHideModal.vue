@@ -1,15 +1,9 @@
 <template>
-  <b-modal
-    id="blockmodal"
-    v-model="showModal"
-    scrollable
-    :title="title"
-    no-stacking
-  >
+  <b-modal ref="modal" scrollable :title="title" no-stacking>
     <template #default>
       <b-row>
         <b-col>
-          <p v-if="id">
+          <p v-if="props.id">
             If you do this, this chat won't show in your list until there are
             new messages from them.
           </p>
@@ -27,37 +21,38 @@
     </template>
   </b-modal>
 </template>
-<script>
-import modal from '@/mixins/modal'
 
-export default {
-  mixins: [modal],
-  props: {
-    id: {
-      type: Number,
-      required: false,
-      default: null,
-    },
-    user: {
-      type: Object,
-      required: false,
-      default: null,
-    },
+<script setup>
+import { computed } from 'vue'
+import { useModal } from '~/composables/useModal'
+
+const props = defineProps({
+  id: {
+    type: Number,
+    required: false,
+    default: null,
   },
-  computed: {
-    title() {
-      if (this.user) {
-        return 'Hide chat with ' + this.user.displayname
-      } else {
-        return 'Hide chat'
-      }
-    },
+  user: {
+    type: Object,
+    required: false,
+    default: null,
   },
-  methods: {
-    confirm() {
-      this.$emit('confirm')
-      this.hide()
-    },
-  },
+})
+
+const emit = defineEmits(['confirm'])
+
+const { modal, hide } = useModal()
+
+const title = computed(() => {
+  if (props.user) {
+    return 'Hide chat with ' + props.user.displayname
+  } else {
+    return 'Hide chat'
+  }
+})
+
+function confirm() {
+  emit('confirm')
+  hide()
 }
 </script>

@@ -6,6 +6,7 @@ export const useStoryStore = defineStore({
   id: 'story',
   state: () => ({
     list: {},
+    recent: [],
   }),
   actions: {
     init(config) {
@@ -18,13 +19,16 @@ export const useStoryStore = defineStore({
           await this.fetching[id]
           await nextTick()
         } else {
-          this.fetching[id] = api(this.config).stories.fetchv2(id)
+          this.fetching[id] = api(this.config).stories.fetchv2(id, false)
           this.list[id] = await this.fetching[id]
           this.fetching[id] = null
         }
       }
 
       return this.list[id]
+    },
+    async fetchRecent(limit) {
+      this.recent = await api(this.config).stories.listv2(limit)
     },
     async fetchByAuthority(authorityid, limit) {
       // Not used enough to bother caching.
@@ -41,16 +45,7 @@ export const useStoryStore = defineStore({
     },
     async fetchByGroup(groupid, limit) {
       // Not used enough to bother caching.
-      const ret = await api(this.config).stories.fetch({
-        groupid,
-        limit,
-      })
-
-      if (ret?.ret === 0) {
-        return ret.stories
-      }
-
-      return []
+      this.recent = await api(this.config).stories.byGroupv2(groupid, limit)
     },
     add(headline, story, photo, allowpublic) {
       return api(this.config).stories.add({

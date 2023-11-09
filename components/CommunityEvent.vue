@@ -122,7 +122,11 @@
         </div>
       </b-card-body>
     </b-card>
-    <CommunityEventModal v-if="showModal" :id="id" ref="eventmodal" />
+    <CommunityEventModal
+      v-if="showModal"
+      :id="id"
+      @hidden="showModal = false"
+    />
   </div>
 </template>
 <script>
@@ -131,7 +135,9 @@ import { useCommunityEventStore } from '../stores/communityevent'
 import { useUserStore } from '../stores/user'
 import { useGroupStore } from '../stores/group'
 import { twem } from '~/composables/useTwem'
-const CommunityEventModal = () => import('./CommunityEventModal')
+const CommunityEventModal = defineAsyncComponent(() =>
+  import('./CommunityEventModal')
+)
 
 export default {
   components: {
@@ -244,10 +250,8 @@ export default {
     },
   },
   methods: {
-    async showEventModal() {
+    showEventModal() {
       this.showModal = true
-      await this.waitForRef('eventmodal')
-      this.$refs.eventmodal?.show()
     },
   },
 }

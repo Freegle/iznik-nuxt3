@@ -180,23 +180,31 @@
               >
                 <v-icon class="d-none d-sm-inline" icon="sync" /> Repost
               </b-button>
-              <b-button
+              <div
                 v-else-if="
                   !rejected &&
-                  !taken &&
-                  !received &&
                   message.repostat &&
                   message.location &&
                   message.item
                 "
-                variant="secondary"
-                disabled
-                class="mr-2 mb-1"
-                title="You will be able to repost this soon"
+                class="position-relative"
               >
-                <v-icon class="d-none d-sm-inline" icon="sync" /> Repost
-                <span class="small">{{ timeago(message.repostat) }}</span>
-              </b-button>
+                <b-button
+                  variant="secondary"
+                  class="mr-2 mb-1"
+                  title="You will be able to repost this soon"
+                  @click.stop="repostWhenUnavailable"
+                >
+                  <v-icon class="d-none d-sm-inline" icon="sync" /> Repost
+                  <span class="small">{{ timeago(message.repostat) }}</span>
+                </b-button>
+                <p
+                  class="invalid-feedback position-absolute bg-white text-center"
+                  :class="triedToRepost ? 'd-block' : 'd-none'"
+                >
+                  You can't repost until {{ datetimeshort(message.repostat) }}
+                </p>
+              </div>
               <b-button
                 v-if="!rejected"
                 variant="secondary"
@@ -296,29 +304,34 @@
         </b-collapse>
       </b-card>
       <MessagePhotosModal
-        v-if="expanded && message.attachments?.length"
+        v-if="showMessagePhotosModal && expanded && message.attachments?.length"
         :id="message.id"
-        ref="photoModal"
+        @hidden="showMessagePhotosModal = false"
       />
     </div>
     <OutcomeModal
       v-if="showOutcomeModal"
       :id="id"
-      ref="outcomeModal"
+      :type="outcomeType"
       @outcome="hide = true"
+      @hidden="showOutcomeModal = false"
     />
     <MessageShareModal
       v-if="showShareModal"
       :id="message.id"
-      ref="shareModal"
+      @hidden="showShareModal = false"
     />
-    <MessageEditModal v-if="showEditModal" :id="id" ref="editModal" />
+    <MessageEditModal
+      v-if="showEditModal"
+      :id="id"
+      @hidden="showEditModal = false"
+    />
     <PromiseModal
       v-if="showPromiseModal"
-      ref="promiseModal"
       :messages="[message]"
       :selected-message="message.id"
       :users="replyusers"
+      @hidden="showPromiseModal = false"
     />
   </div>
 </template>
@@ -333,15 +346,24 @@ import { useUserStore } from '../stores/user'
 import { useTrystStore } from '../stores/tryst'
 import { useLocationStore } from '../stores/location'
 import { milesAway } from '../composables/useDistance'
+import { datetimeshort } from '../composables/useTimeFormat'
 import { useRouter } from '#imports'
-import MessagePhotosModal from '~/components/MessagePhotosModal'
 import MyMessagePromisedTo from '~/components/MyMessagePromisedTo'
-import PromiseModal from '~/components/PromiseModal'
 const MyMessageReply = () => import('./MyMessageReply.vue')
-const MessageShareModal = () => import('./MessageShareModal')
-const OutcomeModal = () => import('./OutcomeModal')
-const MessageEditModal = () => import('./MessageEditModal')
+const MessagePhotosModal = defineAsyncComponent(() =>
+  import('~/components/MessagePhotosModal')
+)
+const MessageShareModal = defineAsyncComponent(() =>
+  import('./MessageShareModal')
+)
 const NoticeMessage = () => import('~/components/NoticeMessage')
+const PromiseModal = defineAsyncComponent(() =>
+  import('~/components/PromiseModal')
+)
+const OutcomeModal = () => defineAsyncComponent(() => import('./OutcomeModal'))
+const MessageEditModal = defineAsyncComponent(() =>
+  import('./MessageEditModal')
+)
 
 export default {
   components: {
@@ -403,10 +425,13 @@ export default {
       expanded: false,
       hide: false,
       showOutcomeModal: false,
+      outcomeType: null,
       showEditModal: false,
       showShareModal: false,
       showPromiseModal: false,
+      showMessagePhotosModal: false,
       broken: false,
+      triedToRepost: false,
     }
   },
   computed: {
@@ -671,7 +696,7 @@ export default {
       },
     },
   },
-  async mounted() {
+  mounted() {
     this.expanded = this.expand
 
     if (this.me) {
@@ -692,19 +717,17 @@ export default {
           break
         case 'promise':
           this.showPromiseModal = true
-          await this.waitForRef('promiseModal')
-          this.$refs.promiseModal?.show()
           break
       }
     }
   },
   methods: {
+    datetimeshort,
     toggle() {
       this.expanded = !this.expanded
     },
-    async showPhotos() {
-      await this.waitForRef('photoModal')
-      this.$refs.photoModal?.show()
+    showPhotos() {
+      this.showMessagePhotosModal = true
     },
     countUnseen(reply) {
       let unseen = 0
@@ -717,12 +740,11 @@ export default {
 
       return unseen
     },
-    async outcome(type) {
+    outcome(type) {
       this.showOutcomeModal = true
-      await this.waitForRef('outcomeModal')
-      this.$refs.outcomeModal.show(type)
+      this.outcomeType = type
     },
-    async share(e) {
+    share(e) {
       if (e) {
         e.preventDefault()
         e.stopPropagation()
@@ -730,8 +752,6 @@ export default {
       }
 
       this.showShareModal = true
-      await this.waitForRef('shareModal')
-      this.$refs.shareModal?.show()
     },
     async edit(e) {
       if (e) {
@@ -742,8 +762,6 @@ export default {
 
       await this.messageStore.fetch(this.id, true)
       this.showEditModal = true
-      const m = await this.waitForRef('editModal')
-      m?.show()
     },
     async repost(e) {
       if (e) {
@@ -789,6 +807,19 @@ export default {
 
       const router = useRouter()
       router.push(this.message.type === 'Offer' ? '/give' : '/find')
+    },
+    async repostWhenUnavailable() {
+      this.triedToRepost = true
+
+      await this.messageStore.fetch(this.id, true)
+
+      if (this.message.canrepost) {
+        // when trying to repost when it's forbidden, the fetch above would update the post, and if the post is allowed
+        // to be reposted now, we reset the blocking flag and reposting. This can happen if time passes while you stay
+        // on the page without refreshing it
+        this.triedToRepost = false
+        await this.repost()
+      }
     },
     hasOutcome(val) {
       let ret = false
@@ -839,5 +870,11 @@ img.attachment {
 
 :deep(.btn-content) {
   width: 100%;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 </style>

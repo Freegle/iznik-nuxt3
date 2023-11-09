@@ -22,16 +22,15 @@ import { useRouter } from '#imports'
 import NoticeMessage from '~/components/NoticeMessage'
 const ExploreGroup = () => import('~/components/ExploreGroup.vue')
 
-definePageMeta({
-  layout: 'login',
-})
-
 export default {
   components: {
     NoticeMessage,
     ExploreGroup,
   },
   async setup() {
+    definePageMeta({
+      layout: 'login',
+    })
     const authStore = useAuthStore()
     const groupStore = useGroupStore()
 
@@ -60,8 +59,13 @@ export default {
   },
   mounted() {
     if (this.me) {
-      // Logged in on load - join
-      this.join()
+      if (!this.oneOfMyGroups(this.id)) {
+        // Logged in on load - join
+        this.join()
+      } else {
+        const router = useRouter()
+        router.go(-1)
+      }
     }
   },
   methods: {

@@ -214,23 +214,25 @@
         <v-icon icon="book-open" /> Tell your story
       </b-button>
     </b-col>
-    <PosterModal ref="modal" />
+    <PosterModal v-if="showPosterModal" @hidden="showPosterModal = false" />
   </b-row>
 </template>
 <script>
 import { useRoute } from 'vue-router'
-import PosterModal from '~/components/PosterModal'
 import InviteSomeone from '~/components/InviteSomeone'
 import { buildHead } from '~/composables/useBuildHead'
 import { useMobileStore } from '@/stores/mobile'
 
-definePageMeta({
-  layout: 'login',
-})
-
+const PosterModal = defineAsyncComponent(() =>
+  import('~/components/PosterModal')
+)
 export default {
   components: { InviteSomeone, PosterModal },
   setup() {
+    definePageMeta({
+      layout: 'login',
+    })
+
     const runtimeConfig = useRuntimeConfig()
     const route = useRoute()
 
@@ -247,6 +249,7 @@ export default {
     return {
       emailValid: false,
       language: 'English',
+      showPosterModal: false,
     }
   },
   computed: {
@@ -268,7 +271,7 @@ export default {
   },
   methods: {
     added() {
-      this.$refs.modal.show()
+      this.showPosterModal = true
     },
   },
 }

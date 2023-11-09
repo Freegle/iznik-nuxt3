@@ -42,6 +42,8 @@ import { useLocationStore } from './stores/location'
 import { useShortlinkStore } from './stores/shortlinks'
 import { useMiscStore } from './stores/misc'
 import { computed, watch, reloadNuxtApp } from '#imports'
+// polyfills
+import 'core-js/actual/array/to-sorted'
 
 const route = useRoute()
 
@@ -194,10 +196,14 @@ if (process.client) {
     titleTemplate: (titleChunk) => {
       const totalCount = notificationCount.value + chatCount.value
 
-      if (titleChunk.charAt(0) !== '(' && totalCount.value > 0) {
-        return '(' + totalCount.value + ') ' + titleChunk
+      if (titleChunk) {
+        if (titleChunk.charAt(0) !== '(' && totalCount.value > 0) {
+          return '(' + totalCount.value + ') ' + titleChunk
+        } else {
+          return titleChunk
+        }
       } else {
-        return titleChunk
+        return null
       }
     },
   })

@@ -843,7 +843,6 @@ export default {
           document.getElementById('googleLoginButton')
         )
 
-        await this.waitForRef('googleLoginButton')
         console.log('Found google button ref')
         window.google.accounts.id.renderButton(
           document.getElementById('googleLoginButton'),

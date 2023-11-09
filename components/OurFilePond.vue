@@ -190,7 +190,7 @@ export default {
         const png = await window.heic2any({
           blob,
           toType: 'image/jpeg',
-          quality: 0.1,
+          quality: 0.92,
         })
         data.append('photo', png, 'photo')
       } else {

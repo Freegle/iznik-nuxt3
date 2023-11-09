@@ -176,10 +176,6 @@ const NewsLocation = () => import('~/components/NewsLocation')
 const ExpectedRepliesWarning = () =>
   import('~/components/ExpectedRepliesWarning')
 
-definePageMeta({
-  layout: 'login',
-})
-
 export default {
   components: {
     VisibleWhen,
@@ -199,6 +195,9 @@ export default {
     return !params.id || /^\d+$/.test(params.id)
   },
   async setup(props) {
+    definePageMeta({
+      layout: 'login',
+    })
     const runtimeConfig = useRuntimeConfig()
     const route = useRoute()
     const id = route.params.id

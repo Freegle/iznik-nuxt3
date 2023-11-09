@@ -65,7 +65,7 @@
               :preview="newsfeed.preview"
               class="mt-1"
             />
-            <div v-if="newsfeed.hidden" class="text-danger small">
+            <div v-if="mod && newsfeed.hidden" class="text-danger small">
               This has been hidden and is only visible to volunteers and the
               person who posted it.
             </div>
@@ -77,11 +77,10 @@
       </b-card-body>
       <template #footer>
         <NewsReplies
-          v-if="newsfeed?.replies"
+          v-if="newsfeed?.replies?.length"
           :id="id"
           :threadhead="newsfeed.id"
           :scroll-to="scrollDownTo"
-          :reply-ids="newsfeed.replies.map((r) => r.id)"
           :reply-to="replyingTo"
           :depth="1"
           :class="newsfeed.deleted ? 'strike mr-1' : 'mr-1'"
@@ -206,25 +205,23 @@
     <NewsEditModal
       v-if="showEditModal"
       :id="id"
-      ref="editModal"
       :threadhead="newsfeed?.threadhead"
     />
     <NewsReportModal
       v-if="showReportModal"
       :id="newsfeed.id"
-      ref="reportModal"
+      @hidden="showReportModal = false"
     />
     <ConfirmModal
       v-if="showDeleteModal"
-      ref="deleteConfirm"
       :title="'Delete thread started by ' + starter"
       @confirm="deleteConfirmed"
+      @hidden="showDeleteModal = false"
     />
   </div>
 </template>
 <script>
 import { useNewsfeedStore } from '../stores/newsfeed'
-import NewsReportModal from './NewsReportModal'
 import SpinButton from './SpinButton'
 import AutoHeightTextarea from './AutoHeightTextarea'
 import NewsReplies from '~/components/NewsReplies'
@@ -243,11 +240,11 @@ import NoticeMessage from '~/components/NoticeMessage'
 import NewsPreview from '~/components/NewsPreview'
 import ProfileImage from '~/components/ProfileImage'
 
-const ConfirmModal = () => import('~/components/ConfirmModal.vue')
+const NewsReportModal = defineAsyncComponent(() => import('./NewsReportModal'))
+const ConfirmModal = () =>
+  defineAsyncComponent(() => import('~/components/ConfirmModal.vue'))
 const OurFilePond = () => import('~/components/OurFilePond')
 const OurAtTa = () => import('~/components/OurAtTa')
-
-const INITIAL_NUMBER_OF_REPLIES_TO_SHOW = 10
 
 export default {
   name: 'NewsThread',
@@ -356,44 +353,6 @@ export default {
     backgroundColor() {
       return this.elementBackgroundColor[this.newsfeed?.type] || 'card__default'
     },
-    visiblereplies() {
-      // These are the replies which are candidates to show, i.e. not deleted or hidden.
-      const ret = []
-
-      if (this.newsfeed?.replies?.length) {
-        for (let i = 0; i < this.newsfeed.replies.length; i++) {
-          if (
-            (!this.newsfeed.replies[i].deleted &&
-              this.newsfeed.replies[i].visible) ||
-            this.mod
-          ) {
-            ret.push(this.newsfeed.replies[i])
-          }
-        }
-      }
-
-      return ret
-    },
-    repliestoshow() {
-      let ret = []
-
-      if (this.visiblereplies && this.visiblereplies.length) {
-        if (
-          this.showAllReplies ||
-          this.visiblereplies.length <= INITIAL_NUMBER_OF_REPLIES_TO_SHOW
-        ) {
-          // Return all the replies
-          ret = this.visiblereplies
-        } else {
-          // Only return the last few replies
-          ret = this.visiblereplies.slice(
-            -Math.abs(INITIAL_NUMBER_OF_REPLIES_TO_SHOW)
-          )
-        }
-      }
-
-      return ret
-    },
     isNewsComponent() {
       return this.newsfeed?.type in this.newsComponents
     },
@@ -422,8 +381,7 @@ export default {
         this.scrollDownTo = this.scrollTo
       }
     },
-    async focusComment() {
-      await this.waitForRef('threadcomment')
+    focusComment() {
       this.$refs.threadcomment.$el.focus()
     },
     focusedComment() {
@@ -472,10 +430,8 @@ export default {
         this.threadcomment += '\n'
       }
     },
-    async show() {
+    show() {
       this.showEditModal = true
-      await this.waitForRef('editModal')
-      this.$refs.editModal?.show()
     },
     async save() {
       await this.newsfeedStore.edit(
@@ -486,10 +442,8 @@ export default {
 
       this.$refs.editModal.hide()
     },
-    async deleteIt() {
+    deleteIt() {
       this.showDeleteModal = true
-      await this.waitForRef('deleteConfirm')
-      this.$refs.deleteConfirm?.show()
     },
     deleteConfirmed() {
       this.newsfeedStore.delete(this.id, this.id)
@@ -497,10 +451,8 @@ export default {
     async unfollow() {
       await this.newsfeedStore.unfollow(this.id)
     },
-    async report() {
+    report() {
       this.showReportModal = true
-      await this.waitForRef('reportModal')
-      this.$refs.reportModal?.show()
     },
     referToOffer() {
       this.referTo('Offer')

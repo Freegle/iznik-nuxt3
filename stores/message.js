@@ -5,6 +5,7 @@ import api from '~/api'
 import { GROUP_REPOSTS, MESSAGE_EXPIRE_TIME } from '~/constants'
 import { useGroupStore } from '~/stores/group'
 import { APIError } from '~/api/BaseAPI'
+import { useAuthStore } from '~/stores/auth'
 
 export const useMessageStore = defineStore({
   id: 'message',
@@ -14,6 +15,7 @@ export const useMessageStore = defineStore({
 
     // In bounds
     bounds: {},
+    activePostsCounter: 0,
   }),
   actions: {
     init(config) {
@@ -188,7 +190,6 @@ export const useMessageStore = defineStore({
             }
           }
         }
-
         this.byUserList[userid] = messages
       } else if (this.byUserList[userid]) {
         // Fetch but don't wait
@@ -202,7 +203,6 @@ export const useMessageStore = defineStore({
               }
             }
           }
-
           this.byUserList[userid] = msgs
         })
 
@@ -215,14 +215,30 @@ export const useMessageStore = defineStore({
       await api(this.config).message.view(id)
     },
     async update(params) {
+      const authStore = useAuthStore()
+      const userUid = authStore.user?.id
       const data = await api(this.config).message.update(params)
 
       if (data.deleted) {
         // This can happen if we withdraw a post while it is pending.
         delete this.list[params.id]
+        if (userUid && this.byUserList[userUid]) {
+          this.byUserList[userUid] = this.byUserList[userUid].filter(
+            (message) => message.id !== params.id
+          )
+        }
       } else {
         // Fetch back the updated version.
-        await this.fetch(params.id, true)
+        const message = await this.fetch(params.id, true)
+        this.list[params.id] = message
+        if (userUid && this.byUserList[userUid]) {
+          const index = this.byUserList[userUid].findIndex(
+            (curMessage) => curMessage.id === params.id
+          )
+          if (index !== -1) {
+            this.byUserList[userUid][index] = message
+          }
+        }
       }
 
       return data
@@ -273,6 +289,18 @@ export const useMessageStore = defineStore({
     },
     async intend(id, outcome) {
       await api(this.config).message.intend(id, outcome)
+    },
+    async fetchActivePostCount() {
+      const authStore = useAuthStore()
+      const userUid = authStore.user?.id
+
+      const activeMessages = await api(this.config).message.fetchByUser(
+        userUid,
+        true
+      )
+      this.activePostsCounter = Array.isArray(activeMessages)
+        ? activeMessages.length
+        : 0
     },
   },
   getters: {

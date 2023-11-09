@@ -1,140 +1,128 @@
 <template>
-  <div>
-    <b-modal
-      id="messagemodal"
-      v-model="showModal"
-      scrollable
-      size="lg"
-      class="hide-footer"
-      body-class="p-0 p-md-3"
-      @shown="shown"
-    >
-      <template #default>
-        <div v-if="message">
-          <div v-if="showImages">
-            <ImageCarousel
-              v-if="message?.attachments?.length"
-              :message-id="id"
-              :attachments="message.attachments"
-            />
-            <hr />
-            <div class="d-flex justify-content-between p-2 mb-2 p-md-0 mb-md-0">
-              <div class="w-50 pl-2">
-                <b-button
-                  size="lg"
-                  variant="primary"
-                  block
-                  @click="showImages = false"
-                >
-                  View description
-                </b-button>
-              </div>
-              <div class="pr-2 w-50">
-                <b-button
-                  variant="secondary"
-                  size="lg"
-                  class="w-100"
-                  block
-                  @click="hide"
-                >
-                  Close
-                </b-button>
-              </div>
+  <b-modal
+    ref="modal"
+    scrollable
+    size="lg"
+    class="hide-footer"
+    body-class="p-0 p-md-3"
+    @shown="bumpMessage++"
+  >
+    <template #default>
+      <div v-if="message">
+        <div v-if="showImagesProxy">
+          <ImageCarousel
+            v-if="message?.attachments?.length"
+            :message-id="id"
+            :attachments="message.attachments"
+          />
+          <hr />
+          <div class="d-flex justify-content-between p-2 mb-2 p-md-0 mb-md-0">
+            <div class="w-50 pl-2">
+              <b-button
+                size="lg"
+                variant="primary"
+                block
+                @click="showImagesProxy = false"
+              >
+                View description
+              </b-button>
+            </div>
+            <div class="pr-2 w-50">
+              <b-button
+                variant="secondary"
+                size="lg"
+                class="w-100"
+                block
+                @click="hide"
+              >
+                Close
+              </b-button>
             </div>
           </div>
-          <MessageExpanded
-            v-else-if="bumpMessage"
-            :id="id"
-            :key="bumpMessage"
-            :replyable="replyable"
-            :hide-close="hideClose"
-            :actions="actions"
-            :show-map="modalShown"
-            :show-ad="modalShown"
-            ad-unit-path="/22794232631/freegle_product"
-            ad-id="div-gpt-ad-1691925699378-0"
-            class="ml-md-2 mr-md-2 mt-md-2 ml-0 mr-0 mt-0"
-            @close="hide"
-            @zoom="showImages = true"
-          />
         </div>
-        <div
-          v-else
-          class="d-flex flex-column -justify-content-around align-content-center"
-        >
-          <b-img lazy src="/loader.gif" alt="Loading" width="100px" />
-        </div>
-      </template>
-    </b-modal>
-  </div>
+        <MessageExpanded
+          v-else-if="bumpMessage"
+          :id="id"
+          :key="bumpMessage"
+          :replyable="replyable"
+          :hide-close="hideClose"
+          :actions="actions"
+          :show-map="true"
+          :show-ad="true"
+          ad-unit-path="/22794232631/freegle_product"
+          ad-id="div-gpt-ad-1691925699378-0"
+          class="ml-md-2 mr-md-2 mt-md-2 ml-0 mr-0 mt-0"
+          @close="hide"
+          @zoom="showImagesProxy = true"
+        />
+      </div>
+      <div
+        v-else
+        class="d-flex flex-column -justify-content-around align-content-center"
+      >
+        <b-img lazy src="/loader.gif" alt="Loading" width="100px" />
+      </div>
+    </template>
+  </b-modal>
 </template>
-<script>
+
+<script setup>
 import { useMessageStore } from '../stores/message'
-import modal from '@/mixins/modal'
+import { useModal } from '~/composables/useModal'
 import ImageCarousel from '~/components/ImageCarousel'
-const MessageExpanded = () => import('~/components/MessageExpanded')
+import MessageExpanded from '~/components/MessageExpanded'
 
-export default {
-  components: { ImageCarousel, MessageExpanded },
-  mixins: [modal],
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-    hideClose: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    replyable: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
-    actions: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
-  },
-  setup() {
-    const messageStore = useMessageStore()
+const messageStore = useMessageStore()
 
-    return { messageStore }
+const props = defineProps({
+  // model
+  showImages: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-  data() {
-    return {
-      modalShown: false,
-      showImages: false,
-      bumpMessage: 0,
-    }
+  id: {
+    type: Number,
+    required: true,
   },
-  computed: {
-    message() {
-      return this.messageStore?.byId(this.id)
-    },
+  hideClose: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-  methods: {
-    show(showImages) {
-      this.showModal = true
-      this.modalShown = false
-      this.showImages = showImages
-    },
-    shown() {
-      this.modalShown = true
+  replyable: {
+    type: Boolean,
+    required: false,
+    default: true,
+  },
+  actions: {
+    type: Boolean,
+    required: false,
+    default: true,
+  },
+})
 
-      // Bump the message, so that if we come back in again we'll re-render a new MessageExpanded with a blank
-      // reply section.
-      this.bumpMessage++
-    },
-    hide() {
-      this.$emit('hide')
-      this.showModal = false
-    },
+const emit = defineEmits(['update:showImages'])
+
+const { modal, hide } = useModal()
+
+const bumpMessage = ref(0)
+
+const message = computed(() => {
+  return messageStore.byId(props.id)
+})
+
+const showImagesProxy = computed({
+  get() {
+    return props.showImages ?? false
   },
-}
+
+  set(value) {
+    emit('update:showImages', value)
+  },
+})
 </script>
+
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';

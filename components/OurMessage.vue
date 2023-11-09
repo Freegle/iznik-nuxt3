@@ -29,7 +29,11 @@
         :ad-id="adId"
         @zoom="showPhotosModal"
       />
-      <MessagePhotosModal :id="message.id" ref="photoModal" />
+      <MessagePhotosModal
+        v-if="showMessagePhotosModal && message.attachments?.length"
+        :id="message.id"
+        @hidden="showMessagePhotosModal = false"
+      />
     </div>
     <div v-else>
       <MessageSummary
@@ -44,20 +48,23 @@
       <MessageModal
         v-if="expanded"
         :id="message.id"
-        ref="modal"
+        v-model:showImages="showImages"
         :replyable="replyable"
         :hide-close="hideClose"
         :actions="actions"
+        @hidden="expanded = false"
       />
     </div>
     <div v-observe-visibility="visibilityChanged" />
   </div>
 </template>
+
 <script>
 import { useMessageStore } from '../stores/message'
-import MessageModal from '~/components/MessageModal'
-
 import { useGroupStore } from '~/stores/group'
+const MessageModal = defineAsyncComponent(() =>
+  import('~/components/MessageModal')
+)
 
 export default {
   components: {
@@ -153,6 +160,8 @@ export default {
     return {
       expanded: false,
       reply: null,
+      showImages: false,
+      showMessagePhotosModal: false,
     }
   },
   computed: {
@@ -238,27 +247,27 @@ export default {
     }
 
     if (this.scrollIntoView) {
-      await this.waitForRef('msg')
-      this.$refs.msg.scrollIntoView()
+      await this.$nextTick()
+
+      if (this.$refs.msg) {
+        this.$refs.msg.scrollIntoView()
+      }
     }
   },
   methods: {
-    async expand(zoom) {
+    expand() {
       if (!this.message?.successful) {
         this.expanded = true
-
-        await this.waitForRef('modal')
-        this.$refs.modal.show(zoom)
 
         this.view()
       }
     },
     zoom() {
-      this.expand(true)
+      this.showImages = true
+      this.expand()
     },
-    async showPhotosModal() {
-      await this.waitForRef('photoModal')
-      this.$refs.photoModal?.show()
+    showPhotosModal() {
+      this.showMessagePhotosModal = true
     },
     async view() {
       if (this.recordView) {

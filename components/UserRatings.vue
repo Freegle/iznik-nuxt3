@@ -5,7 +5,7 @@
         {{ user.displayname }}
       </span>
       <b-button
-        v-b-tooltip="uptitle"
+        v-b-tooltip.bottom="uptitle"
         :size="size"
         :variant="user.info.ratings.Up > 0 ? 'primary' : 'white'"
         :disabled="disabled || user.id === myid ? 'true' : undefined"
@@ -18,7 +18,7 @@
         <v-icon icon="thumbs-up" />&nbsp;{{ user.info.ratings.Up }}
       </b-button>
       <b-button
-        v-b-tooltip="downtitle"
+        v-b-tooltip.bottom="downtitle"
         :size="size"
         :variant="user.info.ratings.Down > 0 ? 'warning' : 'white'"
         :disabled="disabled || user.id === myid ? 'true' : undefined"
@@ -248,5 +248,9 @@ export default {
 .btn-white:hover {
   background-color: white;
   color: black;
+}
+
+.user-ratings {
+  z-index: 1049;
 }
 </style>

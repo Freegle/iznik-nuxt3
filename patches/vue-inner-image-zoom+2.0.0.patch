@@ -1,0 +1,70 @@
+diff --git a/node_modules/vue-inner-image-zoom/lib/vue-inner-image-zoom.common.js b/node_modules/vue-inner-image-zoom/lib/vue-inner-image-zoom.common.js
+index 827cd61..6f66562 100644
+--- a/node_modules/vue-inner-image-zoom/lib/vue-inner-image-zoom.common.js
++++ b/node_modules/vue-inner-image-zoom/lib/vue-inner-image-zoom.common.js
+@@ -2235,17 +2235,19 @@ var es_object_to_string = __webpack_require__("d3b7");
+       }
+     },
+     handleLoad: function handleLoad(e) {
+-      var scaledDimensions = getScaledDimensions(e.target, this.zoomScale);
+-      this.imgProps.zoomImg = e.target;
+-      this.imgProps.zoomImg.setAttribute('width', scaledDimensions.width);
+-      this.imgProps.zoomImg.setAttribute('height', scaledDimensions.height);
+-      this.imgProps.scaledDimensions = scaledDimensions;
+-      this.imgProps.bounds = getBounds(this.$refs.img, false);
+-      this.imgProps.ratios = getRatios(this.imgProps.bounds, scaledDimensions);
+-
+-      if (this.imgProps.onLoadCallback) {
+-        this.imgProps.onLoadCallback();
+-        this.imgProps.onLoadCallback = null;
++      if (this.$refs.img) {
++        var scaledDimensions = getScaledDimensions(e.target, this.zoomScale);
++        this.imgProps.zoomImg = e.target;
++        this.imgProps.zoomImg.setAttribute('width', scaledDimensions.width);
++        this.imgProps.zoomImg.setAttribute('height', scaledDimensions.height);
++        this.imgProps.scaledDimensions = scaledDimensions;
++        this.imgProps.bounds = getBounds(this.$refs.img, false);
++        this.imgProps.ratios = getRatios(this.imgProps.bounds, scaledDimensions);
++
++        if (this.imgProps.onLoadCallback) {
++          this.imgProps.onLoadCallback();
++          this.imgProps.onLoadCallback = null;
++        }
+       }
+     },
+     handleMouseMove: function handleMouseMove(e) {
+diff --git a/node_modules/vue-inner-image-zoom/lib/vue-inner-image-zoom.umd.js b/node_modules/vue-inner-image-zoom/lib/vue-inner-image-zoom.umd.js
+index ca86845..9ae51db 100644
+--- a/node_modules/vue-inner-image-zoom/lib/vue-inner-image-zoom.umd.js
++++ b/node_modules/vue-inner-image-zoom/lib/vue-inner-image-zoom.umd.js
+@@ -2244,17 +2244,19 @@ var es_object_to_string = __webpack_require__("d3b7");
+       }
+     },
+     handleLoad: function handleLoad(e) {
+-      var scaledDimensions = getScaledDimensions(e.target, this.zoomScale);
+-      this.imgProps.zoomImg = e.target;
+-      this.imgProps.zoomImg.setAttribute('width', scaledDimensions.width);
+-      this.imgProps.zoomImg.setAttribute('height', scaledDimensions.height);
+-      this.imgProps.scaledDimensions = scaledDimensions;
+-      this.imgProps.bounds = getBounds(this.$refs.img, false);
+-      this.imgProps.ratios = getRatios(this.imgProps.bounds, scaledDimensions);
+-
+-      if (this.imgProps.onLoadCallback) {
+-        this.imgProps.onLoadCallback();
+-        this.imgProps.onLoadCallback = null;
++      if (this.$refs.img) {
++        var scaledDimensions = getScaledDimensions(e.target, this.zoomScale);
++        this.imgProps.zoomImg = e.target;
++        this.imgProps.zoomImg.setAttribute('width', scaledDimensions.width);
++        this.imgProps.zoomImg.setAttribute('height', scaledDimensions.height);
++        this.imgProps.scaledDimensions = scaledDimensions;
++        this.imgProps.bounds = getBounds(this.$refs.img, false);
++        this.imgProps.ratios = getRatios(this.imgProps.bounds, scaledDimensions);
++
++        if (this.imgProps.onLoadCallback) {
++          this.imgProps.onLoadCallback();
++          this.imgProps.onLoadCallback = null;
++        }
+       }
+     },
+     handleMouseMove: function handleMouseMove(e) {

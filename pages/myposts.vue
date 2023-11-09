@@ -1,12 +1,17 @@
 <template>
   <client-only v-if="me">
+    <DonationAskModal
+      v-if="showDonationAskModal"
+      @hidden="showDonationAskModal = false"
+    />
+
     <b-container fluid class="p-0 p-xl-2">
       <h1 class="visually-hidden">My posts</h1>
       <b-row class="m-0">
         <b-col cols="0" lg="3" class="p-0 pr-1">
           <VisibleWhen
             :not="['xs', 'sm', 'md', 'lg']"
-            class="position-fixed modal-above-fade"
+            class="position-fixed"
             style="width: 300px"
           >
             <ExternalDa
@@ -63,7 +68,7 @@
         <b-col cols="0" lg="3" class="p-0 pl-1">
           <VisibleWhen
             :not="['xs', 'sm', 'md', 'lg']"
-            class="position-fixed modal-above-fade"
+            class="position-fixed"
             style="right: 5px"
           >
             <ExternalDa
@@ -80,7 +85,6 @@
           </VisibleWhen>
         </b-col>
       </b-row>
-      <DonationAskModal />
     </b-container>
   </client-only>
 </template>
@@ -100,7 +104,10 @@ import ExpectedRepliesWarning from '~/components/ExpectedRepliesWarning'
 import JobsTopBar from '~/components/JobsTopBar'
 import MyPostsPostsList from '~/components/MyPostsPostsList.vue'
 import MyPostsSearchesList from '~/components/MyPostsSearchesList.vue'
-import DonationAskModal from '~/components/DonationAskModal'
+import { useDonationAskModal } from '~/composables/useDonationAskModal'
+const DonationAskModal = defineAsyncComponent(() =>
+  import('~/components/DonationAskModal')
+)
 
 const authStore = useAuthStore()
 const messageStore = useMessageStore()
@@ -128,10 +135,12 @@ useHead(
 
 useFavoritePage('myposts')
 
+const { showDonationAskModal } = useDonationAskModal()
+
 const myid = authStore.user?.id
 
 // `posts` holds both OFFERs and WANTEDs (both old and active)
-const posts = ref([])
+const posts = computed(() => messageStore.byUserList[myid] || [])
 
 const offersLoading = ref(true)
 const wantedsLoading = ref(true)
@@ -140,7 +149,7 @@ if (myid) {
   offersLoading.value = true
   wantedsLoading.value = true
 
-  posts.value = await messageStore.fetchByUser(myid, false, true)
+  await messageStore.fetchByUser(myid, false, true)
 
   offersLoading.value = false
   wantedsLoading.value = false

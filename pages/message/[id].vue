@@ -6,7 +6,7 @@
         <b-col cols="0" xl="3" class="d-none d-xl-block">
           <VisibleWhen
             :not="['xs', 'sm', 'md', 'lg']"
-            class="position-fixed modal-above-fade"
+            class="position-fixed"
             style="width: 300px"
           >
             <ExternalDa
@@ -96,7 +96,7 @@
         <b-col cols="0" xl="3" class="d-none d-xl-block">
           <VisibleWhen
             :not="['xs', 'sm', 'md', 'lg']"
-            class="position-fixed modal-above-fade"
+            class="position-fixed"
             style="width: 300px"
           >
             <ExternalDa

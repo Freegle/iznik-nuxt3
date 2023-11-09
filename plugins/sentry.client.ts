@@ -127,13 +127,21 @@ export default defineNuxtPlugin((nuxtApp) => {
         } else if (originalExceptionString?.match(/Down for maintenance/)) {
           console.log('Maintenance - suppress exception', this)
           return null
+        } else if (
+          originalExceptionString?.match(
+            '/window.Piwik undefined after waiting/'
+          )
+        ) {
+          // Some privacy blockers can cause this.
+          console.log('Suppress Piwik/Matomo exception')
+          return null
         } else if (originalExceptionString?.match(/Google ad script blocked/)) {
           console.log('AdBlocker - no need to log.', this)
           return null
         } else if (
           originalExceptionString?.match(/Attempt to use history.replaceState/)
         ) {
-          console.log('History.repalceState too often')
+          console.log('History.replaceState too often')
           return null
         } else if (originalExceptionName === 'TypeError') {
           console.log('TypeError')
@@ -178,12 +186,23 @@ export default defineNuxtPlugin((nuxtApp) => {
           }
         } else if (originalExceptionName === 'SecurityError') {
           if (
-            originalExceptionMessage?.match('Blocked a frame') &&
-            originalExceptionStack?.match('isRef')
+            (originalExceptionMessage?.match('Blocked a frame') &&
+              originalExceptionStack?.match('isRef')) ||
+            originalExceptionStack?.match('popupInterval')
           ) {
             // See https://stackoverflow.com/questions/39081098/close-a-window-opened-with-window-open-after-clicking-a-button
             console.log('Suppress error caused by a bug in vue-social-sharing.')
+            return null
           }
+        } else if (
+          originalExceptionStack?.includes('_.ae') &&
+          originalExceptionStack?.includes('/gsi/client')
+        ) {
+          // This is an error in Google One Tap sign-in, often preceded by a console log about malformed JSON
+          // response.  It's possible that it relates to multiple account sign in.  I've failed to reproduce it, and
+          // it's not really clear that it's our fault so there's no point beating ourselves up about it.
+          console.log('Suppress odd Google One Tap error')
+          return null
         }
       }
 

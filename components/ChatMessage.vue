@@ -78,7 +78,11 @@
     <chat-message-warning v-if="phoneNumber" />
     <chat-message-date-read :id="id" :chatid="chatid" :last="last" :pov="pov" />
 
-    <ConfirmModal ref="confirmDeleteMessageModal" @confirm="deleteMessage">
+    <ConfirmModal
+      v-if="showConfirmModal"
+      @confirm="deleteMessage"
+      @hidden="showConfirmModal = false"
+    >
       <p>
         We will delete this from our system, so you will no longer see it here.
       </p>
@@ -89,10 +93,11 @@
       <p>Are you sure you want to delete the message?</p>
     </ConfirmModal>
     <ResultModal
-      ref="deleteMessageResultModal"
+      v-if="showDeleteMessageResultModal"
       :title="
         deleteMessageSucceeded ? 'Delete Succeeded' : 'Sorry, that didn\'t work'
       "
+      @hidden="showDeleteMessageResultModal = false"
     >
       <template v-if="deleteMessageSucceeded">
         <p>We've deleted your chat message.</p>
@@ -129,11 +134,15 @@ import ChatMessageAddress from './ChatMessageAddress'
 import ChatMessageNudge from './ChatMessageNudge'
 import ChatMessageDateRead from './ChatMessageDateRead'
 import ChatMessageModMail from './ChatMessageModMail'
-import ResultModal from '~/components/ResultModal.vue'
-import ConfirmModal from '~/components/ConfirmModal.vue'
 import SupportLink from '~/components/SupportLink.vue'
 import ChatMessageWarning from '~/components/ChatMessageWarning'
 import 'vue-simple-context-menu/dist/vue-simple-context-menu.css'
+const ConfirmModal = defineAsyncComponent(() =>
+  import('~/components/ConfirmModal.vue')
+)
+const ResultModal = defineAsyncComponent(() =>
+  import('~/components/ResultModal.vue')
+)
 
 // System chat message doesn't seem to be used;
 export default {
@@ -207,7 +216,9 @@ export default {
           name: 'Mark unread',
         },
       ],
+      showDeleteMessageResultModal: false,
       deleteMessageSucceeded: null,
+      showConfirmModal: false,
     }
   },
   computed: {
@@ -249,9 +260,8 @@ export default {
       await this.chatStore.markUnread(this.chatid, this.prevmessage)
       this.selected = false
     },
-    async showDeleteMessageModal() {
-      const m = await this.waitForRef('confirmDeleteMessageModal')
-      m?.show()
+    showDeleteMessageModal() {
+      this.showConfirmModal = true
     },
     async deleteMessage() {
       try {
@@ -262,8 +272,7 @@ export default {
       } catch (err) {
         this.deleteMessageSucceeded = false
       } finally {
-        const m = await this.waitForRef('deleteMessageResultModal')
-        m?.show()
+        this.showDeleteMessageResultModal = true
       }
     },
   },

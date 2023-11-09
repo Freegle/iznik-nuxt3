@@ -165,9 +165,7 @@ export default {
       return runtimeConfig.public.APIv1 + '/locations'
     },
   },
-  async mounted() {
-    await this.waitForRef('autocomplete')
-
+  mounted() {
     if (this.$refs.autocomplete) {
       if (this.focus) {
         // Focus on postcode to grab their attention.

@@ -25,12 +25,15 @@
         </span>
       </span>
     </b-button>
-    <ConfirmModal v-if="confirm && showConfirm" ref="modal" @confirm="doIt" />
+    <ConfirmModal
+      v-if="confirm && showConfirm"
+      @confirm="doIt"
+      @hidden="showConfirm = false"
+    />
   </div>
 </template>
 <script setup>
 import { ref, defineAsyncComponent } from '#imports'
-import { waitForRef } from '~/composables/useWaitForRef'
 
 const ConfirmModal = defineAsyncComponent(() => import('./ConfirmModal'))
 
@@ -90,22 +93,20 @@ const props = defineProps({
   },
 })
 
+const emit = defineEmits(['handle'])
+
 const doing = ref(false)
 const done = ref(false)
 const showConfirm = ref(false)
-const modal = ref(null)
 
-const click = async () => {
+const click = () => {
   if (props.confirm) {
     showConfirm.value = true
-    await waitForRef(modal)
-    modal.value?.show()
   } else {
     doIt()
   }
 }
 
-const emit = defineEmits(['handle'])
 const doIt = async () => {
   if (!doing.value) {
     done.value = false

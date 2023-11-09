@@ -379,7 +379,14 @@ export default {
   },
   watch: {
     bounds(newVal, oldVal) {
-      this.getMessages()
+      if (!this.showGroups) {
+        this.getMessages()
+      }
+    },
+    showGroups(newVal) {
+      if (!newVal) {
+        this.getMessages()
+      }
     },
     zoom(newVal) {
       if (newVal < this.postZoom && !this.forceMessages) {
@@ -474,7 +481,6 @@ export default {
     async ready() {
       const self = this
 
-      this.waitForRef('map')
       this.$emit('update:ready', true)
       this.mapObject = this.$refs.map.leafletObject
       this.$refs.map.leafletObject.fitBounds(this.initialBounds)

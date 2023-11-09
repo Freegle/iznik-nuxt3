@@ -30,13 +30,18 @@
     >
       <v-icon icon="heart" class="text-danger" />&nbsp;{{ newsfeed.loves }}
     </b-button>
-    <NewsLovesModal v-if="showLoveModal" :id="newsfeed.id" ref="loveModal" />
+    <NewsLovesModal
+      v-if="showLoveModal"
+      :id="newsfeed.id"
+      @hidden="showLoveModal = false"
+    />
   </div>
 </template>
 <script>
 import pluralize from 'pluralize'
+import { defineAsyncComponent } from 'vue'
 import { useNewsfeedStore } from '../stores/newsfeed'
-import NewsLovesModal from './NewsLovesModal'
+const NewsLovesModal = defineAsyncComponent(() => import('./NewsLovesModal'))
 
 export default {
   components: {
@@ -91,11 +96,8 @@ export default {
     focusComment() {
       this.$emit('focus-comment')
     },
-    async showLove() {
+    showLove() {
       this.showLoveModal = true
-
-      await this.waitForRef('loveModal')
-      this.$refs.loveModal?.show()
     },
   },
 }

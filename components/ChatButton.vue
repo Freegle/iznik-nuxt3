@@ -143,9 +143,22 @@ export default {
             this.$emit('sent')
           }
 
-          // If we hit the back button, then the code in MessageList to scroll into view will bring us back to the
-          // right place.
-          router.push('/chats/' + chatid)
+          // set the flag on the store to let the chat know that a modal asking for
+          // contact details should be opened as soon as the chat's loaded
+          this.chatStore.showContactDetailsAskModal =
+            this.me && !this.me.settings.mylocation
+
+          // We may be called from within a profile modal. We want to skip the navigation guard which would otherwise
+          // close the modal.
+          router.push({
+            name: 'chats-id',
+            query: {
+              noguard: true,
+            },
+            params: {
+              id: chatid,
+            },
+          })
         }
       }
     },

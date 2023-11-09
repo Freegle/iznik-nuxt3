@@ -55,7 +55,7 @@
           <span class="text-muted small mr-1">
             {{ timeago(reply.added) }}
           </span>
-          <NewsUserInfo :id="replyid" class="mr-1" />
+          <NewsUserInfo :id="id" class="mr-1" />
           &bull;
           <b-button
             variant="link"
@@ -148,10 +148,10 @@
       </div>
     </div>
     <NewsReplies
+      v-if="reply?.replies?.length"
       :id="id"
       :threadhead="threadhead"
       :scroll-to="scrollTo"
-      :reply-ids="reply.replies.map((r) => r.id)"
       :reply-to="reply.id"
       :depth="depth + 1"
     />
@@ -262,27 +262,35 @@
       @photo-processed="photoProcessed"
     />
     <NewsPhotoModal
-      v-if="reply.image"
+      v-if="showNewsPhotoModal && reply.image"
       :id="reply.image.id"
-      ref="replyPhotoModal"
       :newsfeedid="reply.id"
       :src="reply.image.path"
       imgtype="Newsfeed"
       imgflag="Newsfeed"
+      @hidden="showNewsPhotoModal = false"
     />
-    <ProfileModal v-if="infoclick" :id="userid" ref="profilemodal" />
-    <NewsLovesModal v-if="showLoveModal" :id="replyid" ref="loveModal" />
+    <ProfileModal
+      v-if="showProfileModal"
+      :id="userid"
+      @hidden="showProfileModal = false"
+    />
+    <NewsLovesModal
+      v-if="showLoveModal"
+      :id="id"
+      @hidden="showLoveModal = false"
+    />
     <NewsEditModal
       v-if="showEditModal"
-      :id="replyid"
-      ref="editModal"
+      :id="id"
       :threadhead="threadhead"
+      @hidden="showEditModal = false"
     />
     <ConfirmModal
       v-if="showDeleteModal"
-      ref="deleteConfirm"
       :title="'Delete reply from ' + reply.displayname"
       @confirm="deleteConfirm"
+      @hidden="showDeleteModal = false"
     />
   </div>
 </template>
@@ -291,19 +299,26 @@ import pluralize from 'pluralize'
 import { useNewsfeedStore } from '../stores/newsfeed'
 import { useUserStore } from '../stores/user'
 import { useMiscStore } from '../stores/misc'
-import NewsLovesModal from './NewsLovesModal'
 import SpinButton from './SpinButton'
-import NewsEditModal from './NewsEditModal'
 import { twem, untwem } from '~/composables/useTwem'
-
 import NewsUserInfo from '~/components/NewsUserInfo'
 import NewsHighlight from '~/components/NewsHighlight'
+
 import ChatButton from '~/components/ChatButton'
 import NewsPreview from '~/components/NewsPreview'
 import ProfileImage from '~/components/ProfileImage'
 
-const ProfileModal = () => import('~/components/ProfileModal')
-const ConfirmModal = () => import('~/components/ConfirmModal.vue')
+const NewsPhotoModal = defineAsyncComponent(() =>
+  import('./NewsPhotoModal.vue')
+)
+const NewsLovesModal = defineAsyncComponent(() => import('./NewsLovesModal'))
+const NewsEditModal = defineAsyncComponent(() => import('./NewsEditModal'))
+const ProfileModal = defineAsyncComponent(() =>
+  import('~/components/ProfileModal')
+)
+const ConfirmModal = defineAsyncComponent(() =>
+  import('~/components/ConfirmModal.vue')
+)
 const NewsReplies = () => import('~/components/NewsReplies.vue')
 const OurFilePond = () => import('~/components/OurFilePond')
 const OurAtTa = () => import('~/components/OurAtTa')
@@ -311,6 +326,7 @@ const OurAtTa = () => import('~/components/OurAtTa')
 export default {
   name: 'NewsReply',
   components: {
+    NewsPhotoModal,
     NewsEditModal,
     NewsReplies,
     SpinButton,
@@ -334,10 +350,6 @@ export default {
       type: Number,
       required: true,
     },
-    replyid: {
-      type: Number,
-      required: true,
-    },
     scrollTo: {
       type: String,
       required: false,
@@ -348,7 +360,7 @@ export default {
       required: true,
     },
   },
-  setup(props) {
+  setup() {
     const newsfeedStore = useNewsfeedStore()
     const userStore = useUserStore()
     const miscStore = useMiscStore()
@@ -364,7 +376,6 @@ export default {
       showReplyBox: false,
       replyingTo: null,
       replybox: null,
-      infoclick: false,
       showAllReplies: false,
       uploading: false,
       imageid: null,
@@ -374,6 +385,8 @@ export default {
       showEditModal: false,
       hasBecomeVisible: false,
       isVisible: false,
+      showProfileModal: false,
+      showNewsPhotoModal: false,
     }
   },
   computed: {
@@ -384,7 +397,10 @@ export default {
       return this.reply?.userid
     },
     reply() {
-      return this.newsfeedStore?.byId(this.replyid)
+      return this.newsfeedStore?.byId(this.id)
+    },
+    ids() {
+      return this.reply?.replies
     },
     tagusers() {
       return this.newsfeedStore?.tagusers?.map((u) => u.displayname)
@@ -409,7 +425,7 @@ export default {
       return ret
     },
     scrollToThis() {
-      return parseInt(this.scrollTo) === this.replyid
+      return parseInt(this.scrollTo) === this.id
     },
     getShowLovesLabel() {
       return (
@@ -421,7 +437,7 @@ export default {
   },
   watch: {
     scrollTo(newVal) {
-      if (parseInt(this.scrollTo) === this.replyid && this.$el.scrollIntoView) {
+      if (parseInt(this.scrollTo) === this.id && this.$el.scrollIntoView) {
         this.scrollIntoView()
       }
     },
@@ -429,20 +445,17 @@ export default {
   mounted() {
     // This will get propogated up the stack so that we know if the reply to which we'd like to scroll has been
     // rendered.  We'll then come through the watch above.
-    this.$emit('rendered', this.replyid)
+    this.$emit('rendered', this.id)
   },
   methods: {
-    async showInfo() {
-      this.infoclick = true
-      const m = await this.waitForRef('profilemodal')
-      m?.show()
+    showInfo() {
+      this.showProfileModal = true
     },
     async replyReply() {
-      console.log('Replying to', this.replyid, this.reply)
-      this.replyingTo = this.replyid
+      this.replyingTo = this.id
       this.showReplyBox = true
 
-      await this.waitForRef('replybox')
+      await this.$nextTick()
       this.$refs.replybox.$el.focus()
 
       // Reply with tag.
@@ -452,7 +465,7 @@ export default {
       this.$refs.replybox.focus()
     },
     focusedReply() {
-      this.replyingTo = this.replyid
+      this.replyingTo = this.id
     },
     async sendReply(e) {
       if (e) {
@@ -502,7 +515,7 @@ export default {
       const el = e.target
       el.classList.add('pulsate')
 
-      await this.newsfeedStore.love(this.replyid, this.threadhead)
+      await this.newsfeedStore.love(this.id, this.threadhead)
 
       el.classList.remove('pulsate')
     },
@@ -510,30 +523,24 @@ export default {
       const el = e.target
       el.classList.add('pulsate')
 
-      await this.newsfeedStore.unlove(this.replyid, this.threadhead)
+      await this.newsfeedStore.unlove(this.id, this.threadhead)
 
       el.classList.remove('pulsate')
     },
-    async deleteReply() {
+    deleteReply() {
       this.showDeleteModal = true
-      await this.waitForRef('deleteConfirm')
-      this.$refs.deleteConfirm?.show()
     },
     async deleteConfirm() {
-      await this.newsfeedStore.delete(this.replyid, this.threadhead)
+      await this.newsfeedStore.delete(this.id, this.threadhead)
     },
     brokenImage(event) {
       event.target.src = '/defaultprofile.png'
     },
-    async showEdit() {
+    showEdit() {
       this.showEditModal = true
-      await this.waitForRef('editModal')
-      this.$refs.editModal?.show()
     },
-    async showLove() {
+    showLove() {
       this.showLoveModal = true
-      await this.waitForRef('loveModal')
-      this.$refs.loveModal?.show()
     },
     filterMatch(name, chunk) {
       // Only match at start of string.
@@ -576,7 +583,7 @@ export default {
       }
     },
     visibilityChanged(visible) {
-      if (parseInt(this.scrollTo) === this.replyid && !this.hasBecomeVisible) {
+      if (parseInt(this.scrollTo) === this.id && !this.hasBecomeVisible) {
         this.isVisible = visible
 
         if (!visible) {
@@ -585,7 +592,7 @@ export default {
       }
     },
     showReplyPhotoModal() {
-      this.$refs.replyPhotoModal?.show()
+      this.showNewsPhotoModal = true
     },
   },
 }

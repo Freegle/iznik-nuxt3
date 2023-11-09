@@ -1,8 +1,18 @@
 import BaseAPI from '@/api/BaseAPI'
 
 export default class StoriesAPI extends BaseAPI {
-  fetchv2(id) {
-    return this.$getv2('/story/' + id)
+  fetchv2(id, logError = true) {
+    return this.$getv2('/story/' + id, {}, logError)
+  }
+
+  listv2(limit) {
+    return this.$getv2('/story' + (limit ? '?limit=' + limit : ''))
+  }
+
+  byGroupv2(groupid, limit) {
+    return this.$getv2(
+      '/story/group/' + groupid + (limit ? '?limit=' + limit : '')
+    )
   }
 
   fetch(params) {

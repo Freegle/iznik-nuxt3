@@ -28,7 +28,10 @@
         </b-col>
         <b-col cols="0" md="3" class="d-none d-md-block" />
       </b-row>
-      <StoryAddModal ref="addmodal" />
+      <StoryAddModal
+        v-if="showStoryAddModal"
+        @hidden="showStoryAddModal = false"
+      />
     </div>
   </client-only>
 </template>
@@ -36,9 +39,10 @@
 import { buildHead } from '../../composables/useBuildHead'
 import { useStoryStore } from '../../stores/stories'
 import NoticeMessage from '~/components/NoticeMessage'
-import StoryAddModal from '~/components/StoryAddModal'
 import StoryOne from '~/components/StoryOne'
-import { ref, useRoute } from '#imports'
+const StoryAddModal = defineAsyncComponent(() =>
+  import('~/components/StoryAddModal')
+)
 
 const runtimeConfig = useRuntimeConfig()
 const route = useRoute()
@@ -70,8 +74,9 @@ if (invalid) {
   )
 }
 
-const addmodal = ref(null)
+const showStoryAddModal = ref(false)
+
 const showAddModal = () => {
-  addmodal.value.show()
+  showStoryAddModal.value = true
 }
 </script>

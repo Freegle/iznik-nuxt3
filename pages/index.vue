@@ -183,7 +183,9 @@ export default {
             uid: 'landing',
           })
 
-          this.type = type.variant
+          if (type?.variant) {
+            this.type = type.variant
+          }
         } catch (e) {
           console.error(e)
         }
@@ -257,7 +259,6 @@ export default {
     },
     async play() {
       if (process.client) {
-        await this.waitForRef('video')
         try {
           const videoEl = document.querySelector('video')
           videoEl.muted = true

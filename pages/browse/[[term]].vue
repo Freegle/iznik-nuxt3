@@ -6,7 +6,7 @@
         <b-col cols="0" lg="3" class="p-0 pr-1">
           <VisibleWhen
             :not="['xs', 'sm', 'md', 'lg']"
-            class="position-fixed modal-above-fade"
+            class="position-fixed"
             style="width: 300px"
           >
             <ExternalDa
@@ -102,17 +102,17 @@
               />
             </div>
           </div>
-          <AboutMeModal
-            v-if="showAboutMe"
-            ref="aboutMeModal"
+          <about-me-modal
+            v-if="showAboutMeModal"
             :review="reviewAboutMe"
+            @hidden="showAboutMeModal = false"
           />
         </b-col>
         <b-col cols="0" lg="3" class="p-0 pl-1">
           <div class="d-flex justify-content-end">
             <VisibleWhen
               :not="['xs', 'sm', 'md', 'lg']"
-              class="position-fixed modal-above-fade"
+              class="position-fixed"
               style="right: 5px"
             >
               <ExternalDa
@@ -141,11 +141,6 @@ import { useGroupStore } from '~/stores/group'
 import { useIsochroneStore } from '~/stores/isochrone'
 import GiveAsk from '~/components/GiveAsk'
 
-definePageMeta({
-  layout: 'login',
-  alias: ['/communities'],
-})
-
 const MicroVolunteering = () => import('~/components/MicroVolunteering.vue')
 
 export default {
@@ -168,6 +163,10 @@ export default {
     MicroVolunteering,
   },
   async setup() {
+    definePageMeta({
+      layout: 'login',
+      alias: ['/communities'],
+    })
     const route = useRoute()
     const runtimeConfig = useRuntimeConfig()
 
@@ -223,7 +222,7 @@ export default {
     return {
       initialBounds: null,
       bump: 1,
-      showAboutMe: false,
+      showAboutMeModal: false,
       reviewAboutMe: false,
       messagesOnMapCount: 0,
     }
@@ -259,32 +258,31 @@ export default {
         // Not asked too recently.
         await this.fetchMe(true)
 
-        if (!this.me.aboutme || !this.me.aboutme.text) {
-          // We have not yet provided one.
-          const daysago = dayjs().diff(dayjs(this.me.added), 'days')
+        if (this.me) {
+          if (!this.me.aboutme || !this.me.aboutme.text) {
+            // We have not yet provided one.
+            const daysago = dayjs().diff(dayjs(this.me.added), 'days')
 
-          if (daysago > 7) {
-            // Nudge to ask people to to introduce themselves.
-            this.showAboutMe = true
-          }
-        } else {
-          const monthsago = dayjs().diff(
-            dayjs(this.me.aboutme.timestamp),
-            'months'
-          )
+            if (daysago > 7) {
+              // Nudge to ask people to to introduce themselves.
+              this.showAboutMeModal = true
+            }
+          } else {
+            const monthsago = dayjs().diff(
+              dayjs(this.me.aboutme.timestamp),
+              'months'
+            )
 
-          if (monthsago >= 6) {
-            // Old.  Ask them to review it.
-            this.showAboutMe = true
-            this.reviewAboutMe = true
+            if (monthsago >= 6) {
+              // Old.  Ask them to review it.
+              this.showAboutMeModal = true
+              this.reviewAboutMe = true
+            }
           }
         }
       }
 
-      if (this.showAboutMe) {
-        await this.waitForRef('aboutMeModal')
-        this.$refs.aboutMeModal.show()
-
+      if (this.showAboutMeModal) {
         this.miscStore.set({
           key: 'lastaboutmeask',
           value: now,

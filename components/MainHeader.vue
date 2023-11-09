@@ -468,7 +468,10 @@
         </b-nav>
       </b-collapse>
     </b-navbar>
-    <AboutMeModal v-if="showAboutMeModal" ref="aboutMeModal" />
+    <about-me-modal
+      v-if="showAboutMeModal"
+      @hidden="showAboutMeModal = false"
+    />
   </header>
 </template>
 <script setup>
@@ -483,8 +486,6 @@ import { useNotificationStore } from '../stores/notification'
 import { useLogoStore } from '../stores/logo'
 import OfflineIndicator from './OfflineIndicator'
 import { useAuthStore } from '~/stores/auth'
-import { ref, watch, computed, onMounted, defineAsyncComponent } from '#imports'
-import { waitForRef } from '~/composables/useWaitForRef'
 import { fetchMe } from '~/composables/useMe'
 import { useMobileStore } from '@/stores/mobile'
 import { useRuntimeConfig } from '#app'
@@ -511,9 +512,8 @@ const distance = ref(1000)
 const logo = ref('/icon.png')
 const unreadNotificationCount = ref(0)
 const chatCount = ref(0)
-const activePostsCount = ref(0)
+const activePostsCount = computed(() => messageStore.activePostsCounter)
 const showAboutMeModal = ref(false)
-const aboutMeModal = ref(null)
 const mobileNav = ref(null)
 const countTimer = ref(null)
 
@@ -630,10 +630,7 @@ const logout = async () => {
 
 const showAboutMe = async () => {
   await fetchMe(true)
-
   showAboutMeModal.value = true
-  await waitForRef(aboutMeModal)
-  aboutMeModal.value?.show()
 }
 
 const refresh = () => { // IS_APP
@@ -662,8 +659,6 @@ const getCounts = async () => {
       // cause Nuxt to bail out with JS errors.
       await newsfeedStore.fetchCount(false)
 
-      let messages = []
-
       if (
         route.path !== '/profile/' + myid.value &&
         !route.path.includes('/unsubscribe')
@@ -675,16 +670,7 @@ const getCounts = async () => {
         //
         // We also don't do this on unsubscribe pages as there are timing windows which can lead to the call
         // failing and consequent Sentry errors.
-        messages = await messageStore.fetchByUser(myid.value, true)
-      }
-
-      activePostsCount.value = 0
-
-      if (messages) {
-        // Count messages with no outcome
-        activePostsCount.value = messages.filter((msg) => {
-          return !msg.hasoutcome
-        }).length
+        await messageStore.fetchActivePostCount();
       }
 
       unreadNotificationCount.value = await notificationStore.fetchCount()

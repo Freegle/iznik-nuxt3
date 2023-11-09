@@ -98,15 +98,27 @@ export default {
 
       // We only add the cookie banner for logged out users.  This reduces costs.  For logged-in users, we assume
       // they have already seen the banner and specified a preference if they care.
-      //
-      // Add 'https://cdn-cookieyes.com/client_data/fd4582b38fa7a9f269114304/script.js' to head
-      const script = document.createElement('script')
-      script.setAttribute(
-        'src',
-        'https://cdn-cookieyes.com/client_data/fd4582b38fa7a9f269114304/script.js'
+      const runtimeConfig = useRuntimeConfig()
+
+      console.log(
+        'Consider adding cookie banner',
+        runtimeConfig.public.COOKIEYES
       )
 
-      document.head.appendChild(script)
+      if (runtimeConfig.public.COOKIEYES) {
+        console.log('Add it')
+        const cookieScript = document.getElementById('cookieyes')
+
+        if (!cookieScript) {
+          const script = document.createElement('script')
+          script.id = 'cookieyes'
+          script.setAttribute('src', runtimeConfig.public.COOKIEYES)
+
+          document.head.appendChild(script)
+        }
+      } else {
+        console.log('No cookie banner')
+      }
       }
     }
 

@@ -74,7 +74,8 @@
                 name="fullname"
                 autocomplete="given-name"
                 placeholder="Your full name"
-                :class="{ 'border-warning': nameInvalid, 'mb-3': true }"
+                class="mb-3"
+                :state="triedToSubmit ? !nameInvalid : null"
               />
             </b-form-group>
             <b-form-group
@@ -107,7 +108,8 @@
                 rows="4"
                 name="homeaddress"
                 placeholder="Your home address"
-                :class="{ 'border-warning': addressInvalid, 'mb-3': true }"
+                class="mb-3"
+                :state="triedToSubmit ? !addressInvalid : null"
               />
             </b-form-group>
             <b-form-group
@@ -148,7 +150,6 @@
             variant="primary"
             label="Submit Gift Aid Declaration"
             class="mt-4"
-            :disabled="!valid"
             @handle="save"
           />
           <NoticeMessage v-if="saved" variant="primary" class="mt-2">
@@ -192,13 +193,12 @@ import { buildHead } from '~/composables/useBuildHead'
 import OurToggle from '~/components/OurToggle'
 import { ref } from '#imports'
 
-definePageMeta({
-  layout: 'login',
-})
-
 export default {
   components: { SpinButton, NoticeMessage, OurToggle },
   setup() {
+    definePageMeta({
+      layout: 'login',
+    })
     const runtimeConfig = useRuntimeConfig()
     const route = useRoute()
 
@@ -273,6 +273,7 @@ export default {
   },
   data() {
     return {
+      triedToSubmit: false,
       saved: false,
     }
   },
@@ -319,6 +320,9 @@ export default {
   },
   methods: {
     async save() {
+      this.triedToSubmit = true
+      if (!this.valid) return
+
       await this.giftAidStore.save()
       this.saved = true
     },

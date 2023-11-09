@@ -188,7 +188,7 @@ export default {
         photoid: id,
       })
     },
-    drop(e) {
+    async drop(e) {
       // Although it's probably not widely used (I didn't know it even worked) in the old code you could drag and drog
       // a file onto the Add photos button.  So we should handle that too here.
       const droppedFiles = e.dataTransfer.files
@@ -201,10 +201,9 @@ export default {
       this.pondBrowse = false
 
       // Give pond time to render.
-      this.waitForRef('filepond').then(() => {
-        ;[...droppedFiles].forEach((f) => {
-          this.$refs.filepond.addFile(f)
-        })
+      await this.$nextTick()
+      ;[...droppedFiles].forEach((f) => {
+        this.$refs.filepond.addFile(f)
       })
     },
     hidePhotoButton() {

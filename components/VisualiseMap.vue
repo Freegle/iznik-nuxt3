@@ -180,36 +180,40 @@ export default {
               setTimeout(() => {
                 // Show the reply text.
                 this.showReplies = true
-                setTimeout(async () => {
+                setTimeout(() => {
                   // Collect - move the touser to the fromuser's location, stop showing the other replies.
                   this.showOthers = false
                   this.showReplies = false
-                  await this.waitForRef('touser')
-                  this.$refs.touser.setLatLng(
-                    this.item.fromlat,
-                    this.item.fromlng
-                  )
-                  setTimeout(async () => {
-                    if (this.$refs.touser && this.item) {
-                      this.$refs.touser.setLatLng(
-                        this.item.tolat,
-                        this.item.tolng
-                      )
-                      await this.waitForRef('message')
-                      this.$refs.message.setLatLng(
-                        this.item.tolat,
-                        this.item.tolng
-                      )
-                      setTimeout(() => {
-                        this.showMessage = false
-                        this.showThanks = true
+                  if (this.$refs.touser) {
+                    this.$refs.touser.setLatLng(
+                      this.item.fromlat,
+                      this.item.fromlng
+                    )
+                    setTimeout(() => {
+                      if (
+                        this.$refs.touser &&
+                        this.item &&
+                        this.$refs.message
+                      ) {
+                        this.$refs.touser.setLatLng(
+                          this.item.tolat,
+                          this.item.tolng
+                        )
+                        this.$refs.message.setLatLng(
+                          this.item.tolat,
+                          this.item.tolng
+                        )
                         setTimeout(() => {
-                          this.list.shift()
-                          this.doNext()
-                        }, this.delayBeforeNext)
-                      }, this.delayBeforeThanks + 2000)
-                    }
-                  }, this.delayBeforeReturn)
+                          this.showMessage = false
+                          this.showThanks = true
+                          setTimeout(() => {
+                            this.list.shift()
+                            this.doNext()
+                          }, this.delayBeforeNext)
+                        }, this.delayBeforeThanks + 2000)
+                      }
+                    }, this.delayBeforeReturn)
+                  }
                 }, this.delayBeforeCollect)
               }, this.delayBeforeReply)
             }, this.delayBeforeReply)

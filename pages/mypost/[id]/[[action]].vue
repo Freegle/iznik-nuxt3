@@ -1,5 +1,10 @@
 <template>
   <client-only v-if="me">
+    <DonationAskModal
+      v-if="showDonationAskModal"
+      @hidden="showDonationAskModal = false"
+    />
+
     <b-container fluid>
       <b-row class="m-0">
         <b-col cols="12" lg="6" offset-lg="3" class="p-0">
@@ -36,7 +41,6 @@
           </div>
         </b-col>
       </b-row>
-      <DonationAskModal />
     </b-container>
   </client-only>
 </template>
@@ -48,12 +52,11 @@ import { useMessageStore } from '~/stores/message'
 import { useAuthStore } from '~/stores/auth'
 import NoticeMessage from '~/components/NoticeMessage'
 import GlobalWarning from '~/components/GlobalWarning'
+import { useDonationAskModal } from '~/composables/useDonationAskModal'
 const MyMessage = () => import('~/components/MyMessage.vue')
-const DonationAskModal = () => import('~/components/DonationAskModal')
-
-definePageMeta({
-  layout: 'login',
-})
+const DonationAskModal = defineAsyncComponent(() =>
+  import('~/components/DonationAskModal')
+)
 
 export default {
   components: {
@@ -63,6 +66,9 @@ export default {
     DonationAskModal,
   },
   async setup(props) {
+    definePageMeta({
+      layout: 'login',
+    })
     const runtimeConfig = useRuntimeConfig()
     const route = useRoute()
     const id = parseInt(route.params.id)
@@ -74,6 +80,8 @@ export default {
     const messageStore = useMessageStore()
     const groupStore = useGroupStore()
     const myid = authStore.user?.id
+
+    const { showDonationAskModal } = useDonationAskModal()
 
     let message = null
     let missing = false
@@ -131,6 +139,7 @@ export default {
       missing,
       id,
       action,
+      showDonationAskModal,
     }
   },
   data() {
