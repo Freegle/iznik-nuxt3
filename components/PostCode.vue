@@ -49,14 +49,16 @@
           :skidding="-50"
         />
         <div v-if="find && !wip">
-          <spin-button
+          <SpinButton
             variant="secondary"
             label=""
             spinclass=""
             iconclass=""
             button-class="tweakHeight"
             button-title="Find my device's location instead of typing a postcode"
-            :done-icon="locationFailed ? 'exclamation-triangle' : 'map-marker-alt'"
+            :done-icon="
+              locationFailed ? 'exclamation-triangle' : 'map-marker-alt'
+            "
             :name="locationFailed ? 'exclamation-triangle' : 'map-marker-alt'"
             :size="size"
             :show-spinner="locating"
@@ -71,10 +73,10 @@
 import { uid } from '../composables/useId'
 import { useAuthStore } from '../stores/auth'
 import { useLocationStore } from '../stores/location'
+import SpinButton from './SpinButton'
 import { ref } from '#imports'
 import { useComposeStore } from '~/stores/compose'
 import AutoComplete from '~/components/AutoComplete'
-import SpinButton from "./SpinButton";
 
 export default {
   components: {
@@ -245,32 +247,35 @@ export default {
           navigator.geolocation.getCurrentPosition
         ) {
           this.locating = true
-          navigator.geolocation.getCurrentPosition(async (position) => {
-            const res = await this.locationStore.fetch({
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-            })
-
-            if (
-              res.ret === 0 &&
-              res.location &&
-              res.location.name &&
-              this.$refs.autocomplete
-            ) {
-              // Got it - put it in the autocomplete input, and indicate that we've selected it.
-              this.$refs.autocomplete.setValue(res.location.name)
-              await this.select({
-                name: res.location.name,
+          navigator.geolocation.getCurrentPosition(
+            async (position) => {
+              const res = await this.locationStore.fetch({
+                lat: position.coords.latitude,
+                lng: position.coords.longitude,
               })
 
-              // Show the user we've done this, and make them think.
-              this.showLocated = true
-              setTimeout(() => (this.showLocated = false), 10000)
-            } else {
-              this.locationFailed = true
-            }
-            this.locating = false
-          })
+              if (
+                res.ret === 0 &&
+                res.location &&
+                res.location.name &&
+                this.$refs.autocomplete
+              ) {
+                // Got it - put it in the autocomplete input, and indicate that we've selected it.
+                this.$refs.autocomplete.setValue(res.location.name)
+                await this.select({
+                  name: res.location.name,
+                })
+
+                // Show the user we've done this, and make them think.
+                this.showLocated = true
+                setTimeout(() => (this.showLocated = false), 10000)
+              } else {
+                this.locationFailed = true
+              }
+              this.locating = false
+            },
+            () => (this.locating = false)
+          )
         } else {
           console.log('Navigation not supported.  ')
           this.locationFailed = true
@@ -279,7 +284,6 @@ export default {
         console.error('Find location failed with', e)
         this.locationFailed = true
       }
-
     },
   },
 }

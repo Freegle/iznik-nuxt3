@@ -370,26 +370,16 @@ export default class BaseAPI {
       }
     } catch (e) {
       console.log('Fetch error', path, e?.message)
+      if (e?.response?.status) {
+        status = e.response.status
+      }
+
       if (e.message.match(/.*aborted.*/i)) {
         // We've seen requests get aborted immediately after beforeunload().  Makes sense to abort the requests
         // when you're leaving a page.  No point in rippling those errors up to result in Sentry errors.
         // Swallow these by returning a problem that never resolves.  Possible memory leak but it's a rare case.
         console.log('Aborted - ignore')
         return new Promise(function (resolve) {})
-      } else if (e.message.match(/Load failed/i)) {
-        // As well as the case above where we called in retryOn, we've also seen this in an exception.
-        try {
-          console.log('Retry load failed.')
-          await new Promise((resolve) => setTimeout(resolve, 10000))
-          ;[status, data] = await ourFetch(this.config.public.APIv2 + path, {
-            ...config,
-            body,
-            method,
-            headers,
-          })
-        } catch (e) {
-          console.log('Load failed retry failed', path, e?.message)
-        }
       }
     } finally {
       useMiscStore().api(-1)

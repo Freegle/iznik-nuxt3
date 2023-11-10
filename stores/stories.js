@@ -19,7 +19,7 @@ export const useStoryStore = defineStore({
           await this.fetching[id]
           await nextTick()
         } else {
-          this.fetching[id] = api(this.config).stories.fetchv2(id)
+          this.fetching[id] = api(this.config).stories.fetchv2(id, false)
           this.list[id] = await this.fetching[id]
           this.fetching[id] = null
         }

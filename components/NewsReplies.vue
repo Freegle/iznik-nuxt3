@@ -22,7 +22,7 @@
     </div>
     <div
       v-for="reply in repliestoshow"
-      :key="'newsfeed-' + reply?.id"
+      :key="'newsfeed-' + reply"
       class="lines"
     >
       <NewsRefer
@@ -33,10 +33,8 @@
         class="content pt-1 pb-1"
       />
       <NewsReply
-        v-else
-        :id="id"
+        :id="reply.id"
         :key="'reply-' + reply.id"
-        :replyid="reply.id"
         :threadhead="threadhead"
         :scroll-to="scrollTo"
         :class="{
@@ -56,7 +54,6 @@
 import pluralize from 'pluralize'
 import { useNewsfeedStore } from '../stores/newsfeed'
 import { useAuthStore } from '../stores/auth'
-import { useUserStore } from '../stores/user'
 import { ref, computed } from '#imports'
 import NewsRefer from '~/components/NewsRefer'
 
@@ -70,10 +67,6 @@ export default {
   props: {
     id: {
       type: Number,
-      required: true,
-    },
-    replyIds: {
-      type: Array,
       required: true,
     },
     threadhead: {
@@ -98,7 +91,6 @@ export default {
   setup(props) {
     const newsfeedStore = useNewsfeedStore()
     const authStore = useAuthStore()
-    const userStore = useUserStore()
     const showAllReplies = ref(false)
 
     // We do a lot of things in setup() in this component rather than computed properties via the legacy options API.
@@ -116,14 +108,12 @@ export default {
       )
     })
 
+    const newsfeed = computed(() => {
+      return newsfeedStore.byId(props.id)
+    })
+
     const replies = computed(() => {
-      const ret = []
-
-      props.replyIds.forEach((id) => {
-        ret.push(newsfeedStore.byId(id))
-      })
-
-      return ret
+      return newsfeed.value?.replies || []
     })
 
     const visiblereplies = computed(() => {
@@ -131,8 +121,10 @@ export default {
       const ret = []
 
       for (let i = 0; i < replies.value.length; i++) {
-        if (!replies.value[i].deleted || mod) {
-          ret.push(replies.value[i])
+        const reply = newsfeedStore.byId(replies.value[i])
+
+        if (!reply.deleted || mod) {
+          ret.push(reply)
         }
       }
 
@@ -159,7 +151,7 @@ export default {
           let seen = false
 
           for (let i = 0; i < visiblereplies.value.length; i++) {
-            const reply = visiblereplies.value[i]
+            const reply = newsfeedStore.byId(visiblereplies.value[i])
 
             if (reply.id === props.replyTo || seen) {
               seen = true
@@ -175,19 +167,6 @@ export default {
       }
 
       return ret
-    })
-
-    // Extract unique userids from repliestoshow
-    const userids = []
-
-    repliestoshow.value.forEach((reply) => {
-      if (
-        reply.userid &&
-        !userStore.byId(reply.userid) &&
-        !userids.includes(reply.userid)
-      ) {
-        userids.push(reply.userid)
-      }
     })
 
     return {

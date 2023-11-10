@@ -77,11 +77,10 @@
       </b-card-body>
       <template #footer>
         <NewsReplies
-          v-if="newsfeed?.replies"
+          v-if="newsfeed?.replies?.length"
           :id="id"
           :threadhead="newsfeed.id"
           :scroll-to="scrollDownTo"
-          :reply-ids="newsfeed.replies.map((r) => r.id)"
           :reply-to="replyingTo"
           :depth="1"
           :class="newsfeed.deleted ? 'strike mr-1' : 'mr-1'"
@@ -247,8 +246,6 @@ const ConfirmModal = () =>
 const OurFilePond = () => import('~/components/OurFilePond')
 const OurAtTa = () => import('~/components/OurAtTa')
 
-const INITIAL_NUMBER_OF_REPLIES_TO_SHOW = 10
-
 export default {
   name: 'NewsThread',
   components: {
@@ -355,44 +352,6 @@ export default {
     },
     backgroundColor() {
       return this.elementBackgroundColor[this.newsfeed?.type] || 'card__default'
-    },
-    visiblereplies() {
-      // These are the replies which are candidates to show, i.e. not deleted or hidden.
-      const ret = []
-
-      if (this.newsfeed?.replies?.length) {
-        for (let i = 0; i < this.newsfeed.replies.length; i++) {
-          if (
-            (!this.newsfeed.replies[i].deleted &&
-              this.newsfeed.replies[i].visible) ||
-            this.mod
-          ) {
-            ret.push(this.newsfeed.replies[i])
-          }
-        }
-      }
-
-      return ret
-    },
-    repliestoshow() {
-      let ret = []
-
-      if (this.visiblereplies && this.visiblereplies.length) {
-        if (
-          this.showAllReplies ||
-          this.visiblereplies.length <= INITIAL_NUMBER_OF_REPLIES_TO_SHOW
-        ) {
-          // Return all the replies
-          ret = this.visiblereplies
-        } else {
-          // Only return the last few replies
-          ret = this.visiblereplies.slice(
-            -Math.abs(INITIAL_NUMBER_OF_REPLIES_TO_SHOW)
-          )
-        }
-      }
-
-      return ret
     },
     isNewsComponent() {
       return this.newsfeed?.type in this.newsComponents

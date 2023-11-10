@@ -44,7 +44,24 @@ export const useNewsfeedStore = defineStore({
         this.list[item.id] = item
 
         if (item.replies?.length) {
-          this.addItems(item.replies)
+          item.replies.forEach((reply) => {
+            if (typeof reply === 'object') {
+              this.addItems([reply])
+            }
+          })
+        }
+      })
+
+      // Now that they are in store convert all the replies into just ids.  This avoids some reactivity issues.
+      items.forEach((item) => {
+        if (item.replies?.length) {
+          item.replies = item.replies.map((reply) => {
+            if (typeof reply === 'object') {
+              return reply.id
+            } else return reply
+          })
+        } else {
+          item.replies = []
         }
       })
 

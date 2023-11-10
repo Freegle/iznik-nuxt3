@@ -6,20 +6,18 @@
       label-class="mt-0"
       :state="true"
     >
-      <Form ref="form" as="">
-        <Field
-          ref="email"
-          v-model="currentEmail"
-          :rules="validateEmail"
-          type="email"
-          name="email"
-          :class="'email form-control input-' + size + ' ' + inputClass"
-          :center="center"
-          autocomplete="username email"
-          :placeholder="'Email address ' + (required ? '' : '(Optional)')"
-        />
-        <ErrorMessage name="email" class="text-danger font-weight-bold" />
-      </Form>
+      <Field
+        ref="email"
+        v-model="currentEmail"
+        :rules="validateEmail"
+        type="email"
+        name="email"
+        :class="'email form-control input-' + size + ' ' + inputClass"
+        :center="center"
+        autocomplete="username email"
+        :placeholder="'Email address ' + (required ? '' : '(Optional)')"
+      />
+      <ErrorMessage name="email" class="text-danger font-weight-bold" />
     </b-form-group>
     <div
       v-if="suggestedDomains && suggestedDomains.length"
@@ -37,13 +35,13 @@
   </div>
 </template>
 <script>
-import { Field, ErrorMessage, Form } from 'vee-validate'
+import { Field, ErrorMessage } from 'vee-validate'
 import { useDomainStore } from '../stores/domain'
 import { ref } from '#imports'
 import { EMAIL_REGEX } from '~/constants'
 
 export default {
-  components: { Field, ErrorMessage, Form },
+  components: { Field, ErrorMessage },
   props: {
     email: {
       type: String,
@@ -122,30 +120,15 @@ export default {
           }
         }
 
-        const meta = this.$refs.form?.getMeta();
-        if (meta) {
-          this.$emit('update:valid', meta.valid)
+        const validate = await this.$refs.email?.validate()
+        if (validate) {
+          this.$emit('update:valid', validate.valid)
         }
       },
     },
   },
   methods: {
-    async checkValidDomain(value) {
-      let isValidDomain = true;
-      try {
-        const domain = value.substring(value.indexOf('@') + 1)
-        const url = new URL('https://dns.googlee/resolve');
-        url.search = new URLSearchParams({ name: domain }).toString();
-        const googleResponse = await fetch(url).then(response => response);
-        const { Status: status } = await googleResponse.json();
-
-        isValidDomain = status === 0;
-      } catch (_) {
-        // if something doesn't work with google domain check we ignore this check
-      }
-      return isValidDomain;
-    },
-    async validateEmail(value) {
+    validateEmail(value) {
       if (!value && !this.required) {
         return true
       }
@@ -158,8 +141,7 @@ export default {
         return 'Please enter a valid email address.'
       }
 
-      const isValidDomain = await this.checkValidDomain(value);
-      return isValidDomain || 'Please check your email domain - maybe you\'ve made a typo?';
+      return true
     },
   },
 }

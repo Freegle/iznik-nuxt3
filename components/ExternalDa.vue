@@ -24,7 +24,6 @@
   </div>
 </template>
 <script setup>
-import * as Sentry from '@sentry/vue'
 import { nextTick } from 'vue'
 import { useMiscStore } from '../stores/misc'
 import { ref, computed, onBeforeUnmount } from '#imports'

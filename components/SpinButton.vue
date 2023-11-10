@@ -21,7 +21,11 @@
             icon="sync"
             :class="['fa-spin', iconClass, spinclass]"
           />
-          <v-icon v-else-if="done" :icon="doneIcon" :class="[spinclass, iconClass]" />
+          <v-icon
+            v-else-if="done"
+            :icon="doneIcon"
+            :class="[spinclass, iconClass]"
+          />
           <v-icon v-else-if="!spinnerOnly" :class="iconClass" :icon="name" />
         </span>
         <span v-if="!iconlast && (label || $slots.default)" class="ml-1">
@@ -37,8 +41,8 @@
   </div>
 </template>
 <script setup>
+import { computed } from 'vue'
 import { ref, defineAsyncComponent } from '#imports'
-import { computed } from 'vue';
 
 const ConfirmModal = defineAsyncComponent(() => import('./ConfirmModal'))
 

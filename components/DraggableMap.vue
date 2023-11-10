@@ -8,7 +8,9 @@
               variant="secondary"
               button-class="mb-2 ml-0 ml-md-2"
               button-title="Find my location"
-              :done-icon="locationFailed ? 'exclamation-triangle' : 'map-marker-alt'"
+              :done-icon="
+                locationFailed ? 'exclamation-triangle' : 'map-marker-alt'
+              "
               :name="locationFailed ? 'exclamation-triangle' : 'map-marker-alt'"
               :show-spinner="locating"
               spinclass=""
@@ -38,12 +40,12 @@
 <script>
 import 'leaflet-control-geocoder/dist/Control.Geocoder.css'
 import { attribution, osmtile, loadLeaflet } from '../composables/useMap'
+import SpinButton from './SpinButton'
 import { MAX_MAP_ZOOM } from '~/constants'
 import { useRuntimeConfig } from '#app'
-import SpinButton from "./SpinButton";
 
 export default {
-  components: {SpinButton},
+  components: { SpinButton },
   props: {
     initialZoom: {
       type: Number,
@@ -116,14 +118,17 @@ export default {
           navigator.geolocation.getCurrentPosition
         ) {
           this.locating = true
-          navigator.geolocation.getCurrentPosition((position) => {
-            // Show close to where we think they are.
-            this.locating = false;
-            this.mapObject.flyTo(
-              [position.coords.latitude, position.coords.longitude],
-              16
-            )
-          })
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              // Show close to where we think they are.
+              this.locating = false
+              this.mapObject.flyTo(
+                [position.coords.latitude, position.coords.longitude],
+                16
+              )
+            },
+            () => (this.locating = false)
+          )
         } else {
           console.log('Navigation not supported.  ')
           this.locationFailed = true

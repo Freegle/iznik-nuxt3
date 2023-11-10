@@ -639,7 +639,7 @@ const getCounts = async () => {
         //
         // We also don't do this on unsubscribe pages as there are timing windows which can lead to the call
         // failing and consequent Sentry errors.
-        await messageStore.fetchActivePostCount();
+        await messageStore.fetchActivePostCount()
       }
 
       unreadNotificationCount.value = await notificationStore.fetchCount()

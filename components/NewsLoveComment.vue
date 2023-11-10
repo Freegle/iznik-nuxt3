@@ -1,31 +1,31 @@
 <template>
   <div v-if="newsfeed" class="d-flex align-items-center mt-1">
-    <spin-button
+    <SpinButton
       v-if="!newsfeed.loved"
       variant="link"
       size="sm"
-      @handle="love"
       :show-spinner="loving"
       name="heart"
       done-icon="heart"
       icon-class=""
       label=""
+      @handle="love"
     >
       <span class="d-none d-sm-inline">Love this</span>
-    </spin-button>
-    <spin-button
+    </SpinButton>
+    <SpinButton
       v-if="newsfeed.loved"
       variant="link"
       size="sm"
-      @handle="unlove"
       :show-spinner="loving"
       name="heart"
       done-icon="heart"
       icon-class="text-danger"
       label=""
+      @handle="unlove"
     >
       <span class="d-none d-sm-inline">Unlove this</span>
-    </spin-button>
+    </SpinButton>
     <b-button
       v-if="!newsfeed.closed"
       variant="link"
@@ -56,7 +56,7 @@
 import pluralize from 'pluralize'
 import { defineAsyncComponent } from 'vue'
 import { useNewsfeedStore } from '../stores/newsfeed'
-import SpinButton from "./SpinButton";
+import SpinButton from './SpinButton'
 const NewsLovesModal = defineAsyncComponent(() => import('./NewsLovesModal'))
 
 export default {
