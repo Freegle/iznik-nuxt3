@@ -122,7 +122,7 @@ export default {
           }
         }
 
-        const meta = this.$refs.form?.getMeta()
+        const meta = this.$refs.form.getMeta()
         if (meta) {
           this.$emit('update:valid', meta.valid)
         }
@@ -136,7 +136,9 @@ export default {
         const domain = value.substring(value.indexOf('@') + 1)
         const url = new URL('https://dns.google/resolve')
         url.search = new URLSearchParams({ name: domain }).toString()
-        const googleResponse = await fetch(url).then((response) => response)
+        const googleResponse = await fetch(url, {
+          signal: AbortSignal.timeout(10000),
+        }).then((response) => response)
         const { Status: status } = await googleResponse.json()
 
         isValidDomain = status === 0
