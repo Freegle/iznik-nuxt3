@@ -380,10 +380,15 @@ export default {
       this.chatStore.fetchChats()
     },
     gotoChat(id) {
-      // We just replace the route, which is quicker than navigating and re-rendering this page.
-      this.selectedChatId = id
       const router = useRouter()
-      router.replace(id ? '/chats/' + id : '/chats')
+
+      if (this.selectedChatId) {
+        // We just replace the route, which is quicker than navigating and re-rendering this page.
+        this.selectedChatId = id
+        router.replace(id ? '/chats/' + id : '/chats')
+      } else {
+        router.push(id ? '/chats/' + id : '/chats')
+      }
     },
     async searchMore() {
       if (this.searching) {
