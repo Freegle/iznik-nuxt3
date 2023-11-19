@@ -421,7 +421,7 @@ export default {
         if (
           !this.firstname ||
           !this.lastname ||
-          !this.email ||
+          this.emailError ||
           !this.password
         ) {
           this.nativeLoginError = 'Please fill out the form.'
@@ -472,46 +472,50 @@ export default {
             })
         }
       } else if (this.email && this.password) {
-        // Login
-        this.authStore
-          .login({
-            email: this.email,
-            password: this.password,
-          })
-          .then(() => {
-            // We are now logged in. Prompt the browser to remember the credentials.
-            if (window.PasswordCredential) {
-              try {
-                // We used to pass in the DOM element, but in Chrome 92 that causes a crash.
-                const c = new window.PasswordCredential({
-                  id: this.email,
-                  password: this.password,
-                })
-                navigator.credentials
-                  .store(c)
-                  .then(function () {
-                    self.pleaseShowModal = false
+        if (this.emailError || this.passwordError) {
+          this.nativeLoginError = 'Please fill out the form.'
+        } else {
+          // Login
+          this.authStore
+            .login({
+              email: this.email,
+              password: this.password,
+            })
+            .then(() => {
+              // We are now logged in. Prompt the browser to remember the credentials.
+              if (window.PasswordCredential) {
+                try {
+                  // We used to pass in the DOM element, but in Chrome 92 that causes a crash.
+                  const c = new window.PasswordCredential({
+                    id: this.email,
+                    password: this.password,
                   })
-                  .catch((err) => {
-                    console.error('Failed to save credentials', err)
-                  })
-              } catch (e) {
-                console.log('Failed to save credentials2', e)
+                  navigator.credentials
+                    .store(c)
+                    .then(function () {
+                      self.pleaseShowModal = false
+                    })
+                    .catch((err) => {
+                      console.error('Failed to save credentials', err)
+                    })
+                } catch (e) {
+                  console.log('Failed to save credentials2', e)
+                  self.pleaseShowModal = false
+                }
+              } else {
                 self.pleaseShowModal = false
               }
-            } else {
-              self.pleaseShowModal = false
-            }
-          })
-          .catch((e) => {
-            console.log('Login failed', e)
-            if (e instanceof LoginError) {
-              console.log('Login error')
-              this.nativeLoginError = e.status
-            } else {
-              throw e // let others bubble up
-            }
-          })
+            })
+            .catch((e) => {
+              console.log('Login failed', e)
+              if (e instanceof LoginError) {
+                console.log('Login error')
+                this.nativeLoginError = e.status
+              } else {
+                throw e // let others bubble up
+              }
+            })
+        }
       }
     },
     async loginFacebook() {

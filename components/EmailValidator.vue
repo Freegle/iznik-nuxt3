@@ -42,6 +42,8 @@ import { useDomainStore } from '../stores/domain'
 import { ref } from '#imports'
 import { EMAIL_REGEX } from '~/constants'
 
+const domainValidationCache = new Map()
+
 export default {
   components: { Field, ErrorMessage, VeeForm },
   props: {
@@ -121,25 +123,31 @@ export default {
             }
           }
         }
-
-        const meta = this.$refs.form.getMeta()
-        if (meta) {
-          this.$emit('update:valid', meta.valid)
-        }
       },
     },
   },
   methods: {
+    requestGoogleDnsResolve(domain) {
+      const url = new URL('https://dns.google/resolve')
+      url.search = new URLSearchParams({ name: domain }).toString()
+
+      return fetch(url, { signal: AbortSignal.timeout(10000) }).then(
+        (response) => response.json()
+      )
+    },
     async checkValidDomain(value) {
       let isValidDomain = true
+      const domain = value.substring(value.indexOf('@') + 1)
+      let request
+      if (domainValidationCache.has(domain)) {
+        request = domainValidationCache.get(domain)
+      } else {
+        request = this.requestGoogleDnsResolve(domain)
+        domainValidationCache.set(domain, request)
+      }
+
       try {
-        const domain = value.substring(value.indexOf('@') + 1)
-        const url = new URL('https://dns.google/resolve')
-        url.search = new URLSearchParams({ name: domain }).toString()
-        const googleResponse = await fetch(url, {
-          signal: AbortSignal.timeout(10000),
-        }).then((response) => response)
-        const { Status: status } = await googleResponse.json()
+        const { Status: status } = await request
 
         isValidDomain = status === 0
       } catch (_) {
@@ -149,18 +157,22 @@ export default {
     },
     async validateEmail(value) {
       if (!value && !this.required) {
-        return true
+        this.$emit('update:valid', true)
+        return
       }
 
       if (!value) {
+        this.$emit('update:valid', false)
         return 'Please enter an email address.'
       }
 
       if (!new RegExp(EMAIL_REGEX).test(value)) {
+        this.$emit('update:valid', false)
         return 'Please enter a valid email address.'
       }
 
       const isValidDomain = await this.checkValidDomain(value)
+      this.$emit('update:valid', isValidDomain)
       return (
         isValidDomain ||
         "Please check your email domain - maybe you've made a typo?"
