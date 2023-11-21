@@ -221,6 +221,12 @@ export default defineNuxtConfig({
     },
   },
 
+  // Sentry needs sourcemaps.
+  sourcemap: {
+    client: true,
+    server: true,
+  },
+
   app: {
     head: {
       title: "Freegle - Don't throw it away, give it away!",
