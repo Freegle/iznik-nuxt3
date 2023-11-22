@@ -84,6 +84,7 @@ export default {
     return {
       showLoader: true,
       timeTimer: null,
+      haveMounted: false,
     }
   },
   computed: {
@@ -97,7 +98,7 @@ export default {
     },
     allowAd() {
       // We don't want to show the ad on the landing page when logged out - looks tacky.
-      return this.routePath !== '/' || this.loggedIn
+      return this.haveMounted && (this.routePath !== '/' || this.loggedIn)
     },
   },
   async mounted() {
@@ -199,6 +200,8 @@ export default {
       }
 
       this.monitorTabVisibility()
+
+      this.haveMounted = true
     }
   },
   beforeUnmount() {
