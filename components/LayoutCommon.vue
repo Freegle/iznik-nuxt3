@@ -1,7 +1,23 @@
 <template>
   <div>
     <main class="ml-0 ps-0 pe-0 pageContent">
-      <slot ref="pageContent" />
+      <div class="aboveSticky">
+        <slot ref="pageContent" />
+      </div>
+      <VisibleWhen v-if="allowAd" :at="['xs', 'sm']">
+        <div
+          class="d-flex justify-content-around w-100 bg-white sticky"
+          style="height: 52px"
+        >
+          <ExternalDa
+            ad-unit-path="/22794232631/freegle_sticky"
+            :dimensions="[320, 50]"
+            div-id="div-gpt-ad-1699973618906-0"
+            class="sticky"
+            style="width: 320px; height: 50px; margin-top: 2px"
+          />
+        </div>
+      </VisibleWhen>
     </main>
     <client-only>
       <BouncingEmail />
@@ -38,6 +54,7 @@
   </div>
 </template>
 <script>
+import { useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import SomethingWentWrong from './SomethingWentWrong'
 import { useNotificationStore } from '~/stores/notification'
@@ -46,9 +63,12 @@ import { useMobileStore } from '@/stores/mobile'
 import { useMiscStore } from '~/stores/misc'
 import { useChatStore } from '~/stores/chat'
 import replyToPost from '@/mixins/replyToPost'
+import ChatButton from '~/components/ChatButton'
+import VisibleWhen from '~/components/VisibleWhen'
 const SupportLink = () => import('~/components/SupportLink')
 const BouncingEmail = () => import('~/components/BouncingEmail')
 const BreakpointFettler = () => import('~/components/BreakpointFettler')
+const ExternalDa = () => import('~/components/ExternalDa')
 
 export default {
   components: {
@@ -56,6 +76,9 @@ export default {
     SupportLink,
     BreakpointFettler,
     SomethingWentWrong,
+    ChatButton,
+    ExternalDa,
+    VisibleWhen,
   },
   mixins: [replyToPost],
   data() {
@@ -68,6 +91,14 @@ export default {
     breakpoint() {
       const store = useMiscStore()
       return store.getBreakpoint
+    },
+    routePath() {
+      const route = useRoute()
+      return route.path
+    },
+    allowAd() {
+      // We don't want to show the ad on the landing page when logged out - looks tacky.
+      return (this.routePath !== '/' || this.loggedIn)
     },
   },
   async mounted() {
@@ -173,6 +204,8 @@ export default {
       }
 
       this.monitorTabVisibility()
+
+      this.haveMounted = true
     }
   },
   beforeUnmount() {
@@ -238,5 +271,25 @@ body.modal-open {
 
 .pageContent {
   margin-top: 75px;
+  display: flex;
+  flex-direction: column;
+  max-height: 100vh;
+}
+
+.sticky {
+  position: fixed;
+  bottom: 0;
+
+  @include media-breakpoint-up(md) {
+    display: none;
+  }
+}
+
+.aboveSticky {
+  padding-bottom: 52px;
+
+  @include media-breakpoint-up(md) {
+    padding-bottom: unset;
+  }
 }
 </style>
