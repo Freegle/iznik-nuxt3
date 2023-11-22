@@ -27,7 +27,7 @@
   </div>
 </template>
 <script setup>
-import { nextTick } from 'vue'
+import { nextTick, defineProps } from 'vue'
 import { useMiscStore } from '../stores/misc'
 import { ref, computed, onBeforeUnmount } from '#imports'
 
@@ -44,6 +44,12 @@ const props = defineProps({
     type: String,
     required: true,
   },
+})
+
+const adShown = ref(true)
+
+const passClicks = computed(() => {
+  return !adShown.value
 })
 
 const breakpoint = computed(() => {
@@ -81,12 +87,6 @@ const p = new Promise((resolve, reject) => {
 await p
 
 let slot = null
-
-const adShown = ref(true)
-
-const passClicks = computed(() => {
-  return !adShown.value
-})
 
 const timer = ref(null)
 

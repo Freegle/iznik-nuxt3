@@ -63,11 +63,11 @@ import { useMiscStore } from '~/stores/misc'
 import { useChatStore } from '~/stores/chat'
 import replyToPost from '@/mixins/replyToPost'
 import ChatButton from '~/components/ChatButton'
-import ExternalDa from '~/components/ExternalDa'
 import VisibleWhen from '~/components/VisibleWhen'
 const SupportLink = () => import('~/components/SupportLink')
 const BouncingEmail = () => import('~/components/BouncingEmail')
 const BreakpointFettler = () => import('~/components/BreakpointFettler')
+const ExternalDa = () => import('~/components/ExternalDa')
 
 export default {
   components: {
@@ -84,7 +84,6 @@ export default {
     return {
       showLoader: true,
       timeTimer: null,
-      haveMounted: false,
     }
   },
   computed: {
@@ -98,7 +97,7 @@ export default {
     },
     allowAd() {
       // We don't want to show the ad on the landing page when logged out - looks tacky.
-      return this.haveMounted && (this.routePath !== '/' || this.loggedIn)
+      return (this.routePath !== '/' || this.loggedIn)
     },
   },
   async mounted() {
