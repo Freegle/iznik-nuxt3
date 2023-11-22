@@ -6,7 +6,7 @@
     >
       <div class="nameinfo pt-1 pb-1 pl-1">
         <ProfileImage
-          v-if="chat.icon"
+          v-if="!collapsed && chat.icon"
           :image="chat.icon"
           class="pr-1 profile clickme"
           is-thumbnail

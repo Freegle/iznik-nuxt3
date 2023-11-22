@@ -380,10 +380,18 @@ export default {
       this.chatStore.fetchChats()
     },
     gotoChat(id) {
-      // We just replace the route, which is quicker than navigating and re-rendering this page.
-      this.selectedChatId = id
       const router = useRouter()
-      router.replace(id ? '/chats/' + id : '/chats')
+
+      if (this.selectedChatId) {
+        // We just replace the route, which is quicker than navigating and re-rendering this page.
+        //
+        // This means that history won't get updated, which means that Back will go to the top-level /chats page.
+        // That is nice behaviour otherwise you have to hit Back a lot if you've viewed several chats.
+        this.selectedChatId = id
+        router.replace(id ? '/chats/' + id : '/chats')
+      } else {
+        router.push(id ? '/chats/' + id : '/chats')
+      }
     },
     async searchMore() {
       if (this.searching) {

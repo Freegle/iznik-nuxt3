@@ -163,12 +163,10 @@ if (message.value) {
 }
 
 onMounted(async () => {
-  // We've seen pages get stuck serving old cached data.  Not sure whether this is our fault or a Netlify caching issue.
-  //
-  // Fetching again here will reload if the message was added to the cache a while ago - which will be the case in
-  // an old cached page because the hydrated store will contain the message addition time.
+  // We need to fetch again on the client, as the server may have rendered the page with data censored, because
+  // it always renders logged out.
   try {
-    await messageStore.fetch(id)
+    await messageStore.fetch(id, true)
   } catch (e) {
     console.log('Message fetch on mount failed', e)
   }
