@@ -15,8 +15,8 @@
 import { defineStore } from 'pinia'
 import { Device } from '@capacitor/device'
 import { Badge } from '@capawesome/capacitor-badge'
-import { PushNotifications } from '@capacitor/push-notifications'
-//import { PushNotifications } from '@freegle/capacitor-push-notifications'
+//import { PushNotifications } from '@capacitor/push-notifications'
+import { PushNotifications } from '@freegle/capacitor-push-notifications'
 import { useAuthStore } from '~/stores/auth'
 import { AppLauncher } from '@capacitor/app-launcher'
 import api from '~/api'
@@ -169,6 +169,7 @@ export const useMobileStore = defineStore({ // Do not persist
     // https://capacitorjs.com/docs/apis/push-notifications
     // Uses amended @freegle/capacitor-push-notifications plugin which is here: https://github.com/Freegle/capacitor-push-notifications
     // node_modules\@freegle\capacitor-push-notifications\android\src\main\java\com\capacitorjs\plugins\pushnotifications\MessagingService.java
+    // node_modules/@freegle/capacitor-push-notifications/android/src/main/java/com/capacitorjs/plugins/pushnotifications/MessagingService.java
     async initPushNotifications() {
       if (!this.isiOS) {
         // Delete given Android push channel called PushDefaultForeground

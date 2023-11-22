@@ -33,8 +33,8 @@ const config: CapacitorConfig = {
       "@capacitor/browser",
       "@capacitor/device", // C5 OK
       "@capacitor/network",
-      // "@freegle/capacitor-push-notifications",
-      "@capacitor/push-notifications",
+      "@freegle/capacitor-push-notifications",
+      // "@capacitor/push-notifications",
       "@capawesome/capacitor-badge",
       "@capacitor-community/facebook-login", // C5 OK
       "@codetrix-studio/capacitor-google-auth", // C5 OK
@@ -61,8 +61,8 @@ const config: CapacitorConfig = {
       "@capacitor/browser",
       "@capacitor/device",
       "@capacitor/network",
-      "@capacitor/push-notifications",
-      // "@freegle/capacitor-push-notifications",
+      //"@capacitor/push-notifications",
+      "@freegle/capacitor-push-notifications",
       "@capawesome/capacitor-badge",
       "@capacitor-community/facebook-login",
       "@capacitor-community/apple-sign-in",
