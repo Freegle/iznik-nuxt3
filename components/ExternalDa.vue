@@ -3,7 +3,7 @@
   If you don't like ads, then you can use an ad blocker.  Plus you could donate to us
   at https://www.ilovefreegle.org/donate - if we got enough donations we would be delighted not to show ads.
    -->
-  <div v-observe-visibility="visibilityChanged">
+  <div v-observe-visibility="visibilityChanged" class="pointer">
     <div v-if="isVisible" class="d-flex w-100 justify-content-around">
       <div
         :id="divId"
@@ -15,7 +15,10 @@
         }"
       />
     </div>
-    <p v-if="isVisible && adShown" class="text-center textsize">
+    <p
+      v-if="isVisible && adShown"
+      class="text-center textsize d-none d-md-block"
+    >
       Advertisement. These help Freegle keep going.
     </p>
     <!--    <div class="bg-white">-->
@@ -24,7 +27,6 @@
   </div>
 </template>
 <script setup>
-import * as Sentry from '@sentry/vue'
 import { nextTick } from 'vue'
 import { useMiscStore } from '../stores/misc'
 import { ref, computed, onBeforeUnmount } from '#imports'
@@ -82,6 +84,10 @@ let slot = null
 
 const adShown = ref(true)
 
+const passClicks = computed(() => {
+  return !adShown.value
+})
+
 const timer = ref(null)
 
 onBeforeUnmount(() => {
@@ -124,7 +130,6 @@ async function visibilityChanged(visible) {
             if (event?.slot === slot && event?.isEmpty) {
               adShown.value = false
             }
-
             emit('rendered', adShown.value)
 
             // We refresh the ad slot.  This increases views.  Google doesn't like it if this is more frequent than
@@ -166,5 +171,9 @@ async function visibilityChanged(visible) {
 <style scoped lang="scss">
 .textsize {
   font-size: 0.75rem;
+}
+
+.pointer {
+  pointer-events: v-bind(passClicks);
 }
 </style>

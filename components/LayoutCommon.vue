@@ -1,7 +1,23 @@
 <template>
   <div>
     <main class="ml-0 ps-0 pe-0 pageContent">
-      <slot ref="pageContent" />
+      <div class="aboveSticky">
+        <slot ref="pageContent" />
+      </div>
+      <VisibleWhen :at="['xs', 'sm']">
+        <div
+          class="d-flex justify-content-around w-100 bg-white sticky"
+          style="height: 52px"
+        >
+          <ExternalDa
+            ad-unit-path="/22794232631/freegle_sticky"
+            :dimensions="[320, 50]"
+            div-id="div-gpt-ad-1699973618906-0"
+            class="sticky"
+            style="width: 320px; height: 50px; margin-top: 2px"
+          />
+        </div>
+      </VisibleWhen>
     </main>
     <client-only>
       <BouncingEmail />
@@ -45,6 +61,9 @@ import { useMessageStore } from '~/stores/message'
 import { useMiscStore } from '~/stores/misc'
 import { useChatStore } from '~/stores/chat'
 import replyToPost from '@/mixins/replyToPost'
+import ChatButton from '~/components/ChatButton'
+import ExternalDa from '~/components/ExternalDa'
+import VisibleWhen from '~/components/VisibleWhen'
 const SupportLink = () => import('~/components/SupportLink')
 const BouncingEmail = () => import('~/components/BouncingEmail')
 const BreakpointFettler = () => import('~/components/BreakpointFettler')
@@ -55,6 +74,9 @@ export default {
     SupportLink,
     BreakpointFettler,
     SomethingWentWrong,
+    ChatButton,
+    ExternalDa,
+    VisibleWhen,
   },
   mixins: [replyToPost],
   data() {
@@ -233,5 +255,25 @@ body.modal-open {
 
 .pageContent {
   margin-top: 75px;
+  display: flex;
+  flex-direction: column;
+  max-height: 100vh;
+}
+
+.sticky {
+  position: fixed;
+  bottom: 0;
+
+  @include media-breakpoint-up(md) {
+    display: none;
+  }
+}
+
+.aboveSticky {
+  padding-bottom: 52px;
+
+  @include media-breakpoint-up(md) {
+    padding-bottom: unset;
+  }
 }
 </style>
