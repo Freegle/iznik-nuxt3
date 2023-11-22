@@ -4,7 +4,7 @@
       <div class="aboveSticky">
         <slot ref="pageContent" />
       </div>
-      <VisibleWhen :at="['xs', 'sm']">
+      <VisibleWhen v-if="allowAd" :at="['xs', 'sm']">
         <div
           class="d-flex justify-content-around w-100 bg-white sticky"
           style="height: 52px"
@@ -54,6 +54,7 @@
   </div>
 </template>
 <script>
+import { useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import SomethingWentWrong from './SomethingWentWrong'
 import { useNotificationStore } from '~/stores/notification'
@@ -89,6 +90,14 @@ export default {
     breakpoint() {
       const store = useMiscStore()
       return store.getBreakpoint
+    },
+    routePath() {
+      const route = useRoute()
+      return route.path
+    },
+    allowAd() {
+      // We don't want to show the ad on the landing page when logged out - looks tacky.
+      return this.routePath !== '/' || this.loggedIn
     },
   },
   async mounted() {
