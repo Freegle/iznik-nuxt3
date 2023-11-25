@@ -1,7 +1,7 @@
 export default defineEventHandler((event) => {
   const to = event?.node?.req?.url
 
-  const match = to?.match(/^\/one-click-unsubscribe\/.*/)
+  const match = to?.match(/^\/one-click-unsubscribe\/(.*?)\/(.*)/)
 
   // If no match, return
   if (!match) return
@@ -11,6 +11,8 @@ export default defineEventHandler((event) => {
   // to avoid virus-scanners triggering it (which is why List-Unsubscribe-Post was invented).  So we redirect to the
   // usual unsubscribe page, which will require further action.
   if (event.node.req.method !== 'POST') {
-    return sendRedirect(event, '/unsubscribe', 302)
+    const uid = match[1]
+    const key = match[2]
+    return sendRedirect(event, '/unsubscribe?u=' + uid + '&k=' + key, 302)
   }
 })
