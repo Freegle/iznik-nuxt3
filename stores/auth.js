@@ -483,8 +483,9 @@ export const useAuthStore = defineStore({
     },
     async savePushId(){
       const mobileStore = useMobileStore()
+      if( mobileStore.mobilePushId===null) console.log('******************* mobileStore.mobilePushId===null')
       // Tell server our push notification id if logged in
-      if( this.user !== null) {
+      if( this.user !== null && (typeof mobileStore.mobilePushId === 'string') && (mobileStore.mobilePushId.length > 0)) {
         if (mobileStore.acceptedMobilePushId !== mobileStore.mobilePushId) {
           console.log('sending mobilePushId', mobileStore.mobilePushId)
           const params = {
