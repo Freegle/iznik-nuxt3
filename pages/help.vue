@@ -145,8 +145,43 @@
               </p>
             </div>
           </HelpQuestion>
+          <HelpQuestion id="selling" :matches="matches">
+            <template #title>Can I sell something given on Freegle?</template>
+            <div>
+              <p>
+                Reselling also keeps stuff out of landfill; but please don't
+                sell items you got from Freegle without the agreement of the
+                person who gave them to you.
+              </p>
+            </div>
+          </HelpQuestion>
+          <HelpQuestion id="howdoichoose" :matches="matches">
+            <template #title
+              >How do I choose if several people are interested?
+            </template>
+            <div>
+              <p>
+                Unless you are in a hurry, it is better leave it a while to see
+                who replies before choosing. Some people use
+                first-come-first-served, but you don't have to.
+              </p>
+              <p>
+                You can see in someone's profile how close they are, how many
+                thumbs up/down they have from other freeglers.
+              </p>
+              <p>It's up to you - deciding is all part of the fun!</p>
+            </div>
+          </HelpQuestion>
+          <HelpQuestion id="rules" :matches="matches">
+            <template #title>What are your rules?</template>
+            <template #default>
+              <TermsOfUse />
+            </template>
+          </HelpQuestion>
+          <hr class="mt-4" />
+          <h2>Can I help Freegle?</h2>
           <HelpQuestion id="canihelp" :matches="matches">
-            <template #title>Can I help?</template>
+            <template #title>Can I volunteer?</template>
             <div>
               <p>
                 Yes! Freegle is run by volunteers. The first stage is to become
@@ -157,9 +192,9 @@
                 Find out more
               </b-button>
               <SupporterInfoModal
-                v-if="showInfoModal"
-                ref="supporterInfoModal"
-                @hidden="showInfoModal = false"
+                  v-if="showInfoModal"
+                  ref="supporterInfoModal"
+                  @hidden="showInfoModal = false"
               />
               <p>
                 If you'd like to spread the word you can download a poster or
@@ -198,16 +233,16 @@
                   IT geeks who know some of these: VueJS/Bootstrap
                   4/CSS/PHP/Percona/nginx - find us on
                   <a
-                    target="_blank"
-                    href="https://github.com/Freegle"
-                    rel="noopener noreferrer"
-                    >GitHub</a
+                      target="_blank"
+                      href="https://github.com/Freegle"
+                      rel="noopener noreferrer"
+                  >GitHub</a
                   >.
                 </li>
               </ul>
               <p>
                 <!-- eslint-disable-next-line -->
-              You can reach us at <ExternalLink href="mailto:volunteers@ilovefreegle.org">volunteers@ilovefreegle.org</ExternalLink>.
+                You can reach us at <ExternalLink href="mailto:volunteers@ilovefreegle.org">volunteers@ilovefreegle.org</ExternalLink>.
               </p>
               <p>
                 Or if you'd like to donate to our charity, you can do that
@@ -231,40 +266,12 @@
                 If you don't use PayPal, there are other ways to donate
                 <nuxt-link no-prefetch to="/donate">here</nuxt-link>.
               </p>
-            </div>
-          </HelpQuestion>
-          <HelpQuestion id="selling" :matches="matches">
-            <template #title>Can I sell something given on Freegle?</template>
-            <div>
               <p>
-                Reselling also keeps stuff out of landfill; but please don't
-                sell items you got from Freegle without the agreement of the
-                person who gave them to you.
+                We can get even more from your donation if you're able to
+                complete a gift aid declaration
+                <nuxt-link no-prefetch to="/giftaid">here</nuxt-link>.
               </p>
             </div>
-          </HelpQuestion>
-          <HelpQuestion id="howdoichoose" :matches="matches">
-            <template #title
-              >How do I choose if several people are interested?
-            </template>
-            <div>
-              <p>
-                Unless you are in a hurry, it is better leave it a while to see
-                who replies before choosing. Some people use
-                first-come-first-served, but you don't have to.
-              </p>
-              <p>
-                You can see in someone's profile how close they are, how many
-                thumbs up/down they have from other freeglers.
-              </p>
-              <p>It's up to you - deciding is all part of the fun!</p>
-            </div>
-          </HelpQuestion>
-          <HelpQuestion id="rules" :matches="matches">
-            <template #title>What are your rules?</template>
-            <template #default>
-              <TermsOfUse />
-            </template>
           </HelpQuestion>
         </div>
         <hr />
@@ -404,17 +411,20 @@ export default {
     this.forIndex = []
 
     for (const question of faqs) {
-      try {
-        const questionText = question.children[0].innerText.trim()
-        const answerText = question.children[1].innerText.trim()
 
-        this.forIndex.push({
-          id: question.id,
-          question: questionText,
-          answer: answerText,
-        })
-      } catch (e) {
-        console.error('Malformed FAQ', question)
+      if (question.tagName === 'DIV') {
+        try {
+          const questionText = question.children[0].innerText.trim()
+          const answerText = question.children[1].innerText.trim()
+
+          this.forIndex.push({
+            id: question.id,
+            question: questionText,
+            answer: answerText,
+          })
+        } catch (e) {
+          console.error('Malformed FAQ', question)
+        }
       }
     }
 

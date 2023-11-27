@@ -10,6 +10,7 @@
         @click="showInfo"
       >
         <ProfileImage
+          v-if="reply.profile?.id"
           :image="reply.profile?.paththumb"
           class="ml-1 mr-2 mt-1 mb-1 inline"
           :is-moderator="Boolean(reply.showmod && reply.replyto === threadhead)"

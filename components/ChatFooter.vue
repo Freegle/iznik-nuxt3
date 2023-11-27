@@ -485,51 +485,53 @@ export default {
       this.showProfileModal = true
     },
     async send() {
-      if (this.imageid) {
-        this.sending = true
-
-        await this.chatStore.send(this.id, null, null, this.imageid)
-        await this._updateAfterSend()
-        this.sending = false
-        this.imagethumb = null
-        this.imageid = null
-      } else {
-        let msg = this.sendmessage
-
-        if (msg) {
+      if (!this.sending) {
+        if (this.imageid) {
           this.sending = true
 
-          // If the current last message in this chat is an "interested" from the other party, then we're going to ask
-          // if they expect a reply.
-          const RSVP =
-            this.chatmessages.length &&
-            this.chatmessages[this.chatmessages.length - 1].type ===
-              'Interested' &&
-            this.chatmessages[this.chatmessages.length - 1].userid !==
-              this.myid &&
-            this.chat.chattype === 'User2User'
-
-          // Encode up any emojis.
-          msg = untwem(msg)
-
-          // Send it
-          await this.chatStore.send(this.id, msg)
-
-          // Clear the message now it's sent.
-          this.sendmessage = ''
-
+          await this.chatStore.send(this.id, null, null, this.imageid)
           await this._updateAfterSend()
+          this.sending = false
+          this.imagethumb = null
+          this.imageid = null
+        } else {
+          let msg = this.sendmessage
 
-          if (RSVP) {
-            this.RSVP = true
-          } else {
-            // We've sent a message.  This would be a good time to do some microvolunteering.
-            this.showMicrovolunteering = true
+          if (msg) {
+            this.sending = true
+
+            // If the current last message in this chat is an "interested" from the other party, then we're going to ask
+            // if they expect a reply.
+            const RSVP =
+              this.chatmessages.length &&
+              this.chatmessages[this.chatmessages.length - 1].type ===
+                'Interested' &&
+              this.chatmessages[this.chatmessages.length - 1].userid !==
+                this.myid &&
+              this.chat.chattype === 'User2User'
+
+            // Encode up any emojis.
+            msg = untwem(msg)
+
+            // Send it
+            await this.chatStore.send(this.id, msg)
+
+            // Clear the message now it's sent.
+            this.sendmessage = ''
+
+            await this._updateAfterSend()
+
+            if (RSVP) {
+              this.RSVP = true
+            } else {
+              // We've sent a message.  This would be a good time to do some microvolunteering.
+              this.showMicrovolunteering = true
+            }
           }
-        }
 
-        // Start the timer which indicates we may still be typing.
-        this.startTypingTimer()
+          // Start the timer which indicates we may still be typing.
+          this.startTypingTimer()
+        }
       }
     },
     startTypingTimer() {
