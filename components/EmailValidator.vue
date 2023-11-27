@@ -6,18 +6,20 @@
       label-class="mt-0"
       :state="true"
     >
-      <Field
-        ref="email"
-        v-model="currentEmail"
-        :rules="validateEmail"
-        type="email"
-        name="email"
-        :class="'email form-control input-' + size + ' ' + inputClass"
-        :center="center"
-        autocomplete="username email"
-        :placeholder="'Email address ' + (required ? '' : '(Optional)')"
-      />
-      <ErrorMessage name="email" class="text-danger font-weight-bold" />
+      <VeeForm ref="form" as="">
+        <Field
+          ref="email"
+          v-model="currentEmail"
+          :rules="validateEmail"
+          type="email"
+          name="email"
+          :class="'email form-control input-' + size + ' ' + inputClass"
+          :center="center"
+          autocomplete="username email"
+          :placeholder="'Email address ' + (required ? '' : '(Optional)')"
+        />
+        <ErrorMessage name="email" class="text-danger font-weight-bold" />
+      </VeeForm>
     </b-form-group>
     <div
       v-if="suggestedDomains && suggestedDomains.length"
@@ -35,13 +37,15 @@
   </div>
 </template>
 <script>
-import { Field, ErrorMessage } from 'vee-validate'
+import { Field, ErrorMessage, Form as VeeForm } from 'vee-validate'
 import { useDomainStore } from '../stores/domain'
 import { ref } from '#imports'
 import { EMAIL_REGEX } from '~/constants'
 
+const domainValidationCache = new Map()
+
 export default {
-  components: { Field, ErrorMessage },
+  components: { Field, ErrorMessage, VeeForm },
   props: {
     email: {
       type: String,
@@ -119,29 +123,60 @@ export default {
             }
           }
         }
-
-        const validate = await this.$refs.email?.validate()
-        if (validate) {
-          this.$emit('update:valid', validate.valid)
-        }
       },
     },
   },
   methods: {
-    validateEmail(value) {
+    requestGoogleDnsResolve(domain) {
+      const url = new URL('https://dns.google/resolve')
+      url.search = new URLSearchParams({ name: domain }).toString()
+
+      return fetch(url, { signal: AbortSignal.timeout(10000) }).then(
+        (response) => response.json()
+      )
+    },
+    async checkValidDomain(value) {
+      let isValidDomain = true
+      const domain = value.substring(value.indexOf('@') + 1)
+      let request
+      if (domainValidationCache.has(domain)) {
+        request = domainValidationCache.get(domain)
+      } else {
+        request = this.requestGoogleDnsResolve(domain)
+        domainValidationCache.set(domain, request)
+      }
+
+      try {
+        const { Status: status } = await request
+
+        isValidDomain = status === 0
+      } catch (_) {
+        // if something doesn't work with google domain check we ignore this check
+      }
+      return isValidDomain
+    },
+    async validateEmail(value) {
       if (!value && !this.required) {
-        return true
+        this.$emit('update:valid', true)
+        return
       }
 
       if (!value) {
+        this.$emit('update:valid', false)
         return 'Please enter an email address.'
       }
 
       if (!new RegExp(EMAIL_REGEX).test(value)) {
+        this.$emit('update:valid', false)
         return 'Please enter a valid email address.'
       }
 
-      return true
+      const isValidDomain = await this.checkValidDomain(value)
+      this.$emit('update:valid', isValidDomain)
+      return (
+        isValidDomain ||
+        "Please check your email domain - maybe you've made a typo?"
+      )
     },
   },
 }
