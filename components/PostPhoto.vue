@@ -29,6 +29,7 @@
       rounded
       thumbnail
       class="square"
+      :class="{ primary }"
       @click="$emit('click')"
     />
     <b-img
@@ -71,6 +72,10 @@ export default {
       type: Boolean,
       required: false,
       default: true,
+    },
+    primary: {
+      type: Boolean,
+      default: false,
     },
   },
   setup() {
@@ -153,5 +158,10 @@ export default {
   min-width: 200px;
   min-height: 200px;
   max-height: 200px;
+}
+
+.primary {
+  border-width: 2px;
+  border-color: $colour-success;
 }
 </style>
