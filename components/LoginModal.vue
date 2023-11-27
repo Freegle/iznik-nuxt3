@@ -309,6 +309,9 @@ export default {
     lastNameError() {
       return this.nativeBump && this.buttonClicked && !this.lastname
     },
+    formFields() {
+      return [this.firstname, this.lastname, this.email, this.password]
+    },
     emailError() {
       return (
         this.nativeBump &&
@@ -359,6 +362,11 @@ export default {
           this.installGoogleSDK()
         })
       }
+    },
+    formFields() {
+      // reset form validation once any of the fields changes its value
+      this.nativeLoginError = null
+      this.buttonClicked = false
     },
   },
   beforeUnmount() {
