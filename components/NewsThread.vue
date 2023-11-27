@@ -1,6 +1,6 @@
 <template>
   <div v-if="showThis" class="bg-white mt-2">
-    <b-card :class="backgroundColor" no-body>
+    <b-card v-if="newsfeed" :class="backgroundColor" no-body>
       <b-card-body class="p-1 p-sm-2">
         <b-card-text>
           <div v-if="isNewsComponent">

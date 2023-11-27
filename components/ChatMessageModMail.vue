@@ -88,7 +88,7 @@ export default {
   },
   methods: {
     async repost() {
-      const message = this.refmsg
+      const message = Object.assign({}, this.refmsg)
 
       if (message) {
         // Remove any partially composed messages we currently have, because they'll be confusing.
@@ -107,10 +107,7 @@ export default {
           this.me
         )
 
-        await this.composeStore.setAttachmentsForMessage(
-          message.id,
-          message.attachments
-        )
+        this.composeStore.setAttachmentsForMessage(0, message.attachments)
 
         const router = useRouter()
         router.push(message.type === 'Offer' ? '/give' : '/find')

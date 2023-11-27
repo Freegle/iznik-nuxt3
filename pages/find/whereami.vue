@@ -41,7 +41,7 @@
       </div>
       <div v-else>
         <div v-if="postcodeValid" class="mt-1 text-center">
-          Freegle has local communities for each area. We'll We'll put anything
+          Freegle has local communities for each area. We'll put anything
           you post on here, and search this community and others nearby.
         </div>
         <div v-if="postcodeValid" class="mt-1 d-flex justify-content-around">
