@@ -112,7 +112,7 @@
             </span>
           </p>
         </div>
-        <VForm v-else-if="event" ref="form">
+        <VeeForm v-else-if="event" ref="form">
           <b-row>
             <b-col cols="12" md="6">
               <b-form-group label="For which community?" :state="true">
@@ -318,7 +318,7 @@
             <v-icon icon="info-circle" />&nbsp;This community has chosen not to
             allow Community Events.
           </NoticeMessage>
-        </VForm>
+        </VeeForm>
       </div>
     </template>
     <template #footer>
@@ -379,7 +379,7 @@
   </b-modal>
 </template>
 <script>
-import { defineRule, Form as VForm, Field, ErrorMessage } from 'vee-validate'
+import { defineRule, Form as VeeForm, Field, ErrorMessage } from 'vee-validate'
 import { required, email, min, max } from '@vee-validate/rules'
 import { useCommunityEventStore } from '../stores/communityevent'
 import { useComposeStore } from '../stores/compose'
@@ -439,7 +439,7 @@ export default {
     NoticeMessage,
     DonationButton,
     ExternalLink,
-    VForm,
+    VeeForm,
     Field,
     ErrorMessage,
   },
