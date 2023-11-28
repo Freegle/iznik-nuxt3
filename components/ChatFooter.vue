@@ -79,7 +79,6 @@
             @keydown.enter.exact.prevent
             @keyup.enter.exact="send"
             @keydown.enter.shift.exact.prevent="newline"
-            @keydown.alt.shift.exact.prevent="newline"
             @focus="markRead"
           />
         </div>
