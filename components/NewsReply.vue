@@ -227,7 +227,7 @@
               @keydown.enter.exact.prevent
               @keyup.enter.exact="sendReply"
               @keydown.enter.shift.exact.prevent="newlineReply"
-              @keydown.alt.shift.exact.prevent="newlineReply"
+              @keydown.alt.shift.enter.exact.prevent="newlineReply"
               @focus="focusedReply"
             />
           </b-input-group>
