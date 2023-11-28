@@ -1,3 +1,3 @@
 export default defineEventHandler((event) => {
-  console.log('Request: ' + event.node.req.url)
+  console.log(event.node.req.method + ' request: ' + event.node.req.url)
 })

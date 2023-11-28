@@ -188,15 +188,25 @@ export default {
 }
 </script>
 <style scoped lang="scss">
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
+
 .chatpane {
   min-height: 100vh;
 }
 
 .chatHolder {
-  height: calc(100vh - 74px);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+
+  // On mobile there is a sticky ad at the bottom and we want to make sure the buttons show.
+  height: calc(100vh - 74px - 52px);
+
+  @include media-breakpoint-up(md) {
+    height: calc(100vh - 74px);
+  }
 }
 
 .chatTitle {

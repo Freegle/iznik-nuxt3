@@ -142,27 +142,29 @@ export default {
       if (this.name) {
         const cent = this.$refs.map.getCenter()
 
-        // There's a server oddity which means we need to add this and then edit in the name/description.
-        const id = await this.noticeboardStore.add(
-          cent.lat,
-          cent.lng,
-          this.active
-        )
-
-        if (id) {
-          await this.noticeboardStore.edit(
-            id,
-            this.name,
-            this.description,
-            this.active,
-            this.image?.id
+        if (cent?.lat || cent?.lng) {
+          // There's a server oddity which means we need to add this and then edit in the name/description.
+          const id = await this.noticeboardStore.add(
+            cent.lat,
+            cent.lng,
+            this.active
           )
 
-          this.name = null
-          this.description = null
-        }
+          if (id) {
+            await this.noticeboardStore.edit(
+              id,
+              this.name,
+              this.description,
+              this.active,
+              this.image?.id
+            )
 
-        this.hide()
+            this.name = null
+            this.description = null
+          }
+
+          this.hide()
+        }
       }
     },
     shown() {

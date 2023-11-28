@@ -344,6 +344,9 @@ export default {
     lastNameError() {
       return this.nativeBump && this.buttonClicked && !this.lastname
     },
+    formFields() {
+      return [this.firstname, this.lastname, this.email, this.password]
+    },
     emailError() {
       return (
         this.nativeBump &&
@@ -406,6 +409,11 @@ export default {
           this.installGoogleSDK()
         })
       }
+    },
+    formFields() {
+      // reset form validation once any of the fields changes its value
+      this.nativeLoginError = null
+      this.buttonClicked = false
     },
   },
   beforeUnmount() {
@@ -471,7 +479,7 @@ export default {
         if (
           !this.firstname ||
           !this.lastname ||
-          !this.email ||
+          this.emailError ||
           !this.password
         ) {
           this.nativeLoginError = 'Please fill out the form.'
@@ -521,7 +529,9 @@ export default {
               }
             })
         }
-      } else if (this.email && this.password) {
+      } else if (this.emailError || this.passwordError) {
+        this.nativeLoginError = 'Please fill out the form.'
+      } else {
         // Login
         this.loginWaitMessage = "Please wait..."
         this.authStore
