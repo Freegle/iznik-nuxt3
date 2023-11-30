@@ -139,15 +139,15 @@ export default {
       let isValidDomain = true
       const domain = value.substring(value.indexOf('@') + 1)
       let request
-      if (domainValidationCache.has(domain)) {
-        request = domainValidationCache.get(domain)
-      } else {
-        request = this.requestGoogleDnsResolve(domain)
-        domainValidationCache.set(domain, request)
-      }
-
       try {
         const { Status: status } = await request
+
+        if (domainValidationCache.has(domain)) {
+          request = domainValidationCache.get(domain)
+        } else {
+          request = this.requestGoogleDnsResolve(domain)
+          domainValidationCache.set(domain, request)
+        }
 
         isValidDomain = status === 0
       } catch (_) {
