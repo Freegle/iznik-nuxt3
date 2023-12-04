@@ -178,6 +178,41 @@
               <TermsOfUse />
             </template>
           </HelpQuestion>
+          <HelpQuestion id="integrations" :matches="matches">
+            <template #title>
+              How do TrashNothing and LoveJunk relate to Freegle?
+            </template>
+            <div>
+              <p>
+                <ExternalLink href="https://trashnothing.com">
+                  TrashNothing
+                </ExternalLink>
+                is another platform for reuse. We're friends with them. It's
+                very much like Freegle, but it has a different interface.
+              </p>
+              <p>
+                We've done a nice integration with them, so that when you post
+                on Freegle most posts get shown on TrashNothing and vice versa,
+                and things like thumbs up/down work too. You'll get replies from
+                TrashNothing members, though you might not notice. So far as
+                you're concerned, they're just other freeglers.
+              </p>
+              <p>
+                <ExternalLink href="https://lovejunk.com">
+                  LoveJunk
+                </ExternalLink>
+                is another reuse platform. Mostly it's for paid disposal of
+                things you don't need any more - similar to a council bulky
+                waste collection.
+              </p>
+              <p>
+                LoveJunk pays Freegle a bit each month for Freegle posts to get
+                shown on there, so you might get replies from LoveJunk reusers.
+                Again, you might not notice that they are from LoveJunk - just
+                treat them like you would do any other freeglers.
+              </p>
+            </div>
+          </HelpQuestion>
           <hr class="mt-4" />
           <h2>Can I help Freegle?</h2>
           <HelpQuestion id="canihelp" :matches="matches">
@@ -192,9 +227,9 @@
                 Find out more
               </b-button>
               <SupporterInfoModal
-                  v-if="showInfoModal"
-                  ref="supporterInfoModal"
-                  @hidden="showInfoModal = false"
+                v-if="showInfoModal"
+                ref="supporterInfoModal"
+                @hidden="showInfoModal = false"
               />
               <p>
                 If you'd like to spread the word you can download a poster or
@@ -233,10 +268,10 @@
                   IT geeks who know some of these: VueJS/Bootstrap
                   4/CSS/PHP/Percona/nginx - find us on
                   <a
-                      target="_blank"
-                      href="https://github.com/Freegle"
-                      rel="noopener noreferrer"
-                  >GitHub</a
+                    target="_blank"
+                    href="https://github.com/Freegle"
+                    rel="noopener noreferrer"
+                    >GitHub</a
                   >.
                 </li>
               </ul>
@@ -352,6 +387,7 @@
 import { useRoute } from 'vue-router'
 import { Searcher } from 'fast-fuzzy'
 import dayjs from 'dayjs'
+import ExternalLink from '../components/ExternalLink'
 import HelpQuestion from '~/components/HelpQuestion'
 import { buildHead } from '~/composables/useBuildHead'
 import VisibleWhen from '~/components/VisibleWhen'
@@ -361,7 +397,13 @@ const SupporterInfoModal = defineAsyncComponent(() =>
 const SidebarLeft = () => import('~/components/SidebarLeft')
 
 export default {
-  components: { HelpQuestion, SupporterInfoModal, VisibleWhen, SidebarLeft },
+  components: {
+    ExternalLink,
+    HelpQuestion,
+    SupporterInfoModal,
+    VisibleWhen,
+    SidebarLeft,
+  },
   setup() {
     const route = useRoute()
     const runtimeConfig = useRuntimeConfig()
@@ -411,7 +453,6 @@ export default {
     this.forIndex = []
 
     for (const question of faqs) {
-
       if (question.tagName === 'DIV') {
         try {
           const questionText = question.children[0].innerText.trim()
