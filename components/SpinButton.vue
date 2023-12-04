@@ -148,18 +148,20 @@ const click = () => {
   }
 }
 
-const doIt = async () => {
+const doIt = () => {
   if (!doing.value) {
     done.value = false
     doing.value = true
 
-    await emit('handle', props.handlerData)
+    const callback = () => {
+      doing.value = false
+      done.value = true
+      setTimeout(() => {
+        done.value = false
+      }, props.timeout)
+    }
 
-    doing.value = false
-    done.value = true
-    setTimeout(() => {
-      done.value = false
-    }, props.timeout)
+    emit('handle', { data: props.handlerData, callback })
   }
 }
 </script>

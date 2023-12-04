@@ -338,7 +338,7 @@ export default {
       this.showMap = false
       this.$emit('hidden')
     },
-    async add() {
+    async add({ callback }) {
       const id = await this.addressStore.add({
         pafid: this.selectedProperty,
         instructions: this.updatedInstructions,
@@ -347,10 +347,12 @@ export default {
       this.selectedAddress = id
 
       this.showAdd = false
+      callback()
     },
-    async deleteIt() {
+    async deleteIt({ callback }) {
       await this.addressStore.delete(this.selectedAddress)
       this.selectFirst()
+      callback()
     },
     postcodeCleared() {
       this.postcode = null
@@ -363,11 +365,12 @@ export default {
 
       this.selectedProperty = 0
     },
-    async saveInstructions() {
+    async saveInstructions({ callback }) {
       await this.addressStore.update({
         id: this.selectedAddress,
         instructions: this.updatedInstructions,
       })
+      callback()
     },
     addnew() {
       this.showAdd = true

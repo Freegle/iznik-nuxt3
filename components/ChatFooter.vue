@@ -494,7 +494,7 @@ export default {
     showInfo() {
       this.showProfileModal = true
     },
-    async send() {
+    async send({ callback }) {
       if (!this.sending) {
         if (this.imageid) {
           this.sending = true
@@ -543,6 +543,7 @@ export default {
           this.startTypingTimer()
         }
       }
+      callback()
     },
     startTypingTimer() {
       // We want to let the server know regularly that we are still typing.  This will bump earlier recent chat

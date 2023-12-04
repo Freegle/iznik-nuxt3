@@ -174,8 +174,9 @@ export default {
         await this.authStore.setGroup(params)
       }
     },
-    leaveGroup() {
+    leaveGroup({ callback }) {
       this.$emit('leave')
+      callback()
     },
   },
 }

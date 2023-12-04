@@ -225,7 +225,7 @@ export default {
     },
   },
   methods: {
-    async registerOrSend() {
+    async registerOrSend({ callback }) {
       // We've got a reply and an email address.  Maybe the email address is a registered user, maybe it's new.  If
       // it's a registered user then we want to force them to log in.
       //
@@ -263,63 +263,71 @@ export default {
         console.log('Register exception, force login', e.message)
         this.forceLogin = true
       }
+      callback()
     },
-    async sendReply() {
-      console.log('sendReply', this.reply)
+    async sendReply(data) {
+      return await new Promise((resolve) => {
+        setTimeout(() => {
+          data && data.callback()
+          resolve()
+        }, 3000)
+      })
+      // console.log('sendReply', this.reply)
 
-      if (this.reply) {
+      // if (this.reply) {
         // Save the reply
-        const replyStore = useReplyStore()
-        replyStore.replyMsgId = this.id
-        replyStore.replyMessage = this.reply
-        replyStore.replyingAt = Date.now()
-        console.log(
-          'State',
-          useReplyStore().replyMsgId,
-          useReplyStore().replyMessage,
-          useReplyStore().replyingAt
-        )
+        // const replyStore = useReplyStore()
+        // replyStore.replyMsgId = this.id
+        // replyStore.replyMessage = this.reply
+        // replyStore.replyingAt = Date.now()
+        // console.log(
+        //   'State',
+        //   useReplyStore().replyMsgId,
+        //   useReplyStore().replyMessage,
+        //   useReplyStore().replyingAt
+        // )
 
-        if (this.me) {
+        // if (this.me) {
           // We have several things to do:
           // - join a group if need be (doesn't matter which)
           // - post our reply
           // - show/go to the open the popup chat so they see what happened
-          this.replying = true
-          let found = false
-          let tojoin = null
+          // this.replying = true
+          // let found = false
+          // let tojoin = null
 
           // We shouldn't need to fetch, but we've seen a Sentry issue where the message groups are not valid.
-          const msg = await this.messageStore.fetch(this.id, true)
-
-          if (msg?.groups) {
-            for (const messageGroup of msg.groups) {
-              tojoin = messageGroup.groupid
-              Object.keys(this.myGroups).forEach((key) => {
-                const group = this.myGroups[key]
-
-                if (messageGroup.groupid === group.id) {
-                  found = true
-                }
-              })
-            }
-
-            if (!found) {
-              // Not currently a member.
-              await this.authStore.joinGroup(this.myid, tojoin, false)
-            }
-
-            // Now we can send the reply via chat.
-            await this.$nextTick()
-            await this.replyToPost()
-          }
-        } else {
-          // We're not logged in yet.  We need to force a log in.  Once that completes then either the watch in here
-          // or default.vue will spot we have a reply to send and make it happen.
-          console.log('Force login')
-          this.forceLogin = true
-        }
-      }
+          // const msg = await this.messageStore.fetch(this.id, true)
+        //
+        //   if (msg?.groups) {
+        //     for (const messageGroup of msg.groups) {
+        //       tojoin = messageGroup.groupid
+        //       Object.keys(this.myGroups).forEach((key) => {
+        //         const group = this.myGroups[key]
+        //
+        //         if (messageGroup.groupid === group.id) {
+        //           found = true
+        //         }
+        //       })
+        //     }
+        //
+        //     if (!found) {
+        //       // Not currently a member.
+        //       await this.authStore.joinGroup(this.myid, tojoin, false)
+        //     }
+        //
+        //     // Now we can send the reply via chat.
+        //     await this.$nextTick()
+        //     await this.replyToPost()
+        //   }
+        // } else {
+        //   // We're not logged in yet.  We need to force a log in.  Once that completes then either the watch in here
+        //   // or default.vue will spot we have a reply to send and make it happen.
+        //   console.log('Force login')
+        //   this.forceLogin = true
+        // }
+      // }
+      // data && data.callback()
     },
     close() {
       this.$emit('close')

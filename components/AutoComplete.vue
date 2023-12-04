@@ -29,6 +29,7 @@
             :show-spinner="!!ajaxInProgress"
             :tabindex="-1"
             spinner-only
+            @handle="spinButtonClick"
           />
         </b-input-group-append>
       </b-input-group>
@@ -329,6 +330,10 @@ export default {
       if (this.showTimer) {
         clearTimeout(this.showTimer)
       }
+    },
+
+    spinButtonClick({ callback }) {
+      callback()
     },
 
     startTimer() {

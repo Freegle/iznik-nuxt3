@@ -119,7 +119,7 @@
         name="save"
         label="Save"
         spinclass="text-white"
-        @click="save"
+        @handle="save"
       />
     </template>
   </b-modal>
@@ -233,9 +233,12 @@ export default {
     },
   },
   methods: {
-    async save() {
+    async save({ callback }) {
       this.triedToSave = true
-      if (this.isSaveButtonDisabled) return
+      if (this.isSaveButtonDisabled) {
+        callback()
+        return
+      }
 
       if (this.edititem && (this.edittextbody || this.attachments?.length)) {
         const attids = []
@@ -266,6 +269,7 @@ export default {
         this.hide()
         await this.messageStore.patch(params)
       }
+      callback()
     },
     removePhoto(id) {
       this.attachments = this.attachments.filter((item) => {

@@ -601,11 +601,12 @@ export default {
       await this.communityEventStore.delete(this.event.id)
       this.hide()
     },
-    async saveIt() {
+    async saveIt({ callback }) {
       const validate = await this.$refs.form.validate()
 
       if (!this.groupid) {
         this.showGroupError = true
+        callback()
         return
       } else {
         this.showGroupError = false
@@ -615,6 +616,7 @@ export default {
         for (const date of this.event.dates) {
           if (!date.start || !date.end || !date.starttime || !date.endtime) {
             this.showDateError = true
+            callback()
             return
           }
         }
@@ -625,6 +627,7 @@ export default {
       }
 
       if (!validate.valid) {
+        callback()
         return
       }
 
@@ -696,6 +699,7 @@ export default {
           this.added = true
         }
       }
+      callback()
     },
     async dontSave() {
       if (this.id) {

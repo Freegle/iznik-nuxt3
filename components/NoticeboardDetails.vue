@@ -158,17 +158,21 @@ export default {
     },
   },
   methods: {
-    async putup() {
+    async putup({ callback }) {
       await this.noticeboardStore.refresh(this.id)
+      callback()
     },
-    async shutup() {
+    async shutup({ callback }) {
       await this.noticeboardStore.decline(this.id)
+      callback()
     },
-    async dead() {
+    async dead({ callback }) {
       await this.noticeboardStore.inactive(this.id)
+      callback()
     },
-    async saveComments() {
+    async saveComments({ callback }) {
       await this.noticeboardStore.saveComments(this.id, this.comments)
+      callback()
     },
   },
 }

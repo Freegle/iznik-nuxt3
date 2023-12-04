@@ -110,7 +110,7 @@ export default {
     getCenter() {
       return this.center
     },
-    findLoc() {
+    findLoc({ callback }) {
       try {
         if (
           navigator &&
@@ -137,6 +137,7 @@ export default {
         console.error('Find location failed with', e)
         this.locationFailed = true
       }
+      callback()
     },
     idle() {
       this.center = this.mapObject.getCenter()

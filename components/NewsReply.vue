@@ -469,7 +469,9 @@ export default {
       this.replyingTo = this.id
     },
     async sendReply(e) {
-      if (e) {
+      const { callback } = e;
+
+      if (e.target) {
         e.preventDefault()
         e.stopPropagation()
         e.stopImmediatePropagation()
@@ -498,6 +500,7 @@ export default {
         // Force re-render.  Store reactivity doesn't seem to work nicely with the nested reply structure we have.
         this.bump++
       }
+      callback && callback()
     },
     newlineReply() {
       const p = this.$refs.replybox.selectionStart

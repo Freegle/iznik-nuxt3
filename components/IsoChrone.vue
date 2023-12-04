@@ -315,10 +315,11 @@ export default {
         this.$emit('added')
       }
     },
-    remove() {
+    remove({ callback }) {
       this.isochroneStore.delete({
         id: this.id,
       })
+      callback()
     },
   },
 }
