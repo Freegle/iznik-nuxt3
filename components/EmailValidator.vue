@@ -130,24 +130,25 @@ export default {
     requestGoogleDnsResolve(domain) {
       const url = new URL('https://dns.google/resolve')
       url.search = new URLSearchParams({ name: domain }).toString()
+      const abortController = new AbortController()
+      const timer = setTimeout(() => abortController.abort(), 10 * 1000)
 
-      return fetch(url, { signal: AbortSignal.timeout(10000) }).then(
-        (response) => response.json()
-      )
+      return fetch(url, { signal: abortController.signal })
+        .then((response) => response.json())
+        .finally(() => clearTimeout(timer))
     },
     async checkValidDomain(value) {
       let isValidDomain = true
       const domain = value.substring(value.indexOf('@') + 1)
-      let request
-      try {
-        const { Status: status } = await request
 
-        if (domainValidationCache.has(domain)) {
-          request = domainValidationCache.get(domain)
-        } else {
-          request = this.requestGoogleDnsResolve(domain)
-          domainValidationCache.set(domain, request)
-        }
+      try {
+        const request = domainValidationCache.has(domain)
+          ? domainValidationCache.get(domain)
+          : this.requestGoogleDnsResolve(domain)
+
+        domainValidationCache.set(domain, request)
+
+        const { Status: status } = await request
 
         isValidDomain = status === 0
       } catch (_) {
