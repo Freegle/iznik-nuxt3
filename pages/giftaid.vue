@@ -149,6 +149,7 @@
             size="lg"
             variant="primary"
             label="Submit Gift Aid Declaration"
+            spinclass="text-white"
             class="mt-4"
             @handle="save"
           />
@@ -241,7 +242,7 @@ export default {
       return homeaddress.value?.includes('@')
     })
 
-    const giftAidAllowed = period.value !== 'Declined'
+    const giftAidAllowed = computed(() => period.value !== 'Declined')
 
     const oldoptions = computed(() => {
       let oldoptions = false
@@ -280,7 +281,11 @@ export default {
   computed: {
     valid() {
       return (
-        this.period && this.fullname && this.homeaddress && !this.emailByMistake
+        !this.giftAidAllowed ||
+        (this.period &&
+          this.fullname &&
+          this.homeaddress &&
+          !this.emailByMistake)
       )
     },
     nameInvalid() {
@@ -298,7 +303,7 @@ export default {
           await this.addressStore.fetch()
           await this.giftAidStore.fetch()
 
-          if (!this.giftaid?.period) {
+          if (!this.period) {
             // We fetched no gift aid info so set it to the default.
             this.giftaid.period = this.giftAidAllowed
               ? 'Past4YearsAndFuture'
@@ -322,6 +327,17 @@ export default {
     async save() {
       this.triedToSubmit = true
       if (!this.valid) return
+
+      if (!this.giftAidAllowed) {
+        // We might need to fake up some values that the server expects.
+        if (!this.fullname) {
+          this.giftAidStore.giftaid.fullname = this.me.displayname
+        }
+
+        if (!this.homeaddress) {
+          this.giftAidStore.giftaid.homeaddress = 'N/A'
+        }
+      }
 
       await this.giftAidStore.save()
       this.saved = true
