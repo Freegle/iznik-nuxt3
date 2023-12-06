@@ -334,7 +334,6 @@ export default {
       immediate: true,
     },
     async marketingconsent(newVal) {
-      console.log('Save consent', newVal)
       await this.authStore.saveAndGet({
         marketingconsent: newVal,
       })
