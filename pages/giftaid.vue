@@ -137,6 +137,11 @@
                 This and all future donations
               </b-form-radio>
             </b-form-group>
+            <b-form-checkbox v-model="marketingconsent" size="lg" class="mt-2">
+              I'm happy for Freegle to keep in touch with me by email about the
+              impact of my donation and other ways I can support Freegle in the
+              future (please tick box).
+            </b-form-checkbox>
             <NoticeMessage class="info">
               By submitting this declaration I confirm that I am a UK taxpayer
               and understand that if I pay less Income Tax and/or Capital Gains
@@ -149,6 +154,7 @@
             size="lg"
             variant="primary"
             label="Submit Gift Aid Declaration"
+            spinclass="text-white"
             class="mt-4"
             @handle="save"
           />
@@ -187,6 +193,7 @@
 import { useRoute } from 'vue-router'
 import { useAddressStore } from '../stores/address'
 import { useGiftAidStore } from '../stores/giftaid'
+import { useAuthStore } from '../stores/auth'
 import SpinButton from '~/components/SpinButton'
 import NoticeMessage from '~/components/NoticeMessage'
 import { buildHead } from '~/composables/useBuildHead'
@@ -213,6 +220,7 @@ export default {
 
     const addressStore = useAddressStore()
     const giftAidStore = useGiftAidStore()
+    const authStore = useAuthStore()
 
     const addresses = computed(() => addressStore.addresses)
 
@@ -241,7 +249,7 @@ export default {
       return homeaddress.value?.includes('@')
     })
 
-    const giftAidAllowed = period.value !== 'Declined'
+    const giftAidAllowed = computed(() => period.value !== 'Declined')
 
     const oldoptions = computed(() => {
       let oldoptions = false
@@ -261,6 +269,7 @@ export default {
     return {
       addressStore,
       giftAidStore,
+      authStore,
       addresses,
       giftaid,
       period,
@@ -275,12 +284,17 @@ export default {
     return {
       triedToSubmit: false,
       saved: false,
+      marketingconsent: false,
     }
   },
   computed: {
     valid() {
       return (
-        this.period && this.fullname && this.homeaddress && !this.emailByMistake
+        !this.giftAidAllowed ||
+        (this.period &&
+          this.fullname &&
+          this.homeaddress &&
+          !this.emailByMistake)
       )
     },
     nameInvalid() {
@@ -298,12 +312,14 @@ export default {
           await this.addressStore.fetch()
           await this.giftAidStore.fetch()
 
-          if (!this.giftaid?.period) {
+          if (!this.period) {
             // We fetched no gift aid info so set it to the default.
             this.giftaid.period = this.giftAidAllowed
               ? 'Past4YearsAndFuture'
               : 'Declined'
           }
+
+          this.marketingconsent = newVal.marketingconsent
         }
       },
     },
@@ -317,11 +333,27 @@ export default {
       },
       immediate: true,
     },
+    async marketingconsent(newVal) {
+      await this.authStore.saveAndGet({
+        marketingconsent: newVal,
+      })
+    },
   },
   methods: {
     async save() {
       this.triedToSubmit = true
       if (!this.valid) return
+
+      if (!this.giftAidAllowed) {
+        // We might need to fake up some values that the server expects.
+        if (!this.fullname) {
+          this.giftAidStore.giftaid.fullname = this.me.displayname
+        }
+
+        if (!this.homeaddress) {
+          this.giftAidStore.giftaid.homeaddress = 'N/A'
+        }
+      }
 
       await this.giftAidStore.save()
       this.saved = true
@@ -343,8 +375,14 @@ export default {
 }
 </script>
 <style scoped lang="scss">
+@import 'assets/css/_color-vars.scss';
 :deep(.label) {
   font-weight: bold;
   color: $color-green--darker;
+}
+
+:deep input[type='checkbox'] {
+  border: 2px solid $color-red;
+  border-radius: 4px;
 }
 </style>

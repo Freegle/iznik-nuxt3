@@ -157,7 +157,7 @@
                   class="p-0 pl-2 pt-2 entersend"
                   autocapitalize="none"
                   @keydown.enter.shift.exact.prevent="newlineComment"
-                  @keydown.alt.shift.exact.prevent="newlineComment"
+                  @keydown.alt.shift.enter.exact.prevent="newlineComment"
                   @focus="focusedComment"
                 />
               </b-input-group>

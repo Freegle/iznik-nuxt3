@@ -173,6 +173,14 @@ export default defineNuxtPlugin((nuxtApp) => {
             // Error inside Google Ads.
             console.log('Ad error ignored')
             return null
+          } else if (
+            originalExceptionString?.match(
+              /NetworkError when attempting to fetch resource./
+            )
+          ) {
+            // Flaky network.
+            console.log('Suppress flaky network')
+            return null
           }
         } else if (originalExceptionName === 'ReferenceError') {
           console.log('ReferenceError')
