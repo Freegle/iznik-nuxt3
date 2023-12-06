@@ -137,6 +137,11 @@
                 This and all future donations
               </b-form-radio>
             </b-form-group>
+            <b-form-checkbox v-model="marketingconsent" size="lg" class="mt-2">
+              I'm happy for Freegle to keep in touch with me by email about the
+              impact of my donation and other ways I can support Freegle in the
+              future (please tick box).
+            </b-form-checkbox>
             <NoticeMessage class="info">
               By submitting this declaration I confirm that I am a UK taxpayer
               and understand that if I pay less Income Tax and/or Capital Gains
@@ -188,6 +193,7 @@
 import { useRoute } from 'vue-router'
 import { useAddressStore } from '../stores/address'
 import { useGiftAidStore } from '../stores/giftaid'
+import { useAuthStore } from '../stores/auth'
 import SpinButton from '~/components/SpinButton'
 import NoticeMessage from '~/components/NoticeMessage'
 import { buildHead } from '~/composables/useBuildHead'
@@ -214,6 +220,7 @@ export default {
 
     const addressStore = useAddressStore()
     const giftAidStore = useGiftAidStore()
+    const authStore = useAuthStore()
 
     const addresses = computed(() => addressStore.addresses)
 
@@ -262,6 +269,7 @@ export default {
     return {
       addressStore,
       giftAidStore,
+      authStore,
       addresses,
       giftaid,
       period,
@@ -276,6 +284,7 @@ export default {
     return {
       triedToSubmit: false,
       saved: false,
+      marketingconsent: false,
     }
   },
   computed: {
@@ -309,6 +318,8 @@ export default {
               ? 'Past4YearsAndFuture'
               : 'Declined'
           }
+
+          this.marketingconsent = newVal.marketingconsent
         }
       },
     },
@@ -321,6 +332,12 @@ export default {
         }
       },
       immediate: true,
+    },
+    async marketingconsent(newVal) {
+      console.log('Save consent', newVal)
+      await this.authStore.saveAndGet({
+        marketingconsent: newVal,
+      })
     },
   },
   methods: {
@@ -359,8 +376,14 @@ export default {
 }
 </script>
 <style scoped lang="scss">
+@import 'assets/css/_color-vars.scss';
 :deep(.label) {
   font-weight: bold;
   color: $color-green--darker;
+}
+
+:deep input[type='checkbox'] {
+  border: 2px solid $color-red;
+  border-radius: 4px;
 }
 </style>
