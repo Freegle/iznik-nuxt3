@@ -3,14 +3,14 @@
     <div class="d-flex flex-wrap">
       <draggable
         v-model="attachments"
-        class="d-flex flex-wrap"
+        class="d-flex flex-wrap w-100"
         :item-key="(el) => `image-${el.id}`"
         :animation="150"
         ghost-class="ghost"
       >
         <template #header>
           <div
-            class="photoholder bg-light d-flex flex-column align-items-center justify-items-center mr-1"
+            class="photoholder bg-dark-subtle d-flex flex-column align-items-center justify-items-center mr-md-1"
           >
             <v-icon icon="camera" class="fa-8-75x text-faded" />
             <b-button
@@ -35,7 +35,7 @@
             <PostPhoto
               v-bind="element"
               :primary="index === 0"
-              class="mr-1"
+              class="mr-1 mt-1 mt-md-0"
               @remove="removePhoto"
             />
           </div>
@@ -279,8 +279,12 @@ export default {
 }
 
 .photoholder {
-  width: 200px;
   height: 200px;
+  width: 100%;
+
+  @include media-breakpoint-up(md) {
+    width: 200px;
+  }
 }
 
 .ghost {
