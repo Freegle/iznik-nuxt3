@@ -34,7 +34,7 @@ export const useNewsfeedStore = defineStore({
     async fetchCount(distance, log = true) {
       this.lastDistance = distance
       const ret = await api(this.config).news.count(distance, log)
-      this.count = ret?.count
+      this.count = ret?.count || 0
       return this.count
     },
     addItems(items) {

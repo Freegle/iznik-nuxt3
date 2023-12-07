@@ -5,6 +5,7 @@ import { useNewsfeedStore } from '../stores/newsfeed'
 import { useMessageStore } from '../stores/message'
 import { useNotificationStore } from '../stores/notification'
 import { useLogoStore } from '../stores/logo'
+import { useChatStore } from '../stores/chat'
 import { useAuthStore } from '~/stores/auth'
 import { fetchMe } from '~/composables/useMe'
 import { useRuntimeConfig } from '#app'
@@ -15,6 +16,7 @@ export function useNavbar() {
   const newsfeedStore = useNewsfeedStore()
   const messageStore = useMessageStore()
   const notificationStore = useNotificationStore()
+  const chatStore = useChatStore()
   const logoStore = useLogoStore()
   const route = useRoute()
   const router = useRouter()
@@ -24,7 +26,7 @@ export function useNavbar() {
   const distance = ref(1000)
   const logo = ref('/icon.png')
   const unreadNotificationCount = ref(0)
-  const chatCount = ref(0)
+  const chatCount = computed(() => chatStore.unreadCount + 1)
   const activePostsCount = computed(() => messageStore.activePostsCounter)
   const showAboutMeModal = ref(false)
   const countTimer = ref(null)
@@ -61,6 +63,7 @@ export function useNavbar() {
   })
 
   const newsCount = computed(() => {
+    console.log('Count', newsfeedStore, newsfeedStore.count)
     return newsfeedStore.count
   })
 
