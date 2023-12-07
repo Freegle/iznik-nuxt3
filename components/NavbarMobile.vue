@@ -70,12 +70,12 @@
       <br />
       <div class="div text--smallest">Browse</div>
     </nuxt-link>
-    <div class="botmen">
+    <div class="botmen ml-2">
       <ChatMenu
         v-if="loggedIn"
         id="menu-option-chat-sm"
         :is-list-item="false"
-        class="mr-4 pl-2"
+        class="mr-4"
       />
       <div class="chatup text-white">Chats</div>
     </div>
