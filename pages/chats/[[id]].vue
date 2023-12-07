@@ -73,19 +73,37 @@
                       >
                     </b-button>
                   </div>
-                  <div
-                    v-for="chat in visibleChats"
-                    :key="'chat-' + chat.id"
-                    :class="{
-                      chat: true,
-                      active: selectedChatId === chat?.id,
-                    }"
-                    @click="gotoChat(chat.id)"
-                  >
-                    <ChatListEntry
-                      :id="chat.id"
-                      :active="selectedChatId === chat?.id"
-                    />
+                  <div v-if="showClosed">
+                    <div
+                      v-for="chat in closedChats"
+                      :key="'chat-' + chat.id"
+                      :class="{
+                        chat: true,
+                        active: selectedChatId === chat?.id,
+                      }"
+                      @click="gotoChat(chat.id)"
+                    >
+                      <ChatListEntry
+                        :id="chat.id"
+                        :active="selectedChatId === chat?.id"
+                      />
+                    </div>
+                  </div>
+                  <div v-else>
+                    <div
+                      v-for="chat in visibleChats"
+                      :key="'chat-' + chat.id"
+                      :class="{
+                        chat: true,
+                        active: selectedChatId === chat?.id,
+                      }"
+                      @click="gotoChat(chat.id)"
+                    >
+                      <ChatListEntry
+                        :id="chat.id"
+                        :active="selectedChatId === chat?.id"
+                      />
+                    </div>
                   </div>
                   <infinite-loading
                     :identifier="bump"
