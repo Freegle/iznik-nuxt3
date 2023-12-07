@@ -22,6 +22,7 @@
       class="ml-3"
       @show-about-me="showAboutMe"
     />
+    <div v-else />
     <div class="d-flex align-items-center">
       <b-nav>
         <nuxt-link v-if="!loggedIn" no-prefetch>
@@ -54,7 +55,7 @@
     </b-dropdown>
   </b-navbar>
   <b-navbar
-    v-if="!showBackButton"
+    v-if="!showBackButton && loggedIn"
     type="dark"
     class="ourBack d-flex justify-content-between d-xl-none navbot small"
     fixed="bottom"
