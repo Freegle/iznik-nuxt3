@@ -9,7 +9,7 @@
       v-if="showBackButton"
       ref="mobileNav"
       variant="white"
-      class="nohover"
+      class="nohover ml-3"
       @click="backButton"
     >
       <v-icon icon="arrow-left" />
@@ -19,87 +19,18 @@
       v-model:unread-notification-count="unreadNotificationCount"
       :distance="distance"
       :small-screen="true"
+      class="ml-3"
       @show-about-me="showAboutMe"
     />
     <div class="d-flex align-items-center">
       <b-nav>
         <nuxt-link v-if="!loggedIn" no-prefetch>
-          <div class="btn btn-white" @click="requestLogin">Log in or Join</div>
+          <div class="btn btn-white mr-2" @click="requestLogin">
+            Log in or Join
+          </div>
         </nuxt-link>
       </b-nav>
     </div>
-    <b-nav class="ml-auto flex-row flex-wrap small">
-      <li class="nav-item text-center p-0">
-        <nuxt-link
-          no-prefetch
-          class="nav-link text-center p-0"
-          to="/give"
-          @click="clickedMobileNav"
-          @mousedown="maybeReload('/give')"
-        >
-          <v-icon icon="gift" class="fa-fw2" />
-          <br />
-          <span class="nav-item__text">Give</span>
-        </nuxt-link>
-      </li>
-      <li class="nav-item text-center p-0">
-        <nuxt-link
-          no-prefetch
-          class="nav-link text-center p-0"
-          to="/find"
-          @click="clickedMobileNav"
-          @mousedown="maybeReload('/find')"
-        >
-          <v-icon icon="shopping-cart" class="fa-fw2" />
-          <br />
-          <span class="nav-item__text">Ask</span>
-        </nuxt-link>
-      </li>
-      <li class="nav-item text-center p-0"></li>
-      <li class="nav-item text-center p-0"></li>
-      <li class="nav-item text-center p-0">
-        <nuxt-link
-          no-prefetch
-          class="nav-link text-center p-0"
-          to="/communityevents"
-          @click="clickedMobileNav"
-          @mousedown="maybeReload('/communityevents')"
-        >
-          <v-icon icon="calendar-alt" class="fa-fw2" />
-          <br />
-          <span class="nav-item__text">Events</span>
-        </nuxt-link>
-      </li>
-      <li class="nav-item text-center p-0">
-        <nuxt-link
-          no-prefetch
-          class="nav-link text-center p-0"
-          to="/volunteerings"
-          @click="clickedMobileNav"
-          @mousedown="maybeReload('/volunteerings')"
-        >
-          <v-icon icon="hands-helping" class="fa-fw2" />
-          <br />
-          <span class="nav-item__text">Volunteer</span>
-        </nuxt-link>
-      </li>
-      <li class="nav-item text-center p-0">
-        <nuxt-link
-          no-prefetch
-          class="nav-link text-center p-0"
-          to="/promote"
-          @click="clickedMobileNav"
-          @mousedown="maybeReload('/promote')"
-        >
-          <v-icon icon="bullhorn" class="fa-fw2" />
-          <br />
-          <span class="nav-item__text">Promote</span>
-        </nuxt-link>
-      </li>
-      <li class="nav-item text-center p-0"></li>
-      <li class="nav-item text-center p-0"></li>
-      <li class="nav-item text-center p-0"></li>
-    </b-nav>
     <b-dropdown v-if="loggedIn" no-caret variant="primary">
       <template #button-content>
         <v-icon icon="user" size="2x" />
@@ -109,13 +40,13 @@
         @click="clickedMobileNav"
         @mousedown="maybeReload('/settings')"
       >
-        <div class="d-flex align-items-center text-white">
+        <div class="d-flex align-items-center text-black">
           <v-icon icon="cog" size="2x" class="mr-2" />
           <span class="text--large">Settings</span>
         </div>
       </b-dropdown-item>
       <b-dropdown-item href="/settings" @click="logout">
-        <div class="d-flex align-items-center text-white">
+        <div class="d-flex align-items-center text-black">
           <v-icon icon="sign-out-alt" size="2x" class="mr-2" />
           <span class="text--large">Logout</span>
         </div>
@@ -123,6 +54,7 @@
     </b-dropdown>
   </b-navbar>
   <b-navbar
+    v-if="!showBackButton"
     type="dark"
     class="ourBack d-flex justify-content-between d-xl-none navbot small"
     fixed="bottom"
@@ -143,7 +75,7 @@
         v-if="loggedIn"
         id="menu-option-chat-sm"
         :is-list-item="false"
-        class="mr-4"
+        class="mr-4 pl-2"
       />
       <div class="chatup text-white">Chats</div>
     </div>
@@ -168,6 +100,7 @@
         <span class="nav-item__text">My Posts</span>
       </div>
     </nuxt-link>
+    <NavbarMobilePost class="navpost" />
     <nuxt-link
       no-prefetch
       class="nav-link text-center p-0 botmen"
@@ -192,6 +125,17 @@
     <nuxt-link
       no-prefetch
       class="nav-link text-center p-0 botmen"
+      to="/promote"
+      @click="clickedMobileNav"
+      @mousedown="maybeReload('/promote')"
+    >
+      <v-icon icon="bullhorn" class="fa-fw2" />
+      <br />
+      <div class="nav-item__text">Promote</div>
+    </nuxt-link>
+    <nuxt-link
+      no-prefetch
+      class="nav-link text-center p-0 botmen"
       to="/help"
       @click="clickedMobileNav"
       @mousedown="maybeReload('/help')"
@@ -204,6 +148,7 @@
   <about-me-modal v-if="showAboutMeModal" @hidden="showAboutMeModal = false" />
 </template>
 <script setup>
+import NavbarMobilePost from './NavbarMobilePost'
 import { useNavbar } from '~/composables/useNavbar'
 
 const {
@@ -245,13 +190,13 @@ const clickedMobileNav = () => {
 }
 
 :deep(.dropdown-toggle) {
-  background-color: $color-green-background !important;
+  background-color: $color-green-background;
   border: none !important;
 }
 
 :deep(.dropdown-menu) {
-  background-color: $color-green-background !important;
-  color: $color-white !important;
+  //background-color: white !important;
+  //color: $color-white !important;
 }
 
 .mypostsbadge2 {
@@ -284,5 +229,16 @@ const clickedMobileNav = () => {
 .fa-fw2 {
   width: 2rem !important;
   height: 2rem !important;
+}
+
+.navpost {
+  transform: translateY(-40px);
+  color: $color-white;
+  width: 64px;
+  height: 64px;
+}
+
+:deep(.container-fluid) {
+  padding: 0 !important;
 }
 </style>

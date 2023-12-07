@@ -175,15 +175,6 @@ const showAboutMe = () => {
   width: min(400px, 100vw) !important;
   overflow-y: auto;
 
-  // The offset property of the b-dropdown doesn't function when contained
-  // within a bootstrap nav element.  Therefore we have to manually shuffle
-  // it so it fits on a smaller screen
-  transform: translate(65px);
-
-  @include media-breakpoint-up(sm) {
-    transform: none;
-  }
-
   @include media-breakpoint-down(md) {
     width: 300px;
     right: -51px;

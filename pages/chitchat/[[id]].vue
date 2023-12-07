@@ -15,42 +15,6 @@
             :chats="me.expectedchats"
           />
           <b-card v-if="!id" body-class="p-2 p-md-4">
-            <b-card-text class="mb-0">
-              <h5 class="text-center mb-3 d-block d-md-none">
-                <span class="d-none d-sm-inline"
-                  >Looking for your posts? Click</span
-                >
-                <span class="d-inline d-sm-none">Your posts are </span>
-                <!-- eslint-disable-next-line -->
-                <nuxt-link  no-prefetch to="/myposts">here</nuxt-link>.
-              </h5>
-              <h5 class="text-center mb-3 d-block d-md-none">
-                Browse OFFERs/WANTEDs
-                <!-- eslint-disable-next-line -->
-                <nuxt-link  no-prefetch to="/browse">here</nuxt-link>.
-              </h5>
-              <div class="d-flex justify-content-between">
-                <b-button
-                  id="givebutton"
-                  ref="givebutton"
-                  to="/give"
-                  variant="primary"
-                  class="post__button"
-                >
-                  Give stuff
-                </b-button>
-                <b-button
-                  id="findbutton"
-                  ref="findbutton"
-                  to="/find"
-                  variant="secondary"
-                  class="post__button"
-                >
-                  Ask for stuff
-                </b-button>
-              </div>
-            </b-card-text>
-
             <b-popover
               content="Giving something away? Click the Give button. Chitchat is for other discussion."
               target="givebutton"
