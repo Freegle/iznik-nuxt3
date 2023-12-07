@@ -46,6 +46,31 @@
                 </p>
                 <div v-else>
                   <div
+                    v-if="closedChats.length"
+                    class="d-flex justify-content-around"
+                  >
+                    <b-button
+                      variant="link"
+                      size="sm"
+                      @click="showClosed = !showClosed"
+                    >
+                      <b-badge
+                        v-if="closedCount"
+                        variant="danger"
+                        class="closedCount mr-1"
+                        title="Closed chats with unread messages"
+                      >
+                        {{ closedCount }}
+                      </b-badge>
+                      <span v-if="showClosed">Hide</span>
+                      <span v-else>Show </span>
+                      {{ closedChats.length }} hidden/blocked chat<span
+                        v-if="closedChats.length > 1"
+                        >s</span
+                      >
+                    </b-button>
+                  </div>
+                  <div
                     v-for="chat in visibleChats"
                     :key="'chat-' + chat.id"
                     :class="{
@@ -185,8 +210,9 @@ export default {
     definePageMeta({
       layout: 'login',
     })
-    const route = useRoute
     const runtimeConfig = useRuntimeConfig()
+
+    const route = useRoute()
 
     useHead(
       buildHead(
@@ -208,11 +234,9 @@ export default {
     const showContactDetailsAskModal =
       storeToRefs(chatStore).showContactDetailsAskModal
 
+    const id = route.params.id ? parseInt(route.params.id) : 0
+
     if (myid) {
-      const route = useRoute()
-
-      const id = route.params.id ? parseInt(route.params.id) : 0
-
       // Fetch the list of chats.
       await chatStore.fetchChats(null, true, id)
 
@@ -238,7 +262,7 @@ export default {
       }
     }
 
-    return { showContactDetailsAskModal, chatStore, showChats }
+    return { showContactDetailsAskModal, chatStore, showChats, id }
   },
   data() {
     return {
@@ -250,44 +274,32 @@ export default {
       bump: 1,
       distance: 1000,
       selectedChatId: null,
+      showClosed: false,
     }
   },
   computed: {
+    chats() {
+      return this.chatStore?.list ? this.chatStore.list : []
+    },
     showingOlder() {
       return this.chatStore.searchSince !== null
     },
-    filteredChats() {
-      let chats = this.chatStore?.list ? this.chatStore.list : []
+    closedChats() {
+      return this.scanChats(true, this.chats)
+    },
+    closedCount() {
+      let ret = 0
 
-      if (chats && this.search) {
-        const l = this.search.toLowerCase()
-        chats = chats.filter((chat) => {
-          if (
-            chat.name.toLowerCase().includes(l) ||
-            (chat.snippet && chat.snippet.toLowerCase().includes(l))
-          ) {
-            // Found in the name of the chat (which may include a user
-            return true
-          }
-
-          return false
-        })
+      for (const chat of this.closedChats) {
+        if (chat.status === 'Closed') {
+          ret += chat.unseen
+        }
       }
 
-      // Sort by last date.
-      chats.sort((a, b) => {
-        if (a.lastdate && b.lastdate) {
-          return dayjs(b.lastdate).diff(dayjs(a.lastdate))
-        } else if (a.lastdate) {
-          return -1
-        } else if (b.lastdate) {
-          return 1
-        } else {
-          return 0
-        }
-      })
-
-      return chats
+      return ret
+    },
+    filteredChats() {
+      return this.scanChats(this.showClosed, this.chats)
     },
     visibleChats() {
       const chats =
@@ -355,6 +367,49 @@ export default {
 
       const router = useRouter()
       router.push('/chats')
+    },
+    scanChats(closed, chats) {
+      if (chats && this.search) {
+        const l = this.search.toLowerCase()
+        chats = chats.filter((chat) => {
+          if (
+            chat.name.toLowerCase().includes(l) ||
+            (chat.snippet && chat.snippet.toLowerCase().includes(l))
+          ) {
+            // Found in the name of the chat (which may include a user
+            return true
+          }
+
+          return false
+        })
+      }
+
+      chats = chats.filter((chat) => {
+        if (this.id && !closed && chat.id === this.id) {
+          return true
+        }
+
+        if (chat.status === 'Blocked' || chat.status === 'Closed') {
+          return closed
+        }
+
+        return !closed
+      })
+
+      // Sort by last date.
+      chats.sort((a, b) => {
+        if (a.lastdate && b.lastdate) {
+          return dayjs(b.lastdate).diff(dayjs(a.lastdate))
+        } else if (a.lastdate) {
+          return -1
+        } else if (b.lastdate) {
+          return 1
+        } else {
+          return 0
+        }
+      })
+
+      return chats
     },
     loadMore($state) {
       // We use an infinite scroll on the list of chats because even though we have all the data in hand, the less
@@ -453,5 +508,9 @@ export default {
     display: flex;
     flex-direction: column;
   }
+}
+
+.closedCount {
+  border-radius: 50%;
 }
 </style>

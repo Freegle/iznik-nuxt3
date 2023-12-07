@@ -211,6 +211,11 @@ export const useChatStore = defineStore({
 
       // Don't fetch chats.  We might be called in a loop and once we've completed the caller normally routes.
     },
+    async unhide(id) {
+      await api(this.config).chat.unHideChat(id)
+      await this.fetchChat(id)
+      await this.fetchChats(null, false, id)
+    },
     async block(id) {
       await api(this.config).chat.blockChat(id)
 
