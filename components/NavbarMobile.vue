@@ -189,7 +189,6 @@ const clickedMobileNav = () => {
   mobileNav?.value?.$el?.click()
 }
 
-console.log('Meta', useHead())
 const title = computed(() => {
   return useMiscStore().pageTitle
 })

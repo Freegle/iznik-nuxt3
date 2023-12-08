@@ -63,7 +63,6 @@ export function useNavbar() {
   })
 
   const newsCount = computed(() => {
-    console.log('Count', newsfeedStore, newsfeedStore.count)
     return newsfeedStore.count
   })
 
