@@ -23,7 +23,7 @@
     />
     <div v-else />
     <div class="flex-grow-1 d-flex justify-content-around">
-      <h1 class="text-white truncate text-center maxwidth">
+      <h1 v-if="loggedIn" class="text-white truncate text-center maxwidth">
         {{ title }}
       </h1>
     </div>
