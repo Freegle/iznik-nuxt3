@@ -3,10 +3,9 @@
     :is="notificationType"
     id="notification-list"
     ref="theel"
-    class="white text-center notification-list"
-    :class="{ 'mr-2': smallScreen, topstack: true }"
+    class="white text-center notification-list topstack"
     :variant="smallScreen ? 'transparent' : ''"
-    toggle-class="notification-list__dropdown-toggle p-0"
+    toggle-class="notification-list__dropdown-toggle p-md-0"
     menu-class="notification-list__dropdown-menu"
     lazy
     right
@@ -16,7 +15,7 @@
   >
     <template #button-content>
       <div
-        class="position-relative me-2 me-xl-0"
+        class="position-relative me-md-2 me-xl-0"
         :class="{ 'text-center small': !smallScreen }"
       >
         <v-icon icon="bell" class="fa-2 notification-list__icon" />

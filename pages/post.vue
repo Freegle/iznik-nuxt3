@@ -1,6 +1,6 @@
 <template>
   <div class="bg-light">
-    <h2 class="p-2 text-black">Which post would you like to make?</h2>
+    <h2 class="p-2 text-black">Please choose:</h2>
     <div class="bg-light">
       <div class="mt-2 bg-white p-2 d-flex clickme" @click="goto('/give')">
         <div class="d-flex flex-column justify-content-around pl-2 pr-3">
@@ -9,12 +9,12 @@
         <div>
           <h3>Offer</h3>
           <p>
-            Got an item you want to give away? Offer it to someone in your
-            community.
+            Got an item you want to give away for free? Offer it to someone in
+            your community.
           </p>
         </div>
         <div class="d-flex flex-column justify-content-around">
-          <v-icon icon="arrow-right" size="2x" class="back" />
+          <v-icon icon="angle-right" size="2x" class="back" />
         </div>
       </div>
       <div class="mt-2 bg-white p-2 d-flex clickme" @click="goto('/find')">
@@ -29,7 +29,7 @@
           </p>
         </div>
         <div class="d-flex flex-column justify-content-around">
-          <v-icon icon="arrow-right" size="2x" class="back" />
+          <v-icon icon="angle-right" size="2x" class="back" />
         </div>
       </div>
       <div class="mt-2 bg-white p-2 d-flex clickme" @click="goto('/chitchat')">
@@ -39,12 +39,11 @@
         <div>
           <h3>ChitChat</h3>
           <p>
-            Feeling chatty? Make a post in your community ChitChat forum and
-            chat to other freeglers.
+            Feeling chatty? Chat to other freeglers in your community forum.
           </p>
         </div>
         <div class="d-flex flex-column justify-content-around">
-          <v-icon icon="arrow-right" size="2x" class="back" />
+          <v-icon icon="angle-right" size="2x" class="back" />
         </div>
       </div>
       <div
@@ -52,14 +51,16 @@
         @click="goto('/communityevents')"
       >
         <div class="d-flex flex-column justify-content-around pl-2 pr-3">
-          <v-icon icon="coffee" class="back fa-1-5x" />
+          <v-icon icon="calendar-alt" class="back fa-1-5x" />
         </div>
         <div>
           <h3>Event</h3>
-          <p>Got an event coming up? Let everyone know about it.</p>
+          <p>
+            See local events, and add your own, to let everyone know about it.
+          </p>
         </div>
         <div class="d-flex flex-column justify-content-around">
-          <v-icon icon="arrow-right" size="2x" class="back" />
+          <v-icon icon="angle-right" size="2x" class="back" />
         </div>
       </div>
       <div
@@ -67,16 +68,17 @@
         @click="goto('/volunteerings')"
       >
         <div class="d-flex flex-column justify-content-around pl-2 pr-3">
-          <v-icon icon="coffee" class="back fa-1-5x" />
+          <v-icon icon="hands-helping" class="back fa-1-5x" />
         </div>
         <div>
           <h3>Volunteering</h3>
           <p>
-            Know of any volunteering opportunities? Find someone to help out.
+            See volunteering opportunities, and add your own to find someone to
+            help out.
           </p>
         </div>
         <div class="d-flex flex-column justify-content-around">
-          <v-icon icon="arrow-right" size="2x" class="back" />
+          <v-icon icon="angle-right" size="2x" class="back" />
         </div>
       </div>
     </div>

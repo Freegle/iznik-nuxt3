@@ -275,6 +275,7 @@ body.modal-open {
   position: fixed;
   bottom: 0;
   background-color: $color-green-background;
+  z-index: 10000;
 
   @include media-breakpoint-up(md) {
     display: none;

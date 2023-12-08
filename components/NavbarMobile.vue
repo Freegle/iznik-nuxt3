@@ -6,7 +6,7 @@
   >
     <OfflineIndicator v-if="!online" />
     <b-button
-      v-if="showBackButton"
+      v-else-if="showBackButton"
       ref="mobileNav"
       variant="white"
       class="nohover ml-3"
@@ -15,14 +15,18 @@
       <v-icon icon="arrow-left" />
     </b-button>
     <NotificationOptions
-      v-else-if="loggedIn"
+      v-if="online && !showBackButton && loggedIn"
       v-model:unread-notification-count="unreadNotificationCount"
       :distance="distance"
       :small-screen="true"
-      class="ml-3"
       @show-about-me="showAboutMe"
     />
     <div v-else />
+    <div class="flex-grow-1 d-flex justify-content-around">
+      <h1 class="text-white truncate text-center maxwidth">
+        {{ title }}
+      </h1>
+    </div>
     <div class="d-flex align-items-center">
       <b-nav>
         <nuxt-link v-if="!loggedIn" no-prefetch>
@@ -38,16 +42,17 @@
       </template>
       <b-dropdown-item
         href="/settings"
+        class="ourBack"
         @click="clickedMobileNav"
         @mousedown="maybeReload('/settings')"
       >
-        <div class="d-flex align-items-center text-black">
+        <div class="d-flex align-items-center">
           <v-icon icon="cog" size="2x" class="mr-2" />
           <span class="text--large">Settings</span>
         </div>
       </b-dropdown-item>
       <b-dropdown-item href="/settings" @click="logout">
-        <div class="d-flex align-items-center text-black">
+        <div class="d-flex align-items-center">
           <v-icon icon="sign-out-alt" size="2x" class="mr-2" />
           <span class="text--large">Logout</span>
         </div>
@@ -98,7 +103,7 @@
         >
           {{ activePostsCount }}
         </b-badge>
-        <span class="nav-item__text">My Posts</span>
+        <span class="nav-item__text">My&nbsp;Posts</span>
       </div>
     </nuxt-link>
     <NavbarMobilePost class="navpost" />
@@ -151,6 +156,7 @@
 <script setup>
 import NavbarMobilePost from './NavbarMobilePost'
 import { useNavbar } from '~/composables/useNavbar'
+import { useMiscStore } from '~/stores/misc'
 
 const {
   online,
@@ -180,8 +186,13 @@ const NotificationOptions = defineAsyncComponent(() =>
 const mobileNav = ref(null)
 
 const clickedMobileNav = () => {
-  mobileNav?.value.$el?.click()
+  mobileNav?.value?.$el?.click()
 }
+
+console.log('Meta', useHead())
+const title = computed(() => {
+  return useMiscStore().pageTitle
+})
 </script>
 <style scoped lang="scss">
 @import 'assets/css/navbar.scss';
@@ -196,8 +207,11 @@ const clickedMobileNav = () => {
 }
 
 :deep(.dropdown-menu) {
-  //background-color: white !important;
-  //color: $color-white !important;
+  background-color: $color-green-background;
+
+  .dropdown-item {
+    color: $color-white !important;
+  }
 }
 
 .mypostsbadge2 {
@@ -241,5 +255,13 @@ const clickedMobileNav = () => {
 
 :deep(.container-fluid) {
   padding: 0 !important;
+}
+
+.maxwidth {
+  max-width: calc(100vw - 130px);
+}
+
+:deep(.ourBack) {
+  background-color: $color-green-background !important;
 }
 </style>

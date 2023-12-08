@@ -14,22 +14,6 @@
             :count="me.expectedreplies"
             :chats="me.expectedchats"
           />
-          <b-card v-if="!id" body-class="p-2 p-md-4">
-            <b-popover
-              content="Giving something away? Click the Give button. Chitchat is for other discussion."
-              target="givebutton"
-              placement="bottom"
-              variant="primary"
-              :show="showToolGive"
-            />
-            <b-popover
-              content="Looking for an item? Click the Find button. Chitchat is for other discussion."
-              target="findbutton"
-              placement="bottom"
-              variant="primary"
-              :show="showToolFind"
-            />
-          </b-card>
           <div v-if="!id" class="mt-2">
             <b-card no-body class="mb-2">
               <b-card-text class="p-2 pb-0 mb-0">

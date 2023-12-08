@@ -6,6 +6,7 @@ import {
   faAddressBook,
   faArrowCircleLeft,
   faArrowCircleRight,
+  faAngleRight,
   faAngleDoubleDown,
   faAngleDoubleLeft,
   faAngleDoubleRight,
@@ -94,6 +95,7 @@ import {
 
 library.add(
   faAddressBook,
+  faAngleRight,
   faArrowLeft,
   faArrowRight,
   faArrowCircleRight,
