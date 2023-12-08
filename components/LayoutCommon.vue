@@ -6,7 +6,7 @@
       </div>
       <VisibleWhen v-if="allowAd" :at="['xs', 'sm']">
         <div
-          class="d-flex justify-content-around w-100 bg-white sticky"
+          class="d-flex justify-content-around w-100 sticky"
           style="height: 52px"
         >
           <ExternalDa
@@ -97,7 +97,7 @@ export default {
     },
     allowAd() {
       // We don't want to show the ad on the landing page when logged out - looks tacky.
-      return (this.routePath !== '/' || this.loggedIn)
+      return this.routePath !== '/' || this.loggedIn
     },
   },
   async mounted() {
@@ -274,6 +274,8 @@ body.modal-open {
 .sticky {
   position: fixed;
   bottom: 0;
+  background-color: $color-green-background;
+  z-index: 10000;
 
   @include media-breakpoint-up(md) {
     display: none;

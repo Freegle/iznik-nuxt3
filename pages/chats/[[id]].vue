@@ -40,7 +40,10 @@
                     <v-icon icon="check" /> Mark all read
                   </b-button>
                 </div>
-                <p v-if="!visibleChats?.length" class="ml-2">
+                <p
+                  v-if="!visibleChats?.length && !closedChats?.length"
+                  class="ml-2"
+                >
                   <span v-if="searching" class="pulsate"> Searching... </span>
                   <span v-else> No chats to show. </span>
                 </p>
@@ -70,19 +73,37 @@
                       >
                     </b-button>
                   </div>
-                  <div
-                    v-for="chat in visibleChats"
-                    :key="'chat-' + chat.id"
-                    :class="{
-                      chat: true,
-                      active: selectedChatId === chat?.id,
-                    }"
-                    @click="gotoChat(chat.id)"
-                  >
-                    <ChatListEntry
-                      :id="chat.id"
-                      :active="selectedChatId === chat?.id"
-                    />
+                  <div v-if="showClosed">
+                    <div
+                      v-for="chat in closedChats"
+                      :key="'chat-' + chat.id"
+                      :class="{
+                        chat: true,
+                        active: selectedChatId === chat?.id,
+                      }"
+                      @click="gotoChat(chat.id)"
+                    >
+                      <ChatListEntry
+                        :id="chat.id"
+                        :active="selectedChatId === chat?.id"
+                      />
+                    </div>
+                  </div>
+                  <div v-else>
+                    <div
+                      v-for="chat in visibleChats"
+                      :key="'chat-' + chat.id"
+                      :class="{
+                        chat: true,
+                        active: selectedChatId === chat?.id,
+                      }"
+                      @click="gotoChat(chat.id)"
+                    >
+                      <ChatListEntry
+                        :id="chat.id"
+                        :active="selectedChatId === chat?.id"
+                      />
+                    </div>
                   </div>
                   <infinite-loading
                     :identifier="bump"
@@ -140,7 +161,10 @@
                 : ['md', 'lg', 'xl', 'xxl']
             "
           >
-            <p v-if="!visibleChats?.length" class="ml-2">
+            <p
+              v-if="!visibleChats?.length && !closedChats?.length"
+              class="ml-2"
+            >
               <span v-if="searching" class="pulsate"> Searching... </span>
               <span v-else> No chats to show. </span>
             </p>

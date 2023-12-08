@@ -3,10 +3,9 @@
     :is="notificationType"
     id="notification-list"
     ref="theel"
-    class="white text-center notification-list"
-    :class="{ 'mr-2': smallScreen, topstack: true }"
+    class="white text-center notification-list topstack"
     :variant="smallScreen ? 'transparent' : ''"
-    toggle-class="notification-list__dropdown-toggle p-0"
+    toggle-class="notification-list__dropdown-toggle p-md-0"
     menu-class="notification-list__dropdown-menu"
     lazy
     right
@@ -16,7 +15,7 @@
   >
     <template #button-content>
       <div
-        class="position-relative me-2 me-xl-0"
+        class="position-relative me-md-2 me-xl-0"
         :class="{ 'text-center small': !smallScreen }"
       >
         <v-icon icon="bell" class="fa-2 notification-list__icon" />
@@ -174,15 +173,6 @@ const showAboutMe = () => {
   height: 500px;
   width: min(400px, 100vw) !important;
   overflow-y: auto;
-
-  // The offset property of the b-dropdown doesn't function when contained
-  // within a bootstrap nav element.  Therefore we have to manually shuffle
-  // it so it fits on a smaller screen
-  transform: translate(65px);
-
-  @include media-breakpoint-up(sm) {
-    transform: none;
-  }
 
   @include media-breakpoint-down(md) {
     width: 300px;
