@@ -78,7 +78,7 @@
       </div>
       <div v-else>
         <h2 class="visually-hidden">Search Filters</h2>
-        <div variant="info" class="p-2 border border-info bg-white filters">
+        <div variant="info" class="p-2 pb-0 border border-info bg-white filters">
           <GroupSelect
             v-if="me"
             v-model="selectedGroup"
@@ -150,6 +150,7 @@
           :messages-for-list="filteredMessages"
           :bump="infiniteId"
           :loading="loading"
+          :jobs="jobs"
         />
       </div>
     </div>
