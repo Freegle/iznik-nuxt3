@@ -2,6 +2,7 @@
   <b-navbar
     type="dark"
     class="ourBack d-flex justify-content-between d-xl-none"
+    :class="{ hideNavBarTop: navBarHidden, showNavBarTop: !navBarHidden }"
     fixed="top"
   >
     <OfflineIndicator v-if="!online" />
@@ -64,6 +65,7 @@
     type="dark"
     class="ourBack d-flex justify-content-between d-xl-none navbot small"
     fixed="bottom"
+    :class="{ hideNavBarBottom: navBarHidden, showNavBarBottom: !navBarHidden }"
   >
     <nuxt-link
       no-prefetch
@@ -192,6 +194,33 @@ const clickedMobileNav = () => {
 const title = computed(() => {
   return useMiscStore().pageTitle
 })
+
+// We want to hide the navbars when you slide down.
+let lastScrollY = 0
+
+onMounted(() => {
+  lastScrollY = window.scrollY
+  window.addEventListener('scroll', handleScroll)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('scroll', handleScroll)
+})
+
+const navBarHidden = ref(false)
+function handleScroll() {
+  const scrollY = window.scrollY
+
+  if (scrollY > lastScrollY) {
+    if (!navBarHidden.value) {
+      navBarHidden.value = true
+    }
+  } else if (navBarHidden.value) {
+    navBarHidden.value = false
+  }
+
+  lastScrollY = scrollY
+}
 </script>
 <style scoped lang="scss">
 @import 'assets/css/navbar.scss';
@@ -260,7 +289,43 @@ const title = computed(() => {
   max-width: calc(100vw - 130px);
 }
 
-:deep(.ourBack) {
-  background-color: $color-green-background !important;
+.hideNavBarBottom {
+  transform: translateY(150px);
+  transition: transform 1s;
+
+  .navpost {
+    opacity: 0;
+    transition: opacity 0.5s;
+  }
+}
+
+.showNavBarBottom {
+  transform: translateY(0px);
+  transition: transform 1s;
+
+  .navpost {
+    opacity: 1;
+    transition: opacity 0.5s;
+  }
+}
+
+.hideNavBarTop {
+  transform: translateY(-150px);
+  transition: transform 1s;
+
+  .navpost {
+    opacity: 0;
+    transition: opacity 0.5s;
+  }
+}
+
+.showNavBarTop {
+  transform: translateY(0px);
+  transition: transform 1s;
+
+  .navpost {
+    opacity: 1;
+    transition: opacity 0.5s;
+  }
 }
 </style>

@@ -4,8 +4,9 @@
       <div class="aboveSticky">
         <slot ref="pageContent" />
       </div>
-      <VisibleWhen v-if="allowAd" :at="['xs', 'sm']">
+      <VisibleWhen :at="['xs', 'sm']">
         <div
+          v-if="allowAd"
           class="d-flex justify-content-around w-100 sticky"
           style="height: 52px"
         >
@@ -17,6 +18,7 @@
             style="width: 320px; height: 50px; margin-top: 2px"
           />
         </div>
+        <div v-else class="ourBack" style="height: 52px" />
       </VisibleWhen>
     </main>
     <client-only>
