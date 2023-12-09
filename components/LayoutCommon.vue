@@ -18,7 +18,15 @@
             style="width: 320px; height: 50px; margin-top: 2px"
           />
         </div>
-        <div v-else class="ourBack" style="height: 52px" />
+        <div
+          v-else
+          class="sticky ourBack w-100 text-center d-flex flex-column justify-content-center"
+          style="height: 52px"
+        >
+          <nuxt-link to="/donate" class="text-white nodecor">
+            Keep Freegle running. Click to donate.
+          </nuxt-link>
+        </div>
       </VisibleWhen>
     </main>
     <client-only>
