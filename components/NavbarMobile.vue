@@ -208,7 +208,7 @@ onBeforeUnmount(() => {
 })
 
 const navBarHidden = ref(false)
-const scrollTimer = null
+let scrollTimer = null
 
 function handleScroll() {
   const scrollY = window.scrollY
