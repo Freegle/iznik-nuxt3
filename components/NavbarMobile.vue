@@ -108,7 +108,24 @@
         <span class="nav-item__text">My&nbsp;Posts</span>
       </div>
     </nuxt-link>
-    <NavbarMobilePost class="navpost" />
+    <div class="postWrapper">
+      <NavbarMobilePost class="navpost" />
+      <div class="d-flex justify-content-around navpostnav">
+        <nuxt-link
+          no-prefetch
+          class="nav-link text-center p-0 botmen"
+          to="/post"
+          @click="clickedMobileNav"
+          @mousedown="maybeReload('/post')"
+        >
+          <div class="position-relative">
+            <v-icon icon="home" class="fa-fw2 invisible" />
+            <br />
+            <span class="nav-item__text">Post</span>
+          </div>
+        </nuxt-link>
+      </div>
+    </div>
     <nuxt-link
       no-prefetch
       class="nav-link text-center p-0 botmen"
@@ -281,6 +298,9 @@ function handleScroll() {
   width: 51px;
   min-width: 51px;
   max-width: 51px;
+  height: 51px;
+  min-height: 51px;
+  max-height: 51px;
 
   div {
     font-size: 0.7rem;
@@ -344,6 +364,22 @@ function handleScroll() {
   .navpost {
     opacity: 1;
     transition: opacity 0.5s;
+  }
+}
+
+.postWrapper {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 51px;
+
+  .navpost {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .navpostnav {
+    grid-column: 1;
+    grid-row: 1;
   }
 }
 </style>
