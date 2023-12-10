@@ -136,15 +136,13 @@
         <SpinButton
           size="md"
           variant="primary"
-          button-class="h-100"
           class="float-end ml-2 mr-2"
           button-title="Sending..."
           done-icon="angle-double-right"
           label="Send&nbsp;"
-          name="angle-double-right"
+          icon-name="angle-double-right"
           spinclass="text-white"
           icon-class=""
-          :show-spinner="sending"
           iconlast
           @handle="send"
         />
@@ -221,13 +219,11 @@
         <SpinButton
           variant="primary"
           size="md"
-          button-class="h-100"
           done-icon="angle-double-right"
           label="Send&nbsp;"
-          name="angle-double-right"
+          icon-name="angle-double-right"
           spinclass="text-white"
           icon-class=""
-          :show-spinner="sending"
           iconlast
           @handle="send"
         />

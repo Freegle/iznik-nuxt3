@@ -71,7 +71,6 @@
           name="angle-double-right"
           spinclass="text-white"
           icon-class=""
-          :show-spinner="replying"
           :disabled="disableSend"
           iconlast
           @handle="registerOrSend"
@@ -86,7 +85,6 @@
           name="angle-double-right"
           spinclass="text-white"
           icon-class=""
-          :show-spinner="replying"
           :disabled="disableSend"
           iconlast
           @handle="sendReply"
@@ -118,13 +116,14 @@ import { mapWritableState } from 'pinia'
 import { nextTick } from 'vue'
 import { useMessageStore } from '../stores/message'
 import { useAuthStore } from '../stores/auth'
-import { useReplyStore } from '../stores/reply'
+// import { useReplyStore } from '../stores/reply'
 import { milesAway } from '../composables/useDistance'
 import replyToPost from '@/mixins/replyToPost'
 import MessageStillAvailable from '~/components/MessageStillAvailable'
 import EmailValidator from '~/components/EmailValidator'
 import NewUserInfo from '~/components/NewUserInfo'
 import ChatButton from '~/components/ChatButton'
+import SpinButton from '~/components/SpinButton.vue'
 
 const NewFreegler = () => import('~/components/NewFreegler')
 
@@ -135,6 +134,7 @@ export default {
     EmailValidator,
     NewFreegler,
     NewUserInfo,
+    SpinButton,
   },
   mixins: [replyToPost],
   props: {

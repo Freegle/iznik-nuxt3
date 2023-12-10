@@ -4,7 +4,6 @@
       v-if="!newsfeed.loved"
       variant="link"
       size="sm"
-      :show-spinner="loving"
       name="heart"
       done-icon="heart"
       icon-class=""
@@ -17,7 +16,6 @@
       v-if="newsfeed.loved"
       variant="link"
       size="sm"
-      :show-spinner="loving"
       name="heart"
       done-icon="heart"
       icon-class="text-danger"
@@ -93,22 +91,16 @@ export default {
     },
   },
   methods: {
-    async love() {
-      this.loving = true
-
+    async love({ callback }) {
       await this.newsfeedStore.love(this.newsfeed.id, this.newsfeed.threadhead)
-
-      this.loving = false
+      callback()
     },
-    async unlove() {
-      this.loving = true
-
+    async unlove({ callback }) {
       await this.newsfeedStore.unlove(
         this.newsfeed.id,
         this.newsfeed.threadhead
       )
-
-      this.loving = false
+      callback()
     },
     focusComment() {
       this.$emit('focus-comment')

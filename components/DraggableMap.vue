@@ -6,13 +6,12 @@
           <div class="d-flex justify-content-between">
             <SpinButton
               variant="secondary"
-              button-class="mb-2 ml-0 ml-md-2"
+              class="mb-2 ml-0 ml-md-2"
               button-title="Find my location"
               :done-icon="
                 locationFailed ? 'exclamation-triangle' : 'map-marker-alt'
               "
               :name="locationFailed ? 'exclamation-triangle' : 'map-marker-alt'"
-              :show-spinner="locating"
               spinclass=""
               icon-class=""
               label="Find my location"

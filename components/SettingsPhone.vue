@@ -17,13 +17,13 @@
           />
           <b-input-group-append v-if="!autoSave">
             <SpinButton
+              ref="spinButton"
               :disabled="notMobile"
               variant="white"
               size="md"
               name="save"
               label="Save"
               done-icon="check"
-              :show-spinner="savingPhone"
               @handle="savePhone"
             />
           </b-input-group-append>
@@ -90,12 +90,6 @@ export default {
       authStore,
     }
   },
-  data() {
-    return {
-      savingPhone: false,
-      savedPhone: false,
-    }
-  },
   computed: {
     notMobile() {
       if (!this.me?.phone) {
@@ -112,26 +106,19 @@ export default {
     },
   },
   watch: {
-    phone(newVal) {
+    phone() {
       if (this.autoSave) {
-        this.savePhone()
+        this.$refs.spinButton.handle()
       }
     },
   },
   methods: {
-    async savePhone() {
+    async savePhone({ callback }) {
       if (!this.notMobile) {
-        this.savingPhone = true
-
         await this.authStore.saveAndGet({
           phone: this.me.phone,
         })
-
-        this.savingPhone = false
-        this.savedPhone = true
-        setTimeout(() => {
-          this.savedPhone = false
-        }, 2000)
+        callback()
       }
     },
     async removePhone() {

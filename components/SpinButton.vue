@@ -1,57 +1,44 @@
 <template>
-  <div class="d-inline-block">
-    <b-button
-      :variant="variant"
-      :disabled="disabled"
-      :size="size"
-      :class="[buttonClass, transparent && 'transbord']"
-      :tabindex="tabindex"
-      :title="buttonTitle"
-      @click="click"
-    >
-      <span v-if="iconlast && (label || $slots.default)">
-        <slot>
-          {{ label }}
-        </slot>
-      </span>
-      <span>
-        <span v-if="name || spinnerOnly">
-          <v-icon
-            v-if="spinnerVisible"
-            icon="sync"
-            :class="['fa-spin', iconClass, spinclass]"
-          />
-          <v-icon
-            v-else-if="done"
-            :icon="doneIcon"
-            :class="[spinclass, iconClass]"
-          />
-          <v-icon v-else-if="!spinnerOnly" :class="iconClass" :icon="name" />
-        </span>
-        <span v-if="!iconlast && (label || $slots.default)" class="ml-1">
-          <slot>{{ label }}</slot>
-        </span>
-      </span>
-    </b-button>
-    <ConfirmModal
-      v-if="confirm && showConfirm"
-      @confirm="doIt"
-      @hidden="showConfirm = false"
-    />
-  </div>
+  <b-button
+    :variant="variant"
+    :disabled="disabled"
+    :size="size"
+    :tabindex="tabindex"
+    :title="buttonTitle"
+    :class="[
+      'd-flex gap-1',
+      noBorder && 'no-border',
+      iconlast && 'flex-row-reverse',
+    ]"
+    @click="onClick"
+  >
+    <span v-if="iconName">
+      <v-icon
+        v-if="doing"
+        icon="sync"
+        :class="['fa-spin', iconClass, spinclass]"
+      />
+      <v-icon
+        v-else-if="done"
+        :icon="doneIcon"
+        :class="[spinclass, iconClass]"
+      />
+      <v-icon v-else :class="iconClass" :icon="iconName" />
+    </span>
+    <span v-if="label || $slots.default">
+      <slot>{{ label }}</slot>
+    </span>
+  </b-button>
 </template>
 <script setup>
-import { computed } from 'vue'
-import { ref, defineAsyncComponent } from '#imports'
-
-const ConfirmModal = defineAsyncComponent(() => import('./ConfirmModal'))
+import { ref } from '#imports'
 
 const props = defineProps({
   variant: {
     type: String,
     required: true,
   },
-  name: {
+  iconName: {
     type: String,
     required: false,
     default: null,
@@ -99,29 +86,9 @@ const props = defineProps({
     required: false,
     default: null,
   },
-  buttonClass: {
-    type: String,
-    required: false,
-    default: null,
-  },
-  showSpinner: {
-    type: Boolean,
-    default: false,
-    required: false,
-  },
-  spinnerOnly: {
-    type: Boolean,
-    default: false,
-    required: false,
-  },
   tabindex: {
     type: Number,
     default: 0,
-  },
-  transparent: {
-    type: Boolean,
-    default: false,
-    required: false,
   },
   doneIcon: {
     type: String,
@@ -131,47 +98,36 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  noBorder: Boolean,
 })
 
 const emit = defineEmits(['handle'])
 
 const doing = ref(false)
 const done = ref(false)
-const showConfirm = ref(false)
 
-const spinnerVisible = computed(() => props.showSpinner || doing.value)
-const click = () => {
-  if (props.confirm) {
-    showConfirm.value = true
-  } else {
-    doIt()
-  }
+const finnishSpinner = () => {
+  doing.value = false
+  done.value = true
+  setTimeout(() => {
+    done.value = false
+  }, props.timeout)
 }
 
-const doIt = () => {
+const onClick = () => {
   if (!doing.value) {
     done.value = false
     doing.value = true
 
-    const callback = () => {
-      doing.value = false
-      done.value = true
-      setTimeout(() => {
-        done.value = false
-      }, props.timeout)
-    }
-
-    emit('handle', { data: props.handlerData, callback })
+    emit('handle', { data: props.handlerData, callback: finnishSpinner })
   }
 }
+
+defineExpose({ handle: onClick })
 </script>
 
 <style scoped lang="scss">
-.transbord {
+.no-border {
   border-color: transparent !important;
-}
-
-.tweakHeight {
-  line-height: 1.7em;
 }
 </style>

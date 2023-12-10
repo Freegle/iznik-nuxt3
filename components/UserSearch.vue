@@ -1,18 +1,16 @@
 <template>
-  <div v-if="!removed">
+  <div class="d-flex gap-3">
     <b-button :to="'/browse/' + search.term" variant="white d-inline">
       <v-icon icon="search" /> {{ search.term }}
       <span class="text-muted small">{{ searchAgo }}</span>
     </b-button>
     <SpinButton
-      transparent
+      no-border
       variant="white"
-      class="ml-3 d-inline"
-      name="trash-alt"
+      icon-name="trash-alt"
       done-icon="trash-alt"
       label=""
       icon-class=""
-      :show-spinner="removing"
       @handle="deleteSearch"
     />
   </div>
@@ -38,12 +36,6 @@ export default {
       searchStore,
     }
   },
-  data() {
-    return {
-      removing: false,
-      removed: false,
-    }
-  },
   computed: {
     searchAgo() {
       const daysago = dayjs().diff(dayjs(this.search.date), 'day')
@@ -51,15 +43,9 @@ export default {
     },
   },
   methods: {
-    async deleteSearch() {
-      this.removing = true
+    async deleteSearch({ callback }) {
       await this.searchStore.delete(this.search.id, this.myid)
-      this.removing = false
-      this.removed = true
-
-      setTimeout(() => {
-        this.removed = false
-      }, 2000)
+      callback()
     },
   },
 }
