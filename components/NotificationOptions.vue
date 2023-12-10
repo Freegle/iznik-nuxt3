@@ -110,7 +110,10 @@ const loadLatestNotifications = async () => {
   await notificationStore.fetchList()
   infiniteId.value++
   toShow.value = 5
-  theel.value.scrollTop = 0
+
+  if (theel.value) {
+    theel.value.scrollTop = 0
+  }
 }
 
 const loadMoreNotifications = ($state) => {
