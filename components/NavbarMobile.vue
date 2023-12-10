@@ -39,7 +39,14 @@
     </div>
     <b-dropdown v-if="loggedIn" no-caret variant="primary">
       <template #button-content>
-        <v-icon icon="user" size="2x" />
+        <ProfileImage
+          v-if="me.profile.path"
+          :image="me.profile.path"
+          class="m-0 inline"
+          is-thumbnail
+          size="lg"
+        />
+        <v-icon v-else icon="user" size="2x" />
       </template>
       <b-dropdown-item
         href="/settings"
