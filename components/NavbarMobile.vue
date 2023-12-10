@@ -52,8 +52,8 @@
           <span class="text--large">Settings</span>
         </div>
       </b-dropdown-item>
-      <b-dropdown-item href="/settings" @click="logout">
-        <div class="d-flex align-items-center">
+      <b-dropdown-item @click="logout">
+        <div class="d-flex align-items-center clickme">
           <v-icon icon="sign-out-alt" size="2x" class="mr-2" />
           <span class="text--large">Logout</span>
         </div>
