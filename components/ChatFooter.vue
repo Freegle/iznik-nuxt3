@@ -138,11 +138,9 @@
           variant="primary"
           class="float-end ml-2 mr-2"
           button-title="Sending..."
-          done-icon="angle-double-right"
-          label="Send&nbsp;"
+          label="Send"
           icon-name="angle-double-right"
-          spinclass="text-white"
-          icon-class=""
+          done-icon=""
           iconlast
           @handle="send"
         />
@@ -219,11 +217,9 @@
         <SpinButton
           variant="primary"
           size="md"
-          done-icon="angle-double-right"
-          label="Send&nbsp;"
+          label="Send"
           icon-name="angle-double-right"
-          spinclass="text-white"
-          icon-class=""
+          done-icon=""
           iconlast
           @handle="send"
         />
@@ -490,7 +486,7 @@ export default {
     showInfo() {
       this.showProfileModal = true
     },
-    async send({ callback }) {
+    async send(callback) {
       if (!this.sending) {
         if (this.imageid) {
           this.sending = true

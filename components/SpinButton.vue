@@ -6,25 +6,19 @@
     :tabindex="tabindex"
     :title="buttonTitle"
     :class="[
-      'd-flex gap-1',
+      'd-flex gap-1 align-items-center',
       noBorder && 'no-border',
       iconlast && 'flex-row-reverse',
     ]"
     @click="onClick"
   >
-    <span v-if="iconName">
-      <v-icon
-        v-if="doing"
-        icon="sync"
-        :class="['fa-spin', iconClass, spinclass]"
-      />
-      <v-icon
-        v-else-if="done"
-        :icon="doneIcon"
-        :class="[spinclass, iconClass]"
-      />
-      <v-icon v-else :class="iconClass" :icon="iconName" />
-    </span>
+    <v-icon
+      v-if="doing"
+      icon="sync"
+      :class="['fa-spin fa-fw', spinColorClass]"
+    />
+    <v-icon v-else-if="done && doneIcon" :icon="doneIcon" :class="iconClass" />
+    <v-icon v-else-if="iconName" :class="iconClass" :icon="iconName" />
     <span v-if="label || $slots.default">
       <slot>{{ label }}</slot>
     </span>
@@ -45,46 +39,29 @@ const props = defineProps({
   },
   label: {
     type: String,
-    required: true,
+    required: false,
+    default: '',
   },
   timeout: {
     type: Number,
     required: false,
     default: 5000,
   },
-  spinclass: {
+  spinColor: {
     type: String,
     required: false,
-    default: 'text-success',
+    default: '',
   },
-  disabled: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
+  disabled: Boolean,
   size: {
     type: String,
     required: false,
     default: null,
   },
-  iconlast: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
+  iconlast: Boolean,
   iconClass: {
     type: String,
     default: 'fa-fw',
-  },
-  confirm: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
-  handlerData: {
-    type: Object,
-    required: false,
-    default: null,
   },
   tabindex: {
     type: Number,
@@ -106,12 +83,18 @@ const emit = defineEmits(['handle'])
 const doing = ref(false)
 const done = ref(false)
 
+const spinColorClass =
+  props.spinColor ||
+  (props.variant === 'primary' ? ref('text-white') : ref('text-black'))
+
 const finnishSpinner = () => {
   doing.value = false
-  done.value = true
-  setTimeout(() => {
-    done.value = false
-  }, props.timeout)
+  if (props.doneIcon) {
+    done.value = true
+    setTimeout(() => {
+      done.value = false
+    }, props.timeout)
+  }
 }
 
 const onClick = () => {
@@ -119,7 +102,7 @@ const onClick = () => {
     done.value = false
     doing.value = true
 
-    emit('handle', { data: props.handlerData, callback: finnishSpinner })
+    emit('handle', finnishSpinner)
   }
 }
 

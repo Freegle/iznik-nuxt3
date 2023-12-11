@@ -37,9 +37,8 @@
                 </div>
                 <SpinButton
                   variant="primary"
-                  name="save"
+                  icon-name="save"
                   label="Create"
-                  spinclass="text-white"
                   @handle="create"
                 />
                 <div v-if="id" class="w-100 mt-3 m-0">
@@ -152,7 +151,7 @@ export default {
     },
   },
   methods: {
-    async create() {
+    async create(callback) {
       if (this.groupid && this.name) {
         try {
           this.id = await this.shortlinkStore.add(this.groupid, this.name)
@@ -170,6 +169,7 @@ export default {
           console.log('Failed to create shortlink', e.response)
         }
       }
+      callback()
     },
   },
 }

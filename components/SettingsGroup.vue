@@ -16,7 +16,7 @@
       <b-col v-if="leave" cols="12" sm="6">
         <SpinButton
           variant="secondary"
-          name="trash-alt"
+          icon-name="trash-alt"
           label="Leave"
           class="mb-3"
           @handle="leaveGroup"
@@ -174,7 +174,7 @@ export default {
         await this.authStore.setGroup(params)
       }
     },
-    leaveGroup({ callback }) {
+    leaveGroup(callback) {
       this.$emit('leave')
       callback()
     },

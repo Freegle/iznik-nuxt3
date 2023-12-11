@@ -28,7 +28,7 @@
           </b-col>
           <b-col cols="12" sm="4">
             <SpinButton
-              name="trash-alt"
+              icon-name="trash-alt"
               label="Delete"
               variant="secondary"
               @handle="deleteIt"
@@ -77,11 +77,10 @@
             </b-col>
             <b-col cols="12" sm="4">
               <SpinButton
-                name="save"
+                icon-name="save"
                 variant="primary"
                 size="lg"
                 label="Save"
-                spinclass="text-white"
                 @handle="saveInstructions"
               />
             </b-col>
@@ -124,7 +123,7 @@
                 v-if="selectedProperty"
                 label="Add"
                 variant="primary"
-                name="plus"
+                icon-name="plus"
                 @handle="add"
               />
             </b-col>
@@ -338,7 +337,7 @@ export default {
       this.showMap = false
       this.$emit('hidden')
     },
-    async add({ callback }) {
+    async add(callback) {
       const id = await this.addressStore.add({
         pafid: this.selectedProperty,
         instructions: this.updatedInstructions,
@@ -349,7 +348,7 @@ export default {
       this.showAdd = false
       callback()
     },
-    async deleteIt({ callback }) {
+    async deleteIt(callback) {
       await this.addressStore.delete(this.selectedAddress)
       this.selectFirst()
       callback()
@@ -365,7 +364,7 @@ export default {
 
       this.selectedProperty = 0
     },
-    async saveInstructions({ callback }) {
+    async saveInstructions(callback) {
       await this.addressStore.update({
         id: this.selectedAddress,
         instructions: this.updatedInstructions,

@@ -368,9 +368,8 @@
             v-if="editing && enabled"
             variant="primary"
             :disabled="uploadingPhoto"
-            name="save"
+            icon-name="save"
             :label="event.id ? 'Save Changes' : 'Add Event'"
-            spinclass="textWhite"
             @handle="saveIt"
           />
         </template>
@@ -601,7 +600,7 @@ export default {
       await this.communityEventStore.delete(this.event.id)
       this.hide()
     },
-    async saveIt({ callback }) {
+    async saveIt(callback) {
       const validate = await this.$refs.form.validate()
 
       if (!this.groupid) {

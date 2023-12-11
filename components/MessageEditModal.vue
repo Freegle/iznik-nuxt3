@@ -115,10 +115,9 @@
       </b-button>
       <SpinButton
         variant="primary"
-        :disabled="uploadingPhoto || (!edittextbody && !attachments?.length)"
-        name="save"
+        :disabled="uploadingPhoto || isSaveButtonDisabled"
+        icon-name="save"
         label="Save"
-        spinclass="text-white"
         @handle="save"
       />
     </template>
@@ -233,12 +232,8 @@ export default {
     },
   },
   methods: {
-    async save({ callback }) {
+    async save() {
       this.triedToSave = true
-      if (this.isSaveButtonDisabled) {
-        callback()
-        return
-      }
 
       if (this.edititem && (this.edittextbody || this.attachments?.length)) {
         const attids = []
@@ -269,7 +264,6 @@ export default {
         this.hide()
         await this.messageStore.patch(params)
       }
-      callback()
     },
     removePhoto(id) {
       this.attachments = this.attachments.filter((item) => {

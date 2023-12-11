@@ -191,9 +191,8 @@
                 <div class="d-flex flex-column justify-content-end">
                   <SpinButton
                     variant="primary"
-                    name="save"
+                    icon-name="save"
                     label="Save"
-                    spinclass="text-white"
                     :disabled="!emailValid"
                     @handle="saveEmail"
                   />
@@ -219,7 +218,7 @@
                 <p>Or if you're sure it's valid:</p>
                 <SpinButton
                   variant="white"
-                  name="check"
+                  icon-name="check"
                   label="Try again"
                   @handle="unbounce"
                 />
@@ -246,7 +245,7 @@
                         size="lg"
                         class="mb-2 d-inline"
                         :disabled="!pc"
-                        name="save"
+                        icon-name="save"
                         label="Save"
                         @handle="savePostcode"
                       />
@@ -1030,9 +1029,7 @@ export default {
     clearPostcode() {
       this.pc = null
     },
-    async saveEmail() {
-      this.savingEmail = true
-
+    async saveEmail(callback) {
       if (this.me.email) {
         const data = await this.authStore.saveEmail({
           email: this.me.email,
@@ -1042,31 +1039,17 @@ export default {
           this.showEmailConfirmModal = true
         }
       }
-
-      this.savingEmail = false
-      this.savedEmail = true
-      setTimeout(() => {
-        this.savedEmail = false
-      }, 2000)
+      callback()
     },
-    async unbounce() {
-      this.unbouncing = true
-
+    async unbounce(callback) {
       if (this.me.email && this.me.bouncing) {
         await this.authStore.unbounce(this.me.id)
       }
-
-      this.unbouncing = false
-      this.unbounced = true
-      setTimeout(() => {
-        this.unbounced = false
-      }, 2000)
+      callback()
     },
-    async savePostcode() {
+    async savePostcode(callback) {
       if (this.pc?.id) {
         const settings = this.me.settings
-        this.savingPostcode = true
-
         if (!settings?.mylocation || settings?.mylocation.id !== this.pc.id) {
           settings.mylocation = this.pc
           await this.authStore.saveAndGet({
@@ -1074,11 +1057,7 @@ export default {
           })
         }
 
-        this.savingPostcode = false
-        this.savedPostcode = true
-        setTimeout(() => {
-          this.savedPostcode = false
-        }, 2000)
+        callback()
       }
     },
     toggleAdvanced(e) {

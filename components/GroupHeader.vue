@@ -42,7 +42,7 @@
         <div class="button__items">
           <SpinButton
             v-if="!amAMember"
-            name="trash-alt"
+            icon-name="plus"
             variant="primary"
             class="mb-1 ms-1"
             label="Join this community"
@@ -50,7 +50,7 @@
           />
           <SpinButton
             v-if="amAMember === 'Member'"
-            name="trash-alt"
+            icon-name="trash-alt"
             variant="white"
             class="mb-1 ms-1"
             label="Leave"
@@ -201,26 +201,18 @@ export default {
     },
   },
   methods: {
-    async leave({ callback }) {
-      this.joiningOrLeaving = true
-
+    async leave(callback) {
       await this.authStore.leaveGroup(this.myid, this.group.id)
-
-      this.joiningOrLeaving = false
       callback()
     },
-    async join({ callback }) {
+    async join(callback) {
       if (!this.me) {
         // We need to force them to log in.
         this.$router.push('/explore/join/' + this.group.id)
       } else {
-        this.joiningOrLeaving = true
-
         await this.authStore.joinGroup(this.myid, this.group.id, true)
-
-        this.joiningOrLeaving = false
+        callback()
       }
-      callback()
     },
   },
 }

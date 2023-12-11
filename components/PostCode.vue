@@ -51,14 +51,9 @@
         <div v-if="find && !wip">
           <SpinButton
             variant="secondary"
-            label=""
-            spinclass=""
-            iconclass=""
-            class="tweakHeight"
+            class="h-100"
             button-title="Find my device's location instead of typing a postcode"
-            :done-icon="
-              locationFailed ? 'exclamation-triangle' : 'map-marker-alt'
-            "
+            done-icon=""
             :icon-name="
               locationFailed ? 'exclamation-triangle' : 'map-marker-alt'
             "
@@ -238,39 +233,46 @@ export default {
       } else {
         this.$emit('cleared')
       }
+      this.locationFailed = false
     },
-    findLoc() {
+    findLoc(callback) {
       try {
         if (
           navigator &&
           navigator.geolocation &&
           navigator.geolocation.getCurrentPosition
         ) {
-          navigator.geolocation.getCurrentPosition(async (position) => {
-            const res = await this.locationStore.fetch({
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-            })
-
-            if (
-              res.ret === 0 &&
-              res.location &&
-              res.location.name &&
-              this.$refs.autocomplete
-            ) {
-              // Got it - put it in the autocomplete input, and indicate that we've selected it.
-              this.$refs.autocomplete.setValue(res.location.name)
-              await this.select({
-                name: res.location.name,
+          navigator.geolocation.getCurrentPosition(
+            async (position) => {
+              const res = await this.locationStore.fetch({
+                lat: position.coords.latitude,
+                lng: position.coords.longitude,
               })
 
-              // Show the user we've done this, and make them think.
-              this.showLocated = true
-              setTimeout(() => (this.showLocated = false), 10000)
-            } else {
+              if (
+                res.ret === 0 &&
+                res.location &&
+                res.location.name &&
+                this.$refs.autocomplete
+              ) {
+                // Got it - put it in the autocomplete input, and indicate that we've selected it.
+                this.$refs.autocomplete.setValue(res.location.name)
+                await this.select({
+                  name: res.location.name,
+                })
+
+                // Show the user we've done this, and make them think.
+                this.showLocated = true
+                setTimeout(() => (this.showLocated = false), 10000)
+              } else {
+                this.locationFailed = true
+              }
+            },
+            (e) => {
+              console.error('Find location failed with', e)
               this.locationFailed = true
             }
-          })
+          )
         } else {
           console.log('Navigation not supported.  ')
           this.locationFailed = true
@@ -278,6 +280,8 @@ export default {
       } catch (e) {
         console.error('Find location failed with', e)
         this.locationFailed = true
+      } finally {
+        callback()
       }
     },
   },

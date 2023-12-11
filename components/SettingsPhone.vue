@@ -21,9 +21,9 @@
               :disabled="notMobile"
               variant="white"
               size="md"
-              name="save"
+              icon-name="save"
+              spin-color="text-success"
               label="Save"
-              done-icon="check"
               @handle="savePhone"
             />
           </b-input-group-append>
@@ -113,7 +113,7 @@ export default {
     },
   },
   methods: {
-    async savePhone({ callback }) {
+    async savePhone(callback) {
       if (!this.notMobile) {
         await this.authStore.saveAndGet({
           phone: this.me.phone,

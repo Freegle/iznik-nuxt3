@@ -406,9 +406,8 @@
             v-if="editing && enabled"
             variant="primary"
             :disabled="uploadingPhoto"
-            name="save"
+            icon-name="save"
             :label="volunteering.id ? 'Save Changes' : 'Add Opportunity'"
-            spinclass="textWhite"
             @handle="saveIt"
           />
         </template>
@@ -635,17 +634,19 @@ export default {
       await this.volunteeringStore.delete(this.volunteering.id)
       this.hide()
     },
-    async saveIt() {
+    async saveIt(callback) {
       const validate = await this.$refs.form.validate()
 
       if (!this.groupid) {
         this.showGroupError = true
+        callback()
         return
       } else {
         this.showGroupError = false
       }
 
       if (!validate.valid) {
+        callback()
         return
       }
 
@@ -720,6 +721,7 @@ export default {
           this.added = true
         }
       }
+      callback()
     },
     async dontSave() {
       if (this.id) {

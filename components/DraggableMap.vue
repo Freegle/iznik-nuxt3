@@ -8,12 +8,10 @@
               variant="secondary"
               class="mb-2 ml-0 ml-md-2"
               button-title="Find my location"
-              :done-icon="
+              done-icon=""
+              :icon-name="
                 locationFailed ? 'exclamation-triangle' : 'map-marker-alt'
               "
-              :name="locationFailed ? 'exclamation-triangle' : 'map-marker-alt'"
-              spinclass=""
-              icon-class=""
               label="Find my location"
               size="lg"
               @handle="findLoc"
@@ -109,7 +107,7 @@ export default {
     getCenter() {
       return this.center
     },
-    findLoc({ callback }) {
+    findLoc(callback) {
       try {
         if (
           navigator &&

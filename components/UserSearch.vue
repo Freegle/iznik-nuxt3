@@ -8,9 +8,7 @@
       no-border
       variant="white"
       icon-name="trash-alt"
-      done-icon="trash-alt"
-      label=""
-      icon-class=""
+      done-icon=""
       @handle="deleteSearch"
     />
   </div>
@@ -43,7 +41,7 @@ export default {
     },
   },
   methods: {
-    async deleteSearch({ callback }) {
+    async deleteSearch(callback) {
       await this.searchStore.delete(this.search.id, this.myid)
       callback()
     },
