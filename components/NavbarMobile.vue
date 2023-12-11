@@ -37,7 +37,7 @@
         </nuxt-link>
       </b-nav>
     </div>
-    <b-dropdown v-if="loggedIn" no-caret variant="primary">
+    <b-dropdown v-if="loggedIn" no-caret variant="primary" class="userOptions">
       <template #button-content>
         <ProfileImage
           v-if="me.profile.path"
@@ -276,7 +276,7 @@ function handleScroll() {
   border: none !important;
 }
 
-:deep(.dropdown-menu) {
+:deep(.userOptions .dropdown-menu) {
   background-color: $color-green-background;
 
   .dropdown-item {
