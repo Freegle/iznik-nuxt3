@@ -135,7 +135,7 @@ useHead(
 
 useFavoritePage('myposts')
 
-const { showDonationAskModal } = useDonationAskModal()
+const { showDonationAskModal } = await useDonationAskModal()
 
 const myid = authStore.user?.id
 
@@ -215,6 +215,10 @@ const martop2 = ref('285px')
 function adRendered2(visible) {
   martop2.value = visible ? '285px' : '0px'
 }
+
+// onMounted(() => {
+//   showDonationAskModal.value = true
+// })
 </script>
 <style scoped lang="scss">
 .martop2 {

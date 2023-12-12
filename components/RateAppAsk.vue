@@ -40,6 +40,7 @@ export default {
     },
 
     async confirm() {
+      window.localStorage.setItem('rateappnotagain', true) // Do not ask again
       const mobileStore = useMobileStore()
       let review_link = "market://details?id=org.ilovefreegle.direct";
       if (mobileStore.isiOS) review_link = 'https://apps.apple.com/gb/app/id970045029?action=write-review'

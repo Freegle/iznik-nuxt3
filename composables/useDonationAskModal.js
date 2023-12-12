@@ -15,11 +15,8 @@ export function useDonationAskModal(requestedVariant) {
   const variant = ref(null)
   const groupId = ref(null)
 
-  const lastAsk = miscStore.get('lastdonationask')
-  const canAsk =
-    !lastAsk || new Date().getTime() - lastAsk > 60 * 60 * 1000 * 24 * 7
-
   const { $bus } = useNuxtApp()
+
   $bus.$on('outcome', (params) => {
     groupId.value = params.groupid
     const { outcome } = params
@@ -28,33 +25,36 @@ export function useDonationAskModal(requestedVariant) {
       // If someone has set up a regular donation, then we don't ask them to donate again.  Wouldn't be fair to
       // pester them.
 
-      if (!me?.donorrecurring && canAsk) {
-        ask()
-      }
+      const lastAsk = miscStore.get('lastdonationask')
+      const canAsk =
+        !lastAsk || new Date().getTime() - lastAsk > 60 * 60 * 1000 * 24 * 7
+
+      //if (!me?.donorrecurring && canAsk) {
+        show()
+      //}
     }
   })
-
-  function ask() {
-    show(requestedVariant)
-
-    miscStore.set({
-      key: 'lastdonationask',
-      value: new Date().getTime(),
-    })
-  }
 
   const showDonationAskModal = ref(false)
 
   async function show(requestedVariant) {
+    miscStore.set({
+      key: 'lastdonationask',
+      value: new Date().getTime(),
+    })
+
     // We need to decide which variant of donation ask to show.
     variant.value = requestedVariant
 
     try {
       if (!requestedVariant) {
-        // requestedVariant = 'buttons1'
+        requestedVariant = {
+          variant: 'buttons2510',
+        }
 
         const mobileStore = useMobileStore()
         if( mobileStore.isApp){
+          requestedVariant = { variant: 'rateapp' }
           const rateappnotagain = window.localStorage.getItem('rateappnotagain')
           if( !rateappnotagain){
             if( Math.random() > 0.5) requestedVariant = { variant: 'rateapp' }
@@ -84,5 +84,5 @@ export function useDonationAskModal(requestedVariant) {
     })
   }
 
-  return { showDonationAskModal, variant, groupId }
+  return { showDonationAskModal, variant, groupId, show }
 }

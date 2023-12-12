@@ -68,7 +68,6 @@
     </template>
   </b-modal>
 </template>
-
 <script setup>
 import { storeToRefs } from 'pinia'
 import { useModal } from '~/composables/useModal'
@@ -87,7 +86,7 @@ const groupStore = useGroupStore()
 const donationStore = useDonationStore()
 
 const { modal, hide } = useModal()
-const { variant, groupId } = useDonationAskModal()
+const { variant, groupId, show } = await useDonationAskModal()
 
 const groupName = computed(() => {
   if (groupId.value && !targetMet.value) {
@@ -113,4 +112,6 @@ function score(value) {
     score: value,
   })
 }
+
+show()
 </script>
