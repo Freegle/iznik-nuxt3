@@ -3,7 +3,7 @@ import { useMiscStore } from '~/stores/misc'
 import { useRuntimeConfig } from '#app'
 import Api from '~/api'
 
-export async function useDonationAskModal(requestedVariant) {
+export function useDonationAskModal(requestedVariant) {
   const authStore = useAuthStore()
   const miscStore = useMiscStore()
   const runtimeConfig = useRuntimeConfig()
@@ -12,35 +12,10 @@ export async function useDonationAskModal(requestedVariant) {
   const me = authStore.user
 
   const variant = ref(null)
-
-  // We need to decide which variant of donation ask to show.
-  variant.value = requestedVariant
-
-  try {
-    if (!requestedVariant) {
-      requestedVariant = {
-        variant: 'buttons2510',
-      }
-
-      requestedVariant = await api.bandit.choose({
-        uid: 'donation',
-      })
-
-      if (requestedVariant) {
-        variant.value = requestedVariant.variant
-      }
-    }
-  } catch (e) {
-    console.error('Get variant failed')
-  }
-
   const groupId = ref(null)
 
-  const lastAsk = miscStore.get('lastdonationask')
-  const canAsk =
-    !lastAsk || new Date().getTime() - lastAsk > 60 * 60 * 1000 * 24 * 7
-
   const { $bus } = useNuxtApp()
+
   $bus.$on('outcome', (params) => {
     groupId.value = params.groupid
     const { outcome } = params
@@ -49,24 +24,45 @@ export async function useDonationAskModal(requestedVariant) {
       // If someone has set up a regular donation, then we don't ask them to donate again.  Wouldn't be fair to
       // pester them.
 
+      const lastAsk = miscStore.get('lastdonationask')
+      const canAsk =
+        !lastAsk || new Date().getTime() - lastAsk > 60 * 60 * 1000 * 24 * 7
+
       if (!me?.donorrecurring && canAsk) {
-        ask()
+        show()
       }
     }
   })
 
-  function ask() {
-    show(requestedVariant)
+  const showDonationAskModal = ref(false)
 
+  async function show(requestedVariant) {
     miscStore.set({
       key: 'lastdonationask',
       value: new Date().getTime(),
     })
-  }
 
-  const showDonationAskModal = ref(false)
+    // We need to decide which variant of donation ask to show.
+    variant.value = requestedVariant
 
-  async function show(requestedVariant) {
+    try {
+      if (!requestedVariant) {
+        requestedVariant = {
+          variant: 'buttons2510',
+        }
+
+        requestedVariant = await api.bandit.choose({
+          uid: 'donation',
+        })
+
+        if (requestedVariant) {
+          variant.value = requestedVariant.variant
+        }
+      }
+    } catch (e) {
+      console.error('Get variant failed')
+    }
+
     showDonationAskModal.value = true
 
     // Record the show
@@ -76,5 +72,5 @@ export async function useDonationAskModal(requestedVariant) {
     })
   }
 
-  return { showDonationAskModal, variant, groupId }
+  return { showDonationAskModal, variant, groupId, show }
 }
