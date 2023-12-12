@@ -81,7 +81,7 @@ export default {
     const groupStore = useGroupStore()
     const myid = authStore.user?.id
 
-    const { showDonationAskModal } = useDonationAskModal()
+    const { showDonationAskModal } = await useDonationAskModal()
 
     let message = null
     let missing = false

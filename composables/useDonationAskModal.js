@@ -3,7 +3,7 @@ import { useMiscStore } from '~/stores/misc'
 import { useRuntimeConfig } from '#app'
 import Api from '~/api'
 
-export function useDonationAskModal(requestedVariant) {
+export async function useDonationAskModal(requestedVariant) {
   const authStore = useAuthStore()
   const miscStore = useMiscStore()
   const runtimeConfig = useRuntimeConfig()
@@ -12,6 +12,28 @@ export function useDonationAskModal(requestedVariant) {
   const me = authStore.user
 
   const variant = ref(null)
+
+  // We need to decide which variant of donation ask to show.
+  variant.value = requestedVariant
+
+  try {
+    if (!requestedVariant) {
+      requestedVariant = {
+        variant: 'buttons2510',
+      }
+
+      requestedVariant = await api.bandit.choose({
+        uid: 'donation',
+      })
+
+      if (requestedVariant) {
+        variant.value = requestedVariant.variant
+      }
+    }
+  } catch (e) {
+    console.error('Get variant failed')
+  }
+
   const groupId = ref(null)
 
   const lastAsk = miscStore.get('lastdonationask')
@@ -45,25 +67,6 @@ export function useDonationAskModal(requestedVariant) {
   const showDonationAskModal = ref(false)
 
   async function show(requestedVariant) {
-    // We need to decide which variant of donation ask to show.
-    variant.value = requestedVariant
-
-    try {
-      if (!requestedVariant) {
-        requestedVariant = 'buttons1'
-
-        requestedVariant = await api.bandit.choose({
-          uid: 'donation',
-        })
-
-        if (requestedVariant) {
-          variant.value = requestedVariant.variant
-        }
-      }
-    } catch (e) {
-      console.error('Get variant failed')
-    }
-
     showDonationAskModal.value = true
 
     // Record the show

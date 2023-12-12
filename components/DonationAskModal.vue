@@ -81,7 +81,7 @@ const groupStore = useGroupStore()
 const donationStore = useDonationStore()
 
 const { modal, hide } = useModal()
-const { variant, groupId } = useDonationAskModal()
+const { variant, groupId } = await useDonationAskModal()
 
 const groupName = computed(() => {
   if (groupId.value && !targetMet.value) {

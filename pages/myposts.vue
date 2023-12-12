@@ -134,7 +134,7 @@ useHead(
 
 useFavoritePage('myposts')
 
-const { showDonationAskModal } = useDonationAskModal()
+const { showDonationAskModal } = await useDonationAskModal()
 
 const myid = authStore.user?.id
 
