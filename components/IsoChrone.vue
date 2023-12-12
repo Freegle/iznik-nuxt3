@@ -53,15 +53,15 @@
             >
               Add location
             </b-button>
-            <SpinButton
+            <b-button
               v-else-if="isochrone.nickname"
               variant="link"
-              button-class="ml-2 p-0 mb-1"
-              confirm
+              class="ml-2 p-0 mb-1"
               size="sm"
-              label="Remove"
-              @handle="remove"
-            />
+              @click="confirmRemoveLocation = true"
+            >
+              Remove
+            </b-button>
           </div>
         </label>
         <div class="slider">
@@ -145,20 +145,29 @@
       </div>
       <hr v-if="!last" class="text-muted mb-1 mt-1" />
     </template>
+    <client-only>
+      <Teleport to="body">
+        <ConfirmModal
+          v-if="confirmRemoveLocation"
+          @confirm="deleteLocation"
+          @hidden="confirmRemoveLocation = false"
+        />
+      </Teleport>
+    </client-only>
   </div>
 </template>
 <script>
 import { mapState } from 'pinia'
 import { useLocationStore } from '../stores/location'
-import { ref } from '#imports'
+import { ref, defineAsyncComponent } from '#imports'
 import PostCode from '~/components/PostCode'
-import SpinButton from '~/components/SpinButton'
 import { useIsochroneStore } from '~/stores/isochrone'
 
+const ConfirmModal = defineAsyncComponent(() => import('./ConfirmModal'))
 export default {
   components: {
     PostCode,
-    SpinButton,
+    ConfirmModal,
   },
   props: {
     id: {
@@ -183,7 +192,7 @@ export default {
 
     const minutes = ref(20)
     const transport = ref('Drive')
-
+    const confirmRemoveLocation = ref(false)
     if (props.id) {
       minutes.value = isochroneStore.get(props.id).minutes
       transport.value = isochroneStore.get(props.id).transport
@@ -210,6 +219,10 @@ export default {
       await locationStore.fetchv2(isochrone.value.locationid)
     }
 
+    const deleteLocation = async () => {
+      await isochroneStore.delete({ id: props.id })
+    }
+
     return {
       isochroneStore,
       locationStore,
@@ -217,6 +230,8 @@ export default {
       transport,
       isochrone,
       location,
+      confirmRemoveLocation,
+      deleteLocation,
     }
   },
   data() {
@@ -314,11 +329,6 @@ export default {
         this.nickname = null
         this.$emit('added')
       }
-    },
-    remove() {
-      this.isochroneStore.delete({
-        id: this.id,
-      })
     },
   },
 }

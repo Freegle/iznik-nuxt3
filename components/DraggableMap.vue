@@ -6,15 +6,12 @@
           <div class="d-flex justify-content-between">
             <SpinButton
               variant="secondary"
-              button-class="mb-2 ml-0 ml-md-2"
+              class="mb-2 ml-0 ml-md-2"
               button-title="Find my location"
-              :done-icon="
+              done-icon=""
+              :icon-name="
                 locationFailed ? 'exclamation-triangle' : 'map-marker-alt'
               "
-              :name="locationFailed ? 'exclamation-triangle' : 'map-marker-alt'"
-              :show-spinner="locating"
-              spinclass=""
-              icon-class=""
               label="Find my location"
               size="lg"
               @handle="findLoc"
@@ -110,7 +107,7 @@ export default {
     getCenter() {
       return this.center
     },
-    findLoc() {
+    findLoc(callback) {
       try {
         if (
           navigator &&
@@ -137,6 +134,7 @@ export default {
         console.error('Find location failed with', e)
         this.locationFailed = true
       }
+      callback()
     },
     idle() {
       this.center = this.mapObject.getCenter()

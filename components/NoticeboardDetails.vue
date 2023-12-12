@@ -31,7 +31,7 @@
         </p>
         <div class="d-flex flex-wrap justify-content-between">
           <SpinButton
-            name="check"
+            icon-name="check"
             variant="primary"
             size="lg"
             label="I put up a poster!"
@@ -47,7 +47,7 @@
             <v-icon icon="download" /> Download the poster
           </b-button>
           <SpinButton
-            name="times"
+            icon-name="times"
             variant="secondary"
             size="lg"
             label="Please ask someone else"
@@ -66,7 +66,7 @@
           />
           <SpinButton
             variant="secondary"
-            name="save"
+            icon-name="save"
             label="Save comments"
             class="mt-2"
             @handle="saveComments"
@@ -77,7 +77,7 @@
         </p>
         <SpinButton
           variant="secondary"
-          name="trash-alt"
+          icon-name="trash-alt"
           label="Noticeboard no longer active"
           @handle="dead"
         />
@@ -158,17 +158,21 @@ export default {
     },
   },
   methods: {
-    async putup() {
+    async putup(callback) {
       await this.noticeboardStore.refresh(this.id)
+      callback()
     },
-    async shutup() {
+    async shutup(callback) {
       await this.noticeboardStore.decline(this.id)
+      callback()
     },
-    async dead() {
+    async dead(callback) {
       await this.noticeboardStore.inactive(this.id)
+      callback()
     },
-    async saveComments() {
-      await this.noticeboardStore.saveComments(this.id, this.comments)
+    async saveComments(callback) {
+      await this.noticeboardStore.comments(this.id, this.comments)
+      callback()
     },
   },
 }

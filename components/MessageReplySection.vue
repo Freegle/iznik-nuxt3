@@ -67,11 +67,8 @@
           v-if="!me"
           variant="primary"
           size="lg"
-          done-icon="angle-double-right"
-          name="angle-double-right"
-          spinclass="text-white"
-          icon-class=""
-          :show-spinner="replying"
+          done-icon=""
+          icon-name="angle-double-right"
           :disabled="disableSend"
           iconlast
           @handle="registerOrSend"
@@ -82,11 +79,8 @@
           v-else
           variant="primary"
           size="lg"
-          done-icon="angle-double-right"
-          name="angle-double-right"
-          spinclass="text-white"
-          icon-class=""
-          :show-spinner="replying"
+          done-icon=""
+          icon-name="angle-double-right"
           :disabled="disableSend"
           iconlast
           @handle="sendReply"
@@ -125,6 +119,7 @@ import MessageStillAvailable from '~/components/MessageStillAvailable'
 import EmailValidator from '~/components/EmailValidator'
 import NewUserInfo from '~/components/NewUserInfo'
 import ChatButton from '~/components/ChatButton'
+import SpinButton from '~/components/SpinButton.vue'
 
 const NewFreegler = () => import('~/components/NewFreegler')
 
@@ -135,6 +130,7 @@ export default {
     EmailValidator,
     NewFreegler,
     NewUserInfo,
+    SpinButton,
   },
   mixins: [replyToPost],
   props: {
@@ -225,7 +221,7 @@ export default {
     },
   },
   methods: {
-    async registerOrSend() {
+    async registerOrSend(callback) {
       // We've got a reply and an email address.  Maybe the email address is a registered user, maybe it's new.  If
       // it's a registered user then we want to force them to log in.
       //
@@ -263,8 +259,9 @@ export default {
         console.log('Register exception, force login', e.message)
         this.forceLogin = true
       }
+      callback()
     },
-    async sendReply() {
+    async sendReply(callback) {
       console.log('sendReply', this.reply)
 
       if (this.reply) {
@@ -320,6 +317,7 @@ export default {
           this.forceLogin = true
         }
       }
+      callback()
     },
     close() {
       this.$emit('close')

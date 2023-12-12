@@ -1,33 +1,46 @@
 <template>
   <div>
     <div class="d-flex flex-wrap">
-      <div
-        class="photoholder bg-light d-flex flex-column align-items-center justify-items-center mr-1"
+      <draggable
+        v-model="attachments"
+        class="d-flex flex-wrap w-100"
+        :item-key="(el) => `image-${el.id}`"
+        :animation="150"
+        ghost-class="ghost"
       >
-        <v-icon icon="camera" class="fa-8-75x text-faded" />
-        <b-button
-          variant="primary"
-          size="lg"
-          :class="{
-            'ml-3': true,
-            'mr-3': true,
-            invisible: uploading && hidingPhotoButton,
-          }"
-          @click="photoAdd"
-          @drop.prevent="drop"
-          @dragover.prevent
-        >
-          <span v-if="attachments?.length === 1"> Add more photos </span>
-          <span v-else> Add photos </span>
-        </b-button>
-      </div>
-      <div
-        v-for="att in attachments"
-        :key="'image-' + att.id"
-        class="bg-transparent p-0"
-      >
-        <PostPhoto v-bind="att" class="mr-1" @remove="removePhoto" />
-      </div>
+        <template #header>
+          <div
+            class="photoholder bg-dark-subtle d-flex flex-column align-items-center justify-items-center mr-md-1"
+          >
+            <v-icon icon="camera" class="fa-8-75x text-faded" />
+            <b-button
+              variant="primary"
+              size="lg"
+              :class="{
+                'ml-3': true,
+                'mr-3': true,
+                invisible: uploading && hidingPhotoButton,
+              }"
+              @click="photoAdd"
+              @drop.prevent="drop"
+              @dragover.prevent
+            >
+              <span v-if="attachments?.length === 1"> Add more photos </span>
+              <span v-else> Add photos </span>
+            </b-button>
+          </div>
+        </template>
+        <template #item="{ element, index }">
+          <div class="bg-transparent p-0">
+            <PostPhoto
+              v-bind="element"
+              :primary="index === 0"
+              class="mr-1 mt-1 mt-md-0"
+              @remove="removePhoto"
+            />
+          </div>
+        </template>
+      </draggable>
       <hr />
     </div>
     <div v-if="uploading" class="bg-white">
@@ -74,10 +87,12 @@
   </div>
 </template>
 <script>
+import draggable from 'vuedraggable'
 import { uid } from '../composables/useId'
 import { useComposeStore } from '../stores/compose'
 import { useMessageStore } from '../stores/message'
 import NumberIncrementDecrement from './NumberIncrementDecrement'
+
 const OurFilePond = () => import('~/components/OurFilePond')
 const PostPhoto = () => import('~/components/PostPhoto')
 const PostItem = () => import('~/components/PostItem')
@@ -88,6 +103,7 @@ export default {
     OurFilePond,
     PostPhoto,
     PostItem,
+    draggable,
   },
   props: {
     id: {
@@ -145,8 +161,13 @@ export default {
         })
       },
     },
-    attachments() {
-      return this.composeStore?.attachments(this.id)
+    attachments: {
+      get() {
+        return this.composeStore?.attachments(this.id)
+      },
+      set(value) {
+        return this.composeStore?.setAttachmentsForMessage(this.id, value)
+      },
     },
     placeholder() {
       return this.type === 'Offer'
@@ -258,7 +279,15 @@ export default {
 }
 
 .photoholder {
-  width: 200px;
   height: 200px;
+  width: 100%;
+
+  @include media-breakpoint-up(md) {
+    width: 200px;
+  }
+}
+
+.ghost {
+  opacity: 0.5;
 }
 </style>

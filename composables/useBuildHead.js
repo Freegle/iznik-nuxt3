@@ -1,3 +1,5 @@
+import { useMiscStore } from '~/stores/misc'
+
 export function buildHead(
   route,
   runtimeConfig,
@@ -62,6 +64,9 @@ export function buildHead(
     content: '/icons/browserconfig.xml',
   })
   meta.push({ name: 'theme-color', content: '#ffffff' })
+
+  // Store the page title in the store so that we can access it later if we need to.
+  useMiscStore().pageTitle = title
 
   return {
     title,

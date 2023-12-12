@@ -4,11 +4,9 @@
       v-if="!newsfeed.loved"
       variant="link"
       size="sm"
-      :show-spinner="loving"
-      name="heart"
-      done-icon="heart"
-      icon-class=""
-      label=""
+      icon-name="heart"
+      spin-color="text-success"
+      done-icon=""
       @handle="love"
     >
       <span class="d-none d-sm-inline">Love this</span>
@@ -17,11 +15,10 @@
       v-if="newsfeed.loved"
       variant="link"
       size="sm"
-      :show-spinner="loving"
-      name="heart"
-      done-icon="heart"
+      spin-color="text-success"
+      icon-name="heart"
+      done-icon=""
       icon-class="text-danger"
-      label=""
       @handle="unlove"
     >
       <span class="d-none d-sm-inline">Unlove this</span>
@@ -93,22 +90,16 @@ export default {
     },
   },
   methods: {
-    async love() {
-      this.loving = true
-
+    async love(callback) {
       await this.newsfeedStore.love(this.newsfeed.id, this.newsfeed.threadhead)
-
-      this.loving = false
+      callback()
     },
-    async unlove() {
-      this.loving = true
-
+    async unlove(callback) {
       await this.newsfeedStore.unlove(
         this.newsfeed.id,
         this.newsfeed.threadhead
       )
-
-      this.loving = false
+      callback()
     },
     focusComment() {
       this.$emit('focus-comment')

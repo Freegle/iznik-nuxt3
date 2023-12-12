@@ -16,6 +16,9 @@ export const useNewsfeedStore = defineStore({
 
     // Count of interesting items
     count: 0,
+
+    // Most recently used distance.
+    lastDistance: 0,
   }),
   actions: {
     init(config) {
@@ -28,9 +31,10 @@ export const useNewsfeedStore = defineStore({
       this.$reset()
       this.config = init
     },
-    async fetchCount(log = true) {
-      const ret = await api(this.config).news.count(log)
-      this.count = ret?.count
+    async fetchCount(distance, log = true) {
+      this.lastDistance = distance
+      const ret = await api(this.config).news.count(distance, log)
+      this.count = ret?.count || 0
       return this.count
     },
     addItems(items) {
@@ -67,10 +71,11 @@ export const useNewsfeedStore = defineStore({
 
       if (this.maxSeen > prevMax) {
         api(this.config).news.seen(this.maxSeen)
-        this.fetchCount()
+        this.fetchCount(this.lastDistance)
       }
     },
     async fetchFeed(distance) {
+      this.lastDistance = distance
       this.feed = await api(this.config).news.fetch(null, distance)
       return this.feed
     },

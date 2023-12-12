@@ -37,8 +37,7 @@
         />
         <SpinButton
           v-if="emailValid && !worked"
-          name="envelope"
-          spinclass="success"
+          icon-name="envelope"
           variant="primary"
           size="lg"
           label="Mail login link"
@@ -102,7 +101,7 @@ export default {
     }
   },
   methods: {
-    async mail() {
+    async mail(callback) {
       this.error = null
       this.worked = false
       this.unknown = false
@@ -112,6 +111,7 @@ export default {
       this.error = !ret.worked && !ret.unknown
       this.unknown = ret.unknown
       this.worked = ret.worked
+      callback()
     },
   },
 }

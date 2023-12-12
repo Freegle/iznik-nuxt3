@@ -86,15 +86,23 @@
       </b-row>
       <b-row v-if="attachments?.length">
         <b-col>
-          <div class="d-flex flex-wrap mb-1 mt-2">
-            <div
-              v-for="att in attachments"
-              :key="'image-' + att.id"
-              class="bg-transparent p-0"
-            >
-              <PostPhoto v-bind="att" @remove="removePhoto" />
-            </div>
-          </div>
+          <draggable
+            v-model="attachments"
+            class="d-flex flex-wrap mb-1 mt-2"
+            :item-key="(el) => `image-${el.id}`"
+            :animation="150"
+            ghost-class="ghost"
+          >
+            <template #item="{ element, index }">
+              <div class="bg-transparent p-0">
+                <PostPhoto
+                  v-bind="element"
+                  :primary="index === 0"
+                  @remove="removePhoto"
+                />
+              </div>
+            </template>
+          </draggable>
         </b-col>
       </b-row>
     </template>
@@ -107,11 +115,10 @@
       </b-button>
       <SpinButton
         variant="primary"
-        :disabled="uploadingPhoto || (!edittextbody && !attachments?.length)"
-        name="save"
+        :disabled="uploadingPhoto || isSaveButtonDisabled"
+        icon-name="save"
         label="Save"
-        spinclass="text-white"
-        @click="save"
+        @handle="save"
       />
     </template>
   </b-modal>
@@ -119,6 +126,7 @@
 
 <script>
 import { ref, toRaw } from 'vue'
+import draggable from 'vuedraggable'
 import { useMessageStore } from '../stores/message'
 import { useComposeStore } from '../stores/compose'
 import { useGroupStore } from '../stores/group'
@@ -132,6 +140,7 @@ const PostPhoto = () => import('./PostPhoto')
 
 export default {
   components: {
+    draggable,
     NumberIncrementDecrement,
     OurFilePond,
     PostCode,
@@ -225,7 +234,6 @@ export default {
   methods: {
     async save() {
       this.triedToSave = true
-      if (this.isSaveButtonDisabled) return
 
       if (this.edititem && (this.edittextbody || this.attachments?.length)) {
         const attids = []
@@ -292,6 +300,10 @@ export default {
 }
 </script>
 <style scoped lang="scss">
+.ghost {
+  opacity: 0.5;
+}
+
 :deep(.autocomplete-wrap) {
   border: 1px solid $color-gray-4 !important;
 

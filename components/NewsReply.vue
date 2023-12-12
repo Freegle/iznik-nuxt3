@@ -10,6 +10,7 @@
         @click="showInfo"
       >
         <ProfileImage
+          v-if="reply.profile?.id"
           :image="reply.profile?.paththumb"
           class="ml-1 mr-2 mt-1 mb-1 inline"
           :is-moderator="Boolean(reply.showmod && reply.replyto === threadhead)"
@@ -226,7 +227,7 @@
               @keydown.enter.exact.prevent
               @keyup.enter.exact="sendReply"
               @keydown.enter.shift.exact.prevent="newlineReply"
-              @keydown.alt.shift.exact.prevent="newlineReply"
+              @keydown.alt.shift.enter.exact.prevent="newlineReply"
               @focus="focusedReply"
             />
           </b-input-group>
@@ -239,10 +240,9 @@
         <SpinButton
           v-if="enterNewLine"
           variant="primary"
-          name="angle-double-right"
+          icon-name="angle-double-right"
           label="Post"
           iconlast
-          spinclass="text-white"
           @handle="sendReply"
         />
       </div>
@@ -467,13 +467,7 @@ export default {
     focusedReply() {
       this.replyingTo = this.id
     },
-    async sendReply(e) {
-      if (e) {
-        e.preventDefault()
-        e.stopPropagation()
-        e.stopImmediatePropagation()
-      }
-
+    async sendReply(callback) {
       // Encode up any emojis.
       if (this.replybox && this.replybox.trim()) {
         const msg = untwem(this.replybox)
@@ -497,6 +491,7 @@ export default {
         // Force re-render.  Store reactivity doesn't seem to work nicely with the nested reply structure we have.
         this.bump++
       }
+      callback()
     },
     newlineReply() {
       const p = this.$refs.replybox.selectionStart

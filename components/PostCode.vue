@@ -51,17 +51,13 @@
         <div v-if="find && !wip">
           <SpinButton
             variant="secondary"
-            label=""
-            spinclass=""
-            iconclass=""
-            button-class="tweakHeight"
+            class="h-100"
             button-title="Find my device's location instead of typing a postcode"
-            :done-icon="
+            done-icon=""
+            :icon-name="
               locationFailed ? 'exclamation-triangle' : 'map-marker-alt'
             "
-            :name="locationFailed ? 'exclamation-triangle' : 'map-marker-alt'"
             :size="size"
-            :show-spinner="locating"
             @handle="findLoc"
           />
         </div>
@@ -160,7 +156,6 @@ export default {
   data() {
     return {
       results: [],
-      locating: false,
       locationFailed: false,
       showLocated: false,
     }
@@ -238,15 +233,15 @@ export default {
       } else {
         this.$emit('cleared')
       }
+      this.locationFailed = false
     },
-    findLoc() {
+    findLoc(callback) {
       try {
         if (
           navigator &&
           navigator.geolocation &&
           navigator.geolocation.getCurrentPosition
         ) {
-          this.locating = true
           navigator.geolocation.getCurrentPosition(
             async (position) => {
               const res = await this.locationStore.fetch({
@@ -272,9 +267,11 @@ export default {
               } else {
                 this.locationFailed = true
               }
-              this.locating = false
             },
-            () => (this.locating = false)
+            (e) => {
+              console.error('Find location failed with', e)
+              this.locationFailed = true
+            }
           )
         } else {
           console.log('Navigation not supported.  ')
@@ -283,6 +280,8 @@ export default {
       } catch (e) {
         console.error('Find location failed with', e)
         this.locationFailed = true
+      } finally {
+        callback()
       }
     },
   },

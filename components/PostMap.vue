@@ -485,7 +485,7 @@ export default {
       this.mapObject = this.$refs.map.leafletObject
       this.$refs.map.leafletObject.fitBounds(this.initialBounds)
 
-      if (process.client) {
+      if (process.client && this.mapObject) {
         const runtimeConfig = useRuntimeConfig()
 
         const { Geocoder } = await import(

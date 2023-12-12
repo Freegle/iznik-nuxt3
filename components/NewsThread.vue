@@ -1,6 +1,6 @@
 <template>
   <div v-if="showThis" class="bg-white mt-2">
-    <b-card :class="backgroundColor" no-body>
+    <b-card v-if="newsfeed" :class="backgroundColor" no-body>
       <b-card-body class="p-1 p-sm-2">
         <b-card-text>
           <div v-if="isNewsComponent">
@@ -157,7 +157,7 @@
                   class="p-0 pl-2 pt-2 entersend"
                   autocapitalize="none"
                   @keydown.enter.shift.exact.prevent="newlineComment"
-                  @keydown.alt.shift.exact.prevent="newlineComment"
+                  @keydown.alt.shift.enter.exact.prevent="newlineComment"
                   @focus="focusedComment"
                 />
               </b-input-group>
@@ -175,9 +175,8 @@
             <SpinButton
               v-if="enterNewLine"
               variant="primary"
-              name="angle-double-right"
+              icon-name="angle-double-right"
               label="Post"
-              spinclass="text-white"
               iconlast
               @handle="sendComment"
             />
@@ -387,13 +386,7 @@ export default {
     focusedComment() {
       this.replyingTo = this.newsfeed.id
     },
-    async sendComment(e) {
-      if (e) {
-        e.preventDefault()
-        e.stopPropagation()
-        e.stopImmediatePropagation()
-      }
-
+    async sendComment(callback) {
       if (this.threadcomment && this.threadcomment.trim()) {
         // Encode up any emojis.
         const msg = untwem(this.threadcomment)
@@ -412,8 +405,7 @@ export default {
         // And any image id
         this.imageid = null
       }
-
-      return false
+      callback()
     },
     newlineComment() {
       const p = this.$refs.threadcomment.selectionStart

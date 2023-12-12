@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!hide && message">
+  <div v-if="!hide && message?.id">
     <div v-if="showOld || !message.outcomes || !message.outcomes.length">
       <b-card
         no-body

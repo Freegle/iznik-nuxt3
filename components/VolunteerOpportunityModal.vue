@@ -130,7 +130,7 @@
             </span>
           </p>
         </div>
-        <VForm v-else-if="volunteering" ref="form">
+        <VeeForm v-else-if="volunteering" ref="form">
           <b-row>
             <b-col cols="12" md="6">
               <b-form-group label="For which community?" :state="true">
@@ -356,7 +356,7 @@
             <v-icon icon="info-circle" />&nbsp;This community has chosen not to
             allow Volunteer Opportunities.
           </NoticeMessage>
-        </VForm>
+        </VeeForm>
       </div>
     </template>
     <template #footer>
@@ -406,9 +406,8 @@
             v-if="editing && enabled"
             variant="primary"
             :disabled="uploadingPhoto"
-            name="save"
+            icon-name="save"
             :label="volunteering.id ? 'Save Changes' : 'Add Opportunity'"
-            spinclass="textWhite"
             @handle="saveIt"
           />
         </template>
@@ -417,7 +416,7 @@
   </b-modal>
 </template>
 <script>
-import { defineRule, Form as VForm, Field, ErrorMessage } from 'vee-validate'
+import { defineRule, Form as VeeForm, Field, ErrorMessage } from 'vee-validate'
 import { required, email, min, max } from '@vee-validate/rules'
 import { useVolunteeringStore } from '../stores/volunteering'
 import { useComposeStore } from '../stores/compose'
@@ -469,7 +468,7 @@ export default {
     NoticeMessage,
     DonationButton,
     ExternalLink,
-    VForm,
+    VeeForm,
     Field,
     ErrorMessage,
   },
@@ -635,17 +634,19 @@ export default {
       await this.volunteeringStore.delete(this.volunteering.id)
       this.hide()
     },
-    async saveIt() {
+    async saveIt(callback) {
       const validate = await this.$refs.form.validate()
 
       if (!this.groupid) {
         this.showGroupError = true
+        callback()
         return
       } else {
         this.showGroupError = false
       }
 
       if (!validate.valid) {
+        callback()
         return
       }
 
@@ -720,6 +721,7 @@ export default {
           this.added = true
         }
       }
+      callback()
     },
     async dontSave() {
       if (this.id) {

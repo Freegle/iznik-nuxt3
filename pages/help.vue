@@ -145,8 +145,78 @@
               </p>
             </div>
           </HelpQuestion>
+          <HelpQuestion id="selling" :matches="matches">
+            <template #title>Can I sell something given on Freegle?</template>
+            <div>
+              <p>
+                Reselling also keeps stuff out of landfill; but please don't
+                sell items you got from Freegle without the agreement of the
+                person who gave them to you.
+              </p>
+            </div>
+          </HelpQuestion>
+          <HelpQuestion id="howdoichoose" :matches="matches">
+            <template #title
+              >How do I choose if several people are interested?
+            </template>
+            <div>
+              <p>
+                Unless you are in a hurry, it is better leave it a while to see
+                who replies before choosing. Some people use
+                first-come-first-served, but you don't have to.
+              </p>
+              <p>
+                You can see in someone's profile how close they are, how many
+                thumbs up/down they have from other freeglers.
+              </p>
+              <p>It's up to you - deciding is all part of the fun!</p>
+            </div>
+          </HelpQuestion>
+          <HelpQuestion id="rules" :matches="matches">
+            <template #title>What are your rules?</template>
+            <template #default>
+              <TermsOfUse />
+            </template>
+          </HelpQuestion>
+          <HelpQuestion id="integrations" :matches="matches">
+            <template #title>
+              How do TrashNothing and LoveJunk relate to Freegle?
+            </template>
+            <div>
+              <p>
+                <ExternalLink href="https://trashnothing.com">
+                  TrashNothing
+                </ExternalLink>
+                is another platform for reuse. We're friends with them. It's
+                very much like Freegle, but it has a different interface.
+              </p>
+              <p>
+                We've done a nice integration with them, so that when you post
+                on Freegle most posts get shown on TrashNothing and vice versa,
+                and things like thumbs up/down work too. You'll get replies from
+                TrashNothing members, though you might not notice. So far as
+                you're concerned, they're just other freeglers.
+              </p>
+              <p>
+                <ExternalLink href="https://lovejunk.com">
+                  LoveJunk
+                </ExternalLink>
+                is another reuse platform. Mostly it's for paid disposal of
+                things you don't need any more - similar to a council bulky
+                waste collection.
+              </p>
+              <p>
+                LoveJunk pays Freegle a bit each month for Freegle posts to get
+                shown on there, so you might get replies from LoveJunk reusers.
+                Again, you might not notice that they are from LoveJunk - just
+                treat them like you would do any other freeglers.
+              </p>
+            </div>
+          </HelpQuestion>
+          <hr class="mt-4" />
+          <h2>Can I help Freegle?</h2>
           <HelpQuestion id="canihelp" :matches="matches">
-            <template #title>Can I help?</template>
+            <template #title>Can I volunteer?</template>
             <div>
               <p>
                 Yes! Freegle is run by volunteers. The first stage is to become
@@ -207,7 +277,7 @@
               </ul>
               <p>
                 <!-- eslint-disable-next-line -->
-              You can reach us at <ExternalLink href="mailto:volunteers@ilovefreegle.org">volunteers@ilovefreegle.org</ExternalLink>.
+                You can reach us at <ExternalLink href="mailto:volunteers@ilovefreegle.org">volunteers@ilovefreegle.org</ExternalLink>.
               </p>
               <p>
                 Or if you'd like to donate to our charity, you can do that
@@ -231,40 +301,12 @@
                 If you don't use PayPal, there are other ways to donate
                 <nuxt-link no-prefetch to="/donate">here</nuxt-link>.
               </p>
-            </div>
-          </HelpQuestion>
-          <HelpQuestion id="selling" :matches="matches">
-            <template #title>Can I sell something given on Freegle?</template>
-            <div>
               <p>
-                Reselling also keeps stuff out of landfill; but please don't
-                sell items you got from Freegle without the agreement of the
-                person who gave them to you.
+                We can get even more from your donation if you're able to
+                complete a gift aid declaration
+                <nuxt-link no-prefetch to="/giftaid">here</nuxt-link>.
               </p>
             </div>
-          </HelpQuestion>
-          <HelpQuestion id="howdoichoose" :matches="matches">
-            <template #title
-              >How do I choose if several people are interested?
-            </template>
-            <div>
-              <p>
-                Unless you are in a hurry, it is better leave it a while to see
-                who replies before choosing. Some people use
-                first-come-first-served, but you don't have to.
-              </p>
-              <p>
-                You can see in someone's profile how close they are, how many
-                thumbs up/down they have from other freeglers.
-              </p>
-              <p>It's up to you - deciding is all part of the fun!</p>
-            </div>
-          </HelpQuestion>
-          <HelpQuestion id="rules" :matches="matches">
-            <template #title>What are your rules?</template>
-            <template #default>
-              <TermsOfUse />
-            </template>
           </HelpQuestion>
         </div>
         <hr />
@@ -345,6 +387,7 @@
 import { useRoute } from 'vue-router'
 import { Searcher } from 'fast-fuzzy'
 import dayjs from 'dayjs'
+import ExternalLink from '../components/ExternalLink'
 import HelpQuestion from '~/components/HelpQuestion'
 import { buildHead } from '~/composables/useBuildHead'
 import VisibleWhen from '~/components/VisibleWhen'
@@ -354,7 +397,13 @@ const SupporterInfoModal = defineAsyncComponent(() =>
 const SidebarLeft = () => import('~/components/SidebarLeft')
 
 export default {
-  components: { HelpQuestion, SupporterInfoModal, VisibleWhen, SidebarLeft },
+  components: {
+    ExternalLink,
+    HelpQuestion,
+    SupporterInfoModal,
+    VisibleWhen,
+    SidebarLeft,
+  },
   setup() {
     const route = useRoute()
     const runtimeConfig = useRuntimeConfig()
@@ -404,17 +453,19 @@ export default {
     this.forIndex = []
 
     for (const question of faqs) {
-      try {
-        const questionText = question.children[0].innerText.trim()
-        const answerText = question.children[1].innerText.trim()
+      if (question.tagName === 'DIV') {
+        try {
+          const questionText = question.children[0].innerText.trim()
+          const answerText = question.children[1].innerText.trim()
 
-        this.forIndex.push({
-          id: question.id,
-          question: questionText,
-          answer: answerText,
-        })
-      } catch (e) {
-        console.error('Malformed FAQ', question)
+          this.forIndex.push({
+            id: question.id,
+            question: questionText,
+            answer: answerText,
+          })
+        } catch (e) {
+          console.error('Malformed FAQ', question)
+        }
       }
     }
 

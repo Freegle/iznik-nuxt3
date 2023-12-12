@@ -187,10 +187,9 @@
           <b-button variant="secondary" @click="cancel"> Cancel </b-button>
           <SpinButton
             variant="primary"
-            name="save"
+            icon-name="save"
             :label="buttonLabel"
             class="ml-2"
-            spinclass="text-white"
             :disabled="type === 'Taken' && !tookUsers.length"
             @handle="submit"
           />
@@ -323,7 +322,7 @@ export default {
     },
   },
   methods: {
-    async submit() {
+    async submit(callback) {
       if (this.type === 'Taken' && !this.tookUsers.length) {
         return (this.submittedWithNoSelectedUser = true)
       } else {
@@ -371,6 +370,7 @@ export default {
           this.hide()
         }
       }
+      callback()
     },
     onHide() {
       // We're having trouble capturing events from this modal, so use root as a bus.
