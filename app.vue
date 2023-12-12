@@ -1,7 +1,10 @@
 <template>
   <div>
     <client-only>
-      <MainHeader />
+      <header>
+        <NavbarDesktop />
+        <NavbarMobile />
+      </header>
     </client-only>
     <NuxtLayout v-if="ready">
       <NuxtPage />

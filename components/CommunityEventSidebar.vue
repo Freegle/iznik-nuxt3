@@ -56,7 +56,7 @@ export default {
   },
   methods: {
     loadMore($state) {
-      if (this.toShow < this.forUser.length) {
+      if (this.toShow < this.forUser?.length) {
         this.toShow++
         $state.loaded()
       } else {

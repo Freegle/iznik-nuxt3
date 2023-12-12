@@ -101,27 +101,48 @@
             </b-button>
           </div>
           <div v-if="chat.chattype === 'User2User' || !unseen" class="mr-2">
-            <b-button
-              v-b-tooltip="
-                'Don\'t show this chat unless there\'s a new message'
-              "
-              variant="secondary"
-              class="d-none d-md-block"
-              @click="showhide"
-            >
-              Hide chat
-            </b-button>
-            <b-button
-              v-b-tooltip="
-                'Don\'t show this chat unless there\'s a new message'
-              "
-              variant="link"
-              size="sm"
-              class="d-block d-md-none"
-              @click="showhide"
-            >
-              Hide chat
-            </b-button>
+            <template v-if="chat.status === 'Closed'">
+              <b-button
+                v-b-tooltip="'Unhide this chat'"
+                variant="secondary"
+                class="d-none d-md-block"
+                @click="unhide"
+              >
+                Unhide chat
+              </b-button>
+              <b-button
+                v-b-tooltip="'Unhide this chat'"
+                variant="link"
+                size="sm"
+                class="d-block d-md-none"
+                @click="unhide"
+              >
+                Unhide chat
+              </b-button>
+            </template>
+            <template v-else>
+              <b-button
+                v-b-tooltip="
+                  'Don\'t show this chat unless there\'s a new message'
+                "
+                variant="secondary"
+                class="d-none d-md-block"
+                @click="showhide"
+              >
+                Hide chat
+              </b-button>
+              <b-button
+                v-b-tooltip="
+                  'Don\'t show this chat unless there\'s a new message'
+                "
+                variant="link"
+                size="sm"
+                class="d-block d-md-none"
+                @click="showhide"
+              >
+                Hide chat
+              </b-button>
+            </template>
           </div>
         </div>
         <div
@@ -137,23 +158,44 @@
         </div>
         <div class="d-flex">
           <div v-if="chat.chattype === 'User2User' && otheruser" class="mr-2">
-            <b-button
-              v-b-tooltip="'Block this freegler from talking to you.'"
-              variant="secondary"
-              class="d-none d-md-block"
-              @click="showblock"
-            >
-              Block
-            </b-button>
-            <b-button
-              v-b-tooltip="'Block this freegler from talking to you.'"
-              variant="link"
-              size="sm"
-              class="d-block d-md-none"
-              @click="showblock"
-            >
-              Block
-            </b-button>
+            <template v-if="chat.status === 'Blocked'">
+              <b-button
+                v-b-tooltip="'Allow this freegler to talk to you.'"
+                variant="secondary"
+                class="d-none d-md-block"
+                @click="unhide"
+              >
+                Unblock
+              </b-button>
+              <b-button
+                v-b-tooltip="'Allow this freegler to talk to you.'"
+                variant="link"
+                size="sm"
+                class="d-block d-md-none"
+                @click="unhide"
+              >
+                Unblock
+              </b-button>
+            </template>
+            <template v-else>
+              <b-button
+                v-b-tooltip="'Block this freegler from talking to you.'"
+                variant="secondary"
+                class="d-none d-md-block"
+                @click="showblock"
+              >
+                Block
+              </b-button>
+              <b-button
+                v-b-tooltip="'Block this freegler from talking to you.'"
+                variant="link"
+                size="sm"
+                class="d-block d-md-none"
+                @click="showblock"
+              >
+                Block
+              </b-button>
+            </template>
           </div>
           <div v-if="chat.chattype === 'User2User' && otheruser">
             <b-button
@@ -335,17 +377,17 @@ export default {
   },
   methods: {
     async hide() {
-      console.log('Hide chat')
       await this.chatStore.hide(this.id)
       const router = useRouter()
-      console.log('Push')
       router.push('/chats')
-      console.log('ushed')
     },
     async block() {
       await this.chatStore.block(this.id)
       const router = useRouter()
       router.push('/chats')
+    },
+    async unhide() {
+      await this.chatStore.unhide(this.id)
     },
     showhide() {
       this.showChatHide = true

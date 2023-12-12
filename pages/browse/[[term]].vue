@@ -30,7 +30,6 @@
               :count="me.expectedreplies"
               :chats="me.expectedchats"
             />
-            <GiveAsk mobile />
           </div>
           <div v-if="initialBounds">
             <div v-if="browseView === 'mygroups'" class="bg-white mt-2">

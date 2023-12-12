@@ -1,48 +1,51 @@
 <template>
-  <div class="d-flex justify-content-around">
-    <NoticeMessage
-      v-if="showError"
-      variant="danger"
-      class="posit text-center"
-      show
-    >
-      <div v-if="offline">
+  <client-only>
+    <div class="d-flex justify-content-around">
+      <NoticeMessage
+        v-if="showError"
+        variant="danger"
+        class="posit text-center"
+        show
+      >
+        <div v-if="offline">
+          <p>
+            It looks like you're offline. Please reload when your network is
+            back.
+          </p>
+          <b-button
+            variant="primary"
+            class="mt-2"
+            @click="window.location.reload()"
+          >
+            Reload
+          </b-button>
+        </div>
+        <div v-else>
+          <p>Sorry, something went wrong.</p>
+          <p>
+            That might be a bug, or perhaps your network connection broke.
+            Please try again - if you continue to have problems then please take
+            a screenshot and contact <SupportLink />
+          </p>
+        </div>
+      </NoticeMessage>
+      <NoticeMessage
+        v-if="showReload && !snoozeReload"
+        variant="info"
+        class="posit text-center"
+        show
+      >
         <p>
-          It looks like you're offline. Please reload when your network is back.
+          The website has been updated with fixes and improvements. Please
+          reload this page to pick up the latest version.
         </p>
-        <b-button
-          variant="primary"
-          class="mt-2"
-          @click="window.location.reload()"
-        >
-          Reload
-        </b-button>
-      </div>
-      <div v-else>
-        <p>Sorry, something went wrong.</p>
-        <p>
-          That might be a bug, or perhaps your network connection broke. Please
-          try again - if you continue to have problems then please take a
-          screenshot and contact <SupportLink />
-        </p>
-      </div>
-    </NoticeMessage>
-    <NoticeMessage
-      v-if="showReload && !snoozeReload"
-      variant="info"
-      class="posit text-center"
-      show
-    >
-      <p>
-        The website has been updated with fixes and improvements. Please reload
-        this page to pick up the latest version.
-      </p>
-      <div class="d-flex justify-content-around">
-        <b-button variant="white" @click="snooze">Not just now </b-button>
-        <b-button variant="primary" @click="reload"> Reload now </b-button>
-      </div>
-    </NoticeMessage>
-  </div>
+        <div class="d-flex justify-content-around">
+          <b-button variant="white" @click="snooze">Not just now </b-button>
+          <b-button variant="primary" @click="reload"> Reload now </b-button>
+        </div>
+      </NoticeMessage>
+    </div>
+  </client-only>
 </template>
 <script>
 import NoticeMessage from './NoticeMessage'

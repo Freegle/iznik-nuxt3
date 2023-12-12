@@ -4,9 +4,10 @@
       <div class="aboveSticky">
         <slot ref="pageContent" />
       </div>
-      <VisibleWhen v-if="allowAd" :at="['xs', 'sm']">
+      <VisibleWhen :at="['xs', 'sm']">
         <div
-          class="d-flex justify-content-around w-100 bg-white sticky"
+          v-if="allowAd"
+          class="d-flex justify-content-around w-100 sticky"
           style="height: 52px"
         >
           <ExternalDa
@@ -16,6 +17,15 @@
             class="sticky"
             style="width: 320px; height: 50px; margin-top: 2px"
           />
+        </div>
+        <div
+          v-else
+          class="sticky ourBack w-100 text-center d-flex flex-column justify-content-center"
+          style="height: 52px"
+        >
+          <nuxt-link to="/donate" class="text-white nodecor">
+            Keep Freegle running. Click to donate.
+          </nuxt-link>
         </div>
       </VisibleWhen>
     </main>
@@ -98,7 +108,7 @@ export default {
     },
     allowAd() {
       // We don't want to show the ad on the landing page when logged out - looks tacky.
-      return (this.routePath !== '/' || this.loggedIn)
+      return this.routePath !== '/' || this.loggedIn
     },
   },
   async mounted() {
@@ -279,6 +289,8 @@ body.modal-open {
 .sticky {
   position: fixed;
   bottom: 0;
+  background-color: $color-green-background;
+  z-index: 10000;
 
   @include media-breakpoint-up(md) {
     display: none;

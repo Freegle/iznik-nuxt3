@@ -139,8 +139,8 @@
             </b-form-group>
             <b-form-checkbox v-model="marketingconsent" size="lg" class="mt-2">
               I'm happy for Freegle to keep in touch with me by email about the
-              impact of my donation and other ways I can support Freegle in the
-              future (please tick box).
+              impact of my donation and other ways I can support Freegle in
+              future campaigns (please tick box).
             </b-form-checkbox>
             <NoticeMessage class="info">
               By submitting this declaration I confirm that I am a UK taxpayer
@@ -307,8 +307,8 @@ export default {
   watch: {
     me: {
       immediate: true,
-      async handler(newVal) {
-        if (newVal) {
+      async handler(newVal, oldVal) {
+        if (newVal && !oldVal) {
           await this.addressStore.fetch()
           await this.giftAidStore.fetch()
 

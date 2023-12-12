@@ -324,7 +324,7 @@ form {
 .modal-content {
   // Need to make this scrollable so that e.g. login modal can all be accessed on screens with small height.
   overflow-y: auto !important;
-  max-height: 100% !important;
+  max-height: calc(100% - 50px) !important;
 }
 
 label {
@@ -447,7 +447,9 @@ label {
 }
 
 .fa-1-5x {
-  font-size: 1.5em;
+  font-size: 1.5rem;
+  width: 1.5rem !important;
+  height: 1.5rem !important;
 }
 
 .fa-1-75x {
@@ -532,4 +534,8 @@ label {
   .error__heading--sub {
     font-size: 1.8rem;
   }
+}
+
+.ourBack {
+  background-color: $color-green-background !important;
 }

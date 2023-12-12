@@ -7,7 +7,7 @@ export default class ChatAPI extends BaseAPI {
 
   async listChats(since, search, keepChat, logError) {
     return await this.$getv2(
-      '/chat',
+      '/chat?includeClosed=true',
       {
         since,
         search,
@@ -54,6 +54,10 @@ export default class ChatAPI extends BaseAPI {
 
   blockChat(chatid) {
     return this.$post('/chatrooms', { id: chatid, status: 'Blocked' })
+  }
+
+  unHideChat(chatid) {
+    return this.$post('/chatrooms', { id: chatid, status: 'Online' })
   }
 
   rsvp(id, chatid, value) {
