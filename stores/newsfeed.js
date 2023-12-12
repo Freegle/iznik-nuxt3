@@ -70,8 +70,11 @@ export const useNewsfeedStore = defineStore({
       })
 
       if (this.maxSeen > prevMax) {
-        api(this.config).news.seen(this.maxSeen)
-        this.fetchCount(this.lastDistance)
+        api(this.config)
+          .news.seen(this.maxSeen)
+          .then(() => {
+            this.fetchCount(this.lastDistance)
+          })
       }
     },
     async fetchFeed(distance) {

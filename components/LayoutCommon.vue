@@ -4,8 +4,9 @@
       <div class="aboveSticky">
         <slot ref="pageContent" />
       </div>
-      <VisibleWhen v-if="allowAd" :at="['xs', 'sm']">
+      <VisibleWhen :at="['xs', 'sm']">
         <div
+          v-if="allowAd"
           class="d-flex justify-content-around w-100 sticky"
           style="height: 52px"
         >
@@ -16,6 +17,15 @@
             class="sticky"
             style="width: 320px; height: 50px; margin-top: 2px"
           />
+        </div>
+        <div
+          v-else
+          class="sticky ourBack w-100 text-center d-flex flex-column justify-content-center"
+          style="height: 52px"
+        >
+          <nuxt-link to="/donate" class="text-white nodecor">
+            Keep Freegle running. Click to donate.
+          </nuxt-link>
         </div>
       </VisibleWhen>
     </main>

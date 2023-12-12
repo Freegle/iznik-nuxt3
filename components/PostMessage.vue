@@ -10,9 +10,9 @@
       >
         <template #header>
           <div
-            class="photoholder bg-dark-subtle d-flex flex-column align-items-center justify-items-center mr-md-1"
+            class="photoholder bg-dark-subtle d-flex flex-column align-items-center justify-content-around mr-md-1"
           >
-            <v-icon icon="camera" class="fa-8-75x text-faded" />
+            <v-icon icon="camera" class="camera text-faded" />
             <b-button
               variant="primary"
               size="lg"
@@ -81,7 +81,7 @@
         :id="$id('description')"
         v-model="description"
         :placeholder="placeholder"
-        rows="8"
+        class="description"
       />
     </div>
   </div>
@@ -279,8 +279,13 @@ export default {
 }
 
 .photoholder {
-  height: 200px;
+  min-height: max(100px, 15vh);
+  max-height: min(300px, 25vh, 50%);
   width: 100%;
+
+  svg {
+    font-size: min(8.75rem, 7.5vh);
+  }
 
   @include media-breakpoint-up(md) {
     width: 200px;
@@ -289,5 +294,10 @@ export default {
 
 .ghost {
   opacity: 0.5;
+}
+
+.description {
+  min-height: max(100px, 15vh);
+  max-height: min(300px, 25vh);
 }
 </style>
