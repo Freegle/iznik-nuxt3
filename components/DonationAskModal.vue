@@ -47,6 +47,11 @@
           @score="score"
         />
       </div>
+      <div v-else-if="variant === 'rateapp'">
+        <RateAppAsk
+        @hide="hide"
+        />
+      </div>
       <div v-else>
         <DonationAskWhatYouCan
           :groupname="groupName"
@@ -76,6 +81,7 @@ import { useDonationAskModal } from '~/composables/useDonationAskModal'
 import { useGroupStore } from '~/stores/group'
 import { useDonationStore } from '~/stores/donations'
 import Api from '~/api'
+import RateAppAsk from '~/components/RateAppAsk.vue'
 
 const groupStore = useGroupStore()
 const donationStore = useDonationStore()

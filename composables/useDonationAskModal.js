@@ -2,6 +2,7 @@ import { useAuthStore } from '~/stores/auth'
 import { useMiscStore } from '~/stores/misc'
 import { useRuntimeConfig } from '#app'
 import Api from '~/api'
+import { useMobileStore } from '~/stores/mobile'
 
 export function useDonationAskModal(requestedVariant) {
   const authStore = useAuthStore()
@@ -50,11 +51,21 @@ export function useDonationAskModal(requestedVariant) {
 
     try {
       if (!requestedVariant) {
-        requestedVariant = 'buttons1'
+        // requestedVariant = 'buttons1'
 
+        const mobileStore = useMobileStore()
+        if( mobileStore.isApp){
+          const rateappnotagain = window.localStorage.getItem('rateappnotagain')
+          if( !rateappnotagain){
+            if( Math.random() > 0.5) requestedVariant = { variant: 'rateapp' }
+          }
+        }
+  
+        if( !requestedVariant){
         requestedVariant = await api.bandit.choose({
           uid: 'donation',
         })
+        }
 
         if (requestedVariant) {
           variant.value = requestedVariant.variant
