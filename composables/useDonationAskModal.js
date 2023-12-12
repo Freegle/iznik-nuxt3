@@ -29,9 +29,9 @@ export function useDonationAskModal(requestedVariant) {
       const canAsk =
         !lastAsk || new Date().getTime() - lastAsk > 60 * 60 * 1000 * 24 * 7
 
-      //if (!me?.donorrecurring && canAsk) {
+      if (!me?.donorrecurring && canAsk) {
         show()
-      //}
+      }
     }
   })
 
@@ -54,7 +54,6 @@ export function useDonationAskModal(requestedVariant) {
 
         const mobileStore = useMobileStore()
         if( mobileStore.isApp){
-          requestedVariant = { variant: 'rateapp' }
           const rateappnotagain = window.localStorage.getItem('rateappnotagain')
           if( !rateappnotagain){
             if( Math.random() > 0.5) requestedVariant = { variant: 'rateapp' }
