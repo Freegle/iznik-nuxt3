@@ -181,6 +181,7 @@ export default {
     const settings = me?.settings
     const distance = settings?.newsfeedarea || 0
     const error = ref(false)
+    const threadhead = ref(null)
 
     if (me) {
       if (id) {
@@ -190,6 +191,8 @@ export default {
         if (!newsfeed?.id || newsfeed?.deleted) {
           error.value = true
         } else if (newsfeed?.id !== newsfeed?.threadhead) {
+          threadhead.value = newsfeed.threadhead
+
           const fetched = await newsfeedStore.fetch(newsfeed.threadhead)
 
           if (!fetched?.id || fetched?.deleted) {
@@ -219,6 +222,7 @@ export default {
       id,
       error,
       infiniteId: new Date().getTime(),
+      threadhead,
     }
   },
   data() {
@@ -272,19 +276,7 @@ export default {
     newsfeedToShow() {
       if (this.newsfeedStore) {
         if (this.id) {
-          const newsfeed = this.newsfeedStore.byId(this.id)
-
-          if (newsfeed) {
-            if (newsfeed.id !== newsfeed.threadhead) {
-              // We are loading a specific page for a reply but we want to show the whole thread.
-              return [this.newsfeedStore.byId(newsfeed.threadhead)]
-            } else {
-              // Show this item.
-              return [this.newsfeedStore.byId(this.id)]
-            }
-          } else {
-            return []
-          }
+          return [this.newsfeedStore.byId(this.threadhead)]
         } else {
           return this.newsfeed
             .slice(0, this.show)
