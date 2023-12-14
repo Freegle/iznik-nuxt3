@@ -170,7 +170,7 @@ export default {
 
       if (this.me) {
         // Set the context for sentry so that we know which users are having errors.
-        $sentrySetUser({ userid: this.myid })
+        $sentrySetUser({ id: this.myid })
 
         if (typeof __insp !== 'undefined') {
           // eslint-disable-next-line no-undef
