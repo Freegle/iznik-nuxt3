@@ -3,7 +3,7 @@
     <div class="layout fader">
       <GlobalWarning />
       <div class="d-none d-md-flex justify-content-around">
-        <WizardProgress :active-stage="3" class="maxbutt" />
+        <WizardProgress :active-stage="2" class="maxbutt" />
       </div>
       <h1 class="text-center">Now, tell us where it is</h1>
       <p class="text-center">

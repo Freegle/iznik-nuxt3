@@ -3,7 +3,7 @@
     <div class="layout fader">
       <GlobalWarning />
       <div class="d-none d-md-flex justify-content-around">
-        <WizardProgress :active-stage="3" class="maxbutt" />
+        <WizardProgress :active-stage="2" class="maxbutt" />
       </div>
       <h1 class="text-center">Now, tell us where you are</h1>
       <p class="text-center">
@@ -41,8 +41,8 @@
       </div>
       <div v-else>
         <div v-if="postcodeValid" class="mt-1 text-center">
-          Freegle has local communities for each area. We'll put anything
-          you post on here, and search this community and others nearby.
+          Freegle has local communities for each area. We'll put anything you
+          post on here, and search this community and others nearby.
         </div>
         <div v-if="postcodeValid" class="mt-1 d-flex justify-content-around">
           <ComposeGroup />

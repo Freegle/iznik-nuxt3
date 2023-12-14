@@ -2,7 +2,7 @@
   <client-only>
     <div>
       <div class="d-none d-md-flex justify-content-around">
-        <WizardProgress :active-stage="3" class="maxbutt" />
+        <WizardProgress :active-stage="1" class="maxbutt" />
       </div>
       <b-row class="m-0">
         <b-col cols="12" lg="8" class="p-0" offset-lg="2">
