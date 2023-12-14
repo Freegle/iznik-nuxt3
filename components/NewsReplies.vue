@@ -166,6 +166,21 @@ export default {
         }
       }
 
+      // Suppress replies where the message value is the same as the previous one.
+      let lastMessage = null
+
+      let i = ret.length
+
+      while (i--) {
+        if (!ret[i].message.localeCompare(lastMessage)) {
+          // Remove this from the array
+          console.log('Remove')
+          ret.splice(i, 1)
+        } else {
+          lastMessage = ret[i].message
+        }
+      }
+
       return ret
     })
 
