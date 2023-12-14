@@ -286,13 +286,11 @@ export default {
   emits: ['rendered'],
   async setup(props) {
     const newsfeedStore = useNewsfeedStore()
-    const storyStore = useStoryStore()
 
     await newsfeedStore.fetch(props.id)
 
     return {
       newsfeedStore,
-      storyStore,
     }
   },
   data() {
@@ -476,12 +474,7 @@ export default {
       this.referTo('Recived')
     },
     async createStory() {
-      await this.storyStore.add(
-        'My Freegle story',
-        this.newsfeed.message,
-        null,
-        true
-      )
+      await this.newsfeedStore.convertToStory(this.id)
     },
     async unhide() {
       await this.newsfeedStore.unhide(this.id)
