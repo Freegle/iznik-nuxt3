@@ -1,18 +1,18 @@
 <template>
   <div class="container p-0">
-    <span @click="rotateLeft">
+    <span @touchstart="rotateLeft" @click="rotateLeft">
       <div label="Rotate left" class="topleft clickme" title="Rotate left">
         <v-icon icon="circle" size="2x" />
         <v-icon icon="reply" class="image__icon" />
       </div>
     </span>
-    <span @click="rotateRight">
+    <span @touchstart="rotateRight" @click="rotateRight">
       <div label="Rotate right" class="topright clickme" title="Rotate right">
         <v-icon icon="circle" size="2x" />
         <v-icon icon="reply" class="image__icon" flip="horizontal" />
       </div>
     </span>
-    <span @click="remove">
+    <span @touchstart="remove" @click="remove">
       <div
         label="Remove this photo"
         class="bottomright clickme"
