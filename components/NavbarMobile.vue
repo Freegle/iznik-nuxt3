@@ -2,6 +2,7 @@
   <b-navbar
     type="dark"
     class="ourBack d-flex justify-content-between d-xl-none"
+    :class="{ hideNavBarTop: navBarHidden, showNavBarTop: !navBarHidden }"
     fixed="top"
   >
     <OfflineIndicator v-if="!online" />
@@ -36,9 +37,16 @@
         </nuxt-link>
       </b-nav>
     </div>
-    <b-dropdown v-if="loggedIn" no-caret variant="primary">
+    <b-dropdown v-if="loggedIn" no-caret variant="primary" class="userOptions">
       <template #button-content>
-        <v-icon icon="user" size="2x" />
+        <ProfileImage
+          v-if="me.profile.path"
+          :image="me.profile.path"
+          class="m-0 inline"
+          is-thumbnail
+          size="lg"
+        />
+        <v-icon v-else icon="user" size="2x" />
       </template>
       <b-dropdown-item
         href="/settings"
@@ -51,8 +59,8 @@
           <span class="text--large">Settings</span>
         </div>
       </b-dropdown-item>
-      <b-dropdown-item href="/settings" @click="logout">
-        <div class="d-flex align-items-center">
+      <b-dropdown-item @click="logout">
+        <div class="d-flex align-items-center clickme">
           <v-icon icon="sign-out-alt" size="2x" class="mr-2" />
           <span class="text--large">Logout</span>
         </div>
@@ -64,6 +72,7 @@
     type="dark"
     class="ourBack d-flex justify-content-between d-xl-none navbot small"
     fixed="bottom"
+    :class="{ hideNavBarBottom: navBarHidden, showNavBarBottom: !navBarHidden }"
   >
     <nuxt-link
       no-prefetch
@@ -106,7 +115,24 @@
         <span class="nav-item__text">My&nbsp;Posts</span>
       </div>
     </nuxt-link>
-    <NavbarMobilePost class="navpost" />
+    <div class="postWrapper">
+      <NavbarMobilePost class="navpost" />
+      <div class="d-flex justify-content-around navpostnav">
+        <nuxt-link
+          no-prefetch
+          class="nav-link text-center p-0 botmen"
+          to="/post"
+          @click="clickedMobileNav"
+          @mousedown="maybeReload('/post')"
+        >
+          <div class="position-relative">
+            <v-icon icon="home" class="fa-fw2 invisible" />
+            <br />
+            <span class="nav-item__text">Post</span>
+          </div>
+        </nuxt-link>
+      </div>
+    </div>
     <nuxt-link
       no-prefetch
       class="nav-link text-center p-0 botmen"
@@ -189,10 +215,54 @@ const clickedMobileNav = () => {
   mobileNav?.value?.$el?.click()
 }
 
-console.log('Meta', useHead())
 const title = computed(() => {
   return useMiscStore().pageTitle
 })
+
+// We want to hide the navbars when you slide down.
+let lastScrollY = 0
+
+onMounted(() => {
+  lastScrollY = window.scrollY
+  window.addEventListener('scroll', handleScroll)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('scroll', handleScroll)
+})
+
+const navBarHidden = ref(false)
+let scrollTimer = null
+
+function handleScroll() {
+  const scrollY = window.scrollY
+
+  if (scrollY > lastScrollY) {
+    // Scrolling down.  Hide the navbars.
+    if (!navBarHidden.value) {
+      navBarHidden.value = true
+    }
+
+    // Start a timer to show the navbars again after a delay, in case the user doesn't realise that they can
+    // make them show again by scrolling up.
+    if (scrollTimer) {
+      clearTimeout(scrollTimer)
+    }
+
+    scrollTimer = setTimeout(() => {
+      navBarHidden.value = false
+    }, 5000)
+  } else if (navBarHidden.value) {
+    // Scrolling up. Show the navbars.
+    navBarHidden.value = false
+
+    if (scrollTimer) {
+      clearTimeout(scrollTimer)
+    }
+  }
+
+  lastScrollY = scrollY
+}
 </script>
 <style scoped lang="scss">
 @import 'assets/css/navbar.scss';
@@ -206,7 +276,7 @@ const title = computed(() => {
   border: none !important;
 }
 
-:deep(.dropdown-menu) {
+:deep(.userOptions .dropdown-menu) {
   background-color: $color-green-background;
 
   .dropdown-item {
@@ -235,6 +305,9 @@ const title = computed(() => {
   width: 51px;
   min-width: 51px;
   max-width: 51px;
+  height: 51px;
+  min-height: 51px;
+  max-height: 51px;
 
   div {
     font-size: 0.7rem;
@@ -261,7 +334,59 @@ const title = computed(() => {
   max-width: calc(100vw - 130px);
 }
 
-:deep(.ourBack) {
-  background-color: $color-green-background !important;
+.hideNavBarBottom {
+  transform: translateY(150px);
+  transition: transform 1s;
+
+  .navpost {
+    opacity: 0;
+    transition: opacity 0.5s;
+  }
+}
+
+.showNavBarBottom {
+  transform: translateY(0px);
+  transition: transform 1s;
+
+  .navpost {
+    opacity: 1;
+    transition: opacity 0.5s;
+  }
+}
+
+.hideNavBarTop {
+  transform: translateY(-150px);
+  transition: transform 1s;
+
+  .navpost {
+    opacity: 0;
+    transition: opacity 0.5s;
+  }
+}
+
+.showNavBarTop {
+  transform: translateY(0px);
+  transition: transform 1s;
+
+  .navpost {
+    opacity: 1;
+    transition: opacity 0.5s;
+  }
+}
+
+.postWrapper {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 51px;
+
+  .navpost {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .navpostnav {
+    grid-column: 1;
+    grid-row: 1;
+  }
 }
 </style>

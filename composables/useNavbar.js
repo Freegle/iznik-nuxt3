@@ -58,12 +58,12 @@ export function useNavbar() {
       route.path !== '/browse' &&
       route.path !== '/chitchat' &&
       route.path !== '/myposts' &&
+      !route.path.startsWith('/explore/') &&
       route.path !== '/'
     )
   })
 
   const newsCount = computed(() => {
-    console.log('Count', newsfeedStore, newsfeedStore.count)
     return newsfeedStore.count
   })
 

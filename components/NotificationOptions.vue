@@ -5,7 +5,7 @@
     ref="theel"
     class="white text-center notification-list topstack"
     :variant="smallScreen ? 'transparent' : ''"
-    toggle-class="notification-list__dropdown-toggle p-md-0"
+    toggle-class="notification-list__dropdown-toggle p-xl-0"
     menu-class="notification-list__dropdown-menu"
     lazy
     right
@@ -110,7 +110,10 @@ const loadLatestNotifications = async () => {
   await notificationStore.fetchList()
   infiniteId.value++
   toShow.value = 5
-  theel.value.scrollTop = 0
+
+  if (theel.value) {
+    theel.value.scrollTop = 0
+  }
 }
 
 const loadMoreNotifications = ($state) => {

@@ -306,8 +306,8 @@ export default {
   watch: {
     me: {
       immediate: true,
-      async handler(newVal) {
-        if (newVal) {
+      async handler(newVal, oldVal) {
+        if (newVal && !oldVal) {
           await this.addressStore.fetch()
           await this.giftAidStore.fetch()
 

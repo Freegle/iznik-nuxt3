@@ -102,6 +102,7 @@ export default defineNuxtConfig({
     '/myposts': { ssr: false },
     '/mypost/**': { ssr: false },
     '/noticeboards/**': { ssr: false },
+    '/post': { ssr: false },
     '/profile/**': { ssr: false },
     '/promote': { ssr: false },
     '/settings/**': { ssr: false },
