@@ -198,6 +198,8 @@ export default {
           if (!fetched?.id || fetched?.deleted) {
             error.value = true
           }
+        } else {
+          threadhead.value = id
         }
       } else {
         await newsfeedStore.fetchFeed(distance)
@@ -276,7 +278,13 @@ export default {
     newsfeedToShow() {
       if (this.newsfeedStore) {
         if (this.id) {
-          return [this.newsfeedStore.byId(this.threadhead)]
+          const thread = this.newsfeedStore.byId(this.threadhead)
+
+          if (thread) {
+            return [thread]
+          } else {
+            return []
+          }
         } else {
           return this.newsfeed
             .slice(0, this.show)
