@@ -5,7 +5,7 @@
         <WizardProgress :active-stage="1" class="maxbutt" />
       </div>
       <b-row class="m-0">
-        <b-col cols="12" lg="8" class="p-0" offset-lg="2">
+        <b-col cols="12" lg="8" class="p-0 layout fader" offset-lg="2">
           <h1 class="text-center">First, tell us about your item</h1>
           <ul
             v-for="(id, index) in ids"
@@ -54,21 +54,22 @@
               </b-card>
             </li>
           </ul>
-          <div class="mt-3">
+          <div class="d-block d-md-none flex-grow-1" />
+          <div class="mt-1 d-block d-md-none">
+            <b-button
+              variant="primary"
+              :disabled="uploadingPhoto"
+              size="lg"
+              block
+              to="/give/whereami"
+              class="w-100"
+            >
+              Next <v-icon icon="angle-double-right" />
+            </b-button>
+          </div>
+          <div class="w-100 mt-3 mb-5 d-none d-md-flex justify-content-end">
             <div v-if="messageValid">
-              <div class="d-block d-md-none">
-                <b-button
-                  variant="primary"
-                  :disabled="uploadingPhoto"
-                  size="lg"
-                  block
-                  to="/give/whereami"
-                  class="w-100"
-                >
-                  Next <v-icon icon="angle-double-right" />
-                </b-button>
-              </div>
-              <div class="d-none d-md-flex justify-content-end mb-2">
+              <div class="mb-2">
                 <b-button
                   variant="primary"
                   size="lg"
@@ -84,7 +85,6 @@
             </NoticeMessage>
           </div>
         </b-col>
-        <b-col cols="0" md="3" />
       </b-row>
     </div>
   </client-only>
@@ -124,7 +124,11 @@ export default {
   },
 }
 </script>
-<style scoped>
+<style scoped lang="scss">
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
+
 .cg {
   flex-basis: 25%;
   flex-grow: 1;
@@ -132,5 +136,14 @@ export default {
 
 .maxbutt {
   width: 33vw;
+}
+
+@include media-breakpoint-down(md) {
+  .layout {
+    min-height: calc(100vh - 84px - 52px);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
 }
 </style>

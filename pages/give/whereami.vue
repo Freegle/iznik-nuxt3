@@ -52,7 +52,7 @@
         </div>
       </div>
       <div class="d-block d-md-none flex-grow-1" />
-      <div class="mt-1 d-block d-md-none margbott">
+      <div class="mt-1 d-block d-md-none">
         <b-button
           variant="primary"
           size="lg"
@@ -157,19 +157,14 @@ select {
 
 @include media-breakpoint-down(md) {
   .layout {
-    min-height: 100vh;
+    min-height: calc(100vh - 84px - 52px);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding-bottom: 84px;
   }
 }
 
 .maxbutt {
   width: 33vw;
-}
-
-.margbott {
-  margin-bottom: 50px;
 }
 </style>
