@@ -48,7 +48,7 @@
           :show="true"
           :skidding="-50"
         />
-        <div v-if="find && !wip">
+        <div v-if="find && !wip" style="max-height: 52px">
           <SpinButton
             variant="secondary"
             class="h-100"

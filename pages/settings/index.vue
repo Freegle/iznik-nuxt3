@@ -235,7 +235,7 @@
               <b-row>
                 <b-col cols="12">
                   <b-form-group label="Your Postcode:">
-                    <div class="d-flex flex-wrap">
+                    <div class="d-flex flex-wrap align-items-start">
                       <PostCode
                         @selected="selectPostcode"
                         @cleared="clearPostcode"
@@ -243,7 +243,7 @@
                       <SpinButton
                         variant="white"
                         size="lg"
-                        class="mb-2 d-inline"
+                        class="mb-2"
                         :disabled="!pc"
                         icon-name="save"
                         label="Save"
