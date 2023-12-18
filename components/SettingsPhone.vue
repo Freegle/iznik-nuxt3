@@ -107,7 +107,7 @@ export default {
   watch: {
     phone() {
       if (this.autoSave) {
-        this.$refs.spinButton.handle()
+        this.savePhone()
       }
     },
   },
