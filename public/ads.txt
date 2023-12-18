@@ -1,0 +1,3 @@
+# ads.txt file for ilovefreegle.org, updated 13/12/2023
+OWNERDOMAIN=ilovefreegle.org
+CONTACT=sales@zeroads.co
