@@ -84,7 +84,7 @@ export const useNoticeboardStore = defineStore({
       })
       await this.fetch(id)
     },
-    async comments(id, comments) {
+    async saveCmments(id, comments) {
       await this.$api.noticeboard.action({
         action: 'Comments',
         id,
