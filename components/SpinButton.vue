@@ -1,12 +1,13 @@
 <template>
   <b-button
+    v-bind="$attrs"
     :variant="variant"
     :disabled="disabled"
     :size="size"
     :tabindex="tabindex"
     :title="buttonTitle"
     :class="[
-      'd-flex gap-1 align-items-center',
+      flex && 'd-flex gap-1 align-items-center',
       noBorder && 'no-border',
       iconlast && 'flex-row-reverse',
     ]"
@@ -23,10 +24,22 @@
       <slot>{{ label }}</slot>
     </span>
   </b-button>
+  <client-only>
+    <teleport to="body">
+      <ConfirmModal
+        v-if="confirm && showConfirm"
+        @confirm="confirmed"
+        @hidden="onConfirmClosed"
+      />
+    </teleport>
+  </client-only>
 </template>
 <script setup>
 import { ref } from '#imports'
 const { $sentryCaptureException } = useNuxtApp()
+
+const ConfirmModal = defineAsyncComponent(() => import('./ConfirmModal'))
+
 const props = defineProps({
   variant: {
     type: String,
@@ -76,6 +89,11 @@ const props = defineProps({
     default: '',
   },
   noBorder: Boolean,
+  confirm: Boolean,
+  flex: {
+    type: Boolean,
+    default: true,
+  },
 })
 
 const emit = defineEmits(['handle'])
@@ -90,6 +108,8 @@ const SPINNER_COLOR = {
 
 const doing = ref(false)
 const done = ref(false)
+const showConfirm = ref(false)
+const actionConfirmed = ref(false)
 let timer = null
 
 const spinColorClass =
@@ -113,12 +133,27 @@ const forgottenCallback = () => {
 
 const onClick = () => {
   if (!doing.value) {
-    done.value = false
-    doing.value = true
-
-    emit('handle', finishSpinner)
-    timer = setTimeout(forgottenCallback, 20 * 1000)
+    if (props.confirm) {
+      showConfirm.value = true
+    } else {
+      done.value = false
+      doing.value = true
+      emit('handle', finishSpinner)
+      timer = setTimeout(forgottenCallback, 20 * 1000)
+    }
   }
+}
+
+const confirmed = () => {
+  actionConfirmed.value = true
+  done.value = false
+  doing.value = true
+  emit('handle', finishSpinner)
+  timer = setTimeout(forgottenCallback, 20 * 1000)
+}
+
+const onConfirmClosed = () => {
+  showConfirm.value = false
 }
 
 defineExpose({ handle: onClick })

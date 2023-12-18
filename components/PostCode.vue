@@ -48,10 +48,11 @@
           :show="true"
           :skidding="-50"
         />
-        <div v-if="find && !wip" style="max-height: 52px">
+        <div v-if="find && !wip">
           <SpinButton
+            style="line-height: 1.7em"
             variant="secondary"
-            class="h-100"
+            :flex="false"
             button-title="Find my device's location instead of typing a postcode"
             done-icon=""
             :icon-name="

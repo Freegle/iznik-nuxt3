@@ -53,15 +53,15 @@
             >
               Add location
             </b-button>
-            <b-button
+            <SpinButton
               v-else-if="isochrone.nickname"
               variant="link"
-              class="ml-2 p-0 mb-1"
+              button-class="ml-2 p-0 mb-1"
+              confirm
               size="sm"
-              @click="confirmRemoveLocation = true"
-            >
-              Remove
-            </b-button>
+              label="Remove"
+              @handle="deleteLocation"
+            />
           </div>
         </label>
         <div class="slider">
@@ -145,29 +145,20 @@
       </div>
       <hr v-if="!last" class="text-muted mb-1 mt-1" />
     </template>
-    <client-only>
-      <Teleport to="body">
-        <ConfirmModal
-          v-if="confirmRemoveLocation"
-          @confirm="deleteLocation"
-          @hidden="confirmRemoveLocation = false"
-        />
-      </Teleport>
-    </client-only>
   </div>
 </template>
 <script>
 import { mapState } from 'pinia'
 import { useLocationStore } from '../stores/location'
-import { ref, defineAsyncComponent } from '#imports'
+import { ref } from '#imports'
 import PostCode from '~/components/PostCode'
+import SpinButton from '~/components/SpinButton'
 import { useIsochroneStore } from '~/stores/isochrone'
 
-const ConfirmModal = defineAsyncComponent(() => import('./ConfirmModal'))
 export default {
   components: {
     PostCode,
-    ConfirmModal,
+    SpinButton,
   },
   props: {
     id: {
@@ -192,7 +183,6 @@ export default {
 
     const minutes = ref(20)
     const transport = ref('Drive')
-    const confirmRemoveLocation = ref(false)
     if (props.id) {
       minutes.value = isochroneStore.get(props.id).minutes
       transport.value = isochroneStore.get(props.id).transport
@@ -219,8 +209,9 @@ export default {
       await locationStore.fetchv2(isochrone.value.locationid)
     }
 
-    const deleteLocation = async () => {
+    const deleteLocation = async (callback) => {
       await isochroneStore.delete({ id: props.id })
+      callback()
     }
 
     return {
@@ -230,7 +221,6 @@ export default {
       transport,
       isochrone,
       location,
-      confirmRemoveLocation,
       deleteLocation,
     }
   },
