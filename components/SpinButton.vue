@@ -26,7 +26,7 @@
 </template>
 <script setup>
 import { ref } from '#imports'
-
+const { $sentryCaptureException } = useNuxtApp()
 const props = defineProps({
   variant: {
     type: String,
@@ -90,11 +90,13 @@ const SPINNER_COLOR = {
 
 const doing = ref(false)
 const done = ref(false)
+let timer = null
 
 const spinColorClass =
   props.spinColor || SPINNER_COLOR[props.variant] || 'text-success'
 
 const finishSpinner = () => {
+  clearTimeout(timer)
   doing.value = false
   if (props.doneIcon) {
     done.value = true
@@ -104,12 +106,18 @@ const finishSpinner = () => {
   }
 }
 
+const forgottenCallback = () => {
+  finishSpinner()
+  $sentryCaptureException('SpinButton - callback not called')
+}
+
 const onClick = () => {
   if (!doing.value) {
     done.value = false
     doing.value = true
 
     emit('handle', finishSpinner)
+    timer = setTimeout(forgottenCallback, 20 * 1000)
   }
 }
 
