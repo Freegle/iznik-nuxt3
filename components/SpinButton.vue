@@ -94,7 +94,7 @@ const done = ref(false)
 const spinColorClass =
   props.spinColor || SPINNER_COLOR[props.variant] || 'text-success'
 
-const finnishSpinner = () => {
+const finishSpinner = () => {
   doing.value = false
   if (props.doneIcon) {
     done.value = true
@@ -109,7 +109,7 @@ const onClick = () => {
     done.value = false
     doing.value = true
 
-    emit('handle', finnishSpinner)
+    emit('handle', finishSpinner)
   }
 }
 
