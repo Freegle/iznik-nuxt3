@@ -141,7 +141,9 @@ export default {
 
 @include media-breakpoint-down(md) {
   .layout {
-    min-height: calc(100vh - 84px - 52px);
+    //We need to subtract space for the navbar, the ad bar, and also allow some extra because of the way vh works
+    //mobile browsers.
+    min-height: calc(100vh - 84px - 52px - 84px);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
