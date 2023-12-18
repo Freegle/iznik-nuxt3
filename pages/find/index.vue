@@ -11,6 +11,9 @@
             v-for="(id, index) in ids"
             :key="'post-' + id"
             class="p-0 pt-1 list-unstyled"
+            :class="{
+              'mb-0': ids.length === 1,
+            }"
           >
             <li class="p-0">
               <b-card no-body>
