@@ -80,12 +80,19 @@ const props = defineProps({
 
 const emit = defineEmits(['handle'])
 
+const SPINNER_COLOR = {
+  primary: 'text-white',
+  secondary: 'text-black',
+  white: 'text-black',
+  link: 'text-success',
+  danger: 'text-white',
+}
+
 const doing = ref(false)
 const done = ref(false)
 
 const spinColorClass =
-  props.spinColor ||
-  (props.variant === 'primary' ? ref('text-white') : ref('text-black'))
+  props.spinColor || SPINNER_COLOR[props.variant] || 'text-success'
 
 const finnishSpinner = () => {
   doing.value = false

@@ -22,7 +22,6 @@
               variant="white"
               size="md"
               icon-name="save"
-              spin-color="text-success"
               label="Save"
               @handle="savePhone"
             />

@@ -5,7 +5,6 @@
       variant="link"
       size="sm"
       icon-name="heart"
-      spin-color="text-success"
       done-icon=""
       @handle="love"
     >
@@ -15,7 +14,6 @@
       v-if="newsfeed.loved"
       variant="link"
       size="sm"
-      spin-color="text-success"
       icon-name="heart"
       done-icon=""
       icon-class="text-danger"

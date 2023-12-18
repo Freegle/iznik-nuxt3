@@ -82,7 +82,6 @@
                 variant="danger"
                 class="mb-2"
                 label="Leave Freegle completely"
-                spin-color="text-white"
                 @handle="emailConfirm"
               />
               <NoticeMessage
