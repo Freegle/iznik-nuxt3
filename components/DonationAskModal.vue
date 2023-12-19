@@ -47,6 +47,16 @@
           @score="score"
         />
       </div>
+      <div v-else-if="variant === 'impact'">
+        <DonationAskImpact
+          :groupname="groupName"
+          :groupid="groupId"
+          :target="target"
+          :raised="raised"
+          :target-met="targetMet"
+          @score="score"
+        />
+      </div>
       <div v-else>
         <DonationAskWhatYouCan
           :groupname="groupName"
@@ -70,6 +80,7 @@ import DonationAskVideo from '~/components/DonationAskVideo.vue'
 import DonationAskQuote from '~/components/DonationAskQuote.vue'
 import DonationAskButtons2510 from '~/components/DonationAskButtons2510.vue'
 import DonationAskButtons51025 from '~/components/DonationAskButtons51025.vue'
+import DonationAskImpact from '~/components/DonationAskImpact.vue'
 import DonationAskWhatYouCan from '~/components/DonationAskWhatYouCan.vue'
 import { useDonationAskModal } from '~/composables/useDonationAskModal'
 import { useGroupStore } from '~/stores/group'
