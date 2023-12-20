@@ -43,6 +43,9 @@
               <b-dropdown-item v-if="canRefer" @click="referToReceived">
                 Refer to RECEIVED
               </b-dropdown-item>
+              <b-dropdown-item v-if="canStory" @click="createStory">
+                Turn this into a Story
+              </b-dropdown-item>
               <b-dropdown-item
                 v-if="supportOrAdmin && newsfeed.hidden"
                 @click="unhide"
@@ -222,6 +225,7 @@
 </template>
 <script>
 import { useNewsfeedStore } from '../stores/newsfeed'
+import { useStoryStore } from '../stores/stories'
 import SpinButton from './SpinButton'
 import AutoHeightTextarea from './AutoHeightTextarea'
 import NewsReplies from '~/components/NewsReplies'
@@ -321,6 +325,9 @@ export default {
       return (
         (this.mod && this.newsfeed?.type !== 'AboutMe') || this.supportOrAdmin
       )
+    },
+    canStory() {
+      return (this.mod && this.newsfeed?.type !== 'Story') || this.admin
     },
     enterNewLine: {
       get() {
@@ -465,6 +472,9 @@ export default {
     },
     referToReceived() {
       this.referTo('Recived')
+    },
+    async createStory() {
+      await this.newsfeedStore.convertToStory(this.id)
     },
     async unhide() {
       await this.newsfeedStore.unhide(this.id)

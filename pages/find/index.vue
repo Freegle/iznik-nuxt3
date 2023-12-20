@@ -1,16 +1,19 @@
 <template>
   <client-only>
-    <div>
+    <div class="layout fader">
       <div class="d-none d-md-flex justify-content-around">
-        <WizardProgress :active-stage="3" class="maxbutt" />
+        <WizardProgress :active-stage="1" class="maxbutt" />
       </div>
       <b-row class="m-0">
-        <b-col cols="12" lg="8" class="p-0" offset-lg="2">
+        <b-col cols="12" lg="8" class="p-0 layout fader" offset-lg="2">
           <h1 class="text-center">First, what are you looking for?</h1>
           <ul
             v-for="(id, index) in ids"
             :key="'post-' + id"
             class="p-0 pt-1 list-unstyled"
+            :class="{
+              'mb-0': ids.length === 1,
+            }"
           >
             <li class="p-0">
               <b-card no-body>
@@ -54,21 +57,22 @@
               </b-card>
             </li>
           </ul>
-          <div class="mt-3">
+          <div class="d-block d-md-none flex-grow-1" />
+          <div class="mt-1 d-block d-md-none">
+            <b-button
+              variant="primary"
+              :disabled="uploadingPhoto"
+              size="lg"
+              block
+              to="/find/whereami"
+              class="w-100"
+            >
+              Next <v-icon icon="angle-double-right" />
+            </b-button>
+          </div>
+          <div class="w-100 mt-3 mb-5 d-none d-md-flex justify-content-end">
             <div v-if="messageValid">
-              <div class="d-block d-md-none">
-                <b-button
-                  variant="primary"
-                  :disabled="uploadingPhoto"
-                  size="lg"
-                  block
-                  to="/find/whereami"
-                  class="w-100"
-                >
-                  Next <v-icon icon="angle-double-right" />
-                </b-button>
-              </div>
-              <div class="d-none d-md-flex justify-content-end mb-2">
+              <div class="mb-2">
                 <b-button
                   variant="primary"
                   size="lg"
@@ -84,7 +88,6 @@
             </NoticeMessage>
           </div>
         </b-col>
-        <b-col cols="0" md="3" />
       </b-row>
     </div>
   </client-only>
@@ -125,7 +128,11 @@ export default {
   },
 }
 </script>
-<style scoped>
+<style scoped lang="scss">
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
+
 .cg {
   flex-basis: 25%;
   flex-grow: 1;
@@ -133,5 +140,16 @@ export default {
 
 .maxbutt {
   width: 33vw;
+}
+
+@include media-breakpoint-down(md) {
+  .layout {
+    //We need to subtract space for the navbar, the ad bar, and also allow some extra because of the way vh works
+    //mobile browsers.
+    min-height: calc(100vh - 84px - 52px - 84px);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
 }
 </style>

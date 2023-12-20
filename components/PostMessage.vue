@@ -57,7 +57,9 @@
     </div>
     <div class="subject-layout mb-1 mt-1">
       <div class="d-flex flex-column">
-        <label :for="$id('posttype')" class="pl-1"> Type</label>
+        <label :for="$id('posttype')" class="d-none d-md-block pl-1">
+          Type</label
+        >
         <b-form-input
           :id="$id('posttype')"
           :model-value="type"
@@ -91,7 +93,8 @@ import draggable from 'vuedraggable'
 import { uid } from '../composables/useId'
 import { useComposeStore } from '../stores/compose'
 import { useMessageStore } from '../stores/message'
-import { useMobileStore } from '@/stores/mobile'
+import { useMobileStore } from '../stores/mobile'
+import { useMiscStore } from '../stores/misc'
 import NumberIncrementDecrement from './NumberIncrementDecrement'
 
 const OurFilePond = () => import('~/components/OurFilePond')
@@ -137,6 +140,10 @@ export default {
     }
   },
   computed: {
+    breakpoint() {
+      const store = useMiscStore()
+      return store.getBreakpoint
+    },
     availablenow: {
       get() {
         const msg = this.composeStore?.message(this.id)
@@ -305,5 +312,13 @@ export default {
 .description {
   min-height: max(100px, 15vh);
   max-height: min(300px, 25vh);
+}
+
+:deep(.count label) {
+  display: none;
+
+  @include media-breakpoint-up(md) {
+    display: inline;
+  }
 }
 </style>

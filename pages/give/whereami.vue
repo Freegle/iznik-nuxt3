@@ -3,7 +3,7 @@
     <div class="layout fader">
       <GlobalWarning />
       <div class="d-none d-md-flex justify-content-around">
-        <WizardProgress :active-stage="3" class="maxbutt" />
+        <WizardProgress :active-stage="2" class="maxbutt" />
       </div>
       <h1 class="text-center">Now, tell us where it is</h1>
       <p class="text-center">
@@ -52,7 +52,7 @@
         </div>
       </div>
       <div class="d-block d-md-none flex-grow-1" />
-      <div class="mt-1 d-block d-md-none margbott">
+      <div class="mt-1 d-block d-md-none">
         <b-button
           variant="primary"
           size="lg"
@@ -157,19 +157,16 @@ select {
 
 @include media-breakpoint-down(md) {
   .layout {
-    min-height: 100vh;
+    //We need to subtract space for the navbar, the ad bar, and also allow some extra because of the way vh works
+    //mobile browsers.
+    min-height: calc(100vh - 84px - 52px - 84px);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding-bottom: 84px;
   }
 }
 
 .maxbutt {
   width: 33vw;
-}
-
-.margbott {
-  margin-bottom: 50px;
 }
 </style>

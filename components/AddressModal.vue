@@ -249,11 +249,14 @@ export default {
       },
       async set(newValue) {
         const settings = this.me.settings
+        this.showMap = false
         settings.selectedAddress = newValue
 
         await this.authStore.saveAndGet({
           settings,
         })
+
+        this.showMap = true
       },
     },
     selectedAddressObject() {

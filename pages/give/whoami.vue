@@ -43,7 +43,7 @@
         </div>
       </div>
       <div class="d-block d-md-none flex-grow-1" />
-      <div class="d-block d-md-none margbott">
+      <div class="mt-1 d-block d-md-none">
         <b-button
           v-if="emailValid && !submitting && !emailBelongsToSomeoneElse"
           variant="primary"
@@ -55,45 +55,52 @@
           Freegle it! <v-icon icon="angle-double-right" />
         </b-button>
       </div>
-      <div class="w-100 d-flex justify-content-around">
-        <div class="mt-2 d-none d-md-flex justify-content-between maxbutt">
-          <b-button
-            variant="secondary"
-            size="lg"
-            to="/give/whereami"
-            class="d-none d-md-block"
-          >
-            <v-icon icon="angle-double-left" /> Back
-          </b-button>
-          <b-button
-            v-if="emailValid && !submitting && !emailBelongsToSomeoneElse"
-            variant="primary"
-            size="lg"
-            @click="next"
-          >
-            Freegle it! <v-icon icon="angle-double-right" />
-          </b-button>
+      <div class="mt-3 mb-5 d-none d-md-flex">
+        <div class="w-100 d-flex justify-content-around">
+          <div class="mt-2 d-flex justify-content-between maxbutt">
+            <b-button
+              variant="secondary"
+              size="lg"
+              to="/give/whereami"
+              class="d-none d-md-block"
+            >
+              <v-icon icon="angle-double-left" /> Back
+            </b-button>
+            <b-button
+              v-if="emailValid && !submitting && !emailBelongsToSomeoneElse"
+              variant="primary"
+              size="lg"
+              @click="next"
+            >
+              Freegle it! <v-icon icon="angle-double-right" />
+            </b-button>
+          </div>
         </div>
-      </div>
-      <div v-if="submitting" class="d-flex justify-content-around pt-2 mt-2">
-        <b-progress height="48px" class="mt-2 w-25" animated variant="success">
-          <b-progress-bar :value="progress" />
-        </b-progress>
-      </div>
-      <div v-else class="d-flex justify-content-around pt-2 mt-2">
-        <NoticeMessage v-if="notAllowed" variant="danger">
-          You are not allowed to post on this community.
-        </NoticeMessage>
-        <NoticeMessage v-else-if="unvalidatedEmail" variant="danger">
-          You tried to post using an email address which has not yet been
-          validated. Please check your mailbox (including spam) and validate the
-          email, then try again.
-        </NoticeMessage>
-        <NoticeMessage v-else-if="wentWrong" variant="danger">
-          <!-- eslint-disable-next-line -->
-          Something went wrong.  Please try again, and if this keeps happening then contact
-          <SupportLink />.
-        </NoticeMessage>
+        <div v-if="submitting" class="d-flex justify-content-around pt-2 mt-2">
+          <b-progress
+            height="48px"
+            class="mt-2 w-25"
+            animated
+            variant="success"
+          >
+            <b-progress-bar :value="progress" />
+          </b-progress>
+        </div>
+        <div v-else class="d-flex justify-content-around pt-2 mt-2">
+          <NoticeMessage v-if="notAllowed" variant="danger">
+            You are not allowed to post on this community.
+          </NoticeMessage>
+          <NoticeMessage v-else-if="unvalidatedEmail" variant="danger">
+            You tried to post using an email address which has not yet been
+            validated. Please check your mailbox (including spam) and validate
+            the email, then try again.
+          </NoticeMessage>
+          <NoticeMessage v-else-if="wentWrong" variant="danger">
+            <!-- eslint-disable-next-line -->
+            Something went wrong.  Please try again, and if this keeps happening then contact
+            <SupportLink />.
+          </NoticeMessage>
+        </div>
       </div>
     </div>
   </client-only>
@@ -205,19 +212,16 @@ export default {
 
 @include media-breakpoint-down(md) {
   .layout {
-    min-height: 100vh;
+    //We need to subtract space for the navbar, the ad bar, and also allow some extra because of the way vh works
+    //mobile browsers.
+    min-height: calc(100vh - 84px - 52px - 84px);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding-bottom: 84px;
   }
 }
 
 .maxbutt {
   width: 33vw;
-}
-
-.margbott {
-  margin-bottom: 50px;
 }
 </style>

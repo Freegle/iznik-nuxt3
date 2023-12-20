@@ -49,6 +49,10 @@ export default class NewsAPI extends BaseAPI {
     await this.$post('/newsfeed', { id, action: 'Unhide' })
   }
 
+  async convertToStory(id, type) {
+    await this.$post('/newsfeed', { id, action: 'ConvertToStory' })
+  }
+
   async seen(id) {
     await this.$post('/newsfeed?bump=' + id, { id, action: 'Seen' })
   }

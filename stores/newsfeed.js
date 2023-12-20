@@ -174,6 +174,9 @@ export const useNewsfeedStore = defineStore({
       await api(this.config).news.unhide(id)
       await this.fetch(id, true)
     },
+    async convertToStory(id) {
+      await api(this.config).news.convertToStory(id)
+    },
     async referTo(id, type) {
       await api(this.config).news.referto(id, type)
       await this.fetch(id, true)
