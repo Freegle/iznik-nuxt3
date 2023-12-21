@@ -248,7 +248,18 @@ export default {
       return homeaddress.value?.includes('@')
     })
 
-    const giftAidAllowed = computed(() => period.value !== 'Declined')
+    const giftAidAllowed = computed({
+      get() {
+        return period.value !== 'Declined'
+      },
+      set(newValue) {
+        if (!newValue) {
+          period.value = 'Declined'
+        } else {
+          period.value = 'Past4YearsAndFuture'
+        }
+      },
+    })
 
     const oldoptions = computed(() => {
       let oldoptions = false
@@ -321,16 +332,6 @@ export default {
           this.marketingconsent = newVal.marketingconsent
         }
       },
-    },
-    giftAidAllowed: {
-      handler: function (newVal) {
-        if (!newVal) {
-          this.period = 'Declined'
-        } else {
-          this.period = 'Past4YearsAndFuture'
-        }
-      },
-      immediate: true,
     },
     async marketingconsent(newVal) {
       await this.authStore.saveAndGet({
