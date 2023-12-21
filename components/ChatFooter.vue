@@ -133,16 +133,17 @@
             </b-button>
           </div>
         </span>
-        <b-button variant="primary" class="float-end ml-2 mr-2" @click="send">
-          Send&nbsp;
-          <v-icon
-            v-if="sending"
-            icon="sync"
-            class="fa-spin"
-            title="Sending..."
-          />
-          <v-icon v-else icon="angle-double-right" title="Send" />
-        </b-button>
+        <SpinButton
+          size="md"
+          variant="primary"
+          class="float-end ml-2 mr-2"
+          button-title="Sending..."
+          label="Send"
+          icon-name="angle-double-right"
+          done-icon=""
+          iconlast
+          @handle="send"
+        />
         <b-button
           v-b-tooltip="'Upload a photo'"
           variant="secondary"
@@ -213,16 +214,15 @@
           <v-icon scale="2" icon="camera" class="fa-mob" />
           <div class="mobtext text--smallest">Photo</div>
         </div>
-        <b-button variant="primary" @click="send">
-          Send
-          <v-icon
-            v-if="sending"
-            icon="sync"
-            class="fa-spin"
-            title="Sending..."
-          />
-          <v-icon v-else icon="angle-double-right" title="Send" />
-        </b-button>
+        <SpinButton
+          variant="primary"
+          size="md"
+          label="Send"
+          icon-name="angle-double-right"
+          done-icon=""
+          iconlast
+          @handle="send"
+        />
       </div>
     </div>
     <PromiseModal
@@ -274,6 +274,7 @@ import { useMessageStore } from '../stores/message'
 import { fetchOurOffers } from '../composables/useThrottle'
 import { useAuthStore } from '../stores/auth'
 import { useAddressStore } from '../stores/address'
+import SpinButton from './SpinButton'
 import { untwem } from '~/composables/useTwem'
 
 // Don't use dynamic imports because it stops us being able to scroll to the bottom after render.
@@ -301,6 +302,7 @@ const MicroVolunteering = () => import('~/components/MicroVolunteering')
 
 export default {
   components: {
+    SpinButton,
     NudgeTooSoonWarningModal,
     NudgeWarningModal,
     UserRatings,
@@ -484,7 +486,7 @@ export default {
     showInfo() {
       this.showProfileModal = true
     },
-    async send() {
+    async send(callback) {
       if (!this.sending) {
         if (this.imageid) {
           this.sending = true
@@ -533,6 +535,7 @@ export default {
           this.startTypingTimer()
         }
       }
+      callback()
     },
     startTypingTimer() {
       // We want to let the server know regularly that we are still typing.  This will bump earlier recent chat

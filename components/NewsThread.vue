@@ -175,9 +175,8 @@
             <SpinButton
               v-if="enterNewLine"
               variant="primary"
-              name="angle-double-right"
+              icon-name="angle-double-right"
               label="Post"
-              spinclass="text-white"
               iconlast
               @handle="sendComment"
             />
@@ -387,13 +386,7 @@ export default {
     focusedComment() {
       this.replyingTo = this.newsfeed.id
     },
-    async sendComment(e) {
-      if (e) {
-        e.preventDefault()
-        e.stopPropagation()
-        e.stopImmediatePropagation()
-      }
-
+    async sendComment(callback) {
       if (this.threadcomment && this.threadcomment.trim()) {
         // Encode up any emojis.
         const msg = untwem(this.threadcomment)
@@ -412,8 +405,7 @@ export default {
         // And any image id
         this.imageid = null
       }
-
-      return false
+      callback()
     },
     newlineComment() {
       const p = this.$refs.threadcomment.selectionStart

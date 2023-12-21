@@ -240,10 +240,9 @@
         <SpinButton
           v-if="enterNewLine"
           variant="primary"
-          name="angle-double-right"
+          icon-name="angle-double-right"
           label="Post"
           iconlast
-          spinclass="text-white"
           @handle="sendReply"
         />
       </div>
@@ -468,13 +467,7 @@ export default {
     focusedReply() {
       this.replyingTo = this.id
     },
-    async sendReply(e) {
-      if (e) {
-        e.preventDefault()
-        e.stopPropagation()
-        e.stopImmediatePropagation()
-      }
-
+    async sendReply(callback) {
       // Encode up any emojis.
       if (this.replybox && this.replybox.trim()) {
         const msg = untwem(this.replybox)
@@ -498,6 +491,7 @@ export default {
         // Force re-render.  Store reactivity doesn't seem to work nicely with the nested reply structure we have.
         this.bump++
       }
+      callback()
     },
     newlineReply() {
       const p = this.$refs.replybox.selectionStart

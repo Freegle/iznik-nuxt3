@@ -4,18 +4,18 @@
       <b-col ref="mapcont" class="p-0">
         <client-only>
           <div class="d-flex justify-content-between">
-            <b-button
+            <SpinButton
               variant="secondary"
-              size="lg"
               class="mb-2 ml-0 ml-md-2"
-              title="Find my location"
-              @click="findLoc"
-            >
-              <v-icon v-if="locating" icon="sync" class="fa-spin" />
-              <v-icon v-else-if="locationFailed" icon="exclamation-triangle" />
-              <v-icon v-else icon="map-marker-alt" />
-              &nbsp;Find my location
-            </b-button>
+              button-title="Find my location"
+              done-icon=""
+              :icon-name="
+                locationFailed ? 'exclamation-triangle' : 'map-marker-alt'
+              "
+              label="Find my location"
+              size="lg"
+              @handle="findLoc"
+            />
           </div>
           <l-map
             ref="map"
@@ -37,11 +37,12 @@
 <script>
 import 'leaflet-control-geocoder/dist/Control.Geocoder.css'
 import { attribution, osmtile, loadLeaflet } from '../composables/useMap'
+import SpinButton from './SpinButton'
 import { MAX_MAP_ZOOM } from '~/constants'
 import { useRuntimeConfig } from '#app'
 
 export default {
-  components: {},
+  components: { SpinButton },
   props: {
     initialZoom: {
       type: Number,
@@ -106,31 +107,37 @@ export default {
     getCenter() {
       return this.center
     },
-    findLoc() {
+    findLoc(callback) {
       try {
         if (
           navigator &&
           navigator.geolocation &&
           navigator.geolocation.getCurrentPosition
         ) {
-          this.locating = true
-          navigator.geolocation.getCurrentPosition((position) => {
-            // Show close to where we think they are.
-            this.mapObject.flyTo(
-              [position.coords.latitude, position.coords.longitude],
-              16
-            )
-          })
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              // Show close to where we think they are.
+              this.mapObject.flyTo(
+                [position.coords.latitude, position.coords.longitude],
+                16
+              )
+              callback()
+            },
+            () => {
+              this.locationFailed = true
+              callback()
+            }
+          )
         } else {
           console.log('Navigation not supported.  ')
           this.locationFailed = true
+          callback()
         }
       } catch (e) {
         console.error('Find location failed with', e)
         this.locationFailed = true
+        callback()
       }
-
-      this.locating = false
     },
     idle() {
       this.center = this.mapObject.getCenter()

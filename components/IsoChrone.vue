@@ -60,7 +60,7 @@
               confirm
               size="sm"
               label="Remove"
-              @handle="remove"
+              @handle="deleteLocation"
             />
           </div>
         </label>
@@ -183,7 +183,6 @@ export default {
 
     const minutes = ref(20)
     const transport = ref('Drive')
-
     if (props.id) {
       minutes.value = isochroneStore.get(props.id).minutes
       transport.value = isochroneStore.get(props.id).transport
@@ -210,6 +209,11 @@ export default {
       await locationStore.fetchv2(isochrone.value.locationid)
     }
 
+    const deleteLocation = async (callback) => {
+      await isochroneStore.delete({ id: props.id })
+      callback()
+    }
+
     return {
       isochroneStore,
       locationStore,
@@ -217,6 +221,7 @@ export default {
       transport,
       isochrone,
       location,
+      deleteLocation,
     }
   },
   data() {
@@ -314,11 +319,6 @@ export default {
         this.nickname = null
         this.$emit('added')
       }
-    },
-    remove() {
-      this.isochroneStore.delete({
-        id: this.id,
-      })
     },
   },
 }

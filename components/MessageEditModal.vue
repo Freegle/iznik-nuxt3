@@ -115,11 +115,10 @@
       </b-button>
       <SpinButton
         variant="primary"
-        :disabled="uploadingPhoto || (!edittextbody && !attachments?.length)"
-        name="save"
+        :disabled="uploadingPhoto || isSaveButtonDisabled"
+        icon-name="save"
         label="Save"
-        spinclass="text-white"
-        @click="save"
+        @handle="save"
       />
     </template>
   </b-modal>
@@ -235,7 +234,6 @@ export default {
   methods: {
     async save() {
       this.triedToSave = true
-      if (this.isSaveButtonDisabled) return
 
       if (this.edititem && (this.edittextbody || this.attachments?.length)) {
         const attids = []

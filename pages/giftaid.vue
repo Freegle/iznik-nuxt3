@@ -150,11 +150,10 @@
             </NoticeMessage>
           </div>
           <SpinButton
-            name="save"
+            icon-name="save"
             size="lg"
             variant="primary"
             label="Submit Gift Aid Declaration"
-            spinclass="text-white"
             class="mt-4"
             @handle="save"
           />
@@ -175,7 +174,7 @@
             </ul>
             <SpinButton
               v-if="valid"
-              name="trash-alt"
+              icon-name="trash-alt"
               size="lg"
               variant="white"
               label="Remove Gift Aid Consent"
@@ -340,9 +339,12 @@ export default {
     },
   },
   methods: {
-    async save() {
+    async save(callback) {
       this.triedToSubmit = true
-      if (!this.valid) return
+      if (!this.valid) {
+        callback()
+        return
+      }
 
       if (!this.giftAidAllowed) {
         // We might need to fake up some values that the server expects.
@@ -357,12 +359,14 @@ export default {
 
       await this.giftAidStore.save()
       this.saved = true
+      callback()
     },
-    async remove() {
+    async remove(callback) {
       await this.giftAidStore.remove()
       this.period = 'Past4YearsAndFuture'
       this.fullname = null
       this.homeaddress = null
+      callback()
     },
     changeGiftAidToggle(val) {
       if (val.value) {

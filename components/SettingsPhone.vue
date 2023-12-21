@@ -16,20 +16,15 @@
             :class="inputClass"
           />
           <b-input-group-append v-if="!autoSave">
-            <b-button variant="white" @click="savePhone">
-              <v-icon
-                v-if="savingPhone"
-                icon="sync"
-                class="text-success fa-spin"
-              />
-              <v-icon
-                v-else-if="savedPhone"
-                icon="check"
-                class="text-success"
-              />
-              <v-icon v-else icon="save" />
-              Save
-            </b-button>
+            <SpinButton
+              ref="spinButton"
+              :disabled="notMobile"
+              variant="white"
+              size="md"
+              icon-name="save"
+              label="Save"
+              @handle="savePhone"
+            />
           </b-input-group-append>
         </b-input-group>
         <div class="text-muted mt-1 mb-1 text--small">
@@ -51,8 +46,10 @@
 </template>
 <script>
 import { useAuthStore } from '../stores/auth'
+import SpinButton from './SpinButton'
 
 export default {
+  components: { SpinButton },
   props: {
     size: {
       type: String,
@@ -92,12 +89,6 @@ export default {
       authStore,
     }
   },
-  data() {
-    return {
-      savingPhone: false,
-      savedPhone: false,
-    }
-  },
   computed: {
     notMobile() {
       if (!this.me?.phone) {
@@ -114,26 +105,19 @@ export default {
     },
   },
   watch: {
-    phone(newVal) {
+    phone() {
       if (this.autoSave) {
         this.savePhone()
       }
     },
   },
   methods: {
-    async savePhone() {
+    async savePhone(callback) {
       if (!this.notMobile) {
-        this.savingPhone = true
-
         await this.authStore.saveAndGet({
           phone: this.me.phone,
         })
-
-        this.savingPhone = false
-        this.savedPhone = true
-        setTimeout(() => {
-          this.savedPhone = false
-        }, 2000)
+        callback()
       }
     },
     async removePhone() {

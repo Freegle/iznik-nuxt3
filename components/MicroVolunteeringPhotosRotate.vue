@@ -16,11 +16,10 @@
     </div>
     <div class="d-flex justify-content-around mt-2">
       <SpinButton
-        name="save"
+        icon-name="save"
         variant="primary"
         size="lg"
         label="All photos look good"
-        spinclass="text-white"
         @handle="done"
       />
     </div>
@@ -69,7 +68,7 @@ export default {
 
       this.bump++
     },
-    async done() {
+    async done(callback) {
       const promises = []
       for (const p of this.currentPhotos) {
         promises.push(
@@ -82,6 +81,7 @@ export default {
       }
 
       await Promise.all(promises)
+      callback()
 
       this.$emit('done')
     },

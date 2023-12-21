@@ -1,6 +1,6 @@
 <template>
   <client-only>
-    <div>here</div>
+    <div></div>
   </client-only>
 </template>
 <script>

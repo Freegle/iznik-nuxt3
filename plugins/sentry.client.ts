@@ -240,6 +240,7 @@ export default defineNuxtPlugin((nuxtApp) => {
       sentrySetUser: (user) => Sentry.setUser(user),
       sentrySetTag: (tagName, value) => Sentry.setTag(tagName, value),
       sentryAddBreadcrumb: (breadcrumb) => Sentry.addBreadcrumb(breadcrumb),
+      sentryCaptureException: (e) => Sentry.captureException(e),
     },
   }
 })
