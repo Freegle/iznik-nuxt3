@@ -24,15 +24,11 @@
       <slot>{{ label }}</slot>
     </span>
   </b-button>
-  <client-only>
-    <teleport to="body">
-      <ConfirmModal
-        v-if="confirm && showConfirm"
-        @confirm="confirmed"
-        @hidden="onConfirmClosed"
-      />
-    </teleport>
-  </client-only>
+  <ConfirmModal
+    v-if="confirm && showConfirm"
+    @confirm="confirmed"
+    @hidden="onConfirmClosed"
+  />
 </template>
 <script setup>
 import { ref } from '#imports'
