@@ -67,8 +67,7 @@
               class="mt-2"
               variant="primary"
               size="lg"
-              spinclass="text-white"
-              name="angle-double-right"
+              icon-name="angle-double-right"
               @handle="combine"
             />
             <div v-if="mergeComplete">
@@ -197,7 +196,7 @@ export default {
         user2: this.merge.user2.id,
       })
     },
-    async combine() {
+    async combine(callback) {
       await this.$api.merge.accept({
         id: this.id,
         uid: this.uid,
@@ -209,6 +208,7 @@ export default {
       })
 
       this.mergeComplete = true
+      callback()
     },
   },
 }

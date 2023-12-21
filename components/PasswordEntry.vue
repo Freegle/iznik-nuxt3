@@ -36,9 +36,8 @@
         <SpinButton
           variant="primary"
           aria-label="Save password"
-          name="save"
+          icon-name="save"
           label="Save"
-          spinclass="text-white"
           @handle="savePassword"
         />
       </b-input-group-append>
@@ -88,13 +87,14 @@ export default {
     togglePassword() {
       this.showPassword = !this.showPassword
     },
-    async savePassword() {
+    async savePassword(callback) {
       if (this.password) {
         const authStore = useAuthStore()
         await authStore.saveAndGet({
           password: this.password,
         })
       }
+      callback()
     },
   },
 }

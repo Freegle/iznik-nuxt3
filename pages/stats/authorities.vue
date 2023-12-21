@@ -49,7 +49,6 @@ export default {
       buildHead(
         route,
         runtimeConfig,
-        api,
         'Statistics by Authority',
         "You can search for a council, local authority etc. Then we'll show you our impact in that area."
       )

@@ -1,16 +1,26 @@
 <template>
   <div v-if="newsfeed" class="d-flex align-items-center mt-1">
-    <b-button v-if="!newsfeed.loved" variant="link" size="sm" @click="love">
-      <v-icon v-if="loving" icon="sync" class="fa-spin text-success" />
-      <v-icon v-else icon="heart" />
-      <span class="d-none d-sm-inline ml-1">Love this</span>
-    </b-button>
-    <b-button v-if="newsfeed.loved" variant="link" size="sm" @click="unlove">
-      <v-icon icon="heart" class="text-danger" /><span
-        class="d-none d-sm-inline"
-        >&nbsp;Unlove this</span
-      >
-    </b-button>
+    <SpinButton
+      v-if="!newsfeed.loved"
+      variant="link"
+      size="sm"
+      icon-name="heart"
+      done-icon=""
+      @handle="love"
+    >
+      <span class="d-none d-sm-inline">Love this</span>
+    </SpinButton>
+    <SpinButton
+      v-if="newsfeed.loved"
+      variant="link"
+      size="sm"
+      icon-name="heart"
+      done-icon=""
+      icon-class="text-danger"
+      @handle="unlove"
+    >
+      <span class="d-none d-sm-inline">Unlove this</span>
+    </SpinButton>
     <b-button
       v-if="!newsfeed.closed"
       variant="link"
@@ -41,10 +51,12 @@
 import pluralize from 'pluralize'
 import { defineAsyncComponent } from 'vue'
 import { useNewsfeedStore } from '../stores/newsfeed'
+import SpinButton from './SpinButton'
 const NewsLovesModal = defineAsyncComponent(() => import('./NewsLovesModal'))
 
 export default {
   components: {
+    SpinButton,
     NewsLovesModal,
   },
   props: {
@@ -76,22 +88,16 @@ export default {
     },
   },
   methods: {
-    async love() {
-      this.loving = true
-
+    async love(callback) {
       await this.newsfeedStore.love(this.newsfeed.id, this.newsfeed.threadhead)
-
-      this.loving = false
+      callback()
     },
-    async unlove() {
-      this.loving = true
-
+    async unlove(callback) {
       await this.newsfeedStore.unlove(
         this.newsfeed.id,
         this.newsfeed.threadhead
       )
-
-      this.loving = false
+      callback()
     },
     focusComment() {
       this.$emit('focus-comment')

@@ -86,10 +86,9 @@
     <template #footer>
       <b-button variant="white" @click="hide"> Cancel</b-button>
       <SpinButton
-        name="save"
+        icon-name="save"
         label="Save details"
         variant="primary"
-        spin-class="text-white"
         @handle="submit"
       />
     </template>
@@ -138,7 +137,7 @@ export default {
     }
   },
   methods: {
-    async submit() {
+    async submit(callback) {
       if (this.name) {
         const cent = this.$refs.map.getCenter()
 
@@ -166,6 +165,7 @@ export default {
           this.hide()
         }
       }
+      callback()
     },
     shown() {
       this.loaded = true

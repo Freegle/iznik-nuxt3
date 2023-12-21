@@ -1,21 +1,26 @@
 <template>
-  <div v-if="!removed">
+  <div class="d-flex gap-3">
     <b-button :to="'/browse/' + search.term" variant="white d-inline">
       <v-icon icon="search" /> {{ search.term }}
       <span class="text-muted small">{{ searchAgo }}</span>
     </b-button>
-    <span class="ml-3 d-inline clickme" @click="deleteSearch">
-      <v-icon v-if="removing" icon="sync" class="text-success fa-spin" />
-      <v-icon v-else icon="trash-alt" title="Delete this search" />
-    </span>
+    <SpinButton
+      no-border
+      variant="white"
+      icon-name="trash-alt"
+      done-icon=""
+      @handle="deleteSearch"
+    />
   </div>
 </template>
 <script>
 import dayjs from 'dayjs'
 import pluralize from 'pluralize'
 import { useSearchStore } from '../stores/search'
+import SpinButton from './SpinButton'
 
 export default {
+  components: { SpinButton },
   props: {
     search: {
       type: Object,
@@ -29,12 +34,6 @@ export default {
       searchStore,
     }
   },
-  data() {
-    return {
-      removing: false,
-      removed: false,
-    }
-  },
   computed: {
     searchAgo() {
       const daysago = dayjs().diff(dayjs(this.search.date), 'day')
@@ -42,13 +41,9 @@ export default {
     },
   },
   methods: {
-    async deleteSearch() {
+    async deleteSearch(callback) {
       await this.searchStore.delete(this.search.id, this.myid)
-      this.removed = true
-
-      setTimeout(() => {
-        this.removed = false
-      }, 2000)
+      callback()
     },
   },
 }

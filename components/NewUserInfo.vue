@@ -22,7 +22,7 @@
           <b-input-group-append>
             <SpinButton
               variant="secondary"
-              name="save"
+              icon-name="save"
               label="Save"
               @handle="setPassword"
             />
@@ -61,12 +61,13 @@ export default {
     }
   },
   methods: {
-    async setPassword() {
+    async setPassword(callback) {
       if (this.newPassword) {
         await this.authStore.saveAndGet({
           password: this.newPassword,
         })
       }
+      callback()
     },
   },
 }
