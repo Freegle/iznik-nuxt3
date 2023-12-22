@@ -44,6 +44,10 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  pixel: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const adShown = ref(true)
@@ -119,9 +123,15 @@ async function visibilityChanged(visible) {
 
       window.googletag = window.googletag || { cmd: [] }
       window.googletag.cmd.push(function () {
+        const dims = [props.dimensions]
+
+        if (props.pixel) {
+          dims.push([1, 1])
+        }
+
         window.googletag.pubads().collapseEmptyDivs()
         slot = window.googletag
-          .defineSlot(uniqueid.value, [props.dimensions], props.divId)
+          .defineSlot(uniqueid.value, dims, props.divId)
           .addService(window.googletag.pubads())
 
         window.googletag
