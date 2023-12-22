@@ -121,12 +121,7 @@ async function visibilityChanged(visible) {
       window.googletag.cmd.push(function () {
         window.googletag.pubads().collapseEmptyDivs()
         slot = window.googletag
-          .defineSlot(uniqueid.value,
-              [
-                [props.dimensions],
-                [1,1] // This is required by the ad provider.
-              ], //
-              props.divId)
+          .defineSlot(uniqueid.value, [props.dimensions], props.divId)
           .addService(window.googletag.pubads())
 
         window.googletag
