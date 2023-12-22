@@ -31,7 +31,7 @@
   />
 </template>
 <script setup>
-import { ref } from '#imports'
+import { ref, defineAsyncComponent, onBeforeUnmount } from '#imports'
 const { $sentryCaptureException } = useNuxtApp()
 
 const ConfirmModal = defineAsyncComponent(() => import('./ConfirmModal'))
@@ -151,6 +151,8 @@ const confirmed = () => {
 const onConfirmClosed = () => {
   showConfirm.value = false
 }
+
+onBeforeUnmount(() => clearTimeout(timer))
 
 defineExpose({ handle: onClick })
 </script>
