@@ -412,7 +412,10 @@ export default {
         // And any image id
         this.imageid = null
       }
-      callback()
+
+      if (typeof callback === 'function') {
+        callback()
+      }
     },
     newlineComment() {
       const p = this.$refs.threadcomment.selectionStart

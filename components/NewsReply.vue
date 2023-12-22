@@ -491,7 +491,10 @@ export default {
         // Force re-render.  Store reactivity doesn't seem to work nicely with the nested reply structure we have.
         this.bump++
       }
-      callback()
+
+      if (typeof callback === 'function') {
+        callback()
+      }
     },
     newlineReply() {
       const p = this.$refs.replybox.selectionStart
