@@ -64,6 +64,7 @@
             enterkeyhint="enter"
             rows="3"
             max-rows="8"
+            @keydown="typing"
             @focus="markRead"
           />
           <b-form-textarea
@@ -76,6 +77,7 @@
             max-rows="8"
             enterkeyhint="send"
             autocapitalize="none"
+            @keydown="typing"
             @keydown.enter.exact.prevent
             @keyup.enter.exact="send"
             @keydown.enter.shift.exact.prevent="newline"
@@ -268,6 +270,7 @@
 </template>
 <script>
 import pluralize from 'pluralize'
+import { TYPING_TIME_INVERVAL } from '../constants'
 import { setupChat } from '../composables/useChat'
 import { useMiscStore } from '../stores/misc'
 import { useMessageStore } from '../stores/message'
@@ -350,8 +353,7 @@ export default {
       sendmessage: null,
       RSVP: false,
       likelymsg: null,
-      typingLastMessage: null,
-      typingTimer: null,
+      lastTyping: null,
       ouroffers: [],
       imagethumb: null,
       imageid: null,
@@ -397,11 +399,6 @@ export default {
 
       return null
     },
-  },
-  beforeUnmount() {
-    if (this.typingTimer) {
-      clearTimeout(this.typingTimer)
-    }
   },
   mounted() {
     setTimeout(() => {
@@ -530,31 +527,12 @@ export default {
               this.showMicrovolunteering = true
             }
           }
-
-          // Start the timer which indicates we may still be typing.
-          this.startTypingTimer()
         }
       }
 
       if (typeof callback === 'function') {
         // For the send-on-enter case we are passed the native event, whereas for SpinButton we are passed a callback.
         callback()
-      }
-    },
-    startTypingTimer() {
-      // We want to let the server know regularly that we are still typing.  This will bump earlier recent chat
-      // messages so that they don't get send out by email.  This helps with people who don't expect enter to act
-      // as send.
-      if (!this.typingTimer) {
-        this.typingLastMessage = this.sendmessage
-        this.typingTimer = setTimeout(this.stillTyping, 10000)
-      }
-    },
-    async stillTyping() {
-      if (this.sendmessage !== this.typingLastMessage) {
-        // We are still typing.
-        await this.chatStore.typing(this.id)
-        this.startTypingTimer()
       }
     },
     fetchMessages() {
@@ -579,6 +557,15 @@ export default {
       this.imageid = null
       this.imagethumb = null
     },
+    async typing() {
+      // Let the server know that we are typing, no more frequently than every 10 seconds.
+      const now = new Date().getTime()
+
+      if (!this.lastTyping || now - this.lastTyping > TYPING_TIME_INVERVAL) {
+        await this.chatStore.typing(this.id)
+        this.lastTyping = now
+      }
+    }
   },
 }
 </script>

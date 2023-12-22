@@ -12,6 +12,7 @@
         }"
       >
         <div class="pt-1 mb-1 w-100 itemwrapper">
+          <ChatTypingIndicator :chatid="id" :icon="chat?.icon" />
           <div
             v-for="(chatmessage, index) in chatmessages"
             :key="'chatmessage-' + chatmessage.id"
@@ -45,6 +46,7 @@
 import { useChatStore } from '../stores/chat'
 import ChatHeader from './ChatHeader'
 import ChatFooter from './ChatFooter'
+import ChatTypingIndicator from './ChatTypingIndicator'
 import { useUserStore } from '~/stores/user'
 import { setupChat } from '~/composables/useChat'
 
@@ -55,6 +57,7 @@ const ChatNotVisible = () => import('~/components/ChatNotVisible.vue')
 
 export default {
   components: {
+    ChatTypingIndicator,
     ChatHeader,
     ChatFooter,
     ChatMessage,

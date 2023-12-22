@@ -51,3 +51,5 @@ export const RECENT_MESSAGES = 31
 export const OWN_POSTS_AGE = 120
 export const MESSAGE_EXPIRE_TIME = 90
 export const GROUP_REPOSTS = { offer: 3, wanted: 14, max: 10, chaseups: 2 }
+
+export const TYPING_TIME_INVERVAL = 10000
