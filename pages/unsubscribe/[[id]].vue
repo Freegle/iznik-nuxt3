@@ -31,7 +31,7 @@
                     icon-name="trash-alt"
                     label="Leave this community"
                     class="mt-2"
-                    @click="leave"
+                    @handle="leave"
                   />
                 </div>
               </div>
