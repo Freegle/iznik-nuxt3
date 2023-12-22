@@ -535,7 +535,11 @@ export default {
           this.startTypingTimer()
         }
       }
-      callback()
+
+      if (typeof callback === 'function') {
+        // For the send-on-enter case we are passed the native event, whereas for SpinButton we are passed a callback.
+        callback()
+      }
     },
     startTypingTimer() {
       // We want to let the server know regularly that we are still typing.  This will bump earlier recent chat
