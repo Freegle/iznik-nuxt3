@@ -47,8 +47,8 @@ const chat = computed(() => {
 })
 
 const typing = computed(() => {
-  let typing = chat.value.lasttype
-  let lastdate = chat.value.lastdate
+  let typing = chat.value?.lasttype
+  let lastdate = chat.value?.lastdate
 
   if (typing && lastdate) {
     const now = new Date().getTime()

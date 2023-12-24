@@ -42,12 +42,12 @@
       v-if="supportOrAdmin && !reply?.deleted"
       class="d-flex justify-content-end"
     >
-      <b-button variant="link" class="reply__button" @click="deleteReply">
+      <b-button variant="link" class="reply__button" @click="deleteWarning">
         Delete this warning
       </b-button>
       <ConfirmModal
         v-if="showDeleteModal"
-        title="Delete refer from"
+        title="Delete refer to"
         @confirm="deleteConfirm"
         @hidden="showDeleteModal = false"
       />
@@ -96,7 +96,7 @@ export default {
     },
   },
   methods: {
-    deleteReply() {
+    deleteWarning() {
       this.showDeleteModal = true
     },
     async deleteConfirm() {

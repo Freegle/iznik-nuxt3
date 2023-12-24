@@ -33,6 +33,7 @@
         class="content pt-1 pb-1"
       />
       <NewsReply
+        v-else
         :id="reply.id"
         :key="'reply-' + reply.id"
         :threadhead="threadhead"
@@ -174,7 +175,6 @@ export default {
       while (i--) {
         if (!ret[i].message.localeCompare(lastMessage)) {
           // Remove this from the array
-          console.log('Remove')
           ret.splice(i, 1)
         } else {
           lastMessage = ret[i].message
