@@ -38,7 +38,11 @@
       <div v-else-if="chatBusy" class="text-center">
         <b-img class="float-end" src="/loader.gif" width="100px" />
       </div>
-      <ChatFooter v-bind="$props" class="chatFooter" />
+      <ChatFooter
+        v-bind="$props"
+        class="chatFooter"
+        @scrollbottom="checkScroll"
+      />
     </div>
   </div>
 </template>

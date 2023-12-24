@@ -412,6 +412,9 @@ export default {
     },
     async _updateAfterSend() {
       this.sending = false
+
+      // Fetch the messages again to pick up the new one.
+      await this.fetchMessages()
       this.$emit('scrollbottom')
 
       // We also want to trigger an update in the chat list.
@@ -535,8 +538,8 @@ export default {
         callback()
       }
     },
-    fetchMessages() {
-      this.chatStore.fetchMessages(this.id)
+    async fetchMessages() {
+      await this.chatStore.fetchMessages(this.id)
     },
     async sendAddress(id) {
       await this.chatStore.send(this.id, null, id)
@@ -565,7 +568,7 @@ export default {
         await this.chatStore.typing(this.id)
         this.lastTyping = now
       }
-    }
+    },
   },
 }
 </script>

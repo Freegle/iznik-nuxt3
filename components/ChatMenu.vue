@@ -45,11 +45,6 @@ export default {
       return Math.min(99, this.chatStore?.unreadCount)
     },
   },
-  watch: {
-    chatCount() {
-      this.$emit('update:chatCount', this.chatCount)
-    },
-  },
   methods: {
     toChats(e) {
       if (e) {
