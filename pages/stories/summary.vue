@@ -7,10 +7,12 @@
             <h1>Stories from Freeglers</h1>
             <p>This page lets you search through stories.</p>
           </div>
-          <div class="gcse-search"></div>
+          <client-only>
+            <div class="gcse-search"></div>
+          </client-only>
           <ul class="list-unstyled">
             <li v-for="story in stories" :key="'story-' + story" class="mt-2">
-              <nuxt-link :to="'/story/' + story">{{story}}</nuxt-link>
+              <nuxt-link :to="'/story/' + story">{{ story }}</nuxt-link>
             </li>
           </ul>
         </b-col>
@@ -46,8 +48,13 @@ const stories = computed(() => {
 })
 
 onMounted(() => {
-  let scr = document.createElement('script')
-  scr.setAttribute('src', 'https://cse.google.com/cse.js?cx=424a23761185040ff')
-  window.document.head.appendChild(scr)
+  if (process.client) {
+    const scr = document.createElement('script')
+    scr.setAttribute(
+      'src',
+      'https://cse.google.com/cse.js?cx=424a23761185040ff'
+    )
+    window.document.head.appendChild(scr)
+  }
 })
 </script>
