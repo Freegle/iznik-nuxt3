@@ -5,8 +5,9 @@
         <b-col cols="12" lg="6" class="p-0" offset-lg="3">
           <div class="bg-white p-4">
             <h1>Stories from Freeglers</h1>
-            <p>This page just exists for Google.</p>
+            <p>This page lets you search through stories.</p>
           </div>
+          <div class="gcse-search"></div>
           <ul class="list-unstyled">
             <li v-for="story in stories" :key="'story-' + story" class="mt-2">
               <nuxt-link :to="'/story/' + story">{{story}}</nuxt-link>
@@ -42,5 +43,11 @@ useHead(
 
 const stories = computed(() => {
   return storyStore.recent
+})
+
+onMounted(() => {
+  let scr = document.createElement('script')
+  scr.setAttribute('src', 'https://cse.google.com/cse.js?cx=424a23761185040ff')
+  window.document.head.appendChild(scr)
 })
 </script>
