@@ -16,6 +16,7 @@
             div-id="div-gpt-ad-1699973618906-0"
             class="sticky"
             style="width: 320px; height: 50px; margin-top: 2px"
+            pixel
           />
         </div>
         <div

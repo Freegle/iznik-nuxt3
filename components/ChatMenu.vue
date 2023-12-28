@@ -50,11 +50,6 @@ export default {
       return chatcount
     },
   },
-  watch: {
-    chatCount() {
-      this.$emit('update:chatCount', this.chatCount)
-    },
-  },
   methods: {
     toChats(e) {
       if (e) {

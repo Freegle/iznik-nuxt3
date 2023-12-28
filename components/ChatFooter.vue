@@ -64,6 +64,7 @@
             enterkeyhint="enter"
             rows="3"
             max-rows="8"
+            @keydown="typing"
             @focus="markRead"
           />
           <b-form-textarea
@@ -76,6 +77,7 @@
             max-rows="8"
             enterkeyhint="send"
             autocapitalize="none"
+            @keydown="typing"
             @keydown.enter.exact.prevent
             @keyup.enter.exact="send"
             @keydown.enter.shift.exact.prevent="newline"
@@ -84,7 +86,7 @@
           />
         </div>
         <div v-else class="d-flex justify-content-end pt-2 pb-2">
-          <b-img :src="imagethumb" fluid />
+          <b-img :src="imagethumb" fluid class="maxheight" />
           <div>
             <b-button title="Remove photo" @click="removeImage">
               <v-icon icon="times-circle" scale="1.5" />
@@ -133,16 +135,17 @@
             </b-button>
           </div>
         </span>
-        <b-button variant="primary" class="float-end ml-2 mr-2" @click="send">
-          Send&nbsp;
-          <v-icon
-            v-if="sending"
-            icon="sync"
-            class="fa-spin"
-            title="Sending..."
-          />
-          <v-icon v-else icon="angle-double-right" title="Send" />
-        </b-button>
+        <SpinButton
+          size="md"
+          variant="primary"
+          class="float-end ml-2 mr-2"
+          button-title="Sending..."
+          label="Send"
+          icon-name="angle-double-right"
+          done-icon=""
+          iconlast
+          @handle="send"
+        />
         <b-button
           v-b-tooltip="'Upload a photo'"
           variant="secondary"
@@ -213,16 +216,15 @@
           <v-icon scale="2" icon="camera" class="fa-mob" />
           <div class="mobtext text--smallest">Photo</div>
         </div>
-        <b-button variant="primary" @click="send">
-          Send
-          <v-icon
-            v-if="sending"
-            icon="sync"
-            class="fa-spin"
-            title="Sending..."
-          />
-          <v-icon v-else icon="angle-double-right" title="Send" />
-        </b-button>
+        <SpinButton
+          variant="primary"
+          size="md"
+          label="Send"
+          icon-name="angle-double-right"
+          done-icon=""
+          iconlast
+          @handle="send"
+        />
       </div>
     </div>
     <PromiseModal
@@ -268,12 +270,14 @@
 </template>
 <script>
 import pluralize from 'pluralize'
+import { TYPING_TIME_INVERVAL } from '../constants'
 import { setupChat } from '../composables/useChat'
 import { useMiscStore } from '../stores/misc'
 import { useMessageStore } from '../stores/message'
 import { fetchOurOffers } from '../composables/useThrottle'
 import { useAuthStore } from '../stores/auth'
 import { useAddressStore } from '../stores/address'
+import SpinButton from './SpinButton'
 import { untwem } from '~/composables/useTwem'
 
 // Don't use dynamic imports because it stops us being able to scroll to the bottom after render.
@@ -301,6 +305,7 @@ const MicroVolunteering = () => import('~/components/MicroVolunteering')
 
 export default {
   components: {
+    SpinButton,
     NudgeTooSoonWarningModal,
     NudgeWarningModal,
     UserRatings,
@@ -348,8 +353,7 @@ export default {
       sendmessage: null,
       RSVP: false,
       likelymsg: null,
-      typingLastMessage: null,
-      typingTimer: null,
+      lastTyping: null,
       ouroffers: [],
       imagethumb: null,
       imageid: null,
@@ -396,11 +400,6 @@ export default {
       return null
     },
   },
-  beforeUnmount() {
-    if (this.typingTimer) {
-      clearTimeout(this.typingTimer)
-    }
-  },
   mounted() {
     setTimeout(() => {
       this.showNotices = false
@@ -413,6 +412,9 @@ export default {
     },
     async _updateAfterSend() {
       this.sending = false
+
+      // Fetch the messages again to pick up the new one.
+      await this.fetchMessages()
       this.$emit('scrollbottom')
 
       // We also want to trigger an update in the chat list.
@@ -484,7 +486,7 @@ export default {
     showInfo() {
       this.showProfileModal = true
     },
-    async send() {
+    async send(callback) {
       if (!this.sending) {
         if (this.imageid) {
           this.sending = true
@@ -528,30 +530,16 @@ export default {
               this.showMicrovolunteering = true
             }
           }
-
-          // Start the timer which indicates we may still be typing.
-          this.startTypingTimer()
         }
       }
-    },
-    startTypingTimer() {
-      // We want to let the server know regularly that we are still typing.  This will bump earlier recent chat
-      // messages so that they don't get send out by email.  This helps with people who don't expect enter to act
-      // as send.
-      if (!this.typingTimer) {
-        this.typingLastMessage = this.sendmessage
-        this.typingTimer = setTimeout(this.stillTyping, 10000)
+
+      if (typeof callback === 'function') {
+        // For the send-on-enter case we are passed the native event, whereas for SpinButton we are passed a callback.
+        callback()
       }
     },
-    async stillTyping() {
-      if (this.sendmessage !== this.typingLastMessage) {
-        // We are still typing.
-        await this.chatStore.typing(this.id)
-        this.startTypingTimer()
-      }
-    },
-    fetchMessages() {
-      this.chatStore.fetchMessages(this.id)
+    async fetchMessages() {
+      await this.chatStore.fetchMessages(this.id)
     },
     async sendAddress(id) {
       await this.chatStore.send(this.id, null, id)
@@ -572,10 +560,18 @@ export default {
       this.imageid = null
       this.imagethumb = null
     },
+    async typing() {
+      // Let the server know that we are typing, no more frequently than every 10 seconds.
+      const now = new Date().getTime()
+
+      if (!this.lastTyping || now - this.lastTyping > TYPING_TIME_INVERVAL) {
+        await this.chatStore.typing(this.id)
+        this.lastTyping = now
+      }
+    },
   },
 }
 </script>
-
 <style scoped lang="scss">
 .mobtext {
   text-align: center !important;
@@ -600,5 +596,9 @@ export default {
   background-color: $color-yellow-1 !important;
   color: black !important;
   border: 0;
+}
+
+.maxheight {
+  max-height: 33vh;
 }
 </style>

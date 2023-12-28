@@ -12,6 +12,7 @@
         }"
       >
         <div class="pt-1 mb-1 w-100 itemwrapper">
+          <ChatTypingIndicator :chatid="id" :icon="chat?.icon" />
           <div
             v-for="(chatmessage, index) in chatmessages"
             :key="'chatmessage-' + chatmessage.id"
@@ -37,7 +38,11 @@
       <div v-else-if="chatBusy" class="text-center">
         <b-img class="float-end" src="/loader.gif" width="100px" />
       </div>
-      <ChatFooter v-bind="$props" class="chatFooter" />
+      <ChatFooter
+        v-bind="$props"
+        class="chatFooter"
+        @scrollbottom="checkScroll"
+      />
     </div>
   </div>
 </template>
@@ -45,6 +50,7 @@
 import { useChatStore } from '../stores/chat'
 import ChatHeader from './ChatHeader'
 import ChatFooter from './ChatFooter'
+import ChatTypingIndicator from './ChatTypingIndicator'
 import { useUserStore } from '~/stores/user'
 import { setupChat } from '~/composables/useChat'
 
@@ -55,6 +61,7 @@ const ChatNotVisible = () => import('~/components/ChatNotVisible.vue')
 
 export default {
   components: {
+    ChatTypingIndicator,
     ChatHeader,
     ChatFooter,
     ChatMessage,

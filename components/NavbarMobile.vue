@@ -7,11 +7,19 @@
   >
     <OfflineIndicator v-if="!online" />
     <b-button
-      v-else-if="showBackButton"
-      ref="mobileNav"
+      v-if="online && showBackButton"
       variant="white"
       class="nohover ml-3"
-      @click="backButton"
+      to="/"
+    >
+      <v-icon icon="home" />
+    </b-button>
+    <b-button
+        v-if="online && showBackButton"
+        ref="mobileNav"
+        variant="white"
+        class="nohover ml-3"
+        @click="backButton"
     >
       <v-icon icon="arrow-left" />
     </b-button>

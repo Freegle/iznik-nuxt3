@@ -63,30 +63,30 @@
         </b-button>
       </div>
       <div v-if="!fromme" class="pl-2 w-50 justify-content-end d-flex">
-        <b-button
+        <SpinButton
           v-if="!me"
-          size="lg"
           variant="primary"
+          size="lg"
+          done-icon=""
+          icon-name="angle-double-right"
           :disabled="disableSend"
-          block
-          @click="registerOrSend"
+          iconlast
+          @handle="registerOrSend"
         >
           Send <span class="d-none d-md-inline">your</span> reply
-          <v-icon v-if="replying" icon="sync" class="fa-spin" />
-          <v-icon v-else icon="angle-double-right" />&nbsp;
-        </b-button>
-        <b-button
+        </SpinButton>
+        <SpinButton
           v-else
-          size="lg"
           variant="primary"
-          block
+          size="lg"
+          done-icon=""
+          icon-name="angle-double-right"
           :disabled="disableSend"
-          @click="sendReply"
+          iconlast
+          @handle="sendReply"
         >
           Send <span class="d-none d-md-inline">your</span> reply
-          <v-icon v-if="replying" icon="sync" class="fa-spin" />
-          <v-icon v-else icon="angle-double-right" />&nbsp;
-        </b-button>
+        </SpinButton>
       </div>
     </div>
     <b-modal
@@ -119,6 +119,7 @@ import MessageStillAvailable from '~/components/MessageStillAvailable'
 import EmailValidator from '~/components/EmailValidator'
 import NewUserInfo from '~/components/NewUserInfo'
 import ChatButton from '~/components/ChatButton'
+import SpinButton from '~/components/SpinButton.vue'
 
 const NewFreegler = () => import('~/components/NewFreegler')
 
@@ -129,6 +130,7 @@ export default {
     EmailValidator,
     NewFreegler,
     NewUserInfo,
+    SpinButton,
   },
   mixins: [replyToPost],
   props: {
@@ -219,7 +221,7 @@ export default {
     },
   },
   methods: {
-    async registerOrSend() {
+    async registerOrSend(callback) {
       // We've got a reply and an email address.  Maybe the email address is a registered user, maybe it's new.  If
       // it's a registered user then we want to force them to log in.
       //
@@ -257,8 +259,9 @@ export default {
         console.log('Register exception, force login', e.message)
         this.forceLogin = true
       }
+      callback()
     },
-    async sendReply() {
+    async sendReply(callback) {
       console.log('sendReply', this.reply)
 
       if (this.reply) {
@@ -314,6 +317,7 @@ export default {
           this.forceLogin = true
         }
       }
+      callback()
     },
     close() {
       this.$emit('close')

@@ -18,19 +18,17 @@
       <SpinButton
         variant="primary"
         class="mb-1"
-        icon="check"
+        icon-name="check"
         label="Yes, that looks ok"
         size="lg"
-        spinclass="text-white"
         @handle="approve"
       />
       <SpinButton
         variant="secondary"
         class="mb-1"
-        icon="times"
+        icon-name="times"
         label="No, something's not right"
         size="lg"
-        spinclass="text-white"
         @handle="notRight"
       />
     </div>
@@ -55,10 +53,9 @@
           v-if="msgcategory && comments"
           variant="primary"
           class="mt-2"
-          icon="save"
+          icon-name="save"
           label="Send your comments"
           size="lg"
-          spinclass="text-white"
           @handle="sendComments"
         />
       </b-form-group>
@@ -102,11 +99,12 @@ export default {
     },
   },
   methods: {
-    notRight() {
+    notRight(callback) {
       // Don't record the result yet - people who don't give comments seem to have less good judgement.
       this.showComments = true
+      callback()
     },
-    async sendComments() {
+    async sendComments(callback) {
       // Record the result with comments.
       await this.microVolunteeringStore.respond({
         msgid: this.id,
@@ -114,15 +112,17 @@ export default {
         comments: this.comments,
         msgcategory: this.msgcategory,
       })
+      callback()
 
       this.$emit('next')
     },
-    async approve() {
+    async approve(callback) {
       // Approved -  that's it.
       await this.microVolunteeringStore.respond({
         msgid: this.id,
         response: 'Approve',
       })
+      callback()
 
       this.$emit('next')
     },

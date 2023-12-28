@@ -254,9 +254,6 @@ export default {
   },
 
   computed: {
-    faSearch() {
-      return faSearch
-    },
     wrapClass() {
       let border
 

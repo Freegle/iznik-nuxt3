@@ -49,17 +49,18 @@
           :skidding="-50"
         />
         <div v-if="find && !wip">
-          <b-button
+          <SpinButton
+            style="line-height: 1.7em"
             variant="secondary"
+            :flex="false"
+            button-title="Find my device's location instead of typing a postcode"
+            done-icon=""
+            :icon-name="
+              locationFailed ? 'exclamation-triangle' : 'map-marker-alt'
+            "
             :size="size"
-            title="Find my device's location instead of typing a postcode"
-            class="tweakHeight"
-            @click="findLoc"
-          >
-            <v-icon v-if="locating" icon="sync" class="fa-spin" />
-            <v-icon v-else-if="locationFailed" icon="exclamation-triangle" />
-            <v-icon v-else icon="map-marker-alt" />
-          </b-button>
+            @handle="findLoc"
+          />
         </div>
       </div>
     </div>
@@ -69,12 +70,14 @@
 import { uid } from '../composables/useId'
 import { useAuthStore } from '../stores/auth'
 import { useLocationStore } from '../stores/location'
+import SpinButton from './SpinButton'
 import { ref } from '#imports'
 import { useComposeStore } from '~/stores/compose'
 import AutoComplete from '~/components/AutoComplete'
 
 export default {
   components: {
+    SpinButton,
     AutoComplete,
   },
   props: {
@@ -154,7 +157,6 @@ export default {
   data() {
     return {
       results: [],
-      locating: false,
       locationFailed: false,
       showLocated: false,
     }
@@ -232,40 +234,46 @@ export default {
       } else {
         this.$emit('cleared')
       }
+      this.locationFailed = false
     },
-    findLoc() {
+    findLoc(callback) {
       try {
         if (
           navigator &&
           navigator.geolocation &&
           navigator.geolocation.getCurrentPosition
         ) {
-          this.locating = true
-          navigator.geolocation.getCurrentPosition(async (position) => {
-            const res = await this.locationStore.fetch({
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-            })
-
-            if (
-              res.ret === 0 &&
-              res.location &&
-              res.location.name &&
-              this.$refs.autocomplete
-            ) {
-              // Got it - put it in the autocomplete input, and indicate that we've selected it.
-              this.$refs.autocomplete.setValue(res.location.name)
-              this.select({
-                name: res.location.name,
+          navigator.geolocation.getCurrentPosition(
+            async (position) => {
+              const res = await this.locationStore.fetch({
+                lat: position.coords.latitude,
+                lng: position.coords.longitude,
               })
 
-              // Show the user we've done this, and make them think.
-              this.showLocated = true
-              setTimeout(() => (this.showLocated = false), 10000)
-            } else {
+              if (
+                res.ret === 0 &&
+                res.location &&
+                res.location.name &&
+                this.$refs.autocomplete
+              ) {
+                // Got it - put it in the autocomplete input, and indicate that we've selected it.
+                this.$refs.autocomplete.setValue(res.location.name)
+                await this.select({
+                  name: res.location.name,
+                })
+
+                // Show the user we've done this, and make them think.
+                this.showLocated = true
+                setTimeout(() => (this.showLocated = false), 10000)
+              } else {
+                this.locationFailed = true
+              }
+            },
+            (e) => {
+              console.error('Find location failed with', e)
               this.locationFailed = true
             }
-          })
+          )
         } else {
           console.log('Navigation not supported.  ')
           this.locationFailed = true
@@ -273,9 +281,9 @@ export default {
       } catch (e) {
         console.error('Find location failed with', e)
         this.locationFailed = true
+      } finally {
+        callback()
       }
-
-      this.locating = false
     },
   },
 }
@@ -292,9 +300,5 @@ export default {
 
 :deep(.popover) {
   background-color: black;
-}
-
-.tweakHeight {
-  line-height: 1.7em;
 }
 </style>

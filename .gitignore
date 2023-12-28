@@ -13,6 +13,7 @@ debug.log
 .idea
 .idea/sonarlint/issuestore/index.pb
 .idea/deployment.xml
+.idea/iznik-nuxt3.iml
 static/sw.js
 
 # OSx files

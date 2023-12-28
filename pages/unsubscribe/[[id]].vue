@@ -28,11 +28,10 @@
                   <SpinButton
                     v-if="groupid"
                     variant="primary"
-                    name="trash-alt"
+                    icon-name="trash-alt"
                     label="Leave this community"
                     class="mt-2"
-                    spinclass="text-white"
-                    @click="leave"
+                    @handle="leave"
                   />
                 </div>
               </div>
@@ -79,11 +78,10 @@
               </nuxt-link>
               <SpinButton
                 size="lg"
-                name="trash-alt"
+                icon-name="trash-alt"
                 variant="danger"
                 class="mb-2"
                 label="Leave Freegle completely"
-                spinclass="text-white"
                 @handle="emailConfirm"
               />
               <NoticeMessage
@@ -219,7 +217,7 @@ export default {
         this.showConfirmModal = true
       }
     },
-    async leave() {
+    async leave(callback) {
       if (this.groupid) {
         const groupName = this.myGroup(this.groupid).namedisplay
         await this.authStore.leaveGroup(this.myid, this.groupid)
@@ -227,6 +225,7 @@ export default {
       }
 
       this.groupid = 0
+      callback()
     },
     async forget() {
       const ret = await this.authStore.forget()
@@ -238,13 +237,14 @@ export default {
         useRouter().push('/unsubscribe/unsubscribed')
       }
     },
-    async emailConfirm() {
+    async emailConfirm(callback) {
       if (this.emailValid) {
         const ret = await this.authStore.unsubscribe(this.email.trim())
         this.emailProblem = !ret.worked
         this.unknown = ret.unknown
         this.emailSent = ret.worked
       }
+      callback()
     },
   },
 }

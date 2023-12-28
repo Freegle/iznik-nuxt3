@@ -1,39 +1,38 @@
 <template>
-  <div class="d-inline-block">
-    <b-button
-      :variant="variant"
-      :disabled="disabled"
-      :size="size"
-      :class="buttonClass"
-      @click="click"
-    >
-      <span v-if="iconlast">
-        {{ label }}
-      </span>
-      <span>
-        <span v-if="name">
-          <v-icon v-if="done" icon="check" :class="spinclass + ' fa-fw'" />
-          <v-icon
-            v-else-if="doing"
-            icon="sync"
-            :class="'fa-fw fa-spin ' + spinclass"
-          />
-          <v-icon v-else class="fa-fw" :icon="name" />&nbsp;
-        </span>
-        <span v-if="!iconlast" class="ml-1">
-          {{ label }}
-        </span>
-      </span>
-    </b-button>
-    <ConfirmModal
-      v-if="confirm && showConfirm"
-      @confirm="doIt"
-      @hidden="showConfirm = false"
+  <b-button
+    v-bind="$attrs"
+    :variant="variant"
+    :disabled="disabled"
+    :size="size"
+    :tabindex="tabindex"
+    :title="buttonTitle"
+    :class="[
+      flex && 'd-flex gap-1 align-items-center',
+      noBorder && 'no-border',
+      iconlast && 'flex-row-reverse',
+    ]"
+    @click="onClick"
+  >
+    <v-icon
+      v-if="doing"
+      icon="sync"
+      :class="['fa-spin fa-fw', spinColorClass]"
     />
-  </div>
+    <v-icon v-else-if="done && doneIcon" :icon="doneIcon" :class="iconClass" />
+    <v-icon v-else-if="iconName" :class="iconClass" :icon="iconName" />
+    <span v-if="label || $slots.default">
+      <slot>{{ label }}</slot>
+    </span>
+  </b-button>
+  <ConfirmModal
+    v-if="confirm && showConfirm"
+    @confirm="confirmed"
+    @hidden="onConfirmClosed"
+  />
 </template>
 <script setup>
-import { ref, defineAsyncComponent } from '#imports'
+import { ref, defineAsyncComponent, onBeforeUnmount } from '#imports'
+const { $sentryCaptureException } = useNuxtApp()
 
 const ConfirmModal = defineAsyncComponent(() => import('./ConfirmModal'))
 
@@ -42,83 +41,124 @@ const props = defineProps({
     type: String,
     required: true,
   },
-  name: {
+  iconName: {
     type: String,
     required: false,
     default: null,
   },
   label: {
     type: String,
-    required: true,
+    required: false,
+    default: '',
   },
   timeout: {
     type: Number,
     required: false,
     default: 5000,
   },
-  spinclass: {
+  spinColor: {
     type: String,
     required: false,
-    default: 'text-success',
+    default: '',
   },
-  disabled: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
+  disabled: Boolean,
   size: {
     type: String,
     required: false,
     default: null,
   },
-  iconlast: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
-  confirm: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
-  handlerData: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  buttonClass: {
+  iconlast: Boolean,
+  iconClass: {
     type: String,
-    required: false,
-    default: null,
+    default: 'fa-fw',
+  },
+  tabindex: {
+    type: Number,
+    default: 0,
+  },
+  doneIcon: {
+    type: String,
+    default: 'check',
+  },
+  buttonTitle: {
+    type: String,
+    default: '',
+  },
+  noBorder: Boolean,
+  confirm: Boolean,
+  flex: {
+    type: Boolean,
+    default: true,
   },
 })
 
 const emit = defineEmits(['handle'])
 
+const SPINNER_COLOR = {
+  primary: 'text-white',
+  secondary: 'text-black',
+  white: 'text-black',
+  link: 'text-success',
+  danger: 'text-white',
+}
+
 const doing = ref(false)
 const done = ref(false)
 const showConfirm = ref(false)
+const actionConfirmed = ref(false)
+let timer = null
 
-const click = () => {
-  if (props.confirm) {
-    showConfirm.value = true
-  } else {
-    doIt()
-  }
-}
+const spinColorClass =
+  props.spinColor || SPINNER_COLOR[props.variant] || 'text-success'
 
-const doIt = async () => {
-  if (!doing.value) {
-    done.value = false
-    doing.value = true
-
-    await emit('handle', props.handlerData)
-
-    doing.value = false
+const finishSpinner = () => {
+  clearTimeout(timer)
+  doing.value = false
+  if (props.doneIcon) {
     done.value = true
     setTimeout(() => {
       done.value = false
     }, props.timeout)
   }
 }
+
+const forgottenCallback = () => {
+  finishSpinner()
+  $sentryCaptureException('SpinButton - callback not called')
+}
+
+const onClick = () => {
+  if (!doing.value) {
+    if (props.confirm) {
+      showConfirm.value = true
+    } else {
+      done.value = false
+      doing.value = true
+      emit('handle', finishSpinner)
+      timer = setTimeout(forgottenCallback, 20 * 1000)
+    }
+  }
+}
+
+const confirmed = () => {
+  actionConfirmed.value = true
+  done.value = false
+  doing.value = true
+  emit('handle', finishSpinner)
+  timer = setTimeout(forgottenCallback, 20 * 1000)
+}
+
+const onConfirmClosed = () => {
+  showConfirm.value = false
+}
+
+onBeforeUnmount(() => clearTimeout(timer))
+
+defineExpose({ handle: onClick })
 </script>
+
+<style scoped lang="scss">
+.no-border {
+  border-color: transparent !important;
+}
+</style>
