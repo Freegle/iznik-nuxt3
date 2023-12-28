@@ -86,7 +86,7 @@
           />
         </div>
         <div v-else class="d-flex justify-content-end pt-2 pb-2">
-          <b-img :src="imagethumb" fluid />
+          <b-img :src="imagethumb" fluid class="maxheight" />
           <div>
             <b-button title="Remove photo" @click="removeImage">
               <v-icon icon="times-circle" scale="1.5" />
@@ -572,7 +572,6 @@ export default {
   },
 }
 </script>
-
 <style scoped lang="scss">
 .mobtext {
   text-align: center !important;
@@ -597,5 +596,9 @@ export default {
   background-color: $color-yellow-1 !important;
   color: black !important;
   border: 0;
+}
+
+.maxheight {
+  max-height: 33vh;
 }
 </style>
