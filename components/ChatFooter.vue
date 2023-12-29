@@ -233,6 +233,7 @@
       :selected-message="likelymsg ? likelymsg : 0"
       :users="otheruser ? [otheruser] : []"
       :selected-user="otheruser ? otheruser.id : null"
+      :maybe="showPromiseMaybe"
       @hide="fetchMessages"
       @hidden="showPromise = false"
     />
@@ -348,6 +349,7 @@ export default {
       showMicrovolunteering: false,
       showNotices: true,
       showPromise: false,
+      showPromiseMaybe: false,
       showProfileModal: false,
       showAddress: false,
       sendmessage: null,
@@ -456,9 +458,10 @@ export default {
       // processed callback below.
       this.uploading = true
     },
-    promise(date) {
+    promise(date, maybe) {
       // Show the modal first, as eye candy.
-      this.showPromise = true
+      this.showPromiseMaybe = !!maybe
+      this.showPromise = !maybe
 
       this.$nextTick(async () => {
         this.ouroffers = await fetchOurOffers()
@@ -468,15 +471,16 @@ export default {
         this.likelymsg = 0
 
         for (const msg of this.chatmessages) {
-          if (msg.refmsg) {
+          if (msg.type === 'Interested' && msg.refmsgid) {
             // Check that it's still in our list of messages
             for (const ours of this.ouroffers) {
               if (
-                ours.id === msg.refmsg.id &&
+                ours.id === msg.refmsgid &&
                 !ours.promised &&
                 (!ours.outcomes || ours.outcomes.length === 0)
               ) {
-                this.likelymsg = msg.refmsg.id
+                this.likelymsg = msg.refmsgid
+                this.showPromise = true
               }
             }
           }
@@ -544,6 +548,10 @@ export default {
     async sendAddress(id) {
       await this.chatStore.send(this.id, null, id)
       await this._updateAfterSend
+
+      // If we've sent an address to someone who has recently replied to an offer, then it's quite likely that we
+      // are promising the item to them.  Pop up a modified Promise modal to make it easy to do that.
+      this.promise(null, true)
     },
     photoProcessed(imageid, imagethumb, image) {
       // We have uploaded a photo.  Remove the filepond instance.

@@ -2,18 +2,32 @@
   <b-modal
     ref="modal"
     scrollable
-    title="Promise something to someone"
+    :title="
+      maybe ? 'Are you promising this to them?' : 'Promise something to someone'
+    "
     size="lg"
     no-stacking
     @shown="onShow"
   >
     <template #default>
-      <notice-message class="mb-3">
+      <notice-message v-if="!maybe" class="mb-3">
         This lets them know you're planning to give it to them, and helps you
         keep track. You can change your mind later if it doesn't work out, using
         the <em>Unpromise</em> button.
       </notice-message>
-      <p>You're promising:</p>
+      <notice-message v-else class="mb-3" variant="warning">
+        <p>
+          If you are, then please confirm that here. It helps the system keep
+          track and means we can send them reminders. You can change your mind
+          later if it doesn't work out, using the <em>Unpromise</em> button.
+        </p>
+        <p>
+          If you're not promising it to them, then please just press
+          <em>Cancel</em>.
+        </p>
+      </notice-message>
+      <p v-if="maybe">Are you promising:</p>
+      <p v-else>You're promising:</p>
       <b-form-select
         v-model="message"
         :options="messageOptions"
@@ -25,7 +39,7 @@
           id="who"
           v-model="currentlySelected"
           :options="userOptions"
-          class="mb-2 font-weight-bold"
+          class="mt-2 mb-2 font-weight-bold"
         />
       </div>
       <p class="mt-2">
@@ -134,6 +148,11 @@ export default {
       type: Number,
       required: false,
       default: 0,
+    },
+    maybe: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   setup() {
@@ -274,6 +293,9 @@ export default {
         }
       },
     },
+    selectedMessage(newVal) {
+      this.message = newVal
+    },
   },
   methods: {
     async promise() {
@@ -306,6 +328,13 @@ export default {
           }
         }
 
+        if (this.maybe) {
+          await this.$api.bandit.chosen({
+            uid: 'promise',
+            variant: 'AfterAddress',
+          })
+        }
+
         this.hide()
       }
     },
@@ -328,6 +357,13 @@ export default {
         // Explicit date -set it (overriding any in the tryst).
         this.$nextTick(() => {
           this.date = date.format('YYYY-MM-DD')
+        })
+      }
+
+      if (this.maybe) {
+        this.$api.bandit.shown({
+          uid: 'promise',
+          variant: 'AfterAddress',
         })
       }
     },

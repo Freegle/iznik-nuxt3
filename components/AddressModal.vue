@@ -170,7 +170,7 @@ export default {
       default: false,
     },
   },
-  emits: ['hidden'],
+  emits: ['hidden', 'chosen'],
   setup() {
     const addressStore = useAddressStore()
     const authStore = useAuthStore()
