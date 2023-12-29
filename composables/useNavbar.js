@@ -55,6 +55,7 @@ export function useNavbar() {
     const route = useRoute()
 
     return (
+      route &&
       route.path !== '/browse' &&
       route.path !== '/chitchat' &&
       route.path !== '/myposts' &&
