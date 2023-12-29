@@ -27,7 +27,7 @@
   </div>
 </template>
 <script setup>
-import { nextTick, defineProps } from 'vue'
+import { nextTick } from 'vue'
 import { useMiscStore } from '../stores/misc'
 import { ref, computed, onBeforeUnmount } from '#imports'
 

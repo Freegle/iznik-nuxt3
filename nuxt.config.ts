@@ -1,7 +1,3 @@
-import path from 'path-browserify'
-import { VitePWA } from 'vite-plugin-pwa'
-import eslintPlugin from 'vite-plugin-eslint'
-import legacy from '@vitejs/plugin-legacy'
 import config from './config'
 
 // @ts-ignore

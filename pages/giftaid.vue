@@ -386,7 +386,7 @@ export default {
   color: $color-green--darker;
 }
 
-:deep input[type='checkbox'] {
+:deep(input[type='checkbox']) {
   border: 2px solid $color-red;
   border-radius: 4px;
 }

@@ -820,9 +820,7 @@ $color-yahoo: #6b0094;
   text-decoration: none !important;
 }
 
-:deep {
-  .is-invalid label {
-    color: unset;
-  }
+:deep(.is-invalid label) {
+  color: unset;
 }
 </style>
