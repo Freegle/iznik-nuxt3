@@ -10,6 +10,8 @@
             label="Show posts from:"
             all
             all-my
+            custom-name="-- Nearby --"
+            :custom-val="-1"
           />
         </div>
         <div class="type">
@@ -112,6 +114,7 @@
 import { useMiscStore } from '../stores/misc'
 import { ref, watch } from '#imports'
 import { useIsochroneStore } from '~/stores/isochrone'
+import { useAuthStore } from '~/stores/auth'
 
 const props = defineProps({
   selectedGroup: {
@@ -216,8 +219,9 @@ watch(search, (newVal, oldVal) => {
   }
 })
 
-// Selected group
-const group = ref(0)
+// Selected group.  We have a special case for the 'nearby' group, which is -1.
+const browseView = useAuthStore().user?.settings?.browseView || 'nearby'
+const group = ref(browseView === 'nearby' ? -1 : 0)
 
 watch(
   () => props.selectedGroup,
@@ -226,8 +230,32 @@ watch(
   }
 )
 
-watch(group, (newVal) => {
-  emit('update:selectedGroup', newVal)
+watch(group, async (newVal) => {
+  const authStore = useAuthStore()
+  const settings = useAuthStore().user?.settings
+
+  if (newVal === -1) {
+    // Special case for nearby.
+    settings.browseView = 'nearby'
+
+    await authStore.saveAndGet({
+      settings,
+    })
+
+    emit('update:selectedGroup', 0)
+  } else if (newVal === 0) {
+    // Special case for all my groups.
+    const settings = useAuthStore().user?.settings
+    settings.browseView = 'mygroups'
+
+    await authStore.saveAndGet({
+      settings,
+    })
+
+    emit('update:selectedGroup', 0)
+  } else {
+    emit('update:selectedGroup', newVal)
+  }
 })
 
 // Selected type
