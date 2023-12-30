@@ -32,7 +32,6 @@
       :force-messages="forceMessages"
       :type="selectedType"
       :search="searchOn"
-      :search-on-groups="!mapMoved"
       :show-many="showMany"
       :groupid="selectedGroup"
       :region="region"
@@ -91,7 +90,10 @@
       </div>
       <div v-else>
         <h2 class="visually-hidden">Search Filters</h2>
-        <div variant="info" class="p-2 pb-0 border border-info bg-white filters">
+        <div
+          variant="info"
+          class="p-2 pb-0 border border-info bg-white filters"
+        >
           <GroupSelect
             v-if="me"
             v-model="selectedGroup"

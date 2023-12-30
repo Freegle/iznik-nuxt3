@@ -253,7 +253,9 @@ export default {
     selectedType(newVal) {
       this.incBump()
     },
-    isochrones(newVal) {
+    async isochrones(newVal) {
+      this.initialBounds = this.isochroneStore.bounds
+      await this.isochroneStore.fetchMessages(true)
       this.incBump()
     },
   },

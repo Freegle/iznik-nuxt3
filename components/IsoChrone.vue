@@ -23,6 +23,7 @@
             v-model="nickname"
             placeholder="Where is this?"
             max-length="20"
+            :state="nameState"
           />
         </div>
       </div>
@@ -257,6 +258,18 @@ export default {
       }
 
       return ret
+    },
+    nameState() {
+      if (this.id) {
+        return null
+      } else if (this.nickname) {
+        return true
+      } else if (!this.pcname) {
+        return null
+      } else {
+        // We're adding, we have a postcode but no name.
+        return false
+      }
     },
   },
   watch: {

@@ -19,7 +19,6 @@
       :force-messages="forceMessages"
       :type="selectedType"
       :search="search"
-      :search-on-groups="!mapMoved"
       :show-many="showMany"
       :groupid="selectedGroup"
       :region="region"

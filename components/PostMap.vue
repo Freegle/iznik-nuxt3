@@ -138,11 +138,6 @@ export default {
       required: false,
       default: null,
     },
-    searchOnGroups: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
     type: {
       type: String,
       required: false,
@@ -561,6 +556,8 @@ export default {
     },
     async getMessages() {
       let messages = []
+      this.secondaryMessageList = []
+
       this.$emit('update:loading', true)
 
       let bounds = new window.L.LatLngBounds(this.initialBounds)
@@ -580,75 +577,119 @@ export default {
       const swlng = bounds.getSouthWest().lng
       const nelat = bounds.getNorthEast().lat
       const nelng = bounds.getNorthEast().lng
-      let params = null
+      let ret = null
 
-      if (!this.search) {
-        if (this.showIsochrones && !this.moved) {
-          // The default view unless we've moved the map is the messages in the isochrones.
-          if (this.isochrones?.length) {
-            // We have some.
-            messages = await this.isochroneStore.fetchMessages()
-
-            // Fetch the messages in bounds too, so that we can show those as secondary.
-            this.messageStore
-              .fetchInBounds(swlat, swlng, nelat, nelng, this.groupid)
-              .then((res) => {
-                this.secondaryMessageList = res
-              })
-          } else {
-            // We don't, which will be because we don't have a location.  Use the bounding boxes of the groups we
-            // are in.
-            const groupbounds = this.myGroupsBoundingBox
-            messages = await this.messageStore.fetchInBounds(
-              groupbounds[0][0],
-              groupbounds[0][1],
-              groupbounds[1][0],
-              groupbounds[1][1],
-              this.groupid
-            )
-          }
+      if (this.moved) {
+        // The map has been moved.
+        if (this.search) {
+          // Search within the bounds of the map.
+          ret = await this.messageStore.search({
+            messagetype: this.type,
+            search: this.search,
+            swlat,
+            swlng,
+            nelat,
+            nelng,
+          })
         } else {
-          // Get the messages in the map view.
-          messages = await this.messageStore.fetchInBounds(
+          // Just fetch the bounds of the map.
+          ret = await this.messageStore.fetchInBounds(
+            swlat,
+            swlng,
+            nelat,
+            nelng
+          )
+        }
+      } else if (this.groupid) {
+        // We have been asked to show a specific group.
+        if (this.search) {
+          // So search within that group.
+          ret = await this.messageStore.search({
+            messagetype: this.type,
+            search: this.search,
+            groupids: [this.groupid],
+          })
+        } else {
+          // Just fetch that the messages within the map which are on that group.
+          ret = await this.messageStore.fetchInBounds(
             swlat,
             swlng,
             nelat,
             nelng,
             this.groupid
           )
+
+          if (!this.mapHidden) {
+            // Fetch all the messages in the map bounds too, so that we can show others as secondary.
+            // No need to bother if the map isn't showing - they don't appear in the post list.
+            this.messageStore
+              .fetchInBounds(swlat, swlng, nelat, nelng)
+              .then((res) => {
+                this.secondaryMessageList = res
+              })
+          }
         }
-      } else {
-        // We are searching.  Get the list of messages from the server.
+      } else if (this.showIsochrones) {
+        // We are trying to show posts nearby.
+        if (this.isochrones?.length) {
+          // We have isochrones.
+          if (this.search) {
+            // We don't have a search-within-isochones call.  But we can fetch all the messages in the isochrones,
+            // and also search within the map, and take the intersection.
+            const isoret = await this.isochroneStore.fetchMessages()
+            const searchret = await this.messageStore.search({
+              messagetype: this.type,
+              search: this.search,
+              swlat,
+              swlng,
+              nelat,
+              nelng,
+            })
 
-        const gids = this.groupid
-          ? [this.groupid]
-          : this.myGroups.map((g) => g.id)
+            ret = searchret.filter((i) => {
+              return isoret.includes(i)
+            })
 
-        if (this.searchOnGroups && gids.length) {
-          // Got some groups to search on.
-          params = {
-            messagetype: this.type,
-            search: this.search,
-            groupids: gids,
+            this.secondaryMessageList = searchret
+          } else {
+            // Fetch the messages in our isochrones.
+            ret = await this.isochroneStore.fetchMessages()
           }
         } else {
-          // Use the box.
-          params = {
-            messagetype: this.type,
-            search: this.search,
-            groupids: gids.join(','),
-            swlat,
-            swlng,
-            nelat,
-            nelng,
+          // We don't, which will be because we don't have a location.
+          if (this.myGroups?.length) {
+            // Use the bounding boxes of the groups we are in.
+            const groupbounds = this.myGroupsBoundingBox
+
+            if (this.search) {
+              ret = await this.messageStore.search({
+                messagetype: this.type,
+                search: this.search,
+                swlat: groupbounds[0][0],
+                swlng: groupbounds[0][1],
+                nelat: groupbounds[1][0],
+                nelng: groupbounds[1][1],
+              })
+            } else {
+              // Just fetch the messages within those bounds.    This will show a bit more than the strict
+              // "all my groups" option, but not as much as we might show using the map bounds.
+              ret = await this.messageStore.fetchInBounds(
+                groupbounds[0][0],
+                groupbounds[0][1],
+                groupbounds[1][0],
+                groupbounds[1][1],
+                this.groupid
+              )
+            }
+          } else {
+            // We have no isochrones and no groups.  Do nothing - we expect code elsewhere to prompt for a location.
+            ret = []
           }
         }
+      }
 
-        const ret = await this.messageStore.search(params)
-
-        if (ret && !this.destroyed) {
-          messages = ret
-        }
+      if (ret && !this.destroyed) {
+        messages = ret
       }
 
       if (messages?.length) {
