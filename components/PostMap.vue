@@ -455,6 +455,9 @@ export default {
     if (this.mapHidden) {
       // Say we're ready so the parent can crack on.
       this.$emit('update:ready', true)
+
+      // Fetch the messages.
+      this.getMessages()
     }
 
     await loadLeaflet()

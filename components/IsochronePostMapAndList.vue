@@ -18,13 +18,13 @@
       :post-zoom="10"
       :force-messages="forceMessages"
       :type="selectedType"
-      :search="searchOn"
+      :search="search"
       :search-on-groups="!mapMoved"
       :show-many="showMany"
       :groupid="selectedGroup"
       :region="region"
       :can-hide="canHide"
-      @searched="selectedGroup = 0"
+      @searched="searched"
       @messages="messagesChanged($event)"
       @groups="groupsChanged($event)"
     />
@@ -94,8 +94,8 @@
           <NoticeMessage variant="info">
             <v-icon icon="angle-double-down" class="pulsate" />
             Scroll down to see
-            <span v-if="searchOn"
-              >results for "<strong>{{ searchOn }}</strong
+            <span v-if="search"
+              >results for "<strong>{{ search }}</strong
               >"</span
             ><span v-else>the posts</span>.
             <v-icon icon="angle-double-down" class="pulsate" />
@@ -131,12 +131,16 @@ import { MAX_MAP_ZOOM } from '~/constants'
 import { useIsochroneStore } from '~/stores/isochrone'
 
 import JoinWithConfirm from '~/components/JoinWithConfirm'
+import MessageList from '~/components/MessageList'
 const AdaptiveMapGroup = () => import('./AdaptiveMapGroup')
 const ExternalLink = () => import('./ExternalLink')
 const NoticeMessage = () => import('./NoticeMessage')
+const GiveAsk = () => import('./GiveAsk')
 
 export default {
   components: {
+    GiveAsk,
+    MessageList,
     JoinWithConfirm,
     NoticeMessage,
     ExternalLink,
@@ -175,16 +179,6 @@ export default {
       required: false,
       default: false,
     },
-    filterGroup: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    groupInfo: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
     jobs: {
       type: Boolean,
       required: false,
@@ -210,10 +204,20 @@ export default {
       required: false,
       default: false,
     },
-    initialSearch: {
+    search: {
       type: String,
       required: false,
       default: null,
+    },
+    selectedType: {
+      type: String,
+      required: false,
+      default: 'All',
+    },
+    selectedGroup: {
+      type: Number,
+      required: false,
+      default: 0,
     },
   },
   setup(props) {
@@ -223,24 +227,18 @@ export default {
     const authStore = useAuthStore()
     const isochroneStore = useIsochroneStore()
 
-    // We might have a preference for which type of posts we view.
-    const selectedType = miscStore.get('postType') ?? 'All'
-
     return {
       miscStore,
       groupStore,
       messageStore,
       authStore,
       isochroneStore,
-      selectedType: ref(selectedType),
       showGroups: ref(props.startOnGroups),
       groupids: ref(props.initialGroupIds),
       swlat: ref(props.initialBounds[0][0]),
       swlng: ref(props.initialBounds[0][1]),
       nelat: props.initialBounds[1][0],
       nelng: props.initialBounds[1][1],
-      search: ref(props.initialSearch),
-      searchOn: props.initialSearch,
     }
   },
   data() {
@@ -263,7 +261,6 @@ export default {
 
       infiniteId: +new Date(),
 
-      selectedGroup: null,
       context: null,
       noneFound: false,
     }
@@ -448,38 +445,10 @@ export default {
     },
   },
   watch: {
-    async selectedGroup(newVal) {
-      if (newVal) {
-        this.groupStore.fetch(newVal)
-      }
-      await this.messageStore.clear()
-
-      if (newVal) {
-        await this.groupStore.fetch(newVal)
-        await this.groupStore.fetchMessagesForGroup(newVal)
-      } else {
-        await this.isochroneStore.fetch()
-      }
-
-      this.infiniteId++
-    },
-    selectedType(newVal) {
-      this.miscStore.set({
-        key: 'postType',
-        value: newVal,
-      })
-
-      this.infiniteId++
-    },
-    search(newval) {
-      if (!newval) {
-        // We've cleared the search box, so cancel the search and return the map to normal.
-        this.searchOn = null
-        this.messagesOnMap = []
-        this.infiniteId++
-      }
-    },
     messagesForList() {
+      this.infiniteId++
+    },
+    filteredMessages() {
       this.infiniteId++
     },
     isochroneBounds() {
@@ -512,16 +481,6 @@ export default {
     },
     groupsChanged(groupids) {
       this.groupids = groupids
-    },
-    doSearch() {
-      if (this.search) {
-        if (this.searchOn !== this.search) {
-          // Set some values which will cause the post map to search.
-          this.messagesOnMap = []
-          this.searchOn = this.search
-          this.infiniteId++
-        }
-      }
     },
     mapVisibilityChanged(visible) {
       this.mapVisible = visible
@@ -561,6 +520,10 @@ export default {
           }
         }
       }
+    },
+    searched() {
+      // When we've searched on a place, we want to reset the selected group otherwise we won't show anything.
+      this.$emit('updated:selectedGroup', 0)
     },
   },
 }

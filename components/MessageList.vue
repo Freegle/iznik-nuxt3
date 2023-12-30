@@ -312,6 +312,7 @@ export default {
       this.filteredMessagesToShow.forEach((m) => {
         // Filter out dups by subject (for crossposting).
         const message = this.filteredMessagesInStore[m.id]
+
         if (!message) {
           // We haven't yet fetched it, so we don't yet know if it's a dup.  We return it, which will fetch it, and
           // then we'll come back through here.

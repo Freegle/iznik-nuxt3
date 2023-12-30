@@ -7,16 +7,13 @@
           <GroupSelect
             v-if="me"
             v-model="group"
-            label="Communities to view"
-            label-sr-only
+            label="Show posts from:"
             all
-            :all-my="false"
+            all-my
           />
         </div>
         <div class="type">
-          <label for="typeOptions" class="visually-hidden"
-            >Type of posts to view</label
-          >
+          <label for="typeOptions">Show these posts:</label>
           <b-form-select
             id="typeOptions"
             v-model="type"
@@ -35,17 +32,6 @@
         </div>
       </div>
       <div class="isochrones">
-        <p>
-          The <em>Nearby posts</em> slider controls how far away from your
-          postcode to show posts. Click the <em>Near</em> and
-          <em>Far</em> buttons, or drag the slider, to change it. You can set
-          your postcode in
-          <nuxt-link no-prefetch to="/settings">Settings</nuxt-link>. You can
-          <nuxt-link to="#" @click="showAddIsochrone = true"
-            >add a location</nuxt-link
-          >
-          to show posts near another postcode.
-        </p>
         <IsoChrone
           v-for="(isochrone, ix) in isochroneList"
           :id="isochrone.id"
@@ -54,11 +40,22 @@
           :last="ix === isochroneList.length - 1"
           @add="showAddIsochrone = true"
         />
-        <IsoChrone
-          v-if="showAddIsochrone"
-          @added="showAddIsochrone = false"
-          @cancel="showAddIsochrone = false"
-        />
+        <IsoChrone v-if="showAddIsochrone" @added="added" @cancel="cancel" />
+        <p class="mt-2">
+          You'll see posts from near your postcode - see the area shaded on the
+          map below. The slider above controls how far away to include. Click
+          the <em>Near</em> and <em>Far</em> buttons, or drag the slider, to
+          change it.
+        </p>
+        <p>
+          You can set your postcode in
+          <nuxt-link no-prefetch to="/settings">Settings</nuxt-link>, and you
+          can
+          <nuxt-link to="#" @click="showAddIsochrone = true"
+            >add a location</nuxt-link
+          >
+          to show posts near another postcode (e.g. work as well as home).
+        </p>
       </div>
       <hr />
       <div class="d-flex justify-content-around mt-2">
@@ -104,7 +101,7 @@
       >
         <div class="d-flex">
           <div class="d-none d-md-block">Map & Filters</div>
-          <v-icon icon="sliders" class="ml-md-1 align-self-center" />
+          <v-icon icon="sliders" class="ms-md-2 align-self-center" />
           <v-icon icon="map" class="ms-1 align-self-center" />
         </div>
       </b-button>
@@ -131,7 +128,11 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['search'])
+const emit = defineEmits([
+  'update:search',
+  'update:selectedGroup',
+  'update:selectedType',
+])
 
 const breakpoint = computed(() => {
   const miscStore = useMiscStore()
@@ -191,14 +192,29 @@ const isochroneList = computed(() => {
   return store.list
 })
 
+function added() {
+  showAddIsochrone.value = false
+}
+
+function cancel() {
+  showAddIsochrone.value = false
+}
+
 // Search
 const search = ref('')
 
 function doSearch() {
   if (search.value) {
-    emit('search', search.value)
+    emit('update:search', search.value)
   }
 }
+
+watch(search, (newVal, oldVal) => {
+  if (!newVal && oldVal) {
+    // Search box cleared - trigger search.
+    emit('update:search', '')
+  }
+})
 
 // Selected group
 const group = ref(0)
@@ -210,11 +226,15 @@ watch(
   }
 )
 
+watch(group, (newVal) => {
+  emit('update:selectedGroup', newVal)
+})
+
 // Selected type
 const typeOptions = [
   {
     value: 'All',
-    text: '-- All posts --',
+    text: '-- OFFERs & WANTEDs --',
     selected: true,
   },
   {
@@ -235,6 +255,10 @@ watch(
     type.value = newVal
   }
 )
+
+watch(type, (newVal) => {
+  emit('update:selectedType', newVal)
+})
 </script>
 <style scoped lang="scss">
 @import 'assets/css/_color-vars.scss';

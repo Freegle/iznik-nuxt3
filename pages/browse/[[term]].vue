@@ -64,15 +64,18 @@
                 <PostCode @selected="savePostcode" />
               </NoticeMessage>
               <PostFilters
-                v-model:show="showFilters"
+                v-model:forceShowFilters="forceShowFilters"
                 v-model:selectedGroup="selectedGroup"
                 v-model:selectedType="selectedType"
+                v-model:search="searchTerm"
               />
               <IsochronePostMapAndList
                 :key="'map-' + bump"
                 v-model:messagesOnMapCount="messagesOnMapCount"
+                v-model:search="searchTerm"
+                v-model:selectedGroup="selectedGroup"
+                v-model:selectedType="selectedType"
                 :initial-bounds="initialBounds"
-                :initial-search="searchTerm"
                 force-messages
                 group-info
                 :show-many="false"
@@ -117,14 +120,12 @@ import { useMiscStore } from '~/stores/misc'
 import { useAuthStore } from '~/stores/auth'
 import { useGroupStore } from '~/stores/group'
 import { useIsochroneStore } from '~/stores/isochrone'
-import GiveAsk from '~/components/GiveAsk'
 import PostFilters from '~/components/PostFilters'
 
 const MicroVolunteering = () => import('~/components/MicroVolunteering.vue')
 
 export default {
   components: {
-    GiveAsk,
     PostFilters,
     AdaptiveMap: defineAsyncComponent(() => import('~/components/AdaptiveMap')),
     IsochronePostMapAndList: defineAsyncComponent(() =>
@@ -169,7 +170,7 @@ export default {
     const groupStore = useGroupStore()
     const isochroneStore = useIsochroneStore()
 
-    const searchTerm = route.params.term
+    const searchTerm = ref(route.params.term)
 
     // We want this to be our next home page.
     const existingHomepage = miscStore.get('lasthomepage')
@@ -239,6 +240,21 @@ export default {
         // Make sure the filters are showing.
         this.forceShowFilters = true
       }
+    },
+    // When the isochrones or filters change, just re-render the whole map and list.  This is a bit heavy handed, but
+    // the code to handle the various changes is complex and not worth writting - most people will just take the
+    // default and scroll down.
+    searchTerm(newVal) {
+      this.incBump()
+    },
+    selectedGroup(newVal) {
+      this.incBump()
+    },
+    selectedType(newVal) {
+      this.incBump()
+    },
+    isochrones(newVal) {
+      this.incBump()
     },
   },
   async mounted() {
@@ -393,6 +409,20 @@ export default {
 
         // Now get an isochrone at this location.
         await this.isochroneStore.fetch()
+      }
+    },
+    incBump() {
+      this.bump++
+
+      if (process.client) {
+        // Make sure we don't scroll down to a previously seen message.
+        try {
+          const state = window.history.state
+          state.scrollToMessage = null
+          window.history.replaceState(state, '')
+        } catch (e) {
+          console.log('Exception storing message visible', e)
+        }
       }
     },
   },

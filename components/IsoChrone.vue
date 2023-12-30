@@ -36,10 +36,8 @@
               <span class="text-faded">({{ location?.name }})</span>
             </div>
             <div v-else>
-              Nearby posts:
-              <span v-if="myLocation?.name" class="text-faded">
-                (from {{ myLocation.name }})</span
-              >
+              <span v-if="myLocation"> Posts near {{ myLocation }}: </span>
+              <span v-else> Nearby posts: </span>
             </div>
           </div>
           <div v-else>Nearby posts:</div>
@@ -263,7 +261,6 @@ export default {
   },
   watch: {
     minutes(newVal) {
-      console.log('watch', newVal)
       this.changeMinutes(newVal)
     },
   },
