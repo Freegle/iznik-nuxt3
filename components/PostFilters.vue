@@ -1,0 +1,302 @@
+<template>
+  <div :class="{ 'mb-2': !showFilters }">
+    <h2 class="visually-hidden">Post Filters</h2>
+    <b-collapse v-model="showFilters" class="p-2 bg-primary-subtle">
+      <div variant="info" class="filters mb-2">
+        <div class="group">
+          <GroupSelect
+            v-if="me"
+            v-model="group"
+            label="Communities to view"
+            label-sr-only
+            all
+            :all-my="false"
+          />
+        </div>
+        <div class="type">
+          <label for="typeOptions" class="visually-hidden"
+            >Type of posts to view</label
+          >
+          <b-form-select
+            id="typeOptions"
+            v-model="type"
+            :options="typeOptions"
+          />
+        </div>
+        <div class="close d-flex justify-content-end">
+          <b-button
+            variant="white"
+            title="Hide map and post filters"
+            class="noborder close"
+            @click="showFilters = false"
+          >
+            <v-icon icon="times" />
+          </b-button>
+        </div>
+      </div>
+      <div class="isochrones">
+        <p>
+          The <em>Nearby posts</em> slider controls how far away from your
+          postcode to show posts. Click the <em>Near</em> and
+          <em>Far</em> buttons, or drag the slider, to change it. You can set
+          your postcode in
+          <nuxt-link no-prefetch to="/settings">Settings</nuxt-link>. You can
+          <nuxt-link to="#" @click="showAddIsochrone = true"
+            >add a location</nuxt-link
+          >
+          to show posts near another postcode.
+        </p>
+        <IsoChrone
+          v-for="(isochrone, ix) in isochroneList"
+          :id="isochrone.id"
+          :key="'isochrone-' + isochrone.id"
+          :add-button="ix === 0"
+          :last="ix === isochroneList.length - 1"
+          @add="showAddIsochrone = true"
+        />
+        <IsoChrone
+          v-if="showAddIsochrone"
+          @added="showAddIsochrone = false"
+          @cancel="showAddIsochrone = false"
+        />
+      </div>
+      <hr />
+      <div class="d-flex justify-content-around mt-2">
+        <b-input-group class="shrink">
+          <b-form-input
+            v-model="search"
+            type="text"
+            placeholder="Search posts"
+            autocomplete="off"
+            class="flex-shrink-1"
+            size="lg"
+            @keyup.enter.exact="doSearch"
+          />
+          <b-input-group-append>
+            <b-button variant="secondary" title="Search" @click="doSearch">
+              <v-icon icon="search" />
+            </b-button>
+          </b-input-group-append>
+        </b-input-group>
+      </div>
+    </b-collapse>
+    <div v-if="!showFilters" class="d-flex justify-content-between">
+      <b-input-group class="shrink">
+        <b-form-input
+          v-model="search"
+          type="text"
+          placeholder="Search posts"
+          autocomplete="off"
+          class="flex-shrink-1"
+          size="lg"
+          @keyup.enter.exact="doSearch"
+        />
+        <b-input-group-append>
+          <b-button variant="secondary" title="Search" @click="doSearch">
+            <v-icon icon="search" />
+          </b-button>
+        </b-input-group-append>
+      </b-input-group>
+      <b-button
+        variant="white"
+        title="Show map and post filters"
+        @click="showFilters = true"
+      >
+        <div class="d-flex">
+          <div class="d-none d-md-block">Map & Filters</div>
+          <v-icon icon="sliders" class="ml-md-1 align-self-center" />
+          <v-icon icon="map" class="ms-1 align-self-center" />
+        </div>
+      </b-button>
+    </div>
+  </div>
+</template>
+<script setup>
+import { useMiscStore } from '../stores/misc'
+import { ref, watch } from '#imports'
+import { useIsochroneStore } from '~/stores/isochrone'
+
+const props = defineProps({
+  selectedGroup: {
+    type: Number,
+    default: 0,
+  },
+  selectedType: {
+    type: String,
+    default: 'All',
+  },
+  forceShowFilters: {
+    type: Boolean,
+    default: false,
+  },
+})
+
+const emit = defineEmits(['search'])
+
+const breakpoint = computed(() => {
+  const miscStore = useMiscStore()
+  return miscStore.breakpoint
+})
+
+const showFilters = ref(true)
+
+watch(
+  breakpoint,
+  (newVal) => {
+    if (newVal === 'xs' || newVal === 'sm') {
+      // Hide filters on mobile.
+      showFilters.value = false
+    } else {
+      showFilters.value = true
+    }
+  },
+  {
+    immediate: true,
+  }
+)
+
+watch(
+  () => props.forceShowFilters,
+  (newVal) => {
+    showFilters.value = newVal
+  },
+  {
+    immediate: true,
+  }
+)
+
+watch(
+  showFilters,
+  (newVal) => {
+    const miscStore = useMiscStore()
+
+    // If we're showing the filters, we want to show the map.  Otherwise we don't.
+    // It's a smell that the map is not in this component, but the restructuring to make that happen is quite
+    // large
+    miscStore.set({
+      key: 'hidepostmap',
+      value: !newVal,
+    })
+  },
+  {
+    immediate: true,
+  }
+)
+
+// Isochrones
+const showAddIsochrone = ref(false)
+
+const isochroneList = computed(() => {
+  const store = useIsochroneStore()
+  return store.list
+})
+
+// Search
+const search = ref('')
+
+function doSearch() {
+  if (search.value) {
+    emit('search', search.value)
+  }
+}
+
+// Selected group
+const group = ref(0)
+
+watch(
+  () => props.selectedGroup,
+  (newVal) => {
+    group.value = newVal
+  }
+)
+
+// Selected type
+const typeOptions = [
+  {
+    value: 'All',
+    text: '-- All posts --',
+    selected: true,
+  },
+  {
+    value: 'Offer',
+    text: 'Just OFFERs',
+  },
+  {
+    value: 'Wanted',
+    text: 'Just WANTEDs',
+  },
+]
+
+const type = ref('All')
+
+watch(
+  () => props.selectedType,
+  (newVal) => {
+    type.value = newVal
+  }
+)
+</script>
+<style scoped lang="scss">
+@import 'assets/css/_color-vars.scss';
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
+
+.shrink {
+  width: unset;
+}
+
+.noborder {
+  border: none !important;
+  border-color: $color-white !important;
+}
+
+.filters {
+  display: grid;
+
+  grid-template-columns: 1fr 3rem;
+  grid-template-rows: 1fr 1fr min-content;
+  grid-column-gap: 10px;
+  grid-row-gap: 10px;
+
+  @include media-breakpoint-up(md) {
+    grid-template-columns: 2fr 1fr 3rem;
+    grid-template-rows: 1fr min-content;
+  }
+
+  .group {
+    grid-column: 1 / 2;
+    grid-row: 1 / 2;
+  }
+
+  .type {
+    grid-column: 1 / 2;
+    grid-row: 2 / 3;
+
+    @include media-breakpoint-up(md) {
+      grid-column: 2 / 3;
+      grid-row: 1 / 2;
+    }
+  }
+
+  .close {
+    grid-column: 2 / 3;
+    grid-row: 1 / 2;
+    background-color: transparent !important;
+
+    @include media-breakpoint-up(md) {
+      grid-column: 3 / 4;
+    }
+  }
+
+  .isochrones {
+    grid-column: 1 / 3;
+    grid-row: 3 / 4;
+
+    @include media-breakpoint-up(md) {
+      grid-column: 1 / 4;
+      grid-row: 2 / 3;
+    }
+  }
+}
+</style>

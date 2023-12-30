@@ -30,7 +30,10 @@
     />
     <div v-observe-visibility="mapVisibilityChanged" />
     <div class="rest">
-      <div v-if="closestGroups?.length" class="mb-1 border p-2 bg-white">
+      <div
+        v-if="closestGroups?.length && !mapHidden"
+        class="mb-1 border p-2 bg-white"
+      >
         <h2 class="visually-hidden">Nearby commmunities</h2>
         <div class="d-flex flex-wrap justify-content-center">
           <div v-for="g in closestGroups" :key="'group-' + g.id">
@@ -77,48 +80,6 @@
         </p>
       </div>
       <div v-else>
-        <h2 class="visually-hidden">Search Filters</h2>
-        <div variant="info" class="p-2 pb-0 border border-info bg-white filters">
-          <GroupSelect
-            v-if="me"
-            v-model="selectedGroup"
-            label="Communities to view"
-            label-sr-only
-            all
-            :all-my="false"
-          />
-          <div v-if="me" />
-          <div>
-            <label for="typeOptions" class="visually-hidden"
-              >Type of posts to view</label
-            >
-            <b-form-select
-              id="typeOptions"
-              v-model="selectedType"
-              :options="typeOptions"
-              class="shrink"
-            />
-          </div>
-          <div v-if="!me" />
-          <div v-if="!me" />
-          <div />
-          <div role="search" class="search">
-            <b-input-group class="shrink mt-1 mt-sm-0">
-              <b-form-input
-                v-model="search"
-                type="text"
-                placeholder="Search posts"
-                autocomplete="off"
-                @keyup.enter.exact="doSearch"
-              />
-              <b-input-group-append>
-                <b-button variant="secondary" title="Search" @click="doSearch">
-                  <v-icon icon="search" />
-                </b-button>
-              </b-input-group-append>
-            </b-input-group>
-          </div>
-        </div>
         <NoticeMessage v-if="noneFound">
           <p>
             Sorry, we didn't find anything. Things come and go quickly, though,
@@ -172,14 +133,12 @@ import { useIsochroneStore } from '~/stores/isochrone'
 import JoinWithConfirm from '~/components/JoinWithConfirm'
 const AdaptiveMapGroup = () => import('./AdaptiveMapGroup')
 const ExternalLink = () => import('./ExternalLink')
-const GroupSelect = () => import('./GroupSelect')
 const NoticeMessage = () => import('./NoticeMessage')
 
 export default {
   components: {
     JoinWithConfirm,
     NoticeMessage,
-    GroupSelect,
     ExternalLink,
     AdaptiveMapGroup,
     PostMap: defineAsyncComponent(() => import('~/components/PostMap')),
@@ -304,22 +263,6 @@ export default {
 
       infiniteId: +new Date(),
 
-      // Filters
-      typeOptions: [
-        {
-          value: 'All',
-          text: 'All posts',
-          selected: true,
-        },
-        {
-          value: 'Offer',
-          text: 'Just OFFERs',
-        },
-        {
-          value: 'Wanted',
-          text: 'Just WANTEDs',
-        },
-      ],
       selectedGroup: null,
       context: null,
       noneFound: false,
@@ -329,6 +272,9 @@ export default {
     ...mapState(useIsochroneStore, { isochroneBounds: 'bounds' }),
     mapHeight() {
       return calculateMapHeight(this.heightFraction)
+    },
+    mapHidden() {
+      return this.miscStore?.get('hidepostmap')
     },
     messagesOnMap: {
       get() {
@@ -638,24 +584,6 @@ export default {
 
 .shrink {
   width: unset;
-}
-
-.filters {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr 2fr;
-  grid-template-rows: 1fr 0px;
-
-  @include media-breakpoint-down(sm) {
-    grid-template-columns: 2fr 10px 1fr 0px;
-    grid-template-rows: 1fr 1fr;
-  }
-
-  .search {
-    @include media-breakpoint-down(sm) {
-      grid-row: 2 / 3;
-      grid-column: 1 / 6;
-    }
-  }
 }
 
 .dense {

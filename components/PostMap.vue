@@ -1,9 +1,6 @@
 <template>
   <div v-if="initialBounds">
-    <div v-if="mapHidden" class="d-flex justify-content-end">
-      <b-button variant="link" @click="showMap"> Show map of posts </b-button>
-    </div>
-    <div v-else>
+    <div v-if="!mapHidden">
       <div
         ref="mapcont"
         :style="'height: ' + mapHeight + 'px'"
@@ -25,18 +22,6 @@
             @moveend="idle"
             @dragend="dragEnd"
           >
-            <div
-              class="leaflet-top leaflet-right d-flex flex-column justify-content-center"
-            >
-              <b-button
-                v-if="canHide"
-                variant="link"
-                class="pauto black p-1"
-                @click="hideMap"
-              >
-                <v-icon icon="times-circle" title="Hide map" />
-              </b-button>
-            </div>
             <l-tile-layer :url="osmtile" :attribution="attribution" />
             <div v-if="showMessages">
               <ClusterMarker
@@ -735,18 +720,6 @@ export default {
       if (this.me.lat || this.me.lng) {
         this.mapObject.flyTo(new this.L.LatLng(this.me.lat, this.me.lng))
       }
-    },
-    hideMap() {
-      this.miscStore.set({
-        key: 'hidepostmap',
-        value: true,
-      })
-    },
-    showMap() {
-      this.miscStore.set({
-        key: 'hidepostmap',
-        value: false,
-      })
     },
     toJSON(bounds) {
       return [

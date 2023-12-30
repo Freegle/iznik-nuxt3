@@ -104,7 +104,7 @@ export default {
     },
     routePath() {
       const route = useRoute()
-      return route.path
+      return route?.path
     },
     allowAd() {
       // We don't want to show the ad on the landing page when logged out - looks tacky.

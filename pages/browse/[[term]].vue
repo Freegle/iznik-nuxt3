@@ -52,49 +52,29 @@
               />
             </div>
             <div v-else>
-              <div class="mb-1 border p-2 bg-white">
-                <NoticeMessage
-                  v-if="!messagesOnMapCount && !me?.settings?.mylocation"
-                  variant="warning"
-                >
-                  There are no posts in this area at the moment. You can check
-                  back later, or use the controls below:
-                  <ul>
-                    <li>
-                      The <em>Travel time</em> slider lets you see posts from
-                      further away.
-                    </li>
-                    <li>
-                      <!-- eslint-disable-next-line-->
-                      You can change your location in <nuxt-link  no-prefetch to="/settings">Settings</nuxt-link>.
-                    </li>
-                    <li>
-                      The <em>Add location</em> link lets you show posts from
-                      another postcode.
-                    </li>
-                  </ul>
-                </NoticeMessage>
-                <NoticeMessage v-if="!isochrones.length" variant="warning">
-                  <p class="font-weight-bold">
-                    What's your postcode? We'll show you posts nearby.
-                  </p>
-                  <PostCode @selected="savePostcode" />
-                </NoticeMessage>
-                <IsoChrones />
-                <div class="small mt-1">
-                  <!-- eslint-disable-next-line-->
-                  Show all posts from <b-button variant="link" size="sm" class="mb-1 p-0" @click="showPostsFromMyGroups">my communities</b-button> instead.
-                </div>
-              </div>
+              <JobsTopBar class="d-none d-md-block" />
+              <NoticeMessage v-if="noMessagesNoLocation" variant="warning">
+                There are no posts in this area at the moment. You can check
+                back later, or use the controls below.
+              </NoticeMessage>
+              <NoticeMessage v-if="!isochrones.length" variant="warning">
+                <p class="font-weight-bold">
+                  What's your postcode? We'll show you posts nearby.
+                </p>
+                <PostCode @selected="savePostcode" />
+              </NoticeMessage>
+              <PostFilters
+                v-model:show="showFilters"
+                v-model:selectedGroup="selectedGroup"
+                v-model:selectedType="selectedType"
+              />
               <IsochronePostMapAndList
                 :key="'map-' + bump"
                 v-model:messagesOnMapCount="messagesOnMapCount"
                 :initial-bounds="initialBounds"
                 :initial-search="searchTerm"
-                class="mt-2"
                 force-messages
                 group-info
-                jobs
                 :show-many="false"
                 can-hide
               />
@@ -138,12 +118,14 @@ import { useAuthStore } from '~/stores/auth'
 import { useGroupStore } from '~/stores/group'
 import { useIsochroneStore } from '~/stores/isochrone'
 import GiveAsk from '~/components/GiveAsk'
+import PostFilters from '~/components/PostFilters'
 
 const MicroVolunteering = () => import('~/components/MicroVolunteering.vue')
 
 export default {
   components: {
     GiveAsk,
+    PostFilters,
     AdaptiveMap: defineAsyncComponent(() => import('~/components/AdaptiveMap')),
     IsochronePostMapAndList: defineAsyncComponent(() =>
       import('~/components/IsochronePostMapAndList')
@@ -223,9 +205,15 @@ export default {
       showAboutMeModal: false,
       reviewAboutMe: false,
       messagesOnMapCount: 0,
+      selectedGroup: 0,
+      selectedType: 'All',
+      forceShowFilters: false,
     }
   },
   computed: {
+    noMessagesNoLocation() {
+      return !this.messagesOnMapCount && !this.me?.settings?.mylocation
+    },
     browseView() {
       return this?.me?.settings?.browseView
         ? this.me.settings.browseView
@@ -245,6 +233,12 @@ export default {
           this.bump++
         }
       },
+    },
+    noMessagesNoLocation(newVal) {
+      if (newVal) {
+        // Make sure the filters are showing.
+        this.forceShowFilters = true
+      }
     },
   },
   async mounted() {
@@ -383,14 +377,6 @@ export default {
     async showPostsFromNearby() {
       const settings = this.me.settings
       settings.browseView = 'nearby'
-
-      await this.authStore.saveAndGet({
-        settings,
-      })
-    },
-    async showPostsFromMyGroups() {
-      const settings = this.me.settings
-      settings.browseView = 'mygroups'
 
       await this.authStore.saveAndGet({
         settings,

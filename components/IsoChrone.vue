@@ -36,13 +36,13 @@
               <span class="text-faded">({{ location?.name }})</span>
             </div>
             <div v-else>
-              Travel time:
+              Nearby posts:
               <span v-if="myLocation?.name" class="text-faded">
                 (from {{ myLocation.name }})</span
               >
             </div>
           </div>
-          <div v-else>Travel time:</div>
+          <div v-else>Nearby posts:</div>
           <div class="d-flex flex-column justify-content-around">
             <b-button
               v-if="addButton"
