@@ -131,7 +131,7 @@ import { useIsochroneStore } from '~/stores/isochrone'
 
 import JoinWithConfirm from '~/components/JoinWithConfirm'
 import MessageList from '~/components/MessageList'
-const AdaptiveMapGroup = () => import('./AdaptiveMapGroup')
+const AdaptiveMapGroup = () => import('./MapGroup')
 const ExternalLink = () => import('./ExternalLink')
 const NoticeMessage = () => import('./NoticeMessage')
 const GiveAsk = () => import('./GiveAsk')

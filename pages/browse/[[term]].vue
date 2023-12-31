@@ -48,7 +48,7 @@
               v-model:selectedType="selectedType"
               v-model:search="searchTerm"
             />
-            <IsochronePostMapAndList
+            <PostMapAndList
               :key="'map-' + bump"
               v-model:messagesOnMapCount="messagesOnMapCount"
               v-model:search="searchTerm"
@@ -105,8 +105,8 @@ const MicroVolunteering = () => import('~/components/MicroVolunteering.vue')
 export default {
   components: {
     PostFilters,
-    IsochronePostMapAndList: defineAsyncComponent(() =>
-      import('~/components/IsochronePostMapAndList')
+    PostMapAndList: defineAsyncComponent(() =>
+      import('~/components/PostMapAndList')
     ),
     GlobalWarning: defineAsyncComponent(() =>
       import('~/components/GlobalWarning')

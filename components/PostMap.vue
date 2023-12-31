@@ -705,7 +705,31 @@ export default {
             }
           } else {
             // We have no isochrones and no groups.  Do nothing - we expect code elsewhere to prompt for a location.
-            ret = []
+            if (this.search) {
+              // Search within the bounds of the map.
+              console.log(
+                'GetMessages - no isochrones, no groups, search within map bounds'
+              )
+              ret = await this.messageStore.search({
+                messagetype: this.type,
+                search: this.search,
+                swlat,
+                swlng,
+                nelat,
+                nelng,
+              })
+            } else {
+              // Just fetch the bounds of the map.
+              console.log(
+                'GetMessages - no isochrones, no groups, fetch within map bounds'
+              )
+              ret = await this.messageStore.fetchInBounds(
+                swlat,
+                swlng,
+                nelat,
+                nelng
+              )
+            }
           }
         }
       } else if (this.myGroups?.length) {

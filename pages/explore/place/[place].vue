@@ -6,7 +6,7 @@
         <b-col cols="12" lg="6" class="p-0">
           <div v-if="place">
             <h1 class="visually-hidden">Freegling map near {{ place.name }}</h1>
-            <AdaptiveMap
+            <PostMapAndList
               v-if="initialBounds"
               :initial-bounds="initialBounds"
               class="mt-2"
@@ -33,7 +33,9 @@ import { useGroupStore } from '~/stores/group'
 export default {
   components: {
     SupportLink,
-    AdaptiveMap: defineAsyncComponent(() => import('~/components/AdaptiveMap')),
+    PostMapAndList: defineAsyncComponent(() =>
+      import('~/components/PostMapAndList')
+    ),
   },
   async setup() {
     const runtimeConfig = useRuntimeConfig()

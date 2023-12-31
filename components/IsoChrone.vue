@@ -30,7 +30,7 @@
     </div>
     <template v-if="isochrone">
       <div class="layout">
-        <label class="font-weight-bold sliderLabel">
+        <label class="font-weight-bold sliderLabel mb-1">
           <div v-if="id">
             <div v-if="isochrone.nickname">
               {{ isochrone.nickname }}:

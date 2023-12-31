@@ -11,7 +11,7 @@
       <b-row v-else class="m-0">
         <b-col cols="12" lg="6" class="p-0" offset-lg="3">
           <ExploreGroup v-if="group?.id" :id="group.id" />
-          <AdaptiveMap
+          <PostMapAndList
             v-else
             class="mt-2"
             show-start-message
@@ -28,11 +28,9 @@
 </template>
 <script setup>
 import { useRoute } from 'vue-router'
-import { defineAsyncComponent } from 'vue'
 import { buildHead } from '../../composables/useBuildHead'
+import PostMapAndList from '../../components/PostMapAndList'
 import { useGroupStore } from '~/stores/group'
-
-defineAsyncComponent(() => import('~/components/AdaptiveMap'))
 
 const runtimeConfig = useRuntimeConfig()
 const groupStore = useGroupStore()
