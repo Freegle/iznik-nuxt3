@@ -20,8 +20,6 @@
           :id="deDuplicatedMessages[0].id"
           :matchedon="deDuplicatedMessages[0].matchedon"
           record-view
-          :scroll-into-view="scrollToMessage === deDuplicatedMessages[0].id"
-          @visible="messageVisible"
         />
       </div>
       <VisibleWhen
@@ -189,20 +187,6 @@ export default {
     }
 
     const toShow = ref(MIN_TO_SHOW)
-    let scrollToMessage = null
-
-    if (process.client) {
-      scrollToMessage = ref(window?.history?.state?.scrollToMessage)
-      if (scrollToMessage.value) {
-        const ix = props.messagesForList.findIndex(
-          (message) => message.id === scrollToMessage
-        )
-
-        if (ix > 0) {
-          toShow.value = ix + 1
-        }
-      }
-    }
 
     return {
       infiniteId: ref(props.bump),
@@ -211,7 +195,6 @@ export default {
       messageStore,
       miscStore,
       toShow,
-      scrollToMessage,
     }
   },
   data() {
@@ -343,7 +326,7 @@ export default {
       return ret
     },
     noneFound() {
-      return !this.loading && !this.messagesForList?.length
+      return !this.loading && !this.deDuplicatedMessages?.length
     },
   },
   watch: {
@@ -379,8 +362,11 @@ export default {
       // visible.
       this.scrollToMessage = null
     },
-    noneFound(newVal) {
-      this.$emit('update:none', newVal)
+    noneFound: {
+      handler(newVal, oldVal) {
+        this.$emit('update:none', newVal)
+      },
+      immediate: true,
     },
   },
   methods: {
@@ -426,19 +412,6 @@ export default {
         }
       } else {
         this.$emit('update:visible', visible)
-      }
-    },
-    messageVisible(id) {
-      if (process.client) {
-        // We want to store the last visible message as a parameter in the history, so that if we come back to a
-        // page containing it, we will scroll to it.
-        try {
-          const state = window.history.state
-          state.scrollToMessage = id
-          window.history.replaceState(state, '')
-        } catch (e) {
-          console.log('Exception storing message visible', e)
-        }
       }
     },
   },

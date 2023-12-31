@@ -415,17 +415,6 @@ export default {
     },
     incBump() {
       this.bump++
-
-      if (process.client) {
-        // Make sure we don't scroll down to a previously seen message.
-        try {
-          const state = window.history.state
-          state.scrollToMessage = null
-          window.history.replaceState(state, '')
-        } catch (e) {
-          console.log('Exception storing message visible', e)
-        }
-      }
     },
   },
 }

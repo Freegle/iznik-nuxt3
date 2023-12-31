@@ -103,12 +103,12 @@
         <h2 class="visually-hidden">List of wanteds and offers</h2>
         <MessageList
           v-if="updatedMessagesOnMap || messagesOnMap.length"
+          :key="'messagelist-' + infiniteId"
           v-model:visible="postsVisible"
           v-model:none="noneFound"
           :selected-group="selectedGroup"
           :selected-type="selectedType"
           :messages-for-list="filteredMessages"
-          :bump="infiniteId"
           :loading="loading"
           :jobs="jobs"
         />
@@ -444,13 +444,7 @@ export default {
     },
   },
   watch: {
-    messagesForList() {
-      this.infiniteId++
-    },
     filteredMessages() {
-      this.infiniteId++
-    },
-    isochroneBounds() {
       this.infiniteId++
     },
   },
@@ -492,33 +486,6 @@ export default {
         // Make the item filter also work to filter out the successful posts.
         (this.selectedType === 'All' || !m.successful)
       )
-    },
-    messageVisible(isVisible, entry) {
-      if (isVisible && entry && entry.target.id) {
-        const tid = entry.target.id
-        const p = tid.indexOf('-')
-
-        if (p !== -1) {
-          const id = parseInt(tid.substring(p + 1))
-          const ix = this.messagesForListIds.indexOf(id)
-
-          if (id && (!this.maxMessageVisible || ix > this.maxMessageVisible)) {
-            this.maxMessageVisible = ix
-
-            try {
-              history.replaceState(
-                {
-                  msgid: id,
-                },
-                null
-              )
-            } catch (e) {
-              // Some browsers throw exceptions if this is called too frequently.
-              console.log('Ignore replaceState exception', e)
-            }
-          }
-        }
-      }
     },
     searched() {
       // When we've searched on a place, we want to reset the selected group otherwise we won't show anything.

@@ -646,8 +646,15 @@ export default {
               nelng,
             })
 
+            const ids = {}
+
             ret = searchret.filter((i) => {
-              return isoret.includes(i)
+              if (isoret.find((el) => el.id === i.id) && !ids[i.id]) {
+                ids[i.id] = true
+                return true
+              } else {
+                return false
+              }
             })
 
             this.secondaryMessageList = searchret
