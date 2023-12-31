@@ -33,7 +33,7 @@
           </b-button>
         </div>
       </div>
-      <div class="isochrones">
+      <div v-if="browseView === 'nearby'" class="isochrones">
         <IsoChrone
           v-for="(isochrone, ix) in isochroneList"
           :id="isochrone.id"
