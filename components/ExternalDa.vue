@@ -62,6 +62,7 @@ const breakpoint = computed(() => {
 })
 
 const uniqueid = ref(props.adUnitPath)
+let blocked = false
 
 const p = new Promise((resolve, reject) => {
   try {
@@ -78,7 +79,8 @@ const p = new Promise((resolve, reject) => {
       s.onload = () => resolve()
       s.onerror = () => {
         console.log('Google ad script blocked')
-        reject(new Error('Google ad script blocked'))
+        blocked = true
+        resolve()
       }
       document.head.appendChild(s)
     }
@@ -114,67 +116,69 @@ let shownFirst = false
 const emit = defineEmits(['rendered'])
 
 async function visibilityChanged(visible) {
-  try {
-    if (visible && !shownFirst) {
-      isVisible.value = visible
-      shownFirst = true
+  if (!blocked) {
+    try {
+      if (visible && !shownFirst) {
+        isVisible.value = visible
+        shownFirst = true
 
-      await nextTick()
+        await nextTick()
 
-      window.googletag = window.googletag || { cmd: [] }
-      window.googletag.cmd.push(function () {
-        const dims = [props.dimensions]
+        window.googletag = window.googletag || { cmd: [] }
+        window.googletag.cmd.push(function () {
+          const dims = [props.dimensions]
 
-        if (props.pixel) {
-          dims.push([1, 1])
-        }
+          if (props.pixel) {
+            dims.push([1, 1])
+          }
 
-        window.googletag.pubads().collapseEmptyDivs()
-        slot = window.googletag
-          .defineSlot(uniqueid.value, dims, props.divId)
-          .addService(window.googletag.pubads())
+          window.googletag.pubads().collapseEmptyDivs()
+          slot = window.googletag
+            .defineSlot(uniqueid.value, dims, props.divId)
+            .addService(window.googletag.pubads())
 
-        window.googletag
-          .pubads()
-          .addEventListener('slotRenderEnded', (event) => {
-            if (event?.slot === slot && event?.isEmpty) {
-              adShown.value = false
-            }
-            emit('rendered', adShown.value)
+          window.googletag
+            .pubads()
+            .addEventListener('slotRenderEnded', (event) => {
+              if (event?.slot === slot && event?.isEmpty) {
+                adShown.value = false
+              }
+              emit('rendered', adShown.value)
 
-            // We refresh the ad slot.  This increases views.  Google doesn't like it if this is more frequent than
-            // every 30s.
-            if (!timer.value) {
-              timer.value = setTimeout(() => {
-                if (
-                  window.googletag?.pubads &&
-                  typeof window.googletag?.pubads === 'function' &&
-                  typeof window.googletag?.pubads().refresh === 'function'
-                ) {
-                  window.googletag.pubads().refresh([slot])
-                }
-              }, 45000)
-            }
-          })
-          .addEventListener('slotVisibilityChanged', (event) => {
-            if (event.inViewPercentage < 51) {
-              console.log(
-                `Visibility of slot ${event.slot.getSlotElementId()} changed. New visibility: ${
-                  event.inViewPercentage
-                }%.Viewport size: ${window.innerWidth}x${window.innerHeight}`
-              )
-            }
-          })
+              // We refresh the ad slot.  This increases views.  Google doesn't like it if this is more frequent than
+              // every 30s.
+              if (!timer.value) {
+                timer.value = setTimeout(() => {
+                  if (
+                    window.googletag?.pubads &&
+                    typeof window.googletag?.pubads === 'function' &&
+                    typeof window.googletag?.pubads().refresh === 'function'
+                  ) {
+                    window.googletag.pubads().refresh([slot])
+                  }
+                }, 45000)
+              }
+            })
+            .addEventListener('slotVisibilityChanged', (event) => {
+              if (event.inViewPercentage < 51) {
+                console.log(
+                  `Visibility of slot ${event.slot.getSlotElementId()} changed. New visibility: ${
+                    event.inViewPercentage
+                  }%.Viewport size: ${window.innerWidth}x${window.innerHeight}`
+                )
+              }
+            })
 
-        window.googletag.enableServices()
-      })
+          window.googletag.enableServices()
+        })
 
-      window.googletag.cmd.push(function () {
-        window.googletag.display(props.divId)
-      })
+        window.googletag.cmd.push(function () {
+          window.googletag.display(props.divId)
+        })
+      }
+    } catch (e) {
+      console.log('Exception in visibilityChanged', e)
     }
-  } catch (e) {
-    console.log('Exception in visibilityChanged', e)
   }
 }
 </script>
