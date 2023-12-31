@@ -583,6 +583,7 @@ export default {
         // The map has been moved.
         if (this.search) {
           // Search within the bounds of the map.
+          console.log('GetMessages - moved, search within map bounds')
           ret = await this.messageStore.search({
             messagetype: this.type,
             search: this.search,
@@ -593,6 +594,7 @@ export default {
           })
         } else {
           // Just fetch the bounds of the map.
+          console.log('GetMessages - moved, fetch within map bounds')
           ret = await this.messageStore.fetchInBounds(
             swlat,
             swlng,
@@ -604,6 +606,7 @@ export default {
         // We have been asked to show a specific group.
         if (this.search) {
           // So search within that group.
+          console.log('GetMessages - search on specific group')
           ret = await this.messageStore.search({
             messagetype: this.type,
             search: this.search,
@@ -611,6 +614,7 @@ export default {
           })
         } else {
           // Just fetch that the messages within the map which are on that group.
+          console.log('GetMessages - fetch on specific group')
           ret = await this.messageStore.fetchInBounds(
             swlat,
             swlng,
@@ -636,6 +640,7 @@ export default {
           if (this.search) {
             // We don't have a search-within-isochones call.  But we can fetch all the messages in the isochrones,
             // and also search within the map, and take the intersection.
+            console.log('GetMessages - search in isochrones')
             const isoret = await this.isochroneStore.fetchMessages()
             const searchret = await this.messageStore.search({
               messagetype: this.type,
@@ -660,7 +665,15 @@ export default {
             this.secondaryMessageList = searchret
           } else {
             // Fetch the messages in our isochrones.
+            console.log('GetMessages - fetch in isochrones')
             ret = await this.isochroneStore.fetchMessages()
+
+            // Fetch the messages in bounds too, so that we can show those as secondary.
+            this.messageStore
+              .fetchInBounds(swlat, swlng, nelat, nelng)
+              .then((res) => {
+                this.secondaryMessageList = res
+              })
           }
         } else {
           // We don't, which will be because we don't have a location.
@@ -669,6 +682,7 @@ export default {
             const groupbounds = this.myGroupsBoundingBox
 
             if (this.search) {
+              console.log('GetMessages - search within group bounds')
               ret = await this.messageStore.search({
                 messagetype: this.type,
                 search: this.search,
@@ -680,6 +694,7 @@ export default {
             } else {
               // Just fetch the messages within those bounds.    This will show a bit more than the strict
               // "all my groups" option, but not as much as we might show using the map bounds.
+              console.log('GetMessages - fetch in group bounds')
               ret = await this.messageStore.fetchInBounds(
                 groupbounds[0][0],
                 groupbounds[0][1],
@@ -693,6 +708,14 @@ export default {
             ret = []
           }
         }
+      } else if (this.myGroups?.length) {
+        // We have groups, so fetch the messages in those groups.
+        ret = await this.messageStore.fetchMyGroups()
+        console.log('GetMessages - some groups, fetch groups')
+      } else {
+        // We have no groups, so fetch the messages in the map bounds.
+        console.log('GetMessages - no groups, fetch in map bounds')
+        ret = await this.messageStore.fetchInBounds(swlat, swlng, nelat, nelng)
       }
 
       if (ret && !this.destroyed) {

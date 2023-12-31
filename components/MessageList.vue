@@ -58,8 +58,6 @@
               :id="message.id"
               :matchedon="message.matchedon"
               record-view
-              :scroll-into-view="scrollToMessage === message.id"
-              @visible="messageVisible"
             />
           </VisibleWhen>
           <VisibleWhen :not="['xs', 'sm', 'md', 'lg']">
@@ -67,10 +65,8 @@
               :id="message.id"
               :matchedon="message.matchedon"
               record-view
-              :scroll-into-view="scrollToMessage === message.id"
               ad-unit-path="/22794232631/freegle_product"
               ad-id="div-gpt-ad-1691925699378-0"
-              @visible="messageVisible"
             />
           </VisibleWhen>
         </div>
@@ -202,8 +198,6 @@ export default {
       // Infinite message scroll
       distance: 2000,
       prefetched: 0,
-      maxMessageVisible: 0,
-      ensuredMessageVisible: false,
       emitted: false,
     }
   },
@@ -356,11 +350,6 @@ export default {
         }
       },
       immediate: true,
-    },
-    isochroneBounds(newVal) {
-      // If we're changing the isochrone view we don't want to then scroll down to a message which becomes
-      // visible.
-      this.scrollToMessage = null
     },
     noneFound: {
       handler(newVal, oldVal) {

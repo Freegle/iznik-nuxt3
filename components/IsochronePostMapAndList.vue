@@ -10,7 +10,7 @@
       v-model:zoom="zoom"
       v-model:centre="centre"
       v-model:loading="loading"
-      show-isochrones
+      :show-isochrones="browseView === 'nearby'"
       :initial-bounds="initialBounds"
       :height-fraction="heightFraction"
       :min-zoom="minZoom"
@@ -271,6 +271,11 @@ export default {
     },
     mapHidden() {
       return this.miscStore?.get('hidepostmap')
+    },
+    browseView() {
+      return this?.me?.settings?.browseView
+        ? this.me.settings.browseView
+        : 'nearby'
     },
     messagesOnMap: {
       get() {

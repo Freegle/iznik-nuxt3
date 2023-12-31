@@ -31,57 +31,35 @@
             />
           </div>
           <div v-if="initialBounds">
-            <div v-if="browseView === 'mygroups'" class="bg-white mt-2">
-              <div class="small d-flex justify-content-end">
-                <div>
-                  <!-- eslint-disable-next-line-->
-                  Show posts from <b-button variant="link" class="mb-1 p-0" size="sm" @click="showPostsFromNearby">nearby instead</b-button>.
-                </div>
-              </div>
-              <AdaptiveMap
-                :key="'map-' + bump"
-                :initial-bounds="initialBounds"
-                :initial-search="searchTerm"
-                class="mt-2"
-                force-messages
-                group-info
-                jobs
-                :show-many="false"
-                can-hide
-                track
-              />
-            </div>
-            <div v-else>
-              <JobsTopBar class="d-none d-md-block" />
-              <NoticeMessage v-if="noMessagesNoLocation" variant="warning">
-                There are no posts in this area at the moment. You can check
-                back later, or use the controls below.
-              </NoticeMessage>
-              <NoticeMessage v-if="!isochrones.length" variant="warning">
-                <p class="font-weight-bold">
-                  What's your postcode? We'll show you posts nearby.
-                </p>
-                <PostCode @selected="savePostcode" />
-              </NoticeMessage>
-              <PostFilters
-                v-model:forceShowFilters="forceShowFilters"
-                v-model:selectedGroup="selectedGroup"
-                v-model:selectedType="selectedType"
-                v-model:search="searchTerm"
-              />
-              <IsochronePostMapAndList
-                :key="'map-' + bump"
-                v-model:messagesOnMapCount="messagesOnMapCount"
-                v-model:search="searchTerm"
-                v-model:selectedGroup="selectedGroup"
-                v-model:selectedType="selectedType"
-                :initial-bounds="initialBounds"
-                force-messages
-                group-info
-                :show-many="false"
-                can-hide
-              />
-            </div>
+            <JobsTopBar class="d-none d-md-block" />
+            <NoticeMessage v-if="noMessagesNoLocation" variant="warning">
+              There are no posts in this area at the moment. You can check back
+              later, or use the controls below.
+            </NoticeMessage>
+            <NoticeMessage v-if="!isochrones.length" variant="warning">
+              <p class="font-weight-bold">
+                What's your postcode? We'll show you posts nearby.
+              </p>
+              <PostCode @selected="savePostcode" />
+            </NoticeMessage>
+            <PostFilters
+              v-model:forceShowFilters="forceShowFilters"
+              v-model:selectedGroup="selectedGroup"
+              v-model:selectedType="selectedType"
+              v-model:search="searchTerm"
+            />
+            <IsochronePostMapAndList
+              :key="'map-' + bump"
+              v-model:messagesOnMapCount="messagesOnMapCount"
+              v-model:search="searchTerm"
+              v-model:selectedGroup="selectedGroup"
+              v-model:selectedType="selectedType"
+              :initial-bounds="initialBounds"
+              force-messages
+              group-info
+              :show-many="false"
+              can-hide
+            />
           </div>
           <about-me-modal
             v-if="showAboutMeModal"
@@ -127,7 +105,6 @@ const MicroVolunteering = () => import('~/components/MicroVolunteering.vue')
 export default {
   components: {
     PostFilters,
-    AdaptiveMap: defineAsyncComponent(() => import('~/components/AdaptiveMap')),
     IsochronePostMapAndList: defineAsyncComponent(() =>
       import('~/components/IsochronePostMapAndList')
     ),
@@ -212,13 +189,13 @@ export default {
     }
   },
   computed: {
-    noMessagesNoLocation() {
-      return !this.messagesOnMapCount && !this.me?.settings?.mylocation
-    },
     browseView() {
       return this?.me?.settings?.browseView
         ? this.me.settings.browseView
         : 'nearby'
+    },
+    noMessagesNoLocation() {
+      return !this.messagesOnMapCount && !this.me?.settings?.mylocation
     },
     isochrones() {
       return this.isochroneStore?.list
@@ -230,7 +207,7 @@ export default {
       async handler(newVal, oldVal) {
         if (newVal && !oldVal && process.client) {
           await loadLeaflet()
-          this.calculateInitialMapBounds(!this.searchTerm)
+          this.calculateInitialMapBounds()
           this.bump++
         }
       },
@@ -247,10 +224,39 @@ export default {
     searchTerm(newVal) {
       this.incBump()
     },
-    selectedGroup(newVal) {
+    async selectedGroup(newVal) {
+      if (newVal > 0) {
+        // We want to show the group's map.
+        const g = this.myGroup(newVal)
+
+        if (g?.bbox) {
+          await loadLeaflet()
+          const wkt = new window.Wkt.Wkt()
+          wkt.read(g.bbox)
+          const obj = wkt.toObject()
+
+          if (obj?.getBounds) {
+            const bounds = obj.getBounds()
+            const swlat = bounds.getSouthWest().lat
+            const swlng = bounds.getSouthWest().lng
+            const nelat = bounds.getNorthEast().lat
+            const nelng = bounds.getNorthEast().lng
+
+            this.initialBounds = [
+              [swlat, swlng],
+              [nelat, nelng],
+            ]
+          }
+        }
+      }
+
       this.incBump()
     },
     selectedType(newVal) {
+      this.incBump()
+    },
+    browseView(newVal) {
+      this.calculateInitialMapBounds()
       this.incBump()
     },
     async isochrones(newVal) {
@@ -301,14 +307,14 @@ export default {
     }
   },
   methods: {
-    async calculateInitialMapBounds(fetchIsochrones) {
+    async calculateInitialMapBounds() {
       if (process.client) {
         // The initial bounds for the map are determined from the isochrones if possible.  We might have them cached
         // in store.
         const promises = []
         promises.push(this.isochroneStore.fetch())
 
-        if (fetchIsochrones) {
+        if (this.me) {
           // By default we'll be showing the isochrone view in PostMap, so start the fetch of the messages now.  That
           // way we can display the list rapidly.  Fetching this and the isochrones in parallel reduces latency.
           promises.push(this.isochroneStore.fetchMessages(true))
@@ -391,14 +397,6 @@ export default {
           }
         }
       }
-    },
-    async showPostsFromNearby() {
-      const settings = this.me.settings
-      settings.browseView = 'nearby'
-
-      await this.authStore.saveAndGet({
-        settings,
-      })
     },
     async savePostcode(pc) {
       const settings = this.me.settings
