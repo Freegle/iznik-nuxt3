@@ -8307,6 +8307,97 @@ index bbf34b7..60ba247 100644
      });
  
      return { root };
+diff --git a/node_modules/@vue-leaflet/vue-leaflet/src/components/LMap.vue b/node_modules/@vue-leaflet/vue-leaflet/src/components/LMap.vue
+index 15de45d..eb4a90b 100644
+--- a/node_modules/@vue-leaflet/vue-leaflet/src/components/LMap.vue
++++ b/node_modules/@vue-leaflet/vue-leaflet/src/components/LMap.vue
+@@ -190,22 +190,27 @@ export default {
+ 
+     const eventHandlers = {
+       moveEndHandler() {
+-        /**
+-         * Triggers when zoom is updated
+-         * @type {number,string}
+-         */
+-        context.emit("update:zoom", blueprint.leafletRef.getZoom());
+-        /**
+-         * Triggers when center is updated
+-         * @type {object,array}
+-         */
+-        context.emit("update:center", blueprint.leafletRef.getCenter());
++        try {
++          /**
++           * Triggers when zoom is updated
++           * @type {number,string}
++           */
++          context.emit("update:zoom", blueprint.leafletRef.getZoom());
++          /**
++           * Triggers when center is updated
++           * @type {object,array}
++           */
++          context.emit("update:center", blueprint.leafletRef.getCenter());
+ 
+-        /**
+-         * Triggers when bounds are updated
+-         * @type {object}
+-         */
+-        context.emit("update:bounds", blueprint.leafletRef.getBounds());
++          /**
++           * Triggers when bounds are updated
++           * @type {object}
++           */
++          context.emit("update:bounds", blueprint.leafletRef.getBounds());
++        } catch (e) {
++          // This happens if the Vue component has been removed from the DOM - ignore.
++          console.log('Ignore leaflet error', e)
++        }
+       },
+       overlayAddHandler(e) {
+         const layer = blueprint.layersInControl.find((l) => l.name === e.name);
+@@ -375,23 +380,28 @@ export default {
+       updateLeafletWrapper(registerControl, methods.registerControl);
+       updateLeafletWrapper(registerLayerControl, methods.registerLayerControl);
+ 
+-      blueprint.leafletRef = map(root.value, options);
++      try {
++        blueprint.leafletRef = map(root.value, options);
+ 
+-      propsBinder(methods, blueprint.leafletRef, props);
+-      const listeners = remapEvents(context.attrs);
++        propsBinder(methods, blueprint.leafletRef, props);
++        const listeners = remapEvents(context.attrs);
+ 
+-      blueprint.leafletRef.on(
+-        "moveend",
+-        debounce(eventHandlers.moveEndHandler, 100)
+-      );
+-      blueprint.leafletRef.on("overlayadd", eventHandlers.overlayAddHandler);
+-      blueprint.leafletRef.on(
+-        "overlayremove",
+-        eventHandlers.overlayRemoveHandler
+-      );
+-      DomEvent.on(blueprint.leafletRef, listeners);
+-      blueprint.ready = true;
+-      nextTick(() => context.emit("ready", blueprint.leafletRef));
++        blueprint.leafletRef.on(
++            "moveend",
++            debounce(eventHandlers.moveEndHandler, 100)
++        );
++        blueprint.leafletRef.on("overlayadd", eventHandlers.overlayAddHandler);
++        blueprint.leafletRef.on(
++            "overlayremove",
++            eventHandlers.overlayRemoveHandler
++        );
++        DomEvent.on(blueprint.leafletRef, listeners);
++        blueprint.ready = true;
++        nextTick(() => context.emit("ready", blueprint.leafletRef));
++      } catch (e) {
++        // This happens if the Vue component has been removed from the DOM - ignore.
++        console.log('Ignore leaflet error', e)
++      }
+     });
+ 
+     onBeforeUnmount(() => {
 diff --git a/node_modules/@vue-leaflet/vue-leaflet/src/components/LMarker.vue b/node_modules/@vue-leaflet/vue-leaflet/src/components/LMarker.vue
 index b5fdbc7..ae8c69c 100644
 --- a/node_modules/@vue-leaflet/vue-leaflet/src/components/LMarker.vue

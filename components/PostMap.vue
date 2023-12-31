@@ -378,7 +378,12 @@ export default {
     isochroneBounds(newVal) {
       if (newVal && this.mapObject) {
         // Make the map show the isochrone view.
-        this.mapObject.flyToBounds(newVal)
+        try {
+          this.mapObject.flyToBounds(newVal)
+        } catch (e) {
+          // This happens when leaflet is destroyed.
+          console.log('Ignore flyToBounds exception', e)
+        }
       }
       this.getMessages()
     },
@@ -466,64 +471,72 @@ export default {
 
       this.$emit('update:ready', true)
       this.mapObject = this.$refs.map.leafletObject
-      this.$refs.map.leafletObject.fitBounds(this.initialBounds)
 
       if (process.client && this.mapObject) {
-        const runtimeConfig = useRuntimeConfig()
+        try {
+          this.mapObject.fitBounds(this.initialBounds)
+          const runtimeConfig = useRuntimeConfig()
 
-        const { Geocoder } = await import(
-          'leaflet-control-geocoder/src/control'
-        )
-        const { Photon } = await import(
-          'leaflet-control-geocoder/src/geocoders/photon'
-        )
+          const { Geocoder } = await import(
+            'leaflet-control-geocoder/src/control'
+          )
+          const { Photon } = await import(
+            'leaflet-control-geocoder/src/geocoders/photon'
+          )
 
-        new Geocoder({
-          placeholder: 'Search for a place...',
-          defaultMarkGeocode: false,
-          geocoder: new Photon({
-            geocodingQueryParams: {
-              bbox: '-7.57216793459, 49.959999905, 1.68153079591, 58.6350001085',
-            },
-            nameProperties: [
-              'name',
-              'street',
-              'suburb',
-              'hamlet',
-              'town',
-              'city',
-            ],
-            serviceUrl: runtimeConfig.public.GEOCODE,
-          }),
-          collapsed: false,
-        })
-          .on('markgeocode', async function (e) {
-            if (e && e.geocode && e.geocode.bbox) {
-              // Empty out the query box so that the dropdown closes.  Note that "this" is the control object,
-              // which is why this isn't in a separate method.
-              console.log('Selected', e)
-              this.setQuery('')
-
-              // If we don't find anything at this location we will want to zoom out.
-              self.shownMany = false
-
-              // For some reason we need to take a copy of the latlng bounds in the event before passing it to
-              // flyToBounds.
-              const flyTo = e.geocode.bbox
-              const L = await import('leaflet/dist/leaflet-src.esm')
-              const newBounds = new L.LatLngBounds(
-                new L.LatLng(
-                  flyTo.getSouthWest().lat,
-                  flyTo.getSouthWest().lng
-                ),
-                new L.LatLng(flyTo.getNorthEast().lat, flyTo.getNorthEast().lng)
-              )
-              // Move the map to the location we've found.
-              self.$refs.map.leafletObject.flyToBounds(newBounds)
-              self.$emit('searched')
-            }
+          new Geocoder({
+            placeholder: 'Search for a place...',
+            defaultMarkGeocode: false,
+            geocoder: new Photon({
+              geocodingQueryParams: {
+                bbox: '-7.57216793459, 49.959999905, 1.68153079591, 58.6350001085',
+              },
+              nameProperties: [
+                'name',
+                'street',
+                'suburb',
+                'hamlet',
+                'town',
+                'city',
+              ],
+              serviceUrl: runtimeConfig.public.GEOCODE,
+            }),
+            collapsed: false,
           })
-          .addTo(this.mapObject)
+            .on('markgeocode', async function (e) {
+              if (e && e.geocode && e.geocode.bbox) {
+                // Empty out the query box so that the dropdown closes.  Note that "this" is the control object,
+                // which is why this isn't in a separate method.
+                console.log('Selected', e)
+                this.setQuery('')
+
+                // If we don't find anything at this location we will want to zoom out.
+                self.shownMany = false
+
+                // For some reason we need to take a copy of the latlng bounds in the event before passing it to
+                // flyToBounds.
+                const flyTo = e.geocode.bbox
+                const L = await import('leaflet/dist/leaflet-src.esm')
+                const newBounds = new L.LatLngBounds(
+                  new L.LatLng(
+                    flyTo.getSouthWest().lat,
+                    flyTo.getSouthWest().lng
+                  ),
+                  new L.LatLng(
+                    flyTo.getNorthEast().lat,
+                    flyTo.getNorthEast().lng
+                  )
+                )
+                // Move the map to the location we've found.
+                self.$refs.map.leafletObject.flyToBounds(newBounds)
+                self.$emit('searched')
+              }
+            })
+            .addTo(this.mapObject)
+        } catch (e) {
+          // This is usually caused by leaflet.
+          console.log('Ignore leaflet exception', e)
+        }
       }
     },
     clusterClick() {
@@ -626,11 +639,12 @@ export default {
           if (!this.mapHidden) {
             // Fetch all the messages in the map bounds too, so that we can show others as secondary.
             // No need to bother if the map isn't showing - they don't appear in the post list.
-            this.messageStore
-              .fetchInBounds(swlat, swlng, nelat, nelng)
-              .then((res) => {
-                this.secondaryMessageList = res
-              })
+            this.secondaryMessageList = await this.messageStore.fetchInBounds(
+              swlat,
+              swlng,
+              nelat,
+              nelng
+            )
           }
         }
       } else if (this.showIsochrones) {
@@ -669,11 +683,12 @@ export default {
             ret = await this.isochroneStore.fetchMessages()
 
             // Fetch the messages in bounds too, so that we can show those as secondary.
-            this.messageStore
-              .fetchInBounds(swlat, swlng, nelat, nelng)
-              .then((res) => {
-                this.secondaryMessageList = res
-              })
+            this.secondaryMessageList = await this.messageStore.fetchInBounds(
+              swlat,
+              swlng,
+              nelat,
+              nelng
+            )
           }
         } else {
           // We don't, which will be because we don't have a location.

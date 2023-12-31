@@ -108,7 +108,11 @@ export default defineNuxtPlugin((nuxtApp) => {
           // There's basically no info to report, so there's nothing we can do.  Suppress it.
           console.log('No info - suppress exception')
           return null
-        } else if (originalExceptionStack?.includes('leaflet')) {
+        } else if (
+          originalExceptionStack?.includes('leaflet') ||
+          originalExceptionStack?.includes('LMarker') ||
+          originalExceptionMessage?.includes('leaflet')
+        ) {
           // Leaflet produces all sorts of errors, which are not really our fault and don't affect the user.
           console.log('Leaflet in stack - suppress exception')
           return null
