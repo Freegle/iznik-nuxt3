@@ -78,8 +78,7 @@ export function useNavbar() {
 
   const browseCountPlural = computed(() => {
     return (
-      pluralize('unseen post', browseCount.value, true) +
-      ' since your last visit'
+      pluralize('unseen post', messageStore.count, true) +
     )
   })
 
