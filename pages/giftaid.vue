@@ -342,9 +342,14 @@ export default {
   methods: {
     async save(callback) {
       this.triedToSubmit = true
+
       if (!this.valid) {
         callback()
         return
+      }
+
+      if (!this.giftAidStore.giftaid.period) {
+        this.giftAidStore.giftaid.period = 'Past4YearsAndFuture'
       }
 
       if (!this.giftAidAllowed) {
