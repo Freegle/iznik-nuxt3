@@ -6,7 +6,7 @@ export default defineNuxtPlugin((nuxtApp) => {
   const originalErrorHandler = nuxtApp.vueApp.config.errorHandler
 
   nuxtApp.vueApp.config.errorHandler = (err, vm, info, ...rest) => {
-    console.log('Vue errorHandler', err, err.stack)
+    console.log('Vue errorHandler', err)
     if (err instanceof MaintenanceError) {
       // This is thrown in response to API return codes from the server.
       throw err
@@ -34,7 +34,7 @@ export default defineNuxtPlugin((nuxtApp) => {
       err.stack?.includes('leaflet') ||
       err.stack?.includes('LMap') ||
       err.stack?.includes('LMarker') ||
-      err.stack?.includes('layer.js')
+      err.stack?.includes('layer')
     ) {
       // Leaflet throws all kinds of errors when the DOM elements are removed.  Ignore them all.
       console.log('Leaflet in stack - ignore')
