@@ -223,7 +223,7 @@ watch(search, (newVal, oldVal) => {
 const browseView = computed(
   () => useAuthStore().user?.settings?.browseView || 'nearby'
 )
-const group = ref(browseView === 'nearby' ? -1 : 0)
+const group = ref(browseView.value === 'nearby' ? -1 : 0)
 
 watch(
   () => props.selectedGroup,
