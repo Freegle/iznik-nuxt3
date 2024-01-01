@@ -73,13 +73,11 @@ export function useNavbar() {
   }
 
   const browseCount = computed(() => {
-    return Math.min(99, messageStore.count)
+    return Math.min(999, messageStore.count)
   })
 
   const browseCountPlural = computed(() => {
-    return (
-      pluralize('unseen post', messageStore.count, true) +
-    )
+    return pluralize('unseen post', messageStore.count, true)
   })
 
   const activePostsCountPlural = ref(() => {

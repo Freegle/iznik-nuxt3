@@ -223,6 +223,32 @@ export default {
     filteredIdsToShow() {
       return this.filteredMessagesToShow.map((m) => m.id)
     },
+    reduceSuccessful() {
+      // Ensure no more than one successful message in every four.  Makes us look good to show some.
+      const ret = []
+
+      this.messagesForList.forEach((m) => {
+        if (m.successful) {
+          // Don't want the first one to be shown as freegled.
+          if (ret.length) {
+            const lastfour = ret.slice(-4)
+            let gotSuccessful = false
+
+            lastfour.forEach((m) => {
+              gotSuccessful |= m.successful
+            })
+
+            if (!gotSuccessful) {
+              ret.push(m)
+            }
+          }
+        } else {
+          ret.push(m)
+        }
+      })
+
+      return ret
+    },
     filteredMessagesToShow() {
       const ret = []
 
@@ -231,13 +257,12 @@ export default {
       // - Possibly a group id
       // - Don't show deleted posts.  Remember the map may lag a bit as it's only updated on cron, so we
       //   may be returned some.
-      // - Do show completed posts - makes us look good.  But not too many.
       for (
         let i = 0;
-        i < this.messagesForList?.length && i < this.toShow;
+        i < this.reduceSuccessful?.length && i < this.toShow;
         i++
       ) {
-        const m = this.messagesForList[i]
+        const m = this.reduceSuccessful[i]
 
         if (this.wantMessage(m)) {
           // Pass whether the message has been freegled or promised, which is returned in the summary call.
@@ -256,17 +281,6 @@ export default {
                 addIt = false
               } else if (daysago > 7) {
                 addIt = false
-              } else {
-                const lastfour = ret.slice(-4)
-                let gotSuccessful = false
-
-                lastfour.forEach((m) => {
-                  gotSuccessful |= m.successful
-                })
-
-                if (gotSuccessful) {
-                  addIt = false
-                }
               }
             }
           }
@@ -339,11 +353,11 @@ export default {
 
           for (
             let i = Math.max(newVal + 1, this.prefetched);
-            i < this.messagesForList.length && ids.length < 5;
+            i < this.reduceSuccessful.length && ids.length < 5;
             i++
           ) {
-            if (this.wantMessage(this.messagesForList[i])) {
-              ids.push(this.messagesForList[i].id)
+            if (this.wantMessage(this.reduceSuccessful[i])) {
+              ids.push(this.reduceSuccessful[i].id)
             }
 
             this.prefetched = i
@@ -369,20 +383,21 @@ export default {
       do {
         this.toShow++
       } while (
-        this.toShow < this.messagesForList?.length &&
-        !this.wantMessage(this.messagesForList[this.toShow])
+        this.toShow < this.reduceSuccessful?.length &&
+        !this.wantMessage(this.reduceSuccessful[this.toShow])
       )
 
       if (
-        this.toShow <= this.messagesForList?.length &&
-        this.wantMessage(this.messagesForList[this.toShow])
+        this.toShow <= this.reduceSuccessful?.length &&
+        this.wantMessage(this.reduceSuccessful[this.toShow])
       ) {
         // We need another message.
-        const m = this.messagesForList[this.toShow - 1]
+        const m = this.reduceSuccessful[this.toShow - 1]
 
         // We always want to trigger a fetch to the store, because the store will decide whether a cached message
         // needs refreshing.
         await throttleFetches()
+
         await this.messageStore.fetch(m.id)
 
         $state.loaded()

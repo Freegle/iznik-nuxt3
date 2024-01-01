@@ -91,6 +91,7 @@
 import dayjs from 'dayjs'
 import { useRoute, useRouter } from 'vue-router'
 import { defineAsyncComponent } from 'vue'
+import { useMessageStore } from '../../stores/message'
 import { loadLeaflet } from '~/composables/useMap'
 import { buildHead } from '~/composables/useBuildHead'
 import VisibleWhen from '~/components/VisibleWhen'
@@ -146,6 +147,7 @@ export default {
     const authStore = useAuthStore()
     const groupStore = useGroupStore()
     const isochroneStore = useIsochroneStore()
+    const messageStore = useMessageStore()
 
     const searchTerm = ref(route.params.term)
 
@@ -172,6 +174,7 @@ export default {
       authStore,
       groupStore,
       isochroneStore,
+      messageStore,
       searchTerm,
       martop1,
     }
@@ -186,6 +189,8 @@ export default {
       selectedGroup: 0,
       selectedType: 'All',
       forceShowFilters: false,
+      lastCountUpdate: 0,
+      updatingCount: false,
     }
   },
   computed: {
@@ -267,6 +272,7 @@ export default {
   },
   async mounted() {
     if (this.me) {
+      window.addEventListener('scroll', this.handleScroll)
       const lastask = this.miscStore?.get('lastaboutmeask')
       const now = new Date().getTime()
 
@@ -305,6 +311,9 @@ export default {
         })
       }
     }
+  },
+  unmounted() {
+    window.removeEventListener('scroll', this.handleScroll)
   },
   methods: {
     async calculateInitialMapBounds() {
@@ -413,6 +422,19 @@ export default {
     },
     incBump() {
       this.bump++
+    },
+    async handleScroll(event) {
+      // If we are scrolling down the browse window then we want to update our count, but only every few seconds.
+      if (
+        !this.updatingCount &&
+        this.me &&
+        this.lastCountUpdate < new Date().getTime() - 5000
+      ) {
+        this.lastCountUpdate = new Date().getTime()
+        this.updatingCount = true
+        await this.messageStore.fetchCount(this.me.settings?.browseView, false)
+        this.updatingCount = false
+      }
     },
   },
 }
