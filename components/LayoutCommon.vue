@@ -4,7 +4,7 @@
       <div class="aboveSticky">
         <slot ref="pageContent" />
       </div>
-      <VisibleWhen :at="['xs', 'sm']">
+      <VisibleWhen :at="['xs', 'sm', 'md', 'lg']">
         <div
           v-if="allowAd"
           class="d-flex justify-content-around w-100 sticky"
@@ -289,7 +289,7 @@ body.modal-open {
   z-index: 10000;
 
   @include media-breakpoint-up(md) {
-    display: none;
+    display: none !important;
   }
 }
 
