@@ -15,11 +15,11 @@
       <v-icon icon="home" />
     </b-button>
     <b-button
-        v-if="online && showBackButton"
-        ref="mobileNav"
-        variant="white"
-        class="nohover ml-3"
-        @click="backButton"
+      v-if="online && showBackButton"
+      ref="mobileNav"
+      variant="white"
+      class="nohover ml-3"
+      @click="backButton"
     >
       <v-icon icon="arrow-left" />
     </b-button>
@@ -89,9 +89,19 @@
       @click="clickedMobileNav"
       @mousedown="maybeReload('/browse')"
     >
-      <v-icon icon="eye" class="fa-fw2" />
-      <br />
-      <div class="div text--smallest">Browse</div>
+      <div class="position-relative">
+        <v-icon icon="eye" class="fa-fw2" />
+        <br />
+        <b-badge
+          v-if="browseCount"
+          variant="info"
+          class="browsebadge2"
+          :title="browseCountPlural"
+        >
+          {{ browseCount }}
+        </b-badge>
+        <span class="nav-item__text">Browse</span>
+      </div>
     </nuxt-link>
     <div class="botmen ml-2">
       <ChatMenu
@@ -200,6 +210,8 @@ const {
   activePostsCountPlural,
   newsCount,
   newsCountPlural,
+  browseCount,
+  browseCountPlural,
   showAboutMeModal,
   showBackButton,
   requestLogin,
@@ -296,6 +308,13 @@ function handleScroll() {
   position: absolute;
   top: 1px;
   right: -1px;
+  font-size: 11px;
+}
+
+.browsebadge2 {
+  position: absolute;
+  top: 1px;
+  right: -7px;
   font-size: 11px;
 }
 

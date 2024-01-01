@@ -373,7 +373,14 @@ export default {
     sortedMessagesOnMap() {
       if (this.messagesOnMap) {
         return this.messagesOnMap.slice().sort((a, b) => {
-          return new Date(b.arrival).getTime() - new Date(a.arrival).getTime()
+          // Unseen messages first, then by descending date/time.
+          if (a.unseen && !b.unseen) {
+            return -1
+          } else if (!a.unseen && b.unseen) {
+            return 1
+          } else {
+            return new Date(b.arrival).getTime() - new Date(a.arrival).getTime()
+          }
         })
       } else {
         return []

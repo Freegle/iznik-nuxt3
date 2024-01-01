@@ -183,4 +183,14 @@ export default class MessageAPI extends BaseAPI {
       userid,
     })
   }
+
+  async count(browseView, log) {
+    return await this.$getv2(
+      '/message/count',
+      {
+        browseView,
+      },
+      log
+    )
+  }
 }

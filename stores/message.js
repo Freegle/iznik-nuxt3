@@ -13,6 +13,9 @@ export const useMessageStore = defineStore({
     list: {},
     byUserList: {},
 
+    // Count of unseen items
+    count: 0,
+
     // In bounds
     bounds: {},
     activePostsCounter: 0,
@@ -24,6 +27,11 @@ export const useMessageStore = defineStore({
       this.fetching = {}
       this.fetchingCount = 0
       this.fetchingMyGroups = null
+    },
+    async fetchCount(browseView, log = true) {
+      const ret = await api(this.config).message.count(browseView, log)
+      this.count = ret?.count || 0
+      return this.count
     },
     async fetch(id, force) {
       id = parseInt(id)

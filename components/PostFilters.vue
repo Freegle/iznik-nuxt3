@@ -112,6 +112,7 @@
 </template>
 <script setup>
 import { useMiscStore } from '../stores/misc'
+import { useMessageStore } from '../stores/message'
 import { ref, watch } from '#imports'
 import { useIsochroneStore } from '~/stores/isochrone'
 import { useAuthStore } from '~/stores/auth'
@@ -234,7 +235,9 @@ watch(
 
 watch(group, async (newVal) => {
   const authStore = useAuthStore()
-  const settings = useAuthStore().user?.settings
+  const me = useAuthStore().user
+  const settings = me?.settings
+  const messageStore = useMessageStore()
 
   if (newVal === -1) {
     // Special case for nearby.
@@ -245,6 +248,11 @@ watch(group, async (newVal) => {
     })
 
     emit('update:selectedGroup', 0)
+
+    if (me) {
+      // We do this so that UpToDate doesn't show an old count.
+      messageStore.fetchCount(me.settings?.browseView, false)
+    }
   } else if (newVal === 0) {
     // Special case for all my groups.
     const settings = useAuthStore().user?.settings
@@ -253,6 +261,11 @@ watch(group, async (newVal) => {
     await authStore.saveAndGet({
       settings,
     })
+
+    if (me) {
+      // We do this so that UpToDate doesn't show an old count.
+      messageStore.fetchCount(me.settings?.browseView, false)
+    }
 
     emit('update:selectedGroup', 0)
   } else {
