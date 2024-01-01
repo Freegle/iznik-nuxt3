@@ -1,3 +1,23 @@
+diff --git a/node_modules/@vue-leaflet/vue-leaflet/dist/vue-leaflet.esm.js b/node_modules/@vue-leaflet/vue-leaflet/dist/vue-leaflet.esm.js
+index 8229c4f..520c4bd 100644
+--- a/node_modules/@vue-leaflet/vue-leaflet/dist/vue-leaflet.esm.js
++++ b/node_modules/@vue-leaflet/vue-leaflet/dist/vue-leaflet.esm.js
+@@ -200,13 +200,13 @@ const setup$1 = (props, leafletRef, context) => {
+       leafletRef.value.bindTooltip(leafletObject);
+     },
+     unbindTooltip() {
+-      const tooltip = leafletRef.value ? leafletRef.value.getTooltip() : null;
++      const tooltip = leafletRef.value && typeof leafletRef.value.getTooltip === 'function' ? leafletRef.value.getTooltip() : null;
+       if (tooltip) {
+         tooltip.unbindTooltip();
+       }
+     },
+     unbindPopup() {
+-      const popup = leafletRef.value ? leafletRef.value.getPopup() : null;
++      const popup = leafletRef.value && typeof leafletRef.value.getPopup === 'function' ? leafletRef.value.getPopup() : null;
+       if (popup) {
+         popup.unbindPopup();
+       }
 diff --git a/node_modules/@vue-leaflet/vue-leaflet/src/components/LIcon.vue b/node_modules/@vue-leaflet/vue-leaflet/src/components/LIcon.vue
 index bbf34b7..4c14a18 100644
 --- a/node_modules/@vue-leaflet/vue-leaflet/src/components/LIcon.vue

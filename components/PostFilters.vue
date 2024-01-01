@@ -220,7 +220,9 @@ watch(search, (newVal, oldVal) => {
 })
 
 // Selected group.  We have a special case for the 'nearby' group, which is -1.
-const browseView = useAuthStore().user?.settings?.browseView || 'nearby'
+const browseView = computed(
+  () => useAuthStore().user?.settings?.browseView || 'nearby'
+)
 const group = ref(browseView === 'nearby' ? -1 : 0)
 
 watch(
