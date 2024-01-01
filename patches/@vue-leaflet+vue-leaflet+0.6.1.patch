@@ -1,3 +1,35 @@
+diff --git a/node_modules/@vue-leaflet/vue-leaflet/src/components/LIcon.vue b/node_modules/@vue-leaflet/vue-leaflet/src/components/LIcon.vue
+index bbf34b7..4c14a18 100644
+--- a/node_modules/@vue-leaflet/vue-leaflet/src/components/LIcon.vue
++++ b/node_modules/@vue-leaflet/vue-leaflet/src/components/LIcon.vue
+@@ -107,14 +107,19 @@ export default {
+ 
+       propsBinder(methods, {}, props);
+ 
+-      const observer = new MutationObserver(scheduleHtmlSwap);
+-      observer.observe(root.value, {
+-        attributes: true,
+-        childList: true,
+-        characterData: true,
+-        subtree: true,
+-      });
+-      scheduleCreateIcon();
++      try {
++        const observer = new MutationObserver(scheduleHtmlSwap);
++        observer.observe(root.value, {
++          attributes: true,
++          childList: true,
++          characterData: true,
++          subtree: true,
++        });
++        scheduleCreateIcon();
++      } catch (e) {
++        // This can happen if leaflet is removed from the DOM
++        console.log('Ignore leaflet error', e)
++      }
+     });
+ 
+     return { root };
 diff --git a/node_modules/@vue-leaflet/vue-leaflet/src/components/LMap.vue b/node_modules/@vue-leaflet/vue-leaflet/src/components/LMap.vue
 index 15de45d..eb4a90b 100644
 --- a/node_modules/@vue-leaflet/vue-leaflet/src/components/LMap.vue

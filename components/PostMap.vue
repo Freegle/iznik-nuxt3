@@ -751,6 +751,14 @@ export default {
         // We have groups, so fetch the messages in those groups.
         ret = await this.messageStore.fetchMyGroups()
         console.log('GetMessages - some groups, fetch groups')
+
+        // Get the messages in the map bounds too, so that we can show others as secondary.
+        this.secondaryMessageList = await this.messageStore.fetchInBounds(
+          swlat,
+          swlng,
+          nelat,
+          nelng
+        )
       } else {
         // We have no groups, so fetch the messages in the map bounds.
         console.log('GetMessages - no groups, fetch in map bounds')
