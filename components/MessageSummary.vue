@@ -22,7 +22,7 @@
       <MessageHistory
         :id="id"
         class="mb-1 header-history"
-        display-message-link
+        :display-message-link="mod"
       />
       <div class="mb-1 header-description">
         <div
