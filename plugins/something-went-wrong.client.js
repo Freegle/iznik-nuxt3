@@ -30,7 +30,12 @@ export default defineNuxtPlugin((nuxtApp) => {
       miscStore.somethingWentWrong = true
 
       return true
-    } else if (err.stack?.includes('leaflet')) {
+    } else if (
+      err.stack?.includes('leaflet') ||
+      err.stack?.includes('LMap') ||
+      err.stack?.includes('LMarker') ||
+      err.stack?.includes('layer.js')
+    ) {
       // Leaflet throws all kinds of errors when the DOM elements are removed.  Ignore them all.
       console.log('Leaflet in stack - ignore')
       return true
