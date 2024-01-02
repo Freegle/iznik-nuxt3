@@ -7,7 +7,7 @@
   >
     <OfflineIndicator v-if="!online" />
     <b-button
-      v-if="online && showBackButton"
+      v-if="online && (showBackButton || navBarBottomHidden)"
       variant="white"
       class="nohover ml-3"
       to="/"
@@ -80,7 +80,10 @@
     type="dark"
     class="ourBack d-flex justify-content-between d-xl-none navbot small"
     fixed="bottom"
-    :class="{ hideNavBarBottom: navBarHidden, showNavBarBottom: !navBarHidden }"
+    :class="{
+      hideNavBarBottom: navBarBottomHidden,
+      showNavBarBottom: !navBarBottomHidden,
+    }"
   >
     <nuxt-link
       no-prefetch
@@ -198,6 +201,7 @@
   <about-me-modal v-if="showAboutMeModal" @hidden="showAboutMeModal = false" />
 </template>
 <script setup>
+import { useRoute } from 'vue-router'
 import NavbarMobilePost from './NavbarMobilePost'
 import { useNavbar } from '~/composables/useNavbar'
 import { useMiscStore } from '~/stores/misc'
@@ -283,6 +287,16 @@ function handleScroll() {
 
   lastScrollY = scrollY
 }
+
+const route = useRoute()
+
+const navBarBottomHidden = computed(() => {
+  return (
+    route.path.startsWith('/give') ||
+    route.path.startsWith('/find') ||
+    route.path.startsWith('/post')
+  )
+})
 </script>
 <style scoped lang="scss">
 @import 'assets/css/navbar.scss';
