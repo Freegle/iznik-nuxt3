@@ -73,7 +73,7 @@ export function useNavbar() {
   }
 
   const browseCount = computed(() => {
-    return Math.min(999, messageStore.count)
+    return Math.min(99, messageStore.count)
   })
 
   const browseCountPlural = computed(() => {
