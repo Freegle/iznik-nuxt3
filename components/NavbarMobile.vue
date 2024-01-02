@@ -15,11 +15,11 @@
       <v-icon icon="home" />
     </b-button>
     <b-button
-        v-if="online && showBackButton"
-        ref="mobileNav"
-        variant="white"
-        class="nohover ml-3"
-        @click="backButton"
+      v-if="online && showBackButton"
+      ref="mobileNav"
+      variant="white"
+      class="nohover ml-3"
+      @click="backButton"
     >
       <v-icon icon="arrow-left" />
     </b-button>
@@ -282,7 +282,8 @@ const navBarBottomHidden = computed(() => {
   return (
     route.path.startsWith('/give') ||
     route.path.startsWith('/find') ||
-    route.path.startsWith('/post')
+    route.path.startsWith('/post') ||
+    navBarHidden.value
   )
 })
 </script>
