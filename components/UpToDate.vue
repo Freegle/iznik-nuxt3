@@ -7,7 +7,7 @@
     >
       <v-icon icon="check-circle" class="text-success mt-2 text--largest" />
       <p class="text--large font-weight-bold">You're up to date.</p>
-      <p>Scroll down for older posts.</p>
+      <p>Scroll down for posts you've not seen.</p>
     </NoticeMessage>
     <NoticeMessage
       v-else
