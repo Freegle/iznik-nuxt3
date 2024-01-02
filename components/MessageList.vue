@@ -11,6 +11,7 @@
     <h2 class="visually-hidden">List of wanteds and offers</h2>
     <div id="visobserver" v-observe-visibility="visibilityChanged" />
     <div v-if="deDuplicatedMessages?.length" id="messageList">
+      <UpToDate v-if="!loading && !deDuplicatedMessages[0].unseen" />
       <div
         :id="'messagewrapper-' + deDuplicatedMessages[0].id"
         :ref="'messagewrapper-' + deDuplicatedMessages[0].id"
@@ -20,8 +21,6 @@
           :id="deDuplicatedMessages[0].id"
           :matchedon="deDuplicatedMessages[0].matchedon"
           record-view
-          :scroll-into-view="scrollToMessage === deDuplicatedMessages[0].id"
-          @visible="messageVisible"
         />
       </div>
       <VisibleWhen
@@ -43,13 +42,16 @@
           ad-unit-path="/22794232631/freegle_feed_app"
           :dimensions="[300, 250]"
           div-id="div-gpt-ad-1692867324381-0"
-          class="mt-2"
+          class="mt-3"
         />
       </VisibleWhen>
       <div
-        v-for="message in deDuplicatedMessages.slice(1)"
+        v-for="(message, ix) in deDuplicatedMessages.slice(1)"
         :key="'messagelist-' + message.id"
       >
+        <UpToDate
+          v-if="!loading && !message.unseen && deDuplicatedMessages[ix].unseen"
+        />
         <div
           :id="'messagewrapper-' + message.id"
           :ref="'messagewrapper-' + message.id"
@@ -60,8 +62,6 @@
               :id="message.id"
               :matchedon="message.matchedon"
               record-view
-              :scroll-into-view="scrollToMessage === message.id"
-              @visible="messageVisible"
             />
           </VisibleWhen>
           <VisibleWhen :not="['xs', 'sm', 'md', 'lg']">
@@ -69,10 +69,8 @@
               :id="message.id"
               :matchedon="message.matchedon"
               record-view
-              :scroll-into-view="scrollToMessage === message.id"
               ad-unit-path="/22794232631/freegle_product"
               ad-id="div-gpt-ad-1691925699378-0"
-              @visible="messageVisible"
             />
           </VisibleWhen>
         </div>
@@ -101,6 +99,7 @@ import { useGroupStore } from '../stores/group'
 import { useMessageStore } from '../stores/message'
 import { throttleFetches } from '../composables/useThrottle'
 import { useIsochroneStore } from '../stores/isochrone'
+import UpToDate from './UpToDate'
 import { ref } from '#imports'
 import InfiniteLoading from '~/components/InfiniteLoading'
 import { useMiscStore } from '~/stores/misc'
@@ -112,6 +111,7 @@ const MIN_TO_SHOW = 10
 
 export default {
   components: {
+    UpToDate,
     OurMessage,
     GroupHeader,
     InfiniteLoading,
@@ -189,20 +189,6 @@ export default {
     }
 
     const toShow = ref(MIN_TO_SHOW)
-    let scrollToMessage = null
-
-    if (process.client) {
-      scrollToMessage = ref(window?.history?.state?.scrollToMessage)
-      if (scrollToMessage.value) {
-        const ix = props.messagesForList.findIndex(
-          (message) => message.id === scrollToMessage
-        )
-
-        if (ix > 0) {
-          toShow.value = ix + 1
-        }
-      }
-    }
 
     return {
       infiniteId: ref(props.bump),
@@ -211,7 +197,6 @@ export default {
       messageStore,
       miscStore,
       toShow,
-      scrollToMessage,
     }
   },
   data() {
@@ -219,8 +204,6 @@ export default {
       // Infinite message scroll
       distance: 2000,
       prefetched: 0,
-      maxMessageVisible: 0,
-      ensuredMessageVisible: false,
       emitted: false,
     }
   },
@@ -240,6 +223,32 @@ export default {
     filteredIdsToShow() {
       return this.filteredMessagesToShow.map((m) => m.id)
     },
+    reduceSuccessful() {
+      // Ensure no more than one successful message in every four.  Makes us look good to show some.
+      const ret = []
+
+      this.messagesForList.forEach((m) => {
+        if (m.successful) {
+          // Don't want the first one to be shown as freegled.
+          if (ret.length) {
+            const lastfour = ret.slice(-4)
+            let gotSuccessful = false
+
+            lastfour.forEach((m) => {
+              gotSuccessful |= m.successful
+            })
+
+            if (!gotSuccessful) {
+              ret.push(m)
+            }
+          }
+        } else {
+          ret.push(m)
+        }
+      })
+
+      return ret
+    },
     filteredMessagesToShow() {
       const ret = []
 
@@ -248,13 +257,12 @@ export default {
       // - Possibly a group id
       // - Don't show deleted posts.  Remember the map may lag a bit as it's only updated on cron, so we
       //   may be returned some.
-      // - Do show completed posts - makes us look good.  But not too many.
       for (
         let i = 0;
-        i < this.messagesForList?.length && i < this.toShow;
+        i < this.reduceSuccessful?.length && i < this.toShow;
         i++
       ) {
-        const m = this.messagesForList[i]
+        const m = this.reduceSuccessful[i]
 
         if (this.wantMessage(m)) {
           // Pass whether the message has been freegled or promised, which is returned in the summary call.
@@ -273,17 +281,6 @@ export default {
                 addIt = false
               } else if (daysago > 7) {
                 addIt = false
-              } else {
-                const lastfour = ret.slice(-4)
-                let gotSuccessful = false
-
-                lastfour.forEach((m) => {
-                  gotSuccessful |= m.successful
-                })
-
-                if (gotSuccessful) {
-                  addIt = false
-                }
               }
             }
           }
@@ -312,6 +309,7 @@ export default {
       this.filteredMessagesToShow.forEach((m) => {
         // Filter out dups by subject (for crossposting).
         const message = this.filteredMessagesInStore[m.id]
+
         if (!message) {
           // We haven't yet fetched it, so we don't yet know if it's a dup.  We return it, which will fetch it, and
           // then we'll come back through here.
@@ -342,7 +340,7 @@ export default {
       return ret
     },
     noneFound() {
-      return !this.loading && !this.messagesForList?.length
+      return !this.loading && !this.deDuplicatedMessages?.length
     },
   },
   watch: {
@@ -355,11 +353,11 @@ export default {
 
           for (
             let i = Math.max(newVal + 1, this.prefetched);
-            i < this.messagesForList.length && ids.length < 5;
+            i < this.reduceSuccessful.length && ids.length < 5;
             i++
           ) {
-            if (this.wantMessage(this.messagesForList[i])) {
-              ids.push(this.messagesForList[i].id)
+            if (this.wantMessage(this.reduceSuccessful[i])) {
+              ids.push(this.reduceSuccessful[i].id)
             }
 
             this.prefetched = i
@@ -373,13 +371,11 @@ export default {
       },
       immediate: true,
     },
-    isochroneBounds(newVal) {
-      // If we're changing the isochrone view we don't want to then scroll down to a message which becomes
-      // visible.
-      this.scrollToMessage = null
-    },
-    noneFound(newVal) {
-      this.$emit('update:none', newVal)
+    noneFound: {
+      handler(newVal, oldVal) {
+        this.$emit('update:none', newVal)
+      },
+      immediate: true,
     },
   },
   methods: {
@@ -387,20 +383,21 @@ export default {
       do {
         this.toShow++
       } while (
-        this.toShow < this.messagesForList?.length &&
-        !this.wantMessage(this.messagesForList[this.toShow])
+        this.toShow < this.reduceSuccessful?.length &&
+        !this.wantMessage(this.reduceSuccessful[this.toShow])
       )
 
       if (
-        this.toShow <= this.messagesForList?.length &&
-        this.wantMessage(this.messagesForList[this.toShow])
+        this.toShow <= this.reduceSuccessful?.length &&
+        this.wantMessage(this.reduceSuccessful[this.toShow])
       ) {
         // We need another message.
-        const m = this.messagesForList[this.toShow - 1]
+        const m = this.reduceSuccessful[this.toShow - 1]
 
         // We always want to trigger a fetch to the store, because the store will decide whether a cached message
         // needs refreshing.
         await throttleFetches()
+
         await this.messageStore.fetch(m.id)
 
         $state.loaded()
@@ -425,19 +422,6 @@ export default {
         }
       } else {
         this.$emit('update:visible', visible)
-      }
-    },
-    messageVisible(id) {
-      if (process.client) {
-        // We want to store the last visible message as a parameter in the history, so that if we come back to a
-        // page containing it, we will scroll to it.
-        try {
-          const state = window.history.state
-          state.scrollToMessage = id
-          window.history.replaceState(state, '')
-        } catch (e) {
-          console.log('Exception storing message visible', e)
-        }
       }
     },
   },

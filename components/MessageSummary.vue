@@ -119,6 +119,13 @@ export default {
       return ret
     },
   },
+  async mounted() {
+    if (this.me) {
+      await this.messageStore.view(this.id)
+    }
+
+    this.$emit('view')
+  },
   methods: {
     expand() {
       this.$emit('expand')

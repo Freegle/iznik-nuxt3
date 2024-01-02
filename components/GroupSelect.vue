@@ -110,6 +110,16 @@ export default {
       required: false,
       default: false,
     },
+    customName: {
+      type: String,
+      required: false,
+      default: null,
+    },
+    customVal: {
+      type: Number,
+      required: false,
+      default: null,
+    },
   },
   setup() {
     const miscStore = useMiscStore()
@@ -163,6 +173,14 @@ export default {
     },
     groupOptions() {
       const groups = []
+
+      if (this.customName) {
+        groups.push({
+          value: this.customVal,
+          text: this.customName,
+          selected: this.selectedGroup === this.customVal,
+        })
+      }
 
       if (this.all) {
         groups.push({

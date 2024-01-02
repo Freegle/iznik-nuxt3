@@ -92,9 +92,19 @@
       @click="clickedMobileNav"
       @mousedown="maybeReload('/browse')"
     >
-      <v-icon icon="eye" class="fa-fw2" />
-      <br />
-      <div class="div text--smallest">Browse</div>
+      <div class="position-relative">
+        <v-icon icon="eye" class="fa-fw2" />
+        <br />
+        <b-badge
+          v-if="browseCount"
+          variant="info"
+          class="browsebadge2"
+          :title="browseCountPlural"
+        >
+          {{ browseCount }}
+        </b-badge>
+        <span class="nav-item__text">Browse</span>
+      </div>
     </nuxt-link>
     <div class="botmen ml-2">
       <ChatMenu
@@ -204,6 +214,8 @@ const {
   activePostsCountPlural,
   newsCount,
   newsCountPlural,
+  browseCount,
+  browseCountPlural,
   showAboutMeModal,
   showBackButton,
   requestLogin,
@@ -311,6 +323,13 @@ const navBarBottomHidden = computed(() => {
   position: absolute;
   top: 1px;
   right: -1px;
+  font-size: 11px;
+}
+
+.browsebadge2 {
+  position: absolute;
+  top: 1px;
+  right: -7px;
   font-size: 11px;
 }
 

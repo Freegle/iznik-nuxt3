@@ -1,9 +1,6 @@
 <template>
   <div v-if="initialBounds">
-    <div v-if="mapHidden" class="d-flex justify-content-end">
-      <b-button variant="link" @click="showMap"> Show map of posts </b-button>
-    </div>
-    <div v-else>
+    <div v-if="!mapHidden">
       <div
         ref="mapcont"
         :style="'height: ' + mapHeight + 'px'"
@@ -25,18 +22,6 @@
             @moveend="idle"
             @dragend="dragEnd"
           >
-            <div
-              class="leaflet-top leaflet-right d-flex flex-column justify-content-center"
-            >
-              <b-button
-                v-if="canHide"
-                variant="link"
-                class="pauto black p-1"
-                @click="hideMap"
-              >
-                <v-icon icon="times-circle" title="Hide map" />
-              </b-button>
-            </div>
             <l-tile-layer :url="osmtile" :attribution="attribution" />
             <div v-if="showMessages">
               <ClusterMarker
@@ -152,11 +137,6 @@ export default {
       type: Number,
       required: false,
       default: null,
-    },
-    searchOnGroups: {
-      type: Boolean,
-      required: false,
-      default: false,
     },
     type: {
       type: String,
@@ -398,7 +378,12 @@ export default {
     isochroneBounds(newVal) {
       if (newVal && this.mapObject) {
         // Make the map show the isochrone view.
-        this.mapObject.flyToBounds(newVal)
+        try {
+          this.mapObject.flyToBounds(newVal)
+        } catch (e) {
+          // This happens when leaflet is destroyed.
+          console.log('Ignore flyToBounds exception', e)
+        }
       }
       this.getMessages()
     },
@@ -470,6 +455,9 @@ export default {
     if (this.mapHidden) {
       // Say we're ready so the parent can crack on.
       this.$emit('update:ready', true)
+
+      // Fetch the messages.
+      this.getMessages()
     }
 
     await loadLeaflet()
@@ -483,64 +471,72 @@ export default {
 
       this.$emit('update:ready', true)
       this.mapObject = this.$refs.map.leafletObject
-      this.$refs.map.leafletObject.fitBounds(this.initialBounds)
 
       if (process.client && this.mapObject) {
-        const runtimeConfig = useRuntimeConfig()
+        try {
+          this.mapObject.fitBounds(this.initialBounds)
+          const runtimeConfig = useRuntimeConfig()
 
-        const { Geocoder } = await import(
-          'leaflet-control-geocoder/src/control'
-        )
-        const { Photon } = await import(
-          'leaflet-control-geocoder/src/geocoders/photon'
-        )
+          const { Geocoder } = await import(
+            'leaflet-control-geocoder/src/control'
+          )
+          const { Photon } = await import(
+            'leaflet-control-geocoder/src/geocoders/photon'
+          )
 
-        new Geocoder({
-          placeholder: 'Search for a place...',
-          defaultMarkGeocode: false,
-          geocoder: new Photon({
-            geocodingQueryParams: {
-              bbox: '-7.57216793459, 49.959999905, 1.68153079591, 58.6350001085',
-            },
-            nameProperties: [
-              'name',
-              'street',
-              'suburb',
-              'hamlet',
-              'town',
-              'city',
-            ],
-            serviceUrl: runtimeConfig.public.GEOCODE,
-          }),
-          collapsed: false,
-        })
-          .on('markgeocode', async function (e) {
-            if (e && e.geocode && e.geocode.bbox) {
-              // Empty out the query box so that the dropdown closes.  Note that "this" is the control object,
-              // which is why this isn't in a separate method.
-              console.log('Selected', e)
-              this.setQuery('')
-
-              // If we don't find anything at this location we will want to zoom out.
-              self.shownMany = false
-
-              // For some reason we need to take a copy of the latlng bounds in the event before passing it to
-              // flyToBounds.
-              const flyTo = e.geocode.bbox
-              const L = await import('leaflet/dist/leaflet-src.esm')
-              const newBounds = new L.LatLngBounds(
-                new L.LatLng(
-                  flyTo.getSouthWest().lat,
-                  flyTo.getSouthWest().lng
-                ),
-                new L.LatLng(flyTo.getNorthEast().lat, flyTo.getNorthEast().lng)
-              )
-              // Move the map to the location we've found.
-              self.$refs.map.leafletObject.flyToBounds(newBounds)
-              self.$emit('searched')
-            }
+          new Geocoder({
+            placeholder: 'Search for a place...',
+            defaultMarkGeocode: false,
+            geocoder: new Photon({
+              geocodingQueryParams: {
+                bbox: '-7.57216793459, 49.959999905, 1.68153079591, 58.6350001085',
+              },
+              nameProperties: [
+                'name',
+                'street',
+                'suburb',
+                'hamlet',
+                'town',
+                'city',
+              ],
+              serviceUrl: runtimeConfig.public.GEOCODE,
+            }),
+            collapsed: false,
           })
-          .addTo(this.mapObject)
+            .on('markgeocode', async function (e) {
+              if (e && e.geocode && e.geocode.bbox) {
+                // Empty out the query box so that the dropdown closes.  Note that "this" is the control object,
+                // which is why this isn't in a separate method.
+                console.log('Selected', e)
+                this.setQuery('')
+
+                // If we don't find anything at this location we will want to zoom out.
+                self.shownMany = false
+
+                // For some reason we need to take a copy of the latlng bounds in the event before passing it to
+                // flyToBounds.
+                const flyTo = e.geocode.bbox
+                const L = await import('leaflet/dist/leaflet-src.esm')
+                const newBounds = new L.LatLngBounds(
+                  new L.LatLng(
+                    flyTo.getSouthWest().lat,
+                    flyTo.getSouthWest().lng
+                  ),
+                  new L.LatLng(
+                    flyTo.getNorthEast().lat,
+                    flyTo.getNorthEast().lng
+                  )
+                )
+                // Move the map to the location we've found.
+                self.$refs.map.leafletObject.flyToBounds(newBounds)
+                self.$emit('searched')
+              }
+            })
+            .addTo(this.mapObject)
+        } catch (e) {
+          // This is usually caused by leaflet.
+          console.log('Ignore leaflet exception', e)
+        }
       }
     },
     clusterClick() {
@@ -573,6 +569,8 @@ export default {
     },
     async getMessages() {
       let messages = []
+      this.secondaryMessageList = []
+
       this.$emit('update:loading', true)
 
       let bounds = new window.L.LatLngBounds(this.initialBounds)
@@ -592,75 +590,183 @@ export default {
       const swlng = bounds.getSouthWest().lng
       const nelat = bounds.getNorthEast().lat
       const nelng = bounds.getNorthEast().lng
-      let params = null
+      let ret = null
 
-      if (!this.search) {
-        if (this.showIsochrones && !this.moved) {
-          // The default view unless we've moved the map is the messages in the isochrones.
-          if (this.isochrones?.length) {
-            // We have some.
-            messages = await this.isochroneStore.fetchMessages()
-
-            // Fetch the messages in bounds too, so that we can show those as secondary.
-            this.messageStore
-              .fetchInBounds(swlat, swlng, nelat, nelng, this.groupid)
-              .then((res) => {
-                this.secondaryMessageList = res
-              })
-          } else {
-            // We don't, which will be because we don't have a location.  Use the bounding boxes of the groups we
-            // are in.
-            const groupbounds = this.myGroupsBoundingBox
-            messages = await this.messageStore.fetchInBounds(
-              groupbounds[0][0],
-              groupbounds[0][1],
-              groupbounds[1][0],
-              groupbounds[1][1],
-              this.groupid
-            )
-          }
+      if (this.moved) {
+        // The map has been moved.
+        if (this.search) {
+          // Search within the bounds of the map.
+          console.log('GetMessages - moved, search within map bounds')
+          ret = await this.messageStore.search({
+            messagetype: this.type,
+            search: this.search,
+            swlat,
+            swlng,
+            nelat,
+            nelng,
+          })
         } else {
-          // Get the messages in the map view.
-          messages = await this.messageStore.fetchInBounds(
+          // Just fetch the bounds of the map.
+          console.log('GetMessages - moved, fetch within map bounds')
+          ret = await this.messageStore.fetchInBounds(
+            swlat,
+            swlng,
+            nelat,
+            nelng
+          )
+        }
+      } else if (this.groupid) {
+        // We have been asked to show a specific group.
+        if (this.search) {
+          // So search within that group.
+          console.log('GetMessages - search on specific group')
+          ret = await this.messageStore.search({
+            messagetype: this.type,
+            search: this.search,
+            groupids: [this.groupid],
+          })
+        } else {
+          // Just fetch that the messages within the map which are on that group.
+          console.log('GetMessages - fetch on specific group')
+          ret = await this.messageStore.fetchInBounds(
             swlat,
             swlng,
             nelat,
             nelng,
             this.groupid
           )
+
+          if (!this.mapHidden) {
+            // Fetch all the messages in the map bounds too, so that we can show others as secondary.
+            // No need to bother if the map isn't showing - they don't appear in the post list.
+            this.secondaryMessageList = await this.messageStore.fetchInBounds(
+              swlat,
+              swlng,
+              nelat,
+              nelng
+            )
+          }
         }
-      } else {
-        // We are searching.  Get the list of messages from the server.
+      } else if (this.showIsochrones) {
+        // We are trying to show posts nearby.
+        if (this.isochrones?.length) {
+          // We have isochrones.
+          if (this.search) {
+            // We don't have a search-within-isochones call.  But we can fetch all the messages in the isochrones,
+            // and also search within the map, and take the intersection.
+            console.log('GetMessages - search in isochrones')
+            const isoret = await this.isochroneStore.fetchMessages()
+            const searchret = await this.messageStore.search({
+              messagetype: this.type,
+              search: this.search,
+              swlat,
+              swlng,
+              nelat,
+              nelng,
+            })
 
-        const gids = this.groupid
-          ? [this.groupid]
-          : this.myGroups.map((g) => g.id)
+            const ids = {}
 
-        if (this.searchOnGroups && gids.length) {
-          // Got some groups to search on.
-          params = {
-            messagetype: this.type,
-            search: this.search,
-            groupids: gids,
+            ret = searchret.filter((i) => {
+              if (isoret.find((el) => el.id === i.id) && !ids[i.id]) {
+                ids[i.id] = true
+                return true
+              } else {
+                return false
+              }
+            })
+
+            this.secondaryMessageList = searchret
+          } else {
+            // Fetch the messages in our isochrones.
+            console.log('GetMessages - fetch in isochrones')
+            ret = await this.isochroneStore.fetchMessages()
+
+            // Fetch the messages in bounds too, so that we can show those as secondary.
+            this.secondaryMessageList = await this.messageStore.fetchInBounds(
+              swlat,
+              swlng,
+              nelat,
+              nelng
+            )
           }
         } else {
-          // Use the box.
-          params = {
-            messagetype: this.type,
-            search: this.search,
-            groupids: gids.join(','),
-            swlat,
-            swlng,
-            nelat,
-            nelng,
+          // We don't, which will be because we don't have a location.
+          if (this.myGroups?.length) {
+            // Use the bounding boxes of the groups we are in.
+            const groupbounds = this.myGroupsBoundingBox
+
+            if (this.search) {
+              console.log('GetMessages - search within group bounds')
+              ret = await this.messageStore.search({
+                messagetype: this.type,
+                search: this.search,
+                swlat: groupbounds[0][0],
+                swlng: groupbounds[0][1],
+                nelat: groupbounds[1][0],
+                nelng: groupbounds[1][1],
+              })
+            } else {
+              // Just fetch the messages within those bounds.    This will show a bit more than the strict
+              // "all my groups" option, but not as much as we might show using the map bounds.
+              console.log('GetMessages - fetch in group bounds')
+              ret = await this.messageStore.fetchInBounds(
+                groupbounds[0][0],
+                groupbounds[0][1],
+                groupbounds[1][0],
+                groupbounds[1][1],
+                this.groupid
+              )
+            }
+          } else {
+            // We have no isochrones and no groups.  Do nothing - we expect code elsewhere to prompt for a location.
+            if (this.search) {
+              // Search within the bounds of the map.
+              console.log(
+                'GetMessages - no isochrones, no groups, search within map bounds'
+              )
+              ret = await this.messageStore.search({
+                messagetype: this.type,
+                search: this.search,
+                swlat,
+                swlng,
+                nelat,
+                nelng,
+              })
+            } else {
+              // Just fetch the bounds of the map.
+              console.log(
+                'GetMessages - no isochrones, no groups, fetch within map bounds'
+              )
+              ret = await this.messageStore.fetchInBounds(
+                swlat,
+                swlng,
+                nelat,
+                nelng
+              )
+            }
           }
         }
+      } else if (this.myGroups?.length) {
+        // We have groups, so fetch the messages in those groups.
+        console.log('GetMessages - some groups, fetch groups')
+        ret = await this.messageStore.fetchMyGroups()
 
-        const ret = await this.messageStore.search(params)
+        // Get the messages in the map bounds too, so that we can show others as secondary.
+        this.secondaryMessageList = await this.messageStore.fetchInBounds(
+          swlat,
+          swlng,
+          nelat,
+          nelng
+        )
+      } else {
+        // We have no groups, so fetch the messages in the map bounds.
+        console.log('GetMessages - no groups, fetch in map bounds')
+        ret = await this.messageStore.fetchInBounds(swlat, swlng, nelat, nelng)
+      }
 
-        if (ret && !this.destroyed) {
-          messages = ret
-        }
+      if (ret && !this.destroyed) {
+        messages = ret
       }
 
       if (messages?.length) {
@@ -735,18 +841,6 @@ export default {
       if (this.me.lat || this.me.lng) {
         this.mapObject.flyTo(new this.L.LatLng(this.me.lat, this.me.lng))
       }
-    },
-    hideMap() {
-      this.miscStore.set({
-        key: 'hidepostmap',
-        value: true,
-      })
-    },
-    showMap() {
-      this.miscStore.set({
-        key: 'hidepostmap',
-        value: false,
-      })
     },
     toJSON(bounds) {
       return [
