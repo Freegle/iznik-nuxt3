@@ -295,6 +295,7 @@ const navBarBottomHidden = computed(() => {
     route.path.startsWith('/give') ||
     route.path.startsWith('/find') ||
     route.path.startsWith('/post') ||
+    route.path.startsWith('/chat') ||
     navBarHidden.value
   )
 })
