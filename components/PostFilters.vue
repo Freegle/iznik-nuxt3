@@ -100,6 +100,7 @@
         variant="white"
         title="Show map and post filters"
         @click="showFilters = true"
+        class="ms-2"
       >
         <div class="d-flex">
           <div class="d-none d-md-block">Map & Filters</div>
