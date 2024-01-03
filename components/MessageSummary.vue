@@ -52,6 +52,7 @@
         />
       </div>
     </div>
+    <div v-observe-visibility="view" />
   </div>
 </template>
 
@@ -119,14 +120,15 @@ export default {
       return ret
     },
   },
-  async mounted() {
-    if (this.me) {
-      await this.messageStore.view(this.id)
-    }
-
-    this.$emit('view')
-  },
   methods: {
+    async view() {
+      console.log('Record summary view', this.message.unseen)
+      if (this.me && this.message.unseen) {
+        await this.messageStore.view(this.id)
+      }
+
+      this.$emit('view')
+    },
     expand() {
       this.$emit('expand')
     },
