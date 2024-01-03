@@ -60,7 +60,7 @@
                 <p>
                   Volunteers won't see any replies you make in here about this
                   message - they'll go to the other freegler. If you want to
-                  conact the volunteers, please use the button below.
+                  contact the volunteers, please use the button below.
                 </p>
                 <GroupSelect
                   v-model="contactGroupId"
