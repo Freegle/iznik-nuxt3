@@ -405,9 +405,11 @@ export default {
         // We're showing all the messages
         $state.complete()
 
-        // Kick off a fetch of the unread count - normally done when we scroll down but we might skip if we've done
-        // too frequently.
-        this.messageStore.fetchCount(this.me.settings?.browseView, false)
+        if (this.me) {
+          // Kick off a fetch of the unread count - normally done when we scroll down but we might skip if we've done
+          // too frequently.
+          this.messageStore.fetchCount(this.me.settings?.browseView, false)
+        }
       }
     },
     wantMessage(m) {
