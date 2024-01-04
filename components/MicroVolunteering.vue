@@ -200,7 +200,7 @@ export default {
 
     const me = authStore.user
 
-    const showInvite = ref(true)
+    const showInvite = ref(false)
     const fetchTask = ref(false)
     const inviteAccepted = computed(() => {
       return me?.trustlevel && me.trustlevel !== 'Declined'
