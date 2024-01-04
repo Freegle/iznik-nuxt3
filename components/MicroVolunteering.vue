@@ -33,6 +33,10 @@
               people in the Freegle community. Plus you'll get a little
               "Supporter" badge, which other people can see, to say thank you.
             </p>
+            <p>
+              We'll also keep in touch by email about what's happening in
+              Freegle and other ways you can support Freegle in future.
+            </p>
           </b-card-text>
         </template>
         <template #footer>
@@ -196,7 +200,7 @@ export default {
 
     const me = authStore.user
 
-    const showInvite = ref(false)
+    const showInvite = ref(true)
     const fetchTask = ref(false)
     const inviteAccepted = computed(() => {
       return me?.trustlevel && me.trustlevel !== 'Declined'
@@ -333,6 +337,11 @@ export default {
         })
 
         await this.authStore.saveMicrovolunteering('Basic')
+
+        // The wording in here covers us for marketing consent.
+        await this.authStore.saveAndGet({
+          marketingconsent: 1,
+        })
 
         await this.getTask()
       } else {
