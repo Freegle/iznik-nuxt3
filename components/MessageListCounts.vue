@@ -8,7 +8,7 @@
       <p class="text--large font-weight-bold">{{ browseCountPlural }}.</p>
       <p>
         Posts you've not seen before show first. Posts you've seen before are
-        down.
+        further down.
       </p>
     </NoticeMessage>
   </div>
