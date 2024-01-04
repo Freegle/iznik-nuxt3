@@ -380,10 +380,14 @@ export default {
       if (this.messagesOnMap) {
         return this.messagesOnMap.slice().sort((a, b) => {
           if (this.selectedSort === 'Unseen') {
-            // Unseen messages first, then by descending date/time.
-            if (a.unseen && !b.unseen) {
+            // Unseen messages first, then by descending date/time.  But we don't want to treat successful posts as
+            // unseen otherwise they bob up to the top.
+            const aunseen = a.unseen && !a.successful
+            const bunseen = b.unseen && !b.successful
+
+            if (aunseen && !bunseen) {
               return -1
-            } else if (!a.unseen && b.unseen) {
+            } else if (!aunseen && bunseen) {
               return 1
             } else {
               return (
