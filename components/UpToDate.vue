@@ -22,13 +22,26 @@
       <p class="text--large font-weight-bold">
         {{ browseCountPlural }}
       </p>
-      <p>Click to refresh.</p>
+      <p v-if="scrollDown">
+        <v-icon icon="angle-double-down" class="pulsate" />
+        Scroll down to read them.
+        <v-icon icon="angle-double-down" class="pulsate" />
+      </p>
+      <p v-else>Click to refresh.</p>
     </NoticeMessage>
   </div>
 </template>
 <script setup>
 import pluralize from 'pluralize'
 import { useMessageStore } from '../stores/message'
+
+defineProps({
+  scrollDown: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+})
 
 const messageStore = useMessageStore()
 
@@ -37,7 +50,7 @@ const browseCount = computed(() => {
 })
 
 const browseCountPlural = computed(() => {
-  return pluralize('new post', browseCount.value, true)
+  return pluralize('unread post', messageStore.count, true)
 })
 
 function reload() {

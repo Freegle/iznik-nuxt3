@@ -36,7 +36,10 @@
               There are no posts in this area at the moment. You can check back
               later, or use the controls below.
             </NoticeMessage>
-            <NoticeMessage v-if="!isochrones.length" variant="warning">
+            <NoticeMessage
+              v-if="browseView === 'nearby' && !isochrones.length"
+              variant="warning"
+            >
               <p class="font-weight-bold">
                 What's your postcode? We'll show you posts nearby.
               </p>
@@ -318,24 +321,26 @@ export default {
   methods: {
     async calculateInitialMapBounds() {
       if (process.client) {
-        // The initial bounds for the map are determined from the isochrones if possible.  We might have them cached
-        // in store.
-        const promises = []
-        promises.push(this.isochroneStore.fetch())
+        if (this.browseView === 'nearby') {
+          // The initial bounds for the map are determined from the isochrones if possible.  We might have them cached
+          // in store.
+          const promises = []
+          promises.push(this.isochroneStore.fetch())
 
-        if (this.me) {
-          // By default we'll be showing the isochrone view in PostMap, so start the fetch of the messages now.  That
-          // way we can display the list rapidly.  Fetching this and the isochrones in parallel reduces latency.
-          promises.push(this.isochroneStore.fetchMessages(true))
+          if (this.me) {
+            // By default we'll be showing the isochrone view in PostMap, so start the fetch of the messages now.  That
+            // way we can display the list rapidly.  Fetching this and the isochrones in parallel reduces latency.
+            promises.push(this.isochroneStore.fetchMessages(true))
+          }
+
+          await Promise.all(promises)
+
+          this.initialBounds = this.isochroneStore.bounds
         }
 
-        await Promise.all(promises)
-
-        this.initialBounds = this.isochroneStore.bounds
-
         if (!this.initialBounds) {
-          // We don't have any isochrones yet. Use the bounding box of the group that our own
-          // location is within.
+          // Either we have no isochrones, or we're showing our groups.  Use the bounding box of the group that
+          // our own location is within.
           let mylat = null
           let mylng = null
 

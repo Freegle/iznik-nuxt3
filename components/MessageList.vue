@@ -11,7 +11,10 @@
     <h2 class="visually-hidden">List of wanteds and offers</h2>
     <div id="visobserver" v-observe-visibility="visibilityChanged" />
     <div v-if="deDuplicatedMessages?.length" id="messageList">
-      <UpToDate v-if="!loading && !deDuplicatedMessages[0].unseen" />
+      <UpToDate
+        v-if="!loading && !deDuplicatedMessages[0].unseen"
+        scroll-down
+      />
       <div
         :id="'messagewrapper-' + deDuplicatedMessages[0].id"
         :ref="'messagewrapper-' + deDuplicatedMessages[0].id"
