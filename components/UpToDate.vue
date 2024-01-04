@@ -22,26 +22,17 @@
       <p class="text--large font-weight-bold">
         {{ browseCountPlural }}
       </p>
-      <p v-if="scrollDown">
+      <p>
         <v-icon icon="angle-double-down" class="pulsate" />
         Scroll down to read them.
         <v-icon icon="angle-double-down" class="pulsate" />
       </p>
-      <p v-else>Click to refresh.</p>
     </NoticeMessage>
   </div>
 </template>
 <script setup>
 import pluralize from 'pluralize'
 import { useMessageStore } from '../stores/message'
-
-defineProps({
-  scrollDown: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
-})
 
 const messageStore = useMessageStore()
 
