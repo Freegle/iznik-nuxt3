@@ -49,6 +49,7 @@
               v-model:forceShowFilters="forceShowFilters"
               v-model:selectedGroup="selectedGroup"
               v-model:selectedType="selectedType"
+              v-model:selectedSort="selectedSort"
               v-model:search="searchTerm"
             />
             <PostMapAndList
@@ -57,6 +58,7 @@
               v-model:search="searchTerm"
               v-model:selectedGroup="selectedGroup"
               v-model:selectedType="selectedType"
+              v-model:selectedSort="selectedSort"
               :initial-bounds="initialBounds"
               force-messages
               group-info
@@ -191,6 +193,7 @@ export default {
       messagesOnMapCount: 0,
       selectedGroup: 0,
       selectedType: 'All',
+      selectedSort: 'Unseen',
       forceShowFilters: false,
       lastCountUpdate: 0,
       updatingCount: false,

@@ -22,6 +22,15 @@
             :options="typeOptions"
           />
         </div>
+        <div class="sort mb-2">
+          <label for="sortOptions">Sort by:</label>
+          <b-form-select
+            id="sortOptions"
+            v-model="sort"
+            :options="sortOptions"
+            class="shrink"
+          />
+        </div>
         <div class="close d-flex justify-content-end">
           <b-button
             variant="white"
@@ -127,6 +136,10 @@ const props = defineProps({
     type: String,
     default: 'All',
   },
+  selectedSort: {
+    type: String,
+    default: 'Unseen',
+  },
   forceShowFilters: {
     type: Boolean,
     default: false,
@@ -137,6 +150,7 @@ const emit = defineEmits([
   'update:search',
   'update:selectedGroup',
   'update:selectedType',
+  'update:selectedSort',
 ])
 
 const breakpoint = computed(() => {
@@ -303,6 +317,33 @@ watch(
 watch(type, (newVal) => {
   emit('update:selectedType', newVal)
 })
+
+// Sort
+
+const sortOptions = [
+  {
+    value: 'Unseen',
+    text: 'Unseen posts first',
+    selected: true,
+  },
+  {
+    value: 'Newest',
+    text: 'Newest post first',
+  },
+]
+
+const sort = ref('Unseen')
+
+watch(
+  () => props.sort,
+  (newVal) => {
+    sort.value = newVal
+  }
+)
+
+watch(sort, (newVal) => {
+  emit('update:selectedSort', newVal)
+})
 </script>
 <style scoped lang="scss">
 @import 'assets/css/_color-vars.scss';
@@ -323,13 +364,13 @@ watch(type, (newVal) => {
   display: grid;
 
   grid-template-columns: 1fr 3rem;
-  grid-template-rows: 1fr 1fr min-content;
+  grid-template-rows: min-content min-content min-content min-content;
   grid-column-gap: 10px;
   grid-row-gap: 10px;
 
   @include media-breakpoint-up(md) {
     grid-template-columns: 2fr 1fr 3rem;
-    grid-template-rows: 1fr min-content;
+    grid-template-rows: min-content min-content min-content;
   }
 
   .group {
@@ -347,6 +388,16 @@ watch(type, (newVal) => {
     }
   }
 
+  .sort {
+    grid-column: 1 / 2;
+    grid-row: 2 / 3;
+
+    @include media-breakpoint-up(md) {
+      grid-column: 1 / 2;
+      grid-row: 3 / 4;
+    }
+  }
+
   .close {
     grid-column: 2 / 3;
     grid-row: 1 / 2;
@@ -359,11 +410,11 @@ watch(type, (newVal) => {
 
   .isochrones {
     grid-column: 1 / 3;
-    grid-row: 3 / 4;
+    grid-row: 4 / 5;
 
     @include media-breakpoint-up(md) {
       grid-column: 1 / 4;
-      grid-row: 2 / 3;
+      grid-row: 3 / 4;
     }
   }
 }

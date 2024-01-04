@@ -108,6 +108,7 @@
           v-model:none="noneFound"
           :selected-group="selectedGroup"
           :selected-type="selectedType"
+          :selected-sort="selectedSort"
           :messages-for-list="filteredMessages"
           :loading="loading"
           :jobs="jobs"
@@ -217,6 +218,11 @@ export default {
       type: Number,
       required: false,
       default: 0,
+    },
+    selectedSort: {
+      type: String,
+      required: false,
+      default: 'Unseen',
     },
   },
   setup(props) {
@@ -373,12 +379,19 @@ export default {
     sortedMessagesOnMap() {
       if (this.messagesOnMap) {
         return this.messagesOnMap.slice().sort((a, b) => {
-          // Unseen messages first, then by descending date/time.
-          if (a.unseen && !b.unseen) {
-            return -1
-          } else if (!a.unseen && b.unseen) {
-            return 1
+          if (this.selectedSort === 'Unseen') {
+            // Unseen messages first, then by descending date/time.
+            if (a.unseen && !b.unseen) {
+              return -1
+            } else if (!a.unseen && b.unseen) {
+              return 1
+            } else {
+              return (
+                new Date(b.arrival).getTime() - new Date(a.arrival).getTime()
+              )
+            }
           } else {
+            // Descending date/time.
             return new Date(b.arrival).getTime() - new Date(a.arrival).getTime()
           }
         })

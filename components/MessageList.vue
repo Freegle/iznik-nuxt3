@@ -11,7 +11,14 @@
     <h2 class="visually-hidden">List of wanteds and offers</h2>
     <div id="visobserver" v-observe-visibility="visibilityChanged" />
     <div v-if="deDuplicatedMessages?.length" id="messageList">
-      <UpToDate v-if="!loading && !deDuplicatedMessages[0].unseen" />
+      <MessageListCounts v-if="!loading && selectedSort === 'Unseen'" />
+      <MessageListUpToDate
+        v-if="
+          !loading &&
+          selectedSort === 'Unseen' &&
+          !deDuplicatedMessages[0].unseen
+        "
+      />
       <div
         :id="'messagewrapper-' + deDuplicatedMessages[0].id"
         :ref="'messagewrapper-' + deDuplicatedMessages[0].id"
@@ -49,8 +56,13 @@
         v-for="(message, ix) in deDuplicatedMessages.slice(1)"
         :key="'messagelist-' + message.id"
       >
-        <UpToDate
-          v-if="!loading && !message.unseen && deDuplicatedMessages[ix].unseen"
+        <MessageListUpToDate
+          v-if="
+            !loading &&
+            selectedSort === 'Unseen' &&
+            !message.unseen &&
+            deDuplicatedMessages[ix].unseen
+          "
         />
         <div
           :id="'messagewrapper-' + message.id"
@@ -99,7 +111,7 @@ import { useGroupStore } from '../stores/group'
 import { useMessageStore } from '../stores/message'
 import { throttleFetches } from '../composables/useThrottle'
 import { useIsochroneStore } from '../stores/isochrone'
-import UpToDate from './UpToDate'
+import MessageListUpToDate from './MessageListUpToDate'
 import { ref } from '#imports'
 import InfiniteLoading from '~/components/InfiniteLoading'
 import { useMiscStore } from '~/stores/misc'
@@ -111,7 +123,7 @@ const MIN_TO_SHOW = 10
 
 export default {
   components: {
-    UpToDate,
+    MessageListUpToDate,
     OurMessage,
     GroupHeader,
     InfiniteLoading,
@@ -131,6 +143,11 @@ export default {
       type: String,
       required: false,
       default: 'All',
+    },
+    selectedSort: {
+      type: String,
+      required: false,
+      default: 'Unseen',
     },
     loading: {
       type: Boolean,
