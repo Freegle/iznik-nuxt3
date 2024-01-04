@@ -690,62 +690,58 @@ export default {
               nelng
             )
           }
-        } else {
+        } else if (this.myGroups?.length) {
           // We don't, which will be because we don't have a location.
-          if (this.myGroups?.length) {
-            // Use the bounding boxes of the groups we are in.
-            const groupbounds = this.myGroupsBoundingBox
+          // Use the bounding boxes of the groups we are in.
+          const groupbounds = this.myGroupsBoundingBox
 
-            if (this.search) {
-              console.log('GetMessages - search within group bounds')
-              ret = await this.messageStore.search({
-                messagetype: this.type,
-                search: this.search,
-                swlat: groupbounds[0][0],
-                swlng: groupbounds[0][1],
-                nelat: groupbounds[1][0],
-                nelng: groupbounds[1][1],
-              })
-            } else {
-              // Just fetch the messages within those bounds.    This will show a bit more than the strict
-              // "all my groups" option, but not as much as we might show using the map bounds.
-              console.log('GetMessages - fetch in group bounds')
-              ret = await this.messageStore.fetchInBounds(
-                groupbounds[0][0],
-                groupbounds[0][1],
-                groupbounds[1][0],
-                groupbounds[1][1],
-                this.groupid
-              )
-            }
+          if (this.search) {
+            console.log('GetMessages - search within group bounds')
+            ret = await this.messageStore.search({
+              messagetype: this.type,
+              search: this.search,
+              swlat: groupbounds[0][0],
+              swlng: groupbounds[0][1],
+              nelat: groupbounds[1][0],
+              nelng: groupbounds[1][1],
+            })
           } else {
-            // We have no isochrones and no groups.  Do nothing - we expect code elsewhere to prompt for a location.
-            if (this.search) {
-              // Search within the bounds of the map.
-              console.log(
-                'GetMessages - no isochrones, no groups, search within map bounds'
-              )
-              ret = await this.messageStore.search({
-                messagetype: this.type,
-                search: this.search,
-                swlat,
-                swlng,
-                nelat,
-                nelng,
-              })
-            } else {
-              // Just fetch the bounds of the map.
-              console.log(
-                'GetMessages - no isochrones, no groups, fetch within map bounds'
-              )
-              ret = await this.messageStore.fetchInBounds(
-                swlat,
-                swlng,
-                nelat,
-                nelng
-              )
-            }
+            // Just fetch the messages within those bounds.    This will show a bit more than the strict
+            // "all my groups" option, but not as much as we might show using the map bounds.
+            console.log('GetMessages - fetch in group bounds')
+            ret = await this.messageStore.fetchInBounds(
+              groupbounds[0][0],
+              groupbounds[0][1],
+              groupbounds[1][0],
+              groupbounds[1][1],
+              this.groupid
+            )
           }
+        } else if (this.search) {
+          // We have no isochrones and no groups.  Do nothing - we expect code elsewhere to prompt for a location.
+          // Search within the bounds of the map.
+          console.log(
+            'GetMessages - no isochrones, no groups, search within map bounds'
+          )
+          ret = await this.messageStore.search({
+            messagetype: this.type,
+            search: this.search,
+            swlat,
+            swlng,
+            nelat,
+            nelng,
+          })
+        } else {
+          // Just fetch the bounds of the map.
+          console.log(
+            'GetMessages - no isochrones, no groups, fetch within map bounds'
+          )
+          ret = await this.messageStore.fetchInBounds(
+            swlat,
+            swlng,
+            nelat,
+            nelng
+          )
         }
       } else if (this.myGroups?.length) {
         // We have groups, so fetch the messages in those groups.

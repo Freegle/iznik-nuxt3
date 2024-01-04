@@ -286,7 +286,7 @@ export default {
 
       return ret
     },
-    async supporterInfo() {
+    supporterInfo() {
       this.showSupporterInfo = true
     },
   },

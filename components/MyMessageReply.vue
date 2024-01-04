@@ -287,7 +287,7 @@ export default {
     promise() {
       this.showPromiseModal = true
     },
-    async unpromise() {
+    unpromise() {
       this.showRenegeModal = true
     },
     showProfileModal() {

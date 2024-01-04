@@ -21,7 +21,11 @@
                 <div
                   class="d-flex justify-content-between flex-wrap mb-2 mt-3 border-bottom"
                 >
-                  <form role="search" class="mb-1 mr-1 ml-1 ml-md-0" @submit.prevent>
+                  <form
+                    role="search"
+                    class="mb-1 mr-1 ml-1 ml-md-0"
+                    @submit.prevent
+                  >
                     <label for="search-bar" class="visually-hidden"
                       >Search chats</label
                     >

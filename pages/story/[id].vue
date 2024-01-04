@@ -36,6 +36,7 @@
   </client-only>
 </template>
 <script setup>
+import { useRoute } from 'vue-router'
 import { buildHead } from '../../composables/useBuildHead'
 import { useStoryStore } from '../../stores/stories'
 import NoticeMessage from '~/components/NoticeMessage'

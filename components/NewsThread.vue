@@ -224,7 +224,6 @@
 </template>
 <script>
 import { useNewsfeedStore } from '../stores/newsfeed'
-import { useStoryStore } from '../stores/stories'
 import SpinButton from './SpinButton'
 import AutoHeightTextarea from './AutoHeightTextarea'
 import NewsReplies from '~/components/NewsReplies'

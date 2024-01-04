@@ -117,6 +117,7 @@ onMounted(async () => {
 })
 
 const setBounds = () => {
+  // eslint-disable-next-line new-cap
   bounds.value = new L.geoJSON(authorityArea).getBounds().pad(0.1)
 }
 
