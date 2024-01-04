@@ -216,7 +216,7 @@ export default defineNuxtConfig({
       // Make Lint errors cause build failures.
       eslintPlugin(),
       legacy({
-        targets: ['es2015'],
+        targets: ['since 2015'],
       }),
       sentryVitePlugin({
         org: 'freegle',
