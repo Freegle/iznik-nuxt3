@@ -146,14 +146,14 @@ export const useMessageStore = defineStore({
       const ret = await api(this.config).message.search(params)
       return ret
     },
-    async fetchMyGroups() {
+    async fetchMyGroups(gid) {
       let ret = null
 
       if (this.fetchingMyGroups) {
         ret = await this.fetchingMyGroups
         await nextTick()
       } else {
-        this.fetchingMyGroups = api(this.config).message.mygroups()
+        this.fetchingMyGroups = api(this.config).message.mygroups(gid)
         ret = await this.fetchingMyGroups
         this.fetchingMyGroups = null
       }

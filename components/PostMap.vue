@@ -626,15 +626,9 @@ export default {
             groupids: [this.groupid],
           })
         } else {
-          // Just fetch that the messages within the map which are on that group.
+          // Just fetch that the messages on that group.
           console.log('GetMessages - fetch on specific group')
-          ret = await this.messageStore.fetchInBounds(
-            swlat,
-            swlng,
-            nelat,
-            nelng,
-            this.groupid
-          )
+          ret = await this.messageStore.fetchMyGroups(this.groupid)
 
           if (!this.mapHidden) {
             // Fetch all the messages in the map bounds too, so that we can show others as secondary.

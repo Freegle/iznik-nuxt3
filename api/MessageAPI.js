@@ -32,8 +32,8 @@ export default class MessageAPI extends BaseAPI {
     )
   }
 
-  mygroups() {
-    return this.$getv2('/message/mygroups')
+  mygroups(gid) {
+    return this.$getv2('/message/mygroups' + (gid ? '/' + gid : ''))
   }
 
   fetchMessages(params) {
