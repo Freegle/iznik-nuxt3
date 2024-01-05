@@ -332,17 +332,21 @@ const sortOptions = [
   },
 ]
 
-const sort = ref('Unseen')
+const authStore = useAuthStore()
+const sort = computed({
+  get() {
+    return authStore.user?.settings?.browseSort || 'Unseen'
+  },
+  async set(val) {
+    const settings = useAuthStore().user?.settings
+    settings.browseSort = val
 
-watch(
-  () => props.sort,
-  (newVal) => {
-    sort.value = newVal
-  }
-)
+    await authStore.saveAndGet({
+      settings,
+    })
 
-watch(sort, (newVal) => {
-  emit('update:selectedSort', newVal)
+    emit('update:selectedSort', val)
+  },
 })
 </script>
 <style scoped lang="scss">
