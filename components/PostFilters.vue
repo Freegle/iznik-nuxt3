@@ -328,7 +328,7 @@ const sortOptions = [
   },
   {
     value: 'Newest',
-    text: 'Newest post first',
+    text: 'Newest posts first',
   },
 ]
 
