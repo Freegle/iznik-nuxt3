@@ -390,7 +390,7 @@ watch(sort, (newVal) => {
 
   .sort {
     grid-column: 1 / 2;
-    grid-row: 2 / 3;
+    grid-row: 3 / 4;
 
     @include media-breakpoint-up(md) {
       grid-column: 1 / 2;
