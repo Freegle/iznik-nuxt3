@@ -193,4 +193,11 @@ export default class MessageAPI extends BaseAPI {
       log
     )
   }
+
+  async markSeen(ids) {
+    return await this.$post('/messages', {
+      action: 'MarkSeen',
+      ids,
+    })
+  }
 }

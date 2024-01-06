@@ -310,6 +310,19 @@ export const useMessageStore = defineStore({
         ? activeMessages.length
         : 0
     },
+    async markSeen() {
+      const ids = []
+
+      // Scan list
+      for (const id in this.list) {
+        if (this.list[id].unseen) {
+          ids.push(id)
+        }
+      }
+
+      await api(this.config).message.markSeen(ids)
+      await this.fetchCount()
+    },
   },
   getters: {
     byId: (state) => {
