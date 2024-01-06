@@ -11,14 +11,10 @@
     <h2 class="visually-hidden">List of wanteds and offers</h2>
     <div id="visobserver" v-observe-visibility="visibilityChanged" />
     <div v-if="deDuplicatedMessages?.length" id="messageList">
-      <MessageListCounts v-if="!loading && selectedSort === 'Unseen'" />
-      <MessageListUpToDate
-        v-if="
-          !loading &&
-          selectedSort === 'Unseen' &&
-          !deDuplicatedMessages[0].unseen
-        "
-      />
+      <div v-if="!loading && selectedSort === 'Unseen'">
+        <MessageListCounts v-if="browseCount" />
+        <MessageListUpToDate else />
+      </div>
       <div
         :id="'messagewrapper-' + deDuplicatedMessages[0].id"
         :ref="'messagewrapper-' + deDuplicatedMessages[0].id"
@@ -226,6 +222,9 @@ export default {
   },
   computed: {
     ...mapState(useIsochroneStore, { isochroneBounds: 'bounds' }),
+    browseCount() {
+      return this.messageStore.count
+    },
     group() {
       let ret = null
 
