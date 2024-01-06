@@ -6,7 +6,7 @@
       </div>
       <VisibleWhen :at="['xs', 'sm', 'md', 'lg']">
         <div
-          v-if="allowAd"
+          v-if="allowAd && !noAdRendered"
           class="d-flex justify-content-around w-100 sticky"
           style="height: 52px"
         >
@@ -17,6 +17,7 @@
             class="sticky"
             style="width: 320px; height: 50px; margin-top: 2px"
             pixel
+            @rendered="adRendered"
           />
         </div>
         <div
@@ -25,7 +26,7 @@
           style="height: 52px"
         >
           <nuxt-link to="/donate" class="text-white nodecor">
-            Keep Freegle running. Click to donate.
+            Help keep Freegle running. Click to donate.
           </nuxt-link>
         </div>
       </VisibleWhen>
@@ -95,6 +96,7 @@ export default {
     return {
       showLoader: true,
       timeTimer: null,
+      noAdRendered: false,
     }
   },
   computed: {
@@ -251,6 +253,9 @@ export default {
           }
         })
       }
+    },
+    adRendered(adShown) {
+      this.noAdRendered = !adShown
     },
   },
 }

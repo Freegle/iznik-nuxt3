@@ -173,7 +173,12 @@ async function visibilityChanged(visible) {
         })
 
         window.googletag.cmd.push(function () {
-          window.googletag.display(props.divId)
+          try {
+            window.googletag.display(props.divId)
+          } catch (e) {
+            console.log('Exception in ad display', e)
+            emit('rendered', false)
+          }
         })
       }
     } catch (e) {
