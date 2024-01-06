@@ -80,7 +80,7 @@
       </b-card-body>
     </b-card>
     <b-modal
-      v-if="story.image"
+      v-if="story?.image"
       ref="photoModal"
       v-model="showPhotoModal"
       scrollable
