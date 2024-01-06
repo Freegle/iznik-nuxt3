@@ -31,6 +31,7 @@ export default defineNuxtPlugin((nuxtApp) => {
 
       return true
     } else if (
+      err.message?.includes('leaflet') ||
       err.stack?.includes('leaflet') ||
       err.stack?.includes('LMap') ||
       err.stack?.includes('LMarker') ||
