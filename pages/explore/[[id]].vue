@@ -20,6 +20,7 @@
               [58.6350001085, 1.68153079591],
             ]"
             start-on-groups
+            show-many
           />
         </b-col>
       </b-row>

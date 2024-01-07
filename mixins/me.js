@@ -1,6 +1,7 @@
 // Global mixin so that every component can access the logged in state and user.  We use a mixin rather than the Vue
 // idiom of provide/inject because you still have to remember to inject in each component.  And you won't, will you?
 import cloneDeep from 'lodash.clonedeep'
+import Wkt from 'wicket'
 import { useAuthStore } from '~/stores/auth'
 import { fetchMe } from '~/composables/useMe'
 
@@ -106,10 +107,31 @@ export default {
 
       this.myGroups.forEach((g) => {
         if (g.bbox) {
-          swlat = swlat === null ? g.bbox.swlat : Math.min(swlat, g.bbox.swlat)
-          swlng = swlng === null ? g.bbox.swlng : Math.min(swlng, g.bbox.swlng)
-          nelat = nelat === null ? g.bbox.nelat : Math.max(nelat, g.bbox.nelat)
-          nelng = nelng === null ? g.bbox.nelng : Math.min(nelng, g.bbox.nelng)
+          const wkt = new Wkt.Wkt()
+          try {
+            wkt.read(g.bbox)
+            const obj = wkt.toObject()
+            const thisbounds = obj.getBounds()
+            const sw = thisbounds.getSouthWest()
+            const ne = thisbounds.getNorthEast()
+
+            const bounds = new window.L.LatLngBounds([
+              [sw.lat, sw.lng],
+              [ne.lat, ne.lng],
+            ]).pad(0.1)
+
+            const gswlat = bounds.getSouthWest().lat
+            const gswlng = bounds.getSouthWest().lng
+            const gnelat = bounds.getNorthEast().lat
+            const gnelng = bounds.getNorthEast().lng
+
+            swlat = swlat === null ? gswlat : Math.min(swlat, gswlat)
+            swlng = swlng === null ? gswlng : Math.min(swlng, gswlng)
+            nelat = nelat === null ? gnelat : Math.max(nelat, gnelat)
+            nelng = nelng === null ? gnelng : Math.min(nelng, gnelng)
+          } catch (e) {
+            console.log('WKT error', location, e)
+          }
         }
       })
 

@@ -190,6 +190,7 @@ export default {
       manyToShow: 20,
       shownMany: false,
       lastBounds: null,
+      lastBoundsFetch: null,
       zoom: 5,
       destroyed: false,
       mapIdle: 0,
@@ -379,7 +380,7 @@ export default {
       if (newVal && this.mapObject) {
         // Make the map show the isochrone view.
         try {
-          this.mapObject.flyToBounds(newVal)
+          this.mapObject.fitBounds(newVal)
         } catch (e) {
           // This happens when leaflet is destroyed.
           console.log('Ignore flyToBounds exception', e)
@@ -507,7 +508,8 @@ export default {
               if (e && e.geocode && e.geocode.bbox) {
                 // Empty out the query box so that the dropdown closes.  Note that "this" is the control object,
                 // which is why this isn't in a separate method.
-                console.log('Selected', e)
+                console.log('Search for place', e)
+                this.moved = true
                 this.setQuery('')
 
                 // If we don't find anything at this location we will want to zoom out.
@@ -702,14 +704,24 @@ export default {
           } else {
             // Just fetch the messages within those bounds.    This will show a bit more than the strict
             // "all my groups" option, but not as much as we might show using the map bounds.
-            console.log('GetMessages - fetch in group bounds')
-            ret = await this.messageStore.fetchInBounds(
-              groupbounds[0][0],
-              groupbounds[0][1],
-              groupbounds[1][0],
-              groupbounds[1][1],
-              this.groupid
+            console.log(
+              'GetMessages - fetch in group bounds',
+              JSON.stringify(groupbounds)
             )
+
+            if (this.lastBoundsFetch !== JSON.stringify(groupbounds)) {
+              this.lastBoundsFetch = JSON.stringify(groupbounds)
+
+              ret = await this.messageStore.fetchInBounds(
+                groupbounds[0][0],
+                groupbounds[0][1],
+                groupbounds[1][0],
+                groupbounds[1][1],
+                this.groupid
+              )
+            } else {
+              console.log('Already fetched that.')
+            }
           }
         } else if (this.search) {
           // We have no isochrones and no groups.  Do nothing - we expect code elsewhere to prompt for a location.
@@ -771,37 +783,45 @@ export default {
             return m.type === this.type
           })
         }
+      }
 
-        let countInBounds = 0
+      let countInBounds = 0
 
-        messages.forEach((m) => {
-          if (
-            swlat <= m.lat &&
-            m.lat <= nelat &&
-            swlng <= m.lng &&
-            m.lng <= nelng
-          ) {
-            countInBounds++
-          }
-        })
-
-        if (countInBounds >= this.manyToShow) {
-          // We have seen lots, so we don't need to do the auto zoom out thing now.
-          this.shownMany = true
-        } else if (
-          !this.search &&
-          this.showMany &&
-          countInBounds < this.manyToShow &&
-          !this.shownMany
+      messages.forEach((m) => {
+        if (
+          swlat <= m.lat &&
+          m.lat <= nelat &&
+          swlng <= m.lng &&
+          m.lng <= nelng
         ) {
-          // If we haven't got more than 1 message at this zoom level, zoom out.  That means we'll always show at
-          // least something.  This is useful when we search for a specific place.
-          const currzoom = this.mapObject.getZoom()
-          if (currzoom > this.minZoom) {
-            this.mapObject.setZoom(currzoom - 1)
-          } else {
-            this.shownMany = true
-          }
+          countInBounds++
+        }
+      })
+
+      if (countInBounds >= this.manyToShow) {
+        // We have seen lots, so we don't need to do the auto zoom out thing now.
+        this.shownMany = true
+      } else if (
+        !this.search &&
+        this.showMany &&
+        countInBounds < this.manyToShow &&
+        !this.shownMany
+      ) {
+        // If we haven't got more than 1 message at this zoom level, zoom out.  That means we'll always show at
+        // least something.  This is useful when we search for a specific place.
+        const currzoom = this.mapObject.getZoom()
+        if (currzoom > this.minZoom) {
+          console.log(
+            'Not enough showing, zoom out',
+            countInBounds,
+            this.manyToShow,
+            currzoom,
+            this.minZoom
+          )
+          this.mapObject.setZoom(currzoom - 1)
+          this.moved = true
+        } else {
+          this.shownMany = true
         }
       }
 

@@ -519,7 +519,7 @@ export default {
     },
     searched() {
       // When we've searched on a place, we want to reset the selected group otherwise we won't show anything.
-      this.$emit('updated:selectedGroup', 0)
+      this.$emit('update:selectedGroup', 0)
     },
   },
 }
