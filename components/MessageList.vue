@@ -11,7 +11,9 @@
     <h2 class="visually-hidden">List of wanteds and offers</h2>
     <div id="visobserver" v-observe-visibility="visibilityChanged" />
     <div v-if="deDuplicatedMessages?.length" id="messageList">
-      <div v-if="!loading && selectedSort === 'Unseen' && showCountsUnseen">
+      <div
+        v-if="!loading && selectedSort === 'Unseen' && showCountsUnseen && me"
+      >
         <MessageListCounts v-if="browseCount" />
         <MessageListUpToDate else />
       </div>
