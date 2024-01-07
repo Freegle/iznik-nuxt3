@@ -187,6 +187,12 @@ export default {
     }
 
     const me = authStore.user
+    const mod =
+      me &&
+      (me.systemrole === 'Moderator' ||
+        me.systemrole === 'Support' ||
+        me.systemrole === 'Admin')
+
     const settings = me?.settings
     const distance = settings?.newsfeedarea || 0
     const error = ref(false)
@@ -197,14 +203,15 @@ export default {
         // Force as there may be changes since we loaded what was in the store.
         const newsfeed = await newsfeedStore.fetch(id, true)
 
-        if (!newsfeed?.id || newsfeed?.deleted) {
+        // Mods can see deleted posts.
+        if (!mod && (!newsfeed?.id || newsfeed?.deleted)) {
           error.value = true
         } else if (newsfeed?.id !== newsfeed?.threadhead) {
           threadhead.value = newsfeed.threadhead
 
           const fetched = await newsfeedStore.fetch(newsfeed.threadhead)
 
-          if (!fetched?.id || fetched?.deleted) {
+          if (!mod && (!fetched?.id || fetched?.deleted)) {
             error.value = true
           }
         } else {

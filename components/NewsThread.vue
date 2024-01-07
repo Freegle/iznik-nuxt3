@@ -92,6 +92,7 @@
         <span v-if="!newsfeed?.closed">
           <div v-if="enterNewLine">
             <OurAtTa
+              v-if="!newsfeed.deleted"
               ref="at"
               :members="tagusers"
               class="flex-shrink-2 input-group"
@@ -131,6 +132,7 @@
             @keydown.enter.exact="sendComment"
           >
             <OurAtTa
+              v-if="!newsfeed.deleted"
               ref="at"
               :members="tagusers"
               class="flex-shrink-2 input-group"
