@@ -405,7 +405,9 @@ import StatsImpact from '~/components/StatsImpact'
 import { buildHead } from '~/composables/useBuildHead'
 import { useStatsStore } from '~/stores/stats'
 
-const GroupMarker = () => import('~/components/GroupMarker')
+const GroupMarker = defineAsyncComponent(() =>
+  import('~/components/GroupMarker')
+)
 
 // Benefit of reuse per tonne is £711 and CO2 impact is -0.51tCO2eq based on WRAP figures.
 // https://wrap.org.uk/resources/tool/benefits-reuse-tool

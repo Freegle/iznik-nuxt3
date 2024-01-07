@@ -176,7 +176,9 @@ import { twem } from '~/composables/useTwem'
 
 import ReplyTime from '~/components/ReplyTime'
 import ProfileHeader from '~/components/ProfileHeader'
-const MessageList = () => import('~/components/MessageList.vue')
+const MessageList = defineAsyncComponent(() =>
+  import('~/components/MessageList.vue')
+)
 const SupporterInfoModal = defineAsyncComponent(() =>
   import('~/components/SupporterInfoModal.vue')
 )

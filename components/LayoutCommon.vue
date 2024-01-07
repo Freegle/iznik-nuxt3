@@ -76,10 +76,16 @@ import { useChatStore } from '~/stores/chat'
 import replyToPost from '@/mixins/replyToPost'
 import ChatButton from '~/components/ChatButton'
 import VisibleWhen from '~/components/VisibleWhen'
-const SupportLink = () => import('~/components/SupportLink')
-const BouncingEmail = () => import('~/components/BouncingEmail')
-const BreakpointFettler = () => import('~/components/BreakpointFettler')
-const ExternalDa = () => import('~/components/ExternalDa')
+const SupportLink = defineAsyncComponent(() =>
+  import('~/components/SupportLink')
+)
+const BouncingEmail = defineAsyncComponent(() =>
+  import('~/components/BouncingEmail')
+)
+const BreakpointFettler = defineAsyncComponent(() =>
+  import('~/components/BreakpointFettler')
+)
+const ExternalDa = defineAsyncComponent(() => import('~/components/ExternalDa'))
 
 export default {
   components: {

@@ -57,7 +57,9 @@ import { setupChat } from '~/composables/useChat'
 // Don't use dynamic imports because it stops us being able to scroll to the bottom after render.
 import ChatMessage from '~/components/ChatMessage.vue'
 
-const ChatNotVisible = () => import('~/components/ChatNotVisible.vue')
+const ChatNotVisible = defineAsyncComponent(() =>
+  import('~/components/ChatNotVisible.vue')
+)
 
 export default {
   components: {

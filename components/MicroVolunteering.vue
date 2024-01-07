@@ -163,13 +163,18 @@ import { useMiscStore } from '../stores/misc'
 import { useAuthStore } from '../stores/auth'
 import { ref } from '#imports'
 
-const MicroVolunteeringFacebook = () => import('./MicroVolunteeringFacebook')
-const MicroVolunteeringPhotosRotate = () =>
+const MicroVolunteeringFacebook = defineAsyncComponent(() =>
+  import('./MicroVolunteeringFacebook')
+)
+const MicroVolunteeringPhotosRotate = defineAsyncComponent(() =>
   import('./MicroVolunteeringPhotosRotate')
-const MicroVolunteeringCheckMessage = () =>
+)
+const MicroVolunteeringCheckMessage = defineAsyncComponent(() =>
   import('./MicroVolunteeringCheckMessage')
-const MicroVolunteeringSimilarTerms = () =>
+)
+const MicroVolunteeringSimilarTerms = defineAsyncComponent(() =>
   import('./MicroVolunteeringSimilarTerms')
+)
 
 export default {
   components: {

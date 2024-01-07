@@ -58,7 +58,9 @@ import { useAuthStore } from '../stores/auth'
 import { ref, computed } from '#imports'
 import NewsRefer from '~/components/NewsRefer'
 
-const NewsReply = () => import('~/components/NewsReply.vue')
+const NewsReply = defineAsyncComponent(() =>
+  import('~/components/NewsReply.vue')
+)
 
 const INITIAL_NUMBER_OF_REPLIES_TO_SHOW = 5
 

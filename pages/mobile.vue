@@ -57,8 +57,12 @@
 <script>
 import { useRoute } from 'vue-router'
 import { buildHead } from '~/composables/useBuildHead'
-const ExternalLink = () => import('~/components/ExternalLink')
-const SupportLink = () => import('~/components/SupportLink')
+const ExternalLink = defineAsyncComponent(() =>
+  import('~/components/ExternalLink')
+)
+const SupportLink = defineAsyncComponent(() =>
+  import('~/components/SupportLink')
+)
 
 export default {
   components: { ExternalLink, SupportLink },

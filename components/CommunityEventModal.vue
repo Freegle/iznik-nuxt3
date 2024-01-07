@@ -391,12 +391,24 @@ import { ref } from '#imports'
 import { twem } from '~/composables/useTwem'
 import { useModal } from '~/composables/useModal'
 
-const GroupSelect = () => import('~/components/GroupSelect')
-const OurFilePond = () => import('~/components/OurFilePond')
-const StartEndCollection = () => import('~/components/StartEndCollection')
-const NoticeMessage = () => import('~/components/NoticeMessage')
-const DonationButton = () => import('~/components/DonationButton')
-const ExternalLink = () => import('~/components/ExternalLink')
+const GroupSelect = defineAsyncComponent(() =>
+  import('~/components/GroupSelect')
+)
+const OurFilePond = defineAsyncComponent(() =>
+  import('~/components/OurFilePond')
+)
+const StartEndCollection = defineAsyncComponent(() =>
+  import('~/components/StartEndCollection')
+)
+const NoticeMessage = defineAsyncComponent(() =>
+  import('~/components/NoticeMessage')
+)
+const DonationButton = defineAsyncComponent(() =>
+  import('~/components/DonationButton')
+)
+const ExternalLink = defineAsyncComponent(() =>
+  import('~/components/ExternalLink')
+)
 
 defineRule('required', required)
 defineRule('email', email)

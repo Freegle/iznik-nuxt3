@@ -54,7 +54,9 @@ import { useModal } from '~/composables/useModal'
 import UserRatings from '~/components/UserRatings'
 import DateFormatted from '~/components/DateFormatted'
 
-const NoticeMessage = () => import('~/components/NoticeMessage')
+const NoticeMessage = defineAsyncComponent(() =>
+  import('~/components/NoticeMessage')
+)
 
 export default {
   components: {

@@ -53,7 +53,9 @@ import { useAuthStore } from '~/stores/auth'
 import NoticeMessage from '~/components/NoticeMessage'
 import GlobalWarning from '~/components/GlobalWarning'
 import { useDonationAskModal } from '~/composables/useDonationAskModal'
-const MyMessage = () => import('~/components/MyMessage.vue')
+const MyMessage = defineAsyncComponent(() =>
+  import('~/components/MyMessage.vue')
+)
 const DonationAskModal = defineAsyncComponent(() =>
   import('~/components/DonationAskModal')
 )

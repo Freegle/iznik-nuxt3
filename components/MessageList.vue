@@ -114,9 +114,13 @@ import MessageListUpToDate from './MessageListUpToDate'
 import { ref } from '#imports'
 import InfiniteLoading from '~/components/InfiniteLoading'
 import { useMiscStore } from '~/stores/misc'
-const OurMessage = () => import('~/components/OurMessage.vue')
-const GroupHeader = () => import('~/components/GroupHeader.vue')
-const JobsTopBar = () => import('~/components/JobsTopBar')
+const OurMessage = defineAsyncComponent(() =>
+  import('~/components/OurMessage.vue')
+)
+const GroupHeader = defineAsyncComponent(() =>
+  import('~/components/GroupHeader.vue')
+)
+const JobsTopBar = defineAsyncComponent(() => import('~/components/JobsTopBar'))
 
 const MIN_TO_SHOW = 10
 

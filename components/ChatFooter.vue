@@ -282,17 +282,24 @@ import SpinButton from './SpinButton'
 import { untwem } from '~/composables/useTwem'
 
 // Don't use dynamic imports because it stops us being able to scroll to the bottom after render.
-const OurFilePond = () => import('~/components/OurFilePond')
-const UserRatings = () => import('~/components/UserRatings')
-const PromiseModal = () =>
-  defineAsyncComponent(() => import('~/components/PromiseModal'))
+const OurFilePond = defineAsyncComponent(() =>
+  import('~/components/OurFilePond')
+)
+const UserRatings = defineAsyncComponent(() =>
+  import('~/components/UserRatings')
+)
+const PromiseModal = defineAsyncComponent(() =>
+  import('~/components/PromiseModal')
+)
 const ProfileModal = defineAsyncComponent(() =>
   import('~/components/ProfileModal')
 )
 const AddressModal = defineAsyncComponent(() =>
   import('~/components/AddressModal')
 )
-const NoticeMessage = () => import('~/components/NoticeMessage')
+const NoticeMessage = defineAsyncComponent(() =>
+  import('~/components/NoticeMessage')
+)
 const ChatRSVPModal = defineAsyncComponent(() =>
   import('~/components/ChatRSVPModal')
 )
@@ -302,7 +309,9 @@ const NudgeWarningModal = defineAsyncComponent(() =>
 const NudgeTooSoonWarningModal = defineAsyncComponent(() =>
   import('~/components/NudgeTooSoonWarningModal')
 )
-const MicroVolunteering = () => import('~/components/MicroVolunteering')
+const MicroVolunteering = defineAsyncComponent(() =>
+  import('~/components/MicroVolunteering')
+)
 
 export default {
   components: {

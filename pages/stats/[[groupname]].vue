@@ -129,7 +129,9 @@ import { buildHead } from '~/composables/useBuildHead'
 import { useGroupStore } from '~/stores/group'
 import { useStatsStore } from '~/stores/stats'
 
-const GroupHeader = () => import('~/components/GroupHeader.vue')
+const GroupHeader = defineAsyncComponent(() =>
+  import('~/components/GroupHeader.vue')
+)
 
 export default {
   components: {

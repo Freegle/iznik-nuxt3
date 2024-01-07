@@ -123,7 +123,9 @@ import { useTrystStore } from '../stores/tryst'
 import { useMessageStore } from '../stores/message'
 import { useModal } from '~/composables/useModal'
 
-const NoticeMessage = () => import('~/components/NoticeMessage')
+const NoticeMessage = defineAsyncComponent(() =>
+  import('~/components/NoticeMessage')
+)
 
 export default {
   components: {

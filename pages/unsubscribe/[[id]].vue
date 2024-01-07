@@ -132,11 +132,18 @@ import { useRoute, useRouter } from '#imports'
 const ForgetFailModal = defineAsyncComponent(() =>
   import('~/components/ForgetFailModal')
 )
-const GroupSelect = () => import('~/components/GroupSelect.vue')
-const ConfirmModal = () =>
-  defineAsyncComponent(() => import('~/components/ConfirmModal.vue'))
-const NoticeMessage = () => import('~/components/NoticeMessage')
-const ExternalLink = () => import('~/components/ExternalLink')
+const GroupSelect = defineAsyncComponent(() =>
+  import('~/components/GroupSelect.vue')
+)
+const ConfirmModal = defineAsyncComponent(() =>
+  import('~/components/ConfirmModal.vue')
+)
+const NoticeMessage = defineAsyncComponent(() =>
+  import('~/components/NoticeMessage')
+)
+const ExternalLink = defineAsyncComponent(() =>
+  import('~/components/ExternalLink')
+)
 
 export default {
   components: {

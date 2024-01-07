@@ -59,7 +59,9 @@ import SpinButton from '~/components/SpinButton'
 import EmailValidator from '~/components/EmailValidator'
 import { buildHead } from '~/composables/useBuildHead'
 import { useAuthStore } from '~/stores/auth'
-const ExternalLink = () => import('~/components/ExternalLink')
+const ExternalLink = defineAsyncComponent(() =>
+  import('~/components/ExternalLink')
+)
 
 export default {
   components: {

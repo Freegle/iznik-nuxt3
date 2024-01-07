@@ -319,9 +319,13 @@ const ProfileModal = defineAsyncComponent(() =>
 const ConfirmModal = defineAsyncComponent(() =>
   import('~/components/ConfirmModal.vue')
 )
-const NewsReplies = () => import('~/components/NewsReplies.vue')
-const OurFilePond = () => import('~/components/OurFilePond')
-const OurAtTa = () => import('~/components/OurAtTa')
+const NewsReplies = defineAsyncComponent(() =>
+  import('~/components/NewsReplies.vue')
+)
+const OurFilePond = defineAsyncComponent(() =>
+  import('~/components/OurFilePond')
+)
+const OurAtTa = defineAsyncComponent(() => import('~/components/OurAtTa'))
 
 export default {
   name: 'NewsReply',

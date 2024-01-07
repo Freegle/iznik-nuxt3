@@ -106,7 +106,9 @@ import { useGroupStore } from '~/stores/group'
 import { useIsochroneStore } from '~/stores/isochrone'
 import PostFilters from '~/components/PostFilters'
 
-const MicroVolunteering = () => import('~/components/MicroVolunteering.vue')
+const MicroVolunteering = defineAsyncComponent(() =>
+  import('~/components/MicroVolunteering.vue')
+)
 
 export default {
   components: {

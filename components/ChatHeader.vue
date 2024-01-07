@@ -279,7 +279,9 @@ import SupporterInfo from '~/components/SupporterInfo'
 
 const ChatBlockModal = defineAsyncComponent(() => import('./ChatBlockModal'))
 const ChatHideModal = defineAsyncComponent(() => import('./ChatHideModal'))
-const UserRatings = () => import('~/components/UserRatings')
+const UserRatings = defineAsyncComponent(() =>
+  import('~/components/UserRatings')
+)
 const ChatReportModal = defineAsyncComponent(() =>
   import('~/components/ChatReportModal')
 )

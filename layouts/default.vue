@@ -14,8 +14,10 @@ import { useMiscStore } from '../stores/misc'
 import LayoutCommon from '~/components/LayoutCommon'
 import { ref } from '#imports'
 import { useAuthStore } from '~/stores/auth'
-const GoogleOneTap = () => import('~/components/GoogleOneTap')
-const LoginModal = () => import('~/components/LoginModal')
+const GoogleOneTap = defineAsyncComponent(() =>
+  import('~/components/GoogleOneTap')
+)
+const LoginModal = defineAsyncComponent(() => import('~/components/LoginModal'))
 
 export default {
   components: {

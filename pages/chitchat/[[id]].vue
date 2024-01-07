@@ -117,12 +117,21 @@ import NewsThread from '~/components/NewsThread.vue'
 import { untwem } from '~/composables/useTwem'
 import { ref } from '#imports'
 
-const OurFilePond = () => import('~/components/OurFilePond')
-const SidebarLeft = () => import('~/components/SidebarLeft')
-const SidebarRight = () => import('~/components/SidebarRight')
-const NewsLocation = () => import('~/components/NewsLocation')
-const ExpectedRepliesWarning = () =>
+const OurFilePond = defineAsyncComponent(() =>
+  import('~/components/OurFilePond')
+)
+const SidebarLeft = defineAsyncComponent(() =>
+  import('~/components/SidebarLeft')
+)
+const SidebarRight = defineAsyncComponent(() =>
+  import('~/components/SidebarRight')
+)
+const NewsLocation = defineAsyncComponent(() =>
+  import('~/components/NewsLocation')
+)
+const ExpectedRepliesWarning = defineAsyncComponent(() =>
   import('~/components/ExpectedRepliesWarning')
+)
 
 export default {
   components: {

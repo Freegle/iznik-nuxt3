@@ -20,7 +20,9 @@ import { useGroupStore } from '../../../stores/group'
 import { useAuthStore } from '../../../stores/auth'
 import { useRouter } from '#imports'
 import NoticeMessage from '~/components/NoticeMessage'
-const ExploreGroup = () => import('~/components/ExploreGroup.vue')
+const ExploreGroup = defineAsyncComponent(() =>
+  import('~/components/ExploreGroup.vue')
+)
 
 export default {
   components: {

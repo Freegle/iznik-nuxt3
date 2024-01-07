@@ -245,8 +245,10 @@ import ProfileImage from '~/components/ProfileImage'
 const NewsReportModal = defineAsyncComponent(() => import('./NewsReportModal'))
 const ConfirmModal = () =>
   defineAsyncComponent(() => import('~/components/ConfirmModal.vue'))
-const OurFilePond = () => import('~/components/OurFilePond')
-const OurAtTa = () => import('~/components/OurAtTa')
+const OurFilePond = defineAsyncComponent(() =>
+  import('~/components/OurFilePond')
+)
+const OurAtTa = defineAsyncComponent(() => import('~/components/OurAtTa'))
 
 export default {
   name: 'NewsThread',

@@ -134,9 +134,11 @@ import { uid } from '../composables/useId'
 import NumberIncrementDecrement from './NumberIncrementDecrement'
 import PostCode from '~/components/PostCode'
 import { useModal } from '~/composables/useModal'
-const OurFilePond = () => import('~/components/OurFilePond')
-const PostItem = () => import('./PostItem')
-const PostPhoto = () => import('./PostPhoto')
+const OurFilePond = defineAsyncComponent(() =>
+  import('~/components/OurFilePond')
+)
+const PostItem = defineAsyncComponent(() => import('./PostItem'))
+const PostPhoto = defineAsyncComponent(() => import('./PostPhoto'))
 
 export default {
   components: {

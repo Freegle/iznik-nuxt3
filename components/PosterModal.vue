@@ -100,9 +100,15 @@ import SpinButton from '~/components/SpinButton'
 import { useNoticeboardStore } from '~/stores/noticeboard'
 import { useModal } from '~/composables/useModal'
 
-const NoticeMessage = () => import('~/components/NoticeMessage')
-const DraggableMap = () => import('~/components/DraggableMap')
-const OurFilePond = () => import('~/components/OurFilePond')
+const NoticeMessage = defineAsyncComponent(() =>
+  import('~/components/NoticeMessage')
+)
+const DraggableMap = defineAsyncComponent(() =>
+  import('~/components/DraggableMap')
+)
+const OurFilePond = defineAsyncComponent(() =>
+  import('~/components/OurFilePond')
+)
 
 export default {
   components: {
