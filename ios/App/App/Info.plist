@@ -116,6 +116,8 @@
   <true/>
   <key>LSSupportsOpeningDocumentsInPlace</key>
   <true/>
+  <key>NSCalendarsWriteOnlyAccessUsageDescription</key>
+  <string>To save Freegle handover appointments to your calendar</string>
   <key>NSCalendarsUsageDescription</key>
   <string>To save Freegle handover appointments to your calendar</string>
 </dict>
