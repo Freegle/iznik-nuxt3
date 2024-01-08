@@ -15,7 +15,7 @@
         v-if="!loading && selectedSort === 'Unseen' && showCountsUnseen && me"
       >
         <MessageListCounts v-if="browseCount" />
-        <MessageListUpToDate else />
+        <MessageListUpToDate else-if="noUnseen" />
       </div>
       <div
         :id="'messagewrapper-' + deDuplicatedMessages[0].id"
@@ -56,9 +56,11 @@
       >
         <MessageListUpToDate
           v-if="
-            showCountsUnseen &&
             !loading &&
             selectedSort === 'Unseen' &&
+            showCountsUnseen &&
+            me &&
+            !noUnseen &&
             !message.unseen &&
             deDuplicatedMessages[ix].unseen
           "
@@ -236,6 +238,9 @@ export default {
     ...mapState(useIsochroneStore, { isochroneBounds: 'bounds' }),
     browseCount() {
       return this.messageStore.count
+    },
+    noUnseen() {
+      return !this.deDuplicatedMessages.find((m) => m.unseen)
     },
     group() {
       let ret = null
