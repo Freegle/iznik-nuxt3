@@ -149,6 +149,7 @@
 <script>
 import { mapState } from 'pinia'
 import { useLocationStore } from '../stores/location'
+import { useMessageStore } from '../stores/message'
 import { ref } from '#imports'
 import PostCode from '~/components/PostCode'
 import SpinButton from '~/components/SpinButton'
@@ -179,6 +180,7 @@ export default {
   async setup(props) {
     const isochroneStore = useIsochroneStore()
     const locationStore = useLocationStore()
+    const messageStore = useMessageStore()
 
     const minutes = ref(20)
     const transport = ref('Drive')
@@ -216,6 +218,7 @@ export default {
     return {
       isochroneStore,
       locationStore,
+      messageStore,
       minutes,
       transport,
       isochrone,
@@ -293,6 +296,11 @@ export default {
           minutes: newVal,
           transport: this.isochrone.transport,
         })
+
+        if (this.me?.settings?.browseView) {
+          // This might change the count we should see
+          this.messageStore.fetchCount(this.me?.settings?.browseView, false)
+        }
       }
 
       this.minutes = newVal

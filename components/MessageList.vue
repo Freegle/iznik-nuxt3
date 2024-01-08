@@ -14,7 +14,7 @@
       <div
         v-if="!loading && selectedSort === 'Unseen' && showCountsUnseen && me"
       >
-        <MessageListCounts v-if="browseCount" />
+        <MessageListCounts v-if="browseCount" @mark-seen="markSeen" />
         <MessageListUpToDate v-else-if="!deDuplicatedMessages[0].unseen" />
       </div>
       <div
@@ -231,6 +231,8 @@ export default {
       distance: 2000,
       prefetched: 0,
       emitted: false,
+      markSeenTimer: null,
+      markUnseenTries: 10,
     }
   },
   computed: {
@@ -457,6 +459,39 @@ export default {
         }
       } else {
         this.$emit('update:visible', visible)
+      }
+    },
+    markSeen() {
+      const ids = []
+
+      this.messagesForList.forEach((m) => {
+        if (m.unseen) {
+          ids.push(m.id)
+        }
+      })
+
+      this.messageStore.markSeen(ids)
+
+      this.markSeenTimer = setTimeout(async () => {
+        // This is a backgrounded operation on the server and therefore won't happen immediately.
+        const count = await this.messageStore.fetchCount(
+          this.me?.settings?.browseView,
+          false
+        )
+
+        this.markUnseenTries--
+        console.log('Mark unseen', count, this.markUnseenTries)
+
+        if (this.markUnseenTries && count) {
+          this.markSeen()
+        } else {
+          this.markUnseenTries = 10
+        }
+      }, 100)
+    },
+    beforeUnmount() {
+      if (this.markSeenTimer) {
+        clearTimeout(this.markSeenTimer)
       }
     },
   },

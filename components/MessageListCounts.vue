@@ -19,8 +19,8 @@
 <script setup>
 import pluralize from 'pluralize'
 import { useMessageStore } from '../stores/message'
-import { useAuthStore } from '../stores/auth'
 
+const emit = defineEmits(['markSeen'])
 const messageStore = useMessageStore()
 
 const browseCount = computed(() => {
@@ -32,11 +32,6 @@ const browseCountPlural = computed(() => {
 })
 
 function markSeen() {
-  messageStore.markSeen()
-
-  setTimeout(() => {
-    // This is a backgrounded operation on the server and therefore won't happen immediately.
-    messageStore.fetchCount(useAuthStore().user.settings?.browseView, false)
-  }, 5000)
+  emit('markSeen')
 }
 </script>
