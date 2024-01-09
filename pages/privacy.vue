@@ -30,11 +30,6 @@
           location, the description and any photos. No personal details are made
           public unless in this information.
         </p>
-        <p>
-          Norfolk Freegle is a separate legal entity, which is affiliated with
-          Freegle UK, and we share data (in technical GDPR terms this is a joint
-          controller arrangement).
-        </p>
         <h2>Cookies and Tracking</h2>
         <p>
           You'll have seen lots of irritating popups on websites about consent
@@ -128,11 +123,16 @@
         <p>
           Privacy is a complicated and important area, which we take seriously.
           If you have questions or concerns, please
-          <nuxt-link no-prefetch to="/help"> contact us. </nuxt-link>
+          <nuxt-link no-prefetch to="/help"> contact us. </nuxt-link>. Our
+          registered address is Weaver's Field, Loud Bridge, Chipping PR3 2NX.
         </p>
         <h3>Change History</h3>
         <p>Here are the changes to this page.</p>
         <ul class>
+          <li>
+            04/01/2024: Remove mention of Norfolk Freegle, which is no longer a
+            separate entity.
+          </li>
           <li>20/09/2023: Various clarifications and typos.</li>
           <li>
             19/09/2023: We now have a cookie consent banner. Reinstate session

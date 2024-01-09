@@ -70,8 +70,12 @@ import { useGroupStore } from '../stores/group'
 import { useChatStore } from '../stores/chat'
 import { useMiscStore } from '~/stores/misc'
 
-const MessageHistory = () => import('~/components/MessageHistory')
-const NoticeMessage = () => import('~/components/NoticeMessage')
+const MessageHistory = defineAsyncComponent(() =>
+  import('~/components/MessageHistory')
+)
+const NoticeMessage = defineAsyncComponent(() =>
+  import('~/components/NoticeMessage')
+)
 
 export default {
   components: {

@@ -55,6 +55,7 @@ export function useNavbar() {
     const route = useRoute()
 
     return (
+      route &&
       route.path !== '/browse' &&
       route.path !== '/chitchat' &&
       route.path !== '/myposts' &&
@@ -70,6 +71,14 @@ export function useNavbar() {
   const newsCountPlural = () => {
     return pluralize('unread ChitChat post', newsCount.value, true)
   }
+
+  const browseCount = computed(() => {
+    return Math.min(99, messageStore.count)
+  })
+
+  const browseCountPlural = computed(() => {
+    return pluralize('unseen post', messageStore.count, true)
+  })
 
   const activePostsCountPlural = ref(() => {
     return pluralize('open post', activePostsCount.value, {
@@ -131,6 +140,7 @@ export function useNavbar() {
         const settings = me?.settings
         const distance = settings?.newsfeedarea || 0
         await newsfeedStore.fetchCount(distance, false)
+        await messageStore.fetchCount(me?.settings?.browseView, false)
 
         if (
           route.path !== '/profile/' + myid.value &&
@@ -208,6 +218,8 @@ export function useNavbar() {
     activePostsCountPlural,
     newsCount,
     newsCountPlural,
+    browseCount,
+    browseCountPlural,
     showAboutMeModal,
     homePage,
     showBackButton,

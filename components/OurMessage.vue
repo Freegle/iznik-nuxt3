@@ -271,7 +271,7 @@ export default {
     },
     async view() {
       if (this.recordView) {
-        if (this.me) {
+        if (this.me && this.message?.unseen) {
           await this.messageStore.view(this.id)
         }
 

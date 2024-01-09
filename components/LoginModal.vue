@@ -240,8 +240,12 @@ import { SignInWithApple } from '@capacitor-community/apple-sign-in'
 import { FacebookLogin } from '@capacitor-community/facebook-login'
 import { appYahooLogin } from '../composables/app-yahoo'
 
-const NoticeMessage = () => import('~/components/NoticeMessage')
-const PasswordEntry = () => import('~/components/PasswordEntry')
+const NoticeMessage = defineAsyncComponent(() =>
+  import('~/components/NoticeMessage')
+)
+const PasswordEntry = defineAsyncComponent(() =>
+  import('~/components/PasswordEntry')
+)
 
 export default {
   name: 'LoginModal',
@@ -1045,9 +1049,7 @@ $color-apple: #000000;
   text-decoration: none !important;
 }
 
-:deep {
-  .is-invalid label {
-    color: unset;
-  }
+:deep(.is-invalid label) {
+  color: unset;
 }
 </style>

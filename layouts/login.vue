@@ -22,8 +22,10 @@ import { useAuthStore } from '../stores/auth'
 import { useMobileStore } from '~/stores/mobile'
 import LayoutCommon from '~/components/LayoutCommon'
 import { ref } from '#imports'
-const GoogleOneTap = () => import('~/components/GoogleOneTap')
-const LoginModal = () => import('~/components/LoginModal')
+const GoogleOneTap = defineAsyncComponent(() =>
+  import('~/components/GoogleOneTap')
+)
+const LoginModal = defineAsyncComponent(() => import('~/components/LoginModal'))
 
 export default {
   components: {

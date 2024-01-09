@@ -7,7 +7,7 @@
   >
     <OfflineIndicator v-if="!online" />
     <b-button
-      v-if="online && showBackButton"
+      v-if="online && (showBackButton || navBarBottomHidden)"
       variant="white"
       class="nohover ml-3"
       to="/"
@@ -15,11 +15,11 @@
       <v-icon icon="home" />
     </b-button>
     <b-button
-        v-if="online && showBackButton"
-        ref="mobileNav"
-        variant="white"
-        class="nohover ml-3"
-        @click="backButton"
+      v-if="online && showBackButton"
+      ref="mobileNav"
+      variant="white"
+      class="nohover ml-3"
+      @click="backButton"
     >
       <v-icon icon="arrow-left" />
     </b-button>
@@ -85,7 +85,10 @@
     type="dark"
     class="ourBack d-flex justify-content-between d-xl-none navbot small"
     fixed="bottom"
-    :class="{ hideNavBarBottom: navBarHidden, showNavBarBottom: !navBarHidden }"
+    :class="{
+      hideNavBarBottom: navBarBottomHidden,
+      showNavBarBottom: !navBarBottomHidden,
+    }"
   >
     <nuxt-link
       no-prefetch
@@ -94,9 +97,19 @@
       @click="clickedMobileNav"
       @mousedown="maybeReload('/browse')"
     >
-      <v-icon icon="eye" class="fa-fw2" />
-      <br />
-      <div class="div text--smallest">Browse</div>
+      <div class="position-relative">
+        <v-icon icon="eye" class="fa-fw2" />
+        <br />
+        <b-badge
+          v-if="browseCount"
+          variant="info"
+          class="browsebadge2"
+          :title="browseCountPlural"
+        >
+          {{ browseCount }}
+        </b-badge>
+        <span class="nav-item__text">Browse</span>
+      </div>
     </nuxt-link>
     <div class="botmen ml-2">
       <ChatMenu
@@ -193,6 +206,7 @@
   <about-me-modal v-if="showAboutMeModal" @hidden="showAboutMeModal = false" />
 </template>
 <script setup>
+import { useRoute } from 'vue-router'
 import NavbarMobilePost from './NavbarMobilePost'
 import { useNavbar } from '~/composables/useNavbar'
 import { useMiscStore } from '~/stores/misc'
@@ -206,6 +220,8 @@ const {
   activePostsCountPlural,
   newsCount,
   newsCountPlural,
+  browseCount,
+  browseCountPlural,
   showAboutMeModal,
   showBackButton,
   requestLogin,
@@ -286,6 +302,18 @@ function handleScroll() {
 
   lastScrollY = scrollY
 }
+
+const route = useRoute()
+
+const navBarBottomHidden = computed(() => {
+  return (
+    route.path.startsWith('/give') ||
+    route.path.startsWith('/find') ||
+    route.path.startsWith('/post') ||
+    route.path.startsWith('/chat') ||
+    navBarHidden.value
+  )
+})
 </script>
 <style scoped lang="scss">
 @import 'assets/css/navbar.scss';
@@ -311,6 +339,13 @@ function handleScroll() {
   position: absolute;
   top: 1px;
   right: -1px;
+  font-size: 11px;
+}
+
+.browsebadge2 {
+  position: absolute;
+  top: 1px;
+  right: -7px;
   font-size: 11px;
 }
 

@@ -97,9 +97,11 @@ import { useMobileStore } from '../stores/mobile'
 import { useMiscStore } from '../stores/misc'
 import NumberIncrementDecrement from './NumberIncrementDecrement'
 
-const OurFilePond = () => import('~/components/OurFilePond')
-const PostPhoto = () => import('~/components/PostPhoto')
-const PostItem = () => import('~/components/PostItem')
+const OurFilePond = defineAsyncComponent(() =>
+  import('~/components/OurFilePond')
+)
+const PostPhoto = defineAsyncComponent(() => import('~/components/PostPhoto'))
+const PostItem = defineAsyncComponent(() => import('~/components/PostItem'))
 
 export default {
   components: {

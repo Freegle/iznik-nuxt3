@@ -144,7 +144,9 @@ import SupporterInfo from '~/components/SupporterInfo'
 import ProfileImage from '~/components/ProfileImage'
 import { timeago, datelocale } from '~/composables/useTimeFormat'
 
-const UserRatings = () => import('~/components/UserRatings')
+const UserRatings = defineAsyncComponent(() =>
+  import('~/components/UserRatings')
+)
 const PromiseModal = defineAsyncComponent(() => import('./PromiseModal'))
 const RenegeModal = defineAsyncComponent(() => import('./RenegeModal'))
 const ProfileModal = defineAsyncComponent(() =>
@@ -287,7 +289,7 @@ export default {
     promise() {
       this.showPromiseModal = true
     },
-    async unpromise() {
+    unpromise() {
       this.showRenegeModal = true
     },
     showProfileModal() {

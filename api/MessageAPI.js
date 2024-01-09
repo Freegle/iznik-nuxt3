@@ -32,8 +32,8 @@ export default class MessageAPI extends BaseAPI {
     )
   }
 
-  mygroups() {
-    return this.$getv2('/message/mygroups')
+  mygroups(gid) {
+    return this.$getv2('/message/mygroups' + (gid ? '/' + gid : ''))
   }
 
   fetchMessages(params) {
@@ -181,6 +181,23 @@ export default class MessageAPI extends BaseAPI {
       action: 'RemoveBy',
       id,
       userid,
+    })
+  }
+
+  async count(browseView, log) {
+    return await this.$getv2(
+      '/message/count',
+      {
+        browseView,
+      },
+      log
+    )
+  }
+
+  async markSeen(ids) {
+    return await this.$post('/messages', {
+      action: 'MarkSeen',
+      ids,
     })
   }
 }

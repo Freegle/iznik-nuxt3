@@ -121,7 +121,9 @@ import NewUserInfo from '~/components/NewUserInfo'
 import ChatButton from '~/components/ChatButton'
 import SpinButton from '~/components/SpinButton.vue'
 
-const NewFreegler = () => import('~/components/NewFreegler')
+const NewFreegler = defineAsyncComponent(() =>
+  import('~/components/NewFreegler')
+)
 
 export default {
   components: {

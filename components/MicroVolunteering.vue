@@ -33,6 +33,10 @@
               people in the Freegle community. Plus you'll get a little
               "Supporter" badge, which other people can see, to say thank you.
             </p>
+            <p>
+              We'll also keep in touch by email about what's happening in
+              Freegle and other ways you can support Freegle in future.
+            </p>
           </b-card-text>
         </template>
         <template #footer>
@@ -159,13 +163,18 @@ import { useMiscStore } from '../stores/misc'
 import { useAuthStore } from '../stores/auth'
 import { ref } from '#imports'
 
-const MicroVolunteeringFacebook = () => import('./MicroVolunteeringFacebook')
-const MicroVolunteeringPhotosRotate = () =>
+const MicroVolunteeringFacebook = defineAsyncComponent(() =>
+  import('./MicroVolunteeringFacebook')
+)
+const MicroVolunteeringPhotosRotate = defineAsyncComponent(() =>
   import('./MicroVolunteeringPhotosRotate')
-const MicroVolunteeringCheckMessage = () =>
+)
+const MicroVolunteeringCheckMessage = defineAsyncComponent(() =>
   import('./MicroVolunteeringCheckMessage')
-const MicroVolunteeringSimilarTerms = () =>
+)
+const MicroVolunteeringSimilarTerms = defineAsyncComponent(() =>
   import('./MicroVolunteeringSimilarTerms')
+)
 
 export default {
   components: {
@@ -333,6 +342,11 @@ export default {
         })
 
         await this.authStore.saveMicrovolunteering('Basic')
+
+        // The wording in here covers us for marketing consent.
+        await this.authStore.saveAndGet({
+          marketingconsent: 1,
+        })
 
         await this.getTask()
       } else {

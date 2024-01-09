@@ -136,9 +136,9 @@
             />
           </template>
         </span>
-        <NewsPreview
-          v-if="reply.preview"
-          :preview="reply.preview"
+        <NewsPreviews
+          v-if="reply.previews?.length"
+          :previews="reply.previews"
           class="mt-1"
           size="sm"
         />
@@ -305,7 +305,7 @@ import NewsUserInfo from '~/components/NewsUserInfo'
 import NewsHighlight from '~/components/NewsHighlight'
 
 import ChatButton from '~/components/ChatButton'
-import NewsPreview from '~/components/NewsPreview'
+import NewsPreviews from '~/components/NewsPreviews'
 import ProfileImage from '~/components/ProfileImage'
 
 const NewsPhotoModal = defineAsyncComponent(() =>
@@ -319,9 +319,13 @@ const ProfileModal = defineAsyncComponent(() =>
 const ConfirmModal = defineAsyncComponent(() =>
   import('~/components/ConfirmModal.vue')
 )
-const NewsReplies = () => import('~/components/NewsReplies.vue')
-const OurFilePond = () => import('~/components/OurFilePond')
-const OurAtTa = () => import('~/components/OurAtTa')
+const NewsReplies = defineAsyncComponent(() =>
+  import('~/components/NewsReplies.vue')
+)
+const OurFilePond = defineAsyncComponent(() =>
+  import('~/components/OurFilePond')
+)
+const OurAtTa = defineAsyncComponent(() => import('~/components/OurAtTa'))
 
 export default {
   name: 'NewsReply',
@@ -336,7 +340,7 @@ export default {
     NewsHighlight,
     ProfileModal,
     ChatButton,
-    NewsPreview,
+    NewsPreviews,
     ProfileImage,
     ConfirmModal,
     OurAtTa,

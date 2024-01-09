@@ -342,9 +342,14 @@ export default {
   methods: {
     async save(callback) {
       this.triedToSubmit = true
+
       if (!this.valid) {
         callback()
         return
+      }
+
+      if (!this.giftAidStore.giftaid.period) {
+        this.giftAidStore.giftaid.period = 'Past4YearsAndFuture'
       }
 
       if (!this.giftAidAllowed) {
@@ -386,7 +391,7 @@ export default {
   color: $color-green--darker;
 }
 
-:deep input[type='checkbox'] {
+:deep(input[type='checkbox']) {
   border: 2px solid $color-red;
   border-radius: 4px;
 }

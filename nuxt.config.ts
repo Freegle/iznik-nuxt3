@@ -1,7 +1,7 @@
-import path from 'path-browserify'
 import { VitePWA } from 'vite-plugin-pwa'
 import eslintPlugin from 'vite-plugin-eslint'
 import legacy from '@vitejs/plugin-legacy'
+import { sentryVitePlugin } from '@sentry/vite-plugin'
 import config from './config'
 
 // Mobile version change:
@@ -203,8 +203,8 @@ export default defineNuxtConfig({
   },
 
   css: [
-    '@/node_modules/@fortawesome/fontawesome-svg-core/styles.css',
-    '@/assets/css/global.scss',
+    '@fortawesome/fontawesome-svg-core/styles.css',
+    '/assets/css/global.scss',
     'leaflet/dist/leaflet.css',
   ],
 
@@ -220,6 +220,19 @@ export default defineNuxtConfig({
         },
       },
     },
+    plugins: config.ISAPP?[]:
+      [
+      VitePWA({ registerType: 'autoUpdate' }),
+      // Make Lint errors cause build failures.
+      eslintPlugin(),
+      legacy({
+        targets: ['since 2015'],
+      }),
+      sentryVitePlugin({
+        org: 'freegle',
+        project: 'nuxt3',
+      }),
+    ],
   },
 
   // Sentry needs sourcemaps.

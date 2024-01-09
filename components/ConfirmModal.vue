@@ -29,7 +29,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits('confirm')
+const emit = defineEmits(['confirm'])
 
 const { modal, hide } = useModal()
 
