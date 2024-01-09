@@ -89,10 +89,28 @@ export default {
       const title = getCalProp(lines, 'SUMMARY')
       const eventLocation = ''
       const notes = getCalProp(lines, 'DESCRIPTION')
-      const success = function (message) { console.log("Add calendar success", JSON.stringify(message)) }
-      const error = function (message) { alert("Error: " + message) } // TODO
       console.log('window.plugins',window.plugins)
-      window.plugins.calendar.createEventInteractively(title, eventLocation, notes, startDate, endDate, success, error)
+
+      // Call hasWritePermission
+      // Then requestWritePermission if necessary
+      // Then createEventInteractively if possible
+      const success = function (message) { console.log("Add calendar success", JSON.stringify(message)) }
+      const error = function (message) { console.log("Add calendar error: " + message) } // TODO
+
+      const success1 = function (message) { 
+        console.log("hasWritePermission success", JSON.stringify(message)) 
+        window.plugins.calendar.createEventInteractively(title, eventLocation, notes, startDate, endDate, success, error)
+      }
+      const successw = function (message) { 
+        console.log("requestWritePermission success", JSON.stringify(message)) 
+        window.plugins.calendar.createEventInteractively(title, eventLocation, notes, startDate, endDate, success, error)
+      }
+      const errorw = function (message) { console.log("requestWritePermission error: " + message) } // TODO
+      const error1 = function (message) { 
+        console.log("hasWritePermission error: " + message) 
+        window.plugins.calendar.requestWritePermission(successw,errorw)
+    }
+      window.plugins.calendar.hasWritePermission(success1,error1)
     },
   },
 }
