@@ -4,6 +4,7 @@
       <v-icon icon="calendar-alt" />
       Add to Calendar
     </b-button>
+    {{ message }}
   </div>
 </template>
 <script>
@@ -26,6 +27,11 @@ export default {
       required: false,
       default: 'md',
     },
+  },
+  data() {
+    return {
+      message: ''
+    }
   },
   methods: {
     async download(e) {
@@ -89,28 +95,30 @@ export default {
       const title = getCalProp(lines, 'SUMMARY')
       const eventLocation = ''
       const notes = getCalProp(lines, 'DESCRIPTION')
-      console.log('window.plugins',window.plugins)
+      // console.log('window.plugins',window.plugins)
 
       // Call hasWritePermission
       // Then requestWritePermission if necessary
       // Then createEventInteractively if possible
       const success = function (message) { console.log("Add calendar success", JSON.stringify(message)) }
       const error = function (message) { console.log("Add calendar error: " + message) } // TODO
-
+      const error1 = function (message) { console.log("hasWritePermission error: " + message) }
+      const errorw = function () { console.log("requestWritePermission error") }
+      const successw = function () { 
+        console.log("requestWritePermission success") 
+        window.plugins.calendar.createEventInteractively(title, eventLocation, notes, startDate, endDate, success, error)
+      }
       const success1 = function (message) { 
         console.log("hasWritePermission success", JSON.stringify(message)) 
-        window.plugins.calendar.createEventInteractively(title, eventLocation, notes, startDate, endDate, success, error)
+        if( message){
+          window.plugins.calendar.createEventInteractively(title, eventLocation, notes, startDate, endDate, success, error)
+        }
+        else{
+          window.plugins.calendar.requestWritePermission(successw, errorw) // Android: successw not called
+        }
       }
-      const successw = function (message) { 
-        console.log("requestWritePermission success", JSON.stringify(message)) 
-        window.plugins.calendar.createEventInteractively(title, eventLocation, notes, startDate, endDate, success, error)
-      }
-      const errorw = function (message) { console.log("requestWritePermission error: " + message) } // TODO
-      const error1 = function (message) { 
-        console.log("hasWritePermission error: " + message) 
-        window.plugins.calendar.requestWritePermission(successw,errorw)
-    }
-      window.plugins.calendar.hasWritePermission(success1,error1)
+
+      window.plugins.calendar.hasWritePermission(success1,error1) // Always success: message: self.eventStore != nil
     },
   },
 }
