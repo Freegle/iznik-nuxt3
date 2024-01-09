@@ -18,7 +18,7 @@
           {{ chat.name }}
         </div>
         <div
-          v-if="otheruser && otheruser.info && !otheruser.deleted"
+          v-if="otheruser && otheruser.info && !otheruser?.deleted"
           class="d-flex flex-column align-content-between pr-1 ratings"
         >
           <UserRatings
@@ -48,7 +48,7 @@
             </div>
             <br class="d-block d-md-none" />
             <div
-              v-if="!otheruser.deleted && milesaway"
+              v-if="!otheruser?.deleted && milesaway"
               class="d-inline d-md-block"
             >
               About <strong>{{ milesstring }}</strong
@@ -85,7 +85,7 @@
             </b-badge>
           </b-button>
           <div
-            v-if="otheruser && otheruser.info && !otheruser.deleted"
+            v-if="otheruser && otheruser.info && !otheruser?.deleted"
             class="mr-2"
           >
             <b-button
@@ -107,7 +107,7 @@
             </b-button>
           </div>
           <div v-if="chat.chattype === 'User2User' || !unseen" class="mr-2">
-            <template v-if="!otheruser.deleted && chat.status === 'Closed'">
+            <template v-if="!otheruser?.deleted && chat.status === 'Closed'">
               <b-button
                 v-b-tooltip="'Unhide this chat'"
                 variant="secondary"
@@ -126,7 +126,7 @@
                 Unhide chat
               </b-button>
             </template>
-            <template v-else-if="!otheruser.deleted">
+            <template v-else-if="!otheruser?.deleted">
               <b-button
                 v-b-tooltip="
                   'Don\'t show this chat unless there\'s a new message'
@@ -205,7 +205,7 @@
           </div>
           <div
             v-if="
-              chat.chattype === 'User2User' && otheruser && !otheruser.deleted
+              chat.chattype === 'User2User' && otheruser && !otheruser?.deleted
             "
           >
             <b-button
