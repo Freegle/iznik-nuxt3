@@ -32,6 +32,7 @@
       </VisibleWhen>
     </main>
     <client-only>
+      <DeletedRestore />
       <BouncingEmail />
       <div class="navbar-toggle" style="display: none" />
     </client-only>

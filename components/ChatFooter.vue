@@ -8,7 +8,10 @@
       />
     </div>
     <div>
-      <div v-if="showNotices && noticesToShow" class="d-flex">
+      <notice-message v-if="otheruser?.deleted" variant="info" class="mb-2">
+        This freegler has deleted their account, so you can't chat to them.
+      </notice-message>
+      <div v-else-if="showNotices && noticesToShow" class="d-flex">
         <div class="flex-grow-1">
           <notice-message
             v-if="badratings"
@@ -52,7 +55,7 @@
           <v-icon icon="times-circle" scale="1.5" />
         </b-button>
       </div>
-      <div>
+      <div v-if="!otheruser?.deleted">
         <label for="chatmessage" class="visually-hidden">Chat message</label>
         <div v-if="!imagethumb">
           <b-form-textarea
@@ -95,7 +98,10 @@
         </div>
       </div>
     </div>
-    <div v-if="!otheruser?.spammer" class="bg-white pt-1 pb-1">
+    <div
+      v-if="!otheruser?.spammer && !otheruser?.deleted"
+      class="bg-white pt-1 pb-1"
+    >
       <div class="d-none d-lg-block">
         <span v-if="chat && chat.chattype === 'User2User' && otheruser">
           <b-button
@@ -374,7 +380,12 @@ export default {
   },
   computed: {
     noticesToShow() {
-      return this.badratings || this.expectedreplies || this.otheruser?.spammer
+      return (
+        this.badratings ||
+        this.expectedreplies ||
+        this.otheruser?.spammer ||
+        this.otheruser?.deleted
+      )
     },
     badratings() {
       let ret = false
