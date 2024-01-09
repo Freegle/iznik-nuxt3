@@ -110,7 +110,7 @@ export default {
       }
       const success1 = function (message) { 
         console.log("hasWritePermission success", JSON.stringify(message)) 
-        if( message){
+        if( message || !mobileStore.isiOS){
           window.plugins.calendar.createEventInteractively(title, eventLocation, notes, startDate, endDate, success, error)
         }
         else{
