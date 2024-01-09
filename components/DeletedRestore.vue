@@ -19,7 +19,7 @@
           here:
         </p>
         <b-button variant="primary" size="lg" @click="restore">
-          Restore my account
+          Restore your account
         </b-button>
       </NoticeMessage>
     </b-col>
