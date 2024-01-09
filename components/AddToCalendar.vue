@@ -55,6 +55,7 @@ export default {
 
       // webcal://localhost/myCalendar.ics
       // https://www.npmjs.com/package/cordova-plugin-calendar
+      // https://github.com/uzurv/Calendar-PhoneGap-Plugin-ios-17-support
 
       function getCalProp(lines,name){
         name += ':'

@@ -27,7 +27,7 @@ const config: CapacitorConfig = {
   },
   android: {
     includePlugins: [
-      "cordova-plugin-calendar", // C5 OK
+      "cordova-plugin-calendar", // C5 OK https://github.com/uzurv/Calendar-PhoneGap-Plugin-ios-17-support
       "cordova-plugin-inappbrowser", // C5 OK
       "@capacitor/app-launcher", // C5 OK
       "@capacitor/browser",
@@ -55,7 +55,7 @@ const config: CapacitorConfig = {
   	scheme: 'App', // Freegle
     contentInset: 'automatic',
     includePlugins: [
-      "cordova-plugin-calendar",
+      "cordova-plugin-calendar", // iOS 17: https://github.com/uzurv/Calendar-PhoneGap-Plugin-ios-17-support
       "cordova-plugin-inappbrowser",
       "@capacitor/app-launcher",
       "@capacitor/browser",

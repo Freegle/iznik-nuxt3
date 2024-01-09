@@ -12,6 +12,8 @@ import config from './config'
 // - ios\App\App.xcodeproj\project.pbxproj
 //    - CURRENT_PROJECT_VERSION eg 1200 TWICE
 //    - MARKETING_VERSION eg 3.0.0 TWICE
+//
+// If npm reinstall, comment out line 40 of node_modules\@capacitor\cli\dist\android\run.js //await common_1.runTask
 
 // @ts-ignore
 export default defineNuxtConfig({
