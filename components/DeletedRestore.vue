@@ -18,15 +18,26 @@
           If you've done this by mistake, or changed your mind, please click
           here:
         </p>
-        <b-button variant="primary" size="lg" @click="restore">
-          Restore your account
-        </b-button>
+        <div class="d-flex justify-content-around">
+          <SpinButton
+            label="Restore your account"
+            variant="primary"
+            @handle="restore"
+          />
+        </div>
       </NoticeMessage>
     </b-col>
   </b-row>
 </template>
 <script setup>
-function restore() {}
+import { useAuthStore } from '../stores/auth'
+
+const authStore = useAuthStore()
+
+async function restore(handle) {
+  await authStore.restore()
+  handle()
+}
 </script>
 <style scoped>
 .bottom {
