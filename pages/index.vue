@@ -5,7 +5,7 @@
   >
     <div class="info">
       <h1 class="text--largest-responsive">
-        Edit this line and see if the HMR works.6
+        Edit this line and see if the HMR works.10
       </h1>
     </div>
   </div>

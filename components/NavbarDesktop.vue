@@ -5,9 +5,7 @@
     fixed="top"
   >
     <nuxt-link :to="homePage" class="navbar-brand p-0" no-prefetch>
-      <OfflineIndicator v-if="!online" />
       <b-img
-        v-else
         class="logo mr-2"
         height="58"
         width="58"
@@ -164,14 +162,7 @@
             @show-about-me="showAboutMe"
           />
         </li>
-        <li>
-          <ChatMenu
-            v-if="loggedIn"
-            id="menu-option-chat"
-            v-model:chat-count="chatCount"
-            :is-list-item="true"
-          />
-        </li>
+        <li></li>
         <li>
           <nuxt-link
             id="menu-option-spread"
@@ -241,11 +232,9 @@
 import { useNavbar } from '~/composables/useNavbar'
 
 const {
-  online,
   distance,
   logo,
   unreadNotificationCount,
-  chatCount,
   activePostsCount,
   activePostsCountPlural,
   newsCount,

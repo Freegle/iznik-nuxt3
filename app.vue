@@ -2,7 +2,6 @@
   <div>
     <client-only>
       <header>
-        <NavbarDesktop />
         <NavbarMobile />
       </header>
     </client-only>

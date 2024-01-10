@@ -4,7 +4,6 @@
       <slot />
     </LayoutCommon>
     <client-only>
-      <GoogleOneTap v-if="oneTap" @loggedin="googleLoggedIn" />
       <LoginModal v-if="!loggedIn" ref="loginModal" />
     </client-only>
   </div>
@@ -14,16 +13,10 @@ import { useMiscStore } from '../stores/misc'
 import LayoutCommon from '~/components/LayoutCommon'
 import { ref } from '#imports'
 import { useAuthStore } from '~/stores/auth'
-const GoogleOneTap = defineAsyncComponent(() =>
-  import('~/components/GoogleOneTap')
-)
-const LoginModal = defineAsyncComponent(() => import('~/components/LoginModal'))
 
 export default {
   components: {
     LayoutCommon,
-    GoogleOneTap,
-    LoginModal,
   },
   async setup() {
     let ready = false

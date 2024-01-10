@@ -4,36 +4,8 @@
       <div class="aboveSticky">
         <slot ref="pageContent" />
       </div>
-      <VisibleWhen :at="['xs', 'sm', 'md', 'lg']">
-        <div
-          v-if="allowAd && !noAdRendered"
-          class="d-flex justify-content-around w-100 sticky"
-          style="height: 52px"
-        >
-          <ExternalDa
-            ad-unit-path="/22794232631/freegle_sticky"
-            :dimensions="[320, 50]"
-            div-id="div-gpt-ad-1699973618906-0"
-            class="sticky"
-            style="width: 320px; height: 50px; margin-top: 2px"
-            pixel
-            @rendered="adRendered"
-          />
-        </div>
-        <div
-          v-else
-          class="sticky ourBack w-100 text-center d-flex flex-column justify-content-center"
-          style="height: 52px"
-        >
-          <nuxt-link to="/donate" class="text-white nodecor">
-            Help keep Freegle running. Click to donate.
-          </nuxt-link>
-        </div>
-      </VisibleWhen>
     </main>
     <client-only>
-      <DeletedRestore />
-      <BouncingEmail />
       <div class="navbar-toggle" style="display: none" />
     </client-only>
     <div
@@ -52,52 +24,18 @@
         </p>
       </div>
     </div>
-    <client-only>
-      <div class="d-none">
-        <ChatButton
-          v-if="replyToSend"
-          ref="replyToPostChatButton"
-          :userid="replyToUser"
-        />
-      </div>
-      <BreakpointFettler />
-      <div id="here" />
-      <SomethingWentWrong />
-    </client-only>
   </div>
 </template>
 <script>
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
-import SomethingWentWrong from './SomethingWentWrong'
 import { useNotificationStore } from '~/stores/notification'
 import { useMessageStore } from '~/stores/message'
 import { useMiscStore } from '~/stores/misc'
 import { useChatStore } from '~/stores/chat'
 import replyToPost from '@/mixins/replyToPost'
-import ChatButton from '~/components/ChatButton'
-import VisibleWhen from '~/components/VisibleWhen'
-const SupportLink = defineAsyncComponent(() =>
-  import('~/components/SupportLink')
-)
-const BouncingEmail = defineAsyncComponent(() =>
-  import('~/components/BouncingEmail')
-)
-const BreakpointFettler = defineAsyncComponent(() =>
-  import('~/components/BreakpointFettler')
-)
-const ExternalDa = defineAsyncComponent(() => import('~/components/ExternalDa'))
 
 export default {
-  components: {
-    BouncingEmail,
-    SupportLink,
-    BreakpointFettler,
-    SomethingWentWrong,
-    ChatButton,
-    ExternalDa,
-    VisibleWhen,
-  },
   mixins: [replyToPost],
   data() {
     return {
