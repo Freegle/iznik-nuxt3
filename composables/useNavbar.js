@@ -4,7 +4,6 @@ import { useMiscStore } from '../stores/misc'
 import { useNewsfeedStore } from '../stores/newsfeed'
 import { useMessageStore } from '../stores/message'
 import { useNotificationStore } from '../stores/notification'
-import { useLogoStore } from '../stores/logo'
 import { useChatStore } from '../stores/chat'
 import { useAuthStore } from '~/stores/auth'
 import { fetchMe } from '~/composables/useMe'
@@ -17,7 +16,6 @@ export function useNavbar() {
   const messageStore = useMessageStore()
   const notificationStore = useNotificationStore()
   const chatStore = useChatStore()
-  const logoStore = useLogoStore()
   const route = useRoute()
   const router = useRouter()
 
@@ -84,19 +82,6 @@ export function useNavbar() {
     return pluralize('open post', activePostsCount.value, {
       includeNumber: true,
     })
-  })
-
-  onMounted(() => {
-    setTimeout(async () => {
-      // Look for a custom logo.
-      const ret = await logoStore.fetch()
-
-      if (ret.ret === 0 && ret.logo) {
-        logo.value = ret.logo.path.replace(/.*logos/, '/logos')
-      }
-    }, 5000)
-
-    getCounts()
   })
 
   const requestLogin = () => {

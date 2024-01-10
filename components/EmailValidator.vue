@@ -103,7 +103,7 @@ export default {
     },
     currentEmail: {
       immediate: true,
-      async handler(newVal) {
+      handler(newVal) {
         this.$emit('update:email', newVal)
 
         if (newVal && newVal.includes('@')) {
@@ -113,14 +113,6 @@ export default {
           // Wait for the first dot, as that will be long enough that we don't thrash the server.
           if (domain.includes('.')) {
             this.suggestedDomains = []
-
-            const ret = await this.domainStore.fetch({
-              domain,
-            })
-
-            if (ret && ret.ret === 0) {
-              this.suggestedDomains = ret.suggestions
-            }
           }
         }
       },

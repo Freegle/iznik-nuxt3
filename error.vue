@@ -18,11 +18,7 @@
           <p>
             P.S. We know this is a bit of a pain, and we try really hard to
             avoid taking the whole site down where we can. Very occasionally we
-            need to do it. If you want to
-            <ExternalLink
-              href="https://www.paypal.com/gb/fundraiser/charity/55681"
-              >donate a quid</ExternalLink
-            >, that'll help it happen less often.
+            need to do it. If you want to , that'll help it happen less often.
           </p>
         </div>
         <div v-else>
@@ -46,7 +42,7 @@
           </p>
           <p>
             <!-- eslint-disable-next-line -->
-            Having problems? <SupportLink text="Contact us" />
+            Having problems?
           </p>
         </div>
       </div>
@@ -54,8 +50,6 @@
   </div>
 </template>
 <script setup>
-import SupportLink from '~/components/SupportLink'
-import ExternalLink from '~/components/ExternalLink'
 import { useError } from '#imports'
 
 const error = useError()

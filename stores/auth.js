@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import { LoginError, SignUpError } from '../api/BaseAPI'
-import { useComposeStore } from '../stores/compose'
 import api from '~/api'
 
 export const useAuthStore = defineStore({
@@ -262,115 +261,7 @@ export const useAuthStore = defineStore({
 
       this.loginCount++
     },
-    async fetchUser() {
-      // We're so vain, we probably think this call is about us.
-      let me = null
-      let groups = null
-
-      if (this.auth.jwt || this.auth.persistent) {
-        // We have auth info.  The new API can authenticate using either the JWT or the persistent token.
-        try {
-          me = await this.$api.session.fetchv2(
-            {
-              webversion: this.config.public.BUILD_DATE,
-            },
-            false
-          )
-        } catch (e) {
-          // Failed.  This can validly happen with a 404 if the JWT is invalid.
-          console.log('Exception fetching user')
-        }
-
-        if (me) {
-          groups = me.memberships
-          delete me.memberships
-
-          if (!this.auth.jwt && process.client) {
-            // Pick up the JWT for later from the old API.  No need to wait, though.
-            this.$api.session
-              .fetch({
-                webversion: this.config.public.BUILD_DATE,
-                components: ['me'],
-              })
-              .then((ret) => {
-                let persistent = null
-                let jwt = null
-
-                if (ret) {
-                  ;({ me, persistent, jwt } = ret)
-                  if (me) {
-                    this.setAuth(jwt, persistent)
-                  }
-                }
-              })
-          }
-        }
-      }
-
-      if (!me) {
-        // Try the older API which will authenticate via the persistent token and PHP session.
-        const ret = await this.$api.session.fetch({
-          webversion: this.config.public.BUILD_DATE,
-          components: ['me'],
-        })
-
-        let persistent = null
-        let jwt = null
-
-        if (ret) {
-          ;({ me, persistent, jwt } = ret)
-
-          if (me) {
-            this.setAuth(jwt, persistent)
-          }
-
-          if (jwt) {
-            // Now use the JWT on the new API.
-            try {
-              me = await this.$api.session.fetchv2({
-                webversion: this.config.public.BUILD_DATE,
-              })
-            } catch (e) {
-              console.log('exception')
-            }
-
-            if (me) {
-              groups = me.memberships
-              delete me.memberships
-            }
-          }
-        }
-      }
-
-      if (me) {
-        if (groups && groups.length) {
-          this.groups = groups
-        } else {
-          // We asked for groups but got none, so we're not a member of any.
-          this.groups = []
-        }
-
-        // Set the user, which will trigger various re-rendering if we were required to be logged in.
-        this.setUser(me)
-
-        const composeStore = useComposeStore()
-        const email = composeStore.email
-
-        if (me.email && email !== me.email) {
-          // Save off our current email from the account for use in post composing.  Old values might be stuck
-          // because persisted.
-          composeStore.email = me.email
-        }
-      } else {
-        // Any auth info must be invalid.
-        this.setAuth(null, null)
-        this.setUser(null)
-      }
-
-      this.loginStateKnown = true
-
-      return this.user
-    },
+    fetchUser() {},
     async saveAboutMe(value) {
       const data = await this.$api.session.save({
         aboutme: value,
