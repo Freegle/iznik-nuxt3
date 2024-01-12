@@ -215,9 +215,9 @@ function adRendered2(visible) {
   martop2.value = visible ? '285px' : '0px'
 }
 
-// onMounted(() => {
-//   showDonationAskModal.value = true
-// })
+onMounted(() => {
+  showDonationAskModal.value = true
+})
 </script>
 <style scoped lang="scss">
 .martop2 {
