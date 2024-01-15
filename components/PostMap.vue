@@ -750,17 +750,31 @@ export default {
           )
         }
       } else if (this.myGroups?.length) {
-        // We have groups, so fetch the messages in those groups.
-        console.log('GetMessages - some groups, fetch groups')
-        ret = await this.messageStore.fetchMyGroups()
+        if (this.search) {
+          const groupbounds = this.myGroupsBoundingBox
 
-        // Get the messages in the map bounds too, so that we can show others as secondary.
-        this.secondaryMessageList = await this.messageStore.fetchInBounds(
-          swlat,
-          swlng,
-          nelat,
-          nelng
-        )
+          console.log('GetMessages - some groups, search within group bounds')
+          ret = await this.messageStore.search({
+            messagetype: this.type,
+            search: this.search,
+            swlat: groupbounds[0][0],
+            swlng: groupbounds[0][1],
+            nelat: groupbounds[1][0],
+            nelng: groupbounds[1][1],
+          })
+        } else {
+          // We have groups, so fetch the messages in those groups.
+          console.log('GetMessages - some groups, fetch groups')
+          ret = await this.messageStore.fetchMyGroups()
+
+          // Get the messages in the map bounds too, so that we can show others as secondary.
+          this.secondaryMessageList = await this.messageStore.fetchInBounds(
+            swlat,
+            swlng,
+            nelat,
+            nelng
+          )
+        }
       } else {
         // We have no groups, so fetch the messages in the map bounds.
         console.log('GetMessages - no groups, fetch in map bounds')
