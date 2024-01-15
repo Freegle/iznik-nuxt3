@@ -1,9 +1,15 @@
 <template>
   <div>
     <p class="font-weight-bold">
-      We've made little video to explain why we ask for donations. It's just
-      this guy Edward in his living room, because we don't waste your money on
-      fancy PR agencies.
+      <span v-if="donated">
+        You might have seen this video when you donated before. It explains why
+        we ask for donations.
+      </span>
+      <span v-else>
+        We've made little video to explain why we ask for donations.
+      </span>
+      It's just this guy Edward in his living room, because we don't waste your
+      money on fancy PR agencies.
     </p>
     <div class="ratio ratio-16x9">
       <iframe
@@ -51,6 +57,10 @@ export default {
     targetMet: {
       type: Boolean,
       default: false,
+    },
+    donated: {
+      type: String,
+      default: null,
     },
   },
   methods: {

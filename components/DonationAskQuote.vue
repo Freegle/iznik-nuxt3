@@ -6,7 +6,13 @@
         <!-- eslint-disable-next-line -->
           <p class="quote">I pass on my unwanted items here as I hate waste with a passion! It's a last resort to bin it! I also donate to Freegle via Paypal as it's my way of saying thank you for all the free items and to make sure Freegle is kept going.</p>
       </div>
-      <p>
+      <p v-if="donated">
+        You've donated before, so you know that
+        <strong>{{ groupname }}</strong> is a charity that's free to use, but
+        not free to run. If you're able to <strong>donate again</strong>
+        that would be lovely.
+      </p>
+      <p v-else>
         Could you be like Mary and help us keep going? If you can,
         <strong> please donate </strong>
         to keep us running.
@@ -62,6 +68,10 @@ export default {
     targetMet: {
       type: Boolean,
       default: false,
+    },
+    donated: {
+      type: String,
+      default: null,
     },
   },
   data() {
