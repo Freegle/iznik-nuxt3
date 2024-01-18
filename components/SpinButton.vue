@@ -31,6 +31,7 @@
   />
 </template>
 <script setup>
+import { useMiscStore } from '../stores/misc'
 import { ref, defineAsyncComponent, onBeforeUnmount } from '#imports'
 const { $sentryCaptureException } = useNuxtApp()
 
@@ -123,8 +124,11 @@ const finishSpinner = () => {
 }
 
 const forgottenCallback = () => {
-  finishSpinner()
-  $sentryCaptureException('SpinButton - callback not called')
+  // Callbacks validly won't fire if we're offline, as the AJAX request won't complete.
+  if (useMiscStore().online) {
+    finishSpinner()
+    $sentryCaptureException('SpinButton - callback not called')
+  }
 }
 
 const onClick = () => {
