@@ -176,33 +176,6 @@ export function useNavbar() {
           // Fetch the notifications too, so that we can be quick if they view them.
           notificationStore.fetchList()
         }
-
-        const runtimeConfig = useRuntimeConfig()
-
-        if (runtimeConfig.public.NETLIFY_DEPLOY_ID) {
-          try {
-            const response = await fetch(
-              `https://api.netlify.com/api/v1/sites/${runtimeConfig.public.NETLIFY_SITE_NAME}.netlify.com`
-            )
-
-            const data = await response.json()
-
-            if (data?.deploy_id) {
-              if (data.deploy_id !== runtimeConfig.public.NETLIFY_DEPLOY_ID) {
-                const deployDate = new Date(data.published_deploy.published_at)
-
-                // Check it's not too soon to nag.  This stops annoyances when we have lots of releases in a short
-                // time.
-                if (deployDate.getTime() < Date.now() - 12 * 60 * 60 * 1000) {
-                  // We're not on the latest deploy, so show a warning.
-                  useMiscStore().needToReload = true
-                }
-              }
-            }
-          } catch (e) {
-            console.log('Failed to fetch deploy info', e)
-          }
-        }
       } catch (e) {
         console.log('Ignore error fetching counts', e)
       }
