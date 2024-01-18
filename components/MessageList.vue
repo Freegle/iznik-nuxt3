@@ -507,7 +507,9 @@ export default {
         }
       })
 
-      this.messageStore.markSeen(ids)
+      if (ids.length) {
+        this.messageStore.markSeen(ids)
+      }
 
       this.markSeenTimer = setTimeout(async () => {
         // This is a backgrounded operation on the server and therefore won't happen immediately.
