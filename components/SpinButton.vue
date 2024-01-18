@@ -127,7 +127,12 @@ const forgottenCallback = () => {
   // Callbacks validly won't fire if we're offline, as the AJAX request won't complete.
   if (useMiscStore().online) {
     finishSpinner()
-    $sentryCaptureException('SpinButton - callback not called')
+    $sentryCaptureException(
+      'SpinButton - callback not called',
+      props.variant,
+      props.label,
+      props.iconName
+    )
   }
 }
 
