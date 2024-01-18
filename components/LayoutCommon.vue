@@ -280,6 +280,7 @@ body.modal-open {
   display: flex;
   flex-direction: column;
   max-height: 100vh;
+  transition: padding-top 1s;
 }
 
 .sticky {

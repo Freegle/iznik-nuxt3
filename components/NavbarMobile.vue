@@ -1,5 +1,6 @@
 <template>
   <b-navbar
+    ref="navbarRef"
     type="dark"
     class="ourBack d-flex justify-content-between d-xl-none"
     :class="{ hideNavBarTop: navBarHidden, showNavBarTop: !navBarHidden }"
@@ -206,6 +207,7 @@ import NavbarMobilePost from './NavbarMobilePost'
 import { useNavbar } from '~/composables/useNavbar'
 import { useMiscStore } from '~/stores/misc'
 
+const navbarRef = ref(null)
 const {
   online,
   distance,
@@ -262,9 +264,12 @@ function handleScroll() {
   const scrollY = window.scrollY
 
   if (scrollY > lastScrollY) {
-    // Scrolling down.  Hide the navbars.
+    const mainElement = document?.getElementsByTagName('main')[0]
+
+    // Scrolling down.  Hide the navbars. Remove padding for elements shifting.
     if (!navBarHidden.value) {
       navBarHidden.value = true
+      mainElement.style.paddingTop = '0px'
     }
 
     // Start a timer to show the navbars again after a delay, in case the user doesn't realise that they can
@@ -275,6 +280,9 @@ function handleScroll() {
 
     scrollTimer = setTimeout(() => {
       navBarHidden.value = false
+      const navbarHeight = navbarRef?.value?.$el?.offsetHeight
+      // Set padding to <main> element to shift by navbar height
+      mainElement.style.paddingTop = `${navbarHeight}px`
     }, 5000)
   } else if (navBarHidden.value) {
     // Scrolling up. Show the navbars.
