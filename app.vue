@@ -207,13 +207,6 @@ if (process.client) {
       }
     },
   })
-
-  // Check when the app has been updated.
-  const nuxtApp = useNuxtApp()
-  nuxtApp.hook('app:manifest:update', (e) => {
-    console.log('Manifest updated', e)
-    useMiscStore().needToReload = true
-  })
 }
 
 ready = true
