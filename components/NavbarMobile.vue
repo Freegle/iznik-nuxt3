@@ -22,6 +22,9 @@
       @click="backButton"
     >
       <v-icon icon="arrow-left" />
+      <b-badge v-if="backButtonCount" variant="danger" class="ml-1">
+        {{ backButtonCount }}
+      </b-badge>
     </b-button>
     <NotificationOptions
       v-if="online && !showBackButton && loggedIn"
@@ -218,6 +221,7 @@ const {
   browseCountPlural,
   showAboutMeModal,
   showBackButton,
+  backButtonCount,
   requestLogin,
   logout,
   showAboutMe,

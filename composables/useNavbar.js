@@ -26,7 +26,7 @@ export function useNavbar() {
   const distance = ref(1000)
   const logo = ref('/icon.png')
   const unreadNotificationCount = ref(0)
-  const chatCount = computed(() => chatStore.unreadCount + 1)
+  const chatCount = computed(() => chatStore.unreadCount)
   const activePostsCount = computed(() => messageStore.activePostsCounter)
   const showAboutMeModal = ref(false)
   const countTimer = ref(null)
@@ -52,7 +52,7 @@ export function useNavbar() {
   const showBackButton = computed(() => {
     // On mobile we want to show a back button instead of the logo when we're not on one of the "home" routes,
     // which are /browse, /chitchat, /myposts
-    const route = useRoute()
+    console.log('Show back button', route?.path)
 
     return (
       route &&
@@ -62,6 +62,20 @@ export function useNavbar() {
       !route.path.startsWith('/explore/') &&
       route.path !== '/'
     )
+  })
+
+  const backButtonCount = computed(() => {
+    // On mobile, if we're viewing a chat, then we don't have the navbar and we won't see anything which
+    // reminds us that we have other unread chat messages.  In that case we show a count of unread chat
+    // messages.
+    if (route.path.startsWith('/chats/')) {
+      const chatid = parseInt(route.path.split('/')[2])
+      const chat = chatStore.byChatId(chatid)
+
+      return chatCount.value - chat?.unseen
+    }
+
+    return 0
   })
 
   const newsCount = computed(() => {
@@ -223,6 +237,7 @@ export function useNavbar() {
     showAboutMeModal,
     homePage,
     showBackButton,
+    backButtonCount,
     requestLogin,
     logout,
     showAboutMe,
