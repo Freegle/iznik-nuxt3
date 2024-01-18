@@ -424,7 +424,7 @@ export default {
     },
     duplicates: {
       handler(newVal) {
-        if (newVal?.length) {
+        if (this.me && newVal?.length) {
           // Any duplicates are things we won't ever show.  If they are unseen then they will be contributing to the
           // unseen count, but we don't want them to.  So mark such messages as seen.
           const ids = []
