@@ -212,14 +212,6 @@ if (process.client) {
   const nuxtApp = useNuxtApp()
   nuxtApp.hook('app:manifest:update', (e) => {
     console.log('Manifest updated', e)
-    // Check it's not too soon to nag.  This stops annoyances when we have lots of releases in a short
-    // time.
-    console.log('Compare', e.timestamp, Date.now() - 12 * 60 * 60 * 1000)
-    if (e.timestamp < Date.now() - 12 * 60 * 60 * 1000) {
-      // We're not on the latest deploy, so show a warning.
-      useMiscStore().needToReload = true
-    }
-
     useMiscStore().needToReload = true
   })
 }
