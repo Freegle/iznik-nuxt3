@@ -53,3 +53,6 @@ export const MESSAGE_EXPIRE_TIME = 90
 export const GROUP_REPOSTS = { offer: 3, wanted: 14, max: 10, chaseups: 2 }
 
 export const TYPING_TIME_INVERVAL = 10000
+
+// The 37 miles figure comes from research from someone we shall call Clement.
+export const FAR_AWAY = 37

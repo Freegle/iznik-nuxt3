@@ -15,7 +15,9 @@
         v-if="!loading && selectedSort === 'Unseen' && showCountsUnseen && me"
       >
         <MessageListCounts v-if="browseCount" @mark-seen="markSeen" />
-        <MessageListUpToDate v-else-if="!deDuplicatedMessages[0].unseen" />
+        <MessageListUpToDate
+          v-if="browseCount && !deDuplicatedMessages[0].unseen"
+        />
       </div>
       <div
         :id="'messagewrapper-' + deDuplicatedMessages[0].id"
@@ -59,6 +61,7 @@
             !loading &&
             selectedSort === 'Unseen' &&
             showCountsUnseen &&
+            browseCount &&
             me &&
             !message.unseen &&
             deDuplicatedMessages[ix].unseen

@@ -45,6 +45,20 @@
             talk to them and under no circumstances send them any money. Do not
             arrange anything by courier.
           </notice-message>
+          <notice-message
+            v-if="faraway"
+            variant="warning"
+            class="clickme"
+            @click="showInfo"
+          >
+            <p>
+              <v-icon icon="exclamation-triangle" />&nbsp;This freegler is
+              {{ milesstring }}
+              from you. If you are collecting from them, please make sure you
+              can get there. If they are collecting from you, please
+              double-check they have transport.
+            </p>
+          </notice-message>
         </div>
         <b-button
           variant="warning"
@@ -277,7 +291,7 @@
 </template>
 <script>
 import pluralize from 'pluralize'
-import { TYPING_TIME_INVERVAL } from '../constants'
+import { FAR_AWAY, TYPING_TIME_INVERVAL } from '../constants'
 import { setupChat } from '../composables/useChat'
 import { useMiscStore } from '../stores/misc'
 import { useMessageStore } from '../stores/message'
@@ -342,8 +356,15 @@ export default {
     const messageStore = useMessageStore()
     const addressStore = useAddressStore()
 
-    const { chat, otheruser, tooSoonToNudge, chatStore, chatmessages } =
-      await setupChat(props.id)
+    const {
+      chat,
+      otheruser,
+      tooSoonToNudge,
+      chatStore,
+      chatmessages,
+      milesaway,
+      milesstring,
+    } = await setupChat(props.id)
 
     return {
       chat,
@@ -355,6 +376,8 @@ export default {
       addressStore,
       chatmessages,
       authStore,
+      milesaway,
+      milesstring,
     }
   },
   data() {
@@ -384,8 +407,12 @@ export default {
         this.badratings ||
         this.expectedreplies ||
         this.otheruser?.spammer ||
-        this.otheruser?.deleted
+        this.otheruser?.deleted ||
+        this.faraway
       )
+    },
+    faraway() {
+      return this.milesaway && this.milesaway > FAR_AWAY
     },
     badratings() {
       let ret = false

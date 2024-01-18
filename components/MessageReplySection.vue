@@ -11,11 +11,10 @@
       />
       <MessageStillAvailable v-if="stillAvailable" class="mb-1 mt-1" />
       <NoticeMessage
-        v-if="milesaway > 37 && message.type === 'Offer'"
+        v-if="milesaway > farawawy && message.type === 'Offer'"
         variant="danger"
         class="mt-2 mb-1"
       >
-        <!--  The 37 miles figure comes from research from someone we shall call Clement. -->
         This item is {{ milesaway }} miles away. Before replying, are you sure
         you can collect from there?
       </NoticeMessage>
@@ -114,6 +113,7 @@ import { useMessageStore } from '../stores/message'
 import { useAuthStore } from '../stores/auth'
 import { useReplyStore } from '../stores/reply'
 import { milesAway } from '../composables/useDistance'
+import { FAR_AWAY } from '../constants'
 import replyToPost from '@/mixins/replyToPost'
 import MessageStillAvailable from '~/components/MessageStillAvailable'
 import EmailValidator from '~/components/EmailValidator'
@@ -168,6 +168,9 @@ export default {
     }
   },
   computed: {
+    faraway() {
+      return FAR_AWAY
+    },
     message() {
       return this.messageStore?.byId(this.id)
     },
