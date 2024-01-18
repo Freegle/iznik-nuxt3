@@ -23,7 +23,7 @@
         <div v-else>
           <p>Sorry, something went wrong.</p>
           <p>
-            That might be a bug, or perhaps your network connection broke.
+            That might be a bug, or perhaps your network connection has broken?
             Please try again - if you continue to have problems then please take
             a screenshot and contact <SupportLink />
           </p>
