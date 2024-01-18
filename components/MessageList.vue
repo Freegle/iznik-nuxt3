@@ -373,6 +373,17 @@ export default {
 
       return ret
     },
+    duplicates() {
+      const ret = []
+
+      this.filteredMessagesToShow.forEach((m) => {
+        if (!this.deDuplicatedMessages.find((d) => d.id === m.id)) {
+          ret.push(m)
+        }
+      })
+
+      return ret
+    },
     noneFound() {
       return !this.loading && !this.deDuplicatedMessages?.length
     },
@@ -408,6 +419,29 @@ export default {
     noneFound: {
       handler(newVal, oldVal) {
         this.$emit('update:none', newVal)
+      },
+      immediate: true,
+    },
+    duplicates: {
+      handler(newVal) {
+        if (newVal?.length) {
+          // Any duplicates are things we won't ever show.  If they are unseen then they will be contributing to the
+          // unseen count, but we don't want them to.  So mark such messages as seen.
+          const ids = []
+
+          newVal.forEach((m) => {
+            const message = this.filteredMessagesInStore[m.id]
+
+            if (message?.unseen) {
+              ids.push(m.id)
+            }
+          })
+
+          if (ids.length) {
+            console.log('Unseen duplicates', ids)
+            this.messageStore.markSeen(ids)
+          }
+        }
       },
       immediate: true,
     },
