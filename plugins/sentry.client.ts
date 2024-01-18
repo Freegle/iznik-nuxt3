@@ -7,6 +7,7 @@ import {
 import { defineNuxtPlugin, useRuntimeConfig } from '#app'
 import { useRouter } from '#imports'
 import { useMiscStore } from '~/stores/misc'
+import { suppressException } from '~/composables/useSuppressException'
 
 export default defineNuxtPlugin((nuxtApp) => {
   const config = useRuntimeConfig()
@@ -135,6 +136,9 @@ export default defineNuxtPlugin((nuxtApp) => {
           originalExceptionString?.match(/Attempt to use history.replaceState/)
         ) {
           console.log('History.replaceState too often')
+          return null
+        } else if (suppressException(originalException)) {
+          console.log('Suppress exception')
           return null
         } else if (originalExceptionName === 'TypeError') {
           console.log('TypeError')
