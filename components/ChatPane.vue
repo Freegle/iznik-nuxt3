@@ -252,11 +252,16 @@ export default {
             clearTimeout(this.scrollTimerForNavbar)
           }
 
-          this.$refs.chatheader.collapse(true)
+          if (this.$refs.chatheader) {
+            this.$refs.chatheader.collapse(true)
+          }
 
           this.scrollTimer = setTimeout(() => {
             navBarHidden.value = false
-            this.$refs.chatheader.collapse(false)
+
+            if (this.$refs.chatheader) {
+              this.$refs.chatheader.collapse(false)
+            }
           }, 5000)
         }
 
