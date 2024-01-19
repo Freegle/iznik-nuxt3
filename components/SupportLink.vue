@@ -1,7 +1,9 @@
 <template>
-  <ExternalLink class="font-weight-bold" :href="href" style="color: black">{{
-    text
-  }}</ExternalLink>
+  <client-only>
+    <ExternalLink class="font-weight-bold" :href="href" style="color: black">{{
+      text
+    }}</ExternalLink>
+  </client-only>
 </template>
 <script>
 export default {
