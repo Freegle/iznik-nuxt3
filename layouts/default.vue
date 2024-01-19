@@ -35,8 +35,7 @@ export default {
     const persistent = authStore.auth.persistent
 
     if (process.client) {
-      // Ensure we don't wrongly think we have some outstanding requests if the server happened to start some.  This
-      // would break waitForRef.
+      // Ensure we don't wrongly think we have some outstanding requests if the server happened to start some.
       miscStore.apiCount = 0
     }
 

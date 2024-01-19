@@ -184,11 +184,14 @@ export default {
   },
   mounted() {
     this.scrollTimer = setTimeout(this.checkScroll, this.scrollInterval)
-    this.lastScrollYForNavbar = this.$refs.chatContent.scrollTop
-    this.$refs.chatContent.addEventListener(
-      'scroll',
-      this.handleScrollForNavbar
-    )
+
+    if (!this.notVisible && this.me) {
+      this.lastScrollYForNavbar = this.$refs.chatContent.scrollTop
+      this.$refs.chatContent.addEventListener(
+        'scroll',
+        this.handleScrollForNavbar
+      )
+    }
   },
   beforeUnmount() {
     if (this.scrollTimer) {

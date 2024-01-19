@@ -162,8 +162,7 @@ export default {
 
     const { modal, hide } = useModal()
 
-    // Message was fetched by parent.  This allows us to avoid an async setup, which causes problems where waitForRef
-    // returns before the component fully exists and therefore show() fails.
+    // Message was fetched by parent.
     const message = toRaw(messageStore.byId(props.id))
     const textbody = message.textbody
     const item = message.item?.name

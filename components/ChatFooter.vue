@@ -504,7 +504,6 @@ export default {
       }
     },
     async addressBook() {
-      // Fetch the address book here to avoid an async setup which causes issues with waitForRef.
       await this.addressStore.fetch()
 
       this.showAddress = true
