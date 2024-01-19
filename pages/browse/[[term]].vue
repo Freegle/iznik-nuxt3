@@ -51,6 +51,7 @@
               v-model:selectedType="selectedType"
               v-model:selectedSort="selectedSort"
               v-model:search="searchTerm"
+              class="mt-2 mt-md-0"
             />
             <PostMapAndList
               :key="'map-' + bump"
