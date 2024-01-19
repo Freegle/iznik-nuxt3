@@ -151,7 +151,7 @@ export default {
         this.miscStore.breakpoint === 'sm'
       ) {
         // On mobile there is a sticky ad at the bottom and we want to make sure the buttons show.
-        ret = navBarHidden.value ? vh100 - 52 : vh100 - 74 - 52
+        ret = navBarHidden.value ? vh100 - 52 : vh100 - 60 - 52
       } else {
         ret = vh100 - 74
       }
