@@ -10,6 +10,8 @@ import { useAuthStore } from '~/stores/auth'
 import { fetchMe } from '~/composables/useMe'
 import { useRuntimeConfig } from '#app'
 
+export const navBarHidden = ref(false)
+
 export function useNavbar() {
   const authStore = useAuthStore()
   const miscStore = useMiscStore()

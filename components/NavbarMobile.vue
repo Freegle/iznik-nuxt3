@@ -206,7 +206,7 @@
 <script setup>
 import { useRoute } from 'vue-router'
 import NavbarMobilePost from './NavbarMobilePost'
-import { useNavbar } from '~/composables/useNavbar'
+import { useNavbar, navBarHidden } from '~/composables/useNavbar'
 import { useMiscStore } from '~/stores/misc'
 
 const {
@@ -247,7 +247,7 @@ const title = computed(() => {
   return useMiscStore().pageTitle
 })
 
-// We want to hide the navbars when you slide down.
+// We want to hide the navbars when you scroll down.
 let lastScrollY = 0
 
 onMounted(() => {
@@ -259,7 +259,6 @@ onBeforeUnmount(() => {
   window.removeEventListener('scroll', handleScroll)
 })
 
-const navBarHidden = ref(false)
 let scrollTimer = null
 
 function handleScroll() {

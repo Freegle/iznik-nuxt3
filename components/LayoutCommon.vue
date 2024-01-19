@@ -77,6 +77,7 @@ import { useChatStore } from '~/stores/chat'
 import replyToPost from '@/mixins/replyToPost'
 import ChatButton from '~/components/ChatButton'
 import VisibleWhen from '~/components/VisibleWhen'
+import { navBarHidden } from '~/composables/useNavbar'
 const SupportLink = defineAsyncComponent(() =>
   import('~/components/SupportLink')
 )
@@ -118,6 +119,9 @@ export default {
     allowAd() {
       // We don't want to show the ad on the landing page when logged out - looks tacky.
       return this.routePath !== '/' || this.loggedIn
+    },
+    marginTop() {
+      return navBarHidden.value ? '0px' : '60px'
     },
   },
   async mounted() {
@@ -292,7 +296,8 @@ body.modal-open {
   flex-direction: column;
   max-height: 100vh;
 
-  margin-top: 60px;
+  margin-top: v-bind(marginTop);
+  transition: margin-top 1s;
 
   @include media-breakpoint-up(md) {
     margin-top: 75px;

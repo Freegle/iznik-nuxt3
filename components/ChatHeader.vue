@@ -28,7 +28,7 @@
           <UserRatings
             :id="chat.otheruid"
             :key="'otheruser-' + chat.otheruid"
-            class="mt-1 d-flex justify-content-end"
+            class="mb-1 mb-md-0 mt-1 d-flex justify-content-end"
             size="sm"
           />
           <SupporterInfo v-if="otheruser.supporter" class="align-self-end" />
@@ -335,11 +335,6 @@ export default {
       type: Number,
       required: true,
     },
-    shrink: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
   },
   async setup(props) {
     const chatStore = useChatStore()
@@ -348,6 +343,11 @@ export default {
     const { chat, otheruser, unseen, milesaway, milesstring } = await setupChat(
       props.id
     )
+
+    miscStore.set({
+      key: 'chatinfoheader',
+      value: false,
+    })
 
     return {
       chatStore,
@@ -407,19 +407,6 @@ export default {
     },
   },
   watch: {
-    shrink(newVal, oldVal) {
-      if (
-        this.miscStore.breakpoint === 'xs' ||
-        this.miscStore.breakpoint === 'sm'
-      ) {
-        // For small screens we want to autoshrink the header to make more room.
-        if (newVal && !oldVal) {
-          this.collapsed = true
-        } else if (!newVal && oldVal) {
-          this.collapsed = false
-        }
-      }
-    },
     unseen() {
       // Make sure the chat is up to date.  This helps in the case where pollForChatUpdates picks up a new
       // message and so we show that the chat has unread messages, but we haven't yet
@@ -427,6 +414,9 @@ export default {
     },
   },
   methods: {
+    collapse(val) {
+      this.collapsed = val
+    },
     async hide() {
       await this.chatStore.hide(this.id)
       const router = useRouter()
