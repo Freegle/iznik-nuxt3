@@ -79,8 +79,7 @@
             v-model="sendmessage"
             placeholder="Type here..."
             enterkeyhint="enter"
-            rows="3"
-            max-rows="8"
+            :rows="rows"
             @keydown="typing"
             @focus="markRead"
           />
@@ -90,8 +89,7 @@
             ref="chatarea"
             v-model="sendmessage"
             placeholder="Type here..."
-            rows="3"
-            max-rows="8"
+            :rows="rows"
             enterkeyhint="send"
             autocapitalize="none"
             @keydown="typing"
@@ -402,6 +400,10 @@ export default {
     }
   },
   computed: {
+    rows() {
+      // Bootstrap Vue Next doesn't yet have autoresizing.
+      return this.sendmessage ? 6 : 3
+    },
     noticesToShow() {
       return (
         this.badratings ||
@@ -447,6 +449,17 @@ export default {
       }
 
       return null
+    },
+  },
+  watch: {
+    sendmessage(newVal, oldVal) {
+      // This will result in the chat header shrinking once you start typing, to give more room, and then
+      // expanding back again if you delete everything.
+      if (newVal && !oldVal) {
+        this.$emit('update:startedTyping', true)
+      } else if (!newVal) {
+        this.$emit('update:startedTyping', false)
+      }
     },
   },
   mounted() {

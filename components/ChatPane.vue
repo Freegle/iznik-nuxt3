@@ -2,7 +2,7 @@
   <div>
     <ChatNotVisible v-if="notVisible" id="notvisible" />
     <div v-else-if="me" class="chatHolder">
-      <ChatHeader :id="id" class="chatTitle" />
+      <ChatHeader :id="id" class="chatTitle" :shrink="startedTyping" />
       <div
         v-if="chat && chatmessages?.length"
         ref="chatContent"
@@ -40,6 +40,7 @@
       </div>
       <ChatFooter
         v-bind="$props"
+        v-model:startedTyping="startedTyping"
         class="chatFooter"
         @scrollbottom="checkScroll"
       />
@@ -116,6 +117,7 @@ export default {
       scrollTimer: null,
       scrollInterval: 50,
       loaded: false,
+      startedTyping: false,
     }
   },
   computed: {

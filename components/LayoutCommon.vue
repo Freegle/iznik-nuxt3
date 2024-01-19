@@ -288,10 +288,15 @@ body.modal-open {
 }
 
 .pageContent {
-  margin-top: 75px;
   display: flex;
   flex-direction: column;
   max-height: 100vh;
+
+  margin-top: 60px;
+
+  @include media-breakpoint-up(md) {
+    margin-top: 75px;
+  }
 }
 
 .sticky {

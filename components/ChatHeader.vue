@@ -4,17 +4,21 @@
       v-if="chat && (chat.chattype !== 'User2User' || otheruser?.info)"
       class="outer position-relative"
     >
-      <div class="nameinfo pt-1 pb-1 pl-1">
-        <ProfileImage
-          v-if="!collapsed && chat.icon"
-          :image="chat.icon"
-          class="pr-1 profile clickme"
-          is-thumbnail
-          size="xl"
-          border
-          @click="showInfo"
-        />
-        <div class="name font-weight-bold black text--large pl-1">
+      <div class="nameinfo pt-md-1 pb-md-1 pl-1">
+        <div
+          class="profile d-flex flex-column justify-content-around flex-grow-1"
+        >
+          <ProfileImage
+            v-if="!collapsed && chat.icon"
+            :image="chat.icon"
+            class="pr-1 clickme"
+            is-thumbnail
+            size="xl"
+            border
+            @click="showInfo"
+          />
+        </div>
+        <div class="name font-weight-bold black text--large">
           {{ chat.name }}
         </div>
         <div
@@ -29,33 +33,41 @@
           />
           <SupporterInfo v-if="otheruser.supporter" class="align-self-end" />
         </div>
-        <div
+        <span
           v-if="!collapsed && otheruser && otheruser.info"
           class="userinfo mr-2"
         >
-          <div class="small flex flex-wrap">
-            <div v-if="otheruser.lastaccess" class="d-inline d-md-block">
+          <span class="small flex flex-wrap">
+            <span v-if="otheruser.lastaccess" class="d-inline d-md-block">
               <span class="d-none d-md-inline">Last seen</span>
               <span class="d-inline d-md-none">Seen</span>
               <!-- eslint-disable-next-line-->
-              <strong :title="datetimeshort(otheruser.lastaccess)" class="ml-1" >{{ timeago(otheruser.lastaccess) }}</strong>.
-            </div>
-            <div v-if="replytime" class="d-inline d-md-block">
+              <strong :title="datetimeshort(otheruser.lastaccess)" class="ml-1" >{{ timeago(otheruser.lastaccess) }}</strong>
+              <span class="d-none d-md-inline">.</span>
+              <span class="d-inline d-md-none">, </span>
+            </span>
+            <span
+              v-if="!otheruser?.deleted && milesaway"
+              class="d-inline d-md-none"
+            >
+              <strong>{{ milesstring }}</strong
+              >.
+            </span>
+            <span v-if="replytime" class="d-inline d-md-block">
               <span class="d-none d-md-inline">Typically replies in</span>
               <span class="d-inline d-md-none">Replies in</span>
               <strong class="ml-1">{{ replytime }}</strong
               >.
-            </div>
-            <br class="d-block d-md-none" />
-            <div
+            </span>
+            <span
               v-if="!otheruser?.deleted && milesaway"
-              class="d-inline d-md-block"
+              class="d-none d-md-block"
             >
               About <strong>{{ milesstring }}</strong
               >.
-            </div>
-          </div>
-        </div>
+            </span>
+          </span>
+        </span>
       </div>
       <b-button
         v-if="unseen"
@@ -70,7 +82,7 @@
       </b-button>
       <div
         v-if="!collapsed"
-        class="d-flex flex-wrap justify-content-between p-1 mt-1 actions"
+        class="d-flex flex-wrap justify-content-between p-md-1 mt-md-1 actions"
       >
         <div class="d-flex">
           <b-button
@@ -103,7 +115,8 @@
               class="d-block d-md-none"
               @click="showInfo"
             >
-              View profile
+              <span class="d-none d-md-block"> View profile </span>
+              <span class="d-block d-md-none"> Profile </span>
             </b-button>
           </div>
           <div v-if="chat.chattype === 'User2User' || !unseen" class="mr-2">
@@ -114,7 +127,8 @@
                 class="d-none d-md-block"
                 @click="unhide"
               >
-                Unhide chat
+                <span class="d-none d-md-block"> Unhide chat </span>
+                <span class="d-block d-md-none"> Unhide </span>
               </b-button>
               <b-button
                 v-b-tooltip="'Unhide this chat'"
@@ -135,7 +149,8 @@
                 class="d-none d-md-block"
                 @click="showhide"
               >
-                Hide chat
+                <span class="d-none d-md-block"> Hide chat </span>
+                <span class="d-block d-md-none"> Hide </span>
               </b-button>
               <b-button
                 v-b-tooltip="
@@ -146,7 +161,8 @@
                 class="d-block d-md-none"
                 @click="showhide"
               >
-                Hide chat
+                <span class="d-none d-md-block"> Hide chat </span>
+                <span class="d-block d-md-none"> Hide </span>
               </b-button>
             </template>
           </div>
@@ -158,7 +174,12 @@
         >
           <v-icon
             icon="chevron-circle-up"
-            class="text-faded fa-2x"
+            class="text-faded d-block d-md-none"
+            title="Collapse this section"
+          />
+          <v-icon
+            icon="chevron-circle-up"
+            class="text-faded fa-2x d-none d-md-block"
             title="Collapse this section"
           />
         </div>
@@ -314,6 +335,11 @@ export default {
       type: Number,
       required: true,
     },
+    shrink: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   async setup(props) {
     const chatStore = useChatStore()
@@ -381,6 +407,19 @@ export default {
     },
   },
   watch: {
+    shrink(newVal, oldVal) {
+      if (
+        this.miscStore.breakpoint === 'xs' ||
+        this.miscStore.breakpoint === 'sm'
+      ) {
+        // For small screens we want to autoshrink the header to make more room.
+        if (newVal && !oldVal) {
+          this.collapsed = true
+        } else if (!newVal && oldVal) {
+          this.collapsed = false
+        }
+      }
+    },
     unseen() {
       // Make sure the chat is up to date.  This helps in the case where pollForChatUpdates picks up a new
       // message and so we show that the chat has unread messages, but we haven't yet
@@ -433,34 +472,33 @@ export default {
 
 .nameinfo {
   display: grid;
-  grid-template-columns: auto 1fr 121px;
+  grid-template-columns: auto 10px 1fr 121px;
 
   .profile {
     grid-column: 1;
-    grid-row: 1 / 2;
+    grid-row: 1 / 3;
   }
 
   .name {
-    grid-column: 2;
-    grid-row: 1 / 2;
-  }
-
-  .ratings {
     grid-column: 3;
     grid-row: 1 / 2;
   }
 
+  .ratings {
+    grid-column: 4;
+    grid-row: 1 / 2;
+  }
+
   .userinfo {
-    grid-column: 1 / 4;
+    grid-column: 3 / 5;
     grid-row: 2 / 3;
     color: $colour-info-fg;
-    padding-top: 0.5rem;
+    padding-top: 0.25rem;
 
     @include media-breakpoint-up(md) {
       grid-row: 1 / 2;
-      grid-column: 2 / 4;
+      grid-column: 3 / 5;
       padding-top: 2rem;
-      padding-left: 0.25rem;
     }
   }
 }
@@ -499,7 +537,9 @@ pre {
 }
 
 .actions {
-  border-top: 1px solid $color-gray--light;
+  @include media-breakpoint-up(md) {
+    border-top: 1px solid $color-gray--light;
+  }
 }
 
 .collapsedbutton {
