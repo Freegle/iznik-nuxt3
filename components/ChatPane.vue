@@ -185,7 +185,7 @@ export default {
   mounted() {
     this.scrollTimer = setTimeout(this.checkScroll, this.scrollInterval)
 
-    if (!this.notVisible && this.me) {
+    if (this.$refs.chatContent) {
       this.lastScrollYForNavbar = this.$refs.chatContent.scrollTop
       this.$refs.chatContent.addEventListener(
         'scroll',
