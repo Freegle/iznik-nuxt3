@@ -232,28 +232,36 @@ export default {
       }
     },
     handleScrollForNavbar() {
-      // Our normal window-level function to hide the navbar won't apply because we're not scrolling the whole window.
-      // We want different behaviour anyway - hide the navbars when scrolling or typing.
-      const scrollY = this.$refs.chatContent.scrollTop
+      if (
+        this.miscStore.breakpoint === 'xs' ||
+        this.miscStore.breakpoint === 'sm'
+      ) {
+        // Our normal window-level function to hide the navbar won't apply because we're not scrolling the whole window.
+        // We want different behaviour anyway - hide the navbars when scrolling or typing.
+        const scrollY = this.$refs.chatContent.scrollTop
 
-      if (scrollY !== this.lastScrollY) {
-        // Scrolling.  Hide the navbars.
-        if (!navBarHidden.value) {
-          navBarHidden.value = true
+        if (scrollY !== this.lastScrollY) {
+          // Scrolling.  Hide the navbars.
+          if (!navBarHidden.value) {
+            navBarHidden.value = true
+          }
+
+          // Start a timer to show the navbars again after a delay, in case the user doesn't realise that they can
+          // make them show again by scrolling up.
+          if (this.scrollTimerForNavbar) {
+            clearTimeout(this.scrollTimerForNavbar)
+          }
+
+          this.$refs.chatheader.collapse(true)
+
+          this.scrollTimer = setTimeout(() => {
+            navBarHidden.value = false
+            this.$refs.chatheader.collapse(false)
+          }, 5000)
         }
 
-        // Start a timer to show the navbars again after a delay, in case the user doesn't realise that they can
-        // make them show again by scrolling up.
-        if (this.scrollTimerForNavbar) {
-          clearTimeout(this.scrollTimerForNavbar)
-        }
-
-        this.scrollTimer = setTimeout(() => {
-          navBarHidden.value = false
-        }, 5000)
+        this.lastScrollY = scrollY
       }
-
-      this.lastScrollY = scrollY
     },
     typing(val) {
       if (
