@@ -156,7 +156,6 @@ export default {
         ret = vh100 - 74
       }
 
-      console.log('Height', ret)
       return 'height: ' + ret + 'px'
     },
   },
@@ -262,7 +261,7 @@ export default {
         //
         // Start a timer to show the navbars again after a delay, in case the user doesn't realise that they can
         // make them show again.
-        navBarHidden.value = true
+        navBarHidden.value = val
 
         if (this.scrollTimerForNavbar) {
           clearTimeout(this.scrollTimerForNavbar)
