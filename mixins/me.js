@@ -128,9 +128,9 @@ export default {
             swlat = swlat === null ? gswlat : Math.min(swlat, gswlat)
             swlng = swlng === null ? gswlng : Math.min(swlng, gswlng)
             nelat = nelat === null ? gnelat : Math.max(nelat, gnelat)
-            nelng = nelng === null ? gnelng : Math.min(nelng, gnelng)
+            nelng = nelng === null ? gnelng : Math.max(nelng, gnelng)
           } catch (e) {
-            console.log('WKT error', location, e)
+            console.log('WKT error', g.id, g.bbox, g, e)
           }
         }
       })

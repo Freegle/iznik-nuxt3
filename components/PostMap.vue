@@ -753,7 +753,10 @@ export default {
         if (this.search) {
           const groupbounds = this.myGroupsBoundingBox
 
-          console.log('GetMessages - some groups, search within group bounds')
+          console.log(
+            'GetMessages - some groups, search within group bounds',
+            groupbounds
+          )
           ret = await this.messageStore.search({
             messagetype: this.type,
             search: this.search,
