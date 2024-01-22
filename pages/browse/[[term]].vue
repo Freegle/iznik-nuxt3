@@ -33,9 +33,25 @@
           </div>
           <div v-if="initialBounds">
             <JobsTopBar class="d-none d-md-block" />
-            <NoticeMessage v-if="noMessagesNoLocation" variant="warning">
+            <NoticeMessage
+              v-if="noMessagesNoLocation"
+              variant="warning"
+              class="mb-2"
+            >
               There are no posts in this area at the moment. You can check back
               later, or use the controls below.
+            </NoticeMessage>
+            <NoticeMessage v-else-if="messagesOnMapCount === 0" class="mb-2">
+              <div v-if="searchTerm">
+                We couldn't find any posts matching your search. You can check
+                back later, or use the controls below or adjust your filters to
+                show posts from further away.
+              </div>
+              <div v-else>
+                We couldn't find any posts to show. You can check back later, or
+                use the controls below or adjust your filters to show posts from
+                further away.
+              </div>
             </NoticeMessage>
             <NoticeMessage
               v-if="browseView === 'nearby' && !isochrones.length"
@@ -52,6 +68,7 @@
               v-model:selectedType="selectedType"
               v-model:selectedSort="selectedSort"
               v-model:search="searchTerm"
+              class="mt-2 mt-md-0"
             />
             <PostMapAndList
               :key="'map-' + bump"
@@ -98,6 +115,7 @@ import dayjs from 'dayjs'
 import { useRoute, useRouter } from 'vue-router'
 import { defineAsyncComponent } from 'vue'
 import { useMessageStore } from '../../stores/message'
+import NoticeMessage from '../../components/NoticeMessage'
 import { loadLeaflet } from '~/composables/useMap'
 import { buildHead } from '~/composables/useBuildHead'
 import VisibleWhen from '~/components/VisibleWhen'
@@ -113,6 +131,7 @@ const MicroVolunteering = defineAsyncComponent(() =>
 
 export default {
   components: {
+    NoticeMessage,
     PostFilters,
     PostMapAndList: defineAsyncComponent(() =>
       import('~/components/PostMapAndList')
@@ -193,7 +212,7 @@ export default {
       bump: 1,
       showAboutMeModal: false,
       reviewAboutMe: false,
-      messagesOnMapCount: 0,
+      messagesOnMapCount: null,
       selectedGroup: 0,
       selectedType: 'All',
       selectedSort: 'Unseen',
@@ -209,7 +228,7 @@ export default {
         : 'nearby'
     },
     noMessagesNoLocation() {
-      return !this.messagesOnMapCount && !this.me?.settings?.mylocation
+      return this.messagesOnMapCount === 0 && !this.me?.settings?.mylocation
     },
     isochrones() {
       return this.isochroneStore?.list
@@ -328,18 +347,17 @@ export default {
     async calculateInitialMapBounds() {
       if (process.client) {
         if (this.browseView === 'nearby') {
-          // The initial bounds for the map are determined from the isochrones if possible.  We might have them cached
-          // in store.
-          const promises = []
-          promises.push(this.isochroneStore.fetch())
-
           if (this.me) {
+            // The initial bounds for the map are determined from the isochrones if possible.
+            const promises = []
+            promises.push(this.isochroneStore.fetch())
+
             // By default we'll be showing the isochrone view in PostMap, so start the fetch of the messages now.  That
             // way we can display the list rapidly.  Fetching this and the isochrones in parallel reduces latency.
             promises.push(this.isochroneStore.fetchMessages(true))
-          }
 
-          await Promise.all(promises)
+            await Promise.all(promises)
+          }
 
           this.initialBounds = this.isochroneStore.bounds
         }

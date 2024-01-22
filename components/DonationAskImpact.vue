@@ -5,6 +5,12 @@
     >
       £10 donation = £100 impact!
     </p>
+    <p v-if="donated">
+      You've donated before, so you know that
+      <strong>{{ groupname }}</strong> is a charity that's free to use, but not
+      free to run. If you're able to <strong>donate again</strong>
+      that would be lovely.
+    </p>
     <p class="text-center mt-4">
       For every £10 donation, we have an impact of about £100 in stuff saved
       from landfill/incinerators - and reused by other freeglers.
@@ -52,6 +58,10 @@ export default {
     targetMet: {
       type: Boolean,
       default: false,
+    },
+    donated: {
+      type: String,
+      default: null,
     },
   },
   methods: {

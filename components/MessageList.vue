@@ -15,7 +15,9 @@
         v-if="!loading && selectedSort === 'Unseen' && showCountsUnseen && me"
       >
         <MessageListCounts v-if="browseCount" @mark-seen="markSeen" />
-        <MessageListUpToDate v-else-if="!deDuplicatedMessages[0].unseen" />
+        <MessageListUpToDate
+          v-if="deDuplicatedMessages[0].id === firstSeenMessage"
+        />
       </div>
       <div
         :id="'messagewrapper-' + deDuplicatedMessages[0].id"
@@ -51,7 +53,7 @@
         />
       </VisibleWhen>
       <div
-        v-for="(message, ix) in deDuplicatedMessages.slice(1)"
+        v-for="message in deDuplicatedMessages.slice(1)"
         :key="'messagelist-' + message.id"
       >
         <MessageListUpToDate
@@ -59,9 +61,7 @@
             !loading &&
             selectedSort === 'Unseen' &&
             showCountsUnseen &&
-            me &&
-            !message.unseen &&
-            deDuplicatedMessages[ix].unseen
+            message.id === firstSeenMessage
           "
         />
         <div
@@ -137,6 +137,11 @@ export default {
     messagesForList: {
       type: Array,
       required: true,
+    },
+    firstSeenMessage: {
+      type: Number,
+      required: false,
+      default: null,
     },
     selectedGroup: {
       type: Number,
@@ -334,7 +339,7 @@ export default {
       return ret
     },
     deDuplicatedMessages() {
-      const ret = []
+      let ret = []
       const dups = []
 
       this.filteredMessagesToShow.forEach((m) => {
@@ -361,10 +366,28 @@ export default {
 
           const already = key in dups
 
-          if (!already) {
+          if (m.id === this.firstSeenMessage) {
+            if (already) {
+              // We are planning to show a message which is a duplicate of the first seen.  To make sure we show
+              // the notice about having seen messages below here, show this one instead.
+              ret = ret.filter((m) => m.id !== dups[key])
+            }
             ret.push(m)
-            dups[key] = true
+          } else if (!already) {
+            ret.push(m)
+            dups[key] = m.id
           }
+        }
+      })
+
+      return ret
+    },
+    duplicates() {
+      const ret = []
+
+      this.filteredMessagesToShow.forEach((m) => {
+        if (!this.deDuplicatedMessages.find((d) => d.id === m.id)) {
+          ret.push(m)
         }
       })
 
@@ -405,6 +428,29 @@ export default {
     noneFound: {
       handler(newVal, oldVal) {
         this.$emit('update:none', newVal)
+      },
+      immediate: true,
+    },
+    duplicates: {
+      handler(newVal) {
+        if (this.me && newVal?.length) {
+          // Any duplicates are things we won't ever show.  If they are unseen then they will be contributing to the
+          // unseen count, but we don't want them to.  So mark such messages as seen.
+          const ids = []
+
+          newVal.forEach((m) => {
+            const message = this.filteredMessagesInStore[m.id]
+
+            if (message?.unseen) {
+              ids.push(m.id)
+            }
+          })
+
+          if (ids.length) {
+            console.log('Unseen duplicates', ids)
+            this.messageStore.markSeen(ids)
+          }
+        }
       },
       immediate: true,
     },
@@ -470,7 +516,9 @@ export default {
         }
       })
 
-      this.messageStore.markSeen(ids)
+      if (ids.length) {
+        this.messageStore.markSeen(ids)
+      }
 
       this.markSeenTimer = setTimeout(async () => {
         // This is a backgrounded operation on the server and therefore won't happen immediately.

@@ -6,19 +6,15 @@
         <div>
           <h1>We've removed your account</h1>
           <p>
-            We've cleared all your data. You're welcome back in the future if
-            you change your mind.
+            Other freeglers will no longer be able to see your personal data,
+            posts or chat messages. You should stop receiving emails within a
+            few hours.
           </p>
           <p>
-            Occasionally you may receive emails for upto a few more hours -
-            emails may have been sent to you but not yet reached your mailbox.
-            If you receive any more emails after 24 hours please forward the
-            entire mail to <SupportLink />.
-          </p>
-          <p>
-            We have database backups for up to 30 days. Your data will be in
-            there, but we would only access that in very exceptional
-            circumstances.
+            We'll keep your account data for 14 days, in case you change your
+            mind. You can recover your account by logging back in - you'll see a
+            button you can click to restore it. After that, we'll wipe your
+            data.
           </p>
         </div>
       </b-col>

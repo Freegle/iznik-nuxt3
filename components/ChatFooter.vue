@@ -8,7 +8,10 @@
       />
     </div>
     <div>
-      <div v-if="showNotices && noticesToShow" class="d-flex">
+      <notice-message v-if="otheruser?.deleted" variant="info" class="mb-2">
+        This freegler has deleted their account, so you can't chat to them.
+      </notice-message>
+      <div v-else-if="showNotices && noticesToShow" class="d-flex">
         <div class="flex-grow-1">
           <notice-message
             v-if="badratings"
@@ -42,6 +45,20 @@
             talk to them and under no circumstances send them any money. Do not
             arrange anything by courier.
           </notice-message>
+          <notice-message
+            v-if="faraway"
+            variant="warning"
+            class="clickme"
+            @click="showInfo"
+          >
+            <p>
+              <v-icon icon="exclamation-triangle" />&nbsp;This freegler is
+              {{ milesstring }}
+              from you. If you are collecting from them, please make sure you
+              can get there. If they are collecting from you, please
+              double-check they have transport.
+            </p>
+          </notice-message>
         </div>
         <b-button
           variant="warning"
@@ -52,7 +69,7 @@
           <v-icon icon="times-circle" scale="1.5" />
         </b-button>
       </div>
-      <div>
+      <div v-if="!otheruser?.deleted">
         <label for="chatmessage" class="visually-hidden">Chat message</label>
         <div v-if="!imagethumb">
           <b-form-textarea
@@ -62,8 +79,7 @@
             v-model="sendmessage"
             placeholder="Type here..."
             enterkeyhint="enter"
-            rows="3"
-            max-rows="8"
+            :style="height"
             @keydown="typing"
             @focus="markRead"
           />
@@ -73,8 +89,7 @@
             ref="chatarea"
             v-model="sendmessage"
             placeholder="Type here..."
-            rows="3"
-            max-rows="8"
+            :style="height"
             enterkeyhint="send"
             autocapitalize="none"
             @keydown="typing"
@@ -95,7 +110,10 @@
         </div>
       </div>
     </div>
-    <div v-if="!otheruser?.spammer" class="bg-white pt-1 pb-1">
+    <div
+      v-if="!otheruser?.spammer && !otheruser?.deleted"
+      class="bg-white pt-1 pb-1"
+    >
       <div class="d-none d-lg-block">
         <span v-if="chat && chat.chattype === 'User2User' && otheruser">
           <b-button
@@ -271,7 +289,7 @@
 </template>
 <script>
 import pluralize from 'pluralize'
-import { TYPING_TIME_INVERVAL } from '../constants'
+import { FAR_AWAY, TYPING_TIME_INVERVAL } from '../constants'
 import { setupChat } from '../composables/useChat'
 import { useMiscStore } from '../stores/misc'
 import { useMessageStore } from '../stores/message'
@@ -336,8 +354,15 @@ export default {
     const messageStore = useMessageStore()
     const addressStore = useAddressStore()
 
-    const { chat, otheruser, tooSoonToNudge, chatStore, chatmessages } =
-      await setupChat(props.id)
+    const {
+      chat,
+      otheruser,
+      tooSoonToNudge,
+      chatStore,
+      chatmessages,
+      milesaway,
+      milesstring,
+    } = await setupChat(props.id)
 
     return {
       chat,
@@ -349,6 +374,8 @@ export default {
       addressStore,
       chatmessages,
       authStore,
+      milesaway,
+      milesstring,
     }
   },
   data() {
@@ -373,8 +400,21 @@ export default {
     }
   },
   computed: {
+    height() {
+      // Bootstrap Vue Next doesn't yet have autoresizing.
+      return this.sendmessage ? 'height: 12em' : 'height: 6em'
+    },
     noticesToShow() {
-      return this.badratings || this.expectedreplies || this.otheruser?.spammer
+      return (
+        this.badratings ||
+        this.expectedreplies ||
+        this.otheruser?.spammer ||
+        this.otheruser?.deleted ||
+        this.faraway
+      )
+    },
+    faraway() {
+      return this.milesaway && this.milesaway > FAR_AWAY
     },
     badratings() {
       let ret = false
@@ -409,6 +449,13 @@ export default {
       }
 
       return null
+    },
+  },
+  watch: {
+    sendmessage(newVal, oldVal) {
+      // This will result in the chat header shrinking once you start typing, to give more room, and then
+      // expanding back again if you delete everything.
+      this.$emit('typing', newVal?.length)
     },
   },
   mounted() {
@@ -457,7 +504,6 @@ export default {
       }
     },
     async addressBook() {
-      // Fetch the address book here to avoid an async setup which causes issues with waitForRef.
       await this.addressStore.fetch()
 
       this.showAddress = true
@@ -617,5 +663,9 @@ export default {
 
 .maxheight {
   max-height: 33vh;
+}
+
+:deep(textarea) {
+  transition: height 1s;
 }
 </style>

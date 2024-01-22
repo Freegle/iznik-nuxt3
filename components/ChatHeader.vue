@@ -4,55 +4,70 @@
       v-if="chat && (chat.chattype !== 'User2User' || otheruser?.info)"
       class="outer position-relative"
     >
-      <div class="nameinfo pt-1 pb-1 pl-1">
-        <ProfileImage
-          v-if="!collapsed && chat.icon"
-          :image="chat.icon"
-          class="pr-1 profile clickme"
-          is-thumbnail
-          size="xl"
-          border
-          @click="showInfo"
-        />
-        <div class="name font-weight-bold black text--large pl-1">
+      <div class="nameinfo pt-md-1 pb-md-1 pl-1">
+        <div
+          class="profile d-flex flex-column justify-content-around flex-grow-1"
+        >
+          <ProfileImage
+            v-if="!collapsed && chat.icon"
+            :image="chat.icon"
+            class="pr-1 clickme"
+            is-thumbnail
+            size="xl"
+            border
+            @click="showInfo"
+          />
+        </div>
+        <div class="name font-weight-bold black text--large">
           {{ chat.name }}
         </div>
         <div
-          v-if="otheruser && otheruser.info"
+          v-if="otheruser && otheruser.info && !otheruser?.deleted"
           class="d-flex flex-column align-content-between pr-1 ratings"
         >
           <UserRatings
             :id="chat.otheruid"
             :key="'otheruser-' + chat.otheruid"
-            class="mt-1 d-flex justify-content-end"
+            class="mb-1 mb-md-0 mt-1 d-flex justify-content-end"
             size="sm"
           />
           <SupporterInfo v-if="otheruser.supporter" class="align-self-end" />
         </div>
-        <div
+        <span
           v-if="!collapsed && otheruser && otheruser.info"
           class="userinfo mr-2"
         >
-          <div class="small flex flex-wrap">
-            <div v-if="otheruser.lastaccess" class="d-inline d-md-block">
+          <span class="small flex flex-wrap">
+            <span v-if="otheruser.lastaccess" class="d-inline d-md-block">
               <span class="d-none d-md-inline">Last seen</span>
               <span class="d-inline d-md-none">Seen</span>
               <!-- eslint-disable-next-line-->
-              <strong :title="datetimeshort(otheruser.lastaccess)" class="ml-1" >{{ timeago(otheruser.lastaccess) }}</strong>.
-            </div>
-            <div v-if="replytime" class="d-inline d-md-block">
+              <strong :title="datetimeshort(otheruser.lastaccess)" class="ml-1" >{{ timeago(otheruser.lastaccess) }}</strong>
+              <span class="d-none d-md-inline">.</span>
+              <span class="d-inline d-md-none">, </span>
+            </span>
+            <span
+              v-if="!otheruser?.deleted && milesaway"
+              class="d-inline d-md-none"
+            >
+              <strong>{{ milesstring }}</strong
+              >.
+            </span>
+            <span v-if="replytime" class="d-inline d-md-block">
               <span class="d-none d-md-inline">Typically replies in</span>
               <span class="d-inline d-md-none">Replies in</span>
               <strong class="ml-1">{{ replytime }}</strong
               >.
-            </div>
-            <br class="d-block d-md-none" />
-            <div v-if="milesaway" class="d-inline d-md-block">
+            </span>
+            <span
+              v-if="!otheruser?.deleted && milesaway"
+              class="d-none d-md-block"
+            >
               About <strong>{{ milesstring }}</strong
               >.
-            </div>
-          </div>
-        </div>
+            </span>
+          </span>
+        </span>
       </div>
       <b-button
         v-if="unseen"
@@ -67,7 +82,7 @@
       </b-button>
       <div
         v-if="!collapsed"
-        class="d-flex flex-wrap justify-content-between p-1 mt-1 actions"
+        class="d-flex flex-wrap justify-content-between p-md-1 mt-md-1 actions"
       >
         <div class="d-flex">
           <b-button
@@ -81,7 +96,10 @@
               {{ unseen }}
             </b-badge>
           </b-button>
-          <div v-if="otheruser && otheruser.info" class="mr-2">
+          <div
+            v-if="otheruser && otheruser.info && !otheruser?.deleted"
+            class="mr-2"
+          >
             <b-button
               v-b-tooltip="'Show the full profile for this freegler'"
               variant="secondary"
@@ -97,18 +115,20 @@
               class="d-block d-md-none"
               @click="showInfo"
             >
-              View profile
+              <span class="d-none d-md-block"> View profile </span>
+              <span class="d-block d-md-none"> Profile </span>
             </b-button>
           </div>
           <div v-if="chat.chattype === 'User2User' || !unseen" class="mr-2">
-            <template v-if="chat.status === 'Closed'">
+            <template v-if="!otheruser?.deleted && chat.status === 'Closed'">
               <b-button
                 v-b-tooltip="'Unhide this chat'"
                 variant="secondary"
                 class="d-none d-md-block"
                 @click="unhide"
               >
-                Unhide chat
+                <span class="d-none d-md-block"> Unhide chat </span>
+                <span class="d-block d-md-none"> Unhide </span>
               </b-button>
               <b-button
                 v-b-tooltip="'Unhide this chat'"
@@ -120,7 +140,7 @@
                 Unhide chat
               </b-button>
             </template>
-            <template v-else>
+            <template v-else-if="!otheruser?.deleted">
               <b-button
                 v-b-tooltip="
                   'Don\'t show this chat unless there\'s a new message'
@@ -129,7 +149,8 @@
                 class="d-none d-md-block"
                 @click="showhide"
               >
-                Hide chat
+                <span class="d-none d-md-block"> Hide chat </span>
+                <span class="d-block d-md-none"> Hide </span>
               </b-button>
               <b-button
                 v-b-tooltip="
@@ -140,7 +161,8 @@
                 class="d-block d-md-none"
                 @click="showhide"
               >
-                Hide chat
+                <span class="d-none d-md-block"> Hide chat </span>
+                <span class="d-block d-md-none"> Hide </span>
               </b-button>
             </template>
           </div>
@@ -152,7 +174,12 @@
         >
           <v-icon
             icon="chevron-circle-up"
-            class="text-faded fa-2x"
+            class="text-faded d-block d-md-none"
+            title="Collapse this section"
+          />
+          <v-icon
+            icon="chevron-circle-up"
+            class="text-faded fa-2x d-none d-md-block"
             title="Collapse this section"
           />
         </div>
@@ -197,7 +224,11 @@
               </b-button>
             </template>
           </div>
-          <div v-if="chat.chattype === 'User2User' && otheruser">
+          <div
+            v-if="
+              chat.chattype === 'User2User' && otheruser && !otheruser?.deleted
+            "
+          >
             <b-button
               v-b-tooltip="'Report this chat to the volunteers'"
               variant="secondary"
@@ -313,6 +344,11 @@ export default {
       props.id
     )
 
+    miscStore.set({
+      key: 'chatinfoheader',
+      value: false,
+    })
+
     return {
       chatStore,
       miscStore,
@@ -378,6 +414,9 @@ export default {
     },
   },
   methods: {
+    collapse(val) {
+      this.collapsed = val
+    },
     async hide() {
       await this.chatStore.hide(this.id)
       const router = useRouter()
@@ -423,34 +462,33 @@ export default {
 
 .nameinfo {
   display: grid;
-  grid-template-columns: auto 1fr 121px;
+  grid-template-columns: auto 10px 1fr 121px;
 
   .profile {
     grid-column: 1;
-    grid-row: 1 / 2;
+    grid-row: 1 / 3;
   }
 
   .name {
-    grid-column: 2;
-    grid-row: 1 / 2;
-  }
-
-  .ratings {
     grid-column: 3;
     grid-row: 1 / 2;
   }
 
+  .ratings {
+    grid-column: 4;
+    grid-row: 1 / 2;
+  }
+
   .userinfo {
-    grid-column: 1 / 4;
+    grid-column: 3 / 5;
     grid-row: 2 / 3;
     color: $colour-info-fg;
-    padding-top: 0.5rem;
+    padding-top: 0.25rem;
 
     @include media-breakpoint-up(md) {
       grid-row: 1 / 2;
-      grid-column: 2 / 4;
+      grid-column: 3 / 5;
       padding-top: 2rem;
-      padding-left: 0.25rem;
     }
   }
 }
@@ -489,7 +527,9 @@ pre {
 }
 
 .actions {
-  border-top: 1px solid $color-gray--light;
+  @include media-breakpoint-up(md) {
+    border-top: 1px solid $color-gray--light;
+  }
 }
 
 .collapsedbutton {

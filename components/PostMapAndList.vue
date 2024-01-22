@@ -113,6 +113,7 @@
           :messages-for-list="filteredMessages"
           :loading="loading"
           :jobs="jobs"
+          :first-seen-message="firstSeenMessage"
         />
       </div>
     </div>
@@ -227,6 +228,7 @@ export default {
     },
   },
   setup(props) {
+    console.log('PostMapSetup')
     const miscStore = useMiscStore()
     const groupStore = useGroupStore()
     const messageStore = useMessageStore()
@@ -264,6 +266,7 @@ export default {
       joinVisible: false,
       mapMoved: false,
       updatedMessagesOnMap: null,
+      firstSeenMessage: null,
 
       infiniteId: +new Date(),
 
@@ -474,8 +477,23 @@ export default {
     },
   },
   watch: {
-    filteredMessages() {
-      this.infiniteId++
+    filteredMessages: {
+      handler(newVal) {
+        // We want to save the first message we have seen so that we show a message when we have scrolled down to it.
+        // We want that message to stay there until the page is reloaded, even as we read the messages and the seen
+        // state of the messages changes.
+        if (this.firstSeenMessage === null) {
+          for (const message of newVal) {
+            if (!message.unseen) {
+              this.firstSeenMessage = message.id
+              break
+            }
+          }
+        }
+
+        this.infiniteId++
+      },
+      immediate: true,
     },
   },
   methods: {

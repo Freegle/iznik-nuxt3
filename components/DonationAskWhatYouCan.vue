@@ -2,8 +2,17 @@
   <div class="d-flex justify-content-between">
     <div>
       <p>
-        <strong>{{ groupname }}</strong> is a charity that's free to use, but
-        not free to run. This month we're trying to raise
+        <span v-if="donated">
+          You've donated before, so you know that
+          <strong>{{ groupname }}</strong> is a charity that's free to use, but
+          not free to run. If you're able to <strong>donate again</strong>
+          that would be lovely.
+        </span>
+        <span v-else>
+          <strong>{{ groupname }}</strong> is a charity that's free to use, but
+          not free to run.
+        </span>
+        This month we're trying to raise
         <strong>&pound;{{ target }}</strong
         ><span v-if="groupid && !targetMet"> for this community</span
         ><span v-else> across the UK</span>.
@@ -63,6 +72,10 @@ export default {
     targetMet: {
       type: Boolean,
       default: false,
+    },
+    donated: {
+      type: String,
+      default: null,
     },
   },
   data() {

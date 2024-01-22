@@ -1,8 +1,8 @@
 <template>
   <div>
     <ChatNotVisible v-if="notVisible" id="notvisible" />
-    <div v-else-if="me" class="chatHolder">
-      <ChatHeader :id="id" class="chatTitle" />
+    <div v-else-if="me" class="chatHolder" :style="theHeight">
+      <ChatHeader :id="id" ref="chatheader" class="chatTitle" />
       <div
         v-if="chat && chatmessages?.length"
         ref="chatContent"
@@ -41,6 +41,7 @@
       <ChatFooter
         v-bind="$props"
         class="chatFooter"
+        @typing="typing"
         @scrollbottom="checkScroll"
       />
     </div>
@@ -48,6 +49,8 @@
 </template>
 <script>
 import { useChatStore } from '../stores/chat'
+import { navBarHidden } from '../composables/useNavbar'
+import { useMiscStore } from '../stores/misc'
 import ChatHeader from './ChatHeader'
 import ChatFooter from './ChatFooter'
 import ChatTypingIndicator from './ChatTypingIndicator'
@@ -78,6 +81,7 @@ export default {
   async setup(props) {
     const chatStore = useChatStore()
     const userStore = useUserStore()
+    const miscStore = useMiscStore()
 
     const { chat, otheruser } = await setupChat(props.id)
 
@@ -106,7 +110,7 @@ export default {
       return msgs ? msgs.slice().reverse() : []
     })
 
-    return { chatStore, userStore, chat, chatmessages, otheruser }
+    return { chatStore, userStore, miscStore, chat, chatmessages, otheruser }
   },
   data() {
     return {
@@ -116,6 +120,8 @@ export default {
       scrollTimer: null,
       scrollInterval: 50,
       loaded: false,
+      lastScrollYForNavbar: 0,
+      scrollTimerForNavbar: null,
     }
   },
   computed: {
@@ -131,6 +137,26 @@ export default {
     opacity() {
       // Until we've finished our initial render, don't show anything.  Reduces flicker.
       return this.loaded ? 1 : 0
+    },
+    theHeight() {
+      const vh100 = Math.max(
+        document.documentElement.clientHeight,
+        window.innerHeight || 0
+      )
+
+      let ret = null
+
+      if (
+        this.miscStore.breakpoint === 'xs' ||
+        this.miscStore.breakpoint === 'sm'
+      ) {
+        // On mobile there is a sticky ad at the bottom and we want to make sure the buttons show.
+        ret = navBarHidden.value ? vh100 - 52 : vh100 - 60 - 52
+      } else {
+        ret = vh100 - 74
+      }
+
+      return 'height: ' + ret + 'px'
     },
   },
   watch: {
@@ -158,10 +184,22 @@ export default {
   },
   mounted() {
     this.scrollTimer = setTimeout(this.checkScroll, this.scrollInterval)
+
+    if (this.$refs.chatContent) {
+      this.lastScrollYForNavbar = this.$refs.chatContent.scrollTop
+      this.$refs.chatContent.addEventListener(
+        'scroll',
+        this.handleScrollForNavbar
+      )
+    }
   },
   beforeUnmount() {
     if (this.scrollTimer) {
       clearTimeout(this.scrollTimer)
+    }
+
+    if (this.scrollTimerForNavbar) {
+      clearTimeout(this.scrollTimerForNavbar)
     }
   },
   methods: {
@@ -193,6 +231,66 @@ export default {
         this.scrollTimer = setTimeout(this.checkScroll, this.scrollInterval)
       }
     },
+    handleScrollForNavbar() {
+      if (
+        this.miscStore.breakpoint === 'xs' ||
+        this.miscStore.breakpoint === 'sm'
+      ) {
+        // Our normal window-level function to hide the navbar won't apply because we're not scrolling the whole window.
+        // We want different behaviour anyway - hide the navbars when scrolling or typing.
+        const scrollY = this.$refs.chatContent.scrollTop
+
+        if (scrollY !== this.lastScrollY) {
+          // Scrolling.  Hide the navbars.
+          if (!navBarHidden.value) {
+            navBarHidden.value = true
+          }
+
+          // Start a timer to show the navbars again after a delay, in case the user doesn't realise that they can
+          // make them show again by scrolling up.
+          if (this.scrollTimerForNavbar) {
+            clearTimeout(this.scrollTimerForNavbar)
+          }
+
+          if (this.$refs.chatheader) {
+            this.$refs.chatheader.collapse(true)
+          }
+
+          this.scrollTimer = setTimeout(() => {
+            navBarHidden.value = false
+
+            if (this.$refs.chatheader) {
+              this.$refs.chatheader.collapse(false)
+            }
+          }, 5000)
+        }
+
+        this.lastScrollY = scrollY
+      }
+    },
+    typing(val) {
+      if (
+        this.miscStore.breakpoint === 'xs' ||
+        this.miscStore.breakpoint === 'sm'
+      ) {
+        // Hide the navbar when typing.
+        //
+        // Start a timer to show the navbars again after a delay, in case the user doesn't realise that they can
+        // make them show again.
+        navBarHidden.value = val
+
+        if (this.scrollTimerForNavbar) {
+          clearTimeout(this.scrollTimerForNavbar)
+        }
+
+        this.scrollTimer = setTimeout(() => {
+          navBarHidden.value = false
+        }, 5000)
+
+        // Also collapse the chat header, to make even more room.
+        this.$refs.chatheader.collapse(val)
+      }
+    },
   },
 }
 </script>
@@ -209,13 +307,6 @@ export default {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-
-  // On mobile there is a sticky ad at the bottom and we want to make sure the buttons show.
-  height: calc(100vh - 74px - 52px);
-
-  @include media-breakpoint-up(md) {
-    height: calc(100vh - 74px);
-  }
 }
 
 .chatTitle {

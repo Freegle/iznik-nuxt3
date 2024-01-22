@@ -8,7 +8,7 @@
       <div
         :id="divId"
         :ref="adUnitPath"
-        :key="'breakpoint-' + adUnitPath + '-' + breakpoint"
+        :key="'adUnit-' + adUnitPath"
         :style="{
           width: dimensions[0] + 'px',
           height: dimensions[1] + 'px',
@@ -28,7 +28,6 @@
 </template>
 <script setup>
 import { nextTick } from 'vue'
-import { useMiscStore } from '../stores/misc'
 import { ref, computed, onBeforeUnmount } from '#imports'
 
 const props = defineProps({
@@ -54,11 +53,6 @@ const adShown = ref(true)
 
 const passClicks = computed(() => {
   return !adShown.value
-})
-
-const breakpoint = computed(() => {
-  const miscStore = useMiscStore()
-  return miscStore.breakpoint
 })
 
 const uniqueid = ref(props.adUnitPath)

@@ -1,12 +1,9 @@
 <template>
-  <b-modal
-    ref="modal"
-    scrollable
-    :title="'Please help keep ' + groupName + ' running'"
-    size="lg"
-    no-stacking
-  >
+  <b-modal ref="modal" scrollable :title="title" size="lg" no-stacking>
     <template #default>
+      <p v-if="donated">
+        You've already donated to Freegle (on {{ donated }}). Thank you.
+      </p>
       <div v-if="variant === 'video'">
         <DonationAskVideo
           :groupid="groupId"
@@ -14,6 +11,7 @@
           :target="target"
           :raised="raised"
           :target-met="targetMet"
+          :donated="donated"
           @score="score"
         />
       </div>
@@ -24,6 +22,7 @@
           :target="target"
           :raised="raised"
           :target-met="targetMet"
+          :donated="donated"
           @score="score"
         />
       </div>
@@ -34,6 +33,7 @@
           :target="target"
           :raised="raised"
           :target-met="targetMet"
+          :donated="donated"
           @score="score"
         />
       </div>
@@ -44,6 +44,7 @@
           :target="target"
           :raised="raised"
           :target-met="targetMet"
+          :donated="donated"
           @score="score"
         />
       </div>
@@ -59,6 +60,7 @@
           :target="target"
           :raised="raised"
           :target-met="targetMet"
+          :donated="donated"
           @score="score"
         />
       </div>
@@ -69,6 +71,7 @@
           :target="target"
           :raised="raised"
           :target-met="targetMet"
+          :donated="donated"
           @score="score"
         />
       </div>
@@ -91,10 +94,13 @@ import { useDonationAskModal } from '~/composables/useDonationAskModal'
 import { useGroupStore } from '~/stores/group'
 import { useDonationStore } from '~/stores/donations'
 import Api from '~/api'
+import { useAuthStore } from '~/stores/auth'
+import { dateshort } from '~/composables/useTimeFormat'
 import RateAppAsk from '~/components/RateAppAsk.vue'
 
 const groupStore = useGroupStore()
 const donationStore = useDonationStore()
+const authStore = useAuthStore()
 
 const { modal, hide } = useModal()
 const { variant, groupId, show } = await useDonationAskModal()
@@ -124,5 +130,18 @@ function score(value) {
   })
 }
 
+const donated = computed(() => {
+  const me = authStore.user
+
+  return me?.donated ? dateshort(me.donated) : null
+})
+
+const title = computed(() => {
+  if (donated.value) {
+    return 'Thank you for helping keep ' + groupName.value + ' running'
+  } else {
+    return 'Please help keep ' + groupName.value + ' running'
+  }
+})
 show()
 </script>

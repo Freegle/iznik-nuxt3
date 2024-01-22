@@ -22,6 +22,9 @@
       @click="backButton"
     >
       <v-icon icon="arrow-left" />
+      <b-badge v-if="backButtonCount" variant="danger" class="ml-1">
+        {{ backButtonCount }}
+      </b-badge>
     </b-button>
     <NotificationOptions
       v-if="online && !showBackButton && loggedIn"
@@ -208,7 +211,7 @@
 <script setup>
 import { useRoute } from 'vue-router'
 import NavbarMobilePost from './NavbarMobilePost'
-import { useNavbar } from '~/composables/useNavbar'
+import { useNavbar, navBarHidden } from '~/composables/useNavbar'
 import { useMiscStore } from '~/stores/misc'
 import { useMobileStore } from '~/stores/mobile'
 
@@ -224,6 +227,7 @@ const {
   browseCountPlural,
   showAboutMeModal,
   showBackButton,
+  backButtonCount,
   requestLogin,
   logout,
   showAboutMe,
@@ -270,7 +274,6 @@ onBeforeUnmount(() => {
   window.removeEventListener('scroll', handleScroll)
 })
 
-const navBarHidden = ref(false)
 let scrollTimer = null
 
 function handleScroll() {

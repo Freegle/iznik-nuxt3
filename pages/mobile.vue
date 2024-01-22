@@ -42,10 +42,7 @@
             />
           </ExternalLink>
         </div>
-        <p class="mt-2">
-          The app is only available in the UK app stores. We support Android
-          5.1/iOS 12 or later.
-        </p>
+        <p class="mt-2">We support Android 5.1/iOS 13 or later.</p>
         <p>
           <!-- eslint-disable-next-line -->
           Please report any issues to <SupportLink />.

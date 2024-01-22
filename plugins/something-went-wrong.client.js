@@ -1,6 +1,7 @@
 import { APIError, MaintenanceError } from '@/api/BaseAPI'
 import { useMiscStore } from '~/stores/misc'
 import { useRouter } from '#imports'
+import { suppressException } from '~/composables/useSuppressException'
 
 export default defineNuxtPlugin((nuxtApp) => {
   const originalErrorHandler = nuxtApp.vueApp.config.errorHandler
@@ -30,16 +31,7 @@ export default defineNuxtPlugin((nuxtApp) => {
       miscStore.somethingWentWrong = true
 
       return true
-    } else if (
-      err.message?.includes('leaflet') ||
-      err.message?.includes('LatLng') ||
-      err.stack?.includes('leaflet') ||
-      err.stack?.includes('LMap') ||
-      err.stack?.includes('LMarker') ||
-      err.stack?.includes('layer')
-    ) {
-      // Leaflet throws all kinds of errors when the DOM elements are removed.  Ignore them all.
-      console.log('Leaflet in stack - ignore')
+    } else if (suppressException(err)) {
       return true
     }
 

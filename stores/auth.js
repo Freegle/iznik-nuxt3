@@ -174,6 +174,11 @@ export const useAuthStore = defineStore({
       await this.logout()
       return ret
     },
+    async restore() {
+      const { ret } = await this.$api.session.restore()
+      await this.fetchUser()
+      return ret
+    },
     async login(params) {
       try {
         const res = await this.$api.session.login(params, function (data) {
