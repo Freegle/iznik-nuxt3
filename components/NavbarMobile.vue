@@ -249,10 +249,7 @@ const title = computed(() => {
 })
 
 // We want to hide the navbars when you scroll down.
-let lastScrollY = 0
-
 onMounted(() => {
-  lastScrollY = window.scrollY
   window.addEventListener('scroll', handleScroll)
 })
 
@@ -263,15 +260,13 @@ onBeforeUnmount(() => {
 function handleScroll() {
   const scrollY = window.scrollY
 
-  if (scrollY > lastScrollY) {
+  if (scrollY > 200 && !navBarHidden.value) {
     // Scrolling down.  Hide the navbars.
     setNavBarHidden(true)
-  } else if (navBarHidden.value) {
-    // Scrolling up. Show the navbars.
+  } else if (scrollY < 100 && navBarHidden.value) {
+    // At the top. Show the navbars.
     setNavBarHidden(false)
   }
-
-  lastScrollY = scrollY
 }
 
 const route = useRoute()

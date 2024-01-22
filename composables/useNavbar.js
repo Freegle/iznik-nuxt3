@@ -14,11 +14,10 @@ export const navBarHidden = ref(false)
 
 let navBarTimeout = null
 
-export function setNavBarHidden(hidden, notimer) {
+export function setNavBarHidden(hidden) {
   // Hide the navbar when typing.
   //
-  // Start a timer to show the navbars again after a delay, in case the user doesn't realise that they can
-  // make them show again.
+  // Start a timer to show the navbars again after a delay.
   if (navBarHidden.value !== hidden) {
     navBarHidden.value = hidden
   }
@@ -28,7 +27,7 @@ export function setNavBarHidden(hidden, notimer) {
     navBarTimeout = null
   }
 
-  if (hidden && !notimer) {
+  if (hidden) {
     navBarTimeout = setTimeout(() => {
       navBarHidden.value = false
     }, 5000)
