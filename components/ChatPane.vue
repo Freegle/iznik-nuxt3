@@ -49,7 +49,7 @@
 </template>
 <script>
 import { useChatStore } from '../stores/chat'
-import { navBarHidden, setNavBarHidden } from '../composables/useNavbar'
+import { navBarHidden } from '../composables/useNavbar'
 import { useMiscStore } from '../stores/misc'
 import ChatHeader from './ChatHeader'
 import ChatFooter from './ChatFooter'
@@ -120,8 +120,6 @@ export default {
       scrollTimer: null,
       scrollInterval: 50,
       loaded: false,
-      lastScroll: null,
-      scrollCollapseTimer: null,
     }
   },
   computed: {
@@ -184,13 +182,6 @@ export default {
   },
   mounted() {
     this.scrollTimer = setTimeout(this.checkScroll, this.scrollInterval)
-
-    if (this.$refs.chatContent) {
-      // this.$refs.chatContent.addEventListener(
-      //   'scroll',
-      //   this.handleScrollForNavbar
-      // )
-    }
   },
   beforeUnmount() {
     if (this.scrollTimer) {
@@ -226,57 +217,11 @@ export default {
         this.scrollTimer = setTimeout(this.checkScroll, this.scrollInterval)
       }
     },
-    handleScrollForNavbar() {
-      if (
-        this.miscStore.breakpoint === 'xs' ||
-        this.miscStore.breakpoint === 'sm'
-      ) {
-        // Our normal window-level function to hide the navbar won't apply because we're not scrolling the whole window.
-        // We want different behaviour anyway - hide the navbars when scrolling or typing.
-        const scrollY = this.$refs.chatContent.scrollTop
-        const now = new Date().getTime()
-        console.log('scrollY', scrollY, now, this.lastScroll)
-
-        if (scrollY === 0) {
-          // We have scrolled back to the bottom.  Restore the navbar and chat header.
-          console.log('Back at bottom = restore')
-          setNavBarHidden(false)
-
-          if (this.$refs.chatheader) {
-            this.$refs.chatheader.collapse(false)
-          }
-        } else if (now - this.lastScroll < 5000) {
-          // We are scrolling.  Hide the navbar and collapse the chat header.
-          console.log('Scrolling, collapse')
-          if (this.scrollCollapseTimer) {
-            clearTimeout(this.scrollCollapseTimer)
-          }
-
-          setNavBarHidden(true, true)
-
-          if (this.$refs.chatheader) {
-            this.$refs.chatheader.collapse(true)
-          }
-
-          this.scrollCollapseTimer = setTimeout(() => {
-            this.scrollTimer = null
-            setNavBarHidden(false)
-
-            if (this.$refs.chatheader) {
-              this.$refs.chatheader.collapse(false)
-            }
-          }, 5000)
-        }
-      }
-    },
     typing(val) {
       if (
         this.miscStore.breakpoint === 'xs' ||
         this.miscStore.breakpoint === 'sm'
       ) {
-        // Might be nice to hide the navbar when typing, but this leads to scroll thrashing.
-        // setNavBarHidden(true)
-
         // Also collapse the chat header, to make even more room.
         this.$refs.chatheader.collapse(val)
       }
