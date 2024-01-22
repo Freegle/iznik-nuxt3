@@ -64,6 +64,9 @@
             </b-card>
           </div>
           <NewsLocation v-if="!id" class="p-2" @changed="areaChange" />
+          <VisibleWhen :at="['xs', 'sm', 'md']">
+            <NewsCommunityEventVolunteerSummary class="mt-2" />
+          </VisibleWhen>
           <div class="p-0 pt-1 mb-1">
             <NoticeMessage v-if="error" class="mt-2">
               Sorry, this thread isn't around any more.
@@ -108,6 +111,7 @@ import { buildHead } from '../../composables/useBuildHead'
 import { useMiscStore } from '../../stores/misc'
 import { useNewsfeedStore } from '../../stores/newsfeed'
 import { useAuthStore } from '../../stores/auth'
+import NewsCommunityEventVolunteerSummary from '../../components/NewsCommunityEventVolunteerSummary'
 import VisibleWhen from '~/components/VisibleWhen'
 import GlobalWarning from '~/components/GlobalWarning'
 import NoticeMessage from '~/components/NoticeMessage'
@@ -135,6 +139,7 @@ const ExpectedRepliesWarning = defineAsyncComponent(() =>
 
 export default {
   components: {
+    NewsCommunityEventVolunteerSummary,
     VisibleWhen,
     GlobalWarning,
     ExpectedRepliesWarning,
