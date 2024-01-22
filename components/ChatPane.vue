@@ -120,7 +120,8 @@ export default {
       scrollTimer: null,
       scrollInterval: 50,
       loaded: false,
-      lastScrollYForNavbar: 0,
+      lastScroll: null,
+      scrollCollapseTimer: null,
     }
   },
   computed: {
@@ -185,11 +186,10 @@ export default {
     this.scrollTimer = setTimeout(this.checkScroll, this.scrollInterval)
 
     if (this.$refs.chatContent) {
-      this.lastScrollYForNavbar = this.$refs.chatContent.scrollTop
-      this.$refs.chatContent.addEventListener(
-        'scroll',
-        this.handleScrollForNavbar
-      )
+      // this.$refs.chatContent.addEventListener(
+      //   'scroll',
+      //   this.handleScrollForNavbar
+      // )
     }
   },
   beforeUnmount() {
@@ -234,23 +234,39 @@ export default {
         // Our normal window-level function to hide the navbar won't apply because we're not scrolling the whole window.
         // We want different behaviour anyway - hide the navbars when scrolling or typing.
         const scrollY = this.$refs.chatContent.scrollTop
+        const now = new Date().getTime()
+        console.log('scrollY', scrollY, now, this.lastScroll)
 
-        if (scrollY !== this.lastScrollY) {
-          // Scrolling.  Hide the navbars.
-          setNavBarHidden(true)
+        if (scrollY === 0) {
+          // We have scrolled back to the bottom.  Restore the navbar and chat header.
+          console.log('Back at bottom = restore')
+          setNavBarHidden(false)
+
+          if (this.$refs.chatheader) {
+            this.$refs.chatheader.collapse(false)
+          }
+        } else if (now - this.lastScroll < 5000) {
+          // We are scrolling.  Hide the navbar and collapse the chat header.
+          console.log('Scrolling, collapse')
+          if (this.scrollCollapseTimer) {
+            clearTimeout(this.scrollCollapseTimer)
+          }
+
+          setNavBarHidden(true, true)
 
           if (this.$refs.chatheader) {
             this.$refs.chatheader.collapse(true)
           }
 
-          this.scrollTimer = setTimeout(() => {
+          this.scrollCollapseTimer = setTimeout(() => {
+            this.scrollTimer = null
+            setNavBarHidden(false)
+
             if (this.$refs.chatheader) {
               this.$refs.chatheader.collapse(false)
             }
           }, 5000)
         }
-
-        this.lastScrollY = scrollY
       }
     },
     typing(val) {
