@@ -205,6 +205,7 @@
 </template>
 <script setup>
 import { useRoute } from 'vue-router'
+import { setNavBarHidden } from '../composables/useNavbar'
 import NavbarMobilePost from './NavbarMobilePost'
 import { useNavbar, navBarHidden } from '~/composables/useNavbar'
 import { useMiscStore } from '~/stores/misc'
@@ -259,33 +260,15 @@ onBeforeUnmount(() => {
   window.removeEventListener('scroll', handleScroll)
 })
 
-let scrollTimer = null
-
 function handleScroll() {
   const scrollY = window.scrollY
 
   if (scrollY > lastScrollY) {
     // Scrolling down.  Hide the navbars.
-    if (!navBarHidden.value) {
-      navBarHidden.value = true
-    }
-
-    // Start a timer to show the navbars again after a delay, in case the user doesn't realise that they can
-    // make them show again by scrolling up.
-    if (scrollTimer) {
-      clearTimeout(scrollTimer)
-    }
-
-    scrollTimer = setTimeout(() => {
-      navBarHidden.value = false
-    }, 5000)
+    setNavBarHidden(true)
   } else if (navBarHidden.value) {
     // Scrolling up. Show the navbars.
-    navBarHidden.value = false
-
-    if (scrollTimer) {
-      clearTimeout(scrollTimer)
-    }
+    setNavBarHidden(false)
   }
 
   lastScrollY = scrollY

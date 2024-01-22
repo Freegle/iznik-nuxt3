@@ -12,6 +12,27 @@ import { useRuntimeConfig } from '#app'
 
 export const navBarHidden = ref(false)
 
+let navBarTimeout = null
+
+export function setNavBarHidden(hidden) {
+  // Hide the navbar when typing.
+  //
+  // Start a timer to show the navbars again after a delay, in case the user doesn't realise that they can
+  // make them show again.
+  navBarHidden.value = hidden
+
+  if (navBarTimeout) {
+    clearTimeout(navBarTimeout)
+    navBarTimeout = null
+  }
+
+  if (hidden) {
+    navBarTimeout = setTimeout(() => {
+      navBarHidden.value = false
+    }, 5000)
+  }
+}
+
 export function useNavbar() {
   const authStore = useAuthStore()
   const miscStore = useMiscStore()
