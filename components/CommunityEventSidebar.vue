@@ -32,7 +32,6 @@ export default {
     const route = useRoute()
     const groupid = parseInt(route.params.groupid)
 
-    // Delay a little bit to give the main pane a chance to load.
     await communityEventStore.fetchList()
 
     return {

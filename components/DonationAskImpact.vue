@@ -1,28 +1,9 @@
 <template>
   <div>
-    <p
-      class="font-weight-bold text-center text--large-responsive text-primary-emphasis"
-    >
-      £10 donation = £100 impact!
-    </p>
-    <p v-if="donated">
-      You've donated before, so you know that
-      <strong>{{ groupname }}</strong> is a charity that's free to use, but not
-      free to run. If you're able to <strong>donate again</strong>
-      that would be lovely.
-    </p>
-    <p class="text-center mt-4">
-      For every £10 donation, we have an impact of about £100 in stuff saved
-      from landfill/incinerators - and reused by other freeglers.
-    </p>
-    <p class="text-center mt-4">
-      <span class="font-weight-bold">Can you help us do more?</span> If you're
-      able to donate to help us keep going, that would be lovely. <br /><span
-        class="font-weight-bold"
-        >Monthly donations</span
-      >
-      are particularly helpful.
-    </p>
+    <div class="w-100 justify-content-around">
+      <b-img class="w-100" src="/donate/Impact.png" fluid />
+    </div>
+    <p class="mt-2">If you can, please donate.</p>
     <div class="d-flex flex-wrap justify-content-between mt-2">
       <donation-button value="5" class="mb-1" @clicked="score(5)" />
       <donation-button value="10" class="mb-1" @clicked="score(10)" />

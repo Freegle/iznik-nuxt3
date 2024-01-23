@@ -120,8 +120,6 @@ export default {
       scrollTimer: null,
       scrollInterval: 50,
       loaded: false,
-      lastScrollYForNavbar: 0,
-      scrollTimerForNavbar: null,
     }
   },
   computed: {
@@ -184,22 +182,10 @@ export default {
   },
   mounted() {
     this.scrollTimer = setTimeout(this.checkScroll, this.scrollInterval)
-
-    if (this.$refs.chatContent) {
-      this.lastScrollYForNavbar = this.$refs.chatContent.scrollTop
-      this.$refs.chatContent.addEventListener(
-        'scroll',
-        this.handleScrollForNavbar
-      )
-    }
   },
   beforeUnmount() {
     if (this.scrollTimer) {
       clearTimeout(this.scrollTimer)
-    }
-
-    if (this.scrollTimerForNavbar) {
-      clearTimeout(this.scrollTimerForNavbar)
     }
   },
   methods: {
@@ -231,62 +217,11 @@ export default {
         this.scrollTimer = setTimeout(this.checkScroll, this.scrollInterval)
       }
     },
-    handleScrollForNavbar() {
-      if (
-        this.miscStore.breakpoint === 'xs' ||
-        this.miscStore.breakpoint === 'sm'
-      ) {
-        // Our normal window-level function to hide the navbar won't apply because we're not scrolling the whole window.
-        // We want different behaviour anyway - hide the navbars when scrolling or typing.
-        const scrollY = this.$refs.chatContent.scrollTop
-
-        if (scrollY !== this.lastScrollY) {
-          // Scrolling.  Hide the navbars.
-          if (!navBarHidden.value) {
-            navBarHidden.value = true
-          }
-
-          // Start a timer to show the navbars again after a delay, in case the user doesn't realise that they can
-          // make them show again by scrolling up.
-          if (this.scrollTimerForNavbar) {
-            clearTimeout(this.scrollTimerForNavbar)
-          }
-
-          if (this.$refs.chatheader) {
-            this.$refs.chatheader.collapse(true)
-          }
-
-          this.scrollTimer = setTimeout(() => {
-            navBarHidden.value = false
-
-            if (this.$refs.chatheader) {
-              this.$refs.chatheader.collapse(false)
-            }
-          }, 5000)
-        }
-
-        this.lastScrollY = scrollY
-      }
-    },
     typing(val) {
       if (
         this.miscStore.breakpoint === 'xs' ||
         this.miscStore.breakpoint === 'sm'
       ) {
-        // Hide the navbar when typing.
-        //
-        // Start a timer to show the navbars again after a delay, in case the user doesn't realise that they can
-        // make them show again.
-        navBarHidden.value = val
-
-        if (this.scrollTimerForNavbar) {
-          clearTimeout(this.scrollTimerForNavbar)
-        }
-
-        this.scrollTimer = setTimeout(() => {
-          navBarHidden.value = false
-        }, 5000)
-
         // Also collapse the chat header, to make even more room.
         this.$refs.chatheader.collapse(val)
       }
