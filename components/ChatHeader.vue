@@ -18,9 +18,25 @@
             @click="showInfo"
           />
         </div>
-        <div class="name font-weight-bold black text--large">
-          {{ chat.name }}
+        <div
+          v-if="
+            !collapsed && otheruser && otheruser.info && !otheruser?.deleted
+          "
+          class="d-flex flex-column align-content-between pr-1 ratings"
+        >
+          <UserRatings
+            :id="chat.otheruid"
+            :key="'otheruser-' + chat.otheruid"
+            class="mb-1 mb-md-0 mt-1 d-flex justify-content-end"
+            size="sm"
+          />
+          <SupporterInfo v-if="otheruser.supporter" class="align-self-end" />
         </div>
+        <VisibleWhen :not="['xs', 'sm']">
+          <div class="name font-weight-bold black text--large">
+            {{ chat.name }}
+          </div>
+        </VisibleWhen>
         <div
           v-if="otheruser && otheruser.info && !otheruser?.deleted"
           class="d-flex flex-column align-content-between pr-1 ratings"

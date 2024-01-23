@@ -1,5 +1,6 @@
 <template>
   <b-navbar
+    id="navbar-mobile"
     type="dark"
     class="ourBack d-flex justify-content-between d-xl-none"
     :class="{ hideNavBarTop: navBarHidden, showNavBarTop: !navBarHidden }"

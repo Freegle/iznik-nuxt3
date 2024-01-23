@@ -4,7 +4,7 @@
       v-if="showContactDetailsAskModal"
       @hidden="showContactDetailsAskModal = false"
     />
-
+    <Teleport to="#navbar-mobile"> Test </Teleport>
     <div>
       <h1 class="visually-hidden">Chats</h1>
       <b-row class="m-0">
@@ -238,19 +238,13 @@ export default {
     definePageMeta({
       layout: 'login',
     })
+
+    let title = 'Chats'
+    let description =
+      "See the conversations you're having with other freeglers."
+
     const runtimeConfig = useRuntimeConfig()
-
     const route = useRoute()
-
-    useHead(
-      buildHead(
-        route,
-        runtimeConfig,
-
-        'Chats',
-        "See the conversations you're having with other freeglers."
-      )
-    )
 
     const chatStore = useChatStore()
     const authStore = useAuthStore()
@@ -280,6 +274,9 @@ export default {
         }
       } else {
         // We have the chat, but maybe it's not quite up to date (e.g. a new message).  So fetch, but don't wait.
+        title = chat.name
+        description = 'Chat with ' + chat.name
+
         chatStore.fetchChat(id)
       }
 
@@ -289,6 +286,8 @@ export default {
         showChats.value = Math.max(showChats.value, index + 1)
       }
     }
+
+    useHead(buildHead(route, runtimeConfig, title, description))
 
     return { showContactDetailsAskModal, chatStore, showChats, id }
   },
