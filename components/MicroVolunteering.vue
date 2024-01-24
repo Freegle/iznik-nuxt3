@@ -133,6 +133,9 @@
                   @done="considerNext"
                 />
               </div>
+              <div v-else-if="task.type === 'Survey'">
+                <MicroVolunteeringSurvey @done="considerNext" />
+              </div>
               <div v-else>Unknown task {{ task }}</div>
             </div>
           </b-card-text>
@@ -175,6 +178,9 @@ const MicroVolunteeringCheckMessage = defineAsyncComponent(() =>
 const MicroVolunteeringSimilarTerms = defineAsyncComponent(() =>
   import('./MicroVolunteeringSimilarTerms')
 )
+const MicroVolunteeringSurvey = defineAsyncComponent(() =>
+  import('./MicroVolunteeringSurvey')
+)
 
 export default {
   components: {
@@ -182,6 +188,7 @@ export default {
     MicroVolunteeringPhotosRotate,
     MicroVolunteeringSimilarTerms,
     MicroVolunteeringFacebook,
+    MicroVolunteeringSurvey,
   },
   props: {
     force: {
@@ -270,7 +277,7 @@ export default {
       message: null,
       todo: 5,
       done: 0,
-      types: ['CheckMessage', 'PhotoRotate'],
+      types: ['CheckMessage', 'PhotoRotate', 'Survey'],
       bump: 1,
     }
   },
@@ -301,6 +308,8 @@ export default {
         } else if (this.task.type === 'Facebook') {
           this.showTask = true
         } else if (this.task.type === 'PhotoRotate') {
+          this.showTask = true
+        } else if (this.task.type === 'Survey') {
           this.showTask = true
         } else {
           this.doneForNow()
