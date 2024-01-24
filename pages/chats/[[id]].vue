@@ -4,7 +4,11 @@
       v-if="showContactDetailsAskModal"
       @hidden="showContactDetailsAskModal = false"
     />
-    <Teleport to="#navbar-mobile"> Test </Teleport>
+    <VisibleWhen :at="['xs', 'sm']">
+      <Teleport v-if="loggedIn && id" to="#navbar-mobile">
+        <ChatMobileNavbar :id="id" />
+      </Teleport>
+    </VisibleWhen>
     <div>
       <h1 class="visually-hidden">Chats</h1>
       <b-row class="m-0">
