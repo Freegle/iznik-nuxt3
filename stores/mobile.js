@@ -264,7 +264,7 @@ export const useMobileStore = defineStore({ // Do not persist
       //  console.log("getDeliveredNotifications")
       //  console.log("getDeliveredNotifications", notificationList)
       //})
-      this.setBadgeCount(99)
+      this.setBadgeCount(0)
     },
     //////////////
     async setBadgeCount(badgeCount) { // TODO
