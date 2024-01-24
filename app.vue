@@ -6,6 +6,7 @@
         <NavbarMobile />
       </header>
     </client-only>
+    <NuxtLoadingIndicator :throttle="5000" />
     <NuxtLayout v-if="ready">
       <NuxtPage />
     </NuxtLayout>
