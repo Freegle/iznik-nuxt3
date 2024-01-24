@@ -39,7 +39,7 @@
         <UserRatings
           :id="chat.otheruid"
           :key="'otheruser-' + chat.otheruid"
-          class="mb-1 mb-md-0 mt-1 d-flex justify-content-end"
+          class="d-flex justify-content-end"
           size="sm"
         />
         <SupporterInfo v-if="otheruser.supporter" class="align-self-end" />
