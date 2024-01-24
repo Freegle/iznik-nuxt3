@@ -76,8 +76,6 @@ export function useNavbar() {
   const showBackButton = computed(() => {
     // On mobile we want to show a back button instead of the logo when we're not on one of the "home" routes,
     // which are /browse, /chitchat, /myposts
-    console.log('Show back button', route?.path)
-
     return (
       route &&
       route.path !== '/browse' &&

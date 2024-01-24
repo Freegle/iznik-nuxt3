@@ -4,7 +4,11 @@
       v-if="showContactDetailsAskModal"
       @hidden="showContactDetailsAskModal = false"
     />
-
+    <VisibleWhen :at="['xs', 'sm']">
+      <Teleport v-if="loggedIn && id" to="#navbar-mobile">
+        <ChatMobileNavbar :id="id" />
+      </Teleport>
+    </VisibleWhen>
     <div>
       <h1 class="visually-hidden">Chats</h1>
       <b-row class="m-0">
@@ -213,6 +217,7 @@ import VisibleWhen from '~/components/VisibleWhen'
 import InfiniteLoading from '~/components/InfiniteLoading'
 import { useChatStore } from '~/stores/chat'
 import SidebarRight from '~/components/SidebarRight'
+import ChatMobileNavbar from '~/components/ChatMobileNavbar.vue'
 
 // We can't use async on ChatListEntry else the infinite scroll kicks in and tries to load everything while we are
 // still waiting for the import to complete.
@@ -233,24 +238,19 @@ export default {
     ContactDetailsAskModal,
     ChatHideModal,
     InfiniteLoading,
+    ChatMobileNavbar,
   },
   async setup(props) {
     definePageMeta({
       layout: 'login',
     })
+
+    let title = 'Chats'
+    let description =
+      "See the conversations you're having with other freeglers."
+
     const runtimeConfig = useRuntimeConfig()
-
     const route = useRoute()
-
-    useHead(
-      buildHead(
-        route,
-        runtimeConfig,
-
-        'Chats',
-        "See the conversations you're having with other freeglers."
-      )
-    )
 
     const chatStore = useChatStore()
     const authStore = useAuthStore()
@@ -280,6 +280,9 @@ export default {
         }
       } else {
         // We have the chat, but maybe it's not quite up to date (e.g. a new message).  So fetch, but don't wait.
+        title = chat.name
+        description = 'Chat with ' + chat.name
+
         chatStore.fetchChat(id)
       }
 
@@ -289,6 +292,8 @@ export default {
         showChats.value = Math.max(showChats.value, index + 1)
       }
     }
+
+    useHead(buildHead(route, runtimeConfig, title, description))
 
     return { showContactDetailsAskModal, chatStore, showChats, id }
   },
