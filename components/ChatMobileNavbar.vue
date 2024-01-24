@@ -132,4 +132,8 @@ function showInfo() {
     grid-column: 5 / 6;
   }
 }
+
+:deep(.badge) {
+  font-size: 0.6em;
+}
 </style>
