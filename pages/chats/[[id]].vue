@@ -5,7 +5,7 @@
       @hidden="showContactDetailsAskModal = false"
     />
     <VisibleWhen :at="['xs', 'sm']">
-      <Teleport v-if="loggedIn && id" to="#navbar-mobile">
+      <Teleport v-if="loggedIn && id && chat" to="#navbar-mobile">
         <ChatMobileNavbar :id="id" />
       </Teleport>
     </VisibleWhen>
@@ -83,33 +83,33 @@
                   </div>
                   <div v-if="showClosed">
                     <div
-                      v-for="chat in closedChats"
-                      :key="'chat-' + chat.id"
+                      v-for="c in closedChats"
+                      :key="'chat-' + c.id"
                       :class="{
                         chat: true,
-                        active: selectedChatId === chat?.id,
+                        active: selectedChatId === c?.id,
                       }"
-                      @click="gotoChat(chat.id)"
+                      @click="gotoChat(c.id)"
                     >
                       <ChatListEntry
-                        :id="chat.id"
-                        :active="selectedChatId === chat?.id"
+                        :id="c.id"
+                        :active="selectedChatId === c?.id"
                       />
                     </div>
                   </div>
                   <div v-else>
                     <div
-                      v-for="chat in visibleChats"
-                      :key="'chat-' + chat.id"
+                      v-for="c in visibleChats"
+                      :key="'chat-' + c.id"
                       :class="{
                         chat: true,
-                        active: selectedChatId === chat?.id,
+                        active: selectedChatId === c?.id,
                       }"
-                      @click="gotoChat(chat.id)"
+                      @click="gotoChat(c.id)"
                     >
                       <ChatListEntry
-                        :id="chat.id"
-                        :active="selectedChatId === chat?.id"
+                        :id="c.id"
+                        :active="selectedChatId === c?.id"
                       />
                     </div>
                   </div>
@@ -264,12 +264,14 @@ export default {
 
     const id = route.params.id ? parseInt(route.params.id) : 0
 
+    let chat = null
+
     if (myid) {
       // Fetch the list of chats.
       await chatStore.fetchChats(null, true, id)
 
       // Is this chat in the list?
-      let chat = chatStore.byChatId(id)
+      chat = chatStore.byChatId(id)
 
       if (!chat) {
         // Might be old.  Try fetching it specifically.
@@ -295,7 +297,7 @@ export default {
 
     useHead(buildHead(route, runtimeConfig, title, description))
 
-    return { showContactDetailsAskModal, chatStore, showChats, id }
+    return { showContactDetailsAskModal, chatStore, showChats, id, chat }
   },
   data() {
     return {
