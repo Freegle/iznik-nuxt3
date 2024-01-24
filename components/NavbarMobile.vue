@@ -303,7 +303,7 @@ const navBarBottomHidden = computed(() => {
     display: none !important;
   }
   > *:last-child {
-    display: block !important;
+    display: grid !important;
   }
 }
 

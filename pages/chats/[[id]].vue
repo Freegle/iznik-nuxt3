@@ -217,6 +217,7 @@ import VisibleWhen from '~/components/VisibleWhen'
 import InfiniteLoading from '~/components/InfiniteLoading'
 import { useChatStore } from '~/stores/chat'
 import SidebarRight from '~/components/SidebarRight'
+import ChatMobileNavbar from '~/components/ChatMobileNavbar.vue'
 
 // We can't use async on ChatListEntry else the infinite scroll kicks in and tries to load everything while we are
 // still waiting for the import to complete.
@@ -237,6 +238,7 @@ export default {
     ContactDetailsAskModal,
     ChatHideModal,
     InfiniteLoading,
+    ChatMobileNavbar,
   },
   async setup(props) {
     definePageMeta({
