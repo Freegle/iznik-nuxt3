@@ -1,32 +1,29 @@
 <template>
   <div v-if="userid !== myid" class="d-inline clickme">
-    <div id="sizer" ref="sizer" class="d-none d-md-block" />
-    <div>
-      <slot>
-        <b-button
-          :size="size"
-          :variant="variant"
-          :class="btnClass + ' d-none d-sm-inline'"
-          @click="gotoChat(true)"
-        >
-          <v-icon v-if="showIcon" icon="comments" />
-          <span v-if="title" :class="titleClass">
-            {{ title }}
-          </span>
-        </b-button>
-        <b-button
-          :size="size"
-          :variant="variant"
-          :class="btnClass + ' d-inline-block d-sm-none'"
-          @click="gotoChat(false)"
-        >
-          <v-icon v-if="showIcon" icon="comments" />
-          <span v-if="title" :class="titleClass">
-            {{ title }}
-          </span>
-        </b-button>
-      </slot>
-    </div>
+    <slot>
+      <b-button
+        :size="size"
+        :variant="variant"
+        :class="btnClass + ' d-none d-sm-inline'"
+        @click="gotoChat(true)"
+      >
+        <v-icon v-if="showIcon" icon="comments" />
+        <span v-if="title" :class="titleClass">
+          {{ title }}
+        </span>
+      </b-button>
+      <b-button
+        :size="size"
+        :variant="variant"
+        :class="btnClass + ' d-inline-block d-sm-none'"
+        @click="gotoChat(false)"
+      >
+        <v-icon v-if="showIcon" icon="comments" />
+        <span v-if="title" :class="titleClass">
+          {{ title }}
+        </span>
+      </b-button>
+    </slot>
   </div>
 </template>
 <script>
