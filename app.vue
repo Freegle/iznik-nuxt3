@@ -5,11 +5,20 @@
         <NavbarDesktop />
         <NavbarMobile />
       </header>
+      <div class="position-absolute top-50 start-50 translate-middle z-3">
+        <LoadingIndicator :throttle="loadingIndicatorThrottle" />
+      </div>
     </client-only>
-    <NuxtLoadingIndicator :throttle="5000" />
-    <NuxtLayout v-if="ready">
-      <NuxtPage />
-    </NuxtLayout>
+    <div
+      :style="{
+        filter: isLoading ? 'blur(1rem)' : 'unset',
+      }"
+      v-if="ready"
+    >
+      <NuxtLayout>
+        <NuxtPage />
+      </NuxtLayout>
+    </div>
   </div>
 </template>
 <script setup>
@@ -49,7 +58,10 @@ import { computed, watch, reloadNuxtApp } from '#imports'
 import 'core-js/actual/array/to-sorted'
 
 const route = useRoute()
-
+const loadingIndicatorThrottle = ref(5000)
+const { isLoading } = useLoadingIndicator({
+  throttle: loadingIndicatorThrottle.value,
+})
 // Don't render the app until we've done everything in here.
 let ready = false
 
@@ -209,6 +221,5 @@ if (process.client) {
     },
   })
 }
-
 ready = true
 </script>
