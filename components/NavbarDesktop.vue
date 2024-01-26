@@ -4,7 +4,7 @@
     class="ourBack d-none d-xl-flex pl-1 pr-2 navbar-dark navbar-expand-xl"
     fixed="top"
   >
-    <nuxt-link :to="homePage" class="navbar-brand p-0">
+    <nuxt-link :to="homePage" class="navbar-brand p-0" no-prefetch>
       <OfflineIndicator v-if="!online" />
       <b-img
         v-else
@@ -35,6 +35,7 @@
         <li>
           <nuxt-link
             id="menu-option-mygroups"
+            no-prefetch
             class="nav-link text-center small p-0 ml-2"
             to="/browse"
             @mousedown="maybeReload('/browse')"
@@ -57,6 +58,7 @@
         <li>
           <nuxt-link
             id="menu-option-give"
+            no-prefetch
             class="nav-link text-center small p-0"
             to="/give"
             @mousedown="maybeReload('/give')"
@@ -69,6 +71,7 @@
         <li>
           <nuxt-link
             id="menu-option-find"
+            no-prefetch
             class="nav-link text-center small p-0"
             to="/find"
             @mousedown="maybeReload('/find')"
@@ -81,6 +84,7 @@
         <li>
           <nuxt-link
             id="menu-option-myposts"
+            no-prefetch
             class="nav-link text-center small p-0"
             to="/myposts"
             @mousedown="maybeReload('/myposts')"
@@ -103,6 +107,7 @@
         <li>
           <nuxt-link
             id="menu-option-chitchat"
+            no-prefetch
             class="nav-link text-center small p-0"
             to="/chitchat"
             @mousedown="maybeReload('/chitchat')"
@@ -125,6 +130,7 @@
         <li>
           <nuxt-link
             id="menu-option-communityevents"
+            no-prefetch
             class="nav-link text-center small p-0"
             to="/communityevents"
             @mousedown="maybeReload('/communityevents')"
@@ -137,6 +143,7 @@
         <li>
           <nuxt-link
             id="menu-option-volunteering"
+            no-prefetch
             class="nav-link text-center small p-0"
             to="/volunteerings"
             @mousedown="maybeReload('/volunteerings')"
@@ -168,6 +175,7 @@
         <li>
           <nuxt-link
             id="menu-option-spread"
+            no-prefetch
             class="nav-link text-center small p-0"
             to="/promote"
             @mousedown="maybeReload('/promote')"
@@ -182,6 +190,7 @@
         <li>
           <nuxt-link
             id="menu-option-help"
+            no-prefetch
             class="nav-link text-center small p-0"
             to="/help"
             @mousedown="maybeReload('/help')"
@@ -194,6 +203,7 @@
         <li>
           <nuxt-link
             id="menu-option-settings"
+            no-prefetch
             class="nav-link text-center small p-0"
             to="/settings"
             @mousedown="maybeReload('/settings')"
@@ -206,6 +216,7 @@
         <li>
           <nuxt-link
             id="menu-option-logout"
+            no-prefetch
             class="nav-link text-center p-0 small clickme"
             @click="logout"
           >
@@ -217,7 +228,7 @@
       </ul>
     </div>
     <div v-if="!loggedIn" class="navbar-nav ml-auto">
-      <div class="nav-item">
+      <div class="nav-item" no-prefetch>
         <b-button variant="white" class="mr-2" @click="requestLogin">
           Sign&nbsp;in
         </b-button>

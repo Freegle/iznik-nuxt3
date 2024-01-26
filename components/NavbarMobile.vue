@@ -41,7 +41,7 @@
     </div>
     <div class="d-flex align-items-center">
       <b-nav>
-        <nuxt-link v-if="!loggedIn">
+        <nuxt-link v-if="!loggedIn" no-prefetch>
           <div class="btn btn-white mr-2" @click="requestLogin">
             Log in or Join
           </div>
@@ -89,6 +89,7 @@
     }"
   >
     <nuxt-link
+      no-prefetch
       class="nav-link text-center p-0 botmen"
       to="/browse"
       @click="clickedMobileNav"
@@ -118,6 +119,7 @@
       <div class="chatup text-white">Chats</div>
     </div>
     <nuxt-link
+      no-prefetch
       class="nav-link text-center p-0 botmen"
       to="/myposts"
       @click="clickedMobileNav"
@@ -141,6 +143,7 @@
       <NavbarMobilePost class="navpost" />
       <div class="d-flex justify-content-around navpostnav">
         <nuxt-link
+          no-prefetch
           class="nav-link text-center p-0 botmen"
           to="/post"
           @click="clickedMobileNav"
@@ -155,6 +158,7 @@
       </div>
     </div>
     <nuxt-link
+      no-prefetch
       class="nav-link text-center p-0 botmen"
       to="/chitchat"
       @click="clickedMobileNav"
@@ -175,6 +179,7 @@
       </div>
     </nuxt-link>
     <nuxt-link
+      no-prefetch
       class="nav-link text-center p-0 botmen"
       to="/promote"
       @click="clickedMobileNav"
@@ -185,6 +190,7 @@
       <div class="nav-item__text">Promote</div>
     </nuxt-link>
     <nuxt-link
+      no-prefetch
       class="nav-link text-center p-0 botmen"
       to="/help"
       @click="clickedMobileNav"
