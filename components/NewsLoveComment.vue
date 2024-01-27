@@ -1,14 +1,15 @@
 <template>
-  <div v-if="newsfeed" class="d-flex align-items-center mt-1">
+  <div v-if="newsfeed" class="d-flex align-items-center">
     <SpinButton
       v-if="!newsfeed.loved"
       variant="link"
       size="sm"
       icon-name="heart"
       done-icon=""
+      class="ms-0 me-0 ps-0"
       @handle="love"
     >
-      <span class="d-none d-sm-inline">Love this</span>
+      <span class="">Love this</span>
     </SpinButton>
     <SpinButton
       v-if="newsfeed.loved"
@@ -17,9 +18,10 @@
       icon-name="heart"
       done-icon=""
       icon-class="text-danger"
+      class="ms-0 me-0 ps-0"
       @handle="unlove"
     >
-      <span class="d-none d-sm-inline">Unlove this</span>
+      <span class="">Unlove</span>
     </SpinButton>
     <b-button
       v-if="!newsfeed.closed"
@@ -27,14 +29,12 @@
       size="sm"
       @click="focusComment"
     >
-      <v-icon icon="comment" /><span class="d-none d-sm-inline"
-        >&nbsp;Reply</span
-      >
+      <v-icon icon="comment" /><span class="">&nbsp;Reply</span>
     </b-button>
     <b-button
       v-if="newsfeed.loves"
       variant="link"
-      class="showlove"
+      class="showlove ms-0 me-0 ps-0"
       :aria-label="getShowLovesLabel"
       @click="showLove"
     >

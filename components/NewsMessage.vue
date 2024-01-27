@@ -24,18 +24,19 @@
         :newsfeed="newsfeed"
         @focus-comment="$emit('focus-comment')"
       />
-      <div class="d-flex">
+      <div class="d-flex flex-wrap">
         <ChatButton
           :userid="newsfeed.userid"
           title="Message"
           size="sm"
           variant="link"
-          class="mr-2 align-self-baseline"
+          class="align-self-baseline"
+          btn-class="ms-0 me-0 ps-0"
         />
         <div>
           <b-button
             variant="link"
-            class="d-inline-block"
+            class="d-inline-block ms-0 me-0 ps-0 pe-0"
             size="sm"
             @click="share"
           >
