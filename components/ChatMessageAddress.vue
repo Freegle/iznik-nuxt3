@@ -75,6 +75,10 @@
                     </div>
                   </div>
                   <pre v-else>This address has been deleted.</pre>
+                  <div class="text-muted small">
+                    Your address book lets you easily send addresses, and also
+                    add instructions so that people can find you.
+                  </div>
                   <hr v-if="address?.instructions" />
                   <div v-if="address?.instructions" class="mb-2">
                     {{ address.instructions }}
