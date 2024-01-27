@@ -16,7 +16,7 @@
       >
         <MessageListCounts v-if="browseCount" @mark-seen="markSeen" />
         <MessageListUpToDate
-          v-if="browseCount && !deDuplicatedMessages[0].unseen"
+          v-if="deDuplicatedMessages[0].id === firstSeenMessage"
         />
       </div>
       <div
@@ -53,7 +53,7 @@
         />
       </VisibleWhen>
       <div
-        v-for="(message, ix) in deDuplicatedMessages.slice(1)"
+        v-for="message in deDuplicatedMessages.slice(1)"
         :key="'messagelist-' + message.id"
       >
         <MessageListUpToDate
@@ -61,10 +61,7 @@
             !loading &&
             selectedSort === 'Unseen' &&
             showCountsUnseen &&
-            browseCount &&
-            me &&
-            !message.unseen &&
-            deDuplicatedMessages[ix].unseen
+            message.id === firstSeenMessage
           "
         />
         <div
@@ -140,6 +137,11 @@ export default {
     messagesForList: {
       type: Array,
       required: true,
+    },
+    firstSeenMessage: {
+      type: Number,
+      required: false,
+      default: null,
     },
     selectedGroup: {
       type: Number,
@@ -337,7 +339,7 @@ export default {
       return ret
     },
     deDuplicatedMessages() {
-      const ret = []
+      let ret = []
       const dups = []
 
       this.filteredMessagesToShow.forEach((m) => {
@@ -364,9 +366,16 @@ export default {
 
           const already = key in dups
 
-          if (!already) {
+          if (m.id === this.firstSeenMessage) {
+            if (already) {
+              // We are planning to show a message which is a duplicate of the first seen.  To make sure we show
+              // the notice about having seen messages below here, show this one instead.
+              ret = ret.filter((m) => m.id !== dups[key])
+            }
             ret.push(m)
-            dups[key] = true
+          } else if (!already) {
+            ret.push(m)
+            dups[key] = m.id
           }
         }
       })

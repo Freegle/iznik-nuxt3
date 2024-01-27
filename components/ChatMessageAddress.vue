@@ -61,12 +61,24 @@
             <b-card-text>
               <b-row>
                 <b-col cols="12">
-                  <pre
-                    v-if="address"
-                    :class="address.instructions ? '' : 'mb-2'"
-                    >{{ multiline }}</pre
-                  >
+                  <div v-if="address" class="d-flex justify-content-between">
+                    <pre :class="address.instructions ? '' : 'mb-2'">{{
+                      multiline
+                    }}</pre>
+                    <div>
+                      <b-button
+                        variant="white"
+                        class="ml-2"
+                        @click="editAddress"
+                        >Address Book</b-button
+                      >
+                    </div>
+                  </div>
                   <pre v-else>This address has been deleted.</pre>
+                  <div class="text-muted small">
+                    Your address book lets you easily send addresses, and also
+                    add instructions so that people can find you.
+                  </div>
                   <hr v-if="address?.instructions" />
                   <div v-if="address?.instructions" class="mb-2">
                     {{ address.instructions }}
@@ -106,6 +118,13 @@
         </div>
       </b-col>
     </b-row>
+    <AddressModal
+      v-if="showAddress"
+      :choose="true"
+      t-o-d-o
+      @chosen="sendAddress"
+      @hidden="addressClosed"
+    />
   </div>
 </template>
 <script>
@@ -136,19 +155,38 @@ export default {
     const addressid = ref(parseInt(chatmsg?.message))
 
     const address = await addressStore.fetch(addressid.value)
+    const showAddress = ref(false)
 
     return {
       addressStore,
+      chatStore,
       L,
       osmtile: osmtile(),
       attribution: attribution(),
       addressid,
       address: ref(address),
+      showAddress,
+      chatmsg,
     }
   },
   computed: {
     multiline() {
       return constructMultiLine(this.address)
+    },
+  },
+  methods: {
+    async editAddress() {
+      await this.addressStore.fetch()
+
+      this.showAddress = true
+    },
+    async addressClosed() {
+      await this.chatStore.fetchMessages(this.chatmsg.chatid)
+      this.showAddress = false
+    },
+    async sendAddress(id) {
+      await this.chatStore.send(this.chatmsg.chatid, null, id)
+      this.showAddress = false
     },
   },
 }

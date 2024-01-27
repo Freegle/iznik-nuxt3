@@ -154,10 +154,12 @@ const forgottenCallback = () => {
   if (useMiscStore().online) {
     finishSpinner()
     $sentryCaptureException(
-      'SpinButton - callback not called',
-      props.variant,
-      props.label,
-      props.iconName
+      'SpinButton - callback not called, ' +
+        props.variant +
+        ', ' +
+        props.label +
+        ', ' +
+        props.iconName
     )
   }
 }

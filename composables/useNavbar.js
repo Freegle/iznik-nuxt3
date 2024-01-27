@@ -12,6 +12,28 @@ import { useRuntimeConfig } from '#app'
 
 export const navBarHidden = ref(false)
 
+let navBarTimeout = null
+
+export function setNavBarHidden(hidden) {
+  // Hide the navbar when typing.
+  //
+  // Start a timer to show the navbars again after a delay.
+  if (navBarHidden.value !== hidden) {
+    navBarHidden.value = hidden
+  }
+
+  if (navBarTimeout) {
+    clearTimeout(navBarTimeout)
+    navBarTimeout = null
+  }
+
+  if (hidden) {
+    navBarTimeout = setTimeout(() => {
+      navBarHidden.value = false
+    }, 5000)
+  }
+}
+
 export function useNavbar() {
   const authStore = useAuthStore()
   const miscStore = useMiscStore()
@@ -54,8 +76,6 @@ export function useNavbar() {
   const showBackButton = computed(() => {
     // On mobile we want to show a back button instead of the logo when we're not on one of the "home" routes,
     // which are /browse, /chitchat, /myposts
-    console.log('Show back button', route?.path)
-
     return (
       route &&
       route.path !== '/browse' &&

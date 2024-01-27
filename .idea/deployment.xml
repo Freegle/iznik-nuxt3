@@ -9,13 +9,6 @@
           </mappings>
         </serverdata>
       </paths>
-      <paths name="CAN Auction">
-        <serverdata>
-          <mappings>
-            <mapping local="$PROJECT_DIR$" web="/" />
-          </mappings>
-        </serverdata>
-      </paths>
       <paths name="DB Backups">
         <serverdata>
           <mappings>
@@ -23,63 +16,35 @@
           </mappings>
         </serverdata>
       </paths>
-      <paths name="Docker">
+      <paths name="IZNIK Docker">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>
-      <paths name="FreegleWebpack">
+      <paths name="IZNIK FD API DBG app1">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>
-      <paths name="HomeSearch">
+      <paths name="IZNIK FD API DBG app4">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>
-      <paths name="HomeSearch (2)">
+      <paths name="IZNIK FD API LIVE app1">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>
-      <paths name="IZNIK FDAPI DBG app1">
-        <serverdata>
-          <mappings>
-            <mapping local="$PROJECT_DIR$" web="/" />
-          </mappings>
-        </serverdata>
-      </paths>
-      <paths name="IZNIK FDAPI DBG app4">
-        <serverdata>
-          <mappings>
-            <mapping local="$PROJECT_DIR$" web="/" />
-          </mappings>
-        </serverdata>
-      </paths>
-      <paths name="IZNIK FDAPI LIVE app1">
-        <serverdata>
-          <mappings>
-            <mapping local="$PROJECT_DIR$" web="/" />
-          </mappings>
-        </serverdata>
-      </paths>
-      <paths name="IZNIK FDAPI LIVE app4">
-        <serverdata>
-          <mappings>
-            <mapping local="$PROJECT_DIR$" web="/" />
-          </mappings>
-        </serverdata>
-      </paths>
-      <paths name="IZNIK MT DBG app1">
+      <paths name="IZNIK FD API LIVE app4">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
@@ -93,34 +58,6 @@
           </mappings>
         </serverdata>
       </paths>
-      <paths name="IZNIK MT LIVE app1">
-        <serverdata>
-          <mappings>
-            <mapping local="$PROJECT_DIR$" web="/" />
-          </mappings>
-        </serverdata>
-      </paths>
-      <paths name="IZNIK MT LIVE app4">
-        <serverdata>
-          <mappings>
-            <mapping local="$PROJECT_DIR$" web="/" />
-          </mappings>
-        </serverdata>
-      </paths>
-      <paths name="MT DEV app4">
-        <serverdata>
-          <mappings>
-            <mapping local="$PROJECT_DIR$" web="/" />
-          </mappings>
-        </serverdata>
-      </paths>
-      <paths name="MT LIVE app1">
-        <serverdata>
-          <mappings>
-            <mapping local="$PROJECT_DIR$" web="/" />
-          </mappings>
-        </serverdata>
-      </paths>
       <paths name="archive.ilovefreegle.org">
         <serverdata>
           <mappings>
@@ -128,7 +65,7 @@
           </mappings>
         </serverdata>
       </paths>
-      <paths name="bulk1.ilovefreegle.org">
+      <paths name="backup (MB)">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
@@ -177,7 +114,14 @@
           </mappings>
         </serverdata>
       </paths>
-      <paths name="ghostsigns">
+      <paths name="restarters.net">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="restarters.test">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />

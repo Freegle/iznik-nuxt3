@@ -4,26 +4,40 @@
       v-if="chat && (chat.chattype !== 'User2User' || otheruser?.info)"
       class="outer position-relative"
     >
-      <div class="nameinfo pt-md-1 pb-md-1 pl-1">
+      <div class="nameinfo pt-md-1 pb-md-1 pl-md-1">
         <div
           class="profile d-flex flex-column justify-content-around flex-grow-1"
         >
           <ProfileImage
             v-if="!collapsed && chat.icon"
             :image="chat.icon"
-            class="pr-1 clickme"
+            class="pr-1 clickme d-none d-md-flex"
             is-thumbnail
             size="xl"
             border
             @click="showInfo"
           />
         </div>
-        <div class="name font-weight-bold black text--large">
+        <div
+          v-if="
+            !collapsed && otheruser && otheruser.info && !otheruser?.deleted
+          "
+          class="d-none d-md-flex flex-column align-content-between pr-1 ratings"
+        >
+          <UserRatings
+            :id="chat.otheruid"
+            :key="'otheruser-' + chat.otheruid"
+            class="mb-1 mb-md-0 mt-1 d-flex justify-content-end"
+            size="sm"
+          />
+          <SupporterInfo v-if="otheruser.supporter" class="align-self-end" />
+        </div>
+        <div class="name font-weight-bold black text--large d-none d-md-block">
           {{ chat.name }}
         </div>
         <div
           v-if="otheruser && otheruser.info && !otheruser?.deleted"
-          class="d-flex flex-column align-content-between pr-1 ratings"
+          class="d-none d-md-flex flex-column align-content-between pr-1 ratings"
         >
           <UserRatings
             :id="chat.otheruid"
@@ -37,27 +51,21 @@
           v-if="!collapsed && otheruser && otheruser.info"
           class="userinfo mr-2"
         >
-          <span class="small flex flex-wrap">
+          <span
+            class="small d-flex d-md-block justify-content-between flex-wrap"
+          >
             <span v-if="otheruser.lastaccess" class="d-inline d-md-block">
               <span class="d-none d-md-inline">Last seen</span>
               <span class="d-inline d-md-none">Seen</span>
               <!-- eslint-disable-next-line-->
               <strong :title="datetimeshort(otheruser.lastaccess)" class="ml-1" >{{ timeago(otheruser.lastaccess) }}</strong>
               <span class="d-none d-md-inline">.</span>
-              <span class="d-inline d-md-none">, </span>
-            </span>
-            <span
-              v-if="!otheruser?.deleted && milesaway"
-              class="d-inline d-md-none"
-            >
-              <strong>{{ milesstring }}</strong
-              >.
             </span>
             <span v-if="replytime" class="d-inline d-md-block">
               <span class="d-none d-md-inline">Typically replies in</span>
               <span class="d-inline d-md-none">Replies in</span>
               <strong class="ml-1">{{ replytime }}</strong
-              >.
+              ><span class="d-none d-md-inline">.</span>
             </span>
             <span
               v-if="!otheruser?.deleted && milesaway"
@@ -169,7 +177,7 @@
         </div>
         <div
           v-if="!collapsed"
-          class="d-flex flex-column justify-content-around clickme"
+          class="d-none d-md-flex flex-column justify-content-around clickme"
           @click="collapsed = true"
         >
           <v-icon
