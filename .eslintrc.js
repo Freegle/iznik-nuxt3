@@ -55,6 +55,7 @@ module.exports = {
     useLazyAsyncData: 'readonly',
     createApp: 'readonly',
     useNuxtApp: 'readonly',
+    useLoadingIndicator: 'readonly',
     useHead: 'readonly',
     useRouter: 'readonly',
     ref: 'readonly',
