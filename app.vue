@@ -6,14 +6,18 @@
         <NavbarMobile />
       </header>
       <div class="position-absolute top-50 start-50 translate-middle z-3">
-        <LoadingIndicator :throttle="loadingIndicatorThrottle" />
+        <LoadingIndicator
+          with-transition
+          :throttle="loadingIndicatorThrottle"
+        />
       </div>
     </client-only>
     <div
+      v-if="ready"
+      class="nuxt-layout-wrapper"
       :style="{
         filter: isLoading ? 'blur(1rem)' : 'unset',
       }"
-      v-if="ready"
     >
       <NuxtLayout>
         <NuxtPage />
@@ -223,3 +227,9 @@ if (process.client) {
 }
 ready = true
 </script>
+
+<style lang="scss">
+.nuxt-layout-wrapper {
+  transition: all 0.25s;
+}
+</style>
