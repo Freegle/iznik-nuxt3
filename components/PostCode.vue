@@ -159,6 +159,7 @@ export default {
       results: [],
       locationFailed: false,
       showLocated: false,
+      callbackToCall: null,
     }
   },
   computed: {
@@ -166,6 +167,11 @@ export default {
       const runtimeConfig = useRuntimeConfig()
       return runtimeConfig.public.APIv1 + '/locations'
     },
+  },
+  beforeUnmount() {
+    if (this.callbackToCall) {
+      this.callbackToCall()
+    }
   },
   mounted() {
     if (this.$refs.autocomplete) {
@@ -237,6 +243,8 @@ export default {
       this.locationFailed = false
     },
     findLoc(callback) {
+      this.callbackToCall = callback
+
       try {
         if (
           navigator &&
@@ -282,6 +290,7 @@ export default {
         console.error('Find location failed with', e)
         this.locationFailed = true
       } finally {
+        this.callbackToCall = null
         callback()
       }
     },
