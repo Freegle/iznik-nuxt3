@@ -551,11 +551,11 @@ export default {
     showSuggested(newVal) {
       if (newVal) {
         this.$api.bandit.shown({
-          uid: 'address',
+          uid: 'SuggestedAddress',
           variant: 'chosen',
         })
         this.$api.bandit.shown({
-          uid: 'address',
+          uid: 'SuggestedAddress',
           variant: 'cancel',
         })
       }
@@ -738,7 +738,7 @@ export default {
     async sendSuggestedAddress() {
       // We want to send the address.  First we need to make sure it's in our address book.
       this.$api.bandit.chosen({
-        uid: 'address',
+        uid: 'SuggestedAddress',
         variant: 'chosen',
       })
 
@@ -781,7 +781,7 @@ export default {
       this.hideSuggestedAddress = true
 
       this.$api.bandit.chosen({
-        uid: 'address',
+        uid: 'SuggestedAddress',
         variant: 'cancel',
       })
     },
