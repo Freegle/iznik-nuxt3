@@ -99,7 +99,11 @@
             @keydown.alt.shift.enter.exact.prevent="newline"
             @focus="markRead"
           />
-          <b-modal v-model="showSuggested" title="Send an address?" @cancel="rejectSuggestedAddress">
+          <b-modal
+            v-model="showSuggested"
+            title="Send an address?"
+            @cancel="rejectSuggestedAddress"
+          >
             <p>Are you trying to send this address?</p>
             <p>
               <strong>{{ suggestedAddress?.address?.singleline }}</strong>
@@ -552,11 +556,11 @@ export default {
     showSuggested(newVal) {
       if (newVal) {
         this.$api.bandit.shown({
-          uid: 'SuggestedAddress2',
+          uid: 'SuggestedAddress3',
           variant: 'chosen',
         })
         this.$api.bandit.shown({
-          uid: 'SuggestedAddress2',
+          uid: 'SuggestedAddress3',
           variant: 'cancel',
         })
       }
@@ -739,7 +743,7 @@ export default {
     async sendSuggestedAddress() {
       // We want to send the address.  First we need to make sure it's in our address book.
       this.$api.bandit.chosen({
-        uid: 'SuggestedAddress2',
+        uid: 'SuggestedAddress3',
         variant: 'chosen',
       })
 
@@ -782,8 +786,9 @@ export default {
       this.hideSuggestedAddress = true
 
       this.$api.bandit.chosen({
-        uid: 'SuggestedAddress2',
+        uid: 'SuggestedAddress3',
         variant: 'cancel',
+        message: this.sendmessage,
       })
     },
   },
