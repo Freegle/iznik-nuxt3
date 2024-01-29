@@ -13,10 +13,21 @@
       </p>
       <div>
         <p>You can share using these buttons:</p>
-        <b-button v-if="isApp" variant="primary" size="lg" class="m-3" @click="shareApp">
+        <b-button
+          v-if="isApp"
+          variant="primary"
+          size="lg"
+          class="m-3"
+          @click="shareApp"
+        >
           Share now
         </b-button>
-        <b-list-group v-if="!isApp" :key="'newsshare-' + bump" horizontal class="flex-wrap">
+        <b-list-group
+          v-if="!isApp"
+          :key="'newsshare-' + bump"
+          horizontal
+          class="flex-wrap"
+        >
           <b-list-group-item>
             <ShareNetwork
               network="facebook"
@@ -96,8 +107,8 @@
 </template>
 
 <script>
+import { Share } from '@capacitor/share'
 import { useMobileStore } from '@/stores/mobile'
-import { Share } from '@capacitor/share';
 import { useModal } from '~/composables/useModal'
 
 export default {
@@ -134,17 +145,17 @@ export default {
     },
   },
   methods: {
-    async shareApp(){
+    async shareApp() {
       const href = this.url
       const subject = 'Sharing Freegle chitchat'
       try {
         await Share.share({
           title: subject,
-          text: this.newsfeed.message + "\n\n",  // not supported on some apps (Facebook, Instagram)
+          text: this.newsfeed.message + '\n\n', // not supported on some apps (Facebook, Instagram)
           url: href,
           dialogTitle: 'Share now...',
         })
-      } catch( e){
+      } catch (e) {
         console.log('Share exception', e.message)
       }
     },

@@ -46,7 +46,7 @@ export default {
       // Don't show so many that the layout breaks.
       const chatcount = Math.min(99, this.chatStore?.unreadCount)
       mobileStore.setBadgeCount(chatcount)
-      console.log('chatcount:',chatcount)
+      console.log('chatcount:', chatcount)
       return chatcount
     },
   },

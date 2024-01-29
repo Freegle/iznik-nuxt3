@@ -260,7 +260,7 @@ export default {
     contactPicker() {
       if (process.server) {
         return false
-      } else if( this.isApp) {
+      } else if (this.isApp) {
         return true
       } else {
         const ret =

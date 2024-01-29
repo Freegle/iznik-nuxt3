@@ -30,7 +30,7 @@ export default {
   },
   data() {
     return {
-      message: ''
+      message: '',
     }
   },
   methods: {
@@ -39,41 +39,43 @@ export default {
       e.preventDefault()
       e.stopPropagation()
       const mobileStore = useMobileStore()
-      if( !mobileStore.isApp){
-        const blob = new Blob([this.ics], { type: 'text/calendar;charset=utf-8' })
+      if (!mobileStore.isApp) {
+        const blob = new Blob([this.ics], {
+          type: 'text/calendar;charset=utf-8',
+        })
         await saveAs(blob, 'freegle-handover.ics')
         return
       }
-      /*const blob = new Blob([this.ics], { type: 'application/octet-stream' })
+      /* const blob = new Blob([this.ics], { type: 'application/octet-stream' })
       const link = document.createElement('a')
       link.href = URL.createObjectURL(blob)
       link.download = 'freegle-handover.ics'
       link.click()
-      URL.revokeObjectURL(link.href)*/
+      URL.revokeObjectURL(link.href) */
 
-      /*// https://capacitorjs.com/docs/apis/filesystem
+      /* // https://capacitorjs.com/docs/apis/filesystem
       await Filesystem.writeFile({
         path: 'freegle-handover.ics',
         data: this.ics,
         directory: Directory.Documents,
         encoding: Encoding.UTF8,
-      })*/
+      }) */
 
       // webcal://localhost/myCalendar.ics
       // https://www.npmjs.com/package/cordova-plugin-calendar
       // https://github.com/uzurv/Calendar-PhoneGap-Plugin-ios-17-support
 
-      function getCalProp(lines,name){
+      function getCalProp(lines, name) {
         name += ':'
         const namelen = name.length
-        for(let i=0;i<lines.length;i++){
+        for (let i = 0; i < lines.length; i++) {
           const line = lines[i]
-          if( line.length>=namelen){
-            if( line.substring(0,namelen)===name){
+          if (line.length >= namelen) {
+            if (line.substring(0, namelen) === name) {
               let rv = line.substring(namelen)
               while (++i < lines.length) {
                 const nextline = lines[i]
-                if (nextline.substring(0,1)!==' ') break
+                if (nextline.substring(0, 1) !== ' ') break
                 rv += nextline.substring(1)
               }
               return rv
@@ -84,14 +86,14 @@ export default {
       }
       const lines = this.ics.split('\r\n')
       const dtstart = getCalProp(lines, 'DTSTART;TZID=Europe/London') // 20210109T110000
-      const year = parseInt(dtstart.substring(0,4))
-      const month = parseInt(dtstart.substring(4,6))-1
-      const dom = parseInt(dtstart.substring(6,8))
-      const hour = parseInt(dtstart.substring(9,11))
-      const mins = parseInt(dtstart.substring(11,13))
-      const secs = parseInt(dtstart.substring(13,15))
+      const year = parseInt(dtstart.substring(0, 4))
+      const month = parseInt(dtstart.substring(4, 6)) - 1
+      const dom = parseInt(dtstart.substring(6, 8))
+      const hour = parseInt(dtstart.substring(9, 11))
+      const mins = parseInt(dtstart.substring(11, 13))
+      const secs = parseInt(dtstart.substring(13, 15))
       const startDate = new Date(year, month, dom, hour, mins, secs)
-      const endDate = new Date(startDate.getTime()+5*60*1000)
+      const endDate = new Date(startDate.getTime() + 5 * 60 * 1000)
       const title = getCalProp(lines, 'SUMMARY')
       const eventLocation = ''
       const notes = getCalProp(lines, 'DESCRIPTION')
@@ -100,25 +102,48 @@ export default {
       // Call hasWritePermission
       // Then requestWritePermission if necessary
       // Then createEventInteractively if possible
-      const success = function (message) { console.log("Add calendar success", JSON.stringify(message)) }
-      const error = function (message) { console.log("Add calendar error: " + message) } // TODO
-      const error1 = function (message) { console.log("hasWritePermission error: " + message) }
-      const errorw = function () { console.log("requestWritePermission error") }
-      const successw = function () { 
-        console.log("requestWritePermission success") 
-        window.plugins.calendar.createEventInteractively(title, eventLocation, notes, startDate, endDate, success, error)
+      const success = function (message) {
+        console.log('Add calendar success', JSON.stringify(message))
       }
-      const success1 = function (message) { 
-        console.log("hasWritePermission success", JSON.stringify(message)) 
-        if( message || !mobileStore.isiOS){
-          window.plugins.calendar.createEventInteractively(title, eventLocation, notes, startDate, endDate, success, error)
-        }
-        else{
+      const error = function (message) {
+        console.log('Add calendar error: ' + message)
+      } // TODO
+      const error1 = function (message) {
+        console.log('hasWritePermission error: ' + message)
+      }
+      const errorw = function () {
+        console.log('requestWritePermission error')
+      }
+      const successw = function () {
+        console.log('requestWritePermission success')
+        window.plugins.calendar.createEventInteractively(
+          title,
+          eventLocation,
+          notes,
+          startDate,
+          endDate,
+          success,
+          error
+        )
+      }
+      const success1 = function (message) {
+        console.log('hasWritePermission success', JSON.stringify(message))
+        if (message || !mobileStore.isiOS) {
+          window.plugins.calendar.createEventInteractively(
+            title,
+            eventLocation,
+            notes,
+            startDate,
+            endDate,
+            success,
+            error
+          )
+        } else {
           window.plugins.calendar.requestWritePermission(successw, errorw) // Android: successw not called
         }
       }
 
-      window.plugins.calendar.hasWritePermission(success1,error1) // Always success: message: self.eventStore != nil
+      window.plugins.calendar.hasWritePermission(success1, error1) // Always success: message: self.eventStore != nil
     },
   },
 }

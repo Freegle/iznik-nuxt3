@@ -53,17 +53,17 @@ export function useDonationAskModal(requestedVariant) {
         }
 
         const mobileStore = useMobileStore()
-        if( mobileStore.isApp){
+        if (mobileStore.isApp) {
           const rateappnotagain = window.localStorage.getItem('rateappnotagain')
-          if( !rateappnotagain){
-            if( Math.random() > 0.5) requestedVariant = { variant: 'rateapp' }
+          if (!rateappnotagain) {
+            if (Math.random() > 0.5) requestedVariant = { variant: 'rateapp' }
           }
         }
-  
-        if( !requestedVariant){
-        requestedVariant = await api.bandit.choose({
-          uid: 'donation',
-        })
+
+        if (!requestedVariant) {
+          requestedVariant = await api.bandit.choose({
+            uid: 'donation',
+          })
         }
 
         if (requestedVariant) {

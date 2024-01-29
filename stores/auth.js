@@ -1,11 +1,10 @@
 import { defineStore } from 'pinia'
+import { FacebookLogin } from '@capacitor-community/facebook-login'
+import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth'
 import { LoginError, SignUpError } from '../api/BaseAPI'
 import { useComposeStore } from '../stores/compose'
 import api from '~/api'
-import { useCookie } from '#imports'
 import { useMobileStore } from '@/stores/mobile'
-import { FacebookLogin } from '@capacitor-community/facebook-login'
-import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth'
 
 export const useAuthStore = defineStore({
   id: 'auth',
@@ -139,19 +138,19 @@ export const useAuthStore = defineStore({
 
       await this.$api.session.logout()
 
-      if( !mobileStore.isApp){
+      if (!mobileStore.isApp) {
         this.disableGoogleAutoselect()
       }
 
-      if( mobileStore.isApp){
+      if (mobileStore.isApp) {
         try {
-          await FacebookLogin.logout();
+          await FacebookLogin.logout()
         } catch (e) {
           console.log('Ignore Facebook logout error', e)
         }
 
         try {
-          await GoogleAuth.signOut();
+          await GoogleAuth.signOut()
         } catch (e) {
           console.log('Ignore Google signOut error', e)
         }
@@ -486,27 +485,35 @@ export const useAuthStore = defineStore({
       await this.fetchUser()
       return this.user
     },
-    async savePushId(){
+    async savePushId() {
       const mobileStore = useMobileStore()
-      if( mobileStore.mobilePushId===null) console.log('******************* mobileStore.mobilePushId===null')
+      if (mobileStore.mobilePushId === null)
+        console.log('******************* mobileStore.mobilePushId===null')
       // Tell server our push notification id if logged in
-      if( this.user !== null && (typeof mobileStore.mobilePushId === 'string') && (mobileStore.mobilePushId.length > 0)) {
+      if (
+        this.user !== null &&
+        typeof mobileStore.mobilePushId === 'string' &&
+        mobileStore.mobilePushId.length > 0
+      ) {
         if (mobileStore.acceptedMobilePushId !== mobileStore.mobilePushId) {
           console.log('sending mobilePushId', mobileStore.mobilePushId)
           const params = {
             notifications: {
               push: {
                 type: mobileStore.isiOS ? 'FCMIOS' : 'FCMAndroid',
-                subscription: mobileStore.mobilePushId
-              }
-            }
+                subscription: mobileStore.mobilePushId,
+              },
+            },
           }
           const data = await this.$api.session.save(params)
           if (data.ret === 0) {
             mobileStore.acceptedMobilePushId = mobileStore.mobilePushId
             console.log('savePushId: saved OK')
-          } else { // 1 === Not logged in
-            console.log('savePushId: Not logged in: OK will try again when signed in')
+          } else {
+            // 1 === Not logged in
+            console.log(
+              'savePushId: Not logged in: OK will try again when signed in'
+            )
           }
         }
       }
@@ -514,7 +521,8 @@ export const useAuthStore = defineStore({
     // Remember that we've logged out
     // It could tell the server to invalidate pushid
     // However we simply zap acceptedMobilePushId so it is sent when logged in
-    logoutPushId() { // TODO
+    logoutPushId() {
+      // TODO
       const mobileStore = useMobileStore()
       mobileStore.acceptedMobilePushId = false
       console.log('logoutPushId')

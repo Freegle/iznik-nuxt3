@@ -184,11 +184,11 @@ export default {
         ? "e.g. colour, condition, size, whether it's working etc."
         : "Explain what you're looking for, and why you'd like it."
     },
-    singleInAndroidApp(){
+    singleInAndroidApp() {
       const mobileStore = useMobileStore()
-      if( mobileStore.isApp) return mobileStore.isiOS
+      if (mobileStore.isApp) return mobileStore.isiOS
       return true
-    }
+    },
   },
   methods: {
     photoAdd() {

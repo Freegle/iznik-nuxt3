@@ -271,8 +271,9 @@ const isApp = computed(() => {
   return mobileStore.isApp
 })
 
-const refresh = () => { // IS_APP
-  window.location.reload(true)  // Works, but causes a complete reload from scratch. this.$router.go() doesn't work in iOS app
+const refresh = () => {
+  // IS_APP
+  window.location.reload(true) // Works, but causes a complete reload from scratch. this.$router.go() doesn't work in iOS app
 }
 
 // We want to hide the navbars when you scroll down.

@@ -66,5 +66,7 @@ module.exports = {
     navigateTo: 'readonly',
     sendRedirect: 'readonly',
     setResponseStatus: 'readonly',
+    cordova: 'readonly',
+    Capacitor: 'readonly',
   },
 }

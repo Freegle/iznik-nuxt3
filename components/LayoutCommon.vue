@@ -150,30 +150,29 @@ export default {
     } else if (process.client) {
       const mobileStore = useMobileStore()
       if (!mobileStore.isApp) {
+        // We only add the cookie banner for logged out users.  This reduces costs.  For logged-in users, we assume
+        // they have already seen the banner and specified a preference if they care.
+        const runtimeConfig = useRuntimeConfig()
 
-      // We only add the cookie banner for logged out users.  This reduces costs.  For logged-in users, we assume
-      // they have already seen the banner and specified a preference if they care.
-      const runtimeConfig = useRuntimeConfig()
+        console.log(
+          'Consider adding cookie banner',
+          runtimeConfig.public.COOKIEYES
+        )
 
-      console.log(
-        'Consider adding cookie banner',
-        runtimeConfig.public.COOKIEYES
-      )
+        if (runtimeConfig.public.COOKIEYES) {
+          console.log('Add it')
+          const cookieScript = document.getElementById('cookieyes')
 
-      if (runtimeConfig.public.COOKIEYES) {
-        console.log('Add it')
-        const cookieScript = document.getElementById('cookieyes')
+          if (!cookieScript) {
+            const script = document.createElement('script')
+            script.id = 'cookieyes'
+            script.setAttribute('src', runtimeConfig.public.COOKIEYES)
 
-        if (!cookieScript) {
-          const script = document.createElement('script')
-          script.id = 'cookieyes'
-          script.setAttribute('src', runtimeConfig.public.COOKIEYES)
-
-          document.head.appendChild(script)
+            document.head.appendChild(script)
+          }
+        } else {
+          console.log('No cookie banner')
         }
-      } else {
-        console.log('No cookie banner')
-      }
       }
     }
 

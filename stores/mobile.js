@@ -1,4 +1,4 @@
-// mobile.js: 
+// mobile.js:
 // - This code is run once at app startup - and does nothing on the web
 // - Then handles push notifications and deeplinks
 //
@@ -15,18 +15,19 @@
 import { defineStore } from 'pinia'
 import { Device } from '@capacitor/device'
 import { Badge } from '@capawesome/capacitor-badge'
-//import { PushNotifications } from '@capacitor/push-notifications'
+// import { PushNotifications } from '@capacitor/push-notifications'
 import { PushNotifications } from '@freegle/capacitor-push-notifications'
-import { useAuthStore } from '~/stores/auth'
 import { AppLauncher } from '@capacitor/app-launcher'
+import { ZoomPlugin } from 'capacitor-zoom-android'
+import { App } from '@capacitor/app'
 import api from '~/api'
-import { ZoomPlugin } from 'capacitor-zoom-android';
-import { App } from '@capacitor/app';
+import { useAuthStore } from '~/stores/auth'
 import { useRouter } from '#imports'
 import { useChatStore } from '~/stores/chat'
 import { useNotificationStore } from '~/stores/notification'
 
-export const useMobileStore = defineStore({ // Do not persist
+export const useMobileStore = defineStore({
+  // Do not persist
   id: 'mobile',
   state: () => ({
     config: null,
@@ -47,7 +48,7 @@ export const useMobileStore = defineStore({ // Do not persist
     appupdateavailable: false,
   }),
   actions: {
-    //////////////
+    /// ///////////
     init(config) {
       this.config = config
       this.isApp = config.public.ISAPP
@@ -57,7 +58,7 @@ export const useMobileStore = defineStore({ // Do not persist
 
       this.initApp()
     },
-    //////////////
+    /// ///////////
     async initApp() {
       await this.getDeviceInfo()
       await this.fixIOSwindowOpen()
@@ -71,7 +72,7 @@ export const useMobileStore = defineStore({ // Do not persist
       }
     },
 
-    //////////////
+    /// ///////////
     async getDeviceInfo() {
       console.log('--------------initapp--------------')
       const deviceinfo = await Device.getInfo()
@@ -82,18 +83,16 @@ export const useMobileStore = defineStore({ // Do not persist
       console.log('deviceid', deviceid)
       this.devicePersistentId = deviceid.identifier
     },
-    //////////////
-    async fixIOSwindowOpen() {
-
+    /// ///////////
+    fixIOSwindowOpen() {
       // Make window.open work in iOS app TODO is this needed?
-      const prevwindowopener = window.open
       window.open = (url) => {
         console.log('App window.open', url)
         AppLauncher.openUrl({ url: this.href })
       }
     },
-    //////////////
-    async enableAndroidPinchZoom() {
+    /// ///////////
+    enableAndroidPinchZoom() {
       if (!this.isiOS) {
         ZoomPlugin.enableZoom()
       }
@@ -104,23 +103,25 @@ export const useMobileStore = defineStore({ // Do not persist
       if (qm >= 0) {
         const qs = url.substring(qm + 1)
         // http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript
-        const pl = /\+/g  // Regex for replacing addition symbol with a space
+        const pl = /\+/g // Regex for replacing addition symbol with a space
         const search = /([^&=]+)=?([^&]*)/g
-        const decode = s => { return decodeURIComponent(s.replace(pl, ' ')) }
+        const decode = (s) => {
+          return decodeURIComponent(s.replace(pl, ' '))
+        }
         urlParams = {}
         let match
         while ((match = search.exec(qs))) {
-          urlParams[decode(match[1]).replace(/\./g, "_")] = decode(match[2]) // Convert period to underscore to get through to openid.php
+          urlParams[decode(match[1]).replace(/\./g, '_')] = decode(match[2]) // Convert period to underscore to get through to openid.php
         }
       }
       return urlParams
     },
 
-    //////////////
+    /// ///////////
     // https://capacitorjs.com/docs/apis/app#addlistenerresume
-    async initWakeUpActions() {
+    initWakeUpActions() {
       if (process.client) {
-        App.addListener('resume', async event => {
+        App.addListener('resume', (event) => {
           // We have become visible.  Refetch our notification count and chat count, which are the two key things which
           // produce red badges people should click on.
           try {
@@ -131,23 +132,24 @@ export const useMobileStore = defineStore({ // Do not persist
 
             // Don't log as we might have been logged out since we were last active.
             chatStore.fetchChats(null, false)
-          } catch (e){}
+          } catch (e) {}
         })
       }
     },
 
-    //////////////
+    /// ///////////
     // Needs: https://www.ilovefreegle.org/.well-known/assetlinks.json
-    async initDeepLinks() {
+    initDeepLinks() {
       if (process.client) {
-        App.addListener('appUrlOpen', async event => {
+        App.addListener('appUrlOpen', async (event) => {
           // url eg https://www.ilovefreegle.org/chats/123456?u=98765&src=chatnotif
           const lookfor = 'ilovefreegle.org'
           const ilfpos = event.url.indexOf(lookfor)
           if (ilfpos !== false) {
             const route = event.url.substring(ilfpos + lookfor.length)
             const router = useRouter()
-            if (route.indexOf('src=forgotpass') !== -1) {  // Special handling of forgotpass
+            if (route.includes('src=forgotpass')) {
+              // Special handling of forgotpass
               // /settings?u=uuu&k=kkk&src=forgotpass
               const authStore = useAuthStore()
               await authStore.clearRelated()
@@ -164,7 +166,7 @@ export const useMobileStore = defineStore({ // Do not persist
         })
       }
     },
-    //////////////
+    /// ///////////
     // https://developer.android.com/develop/ui/views/notifications
     // https://capacitorjs.com/docs/apis/push-notifications
     // Uses amended @freegle/capacitor-push-notifications plugin which is here: https://github.com/Freegle/capacitor-push-notifications
@@ -176,61 +178,58 @@ export const useMobileStore = defineStore({ // Do not persist
         // This is created if capacitor.config.ts has plugins:PushNotifications:presentationOptions
         // OK if already deleted
         await PushNotifications.deleteChannel({
-          id: 'PushDefaultForeground'
+          id: 'PushDefaultForeground',
         })
-        console.log("CHANNEL DELETED: PushDefaultForeground")
+        console.log('CHANNEL DELETED: PushDefaultForeground')
 
         // Create our Android push channel
         await PushNotifications.createChannel({
           id: 'PushDefaultForeground', // PushPluginChannel
           name: 'Freegle chats',
           description: 'Direct messages with other Freeglers',
-          //sound: 'res/raw/unconvinced',
+          // sound: 'res/raw/unconvinced',
           importance: 3,
           visibility: 1,
           lights: true,
           lightColor: '#5ECA24',
-          vibration: false
+          vibration: false,
         })
-        console.log("CHANNEL CREATED: PushDefaultForeground")
+        console.log('CHANNEL CREATED: PushDefaultForeground')
       }
 
-      let permStatus = await PushNotifications.checkPermissions();
+      let permStatus = await PushNotifications.checkPermissions()
       console.log('checkPermissions:', permStatus)
       /* PushNotifications.checkPermissions().then((result) => {
         console.log('checkPermissions:', result) // Android always returns "granted"
-      })*/
+      }) */
 
       // On success, we should be able to receive notifications
-      await PushNotifications.addListener('registration',
-        (token) => {
-          console.log('Push registration success, token: ', token.value)
-          this.mobilePushId = token.value
-          // Tell server now if logged in
-          const authStore = useAuthStore()
-          authStore.savePushId()
+      await PushNotifications.addListener('registration', (token) => {
+        console.log('Push registration success, token: ', token.value)
+        this.mobilePushId = token.value
+        // Tell server now if logged in
+        const authStore = useAuthStore()
+        authStore.savePushId()
 
-          if (!this.isiOS) {
-            PushNotifications.listChannels().then(result => {
-              for (const channel of result.channels) {
-                console.log("CHANNEL", channel)
-              }
-            })
-          }
+        if (!this.isiOS) {
+          PushNotifications.listChannels().then((result) => {
+            for (const channel of result.channels) {
+              console.log('CHANNEL', channel)
+            }
+          })
         }
-      )
+      })
       console.log('addListener registration done')
 
       // Some issue with our setup and push will not work
-      await PushNotifications.addListener('registrationError',
-        (error) => {
-          console.log('Error on registration: ', error)
-        }
-      )
+      await PushNotifications.addListener('registrationError', (error) => {
+        console.log('Error on registration: ', error)
+      })
       console.log('addListener registrationError done')
 
       // Show us the notification payload if the app is open on our device
-      await PushNotifications.addListener('pushNotificationReceived',
+      await PushNotifications.addListener(
+        'pushNotificationReceived',
         (notification) => {
           console.log('============ Push received:', notification)
           this.handleNotification(notification)
@@ -239,7 +238,8 @@ export const useMobileStore = defineStore({ // Do not persist
       console.log('addListener pushNotificationReceived done')
 
       // Method called when tapping on a notification
-      await PushNotifications.addListener('pushNotificationActionPerformed',
+      await PushNotifications.addListener(
+        'pushNotificationActionPerformed',
         (notification) => {
           console.log('Push action performed:', notification)
         }
@@ -260,28 +260,29 @@ export const useMobileStore = defineStore({ // Do not persist
         console.log('Error on request: ', permStatus)
       }
 
-      //PushNotifications.getDeliveredNotifications().then(notificationList => {
+      // PushNotifications.getDeliveredNotifications().then(notificationList => {
       //  console.log("getDeliveredNotifications")
       //  console.log("getDeliveredNotifications", notificationList)
-      //})
+      // })
       this.setBadgeCount(0)
     },
-    //////////////
-    async setBadgeCount(badgeCount) { // TODO
+    /// ///////////
+    async setBadgeCount(badgeCount) {
+      // TODO
       if (!this.isApp) return
       if (isNaN(badgeCount)) badgeCount = 0
       if (badgeCount !== this.lastBadgeCount) {
         console.log('setBadgeCount', badgeCount)
-        //const rv = await Badge.isSupported();
-        //console.log('isSupported', rv.isSupported)
-        await Badge.set({ count: badgeCount });
-        //mobilePush.setApplicationIconBadgeNumber(function () { }, function () { }, badgeCount)
-        //const result = await Badge.get();
-        //console.log("Get Badge Count: ", result.count);
+        // const rv = await Badge.isSupported();
+        // console.log('isSupported', rv.isSupported)
+        await Badge.set({ count: badgeCount })
+        // mobilePush.setApplicationIconBadgeNumber(function () { }, function () { }, badgeCount)
+        // const result = await Badge.get();
+        // console.log("Get Badge Count: ", result.count);
         this.lastBadgeCount = badgeCount
       }
     },
-    //////////////
+    /// ///////////
     // https://capacitorjs.com/docs/apis/push-notifications
     // Usually receives a clear to zero notification followed by the real one
     //  notification.data:
@@ -302,45 +303,40 @@ export const useMobileStore = defineStore({ // Do not persist
       const router = useRouter()
 
       console.log('handleNotification', notification)
-      PushNotifications.getDeliveredNotifications().then(notificationList => {
-        console.log("getDeliveredNotifications")
-        console.log("getDeliveredNotifications", notificationList)
+      PushNotifications.getDeliveredNotifications().then((notificationList) => {
+        console.log('getDeliveredNotifications')
+        console.log('getDeliveredNotifications', notificationList)
       })
 
-      //console.log('push notification', notificationType)
+      // console.log('push notification', notificationType)
       console.log(notification)
       const data = notification.data
       let foreground = false
-      if( 'foreground' in data){
-        console.log('--- FOREGROUND',data.foreground)
+      if ('foreground' in data) {
+        console.log('--- FOREGROUND', data.foreground)
         foreground = data.foreground
       } else console.log('--- FOREGROUND NOT SET')
 
-      // let msgid = new Date().getTime() // Can't tell if double event if notId not given
-      let msgid = 0
-      if ('notId' in data) {
-        msgid = data.notId
-      }
-      //const doubleEvent = !foreground && msgid !== 0 && msgid === lastPushMsgid
-      //lastPushMsgid = msgid
+      // const doubleEvent = !foreground && msgid !== 0 && msgid === lastPushMsgid
+      // lastPushMsgid = msgid
       if (!('count' in data)) {
         data.count = 0
       }
       if (!('modtools' in data)) {
         data.modtools = 0
       }
-      const modtools = data.modtools == '1'
+      const modtools = data.modtools === '1'
       this.modtools = modtools
       data.count = parseInt(data.badge)
-      //console.log('foreground ' + foreground + ' double ' + doubleEvent + ' msgid: ' + msgid + ' count: ' + data.count + ' modtools: ' + modtools)
+      // console.log('foreground ' + foreground + ' double ' + doubleEvent + ' msgid: ' + msgid + ' count: ' + data.count + ' modtools: ' + modtools)
       if (data.count === 0) {
-        //PushNotifications.removeAllDeliveredNotifications()
-        //mobilePush.clearAllNotifications() // no success and error fns given
+        // PushNotifications.removeAllDeliveredNotifications()
+        // mobilePush.clearAllNotifications() // no success and error fns given
         console.log('clearAllNotifications TODO')
       }
       console.log('handleNotification badgeCount', data.count)
       this.setBadgeCount(data.count)
-      //mobilePush.setApplicationIconBadgeNumber(function () { }, function () { }, data.count)
+      // mobilePush.setApplicationIconBadgeNumber(function () { }, function () { }, data.count)
 
       if (!this.isiOS && 'inlineReply' in data) {
         const inlineReply = data.inlineReply.trim()
@@ -358,51 +354,59 @@ export const useMobileStore = defineStore({ // Do not persist
       }
 
       if (this.inlineReply) {
-        const params = {
-          roomid: this.chatid,
-          message: this.inlineReply
-        }
         // CC TODO store.$api.chat.send(params)
+        // const params = {
+        //   roomid: this.chatid,
+        //   message: this.inlineReply,
+        // }
         this.inlineReply = false
         this.pushed = false
         this.route = false
         return
       }
-      //store.dispatch('notifications/count')
-      //store.dispatch('chats/listChats')
-      //await api(this.config).chat.listChats(since, search)
-      /*if (this.modtools) {
+      // store.dispatch('notifications/count')
+      // store.dispatch('chats/listChats')
+      // await api(this.config).chat.listChats(since, search)
+      /* if (this.modtools) {
         store.dispatch('auth/fetchUser', {
           components: ['work'],
           force: true
         })
-      }*/
+      } */
 
       const appState = await App.getState() // isActive true at startup and when app active; false when in background
       const active = appState ? appState.isActive : false
       let okToMove = false
-      if( this.isiOS){
+      if (this.isiOS) {
         okToMove = !active // Do not have push foreground flag, so: do not move if active, even if just started
-      } else { // isAndroid
-        okToMove = (!foreground && active) || // Just started
-                   (foreground && !active)   // foreground && activeIn background
+      } else {
+        // isAndroid
+        okToMove =
+          (!foreground && active) || // Just started
+          (foreground && !active) // foreground && activeIn background
       }
-      console.log('this.isiOS',this.isiOS, 'active', active, 'okToMove', okToMove)
-      
+      console.log(
+        'this.isiOS',
+        this.isiOS,
+        'active',
+        active,
+        'okToMove',
+        okToMove
+      )
+
       if (this.route && okToMove) {
         this.route = this.route.replace('/chat/', '/chats/') // Match redirects in nuxt.config.js
         console.log('router.currentRoute', router.currentRoute)
         if (router.currentRoute.path !== this.route) {
           console.log('GO TO ', this.route)
-          router.push({ path: this.route })  // Often doesn't work as intended when starting app from scratch as this routing is too early. Delaying doesn't seem to help.
+          router.push({ path: this.route }) // Often doesn't work as intended when starting app from scratch as this routing is too early. Delaying doesn't seem to help.
         }
       }
 
       this.route = false
 
-
       // iOS needs to be told when we've finished: do it after a short delay to allow our code to run
-      /*if (this.isiOS) {
+      /* if (this.isiOS) {
         setTimeout(function () {
           mobilePush.finish(
             function () {
@@ -414,18 +418,21 @@ export const useMobileStore = defineStore({ // Do not persist
             data.notId
           )
         }, 50)
-      }*/
+      } */
     },
-    //////////////
+    /// ///////////
     async checkForAppUpdate($api, $axios, store, router) {
       // https://api.ilovefreegle.org/apiv2/config/app_fd_version_android_latest
       // https://api.ilovefreegle.org/apiv2/config/app_fd_version_android_required
       // https://api.ilovefreegle.org/apiv2/config/app_fd_version_ios_latest
       // https://api.ilovefreegle.org/apiv2/config/app_fd_version_ios_required
 
-
-      const requiredKey = this.isiOS ? 'app_fd_version_ios_required' : 'app_fd_version_android_required'
-      const latestKey = this.isiOS ? 'app_fd_version_ios_latest' : 'app_fd_version_android_latest'
+      const requiredKey = this.isiOS
+        ? 'app_fd_version_ios_required'
+        : 'app_fd_version_android_required'
+      const latestKey = this.isiOS
+        ? 'app_fd_version_ios_latest'
+        : 'app_fd_version_android_latest'
 
       const reqdValues = await api(this.config).config.get({ key: requiredKey })
       if (reqdValues && reqdValues.length === 1) {
@@ -464,6 +471,5 @@ export const useMobileStore = defineStore({ // Do not persist
       }
       return false
     },
-  }
+  },
 })
-

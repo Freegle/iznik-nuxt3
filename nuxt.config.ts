@@ -222,19 +222,20 @@ export default defineNuxtConfig({
         },
       },
     },
-    plugins: config.ISAPP?[]:
-      [
-      VitePWA({ registerType: 'autoUpdate' }),
-      // Make Lint errors cause build failures.
-      eslintPlugin(),
-      legacy({
-        targets: ['since 2015'],
-      }),
-      sentryVitePlugin({
-        org: 'freegle',
-        project: 'nuxt3',
-      }),
-    ],
+    plugins: config.ISAPP
+      ? []
+      : [
+          VitePWA({ registerType: 'autoUpdate' }),
+          // Make Lint errors cause build failures.
+          eslintPlugin(),
+          legacy({
+            targets: ['since 2015'],
+          }),
+          sentryVitePlugin({
+            org: 'freegle',
+            project: 'nuxt3',
+          }),
+        ],
   },
 
   // Sentry needs sourcemaps.

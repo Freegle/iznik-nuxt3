@@ -16,7 +16,13 @@
           </p>
         </NoticeMessage>
         <p class="mt-1">You can share using these buttons:</p>
-        <b-button v-if="isApp" variant="primary" size="lg" class="m-3" @click="shareApp">
+        <b-button
+          v-if="isApp"
+          variant="primary"
+          size="lg"
+          class="m-3"
+          @click="shareApp"
+        >
           Share now
         </b-button>
         <b-list-group v-if="!isApp" horizontal class="flex-wrap">
@@ -100,10 +106,10 @@
   </b-modal>
 </template>
 <script>
+import { Share } from '@capacitor/share'
 import { useMessageStore } from '../stores/message'
 import NoticeMessage from './NoticeMessage'
 import { useMobileStore } from '@/stores/mobile'
-import { Share } from '@capacitor/share';
 import { useModal } from '~/composables/useModal'
 
 export default {
@@ -153,25 +159,25 @@ export default {
     },
   },
   methods: {
-    async shareApp(){
+    async shareApp() {
       const href = this.message.url
       const subject = 'Sharing ' + this.message.subject
-      try{
+      try {
         await Share.share({
           title: subject,
-          text: this.message.textbody + "\n\n",  // not supported on some apps (Facebook, Instagram)
+          text: this.message.textbody + '\n\n', // not supported on some apps (Facebook, Instagram)
           url: href,
           dialogTitle: 'Share now...',
         })
-      } catch( e){
+      } catch (e) {
         console.log('Share exception', e.message)
       }
     },
     async show() {
       try {
         await this.messageStore.fetch(this.id, true)
-        if( this.isApp) this.shareApp(); else
-        this.showModal = true
+        if (this.isApp) this.shareApp()
+        else this.showModal = true
       } catch (e) {
         // Must no longer exist on server.
         this.close()

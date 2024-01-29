@@ -19,7 +19,7 @@ export default {
         // It's to a chat.
         next()
       }
-    })*/
+    }) */
   },
   destroyed() {
     if (this.unregisterRouterGuard) {
