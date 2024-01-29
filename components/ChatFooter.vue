@@ -99,7 +99,7 @@
             @keydown.alt.shift.enter.exact.prevent="newline"
             @focus="markRead"
           />
-          <b-modal v-model="showSuggested" title="Send an address?">
+          <b-modal v-model="showSuggested" title="Send an address?" @cancel="rejectSuggestedAddress">
             <p>Are you trying to send this address?</p>
             <p>
               <strong>{{ suggestedAddress?.address?.singleline }}</strong>
