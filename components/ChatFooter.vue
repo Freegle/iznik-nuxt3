@@ -72,58 +72,51 @@
       <div v-if="!otheruser?.deleted">
         <label for="chatmessage" class="visually-hidden">Chat message</label>
         <div v-if="!imagethumb">
-          <b-form-textarea
-            v-if="enterNewLine && !otheruser?.spammer"
-            id="chatmessage"
-            ref="chatarea"
-            v-model="sendmessage"
-            placeholder="Type here..."
-            enterkeyhint="enter"
-            :style="height"
-            @keydown="typing"
-            @focus="markRead"
-          />
-          <b-form-textarea
-            v-else-if="!otheruser?.spammer"
-            id="chatmessage"
-            ref="chatarea"
-            v-model="sendmessage"
-            placeholder="Type here..."
-            :style="height"
-            enterkeyhint="send"
-            autocapitalize="none"
-            @keydown="typing"
-            @keydown.enter.exact.prevent
-            @keyup.enter.exact="send"
-            @keydown.enter.shift.exact.prevent="newline"
-            @keydown.alt.shift.enter.exact.prevent="newline"
-            @focus="markRead"
-          />
-          <b-modal
-            v-model="showSuggested"
-            title="Send an address?"
-            @cancel="rejectSuggestedAddress"
+          <Popper
+            :show="showSuggested"
+            placement="top"
+            arrow
+            class="w-100 m-0 p-0 border-0"
           >
-            <p>Are you trying to send this address?</p>
-            <p>
+            <b-form-textarea
+              v-if="enterNewLine && !otheruser?.spammer"
+              id="chatmessage"
+              ref="chatarea"
+              v-model="sendmessage"
+              placeholder="Type here..."
+              enterkeyhint="enter"
+              :style="height"
+              @keydown="typing"
+              @focus="markRead"
+            />
+            <b-form-textarea
+              v-else-if="!otheruser?.spammer"
+              id="chatmessage"
+              ref="chatarea"
+              v-model="sendmessage"
+              placeholder="Type here..."
+              :style="height"
+              enterkeyhint="send"
+              autocapitalize="none"
+              @keydown="typing"
+              @keydown.enter.exact.prevent
+              @keyup.enter.exact="send"
+              @keydown.enter.shift.exact.prevent="newline"
+              @keydown.alt.shift.enter.exact.prevent="newline"
+              @focus="markRead"
+            />
+            <template #content>
               <strong>{{ suggestedAddress?.address?.singleline }}</strong>
-            </p>
-            <p>
-              We can send it with a little map, so it's easier for the freegler
-              to find it. You can add precise instructions later using your
-              Address Book.
-            </p>
-            <template #footer>
-              <div class="d-flex justify-content-between flex-wrap w-100">
-                <b-button variant="secondary" @click="rejectSuggestedAddress">
-                  No thanks
-                </b-button>
+              <div class="d-flex justify-content-between flex-wrap mt-2">
                 <b-button variant="primary" @click="sendSuggestedAddress">
                   Send address
                 </b-button>
+                <b-button variant="secondary" @click="rejectSuggestedAddress">
+                  Cancel
+                </b-button>
               </div>
             </template>
-          </b-modal>
+          </Popper>
         </div>
         <div v-else class="d-flex justify-content-end pt-2 pb-2">
           <b-img :src="imagethumb" fluid class="maxheight" />
@@ -314,6 +307,7 @@
 </template>
 <script>
 import pluralize from 'pluralize'
+import Popper from 'vue3-popper'
 import { FAR_AWAY, TYPING_TIME_INVERVAL } from '../constants'
 import { setupChat } from '../composables/useChat'
 import { useMiscStore } from '../stores/misc'
@@ -369,6 +363,7 @@ export default {
     ProfileModal,
     ChatRSVPModal,
     MicroVolunteering,
+    Popper,
   },
   props: {
     id: { type: Number, required: true },
@@ -556,11 +551,11 @@ export default {
     showSuggested(newVal) {
       if (newVal) {
         this.$api.bandit.shown({
-          uid: 'SuggestedAddress3',
+          uid: 'SuggestedAddress',
           variant: 'chosen',
         })
         this.$api.bandit.shown({
-          uid: 'SuggestedAddress3',
+          uid: 'SuggestedAddress',
           variant: 'cancel',
         })
       }
@@ -743,7 +738,7 @@ export default {
     async sendSuggestedAddress() {
       // We want to send the address.  First we need to make sure it's in our address book.
       this.$api.bandit.chosen({
-        uid: 'SuggestedAddress3',
+        uid: 'SuggestedAddress',
         variant: 'chosen',
       })
 
@@ -786,7 +781,7 @@ export default {
       this.hideSuggestedAddress = true
 
       this.$api.bandit.chosen({
-        uid: 'SuggestedAddress3',
+        uid: 'SuggestedAddress',
         variant: 'cancel',
         message: this.sendmessage,
       })
