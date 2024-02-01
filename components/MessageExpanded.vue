@@ -145,7 +145,9 @@ export default {
   },
   setup(props) {
     const messageStore = useMessageStore()
-    return { messageStore }
+    const miscStore = useMiscStore()
+
+    return { messageStore, miscStore }
   },
   data() {
     return {
@@ -210,6 +212,17 @@ export default {
       }
 
       return ret
+    },
+  },
+  watch: {
+    breakpoint: {
+      immediate: true,
+      handler(newVal) {
+        // The ad is only shown on xs and sm, so for others we need to pretend it has been.
+        if (newVal !== 'xs' && newVal !== 'sm') {
+          this.adRendered = true
+        }
+      },
     },
   },
   methods: {

@@ -13,13 +13,7 @@
     ]"
     @click="onClick"
   >
-    <v-icon
-      v-if="doing"
-      icon="sync"
-      :class="['fa-spin fa-fw', spinColorClass]"
-    />
-    <v-icon v-else-if="done && doneIcon" :icon="doneIcon" :class="iconClass" />
-    <v-icon v-else-if="iconName" :class="iconClass" :icon="iconName" />
+    <v-icon :icon="computedIconData.name" :class="computedIconData.class" />
     <span v-if="label || $slots.default">
       <slot>{{ label }}</slot>
     </span>
@@ -91,6 +85,10 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  minimumSpinTime: {
+    type: Number,
+    default: 500,
+  },
 })
 
 const emit = defineEmits(['handle'])
@@ -103,7 +101,26 @@ const SPINNER_COLOR = {
   danger: 'text-white',
 }
 
-const doing = ref(false)
+const computedIconData = computed(() => {
+  if (loading.value) {
+    return {
+      class: `fa-spin fa-fw ${spinColorClass}`,
+      name: 'sync',
+    }
+  }
+  if (done.value && props.doneIcon) {
+    return {
+      class: props.iconClass,
+      name: props.doneIcon,
+    }
+  }
+  return {
+    class: props.iconClass,
+    name: props.iconName,
+  }
+})
+
+const loading = ref(false)
 const done = ref(false)
 const showConfirm = ref(false)
 const actionConfirmed = ref(false)
@@ -112,15 +129,24 @@ let timer = null
 const spinColorClass =
   props.spinColor || SPINNER_COLOR[props.variant] || 'text-success'
 
+const cancelLoading = () => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      loading.value = false
+      resolve()
+    }, props.minimumSpinTime)
+  })
+}
 const finishSpinner = () => {
   clearTimeout(timer)
-  doing.value = false
-  if (props.doneIcon) {
-    done.value = true
-    setTimeout(() => {
-      done.value = false
-    }, props.timeout)
-  }
+  cancelLoading().then(() => {
+    if (props.doneIcon) {
+      done.value = true
+      setTimeout(() => {
+        done.value = false
+      }, props.timeout)
+    }
+  })
 }
 
 const forgottenCallback = () => {
@@ -128,21 +154,23 @@ const forgottenCallback = () => {
   if (useMiscStore().online) {
     finishSpinner()
     $sentryCaptureException(
-      'SpinButton - callback not called',
-      props.variant,
-      props.label,
-      props.iconName
+      'SpinButton - callback not called, ' +
+        props.variant +
+        ', ' +
+        props.label +
+        ', ' +
+        props.iconName
     )
   }
 }
 
 const onClick = () => {
-  if (!doing.value) {
+  if (!loading.value) {
     if (props.confirm) {
       showConfirm.value = true
     } else {
       done.value = false
-      doing.value = true
+      loading.value = true
       emit('handle', finishSpinner)
       timer = setTimeout(forgottenCallback, 20 * 1000)
     }
@@ -152,7 +180,7 @@ const onClick = () => {
 const confirmed = () => {
   actionConfirmed.value = true
   done.value = false
-  doing.value = true
+  loading.value = true
   emit('handle', finishSpinner)
   timer = setTimeout(forgottenCallback, 20 * 1000)
 }

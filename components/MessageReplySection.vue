@@ -268,6 +268,7 @@ export default {
     },
     async sendReply(callback) {
       console.log('sendReply', this.reply)
+      let called = false
 
       if (this.reply) {
         // Save the reply
@@ -313,6 +314,8 @@ export default {
 
             // Now we can send the reply via chat.
             await this.$nextTick()
+            callback()
+            called = true
             await this.replyToPost()
           }
         } else {
@@ -322,7 +325,10 @@ export default {
           this.forceLogin = true
         }
       }
-      callback()
+
+      if (!called) {
+        callback()
+      }
     },
     close() {
       this.$emit('close')
