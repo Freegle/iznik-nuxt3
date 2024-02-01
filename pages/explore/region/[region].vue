@@ -3,7 +3,7 @@
     <b-row class="m-0">
       <b-col cols="12" lg="6" class="p-0" offset-lg="3">
         <h1 class="visually-hidden">Freegling map in {{ region }}</h1>
-        <AdaptiveMap
+        <PostMapAndList
           v-if="initialBounds"
           :initial-bounds="initialBounds"
           start-on-groups
@@ -27,7 +27,9 @@ import { useGroupStore } from '~/stores/group'
 
 export default {
   components: {
-    AdaptiveMap: defineAsyncComponent(() => import('~/components/AdaptiveMap')),
+    PostMapAndList: defineAsyncComponent(() =>
+      import('~/components/PostMapAndList')
+    ),
   },
   async setup(props) {
     const runtimeConfig = useRuntimeConfig()

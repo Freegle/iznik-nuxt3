@@ -110,6 +110,16 @@ export default {
       required: false,
       default: false,
     },
+    customName: {
+      type: String,
+      required: false,
+      default: null,
+    },
+    customVal: {
+      type: Number,
+      required: false,
+      default: null,
+    },
   },
   setup() {
     const miscStore = useMiscStore()
@@ -163,6 +173,14 @@ export default {
     },
     groupOptions() {
       const groups = []
+
+      if (this.customName) {
+        groups.push({
+          value: this.customVal,
+          text: this.customName,
+          selected: this.selectedGroup === this.customVal,
+        })
+      }
 
       if (this.all) {
         groups.push({
@@ -244,6 +262,24 @@ export default {
         if (val && this.restrict) this.selectedGroup = 0
       },
     },
+    // groupOptions: {
+    //   immediate: true,
+    //   handler(val) {
+    //     // If we only have one real group then don't force them to choose.
+    //     let count = 0
+    //     let group = null
+    //     val.forEach((option) => {
+    //       if (option.value > 0) {
+    //         group = option.value
+    //         count++
+    //       }
+    //     })
+    //
+    //     if (count === 1 && this.selectedGroup === 0) {
+    //       this.selectedGroup = group
+    //     }
+    //   },
+    // },
   },
   async mounted() {
     if (this.listall) {

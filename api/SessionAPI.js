@@ -68,6 +68,10 @@ export default class SessionAPI extends BaseAPI {
     return this.$post('/session', { action: 'Forget' })
   }
 
+  restore() {
+    return this.$patch('/session', { deleted: null })
+  }
+
   related(userlist) {
     return this.$post('/session', {
       action: 'Related',

@@ -2,12 +2,15 @@
   <div>
     <b-img lazy src="/freegled.jpg" class="freegled__image" />
     <b-popover
+      v-model="showing"
       :content="title"
       placement="top"
       variant="primary"
       triggers="hover"
       :target="'msg-' + id"
       custom-class="primary"
+      @shown="shown"
+      @hidden="hidden"
     />
   </div>
 </template>
@@ -28,6 +31,13 @@ export default {
       messageStore,
     }
   },
+  data: function () {
+    return {
+      scrollHandler: null,
+      showing: false,
+    }
+  },
+
   computed: {
     message() {
       return this.messageStore?.byId(this.id)
@@ -44,6 +54,31 @@ export default {
       ret += " Don't forget to Mark your posts as TAKEN/RECEIVED from My Posts."
 
       return ret
+    },
+  },
+  beforeUnmount() {
+    if (this.scrollHandler) {
+      window.removeEventListener('scroll', this.scrollHandler)
+      this.scrollHandler = null
+    }
+  },
+  methods: {
+    shown() {
+      if (!this.scrollHandler) {
+        this.scrollHandler = window.addEventListener(
+          'scroll',
+          this.handleScroll
+        )
+      }
+    },
+    hidden() {
+      if (this.scrollHandler) {
+        window.removeEventListener('scroll', this.scrollHandler)
+        this.scrollHandler = null
+      }
+    },
+    handleScroll() {
+      this.showing = false
     },
   },
 }

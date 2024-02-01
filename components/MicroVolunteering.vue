@@ -33,6 +33,10 @@
               people in the Freegle community. Plus you'll get a little
               "Supporter" badge, which other people can see, to say thank you.
             </p>
+            <p>
+              We'll also keep in touch by email about what's happening in
+              Freegle and other ways you can support Freegle in future.
+            </p>
           </b-card-text>
         </template>
         <template #footer>
@@ -129,6 +133,9 @@
                   @done="considerNext"
                 />
               </div>
+              <div v-else-if="task.type === 'Survey'">
+                <MicroVolunteeringSurvey @done="considerNext" />
+              </div>
               <div v-else>Unknown task {{ task }}</div>
             </div>
           </b-card-text>
@@ -159,13 +166,21 @@ import { useMiscStore } from '../stores/misc'
 import { useAuthStore } from '../stores/auth'
 import { ref } from '#imports'
 
-const MicroVolunteeringFacebook = () => import('./MicroVolunteeringFacebook')
-const MicroVolunteeringPhotosRotate = () =>
+const MicroVolunteeringFacebook = defineAsyncComponent(() =>
+  import('./MicroVolunteeringFacebook')
+)
+const MicroVolunteeringPhotosRotate = defineAsyncComponent(() =>
   import('./MicroVolunteeringPhotosRotate')
-const MicroVolunteeringCheckMessage = () =>
+)
+const MicroVolunteeringCheckMessage = defineAsyncComponent(() =>
   import('./MicroVolunteeringCheckMessage')
-const MicroVolunteeringSimilarTerms = () =>
+)
+const MicroVolunteeringSimilarTerms = defineAsyncComponent(() =>
   import('./MicroVolunteeringSimilarTerms')
+)
+const MicroVolunteeringSurvey = defineAsyncComponent(() =>
+  import('./MicroVolunteeringSurvey')
+)
 
 export default {
   components: {
@@ -173,6 +188,7 @@ export default {
     MicroVolunteeringPhotosRotate,
     MicroVolunteeringSimilarTerms,
     MicroVolunteeringFacebook,
+    MicroVolunteeringSurvey,
   },
   props: {
     force: {
@@ -261,7 +277,7 @@ export default {
       message: null,
       todo: 5,
       done: 0,
-      types: ['CheckMessage', 'PhotoRotate'],
+      types: ['CheckMessage', 'PhotoRotate', 'Survey'],
       bump: 1,
     }
   },
@@ -292,6 +308,8 @@ export default {
         } else if (this.task.type === 'Facebook') {
           this.showTask = true
         } else if (this.task.type === 'PhotoRotate') {
+          this.showTask = true
+        } else if (this.task.type === 'Survey') {
           this.showTask = true
         } else {
           this.doneForNow()
@@ -333,6 +351,11 @@ export default {
         })
 
         await this.authStore.saveMicrovolunteering('Basic')
+
+        // The wording in here covers us for marketing consent.
+        await this.authStore.saveAndGet({
+          marketingconsent: 1,
+        })
 
         await this.getTask()
       } else {

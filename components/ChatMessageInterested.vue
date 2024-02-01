@@ -156,8 +156,8 @@ import ProfileImage from '~/components/ProfileImage'
 import ChatMessageSummary from '~/components/ChatMessageSummary'
 const OutcomeModal = () =>
   defineAsyncComponent(() => import('~/components/OutcomeModal'))
-const PromiseModal = defineAsyncComponent(
-  () => () => import('~/components/PromiseModal')
+const PromiseModal = defineAsyncComponent(() =>
+  import('~/components/PromiseModal')
 )
 
 export default {

@@ -4,9 +4,9 @@
       <div class="aboveSticky">
         <slot ref="pageContent" />
       </div>
-      <VisibleWhen :at="['xs', 'sm']">
+      <VisibleWhen :at="['xs', 'sm', 'md', 'lg']">
         <div
-          v-if="allowAd"
+          v-if="allowAd && !noAdRendered"
           class="d-flex justify-content-around w-100 sticky"
           style="height: 52px"
         >
@@ -17,6 +17,7 @@
             class="sticky"
             style="width: 320px; height: 50px; margin-top: 2px"
             pixel
+            @rendered="adRendered"
           />
         </div>
         <div
@@ -25,12 +26,13 @@
           style="height: 52px"
         >
           <nuxt-link to="/donate" class="text-white nodecor">
-            Keep Freegle running. Click to donate.
+            Help keep Freegle running. Click to donate.
           </nuxt-link>
         </div>
       </VisibleWhen>
     </main>
     <client-only>
+      <DeletedRestore />
       <BouncingEmail />
       <div class="navbar-toggle" style="display: none" />
     </client-only>
@@ -75,10 +77,17 @@ import { useChatStore } from '~/stores/chat'
 import replyToPost from '@/mixins/replyToPost'
 import ChatButton from '~/components/ChatButton'
 import VisibleWhen from '~/components/VisibleWhen'
-const SupportLink = () => import('~/components/SupportLink')
-const BouncingEmail = () => import('~/components/BouncingEmail')
-const BreakpointFettler = () => import('~/components/BreakpointFettler')
-const ExternalDa = () => import('~/components/ExternalDa')
+import { navBarHidden } from '~/composables/useNavbar'
+const SupportLink = defineAsyncComponent(() =>
+  import('~/components/SupportLink')
+)
+const BouncingEmail = defineAsyncComponent(() =>
+  import('~/components/BouncingEmail')
+)
+const BreakpointFettler = defineAsyncComponent(() =>
+  import('~/components/BreakpointFettler')
+)
+const ExternalDa = defineAsyncComponent(() => import('~/components/ExternalDa'))
 
 export default {
   components: {
@@ -95,6 +104,7 @@ export default {
     return {
       showLoader: true,
       timeTimer: null,
+      noAdRendered: false,
     }
   },
   computed: {
@@ -104,11 +114,14 @@ export default {
     },
     routePath() {
       const route = useRoute()
-      return route.path
+      return route?.path
     },
     allowAd() {
       // We don't want to show the ad on the landing page when logged out - looks tacky.
       return this.routePath !== '/' || this.loggedIn
+    },
+    marginTop() {
+      return navBarHidden.value ? '0px' : '60px'
     },
   },
   async mounted() {
@@ -252,6 +265,9 @@ export default {
         })
       }
     },
+    adRendered(adShown) {
+      this.noAdRendered = !adShown
+    },
   },
 }
 </script>
@@ -276,10 +292,16 @@ body.modal-open {
 }
 
 .pageContent {
-  margin-top: 75px;
   display: flex;
   flex-direction: column;
   max-height: 100vh;
+
+  margin-top: v-bind(marginTop);
+  transition: margin-top 1s;
+
+  @include media-breakpoint-up(md) {
+    margin-top: 75px;
+  }
 }
 
 .sticky {
@@ -289,7 +311,7 @@ body.modal-open {
   z-index: 10000;
 
   @include media-breakpoint-up(md) {
-    display: none;
+    display: none !important;
   }
 }
 

@@ -36,17 +36,30 @@
 </template>
 <script>
 import { setupNotification } from '../composables/useNotification'
-const NotificationGiftAid = () => import('~/components/NotificationGiftAid')
-const NotificationLovedPost = () => import('~/components/NotificationLovedPost')
-const NotificationLovedComment = () =>
+const NotificationGiftAid = defineAsyncComponent(() =>
+  import('~/components/NotificationGiftAid')
+)
+const NotificationLovedPost = defineAsyncComponent(() =>
+  import('~/components/NotificationLovedPost')
+)
+const NotificationLovedComment = defineAsyncComponent(() =>
   import('~/components/NotificationLovedComment')
-const NotificationCommentOnPost = () =>
+)
+const NotificationCommentOnPost = defineAsyncComponent(() =>
   import('~/components/NotificationCommentOnPost')
-const NotificationCommentOnComment = () =>
+)
+const NotificationCommentOnComment = defineAsyncComponent(() =>
   import('~/components/NotificationCommentOnComment')
-const NotificationExhort = () => import('~/components/NotificationExhort')
-const NotificationAboutMe = () => import('~/components/NotificationAboutMe')
-const NotificationOpenPosts = () => import('~/components/NotificationOpenPosts')
+)
+const NotificationExhort = defineAsyncComponent(() =>
+  import('~/components/NotificationExhort')
+)
+const NotificationAboutMe = defineAsyncComponent(() =>
+  import('~/components/NotificationAboutMe')
+)
+const NotificationOpenPosts = defineAsyncComponent(() =>
+  import('~/components/NotificationOpenPosts')
+)
 
 export default {
   components: {

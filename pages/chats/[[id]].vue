@@ -4,7 +4,11 @@
       v-if="showContactDetailsAskModal"
       @hidden="showContactDetailsAskModal = false"
     />
-
+    <VisibleWhen :at="['xs', 'sm']">
+      <Teleport v-if="loggedIn && id && chat" to="#navbar-mobile">
+        <ChatMobileNavbar :id="id" />
+      </Teleport>
+    </VisibleWhen>
     <div>
       <h1 class="visually-hidden">Chats</h1>
       <b-row class="m-0">
@@ -79,33 +83,33 @@
                   </div>
                   <div v-if="showClosed">
                     <div
-                      v-for="chat in closedChats"
-                      :key="'chat-' + chat.id"
+                      v-for="c in closedChats"
+                      :key="'chat-' + c.id"
                       :class="{
                         chat: true,
-                        active: selectedChatId === chat?.id,
+                        active: selectedChatId === c?.id,
                       }"
-                      @click="gotoChat(chat.id)"
+                      @click="gotoChat(c.id)"
                     >
                       <ChatListEntry
-                        :id="chat.id"
-                        :active="selectedChatId === chat?.id"
+                        :id="c.id"
+                        :active="selectedChatId === c?.id"
                       />
                     </div>
                   </div>
                   <div v-else>
                     <div
-                      v-for="chat in visibleChats"
-                      :key="'chat-' + chat.id"
+                      v-for="c in visibleChats"
+                      :key="'chat-' + c.id"
                       :class="{
                         chat: true,
-                        active: selectedChatId === chat?.id,
+                        active: selectedChatId === c?.id,
                       }"
-                      @click="gotoChat(chat.id)"
+                      @click="gotoChat(c.id)"
                     >
                       <ChatListEntry
-                        :id="chat.id"
-                        :active="selectedChatId === chat?.id"
+                        :id="c.id"
+                        :active="selectedChatId === c?.id"
                       />
                     </div>
                   </div>
@@ -217,6 +221,7 @@ import VisibleWhen from '~/components/VisibleWhen'
 import InfiniteLoading from '~/components/InfiniteLoading'
 import { useChatStore } from '~/stores/chat'
 import SidebarRight from '~/components/SidebarRight'
+import ChatMobileNavbar from '~/components/ChatMobileNavbar.vue'
 
 // We can't use async on ChatListEntry else the infinite scroll kicks in and tries to load everything while we are
 // still waiting for the import to complete.
@@ -237,24 +242,19 @@ export default {
     ContactDetailsAskModal,
     ChatHideModal,
     InfiniteLoading,
+    ChatMobileNavbar,
   },
   async setup(props) {
     definePageMeta({
       layout: 'login',
     })
+
+    let title = 'Chats'
+    let description =
+      "See the conversations you're having with other freeglers."
+
     const runtimeConfig = useRuntimeConfig()
-
     const route = useRoute()
-
-    useHead(
-      buildHead(
-        route,
-        runtimeConfig,
-
-        'Chats',
-        "See the conversations you're having with other freeglers."
-      )
-    )
 
     const chatStore = useChatStore()
     const authStore = useAuthStore()
@@ -268,12 +268,14 @@ export default {
 
     const id = route.params.id ? parseInt(route.params.id) : 0
 
+    let chat = null
+
     if (myid) {
       // Fetch the list of chats.
       await chatStore.fetchChats(null, true, id)
 
       // Is this chat in the list?
-      let chat = chatStore.byChatId(id)
+      chat = chatStore.byChatId(id)
 
       if (!chat) {
         // Might be old.  Try fetching it specifically.
@@ -284,6 +286,9 @@ export default {
         }
       } else {
         // We have the chat, but maybe it's not quite up to date (e.g. a new message).  So fetch, but don't wait.
+        title = chat.name
+        description = 'Chat with ' + chat.name
+
         chatStore.fetchChat(id)
       }
 
@@ -294,7 +299,9 @@ export default {
       }
     }
 
-    return { showContactDetailsAskModal, chatStore, showChats, id }
+    useHead(buildHead(route, runtimeConfig, title, description))
+
+    return { showContactDetailsAskModal, chatStore, showChats, id, chat }
   },
   data() {
     return {

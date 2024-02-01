@@ -40,9 +40,19 @@
             to="/browse"
             @mousedown="maybeReload('/browse')"
           >
-            <v-icon icon="eye" class="fa-2x" />
-            <br />
-            <span class="nav-item__text">Browse</span>
+            <div class="position-relative">
+              <v-icon icon="eye" class="fa-2x" />
+              <br />
+              <b-badge
+                v-if="browseCount"
+                variant="info"
+                class="browsebadge"
+                :title="browseCountPlural"
+              >
+                {{ browseCount }}
+              </b-badge>
+              <span class="nav-item__text">Browse</span>
+            </div>
           </nuxt-link>
         </li>
         <li>
@@ -240,6 +250,8 @@ const {
   activePostsCountPlural,
   newsCount,
   newsCountPlural,
+  browseCount,
+  browseCountPlural,
   showAboutMeModal,
   homePage,
   requestLogin,

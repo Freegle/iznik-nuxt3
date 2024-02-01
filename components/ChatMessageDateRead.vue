@@ -6,7 +6,7 @@
       chatmessage?.bymailid ||
       chatmessage?.gap
     "
-    class="text-muted small"
+    class="text-muted fontsize"
   >
     <div v-if="!messageIsFromCurrentUser">
       <span
@@ -143,8 +143,11 @@ export default {
   },
 }
 </script>
+<style scoped lang="scss">
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
 
-<style scoped>
 .chat__dateread--theirs {
   padding-left: 40px;
   margin-bottom: 5px;
@@ -154,5 +157,13 @@ export default {
   padding-right: 40px;
   padding-left: 10px;
   margin-bottom: 5px;
+}
+
+.fontsize {
+  font-size: 0.7em;
+
+  @include media-breakpoint-up(md) {
+    font-size: 0.875em;
+  }
 }
 </style>

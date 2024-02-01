@@ -1,7 +1,11 @@
 <template>
   <b-row>
-    <b-col cols="12" xl="6" offset-xl="3" class="bottom">
-      <NoticeMessage v-if="me && me.bouncing" variant="danger">
+    <b-col cols="12" xl="6" offset-xl="3" class="bottom verytop">
+      <NoticeMessage
+        v-if="me && me.bouncing"
+        variant="danger"
+        class="mb-3 text-center"
+      >
         <v-icon icon="exclamation-triangle" />
         We can't send to your email address. Please go to
         <nuxt-link no-prefetch to="/settings">Settings</nuxt-link>
@@ -11,7 +15,9 @@
   </b-row>
 </template>
 <script>
-const NoticeMessage = () => import('~/components/NoticeMessage')
+const NoticeMessage = defineAsyncComponent(() =>
+  import('~/components/NoticeMessage')
+)
 
 export default {
   components: {

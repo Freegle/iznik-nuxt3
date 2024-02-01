@@ -8,7 +8,10 @@
       />
     </div>
     <div>
-      <div v-if="showNotices && noticesToShow" class="d-flex">
+      <notice-message v-if="otheruser?.deleted" variant="info" class="mb-2">
+        This freegler has deleted their account, so you can't chat to them.
+      </notice-message>
+      <div v-else-if="showNotices && noticesToShow" class="d-flex">
         <div class="flex-grow-1">
           <notice-message
             v-if="badratings"
@@ -42,6 +45,20 @@
             talk to them and under no circumstances send them any money. Do not
             arrange anything by courier.
           </notice-message>
+          <notice-message
+            v-if="faraway"
+            variant="warning"
+            class="clickme"
+            @click="showInfo"
+          >
+            <p>
+              <v-icon icon="exclamation-triangle" />&nbsp;This freegler is
+              {{ milesstring }}
+              from you. If you are collecting from them, please make sure you
+              can get there. If they are collecting from you, please
+              double-check they have transport.
+            </p>
+          </notice-message>
         </div>
         <b-button
           variant="warning"
@@ -52,38 +69,54 @@
           <v-icon icon="times-circle" scale="1.5" />
         </b-button>
       </div>
-      <div>
+      <div v-if="!otheruser?.deleted">
         <label for="chatmessage" class="visually-hidden">Chat message</label>
         <div v-if="!imagethumb">
-          <b-form-textarea
-            v-if="enterNewLine && !otheruser?.spammer"
-            id="chatmessage"
-            ref="chatarea"
-            v-model="sendmessage"
-            placeholder="Type here..."
-            enterkeyhint="enter"
-            rows="3"
-            max-rows="8"
-            @keydown="typing"
-            @focus="markRead"
-          />
-          <b-form-textarea
-            v-else-if="!otheruser?.spammer"
-            id="chatmessage"
-            ref="chatarea"
-            v-model="sendmessage"
-            placeholder="Type here..."
-            rows="3"
-            max-rows="8"
-            enterkeyhint="send"
-            autocapitalize="none"
-            @keydown="typing"
-            @keydown.enter.exact.prevent
-            @keyup.enter.exact="send"
-            @keydown.enter.shift.exact.prevent="newline"
-            @keydown.alt.shift.enter.exact.prevent="newline"
-            @focus="markRead"
-          />
+          <Popper
+            :show="showSuggested"
+            placement="top"
+            arrow
+            class="w-100 m-0 p-0 border-0"
+          >
+            <b-form-textarea
+              v-if="enterNewLine && !otheruser?.spammer"
+              id="chatmessage"
+              ref="chatarea"
+              v-model="sendmessage"
+              placeholder="Type here..."
+              enterkeyhint="enter"
+              :style="height"
+              @keydown="typing"
+              @focus="markRead"
+            />
+            <b-form-textarea
+              v-else-if="!otheruser?.spammer"
+              id="chatmessage"
+              ref="chatarea"
+              v-model="sendmessage"
+              placeholder="Type here..."
+              :style="height"
+              enterkeyhint="send"
+              autocapitalize="none"
+              @keydown="typing"
+              @keydown.enter.exact.prevent
+              @keyup.enter.exact="send"
+              @keydown.enter.shift.exact.prevent="newline"
+              @keydown.alt.shift.enter.exact.prevent="newline"
+              @focus="markRead"
+            />
+            <template #content>
+              <strong>{{ suggestedAddress?.address?.singleline }}</strong>
+              <div class="d-flex justify-content-between flex-wrap mt-2">
+                <b-button variant="primary" @click="sendSuggestedAddress">
+                  Send address
+                </b-button>
+                <b-button variant="secondary" @click="rejectSuggestedAddress">
+                  Cancel
+                </b-button>
+              </div>
+            </template>
+          </Popper>
         </div>
         <div v-else class="d-flex justify-content-end pt-2 pb-2">
           <b-img :src="imagethumb" fluid class="maxheight" />
@@ -95,7 +128,10 @@
         </div>
       </div>
     </div>
-    <div v-if="!otheruser?.spammer" class="bg-white pt-1 pb-1">
+    <div
+      v-if="!otheruser?.spammer && !otheruser?.deleted"
+      class="bg-white pt-1 pb-1"
+    >
       <div class="d-none d-lg-block">
         <span v-if="chat && chat.chattype === 'User2User' && otheruser">
           <b-button
@@ -271,7 +307,8 @@
 </template>
 <script>
 import pluralize from 'pluralize'
-import { TYPING_TIME_INVERVAL } from '../constants'
+import Popper from 'vue3-popper'
+import { FAR_AWAY, TYPING_TIME_INVERVAL } from '../constants'
 import { setupChat } from '../composables/useChat'
 import { useMiscStore } from '../stores/misc'
 import { useMessageStore } from '../stores/message'
@@ -282,17 +319,24 @@ import SpinButton from './SpinButton'
 import { untwem } from '~/composables/useTwem'
 
 // Don't use dynamic imports because it stops us being able to scroll to the bottom after render.
-const OurFilePond = () => import('~/components/OurFilePond')
-const UserRatings = () => import('~/components/UserRatings')
-const PromiseModal = () =>
-  defineAsyncComponent(() => import('~/components/PromiseModal'))
+const OurFilePond = defineAsyncComponent(() =>
+  import('~/components/OurFilePond')
+)
+const UserRatings = defineAsyncComponent(() =>
+  import('~/components/UserRatings')
+)
+const PromiseModal = defineAsyncComponent(() =>
+  import('~/components/PromiseModal')
+)
 const ProfileModal = defineAsyncComponent(() =>
   import('~/components/ProfileModal')
 )
 const AddressModal = defineAsyncComponent(() =>
   import('~/components/AddressModal')
 )
-const NoticeMessage = () => import('~/components/NoticeMessage')
+const NoticeMessage = defineAsyncComponent(() =>
+  import('~/components/NoticeMessage')
+)
 const ChatRSVPModal = defineAsyncComponent(() =>
   import('~/components/ChatRSVPModal')
 )
@@ -302,7 +346,9 @@ const NudgeWarningModal = defineAsyncComponent(() =>
 const NudgeTooSoonWarningModal = defineAsyncComponent(() =>
   import('~/components/NudgeTooSoonWarningModal')
 )
-const MicroVolunteering = () => import('~/components/MicroVolunteering')
+const MicroVolunteering = defineAsyncComponent(() =>
+  import('~/components/MicroVolunteering')
+)
 
 export default {
   components: {
@@ -317,6 +363,7 @@ export default {
     ProfileModal,
     ChatRSVPModal,
     MicroVolunteering,
+    Popper,
   },
   props: {
     id: { type: Number, required: true },
@@ -327,8 +374,15 @@ export default {
     const messageStore = useMessageStore()
     const addressStore = useAddressStore()
 
-    const { chat, otheruser, tooSoonToNudge, chatStore, chatmessages } =
-      await setupChat(props.id)
+    const {
+      chat,
+      otheruser,
+      tooSoonToNudge,
+      chatStore,
+      chatmessages,
+      milesaway,
+      milesstring,
+    } = await setupChat(props.id)
 
     return {
       chat,
@@ -340,6 +394,8 @@ export default {
       addressStore,
       chatmessages,
       authStore,
+      milesaway,
+      milesstring,
     }
   },
   data() {
@@ -361,11 +417,25 @@ export default {
       imageid: null,
       showNudgeTooSoonWarningModal: false,
       showNudgeWarningModal: false,
+      hideSuggestedAddress: false,
     }
   },
   computed: {
+    height() {
+      // Bootstrap Vue Next doesn't yet have autoresizing.
+      return this.sendmessage ? 'height: 12em' : 'height: 6em'
+    },
     noticesToShow() {
-      return this.badratings || this.expectedreplies || this.otheruser?.spammer
+      return (
+        this.badratings ||
+        this.expectedreplies ||
+        this.otheruser?.spammer ||
+        this.otheruser?.deleted ||
+        this.faraway
+      )
+    },
+    faraway() {
+      return this.milesaway && this.milesaway > FAR_AWAY
     },
     badratings() {
       let ret = false
@@ -400,6 +470,95 @@ export default {
       }
 
       return null
+    },
+    possibleAddresses() {
+      const seen = {}
+      const ret = []
+
+      Object.values(this.addressStore.properties).forEach((p) => {
+        if (!seen[p.singleline]) {
+          ret.push(p)
+          seen[p.singleline] = true
+        }
+      })
+
+      ret.sort((a, b) => {
+        return a.singleline.localeCompare(b.singleline)
+      })
+
+      return ret
+    },
+    suggestedAddress() {
+      let ret = null
+      let bestMatch = 0
+      let bestAddr = null
+
+      const sendMessageLength = this.sendmessage?.length
+      const possibleAddressesLength = this.possibleAddresses?.length
+      const sendLower = this.sendmessage?.toLowerCase()
+
+      if (sendMessageLength >= 3 && possibleAddressesLength) {
+        // Scan through the possible addresses, looking for the longest prefix of the address which appears as a
+        // suffix of the typed message.  This finds when they're typing a possibly matching address.
+        for (let i = 0; i < possibleAddressesLength; i++) {
+          const addr = this.possibleAddresses[i].singleline.toLowerCase()
+
+          for (let j = 1; j <= addr.length; j++) {
+            const prefix = addr.substring(0, j)
+            const suffix = sendLower.substring(sendLower.length - j)
+
+            if (prefix === suffix && prefix.length > bestMatch) {
+              bestMatch = prefix.length
+              bestAddr = this.possibleAddresses[i]
+            }
+          }
+        }
+      }
+
+      if (bestMatch >= 3) {
+        ret = {
+          address: bestAddr,
+          matchedLength: bestMatch,
+        }
+      }
+
+      return ret
+    },
+    showSuggested() {
+      return !this.hideSuggestedAddress && this.suggestedAddress !== null
+    },
+  },
+  watch: {
+    sendmessage(newVal, oldVal) {
+      // This will result in the chat header shrinking once you start typing, to give more room, and then
+      // expanding back again if you delete everything.
+      this.$emit('typing', newVal?.length)
+    },
+    me: {
+      async handler(newVal, oldVal) {
+        if (newVal?.settings?.mylocation?.id) {
+          // We know our postcode.  This will usually be the case if we've posted.
+          //
+          // Fetch the addresses in that postcode - we can then spot them when people type and suggest
+          // them.
+          await this.addressStore.fetchProperties(
+            newVal?.settings?.mylocation?.id
+          )
+        }
+      },
+      immediate: true,
+    },
+    showSuggested(newVal) {
+      if (newVal) {
+        this.$api.bandit.shown({
+          uid: 'SuggestedAddress',
+          variant: 'chosen',
+        })
+        this.$api.bandit.shown({
+          uid: 'SuggestedAddress',
+          variant: 'cancel',
+        })
+      }
     },
   },
   mounted() {
@@ -448,7 +607,6 @@ export default {
       }
     },
     async addressBook() {
-      // Fetch the address book here to avoid an async setup which causes issues with waitForRef.
       await this.addressStore.fetch()
 
       this.showAddress = true
@@ -577,6 +735,57 @@ export default {
         this.lastTyping = now
       }
     },
+    async sendSuggestedAddress() {
+      // We want to send the address.  First we need to make sure it's in our address book.
+      this.$api.bandit.chosen({
+        uid: 'SuggestedAddress',
+        variant: 'chosen',
+      })
+
+      const toSend = JSON.parse(JSON.stringify(this.suggestedAddress.address))
+      const matchLen = this.suggestedAddress.matchedLength
+      await this.addressStore.fetch()
+
+      // Check if it's already in the address book.
+      let found = null
+      for (const addrid in this.addressStore.list) {
+        const addr = this.addressStore.list[addrid]
+
+        if (addr.singleline === toSend.singleline) {
+          found = addr.id
+          break
+        }
+      }
+
+      if (!found) {
+        // It's not in the address book.  Add it.
+        found = await this.addressStore.add({
+          pafid: toSend.id,
+        })
+      }
+
+      if (found) {
+        await this.sendAddress(found)
+      }
+
+      // Remove this.bestAddressMatch characters from the end of the message.
+      this.sendmessage = this.sendmessage.substring(
+        0,
+        this.sendmessage.length - matchLen
+      )
+
+      this.hideSuggestedAddress = true
+      this.$refs.chatarea.focus()
+    },
+    rejectSuggestedAddress() {
+      this.hideSuggestedAddress = true
+
+      this.$api.bandit.chosen({
+        uid: 'SuggestedAddress',
+        variant: 'cancel',
+        message: this.sendmessage,
+      })
+    },
   },
 }
 </script>
@@ -608,5 +817,9 @@ export default {
 
 .maxheight {
   max-height: 33vh;
+}
+
+:deep(textarea) {
+  transition: height 1s;
 }
 </style>

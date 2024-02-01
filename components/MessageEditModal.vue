@@ -134,9 +134,11 @@ import { uid } from '../composables/useId'
 import NumberIncrementDecrement from './NumberIncrementDecrement'
 import PostCode from '~/components/PostCode'
 import { useModal } from '~/composables/useModal'
-const OurFilePond = () => import('~/components/OurFilePond')
-const PostItem = () => import('./PostItem')
-const PostPhoto = () => import('./PostPhoto')
+const OurFilePond = defineAsyncComponent(() =>
+  import('~/components/OurFilePond')
+)
+const PostItem = defineAsyncComponent(() => import('./PostItem'))
+const PostPhoto = defineAsyncComponent(() => import('./PostPhoto'))
 
 export default {
   components: {
@@ -160,8 +162,7 @@ export default {
 
     const { modal, hide } = useModal()
 
-    // Message was fetched by parent.  This allows us to avoid an async setup, which causes problems where waitForRef
-    // returns before the component fully exists and therefore show() fails.
+    // Message was fetched by parent.
     const message = toRaw(messageStore.byId(props.id))
     const textbody = message.textbody
     const item = message.item?.name

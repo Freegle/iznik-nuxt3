@@ -3,12 +3,15 @@
     <div v-if="summary">
       <b-img lazy src="/promised.jpg" class="promised__image" />
       <b-popover
+        v-model="showing"
         :content="title"
         placement="top"
         variant="primary"
         triggers="hover"
         :target="'msg-' + id"
         custom-class="primary"
+        @shown="shown"
+        @hidden="hidden"
       />
     </div>
     <div v-else>
@@ -40,6 +43,12 @@ export default {
       default: false,
     },
   },
+  data: function () {
+    return {
+      scrollHandler: null,
+      showing: false,
+    }
+  },
   computed: {
     title() {
       if (!this.toMe) {
@@ -47,6 +56,31 @@ export default {
       } else {
         return 'This has been promised to you.'
       }
+    },
+  },
+  beforeUnmount() {
+    if (this.scrollHandler) {
+      window.removeEventListener('scroll', this.scrollHandler)
+      this.scrollHandler = null
+    }
+  },
+  methods: {
+    shown() {
+      if (!this.scrollHandler) {
+        this.scrollHandler = window.addEventListener(
+          'scroll',
+          this.handleScroll
+        )
+      }
+    },
+    hidden() {
+      if (this.scrollHandler) {
+        window.removeEventListener('scroll', this.scrollHandler)
+        this.scrollHandler = null
+      }
+    },
+    handleScroll() {
+      this.showing = false
     },
   },
 }

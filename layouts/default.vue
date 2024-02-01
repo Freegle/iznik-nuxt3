@@ -14,8 +14,10 @@ import { useMiscStore } from '../stores/misc'
 import LayoutCommon from '~/components/LayoutCommon'
 import { ref } from '#imports'
 import { useAuthStore } from '~/stores/auth'
-const GoogleOneTap = () => import('~/components/GoogleOneTap')
-const LoginModal = () => import('~/components/LoginModal')
+const GoogleOneTap = defineAsyncComponent(() =>
+  import('~/components/GoogleOneTap')
+)
+const LoginModal = defineAsyncComponent(() => import('~/components/LoginModal'))
 
 export default {
   components: {
@@ -33,8 +35,7 @@ export default {
     const persistent = authStore.auth.persistent
 
     if (process.client) {
-      // Ensure we don't wrongly think we have some outstanding requests if the server happened to start some.  This
-      // would break waitForRef.
+      // Ensure we don't wrongly think we have some outstanding requests if the server happened to start some.
       miscStore.apiCount = 0
     }
 

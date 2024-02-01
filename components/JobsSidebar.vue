@@ -48,8 +48,12 @@ import { useJobStore } from '../stores/job'
 import { useAuthStore } from '../stores/auth'
 import JobOne from './JobOne'
 import InfiniteLoading from '~/components/InfiniteLoading'
-const NoticeMessage = () => import('~/components/NoticeMessage')
-const DonationButton = () => import('~/components/DonationButton')
+const NoticeMessage = defineAsyncComponent(() =>
+  import('~/components/NoticeMessage')
+)
+const DonationButton = defineAsyncComponent(() =>
+  import('~/components/DonationButton')
+)
 
 export default {
   components: {

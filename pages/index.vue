@@ -124,7 +124,9 @@ import { useMiscStore } from '../stores/misc'
 import MainFooter from '~/components/MainFooter'
 import { useRouter } from '#imports'
 import api from '~/api'
-const VisualiseMap = () => import('~/components/VisualiseMap')
+const VisualiseMap = defineAsyncComponent(() =>
+  import('~/components/VisualiseMap')
+)
 
 export default {
   components: {

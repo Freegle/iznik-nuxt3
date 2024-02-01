@@ -1129,7 +1129,6 @@ export default {
       await this.authStore.leaveGroup(this.myid, id)
     },
     async addressBook() {
-      // Fetch the address book here to avoid an async setup which causes issues with waitForRef.
       await this.addressStore.fetch()
       this.showAddressModal = true
     },

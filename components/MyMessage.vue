@@ -349,18 +349,22 @@ import { milesAway } from '../composables/useDistance'
 import { datetimeshort } from '../composables/useTimeFormat'
 import { useRouter } from '#imports'
 import MyMessagePromisedTo from '~/components/MyMessagePromisedTo'
-const MyMessageReply = () => import('./MyMessageReply.vue')
+const MyMessageReply = defineAsyncComponent(() =>
+  import('./MyMessageReply.vue')
+)
 const MessagePhotosModal = defineAsyncComponent(() =>
   import('~/components/MessagePhotosModal')
 )
 const MessageShareModal = defineAsyncComponent(() =>
   import('./MessageShareModal')
 )
-const NoticeMessage = () => import('~/components/NoticeMessage')
+const NoticeMessage = defineAsyncComponent(() =>
+  import('~/components/NoticeMessage')
+)
 const PromiseModal = defineAsyncComponent(() =>
   import('~/components/PromiseModal')
 )
-const OutcomeModal = () => defineAsyncComponent(() => import('./OutcomeModal'))
+const OutcomeModal = defineAsyncComponent(() => import('./OutcomeModal'))
 const MessageEditModal = defineAsyncComponent(() =>
   import('./MessageEditModal')
 )

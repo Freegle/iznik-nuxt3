@@ -64,6 +64,9 @@
             </b-card>
           </div>
           <NewsLocation v-if="!id" class="p-2" @changed="areaChange" />
+          <VisibleWhen :at="['xs', 'sm', 'md']">
+            <NewsCommunityEventVolunteerSummary class="mt-2" />
+          </VisibleWhen>
           <div class="p-0 pt-1 mb-1">
             <NoticeMessage v-if="error" class="mt-2">
               Sorry, this thread isn't around any more.
@@ -108,6 +111,7 @@ import { buildHead } from '../../composables/useBuildHead'
 import { useMiscStore } from '../../stores/misc'
 import { useNewsfeedStore } from '../../stores/newsfeed'
 import { useAuthStore } from '../../stores/auth'
+import NewsCommunityEventVolunteerSummary from '../../components/NewsCommunityEventVolunteerSummary'
 import VisibleWhen from '~/components/VisibleWhen'
 import GlobalWarning from '~/components/GlobalWarning'
 import NoticeMessage from '~/components/NoticeMessage'
@@ -117,15 +121,25 @@ import NewsThread from '~/components/NewsThread.vue'
 import { untwem } from '~/composables/useTwem'
 import { ref } from '#imports'
 
-const OurFilePond = () => import('~/components/OurFilePond')
-const SidebarLeft = () => import('~/components/SidebarLeft')
-const SidebarRight = () => import('~/components/SidebarRight')
-const NewsLocation = () => import('~/components/NewsLocation')
-const ExpectedRepliesWarning = () =>
+const OurFilePond = defineAsyncComponent(() =>
+  import('~/components/OurFilePond')
+)
+const SidebarLeft = defineAsyncComponent(() =>
+  import('~/components/SidebarLeft')
+)
+const SidebarRight = defineAsyncComponent(() =>
+  import('~/components/SidebarRight')
+)
+const NewsLocation = defineAsyncComponent(() =>
+  import('~/components/NewsLocation')
+)
+const ExpectedRepliesWarning = defineAsyncComponent(() =>
   import('~/components/ExpectedRepliesWarning')
+)
 
 export default {
   components: {
+    NewsCommunityEventVolunteerSummary,
     VisibleWhen,
     GlobalWarning,
     ExpectedRepliesWarning,
@@ -178,6 +192,12 @@ export default {
     }
 
     const me = authStore.user
+    const mod =
+      me &&
+      (me.systemrole === 'Moderator' ||
+        me.systemrole === 'Support' ||
+        me.systemrole === 'Admin')
+
     const settings = me?.settings
     const distance = settings?.newsfeedarea || 0
     const error = ref(false)
@@ -188,14 +208,15 @@ export default {
         // Force as there may be changes since we loaded what was in the store.
         const newsfeed = await newsfeedStore.fetch(id, true)
 
-        if (!newsfeed?.id || newsfeed?.deleted) {
+        // Mods can see deleted posts.
+        if (!mod && (!newsfeed?.id || newsfeed?.deleted)) {
           error.value = true
         } else if (newsfeed?.id !== newsfeed?.threadhead) {
           threadhead.value = newsfeed.threadhead
 
           const fetched = await newsfeedStore.fetch(newsfeed.threadhead)
 
-          if (!fetched?.id || fetched?.deleted) {
+          if (!mod && (!fetched?.id || fetched?.deleted)) {
             error.value = true
           }
         } else {

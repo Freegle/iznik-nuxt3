@@ -52,6 +52,29 @@
                   <v-icon icon="pen" /> Edit and Resend
                 </b-button>
               </div>
+              <NoticeMessage
+                v-else-if="chat.chattype === 'User2User'"
+                variant="warning"
+                class="mt-2"
+              >
+                <p>
+                  Volunteers won't see any replies you make in here about this
+                  message - they'll go to the other freegler. If you want to
+                  contact the volunteers, please use the button below.
+                </p>
+                <GroupSelect
+                  v-model="contactGroupId"
+                  remember="contactmods"
+                  class="mb-3"
+                />
+                <ChatButton
+                  :groupid="contactGroupId"
+                  size="md"
+                  title="Contact community volunteers"
+                  variant="primary"
+                  class="mb-2"
+                />
+              </NoticeMessage>
             </b-card-text>
           </b-card>
         </div>
@@ -62,13 +85,17 @@
 <script>
 import { useComposeStore } from '../stores/compose'
 import { fetchReferencedMessage } from '../composables/useChat'
+import NoticeMessage from './NoticeMessage'
+import ChatButton from './ChatButton'
 import ChatBase from '~/components/ChatBase'
 import ProfileImage from '~/components/ProfileImage'
 import { useRouter } from '#imports'
 
 export default {
   components: {
+    NoticeMessage,
     ProfileImage,
+    ChatButton,
   },
   extends: ChatBase,
   async setup(props) {
@@ -77,6 +104,11 @@ export default {
     await fetchReferencedMessage(props.chatid, props.id)
 
     return { composeStore }
+  },
+  data: function () {
+    return {
+      contactGroupId: null,
+    }
   },
   computed: {
     group() {

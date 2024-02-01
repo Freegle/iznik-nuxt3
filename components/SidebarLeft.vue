@@ -25,9 +25,12 @@
 </template>
 <script>
 import BotLeftBox from './BotLeftBox'
-const CommunityEventSidebar = () => import('~/components/CommunityEventSidebar')
-const VolunteerOpportunitySidebar = () =>
+const CommunityEventSidebar = defineAsyncComponent(() =>
+  import('~/components/CommunityEventSidebar')
+)
+const VolunteerOpportunitySidebar = defineAsyncComponent(() =>
   import('~/components/VolunteerOpportunitySidebar')
+)
 
 export default {
   components: {

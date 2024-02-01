@@ -11,11 +11,10 @@
       />
       <MessageStillAvailable v-if="stillAvailable" class="mb-1 mt-1" />
       <NoticeMessage
-        v-if="milesaway > 37 && message.type === 'Offer'"
+        v-if="milesaway > farawawy && message.type === 'Offer'"
         variant="danger"
         class="mt-2 mb-1"
       >
-        <!--  The 37 miles figure comes from research from someone we shall call Clement. -->
         This item is {{ milesaway }} miles away. Before replying, are you sure
         you can collect from there?
       </NoticeMessage>
@@ -114,6 +113,7 @@ import { useMessageStore } from '../stores/message'
 import { useAuthStore } from '../stores/auth'
 import { useReplyStore } from '../stores/reply'
 import { milesAway } from '../composables/useDistance'
+import { FAR_AWAY } from '../constants'
 import replyToPost from '@/mixins/replyToPost'
 import MessageStillAvailable from '~/components/MessageStillAvailable'
 import EmailValidator from '~/components/EmailValidator'
@@ -121,7 +121,9 @@ import NewUserInfo from '~/components/NewUserInfo'
 import ChatButton from '~/components/ChatButton'
 import SpinButton from '~/components/SpinButton.vue'
 
-const NewFreegler = () => import('~/components/NewFreegler')
+const NewFreegler = defineAsyncComponent(() =>
+  import('~/components/NewFreegler')
+)
 
 export default {
   components: {
@@ -166,6 +168,9 @@ export default {
     }
   },
   computed: {
+    faraway() {
+      return FAR_AWAY
+    },
     message() {
       return this.messageStore?.byId(this.id)
     },
@@ -263,6 +268,7 @@ export default {
     },
     async sendReply(callback) {
       console.log('sendReply', this.reply)
+      let called = false
 
       if (this.reply) {
         // Save the reply
@@ -308,6 +314,8 @@ export default {
 
             // Now we can send the reply via chat.
             await this.$nextTick()
+            callback()
+            called = true
             await this.replyToPost()
           }
         } else {
@@ -317,7 +325,10 @@ export default {
           this.forceLogin = true
         }
       }
-      callback()
+
+      if (!called) {
+        callback()
+      }
     },
     close() {
       this.$emit('close')

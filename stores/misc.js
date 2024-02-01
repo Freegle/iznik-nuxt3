@@ -122,10 +122,7 @@ export const useMiscStore = defineStore({
         }
       }
 
-      this.onlineTimer = setTimeout(
-        this.checkOnline,
-        1000
-      )
+      this.onlineTimer = setTimeout(this.checkOnline, 1000)
     },
     waitForOnline() {
       if (this.online) {

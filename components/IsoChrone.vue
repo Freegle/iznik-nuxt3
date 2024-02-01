@@ -23,26 +23,25 @@
             v-model="nickname"
             placeholder="Where is this?"
             max-length="20"
+            :state="nameState"
           />
         </div>
       </div>
     </div>
     <template v-if="isochrone">
       <div class="layout">
-        <label class="font-weight-bold sliderLabel">
+        <label class="font-weight-bold sliderLabel mb-1">
           <div v-if="id">
             <div v-if="isochrone.nickname">
               {{ isochrone.nickname }}:
               <span class="text-faded">({{ location?.name }})</span>
             </div>
             <div v-else>
-              Travel time:
-              <span v-if="myLocation?.name" class="text-faded">
-                (from {{ myLocation.name }})</span
-              >
+              <span v-if="myLocation"> Posts near {{ myLocation }}: </span>
+              <span v-else> Nearby posts: </span>
             </div>
           </div>
-          <div v-else>Travel time:</div>
+          <div v-else>Nearby posts:</div>
           <div class="d-flex flex-column justify-content-around">
             <b-button
               v-if="addButton"
@@ -150,6 +149,7 @@
 <script>
 import { mapState } from 'pinia'
 import { useLocationStore } from '../stores/location'
+import { useMessageStore } from '../stores/message'
 import { ref } from '#imports'
 import PostCode from '~/components/PostCode'
 import SpinButton from '~/components/SpinButton'
@@ -180,6 +180,7 @@ export default {
   async setup(props) {
     const isochroneStore = useIsochroneStore()
     const locationStore = useLocationStore()
+    const messageStore = useMessageStore()
 
     const minutes = ref(20)
     const transport = ref('Drive')
@@ -217,6 +218,7 @@ export default {
     return {
       isochroneStore,
       locationStore,
+      messageStore,
       minutes,
       transport,
       isochrone,
@@ -260,10 +262,21 @@ export default {
 
       return ret
     },
+    nameState() {
+      if (this.id) {
+        return null
+      } else if (this.nickname) {
+        return true
+      } else if (!this.pcname) {
+        return null
+      } else {
+        // We're adding, we have a postcode but no name.
+        return false
+      }
+    },
   },
   watch: {
     minutes(newVal) {
-      console.log('watch', newVal)
       this.changeMinutes(newVal)
     },
   },
@@ -283,6 +296,11 @@ export default {
           minutes: newVal,
           transport: this.isochrone.transport,
         })
+
+        if (this.me?.settings?.browseView) {
+          // This might change the count we should see
+          this.messageStore.fetchCount(this.me?.settings?.browseView, false)
+        }
       }
 
       this.minutes = newVal

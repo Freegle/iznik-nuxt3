@@ -213,8 +213,12 @@ import EmailValidator from './EmailValidator'
 import { useAuthStore } from '~/stores/auth'
 import me from '~/mixins/me.js'
 
-const NoticeMessage = () => import('~/components/NoticeMessage')
-const PasswordEntry = () => import('~/components/PasswordEntry')
+const NoticeMessage = defineAsyncComponent(() =>
+  import('~/components/NoticeMessage')
+)
+const PasswordEntry = defineAsyncComponent(() =>
+  import('~/components/PasswordEntry')
+)
 
 export default {
   name: 'LoginModal',

@@ -539,8 +539,38 @@ label {
 .ourBack {
   background-color: $color-green-background !important;
 }
+  --popper-theme-box-shadow: 0 6px 30px -6px rgba(0, 0, 0, 0.25);
+  --ads-height: 258px;
+  --ads-label-height: 42px;
+  --header-navbar-height: 76px;
+
+
+.v-popper--theme-mentionable {
+  .v-popper__inner {
+    border-radius: 0px !important;
+  }
+
+  .mention-item {
+    padding-left: 10px;
+    padding-right: 10px;
+    background: $color-white;
+    color: $color-black;
+  }
+
+  .mention-selected {
+    font-weight: bold;
+  }
+}
 
 :root {
+  --popper-theme-background-color: white;
+  --popper-theme-background-color-hover: white;
+  --popper-theme-text-color: $color-black;
+  --popper-theme-border-width: 0px;
+  --popper-theme-border-style: solid;
+  --popper-theme-border-radius: 6px;
+  --popper-theme-padding: 10px;
+  --popper-theme-box-shadow: 0 6px 30px -6px rgba(0, 0, 0, 0.25);
   --ads-height: 258px;
   --ads-label-height: 42px;
   --header-navbar-height: 76px;

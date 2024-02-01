@@ -31,74 +31,57 @@
             />
           </div>
           <div v-if="initialBounds">
-            <div v-if="browseView === 'mygroups'" class="bg-white mt-2">
-              <div class="small d-flex justify-content-end">
-                <div>
-                  <!-- eslint-disable-next-line-->
-                  Show posts from <b-button variant="link" class="mb-1 p-0" size="sm" @click="showPostsFromNearby">nearby instead</b-button>.
-                </div>
+            <JobsTopBar class="d-none d-md-block" />
+            <NoticeMessage
+              v-if="noMessagesNoLocation"
+              variant="warning"
+              class="mb-2"
+            >
+              There are no posts in this area at the moment. You can check back
+              later, or use the controls below.
+            </NoticeMessage>
+            <NoticeMessage v-else-if="messagesOnMapCount === 0" class="mb-2">
+              <div v-if="searchTerm">
+                We couldn't find any posts matching your search. You can check
+                back later, or use the controls below or adjust your filters to
+                show posts from further away.
               </div>
-              <AdaptiveMap
-                :key="'map-' + bump"
-                :initial-bounds="initialBounds"
-                :initial-search="searchTerm"
-                class="mt-2"
-                force-messages
-                group-info
-                jobs
-                :show-many="false"
-                can-hide
-                track
-              />
-            </div>
-            <div v-else>
-              <div class="mb-1 border p-2 bg-white">
-                <NoticeMessage
-                  v-if="!messagesOnMapCount && !me?.settings?.mylocation"
-                  variant="warning"
-                >
-                  There are no posts in this area at the moment. You can check
-                  back later, or use the controls below:
-                  <ul>
-                    <li>
-                      The <em>Travel time</em> slider lets you see posts from
-                      further away.
-                    </li>
-                    <li>
-                      <!-- eslint-disable-next-line-->
-                      You can change your location in <nuxt-link  no-prefetch to="/settings">Settings</nuxt-link>.
-                    </li>
-                    <li>
-                      The <em>Add location</em> link lets you show posts from
-                      another postcode.
-                    </li>
-                  </ul>
-                </NoticeMessage>
-                <NoticeMessage v-if="!isochrones.length" variant="warning">
-                  <p class="font-weight-bold">
-                    What's your postcode? We'll show you posts nearby.
-                  </p>
-                  <PostCode @selected="savePostcode" />
-                </NoticeMessage>
-                <IsoChrones />
-                <div class="small mt-1">
-                  <!-- eslint-disable-next-line-->
-                  Show all posts from <b-button variant="link" size="sm" class="mb-1 p-0" @click="showPostsFromMyGroups">my communities</b-button> instead.
-                </div>
+              <div v-else>
+                We couldn't find any posts to show. You can check back later, or
+                use the controls below or adjust your filters to show posts from
+                further away.
               </div>
-              <IsochronePostMapAndList
-                :key="'map-' + bump"
-                v-model:messagesOnMapCount="messagesOnMapCount"
-                :initial-bounds="initialBounds"
-                :initial-search="searchTerm"
-                class="mt-2"
-                force-messages
-                group-info
-                jobs
-                :show-many="false"
-                can-hide
-              />
-            </div>
+            </NoticeMessage>
+            <NoticeMessage
+              v-if="browseView === 'nearby' && !isochrones.length"
+              variant="warning"
+            >
+              <p class="font-weight-bold">
+                What's your postcode? We'll show you posts nearby.
+              </p>
+              <PostCode @selected="savePostcode" />
+            </NoticeMessage>
+            <PostFilters
+              v-model:forceShowFilters="forceShowFilters"
+              v-model:selectedGroup="selectedGroup"
+              v-model:selectedType="selectedType"
+              v-model:selectedSort="selectedSort"
+              v-model:search="searchTerm"
+              class="mt-2 mt-md-0"
+            />
+            <PostMapAndList
+              :key="'map-' + bump"
+              v-model:messagesOnMapCount="messagesOnMapCount"
+              v-model:search="searchTerm"
+              v-model:selectedGroup="selectedGroup"
+              v-model:selectedType="selectedType"
+              v-model:selectedSort="selectedSort"
+              :initial-bounds="initialBounds"
+              force-messages
+              group-info
+              :show-many="false"
+              can-hide
+            />
           </div>
           <about-me-modal
             v-if="showAboutMeModal"
@@ -130,6 +113,8 @@
 import dayjs from 'dayjs'
 import { useRoute, useRouter } from 'vue-router'
 import { defineAsyncComponent } from 'vue'
+import { useMessageStore } from '../../stores/message'
+import NoticeMessage from '../../components/NoticeMessage'
 import { loadLeaflet } from '~/composables/useMap'
 import { buildHead } from '~/composables/useBuildHead'
 import VisibleWhen from '~/components/VisibleWhen'
@@ -137,16 +122,18 @@ import { useMiscStore } from '~/stores/misc'
 import { useAuthStore } from '~/stores/auth'
 import { useGroupStore } from '~/stores/group'
 import { useIsochroneStore } from '~/stores/isochrone'
-import GiveAsk from '~/components/GiveAsk'
+import PostFilters from '~/components/PostFilters'
 
-const MicroVolunteering = () => import('~/components/MicroVolunteering.vue')
+const MicroVolunteering = defineAsyncComponent(() =>
+  import('~/components/MicroVolunteering.vue')
+)
 
 export default {
   components: {
-    GiveAsk,
-    AdaptiveMap: defineAsyncComponent(() => import('~/components/AdaptiveMap')),
-    IsochronePostMapAndList: defineAsyncComponent(() =>
-      import('~/components/IsochronePostMapAndList')
+    NoticeMessage,
+    PostFilters,
+    PostMapAndList: defineAsyncComponent(() =>
+      import('~/components/PostMapAndList')
     ),
     GlobalWarning: defineAsyncComponent(() =>
       import('~/components/GlobalWarning')
@@ -186,8 +173,9 @@ export default {
     const authStore = useAuthStore()
     const groupStore = useGroupStore()
     const isochroneStore = useIsochroneStore()
+    const messageStore = useMessageStore()
 
-    const searchTerm = route.params.term
+    const searchTerm = ref(route.params.term)
 
     // We want this to be our next home page.
     const existingHomepage = miscStore.get('lasthomepage')
@@ -212,6 +200,7 @@ export default {
       authStore,
       groupStore,
       isochroneStore,
+      messageStore,
       searchTerm,
       martop1,
     }
@@ -222,7 +211,13 @@ export default {
       bump: 1,
       showAboutMeModal: false,
       reviewAboutMe: false,
-      messagesOnMapCount: 0,
+      messagesOnMapCount: null,
+      selectedGroup: 0,
+      selectedType: 'All',
+      selectedSort: 'Unseen',
+      forceShowFilters: false,
+      lastCountUpdate: 0,
+      updatingCount: false,
     }
   },
   computed: {
@@ -230,6 +225,9 @@ export default {
       return this?.me?.settings?.browseView
         ? this.me.settings.browseView
         : 'nearby'
+    },
+    noMessagesNoLocation() {
+      return this.messagesOnMapCount === 0 && !this.me?.settings?.mylocation
     },
     isochrones() {
       return this.isochroneStore?.list
@@ -241,14 +239,67 @@ export default {
       async handler(newVal, oldVal) {
         if (newVal && !oldVal && process.client) {
           await loadLeaflet()
-          this.calculateInitialMapBounds(!this.searchTerm)
+          this.calculateInitialMapBounds()
           this.bump++
         }
       },
     },
+    noMessagesNoLocation(newVal) {
+      if (newVal) {
+        // Make sure the filters are showing.
+        this.forceShowFilters = true
+      }
+    },
+    // When the isochrones or filters change, just re-render the whole map and list.  This is a bit heavy handed, but
+    // the code to handle the various changes is complex and not worth writting - most people will just take the
+    // default and scroll down.
+    searchTerm(newVal) {
+      this.incBump()
+    },
+    async selectedGroup(newVal) {
+      if (newVal > 0) {
+        // We want to show the group's map.
+        const g = this.myGroup(newVal)
+
+        if (g?.bbox) {
+          await loadLeaflet()
+          const wkt = new window.Wkt.Wkt()
+          wkt.read(g.bbox)
+          const obj = wkt.toObject()
+
+          if (obj?.getBounds) {
+            const bounds = obj.getBounds()
+            const swlat = bounds.getSouthWest().lat
+            const swlng = bounds.getSouthWest().lng
+            const nelat = bounds.getNorthEast().lat
+            const nelng = bounds.getNorthEast().lng
+
+            this.initialBounds = [
+              [swlat, swlng],
+              [nelat, nelng],
+            ]
+          }
+        }
+      }
+
+      this.incBump()
+    },
+    selectedType(newVal) {
+      this.incBump()
+    },
+    browseView(newVal) {
+      this.calculateInitialMapBounds()
+      this.incBump()
+    },
+    async isochrones(newVal) {
+      this.initialBounds = this.isochroneStore.bounds
+      await this.isochroneStore.fetchMessages(true)
+      this.incBump()
+    },
   },
   async mounted() {
     if (this.me) {
+      window.addEventListener('scroll', this.handleScroll)
       const lastask = this.miscStore?.get('lastaboutmeask')
       const now = new Date().getTime()
 
@@ -288,27 +339,31 @@ export default {
       }
     }
   },
+  unmounted() {
+    window.removeEventListener('scroll', this.handleScroll)
+  },
   methods: {
-    async calculateInitialMapBounds(fetchIsochrones) {
+    async calculateInitialMapBounds() {
       if (process.client) {
-        // The initial bounds for the map are determined from the isochrones if possible.  We might have them cached
-        // in store.
-        const promises = []
-        promises.push(this.isochroneStore.fetch())
+        if (this.browseView === 'nearby') {
+          if (this.me) {
+            // The initial bounds for the map are determined from the isochrones if possible.
+            const promises = []
+            promises.push(this.isochroneStore.fetch())
 
-        if (fetchIsochrones) {
-          // By default we'll be showing the isochrone view in PostMap, so start the fetch of the messages now.  That
-          // way we can display the list rapidly.  Fetching this and the isochrones in parallel reduces latency.
-          promises.push(this.isochroneStore.fetchMessages(true))
+            // By default we'll be showing the isochrone view in PostMap, so start the fetch of the messages now.  That
+            // way we can display the list rapidly.  Fetching this and the isochrones in parallel reduces latency.
+            promises.push(this.isochroneStore.fetchMessages(true))
+
+            await Promise.all(promises)
+          }
+
+          this.initialBounds = this.isochroneStore.bounds
         }
 
-        await Promise.all(promises)
-
-        this.initialBounds = this.isochroneStore.bounds
-
         if (!this.initialBounds) {
-          // We don't have any isochrones yet. Use the bounding box of the group that our own
-          // location is within.
+          // Either we have no isochrones, or we're showing our groups.  Use the bounding box of the group that
+          // our own location is within.
           let mylat = null
           let mylng = null
 
@@ -380,22 +435,6 @@ export default {
         }
       }
     },
-    async showPostsFromNearby() {
-      const settings = this.me.settings
-      settings.browseView = 'nearby'
-
-      await this.authStore.saveAndGet({
-        settings,
-      })
-    },
-    async showPostsFromMyGroups() {
-      const settings = this.me.settings
-      settings.browseView = 'mygroups'
-
-      await this.authStore.saveAndGet({
-        settings,
-      })
-    },
     async savePostcode(pc) {
       const settings = this.me.settings
 
@@ -407,6 +446,22 @@ export default {
 
         // Now get an isochrone at this location.
         await this.isochroneStore.fetch()
+      }
+    },
+    incBump() {
+      this.bump++
+    },
+    async handleScroll(event) {
+      // If we are scrolling down the browse window then we want to update our count, but only every few seconds.
+      if (
+        !this.updatingCount &&
+        this.me &&
+        this.lastCountUpdate < new Date().getTime() - 5000
+      ) {
+        this.lastCountUpdate = new Date().getTime()
+        this.updatingCount = true
+        await this.messageStore.fetchCount(this.me.settings?.browseView, false)
+        this.updatingCount = false
       }
     },
   },

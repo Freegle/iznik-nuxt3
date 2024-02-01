@@ -22,7 +22,7 @@
       <MessageHistory
         :id="id"
         class="mb-1 header-history"
-        display-message-link
+        :display-message-link="mod"
       />
       <div class="mb-1 header-description">
         <div
@@ -52,6 +52,7 @@
         />
       </div>
     </div>
+    <div v-observe-visibility="view" />
   </div>
 </template>
 
@@ -120,6 +121,13 @@ export default {
     },
   },
   methods: {
+    async view() {
+      if (this.me && this.message.unseen) {
+        await this.messageStore.view(this.id)
+      }
+
+      this.$emit('view')
+    },
     expand() {
       this.$emit('expand')
     },

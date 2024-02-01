@@ -101,7 +101,9 @@
 import { useAuthStore } from '~/stores/auth'
 import { buildHead } from '~/composables/useBuildHead'
 import { useRoute, useRouter } from '#imports'
-const ExternalLink = () => import('~/components/ExternalLink')
+const ExternalLink = defineAsyncComponent(() =>
+  import('~/components/ExternalLink')
+)
 
 export default {
   components: { ExternalLink },

@@ -10,6 +10,30 @@ import { useAuthStore } from '~/stores/auth'
 import { fetchMe } from '~/composables/useMe'
 import { useRuntimeConfig } from '#app'
 
+export const navBarHidden = ref(false)
+
+let navBarTimeout = null
+
+export function setNavBarHidden(hidden) {
+  // Hide the navbar when typing.
+  //
+  // Start a timer to show the navbars again after a delay.
+  if (navBarHidden.value !== hidden) {
+    navBarHidden.value = hidden
+  }
+
+  if (navBarTimeout) {
+    clearTimeout(navBarTimeout)
+    navBarTimeout = null
+  }
+
+  if (hidden) {
+    navBarTimeout = setTimeout(() => {
+      navBarHidden.value = false
+    }, 5000)
+  }
+}
+
 export function useNavbar() {
   const authStore = useAuthStore()
   const miscStore = useMiscStore()
@@ -26,7 +50,7 @@ export function useNavbar() {
   const distance = ref(1000)
   const logo = ref('/icon.png')
   const unreadNotificationCount = ref(0)
-  const chatCount = computed(() => chatStore.unreadCount + 1)
+  const chatCount = computed(() => chatStore.unreadCount)
   const activePostsCount = computed(() => messageStore.activePostsCounter)
   const showAboutMeModal = ref(false)
   const countTimer = ref(null)
@@ -52,8 +76,6 @@ export function useNavbar() {
   const showBackButton = computed(() => {
     // On mobile we want to show a back button instead of the logo when we're not on one of the "home" routes,
     // which are /browse, /chitchat, /myposts
-    const route = useRoute()
-
     return (
       route &&
       route.path !== '/browse' &&
@@ -64,6 +86,20 @@ export function useNavbar() {
     )
   })
 
+  const backButtonCount = computed(() => {
+    // On mobile, if we're viewing a chat, then we don't have the navbar and we won't see anything which
+    // reminds us that we have other unread chat messages.  In that case we show a count of unread chat
+    // messages.
+    if (route.path.startsWith('/chats/')) {
+      const chatid = parseInt(route.path.split('/')[2])
+      const chat = chatStore.byChatId(chatid)
+
+      return chatCount.value - chat?.unseen
+    }
+
+    return 0
+  })
+
   const newsCount = computed(() => {
     return newsfeedStore.count
   })
@@ -71,6 +107,14 @@ export function useNavbar() {
   const newsCountPlural = () => {
     return pluralize('unread ChitChat post', newsCount.value, true)
   }
+
+  const browseCount = computed(() => {
+    return Math.min(99, messageStore.count)
+  })
+
+  const browseCountPlural = computed(() => {
+    return pluralize('unseen post', messageStore.count, true)
+  })
 
   const activePostsCountPlural = ref(() => {
     return pluralize('open post', activePostsCount.value, {
@@ -132,6 +176,7 @@ export function useNavbar() {
         const settings = me?.settings
         const distance = settings?.newsfeedarea || 0
         await newsfeedStore.fetchCount(distance, false)
+        await messageStore.fetchCount(me?.settings?.browseView, false)
 
         if (
           route.path !== '/profile/' + myid.value &&
@@ -209,9 +254,12 @@ export function useNavbar() {
     activePostsCountPlural,
     newsCount,
     newsCountPlural,
+    browseCount,
+    browseCountPlural,
     showAboutMeModal,
     homePage,
     showBackButton,
+    backButtonCount,
     requestLogin,
     logout,
     showAboutMe,

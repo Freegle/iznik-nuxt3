@@ -394,7 +394,9 @@ import VisibleWhen from '~/components/VisibleWhen'
 const SupporterInfoModal = defineAsyncComponent(() =>
   import('~/components/SupporterInfoModal.vue')
 )
-const SidebarLeft = () => import('~/components/SidebarLeft')
+const SidebarLeft = defineAsyncComponent(() =>
+  import('~/components/SidebarLeft')
+)
 
 export default {
   components: {

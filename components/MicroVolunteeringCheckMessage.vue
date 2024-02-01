@@ -66,7 +66,9 @@
 import { useMessageStore } from '../stores/message'
 import { useMicroVolunteeringStore } from '../stores/microvolunteering'
 import SpinButton from './SpinButton'
-const MessageExpanded = () => import('~/components/MessageExpanded')
+const MessageExpanded = defineAsyncComponent(() =>
+  import('~/components/MessageExpanded')
+)
 
 export default {
   components: { MessageExpanded, SpinButton },

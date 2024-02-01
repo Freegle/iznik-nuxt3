@@ -1,6 +1,7 @@
 import { APIError, MaintenanceError } from '@/api/BaseAPI'
 import { useMiscStore } from '~/stores/misc'
 import { useRouter } from '#imports'
+import { suppressException } from '~/composables/useSuppressException'
 
 export default defineNuxtPlugin((nuxtApp) => {
   const originalErrorHandler = nuxtApp.vueApp.config.errorHandler
@@ -29,6 +30,8 @@ export default defineNuxtPlugin((nuxtApp) => {
       const miscStore = useMiscStore()
       miscStore.somethingWentWrong = true
 
+      return true
+    } else if (suppressException(err)) {
       return true
     }
 

@@ -58,7 +58,9 @@ import { buildHead } from '~/composables/useBuildHead'
 let LeafletHeatmap = null
 
 if (process.client) {
-  LeafletHeatmap = () => import('~/components/LeafletHeatmap')
+  LeafletHeatmap = defineAsyncComponent(() =>
+    import('~/components/LeafletHeatmap')
+  )
 }
 
 export default {

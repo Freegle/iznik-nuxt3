@@ -49,51 +49,49 @@
             @error="brokenImage"
           />
         </div>
-        <span
-          v-if="userid"
-          class="text-muted d-flex flex-row flex-wrap align-items-center"
-        >
+        <div v-if="userid" class="text-muted align-items-center">
           <span class="text-muted small mr-1">
             {{ timeago(reply.added) }}
           </span>
-          <NewsUserInfo :id="id" class="mr-1" />
-          &bull;
+          <NewsUserInfo :id="id" class="mr-1 d-inline" />
+        </div>
+        <div class="d-flex flex-row align-items-center">
           <b-button
             variant="link"
             size="sm"
-            class="reply__button text-muted"
+            class="reply__button text-muted m-0"
             @click="replyReply"
           >
             Reply
           </b-button>
           <template v-if="!reply.loved">
-            &bull;
+            <span class="text-muted small ms-1 me-1">&bull;</span>
             <b-button
               variant="link"
               size="sm"
-              class="reply__button text-muted"
+              class="reply__button text-muted m-0"
               @click="love"
             >
               Love this
             </b-button>
           </template>
           <template v-if="reply.loved">
-            &bull;
+            <span class="text-muted small ms-1 me-1">&bull;</span>
             <b-button
               variant="link"
               size="sm"
-              class="reply__button text-muted"
+              class="reply__button text-muted m-0"
               @click="unlove"
             >
               Unlove this
             </b-button>
           </template>
           <template v-if="reply.loves">
-            &bull;
+            <span class="text-muted small ms-1 me-1">&bull;</span>
             <b-button
               variant="link"
               size="sm"
-              class="mr-1 small text-muted showlove"
+              class="mr-1 small text-muted showlove m-0"
               :aria-label="getShowLovesLabel"
               @click="showLove"
             >
@@ -101,44 +99,44 @@
             </b-button>
           </template>
           <template v-if="parseInt(me.id) === parseInt(userid) || admin">
-            &bull;
+            <span class="text-muted small ms-1 me-1">&bull;</span>
             <b-button
               variant="link"
               size="sm"
-              class="reply__button text-muted"
+              class="reply__button text-muted m-0"
               @click="showEdit"
             >
               Edit
             </b-button>
           </template>
           <template v-if="parseInt(me.id) === parseInt(userid) || mod">
-            &bull;
+            <span class="text-muted small ms-1 me-1">&bull;</span>
             <b-button
               variant="link"
               size="sm"
-              class="reply__button text-muted"
+              class="reply__button text-muted m-0"
               @click="deleteReply"
             >
               Delete
             </b-button>
           </template>
           <template v-if="parseInt(me.id) !== parseInt(userid)">
-            &bull;
+            <span class="text-muted small ms-1 me-1">&bull;</span>
             <ChatButton
-              class="reply__button text-muted d-flex align-items-center"
+              class="reply__button text-muted d-flex align-items-center m-0"
               :userid="userid"
               title="Message"
               variant="link"
               size="sm"
               :show-icon="false"
-              btn-class="text-muted p-0 mbsmall"
+              btn-class="text-muted p-0"
               title-class="ml-0"
             />
           </template>
-        </span>
-        <NewsPreview
-          v-if="reply.preview"
-          :preview="reply.preview"
+        </div>
+        <NewsPreviews
+          v-if="reply.previews?.length"
+          :previews="reply.previews"
           class="mt-1"
           size="sm"
         />
@@ -305,7 +303,7 @@ import NewsUserInfo from '~/components/NewsUserInfo'
 import NewsHighlight from '~/components/NewsHighlight'
 
 import ChatButton from '~/components/ChatButton'
-import NewsPreview from '~/components/NewsPreview'
+import NewsPreviews from '~/components/NewsPreviews'
 import ProfileImage from '~/components/ProfileImage'
 
 const NewsPhotoModal = defineAsyncComponent(() =>
@@ -319,9 +317,13 @@ const ProfileModal = defineAsyncComponent(() =>
 const ConfirmModal = defineAsyncComponent(() =>
   import('~/components/ConfirmModal.vue')
 )
-const NewsReplies = () => import('~/components/NewsReplies.vue')
-const OurFilePond = () => import('~/components/OurFilePond')
-const OurAtTa = () => import('~/components/OurAtTa')
+const NewsReplies = defineAsyncComponent(() =>
+  import('~/components/NewsReplies.vue')
+)
+const OurFilePond = defineAsyncComponent(() =>
+  import('~/components/OurFilePond')
+)
+const OurAtTa = defineAsyncComponent(() => import('~/components/OurAtTa'))
 
 export default {
   name: 'NewsReply',
@@ -336,7 +338,7 @@ export default {
     NewsHighlight,
     ProfileModal,
     ChatButton,
-    NewsPreview,
+    NewsPreviews,
     ProfileImage,
     ConfirmModal,
     OurAtTa,
@@ -630,9 +632,5 @@ export default {
 
 :deep(.strike) {
   text-decoration: line-through;
-}
-
-:deep(.mbsmall) {
-  margin-bottom: 0.125rem !important;
 }
 </style>

@@ -132,7 +132,9 @@ import { useStoryStore } from '../stores/stories'
 import { useComposeStore } from '../stores/compose'
 import NoticeMessage from './NoticeMessage'
 import { useModal } from '~/composables/useModal'
-const OurFilePond = () => import('~/components/OurFilePond')
+const OurFilePond = defineAsyncComponent(() =>
+  import('~/components/OurFilePond')
+)
 
 export default {
   components: {

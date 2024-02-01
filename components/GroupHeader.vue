@@ -208,6 +208,7 @@ export default {
     async join(callback) {
       if (!this.me) {
         // We need to force them to log in.
+        callback()
         this.$router.push('/explore/join/' + this.group.id)
       } else {
         await this.authStore.joinGroup(this.myid, this.group.id, true)

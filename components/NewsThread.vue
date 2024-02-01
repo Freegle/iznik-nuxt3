@@ -63,9 +63,9 @@
               @hide="showThis = false"
             />
             <div v-else>Bad feed item {{ newsfeed }}</div>
-            <NewsPreview
-              v-if="newsfeed.preview && !newsfeed.html"
-              :preview="newsfeed.preview"
+            <NewsPreviews
+              v-if="newsfeed.previews?.length && !newsfeed.html"
+              :previews="newsfeed.previews"
               class="mt-1"
             />
             <div v-if="mod && newsfeed.hidden" class="text-danger small">
@@ -92,6 +92,7 @@
         <span v-if="!newsfeed?.closed">
           <div v-if="enterNewLine">
             <OurAtTa
+              v-if="!newsfeed.deleted"
               ref="at"
               :members="tagusers"
               class="flex-shrink-2 input-group"
@@ -131,6 +132,7 @@
             @keydown.enter.exact="sendComment"
           >
             <OurAtTa
+              v-if="!newsfeed.deleted"
               ref="at"
               :members="tagusers"
               class="flex-shrink-2 input-group"
@@ -224,7 +226,6 @@
 </template>
 <script>
 import { useNewsfeedStore } from '../stores/newsfeed'
-import { useStoryStore } from '../stores/stories'
 import SpinButton from './SpinButton'
 import AutoHeightTextarea from './AutoHeightTextarea'
 import NewsReplies from '~/components/NewsReplies'
@@ -240,14 +241,16 @@ import NewsStory from '~/components/NewsStory'
 import NewsAlert from '~/components/NewsAlert'
 import NewsNoticeboard from '~/components/NewsNoticeboard'
 import NoticeMessage from '~/components/NoticeMessage'
-import NewsPreview from '~/components/NewsPreview'
+import NewsPreviews from '~/components/NewsPreviews'
 import ProfileImage from '~/components/ProfileImage'
 
 const NewsReportModal = defineAsyncComponent(() => import('./NewsReportModal'))
 const ConfirmModal = () =>
   defineAsyncComponent(() => import('~/components/ConfirmModal.vue'))
-const OurFilePond = () => import('~/components/OurFilePond')
-const OurAtTa = () => import('~/components/OurAtTa')
+const OurFilePond = defineAsyncComponent(() =>
+  import('~/components/OurFilePond')
+)
+const OurAtTa = defineAsyncComponent(() => import('~/components/OurAtTa'))
 
 export default {
   name: 'NewsThread',
@@ -265,7 +268,7 @@ export default {
     NewsAlert,
     NewsNoticeboard,
     NoticeMessage,
-    NewsPreview,
+    NewsPreviews,
     ProfileImage,
     ConfirmModal,
     AutoHeightTextarea,

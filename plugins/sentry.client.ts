@@ -7,6 +7,7 @@ import {
 import { defineNuxtPlugin, useRuntimeConfig } from '#app'
 import { useRouter } from '#imports'
 import { useMiscStore } from '~/stores/misc'
+import { suppressException } from '~/composables/useSuppressException'
 
 export default defineNuxtPlugin((nuxtApp) => {
   const config = useRuntimeConfig()
@@ -26,9 +27,6 @@ export default defineNuxtPlugin((nuxtApp) => {
       'ResizeObserver loop limit exceeded', // Benign - see https://stackoverflow.com/questions/49384120/resizeobserver-loop-limit-exceeded
       'ResizeObserver loop completed with undelivered notifications.',
       'Navigation cancelled from ', // This can happen if someone clicks twice in quick succession
-
-      // Leaflet errors.
-      'Map container not found',
 
       // These are very commonly errors caused by fetch() being aborted during page navigation.  See for example
       // https://forum.sentry.io/t/typeerror-failed-to-fetch-reported-over-and-overe/8447
@@ -108,10 +106,6 @@ export default defineNuxtPlugin((nuxtApp) => {
           // There's basically no info to report, so there's nothing we can do.  Suppress it.
           console.log('No info - suppress exception')
           return null
-        } else if (originalExceptionStack?.includes('leaflet')) {
-          // Leaflet produces all sorts of errors, which are not really our fault and don't affect the user.
-          console.log('Leaflet in stack - suppress exception')
-          return null
         } else if (originalExceptionStack?.includes('/gpt/')) {
           // Google ads are not our problem.
           console.log('Google ads - suppress exception')
@@ -143,16 +137,12 @@ export default defineNuxtPlugin((nuxtApp) => {
         ) {
           console.log('History.replaceState too often')
           return null
+        } else if (suppressException(originalException)) {
+          console.log('Suppress exception')
+          return null
         } else if (originalExceptionName === 'TypeError') {
           console.log('TypeError')
           if (
-            originalExceptionMessage?.match(/leaflet/) ||
-            originalExceptionMessage?.match(/getPosition/)
-          ) {
-            // Leaflet produces all sorts of errors, which are not really our fault and don't affect the user.
-            console.log('Suppress leaflet exception')
-            return null
-          } else if (
             originalExceptionMessage?.match(
               /can't redefine non-configurable property "userAgent"/
             )

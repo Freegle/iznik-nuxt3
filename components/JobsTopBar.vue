@@ -42,9 +42,9 @@ import { mapState } from 'pinia'
 import { useJobStore } from '../stores/job'
 import { useAuthStore } from '../stores/auth'
 import { useMiscStore } from '../stores/misc'
-const JobOne = () => import('./JobOne')
-const NoticeMessage = () => import('./NoticeMessage')
-const DonationButton = () => import('./DonationButton')
+const JobOne = defineAsyncComponent(() => import('./JobOne'))
+const NoticeMessage = defineAsyncComponent(() => import('./NoticeMessage'))
+const DonationButton = defineAsyncComponent(() => import('./DonationButton'))
 
 export default {
   components: {
