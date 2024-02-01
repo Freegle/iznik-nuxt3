@@ -25,6 +25,7 @@ import { App } from '@capacitor/app';
 import { useRouter } from '#imports'
 import { useChatStore } from '~/stores/chat'
 import { useNotificationStore } from '~/stores/notification'
+// import * as Sentry from "@sentry/vue";
 
 export const useMobileStore = defineStore({ // Do not persist
   id: 'mobile',

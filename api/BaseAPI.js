@@ -1,4 +1,4 @@
-import * as Sentry from '@sentry/browser'
+import * as Sentry from '@sentry/vue'
 import { fetchRetry } from '~/composables/useFetchRetry'
 import { useAuthStore } from '~/stores/auth'
 import { useMobileStore } from '~/stores/mobile'

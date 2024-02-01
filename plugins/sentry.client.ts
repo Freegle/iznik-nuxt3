@@ -1,4 +1,5 @@
-import * as Sentry from '@sentry/vue'
+//import * as Sentry from '@sentry/capacitor';
+import * as Sentry from '@sentry/vue';
 import { Integrations } from '@sentry/tracing'
 import {
   HttpClient as HttpClientIntegration,
@@ -20,7 +21,7 @@ export default defineNuxtPlugin((nuxtApp) => {
   }
 
   Sentry.init({
-    app: [vueApp],
+    app: vueApp,
     dsn: config.public.SENTRY_DSN,
     // Some errors seem benign, and so we ignore them on the client side rather than clutter our sentry logs.
     ignoreErrors: [
@@ -35,7 +36,7 @@ export default defineNuxtPlugin((nuxtApp) => {
       'TypeError: Unable to preload',
     ],
     integrations: [
-      new Integrations.BrowserTracing({
+      new Sentry.BrowserTracing({
         routingInstrumentation: Sentry.vueRouterInstrumentation(router),
         tracePropagationTargets: ['localhost', 'ilovefreegle.org', /^\//],
       }),
@@ -207,7 +208,10 @@ export default defineNuxtPlugin((nuxtApp) => {
       // Continue sending to Sentry
       return event
     },
-  })
+  }
+  //,
+  //Sentry.init
+  )
 
   vueApp.mixin(
     Sentry.createTracingMixins({

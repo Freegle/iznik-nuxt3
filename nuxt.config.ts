@@ -222,7 +222,13 @@ export default defineNuxtConfig({
         },
       },
     },
-    plugins: config.ISAPP?[]:
+    plugins: config.ISAPP?[
+      sentryVitePlugin({
+        org: 'freegle',
+        project: 'capacitor',
+        authToken: config.SENTRY_AUTH_TOKEN,
+      }),
+    ]:
       [
       VitePWA({ registerType: 'autoUpdate' }),
       // Make Lint errors cause build failures.

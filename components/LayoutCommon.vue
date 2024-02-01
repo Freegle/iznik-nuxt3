@@ -215,7 +215,7 @@ export default {
         }
       }
     } catch (e) {
-      console.log('Failed to set context', e)
+      console.log('Failed to set sentry context', e)
     }
 
     if (process.client) {
