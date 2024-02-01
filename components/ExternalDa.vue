@@ -10,8 +10,8 @@
         :ref="adUnitPath"
         :key="'breakpoint-' + adUnitPath + '-' + breakpoint"
         :style="{
-          width: dimensions[0] + 'px',
-          height: dimensions[1] + 'px',
+          'max-width': dimensions[0] + 'px',
+          'max-height': dimensions[1] + 'px',
         }"
       />
     </div>

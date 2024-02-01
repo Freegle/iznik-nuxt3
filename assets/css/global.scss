@@ -248,7 +248,7 @@ legend {
 }
 
 .sidebar__wrapper {
-  height: calc(100vh - 68px);
+  height: calc(100vh - var(--header-navbar-height) - var(--ads-label-height));
 
   .card-body .card {
     border-radius: unset;
@@ -538,4 +538,10 @@ label {
 
 .ourBack {
   background-color: $color-green-background !important;
+}
+
+:root {
+  --ads-height: 258px;
+  --ads-label-height: 42px;
+  --header-navbar-height: 76px;
 }

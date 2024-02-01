@@ -548,6 +548,6 @@ export default {
 }
 
 .sidebar-with-ads .sidebar__wrapper {
-  height: calc(100vh - 250px - 68px);
+  height: calc(100vh - var(--ads-height) - var(--ads-label-height) - var(--header-navbar-height));
 }
 </style>
