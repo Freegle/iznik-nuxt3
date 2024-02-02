@@ -70,6 +70,8 @@ export const useMobileStore = defineStore({ // Do not persist
       if (!this.isiOS) {
         Capacitor.Plugins.ZoomPlugin.enableZoom()
       }
+      // Sentry.captureMessage("Something went wrong A");
+      // Sentry.captureException("Test Captured Exception three");
     },
 
     //////////////
