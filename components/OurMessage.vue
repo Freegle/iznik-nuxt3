@@ -3,6 +3,12 @@
     v-if="message"
     :id="'msg-' + id"
     ref="msg"
+    v-observe-visibility="{
+      callback: visibilityChanged,
+      options: {
+        threshold: [0, 1],
+      },
+    }"
     class="position-relative ms-2 me-2 ms-sm-0 me-sm-0"
     itemscope
     itemtype="http://schema.org/Product"
@@ -55,7 +61,6 @@
         @hidden="expanded = false"
       />
     </div>
-    <div v-observe-visibility="visibilityChanged" />
   </div>
 </template>
 

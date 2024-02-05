@@ -1,5 +1,15 @@
 <template>
-  <div v-if="message" :id="'msg-' + id" class="position-relative">
+  <div
+    v-if="message"
+    :id="'msg-' + id"
+    v-observe-visibility="{
+      callback: view,
+      options: {
+        threshold: [0, 1],
+      },
+    }"
+    class="position-relative"
+  >
     <template v-if="message.successful">
       <MessageFreegled :id="id" />
     </template>
@@ -52,7 +62,6 @@
         />
       </div>
     </div>
-    <div v-observe-visibility="view" />
   </div>
 </template>
 
