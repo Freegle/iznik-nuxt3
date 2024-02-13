@@ -232,8 +232,10 @@ export const useChatStore = defineStore({
           keepChat = parseInt(this.route.path.substring(7))
         }
 
+        const search = this.route?.query?.search || null
+
         // Don't want to log any errors to Sentry - they can happen due to timing windows.
-        await this.fetchChats(null, false, keepChat)
+        await this.fetchChats(search, false, keepChat)
       }
 
       setTimeout(this.pollForChatUpdates, 30000)
