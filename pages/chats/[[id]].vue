@@ -187,12 +187,16 @@
           </VisibleWhen>
         </b-col>
         <b-col cols="0" xl="3" class="p-0 pl-1">
-          <VisibleWhen :at="['xl', 'xxl']">
+          <VisibleWhen
+            :at="['xl', 'xxl']"
+            :class="[adsVisible && 'sidebar-with-ads']"
+          >
             <ExternalDa
               ad-unit-path="/22794232631/freegle_chat_desktop"
               :dimensions="[300, 250]"
               div-id="div-gpt-ad-1692867596111-0"
               class="mt-2"
+              @rendered="adsVisible = $event"
             />
             <SidebarRight :show-job-opportunities="true" />
           </VisibleWhen>
@@ -266,9 +270,15 @@ export default {
 
     let chat = null
 
+    const search = ref(null)
+
+    if (route.query.search) {
+      search.value = route.query.search
+    }
+
     if (myid) {
       // Fetch the list of chats.
-      await chatStore.fetchChats(null, true, id)
+      await chatStore.fetchChats(search.value, true, id)
 
       // Is this chat in the list?
       chat = chatStore.byChatId(id)
@@ -297,19 +307,26 @@ export default {
 
     useHead(buildHead(route, runtimeConfig, title, description))
 
-    return { showContactDetailsAskModal, chatStore, showChats, id, chat }
+    return {
+      showContactDetailsAskModal,
+      chatStore,
+      showChats,
+      id,
+      chat,
+      search,
+    }
   },
   data() {
     return {
       showHideAllModal: false,
       minShowChats: 20,
-      search: null,
       searching: false,
       complete: false,
       bump: 1,
       distance: 1000,
       selectedChatId: null,
       showClosed: false,
+      adsVisible: false,
     }
   },
   computed: {
@@ -478,7 +495,13 @@ export default {
         // This means that history won't get updated, which means that Back will go to the top-level /chats page.
         // That is nice behaviour otherwise you have to hit Back a lot if you've viewed several chats.
         this.selectedChatId = id
-        router.replace(id ? '/chats/' + id : '/chats')
+        let url = id ? '/chats/' + id : '/chats'
+
+        if (this.search) {
+          url += '?search=' + this.search
+        }
+
+        router.replace(url)
       } else {
         router.push(id ? '/chats/' + id : '/chats')
       }
@@ -547,5 +570,12 @@ export default {
 
 .closedCount {
   border-radius: 50%;
+}
+
+.sidebar-with-ads .sidebar__wrapper {
+  height: calc(
+    100vh - var(--ads-height) - var(--ads-label-height) -
+      var(--header-navbar-height)
+  );
 }
 </style>
