@@ -270,9 +270,15 @@ export default {
 
     let chat = null
 
+    const search = ref(null)
+
+    if (route.query.search) {
+      search.value = route.query.search
+    }
+
     if (myid) {
       // Fetch the list of chats.
-      await chatStore.fetchChats(null, true, id)
+      await chatStore.fetchChats(search.value, true, id)
 
       // Is this chat in the list?
       chat = chatStore.byChatId(id)
@@ -301,13 +307,19 @@ export default {
 
     useHead(buildHead(route, runtimeConfig, title, description))
 
-    return { showContactDetailsAskModal, chatStore, showChats, id, chat }
+    return {
+      showContactDetailsAskModal,
+      chatStore,
+      showChats,
+      id,
+      chat,
+      search,
+    }
   },
   data() {
     return {
       showHideAllModal: false,
       minShowChats: 20,
-      search: null,
       searching: false,
       complete: false,
       bump: 1,
@@ -483,7 +495,13 @@ export default {
         // This means that history won't get updated, which means that Back will go to the top-level /chats page.
         // That is nice behaviour otherwise you have to hit Back a lot if you've viewed several chats.
         this.selectedChatId = id
-        router.replace(id ? '/chats/' + id : '/chats')
+        let url = id ? '/chats/' + id : '/chats'
+
+        if (this.search) {
+          url += '?search=' + this.search
+        }
+
+        router.replace(url)
       } else {
         router.push(id ? '/chats/' + id : '/chats')
       }
