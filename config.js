@@ -31,7 +31,7 @@ export default {
     'dj0yJmk9N245WTRqaDd2dnA4JmQ9WVdrOWIzTlZNMU01TjJjbWNHbzlNQS0tJnM9Y29uc3VtZXJzZWNyZXQmc3Y9MCZ4PWRh',
 
   SENTRY_DSN:
-    'https://63f870e6c729477ebca4098a0b07fd3a@o118493.ingest.sentry.io/4504083802226688',
+    'https://1ab4fc0b56b355f5e794857f8e25d316@o118493.ingest.sentry.io/4506712427855872', // modtools
 
   // Cookie banner for this site.
   COOKIEYES: process.env.COOKIEYES || null,

@@ -21,3 +21,7 @@ static/sw.js
 
 # Sentry Auth Token
 .env.sentry-build-plugin
+
+modtools/node_modules
+modtools/.nuxt
+modtools/dist

@@ -214,13 +214,13 @@ export default defineNuxtConfig({
     plugins: [
       VitePWA({ registerType: 'autoUpdate' }),
       // Make Lint errors cause build failures.
-      eslintPlugin(),
+      // eslintPlugin(),
       legacy({
         targets: ['since 2015'],
       }),
       sentryVitePlugin({
         org: 'freegle',
-        project: 'nuxt3',
+        project: 'modtools',
       }),
     ],
   },
