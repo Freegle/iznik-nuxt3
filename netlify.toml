@@ -1,7 +1,7 @@
 # Return 404 for requests from old code.  This avoids the function call, which costs.
 [build]
 command = "cd modtools && npm i && nuxt build"
-publish = "modtools/.output"
+publish = "modtools/dist"
 
 [[redirects]]
 from = "/api/*"
