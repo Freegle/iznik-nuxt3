@@ -5,7 +5,8 @@
       Here's an <ExternalLink href="https://ilovefreegle.org">ExternalLink to the Freegle website</ExternalLink>
     </p>
     <NoticeMessage>
-      Here's a notice
+      Here's a notice.
+      Does changing this show online?
     </NoticeMessage>
     <button @click="throwError">Throw error</button>
   </div>
