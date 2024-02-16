@@ -1,4 +1,7 @@
 # Return 404 for requests from old code.  This avoids the function call, which costs.
+[[build]]
+base = modtools
+
 [[redirects]]
 from = "/api/*"
 to = "/"
