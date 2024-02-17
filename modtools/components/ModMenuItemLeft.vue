@@ -1,5 +1,14 @@
 <template>
-  LEFT
+  <div>
+    <!-- eslint-disable-next-line -->
+    <span v-if="indent" class="pl-3" /><nuxt-link :to="link" @mousedown.native="click">{{ name }}</nuxt-link>
+    <b-badge v-if="count && getCount(count)" :variant="countVariant">
+      {{ getCount(count) }}
+    </b-badge>
+    <b-badge v-if="othercount && getCount(othercount)" variant="info">
+      {{ getCount(othercount) }}
+    </b-badge>
+  </div>
 </template>
 <script>
 export default {
@@ -45,13 +54,14 @@ export default {
     getCount(types) {
       let total = 0
 
-      if (types) {
+      /* TODO if (types) {
         for (const key in this.work) {
           if (types.indexOf(key) !== -1) {
             total += this.work[key]
           }
         }
-      }
+      }*/
+      total = 1
 
       return total
     },
@@ -69,3 +79,15 @@ export default {
   }
 }
 </script>
+
+<style scoped lang="scss">
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
+
+@include media-breakpoint-down(xs) {
+  .badge {
+    margin-left: 0.3em;
+  }
+}
+</style>

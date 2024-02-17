@@ -20,7 +20,7 @@ A fairly minimal `package.json` is needed as `nuxt.config.ts` extends `../` and 
 ## Not extended:
 
 * api/*
-* assets/* - ADDED
+* assets/* - ADDED and amended assets/css/_color-vars.scss
 
 ## Changes
 

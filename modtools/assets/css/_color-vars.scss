@@ -65,6 +65,12 @@ $color-black-opacity-60: rgba(0, 0, 0, 0.6);
 $color-purple: purple;
 $color-gold: darkgoldenrod;
 
+// ModTools colours
+$color-modtools-blue--dark: #396aa3;
+$color-modtools-green--light: #dff2d1;
+$color-modtools-menu: #3C73B3;
+$color-modtools-leftmenu-bg: #e8fefb;
+
 // Social networks
 $color-facebook: #3b5998;
 $color-twitter: #00aced;
@@ -72,4 +78,10 @@ $color-pinterest: #cb2027;
 $color-whatsapp: #43d854;
 $color-gmail: #ea4335;
 $color-skype: #00aff0;
-$color-telegram: #00405d
+$color-telegram: #00405d;
+
+// TODO
+/* margin-left: 0.3em; */
+$badge-padding-x: 0.4em;
+$badge-padding-y: 0.25em;
+$badge-font-size: 75%;
