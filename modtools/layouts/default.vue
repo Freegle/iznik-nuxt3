@@ -304,6 +304,7 @@ body.modal-open {
   left: 25px;
 }
 </style>
+
 <style>
 .container-fluid {
   --bs-gutter-x: 0;
