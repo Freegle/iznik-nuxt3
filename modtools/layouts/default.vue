@@ -126,7 +126,7 @@ export default {
     },
     menuCount() {
       const myid = this.myid()
-      console.log('menuCount myid',myid)
+      console.log('menuCount myid', myid)
       const work = this.$store.getters['auth/work']
       if (process.env.IS_APP) setBadgeCount(this.chatCount + work.total) // CC
       return work.total
@@ -302,5 +302,24 @@ body.modal-open {
   position: absolute;
   top: 0px;
   left: 25px;
+}
+</style>
+<style>
+.container-fluid {
+  --bs-gutter-x: 0;
+}
+
+a {
+  color: #00f;
+  text-decoration: none;
+  background-color: transparent;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.router-link-active{
+  font-weight: bold;
 }
 </style>
