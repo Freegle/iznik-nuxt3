@@ -1,4 +1,6 @@
 const config = defineNuxtConfig({
+  // target: 'static',
+  ssr: false,
   extends: [
     '../'
   ],

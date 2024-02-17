@@ -1,99 +1,97 @@
 <template>
-  <client-only>
-    <div class="pageback">
-      <b-navbar id="navbar" :key="'nuxt1-' + bump" type="dark" class="navback p-0 p-sm-1 justify-content-between" fixed="top">
-        <b-navbar-brand class="p-0 pr-2 d-flex">
-          <b-img class="logo clickme" fluid rounded :src="logo" alt="Home" @click="clicklogo" />
-          <ModStatus class="status" />
-        </b-navbar-brand>
-        <ModZoomStock class="d-none d-md-block text-white" />
-        <b-navbar-nav class="d-flex align-items-center">
-          <b-nav-item v-if="loggedIn" id="menu-option-modtools-discourse2" class="text-center p-0 mr-4" @click="discourse">
-            <div class="position-relative small">
-              <v-icon name="brands/discourse" scale="2" class="fw" />
-              <div class="d-none d-xl-block">
-                Us
-              </div>
-              <b-badge v-show="discourseCount" variant="success" class="discourseBadge">
-                {{ discourseCount }}
-              </b-badge>
+  <div class="pageback">
+    <b-navbar id="navbar" :key="'nuxt1-' + bump" type="dark" class="navback p-0 p-sm-1 justify-content-between" fixed="top">
+      <b-navbar-brand class="p-0 pr-2 d-flex">
+        <b-img class="logo clickme" fluid rounded :src="logo" alt="Home" @click="clicklogo" />
+        <ModStatus class="status" />
+      </b-navbar-brand>
+      <ModZoomStock class="d-none d-md-block text-white" />
+      <b-navbar-nav class="d-flex align-items-center">
+        <b-nav-item v-if="loggedIn" id="menu-option-modtools-discourse2" class="text-center p-0 mr-4" @click="discourse">
+          <div class="position-relative small">
+            <v-icon name="brands/discourse" scale="2" class="fw" />
+            <div class="d-none d-xl-block">
+              Us
             </div>
-          </b-nav-item>
-          <ChatMenu v-if="loggedIn" id="menu-option-modtools-chat2" :is-list-item="true" :chat-count.sync="chatCount" class="mr-4" />
-          <b-nav-item v-if="loggedIn">
-            <div class="position-relative">
-              <b-button variant="white" class="menu" @click="toggleMenu">
-                <v-icon name="bars" class="" scale="1.5" />
-              </b-button>
-              <b-badge v-show="menuCount" v-if="!showMenu" variant="danger" class="menuCount position-absolute" @click="toggleMenu">
-                {{ menuCount }}
-              </b-badge>
-            </div>
-          </b-nav-item>
-          <b-nav-item v-if="!loggedIn">
-            <b-button variant="white" @click="requestLogin">
-              Log in
+            <b-badge v-show="discourseCount" variant="success" class="discourseBadge">
+              {{ discourseCount }}
+            </b-badge>
+          </div>
+        </b-nav-item>
+        <ChatMenu v-if="loggedIn" id="menu-option-modtools-chat2" :is-list-item="true" :chat-count.sync="chatCount" class="mr-4" />
+        <b-nav-item v-if="loggedIn">
+          <div class="position-relative">
+            <b-button variant="white" class="menu" @click="toggleMenu">
+              <v-icon name="bars" class="" scale="1.5" />
             </b-button>
-          </b-nav-item>
-        </b-navbar-nav>
-      </b-navbar>
+            <b-badge v-show="menuCount" v-if="!showMenu" variant="danger" class="menuCount position-absolute" @click="toggleMenu">
+              {{ menuCount }}
+            </b-badge>
+          </div>
+        </b-nav-item>
+        <b-nav-item v-if="!loggedIn">
+          <b-button variant="white" @click="requestLogin">
+            Log in
+          </b-button>
+        </b-nav-item>
+      </b-navbar-nav>
+    </b-navbar>
 
-      <div :key="'nuxt2-' + bump" class="d-flex">
-        <div v-if="showMenu" class="leftmenu text--medium-large-spaced">
-          <ModMenuItemLeft link="/" name="Dashboard" />
-          <hr>
-          <div class="pl-1">
-            Messages
-          </div>
-          <ModMenuItemLeft link="/messages/pending" name="Pending" :count="['pending']" :othercount="['pendingother']" indent />
-          <ModMenuItemLeft link="/messages/approved" name="Approved" indent />
-          <ModMenuItemLeft link="/messages/edits" name="Edits" :count="['editreview']" indent />
-          <hr>
-          <div class="pl-1">
-            Members
-          </div>
-          <ModMenuItemLeft link="/members/approved" name="Approved" indent />
-          <ModMenuItemLeft link="/members/review" name="Member Review" :count="['spammembers']" indent />
-          <ModMenuItemLeft link="/chats/review" name="Chat Review" :count="['chatreview']" :othercount="['chatreviewother']" indent />
-          <ModMenuItemLeft link="/members/related" name="Related" :count="['relatedmembers']" indent />
-          <ModMenuItemLeft link="/members/stories" name="Stories" indent :count="['stories']" />
-          <ModMenuItemLeft v-if="hasPermissionNewsletter" link="/members/newsletter" name="Newsletter" indent :count="['newsletterstories']" />
-          <ModMenuItemLeft v-if="hasPermissionGiftAid" link="/giftaid" name="Gift Aid" indent :count="['giftaid']" />
-          <ModMenuItemLeft link="/members/feedback" name="Feedback" indent :othercount="['happiness']" />
-          <ModMenuItemLeft link="/members/microvolunteering" indent name="MicroVols" />
-          <ModMenuItemLeft link="/members/notes" name="Notes" indent />
-          <hr>
-          <hr>
-          <ModMenuItemLeft link="/communityevents" name="Events" :count="['pendingevents']" />
-          <ModMenuItemLeft link="/volunteering" name="Volunteering" :count="['pendingvolunteering']" />
-          <ModMenuItemLeft link="/publicity" name="Publicity" :count="['socialactions', 'popularposts']" />
-          <ModMenuItemLeft link="/admins" name="Admins" :count="['pendingadmins']" />
-          <ModMenuItemLeft link="/spammers" name="Spammers" :count="hasPermissionSpamAdmin ? ['spammerpendingadd', 'spammerpendingremove'] : []" />
-          <hr>
-          <ModMenuItemLeft link="/logs" name="Logs" />
-          <ModMenuItemLeft v-if="supportOrAdmin" link="/support" name="Support" />
-          <ModMenuItemLeft link="/settings" name="Settings" />
-          <ModMenuItemLeft link="/teams" name="Teams" />
-          <div>
-            <ExternalLink href="https://wiki.ilovefreegle.org/ModTools" class="pl-1">
-              Help
-            </ExternalLink>
-          </div>
-          <div>
-            <a href="#" class="pl-1" @click="logOut">
-              Logout
-            </a>
-          </div>
+    <div :key="'nuxt2-' + bump" class="d-flex">
+      <div v-if="showMenu" class="leftmenu text--medium-large-spaced">
+        <ModMenuItemLeft link="/" name="Dashboard" />
+        <hr>
+        <div class="pl-1">
+          Messages
         </div>
-        <div class="ml-0 pl-0 pl-sm-1 pr-0 pr-sm-1 pageContent w-100">
-          <slot ref="pageContent" />
+        <ModMenuItemLeft link="/messages/pending" name="Pending" :count="['pending']" :othercount="['pendingother']" indent />
+        <ModMenuItemLeft link="/messages/approved" name="Approved" indent />
+        <ModMenuItemLeft link="/messages/edits" name="Edits" :count="['editreview']" indent />
+        <hr>
+        <div class="pl-1">
+          Members
+        </div>
+        <ModMenuItemLeft link="/members/approved" name="Approved" indent />
+        <ModMenuItemLeft link="/members/review" name="Member Review" :count="['spammembers']" indent />
+        <ModMenuItemLeft link="/chats/review" name="Chat Review" :count="['chatreview']" :othercount="['chatreviewother']" indent />
+        <ModMenuItemLeft link="/members/related" name="Related" :count="['relatedmembers']" indent />
+        <ModMenuItemLeft link="/members/stories" name="Stories" indent :count="['stories']" />
+        <ModMenuItemLeft v-if="hasPermissionNewsletter" link="/members/newsletter" name="Newsletter" indent :count="['newsletterstories']" />
+        <ModMenuItemLeft v-if="hasPermissionGiftAid" link="/giftaid" name="Gift Aid" indent :count="['giftaid']" />
+        <ModMenuItemLeft link="/members/feedback" name="Feedback" indent :othercount="['happiness']" />
+        <ModMenuItemLeft link="/members/microvolunteering" indent name="MicroVols" />
+        <ModMenuItemLeft link="/members/notes" name="Notes" indent />
+        <hr>
+        <hr>
+        <ModMenuItemLeft link="/communityevents" name="Events" :count="['pendingevents']" />
+        <ModMenuItemLeft link="/volunteering" name="Volunteering" :count="['pendingvolunteering']" />
+        <ModMenuItemLeft link="/publicity" name="Publicity" :count="['socialactions', 'popularposts']" />
+        <ModMenuItemLeft link="/admins" name="Admins" :count="['pendingadmins']" />
+        <ModMenuItemLeft link="/spammers" name="Spammers" :count="hasPermissionSpamAdmin ? ['spammerpendingadd', 'spammerpendingremove'] : []" />
+        <hr>
+        <ModMenuItemLeft link="/logs" name="Logs" />
+        <ModMenuItemLeft v-if="supportOrAdmin" link="/support" name="Support" />
+        <ModMenuItemLeft link="/settings" name="Settings" />
+        <ModMenuItemLeft link="/teams" name="Teams" />
+        <div>
+          <ExternalLink href="https://wiki.ilovefreegle.org/ModTools" class="pl-1">
+            Help
+          </ExternalLink>
+        </div>
+        <div>
+          <a href="#" class="pl-1" @click="logOut">
+            Logout
+          </a>
         </div>
       </div>
-      <ChatPopups v-if="loggedIn" class="d-none d-sm-block" />
-      <LoginModal v-if="complete" ref="loginModal" :key="'login-' + bumpLogin" />
-      <div id="sizer" ref="sizer" class="d-none d-lg-block" />
+      <div class="ml-0 pl-0 pl-sm-1 pr-0 pr-sm-1 pageContent w-100">
+        <slot ref="pageContent" />
+      </div>
     </div>
-  </client-only>
+    <ChatPopups v-if="loggedIn" class="d-none d-sm-block" />
+    <LoginModal v-if="complete" ref="loginModal" :key="'login-' + bumpLogin" />
+    <div id="sizer" ref="sizer" class="d-none d-lg-block" />
+  </div>
 </template>
 
 <script lang="ts">
@@ -127,6 +125,8 @@ export default {
       return this.showMenu ? 'slide-in' : 'slide-out'
     },
     menuCount() {
+      const myid = this.myid()
+      console.log('menuCount myid',myid)
       const work = this.$store.getters['auth/work']
       if (process.env.IS_APP) setBadgeCount(this.chatCount + work.total) // CC
       return work.total
