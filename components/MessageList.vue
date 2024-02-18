@@ -536,6 +536,26 @@ export default {
               dimensions: [728, 90],
               divId: 'div-gpt-ad-1692867153277-0',
             },
+            1: {
+              adUnitPath: '/22794232631/freegle_feed_desktop_2',
+              dimensions: [728, 90],
+              divId: 'div-gpt-ad-1708280158016-0',
+            },
+            2: {
+              adUnitPath: '/22794232631/freegle_feed_desktop_3',
+              dimensions: [728, 90],
+              divId: 'div-gpt-ad-1708280229653-0',
+            },
+            3: {
+              adUnitPath: '/22794232631/freegle_feed_desktop_4',
+              dimensions: [728, 90],
+              divId: 'div-gpt-ad-1708280290737-0',
+            },
+            4: {
+              adUnitPath: '/22794232631/freegle_feed_desktop_5',
+              dimensions: [728, 90],
+              divId: 'div-gpt-ad-1708280362777-0',
+            },
           }
         : {
             0: {
