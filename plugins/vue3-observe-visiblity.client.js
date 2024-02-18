@@ -5,6 +5,10 @@ const intersectionObserverDirective = {
     let callback
     let options = {}
     let throttle = 0
+    let entryTopWasObserved = false
+    let entryBottomWasObserved = false
+    let entryWasObserved = false
+    let entryObservedCount = 0
 
     // Check if binding.value is a function or an object
     if (typeof binding.value === 'function') {
@@ -13,6 +17,10 @@ const intersectionObserverDirective = {
       ;({ callback, options, throttle } = binding.value)
     }
     let timer
+
+    if (options.observeFullElement) {
+      options.threshold = [0, 1]
+    }
 
     const observerCallback = (entries, observer) => {
       entries.forEach((entry) => {
@@ -25,6 +33,21 @@ const intersectionObserverDirective = {
         const isBottomVisible =
           isVisible && intersectionRect.bottom >= boundingClientRect.bottom
 
+        if (options.observeFullElement) {
+          entryTopWasObserved = isTopVisible
+          entryBottomWasObserved = isBottomVisible
+
+          if (entryTopWasObserved && entryBottomWasObserved) {
+            entryWasObserved = true
+            entryObservedCount += 1
+          }
+
+          if (!isVisible) {
+            entryTopWasObserved = false
+            entryBottomWasObserved = false
+          }
+        }
+
         // Throttle callback execution
         if (timer === undefined) {
           timer = window.setTimeout(() => {
@@ -32,6 +55,8 @@ const intersectionObserverDirective = {
             callback(isVisible, {
               isTopVisible,
               isBottomVisible,
+              entryWasObserved,
+              entryObservedCount,
               entry,
               observer,
             })
