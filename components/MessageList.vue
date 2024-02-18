@@ -50,13 +50,13 @@
             />
           </VisibleWhen>
         </div>
-        <ExternalDa
-          v-if="insertAd(ix)"
-          :ad-unit-path="insertAd(ix).adUnitPath"
-          :dimensions="insertAd(ix).dimensions"
-          :div-id="insertAd(ix).divId"
-          class="mt-3 mt-xl-2"
-        />
+        <div v-if="insertAd(ix)" class="mt-3 mt-xl-2">
+          <ExternalDa
+            :ad-unit-path="insertAd(ix).adUnitPath"
+            :dimensions="insertAd(ix).dimensions"
+            :div-id="insertAd(ix).divId"
+          />
+        </div>
       </div>
     </div>
     <infinite-loading
