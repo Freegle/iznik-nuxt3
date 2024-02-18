@@ -50,28 +50,13 @@
             />
           </VisibleWhen>
         </div>
-        <VisibleWhen
-          v-if="ix % SHOW_AD_EVERY === 0"
-          :not="['xs', 'sm', 'md', 'lg']"
-        >
-          <ExternalDa
-            ad-unit-path="/22794232631/freegle_feed_desktop"
-            :dimensions="[728, 90]"
-            :div-id="'div-gpt-ad-1692867153277-' + ix"
-            class="mt-2"
-          />
-        </VisibleWhen>
-        <VisibleWhen
-          v-if="ix % SHOW_AD_EVERY === 0"
-          :at="['xs', 'sm', 'md', 'lg']"
-        >
-          <ExternalDa
-            ad-unit-path="/22794232631/freegle_feed_app"
-            :dimensions="[300, 250]"
-            :div-id="'div-gpt-ad-1692867324381-' + ix"
-            class="mt-3"
-          />
-        </VisibleWhen>
+        <ExternalDa
+          v-if="insertAd(ix)"
+          :ad-unit-path="insertAd(ix).adUnitPath"
+          :dimensions="insertAd(ix).dimensions"
+          :div-id="insertAd(ix).divId"
+          class="mt-3 mt-xl-2"
+        />
       </div>
     </div>
     <infinite-loading
@@ -443,6 +428,11 @@ export default {
       immediate: true,
     },
   },
+  beforeUnmount() {
+    if (this.markSeenTimer) {
+      clearTimeout(this.markSeenTimer)
+    }
+  },
   methods: {
     async loadMore($state) {
       do {
@@ -525,10 +515,61 @@ export default {
         }
       }, 100)
     },
-    beforeUnmount() {
-      if (this.markSeenTimer) {
-        clearTimeout(this.markSeenTimer)
+    insertAd(ix) {
+      // We show an ad occasionally in the feed.
+      if (ix % this.SHOW_AD_EVERY !== 0) {
+        return false
       }
+
+      // We have to insert a different ad slot each time - Google doesn't let you repeat them.  And we need to
+      // have different variants for desktop and mobile.
+      const desktop = !['xs', 'sm', 'md', 'lg'].includes(
+        this.miscStore.breakpoint
+      )
+
+      ix = ix / 10
+
+      const ads = desktop
+        ? {
+            0: {
+              adUnitPath: '/22794232631/freegle_feed_desktop',
+              dimensions: [728, 90],
+              divId: 'div-gpt-ad-1692867153277-0',
+            },
+          }
+        : {
+            0: {
+              adUnitPath: '/22794232631/freegle_feed_app',
+              dimensions: [300, 250],
+              divId: 'div-gpt-ad-1692867324381-0',
+            },
+            1: {
+              adUnitPath: '/22794232631/freegle_feed_app_2',
+              dimensions: [300, 250],
+              divId: 'div-gpt-ad-1707999616879-0',
+            },
+            2: {
+              adUnitPath: '/22794232631/freegle_feed_app_3',
+              dimensions: [300, 250],
+              divId: 'div-gpt-ad-1707999845886-0',
+            },
+            3: {
+              adUnitPath: '/22794232631/freegle_feed_app_4',
+              dimensions: [300, 250],
+              divId: 'div-gpt-ad-1707999962593-0',
+            },
+            4: {
+              adUnitPath: '/22794232631/freegle_feed_app_5',
+              dimensions: [300, 250],
+              divId: 'div-gpt-ad-1708000097990-0',
+            },
+          }
+
+      if (ix < ads.length) {
+        return false
+      }
+
+      return ads[ix]
     },
   },
 }
