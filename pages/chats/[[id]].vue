@@ -536,6 +536,11 @@ export default {
 }
 </script>
 <style scoped lang="scss">
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/sticky-banner.scss';
+
 .chatback {
   background-color: $color-yellow--light;
 }
@@ -549,7 +554,15 @@ export default {
 }
 
 .chatlist {
-  height: calc(100vh - 75px);
+  // On mobile we substitute a different height navbar on this page.
+  height: calc(100vh - 58px - $sticky-banner-height-mobile);
+
+  @include media-breakpoint-up(md) {
+    height: calc(
+      100vh - var(--header-navbar-height) - $sticky-banner-height-desktop
+    );
+  }
+
   display: flex;
   flex-direction: column;
 
@@ -575,7 +588,7 @@ export default {
 .sidebar-with-ads .sidebar__wrapper {
   height: calc(
     100vh - var(--ads-height) - var(--ads-label-height) -
-      var(--header-navbar-height)
+      var(--header-navbar-height) - $sticky-banner-height-desktop
   );
 }
 </style>

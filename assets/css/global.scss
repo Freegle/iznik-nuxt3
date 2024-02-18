@@ -1,3 +1,5 @@
+@import 'assets/css/sticky-banner.scss';
+
 #serverloader {
   z-index: 1000;
   display: flex !important;
@@ -248,7 +250,7 @@ legend {
 }
 
 .sidebar__wrapper {
-  height: calc(100vh - var(--header-navbar-height) - var(--ads-label-height));
+  height: calc(100vh - var(--header-navbar-height) - var(--ads-label-height) - $sticky-banner-height-desktop);
 
   .card-body .card {
     border-radius: unset;
@@ -324,7 +326,12 @@ form {
 .modal-content {
   // Need to make this scrollable so that e.g. login modal can all be accessed on screens with small height.
   overflow-y: auto !important;
-  max-height: calc(100% - 50px) !important;
+
+  max-height: calc(100% - $sticky-banner-height-mobile) !important;
+
+  @include media-breakpoint-up(md) {
+    max-height: calc(100% - $sticky-banner-height-desktop) !important;
+  }
 }
 
 label {

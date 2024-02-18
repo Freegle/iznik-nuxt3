@@ -4,32 +4,28 @@
       <div class="aboveSticky">
         <slot ref="pageContent" />
       </div>
-      <VisibleWhen :at="['xs', 'sm', 'md', 'lg']">
-        <div
-          v-if="allowAd && !noAdRendered"
-          class="d-flex justify-content-around w-100 sticky"
-          style="height: 52px"
-        >
-          <ExternalDa
-            ad-unit-path="/22794232631/freegle_sticky"
-            :dimensions="[320, 50]"
-            div-id="div-gpt-ad-1699973618906-0"
-            class="sticky"
-            style="width: 320px; height: 50px; margin-top: 2px"
-            pixel
-            @rendered="adRendered"
-          />
-        </div>
-        <div
-          v-else
-          class="sticky ourBack w-100 text-center d-flex flex-column justify-content-center"
-          style="height: 52px"
-        >
-          <nuxt-link to="/donate" class="text-white nodecor">
-            Help keep Freegle running. Click to donate.
-          </nuxt-link>
-        </div>
-      </VisibleWhen>
+      <div
+        v-if="allowAd && !noAdRendered"
+        class="d-flex justify-content-around w-100 sticky"
+      >
+        <ExternalDa
+          ad-unit-path="/22794232631/freegle_sticky"
+          :dimensions="[320, 50]"
+          div-id="div-gpt-ad-1699973618906-0"
+          class="sticky"
+          pixel
+          @rendered="adRendered"
+        />
+      </div>
+      <div
+        v-else
+        class="sticky ourBack w-100 text-center d-flex flex-column justify-content-center"
+        style="height: 50px"
+      >
+        <nuxt-link to="/donate" class="text-white nodecor">
+          Help keep Freegle running. Click to donate.
+        </nuxt-link>
+      </div>
     </main>
     <client-only>
       <DeletedRestore />
@@ -76,7 +72,6 @@ import { useMiscStore } from '~/stores/misc'
 import { useChatStore } from '~/stores/chat'
 import replyToPost from '@/mixins/replyToPost'
 import ChatButton from '~/components/ChatButton'
-import VisibleWhen from '~/components/VisibleWhen'
 import { navBarHidden } from '~/composables/useNavbar'
 const SupportLink = defineAsyncComponent(() =>
   import('~/components/SupportLink')
@@ -97,7 +92,6 @@ export default {
     SomethingWentWrong,
     ChatButton,
     ExternalDa,
-    VisibleWhen,
   },
   mixins: [replyToPost],
   data() {
@@ -275,6 +269,7 @@ export default {
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/sticky-banner.scss';
 
 html {
   box-sizing: border-box;
@@ -307,19 +302,23 @@ body.modal-open {
 .sticky {
   position: fixed;
   bottom: 0;
-  background-color: $color-green-background;
+  background-color: $color-gray--dark;
   z-index: 10000;
 
+  margin-top: 2px;
+  width: 320px;
+  height: $sticky-banner-height-mobile;
+
   @include media-breakpoint-up(md) {
-    display: none !important;
+    height: $sticky-banner-height-desktop;
   }
 }
 
 .aboveSticky {
-  padding-bottom: 52px;
+  padding-bottom: calc($sticky-banner-height-mobile + 2px);
 
   @include media-breakpoint-up(md) {
-    padding-bottom: unset;
+    padding-bottom: calc($sticky-banner-height-desktop + 2px);
   }
 }
 </style>

@@ -295,6 +295,7 @@ const navBarBottomHidden = computed(() => {
 </script>
 <style scoped lang="scss">
 @import 'assets/css/navbar.scss';
+@import 'assets/css/sticky-banner.scss';
 
 #navbar-mobile {
   // Set all children to display: none except the last one.  This means that normally we'll display the navbar
@@ -308,7 +309,11 @@ const navBarBottomHidden = computed(() => {
 }
 
 .navbot {
-  margin-bottom: 50px;
+  margin-bottom: $sticky-banner-height-mobile;
+
+  @include media-breakpoint-up(md) {
+    margin-bottom: $sticky-banner-height-desktop;
+  }
 }
 
 :deep(.dropdown-toggle) {

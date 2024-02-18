@@ -132,6 +132,7 @@ export default {
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/sticky-banner.scss';
 
 .cg {
   flex-basis: 25%;
@@ -142,11 +143,11 @@ export default {
   width: 33vw;
 }
 
-@include media-breakpoint-down(md) {
+@include media-breakpoint-down(sm) {
   .layout {
     //We need to subtract space for the navbar, the ad bar, and also allow some extra because of the way vh works
     //mobile browsers.
-    min-height: calc(100vh - 84px - 52px - 84px);
+    min-height: calc(100vh - 84px - $sticky-banner-height-mobile - 84px);
     display: flex;
     flex-direction: column;
     justify-content: space-between;

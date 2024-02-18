@@ -1,30 +1,32 @@
 <template>
-  <!--
-  If you don't like ads, then you can use an ad blocker.  Plus you could donate to us
-  at https://www.ilovefreegle.org/donate - if we got enough donations we would be delighted not to show ads.
-   -->
-  <div v-observe-visibility="visibilityChanged" class="pointer">
-    <div v-if="isVisible" class="d-flex w-100 justify-content-around">
-      <div
-        :id="divId"
-        :ref="adUnitPath"
-        :key="'adUnit-' + adUnitPath"
-        :style="{
-          'max-width': dimensions[0] + 'px',
-          'max-height': dimensions[1] + 'px',
-        }"
-      />
+  <client-only>
+    <!--
+    If you don't like ads, then you can use an ad blocker.  Plus you could donate to us
+    at https://www.ilovefreegle.org/donate - if we got enough donations we would be delighted not to show ads.
+     -->
+    <div v-observe-visibility="visibilityChanged" class="pointer">
+      <div v-if="isVisible" class="d-flex w-100 justify-content-around">
+        <div
+          :id="divId"
+          :ref="adUnitPath"
+          :key="'adUnit-' + adUnitPath"
+          :style="{
+            'max-width': dimensions[0] + 'px',
+            'max-height': dimensions[1] + 'px',
+          }"
+        />
+      </div>
+      <p
+        v-if="isVisible && adShown"
+        class="text-center textsize d-none d-md-block"
+      >
+        Advertisement. These help Freegle keep going.
+      </p>
+      <!--    <div class="bg-white">-->
+      <!--      Path {{ adUnitPath }} id {{ divId }} dimensions {{ dimensions }}-->
+      <!--    </div>-->
     </div>
-    <p
-      v-if="isVisible && adShown"
-      class="text-center textsize d-none d-md-block"
-    >
-      Advertisement. These help Freegle keep going.
-    </p>
-    <!--    <div class="bg-white">-->
-    <!--      Path {{ adUnitPath }} id {{ divId }} dimensions {{ dimensions }}-->
-    <!--    </div>-->
-  </div>
+  </client-only>
 </template>
 <script setup>
 import { nextTick } from 'vue'
