@@ -90,6 +90,19 @@ let slot = null
 
 const timer = ref(null)
 
+const AD_REFRESH_TIMEOUT = 45000
+
+function refreshAd() {
+  if (
+    window.googletag?.pubads &&
+    typeof window.googletag?.pubads === 'function' &&
+    typeof window.googletag?.pubads().refresh === 'function'
+  ) {
+    window.googletag.pubads().refresh([slot])
+    timer.value = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
+  }
+}
+
 onBeforeUnmount(() => {
   try {
     if (timer.value) {
@@ -138,20 +151,6 @@ async function visibilityChanged(visible) {
                 adShown.value = false
               }
               emit('rendered', adShown.value)
-
-              // We refresh the ad slot.  This increases views.  Google doesn't like it if this is more frequent than
-              // every 30s.
-              if (!timer.value) {
-                timer.value = setTimeout(() => {
-                  if (
-                    window.googletag?.pubads &&
-                    typeof window.googletag?.pubads === 'function' &&
-                    typeof window.googletag?.pubads().refresh === 'function'
-                  ) {
-                    window.googletag.pubads().refresh([slot])
-                  }
-                }, 45000)
-              }
             })
             .addEventListener('slotVisibilityChanged', (event) => {
               if (event.inViewPercentage < 51) {
@@ -160,6 +159,13 @@ async function visibilityChanged(visible) {
                     event.inViewPercentage
                   }%.Viewport size: ${window.innerWidth}x${window.innerHeight}`
                 )
+              }
+            })
+            .addEventListener('impressionViewable', (event) => {
+              // We refresh the ad slot.  This increases views.  Google doesn't like it if this is more frequent than
+              // every 30s.
+              if (!timer.value) {
+                timer.value = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
               }
             })
 
