@@ -31,6 +31,9 @@
 <script setup>
 import { nextTick } from 'vue'
 import { ref, computed, onBeforeUnmount } from '#imports'
+import { useMiscStore } from '~/stores/misc'
+
+const miscStore = useMiscStore()
 
 const props = defineProps({
   adUnitPath: {
@@ -100,7 +103,11 @@ function refreshAd() {
     typeof window.googletag?.pubads === 'function' &&
     typeof window.googletag?.pubads().refresh === 'function'
   ) {
-    window.googletag.pubads().refresh([slot])
+    // Don't fresh if the ad is not visible or tab is not active.
+    if (isVisible.value && miscStore.visible) {
+      window.googletag.pubads().refresh([slot])
+    }
+
     timer.value = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
   }
 }
@@ -127,8 +134,9 @@ const emit = defineEmits(['rendered'])
 async function visibilityChanged(visible) {
   if (!blocked) {
     try {
+      isVisible.value = visible
+
       if (visible && !shownFirst) {
-        isVisible.value = visible
         shownFirst = true
 
         await nextTick()
