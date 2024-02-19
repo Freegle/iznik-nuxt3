@@ -209,7 +209,7 @@ const chatheader = ref(null)
 function typing(val) {
   if (miscStore.breakpoint === 'xs' || miscStore.breakpoint === 'sm') {
     // Also collapse the chat header, to make even more room.
-    chatheader.collapse(val)
+    chatheader.value.collapse(val)
   }
 }
 </script>
