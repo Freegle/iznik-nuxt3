@@ -90,6 +90,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 
 import {
+  faDiscourse,
   faFacebook,
   faTwitter,
   faWhatsapp,
@@ -135,6 +136,7 @@ library.add(
   faComments,
   faCalendarAlt,
   faCrown,
+  faDiscourse,
   faDownload,
   faEnvelope,
   faExclamationTriangle,

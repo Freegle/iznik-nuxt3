@@ -9,7 +9,7 @@
       <b-navbar-nav class="d-flex align-items-center">
         <b-nav-item v-if="loggedIn" id="menu-option-modtools-discourse2" class="text-center p-0 mr-4" @click="discourse">
           <div class="position-relative small">
-            <v-icon name="brands/discourse" scale="2" class="fw" />
+            <v-icon :icon="['fab', 'discourse']" scale="2" />
             <div class="d-none d-xl-block">
               Us
             </div>
@@ -22,7 +22,7 @@
         <b-nav-item v-if="loggedIn">
           <div class="position-relative">
             <b-button variant="white" class="menu" @click="toggleMenu">
-              <v-icon name="bars" class="" scale="1.5" />
+              <v-icon icon="bars" class="" scale="1.5" />
             </b-button>
             <b-badge v-show="menuCount" v-if="!showMenu" variant="danger" class="menuCount position-absolute" @click="toggleMenu">
               {{ menuCount }}
@@ -88,7 +88,7 @@
         <slot ref="pageContent" />
       </div>
     </div>
-    <ChatPopups v-if="loggedIn" class="d-none d-sm-block" />
+    <!--ChatPopups v-if="loggedIn" class="d-none d-sm-block" /-->
     <LoginModal v-if="complete" ref="loginModal" :key="'login-' + bumpLogin" />
     <div id="sizer" ref="sizer" class="d-none d-lg-block" />
   </div>
@@ -96,11 +96,13 @@
 
 <script lang="ts">
 import { useMiscStore } from '@/stores/misc'
+import { useAuthStore } from '../stores/auth'
 
 export default {
   setup() {
+    const authStore = useAuthStore()
     const miscStore = useMiscStore()
-    return { miscStore }
+    return { authStore, miscStore }
   },
   data: function () {
     return {
@@ -116,28 +118,62 @@ export default {
   },
   computed: {
     discourseCount() {
-      const discourse = this.$store.getters['auth/discourse']
+      /* const discourse = this.authStore.discourse
       return discourse
         ? discourse.notifications + discourse.newtopics + discourse.unreadtopics
-        : 0
+        : 0*/
+        return 77
     },
     slideclass() {
       return this.showMenu ? 'slide-in' : 'slide-out'
     },
     menuCount() {
-      const myid = this.myid()
+      /*const myid = this.myid()
       console.log('menuCount myid', myid)
-      const work = this.$store.getters['auth/work']
+      const work = this.authStore.work
       if (process.env.IS_APP) setBadgeCount(this.chatCount + work.total) // CC
-      return work.total
+      return work.total*/
+      return 88
     },
     work() {
-      return this.$store.getters['auth/work']
+      return  this.authStore.work
     }
   },
   mounted() {
   },
   methods: {
+    async logOut() {
+      // Remove all cookies, both client and server.  This seems to be necessary to kill off the PHPSESSID cookie
+      // on the server, which would otherwise keep us logged in despite our efforts.
+      console.log('Logout')
+      try {
+        this.$cookies.removeAll()
+      } catch (e) {}
+
+      await this.authStore.logout()
+      this.authStore.forceLogin = false
+
+      // Go to the landing page.
+      this.$router.push('/')
+    },
+    requestLogin() {
+      console.log('MODTOOLS.VUE requestLogin')
+      this.$refs.loginModal.show()
+    },
+    async checkWork() {
+      /*await this.fetchMe(['work'], true)
+      setTimeout(this.checkWork, 30000)*/
+    },
+    discourse(e) {
+      window.open('https://discourse.ilovefreegle.org/')
+      e.stopPropagation()
+      e.preventDefault()
+    },
+    chats(e) {
+      this.$router.push('/chats')
+      e.stopPropagation()
+      e.preventDefault()
+    },
     clicklogo(e) {
       console.log('clicklogo', this.$route.fullPath)
       if (this.$route.fullPath === '/') {
@@ -148,10 +184,34 @@ export default {
         this.$router.push('/')
       }
     },
-    requestLogin() {
-      console.log('MODTOOLS.VUE requestLogin')
-      this.$refs.loginModal.show()
+    toggleMenu() {
+      this.showMenu = !this.showMenu
     },
+    updateTime() {
+      this.miscStore.setTime()
+      this.timeTimer = setTimeout(this.updateTime, 30000)
+    },
+    googleLoggedIn() {
+      // Re-render the page, now that we are logged in.
+      this.bump++
+    },
+    googleLoaded() {
+      if (
+        this.$refs.loginModal &&
+        this.$refs.loginModal.showModal &&
+        this.$refs.loginModal.email
+      ) {
+        console.log(
+          'Showing login modal - leave well alone',
+          this.$refs.loginModal.email
+        )
+      } else {
+        this.bumpLogin++
+      }
+    },
+    //login() {
+    //  this.$refs.loginModal.show()
+    //}
   }
 }
 </script>
