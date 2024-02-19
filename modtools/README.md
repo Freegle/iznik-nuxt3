@@ -1,5 +1,7 @@
 # iznik-nuxt3 modtools
 
+This branch provides an interface for Freegle volunteers to moderate their group, running on separate website https://modtools.org/
+
 The app exists as a branch of the main nuxt3 app, with minimal modifications of the main codebase, with additions in a `modtools` directory.
 
 The modtools app in `modtools` has the parent directory as a layer, ie modtools extends or inherits from `..` ie the base nuxt3 app. 
@@ -20,14 +22,19 @@ A fairly minimal `package.json` is needed as `nuxt.config.ts` extends `../` and 
 ## Not extended:
 
 * api/*
-* assets/* - ADDED and amended assets/css/_color-vars.scss
+* assets/* - ADDED and amended `assets/css/_color-vars.scss`
 
 ## Changes
 
-* modtools/layouts/default.vue overrides ./layouts/default.vue
-* modtools/components/NoticeMessage.vue overrides ./components/NoticeMessage.vue
+* `app.vue` is a simplified copy of the root version
+* `modtools/layouts/default.vue` supersedes `./layouts/default.vue`
 
 ## Amended:
 
 * `modtools\assets\css\bootstrap-custom.scss` now has `~/../` at start twice
 
+## Upgrade notes
+
+* b-modal <template #default> <template #footer> useModal, etc. Do not use v-if on b-modal
+* Use icon in <v-icon :icon="['fab', 'discourse']" scale="2" />
+* Add extra icons to root plugins/vue-awesome.js

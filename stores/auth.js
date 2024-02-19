@@ -55,7 +55,7 @@ export const useAuthStore = defineStore({
     },
     setUser(value) {
       if (value) {
-        console.log('auth setUser YES')
+        console.log('auth setUser YES') // TODO
         // Remember that we have successfully logged in at some point.
         this.loggedInEver = true
         this.user = value
@@ -85,7 +85,7 @@ export const useAuthStore = defineStore({
           this.forceLogin = false
         }
       } else {
-        console.log('auth setUser NO')
+        console.log('auth setUser NO') // TODO
         this.user = null
       }
     },
@@ -280,7 +280,7 @@ export const useAuthStore = defineStore({
             },
             false
           )
-          console.log("GOT ME",me)
+          console.log("GOT ME",me) // TODO
         } catch (e) {
           // Failed.  This can validly happen with a 404 if the JWT is invalid.
           console.log('Exception fetching user')
