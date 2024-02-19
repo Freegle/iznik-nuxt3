@@ -81,6 +81,7 @@
     "save-file": "^2.3.1",
     "simpleheat": "^0.4.0",
     "supercluster": "^7.1.5",
+    "textarea-caret": "^3.1.0",
     "turf-distance": "^3.0.12",
     "turf-point": "^2.0.1",
     "twemoji": "^14.0.2",

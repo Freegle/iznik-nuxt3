@@ -72,51 +72,58 @@
       <div v-if="!otheruser?.deleted">
         <label for="chatmessage" class="visually-hidden">Chat message</label>
         <div v-if="!imagethumb">
-          <Popper
-            :show="showSuggested"
+          <b-form-textarea
+            v-if="enterNewLine && !otheruser?.spammer"
+            id="chatmessage"
+            ref="chatarea"
+            v-model="sendmessage"
+            placeholder="Type here..."
+            enterkeyhint="enter"
+            :style="height"
+            @keydown="typing"
+            @focus="markRead"
+          />
+          <b-form-textarea
+            v-else-if="!otheruser?.spammer"
+            id="chatmessage"
+            ref="chatarea"
+            v-model="sendmessage"
+            placeholder="Type here..."
+            :style="height"
+            enterkeyhint="send"
+            autocapitalize="none"
+            @keydown="typing"
+            @keydown.enter.exact.prevent
+            @keyup.enter.exact="send"
+            @keydown.enter.shift.exact.prevent="newline"
+            @keydown.alt.shift.enter.exact.prevent="newline"
+            @focus="markRead"
+          />
+          <Dropdown
             placement="top"
-            arrow
-            class="w-100 m-0 p-0 border-0"
+            :shown="showSuggested"
+            :triggers="[]"
+            :auto-hide="false"
+            class="position-absolute"
+            :style="
+              caretPosition
+                ? {
+                    top: `${caretPosition.top}px`,
+                    left: `${caretPosition.left}px`,
+                  }
+                : {}
+            "
           >
-            <b-form-textarea
-              v-if="enterNewLine && !otheruser?.spammer"
-              id="chatmessage"
-              ref="chatarea"
-              v-model="sendmessage"
-              placeholder="Type here..."
-              enterkeyhint="enter"
-              :style="height"
-              @keydown="typing"
-              @focus="markRead"
-            />
-            <b-form-textarea
-              v-else-if="!otheruser?.spammer"
-              id="chatmessage"
-              ref="chatarea"
-              v-model="sendmessage"
-              placeholder="Type here..."
-              :style="height"
-              enterkeyhint="send"
-              autocapitalize="none"
-              @keydown="typing"
-              @keydown.enter.exact.prevent
-              @keyup.enter.exact="send"
-              @keydown.enter.shift.exact.prevent="newline"
-              @keydown.alt.shift.enter.exact.prevent="newline"
-              @focus="markRead"
-            />
-            <template #content>
-              <strong>{{ suggestedAddress?.address?.singleline }}</strong>
-              <div class="d-flex justify-content-between flex-wrap mt-2">
-                <b-button variant="primary" @click="sendSuggestedAddress">
-                  Send address
-                </b-button>
-                <b-button variant="secondary" @click="rejectSuggestedAddress">
-                  Cancel
-                </b-button>
+            <template #popper>
+              <div
+                style="cursor: pointer"
+                class="px-2 py-2"
+                @mousedown="applySuggestedAddress()"
+              >
+                {{ suggestedAddress?.address?.singleline }}
               </div>
             </template>
-          </Popper>
+          </Dropdown>
         </div>
         <div v-else class="d-flex justify-content-end pt-2 pb-2">
           <b-img :src="imagethumb" fluid class="maxheight" />
@@ -307,7 +314,8 @@
 </template>
 <script>
 import pluralize from 'pluralize'
-import Popper from 'vue3-popper'
+import getCaretCoordinates from 'textarea-caret'
+import { Dropdown } from 'floating-vue'
 import { FAR_AWAY, TYPING_TIME_INVERVAL } from '../constants'
 import { setupChat } from '../composables/useChat'
 import { useMiscStore } from '../stores/misc'
@@ -363,7 +371,7 @@ export default {
     ProfileModal,
     ChatRSVPModal,
     MicroVolunteering,
-    Popper,
+    Dropdown,
   },
   props: {
     id: { type: Number, required: true },
@@ -418,6 +426,7 @@ export default {
       showNudgeTooSoonWarningModal: false,
       showNudgeWarningModal: false,
       hideSuggestedAddress: false,
+      caretPosition: { top: 0, left: 0 },
     }
   },
   computed: {
@@ -529,6 +538,15 @@ export default {
     },
   },
   watch: {
+    suggestedAddress: {
+      handler(newVal) {
+        if (newVal?.address?.singleline?.length !== newVal?.matchedLength) {
+          this.hideSuggestedAddress = false
+          this.updateCaretPosition()
+        }
+      },
+      deep: true,
+    },
     sendmessage(newVal, oldVal) {
       // This will result in the chat header shrinking once you start typing, to give more room, and then
       // expanding back again if you delete everything.
@@ -567,6 +585,27 @@ export default {
     }, 30000)
   },
   methods: {
+    updateCaretPosition() {
+      const textarea = this.$refs.chatarea.$el
+      const caretPosition = getCaretCoordinates(textarea, textarea.selectionEnd)
+      const textareaPosition = textarea.getBoundingClientRect()
+      this.caretPosition = {
+        top: caretPosition.top + textareaPosition.top,
+        left: caretPosition.left + textareaPosition.left,
+      }
+    },
+    applySuggestedAddress() {
+      const matchedLength = this.suggestedAddress.matchedLength
+      const suggestedAddress = this.suggestedAddress.address.singleline
+      // No need to apply suggestion if length of match and address are equal
+      if (matchedLength === suggestedAddress.length) {
+        return
+      }
+      this.sendmessage =
+        this.sendmessage.substring(0, this.sendmessage.length - matchedLength) +
+        this.suggestedAddress.address.singleline
+      this.hideSuggestedAddress = true
+    },
     async markRead() {
       await this.chatStore.markRead(this.id)
       this._updateAfterSend()

@@ -158,7 +158,7 @@ export default defineNuxtConfig({
     extractCSS: true,
   },
 
-  modules: ['@pinia/nuxt'],
+  modules: ['@pinia/nuxt', 'floating-vue/nuxt'],
 
   buildModules: [
     [
