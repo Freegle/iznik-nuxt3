@@ -84,6 +84,7 @@ export const useAuthStore = defineStore({
           // We have logged in.
           this.forceLogin = false
         }
+        console.log('auth setUser DONE') // TODO
       } else {
         console.log('auth setUser NO') // TODO
         this.user = null
@@ -161,6 +162,7 @@ export const useAuthStore = defineStore({
     },
     async login(params) {
       try {
+        console.log('AUTH AAAA')
         const res = await this.$api.session.login(params, function (data) {
           let logIt
 
@@ -174,6 +176,7 @@ export const useAuthStore = defineStore({
           return logIt
         })
 
+        console.log('AUTH BBBB', res)
         const { ret, status, persistent, jwt } = res
 
         if (ret === 0) {
@@ -181,7 +184,9 @@ export const useAuthStore = defineStore({
           this.setAuth(jwt, persistent)
 
           // Login succeeded.  Get the user from the new API.
+          console.log('AUTH CCCC')
           await this.fetchUser()
+          console.log('AUTH DDDD')
         } else {
           // Login failed.
           throw new LoginError(ret, status)

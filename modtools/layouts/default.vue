@@ -89,7 +89,7 @@
       </div>
     </div>
     <div id="mtinfo" :title="buildDate">MT-{{ version }}</div>
-    <!--ChatPopups v-if="loggedIn" class="d-none d-sm-block" /-->
+    <!--ChatPopups v-if="loggedIn" class="d-none d-sm-block" TODO /-->
     <LoginModal v-if="complete" ref="loginModal" :key="'login-' + bumpLogin" />
     <div id="sizer" ref="sizer" class="d-none d-lg-block" />
   </div>

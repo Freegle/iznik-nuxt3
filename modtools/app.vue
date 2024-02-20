@@ -125,10 +125,11 @@ const loginCount = computed(() => {
 
 watch(loginCount, async () => {
   if (!route.query.k) {
-    await reloadNuxtApp({
+    console.log('WATCH LOGINCOUNT RELOAD TODO')
+    /*await reloadNuxtApp({
       force: true,
       persistState: false,
-    })
+    })*/
   }
 })
 
