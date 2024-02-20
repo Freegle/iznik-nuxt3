@@ -13,7 +13,5 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
-  },
-  "devDependencies": {
   }
 }

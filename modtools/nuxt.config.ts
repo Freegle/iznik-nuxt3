@@ -34,6 +34,10 @@ const config = defineNuxtConfig({
       },
     },
   },
+  modules:[
+  ],
+  plugins:[
+  ],
   app: {
     head: { // Overrides and inherits ones not set here
       title: "ModTools",

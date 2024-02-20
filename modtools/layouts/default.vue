@@ -123,7 +123,7 @@ export default {
       return discourse
         ? discourse.notifications + discourse.newtopics + discourse.unreadtopics
         : 0*/
-        return 77
+      return 77
     },
     slideclass() {
       return this.showMenu ? 'slide-in' : 'slide-out'
@@ -137,18 +137,28 @@ export default {
       return 88
     },
     work() {
-      return  this.authStore.work
+      return this.authStore.work
     },
-    version(){
+    version() {
       const runtimeConfig = useRuntimeConfig()
       return runtimeConfig.public.VERSION
     },
-    buildDate(){
+    buildDate() {
       const runtimeConfig = useRuntimeConfig()
       return runtimeConfig.public.BUILD_DATE
     },
   },
   mounted() {
+    // TODO
+    console.log('MODTOOLS.VUE mounted TODO')
+    // Start our timer.  Holding the time in the store allows us to update the time regularly and have reactivity
+    // cause displayed fromNow() values to change, rather than starting a timer for each of them.
+    this.updateTime()
+
+    this.miscStore.set({
+      key: 'modtools',
+      value: true,
+    })
   },
   methods: {
     async logOut() {
@@ -157,7 +167,7 @@ export default {
       console.log('Logout')
       try {
         this.$cookies.removeAll()
-      } catch (e) {}
+      } catch (e) { }
 
       await this.authStore.logout()
       this.authStore.forceLogin = false
@@ -389,10 +399,11 @@ a:hover {
   text-decoration: underline;
 }
 
-.router-link-active{
+.router-link-active {
   font-weight: bold;
 }
-#mtinfo{
+
+#mtinfo {
   text-align: right;
 }
 </style>

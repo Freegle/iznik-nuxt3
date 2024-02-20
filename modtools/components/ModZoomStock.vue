@@ -1,10 +1,25 @@
 <template>
   <div class="font-weight-bold">
-    ZOOMSTOCK
+    <div v-if="now" class="d-flex">
+      <!-- eslint-disable-next-line-->
+      <ExternalLink href="https://zoom.us/j/95789187203?pwd=VE9Va1M5YWJWY0M1dC9sc014L0xjQT09" class="text-warning">ZoomStock happening now till 5pm!
+        Join other volunteers for a natter - click here.</ExternalLink>
+    </div>
+    <div v-else-if="today" class="d-flex">
+      <!-- eslint-disable-next-line-->
+      <ExternalLink href="https://zoom.us/j/95789187203?pwd=VE9Va1M5YWJWY0M1dC9sc014L0xjQT09" :class="colorClass">ZoomStock Thursdays - join other
+        volunteers for a natter. Link will be here 2pm-5pm.</ExternalLink>
+    </div>
+    <div v-else class="d-flex">
+      ZoomStock Thursdays @ 2pm-5pm, next {{ timeago(fromNow) }}. Join other volunteers for a natter. Link will be here.
+    </div>
   </div>
 </template>
 <script>
+import dayjs from 'dayjs'
 import ExternalLink from '@/components/ExternalLink'
+import { useMiscStore } from '~/stores/misc'
+
 
 const DAY_OF_WEEK = 4
 const START = '1400'
@@ -19,44 +34,47 @@ export default {
       default: 'text-white'
     }
   },
-  data: function() {
+  data: function () {
     return {
       nextOne: null
     }
   },
+  setup() {
+    const miscStore = useMiscStore()
+    return { miscStore }
+  },
   computed: {
     timeNow() {
-      return this.$store.getters['misc/time']
-        ? this.$dayjs().format('HHmm')
+      return this.miscStore.time
+        ? dayjs().format('HHmm')
         : ''
     },
     fromNow() {
-      return this.$store.getters['misc/time'] && this.nextOne
+      return this.miscStore.time && this.nextOne
         ? this.nextOne
         : null
     },
     today() {
-      const d = this.$dayjs()
+      const d = dayjs()
       return d.day() === DAY_OF_WEEK && this.timeNow < START
     },
     now() {
       return (
-        this.$dayjs().day() === DAY_OF_WEEK &&
+        dayjs().day() === DAY_OF_WEEK &&
         this.timeNow >= START &&
         this.timeNow <= END
       )
     }
   },
   mounted() {
-    /*let d = this.$dayjs()
+    let d = dayjs()
 
     if (d.day() < DAY_OF_WEEK) {
       d = d.day(DAY_OF_WEEK)
     } else {
       d = d.add(1, 'week').day(DAY_OF_WEEK)
     }
-
-    this.nextOne = d*/
+    this.nextOne = d
   }
 }
 </script>

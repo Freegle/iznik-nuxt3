@@ -38,3 +38,4 @@ A fairly minimal `package.json` is needed as `nuxt.config.ts` extends `../` and 
 * b-modal <template #default> <template #footer> useModal, etc. Do not use v-if on b-modal
 * Use icon in <v-icon :icon="['fab', 'discourse']" scale="2" />
 * Add extra icons to root plugins/vue-awesome.js
+* Change `this.$store.getters['misc/time']` into `this.miscStore.time`
