@@ -160,16 +160,6 @@ export default defineNuxtConfig({
 
   modules: ['@pinia/nuxt', 'floating-vue/nuxt'],
 
-  buildModules: [
-    [
-      '@pinia/nuxt',
-      {
-        autoImports: ['defineStore'],
-      },
-    ],
-    'floating-vue/nuxt',
-  ],
-
   // Environment variables the client needs.
   runtimeConfig: {
     public: {
