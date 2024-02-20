@@ -162,10 +162,10 @@ async function visibilityChanged(visible) {
             .pubads()
             .addEventListener('slotRenderEnded', (event) => {
               if (event?.slot === slot) {
+                console.log('Rendered', uniqueid.value, 'empty', event?.isEmpty)
                 if (event?.isEmpty) {
                   adShown.value = false
                 }
-
                 emit('rendered', adShown.value)
               }
             })
