@@ -41,7 +41,7 @@
     </span>
 </template>
 <script>
-import NoticeMessage from './NoticeMessage'
+import NoticeMessage from '@/components/NoticeMessage'
 import { useModal } from '~/composables/useModal'
 
 export default {

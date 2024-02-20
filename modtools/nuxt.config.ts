@@ -1,3 +1,9 @@
+import fs from 'fs'
+
+const packageJson = fs.readFileSync('./package.json', 'utf8')
+const version = JSON.parse(packageJson).version || 0
+console.log('Building iznik-modtools', version)
+
 const config = defineNuxtConfig({
   // target: 'static',
   ssr: false,
@@ -9,7 +15,12 @@ const config = defineNuxtConfig({
     '/assets/css/global.scss',
     'leaflet/dist/leaflet.css',
   ],
-
+  runtimeConfig: {
+    public: {
+      VERSION: version,
+      BUILD_DATE: new Date().toISOString(),
+    }
+  },
   vite: {
     css: {
       preprocessorOptions: {

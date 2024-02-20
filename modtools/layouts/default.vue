@@ -88,6 +88,7 @@
         <slot ref="pageContent" />
       </div>
     </div>
+    <div id="mtinfo" :title="buildDate">MT-{{ version }}</div>
     <!--ChatPopups v-if="loggedIn" class="d-none d-sm-block" /-->
     <LoginModal v-if="complete" ref="loginModal" :key="'login-' + bumpLogin" />
     <div id="sizer" ref="sizer" class="d-none d-lg-block" />
@@ -137,7 +138,15 @@ export default {
     },
     work() {
       return  this.authStore.work
-    }
+    },
+    version(){
+      const runtimeConfig = useRuntimeConfig()
+      return runtimeConfig.public.VERSION
+    },
+    buildDate(){
+      const runtimeConfig = useRuntimeConfig()
+      return runtimeConfig.public.BUILD_DATE
+    },
   },
   mounted() {
   },
@@ -382,5 +391,8 @@ a:hover {
 
 .router-link-active{
   font-weight: bold;
+}
+#mtinfo{
+  text-align: right;
 }
 </style>

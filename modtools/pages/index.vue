@@ -13,6 +13,29 @@
 </template>
 
 <script setup>
+import { buildHead } from '~/composables/useMTBuildHead'
+
+const runtimeConfig = useRuntimeConfig()
+const route = useRoute()
+
+useHead(
+      buildHead(
+        route,
+        runtimeConfig,
+        'ModTools',
+        'Moderation tool for Freegle volunteers'
+      )
+    )
+
+/*const version = computed(() => {
+  return runtimeConfig.public.VERSION
+})
+
+const buildDate = computed(() => {
+  return runtimeConfig.public.BUILD_DATE
+})*/
+
+
 function throwError() {
   throw new Error('Sentry Error2')
 }
