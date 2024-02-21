@@ -83,12 +83,12 @@
             Logout
           </a>
         </div>
+        <div id="mtinfo" :title="buildDate">MT-{{ version }}</div>
       </div>
       <div class="ml-0 pl-0 pl-sm-1 pr-0 pr-sm-1 pageContent w-100">
         <slot ref="pageContent" />
       </div>
     </div>
-    <div id="mtinfo" :title="buildDate">MT-{{ version }}</div>
     <ChatPopups v-if="loggedIn" class="d-none d-sm-block" />
     <LoginModal v-if="complete" ref="loginModal" :key="'login-' + bumpLogin" />
     <div id="sizer" ref="sizer" class="d-none d-lg-block" />
@@ -460,5 +460,6 @@ a:hover {
 
 #mtinfo {
   text-align: right;
+  font-size: 75%;
 }
 </style>

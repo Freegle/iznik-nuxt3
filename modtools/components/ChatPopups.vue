@@ -26,10 +26,10 @@ export default {
     ChatPopup
   },
   props: {},
-  data: function() {
+  data: function () {
     return {}
   },
-  setup(){
+  setup() {
     const chatStore = useChatStore()
     return { chatStore }
   },
@@ -57,7 +57,7 @@ export default {
           }
         }
       }
-      console.log('ChatPopups chatlist', ret)
+      // console.log('ChatPopups chatlist', ret)
 
       return ret
     }
@@ -65,9 +65,7 @@ export default {
   async mounted() {
     // Components can't use asyncData, so we fetch here.  Can't do this for SSR, but that's fine as we don't
     // need to render this on the server.
-    console.log('ChatPopups AAA')
     await this.chatStore.fetchChats({ fetchChats: ['User2Mod', 'Mod2Mod'] })
-    console.log('ChatPopups BBB')
   },
   methods: {}
 }

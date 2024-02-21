@@ -23,6 +23,7 @@ import { useMiscStore } from '~/stores/misc'
 
 const DAY_OF_WEEK = 4
 const START = '1400'
+const STARTHOUR = 13
 const END = '1700'
 
 export default {
@@ -67,7 +68,7 @@ export default {
     }
   },
   mounted() {
-    let d = dayjs()
+    let d = dayjs().hour(STARTHOUR).minute(0).second(0)
 
     if (d.day() < DAY_OF_WEEK) {
       d = d.day(DAY_OF_WEEK)
