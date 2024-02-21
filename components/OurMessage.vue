@@ -6,7 +6,7 @@
     v-observe-visibility="{
       callback: visibilityChanged,
       options: {
-        threshold: [0, 1],
+        observeFullElement: true,
       },
     }"
     class="position-relative ms-2 me-2 ms-sm-0 me-sm-0"
@@ -283,7 +283,8 @@ export default {
         this.$emit('view')
       }
     },
-    visibilityChanged(vis) {
+    visibilityChanged(vis, { entryWasObserved }) {
+      console.log('entryWasObserved', entryWasObserved)
       if (vis) {
         this.$emit('visible', this.id)
       }

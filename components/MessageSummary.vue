@@ -5,7 +5,7 @@
     v-observe-visibility="{
       callback: view,
       options: {
-        threshold: [0, 1],
+        observeFullElement: true,
       },
     }"
     class="position-relative"

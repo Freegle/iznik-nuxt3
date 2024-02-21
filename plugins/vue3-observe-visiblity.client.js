@@ -5,10 +5,9 @@ const intersectionObserverDirective = {
     let callback
     let options = {}
     let throttle = 0
-    let entryTopWasObserved = false
-    let entryBottomWasObserved = false
+    let entryTopWasVisible = false
+    let entryBottomWasVisible = false
     let entryWasObserved = false
-    let entryObservedCount = 0
 
     // Check if binding.value is a function or an object
     if (typeof binding.value === 'function') {
@@ -17,10 +16,6 @@ const intersectionObserverDirective = {
       ;({ callback, options, throttle } = binding.value)
     }
     let timer
-
-    if (options.observeFullElement) {
-      options.threshold = [0, 1]
-    }
 
     const observerCallback = (entries, observer) => {
       entries.forEach((entry) => {
@@ -33,33 +28,34 @@ const intersectionObserverDirective = {
         const isBottomVisible =
           isVisible && intersectionRect.bottom >= boundingClientRect.bottom
 
-        if (options.observeFullElement) {
-          entryTopWasObserved = isTopVisible
-          entryBottomWasObserved = isBottomVisible
-
-          if (entryTopWasObserved && entryBottomWasObserved) {
-            entryWasObserved = true
-            entryObservedCount += 1
+        if (options.observeFullElement && entry.isIntersecting) {
+          if (entry.target.classList.contains('top-sentinel')) {
+            entryTopWasVisible = true
+          } else if (entry.target.classList.contains('bottom-sentinel')) {
+            entryBottomWasVisible = true
           }
 
-          if (!isVisible) {
-            entryTopWasObserved = false
-            entryBottomWasObserved = false
-          }
+          entryWasObserved = entryTopWasVisible && entryBottomWasVisible
         }
-
         // Throttle callback execution
         if (timer === undefined) {
           timer = window.setTimeout(() => {
+            const cb = () => {
+              callback(isVisible, {
+                isTopVisible,
+                isBottomVisible,
+                entryWasObserved,
+                entry,
+                observer,
+              })
+            }
             // Provide additional visibility info in the callback
-            callback(isVisible, {
-              isTopVisible,
-              isBottomVisible,
-              entryWasObserved,
-              entryObservedCount,
-              entry,
-              observer,
-            })
+            if (options.observeFullElement) {
+              entryWasObserved && cb()
+              entryWasObserved = false
+            } else {
+              cb()
+            }
             timer = undefined
           }, throttle || 0)
         }
@@ -67,6 +63,27 @@ const intersectionObserverDirective = {
     }
 
     const observer = new IntersectionObserver(observerCallback, options)
+
+    if (options.observeFullElement) {
+      const topSentinel = document.createElement('div')
+      topSentinel.classList.add('top-sentinel')
+      el.prepend(topSentinel)
+
+      const bottomSentinel = document.createElement('div')
+      bottomSentinel.classList.add('bottom-sentinel')
+      el.appendChild(bottomSentinel)
+
+      const sentinels = [topSentinel, bottomSentinel]
+      observers.set(el, { topSentinel, bottomSentinel, observer })
+      sentinels.forEach((item, index) => {
+        item.style.height = '1px'
+        item.style.width = '1px'
+        item.style.position = 'absolute'
+        item.style[index === 0 ? 'top' : 'bottom'] = '0'
+        observer.observe(item)
+      })
+      return
+    }
 
     observers.set(el, observer)
     observer.observe(el)
