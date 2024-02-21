@@ -52,6 +52,7 @@ export default class BaseAPI {
       const headers = config.headers ? config.headers : {}
 
       const authStore = useAuthStore()
+      const miscStore = useMiscStore()
 
       if (authStore.auth.persistent) {
         // Use the persistent token (a kind of JWT) to authenticate the request.
@@ -85,13 +86,14 @@ export default class BaseAPI {
         if (urlParams.length) {
           path += '&' + urlParams
         }
+        config.params.modtools = miscStore.modtools ? 2 : 1 // TODO
       } else if (method !== 'POST') {
         // Any parameters are passed in config.params.
         if (!config?.params) {
           config.params = {}
         }
 
-        config.params.modtools = false
+        config.params.modtools = miscStore.modtools ? 2 : 1 // TODO
 
         // JSON-encode these for to pass.
         body = JSON.stringify(config.params)
@@ -101,11 +103,10 @@ export default class BaseAPI {
           config.data = {}
         }
 
-        config.data.modtools = false
+        config.data.modtools = miscStore.modtools ? 2 : 1 // TODO
         body = JSON.stringify(config.data)
       }
 
-      const miscStore = useMiscStore()
       await miscStore.waitForOnline()
       miscStore.api(1)
       ;[status, data] = await ourFetch(this.config.public.APIv1 + path, {

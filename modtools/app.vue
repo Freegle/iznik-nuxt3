@@ -119,6 +119,8 @@ logoStore.init(runtimeConfig)
 locationStore.init(runtimeConfig)
 shortlinkStore.init(runtimeConfig)
 
+miscStore.modtools = true
+
 const loginCount = computed(() => {
   return authStore.loginCount
 })

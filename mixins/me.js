@@ -22,13 +22,10 @@ export default {
       // We have this separate method so that components can override me() and still access the real user if they
       // need to. This is used by impersonation.
       try {
-        console.log('ME realME')
-        // console.trace("Here I am!")
         const authStore = useAuthStore()
         const me = authStore.user
         return me?.id ? me : null
       } catch (e) {
-        console.log('RealME error', e)
         return null
       }
     },
@@ -36,7 +33,6 @@ export default {
       return this.me?.id
     },
     loggedIn() {
-      console.log('loggedIn',this.me !== null)
       return this.me !== null
     },
     myGroups() {

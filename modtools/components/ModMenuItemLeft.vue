@@ -11,6 +11,8 @@
   </div>
 </template>
 <script>
+import { useAuthStore } from '@/stores/auth'
+
 export default {
   props: {
     link: {
@@ -44,7 +46,8 @@ export default {
   },
   computed: {
     work() {
-      return this.$store.getters['auth/work']
+      const authStore = useAuthStore()
+      return authStore.work
     },
     getClass() {
       return 'pl-1 ' + (this.$route.path === this.link ? 'active' : '')
@@ -54,14 +57,13 @@ export default {
     getCount(types) {
       let total = 0
 
-      /* TODO if (types) {
+      if (types) {
         for (const key in this.work) {
           if (types.indexOf(key) !== -1) {
             total += this.work[key]
           }
         }
-      }*/
-      total = 1
+      }
 
       return total
     },

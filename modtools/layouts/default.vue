@@ -97,18 +97,47 @@
 
 <script lang="ts">
 import { useMiscStore } from '@/stores/misc'
-import { useAuthStore } from '../stores/auth'
+import { useAuthStore } from '@/stores/auth'
 
 export default {
-  setup() {
+  async setup() {
+    let ready = false
+    const oneTap = ref(false)
+    const googleReady = ref(false)
     const authStore = useAuthStore()
+    const jwt = authStore.auth.jwt
     const miscStore = useMiscStore()
-    return { authStore, miscStore }
+    const persistent = authStore.auth.persistent
+
+    if (process.client) {
+      // Ensure we don't wrongly think we have some outstanding requests if the server happened to start some.
+      miscStore.apiCount = 0
+    }
+
+    if (jwt || persistent) {
+      // We have some credentials, which may or may not be valid on the server.  If they are, then we can crack on and
+      // start rendering the page.  This will be quicker than waiting for GoogleOneTap to load on the client and tell us
+      // whether or not we can log in that way.
+      let user = null
+
+      try {
+        user = await authStore.fetchUser()
+      } catch (e) {
+        console.log('Error fetching user', e)
+      }
+
+      if (user) {
+        ready = true
+      }
+    }
+
+
+    return { authStore, googleReady, miscStore, oneTap }
   },
   data: function () {
     return {
       logo: '/icon_modtools.png',
-      showMenu: true, // TODO
+      showMenu: true,
       sliding: false,
       timeTimer: null,
       chatCount: 0,
@@ -119,22 +148,18 @@ export default {
   },
   computed: {
     discourseCount() {
-      /* const discourse = this.authStore.discourse
+      const discourse = this.authStore.discourse
       return discourse
         ? discourse.notifications + discourse.newtopics + discourse.unreadtopics
-        : 0*/
-      return 77
+        : 0
+      //return 77
     },
     slideclass() {
       return this.showMenu ? 'slide-in' : 'slide-out'
     },
     menuCount() {
-      /*const myid = this.myid()
-      console.log('menuCount myid', myid)
       const work = this.authStore.work
-      if (process.env.IS_APP) setBadgeCount(this.chatCount + work.total) // CC
-      return work.total*/
-      return 88
+      return work.total
     },
     work() {
       return this.authStore.work
@@ -148,17 +173,32 @@ export default {
       return runtimeConfig.public.BUILD_DATE
     },
   },
-  mounted() {
+  watch: {
+    loginStateKnown: {
+      immediate: true,
+      handler(newVal) {
+        if (newVal) {
+          // We now know whether or not we have logged in.  Re-render the page to make it reflect that.
+          this.bump++
+        }
+      },
+    },
+  },
+  async mounted() {
     // TODO
     console.log('MODTOOLS.VUE mounted TODO')
+
+    // For this layout we don't need to be logged in.  So can just continue.  But we want to know first whether or
+    // not we are logged in.  We might already know that from the server via cookies, but if not, find out.
+    if (!this.loginStateKnown) {
+      await this.authStore.fetchUser()
+    }
+
     // Start our timer.  Holding the time in the store allows us to update the time regularly and have reactivity
     // cause displayed fromNow() values to change, rather than starting a timer for each of them.
     this.updateTime()
 
-    this.miscStore.set({
-      key: 'modtools',
-      value: true,
-    })
+    // this.miscStore.set({ key: 'modtools', value: true, }) // Already done in app.vue
   },
   methods: {
     async logOut() {
@@ -228,9 +268,6 @@ export default {
         this.bumpLogin++
       }
     },
-    //login() {
-    //  this.$refs.loginModal.show()
-    //}
   }
 }
 </script>

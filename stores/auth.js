@@ -55,7 +55,6 @@ export const useAuthStore = defineStore({
     },
     setUser(value) {
       if (value) {
-        console.log('auth setUser YES') // TODO
         // Remember that we have successfully logged in at some point.
         this.loggedInEver = true
         this.user = value
@@ -84,9 +83,7 @@ export const useAuthStore = defineStore({
           // We have logged in.
           this.forceLogin = false
         }
-        console.log('auth setUser DONE') // TODO
       } else {
-        console.log('auth setUser NO') // TODO
         this.user = null
       }
     },
@@ -162,7 +159,6 @@ export const useAuthStore = defineStore({
     },
     async login(params) {
       try {
-        console.log('AUTH AAAA')
         const res = await this.$api.session.login(params, function (data) {
           let logIt
 
@@ -176,7 +172,6 @@ export const useAuthStore = defineStore({
           return logIt
         })
 
-        console.log('AUTH BBBB', res)
         const { ret, status, persistent, jwt } = res
 
         if (ret === 0) {
@@ -184,9 +179,7 @@ export const useAuthStore = defineStore({
           this.setAuth(jwt, persistent)
 
           // Login succeeded.  Get the user from the new API.
-          console.log('AUTH CCCC')
           await this.fetchUser()
-          console.log('AUTH DDDD')
         } else {
           // Login failed.
           throw new LoginError(ret, status)
@@ -275,7 +268,10 @@ export const useAuthStore = defineStore({
       // We're so vain, we probably think this call is about us.
       let me = null
       let groups = null
+      let work = null // TODO
+      let discourse = null // TODO
 
+      /* TODO
       if (this.auth.jwt || this.auth.persistent) {
         // We have auth info.  The new API can authenticate using either the JWT or the persistent token.
         try {
@@ -285,7 +281,6 @@ export const useAuthStore = defineStore({
             },
             false
           )
-          console.log("GOT ME",me) // TODO
         } catch (e) {
           // Failed.  This can validly happen with a 404 if the JWT is invalid.
           console.log('Exception fetching user')
@@ -315,13 +310,13 @@ export const useAuthStore = defineStore({
               })
           }
         }
-      }
+      } */
 
       if (!me) {
         // Try the older API which will authenticate via the persistent token and PHP session.
         const ret = await this.$api.session.fetch({
           webversion: this.config.public.BUILD_DATE,
-          components: ['me'],
+          // TODO components: ['me'],
         })
 
         let persistent = null
@@ -329,7 +324,9 @@ export const useAuthStore = defineStore({
 
         if (ret) {
           ;({ me, persistent, jwt } = ret)
-
+          work = ret.work // TODO
+          discourse = ret.discourse // TODO
+    
           if (me) {
             this.setAuth(jwt, persistent)
           }
@@ -371,7 +368,11 @@ export const useAuthStore = defineStore({
           // because persisted.
           composeStore.email = me.email
         }
-      } else {
+
+        this.work = work
+    
+        this.discourse = discourse
+     } else {
         // Any auth info must be invalid.
         this.setAuth(null, null)
         this.setUser(null)
