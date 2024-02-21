@@ -134,8 +134,6 @@ export default {
       if (this.me && this.message.unseen) {
         await this.messageStore.view(this.id)
       }
-
-      this.$emit('view')
     },
     expand() {
       this.$emit('expand')

@@ -74,7 +74,6 @@ const intersectionObserverDirective = {
       el.appendChild(bottomSentinel)
 
       const sentinels = [topSentinel, bottomSentinel]
-      observers.set(el, { topSentinel, bottomSentinel, observer })
       sentinels.forEach((item, index) => {
         item.style.height = '1px'
         item.style.width = '1px'

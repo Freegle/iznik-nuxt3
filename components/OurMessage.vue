@@ -3,12 +3,6 @@
     v-if="message"
     :id="'msg-' + id"
     ref="msg"
-    v-observe-visibility="{
-      callback: visibilityChanged,
-      options: {
-        observeFullElement: true,
-      },
-    }"
     class="position-relative ms-2 me-2 ms-sm-0 me-sm-0"
     itemscope
     itemtype="http://schema.org/Product"
@@ -281,12 +275,6 @@ export default {
         }
 
         this.$emit('view')
-      }
-    },
-    visibilityChanged(vis, { entryWasObserved }) {
-      console.log('entryWasObserved', entryWasObserved)
-      if (vis) {
-        this.$emit('visible', this.id)
       }
     },
   },
