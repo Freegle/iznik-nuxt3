@@ -2,12 +2,12 @@
   <div>
     <ModComment v-for="comment in comments" :key="'modcomments-' + user.id + '-' + comment.id" :comment="comment" :user="user" :expand-comments="expandComments" />
     <div v-if="sortedComments.length > 1" class="mb-1">
-      <b-btn v-if="!showAll" variant="white" @click="showAll = true">
+      <b-button v-if="!showAll" variant="white" @click="showAll = true">
         <v-icon name="tag" /> Show {{ sortedComments.length - 1 | pluralize(['more note', 'more notes'], { includeNumber: true }) }}
-      </b-btn>
-      <b-btn v-else variant="white" @click="showAll = false">
+      </b-button>
+      <b-button v-else variant="white" @click="showAll = false">
         <v-icon name="tag" /> Hide notes
-      </b-btn>
+      </b-button>
     </div>
   </div>
 </template>

@@ -41,6 +41,7 @@ A fairly minimal `package.json` is needed as `nuxt.config.ts` extends `../` and 
 
 ## Upgrade notes
 
+* b-btn to b-button
 * b-modal <template #default> <template #footer> useModal, etc. Do not use v-if on b-modal
 * Use icon in <v-icon :icon="['fab', 'discourse']" scale="2" />
 * Add extra icons to root plugins/vue-awesome.js

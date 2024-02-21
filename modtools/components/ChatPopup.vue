@@ -95,7 +95,7 @@
                 @focus="markRead"
               />
               <div v-if="!spammer" class="pt-1 pb-1">
-                <b-btn
+                <b-button
                   v-if="chat && chat.chattype === 'User2User' && otheruser"
                   v-b-tooltip.hover.top
                   variant="secondary"
@@ -104,24 +104,24 @@
                   @click="promise"
                 >
                   <v-icon name="handshake" />
-                </b-btn>
-                <b-btn v-if="!simple && chat && chat.chattype === 'User2User' && otheruser" v-b-tooltip.hover.top variant="secondary" title="Send your address" @click="addressBook">
+                </b-button>
+                <b-button v-if="!simple && chat && chat.chattype === 'User2User' && otheruser" v-b-tooltip.hover.top variant="secondary" title="Send your address" @click="addressBook">
                   <v-icon name="address-book" />
-                </b-btn>
-                <b-btn v-b-tooltip.hover.top variant="secondary" title="Info about this freegler" @click="showInfo">
+                </b-button>
+                <b-button v-b-tooltip.hover.top variant="secondary" title="Info about this freegler" @click="showInfo">
                   <v-icon name="info-circle" />
-                </b-btn>
-                <b-btn v-if="!simple && chat && chat.chattype === 'User2User' && otheruser && !tooSoonToNudge" v-b-tooltip.hover.top variant="secondary" title="Waiting for a reply?  Nudge this freegler." @click="nudge">
+                </b-button>
+                <b-button v-if="!simple && chat && chat.chattype === 'User2User' && otheruser && !tooSoonToNudge" v-b-tooltip.hover.top variant="secondary" title="Waiting for a reply?  Nudge this freegler." @click="nudge">
                   <v-icon name="bell" />
-                </b-btn>
-                <b-btn v-if="!simple && chat && chat.chattype === 'User2User' && otheruser && tooSoonToNudge" v-b-tooltip.hover.top variant="secondary" title="It's too soon to nudge" @click="nudgeTooSoon">
+                </b-button>
+                <b-button v-if="!simple && chat && chat.chattype === 'User2User' && otheruser && tooSoonToNudge" v-b-tooltip.hover.top variant="secondary" title="It's too soon to nudge" @click="nudgeTooSoon">
                   <v-icon name="bell" />
-                </b-btn>
+                </b-button>
 
-                <b-btn variant="primary" class="float-right mr-1" @click="send">
+                <b-button variant="primary" class="float-right mr-1" @click="send">
                   <v-icon v-if="sending" name="sync" class="fa-spin" title="Sending..." />
                   <v-icon v-else name="angle-double-right" title="Send" />
-                </b-btn>
+                </b-button>
               </div>
             </div>
           </div>

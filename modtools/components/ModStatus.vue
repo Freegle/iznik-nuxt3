@@ -55,7 +55,6 @@ export default {
       overall: 'green',
       status: null,
       updated: null,
-      //show: false,
       tried: false
     }
   },
