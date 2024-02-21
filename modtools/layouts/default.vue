@@ -8,8 +8,8 @@
       <ModZoomStock class="d-none d-md-block text-white" />
       <b-navbar-nav class="d-flex align-items-center">
         <b-nav-item v-if="loggedIn" id="menu-option-modtools-discourse2" class="text-center p-0 mr-4" @click="discourse">
-          <div class="position-relative small">
-            <v-icon :icon="['fab', 'discourse']" scale="2" />
+          <div id="discourseIcon" class="position-relative small">
+            <v-icon :icon="['fab', 'discourse']" class="fa-2x" />
             <div class="d-none d-xl-block">
               Us
             </div>
@@ -22,7 +22,7 @@
         <b-nav-item v-if="loggedIn">
           <div class="position-relative">
             <b-button variant="white" class="menu" @click="toggleMenu">
-              <v-icon icon="bars" class="" scale="1.5" />
+              <v-icon icon="bars" class="" />
             </b-button>
             <b-badge v-show="menuCount" v-if="!showMenu" variant="danger" class="menuCount position-absolute" @click="toggleMenu">
               {{ menuCount }}
@@ -89,7 +89,7 @@
       </div>
     </div>
     <div id="mtinfo" :title="buildDate">MT-{{ version }}</div>
-    <!--ChatPopups v-if="loggedIn" class="d-none d-sm-block" TODO /-->
+    <ChatPopups v-if="loggedIn" class="d-none d-sm-block" />
     <LoginModal v-if="complete" ref="loginModal" :key="'login-' + bumpLogin" />
     <div id="sizer" ref="sizer" class="d-none d-lg-block" />
   </div>
@@ -342,6 +342,10 @@ nav .navbar-nav li a,
   color: $color-gray--light !important;
 }
 
+#discourseIcon {
+  color: $color-white !important;
+}
+
 nav .navbar-nav li a.nuxt-link-active {
   color: $color-white !important;
 }
@@ -417,7 +421,7 @@ body.modal-open {
   .badge {
     position: absolute;
     top: 0px;
-    left: 25px;
+    left: 20px;
   }
 }
 
@@ -431,7 +435,7 @@ body.modal-open {
 .discourseBadge {
   position: absolute;
   top: 0px;
-  left: 25px;
+  left: 20x;
 }
 </style>
 
