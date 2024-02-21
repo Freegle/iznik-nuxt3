@@ -199,6 +199,20 @@ export default {
     this.updateTime()
 
     // this.miscStore.set({ key: 'modtools', value: true, }) // Already done in app.vue
+
+    this.workTimer = setTimeout(this.checkWork, 0)
+    /* TODO this.$store.dispatch('modconfigs/fetch', {
+      all: true
+    })
+
+    // Get chats and poll regularly for new ones
+    this.$store.dispatch('chats/fetchLatestChats')*/
+
+  },
+  beforeDestroy() {
+    if (this.workTimer) {
+      clearTimeout(this.workTimer)
+    }
   },
   methods: {
     async logOut() {
@@ -220,8 +234,8 @@ export default {
       this.$refs.loginModal.show()
     },
     async checkWork() {
-      /*await this.fetchMe(['work'], true)
-      setTimeout(this.checkWork, 30000)*/
+      await this.fetchMe(['work'], true)
+      setTimeout(this.checkWork, 30000)
     },
     discourse(e) {
       window.open('https://discourse.ilovefreegle.org/')

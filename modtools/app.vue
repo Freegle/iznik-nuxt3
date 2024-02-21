@@ -128,10 +128,10 @@ const loginCount = computed(() => {
 watch(loginCount, async () => {
   if (!route.query.k) {
     console.log('WATCH LOGINCOUNT RELOAD TODO')
-    /*await reloadNuxtApp({
+    await reloadNuxtApp({
       force: true,
       persistState: false,
-    })*/
+    })
   }
 })
 
@@ -184,6 +184,10 @@ if (process.client) {
     }
   }
 
+  const menuCount = computed(() => {
+    return authStore.work ? authStore.work.total : 0
+  })
+
   const chatCount = computed(() => {
     return chatStore.unreadCount
   })
@@ -194,11 +198,11 @@ if (process.client) {
 
   useHead({
     titleTemplate: (titleChunk) => {
-      const totalCount = notificationCount.value + chatCount.value
+      const totalCount = menuCount.value + chatCount.value
 
       if (titleChunk) {
-        if (titleChunk.charAt(0) !== '(' && totalCount.value > 0) {
-          return '(' + totalCount.value + ') ' + titleChunk
+        if (titleChunk.charAt(0) !== '(' && totalCount > 0) {
+          return '(' + totalCount + ') ' + titleChunk
         } else {
           return titleChunk
         }

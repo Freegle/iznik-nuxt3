@@ -32,6 +32,12 @@ A fairly minimal `package.json` is needed as `nuxt.config.ts` extends `../` and 
 ## Amended:
 
 * `modtools\assets\css\bootstrap-custom.scss` now has `~/../` at start twice
+* base auth.js calls this.$api.session.fetch not this.$api.session.fetchv2
+
+## TODO
+
+* Loads of TODOs to check inc some in base code
+* Cope on mobile ie left menu
 
 ## Upgrade notes
 
