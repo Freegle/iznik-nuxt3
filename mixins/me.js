@@ -26,6 +26,7 @@ export default {
         const me = authStore.user
         return me?.id ? me : null
       } catch (e) {
+        console.log('RealME error', e)
         return null
       }
     },

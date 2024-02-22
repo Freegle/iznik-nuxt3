@@ -416,7 +416,6 @@ export default {
     },
     loginNative(e) {
       this.loginType = 'Freegle'
-      console.log('LM START')
 
       const self = this
       this.nativeLoginError = null
@@ -494,7 +493,6 @@ export default {
             password: this.password,
           })
           .then(() => {
-            console.log('LM AAAA')
             // We are now logged in. Prompt the browser to remember the credentials.
             if (window.PasswordCredential) {
               try {

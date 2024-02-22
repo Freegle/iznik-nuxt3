@@ -28,12 +28,15 @@ A fairly minimal `package.json` is needed as `nuxt.config.ts` extends `../` and 
 
 * `app.vue` is a simplified copy of the root version
 * `modtools/layouts/default.vue` supersedes `./layouts/default.vue`
-* `stores\group.js` has confirmAffiliation() added
 
 ## Amended:
 
-* `modtools\assets\css\bootstrap-custom.scss` now has `~/../` at start twice
-* base auth.js calls this.$api.session.fetch not this.$api.session.fetchv2
+* `modtools/assets/css/bootstrap-custom.scss` now has `~/../` at start twice
+* `api/BaseAPI.js` add config.params.modtools
+* `stores/group.js` has confirmAffiliation() added
+* `stores/auth.js` has work&discourse added; session.fetchv2
+* `stores/misc.js` add modtools
+* `config.js` has modtools SENTRY_DSN
 
 ## TODO
 

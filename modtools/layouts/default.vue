@@ -201,10 +201,7 @@ export default {
     // this.miscStore.set({ key: 'modtools', value: true, }) // Already done in app.vue
 
     this.workTimer = setTimeout(this.checkWork, 0)
-    /* TODO this.$store.dispatch('modconfigs/fetch', {
-      all: true
-    })
-
+    /*
     // Get chats and poll regularly for new ones
     this.$store.dispatch('chats/fetchLatestChats')*/
 

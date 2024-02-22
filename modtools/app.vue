@@ -127,7 +127,6 @@ const loginCount = computed(() => {
 
 watch(loginCount, async () => {
   if (!route.query.k) {
-    console.log('WATCH LOGINCOUNT RELOAD TODO')
     await reloadNuxtApp({
       force: true,
       persistState: false,
