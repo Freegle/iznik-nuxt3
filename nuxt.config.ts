@@ -158,17 +158,7 @@ export default defineNuxtConfig({
     extractCSS: true,
   },
 
-  modules: ['@pinia/nuxt'],
-
-  buildModules: [
-    [
-      '@pinia/nuxt',
-      {
-        autoImports: ['defineStore'],
-      },
-    ],
-    'floating-vue/nuxt',
-  ],
+  modules: ['@pinia/nuxt', 'floating-vue/nuxt'],
 
   // Environment variables the client needs.
   runtimeConfig: {

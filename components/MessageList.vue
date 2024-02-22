@@ -15,45 +15,9 @@
         v-if="!loading && selectedSort === 'Unseen' && showCountsUnseen && me"
       >
         <MessageListCounts v-if="browseCount" @mark-seen="markSeen" />
-        <MessageListUpToDate
-          v-if="deDuplicatedMessages[0].id === firstSeenMessage"
-        />
       </div>
       <div
-        :id="'messagewrapper-' + deDuplicatedMessages[0].id"
-        :ref="'messagewrapper-' + deDuplicatedMessages[0].id"
-        class="p-0"
-      >
-        <OurMessage
-          :id="deDuplicatedMessages[0].id"
-          :matchedon="deDuplicatedMessages[0].matchedon"
-          record-view
-        />
-      </div>
-      <VisibleWhen
-        v-if="deDuplicatedMessages.length"
-        :not="['xs', 'sm', 'md', 'lg']"
-      >
-        <ExternalDa
-          ad-unit-path="/22794232631/freegle_feed_desktop"
-          :dimensions="[728, 90]"
-          div-id="div-gpt-ad-1692867153277-0"
-          class="mt-2"
-        />
-      </VisibleWhen>
-      <VisibleWhen
-        v-if="deDuplicatedMessages.length"
-        :at="['xs', 'sm', 'md', 'lg']"
-      >
-        <ExternalDa
-          ad-unit-path="/22794232631/freegle_feed_app"
-          :dimensions="[300, 250]"
-          div-id="div-gpt-ad-1692867324381-0"
-          class="mt-3"
-        />
-      </VisibleWhen>
-      <div
-        v-for="message in deDuplicatedMessages.slice(1)"
+        v-for="(message, ix) in deDuplicatedMessages"
         :key="'messagelist-' + message.id"
       >
         <MessageListUpToDate
@@ -85,6 +49,13 @@
               ad-id="div-gpt-ad-1691925699378-0"
             />
           </VisibleWhen>
+        </div>
+        <div v-if="insertAd(ix)" class="mt-3 mt-xl-2">
+          <ExternalDa
+            :ad-unit-path="insertAd(ix).adUnitPath"
+            :dimensions="insertAd(ix).dimensions"
+            :div-id="insertAd(ix).divId"
+          />
         </div>
       </div>
     </div>
@@ -124,6 +95,7 @@ const GroupHeader = defineAsyncComponent(() =>
 const JobsTopBar = defineAsyncComponent(() => import('~/components/JobsTopBar'))
 
 const MIN_TO_SHOW = 10
+const SHOW_AD_EVERY = 10
 
 export default {
   components: {
@@ -228,6 +200,7 @@ export default {
       messageStore,
       miscStore,
       toShow,
+      SHOW_AD_EVERY,
     }
   },
   data() {
@@ -455,6 +428,11 @@ export default {
       immediate: true,
     },
   },
+  beforeUnmount() {
+    if (this.markSeenTimer) {
+      clearTimeout(this.markSeenTimer)
+    }
+  },
   methods: {
     async loadMore($state) {
       do {
@@ -537,10 +515,81 @@ export default {
         }
       }, 100)
     },
-    beforeUnmount() {
-      if (this.markSeenTimer) {
-        clearTimeout(this.markSeenTimer)
+    insertAd(ix) {
+      // We show an ad occasionally in the feed.
+      if (ix % this.SHOW_AD_EVERY !== 0) {
+        return false
       }
+
+      // We have to insert a different ad slot each time - Google doesn't let you repeat them.  And we need to
+      // have different variants for desktop and mobile.
+      const desktop = !['xs', 'sm', 'md', 'lg'].includes(
+        this.miscStore.breakpoint
+      )
+
+      ix = ix / 10
+
+      const ads = desktop
+        ? {
+            0: {
+              adUnitPath: '/22794232631/freegle_feed_desktop',
+              dimensions: [728, 90],
+              divId: 'div-gpt-ad-1692867153277-0',
+            },
+            1: {
+              adUnitPath: '/22794232631/freegle_feed_desktop_2',
+              dimensions: [728, 90],
+              divId: 'div-gpt-ad-1708280158016-0',
+            },
+            2: {
+              adUnitPath: '/22794232631/freegle_feed_desktop_3',
+              dimensions: [728, 90],
+              divId: 'div-gpt-ad-1708280229653-0',
+            },
+            3: {
+              adUnitPath: '/22794232631/freegle_feed_desktop_4',
+              dimensions: [728, 90],
+              divId: 'div-gpt-ad-1708280290737-0',
+            },
+            4: {
+              adUnitPath: '/22794232631/freegle_feed_desktop_5',
+              dimensions: [728, 90],
+              divId: 'div-gpt-ad-1708280362777-0',
+            },
+          }
+        : {
+            0: {
+              adUnitPath: '/22794232631/freegle_feed_app',
+              dimensions: [300, 250],
+              divId: 'div-gpt-ad-1692867324381-0',
+            },
+            1: {
+              adUnitPath: '/22794232631/freegle_feed_app_2',
+              dimensions: [300, 250],
+              divId: 'div-gpt-ad-1707999616879-0',
+            },
+            2: {
+              adUnitPath: '/22794232631/freegle_feed_app_3',
+              dimensions: [300, 250],
+              divId: 'div-gpt-ad-1707999845886-0',
+            },
+            3: {
+              adUnitPath: '/22794232631/freegle_feed_app_4',
+              dimensions: [300, 250],
+              divId: 'div-gpt-ad-1707999962593-0',
+            },
+            4: {
+              adUnitPath: '/22794232631/freegle_feed_app_5',
+              dimensions: [300, 250],
+              divId: 'div-gpt-ad-1708000097990-0',
+            },
+          }
+
+      if (ix < ads.length) {
+        return false
+      }
+
+      return ads[ix]
     },
   },
 }

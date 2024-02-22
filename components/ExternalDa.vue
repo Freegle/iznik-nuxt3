@@ -1,30 +1,32 @@
 <template>
-  <!--
-  If you don't like ads, then you can use an ad blocker.  Plus you could donate to us
-  at https://www.ilovefreegle.org/donate - if we got enough donations we would be delighted not to show ads.
-   -->
-  <div v-observe-visibility="visibilityChanged" class="pointer">
-    <div v-if="isVisible" class="d-flex w-100 justify-content-around">
-      <div
-        :id="divId"
-        :ref="adUnitPath"
-        :key="'adUnit-' + adUnitPath"
-        :style="{
-          width: dimensions[0] + 'px',
-          height: dimensions[1] + 'px',
-        }"
-      />
+  <client-only>
+    <!--
+    If you don't like ads, then you can use an ad blocker.  Plus you could donate to us
+    at https://www.ilovefreegle.org/donate - if we got enough donations we would be delighted not to show ads.
+     -->
+    <div v-observe-visibility="visibilityChanged" class="pointer">
+      <div v-if="isVisible" class="d-flex w-100 justify-content-around">
+        <div
+          :id="divId"
+          :ref="adUnitPath"
+          :key="'adUnit-' + adUnitPath"
+          :style="{
+            'max-width': dimensions[0] + 'px',
+            'max-height': dimensions[1] + 'px',
+          }"
+        />
+      </div>
+      <p
+        v-if="isVisible && adShown"
+        class="text-center textsize d-none d-md-block"
+      >
+        Advertisement. These help Freegle keep going.
+      </p>
+      <!--    <div class="bg-white">-->
+      <!--      Path {{ adUnitPath }} id {{ divId }} dimensions {{ dimensions }}-->
+      <!--    </div>-->
     </div>
-    <p
-      v-if="isVisible && adShown"
-      class="text-center textsize d-none d-md-block"
-    >
-      Advertisement. These help Freegle keep going.
-    </p>
-    <!--    <div class="bg-white">-->
-    <!--      Path {{ adUnitPath }} id {{ divId }} dimensions {{ dimensions }}-->
-    <!--    </div>-->
-  </div>
+  </client-only>
 </template>
 <script setup>
 import { nextTick } from 'vue'
@@ -90,6 +92,19 @@ let slot = null
 
 const timer = ref(null)
 
+const AD_REFRESH_TIMEOUT = 45000
+
+function refreshAd() {
+  if (
+    window.googletag?.pubads &&
+    typeof window.googletag?.pubads === 'function' &&
+    typeof window.googletag?.pubads().refresh === 'function'
+  ) {
+    window.googletag.pubads().refresh([slot])
+    timer.value = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
+  }
+}
+
 onBeforeUnmount(() => {
   try {
     if (timer.value) {
@@ -138,20 +153,6 @@ async function visibilityChanged(visible) {
                 adShown.value = false
               }
               emit('rendered', adShown.value)
-
-              // We refresh the ad slot.  This increases views.  Google doesn't like it if this is more frequent than
-              // every 30s.
-              if (!timer.value) {
-                timer.value = setTimeout(() => {
-                  if (
-                    window.googletag?.pubads &&
-                    typeof window.googletag?.pubads === 'function' &&
-                    typeof window.googletag?.pubads().refresh === 'function'
-                  ) {
-                    window.googletag.pubads().refresh([slot])
-                  }
-                }, 45000)
-              }
             })
             .addEventListener('slotVisibilityChanged', (event) => {
               if (event.inViewPercentage < 51) {
@@ -160,6 +161,13 @@ async function visibilityChanged(visible) {
                     event.inViewPercentage
                   }%.Viewport size: ${window.innerWidth}x${window.innerHeight}`
                 )
+              }
+            })
+            .addEventListener('impressionViewable', (event) => {
+              // We refresh the ad slot.  This increases views.  Google doesn't like it if this is more frequent than
+              // every 30s.
+              if (!timer.value) {
+                timer.value = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
               }
             })
 

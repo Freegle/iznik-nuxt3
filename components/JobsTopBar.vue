@@ -95,13 +95,13 @@ export default {
         j.sortBy = j.cpc.toFixed(3) + '-' + Math.random()
       })
 
-      jobs.sort((a, b) => {
+      let j = jobs.toSorted((a, b) => {
         return a.sortBy.localeCompare(b.sortBy)
       })
 
-      jobs = jobs.slice(0, len)
+      j = j.slice(0, len)
 
-      return jobs
+      return j
     },
   },
 }

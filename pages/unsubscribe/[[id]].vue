@@ -43,21 +43,23 @@
                   You can get fewer emails and stay a member, or you can leave
                   Freegle completely:
                 </p>
-                <nuxt-link to="/settings" no-prefetch>
-                  <b-button size="lg" variant="primary" class="mb-2 mr-2">
-                    <v-icon icon="cog" />
-                    <span class="ml-1"> Get fewer emails </span>
+                <div class="d-flex justify-content-between flex-wrap">
+                  <nuxt-link to="/settings" no-prefetch>
+                    <b-button size="lg" variant="primary" class="mb-2 mr-2">
+                      <v-icon icon="cog" />
+                      <span class="ml-1"> Get fewer emails </span>
+                    </b-button>
+                  </nuxt-link>
+                  <b-button
+                    size="lg"
+                    variant="danger"
+                    class="mb-2"
+                    @click="unsubscribe"
+                  >
+                    <v-icon icon="trash-alt" />
+                    <span class="ml-1"> Leave Freegle completely </span>
                   </b-button>
-                </nuxt-link>
-                <b-button
-                  size="lg"
-                  variant="danger"
-                  class="mb-2"
-                  @click="unsubscribe"
-                >
-                  <v-icon icon="trash-alt" />
-                  <span class="ml-1"> Leave Freegle completely </span>
-                </b-button>
+                </div>
               </template>
               <p>If you need help, please mail <SupportLink />.</p>
             </div>
@@ -70,20 +72,22 @@
                 label=""
                 class="mb-2"
               />
-              <nuxt-link to="/settings" no-prefetch class="mb-2 mr-2">
-                <b-button size="lg" variant="primary">
-                  <v-icon icon="cog" />
-                  <span class="ml-1"> Get fewer emails </span>
-                </b-button>
-              </nuxt-link>
-              <SpinButton
-                size="lg"
-                icon-name="trash-alt"
-                variant="danger"
-                class="mb-2"
-                label="Leave Freegle completely"
-                @handle="emailConfirm"
-              />
+              <div class="d-flex justify-content-between flex-wrap mt-4">
+                <nuxt-link to="/settings" no-prefetch class="mb-2 mr-2">
+                  <b-button size="lg" variant="primary">
+                    <v-icon icon="cog" />
+                    <span class="ml-1"> Get fewer emails </span>
+                  </b-button>
+                </nuxt-link>
+                <SpinButton
+                  size="lg"
+                  icon-name="trash-alt"
+                  variant="danger"
+                  class="mb-2"
+                  label="Leave Freegle completely"
+                  @handle="emailConfirm"
+                />
+              </div>
               <NoticeMessage
                 v-if="emailSent"
                 variant="primary"
