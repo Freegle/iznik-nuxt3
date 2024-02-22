@@ -4,50 +4,52 @@
       <div class="aboveSticky">
         <slot ref="pageContent" />
       </div>
-      <div
-        v-if="allowAd && !noAdRendered"
-        class="d-flex justify-content-around w-100 sticky"
-      >
-        <VisibleWhen :at="['xs', 'sm']">
-          <ExternalDa
-            ad-unit-path="/22794232631/freegle_sticky"
-            :dimensions="[320, 50]"
-            div-id="div-gpt-ad-1699973618906-0"
-            class="sticky"
-            pixel
-            @rendered="adRendered"
-          />
-        </VisibleWhen>
-        <VisibleWhen :at="['md']">
-          <ExternalDa
-            ad-unit-path="/22794232631/freegle_sticky_desktop"
-            :dimensions="[728, 90]"
-            div-id="div-gpt-ad-1707999304775-0"
-            class="sticky"
-            pixel
-            @rendered="adRendered"
-          />
-        </VisibleWhen>
-        <VisibleWhen :at="['lg', 'xl', 'xxl']">
-          <ExternalDa
-            ad-unit-path="/22794232631/freegle_sticky_desktop"
-            :dimensions="[970, 90]"
-            div-id="div-gpt-ad-1707999304775-0"
-            class="sticky"
-            pixel
-            @rendered="adRendered"
-          />
-        </VisibleWhen>
-      </div>
-      <div
-        v-else
-        class="sticky ourBack w-100 text-center d-flex flex-column justify-content-center"
-        style="height: 50px"
-      >
-        <nuxt-link to="/donate" class="text-white nodecor">
-          Help keep Freegle running. Click to donate.
-        </nuxt-link>
-      </div>
+      <client-only>
+        <div
+          v-if="allowAd && !noAdRendered"
+          class="d-flex justify-content-around w-100 sticky"
+        >
+          <VisibleWhen :at="['xs', 'sm']">
+            <ExternalDa
+              ad-unit-path="/22794232631/freegle_sticky"
+              :dimensions="[320, 50]"
+              div-id="div-gpt-ad-1699973618906-0"
+              class="sticky"
+              pixel
+              @rendered="adRendered"
+            />
+          </VisibleWhen>
+          <VisibleWhen :at="['md']">
+            <ExternalDa
+              ad-unit-path="/22794232631/freegle_sticky_desktop"
+              :dimensions="[728, 90]"
+              div-id="div-gpt-ad-1707999304775-0"
+              class="sticky"
+              pixel
+              @rendered="adRendered"
+            />
+          </VisibleWhen>
+          <VisibleWhen :at="['lg', 'xl', 'xxl']">
+            <ExternalDa
+              ad-unit-path="/22794232631/freegle_sticky_desktop"
+              :dimensions="[970, 90]"
+              div-id="div-gpt-ad-1707999304775-0"
+              class="sticky"
+              pixel
+              @rendered="adRendered"
+            />
+          </VisibleWhen>
+        </div>
+        <div
+          v-else
+          class="sticky ourBack w-100 text-center d-flex flex-column justify-content-center"
+          style="height: 50px"
+        >
+          <nuxt-link to="/donate" class="text-white nodecor">
+            Help keep Freegle running. Click to donate.
+          </nuxt-link>
+        </div>
+      </client-only>
     </main>
     <client-only>
       <DeletedRestore />

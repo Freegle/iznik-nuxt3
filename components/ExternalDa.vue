@@ -31,6 +31,10 @@
 <script setup>
 import { nextTick } from 'vue'
 import { ref, computed, onBeforeUnmount } from '#imports'
+import { useMiscStore } from '~/stores/misc'
+
+const miscStore = useMiscStore()
+const unmounted = ref(false)
 
 const props = defineProps({
   adUnitPath: {
@@ -98,14 +102,21 @@ function refreshAd() {
   if (
     window.googletag?.pubads &&
     typeof window.googletag?.pubads === 'function' &&
-    typeof window.googletag?.pubads().refresh === 'function'
+    typeof window.googletag?.pubads().refresh === 'function' &&
+    !unmounted.value
   ) {
-    window.googletag.pubads().refresh([slot])
+    // Don't fresh if the ad is not visible or tab is not active.
+    if (isVisible.value && miscStore.visible) {
+      window.googletag.pubads().refresh([slot])
+    }
+
     timer.value = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
   }
 }
 
 onBeforeUnmount(() => {
+  unmounted.value = true
+
   try {
     if (timer.value) {
       clearTimeout(timer)
@@ -127,8 +138,9 @@ const emit = defineEmits(['rendered'])
 async function visibilityChanged(visible) {
   if (!blocked) {
     try {
+      isVisible.value = visible
+
       if (visible && !shownFirst) {
-        isVisible.value = visible
         shownFirst = true
 
         await nextTick()
@@ -149,25 +161,34 @@ async function visibilityChanged(visible) {
           window.googletag
             .pubads()
             .addEventListener('slotRenderEnded', (event) => {
-              if (event?.slot === slot && event?.isEmpty) {
-                adShown.value = false
+              if (event?.slot === slot) {
+                console.log('Rendered', uniqueid.value, 'empty', event?.isEmpty)
+                if (event?.isEmpty) {
+                  adShown.value = false
+                }
+                emit('rendered', adShown.value)
               }
-              emit('rendered', adShown.value)
             })
             .addEventListener('slotVisibilityChanged', (event) => {
-              if (event.inViewPercentage < 51) {
-                console.log(
-                  `Visibility of slot ${event.slot.getSlotElementId()} changed. New visibility: ${
-                    event.inViewPercentage
-                  }%.Viewport size: ${window.innerWidth}x${window.innerHeight}`
-                )
+              if (event?.slot === slot) {
+                if (event.inViewPercentage < 51) {
+                  // console.log(
+                  //   `Visibility of slot ${event.slot.getSlotElementId()} changed. New visibility: ${
+                  //     event.inViewPercentage
+                  //   }%.Viewport size: ${window.innerWidth}x${
+                  //     window.innerHeight
+                  //   }`
+                  // )
+                }
               }
             })
             .addEventListener('impressionViewable', (event) => {
-              // We refresh the ad slot.  This increases views.  Google doesn't like it if this is more frequent than
-              // every 30s.
-              if (!timer.value) {
-                timer.value = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
+              if (event?.slot === slot) {
+                // We refresh the ad slot.  This increases views.  Google doesn't like it if this is more frequent than
+                // every 30s.
+                if (!timer.value) {
+                  timer.value = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
+                }
               }
             })
 
