@@ -46,3 +46,5 @@ A fairly minimal `package.json` is needed as `nuxt.config.ts` extends `../` and 
 * Use icon in <v-icon :icon="['fab', 'discourse']" scale="2" />
 * Add extra icons to root plugins/vue-awesome.js
 * Change `this.$store.getters['misc/time']` into `this.miscStore.time`
+* SpinButton has changed params
+* const path = computed(() => { return 0 } and access as path.value

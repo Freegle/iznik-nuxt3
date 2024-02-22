@@ -19,7 +19,6 @@ const path = computed(() => {
 onMounted(() => {
   setTimeout(() => {
     const router = useRouter()
-    console.log('router.push', path.value)
     router.push(path.value)
   }, 2000)
 });
