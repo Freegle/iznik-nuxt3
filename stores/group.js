@@ -93,7 +93,14 @@ export const useGroupStore = defineStore({
         this.messages[id] = messages
       }
     },
-  },
+    async confirmAffiliation(params) {
+      await api(this.config).group.patch({
+        id: params.id,
+        affiliationconfirmed: new Date().toISOString()
+      })
+      await this.fetch(params.id)
+    }
+    },
   getters: {
     get: (state) => (idOrName) => {
       let ret = null

@@ -1,5 +1,6 @@
 <template>
   <div>
+    <!-- TODO -->
     <client-only>
       <b-list-group horizontal class="p-0 m-0 list-unstyled chatPopups">
         <b-list-group-item v-for="chat in chatlist" :key="'popupchat-' + chat.id" class="bg-transparent">

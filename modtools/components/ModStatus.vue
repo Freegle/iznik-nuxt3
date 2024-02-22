@@ -1,4 +1,5 @@
 <template>
+  <!-- DONE -->
   <span title="Platform Status - click for more info" class="clickme" @click="clicked">
     <span v-if="!tried" class="trying" />
     <span v-else-if="error" class="error" />
@@ -37,8 +38,8 @@
           Close
         </b-button>
       </template>
-    </b-modal> 
-    </span>
+    </b-modal>
+  </span>
 </template>
 <script>
 import NoticeMessage from '@/components/NoticeMessage'

@@ -1,5 +1,6 @@
 <template>
   <div>
+    <!-- DONE -->
     <b-modal ref="modal" id="aboutmemodal" title="Freegle Aims" size="lg" no-stacking>
       <template #default>
         <NoticeMessage variant="info">

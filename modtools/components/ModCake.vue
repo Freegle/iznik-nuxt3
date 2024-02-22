@@ -1,5 +1,6 @@
 <template>
   <div>
+    <!-- DONE -->
     <p>
       About once a month, we will randomly select one member of Freegle's national organisation (Freegle Ltd) to
       receive a surprise cake as a thank you.  If you don't want the cake yourself, you are of course welcome to

@@ -1,5 +1,6 @@
 <template>
   <div>
+    <!-- TODO -->
     <ModComment v-for="comment in comments" :key="'modcomments-' + user.id + '-' + comment.id" :comment="comment" :user="user" :expand-comments="expandComments" />
     <div v-if="sortedComments.length > 1" class="mb-1">
       <b-button v-if="!showAll" variant="white" @click="showAll = true">

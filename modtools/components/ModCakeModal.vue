@@ -1,5 +1,6 @@
 <template>
   <div>
+    <!-- DONE -->
     <b-modal ref="modal" id="modcakemodal" title="Would you like some cake?" size="lg" no-stacking>
       <template #default>
         <ModCake />

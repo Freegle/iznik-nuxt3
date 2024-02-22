@@ -1,5 +1,7 @@
 <template>
-  <div></div>
+  <div>
+    <!-- TODO -->
+  </div>
 </template>
 <script>
 /*
@@ -126,7 +128,6 @@ export default {
 */
 </script>
 <style scoped lang="scss">
-
 .vdr {
   position: absolute;
   top: initial !important;
@@ -162,6 +163,7 @@ export default {
     transform: scale(0.1);
     opacity: 0;
   }
+
   100% {
     opacity: 1;
     transform: scale(1);

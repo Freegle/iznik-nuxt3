@@ -28,6 +28,7 @@ A fairly minimal `package.json` is needed as `nuxt.config.ts` extends `../` and 
 
 * `app.vue` is a simplified copy of the root version
 * `modtools/layouts/default.vue` supersedes `./layouts/default.vue`
+* `stores\group.js` has confirmAffiliation() added
 
 ## Amended:
 

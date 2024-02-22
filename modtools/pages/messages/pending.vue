@@ -8,14 +8,19 @@
       <NoticeMessage variant="info" class="mb-2 d-block d-md-none">
         <ModZoomStock color-class="text-black" />
       </NoticeMessage>
+
+      <ModAffiliationConfirmModal v-if="affiliationGroup" ref="affiliation" :groupid="affiliationGroup" />
+
       <div ref="end" />
     </client-only>
   </div>
 </template>
 
 <script>
+import dayjs from 'dayjs'
 import { useMiscStore } from '@/stores/misc'
 import NoticeMessage from '~/components/NoticeMessage'
+import ModAffiliationConfirmModal from '~/components/ModAffiliationConfirmModal'
 import ScrollToTop from '~/components/ScrollToTop'
 
 export default {
@@ -42,9 +47,31 @@ export default {
     // Consider affiliation ask.
     const lastask = this.miscStore.get('lastaffiliationask')
     const now = new Date().getTime()
-    this.miscStore.set({ key: 'lastaffiliationask', value: now })
-    //console.log('refs', this.$refs)
-    //this.$refs.aims.show() TODO
+
+    // Ask for affiliation not too frequently.
+    if (!lastask || now - lastask > 7 * 24 * 60 * 60 * 1000) {
+      function shuffleArray(array) {
+        return array.sort(() => Math.random() - 0.5);
+      }
+      const myGroups = shuffleArray(this.myGroups)
+      console.log('myGroups', myGroups.length)
+
+      for (const group of myGroups) {
+        console.log('group', group.nameshort)
+        if (group.role === 'Owner' || group.role === 'Moderator') {
+          const postdate = dayjs(group.affiliationconfirmed)
+          const daysago = dayjs().diff(postdate, 'day')
+          console.log('daysago', daysago)
+          if (!group.affiliationconfirmed || daysago > 365) {
+            this.affiliationGroup = group.id
+            break
+          }
+        }
+      }
+
+      this.miscStore.set({ key: 'lastaffiliationask', value: now })
+    }
+
   },
   methods: {
     async loadAll() {
