@@ -36,11 +36,12 @@
         citrus fruit allergy etc.) please let us know here.
       </p>
       <b-form-textarea v-model="cakenotes" placeholder="Any dietary requirements." rows="3" class="mt-2" />
-      <SpinButton name="save" label="Save notes" variant="primary" class="mt-2" :handler="saveNotes" />
+      <SpinButton icon-name="save" label="Save notes" variant="primary" class="mt-2" @handle="saveNotes" />
     </div>
   </div>
 </template>
 <script>
+import { useAuthStore } from '@/stores/auth'
 import ExternalLink from '~/components/ExternalLink'
 import SpinButton from '~/components/SpinButton'
 const OurToggle = () => import('~/components/OurToggle')
@@ -50,6 +51,13 @@ export default {
   data: function() {
     return {
       notes: null
+    }
+  },
+  setup() {
+    const authStore = useAuthStore()
+
+    return {
+      authStore,
     }
   },
   computed: {
@@ -78,7 +86,7 @@ export default {
     async saveSetting(name, val) {
       const settings = this.me.settings
       settings[name] = val
-      await this.$store.dispatch('auth/saveAndGet', {
+      await this.authStore.saveAndGet({
         settings: settings
       })
     },

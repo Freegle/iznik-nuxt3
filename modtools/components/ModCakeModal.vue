@@ -32,6 +32,7 @@ export default {
   mounted() {
     const miscStore = useMiscStore()
     this.modal.hide()
+    miscStore.set({ key: 'cakeasked', value: false })
     if (!miscStore.get('cakeasked')) {
       this.modal.show()
 
