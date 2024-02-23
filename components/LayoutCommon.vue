@@ -168,6 +168,7 @@ export default {
       const chatStore = useChatStore()
       chatStore.pollForChatUpdates()
     } else if (process.client) {
+      //
       // We only add the cookie banner for logged out users.  This reduces costs.  For logged-in users, we assume
       // they have already seen the banner and specified a preference if they care.
       const runtimeConfig = useRuntimeConfig()
@@ -192,6 +193,12 @@ export default {
         console.log('No cookie banner')
       }
     }
+
+    // The pubmatic code (for ads) has to happen after the cookie banner.
+    const script = document.createElement('script')
+    script.id = 'pubmatic'
+    script.setAttribute('src', '/js/pubmatic.js')
+    document.head.appendChild(script)
 
     try {
       // Set the build date.  This may get superceded by Sentry releases, but it does little harm to add it in.
