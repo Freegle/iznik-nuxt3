@@ -1,8 +1,8 @@
 diff --git a/node_modules/@vue/runtime-dom/dist/runtime-dom.esm-bundler.js b/node_modules/@vue/runtime-dom/dist/runtime-dom.esm-bundler.js
-index 95e87b8..7ddaf88 100644
+index 9afcea6..7eccf32 100644
 --- a/node_modules/@vue/runtime-dom/dist/runtime-dom.esm-bundler.js
 +++ b/node_modules/@vue/runtime-dom/dist/runtime-dom.esm-bundler.js
-@@ -31,7 +31,7 @@ const nodeOps = {
+@@ -36,7 +36,7 @@ const nodeOps = {
    setElementText: (el, text) => {
      el.textContent = text;
    },

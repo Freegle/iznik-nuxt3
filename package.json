@@ -11,6 +11,11 @@
   "engines": {
     "node": ">=17.9.1"
   },
+  "overrides": {
+    "vue-mention": {
+      "floating-vue": "^5.2.2"
+    }
+  },
   "devDependencies": {
     "@capacitor/cli": "^3.4.3",
     "@nuxtjs/eslint-config": "^12.0.0",
