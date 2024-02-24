@@ -39,5 +39,5 @@ export default {
   // Cookie banner for this site.
   COOKIEYES: process.env.COOKIEYES || null,
   ISAPP: process.env.IZNIK_NUXT3_IS_APP === 'true',
-  MOBILE_VERSION: '3.1.8'
+  MOBILE_VERSION: '3.1.9'
 }
