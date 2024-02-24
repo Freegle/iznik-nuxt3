@@ -316,8 +316,11 @@ export default {
 
             // Now we can send the reply via chat.
             await this.$nextTick()
-            callback()
-            called = true
+            if (callback) {
+              callback()
+              called = true
+            }
+
             await this.replyToPost()
           }
         } else {
@@ -328,7 +331,7 @@ export default {
         }
       }
 
-      if (!called) {
+      if (!called && callback) {
         callback()
       }
     },
