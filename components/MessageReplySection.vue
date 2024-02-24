@@ -11,7 +11,7 @@
       />
       <MessageStillAvailable v-if="stillAvailable" class="mb-1 mt-1" />
       <NoticeMessage
-        v-if="milesaway > farawawy && message.type === 'Offer'"
+        v-if="milesaway > faraway && message.type === 'Offer'"
         variant="danger"
         class="mt-2 mb-1"
       >
