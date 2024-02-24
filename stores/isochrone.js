@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { nextTick } from 'vue'
+import Wkt from 'wicket'
 import api from '~/api'
 
 export const useIsochroneStore = defineStore({
@@ -89,7 +90,7 @@ export const useIsochroneStore = defineStore({
 
         isochrones.forEach((i) => {
           try {
-            const wkt = new window.Wkt.Wkt()
+            const wkt = new Wkt.Wkt()
             wkt.read(i.polygon)
             const obj = wkt.toObject()
             const thisbounds = obj.getBounds()

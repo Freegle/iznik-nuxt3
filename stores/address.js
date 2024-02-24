@@ -55,9 +55,11 @@ export const useAddressStore = defineStore({
         postcodeid,
       })
 
-      addresses.forEach((address) => {
-        this.properties[address.id] = address
-      })
+      if (addresses?.length) {
+        addresses.forEach((address) => {
+          this.properties[address.id] = address
+        })
+      }
     },
     async update(params) {
       await api(this.config).address.update(params)
