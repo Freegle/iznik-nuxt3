@@ -5,13 +5,13 @@ import { sentryVitePlugin } from '@sentry/vite-plugin'
 import config from './config'
 
 // Mobile version change:
-// - config.js: MOBILE_VERSION eg 3.0.0
+// - config.js: MOBILE_VERSION eg 3.1.9
 // - android\app\build.gradle
 //    - versionCode eg 1200
-//    - versionName eg "3.0.0"
+//    - versionName eg "3.1.9"
 // - ios\App\App.xcodeproj\project.pbxproj
 //    - CURRENT_PROJECT_VERSION eg 1200 TWICE
-//    - MARKETING_VERSION eg 3.0.0 TWICE
+//    - MARKETING_VERSION eg 3.1.9 TWICE
 //
 // If npm reinstall, comment out line 40 of node_modules\@capacitor\cli\dist\android\run.js //await common_1.runTask
 
