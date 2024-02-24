@@ -27,7 +27,6 @@ const intersectionObserverDirective = {
           isVisible && intersectionRect.top >= boundingClientRect.top
         const isBottomVisible =
           isVisible && intersectionRect.bottom >= boundingClientRect.bottom
-        console.log('Observe', isTopVisible, isBottomVisible)
 
         if (options.observeFullElement && entry.isIntersecting) {
           if (entry.target.classList.contains('top-sentinel')) {
