@@ -1,34 +1,40 @@
 <template>
-  <!--
-  If you don't like ads, then you can use an ad blocker.  Plus you could donate to us
-  at https://www.ilovefreegle.org/donate - if we got enough donations we would be delighted not to show ads.
-   -->
-  <div v-observe-visibility="visibilityChanged" class="pointer">
-    <div v-if="isVisible" class="d-flex w-100 justify-content-around">
-      <div
-        :id="divId"
-        :ref="adUnitPath"
-        :key="'adUnit-' + adUnitPath"
-        :style="{
-          width: dimensions[0] + 'px',
-          height: dimensions[1] + 'px',
-        }"
-      />
+  <client-only>
+    <!--
+    If you don't like ads, then you can use an ad blocker.  Plus you could donate to us
+    at https://www.ilovefreegle.org/donate - if we got enough donations we would be delighted not to show ads.
+     -->
+    <div v-observe-visibility="visibilityChanged" class="pointer">
+      <div v-if="isVisible" class="d-flex w-100 justify-content-around">
+        <div
+          :id="divId"
+          :ref="adUnitPath"
+          :key="'adUnit-' + adUnitPath"
+          :style="{
+            'max-width': dimensions[0] + 'px',
+            'max-height': dimensions[1] + 'px',
+          }"
+        />
+      </div>
+      <p
+        v-if="isVisible && adShown"
+        class="text-center textsize d-none d-md-block"
+      >
+        Advertisement. These help Freegle keep going.
+      </p>
+      <!--    <div class="bg-white">-->
+      <!--      Path {{ adUnitPath }} id {{ divId }} dimensions {{ dimensions }}-->
+      <!--    </div>-->
     </div>
-    <p
-      v-if="isVisible && adShown"
-      class="text-center textsize d-none d-md-block"
-    >
-      Advertisement. These help Freegle keep going.
-    </p>
-    <!--    <div class="bg-white">-->
-    <!--      Path {{ adUnitPath }} id {{ divId }} dimensions {{ dimensions }}-->
-    <!--    </div>-->
-  </div>
+  </client-only>
 </template>
 <script setup>
 import { nextTick } from 'vue'
 import { ref, computed, onBeforeUnmount } from '#imports'
+import { useMiscStore } from '~/stores/misc'
+
+const miscStore = useMiscStore()
+const unmounted = ref(false)
 
 const props = defineProps({
   adUnitPath: {
@@ -90,7 +96,27 @@ let slot = null
 
 const timer = ref(null)
 
+const AD_REFRESH_TIMEOUT = 45000
+
+function refreshAd() {
+  if (
+    window.googletag?.pubads &&
+    typeof window.googletag?.pubads === 'function' &&
+    typeof window.googletag?.pubads().refresh === 'function' &&
+    !unmounted.value
+  ) {
+    // Don't fresh if the ad is not visible or tab is not active.
+    if (isVisible.value && miscStore.visible) {
+      window.googletag.pubads().refresh([slot])
+    }
+
+    timer.value = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
+  }
+}
+
 onBeforeUnmount(() => {
+  unmounted.value = true
+
   try {
     if (timer.value) {
       clearTimeout(timer)
@@ -112,8 +138,9 @@ const emit = defineEmits(['rendered'])
 async function visibilityChanged(visible) {
   if (!blocked) {
     try {
+      isVisible.value = visible
+
       if (visible && !shownFirst) {
-        isVisible.value = visible
         shownFirst = true
 
         await nextTick()
@@ -134,32 +161,34 @@ async function visibilityChanged(visible) {
           window.googletag
             .pubads()
             .addEventListener('slotRenderEnded', (event) => {
-              if (event?.slot === slot && event?.isEmpty) {
-                adShown.value = false
-              }
-              emit('rendered', adShown.value)
-
-              // We refresh the ad slot.  This increases views.  Google doesn't like it if this is more frequent than
-              // every 30s.
-              if (!timer.value) {
-                timer.value = setTimeout(() => {
-                  if (
-                    window.googletag?.pubads &&
-                    typeof window.googletag?.pubads === 'function' &&
-                    typeof window.googletag?.pubads().refresh === 'function'
-                  ) {
-                    window.googletag.pubads().refresh([slot])
-                  }
-                }, 45000)
+              if (event?.slot === slot) {
+                console.log('Rendered', uniqueid.value, 'empty', event?.isEmpty)
+                if (event?.isEmpty) {
+                  adShown.value = false
+                }
+                emit('rendered', adShown.value)
               }
             })
             .addEventListener('slotVisibilityChanged', (event) => {
-              if (event.inViewPercentage < 51) {
-                console.log(
-                  `Visibility of slot ${event.slot.getSlotElementId()} changed. New visibility: ${
-                    event.inViewPercentage
-                  }%.Viewport size: ${window.innerWidth}x${window.innerHeight}`
-                )
+              if (event?.slot === slot) {
+                if (event.inViewPercentage < 51) {
+                  // console.log(
+                  //   `Visibility of slot ${event.slot.getSlotElementId()} changed. New visibility: ${
+                  //     event.inViewPercentage
+                  //   }%.Viewport size: ${window.innerWidth}x${
+                  //     window.innerHeight
+                  //   }`
+                  // )
+                }
+              }
+            })
+            .addEventListener('impressionViewable', (event) => {
+              if (event?.slot === slot) {
+                // We refresh the ad slot.  This increases views.  Google doesn't like it if this is more frequent than
+                // every 30s.
+                if (!timer.value) {
+                  timer.value = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
+                }
               }
             })
 
