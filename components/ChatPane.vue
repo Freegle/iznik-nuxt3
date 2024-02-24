@@ -79,7 +79,7 @@ function resize() {
 const theHeight = computed(() => {
   const vh100 = Math.max(
     document.documentElement.clientHeight,
-    windowHeight || 0
+    windowHeight.value || 0
   )
 
   let ret = null
@@ -173,6 +173,7 @@ watch(me, async (newVal, oldVal) => {
 onMounted(() => {
   scrollTimer.value = setTimeout(checkScroll, scrollInterval.value)
 
+  resize()
   window.addEventListener('resize', resize)
 })
 
