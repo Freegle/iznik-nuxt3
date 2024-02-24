@@ -61,7 +61,7 @@
           <div class="mt-1 d-block d-md-none">
             <b-button
               variant="primary"
-              :disabled="uploadingPhoto"
+              :disabled="uploadingPhoto || !messageValid"
               size="lg"
               block
               to="/find/whereami"
