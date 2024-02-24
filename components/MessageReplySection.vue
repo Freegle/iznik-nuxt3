@@ -248,6 +248,7 @@ export default {
           this.showNewUser = true
 
           await nextTick()
+          callback()
 
           // Now that we are logged in, we can reply.
           this.$refs.newUserModal?.show()
@@ -257,14 +258,15 @@ export default {
           // If anything else happens, then we call sendReply which will force us to log in.  Then the watch will
           // spot that we're logged in and trigger the send, so we don't need to do that here.
           console.log('Failed to register - force login', ret)
+          callback()
           this.forceLogin = true
         }
       } catch (e) {
         // Probably an existing user.  Force ourselves to log in as above.
         console.log('Register exception, force login', e.message)
+        callback()
         this.forceLogin = true
       }
-      callback()
     },
     async sendReply(callback) {
       console.log('sendReply', this.reply)
