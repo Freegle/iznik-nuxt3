@@ -178,7 +178,9 @@ export function useNavbar() {
         await newsfeedStore.fetchCount(distance, false)
         await messageStore.fetchCount(me?.settings?.browseView, false)
 
+        // We might get logged out during awaits.
         if (
+          myid.value &&
           route.path !== '/profile/' + myid.value &&
           !route.path.includes('/unsubscribe')
         ) {
@@ -192,11 +194,13 @@ export function useNavbar() {
           await messageStore.fetchActivePostCount()
         }
 
-        unreadNotificationCount.value = await notificationStore.fetchCount()
+        if (myid.value) {
+          unreadNotificationCount.value = await notificationStore.fetchCount()
 
-        if (unreadNotificationCount.value) {
-          // Fetch the notifications too, so that we can be quick if they view them.
-          notificationStore.fetchList()
+          if (myid.value && unreadNotificationCount.value) {
+            // Fetch the notifications too, so that we can be quick if they view them.
+            notificationStore.fetchList()
+          }
         }
 
         const runtimeConfig = useRuntimeConfig()
