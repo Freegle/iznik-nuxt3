@@ -7,7 +7,7 @@ import config from './config'
 // Mobile version change:
 // - config.js: MOBILE_VERSION eg 3.1.9
 // - android\app\build.gradle
-//    - versionCode eg 1200
+//    - versionCode eg 1201
 //    - versionName eg "3.1.9"
 // - ios\App\App.xcodeproj\project.pbxproj
 //    - CURRENT_PROJECT_VERSION eg 1200 TWICE
