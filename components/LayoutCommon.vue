@@ -1,7 +1,6 @@
 <template>
   <div>
     <main class="ml-0 ps-0 pe-0 pageContent">
-      Ad rendered {{ noAdRendered }} , {{ adRendering }}
       <div class="aboveSticky">
         <slot ref="pageContent" />
       </div>
