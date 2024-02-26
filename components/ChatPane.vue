@@ -70,14 +70,16 @@ const props = defineProps({
   id: { type: Number, required: true },
 })
 
-const ChatNotVisible = defineAsyncComponent(() =>
-  import('~/components/ChatNotVisible.vue')
-)
+const windowHeight = ref(window.innerHeight)
+
+function resize() {
+  windowHeight.value = window.innerHeight
+}
 
 const theHeight = computed(() => {
   const vh100 = Math.max(
     document.documentElement.clientHeight,
-    window.innerHeight || 0
+    windowHeight.value || 0
   )
 
   let ret = null
@@ -91,6 +93,10 @@ const theHeight = computed(() => {
 
   return ret + 'px'
 })
+
+const ChatNotVisible = defineAsyncComponent(() =>
+  import('~/components/ChatNotVisible.vue')
+)
 
 const { chat } = await setupChat(props.id)
 
@@ -166,12 +172,17 @@ watch(me, async (newVal, oldVal) => {
 
 onMounted(() => {
   scrollTimer.value = setTimeout(checkScroll, scrollInterval.value)
+
+  resize()
+  window.addEventListener('resize', resize)
 })
 
 onBeforeUnmount(() => {
   if (scrollTimer.value) {
     clearTimeout(scrollTimer.value)
   }
+
+  window.removeEventListener('resize', resize)
 })
 
 function checkScroll() {

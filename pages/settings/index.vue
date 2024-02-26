@@ -1056,9 +1056,9 @@ export default {
             settings,
           })
         }
-
-        callback()
       }
+
+      callback()
     },
     toggleAdvanced(e) {
       e.preventDefault()

@@ -4,7 +4,7 @@ const intersectionObserverDirective = {
   beforeMount(el, binding) {
     let callback
     let options = {}
-    let throttle = 0
+    // let throttle = 0
     let entryTopWasVisible = false
     let entryBottomWasVisible = false
     let entryWasObserved = false
@@ -13,9 +13,9 @@ const intersectionObserverDirective = {
     if (typeof binding.value === 'function') {
       callback = binding.value
     } else {
-      ;({ callback, options, throttle } = binding.value)
+      ;({ callback, options } = binding.value)
     }
-    let timer
+    // let timer
 
     const observerCallback = (entries, observer) => {
       entries.forEach((entry) => {
@@ -38,27 +38,29 @@ const intersectionObserverDirective = {
           entryWasObserved = entryTopWasVisible && entryBottomWasVisible
         }
         // Throttle callback execution
-        if (timer === undefined) {
-          timer = window.setTimeout(() => {
-            const cb = () => {
-              callback(isVisible, {
-                isTopVisible,
-                isBottomVisible,
-                entryWasObserved,
-                entry,
-                observer,
-              })
-            }
-            // Provide additional visibility info in the callback
-            if (options.observeFullElement) {
-              entryWasObserved && cb()
-              entryWasObserved = false
-            } else {
-              cb()
-            }
-            timer = undefined
-          }, throttle || 0)
+        // if (timer === undefined) {
+        //   timer = window.setTimeout(() => {
+        const cb = () => {
+          callback(isVisible, {
+            isTopVisible,
+            isBottomVisible,
+            entryWasObserved,
+            entry,
+            observer,
+          })
         }
+        // Provide additional visibility info in the callback
+        if (options.observeFullElement) {
+          entryWasObserved && cb()
+          entryWasObserved = false
+        } else {
+          cb()
+        }
+        //     timer = undefined
+        //   }, throttle || 0)
+        // } else {
+        //   console.log('Throttled')
+        // }
       })
     }
 

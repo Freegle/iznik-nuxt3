@@ -19,7 +19,7 @@ export default {
   // Geocode server
   GEOCODE: process.env.GEOCODE || 'https://geocode.ilovefreegle.org/api',
 
-  // Google keys from scenic-oxygen-849 project.
+  // Google keys from scenic-oxygen-849 project accessed from Freegle Geeks.
   GOOGLE_MAPS_KEY: 'AIzaSyCdTSJKGWJUOx2pq1Y0f5in5g4kKAO5dgg',
   GOOGLE_API_KEY: 'AIzaSyArVxoX781qdcbmQZi1PKHX-qa0bPbboH4',
   GOOGLE_CLIENT_ID:

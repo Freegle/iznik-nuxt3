@@ -5,6 +5,7 @@
     :data-client_id="clientId"
     data-callback="handleGoogleCredentialsResponse"
     data-auto_select="true"
+    data-use_fedcm_for_prompt="true"
   />
 </template>
 <script>
@@ -35,7 +36,9 @@ export default {
   mounted() {
     const self = this
 
-    // Fallback in case the script load just quietly fails.  We've seen this on some Firefox versions.
+    // Fallback in case:
+    // - Whe script load just quietly fails.  We've seen this on some Firefox versions.
+    // - The notification is not displayed.  As of 2024 with OneTap migrating to FedCM we can't find this out.
     setTimeout(() => {
       console.log('One Tap fallback')
       self.$emit('complete')
@@ -67,14 +70,6 @@ export default {
               try {
                 window.google.accounts.id.prompt((notification) => {
                   console.log('One Tap prompt returned', notification)
-
-                  if (
-                    notification.isNotDisplayed() ||
-                    !notification.isDisplayed()
-                  ) {
-                    console.log('One Tap not displayed')
-                    self.$emit('complete')
-                  }
                 })
               } catch (e) {
                 console.error('One Tap error', e)

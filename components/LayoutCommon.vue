@@ -6,7 +6,7 @@
       </div>
       <client-only>
         <div
-          v-if="allowAd && !noAdRendered"
+          v-if="allowAd && !adRendering && !noAdRendered"
           class="d-flex justify-content-around w-100 sticky"
         >
           <VisibleWhen :at="['xs', 'sm']">
@@ -25,6 +25,7 @@
               :dimensions="[728, 90]"
               div-id="div-gpt-ad-1707999304775-0"
               class="sticky"
+              :class="{ rendered: !noAdRendered }"
               pixel
               @rendered="adRendered"
             />
@@ -34,7 +35,7 @@
               ad-unit-path="/22794232631/freegle_sticky_desktop"
               :dimensions="[970, 90]"
               div-id="div-gpt-ad-1707999304775-0"
-              class="sticky"
+              :class="{ test: true, rendered: !noAdRendered, sticky: true }"
               pixel
               @rendered="adRendered"
             />
@@ -42,8 +43,7 @@
         </div>
         <div
           v-else
-          class="sticky ourBack w-100 text-center d-flex flex-column justify-content-center"
-          style="height: 50px"
+          class="adFallback sticky ourBack w-100 text-center d-flex flex-column justify-content-center"
         >
           <nuxt-link to="/donate" class="text-white nodecor">
             Help keep Freegle running. Click to donate.
@@ -125,6 +125,7 @@ export default {
     return {
       showLoader: true,
       timeTimer: null,
+      adRendering: true,
       noAdRendered: false,
     }
   },
@@ -294,6 +295,7 @@ export default {
       }
     },
     adRendered(adShown) {
+      this.adRendering = false
       this.noAdRendered = !adShown
     },
   },
@@ -336,7 +338,13 @@ body.modal-open {
 .sticky {
   position: fixed;
   bottom: 0;
-  background-color: $color-gray--dark;
+
+  background-color: transparent;
+
+  &.anAdRendered {
+    background-color: $color-gray--dark;
+  }
+
   z-index: 10000;
 
   margin-top: 2px;
@@ -345,6 +353,15 @@ body.modal-open {
 
   @include media-breakpoint-up(md) {
     height: $sticky-banner-height-desktop;
+  }
+}
+
+.adFallback {
+  height: $sticky-banner-height-mobile;
+
+  @include media-breakpoint-up(md) {
+    // On larger screens we already have enough prompts for donations.
+    height: 0;
   }
 }
 
