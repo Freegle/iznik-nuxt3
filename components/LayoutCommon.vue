@@ -1,20 +1,24 @@
 <template>
   <div>
     <main class="ml-0 ps-0 pe-0 pageContent">
+      Ad rendered {{ noAdRendered }} , {{ adRendering }}
       <div class="aboveSticky">
         <slot ref="pageContent" />
       </div>
       <client-only>
         <div
-          v-if="allowAd && !adRendering && !noAdRendered"
-          class="d-flex justify-content-around w-100 sticky"
+          v-if="allowAd"
+          class="d-flex justify-content-around w-100"
+          :class="{
+            sticky: true,
+            anAdRendered: !adRendering && !noAdRendered,
+          }"
         >
-          <VisibleWhen :at="['xs', 'sm']">
+          <VisibleWhen :at="['xs', 'sm']" class="sticky">
             <ExternalDa
               ad-unit-path="/22794232631/freegle_sticky"
               :dimensions="[320, 50]"
               div-id="div-gpt-ad-1699973618906-0"
-              class="sticky"
               pixel
               @rendered="adRendered"
             />
@@ -24,8 +28,6 @@
               ad-unit-path="/22794232631/freegle_sticky_desktop"
               :dimensions="[728, 90]"
               div-id="div-gpt-ad-1707999304775-0"
-              class="sticky"
-              :class="{ rendered: !noAdRendered }"
               pixel
               @rendered="adRendered"
             />
