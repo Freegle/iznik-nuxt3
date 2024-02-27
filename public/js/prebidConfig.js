@@ -43,21 +43,20 @@ var adUnits = [
       }
     }]
   },
-  // TODO
-  // {
-  //   code: '/22794232631/freegle_product',
-  //   mediaTypes: {
-  //     banner: {
-  //       sizes: squarish_sizes
-  //     }
-  //   },
-  //   bids: [{
-  //     bidder: 'pubmatic',
-  //     params: {
-  //       placementId: 5753985
-  //     }
-  //   }]
-  // },
+  {
+    code: '/22794232631/freegle_product',
+    mediaTypes: {
+      banner: {
+        sizes: squarish_sizes
+      }
+    },
+    bids: [{
+      bidder: 'pubmatic',
+      params: {
+        placementId: 5773059
+      }
+    }]
+  },
   {
     code: '/22794232631/freegle_productemail',
     mediaTypes: {
