@@ -86,6 +86,20 @@ var adUnits = [
     }]
   },
   {
+    code: '/22794232631/freegle_myposts_desktop_right',
+    mediaTypes: {
+      banner: {
+        sizes: squarish_sizes
+      }
+    },
+    bids: [{
+      bidder: 'pubmatic',
+      params: {
+        placementId: 5753988
+      }
+    }]
+  },
+  {
     code: '/22794232631/freegle_home_left',
     mediaTypes: {
       banner: {

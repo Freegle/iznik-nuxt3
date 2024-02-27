@@ -195,23 +195,17 @@
               'ads-wrapper': true,
             }"
           >
-            <ExternalDa
-              v-if="tryLargeAd"
+            <ExternalDas
               ad-unit-path="/22794232631/freegle_chat_desktop"
-              :dimensions="[300, 600]"
+              :dimensions="[
+                [300, 600],
+                [300, 250],
+              ]"
               div-id="div-gpt-ad-1692867596111-0"
               class="mt-2"
-              @rendered="largeRendered"
+              @rendered="adRendered"
             />
-            <ExternalDa
-              v-else
-              ad-unit-path="/22794232631/freegle_chat_desktop"
-              :dimensions="[300, 250]"
-              div-id="div-gpt-ad-1692867596111-0"
-              class="mt-2"
-              @rendered="smallRendered"
-            />
-            <SidebarRight :show-job-opportunities="true" v-if="triedAds" />
+            <SidebarRight v-if="triedAds" :show-job-opportunities="true" />
           </VisibleWhen>
         </b-col>
       </b-row>
@@ -235,6 +229,8 @@ import InfiniteLoading from '~/components/InfiniteLoading'
 import { useChatStore } from '~/stores/chat'
 import SidebarRight from '~/components/SidebarRight'
 import ChatMobileNavbar from '~/components/ChatMobileNavbar.vue'
+import ExternalDas from '~/components/ExternalDas.vue'
+import ExternalDa from '~/components/ExternalDa.vue'
 
 // We can't use async on ChatListEntry else the infinite scroll kicks in and tries to load everything while we are
 // still waiting for the import to complete.
@@ -256,6 +252,8 @@ export default {
     ChatHideModal,
     InfiniteLoading,
     ChatMobileNavbar,
+    ExternalDas,
+    ExternalDa,
   },
   async setup(props) {
     definePageMeta({
@@ -341,7 +339,6 @@ export default {
       showClosed: false,
       smallAdVisible: false,
       largeAdVisible: false,
-      tryLargeAd: true,
       triedAds: false,
     }
   },
@@ -548,18 +545,16 @@ export default {
         this.searching = null
       }
     },
-    largeRendered(rendered) {
-      console.log('Large rendered', rendered)
+    adRendered(rendered, index, dimension) {
+      console.log('Ad rendered in parent', rendered, index, dimension)
       if (rendered) {
-        this.largeAdVisible = true
-        this.triedAds = true
-      } else {
-        this.tryLargeAd = false
+        if (index === 0) {
+          this.largeAdVisible = true
+        } else {
+          this.smallAdVisible = true
+        }
       }
-    },
-    smallRendered(rendered) {
-      console.log('Small rendered', rendered)
-      this.smallAdVisible = rendered
+
       this.triedAds = true
     },
   },
