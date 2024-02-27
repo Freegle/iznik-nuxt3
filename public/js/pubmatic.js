@@ -26,7 +26,8 @@ setTimeout(loadGPT, 500);
 
 // Callback code end
 
-// ID hub code for EU traffic start
+// ID hub code for EU traffic start.  The UK is inside the EU for these GDPR purposes, even though
+// we're not for political purposes.
 
 (function() {
   var purl = window.location.href
@@ -48,29 +49,6 @@ setTimeout(loadGPT, 500);
 })();
 
 // ID hub code for EU traffic End
-
-// ID hub code for Non EU traffic start
-
-(function() {
-  var purl = window.location.href
-  var url = '//ads.pubmatic.com/AdServer/js/pwt/164422/12427/'
-  var profileVersionId = ''
-  if (purl.indexOf('pwtv=') > 0) {
-    var regexp = /pwtv=(.*?)(&|$)/g
-    var matches = regexp.exec(purl)
-    if (matches.length >= 2 && matches[1].length > 0) {
-      profileVersionId = '/' + matches[1]
-    }
-  }
-  var wtads = document.createElement('script')
-  wtads.async = true
-  wtads.type = 'text/javascript'
-  wtads.src = url + profileVersionId + '/pwt.js'
-  var node = document.getElementsByTagName('script')[0]
-  node.parentNode.insertBefore(wtads, node)
-})()
-
-// ID hub code for Non EU traffic End
 
 
 
