@@ -323,10 +323,14 @@ body.modal-open {
   position: fixed;
   bottom: 0;
 
-  background-color: transparent;
+  background-color: $color-gray--dark;
 
-  &.anAdRendered {
-    background-color: $color-gray--dark;
+  @include media-breakpoint-up(lg) {
+    background-color: transparent;
+
+    &.anAdRendered {
+      background-color: $color-gray--dark;
+    }
   }
 
   z-index: 10000;
