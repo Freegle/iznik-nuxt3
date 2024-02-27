@@ -69,7 +69,8 @@ export default {
               console.log('GSI loaded')
               try {
                 window.google.accounts.id.prompt((notification) => {
-                  console.log('One Tap prompt returned', notification)
+                  console.log('One Tap prompt returned')
+                  self.$emit('complete')
                 })
               } catch (e) {
                 console.error('One Tap error', e)
