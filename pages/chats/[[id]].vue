@@ -189,16 +189,29 @@
         <b-col cols="0" xl="3" class="p-0 pl-1">
           <VisibleWhen
             :at="['xl', 'xxl']"
-            :class="[adsVisible && 'sidebar-with-ads']"
+            :class="{
+              'sidebar-with-small-ads': smallAdVisible,
+              'sidebar-with-large-ads': largeAdVisible,
+              'ads-wrapper': true,
+            }"
           >
             <ExternalDa
+              v-if="tryLargeAd"
+              ad-unit-path="/22794232631/freegle_chat_desktop"
+              :dimensions="[300, 600]"
+              div-id="div-gpt-ad-1692867596111-0"
+              class="mt-2"
+              @rendered="largeRendered"
+            />
+            <ExternalDa
+              v-else
               ad-unit-path="/22794232631/freegle_chat_desktop"
               :dimensions="[300, 250]"
               div-id="div-gpt-ad-1692867596111-0"
               class="mt-2"
-              @rendered="adsVisible = $event"
+              @rendered="smallRendered"
             />
-            <SidebarRight :show-job-opportunities="true" />
+            <SidebarRight :show-job-opportunities="true" v-if="triedAds" />
           </VisibleWhen>
         </b-col>
       </b-row>
@@ -326,7 +339,10 @@ export default {
       distance: 1000,
       selectedChatId: null,
       showClosed: false,
-      adsVisible: false,
+      smallAdVisible: false,
+      largeAdVisible: false,
+      tryLargeAd: true,
+      triedAds: false,
     }
   },
   computed: {
@@ -532,6 +548,20 @@ export default {
         this.searching = null
       }
     },
+    largeRendered(rendered) {
+      console.log('Large rendered', rendered)
+      if (rendered) {
+        this.largeAdVisible = true
+        this.triedAds = true
+      } else {
+        this.tryLargeAd = false
+      }
+    },
+    smallRendered(rendered) {
+      console.log('Small rendered', rendered)
+      this.smallAdVisible = rendered
+      this.triedAds = true
+    },
   },
 }
 </script>
@@ -540,6 +570,7 @@ export default {
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
 @import 'assets/css/sticky-banner.scss';
+@import 'assets/css/sidebar-ads.scss';
 
 .chatback {
   background-color: $color-yellow--light;
@@ -585,9 +616,16 @@ export default {
   border-radius: 50%;
 }
 
-.sidebar-with-ads .sidebar__wrapper {
+.sidebar-with-small-ads .sidebar__wrapper {
   height: calc(
-    100vh - var(--ads-height) - var(--ads-label-height) -
+    100vh - $sidebar-ads-height-small - $sidebar-ads-label-height -
+      var(--header-navbar-height) - $sticky-banner-height-desktop
+  );
+}
+
+.sidebar-with-large-ads .sidebar__wrapper {
+  height: calc(
+    100vh - $sidebar-ads-height-large - $sidebar-ads-label-height -
       var(--header-navbar-height) - $sticky-banner-height-desktop
   );
 }
