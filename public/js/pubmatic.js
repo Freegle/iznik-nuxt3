@@ -30,7 +30,7 @@ setTimeout(loadGPT, 500);
 
 (function() {
   var purl = window.location.href
-  var url = '//ads.pubmatic.com/AdServer/js/pwt/164422/12426'
+  var url = '//ads.pubmatic.com/AdServer/js/pwt/164422/12426/'
   var profileVersionId = ''
   if (purl.indexOf('pwtv=') > 0) {
     var regexp = /pwtv=(.*?)(&|$)/g
@@ -53,7 +53,7 @@ setTimeout(loadGPT, 500);
 
 (function() {
   var purl = window.location.href
-  var url = '//ads.pubmatic.com/AdServer/js/pwt/164422/12427'
+  var url = '//ads.pubmatic.com/AdServer/js/pwt/164422/12427/'
   var profileVersionId = ''
   if (purl.indexOf('pwtv=') > 0) {
     var regexp = /pwtv=(.*?)(&|$)/g
