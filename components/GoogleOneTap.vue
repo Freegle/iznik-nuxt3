@@ -68,7 +68,7 @@ export default {
             js.onload = (e) => {
               console.log('GSI loaded')
               try {
-                window.google.accounts.id.prompt((notification) => {
+                window.google.accounts.id.prompt(() => {
                   console.log('One Tap prompt returned')
                   self.$emit('complete')
                 })
