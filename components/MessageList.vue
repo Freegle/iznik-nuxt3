@@ -88,6 +88,7 @@ import MessageListUpToDate from './MessageListUpToDate'
 import { ref } from '#imports'
 import InfiniteLoading from '~/components/InfiniteLoading'
 import { useMiscStore } from '~/stores/misc'
+import VisibleWhen from '~/components/VisibleWhen'
 const OurMessage = defineAsyncComponent(() =>
   import('~/components/OurMessage.vue')
 )
@@ -106,6 +107,7 @@ export default {
     GroupHeader,
     InfiniteLoading,
     JobsTopBar,
+    VisibleWhen,
   },
   props: {
     messagesForList: {
