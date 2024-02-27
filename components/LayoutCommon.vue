@@ -187,9 +187,17 @@ export default {
     }
 
     // The pubmatic code (for ads) has to happen after the cookie banner.
+    //
+    // This code in turn loads prebid.js.
     const script = document.createElement('script')
     script.id = 'pubmatic'
     script.setAttribute('src', '/js/pubmatic.js')
+    document.head.appendChild(script)
+
+    // The prebid config code (for ads) has to happen after the pubmatic code.
+    const script2 = document.createElement('script')
+    script2.id = 'prebid'
+    script2.setAttribute('src', '/js/prebidConfig.js')
     document.head.appendChild(script)
 
     try {
