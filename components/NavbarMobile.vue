@@ -31,6 +31,7 @@
         <NotificationOptions
           v-if="online && !showBackButton && loggedIn"
           v-model:unread-notification-count="unreadNotificationCount"
+          v-model:shown="notificationsShown"
           :distance="distance"
           :small-screen="true"
           @show-about-me="showAboutMe"
@@ -260,6 +261,15 @@ const title = computed(() => {
   return useMiscStore().pageTitle
 })
 
+const notificationsShown = ref(false)
+
+watch(notificationsShown, (newVal) => {
+  console.log('Notifications shown', newVal)
+  if (newVal && navBarHidden.value) {
+    setNavBarHidden(false)
+  }
+})
+
 // We want to hide the navbars when you scroll down.
 onMounted(() => {
   window.addEventListener('scroll', handleScroll)
@@ -272,7 +282,12 @@ onBeforeUnmount(() => {
 function handleScroll() {
   const scrollY = window.scrollY
 
-  if (scrollY > 200 && !navBarHidden.value) {
+  if (notificationsShown.value) {
+    if (navBarHidden.value) {
+      // Don't hide the navbar if the notifications are visible.s
+      setNavBarHidden(false)
+    }
+  } else if (scrollY > 200 && !navBarHidden.value) {
     // Scrolling down.  Hide the navbars.
     setNavBarHidden(true)
   } else if (scrollY < 100 && navBarHidden.value) {
