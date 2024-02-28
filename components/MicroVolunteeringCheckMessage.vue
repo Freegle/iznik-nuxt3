@@ -10,6 +10,12 @@
       :actions="false"
       :record-view="false"
       :show-map="false"
+      @zoom="showPhotosModal"
+    />
+    <MessagePhotosModal
+      v-if="showMessagePhotosModal && message.attachments?.length"
+      :id="message.id"
+      @hidden="showMessagePhotosModal = false"
     />
     <div
       v-if="!showComments"
@@ -83,9 +89,15 @@ export default {
     const messageStore = useMessageStore()
     await messageStore.fetch(props.id, true)
 
+    const showMessagePhotosModal = ref(false)
+    const showPhotosModal = () => {
+      showMessagePhotosModal.value = true
+    }
     return {
       messageStore,
       microVolunteeringStore,
+      showMessagePhotosModal,
+      showPhotosModal,
     }
   },
   data() {
