@@ -198,9 +198,9 @@ export default {
 
       // The prebid config code (for ads) has to happen after the pubmatic code.
       if (!document.getElementById('prebid')) {
-        console.log('Add prebid script')
+        console.log('Add prebidConfig script')
         const script2 = document.createElement('script')
-        script2.id = 'prebid'
+        script2.id = 'prebidConfig'
         script2.setAttribute('src', '/js/prebidConfig.js')
         document.head.appendChild(script2)
       }
