@@ -162,7 +162,7 @@ export default {
       chatStore.pollForChatUpdates()
     } else if (process.client) {
       const mobileStore = useMobileStore()
-      if (!mobileStore.isApp) {
+      //if (!mobileStore.isApp) {
 
       // We only add the cookie banner for logged out users.  This reduces costs.  For logged-in users, we assume
       // they have already seen the banner and specified a preference if they care.
@@ -180,14 +180,15 @@ export default {
         if (!cookieScript) {
           const script = document.createElement('script')
           script.id = 'cookieyes'
-          script.setAttribute('src', runtimeConfig.public.COOKIEYES)
+          //script.setAttribute('src', runtimeConfig.public.COOKIEYES)
+          script.setAttribute('src', '/js/cookieyesapp.js')
 
           document.head.appendChild(script)
         }
       } else {
         console.log('No cookie banner')
       }
-      }
+      //}
     }
 
     try {
