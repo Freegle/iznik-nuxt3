@@ -3,8 +3,7 @@
 </template>
 
 <script>
-//import Vue from 'vue'
-
+import pluralize from 'pluralize'
 export default {
   props: {
     groupid: {
@@ -81,6 +80,13 @@ export default {
           this.fetch()
         })
       }
+    },
+    withplural(a, b, c) {
+      if (Array.isArray(a)) {
+        pluralize.addIrregularRule(...a)
+        a = a[0]
+      }
+      return pluralize(a, b, c)
     }
   }
 }

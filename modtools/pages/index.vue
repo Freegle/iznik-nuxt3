@@ -10,7 +10,7 @@
     </p>
 
     <ModDashboardDiscourseTopics v-if="start" :groupid="groupid" :group-name="groupName" :start="start" :end="end" class="mb-2" />
-    <ModMissingFacebook />
+    <ModMissingFacebook/>
     <ModMissingProfile class="mt-1" />
     <div class="d-flex mb-2 mt-2 flex-wrap">
       <div class="borderit d-flex flex-column">
@@ -50,7 +50,23 @@
         </b-button>
       </div>
     </div>
-    {{ showInfo }} - {{ start }} - {{ end }} - {{ groupid }}
+    <div v-if="start && end">
+      <ModDashboardRecentCounts :groupid="groupid" :group-name="groupName" :start="start" :end="end" />
+      <ModDashboardModeratorsActive :groupid="groupid" :group-name="groupName" :start="start" :end="end" />
+      <ModDashboardPopularPosts :groupid="groupid" :group-name="groupName" :start="start" :end="end" class="mt-2" />
+      <h2 class="mt-2">
+        Active Freeglers <span class="text-muted">on {{ groupName }}</span>
+      </h2>
+      <p>These are the freeglers who've done most on the site recently.</p>
+      <b-row>
+        <b-col cols="12" xl="6">
+          <ModDashboardFreeglersPosting :groupid="groupid" :group-name="groupName" :start="start" :end="end" />
+        </b-col>
+        <b-col cols="12" xl="6">
+          <ModDashboardFreeglersReplying :groupid="groupid" :group-name="groupName" :start="start" :end="end" />
+        </b-col>
+      </b-row>
+    </div>
   </div>
 </template>
 
@@ -59,7 +75,7 @@ import { useMiscStore } from '@/stores/misc'
 import { useGroupStore } from '@/stores/group'
 import { buildHead } from '~/composables/useMTBuildHead'
 import dayjs from 'dayjs'
-//mixins: [loginRequired],
+// TODO mixins: [loginRequired],
 
 const miscStore = useMiscStore()
 const groupStore = useGroupStore()

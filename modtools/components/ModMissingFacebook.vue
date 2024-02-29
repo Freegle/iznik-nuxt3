@@ -2,7 +2,8 @@
   <div>
     <NoticeMessage v-if="invalid.length" variant="danger">
       <div v-if="summary">
-        <v-icon icon="exclamation-triangle" /> {{ invalid.length }} Facebook {{ invalid.length | pluralize(['page has', 'pages have']) }} become unlinked.
+        <v-icon icon="exclamation-triangle" /> {{ invalid.length }} Facebook {{ withplural(['page has', 'pages have'], invalid.length) }} become
+        unlinked.
         <b-button variant="white" @click="expand">
           Click to view
         </b-button>
@@ -22,7 +23,8 @@
     </NoticeMessage>
     <NoticeMessage v-if="notlinked.length" variant="warning" class="mt-1">
       <div v-if="summary">
-        <v-icon icon="exclamation-triangle" /> {{ notlinked.length | pluralize(['community needs', 'communities need'], { includeNumber: true }) }} to be linked to a Facebook page.
+        <v-icon icon="exclamation-triangle" /> {{ withplural(['community needs', 'communities need'], notlinked.length, true) }} to be linked to a
+        Facebook page.
         <b-button variant="white" @click="expand">
           Click to view
         </b-button>
@@ -40,11 +42,12 @@
   </div>
 </template>
 <script>
+import pluralize from 'pluralize'
 import NoticeMessage from '@/components/NoticeMessage'
 const ExternalLink = () => import('~/components/ExternalLink')
 export default {
   components: { NoticeMessage, ExternalLink },
-  data: function() {
+  data: function () {
     return {
       summary: true
     }
@@ -109,6 +112,13 @@ export default {
   methods: {
     expand() {
       this.summary = false
+    },
+    withplural(a, b, c) {
+      if (Array.isArray(a)) {
+        pluralize.addIrregularRule(...a)
+        a = a[0]
+      }
+      return pluralize(a, b, c)
     }
   }
 }
