@@ -324,7 +324,9 @@ export default {
   methods: {
     async submit(callback) {
       if (this.type === 'Taken' && !this.tookUsers.length) {
-        return (this.submittedWithNoSelectedUser = true)
+        callback()
+        this.submittedWithNoSelectedUser = true
+        return
       } else {
         this.submittedWithNoSelectedUser = false
       }
