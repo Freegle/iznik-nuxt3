@@ -184,26 +184,30 @@ export default {
       } else {
         console.log('No cookie banner')
       }
+    }
 
-      // The pubmatic code (for ads) has to happen after the cookie banner.
-      //
-      // This code in turn loads prebid.js.
-      if (!document.getElementById('pubmatic')) {
-        console.log('Add pubmatic script')
-        const script = document.createElement('script')
-        script.id = 'pubmatic'
-        script.setAttribute('src', '/js/pubmatic.js')
-        document.head.appendChild(script)
-      }
+    // The pubmatic code (for ads) has to happen after the cookie banner.
+    //
+    // This code in turn loads prebid.js.
+    if (!document.getElementById('pubmatic')) {
+      console.log('Add pubmatic script')
+      const script = document.createElement('script')
+      script.id = 'pubmatic'
+      script.setAttribute('src', '/js/pubmatic.js')
+      document.head.appendChild(script)
+    } else {
+      console.log('Pubmatic script already present')
+    }
 
-      // The prebid config code (for ads) has to happen after the pubmatic code.
-      if (!document.getElementById('prebidConfig')) {
-        console.log('Add prebidConfig script')
-        const script2 = document.createElement('script')
-        script2.id = 'prebidConfig'
-        script2.setAttribute('src', '/js/prebidConfig.js')
-        document.head.appendChild(script2)
-      }
+    // The prebid config code (for ads) has to happen after the pubmatic code.
+    if (!document.getElementById('prebidConfig')) {
+      console.log('Add prebidConfig script')
+      const script2 = document.createElement('script')
+      script2.id = 'prebidConfig'
+      script2.setAttribute('src', '/js/prebidConfig.js')
+      document.head.appendChild(script2)
+    } else {
+      console.log('Prebid config script already present')
     }
 
     try {
