@@ -55,7 +55,7 @@ const props = defineProps({
   },
 })
 
-const adShown = ref(false)
+const adShown = ref(true)
 
 const passClicks = computed(() => {
   return !adShown.value
