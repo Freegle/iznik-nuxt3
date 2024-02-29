@@ -11,8 +11,8 @@
           :ref="adUnitPath"
           :key="'adUnit-' + adUnitPath"
           :style="{
-            'max-width': dimensions[0] + 'px',
-            'max-height': dimensions[1] + 'px',
+            'max-width': maxWidth + 'px',
+            'max-height': maxHeight + 'px',
           }"
         />
       </div>
@@ -63,6 +63,9 @@ const passClicks = computed(() => {
 
 const uniqueid = ref(props.adUnitPath)
 let blocked = false
+
+const maxWidth = ref(Math.max(...props.dimensions.map((d) => d[0])))
+const maxHeight = ref(Math.max(...props.dimensions.map((d) => d[1])))
 
 const p = new Promise((resolve, reject) => {
   try {
@@ -141,6 +144,7 @@ async function visibilityChanged(visible) {
       isVisible.value = visible
 
       if (visible && !shownFirst) {
+        console.log('Render ad', props.adUnitPath, props.divId)
         shownFirst = true
 
         await nextTick()
@@ -158,13 +162,27 @@ async function visibilityChanged(visible) {
             .defineSlot(uniqueid.value, dims, props.divId)
             .addService(window.googletag.pubads())
 
+          console.log('Add listener')
           window.googletag
             .pubads()
             .addEventListener('slotRenderEnded', (event) => {
+              console.log(
+                'Slot rendered',
+                event?.slot,
+                event?.slot?.getAdUnitPath()
+              )
               if (event?.slot === slot) {
-                console.log('Rendered', uniqueid.value, 'empty', event?.isEmpty)
+                console.log('This one')
+                console.log(
+                  'Rendered',
+                  uniqueid.value,
+                  'empty',
+                  event?.isEmpty,
+                  event
+                )
                 if (event?.isEmpty) {
                   adShown.value = false
+                  console.log('Rendered empty', adShown)
                 }
                 emit('rendered', adShown.value)
               }
@@ -192,6 +210,7 @@ async function visibilityChanged(visible) {
               }
             })
 
+          console.log('Enable services')
           window.googletag.enableServices()
         })
 

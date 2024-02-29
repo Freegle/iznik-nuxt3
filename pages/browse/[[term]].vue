@@ -9,7 +9,7 @@
             class="position-fixed"
             style="width: 300px"
           >
-            <ExternalDas
+            <ExternalDa
               ad-unit-path="/22794232631/freegle_home_left"
               :dimensions="[
                 [300, 600],
@@ -99,7 +99,7 @@
               class="position-fixed"
               style="right: 5px"
             >
-              <ExternalDas
+              <ExternalDa
                 ad-unit-path="/22794232631/freegle_home"
                 :dimensions="[
                   [300, 600],
@@ -129,7 +129,6 @@ import { useAuthStore } from '~/stores/auth'
 import { useGroupStore } from '~/stores/group'
 import { useIsochroneStore } from '~/stores/isochrone'
 import PostFilters from '~/components/PostFilters'
-import ExternalDas from '~/components/ExternalDas.vue'
 
 const MicroVolunteering = defineAsyncComponent(() =>
   import('~/components/MicroVolunteering.vue')
@@ -153,7 +152,6 @@ export default {
     ),
     VisibleWhen,
     MicroVolunteering,
-    ExternalDas,
   },
   async setup() {
     definePageMeta({
