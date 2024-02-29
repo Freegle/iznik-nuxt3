@@ -25,8 +25,8 @@ var adUnits = [
     bids: [{
       bidder: 'pubmatic',
       params: {
-        publisherId: 164422,
-        adSlot: 5753989
+        publisherId: '164422',
+        adSlot: '5753989'
       }
     }]
   },
@@ -40,8 +40,8 @@ var adUnits = [
     bids: [{
       bidder: 'pubmatic',
       params: {
-        publisherId: 164422,
-        adSlot: 5753990
+        publisherId: '164422',
+        adSlot: '5753990'
       }
     }]
   },
@@ -55,8 +55,8 @@ var adUnits = [
     bids: [{
       bidder: 'pubmatic',
       params: {
-        publisherId: 164422,
-        adSlot: 5773059
+        publisherId: '164422',
+        adSlot: '5773059'
       }
     }]
   },
@@ -70,8 +70,8 @@ var adUnits = [
     bids: [{
       bidder: 'pubmatic',
       params: {
-        publisherId: 164422,
-        adSlot: 5753984
+        publisherId: '164422',
+        adSlot: '5753984'
       }
     }]
   },
@@ -85,8 +85,8 @@ var adUnits = [
     bids: [{
       bidder: 'pubmatic',
       params: {
-        publisherId: 164422,
-        adSlot: 5753988
+        publisherId: '164422',
+        adSlot: '5753988'
       }
     }]
   },
@@ -100,8 +100,8 @@ var adUnits = [
     bids: [{
       bidder: 'pubmatic',
       params: {
-        publisherId: 164422,
-        adSlot: 5753988
+        publisherId: '164422',
+        adSlot: '5753988'
       }
     }]
   },
@@ -115,8 +115,8 @@ var adUnits = [
     bids: [{
       bidder: 'pubmatic',
       params: {
-        publisherId: 164422,
-        adSlot: 5753983
+        publisherId: '164422',
+        adSlot: '5753983'
       }
     }]
   },
@@ -130,8 +130,8 @@ var adUnits = [
     bids: [{
       bidder: 'pubmatic',
       params: {
-        publisherId: 164422,
-        adSlot: 5753982
+        publisherId: '164422',
+        adSlot: '5753982'
       }
     }]
   },
@@ -145,8 +145,8 @@ var adUnits = [
     bids: [{
       bidder: 'pubmatic',
       params: {
-        publisherId: 164422,
-        adSlot: 5753987
+        publisherId: '164422',
+        adSlot: '5753987'
       }
     }]
   },
@@ -160,8 +160,8 @@ var adUnits = [
     bids: [{
       bidder: 'pubmatic',
       params: {
-        publisherId: 164422,
-        adSlot: 5753986
+        publisherId: '164422',
+        adSlot: '5753986'
       }
     }]
   }
