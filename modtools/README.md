@@ -45,10 +45,11 @@ A fairly minimal `package.json` is needed as `nuxt.config.ts` extends `../` and 
 
 ## Upgrade notes
 
-* b-btn to b-button
+* b-btn to b-button, b-select to b-form-select, date-picker to OurDatePicker
 * b-modal <template #default> <template #footer> useModal, etc. Do not use v-if on b-modal
 * Use icon in <v-icon :icon="['fab', 'discourse']" scale="2" />
 * Add extra icons to root plugins/vue-awesome.js
 * Change `this.$store.getters['misc/time']` into `this.miscStore.time`
+* And... miscStore.get('dashboardShowInfo') and miscStore.set({ key: 'dashboardShowInfo', value: newValue })
 * SpinButton has changed params
 * const path = computed(() => { return 0 } and access as path.value

@@ -1,31 +1,79 @@
 <template>
-  <div>
-    <h1><HomeIcon /> ModTools!</h1>
-    <p>
-      Here's an <ExternalLink href="https://ilovefreegle.org">ExternalLink to the Freegle website</ExternalLink>
+  <div v-if="me">
+    <div class="d-flex justify-content-around w-100">
+      <b-img v-if="showVolunteersWeek" ref="volunteersWeek" fluid src="/VolunteersWeek.gif" />
+    </div>
+    <h2>Hello, {{ me.displayname }}</h2>
+    <p>Here's your dashboard, where you can see what your communities have been doing recently.</p>
+    <!-- eslint-disable-next-line -->
+    <p>Need temporary help moderating? Mail <ExternalLink href="mailto:mentors@ilovefreegle.org">mentors@ilovefreegle.org</ExternalLink>
     </p>
-    <NoticeMessage>
-      Here's a notice.
-      Does changing this show online?
-    </NoticeMessage>
-    <button @click="throwError">Throw error</button>
+
+    <ModDashboardDiscourseTopics v-if="start" :groupid="groupid" :group-name="groupName" :start="start" :end="end" class="mb-2" />
+    <ModMissingFacebook />
+    <ModMissingProfile class="mt-1" />
+    <div class="d-flex mb-2 mt-2 flex-wrap">
+      <div class="borderit d-flex flex-column">
+        <label for="dashboardgroup">Choose community:</label>
+        <GroupSelect id="dashboardgroup" v-model="groupidi" all modonly :systemwide="admin" active />
+      </div>
+      <div class="borderit d-flex flex-column">
+        <label for="showInfo">Show info from:</label>
+        <b-form-select id="showInfo" v-model="showInfo" @input="update">
+          <option value="week">
+            Last 7 days
+          </option>
+          <option value="month">
+            The last month
+          </option>
+          <option value="year">
+            The last 12 months
+          </option>
+          <option value="custom">
+            Specific dates
+          </option>
+        </b-form-select>
+      </div>
+      <div v-if="showInfo === 'custom'" class="d-flex flex-wrap">
+        <div class="borderit d-flex flex-column">
+          <label for="startDate">From:</label>
+          <OurDatePicker id="startDate" v-model="starti" lang="en" type="date" format="YYYY-MM-DD" :disabled-date="notbeforeepoch" />
+        </div>
+        <div class="borderit d-flex flex-column">
+          <label for="endDate">To:</label>
+          <OurDatePicker id="endDate" v-model="endi" lang="en" type="date" format="YYYY-MM-DD" :disabled-date="notbeforestart" />
+        </div>
+      </div>
+      <div class="borderit d-flex flex-column justify-content-end">
+        <b-button variant="white" @click="update">
+          <v-icon icon="sync" /> Update
+        </b-button>
+      </div>
+    </div>
+    {{ showInfo }} - {{ start }} - {{ end }} - {{ groupid }}
   </div>
 </template>
 
 <script setup>
+import { useMiscStore } from '@/stores/misc'
+import { useGroupStore } from '@/stores/group'
 import { buildHead } from '~/composables/useMTBuildHead'
+import dayjs from 'dayjs'
+//mixins: [loginRequired],
 
+const miscStore = useMiscStore()
+const groupStore = useGroupStore()
 const runtimeConfig = useRuntimeConfig()
 const route = useRoute()
 
 useHead(
-      buildHead(
-        route,
-        runtimeConfig,
-        'ModTools',
-        'Moderation tool for Freegle volunteers'
-      )
-    )
+  buildHead(
+    route,
+    runtimeConfig,
+    'ModTools',
+    'Moderation tool for Freegle volunteers'
+  )
+)
 
 /*const version = computed(() => {
   return runtimeConfig.public.VERSION
@@ -35,8 +83,103 @@ const buildDate = computed(() => {
   return runtimeConfig.public.BUILD_DATE
 })*/
 
+const showVolunteersWeek = ref(false)
+const groupid = ref(null)
+const groupidi = ref(null)
+const starti = ref(null)
+const endi = ref(null)
+const start = ref(null)
+const end = ref(null)
+const dateFormat = ref(null)
 
-function throwError() {
-  throw new Error('Sentry Error2')
+const showInfo = computed({
+  get: () => { return miscStore.get('dashboardShowInfo') || 'week' },
+  set: (newValue) => { miscStore.set({ key: 'dashboardShowInfo', value: newValue }) }
+})
+
+const notbeforeepoch = function (date) {
+  // We only have stats back to this point.
+  return !dayjs(date).isSameOrAfter(dayjs('2015-08-24'))
 }
+
+const groupName = computed(() => {
+  if (groupid.value < 0) {
+    return 'all Freegle communities'
+  } else if (!groupid.value) {
+    return 'all my communities'
+  } else {
+    const group = groupStore.get(groupid.value)
+
+    if (group) {
+      return group.namedisplay
+    } else {
+      return ''
+    }
+  }
+})
+
+const notbeforestart = function (date) {
+  const d = dayjs(date)
+  const now = dayjs()
+
+  return d.isAfter(now) || !d.isAfter(dayjs(this.starti))
+}
+
+
+
+onMounted(() => {
+  // Volunteers' Week is between 1st and 7th June every year.
+  if (
+    dayjs().get('month') === 5 &&
+    dayjs().get('date') >= 1 &&
+    dayjs().get('date') <= 7
+  ) {
+    showVolunteersWeek.value = true
+
+    setTimeout(() => {
+      showVolunteersWeek.value = false
+    }, 30000)
+  }
+
+  update()
+})
+
+
+const update = function (newShowInfo) {
+  //console.log("UPDATE", newShowInfo)
+  if (newShowInfo) showInfo.value = newShowInfo
+  // A manual click to do the refresh avoids multiple refreshes when tweaking dates.
+  switch (showInfo.value) {
+    case 'week': {
+      starti.value = dayjs()
+        .subtract(7, 'days')
+        .toDate()
+      endi.value = new Date()
+      break
+    }
+    case 'month': {
+      starti.value = dayjs()
+        .subtract(1, 'month')
+        .toDate()
+      endi.value = new Date()
+      break
+    }
+    case 'year': {
+      starti.value = dayjs()
+        .subtract(1, 'year')
+        .toDate()
+      endi.value = new Date()
+      break
+    }
+    case 'custom': {
+      // Do nothing - use the values in the input.
+    }
+  }
+
+  start.value = starti.value
+  end.value = endi.value
+  groupid.value = groupidi.value
+  //console.log('UPDATE', start.value, end.value, groupid.value)
+}
+
 </script>

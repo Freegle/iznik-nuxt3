@@ -1,0 +1,55 @@
+<template>
+  <div>
+    <NoticeMessage v-if="missing.length" variant="warning" class="mt-1">
+      <div v-if="summary">
+        <v-icon icon="exclamation-triangle" /> {{ missing.length | pluralize(['group is', 'groups are'], { includeNumber: true }) }} missing taglines or profile pictures.
+        <b-button variant="white" @click="expand">
+          Click to view
+        </b-button>
+      </div>
+      <div v-else>
+        <p>Groups can have a profile picture and a tagline, which are used in emails and on the site to help give your group a local feel.</p>
+        <p>Please add them from <em>Settings->Community Settings</em>.</p>
+        <div v-for="(inv) of missing" :key="'fbmissing-' + inv.group.id">
+          <strong>{{ inv.group.namedisplay }}</strong>
+        </div>
+      </div>
+    </NoticeMessage>
+  </div>
+</template>
+<script>
+import NoticeMessage from '@/components/NoticeMessage'
+export default {
+  components: { NoticeMessage },
+  data: function() {
+    return {
+      summary: true
+    }
+  },
+  computed: {
+    missing() {
+      const ret = []
+
+      for (const group of this.myGroups) {
+        if (
+          group.type === 'Freegle' &&
+          (group.role === 'Moderator' || group.role === 'Owner') &&
+          group.publish &&
+          (!group.tagline || !group.profile)
+        ) {
+          ret.push({
+            group: group
+          })
+        }
+      }
+
+      return ret
+    }
+  },
+  methods: {
+    expand() {
+      this.summary = false
+    }
+  }
+}
+</script>
