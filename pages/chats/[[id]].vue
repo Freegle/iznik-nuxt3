@@ -195,7 +195,7 @@
               'ads-wrapper': true,
             }"
           >
-            <ExternalDas
+            <ExternalDa
               ad-unit-path="/22794232631/freegle_chat_desktop"
               :dimensions="[
                 [300, 600],
@@ -229,7 +229,6 @@ import InfiniteLoading from '~/components/InfiniteLoading'
 import { useChatStore } from '~/stores/chat'
 import SidebarRight from '~/components/SidebarRight'
 import ChatMobileNavbar from '~/components/ChatMobileNavbar.vue'
-import ExternalDas from '~/components/ExternalDas.vue'
 import ExternalDa from '~/components/ExternalDa.vue'
 
 // We can't use async on ChatListEntry else the infinite scroll kicks in and tries to load everything while we are
@@ -252,7 +251,6 @@ export default {
     ChatHideModal,
     InfiniteLoading,
     ChatMobileNavbar,
-    ExternalDas,
     ExternalDa,
   },
   async setup(props) {

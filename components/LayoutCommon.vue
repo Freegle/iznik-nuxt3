@@ -16,7 +16,7 @@
           <VisibleWhen :at="['xs', 'sm']" class="sticky">
             <ExternalDa
               ad-unit-path="/22794232631/freegle_sticky"
-              :dimensions="[320, 50]"
+              :dimensions="[[320, 50]]"
               div-id="div-gpt-ad-1699973618906-0"
               pixel
               @rendered="adRendered"
@@ -25,7 +25,7 @@
           <VisibleWhen :at="['md', 'lg', 'xl', 'xxl']">
             <ExternalDa
               ad-unit-path="/22794232631/freegle_sticky_desktop"
-              :dimensions="[728, 90]"
+              :dimensions="[[728, 90]]"
               div-id="div-gpt-ad-1707999304775-0"
               pixel
               @rendered="adRendered"
@@ -191,6 +191,8 @@ export default {
     // This code in turn loads prebid.js.
     if (!document.getElementById('pubmatic')) {
       console.log('Add pubmatic script')
+      window.miscStore = useMiscStore()
+
       const script = document.createElement('script')
       script.id = 'pubmatic'
       script.setAttribute('src', '/js/pubmatic.js')

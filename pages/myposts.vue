@@ -14,7 +14,7 @@
             class="position-fixed"
             style="width: 300px"
           >
-            <ExternalDas
+            <ExternalDa
               ad-unit-path="/22794232631/freegle_myposts_desktop"
               :dimensions="[
                 [300, 600],
@@ -76,7 +76,7 @@
               'ads-wrapper': true,
             }"
           >
-            <ExternalDas
+            <ExternalDa
               ad-unit-path="/22794232631/freegle_myposts_desktop_right"
               :dimensions="[
                 [300, 600],

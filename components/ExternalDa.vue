@@ -11,8 +11,8 @@
           :ref="adUnitPath"
           :key="'adUnit-' + adUnitPath"
           :style="{
-            'max-width': dimensions[0] + 'px',
-            'max-height': dimensions[1] + 'px',
+            'max-width': maxWidth + 'px',
+            'max-height': maxHeight + 'px',
           }"
         />
       </div>
@@ -64,6 +64,9 @@ const passClicks = computed(() => {
 const uniqueid = ref(props.adUnitPath)
 let blocked = false
 
+const maxWidth = ref(Math.max(...props.dimensions.map((d) => d[0])))
+const maxHeight = ref(Math.max(...props.dimensions.map((d) => d[1])))
+
 const p = new Promise((resolve, reject) => {
   try {
     const already = document.getElementById('gpt-script')
@@ -105,7 +108,7 @@ function refreshAd() {
     typeof window.googletag?.pubads().refresh === 'function' &&
     !unmounted.value
   ) {
-    // Don't fresh if the ad is not visible or tab is not active.
+    // Don't refresh if the ad is not visible or tab is not active.
     if (isVisible.value && miscStore.visible) {
       window.googletag.pubads().refresh([slot])
     }
@@ -113,6 +116,30 @@ function refreshAd() {
     timer.value = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
   }
 }
+
+const adPrebidComplete = computed(() => useMiscStore().adPrebidComplete)
+
+watch(
+  adPrebidComplete,
+  (newVal) => {
+    if (newVal) {
+      // We used disableInitialLoad to stop the initial load until the prebid is complete.  Now we want to
+      // do the initial load to get the ad in the page.
+      console.log(
+        'Ad prebid complete, initial refresh',
+        props.adUnitPath,
+        props.divId
+      )
+
+      if (window.googletag?.pubads) {
+        window.googletag.pubads().refresh([slot])
+      }
+    }
+  },
+  {
+    immediate: true,
+  }
+)
 
 onBeforeUnmount(() => {
   unmounted.value = true
@@ -141,12 +168,24 @@ async function visibilityChanged(visible) {
       isVisible.value = visible
 
       if (visible && !shownFirst) {
+        console.log('Queue create ad', props.adUnitPath, props.divId)
         shownFirst = true
 
         await nextTick()
 
         window.googletag = window.googletag || { cmd: [] }
+
+        if (!miscStore.adPrebidComplete) {
+          // We don't want our ads to load until the prebid has completed, i.e. bidsBackHandler has been called.
+          window.googletag.cmd.push(function () {
+            console.log('Disable initial ad load')
+            window.googletag.pubads().disableInitialLoad()
+          })
+        }
+
         window.googletag.cmd.push(function () {
+          // Create the ad.  This may not render immediately if we haven't completed the prebid.
+          console.log('Create ad', props.adUnitPath, props.divId)
           const dims = [props.dimensions]
 
           if (props.pixel) {
@@ -162,9 +201,16 @@ async function visibilityChanged(visible) {
             .pubads()
             .addEventListener('slotRenderEnded', (event) => {
               if (event?.slot === slot) {
-                console.log('Rendered', uniqueid.value, 'empty', event?.isEmpty)
+                console.log(
+                  'Rendered',
+                  uniqueid.value,
+                  'empty',
+                  event?.isEmpty,
+                  event
+                )
                 if (event?.isEmpty) {
                   adShown.value = false
+                  console.log('Rendered empty', adShown)
                 }
                 emit('rendered', adShown.value)
               }
@@ -191,8 +237,6 @@ async function visibilityChanged(visible) {
                 }
               }
             })
-
-          window.googletag.enableServices()
         })
 
         window.googletag.cmd.push(function () {

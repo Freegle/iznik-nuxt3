@@ -168,19 +168,13 @@ var adUnits = [
 ]
 
 // ======== DO NOT EDIT BELOW THIS LINE =========== //
-var googletag = googletag || {}
-googletag.cmd = googletag.cmd || []
-googletag.cmd.push(function() {
-  googletag.pubads().disableInitialLoad()
-})
-
 var pbjs = pbjs || {}
 pbjs.que = pbjs.que || []
 
 pbjs.que.push(function() {
   pbjs.addAdUnits(adUnits)
   pbjs.requestBids({
-    bidsBackHandler: initAdserver,
+    bidsBackHandler: backHandler,
     timeout: PREBID_TIMEOUT
   })
 })
@@ -191,9 +185,20 @@ function initAdserver () {
   googletag.cmd.push(function() {
     pbjs.que.push(function() {
       pbjs.setTargetingForGPTAsync()
-      googletag.pubads().refresh()
+
+      // Signal that the prebid is complete, which will trigger rendering in ExternalDa.
+      console.log('Signal that prebid is complete')
+      window.miscStore.adPrebidComplete = true
+      console.log('Set it ok')
+      window.googletag.enableServices()
     })
   })
+}
+
+// Prebid callback
+function backHandler(bids, timedOut, auctionId) {
+  console.log('Back handler', bids, timedOut, auctionId)
+  initAdserver()
 }
 
 // in case PBJS doesn't load

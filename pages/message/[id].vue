@@ -11,7 +11,7 @@
           >
             <ExternalDa
               ad-unit-path="/22794232631/freegle_productemail"
-              :dimensions="[300, 250]"
+              :dimensions="[[300, 250]]"
               div-id="div-gpt-ad-1691925773522-0"
               class="mt-2"
             />
@@ -101,7 +101,7 @@
           >
             <ExternalDa
               ad-unit-path="/22794232631/freegle_productemail"
-              :dimensions="[300, 250]"
+              :dimensions="[[300, 250]]"
               div-id="div-gpt-ad-1691925773522-1"
               class="mt-2"
             />
