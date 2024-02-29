@@ -191,6 +191,8 @@ export default {
     // This code in turn loads prebid.js.
     if (!document.getElementById('pubmatic')) {
       console.log('Add pubmatic script')
+      window.miscStore = useMiscStore()
+
       const script = document.createElement('script')
       script.id = 'pubmatic'
       script.setAttribute('src', '/js/pubmatic.js')

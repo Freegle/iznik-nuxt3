@@ -108,7 +108,7 @@ function refreshAd() {
     typeof window.googletag?.pubads().refresh === 'function' &&
     !unmounted.value
   ) {
-    // Don't fresh if the ad is not visible or tab is not active.
+    // Don't refresh if the ad is not visible or tab is not active.
     if (isVisible.value && miscStore.visible) {
       window.googletag.pubads().refresh([slot])
     }
@@ -116,6 +116,30 @@ function refreshAd() {
     timer.value = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
   }
 }
+
+const adPrebidComplete = computed(() => useMiscStore().adPrebidComplete)
+
+watch(
+  adPrebidComplete,
+  (newVal) => {
+    if (newVal) {
+      // We used disableInitialLoad to stop the initial load until the prebid is complete.  Now we want to
+      // do the initial load to get the ad in the page.
+      console.log(
+        'Ad prebid complete, initial refresh',
+        props.adUnitPath,
+        props.divId
+      )
+
+      if (window.googletag?.pubads) {
+        window.googletag.pubads().refresh([slot])
+      }
+    }
+  },
+  {
+    immediate: true,
+  }
+)
 
 onBeforeUnmount(() => {
   unmounted.value = true
@@ -144,13 +168,24 @@ async function visibilityChanged(visible) {
       isVisible.value = visible
 
       if (visible && !shownFirst) {
-        console.log('Render ad', props.adUnitPath, props.divId)
+        console.log('Queue create ad', props.adUnitPath, props.divId)
         shownFirst = true
 
         await nextTick()
 
         window.googletag = window.googletag || { cmd: [] }
+
+        if (!miscStore.adPrebidComplete) {
+          // We don't want our ads to load until the prebid has completed, i.e. bidsBackHandler has been called.
+          window.googletag.cmd.push(function () {
+            console.log('Disable initial ad load')
+            window.googletag.pubads().disableInitialLoad()
+          })
+        }
+
         window.googletag.cmd.push(function () {
+          // Create the ad.  This may not render immediately if we haven't completed the prebid.
+          console.log('Create ad', props.adUnitPath, props.divId)
           const dims = [props.dimensions]
 
           if (props.pixel) {
@@ -162,17 +197,10 @@ async function visibilityChanged(visible) {
             .defineSlot(uniqueid.value, dims, props.divId)
             .addService(window.googletag.pubads())
 
-          console.log('Add listener')
           window.googletag
             .pubads()
             .addEventListener('slotRenderEnded', (event) => {
-              console.log(
-                'Slot rendered',
-                event?.slot,
-                event?.slot?.getAdUnitPath()
-              )
               if (event?.slot === slot) {
-                console.log('This one')
                 console.log(
                   'Rendered',
                   uniqueid.value,
@@ -209,9 +237,6 @@ async function visibilityChanged(visible) {
                 }
               }
             })
-
-          console.log('Enable services')
-          window.googletag.enableServices()
         })
 
         window.googletag.cmd.push(function () {
