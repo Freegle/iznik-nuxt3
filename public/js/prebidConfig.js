@@ -1,15 +1,4 @@
 // This is our configuration for prebid.  It defines what ads we expose.
-var small_banner_sizes = [
-  [320, 50]
-]
-
-var medium_banner_sizes = [
-  [728, 90]
-]
-
-var squarish_sizes = [
-  [300, 250]
-]
 
 var PREBID_TIMEOUT = 1000
 var FAILSAFE_TIMEOUT = 3000

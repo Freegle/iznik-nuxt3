@@ -224,6 +224,14 @@ export default defineNuxtConfig({
   app: {
     head: {
       title: "Freegle - Don't throw it away, give it away!",
+      script: [
+        { src: '//securepubads.g.doubleclick.net/tag/js/gpt.js', async: true },
+        {
+          type: 'text/javascript',
+          innerHTML: `var googletag = googletag || {};
+            googletag.cmd = googletag.cmd || [];`,
+        },
+      ],
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },

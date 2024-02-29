@@ -5,16 +5,15 @@
     at https://www.ilovefreegle.org/donate - if we got enough donations we would be delighted not to show ads.
      -->
     <div v-observe-visibility="visibilityChanged" class="pointer">
-      <div v-if="isVisible" class="d-flex w-100 justify-content-around">
-        <div
-          :id="divId"
-          :ref="adUnitPath"
-          :key="'adUnit-' + adUnitPath"
-          :style="{
-            'max-width': maxWidth + 'px',
-            'max-height': maxHeight + 'px',
-          }"
-        />
+      <div
+        v-if="isVisible"
+        class="d-flex w-100 justify-content-around"
+        :style="{
+          width: maxWidth + 'px',
+          height: maxHeight + 'px',
+        }"
+      >
+        <AdvertisingSlot :id="divId" />
       </div>
       <p
         v-if="isVisible && adShown"
@@ -30,6 +29,7 @@
 </template>
 <script setup>
 import { nextTick } from 'vue'
+import { AdvertisingSlot } from '@storipress/vue-advertising'
 import { ref, computed, onBeforeUnmount } from '#imports'
 import { useMiscStore } from '~/stores/misc'
 
@@ -62,40 +62,12 @@ const passClicks = computed(() => {
 })
 
 const uniqueid = ref(props.adUnitPath)
-let blocked = false
+const blocked = false
 
 const maxWidth = ref(Math.max(...props.dimensions.map((d) => d[0])))
 const maxHeight = ref(Math.max(...props.dimensions.map((d) => d[1])))
 
-const p = new Promise((resolve, reject) => {
-  try {
-    const already = document.getElementById('gpt-script')
-    if (already) {
-      resolve()
-    } else {
-      const s = document.createElement('script')
-      s.setAttribute(
-        'src',
-        'https://securepubads.g.doubleclick.net/tag/js/gpt.js'
-      )
-      s.id = 'gpt-script'
-      s.onload = () => resolve()
-      s.onerror = () => {
-        console.log('Google ad script blocked')
-        blocked = true
-        resolve()
-      }
-      document.head.appendChild(s)
-    }
-  } catch (e) {
-    console.log('Load of Google ad script failed', e)
-    resolve()
-  }
-})
-
-await p
-
-let slot = null
+const slot = null
 
 const timer = ref(null)
 
@@ -175,32 +147,18 @@ async function visibilityChanged(visible) {
 
         window.googletag = window.googletag || { cmd: [] }
 
-        if (!miscStore.adPrebidComplete) {
-          // We don't want our ads to load until the prebid has completed, i.e. bidsBackHandler has been called.
-          window.googletag.cmd.push(function () {
-            console.log('Disable initial ad load')
-            window.googletag.pubads().disableInitialLoad()
-          })
-        }
-
         window.googletag.cmd.push(function () {
-          // Create the ad.  This may not render immediately if we haven't completed the prebid.
-          console.log('Create ad', props.adUnitPath, props.divId)
-          const dims = [props.dimensions]
-
-          if (props.pixel) {
-            dims.push([1, 1])
-          }
-
           window.googletag.pubads().collapseEmptyDivs()
-          slot = window.googletag
-            .defineSlot(uniqueid.value, dims, props.divId)
-            .addService(window.googletag.pubads())
 
           window.googletag
             .pubads()
             .addEventListener('slotRenderEnded', (event) => {
-              if (event?.slot === slot) {
+              console.log(
+                'Rendered',
+                event?.slot.getAdUnitPath(),
+                props.adUnitPath
+              )
+              if (event?.slot.getAdUnitPath() === props.adUnitPath) {
                 console.log(
                   'Rendered',
                   uniqueid.value,
@@ -211,12 +169,16 @@ async function visibilityChanged(visible) {
                 if (event?.isEmpty) {
                   adShown.value = false
                   console.log('Rendered empty', adShown)
+                } else {
+                  maxWidth.value = event.size[0]
+                  maxHeight.value = event.size[1]
                 }
+
                 emit('rendered', adShown.value)
               }
             })
             .addEventListener('slotVisibilityChanged', (event) => {
-              if (event?.slot === slot) {
+              if (event?.slot.getAdUnitPath() === props.adUnitPath) {
                 if (event.inViewPercentage < 51) {
                   // console.log(
                   //   `Visibility of slot ${event.slot.getSlotElementId()} changed. New visibility: ${
@@ -229,7 +191,7 @@ async function visibilityChanged(visible) {
               }
             })
             .addEventListener('impressionViewable', (event) => {
-              if (event?.slot === slot) {
+              if (event?.slot.getAdUnitPath() === props.adUnitPath) {
                 // We refresh the ad slot.  This increases views.  Google doesn't like it if this is more frequent than
                 // every 30s.
                 if (!timer.value) {
@@ -237,15 +199,6 @@ async function visibilityChanged(visible) {
                 }
               }
             })
-        })
-
-        window.googletag.cmd.push(function () {
-          try {
-            window.googletag.display(props.divId)
-          } catch (e) {
-            console.log('Exception in ad display', e)
-            emit('rendered', false)
-          }
         })
       }
     } catch (e) {

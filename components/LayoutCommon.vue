@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <AdvertisingProvider :config="adConfig">
     <main class="ml-0 ps-0 pe-0 pageContent">
       <div class="aboveSticky">
         <slot ref="pageContent" />
@@ -75,10 +75,11 @@
       <div id="here" />
       <SomethingWentWrong />
     </client-only>
-  </div>
+  </AdvertisingProvider>
 </template>
 <script>
 import { useRoute } from 'vue-router'
+import { AdvertisingProvider } from '@storipress/vue-advertising'
 import { useAuthStore } from '../stores/auth'
 import SomethingWentWrong from './SomethingWentWrong'
 import { useNotificationStore } from '~/stores/notification'
@@ -89,6 +90,7 @@ import replyToPost from '@/mixins/replyToPost'
 import ChatButton from '~/components/ChatButton'
 import { navBarHidden } from '~/composables/useNavbar'
 import VisibleWhen from '~/components/VisibleWhen.vue'
+import { AD_GPT_CONFIG } from '~/composables/useAdConfig'
 
 const SupportLink = defineAsyncComponent(() =>
   import('~/components/SupportLink')
@@ -110,8 +112,14 @@ export default {
     ChatButton,
     ExternalDa,
     VisibleWhen,
+    AdvertisingProvider,
   },
   mixins: [replyToPost],
+  setup() {
+    return {
+      adConfig: AD_GPT_CONFIG,
+    }
+  },
   data() {
     return {
       showLoader: true,
@@ -184,32 +192,6 @@ export default {
       } else {
         console.log('No cookie banner')
       }
-    }
-
-    // The pubmatic code (for ads) has to happen after the cookie banner.
-    //
-    // This code in turn loads prebid.js.
-    if (!document.getElementById('pubmatic')) {
-      console.log('Add pubmatic script')
-      window.miscStore = useMiscStore()
-
-      const script = document.createElement('script')
-      script.id = 'pubmatic'
-      script.setAttribute('src', '/js/pubmatic.js')
-      document.head.appendChild(script)
-    } else {
-      console.log('Pubmatic script already present')
-    }
-
-    // The prebid config code (for ads) has to happen after the pubmatic code.
-    if (!document.getElementById('prebidConfig')) {
-      console.log('Add prebidConfig script')
-      const script2 = document.createElement('script')
-      script2.id = 'prebidConfig'
-      script2.setAttribute('src', '/js/prebidConfig.js')
-      document.head.appendChild(script2)
-    } else {
-      console.log('Prebid config script already present')
     }
 
     try {

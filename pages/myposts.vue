@@ -82,7 +82,7 @@
                 [300, 600],
                 [300, 250],
               ]"
-              div-id="div-gpt-ad-1692867596111-0"
+              div-id="div-gpt-ad-1709056727559-0"
               class="mt-2"
               @rendered="adRendered"
             />
