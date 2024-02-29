@@ -11,7 +11,10 @@
           >
             <ExternalDa
               ad-unit-path="/22794232631/freegle_home_left"
-              :dimensions="[300, 250]"
+              :dimensions="[
+                [300, 600],
+                [300, 250],
+              ]"
               div-id="div-gpt-ad-1691925450433-0"
               class="mt-2"
             />
@@ -98,7 +101,10 @@
             >
               <ExternalDa
                 ad-unit-path="/22794232631/freegle_home"
-                :dimensions="[300, 250]"
+                :dimensions="[
+                  [300, 600],
+                  [300, 250],
+                ]"
                 div-id="div-gpt-ad-1691925450433-1"
                 class="mt-2"
               />

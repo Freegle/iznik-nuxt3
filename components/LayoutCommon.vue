@@ -6,36 +6,27 @@
       </div>
       <client-only>
         <div
-          v-if="allowAd && !adRendering && !noAdRendered"
-          class="d-flex justify-content-around w-100 sticky"
+          v-if="allowAd"
+          class="d-flex justify-content-around w-100"
+          :class="{
+            sticky: true,
+            anAdRendered: !adRendering && !noAdRendered,
+          }"
         >
-          <VisibleWhen :at="['xs', 'sm']">
+          <VisibleWhen :at="['xs', 'sm']" class="sticky">
             <ExternalDa
               ad-unit-path="/22794232631/freegle_sticky"
-              :dimensions="[320, 50]"
+              :dimensions="[[320, 50]]"
               div-id="div-gpt-ad-1699973618906-0"
-              class="sticky"
               pixel
               @rendered="adRendered"
             />
           </VisibleWhen>
-          <VisibleWhen :at="['md']">
+          <VisibleWhen :at="['md', 'lg', 'xl', 'xxl']">
             <ExternalDa
               ad-unit-path="/22794232631/freegle_sticky_desktop"
-              :dimensions="[728, 90]"
+              :dimensions="[[728, 90]]"
               div-id="div-gpt-ad-1707999304775-0"
-              class="sticky"
-              :class="{ rendered: !noAdRendered }"
-              pixel
-              @rendered="adRendered"
-            />
-          </VisibleWhen>
-          <VisibleWhen :at="['lg', 'xl', 'xxl']">
-            <ExternalDa
-              ad-unit-path="/22794232631/freegle_sticky_desktop"
-              :dimensions="[970, 90]"
-              div-id="div-gpt-ad-1707999304775-0"
-              :class="{ test: true, rendered: !noAdRendered, sticky: true }"
               pixel
               @rendered="adRendered"
             />
@@ -169,6 +160,7 @@ export default {
       const chatStore = useChatStore()
       chatStore.pollForChatUpdates()
     } else if (process.client) {
+      //
       // We only add the cookie banner for logged out users.  This reduces costs.  For logged-in users, we assume
       // they have already seen the banner and specified a preference if they care.
       const runtimeConfig = useRuntimeConfig()
@@ -192,6 +184,32 @@ export default {
       } else {
         console.log('No cookie banner')
       }
+    }
+
+    // The pubmatic code (for ads) has to happen after the cookie banner.
+    //
+    // This code in turn loads prebid.js.
+    if (!document.getElementById('pubmatic')) {
+      console.log('Add pubmatic script')
+      window.miscStore = useMiscStore()
+
+      const script = document.createElement('script')
+      script.id = 'pubmatic'
+      script.setAttribute('src', '/js/pubmatic.js')
+      document.head.appendChild(script)
+    } else {
+      console.log('Pubmatic script already present')
+    }
+
+    // The prebid config code (for ads) has to happen after the pubmatic code.
+    if (!document.getElementById('prebidConfig')) {
+      console.log('Add prebidConfig script')
+      const script2 = document.createElement('script')
+      script2.id = 'prebidConfig'
+      script2.setAttribute('src', '/js/prebidConfig.js')
+      document.head.appendChild(script2)
+    } else {
+      console.log('Prebid config script already present')
     }
 
     try {
@@ -332,10 +350,14 @@ body.modal-open {
   position: fixed;
   bottom: 0;
 
-  background-color: transparent;
+  background-color: $color-gray--dark;
 
-  &.anAdRendered {
-    background-color: $color-gray--dark;
+  @include media-breakpoint-up(lg) {
+    background-color: transparent;
+
+    &.anAdRendered {
+      background-color: $color-gray--dark;
+    }
   }
 
   z-index: 10000;
