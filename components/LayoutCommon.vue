@@ -201,13 +201,13 @@ export default {
 
       if (runtimeConfig.public.COOKIEYES) {
         console.log('Add it')
-        const { cookieLoad } = useScriptTag(
+        const { load } = useScriptTag(
           runtimeConfig.public.COOKIEYES,
           () => {},
           { manual: true }
         )
 
-        await cookieLoad()
+        await load()
         console.log('Loaded cookie script')
       } else {
         console.log('No cookie banner')

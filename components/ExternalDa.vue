@@ -80,6 +80,7 @@ function refreshAd() {
   ) {
     // Don't refresh if the ad is not visible or tab is not active.
     if (isVisible.value && miscStore.visible) {
+      console.log('Refresh ad', slot.value.getAdUnitPath())
       window.googletag.pubads().refresh([slot.value])
     }
 
