@@ -10,12 +10,12 @@
     </p>
 
     <ModDashboardDiscourseTopics v-if="start" :groupid="groupid" :group-name="groupName" :start="start" :end="end" class="mb-2" />
-    <ModMissingFacebook/>
+    <ModMissingFacebook />
     <ModMissingProfile class="mt-1" />
     <div class="d-flex mb-2 mt-2 flex-wrap">
       <div class="borderit d-flex flex-column">
         <label for="dashboardgroup">Choose community:</label>
-        <GroupSelect id="dashboardgroup" v-model="groupidi" all modonly :systemwide="admin" active />
+        <GroupSelect id="dashboardgroup" v-model="groupidi" all modonly :systemwide="admin" active @input="update" />
       </div>
       <div class="borderit d-flex flex-column">
         <label for="showInfo">Show info from:</label>
@@ -66,6 +66,10 @@
           <ModDashboardFreeglersReplying :groupid="groupid" :group-name="groupName" :start="start" :end="end" />
         </b-col>
       </b-row>
+      <ModDashboardImpact :groupid="groupid" :start="start" :group-name="groupName" :end="end" class="mt-2" />
+      <ActivityGraph :groupid="groupidi" :group-name="groupName" :start="start" :end="end" offers wanteds weights donations successful activeusers
+        approvedmembers :systemwide="groupidi < 0" />
+      <!--      TODO MT POSTLAUNCH TN vs email vs web stats-->
     </div>
   </div>
 </template>
@@ -101,16 +105,29 @@ const buildDate = computed(() => {
 
 const showVolunteersWeek = ref(false)
 const groupid = ref(null)
-const groupidi = ref(null)
 const starti = ref(null)
 const endi = ref(null)
 const start = ref(null)
 const end = ref(null)
 const dateFormat = ref(null)
 
+const groupidi = computed({
+  get: () => {
+    return miscStore.get('groupidi')
+  },
+  set: (newValue) => {
+    groupid.value = newValue
+    miscStore.set({ key: 'groupidi', value: newValue })
+  }
+})
+
 const showInfo = computed({
-  get: () => { return miscStore.get('dashboardShowInfo') || 'week' },
-  set: (newValue) => { miscStore.set({ key: 'dashboardShowInfo', value: newValue }) }
+  get: () => {
+    return miscStore.get('dashboardShowInfo') || 'week'
+  },
+  set: (newValue) => {
+    miscStore.set({ key: 'dashboardShowInfo', value: newValue })
+  }
 })
 
 const notbeforeepoch = function (date) {
@@ -162,8 +179,7 @@ onMounted(() => {
 
 
 const update = function (newShowInfo) {
-  //console.log("UPDATE", newShowInfo)
-  if (newShowInfo) showInfo.value = newShowInfo
+  if (typeof newShowInfo === "string") showInfo.value = newShowInfo
   // A manual click to do the refresh avoids multiple refreshes when tweaking dates.
   switch (showInfo.value) {
     case 'week': {
