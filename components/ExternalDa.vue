@@ -55,7 +55,6 @@ const props = defineProps({
 })
 
 const adShown = ref(true)
-// const adConfig = ref(AD_GPT_CONFIG)
 
 const passClicks = computed(() => {
   return !adShown.value
@@ -70,7 +69,6 @@ const maxHeight = ref(Math.max(...props.dimensions.map((d) => d[1])))
 const slot = ref(null)
 
 const timer = ref(null)
-
 const AD_REFRESH_TIMEOUT = 45000
 
 function refreshAd() {
@@ -89,36 +87,8 @@ function refreshAd() {
   }
 }
 
-// const PREBID_TIMEOUT = 1000
-
-// function runBids() {
-//   console.log('Request bids')
-//
-//   window.ihowpbjs.que.push(function () {
-//     // Find slot in AD_GPT_CONFIG
-//     const slotConfig = AD_GPT_CONFIG.slots.find(
-//       (item) => item.path === props.adUnitPath && item.id === props.divId
-//     )
-//     console.log('Slot config', slotConfig)
-//     slot.value.bids = slotConfig.bids
-//
-//     window.ihowpbjs.requestBids({
-//       bidsBackHandler: function (bids, timedOut, auctionId) {
-//         console.log('Bids back', bids, timedOut, auctionId)
-//         window.googletag.pubads().refresh([slot.value])
-//       },
-//       timeout: PREBID_TIMEOUT,
-//     })
-//   })
-//
-//   console.log('Process queue')
-//   window.ihowpbjs.processQueue()
-//   console.log('Process queue')
-// }
-
 const isVisible = ref(false)
 let shownFirst = false
-// const loadedScripts = ref(false)
 const emit = defineEmits(['rendered'])
 
 function visibilityChanged(visible) {
@@ -130,20 +100,12 @@ function visibilityChanged(visible) {
         console.log('Queue create ad', props.adUnitPath, props.divId)
         shownFirst = true
 
-        // await loadGPT()
-        // await loadPubmatic()
-        // loadedScripts.value = true
-        //
-        // if (!loadedScripts.value) {
-        //   runBids()
-        // }
-
         window.googletag.cmd.push(function () {
           window.googletag
             .pubads()
             .addEventListener('slotRenderEnded', (event) => {
               if (event?.slot.getAdUnitPath() === props.adUnitPath) {
-                // Save off the slot for when we run the prebids later.
+                // Save off slot for refresh later.
                 slot.value = event.slot
 
                 console.log(
