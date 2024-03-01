@@ -223,8 +223,12 @@ export default {
       // because it's only at this point that we have (perhaps) shown the cookie banner.
       //
       // Once we've done this we can proceed, which may involve creating ad slots.
-      await this.loadGPT()
-      await this.loadPubmatic()
+      try {
+        await this.loadGPT()
+        await this.loadPubmatic()
+      } catch (e) {
+        console.log('Failed to load ad scripts', e)
+      }
     }
 
     this.adScriptsLoaded = true
