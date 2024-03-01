@@ -13,5 +13,6 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "letterparser": "^0.1.4"
   }
 }

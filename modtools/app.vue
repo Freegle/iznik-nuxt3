@@ -41,6 +41,12 @@ import { computed, watch, reloadNuxtApp } from '#imports'
 // polyfills
 import 'core-js/actual/array/to-sorted'
 
+import { useMembersStore } from './stores/members'
+import { useModconfigsStore } from './stores/modconfigs'
+import { useSpammersStore } from './stores/spammers'
+import { useStdmsgsStore } from './stores/stdmsgs'
+
+
 const route = useRoute()
 const loadingIndicatorThrottle = ref(5000)
 const { isLoading } = useLoadingIndicator({
@@ -87,6 +93,10 @@ const domainStore = useDomainStore()
 const logoStore = useLogoStore()
 const locationStore = useLocationStore()
 const shortlinkStore = useShortlinkStore()
+const membersStore = useMembersStore()
+const modconfigsStore = useModconfigsStore()
+const spammersStore = useSpammersStore()
+const stdmsgsStore = useStdmsgsStore()
 
 miscStore.init(runtimeConfig)
 groupStore.init(runtimeConfig)
@@ -118,6 +128,10 @@ domainStore.init(runtimeConfig)
 logoStore.init(runtimeConfig)
 locationStore.init(runtimeConfig)
 shortlinkStore.init(runtimeConfig)
+spammersStore.init(runtimeConfig)
+membersStore.init(runtimeConfig)
+modconfigsStore.init(runtimeConfig)
+stdmsgsStore.init(runtimeConfig)
 
 miscStore.modtools = true
 

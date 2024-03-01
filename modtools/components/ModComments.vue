@@ -4,10 +4,10 @@
     <ModComment v-for="comment in comments" :key="'modcomments-' + user.id + '-' + comment.id" :comment="comment" :user="user" :expand-comments="expandComments" />
     <div v-if="sortedComments.length > 1" class="mb-1">
       <b-button v-if="!showAll" variant="white" @click="showAll = true">
-        <v-icon name="tag" /> Show {{ sortedComments.length - 1 | pluralize(['more note', 'more notes'], { includeNumber: true }) }}
+        <v-icon icon="tag" /> Show {{ sortedComments.length - 1 | pluralize(['more note', 'more notes'], { includeNumber: true }) }}
       </b-button>
       <b-button v-else variant="white" @click="showAll = false">
-        <v-icon name="tag" /> Hide notes
+        <v-icon icon="tag" /> Hide notes
       </b-button>
     </div>
   </div>

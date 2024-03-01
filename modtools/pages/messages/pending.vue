@@ -9,6 +9,12 @@
         <ModZoomStock color-class="text-black" />
       </NoticeMessage>
 
+      <div v-for="(message, ix) in visibleMessages" :key="'messagelist-' + message.id" class="p-0 mt-2">
+        <div :ref="'top' + message.id" />
+        <ModMessage :message="message" :next="ix < visibleMessages.length - 1 ? visibleMessages[ix + 1].id : null" :next-after-removed="nextAfterRemoved" @destroy="destroy" />
+        <div :ref="'bottom' + message.id" />
+      </div>
+
       <ModAffiliationConfirmModal v-if="affiliationGroup" ref="affiliation" :groupid="affiliationGroup" />
 
       <div ref="end" />
