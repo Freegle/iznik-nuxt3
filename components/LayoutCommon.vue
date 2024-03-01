@@ -1,11 +1,18 @@
 <template>
   <div>
     <main class="ml-0 ps-0 pe-0 pageContent">
-      <AdvertisingProvider v-if="adScriptsLoaded" :config="adConfig">
-        <div class="aboveSticky">
-          <slot ref="pageContent" />
+      <div v-if="!client">
+        <div>
+          <div class="aboveSticky">
+            <slot ref="pageContent" />
+          </div>
         </div>
-        <client-only>
+      </div>
+      <client-only v-else>
+        <AdvertisingProvider v-if="adScriptsLoaded" :config="adConfig">
+          <div class="aboveSticky">
+            <slot ref="pageContent" />
+          </div>
           <div
             v-if="allowAd"
             class="d-flex justify-content-around w-100"
@@ -41,8 +48,8 @@
               Help keep Freegle running. Click to donate.
             </nuxt-link>
           </div>
-        </client-only>
-      </AdvertisingProvider>
+        </AdvertisingProvider>
+      </client-only>
     </main>
     <client-only>
       <DeletedRestore />
@@ -82,7 +89,6 @@
 <script>
 import { useRoute } from 'vue-router'
 import { useScriptTag } from '@vueuse/core'
-import { AdvertisingProvider } from '@storipress/vue-advertising'
 import { useAuthStore } from '../stores/auth'
 import SomethingWentWrong from './SomethingWentWrong'
 import { useNotificationStore } from '~/stores/notification'
@@ -104,6 +110,12 @@ const BouncingEmail = defineAsyncComponent(() =>
 const BreakpointFettler = defineAsyncComponent(() =>
   import('~/components/BreakpointFettler')
 )
+
+const AdvertisingProvider = defineAsyncComponent(async () => {
+  const ad = await import('@storipress/vue-advertising')
+  return ad.AdvertisingProvider
+})
+
 const ExternalDa = defineAsyncComponent(() => import('~/components/ExternalDa'))
 
 export default {
@@ -133,6 +145,9 @@ export default {
     }
   },
   computed: {
+    client() {
+      return process.client
+    },
     breakpoint() {
       const store = useMiscStore()
       return store.getBreakpoint
@@ -199,12 +214,15 @@ export default {
       }
     }
 
-    // We want to load the GPT script and then the pubmatic script.  We must only do this once.  We do it here
-    // because it's only at this point that we have (perhaps) shown the cookie banner.
-    //
-    // Once we've done this we can proceed, which may involve creating ad slots.
-    await this.loadGPT()
-    await this.loadPubmatic()
+    if (process.client) {
+      // We want to load the GPT script and then the pubmatic script.  We must only do this once.  We do it here
+      // because it's only at this point that we have (perhaps) shown the cookie banner.
+      //
+      // Once we've done this we can proceed, which may involve creating ad slots.
+      await this.loadGPT()
+      await this.loadPubmatic()
+    }
+
     this.adScriptsLoaded = true
 
     try {
