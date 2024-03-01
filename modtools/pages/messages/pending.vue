@@ -9,11 +9,7 @@
         <ModZoomStock color-class="text-black" />
       </NoticeMessage>
 
-      <div v-for="(message, ix) in visibleMessages" :key="'messagelist-' + message.id" class="p-0 mt-2">
-        <div :ref="'top' + message.id" />
-        <ModMessage :message="message" :next="ix < visibleMessages.length - 1 ? visibleMessages[ix + 1].id : null" :next-after-removed="nextAfterRemoved" @destroy="destroy" />
-        <div :ref="'bottom' + message.id" />
-      </div>
+      <ModMessages />
 
       <ModAffiliationConfirmModal v-if="affiliationGroup" ref="affiliation" :groupid="affiliationGroup" />
 
@@ -26,6 +22,10 @@
 import dayjs from 'dayjs'
 import { useMiscStore } from '@/stores/misc'
 import ScrollToTop from '~/components/ScrollToTop'
+//import { useModMessages } from './modMessages';
+//import { modMessages } from '~/composables/modMessages'
+
+//const { context, distance, limit, workType, show, busy, messageTerm, memberTerm, modalOpen, scrollHeight, scrollTop, nextAfterRemoved,  visibleMessages, messages, work } = modMessages()
 
 export default {
   setup() {
@@ -77,7 +77,27 @@ export default {
   },
   methods: {
     async loadAll() {
-      // TODO
+      /*
+      // This is a bit of a hack - we clear the store and fetch 1000 messages, which is likely to be all of them.
+      this.limit = 1000
+      await this.$store.dispatch('messages/clearContext')
+      await this.$store.dispatch('messages/clear')
+      const self = this
+
+      this.loadMore({
+        loaded() {
+          self.show = self.messages.length
+          self.$nextTick(() => {
+            self.$refs.end.scrollIntoView()
+          })
+        },
+        complete() {
+          self.show = self.messages.length
+          self.$nextTick(() => {
+            self.$refs.end.scrollIntoView()
+          })
+        }
+      })*/
     }
   }
 }

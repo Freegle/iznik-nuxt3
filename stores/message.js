@@ -34,6 +34,7 @@ export const useMessageStore = defineStore({
       return this.count
     },
     async fetch(id, force) {
+      console.log("MESSAGESTORE FETCH")
       id = parseInt(id)
 
       // Refetch after 10 minutes in case the state has changed.
@@ -86,6 +87,7 @@ export const useMessageStore = defineStore({
       return this.list[id]
     },
     async fetchMultiple(ids, force) {
+      console.log("MESSAGESTORE FETCHMULTIPLE")
       const left = []
 
       ids.forEach((id) => {
@@ -126,6 +128,7 @@ export const useMessageStore = defineStore({
       }
     },
     async fetchInBounds(swlat, swlng, nelat, nelng, groupid) {
+      console.log("MESSAGESTORE FETCHINBOUNDS")
       // Don't cache this, as it might change.
       const ret = await api(this.config).message.inbounds(
         swlat,
@@ -147,6 +150,7 @@ export const useMessageStore = defineStore({
       return ret
     },
     async fetchMyGroups(gid) {
+      console.log("MESSAGESTORE FETCHMYGROUPS")
       let ret = null
 
       if (this.fetchingMyGroups) {
@@ -182,6 +186,7 @@ export const useMessageStore = defineStore({
       return expired
     },
     async fetchByUser(userid, active, force) {
+      console.log("MESSAGESTORE FETCHBYUSER")
       let messages = []
 
       const promise = api(this.config).message.fetchByUser(userid, active)

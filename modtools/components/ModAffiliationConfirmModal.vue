@@ -1,6 +1,5 @@
 <template>
   <div>
-    <!-- DONE -->
     <b-modal ref="modal" v-if="group" id="modAffiliationModal" size="lg" no-stacking>
       <template #title class="w-100">
         Please confirm affiliation for {{ group.nameshort }}
