@@ -42,11 +42,9 @@
   </span>
 </template>
 <script>
-import NoticeMessage from '@/components/NoticeMessage'
 import { useModal } from '~/composables/useModal'
 
 export default {
-  components: { NoticeMessage },
   setup() {
     const { modal, hide } = useModal()
     return { modal, hide }

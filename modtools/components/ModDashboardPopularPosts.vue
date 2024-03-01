@@ -45,10 +45,8 @@
 </template>
 <script>
 import ModDashboardBase from '~/components/ModDashboardBase'
-const ExternalLink = () => import('~/components/ExternalLink')
 
 export default {
-  components: { ExternalLink },
   extends: ModDashboardBase,
   data: function () {
     return {

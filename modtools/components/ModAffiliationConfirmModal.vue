@@ -41,11 +41,9 @@
 </template>
 <script>
 import { useModal } from '~/composables/useModal'
-import ExternalLink from '~/components/ExternalLink'
 import { useGroupStore } from '@/stores/group'
 
 export default {
-  components: { ExternalLink },
   setup() {
     const groupStore = useGroupStore()
     const { modal, hide } = useModal()

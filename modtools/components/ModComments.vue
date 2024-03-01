@@ -13,10 +13,8 @@
   </div>
 </template>
 <script>
-import ModComment from './ModComment'
 
 export default {
-  components: { ModComment },
   props: {
     user: {
       type: Object,

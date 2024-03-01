@@ -26,10 +26,7 @@
   </div>
 </template>
 <script>
-import ProfileImage from '@/components/ProfileImage'
-import ExternalLink from '@/components/ExternalLink'
 export default {
-  components: { ExternalLink, ProfileImage },
   props: {
     topic: {
       type: Object,

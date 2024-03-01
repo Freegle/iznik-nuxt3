@@ -17,10 +17,9 @@
     </NoticeMessage>
   </div>
 </template>
+
 <script>
-import NoticeMessage from '@/components/NoticeMessage'
 export default {
-  components: { NoticeMessage },
   data: function() {
     return {
       summary: true

@@ -61,12 +61,9 @@
 <script>
 import dayjs from 'dayjs'
 import { useModal } from '~/composables/useModal'
-import ExternalLink from '@/components/ExternalLink'
-import NoticeMessage from '@/components/NoticeMessage'
 import { useAuthStore } from '@/stores/auth'
 
 export default {
-  components: { NoticeMessage, ExternalLink },
   setup() {
     const authStore = useAuthStore()
     const { modal, hide } = useModal()

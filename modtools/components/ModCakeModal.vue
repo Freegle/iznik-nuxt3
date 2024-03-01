@@ -20,12 +20,8 @@
 <script>
 import { useMiscStore } from '@/stores/misc'
 import { useModal } from '~/composables/useModal'
-import ModCake from '~/components/ModCake'
 
 export default {
-  components: {
-    ModCake
-  },
   setup() {
     const { modal, hide } = useModal()
     return { modal, hide }

@@ -18,7 +18,6 @@
 </template>
 <script>
 import dayjs from 'dayjs'
-import ExternalLink from '@/components/ExternalLink'
 import { useMiscStore } from '~/stores/misc'
 
 
@@ -28,7 +27,6 @@ const STARTHOUR = 13
 const END = '1700'
 
 export default {
-  components: { ExternalLink },
   props: {
     colorClass: {
       type: String,

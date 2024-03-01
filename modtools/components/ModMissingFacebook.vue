@@ -43,10 +43,8 @@
 </template>
 <script>
 import pluralize from 'pluralize'
-import NoticeMessage from '@/components/NoticeMessage'
-const ExternalLink = () => import('~/components/ExternalLink')
+
 export default {
-  components: { NoticeMessage, ExternalLink },
   data: function () {
     return {
       summary: true

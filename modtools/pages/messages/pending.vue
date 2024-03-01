@@ -19,13 +19,9 @@
 <script>
 import dayjs from 'dayjs'
 import { useMiscStore } from '@/stores/misc'
-import NoticeMessage from '~/components/NoticeMessage'
-import ModAffiliationConfirmModal from '~/components/ModAffiliationConfirmModal'
 import ScrollToTop from '~/components/ScrollToTop'
 
 export default {
-  components: {
-  },
   setup() {
     const miscStore = useMiscStore()
     return { miscStore }
