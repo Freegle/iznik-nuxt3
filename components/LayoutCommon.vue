@@ -1,46 +1,48 @@
 <template>
-  <AdvertisingProvider :config="adConfig">
+  <div>
     <main class="ml-0 ps-0 pe-0 pageContent">
-      <div class="aboveSticky">
-        <slot ref="pageContent" />
-      </div>
-      <client-only>
-        <div
-          v-if="allowAd"
-          class="d-flex justify-content-around w-100"
-          :class="{
-            sticky: true,
-            anAdRendered: !adRendering && !noAdRendered,
-          }"
-        >
-          <VisibleWhen :at="['xs', 'sm']" class="sticky">
-            <ExternalDa
-              ad-unit-path="/22794232631/freegle_sticky"
-              :dimensions="[[320, 50]]"
-              div-id="div-gpt-ad-1699973618906-0"
-              pixel
-              @rendered="adRendered"
-            />
-          </VisibleWhen>
-          <VisibleWhen :at="['md', 'lg', 'xl', 'xxl']">
-            <ExternalDa
-              ad-unit-path="/22794232631/freegle_sticky_desktop"
-              :dimensions="[[728, 90]]"
-              div-id="div-gpt-ad-1707999304775-0"
-              pixel
-              @rendered="adRendered"
-            />
-          </VisibleWhen>
+      <AdvertisingProvider v-if="adScriptsLoaded" :config="adConfig">
+        <div class="aboveSticky">
+          <slot ref="pageContent" />
         </div>
-        <div
-          v-else
-          class="adFallback sticky ourBack w-100 text-center d-flex flex-column justify-content-center"
-        >
-          <nuxt-link to="/donate" class="text-white nodecor">
-            Help keep Freegle running. Click to donate.
-          </nuxt-link>
-        </div>
-      </client-only>
+        <client-only>
+          <div
+            v-if="allowAd"
+            class="d-flex justify-content-around w-100"
+            :class="{
+              sticky: true,
+              anAdRendered: !adRendering && !noAdRendered,
+            }"
+          >
+            <VisibleWhen :at="['xs', 'sm']" class="sticky">
+              <ExternalDa
+                ad-unit-path="/22794232631/freegle_sticky"
+                :dimensions="[[320, 50]]"
+                div-id="div-gpt-ad-1699973618906-0"
+                pixel
+                @rendered="adRendered"
+              />
+            </VisibleWhen>
+            <VisibleWhen :at="['md', 'lg', 'xl', 'xxl']">
+              <ExternalDa
+                ad-unit-path="/22794232631/freegle_sticky_desktop"
+                :dimensions="[[728, 90]]"
+                div-id="div-gpt-ad-1707999304775-0"
+                pixel
+                @rendered="adRendered"
+              />
+            </VisibleWhen>
+          </div>
+          <div
+            v-else
+            class="adFallback sticky ourBack w-100 text-center d-flex flex-column justify-content-center"
+          >
+            <nuxt-link to="/donate" class="text-white nodecor">
+              Help keep Freegle running. Click to donate.
+            </nuxt-link>
+          </div>
+        </client-only>
+      </AdvertisingProvider>
     </main>
     <client-only>
       <DeletedRestore />
@@ -75,10 +77,11 @@
       <div id="here" />
       <SomethingWentWrong />
     </client-only>
-  </AdvertisingProvider>
+  </div>
 </template>
 <script>
 import { useRoute } from 'vue-router'
+import { useScriptTag } from '@vueuse/core'
 import { AdvertisingProvider } from '@storipress/vue-advertising'
 import { useAuthStore } from '../stores/auth'
 import SomethingWentWrong from './SomethingWentWrong'
@@ -126,6 +129,7 @@ export default {
       timeTimer: null,
       adRendering: true,
       noAdRendered: false,
+      adScriptsLoaded: false,
     }
   },
   computed: {
@@ -146,6 +150,7 @@ export default {
     },
   },
   async mounted() {
+    console.log('LayoutCommon mounted')
     // Start our timer.  Holding the time in the store allows us to update the time regularly and have reactivity
     // cause displayed fromNow() values to change, rather than starting a timer for each of them.
     if (process.client) {
@@ -168,9 +173,10 @@ export default {
       const chatStore = useChatStore()
       chatStore.pollForChatUpdates()
     } else if (process.client) {
-      //
-      // We only add the cookie banner for logged out users.  This reduces costs.  For logged-in users, we assume
+      // We only add the cookie banner for logged-out users.  This reduces costs.  For logged-in users, we assume
       // they have already seen the banner and specified a preference if they care.
+      //
+      // Because of that we load it here, which happens after the layout has checked login status.
       const runtimeConfig = useRuntimeConfig()
 
       console.log(
@@ -180,19 +186,26 @@ export default {
 
       if (runtimeConfig.public.COOKIEYES) {
         console.log('Add it')
-        const cookieScript = document.getElementById('cookieyes')
+        const { cookieLoad } = useScriptTag(
+          runtimeConfig.public.COOKIEYES,
+          () => {},
+          { manual: true }
+        )
 
-        if (!cookieScript) {
-          const script = document.createElement('script')
-          script.id = 'cookieyes'
-          script.setAttribute('src', runtimeConfig.public.COOKIEYES)
-
-          document.head.appendChild(script)
-        }
+        await cookieLoad()
+        console.log('Loaded cookie script')
       } else {
         console.log('No cookie banner')
       }
     }
+
+    // We want to load the GPT script and then the pubmatic script.  We must only do this once.  We do it here
+    // because it's only at this point that we have (perhaps) shown the cookie banner.
+    //
+    // Once we've done this we can proceed, which may involve creating ad slots.
+    await this.loadGPT()
+    await this.loadPubmatic()
+    this.adScriptsLoaded = true
 
     try {
       // Set the build date.  This may get superceded by Sentry releases, but it does little harm to add it in.
@@ -290,6 +303,61 @@ export default {
     adRendered(adShown) {
       this.adRendering = false
       this.noAdRendered = !adShown
+    },
+    async loadGPT() {
+      window.googletag = window.googletag || {}
+      window.googletag.cmd = window.googletag.cmd || []
+      window.googletag.cmd.push(function () {
+        window.googletag.pubads().disableInitialLoad()
+        window.googletag.pubads().collapseEmptyDivs()
+      })
+
+      console.log('Start load GPT script')
+      const { load } = useScriptTag(
+        '//securepubads.g.doubleclick.net/tag/js/gpt.js',
+        () => {},
+        { manual: true }
+      )
+
+      await load()
+      console.log('Loaded GPT script')
+    },
+    async loadPubmatic() {
+      const purl = window.location.href
+      const url = '//ads.pubmatic.com/AdServer/js/pwt/164422/12426/'
+      let profileVersionId = ''
+      if (purl.indexOf('pwtv=') > 0) {
+        const regexp = /pwtv=(.*?)(&|$)/g
+        const matches = regexp.exec(purl)
+        if (matches.length >= 2 && matches[1].length > 0) {
+          profileVersionId = '/' + matches[1]
+        }
+      }
+
+      const { load } = useScriptTag(
+        url + profileVersionId + '/pwt.js',
+        () => {},
+        {
+          manual: true,
+        }
+      )
+
+      console.log('Load pubmatic script')
+
+      window.pbjs = window.pbjs || {}
+      window.pbjs.que = window.pbjs.que || []
+
+      window.ihowpbjs = window.ihowpbjs || {}
+      window.ihowpbjs.que = window.ihowpbjs.que || []
+
+      window.ihowpbjs.que.push(function () {
+        console.log('Set pubmatic ad units')
+        window.ihowpbjs.addAdUnits(AD_GPT_CONFIG)
+        console.log('Set pubmatic ad units ok')
+      })
+
+      await load()
+      console.log('Loaded pubmatic script')
     },
   },
 }

@@ -225,12 +225,23 @@ export default defineNuxtConfig({
     head: {
       title: "Freegle - Don't throw it away, give it away!",
       script: [
-        { src: '//securepubads.g.doubleclick.net/tag/js/gpt.js', async: true },
-        {
-          type: 'text/javascript',
-          innerHTML: `var googletag = googletag || {};
-            googletag.cmd = googletag.cmd || [];`,
-        },
+        // { src: '//securepubads.g.doubleclick.net/tag/js/gpt.js', async: true },
+        // {
+        //   type: 'text/javascript',
+        //   innerHTML: `var googletag = googletag || {};
+        //     googletag.cmd = googletag.cmd || [];
+        //     window.googletag.cmd.push(function () {
+        //       window.googletag.pubads().disableInitialLoad()
+        //     })`,
+        // },
+        // { src: '/js/prebid.js', async: true },
+        // {
+        //   type: 'text/javascript',
+        //   innerHTML: `var IHPWT = {};
+        //     pbjs = pbjs || {};
+        //     pbjs.que = pbjs.que || [];`,
+        // },
+        // { src: '/js/pubmatic.js', async: true },
       ],
       meta: [
         { charset: 'utf-8' },

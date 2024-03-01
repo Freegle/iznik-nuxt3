@@ -28,7 +28,6 @@
   </client-only>
 </template>
 <script setup>
-import { nextTick } from 'vue'
 import { AdvertisingSlot } from '@storipress/vue-advertising'
 import { ref, computed, onBeforeUnmount } from '#imports'
 import { useMiscStore } from '~/stores/misc'
@@ -56,6 +55,7 @@ const props = defineProps({
 })
 
 const adShown = ref(true)
+// const adConfig = ref(AD_GPT_CONFIG)
 
 const passClicks = computed(() => {
   return !adShown.value
@@ -67,7 +67,7 @@ const blocked = false
 const maxWidth = ref(Math.max(...props.dimensions.map((d) => d[0])))
 const maxHeight = ref(Math.max(...props.dimensions.map((d) => d[1])))
 
-const slot = null
+const slot = ref(null)
 
 const timer = ref(null)
 
@@ -82,59 +82,46 @@ function refreshAd() {
   ) {
     // Don't refresh if the ad is not visible or tab is not active.
     if (isVisible.value && miscStore.visible) {
-      window.googletag.pubads().refresh([slot])
+      window.googletag.pubads().refresh([slot.value])
     }
 
     timer.value = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
   }
 }
 
-const adPrebidComplete = computed(() => useMiscStore().adPrebidComplete)
+// const PREBID_TIMEOUT = 1000
 
-watch(
-  adPrebidComplete,
-  (newVal) => {
-    if (newVal) {
-      // We used disableInitialLoad to stop the initial load until the prebid is complete.  Now we want to
-      // do the initial load to get the ad in the page.
-      console.log(
-        'Ad prebid complete, initial refresh',
-        props.adUnitPath,
-        props.divId
-      )
-
-      if (window.googletag?.pubads) {
-        window.googletag.pubads().refresh([slot])
-      }
-    }
-  },
-  {
-    immediate: true,
-  }
-)
-
-onBeforeUnmount(() => {
-  unmounted.value = true
-
-  try {
-    if (timer.value) {
-      clearTimeout(timer)
-    }
-
-    if (window.googletag?.destroySlots) {
-      window.googletag.destroySlots([slot])
-    }
-  } catch (e) {
-    console.log('Exception in onBeforeUnmount', e)
-  }
-})
+// function runBids() {
+//   console.log('Request bids')
+//
+//   window.ihowpbjs.que.push(function () {
+//     // Find slot in AD_GPT_CONFIG
+//     const slotConfig = AD_GPT_CONFIG.slots.find(
+//       (item) => item.path === props.adUnitPath && item.id === props.divId
+//     )
+//     console.log('Slot config', slotConfig)
+//     slot.value.bids = slotConfig.bids
+//
+//     window.ihowpbjs.requestBids({
+//       bidsBackHandler: function (bids, timedOut, auctionId) {
+//         console.log('Bids back', bids, timedOut, auctionId)
+//         window.googletag.pubads().refresh([slot.value])
+//       },
+//       timeout: PREBID_TIMEOUT,
+//     })
+//   })
+//
+//   console.log('Process queue')
+//   window.ihowpbjs.processQueue()
+//   console.log('Process queue')
+// }
 
 const isVisible = ref(false)
 let shownFirst = false
-
+// const loadedScripts = ref(false)
 const emit = defineEmits(['rendered'])
 
-async function visibilityChanged(visible) {
+function visibilityChanged(visible) {
   if (!blocked) {
     try {
       isVisible.value = visible
@@ -143,22 +130,22 @@ async function visibilityChanged(visible) {
         console.log('Queue create ad', props.adUnitPath, props.divId)
         shownFirst = true
 
-        await nextTick()
-
-        window.googletag = window.googletag || { cmd: [] }
+        // await loadGPT()
+        // await loadPubmatic()
+        // loadedScripts.value = true
+        //
+        // if (!loadedScripts.value) {
+        //   runBids()
+        // }
 
         window.googletag.cmd.push(function () {
-          window.googletag.pubads().collapseEmptyDivs()
-
           window.googletag
             .pubads()
             .addEventListener('slotRenderEnded', (event) => {
-              console.log(
-                'Rendered',
-                event?.slot.getAdUnitPath(),
-                props.adUnitPath
-              )
               if (event?.slot.getAdUnitPath() === props.adUnitPath) {
+                // Save off the slot for when we run the prebids later.
+                slot.value = event.slot
+
                 console.log(
                   'Rendered',
                   uniqueid.value,
@@ -166,6 +153,15 @@ async function visibilityChanged(visible) {
                   event?.isEmpty,
                   event
                 )
+
+                if (event?.isEmpty) {
+                  adShown.value = false
+                  console.log('Rendered empty', adShown)
+                } else {
+                  maxWidth.value = event.size[0]
+                  maxHeight.value = event.size[1]
+                }
+
                 if (event?.isEmpty) {
                   adShown.value = false
                   console.log('Rendered empty', adShown)
@@ -206,6 +202,22 @@ async function visibilityChanged(visible) {
     }
   }
 }
+
+onBeforeUnmount(() => {
+  unmounted.value = true
+
+  try {
+    if (timer.value) {
+      clearTimeout(timer)
+    }
+
+    if (window.googletag?.destroySlots) {
+      window.googletag.destroySlots([slot])
+    }
+  } catch (e) {
+    console.log('Exception in onBeforeUnmount', e)
+  }
+})
 </script>
 <style scoped lang="scss">
 .textsize {
