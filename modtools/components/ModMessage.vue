@@ -85,7 +85,7 @@
       </b-card-header>
       <b-card-body v-if="expanded" class="p-1 p-md-2">
         <b-row>
-          <!--b-col cols="12" lg="5">
+          <b-col cols="12" lg="5">
             <NoticeMessage v-if="message.type === 'Other'" variant="danger" class="mb-2">
               This message needs editing so that we know what kind of post it is.
             </NoticeMessage>
@@ -109,7 +109,7 @@
               </div>
             </div>
             <div v-if="message.fromuser">
-              <ModComments :user="message.fromuser" />
+              <!--ModComments :user="message.fromuser" /-->
               <ModSpammer v-if="message.fromuser.spammer" :user="message.fromuser" />
               <NoticeMessage v-if="message.fromuser && message.fromuser.activedistance > 50" variant="warning" class="mb-2">
                 This freegler recently active on groups {{ message.fromuser.activedistance }} miles apart.
@@ -165,7 +165,7 @@
               </div>
               <MessageReplyInfo v-if="!pending || message.replies && message.replies.length" :message="message" class="d-inline" />
             </div>
-          </b-col-->
+          </b-col>
           <b-col cols="12" lg="3">
             <MessageMap v-if="group && position" :centerat="{ lat: group.lat, lng: group.lng }" :position="{ lat: position.lat, lng: position.lng }"
               locked :boundary="group.polygon" :height="150" />
