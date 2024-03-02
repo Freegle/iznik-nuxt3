@@ -67,14 +67,8 @@
   </div>
 </template>
 <script>
-import ModModeration from './ModModeration'
-const OurToggle = () => import('~/components/OurToggle')
-
+import { useUserStore } from '../stores/user'
 export default {
-  components: {
-    ModModeration,
-    OurToggle
-  },
   props: {
     groupid: {
       type: Number,
@@ -116,10 +110,11 @@ export default {
   },
   computed: {
     modtools() {
-      return this.$store.getters['misc/get']('modtools')
+      return true
     },
     user() {
-      return this.userid ? this.$store.getters['user/get'](this.userid) : null
+      const userStore = useUserStore()
+      return this.userid ? userStore.get(this.userid) : null
     },
     membership() {
       let ret = null

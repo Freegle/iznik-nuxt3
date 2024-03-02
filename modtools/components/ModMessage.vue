@@ -1,6 +1,7 @@
 <template>
   <div>
     <div ref="top" style="position:relative; top:-66px" />
+    {{  message.id }} {{  message }}
     <ModMessageEmailModal v-if="message.source === 'Email'" :id="message.id" ref="original" />
     <div ref="bottom" />
   </div>

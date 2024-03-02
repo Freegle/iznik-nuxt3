@@ -19,6 +19,7 @@ export const useMessageStore = defineStore({
     // In bounds
     bounds: {},
     activePostsCounter: 0,
+
   }),
   actions: {
     init(config) {
@@ -27,6 +28,8 @@ export const useMessageStore = defineStore({
       this.fetching = {}
       this.fetchingCount = 0
       this.fetchingMyGroups = null
+      // The context from the last fetch, used for fetchMore. // ModTools
+      this.context = null
     },
     async fetchCount(browseView, log = true) {
       const ret = await api(this.config).message.count(browseView, log)
@@ -273,6 +276,7 @@ export const useMessageStore = defineStore({
     },
     clear() {
       this.$reset()
+      this.clearContext() // ModTools
     },
     async promise(id, userid) {
       await api(this.config).message.update({
@@ -319,6 +323,44 @@ export const useMessageStore = defineStore({
       await api(this.config).message.markSeen(ids)
       await this.fetchCount()
     },
+    clearContext() { // Added for ModTools
+      this.context = null
+    },
+    async fetchMessages(params) { // Added for ModTools
+      console.log("FETCHMESSAGES", params)
+      // Watch out for the store being cleared under the feet of this fetch. If that happens then we throw away the
+      // results.
+      // TODO const instance = state.instance
+
+      if (params.context) {
+        // Ensure the context is a real object, in case it has been in the store.
+        const ctx = cloneDeep(params.context)
+        params.context = ctx
+      } else if (this.context) {
+        params.context = this.context
+      }
+
+      const { messages, context } = await api(this.config).message.fetchMessages(params)
+      console.log("GOTMESSAGES", messages.length)
+
+      // TODO if (state.instance === instance) {
+      // TODO  commit('addAll', messages)
+
+      if (params.collection !== 'Draft') {
+        // We don't use context for drafts - there aren't many.
+        this.context = context
+        // TODO commit('setContext', context)
+      }
+      // TODO}
+      await this.clear()
+      for(const message of messages){
+        console.log('MESSAGE',message.id)
+        this.list[message.id] = message
+      }
+
+      //state.list = messages
+
+    },
   },
   getters: {
     byId: (state) => {
@@ -335,6 +377,15 @@ export const useMessageStore = defineStore({
       return Object.values(state.list).filter((msg) => {
         return msg.fromuser === userid
       })
+    },
+    getByGroup: (state) => (groupid) => { // Added for ModTools
+      const ret = state.list.filter(message => {
+        return (
+          message.groups.length > 0 &&
+          parseInt(message.groups[0].groupid) === parseInt(groupid)
+        )
+      })
+      return ret
     },
   },
 })
