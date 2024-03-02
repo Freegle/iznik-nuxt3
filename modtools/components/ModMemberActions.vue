@@ -1,20 +1,20 @@
 <template>
   <div>
-    <b-btn v-if="groupid && !banned" variant="white" @click="remove">
+    <b-button v-if="groupid && !banned" variant="white" @click="remove">
       <v-icon icon="times" /> Remove
-    </b-btn>
-    <b-btn v-if="groupid && !banned" variant="white" @click="ban">
+    </b-button>
+    <b-button v-if="groupid && !banned" variant="white" @click="ban">
       <v-icon icon="trash-alt" /> Ban
-    </b-btn>
-    <b-btn v-if="!spam" variant="white" @click="spamReport">
+    </b-button>
+    <b-button v-if="!spam" variant="white" @click="spamReport">
       <v-icon icon="ban" /> Spammer
-    </b-btn>
-    <b-btn v-if="supportOrAdmin" variant="white" @click="spamWhitelist">
+    </b-button>
+    <b-button v-if="supportOrAdmin" variant="white" @click="spamWhitelist">
       <v-icon icon="check" /> Whitelist
-    </b-btn>
-    <b-btn v-if="groupid" variant="white" @click="addAComment">
+    </b-button>
+    <b-button v-if="groupid" variant="white" @click="addAComment">
       <v-icon icon="tag" /> Add note
-    </b-btn>
+    </b-button>
     <ConfirmModal v-if="removeConfirm && groupname" ref="removeConfirm" :title="'Remove ' + displayname + ' from ' + groupname + '?'"
       @confirm="removeConfirmed" />
     <ConfirmModal v-if="removeConfirm && !groupname" ref="removeConfirm" title="Please select a group first." />

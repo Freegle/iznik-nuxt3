@@ -1,17 +1,17 @@
 <template>
   <div class="d-inline">
     <div class="position-relative d-inline">
-      <SpinButton :variant="variant" :spinclass="spinclass" :name="icon" :label="label" class="mb-1" :disabled="disabled" :handler="click"
+      <SpinButton :variant="variant" :spinclass="spinclass" :icon-name="icon" :label="label" class="mb-1" :disabled="disabled" :handler="click"
         :confirm="confirmButton" />
       <v-icon v-if="autosend" name="chevron-circle-right" title="Autosend - configured to send immediately without edit" class="autosend" />
     </div>
     <ConfirmModal v-if="showDeleteModal" ref="deleteConfirm" :title="'Delete: ' + message.subject" @confirm="deleteConfirmed" />
     <ConfirmModal v-if="showSpamModal" ref="spamConfirm" :title="'Mark as Spam: ' + message.subject" @confirm="spamConfirmed" />
-    <ModStdMessageModal v-if="showStdMsgModal" ref="stdmodal" :stdmsg="stdmsg" :message="message" :autosend="autosend" />
+    <!--ModStdMessageModal v-if="showStdMsgModal" ref="stdmodal" :stdmsg="stdmsg" :message="message" :autosend="autosend" /-->
   </div>
 </template>
 <script>
-import { useMessageStore } from '../stores/message'
+import { useMessageStore } from '../../stores/message'
 import { useStdmsgsStore } from '../stores/stdmsgs'
 
 export default {

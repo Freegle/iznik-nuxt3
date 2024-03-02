@@ -3,12 +3,12 @@
     <NoticeMessage v-for="word in message.worry" :key="'worry-' + message.id + '-' + word.worryword.id" variant="warning" class="mb-1">
       <p>
         Flagged for review: "<span class="text-danger font-weight-bold">{{ word.worryword.keyword }}</span>".
-        <b-btn v-if="!expand" variant="link" class=" p-0 align-top" @click="expand = true">
+        <b-button v-if="!expand" variant="link" class=" p-0 align-top" @click="expand = true">
           Click for more info
-        </b-btn>
-        <b-btn v-else variant="link" class=" p-0 align-top" @click="expand = false">
+        </b-button>
+        <b-button v-else variant="link" class=" p-0 align-top" @click="expand = false">
           Hide more info
-        </b-btn>
+        </b-button>
       </p>
       <div v-if="expand">
         <p v-if="word.worryword.type === 'Review'">

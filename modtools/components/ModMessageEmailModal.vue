@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-modal v-if="message" id="modEmailMessageModal" v-model="showModal" size="lg">
+    <b-modal v-if="message" ref="modal" id="modEmailMessageModal" size="lg">
       <template #title class="w-100">
         Message received by email
       </template>
@@ -32,12 +32,14 @@
   </div>
 </template>
 <script>
+import { Letter } from 'vue-letter'
 import { useModal } from '~/composables/useModal'
 import { useMessageStore } from '../../stores/message'
 
 import { extract } from 'letterparser'
 
 export default {
+  components: { Letter },
   setup() {
     const { modal, hide } = useModal()
     const messageStore = useMessageStore()
@@ -56,7 +58,7 @@ export default {
   },
   computed: {
     message() {
-      return this.messageStore.get(this.id)
+      return this.messageStore.byId(this.id)
     },
     parsed() {
       return this.message && this.message.message

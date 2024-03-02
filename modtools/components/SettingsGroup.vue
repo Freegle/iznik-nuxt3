@@ -19,10 +19,10 @@
         </b-form-group>
       </b-col>
       <b-col v-if="leave" cols="12" sm="6">
-        <b-btn variant="secondary" class="float-right mt-4" @click="leaveGroup">
+        <b-button variant="secondary" class="float-right mt-4" @click="leaveGroup">
           <v-icon v-if="leaving" class="text-success fa-spin" />
           <v-icon v-else icon="trash-alt" /> Leave
-        </b-btn>
+        </b-button>
       </b-col>
       <b-col v-if="moderation && membership">
         <b-form-group

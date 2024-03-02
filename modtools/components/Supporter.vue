@@ -10,7 +10,7 @@
       title="Kindly supports Freegle - click for more info."
       @click="showModal"
     >
-      <v-icon name="trophy" />
+      <v-icon icon="trophy" />
       Supporter
     </b-badge>
     <SupporterInfoModal ref="modal" />

@@ -16,19 +16,19 @@
       <ModMessageButton :message="message" variant="primary" icon="envelope" leave label="Blank Reply" />
       <ModMessageButton :message="message" variant="danger" icon="trash-alt" delete label="Delete" />
       <ModMessageButton :message="message" variant="danger" icon="ban" spam label="Spam" />
-      <SpinButton v-if="message.type === 'Offer' && !message.outcomes.length" variant="white" class="m-1" name="check" label="Mark as TAKEN"
+      <SpinButton v-if="message.type === 'Offer' && !message.outcomes.length" variant="white" class="m-1" icon-name="check" label="Mark as TAKEN"
         :handler="outcome('Taken')" confirm />
-      <SpinButton v-if="message.type === 'Wanted' && !message.outcomes.length" variant="white" class="m-1" name="check" label="Mark as RECEIVED"
+      <SpinButton v-if="message.type === 'Wanted' && !message.outcomes.length" variant="white" class="m-1" icon-name="check" label="Mark as RECEIVED"
         :handler="outcome('Received')" confirm />
-      <SpinButton v-if="!message.outcomes.length" variant="white" class="m-1" name="trash-alt" label="Mark as Withdrawn" :handler="outcome('Withdrawn')"
+      <SpinButton v-if="!message.outcomes.length" variant="white" class="m-1" icon-name="trash-alt" label="Mark as Withdrawn" :handler="outcome('Withdrawn')"
         confirm />
     </div>
     <div v-if="!editreview" class="d-lg-inline">
       <ModMessageButton v-for="stdmsg in filtered" :key="stdmsg.id" :variant="variant(stdmsg)" :icon="icon(stdmsg)" :label="stdmsg.title"
         :stdmsgid="stdmsg.id" :message="message" :autosend="(Boolean)(stdmsg.autosend && allowAutoSend)" />
-      <b-btn v-if="rareToShow && !showRare" variant="white" class="mb-1" @click="showRare = true">
+      <b-button v-if="rareToShow && !showRare" variant="white" class="mb-1" @click="showRare = true">
         <v-icon icon="caret-down" /> +{{ rareToShow }}...
-      </b-btn>
+      </b-button>
     </div>
     <client-only>
       <div class="mt-1 mb-1 d-flex flex-wrap">
@@ -42,8 +42,8 @@
   </div>
 </template>
 <script>
-import { useMessageStore } from '../stores/message'
-
+import { useMessageStore } from '../../stores/message'
+import { useStdmsgsStore } from '../stores/stdmsgs'
 export default {
   props: {
     message: {

@@ -2,7 +2,7 @@
   <div class="small">
     <span class="text-danger ">
       Crosspost
-      <v-icon name="hashtag" class="text-muted" scale="0.5" />
+      <v-icon icon="hashtag" class="text-muted" scale="0.5" />
       {{ message.id }}
       <nuxt-link :to="'/modtools/message/' + message.id">
         <em>{{ message.subject }}</em>
