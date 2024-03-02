@@ -9,7 +9,7 @@
         <ModZoomStock color-class="text-black" />
       </NoticeMessage>
 
-      <ModMessages />
+      <ModMessages :collection="collection" />
 
       <ModAffiliationConfirmModal v-if="affiliationGroup" ref="affiliation" :groupid="affiliationGroup" />
 

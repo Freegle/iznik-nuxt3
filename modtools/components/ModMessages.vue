@@ -6,6 +6,10 @@
         @destroy="destroy" />
       <div :ref="'bottom' + message.id" />
     </div>
+
+    <NoticeMessage v-if="!messages.length && !busy" class="mt-2">
+      There are no messages at the moment. This will refresh automatically.
+    </NoticeMessage>
   </div>
 </template>
 <script setup>
@@ -17,6 +21,14 @@ const authStore = useAuthStore()
 const messageStore = useMessageStore()
 const miscStore = useMiscStore()
 const groupStore = useGroupStore()
+
+
+const props = defineProps({
+  collection: {
+    type: String,
+    required: true,
+  }
+})
 
 const groupid = ref(0)
 
@@ -36,7 +48,6 @@ const modalOpen = ref(false)
 const scrollHeight = ref(null)
 const scrollTop = ref(null)
 const nextAfterRemoved = ref(null)
-const collection = ref('Pending')
 
 // mixin/modMessagesPage
 const visibleMessages = computed(() => {
@@ -104,7 +115,7 @@ watch(work, async (newVal, oldVal) => {
 
       await messageStore.fetchMessages({
         groupid: groupid.value,
-        collection: collection.value,
+        collection: props.collection,
         modtools: true,
         summary: false,
         limit: Math.max(limit.value, newVal)
@@ -177,7 +188,7 @@ onMounted(async () => {
   if (work.value > 0) {
     await messageStore.fetchMessages({
       groupid: groupid.value,
-      collection: collection.value,
+      collection: props.collection,
       modtools: true,
       summary: false,
       limit: Math.max(limit.value, work.value)
