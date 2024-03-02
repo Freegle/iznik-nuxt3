@@ -4,7 +4,6 @@ const intersectionObserverDirective = {
   beforeMount(el, binding) {
     let callback
     let options = {}
-    // let throttle = 0
     let entryTopWasVisible = false
     let entryBottomWasVisible = false
     let entryWasObserved = false
@@ -15,7 +14,7 @@ const intersectionObserverDirective = {
     } else {
       ;({ callback, options } = binding.value)
     }
-    // let timer
+    let timer
 
     const observerCallback = (entries, observer) => {
       entries.forEach((entry) => {
@@ -37,9 +36,7 @@ const intersectionObserverDirective = {
 
           entryWasObserved = entryTopWasVisible && entryBottomWasVisible
         }
-        // Throttle callback execution
-        // if (timer === undefined) {
-        //   timer = window.setTimeout(() => {
+
         const cb = () => {
           callback(isVisible, {
             isTopVisible,
@@ -49,6 +46,26 @@ const intersectionObserverDirective = {
             observer,
           })
         }
+
+        const executeCallback = () => {
+          if (options.observeFullElement) {
+            entryWasObserved && cb()
+            entryWasObserved = false
+          } else {
+            cb()
+          }
+        }
+
+        // Throttle callback execution
+        if (timer === undefined && options.throttle) {
+          timer = window.setTimeout(() => {
+            // Provide additional visibility info in the callback
+            executeCallback()
+            timer = undefined
+          }, options.throttle || 0)
+        } else {
+          executeCallback()
+        }
         // Provide additional visibility info in the callback
         if (options.observeFullElement) {
           entryWasObserved && cb()
@@ -56,11 +73,6 @@ const intersectionObserverDirective = {
         } else {
           cb()
         }
-        //     timer = undefined
-        //   }, throttle || 0)
-        // } else {
-        //   console.log('Throttled')
-        // }
       })
     }
 

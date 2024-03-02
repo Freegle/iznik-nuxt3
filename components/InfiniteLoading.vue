@@ -39,7 +39,11 @@ export default {
     }
   },
   watch: {
-    state(newVal) {
+    async state(newVal) {
+      if (newVal === 'loaded' && this.visible) {
+        await this.emit()
+        return
+      }
       // console.log('state changed', newVal)
       if (newVal === 'loading') {
         // This is an internal change - nothing to do.
@@ -63,35 +67,15 @@ export default {
       this.emit()
     },
   },
-  beforeUnmount() {
-    if (this.timer) {
-      clearTimeout(this.timer)
-    }
-  },
   async mounted() {
-    if (this.firstload) {
-      await this.emit()
-    }
-
-    // It would be nice if we didn't need a timer and could be purely event-driven.  But there is no guarantee
-    // that what happens in response to our emit will result in all the components being rendered, and although
-    // Vue3 has Suspense I can't see an easy way of waiting for all renders to finish.
-    this.timer = setTimeout(this.fallback, 100)
+    await this.emit()
   },
   methods: {
-    fallback() {
-      this.timer = null
-
-      if (this.visible && this.state === 'loaded') {
-        // We have loaded and not completed, and yet it's still visible.  We need to do some more.
-        // console.log('Fallback emit')
-        this.emit()
-      }
-
-      this.timer = setTimeout(this.fallback, 100)
-    },
-    visibilityChanged(isVisible) {
+    async visibilityChanged(isVisible) {
       this.visible = isVisible
+      if (this.state === 'loaded' && isVisible) {
+        await this.emit()
+      }
     },
     async emit() {
       this.loading()
