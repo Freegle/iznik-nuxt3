@@ -37,7 +37,6 @@ export const useMessageStore = defineStore({
       return this.count
     },
     async fetch(id, force) {
-      console.log("MESSAGESTORE FETCH")
       id = parseInt(id)
 
       // Refetch after 10 minutes in case the state has changed.
@@ -90,7 +89,6 @@ export const useMessageStore = defineStore({
       return this.list[id]
     },
     async fetchMultiple(ids, force) {
-      console.log("MESSAGESTORE FETCHMULTIPLE")
       const left = []
 
       ids.forEach((id) => {
@@ -131,7 +129,6 @@ export const useMessageStore = defineStore({
       }
     },
     async fetchInBounds(swlat, swlng, nelat, nelng, groupid) {
-      console.log("MESSAGESTORE FETCHINBOUNDS")
       // Don't cache this, as it might change.
       const ret = await api(this.config).message.inbounds(
         swlat,
@@ -153,7 +150,6 @@ export const useMessageStore = defineStore({
       return ret
     },
     async fetchMyGroups(gid) {
-      console.log("MESSAGESTORE FETCHMYGROUPS")
       let ret = null
 
       if (this.fetchingMyGroups) {
@@ -189,7 +185,6 @@ export const useMessageStore = defineStore({
       return expired
     },
     async fetchByUser(userid, active, force) {
-      console.log("MESSAGESTORE FETCHBYUSER")
       let messages = []
 
       const promise = api(this.config).message.fetchByUser(userid, active)
@@ -327,7 +322,6 @@ export const useMessageStore = defineStore({
       this.context = null
     },
     async fetchMessages(params) { // Added for ModTools
-      console.log("FETCHMESSAGES", params)
       // Watch out for the store being cleared under the feet of this fetch. If that happens then we throw away the
       // results.
       // TODO const instance = state.instance
@@ -341,7 +335,6 @@ export const useMessageStore = defineStore({
       }
 
       const { messages, context } = await api(this.config).message.fetchMessages(params)
-      console.log("GOTMESSAGES", messages.length)
 
       // TODO if (state.instance === instance) {
       // TODO  commit('addAll', messages)
@@ -354,12 +347,8 @@ export const useMessageStore = defineStore({
       // TODO}
       await this.clear()
       for(const message of messages){
-        console.log('MESSAGE',message.id)
         this.list[message.id] = message
       }
-
-      //state.list = messages
-
     },
   },
   getters: {

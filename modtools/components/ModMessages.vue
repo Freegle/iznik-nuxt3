@@ -39,7 +39,6 @@ const collection = ref(null) // TODO
 
 // mixin/modMessagesPage
 const visibleMessages = computed(() => {
-  console.log('visibleMessages', messages.value.length, show.value)
   return messages.value.slice(0, show.value)
 })
 
@@ -48,7 +47,6 @@ const work = computed(() => {
   // Count for the type of work we're interested in.
   const work = authStore.work
   const count = workType.value ? work[workType.value] : 0
-  console.log("GET WORK", count)
   return count
 })
 
@@ -127,7 +125,6 @@ watch(work, async (newVal, oldVal) => {
 
 // mixin/modMessagesPage
 const messages = computed(() => {
-  console.log('computed messages', groupid.value)
   let messages
 
   if (groupid.value) {
@@ -185,7 +182,6 @@ onMounted(async () => {
       limit: Math.max(limit.value, work.value)
     })
     show.value = messages.value.length
-    console.log('gotmessages', show.value)
   }
 
 })
