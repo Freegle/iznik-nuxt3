@@ -2,14 +2,14 @@
   <div>
     <div ref="top" style="position:relative; top:-66px" />
     <b-card bg-variant="white" no-body>
-      <!--b-card-header class="p-1 p-md-2">
+      <b-card-header class="p-1 p-md-2">
         <div class="d-flex justify-content-between">
           <div class="flex-grow-1">
             <div v-if="editing" class="d-flex flex-wrap">
               <GroupSelect v-model="editgroup" modonly class="mr-1" size="lg" :disabled-except-for="memberGroupIds" />
               <div v-if="message.item && message.location" class="d-flex justify-content-start">
-                <b-select v-model="message.type" :options="typeOptions" class="type mr-1" size="lg" />
-                <b-input v-model="message.item.name" size="lg" class="mr-1" />
+                <b-form-select v-model="message.type" :options="typeOptions" class="type mr-1" size="lg" />
+                <b-form-input v-model="message.item.name" size="lg" class="mr-1" />
               </div>
               <div v-if="message.item && message.location">
                 <b-input-group>
@@ -18,9 +18,9 @@
               </div>
               <div v-else class="flex-grow-1 pl-0 pl-md-2 pr-0 pr-md-2 fullsubject">
                 <label class="mr-2">Subject:</label>
-                <b-input v-model="message.subject" size="lg" />
+                <b-form-input v-model="message.subject" size="lg" />
                 <label class="mr-2">Post type:</label>
-                <b-select v-model="message.type" :options="typeOptions" class="type mr-1" size="lg" />
+                <b-form-select v-model="message.type" :options="typeOptions" class="type mr-1" size="lg" />
               </div>
             </div>
             <Diff v-else-if="editreview && oldSubject && newSubject" :old="oldSubject" :new="newSubject" class="font-weight-bold" />
@@ -82,7 +82,7 @@
             </div>
           </div>
         </div>
-      </b-card-header-->
+      </b-card-header>
       <b-card-body v-if="expanded" class="p-1 p-md-2">
         <b-row>
           <!--b-col cols="12" lg="5">
@@ -297,6 +297,8 @@
   </div>
 </template>
 <script>
+import Highlighter from 'vue-highlight-words'
+
 import { useLocationStore } from '../../stores/location'
 import { useModconfigsStore } from '../stores/modconfigs'
 import { useMessageStore } from '../../stores/message'
@@ -310,6 +312,7 @@ import { twem } from '~/composables/useTwem'
 export default {
   name: 'ModMessage',
   components: {
+    Highlighter
   },
   //mixins: [keywords],
   props: {
@@ -385,7 +388,7 @@ export default {
 
       if (this.message && this.message.groups && this.message.groups.length) {
         const groupid = this.message.groups[0].groupid
-        console.log("groupid",groupid)
+        console.log("groupid", groupid)
         ret = this.myGroups.find(g => parseInt(g.id) === groupid)
       }
 
@@ -545,24 +548,32 @@ export default {
       this.message.groups.forEach(g => {
         const group = this.myGroup(g.groupid)
 
-        if (
-          group &&
-          (!group.settings ||
-            !group.settings.duplicates ||
-            group.settings.duplicates.check)
-        ) {
-          check = true
-          const msgtype = this.message.type.toLowerCase()
-          ret = Math.min(ret, group.settings.duplicates[msgtype])
+        try { // TODO remove
+          if (
+            group &&
+            (!group.settings ||
+              !group.settings.duplicates ||
+              group.settings.duplicates.check)
+          ) {
+            check = true
+            const msgtype = this.message.type.toLowerCase()
+            ret = Math.min(ret, group.settings.duplicates[msgtype])
+          }
+        } catch (e) { // TODO remove
+          console.log("duplicateAge exception", e.message)
         }
       })
 
       return check ? ret : null
     },
     crossposts() {
+      console.log('crossposts')
+      //return [] // TODO
       return this.checkHistory(false)
     },
     duplicates() {
+      console.log('duplicates')
+      //return [] // TODO
       return this.checkHistory(true)
     },
     memberGroupIds() {

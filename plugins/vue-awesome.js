@@ -64,6 +64,7 @@ import {
   faMapMarkerAlt,
   faMeh,
   faMinus,
+  faPause, // ModTools
   faPen,
   faPlus,
   faQuestionCircle,
@@ -160,6 +161,7 @@ library.add(
   faMapMarkerAlt,
   faMeh,
   faMinus,
+  faPause, // ModTools
   faPen,
   faPlus,
   faQuestionCircle,

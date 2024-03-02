@@ -18,5 +18,10 @@ export default {
       const perms = this.me ? this.me.permissions : null
       return perms && perms.indexOf(perm) !== -1
     },
+    myGroup(groupid) {
+      return groupid
+        ? this.myGroups.find(g => parseInt(g.id) === groupid)
+        : null
+    },
   },
 }

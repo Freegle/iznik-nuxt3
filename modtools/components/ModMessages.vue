@@ -15,6 +15,7 @@ import { useMessageStore } from '~/stores/message'
 import { useMiscStore } from '~/stores/misc';
 const authStore = useAuthStore()
 const messageStore = useMessageStore()
+const miscStore = useMiscStore()
 const groupStore = useGroupStore()
 
 const groupid = ref(0)
@@ -35,7 +36,7 @@ const modalOpen = ref(false)
 const scrollHeight = ref(null)
 const scrollTop = ref(null)
 const nextAfterRemoved = ref(null)
-const collection = ref(null) // TODO
+const collection = ref('Pending')
 
 // mixin/modMessagesPage
 const visibleMessages = computed(() => {
