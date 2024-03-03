@@ -83,7 +83,7 @@
             Logout
           </a>
         </div>
-        <div id="mtinfo" :title="buildDate">MT-{{ version }}</div>
+        <div id="mtinfo" :title="buildDate">MT-{{ version }} <br/>{{ buildDate }}</div>
       </div>
       <div class="ml-0 pl-0 pl-sm-1 pr-0 pr-sm-1 pageContent w-100">
         <slot ref="pageContent" />
@@ -456,7 +456,7 @@ a:hover {
 }
 
 #mtinfo {
-  text-align: right;
+  text-align: left;
   font-size: 75%;
 }
 </style>
