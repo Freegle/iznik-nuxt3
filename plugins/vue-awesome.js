@@ -49,6 +49,7 @@ import {
   faGavel,
   faGift,
   faGlobeEurope,
+  faHammer,
   faHandHoldingHeart,
   faHandsHelping,
   faHandshake,
@@ -66,6 +67,7 @@ import {
   faMinus,
   faPause, // ModTools
   faPen,
+  faPlay,
   faPlus,
   faQuestionCircle,
   faReply,
@@ -146,6 +148,7 @@ library.add(
   faGavel,
   faGift,
   faGlobeEurope,
+  faHammer,
   faHandHoldingHeart,
   faHandsHelping,
   faHandshake,
@@ -163,6 +166,7 @@ library.add(
   faMinus,
   faPause, // ModTools
   faPen,
+  faPlay,
   faPlus,
   faQuestionCircle,
   faReply,

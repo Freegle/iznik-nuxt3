@@ -59,16 +59,16 @@
       <div class="d-flex justify-content-between w-100">
         <div>
           <b-btn variant="white" class="nohover" size="xs" @click="moveLeft">
-            <v-icon name="arrow-left" />
+            <v-icon icon="arrow-left" />
           </b-btn>
           <b-btn variant="white" class="nohover" size="xs" @click="moveRight">
-            <v-icon name="arrow-right" />
+            <v-icon icon="arrow-right" />
           </b-btn>
           <b-btn variant="white" class="nohover" size="xs" @click="moveUp">
-            <v-icon name="arrow-up" />
+            <v-icon icon="arrow-up" />
           </b-btn>
           <b-btn variant="white" class="nohover" size="xs" @click="moveDown">
-            <v-icon name="arrow-down" />
+            <v-icon icon="arrow-down" />
           </b-btn>
         </div>
         <div>

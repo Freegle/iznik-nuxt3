@@ -12,10 +12,10 @@
           </b-col>
           <b-col cols="4" sm="2">
             <div>
-              <v-icon name="hashtag" scale="0.75" class="text-muted" />{{ message.id }}
+              <v-icon icon="hashtag" scale="0.75" class="text-muted" />{{ message.id }}
               <span v-if="message.repost">
-                <v-icon v-if="message.autorepost" name="sync" class="text-danger" title="Auto-repost" />
-                <v-icon v-else name="hand-paper" class="text-danger" title="Manual repost" />
+                <v-icon v-if="message.autorepost" icon="sync" class="text-danger" title="Auto-repost" />
+                <v-icon v-else icon="hand-paper" class="text-danger" title="Manual repost" />
               </span>
             </div>
           </b-col>
@@ -101,9 +101,10 @@ export default {
   },
   mounted() {
     // Not all the groups we show will be ours, so get them all for the group name.
-    this.groupStore.list({
-      grouptype: 'Freegle'
-    })
+    // TODO
+    //this.groupStore.list({
+    //  grouptype: 'Freegle'
+    //})
   },
   methods: {
     show() {

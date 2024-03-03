@@ -77,5 +77,8 @@ export const useMembersStore = defineStore({
     get: (state) => (id) => {
       return state.listById(id)
     },
+    getByUserId: (state) => (id) => {
+      return null // TODO
+    },
   },
 })

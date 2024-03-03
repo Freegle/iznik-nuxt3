@@ -16,7 +16,7 @@
           <span slot="no-results" />
           <span slot="no-more" />
           <span slot="spinner">
-            <b-img-lazy src="~/static/loader.gif" alt="Loading" />
+            <b-img lazy src="~/static/loader.gif" alt="Loading" />
           </span>
         </infinite-loading>
       </template>
@@ -69,7 +69,8 @@ export default {
     },
     user() {
       let ret = null
-      let user = this.authStore.get(this.userid)
+      // TODO let user = this.authStore.get(this.userid)
+      let user = null
 
       if (user && user.info) {
         ret = user
