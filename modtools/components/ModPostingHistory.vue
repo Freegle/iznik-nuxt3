@@ -24,8 +24,8 @@
     <b-button variant="link" size="sm" @click="showLogs">
       Logs
     </b-button>
-    <ModPostingHistoryModal ref="history" :user="user" :type="type" />
-    <ModLogsModal ref="logs" :userid="user.id" :modmailsonly="modmailsonly" />
+    <ModPostingHistoryModal v-if="showPostingHistoryModal" ref="history" :user="user" :type="type" @hidden="showPostingHistoryModal = false" />
+    <ModLogsModal v-if="showLogsModal" ref="logs" :userid="user.id" :modmailsonly="modmailsonly" @hidden="showLogsModal = false" />
   </span>
 </template>
 <script>
@@ -45,7 +45,9 @@ export default {
   data: function () {
     return {
       type: null,
-      modmailsonly: false
+      modmailsonly: false,
+      showPostingHistoryModal: false,
+      showLogsModal: false
     }
   },
   computed: {
@@ -92,25 +94,26 @@ export default {
 
       return count
     },
-    showHistory(type = null) {
+    async showHistory(type = null) {
       this.type = type
-      this.waitForRef('history', () => {
-        this.$refs.history.show()
-      })
+      this.showPostingHistoryModal = true
+      await nextTick()
+      this.$refs.history.show()
     },
-    showLogs() {
+    async showLogs() {
+      console.log("showLogs")
       this.modmailsonly = false
 
-      this.waitForRef('logs', () => {
-        this.$refs.logs.show()
-      })
+      this.showLogsModal = true
+      await nextTick()
+      this.$refs.logs.show()
     },
-    showModmails() {
+    async showModmails() {
       this.modmailsonly = true
 
-      this.waitForRef('logs', () => {
-        this.$refs.logs.show()
-      })
+      this.showLogsModal = true
+      await nextTick()
+      this.$refs.logs.show()
     }
   }
 }

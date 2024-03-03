@@ -108,8 +108,8 @@ export default {
   },
   methods: {
     show() {
-      this.showModal = true
       this.groupid = null
+      this.modal.show()
     }
   }
 }

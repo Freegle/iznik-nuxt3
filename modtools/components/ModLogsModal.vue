@@ -98,12 +98,15 @@ export default {
       return ret
     }
   },
+  mounted() {
+    this.logsStore.clear()
+  },
   methods: {
     show() {
       // Clear the log context - otherwise if we open another modal for this user then it will get confused and
       // fetch from a previous context and show no logs.
       this.logsStore.clear()
-      this.showModal = true
+      this.modal.show()
     },
     async fetchChunk($state) {
       this.busy = true

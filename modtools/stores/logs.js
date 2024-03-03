@@ -17,6 +17,9 @@ export const useLogsStore = defineStore({
     init(config) {
       this.config = config
     },
+    clear(){
+      this.list = []
+    },
     async fetch(id, force) {
       /*if (id) {
         // Specific address which may or may not be ours.  If it's not, we'll get an error, which is a bug.  But we
