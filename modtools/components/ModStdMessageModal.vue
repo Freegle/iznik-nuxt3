@@ -18,7 +18,7 @@
         </div>
       </div>
       <div v-if="message && stdmsg.action === 'Edit' && message.item && message.location" class="d-flex justify-content-start">
-        <b-select v-model="message.type" :options="typeOptions" class="type mr-1" size="lg" />
+        <b-form-select v-model="message.type" :options="typeOptions" class="type mr-1" size="lg" />
         <b-input v-model="message.item.name" size="lg" class="mr-1" />
         <b-input-group>
           <Postcode :value="message.location.name" :find="false" @selected="postcodeSelect" />
@@ -82,6 +82,7 @@
   </b-modal>
 </template>
 <script>
+import dayjs from 'dayjs'
 import { useModal } from '~/composables/useModal'
 //import keywords from '@/mixins/keywords.js'
 import { SUBJECT_REGEX } from '@/utils/constants'
@@ -422,7 +423,7 @@ export default {
             history.forEach(msg => {
               if (msg.daysago < self.recentDays) {
                 recentmsg +=
-                  this.$dayjs(msg.postdate).format('lll') +
+                  dayjs(msg.postdate).format('lll') +
                   ' - ' +
                   msg.subject +
                   '\n'
@@ -439,12 +440,12 @@ export default {
 
             if (history.length) {
               history.forEach(msg => {
-                const postdate = this.$dayjs(msg.postdate)
-                const daysago = this.$dayjs().diff(postdate, 'day')
+                const postdate = dayjs(msg.postdate)
+                const daysago = dayjs().diff(postdate, 'day')
 
                 if (msg.type === keyword && daysago < self.recentDays) {
                   recentmsg +=
-                    this.$dayjs(msg.postdate).format('lll') +
+                    dayjs(msg.postdate).format('lll') +
                     ' - ' +
                     msg.subject +
                     '\n'
@@ -474,7 +475,7 @@ export default {
         if (this.user && this.user.joined) {
           text = text.replace(
             /\$membersubdate/g,
-            new this.$dayjs(this.user.joined).format('lll')
+            new dayjs(this.user.joined).format('lll')
           )
         }
 
@@ -504,7 +505,7 @@ export default {
         if (this.message && this.message.duplicates) {
           this.message.duplicates.forEach(m => {
             summ +=
-              new this.$dayjs(m.date).format('lll') + ' - ' + m.subject + '\n'
+              new dayjs(m.date).format('lll') + ' - ' + m.subject + '\n'
           })
 
           const regex = new RegExp('\\$duplicatemessages', 'gim')

@@ -1,7 +1,7 @@
 <template>
   <div class="d-inline d-flex justify-content-start flex-wrap">
-    <b-select v-model="postingStatus" :options="options" class="sel" :size="size" />
-    <b-select v-model="trustlevel" class="sel" :size="size" readyonly>
+    <b-form-select v-model="postingStatus" :options="options" class="sel" :size="size" />
+    <b-form-select v-model="trustlevel" class="sel" :size="size" readyonly>
       <option :value="null">
         Volunteering - not asked
       </option>
@@ -20,7 +20,7 @@
       <option value="Excluded">
         Volunteering - disabled
       </option>
-    </b-select>
+    </b-form-select>
   </div>
 </template>
 <script>

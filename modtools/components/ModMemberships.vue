@@ -24,6 +24,7 @@
   </div>
 </template>
 <script>
+import dayjs from 'dayjs'
 const MEMBERSHIPS_SHOW = 3
 
 export default {
@@ -106,7 +107,7 @@ export default {
   },
   methods: {
     daysago(d) {
-      return this.$dayjs().diff(this.$dayjs(d), 'days')
+      return dayjs().diff(dayjs(d), 'days')
     }
   }
 }

@@ -116,7 +116,8 @@
               </NoticeMessage>
             </div>
             <NoticeMessage v-if="outsideUK" variant="warning" class="mb-2">
-              This message may be from outside the UK ({{ position.lat }}, {{ position.lng }}), which means it might be a scam. Please check carefully.
+              This message may be from outside the UK ({{ position.lat }}, {{ position.lng }}), which means it might be a scam. Please check
+              carefully.
             </NoticeMessage>
             <NoticeMessage v-if="message.spamreason" variant="warning" class="mb-2">
               {{ message.spamreason }}
@@ -171,7 +172,7 @@
               locked :boundary="group.polygon" :height="150" />
           </b-col>
           <b-col cols="12" lg="3">
-            <!--div class="rounded border border-info p-2 d-flex justify-content-between flex-wrap">
+            <div class="rounded border border-info p-2 d-flex justify-content-between flex-wrap">
               <MessageUserInfo v-if="message.fromuser && message.groups && message.groups.length" :message="message" :user="message.fromuser" modinfo
                 :groupid="message.groups[0].groupid" />
               <div v-else>
@@ -211,15 +212,15 @@
                     Hide
                   </span>
                   <span class="d-none d-sm-inline">
-                    Hide {{ message.fromuser.emails.length | pluralize('email', { includeNumber: true }) }}
+                    Hide {{ withplural('email', message.fromuser.emails.length, true) }}
                   </span>
                 </span>
                 <span v-else>
                   <span class="d-inline d-sm-none">
-                    <v-icon icon="envelope" /> {{ message.fromuser.emails.length | pluralize('email', { includeNumber: true }) }}
+                    <v-icon icon="envelope" /> {{ withplural('email', message.fromuser.emails.length, true ) }}
                   </span>
                   <span class="d-none d-sm-inline">
-                    Show {{ message.fromuser.emails.length | pluralize('email', { includeNumber: true }) }}
+                    Show {{ withplural('email', message.fromuser.emails.length, true ) }}
                   </span>
                 </span>
               </b-button>
@@ -251,10 +252,9 @@
               <div v-for="email in message.fromuser.emails" :key="email.id">
                 {{ email.email }} <v-icon v-if="email.preferred" name="star" />
               </div>
-            </div-->
-            {{ message.groups }}
-            <!--ModMemberActions v-if="showActions && message.groups && message.groups.length" :userid="message.fromuser.id"
-              :groupid="message.groups[0].groupid" /-->
+            </div>
+            <ModMemberActions v-if="showActions && message.groups && message.groups.length" :userid="message.fromuser.id"
+              :groupid="message.groups[0].groupid" />
           </b-col>
         </b-row>
         <div v-if="review && message.groups && message.groups.length" class="mt-1">
@@ -296,7 +296,9 @@
     <div ref="bottom" />
   </div>
 </template>
+
 <script>
+import pluralize from 'pluralize'
 import Highlighter from 'vue-highlight-words'
 
 import { useLocationStore } from '../../stores/location'
@@ -837,10 +839,18 @@ export default {
     },
     backToPending() {
       this.messageStore.backToPending(this.message.id)
+    },
+    withplural(a, b, c) {
+      if (Array.isArray(a)) {
+        pluralize.addIrregularRule(...a)
+        a = a[0]
+      }
+      return pluralize(a, b, c)
     }
   }
 }
 </script>
+
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
