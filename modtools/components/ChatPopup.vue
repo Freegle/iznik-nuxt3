@@ -7,7 +7,7 @@
 /*
 import { TooltipPlugin } from 'bootstrap-vue'
 import Vue from 'vue'
-import InfiniteLoading from 'vue-infinite-loading'
+import InfiniteLoading from '~/components/InfiniteLoading'
 import VueDraggableResizable from 'vue-draggable-resizable/src/components/vue-draggable-resizable'
 import chat from '@/mixins/chat.js'
 

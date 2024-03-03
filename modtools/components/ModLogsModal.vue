@@ -32,7 +32,7 @@
 
 <script>
 import { useModal } from '~/composables/useModal'
-import InfiniteLoading from 'vue-infinite-loading'
+import InfiniteLoading from '~/components/InfiniteLoading'
 import { useLogsStore } from '../stores/logs'
 import { useAuthStore } from '../../stores/auth'
 import { useMembersStore } from '../stores/members'
