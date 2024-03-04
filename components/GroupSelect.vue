@@ -236,6 +236,7 @@ export default {
               }
             })
           }
+          if (!group.work) text += "(TODO)"
 
           groups.push({
             value: group.id,

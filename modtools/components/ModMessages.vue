@@ -17,10 +17,18 @@ import { useAuthStore } from '~/stores/auth'
 import { useGroupStore } from '~/stores/group';
 import { useMessageStore } from '~/stores/message'
 import { useMiscStore } from '~/stores/misc';
+import { setupModMessages } from '../composables/useModMessages'
+
 const authStore = useAuthStore()
 const messageStore = useMessageStore()
 const miscStore = useMiscStore()
 const groupStore = useGroupStore()
+
+const {
+  busy, context, group, groupid, limit, workType, show  
+  //distance,  messageTerm, memberTerm, modalOpen, scrollHeight, scrollTop, nextAfterRemoved, 
+  //visibleMessages, messages,work 
+} = setupModMessages()
 
 
 const props = defineProps({
@@ -30,18 +38,11 @@ const props = defineProps({
   }
 })
 
-const groupid = ref(0)
-
 // mixin/modMessagesPage
-const context = ref(null)
 // We fetch less stuff at once for MT.  This is because for slow devices and networks the time to fetch and
 // render is significant, and each of these consumes a lot of screen space.  So by fetching and rendering less,
 // we increase how fast it feels.
 const distance = ref(1000)
-const limit = ref(2)
-const workType = ref('pending')
-const show = ref(0)
-const busy = ref(false)
 const messageTerm = ref(null)
 const memberTerm = ref(null)
 const modalOpen = ref(false)
@@ -64,20 +65,21 @@ const work = computed(() => {
 
 // mixin/modMessagesPage
 watch(groupid, () => {
+  console.log('MODMESSAGES: groupid changed')
   context.value = null
   show.value = 0
   messageStore.clear()
 })
 
 // mixin/modMessagesPage
-// TODO: where is group defined?
-/*watch(group, async (newValue, oldValue) => {
+watch(group, async (newValue, oldValue) => {
+  console.log('MODMESSAGES: group changed')
   // We have this watch because we may need to fetch a group that we have remembered.  The mounted()
   // call may happen before we have restored the persisted state, so we can't initiate the fetch there.
   if (oldValue === null || oldValue.id !== groupid.value) {
     await groupStore.fetch(groupid.value)
   }
-})*/
+})
 
 // mixin/modMessagesPage
 watch(work, async (newVal, oldVal) => {
@@ -114,7 +116,7 @@ watch(work, async (newVal, oldVal) => {
       context.value = null
 
       await messageStore.fetchMessages({
-        groupid: groupid.value,
+        groupid: props.groupid,
         collection: props.collection,
         modtools: true,
         summary: false,
@@ -124,8 +126,8 @@ watch(work, async (newVal, oldVal) => {
       // Force them to show.
       let messages
 
-      if (groupid.value) {
-        messages = messageStore.getByGroup(groupid.value)
+      if (props.groupid) {
+        messages = messageStore.getByGroup(props.groupid)
       } else {
         messages = messageStore.all
       }
@@ -139,8 +141,8 @@ watch(work, async (newVal, oldVal) => {
 const messages = computed(() => {
   let messages
 
-  if (groupid.value) {
-    messages = messageStore.getByGroup(groupid.value)
+  if (props.groupid) {
+    messages = messageStore.getByGroup(props.groupid)
   } else {
     messages = messageStore.all
   }
@@ -164,8 +166,8 @@ onMounted(async () => {
   // Ensure we have no cached messages for other searches/groups
   messageStore.clear()
 
-  if (process.client && groupid.value) {
-    groupStore.fetch(groupid.value)
+  if (process.client && props.groupid) {
+    groupStore.fetch(props.groupid)
   }
 
   /*// Keep track of whether we have a modal open, so that we don't clear messages under its feet.
@@ -187,7 +189,7 @@ onMounted(async () => {
 
   if (work.value > 0) {
     await messageStore.fetchMessages({
-      groupid: groupid.value,
+      groupid: props.groupid,
       collection: props.collection,
       modtools: true,
       summary: false,

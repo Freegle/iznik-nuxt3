@@ -11,7 +11,7 @@
       <ModtoolsViewControl />
     </div>
     <div>
-      <ModMessages :collection="collection" />
+      <ModMessages :collection="collection" :groupid="groupid" :group="group"/>
 
       <!--infinite-loading :key="'infinite-' + groupid + '-' + bump" force-use-infinite-wrapper="body" :distance="distance" @infinite="loadMore">
           <span slot="no-results" />
@@ -46,6 +46,7 @@ export default {
   ],
   data: function () {
     return {
+      group: null,
       groupid: 0,
       groupName: "TODO",
       collection: 'Approved',

@@ -109,7 +109,7 @@
               </div>
             </div>
             <div v-if="message.fromuser">
-              <!--ModComments :user="message.fromuser" /-->
+              <ModComments :user="message.fromuser" />
               <ModSpammer v-if="message.fromuser.spammer" :user="message.fromuser" />
               <NoticeMessage v-if="message.fromuser && message.fromuser.activedistance > 50" variant="warning" class="mb-2">
                 This freegler recently active on groups {{ message.fromuser.activedistance }} miles apart.
@@ -217,10 +217,10 @@
                 </span>
                 <span v-else>
                   <span class="d-inline d-sm-none">
-                    <v-icon icon="envelope" /> {{ withplural('email', message.fromuser.emails.length, true ) }}
+                    <v-icon icon="envelope" /> {{ withplural('email', message.fromuser.emails.length, true) }}
                   </span>
                   <span class="d-none d-sm-inline">
-                    Show {{ withplural('email', message.fromuser.emails.length, true ) }}
+                    Show {{ withplural('email', message.fromuser.emails.length, true) }}
                   </span>
                 </span>
               </b-button>

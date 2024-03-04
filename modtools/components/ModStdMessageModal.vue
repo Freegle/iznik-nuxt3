@@ -58,18 +58,18 @@
     <template #footer>
       <div class="d-flex justify-content-between w-100">
         <div>
-          <b-btn variant="white" class="nohover" size="xs" @click="moveLeft">
+          <b-button variant="white" class="nohover" size="xs" @click="moveLeft">
             <v-icon icon="arrow-left" />
-          </b-btn>
-          <b-btn variant="white" class="nohover" size="xs" @click="moveRight">
+          </b-button>
+          <b-button variant="white" class="nohover" size="xs" @click="moveRight">
             <v-icon icon="arrow-right" />
-          </b-btn>
-          <b-btn variant="white" class="nohover" size="xs" @click="moveUp">
+          </b-button>
+          <b-button variant="white" class="nohover" size="xs" @click="moveUp">
             <v-icon icon="arrow-up" />
-          </b-btn>
-          <b-btn variant="white" class="nohover" size="xs" @click="moveDown">
+          </b-button>
+          <b-button variant="white" class="nohover" size="xs" @click="moveDown">
             <v-icon icon="arrow-down" />
-          </b-btn>
+          </b-button>
         </div>
         <div>
           <SpinButton ref="process" :label="processLabel" icon-name="envelope" spinclass="success" variant="primary" :handler="process" />

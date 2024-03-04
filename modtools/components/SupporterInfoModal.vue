@@ -18,14 +18,14 @@
           <div class="d-flex justify-content-between flex-wrap">
             <DonationButton value="1510" class="mt-2" />
             <div class="align-self-center">
-              <b-btn variant="secondary" size="lg" :disabled="amMicroVolunteering" @click="donateTime">
+              <b-button variant="secondary" size="lg" :disabled="amMicroVolunteering" @click="donateTime">
                 <span v-if="amMicroVolunteering" class="text-wrap">
                   Donating time. Thanks!
                 </span>
                 <span v-else>
                   Donate time
                 </span>
-              </b-btn>
+              </b-button>
             </div>
           </div>
         </template>

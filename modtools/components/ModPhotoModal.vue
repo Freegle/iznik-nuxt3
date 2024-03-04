@@ -1,18 +1,22 @@
 <template>
-  <span class="clickme">
-    <PostPhoto v-bind="attachment" @remove="removePhoto" @click="zoom = true" />
-    <ModPhotoModal v-if="zoom" :attachment="attachment" :message="message" />
-  </span>
+  <b-modal ref="modal" :id="'photoModal-' + attachment.id" :title="message.subject" size="lg" no-stacking ok-only>
+    <template #default>
+      <PostPhoto v-bind="attachment" :thumbnail="false" @remove="removePhoto" />
+    </template>
+
+    <template #footer>
+      <b-button variant="white" @click="hide">
+        Close
+      </b-button>
+    </template>
+  </b-modal>
 </template>
 
 <script>
+import { useModal } from '~/composables/useModal'
 import { useMessageStore } from '../../stores/message'
-const PostPhoto = defineAsyncComponent(() => import('../../components/PostPhoto'))
 
 export default {
-  components: {
-    PostPhoto
-  },
   props: {
     attachment: {
       type: Object,
@@ -24,13 +28,9 @@ export default {
     }
   },
   setup() {
+    const { modal, hide } = useModal()
     const messageStore = useMessageStore()
-    return { messageStore }
-  },
-  data: function () {
-    return {
-      zoom: false
-    }
+    return { messageStore, modal, hide }
   },
   methods: {
     async removePhoto(id) {
