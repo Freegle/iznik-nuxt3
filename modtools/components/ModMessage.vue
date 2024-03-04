@@ -303,6 +303,7 @@ import Highlighter from 'vue-highlight-words'
 
 import { useLocationStore } from '../../stores/location'
 import { useModconfigsStore } from '../stores/modconfigs'
+import { useMemberStore } from '../stores/member'
 import { useMessageStore } from '../../stores/message'
 import { useUserStore } from '../../stores/user'
 
@@ -361,10 +362,11 @@ export default {
   setup() {
     const locationStore = useLocationStore()
     const modconfigsStore = useModconfigsStore()
+    const memberStore = useMemberStore()
     const messageStore = useMessageStore()
     const userStore = useUserStore()
 
-    return { locationStore, messageStore, modconfigsStore, userStore }
+    return { locationStore, memberStore, messageStore, modconfigsStore, userStore }
   },
   data: function () {
     return {
@@ -718,7 +720,7 @@ export default {
         groupid: this.groupid
       }
       params[e.param] = e.val
-      this.membersStore.update(params)
+      this.memberStore.update(params)
     },
     async toggleMail() {
       this.showMailSettings = !this.showMailSettings

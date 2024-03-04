@@ -1,4 +1,4 @@
-// DONE
+import { useAuthStore } from '~/stores/auth'
 
 export default {
   computed: {
@@ -23,5 +23,11 @@ export default {
         ? this.myGroups.find(g => parseInt(g.id) === groupid)
         : null
     },
+    amAModOn(groupid){
+      const authStore = useAuthStore()
+      const member = authStore.member(groupid)
+      return member === 'Moderator' || member === 'Owner'
+
+    }
   },
 }

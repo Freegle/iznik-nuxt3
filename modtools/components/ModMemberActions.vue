@@ -26,7 +26,7 @@
 <script>
 import { useGroupStore } from '../stores/group'
 import { useUserStore } from '../stores/user'
-import { useMembersStore } from '../stores/members'
+import { useMemberStore } from '../stores/member'
 
 export default {
   props: {
@@ -52,9 +52,9 @@ export default {
   },
   setup() {
     const groupStore = useGroupStore()
-    const membersStore = useMembersStore()
+    const memberStore = useMemberStore()
     const userStore = useUserStore()
-    return { groupStore, membersStore, userStore }
+    return { groupStore, memberStore, userStore }
   },
   data: function () {
     return {
@@ -102,7 +102,7 @@ export default {
       })
     },
     removeConfirmed() {
-      this.membersStore.remove(this.userid, this.groupid)
+      this.memberStore.remove(this.userid, this.groupid)
     },
     async ban() {
       if (!this.user) {
@@ -120,7 +120,7 @@ export default {
       })
     },
     banConfirmed() {
-      this.membersStore.ban(this.userid, this.groupid)
+      this.memberStore.ban(this.userid, this.groupid)
     },
     async addAComment() {
       if (!this.user) {
@@ -139,7 +139,7 @@ export default {
 
       const user = this.userStore.get(this.userid)
 
-      await this.membersStore.updateComments(this.user.id, user.comments)
+      await this.memberStore.updateComments(this.user.id, user.comments)
     },
     async spamReport() {
       if (!this.user) {

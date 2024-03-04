@@ -203,6 +203,7 @@ export default {
     this.workTimer = setTimeout(this.checkWork, 0)
     /*
     // Get chats and poll regularly for new ones
+    TODO
     this.$store.dispatch('chats/fetchLatestChats')*/
 
   },

@@ -82,6 +82,9 @@
   </b-modal>
 </template>
 <script>
+import { useGroupStore } from './stores/group'
+import { useMemberStore } from './stores/member'
+import { useMessageStore } from './stores/message'
 import dayjs from 'dayjs'
 import { useModal } from '~/composables/useModal'
 //import keywords from '@/mixins/keywords.js'
@@ -112,7 +115,11 @@ export default {
   },
   setup() {
     const { modal, hide } = useModal()
-    return { modal, hide }
+    const groupStore = useGroupStore()
+    const messageStore = useMessageStore()
+    const memberStore = useMemberStore()
+    const userStore = useUserStore()
+    return { groupStore, memberStore, messageStore, userStore, modal, hide }
   },
   data: function () {
     return {
@@ -522,7 +529,7 @@ export default {
         this.stdmsg.newdelstatus !== 'UNCHANGED'
       ) {
         this.changingNewDelStatus = true
-        await this.$store.dispatch('user/edit', {
+        await this.userStore.edit({
           id: this.userid,
           groupid: this.groupid,
           emailfrequency: this.emailfrequency
@@ -536,7 +543,7 @@ export default {
         this.stdmsg.newmodstatus !== 'UNCHANGED'
       ) {
         this.changingNewModStatus = true
-        await this.$store.dispatch('user/edit', {
+        await this.userStore.edit({
           id: this.userid,
           groupid: this.groupid,
           ourPostingStatus: this.stdmsg.newmodstatus
@@ -550,7 +557,7 @@ export default {
 
       switch (this.stdmsg.action) {
         case 'Approve':
-          await this.$store.dispatch('messages/approve', {
+          await this.messageStore.approve({
             id: this.message.id,
             groupid: this.groupid,
             subject: subj,
@@ -560,7 +567,7 @@ export default {
           break
         case 'Leave':
         case 'Leave Approved Message':
-          await this.$store.dispatch('messages/reply', {
+          await this.messageStore.reply({
             id: this.message.id,
             groupid: this.groupid,
             subject: subj,
@@ -571,14 +578,14 @@ export default {
         case 'Hold Message':
           this.changingHold = true
 
-          await this.$store.dispatch('messages/hold', {
+          await this.messageStore.hold({
             id: this.message.id
           })
 
           this.changingHold = false
           this.changedHold = true
 
-          await this.$store.dispatch('messages/reply', {
+          await this.messageStore.reply({
             id: this.message.id,
             groupid: this.groupid,
             subject: subj,
@@ -588,7 +595,7 @@ export default {
           break
         case 'Leave Member':
         case 'Leave Approved Member':
-          await this.$store.dispatch('members/reply', {
+          await this.messageStore.reply( {
             id: this.member.userid,
             groupid: this.groupid,
             subject: subj,
@@ -597,7 +604,7 @@ export default {
           })
           break
         case 'Reject':
-          await this.$store.dispatch('messages/reject', {
+          await this.messageStore.reject({
             id: this.message.id,
             groupid: this.groupid,
             subject: subj,
@@ -607,7 +614,7 @@ export default {
           break
         case 'Delete':
         case 'Delete Approved Message':
-          await this.$store.dispatch('messages/delete', {
+          await this.messageStore.delete({
             id: this.message.id,
             groupid: this.groupid,
             subject: subj,
@@ -617,7 +624,7 @@ export default {
           break
         case 'Delete Member':
         case 'Delete Approved Member':
-          await this.$store.dispatch('members/delete', {
+          await this.messageStore.delete({
             id: this.member.userid,
             groupid: this.groupid,
             subject: subj,
@@ -629,7 +636,7 @@ export default {
           if (this.message) {
             if (this.message.item && this.message.location) {
               // Well-structured message
-              await this.$store.dispatch('messages/patch', {
+              await this.messageStore.patch({
                 id: this.message.id,
                 msgtype: this.message.type,
                 item: this.message.item.name,
@@ -638,7 +645,7 @@ export default {
               })
             } else {
               // Not
-              await this.$store.dispatch('messages/patch', {
+              await this.messageStore.patch({
                 id: this.message.id,
                 subject: subj,
                 textbody: body

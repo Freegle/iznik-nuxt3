@@ -1,7 +1,6 @@
 <template>
   <div>
-    I AM A COMMENT
-    <!--NoticeMessage v-if="savedComment" variant="danger" class="mb-2">
+    <NoticeMessage v-if="savedComment" variant="danger" class="mb-2">
       <div v-for="n in 10" :key="'modcomments-' + user.id + '-' + savedComment.id + '-' + n">
         <div class="d-flex">
           <div v-if="n === 1 && savedComment.flag">
@@ -11,7 +10,7 @@
             class="font-weight-bold nopara" />
         </div>
       </div>
-      <div class="small">
+      <!--TODO div class="small">
         <span v-if="savedComment.byuser">
           <v-icon icon="tag" /> by {{ savedComment.byuser.displayname }}
         </span>
@@ -36,16 +35,28 @@
       </div>
       <ConfirmModal ref="confirm" @confirm="deleteConfirmed" />
       <ModCommentEditModal v-if="amAModOn(savedComment.groupid) || supportOrAdmin" ref="editComment" :user="user" :comment="comment"
-        @edited="updateComments" />
-    </NoticeMessage-->
+        @edited="updateComments" /-->
+    </NoticeMessage>
   </div>
 </template>
+
 <script>
+import ReadMore from 'vue-read-more3/src/ReadMoreComponent'
+import { useGroupStore } from '~/stores/group'
+import { useMemberStore } from '../stores/member'
+import { useUserStore } from '~/stores/user'
 import cloneDeep from 'lodash.clonedeep'
 //const ConfirmModal = () => import('~/components/ConfirmModal.vue')
 
 export default {
-  //components: { ConfirmModal },
+  components: { ReadMore },
+
+  setup() {
+    const groupStore = useGroupStore()
+    const memberStore = useMemberStore()
+    const userStore = useUserStore()
+    return { groupStore, memberStore, userStore }
+  },
 
   props: {
     comment: {
@@ -75,7 +86,7 @@ export default {
         ret = this.myGroup(this.comment.groupid)
 
         if (!ret) {
-          ret = this.$store.getters['group/get'](this.comment.groupid)
+          ret = this.groupStore.get(this.comment.groupid)
         }
       }
 
@@ -91,10 +102,7 @@ export default {
 
     if (this.comment.groupid && !this.group) {
       // Need to fetch group
-      // TODO
-      //this.$store.dispatch('group/fetch', {
-      //  id: this.comment.groupid
-      //})
+      this.groupStore.fetch(this.comment.groupid)
     }
   },
   methods: {
@@ -102,14 +110,14 @@ export default {
       // The server API doesn't make it easy to refresh comments on memberships, because we can't refetch a
       // specific membership id.  Instead fetch the user and then pass any comments to the store to update there.
       const userid = this.user.userid ? this.user.userid : this.user.id
-      await this.$store.dispatch('user/fetch', {
+      await this.userStore.fetch({
         id: userid,
         info: true
       })
 
-      const user = this.$store.getters['user/get'](userid)
+      const user = this.userStore.get(userid)
 
-      await this.$store.dispatch('members/updateComments', {
+      await this.memberStore.updateComments({
         userid: userid,
         comments: user.comments
       })
@@ -122,22 +130,25 @@ export default {
     },
 
     deleteIt() {
-      this.waitForRef('confirm', () => {
-        this.$refs.confirm.show()
-      })
+      alert("todo")
+      //this.waitForRef('confirm', () => {
+      //  this.$refs.confirm.show()
+      //})
     },
 
     async deleteConfirmed() {
       // Go direct to API because comments aren't in the Store separately.
-      await this.$api.comment.del(this.comment.id)
+      alert("todo")
+      //await this.$api.comment.del(this.comment.id)
 
       this.updateComments()
     },
 
     editIt() {
-      this.waitForRef('editComment', () => {
-        this.$refs.editComment.show()
-      })
+      alert("todo")
+      //this.waitForRef('editComment', () => {
+      //  this.$refs.editComment.show()
+      //})
     }
   }
 }

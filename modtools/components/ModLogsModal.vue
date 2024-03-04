@@ -35,16 +35,16 @@ import { useModal } from '~/composables/useModal'
 import InfiniteLoading from '~/components/InfiniteLoading'
 import { useLogsStore } from '../stores/logs'
 import { useAuthStore } from '../../stores/auth'
-import { useMembersStore } from '../stores/members'
+import { useMemberStore } from '../stores/member'
 
 export default {
   components: { InfiniteLoading },
   setup() {
     const authStore = useAuthStore()
     const logsStore = useLogsStore()
-    const membersStore = useMembersStore()
+    const memberStore = useMemberStore()
     const { modal, hide } = useModal()
-    return { authStore, logsStore, membersStore, modal, hide }
+    return { authStore, logsStore, memberStore, modal, hide }
   },
   props: {
     userid: {
@@ -75,7 +75,7 @@ export default {
       if (user && user.info) {
         ret = user
       } else {
-        user = this.membersStore.getByUserId(this.userid)
+        user = this.memberStore.getByUserId(this.userid)
 
         if (user && user.info) {
           ret = user
