@@ -2,8 +2,8 @@
   <div>
     <div v-for="(message, ix) in visibleMessages" :key="'messagelist-' + message.id" class="p-0 mt-2">
       <div :ref="'top' + message.id" />
-      <ModMessage :message="message" :next="ix < visibleMessages.length - 1 ? visibleMessages[ix + 1].id : null" :next-after-removed="nextAfterRemoved"
-        @destroy="destroy" />
+      <ModMessage :message="message" :next="ix < visibleMessages.length - 1 ? visibleMessages[ix + 1].id : null"
+        :next-after-removed="nextAfterRemoved" :summary="summary" :search="messageTerm" @destroy="destroy" />
       <div :ref="'bottom' + message.id" />
     </div>
 
@@ -12,6 +12,7 @@
     </NoticeMessage>
   </div>
 </template>
+
 <script setup>
 import { useAuthStore } from '~/stores/auth'
 import { useGroupStore } from '~/stores/group';
@@ -20,22 +21,19 @@ import { useMiscStore } from '~/stores/misc';
 import { setupModMessages } from '../composables/useModMessages'
 
 const authStore = useAuthStore()
+const groupStore = useGroupStore()
 const messageStore = useMessageStore()
 const miscStore = useMiscStore()
-const groupStore = useGroupStore()
 
 const {
-  busy, context, group, groupid, limit, workType, show  
+  messageTerm, summary, collection, messages,
+  busy, context, group, groupid, limit, workType, show
   //distance,  messageTerm, memberTerm, modalOpen, scrollHeight, scrollTop, nextAfterRemoved, 
   //visibleMessages, messages,work 
 } = setupModMessages()
 
 
 const props = defineProps({
-  collection: {
-    type: String,
-    required: true,
-  }
 })
 
 // mixin/modMessagesPage
@@ -43,7 +41,7 @@ const props = defineProps({
 // render is significant, and each of these consumes a lot of screen space.  So by fetching and rendering less,
 // we increase how fast it feels.
 const distance = ref(1000)
-const messageTerm = ref(null)
+//const messageTerm = ref(null)
 const memberTerm = ref(null)
 const modalOpen = ref(false)
 const scrollHeight = ref(null)
@@ -116,8 +114,8 @@ watch(work, async (newVal, oldVal) => {
       context.value = null
 
       await messageStore.fetchMessages({
-        groupid: props.groupid,
-        collection: props.collection,
+        groupid: groupid.value,
+        collection: collection.value,
         modtools: true,
         summary: false,
         limit: Math.max(limit.value, newVal)
@@ -126,8 +124,8 @@ watch(work, async (newVal, oldVal) => {
       // Force them to show.
       let messages
 
-      if (props.groupid) {
-        messages = messageStore.getByGroup(props.groupid)
+      if (groupid.value) {
+        messages = messageStore.getByGroup(groupid.value)
       } else {
         messages = messageStore.all
       }
@@ -137,37 +135,14 @@ watch(work, async (newVal, oldVal) => {
   }
 })
 
-// mixin/modMessagesPage
-const messages = computed(() => {
-  let messages
-
-  if (props.groupid) {
-    messages = messageStore.getByGroup(props.groupid)
-  } else {
-    messages = messageStore.all
-  }
-  // We need to sort as otherwise new messages may appear at the end.
-  messages.sort((a, b) => {
-    if (a.groups && b.groups) {
-      return (
-        new Date(b.groups[0].arrival).getTime() -
-        new Date(a.groups[0].arrival).getTime()
-      )
-    } else {
-      return new Date(b.arrival).getTime() - new Date(a.arrival).getTime()
-    }
-  })
-
-  return messages
-})
 
 // mixin/modMessagesPage
 onMounted(async () => {
   // Ensure we have no cached messages for other searches/groups
   messageStore.clear()
 
-  if (process.client && props.groupid) {
-    groupStore.fetch(props.groupid)
+  if (process.client && groupid.value) {
+    groupStore.fetch(groupid.value)
   }
 
   /*// Keep track of whether we have a modal open, so that we don't clear messages under its feet.
@@ -189,8 +164,8 @@ onMounted(async () => {
 
   if (work.value > 0) {
     await messageStore.fetchMessages({
-      groupid: props.groupid,
-      collection: props.collection,
+      groupid: groupid.value,
+      collection: collection.value,
       modtools: true,
       summary: false,
       limit: Math.max(limit.value, work.value)

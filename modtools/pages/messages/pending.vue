@@ -14,7 +14,7 @@
           Load all
         </b-button>
       </div>
-      <ModMessages :collection="collection" :group="group" />
+      <ModMessages :group="group" />
 
       <ModAffiliationConfirmModal v-if="affiliationGroup" ref="affiliation" :groupid="affiliationGroup" />
 
@@ -29,17 +29,17 @@ import { useMiscStore } from '@/stores/misc'
 import ScrollToTop from '~/components/ScrollToTop'
 import { setupModMessages } from '../composables/useModMessages'
 
-const {
-  busy, context, group, groupid, limit, workType, show  
-  //context, distance, limit, workType, show, busy, messageTerm, memberTerm, modalOpen, scrollHeight, scrollTop, nextAfterRemoved, 
+const { collection, messages, distance,
+  busy, context, group, groupid, limit, workType, show
+  //context, limit, workType, show, busy, messageTerm, memberTerm, modalOpen, scrollHeight, scrollTop, nextAfterRemoved, 
   //visibleMessages, messages,work 
 } = setupModMessages()
 
+collection.value = 'Pending'
 workType.value = 'pending'
 
 const miscStore = useMiscStore()
 
-const collection = ref('Pending')
 const affiliationGroup = ref(null)
 
 //  mixins: [
