@@ -104,9 +104,16 @@ function refreshAd() {
         window.pbjs.requestBids({
           timeout: PREBID_TIMEOUT,
           adUnitCodes: [props.divId],
-          bidsBackHandler: function () {
+          bidsBackHandler: function (bids, timedOut, auctionId) {
+            console.log('Got bids back', bids, timedOut, auctionId)
             window.pbjs.setTargetingForGPTAsync([props.adUnitPath])
-            window.googletag.pubads().refresh([slot.value])
+
+            if (slot.value) {
+              console.log('Refresh slot', props.adUnitPath)
+              window.googletag.pubads().refresh([slot.value])
+            } else {
+              console.log('No slot to refresh found for', props.adUnitPath)
+            }
           },
         })
       })
