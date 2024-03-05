@@ -110,7 +110,15 @@ function refreshAd() {
 
             if (slot.value) {
               console.log('Refresh slot', props.adUnitPath)
-              window.googletag.pubads().refresh([slot.value])
+              const slots = window.googletag.pubads().getSlots()
+
+              // Iterate
+              for (let i = 0; i < slots.length; i++) {
+                if (slots[i].getAdUnitPath() === props.adUnitPath) {
+                  console.log('Found slot to refresh')
+                  window.googletag.pubads().refresh([slots[i]])
+                }
+              }
             } else {
               console.log('No slot to refresh found for', props.adUnitPath)
             }
