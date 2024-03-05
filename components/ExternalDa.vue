@@ -5,32 +5,36 @@
     at https://www.ilovefreegle.org/donate - if we got enough donations we would be delighted not to show ads.
      -->
     <div v-observe-visibility="visibilityChanged" class="pointer">
-      <div
-        v-if="isVisible"
-        class="d-flex w-100 justify-content-around"
-        :style="{
-          width: maxWidth + 'px',
-          height: maxHeight + 'px',
-        }"
-      >
-        <AdvertisingSlot :id="divId" />
-      </div>
-      <p
-        v-if="isVisible && adShown"
-        class="text-center textsize d-none d-md-block"
-      >
-        Advertisement. These help Freegle keep going.
-      </p>
-      <!--    <div class="bg-white">-->
-      <!--      Path {{ adUnitPath }} id {{ divId }} dimensions {{ dimensions }}-->
-      <!--    </div>-->
+      <AdvertisingProvider v-if="isVisible" :config="adConfig" is-prebid>
+        <div
+          class="d-flex w-100 justify-content-around"
+          :style="{
+            width: maxWidth + 'px',
+            height: maxHeight + 'px',
+          }"
+        >
+          <AdvertisingSlot :id="divId" />
+        </div>
+        <p
+          v-if="isVisible && adShown"
+          class="text-center textsize d-none d-md-block"
+        >
+          Advertisement. These help Freegle keep going.
+        </p>
+        <!--    <div class="bg-white">-->
+        <!--      Path {{ adUnitPath }} id {{ divId }} dimensions {{ dimensions }}-->
+        <!--    </div>-->
+      </AdvertisingProvider>
     </div>
   </client-only>
 </template>
 <script setup>
-import { AdvertisingSlot } from '@storipress/vue-advertising'
+import {
+  AdvertisingProvider,
+  AdvertisingSlot,
+} from '@storipress/vue-advertising'
 import { nextTick } from 'vue'
-import { ref, computed, onBeforeUnmount } from '#imports'
+import { ref, computed, onBeforeUnmount, AD_GPT_CONFIG } from '#imports'
 import { useMiscStore } from '~/stores/misc'
 
 const miscStore = useMiscStore()
@@ -73,6 +77,18 @@ const timer = ref(null)
 const PREBID_TIMEOUT = 1000
 const AD_REFRESH_TIMEOUT = 45000
 
+// Filter AD_GPT_CONFIG to pick out the matching divId and adUnitPath
+const adConfig = JSON.parse(JSON.stringify(AD_GPT_CONFIG))
+
+adConfig.slots = adConfig.slots.filter((slot) => {
+  return slot.id === props.divId && slot.path === props.adUnitPath
+})
+
+if (!adConfig.slots.length) {
+  console.error('Ad config not found', props.divId, props.adUnitPath, adConfig)
+}
+
+console.log('Set up ad', JSON.stringify(adConfig))
 function refreshAd() {
   if (
     window.googletag?.pubads &&

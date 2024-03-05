@@ -9,7 +9,7 @@
         </div>
       </div>
       <client-only v-else>
-        <AdvertisingProvider :config="adConfig">
+        <div>
           <div class="aboveSticky">
             <slot ref="pageContent" />
           </div>
@@ -48,7 +48,7 @@
               Help keep Freegle running. Click to donate.
             </nuxt-link>
           </div>
-        </AdvertisingProvider>
+        </div>
       </client-only>
     </main>
     <client-only>
@@ -88,7 +88,6 @@
 </template>
 <script>
 import { useRoute } from 'vue-router'
-import { useScriptTag } from '@vueuse/core'
 import { useAuthStore } from '../stores/auth'
 import SomethingWentWrong from './SomethingWentWrong'
 import { useNotificationStore } from '~/stores/notification'
@@ -99,7 +98,6 @@ import replyToPost from '@/mixins/replyToPost'
 import ChatButton from '~/components/ChatButton'
 import { navBarHidden } from '~/composables/useNavbar'
 import VisibleWhen from '~/components/VisibleWhen.vue'
-import { AD_GPT_CONFIG } from '~/composables/useAdConfig'
 
 const SupportLink = defineAsyncComponent(() =>
   import('~/components/SupportLink')
@@ -110,11 +108,6 @@ const BouncingEmail = defineAsyncComponent(() =>
 const BreakpointFettler = defineAsyncComponent(() =>
   import('~/components/BreakpointFettler')
 )
-
-const AdvertisingProvider = defineAsyncComponent(async () => {
-  const ad = await import('@storipress/vue-advertising')
-  return ad.AdvertisingProvider
-})
 
 const ExternalDa = defineAsyncComponent(() => import('~/components/ExternalDa'))
 
@@ -127,14 +120,8 @@ export default {
     ChatButton,
     ExternalDa,
     VisibleWhen,
-    AdvertisingProvider,
   },
   mixins: [replyToPost],
-  setup() {
-    return {
-      adConfig: AD_GPT_CONFIG,
-    }
-  },
   data() {
     return {
       showLoader: true,
@@ -186,35 +173,6 @@ export default {
       // Get chats and poll regularly for new ones
       const chatStore = useChatStore()
       chatStore.pollForChatUpdates()
-    } else if (process.client) {
-      // We only add the cookie banner for logged-out users.  This reduces costs.  For logged-in users, we assume
-      // they have already seen the banner and specified a preference if they care.
-      //
-      // Because of that we load it here, which happens after the layout has checked login status.
-      const runtimeConfig = useRuntimeConfig()
-
-      console.log(
-        'Consider adding cookie banner',
-        runtimeConfig.public.COOKIEYES
-      )
-
-      if (runtimeConfig.public.COOKIEYES) {
-        console.log('Add it')
-        try {
-          const { load } = useScriptTag(
-            runtimeConfig.public.COOKIEYES,
-            () => {},
-            { manual: true }
-          )
-
-          await load()
-          console.log('Loaded cookie script')
-        } catch (e) {
-          console.log('Cookie script load failed', e.message)
-        }
-      } else {
-        console.log('No cookie banner')
-      }
     }
 
     try {

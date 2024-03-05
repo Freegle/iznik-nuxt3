@@ -242,6 +242,24 @@ export default defineNuxtConfig({
               console.error('Error initialising pbjs and googletag:', e.message);
             }`,
         },
+        // We have to load the CookieYes script before we load prebid, because prebid looks for the CMP.
+        //
+        // We use defer because we want to ensure that this is loaded before GPT and prebid.
+        config.COOKIEYES
+          ? {
+              src: config.COOKIEYES,
+              defer: true,
+            }
+          : {},
+        // We load GPT and prebid here and not inside vue-advertising to avoid them being loaded multiple times.
+        {
+          src: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
+          defer: true,
+        },
+        {
+          src: '/js/prebid.js',
+          defer: true,
+        },
       ],
       meta: [
         { charset: 'utf-8' },
