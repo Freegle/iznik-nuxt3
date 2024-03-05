@@ -9,7 +9,7 @@
         </div>
       </div>
       <client-only v-else>
-        <AdvertisingProvider v-if="adScriptsLoaded" :config="adConfig">
+        <AdvertisingProvider :config="adConfig">
           <div class="aboveSticky">
             <slot ref="pageContent" />
           </div>
@@ -141,7 +141,6 @@ export default {
       timeTimer: null,
       adRendering: true,
       noAdRendered: false,
-      adScriptsLoaded: false,
     }
   },
   computed: {
@@ -217,21 +216,6 @@ export default {
         console.log('No cookie banner')
       }
     }
-
-    if (process.client) {
-      // We want to load the GPT script and then the pubmatic script.  We must only do this once.  We do it here
-      // because it's only at this point that we have (perhaps) shown the cookie banner.
-      //
-      // Once we've done this we can proceed, which may involve creating ad slots.
-      try {
-        await this.loadGPT()
-        await this.loadPubmatic()
-      } catch (e) {
-        console.log('Failed to load ad scripts', e)
-      }
-    }
-
-    this.adScriptsLoaded = true
 
     try {
       // Set the build date.  This may get superceded by Sentry releases, but it does little harm to add it in.
@@ -329,61 +313,6 @@ export default {
     adRendered(adShown) {
       this.adRendering = false
       this.noAdRendered = !adShown
-    },
-    async loadGPT() {
-      window.googletag = window.googletag || {}
-      window.googletag.cmd = window.googletag.cmd || []
-      window.googletag.cmd.push(function () {
-        window.googletag.pubads().disableInitialLoad()
-        window.googletag.pubads().collapseEmptyDivs()
-      })
-
-      console.log('Start load GPT script')
-      const { load } = useScriptTag(
-        '//securepubads.g.doubleclick.net/tag/js/gpt.js',
-        () => {},
-        { manual: true }
-      )
-
-      await load()
-      console.log('Loaded GPT script')
-    },
-    async loadPubmatic() {
-      const purl = window.location.href
-      const url = '//ads.pubmatic.com/AdServer/js/pwt/164422/12426/'
-      let profileVersionId = ''
-      if (purl.indexOf('pwtv=') > 0) {
-        const regexp = /pwtv=(.*?)(&|$)/g
-        const matches = regexp.exec(purl)
-        if (matches.length >= 2 && matches[1].length > 0) {
-          profileVersionId = '/' + matches[1]
-        }
-      }
-
-      const { load } = useScriptTag(
-        url + profileVersionId + '/pwt.js',
-        () => {},
-        {
-          manual: true,
-        }
-      )
-
-      console.log('Load pubmatic script')
-
-      window.pbjs = window.pbjs || {}
-      window.pbjs.que = window.pbjs.que || []
-
-      window.ihowpbjs = window.ihowpbjs || {}
-      window.ihowpbjs.que = window.ihowpbjs.que || []
-
-      window.ihowpbjs.que.push(function () {
-        console.log('Set pubmatic ad units')
-        window.ihowpbjs.addAdUnits(AD_GPT_CONFIG)
-        console.log('Set pubmatic ad units ok')
-      })
-
-      await load()
-      console.log('Loaded pubmatic script')
     },
   },
 }

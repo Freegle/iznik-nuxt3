@@ -147,7 +147,6 @@ export const AD_GPT_CONFIG = {
       ],
     },
   ],
-  // Pubmatic loads its own prebid.
-  usePrebid: false,
+  usePrebid: true,
   useAPS: false,
 }

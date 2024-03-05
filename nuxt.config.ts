@@ -224,6 +224,25 @@ export default defineNuxtConfig({
   app: {
     head: {
       title: "Freegle - Don't throw it away, give it away!",
+      script: [
+        // We need to initialise the pbjs object before the vue-advertising package is loaded.
+        {
+          type: 'text/javascript',
+          innerHTML: `try {
+              console.log('Initialising pbjs and googletag...');
+              window.googletag = window.googletag || {};
+              window.googletag.cmd = window.googletag.cmd || [];
+              // window.googletag.cmd.push(function() {
+              //     window.googletag.pubads().disableInitialLoad();
+              // });
+              window.pbjs = window.pbjs || {};
+              window.pbjs.que = window.pbjs.que || [];
+              console.log('Initialised pbjs and googletag.');
+            } catch (e) {
+              console.error('Error initialising pbjs and googletag:', e.message);
+            }`,
+        },
+      ],
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },

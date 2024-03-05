@@ -29,6 +29,7 @@
 </template>
 <script setup>
 import { AdvertisingSlot } from '@storipress/vue-advertising'
+import { nextTick } from 'vue'
 import { ref, computed, onBeforeUnmount } from '#imports'
 import { useMiscStore } from '~/stores/misc'
 
@@ -69,6 +70,7 @@ const maxHeight = ref(Math.max(...props.dimensions.map((d) => d[1])))
 const slot = ref(null)
 
 const timer = ref(null)
+const PREBID_TIMEOUT = 1000
 const AD_REFRESH_TIMEOUT = 45000
 
 function refreshAd() {
@@ -81,7 +83,18 @@ function refreshAd() {
     // Don't refresh if the ad is not visible or tab is not active.
     if (isVisible.value && miscStore.visible) {
       console.log('Refresh ad', slot.value.getAdUnitPath())
-      window.googletag.pubads().refresh([slot.value])
+
+      window.pbjs.que.push(function () {
+        window.pbjs.requestBids({
+          timeout: PREBID_TIMEOUT,
+          adUnitCodes: [props.divId],
+          bidsBackHandler: function () {
+            window.pbjs.setTargetingForGPTAsync([props.adUnitPath])
+            window.googletag.pubads().refresh([slot.value])
+          },
+        })
+      })
+      console.log('Refresh ad', slot.value.getAdUnitPath())
     }
 
     timer.value = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
@@ -92,13 +105,14 @@ const isVisible = ref(false)
 let shownFirst = false
 const emit = defineEmits(['rendered'])
 
-function visibilityChanged(visible) {
+async function visibilityChanged(visible) {
   if (!blocked) {
     try {
       isVisible.value = visible
 
       if (visible && !shownFirst) {
         console.log('Queue create ad', props.adUnitPath, props.divId)
+        await nextTick()
         shownFirst = true
 
         window.googletag.cmd.push(function () {
@@ -154,6 +168,7 @@ function visibilityChanged(visible) {
                 // We refresh the ad slot.  This increases views.  Google doesn't like it if this is more frequent than
                 // every 30s.
                 if (!timer.value) {
+                  console.log('Set refresh timer for ', props.adUnitPath)
                   timer.value = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
                 }
               }
