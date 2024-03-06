@@ -20,7 +20,7 @@
           v-if="online && showBackButton"
           ref="mobileNav"
           variant="white"
-          class="nohover ml-3"
+          class="nohover ml-2 mr-1"
           @click="backButton"
         >
           <v-icon icon="arrow-left" />
