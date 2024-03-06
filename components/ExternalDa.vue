@@ -70,7 +70,7 @@ const passClicks = computed(() => {
 })
 
 const uniqueid = ref(props.adUnitPath)
-const blocked = false
+const blocked = !process.client || !window?.pbjs?.version
 
 const maxWidth = ref(Math.max(...props.dimensions.map((d) => d[0])))
 const maxHeight = ref(Math.max(...props.dimensions.map((d) => d[1])))
