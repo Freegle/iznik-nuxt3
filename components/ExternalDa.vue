@@ -5,7 +5,11 @@
     at https://www.ilovefreegle.org/donate - if we got enough donations we would be delighted not to show ads.
      -->
     <div v-observe-visibility="visibilityChanged" class="pointer">
-      <AdvertisingProvider v-if="isVisible" :config="adConfig" is-prebid>
+      <AdvertisingProvider
+        v-if="isVisible && adConfig?.slots?.length"
+        :config="adConfig"
+        is-prebid
+      >
         <div
           class="d-flex w-100 justify-content-around"
           :style="{
