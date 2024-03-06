@@ -146,6 +146,76 @@ export const AD_GPT_CONFIG = {
         },
       ],
     },
+    {
+      id: 'div-gpt-ad-1692867324381-0',
+      path: '/22794232631/freegle_feed_app',
+      sizes: ADS_SQUARISH_SIZES,
+      bids: [
+        {
+          bidder: 'pubmatic',
+          params: {
+            publisherId: '164422',
+            adSlot: '5753986',
+          },
+        },
+      ],
+    },
+    {
+      id: 'div-gpt-ad-1707999616879-0',
+      path: '/22794232631/freegle_feed_app_2',
+      sizes: ADS_SQUARISH_SIZES,
+      bids: [
+        {
+          bidder: 'pubmatic',
+          params: {
+            publisherId: '164422',
+            adSlot: '5753986',
+          },
+        },
+      ],
+    },
+    {
+      id: 'div-gpt-ad-1707999845886-0',
+      path: '/22794232631/freegle_feed_app_3',
+      sizes: ADS_SQUARISH_SIZES,
+      bids: [
+        {
+          bidder: 'pubmatic',
+          params: {
+            publisherId: '164422',
+            adSlot: '5753986',
+          },
+        },
+      ],
+    },
+    {
+      id: 'div-gpt-ad-1707999962593-0',
+      path: '/22794232631/freegle_feed_app_4',
+      sizes: ADS_SQUARISH_SIZES,
+      bids: [
+        {
+          bidder: 'pubmatic',
+          params: {
+            publisherId: '164422',
+            adSlot: '5753986',
+          },
+        },
+      ],
+    },
+    {
+      id: 'div-gpt-ad-1708000097990-0',
+      path: '/22794232631/freegle_feed_app_5',
+      sizes: ADS_SQUARISH_SIZES,
+      bids: [
+        {
+          bidder: 'pubmatic',
+          params: {
+            publisherId: '164422',
+            adSlot: '5753986',
+          },
+        },
+      ],
+    },
   ],
   usePrebid: true,
   useAPS: false,

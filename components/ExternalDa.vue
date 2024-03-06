@@ -167,8 +167,10 @@ async function visibilityChanged(visible) {
                 )
 
                 if (event?.isEmpty) {
+                  console.log('Rendered empty')
                   adShown.value = false
-                  console.log('Rendered empty', adShown)
+                  maxWidth.value = 0
+                  maxHeight.value = 0
                 } else {
                   maxWidth.value = event.size[0]
                   maxHeight.value = event.size[1]
