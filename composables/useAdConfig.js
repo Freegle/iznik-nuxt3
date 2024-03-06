@@ -49,7 +49,7 @@ export const AD_GPT_CONFIG = {
       ],
     },
     {
-      id: 'div-gpt-ad-1691925773522-2',
+      id: 'div-gpt-ad-1691925773522-0',
       path: '/22794232631/freegle_productemail',
       sizes: ADS_SQUARISH_SIZES,
       bids: [
@@ -218,5 +218,13 @@ export const AD_GPT_CONFIG = {
     },
   ],
   usePrebid: true,
+  prebid: {
+    consentManagement: {
+      gdpr: {
+        cmpApi: 'iab',
+        allowAuctionWithoutConsent: true,
+      },
+    },
+  },
   useAPS: false,
 }
