@@ -225,10 +225,29 @@ export default defineNuxtConfig({
     head: {
       title: "Freegle - Don't throw it away, give it away!",
       script: [
-        // We need to initialise the pbjs object before the vue-advertising package is loaded.
+        // We need to initialise some stuff early:
+        // - CookieEyes custom script for GTM.
+        // - the pbjs object before the vue-advertising package is loaded.
         {
           type: 'text/javascript',
           innerHTML: `try {
+              window.dataLayer = window.dataLayer || [];
+              function ce_gtag() {
+                  window.dataLayer.push(arguments);
+              }
+              ce_gtag("consent", "default", {
+                  ad_storage: "denied",
+                  ad_user_data: "denied", 
+                  ad_personalization: "denied",
+                  analytics_storage: "denied",
+                  functionality_storage: "denied",
+                  personalization_storage: "denied",
+                  security_storage: "granted",
+                  wait_for_update: 2000,
+              });
+              ce_gtag("set", "ads_data_redaction", true);
+              ce_gtag("set", "url_passthrough", true);
+              
               console.log('Initialising pbjs and googletag...');
               window.googletag = window.googletag || {};
               window.googletag.cmd = window.googletag.cmd || [];
