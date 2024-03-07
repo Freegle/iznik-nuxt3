@@ -3,6 +3,7 @@ import eslintPlugin from 'vite-plugin-eslint'
 import legacy from '@vitejs/plugin-legacy'
 import { sentryVitePlugin } from '@sentry/vite-plugin'
 import config from './config'
+import { AD_GPT_CONFIG } from '~/composables/useAdConfig'
 
 // @ts-ignore
 export default defineNuxtConfig({
@@ -270,7 +271,8 @@ export default defineNuxtConfig({
                      //  cmpApi: 'iab',
                      //  timeout: 8000
                      // }
-                   }
+                   },
+                   slots: AD_GPT_CONFIG.slots
                  });
              });
             } catch (e) {
