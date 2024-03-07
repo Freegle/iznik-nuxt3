@@ -251,9 +251,7 @@ export default defineNuxtConfig({
               console.log('Initialising pbjs and googletag...');
               window.googletag = window.googletag || {};
               window.googletag.cmd = window.googletag.cmd || [];
-              // window.googletag.cmd.push(function() {
-              //     window.googletag.pubads().disableInitialLoad();
-              // });
+              
               window.pbjs = window.pbjs || {};
               window.pbjs.que = window.pbjs.que || [];
               
@@ -265,9 +263,9 @@ export default defineNuxtConfig({
                       allowAuctionWithoutConsent: false,
                       timeout: 3000
                      },
-                     usp: {
-                      timeout: 8000 
-                     },
+                     // usp: {
+                     //  timeout: 8000 
+                     // },
                      gpp: {
                       cmpApi: 'iab',
                       timeout: 8000
@@ -275,7 +273,6 @@ export default defineNuxtConfig({
                    }
                  });
              });
-              console.log('Initialised pbjs and googletag.');
             } catch (e) {
               console.error('Error initialising pbjs and googletag:', e.message);
             }`,
