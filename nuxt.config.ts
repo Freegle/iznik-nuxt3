@@ -263,13 +263,13 @@ export default defineNuxtConfig({
                       allowAuctionWithoutConsent: false,
                       timeout: 3000
                      },
-                     // usp: {
-                     //  timeout: 8000 
-                     // },
-                     // gpp: {
-                     //  cmpApi: 'iab',
-                     //  timeout: 8000
-                     // }
+                     usp: {
+                      timeout: 8000 
+                     },
+                     gpp: {
+                      cmpApi: 'iab',
+                      timeout: 8000
+                     }
                    }
                  });
              });
