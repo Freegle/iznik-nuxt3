@@ -87,7 +87,7 @@ function refreshAd() {
       window.pbjs.que.push(function () {
         window.pbjs.requestBids({
           timeout: PREBID_TIMEOUT,
-          adUnitCodes: [props.divId],
+          adUnitCodes: [props.adUnitPath],
           bidsBackHandler: function (bids, timedOut, auctionId) {
             console.log('Got bids back', bids, timedOut, auctionId)
             window.pbjs.setTargetingForGPTAsync([props.adUnitPath])
