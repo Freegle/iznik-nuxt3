@@ -227,18 +227,22 @@ export default defineNuxtConfig({
       script: [
         // The ecosystem of advertising is complex.
         // - The underlying ad service is Google Tags (GPT).
-        // - We use prebid (pbjs), which gives a pipeline of ads to use.
+        // - We use prebid (pbjs), which is some kind of ad broker which gives us a pipeline of ads to use.
+        //   We can also define our own ads in GPT.
         // - Google and prebid both require use of a Consent Management Platform (CMP) so that the
         //   user has indicated whether we have permission to show personalised ads.  We use CookieYes.
         // - So we need to signal to Google and prebid which CMP we're using, which we do via window.dataLayer,
         //   window.gtag and window.pbjs.
         // - We also have to define the possible advertising slots available to prebid so that it knows what to bid on.
-        //   We do this once, here, for all slots. Only some slots may appear on any given page.
-        // - When using prebid, we disable the initial ad load because it doesn't happen until after the prebid, inside ExternalDa
+        //   We do this once, here, for all slots. Only some slots may appear on any given page - they are
+        //   defined and added in ExternalDa.
+        // - When using prebid, we disable the initial ad load because it doesn't happen until after the prebid,
+        //   inside ExternalDa.
         //
         // During development we don't have a CMP because CookieYes doesn't work on localhost.  So in that case we
-        // - don't disable initial ad load.
-        // - set the allowAuctionWithoutConsent flag to allow prebid to continue.
+        // don't disable initial ad load - so Google will load ads immediately.
+        //
+        // The order in which we load scripts is important - see below.
         {
           type: 'text/javascript',
           innerHTML:
@@ -284,9 +288,7 @@ export default defineNuxtConfig({
                      // political purposes) inside the EU. 
                      gdpr: {
                       cmpApi: 'iab',
-                      allowAuctionWithoutConsent: ` +
-            (config.COOKIEYES ? 'false' : 'true') +
-            `,
+                      allowAuctionWithoutConsent: false,
                       timeout: 3000
                      },
                      // usp: {
@@ -301,12 +303,12 @@ export default defineNuxtConfig({
               });  
                  
               window.pbjs.que.push(function() {
-                 console.log('Add PBJS ad units', \` +
-                  JSON.stringify(config.AD_PREBID_CONFIG) +
-                 \`);
-                 window.pbjs.addAdUnits(\` +
-                  JSON.stringify(config.AD_PREBID_CONFIG) +
-                 \`)
+                 console.log('Add PBJS ad units', ` +
+            JSON.stringify(config.AD_PREBID_CONFIG) +
+            `);
+                 window.pbjs.addAdUnits(` +
+            JSON.stringify(config.AD_PREBID_CONFIG) +
+            `)
               });
             } catch (e) {
               console.error('Error initialising pbjs and googletag:', e.message);
