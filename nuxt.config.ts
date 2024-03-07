@@ -270,6 +270,7 @@ export default defineNuxtConfig({
               ? `window.googletag.pubads().disableInitialLoad()`
               : '') +
             `
+                window.googletag.enableServices()
               });
               
               window.pbjs = window.pbjs || {};

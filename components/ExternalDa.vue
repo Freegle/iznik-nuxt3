@@ -67,7 +67,7 @@ const blocked = !process.client || !window?.pbjs?.version
 const maxWidth = ref(Math.max(...props.dimensions.map((d) => d[0])))
 const maxHeight = ref(Math.max(...props.dimensions.map((d) => d[1])))
 
-const slot = ref(null)
+let slot = null
 
 const timer = ref(null)
 const PREBID_TIMEOUT = 1000
@@ -92,9 +92,21 @@ function refreshAd() {
             console.log('Got bids back', bids, timedOut, auctionId)
             window.pbjs.setTargetingForGPTAsync([props.adUnitPath])
 
-            if (slot.value) {
+            if (slot) {
               console.log('Refresh slot', props.adUnitPath)
-              window.googletag.pubads().refresh([slot.value])
+              window.googletag.pubads().refresh([slot])
+
+              // const slots = window.googletag.pubads().getSlots()
+              //
+              // // Iterate
+              // for (let i = 0; i < slots.length; i++) {
+              //   if (slots[i].getAdUnitPath() === props.adUnitPath) {
+              //     console.log('Found slot to refresh')
+              //     window.googletag.pubads().refresh([slots[i]])
+              //   }
+              // }
+
+              console.log('Refreshed slot', props.adUnitPath)
             } else {
               console.error(
                 'No slot found to refresh found for',
@@ -104,7 +116,7 @@ function refreshAd() {
           },
         })
       })
-      console.log('Refresh ad', slot.value.getAdUnitPath())
+      console.log('Refresh ad', slot.getAdUnitPath())
     }
 
     timer.value = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
@@ -127,19 +139,23 @@ async function visibilityChanged(visible) {
 
         window.googletag.cmd.push(function () {
           console.log('Create ad slot')
-          slot.value = window.googletag.defineSlot(
+          slot = window.googletag.defineSlot(
             props.adUnitPath,
             props.dimensions,
             props.divId
           )
-          console.log('Defined slot', slot.value)
+          console.log('Defined slot', slot)
+        })
 
-          window.googletag.enableServices()
+        window.googletag.cmd.push(function () {
           window.googletag.display(props.divId)
           console.log('Displayed')
-          refreshAd()
+          nextTick().then(() => {
+            console.log('Trigger refresh')
+            refreshAd()
 
-          shownFirst = true
+            shownFirst = true
+          })
         })
 
         window.googletag.cmd.push(function () {
