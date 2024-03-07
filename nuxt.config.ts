@@ -225,7 +225,6 @@ export default defineNuxtConfig({
     head: {
       title: "Freegle - Don't throw it away, give it away!",
       script: [
-        // We need to initialise the pbjs object before the vue-advertising package is loaded.
         {
           type: 'text/javascript',
           innerHTML:

@@ -62,7 +62,7 @@ const passClicks = computed(() => {
 })
 
 const uniqueid = ref(props.adUnitPath)
-const blocked = false
+const blocked = !process.client || !window?.pbjs?.version
 
 const maxWidth = ref(Math.max(...props.dimensions.map((d) => d[0])))
 const maxHeight = ref(Math.max(...props.dimensions.map((d) => d[1])))
@@ -88,7 +88,8 @@ function refreshAd() {
         window.pbjs.requestBids({
           timeout: PREBID_TIMEOUT,
           adUnitCodes: [props.divId],
-          bidsBackHandler: function () {
+          bidsBackHandler: function (bids, timedOut, auctionId) {
+            console.log('Got bids back', bids, timedOut, auctionId)
             window.pbjs.setTargetingForGPTAsync([props.adUnitPath])
 
             if (slot.value) {
@@ -155,8 +156,10 @@ async function visibilityChanged(visible) {
                 )
 
                 if (event?.isEmpty) {
+                  console.log('Rendered empty')
                   adShown.value = false
-                  console.log('Rendered empty', adShown)
+                  maxWidth.value = 0
+                  maxHeight.value = 0
                 } else {
                   maxWidth.value = event.size[0]
                   maxHeight.value = event.size[1]
