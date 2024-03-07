@@ -266,10 +266,10 @@ export default defineNuxtConfig({
                      // usp: {
                      //  timeout: 8000 
                      // },
-                     gpp: {
-                      cmpApi: 'iab',
-                      timeout: 8000
-                     }
+                     // gpp: {
+                     //  cmpApi: 'iab',
+                     //  timeout: 8000
+                     // }
                    }
                  });
              });
