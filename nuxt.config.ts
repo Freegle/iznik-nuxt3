@@ -228,16 +228,61 @@ export default defineNuxtConfig({
         // We need to initialise the pbjs object before the vue-advertising package is loaded.
         {
           type: 'text/javascript',
-          innerHTML: `try {
+          innerHTML:
+            `try {
+              window.dataLayer = window.dataLayer || [];
+              function ce_gtag() {
+                  window.dataLayer.push(arguments);
+              }
+              ce_gtag("consent", "default", {
+                  ad_storage: "denied",
+                  ad_user_data: "denied", 
+                  ad_personalization: "denied",
+                  analytics_storage: "denied",
+                  functionality_storage: "denied",
+                  personalization_storage: "denied",
+                  security_storage: "granted",
+                  wait_for_update: 2000,
+              });
+              ce_gtag("set", "ads_data_redaction", true);
+              ce_gtag("set", "url_passthrough", true);
+              
               console.log('Initialising pbjs and googletag...');
               window.googletag = window.googletag || {};
               window.googletag.cmd = window.googletag.cmd || [];
-              // window.googletag.cmd.push(function() {
-              //     window.googletag.pubads().disableInitialLoad();
-              // });
+              window.googletag.cmd.push(function() {
+                window.googletag.pubads().disableInitialLoad();
+              });
+              
               window.pbjs = window.pbjs || {};
               window.pbjs.que = window.pbjs.que || [];
-              console.log('Initialised pbjs and googletag.');
+              
+              window.pbjs.que.push(function() {
+                 window.pbjs.setConfig({
+                   consentManagement: {
+                     // We only need GDPR config.  We are interested in UK users, who are (for GDPR purposes if not
+                     // political purposes) inside the EU. 
+                     gdpr: {
+                      cmpApi: 'iab',
+                      allowAuctionWithoutConsent: ` +
+            (config.COOKIEYES ? 'false' : 'true') +
+            `,
+                      timeout: 3000
+                     },
+                     // usp: {
+                     //  timeout: 8000 
+                     // },
+                     // gpp: {
+                     //  cmpApi: 'iab',
+                     //  timeout: 8000
+                     // }
+                   }
+                 });
+                 
+                 window.pbjs.addAdUnits(` +
+            JSON.stringify(config.AD_GPT_CONFIG.slots) +
+            `);
+              });  
             } catch (e) {
               console.error('Error initialising pbjs and googletag:', e.message);
             }`,

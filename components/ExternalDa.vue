@@ -5,7 +5,7 @@
     at https://www.ilovefreegle.org/donate - if we got enough donations we would be delighted not to show ads.
      -->
     <div v-observe-visibility="visibilityChanged" class="pointer">
-      <AdvertisingProvider v-if="isVisible" :config="adConfig" is-prebid>
+      <div v-if="isVisible">
         <div
           class="d-flex w-100 justify-content-around"
           :style="{
@@ -13,7 +13,7 @@
             height: maxHeight + 'px',
           }"
         >
-          <AdvertisingSlot :id="divId" />
+          <div :id="divId" />
         </div>
         <p
           v-if="isVisible && adShown"
@@ -24,17 +24,13 @@
         <!--    <div class="bg-white">-->
         <!--      Path {{ adUnitPath }} id {{ divId }} dimensions {{ dimensions }}-->
         <!--    </div>-->
-      </AdvertisingProvider>
+      </div>
     </div>
   </client-only>
 </template>
 <script setup>
-import {
-  AdvertisingProvider,
-  AdvertisingSlot,
-} from '@storipress/vue-advertising'
 import { nextTick } from 'vue'
-import { ref, computed, onBeforeUnmount, AD_GPT_CONFIG } from '#imports'
+import { ref, computed, onBeforeUnmount } from '#imports'
 import { useMiscStore } from '~/stores/misc'
 
 const miscStore = useMiscStore()
@@ -77,18 +73,6 @@ const timer = ref(null)
 const PREBID_TIMEOUT = 1000
 const AD_REFRESH_TIMEOUT = 45000
 
-// Filter AD_GPT_CONFIG to pick out the matching divId and adUnitPath
-const adConfig = JSON.parse(JSON.stringify(AD_GPT_CONFIG))
-
-adConfig.slots = adConfig.slots.filter((slot) => {
-  return slot.id === props.divId && slot.path === props.adUnitPath
-})
-
-if (!adConfig.slots.length) {
-  console.error('Ad config not found', props.divId, props.adUnitPath, adConfig)
-}
-
-console.log('Set up ad', JSON.stringify(adConfig))
 function refreshAd() {
   if (
     window.googletag?.pubads &&
@@ -98,7 +82,7 @@ function refreshAd() {
   ) {
     // Don't refresh if the ad is not visible or tab is not active.
     if (isVisible.value && miscStore.visible) {
-      console.log('Refresh ad', slot.value.getAdUnitPath())
+      console.log('Refresh ad', props.adUnitPath)
 
       window.pbjs.que.push(function () {
         window.pbjs.requestBids({
@@ -106,7 +90,16 @@ function refreshAd() {
           adUnitCodes: [props.divId],
           bidsBackHandler: function () {
             window.pbjs.setTargetingForGPTAsync([props.adUnitPath])
-            window.googletag.pubads().refresh([slot.value])
+
+            if (slot.value) {
+              console.log('Refresh slot', props.adUnitPath)
+              window.googletag.pubads().refresh([slot.value])
+            } else {
+              console.error(
+                'No slot found to refresh found for',
+                props.adUnitPath
+              )
+            }
           },
         })
       })
@@ -128,17 +121,31 @@ async function visibilityChanged(visible) {
 
       if (visible && !shownFirst) {
         console.log('Queue create ad', props.adUnitPath, props.divId)
+
         await nextTick()
-        shownFirst = true
+
+        window.googletag.cmd.push(function () {
+          console.log('Create ad slot')
+          slot.value = window.googletag.defineSlot(
+            props.adUnitPath,
+            props.dimensions,
+            props.divId
+          )
+          console.log('Defined slot', slot.value)
+
+          window.googletag.enableServices()
+          window.googletag.display(props.divId)
+          console.log('Displayed')
+          refreshAd()
+
+          shownFirst = true
+        })
 
         window.googletag.cmd.push(function () {
           window.googletag
             .pubads()
             .addEventListener('slotRenderEnded', (event) => {
               if (event?.slot.getAdUnitPath() === props.adUnitPath) {
-                // Save off slot for refresh later.
-                slot.value = event.slot
-
                 console.log(
                   'Rendered',
                   uniqueid.value,
@@ -179,17 +186,19 @@ async function visibilityChanged(visible) {
                 }
               }
             })
-            .addEventListener('impressionViewable', (event) => {
-              if (event?.slot.getAdUnitPath() === props.adUnitPath) {
-                // We refresh the ad slot.  This increases views.  Google doesn't like it if this is more frequent than
-                // every 30s.
-                if (!timer.value) {
-                  console.log('Set refresh timer for ', props.adUnitPath)
-                  timer.value = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
-                }
-              }
-            })
+          // .addEventListener('impressionViewable', (event) => {
+          //   if (event?.slot.getAdUnitPath() === props.adUnitPath) {
+          //     // We refresh the ad slot.  This increases views.  Google doesn't like it if this is more frequent than
+          //     // every 30s.
+          //     if (!timer.value) {
+          //       console.log('Set refresh timer for ', props.adUnitPath)
+          //       timer.value = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
+          //     }
+          //   }
+          // })
         })
+
+        timer.value = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
       }
     } catch (e) {
       console.log('Exception in visibilityChanged', e)
