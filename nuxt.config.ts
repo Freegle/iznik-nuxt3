@@ -258,6 +258,8 @@ export default defineNuxtConfig({
               window.pbjs.que.push(function() {
                  window.pbjs.setConfig({
                    consentManagement: {
+                     // We only need GDPR config.  We are interested in UK users, who are (for GDPR purposes if not
+                     // political purposes) inside the EU. 
                      gdpr: {
                       cmpApi: 'iab',
                       allowAuctionWithoutConsent: false,
