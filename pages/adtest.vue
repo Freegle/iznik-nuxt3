@@ -15,7 +15,7 @@
                 [300, 600],
                 [300, 250],
               ]"
-              div-id="div-gpt-ad-1691925450433-0"
+              div-id="div-gpt-ad-1693235056629-0"
               class="mt-2"
             />
           </VisibleWhen>
@@ -30,8 +30,9 @@
             the bottom. The ads should refresh.
           </p>
           <p>
-            To debug this page, you can add ?pbjs_debug=true to the URL. This
-            will produce output from prebid in the Developer Console.
+            To debug this page, you can add ?pbjs_debug=true&pubmaticTest=true
+            to the URL. This will produce output from prebid in the Developer
+            Console.
           </p>
         </b-col>
         <b-col cols="0" lg="3" class="p-0 pl-1">
@@ -47,7 +48,7 @@
                   [300, 600],
                   [300, 250],
                 ]"
-                div-id="div-gpt-ad-1691925450433-1"
+                div-id="div-gpt-ad-1691925450433-0"
                 class="mt-2"
               />
             </VisibleWhen>

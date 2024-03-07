@@ -270,7 +270,7 @@ export default defineNuxtConfig({
               ? `window.googletag.pubads().disableInitialLoad()`
               : '') +
             `
-                window.googletag.enableSingleRequest()
+                window.googletag.pubads().enableSingleRequest()
                 window.googletag.enableServices()
               });
               

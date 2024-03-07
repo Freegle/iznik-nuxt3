@@ -127,7 +127,7 @@ export default {
         ],
       },
       {
-        id: 'div-gpt-ad-1691925450433-0',
+        id: 'div-gpt-ad-1693235056629-0',
         path: '/22794232631/freegle_home_left',
         sizes: ADS_SQUARISH_SIZES,
         bids: [
@@ -141,7 +141,7 @@ export default {
         ],
       },
       {
-        id: 'div-gpt-ad-1691925450433-1',
+        id: 'div-gpt-ad-1691925450433-0',
         path: '/22794232631/freegle_home',
         sizes: ADS_SQUARISH_SIZES,
         bids: [

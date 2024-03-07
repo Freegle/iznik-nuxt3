@@ -15,7 +15,7 @@
                 [300, 600],
                 [300, 250],
               ]"
-              div-id="div-gpt-ad-1691925450433-0"
+              div-id="div-gpt-ad-1693235056629-0"
               class="mt-2"
             />
           </VisibleWhen>
@@ -105,7 +105,7 @@
                   [300, 600],
                   [300, 250],
                 ]"
-                div-id="div-gpt-ad-1691925450433-1"
+                div-id="div-gpt-ad-1691925450433-0"
                 class="mt-2"
               />
             </VisibleWhen>
