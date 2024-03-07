@@ -218,13 +218,5 @@ export const AD_GPT_CONFIG = {
     },
   ],
   usePrebid: true,
-  prebid: {
-    consentManagement: {
-      gdpr: {
-        cmpApi: 'iab',
-        allowAuctionWithoutConsent: true,
-      },
-    },
-  },
   useAPS: false,
 }

@@ -263,10 +263,14 @@ export default defineNuxtConfig({
                      gdpr: {
                       cmpApi: 'iab',
                       allowAuctionWithoutConsent: false,
-                      timeout: 3000  // GDPR timeout 3000ms
+                      timeout: 3000
                      },
                      usp: {
-                      timeout: 100 // US Privacy timeout 100ms
+                      timeout: 8000 
+                     },
+                     gpp: {
+                      cmpApi: 'iab',
+                      timeout: 8000
                      }
                    }
                  });
