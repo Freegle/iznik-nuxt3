@@ -318,7 +318,6 @@ export default defineNuxtConfig({
               defer: true,
             }
           : {},
-        // We load GPT and prebid here and not inside vue-advertising to avoid them being loaded multiple times.
         {
           src: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
           defer: true,
