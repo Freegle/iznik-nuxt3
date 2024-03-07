@@ -298,13 +298,16 @@ export default defineNuxtConfig({
                      // }
                    }
                  });
-                 
-                 window.pbjs.que.push(function() {
-                       window.pbjs.addAdUnits(` +
-            JSON.stringify(config.AD_PREBID_CONFIG) +
-            `})
-                );
               });  
+                 
+              window.pbjs.que.push(function() {
+                 console.log('Add PBJS ad units', \` +
+                  JSON.stringify(config.AD_PREBID_CONFIG) +
+                 \`);
+                 window.pbjs.addAdUnits(\` +
+                  JSON.stringify(config.AD_PREBID_CONFIG) +
+                 \`})
+                );
             } catch (e) {
               console.error('Error initialising pbjs and googletag:', e.message);
             }`,
