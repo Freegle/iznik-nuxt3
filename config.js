@@ -2,7 +2,7 @@ const ADS_SMALL_BANNER_SIZES = [[320, 50]]
 const ADS_MEDIUM_BANNER_SIZES = [[728, 90]]
 const ADS_SQUARISH_SIZES = [[300, 250]]
 
-export default {
+const CONFIG = {
   // Legacy API, especially mod ops.
   APIv1: process.env.IZNIK_API_V1 || 'https://fdapilive.ilovefreegle.org/api',
 
@@ -40,223 +40,280 @@ export default {
   // Cookie banner for this site.
   COOKIEYES: process.env.COOKIEYES || null,
 
-  AD_GPT_CONFIG: {
-    slots: [
-      {
-        id: 'div-gpt-ad-1699973618906-0',
-        path: '/22794232631/freegle_sticky',
-        sizes: ADS_SMALL_BANNER_SIZES,
-        bids: [
-          {
-            bidder: 'pubmatic',
-            params: {
-              publisherId: '164422',
-              adSlot: '5753989',
-            },
-          },
-        ],
+  AD_PREBID_CONFIG: [
+    {
+      code: '/22794232631/freegle_sticky',
+      mediaTypes: {
+        banner: {
+          sizes: ADS_SMALL_BANNER_SIZES,
+        },
       },
-      {
-        id: 'div-gpt-ad-1707999304775-0',
-        path: '/22794232631/freegle_sticky_desktop',
-        sizes: ADS_MEDIUM_BANNER_SIZES,
-        bids: [
-          {
-            bidder: 'pubmatic',
-            params: {
-              publisherId: '164422',
-              adSlot: '5753990',
-            },
+      bids: [
+        {
+          bidder: 'pubmatic',
+          params: {
+            publisherId: '164422',
+            adSlot: '5753989',
           },
-        ],
+        },
+      ],
+    },
+    {
+      code: '/22794232631/freegle_sticky_desktop',
+      mediaTypes: {
+        banner: {
+          sizes: ADS_MEDIUM_BANNER_SIZES,
+        },
       },
-      {
-        id: 'div-gpt-ad-1691925699378-0',
-        path: '/22794232631/freegle_product',
-        sizes: ADS_SQUARISH_SIZES,
-        bids: [
-          {
-            bidder: 'pubmatic',
-            params: {
-              publisherId: '164422',
-              adSlot: '5773059',
-            },
+      bids: [
+        {
+          bidder: 'pubmatic',
+          params: {
+            publisherId: '164422',
+            adSlot: '5753990',
           },
-        ],
+        },
+      ],
+    },
+    {
+      code: '/22794232631/freegle_product',
+      mediaTypes: {
+        banner: {
+          sizes: ADS_SQUARISH_SIZES,
+        },
       },
-      {
-        id: 'div-gpt-ad-1691925773522-0',
-        path: '/22794232631/freegle_productemail',
-        sizes: ADS_SQUARISH_SIZES,
-        bids: [
-          {
-            bidder: 'pubmatic',
-            params: {
-              publisherId: '164422',
-              adSlot: '5753984',
-            },
+      bids: [
+        {
+          bidder: 'pubmatic',
+          params: {
+            publisherId: '164422',
+            adSlot: '5773059',
           },
-        ],
+        },
+      ],
+    },
+    {
+      code: '/22794232631/freegle_product_email',
+      mediaTypes: {
+        banner: {
+          sizes: ADS_SQUARISH_SIZES,
+        },
       },
-      {
-        id: 'div-gpt-ad-1692868003771-0',
-        path: '/22794232631/freegle_myposts_desktop',
-        sizes: ADS_SQUARISH_SIZES,
-        bids: [
-          {
-            bidder: 'pubmatic',
-            params: {
-              publisherId: '164422',
-              adSlot: '5753988',
-            },
+      bids: [
+        {
+          bidder: 'pubmatic',
+          params: {
+            publisherId: '164422',
+            adSlot: '5753984',
           },
-        ],
+        },
+      ],
+    },
+    {
+      code: '/22794232631/freegle_productemail',
+      mediaTypes: {
+        banner: {
+          sizes: ADS_SQUARISH_SIZES,
+        },
       },
-      {
-        id: 'div-gpt-ad-1709056727559-0',
-        path: '/22794232631/freegle_myposts_desktop_right',
-        sizes: ADS_SQUARISH_SIZES,
-        bids: [
-          {
-            bidder: 'pubmatic',
-            params: {
-              publisherId: '164422',
-              adSlot: '5753988',
-            },
+      bids: [
+        {
+          bidder: 'pubmatic',
+          params: {
+            publisherId: '164422',
+            adSlot: '5753984',
           },
-        ],
+        },
+      ],
+    },
+    {
+      code: '/22794232631/freegle_myposts_desktop',
+      mediaTypes: {
+        banner: {
+          sizes: ADS_SQUARISH_SIZES,
+        },
       },
-      {
-        id: 'div-gpt-ad-1693235056629-0',
-        path: '/22794232631/freegle_home_left',
-        sizes: ADS_SQUARISH_SIZES,
-        bids: [
-          {
-            bidder: 'pubmatic',
-            params: {
-              publisherId: '164422',
-              adSlot: '5753983',
-            },
+      bids: [
+        {
+          bidder: 'pubmatic',
+          params: {
+            publisherId: '164422',
+            adSlot: '5753988',
           },
-        ],
+        },
+      ],
+    },
+    {
+      code: '/22794232631/freegle_myposts_desktop_right',
+      mediaTypes: {
+        banner: {
+          sizes: ADS_SQUARISH_SIZES,
+        },
       },
-      {
-        id: 'div-gpt-ad-1691925450433-0',
-        path: '/22794232631/freegle_home',
-        sizes: ADS_SQUARISH_SIZES,
-        bids: [
-          {
-            bidder: 'pubmatic',
-            params: {
-              publisherId: '164422',
-              adSlot: '5753982',
-            },
+      bids: [
+        {
+          bidder: 'pubmatic',
+          params: {
+            publisherId: '164422',
+            adSlot: '5753988', // TODO Is this right?  Same as above
           },
-        ],
+        },
+      ],
+    },
+    {
+      code: '/22794232631/freegle_home_left',
+      mediaTypes: {
+        banner: {
+          sizes: ADS_SQUARISH_SIZES,
+        },
       },
-      {
-        id: 'div-gpt-ad-1691925773522-0',
-        path: '/22794232631/freegle_chat_app',
-        sizes: ADS_SMALL_BANNER_SIZES,
-        bids: [
-          {
-            bidder: 'pubmatic',
-            params: {
-              publisherId: '164422',
-              adSlot: '5753987',
-            },
+      bids: [
+        {
+          bidder: 'pubmatic',
+          params: {
+            publisherId: '164422',
+            adSlot: '5753983',
           },
-        ],
+        },
+      ],
+    },
+    {
+      code: '/22794232631/freegle_home',
+      mediaTypes: {
+        banner: {
+          sizes: ADS_SQUARISH_SIZES,
+        },
       },
-      {
-        id: 'div-gpt-ad-1692867596111-0',
-        path: '/22794232631/freegle_chat_desktop',
-        sizes: ADS_SQUARISH_SIZES,
-        bids: [
-          {
-            bidder: 'pubmatic',
-            params: {
-              publisherId: '164422',
-              adSlot: '5753986',
-            },
+      bids: [
+        {
+          bidder: 'pubmatic',
+          params: {
+            publisherId: '164422',
+            adSlot: '5753982',
           },
-        ],
+        },
+      ],
+    },
+    {
+      code: '/22794232631/freegle_chat_app',
+      mediaTypes: {
+        banner: {
+          sizes: ADS_SMALL_BANNER_SIZES,
+        },
       },
-      {
-        id: 'div-gpt-ad-1692867324381-0',
-        path: '/22794232631/freegle_feed_app',
-        sizes: ADS_SQUARISH_SIZES,
-        bids: [
-          {
-            bidder: 'pubmatic',
-            params: {
-              publisherId: '164422',
-              adSlot: '5753986',
-            },
+      bids: [
+        {
+          bidder: 'pubmatic',
+          params: {
+            publisherId: '164422',
+            adSlot: '5753987',
           },
-        ],
+        },
+      ],
+    },
+    {
+      code: '/22794232631/freegle_chat_desktop',
+      mediaTypes: {
+        banner: {
+          sizes: ADS_SQUARISH_SIZES,
+        },
       },
-      {
-        id: 'div-gpt-ad-1707999616879-0',
-        path: '/22794232631/freegle_feed_app_2',
-        sizes: ADS_SQUARISH_SIZES,
-        bids: [
-          {
-            bidder: 'pubmatic',
-            params: {
-              publisherId: '164422',
-              adSlot: '5753986',
-            },
+      bids: [
+        {
+          bidder: 'pubmatic',
+          params: {
+            publisherId: '164422',
+            adSlot: '5753986',
           },
-        ],
+        },
+      ],
+    },
+    {
+      code: '/22794232631/freegle_feed_app',
+      mediaTypes: {
+        banner: {
+          sizes: ADS_SQUARISH_SIZES,
+        },
       },
-      {
-        id: 'div-gpt-ad-1707999845886-0',
-        path: '/22794232631/freegle_feed_app_3',
-        sizes: ADS_SQUARISH_SIZES,
-        bids: [
-          {
-            bidder: 'pubmatic',
-            params: {
-              publisherId: '164422',
-              adSlot: '5753986',
-            },
+      bids: [
+        {
+          bidder: 'pubmatic',
+          params: {
+            publisherId: '164422',
+            adSlot: '5753981',
           },
-        ],
+        },
+      ],
+    },
+    {
+      code: '/22794232631/freegle_feed_app_2',
+      mediaTypes: {
+        banner: {
+          sizes: ADS_SQUARISH_SIZES,
+        },
       },
-      {
-        id: 'div-gpt-ad-1707999962593-0',
-        path: '/22794232631/freegle_feed_app_4',
-        sizes: ADS_SQUARISH_SIZES,
-        bids: [
-          {
-            bidder: 'pubmatic',
-            params: {
-              publisherId: '164422',
-              adSlot: '5753986',
-            },
+      bids: [
+        {
+          bidder: 'pubmatic',
+          params: {
+            publisherId: '164422',
+            adSlot: '5753991',
           },
-        ],
+        },
+      ],
+    },
+    {
+      code: '/22794232631/freegle_feed_app_3',
+      mediaTypes: {
+        banner: {
+          sizes: ADS_SQUARISH_SIZES,
+        },
       },
-      {
-        id: 'div-gpt-ad-1708000097990-0',
-        path: '/22794232631/freegle_feed_app_5',
-        sizes: ADS_SQUARISH_SIZES,
-        bids: [
-          {
-            bidder: 'pubmatic',
-            params: {
-              publisherId: '164422',
-              adSlot: '5753986',
-            },
+      bids: [
+        {
+          bidder: 'pubmatic',
+          params: {
+            publisherId: '164422',
+            adSlot: '5753992',
           },
-        ],
+        },
+      ],
+    },
+    {
+      code: '/22794232631/freegle_feed_app_4',
+      mediaTypes: {
+        banner: {
+          sizes: ADS_SQUARISH_SIZES,
+        },
       },
-    ],
-    usePrebid: true,
-    useAPS: false,
-  },
-  ADS_SMALL_BANNER_SIZES,
-  ADS_MEDIUM_BANNER_SIZES,
-  ADS_SQUARISH_SIZES,
+      bids: [
+        {
+          bidder: 'pubmatic',
+          params: {
+            publisherId: '164422',
+            adSlot: '5753993',
+          },
+        },
+      ],
+    },
+    {
+      code: '/22794232631/freegle_feed_app_5',
+      mediaTypes: {
+        banner: {
+          sizes: ADS_SQUARISH_SIZES,
+        },
+      },
+      bids: [
+        {
+          bidder: 'pubmatic',
+          params: {
+            publisherId: '164422',
+            adSlot: '5753994',
+          },
+        },
+      ],
+    },
+  ],
 }
+
+export default CONFIG

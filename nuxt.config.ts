@@ -300,7 +300,7 @@ export default defineNuxtConfig({
                  });
                  
                  window.pbjs.addAdUnits(` +
-            JSON.stringify(config.AD_GPT_CONFIG.slots) +
+            JSON.stringify(config.AD_PREBID_CONFIG) +
             `);
               });  
             } catch (e) {
