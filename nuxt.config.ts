@@ -256,6 +256,21 @@ export default defineNuxtConfig({
               // });
               window.pbjs = window.pbjs || {};
               window.pbjs.que = window.pbjs.que || [];
+              
+              window.pbjs.que.push(function() {
+                 window.pbjs.setConfig({
+                   consentManagement: {
+                     gdpr: {
+                      cmpApi: 'iab',
+                      allowAuctionWithoutConsent: false,
+                      timeout: 3000  // GDPR timeout 3000ms
+                     },
+                     usp: {
+                      timeout: 100 // US Privacy timeout 100ms
+                     }
+                   }
+                 });
+             });
               console.log('Initialised pbjs and googletag.');
             } catch (e) {
               console.error('Error initialising pbjs and googletag:', e.message);
