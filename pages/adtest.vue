@@ -24,7 +24,15 @@
           </VisibleWhen>
         </b-col>
         <b-col cols="12" lg="6" class="p-0">
-          This is a test page for ads.
+          <p>
+            This is a test page for ads. You should view this on desktop. There
+            should be an ad on the left, on the right, and a sticky ad banner at
+            the bottom. The ads should refresh.
+          </p>
+          <p>
+            To debug this page, you can add ?pbjs_debug=true to the URL. This
+            will produce output from prebid in the Developer Console.
+          </p>
         </b-col>
         <b-col cols="0" lg="3" class="p-0 pl-1">
           <div class="d-flex justify-content-end">
