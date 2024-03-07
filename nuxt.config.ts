@@ -306,8 +306,8 @@ export default defineNuxtConfig({
                  \`);
                  window.pbjs.addAdUnits(\` +
                   JSON.stringify(config.AD_PREBID_CONFIG) +
-                 \`})
-                );
+                 \`)
+              });
             } catch (e) {
               console.error('Error initialising pbjs and googletag:', e.message);
             }`,
