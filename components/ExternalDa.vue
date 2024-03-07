@@ -93,7 +93,11 @@ function refreshAd() {
             window.pbjs.setTargetingForGPTAsync([props.adUnitPath])
 
             if (slot) {
-              console.log('Refresh slot', props.adUnitPath)
+              console.log(
+                'Refresh slot',
+                props.adUnitPath,
+                JSON.stringify(slot)
+              )
               window.googletag.pubads().refresh([slot])
 
               // const slots = window.googletag.pubads().getSlots()
@@ -139,12 +143,14 @@ async function visibilityChanged(visible) {
 
         window.googletag.cmd.push(function () {
           console.log('Create ad slot')
-          slot = window.googletag.defineSlot(
-            props.adUnitPath,
-            props.dimensions,
-            props.divId
+          slot = window.googletag
+            .defineSlot(props.adUnitPath, props.dimensions, props.divId)
+            .addService(window.googletag.pubads())
+          console.log(
+            'Defined slot',
+            JSON.stringify(slot),
+            JSON.stringify(window.googletag.pubads().getSlots())
           )
-          console.log('Defined slot', slot)
         })
 
         window.googletag.cmd.push(function () {
@@ -162,6 +168,7 @@ async function visibilityChanged(visible) {
           window.googletag
             .pubads()
             .addEventListener('slotRenderEnded', (event) => {
+              console.log('Slot render ended', event)
               if (event?.slot.getAdUnitPath() === props.adUnitPath) {
                 console.log(
                   'Rendered',
