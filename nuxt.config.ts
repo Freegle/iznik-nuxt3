@@ -225,6 +225,20 @@ export default defineNuxtConfig({
     head: {
       title: "Freegle - Don't throw it away, give it away!",
       script: [
+        // The ecosystem of advertising is complex.
+        // - The underlying ad service is Google Tags (GPT).
+        // - We use prebid (pbjs), which gives a pipeline of ads to use.
+        // - Google and prebid both require use of a Consent Management Platform (CMP) so that the
+        //   user has indicated whether we have permission to show personalised ads.  We use CookieYes.
+        // - So we need to signal to Google and prebid which CMP we're using, which we do via window.dataLayer,
+        //   window.gtag and window.pbjs.
+        // - We also have to define the possible advertising slots available to prebid so that it knows what to bid on.
+        //   We do this once, here, for all slots. Only some slots may appear on any given page.
+        // - When using prebid, we disable the initial ad load because it doesn't happen until after the prebid, inside ExternalDa
+        //
+        // During development we don't have a CMP because CookieYes doesn't work on localhost.  So in that case we
+        // - don't disable initial ad load.
+        // - set the allowAuctionWithoutConsent flag to allow prebid to continue.
         {
           type: 'text/javascript',
           innerHTML:
@@ -250,7 +264,12 @@ export default defineNuxtConfig({
               window.googletag = window.googletag || {};
               window.googletag.cmd = window.googletag.cmd || [];
               window.googletag.cmd.push(function() {
-                window.googletag.pubads().disableInitialLoad();
+                // On the dev server, where COOKIEYES is not set, we want ads to load immediately.
+              ` +
+            (config.COOKIEYES
+              ? `window.googletag.pubads().disableInitialLoad()`
+              : '') +
+            `
               });
               
               window.pbjs = window.pbjs || {};
