@@ -310,9 +310,27 @@ export default defineNuxtConfig({
             JSON.stringify(config.AD_PREBID_CONFIG) +
             `)
               });
-            } catch (e) {
-              console.error('Error initialising pbjs and googletag:', e.message);
-            }`,
+             
+            // This Identity Hub script is needed by pubmatic.  
+            var purl = window.location.href;
+            var url = '//ads.pubmatic.com/AdServer/js/pwt/164422/12426';
+            var profileVersionId = '';
+            if(purl.indexOf('pwtv=')>0){
+              var regexp = /pwtv=(.*?)(&|$)/g;
+              var matches = regexp.exec(purl);
+              if(matches.length >= 2 && matches[1].length > 0){
+                profileVersionId = '/'+matches[1];
+              }
+            }
+            var wtads = document.createElement('script');
+            wtads.async = true;
+            wtads.type = 'text/javascript';
+            wtads.src = url+profileVersionId+'/pwt.js';
+            var node = document.getElementsByTagName('script')[0];
+            node.parentNode.insertBefore(wtads, node);
+          } catch (e) {
+            console.error('Error initialising pbjs and googletag:', e.message);
+          }`,
         },
         // We have to load the CookieYes script before we load prebid, because prebid looks for the CMP.
         //
