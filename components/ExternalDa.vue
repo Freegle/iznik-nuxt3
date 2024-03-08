@@ -112,7 +112,6 @@ function refreshAd() {
           },
         })
       })
-      console.log('Refresh ad', slot.getAdUnitPath())
     }
 
     timer.value = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
