@@ -82,6 +82,8 @@ function refreshAd() {
   ) {
     // Don't refresh if the ad is not visible or tab is not active.
     if (isVisible.value && miscStore.visible) {
+      // Refreshing an ad is a bit more complex because we're using prebid.  That means we have to request the
+      // bids, and then once we've got those, refresh the ad slot to kick Google to render the ad.
       console.log('Refresh ad', props.adUnitPath)
 
       window.pbjs.que.push(function () {
@@ -99,16 +101,6 @@ function refreshAd() {
                 JSON.stringify(slot)
               )
               window.googletag.pubads().refresh([slot])
-
-              // const slots = window.googletag.pubads().getSlots()
-              //
-              // // Iterate
-              // for (let i = 0; i < slots.length; i++) {
-              //   if (slots[i].getAdUnitPath() === props.adUnitPath) {
-              //     console.log('Found slot to refresh')
-              //     window.googletag.pubads().refresh([slots[i]])
-              //   }
-              // }
 
               console.log('Refreshed slot', props.adUnitPath)
             } else {
@@ -157,6 +149,8 @@ async function visibilityChanged(visible) {
           window.googletag.display(props.divId)
           console.log('Displayed')
           nextTick().then(() => {
+            // We need to refresh the ad because we called disableInitialLoad.  That's what you do when
+            // using prebit.
             console.log('Trigger refresh')
             refreshAd()
 
@@ -212,16 +206,6 @@ async function visibilityChanged(visible) {
                 }
               }
             })
-          // .addEventListener('impressionViewable', (event) => {
-          //   if (event?.slot.getAdUnitPath() === props.adUnitPath) {
-          //     // We refresh the ad slot.  This increases views.  Google doesn't like it if this is more frequent than
-          //     // every 30s.
-          //     if (!timer.value) {
-          //       console.log('Set refresh timer for ', props.adUnitPath)
-          //       timer.value = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
-          //     }
-          //   }
-          // })
         })
 
         timer.value = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
