@@ -4,3 +4,7 @@ CONTACT=sales@zeroads.co
 
 
 Gumgum.com, 15952, DIRECT, ffdef49475d318a9
+
+pubmatic.com, 164422, DIRECT, 5d62403b186f2ace
+
+appnexus.com, 15950, DIRECT , f5ab79cb980f11d1
