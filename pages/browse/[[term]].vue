@@ -119,6 +119,7 @@
 import dayjs from 'dayjs'
 import { useRoute, useRouter } from 'vue-router'
 import { defineAsyncComponent } from 'vue'
+import Wkt from 'wicket'
 import { useMessageStore } from '../../stores/message'
 import NoticeMessage from '../../components/NoticeMessage'
 import { loadLeaflet } from '~/composables/useMap'
@@ -269,7 +270,7 @@ export default {
 
         if (g?.bbox) {
           await loadLeaflet()
-          const wkt = new window.Wkt.Wkt()
+          const wkt = new Wkt.Wkt()
           wkt.read(g.bbox)
           const obj = wkt.toObject()
 
@@ -385,7 +386,7 @@ export default {
             this.myGroups.forEach(async (g) => {
               if (g.bbox) {
                 await loadLeaflet()
-                const wkt = new window.Wkt.Wkt()
+                const wkt = new Wkt.Wkt()
                 wkt.read(g.bbox)
                 const obj = wkt.toObject()
 
