@@ -56,6 +56,13 @@ const CONFIG = {
             adSlot: '5753989',
           },
         },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
+          },
+        },
       ],
     },
     {
@@ -71,6 +78,13 @@ const CONFIG = {
           params: {
             publisherId: '164422',
             adSlot: '5753990',
+          },
+        },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
           },
         },
       ],
@@ -90,6 +104,13 @@ const CONFIG = {
             adSlot: '5773059',
           },
         },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
+          },
+        },
       ],
     },
     {
@@ -105,6 +126,13 @@ const CONFIG = {
           params: {
             publisherId: '164422',
             adSlot: '5753984',
+          },
+        },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
           },
         },
       ],
@@ -124,6 +152,13 @@ const CONFIG = {
             adSlot: '5753984',
           },
         },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
+          },
+        },
       ],
     },
     {
@@ -139,6 +174,13 @@ const CONFIG = {
           params: {
             publisherId: '164422',
             adSlot: '5753988',
+          },
+        },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
           },
         },
       ],
@@ -158,6 +200,13 @@ const CONFIG = {
             adSlot: '5775938',
           },
         },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
+          },
+        },
       ],
     },
     {
@@ -173,6 +222,13 @@ const CONFIG = {
           params: {
             publisherId: '164422',
             adSlot: '5753983',
+          },
+        },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
           },
         },
       ],
@@ -192,6 +248,13 @@ const CONFIG = {
             adSlot: '5753982',
           },
         },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
+          },
+        },
       ],
     },
     {
@@ -207,6 +270,13 @@ const CONFIG = {
           params: {
             publisherId: '164422',
             adSlot: '5753987',
+          },
+        },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
           },
         },
       ],
@@ -226,6 +296,13 @@ const CONFIG = {
             adSlot: '5753986',
           },
         },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
+          },
+        },
       ],
     },
     {
@@ -241,6 +318,13 @@ const CONFIG = {
           params: {
             publisherId: '164422',
             adSlot: '5753981',
+          },
+        },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
           },
         },
       ],
@@ -260,6 +344,13 @@ const CONFIG = {
             adSlot: '5753991',
           },
         },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
+          },
+        },
       ],
     },
     {
@@ -275,6 +366,13 @@ const CONFIG = {
           params: {
             publisherId: '164422',
             adSlot: '5753992',
+          },
+        },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
           },
         },
       ],
@@ -294,6 +392,13 @@ const CONFIG = {
             adSlot: '5753993',
           },
         },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
+          },
+        },
       ],
     },
     {
@@ -309,6 +414,13 @@ const CONFIG = {
           params: {
             publisherId: '164422',
             adSlot: '5753994',
+          },
+        },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
           },
         },
       ],

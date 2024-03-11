@@ -317,7 +317,7 @@ export default defineNuxtConfig({
             var PWTcalled = false;
             
             function loadScript(url) {
-              if (url && url.length) {
+              if (url && url.length && url !== 'null') {
                 console.log('Load script:', url);
                 var script = document.createElement('script');
                 script.defer = true;
