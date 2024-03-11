@@ -335,6 +335,7 @@ export default defineNuxtConfig({
                 // - Cookieyes, which needs to be loaded before prebid because prebid looks for the CMP.
                 // - GPT, which needs to be loaded before prebid.
                 // - Prebid.
+                // The ordering is ensured by using defer and appending the script.
                 console.log('PWT.js loaded');
                 loadScript('` +
             config.COOKIEYES +
@@ -346,7 +347,6 @@ export default defineNuxtConfig({
             
             window.IHPWT.jsLoaded = postPWT;
              
-            console.log('Insert pubmatic PWT script');  
             var purl = window.location.href;
             var url = '//ads.pubmatic.com/AdServer/js/pwt/164422/12426';
             var profileVersionId = '';
