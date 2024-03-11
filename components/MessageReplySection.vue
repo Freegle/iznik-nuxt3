@@ -50,7 +50,7 @@
         class="mt-1"
         label="When could you collect?"
         :label-for="'replytomessage2-' + message.id"
-        description="Suggest times you could collect if you're chosen.  Your plans might change but this speeds up making arrangements."
+        description="Suggest days and times you could collect if you're chosen.  Your plans might change but this speeds up making arrangements."
       >
         <b-form-input
           :id="'replytomessage2-' + message.id"
