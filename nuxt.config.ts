@@ -242,7 +242,7 @@ export default defineNuxtConfig({
         // During development we don't have a CMP because CookieYes doesn't work on localhost.  So in that case we
         // don't disable initial ad load - so Google will load ads immediately.
         //
-        // The order in which we load scripts is important - see below.
+        // The order in which we load scripts is excruciatingly and critically important - see below.
         {
           type: 'text/javascript',
           innerHTML:
@@ -311,43 +311,60 @@ export default defineNuxtConfig({
             `)
               });
              
-            // This Identity Hub script is needed by pubmatic.  
+            // This Identity Hub script is needed by pubmatic.  We have to load it before we load any of the
+            // other scripts.
+            window.IHPWT = {};
+            var PWTcalled = false;
+            
+            function loadScript(url) {
+              if (url && url.length) {
+                console.log('Load script:', url);
+                var script = document.createElement('script');
+                script.defer = true;
+                script.type = 'text/javascript';
+                script.src = url;
+                document.head.appendChild(script);
+              }
+            }
+            
+            function postPWT() {
+              if (!PWTcalled) {
+                PWTcalled = true;
+                
+                // Now that PWT is loaded, or has failed, we need to load:
+                // - Cookieyes, which needs to be loaded before prebid because prebid looks for the CMP.
+                // - GPT, which needs to be loaded before prebid.
+                // - Prebid.
+                console.log('PWT.js loaded');
+                loadScript('` +
+            config.COOKIEYES +
+            `')
+                loadScript('https://securepubads.g.doubleclick.net/tag/js/gpt.js')
+                loadScript('/js/prebid.js')
+              }
+            };
+            
+            window.IHPWT.jsLoaded = postPWT;
+             
+            console.log('Insert pubmatic PWT script');  
             var purl = window.location.href;
             var url = '//ads.pubmatic.com/AdServer/js/pwt/164422/12426';
             var profileVersionId = '';
-            if(purl.indexOf('pwtv=')>0){
+            if (purl.indexOf('pwtv=')>0){
               var regexp = /pwtv=(.*?)(&|$)/g;
               var matches = regexp.exec(purl);
               if(matches.length >= 2 && matches[1].length > 0){
                 profileVersionId = '/'+matches[1];
               }
             }
-            var wtads = document.createElement('script');
-            wtads.async = true;
-            wtads.type = 'text/javascript';
-            wtads.src = url+profileVersionId+'/pwt.js';
-            var node = document.getElementsByTagName('script')[0];
-            node.parentNode.insertBefore(wtads, node);
+            
+            loadScript(url+profileVersionId+'/pwt.js');
+            
+            // Failsafe to load GPT etc if PWT fails.
+            setTimeout(postPWT, 500);
           } catch (e) {
             console.error('Error initialising pbjs and googletag:', e.message);
           }`,
-        },
-        // We have to load the CookieYes script before we load prebid, because prebid looks for the CMP.
-        //
-        // We use defer because we want to ensure that this is loaded before GPT and prebid.
-        config.COOKIEYES
-          ? {
-              src: config.COOKIEYES,
-              defer: true,
-            }
-          : {},
-        {
-          src: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
-          defer: true,
-        },
-        {
-          src: '/js/prebid.js',
-          defer: true,
         },
       ],
       meta: [
