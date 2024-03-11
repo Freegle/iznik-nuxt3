@@ -246,8 +246,8 @@ export default {
 
       return p
     },
-    error(e) {
-      console.log('Failed to process file for upload', e)
+    error(e, file) {
+      console.log('Failed to process file for upload', e, file)
       Sentry.captureMessage('Failed to process file for upload', e?.message)
       this.$emit('error', e)
     },
