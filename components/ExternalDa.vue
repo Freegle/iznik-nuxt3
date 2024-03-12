@@ -84,7 +84,7 @@ function refreshAd() {
     if (isVisible.value && miscStore.visible) {
       // Refreshing an ad is a bit more complex because we're using prebid.  That means we have to request the
       // bids, and then once we've got those, refresh the ad slot to kick Google to render the ad.
-      console.log('Refresh ad', props.adUnitPath)
+      console.log('Request bids for ad', props.adUnitPath)
 
       window.pbjs.que.push(function () {
         window.pbjs.requestBids({
@@ -95,11 +95,6 @@ function refreshAd() {
             window.pbjs.setTargetingForGPTAsync([props.adUnitPath])
 
             if (slot) {
-              console.log(
-                'Refresh slot',
-                props.adUnitPath,
-                JSON.stringify(slot)
-              )
               window.googletag.pubads().refresh([slot])
 
               console.log('Refreshed slot', props.adUnitPath)
@@ -142,15 +137,13 @@ async function visibilityChanged(visible) {
             JSON.stringify(slot),
             JSON.stringify(window.googletag.pubads().getSlots())
           )
-        })
 
-        window.googletag.cmd.push(function () {
-          window.googletag.display(props.divId)
-          console.log('Displayed')
-          nextTick().then(() => {
+          window.googletag.cmd.push(function () {
+            window.googletag.display(props.divId)
+
             // We need to refresh the ad because we called disableInitialLoad.  That's what you do when
             // using prebit.
-            console.log('Trigger refresh')
+            console.log('Displayed, now trigger refresh', props.adUnitPath)
             refreshAd()
 
             shownFirst = true
@@ -206,8 +199,6 @@ async function visibilityChanged(visible) {
               }
             })
         })
-
-        timer.value = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
       }
     } catch (e) {
       console.log('Exception in visibilityChanged', e)
