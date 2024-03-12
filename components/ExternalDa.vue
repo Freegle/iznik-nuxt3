@@ -141,10 +141,14 @@ async function visibilityChanged(visible) {
           window.googletag.cmd.push(function () {
             window.googletag.display(props.divId)
 
-            // We need to refresh the ad because we called disableInitialLoad.  That's what you do when
-            // using prebit.
-            console.log('Displayed, now trigger refresh', props.adUnitPath)
-            refreshAd()
+            if (window.googletag.pubads().isInitialLoadDisabled()) {
+              // We need to refresh the ad because we called disableInitialLoad.  That's what you do when
+              // using prebid.
+              console.log('Displayed, now trigger refresh', props.adUnitPath)
+              refreshAd()
+            } else {
+              console.log('Displayed and rendered, no refresh needed')
+            }
 
             shownFirst = true
           })
