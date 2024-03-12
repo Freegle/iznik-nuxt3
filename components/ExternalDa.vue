@@ -182,7 +182,7 @@ async function visibilityChanged(visible) {
                 if (event?.isEmpty) {
                   adShown.value = false
                   console.log('Rendered empty', adShown)
-                  Sentry.captureMessage('Ad rendered empty ' + props.adUnitPath)
+                  // Sentry.captureMessage('Ad rendered empty ' + props.adUnitPath)
                 } else {
                   maxWidth.value = event.size[0]
                   maxHeight.value = event.size[1]
@@ -194,20 +194,20 @@ async function visibilityChanged(visible) {
             .addEventListener('slotVisibilityChanged', (event) => {
               if (event?.slot.getAdUnitPath() === props.adUnitPath) {
                 if (event.inViewPercentage < 51) {
-                  console.log(
-                    `Visibility of slot ${event.slot.getSlotElementId()} changed. New visibility: ${
-                      event.inViewPercentage
-                    }%.Viewport size: ${window.innerWidth}x${
-                      window.innerHeight
-                    }`
-                  )
-                  Sentry.captureMessage(
-                    `Visibility of slot ${event.slot.getSlotElementId()} changed. New visibility: ${
-                      event.inViewPercentage
-                    }%.Viewport size: ${window.innerWidth}x${
-                      window.innerHeight
-                    }`
-                  )
+                  // console.log(
+                  //   `Visibility of slot ${event.slot.getSlotElementId()} changed. New visibility: ${
+                  //     event.inViewPercentage
+                  //   }%.Viewport size: ${window.innerWidth}x${
+                  //     window.innerHeight
+                  //   }`
+                  // )
+                  // Sentry.captureMessage(
+                  //   `Visibility of slot ${event.slot.getSlotElementId()} changed. New visibility: ${
+                  //     event.inViewPercentage
+                  //   }%.Viewport size: ${window.innerWidth}x${
+                  //     window.innerHeight
+                  //   }`
+                  // )
                 }
               }
             })
