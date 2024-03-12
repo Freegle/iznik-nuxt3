@@ -195,13 +195,13 @@ async function visibilityChanged(visible) {
             .addEventListener('slotVisibilityChanged', (event) => {
               if (event?.slot.getAdUnitPath() === props.adUnitPath) {
                 if (event.inViewPercentage < 51) {
-                  // console.log(
-                  //   `Visibility of slot ${event.slot.getSlotElementId()} changed. New visibility: ${
-                  //     event.inViewPercentage
-                  //   }%.Viewport size: ${window.innerWidth}x${
-                  //     window.innerHeight
-                  //   }`
-                  // )
+                  console.log(
+                    `Visibility of slot ${event.slot.getSlotElementId()} changed. New visibility: ${
+                      event.inViewPercentage
+                    }%.Viewport size: ${window.innerWidth}x${
+                      window.innerHeight
+                    }`
+                  )
                 }
               }
             })
