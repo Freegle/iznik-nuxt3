@@ -30,7 +30,6 @@
 </template>
 <script setup>
 import { nextTick } from 'vue'
-import * as Sentry from '@sentry/browser'
 import { ref, computed, onBeforeUnmount } from '#imports'
 import { useMiscStore } from '~/stores/misc'
 
