@@ -5,6 +5,7 @@
     at https://www.ilovefreegle.org/donate - if we got enough donations we would be delighted not to show ads.
      -->
     <div
+      v-if="me"
       v-observe-visibility="{
         callback: visibilityChanged,
         options: {
