@@ -4,16 +4,7 @@
     If you don't like ads, then you can use an ad blocker.  Plus you could donate to us
     at https://www.ilovefreegle.org/donate - if we got enough donations we would be delighted not to show ads.
      -->
-    <div
-      v-if="me"
-      v-observe-visibility="{
-        callback: visibilityChanged,
-        options: {
-          observeFullElement: false,
-        },
-      }"
-      class="pointer"
-    >
+    <div v-if="me" v-observe-visibility="visibilityChanged" class="pointer">
       <div v-if="isVisible">
         <div
           class="d-flex w-100 justify-content-around"
