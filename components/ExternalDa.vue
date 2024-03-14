@@ -38,7 +38,6 @@
   </client-only>
 </template>
 <script setup>
-import { nextTick } from 'vue'
 import { ref, computed, onBeforeUnmount } from '#imports'
 import { useMiscStore } from '~/stores/misc'
 
@@ -126,7 +125,100 @@ const isVisible = ref(false)
 let shownFirst = false
 const emit = defineEmits(['rendered'])
 
-async function visibilityChanged(visible) {
+// We want to wait until an ad has been viewable for 100ms.  That reduces the impact of fast scrolling or
+// redirects.
+let initialTimer = null
+
+function handleVisible() {
+  // Check if the ad is still visible after this delay.
+  if (isVisible.value) {
+    window.googletag.cmd.push(function () {
+      console.log('Create ad slot')
+      slot = window.googletag
+        .defineSlot(props.adUnitPath, props.dimensions, props.divId)
+        .addService(window.googletag.pubads())
+      console.log(
+        'Defined slot',
+        JSON.stringify(slot),
+        JSON.stringify(window.googletag.pubads().getSlots())
+      )
+
+      window.googletag.cmd.push(function () {
+        window.googletag.display(props.divId)
+
+        if (window.googletag.pubads().isInitialLoadDisabled()) {
+          // We need to refresh the ad because we called disableInitialLoad.  That's what you do when
+          // using prebid.
+          console.log('Displayed, now trigger refresh', props.adUnitPath)
+          refreshAd()
+        } else {
+          console.log('Displayed and rendered, no refresh needed')
+        }
+
+        shownFirst = true
+      })
+    })
+
+    window.googletag.cmd.push(function () {
+      window.googletag
+        .pubads()
+        .addEventListener('slotRenderEnded', (event) => {
+          console.log('Slot render ended', event)
+          if (event?.slot.getAdUnitPath() === props.adUnitPath) {
+            console.log(
+              'Rendered',
+              uniqueid.value,
+              'empty',
+              event?.isEmpty,
+              event
+            )
+
+            if (event?.isEmpty) {
+              console.log('Rendered empty')
+              adShown.value = false
+              maxWidth.value = 0
+              maxHeight.value = 0
+            } else {
+              maxWidth.value = event.size[0]
+              maxHeight.value = event.size[1]
+            }
+
+            if (event?.isEmpty) {
+              adShown.value = false
+              console.log('Rendered empty', adShown)
+              // Sentry.captureMessage('Ad rendered empty ' + props.adUnitPath)
+            } else {
+              maxWidth.value = event.size[0]
+              maxHeight.value = event.size[1]
+            }
+
+            emit('rendered', adShown.value)
+          }
+        })
+        .addEventListener('slotVisibilityChanged', (event) => {
+          if (event?.slot.getAdUnitPath() === props.adUnitPath) {
+            if (event.inViewPercentage < 51) {
+              // console.log(
+              //   `Visibility of slot ${event.slot.getSlotElementId()} changed. New visibility: ${
+              //     event.inViewPercentage
+              //   }%.Viewport size: ${window.innerWidth}x${
+              //     window.innerHeight
+              //   }`
+              // )
+              // Sentry.captureMessage(
+              //   `Visibility of slot ${event.slot.getSlotElementId()} changed. New visibility: ${
+              //     event.inViewPercentage
+              //   }%.Viewport size: ${window.innerWidth}x${
+              //     window.innerHeight
+              //   }`
+              // )
+            }
+          }
+        })
+    })
+  }
+}
+function visibilityChanged(visible) {
   if (!blocked) {
     try {
       isVisible.value = visible
@@ -134,92 +226,9 @@ async function visibilityChanged(visible) {
       if (visible && !shownFirst) {
         console.log('Queue create ad', props.adUnitPath, props.divId)
 
-        await nextTick()
-
-        window.googletag.cmd.push(function () {
-          console.log('Create ad slot')
-          slot = window.googletag
-            .defineSlot(props.adUnitPath, props.dimensions, props.divId)
-            .addService(window.googletag.pubads())
-          console.log(
-            'Defined slot',
-            JSON.stringify(slot),
-            JSON.stringify(window.googletag.pubads().getSlots())
-          )
-
-          window.googletag.cmd.push(function () {
-            window.googletag.display(props.divId)
-
-            if (window.googletag.pubads().isInitialLoadDisabled()) {
-              // We need to refresh the ad because we called disableInitialLoad.  That's what you do when
-              // using prebid.
-              console.log('Displayed, now trigger refresh', props.adUnitPath)
-              refreshAd()
-            } else {
-              console.log('Displayed and rendered, no refresh needed')
-            }
-
-            shownFirst = true
-          })
-        })
-
-        window.googletag.cmd.push(function () {
-          window.googletag
-            .pubads()
-            .addEventListener('slotRenderEnded', (event) => {
-              console.log('Slot render ended', event)
-              if (event?.slot.getAdUnitPath() === props.adUnitPath) {
-                console.log(
-                  'Rendered',
-                  uniqueid.value,
-                  'empty',
-                  event?.isEmpty,
-                  event
-                )
-
-                if (event?.isEmpty) {
-                  console.log('Rendered empty')
-                  adShown.value = false
-                  maxWidth.value = 0
-                  maxHeight.value = 0
-                } else {
-                  maxWidth.value = event.size[0]
-                  maxHeight.value = event.size[1]
-                }
-
-                if (event?.isEmpty) {
-                  adShown.value = false
-                  console.log('Rendered empty', adShown)
-                  // Sentry.captureMessage('Ad rendered empty ' + props.adUnitPath)
-                } else {
-                  maxWidth.value = event.size[0]
-                  maxHeight.value = event.size[1]
-                }
-
-                emit('rendered', adShown.value)
-              }
-            })
-            .addEventListener('slotVisibilityChanged', (event) => {
-              if (event?.slot.getAdUnitPath() === props.adUnitPath) {
-                if (event.inViewPercentage < 51) {
-                  // console.log(
-                  //   `Visibility of slot ${event.slot.getSlotElementId()} changed. New visibility: ${
-                  //     event.inViewPercentage
-                  //   }%.Viewport size: ${window.innerWidth}x${
-                  //     window.innerHeight
-                  //   }`
-                  // )
-                  // Sentry.captureMessage(
-                  //   `Visibility of slot ${event.slot.getSlotElementId()} changed. New visibility: ${
-                  //     event.inViewPercentage
-                  //   }%.Viewport size: ${window.innerWidth}x${
-                  //     window.innerHeight
-                  //   }`
-                  // )
-                }
-              }
-            })
-        })
+        if (!initialTimer) {
+          initialTimer = setTimeout(handleVisible, 100)
+        }
       }
     } catch (e) {
       console.log('Exception in visibilityChanged', e)
