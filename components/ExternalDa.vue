@@ -130,8 +130,8 @@ const emit = defineEmits(['rendered'])
 let initialTimer = null
 
 function handleVisible() {
-  // Check if the ad is still visible after this delay.
-  if (isVisible.value) {
+  // Check if the ad is still visible after this delay, and no modal is open.
+  if (isVisible.value && !document.body.classList.contains('modal-open')) {
     window.googletag.cmd.push(function () {
       console.log('Create ad slot')
       slot = window.googletag
