@@ -198,20 +198,18 @@ function handleVisible() {
         .addEventListener('slotVisibilityChanged', (event) => {
           if (event?.slot.getAdUnitPath() === props.adUnitPath) {
             if (event.inViewPercentage < 51) {
-              // console.log(
-              //   `Visibility of slot ${event.slot.getSlotElementId()} changed. New visibility: ${
-              //     event.inViewPercentage
-              //   }%.Viewport size: ${window.innerWidth}x${
-              //     window.innerHeight
-              //   }`
-              // )
-              // Sentry.captureMessage(
-              //   `Visibility of slot ${event.slot.getSlotElementId()} changed. New visibility: ${
-              //     event.inViewPercentage
-              //   }%.Viewport size: ${window.innerWidth}x${
-              //     window.innerHeight
-              //   }`
-              // )
+              const msg =
+                'Visibility of slot ' +
+                props.adUnitPath +
+                ' changed. New visibility: ' +
+                event.inViewPercentage +
+                '%.Viewport size: ' +
+                window.innerWidth +
+                'x' +
+                window.innerHeight
+
+              console.log(msg)
+              Sentry.captureMessage(msg)
             }
           }
         })
