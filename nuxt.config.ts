@@ -225,6 +225,11 @@ export default defineNuxtConfig({
     head: {
       title: "Freegle - Don't throw it away, give it away!",
       script: [
+        // We have to load GSI before we load the cookie banner, otherwise the Google Sign-in button doesn't
+        // render.
+        {
+          src: 'https://accounts.google.com/gsi/client',
+        },
         // The ecosystem of advertising is complex.
         // - The underlying ad service is Google Tags (GPT).
         // - We use prebid (pbjs), which is some kind of ad broker which gives us a pipeline of ads to use.

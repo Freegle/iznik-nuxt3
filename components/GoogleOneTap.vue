@@ -11,7 +11,6 @@
 <script>
 // eslint-disable-next-line camelcase
 import jwt_decode from 'jwt-decode'
-import { loadScript } from 'vue-plugin-load-script'
 import { useAuthStore } from '../stores/auth'
 
 export default {
@@ -34,7 +33,7 @@ export default {
       return this.runtimeConfig.public.GOOGLE_CLIENT_ID
     },
   },
-  async mounted() {
+  mounted() {
     const self = this
 
     // Fallback in case:
@@ -47,14 +46,13 @@ export default {
 
     if (!this.loggedIn) {
       try {
+        // GSI script was loaded in nuxt.config.js
         console.log('Set credentials response')
         window.handleGoogleCredentialsResponse =
           this.handleGoogleCredentialsResponse
 
         console.log('Set show')
         this.show = true
-        console.log('Load GSI')
-        await loadScript('https://accounts.google.com/gsi/client')
         try {
           window.google.accounts.id.prompt(() => {
             console.log('One Tap prompt returned')
