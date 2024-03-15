@@ -200,8 +200,8 @@ function handleVisible() {
                 'x' +
                 window.innerHeight
 
-              console.log(msg)
-              Sentry.captureMessage(msg)
+              // console.log(msg)
+              // Sentry.captureMessage(msg)
             }
           }
         })
