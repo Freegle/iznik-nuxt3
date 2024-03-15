@@ -29,7 +29,6 @@
   </client-only>
 </template>
 <script setup>
-import * as Sentry from '@sentry/browser'
 import { ref, computed, onBeforeUnmount } from '#imports'
 import { useMiscStore } from '~/stores/misc'
 
@@ -190,18 +189,18 @@ function handleVisible() {
         .addEventListener('slotVisibilityChanged', (event) => {
           if (event?.slot.getAdUnitPath() === props.adUnitPath) {
             if (event.inViewPercentage < 51 && miscStore.visible) {
-              const msg =
-                'Visibility of slot ' +
-                props.adUnitPath +
-                ' changed. New visibility: ' +
-                event.inViewPercentage +
-                '%.Viewport size: ' +
-                window.innerWidth +
-                'x' +
-                window.innerHeight
-
-              console.log(msg)
-              Sentry.captureMessage(msg)
+              // const msg =
+              //   'Visibility of slot ' +
+              //   props.adUnitPath +
+              //   ' changed. New visibility: ' +
+              //   event.inViewPercentage +
+              //   '%.Viewport size: ' +
+              //   window.innerWidth +
+              //   'x' +
+              //   window.innerHeight
+              //
+              // console.log(msg)
+              // Sentry.captureMessage(msg)
             }
           }
         })
