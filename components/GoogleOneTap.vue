@@ -46,46 +46,23 @@ export default {
 
     if (!this.loggedIn) {
       try {
+        // GSI script was loaded in nuxt.config.js
         console.log('Set credentials response')
         window.handleGoogleCredentialsResponse =
           this.handleGoogleCredentialsResponse
 
         console.log('Set show')
         this.show = true
-        console.log('Load SDK')
-        ;(function (d, s, id) {
-          try {
-            console.log('SDK callback')
-            const fjs = d.getElementsByTagName(s)[0]
-            if (d.getElementById(id)) {
-              self.$emit('complete')
-              return
-            }
-            console.log('Load GSI')
-            const js = d.createElement(s)
-            js.id = id
-            js.src = 'https://accounts.google.com/gsi/client'
-            js.onload = (e) => {
-              console.log('GSI loaded')
-              try {
-                window.google.accounts.id.prompt(() => {
-                  console.log('One Tap prompt returned')
-                  self.$emit('complete')
-                })
-              } catch (e) {
-                console.error('One Tap error', e)
-                self.$emit('complete')
-              }
-            }
-            js.onerror = (e) => {
-              console.log('Error loading Google One Tap', e)
-              self.$emit('complete')
-            }
-            fjs.parentNode.insertBefore(js, fjs)
-          } catch (e) {
-            console.log('Exception in SDK callback', e)
-          }
-        })(document, 'script', 'google-jssdk')
+        try {
+          window.google.accounts.id.prompt(() => {
+            console.log('One Tap prompt returned')
+            self.$emit('complete')
+          })
+        } catch (e) {
+          console.error('One Tap error', e)
+          self.$emit('complete')
+        }
+
         console.log('Loaded SDK')
       } catch (e) {
         console.log('Failed to load One Tap', e)

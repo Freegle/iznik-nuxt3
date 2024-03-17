@@ -1,44 +1,53 @@
 <template>
   <div>
     <main class="ml-0 ps-0 pe-0 pageContent">
-      <div class="aboveSticky">
-        <slot ref="pageContent" />
-      </div>
-      <client-only>
-        <div
-          v-if="allowAd"
-          class="d-flex justify-content-around w-100"
-          :class="{
-            sticky: true,
-            anAdRendered: !adRendering && !noAdRendered,
-          }"
-        >
-          <VisibleWhen :at="['xs', 'sm']" class="sticky">
-            <ExternalDa
-              ad-unit-path="/22794232631/freegle_sticky"
-              :dimensions="[320, 50]"
-              div-id="div-gpt-ad-1699973618906-0"
-              pixel
-              @rendered="adRendered"
-            />
-          </VisibleWhen>
-          <VisibleWhen :at="['md', 'lg', 'xl', 'xxl']">
-            <ExternalDa
-              ad-unit-path="/22794232631/freegle_sticky_desktop"
-              :dimensions="[728, 90]"
-              div-id="div-gpt-ad-1707999304775-0"
-              pixel
-              @rendered="adRendered"
-            />
-          </VisibleWhen>
+      <div v-if="!client">
+        <div>
+          <div class="aboveSticky">
+            <slot ref="pageContent" />
+          </div>
         </div>
-        <div
-          v-else
-          class="adFallback sticky ourBack w-100 text-center d-flex flex-column justify-content-center"
-        >
-          <nuxt-link to="/donate" class="text-white nodecor">
-            Help keep Freegle running. Click to donate.
-          </nuxt-link>
+      </div>
+      <client-only v-else>
+        <div>
+          <div class="aboveSticky">
+            <slot ref="pageContent" />
+          </div>
+          <div
+            v-if="allowAd"
+            class="d-flex justify-content-around w-100"
+            :class="{
+              sticky: true,
+              anAdRendered: !adRendering && !noAdRendered,
+            }"
+          >
+            <VisibleWhen :at="['xs', 'sm']" class="sticky">
+              <ExternalDa
+                ad-unit-path="/22794232631/freegle_sticky"
+                :dimensions="[[320, 50]]"
+                div-id="div-gpt-ad-1699973618906-0"
+                pixel
+                @rendered="adRendered"
+              />
+            </VisibleWhen>
+            <VisibleWhen :at="['md', 'lg', 'xl', 'xxl']">
+              <ExternalDa
+                ad-unit-path="/22794232631/freegle_sticky_desktop"
+                :dimensions="[[728, 90]]"
+                div-id="div-gpt-ad-1707999304775-0"
+                pixel
+                @rendered="adRendered"
+              />
+            </VisibleWhen>
+          </div>
+          <div
+            v-else
+            class="adFallback sticky ourBack w-100 text-center d-flex flex-column justify-content-center"
+          >
+            <nuxt-link to="/donate" class="text-white nodecor">
+              Help keep Freegle running. Click to donate.
+            </nuxt-link>
+          </div>
         </div>
       </client-only>
     </main>
@@ -100,6 +109,7 @@ const BouncingEmail = defineAsyncComponent(() =>
 const BreakpointFettler = defineAsyncComponent(() =>
   import('~/components/BreakpointFettler')
 )
+
 const ExternalDa = defineAsyncComponent(() => import('~/components/ExternalDa'))
 
 export default {
@@ -122,6 +132,9 @@ export default {
     }
   },
   computed: {
+    client() {
+      return process.client
+    },
     breakpoint() {
       const store = useMiscStore()
       return store.getBreakpoint
@@ -139,6 +152,7 @@ export default {
     },
   },
   async mounted() {
+    console.log('LayoutCommon mounted')
     // Start our timer.  Holding the time in the store allows us to update the time regularly and have reactivity
     // cause displayed fromNow() values to change, rather than starting a timer for each of them.
     if (process.client) {
@@ -160,7 +174,9 @@ export default {
       // Get chats and poll regularly for new ones
       const chatStore = useChatStore()
       chatStore.pollForChatUpdates()
-    } else if (process.client) {
+    }
+    
+    /*if (process.client) {
       const mobileStore = useMobileStore()
       //if (!mobileStore.isApp) {
 
@@ -189,7 +205,7 @@ export default {
         console.log('No cookie banner')
       }
       //}
-    }
+    } */
 
     try {
       // Set the build date.  This may get superceded by Sentry releases, but it does little harm to add it in.

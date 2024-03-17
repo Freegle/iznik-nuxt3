@@ -537,54 +537,54 @@ export default {
         ? {
             0: {
               adUnitPath: '/22794232631/freegle_feed_desktop',
-              dimensions: [728, 90],
+              dimensions: [[728, 90]],
               divId: 'div-gpt-ad-1692867153277-0',
             },
             1: {
               adUnitPath: '/22794232631/freegle_feed_desktop_2',
-              dimensions: [728, 90],
+              dimensions: [[728, 90]],
               divId: 'div-gpt-ad-1708280158016-0',
             },
             2: {
               adUnitPath: '/22794232631/freegle_feed_desktop_3',
-              dimensions: [728, 90],
+              dimensions: [[728, 90]],
               divId: 'div-gpt-ad-1708280229653-0',
             },
             3: {
               adUnitPath: '/22794232631/freegle_feed_desktop_4',
-              dimensions: [728, 90],
+              dimensions: [[728, 90]],
               divId: 'div-gpt-ad-1708280290737-0',
             },
             4: {
               adUnitPath: '/22794232631/freegle_feed_desktop_5',
-              dimensions: [728, 90],
+              dimensions: [[728, 90]],
               divId: 'div-gpt-ad-1708280362777-0',
             },
           }
         : {
             0: {
               adUnitPath: '/22794232631/freegle_feed_app',
-              dimensions: [300, 250],
+              dimensions: [[300, 250]],
               divId: 'div-gpt-ad-1692867324381-0',
             },
             1: {
               adUnitPath: '/22794232631/freegle_feed_app_2',
-              dimensions: [300, 250],
+              dimensions: [[300, 250]],
               divId: 'div-gpt-ad-1707999616879-0',
             },
             2: {
               adUnitPath: '/22794232631/freegle_feed_app_3',
-              dimensions: [300, 250],
+              dimensions: [[300, 250]],
               divId: 'div-gpt-ad-1707999845886-0',
             },
             3: {
               adUnitPath: '/22794232631/freegle_feed_app_4',
-              dimensions: [300, 250],
+              dimensions: [[300, 250]],
               divId: 'div-gpt-ad-1707999962593-0',
             },
             4: {
               adUnitPath: '/22794232631/freegle_feed_app_5',
-              dimensions: [300, 250],
+              dimensions: [[300, 250]],
               divId: 'div-gpt-ad-1708000097990-0',
             },
           }

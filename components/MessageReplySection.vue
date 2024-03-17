@@ -24,7 +24,7 @@
         :label-for="'replytomessage-' + message.id"
         :description="
           message.type === 'Offer'
-            ? 'Interested?  Please explain why you\'d like it and when you can collect.  Always be polite and helpful, and remember it\'s not always first come first served.  If appropriate, ask if it\'s working.'
+            ? 'Explain why you\'d like it.  It\'s not always first come first served.  If appropriate, ask if it\'s working. Always be polite.'
             : 'Can you help?  If you have what they\'re looking for, let them know.'
         "
       >
@@ -43,6 +43,19 @@
           rows="3"
           max-rows="8"
           class="flex-grow-1"
+        />
+      </b-form-group>
+      <b-form-group
+        v-if="message.type == 'Offer'"
+        class="mt-1"
+        label="When could you collect?"
+        :label-for="'replytomessage2-' + message.id"
+        description="Suggest days and times you could collect if you're chosen.  Your plans might change but this speeds up making arrangements."
+      >
+        <b-form-input
+          :id="'replytomessage2-' + message.id"
+          v-model="collect"
+          class="border border-success"
         />
       </b-form-group>
       <p v-if="me && !alreadyAMember" class="text--small text-muted">
@@ -160,6 +173,7 @@ export default {
   data() {
     return {
       reply: null,
+      collect: null,
       replying: false,
       email: null,
       emailValid: false,
@@ -191,7 +205,13 @@ export default {
       )
     },
     disableSend() {
-      return this.replying || !this.reply || (!this.me && !this.emailValid)
+      return (
+        this.replying ||
+        !this.reply ||
+        this.stillAvailable ||
+        (this.message?.type === 'Offer' && !this.collect) ||
+        (!this.me && !this.emailValid)
+      )
     },
     fromme() {
       return this.message?.fromuser === this.myid
@@ -277,6 +297,12 @@ export default {
         const replyStore = useReplyStore()
         replyStore.replyMsgId = this.id
         replyStore.replyMessage = this.reply
+
+        if (this.collect) {
+          replyStore.replyMessage +=
+            '\r\n\r\nPossible collection times: ' + this.collect
+        }
+
         replyStore.replyingAt = Date.now()
         console.log(
           'State',

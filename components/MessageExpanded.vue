@@ -48,8 +48,8 @@
           <ExternalDa
             :ad-unit-path="adUnitPath"
             :ad-id="adId"
-            :dimensions="[300, 250]"
-            :div-id="adId + '-' + id"
+            :dimensions="[[300, 250]]"
+            :div-id="adId"
             @rendered="adRendered = true"
           />
         </div>

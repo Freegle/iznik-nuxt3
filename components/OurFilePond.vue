@@ -10,6 +10,8 @@
       :files="myFiles"
       image-resize-target-width="800"
       image-resize-target-height="800"
+      image-validate-size-max-width="400"
+      image-validate-size-max-height="400"
       image-crop-aspect-ratio="1"
       :label-idle="userPrompt"
       :server="{ process, revert, restore, load, fetch }"
@@ -19,6 +21,8 @@
       @init="photoInit"
       @processfile="processed"
       @processfiles="allProcessed"
+      @error="error"
+      @preparefile="preparefile"
     />
     <div v-else>
       Sorry, photo uploads aren't supported on this browser. Maybe it's old?
@@ -26,6 +30,7 @@
   </div>
 </template>
 <script>
+import * as Sentry from '@sentry/browser'
 import { useComposeStore } from '../stores/compose'
 import { useMobileStore } from '@/stores/mobile'
 import { Camera, CameraSource, CameraResultType } from '@capacitor/camera'
@@ -175,6 +180,9 @@ export default {
         }
       }
     },
+    preparefile(file, output) {
+      console.log('Transformed', file?.fileSize, output?.size)
+    },
     async process(fieldName, file, metadata, load, error, progress, abort) {
       this.composeStore.uploading = true
 
@@ -261,9 +269,11 @@ export default {
           // Only one, so the allProcessed event isn't fired by pond.
           this.allProcessed()
         }
+      } else {
+        console.error('Failed to process file', error, file)
+        this.error(error)
       }
     },
-
     addFile(f) {
       this.$refs.pond.addFile(f)
     },
@@ -295,11 +305,11 @@ export default {
 
       return p
     },
-  },
-  blockkey(e) {
-    // We're blocking all interaction with this div while the load happens.
-    e.returnValue = false
-    return false
+    error(e, file) {
+      console.log('Failed to process file for upload', e, file)
+      Sentry.captureMessage('Failed to process file for upload', e?.message)
+      this.$emit('error', e)
+    },
   },
 }
 </script>

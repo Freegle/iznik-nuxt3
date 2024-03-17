@@ -16,7 +16,7 @@
             variant="info"
             class="lg ml-2"
           >
-            {{ left }} left
+            {{ message.availablenow }} left
           </b-badge>
         </div>
       </h3>
@@ -55,7 +55,7 @@
           :taken-by="takenBy"
           :choose-error="chooseError"
           :invalid="submittedWithNoSelectedUser"
-          @took-users="tookUsers = $event"
+          @took-users="took"
         />
       </div>
       <div v-if="showCompletion">
@@ -322,9 +322,15 @@ export default {
     },
   },
   methods: {
+    took(users) {
+      console.log('Took', users)
+      this.tookUsers = users
+    },
     async submit(callback) {
       if (this.type === 'Taken' && !this.tookUsers.length) {
-        return (this.submittedWithNoSelectedUser = true)
+        callback()
+        this.submittedWithNoSelectedUser = true
+        return
       } else {
         this.submittedWithNoSelectedUser = false
       }
