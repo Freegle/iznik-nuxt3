@@ -316,26 +316,31 @@ export default defineNuxtConfig({
             `)
               });
 
-            // This Identity Hub script is needed by pubmatic.  We have to load it before we load any of the
-            // other scripts.
             window.IHPWT = {};
             var PWTcalled = false;
             
-            function loadScript(url) {
+            function loadScript(url, block) {
               if (url && url.length) {
                 console.log('Load script:', url);
                 var script = document.createElement('script');
                 script.defer = true;
                 script.type = 'text/javascript';
                 script.src = url;
+                
+                if (block) {
+                  // Block loading of this script until CookieYes has been authorised.
+                  console.log('Set CookieYes script block', url);
+                  script.setAttribute('data-cookieyes', 'cookieyes-advertisement')
+                }
+                
                 document.head.appendChild(script);
               }
             }
 
-            // First we load Cookieyes, which needs to be loaded before the PWT script.
+            // First we load Cookieyes, which needs to be loaded before the PWT script.  
             loadScript('` +
             config.COOKIEYES +
-            `')
+            `', false)
              
             function postPWT() {
               if (!PWTcalled) {
@@ -346,8 +351,8 @@ export default defineNuxtConfig({
                 // - Prebid.
                 // The ordering is ensured by using defer and appending the script.
                 console.log('PWT.js loaded');
-                loadScript('https://securepubads.g.doubleclick.net/tag/js/gpt.js')
-                loadScript('/js/prebid.js')
+                loadScript('https://securepubads.g.doubleclick.net/tag/js/gpt.js', true)
+                loadScript('/js/prebid.js', true)
               }
             };
             
@@ -364,7 +369,7 @@ export default defineNuxtConfig({
               }
             }
             
-            loadScript(url+profileVersionId+'/pwt.js');
+            loadScript(url+profileVersionId+'/pwt.js', true);
             
             // Failsafe to load GPT etc if PWT fails.
             setTimeout(postPWT, 500);
