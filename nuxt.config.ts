@@ -388,7 +388,14 @@ export default defineNuxtConfig({
               function checkCookieYes() {
                 if (document.cookie.indexOf('cookieyes-consent') > -1) {
                   console.log('CookieYes loaded');
-                  postCookieYes();
+                  window.__tcfapi('getTCData', 2, (tcData, success) => {
+                    console.log('TC data', JSON.stringify(tcData), success)
+                    if (success) {
+                      postCookieYes();
+                    } else {
+                      console.log('Failed to get TC data')
+                    }
+                  }, [1,2,3]);
                 } else {
                   console.log('CookieYes not yet loaded')
                   setTimeout(checkCookieYes, 100);
