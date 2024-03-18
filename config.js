@@ -56,6 +56,19 @@ const CONFIG = {
             adSlot: '5753989',
           },
         },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
+          },
+        },
+        {
+          bidder: 'appnexus',
+          params: {
+            placementId: '32336192',
+          },
+        },
       ],
     },
     {
@@ -71,6 +84,19 @@ const CONFIG = {
           params: {
             publisherId: '164422',
             adSlot: '5753990',
+          },
+        },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
+          },
+        },
+        {
+          bidder: 'appnexus',
+          params: {
+            placementId: '32336193',
           },
         },
       ],
@@ -90,21 +116,17 @@ const CONFIG = {
             adSlot: '5773059',
           },
         },
-      ],
-    },
-    {
-      code: '/22794232631/freegle_product_email',
-      mediaTypes: {
-        banner: {
-          sizes: ADS_SQUARISH_SIZES,
-        },
-      },
-      bids: [
         {
-          bidder: 'pubmatic',
+          bidder: 'gumgum',
           params: {
-            publisherId: '164422',
-            adSlot: '5753984',
+            zone: 'hx1nvvhf',
+            slot: '1091236',
+          },
+        },
+        {
+          bidder: 'appnexus',
+          params: {
+            placementId: '32336187',
           },
         },
       ],
@@ -124,6 +146,19 @@ const CONFIG = {
             adSlot: '5753984',
           },
         },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
+          },
+        },
+        {
+          bidder: 'appnexus',
+          params: {
+            placementId: '32336188',
+          },
+        },
       ],
     },
     {
@@ -139,6 +174,19 @@ const CONFIG = {
           params: {
             publisherId: '164422',
             adSlot: '5753988',
+          },
+        },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
+          },
+        },
+        {
+          bidder: 'appnexus',
+          params: {
+            placementId: '32336191',
           },
         },
       ],
@@ -158,6 +206,19 @@ const CONFIG = {
             adSlot: '5775938',
           },
         },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
+          },
+        },
+        {
+          bidder: 'appnexus',
+          params: {
+            placementId: '32336198',
+          },
+        },
       ],
     },
     {
@@ -173,6 +234,19 @@ const CONFIG = {
           params: {
             publisherId: '164422',
             adSlot: '5753983',
+          },
+        },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
+          },
+        },
+        {
+          bidder: 'appnexus',
+          params: {
+            placementId: '32336186',
           },
         },
       ],
@@ -192,6 +266,19 @@ const CONFIG = {
             adSlot: '5753982',
           },
         },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
+          },
+        },
+        {
+          bidder: 'appnexus',
+          params: {
+            placementId: '32336185',
+          },
+        },
       ],
     },
     {
@@ -207,6 +294,19 @@ const CONFIG = {
           params: {
             publisherId: '164422',
             adSlot: '5753987',
+          },
+        },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
+          },
+        },
+        {
+          bidder: 'appnexus',
+          params: {
+            placementId: '32336179',
           },
         },
       ],
@@ -226,6 +326,19 @@ const CONFIG = {
             adSlot: '5753986',
           },
         },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
+          },
+        },
+        {
+          bidder: 'appnexus',
+          params: {
+            placementId: '32336190',
+          },
+        },
       ],
     },
     {
@@ -241,6 +354,19 @@ const CONFIG = {
           params: {
             publisherId: '164422',
             adSlot: '5753981',
+          },
+        },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
+          },
+        },
+        {
+          bidder: 'appnexus',
+          params: {
+            placementId: '32336154',
           },
         },
       ],
@@ -260,6 +386,19 @@ const CONFIG = {
             adSlot: '5753991',
           },
         },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
+          },
+        },
+        {
+          bidder: 'appnexus',
+          params: {
+            placementId: '32336180',
+          },
+        },
       ],
     },
     {
@@ -275,6 +414,19 @@ const CONFIG = {
           params: {
             publisherId: '164422',
             adSlot: '5753992',
+          },
+        },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
+          },
+        },
+        {
+          bidder: 'appnexus',
+          params: {
+            placementId: '32336181',
           },
         },
       ],
@@ -294,6 +446,19 @@ const CONFIG = {
             adSlot: '5753993',
           },
         },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
+          },
+        },
+        {
+          bidder: 'appnexus',
+          params: {
+            placementId: '32336182',
+          },
+        },
       ],
     },
     {
@@ -309,6 +474,19 @@ const CONFIG = {
           params: {
             publisherId: '164422',
             adSlot: '5753994',
+          },
+        },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
+          },
+        },
+        {
+          bidder: 'appnexus',
+          params: {
+            placementId: '32336183',
           },
         },
       ],
