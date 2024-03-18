@@ -329,6 +329,8 @@ export default defineNuxtConfig({
                 
                 if (block) {
                   // Block loading of this script until CookieYes has been authorised.
+                  // It's not clear that this blocking works, but it does no harm to 
+                  // ask for it.
                   console.log('Set CookieYes script block', url);
                   script.setAttribute('data-cookieyes', 'cookieyes-advertisement')
                 }
@@ -337,11 +339,6 @@ export default defineNuxtConfig({
               }
             }
 
-            // First we load Cookieyes, which needs to be loaded before the PWT script.  
-            loadScript('` +
-            config.COOKIEYES +
-            `', false)
-             
             function postPWT() {
               if (!PWTcalled) {
                 PWTcalled = true;
@@ -356,23 +353,54 @@ export default defineNuxtConfig({
               }
             };
             
-            window.IHPWT.jsLoaded = postPWT;
-             
-            var purl = window.location.href;
-            var url = '//ads.pubmatic.com/AdServer/js/pwt/164422/12426';
-            var profileVersionId = '';
-            if (purl.indexOf('pwtv=')>0){
-              var regexp = /pwtv=(.*?)(&|$)/g;
-              var matches = regexp.exec(purl);
-              if(matches.length >= 2 && matches[1].length > 0){
-                profileVersionId = '/'+matches[1];
+            function postCookieYes() {
+              window.IHPWT.jsLoaded = postPWT;
+               
+              var purl = window.location.href;
+              var url = '//ads.pubmatic.com/AdServer/js/pwt/164422/12426';
+              var profileVersionId = '';
+              if (purl.indexOf('pwtv=')>0){
+                var regexp = /pwtv=(.*?)(&|$)/g;
+                var matches = regexp.exec(purl);
+                if(matches.length >= 2 && matches[1].length > 0){
+                  profileVersionId = '/'+matches[1];
+                }
               }
+              
+              loadScript(url+profileVersionId+'/pwt.js', true);
+              
+              // Failsafe to load GPT etc if PWT fails.
+              setTimeout(postPWT, 500);
             }
+
+            if ('` +
+            config.COOKIEYES +
+            `' != 'null') {
+              // First we load CookieYes, which needs to be loaded before the PWT script.
+              console.log('Load CookieYes');
+              loadScript('` +
+            config.COOKIEYES +
+            `', false)
             
-            loadScript(url+profileVersionId+'/pwt.js', true);
-            
-            // Failsafe to load GPT etc if PWT fails.
-            setTimeout(postPWT, 500);
+              // Now we wait until the CookieYes script has set its own cookie.  
+              // This might be later than when the script has loaded in pure JS terms, but we
+              // need to be sure it's loaded before we can move on to the PWT.
+              function checkCookieYes() {
+                if (document.cookie.indexOf('cookieyes-consent') > -1) {
+                  console.log('CookieYes loaded');
+                  postCookieYes();
+                } else {
+                  console.log('CookieYes not yet loaded')
+                  setTimeout(checkCookieYes, 100);
+                }
+              }
+              
+              checkCookieYes();
+            } else {
+              console.log('No CookieYes to load')
+              postCookieYes();
+            }
+
           } catch (e) {
             console.error('Error initialising pbjs and googletag:', e.message);
           }`,
