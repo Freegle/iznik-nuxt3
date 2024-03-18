@@ -387,17 +387,20 @@ export default defineNuxtConfig({
               // need to be sure it's loaded before we can move on to the PWT.
               function checkCookieYes() {
                 if (document.cookie.indexOf('cookieyes-consent') > -1) {
-                  console.log('CookieYes loaded');
+                  console.log('CookieYes cookie is set, so CookieYes is loaded');
                   
                   // Check that we have set the TCF string which the PWT script uses to
-                  // check for the CMP.
+                  // check for the CMP.  This only happens once the user has responded
+                  // to the cookie banner.
                   if (window.__tcfapi) {
                     window.__tcfapi('getTCData', 2, (tcData, success) => {
                       console.log('TC data', JSON.stringify(tcData), success)
-                      if (success) {
+                      if (success && tcData && tcData.tcString) {
+                        console.log('TC data loaded and TC String set');
                         postCookieYes();
                       } else {
-                        console.log('Failed to get TC data')
+                        console.log('Failed to get TC data or string, retry.')
+                        setTimeout(checkCookieYes, 100);
                       }
                     }, [1,2,3]);
                   } else {
