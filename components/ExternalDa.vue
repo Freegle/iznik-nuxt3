@@ -61,14 +61,14 @@ const passClicks = computed(() => {
 })
 
 const uniqueid = ref(props.adUnitPath)
-const blocked = !process.client || !window?.pbjs?.version
 
 const maxWidth = ref(Math.max(...props.dimensions.map((d) => d[0])))
 const maxHeight = ref(Math.max(...props.dimensions.map((d) => d[1])))
 
 let slot = null
 
-const timer = ref(null)
+let refreshTimer = null
+let visibleTimer = null
 const PREBID_TIMEOUT = 1000
 const AD_REFRESH_TIMEOUT = 45000
 
@@ -106,9 +106,11 @@ function refreshAd() {
           },
         })
       })
+    } else {
+      console.log('Not refreshing ad', props.adUnitPath, isVisible.value)
     }
 
-    timer.value = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
+    refreshTimer = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
   }
 }
 
@@ -124,15 +126,9 @@ function handleVisible() {
   // Check if the ad is still visible after this delay, and no modal is open.
   if (isVisible.value && !document.body.classList.contains('modal-open')) {
     window.googletag.cmd.push(function () {
-      console.log('Create ad slot')
       slot = window.googletag
         .defineSlot(props.adUnitPath, props.dimensions, props.divId)
         .addService(window.googletag.pubads())
-      console.log(
-        'Defined slot',
-        JSON.stringify(slot),
-        JSON.stringify(window.googletag.pubads().getSlots())
-      )
 
       window.googletag.cmd.push(function () {
         window.googletag.display(props.divId)
@@ -143,7 +139,11 @@ function handleVisible() {
           console.log('Displayed, now trigger refresh', props.adUnitPath)
           refreshAd()
         } else {
-          console.log('Displayed and rendered, no refresh needed')
+          console.log('Displayed and rendered, refresh timer')
+
+          if (!refreshTimer) {
+            refreshTimer = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
+          }
         }
 
         shownFirst = true
@@ -154,7 +154,6 @@ function handleVisible() {
       window.googletag
         .pubads()
         .addEventListener('slotRenderEnded', (event) => {
-          console.log('Slot render ended', event)
           if (event?.slot.getAdUnitPath() === props.adUnitPath) {
             console.log(
               'Rendered',
@@ -165,7 +164,6 @@ function handleVisible() {
             )
 
             if (event?.isEmpty) {
-              console.log('Rendered empty')
               adShown.value = false
               maxWidth.value = 0
               maxHeight.value = 0
@@ -176,7 +174,7 @@ function handleVisible() {
 
             if (event?.isEmpty) {
               adShown.value = false
-              console.log('Rendered empty', adShown)
+              console.log('Rendered empty', props.adUnitPath, adShown)
               // Sentry.captureMessage('Ad rendered empty ' + props.adUnitPath)
             } else {
               maxWidth.value = event.size[0]
@@ -208,19 +206,29 @@ function handleVisible() {
   }
 }
 function visibilityChanged(visible) {
-  if (!blocked) {
-    try {
-      isVisible.value = visible
+  // Check the pbjs status here rather than on component load, as it might not be available yet.
+  if (process.client) {
+    if (!window.pbjs?.version) {
+      console.log('Prebid not loaded yet')
+      visibleTimer = window.setTimeout(() => {
+        visibilityChanged(visible)
+      }, 100)
+    } else {
+      visibleTimer = null
 
-      if (visible && !shownFirst) {
-        console.log('Queue create ad', props.adUnitPath, props.divId)
+      try {
+        isVisible.value = visible
 
-        if (!initialTimer) {
-          initialTimer = setTimeout(handleVisible, 100)
+        if (visible && !shownFirst) {
+          console.log('Queue create ad', props.adUnitPath, props.divId)
+
+          if (!initialTimer) {
+            initialTimer = setTimeout(handleVisible, 100)
+          }
         }
+      } catch (e) {
+        console.log('Exception in visibilityChanged', e)
       }
-    } catch (e) {
-      console.log('Exception in visibilityChanged', e)
     }
   }
 }
@@ -229,8 +237,12 @@ onBeforeUnmount(() => {
   unmounted.value = true
 
   try {
-    if (timer.value) {
-      clearTimeout(timer)
+    if (refreshTimer) {
+      clearTimeout(refreshTimer)
+    }
+
+    if (visibleTimer) {
+      clearTimeout(visibleTimer)
     }
 
     if (window.googletag?.destroySlots) {

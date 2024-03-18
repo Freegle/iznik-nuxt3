@@ -544,7 +544,6 @@ export default {
       }
     },
     adRendered(rendered, index, dimension) {
-      console.log('Ad rendered in parent', rendered, index, dimension)
       if (rendered) {
         if (index === 0) {
           this.largeAdVisible = true

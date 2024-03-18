@@ -333,67 +333,121 @@ export default defineNuxtConfig({
             JSON.stringify(config.AD_PREBID_CONFIG) +
             `)
               });
-             
-            // This Identity Hub script is needed by pubmatic.  We have to load it before we load any of the
-            // other scripts.
+
             window.IHPWT = {};
             var PWTcalled = false;
             
-            function loadScript(url) {
+            function loadScript(url, block) {
               if (url && url.length) {
                 console.log('Load script:', url);
                 var script = document.createElement('script');
                 script.defer = true;
                 script.type = 'text/javascript';
                 script.src = url;
+                
+                if (block) {
+                  // Block loading of this script until CookieYes has been authorised.
+                  // It's not clear that this blocking works, but it does no harm to 
+                  // ask for it.
+                  console.log('Set CookieYes script block', url);
+                  script.setAttribute('data-cookieyes', 'cookieyes-advertisement')
+                }
+                
                 document.head.appendChild(script);
               }
             }
-            
+
             function postPWT() {
               if (!PWTcalled) {
                 PWTcalled = true;
                 
                 // Now that PWT is loaded, or has failed, we need to load:
-                // - Cookieyes, which needs to be loaded before prebid because prebid looks for the CMP.
                 // - GPT, which needs to be loaded before prebid.
                 // - Prebid.
                 // The ordering is ensured by using defer and appending the script.
                 console.log('PWT.js loaded');
-                ` +
-                config.ISAPP?`
-                  console.log("APP ADD COOKIEYES")
-                  const cookieScript = document.getElementById('cookieyes')
-                  if (!cookieScript) {
-                    const script = document.createElement('script')
-                    script.id = 'cookieyes'
-                    script.setAttribute('src', '/js/cookieyesapp.js')
-                    document.head.appendChild(script)
-                  }
-                  `:`
-                loadScript('` + config.COOKIEYES + `')`+`
-                loadScript('https://securepubads.g.doubleclick.net/tag/js/gpt.js')
-                loadScript('/js/prebid.js')
+                loadScript('https://securepubads.g.doubleclick.net/tag/js/gpt.js', true)
+                loadScript('/js/prebid.js', true)
               }
             };
             
-            window.IHPWT.jsLoaded = postPWT;
-             
-            var purl = window.location.href;
-            var url = '//ads.pubmatic.com/AdServer/js/pwt/164422/12426';
-            var profileVersionId = '';
-            if (purl.indexOf('pwtv=')>0){
-              var regexp = /pwtv=(.*?)(&|$)/g;
-              var matches = regexp.exec(purl);
-              if(matches.length >= 2 && matches[1].length > 0){
-                profileVersionId = '/'+matches[1];
+            function postCookieYes() {
+              window.IHPWT.jsLoaded = postPWT;
+               
+              var purl = window.location.href;
+              var url = '//ads.pubmatic.com/AdServer/js/pwt/164422/12426';
+              var profileVersionId = '';
+              if (purl.indexOf('pwtv=')>0){
+                var regexp = /pwtv=(.*?)(&|$)/g;
+                var matches = regexp.exec(purl);
+                if(matches.length >= 2 && matches[1].length > 0){
+                  profileVersionId = '/'+matches[1];
+                }
               }
+              
+              loadScript(url+profileVersionId+'/pwt.js', true);
+              
+              // Failsafe to load GPT etc if PWT fails.
+              setTimeout(postPWT, 500);
             }
+
+            if ('` +
+            config.COOKIEYES +
+            `' != 'null') {
+              // First we load CookieYes, which needs to be loaded before the PWT script.
+              console.log('Load CookieYes');
+              ` +
+              config.ISAPP?`
+                console.log("APP ADD COOKIEYES")
+                const cookieScript = document.getElementById('cookieyes')
+                if (!cookieScript) {
+                  const script = document.createElement('script')
+                  script.id = 'cookieyes'
+                  script.setAttribute('src', '/js/cookieyesapp.js')
+                  document.head.appendChild(script)
+                }
+                `:`
+              loadScript('` + config.COOKIEYES + `', false)`+`
             
-            loadScript(url+profileVersionId+'/pwt.js');
-            
-            // Failsafe to load GPT etc if PWT fails.
-            setTimeout(postPWT, 500);
+              // Now we wait until the CookieYes script has set its own cookie.  
+              // This might be later than when the script has loaded in pure JS terms, but we
+              // need to be sure it's loaded before we can move on to the PWT.
+              function checkCookieYes() {
+                var cookies = localStorage.getItem('cookies')
+                if (cookies.indexOf('cookieyes-consent') > -1) {
+                //if (document.cookie.indexOf('cookieyes-consent') > -1) {
+                  console.log('CookieYes cookie is set, so CookieYes is loaded');
+                  
+                  // Check that we have set the TCF string which the PWT script uses to
+                  // check for the CMP.  This only happens once the user has responded
+                  // to the cookie banner.
+                  if (window.__tcfapi) {
+                    window.__tcfapi('getTCData', 2, (tcData, success) => {
+                      console.log('TC data', JSON.stringify(tcData), success)
+                      if (success && tcData && tcData.tcString) {
+                        console.log('TC data loaded and TC String set');
+                        postCookieYes();
+                      } else {
+                        console.log('Failed to get TC data or string, retry.')
+                        setTimeout(checkCookieYes, 100);
+                      }
+                    }, [1,2,3]);
+                  } else {
+                    console.log('TCP API not yet loaded')
+                    setTimeout(checkCookieYes, 100);
+                  }
+                } else {
+                  console.log('CookieYes not yet loaded')
+                  setTimeout(checkCookieYes, 100);
+                }
+              }
+              
+              checkCookieYes();
+            } else {
+              console.log('No CookieYes to load')
+              postCookieYes();
+            }
+
           } catch (e) {
             console.error('Error initialising pbjs and googletag:', e.message);
           }`,
