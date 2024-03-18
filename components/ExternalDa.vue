@@ -61,7 +61,6 @@ const passClicks = computed(() => {
 })
 
 const uniqueid = ref(props.adUnitPath)
-const blocked = !process.client || !window?.pbjs?.version
 
 const maxWidth = ref(Math.max(...props.dimensions.map((d) => d[0])))
 const maxHeight = ref(Math.max(...props.dimensions.map((d) => d[1])))
@@ -206,6 +205,8 @@ function handleVisible() {
   }
 }
 function visibilityChanged(visible) {
+  const blocked = !process.client || !window?.pbjs?.version
+
   if (!blocked) {
     try {
       isVisible.value = visible
