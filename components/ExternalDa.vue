@@ -106,6 +106,8 @@ function refreshAd() {
           },
         })
       })
+    } else {
+      console.log('Not refreshing ad', props.adUnitPath, isVisible.value)
     }
 
     timer.value = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
@@ -124,15 +126,9 @@ function handleVisible() {
   // Check if the ad is still visible after this delay, and no modal is open.
   if (isVisible.value && !document.body.classList.contains('modal-open')) {
     window.googletag.cmd.push(function () {
-      console.log('Create ad slot')
       slot = window.googletag
         .defineSlot(props.adUnitPath, props.dimensions, props.divId)
         .addService(window.googletag.pubads())
-      console.log(
-        'Defined slot',
-        JSON.stringify(slot),
-        JSON.stringify(window.googletag.pubads().getSlots())
-      )
 
       window.googletag.cmd.push(function () {
         window.googletag.display(props.divId)
@@ -143,7 +139,11 @@ function handleVisible() {
           console.log('Displayed, now trigger refresh', props.adUnitPath)
           refreshAd()
         } else {
-          console.log('Displayed and rendered, no refresh needed')
+          console.log('Displayed and rendered, refresh timer')
+
+          if (!timer.value) {
+            timer.value = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
+          }
         }
 
         shownFirst = true
@@ -154,7 +154,6 @@ function handleVisible() {
       window.googletag
         .pubads()
         .addEventListener('slotRenderEnded', (event) => {
-          console.log('Slot render ended', event)
           if (event?.slot.getAdUnitPath() === props.adUnitPath) {
             console.log(
               'Rendered',
@@ -165,7 +164,6 @@ function handleVisible() {
             )
 
             if (event?.isEmpty) {
-              console.log('Rendered empty')
               adShown.value = false
               maxWidth.value = 0
               maxHeight.value = 0
@@ -176,7 +174,7 @@ function handleVisible() {
 
             if (event?.isEmpty) {
               adShown.value = false
-              console.log('Rendered empty', adShown)
+              console.log('Rendered empty', props.adUnitPath, adShown)
               // Sentry.captureMessage('Ad rendered empty ' + props.adUnitPath)
             } else {
               maxWidth.value = event.size[0]

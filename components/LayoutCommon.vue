@@ -151,7 +151,6 @@ export default {
     },
   },
   async mounted() {
-    console.log('LayoutCommon mounted')
     // Start our timer.  Holding the time in the store allows us to update the time regularly and have reactivity
     // cause displayed fromNow() values to change, rather than starting a timer for each of them.
     if (process.client) {
