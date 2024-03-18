@@ -184,6 +184,13 @@ export default {
       console.log('Transformed', file?.fileSize, output?.size)
     },
     async process(fieldName, file, metadata, load, error, progress, abort) {
+      if( file.size>8*1024*1024){
+        console.log("PHOTO TOO BIG")
+        document.getElementById('camera-msg').innerHTML = "Photo not resized to be less than 8MB. Please try another one or a smaller one."
+        alert("Photo not resized to be less than 8MB. Please try another one or a smaller one.")
+        abort()
+        return
+      }
       this.composeStore.uploading = true
 
       const data = new FormData()
