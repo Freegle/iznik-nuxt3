@@ -67,7 +67,8 @@ const maxHeight = ref(Math.max(...props.dimensions.map((d) => d[1])))
 
 let slot = null
 
-const timer = ref(null)
+let refreshTimer = null
+let visibleTimer = null
 const PREBID_TIMEOUT = 1000
 const AD_REFRESH_TIMEOUT = 45000
 
@@ -109,7 +110,7 @@ function refreshAd() {
       console.log('Not refreshing ad', props.adUnitPath, isVisible.value)
     }
 
-    timer.value = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
+    refreshTimer = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
   }
 }
 
@@ -140,8 +141,8 @@ function handleVisible() {
         } else {
           console.log('Displayed and rendered, refresh timer')
 
-          if (!timer.value) {
-            timer.value = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
+          if (!refreshTimer) {
+            refreshTimer = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
           }
         }
 
@@ -205,21 +206,29 @@ function handleVisible() {
   }
 }
 function visibilityChanged(visible) {
-  const blocked = !process.client || !window?.pbjs?.version
+  // Check the pbjs status here rather than on component load, as it might not be available yet.
+  if (process.client) {
+    if (!window.pbjs?.version) {
+      console.log('Prebid not loaded yet')
+      visibleTimer = window.setTimeout(() => {
+        visibilityChanged(visible)
+      }, 100)
+    } else {
+      visibleTimer = null
 
-  if (!blocked) {
-    try {
-      isVisible.value = visible
+      try {
+        isVisible.value = visible
 
-      if (visible && !shownFirst) {
-        console.log('Queue create ad', props.adUnitPath, props.divId)
+        if (visible && !shownFirst) {
+          console.log('Queue create ad', props.adUnitPath, props.divId)
 
-        if (!initialTimer) {
-          initialTimer = setTimeout(handleVisible, 100)
+          if (!initialTimer) {
+            initialTimer = setTimeout(handleVisible, 100)
+          }
         }
+      } catch (e) {
+        console.log('Exception in visibilityChanged', e)
       }
-    } catch (e) {
-      console.log('Exception in visibilityChanged', e)
     }
   }
 }
@@ -228,8 +237,12 @@ onBeforeUnmount(() => {
   unmounted.value = true
 
   try {
-    if (timer.value) {
-      clearTimeout(timer)
+    if (refreshTimer) {
+      clearTimeout(refreshTimer)
+    }
+
+    if (visibleTimer) {
+      clearTimeout(visibleTimer)
     }
 
     if (window.googletag?.destroySlots) {
