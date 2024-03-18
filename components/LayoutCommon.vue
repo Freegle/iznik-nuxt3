@@ -1,53 +1,53 @@
 <template>
   <div>
     <main class="ml-0 ps-0 pe-0 pageContent">
-      <div class="aboveSticky">
-        <slot ref="pageContent" />
-      </div>
-      <client-only>
-        <div
-          v-if="allowAd && !adRendering && !noAdRendered"
-          class="d-flex justify-content-around w-100 sticky"
-        >
-          <VisibleWhen :at="['xs', 'sm']">
-            <ExternalDa
-              ad-unit-path="/22794232631/freegle_sticky"
-              :dimensions="[320, 50]"
-              div-id="div-gpt-ad-1699973618906-0"
-              class="sticky"
-              pixel
-              @rendered="adRendered"
-            />
-          </VisibleWhen>
-          <VisibleWhen :at="['md']">
-            <ExternalDa
-              ad-unit-path="/22794232631/freegle_sticky_desktop"
-              :dimensions="[728, 90]"
-              div-id="div-gpt-ad-1707999304775-0"
-              class="sticky"
-              :class="{ rendered: !noAdRendered }"
-              pixel
-              @rendered="adRendered"
-            />
-          </VisibleWhen>
-          <VisibleWhen :at="['lg', 'xl', 'xxl']">
-            <ExternalDa
-              ad-unit-path="/22794232631/freegle_sticky_desktop"
-              :dimensions="[970, 90]"
-              div-id="div-gpt-ad-1707999304775-0"
-              :class="{ test: true, rendered: !noAdRendered, sticky: true }"
-              pixel
-              @rendered="adRendered"
-            />
-          </VisibleWhen>
+      <div v-if="!client">
+        <div>
+          <div class="aboveSticky">
+            <slot ref="pageContent" />
+          </div>
         </div>
-        <div
-          v-else
-          class="adFallback sticky ourBack w-100 text-center d-flex flex-column justify-content-center"
-        >
-          <nuxt-link to="/donate" class="text-white nodecor">
-            Help keep Freegle running. Click to donate.
-          </nuxt-link>
+      </div>
+      <client-only v-else>
+        <div>
+          <div class="aboveSticky">
+            <slot ref="pageContent" />
+          </div>
+          <div
+            v-if="allowAd"
+            class="d-flex justify-content-around w-100"
+            :class="{
+              sticky: true,
+              anAdRendered: !adRendering && !noAdRendered,
+            }"
+          >
+            <VisibleWhen :at="['xs', 'sm']" class="sticky">
+              <ExternalDa
+                ad-unit-path="/22794232631/freegle_sticky"
+                :dimensions="[[320, 50]]"
+                div-id="div-gpt-ad-1699973618906-0"
+                pixel
+                @rendered="adRendered"
+              />
+            </VisibleWhen>
+            <VisibleWhen :at="['md', 'lg', 'xl', 'xxl']">
+              <ExternalDa
+                ad-unit-path="/22794232631/freegle_sticky_desktop"
+                :dimensions="[[728, 90]]"
+                div-id="div-gpt-ad-1707999304775-0"
+                pixel
+                @rendered="adRendered"
+              />
+            </VisibleWhen>
+          </div>
+          <div
+            v-else
+            class="adFallback sticky ourBack w-100 text-center d-flex flex-column justify-content-center"
+          >
+            <nuxt-link to="/donate" class="text-white nodecor">
+              Help keep Freegle running. Click to donate.
+            </nuxt-link>
+          </div>
         </div>
       </client-only>
     </main>
@@ -108,6 +108,7 @@ const BouncingEmail = defineAsyncComponent(() =>
 const BreakpointFettler = defineAsyncComponent(() =>
   import('~/components/BreakpointFettler')
 )
+
 const ExternalDa = defineAsyncComponent(() => import('~/components/ExternalDa'))
 
 export default {
@@ -130,6 +131,9 @@ export default {
     }
   },
   computed: {
+    client() {
+      return process.client
+    },
     breakpoint() {
       const store = useMiscStore()
       return store.getBreakpoint
@@ -168,30 +172,6 @@ export default {
       // Get chats and poll regularly for new ones
       const chatStore = useChatStore()
       chatStore.pollForChatUpdates()
-    } else if (process.client) {
-      // We only add the cookie banner for logged out users.  This reduces costs.  For logged-in users, we assume
-      // they have already seen the banner and specified a preference if they care.
-      const runtimeConfig = useRuntimeConfig()
-
-      console.log(
-        'Consider adding cookie banner',
-        runtimeConfig.public.COOKIEYES
-      )
-
-      if (runtimeConfig.public.COOKIEYES) {
-        console.log('Add it')
-        const cookieScript = document.getElementById('cookieyes')
-
-        if (!cookieScript) {
-          const script = document.createElement('script')
-          script.id = 'cookieyes'
-          script.setAttribute('src', runtimeConfig.public.COOKIEYES)
-
-          document.head.appendChild(script)
-        }
-      } else {
-        console.log('No cookie banner')
-      }
     }
 
     try {
@@ -332,10 +312,14 @@ body.modal-open {
   position: fixed;
   bottom: 0;
 
-  background-color: transparent;
+  background-color: $color-gray--dark;
 
-  &.anAdRendered {
-    background-color: $color-gray--dark;
+  @include media-breakpoint-up(lg) {
+    background-color: transparent;
+
+    &.anAdRendered {
+      background-color: $color-gray--dark;
+    }
   }
 
   z-index: 10000;

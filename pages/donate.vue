@@ -38,7 +38,7 @@
             </p>
             <h3>If you can, please donate &pound;3.</h3>
             <p>...but anything you can give is very welcome.</p>
-            <donation-button :direct-donation="true" />
+            <donation-button :direct-donation="true" value="3" />
           </b-card-text>
         </b-card>
         <b-card no-body variant="success" class="mt-2">

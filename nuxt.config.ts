@@ -224,6 +224,287 @@ export default defineNuxtConfig({
   app: {
     head: {
       title: "Freegle - Don't throw it away, give it away!",
+      script: [
+        // We have to load GSI before we load the cookie banner, otherwise the Google Sign-in button doesn't
+        // render.
+        {
+          src: 'https://accounts.google.com/gsi/client',
+        },
+        // The ecosystem of advertising is complex.
+        // - The underlying ad service is Google Tags (GPT).
+        // - We use prebid (pbjs), which is some kind of ad broker which gives us a pipeline of ads to use.
+        //   We can also define our own ads in GPT.
+        // - Google and prebid both require use of a Consent Management Platform (CMP) so that the
+        //   user has indicated whether we have permission to show personalised ads.  We use CookieYes.
+        // - So we need to signal to Google and prebid which CMP we're using, which we do via window.dataLayer,
+        //   window.gtag and window.pbjs.
+        // - We also have to define the possible advertising slots available to prebid so that it knows what to bid on.
+        //   We do this once, here, for all slots. Only some slots may appear on any given page - they are
+        //   defined and added in ExternalDa.
+        // - When using prebid, we disable the initial ad load because it doesn't happen until after the prebid,
+        //   inside ExternalDa.
+        //
+        // During development we don't have a CMP because CookieYes doesn't work on localhost.  So in that case we
+        // don't disable initial ad load - so Google will load ads immediately.
+        //
+        // The order in which we load scripts is excruciatingly and critically important - see below.
+        {
+          type: 'text/javascript',
+          innerHTML:
+            `try {
+              window.dataLayer = window.dataLayer || [];
+              function ce_gtag() {
+                  window.dataLayer.push(arguments);
+              }
+              ce_gtag("consent", "default", {
+                  ad_storage: "denied",
+                  ad_user_data: "denied", 
+                  ad_personalization: "denied",
+                  analytics_storage: "denied",
+                  functionality_storage: "denied",
+                  personalization_storage: "denied",
+                  security_storage: "granted",
+                  wait_for_update: 2000,
+              });
+              ce_gtag("set", "ads_data_redaction", true);
+              ce_gtag("set", "url_passthrough", true);
+              
+              console.log('Initialising pbjs and googletag...');
+              window.googletag = window.googletag || {};
+              window.googletag.cmd = window.googletag.cmd || [];
+              window.googletag.cmd.push(function() {
+                window.googletag.pubads().disableInitialLoad()
+                window.googletag.pubads().enableSingleRequest()
+                window.googletag.enableServices()
+              });
+              
+              window.pbjs = window.pbjs || {};
+              window.pbjs.que = window.pbjs.que || [];
+              
+              window.pbjs.que.push(function() {
+                 window.pbjs.setConfig({
+                   consentManagement: {
+                     // We only need GDPR config.  We are interested in UK users, who are (for GDPR purposes if not
+                     // political purposes) inside the EU. 
+                     gdpr: {
+                      cmpApi: 'iab',
+                      allowAuctionWithoutConsent: false,
+                      timeout: 3000
+                     },
+                     // usp: {
+                     //  timeout: 8000 
+                     // },
+                     // gpp: {
+                     //  cmpApi: 'iab',
+                     //  timeout: 8000
+                     // }
+                   }
+                 });
+              });  
+                 
+              window.pbjs.que.push(function() {
+                 console.log('Add PBJS ad units', ` +
+            JSON.stringify(config.AD_PREBID_CONFIG) +
+            `);
+                 window.pbjs.addAdUnits(` +
+            JSON.stringify(config.AD_PREBID_CONFIG) +
+            `)
+              });
+             
+            // This Identity Hub script is needed by pubmatic.  We have to load it before we load any of the
+            // other scripts.
+            window.IHPWT = {};
+            var PWTcalled = false;
+            
+            function loadScript(url) {
+              if (url && url.length) {
+                console.log('Load script:', url);
+                var script = document.createElement('script');
+                script.defer = true;
+                script.type = 'text/javascript';
+                script.src = url;
+                document.head.appendChild(script);
+              }
+            }
+            
+            function postPWT() {
+              if (!PWTcalled) {
+                PWTcalled = true;
+                
+                // Now that PWT is loaded, or has failed, we need to load:
+                // - Cookieyes, which needs to be loaded before prebid because prebid looks for the CMP.
+                // - GPT, which needs to be loaded before prebid.
+                // - Prebid.
+                // The ordering is ensured by using defer and appending the script.
+                console.log('PWT.js loaded');
+                <!-- InMobi Choice. Consent Manager Tag v3.0 (for TCF 2.2) -->
+(function() {
+  var host = 'www.ilovefreegle.org';
+  var element = document.createElement('script');
+  var firstScript = document.getElementsByTagName('script')[0];
+  var url = 'https://cmp.inmobi.com'
+    .concat('/choice/', 'GLPjaeK0kbHd8', '/', host, '/choice.js?tag_version=V3');
+  var uspTries = 0;
+  var uspTriesLimit = 3;
+  element.async = true;
+  element.type = 'text/javascript';
+  element.src = url;
+  firstScript.parentNode.insertBefore(element, firstScript);
+  function makeStub() {
+    var TCF_LOCATOR_NAME = '__tcfapiLocator';
+    var queue = [];
+    var win = window;
+    var cmpFrame;
+    function addFrame() {
+      var doc = win.document;
+      var otherCMP = !!(win.frames[TCF_LOCATOR_NAME]);
+      if (!otherCMP) {
+        if (doc.body) {
+          var iframe = doc.createElement('iframe');
+          iframe.style.cssText = 'display:none';
+          iframe.name = TCF_LOCATOR_NAME;
+          doc.body.appendChild(iframe);
+        } else {
+          setTimeout(addFrame, 5);
+        }
+      }
+      return !otherCMP;
+    }
+    function tcfAPIHandler() {
+      var gdprApplies;
+      var args = arguments;
+      if (!args.length) {
+        return queue;
+      } else if (args[0] === 'setGdprApplies') {
+        if (
+          args.length > 3 &&
+          args[2] === 2 &&
+          typeof args[3] === 'boolean'
+        ) {
+          gdprApplies = args[3];
+          if (typeof args[2] === 'function') {
+            args[2]('set', true);
+          }
+        }
+      } else if (args[0] === 'ping') {
+        var retr = {
+          gdprApplies: gdprApplies,
+          cmpLoaded: false,
+          cmpStatus: 'stub'
+        };
+        if (typeof args[2] === 'function') {
+          args[2](retr);
+        }
+      } else {
+        if(args[0] === 'init' && typeof args[3] === 'object') {
+          args[3] = Object.assign(args[3], { tag_version: 'V3' });
+        }
+        queue.push(args);
+      }
+    }
+    function postMessageEventHandler(event) {
+      var msgIsString = typeof event.data === 'string';
+      var json = {};
+      try {
+        if (msgIsString) {
+          json = JSON.parse(event.data);
+        } else {
+          json = event.data;
+        }
+      } catch (ignore) {}
+      var payload = json.__tcfapiCall;
+      if (payload) {
+        window.__tcfapi(
+          payload.command,
+          payload.version,
+          function(retValue, success) {
+            var returnMsg = {
+              __tcfapiReturn: {
+                returnValue: retValue,
+                success: success,
+                callId: payload.callId
+              }
+            };
+            if (msgIsString) {
+              returnMsg = JSON.stringify(returnMsg);
+            }
+            if (event && event.source && event.source.postMessage) {
+              event.source.postMessage(returnMsg, '*');
+            }
+          },
+          payload.parameter
+        );
+      }
+    }
+    while (win) {
+      try {
+        if (win.frames[TCF_LOCATOR_NAME]) {
+          cmpFrame = win;
+          break;
+        }
+      } catch (ignore) {}
+      if (win === window.top) {
+        break;
+      }
+      win = win.parent;
+    }
+    if (!cmpFrame) {
+      addFrame();
+      win.__tcfapi = tcfAPIHandler;
+      win.addEventListener('message', postMessageEventHandler, false);
+    }
+  };
+  makeStub();
+  var uspStubFunction = function() {
+    var arg = arguments;
+    if (typeof window.__uspapi !== uspStubFunction) {
+      setTimeout(function() {
+        if (typeof window.__uspapi !== 'undefined') {
+          window.__uspapi.apply(window.__uspapi, arg);
+        }
+      }, 500);
+    }
+  };
+  var checkIfUspIsReady = function() {
+    uspTries++;
+    if (window.__uspapi === uspStubFunction && uspTries < uspTriesLimit) {
+      console.warn('USP is not accessible');
+    } else {
+      clearInterval(uspInterval);
+    }
+  };
+  if (typeof window.__uspapi === 'undefined') {
+    window.__uspapi = uspStubFunction;
+    var uspInterval = setInterval(checkIfUspIsReady, 6000);
+  }
+})();
+                loadScript('https://securepubads.g.doubleclick.net/tag/js/gpt.js')
+                loadScript('/js/prebid.js')
+              }
+            };
+            
+            window.IHPWT.jsLoaded = postPWT;
+             
+            var purl = window.location.href;
+            var url = '//ads.pubmatic.com/AdServer/js/pwt/164422/12426';
+            var profileVersionId = '';
+            if (purl.indexOf('pwtv=')>0){
+              var regexp = /pwtv=(.*?)(&|$)/g;
+              var matches = regexp.exec(purl);
+              if(matches.length >= 2 && matches[1].length > 0){
+                profileVersionId = '/'+matches[1];
+              }
+            }
+            
+            loadScript(url+profileVersionId+'/pwt.js');
+            
+            // Failsafe to load GPT etc if PWT fails.
+            setTimeout(postPWT, 500);
+          } catch (e) {
+            console.error('Error initialising pbjs and googletag:', e.message);
+          }`,
+        },
+      ],
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },

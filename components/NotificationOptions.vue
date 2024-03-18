@@ -3,6 +3,7 @@
     :is="notificationType"
     id="notification-list"
     ref="theel"
+    v-model="notificationsShown"
     class="white text-center notification-list topstack"
     :variant="smallScreen ? 'transparent' : ''"
     toggle-class="notification-list__dropdown-toggle p-xl-0"
@@ -87,6 +88,7 @@ defineProps({
   },
 })
 
+const notificationsShown = ref(false)
 const toShow = ref(5)
 const infiniteId = ref(0)
 const notificationType = computed(() => {
@@ -128,10 +130,18 @@ const markAllRead = async () => {
   await notificationStore.allSeen()
 }
 
-const emit = defineEmits(['update:unreadNotificationCount', 'showAboutMe'])
+const emit = defineEmits([
+  'update:notificationsShown',
+  'update:unreadNotificationCount',
+  'showAboutMe',
+])
 
 watch(unreadNotificationCount, (newVal) => {
   emit('update:unreadNotificationCount', newVal)
+})
+
+watch(notificationsShown, (newVal) => {
+  emit('update:notificationsShown', newVal)
 })
 
 const showAboutMe = () => {

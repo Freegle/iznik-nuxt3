@@ -11,8 +11,11 @@
           >
             <ExternalDa
               ad-unit-path="/22794232631/freegle_home_left"
-              :dimensions="[300, 250]"
-              div-id="div-gpt-ad-1691925450433-0"
+              :dimensions="[
+                [300, 600],
+                [300, 250],
+              ]"
+              div-id="div-gpt-ad-1693235056629-0"
               class="mt-2"
             />
           </VisibleWhen>
@@ -98,8 +101,11 @@
             >
               <ExternalDa
                 ad-unit-path="/22794232631/freegle_home"
-                :dimensions="[300, 250]"
-                div-id="div-gpt-ad-1691925450433-1"
+                :dimensions="[
+                  [300, 600],
+                  [300, 250],
+                ]"
+                div-id="div-gpt-ad-1691925450433-0"
                 class="mt-2"
               />
             </VisibleWhen>
@@ -113,6 +119,7 @@
 import dayjs from 'dayjs'
 import { useRoute, useRouter } from 'vue-router'
 import { defineAsyncComponent } from 'vue'
+import Wkt from 'wicket'
 import { useMessageStore } from '../../stores/message'
 import NoticeMessage from '../../components/NoticeMessage'
 import { loadLeaflet } from '~/composables/useMap'
@@ -263,7 +270,7 @@ export default {
 
         if (g?.bbox) {
           await loadLeaflet()
-          const wkt = new window.Wkt.Wkt()
+          const wkt = new Wkt.Wkt()
           wkt.read(g.bbox)
           const obj = wkt.toObject()
 
@@ -379,7 +386,7 @@ export default {
             this.myGroups.forEach(async (g) => {
               if (g.bbox) {
                 await loadLeaflet()
-                const wkt = new window.Wkt.Wkt()
+                const wkt = new Wkt.Wkt()
                 wkt.read(g.bbox)
                 const obj = wkt.toObject()
 

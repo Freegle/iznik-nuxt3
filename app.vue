@@ -66,6 +66,7 @@ const loadingIndicatorThrottle = ref(5000)
 const { isLoading } = useLoadingIndicator({
   throttle: loadingIndicatorThrottle.value,
 })
+
 // Don't render the app until we've done everything in here.
 let ready = false
 

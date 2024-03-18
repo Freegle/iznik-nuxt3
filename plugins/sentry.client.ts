@@ -122,9 +122,7 @@ export default defineNuxtPlugin((nuxtApp) => {
           console.log('Maintenance - suppress exception', this)
           return null
         } else if (
-          originalExceptionString?.match(
-            '/window.Piwik undefined after waiting/'
-          )
+          originalExceptionString?.match(/Piwik undefined after waiting/)
         ) {
           // Some privacy blockers can cause this.
           console.log('Suppress Piwik/Matomo exception')

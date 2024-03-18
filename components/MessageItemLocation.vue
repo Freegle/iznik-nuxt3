@@ -21,7 +21,9 @@
           }"
           itemprop="name"
         >
-          {{ item }}
+          <a class="nodecor" :href="'/message/' + id" @click="block">{{
+            item
+          }}</a>
         </span>
       </div>
       <div>
@@ -105,11 +107,21 @@ export default {
       return ret ? twem(ret) : null
     },
   },
+  methods: {
+    block(e) {
+      e.preventDefault()
+    },
+  },
 }
 </script>
 <style scoped lang="scss">
 .item {
   color: $colour-info-fg !important;
+
+  a {
+    color: $colour-info-fg !important;
+  }
+
   font-weight: bold !important;
   text-overflow: ellipsis;
   overflow: hidden;
