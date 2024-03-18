@@ -315,7 +315,7 @@ export default defineNuxtConfig({
             JSON.stringify(config.AD_PREBID_CONFIG) +
             `)
               });
-             
+
             // This Identity Hub script is needed by pubmatic.  We have to load it before we load any of the
             // other scripts.
             window.IHPWT = {};
@@ -331,20 +331,21 @@ export default defineNuxtConfig({
                 document.head.appendChild(script);
               }
             }
-            
+
+            // First we load Cookieyes, which needs to be loaded before the PWT script.
+            loadScript('` +
+            config.COOKIEYES +
+            `')
+             
             function postPWT() {
               if (!PWTcalled) {
                 PWTcalled = true;
                 
                 // Now that PWT is loaded, or has failed, we need to load:
-                // - Cookieyes, which needs to be loaded before prebid because prebid looks for the CMP.
                 // - GPT, which needs to be loaded before prebid.
                 // - Prebid.
                 // The ordering is ensured by using defer and appending the script.
                 console.log('PWT.js loaded');
-                loadScript('` +
-            config.COOKIEYES +
-            `')
                 loadScript('https://securepubads.g.doubleclick.net/tag/js/gpt.js')
                 loadScript('/js/prebid.js')
               }
