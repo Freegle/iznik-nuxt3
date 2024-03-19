@@ -375,7 +375,7 @@ export default defineNuxtConfig({
                 console.log('PWT failed to load in time, triggering failsafe load of GPT')
                 postPWT();
                 if (window.Sentry) {
-                  Sentry.captureMessage('PWT failed to load in time, triggering failsafe load of GPT');
+                  window.Sentry.captureMessage('PWT failed to load in time, triggering failsafe load of GPT');
                 }
               }, 3000);
             }
