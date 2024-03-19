@@ -109,7 +109,7 @@
       ok-only
       ok-title="Close and Continue"
       title="Welcome to Freegle!"
-      @hide="sendReply"
+      @hide="sendReply(null)"
     >
       <NewUserInfo :password="newUserPassword" />
     </b-modal>
