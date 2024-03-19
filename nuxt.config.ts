@@ -373,7 +373,9 @@ export default defineNuxtConfig({
               // Failsafe to load GPT etc if PWT fails.
               setTimeout(() => {
                 postPWT();
-                Sentry.captureMessage('PWT failed to load, triggering failsafe load of GPT');
+                if (window.Sentry) {
+                  Sentry.captureMessage('PWT failed to load, triggering failsafe load of GPT');
+                }
               }, 3000);
             }
 
