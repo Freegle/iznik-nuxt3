@@ -264,6 +264,7 @@ export default defineNuxtConfig({
                   functionality_storage: "denied",
                   personalization_storage: "denied",
                   security_storage: "granted",
+                  // wait_for_update shouldn't apply because we force the CMP to load before gtag.
                   wait_for_update: 2000,
               });
               ce_gtag("set", "ads_data_redaction", true);
@@ -370,7 +371,10 @@ export default defineNuxtConfig({
               loadScript(url+profileVersionId+'/pwt.js', true);
               
               // Failsafe to load GPT etc if PWT fails.
-              setTimeout(postPWT, 500);
+              setTimeout(() => {
+                postPWT();
+                Sentry.captureMessage('PWT failed to load, triggering failsafe load of GPT');
+              }, 3000);
             }
 
             if ('` +
