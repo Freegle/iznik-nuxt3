@@ -133,7 +133,7 @@
                   @done="considerNext"
                 />
               </div>
-              <div v-else-if="task.type === 'Survey'">
+              <div v-else-if="task.type === 'Survey2'">
                 <MicroVolunteeringSurvey :url="task.url" @done="considerNext" />
               </div>
               <div v-else>Unknown task {{ task }}</div>
@@ -236,6 +236,8 @@ export default {
         }
       })
 
+      console.log('Ask due', askDue)
+
       if (!allowed) {
         // Not on a group with this function enabled.
       } else if (!askDue) {
@@ -309,7 +311,7 @@ export default {
           this.showTask = true
         } else if (this.task.type === 'PhotoRotate') {
           this.showTask = true
-        } else if (this.task.type === 'Survey') {
+        } else if (this.task.type === 'Survey2') {
           this.showTask = true
         } else {
           this.doneForNow()
