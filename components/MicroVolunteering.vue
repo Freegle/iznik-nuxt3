@@ -134,7 +134,7 @@
                 />
               </div>
               <div v-else-if="task.type === 'Survey'">
-                <MicroVolunteeringSurvey @done="considerNext" />
+                <MicroVolunteeringSurvey :url="task.url" @done="considerNext" />
               </div>
               <div v-else>Unknown task {{ task }}</div>
             </div>
