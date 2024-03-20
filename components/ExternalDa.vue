@@ -107,7 +107,7 @@ function refreshAd() {
         })
       })
     } else {
-      console.log('Not refreshing ad', props.adUnitPath, isVisible.value)
+      // console.log('Not refreshing ad', props.adUnitPath, isVisible.value)
     }
 
     refreshTimer = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
