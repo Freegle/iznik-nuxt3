@@ -277,7 +277,7 @@ export default {
       message: null,
       todo: 5,
       done: 0,
-      types: ['CheckMessage', 'PhotoRotate', 'Survey'],
+      types: ['CheckMessage', 'PhotoRotate', 'Survey2'],
       bump: 1,
     }
   },
