@@ -295,7 +295,7 @@ export default defineNuxtConfig({
               ` +
             (config.COOKIEYES
               ? `window.googletag.pubads().disableInitialLoad()`
-              : '') +
+              : ``) +
             `
                 window.googletag.pubads().enableSingleRequest()
                 window.googletag.enableServices()
@@ -395,9 +395,8 @@ export default defineNuxtConfig({
             config.COOKIEYES +
             `' != 'null') {
               // First we load CookieYes, which needs to be loaded before the PWT script.
-              console.log('Load CookieYes');
               ` +
-              config.ISAPP?`
+              (config.ISAPP?`
                 console.log("APP ADD COOKIEYES")
                 const cookieScript = document.getElementById('cookieyes')
                 if (!cookieScript) {
@@ -406,8 +405,8 @@ export default defineNuxtConfig({
                   script.setAttribute('src', '/js/cookieyesapp.js')
                   document.head.appendChild(script)
                 }
-                `:`
-              loadScript('` + config.COOKIEYES + `', false)`+`
+                `:(`
+              loadScript('` + config.COOKIEYES + `', false)`))+`
             
               // Now we wait until the CookieYes script has set its own cookie.  
               // This might be later than when the script has loaded in pure JS terms, but we
@@ -416,7 +415,6 @@ export default defineNuxtConfig({
                 var cookies = localStorage.getItem('cookies')
                 if (cookies.indexOf('cookieyes-consent') > -1) {
                 //if (document.cookie.indexOf('cookieyes-consent') > -1) {
-                  console.log('CookieYes cookie is set, so CookieYes is loaded');
                   
                   // Check that we have set the TCF string which the PWT script uses to
                   // check for the CMP.  This only happens once the user has responded
