@@ -340,6 +340,7 @@ export default {
 
       if (this.submitDisabled) {
         this.chooseError = true
+        callback()
       } else {
         if (this.type === 'Withdrawn' || this.type === 'Received') {
           complete = true
@@ -373,10 +374,12 @@ export default {
             message: this.completionMessage,
           })
 
+          callback()
           this.hide()
+        } else {
+          callback()
         }
       }
-      callback()
     },
     onHide() {
       // We're having trouble capturing events from this modal, so use root as a bus.
