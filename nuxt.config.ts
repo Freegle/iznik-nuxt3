@@ -3,6 +3,8 @@ import eslintPlugin from 'vite-plugin-eslint'
 import legacy from '@vitejs/plugin-legacy'
 import { sentryVitePlugin } from '@sentry/vite-plugin'
 import config from './config'
+import fs from 'fs'
+import https from 'https'
 
 // Mobile version change:
 // - config.js: MOBILE_VERSION eg 3.1.9
@@ -14,6 +16,33 @@ import config from './config'
 //    - MARKETING_VERSION eg 3.1.9 TWICE
 //
 // If npm reinstall, comment out line 40 of node_modules\@capacitor\cli\dist\android\run.js //await common_1.runTask
+
+console.log("CHECK PREBID SCRIPT CHANGES")
+const prebidCurrent = fs.readFileSync('public/js/prebid.js')
+const prebidBase = fs.readFileSync('public/js/prebid-base.js')
+if (prebidCurrent.compare(prebidBase) !== 0) {
+  console.error('public/js/prebid.js NOT THE SAME AS public/js/prebid-base.js', prebidCurrent.length, prebidBase.length)
+  process.exit(1)
+}
+
+if (config.COOKIEYES) {
+  console.log('CHECK COOKIEYES SCRIPT CHANGES')
+  const cookieyesBase = fs.readFileSync('public/js/cookieyes-base.js').toString()
+
+  https.get(config.COOKIEYES, (res) => {
+    let cookieyesCurrent = '';
+    res.on('data', (chunk) => { cookieyesCurrent += chunk; });
+    res.on('end', () => {
+      try {
+        if (cookieyesCurrent !== cookieyesBase) {
+          console.error('config.COOKIEYES NOT THE SAME AS public/js/cookieyes-base.js', cookieyesCurrent.length, cookieyesBase.length)
+          process.exit(1)
+        }
+      } catch (error) { console.error(error.message) }
+    })
+
+  }).on("error", (error) => { console.error(error.message) })
+} else { console.error('config.COOKIEYES not set') }
 
 // @ts-ignore
 export default defineNuxtConfig({
@@ -212,25 +241,25 @@ export default defineNuxtConfig({
         },
       },
     },
-    plugins: config.ISAPP?[
+    plugins: config.ISAPP ? [
       sentryVitePlugin({
         org: 'freegle',
         project: 'capacitor',
         authToken: config.SENTRY_AUTH_TOKEN,
       }),
-    ]:
+    ] :
       [
-      VitePWA({ registerType: 'autoUpdate' }),
-      // Make Lint errors cause build failures.
-      eslintPlugin(),
-      legacy({
-        targets: ['since 2015'],
-      }),
-      sentryVitePlugin({
-        org: 'freegle',
-        project: 'nuxt3',
-      }),
-    ],
+        VitePWA({ registerType: 'autoUpdate' }),
+        // Make Lint errors cause build failures.
+        eslintPlugin(),
+        legacy({
+          targets: ['since 2015'],
+        }),
+        sentryVitePlugin({
+          org: 'freegle',
+          project: 'nuxt3',
+        }),
+      ],
   },
 
   // Sentry needs sourcemaps.
@@ -403,7 +432,7 @@ export default defineNuxtConfig({
             `' != 'null') {
               // First we load CookieYes, which needs to be loaded before the PWT script.
               ` +
-              (config.ISAPP?`
+            (config.ISAPP ? `
                 console.log("APP ADD COOKIEYES")
                 const cookieScript = document.getElementById('cookieyes')
                 if (!cookieScript) {
@@ -412,8 +441,8 @@ export default defineNuxtConfig({
                   script.setAttribute('src', '/js/cookieyesapp.js')
                   document.head.appendChild(script)
                 }
-                `:(`
-              loadScript('` + config.COOKIEYES + `', false)`))+`
+                `: (`
+              loadScript('` + config.COOKIEYES + `', false)`)) + `
             
               // Now we wait until the CookieYes script has set its own cookie.  
               // This might be later than when the script has loaded in pure JS terms, but we
