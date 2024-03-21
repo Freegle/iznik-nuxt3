@@ -397,7 +397,7 @@ export default defineNuxtConfig({
                 // The ordering is ensured by using defer and appending the script.
                 console.log('PWT.js loaded');
                 loadScript('https://securepubads.g.doubleclick.net/tag/js/gpt.js', true)
-                loadScript('/js/prebid.js', true)
+                loadScript('/js/prebid-app.js', true)
               }
             };
             
