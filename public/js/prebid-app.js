@@ -1,3 +1,4 @@
+console.log('########## PREBID-APP')
 /* prebid.js v8.37.0
 Updated: 2024-02-20
 Modules: rtdModule, appnexusBidAdapter, gumgumBidAdapter, pubmaticBidAdapter, consentManagement, consentManagementGpp, consentManagementUsp, enrichmentFpdModule, gdprEnforcement, gppControl_usnat, gppControl_usstates, gptPreAuction, bidViewabilityIO, priceFloors, geolocationRtdProvider, bidViewability */
