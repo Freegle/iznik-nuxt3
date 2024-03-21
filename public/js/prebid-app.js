@@ -1,4 +1,3 @@
-console.log('########## PREBID-APP')
 /* prebid.js v8.37.0
 Updated: 2024-02-20
 Modules: rtdModule, appnexusBidAdapter, gumgumBidAdapter, pubmaticBidAdapter, consentManagement, consentManagementGpp, consentManagementUsp, enrichmentFpdModule, gdprEnforcement, gppControl_usnat, gppControl_usstates, gptPreAuction, bidViewabilityIO, priceFloors, geolocationRtdProvider, bidViewability */
@@ -8,17 +7,9 @@ if(window.pbjs&&window.pbjs.libLoaded)try{window.pbjs.getConfig("debug")&&consol
     return y((function(o){
       if(o&&o.valid){
         var a=i&&""!==i?" ;domain=".concat(encodeURIComponent(i)):"",u=t&&""!==t?" ;expires=".concat(t):"",c=null!=r&&"none"==r.toLowerCase()?"; Secure":"";
-        console.log('document.cookie e',e)
-        console.log('document.cookie n',n)
-        console.log('document.cookie u',u)
-        console.log('document.cookie a',a)
-        console.log('document.cookie r',r)
-        console.log('document.cookie c',c)
-        console.log('document.cookie ADD',"".concat(e,"=").concat(encodeURIComponent(n)).concat(u,"; path=/").concat(a).concat(r?"; SameSite=".concat(r):"").concat(c))
         var newcookie = "".concat(e, "=").concat(n, "")
-        console.log('newcookie',newcookie)
+        //console.log('newcookie',newcookie)
         //document.cookie="".concat(e,"=").concat(encodeURIComponent(n)).concat(u,"; path=/").concat(a).concat(r?"; SameSite=".concat(r):"").concat(c)
-        //console.log('document.cookie SET',document.cookie)
         var cookies = localStorage.getItem('prebid')
         if( !cookies) cookies = ''
         var acookies = cookies.split(';')
@@ -43,14 +34,14 @@ if(window.pbjs&&window.pbjs.libLoaded)try{window.pbjs.getConfig("debug")&&consol
     E=function(e,n){
       return y((function(n){
         if(n&&n.valid){
-          console.log('document.cookie GET1',localStorage.getItem('prebid'))
+          //console.log('document.cookie GET1',localStorage.getItem('prebid'))
           var t=localStorage.getItem('prebid').match("(^|;)\\s*"+e+"\\s*=\\s*([^;]*)\\s*(;|$)");
           //var t=window.document.cookie.match("(^|;)\\s*"+e+"\\s*=\\s*([^;]*)\\s*(;|$)");
           return t?decodeURIComponent(t[2]):null
         }
         return null
       }),p,n)},A=function(e){return y((function(e){if(e&&e.valid)try{return localStorage.setItem("prebid.cookieTest","1"),"1"===localStorage.getItem("prebid.cookieTest")}catch(e){}finally{try{localStorage.removeItem("prebid.cookieTest")}catch(e){}}return!1}),g,e)},C=function(e){return y((function(e){return!(!e||!e.valid)&&(0,i.checkCookieSupport)()}),p,e)},T=function(e,n,t){return y((function(t){t&&t.valid&&S()&&window.localStorage.setItem(e,n)}),g,t)},I=function(e,n){return y((function(n){return n&&n.valid&&S()?window.localStorage.getItem(e):null}),g,n)},O=function(e,n){return y((function(n){n&&n.valid&&S()&&window.localStorage.removeItem(e)}),g,n)},S=function(e){return y((function(e){if(e&&e.valid)try{return!!window.localStorage}catch(e){(0,i.logError)("Local storage api disabled")}return!1}),g,e)},k=function(e,n){return y((function(n){if(n&&n.valid){var t=[];if((0,i.hasDeviceAccess)())
-        console.log('document.cookie GET2',localStorage.getItem('prebid'))
+        //console.log('document.cookie GET2',localStorage.getItem('prebid'))
         for(var r=localStorage.getItem('prebid').split(";");r.length;){
         //for(var r=document.cookie.split(";");r.length;){
           var o=r.pop(),a=o.indexOf("=");
