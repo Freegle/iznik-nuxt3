@@ -3,28 +3,45 @@
     <div class="d-flex flex-wrap">
       <div v-if="promise.id === myid">
         <!-- This can happen with TN.  It means it's promised, but we don't know who to.-->
-        <v-icon icon="handshake" class="fa-fw mt-1" />&nbsp;Promised
+        <b-badge variant="success">
+          <v-icon icon="handshake" class="fa-fw" /> Promised
+        </b-badge>
       </div>
       <div v-else>
         <!-- eslint-disable-next-line-->
-        <v-icon icon="handshake" class="fa-fw mt-1" />&nbsp;Promised to <strong>{{ promise.name }}</strong><span v-if="promise.trystdate">,</span>
-        <b-button
-          variant="link"
-          class="ml-2 text--smallest text-black"
-          @click="unpromise"
-          >(Unpromise)</b-button
+        <b-badge
+          variant="success"
+          class="ml-0"
         >
+          <v-icon icon="handshake" />
+          <span class="ml-2">Promised</span>
+        </b-badge>
+        to
+        <strong>{{ promise.name }}</strong>
       </div>
-      <div v-if="promise.trystdate" class="d-flex">
-        handover <span class="d-none d-md-inline">arranged for</span
+      <template v-if="promise.trystdate">
+        &nbsp;handover <span class="d-none d-md-inline">&nbsp;arranged for</span
         ><strong>&nbsp;{{ promise.trystdate }}</strong>
-      </div>
+      </template>
     </div>
-    <div v-if="promise.tryst" class="d-flex flex-wrap small">
-      <AddToCalendar :ics="promise.tryst.ics" variant="link" />
-      <b-button variant="link" @click="changeTime">
+    <div v-if="promise.trystdate" class="d-flex flex-wrap small">
+      <AddToCalendar
+        :ics="promise.tryst.ics"
+        variant="link"
+        btn-class="ps-0"
+        size="sm"
+      />
+      <b-button variant="link" size="sm" @click="changeTime">
         <v-icon icon="pen" />
         Change time
+      </b-button>
+      <b-button variant="link" size="sm">
+        <div class="d-flex" @click="unpromise">
+          <span class="stacked">
+            <v-icon icon="handshake" class="mt-1" />
+            <v-icon icon="slash" class="unpromise__slash" /> </span
+          >Unpromise
+        </div>
       </b-button>
       <PromiseModal
         v-if="showPromiseModal"
@@ -112,3 +129,22 @@ export default {
   },
 }
 </script>
+<style scoped lang="scss">
+.stacked {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+
+  svg {
+    grid-row: 1 / 2;
+    grid-column: 1 / 2;
+  }
+
+  svg:nth-child(2) {
+    z-index: 10000;
+    color: white;
+    padding-top: 7px;
+    padding-right: 7px;
+  }
+}
+</style>

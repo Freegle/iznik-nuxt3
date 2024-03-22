@@ -110,6 +110,7 @@ import JobsTopBar from '~/components/JobsTopBar'
 import MyPostsPostsList from '~/components/MyPostsPostsList.vue'
 import MyPostsSearchesList from '~/components/MyPostsSearchesList.vue'
 import { useDonationAskModal } from '~/composables/useDonationAskModal'
+import { useTrystStore } from '~/stores/tryst'
 const DonationAskModal = defineAsyncComponent(() =>
   import('~/components/DonationAskModal')
 )
@@ -117,6 +118,7 @@ const DonationAskModal = defineAsyncComponent(() =>
 const authStore = useAuthStore()
 const messageStore = useMessageStore()
 const searchStore = useSearchStore()
+const trystStore = useTrystStore()
 
 const runtimeConfig = useRuntimeConfig()
 const route = useRoute()
@@ -231,6 +233,7 @@ function adRendered(rendered, index, dimension) {
   triedAds.value = true
 }
 
+trystStore.fetch()
 // onMounted(() => {
 //   showDonationAskModal.value = true
 // })
