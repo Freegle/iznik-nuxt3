@@ -1,5 +1,5 @@
-importScripts('https://www.gstatic.com/firebasejs/3.5.2/firebase-app.js');
-importScripts('https://www.gstatic.com/firebasejs/3.5.2/firebase-messaging.js');
+importScripts('https://www.gstatic.com/firebasejs/3.5.2/firebase-app.js')
+importScripts('https://www.gstatic.com/firebasejs/3.5.2/firebase-messaging.js')
 
 // Initialize the Firebase app in the service worker by passing in the
 // messagingSenderId.
@@ -11,32 +11,63 @@ firebase.initializeApp({
   storageBucket: 'scenic-oxygen-849.appspot.com',
   messagingSenderId: '423761283916',
   appId: '1:423761283916:web:20c1e8e44bd83b891f1de9',
-  measurementId: 'G-86N0ZCZ2ZW',
-});
+  measurementId: 'G-86N0ZCZ2ZW'
+})
 
-const messaging = firebase.messaging();
+const messaging = firebase.messaging()
 
 messaging.setBackgroundMessageHandler(function(payload) {
-  console.log("[firebase-messaging-sw.js] Received background message ");
+  console.log('[firebase-messaging-sw.js] Received background message ')
   // self.registration.hideNotification();
 
-  return null;
-});
+  return null
+})
 
-self.addEventListener("push", function(e) {
-  data = e.data.json();
+self.addEventListener('push', function(e) {
+  data = e.data.json()
   console.log('[firebase-messaging-sw.js] Received push event', data)
   const options = {
-    tag: "notification-1",
+    tag: 'notification-1',
     body: data.notification.body,
     vibrate: [100, 50, 100],
+    icon: '/logos/user_logo_vector.svg',
+    badge: '/logos/user_logo_vector.svg',
     data: {
       dateOfArrival: Date.now(),
-      primaryKey: "1"
+      primaryKey: '1'
     }
-  };
-  self.registration.showNotification(data.notification.title, options);
-});
+  }
 
-// TODO notification click event?
+  // We only want one notification.
+  self.registration.hideNotification()
+  self.registration.showNotification(data.notification.title, options)
+})
+
+self.addEventListener(
+  'notificationclick',
+  function(event) {
+    console.log('test', event)
+    event.notification.close()
+    const url = '/'
+    event.waitUntil(
+      self.clients.matchAll({ type: 'window' }).then(windowClients => {
+        // Check if there is already a window/tab open with the target URL
+        for (let i = 0; i < windowClients.length; i++) {
+          const client = windowClients[i]
+          // If so, just focus it.
+
+          if (client.url === url && 'focus' in client) {
+            return client.focus()
+          }
+        }
+
+        if (self.clients.openWindow) {
+          clients.openWindow(url)
+        }
+      })
+    )
+  },
+  false
+)
+
 console.log('Service worker registered')
