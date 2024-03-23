@@ -23,7 +23,7 @@ messaging.setBackgroundMessageHandler(function(payload) {
   return null
 })
 
-self.addEventListener('push', async function(e) {
+async function processEvent(e) {
   data = e.data.json()
   console.log('[firebase-messaging-sw.js] Received push event', data)
   const options = {
@@ -56,6 +56,12 @@ self.addEventListener('push', async function(e) {
     await self.registration.showNotification(data?.notification?.title, options)
     console.log('Shown new')
   }
+}
+
+self.addEventListener('push', function(e) {
+  // We use this as a way of waiting until the await function has completed.
+  // This avoids duplicate notifications.
+  e.waitUntil(processEvent(e))
 })
 
 self.addEventListener(
