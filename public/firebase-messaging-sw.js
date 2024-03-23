@@ -26,8 +26,23 @@ messaging.setBackgroundMessageHandler(function(payload) {
 async function processEvent(e) {
   data = e.data.json()
   console.log('[firebase-messaging-sw.js] Received push event', data)
+
+  // We only want one notification, so hide any others currently open.
+  // const notifications = await self.registration.getNotifications()
+  // console.log('Got existing notifications', notifications)
+  // const promises = []
+  // notifications.forEach((notification) => {
+  //   console.log('Close', notification)
+  //   promises.push(notification.close())
+  // })
+  //
+  // console.log('Wait for all to close')
+  // await Promise.all(promises)
+  // console.log('Closed')
+
   const options = {
     tag: 'notification-1',
+    renotify: true,
     body: data?.notification?.body,
     vibrate: [100, 50, 100],
     icon: '/logos/user_logo_512x512.png',
@@ -38,19 +53,6 @@ async function processEvent(e) {
       dataInNotification: data.data
     }
   }
-
-  // We only want one notification, so hide any others currently open.
-  const notifications = await self.registration.getNotifications()
-  console.log('Got existing notifications', notifications)
-  const promises = []
-  notifications.forEach((notification) => {
-    console.log('Close', notification)
-    promises.push(notification.close())
-  })
-
-  console.log('Wait for all to close')
-  await Promise.all(promises)
-  console.log('Closed')
 
   if (data?.notification?.title) {
     await self.registration.showNotification(data?.notification?.title, options)
