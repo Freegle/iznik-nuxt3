@@ -23,22 +23,9 @@ messaging.setBackgroundMessageHandler(function(payload) {
   return null
 })
 
-async function processEvent(e) {
+self.addEventListener('push', function(e) {
   data = e.data.json()
   console.log('[firebase-messaging-sw.js] Received push event', data)
-
-  // We only want one notification, so hide any others currently open.
-  // const notifications = await self.registration.getNotifications()
-  // console.log('Got existing notifications', notifications)
-  // const promises = []
-  // notifications.forEach((notification) => {
-  //   console.log('Close', notification)
-  //   promises.push(notification.close())
-  // })
-  //
-  // console.log('Wait for all to close')
-  // await Promise.all(promises)
-  // console.log('Closed')
 
   const options = {
     tag: 'notification-1',
@@ -54,16 +41,21 @@ async function processEvent(e) {
     }
   }
 
-  if (data?.notification?.title) {
-    await self.registration.showNotification(data?.notification?.title, options)
-    console.log('Shown new')
-  }
-}
+  // We only want one notification, so hide any others currently open.
+  return self.registration.getNotifications().then((notifications) => {
+    console.log('Got existing notifications', notifications)
+    notifications.forEach((notification) => {
+      console.log('Close', notification)
+      notification.close()
+    })
 
-self.addEventListener('push', function(e) {
-  // We use this as a way of waiting until the await function has completed.
-  // This avoids duplicate notifications.
-  e.waitUntil(processEvent(e))
+    if (data?.notification?.title) {
+      return self.registration.showNotification(data?.notification?.title, options)
+      console.log('Shown new')
+    }
+  }).catch((e) => {
+    console.log('Service worker error', e)
+  })
 })
 
 self.addEventListener(
