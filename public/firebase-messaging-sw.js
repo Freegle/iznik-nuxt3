@@ -28,7 +28,7 @@ self.addEventListener('push', function(e) {
   console.log('[firebase-messaging-sw.js] Received push event', data)
   const options = {
     tag: 'notification-1',
-    body: data.notification.body,
+    body: data?.notification?.body,
     vibrate: [100, 50, 100],
     icon: '/logos/user_logo_512x512.png',
     badge: '/logos/user_logo_24x24.png',
@@ -38,9 +38,20 @@ self.addEventListener('push', function(e) {
     }
   }
 
-  // We only want one notification.
-  self.registration.hideNotification()
-  self.registration.showNotification(data.notification.title, options)
+  // We only want one notification, so hide the others.
+  const notifications = self.registration.getNotifications()
+    .then(notifications => {
+      console.log('Got existing notifications', notifications)
+      const notification = notifications.find(notification => notification.tag === 'notification-1')
+      if (notification) {
+        notification.close()
+      }
+
+      if (data?.notification?.title) {
+        console.log('Now show new one.')
+        self.registration.showNotification(data?.notification?.title, options)
+      }
+    })
 })
 
 self.addEventListener(
