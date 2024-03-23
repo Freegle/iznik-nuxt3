@@ -34,11 +34,12 @@ self.addEventListener('push', async function(e) {
     badge: '/logos/user_logo_24x24.png',
     data: {
       dateOfArrival: Date.now(),
-      primaryKey: '1'
+      primaryKey: '1',
+      dataInNotification: data.data
     }
   }
 
-  // We only want one notification, so hide the others.
+  // We only want one notification, so hide any others currently open.
   const notifications = await self.registration.getNotifications()
   console.log('Got existing notifications', notifications)
   const promises = []
@@ -60,9 +61,11 @@ self.addEventListener('push', async function(e) {
 self.addEventListener(
   'notificationclick',
   function(event) {
-    console.log('test', event)
+    console.log('Clicked', event)
     event.notification.close()
-    const url = '/'
+
+    // The notification from the server passes the route we should navigate to.
+    const url = event.notification.data?.dataInNotification?.route ? event.notification.data?.dataInNotification?.route : '/'
     event.waitUntil(
       self.clients.matchAll({ type: 'window' }).then(windowClients => {
         // Check if there is already a window/tab open with the target URL
