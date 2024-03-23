@@ -34,24 +34,36 @@ self.addEventListener('push', function(e) {
     }
   }
 
-  // We only want one notification, so hide any others currently open.
-  return e.waitUntil(self.registration.getNotifications().then((notifications) => {
-    console.log('Got existing notifications', notifications)
-    notifications.forEach((notification) => {
-      console.log('Close', notification)
-      notification.close()
-    })
+  if (data?.notification?.title) {
+    return self.registration.showNotification(data?.notification?.title, options)
+    console.log('Shown new')
+  } else {
+    return e.waitUntil(self.registration.getNotifications().then((notifications) => {
+      console.log('Got existing notifications', notifications)
+      notifications.forEach((notification) => {
+        console.log('Close', notification)
+        notification.close()
+      })
+    }).catch((err) => {
+      console.log('Service worker error', err)
+    }))
+  }
 
-    if (data?.notification?.title) {
-      return self.registration.showNotification(data?.notification?.title, options)
-      console.log('Shown new')
-    } else {
-      // Maybe helps suppress default notification.
-      return Promise.resolve(null)
-    }
-  }).catch((err) => {
-    console.log('Service worker error', err)
-  }))
+  // We only want one notification, so hide any others currently open.
+  // return e.waitUntil(self.registration.getNotifications().then((notifications) => {
+  //   console.log('Got existing notifications', notifications)
+  //   notifications.forEach((notification) => {
+  //     console.log('Close', notification)
+  //     notification.close()
+  //   })
+  //
+  //   if (data?.notification?.title) {
+  //     return self.registration.showNotification(data?.notification?.title, options)
+  //     console.log('Shown new')
+  //   }
+  // }).catch((err) => {
+  //   console.log('Service worker error', err)
+  // }))
 })
 
 self.addEventListener(
