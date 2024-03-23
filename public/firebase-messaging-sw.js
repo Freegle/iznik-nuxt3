@@ -23,7 +23,7 @@ messaging.setBackgroundMessageHandler(function(payload) {
   return null
 })
 
-self.addEventListener('push', function(e) {
+self.addEventListener('push', async function(e) {
   data = e.data.json()
   console.log('[firebase-messaging-sw.js] Received push event', data)
   const options = {
@@ -39,18 +39,22 @@ self.addEventListener('push', function(e) {
   }
 
   // We only want one notification, so hide the others.
-  const notifications = self.registration.getNotifications()
-    .then(notifications => {
-      console.log('Got existing notifications', notifications)
-      notifications.forEach(notification => {
-        console.log('Close', notification)
-        notification.close()
-      })
+  const notifications = await self.registration.getNotifications()
+  console.log('Got existing notifications', notifications)
+  const promises = []
+  notifications.forEach((notification) => {
+    console.log('Close', notification)
+    promises.push(notification.close())
+  })
 
-      if (data?.notification?.title) {
-        self.registration.showNotification(data?.notification?.title, options)
-      }
-    })
+  console.log('Wait for all to close')
+  await Promise.all(promises)
+  console.log('Closed')
+
+  if (data?.notification?.title) {
+    await self.registration.showNotification(data?.notification?.title, options)
+    console.log('Shown new')
+  }
 })
 
 self.addEventListener(
