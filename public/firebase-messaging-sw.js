@@ -16,13 +16,6 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging()
 
-messaging.setBackgroundMessageHandler(function(payload) {
-  console.log('[firebase-messaging-sw.js] Received background message ')
-  // self.registration.hideNotification();
-
-  return null
-})
-
 self.addEventListener('push', function(e) {
   data = e.data.json()
   console.log('[firebase-messaging-sw.js] Received push event', data)
@@ -42,7 +35,7 @@ self.addEventListener('push', function(e) {
   }
 
   // We only want one notification, so hide any others currently open.
-  return self.registration.getNotifications().then((notifications) => {
+  return e.waitUntil(self.registration.getNotifications().then((notifications) => {
     console.log('Got existing notifications', notifications)
     notifications.forEach((notification) => {
       console.log('Close', notification)
@@ -52,10 +45,13 @@ self.addEventListener('push', function(e) {
     if (data?.notification?.title) {
       return self.registration.showNotification(data?.notification?.title, options)
       console.log('Shown new')
+    } else {
+      // Maybe helps suppress default notification.
+      return Promise.resolve(null)
     }
-  }).catch((e) => {
-    console.log('Service worker error', e)
-  })
+  }).catch((err) => {
+    console.log('Service worker error', err)
+  }))
 })
 
 self.addEventListener(
