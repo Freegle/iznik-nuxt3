@@ -30,8 +30,8 @@ self.addEventListener('push', function(e) {
     tag: 'notification-1',
     body: data.notification.body,
     vibrate: [100, 50, 100],
-    icon: '/logos/user_logo_vector.svg',
-    badge: '/logos/user_logo_vector.svg',
+    icon: '/logos/user_logo_512x512.png',
+    badge: '/logos/user_logo_24x24.png',
     data: {
       dateOfArrival: Date.now(),
       primaryKey: '1'
