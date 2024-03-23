@@ -42,13 +42,12 @@ self.addEventListener('push', function(e) {
   const notifications = self.registration.getNotifications()
     .then(notifications => {
       console.log('Got existing notifications', notifications)
-      const notification = notifications.find(notification => notification.tag === 'notification-1')
-      if (notification) {
+      notifications.forEach(notification => {
+        console.log('Close', notification)
         notification.close()
-      }
+      })
 
       if (data?.notification?.title) {
-        console.log('Now show new one.')
         self.registration.showNotification(data?.notification?.title, options)
       }
     })
