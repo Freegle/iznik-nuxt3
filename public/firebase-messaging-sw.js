@@ -35,7 +35,7 @@ self.addEventListener('push', function(e) {
   }
 
   if (data?.notification?.title) {
-    return self.registration.showNotification(data?.notification?.title, options)
+    return e.waitUntil(self.registration.showNotification(data?.notification?.title, options))
     console.log('Shown new')
   } else {
     return e.waitUntil(self.registration.getNotifications().then((notifications) => {
