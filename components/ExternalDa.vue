@@ -209,7 +209,7 @@ function visibilityChanged(visible) {
   // Check the pbjs status here rather than on component load, as it might not be available yet.
   if (process.client) {
     if (!window.pbjs?.version) {
-      console.log('Prebid not loaded yet')
+      // console.log('Prebid not loaded yet')
       visibleTimer = window.setTimeout(() => {
         visibilityChanged(visible)
       }, 100)
