@@ -45,20 +45,22 @@ self.addEventListener('push', function(e) {
 
   // Close (other) notifications.  The timining is unpredictable so make sure
   // we don't close the new one.
-  self.registration.getNotifications().then((notifications) => {
-    console.log('Got existing notifications', notifications)
-    notifications.forEach((notification) => {
-      console.log('Close it?', fcmId, notification.fcmMessageId)
+  setTimeout(() => {
+    self.registration.getNotifications().then((notifications) => {
+      console.log('Got existing notifications', notifications)
+      notifications.forEach((notification) => {
+        console.log('Close it?', fcmId, notification.fcmMessageId)
 
-      if (fcmId !== notification.fcmMessageId) {
-        console.log('Yes')
-        notification.close()
-      } else {
-        console.log('No')
-      }
+        if (fcmId !== notification.fcmMessageId) {
+          console.log('Yes')
+          notification.close()
+        } else {
+          console.log('No')
+        }
+      })
+    }).catch((err) => {
+      console.log('Service worker error', err)
     })
-  }).catch((err) => {
-    console.log('Service worker error', err)
   })
 
   if (data?.notification?.title) {
