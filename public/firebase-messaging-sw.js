@@ -16,13 +16,6 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging()
 
-messaging.onBackgroundMessage((payload) => {
-  // Hide the default notification, otherwise we get the default as well as
-  // the one below when the browser isn't running.
-  console.log('[firebase-messaging-sw.js] Received background message ', payload);
-  self.registration.hideNotification();
-});
-
 self.addEventListener('push', function(e) {
   data = e.data.json()
   console.log('[firebase-messaging-sw.js] Received push event', data)
