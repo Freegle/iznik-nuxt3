@@ -16,19 +16,6 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging()
 
-messaging.onBackgroundMessage((data) => {
-  // We need to customise the default background notification which is shown.
-  console.log(
-    '[firebase-messaging-sw.js] Received background message ',
-    data
-  );
-
-  const options = extractData(data)
-
-  // Customize notification here
-  self.registration.showNotification(data?.notification?.title, options);
-});
-
 function extractData (data) {
   const options = {
     tag: 'notification-1',
@@ -47,6 +34,20 @@ function extractData (data) {
 
   return options
 }
+
+messaging.onBackgroundMessage((data) => {
+  // We need to customise the default background notification which is shown,
+  // so that it doesn't just look like a Chrome notification.
+  console.log(
+    '[firebase-messaging-sw.js] Received background message ',
+    data
+  );
+
+  const options = extractData(data)
+
+  self.registration.showNotification(data?.notification?.title, options);
+});
+
 
 self.addEventListener('push', function(e) {
   data = e.data.json()
