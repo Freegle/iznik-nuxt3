@@ -44,7 +44,6 @@ messaging.onBackgroundMessage((data) => {
   );
 
   const options = extractData(data)
-
   self.registration.showNotification(data?.notification?.title, options);
 });
 
@@ -53,39 +52,7 @@ self.addEventListener('push', function(e) {
   data = e.data.json()
   console.log('[firebase-messaging-sw.js] Received push event', data)
   const options = extractData(data)
-
-  let fcmId = data.fcmMessageId
-
-  // Close (other) notifications.  The timining is unpredictable so make sure
-  // we don't close the new one.
-  setTimeout(() => {
-    self.registration.getNotifications().then((notifications) => {
-      console.log('Got existing notifications', notifications)
-      notifications.forEach((notification) => {
-        console.log('Close it?', fcmId, notification?.data?.fcmMessageId)
-
-        if (!notification?.data?.fcmMessageId || fcmId !== notification?.data?.fcmMessageId) {
-          console.log('Yes')
-          notification.close()
-        } else {
-          console.log('No')
-        }
-      })
-    }).catch((err) => {
-      console.log('Service worker error', err)
-    })
-  }, 100)
-
-  if (data?.notification?.title) {
-    console.log('Show new')
-    return e.waitUntil(self.registration.showNotification(data?.notification?.title, options))
-  } else {
-    // Force close of the notification we're just about to open.  We have to open one in order to avoid
-    // the default notification which will otherwise open.
-    console.log('Show empty.')
-    fcmId = null
-    return e.waitUntil(self.registration.showNotification(data?.notification?.title, options))
-  }
+  return e.waitUntil(self.registration.showNotification(data?.notification?.title, options))
 })
 
 self.addEventListener(
