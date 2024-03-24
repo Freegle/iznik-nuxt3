@@ -52,7 +52,7 @@ messaging.onBackgroundMessage((data) => {
 self.addEventListener('push', function(e) {
   data = e.data.json()
   console.log('[firebase-messaging-sw.js] Received push event', data)
-  const options = extractData()
+  const options = extractData(data)
 
   let fcmId = data.fcmMessageId
 
