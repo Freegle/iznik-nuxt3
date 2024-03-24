@@ -92,28 +92,24 @@
                   <v-icon icon="check" class="fa-fw" /> Withdrawn
                 </b-badge>
               </div>
-              <div v-else-if="message.promisecount > 0" class="mr-2">
-                <b-badge
-                  v-if="promisedTo?.length === 0"
-                  variant="success"
-                  class="mt-1"
-                >
-                  <v-icon icon="handshake" class="fa-fw" /> Promised
-                </b-badge>
-                <div v-else class="ml-1 text-info">
-                  <MyMessagePromisedTo
-                    v-for="p in promisedTo"
-                    :id="message.id"
-                    :key="'promised-' + p.id"
-                    :promise="p"
-                    :replyusers="replyusers"
-                  />
-                </div>
-              </div>
               <div v-if="unseen > 0" class="mr-2">
                 <b-badge variant="danger">
                   <v-icon icon="comments" class="fa-fw" /> {{ unseen }} unread
                 </b-badge>
+              </div>
+            </div>
+            <div
+              v-if="message.outcomes?.length === 0 && message.promisecount > 0"
+            >
+              <div class="text-info">
+                <MyMessagePromisedTo
+                  v-for="p in promisedTo"
+                  :id="message.id"
+                  :key="'promised-' + p.id"
+                  class="mt-1 border border-info p-2"
+                  :promise="p"
+                  :replyusers="replyusers"
+                />
               </div>
             </div>
             <hr class="" />
@@ -652,7 +648,7 @@ export default {
     promisedTo() {
       const ret = []
 
-      if (this.expanded && this.message.promises?.length) {
+      if (this.message.promises?.length) {
         this.message.promises.forEach((p) => {
           const user = this.userStore?.byId(p.userid)
 

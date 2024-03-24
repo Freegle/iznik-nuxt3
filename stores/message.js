@@ -58,11 +58,11 @@ export const useMessageStore = defineStore({
             }
           }
         } else {
-          this.fetchingCount++
-          this.fetching[id] = api(this.config).message.fetch(id, false)
-          this.fetchingCount--
-
           try {
+            this.fetchingCount++
+            this.fetching[id] = api(this.config).message.fetch(id, false)
+            this.fetchingCount--
+
             this.list[id] = await this.fetching[id]
             this.fetching[id] = null
 
@@ -100,7 +100,10 @@ export const useMessageStore = defineStore({
       if (left.length) {
         this.fetchingCount++
         try {
-          const msgs = await api(this.config).message.fetch(left.join(','))
+          const msgs = await api(this.config).message.fetch(
+            left.join(','),
+            false
+          )
 
           if (msgs && msgs.forEach) {
             msgs.forEach((msg) => {

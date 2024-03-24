@@ -755,7 +755,8 @@ export default {
 
           console.log(
             'GetMessages - some groups, search within group bounds',
-            groupbounds
+            groupbounds,
+            this.myGroupIds
           )
           ret = await this.messageStore.search({
             messagetype: this.type,
@@ -764,6 +765,7 @@ export default {
             swlng: groupbounds[0][1],
             nelat: groupbounds[1][0],
             nelng: groupbounds[1][1],
+            groupids: this.myGroupIds,
           })
         } else {
           // We have groups, so fetch the messages in those groups.

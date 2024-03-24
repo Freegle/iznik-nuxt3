@@ -53,8 +53,13 @@
         @photo-processed="photoProcessed"
         @all-processed="allProcessed"
         @init="hidePhotoButton"
+        @error="photoError"
       />
     </div>
+    <NoticeMessage v-if="photoFailed" variant="danger" class="mt-2 mb-2">
+      Photo upload failed. If this keeps happening, then please contact
+      <SupportLink />.
+    </NoticeMessage>
     <div class="subject-layout mb-1 mt-1">
       <div class="d-flex flex-column">
         <label :for="$id('posttype')" class="d-none d-md-block pl-1">
@@ -138,6 +143,7 @@ export default {
       myFiles: [],
       pondBrowse: true,
       hidingPhotoButton: false,
+      photoFailed: false,
     }
   },
   computed: {
@@ -189,6 +195,7 @@ export default {
       // Flag that we're uploading.  This will trigger the render of the filepond instance and subsequently the
       // init callback below.
       this.uploading = true
+      this.photoFailed = false
     },
     photoProcessed(imageid, imagethumb, image) {
       // We have uploaded a photo.  Remove the filepond instance.
@@ -205,6 +212,9 @@ export default {
     },
     allProcessed() {
       this.uploading = false
+    },
+    photoError(e) {
+      this.photoFailed = true
     },
     removePhoto(id) {
       this.composeStore.removeAttachment({

@@ -69,6 +69,7 @@
     "filepond-plugin-image-preview": "^4.6.11",
     "filepond-plugin-image-resize": "^2.0.10",
     "filepond-plugin-image-transform": "^3.8.7",
+    "firebase": "^10.9.0",
     "floating-vue": "^5.2.2",
     "jwt-decode": "^3.1.2",
     "leaflet": "^1.8.0",

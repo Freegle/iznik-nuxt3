@@ -482,6 +482,18 @@ export const useAuthStore = defineStore({
         await this.fetchUser()
       }
     },
+    async saveBrowserPushToken(token) {
+      const params = {
+        notifications: {
+          push: {
+            type: 'BrowserPush',
+            subscription: token,
+          },
+        },
+      }
+
+      await this.$api.session.save(params)
+    },
   },
   getters: {
     member: (state) => (id) => {

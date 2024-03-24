@@ -36,6 +36,19 @@ export default {
     loggedIn() {
       return this.me !== null
     },
+    myGroupIds() {
+      const authStore = useAuthStore()
+      let ret = []
+
+      if (this.me) {
+        ret = authStore.groups.map((g) => {
+          // Memberships have an id of the membership whereas we want the groups to have the id of the group.
+          return g.groupid
+        })
+      }
+
+      return ret
+    },
     myGroups() {
       const authStore = useAuthStore()
       let ret = []

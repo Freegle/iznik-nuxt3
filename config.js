@@ -1,4 +1,8 @@
-export default {
+const ADS_SMALL_BANNER_SIZES = [[320, 50]]
+const ADS_MEDIUM_BANNER_SIZES = [[728, 90]]
+const ADS_SQUARISH_SIZES = [[300, 250]]
+
+const CONFIG = {
   // Legacy API, especially mod ops.
   APIv1: process.env.IZNIK_API_V1 || 'https://fdapilive.ilovefreegle.org/api',
 
@@ -35,4 +39,459 @@ export default {
 
   // Cookie banner for this site.
   COOKIEYES: process.env.COOKIEYES || null,
+
+  AD_PREBID_CONFIG: [
+    {
+      code: '/22794232631/freegle_sticky',
+      mediaTypes: {
+        banner: {
+          sizes: ADS_SMALL_BANNER_SIZES,
+        },
+      },
+      bids: [
+        {
+          bidder: 'pubmatic',
+          params: {
+            publisherId: '164422',
+            adSlot: '5753989',
+          },
+        },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
+          },
+        },
+        {
+          bidder: 'appnexus',
+          params: {
+            placementId: '32336192',
+          },
+        },
+      ],
+    },
+    {
+      code: '/22794232631/freegle_sticky_desktop',
+      mediaTypes: {
+        banner: {
+          sizes: ADS_MEDIUM_BANNER_SIZES,
+        },
+      },
+      bids: [
+        {
+          bidder: 'pubmatic',
+          params: {
+            publisherId: '164422',
+            adSlot: '5753990',
+          },
+        },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
+          },
+        },
+        {
+          bidder: 'appnexus',
+          params: {
+            placementId: '32336193',
+          },
+        },
+      ],
+    },
+    {
+      code: '/22794232631/freegle_product',
+      mediaTypes: {
+        banner: {
+          sizes: ADS_SQUARISH_SIZES,
+        },
+      },
+      bids: [
+        {
+          bidder: 'pubmatic',
+          params: {
+            publisherId: '164422',
+            adSlot: '5773059',
+          },
+        },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
+          },
+        },
+        {
+          bidder: 'appnexus',
+          params: {
+            placementId: '32336187',
+          },
+        },
+      ],
+    },
+    {
+      code: '/22794232631/freegle_productemail',
+      mediaTypes: {
+        banner: {
+          sizes: ADS_SQUARISH_SIZES,
+        },
+      },
+      bids: [
+        {
+          bidder: 'pubmatic',
+          params: {
+            publisherId: '164422',
+            adSlot: '5753984',
+          },
+        },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
+          },
+        },
+        {
+          bidder: 'appnexus',
+          params: {
+            placementId: '32336188',
+          },
+        },
+      ],
+    },
+    {
+      code: '/22794232631/freegle_myposts_desktop',
+      mediaTypes: {
+        banner: {
+          sizes: ADS_SQUARISH_SIZES,
+        },
+      },
+      bids: [
+        {
+          bidder: 'pubmatic',
+          params: {
+            publisherId: '164422',
+            adSlot: '5753988',
+          },
+        },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
+          },
+        },
+        {
+          bidder: 'appnexus',
+          params: {
+            placementId: '32336191',
+          },
+        },
+      ],
+    },
+    {
+      code: '/22794232631/freegle_myposts_desktop_right',
+      mediaTypes: {
+        banner: {
+          sizes: ADS_SQUARISH_SIZES,
+        },
+      },
+      bids: [
+        {
+          bidder: 'pubmatic',
+          params: {
+            publisherId: '164422',
+            adSlot: '5775938',
+          },
+        },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
+          },
+        },
+        {
+          bidder: 'appnexus',
+          params: {
+            placementId: '32336198',
+          },
+        },
+      ],
+    },
+    {
+      code: '/22794232631/freegle_home_left',
+      mediaTypes: {
+        banner: {
+          sizes: ADS_SQUARISH_SIZES,
+        },
+      },
+      bids: [
+        {
+          bidder: 'pubmatic',
+          params: {
+            publisherId: '164422',
+            adSlot: '5753983',
+          },
+        },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
+          },
+        },
+        {
+          bidder: 'appnexus',
+          params: {
+            placementId: '32336186',
+          },
+        },
+      ],
+    },
+    {
+      code: '/22794232631/freegle_home',
+      mediaTypes: {
+        banner: {
+          sizes: ADS_SQUARISH_SIZES,
+        },
+      },
+      bids: [
+        {
+          bidder: 'pubmatic',
+          params: {
+            publisherId: '164422',
+            adSlot: '5753982',
+          },
+        },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
+          },
+        },
+        {
+          bidder: 'appnexus',
+          params: {
+            placementId: '32336185',
+          },
+        },
+      ],
+    },
+    {
+      code: '/22794232631/freegle_chat_app',
+      mediaTypes: {
+        banner: {
+          sizes: ADS_SMALL_BANNER_SIZES,
+        },
+      },
+      bids: [
+        {
+          bidder: 'pubmatic',
+          params: {
+            publisherId: '164422',
+            adSlot: '5753987',
+          },
+        },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
+          },
+        },
+        {
+          bidder: 'appnexus',
+          params: {
+            placementId: '32336179',
+          },
+        },
+      ],
+    },
+    {
+      code: '/22794232631/freegle_chat_desktop',
+      mediaTypes: {
+        banner: {
+          sizes: ADS_SQUARISH_SIZES,
+        },
+      },
+      bids: [
+        {
+          bidder: 'pubmatic',
+          params: {
+            publisherId: '164422',
+            adSlot: '5753986',
+          },
+        },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
+          },
+        },
+        {
+          bidder: 'appnexus',
+          params: {
+            placementId: '32336190',
+          },
+        },
+      ],
+    },
+    {
+      code: '/22794232631/freegle_feed_app',
+      mediaTypes: {
+        banner: {
+          sizes: ADS_SQUARISH_SIZES,
+        },
+      },
+      bids: [
+        {
+          bidder: 'pubmatic',
+          params: {
+            publisherId: '164422',
+            adSlot: '5753981',
+          },
+        },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
+          },
+        },
+        {
+          bidder: 'appnexus',
+          params: {
+            placementId: '32336154',
+          },
+        },
+      ],
+    },
+    {
+      code: '/22794232631/freegle_feed_app_2',
+      mediaTypes: {
+        banner: {
+          sizes: ADS_SQUARISH_SIZES,
+        },
+      },
+      bids: [
+        {
+          bidder: 'pubmatic',
+          params: {
+            publisherId: '164422',
+            adSlot: '5753991',
+          },
+        },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
+          },
+        },
+        {
+          bidder: 'appnexus',
+          params: {
+            placementId: '32336180',
+          },
+        },
+      ],
+    },
+    {
+      code: '/22794232631/freegle_feed_app_3',
+      mediaTypes: {
+        banner: {
+          sizes: ADS_SQUARISH_SIZES,
+        },
+      },
+      bids: [
+        {
+          bidder: 'pubmatic',
+          params: {
+            publisherId: '164422',
+            adSlot: '5753992',
+          },
+        },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
+          },
+        },
+        {
+          bidder: 'appnexus',
+          params: {
+            placementId: '32336181',
+          },
+        },
+      ],
+    },
+    {
+      code: '/22794232631/freegle_feed_app_4',
+      mediaTypes: {
+        banner: {
+          sizes: ADS_SQUARISH_SIZES,
+        },
+      },
+      bids: [
+        {
+          bidder: 'pubmatic',
+          params: {
+            publisherId: '164422',
+            adSlot: '5753993',
+          },
+        },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
+          },
+        },
+        {
+          bidder: 'appnexus',
+          params: {
+            placementId: '32336182',
+          },
+        },
+      ],
+    },
+    {
+      code: '/22794232631/freegle_feed_app_5',
+      mediaTypes: {
+        banner: {
+          sizes: ADS_SQUARISH_SIZES,
+        },
+      },
+      bids: [
+        {
+          bidder: 'pubmatic',
+          params: {
+            publisherId: '164422',
+            adSlot: '5753994',
+          },
+        },
+        {
+          bidder: 'gumgum',
+          params: {
+            zone: 'hx1nvvhf',
+            slot: '1091236',
+          },
+        },
+        {
+          bidder: 'appnexus',
+          params: {
+            placementId: '32336183',
+          },
+        },
+      ],
+    },
+  ],
 }
+
+export default CONFIG

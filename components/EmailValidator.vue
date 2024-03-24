@@ -186,6 +186,9 @@ export default {
         "Please check your email domain - maybe you've made a typo?"
       )
     },
+    focus() {
+      this.$refs.form.validate()
+    },
   },
 }
 </script>

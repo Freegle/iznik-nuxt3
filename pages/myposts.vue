@@ -16,7 +16,10 @@
           >
             <ExternalDa
               ad-unit-path="/22794232631/freegle_myposts_desktop"
-              :dimensions="[300, 250]"
+              :dimensions="[
+                [300, 600],
+                [300, 250],
+              ]"
               div-id="div-gpt-ad-1692868003771-0"
               class="mt-2"
             />
@@ -66,21 +69,24 @@
         </b-col>
         <b-col cols="0" lg="3" class="p-0 pl-1">
           <VisibleWhen
-            :not="['xs', 'sm', 'md', 'lg']"
-            class="position-fixed"
-            style="right: 5px"
+            :at="['xl', 'xxl']"
+            :class="{
+              'sidebar-with-small-ads': smallAdVisible,
+              'sidebar-with-large-ads': largeAdVisible,
+              'ads-wrapper': true,
+            }"
           >
             <ExternalDa
-              ad-unit-path="/22794232631/freegle_myposts_desktop"
-              :dimensions="[300, 250]"
-              div-id="div-gpt-ad-1692868003771-1"
+              ad-unit-path="/22794232631/freegle_myposts_desktop_right"
+              :dimensions="[
+                [300, 600],
+                [300, 250],
+              ]"
+              div-id="div-gpt-ad-1709056727559-0"
               class="mt-2"
-              style="width: 300px"
-              @rendered="adRendered2"
+              @rendered="adRendered"
             />
-          </VisibleWhen>
-          <VisibleWhen :at="['lg', 'xl', 'xxl']">
-            <SidebarRight class="martop2" show-job-opportunities />
+            <SidebarRight v-if="triedAds" :show-job-opportunities="true" />
           </VisibleWhen>
         </b-col>
       </b-row>
@@ -104,6 +110,7 @@ import JobsTopBar from '~/components/JobsTopBar'
 import MyPostsPostsList from '~/components/MyPostsPostsList.vue'
 import MyPostsSearchesList from '~/components/MyPostsSearchesList.vue'
 import { useDonationAskModal } from '~/composables/useDonationAskModal'
+import { useTrystStore } from '~/stores/tryst'
 const DonationAskModal = defineAsyncComponent(() =>
   import('~/components/DonationAskModal')
 )
@@ -111,6 +118,7 @@ const DonationAskModal = defineAsyncComponent(() =>
 const authStore = useAuthStore()
 const messageStore = useMessageStore()
 const searchStore = useSearchStore()
+const trystStore = useTrystStore()
 
 const runtimeConfig = useRuntimeConfig()
 const route = useRoute()
@@ -209,18 +217,42 @@ function forceLogin() {
   authStore.forceLogin = true
 }
 
-const martop2 = ref('285px')
+const largeAdVisible = ref(false)
+const smallAdVisible = ref(false)
+const triedAds = ref(false)
 
-function adRendered2(visible) {
-  martop2.value = visible ? '285px' : '0px'
+function adRendered(rendered, index, dimension) {
+  if (rendered) {
+    if (index === 0) {
+      largeAdVisible.value = true
+    } else {
+      smallAdVisible.valye = true
+    }
+  }
+
+  triedAds.value = true
 }
 
+trystStore.fetch()
 // onMounted(() => {
 //   showDonationAskModal.value = true
 // })
 </script>
 <style scoped lang="scss">
-.martop2 {
-  margin-top: v-bind(martop2);
+@import 'assets/css/sticky-banner.scss';
+@import 'assets/css/sidebar-ads.scss';
+
+.sidebar-with-small-ads .sidebar__wrapper {
+  height: calc(
+    100vh - $sidebar-ads-height-small - $sidebar-ads-label-height -
+      var(--header-navbar-height) - $sticky-banner-height-desktop
+  );
+}
+
+.sidebar-with-large-ads .sidebar__wrapper {
+  height: calc(
+    100vh - $sidebar-ads-height-large - $sidebar-ads-label-height -
+      var(--header-navbar-height) - $sticky-banner-height-desktop
+  );
 }
 </style>

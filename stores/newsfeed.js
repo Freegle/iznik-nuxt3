@@ -73,7 +73,7 @@ export const useNewsfeedStore = defineStore({
         api(this.config)
           .news.seen(this.maxSeen)
           .then(() => {
-            this.fetchCount(this.lastDistance)
+            this.fetchCount(this.lastDistance, false)
           })
       }
     },
