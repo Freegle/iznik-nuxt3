@@ -61,7 +61,7 @@ self.addEventListener('push', function(e) {
     }).catch((err) => {
       console.log('Service worker error', err)
     })
-  }, 0)
+  }, 100)
 
   if (data?.notification?.title) {
     console.log('Show new')
