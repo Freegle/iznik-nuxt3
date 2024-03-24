@@ -41,7 +41,7 @@ self.addEventListener('push', function(e) {
     }
   }
 
-  const fcmId = data.fcmMessageId
+  let fcmId = data.fcmMessageId
 
   // Close (other) notifications.  The timining is unpredictable so make sure
   // we don't close the new one.
@@ -61,10 +61,16 @@ self.addEventListener('push', function(e) {
     }).catch((err) => {
       console.log('Service worker error', err)
     })
-  })
+  }, 0)
 
   if (data?.notification?.title) {
     console.log('Show new')
+    return e.waitUntil(self.registration.showNotification(data?.notification?.title, options))
+  } else {
+    // Force close of the notification we're just about to open.  We have to open one in order to avoid
+    // the default notification which will otherwise open.
+    console.log('Show empty.')
+    fcmId = null
     return e.waitUntil(self.registration.showNotification(data?.notification?.title, options))
   }
 })
