@@ -1,5 +1,5 @@
-importScripts('https://www.gstatic.com/firebasejs/3.5.2/firebase-app.js')
-importScripts('https://www.gstatic.com/firebasejs/3.5.2/firebase-messaging.js')
+importScripts('https://www.gstatic.com/firebasejs/9.6.5/firebase-app.js')
+importScripts('https://www.gstatic.com/firebasejs/9.6.5/firebase-messaging.js')
 
 // Initialize the Firebase app in the service worker by passing in the
 // messagingSenderId.
@@ -15,6 +15,13 @@ firebase.initializeApp({
 })
 
 const messaging = firebase.messaging()
+
+messaging.onBackgroundMessage((payload) => {
+  // Hide the default notification, otherwise we get the default as well as
+  // the one below when the browser isn't running.
+  console.log('[firebase-messaging-sw.js] Received background message ', payload);
+  self.registration.hideNotification();
+});
 
 self.addEventListener('push', function(e) {
   data = e.data.json()
