@@ -64,7 +64,7 @@ self.addEventListener('push', function(e) {
       notifications.forEach((notification) => {
         console.log('Close it?', fcmId, notification?.data?.fcmMessageId)
 
-        if (notification?.data?.fcmMessageId && fcmId !== notification?.data?.fcmMessageId) {
+        if (!notification?.data?.fcmMessageId || fcmId !== notification?.data?.fcmMessageId) {
           console.log('Yes')
           notification.close()
         } else {
