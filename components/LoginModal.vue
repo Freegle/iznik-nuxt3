@@ -566,7 +566,7 @@ export default {
       this.loginType = 'Facebook'
 
       if (this.signUp) {
-        this.$api.bandit.chosen({
+        await this.$api.bandit.chosen({
           uid: 'signUpModal',
           variant: 'facebook',
         })
@@ -614,7 +614,7 @@ export default {
         console.log('Signed in')
 
         if (this.signUp) {
-          this.$api.bandit.chosen({
+          await this.$api.bandit.chosen({
             uid: 'signUpModal',
             variant: 'google',
           })
@@ -636,11 +636,11 @@ export default {
         this.socialLoginError = 'Google login failed: ' + response.error
       }
     },
-    loginYahoo() {
+    async loginYahoo() {
       this.loginType = 'Yahoo'
 
       if (this.signUp) {
-        this.$api.bandit.chosen({
+        await this.$api.bandit.chosen({
           uid: 'signUpModal',
           variant: 'yahoo',
         })
