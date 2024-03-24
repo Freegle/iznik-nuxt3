@@ -30,7 +30,8 @@ self.addEventListener('push', function(e) {
     data: {
       dateOfArrival: Date.now(),
       primaryKey: '1',
-      dataInNotification: data.data
+      dataInNotification: data.data,
+      fcmMessageId: data.fcmMessageId
     }
   }
 
@@ -42,9 +43,9 @@ self.addEventListener('push', function(e) {
     self.registration.getNotifications().then((notifications) => {
       console.log('Got existing notifications', notifications)
       notifications.forEach((notification) => {
-        console.log('Close it?', fcmId, notification.fcmMessageId)
+        console.log('Close it?', fcmId, notification?.data?.fcmMessageId)
 
-        if (fcmId !== notification.fcmMessageId) {
+        if (notification?.data?.fcmMessageId && fcmId !== notification?.data?.fcmMessageId) {
           console.log('Yes')
           notification.close()
         } else {
