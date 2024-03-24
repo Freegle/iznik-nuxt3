@@ -48,7 +48,7 @@ self.addEventListener('push', function(e) {
   self.registration.getNotifications().then((notifications) => {
     console.log('Got existing notifications', notifications)
     notifications.forEach((notification) => {
-      console.log('Close?', fcmId, notification.fcmMessageId)
+      console.log('Close it?', fcmId, notification.fcmMessageId)
 
       if (fcmId !== notification.fcmMessageId) {
         console.log('Yes')
