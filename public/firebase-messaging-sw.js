@@ -16,10 +16,20 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging()
 
-self.addEventListener('push', function(e) {
-  data = e.data.json()
-  console.log('[firebase-messaging-sw.js] Received push event', data)
+messaging.onBackgroundMessage((data) => {
+  // We need to customise the default background notification which is shown.
+  console.log(
+    '[firebase-messaging-sw.js] Received background message ',
+    data
+  );
 
+  const options = extractData(data)
+
+  // Customize notification here
+  self.registration.showNotification(data?.notification?.title, options);
+});
+
+function extractData (data) {
   const options = {
     tag: 'notification-1',
     renotify: true,
@@ -34,6 +44,14 @@ self.addEventListener('push', function(e) {
       fcmMessageId: data.fcmMessageId
     }
   }
+
+  return options
+}
+
+self.addEventListener('push', function(e) {
+  data = e.data.json()
+  console.log('[firebase-messaging-sw.js] Received push event', data)
+  const options = extractData()
 
   let fcmId = data.fcmMessageId
 
