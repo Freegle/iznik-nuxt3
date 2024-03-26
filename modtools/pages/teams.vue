@@ -33,7 +33,7 @@
         <p v-if="team.email">
           Contact email: <ExternalLink :href="'mailto:' + team.email">{{ team.email }}</ExternalLink>
         </p>
-        <ModTeamMember v-for="member in team.members" :key="'member-' + member.id" :teamid="team.id" :member="member" />
+        <ModTeamMember v-for="member in team.members" :key="'member-' + member.id" :teamid="team.id" :member="member" @removed="removed(team.name)" />
       </div>
     </client-only>
   </div>
@@ -52,31 +52,26 @@ const teams = computed(() => {
 })
 
 onMounted(() => {
-  console.log("TEAMS onMounted")
   teamStore.fetch()
 })
 
 const selectTeam = async (t) => {
-  console.log('selectTeam', t.id)
   team.value = await teamStore.fetch(t.name)
-  console.log('selectTeam', team.value)
 
   selected.value = t.id
 }
 const addMember = async (callback, name) => {
-  console.log('addMember A')
   if (memberToAdd.value && selected.value) {
-    console.log('addMember B')
     await teamStore.add({
       id: selected.value,
       userid: memberToAdd.value
     })
-    console.log('addMember C')
     team.value = await teamStore.fetch(name)
-    console.log('addMember D')
-    //selected.value = null
     callback()
   }
+}
+const removed = async (name) => {
+  team.value = await teamStore.fetch(name)
 }
 
 </script>

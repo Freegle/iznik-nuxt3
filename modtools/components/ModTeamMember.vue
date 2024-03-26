@@ -21,6 +21,8 @@
   </b-row>
 </template>
 <script>
+import { useTeamStore } from '@/stores/team'
+
 export default {
   props: {
     teamid: {
@@ -33,12 +35,13 @@ export default {
     }
   },
   methods: {
-    remove() {
-      console.log('Remove', this.teamid, this.member.id)
-      /*this.$store.dispatch('team/remove', {
+    async remove() {
+      const teamStore = useTeamStore()
+      await teamStore.remove({
         id: this.teamid,
         userid: this.member.id
-      })*/
+      })
+      this.$emit('removed')
     }
   }
 }

@@ -14,10 +14,8 @@ export const useTeamStore = defineStore({
       this.fetching = {}
     },
     async fetch(team) {
-      console.log('team fetch',team)
       if (!team) {
         this.all = await api(this.config).team.fetch()
-        console.log('team fetched',this.all)
         return
       }
       if (team in this.fetching) {
@@ -28,13 +26,16 @@ export const useTeamStore = defineStore({
           name: team,
         })
         this.list[team] = await this.fetching[team]
-        this.fetching[team] = null
+        delete this.fetching[team]
       }
 
       return this.list[team]
     },
     async add(params){
       await api(this.config).team.add(params)
+    },
+    async remove(params){
+      await api(this.config).team.remove(params)
     }
   },
   getters: {
