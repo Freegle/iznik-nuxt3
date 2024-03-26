@@ -18,7 +18,8 @@
         <b-input-group v-if="supportOrAdmin" class="mt-2 mb-2">
           <b-form-input v-model="memberToAdd" type="number" placeholder="Add member by ID" />
           <b-input-group-append>
-            <SpinButton variant="primary" name="plus" label="Add" spinclass="text-white" :handler="addMember" :disabled="!memberToAdd" />
+            <SpinButton variant="primary" icon-name="plus" label="Add" spinclass="text-white" @handle="addMember($event, team.name)"
+              :disabled="!memberToAdd" />
           </b-input-group-append>
         </b-input-group>
         <NoticeMessage v-if="!team.active" variant="info">
@@ -61,6 +62,21 @@ const selectTeam = async (t) => {
   console.log('selectTeam', team.value)
 
   selected.value = t.id
+}
+const addMember = async (callback, name) => {
+  console.log('addMember A')
+  if (memberToAdd.value && selected.value) {
+    console.log('addMember B')
+    await teamStore.add({
+      id: selected.value,
+      userid: memberToAdd.value
+    })
+    console.log('addMember C')
+    team.value = await teamStore.fetch(name)
+    console.log('addMember D')
+    //selected.value = null
+    callback()
+  }
 }
 
 </script>

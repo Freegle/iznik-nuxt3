@@ -6,4 +6,11 @@ export default class TeamAPI extends BaseAPI {
     const { team, teams } = await this.$get('/team', params)
     return teams || team
   }
+  async add(params) {
+    console.log('TeamAPI add',params)
+    await this.$patch('/team', {
+      action: 'Add', 
+      ...params
+    })
+  }
 }
