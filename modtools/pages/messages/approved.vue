@@ -46,6 +46,7 @@ const { collection, messageTerm, memberTerm, summary, messages, distance,
 
 collection.value = 'Approved'
 workType.value = null
+limit.value = 1000
 
 const groupName = computed(() => {
   if (groupid.value) {

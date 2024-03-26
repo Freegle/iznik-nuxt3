@@ -5,6 +5,7 @@ import api from '~/api'
 export const useTeamStore = defineStore({
   id: 'team',
   state: () => ({
+    all: [],
     list: {},
   }),
   actions: {
@@ -13,6 +14,12 @@ export const useTeamStore = defineStore({
       this.fetching = {}
     },
     async fetch(team) {
+      console.log('team fetch',team)
+      if (!team) {
+        this.all = await api(this.config).team.fetch()
+        console.log('team fetched',this.all)
+        return
+      }
       if (team in this.fetching) {
         await this.fetching[team]
         await nextTick()
