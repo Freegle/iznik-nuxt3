@@ -74,7 +74,7 @@ let slot = null
 let refreshTimer = null
 let visibleTimer = null
 const PREBID_TIMEOUT = 1000
-const AD_REFRESH_TIMEOUT = 45000
+const AD_REFRESH_TIMEOUT = 31000
 
 function refreshAd() {
   if (
