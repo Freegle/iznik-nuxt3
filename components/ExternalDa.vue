@@ -52,6 +52,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  inModal: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const adShown = ref(true)
@@ -124,7 +128,10 @@ let initialTimer = null
 
 function handleVisible() {
   // Check if the ad is still visible after this delay, and no modal is open.
-  if (isVisible.value && !document.body.classList.contains('modal-open')) {
+  if (
+    isVisible.value &&
+    (props.inModal || !document.body.classList.contains('modal-open'))
+  ) {
     window.googletag.cmd.push(function () {
       slot = window.googletag
         .defineSlot(props.adUnitPath, props.dimensions, props.divId)
