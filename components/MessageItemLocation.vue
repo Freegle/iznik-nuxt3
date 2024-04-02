@@ -27,18 +27,16 @@
         </span>
       </div>
       <div>
-        <client-only>
-          <b-badge
-            v-if="message && message.availablenow > 1"
-            variant="info"
-            class="ms-2 me-2 mt-0 align-top"
-          >
-            {{ message.availablenow ? message.availablenow : '0' }} left
-          </b-badge>
-        </client-only>
+        <b-badge
+          v-if="message && message.availablenow > 1"
+          variant="info"
+          class="ms-2 me-2 mt-0 align-top"
+        >
+          {{ message.availablenow ? message.availablenow : '0' }} left
+        </b-badge>
       </div>
     </h3>
-    <div v-if="showLocation" class="location">
+    <div class="location">
       {{ location }}
     </div>
   </div>
@@ -69,11 +67,6 @@ export default {
       type: Boolean,
       required: false,
       default: false,
-    },
-    showLocation: {
-      type: Boolean,
-      required: false,
-      default: true,
     },
   },
   setup() {

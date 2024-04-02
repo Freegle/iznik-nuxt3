@@ -62,7 +62,7 @@ export function addStrings(item, times) {
   return item
 }
 
-export function timeago(val, past) {
+export function timeago(val) {
   let f = null
 
   // dayjs pluralises wrongly in some cases - we've seen 1 hours ago.
@@ -71,10 +71,6 @@ export function timeago(val, past) {
   const v = dayjs(val)
   f = v.fromNow()
   f = f.replace(dePlural, '1 $1')
-
-  if (past && f === 'in a few seconds') {
-    f = 'just now'
-  }
 
   return f
 }

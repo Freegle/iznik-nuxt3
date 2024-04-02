@@ -128,27 +128,20 @@ export const useMessageStore = defineStore({
         }
       }
     },
-    async fetchInBounds(swlat, swlng, nelat, nelng, groupid, limit, cache) {
-      let ret = []
+    async fetchInBounds(swlat, swlng, nelat, nelng, groupid) {
+      // Don't cache this, as it might change.
+      const ret = await api(this.config).message.inbounds(
+        swlat,
+        swlng,
+        nelat,
+        nelng,
+        groupid
+      )
+
       const key =
         swlat + ':' + swlng + ':' + nelat + ':' + nelng + ':' + groupid
 
-      if (cache && this.bounds[key]) {
-        ret = this.bounds[key]
-      } else {
-        // Don't cache this, as it might change.
-        ret = await api(this.config).message.inbounds(
-          swlat,
-          swlng,
-          nelat,
-          nelng,
-          groupid,
-          limit
-        )
-
-        this.bounds[key] = ret
-      }
-
+      this.bounds[key] = ret
       return ret
     },
     async search(params) {

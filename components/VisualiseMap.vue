@@ -109,7 +109,6 @@ export default {
   },
   data() {
     return {
-      timer: null,
       center: [53.945, -2.5209],
       zoom: 8,
       bounds: null,
@@ -161,11 +160,6 @@ export default {
       ]
     },
   },
-  beforeUnmount() {
-    if (this.timer) {
-      clearTimeout(this.timer)
-    }
-  },
   methods: {
     idle(map) {
       if (this.running && this.list.length === 0) {
@@ -177,16 +171,16 @@ export default {
         case 0: {
           // We have flown to the from location.  Show the posting user.
           this.showFrom = true
-          this.timer = setTimeout(() => {
+          setTimeout(() => {
             this.showMessage = true
-            this.timer = setTimeout(() => {
+            setTimeout(() => {
               // Show all the repliers
               this.showTo = true
               this.showOthers = true
-              this.timer = setTimeout(() => {
+              setTimeout(() => {
                 // Show the reply text.
                 this.showReplies = true
-                this.timer = setTimeout(() => {
+                setTimeout(() => {
                   // Collect - move the touser to the fromuser's location, stop showing the other replies.
                   this.showOthers = false
                   this.showReplies = false
@@ -195,7 +189,7 @@ export default {
                       this.item.fromlat,
                       this.item.fromlng
                     )
-                    this.timer = setTimeout(() => {
+                    setTimeout(() => {
                       if (
                         this.$refs.touser &&
                         this.item &&
@@ -209,10 +203,10 @@ export default {
                           this.item.tolat,
                           this.item.tolng
                         )
-                        this.timer = setTimeout(() => {
+                        setTimeout(() => {
                           this.showMessage = false
                           this.showThanks = true
-                          this.timer = setTimeout(() => {
+                          setTimeout(() => {
                             this.list.shift()
                             this.doNext()
                           }, this.delayBeforeNext)
