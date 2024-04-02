@@ -4,9 +4,7 @@
     class="grid m-0 pl-1 pr-1 pl-sm-0 pr-sm-0 mt-0 mt-lg-5 ml-2 mr-2"
   >
     <client-only>
-      <div
-        class="d-none d-sm-block map justify-content-start flex-column d-flex"
-      >
+      <div class="d-none d-sm-flex map justify-content-start flex-column">
         <VisualiseMap v-if="type === 'Map'" class="shadow flex-grow-1" />
         <div v-else-if="type === 'Song'" class="w-100">
           <b-img
