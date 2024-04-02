@@ -50,6 +50,12 @@ export default defineNuxtConfig({
   ssr: true,
   spaLoadingTemplate: false,
 
+  build: {
+    optimization: {
+      minimize: false
+    }
+  },
+
   // This makes Netlify serve assets from the perm link for the build, which avoids missing chunk problems when
   // a new deploy happens.  See https://github.com/nuxt/nuxt/issues/20950.
   //
