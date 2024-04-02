@@ -45,7 +45,7 @@ A fairly minimal `package.json` is needed as `nuxt.config.ts` extends `../` and 
 
 ## Upgrade notes
 
-* b-btn to b-button, b-select to b-form-select, date-picker to OurDatePicker
+* b-btn to b-button, b-select to b-form-select, date-picker to OurDatePicker, b-input to b-form-input
 * b-modal <template #default> <template #footer> useModal, etc. Do not use v-if on b-modal
   add v-if and @hidden <ModLogsModal v-if="showLogsModal" @hidden="showLogsModal = false" />
   and if needed, in modal add show() { this.modal.show() }
@@ -53,5 +53,5 @@ A fairly minimal `package.json` is needed as `nuxt.config.ts` extends `../` and 
 * Add extra icons to root plugins/vue-awesome.js
 * Change `this.$store.getters['misc/time']` into `this.miscStore.time`
 * And... miscStore.get('dashboardShowInfo') and miscStore.set({ key: 'dashboardShowInfo', value: newValue })
-* SpinButton has changed params
+* SpinButton has changed params inc icon-name and :handler to @handle which has param callback that must be called when complete
 * const path = computed(() => { return 0 } and access as path.value

@@ -7,7 +7,7 @@
             Personal
           </h2>
         </template>
-        <!--ModSettingsPersonal /-->
+        <ModSettingsPersonal />
       </b-tab>
       <b-tab>
         <template v-slot:title>
