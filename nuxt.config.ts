@@ -52,8 +52,8 @@ export default defineNuxtConfig({
 
   build: {
     optimization: {
-      minimize: false
-    }
+      minimize: false,
+    },
   },
 
   // This makes Netlify serve assets from the perm link for the build, which avoids missing chunk problems when
