@@ -196,6 +196,20 @@ export const useMobileStore = defineStore({ // Do not persist
           vibration: false
         })
         console.log("CHANNEL CREATED: PushDefaultForeground")
+
+        // Create New Posts  Android push channel
+        await PushNotifications.createChannel({
+          id: 'NewPosts', // PushPluginChannel
+          name: 'Freegle new posts',
+          description: 'New offer and wanted posts from other Freeglers',
+          //sound: 'res/raw/unconvinced',
+          importance: 3,
+          visibility: 1,
+          lights: true,
+          lightColor: '#5ECA24',
+          vibration: false
+        })
+        console.log("CHANNEL CREATED: NewPosts")
       }
 
       let permStatus = await PushNotifications.checkPermissions();
