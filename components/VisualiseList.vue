@@ -86,10 +86,10 @@ function doNext() {
   }
 
   if (running) {
-    index.value++
-
     if (index.value >= list.value.length) {
       index.value = 0
+    } else {
+      index.value++
     }
   }
 }
