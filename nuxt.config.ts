@@ -1,5 +1,5 @@
-import { VitePWA } from 'vite-plugin-pwa'
 import eslintPlugin from 'vite-plugin-eslint'
+import { VitePWA } from 'vite-plugin-pwa'
 import legacy from '@vitejs/plugin-legacy'
 import { sentryVitePlugin } from '@sentry/vite-plugin'
 import config from './config'
@@ -49,12 +49,6 @@ export default defineNuxtConfig({
   target: 'server',
   ssr: true,
   spaLoadingTemplate: false,
-
-  build: {
-    optimization: {
-      minimize: false,
-    },
-  },
 
   // This makes Netlify serve assets from the perm link for the build, which avoids missing chunk problems when
   // a new deploy happens.  See https://github.com/nuxt/nuxt/issues/20950.
