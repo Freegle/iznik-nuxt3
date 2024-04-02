@@ -10,10 +10,10 @@
     }"
     class="position-relative"
   >
-    <template v-if="message.successful && showFreegled">
+    <template v-if="message.successful">
       <MessageFreegled :id="id" />
     </template>
-    <template v-else-if="message.promised && showPromised">
+    <template v-else-if="message.promised">
       <MessagePromised
         :id="id"
         summary
@@ -28,7 +28,6 @@
         :matchedon="matchedon"
         class="mb-1 header-title"
         :expanded="false"
-        :show-location="showLocation"
       />
       <MessageHistory
         :id="id"
@@ -95,21 +94,6 @@ export default {
       required: false,
       default: null,
     },
-    showFreegled: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
-    showPromised: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
-    showLocation: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
   },
   setup() {
     const messageStore = useMessageStore()
@@ -125,12 +109,11 @@ export default {
     classes() {
       const ret = {
         messagecard: true,
-        freegled: this.message?.successful && this.showFreegled,
+        freegled: this.message?.successful,
         offer: this.message.type === 'Offer',
         wanted: this.message.type === 'Wanted',
         clickme: !this.message?.successful,
         promisedfade:
-          this.showPromised &&
           this.message?.promised &&
           this.replyable &&
           !this.message?.promisedtome &&

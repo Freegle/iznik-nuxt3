@@ -5,7 +5,7 @@
       :key="'message-' + message.id + '-' + group.id"
       class="text--small"
     >
-      <span :title="group.arrival">{{ timeago(group.arrival, true) }} on </span>
+      <span :title="group.arrival">{{ timeago(group.arrival) }} on </span>
       <nuxt-link
         v-if="group.groupid in groups"
         no-prefetch

@@ -36,7 +36,7 @@
         </b-badge>
       </div>
     </h3>
-    <div v-if="showLocation" class="location">
+    <div class="location">
       {{ location }}
     </div>
   </div>
@@ -67,11 +67,6 @@ export default {
       type: Boolean,
       required: false,
       default: false,
-    },
-    showLocation: {
-      type: Boolean,
-      required: false,
-      default: true,
     },
   },
   setup() {

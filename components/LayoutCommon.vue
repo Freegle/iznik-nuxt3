@@ -41,7 +41,7 @@
             </VisibleWhen>
           </div>
           <div
-            v-else-if="routePath !== '/'"
+            v-else
             class="adFallback sticky ourBack w-100 text-center d-flex flex-column justify-content-center"
           >
             <nuxt-link to="/donate" class="text-white nodecor">

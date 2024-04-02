@@ -30,32 +30,20 @@
       </VisibleWhen>
     </client-only>
     <div class="info">
-      <VisibleWhen :at="['xs']">
-        <h1 class="text--large-responsive">
-          Freegle - online dating for stuff.
-        </h1>
-        <p class="text--medium-responsive black font-weight-bold">
-          Got things you don't need? Need stuff?
-          <br />
-          Match with someone local. Completely free.
-        </p>
-      </VisibleWhen>
-      <VisibleWhen :not="['xs']">
-        <h1 class="text--largest-responsive">
-          Freegle - like online dating for stuff.
-        </h1>
-        <p class="text--medium-responsive black font-weight-bold">
-          Got stuff you don't need? Looking for something?
-        </p>
-        <p class="text--medium-responsive black font-weight-bold">
-          We'll match you with someone local. All completely free.
-        </p>
-      </VisibleWhen>
+      <h1 class="text--largest-responsive">
+        Freegle - like online dating for stuff.
+      </h1>
+      <p class="text--medium-responsive black font-weight-bold">
+        Got stuff you don't need? Looking for something?
+      </p>
+      <p class="text--medium-responsive black font-weight-bold">
+        We'll match you with someone local. All completely free.
+      </p>
       <client-only>
         <div class="d-flex justify-content-between justify-content-lg-start">
           <b-button
             variant="primary"
-            size="xl"
+            size="lg"
             to="/give"
             class="text--medium-responsive ml-1 ml-sm-0"
             @click="clicked('give')"
@@ -65,7 +53,7 @@
           <div style="width: 4vw" class="d-none d-lg-block" />
           <b-button
             variant="secondary"
-            size="xl"
+            size="lg"
             to="/find"
             class="text--medium-responsive mr-1 mr-sm-0"
             @click="clicked('ask')"
@@ -75,30 +63,25 @@
         </div>
       </client-only>
       <div
-        class="font-weight-bold text-header text--medium-responsive mt-3 mb-4 d-none d-md-block"
+        class="font-weight-bold text-header text--medium-responsive mt-3 mb-4"
       >
         Don't throw it away, give it away!
       </div>
-      <h2
-        class="text--medium-responsive font-weight-bold black d-none d-md-block"
-      >
+      <h2 class="text--medium-responsive font-weight-bold black">
         Just looking?
       </h2>
       <client-only>
         <div
-          class="d-flex justify-content-around justify-content-lg-start flex-wrap mt-2 mt-md-0"
+          class="d-flex justify-content-around justify-content-lg-start flex-wrap"
         >
           <PlaceAutocomplete
             class="mb-2"
-            labeltext="See what's being freegled near you:"
+            labeltext="See what's being freegled near you."
             labeltext-sr="Enter your location and"
             @selected="explorePlace($event)"
           />
         </div>
       </client-only>
-      <VisibleWhen :at="['xs']">
-        <VisualiseList class="mb-2" />
-      </VisibleWhen>
     </div>
     <client-only>
       <div class="app-download mt-2">
@@ -144,15 +127,11 @@ import api from '~/api'
 const VisualiseMap = defineAsyncComponent(() =>
   import('~/components/VisualiseMap')
 )
-const VisualiseList = defineAsyncComponent(() =>
-  import('~/components/VisualiseList')
-)
 
 export default {
   components: {
     MainFooter,
     VisualiseMap,
-    VisualiseList,
   },
   setup() {
     const runtimeConfig = useRuntimeConfig()
