@@ -6,10 +6,12 @@
     >
       <MessageTag :id="id" def class="ps-2 pe-2" />
       <div class="d-flex justify-content-around bg rounded">
-        <b-img
-          src="/camera.png"
-          class="align-self-center justify-se w-100 rounded h-100 fit-cover"
-        />
+        <client-only>
+          <b-img
+            src="/camera.png"
+            class="align-self-center justify-self-center w-100 rounded h-100 fit-cover"
+          />
+        </client-only>
       </div>
     </div>
     <button
@@ -26,33 +28,46 @@
         View larger image
       </div>
       <div class="photobadge d-flex">
-        <b-badge v-if="attachments?.length > 1" @click="$emit('zoom')">
-          1 / {{ attachments?.length }} <v-icon icon="camera" />
-        </b-badge>
+        <client-only>
+          <b-badge v-if="attachments?.length > 1" @click="$emit('zoom')">
+            1 / {{ attachments?.length }} <v-icon icon="camera" />
+          </b-badge>
+        </client-only>
       </div>
       <div :class="{ thumbnail: thumbnail, notThumbnail: !thumbnail }">
-        <b-img
-          lazy
-          rounded
-          class="d-none d-md-block attachment p-0"
-          generator-unable-to-provide-required-alt=""
-          title="Item picture"
-          :src="thumbnail ? attachments[0].paththumb : attachments[0].path"
-          itemprop="image"
-          @error="brokenImage"
-          @click="$emit('zoom')"
-        />
-        <b-img
-          lazy
-          rounded
-          class="d-block d-md-none attachment p-0"
-          generator-unable-to-provide-required-alt=""
-          title="Item picture"
-          :src="attachments[0].path"
-          itemprop="image"
-          @error="brokenImage"
-          @click="$emit('zoom')"
-        />
+        <client-only>
+          <b-img
+            lazy
+            rounded
+            class="d-none d-md-block attachment p-0"
+            generator-unable-to-provide-required-alt=""
+            title="Item picture"
+            :src="thumbnail ? attachments[0].paththumb : attachments[0].path"
+            itemprop="image"
+            @error="brokenImage"
+            @click="$emit('zoom')"
+          />
+          <b-img
+            lazy
+            rounded
+            class="d-block d-md-none attachment p-0"
+            generator-unable-to-provide-required-alt=""
+            title="Item picture"
+            :src="attachments[0].path"
+            itemprop="image"
+            @error="brokenImage"
+            @click="$emit('zoom')"
+          />
+          <template #fallback>
+            <img
+              class="attachment p-0"
+              generator-unable-to-provide-required-alt=""
+              title="Item picture"
+              src="/camera.png"
+              itemprop="image"
+            />
+          </template>
+        </client-only>
       </div>
     </button>
   </div>
