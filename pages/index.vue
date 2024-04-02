@@ -5,7 +5,7 @@
   >
     <client-only>
       <div
-        class="d-none d-sm-block map justify-content-start flex-column d-flex"
+        class="d-none d-sm-flex map justify-content-start flex-column d-flex"
       >
         <VisualiseMap v-if="type === 'Map'" class="shadow flex-grow-1" />
         <div v-else-if="type === 'Song'" class="w-100">
