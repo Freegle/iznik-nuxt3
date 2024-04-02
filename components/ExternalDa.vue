@@ -52,6 +52,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  inModal: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const adShown = ref(true)
@@ -70,7 +74,7 @@ let slot = null
 let refreshTimer = null
 let visibleTimer = null
 const PREBID_TIMEOUT = 1000
-const AD_REFRESH_TIMEOUT = 45000
+const AD_REFRESH_TIMEOUT = 31000
 
 function refreshAd() {
   if (
@@ -107,7 +111,7 @@ function refreshAd() {
         })
       })
     } else {
-      console.log('Not refreshing ad', props.adUnitPath, isVisible.value)
+      // console.log('Not refreshing ad', props.adUnitPath, isVisible.value)
     }
 
     refreshTimer = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
@@ -124,7 +128,10 @@ let initialTimer = null
 
 function handleVisible() {
   // Check if the ad is still visible after this delay, and no modal is open.
-  if (isVisible.value && !document.body.classList.contains('modal-open')) {
+  if (
+    isVisible.value &&
+    (props.inModal || !document.body.classList.contains('modal-open'))
+  ) {
     window.googletag.cmd.push(function () {
       slot = window.googletag
         .defineSlot(props.adUnitPath, props.dimensions, props.divId)

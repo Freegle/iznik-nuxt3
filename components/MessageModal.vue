@@ -5,8 +5,25 @@
     size="lg"
     class="hide-footer"
     body-class="p-0 p-md-3"
+    header-class="p-0"
     @shown="bumpMessage++"
   >
+    <template #header>
+      <div class="layout">
+        <VisibleWhen v-if="bumpMessage > 0" :at="['xs', 'sm']" class="maybeAd">
+          <ExternalDa
+            ad-unit-path="/22794232631/freegle_modal_app"
+            :dimensions="[[320, 50]]"
+            div-id="div-gpt-ad-1711542403014-0"
+            pixel
+            in-modal
+          />
+        </VisibleWhen>
+        <b-button variant="white" class="noborder p-0" @click="hide">
+          <v-icon icon="times-circle" class="fa-2x" />
+        </b-button>
+      </div>
+    </template>
     <template #default>
       <div v-if="message">
         <div v-if="showImagesProxy">
@@ -151,5 +168,28 @@ const showImagesProxy = computed({
 
 :deep(.carousel-item.active) {
   background-color: transparent !important;
+}
+
+.maybeAd {
+  visibility: hidden;
+
+  @media only screen and (min-width: 386px) {
+    visibility: visible;
+    height: 50px;
+    width: 320px;
+  }
+}
+
+.noborder {
+  border: none !important;
+  border-color: $color-white !important;
+}
+
+.layout {
+  display: grid;
+  width: 100%;
+  align-items: center;
+  grid-template-rows: 1fr;
+  grid-template-columns: calc(100% - 3rem) 3rem;
 }
 </style>

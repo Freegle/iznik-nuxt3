@@ -254,6 +254,9 @@ export default {
     ExternalDa,
   },
   async setup(props) {
+    const chatStore = useChatStore()
+    const authStore = useAuthStore()
+
     definePageMeta({
       layout: 'login',
     })
@@ -265,8 +268,6 @@ export default {
     const runtimeConfig = useRuntimeConfig()
     const route = useRoute()
 
-    const chatStore = useChatStore()
-    const authStore = useAuthStore()
     const myid = authStore.user?.id
     const showChats = ref(20)
 

@@ -419,6 +419,33 @@ export default {
       this.nativeLoginError = null
       this.buttonClicked = false
     },
+    signUp: {
+      immediate: true,
+      handler(newVal) {
+        if (newVal) {
+          this.$api.bandit.shown({
+            uid: 'signUpModal',
+            variant: 'facebook',
+          })
+          this.$api.bandit.shown({
+            uid: 'signUpModal',
+            variant: 'google',
+          })
+          this.$api.bandit.shown({
+            uid: 'signUpModal',
+            variant: 'yahoo',
+          })
+          this.$api.bandit.shown({
+            uid: 'signUpModal',
+            variant: 'native',
+          })
+          this.$api.bandit.shown({
+            uid: 'signUpModal',
+            variant: 'signin',
+          })
+        }
+      },
+    },
   },
   beforeUnmount() {
     if (this.bumpTimer) {
@@ -465,6 +492,13 @@ export default {
     },
     loginNative(e) {
       this.loginType = 'Freegle'
+
+      if (this.signUp) {
+        this.$api.bandit.chosen({
+          uid: 'signUpModal',
+          variant: 'native',
+        })
+      }
 
       const self = this
       this.nativeLoginError = null
@@ -582,6 +616,13 @@ export default {
     },
     async loginFacebook() {
       this.loginType = 'Facebook'
+
+      if (this.signUp) {
+        await this.$api.bandit.chosen({
+          uid: 'signUpModal',
+          variant: 'facebook',
+        })
+      }
 
       this.nativeLoginError = null
       this.socialLoginError = null
@@ -723,6 +764,13 @@ export default {
       if (response?.credential) {
         console.log('Signed in')
 
+        if (this.signUp) {
+          await this.$api.bandit.chosen({
+            uid: 'signUpModal',
+            variant: 'google',
+          })
+        }
+
         try {
           await this.authStore.login({
             googlejwt: response.credential,
@@ -739,8 +787,15 @@ export default {
         this.socialLoginError = 'Google login failed: ' + response.error
       }
     },
-    loginYahoo() {
+    async loginYahoo() {
       this.loginType = 'Yahoo'
+
+      if (this.signUp) {
+        await this.$api.bandit.chosen({
+          uid: 'signUpModal',
+          variant: 'yahoo',
+        })
+      }
 
       this.nativeLoginError = null
       this.socialLoginError = null
@@ -827,6 +882,11 @@ export default {
       this.forceSignIn = true
       e.preventDefault()
       e.stopPropagation()
+
+      this.$api.bandit.chosen({
+        uid: 'signUpModal',
+        variant: 'signin',
+      })
     },
     togglePassword() {
       this.showPassword = !this.showPassword

@@ -311,7 +311,7 @@ export default {
   padding-left: 4px;
   padding-right: 4px;
   word-wrap: break-word;
-  line-height: 1.75;
+  line-height: 1.5;
   font-size: 125%;
   font-weight: bold;
 }

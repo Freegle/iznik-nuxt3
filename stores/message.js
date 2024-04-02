@@ -100,7 +100,10 @@ export const useMessageStore = defineStore({
       if (left.length) {
         this.fetchingCount++
         try {
-          const msgs = await api(this.config).message.fetch(left.join(','))
+          const msgs = await api(this.config).message.fetch(
+            left.join(','),
+            false
+          )
 
           if (msgs && msgs.forEach) {
             msgs.forEach((msg) => {

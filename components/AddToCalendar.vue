@@ -1,6 +1,11 @@
 <template>
   <div>
-    <b-button :variant="variant" :size="size" @click="download">
+    <b-button
+      :variant="variant"
+      :size="size"
+      :class="btnClass"
+      @click="download"
+    >
       <v-icon icon="calendar-alt" />
       Add to Calendar
     </b-button>
@@ -26,6 +31,11 @@ export default {
       type: String,
       required: false,
       default: 'md',
+    },
+    btnClass: {
+      type: String,
+      required: false,
+      default: '',
     },
   },
   data() {

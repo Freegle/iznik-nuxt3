@@ -94,7 +94,6 @@
     </b-container>
   </client-only>
 </template>
-
 <script setup>
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
@@ -111,6 +110,7 @@ import JobsTopBar from '~/components/JobsTopBar'
 import MyPostsPostsList from '~/components/MyPostsPostsList.vue'
 import MyPostsSearchesList from '~/components/MyPostsSearchesList.vue'
 import { useDonationAskModal } from '~/composables/useDonationAskModal'
+import { useTrystStore } from '~/stores/tryst'
 const DonationAskModal = defineAsyncComponent(() =>
   import('~/components/DonationAskModal')
 )
@@ -118,6 +118,7 @@ const DonationAskModal = defineAsyncComponent(() =>
 const authStore = useAuthStore()
 const messageStore = useMessageStore()
 const searchStore = useSearchStore()
+const trystStore = useTrystStore()
 
 const runtimeConfig = useRuntimeConfig()
 const route = useRoute()
@@ -143,26 +144,34 @@ useFavoritePage('myposts')
 
 const { showDonationAskModal } = await useDonationAskModal()
 
-const myid = authStore.user?.id
+const myid = computed(() => authStore.user?.id)
 
 // `posts` holds both OFFERs and WANTEDs (both old and active)
-const posts = computed(() => messageStore.byUserList[myid] || [])
+const posts = computed(() => messageStore.byUserList[myid.value] || [])
 
 const offersLoading = ref(true)
 const wantedsLoading = ref(true)
 
-if (myid) {
-  offersLoading.value = true
-  wantedsLoading.value = true
+watch(
+  myid,
+  async (newMyid) => {
+    if (newMyid) {
+      offersLoading.value = true
+      wantedsLoading.value = true
 
-  await messageStore.fetchByUser(myid, false, true)
+      await messageStore.fetchByUser(newMyid, false, true)
 
-  offersLoading.value = false
-  wantedsLoading.value = false
+      offersLoading.value = false
+      wantedsLoading.value = false
 
-  // No need to wait for searches - often below the fold.
-  searchStore.fetch(myid)
-}
+      // No need to wait for searches - often below the fold.
+      searchStore.fetch(newMyid)
+    }
+  },
+  {
+    immediate: true,
+  }
+)
 
 const shownOffersCount = ref(1)
 const offers = computed(() => {
@@ -232,6 +241,7 @@ function adRendered(rendered, index, dimension) {
   triedAds.value = true
 }
 
+trystStore.fetch()
 // onMounted(() => {
 //   showDonationAskModal.value = true
 // })

@@ -58,7 +58,7 @@
     </div>
     <NoticeMessage v-if="photoFailed" variant="danger" class="mt-2 mb-2">
       Photo upload failed. If this keeps happening, then please contact
-      <SupportLink />.
+      <SupportLink />, including the photo as an attachment.
     </NoticeMessage>
     <div class="subject-layout mb-1 mt-1">
       <div class="d-flex flex-column">

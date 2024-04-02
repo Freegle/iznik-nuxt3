@@ -223,11 +223,11 @@ export default {
         data.append('groupid', this.groupid)
       }
 
-      // It would be nice to have a progress indicator, but this doesn't immediately appear to be
-      // available using fetch().  So we don't specify onUpLoadProgress.
-      const ret = await this.imageStore.postForm(data)
-
       try {
+        // It would be nice to have a progress indicator, but this doesn't immediately appear to be
+        // available using fetch().  So we don't specify onUpLoadProgress.
+        const ret = await this.imageStore.postForm(data)
+
         if (ret.ret === 0) {
           this.imageid = ret.id
           this.imagethumb = ret.paththumb
