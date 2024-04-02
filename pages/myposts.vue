@@ -233,7 +233,7 @@ function adRendered(rendered, index, dimension) {
     if (index === 0) {
       largeAdVisible.value = true
     } else {
-      smallAdVisible.valye = true
+      smallAdVisible.value = true
     }
   }
 

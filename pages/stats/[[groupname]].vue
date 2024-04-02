@@ -163,7 +163,7 @@ export default {
           runtimeConfig,
           'Statistics for ' + groupname,
           'See stats and graphs for ' + groupname,
-          group ? group.profile : null
+          group.value?.profile ? group.value?.profile : null
         )
       )
     } else {
