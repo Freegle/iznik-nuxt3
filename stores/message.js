@@ -128,14 +128,15 @@ export const useMessageStore = defineStore({
         }
       }
     },
-    async fetchInBounds(swlat, swlng, nelat, nelng, groupid) {
+    async fetchInBounds(swlat, swlng, nelat, nelng, groupid, limit) {
       // Don't cache this, as it might change.
       const ret = await api(this.config).message.inbounds(
         swlat,
         swlng,
         nelat,
         nelng,
-        groupid
+        groupid,
+        limit
       )
 
       const key =
