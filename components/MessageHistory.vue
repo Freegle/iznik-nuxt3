@@ -15,17 +15,15 @@
         {{ groups[group.groupid].namedisplay }}
       </nuxt-link>
       &nbsp;
-      <client-only>
-        <b-button
-          v-if="displayMessageLink"
-          variant="link"
-          :to="'/message/' + message.id"
-          class="text-faded text-decoration-none"
-          size="xs"
-        >
-          #{{ message.id }}
-        </b-button>
-      </client-only>
+      <b-button
+        v-if="displayMessageLink"
+        variant="link"
+        :to="'/message/' + message.id"
+        class="text-faded text-decoration-none"
+        size="xs"
+      >
+        #{{ message.id }}
+      </b-button>
       <span v-if="approvedby" class="text-muted small">
         Approved by {{ approvedby }}
       </span>

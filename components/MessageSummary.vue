@@ -50,11 +50,9 @@
         v-if="!message.successful && replyable"
         class="header-expand mt-2 mt-sm-0"
       >
-        <client-only>
-          <b-button variant="primary" class="mt-2" @click="expand">
-            {{ expandButtonText }}
-          </b-button>
-        </client-only>
+        <b-button variant="primary" class="mt-2" @click="expand">
+          {{ expandButtonText }}
+        </b-button>
       </div>
       <div class="image-wrapper" @click="zoom">
         <MessageAttachments
@@ -67,6 +65,7 @@
     </div>
   </div>
 </template>
+
 <script>
 import { useMessageStore } from '~/stores/message'
 

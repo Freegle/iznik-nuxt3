@@ -35,41 +35,6 @@ const groupStore = useGroupStore()
 
 await groupStore.fetch()
 
-onMounted(() => {
-  // We used SSR so we have one rendeerd already.
-  timer = setTimeout(doNext, 3000)
-})
-
-onBeforeUnmount(() => {
-  clearTimeout(timer)
-})
-
-// Get the messages.
-try {
-  list.value = await useMessageStore().fetchInBounds(
-    49.45,
-    -9,
-    61,
-    2,
-    null,
-    50,
-    true
-  )
-
-  list.value = list.value.filter((item) => item.type === 'Offer')
-
-  if (list.value.length) {
-    // Get the first into store for render speed.
-    await useMessageStore().fetch(list.value[0].id)
-  }
-} catch (e) {
-  console.log('Failed to get list of messages')
-}
-
-if (!list.value?.length) {
-  running = false
-}
-
 watch(
   msgid,
   async (newVal) => {
@@ -92,6 +57,28 @@ watch(
   },
   { immediate: true }
 )
+
+onMounted(doNext)
+onBeforeUnmount(() => {
+  clearTimeout(timer)
+})
+
+// Get the messages.
+try {
+  list.value = await useMessageStore().fetchInBounds(49.45, -9, 61, 2, null, 50)
+  list.value = list.value.filter((item) => item.type === 'Offer')
+
+  if (list.value.length) {
+    // Get the first into store for render speed.
+    useMessageStore().fetch(list.value[0].id)
+  }
+} catch (e) {
+  console.log('Failed to get list of messages')
+}
+
+if (!list.value?.length) {
+  running = false
+}
 
 function doNext() {
   if (timer) {
