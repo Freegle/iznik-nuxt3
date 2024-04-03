@@ -401,7 +401,6 @@ export default defineNuxtConfig({
                   // to the cookie banner.
                   if (window.__tcfapi) {
                     window.__tcfapi('getTCData', 2, (tcData, success) => {
-                      console.log('TC data', JSON.stringify(tcData), success)
                       if (success && tcData && tcData.tcString) {
                         console.log('TC data loaded and TC String set');
                         postCookieYes();
