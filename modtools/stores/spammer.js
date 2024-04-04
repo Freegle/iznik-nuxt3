@@ -3,8 +3,8 @@ import { defineStore } from 'pinia'
 //import api from '~/api'
 // TODO
 
-export const useSpammersStore = defineStore({
-  id: 'spammers',
+export const useSpammerStore = defineStore({
+  id: 'spammer',
   state: () => ({
     list: [],
     // The context from the last fetch, used for fetchMore.

@@ -31,7 +31,7 @@
         </p>
       </div>
       <p>This reason will be visible to other moderators, so please make sure it's helpful.</p>
-      <b-textarea v-model="reason" placeholder="Enter a reason" />
+      <b-form-textarea v-model="reason" placeholder="Enter a reason" />
     </template>
     <template #footer>
       <b-button variant="white" @click="hide">
@@ -48,7 +48,7 @@
 </template>
 <script>
 import { useModal } from '~/composables/useModal'
-import { useSpammersStore } from '../stores/spammers'
+import { useSpammerStore } from '../stores/spammer'
 
 export default {
   props: {
@@ -64,8 +64,8 @@ export default {
   },
   setup() {
     const { modal, hide } = useModal()
-    const spammersStore = useSpammersStore()
-    return { spammersStore, modal, hide }
+    const spammerStore = useSpammerStore()
+    return { spammerStore, modal, hide }
   },
   data: function () {
     return {
@@ -85,9 +85,9 @@ export default {
     async send() {
       if (this.reason) {
         if (this.whitelist) {
-          await this.spammersStore.whitelist(this.user.userid,this.reason)
+          await this.spammerStore.whitelist(this.user.userid,this.reason)
         } else {
-          await this.spammersStore.report(this.user.userid,this.reason)
+          await this.spammerStore.report(this.user.userid,this.reason)
         }
 
         this.hide()

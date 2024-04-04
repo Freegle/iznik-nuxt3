@@ -12,17 +12,17 @@
           These comments can be seen by moderators, and also by members who choose to download their data under
           GDPR. So keep them objective, polite and factual, and without identifiable personal information please.
         </p>
-        <b-input v-model="comment.user1" :placeholder="placeholders[1]" />
-        <b-input v-model="comment.user2" :placeholder="placeholders[2]" />
-        <b-input v-model="comment.user3" :placeholder="placeholders[3]" />
-        <b-input v-model="comment.user4" :placeholder="placeholders[4]" />
-        <b-input v-model="comment.user5" :placeholder="placeholders[5]" />
-        <b-input v-model="comment.user6" :placeholder="placeholders[6]" />
-        <b-input v-model="comment.user7" :placeholder="placeholders[7]" />
-        <b-input v-model="comment.user8" :placeholder="placeholders[8]" />
-        <b-input v-model="comment.user9" :placeholder="placeholders[9]" />
-        <b-input v-model="comment.user10" :placeholder="placeholders[10]" />
-        <b-input v-model="comment.user11" :placeholder="placeholders[11]" />
+        <b-form-input v-model="comment.user1" :placeholder="placeholders[1]" />
+        <b-form-input v-model="comment.user2" :placeholder="placeholders[2]" />
+        <b-form-input v-model="comment.user3" :placeholder="placeholders[3]" />
+        <b-form-input v-model="comment.user4" :placeholder="placeholders[4]" />
+        <b-form-input v-model="comment.user5" :placeholder="placeholders[5]" />
+        <b-form-input v-model="comment.user6" :placeholder="placeholders[6]" />
+        <b-form-input v-model="comment.user7" :placeholder="placeholders[7]" />
+        <b-form-input v-model="comment.user8" :placeholder="placeholders[8]" />
+        <b-form-input v-model="comment.user9" :placeholder="placeholders[9]" />
+        <b-form-input v-model="comment.user10" :placeholder="placeholders[10]" />
+        <b-form-input v-model="comment.user11" :placeholder="placeholders[11]" />
         <p class="mt-2">
           You can choose for this note to be be alerted to other groups, which will put the member in <em>Member->Review</em>
           if they are an existing member or join a group. Please use this only for serious issues.

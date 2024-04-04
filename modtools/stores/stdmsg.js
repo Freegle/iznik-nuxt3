@@ -3,8 +3,8 @@ import { defineStore } from 'pinia'
 //import api from '~/api'
 // TODO
 
-export const useModconfigsStore = defineStore({
-  id: 'modconfigs',
+export const useStdmsgStore = defineStore({
+  id: 'stdmsg',
   state: () => ({
     list: [],
     // The context from the last fetch, used for fetchMore.

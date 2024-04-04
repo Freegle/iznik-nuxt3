@@ -302,7 +302,7 @@ import pluralize from 'pluralize'
 import Highlighter from 'vue-highlight-words'
 
 import { useLocationStore } from '../../stores/location'
-import { useModconfigsStore } from '../stores/modconfigs'
+import { useModConfigStore } from '../stores/modconfig'
 import { useMemberStore } from '../stores/member'
 import { useMessageStore } from '../../stores/message'
 import { useUserStore } from '../../stores/user'
@@ -361,12 +361,12 @@ export default {
   },
   setup() {
     const locationStore = useLocationStore()
-    const modconfigsStore = useModconfigsStore()
+    const modconfigStore = useModconfigStore()
     const memberStore = useMemberStore()
     const messageStore = useMessageStore()
     const userStore = useUserStore()
 
-    return { locationStore, memberStore, messageStore, modconfigsStore, userStore }
+    return { locationStore, memberStore, messageStore, modconfigStore, userStore }
   },
   data: function () {
     return {
@@ -459,7 +459,7 @@ export default {
         }
       })
 
-      const configs = this.modconfigsStore.list
+      const configs = this.modconfigStore.configs
       ret = configs.find(config => config.id === configid)
 
       return ret

@@ -43,9 +43,9 @@ import 'core-js/actual/array/to-sorted'
 
 import { useLogsStore } from './stores/logs'
 import { useMemberStore } from './stores/member'
-import { useModconfigsStore } from './stores/modconfigs'
-import { useSpammersStore } from './stores/spammers'
-import { useStdmsgsStore } from './stores/stdmsgs'
+import { useModConfigStore } from './stores/modconfig'
+import { useSpammerStore } from './stores/spammer'
+import { useStdmsgStore } from './stores/stdmsg'
 
 const route = useRoute()
 const loadingIndicatorThrottle = ref(5000)
@@ -95,9 +95,9 @@ const locationStore = useLocationStore()
 const shortlinkStore = useShortlinkStore()
 const logsStore = useLogsStore()
 const memberStore = useMemberStore()
-const modconfigsStore = useModconfigsStore()
-const spammersStore = useSpammersStore()
-const stdmsgsStore = useStdmsgsStore()
+const modconfigStore = useModConfigStore()
+const spammerStore = useSpammerStore()
+const stdmsgStore = useStdmsgStore()
 
 miscStore.init(runtimeConfig)
 groupStore.init(runtimeConfig)
@@ -131,9 +131,9 @@ locationStore.init(runtimeConfig)
 shortlinkStore.init(runtimeConfig)
 logsStore.init(runtimeConfig)
 memberStore.init(runtimeConfig)
-modconfigsStore.init(runtimeConfig)
-spammersStore.init(runtimeConfig)
-stdmsgsStore.init(runtimeConfig)
+modconfigStore.init(runtimeConfig)
+spammerStore.init(runtimeConfig)
+stdmsgStore.init(runtimeConfig)
 
 miscStore.modtools = true
 

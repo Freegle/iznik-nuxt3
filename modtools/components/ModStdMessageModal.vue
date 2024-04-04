@@ -19,14 +19,14 @@
       </div>
       <div v-if="message && stdmsg.action === 'Edit' && message.item && message.location" class="d-flex justify-content-start">
         <b-form-select v-model="message.type" :options="typeOptions" class="type mr-1" size="lg" />
-        <b-input v-model="message.item.name" size="lg" class="mr-1" />
+        <b-form-input v-model="message.item.name" size="lg" class="mr-1" />
         <b-input-group>
           <Postcode :value="message.location.name" :find="false" @selected="postcodeSelect" />
         </b-input-group>
       </div>
       <div v-else>
         <b-input-group>
-          <b-input v-model="subject" class="mt-2" />
+          <b-form-input v-model="subject" class="mt-2" />
         </b-input-group>
       </div>
       <NoticeMessage v-if="warning" variant="warning" class="mt-1 mb-1">
@@ -35,7 +35,7 @@
           <strong>{{ warning }}</strong>
         </p>
       </NoticeMessage>
-      <b-textarea v-model="body" rows="10" class="mt-2" />
+      <b-form-textarea v-model="body" rows="10" class="mt-2" />
       <div v-if="stdmsg.newdelstatus && stdmsg.newdelstatus !== 'UNCHANGED'" class="mt-1">
         <v-icon v-if="changingNewDelStatus" name="sync" class="text-success fa-spin" />
         <v-icon v-else-if="changedNewDelStatus" name="check" class="text-success" />

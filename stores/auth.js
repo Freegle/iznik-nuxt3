@@ -316,7 +316,7 @@ export const useAuthStore = defineStore({
         // Try the older API which will authenticate via the persistent token and PHP session.
         const ret = await this.$api.session.fetch({
           webversion: this.config.public.BUILD_DATE,
-          // TODO components: ['me'],
+          components: ['me'],
         })
 
         let persistent = null

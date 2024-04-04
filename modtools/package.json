@@ -15,6 +15,7 @@
   "dependencies": {
     "diff": "^5.2.0",
     "letterparser": "^0.1.4",
+    "turf-buffer": "^3.0.12",
     "vue-letter": "^0.2.0"
   }
 }

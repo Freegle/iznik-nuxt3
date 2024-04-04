@@ -24,7 +24,7 @@
         confirm />
     </div>
     <div v-if="!editreview" class="d-lg-inline">
-      <ModMessageButton v-for="stdmsg in filtered" :key="stdmsg.id" :variant="variant(stdmsg)" :icon="icon(stdmsg)" :label="stdmsg.title"
+      <ModMessageButton v-for="stdmsg in filtered" :key="stdmsg.id" :variant="stdmsgVariant(stdmsg)" :icon="icon(stdmsg)" :label="stdmsg.title"
         :stdmsgid="stdmsg.id" :message="message" :autosend="(Boolean)(stdmsg.autosend && allowAutoSend)" />
       <b-button v-if="rareToShow && !showRare" variant="white" class="mb-1" @click="showRare = true">
         <v-icon icon="caret-down" /> +{{ rareToShow }}...
@@ -42,9 +42,11 @@
   </div>
 </template>
 <script>
+import stdmsgs from '../mixins/stdmsgs'
 import { useMessageStore } from '../../stores/message'
-import { useStdmsgsStore } from '../stores/stdmsgs'
+import { useStdmsgStore } from '../stores/stdmsg'
 export default {
+  mixins: [stdmsgs],
   props: {
     message: {
       type: Object,
@@ -68,8 +70,8 @@ export default {
   },
   setup() {
     const messageStore = useMessageStore()
-    const stdmsgsStore = useStdmsgsStore()
-    return { messageStore, stdmsgsStore }
+    const stdmsgStore = useStdmsgStore()
+    return { messageStore, stdmsgStore }
   },
   data: function () {
     return {
@@ -103,7 +105,7 @@ export default {
     },
     stdmsgs() {
       if (this.modconfig) {
-        return this.copyStdMsgs(this.modconfig)
+        return this.stdmsgCopyStdMsgs(this.modconfig)
       } else {
         return []
       }

@@ -15,7 +15,7 @@
             Community
           </h2>
         </template>
-        <!--ModSettingsGroup :initial-group="loadGroup" /-->
+        <ModSettingsGroup :initial-group="loadGroup" />
       </b-tab>
       <b-tab>
         <template v-slot:title>
@@ -23,7 +23,7 @@
             Standard Messages
           </h2>
         </template>
-        <!--ModSettingsModConfig /-->
+        <ModSettingsModConfig />
       </b-tab>
       <b-tab>
         <template v-slot:title>

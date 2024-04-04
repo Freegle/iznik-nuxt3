@@ -21,17 +21,17 @@
           <!-- eslint-disable-next-line -->
           Read more <ExternalLink href="https://wiki.ilovefreegle.org/Member_Notes">on the wiki</ExternalLink>.
         </p>
-        <b-input v-model="user1" :placeholder="placeholders[1]" />
-        <b-input v-model="user2" :placeholder="placeholders[2]" />
-        <b-input v-model="user3" :placeholder="placeholders[3]" />
-        <b-input v-model="user4" :placeholder="placeholders[4]" />
-        <b-input v-model="user5" :placeholder="placeholders[5]" />
-        <b-input v-model="user6" :placeholder="placeholders[6]" />
-        <b-input v-model="user7" :placeholder="placeholders[7]" />
-        <b-input v-model="user8" :placeholder="placeholders[8]" />
-        <b-input v-model="user9" :placeholder="placeholders[9]" />
-        <b-input v-model="user10" :placeholder="placeholders[10]" />
-        <b-input v-model="user11" :placeholder="placeholders[11]" />
+        <b-form-input v-model="user1" :placeholder="placeholders[1]" />
+        <b-form-input v-model="user2" :placeholder="placeholders[2]" />
+        <b-form-input v-model="user3" :placeholder="placeholders[3]" />
+        <b-form-input v-model="user4" :placeholder="placeholders[4]" />
+        <b-form-input v-model="user5" :placeholder="placeholders[5]" />
+        <b-form-input v-model="user6" :placeholder="placeholders[6]" />
+        <b-form-input v-model="user7" :placeholder="placeholders[7]" />
+        <b-form-input v-model="user8" :placeholder="placeholders[8]" />
+        <b-form-input v-model="user9" :placeholder="placeholders[9]" />
+        <b-form-input v-model="user10" :placeholder="placeholders[10]" />
+        <b-form-input v-model="user11" :placeholder="placeholders[11]" />
         <p class="mt-2">
           You can choose for this note to be be alerted to other groups, which will put the member in <em>Member->Review</em>
           if they are an existing member or join a group.  Please use this only for serious issues.

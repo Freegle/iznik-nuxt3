@@ -15,3 +15,18 @@ $carousel-control-next-icon-bg:      url('data:image/svg+xml,<svg xmlns="http://
 // Then include the Bootstrap and Bootstrap Vue CSS, which should pick up our customisations.
 @import "~/../node_modules/bootstrap/scss/bootstrap";
 @import '~/../node_modules/bootstrap-vue-next/dist/bootstrap-vue-next.css';
+
+// Missing for some reason...
+//
+// Block button
+//
+
+.btn-block {
+  display: block;
+  width: 100%;
+
+  // Vertically space out multiple block buttons
+  + .btn-block {
+    margin-top: .5rem; // $btn-block-spacing-y
+  }
+}

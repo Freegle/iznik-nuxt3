@@ -12,7 +12,7 @@
 </template>
 <script>
 import { useMessageStore } from '../../stores/message'
-import { useStdmsgsStore } from '../stores/stdmsgs'
+import { useStdmsgStore } from '../stores/stdmsg'
 
 export default {
   props: {
@@ -100,8 +100,8 @@ export default {
   },
   setup() {
     const messageStore = useMessageStore()
-    const stdmsgsStore = useStdmsgsStore()
-    return { messageStore, stdmsgsStore }
+    const stdmsgStore = useStdmsgStore()
+    return { messageStore, stdmsgStore }
   },
   data: function () {
     return {
@@ -171,7 +171,7 @@ export default {
         } else if (this.stdmsgid) {
           // We have a standard message.  Fetch it.
 
-          this.stdmsg = await this.stdmsgsStore.fetch(this.stdmsgid)
+          this.stdmsg = await this.stdmsgStore.fetch(this.stdmsgid)
         }
 
         this.showStdMsgModal = true
