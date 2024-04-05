@@ -134,14 +134,67 @@ export default {
         // If we have an HEIC file, then the server can't cope with it as it will fail imagecreatefromstring, so
         // convert it to a PNG file on the client before upload.  We have to restrict the quality to keep the cconversion
         // time reasonable.
-        //
+        console.log('Need to convert HEIC')
         const blob = file.slice(0, file.size, 'image/heic')
         const png = await window.heic2any({
           blob,
           toType: 'image/jpeg',
           quality: 0.92,
         })
-        data.append('photo', png, 'photo')
+
+        // Now we have png which is a Blob.
+        console.log('Converted HEIC to PNG', png.size, png.type, png)
+
+        // In this case FilePond won't have resized the image, so we do it ourselves here.
+        const img = new Image()
+        console.log('Convert blob to url')
+        const urlCreator = window.URL || window.webkitURL
+        console.log('Create img')
+        img.src = urlCreator.createObjectURL(png)
+
+        await img.decode()
+
+        console.log('Image loaded, resize')
+        const canvas = document.createElement('canvas')
+        const maxWidth = 800
+        const maxHeight = 800
+        let width = img.width
+        let height = img.height
+
+        // Calculate the new dimensions, maintaining the aspect ratio
+        if (width > height) {
+          if (width > maxWidth) {
+            height *= maxWidth / width
+            width = maxWidth
+          }
+        } else if (height > maxHeight) {
+          width *= maxHeight / height
+          height = maxHeight
+        }
+
+        // Set the canvas dimensions to the new dimensions
+        canvas.width = width
+        canvas.height = height
+
+        // Draw the resized image on the canvas
+        const ctx = canvas.getContext('2d')
+        ctx.drawImage(img, 0, 0, width, height)
+
+        // Get the resized image back as a Blob.
+        const p = new Promise((resolve, reject) => {
+          canvas.toBlob((resized) => {
+            console.log('Resized', resized)
+            resolve(resized)
+          }, 'image/png')
+        })
+
+        const resized = await p
+        console.log('Resized', resized.size, resized.type, resized)
+
+        // Add into the form data.
+        data.append('photo', resized, 'photo')
+
+        console.log('Converted to url', img.src)
       } else {
         data.append('photo', file, 'photo')
       }
