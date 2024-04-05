@@ -128,8 +128,8 @@ export default {
         const image = await Camera.getPhoto({
           quality: 50,
           //allowEditing: true,
-          width: 1200,
-          height: 1200,
+          width: 800,
+          height: 800,
           source: CameraSource.Camera,
           resultType: CameraResultType.DataUrl
         })
