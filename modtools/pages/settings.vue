@@ -48,11 +48,15 @@
 const tabIndex = ref(0)
 const loadGroup = ref(null)
 
-onMounted(() => {
-  /*if (this.loadGroup) {
+/* created() {
+    loadGroup.value = parseInt(this.$route.params.id) || null
+  },*/
+
+  onMounted(() => {
+  /*if (loadGroup.value) {
     // We've been asked to load group setting.
     this.$nextTick(() => {
-      this.tabIndex = 1
+      tabIndex.value = 1
     })
   }*/
 })

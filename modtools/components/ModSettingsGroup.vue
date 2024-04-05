@@ -3,6 +3,9 @@
     <div class="d-flex justify-content-between flex-wrap">
       <GroupSelect v-model="groupid" modonly />
     </div>
+    <div v-if="group" class="mt-2">
+      {{ group.namefull }}
+    </div>
     <div v-if="group && group.mysettings" class="mt-2">
       <NoticeMessage v-if="group.settings.closed" variant="danger" class="mb-1">
         Your community is currently closed. You can change this in <em>Features for Members</em>.
@@ -514,6 +517,11 @@ export default {
       return this.group.myrole !== 'Owner'
     },
     group() {
+      console.log("MSG group", this.groupid)
+      const g = this.groupStore.get(this.groupid)
+      console.log("MSG group GOT", g)
+      if (g) console.log("MSG group mysettings", g.mysettings)
+
       return this.groupStore.get(this.groupid)
     },
     shortlinks() {
@@ -593,12 +601,11 @@ export default {
     async fetchGroup() {
       this.editingDescription = false
 
-      await this.groupStore.fetch(this.groupid)
-      /* TODO {
+      await this.groupStore.fetchMT({
         id: this.groupid,
         polygon: true,
         tnkey: true
-      })*/
+      })
 
       this.shortlinkStore.fetch(this.groupid)
     },
@@ -628,7 +635,7 @@ export default {
       this.uploadingProfile = false
 
       // Set the image id in the group.
-      this.groupStore.update({
+      this.groupStore.updateMT({
         id: this.groupid,
         profile: imageid
       })
@@ -642,10 +649,10 @@ export default {
 
       data[name] = val
 
-      this.groupStore.update(data)
+      this.groupStore.updateMT(data)
     },
     async saveDescription(callback) {
-      await this.groupStore.update({
+      await this.groupStore.updateMT({
         id: this.groupid,
         description: this.group.description
       })

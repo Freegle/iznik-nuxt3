@@ -195,7 +195,7 @@ export default {
       const wkt = new Wkt.Wkt()
       wkt.read(JSON.stringify(this.visibility))
 
-      await this.groupStore.update({
+      await this.groupStore.updateMT({
         id: this.groupid,
         postvisibility: wkt.toString()
       })

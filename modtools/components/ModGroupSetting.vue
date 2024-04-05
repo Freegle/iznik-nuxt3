@@ -147,7 +147,8 @@ export default {
       }, obj)
     },
 
-    async save(callback) {
+    async save(callbackorvalue) {
+      console.log("save",callbackorvalue)
       const data = {
         id: this.groupid
       }
@@ -171,11 +172,11 @@ export default {
         data[top] = topobj[top]
       }
 
-      await this.groupStore.update(data)
-      callback()
+      await this.groupStore.updateMT(data)
+      if (typeof callbackorvalue === 'function') callbackorvalue()
     },
     getValueFromGroup() {
-      let obj = this.groupStoreget(this.groupid)
+      let obj = this.groupStore.get(this.groupid)
 
       if (obj) {
         let name = this.name

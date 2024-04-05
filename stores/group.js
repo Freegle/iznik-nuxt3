@@ -15,7 +15,43 @@ export const useGroupStore = defineStore({
       this.config = config
       this.fetching = {}
     },
-    async fetch(id, force) {
+    async fetchMT({ id, polygon, showmods, sponsors, tnkey }) {
+      if (!id) return null
+      polygon = Object.is(polygon, undefined) ? false : polygon
+      sponsors = Object.is(sponsors, undefined) ? false : sponsors
+      showmods = Object.is(showmods, undefined) ? false : showmods
+      tnkey = Object.is(tnkey, undefined) ? false : tnkey
+
+      const group = await api(this.config).group.fetchMT(
+        id,
+        polygon,
+        showmods,
+        sponsors,
+        tnkey
+        /*,
+        function (data) {
+          console.log('fetchMT log',data?.ret)
+          if (data && data.ret === 10) {
+            // Not hosting a group isn't worth logging.
+            return false
+          } else {
+            return true
+          }
+        }*/
+      )
+      if (group) {
+        this.list[group.id] = group
+      }
+    },
+    async updateMT(params) {
+      console.log('updateMT TODO')
+      /*await api(this.config).group.patch(params)
+      await this.fetchMT({
+        id: params.id,
+        polygon: true
+      })*/
+    },
+      async fetch(id, force) {
       if (id) {
         if (isNaN(id)) {
           // Get by name.  Case-insensitive.
@@ -100,7 +136,7 @@ export const useGroupStore = defineStore({
       })
       await this.fetch(params.id)
     }
-    },
+  },
   getters: {
     get: (state) => (idOrName) => {
       let ret = null

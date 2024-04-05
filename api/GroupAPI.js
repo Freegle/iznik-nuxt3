@@ -5,6 +5,15 @@ export default class GroupAPI extends BaseAPI {
     return await this.$getv2('/group', params)
   }
 
+  async fetchMT(id, polygon, showmods, sponsors, tnkey, log) {
+    const { group } = await this.$get(
+      '/group',
+      { id, polygon, showmods, sponsors, tnkey },
+      log
+    )
+    return group
+  }
+
   async fetch(id, log) {
     const group = await this.$getv2('/group/' + id, {}, log)
 
