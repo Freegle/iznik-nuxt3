@@ -4,6 +4,14 @@ CONTACT=sales@zeroads.co
 
 
 Gumgum.com, 15952, DIRECT, ffdef49475d318a9
+rubiconproject.com, 23434, RESELLER, 0bfd66d529a55807
+pubmatic.com, 157897, RESELLER, 5d62403b186f2ace
+appnexus.com, 2758, RESELLER, f5ab79cb980f11d1
+contextweb.com, 558355, RESELLER, 89ff185a4c4e857c
+openx.com, 537149485, RESELLER, 6a698e2ec38604c6
+improvedigital.com, 1884, RESELLER
+smartadserver.com, 4005, RESELLER, 060d053dcf45cbf3
+admanmedia.com, 799, RESELLER
 
 pubmatic.com, 164422, DIRECT, 5d62403b186f2ace
 
