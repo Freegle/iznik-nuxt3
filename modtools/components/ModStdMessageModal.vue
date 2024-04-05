@@ -121,6 +121,9 @@ export default {
     const userStore = useUserStore()
     return { groupStore, memberStore, messageStore, userStore, modal, hide }
   },
+  mounted(){
+console.log("MSMM mounted")
+  },
   data: function () {
     return {
       subject: null,

@@ -1,64 +1,33 @@
 <template>
   <div>
-    <ModConfigSetting
-      :configid="config.id"
-      :name="cc"
-      label="BCC to:"
-      description="You can choose whether standard messages get copied by email."
-      type="select"
-      :options="ccopts"
-      :disabled="locked"
-    />
-    <ModConfigSetting
-      v-if="config[cc] === 'Specific'"
-      :configid="config.id"
-      :name="addr"
-      label="Specific address:"
-      description="This is the address to BCC messages to."
-      :disabled="locked"
-    />
+    <ModConfigSetting :configid="config.id" :name="cc" label="BCC to:" description="You can choose whether standard messages get copied by email."
+      type="select" :options="ccopts" :disabled="locked" />
+    <ModConfigSetting v-if="config[cc] === 'Specific'" :configid="config.id" :name="addr" label="Specific address:"
+      description="This is the address to BCC messages to." :disabled="locked" />
     <p>
-      Click on a button to edit the message.  You can also drag and drop to change the order that they'll show in on the relevant
+      Click on a button to edit the message. You can also drag and drop to change the order that they'll show in on the relevant
       pages (e.g. put the ones you use most first).
     </p>
-    <b-form-checkbox
-      v-if="!locked"
-      v-model="dragging"
-      class="mb-2"
-      name="dragbox"
-      :disabled="locked"
-    >
+    <b-form-checkbox v-if="!locked" v-model="dragging" class="mb-2" name="dragbox" :disabled="locked">
       <v-icon icon="arrow-left" /> Click to enable dragging
     </b-form-checkbox>
     <div v-if="dragging">
       <draggable :key="'list-' + bump" v-model="stdmsgscopy" group="buttons" class="d-flex justify-content-center flex-wrap" @end="updateOrder">
-        <div
-          v-for="stdmsg in stdmsgscopy"
-          :key="'stdmsg-' + stdmsg.id"
-        >
-          <ModSettingsStandardMessageButton
-            v-if="visible(stdmsg)"
-            :stdmsg="stdmsg"
-          />
+        <div v-for="stdmsg in stdmsgscopy" :key="'stdmsg-' + stdmsg.id">
+          <ModSettingsStandardMessageButton v-if="visible(stdmsg)" :stdmsg="stdmsg" />
         </div>
       </draggable>
     </div>
     <div v-else class="d-flex justify-content-center flex-wrap">
-      <span
-        v-for="stdmsg in stdmsgscopy"
-        :key="'stdmsg-' + stdmsg.id"
-      >
-        <ModSettingsStandardMessageButton
-          v-if="visible(stdmsg)"
-          :stdmsg="stdmsg"
-        />
+      <span v-for="stdmsg in stdmsgscopy" :key="'stdmsg-' + stdmsg.id">
+        <ModSettingsStandardMessageButton v-if="visible(stdmsg)" :stdmsg="stdmsg" />
       </span>
     </div>
     <hr>
     <b-button v-if="!locked" variant="white" @click="add">
       <v-icon icon="plus" /> Add new standard message
     </b-button>
-    <ModSettingsStandardMessageModal v-if="showModal" ref="msgmodal" :locked="locked" :types="types" @hide="fetch" />
+    <ModSettingsStandardMessageModal v-if="showModal" :locked="locked" :types="types" @hide="fetch" />
   </div>
 </template>
 <script>
@@ -95,7 +64,7 @@ export default {
       default: false
     }
   },
-  data: function() {
+  data: function () {
     return {
       ccopts: [
         { value: 'Nobody', text: 'Nobody' },
@@ -136,9 +105,6 @@ export default {
     },
     add() {
       this.showModal = true
-      this.waitForRef('msgmodal', () => {
-        this.$refs.msgmodal.show()
-      })
     },
     async fetch() {
       // Update any changed/new buttons.

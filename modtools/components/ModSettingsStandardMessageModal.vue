@@ -1,122 +1,122 @@
 <template>
   <div>
-    <client-only>
-      <b-modal ref="modal" v-if="stdmsg" id="stdmsgmodal" v-model="showModal" :title="title" size="lg" no-stacking>
-        <template #default>
-          <label>Title</label>
-          <b-form-input v-model="stdmsg.title" />
-          <label>Action</label>
-          <b-form-select v-model="stdmsg.action" :options="options" />
-          <label>Edit Text</label>
-          <b-form-select v-if="stdmsg.action === 'Edit'" v-model="stdmsg.edittext">
-            <option value="Unchanged">
-              Unchanged
-            </option>
-            <option value="Correct Case">
-              Correct Case
-            </option>
-          </b-form-select>
-          <label>Autosend?</label>
-          <b-form-select v-model="stdmsg.autosend">
-            <option :value="0">
-              Edit before send
-            </option>
-            <option :value="1">
-              Send Immediately
-            </option>
-          </b-form-select>
-          <label>How often do you use this?</label>
-          <b-form-select v-model="stdmsg.rarelyused">
-            <option :value="0">
-              Frequently
-            </option>
-            <option :value="1">
-              Rarely
-            </option>
-          </b-form-select>
-          <label>Change Moderation Status *</label>
-          <b-form-select v-model="stdmsg.newmodstatus">
-            <option value="UNCHANGED">
-              Unchanged
-            </option>
-            <option value="MODERATED">
-              Moderated
-            </option>
-            <option value="DEFAULT">
-              Group Settings
-            </option>
-            <option value="PROHIBITED">
-              Can't Post
-            </option>
-            <option value="UNMODERATED">
-              Unmoderated
-            </option>
-          </b-form-select>
-          <label>Change Delivery Settings *</label>
-          <b-form-select v-model="stdmsg.newdelstatus">
-            <option value="UNCHANGED">
-              Unchanged
-            </option>
-            <option value="DIGEST">
-              Daily Digest
-            </option>
-            <option value="NONE">
-              Web Only
-            </option>
-            <option value="SINGLE">
-              Individual Emails
-            </option>
-            <option value="ANNOUNCEMENT">
-              Special Notices
-            </option>
-          </b-form-select>
-          <label>Subject Prefix</label>
-          <b-form-input v-model="stdmsg.subjpref" />
-          <label>Subject Suffix</label>
-          <b-form-input v-model="stdmsg.subjsuff" />
-          <label>Insert Text</label>
-          <b-form-select v-model="stdmsg.insert">
-            <option value="Top">
-              Top
-            </option>
-            <option value="Bottom">
-              Bottom
-            </option>
-          </b-form-select>
-          <label>Message Body</label>
-          <b-form-textarea v-model="stdmsg.body" rows="10" />
-        </template>
-        <template #footer>
-          <div class="d-flex justify-content-between flex-wrap w-100">
-            <div>
-              <b-button v-if="id && !locked" variant="danger" @click="deleteIt">
-                Delete
-              </b-button>
-            </div>
-            <div>
-              <b-button variant="white" class="mr-2" @click="cancel">
-                Cancel
-              </b-button>
-              <b-button v-if="!locked" variant="primary" :disabled="!stdmsg.title" @click="save">
-                <span v-if="id">Save</span>
-                <span v-else>Add</span>
-              </b-button>
-            </div>
+    <b-modal ref="modal" id="stdmsgmodal" :title="title" size="lg" no-stacking>
+      <template #default>
+        <label>Title</label>
+        <b-form-input v-model="stdmsg.title" />
+        <label>Action</label>
+        <b-form-select v-model="stdmsg.action" :options="options" />
+        <label>Edit Text</label>
+        <b-form-select v-if="stdmsg.action === 'Edit'" v-model="stdmsg.edittext">
+          <option value="Unchanged">
+            Unchanged
+          </option>
+          <option value="Correct Case">
+            Correct Case
+          </option>
+        </b-form-select>
+        <label>Autosend?</label>
+        <b-form-select v-model="stdmsg.autosend">
+          <option :value="0">
+            Edit before send
+          </option>
+          <option :value="1">
+            Send Immediately
+          </option>
+        </b-form-select>
+        <label>How often do you use this?</label>
+        <b-form-select v-model="stdmsg.rarelyused">
+          <option :value="0">
+            Frequently
+          </option>
+          <option :value="1">
+            Rarely
+          </option>
+        </b-form-select>
+        <label>Change Moderation Status *</label>
+        <b-form-select v-model="stdmsg.newmodstatus">
+          <option value="UNCHANGED">
+            Unchanged
+          </option>
+          <option value="MODERATED">
+            Moderated
+          </option>
+          <option value="DEFAULT">
+            Group Settings
+          </option>
+          <option value="PROHIBITED">
+            Can't Post
+          </option>
+          <option value="UNMODERATED">
+            Unmoderated
+          </option>
+        </b-form-select>
+        <label>Change Delivery Settings *</label>
+        <b-form-select v-model="stdmsg.newdelstatus">
+          <option value="UNCHANGED">
+            Unchanged
+          </option>
+          <option value="DIGEST">
+            Daily Digest
+          </option>
+          <option value="NONE">
+            Web Only
+          </option>
+          <option value="SINGLE">
+            Individual Emails
+          </option>
+          <option value="ANNOUNCEMENT">
+            Special Notices
+          </option>
+        </b-form-select>
+        <label>Subject Prefix</label>
+        <b-form-input v-model="stdmsg.subjpref" />
+        <label>Subject Suffix</label>
+        <b-form-input v-model="stdmsg.subjsuff" />
+        <label>Insert Text</label>
+        <b-form-select v-model="stdmsg.insert">
+          <option value="Top">
+            Top
+          </option>
+          <option value="Bottom">
+            Bottom
+          </option>
+        </b-form-select>
+        <label>Message Body</label>
+        <b-form-textarea v-model="stdmsg.body" rows="10" />
+      </template>
+      <template #footer>
+        <div class="d-flex justify-content-between flex-wrap w-100">
+          <div>
+            <b-button v-if="id && !locked" variant="danger" @click="deleteIt">
+              Delete
+            </b-button>
           </div>
-        </template>
-      </b-modal>
-    </client-only>
+          <div>
+            <b-button variant="white" class="mr-2" @click="hide">
+              Cancel
+            </b-button>
+            <b-button v-if="!locked" variant="primary" :disabled="!stdmsg.title" @click="save">
+              <span v-if="id">Save</span>
+              <span v-else>Add</span>
+            </b-button>
+          </div>
+        </div>
+      </template>
+    </b-modal>
   </div>
 </template>
 <script>
 import { useModal } from '~/composables/useModal'
 import { useModConfigStore } from '../stores/modconfig'
+import { useStdmsgStore } from '../stores/stdmsg'
 
 export default {
   setup() {
     const modConfigStore = useModConfigStore()
+    const stdmsgStore = useStdmsgStore()
     const { modal, hide } = useModal()
-    return {  modConfigStore, modal, hide }
+    return { modConfigStore, stdmsgStore, modal, hide }
   },
   props: {
     id: {
@@ -193,25 +193,23 @@ export default {
     async show() {
       // Fetch the current value, if any, before opening the modal.
       if (this.id) {
-        await this.$store.dispatch('stdmsgs/fetch', {
+        await this.stdmsgStore.fetch({
           id: this.id
         })
       }
-
-      this.showModal = true
+      this.modal.show()
     },
-    hide() {
-      this.showModal = false
+    hidex() {
       this.$emit('hide')
     },
     async save() {
       if (!this.id) {
-        await this.$store.dispatch('stdmsgs/add', {
+        await this.stdmsgStore.add({
           ...this.stdmsg,
           configid: this.config.id
         })
       } else {
-        await this.$store.dispatch('stdmsgs/update', {
+        await this.stdmsgStore.update({
           ...this.stdmsg
         })
       }
@@ -219,7 +217,7 @@ export default {
       this.hide()
     },
     async deleteIt() {
-      await this.$store.dispatch('stdmsgs/delete', {
+      await this.stdmsgStore.delete({
         id: this.stdmsg.id,
         configid: this.config.id
       })
