@@ -91,7 +91,7 @@
                       </div>
                       <b-row v-if="uploading" class="bg-white">
                         <b-col class="p-0">
-                          <OurFilePond
+                          <OurUploader
                             imgtype="User"
                             imgflag="user"
                             :msgid="me.id"
@@ -686,7 +686,7 @@ import PostCode from '~/components/PostCode'
 
 import SettingsGroup from '~/components/SettingsGroup'
 import NoticeMessage from '~/components/NoticeMessage'
-import OurFilePond from '~/components/OurFilePond'
+import OurUploader from '~/components/OurUploader'
 import OurToggle from '~/components/OurToggle'
 import DonationButton from '~/components/DonationButton'
 import PasswordEntry from '~/components/PasswordEntry'
@@ -719,7 +719,7 @@ export default {
     SettingsGroup,
     NoticeMessage,
     ProfileImage,
-    OurFilePond,
+    OurUploader,
     DonationButton,
     PasswordEntry,
   },

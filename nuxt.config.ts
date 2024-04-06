@@ -2,6 +2,7 @@ import eslintPlugin from 'vite-plugin-eslint'
 import { VitePWA } from 'vite-plugin-pwa'
 import legacy from '@vitejs/plugin-legacy'
 import { sentryVitePlugin } from '@sentry/vite-plugin'
+import vue from '@vitejs/plugin-vue'
 import config from './config'
 
 // @ts-ignore
@@ -158,7 +159,7 @@ export default defineNuxtConfig({
     extractCSS: true,
   },
 
-  modules: ['@pinia/nuxt', 'floating-vue/nuxt'],
+  modules: ['@pinia/nuxt', 'floating-vue/nuxt', '@nuxt/image'],
 
   // Environment variables the client needs.
   runtimeConfig: {
@@ -526,6 +527,13 @@ export default defineNuxtConfig({
           content: 'Awin',
         },
       ],
+    },
+  },
+  image: {
+    uploadcare: {
+      provider: 'uploadcare',
+      // TODO
+      // cdnURL: 'cdn.mycompany.com',
     },
   },
 })

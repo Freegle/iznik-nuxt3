@@ -46,7 +46,7 @@
                 />
               </b-card-text>
               <hr class="mt-1 mb-1" />
-              <OurFilePond
+              <OurUploader
                 v-if="uploading"
                 class="bg-white m-0 pondrow"
                 imgtype="Newsfeed"
@@ -121,8 +121,8 @@ import NewsThread from '~/components/NewsThread.vue'
 import { untwem } from '~/composables/useTwem'
 import { ref } from '#imports'
 
-const OurFilePond = defineAsyncComponent(() =>
-  import('~/components/OurFilePond')
+const OurUploader = defineAsyncComponent(() =>
+  import('~/components/OurUploader')
 )
 const SidebarLeft = defineAsyncComponent(() =>
   import('~/components/SidebarLeft')
@@ -145,7 +145,7 @@ export default {
     ExpectedRepliesWarning,
     NoticeMessage,
     NewsThread,
-    OurFilePond,
+    OurUploader,
     SidebarLeft,
     SidebarRight,
     NewsLocation,
