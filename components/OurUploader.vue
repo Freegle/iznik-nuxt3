@@ -4,19 +4,24 @@
       ctx-name="my-uploader"
       pubkey="61ddd294bd3a390019c6"
       :max-local-file-size-bytes="0"
-      :img-only="true"
+      img-only
       source-list="local, camera"
       :multiple="multiple"
       image-shrink="1024x1024 95%"
-      :remove-copyright="true"
-      :use-cloud-image-editor="true"
+      remove-copyright
+      use-cloud-image-editor
+      debug
     ></lr-config>
-    <lr-file-uploader-regular
-      css-src="https://cdn.jsdelivr.net/npm/@uploadcare/blocks@0.35.2/web/lr-file-uploader-regular.min.css"
-      ctx-name="my-uploader"
-      class="my-config"
-    >
-    </lr-file-uploader-regular>
+    <div class="uploader">
+      <lr-file-uploader-regular
+        ref="uploader"
+        v-model="uploadedPhotos"
+        css-src="https://cdn.jsdelivr.net/npm/@uploadcare/blocks@0.35.2/web/lr-file-uploader-regular.min.css"
+        ctx-name="my-uploader"
+        class="my-config"
+      >
+      </lr-file-uploader-regular>
+    </div>
     <lr-upload-ctx-provider
       ref="ctxProviderRef"
       ctx-name="my-uploader"
@@ -68,27 +73,48 @@ const props = defineProps({
 const emit = defineEmits(['uploaded'])
 const uploadedPhotos = ref([])
 const ctxProviderRef = ref(null)
+const uploader = ref(null)
 
 onMounted(() => {
-  ctxProviderRef.value.uploadCollection.clearAll()
+  uploader.value = ctxProviderRef.value.uploadCollection
+  uploader.value.clearAll()
+  uploadedPhotos.value = props.photos.map((f) => {
+    return {
+      uuiid: f.id,
+    }
+  })
+  uploadedPhotos.value.forEach((f) => {
+    console.log('Add photo', f.uuiid)
+    ctxProviderRef.value.addFileFromUuid(f.uuiid)
+  })
 })
 
 function handleChangeEvent(e) {
   if (e.detail) {
-    uploadedPhotos.value = e.detail.allEntries.filter(
-      (f) => f.status === 'success'
-    )
+    uploadedPhotos.value = e.detail.allEntries
+      .filter((f) => f.status === 'success')
+      .map((f) => {
+        return {
+          id: f.uuid,
+          path: f.cdnUrl,
+          paththumb: f.cdnUrl,
+        }
+      })
   }
 }
 
 function handleModalCloseEvent() {
-  ctxProviderRef.value.uploadCollection.clearAll()
-  emit('uploaded', [...props.photos, ...uploadedPhotos.value])
+  emit('uploaded', uploadedPhotos.value)
   uploadedPhotos.value = []
+  ctxProviderRef.value.uploadCollection.clearAll()
 }
 </script>
 <style scoped lang="scss">
 @import 'assets/css/_color-vars.scss';
+
+.uploader {
+  min-height: 50px;
+}
 
 :deep(.my-config) {
   --darkmode: 0;

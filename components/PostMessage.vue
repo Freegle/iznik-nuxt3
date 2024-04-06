@@ -14,24 +14,18 @@
           >
             <v-icon icon="camera" class="camera text-faded" />
             <OurUploader
-              ref="filepond"
-              imgtype="Message"
-              imgflag="message"
-              :browse="pondBrowse"
+              :key="'uploader-' + uploaderBump"
               :multiple="true"
               :class="{
                 'ml-3': true,
                 'mr-3': true,
-                invisible: uploading && hidingPhotoButton,
               }"
               variant="primary"
               size="lg"
-              @photo-processed="photoProcessed"
-              @all-processed="allProcessed"
-              @init="hidePhotoButton"
-              @error="photoError"
+              :photos="attachments"
+              @uploaded="uploaded"
             >
-              <span v-if="attachments?.length === 1"> Add more photos </span>
+              <span v-if="attachments?.length >= 1"> Add/edit photos </span>
               <span v-else> Add photos </span>
             </OurUploader>
           </div>
@@ -49,10 +43,6 @@
       </draggable>
       <hr />
     </div>
-    <NoticeMessage v-if="photoFailed" variant="danger" class="mt-2 mb-2">
-      Photo upload failed. If this keeps happening, then please contact
-      <SupportLink />, including the photo as an attachment.
-    </NoticeMessage>
     <div class="subject-layout mb-1 mt-1">
       <div class="d-flex flex-column">
         <label :for="$id('posttype')" class="d-none d-md-block pl-1">
@@ -132,11 +122,7 @@ export default {
   },
   data() {
     return {
-      uploading: false,
-      myFiles: [],
-      pondBrowse: true,
-      hidingPhotoButton: false,
-      photoFailed: false,
+      uploaderBump: 0,
     }
   },
   computed: {
@@ -171,7 +157,7 @@ export default {
     },
     attachments: {
       get() {
-        return this.composeStore?.attachments(this.id)
+        return this.composeStore?.attachments(this.id).filter((a) => a.id)
       },
       set(value) {
         return this.composeStore?.setAttachmentsForMessage(this.id, value)
@@ -184,57 +170,9 @@ export default {
     },
   },
   methods: {
-    photoAdd() {
-      // Flag that we're uploading.  This will trigger the render of the filepond instance and subsequently the
-      // init callback below.
-      this.uploading = true
-      this.photoFailed = false
-    },
-    photoProcessed(imageid, imagethumb, image) {
-      // We have uploaded a photo.  Remove the filepond instance.
-      const att = {
-        id: imageid,
-        paththumb: imagethumb,
-        path: image,
-      }
-
-      this.composeStore.addAttachment({
-        id: this.id,
-        attachment: att,
-      })
-    },
-    allProcessed() {
-      this.uploading = false
-    },
-    photoError(e) {
-      this.photoFailed = true
-    },
-    removePhoto(id) {
-      this.composeStore.removeAttachment({
-        id: this.id,
-        photoid: id,
-      })
-    },
-    async drop(e) {
-      // Although it's probably not widely used (I didn't know it even worked) in the old code you could drag and drog
-      // a file onto the Add photos button.  So we should handle that too here.
-      const droppedFiles = e.dataTransfer.files
-
-      if (!droppedFiles) {
-        return
-      }
-
-      this.uploading = droppedFiles.length
-      this.pondBrowse = false
-
-      // Give pond time to render.
-      await this.$nextTick()
-      ;[...droppedFiles].forEach((f) => {
-        this.$refs.filepond.addFile(f)
-      })
-    },
-    hidePhotoButton() {
-      this.hidingPhotoButton = true
+    uploaded(photos) {
+      this.composeStore.setAttachmentsForMessage(this.id, photos)
+      this.uploaderBump++
     },
     $id(type) {
       return uid(type)
@@ -301,6 +239,9 @@ export default {
 
   @include media-breakpoint-up(md) {
     width: 200px;
+    height: 200px;
+    min-height: unset;
+    max-height: unset;
   }
 }
 
