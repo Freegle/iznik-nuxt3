@@ -252,7 +252,7 @@
       :src="imagethumb"
       class="mt-1 ml-4 image__uploaded"
     />
-    <OurFilePond
+    <OurUploader
       v-if="uploading"
       class="bg-white m-0 pondrow"
       imgtype="Newsfeed"
@@ -320,8 +320,8 @@ const ConfirmModal = defineAsyncComponent(() =>
 const NewsReplies = defineAsyncComponent(() =>
   import('~/components/NewsReplies.vue')
 )
-const OurFilePond = defineAsyncComponent(() =>
-  import('~/components/OurFilePond')
+const OurUploader = defineAsyncComponent(() =>
+  import('~/components/OurUploader')
 )
 const OurAtTa = defineAsyncComponent(() => import('~/components/OurAtTa'))
 
@@ -332,7 +332,7 @@ export default {
     NewsEditModal,
     NewsReplies,
     SpinButton,
-    OurFilePond,
+    OurUploader,
     NewsLovesModal,
     NewsUserInfo,
     NewsHighlight,

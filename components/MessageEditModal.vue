@@ -77,7 +77,7 @@
       </b-row>
       <b-row v-if="uploading" class="bg-white">
         <b-col class="p-0">
-          <OurFilePond
+          <OurUploader
             imgtype="Message"
             imgflag="message"
             @photo-processed="photoProcessed"
@@ -134,8 +134,8 @@ import { uid } from '../composables/useId'
 import NumberIncrementDecrement from './NumberIncrementDecrement'
 import PostCode from '~/components/PostCode'
 import { useModal } from '~/composables/useModal'
-const OurFilePond = defineAsyncComponent(() =>
-  import('~/components/OurFilePond')
+const OurUploader = defineAsyncComponent(() =>
+  import('~/components/OurUploader')
 )
 const PostItem = defineAsyncComponent(() => import('./PostItem'))
 const PostPhoto = defineAsyncComponent(() => import('./PostPhoto'))
@@ -144,7 +144,7 @@ export default {
   components: {
     draggable,
     NumberIncrementDecrement,
-    OurFilePond,
+    OurUploader,
     PostCode,
     PostItem,
     PostPhoto,

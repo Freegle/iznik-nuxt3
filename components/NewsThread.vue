@@ -193,7 +193,7 @@
             :src="imagethumb"
             class="mt-1 ml-4 image__uploaded"
           />
-          <OurFilePond
+          <OurUploader
             v-if="uploading"
             class="bg-white m-0 pondrow"
             imgtype="Newsfeed"
@@ -247,8 +247,8 @@ import ProfileImage from '~/components/ProfileImage'
 const NewsReportModal = defineAsyncComponent(() => import('./NewsReportModal'))
 const ConfirmModal = () =>
   defineAsyncComponent(() => import('~/components/ConfirmModal.vue'))
-const OurFilePond = defineAsyncComponent(() =>
-  import('~/components/OurFilePond')
+const OurUploader = defineAsyncComponent(() =>
+  import('~/components/OurUploader')
 )
 const OurAtTa = defineAsyncComponent(() => import('~/components/OurAtTa'))
 
@@ -257,7 +257,7 @@ export default {
   components: {
     NewsReplies,
     SpinButton,
-    OurFilePond,
+    OurUploader,
     NewsReportModal,
     NewsRefer,
     NewsMessage,

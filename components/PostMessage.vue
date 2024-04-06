@@ -13,21 +13,27 @@
             class="photoholder bg-dark-subtle d-flex flex-column align-items-center justify-content-around mr-md-1"
           >
             <v-icon icon="camera" class="camera text-faded" />
-            <b-button
-              variant="primary"
-              size="lg"
+            <OurUploader
+              ref="filepond"
+              imgtype="Message"
+              imgflag="message"
+              :browse="pondBrowse"
+              :multiple="true"
               :class="{
                 'ml-3': true,
                 'mr-3': true,
                 invisible: uploading && hidingPhotoButton,
               }"
-              @click="photoAdd"
-              @drop.prevent="drop"
-              @dragover.prevent
+              variant="primary"
+              size="lg"
+              @photo-processed="photoProcessed"
+              @all-processed="allProcessed"
+              @init="hidePhotoButton"
+              @error="photoError"
             >
               <span v-if="attachments?.length === 1"> Add more photos </span>
               <span v-else> Add photos </span>
-            </b-button>
+            </OurUploader>
           </div>
         </template>
         <template #item="{ element, index }">
@@ -42,19 +48,6 @@
         </template>
       </draggable>
       <hr />
-    </div>
-    <div v-if="uploading" class="bg-white">
-      <OurFilePond
-        ref="filepond"
-        imgtype="Message"
-        imgflag="message"
-        :browse="pondBrowse"
-        :multiple="true"
-        @photo-processed="photoProcessed"
-        @all-processed="allProcessed"
-        @init="hidePhotoButton"
-        @error="photoError"
-      />
     </div>
     <NoticeMessage v-if="photoFailed" variant="danger" class="mt-2 mb-2">
       Photo upload failed. If this keeps happening, then please contact
@@ -101,8 +94,8 @@ import { useMessageStore } from '../stores/message'
 import { useMiscStore } from '../stores/misc'
 import NumberIncrementDecrement from './NumberIncrementDecrement'
 
-const OurFilePond = defineAsyncComponent(() =>
-  import('~/components/OurFilePond')
+const OurUploader = defineAsyncComponent(() =>
+  import('~/components/OurUploader')
 )
 const PostPhoto = defineAsyncComponent(() => import('~/components/PostPhoto'))
 const PostItem = defineAsyncComponent(() => import('~/components/PostItem'))
@@ -110,7 +103,7 @@ const PostItem = defineAsyncComponent(() => import('~/components/PostItem'))
 export default {
   components: {
     NumberIncrementDecrement,
-    OurFilePond,
+    OurUploader,
     PostPhoto,
     PostItem,
     draggable,

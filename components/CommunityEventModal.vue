@@ -194,7 +194,7 @@
             </b-row>
             <b-row v-if="uploading">
               <b-col>
-                <OurFilePond
+                <OurUploader
                   class="bg-white"
                   imgtype="CommunityEvent"
                   imgflag="communityevent"
@@ -394,8 +394,8 @@ import { useModal } from '~/composables/useModal'
 const GroupSelect = defineAsyncComponent(() =>
   import('~/components/GroupSelect')
 )
-const OurFilePond = defineAsyncComponent(() =>
-  import('~/components/OurFilePond')
+const OurUploader = defineAsyncComponent(() =>
+  import('~/components/OurUploader')
 )
 const StartEndCollection = defineAsyncComponent(() =>
   import('~/components/StartEndCollection')
@@ -445,7 +445,7 @@ export default {
   components: {
     EmailValidator,
     GroupSelect,
-    OurFilePond,
+    OurUploader,
     StartEndCollection,
     NoticeMessage,
     DonationButton,

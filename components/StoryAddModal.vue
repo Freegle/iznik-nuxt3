@@ -52,7 +52,7 @@
         </b-row>
         <b-row v-if="uploading">
           <b-col>
-            <OurFilePond
+            <OurUploader
               class="bg-white"
               imgtype="Story"
               imgflag="story"
@@ -132,14 +132,14 @@ import { useStoryStore } from '../stores/stories'
 import { useComposeStore } from '../stores/compose'
 import NoticeMessage from './NoticeMessage'
 import { useModal } from '~/composables/useModal'
-const OurFilePond = defineAsyncComponent(() =>
-  import('~/components/OurFilePond')
+const OurUploader = defineAsyncComponent(() =>
+  import('~/components/OurUploader')
 )
 
 export default {
   components: {
     NoticeMessage,
-    OurFilePond,
+    OurUploader,
   },
   props: {},
   setup() {

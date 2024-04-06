@@ -41,7 +41,7 @@
     </b-row>
     <b-row v-if="uploading">
       <b-col>
-        <OurFilePond
+        <OurUploader
           class="bg-white"
           imgtype="Noticeboard"
           imgflag="noticeboard"
@@ -106,8 +106,8 @@ const NoticeMessage = defineAsyncComponent(() =>
 const DraggableMap = defineAsyncComponent(() =>
   import('~/components/DraggableMap')
 )
-const OurFilePond = defineAsyncComponent(() =>
-  import('~/components/OurFilePond')
+const OurUploader = defineAsyncComponent(() =>
+  import('~/components/OurUploader')
 )
 
 export default {
@@ -115,7 +115,7 @@ export default {
     DraggableMap,
     NoticeMessage,
     SpinButton,
-    OurFilePond,
+    OurUploader,
   },
   emits: ['hidden'],
   setup() {

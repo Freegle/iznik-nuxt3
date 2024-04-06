@@ -1,7 +1,7 @@
 <template>
   <div class="cont bg-white">
     <div v-if="uploading" class="bg-white">
-      <OurFilePond
+      <OurUploader
         imgtype="ChatMessage"
         imgflag="chatmessage"
         @photo-processed="photoProcessed"
@@ -327,8 +327,8 @@ import SpinButton from './SpinButton'
 import { untwem } from '~/composables/useTwem'
 
 // Don't use dynamic imports because it stops us being able to scroll to the bottom after render.
-const OurFilePond = defineAsyncComponent(() =>
-  import('~/components/OurFilePond')
+const OurUploader = defineAsyncComponent(() =>
+  import('~/components/OurUploader')
 )
 const UserRatings = defineAsyncComponent(() =>
   import('~/components/UserRatings')
@@ -364,7 +364,7 @@ export default {
     NudgeTooSoonWarningModal,
     NudgeWarningModal,
     UserRatings,
-    OurFilePond,
+    OurUploader,
     NoticeMessage,
     PromiseModal,
     AddressModal,
