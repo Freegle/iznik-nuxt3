@@ -172,6 +172,10 @@ export default {
   methods: {
     uploaded(photos) {
       this.composeStore.setAttachmentsForMessage(this.id, photos)
+
+      // We force the uploader to re-render.  There might be a better way of doing this, but it means
+      // we reset everything and will load any existing photos into the uploader.  Using the modal-open
+      // event on the uploader didn't seem to work - possibly it fired too soon.
       this.uploaderBump++
     },
     $id(type) {
