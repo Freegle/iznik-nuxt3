@@ -70,6 +70,11 @@ LR.FileUploaderRegular.shadowStyles =
 :host .file-name {
   display: none;
 }
+
+:host lr-progress-bar {
+  top: 0px !important;
+  height: 100% !important;
+}
 `
 LR.registerBlocks(LR)
 
