@@ -15,6 +15,19 @@ export const useGroupStore = defineStore({
       this.config = config
       this.fetching = {}
     },
+    
+    async listMT(params){
+      const groups = await api(this.config).group.listMT(params)
+      this.list = {}
+      this.allGroups = {}
+      if (groups) {
+        groups.forEach((g) => {
+          this.allGroups[g.nameshort.toLowerCase()] = g
+          this.list[g.id] = g
+        })
+      }
+  },
+
     async fetchMT({ id, polygon, showmods, sponsors, tnkey }) {
       if (!id) return null
       polygon = Object.is(polygon, undefined) ? false : polygon

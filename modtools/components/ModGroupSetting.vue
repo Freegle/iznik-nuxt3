@@ -148,7 +148,7 @@ export default {
     },
 
     async save(callbackorvalue) {
-      console.log("save",callbackorvalue)
+      console.log("save",callbackorvalue, this.name, this.value)
       const data = {
         id: this.groupid
       }

@@ -80,7 +80,7 @@ export default {
   },
   methods: {
     async showModal() {
-      await this.fetchMe(['me'], true)
+      await this.fetchMe(true) // ['me']
       this.showAboutMeModal = true
     },
   },

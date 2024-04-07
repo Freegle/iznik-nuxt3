@@ -158,7 +158,16 @@ const notbeforestart = function (date) {
   return d.isAfter(now) || !d.isAfter(dayjs(this.starti))
 }
 
+watch(showInfo, () => {
+  update()
+})
 
+watch(groupid, async () => {
+  console.log('index.vue watch groupid', groupid.value)
+  await groupStore.fetchMT({
+    id: groupid.value
+  })
+})
 
 onMounted(() => {
   // Volunteers' Week is between 1st and 7th June every year.

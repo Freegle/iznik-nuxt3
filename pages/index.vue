@@ -166,7 +166,7 @@ export default {
   },
   async mounted() {
     if (process.client) {
-      // await this.fetchMe(['me', 'groups'])
+      // IN MASTER await this.fetchMe(['me', 'groups'])
 
       if (this.me) {
         this.goHome()

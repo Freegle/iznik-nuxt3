@@ -622,7 +622,7 @@ export default {
         settings
       })
 
-      this.fetchMe(['me', 'groups'])
+      this.fetchMe() // TODO ['me', 'groups']
     },
     uploadProfile() {
       this.uploadingProfile = true

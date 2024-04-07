@@ -74,26 +74,37 @@ export default class BaseAPI {
       headers['Cache-Control'] =
         'max-age=0, must-revalidate, no-cache, no-store, private'
 
-      if (method === 'GET' && config?.params) {
+        if (method === 'GET' && config?.params) {
         // Remove falsey values from the params.
         config.params = Object.fromEntries(
           Object.entries(config.params).filter(([_, v]) => v)
         )
+        config.params.modtools = miscStore.modtools // MT ADDED
 
+        // MT ADDED cope with arrays eg components['me','work']
+        Object.keys(config.params).forEach((c) => {
+          const v = config.params[c]
+          if( Array.isArray(v)) {
+            delete config.params[c]
+            for( let ix=0; ix<v.length; ix++){
+              config.params[c+'['+ix+']'] = v[ix]
+            }
+          }
+          //this[c] = res[c]
+        })
         // URL encode the parameters if any
         const urlParams = new URLSearchParams(config.params).toString()
+        // console.log('BaseAPI $request',path, config.params, urlParams)
 
-        if (urlParams.length) {
+        if (urlParams.length) { 
           path += '&' + urlParams
         }
-        config.params.modtools = miscStore.modtools ? 2 : 1 // TODO
       } else if (method !== 'POST') {
         // Any parameters are passed in config.params.
         if (!config?.params) {
           config.params = {}
         }
-
-        config.params.modtools = miscStore.modtools ? 2 : 1 // TODO
+        config.params.modtools = miscStore.modtools // MT ADDED
 
         // JSON-encode these for to pass.
         body = JSON.stringify(config.params)
@@ -102,8 +113,7 @@ export default class BaseAPI {
         if (!config.data) {
           config.data = {}
         }
-
-        config.data.modtools = miscStore.modtools ? 2 : 1 // TODO
+        config.data.modtools = miscStore.modtools // MT ADDED
         body = JSON.stringify(config.data)
       }
 
@@ -295,6 +305,7 @@ export default class BaseAPI {
 
     try {
       const authStore = useAuthStore()
+      const miscStore = useMiscStore()
 
       if (authStore?.auth?.jwt) {
         // Use the JWT to authenticate the request if possible.
@@ -338,7 +349,7 @@ export default class BaseAPI {
           config.params = {}
         }
 
-        config.params.modtools = false
+        config.params.modtools = miscStore.modtools // MT ADDED
 
         // JSON-encode these for to pass.
         body = JSON.stringify(config.params)
@@ -348,11 +359,10 @@ export default class BaseAPI {
           config.data = {}
         }
 
-        config.data.modtools = false
+        config.data.modtools = miscStore.modtools // MT ADDED
         body = JSON.stringify(config.data)
       }
 
-      const miscStore = useMiscStore()
       await miscStore.waitForOnline()
       miscStore.api(1)
       ;[status, data] = await ourFetch(this.config.public.APIv2 + path, {

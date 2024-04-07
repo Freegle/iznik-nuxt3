@@ -232,7 +232,7 @@ export default {
       this.$refs.loginModal.show()
     },
     async checkWork() {
-      await this.fetchMe(['work'], true)
+      await this.fetchMe(true, ['work'])
       setTimeout(this.checkWork, 30000)
     },
     discourse(e) {

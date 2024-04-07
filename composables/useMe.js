@@ -1,8 +1,9 @@
 import { useAuthStore } from '~/stores/auth'
+import { useMiscStore } from '@/stores/misc'
 
 let fetchingPromise = null
 
-export async function fetchMe(hitServer) {
+export async function fetchMe(hitServer, components) { // MT ADDED components
   const authStore = useAuthStore()
 
   // We can be called in several ways.
@@ -22,6 +23,13 @@ export async function fetchMe(hitServer) {
   // Because multiple pages/components may call fetchMe to ensure that they have data they need, we
   // want to minimise the number of calls.  We have some fairly complex logic below to keep the number of parallel
   // calls down and return earlier if we happen to already be fetching what we need.
+
+  if( !components) components = [] // MT ADDED..
+  const miscStore = useMiscStore()
+  if( miscStore.modtools) {
+    components.push('expectedreplies')
+  }
+
   let needToFetch = false
 
   if (!hitServer) {
@@ -45,7 +53,7 @@ export async function fetchMe(hitServer) {
   }
 
   if (needToFetch) {
-    fetchingPromise = authStore.fetchUser()
+    fetchingPromise = authStore.fetchUser(components) // MT ADDED
 
     if (hitServer) {
       // We need to wait for the server before returning.

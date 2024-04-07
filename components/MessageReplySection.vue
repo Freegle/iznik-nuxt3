@@ -241,7 +241,7 @@ export default {
           // We registered a new user and logged in.
           this.loggedInEver = true
 
-          await this.fetchMe(['me'], true)
+          await this.fetchMe(true) // ['me']
 
           // Show the new user modal.
           this.newUserPassword = ret.password

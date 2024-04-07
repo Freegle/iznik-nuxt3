@@ -264,7 +264,7 @@ export const useAuthStore = defineStore({
 
       this.loginCount++
     },
-    async fetchUser() {
+    async fetchUser(components) { // MT ADDED components
       // We're so vain, we probably think this call is about us.
       let me = null
       let groups = null
@@ -313,10 +313,15 @@ export const useAuthStore = defineStore({
       } */
 
       if (!me) {
+        if( !components) components = [] // MT ADDED
+        components = [ 'me', ...components] // MT ADDED
+        // console.log('useAuthStore fetchUser',components)
+
         // Try the older API which will authenticate via the persistent token and PHP session.
         const ret = await this.$api.session.fetch({
           webversion: this.config.public.BUILD_DATE,
-          components: ['me'],
+          components,
+          //components: ['me'],
         })
 
         let persistent = null
@@ -324,6 +329,7 @@ export const useAuthStore = defineStore({
 
         if (ret) {
           ;({ me, persistent, jwt } = ret)
+          //  console.log('fetchuser ret.work',ret.work)
           work = ret.work // TODO
           discourse = ret.discourse // TODO
     

@@ -322,6 +322,7 @@ export const useMessageStore = defineStore({
       this.context = null
     },
     async fetchMessages(params) { // Added for ModTools
+      console.log("===useMessageStore fetchMessages")
       // Watch out for the store being cleared under the feet of this fetch. If that happens then we throw away the
       // results.
       // TODO const instance = state.instance
@@ -347,6 +348,7 @@ export const useMessageStore = defineStore({
       // TODO}
       await this.clear()
       for(const message of messages){
+        console.log('GOT message',message.id)
         this.list[message.id] = message
       }
     },
@@ -368,7 +370,7 @@ export const useMessageStore = defineStore({
       })
     },
     getByGroup: (state) => (groupid) => { // Added for ModTools
-      const ret = state.list.filter(message => {
+      const ret = Object.values(state.list).filter(message => {
         return (
           message.groups.length > 0 &&
           parseInt(message.groups[0].groupid) === parseInt(groupid)

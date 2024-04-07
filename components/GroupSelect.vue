@@ -284,7 +284,9 @@ export default {
   },
   async mounted() {
     if (this.listall) {
-      await this.groupStore.fetch()
+      await this.groupStore.listMT({
+        grouptype: 'Freegle'
+      })
     }
 
     if (this.remember) {
