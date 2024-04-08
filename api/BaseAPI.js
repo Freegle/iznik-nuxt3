@@ -90,7 +90,6 @@ export default class BaseAPI {
               config.params[c+'['+ix+']'] = v[ix]
             }
           }
-          //this[c] = res[c]
         })
         // URL encode the parameters if any
         const urlParams = new URLSearchParams(config.params).toString()

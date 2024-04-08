@@ -361,7 +361,7 @@ export default {
   },
   setup() {
     const locationStore = useLocationStore()
-    const modconfigStore = useModconfigStore()
+    const modconfigStore = useModConfigStore()
     const memberStore = useMemberStore()
     const messageStore = useMessageStore()
     const userStore = useUserStore()

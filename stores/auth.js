@@ -37,7 +37,7 @@ export const useAuthStore = defineStore({
     userlist: [],
     loginType: null,
     loginCount: 0,
-    work: [],
+    work: {},
     discourse: {},
   }),
   actions: {
@@ -268,8 +268,8 @@ export const useAuthStore = defineStore({
       // We're so vain, we probably think this call is about us.
       let me = null
       let groups = null
-      let work = null // TODO
-      let discourse = null // TODO
+      let xwork = null // TODO
+      let xdiscourse = null // TODO
 
       /* TODO
       if (this.auth.jwt || this.auth.persistent) {
@@ -328,10 +328,10 @@ export const useAuthStore = defineStore({
         let jwt = null
 
         if (ret) {
-          ;({ me, persistent, jwt } = ret)
-          //  console.log('fetchuser ret.work',ret.work)
-          work = ret.work // TODO
-          discourse = ret.discourse // TODO
+          ;({ me, groups, persistent, jwt } = ret) // MT added
+          console.log('!!!fetchuser ret.work',ret.work)
+          xwork = ret.work // TODO
+          xdiscourse = ret.discourse // TODO
     
           if (me) {
             this.setAuth(jwt, persistent)
@@ -375,9 +375,11 @@ export const useAuthStore = defineStore({
           composeStore.email = me.email
         }
 
-        this.work = work
+        this.work = xwork
+        console.log('!!!fetchUser this.work',this.work)
     
-        this.discourse = discourse
+        this.discourse = xdiscourse
+        // console.log('useAuthStore work discourse', work, discourse)
      } else {
         // Any auth info must be invalid.
         this.setAuth(null, null)

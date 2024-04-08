@@ -21,7 +21,7 @@ export default {
   },
   setup() {
     const miscStore = useMiscStore()
-    const groupStore = useGroupStore
+    const groupStore = useGroupStore()
     const composeStore = useComposeStore()
 
     return { miscStore, groupStore, composeStore }

@@ -123,7 +123,7 @@ export default {
   },
   setup() {
     const miscStore = useMiscStore()
-    const groupStore = useGroupStore
+    const groupStore = useGroupStore()
 
     return { miscStore, groupStore }
   },
@@ -151,6 +151,12 @@ export default {
         })
       } else {
         ret = this.myGroups
+        // MT ADDED
+        for( const g of ret){
+          if( this.groupStore.list[g.id]){
+            g.work = this.groupStore.list[g.id].work
+          }
+        }
       }
 
       ret = ret || []
@@ -172,6 +178,7 @@ export default {
       return groups
     },
     groupOptions() {
+      // console.log('===GroupSelect groupOptions')
       const groups = []
 
       if (this.customName) {
@@ -236,7 +243,7 @@ export default {
               }
             })
           }
-          if (!group.work) text += "(TODO)"
+          // if (!group.work) text += "(TODO)"
 
           groups.push({
             value: group.id,

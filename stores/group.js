@@ -29,6 +29,7 @@ export const useGroupStore = defineStore({
   },
 
     async fetchMT({ id, polygon, showmods, sponsors, tnkey }) {
+      console.log('useGroupStore fetchMT', id)
       if (!id) return null
       polygon = Object.is(polygon, undefined) ? false : polygon
       sponsors = Object.is(sponsors, undefined) ? false : sponsors
@@ -54,6 +55,17 @@ export const useGroupStore = defineStore({
       )
       if (group) {
         this.list[group.id] = group
+
+        const ret = await api(this.config).session.fetch({
+          webversion: this.config.public.BUILD_DATE,
+          components: ['groups'],
+        })
+        if (ret && ret.groups) {
+          const g = ret.groups.find((g)=> g.id===group.id)
+          if( g && g.work){
+            this.list[group.id].work = g.work
+          }
+        }
       }
     },
     async updateMT(params) {
@@ -64,8 +76,11 @@ export const useGroupStore = defineStore({
         polygon: true
       })*/
     },
+
+
       async fetch(id, force) {
-      if (id) {
+        console.log('useGroupStore fetch', id)
+        if (id) {
         if (isNaN(id)) {
           // Get by name.  Case-insensitive.
           id = id.toLowerCase()

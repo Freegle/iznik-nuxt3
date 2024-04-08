@@ -14,7 +14,7 @@
           Load all
         </b-button>
       </div>
-      <ModMessages :group="group" />
+      <ModMessages />
 
       <ModAffiliationConfirmModal v-if="affiliationGroup" ref="affiliation" :groupid="affiliationGroup" />
 
@@ -30,26 +30,15 @@ import ScrollToTop from '~/components/ScrollToTop'
 import me from '~/mixins/me.js'
 import { setupModMessages } from '../composables/useModMessages'
 
-/*const {
-    //collection,  workType, 
-    messages, distance,
-    busy, context, group, groupid, limit,show
-    //context, limit, workType, show, busy, messageTerm, memberTerm, modalOpen, scrollHeight, scrollTop, nextAfterRemoved, 
-    //visibleMessages, messages,work 
-  } = setupModMessages()
-
-//collection.value = 'Pending'
-//workType.value = 'pending'
-
-//const affiliationGroup = ref(null)
-*/
-
 export default {
   async setup() {
     const miscStore = useMiscStore()
+    const modMessages = setupModMessages()
+    modMessages.collection.value = 'Pending'
+    modMessages.workType.value = 'pending'
     return {
       miscStore,
-      ...setupModMessages()
+      ...modMessages
     }
   },
   mixins: [
@@ -61,8 +50,6 @@ export default {
   ],
   data: function () {
     return {
-      collection: 'Pending',
-      workType: 'pending',
       affiliationGroup: null
     }
   },
