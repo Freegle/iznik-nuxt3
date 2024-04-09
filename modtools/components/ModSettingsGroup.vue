@@ -137,7 +137,11 @@
                 </b-button>
               </div>
               <div v-else>
-                <!--VueEditor v-model="group.description" :editor-options="editorOptions" /-->
+                <client-only>
+                  <!--QuillEditor theme="snow" toolbar="essential" v-model:content="group.description" contentType="html" /-->
+                  <QuillEditor :modules="quillModules" theme="snow" :toolbar="toolbarOptions" v-model:content="group.description"
+                    contentType="html" />
+                </client-only>
                 <SpinButton variant="white" icon-name="save" label="Save" @handle="saveDescription" class="mt-2" />
               </div>
             </b-form-group>
@@ -463,32 +467,31 @@
 </template>
 
 <script>
+import { QuillEditor } from '@vueup/vue-quill';
+import '@vueup/vue-quill/dist/vue-quill.snow.css';
+import htmlEditButton from "quill-html-edit-button";
+
 import { useAuthStore } from '../stores/auth'
 import { useGroupStore } from '../../stores/group'
 import { useModConfigStore } from '../stores/modconfig'
 import { useShortlinkStore } from '../../stores/shortlinks'
 import api from '~/api'
 
-let VueEditor, htmlEditButton
-
-/* if (process.client) {
-  const Quill = require('vue2-editor').Quill
-  window.Quill = Quill
-  htmlEditButton = require('quill-html-edit-button').htmlEditButton
-  VueEditor = require('vue2-editor').VueEditor
-  Quill.register('modules/htmlEditButton', htmlEditButton)
-}*/
-
 export default {
   components: {
-    //VueEditor,
+    QuillEditor
   },
   setup() {
     const authStore = useAuthStore()
     const groupStore = useGroupStore()
     const modConfigStore = useModConfigStore()
     const shortlinkStore = useShortlinkStore()
-    return { authStore, groupStore, modConfigStore, shortlinkStore }
+    const quillModules = {
+      name: 'htmlEditButton',
+      module: htmlEditButton,
+      options: {} // https://github.com/benwinding/quill-html-edit-button?tab=readme-ov-file#options
+    }
+    return { authStore, groupStore, modConfigStore, shortlinkStore, quillModules }
   },
   props: {
     initialGroup: {
@@ -502,11 +505,16 @@ export default {
       groupid: null,
       uploadingProfile: false,
       editingDescription: false,
-      editorOptions: {
-        modules: {
-          htmlEditButton: {}
-        }
-      }
+      toolbarOptions: [
+        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+        ['bold', 'italic', 'underline', 'strike'],
+        ['blockquote', 'code-block'],
+        [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'list': 'check' }],
+        [{ 'indent': '-1' }, { 'indent': '+1' }],
+        [{ 'color': [] }, { 'background': [] }],
+        ['link', 'image', 'video'],
+        ['clean']
+      ]
     }
   },
   computed: {
@@ -596,8 +604,8 @@ export default {
   },
   methods: {
     async fetchGroup() {
-      console.log('MSG fetchGroup',this.groupid)
-      if( !this.groupid) return
+      console.log('MSG fetchGroup', this.groupid)
+      if (!this.groupid) return
       this.editingDescription = false
 
       await this.groupStore.fetchMT({
