@@ -31,7 +31,9 @@
   </div>
 </template>
 <script setup>
-import * as LR from '@uploadcare/blocks'
+// import * as LR from '@uploadcare/blocks'
+// TODO Waiting for official release.
+import * as LR from 'https://cdn.jsdelivr.net/npm/@uploadcare/blocks@0.36.1-alpha.3/web/blocks.min.js'
 
 const props = defineProps({
   multiple: {
