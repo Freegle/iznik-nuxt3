@@ -2,9 +2,10 @@
   <div>
     <div class="d-flex flex-wrap">
       <draggable
+        v-if="showDraggable"
         v-model="attachments"
         class="d-flex flex-wrap w-100"
-        :item-key="(el) => `image-${el.id}`"
+        item-key="id"
         :animation="150"
         ghost-class="ghost"
       >
@@ -123,6 +124,7 @@ export default {
   data() {
     return {
       uploaderBump: 0,
+      showDraggable: false,
     }
   },
   computed: {
@@ -157,7 +159,12 @@ export default {
     },
     attachments: {
       get() {
-        return this.composeStore?.attachments(this.id).filter((a) => a.id)
+        const ret = this.composeStore
+          ?.attachments(this.id)
+          .filter((a) => 'id' in a)
+
+        console.log('Atts', ret)
+        return ret
       },
       set(value) {
         return this.composeStore?.setAttachmentsForMessage(this.id, value)
@@ -168,6 +175,13 @@ export default {
         ? "e.g. colour, condition, size, whether it's working etc."
         : "Explain what you're looking for, and why you'd like it."
     },
+  },
+  mounted() {
+    // This is a workaround for a problem I don't properly understand, where loading the /give page in dev
+    // throws a tizzy.
+    setTimeout(() => {
+      this.showDraggable = true
+    }, 1)
   },
   methods: {
     uploaded(photos) {
