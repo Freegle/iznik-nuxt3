@@ -7,7 +7,7 @@
       </p>
       <p>
         We know some people can give one and not the other. We want everyone to
-        be able to help if they're able.
+        be able to help if they can.
       </p>
       <p>
         If you've donated either recently, then we'll thank you with the
