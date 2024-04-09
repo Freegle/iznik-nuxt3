@@ -11,7 +11,6 @@ export const useShortlinkStore = defineStore({
       this.config = config
     },
     async fetch(id, groupid) {
-      console.log('shortlinkstore fetch',id, groupid)
       if( groupid) this.clear()
       const { shortlinks, shortlink } = await api(this.config).shortlinks.fetch(
         {

@@ -92,7 +92,8 @@ export default {
   },
   data: function () {
     return {
-      value: null
+      value: null,
+      mounted: false // Stops save during load process
     }
   },
   computed: {
@@ -110,6 +111,9 @@ export default {
   },
   mounted() {
     this.getValueFromGroup()
+    this.$nextTick(() => {
+      this.mounted = true
+    })
   },
   methods: {
     /**
@@ -148,31 +152,32 @@ export default {
     },
 
     async save(callbackorvalue) {
-      console.log("save",callbackorvalue, this.name, this.value)
-      const data = {
-        id: this.groupid
+      if (this.mounted) {
+        const data = {
+          id: this.groupid
+        }
+
+        const p = this.name.indexOf('.')
+        let val = typeof callbackorvalue !== 'function' ? callbackorvalue : this.value
+
+        if (typeof val === 'boolean') {
+          val = val ? 1 : 0
+        }
+
+        if (p === -1) {
+          // Top level property
+          data[this.name] = val
+        } else {
+          // Lower down - we send the top one but we need to modify it wherever it is.
+          const top = this.name.substring(0, p)
+          const topobj = this.groupStore.get(this.groupid)
+
+          this.setDeep(topobj, this.name.split('.'), val)
+          data[top] = topobj[top]
+        }
+
+        await this.groupStore.updateMT(data)
       }
-
-      const p = this.name.indexOf('.')
-      let val = this.value
-
-      if (typeof val === 'boolean') {
-        val = val ? 1 : 0
-      }
-
-      if (p === -1) {
-        // Top level property
-        data[this.name] = val
-      } else {
-        // Lower down - we send the top one but we need to modify it wherever it is.
-        const top = this.name.substring(0, p)
-        const topobj = this.groupStore.get(this.groupid)
-
-        this.setDeep(topobj, this.name.split('.'), val)
-        data[top] = topobj[top]
-      }
-
-      await this.groupStore.updateMT(data)
       if (typeof callbackorvalue === 'function') callbackorvalue()
     },
     getValueFromGroup() {

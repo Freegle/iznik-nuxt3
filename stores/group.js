@@ -69,12 +69,11 @@ export const useGroupStore = defineStore({
       }
     },
     async updateMT(params) {
-      console.log('updateMT TODO')
-      /*await api(this.config).group.patch(params)
+      await api(this.config).group.patch(params)
       await this.fetchMT({
         id: params.id,
         polygon: true
-      })*/
+      })
     },
 
 
