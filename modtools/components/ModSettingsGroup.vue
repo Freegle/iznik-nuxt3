@@ -596,6 +596,8 @@ export default {
   },
   methods: {
     async fetchGroup() {
+      console.log('MSG fetchGroup',this.groupid)
+      if( !this.groupid) return
       this.editingDescription = false
 
       await this.groupStore.fetchMT({
@@ -604,7 +606,7 @@ export default {
         tnkey: true
       })
 
-      this.shortlinkStore.fetch(this.groupid)
+      this.shortlinkStore.fetch(0, this.groupid)
     },
     async fetchConfigs() {
       await this.$api.session.fetch({
