@@ -33,7 +33,9 @@
 <script setup>
 // import * as LR from '@uploadcare/blocks'
 // TODO Waiting for official release.
-import * as LR from 'https://cdn.jsdelivr.net/npm/@uploadcare/blocks@0.36.1-alpha.3/web/blocks.min.js'
+const LR = await import(
+  'https://cdn.jsdelivr.net/npm/@uploadcare/blocks@0.36.1-alpha.3/web/blocks.min.js'
+)
 
 const props = defineProps({
   multiple: {
@@ -58,28 +60,6 @@ const props = defineProps({
   },
 })
 
-LR.FileUploaderRegular.shadowStyles =
-  /* CSS */ `
-
-:host lr-simple-btn button {
-  background-color: #61C924;
-  color: white;
-  font-size: ` +
-  (props.photos.length ? '1rem' : '1.25rem') +
-  `;
-}
-
-:host .file-name {
-  display: none;
-}
-
-:host lr-progress-bar {
-  top: 0px !important;
-  height: 100% !important;
-}
-`
-LR.registerBlocks(LR)
-
 const emit = defineEmits(['uploaded'])
 const uploadedPhotos = ref([])
 const ctxProviderRef = ref(null)
@@ -95,6 +75,28 @@ const configName = computed(() => {
 })
 
 onMounted(() => {
+  LR.FileUploaderRegular.shadowStyles =
+    /* CSS */ `
+
+:host lr-simple-btn button {
+  background-color: #61C924;
+  color: white;
+  font-size: ` +
+    (props.photos.length ? '1rem' : '1.25rem') +
+    `;
+}
+
+:host .file-name {
+  display: none;
+}
+
+:host lr-progress-bar {
+  top: 0px !important;
+  height: 100% !important;
+}
+`
+  LR.registerBlocks(LR)
+
   uploader.value = ctxProviderRef.value.uploadCollection
   uploader.value.clearAll()
   uploadedPhotos.value = props.photos.map((f) => {
