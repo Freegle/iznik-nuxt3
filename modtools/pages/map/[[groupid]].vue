@@ -29,14 +29,11 @@ const caretaker = ref(false)
 
 onMounted(async () => {
   // Get the data before we load the map to avoid timing windows.
-  console.log('map onmounted',groupid.value)
+  console.log('map onmounted', groupid.value)
   await groupStore.fetchMT({
     id: groupid.value,
     polygon: true
   })
-  /*await this.$store.dispatch('group/list', {
-    grouptype: 'Freegle'
-  })*/
 
   loaded.value = true
 })

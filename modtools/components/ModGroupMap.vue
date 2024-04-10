@@ -65,19 +65,17 @@
         </p>
       </b-modal>
       <b-row class="m-0">
-        <b-col ref="mapcont" cols="12" md="8" lg="9" class="p-0 w-100">
+        <b-col ref="mapcont" cols="12" md="9" class="p-0">
           <!--
             :center="center"
-            :style="'width: ' + mapWidth + 'px; height: ' + mapHeight + 'px'"
           -->
-          <div :style="'width: 100%; height: 200px'">
-            <l-map ref="map" :zoom="zoom" :min-zoom="5" :max-zoom="17" :options="{ dragging: selectedWKT, touchZoom: true }"
-                  :center="[
-                    55.95206000,
-                    -3.19648000,
-                  ]"
-
-              @update:bounds="boundsChanged" @update:zoom="boundsChanged" @ready="ready" @moveend="idle">
+          <div>
+            <l-map ref="map" :zoom="zoom" :min-zoom="5" :max-zoom="17" :options="{ dragging: selectedWKT, touchZoom: true }" 
+            :style="'width: 100%; height: ' + mapHeight + 'px'"
+            :center="[
+            55.95206000,
+            -3.19648000,
+          ]" @update:bounds="boundsChanged" @update:zoom="boundsChanged" @ready="ready" @moveend="idle">
               <l-tile-layer :url="osmtile" :attribution="attribution" />
               <l-control position="topright" />
               <div v-if="cga">
@@ -116,7 +114,7 @@
             </l-map>
           </div>
         </b-col>
-        <b-col cols="12" md="4" lg="3">
+        <b-col cols="12" md="3">
           <b-card v-if="selectedWKT" class="mb-2" no-body>
             <b-card-header class="bg-info">
               Area Details
@@ -170,6 +168,8 @@
   </div>
 </template>
 <script>
+import { useRuntimeConfig } from '#app'
+
 import { useGroupStore } from '~/stores/group'
 import { useLocationStore } from '~/stores/location'
 
@@ -182,18 +182,6 @@ import ClusterMarker from '../components/ClusterMarker'
 import turfpolygon from 'turf-polygon'
 import turfintersect from 'turf-intersect'
 import turfarea from 'turf-area'
-
-//let Wkt = null
-//let L = null
-
-/*if (process.client) {
-  Wkt = require('wicket')
-  require('wicket/wicket-leaflet')
-  L = require('leaflet')
-  require('leaflet-draw')
-  require('leaflet-control-geocoder')
-  require('leaflet-control-geocoder/dist/Control.Geocoder.css')
-}*/
 
 // const GROUP_FILL_COLOUR = '#EEFFCC'
 const AREA_FILL_COLOUR = 'darkgreen'
@@ -208,16 +196,27 @@ export default {
   components: {
     ClusterMarker,
   },
-  setup() {
+  async setup() {
     const groupStore = useGroupStore()
     const locationStore = useLocationStore()
+    const runtimeConfig = useRuntimeConfig()
+
+    let L = null
+
+    if (process.client) {
+      L = await import('leaflet/dist/leaflet-src.esm')
+    }
+
+    const serviceUrl = runtimeConfig.public.GEOCODE
 
     return {
       groupStore,
       locationStore,
       Wkt,
+      L,
       osmtile: osmtile(),
       attribution: attribution(),
+      serviceUrl
     }
   },
   //mixins: [map],
@@ -527,6 +526,65 @@ export default {
           const themap = this.$refs.map.leafletObject
           this.mapObject = themap
 
+          const { Geocoder } = await import(
+            'leaflet-control-geocoder/src/control'
+          )
+          const { Photon } = await import(
+            'leaflet-control-geocoder/src/geocoders/photon'
+          )
+          new Geocoder({
+            placeholder: 'Search for a place...',
+            defaultMarkGeocode: false,
+            geocoder: new Photon({
+              geocodingQueryParams: {
+                bbox: '-7.57216793459, 49.959999905, 1.68153079591, 58.6350001085',
+              },
+              nameProperties: [
+                'name',
+                'street',
+                'suburb',
+                'hamlet',
+                'town',
+                'city',
+              ],
+              serviceUrl: this.serviceUrl,
+            }),
+            collapsed: false,
+          })
+            .on('markgeocode', function (e) {
+              if (e && e.geocode && e.geocode.bbox) {
+                const bbox = e.geocode.bbox
+
+                const sw = bbox.getSouthWest()
+                const ne = bbox.getNorthEast()
+                console.log('BBOX', bbox, sw, ne)
+
+                const bounds = new window.L.LatLngBounds([
+                  [sw.lat, sw.lng],
+                  [ne.lat, ne.lng],
+                ]).pad(0.1)
+
+                // For reasons I don't understand, leaflet throws errors if we don't make these local here.
+                const swlat = bounds.getSouthWest().lat
+                const swlng = bounds.getSouthWest().lng
+                const nelat = bounds.getNorthEast().lat
+                const nelng = bounds.getNorthEast().lng
+
+                // Empty out the query box so that the dropdown closes.
+                this.setQuery('')
+                this.zoom = 14
+
+                self.$nextTick(() => {
+                  // Move the map to the location we've found.
+                  console.log('Fly to', swlat, swlng, nelat, nelng)
+                  self.mapObject.flyToBounds([
+                    [swlat, swlng],
+                    [nelat, nelng],
+                  ])
+                })
+              }
+            })
+            .addTo(this.mapObject)
 
           if (this.groups) {
             this.zoom = 5
@@ -542,7 +600,7 @@ export default {
             drawnItems = l
           })
 
-          /* TODO if (drawnItems) {
+          /*if (drawnItems) {
             const drawControl = new window.L.Control.Draw({
               edit: {
                 featureGroup: drawnItems,
@@ -587,37 +645,7 @@ export default {
     },
     async idle() {
       const self = this
-      /* TODO      window.L.Control.geocoder({
-              placeholder: 'Search for a place...',
-              defaultMarkGeocode: false,
-              geocoder: window.L.Control.Geocoder.photon({
-                geocodingQueryParams: {
-                  bbox: '-7.57216793459, 49.959999905, 1.68153079591, 58.6350001085'
-                },
-                nameProperties: [
-                  'name',
-                  'street',
-                  'suburb',
-                  'hamlet',
-                  'town',
-                  'city'
-                ],
-                serviceUrl:
-                  process.env.GEOCODE || 'https://geocode.ilovefreegle.org/api'
-              }),
-              collapsed: this.locked
-            })
-              .on('markgeocode', function (e) {
-                if (e && e.geocode && e.geocode.bbox) {
-                  // Empty out the query box so that the dropdown closes.
-                  this.setQuery('')
-      
-                  // Move the map to the location we've found.
-                  self.$refs.map.mapObject.flyToBounds(e.geocode.bbox)
-                }
-              })
-              .addTo(self.$refs.map.mapObject)
-      */
+
       if (this.groupid) {
         const group = this.groupStore.get(this.groupid)
 
