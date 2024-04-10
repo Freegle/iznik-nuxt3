@@ -522,10 +522,7 @@ export default {
       return this.group.myrole !== 'Owner'
     },
     group() {
-      console.log("MSG group", this.groupid)
       const g = this.groupStore.get(this.groupid)
-      console.log("MSG group GOT", g)
-      if (g) console.log("MSG group mysettings", g.mysettings)
 
       return this.groupStore.get(this.groupid)
     },
@@ -604,7 +601,6 @@ export default {
   },
   methods: {
     async fetchGroup() {
-      console.log('MSG fetchGroup', this.groupid)
       if (!this.groupid) return
       this.editingDescription = false
 
