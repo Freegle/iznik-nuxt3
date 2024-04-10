@@ -57,3 +57,5 @@ A fairly minimal `package.json` is needed as `nuxt.config.ts` extends `../` and 
 * const path = computed(() => { return 0 } and access as path.value
 * Change pluralize to added withplural with number and includeNumber as extra params
 * For refs use this.$refs.modal?.show() etc
+* b-img-lazy to b-img lazy
+* float-right to float-end

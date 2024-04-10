@@ -127,7 +127,7 @@
             <b-form-group label="Description">
               <b-form-text class="mb-2">
                 This is a longer description which will display on the community page and elsewhere on the site.
-                HTML is OK in here, and if you're really geeky, Bootstrap-4 styling.
+                HTML is OK in here, and if you're really geeky, Bootstrap-5 styling.
               </b-form-text>
               <div v-if="!editingDescription">
                 <!-- eslint-disable-next-line -->
@@ -138,7 +138,6 @@
               </div>
               <div v-else>
                 <client-only>
-                  <!--QuillEditor theme="snow" toolbar="essential" v-model:content="group.description" contentType="html" /-->
                   <QuillEditor :modules="quillModules" theme="snow" :toolbar="toolbarOptions" v-model:content="group.description"
                     contentType="html" />
                 </client-only>
@@ -374,7 +373,7 @@
                 Each postcode in a group lies within an area, which is something that a freegler would recognise as a
                 description of a rough location. You can set these areas up here:
               </b-form-text>
-              <b-button variant="secondary" :to="'/modtools/map/' + groupid">
+              <b-button variant="secondary" :to="'/map/' + groupid">
                 <v-icon icon="map-marker-alt" /> View Areas
               </b-button>
             </b-form-group>
