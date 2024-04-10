@@ -70,43 +70,51 @@
             :center="center"
             :style="'width: ' + mapWidth + 'px; height: ' + mapHeight + 'px'"
           -->
-          <l-map ref="map" :zoom="zoom" :min-zoom="5" :max-zoom="17" :options="{ dragging: selectedWKT, touchZoom: true }"
-            @update:bounds="boundsChanged" @update:zoom="boundsChanged" @ready="idle">
-            <l-tile-layer :url="osmtile" :attribution="attribution" />
-            <l-control position="topright" />
-            <div v-if="cga">
-              <l-geojson v-for="(c, i) in CGAs" :key="'cga-' + i" :geojson="c.json" :options="cgaOptions" :z-index-offset="2"
-                @click="selectCGA($event, c.group)" />
-            </div>
-            <div v-if="dpa">
-              <l-geojson v-for="(d, i) in DPAs" :key="'dpa-' + i" :geojson="d.json" :options="dpaOptions" :z-index-offset="1"
-                @click="selectDPA($event, d.group)" />
-            </div>
-            <div v-if="overlaps && showDodgy && !groupid">
-              <l-geojson v-for="(d, i) in overlappingCGAs" :key="'cgaoverlap-' + i" :geojson="d" :options="cgaOverlapOptions" :z-index-offset="0" />
-            </div>
-            <div v-if="groupid">
-              <l-feature-group>
-                <div v-if="zoom >= 12">
-                  <ModGroupMapLocation v-for="l in locationsInBounds" :key="'location-' + l.id" :ref="'location-' + l.id" :location="l"
-                    :selected="selectedObj === l" :shade="shade" :labels="labels" :map="map" @click="selectLocation(l)" />
-                </div>
-              </l-feature-group>
-            </div>
-            <div v-if="showDodgy && groupid">
-              <ClusterMarker v-if="mapObject && zoom < 10" :markers="dodgyInBounds" :map="mapObject" />
-              <l-feature-group v-else>
-                <l-circle-marker v-if="highlighted" :key="'highlighted-' + highlighted.id" :lat-lng="[highlighted.lat, highlighted.lng]"
-                  :interactive="false" :radius="10" :options="{ color: 'blue' }" />
-                <l-circle-marker v-for="d in dodgyInBounds" :key="d.id" :lat-lng="d" :radius="1" :options="{ color: 'red' }" @click="selected = d" />
-              </l-feature-group>
-            </div>
+          <div :style="'width: 100%; height: 200px'">
+            <l-map ref="map" :zoom="zoom" :min-zoom="5" :max-zoom="17" :options="{ dragging: selectedWKT, touchZoom: true }"
+                  :center="[
+                    55.95206000,
+                    -3.19648000,
+                  ]"
 
-            <div v-if="groups && zoom > 7">
-              <l-circle-marker v-for="g in allgroups" :key="'groupcentre-' + g.id" :lat-lng="[g.lat, g.lng]"
-                :options="{ radius: zoom, color: 'darkgreen', fill: true, fillColor: 'darkgreen', fillOpacity: 1 }" />
-            </div>
-          </l-map>
+              @update:bounds="boundsChanged" @update:zoom="boundsChanged" @ready="ready" @moveend="idle">
+              <l-tile-layer :url="osmtile" :attribution="attribution" />
+              <l-control position="topright" />
+              <div v-if="cga">
+                <l-geojson v-for="(c, i) in CGAs" :key="'cga-' + i" :geojson="c.json" :options="cgaOptions" :z-index-offset="2"
+                  @click="selectCGA($event, c.group)" />
+              </div>
+              <div v-if="dpa">
+                <l-geojson v-for="(d, i) in DPAs" :key="'dpa-' + i" :geojson="d.json" :options="dpaOptions" :z-index-offset="1"
+                  @click="selectDPA($event, d.group)" />
+              </div>
+              <div v-if="overlaps && showDodgy && !groupid">
+                <l-geojson v-for="(d, i) in overlappingCGAs" :key="'cgaoverlap-' + i" :geojson="d" :options="cgaOverlapOptions" :z-index-offset="0" />
+              </div>
+              <div v-if="groupid">
+                <l-feature-group>
+                  <div v-if="zoom >= 12">
+                    <ModGroupMapLocation v-for="l in locationsInBounds" :key="'location-' + l.id" :ref="'location-' + l.id" :location="l"
+                      :selected="selectedObj === l" :shade="shade" :labels="labels" :map="map" @click="selectLocation(l)" />
+                  </div>
+                </l-feature-group>
+              </div>
+              <div v-if="showDodgy && groupid">
+                <ClusterMarker v-if="mapObject && zoom < 10" :markers="dodgyInBounds" :map="mapObject" />
+                <l-feature-group v-else>
+                  <l-circle-marker v-if="highlighted" :key="'highlighted-' + highlighted.id" :lat-lng="[highlighted.lat, highlighted.lng]"
+                    :interactive="false" :radius="10" :options="{ color: 'blue' }" />
+                  <l-circle-marker v-for="d in dodgyInBounds" :key="d.id" :lat-lng="d" :radius="1" :options="{ color: 'red' }"
+                    @click="selected = d" />
+                </l-feature-group>
+              </div>
+
+              <div v-if="groups && zoom > 7">
+                <l-circle-marker v-for="g in allgroups" :key="'groupcentre-' + g.id" :lat-lng="[g.lat, g.lng]"
+                  :options="{ radius: zoom, color: 'darkgreen', fill: true, fillColor: 'darkgreen', fillOpacity: 1 }" />
+              </div>
+            </l-map>
+          </div>
         </b-col>
         <b-col cols="12" md="4" lg="3">
           <b-card v-if="selectedWKT" class="mb-2" no-body>
@@ -165,14 +173,18 @@
 import { useGroupStore } from '~/stores/group'
 import { useLocationStore } from '~/stores/location'
 
+import 'leaflet-control-geocoder/dist/Control.Geocoder.css'
+import { attribution, osmtile, loadLeaflet } from '../composables/useMap'
+import Wkt from 'wicket'
+
 import ClusterMarker from '../components/ClusterMarker'
 //import map from '@/mixins/map.js'
 import turfpolygon from 'turf-polygon'
 import turfintersect from 'turf-intersect'
 import turfarea from 'turf-area'
 
-let Wkt = null
-let L = null
+//let Wkt = null
+//let L = null
 
 /*if (process.client) {
   Wkt = require('wicket')
@@ -200,7 +212,13 @@ export default {
     const groupStore = useGroupStore()
     const locationStore = useLocationStore()
 
-    return { groupStore, locationStore }
+    return {
+      groupStore,
+      locationStore,
+      Wkt,
+      osmtile: osmtile(),
+      attribution: attribution(),
+    }
   },
   //mixins: [map],
   props: {
@@ -262,7 +280,7 @@ export default {
       return height
     },
     allgroups() {
-      let groups = this.groupStore.list
+      let groups = Object.values(this.groupStore.list)
 
       if (this.caretaker) {
         groups = groups.filter(g => g.mentored)
@@ -295,6 +313,7 @@ export default {
         if (g.onmap && g.polyofficial) {
           try {
             const wkt = new Wkt.Wkt()
+            console.log('Wkt.Wkt A', g.polyofficial)
             wkt.read(g.polyofficial)
             ret.push({
               json: wkt.toJson(),
@@ -315,6 +334,7 @@ export default {
         if (g.onmap && g.poly) {
           try {
             const wkt = new Wkt.Wkt()
+            console.log('Wkt.Wkt B', g.poly)
             wkt.read(g.poly)
             ret.push({
               json: wkt.toJson(),
@@ -375,6 +395,7 @@ export default {
           ) {
             const wkt = new Wkt.Wkt()
             try {
+              console.log('Wkt.Wkt C', location.polygon)
               wkt.read(location.polygon)
               location.json = wkt.toJson()
               ret.push(location)
@@ -423,7 +444,7 @@ export default {
   watch: {
     async showDodgy(newVal) {
       this.busy = true
-      const bounds = this.$refs.map.mapObject.getBounds()
+      const bounds = this.$refs.map.leafletObject.getBounds()
 
       const data = {
         swlat: bounds.getSouthWest().lat,
@@ -437,68 +458,10 @@ export default {
       this.busy = false
     }
   },
-  mounted() {
+  async mounted() {
+    await loadLeaflet()
     // Add the draw toolbar as per https://github.com/vue-leaflet/Vue2Leaflet/issues/331
     //this.waitForRef('map', () => {
-    if (this.$refs.map) {
-      const themap = this.$refs.map.mapObject
-      this.mapObject = themap
-
-      if (this.groups) {
-        this.zoom = 5
-      } else {
-        this.zoom = 13
-      }
-
-      // Last layer is drawn items.  Seems to be, anyway.  Need to use this so that we can turn on editing for
-      // the locations we've already got, as well as any new ones we draw.
-      let drawnItems = null
-
-      themap.eachLayer(l => {
-        drawnItems = l
-      })
-
-      if (drawnItems) {
-        const drawControl = new L.Control.Draw({
-          edit: {
-            featureGroup: drawnItems,
-            remove: false,
-            edit: false,
-            poly: {
-              allowIntersection: false
-            }
-          },
-          position: 'topright',
-          draw: {
-            polyline: false,
-            polygon: {
-              allowIntersection: false,
-              showArea: true
-            },
-            rectangle: false,
-            circle: false,
-            marker: false,
-            circlemarker: false
-          }
-        })
-
-        themap.addControl(drawControl)
-
-        themap.on(L.Draw.Event.CREATED, e => {
-          // const type = e.layerType;
-          const layer = e.layer
-          layer.editing.enable()
-          layer.addTo(drawnItems)
-
-          const wkt = new Wkt.Wkt()
-          wkt.fromObject(layer)
-          this.selectedWKT = wkt.write()
-        })
-
-        themap.on(L.Draw.Event.DRAWVERTEX, this.shapeChanged)
-        themap.on(L.Draw.Event.EDITVERTEX, this.shapeChanged)
-      }
-    }
   },
   methods: {
     clearSelection(callback) {
@@ -509,7 +472,7 @@ export default {
 
       if (this.$refs.map) {
         // Re-enable map movement.
-        const mapobj = this.$refs.map.mapObject
+        const mapobj = this.$refs.map.leafletObject
         mapobj._handlers.forEach(function (handler) {
           handler.enable()
         })
@@ -541,7 +504,7 @@ export default {
       this.selectedWKT = l.polygon
 
       // Disable map movement to avoid triggering location reload.
-      const mapobj = this.$refs.map.mapObject
+      const mapobj = this.$refs.map.leafletObject
       mapobj._handlers.forEach(function (handler) {
         handler.disable()
       })
@@ -551,43 +514,110 @@ export default {
         this.intersects = e.poly.intersects()
 
         const wkt = new Wkt.Wkt()
+        console.log('Wkt.Wkt D', e.poly)
         wkt.fromObject(e.poly)
         this.selectedWKT = wkt.write()
       }
     },
+    async ready() {
+      const self = this
+
+      if (process.client) {
+        if (this.$refs.map) {
+          const themap = this.$refs.map.leafletObject
+          this.mapObject = themap
+
+
+          if (this.groups) {
+            this.zoom = 5
+          } else {
+            this.zoom = 13
+          }
+
+          // Last layer is drawn items.  Seems to be, anyway.  Need to use this so that we can turn on editing for
+          // the locations we've already got, as well as any new ones we draw.
+          let drawnItems = null
+
+          themap.eachLayer(l => {
+            drawnItems = l
+          })
+
+          /* TODO if (drawnItems) {
+            const drawControl = new window.L.Control.Draw({
+              edit: {
+                featureGroup: drawnItems,
+                remove: false,
+                edit: false,
+                poly: {
+                  allowIntersection: false
+                }
+              },
+              position: 'topright',
+              draw: {
+                polyline: false,
+                polygon: {
+                  allowIntersection: false,
+                  showArea: true
+                },
+                rectangle: false,
+                circle: false,
+                marker: false,
+                circlemarker: false
+              }
+            })
+
+            themap.addControl(drawControl)
+
+            themap.on(L.Draw.Event.CREATED, e => {
+              // const type = e.layerType;
+              const layer = e.layer
+              layer.editing.enable()
+              layer.addTo(drawnItems)
+
+              const wkt = new Wkt.Wkt()
+              wkt.fromObject(layer)
+              this.selectedWKT = wkt.write()
+            })
+
+            themap.on(L.Draw.Event.DRAWVERTEX, this.shapeChanged)
+            themap.on(L.Draw.Event.EDITVERTEX, this.shapeChanged)
+          }*/
+        }
+      }
+    },
     async idle() {
       const self = this
-      L.Control.geocoder({
-        placeholder: 'Search for a place...',
-        defaultMarkGeocode: false,
-        geocoder: L.Control.Geocoder.photon({
-          geocodingQueryParams: {
-            bbox: '-7.57216793459, 49.959999905, 1.68153079591, 58.6350001085'
-          },
-          nameProperties: [
-            'name',
-            'street',
-            'suburb',
-            'hamlet',
-            'town',
-            'city'
-          ],
-          serviceUrl:
-            process.env.GEOCODE || 'https://geocode.ilovefreegle.org/api'
-        }),
-        collapsed: this.locked
-      })
-        .on('markgeocode', function (e) {
-          if (e && e.geocode && e.geocode.bbox) {
-            // Empty out the query box so that the dropdown closes.
-            this.setQuery('')
-
-            // Move the map to the location we've found.
-            self.$refs.map.mapObject.flyToBounds(e.geocode.bbox)
-          }
-        })
-        .addTo(self.$refs.map.mapObject)
-
+      /* TODO      window.L.Control.geocoder({
+              placeholder: 'Search for a place...',
+              defaultMarkGeocode: false,
+              geocoder: window.L.Control.Geocoder.photon({
+                geocodingQueryParams: {
+                  bbox: '-7.57216793459, 49.959999905, 1.68153079591, 58.6350001085'
+                },
+                nameProperties: [
+                  'name',
+                  'street',
+                  'suburb',
+                  'hamlet',
+                  'town',
+                  'city'
+                ],
+                serviceUrl:
+                  process.env.GEOCODE || 'https://geocode.ilovefreegle.org/api'
+              }),
+              collapsed: this.locked
+            })
+              .on('markgeocode', function (e) {
+                if (e && e.geocode && e.geocode.bbox) {
+                  // Empty out the query box so that the dropdown closes.
+                  this.setQuery('')
+      
+                  // Move the map to the location we've found.
+                  self.$refs.map.mapObject.flyToBounds(e.geocode.bbox)
+                }
+              })
+              .addTo(self.$refs.map.mapObject)
+      */
       if (this.groupid) {
         const group = this.groupStore.get(this.groupid)
 
@@ -599,18 +629,21 @@ export default {
             // we don't fetch them for the whole country.
             this.initialGroupZoomed = true
             const area = group.poly || group.polyofficial
-
-            const wkt = new Wkt.Wkt()
-            wkt.read(area)
-            const mapobj = this.$refs.map.mapObject
-            const obj = wkt.toObject(mapobj.defaults)
-            bounds = obj.getBounds()
-            this.$nextTick(() => {
-              mapobj.fitBounds(bounds)
-            })
+            console.log('Wkt.Wkt E group', area)
+            if (area) { // TODO added
+              const wkt = new Wkt.Wkt()
+              console.log('Wkt.Wkt E', area)
+              wkt.read(area)
+              const mapobj = this.$refs.map.leafletObject
+              const obj = wkt.toObject(mapobj.defaults)
+              bounds = obj.getBounds()
+              this.$nextTick(() => {
+                mapobj.fitBounds(bounds)
+              })
+            }
           } else {
             // Get the locations in this area
-            bounds = this.$refs.map.mapObject.getBounds()
+            bounds = this.$refs.map.leafletObject.getBounds()
           }
 
           this.busy = true
@@ -631,9 +664,11 @@ export default {
       }
     },
     async boundsChanged() {
-      if (this.$refs.map && this.$refs.map.mapObject) {
-        this.bounds = this.$refs.map.mapObject.getBounds()
-        this.zoom = this.$refs.map.mapObject.getZoom()
+      console.log('===boundsChanged')
+      if (this.$refs.map && this.$refs.map.leafletObject) {
+        this.bounds = this.$refs.map.leafletObject.getBounds()
+        console.log('===boundsChanged', this.bounds)
+        this.zoom = this.$refs.map.leafletObject.getZoom()
         this.busy = true
 
         await this.$nextTick()
@@ -651,9 +686,9 @@ export default {
           await this.fetchLocations(data)
         }
 
-        if (this.$refs.map && this.$refs.map.mapObject) {
+        if (this.$refs.map && this.$refs.map.leafletObject) {
           // Sometimes the map needs a kick to show correctly.
-          this.$refs.map.mapObject.invalidateSize()
+          this.$refs.map.leafletObject.invalidateSize()
         }
       }
 
@@ -713,7 +748,7 @@ export default {
       }
     },
     highlightPostcode(pc) {
-      this.$refs.map.mapObject.flyTo([pc.lat, pc.lng])
+      this.$refs.map.leafletObject.flyTo([pc.lat, pc.lng])
       this.highlighted = pc
     }
   }

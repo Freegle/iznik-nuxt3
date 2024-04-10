@@ -5,62 +5,41 @@
     </label>
     <p>
       On the Browse page, freeglers will see posts that are reasonably close to their own location, based on how long it
-      would take them to get there.  They can adjust this setting, and also whether they are travelling on foot,
-      by bike, or by car.  They can also add extra locations - for example if they have relatives in different places.
+      would take them to get there. They can adjust this setting, and also whether they are travelling on foot,
+      by bike, or by car. They can also add extra locations - for example if they have relatives in different places.
       Once they post on a group, or reply to a post, then they will become a group member.
     </p>
     <p>
-      This gives a good set of posts for most freeglers.  It particularly helps those who are close to
-      group boundaries.  Posts in neighbouring groups may be a lot closer to them than some of the posts on the far
+      This gives a good set of posts for most freeglers. It particularly helps those who are close to
+      group boundaries. Posts in neighbouring groups may be a lot closer to them than some of the posts on the far
       side of the group they're in.
     </p>
     <p>
-      You can restrict how far outside your group the posts will be easily visible.  You should only do
+      You can restrict how far outside your group the posts will be easily visible. You should only do
       this if you want to override the members' choice.
       <b>This will result in less freegling near the boundaries of your group.</b>
     </p>
     <p v-if="!showing">
       Click the toggle to show the map.
     </p>
-    <OurToggle
-      :value="showing"
-      class="mt-2"
-      :height="30"
-      :width="150"
-      :font-size="14"
-      :sync="true"
-      :labels="{checked: 'Show map', unchecked: 'Hide map'}"
-      color="#61AE24"
-      @change="toggleView"
-    />
+    <OurToggle :value="showing" class="mt-2" :height="30" :width="150" :font-size="14" :sync="true"
+      :labels="{ checked: 'Show map', unchecked: 'Hide map' }" color="#61AE24" @change="toggleView" />
     <div v-if="showing">
       <p>
-        This map shows your Core Group Area (CGA) in dark blue.  You can control how far outside this area
-        posts are easily visible using the slider.  The visible area is shown in light blue.
+        This map shows your Core Group Area (CGA) in dark blue. You can control how far outside this area
+        posts are easily visible using the slider. The visible area is shown in light blue.
       </p>
       <div class="d-flex">
         <label class="mr-2">
           Just the group
         </label>
-        <b-form-input
-          v-model="scale"
-          class="w-100"
-          type="range"
-          min="0"
-          max="30000"
-          step="100"
-        />
+        <b-form-input v-model="scale" class="w-100" type="range" min="0" max="30000" step="100" />
         <label class="ml-2">
           Further away
         </label>
         <SpinButton icon-name="save" label="Save" variant="primary" @handle="save" />
       </div>
-      <l-map
-        ref="map"
-        :zoom="7"
-        :center="[group.lat, group.lng]"
-        :style="'width: 100%; height: 600px'"
-      >
+      <l-map ref="map" :zoom="7" :center="[group.lat, group.lng]" :style="'width: 100%; height: 600px'">
         <l-tile-layer :url="osmtile" :attribution="attribution" />
         <l-geojson v-if="CGA" :geojson="CGA" :options="cgaOptions" />
         <l-geojson v-if="visibility" :geojson="visibility" :options="visibilityOptions" />
@@ -69,7 +48,7 @@
   </div>
 </template>
 <script>
-  import { useGroupStore } from '../../stores/group'
+import { useGroupStore } from '../../stores/group'
 import turfbuffer from 'turf-buffer'
 
 let Wkt = null
@@ -90,7 +69,7 @@ export default {
       required: true
     }
   },
-  data: function() {
+  data: function () {
     return {
       showing: false,
       value: null,
@@ -185,7 +164,7 @@ export default {
         const area = this.group.dpa || this.group.cga
         const wkt = new Wkt.Wkt()
         wkt.read(area)
-        const mapobj = this.$refs.map.mapObject
+        const mapobj = this.$refs.map.leafletObject
         const obj = wkt.toObject(mapobj.defaults)
         const bounds = obj.getBounds()
         this.$refs.map.fitBounds(bounds.pad(0.1))
