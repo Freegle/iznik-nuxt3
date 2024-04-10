@@ -27,7 +27,7 @@
           postcodes which might need better mapping.
         </p>
         <p class="font-weight-bold text-danger">
-          The red dots indicate where mapping has changed recently.  You can review these to check if it looks OK.
+          The red dots indicate where mapping has changed recently. You can review these to check if it looks OK.
         </p>
         <ul>
           <li>
@@ -35,7 +35,7 @@
             Clusters of dots in a single area are worth reviewing.
           </li>
           <li>
-            The dots might highlight areas where the existing mapping is poor.  Typical problem are places where
+            The dots might highlight areas where the existing mapping is poor. Typical problem are places where
             areas overlap, or where there are gaps between areas.
           </li>
           <li>
@@ -57,48 +57,30 @@
           </li>
         </ul>
         <p class="font-weight-bold text-danger">
-          The red dots don't get updated at the moment.  Soon.
+          The red dots don't get updated at the moment. Soon.
         </p>
         <p>
-          To help more widely, you can zoom the map out to view the whole UK.  Once you zoom out far enough you'll see the numbers of
+          To help more widely, you can zoom the map out to view the whole UK. Once you zoom out far enough you'll see the numbers of
           postcodes which need attention - you can click on those to zoom in.
         </p>
       </b-modal>
       <b-row class="m-0">
         <b-col ref="mapcont" cols="12" md="8" lg="9" class="p-0 w-100">
-          <l-map
-            ref="map"
-            :zoom="zoom"
+          <!--
             :center="center"
             :style="'width: ' + mapWidth + 'px; height: ' + mapHeight + 'px'"
-            :min-zoom="5"
-            :max-zoom="17"
-            :options="{ dragging: selectedWKT, touchZoom: true }"
-            @update:bounds="boundsChanged"
-            @update:zoom="boundsChanged"
-            @ready="idle"
-          >
+          -->
+          <l-map ref="map" :zoom="zoom" :min-zoom="5" :max-zoom="17" :options="{ dragging: selectedWKT, touchZoom: true }"
+            @update:bounds="boundsChanged" @update:zoom="boundsChanged" @ready="idle">
             <l-tile-layer :url="osmtile" :attribution="attribution" />
             <l-control position="topright" />
             <div v-if="cga">
-              <l-geojson
-                v-for="(c, i) in CGAs"
-                :key="'cga-' + i"
-                :geojson="c.json"
-                :options="cgaOptions"
-                :z-index-offset="2"
-                @click="selectCGA($event, c.group)"
-              />
+              <l-geojson v-for="(c, i) in CGAs" :key="'cga-' + i" :geojson="c.json" :options="cgaOptions" :z-index-offset="2"
+                @click="selectCGA($event, c.group)" />
             </div>
             <div v-if="dpa">
-              <l-geojson
-                v-for="(d, i) in DPAs"
-                :key="'dpa-' + i"
-                :geojson="d.json"
-                :options="dpaOptions"
-                :z-index-offset="1"
-                @click="selectDPA($event, d.group)"
-              />
+              <l-geojson v-for="(d, i) in DPAs" :key="'dpa-' + i" :geojson="d.json" :options="dpaOptions" :z-index-offset="1"
+                @click="selectDPA($event, d.group)" />
             </div>
             <div v-if="overlaps && showDodgy && !groupid">
               <l-geojson v-for="(d, i) in overlappingCGAs" :key="'cgaoverlap-' + i" :geojson="d" :options="cgaOverlapOptions" :z-index-offset="0" />
@@ -106,44 +88,23 @@
             <div v-if="groupid">
               <l-feature-group>
                 <div v-if="zoom >= 12">
-                  <ModGroupMapLocation
-                    v-for="l in locationsInBounds"
-                    :key="'location-' + l.id"
-                    :ref="'location-' + l.id"
-                    :location="l"
-                    :selected="selectedObj === l"
-                    :shade="shade"
-                    :labels="labels"
-                    :map="map"
-                    @click="selectLocation(l)"
-                  />
+                  <ModGroupMapLocation v-for="l in locationsInBounds" :key="'location-' + l.id" :ref="'location-' + l.id" :location="l"
+                    :selected="selectedObj === l" :shade="shade" :labels="labels" :map="map" @click="selectLocation(l)" />
                 </div>
               </l-feature-group>
             </div>
             <div v-if="showDodgy && groupid">
               <ClusterMarker v-if="mapObject && zoom < 10" :markers="dodgyInBounds" :map="mapObject" />
               <l-feature-group v-else>
-                <l-circle-marker
-                  v-if="highlighted"
-                  :key="'highlighted-' + highlighted.id"
-                  :lat-lng="[ highlighted.lat, highlighted.lng ]"
-                  :interactive="false"
-                  :radius="10"
-                  :options="{ color: 'blue'}"
-                />
-                <l-circle-marker
-                  v-for="d in dodgyInBounds"
-                  :key="d.id"
-                  :lat-lng="d"
-                  :radius="1"
-                  :options="{ color: 'red' }"
-                  @click="selected = d"
-                />
+                <l-circle-marker v-if="highlighted" :key="'highlighted-' + highlighted.id" :lat-lng="[highlighted.lat, highlighted.lng]"
+                  :interactive="false" :radius="10" :options="{ color: 'blue' }" />
+                <l-circle-marker v-for="d in dodgyInBounds" :key="d.id" :lat-lng="d" :radius="1" :options="{ color: 'red' }" @click="selected = d" />
               </l-feature-group>
             </div>
 
             <div v-if="groups && zoom > 7">
-              <l-circle-marker v-for="g in allgroups" :key="'groupcentre-' + g.id" :lat-lng="[g.lat, g.lng]" :options="{ radius: zoom, color: 'darkgreen', fill: true, fillColor: 'darkgreen', fillOpacity: 1 }" />
+              <l-circle-marker v-for="g in allgroups" :key="'groupcentre-' + g.id" :lat-lng="[g.lat, g.lng]"
+                :options="{ radius: zoom, color: 'darkgreen', fill: true, fillColor: 'darkgreen', fillOpacity: 1 }" />
             </div>
           </l-map>
         </b-col>
@@ -154,29 +115,23 @@
             </b-card-header>
             <b-card-body>
               <p class="text-danger font-weight-bold">
-                Zoom/pan locked while area selected.  Use Cancel to free.
+                Zoom/pan locked while area selected. Use Cancel to free.
               </p>
               <div v-if="groupid">
-                <b-input v-model="selectedName" placeholder="Enter area name" size="lg" class="mb-1" />
-                <b-textarea v-model="selectedWKT" rows="4" />
+                <b-form-input v-model="selectedName" placeholder="Enter area name" size="lg" class="mb-1" />
+                <b-form-textarea v-model="selectedWKT" rows="4" />
               </div>
               <div v-else>
                 <h5>{{ selectedName }}</h5>
-                <b-textarea v-model="selectedWKT" rows="4" readonly />
+                <b-form-textarea v-model="selectedWKT" rows="4" readonly />
               </div>
               <p v-if="intersects" class="text-danger">
                 Crosses over itself - not valid
               </p>
             </b-card-body>
             <b-card-footer v-if="groupid" class="d-flex justify-content-between flex-wrap">
-              <SpinButton
-                variant="primary"
-                name="save"
-                label="Save"
-                spinclass="text-white"
-                @handle="saveArea"
-                :disabled="!selectedName || !selectedWKT || intersects"
-              />
+              <SpinButton variant="primary" name="save" label="Save" spinclass="text-white" @handle="saveArea"
+                :disabled="!selectedName || !selectedWKT || intersects" />
               <SpinButton variant="white" name="times" label="Cancel" @handle="clearSelection" />
               <SpinButton v-if="selectedId" variant="danger" name="trash-alt" label="Delete" @handle="deleteArea" />
             </b-card-footer>
@@ -194,13 +149,7 @@
             </b-card-header>
             <b-card-body>
               <div v-if="dodgyInBounds.length < 200">
-                <ModChangedMapping
-                  v-for="d in dodgyInBounds"
-                  :key="d.id"
-                  :changed="d"
-                  :highlighted="highlighted"
-                  @click="highlightPostcode(d)"
-                />
+                <ModChangedMapping v-for="d in dodgyInBounds" :key="d.id" :changed="d" :highlighted="highlighted" @click="highlightPostcode(d)" />
               </div>
               <p v-else>
                 Too many changes to show; zoom in.
@@ -213,6 +162,10 @@
   </div>
 </template>
 <script>
+import { useGroupStore } from '~/stores/group'
+import { useLocationStore } from '~/stores/location'
+
+import ClusterMarker from '../components/ClusterMarker'
 //import map from '@/mixins/map.js'
 import turfpolygon from 'turf-polygon'
 import turfintersect from 'turf-intersect'
@@ -240,6 +193,15 @@ const DPA_BOUNDARY_COLOUR = 'darkblue'
 // const CENTRE_BORDER_COLOUR = 'darkgrey'
 
 export default {
+  components: {
+    ClusterMarker,
+  },
+  setup() {
+    const groupStore = useGroupStore()
+    const locationStore = useLocationStore()
+
+    return { groupStore, locationStore }
+  },
   //mixins: [map],
   props: {
     groups: {
@@ -263,7 +225,7 @@ export default {
       default: false
     }
   },
-  data: function() {
+  data: function () {
     return {
       cgas: [],
       dpas: [],
@@ -300,7 +262,7 @@ export default {
       return height
     },
     allgroups() {
-      let groups = Object.values(this.$store.getters['group/list'])
+      let groups = this.groupStore.list
 
       if (this.caretaker) {
         groups = groups.filter(g => g.mentored)
@@ -310,7 +272,7 @@ export default {
     },
     group() {
       return this.groupid
-        ? this.$store.getters['group/get'](this.groupid)
+        ? this.groupStore.get(this.groupid)
         : null
     },
     groupsInBounds() {
@@ -401,7 +363,7 @@ export default {
       return ret
     },
     locationsInBounds() {
-      const locations = Object.values(this.$store.getters['locations/list'])
+      const locations = Object.values(this.locationStore.list)
       const ret = []
 
       if (this.bounds) {
@@ -447,7 +409,10 @@ export default {
       }
     },
     dodgy() {
-      return Object.values(this.$store.getters['locations/dodgy'])
+      //const loc = await this.locationStore.fetch({
+      //    typeahead: this.message.location.name,
+      //  })
+      return Object.values(this.locationStore.dodgy)
     },
     dodgyInBounds() {
       return this.dodgy.filter(
@@ -468,14 +433,14 @@ export default {
       }
 
       data.dodgy = newVal
-
-      await this.$store.dispatch('locations/fetch', data)
+      await this.locationStore.fetch(data)
       this.busy = false
     }
   },
   mounted() {
     // Add the draw toolbar as per https://github.com/vue-leaflet/Vue2Leaflet/issues/331
-    this.waitForRef('map', () => {
+    //this.waitForRef('map', () => {
+    if (this.$refs.map) {
       const themap = this.$refs.map.mapObject
       this.mapObject = themap
 
@@ -533,7 +498,7 @@ export default {
         themap.on(L.Draw.Event.DRAWVERTEX, this.shapeChanged)
         themap.on(L.Draw.Event.EDITVERTEX, this.shapeChanged)
       }
-    })
+    }
   },
   methods: {
     clearSelection(callback) {
@@ -545,7 +510,7 @@ export default {
       if (this.$refs.map) {
         // Re-enable map movement.
         const mapobj = this.$refs.map.mapObject
-        mapobj._handlers.forEach(function(handler) {
+        mapobj._handlers.forEach(function (handler) {
           handler.enable()
         })
       }
@@ -577,7 +542,7 @@ export default {
 
       // Disable map movement to avoid triggering location reload.
       const mapobj = this.$refs.map.mapObject
-      mapobj._handlers.forEach(function(handler) {
+      mapobj._handlers.forEach(function (handler) {
         handler.disable()
       })
     },
@@ -612,7 +577,7 @@ export default {
         }),
         collapsed: this.locked
       })
-        .on('markgeocode', function(e) {
+        .on('markgeocode', function (e) {
           if (e && e.geocode && e.geocode.bbox) {
             // Empty out the query box so that the dropdown closes.
             this.setQuery('')
@@ -624,7 +589,7 @@ export default {
         .addTo(self.$refs.map.mapObject)
 
       if (this.groupid) {
-        const group = this.$store.getters['group/get'](this.groupid)
+        const group = this.groupStore.get(this.groupid)
 
         if (group) {
           let bounds
@@ -699,14 +664,14 @@ export default {
 
       if (!this.selectedId) {
         // This is a new area.
-        await this.$store.dispatch('locations/add', {
+        await this.locationStore.add({
           name: this.selectedName,
           polygon: this.selectedWKT,
           remap: false
         })
       } else {
         // This is an existing area
-        await this.$store.dispatch('locations/update', {
+        await this.locationStore.update({
           id: this.selectedId,
           name: this.selectedName,
           polygon: this.selectedWKT,
@@ -724,7 +689,7 @@ export default {
     async deleteArea(callback) {
       this.busy = true
 
-      await this.$store.dispatch('locations/delete', {
+      await this.locationStore.delete({
         id: this.selectedId,
         groupid: this.groupid,
         remap: false
@@ -744,7 +709,7 @@ export default {
         console.log('Fetch', thisFetch, this.lastLocationFetch)
         this.lastLocationFetch = thisFetch
 
-        await this.$store.dispatch('locations/fetch', data)
+        await this.locationStore.fetch(data)
       }
     },
     highlightPostcode(pc) {
@@ -767,18 +732,23 @@ export default {
 ::v-deep .leaflet-draw-section {
   position: relative;
 }
+
 ::v-deep .leaflet-draw-toolbar {
   margin-top: 12px;
 }
+
 ::v-deep .leaflet-draw-toolbar-top {
   margin-top: 0;
 }
+
 ::v-deep .leaflet-draw-toolbar-notop a:first-child {
   border-top-right-radius: 0;
 }
+
 ::v-deep .leaflet-draw-toolbar-nobottom a:last-child {
   border-bottom-right-radius: 0;
 }
+
 ::v-deep .leaflet-draw-toolbar a {
   background-image: url('/drawtoolbar/spritesheet.png');
   background-image: linear-gradient(transparent, transparent),
@@ -787,16 +757,19 @@ export default {
   background-size: 300px 30px;
   background-clip: padding-box;
 }
+
 ::v-deep .leaflet-retina .leaflet-draw-toolbar a {
   background-image: url('/drawtoolbar/spritesheet-2x.png');
   background-image: linear-gradient(transparent, transparent),
     url('/drawtoolbar/spritesheet.svg');
 }
+
 ::v-deep .leaflet-draw a {
   display: block;
   text-align: center;
   text-decoration: none;
 }
+
 ::v-deep .leaflet-draw a .sr-only {
   position: absolute;
   width: 1px;
@@ -807,6 +780,7 @@ export default {
   clip: rect(0, 0, 0, 0);
   border: 0;
 }
+
 ::v-deep .leaflet-draw-actions {
   display: none;
   list-style: none;
@@ -817,35 +791,44 @@ export default {
   top: 0;
   white-space: nowrap;
 }
+
 ::v-deep .leaflet-touch .leaflet-draw-actions {
   left: 32px;
 }
+
 ::v-deep .leaflet-right .leaflet-draw-actions {
   right: 26px;
   left: auto;
 }
+
 ::v-deep .leaflet-touch .leaflet-right .leaflet-draw-actions {
   right: 32px;
   left: auto;
 }
+
 ::v-deep .leaflet-draw-actions li {
   display: inline-block;
 }
+
 ::v-deep .leaflet-draw-actions li:first-child a {
   border-left: 0;
 }
+
 ::v-deep .leaflet-draw-actions li:last-child a {
   -webkit-border-radius: 0 4px 4px 0;
   border-radius: 0 4px 4px 0;
 }
+
 ::v-deep .leaflet-right .leaflet-draw-actions li:last-child a {
   -webkit-border-radius: 0;
   border-radius: 0;
 }
+
 ::v-deep .leaflet-right .leaflet-draw-actions li:first-child a {
   -webkit-border-radius: 4px 0 0 4px;
   border-radius: 4px 0 0 4px;
 }
+
 ::v-deep .leaflet-draw-actions a {
   background-color: #919187;
   border-left: 1px solid #aaa;
@@ -857,99 +840,121 @@ export default {
   padding-right: 10px;
   height: 28px;
 }
+
 ::v-deep .leaflet-touch .leaflet-draw-actions a {
   font-size: 12px;
   line-height: 30px;
   height: 30px;
 }
+
 ::v-deep .leaflet-draw-actions-bottom {
   margin-top: 0;
 }
+
 ::v-deep .leaflet-draw-actions-top {
   margin-top: 1px;
 }
+
 ::v-deep .leaflet-draw-actions-top a,
 .leaflet-draw-actions-bottom a {
   height: 27px;
   line-height: 27px;
 }
+
 ::v-deep .leaflet-draw-actions a:hover {
   background-color: #a0a098;
 }
+
 ::v-deep .leaflet-draw-actions-top.leaflet-draw-actions-bottom a {
   height: 26px;
   line-height: 26px;
 }
+
 ::v-deep .leaflet-draw-toolbar .leaflet-draw-draw-polyline {
   background-position: -2px -2px;
 }
+
 ::v-deep .leaflet-touch .leaflet-draw-toolbar .leaflet-draw-draw-polyline {
   background-position: 0 -1px;
 }
+
 ::v-deep .leaflet-draw-toolbar .leaflet-draw-draw-polygon {
   background-position: -31px -2px;
 }
+
 ::v-deep .leaflet-touch .leaflet-draw-toolbar .leaflet-draw-draw-polygon {
   background-position: -29px -1px;
 }
+
 ::v-deep .leaflet-draw-toolbar .leaflet-draw-draw-rectangle {
   background-position: -62px -2px;
 }
+
 ::v-deep .leaflet-touch .leaflet-draw-toolbar .leaflet-draw-draw-rectangle {
   background-position: -60px -1px;
 }
+
 ::v-deep .leaflet-draw-toolbar .leaflet-draw-draw-circle {
   background-position: -92px -2px;
 }
+
 ::v-deep .leaflet-touch .leaflet-draw-toolbar .leaflet-draw-draw-circle {
   background-position: -90px -1px;
 }
+
 ::v-deep .leaflet-draw-toolbar .leaflet-draw-draw-marker {
   background-position: -122px -2px;
 }
+
 ::v-deep .leaflet-touch .leaflet-draw-toolbar .leaflet-draw-draw-marker {
   background-position: -120px -1px;
 }
+
 ::v-deep .leaflet-draw-toolbar .leaflet-draw-draw-circlemarker {
   background-position: -273px -2px;
 }
+
 ::v-deep .leaflet-touch .leaflet-draw-toolbar .leaflet-draw-draw-circlemarker {
   background-position: -271px -1px;
 }
+
 ::v-deep .leaflet-draw-toolbar .leaflet-draw-edit-edit {
   background-position: -152px -2px;
 }
+
 ::v-deep .leaflet-touch .leaflet-draw-toolbar .leaflet-draw-edit-edit {
   background-position: -150px -1px;
 }
+
 ::v-deep .leaflet-draw-toolbar .leaflet-draw-edit-remove {
   background-position: -182px -2px;
 }
+
 ::v-deep .leaflet-touch .leaflet-draw-toolbar .leaflet-draw-edit-remove {
   background-position: -180px -1px;
 }
+
 ::v-deep .leaflet-draw-toolbar .leaflet-draw-edit-edit.leaflet-disabled {
   background-position: -212px -2px;
 }
-::v-deep
-  .leaflet-touch
-  .leaflet-draw-toolbar
-  .leaflet-draw-edit-edit.leaflet-disabled {
+
+::v-deep .leaflet-touch .leaflet-draw-toolbar .leaflet-draw-edit-edit.leaflet-disabled {
   background-position: -210px -1px;
 }
+
 ::v-deep .leaflet-draw-toolbar .leaflet-draw-edit-remove.leaflet-disabled {
   background-position: -242px -2px;
 }
-::v-deep
-  .leaflet-touch
-  .leaflet-draw-toolbar
-  .leaflet-draw-edit-remove.leaflet-disabled {
+
+::v-deep .leaflet-touch .leaflet-draw-toolbar .leaflet-draw-edit-remove.leaflet-disabled {
   background-position: -240px -2px;
 }
+
 ::v-deep .leaflet-mouse-marker {
   background-color: #fff;
   cursor: crosshair;
 }
+
 ::v-deep .leaflet-draw-tooltip {
   background: #363636;
   background: rgba(0, 0, 0, 0.5);
@@ -966,6 +971,7 @@ export default {
   white-space: nowrap;
   z-index: 6;
 }
+
 ::v-deep .leaflet-draw-tooltip:before {
   border-right: 6px solid black;
   border-right-color: rgba(0, 0, 0, 0.5);
@@ -976,20 +982,25 @@ export default {
   top: 7px;
   left: -7px;
 }
+
 ::v-deep .leaflet-error-draw-tooltip {
   background-color: #f2dede;
   border: 1px solid #e6b6bd;
   color: #b94a48;
 }
+
 ::v-deep .leaflet-error-draw-tooltip:before {
   border-right-color: #e6b6bd;
 }
+
 ::v-deep .leaflet-draw-tooltip-single {
   margin-top: -12px;
 }
+
 ::v-deep .leaflet-draw-tooltip-subtext {
   color: #f8d5e4;
 }
+
 ::v-deep .leaflet-draw-guide-dash {
   font-size: 1%;
   opacity: 0.6;
@@ -997,6 +1008,7 @@ export default {
   width: 5px;
   height: 5px;
 }
+
 ::v-deep .leaflet-edit-marker-selected {
   background-color: rgba(254, 87, 161, 0.1);
   border: 4px dashed rgba(254, 87, 161, 0.6);
@@ -1004,12 +1016,15 @@ export default {
   border-radius: 4px;
   box-sizing: content-box;
 }
+
 ::v-deep .leaflet-edit-move {
   cursor: move;
 }
+
 ::v-deep .leaflet-edit-resize {
   cursor: pointer;
 }
+
 ::v-deep .leaflet-oldie .leaflet-draw-toolbar {
   border: 1px solid #999;
 }

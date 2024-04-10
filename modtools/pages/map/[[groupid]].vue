@@ -2,8 +2,8 @@
   <div class="bg-white">
     <ModHelpMap />
     <div v-if="loaded">
-      <!--ModGroupMap v-if="groupid" :groupid="groupid" />
-      <ModGroupMap v-else groups :caretaker="caretaker" overlaps /-->
+      <ModGroupMap v-if="groupid" :groupid="groupid" />
+      <ModGroupMap v-else groups :caretaker="caretaker" overlaps />
     </div>
     <div v-else class="d-flex justify-content-around">
       <b-img src="/loader.gif" alt="Loading..." width="100px" />
@@ -20,7 +20,7 @@ const groupStore = useGroupStore()
 
 
 const groupid = computed(() => {
-  return ('groupid' in route.params) ? route.params.groupid : 0
+  return ('groupid' in route.params) ? parseInt(route.params.groupid) : 0
 })
 
 const loaded = ref(false)

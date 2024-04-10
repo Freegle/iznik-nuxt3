@@ -5,6 +5,7 @@ export const useLocationStore = defineStore({
   id: 'location',
   state: () => ({
     list: {},
+    dodgy: {},
   }),
   actions: {
     init(config) {
