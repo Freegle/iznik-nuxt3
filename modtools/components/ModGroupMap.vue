@@ -67,15 +67,11 @@
       <b-row class="m-0">
         <b-col ref="mapcont" cols="12" md="9" class="p-0">
           <!--
-            :center="center"
           -->
           <div>
-            <l-map ref="map" :zoom="zoom" :min-zoom="5" :max-zoom="17" :options="{ dragging: selectedWKT, touchZoom: true }" 
-            :style="'width: 100%; height: ' + mapHeight + 'px'"
-            :center="[
-            55.95206000,
-            -3.19648000,
-          ]" @update:bounds="boundsChanged" @update:zoom="boundsChanged" @ready="ready" @moveend="idle">
+            <l-map ref="map" :zoom="zoom" :min-zoom="5" :max-zoom="17" :options="{ dragging: selectedWKT, touchZoom: true }" :center="center"
+              :style="'width: 100%; height: ' + mapHeight + 'px'" @update:bounds="boundsChanged" @update:zoom="boundsChanged" @ready="ready"
+              @moveend="idle">
               <l-tile-layer :url="osmtile" :attribution="attribution" />
               <l-control position="topright" />
               <div v-if="cga">
@@ -262,7 +258,10 @@ export default {
       zoom: 12,
       lastLocationFetch: null,
       showMappingChanges: false,
-      highlighted: null
+      highlighted: null,
+      bounds: null,
+      locations: [],
+      dodgy: [],
     }
   },
   computed: {
@@ -277,6 +276,22 @@ export default {
       }
 
       return height
+    },
+    center() {
+      let ret = [53.945, -2.5209]
+
+      const bounds = this.$refs.map
+        ? this.$refs.map.mapObject.getBounds()
+        : null
+
+      if (bounds) {
+        ret = [
+          (bounds.getNorthEast().lat + bounds.getSouthWest().lat) / 2,
+          (bounds.getNorthEast().lng + bounds.getSouthWest().lng) / 2
+        ]
+      }
+
+      return ret
     },
     allgroups() {
       let groups = Object.values(this.groupStore.list)
@@ -382,11 +397,10 @@ export default {
       return ret
     },
     locationsInBounds() {
-      const locations = Object.values(this.locationStore.list)
       const ret = []
 
       if (this.bounds) {
-        for (const location of locations) {
+        for (const location of this.locations) {
           if (
             location &&
             location.polygon &&
@@ -428,13 +442,8 @@ export default {
         color: OVERLAP_COLOUR
       }
     },
-    dodgy() {
-      //const loc = await this.locationStore.fetch({
-      //    typeahead: this.message.location.name,
-      //  })
-      return Object.values(this.locationStore.dodgy)
-    },
     dodgyInBounds() {
+      if (!this.bounds || !this.dodgy) return []
       return this.dodgy.filter(
         d => this.bounds && this.bounds.contains([d.lat, d.lng])
       )
@@ -442,19 +451,22 @@ export default {
   },
   watch: {
     async showDodgy(newVal) {
-      this.busy = true
-      const bounds = this.$refs.map.leafletObject.getBounds()
+      if (this.$refs.map) {
+        this.busy = true
+        const bounds = this.$refs.map.leafletObject.getBounds()
 
-      const data = {
-        swlat: bounds.getSouthWest().lat,
-        swlng: bounds.getSouthWest().lng,
-        nelat: bounds.getNorthEast().lat,
-        nelng: bounds.getNorthEast().lng
+        const data = {
+          swlat: bounds.getSouthWest().lat,
+          swlng: bounds.getSouthWest().lng,
+          nelat: bounds.getNorthEast().lat,
+          nelng: bounds.getNorthEast().lng
+        }
+
+        data.dodgy = newVal
+        const ret = await this.locationStore.fetch(data)
+        this.dodgy = ret.dodgy
+        this.busy = false
       }
-
-      data.dodgy = newVal
-      await this.locationStore.fetch(data)
-      this.busy = false
     }
   },
   async mounted() {
@@ -503,10 +515,12 @@ export default {
       this.selectedWKT = l.polygon
 
       // Disable map movement to avoid triggering location reload.
-      const mapobj = this.$refs.map.leafletObject
-      mapobj._handlers.forEach(function (handler) {
-        handler.disable()
-      })
+      if (this.$refs.map) {
+        const mapobj = this.$refs.map.leafletObject
+        mapobj._handlers.forEach(function (handler) {
+          handler.disable()
+        })
+      }
     },
     shapeChanged(e) {
       if (e.poly) {
@@ -600,7 +614,7 @@ export default {
             drawnItems = l
           })
 
-          /*if (drawnItems) {
+          /* TODO if (drawnItems) {
             const drawControl = new window.L.Control.Draw({
               edit: {
                 featureGroup: drawnItems,
@@ -643,8 +657,15 @@ export default {
         }
       }
     },
+    boundsChanged() {
+      if (this.$refs.map) {
+        this.bounds = this.$refs.map.mapObject.getBounds()
+        this.zoom = this.$refs.map.mapObject.getZoom()
+      }
+    },
     async idle() {
       const self = this
+      this.boundsChanged()
 
       if (this.groupid) {
         const group = this.groupStore.get(this.groupid)
@@ -674,28 +695,30 @@ export default {
             bounds = this.$refs.map.leafletObject.getBounds()
           }
 
-          this.busy = true
+          if (bounds) {
+            this.busy = true
 
-          const data = {
-            swlat: bounds.getSouthWest().lat,
-            swlng: bounds.getSouthWest().lng,
-            nelat: bounds.getNorthEast().lat,
-            nelng: bounds.getNorthEast().lng,
-            dodgy: this.showDodgy,
-            areas: this.zoom >= 12
+            const data = {
+              swlat: bounds.getSouthWest().lat,
+              swlng: bounds.getSouthWest().lng,
+              nelat: bounds.getNorthEast().lat,
+              nelng: bounds.getNorthEast().lng,
+              dodgy: this.showDodgy,
+              areas: this.zoom >= 12
+            }
+
+            await this.fetchLocations(data)
+
+            this.busy = false
           }
-
-          await this.fetchLocations(data)
-
-          this.busy = false
         }
       }
     },
     async boundsChanged() {
-      console.log('===boundsChanged')
+      // console.log('===boundsChanged')
       if (this.$refs.map && this.$refs.map.leafletObject) {
         this.bounds = this.$refs.map.leafletObject.getBounds()
-        console.log('===boundsChanged', this.bounds)
+        // console.log('===boundsChanged', this.bounds)
         this.zoom = this.$refs.map.leafletObject.getZoom()
         this.busy = true
 
@@ -714,10 +737,8 @@ export default {
           await this.fetchLocations(data)
         }
 
-        if (this.$refs.map && this.$refs.map.leafletObject) {
-          // Sometimes the map needs a kick to show correctly.
-          this.$refs.map.leafletObject.invalidateSize()
-        }
+        // Sometimes the map needs a kick to show correctly.
+        this.$refs.map.leafletObject.invalidateSize()
       }
 
       this.busy = false
@@ -769,15 +790,19 @@ export default {
       if (this.lastLocationFetch === thisFetch) {
         console.log('Already fetching, skip')
       } else {
-        console.log('Fetch', thisFetch, this.lastLocationFetch)
+        console.log('===Fetch', thisFetch, this.lastLocationFetch)
         this.lastLocationFetch = thisFetch
 
-        await this.locationStore.fetch(data)
+        const ret = await this.locationStore.fetch(data)
+        this.locations = ret.locations
+        this.dodgy = ret.dodgy
       }
     },
     highlightPostcode(pc) {
-      this.$refs.map.leafletObject.flyTo([pc.lat, pc.lng])
-      this.highlighted = pc
+      if (this.$refs.map) {
+        this.$refs.map.leafletObject.flyTo([pc.lat, pc.lng])
+        this.highlighted = pc
+      }
     }
   }
 }
