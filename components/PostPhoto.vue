@@ -5,7 +5,7 @@
       format="webp"
       provider="uploadcare"
       :src="id"
-      alt="NuItem Photo"
+      alt="Item Photo"
       :width="200"
       :height="200"
       @click="$emit('click')"
@@ -13,20 +13,14 @@
     <b-img
       v-else-if="thumbnail"
       lazy
-      :src="paththumb + '?' + cacheBust"
+      :src="paththumb"
       rounded
       thumbnail
       class="square"
       :class="{ primary }"
       @click="$emit('click')"
     />
-    <b-img
-      v-else
-      lazy
-      :src="path + '?' + cacheBust"
-      rounded
-      @click="$emit('click')"
-    />
+    <b-img v-else lazy :src="path" rounded @click="$emit('click')" />
   </div>
 </template>
 <script>

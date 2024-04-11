@@ -33,6 +33,8 @@
 <script setup>
 // import * as LR from '@uploadcare/blocks'
 // TODO Waiting for official release.
+// TODO Rotate in microvolunteering and ModTools
+// TODO User edit of photo
 const LR = await import(
   'https://cdn.jsdelivr.net/npm/@uploadcare/blocks@0.36.1-alpha.3/web/blocks.min.js'
 )

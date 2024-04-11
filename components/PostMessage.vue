@@ -37,7 +37,6 @@
               v-bind="element"
               :primary="index === 0"
               class="mr-1 mt-1 mt-md-0"
-              @remove="removePhoto"
             />
           </div>
         </template>
@@ -84,6 +83,7 @@ import { useComposeStore } from '../stores/compose'
 import { useMessageStore } from '../stores/message'
 import { useMiscStore } from '../stores/misc'
 import NumberIncrementDecrement from './NumberIncrementDecrement'
+import { useImageStore } from '~/stores/image'
 
 const OurUploader = defineAsyncComponent(() =>
   import('~/components/OurUploader')
@@ -113,13 +113,14 @@ export default {
   setup(props) {
     const composeStore = useComposeStore()
     const messageStore = useMessageStore()
+    const imageStore = useImageStore()
 
     composeStore.setType({
       id: props.id,
       type: props.type,
     })
 
-    return { composeStore, messageStore }
+    return { composeStore, messageStore, imageStore }
   },
   data() {
     return {
@@ -184,8 +185,33 @@ export default {
     }, 1)
   },
   methods: {
-    uploaded(photos) {
-      this.composeStore.setAttachmentsForMessage(this.id, photos)
+    async uploaded(photos) {
+      console.log('Uploaded', photos)
+      const atts = []
+
+      for (const photo of photos) {
+        // Create the attachment on the server which references the uploaded image.
+        const att = {
+          imgtype: 'Message',
+          externaluid: photo.id,
+          externalurl: photo.path,
+        }
+
+        const ret = await this.imageStore.post(att)
+
+        // Set up our local attachment info, which has the UID of the image as the ID so that PostPhoto
+        // will display it correctly.
+        console.log('Post returned', ret)
+        atts.push({
+          id: photo.id,
+          attid: ret.id,
+          path: photo.path,
+          paththumb: photo.path,
+        })
+        console.log('Message attachments', atts)
+      }
+
+      this.composeStore.setAttachmentsForMessage(this.id, atts)
 
       // We force the uploader to re-render.  There might be a better way of doing this, but it means
       // we reset everything and will load any existing photos into the uploader.  Using the modal-open

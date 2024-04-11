@@ -36,28 +36,40 @@
       </div>
       <div :class="{ thumbnail: thumbnail, notThumbnail: !thumbnail }">
         <client-only>
-          <b-img
-            lazy
-            rounded
-            class="d-none d-md-block attachment p-0"
-            generator-unable-to-provide-required-alt=""
-            title="Item picture"
-            :src="thumbnail ? attachments[0].paththumb : attachments[0].path"
-            itemprop="image"
+          <NuxtImg
+            v-if="typeof attachments[0].id === 'string'"
+            format="webp"
+            provider="uploadcare"
+            :src="attachments[0].id"
+            alt="Item Photo"
+            class="attachment"
             @error="brokenImage"
             @click="$emit('zoom')"
           />
-          <b-img
-            lazy
-            rounded
-            class="d-block d-md-none attachment p-0"
-            generator-unable-to-provide-required-alt=""
-            title="Item picture"
-            :src="attachments[0].path"
-            itemprop="image"
-            @error="brokenImage"
-            @click="$emit('zoom')"
-          />
+          <div v-else>
+            <b-img
+              lazy
+              rounded
+              class="d-none d-md-block attachment p-0"
+              generator-unable-to-provide-required-alt=""
+              title="Item picture"
+              :src="thumbnail ? attachments[0].paththumb : attachments[0].path"
+              itemprop="image"
+              @error="brokenImage"
+              @click="$emit('zoom')"
+            />
+            <b-img
+              lazy
+              rounded
+              class="d-block d-md-none attachment p-0"
+              generator-unable-to-provide-required-alt=""
+              title="Item picture"
+              :src="attachments[0].path"
+              itemprop="image"
+              @error="brokenImage"
+              @click="$emit('zoom')"
+            />
+          </div>
           <template #fallback>
             <img
               class="attachment p-0"
