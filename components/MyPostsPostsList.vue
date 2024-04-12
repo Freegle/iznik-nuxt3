@@ -62,7 +62,7 @@
           <div
             v-for="post in visiblePosts"
             :key="'post-' + post.id"
-            class="p-0 text-start mt-1"
+            class="p-0 text-start mt-1 minheight"
           >
             <MyMessage
               :id="post.id"
@@ -215,11 +215,14 @@ const upcomingTrysts = computed(() => {
   })
 })
 </script>
-
 <style scoped>
 .restricted-height {
   max-height: 100vh;
   overflow-x: hidden;
   overflow-y: auto;
+}
+
+.minheight {
+  min-height: 200px;
 }
 </style>
