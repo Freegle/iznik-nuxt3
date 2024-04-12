@@ -71,7 +71,7 @@
             />
           </div>
           <b-img
-            v-if="props.loading"
+            v-if="loading"
             lazy
             src="/loader.gif"
             alt="Loading..."
