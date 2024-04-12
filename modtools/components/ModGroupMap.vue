@@ -14,7 +14,7 @@
         <b-form-checkbox v-if="groupid" v-model="labels" class="ml-2 font-weight-bold">
           Labels
         </b-form-checkbox>
-        <b-form-checkbox v-model="shade" class="ml-2 font-weight-bold">
+        <b-form-checkbox v-model="shade" class="ml-2 font-weight-bold" @click="dobump">
           Shade areas
         </b-form-checkbox>
         <b-form-checkbox v-model="showDodgy" class="ml-2 font-weight-bold">
@@ -69,7 +69,7 @@
           <!--
           -->
           <div>
-            <l-map ref="map" :zoom="zoom" :min-zoom="5" :max-zoom="17" :options="{ dragging: selectedWKT, touchZoom: true }" :center="center"
+            <l-map ref="map" :zoom="zoom" :min-zoom="5" :max-zoom="17" :options="{ dragging: dragging, touchZoom: true }" :center="center"
               :style="'width: 100%; height: ' + mapHeight + 'px'" @update:bounds="boundsChanged" @update:zoom="boundsChanged" @ready="ready"
               @moveend="idle">
               <l-tile-layer :url="osmtile" :attribution="attribution" />
@@ -89,7 +89,7 @@
                 <l-feature-group>
                   <div v-if="zoom >= 12">
                     <ModGroupMapLocation v-for="l in locationsInBounds" :key="'location-' + l.id" :ref="'location-' + l.id" :location="l"
-                      :selected="selectedObj === l" :shade="shade" :labels="labels" :map="map" @click="selectLocation(l)" />
+                      :selected="selectedObj === l" :shade="shade" :labels="labels" :map="mapObject" @click="selectLocation(l)" :bump="bump" />
                   </div>
                 </l-feature-group>
               </div>
@@ -132,10 +132,10 @@
               </p>
             </b-card-body>
             <b-card-footer v-if="groupid" class="d-flex justify-content-between flex-wrap">
-              <SpinButton variant="primary" name="save" label="Save" spinclass="text-white" @handle="saveArea"
+              <SpinButton variant="primary" icon-name="save" label="Save" spinclass="text-white" @handle="saveArea"
                 :disabled="!selectedName || !selectedWKT || intersects" />
-              <SpinButton variant="white" name="times" label="Cancel" @handle="clearSelection" />
-              <SpinButton v-if="selectedId" variant="danger" name="trash-alt" label="Delete" @handle="deleteArea" />
+              <SpinButton variant="white" icon-name="times" label="Cancel" @handle="clearSelection" />
+              <SpinButton v-if="selectedId" variant="danger" icon-name="trash-alt" label="Delete" @handle="deleteArea" />
             </b-card-footer>
           </b-card>
           <NoticeMessage v-if="zoom <= 12" variant="danger" show class="mb-2">
@@ -169,6 +169,7 @@ import { useRuntimeConfig } from '#app'
 import { useGroupStore } from '~/stores/group'
 import { useLocationStore } from '~/stores/location'
 
+//import LDraw from 'leaflet-draw'
 import 'leaflet-control-geocoder/dist/Control.Geocoder.css'
 import { attribution, osmtile, loadLeaflet } from '../composables/useMap'
 import Wkt from 'wicket'
@@ -250,6 +251,7 @@ export default {
       showDodgy: false,
       selectedName: null,
       selectedWKT: null,
+      dragging: true,
       selectedObj: null,
       selectedId: null,
       busy: false,
@@ -262,6 +264,7 @@ export default {
       bounds: null,
       locations: [],
       dodgy: [],
+      bump: 0,
     }
   },
   computed: {
@@ -281,7 +284,7 @@ export default {
       let ret = [53.945, -2.5209]
 
       const bounds = this.$refs.map
-        ? this.$refs.map.mapObject.getBounds()
+        ? this.$refs.map.leafletObject.getBounds()
         : null
 
       if (bounds) {
@@ -480,6 +483,8 @@ export default {
       this.selectedId = null
       this.selectedName = null
       this.selectedWKT = null
+      this.dragging = true
+      this.bump++
 
       if (this.$refs.map) {
         // Re-enable map movement.
@@ -494,6 +499,7 @@ export default {
       this.selectedObj = g
       this.selectedName = g.nameshort + ' CGA'
       this.selectedWKT = g.polyofficial
+      this.bump++
 
       if (this.supportOrAdmin) {
         e.sourceTarget.editing.enable()
@@ -503,16 +509,20 @@ export default {
       this.selectedObj = g
       this.selectedName = g.nameshort + ' DPA'
       this.selectedWKT = g.poly
+      this.bump++
 
       if (this.supportOrAdmin) {
         e.sourceTarget.editing.enable()
       }
     },
     selectLocation(l) {
+      console.log("selectLocation", l.id)
       this.selectedId = l.id
       this.selectedObj = l
       this.selectedName = l.name
       this.selectedWKT = l.polygon
+      this.dragging = false
+      this.bump++
 
       // Disable map movement to avoid triggering location reload.
       if (this.$refs.map) {
@@ -614,53 +624,62 @@ export default {
             drawnItems = l
           })
 
-          /* TODO if (drawnItems) {
-            const drawControl = new window.L.Control.Draw({
-              edit: {
-                featureGroup: drawnItems,
-                remove: false,
-                edit: false,
-                poly: {
-                  allowIntersection: false
-                }
-              },
-              position: 'topright',
-              draw: {
-                polyline: false,
-                polygon: {
-                  allowIntersection: false,
-                  showArea: true
+          try {
+            if (drawnItems) {
+              //const Control = await import(
+              //  'leaflet-draw/dist/leaflet.draw-src.js'
+              //)
+              //console.log('Control',Control)
+              //const drawControl = new LDraw({
+              const drawControl = new window.L.Control.Draw({
+                edit: {
+                  featureGroup: drawnItems,
+                  remove: false,
+                  edit: false,
+                  poly: {
+                    allowIntersection: false
+                  }
                 },
-                rectangle: false,
-                circle: false,
-                marker: false,
-                circlemarker: false
-              }
-            })
+                position: 'topright',
+                draw: {
+                  polyline: false,
+                  polygon: {
+                    allowIntersection: false,
+                    showArea: true
+                  },
+                  rectangle: false,
+                  circle: false,
+                  marker: false,
+                  circlemarker: false
+                }
+              })
 
-            themap.addControl(drawControl)
+              themap.addControl(drawControl)
 
-            themap.on(L.Draw.Event.CREATED, e => {
-              // const type = e.layerType;
-              const layer = e.layer
-              layer.editing.enable()
-              layer.addTo(drawnItems)
+              themap.on(L.Draw.Event.CREATED, e => {
+                // const type = e.layerType;
+                const layer = e.layer
+                layer.editing.enable()
+                layer.addTo(drawnItems)
 
-              const wkt = new Wkt.Wkt()
-              wkt.fromObject(layer)
-              this.selectedWKT = wkt.write()
-            })
+                const wkt = new Wkt.Wkt()
+                wkt.fromObject(layer)
+                this.selectedWKT = wkt.write()
+              })
 
-            themap.on(L.Draw.Event.DRAWVERTEX, this.shapeChanged)
-            themap.on(L.Draw.Event.EDITVERTEX, this.shapeChanged)
-          }*/
+              themap.on(L.Draw.Event.DRAWVERTEX, this.shapeChanged)
+              themap.on(L.Draw.Event.EDITVERTEX, this.shapeChanged)
+            }
+          } catch (e) {
+            console.log('drawnItems FAIL TODO', e.message)
+          }
         }
       }
     },
     boundsChanged() {
       if (this.$refs.map) {
-        this.bounds = this.$refs.map.mapObject.getBounds()
-        this.zoom = this.$refs.map.mapObject.getZoom()
+        this.bounds = this.$refs.map.leafletObject.getBounds()
+        this.zoom = this.$refs.map.leafletObject.getZoom()
       }
     },
     async idle() {
@@ -803,6 +822,11 @@ export default {
         this.$refs.map.leafletObject.flyTo([pc.lat, pc.lng])
         this.highlighted = pc
       }
+    },
+    dobump() { // Naff way to make this happen
+      setTimeout(() => {
+        this.bump++
+      }, 500)
     }
   }
 }

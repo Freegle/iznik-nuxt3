@@ -1,12 +1,7 @@
 <template>
   <div>
-    <l-geojson
-      :geojson="location.json"
-      :options="locationOptions"
-      :contenteditable="editable"
-      @click="select"
-    />
-    <l-circle-marker v-if="labels && centre" :lat-lng="[ centre.lat, centre.lng ]" :radius="1">
+    <l-geojson :key="bump" :geojson="location.json" :options="locationOptions" :contenteditable="editable" @click="select" />
+    <l-circle-marker v-if="labels && centre" :lat-lng="[centre.lat, centre.lng]" :radius="1">
       <l-tooltip ref="tooltip" :content="location.name + ''" :options="{ permanent: true, direction: 'center' }" />
     </l-circle-marker>
   </div>
@@ -19,6 +14,10 @@ const SELECTED = '#990000'
 
 export default {
   props: {
+    bump: { // Needed as change in locationOptions does not cause refresh
+      type: Number,
+      required: true
+    },
     location: {
       type: Object,
       required: true
@@ -36,10 +35,10 @@ export default {
       required: false
     }
   },
-  data: function() {
+  data: function () {
     return {
       editable: false,
-      obj: null
+      obj: null,
     }
   },
   computed: {
@@ -76,9 +75,13 @@ export default {
   },
   methods: {
     select(e) {
+      console.log("select", e.sourceTarget)
       this.obj = e.sourceTarget
-      this.obj.editing.enable()
-      this.$emit('click')
+      if (this.obj) {
+        console.log("select", this.obj.editing)
+        //      this.obj.editing.enable()
+        this.$emit('click')
+      }
     }
   }
 }

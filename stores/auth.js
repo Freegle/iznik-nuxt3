@@ -329,7 +329,7 @@ export const useAuthStore = defineStore({
 
         if (ret) {
           ;({ me, groups, persistent, jwt } = ret) // MT added
-          console.log('!!!fetchuser ret.work',ret.work)
+          //console.log('!!!fetchuser ret.work',ret.work)
           xwork = ret.work // TODO
           xdiscourse = ret.discourse // TODO
     
@@ -376,7 +376,7 @@ export const useAuthStore = defineStore({
         }
 
         this.work = xwork
-        console.log('!!!fetchUser this.work',this.work)
+        //console.log('!!!fetchUser this.work',this.work)
     
         this.discourse = xdiscourse
         // console.log('useAuthStore work discourse', work, discourse)

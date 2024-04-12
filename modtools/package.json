@@ -15,6 +15,9 @@
   "dependencies": {
     "@vueup/vue-quill": "^1.2.0",
     "diff": "^5.2.0",
+    "leaflet-draw": "^1.0.4",
+    "leaflet-draw-toolbar": "^0.3.0-alpha.1",
+    "leaflet-toolbar": "^0.4.0-alpha.2",
     "letterparser": "^0.1.4",
     "quill-html-edit-button": "^2.2.13",
     "turf-area": "^3.0.12",
