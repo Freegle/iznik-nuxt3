@@ -373,12 +373,10 @@ export default {
             comment: this.comments,
             message: this.completionMessage,
           })
-
-          callback()
-          this.hide()
-        } else {
-          callback()
         }
+
+        callback()
+        this.hide()
       }
     },
     onHide() {
