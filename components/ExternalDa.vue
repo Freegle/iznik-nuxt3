@@ -6,6 +6,12 @@
      -->
     <div v-if="me" v-observe-visibility="visibilityChanged" class="pointer">
       <div v-if="isVisible">
+        <p
+          v-if="isVisible && adShown"
+          class="text-center textsize d-none d-md-block"
+        >
+          Advertisement. These help Freegle keep going.
+        </p>
         <div
           class="d-flex w-100 justify-content-around"
           :style="{
@@ -15,12 +21,6 @@
         >
           <div :id="divId" />
         </div>
-        <p
-          v-if="isVisible && adShown"
-          class="text-center textsize d-none d-md-block"
-        >
-          Advertisement. These help Freegle keep going.
-        </p>
         <!--    <div class="bg-white">-->
         <!--      Path {{ adUnitPath }} id {{ divId }} dimensions {{ dimensions }}-->
         <!--    </div>-->
