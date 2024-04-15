@@ -7,8 +7,8 @@
     <div v-if="me" v-observe-visibility="visibilityChanged" class="pointer">
       <div v-if="isVisible">
         <p
-          v-if="isVisible && adShown"
-          class="text-center textsize d-none d-md-block"
+          v-if="isVisible && adShown && adNotice"
+          class="text-center textsize d-none d-md-block mb-1"
         >
           Advertisement. These help Freegle keep going.
         </p>
@@ -55,6 +55,10 @@ const props = defineProps({
   inModal: {
     type: Boolean,
     default: false,
+  },
+  adNotice: {
+    type: Boolean,
+    default: true,
   },
 })
 
