@@ -200,6 +200,7 @@ export default {
         } catch (e) {
           console.log('Failed to convert HEIC to PNG, use original', e)
           data.append('photo', file, 'photo')
+          this.$emit('heicerror')
         }
       } else {
         // Filepond will have resized.
