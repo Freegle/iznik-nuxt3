@@ -136,66 +136,73 @@ export default {
         // time reasonable.
         console.log('Need to convert HEIC')
         const blob = file.slice(0, file.size, 'image/heic')
-        const png = await window.heic2any({
-          blob,
-          toType: 'image/jpeg',
-          quality: 0.92,
-        })
 
-        // Now we have png which is a Blob.
-        console.log('Converted HEIC to PNG', png.size, png.type, png)
+        try {
+          const png = await window.heic2any({
+            blob,
+            toType: 'image/jpeg',
+            quality: 0.92,
+          })
 
-        // In this case FilePond won't have resized the image, so we do it ourselves here.
-        const img = new Image()
-        console.log('Convert blob to url')
-        const urlCreator = window.URL || window.webkitURL
-        console.log('Create img')
-        img.src = urlCreator.createObjectURL(png)
+          // Now we have png which is a Blob.
+          console.log('Converted HEIC to PNG', png.size, png.type, png)
 
-        await img.decode()
+          // In this case FilePond won't have resized the image, so we do it ourselves here.
+          const img = new Image()
+          console.log('Convert blob to url')
+          const urlCreator = window.URL || window.webkitURL
+          console.log('Create img')
+          img.src = urlCreator.createObjectURL(png)
 
-        console.log('Image loaded, resize')
-        const canvas = document.createElement('canvas')
-        const maxWidth = 800
-        const maxHeight = 800
-        let width = img.width
-        let height = img.height
+          await img.decode()
 
-        // Calculate the new dimensions, maintaining the aspect ratio
-        if (width > height) {
-          if (width > maxWidth) {
-            height *= maxWidth / width
-            width = maxWidth
+          console.log('Image loaded, resize')
+          const canvas = document.createElement('canvas')
+          const maxWidth = 800
+          const maxHeight = 800
+          let width = img.width
+          let height = img.height
+
+          // Calculate the new dimensions, maintaining the aspect ratio
+          if (width > height) {
+            if (width > maxWidth) {
+              height *= maxWidth / width
+              width = maxWidth
+            }
+          } else if (height > maxHeight) {
+            width *= maxHeight / height
+            height = maxHeight
           }
-        } else if (height > maxHeight) {
-          width *= maxHeight / height
-          height = maxHeight
+
+          // Set the canvas dimensions to the new dimensions
+          canvas.width = width
+          canvas.height = height
+
+          // Draw the resized image on the canvas
+          const ctx = canvas.getContext('2d')
+          ctx.drawImage(img, 0, 0, width, height)
+
+          // Get the resized image back as a Blob.
+          const p = new Promise((resolve, reject) => {
+            canvas.toBlob((resized) => {
+              console.log('Resized', resized)
+              resolve(resized)
+            }, 'image/png')
+          })
+
+          const resized = await p
+          console.log('Resized', resized.size, resized.type, resized)
+
+          // Add into the form data.
+          data.append('photo', resized, 'photo')
+
+          console.log('Converted to url', img.src)
+        } catch (e) {
+          console.log('Failed to convert HEIC to PNG, use original', e)
+          data.append('photo', file, 'photo')
         }
-
-        // Set the canvas dimensions to the new dimensions
-        canvas.width = width
-        canvas.height = height
-
-        // Draw the resized image on the canvas
-        const ctx = canvas.getContext('2d')
-        ctx.drawImage(img, 0, 0, width, height)
-
-        // Get the resized image back as a Blob.
-        const p = new Promise((resolve, reject) => {
-          canvas.toBlob((resized) => {
-            console.log('Resized', resized)
-            resolve(resized)
-          }, 'image/png')
-        })
-
-        const resized = await p
-        console.log('Resized', resized.size, resized.type, resized)
-
-        // Add into the form data.
-        data.append('photo', resized, 'photo')
-
-        console.log('Converted to url', img.src)
       } else {
+        // Filepond will have resized.
         data.append('photo', file, 'photo')
       }
 
