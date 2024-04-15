@@ -78,19 +78,19 @@ const CONFIG = {
         },
       },
       bids: [
-        // {
-        //   bidder: 'pubmatic',
-        //   params: {
-        //     publisherId: '164422',
-        //     adSlot: '5753990',
-        //   },
-        // },
-        // {
-        //   bidder: 'appnexus',
-        //   params: {
-        //     placementId: '32336193',
-        //   },
-        // },
+        {
+          bidder: 'pubmatic',
+          params: {
+            publisherId: '164422',
+            adSlot: '5753990',
+          },
+        },
+        {
+          bidder: 'appnexus',
+          params: {
+            placementId: '32336193',
+          },
+        },
         {
           bidder: 'gourmetads',
           params: {
