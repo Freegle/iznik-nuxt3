@@ -484,14 +484,13 @@ const CONFIG = {
         },
       },
       bids: [
-        // TODO Waiting on Phil to provide.
-        // {
-        //   bidder: 'pubmatic',
-        //   params: {
-        //     publisherId: '164422',
-        //     adSlot: '5753994',
-        //   },
-        // },
+        {
+          bidder: 'pubmatic',
+          params: {
+            publisherId: '164422',
+            adSlot: '5893878',
+          },
+        },
         {
           bidder: 'appnexus',
           params: {
