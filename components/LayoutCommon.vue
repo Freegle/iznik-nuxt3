@@ -19,7 +19,6 @@
               :dimensions="[[320, 50]]"
               div-id="div-gpt-ad-1699973618906-0"
               pixel
-              :ad-notice="false"
               @rendered="adRendered"
             />
           </VisibleWhen>
@@ -29,7 +28,6 @@
               :dimensions="[[728, 90]]"
               div-id="div-gpt-ad-1707999304775-0"
               pixel
-              :ad-notice="false"
               @rendered="adRendered"
             />
           </VisibleWhen>
