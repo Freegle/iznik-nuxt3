@@ -8,8 +8,6 @@
       accepted-file-types="image/jpeg, image/png, image/gif, image/jpg, image/heic"
       :file-validate-type-detect-type="validateType"
       :files="myFiles"
-      image-resize-target-width="800"
-      image-resize-target-height="800"
       image-validate-size-max-width="400"
       image-validate-size-max-height="400"
       image-crop-aspect-ratio="1"
@@ -129,15 +127,16 @@ export default {
 
       const data = new FormData()
       const fn = file.name.toLowerCase()
+      let blob = null
 
       if (fn.includes('.heic')) {
         // If we have an HEIC file, then the server can't cope with it as it will fail imagecreatefromstring, so
         // convert it to a PNG file on the client before upload.  We have to restrict the quality to keep the cconversion
         // time reasonable.
         console.log('Need to convert HEIC')
-        const blob = file.slice(0, file.size, 'image/heic')
-
         try {
+          blob = file.slice(0, file.size, 'image/heic')
+
           const png = await window.heic2any({
             blob,
             toType: 'image/jpeg',
@@ -146,13 +145,28 @@ export default {
 
           // Now we have png which is a Blob.
           console.log('Converted HEIC to PNG', png.size, png.type, png)
+          blob = png
+        } catch (e) {
+          // We couldn't convert to PNG. We can't use it.
+          console.log('Failed to convert HEIC to PNG', e)
+          this.$emit('heicerror')
+          blob = null
+        }
+      } else {
+        blob = file
+      }
 
-          // In this case FilePond won't have resized the image, so we do it ourselves here.
+      let resized = blob
+
+      if (blob) {
+        // We resize ourselves, because Filepond isn't always doing it and its error handling is poor.
+        try {
+          console.log('Resize', blob)
           const img = new Image()
           console.log('Convert blob to url')
           const urlCreator = window.URL || window.webkitURL
           console.log('Create img')
-          img.src = urlCreator.createObjectURL(png)
+          img.src = urlCreator.createObjectURL(blob)
 
           await img.decode()
 
@@ -190,32 +204,26 @@ export default {
             }, 'image/png')
           })
 
-          const resized = await p
-          console.log('Resized', resized.size, resized.type, resized)
-
-          // Add into the form data.
-          data.append('photo', resized, 'photo')
-
-          console.log('Converted to url', img.src)
+          resized = await p
+          console.log('Resized', blob?.size, blob?.type)
         } catch (e) {
-          console.log('Failed to convert HEIC to PNG, use original', e)
-          data.append('photo', file, 'photo')
-          this.$emit('heicerror')
+          // We failed to resize - we'll upload the original.
+          console.log('Resize failed', e)
         }
-      } else {
-        // Filepond will have resized.
-        data.append('photo', file, 'photo')
       }
 
-      data.append(this.imgflag, true)
-      data.append('imgtype', this.imgtype)
-      data.append('ocr', this.ocr)
-      data.append('identify', this.identify)
+      if (resized) {
+        data.append('photo', resized, 'photo')
+        data.append(this.imgflag, true)
+        data.append('imgtype', this.imgtype)
+        data.append('ocr', this.ocr)
+        data.append('identify', this.identify)
 
-      if (this.msgid) {
-        data.append('msgid', this.msgid)
-      } else if (this.groupid) {
-        data.append('groupid', this.groupid)
+        if (this.msgid) {
+          data.append('msgid', this.msgid)
+        } else if (this.groupid) {
+          data.append('groupid', this.groupid)
+        }
       }
 
       try {

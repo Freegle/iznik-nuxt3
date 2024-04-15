@@ -209,6 +209,7 @@ export default {
       // init callback below.
       this.uploading = true
       this.photoFailed = false
+      this.heicFailed = false
     },
     photoProcessed(imageid, imagethumb, image) {
       // We have uploaded a photo.  Remove the filepond instance.
