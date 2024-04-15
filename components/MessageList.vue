@@ -424,7 +424,6 @@ export default {
           })
 
           if (ids.length) {
-            console.log('Unseen duplicates', ids)
             this.messageStore.markSeen(ids)
           }
         }
