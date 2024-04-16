@@ -110,6 +110,10 @@ export default defineNuxtPlugin((nuxtApp) => {
           // Google ads are not our problem.
           console.log('Google ads - suppress exception')
           return null
+        } else if (originalExceptionStack?.includes('/pageFold/')) {
+          // This is a flakey ad library
+          console.log('Pagefold, ads - suppress exception')
+          return null
         } else if (
           (originalExceptionStack?.includes('bootstrap-vue-next') &&
             originalExceptionString?.match('removeAttribute')) ||
