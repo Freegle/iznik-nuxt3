@@ -138,6 +138,7 @@
               <SpinButton v-if="selectedId" variant="danger" icon-name="trash-alt" label="Delete" @handle="deleteArea" />
             </b-card-footer>
           </b-card>
+          Zoom: {{zoom}} Groups: {{ groups }}
           <NoticeMessage v-if="zoom < 12" variant="danger" show class="mb-2">
             Please zoom in further to see locations.
           </NoticeMessage>
@@ -247,7 +248,7 @@ export default {
       dpa: false,
       cga: true,
       shade: true,
-      labels: true,
+      labels: false,
       showDodgy: false,
       selectedName: null,
       selectedWKT: null,
@@ -298,6 +299,7 @@ export default {
     },
     allgroups() {
       let groups = Object.values(this.groupStore.list)
+      console.log('allgroups',groups.length)
 
       if (this.caretaker) {
         groups = groups.filter(g => g.mentored)
@@ -626,6 +628,7 @@ export default {
 
           try {
             if (drawnItems) {
+              console.log('################## drawnItems')
               //const Control = await import(
               //  'leaflet-draw/dist/leaflet.draw-src.js'
               //)
@@ -702,8 +705,8 @@ export default {
             this.initialGroupZoomed = true
             //const area = group.poly || group.polyofficial
             const area = group.dpa || group.cga // TODO
-            console.log('=== Wkt.Wkt E group', area)
             if (area) { // TODO added
+              console.log('=== Wkt.Wkt E group')
               const wkt = new Wkt.Wkt()
               wkt.read(area)
               const obj = wkt.toObject(this.mapObject.defaults)

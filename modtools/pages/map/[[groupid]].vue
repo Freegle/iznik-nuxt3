@@ -22,30 +22,26 @@ const groupStore = useGroupStore()
 const groupid = computed(() => {
   return ('groupid' in route.params) ? parseInt(route.params.groupid) : 0
 })
+const all = computed(() => {
+  return ('groupid' in route.params) ? route.params.groupid === "all" : false
+})
+const caretaker = computed(() => {
+  return ('groupid' in route.params) ? route.params.groupid === "caretaker" : false
+})
 
 const loaded = ref(false)
-const all = ref(false)
-const caretaker = ref(false)
 
 onMounted(async () => {
   // Get the data before we load the map to avoid timing windows.
-  console.log('map onmounted', groupid.value)
-  await groupStore.fetchMT({
-    id: groupid.value,
-    polygon: true
-  })
+  /*if (groupid.value) {
+    console.log('map onmounted', groupid.value)
+    await groupStore.fetchMT({
+      id: groupid.value,
+      polygon: true
+    })
+  }*/
 
   loaded.value = true
 })
-/*
-created() {
-  if (this.$route.params.groupid === 'all') {
-    this.all = true
-  } else if (this.$route.params.groupid === 'caretaker') {
-    this.caretaker = true
-  } else {
-    this.groupid = parseInt(this.$route.params.groupid)
-  }
-}*/
 
 </script>
