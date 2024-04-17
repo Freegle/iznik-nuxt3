@@ -17,7 +17,7 @@
       <li><em>Areas to review</em> helps you see where mapping has changed or could be improved.</li>
     </ul>
   </NoticeMessage>
-  <b-button v-if="!showHelp" variant="link" class="float-end" @click="toggleHelp">
+  <b-button v-if="!showHelp" variant="link" class="float-end pt-0" @click="toggleHelp">
     Help
   </b-button>
 </template>

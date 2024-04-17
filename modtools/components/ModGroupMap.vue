@@ -138,7 +138,7 @@
               <SpinButton v-if="selectedId" variant="danger" icon-name="trash-alt" label="Delete" @handle="deleteArea" />
             </b-card-footer>
           </b-card>
-          <NoticeMessage v-if="zoom <= 12" variant="danger" show class="mb-2">
+          <NoticeMessage v-if="zoom < 12" variant="danger" show class="mb-2">
             Please zoom in further to see locations.
           </NoticeMessage>
           <ModPostcodeTester />
@@ -411,7 +411,7 @@ export default {
           ) {
             const wkt = new Wkt.Wkt()
             try {
-              console.log('Wkt.Wkt C', location.polygon)
+              console.log('Wkt.Wkt C') // , location.polygon
               wkt.read(location.polygon)
               location.json = wkt.toJson()
               ret.push(location)
@@ -687,6 +687,10 @@ export default {
       this.boundsChanged()
 
       if (this.groupid) {
+        await this.groupStore.fetchMT({
+          id: this.groupid,
+          polygon: true
+        })
         const group = this.groupStore.get(this.groupid)
 
         if (group) {
@@ -696,18 +700,16 @@ export default {
             // Zoom the map to fit the DPA/CGA of the group.  We need to do this before fetching the locations so that
             // we don't fetch them for the whole country.
             this.initialGroupZoomed = true
-            const area = group.poly || group.polyofficial
-            console.log('Wkt.Wkt E group', area)
+            //const area = group.poly || group.polyofficial
+            const area = group.dpa || group.cga // TODO
+            console.log('=== Wkt.Wkt E group', area)
             if (area) { // TODO added
               const wkt = new Wkt.Wkt()
-              console.log('Wkt.Wkt E', area)
               wkt.read(area)
-              const mapobj = this.$refs.map.leafletObject
-              const obj = wkt.toObject(mapobj.defaults)
+              const obj = wkt.toObject(this.mapObject.defaults)
               bounds = obj.getBounds()
-              this.$nextTick(() => {
-                mapobj.fitBounds(bounds)
-              })
+              const abounds = [[bounds.getSouthWest().lat, bounds.getSouthWest().lng],[bounds.getNorthEast().lat,bounds.getNorthEast().lng]]
+              this.mapObject.fitBounds(abounds)
             }
           } else {
             // Get the locations in this area
@@ -812,9 +814,12 @@ export default {
         console.log('===Fetch', thisFetch, this.lastLocationFetch)
         this.lastLocationFetch = thisFetch
 
-        const ret = await this.locationStore.fetch(data)
-        this.locations = ret.locations
-        this.dodgy = ret.dodgy
+        // TODO DONE: Do not fetch if too zoomed out
+        //if (this.zoom >= 12) {
+          const ret = await this.locationStore.fetch(data)
+          this.locations = ret.locations
+          this.dodgy = ret.dodgy
+        //}
       }
     },
     highlightPostcode(pc) {

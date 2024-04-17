@@ -29,7 +29,7 @@ export const useGroupStore = defineStore({
   },
 
     async fetchMT({ id, polygon, showmods, sponsors, tnkey }) {
-      console.log('useGroupStore fetchMT', id)
+      console.log('useGroupStore fetchMT', id, polygon)
       if (!id) return null
       polygon = Object.is(polygon, undefined) ? false : polygon
       sponsors = Object.is(sponsors, undefined) ? false : sponsors
