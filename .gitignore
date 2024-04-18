@@ -28,3 +28,8 @@ ios/App/App/GoogleService-Info.plist
 
 # copied with app secrets
 android/app/src/main/assets/capacitor.config.json
+
+# public/js
+public/js/cookieyes-*
+public/js/prebid-app-*
+public/js/prebid-base-*
