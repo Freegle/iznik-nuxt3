@@ -77,8 +77,9 @@ export default {
     loginStateKnown: {
       immediate: true,
       handler(newVal) {
-        if (newVal) {
-          // We now know whether or not we have logged in.  Re-render the page to make it reflect that.
+        if (newVal && this.loggedIn) {
+          // We now know that we have logged in.  We rendered the page originally
+          // as logged out.  So re-render the page to make it reflect that.
           this.bump++
         }
       },

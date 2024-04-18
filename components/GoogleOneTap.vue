@@ -48,6 +48,11 @@ export default {
       try {
         // GSI script was loaded in nuxt.config.js
         console.log('Set credentials response')
+        window.google.accounts.id.initialize({
+          client_id: this.clientId,
+          callback: this.handleGoogleCredentialsResponse,
+        })
+
         window.handleGoogleCredentialsResponse =
           this.handleGoogleCredentialsResponse
 

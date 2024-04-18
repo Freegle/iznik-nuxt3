@@ -130,7 +130,7 @@ export default {
 
     const center = computed(() => {
       console.log('compute centre', noticeboard)
-      if (noticeboard) {
+      if (noticeboard.value) {
         return [noticeboard?.value?.lat, noticeboard?.value?.lng]
       } else {
         return [53.945, -2.5209]

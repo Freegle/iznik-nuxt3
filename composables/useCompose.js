@@ -33,15 +33,16 @@ export function setup(type) {
     },
   })
 
+  const me = computed(() => authStore.user)
+
   const email = computed({
     get() {
       // See if we have a local email stored from last time we were logged in.
       let email = composeStore.email
-      const me = authStore.user
 
-      if (!email && me && me.email) {
+      if (!email && me.value?.email) {
         // If we're logged in, then we have an email from that which takes precedence.
-        email = me.email
+        email = me.value.email
       }
 
       return email
@@ -108,7 +109,7 @@ export function setup(type) {
     initialPostcode: ref(initialPostcode),
     group,
     postcode,
-    closed: computed(() => group?.settings?.closed),
+    closed: computed(() => group?.value?.settings?.closed),
     ids,
     notblank: computed(() => {
       let ret = false
@@ -144,7 +145,7 @@ export function setup(type) {
       const me = authStore.user
       const em = email.value + ''
 
-      if (email && me) {
+      if (email.value && me) {
         ret = !me.emails?.find((e) => {
           return (
             em

@@ -5,12 +5,36 @@
         <NavbarDesktop />
         <NavbarMobile />
       </header>
-      <div class="position-absolute top-50 start-50 translate-middle z-3">
+      <div
+        class="position-absolute top-50 start-50 translate-middle z-3 pointer-none"
+      >
         <LoadingIndicator
           with-transition
           :throttle="loadingIndicatorThrottle"
         />
       </div>
+      <template #fallback>
+        <header>
+          <nav
+            class="navbar fixed-top navbar-expand ourBack d-flex justify-content-between d-xl-none showNavBarTop"
+            type="dark"
+          >
+            <div class="container-fluid">
+              <div />
+              <div />
+              <div class="d-flex align-items-center">
+                <ul class="nav">
+                  <a
+                    ><div class="btn btn-white mr-2 trans">
+                      Log in or Join
+                    </div></a
+                  >
+                </ul>
+              </div>
+            </div>
+          </nav>
+        </header>
+      </template>
     </client-only>
     <div
       v-if="ready"
@@ -231,9 +255,18 @@ if (process.client) {
 }
 ready = true
 </script>
-
 <style lang="scss">
 .nuxt-layout-wrapper {
   transition: all 0.25s;
+}
+
+.trans {
+  background-color: transparent !important;
+  color: transparent !important;
+  border: none !important;
+}
+
+.pointer-none {
+  pointer-events: none;
 }
 </style>

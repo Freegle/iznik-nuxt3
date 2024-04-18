@@ -10,16 +10,22 @@
   >
     <template #header>
       <div class="layout">
-        <VisibleWhen v-if="bumpMessage > 0" :at="['xs', 'sm']" class="maybeAd">
-          <ExternalDa
-            ad-unit-path="/22794232631/freegle_modal_app"
-            :dimensions="[[320, 50]]"
-            div-id="div-gpt-ad-1711542403014-0"
-            pixel
-            in-modal
-          />
-        </VisibleWhen>
-        <b-button variant="white" class="noborder p-0" @click="hide">
+        <div>
+          <VisibleWhen
+            v-if="bumpMessage > 0"
+            :at="['xs', 'sm']"
+            class="maybeAd"
+          >
+            <ExternalDa
+              ad-unit-path="/22794232631/freegle_modal_app"
+              :dimensions="[[320, 50]]"
+              div-id="div-gpt-ad-1711542403014-0"
+              pixel
+              in-modal
+            />
+          </VisibleWhen>
+        </div>
+        <b-button variant="white" class="noborder p-0 mt-1 mb-1" @click="hide">
           <v-icon icon="times-circle" class="fa-2x" />
         </b-button>
       </div>
@@ -36,9 +42,19 @@
           <div class="d-flex justify-content-between p-2 mb-2 p-md-0 mb-md-0">
             <div class="w-50 pl-2">
               <b-button
+                size="md"
+                variant="primary"
+                block
+                class="d-block d-md-none"
+                @click="showImagesProxy = false"
+              >
+                View description
+              </b-button>
+              <b-button
                 size="lg"
                 variant="primary"
                 block
+                class="d-none d-md-block"
                 @click="showImagesProxy = false"
               >
                 View description
@@ -47,8 +63,17 @@
             <div class="pr-2 w-50">
               <b-button
                 variant="secondary"
+                size="md"
+                class="w-100 d-block d-md-none"
+                block
+                @click="hide"
+              >
+                Close
+              </b-button>
+              <b-button
+                variant="secondary"
                 size="lg"
-                class="w-100"
+                class="w-100 d-none d-md-block"
                 block
                 @click="hide"
               >

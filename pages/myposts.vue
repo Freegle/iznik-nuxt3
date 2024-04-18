@@ -178,23 +178,14 @@ const offers = computed(() => {
   return posts.value.filter((message) => message.type === 'Offer')
 })
 
-async function loadMoreOffers(infiniteLoaderInstance) {
+function loadMoreOffers(infiniteLoaderInstance) {
   shownOffersCount.value++
 
   if (shownOffersCount.value > offers.value.length) {
     shownOffersCount.value = offers.value.length
-
-    infiniteLoaderInstance.complete()
-  } else {
-    // only show the loading indicator when loading the active offers
-    if (!offers.value[shownOffersCount.value - 1].hasoutcome)
-      offersLoading.value = true
-
-    await messageStore.fetch(offers.value[shownOffersCount.value - 1].id)
-
-    offersLoading.value = false
-    infiniteLoaderInstance.loaded()
   }
+
+  infiniteLoaderInstance.loaded()
 }
 
 const shownWantedsCount = ref(1)
@@ -202,23 +193,14 @@ const wanteds = computed(() => {
   return posts.value.filter((message) => message.type === 'Wanted')
 })
 
-async function loadMoreWanteds(infiniteLoaderInstance) {
+function loadMoreWanteds(infiniteLoaderInstance) {
   shownWantedsCount.value++
 
   if (shownWantedsCount.value > wanteds.value.length) {
     shownWantedsCount.value = wanteds.value.length
-
-    infiniteLoaderInstance.complete()
-  } else {
-    // only show the loading indicator when loading the active wanteds
-    if (!wanteds.value[shownWantedsCount.value - 1].hasoutcome)
-      wantedsLoading.value = true
-
-    await messageStore.fetch(wanteds.value[shownWantedsCount.value - 1].id)
-
-    wantedsLoading.value = false
-    infiniteLoaderInstance.loaded()
   }
+
+  infiniteLoaderInstance.complete()
 }
 
 function forceLogin() {
@@ -234,7 +216,7 @@ function adRendered(rendered, index, dimension) {
     if (index === 0) {
       largeAdVisible.value = true
     } else {
-      smallAdVisible.valye = true
+      smallAdVisible.value = true
     }
   }
 

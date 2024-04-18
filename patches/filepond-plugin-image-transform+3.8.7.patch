@@ -1,0 +1,35 @@
+diff --git a/node_modules/filepond-plugin-image-transform/dist/filepond-plugin-image-transform.esm.js b/node_modules/filepond-plugin-image-transform/dist/filepond-plugin-image-transform.esm.js
+index e9c59b6..a9074a4 100644
+--- a/node_modules/filepond-plugin-image-transform/dist/filepond-plugin-image-transform.esm.js
++++ b/node_modules/filepond-plugin-image-transform/dist/filepond-plugin-image-transform.esm.js
+@@ -1984,17 +1984,22 @@ const plugin = ({ addFilter, utils }) => {
+ 
+                             transformImage(file, instructions, options)
+                                 .then(blob => {
+-                                    // set file object
+-                                    const out = getFileFromBlob(
+-                                        blob,
+-                                        // rename the original filename to match the mime type of the output image
+-                                        renameFileToMatchMimeType(
++                                    if (blob) {
++                                        // set file object
++                                        const out = getFileFromBlob(
++                                          blob,
++                                          // rename the original filename to match the mime type of the output image
++                                          renameFileToMatchMimeType(
+                                             file.name,
+                                             getValidOutputMimeType(blob.type)
+-                                        )
+-                                    );
++                                          )
++                                        );
+ 
+-                                    resolve(out);
++                                        resolve(out);
++                                    } else {
++                                        console.log('Transform failed, use original')
++                                        resolve(file)
++                                    }
+                                 })
+                                 .catch(reject);
+                         });

@@ -138,8 +138,8 @@ export default {
       let ret = []
 
       if (props.msgid) {
-        if (message && message.by) {
-          ret = [message.by]
+        if (message?.value?.by) {
+          ret = [message.value.by]
         }
 
         if (props.takenBy) {

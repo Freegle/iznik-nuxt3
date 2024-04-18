@@ -67,6 +67,12 @@ const CONFIG = {
             placementId: '32336192',
           },
         },
+        {
+          bidder: 'gourmetads',
+          params: {
+            placementId: '32293691',
+          },
+        },
       ],
     },
     {
@@ -88,6 +94,12 @@ const CONFIG = {
           bidder: 'appnexus',
           params: {
             placementId: '32336193',
+          },
+        },
+        {
+          bidder: 'gourmetads',
+          params: {
+            placementId: '32293692',
           },
         },
       ],
@@ -113,6 +125,12 @@ const CONFIG = {
             placementId: '32336187',
           },
         },
+        {
+          bidder: 'gourmetads',
+          params: {
+            placementId: '32293683',
+          },
+        },
       ],
     },
     {
@@ -134,6 +152,12 @@ const CONFIG = {
           bidder: 'appnexus',
           params: {
             placementId: '32336188',
+          },
+        },
+        {
+          bidder: 'gourmetads',
+          params: {
+            placementId: '32293685',
           },
         },
       ],
@@ -159,6 +183,12 @@ const CONFIG = {
             placementId: '32336191',
           },
         },
+        {
+          bidder: 'gourmetads',
+          params: {
+            placementId: '32293689',
+          },
+        },
       ],
     },
     {
@@ -180,6 +210,12 @@ const CONFIG = {
           bidder: 'appnexus',
           params: {
             placementId: '32336198',
+          },
+        },
+        {
+          bidder: 'gourmetads',
+          params: {
+            placementId: '32293701',
           },
         },
       ],
@@ -205,6 +241,12 @@ const CONFIG = {
             placementId: '32336186',
           },
         },
+        {
+          bidder: 'gourmetads',
+          params: {
+            placementId: '32293682',
+          },
+        },
       ],
     },
     {
@@ -226,6 +268,12 @@ const CONFIG = {
           bidder: 'appnexus',
           params: {
             placementId: '32336185',
+          },
+        },
+        {
+          bidder: 'gourmetads',
+          params: {
+            placementId: '32293670',
           },
         },
       ],
@@ -251,6 +299,12 @@ const CONFIG = {
             placementId: '32336179',
           },
         },
+        {
+          bidder: 'gourmetads',
+          params: {
+            placementId: '32293688',
+          },
+        },
       ],
     },
     {
@@ -272,6 +326,12 @@ const CONFIG = {
           bidder: 'appnexus',
           params: {
             placementId: '32336190',
+          },
+        },
+        {
+          bidder: 'gourmetads',
+          params: {
+            placementId: '32293687',
           },
         },
       ],
@@ -297,6 +357,12 @@ const CONFIG = {
             placementId: '32336154',
           },
         },
+        {
+          bidder: 'gourmetads',
+          params: {
+            placementId: '32293654',
+          },
+        },
       ],
     },
     {
@@ -318,6 +384,12 @@ const CONFIG = {
           bidder: 'appnexus',
           params: {
             placementId: '32336180',
+          },
+        },
+        {
+          bidder: 'gourmetads',
+          params: {
+            placementId: '32293693',
           },
         },
       ],
@@ -343,6 +415,12 @@ const CONFIG = {
             placementId: '32336181',
           },
         },
+        {
+          bidder: 'gourmetads',
+          params: {
+            placementId: '32293694',
+          },
+        },
       ],
     },
     {
@@ -364,6 +442,12 @@ const CONFIG = {
           bidder: 'appnexus',
           params: {
             placementId: '32336182',
+          },
+        },
+        {
+          bidder: 'gourmetads',
+          params: {
+            placementId: '32293695',
           },
         },
       ],
@@ -389,6 +473,12 @@ const CONFIG = {
             placementId: '32336183',
           },
         },
+        {
+          bidder: 'gourmetads',
+          params: {
+            placementId: '32293696',
+          },
+        },
       ],
     },
     {
@@ -399,18 +489,23 @@ const CONFIG = {
         },
       },
       bids: [
-        // TODO Waiting on Phil to provide.
-        // {
-        //   bidder: 'pubmatic',
-        //   params: {
-        //     publisherId: '164422',
-        //     adSlot: '5753994',
-        //   },
-        // },
+        {
+          bidder: 'pubmatic',
+          params: {
+            publisherId: '164422',
+            adSlot: '5893878',
+          },
+        },
         {
           bidder: 'appnexus',
           params: {
             placementId: '32426827',
+          },
+        },
+        {
+          bidder: 'gourmetads',
+          params: {
+            placementId: '32293696',
           },
         },
       ],

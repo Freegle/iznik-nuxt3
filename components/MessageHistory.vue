@@ -5,7 +5,7 @@
       :key="'message-' + message.id + '-' + group.id"
       class="text--small"
     >
-      <span :title="group.arrival">{{ timeago(group.arrival) }} on </span>
+      <span :title="group.arrival">{{ timeago(group.arrival, true) }} on </span>
       <nuxt-link
         v-if="group.groupid in groups"
         no-prefetch
@@ -15,15 +15,17 @@
         {{ groups[group.groupid].namedisplay }}
       </nuxt-link>
       &nbsp;
-      <b-button
-        v-if="displayMessageLink"
-        variant="link"
-        :to="'/message/' + message.id"
-        class="text-faded text-decoration-none"
-        size="xs"
-      >
-        #{{ message.id }}
-      </b-button>
+      <client-only>
+        <b-button
+          v-if="displayMessageLink"
+          variant="link"
+          :to="'/message/' + message.id"
+          class="text-faded text-decoration-none"
+          size="xs"
+        >
+          #{{ message.id }}
+        </b-button>
+      </client-only>
       <span v-if="approvedby" class="text-muted small">
         Approved by {{ approvedby }}
       </span>

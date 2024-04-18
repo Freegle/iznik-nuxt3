@@ -15,13 +15,14 @@ export default class MessageAPI extends BaseAPI {
     )
   }
 
-  inbounds(swlat, swlng, nelat, nelng, groupid) {
+  inbounds(swlat, swlng, nelat, nelng, groupid, limit) {
     return this.$getv2('/message/inbounds', {
       swlat,
       swlng,
       nelat,
       nelng,
       groupid,
+      limit,
     })
   }
 
