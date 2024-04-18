@@ -38,7 +38,7 @@ onMounted(async () => {
       link: job.value.url,
     })
 
-    // window.location = job.value.url
+    window.location = job.value.url
   } else {
     invalid.value = true
   }
