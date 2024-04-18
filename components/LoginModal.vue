@@ -427,6 +427,12 @@ export default {
             uid: 'signUpModal',
             variant: 'facebook',
           })
+          if( !this.appleDisabled){
+            this.$api.bandit.shown({
+              uid: 'signUpModal',
+              variant: 'apple',
+            })
+          }
           this.$api.bandit.shown({
             uid: 'signUpModal',
             variant: 'google',
@@ -693,6 +699,12 @@ export default {
       }
     },
     loginAppleApp() {
+      if (this.signUp) {
+        this.$api.bandit.chosen({
+          uid: 'signUpModal',
+          variant: 'apple',
+        })
+      }
       // https://github.com/capacitor-community/apple-sign-in
       this.socialLoginError = null
       this.loginWaitMessage = null

@@ -3,7 +3,13 @@
     <div>
       <b-row class="m-0">
         <b-col cols="12" lg="6" class="p-0" offset-lg="3">
-          <NoticeMessage v-if="invalid">
+          <NoticeMessage v-if="appshown">
+            <p>The job ad should have opened in your browser</p>
+            <b-button to="/jobs" variant="primary" size="lg">
+              View more jobs
+            </b-button>
+          </NoticeMessage>
+          <NoticeMessage v-else-if="invalid">
             <p>Sorry, that job is no longer available.</p>
             <b-button to="/jobs" variant="primary" size="lg">
               View more jobs
@@ -39,6 +45,7 @@ export default {
   },
   data() {
     return {
+      appshown: false,
       invalid: false,
     }
   },
@@ -53,6 +60,7 @@ export default {
       })
 
       window.location = this.job.url
+      this.appshown = true
     } else {
       this.invalid = true
     }
