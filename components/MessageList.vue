@@ -98,7 +98,7 @@ const GroupHeader = defineAsyncComponent(() =>
 const JobsTopBar = defineAsyncComponent(() => import('~/components/JobsTopBar'))
 
 const MIN_TO_SHOW = 10
-const SHOW_AD_EVERY = 10
+const SHOW_AD_EVERY = 5
 
 export default {
   components: {
@@ -424,7 +424,6 @@ export default {
           })
 
           if (ids.length) {
-            console.log('Unseen duplicates', ids)
             this.messageStore.markSeen(ids)
           }
         }

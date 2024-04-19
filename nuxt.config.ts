@@ -307,6 +307,27 @@ export default defineNuxtConfig({
                      // }
                    }
                  });
+                 
+                 // Gourmetads requires schain config.
+                 pbjs.setBidderConfig({
+                  "bidders": ['gourmetads'],   
+                  "config": {
+                   "schain": {
+                     "validation": "relaxed",
+                     "config": {
+                       "ver":"1.0",
+                       "complete": 1,
+                       "nodes": [
+                         {
+                           "asi":"gourmetads.com",
+                           "sid":"16593",
+                           "hp":1
+                         }
+                       ]
+                     }
+                   }
+                 }
+                });
               });  
                  
               window.pbjs.que.push(function() {

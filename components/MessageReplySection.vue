@@ -65,6 +65,9 @@
             name="collect"
             :rules="validateCollect"
             class="border border-success w-100"
+            as="textarea"
+            rows="2"
+            max-rows="2"
           />
         </b-form-group>
         <ErrorMessage name="collect" class="text-danger font-weight-bold" />

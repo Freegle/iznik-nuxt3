@@ -1,61 +1,46 @@
 <template>
   <client-only>
-    <div>
-      <b-row class="m-0">
-        <b-col cols="12" lg="6" class="p-0" offset-lg="3">
-          <NoticeMessage v-if="invalid">
-            <p>Sorry, that job is no longer available.</p>
-            <b-button to="/jobs" variant="primary" size="lg">
-              View more jobs
-            </b-button>
-          </NoticeMessage>
-          <div v-else class="d-flex justify-content-around">
-            <b-img lazy src="/loader.gif" alt="Loading" width="100px" />
-          </div>
-        </b-col>
-      </b-row>
-    </div>
+    <b-row class="m-0 mt-4">
+      <b-col cols="12" lg="6" class="p-0 mt-4" offset-lg="3">
+        <NoticeMessage v-if="invalid" class="mt-4">
+          <p>Sorry, that job is no longer available.</p>
+          <b-button to="/jobs" variant="primary" size="lg">
+            View more jobs
+          </b-button>
+        </NoticeMessage>
+        <div v-else class="d-flex justify-content-around">
+          <b-img lazy src="/loader.gif" alt="Loading" width="100px" />
+        </div>
+      </b-col>
+    </b-row>
   </client-only>
 </template>
-<script>
+<script setup>
 import { useRoute } from 'vue-router'
-import { useJobStore } from '../../stores/job'
+import { useJobStore } from '~/stores/job'
 import NoticeMessage from '~/components/NoticeMessage'
 
-export default {
-  components: { NoticeMessage },
-  async setup(s) {
-    const jobStore = useJobStore()
-    const route = useRoute()
-    const id = parseInt(route.params.id)
+definePageMeta({
+  layout: 'empty',
+})
 
-    const job = await jobStore.fetchOne(id)
+const jobStore = useJobStore()
+const route = useRoute()
+const id = ref(parseInt(route.params.id))
+const invalid = ref(false)
 
-    return {
-      jobStore,
-      id,
-      job,
-    }
-  },
-  data() {
-    return {
-      invalid: false,
-    }
-  },
-  created() {
-    this.id = parseInt(this.$route.params.id) || null
-  },
-  async mounted() {
-    // Log the view and redirect to the job link.
-    if (this.id && this.job?.id === this.id) {
-      await this.jobStore.log({
-        link: this.job.url,
-      })
+const job = ref(await jobStore.fetchOne(id.value))
 
-      window.location = this.job.url
-    } else {
-      this.invalid = true
-    }
-  },
-}
+onMounted(async () => {
+  // Log the view and redirect to the job link.
+  if (id.value && job.value?.id === id.value) {
+    await jobStore.log({
+      link: job.value.url,
+    })
+
+    window.location = job.value.url
+  } else {
+    invalid.value = true
+  }
+})
 </script>
