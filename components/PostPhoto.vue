@@ -57,7 +57,7 @@ export default {
   components: { ConfirmModal },
   props: {
     id: {
-      type: Number,
+      type: [Number, String],
       required: true,
     },
     path: {
