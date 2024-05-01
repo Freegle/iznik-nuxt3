@@ -90,16 +90,19 @@ function refreshAd() {
           timeout: PREBID_TIMEOUT,
           adUnitCodes: [props.adUnitPath],
           bidsBackHandler: function (bids, timedOut, auctionId) {
+            const runtimeConfig = useRuntimeConfig()
+            const api = Api(runtimeConfig)
+
             if (timedOut) {
               Sentry.captureMessage(
                 'Prebid auction timed out' + props.adUnitPath
               )
-            }
 
-            const runtimeConfig = useRuntimeConfig()
-            const api = Api(runtimeConfig)
-
-            if (bids?.length) {
+              api.bandit.chosen({
+                uid: 'prebid',
+                variant: 'timeout',
+              })
+            } else if (bids?.length) {
               console.log('Got bids back', bids, timedOut, auctionId)
 
               api.bandit.chosen({
