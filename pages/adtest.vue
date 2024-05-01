@@ -32,8 +32,23 @@
           <p>
             To debug this page, you can add ?pbjs_debug=true&pubmaticTest=true
             to the URL. This will produce output from prebid in the Developer
-            Console.
+            Console, and will force Pubmatic to win the sticky footer ad auction
+            showing a test ad.
           </p>
+          <p>
+            You should also see the AppNexus test ad here - this is triggered
+            using a test placement id.
+          </p>
+          <ExternalDa
+            ad-unit-path="/22794232631/appnexus_test"
+            :dimensions="[
+              [600, 500],
+              [300, 600],
+            ]"
+            div-id="div-gpt-ad-appnexus-test-0"
+            class="mt-2"
+          />
+          <p>(AppNexus should appear above)</p>
         </b-col>
         <b-col cols="0" lg="3" class="p-0 pl-1">
           <div class="d-flex justify-content-end">
