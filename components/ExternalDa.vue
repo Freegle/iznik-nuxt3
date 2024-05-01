@@ -88,7 +88,12 @@ function refreshAd() {
           timeout: PREBID_TIMEOUT,
           adUnitCodes: [props.adUnitPath],
           bidsBackHandler: function (bids, timedOut, auctionId) {
-            console.log('Got bids back', bids, timedOut, auctionId)
+            if (bids?.length) {
+              console.log('Got bids back', bids, timedOut, auctionId)
+            } else {
+              console.log('Got no bids back', bids, timedOut, auctionId)
+            }
+
             window.pbjs.setTargetingForGPTAsync([props.adUnitPath])
 
             if (slot) {
