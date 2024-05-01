@@ -191,7 +191,7 @@
         v-else
         class="w-100"
         @keyup.enter.exact.prevent
-        @keydown.enter.exact="sendReply"
+        @keydown.enter.exact.prevent="sendReply"
       >
         <OurAtTa
           ref="at"
