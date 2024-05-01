@@ -262,6 +262,7 @@ export default {
           availableinitially: this.availablenow,
         }
 
+        this.$emit('hidden')
         this.hide()
         await this.messageStore.patch(params)
       }

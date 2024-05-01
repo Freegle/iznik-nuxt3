@@ -111,9 +111,13 @@
     </template>
     <template #footer>
       <b-button variant="white" @click="hide"> Cancel </b-button>
-      <b-button variant="primary" :disabled="buttonDisabled" @click="promise">
-        Promise
-      </b-button>
+      <SpinButton
+        variant="primary"
+        icon-name="handshake"
+        label="Promise"
+        disabled="buttonDisabled"
+        @handle="promise"
+      />
     </template>
   </b-modal>
 </template>
@@ -121,6 +125,7 @@
 import dayjs from 'dayjs'
 import { useTrystStore } from '../stores/tryst'
 import { useMessageStore } from '../stores/message'
+import SpinButton from './SpinButton'
 import { useModal } from '~/composables/useModal'
 
 const NoticeMessage = defineAsyncComponent(() =>
@@ -130,8 +135,8 @@ const NoticeMessage = defineAsyncComponent(() =>
 export default {
   components: {
     NoticeMessage,
+    SpinButton,
   },
-
   props: {
     messages: {
       validator: (prop) => typeof prop === 'object' || prop === null,
@@ -300,7 +305,7 @@ export default {
     },
   },
   methods: {
-    async promise() {
+    async promise(callback) {
       if (this.currentlySelected > 0) {
         await this.messageStore.promise(this.message, this.currentlySelected)
 
@@ -339,6 +344,8 @@ export default {
 
         this.hide()
       }
+
+      callback()
     },
     async onShow(date) {
       this.message = this.selectedMessage

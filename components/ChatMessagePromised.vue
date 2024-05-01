@@ -102,17 +102,18 @@
               @error="brokenImage"
             />
           </nuxt-link>
-          <ProfileImage
-            :image="me.profile.path"
-            class="mr-1 mb-1 mt-1 inline"
-            is-thumbnail
-            size="sm"
-          />
-          <span class="small black"
-            >You promised <strong>{{ otheruser.displayname }}</strong
-            >:</span
-          >
-          <br />
+          <div class="d-flex justify-content-start align-items-center">
+            <ProfileImage
+              :image="me.profile.path"
+              class="mr-1 inline"
+              is-thumbnail
+              size="sm"
+            />
+            <div class="small black">
+              You promised <strong>{{ otheruser.displayname }}</strong
+              >:
+            </div>
+          </div>
           <nuxt-link
             no-prefetch
             :to="

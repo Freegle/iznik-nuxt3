@@ -129,7 +129,7 @@
           <div
             v-else
             @keyup.enter.exact.prevent
-            @keydown.enter.exact="sendComment"
+            @keydown.enter.exact.prevent="sendComment"
           >
             <OurAtTa
               v-if="!newsfeed.deleted"
