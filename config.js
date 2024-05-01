@@ -519,13 +519,11 @@ const CONFIG = {
         {
           bidder: 'appnexus',
           params: {
-            placementId: '13144370',
+            placementId: 13144370,
           },
         },
       ],
     },
-
-    13144370,
   ],
 }
 
