@@ -26,6 +26,7 @@
 import * as Sentry from '@sentry/browser'
 import { ref, computed, onBeforeUnmount } from '#imports'
 import { useMiscStore } from '~/stores/misc'
+import Api from '~/api'
 
 const miscStore = useMiscStore()
 const unmounted = ref(false)
@@ -95,10 +96,23 @@ function refreshAd() {
               )
             }
 
+            const runtimeConfig = useRuntimeConfig()
+            const api = Api(runtimeConfig)
+
             if (bids?.length) {
               console.log('Got bids back', bids, timedOut, auctionId)
+
+              api.bandit.chosen({
+                uid: 'prebid',
+                variant: 'bids',
+              })
             } else {
               console.log('Got no bids back', bids, timedOut, auctionId)
+
+              api.bandit.chosen({
+                uid: 'prebid',
+                variant: 'nobids',
+              })
             }
 
             window.pbjs.setTargetingForGPTAsync([props.adUnitPath])
