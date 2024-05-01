@@ -23,7 +23,6 @@
   </client-only>
 </template>
 <script setup>
-import * as Sentry from '@sentry/browser'
 import { ref, computed, onBeforeUnmount } from '#imports'
 import { useMiscStore } from '~/stores/misc'
 import Api from '~/api'
@@ -94,10 +93,6 @@ function refreshAd() {
             const api = Api(runtimeConfig)
 
             if (timedOut) {
-              Sentry.captureMessage(
-                'Prebid auction timed out' + props.adUnitPath
-              )
-
               api.bandit.chosen({
                 uid: 'prebid',
                 variant: 'timeout',

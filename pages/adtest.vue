@@ -48,7 +48,10 @@
             div-id="div-gpt-ad-appnexus-test-0"
             class="mt-2"
           />
-          <p>(AppNexus should appear above)</p>
+          <p>
+            AppNexus test ad appear around here. It is a bit flaky so may only
+            appear after 30s or so.
+          </p>
         </b-col>
         <b-col cols="0" lg="3" class="p-0 pl-1">
           <div class="d-flex justify-content-end">
