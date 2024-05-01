@@ -23,6 +23,7 @@
   </client-only>
 </template>
 <script setup>
+import * as Sentry from '@sentry/browser'
 import { ref, computed, onBeforeUnmount } from '#imports'
 import { useMiscStore } from '~/stores/misc'
 
@@ -88,6 +89,12 @@ function refreshAd() {
           timeout: PREBID_TIMEOUT,
           adUnitCodes: [props.adUnitPath],
           bidsBackHandler: function (bids, timedOut, auctionId) {
+            if (timedOut) {
+              Sentry.captureMessage(
+                'Prebid auction timed out' + props.adUnitPath
+              )
+            }
+
             if (bids?.length) {
               console.log('Got bids back', bids, timedOut, auctionId)
             } else {
