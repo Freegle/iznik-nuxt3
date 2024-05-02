@@ -115,7 +115,7 @@
         variant="primary"
         icon-name="handshake"
         label="Promise"
-        disabled="buttonDisabled"
+        :disabled="buttonDisabled"
         @handle="promise"
       />
     </template>
