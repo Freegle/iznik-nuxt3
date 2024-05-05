@@ -182,13 +182,6 @@ export default {
       console.log('Transformed', file?.fileSize, output?.size)
     },
     async process(fieldName, file, metadata, load, error, progress, abort) {
-      if( file.size>3*1024*1024){
-        console.log("PHOTO TOO BIG")
-        document.getElementById('camera-msg').innerHTML = "Photo not resized to be less than 3MB. Please try another one or a smaller one."
-        alert("Photo not resized to be less than 3MB. Please try another one or a smaller one.")
-        abort()
-        return
-      }
       this.composeStore.uploading = true
 
       const data = new FormData()
@@ -224,7 +217,7 @@ export default {
 
       let resized = blob
 
-      if (blob) {
+      if (blob && (blob.size>512*1024)) {
         // We resize ourselves, because Filepond isn't always doing it and its error handling is poor.
         try {
           console.log('Resize', blob)
@@ -267,15 +260,22 @@ export default {
             canvas.toBlob((resized) => {
               console.log('Resized', resized)
               resolve(resized)
-            }, 'image/png')
+            }, 'image/jpeg')
           })
 
           resized = await p
-          console.log('Resized', blob?.size, blob?.type)
+          console.log('Resized', blob?.size, blob?.type, 'to', resized?.size, resized?.type)
         } catch (e) {
           // We failed to resize - we'll upload the original.
           console.log('Resize failed', e)
         }
+      }
+      if( resized.size>3*1024*1024){
+        console.log("PHOTO TOO BIG")
+        document.getElementById('camera-msg').innerHTML = "Photo not resized to be less than 3MB. Please try another one or a smaller one."
+        alert("Photo not resized to be less than 3MB. Please try another one or a smaller one.")
+        abort()
+        return
       }
 
       if (resized) {
