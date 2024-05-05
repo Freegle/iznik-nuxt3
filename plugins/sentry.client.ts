@@ -114,7 +114,8 @@ export default defineNuxtPlugin((nuxtApp) => {
           return null
         } else if (
           originalExceptionStack?.includes('/pageFold/') ||
-          originalExceptionStack?.includes('/strikeforce/')
+          originalExceptionStack?.includes('/strikeforce/') ||
+          originalExceptionStack?.includes('/ads/js/')
         ) {
           // This is a flaky ad library
           console.log('Pagefold, ads - suppress exception')

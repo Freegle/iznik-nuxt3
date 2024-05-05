@@ -47,7 +47,7 @@
     </div>
     <ProfileModal
       v-if="showProfileModal"
-      :id="otheruser.id"
+      :id="otheruser?.id"
       close-on-message
       @hidden="showProfileModal = false"
     />

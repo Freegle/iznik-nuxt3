@@ -171,7 +171,7 @@ export default {
       callback()
     },
     async saveComments(callback) {
-      await this.noticeboardStore.comments(this.id, this.comments)
+      await this.noticeboardStore.saveComments(this.id, this.comments)
       callback()
     },
   },

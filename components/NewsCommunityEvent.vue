@@ -148,10 +148,13 @@ export default {
       if (dates) {
         for (let i = 0; i < dates.length; i++) {
           const date = dates[i]
-          if (dayjs().diff(date.end) < 0 || dayjs().isSame(date.end, 'day')) {
+          const start = date.start + ' ' + date.starttime
+          const end = date.end + ' ' + date.endtime
+          if (dayjs(start).diff(end) < 0 || dayjs(start).isSame(end, 'day')) {
             if (count === 0) {
-              const startm = dayjs(date.start)
-              let endm = dayjs(date.end)
+              console.log('Date', date)
+              const startm = dayjs(start)
+              let endm = dayjs(end)
               endm = endm.isSame(startm, 'day')
                 ? endm.format('HH:mm')
                 : endm.format('ddd, Do MMM HH:mm')
