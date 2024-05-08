@@ -15,12 +15,6 @@
         >
           <div :id="divId" />
         </div>
-        <p
-          v-if="isVisible && adShown"
-          class="text-center textsize d-none d-md-block"
-        >
-          Advertisement. These help Freegle keep going.
-        </p>
         <!--    <div class="bg-white">-->
         <!--      Path {{ adUnitPath }} id {{ divId }} dimensions {{ dimensions }}-->
         <!--    </div>-->
@@ -31,6 +25,7 @@
 <script setup>
 import { ref, computed, onBeforeUnmount } from '#imports'
 import { useMiscStore } from '~/stores/misc'
+import Api from '~/api'
 
 const miscStore = useMiscStore()
 const unmounted = ref(false)
@@ -73,7 +68,7 @@ let slot = null
 
 let refreshTimer = null
 let visibleTimer = null
-const PREBID_TIMEOUT = 1000
+const PREBID_TIMEOUT = 2000
 const AD_REFRESH_TIMEOUT = 31000
 
 function refreshAd() {
@@ -94,7 +89,30 @@ function refreshAd() {
           timeout: PREBID_TIMEOUT,
           adUnitCodes: [props.adUnitPath],
           bidsBackHandler: function (bids, timedOut, auctionId) {
-            console.log('Got bids back', bids, timedOut, auctionId)
+            const runtimeConfig = useRuntimeConfig()
+            const api = Api(runtimeConfig)
+
+            if (timedOut) {
+              api.bandit.chosen({
+                uid: 'prebid',
+                variant: 'timeout',
+              })
+            } else if (bids?.length) {
+              console.log('Got bids back', bids, timedOut, auctionId)
+
+              api.bandit.chosen({
+                uid: 'prebid',
+                variant: 'bids',
+              })
+            } else {
+              console.log('Got no bids back', bids, timedOut, auctionId)
+
+              api.bandit.chosen({
+                uid: 'prebid',
+                variant: 'nobids',
+              })
+            }
+
             window.pbjs.setTargetingForGPTAsync([props.adUnitPath])
 
             if (slot) {

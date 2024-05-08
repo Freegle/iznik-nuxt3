@@ -1,5 +1,5 @@
-import { VitePWA } from 'vite-plugin-pwa'
 import eslintPlugin from 'vite-plugin-eslint'
+import { VitePWA } from 'vite-plugin-pwa'
 import legacy from '@vitejs/plugin-legacy'
 import { sentryVitePlugin } from '@sentry/vite-plugin'
 import config from './config'
@@ -306,6 +306,27 @@ export default defineNuxtConfig({
                      // }
                    }
                  });
+                 
+                 // Gourmetads requires schain config.
+                 pbjs.setBidderConfig({
+                  "bidders": ['gourmetads'],   
+                  "config": {
+                   "schain": {
+                     "validation": "relaxed",
+                     "config": {
+                       "ver":"1.0",
+                       "complete": 1,
+                       "nodes": [
+                         {
+                           "asi":"gourmetads.com",
+                           "sid":"16593",
+                           "hp":1
+                         }
+                       ]
+                     }
+                   }
+                 }
+                });
               });  
                  
               window.pbjs.que.push(function() {
@@ -401,7 +422,6 @@ export default defineNuxtConfig({
                   // to the cookie banner.
                   if (window.__tcfapi) {
                     window.__tcfapi('getTCData', 2, (tcData, success) => {
-                      console.log('TC data', JSON.stringify(tcData), success)
                       if (success && tcData && tcData.tcString) {
                         console.log('TC data loaded and TC String set');
                         postCookieYes();

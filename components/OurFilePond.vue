@@ -8,8 +8,6 @@
       accepted-file-types="image/jpeg, image/png, image/gif, image/jpg, image/heic"
       :file-validate-type-detect-type="validateType"
       :files="myFiles"
-      image-resize-target-width="800"
-      image-resize-target-height="800"
       image-validate-size-max-width="400"
       image-validate-size-max-height="400"
       image-crop-aspect-ratio="1"
@@ -129,32 +127,103 @@ export default {
 
       const data = new FormData()
       const fn = file.name.toLowerCase()
+      let blob = null
 
       if (fn.includes('.heic')) {
         // If we have an HEIC file, then the server can't cope with it as it will fail imagecreatefromstring, so
         // convert it to a PNG file on the client before upload.  We have to restrict the quality to keep the cconversion
         // time reasonable.
-        //
-        const blob = file.slice(0, file.size, 'image/heic')
-        const png = await window.heic2any({
-          blob,
-          toType: 'image/jpeg',
-          quality: 0.92,
-        })
-        data.append('photo', png, 'photo')
+        console.log('Need to convert HEIC')
+        try {
+          blob = file.slice(0, file.size, 'image/heic')
+
+          const png = await window.heic2any({
+            blob,
+            toType: 'image/jpeg',
+            quality: 0.92,
+          })
+
+          // Now we have png which is a Blob.
+          console.log('Converted HEIC to PNG', png.size, png.type, png)
+          blob = png
+        } catch (e) {
+          // We couldn't convert to PNG. We can't use it.
+          console.log('Failed to convert HEIC to PNG', e)
+          this.$emit('heicerror')
+          blob = null
+        }
       } else {
-        data.append('photo', file, 'photo')
+        blob = file
       }
 
-      data.append(this.imgflag, true)
-      data.append('imgtype', this.imgtype)
-      data.append('ocr', this.ocr)
-      data.append('identify', this.identify)
+      let resized = blob
 
-      if (this.msgid) {
-        data.append('msgid', this.msgid)
-      } else if (this.groupid) {
-        data.append('groupid', this.groupid)
+      if (blob) {
+        // We resize ourselves, because Filepond isn't always doing it and its error handling is poor.
+        try {
+          console.log('Resize', blob)
+          const img = new Image()
+          console.log('Convert blob to url')
+          const urlCreator = window.URL || window.webkitURL
+          console.log('Create img')
+          img.src = urlCreator.createObjectURL(blob)
+
+          await img.decode()
+
+          console.log('Image loaded, resize')
+          const canvas = document.createElement('canvas')
+          const maxWidth = 800
+          const maxHeight = 800
+          let width = img.width
+          let height = img.height
+
+          // Calculate the new dimensions, maintaining the aspect ratio
+          if (width > height) {
+            if (width > maxWidth) {
+              height *= maxWidth / width
+              width = maxWidth
+            }
+          } else if (height > maxHeight) {
+            width *= maxHeight / height
+            height = maxHeight
+          }
+
+          // Set the canvas dimensions to the new dimensions
+          canvas.width = width
+          canvas.height = height
+
+          // Draw the resized image on the canvas
+          const ctx = canvas.getContext('2d')
+          ctx.drawImage(img, 0, 0, width, height)
+
+          // Get the resized image back as a Blob.
+          const p = new Promise((resolve, reject) => {
+            canvas.toBlob((resized) => {
+              console.log('Resized', resized)
+              resolve(resized)
+            }, 'image/png')
+          })
+
+          resized = await p
+          console.log('Resized', blob?.size, blob?.type)
+        } catch (e) {
+          // We failed to resize - we'll upload the original.
+          console.log('Resize failed', e)
+        }
+      }
+
+      if (resized) {
+        data.append('photo', resized, 'photo')
+        data.append(this.imgflag, true)
+        data.append('imgtype', this.imgtype)
+        data.append('ocr', this.ocr)
+        data.append('identify', this.identify)
+
+        if (this.msgid) {
+          data.append('msgid', this.msgid)
+        } else if (this.groupid) {
+          data.append('groupid', this.groupid)
+        }
       }
 
       try {

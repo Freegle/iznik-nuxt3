@@ -1,338 +1,228 @@
 <template>
-  <div v-if="!hide && message?.id">
-    <div v-if="showOld || !message.outcomes || !message.outcomes.length">
-      <b-card
-        no-body
-        class="mb-1 bnuorder"
-        :border-variant="expanded ? 'primary' : 'success'"
-      >
-        <b-card-header header-tag="header" class="p-1" role="tab">
-          <div
-            :v-b-toggle="'mypost-' + message.id"
-            class="bg-white p-2 clickme"
-            @click="toggle"
-          >
-            <div class="d-flex justify-content-between w-100">
-              <div class="d-flex flex-column w-100">
-                <h3 class="text-wrap flex-shrink-2 mr-2 mb-0">
-                  <span v-if="message.isdraft">
-                    {{ message.type.toUpperCase() }}: {{ message.subject }} ({{
-                      message.area.name
-                    }}
-                    {{ message.postcode.name }})
-                  </span>
-                  <span v-else>
-                    {{ message.subject }}
-                  </span>
-                  <b-badge
-                    v-if="message.availableinitially > 1"
-                    variant="info"
-                    class="ml-1"
-                  >
-                    {{ message.availablenow ? message.availablenow : '0' }} left
-                  </b-badge>
-                  <span v-if="rejected" class="text-danger">
-                    <v-icon icon="exclamation-triangle" scale="2" />
-                  </span>
-                </h3>
-                <div
-                  v-for="group in message.groups"
-                  :key="'message-' + message.id + '-' + group.groupid"
-                  class="small text-muted text-wrap"
-                >
-                  {{ timeago(group.arrival) }} on
-                  <nuxt-link
-                    v-if="group.groupid in groups"
-                    no-prefetch
-                    :to="'/explore/' + groups[group.groupid].exploreLink"
-                    :title="
-                      'Click to view ' + groups[group.groupid].namedisplay
-                    "
-                  >
-                    {{ groups[group.groupid].namedisplay }}
-                  </nuxt-link>
-                  &nbsp;
-                  <b-button
-                    variant="link"
-                    :to="'/message/' + message.id"
-                    size="xs"
-                    class="text-faded decornone"
-                  >
-                    #{{ message.id }}
-                  </b-button>
+  <div v-observe-visibility="visibilityChanged">
+    <div v-if="visible && !hide && message?.id">
+      <div v-if="showOld || !message.outcomes || !message.outcomes.length">
+        <b-card
+          no-body
+          class="mb-1 bnuorder"
+          :border-variant="expanded ? 'success' : 'secondary'"
+        >
+          <b-card-header header-tag="header" class="p-0" role="tab">
+            <div
+              :v-b-toggle="'mypost-' + message.id"
+              class="bg-white clickme"
+              @click="toggle"
+            >
+              <notice-message v-if="rejected" class="mb-3" variant="warning">
+                <v-icon icon="exclamation-triangle" scale="2" /> This post has
+                not been accepted and is not public yet.
+              </notice-message>
+              <MessageSummary :id="message.id" />
+              <div
+                v-if="
+                  message.outcomes?.length === 0 && message.promisecount > 0
+                "
+              >
+                <div class="text-info">
+                  <MyMessagePromisedTo
+                    v-for="p in promisedTo"
+                    :id="message.id"
+                    :key="'promised-' + p.id"
+                    class="mt-1 border border-info p-2"
+                    :promise="p"
+                    :replyusers="replyusers"
+                  />
                 </div>
               </div>
-              <span>
-                <b-button v-if="!expand" class="ml-1" variant="secondary">
-                  <v-icon v-if="!expanded" icon="caret-down" />
-                  <v-icon v-else icon="caret-up" />
-                  <template #button-content />
-                </b-button>
-              </span>
-            </div>
-            <div class="d-flex flex-wrap">
-              <div v-if="message.replycount > 0" class="mr-2 mt-1">
-                <b-badge variant="info">
-                  <v-icon icon="user" class="fa-fw" />
-                  {{
-                    message.replycount === 1
-                      ? '1 reply'
-                      : message.replycount + ' replies'
-                  }}
-                </b-badge>
-              </div>
-              <div v-if="message.outcomes?.length > 0" class="mr-2 mt-1">
-                <b-badge v-if="taken" variant="success">
-                  <v-icon icon="check" class="fa-fw" /> Taken
-                </b-badge>
-                <b-badge v-if="received" variant="success">
-                  <v-icon icon="check" class="fa-fw" /> Received
-                </b-badge>
-                <b-badge v-if="withdrawn" variant="secondary">
-                  <v-icon icon="check" class="fa-fw" /> Withdrawn
-                </b-badge>
-              </div>
-              <div v-if="unseen > 0" class="mr-2">
-                <b-badge variant="danger">
-                  <v-icon icon="comments" class="fa-fw" /> {{ unseen }} unread
-                </b-badge>
-              </div>
-            </div>
-            <div
-              v-if="message.outcomes?.length === 0 && message.promisecount > 0"
-            >
-              <div class="text-info">
-                <MyMessagePromisedTo
-                  v-for="p in promisedTo"
-                  :id="message.id"
-                  :key="'promised-' + p.id"
-                  class="mt-1 border border-info p-2"
-                  :promise="p"
-                  :replyusers="replyusers"
-                />
-              </div>
-            </div>
-            <hr class="" />
-            <div class="d-flex justify-content-between flex-wrap mt-1 neartop">
-              <b-button
-                v-if="rejected && message.location && message.item"
-                variant="warning"
-                class="mr-2 mb-1"
-                @click="repost"
-              >
-                <v-icon class="d-none d-sm-inline" icon="pen" /> Edit and Resend
-              </b-button>
-              <b-button
-                v-if="rejected && !withdrawn"
-                variant="secondary"
-                class="mr-2 mb-1"
-                @click="outcome('Withdrawn', $event)"
-              >
-                <v-icon class="d-none d-sm-inline" icon="trash-alt" /> Withdraw
-              </b-button>
-              <b-button
-                v-if="!rejected && message.type === 'Offer' && !taken"
-                variant="primary"
-                class="mr-2 mb-1"
-                @click="outcome('Taken', $event)"
-              >
-                <v-icon class="d-none d-sm-inline" icon="check" /> Mark as TAKEN
-              </b-button>
-              <b-button
-                v-if="!rejected && message.type === 'Wanted' && !received"
-                variant="primary"
-                class="mr-2 mb-1"
-                @click="outcome('Received', $event)"
-              >
-                <v-icon class="d-none d-sm-inline" icon="check" /> Mark as
-                RECEIVED
-              </b-button>
-              <b-button
-                v-if="!rejected"
-                variant="secondary"
-                class="mr-2 mb-1"
-                @click="edit"
-              >
-                <v-icon class="d-none d-sm-inline" icon="pen" /> Edit
-              </b-button>
-              <b-button
-                v-if="!rejected && !taken && !received && !withdrawn"
-                variant="secondary"
-                class="mr-2 mb-1"
-                @click="outcome('Withdrawn', $event)"
-              >
-                <v-icon class="d-none d-sm-inline" icon="trash-alt" /> Withdraw
-              </b-button>
-              <b-button
-                v-if="
-                  !rejected &&
-                  message.canrepost &&
-                  message.location &&
-                  message.item
-                "
-                variant="secondary"
-                class="mr-2 mb-1"
-                @click="repost"
-              >
-                <v-icon class="d-none d-sm-inline" icon="sync" /> Repost
-              </b-button>
               <div
-                v-else-if="
-                  !rejected &&
-                  message.repostat &&
-                  message.location &&
-                  message.item
-                "
-                class="position-relative"
+                class="d-flex justify-content-between flex-wrap mt-2 ps-2 neartop"
               >
                 <b-button
+                  v-if="rejected && message.location && message.item"
+                  variant="warning"
+                  class="mr-2 mb-1"
+                  @click="repost"
+                >
+                  <v-icon class="d-none d-sm-inline" icon="pen" /> Edit and
+                  Resend
+                </b-button>
+                <b-button
+                  v-if="rejected && !withdrawn"
                   variant="secondary"
                   class="mr-2 mb-1"
-                  title="You will be able to repost this soon"
-                  @click.stop="repostWhenUnavailable"
+                  @click="outcome('Withdrawn', $event)"
+                >
+                  <v-icon class="d-none d-sm-inline" icon="trash-alt" />
+                  Withdraw
+                </b-button>
+                <b-button
+                  v-if="!rejected && message.type === 'Offer' && !taken"
+                  variant="primary"
+                  class="mr-2 mb-1"
+                  @click="outcome('Taken', $event)"
+                >
+                  <v-icon class="d-none d-sm-inline" icon="check" /> Mark as
+                  TAKEN
+                </b-button>
+                <b-button
+                  v-if="!rejected && message.type === 'Wanted' && !received"
+                  variant="primary"
+                  class="mr-2 mb-1"
+                  @click="outcome('Received', $event)"
+                >
+                  <v-icon class="d-none d-sm-inline" icon="check" /> Mark as
+                  RECEIVED
+                </b-button>
+                <b-button
+                  v-if="!rejected"
+                  variant="secondary"
+                  class="mr-2 mb-1"
+                  @click="edit"
+                >
+                  <v-icon class="d-none d-sm-inline" icon="pen" /> Edit
+                </b-button>
+                <b-button
+                  v-if="!rejected && !taken && !received && !withdrawn"
+                  variant="secondary"
+                  class="mr-2 mb-1"
+                  @click="outcome('Withdrawn', $event)"
+                >
+                  <v-icon class="d-none d-sm-inline" icon="trash-alt" />
+                  Withdraw
+                </b-button>
+                <b-button
+                  v-if="
+                    !rejected &&
+                    message.canrepost &&
+                    message.location &&
+                    message.item
+                  "
+                  variant="secondary"
+                  class="mr-2 mb-1"
+                  @click="repost"
                 >
                   <v-icon class="d-none d-sm-inline" icon="sync" /> Repost
-                  <span class="small">{{ timeago(message.repostat) }}</span>
                 </b-button>
-                <p
-                  class="invalid-feedback position-absolute bg-white text-center"
-                  :class="triedToRepost ? 'd-block' : 'd-none'"
+                <div
+                  v-else-if="
+                    !rejected &&
+                    message.repostat &&
+                    message.location &&
+                    message.item
+                  "
+                  class="position-relative"
                 >
-                  You can't repost until {{ datetimeshort(message.repostat) }}
-                </p>
-              </div>
-              <b-button
-                v-if="!rejected"
-                variant="secondary"
-                title="Share"
-                class="mr-2 mb-1"
-                @click="share"
-              >
-                <v-icon class="d-none d-sm-inline" icon="share-alt" /> Share
-              </b-button>
-            </div>
-          </div>
-        </b-card-header>
-        <b-collapse
-          :id="'mypost-' + message.id"
-          v-model="expanded"
-          role="tabpanel"
-          @show="expanded = true"
-          @hidden="expanded = false"
-        >
-          <div v-if="expanded">
-            <b-card-body class="p-2">
-              <b-card-text>
-                <notice-message v-if="rejected" class="mb-3" variant="warning">
-                  <v-icon icon="exclamation-triangle" scale="2" /> This post has
-                  not been accepted and is not public yet.
-                </notice-message>
-                <div class="d-flex justify-content-between">
-                  <div>
-                    <span class="prewrap">
-                      <read-more
-                        v-if="message?.textbody"
-                        :text="message.textbody"
-                        :max-chars="maxChars"
-                        class="nopara"
-                      />
-                    </span>
-                  </div>
-                  <div>
-                    <div
-                      v-if="!broken && message.attachments?.length > 0"
-                      class="clickme position-relative"
-                      @click="showPhotos"
-                    >
-                      <div class="small">
-                        <b-badge
-                          v-if="message.attachments?.length > 1"
-                          class="photobadge"
-                          variant="primary"
-                        >
-                          {{ message.attachments?.length }}
-                          <v-icon icon="camera" />
-                        </b-badge>
-                      </div>
-                      <b-img
-                        lazy
-                        rounded
-                        thumbnail
-                        class="attachment p-0 square mb-1"
-                        generator-unable-to-provide-required-alt=""
-                        title="Item picture"
-                        :src="message.attachments[0].paththumb"
-                        @error="brokenImage"
-                      />
-                    </div>
-                  </div>
-                </div>
-                <hr />
-                <table
-                  v-if="replies?.length > 0"
-                  class="table table-borderless table-striped mb-0"
-                >
-                  <tbody>
-                    <tr v-for="reply in replies" :key="'reply-' + reply.id">
-                      <MyMessageReply
-                        :reply="reply"
-                        :chats="chats"
-                        :message="message"
-                        :taken="taken"
-                        :received="received"
-                        :withdrawn="withdrawn"
-                        :closest="reply.userid === closestUser"
-                        :best="reply.userid === bestRatedUser"
-                        :quickest="reply.userid === quickestUser"
-                      />
-                    </tr>
-                  </tbody>
-                </table>
-                <p v-else class="text-muted">
-                  No replies yet.
-                  <span v-if="willAutoRepost"
-                    >Will auto-repost {{ timeago(message.canrepostat) }}.</span
+                  <b-button
+                    variant="secondary"
+                    class="mr-2 mb-1"
+                    title="You will be able to repost this soon"
+                    @click.stop="repostWhenUnavailable"
                   >
-                </p>
-              </b-card-text>
-            </b-card-body>
-          </div>
-        </b-collapse>
-      </b-card>
-      <MessagePhotosModal
-        v-if="showMessagePhotosModal && expanded && message.attachments?.length"
+                    <v-icon class="d-none d-sm-inline" icon="sync" /> Repost
+                    <span class="small">{{ timeago(message.repostat) }}</span>
+                  </b-button>
+                  <p
+                    class="invalid-feedback position-absolute bg-white text-center"
+                    :class="triedToRepost ? 'd-block' : 'd-none'"
+                  >
+                    You can't repost until {{ datetimeshort(message.repostat) }}
+                  </p>
+                </div>
+                <b-button
+                  v-if="!rejected"
+                  variant="secondary"
+                  title="Share"
+                  class="mr-2 mb-1"
+                  @click="share"
+                >
+                  <v-icon class="d-none d-sm-inline" icon="share-alt" /> Share
+                </b-button>
+              </div>
+            </div>
+          </b-card-header>
+          <MyMessageReplySummary
+            v-if="!expanded && message.replycount > 0"
+            :id="id"
+            @expand="expanded = true"
+          />
+          <b-collapse
+            :id="'mypost-' + message.id"
+            v-model="expanded"
+            role="tabpanel"
+            @show="expanded = true"
+            @hidden="expanded = false"
+          >
+            <div v-if="expanded">
+              <b-card-body class="p-2">
+                <b-card-text>
+                  <table
+                    v-if="replies?.length > 0"
+                    class="table table-borderless table-striped mb-0"
+                  >
+                    <tbody>
+                      <tr v-for="reply in replies" :key="'reply-' + reply.id">
+                        <MyMessageReply
+                          :reply="reply"
+                          :chats="chats"
+                          :message="message"
+                          :taken="taken"
+                          :received="received"
+                          :withdrawn="withdrawn"
+                          :closest="reply.userid === closestUser"
+                          :best="reply.userid === bestRatedUser"
+                          :quickest="reply.userid === quickestUser"
+                        />
+                      </tr>
+                    </tbody>
+                  </table>
+                  <p v-else class="text-muted">
+                    No replies yet.
+                    <span v-if="willAutoRepost"
+                      >Will auto-repost
+                      {{ timeago(message.canrepostat) }}.</span
+                    >
+                  </p>
+                </b-card-text>
+              </b-card-body>
+            </div>
+          </b-collapse>
+        </b-card>
+        <MessagePhotosModal
+          v-if="
+            showMessagePhotosModal && expanded && message.attachments?.length
+          "
+          :id="message.id"
+          @hidden="showMessagePhotosModal = false"
+        />
+      </div>
+      <OutcomeModal
+        v-if="showOutcomeModal"
+        :id="id"
+        :type="outcomeType"
+        @outcome="hide = true"
+        @hidden="showOutcomeModal = false"
+      />
+      <MessageShareModal
+        v-if="showShareModal"
         :id="message.id"
-        @hidden="showMessagePhotosModal = false"
+        @hidden="showShareModal = false"
+      />
+      <MessageEditModal
+        v-if="showEditModal"
+        :id="id"
+        @hidden="showEditModal = false"
+      />
+      <PromiseModal
+        v-if="showPromiseModal"
+        :messages="[message]"
+        :selected-message="message.id"
+        :users="replyusers"
+        @hidden="showPromiseModal = false"
       />
     </div>
-    <OutcomeModal
-      v-if="showOutcomeModal"
-      :id="id"
-      :type="outcomeType"
-      @outcome="hide = true"
-      @hidden="showOutcomeModal = false"
-    />
-    <MessageShareModal
-      v-if="showShareModal"
-      :id="message.id"
-      @hidden="showShareModal = false"
-    />
-    <MessageEditModal
-      v-if="showEditModal"
-      :id="id"
-      @hidden="showEditModal = false"
-    />
-    <PromiseModal
-      v-if="showPromiseModal"
-      :messages="[message]"
-      :selected-message="message.id"
-      :users="replyusers"
-      @hidden="showPromiseModal = false"
-    />
   </div>
 </template>
 <script>
-import ReadMore from 'vue-read-more3/src/ReadMoreComponent'
 import dayjs from 'dayjs'
 import { useComposeStore } from '../stores/compose'
 import { useMessageStore } from '../stores/message'
@@ -375,9 +265,7 @@ export default {
     MyMessageReply,
     MessageEditModal,
     NoticeMessage,
-    ReadMore,
   },
-
   props: {
     id: {
       type: Number,
@@ -398,7 +286,7 @@ export default {
       default: null,
     },
   },
-  async setup(props) {
+  setup(props) {
     const messageStore = useMessageStore()
     const chatStore = useChatStore()
     const groupStore = useGroupStore()
@@ -406,8 +294,6 @@ export default {
     const trystStore = useTrystStore()
     const composeStore = useComposeStore()
     const locationStore = useLocationStore()
-
-    await messageStore.fetch(props.id)
 
     return {
       messageStore,
@@ -421,6 +307,7 @@ export default {
   },
   data() {
     return {
+      visible: false,
       maxChars: 60,
       expanded: false,
       hide: false,
@@ -458,25 +345,6 @@ export default {
       }
 
       return ret
-    },
-    unseen() {
-      // We want all the chats from replies.  We fetch them in default.vue, here we only need to
-      // get them from the store
-      const chats = this.chatStore?.list ? this.chatStore.list : []
-
-      let unseen = 0
-
-      if (this.message?.replies) {
-        for (const reply of this.message.replies) {
-          for (const chat of chats) {
-            if (chat.id === reply.chatid) {
-              unseen += chat.unseen
-            }
-          }
-        }
-      }
-
-      return unseen
     },
     taken() {
       return this.hasOutcome('Taken')
@@ -723,6 +591,12 @@ export default {
   },
   methods: {
     datetimeshort,
+    async visibilityChanged(isVisible) {
+      if (isVisible) {
+        await this.messageStore.fetch(this.id)
+        this.visible = isVisible
+      }
+    },
     toggle() {
       this.expanded = !this.expanded
     },
@@ -876,5 +750,9 @@ img.attachment {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
+}
+
+:deep(.messagecard) {
+  border-radius: 0px !important;
 }
 </style>

@@ -204,6 +204,8 @@ export default {
       if (isochrone.value.locationid) {
         return locationStore.byId(isochrone.value.locationid)
       }
+
+      return null
     })
 
     if (isochrone.value.locationid) {

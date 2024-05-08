@@ -5,7 +5,8 @@
         <h1 class="text-center">Privacy</h1>
         <p>
           We won’t pass on your email address to any organisation outside
-          Freegle, and other freeglers can't see it.
+          Freegle, and other freeglers can't see it (unless your community
+          leaves Freegle - see below).
         </p>
         <p>
           Other freeglers can see your name, profile picture and approximate
@@ -119,6 +120,13 @@
         <nuxt-link  no-prefetch to="/unsubscribe">here</nuxt-link>.
         </p>
         <p>Once you leave, this will delete all your personal data.</p>
+        <h4>Communities leaving Freegle</h4>
+        <p>
+          Freegle communities may in theory choose to leave Freegle and move
+          somewhere else. This has never actually happened, but it's possible in
+          theory. If this happens then we will be in touch with you to discuss
+          what should happen to your details.
+        </p>
         <h2>Got questions?</h2>
         <p>
           Privacy is a complicated and important area, which we take seriously.
@@ -129,6 +137,9 @@
         <h3>Change History</h3>
         <p>Here are the changes to this page.</p>
         <ul class>
+          <li>
+            15/04/2024: Update to mention case where a community leaves Freegle.
+          </li>
           <li>
             04/01/2024: Remove mention of Norfolk Freegle, which is no longer a
             separate entity.

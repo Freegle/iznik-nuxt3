@@ -139,7 +139,7 @@ export default {
 
       if (visiblereplies.value.length) {
         if (
-          showAllReplies ||
+          showAllReplies.value ||
           scrollTo ||
           visiblereplies.value.length <= INITIAL_NUMBER_OF_REPLIES_TO_SHOW
         ) {
@@ -164,7 +164,7 @@ export default {
 
           if (!seen) {
             // Probably won't happen.
-            ret = visiblereplies.slice(-5)
+            ret = visiblereplies.value.slice(-5)
           }
         }
       }

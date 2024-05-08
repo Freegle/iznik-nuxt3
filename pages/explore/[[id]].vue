@@ -56,7 +56,7 @@ useHead(
     runtimeConfig,
     group.value ? 'Explore ' + group.value.namedisplay : 'Explore Freegle',
     'Freegle - like online dating for stuff. Find a community near you...',
-    group.profile ? group.profile : '/icon.png',
+    group.value?.profile ? group.value.profile : '/icon.png',
     {
       class: 'overflow-y-scroll',
     }
