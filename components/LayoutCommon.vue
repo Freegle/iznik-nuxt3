@@ -132,6 +132,12 @@ export default {
     },
     allowAd() {
       // We don't want to show the ad on the landing page when logged out - looks tacky.
+      console.log(
+        'Compute allowAd',
+        this.routePath !== '/',
+        this.loggedIn,
+        this.routePath !== '/' || this.loggedIn
+      )
       return this.routePath !== '/' || this.loggedIn
     },
     marginTop() {
