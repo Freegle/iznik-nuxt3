@@ -1,6 +1,6 @@
 <template>
   <client-only>
-    <b-container fluid class="p-0 p-xl-2">
+    <b-container fluid class="p-0 p-xl-2 bg-white">
       <h1 class="visually-hidden">Ad Test page</h1>
       <b-row class="m-0">
         <b-col cols="0" lg="3" class="p-0 pr-1">
@@ -17,6 +17,7 @@
               ]"
               div-id="div-gpt-ad-1693235056629-0"
               class="mt-2"
+              show-logged-out
             />
           </VisibleWhen>
           <VisibleWhen :at="['lg', 'xl', 'xxl']">
@@ -30,16 +31,20 @@
             the bottom. The ads should refresh.
           </p>
           <p>
-            To debug this page, you can add ?pbjs_debug=true&pubmaticTest=true
+            Ads on here will show when logged out - normally they don't,
+            deliberately.
+          </p>
+          <p>
+            To debug this page, you can add
+            <em>?pbjs_debug=true&pubmaticTest=true</em>
             to the URL. This will produce output from prebid in the Developer
             Console, and will force Pubmatic to win the sticky footer ad auction
             showing a test ad.
           </p>
           <p>
             You should also see the AppNexus test ad here - this is triggered
-            using a test placement id and will show when logged out (which ads
-            normally don't). It is a bit flaky so may only appear after 30s or
-            so.
+            using a test placement id. It is a bit flaky so may only appear
+            after 30s or so.
           </p>
           <ExternalDa
             ad-unit-path="/22794232631/appnexus_test"
@@ -67,6 +72,7 @@
                 ]"
                 div-id="div-gpt-ad-1691925450433-0"
                 class="mt-2"
+                show-logged-out
               />
             </VisibleWhen>
           </div>
