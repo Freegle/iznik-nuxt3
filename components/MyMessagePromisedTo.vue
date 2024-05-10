@@ -24,34 +24,36 @@
         ><strong>&nbsp;{{ promise.trystdate }}</strong>
       </template>
     </div>
-    <div v-if="promise.trystdate" class="d-flex flex-wrap small">
+    <div class="d-flex flex-wrap small">
       <AddToCalendar
+        v-if="promise.trystdate"
         :ics="promise.tryst.ics"
         variant="link"
         btn-class="ps-0"
-        size="sm"
+        :size="btnSize"
+        class="d-flex flex-column justify-content-around"
       />
-      <b-button variant="link" size="sm" @click="changeTime">
-        <v-icon icon="pen" />
-        Change time
+      <b-button variant="link" :size="btnSize" @click="changeTime">
+        <v-icon icon="pen" />&nbsp; <span v-if="promise.trystdate">Change</span
+        ><span v-else>Set time</span>
       </b-button>
-      <b-button variant="link" size="sm">
-        <div class="d-flex" @click="unpromise">
+      <b-button variant="link" :size="btnSize">
+        <div class="d-flex align-items-center" @click="unpromise">
           <span class="stacked">
             <v-icon icon="handshake" class="mt-1" />
             <v-icon icon="slash" class="unpromise__slash" /> </span
           >Unpromise
         </div>
       </b-button>
-      <PromiseModal
-        v-if="showPromiseModal"
-        :messages="[message]"
-        :selected-message="message.id"
-        :users="[replyusers]"
-        :selected-user="promisee"
-        @hidden="showPromiseModal = false"
-      />
     </div>
+    <PromiseModal
+      v-if="showPromiseModal"
+      :messages="[message]"
+      :selected-message="message.id"
+      :users="[replyusers]"
+      :selected-user="promisee"
+      @hidden="showPromiseModal = false"
+    />
     <RenegeModal
       v-if="promise.id !== myid && showRenegeModal"
       :messages="[message.id]"
@@ -66,6 +68,7 @@
 import { useMessageStore } from '../stores/message'
 import { useUserStore } from '../stores/user'
 import AddToCalendar from '~/components/AddToCalendar'
+import { useMiscStore } from '~/stores/misc'
 const PromiseModal = defineAsyncComponent(() =>
   import('~/components/PromiseModal')
 )
@@ -88,10 +91,12 @@ export default {
     },
   },
   setup() {
+    const miscStore = useMiscStore()
     const messageStore = useMessageStore()
     const userStore = useUserStore()
 
     return {
+      miscStore,
       messageStore,
       userStore,
     }
@@ -111,6 +116,13 @@ export default {
     },
     promiseeUser() {
       return this.userStore.byId(this.promisee)
+    },
+    btnSize() {
+      if (this.miscStore.breakpoint === 'xs') {
+        return 'xs'
+      } else {
+        return 'sm'
+      }
     },
   },
   methods: {

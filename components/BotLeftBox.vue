@@ -14,7 +14,7 @@
         </ExternalLink>
       </div>
       <ExternalLink
-        href="https://github.com/Freegle/iznik-nuxt"
+        href="https://github.com/Freegle/iznik-nuxt3"
         title="We're open source - find us on GitHub"
       >
         <b-img

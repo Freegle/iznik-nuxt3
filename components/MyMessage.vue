@@ -5,100 +5,19 @@
         <b-card
           no-body
           class="mb-1 bnuorder"
-          :border-variant="expanded ? 'primary' : 'success'"
+          :border-variant="expanded ? 'success' : 'secondary'"
         >
-          <b-card-header header-tag="header" class="p-1" role="tab">
+          <b-card-header header-tag="header" class="p-0" role="tab">
             <div
               :v-b-toggle="'mypost-' + message.id"
-              class="bg-white p-2 clickme"
+              class="bg-white clickme"
               @click="toggle"
             >
-              <div class="d-flex justify-content-between w-100">
-                <div class="d-flex flex-column w-100">
-                  <h3 class="text-wrap flex-shrink-2 mr-2 mb-0">
-                    <span v-if="message.isdraft">
-                      {{ message.type.toUpperCase() }}:
-                      {{ message.subject }} ({{ message.area.name }}
-                      {{ message.postcode.name }})
-                    </span>
-                    <span v-else>
-                      {{ message.subject }}
-                    </span>
-                    <b-badge
-                      v-if="message.availableinitially > 1"
-                      variant="info"
-                      class="ml-1"
-                    >
-                      {{ message.availablenow ? message.availablenow : '0' }}
-                      left
-                    </b-badge>
-                    <span v-if="rejected" class="text-danger">
-                      <v-icon icon="exclamation-triangle" scale="2" />
-                    </span>
-                  </h3>
-                  <div
-                    v-for="group in message.groups"
-                    :key="'message-' + message.id + '-' + group.groupid"
-                    class="small text-muted text-wrap"
-                  >
-                    {{ timeago(group.arrival) }} on
-                    <nuxt-link
-                      v-if="group.groupid in groups"
-                      no-prefetch
-                      :to="'/explore/' + groups[group.groupid].exploreLink"
-                      :title="
-                        'Click to view ' + groups[group.groupid].namedisplay
-                      "
-                    >
-                      {{ groups[group.groupid].namedisplay }}
-                    </nuxt-link>
-                    &nbsp;
-                    <b-button
-                      variant="link"
-                      :to="'/message/' + message.id"
-                      size="xs"
-                      class="text-faded decornone"
-                    >
-                      #{{ message.id }}
-                    </b-button>
-                  </div>
-                </div>
-                <span>
-                  <b-button v-if="!expand" class="ml-1" variant="secondary">
-                    <v-icon v-if="!expanded" icon="caret-down" />
-                    <v-icon v-else icon="caret-up" />
-                    <template #button-content />
-                  </b-button>
-                </span>
-              </div>
-              <div class="d-flex flex-wrap">
-                <div v-if="message.replycount > 0" class="mr-2 mt-1">
-                  <b-badge variant="info">
-                    <v-icon icon="user" class="fa-fw" />
-                    {{
-                      message.replycount === 1
-                        ? '1 reply'
-                        : message.replycount + ' replies'
-                    }}
-                  </b-badge>
-                </div>
-                <div v-if="message.outcomes?.length > 0" class="mr-2 mt-1">
-                  <b-badge v-if="taken" variant="success">
-                    <v-icon icon="check" class="fa-fw" /> Taken
-                  </b-badge>
-                  <b-badge v-if="received" variant="success">
-                    <v-icon icon="check" class="fa-fw" /> Received
-                  </b-badge>
-                  <b-badge v-if="withdrawn" variant="secondary">
-                    <v-icon icon="check" class="fa-fw" /> Withdrawn
-                  </b-badge>
-                </div>
-                <div v-if="unseen > 0" class="mr-2">
-                  <b-badge variant="danger">
-                    <v-icon icon="comments" class="fa-fw" /> {{ unseen }} unread
-                  </b-badge>
-                </div>
-              </div>
+              <notice-message v-if="rejected" class="mb-3" variant="warning">
+                <v-icon icon="exclamation-triangle" scale="2" /> This post has
+                not been accepted and is not public yet.
+              </notice-message>
+              <MessageSummary :id="message.id" />
               <div
                 v-if="
                   message.outcomes?.length === 0 && message.promisecount > 0
@@ -115,9 +34,8 @@
                   />
                 </div>
               </div>
-              <hr class="" />
               <div
-                class="d-flex justify-content-between flex-wrap mt-1 neartop"
+                class="d-flex justify-content-between flex-wrap mt-2 ps-2 neartop"
               >
                 <b-button
                   v-if="rejected && message.location && message.item"
@@ -222,6 +140,11 @@
               </div>
             </div>
           </b-card-header>
+          <MyMessageReplySummary
+            v-if="!expanded && message.replycount > 0"
+            :id="id"
+            @expand="expanded = true"
+          />
           <b-collapse
             :id="'mypost-' + message.id"
             v-model="expanded"
@@ -232,55 +155,6 @@
             <div v-if="expanded">
               <b-card-body class="p-2">
                 <b-card-text>
-                  <notice-message
-                    v-if="rejected"
-                    class="mb-3"
-                    variant="warning"
-                  >
-                    <v-icon icon="exclamation-triangle" scale="2" /> This post
-                    has not been accepted and is not public yet.
-                  </notice-message>
-                  <div class="d-flex justify-content-between">
-                    <div>
-                      <span class="prewrap">
-                        <read-more
-                          v-if="message?.textbody"
-                          :text="message.textbody"
-                          :max-chars="maxChars"
-                          class="nopara"
-                        />
-                      </span>
-                    </div>
-                    <div>
-                      <div
-                        v-if="!broken && message.attachments?.length > 0"
-                        class="clickme position-relative"
-                        @click="showPhotos"
-                      >
-                        <div class="small">
-                          <b-badge
-                            v-if="message.attachments?.length > 1"
-                            class="photobadge"
-                            variant="primary"
-                          >
-                            {{ message.attachments?.length }}
-                            <v-icon icon="camera" />
-                          </b-badge>
-                        </div>
-                        <b-img
-                          lazy
-                          rounded
-                          thumbnail
-                          class="attachment p-0 square mb-1"
-                          generator-unable-to-provide-required-alt=""
-                          title="Item picture"
-                          :src="message.attachments[0].paththumb"
-                          @error="brokenImage"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <hr />
                   <table
                     v-if="replies?.length > 0"
                     class="table table-borderless table-striped mb-0"
@@ -349,7 +223,6 @@
   </div>
 </template>
 <script>
-import ReadMore from 'vue-read-more3/src/ReadMoreComponent'
 import dayjs from 'dayjs'
 import { useComposeStore } from '../stores/compose'
 import { useMessageStore } from '../stores/message'
@@ -392,7 +265,6 @@ export default {
     MyMessageReply,
     MessageEditModal,
     NoticeMessage,
-    ReadMore,
   },
   props: {
     id: {
@@ -473,25 +345,6 @@ export default {
       }
 
       return ret
-    },
-    unseen() {
-      // We want all the chats from replies.  We fetch them in default.vue, here we only need to
-      // get them from the store
-      const chats = this.chatStore?.list ? this.chatStore.list : []
-
-      let unseen = 0
-
-      if (this.message?.replies) {
-        for (const reply of this.message.replies) {
-          for (const chat of chats) {
-            if (chat.id === reply.chatid) {
-              unseen += chat.unseen
-            }
-          }
-        }
-      }
-
-      return unseen
     },
     taken() {
       return this.hasOutcome('Taken')
@@ -897,5 +750,9 @@ img.attachment {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
+}
+
+:deep(.messagecard) {
+  border-radius: 0px !important;
 }
 </style>

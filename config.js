@@ -505,6 +505,25 @@ const CONFIG = {
         },
       ],
     },
+    {
+      code: '/22794232631/appnexus_test',
+      mediaTypes: {
+        banner: {
+          sizes: [
+            [600, 500],
+            [300, 600],
+          ],
+        },
+      },
+      bids: [
+        {
+          bidder: 'appnexus',
+          params: {
+            placementId: 13144370,
+          },
+        },
+      ],
+    },
   ],
 }
 
