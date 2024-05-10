@@ -37,10 +37,10 @@
       <div :class="{ thumbnail: thumbnail, notThumbnail: !thumbnail }">
         <client-only>
           <NuxtImg
-            v-if="typeof attachments[0].id === 'string'"
+            v-if="attachments[0].externalurl"
             format="webp"
             provider="uploadcare"
-            :src="attachments[0].id"
+            :src="attachments[0].externalurl"
             alt="Item Photo"
             class="attachment"
             @error="brokenImage"

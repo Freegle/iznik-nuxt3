@@ -199,14 +199,16 @@ export default {
 
         const ret = await this.imageStore.post(att)
 
-        // Set up our local attachment info, which has the UID of the image as the ID so that PostPhoto
-        // will display it correctly.
+        // Set up our local attachment info.  Note that the URL is returned from the server because it
+        // is manipulated on there to remove EXIF, so we use that rather than the URL that was returned
+        // from the upload.
         console.log('Post returned', ret)
         atts.push({
-          id: photo.id,
-          attid: ret.id,
-          path: photo.path,
-          paththumb: photo.path,
+          id: ret.id,
+          path: ret.url,
+          paththumb: ret.url,
+          externaluid: ret.uid,
+          externalurl: ret.url,
         })
         console.log('Message attachments', atts)
       }

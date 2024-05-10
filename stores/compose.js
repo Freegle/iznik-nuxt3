@@ -75,11 +75,10 @@ export const useComposeStore = defineStore({
     async createDraft(message, email) {
       const attids = []
 
-      // Extract the server attachment id from message.attachments.  Remember
-      // that id is the uuid at this point.
+      // Extract the server attachment id from message.attachments.
       if (message.attachments) {
         for (const attachment of message.attachments) {
-          attids.push(attachment.attid)
+          attids.push(attachment.externaluid)
         }
       }
 

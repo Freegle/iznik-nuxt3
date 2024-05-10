@@ -101,7 +101,7 @@ onMounted(() => {
   uploader.value.clearAll()
   uploadedPhotos.value = props.photos.map((f) => {
     return {
-      uuiid: f.id,
+      uuiid: f.externaluid,
     }
   })
   uploadedPhotos.value.forEach((f) => {

@@ -1,10 +1,10 @@
 <template>
   <div>
     <NuxtImg
-      v-if="typeof id === 'string'"
+      v-if="externaluid"
       format="webp"
       provider="uploadcare"
-      :src="id"
+      :src="externaluid"
       alt="Item Photo"
       :width="200"
       :height="200"
@@ -29,7 +29,7 @@ import { useImageStore } from '../stores/image'
 export default {
   props: {
     id: {
-      type: [Number, String],
+      type: Number,
       required: true,
     },
     path: {
@@ -48,6 +48,11 @@ export default {
     primary: {
       type: Boolean,
       default: false,
+    },
+    externaluid: {
+      type: String,
+      required: false,
+      default: null,
     },
   },
   setup() {
