@@ -31,6 +31,7 @@
         variant="link"
         btn-class="ps-0"
         :size="btnSize"
+        class="d-flex flex-column justify-content-around"
       />
       <b-button variant="link" :size="btnSize" @click="changeTime">
         <v-icon icon="pen" />&nbsp; <span v-if="promise.trystdate">Change</span
