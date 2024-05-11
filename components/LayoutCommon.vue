@@ -262,8 +262,11 @@ export default {
       }
     },
     adRendered(adShown) {
+      console.log('Layout ad rendered', adShown, adShown ? 1 : 0)
       this.adRendering = false
       this.noAdRendered = !adShown
+      const store = useMiscStore()
+      store.stickyAdRendered = adShown ? 1 : 0
     },
   },
 }
@@ -337,10 +340,14 @@ body.modal-open {
 }
 
 .aboveSticky {
-  padding-bottom: calc($sticky-banner-height-mobile + 2px);
+  padding-bottom: calc(
+    ($sticky-banner-height-mobile + 2px) * v-bind('stickyAdRendered')
+  );
 
   @include media-breakpoint-up(md) {
-    padding-bottom: calc($sticky-banner-height-desktop + 2px);
+    padding-bottom: calc(
+      ($sticky-banner-height-desktop + 2px) * v-bind('stickyAdRendered')
+    );
   }
 }
 </style>
