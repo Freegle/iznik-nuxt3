@@ -154,16 +154,25 @@ let initialTimer = null
 
 function handleVisible() {
   // Check if the ad is still visible after this delay, and no modal is open.
+  console.log(
+    'Check if ad still visible',
+    isVisible.value,
+    props.inModal,
+    document.body.classList.contains('modal-open')
+  )
   if (
     isVisible.value &&
     (props.inModal || !document.body.classList.contains('modal-open'))
   ) {
+    console.log('Queue GPT define slot', props.divId)
     window.googletag.cmd.push(function () {
+      console.log('Execute GPT define slot', props.divId)
       slot = window.googletag
         .defineSlot(props.adUnitPath, props.dimensions, props.divId)
         .addService(window.googletag.pubads())
 
       window.googletag.cmd.push(function () {
+        console.log('Excute GPT display', props.divId)
         window.googletag.display(props.divId)
 
         if (window.googletag.pubads().isInitialLoadDisabled()) {
