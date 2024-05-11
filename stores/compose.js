@@ -78,7 +78,7 @@ export const useComposeStore = defineStore({
       // Extract the server attachment id from message.attachments.
       if (message.attachments) {
         for (const attachment of message.attachments) {
-          attids.push(attachment.externaluid)
+          attids.push(attachment.id)
         }
       }
 
