@@ -34,6 +34,22 @@
 
     <b-card-body class="p-1 p-lg-3">
       <b-card-text class="restricted-height text-center">
+        <div
+          v-if="upcomingTrysts.length > 0"
+          class="mt-2 mb-3 border border-info p-2"
+        >
+          <h3 class="header--size4 text-start">Your upcoming collections:</h3>
+          <div
+            v-for="tryst in upcomingTrysts"
+            :key="'tryst-' + tryst.id"
+            variant="info"
+            class="d-flex justcontent-start"
+          >
+            <v-icon icon="calendar-alt" class="pt-1" />&nbsp;
+            <span class="font-weight-bold">{{ tryst.trystdate }}</span>
+            &nbsp;{{ tryst.name }}
+          </div>
+        </div>
         <p v-if="activePosts.length > 0" class="text-muted">
           <template v-if="props.type === 'Offer'">
             Stuff you're giving away.
@@ -46,7 +62,7 @@
           <div
             v-for="post in visiblePosts"
             :key="'post-' + post.id"
-            class="p-0 text-start mt-1"
+            class="p-0 text-start mt-1 minheight"
           >
             <MyMessage
               :id="post.id"
@@ -55,7 +71,7 @@
             />
           </div>
           <b-img
-            v-if="props.loading"
+            v-if="loading"
             lazy
             src="/loader.gif"
             alt="Loading..."
@@ -91,11 +107,18 @@
     </b-card-body>
   </b-card>
 </template>
-
 <script setup>
 import pluralize from 'pluralize'
+import dayjs from 'dayjs'
 import MyMessage from '~/components/MyMessage.vue'
 import InfiniteLoading from '~/components/InfiniteLoading.vue'
+import { useMessageStore } from '~/stores/message'
+import { useUserStore } from '~/stores/user'
+import { useTrystStore } from '~/stores/tryst'
+
+const messageStore = useMessageStore()
+const userStore = useUserStore()
+const trystStore = useTrystStore()
 
 const props = defineProps({
   type: { type: String, required: true },
@@ -150,12 +173,56 @@ const visiblePosts = computed(() => {
     }
   })
 })
-</script>
 
+const upcomingTrysts = computed(() => {
+  const ret = []
+
+  activePosts.value.forEach((post) => {
+    const message = messageStore.byId(post.id)
+    if (post.type === 'Offer' && message?.promises?.length) {
+      message.promises.forEach((p) => {
+        const user = userStore?.byId(p.userid)
+
+        if (user) {
+          const tryst = trystStore?.getByUser(p.userid)
+
+          // If tryst.arrangedfor is in the future
+          if (
+            tryst &&
+            new Date(tryst.arrangedfor).getTime() > new Date().getTime()
+          ) {
+            const date = tryst
+              ? dayjs(tryst.arrangedfor).format('dddd Do HH:mm a')
+              : null
+
+            ret.push({
+              id: p.userid,
+              name: user.displayname,
+              tryst,
+              trystdate: date,
+            })
+          }
+        }
+      })
+    }
+  })
+
+  return ret.toSorted((a, b) => {
+    return (
+      new Date(a.tryst.arrangedfor).getTime() -
+      new Date(b.tryst.arrangedfor).getTime()
+    )
+  })
+})
+</script>
 <style scoped>
 .restricted-height {
   max-height: 100vh;
   overflow-x: hidden;
   overflow-y: auto;
+}
+
+.minheight {
+  min-height: 200px;
 }
 </style>

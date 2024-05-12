@@ -6,43 +6,34 @@
       </div>
       <client-only>
         <div
-          v-if="allowAd && !adRendering && !noAdRendered"
-          class="d-flex justify-content-around w-100 sticky"
+          v-if="allowAd"
+          class="d-flex justify-content-around w-100"
+          :class="{
+            sticky: true,
+            anAdRendered: !adRendering && !noAdRendered,
+          }"
         >
-          <VisibleWhen :at="['xs', 'sm']">
+          <VisibleWhen :at="['xs', 'sm']" class="sticky">
             <ExternalDa
               ad-unit-path="/22794232631/freegle_sticky"
-              :dimensions="[320, 50]"
+              :dimensions="[[320, 50]]"
               div-id="div-gpt-ad-1699973618906-0"
-              class="sticky"
               pixel
               @rendered="adRendered"
             />
           </VisibleWhen>
-          <VisibleWhen :at="['md']">
+          <VisibleWhen :at="['md', 'lg', 'xl', 'xxl']">
             <ExternalDa
               ad-unit-path="/22794232631/freegle_sticky_desktop"
-              :dimensions="[728, 90]"
+              :dimensions="[[728, 90]]"
               div-id="div-gpt-ad-1707999304775-0"
-              class="sticky"
-              :class="{ rendered: !noAdRendered }"
-              pixel
-              @rendered="adRendered"
-            />
-          </VisibleWhen>
-          <VisibleWhen :at="['lg', 'xl', 'xxl']">
-            <ExternalDa
-              ad-unit-path="/22794232631/freegle_sticky_desktop"
-              :dimensions="[970, 90]"
-              div-id="div-gpt-ad-1707999304775-0"
-              :class="{ test: true, rendered: !noAdRendered, sticky: true }"
               pixel
               @rendered="adRendered"
             />
           </VisibleWhen>
         </div>
         <div
-          v-else
+          v-else-if="routePath !== '/'"
           class="adFallback sticky ourBack w-100 text-center d-flex flex-column justify-content-center"
         >
           <nuxt-link to="/donate" class="text-white nodecor">
@@ -108,6 +99,7 @@ const BouncingEmail = defineAsyncComponent(() =>
 const BreakpointFettler = defineAsyncComponent(() =>
   import('~/components/BreakpointFettler')
 )
+
 const ExternalDa = defineAsyncComponent(() => import('~/components/ExternalDa'))
 
 export default {
@@ -140,6 +132,12 @@ export default {
     },
     allowAd() {
       // We don't want to show the ad on the landing page when logged out - looks tacky.
+      console.log(
+        'Compute allowAd',
+        this.routePath !== '/',
+        this.loggedIn,
+        this.routePath !== '/' || this.loggedIn
+      )
       return this.routePath !== '/' || this.loggedIn
     },
     marginTop() {
@@ -168,30 +166,6 @@ export default {
       // Get chats and poll regularly for new ones
       const chatStore = useChatStore()
       chatStore.pollForChatUpdates()
-    } else if (process.client) {
-      // We only add the cookie banner for logged out users.  This reduces costs.  For logged-in users, we assume
-      // they have already seen the banner and specified a preference if they care.
-      const runtimeConfig = useRuntimeConfig()
-
-      console.log(
-        'Consider adding cookie banner',
-        runtimeConfig.public.COOKIEYES
-      )
-
-      if (runtimeConfig.public.COOKIEYES) {
-        console.log('Add it')
-        const cookieScript = document.getElementById('cookieyes')
-
-        if (!cookieScript) {
-          const script = document.createElement('script')
-          script.id = 'cookieyes'
-          script.setAttribute('src', runtimeConfig.public.COOKIEYES)
-
-          document.head.appendChild(script)
-        }
-      } else {
-        console.log('No cookie banner')
-      }
     }
 
     try {
@@ -288,8 +262,11 @@ export default {
       }
     },
     adRendered(adShown) {
+      console.log('Layout ad rendered', adShown, adShown ? 1 : 0)
       this.adRendering = false
       this.noAdRendered = !adShown
+      const store = useMiscStore()
+      store.stickyAdRendered = adShown ? 1 : 0
     },
   },
 }
@@ -332,10 +309,14 @@ body.modal-open {
   position: fixed;
   bottom: 0;
 
-  background-color: transparent;
+  background-color: $color-gray--dark;
 
-  &.anAdRendered {
-    background-color: $color-gray--dark;
+  @include media-breakpoint-up(lg) {
+    background-color: transparent;
+
+    &.anAdRendered {
+      background-color: $color-gray--dark;
+    }
   }
 
   z-index: 10000;
@@ -359,10 +340,14 @@ body.modal-open {
 }
 
 .aboveSticky {
-  padding-bottom: calc($sticky-banner-height-mobile + 2px);
+  padding-bottom: calc(
+    ($sticky-banner-height-mobile + 2px) * v-bind('stickyAdRendered')
+  );
 
   @include media-breakpoint-up(md) {
-    padding-bottom: calc($sticky-banner-height-desktop + 2px);
+    padding-bottom: calc(
+      ($sticky-banner-height-desktop + 2px) * v-bind('stickyAdRendered')
+    );
   }
 }
 </style>

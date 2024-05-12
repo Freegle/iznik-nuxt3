@@ -11,7 +11,7 @@
           >
             <ExternalDa
               ad-unit-path="/22794232631/freegle_productemail"
-              :dimensions="[300, 250]"
+              :dimensions="[[300, 250]]"
               div-id="div-gpt-ad-1691925773522-0"
               class="mt-2"
             />
@@ -78,7 +78,7 @@
                 hide-close
                 record-view
                 ad-unit-path="/22794232631/freegle_productemail"
-                ad-id="div-gpt-ad-1691925773522-2"
+                ad-id="div-gpt-ad-1691925773522-0"
                 @not-found="error = true"
               />
             </VisibleWhen>
@@ -99,12 +99,12 @@
             class="position-fixed"
             style="width: 300px"
           >
-            <ExternalDa
-              ad-unit-path="/22794232631/freegle_productemail"
-              :dimensions="[300, 250]"
-              div-id="div-gpt-ad-1691925773522-1"
-              class="mt-2"
-            />
+            <!--            <ExternalDa-->
+            <!--              ad-unit-path="/22794232631/freegle_productemail"-->
+            <!--              :dimensions="[[300, 250]]"-->
+            <!--              div-id="div-gpt-ad-1691925773522-0"-->
+            <!--              class="mt-2"-->
+            <!--            />-->
           </VisibleWhen>
         </b-col>
       </b-row>

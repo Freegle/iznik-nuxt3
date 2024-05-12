@@ -50,7 +50,7 @@
           </div>
           <b-row>
             <!-- eslint-disable-next-line-->
-            <b-col class="mb-2 prewrap font-weight-bold forcebreak">{{ description }}</b-col>
+            <b-col class="mb-2 prewrap font-weight-bold forcebreak">{{ volunteering.description }}</b-col>
           </b-row>
           <b-row class="mt-2">
             <b-col cols="4" md="3" class="field"> Time commitment</b-col>
@@ -230,7 +230,7 @@
             >
               <Field
                 id="description"
-                v-model="volunteering.description"
+                v-model="description"
                 name="description"
                 class="form-control mt-2"
                 as="textarea"
@@ -538,6 +538,7 @@ export default {
       cacheBust: Date.now(),
       uploading: false,
       showGroupError: false,
+      description: null,
     }
   },
   computed: {
@@ -578,12 +579,6 @@ export default {
     isExisting() {
       return Boolean(this.volunteering?.id)
     },
-    description() {
-      let desc = this.volunteering?.description
-      desc = desc ? twem(desc) : ''
-      desc = desc.trim()
-      return desc
-    },
     enabled() {
       const group = this.groupStore.get(this.groupid)
 
@@ -596,6 +591,23 @@ export default {
       }
 
       return ret
+    },
+  },
+  watch: {
+    event: {
+      handler(newVal) {
+        let desc = newVal?.description
+        desc = desc ? twem(desc) : ''
+        desc = desc.trim()
+
+        this.description = desc
+      },
+      immediate: true,
+    },
+    description: {
+      handler(newVal) {
+        this.volunteering.description = newVal
+      },
     },
   },
   methods: {

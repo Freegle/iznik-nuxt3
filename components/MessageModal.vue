@@ -5,8 +5,31 @@
     size="lg"
     class="hide-footer"
     body-class="p-0 p-md-3"
+    header-class="p-0"
     @shown="bumpMessage++"
   >
+    <template #header>
+      <div class="layout">
+        <div>
+          <VisibleWhen
+            v-if="bumpMessage > 0"
+            :at="['xs', 'sm']"
+            class="maybeAd"
+          >
+            <ExternalDa
+              ad-unit-path="/22794232631/freegle_modal_app"
+              :dimensions="[[320, 50]]"
+              div-id="div-gpt-ad-1711542403014-0"
+              pixel
+              in-modal
+            />
+          </VisibleWhen>
+        </div>
+        <b-button variant="white" class="noborder p-0 mt-1 mb-1" @click="hide">
+          <v-icon icon="times-circle" class="fa-2x" />
+        </b-button>
+      </div>
+    </template>
     <template #default>
       <div v-if="message">
         <div v-if="showImagesProxy">
@@ -19,9 +42,19 @@
           <div class="d-flex justify-content-between p-2 mb-2 p-md-0 mb-md-0">
             <div class="w-50 pl-2">
               <b-button
+                size="md"
+                variant="primary"
+                block
+                class="d-block d-md-none"
+                @click="showImagesProxy = false"
+              >
+                View description
+              </b-button>
+              <b-button
                 size="lg"
                 variant="primary"
                 block
+                class="d-none d-md-block"
                 @click="showImagesProxy = false"
               >
                 View description
@@ -30,8 +63,17 @@
             <div class="pr-2 w-50">
               <b-button
                 variant="secondary"
+                size="md"
+                class="w-100 d-block d-md-none"
+                block
+                @click="hide"
+              >
+                Close
+              </b-button>
+              <b-button
+                variant="secondary"
                 size="lg"
-                class="w-100"
+                class="w-100 d-none d-md-block"
                 block
                 @click="hide"
               >
@@ -151,5 +193,28 @@ const showImagesProxy = computed({
 
 :deep(.carousel-item.active) {
   background-color: transparent !important;
+}
+
+.maybeAd {
+  visibility: hidden;
+
+  @media only screen and (min-width: 386px) {
+    visibility: visible;
+    height: 50px;
+    width: 320px;
+  }
+}
+
+.noborder {
+  border: none !important;
+  border-color: $color-white !important;
+}
+
+.layout {
+  display: grid;
+  width: 100%;
+  align-items: center;
+  grid-template-rows: 1fr;
+  grid-template-columns: calc(100% - 3rem) 3rem;
 }
 </style>

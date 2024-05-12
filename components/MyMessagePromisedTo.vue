@@ -3,38 +3,57 @@
     <div class="d-flex flex-wrap">
       <div v-if="promise.id === myid">
         <!-- This can happen with TN.  It means it's promised, but we don't know who to.-->
-        <v-icon icon="handshake" class="fa-fw mt-1" />&nbsp;Promised
+        <b-badge variant="success">
+          <v-icon icon="handshake" class="fa-fw" /> Promised
+        </b-badge>
       </div>
       <div v-else>
         <!-- eslint-disable-next-line-->
-        <v-icon icon="handshake" class="fa-fw mt-1" />&nbsp;Promised to <strong>{{ promise.name }}</strong><span v-if="promise.trystdate">,</span>
-        <b-button
-          variant="link"
-          class="ml-2 text--smallest text-black"
-          @click="unpromise"
-          >(Unpromise)</b-button
+        <b-badge
+          variant="success"
+          class="ml-0"
         >
+          <v-icon icon="handshake" />
+          <span class="ml-2">Promised</span>
+        </b-badge>
+        to
+        <strong>{{ promise.name }}</strong>
       </div>
-      <div v-if="promise.trystdate" class="d-flex">
-        handover <span class="d-none d-md-inline">arranged for</span
+      <template v-if="promise.trystdate">
+        &nbsp;handover <span class="d-none d-md-inline">&nbsp;arranged for</span
         ><strong>&nbsp;{{ promise.trystdate }}</strong>
-      </div>
+      </template>
     </div>
-    <div v-if="promise.tryst" class="d-flex flex-wrap small">
-      <AddToCalendar :ics="promise.tryst.ics" variant="link" />
-      <b-button variant="link" @click="changeTime">
-        <v-icon icon="pen" />
-        Change time
-      </b-button>
-      <PromiseModal
-        v-if="showPromiseModal"
-        :messages="[message]"
-        :selected-message="message.id"
-        :users="[replyusers]"
-        :selected-user="promisee"
-        @hidden="showPromiseModal = false"
+    <div class="d-flex flex-wrap small">
+      <AddToCalendar
+        v-if="promise.trystdate"
+        :ics="promise.tryst.ics"
+        variant="link"
+        btn-class="ps-0"
+        :size="btnSize"
+        class="d-flex flex-column justify-content-around"
       />
+      <b-button variant="link" :size="btnSize" @click="changeTime">
+        <v-icon icon="pen" />&nbsp; <span v-if="promise.trystdate">Change</span
+        ><span v-else>Set time</span>
+      </b-button>
+      <b-button variant="link" :size="btnSize">
+        <div class="d-flex align-items-center" @click="unpromise">
+          <span class="stacked">
+            <v-icon icon="handshake" class="mt-1" />
+            <v-icon icon="slash" class="unpromise__slash" /> </span
+          >Unpromise
+        </div>
+      </b-button>
     </div>
+    <PromiseModal
+      v-if="showPromiseModal"
+      :messages="[message]"
+      :selected-message="message.id"
+      :users="[replyusers]"
+      :selected-user="promisee"
+      @hidden="showPromiseModal = false"
+    />
     <RenegeModal
       v-if="promise.id !== myid && showRenegeModal"
       :messages="[message.id]"
@@ -49,6 +68,7 @@
 import { useMessageStore } from '../stores/message'
 import { useUserStore } from '../stores/user'
 import AddToCalendar from '~/components/AddToCalendar'
+import { useMiscStore } from '~/stores/misc'
 const PromiseModal = defineAsyncComponent(() =>
   import('~/components/PromiseModal')
 )
@@ -71,10 +91,12 @@ export default {
     },
   },
   setup() {
+    const miscStore = useMiscStore()
     const messageStore = useMessageStore()
     const userStore = useUserStore()
 
     return {
+      miscStore,
       messageStore,
       userStore,
     }
@@ -95,6 +117,13 @@ export default {
     promiseeUser() {
       return this.userStore.byId(this.promisee)
     },
+    btnSize() {
+      if (this.miscStore.breakpoint === 'xs') {
+        return 'xs'
+      } else {
+        return 'sm'
+      }
+    },
   },
   methods: {
     changeTime(e) {
@@ -112,3 +141,22 @@ export default {
   },
 }
 </script>
+<style scoped lang="scss">
+.stacked {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+
+  svg {
+    grid-row: 1 / 2;
+    grid-column: 1 / 2;
+  }
+
+  svg:nth-child(2) {
+    z-index: 10000;
+    color: white;
+    padding-top: 7px;
+    padding-right: 7px;
+  }
+}
+</style>

@@ -4,34 +4,32 @@
     If you don't like ads, then you can use an ad blocker.  Plus you could donate to us
     at https://www.ilovefreegle.org/donate - if we got enough donations we would be delighted not to show ads.
      -->
-    <div v-observe-visibility="visibilityChanged" class="pointer">
-      <div v-if="isVisible" class="d-flex w-100 justify-content-around">
+    <div
+      v-if="me || showLoggedOut"
+      v-observe-visibility="visibilityChanged"
+      class="pointer"
+    >
+      <div v-if="isVisible">
         <div
-          :id="divId"
-          :ref="adUnitPath"
-          :key="'adUnit-' + adUnitPath"
+          class="d-flex w-100 justify-content-around"
           :style="{
-            'max-width': dimensions[0] + 'px',
-            'max-height': dimensions[1] + 'px',
+            width: maxWidth + 'px',
+            height: maxHeight + 'px',
           }"
-        />
+        >
+          <div :id="divId" />
+        </div>
+        <!--    <div class="bg-white">-->
+        <!--      Path {{ adUnitPath }} id {{ divId }} dimensions {{ dimensions }}-->
+        <!--    </div>-->
       </div>
-      <p
-        v-if="isVisible && adShown"
-        class="text-center textsize d-none d-md-block"
-      >
-        Advertisement. These help Freegle keep going.
-      </p>
-      <!--    <div class="bg-white">-->
-      <!--      Path {{ adUnitPath }} id {{ divId }} dimensions {{ dimensions }}-->
-      <!--    </div>-->
     </div>
   </client-only>
 </template>
 <script setup>
-import { nextTick } from 'vue'
 import { ref, computed, onBeforeUnmount } from '#imports'
 import { useMiscStore } from '~/stores/misc'
+import Api from '~/api'
 
 const miscStore = useMiscStore()
 const unmounted = ref(false)
@@ -53,6 +51,14 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  inModal: {
+    type: Boolean,
+    default: false,
+  },
+  showLoggedOut: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const adShown = ref(true)
@@ -62,41 +68,16 @@ const passClicks = computed(() => {
 })
 
 const uniqueid = ref(props.adUnitPath)
-let blocked = false
 
-const p = new Promise((resolve, reject) => {
-  try {
-    const already = document.getElementById('gpt-script')
-    if (already) {
-      resolve()
-    } else {
-      const s = document.createElement('script')
-      s.setAttribute(
-        'src',
-        'https://securepubads.g.doubleclick.net/tag/js/gpt.js'
-      )
-      s.id = 'gpt-script'
-      s.onload = () => resolve()
-      s.onerror = () => {
-        console.log('Google ad script blocked')
-        blocked = true
-        resolve()
-      }
-      document.head.appendChild(s)
-    }
-  } catch (e) {
-    console.log('Load of Google ad script failed', e)
-    resolve()
-  }
-})
-
-await p
+const maxWidth = ref(Math.max(...props.dimensions.map((d) => d[0])))
+const maxHeight = ref(Math.max(...props.dimensions.map((d) => d[1])))
 
 let slot = null
 
-const timer = ref(null)
-
-const AD_REFRESH_TIMEOUT = 45000
+let refreshTimer = null
+let visibleTimer = null
+const PREBID_TIMEOUT = 2000
+const AD_REFRESH_TIMEOUT = 31000
 
 function refreshAd() {
   if (
@@ -105,12 +86,189 @@ function refreshAd() {
     typeof window.googletag?.pubads().refresh === 'function' &&
     !unmounted.value
   ) {
-    // Don't fresh if the ad is not visible or tab is not active.
+    // Don't refresh if the ad is not visible or tab is not active.
     if (isVisible.value && miscStore.visible) {
-      window.googletag.pubads().refresh([slot])
+      // Refreshing an ad is a bit more complex because we're using prebid.  That means we have to request the
+      // bids, and then once we've got those, refresh the ad slot to kick Google to render the ad.
+      console.log('Request bids for ad', props.adUnitPath)
+
+      window.pbjs.que.push(function () {
+        window.pbjs.requestBids({
+          timeout: PREBID_TIMEOUT,
+          adUnitCodes: [props.adUnitPath],
+          bidsBackHandler: function (bids, timedOut, auctionId) {
+            const runtimeConfig = useRuntimeConfig()
+            const api = Api(runtimeConfig)
+
+            if (timedOut) {
+              api.bandit.chosen({
+                uid: 'prebid',
+                variant: 'timeout',
+              })
+            } else if (bids?.length) {
+              console.log('Got bids back', bids, timedOut, auctionId)
+
+              api.bandit.chosen({
+                uid: 'prebid',
+                variant: 'bids',
+              })
+            } else {
+              console.log('Got no bids back', bids, timedOut, auctionId)
+
+              api.bandit.chosen({
+                uid: 'prebid',
+                variant: 'nobids',
+              })
+            }
+
+            window.pbjs.setTargetingForGPTAsync([props.adUnitPath])
+
+            if (slot) {
+              window.googletag.pubads().refresh([slot])
+
+              console.log('Refreshed slot', props.adUnitPath)
+            } else {
+              console.error(
+                'No slot found to refresh found for',
+                props.adUnitPath
+              )
+            }
+          },
+        })
+      })
+    } else {
+      // console.log('Not refreshing ad', props.adUnitPath, isVisible.value)
     }
 
-    timer.value = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
+    refreshTimer = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
+  }
+}
+
+const isVisible = ref(false)
+let shownFirst = false
+const emit = defineEmits(['rendered'])
+
+// We want to wait until an ad has been viewable for 100ms.  That reduces the impact of fast scrolling or
+// redirects.
+let initialTimer = null
+
+function handleVisible() {
+  // Check if the ad is still visible after this delay, and no modal is open.
+  console.log(
+    'Check if ad still visible',
+    isVisible.value,
+    props.inModal,
+    document.body.classList.contains('modal-open')
+  )
+  if (
+    isVisible.value &&
+    (props.inModal || !document.body.classList.contains('modal-open'))
+  ) {
+    console.log('Queue GPT commands', props.divId)
+    window.googletag.cmd.push(function () {
+      console.log('Execute GPT define slot', props.divId)
+      slot = window.googletag
+        .defineSlot(props.adUnitPath, props.dimensions, props.divId)
+        .addService(window.googletag.pubads())
+
+      console.log('Add event listeners', props.adUnitPath)
+      window.googletag
+        .pubads()
+        .addEventListener('slotRenderEnded', (event) => {
+          if (event?.slot.getAdUnitPath() === props.adUnitPath) {
+            console.log(
+              'Rendered',
+              uniqueid.value,
+              'empty',
+              event?.isEmpty,
+              event
+            )
+
+            if (event?.isEmpty) {
+              adShown.value = false
+              maxWidth.value = 0
+              maxHeight.value = 0
+            } else {
+              maxWidth.value = event.size[0]
+              maxHeight.value = event.size[1]
+            }
+
+            if (event?.isEmpty) {
+              adShown.value = false
+              console.log('Rendered empty', props.adUnitPath, adShown)
+              // Sentry.captureMessage('Ad rendered empty ' + props.adUnitPath)
+            } else {
+              maxWidth.value = event.size[0]
+              maxHeight.value = event.size[1]
+            }
+
+            emit('rendered', adShown.value)
+          }
+        })
+        .addEventListener('slotVisibilityChanged', (event) => {
+          if (event?.slot.getAdUnitPath() === props.adUnitPath) {
+            if (event.inViewPercentage < 51 && miscStore.visible) {
+              // const msg =
+              //   'Visibility of slot ' +
+              //   props.adUnitPath +
+              //   ' changed. New visibility: ' +
+              //   event.inViewPercentage +
+              //   '%.Viewport size: ' +
+              //   window.innerWidth +
+              //   'x' +
+              //   window.innerHeight
+              //
+              // console.log(msg)
+              // Sentry.captureMessage(msg)
+            }
+          }
+        })
+
+      console.log('Excute GPT display', props.divId)
+      window.googletag.display(props.divId)
+
+      if (window.googletag.pubads().isInitialLoadDisabled()) {
+        // We need to refresh the ad because we called disableInitialLoad.  That's what you do when
+        // using prebid.
+        console.log('Displayed, now trigger refresh', props.adUnitPath)
+        refreshAd()
+      } else {
+        console.log('Displayed and rendered, refresh timer')
+
+        if (!refreshTimer) {
+          refreshTimer = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
+        }
+      }
+
+      shownFirst = true
+    })
+  }
+}
+function visibilityChanged(visible) {
+  // Check the pbjs status here rather than on component load, as it might not be available yet.
+  if (process.client) {
+    if (!window.pbjs?.version) {
+      console.log('Prebid not loaded yet')
+      visibleTimer = window.setTimeout(() => {
+        visibilityChanged(visible)
+      }, 100)
+    } else {
+      visibleTimer = null
+
+      try {
+        isVisible.value = visible
+
+        if (visible && !shownFirst) {
+          console.log('Queue create ad', props.adUnitPath, props.divId)
+
+          if (!initialTimer) {
+            initialTimer = setTimeout(handleVisible, 100)
+          }
+        }
+      } catch (e) {
+        console.log('Exception in visibilityChanged', e)
+      }
+    }
   }
 }
 
@@ -118,8 +276,12 @@ onBeforeUnmount(() => {
   unmounted.value = true
 
   try {
-    if (timer.value) {
-      clearTimeout(timer)
+    if (refreshTimer) {
+      clearTimeout(refreshTimer)
+    }
+
+    if (visibleTimer) {
+      clearTimeout(visibleTimer)
     }
 
     if (window.googletag?.destroySlots) {
@@ -129,86 +291,6 @@ onBeforeUnmount(() => {
     console.log('Exception in onBeforeUnmount', e)
   }
 })
-
-const isVisible = ref(false)
-let shownFirst = false
-
-const emit = defineEmits(['rendered'])
-
-async function visibilityChanged(visible) {
-  if (!blocked) {
-    try {
-      isVisible.value = visible
-
-      if (visible && !shownFirst) {
-        shownFirst = true
-
-        await nextTick()
-
-        window.googletag = window.googletag || { cmd: [] }
-        window.googletag.cmd.push(function () {
-          const dims = [props.dimensions]
-
-          if (props.pixel) {
-            dims.push([1, 1])
-          }
-
-          window.googletag.pubads().collapseEmptyDivs()
-          slot = window.googletag
-            .defineSlot(uniqueid.value, dims, props.divId)
-            .addService(window.googletag.pubads())
-
-          window.googletag
-            .pubads()
-            .addEventListener('slotRenderEnded', (event) => {
-              if (event?.slot === slot) {
-                console.log('Rendered', uniqueid.value, 'empty', event?.isEmpty)
-                if (event?.isEmpty) {
-                  adShown.value = false
-                }
-                emit('rendered', adShown.value)
-              }
-            })
-            .addEventListener('slotVisibilityChanged', (event) => {
-              if (event?.slot === slot) {
-                if (event.inViewPercentage < 51) {
-                  // console.log(
-                  //   `Visibility of slot ${event.slot.getSlotElementId()} changed. New visibility: ${
-                  //     event.inViewPercentage
-                  //   }%.Viewport size: ${window.innerWidth}x${
-                  //     window.innerHeight
-                  //   }`
-                  // )
-                }
-              }
-            })
-            .addEventListener('impressionViewable', (event) => {
-              if (event?.slot === slot) {
-                // We refresh the ad slot.  This increases views.  Google doesn't like it if this is more frequent than
-                // every 30s.
-                if (!timer.value) {
-                  timer.value = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
-                }
-              }
-            })
-
-          window.googletag.enableServices()
-        })
-
-        window.googletag.cmd.push(function () {
-          try {
-            window.googletag.display(props.divId)
-          } catch (e) {
-            console.log('Exception in ad display', e)
-            emit('rendered', false)
-          }
-        })
-      }
-    } catch (e) {
-      console.log('Exception in visibilityChanged', e)
-    }
-  }
-}
 </script>
 <style scoped lang="scss">
 .textsize {

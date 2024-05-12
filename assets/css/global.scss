@@ -347,6 +347,11 @@ label {
   text-decoration: none;
 }
 
+.btn-xl {
+  padding: 10px 20px;
+  font-size: 20px;
+}
+
 // Bootstrap 4 class compatibility.
 .ml-1 {
   @extend .ms-1
@@ -573,7 +578,5 @@ label {
   --popper-theme-border-radius: 6px;
   --popper-theme-padding: 10px;
   --popper-theme-box-shadow: 0 6px 30px -6px rgba(0, 0, 0, 0.25);
-  --ads-height: 258px;
-  --ads-label-height: 42px;
   --header-navbar-height: 76px;
 }

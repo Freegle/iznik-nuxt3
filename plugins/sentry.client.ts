@@ -111,6 +111,14 @@ export default defineNuxtPlugin((nuxtApp) => {
           console.log('Google ads - suppress exception')
           return null
         } else if (
+          originalExceptionStack?.includes('/pageFold/') ||
+          originalExceptionStack?.includes('/strikeforce/') ||
+          originalExceptionStack?.includes('/ads/js/')
+        ) {
+          // This is a flaky ad library
+          console.log('Pagefold, ads - suppress exception')
+          return null
+        } else if (
           (originalExceptionStack?.includes('bootstrap-vue-next') &&
             originalExceptionString?.match('removeAttribute')) ||
           originalExceptionStack?.match('_isWithActiveTrigger ')
@@ -122,9 +130,7 @@ export default defineNuxtPlugin((nuxtApp) => {
           console.log('Maintenance - suppress exception', this)
           return null
         } else if (
-          originalExceptionString?.match(
-            '/window.Piwik undefined after waiting/'
-          )
+          originalExceptionString?.match(/Piwik undefined after waiting/)
         ) {
           // Some privacy blockers can cause this.
           console.log('Suppress Piwik/Matomo exception')

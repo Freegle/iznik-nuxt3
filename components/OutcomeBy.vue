@@ -1,13 +1,6 @@
 <template>
   <div>
-    <div v-if="availablenow > 1">
-      <p>
-        If you gave these to more than one person, please list each of them
-        here.
-      </p>
-      <p>You can save and come back later if you like.</p>
-    </div>
-    <div v-else>
+    <div v-if="availablenow <= 1">
       <label :class="'strong ' + (chooseError ? 'text-danger' : '')">
         Please tell us who took this item:
       </label>
@@ -46,6 +39,11 @@
         />
       </div>
     </div>
+    <div v-if="availablenow > 1">
+      <p>
+        If you split these between several people, you can add more people here:
+      </p>
+    </div>
     <div class="d-none d-md-block mt-1">
       <b-form-select
         v-if="moreUsersToSelect"
@@ -74,8 +72,11 @@
         Please select someone from the list above.
       </p>
     </div>
-    <p class="mt-1 text-muted small">
+    <p class="mt-2 text-muted small">
       This helps us identify reliable freeglers.
+      <span v-if="availablenow > 1"
+        >You can save and come back later if you like.</span
+      >
     </p>
   </div>
 </template>
@@ -137,8 +138,8 @@ export default {
       let ret = []
 
       if (props.msgid) {
-        if (message && message.by) {
-          ret = [message.by]
+        if (message?.value?.by) {
+          ret = [message.value.by]
         }
 
         if (props.takenBy) {
@@ -196,9 +197,8 @@ export default {
     moreUsersToSelect() {
       // We show the choose if there are some left and we have not got all users plus someone else.
       return (
-        this.left &&
-        (this.currentlySelectedUsers?.length <= this.repliers?.length ||
-          !this.currentlySelectedUsers.find((u) => !u.userid))
+        this.currentlySelectedUsers?.length <= this.repliers?.length ||
+        !this.currentlySelectedUsers.find((u) => !u.userid)
       )
     },
     sortedSelectors() {
@@ -227,14 +227,43 @@ export default {
   },
   methods: {
     selected(userid) {
+      let user = null
+
       if (userid === 0) {
-        this.currentlySelectedUsers.push({
+        user = {
           userid: null,
-          count: 1,
-        })
+          count: this.left,
+        }
       } else if (userid > 0) {
-        const user = this.availableUsers.find((u) => u.userid === userid)
-        user.count = 1
+        user = this.availableUsers.find((u) => u.userid === userid)
+
+        // Default to assuming they took all the remaining ones.  This particularly helps when there were
+        // multiple items which all went to a single person.
+        user.count = this.left
+      }
+
+      if (user) {
+        console.log('Selected', userid, user)
+        if (user.count === 0) {
+          // None left.  But they wouldn't have added them unless they wanted to give them at least one.  So
+          // steal one from the last person who had a count > 1.
+          console.log('Steal one', JSON.stringify(this.currentlySelectedUsers))
+          const last = this.currentlySelectedUsers
+            .slice()
+            .reverse()
+            .findIndex((u) => u.count > 1)
+          console.log('Last', last)
+
+          if (last >= 0) {
+            console.log(
+              'Last user has',
+              this.currentlySelectedUsers[last].count
+            )
+            this.currentlySelectedUsers[last].count--
+            user.count++
+          }
+        }
+
         this.currentlySelectedUsers.push(user)
       }
 
@@ -249,7 +278,7 @@ export default {
         value: -1,
         html:
           this.currentlySelectedUsers.length >= 1
-            ? '<em>-- Add someone --</em>'
+            ? '<em>-- Add someone else --</em>'
             : this.userOptionsChoose(small),
       })
 
@@ -311,7 +340,7 @@ select {
     padding: 10px;
 
     grid-template-rows: auto;
-    grid-template-columns: 1fr 160px 160px;
+    grid-template-columns: 1fr 165px 160px;
   }
 
   .select {

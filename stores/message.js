@@ -58,11 +58,11 @@ export const useMessageStore = defineStore({
             }
           }
         } else {
-          this.fetchingCount++
-          this.fetching[id] = api(this.config).message.fetch(id, false)
-          this.fetchingCount--
-
           try {
+            this.fetchingCount++
+            this.fetching[id] = api(this.config).message.fetch(id, false)
+            this.fetchingCount--
+
             this.list[id] = await this.fetching[id]
             this.fetching[id] = null
 
@@ -100,7 +100,10 @@ export const useMessageStore = defineStore({
       if (left.length) {
         this.fetchingCount++
         try {
-          const msgs = await api(this.config).message.fetch(left.join(','))
+          const msgs = await api(this.config).message.fetch(
+            left.join(','),
+            false
+          )
 
           if (msgs && msgs.forEach) {
             msgs.forEach((msg) => {
@@ -125,20 +128,27 @@ export const useMessageStore = defineStore({
         }
       }
     },
-    async fetchInBounds(swlat, swlng, nelat, nelng, groupid) {
-      // Don't cache this, as it might change.
-      const ret = await api(this.config).message.inbounds(
-        swlat,
-        swlng,
-        nelat,
-        nelng,
-        groupid
-      )
-
+    async fetchInBounds(swlat, swlng, nelat, nelng, groupid, limit, cache) {
+      let ret = []
       const key =
         swlat + ':' + swlng + ':' + nelat + ':' + nelng + ':' + groupid
 
-      this.bounds[key] = ret
+      if (cache && this.bounds[key]) {
+        ret = this.bounds[key]
+      } else {
+        // Don't cache this, as it might change.
+        ret = await api(this.config).message.inbounds(
+          swlat,
+          swlng,
+          nelat,
+          nelng,
+          groupid,
+          limit
+        )
+
+        this.bounds[key] = ret
+      }
+
       return ret
     },
     async search(params) {

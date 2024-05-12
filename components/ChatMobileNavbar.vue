@@ -47,7 +47,7 @@
     </div>
     <ProfileModal
       v-if="showProfileModal"
-      :id="otheruser.id"
+      :id="otheruser?.id"
       close-on-message
       @hidden="showProfileModal = false"
     />
@@ -106,9 +106,9 @@ function showInfo() {
   display: grid;
   grid-template-columns:
     0.25em 40px 50px calc(
-      100vw - 0.5em - 40px - 0.25em - 50px - 0.25em - 100px - 0.5em
+      100vw - 0.5em - 40px - 0.25em - 50px - 0.25em - 110px - 0.5em
     )
-    100px 0.25em;
+    110px 0.25em;
   grid-column-gap: 0.25em;
 
   .offline,

@@ -12,7 +12,7 @@ export const useImageStore = defineStore({
       return await api(this.config).image.post(data)
     },
     async postForm(data) {
-      return await api(this.config).image.postForm(data)
+      return await api(this.config).image.postForm(data, false)
     },
   },
 })

@@ -130,7 +130,7 @@ export default {
 
     const center = computed(() => {
       console.log('compute centre', noticeboard)
-      if (noticeboard) {
+      if (noticeboard.value) {
         return [noticeboard?.value?.lat, noticeboard?.value?.lng]
       } else {
         return [53.945, -2.5209]
@@ -171,7 +171,7 @@ export default {
       callback()
     },
     async saveComments(callback) {
-      await this.noticeboardStore.comments(this.id, this.comments)
+      await this.noticeboardStore.saveComments(this.id, this.comments)
       callback()
     },
   },

@@ -21,20 +21,24 @@
           }"
           itemprop="name"
         >
-          {{ item }}
+          <a class="nodecor" :href="'/message/' + id" @click="block">{{
+            item
+          }}</a>
         </span>
       </div>
       <div>
-        <b-badge
-          v-if="message && message.availablenow > 1"
-          variant="info"
-          class="ms-2 me-2 mt-0 align-top"
-        >
-          {{ message.availablenow ? message.availablenow : '0' }} left
-        </b-badge>
+        <client-only>
+          <b-badge
+            v-if="message && message.availablenow > 1"
+            variant="info"
+            class="ms-2 me-2 mt-0 align-top"
+          >
+            {{ message.availablenow ? message.availablenow : '0' }} left
+          </b-badge>
+        </client-only>
       </div>
     </h3>
-    <div class="location">
+    <div v-if="showLocation" class="location">
       {{ location }}
     </div>
   </div>
@@ -65,6 +69,11 @@ export default {
       type: Boolean,
       required: false,
       default: false,
+    },
+    showLocation: {
+      type: Boolean,
+      required: false,
+      default: true,
     },
   },
   setup() {
@@ -105,11 +114,21 @@ export default {
       return ret ? twem(ret) : null
     },
   },
+  methods: {
+    block(e) {
+      e.preventDefault()
+    },
+  },
 }
 </script>
 <style scoped lang="scss">
 .item {
   color: $colour-info-fg !important;
+
+  a {
+    color: $colour-info-fg !important;
+  }
+
   font-weight: bold !important;
   text-overflow: ellipsis;
   overflow: hidden;

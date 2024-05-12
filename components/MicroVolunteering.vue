@@ -133,8 +133,8 @@
                   @done="considerNext"
                 />
               </div>
-              <div v-else-if="task.type === 'Survey'">
-                <MicroVolunteeringSurvey @done="considerNext" />
+              <div v-else-if="task.type === 'Survey2'">
+                <MicroVolunteeringSurvey :url="task.url" @done="considerNext" />
               </div>
               <div v-else>Unknown task {{ task }}</div>
             </div>
@@ -236,6 +236,8 @@ export default {
         }
       })
 
+      console.log('Ask due', askDue)
+
       if (!allowed) {
         // Not on a group with this function enabled.
       } else if (!askDue) {
@@ -277,7 +279,7 @@ export default {
       message: null,
       todo: 5,
       done: 0,
-      types: ['CheckMessage', 'PhotoRotate', 'Survey'],
+      types: ['CheckMessage', 'PhotoRotate', 'Survey2'],
       bump: 1,
     }
   },
@@ -309,7 +311,7 @@ export default {
           this.showTask = true
         } else if (this.task.type === 'PhotoRotate') {
           this.showTask = true
-        } else if (this.task.type === 'Survey') {
+        } else if (this.task.type === 'Survey2') {
           this.showTask = true
         } else {
           this.doneForNow()

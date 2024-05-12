@@ -4,10 +4,7 @@
     class="grid m-0 pl-1 pr-1 pl-sm-0 pr-sm-0 mt-0 mt-lg-5 ml-2 mr-2"
   >
     <client-only>
-      <VisibleWhen
-        :not="['xs']"
-        class="map justify-content-start flex-column d-flex"
-      >
+      <div class="d-none d-sm-flex map justify-content-start flex-column">
         <VisualiseMap v-if="type === 'Map'" class="shadow flex-grow-1" />
         <div v-else-if="type === 'Song'" class="w-100">
           <b-img
@@ -27,23 +24,35 @@
             class="embed-responsive-item shadow flex-grow-1 w-100 bg-secondary"
           ></video>
         </div>
-      </VisibleWhen>
+      </div>
     </client-only>
     <div class="info">
-      <h1 class="text--largest-responsive">
-        Freegle - like online dating for stuff.
-      </h1>
-      <p class="text--medium-responsive black font-weight-bold">
-        Got stuff you don't need? Looking for something?
-      </p>
-      <p class="text--medium-responsive black font-weight-bold">
-        We'll match you with someone local. All completely free.
-      </p>
-      <client-only>
-        <div class="d-flex justify-content-between justify-content-lg-start">
+      <div class="d-block d-sm-none">
+        <h1 class="text--large-responsive">
+          Freegle - online dating for stuff.
+        </h1>
+        <p class="text--medium-responsive black font-weight-bold">
+          Got things you don't need? Need stuff?
+          <br />
+          Match with someone local. Completely free.
+        </p>
+      </div>
+      <div class="d-none d-sm-block">
+        <h1 class="text--largest-responsive">
+          Freegle - like online dating for stuff.
+        </h1>
+        <p class="text--medium-responsive black font-weight-bold">
+          Got stuff you don't need? Looking for something?
+        </p>
+        <p class="text--medium-responsive black font-weight-bold">
+          We'll match you with someone local. All completely free.
+        </p>
+      </div>
+      <div class="d-flex justify-content-between justify-content-lg-start">
+        <client-only>
           <b-button
             variant="primary"
-            size="lg"
+            size="xl"
             to="/give"
             class="text--medium-responsive ml-1 ml-sm-0"
             @click="clicked('give')"
@@ -53,35 +62,55 @@
           <div style="width: 4vw" class="d-none d-lg-block" />
           <b-button
             variant="secondary"
-            size="lg"
+            size="xl"
             to="/find"
             class="text--medium-responsive mr-1 mr-sm-0"
             @click="clicked('ask')"
           >
             Ask for Stuff
           </b-button>
-        </div>
-      </client-only>
+          <template #fallback>
+            <a
+              variant="primary"
+              size="xl"
+              href="/give"
+              class="btn btn-xl btn-primary text--medium-responsive ml-1 ml-sm-0"
+            >
+              Give Stuff
+            </a>
+            <div style="width: 4rem" class="d-none d-lg-block" />
+            <a
+              variant="secondary"
+              size="xl"
+              href="/find"
+              class="btn btn-xl btn-secondary text--medium-responsive mr-1 ml-sm-0"
+            >
+              Ask for Stuff
+            </a>
+          </template>
+        </client-only>
+      </div>
       <div
-        class="font-weight-bold text-header text--medium-responsive mt-3 mb-4"
+        class="font-weight-bold text-header text--medium-responsive mt-3 mb-4 d-none d-md-block"
       >
         Don't throw it away, give it away!
       </div>
-      <h2 class="text--medium-responsive font-weight-bold black">
+      <h2
+        class="text--medium-responsive font-weight-bold black d-none d-md-block"
+      >
         Just looking?
       </h2>
-      <client-only>
-        <div
-          class="d-flex justify-content-around justify-content-lg-start flex-wrap"
-        >
-          <PlaceAutocomplete
-            class="mb-2"
-            labeltext="See what's being freegled near you."
-            labeltext-sr="Enter your location and"
-            @selected="explorePlace($event)"
-          />
-        </div>
-      </client-only>
+      <div
+        class="d-flex justify-content-around justify-content-lg-start flex-wrap mt-2 mt-md-0"
+      >
+        <PlaceAutocomplete
+          class="mb-2"
+          labeltext="See what's being freegled near you:"
+          labeltext-sr="Enter your location and"
+          @selected="explorePlace($event)"
+        />
+      </div>
+      <VisualiseList class="mb-2 d-block d-sm-none" />
     </div>
     <client-only>
       <div class="app-download mt-2">
@@ -127,11 +156,15 @@ import api from '~/api'
 const VisualiseMap = defineAsyncComponent(() =>
   import('~/components/VisualiseMap')
 )
+const VisualiseList = defineAsyncComponent(() =>
+  import('~/components/VisualiseList')
+)
 
 export default {
   components: {
     MainFooter,
     VisualiseMap,
+    VisualiseList,
   },
   setup() {
     const runtimeConfig = useRuntimeConfig()
@@ -256,8 +289,11 @@ export default {
       if (process.client) {
         try {
           const videoEl = document.querySelector('video')
-          videoEl.muted = true
-          await videoEl.play()
+
+          if (videoEl) {
+            videoEl.muted = true
+            await videoEl.play()
+          }
         } catch (e) {
           console.log('Video play failed', e)
         }

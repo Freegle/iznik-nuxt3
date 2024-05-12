@@ -1,5 +1,5 @@
-import { VitePWA } from 'vite-plugin-pwa'
 import eslintPlugin from 'vite-plugin-eslint'
+import { VitePWA } from 'vite-plugin-pwa'
 import legacy from '@vitejs/plugin-legacy'
 import { sentryVitePlugin } from '@sentry/vite-plugin'
 import config from './config'
@@ -224,6 +224,208 @@ export default defineNuxtConfig({
   app: {
     head: {
       title: "Freegle - Don't throw it away, give it away!",
+      script: [
+        // We have to load GSI before we load the cookie banner, otherwise the Google Sign-in button doesn't
+        // render.
+        {
+          src: 'https://accounts.google.com/gsi/client',
+        },
+        // The ecosystem of advertising is complex.
+        // - The underlying ad service is Google Tags (GPT).
+        // - We use prebid (pbjs), which is some kind of ad broker which gives us a pipeline of ads to use.
+        //   We can also define our own ads in GPT.
+        // - Google and prebid both require use of a Consent Management Platform (CMP) so that the
+        //   user has indicated whether we have permission to show personalised ads.  We use CookieYes.
+        // - So we need to signal to Google and prebid which CMP we're using, which we do via window.dataLayer,
+        //   window.gtag and window.pbjs.
+        // - We also have to define the possible advertising slots available to prebid so that it knows what to bid on.
+        //   We do this once, here, for all slots. Only some slots may appear on any given page - they are
+        //   defined and added in ExternalDa.
+        // - When using prebid, we disable the initial ad load because it doesn't happen until after the prebid,
+        //   inside ExternalDa.
+        //
+        // During development we don't have a CMP because CookieYes doesn't work on localhost.  So in that case we
+        // don't disable initial ad load - so Google will load ads immediately.
+        //
+        // The order in which we load scripts is excruciatingly and critically important - see below.
+        {
+          type: 'text/javascript',
+          innerHTML:
+            `try {
+              window.dataLayer = window.dataLayer || [];
+              function ce_gtag() {
+                  window.dataLayer.push(arguments);
+              }
+              ce_gtag("consent", "default", {
+                  ad_storage: "denied",
+                  ad_user_data: "denied", 
+                  ad_personalization: "denied",
+                  analytics_storage: "denied",
+                  functionality_storage: "denied",
+                  personalization_storage: "denied",
+                  security_storage: "granted",
+                  // wait_for_update shouldn't apply because we force the CMP to load before gtag.
+                  wait_for_update: 2000,
+              });
+              ce_gtag("set", "ads_data_redaction", true);
+              ce_gtag("set", "url_passthrough", true);
+              
+              console.log('Initialising pbjs and googletag...');
+              window.googletag = window.googletag || {};
+              window.googletag.cmd = window.googletag.cmd || [];
+              window.googletag.cmd.push(function() {
+                // On the dev server, where COOKIEYES is not set, we want ads to load immediately.
+              ` +
+            (config.COOKIEYES
+              ? `window.googletag.pubads().disableInitialLoad()`
+              : '') +
+            `
+                window.googletag.pubads().enableSingleRequest()
+                window.googletag.enableServices()
+              });
+              
+              window.pbjs = window.pbjs || {};
+              window.pbjs.que = window.pbjs.que || [];
+              
+              window.pbjs.que.push(function() {
+                 window.pbjs.setConfig({
+                   consentManagement: {
+                     // We only need GDPR config.  We are interested in UK users, who are (for GDPR purposes if not
+                     // political purposes) inside the EU. 
+                     gdpr: {
+                      cmpApi: 'iab',
+                      allowAuctionWithoutConsent: false,
+                      timeout: 3000
+                     },
+                     // usp: {
+                     //  timeout: 8000 
+                     // },
+                     // gpp: {
+                     //  cmpApi: 'iab',
+                     //  timeout: 8000
+                     // }
+                   }
+                 });
+                 
+                 // Gourmetads requires schain config.
+                 pbjs.setBidderConfig({
+                  "bidders": ['gourmetads'],   
+                  "config": {
+                   "schain": {
+                     "validation": "relaxed",
+                     "config": {
+                       "ver":"1.0",
+                       "complete": 1,
+                       "nodes": [
+                         {
+                           "asi":"gourmetads.com",
+                           "sid":"16593",
+                           "hp":1
+                         }
+                       ]
+                     }
+                   }
+                 }
+                });
+              });  
+                 
+              window.pbjs.que.push(function() {
+                 console.log('Add PBJS ad units', ` +
+            JSON.stringify(config.AD_PREBID_CONFIG) +
+            `);
+                 window.pbjs.addAdUnits(` +
+            JSON.stringify(config.AD_PREBID_CONFIG) +
+            `)
+              });
+
+            function loadScript(url, block) {
+              if (url && url.length) {
+                console.log('Load script:', url);
+                var script = document.createElement('script');
+                script.defer = true;
+                script.type = 'text/javascript';
+                script.src = url;
+                
+                if (block) {
+                  // Block loading of this script until CookieYes has been authorised.
+                  // It's not clear that this blocking works, but it does no harm to 
+                  // ask for it.
+                  console.log('Set CookieYes script block', url);
+                  script.setAttribute('data-cookieyes', 'cookieyes-advertisement')
+                }
+                
+                document.head.appendChild(script);
+              }
+            }
+
+            function postCookieYes() {
+              console.log('Consider load of GPT and prebid');
+              
+              if (!window.weHaveLoadedGPT) {
+                window.weHaveLoadedGPT = true;
+                
+                // We need to load:
+                // - GPT, which needs to be loaded before prebid.
+                // - Prebid.
+                // The ordering is ensured by using defer and appending the script.
+                console.log('Load GPT and prebid');
+                loadScript('https://securepubads.g.doubleclick.net/tag/js/gpt.js', true)
+                loadScript('/js/prebid.js', true)
+              } else {
+                console.log('GPT and prebid already loaded');
+              }
+            };
+
+            if ('` +
+            config.COOKIEYES +
+            `' != 'null') {
+              // First we load CookieYes, which needs to be loaded before anything else, so that
+              // we have the cookie consent.
+              console.log('Load CookieYes');
+              loadScript('` +
+            config.COOKIEYES +
+            `', false)
+            
+              // Now we wait until the CookieYes script has set its own cookie.  
+              // This might be later than when the script has loaded in pure JS terms, but we
+              // need to be sure it's loaded before we can move on.
+              function checkCookieYes() {
+                if (document.cookie.indexOf('cookieyes-consent') > -1) {
+                  console.log('CookieYes cookie is set, so CookieYes is loaded');
+                  
+                  // Check that we have set the TCF string.  This only happens once the user 
+                  // has responded to the cookie banner.
+                  if (window.__tcfapi) {
+                    window.__tcfapi('getTCData', 2, (tcData, success) => {
+                      if (success && tcData && tcData.tcString) {
+                        console.log('TC data loaded and TC String set');
+                        postCookieYes();
+                      } else {
+                        console.log('Failed to get TC data or string, retry.')
+                        setTimeout(checkCookieYes, 100);
+                      }
+                    }, [1,2,3]);
+                  } else {
+                    console.log('TCP API not yet loaded')
+                    setTimeout(checkCookieYes, 100);
+                  }
+                } else {
+                  console.log('CookieYes not yet loaded')
+                  setTimeout(checkCookieYes, 100);
+                }
+              }
+              
+              checkCookieYes();
+            } else {
+              console.log('No CookieYes to load')
+              postCookieYes();
+            }
+
+          } catch (e) {
+            console.error('Error initialising pbjs and googletag:', e.message);
+          }`,
+        },
+      ],
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },

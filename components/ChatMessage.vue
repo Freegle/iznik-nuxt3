@@ -300,7 +300,7 @@ export default {
   border-radius: 10px;
   padding: 2px 4px 2px 4px;
   word-wrap: break-word;
-  line-height: 1.75;
+  line-height: 1.5;
 
   @include media-breakpoint-up(md) {
     padding: 4px 8px 4px 8px;

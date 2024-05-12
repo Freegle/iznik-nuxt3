@@ -53,8 +53,25 @@
         @photo-processed="photoProcessed"
         @all-processed="allProcessed"
         @init="hidePhotoButton"
+        @error="photoError"
+        @heicerror="heicError"
       />
     </div>
+    <NoticeMessage v-if="heicFailed" variant="danger" class="mt-2 mb-2">
+      <p>This is an HEIC file. We tried to process it but failed.</p>
+      <p>
+        Please convert it to JPG and try again. You can find instructions on how
+        to do this
+        <ExternalLink
+          href="https://www.lifewire.com/convert-heic-to-jpg-on-iphone-5295695"
+          >here</ExternalLink
+        >.
+      </p>
+    </NoticeMessage>
+    <NoticeMessage v-else-if="photoFailed" variant="danger" class="mt-2 mb-2">
+      Photo upload failed. If this keeps happening, then please contact
+      <SupportLink />, including the photo as an attachment.
+    </NoticeMessage>
     <div class="subject-layout mb-1 mt-1">
       <div class="d-flex flex-column">
         <label :for="$id('posttype')" class="d-none d-md-block pl-1">
@@ -138,6 +155,8 @@ export default {
       myFiles: [],
       pondBrowse: true,
       hidingPhotoButton: false,
+      photoFailed: false,
+      heicFailed: false,
     }
   },
   computed: {
@@ -189,6 +208,8 @@ export default {
       // Flag that we're uploading.  This will trigger the render of the filepond instance and subsequently the
       // init callback below.
       this.uploading = true
+      this.photoFailed = false
+      this.heicFailed = false
     },
     photoProcessed(imageid, imagethumb, image) {
       // We have uploaded a photo.  Remove the filepond instance.
@@ -205,6 +226,12 @@ export default {
     },
     allProcessed() {
       this.uploading = false
+    },
+    photoError(e) {
+      this.photoFailed = true
+    },
+    heicError(e) {
+      this.heicFailed = true
     },
     removePhoto(id) {
       this.composeStore.removeAttachment({

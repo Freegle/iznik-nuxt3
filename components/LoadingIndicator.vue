@@ -44,5 +44,7 @@ const { isLoading } = useLoadingIndicator({
   &--transitioned {
     transition: all 0.25s;
   }
+
+  pointer-events: none;
 }
 </style>
