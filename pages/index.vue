@@ -6,7 +6,7 @@
     <client-only>
       <div class="d-none d-sm-flex eyecandy justify-content-start flex-column">
         <VisualiseMap v-if="type === 'Map'" class="shadow flex-grow-1" />
-        <FreeglerPhotos v-else-if="type === 'Photos'" class="p-4" />
+        <FreeglerPhotos v-else-if="type === 'Photos'" class="ps-4" />
         <div v-else-if="type === 'Song'" class="w-100">
           <b-img
             v-if="!timeToPlay"

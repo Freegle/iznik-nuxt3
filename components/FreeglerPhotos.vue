@@ -26,12 +26,13 @@
         </template>
       </BCarouselSlide>
     </BCarousel>
+    <p class="text-center text--smallest">
+      Photos of real freeglers, kindly taken by
+      <ExternalLink href="https://www.alexbamford.com/"
+        >Alex Bamford</ExternalLink
+      >. Back when wearing masks was a thing...
+    </p>
   </div>
-  <p class="text-center text--smallest">
-    Photos of real freeglers, kindly taken by
-    <ExternalLink href="https://www.alexbamford.com/">Alex Bamford</ExternalLink
-    >. Back when wearing masks was a thing...
-  </p>
 </template>
 <script setup lang="ts"></script>
 <style scoped lang="scss">
