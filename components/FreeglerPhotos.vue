@@ -1,31 +1,33 @@
 <template>
   <div class="d-flex flex-column justify-content-between">
-    <BCarousel
-      class="carousel"
-      ride="carousel"
-      fade
-      background="/landingpage/frame.png"
-    >
-      <BCarouselSlide
-        v-for="img in [
-          1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-          21, 22, 23, 24, 25,
-        ]"
-        :key="'slide-' + img"
+    <div class="flex-grow-1">
+      <BCarousel
+        class="carousel"
+        ride="carousel"
+        fade
+        background="/landingpage/frame.png"
       >
-        <template #img>
-          <div class="layout">
-            <b-img fluid src="/landingpage/frame.png" class="frame" />
-            <b-img
-              fluid
-              lazy
-              :src="'/landingpage/Freegler' + img + '.jpeg'"
-              class="image"
-            />
-          </div>
-        </template>
-      </BCarouselSlide>
-    </BCarousel>
+        <BCarouselSlide
+          v-for="img in [
+            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+            20, 21, 22, 23, 24, 25,
+          ]"
+          :key="'slide-' + img"
+        >
+          <template #img>
+            <div class="layout">
+              <b-img fluid src="/landingpage/frame.png" class="frame" />
+              <b-img
+                fluid
+                lazy
+                :src="'/landingpage/Freegler' + img + '.jpeg'"
+                class="image"
+              />
+            </div>
+          </template>
+        </BCarouselSlide>
+      </BCarousel>
+    </div>
     <p class="text-center text--smallest">
       Photos of real freeglers, kindly taken by
       <ExternalLink href="https://www.alexbamford.com/"

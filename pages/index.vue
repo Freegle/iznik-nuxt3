@@ -6,7 +6,7 @@
     <client-only>
       <div class="d-none d-sm-flex eyecandy justify-content-start flex-column">
         <VisualiseMap v-if="type === 'Map'" class="shadow flex-grow-1" />
-        <FreeglerPhotos v-else-if="type === 'Photos'" class="ps-4" />
+        <FreeglerPhotos v-else-if="type === 'Photos'" class="ps-4 h-100" />
         <div v-else-if="type === 'Song'" class="w-100">
           <b-img
             v-if="!timeToPlay"
@@ -214,7 +214,11 @@ export default {
 
           if (type?.variant) {
             this.type = type.variant
-            this.type = 'Photos'
+
+            this.$api.bandit.shown({
+              uid: 'landing',
+              variant: this.type,
+            })
           }
         } catch (e) {
           console.error(e)
@@ -338,7 +342,7 @@ export default {
     grid-row: 1 / 3;
     grid-column: 1 / 2;
     // 100vh includes the header and margins etc so they need to be taken off
-    height: calc(100vh - 150px);
+    height: max(500px, calc(100vh - 450px));
     max-height: 800px;
   }
 }
