@@ -4,8 +4,9 @@
     class="grid m-0 pl-1 pr-1 pl-sm-0 pr-sm-0 mt-0 mt-lg-5 ml-2 mr-2"
   >
     <client-only>
-      <div class="d-none d-sm-flex map justify-content-start flex-column">
+      <div class="d-none d-sm-flex eyecandy justify-content-start flex-column">
         <VisualiseMap v-if="type === 'Map'" class="shadow flex-grow-1" />
+        <FreeglerPhotos v-else-if="type === 'Photos'" class="p-4" />
         <div v-else-if="type === 'Song'" class="w-100">
           <b-img
             v-if="!timeToPlay"
@@ -213,6 +214,7 @@ export default {
 
           if (type?.variant) {
             this.type = type.variant
+            this.type = 'Photos'
           }
         } catch (e) {
           console.error(e)
@@ -324,7 +326,7 @@ export default {
   }
 }
 
-.map {
+.eyecandy {
   grid-row: 3 / 4;
   grid-column: 1 / 3;
 
