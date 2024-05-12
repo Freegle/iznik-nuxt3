@@ -33,6 +33,8 @@
 <script setup>
 // TODO Rotate in microvolunteering and ModTools
 // TODO User edit of photo
+// TODO Other photos besides messages.
+// TODO Perceptual hashes.
 const LR = await import(
   'https://cdn.jsdelivr.net/npm/@uploadcare/blocks@0.38.2/web/blocks.min.js'
 )
