@@ -143,6 +143,10 @@ export default {
     marginTop() {
       return navBarHidden.value ? '0px' : '60px'
     },
+    stickyAdRendered() {
+      const store = useMiscStore()
+      return store.stickyAdRendered
+    },
   },
   async mounted() {
     // Start our timer.  Holding the time in the store allows us to update the time regularly and have reactivity
