@@ -13,7 +13,6 @@
           <div
             class="photoholder bg-dark-subtle d-flex flex-column align-items-center justify-content-around mr-md-1"
           >
-            <v-icon icon="camera" class="camera text-faded" />
             <OurUploader
               :key="'uploader-' + uploaderBump"
               :multiple="true"
@@ -164,7 +163,7 @@ export default {
           ?.attachments(this.id)
           .filter((a) => 'id' in a)
 
-        console.log('Atts', ret)
+        console.log('Compute atts from store', ret)
         return ret
       },
       set(value) {
@@ -210,15 +209,16 @@ export default {
           externaluid: ret.uid,
           externalurl: ret.url,
         })
-        console.log('Message attachments', atts)
       }
 
+      console.log('Set message attachments', atts)
       this.composeStore.setAttachmentsForMessage(this.id, atts)
 
       // We force the uploader to re-render.  There might be a better way of doing this, but it means
       // we reset everything and will load any existing photos into the uploader.  Using the modal-open
       // event on the uploader didn't seem to work - possibly it fired too soon.
-      this.uploaderBump++
+      // await this.$nextTick()
+      // this.uploaderBump++
     },
     $id(type) {
       return uid(type)
@@ -276,18 +276,11 @@ export default {
 
 .photoholder {
   min-height: max(100px, 15vh);
-  max-height: min(300px, 25vh, 50%);
   width: 100%;
 
-  svg {
-    font-size: min(8.75rem, 7.5vh);
-  }
-
   @include media-breakpoint-up(md) {
-    width: 200px;
-    height: 200px;
     min-height: unset;
-    max-height: unset;
+    width: 320px;
   }
 }
 
