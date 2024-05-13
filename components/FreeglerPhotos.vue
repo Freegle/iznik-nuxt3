@@ -16,11 +16,17 @@
         >
           <template #img>
             <div class="layout">
-              <b-img fluid src="/landingpage/frame.png" class="frame" />
+              <b-img
+                fluid
+                src="/landingpage/frame.png"
+                class="frame"
+                alt="Ornate gold picture frame. Image courtesy of https://pixabay.com/users/avantrend-321510/"
+              />
               <b-img
                 fluid
                 lazy
                 :src="'/landingpage/Freegler' + img + '.jpeg'"
+                alt="Picture of a real freegler, looking happy. Photo by Alex Bamford."
                 class="image"
               />
             </div>
