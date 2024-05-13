@@ -6,7 +6,7 @@
       </div>
       <client-only>
         <div
-          v-if="allowAd"
+          v-if="allowAd && !noAdRendered"
           class="d-flex justify-content-around w-100"
           :class="{
             sticky: true,
@@ -20,6 +20,7 @@
               div-id="div-gpt-ad-1699973618906-0"
               pixel
               @rendered="adRendered"
+              @failed="adFailed"
             />
           </VisibleWhen>
           <VisibleWhen :at="['md', 'lg', 'xl', 'xxl']">
@@ -29,6 +30,7 @@
               div-id="div-gpt-ad-1707999304775-0"
               pixel
               @rendered="adRendered"
+              @failed="adFailed"
             />
           </VisibleWhen>
         </div>
@@ -119,6 +121,7 @@ export default {
       timeTimer: null,
       adRendering: true,
       noAdRendered: false,
+      adFailed: false,
     }
   },
   computed: {

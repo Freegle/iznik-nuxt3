@@ -151,6 +151,8 @@ const emit = defineEmits(['rendered'])
 // We want to wait until an ad has been viewable for 100ms.  That reduces the impact of fast scrolling or
 // redirects.
 let initialTimer = null
+let GPTTimer = null
+let GPTFailed = false
 
 function handleVisible() {
   // Check if the ad is still visible after this delay, and no modal is open.
@@ -165,82 +167,99 @@ function handleVisible() {
     (props.inModal || !document.body.classList.contains('modal-open'))
   ) {
     console.log('Queue GPT commands', props.divId)
+
+    // Sometimes GPT is blocked, so we push the command but it never runs.
+    // Start a fallback timer for that.
+    if (!GPTTimer) {
+      GPTTimer = setTimeout(() => {
+        console.log("GPT didn't run", props.divId)
+        GPTTimer = null
+        GPTFailed = true
+        emit('rendered', false)
+      }, 1000)
+    }
+
     window.googletag.cmd.push(function () {
-      console.log('Execute GPT define slot', props.divId)
-      slot = window.googletag
-        .defineSlot(props.adUnitPath, props.dimensions, props.divId)
-        .addService(window.googletag.pubads())
-
-      console.log('Add event listeners', props.adUnitPath)
-      window.googletag
-        .pubads()
-        .addEventListener('slotRenderEnded', (event) => {
-          if (event?.slot.getAdUnitPath() === props.adUnitPath) {
-            console.log(
-              'Rendered',
-              uniqueid.value,
-              'empty',
-              event?.isEmpty,
-              event
-            )
-
-            if (event?.isEmpty) {
-              adShown.value = false
-              maxWidth.value = 0
-              maxHeight.value = 0
-            } else {
-              maxWidth.value = event.size[0]
-              maxHeight.value = event.size[1]
-            }
-
-            if (event?.isEmpty) {
-              adShown.value = false
-              console.log('Rendered empty', props.adUnitPath, adShown)
-              // Sentry.captureMessage('Ad rendered empty ' + props.adUnitPath)
-            } else {
-              maxWidth.value = event.size[0]
-              maxHeight.value = event.size[1]
-            }
-
-            emit('rendered', adShown.value)
-          }
-        })
-        .addEventListener('slotVisibilityChanged', (event) => {
-          if (event?.slot.getAdUnitPath() === props.adUnitPath) {
-            if (event.inViewPercentage < 51 && miscStore.visible) {
-              // const msg =
-              //   'Visibility of slot ' +
-              //   props.adUnitPath +
-              //   ' changed. New visibility: ' +
-              //   event.inViewPercentage +
-              //   '%.Viewport size: ' +
-              //   window.innerWidth +
-              //   'x' +
-              //   window.innerHeight
-              //
-              // console.log(msg)
-              // Sentry.captureMessage(msg)
-            }
-          }
-        })
-
-      console.log('Excute GPT display', props.divId)
-      window.googletag.display(props.divId)
-
-      if (window.googletag.pubads().isInitialLoadDisabled()) {
-        // We need to refresh the ad because we called disableInitialLoad.  That's what you do when
-        // using prebid.
-        console.log('Displayed, now trigger refresh', props.adUnitPath)
-        refreshAd()
+      if (GPTFailed) {
+        console.log('GPT already timed out')
       } else {
-        console.log('Displayed and rendered, refresh timer')
+        clearTimeout(GPTTimer)
+        console.log('Execute GPT define slot', props.divId)
+        slot = window.googletag
+          .defineSlot(props.adUnitPath, props.dimensions, props.divId)
+          .addService(window.googletag.pubads())
 
-        if (!refreshTimer) {
-          refreshTimer = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
+        console.log('Add event listeners', props.adUnitPath)
+        window.googletag
+          .pubads()
+          .addEventListener('slotRenderEnded', (event) => {
+            if (event?.slot.getAdUnitPath() === props.adUnitPath) {
+              console.log(
+                'Rendered',
+                uniqueid.value,
+                'empty',
+                event?.isEmpty,
+                event
+              )
+
+              if (event?.isEmpty) {
+                adShown.value = false
+                maxWidth.value = 0
+                maxHeight.value = 0
+              } else {
+                maxWidth.value = event.size[0]
+                maxHeight.value = event.size[1]
+              }
+
+              if (event?.isEmpty) {
+                adShown.value = false
+                console.log('Rendered empty', props.adUnitPath, adShown)
+                // Sentry.captureMessage('Ad rendered empty ' + props.adUnitPath)
+              } else {
+                maxWidth.value = event.size[0]
+                maxHeight.value = event.size[1]
+              }
+
+              emit('rendered', adShown.value)
+            }
+          })
+          .addEventListener('slotVisibilityChanged', (event) => {
+            if (event?.slot.getAdUnitPath() === props.adUnitPath) {
+              if (event.inViewPercentage < 51 && miscStore.visible) {
+                // const msg =
+                //   'Visibility of slot ' +
+                //   props.adUnitPath +
+                //   ' changed. New visibility: ' +
+                //   event.inViewPercentage +
+                //   '%.Viewport size: ' +
+                //   window.innerWidth +
+                //   'x' +
+                //   window.innerHeight
+                //
+                // console.log(msg)
+                // Sentry.captureMessage(msg)
+              }
+            }
+          })
+
+        console.log('Excute GPT display', props.divId)
+        window.googletag.display(props.divId)
+
+        if (window.googletag.pubads().isInitialLoadDisabled()) {
+          // We need to refresh the ad because we called disableInitialLoad.  That's what you do when
+          // using prebid.
+          console.log('Displayed, now trigger refresh', props.adUnitPath)
+          refreshAd()
+        } else {
+          console.log('Displayed and rendered, refresh timer')
+
+          if (!refreshTimer) {
+            refreshTimer = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
+          }
         }
-      }
 
-      shownFirst = true
+        shownFirst = true
+      }
     })
   }
 }
