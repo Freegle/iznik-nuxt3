@@ -164,35 +164,14 @@ function handleVisible() {
     isVisible.value &&
     (props.inModal || !document.body.classList.contains('modal-open'))
   ) {
-    console.log('Queue GPT define slot', props.divId)
+    console.log('Queue GPT commands', props.divId)
     window.googletag.cmd.push(function () {
       console.log('Execute GPT define slot', props.divId)
       slot = window.googletag
         .defineSlot(props.adUnitPath, props.dimensions, props.divId)
         .addService(window.googletag.pubads())
 
-      window.googletag.cmd.push(function () {
-        console.log('Excute GPT display', props.divId)
-        window.googletag.display(props.divId)
-
-        if (window.googletag.pubads().isInitialLoadDisabled()) {
-          // We need to refresh the ad because we called disableInitialLoad.  That's what you do when
-          // using prebid.
-          console.log('Displayed, now trigger refresh', props.adUnitPath)
-          refreshAd()
-        } else {
-          console.log('Displayed and rendered, refresh timer')
-
-          if (!refreshTimer) {
-            refreshTimer = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
-          }
-        }
-
-        shownFirst = true
-      })
-    })
-
-    window.googletag.cmd.push(function () {
+      console.log('Add event listeners', props.adUnitPath)
       window.googletag
         .pubads()
         .addEventListener('slotRenderEnded', (event) => {
@@ -244,6 +223,24 @@ function handleVisible() {
             }
           }
         })
+
+      console.log('Excute GPT display', props.divId)
+      window.googletag.display(props.divId)
+
+      if (window.googletag.pubads().isInitialLoadDisabled()) {
+        // We need to refresh the ad because we called disableInitialLoad.  That's what you do when
+        // using prebid.
+        console.log('Displayed, now trigger refresh', props.adUnitPath)
+        refreshAd()
+      } else {
+        console.log('Displayed and rendered, refresh timer')
+
+        if (!refreshTimer) {
+          refreshTimer = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
+        }
+      }
+
+      shownFirst = true
     })
   }
 }

@@ -76,6 +76,8 @@ function resize() {
   windowHeight.value = window.innerHeight
 }
 
+const stickyAdRendered = computed(() => miscStore.stickyAdRendered)
+
 const theHeight = computed(() => {
   const vh100 = Math.max(
     document.documentElement.clientHeight,
@@ -85,7 +87,6 @@ const theHeight = computed(() => {
   let ret = null
 
   if (miscStore.breakpoint === 'xs' || miscStore.breakpoint === 'sm') {
-    // On mobile there is a sticky ad at the bottom and we want to make sure the buttons show.
     ret = navBarHidden.value ? vh100 : vh100 - 60
   } else {
     ret = vh100 - 74
@@ -231,10 +232,14 @@ function typing(val) {
 @import 'assets/css/sticky-banner.scss';
 
 .chatpane {
-  min-height: calc(100vh - $sticky-banner-height-mobile);
+  min-height: calc(
+    100vh - $sticky-banner-height-mobile * v-bind('stickyAdRendered')
+  );
 
   @include media-breakpoint-up(md) {
-    min-height: calc(100vh - $sticky-banner-height-desktop);
+    min-height: calc(
+      100vh - $sticky-banner-height-desktop * v-bind('stickyAdRendered')
+    );
   }
 }
 
@@ -242,10 +247,16 @@ function typing(val) {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: calc(v-bind(theHeight) - $sticky-banner-height-mobile);
+  height: calc(
+    v-bind(theHeight) - $sticky-banner-height-mobile *
+      v-bind('stickyAdRendered')
+  );
 
   @include media-breakpoint-up(md) {
-    height: calc(v-bind(theHeight) - $sticky-banner-height-desktop);
+    height: calc(
+      v-bind(theHeight) - $sticky-banner-height-desktop *
+        v-bind('stickyAdRendered')
+    );
   }
 }
 
