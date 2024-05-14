@@ -2,6 +2,7 @@
   <div>
     <client-only>
       <div class="maptools d-flex mb-1 justify-content-between">
+        <div v-if="caretaker" style="font-weight:bold;color:red;">CARETAKER</div>
         <div class="d-flex">
           <v-icon icon="sync" :class="busy ? 'text-success fa-spin ml-4 mt-1' : 'text-faded ml-4 mt-1'" scale="2" />
         </div>
@@ -138,7 +139,7 @@
               <SpinButton v-if="selectedId" variant="danger" icon-name="trash-alt" label="Delete" @handle="deleteArea" />
             </b-card-footer>
           </b-card>
-          Zoom: {{zoom}} Groups: {{ groups }}
+          Zoom: {{ zoom }} Groups: {{ groups }}
           <NoticeMessage v-if="zoom < 12" variant="danger" show class="mb-2">
             Please zoom in further to see locations.
           </NoticeMessage>
@@ -299,7 +300,7 @@ export default {
     },
     allgroups() {
       let groups = Object.values(this.groupStore.list)
-      console.log('allgroups',groups.length)
+      console.log('allgroups', groups.length)
 
       if (this.caretaker) {
         groups = groups.filter(g => g.mentored)
@@ -332,7 +333,7 @@ export default {
         if (g.onmap && g.polyofficial) {
           try {
             const wkt = new Wkt.Wkt()
-            console.log('Wkt.Wkt A', g.polyofficial)
+            //console.log('Wkt.Wkt A', g.polyofficial?g.polyofficial.length:-1)
             wkt.read(g.polyofficial)
             ret.push({
               json: wkt.toJson(),
@@ -353,7 +354,7 @@ export default {
         if (g.onmap && g.poly) {
           try {
             const wkt = new Wkt.Wkt()
-            console.log('Wkt.Wkt B', g.poly)
+            //console.log('Wkt.Wkt B', g.poly?g.poly.length:-1)
             wkt.read(g.poly)
             ret.push({
               json: wkt.toJson(),
@@ -711,7 +712,7 @@ export default {
               wkt.read(area)
               const obj = wkt.toObject(this.mapObject.defaults)
               bounds = obj.getBounds()
-              const abounds = [[bounds.getSouthWest().lat, bounds.getSouthWest().lng],[bounds.getNorthEast().lat,bounds.getNorthEast().lng]]
+              const abounds = [[bounds.getSouthWest().lat, bounds.getSouthWest().lng], [bounds.getNorthEast().lat, bounds.getNorthEast().lng]]
               this.mapObject.fitBounds(abounds)
             }
           } else {
@@ -819,9 +820,9 @@ export default {
 
         // TODO DONE: Do not fetch if too zoomed out
         //if (this.zoom >= 12) {
-          const ret = await this.locationStore.fetch(data)
-          this.locations = ret.locations
-          this.dodgy = ret.dodgy
+        const ret = await this.locationStore.fetch(data)
+        this.locations = ret.locations
+        this.dodgy = ret.dodgy
         //}
       }
     },

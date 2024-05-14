@@ -15,8 +15,8 @@ export const useGroupStore = defineStore({
       this.config = config
       this.fetching = {}
     },
-    
-    async listMT(params){
+
+    async listMT(params) {
       const groups = await api(this.config).group.listMT(params)
       this.list = {}
       this.allGroups = {}
@@ -26,7 +26,7 @@ export const useGroupStore = defineStore({
           this.list[g.id] = g
         })
       }
-  },
+    },
 
     async fetchMT({ id, polygon, showmods, sponsors, tnkey }) {
       console.log('useGroupStore fetchMT', id, polygon)
@@ -61,8 +61,8 @@ export const useGroupStore = defineStore({
           components: ['groups'],
         })
         if (ret && ret.groups) {
-          const g = ret.groups.find((g)=> g.id===group.id)
-          if( g && g.work){
+          const g = ret.groups.find((g) => g.id === group.id)
+          if (g && g.work) {
             this.list[group.id].work = g.work
           }
         }
@@ -77,9 +77,9 @@ export const useGroupStore = defineStore({
     },
 
 
-      async fetch(id, force) {
-        console.log('useGroupStore fetch', id)
-        if (id) {
+    async fetch(id, force) {
+      console.log('useGroupStore fetch', id)
+      if (id) {
         if (isNaN(id)) {
           // Get by name.  Case-insensitive.
           id = id.toLowerCase()

@@ -22,10 +22,13 @@ const groupStore = useGroupStore()
 const groupid = computed(() => {
   return ('groupid' in route.params) ? parseInt(route.params.groupid) : 0
 })
+/* TODO /map/all not actually used ???
 const all = computed(() => {
   return ('groupid' in route.params) ? route.params.groupid === "all" : false
-})
+})*/
 const caretaker = computed(() => {
+  const caretaker = ('groupid' in route.params) ? route.params.groupid === "caretaker" : false
+console.log('caretaker',caretaker)
   return ('groupid' in route.params) ? route.params.groupid === "caretaker" : false
 })
 
@@ -33,13 +36,10 @@ const loaded = ref(false)
 
 onMounted(async () => {
   // Get the data before we load the map to avoid timing windows.
-  /*if (groupid.value) {
-    console.log('map onmounted', groupid.value)
-    await groupStore.fetchMT({
-      id: groupid.value,
-      polygon: true
+  // Get CGAs and DPAs for all groups - but no locations
+  await groupStore.listMT({
+      grouptype: 'Freegle'
     })
-  }*/
 
   loaded.value = true
 })
