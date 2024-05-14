@@ -1,45 +1,20 @@
 <template>
   <div>
     <div class="d-flex flex-wrap">
-      <draggable
-        v-if="showDraggable"
-        v-model="attachments"
-        class="d-flex flex-wrap w-100"
-        item-key="id"
-        :animation="150"
-        ghost-class="ghost"
-      >
-        <template #header>
-          <div
-            class="photoholder bg-dark-subtle d-flex flex-column align-items-center justify-content-around mr-md-1"
-          >
-            <OurUploader
-              :key="'uploader-' + uploaderBump"
-              :multiple="true"
-              :class="{
-                'ml-3': true,
-                'mr-3': true,
-              }"
-              variant="primary"
-              size="lg"
-              :photos="attachments"
-              @uploaded="uploaded"
-            >
-              <span v-if="attachments?.length >= 1"> Add/edit photos </span>
-              <span v-else> Add photos </span>
-            </OurUploader>
-          </div>
-        </template>
-        <template #item="{ element, index }">
-          <div class="bg-transparent p-0">
-            <PostPhoto
-              v-bind="element"
-              :primary="index === 0"
-              class="mr-1 mt-1 mt-md-0"
-            />
-          </div>
-        </template>
-      </draggable>
+      <div class="photoholder">
+        <label for="uploader" class="d-none d-md-block pl-1 mt-1">
+          Please add a photo:
+        </label>
+        Atts {{ attachments }}
+        <OurUploader
+          id="uploader"
+          :key="'uploader-' + uploaderBump"
+          v-model="attachments"
+          :multiple="true"
+          variant="primary"
+          size="lg"
+        />
+      </div>
       <hr />
     </div>
     <div class="subject-layout mb-1 mt-1">
@@ -65,7 +40,9 @@
       />
     </div>
     <div class="d-flex flex-column mt-2">
-      <label :for="$id('description')">Please give a few details:</label>
+      <label :for="$id('description')" class="mb-1"
+        >Please give a few details:</label
+      >
       <b-form-textarea
         :id="$id('description')"
         v-model="description"
@@ -76,7 +53,6 @@
   </div>
 </template>
 <script>
-import draggable from 'vuedraggable'
 import { uid } from '../composables/useId'
 import { useComposeStore } from '../stores/compose'
 import { useMessageStore } from '../stores/message'
@@ -87,16 +63,13 @@ import { useImageStore } from '~/stores/image'
 const OurUploader = defineAsyncComponent(() =>
   import('~/components/OurUploader')
 )
-const PostPhoto = defineAsyncComponent(() => import('~/components/PostPhoto'))
 const PostItem = defineAsyncComponent(() => import('~/components/PostItem'))
 
 export default {
   components: {
     NumberIncrementDecrement,
     OurUploader,
-    PostPhoto,
     PostItem,
-    draggable,
   },
   props: {
     id: {
@@ -164,9 +137,11 @@ export default {
           .filter((a) => 'id' in a)
 
         console.log('Compute atts from store', ret)
-        return ret
+        return ret || []
       },
       set(value) {
+        // The uploader has updated the list of attachments.  Update the attachments for the message in the store.
+        console.log('Set message attachments', value)
         return this.composeStore?.setAttachmentsForMessage(this.id, value)
       },
     },
@@ -184,42 +159,6 @@ export default {
     }, 1)
   },
   methods: {
-    async uploaded(photos) {
-      console.log('Uploaded', photos)
-      const atts = []
-
-      for (const photo of photos) {
-        // Create the attachment on the server which references the uploaded image.
-        const att = {
-          imgtype: 'Message',
-          externaluid: photo.id,
-          externalurl: photo.path,
-        }
-
-        const ret = await this.imageStore.post(att)
-
-        // Set up our local attachment info.  Note that the URL is returned from the server because it
-        // is manipulated on there to remove EXIF, so we use that rather than the URL that was returned
-        // from the upload.
-        console.log('Post returned', ret)
-        atts.push({
-          id: ret.id,
-          path: ret.url,
-          paththumb: ret.url,
-          externaluid: ret.uid,
-          externalurl: ret.url,
-        })
-      }
-
-      console.log('Set message attachments', atts)
-      this.composeStore.setAttachmentsForMessage(this.id, atts)
-
-      // We force the uploader to re-render.  There might be a better way of doing this, but it means
-      // we reset everything and will load any existing photos into the uploader.  Using the modal-open
-      // event on the uploader didn't seem to work - possibly it fired too soon.
-      // await this.$nextTick()
-      // this.uploaderBump++
-    },
     $id(type) {
       return uid(type)
     },
@@ -280,7 +219,6 @@ export default {
 
   @include media-breakpoint-up(md) {
     min-height: unset;
-    width: 320px;
   }
 }
 
