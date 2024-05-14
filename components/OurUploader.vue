@@ -31,7 +31,6 @@
       ctx-name="my-uploader"
       @file-upload-success="uploadSuccess"
       @file-removed="removed"
-      @modal-close="handleModalCloseEvent"
     ></lr-upload-ctx-provider>
   </div>
 </template>
@@ -54,20 +53,15 @@ const props = defineProps({
     required: false,
     default: false,
   },
-  variant: {
-    type: String,
-    required: false,
-    default: 'primary',
-  },
-  size: {
-    type: String,
-    required: false,
-    default: 'md',
-  },
   modelValue: {
     type: Array,
     required: false,
     default: () => [],
+  },
+  type: {
+    type: String,
+    required: false,
+    default: 'Message',
   },
 })
 
@@ -108,6 +102,7 @@ onMounted(() => {
       'drop-files-here': 'Add photos',
       clear: 'Remove',
       'add-more': 'Add',
+      'src-type-local': 'Browse',
     },
   }
   LR.registerBlocks(LR)
@@ -128,16 +123,6 @@ function setPhotos(photos) {
   }
 }
 
-// watch(
-//   () => props.modelValue,
-//   (newVal) => {
-//     setPhotos(newVal)
-//   },
-//   {
-//     immediate: true,
-//   }
-// )
-//
 async function uploadSuccess(e) {
   console.log('Uploaded', e)
 
@@ -145,8 +130,7 @@ async function uploadSuccess(e) {
     if (e.detail.status === 'success') {
       // We've uploaded a file.  Create the attachment on the server which references the uploaded image.
       const att = {
-        // TODO Support other types.
-        imgtype: 'Message',
+        imgtype: props.type,
         externaluid: e.detail.uuid,
         externalurl: e.detail.cdnUrl,
       }
@@ -159,12 +143,11 @@ async function uploadSuccess(e) {
       // Note that the URL is returned from the server because it is manipulated on there to remove EXIF,
       // so we use that rather than the URL that was returned from the uploader.
       console.log('Post returned', ret)
+      uploadedPhotos.value = props.modelValue
       uploadedPhotos.value.push({
         id: ret.id,
         path: ret.url,
         paththumb: ret.url,
-        externaluid: ret.uid,
-        externalurl: ret.url,
       })
 
       emit('update:modelValue', uploadedPhotos.value)

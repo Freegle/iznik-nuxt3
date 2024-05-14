@@ -47,7 +47,7 @@ lr-progress-bar {
 }
 
 lr-file-uploader-inline {
-  width: 230px;
+  min-width: 230px;
 }
 
 lr-drop-area[with-icon] {
@@ -77,6 +77,11 @@ lr-upload-list {
       width: 210px;
     }
   }
+
+  .files {
+    display: flex;
+    flex-wrap: wrap;
+  }
 }
 
 lr-file-item .thumb {
@@ -90,6 +95,14 @@ lr-file-item .thumb {
 }
 
 lr-drop-area[with-icon] {
+  width: 100px;
+  height: 100px;
+
+  @include media-breakpoint-up(md) {
+    width: 200px;
+    height: 200px;
+  }
+
   &:hover {
     color: $colour-success;
 
@@ -119,7 +132,7 @@ lr-drop-area[with-icon] {
 lr-file-item {
   >.inner {
     padding-left: 0px;
-    padding-right: 0px;
+    padding-right: 10px;
     grid-template-columns: 1fr;
     background-color: transparent;
   }
@@ -131,5 +144,25 @@ lr-file-item {
   .badge lr-icon, .badge lr-icon svg {
     width: unset;
     height: unset;
+  }
+}
+
+lr-source-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+
+  lr-source-btn {
+    padding-left: 0px;
+
+    lr-icon {
+      margin-right: 0px;
+    }
+  }
+}
+
+lr-start-from {
+  .content {
+    gap: unset;
   }
 }

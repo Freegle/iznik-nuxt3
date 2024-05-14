@@ -2,17 +2,14 @@
   <div>
     <div class="d-flex flex-wrap">
       <div class="photoholder">
-        <label for="uploader" class="d-none d-md-block pl-1 mt-1">
-          Please add a photo:
+        <label for="uploader" class="d-none d-md-block mt-2">
+          Please add photos:
         </label>
-        Atts {{ attachments }}
         <OurUploader
           id="uploader"
           :key="'uploader-' + uploaderBump"
           v-model="attachments"
           :multiple="true"
-          variant="primary"
-          size="lg"
         />
       </div>
       <hr />
