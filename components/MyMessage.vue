@@ -141,7 +141,7 @@
             </div>
           </b-card-header>
           <MyMessageReplySummary
-            v-if="!expanded && message.replycount > 0"
+            v-if="!expanded"
             :id="id"
             @expand="expanded = true"
           />
@@ -379,7 +379,6 @@ export default {
 
       return ret
     },
-
     replies() {
       // Show the replies with unseen messages first, then most recent
       // console.log('Sort replies', this.message.replies, this)
@@ -560,6 +559,20 @@ export default {
               this.userStore.fetch(p.userid)
             })
           }
+
+          if (newVal.replycount === 1) {
+            this.expanded = true
+          }
+        }
+      },
+    },
+    replies: {
+      immediate: true,
+      handler(newVal) {
+        console.log('Replies', newVal, newVal?.length)
+        if (newVal?.length === 1) {
+          console.log('Expand')
+          this.expanded = true
         }
       },
     },
