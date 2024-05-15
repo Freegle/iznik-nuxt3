@@ -263,14 +263,27 @@ function handleVisible() {
     })
   }
 }
+
+let prebidRetry = 0
+
 function visibilityChanged(visible) {
   // Check the pbjs status here rather than on component load, as it might not be available yet.
+  visibleTimer = null
+
   if (process.client) {
     if (!window.pbjs?.version) {
       console.log('Prebid not loaded yet')
-      visibleTimer = window.setTimeout(() => {
-        visibilityChanged(visible)
-      }, 100)
+      prebidRetry++
+
+      if (prebidRetry > 20) {
+        // Give up.  Probably blocked, so we should emit that we've not rendered an ad.  This may trigger
+        // a fallback ad.
+        emit('rendered', false)
+      } else {
+        visibleTimer = window.setTimeout(() => {
+          visibilityChanged(visible)
+        }, 100)
+      }
     } else {
       visibleTimer = null
 

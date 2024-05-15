@@ -89,7 +89,7 @@ const theHeight = computed(() => {
   if (miscStore.breakpoint === 'xs' || miscStore.breakpoint === 'sm') {
     ret = navBarHidden.value ? vh100 : vh100 - 60
   } else {
-    ret = vh100 - 74
+    ret = vh100 - 78
   }
 
   return ret + 'px'
@@ -231,31 +231,18 @@ function typing(val) {
 @import 'bootstrap/scss/mixins/_breakpoints';
 @import 'assets/css/sticky-banner.scss';
 
-.chatpane {
-  min-height: calc(
-    100vh - $sticky-banner-height-mobile * v-bind('stickyAdRendered')
-  );
-
-  @include media-breakpoint-up(md) {
-    min-height: calc(
-      100vh - $sticky-banner-height-desktop * v-bind('stickyAdRendered')
-    );
-  }
-}
-
 .chatHolder {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   height: calc(
-    v-bind(theHeight) - $sticky-banner-height-mobile *
-      v-bind('stickyAdRendered')
+    v-bind(theHeight) - $sticky-banner-height-mobile * v-bind(stickyAdRendered)
   );
 
   @include media-breakpoint-up(md) {
     height: calc(
       v-bind(theHeight) - $sticky-banner-height-desktop *
-        v-bind('stickyAdRendered')
+        v-bind(stickyAdRendered)
     );
   }
 }
