@@ -312,6 +312,7 @@ export default defineNuxtConfig({
                       vasttrack: true 
                    },
                    s2sConfig: [{
+                      accountId: '26548'
                       bidders: ['mgnipbs'],   // PBS ‘bidder’ code that triggers the call to PBS
                       defaultVendor: 'rubicon',
                       coopSync: true,
