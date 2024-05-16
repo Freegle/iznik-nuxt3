@@ -598,7 +598,7 @@ const CONFIG = {
       },
       bids: [
         {
-          bidder: 'mgnipbs',
+          bidder: 'rubicon',
           params: {},
         },
       ],
