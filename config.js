@@ -69,7 +69,7 @@ const CONFIG = {
           },
         },
         // {
-        //   bidder: 'rubicon',
+        //   bidder: 'mgnipbs',
         //   params: {},
         // },
       ],
@@ -102,7 +102,7 @@ const CONFIG = {
           },
         },
         // {
-        //   bidder: 'rubicon',
+        //   bidder: 'mgnipbs',
         //   params: {},
         // },
       ],
@@ -135,7 +135,7 @@ const CONFIG = {
           },
         },
         // {
-        //   bidder: 'rubicon',
+        //   bidder: 'mgnipbs',
         //   params: {},
         // },
       ],
@@ -168,7 +168,7 @@ const CONFIG = {
           },
         },
         // {
-        //   bidder: 'rubicon',
+        //   bidder: 'mgnipbs',
         //   params: {},
         // },
       ],
@@ -201,7 +201,7 @@ const CONFIG = {
           },
         },
         // {
-        //   bidder: 'rubicon',
+        //   bidder: 'mgnipbs',
         //   params: {},
         // },
       ],
@@ -234,7 +234,7 @@ const CONFIG = {
           },
         },
         // {
-        //   bidder: 'rubicon',
+        //   bidder: 'mgnipbs',
         //   params: {},
         // },
       ],
@@ -268,12 +268,8 @@ const CONFIG = {
         //   },
         // },
         {
-          bidder: 'rubicon',
-          params: {
-            accountId: '26548',
-            siteId: '1',
-            zoneId: '1',
-          },
+          bidder: 'mgnipbs',
+          params: {},
         },
       ],
     },
@@ -305,7 +301,7 @@ const CONFIG = {
           },
         },
         // {
-        //   bidder: 'rubicon',
+        //   bidder: 'mgnipbs',
         //   params: {},
         // },
       ],
@@ -338,7 +334,7 @@ const CONFIG = {
           },
         },
         // {
-        //   bidder: 'rubicon',
+        //   bidder: 'mgnipbs',
         //   params: {},
         // },
       ],
@@ -371,7 +367,7 @@ const CONFIG = {
           },
         },
         // {
-        //   bidder: 'rubicon',
+        //   bidder: 'mgnipbs',
         //   params: {},
         // },
       ],
@@ -404,7 +400,7 @@ const CONFIG = {
           },
         },
         // {
-        //   bidder: 'rubicon',
+        //   bidder: 'mgnipbs',
         //   params: {},
         // },
       ],
@@ -437,7 +433,7 @@ const CONFIG = {
           },
         },
         // {
-        //   bidder: 'rubicon',
+        //   bidder: 'mgnipbs',
         //   params: {},
         // },
       ],
@@ -470,7 +466,7 @@ const CONFIG = {
           },
         },
         // {
-        //   bidder: 'rubicon',
+        //   bidder: 'mgnipbs',
         //   params: {},
         // },
       ],
@@ -503,7 +499,7 @@ const CONFIG = {
           },
         },
         // {
-        //   bidder: 'rubicon',
+        //   bidder: 'mgnipbs',
         //   params: {},
         // },
       ],
@@ -536,7 +532,7 @@ const CONFIG = {
           },
         },
         // {
-        //   bidder: 'rubicon',
+        //   bidder: 'mgnipbs',
         //   params: {},
         // },
       ],
@@ -569,7 +565,7 @@ const CONFIG = {
           },
         },
         // {
-        //   bidder: 'rubicon',
+        //   bidder: 'mgnipbs',
         //   params: {},
         // },
       ],
@@ -602,7 +598,7 @@ const CONFIG = {
       },
       bids: [
         // {
-        //   bidder: 'rubicon',
+        //   bidder: 'mgnipbs',
         //   params: {}
         // },
       ],
