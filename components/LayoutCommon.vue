@@ -7,7 +7,7 @@
       <client-only>
         <div v-if="allowAd">
           <div
-            v-if="!noAdRendered"
+            v-if="noAdRendered"
             class="d-flex justify-content-around w-100"
             :class="{
               sticky: true,
@@ -43,7 +43,10 @@
               to="/donate"
               class="nodecor text-primary-emphasis font-weight-bold"
             >
-              Help keep Freegle running. Click to donate.
+              <span v-if="me?.donated">
+                Thank you for donating to help keep Freegle running.
+              </span>
+              <span v-else> Help keep Freegle running. Click to donate. </span>
             </nuxt-link>
           </div>
         </div>
