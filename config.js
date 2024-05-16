@@ -68,6 +68,10 @@ const CONFIG = {
             placementId: '32293691',
           },
         },
+        {
+          bidder: 'mgnipbs',
+          params: {},
+        },
       ],
     },
     {
@@ -96,6 +100,10 @@ const CONFIG = {
           params: {
             placementId: '32293692',
           },
+        },
+        {
+          bidder: 'mgnipbs',
+          params: {},
         },
       ],
     },
@@ -126,6 +134,10 @@ const CONFIG = {
             placementId: '32293683',
           },
         },
+        {
+          bidder: 'mgnipbs',
+          params: {},
+        },
       ],
     },
     {
@@ -154,6 +166,10 @@ const CONFIG = {
           params: {
             placementId: '32293685',
           },
+        },
+        {
+          bidder: 'mgnipbs',
+          params: {},
         },
       ],
     },
@@ -184,6 +200,10 @@ const CONFIG = {
             placementId: '32293689',
           },
         },
+        {
+          bidder: 'mgnipbs',
+          params: {},
+        },
       ],
     },
     {
@@ -213,6 +233,10 @@ const CONFIG = {
             placementId: '32293701',
           },
         },
+        {
+          bidder: 'mgnipbs',
+          params: {},
+        },
       ],
     },
     {
@@ -223,24 +247,29 @@ const CONFIG = {
         },
       },
       bids: [
+        // TODO Testing magnite.
+        // {
+        //   bidder: 'pubmatic',
+        //   params: {
+        //     publisherId: '164422',
+        //     adSlot: '5753983',
+        //   },
+        // },
+        // {
+        //   bidder: 'appnexus',
+        //   params: {
+        //     placementId: '32336186',
+        //   },
+        // },
+        // {
+        //   bidder: 'gourmetads',
+        //   params: {
+        //     placementId: '32293682',
+        //   },
+        // },
         {
-          bidder: 'pubmatic',
-          params: {
-            publisherId: '164422',
-            adSlot: '5753983',
-          },
-        },
-        {
-          bidder: 'appnexus',
-          params: {
-            placementId: '32336186',
-          },
-        },
-        {
-          bidder: 'gourmetads',
-          params: {
-            placementId: '32293682',
-          },
+          bidder: 'mgnipbs',
+          params: {},
         },
       ],
     },
@@ -271,6 +300,10 @@ const CONFIG = {
             placementId: '32293670',
           },
         },
+        {
+          bidder: 'mgnipbs',
+          params: {},
+        },
       ],
     },
     {
@@ -299,6 +332,10 @@ const CONFIG = {
           params: {
             placementId: '32293688',
           },
+        },
+        {
+          bidder: 'mgnipbs',
+          params: {},
         },
       ],
     },
@@ -329,6 +366,10 @@ const CONFIG = {
             placementId: '32293687',
           },
         },
+        {
+          bidder: 'mgnipbs',
+          params: {},
+        },
       ],
     },
     {
@@ -357,6 +398,10 @@ const CONFIG = {
           params: {
             placementId: '32293654',
           },
+        },
+        {
+          bidder: 'mgnipbs',
+          params: {},
         },
       ],
     },
@@ -387,6 +432,10 @@ const CONFIG = {
             placementId: '32293693',
           },
         },
+        {
+          bidder: 'mgnipbs',
+          params: {},
+        },
       ],
     },
     {
@@ -415,6 +464,10 @@ const CONFIG = {
           params: {
             placementId: '32293694',
           },
+        },
+        {
+          bidder: 'mgnipbs',
+          params: {},
         },
       ],
     },
@@ -445,6 +498,10 @@ const CONFIG = {
             placementId: '32293695',
           },
         },
+        {
+          bidder: 'mgnipbs',
+          params: {},
+        },
       ],
     },
     {
@@ -473,6 +530,10 @@ const CONFIG = {
           params: {
             placementId: '32293696',
           },
+        },
+        {
+          bidder: 'mgnipbs',
+          params: {},
         },
       ],
     },
@@ -503,6 +564,10 @@ const CONFIG = {
             placementId: '32293696',
           },
         },
+        {
+          bidder: 'mgnipbs',
+          params: {},
+        },
       ],
     },
     {
@@ -521,6 +586,20 @@ const CONFIG = {
           params: {
             placementId: 13144370,
           },
+        },
+      ],
+    },
+    {
+      code: '/22794232631/freegle_test4',
+      mediaTypes: {
+        banner: {
+          sizes: ADS_SMALL_BANNER_SIZES,
+        },
+      },
+      bids: [
+        {
+          bidder: 'mgnipbs',
+          params: {},
         },
       ],
     },
