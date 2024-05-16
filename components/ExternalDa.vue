@@ -106,14 +106,26 @@ function refreshAd() {
                 variant: 'timeout',
               })
             } else if (bids?.length) {
-              console.log('Got bids back', bids, timedOut, auctionId)
+              console.log(
+                'Got bids back',
+                props.adUnitPath,
+                bids,
+                timedOut,
+                auctionId
+              )
 
               api.bandit.chosen({
                 uid: 'prebid',
                 variant: 'bids',
               })
             } else {
-              console.log('Got no bids back', bids, timedOut, auctionId)
+              console.log(
+                'Got no bids back',
+                props.adUnitPath,
+                bids,
+                timedOut,
+                auctionId
+              )
 
               api.bandit.chosen({
                 uid: 'prebid',
@@ -263,14 +275,27 @@ function handleVisible() {
     })
   }
 }
+
+let prebidRetry = 0
+
 function visibilityChanged(visible) {
   // Check the pbjs status here rather than on component load, as it might not be available yet.
+  visibleTimer = null
+
   if (process.client) {
     if (!window.pbjs?.version) {
       console.log('Prebid not loaded yet')
-      visibleTimer = window.setTimeout(() => {
-        visibilityChanged(visible)
-      }, 100)
+      prebidRetry++
+
+      if (prebidRetry > 20) {
+        // Give up.  Probably blocked, so we should emit that we've not rendered an ad.  This may trigger
+        // a fallback ad.
+        emit('rendered', false)
+      } else {
+        visibleTimer = window.setTimeout(() => {
+          visibilityChanged(visible)
+        }, 100)
+      }
     } else {
       visibleTimer = null
 

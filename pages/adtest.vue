@@ -56,6 +56,16 @@
             class="mt-2"
             show-logged-out
           />
+          <!--          <p>You should also see a Magnite text ad here:</p>-->
+          <!--          <ExternalDa-->
+          <!--            ad-unit-path="/22794232631/freegle_chat_desktop"-->
+          <!--            :dimensions="[-->
+          <!--                [300, 600],-->
+          <!--                [300, 250],-->
+          <!--              ]"-->
+          <!--            div-id="div-gpt-ad-1692867596111-0"-->
+          <!--            class="mt-2"-->
+          <!--          />-->
         </b-col>
         <b-col cols="0" lg="3" class="p-0 pl-1">
           <div class="d-flex justify-content-end">
@@ -83,9 +93,11 @@
 </template>
 <script>
 import VisibleWhen from '~/components/VisibleWhen'
+import ExternalDa from '~/components/ExternalDa.vue'
 
 export default {
   components: {
+    ExternalDa,
     VisibleWhen,
   },
 }

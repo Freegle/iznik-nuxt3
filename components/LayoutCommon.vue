@@ -1,46 +1,54 @@
 <template>
   <div>
     <main class="ml-0 ps-0 pe-0 pageContent">
-      <div class="aboveSticky">
+      <div class="aboveSticky" :class="{ allowAd }">
         <slot ref="pageContent" />
       </div>
       <client-only>
-        <div
-          v-if="allowAd && !noAdRendered"
-          class="d-flex justify-content-around w-100"
-          :class="{
-            sticky: true,
-            anAdRendered: !adRendering && !noAdRendered,
-          }"
-        >
-          <VisibleWhen :at="['xs', 'sm']" class="sticky">
-            <ExternalDa
-              ad-unit-path="/22794232631/freegle_sticky"
-              :dimensions="[[320, 50]]"
-              div-id="div-gpt-ad-1699973618906-0"
-              pixel
-              @rendered="adRendered"
-              @failed="adFailed"
-            />
-          </VisibleWhen>
-          <VisibleWhen :at="['md', 'lg', 'xl', 'xxl']">
-            <ExternalDa
-              ad-unit-path="/22794232631/freegle_sticky_desktop"
-              :dimensions="[[728, 90]]"
-              div-id="div-gpt-ad-1707999304775-0"
-              pixel
-              @rendered="adRendered"
-              @failed="adFailed"
-            />
-          </VisibleWhen>
-        </div>
-        <div
-          v-else-if="routePath !== '/'"
-          class="adFallback sticky ourBack w-100 text-center d-flex flex-column justify-content-center"
-        >
-          <nuxt-link to="/donate" class="text-white nodecor">
-            Help keep Freegle running. Click to donate.
-          </nuxt-link>
+        <div v-if="allowAd">
+          <div
+            v-if="!noAdRendered"
+            class="d-flex justify-content-around w-100"
+            :class="{
+              sticky: true,
+              anAdRendered: !noAdRendered,
+            }"
+          >
+            <VisibleWhen :at="['xs', 'sm']" class="sticky">
+              <ExternalDa
+                ad-unit-path="/22794232631/freegle_sticky"
+                :dimensions="[[320, 50]]"
+                div-id="div-gpt-ad-1699973618906-0"
+                pixel
+                @rendered="adRendered"
+                @failed="adFailed"
+              />
+            </VisibleWhen>
+            <VisibleWhen :at="['md', 'lg', 'xl', 'xxl']">
+              <ExternalDa
+                ad-unit-path="/22794232631/freegle_sticky_desktop"
+                :dimensions="[[728, 90]]"
+                div-id="div-gpt-ad-1707999304775-0"
+                pixel
+                @rendered="adRendered"
+                @failed="adFailed"
+              />
+            </VisibleWhen>
+          </div>
+          <div
+            v-else
+            class="adFallback sticky ourBackLight w-100 text-center d-flex flex-column justify-content-center"
+          >
+            <nuxt-link
+              to="/donate"
+              class="nodecor text-primary-emphasis font-weight-bold"
+            >
+              <span v-if="me?.donated">
+                Thank you for donating to help keep Freegle running.
+              </span>
+              <span v-else> Help keep Freegle running. Click to donate. </span>
+            </nuxt-link>
+          </div>
         </div>
       </client-only>
     </main>
@@ -121,7 +129,6 @@ export default {
       timeTimer: null,
       adRendering: true,
       noAdRendered: false,
-      adFailed: false,
     }
   },
   computed: {
@@ -135,20 +142,10 @@ export default {
     },
     allowAd() {
       // We don't want to show the ad on the landing page when logged out - looks tacky.
-      console.log(
-        'Compute allowAd',
-        this.routePath !== '/',
-        this.loggedIn,
-        this.routePath !== '/' || this.loggedIn
-      )
       return this.routePath !== '/' || this.loggedIn
     },
     marginTop() {
       return navBarHidden.value ? '0px' : '60px'
-    },
-    stickyAdRendered() {
-      const store = useMiscStore()
-      return store.stickyAdRendered
     },
   },
   async mounted() {
@@ -273,7 +270,14 @@ export default {
       this.adRendering = false
       this.noAdRendered = !adShown
       const store = useMiscStore()
-      store.stickyAdRendered = adShown ? 1 : 0
+
+      // We'll show either the ad or the fallback, so either way we've shown a sticky ad.
+      store.stickyAdRendered = 1
+    },
+    adFailed() {
+      this.noAdRendered = true
+      const store = useMiscStore()
+      store.stickyAdRendered = 1
     },
   },
 }
@@ -341,20 +345,17 @@ body.modal-open {
   height: $sticky-banner-height-mobile;
 
   @include media-breakpoint-up(md) {
-    // On larger screens we already have enough prompts for donations.
-    height: 0;
+    height: $sticky-banner-height-desktop;
   }
 }
 
 .aboveSticky {
-  padding-bottom: calc(
-    ($sticky-banner-height-mobile + 2px) * v-bind('stickyAdRendered')
-  );
+  &.allowAd {
+    padding-bottom: calc($sticky-banner-height-mobile + 2px);
 
-  @include media-breakpoint-up(md) {
-    padding-bottom: calc(
-      ($sticky-banner-height-desktop + 2px) * v-bind('stickyAdRendered')
-    );
+    @include media-breakpoint-up(md) {
+      padding-bottom: calc($sticky-banner-height-desktop + 2px);
+    }
   }
 }
 </style>
