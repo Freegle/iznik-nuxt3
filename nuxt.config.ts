@@ -305,26 +305,6 @@ export default defineNuxtConfig({
                      //  cmpApi: 'iab',
                      //  timeout: 8000
                      // }
-                   }
-                 });
-                 
-                 // Gourmetads requires schain config.
-                 pbjs.setBidderConfig({
-                  "bidders": ['gourmetads'],   
-                  "config": {
-                   "schain": {
-                     "validation": "relaxed",
-                     "config": {
-                       "ver":"1.0",
-                       "complete": 1,
-                       "nodes": [
-                         {
-                           "asi":"gourmetads.com",
-                           "sid":"16593",
-                           "hp":1
-                         }
-                       ]
-                     }
                    },
                    cache: {
                       url: 'https://prebid-server.rubiconproject.com/vtrack?a=26548',
@@ -349,6 +329,26 @@ export default defineNuxtConfig({
                         }
                       }
                     }]
+                 });
+                 
+                 // Gourmetads requires schain config.
+                 pbjs.setBidderConfig({
+                  "bidders": ['gourmetads'],   
+                  "config": {
+                   "schain": {
+                     "validation": "relaxed",
+                     "config": {
+                       "ver":"1.0",
+                       "complete": 1,
+                       "nodes": [
+                         {
+                           "asi":"gourmetads.com",
+                           "sid":"16593",
+                           "hp":1
+                         }
+                       ]
+                     }
+                   },
                  }
                 });
               });  
