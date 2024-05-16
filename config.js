@@ -68,10 +68,10 @@ const CONFIG = {
             placementId: '32293691',
           },
         },
-        {
-          bidder: 'rubicon',
-          params: {},
-        },
+        // {
+        //   bidder: 'rubicon',
+        //   params: {},
+        // },
       ],
     },
     {
@@ -101,10 +101,10 @@ const CONFIG = {
             placementId: '32293692',
           },
         },
-        {
-          bidder: 'rubicon',
-          params: {},
-        },
+        // {
+        //   bidder: 'rubicon',
+        //   params: {},
+        // },
       ],
     },
     {
@@ -134,10 +134,10 @@ const CONFIG = {
             placementId: '32293683',
           },
         },
-        {
-          bidder: 'rubicon',
-          params: {},
-        },
+        // {
+        //   bidder: 'rubicon',
+        //   params: {},
+        // },
       ],
     },
     {
@@ -167,10 +167,10 @@ const CONFIG = {
             placementId: '32293685',
           },
         },
-        {
-          bidder: 'rubicon',
-          params: {},
-        },
+        // {
+        //   bidder: 'rubicon',
+        //   params: {},
+        // },
       ],
     },
     {
@@ -200,10 +200,10 @@ const CONFIG = {
             placementId: '32293689',
           },
         },
-        {
-          bidder: 'rubicon',
-          params: {},
-        },
+        // {
+        //   bidder: 'rubicon',
+        //   params: {},
+        // },
       ],
     },
     {
@@ -233,10 +233,10 @@ const CONFIG = {
             placementId: '32293701',
           },
         },
-        {
-          bidder: 'rubicon',
-          params: {},
-        },
+        // {
+        //   bidder: 'rubicon',
+        //   params: {},
+        // },
       ],
     },
     {
@@ -269,7 +269,13 @@ const CONFIG = {
         // },
         {
           bidder: 'rubicon',
-          params: {},
+          params: {
+            params: {
+              accountId: '26548',
+              siteId: '1',
+              zoneId: '1',
+            },
+          },
         },
       ],
     },
@@ -300,10 +306,10 @@ const CONFIG = {
             placementId: '32293670',
           },
         },
-        {
-          bidder: 'rubicon',
-          params: {},
-        },
+        // {
+        //   bidder: 'rubicon',
+        //   params: {},
+        // },
       ],
     },
     {
@@ -333,10 +339,10 @@ const CONFIG = {
             placementId: '32293688',
           },
         },
-        {
-          bidder: 'rubicon',
-          params: {},
-        },
+        // {
+        //   bidder: 'rubicon',
+        //   params: {},
+        // },
       ],
     },
     {
@@ -366,10 +372,10 @@ const CONFIG = {
             placementId: '32293687',
           },
         },
-        {
-          bidder: 'rubicon',
-          params: {},
-        },
+        // {
+        //   bidder: 'rubicon',
+        //   params: {},
+        // },
       ],
     },
     {
@@ -399,10 +405,10 @@ const CONFIG = {
             placementId: '32293654',
           },
         },
-        {
-          bidder: 'rubicon',
-          params: {},
-        },
+        // {
+        //   bidder: 'rubicon',
+        //   params: {},
+        // },
       ],
     },
     {
@@ -432,10 +438,10 @@ const CONFIG = {
             placementId: '32293693',
           },
         },
-        {
-          bidder: 'rubicon',
-          params: {},
-        },
+        // {
+        //   bidder: 'rubicon',
+        //   params: {},
+        // },
       ],
     },
     {
@@ -465,10 +471,10 @@ const CONFIG = {
             placementId: '32293694',
           },
         },
-        {
-          bidder: 'rubicon',
-          params: {},
-        },
+        // {
+        //   bidder: 'rubicon',
+        //   params: {},
+        // },
       ],
     },
     {
@@ -498,10 +504,10 @@ const CONFIG = {
             placementId: '32293695',
           },
         },
-        {
-          bidder: 'rubicon',
-          params: {},
-        },
+        // {
+        //   bidder: 'rubicon',
+        //   params: {},
+        // },
       ],
     },
     {
@@ -531,10 +537,10 @@ const CONFIG = {
             placementId: '32293696',
           },
         },
-        {
-          bidder: 'rubicon',
-          params: {},
-        },
+        // {
+        //   bidder: 'rubicon',
+        //   params: {},
+        // },
       ],
     },
     {
@@ -564,10 +570,10 @@ const CONFIG = {
             placementId: '32293696',
           },
         },
-        {
-          bidder: 'rubicon',
-          params: {},
-        },
+        // {
+        //   bidder: 'rubicon',
+        //   params: {},
+        // },
       ],
     },
     {
@@ -597,10 +603,10 @@ const CONFIG = {
         },
       },
       bids: [
-        {
-          bidder: 'rubicon',
-          params: {},
-        },
+        // {
+        //   bidder: 'rubicon',
+        //   params: {}
+        // },
       ],
     },
   ],
