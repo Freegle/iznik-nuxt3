@@ -270,11 +270,9 @@ const CONFIG = {
         {
           bidder: 'rubicon',
           params: {
-            params: {
-              accountId: '26548',
-              siteId: '1',
-              zoneId: '1',
-            },
+            accountId: '26548',
+            siteId: '1',
+            zoneId: '1',
           },
         },
       ],
