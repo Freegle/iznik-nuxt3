@@ -69,7 +69,7 @@ const CONFIG = {
           },
         },
         {
-          bidder: 'mgnipbs',
+          bidder: 'rubicon',
           params: {},
         },
       ],
@@ -102,7 +102,7 @@ const CONFIG = {
           },
         },
         {
-          bidder: 'mgnipbs',
+          bidder: 'rubicon',
           params: {},
         },
       ],
@@ -135,7 +135,7 @@ const CONFIG = {
           },
         },
         {
-          bidder: 'mgnipbs',
+          bidder: 'rubicon',
           params: {},
         },
       ],
@@ -168,7 +168,7 @@ const CONFIG = {
           },
         },
         {
-          bidder: 'mgnipbs',
+          bidder: 'rubicon',
           params: {},
         },
       ],
@@ -201,7 +201,7 @@ const CONFIG = {
           },
         },
         {
-          bidder: 'mgnipbs',
+          bidder: 'rubicon',
           params: {},
         },
       ],
@@ -234,7 +234,7 @@ const CONFIG = {
           },
         },
         {
-          bidder: 'mgnipbs',
+          bidder: 'rubicon',
           params: {},
         },
       ],
@@ -268,7 +268,7 @@ const CONFIG = {
         //   },
         // },
         {
-          bidder: 'mgnipbs',
+          bidder: 'rubicon',
           params: {},
         },
       ],
@@ -301,7 +301,7 @@ const CONFIG = {
           },
         },
         {
-          bidder: 'mgnipbs',
+          bidder: 'rubicon',
           params: {},
         },
       ],
@@ -334,7 +334,7 @@ const CONFIG = {
           },
         },
         {
-          bidder: 'mgnipbs',
+          bidder: 'rubicon',
           params: {},
         },
       ],
@@ -367,7 +367,7 @@ const CONFIG = {
           },
         },
         {
-          bidder: 'mgnipbs',
+          bidder: 'rubicon',
           params: {},
         },
       ],
@@ -400,7 +400,7 @@ const CONFIG = {
           },
         },
         {
-          bidder: 'mgnipbs',
+          bidder: 'rubicon',
           params: {},
         },
       ],
@@ -433,7 +433,7 @@ const CONFIG = {
           },
         },
         {
-          bidder: 'mgnipbs',
+          bidder: 'rubicon',
           params: {},
         },
       ],
@@ -466,7 +466,7 @@ const CONFIG = {
           },
         },
         {
-          bidder: 'mgnipbs',
+          bidder: 'rubicon',
           params: {},
         },
       ],
@@ -499,7 +499,7 @@ const CONFIG = {
           },
         },
         {
-          bidder: 'mgnipbs',
+          bidder: 'rubicon',
           params: {},
         },
       ],
@@ -532,7 +532,7 @@ const CONFIG = {
           },
         },
         {
-          bidder: 'mgnipbs',
+          bidder: 'rubicon',
           params: {},
         },
       ],
@@ -565,7 +565,7 @@ const CONFIG = {
           },
         },
         {
-          bidder: 'mgnipbs',
+          bidder: 'rubicon',
           params: {},
         },
       ],
