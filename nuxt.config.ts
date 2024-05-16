@@ -343,7 +343,7 @@ export default defineNuxtConfig({
                            vastxml: { returnCreative: false }
                         },
                         bidders: {
-                          mgnipbs: {
+                          rubicon: {
                             wrappername: "Freegle"
                           }
                         }
