@@ -332,7 +332,7 @@ export default defineNuxtConfig({
                       vasttrack: true 
                    },
                    s2sConfig: [{
-                      bidders: ['mgnipbs'],   // PBS ‘bidder’ code that triggers the call to PBS
+                      bidders: ['rubicon'],   // PBS ‘bidder’ code that triggers the call to PBS
                       defaultVendor: 'rubicon',
                       coopSync: true,
                       userSyncLimit: 8,       // syncs per page up to the publisher
