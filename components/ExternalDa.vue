@@ -106,14 +106,26 @@ function refreshAd() {
                 variant: 'timeout',
               })
             } else if (bids?.length) {
-              console.log('Got bids back', bids, timedOut, auctionId)
+              console.log(
+                'Got bids back',
+                props.adUnitPath,
+                bids,
+                timedOut,
+                auctionId
+              )
 
               api.bandit.chosen({
                 uid: 'prebid',
                 variant: 'bids',
               })
             } else {
-              console.log('Got no bids back', bids, timedOut, auctionId)
+              console.log(
+                'Got no bids back',
+                props.adUnitPath,
+                bids,
+                timedOut,
+                auctionId
+              )
 
               api.bandit.chosen({
                 uid: 'prebid',
