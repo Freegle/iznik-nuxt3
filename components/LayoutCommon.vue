@@ -7,7 +7,7 @@
       <client-only>
         <div v-if="allowAd">
           <div
-            v-if="noAdRendered"
+            v-if="!noAdRendered"
             class="d-flex justify-content-around w-100"
             :class="{
               sticky: true,
