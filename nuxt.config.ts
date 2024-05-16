@@ -333,6 +333,8 @@ export default defineNuxtConfig({
                    },
                    s2sConfig: [{
                       accountId: "26548",  
+                      siteId: '1',
+                      zoneId: '1',
                       bidders: ['mgnipbs'],   // PBS ‘bidder’ code that triggers the call to PBS
                       defaultVendor: 'rubicon',
                       coopSync: true,
