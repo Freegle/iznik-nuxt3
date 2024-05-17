@@ -9,7 +9,7 @@
           change should take effect immediately, but ones outside the areas may may take overnight
           before postcode mapping is updated.</b>
       </p>
-      <Postcode :find="false" @selected="postcodeSelect" />
+      <PostCode :find="false" @selected="postcodeSelect" />
       <div v-if="postcode" class="mt-2">
         <p class="font-weight-bold">
           Community:
@@ -34,10 +34,10 @@
   </b-card>
 </template>
 <script>
-import Postcode from '~/components/Postcode'
+import PostCode from '~/components/PostCode'
 export default {
   components: {
-    Postcode
+    PostCode
   },
   data: function() {
     return {
