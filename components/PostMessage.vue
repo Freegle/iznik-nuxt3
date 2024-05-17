@@ -1,18 +1,32 @@
 <template>
   <div>
-    <div class="d-flex flex-wrap">
-      <div class="photoholder">
-        <label for="uploader" class="d-none d-md-block mt-2">
-          Please add photos:
-        </label>
-        <OurUploader
-          id="uploader"
-          :key="'uploader-' + uploaderBump"
-          v-model="attachments"
-          :multiple="true"
-        />
-      </div>
-      <hr />
+    <div class="photoholder">
+      <label for="uploader" class="d-none d-md-block mt-2">
+        Please add photos:
+      </label>
+      <draggable
+        v-model="attachments"
+        class="d-flex flex-wrap pl-2 mt-2"
+        :item-key="(el) => `image-${el.id}`"
+        :animation="150"
+        ghost-class="ghost"
+      >
+        <template #item="{ element, index }">
+          <div class="bg-transparent p-0">
+            <PostPhoto
+              v-bind="element"
+              :primary="index === 0"
+              class="mr-1 mt-1 mt-md-0"
+            />
+          </div>
+        </template>
+      </draggable>
+      <OurUploader
+        id="uploader"
+        :key="'uploader-' + uploaderBump"
+        v-model="attachments"
+        :multiple="true"
+      />
     </div>
     <div class="subject-layout mb-1 mt-1">
       <div class="d-flex flex-column">
@@ -50,6 +64,7 @@
   </div>
 </template>
 <script>
+import draggable from 'vuedraggable'
 import { uid } from '../composables/useId'
 import { useComposeStore } from '../stores/compose'
 import { useMessageStore } from '../stores/message'
@@ -67,6 +82,7 @@ export default {
     NumberIncrementDecrement,
     OurUploader,
     PostItem,
+    draggable,
   },
   props: {
     id: {

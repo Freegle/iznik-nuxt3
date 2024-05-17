@@ -23,6 +23,7 @@
         css-src="https://cdn.jsdelivr.net/npm/@uploadcare/blocks@0.39.0/web/lr-file-uploader-inline.min.css"
         ctx-name="my-uploader"
         :class="configName"
+        @click="click"
       >
       </lr-file-uploader-inline>
     </div>
@@ -129,10 +130,17 @@ async function uploadSuccess(e) {
   if (e.detail) {
     if (e.detail.status === 'success') {
       // We've uploaded a file.  Create the attachment on the server which references the uploaded image.
+      //
+      // Say we'd like it back in webp format for efficiency.
+      const mods = {
+        format: 'webp',
+      }
+
       const att = {
         imgtype: props.type,
         externaluid: e.detail.uuid,
         externalurl: e.detail.cdnUrl,
+        externalmods: mods,
       }
 
       const ret = await imageStore.post(att)
@@ -148,6 +156,9 @@ async function uploadSuccess(e) {
         id: ret.id,
         path: ret.url,
         paththumb: ret.url,
+        externaluid: e.detail.uuid,
+        externalurl: e.detail.cdnUrl,
+        externalmods: mods,
       })
 
       emit('update:modelValue', uploadedPhotos.value)
@@ -167,6 +178,10 @@ function removed(e) {
     console.log('emit modelValue')
     emit('update:modelValue', uploadedPhotos.value)
   }
+}
+
+function click(e) {
+  console.log('Clicked', e)
 }
 </script>
 <style lang="scss">

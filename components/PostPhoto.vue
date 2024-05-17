@@ -5,6 +5,7 @@
       format="webp"
       provider="uploadcare"
       :src="externaluid"
+      :modifiers="externalmods"
       alt="Item Photo"
       :width="200"
       :height="200"
@@ -53,6 +54,11 @@ export default {
       type: String,
       required: false,
       default: null,
+    },
+    externalmods: {
+      type: Array,
+      required: false,
+      default: () => {},
     },
   },
   setup() {

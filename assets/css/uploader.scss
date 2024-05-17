@@ -81,16 +81,30 @@ lr-upload-list {
   .files {
     display: flex;
     flex-wrap: wrap;
+    min-height: unset;
   }
 }
 
-lr-file-item .thumb {
-  width: 100px;
-  height: 100px;
+lr-file-item {
+  .thumb {
+    // We hide the thumbnails in the uploader because we add our own.
+    width: 0px;
+    height: 0px;
+  }
 
-  @include media-breakpoint-up(md) {
-    width: 200px;
-    height: 200px;
+  .inner[uploading] .thumb {
+    // ...except when uploading.
+    width: 100px;
+    height: 100px;
+
+    @include media-breakpoint-up(md) {
+      width: 200px;
+      height: 200px;
+    }
+  }
+
+  .inner[finished] {
+    padding: 0px;
   }
 }
 
@@ -132,7 +146,7 @@ lr-drop-area[with-icon] {
 lr-file-item {
   >.inner {
     padding-left: 0px;
-    padding-right: 10px;
+    padding-right: 0px;
     grid-template-columns: 1fr;
     background-color: transparent;
   }
@@ -141,9 +155,9 @@ lr-file-item {
     display: none;
   }
 
-  .badge lr-icon, .badge lr-icon svg {
-    width: unset;
-    height: unset;
+  .badge, .badge lr-icon, .badge lr-icon svg {
+    width: 0px;
+    height: 0px;
   }
 }
 
