@@ -1,5 +1,5 @@
 <template>
-  <div class="container p-0" :class="{ primary }">
+  <div class="container p-0 mb-1 mr-2" :class="{ primary }">
     <span @touchstart="rotateLeft" @click="rotateLeft">
       <div label="Rotate left" class="topleft clickme" title="Rotate left">
         <v-icon icon="circle" size="2x" />
@@ -169,12 +169,13 @@ export default {
   position: relative;
 
   :deep(img) {
-    outline: 2px solid $color-gray--lighter;
+    box-shadow: 0px 0px 3px 2px $color-gray--light;
+    border-radius: 5px;
   }
 
   &.primary {
     :deep(img) {
-      outline: 2px solid $colour-success;
+      box-shadow: 0px 0px 3px 2px $colour-success;
     }
   }
 }
