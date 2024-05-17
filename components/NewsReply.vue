@@ -3,7 +3,7 @@
     v-observe-visibility="visibilityChanged"
     :class="{ 'bg-info': scrollToThis }"
   >
-    <div class="reply">
+    <div v-if="mod || myid === reply.userid || !reply.hidden" class="reply">
       <div
         class="clickme align-top"
         title="Click to see their profile"
