@@ -5,16 +5,23 @@
         Please add photos:
       </label>
       <draggable
-        v-model="attachments"
+        v-model="currentAtts"
         class="d-flex flex-wrap pl-2 mt-2"
         :item-key="(el) => `image-${el.id}`"
         :animation="150"
         ghost-class="ghost"
+        @start="dragging = true"
+        @end="dragging = false"
       >
         <template #item="{ element, index }">
           <div class="bg-transparent p-0">
             <PostPhoto
-              v-bind="element"
+              :id="element.id"
+              :path="element.path"
+              :paththumb="element.paththumb"
+              :thumbnail="element.thumbnail"
+              :externaluid="element.externaluid"
+              :externalmods="element.externalmods"
               :primary="index === 0"
               class="mr-1 mt-1 mt-md-0"
               @remove="removePhoto"
@@ -23,9 +30,9 @@
         </template>
       </draggable>
       <OurUploader
+        v-if="!dragging"
         id="uploader"
-        :key="'uploader-' + uploaderBump"
-        v-model="attachments"
+        v-model="currentAtts"
         :multiple="true"
       />
     </div>
@@ -64,127 +71,93 @@
     </div>
   </div>
 </template>
-<script>
-import draggable from 'vuedraggable'
+<script setup>
 import { uid } from '../composables/useId'
 import { useComposeStore } from '../stores/compose'
-import { useMessageStore } from '../stores/message'
-import { useMiscStore } from '../stores/misc'
 import NumberIncrementDecrement from './NumberIncrementDecrement'
-import { useImageStore } from '~/stores/image'
 
 const OurUploader = defineAsyncComponent(() =>
   import('~/components/OurUploader')
 )
 const PostItem = defineAsyncComponent(() => import('~/components/PostItem'))
+const draggable = defineAsyncComponent(() => import('vuedraggable'))
 
-export default {
-  components: {
-    NumberIncrementDecrement,
-    OurUploader,
-    PostItem,
-    draggable,
+const props = defineProps({
+  id: {
+    type: Number,
+    required: false,
+    default: null,
   },
-  props: {
-    id: {
-      type: Number,
-      required: false,
-      default: null,
-    },
-    type: {
-      type: String,
-      required: true,
-    },
+  type: {
+    type: String,
+    required: true,
   },
-  setup(props) {
-    const composeStore = useComposeStore()
-    const messageStore = useMessageStore()
-    const imageStore = useImageStore()
+})
 
-    composeStore.setType({
+const composeStore = useComposeStore()
+
+composeStore.setType({
+  id: props.id,
+  type: props.type,
+})
+
+const ret = composeStore.attachments(props.id).filter((a) => 'id' in a)
+
+// Need a separate variable to avoid watching on object causing tizzy.
+const currentAtts = ref(JSON.parse(JSON.stringify(ret || [])))
+
+const availablenow = computed({
+  get() {
+    const msg = composeStore?.message(props.id)
+    return msg &&
+      'availablenow' in msg &&
+      typeof msg.availablenow !== 'undefined'
+      ? msg.availablenow
+      : 1
+  },
+  set(newValue) {
+    composeStore.setAvailableNow(props.id, newValue)
+  },
+})
+
+const description = computed({
+  get() {
+    const msg = composeStore?.message(props.id)
+    return msg?.description
+  },
+  set(newValue) {
+    composeStore.setDescription({
       id: props.id,
-      type: props.type,
+      description: newValue,
     })
+  },
+})
 
-    return { composeStore, messageStore, imageStore }
-  },
-  data() {
-    return {
-      uploaderBump: 0,
-      showDraggable: false,
-    }
-  },
-  computed: {
-    breakpoint() {
-      const store = useMiscStore()
-      return store.getBreakpoint
-    },
-    availablenow: {
-      get() {
-        const msg = this.composeStore?.message(this.id)
-        return msg &&
-          'availablenow' in msg &&
-          typeof msg.availablenow !== 'undefined'
-          ? msg.availablenow
-          : 1
-      },
-      set(newValue) {
-        this.composeStore.setAvailableNow(this.id, newValue)
-      },
-    },
-    description: {
-      get() {
-        const msg = this.composeStore?.message(this.id)
-        return msg?.description
-      },
-      set(newValue) {
-        this.composeStore.setDescription({
-          id: this.id,
-          description: newValue,
-        })
-      },
-    },
-    attachments: {
-      get() {
-        const ret = this.composeStore
-          ?.attachments(this.id)
-          .filter((a) => 'id' in a)
+const placeholder = computed(() => {
+  return props.type === 'Offer'
+    ? "e.g. colour, condition, size, whether it's working etc."
+    : "Explain what you're looking for, and why you'd like it."
+})
 
-        console.log('Compute atts from store', ret)
-        return ret || []
-      },
-      set(value) {
-        // The uploader has updated the list of attachments.  Update the attachments for the message in the store.
-        console.log('Set message attachments', value)
-        return this.composeStore?.setAttachmentsForMessage(this.id, value)
-      },
-    },
-    placeholder() {
-      return this.type === 'Offer'
-        ? "e.g. colour, condition, size, whether it's working etc."
-        : "Explain what you're looking for, and why you'd like it."
-    },
-  },
-  mounted() {
-    // This is a workaround for a problem I don't properly understand, where loading the /give page in dev
-    // throws a tizzy.
-    setTimeout(() => {
-      this.showDraggable = true
-    }, 1)
-  },
-  methods: {
-    $id(type) {
-      return uid(type)
-    },
-    removePhoto(id) {
-      // We just remove it from our store here.  The attachment on the server will get tidied up.
-      this.composeStore.removeAttachment({
-        id: this.id,
-        photoid: id,
-      })
-    },
-  },
+watch(currentAtts, (newVal) => {
+  composeStore.setAttachmentsForMessage(props.id, newVal)
+})
+
+function $id(type) {
+  return uid(type)
 }
+
+function removePhoto(id) {
+  // We just remove it from our store here.  The attachment on the server will get tidied up.
+  composeStore.removeAttachment({
+    id: props.id,
+    photoid: id,
+  })
+
+  currentAtts.value = currentAtts.value.filter((a) => a.id !== id)
+}
+
+const dragging = ref(false)
 </script>
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';

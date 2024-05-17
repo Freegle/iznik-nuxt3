@@ -1,46 +1,46 @@
 <template>
-  <div
-    :class="{
-      invisible: !visible,
-    }"
-  >
-    <lr-config
-      ref="lrconfig"
-      ctx-name="my-uploader"
-      pubkey="61ddd294bd3a390019c6"
-      :max-local-file-size-bytes="0"
-      img-only
-      source-list="local, camera"
-      :multiple="multiple"
-      image-shrink="1024x1024 95%"
-      remove-copyright
-      :thumb-size="thumbSize"
-      debug
-    ></lr-config>
-    <div class="d-flex flex-column justify-content-around align-items-start">
-      <lr-file-uploader-inline
-        ref="uploader"
-        css-src="https://cdn.jsdelivr.net/npm/@uploadcare/blocks@0.39.0/web/lr-file-uploader-inline.min.css"
+  <client-only>
+    <div
+      :class="{
+        invisible: !visible,
+      }"
+    >
+      <lr-config
+        ref="lrconfig"
         ctx-name="my-uploader"
-        :class="configName"
-        @click="click"
-      >
-      </lr-file-uploader-inline>
+        pubkey="61ddd294bd3a390019c6"
+        :max-local-file-size-bytes="0"
+        img-only
+        source-list="local, camera"
+        :multiple="multiple"
+        image-shrink="1024x1024 95%"
+        remove-copyright
+        :thumb-size="thumbSize"
+        debug
+      ></lr-config>
+      <div class="d-flex flex-column justify-content-around align-items-start">
+        <lr-file-uploader-inline
+          ref="uploader"
+          css-src="https://cdn.jsdelivr.net/npm/@uploadcare/blocks@0.39.0/web/lr-file-uploader-inline.min.css"
+          ctx-name="my-uploader"
+          :class="configName"
+          @click="click"
+        >
+        </lr-file-uploader-inline>
+      </div>
+      <lr-upload-ctx-provider
+        ref="ctxProviderRef"
+        ctx-name="my-uploader"
+        @file-upload-success="uploadSuccess"
+        @file-removed="removed"
+      ></lr-upload-ctx-provider>
     </div>
-    <lr-upload-ctx-provider
-      ref="ctxProviderRef"
-      ctx-name="my-uploader"
-      @file-upload-success="uploadSuccess"
-      @file-removed="removed"
-    ></lr-upload-ctx-provider>
-  </div>
+  </client-only>
 </template>
 <script setup>
-// TODO Rotate in microvolunteering and ModTools
 // TODO User edit of photo
 // TODO Other photos besides messages.
 // TODO Perceptual hashes.
-// TODO Image editor height
 import { useMiscStore } from '~/stores/misc'
 import { useImageStore } from '~/stores/image'
 
@@ -95,24 +95,35 @@ const thumbSize = computed(() => {
 
 const lrconfig = ref(null)
 
+watch(
+  lrconfig,
+  (newVal) => {
+    if (newVal) {
+      try {
+        lrconfig.value.localeDefinitionOverride = {
+          en: {
+            'drop-files-here': 'Add photos',
+            clear: 'Remove',
+            'add-more': 'Add more photos',
+            'src-type-local': 'Browse',
+          },
+        }
+        LR.registerBlocks(LR)
+        setPhotos(props.modelValue)
+        visible.value = true
+      } catch (e) {
+        console.error('Failed in mount', e)
+      }
+    }
+  },
+  {
+    immediate: true,
+  }
+)
+
 const visible = ref(false)
 
-onMounted(() => {
-  lrconfig.value.localeDefinitionOverride = {
-    en: {
-      'drop-files-here': 'Add photos',
-      clear: 'Remove',
-      'add-more': 'Add more photos',
-      'src-type-local': 'Browse',
-    },
-  }
-  LR.registerBlocks(LR)
-  setPhotos(props.modelValue)
-  visible.value = true
-})
-
 function setPhotos(photos) {
-  console.log('Set photos', JSON.stringify(photos))
   if (ctxProviderRef.value) {
     ctxProviderRef.value.removeAllFiles()
 

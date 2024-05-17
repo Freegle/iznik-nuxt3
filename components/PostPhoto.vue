@@ -1,5 +1,5 @@
 <template>
-  <div class="container p-0">
+  <div class="container p-0" :class="{ primary }">
     <span @touchstart="rotateLeft" @click="rotateLeft">
       <div label="Rotate left" class="topleft clickme" title="Rotate left">
         <v-icon icon="circle" size="2x" />
@@ -22,28 +22,29 @@
         <v-icon icon="trash-alt" class="image__icon" />
       </div>
     </span>
-    <NuxtImg
-      v-if="externaluid"
-      format="webp"
-      provider="uploadcare"
-      :src="externaluid"
-      :modifiers="mods"
-      alt="Item Photo"
-      :width="200"
-      :height="200"
-      @click="$emit('click')"
-    />
-    <b-img
-      v-else-if="thumbnail"
-      lazy
-      :src="paththumb"
-      rounded
-      thumbnail
-      class="square"
-      :class="{ primary }"
-      @click="$emit('click')"
-    />
-    <b-img v-else lazy :src="path" rounded @click="$emit('click')" />
+    <div class="image-wrapper">
+      <NuxtImg
+        v-if="externaluid"
+        format="webp"
+        provider="uploadcare"
+        :src="externaluid"
+        :modifiers="mods"
+        alt="Item Photo"
+        :width="200"
+        :height="200"
+        @click="$emit('click')"
+      />
+      <b-img
+        v-else-if="thumbnail"
+        lazy
+        :src="paththumb"
+        rounded
+        thumbnail
+        class="square"
+        @click="$emit('click')"
+      />
+      <b-img v-else lazy :src="path" rounded @click="$emit('click')" />
+    </div>
     <ConfirmModal
       v-if="confirm"
       :title="'Delete this photo?'"
@@ -144,6 +145,8 @@ export default {
 }
 </script>
 <style scoped lang="scss">
+@import 'assets/css/_color-vars.scss';
+
 .bottomright {
   bottom: 12px;
   right: 0px;
@@ -164,6 +167,16 @@ export default {
 
 .container {
   position: relative;
+
+  :deep(img) {
+    outline: 2px solid $color-gray--lighter;
+  }
+
+  &.primary {
+    :deep(img) {
+      outline: 2px solid $colour-success;
+    }
+  }
 }
 
 .image__icon {
@@ -185,10 +198,5 @@ export default {
   min-width: 200px;
   min-height: 200px;
   max-height: 200px;
-}
-
-.primary {
-  border-width: 2px;
-  border-color: $colour-success;
 }
 </style>
