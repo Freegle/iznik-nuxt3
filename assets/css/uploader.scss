@@ -59,7 +59,7 @@ lr-activity-header {
 }
 
 lr-upload-list {
-  .done-btn, .upload-btn {
+  .done-btn, .upload-btn, .cancel-btn {
     display: none;
   }
 
@@ -94,13 +94,8 @@ lr-file-item {
 
   .inner[uploading] .thumb {
     // ...except when uploading.
-    width: 100px;
-    height: 100px;
-
-    @include media-breakpoint-up(md) {
-      width: 200px;
-      height: 200px;
-    }
+    width: 200px;
+    height: 200px;
   }
 
   .inner[finished] {
@@ -109,13 +104,8 @@ lr-file-item {
 }
 
 lr-drop-area[with-icon] {
-  width: 100px;
-  height: 100px;
-
-  @include media-breakpoint-up(md) {
-    width: 200px;
-    height: 200px;
-  }
+  width: 200px;
+  height: 200px;
 
   &:hover {
     color: $colour-success;
@@ -136,7 +126,7 @@ lr-drop-area[with-icon] {
     lr-icon[name="default"] {
       svg {
         width: 32px;
-        height: 320px;
+        height: 32px;
         color: $color-white;
       }
     }
@@ -178,5 +168,6 @@ lr-source-list {
 lr-start-from {
   .content {
     gap: unset;
+    padding: 8px;
   }
 }

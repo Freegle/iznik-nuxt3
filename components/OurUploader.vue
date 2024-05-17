@@ -102,7 +102,7 @@ onMounted(() => {
     en: {
       'drop-files-here': 'Add photos',
       clear: 'Remove',
-      'add-more': 'Add',
+      'add-more': 'Add more photos',
       'src-type-local': 'Browse',
     },
   }

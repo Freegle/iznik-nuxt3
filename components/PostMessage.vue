@@ -17,6 +17,7 @@
               v-bind="element"
               :primary="index === 0"
               class="mr-1 mt-1 mt-md-0"
+              @remove="removePhoto"
             />
           </div>
         </template>
@@ -174,6 +175,13 @@ export default {
   methods: {
     $id(type) {
       return uid(type)
+    },
+    removePhoto(id) {
+      // We just remove it from our store here.  The attachment on the server will get tidied up.
+      this.composeStore.removeAttachment({
+        id: this.id,
+        photoid: id,
+      })
     },
   },
 }
