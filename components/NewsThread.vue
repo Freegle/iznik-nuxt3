@@ -47,10 +47,22 @@
                 Turn this into a Story
               </b-dropdown-item>
               <b-dropdown-item
-                v-if="supportOrAdmin && newsfeed.hidden"
+                v-if="chitChatMod && newsfeed.hidden"
                 @click="unhide"
               >
                 Unhide post
+              </b-dropdown-item>
+              <b-dropdown-item
+                v-if="chitChatMod && !newsfeed.hidden"
+                @click="mute"
+              >
+                Mute on ChitChat
+              </b-dropdown-item>
+              <b-dropdown-item
+                v-if="chitChatMod && newsfeed.hidden"
+                @click="unmute"
+              >
+                Unmute on ChitChat
               </b-dropdown-item>
             </b-dropdown>
             <component
@@ -243,6 +255,9 @@ import NewsNoticeboard from '~/components/NewsNoticeboard'
 import NoticeMessage from '~/components/NoticeMessage'
 import NewsPreviews from '~/components/NewsPreviews'
 import ProfileImage from '~/components/ProfileImage'
+import { useTeamStore } from '~/stores/team'
+import { useAuthStore } from '~/stores/auth'
+import { useUserStore } from '~/stores/user'
 
 const NewsReportModal = defineAsyncComponent(() => import('./NewsReportModal'))
 const ConfirmModal = () =>
@@ -288,11 +303,28 @@ export default {
   emits: ['rendered'],
   async setup(props) {
     const newsfeedStore = useNewsfeedStore()
+    const teamStore = useTeamStore()
+    const authStore = useAuthStore()
+    const userStore = useUserStore()
+
+    const me = authStore.user
+
+    // Get ChitChat moderation team so that we can show extra options for them.
+    if (
+      me &&
+      (me.systemrole === 'Moderator' ||
+        me.systemrole === 'Support' ||
+        me.systemrole === 'Admin')
+    ) {
+      teamStore.fetch('ChitChat Moderation')
+    }
 
     await newsfeedStore.fetch(props.id)
 
     return {
       newsfeedStore,
+      teamStore,
+      userStore,
     }
   },
   data() {
@@ -370,6 +402,9 @@ export default {
         ? this.newsComponents[this.newsfeed?.type]
         : ''
     },
+    user() {
+      return this.userStore.byId(this.newsfeed?.userid)
+    },
     starter() {
       if (this.newsfeed.userid === this.myid) {
         return 'you'
@@ -378,6 +413,23 @@ export default {
       } else {
         return 'someone'
       }
+    },
+    chitChatMod() {
+      let ret = false
+
+      if (this.me) {
+        if (this.supportOrAdmin) {
+          ret = true
+        } else {
+          const mods = this.teamStore.getTeam('ChitChat Moderation')
+
+          if (mods) {
+            ret = !!mods.members.find((m) => this.myid === m.id)
+          }
+        }
+      }
+
+      return ret
     },
   },
   mounted() {
@@ -496,6 +548,14 @@ export default {
       // The imageid is in this.imageid
       this.imageid = imageid
       this.imagethumb = imagethumb
+    },
+    async mute() {
+      await this.userStore.muteOnChitChat(this.newsfeed.userid)
+      await this.newsfeedStore.fetch(this.id)
+    },
+    async unmute() {
+      await this.userStore.muteOnChitChat(this.newsfeed.userid)
+      await this.newsfeedStore.fetch(this.id)
     },
   },
 }
