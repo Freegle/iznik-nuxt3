@@ -73,14 +73,14 @@ export default class UserAPI extends BaseAPI {
 
   muteOnChitChat(userid) {
     return this.$patch('/user', {
-      userid,
+      id: userid,
       newsfeedmodstatus: 'Suppressed',
     })
   }
 
   unMuteOnChitChat(userid) {
     return this.$patch('/user', {
-      userid,
+      id: userid,
       newsfeedmodstatus: 'Unmoderated',
     })
   }

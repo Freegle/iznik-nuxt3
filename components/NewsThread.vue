@@ -554,7 +554,7 @@ export default {
       await this.newsfeedStore.fetch(this.id)
     },
     async unmute() {
-      await this.userStore.muteOnChitChat(this.newsfeed.userid)
+      await this.userStore.unMuteOnChitChat(this.newsfeed.userid)
       await this.newsfeedStore.fetch(this.id)
     },
   },
