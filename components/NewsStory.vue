@@ -78,9 +78,9 @@
   </div>
 </template>
 <script>
-import ReadMore from 'vue-read-more3/src/ReadMoreComponent'
 import { useStoryStore } from '../stores/stories'
 import { useNewsfeedStore } from '../stores/newsfeed'
+import ReadMore from '~/components/ReadMore'
 import { twem } from '~/composables/useTwem'
 import NewsBase from '~/components/NewsBase'
 

@@ -164,11 +164,11 @@
   </div>
 </template>
 <script>
-import ReadMore from 'vue-read-more3/src/ReadMoreComponent'
 import { useVolunteeringStore } from '../stores/volunteering'
 import { useUserStore } from '../stores/user'
 import { useGroupStore } from '../stores/group'
 import NoticeMessage from './NoticeMessage'
+import ReadMore from '~/components/ReadMore'
 import { twem } from '~/composables/useTwem'
 const VolunteerOpportunityModal = defineAsyncComponent(() =>
   import('./VolunteerOpportunityModal')
