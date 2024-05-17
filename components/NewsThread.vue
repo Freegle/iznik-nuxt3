@@ -3,6 +3,10 @@
     <b-card v-if="newsfeed" :class="backgroundColor" no-body>
       <b-card-body class="p-1 p-sm-2">
         <b-card-text>
+          <div v-if="mod && newsfeed.hidden" class="text-danger small mb-1">
+            This has been hidden and is only visible to volunteers and the
+            person who posted it.
+          </div>
           <div v-if="isNewsComponent">
             <b-dropdown class="float-end" right variant="white">
               <template #button-content />
@@ -80,10 +84,6 @@
               :previews="newsfeed.previews"
               class="mt-1"
             />
-            <div v-if="mod && newsfeed.hidden" class="text-danger small">
-              This has been hidden and is only visible to volunteers and the
-              person who posted it.
-            </div>
           </div>
           <notice-message v-else variant="danger">
             Unknown item type {{ newsfeed?.type }}
