@@ -3,7 +3,7 @@
     v-observe-visibility="visibilityChanged"
     :class="{ 'bg-info': scrollToThis }"
   >
-    <div class="reply">
+    <div v-if="mod || myid === reply.userid || !reply.hidden" class="reply">
       <div
         class="clickme align-top"
         title="Click to see their profile"
@@ -139,7 +139,7 @@
           class="mt-1"
           size="sm"
         />
-        <div v-if="reply.hidden" class="text-danger small">
+        <div v-if="mod && reply.hidden" class="text-danger small">
           This has been hidden and is only visible to volunteers and the person
           who posted it.
         </div>
