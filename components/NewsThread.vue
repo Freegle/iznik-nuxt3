@@ -60,13 +60,13 @@
                 v-if="chitChatMod && !newsfeed.hidden"
                 @click="mute"
               >
-                Mute on ChitChat
+                Mute user on ChitChat
               </b-dropdown-item>
               <b-dropdown-item
                 v-if="chitChatMod && newsfeed.hidden"
                 @click="unmute"
               >
-                Unmute on ChitChat
+                Unmute user on ChitChat
               </b-dropdown-item>
             </b-dropdown>
             <component
