@@ -2,7 +2,6 @@
   <div>
     <client-only>
       <div class="maptools d-flex mb-1 justify-content-between">
-        <div v-if="caretaker" style="font-weight:bold;color:red;">CARETAKER</div>
         <div class="d-flex">
           <v-icon icon="sync" :class="busy ? 'text-success fa-spin ml-4 mt-1' : 'text-faded ml-4 mt-1'" scale="2" />
         </div>
@@ -22,13 +21,14 @@
           Areas to Review
         </b-form-checkbox>
       </div>
+      <div>{{ groupname }}</div>
       <b-modal id="mappingChanges" ref="mappingChanges" v-model="showMappingChanges">
         <p>
-          If you have the "Areas to Review" checkbox ticked, you'll see the red dots for
+          If you have the "Areas to Review" checkbox ticked, you'll see the red circles for
           postcodes which might need better mapping.
         </p>
         <p class="font-weight-bold text-danger">
-          The red dots indicate where mapping has changed recently. You can review these to check if it looks OK.
+          The red circles indicate where mapping has changed recently. You can review these to check if it looks OK.
         </p>
         <ul>
           <li>
@@ -58,7 +58,7 @@
           </li>
         </ul>
         <p class="font-weight-bold text-danger">
-          The red dots don't get updated at the moment. Soon.
+          The red circles don't get updated at the moment. Soon.
         </p>
         <p>
           To help more widely, you can zoom the map out to view the whole UK. Once you zoom out far enough you'll see the numbers of
@@ -70,7 +70,7 @@
           <!--
           -->
           <div>
-            <l-map ref="map" :zoom="zoom" :min-zoom="5" :max-zoom="17" :options="{ dragging: dragging, touchZoom: true }" :center="center"
+            <l-map ref="map" :zoom="zoom" :min-zoom="5" :max-zoom="17" :options="{ dragging: dragging, touchZoom: true }"
               :style="'width: 100%; height: ' + mapHeight + 'px'" @update:bounds="boundsChanged" @update:zoom="boundsChanged" @ready="ready"
               @moveend="idle">
               <l-tile-layer :url="osmtile" :attribution="attribution" />
@@ -98,15 +98,14 @@
                 <ClusterMarker v-if="mapObject && zoom < 10" :markers="dodgyInBounds" :map="mapObject" />
                 <l-feature-group v-else>
                   <l-circle-marker v-if="highlighted" :key="'highlighted-' + highlighted.id" :lat-lng="[highlighted.lat, highlighted.lng]"
-                    :interactive="false" :radius="10" :options="{ color: 'blue' }" />
-                  <l-circle-marker v-for="d in dodgyInBounds" :key="d.id" :lat-lng="d" :radius="1" :options="{ color: 'red' }"
-                    @click="selected = d" />
+                    :interactive="false" :radius="5" color="blue" />
+                  <l-circle-marker v-for="d in dodgyInBounds" :key="d.id" :lat-lng="d" :radius="5" color="red" @click="selected = d" />
                 </l-feature-group>
               </div>
 
               <div v-if="groups && zoom > 7">
-                <l-circle-marker v-for="g in allgroups" :key="'groupcentre-' + g.id" :lat-lng="[g.lat, g.lng]"
-                  :options="{ radius: zoom, color: 'darkgreen', fill: true, fillColor: 'darkgreen', fillOpacity: 1 }" />
+                <l-circle-marker v-for="g in allgroups" :key="'groupcentre-' + g.id" :lat-lng="[g.lat, g.lng]" :radius="10" color="darkgreen"
+                  :fill="true" fillColor="darkgreen" :fillOpacity="1" />
               </div>
             </l-map>
           </div>
@@ -282,22 +281,6 @@ export default {
 
       return height
     },
-    center() {
-      let ret = [53.945, -2.5209]
-
-      const bounds = this.$refs.map
-        ? this.$refs.map.leafletObject.getBounds()
-        : null
-
-      if (bounds) {
-        ret = [
-          (bounds.getNorthEast().lat + bounds.getSouthWest().lat) / 2,
-          (bounds.getNorthEast().lng + bounds.getSouthWest().lng) / 2
-        ]
-      }
-
-      return ret
-    },
     allgroups() {
       let groups = Object.values(this.groupStore.list)
       console.log('allgroups', groups.length)
@@ -312,6 +295,16 @@ export default {
       return this.groupid
         ? this.groupStore.get(this.groupid)
         : null
+    },
+    groupname() {
+      const group = this.group
+      if (group) {
+        let groupname = group.namefull ?? group.nameshort
+        if (group.region) groupname += ' (' + group.region + ')'
+        return groupname
+      }
+      if( this.caretaker) return 'Caretaker groups'
+      return 'All groups'
     },
     groupsInBounds() {
       const ret = []
@@ -396,6 +389,7 @@ export default {
           } catch (e) {
             console.log('Compare ', this.CGAs[i], this.CGAs[j])
             console.log('Check failed', e)
+            break // TODO
           }
         }
       }
@@ -691,10 +685,6 @@ export default {
       this.boundsChanged()
 
       if (this.groupid) {
-        await this.groupStore.fetchMT({
-          id: this.groupid,
-          polygon: true
-        })
         const group = this.groupStore.get(this.groupid)
 
         if (group) {
@@ -704,9 +694,8 @@ export default {
             // Zoom the map to fit the DPA/CGA of the group.  We need to do this before fetching the locations so that
             // we don't fetch them for the whole country.
             this.initialGroupZoomed = true
-            //const area = group.poly || group.polyofficial
-            const area = group.dpa || group.cga // TODO
-            if (area) { // TODO added
+            const area = group.poly || group.polyofficial
+            if (area) {
               console.log('=== Wkt.Wkt E group')
               const wkt = new Wkt.Wkt()
               wkt.read(area)
@@ -736,6 +725,11 @@ export default {
 
             this.busy = false
           }
+        }
+      } else {
+        if (!this.initialGroupZoomed) {
+          this.initialGroupZoomed = true
+          this.mapObject.setView([53.945, -2.5209], 6) // Show UK centred on Dunsop Bridge
         }
       }
     },
