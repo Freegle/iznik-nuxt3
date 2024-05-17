@@ -569,7 +569,6 @@ export default {
     replies: {
       immediate: true,
       handler(newVal) {
-        console.log('Replies', newVal, newVal?.length)
         if (newVal?.length === 1) {
           console.log('Expand')
           this.expanded = true
