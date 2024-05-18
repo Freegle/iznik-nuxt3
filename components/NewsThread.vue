@@ -29,12 +29,6 @@
               <b-dropdown-item @click="report">
                 Report this thread or one of its replies
               </b-dropdown-item>
-              <b-dropdown-item
-                v-if="myid === parseInt(newsfeed.userid) || mod"
-                @click="deleteIt"
-              >
-                Delete this thread
-              </b-dropdown-item>
               <b-dropdown-item v-if="canRefer" @click="referToOffer">
                 Refer to OFFER
               </b-dropdown-item>
@@ -51,10 +45,22 @@
                 Turn this into a Story
               </b-dropdown-item>
               <b-dropdown-item
+                v-if="chitChatMod && !newsfeed.hidden"
+                @click="hide"
+              >
+                Hide this thread
+              </b-dropdown-item>
+              <b-dropdown-item
                 v-if="chitChatMod && newsfeed.hidden"
                 @click="unhide"
               >
-                Unhide post
+                Unhide this thread
+              </b-dropdown-item>
+              <b-dropdown-item
+                v-if="myid === parseInt(newsfeed.userid) || mod"
+                @click="deleteIt"
+              >
+                Delete this thread
               </b-dropdown-item>
               <b-dropdown-item
                 v-if="chitChatMod && !newsfeed.hidden"
@@ -528,6 +534,9 @@ export default {
     },
     async unhide() {
       await this.newsfeedStore.unhide(this.id)
+    },
+    async hide() {
+      await this.newsfeedStore.hide(this.id)
     },
     async referTo(type) {
       await this.newsfeedStore.referTo(this.id, type)
