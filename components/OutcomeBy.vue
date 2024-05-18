@@ -340,7 +340,7 @@ select {
     padding: 10px;
 
     grid-template-rows: auto;
-    grid-template-columns: 1fr 160px 160px;
+    grid-template-columns: 1fr 165px 160px;
   }
 
   .select {

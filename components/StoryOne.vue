@@ -98,10 +98,10 @@
   </div>
 </template>
 <script>
-import ReadMore from 'vue-read-more3/src/ReadMoreComponent'
 import { defineAsyncComponent } from 'vue'
 import { useStoryStore } from '../stores/stories'
 import { useUserStore } from '../stores/user'
+import ReadMore from '~/components/ReadMore'
 const StoryShareModal = defineAsyncComponent(() =>
   import('~/components/StoryShareModal')
 )

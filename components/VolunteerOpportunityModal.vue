@@ -50,7 +50,7 @@
           </div>
           <b-row>
             <!-- eslint-disable-next-line-->
-            <b-col class="mb-2 prewrap font-weight-bold forcebreak">{{ description }}</b-col>
+            <b-col class="mb-2 prewrap font-weight-bold forcebreak">{{ volunteering.description }}</b-col>
           </b-row>
           <b-row class="mt-2">
             <b-col cols="4" md="3" class="field"> Time commitment</b-col>

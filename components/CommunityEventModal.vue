@@ -38,7 +38,7 @@
           </div>
           <b-row>
             <!-- eslint-disable-next-line-->
-            <b-col class="mb-2 prewrap font-weight-bold forcebreak">{{ description }}</b-col>
+            <b-col class="mb-2 prewrap font-weight-bold forcebreak">{{ event.description }}</b-col>
           </b-row>
           <b-row>
             <b-col cols="4" md="3" class="field"> Where</b-col>

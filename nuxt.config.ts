@@ -147,6 +147,7 @@ export default defineNuxtConfig({
     '/stats/**': { ssr: false },
     '/stories/**': { ssr: false },
     '/teams': { ssr: false },
+    '/adtest': { ssr: false },
 
     // Render on demand - may never be shown in a given build - then cache for a while.
     '/explore/region/**': { isr: 3600 },
@@ -351,7 +352,31 @@ export default defineNuxtConfig({
                      //  cmpApi: 'iab',
                      //  timeout: 8000
                      // }
-                   }
+                   },
+                   cache: {
+                      url: 'https://prebid-server.rubiconproject.com/vtrack?a=26548',
+                      ignoreBidderCacheKey: true,
+                      vasttrack: true 
+                   },
+                   s2sConfig: [{
+                      accountId: '26548',
+                      bidders: ['mgnipbs'],   // PBS ‘bidder’ code that triggers the call to PBS
+                      defaultVendor: 'rubicon',
+                      coopSync: true,
+                      userSyncLimit: 8,       // syncs per page up to the publisher
+                      defaultTtl: 300,        // allow Prebid.js to cache bids for 5 minutes
+                      allowUnknownBidderCodes: true,  // so PBJS doesn't reject responses
+                      extPrebid: {
+                        cache: {      // only needed if you're running video
+                           vastxml: { returnCreative: false }
+                        },
+                        bidders: {
+                          mgnipbs: {
+                            wrappername: "26548_Freegle"
+                          }
+                        }
+                      }
+                    }]
                  });
                  
                  // Gourmetads requires schain config.
@@ -371,7 +396,7 @@ export default defineNuxtConfig({
                          }
                        ]
                      }
-                   }
+                   },
                  }
                 });
               });  
@@ -385,9 +410,6 @@ export default defineNuxtConfig({
             `)
               });
 
-            window.IHPWT = {};
-            var PWTcalled = false;
-            
             function loadScript(url, block) {
               if (url && url.length) {
                 console.log('Load script:', url);
@@ -408,51 +430,30 @@ export default defineNuxtConfig({
               }
             }
 
-            function postPWT() {
-              if (!PWTcalled) {
-                PWTcalled = true;
+            function postCookieYes() {
+              console.log('Consider load of GPT and prebid');
+              
+              if (!window.weHaveLoadedGPT) {
+                window.weHaveLoadedGPT = true;
                 
-                // Now that PWT is loaded, or has failed, we need to load:
+                // We need to load:
                 // - GPT, which needs to be loaded before prebid.
                 // - Prebid.
                 // The ordering is ensured by using defer and appending the script.
-                console.log('PWT.js loaded');
+                console.log('Load GPT and prebid');
                 loadScript('https://securepubads.g.doubleclick.net/tag/js/gpt.js', true)
                 loadScript('/js/prebid-app.js', true)
+              } else {
+                console.log('GPT and prebid already loaded');
               }
             };
-            
-            function postCookieYes() {
-              window.IHPWT.jsLoaded = postPWT;
-               
-              var purl = window.location.href;
-              var url = '//ads.pubmatic.com/AdServer/js/pwt/164422/12426';
-              var profileVersionId = '';
-              if (purl.indexOf('pwtv=')>0){
-                var regexp = /pwtv=(.*?)(&|$)/g;
-                var matches = regexp.exec(purl);
-                if(matches.length >= 2 && matches[1].length > 0){
-                  profileVersionId = '/'+matches[1];
-                }
-              }
-              
-              loadScript(url+profileVersionId+'/pwt.js', true);
-              
-              // Failsafe to load GPT etc if PWT fails.
-              setTimeout(() => {
-                console.log('PWT failed to load in time, triggering failsafe load of GPT')
-                postPWT();
-                if (window.Sentry) {
-                  window.Sentry.captureMessage('PWT failed to load in time, triggering failsafe load of GPT');
-                }
-              }, 3000);
-            }
 
             if ('` +
             config.COOKIEYES +
             `' != 'null') {
-              // First we load CookieYes, which needs to be loaded before the PWT script.
-              ` +
+              // First we load CookieYes, which needs to be loaded before anything else, so that
+              // we have the cookie consent.
+            ` +
             (config.ISAPP ? `
                 console.log("APP ADD COOKIEYES")
                 const cookieScript = document.getElementById('cookieyes')
@@ -467,15 +468,14 @@ export default defineNuxtConfig({
             
               // Now we wait until the CookieYes script has set its own cookie.  
               // This might be later than when the script has loaded in pure JS terms, but we
-              // need to be sure it's loaded before we can move on to the PWT.
+              // need to be sure it's loaded before we can move on.
               function checkCookieYes() {
                 var cookies = localStorage.getItem('cookies')
                 if (cookies.indexOf('cookieyes-consent') > -1) {
                 //if (document.cookie.indexOf('cookieyes-consent') > -1) {
                   
-                  // Check that we have set the TCF string which the PWT script uses to
-                  // check for the CMP.  This only happens once the user has responded
-                  // to the cookie banner.
+                  // Check that we have set the TCF string.  This only happens once the user 
+                  // has responded to the cookie banner.
                   if (window.__tcfapi) {
                     window.__tcfapi('getTCData', 2, (tcData, success) => {
                       if (success && tcData && tcData.tcString) {

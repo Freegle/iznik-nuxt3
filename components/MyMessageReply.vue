@@ -2,58 +2,37 @@
   <div class="border border-success rounded mb-1">
     <div class="layout mb-1">
       <div class="divider" />
-      <div class="d-flex flex-column justify-content-start user">
-        <div
-          v-if="replyuser"
-          class="d-flex mr-4 clickme"
-          @click="showProfileModal"
-        >
-          <ProfileImage
-            :image="replyuser.profile.paththumb"
-            class="m-1 d-none d-md-block"
-            is-thumbnail
-            size="sm"
+      <div class="user d-flex flex-wrap">
+        <MyMessageReplyUser :id="replyuser?.id" />
+        <div class="badges d-flex flex-wrap align-self-center">
+          <div class="mt-1 mb-1 ms-1 d-flex flex-column justify-content-center">
+            <b-badge v-if="closest" variant="info" pill class="pb-1">
+              Nearby
+            </b-badge>
+          </div>
+          <div class="mt-1 mb-1 ms-1 d-flex flex-column justify-content-center">
+            <b-badge v-if="best" variant="info" pill class="pb-1">
+              Good rating
+            </b-badge>
+          </div>
+          <div class="mt-1 mb-1 ms-1 d-flex flex-column justify-content-center">
+            <b-badge v-if="quickest" variant="info" pill class="pb-1">
+              Quick reply
+            </b-badge>
+          </div>
+          <SupporterInfo
+            v-if="replyuser?.supporter"
+            class="ms-1 d-flex flex-column justify-content-center"
           />
-          <ProfileImage
-            :image="replyuser.profile.paththumb"
-            class="m-1 d-block d-md-none"
-            is-thumbnail
-            size="lg"
-          />
-          <!-- eslint-disable-next-line -->
-            <span class="align-middle mt-1" v-if="unseen > 0"><strong>{{ replyuser.displayname }}</strong></span>
-          <!-- eslint-disable-next-line -->
-            <span v-else class="align-middle mt-1"><strong>{{ replyuser.displayname }}</strong></span>
         </div>
-      </div>
-      <div class="badges d-flex flex-wrap justify-content-end">
-        <div class="mt-1 mr-1 d-flex flex-column justify-content-center">
-          <b-badge v-if="closest" variant="info" pill class="pb-1">
-            Nearby
-          </b-badge>
-        </div>
-        <div class="mt-1 mr-1 d-flex flex-column justify-content-center">
-          <b-badge v-if="best" variant="info" pill class="pb-1">
-            Good rating
-          </b-badge>
-        </div>
-        <div class="mt-1 mr-1 d-flex flex-column justify-content-center">
-          <b-badge v-if="quickest" variant="info" pill class="pb-1">
-            Quick reply
-          </b-badge>
-        </div>
-        <SupporterInfo
-          v-if="replyuser?.supporter"
-          class="mt-1 mr-1 d-flex flex-column justify-content-center"
-        />
       </div>
       <div
-        class="pl-1 flex-shrink-1 ratings d-flex d-md-none justify-content-end"
+        class="pl-1 flex-shrink-1 ratings d-flex d-md-none justify-content-end align-self-center m-0"
       >
         <UserRatings v-if="replyuser?.id" :id="replyuser?.id" size="sm" />
       </div>
       <div
-        class="pl-1 flex-shrink-1 ratings d-none d-md-flex justify-content-end w-100 pr-1"
+        class="pl-1 flex-shrink-1 ratings d-none d-md-flex justify-content-end w-100 pr-1 m-0"
       >
         <UserRatings :id="replyuser?.id" />
       </div>
@@ -82,7 +61,7 @@
             @click="unpromise"
           >
             <div class="d-flex">
-              <span class="stacked">
+              <span class="stacked mt-1">
                 <v-icon icon="handshake" />
                 <v-icon icon="slash" class="unpromise__slash" /> </span
               >&nbsp;Unpromise
@@ -128,11 +107,6 @@
       :selected-user="replyuser?.id"
       @hidden="showRenegeModal = false"
     />
-    <ProfileModal
-      v-if="showProfile && reply && replyuser"
-      :id="replyuser.id"
-      @hidden="showProfile = false"
-    />
   </div>
 </template>
 <script>
@@ -141,7 +115,6 @@ import { useMessageStore } from '../stores/message'
 import { useChatStore } from '../stores/chat'
 import { useRouter } from '#imports'
 import SupporterInfo from '~/components/SupporterInfo'
-import ProfileImage from '~/components/ProfileImage'
 import { timeago, datelocale } from '~/composables/useTimeFormat'
 
 const UserRatings = defineAsyncComponent(() =>
@@ -149,9 +122,6 @@ const UserRatings = defineAsyncComponent(() =>
 )
 const PromiseModal = defineAsyncComponent(() => import('./PromiseModal'))
 const RenegeModal = defineAsyncComponent(() => import('./RenegeModal'))
-const ProfileModal = defineAsyncComponent(() =>
-  import('~/components/ProfileModal')
-)
 
 export default {
   components: {
@@ -159,8 +129,6 @@ export default {
     UserRatings,
     PromiseModal,
     RenegeModal,
-    ProfileImage,
-    ProfileModal,
   },
   props: {
     message: {
@@ -239,7 +207,6 @@ export default {
   },
   data() {
     return {
-      showProfile: false,
       showPromiseModal: false,
       showRenegeModal: false,
     }
@@ -291,9 +258,6 @@ export default {
     },
     unpromise() {
       this.showRenegeModal = true
-    },
-    showProfileModal() {
-      this.showProfile = true
     },
   },
 }

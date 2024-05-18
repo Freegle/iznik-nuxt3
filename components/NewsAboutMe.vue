@@ -55,7 +55,7 @@
   </div>
 </template>
 <script>
-import ReadMore from 'vue-read-more3/src/ReadMoreComponent'
+import ReadMore from '~/components/ReadMore'
 import NewsBase from '~/components/NewsBase'
 import NewsUserIntro from '~/components/NewsUserIntro'
 import NewsLoveComment from '~/components/NewsLoveComment'

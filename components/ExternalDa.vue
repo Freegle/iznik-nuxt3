@@ -4,7 +4,11 @@
     If you don't like ads, then you can use an ad blocker.  Plus you could donate to us
     at https://www.ilovefreegle.org/donate - if we got enough donations we would be delighted not to show ads.
      -->
-    <div v-if="me" v-observe-visibility="visibilityChanged" class="pointer">
+    <div
+      v-if="me || showLoggedOut"
+      v-observe-visibility="visibilityChanged"
+      class="pointer"
+    >
       <div v-if="isVisible">
         <div
           class="d-flex w-100 justify-content-around"
@@ -48,6 +52,10 @@ const props = defineProps({
     default: false,
   },
   inModal: {
+    type: Boolean,
+    default: false,
+  },
+  showLoggedOut: {
     type: Boolean,
     default: false,
   },
@@ -98,14 +106,26 @@ function refreshAd() {
                 variant: 'timeout',
               })
             } else if (bids?.length) {
-              console.log('Got bids back', bids, timedOut, auctionId)
+              console.log(
+                'Got bids back',
+                props.adUnitPath,
+                bids,
+                timedOut,
+                auctionId
+              )
 
               api.bandit.chosen({
                 uid: 'prebid',
                 variant: 'bids',
               })
             } else {
-              console.log('Got no bids back', bids, timedOut, auctionId)
+              console.log(
+                'Got no bids back',
+                props.adUnitPath,
+                bids,
+                timedOut,
+                auctionId
+              )
 
               api.bandit.chosen({
                 uid: 'prebid',
@@ -143,19 +163,98 @@ const emit = defineEmits(['rendered'])
 // We want to wait until an ad has been viewable for 100ms.  That reduces the impact of fast scrolling or
 // redirects.
 let initialTimer = null
+let GPTTimer = null
+let GPTFailed = false
 
 function handleVisible() {
   // Check if the ad is still visible after this delay, and no modal is open.
+  console.log(
+    'Check if ad still visible',
+    isVisible.value,
+    props.inModal,
+    document.body.classList.contains('modal-open')
+  )
   if (
     isVisible.value &&
     (props.inModal || !document.body.classList.contains('modal-open'))
   ) {
-    window.googletag.cmd.push(function () {
-      slot = window.googletag
-        .defineSlot(props.adUnitPath, props.dimensions, props.divId)
-        .addService(window.googletag.pubads())
+    console.log('Queue GPT commands', props.divId)
 
-      window.googletag.cmd.push(function () {
+    // Sometimes GPT is blocked, so we push the command but it never runs.
+    // Start a fallback timer for that.
+    if (!GPTTimer) {
+      GPTTimer = setTimeout(() => {
+        console.log("GPT didn't run", props.divId)
+        GPTTimer = null
+        GPTFailed = true
+        emit('rendered', false)
+      }, 1000)
+    }
+
+    window.googletag.cmd.push(function () {
+      if (GPTFailed) {
+        console.log('GPT already timed out')
+      } else {
+        clearTimeout(GPTTimer)
+        console.log('Execute GPT define slot', props.divId)
+        slot = window.googletag
+          .defineSlot(props.adUnitPath, props.dimensions, props.divId)
+          .addService(window.googletag.pubads())
+
+        console.log('Add event listeners', props.adUnitPath)
+        window.googletag
+          .pubads()
+          .addEventListener('slotRenderEnded', (event) => {
+            if (event?.slot.getAdUnitPath() === props.adUnitPath) {
+              console.log(
+                'Rendered',
+                uniqueid.value,
+                'empty',
+                event?.isEmpty,
+                event
+              )
+
+              if (event?.isEmpty) {
+                adShown.value = false
+                maxWidth.value = 0
+                maxHeight.value = 0
+              } else {
+                maxWidth.value = event.size[0]
+                maxHeight.value = event.size[1]
+              }
+
+              if (event?.isEmpty) {
+                adShown.value = false
+                console.log('Rendered empty', props.adUnitPath, adShown)
+                // Sentry.captureMessage('Ad rendered empty ' + props.adUnitPath)
+              } else {
+                maxWidth.value = event.size[0]
+                maxHeight.value = event.size[1]
+              }
+
+              emit('rendered', adShown.value)
+            }
+          })
+          .addEventListener('slotVisibilityChanged', (event) => {
+            if (event?.slot.getAdUnitPath() === props.adUnitPath) {
+              if (event.inViewPercentage < 51 && miscStore.visible) {
+                // const msg =
+                //   'Visibility of slot ' +
+                //   props.adUnitPath +
+                //   ' changed. New visibility: ' +
+                //   event.inViewPercentage +
+                //   '%.Viewport size: ' +
+                //   window.innerWidth +
+                //   'x' +
+                //   window.innerHeight
+                //
+                // console.log(msg)
+                // Sentry.captureMessage(msg)
+              }
+            }
+          })
+
+        console.log('Excute GPT display', props.divId)
         window.googletag.display(props.divId)
 
         if (window.googletag.pubads().isInitialLoadDisabled()) {
@@ -172,88 +271,72 @@ function handleVisible() {
         }
 
         shownFirst = true
-      })
-    })
-
-    window.googletag.cmd.push(function () {
-      window.googletag
-        .pubads()
-        .addEventListener('slotRenderEnded', (event) => {
-          if (event?.slot.getAdUnitPath() === props.adUnitPath) {
-            console.log(
-              'Rendered',
-              uniqueid.value,
-              'empty',
-              event?.isEmpty,
-              event
-            )
-
-            if (event?.isEmpty) {
-              adShown.value = false
-              maxWidth.value = 0
-              maxHeight.value = 0
-            } else {
-              maxWidth.value = event.size[0]
-              maxHeight.value = event.size[1]
-            }
-
-            if (event?.isEmpty) {
-              adShown.value = false
-              console.log('Rendered empty', props.adUnitPath, adShown)
-              // Sentry.captureMessage('Ad rendered empty ' + props.adUnitPath)
-            } else {
-              maxWidth.value = event.size[0]
-              maxHeight.value = event.size[1]
-            }
-
-            emit('rendered', adShown.value)
-          }
-        })
-        .addEventListener('slotVisibilityChanged', (event) => {
-          if (event?.slot.getAdUnitPath() === props.adUnitPath) {
-            if (event.inViewPercentage < 51 && miscStore.visible) {
-              // const msg =
-              //   'Visibility of slot ' +
-              //   props.adUnitPath +
-              //   ' changed. New visibility: ' +
-              //   event.inViewPercentage +
-              //   '%.Viewport size: ' +
-              //   window.innerWidth +
-              //   'x' +
-              //   window.innerHeight
-              //
-              // console.log(msg)
-              // Sentry.captureMessage(msg)
-            }
-          }
-        })
+      }
     })
   }
 }
+
+let prebidRetry = 0
+
 function visibilityChanged(visible) {
-  // Check the pbjs status here rather than on component load, as it might not be available yet.
+  // We need to wait for CookieYes, then the TC data, then prebid being loaded.  This is triggered in nuxt.config.ts.
+  // Check the status here rather than on component load, as it might not be available yet.
+  visibleTimer = null
+
   if (process.client) {
-    if (!window.pbjs?.version) {
-      console.log('Prebid not loaded yet')
+    if (!window.__tcfapi) {
+      // CookieYes not yet loaded - retry.
+      console.log('CookieYes not yet loaded in ad')
       visibleTimer = window.setTimeout(() => {
         visibilityChanged(visible)
       }, 100)
     } else {
-      visibleTimer = null
+      window.__tcfapi(
+        'getTCData',
+        2,
+        (tcData, success) => {
+          if (success && tcData && tcData.tcString) {
+            console.log('TC data loaded and TC String set')
+            if (!window.pbjs?.version) {
+              console.log('Prebid not loaded yet')
+              prebidRetry++
 
-      try {
-        isVisible.value = visible
+              if (prebidRetry > 20) {
+                // Give up.  Probably blocked, so we should emit that we've not rendered an ad.  This may trigger
+                // a fallback ad.
+                emit('rendered', false)
+              } else {
+                visibleTimer = window.setTimeout(() => {
+                  visibilityChanged(visible)
+                }, 100)
+              }
+            } else {
+              visibleTimer = null
 
-        if (visible && !shownFirst) {
-          console.log('Queue create ad', props.adUnitPath, props.divId)
+              try {
+                isVisible.value = visible
 
-          if (!initialTimer) {
-            initialTimer = setTimeout(handleVisible, 100)
+                if (visible && !shownFirst) {
+                  console.log('Queue create ad', props.adUnitPath, props.divId)
+
+                  if (!initialTimer) {
+                    initialTimer = setTimeout(handleVisible, 100)
+                  }
+                }
+              } catch (e) {
+                console.log('Exception in visibilityChanged', e)
+              }
+            }
+          } else {
+            // TC data not yet ready - this is expected as it requires user response.
+            console.log('TC data not yet available in ad')
+            visibleTimer = window.setTimeout(() => {
+              visibilityChanged(visible)
+            }, 100)
           }
-        }
-      } catch (e) {
-        console.log('Exception in visibilityChanged', e)
-      }
+        },
+        [1, 2, 3]
+      )
     }
   }
 }

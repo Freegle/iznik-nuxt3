@@ -24,7 +24,20 @@ export default {
   },
   computed: {
     emessage() {
-      return this.newsfeed.message ? twem(this.newsfeed.message) : null
+      let ret = this.newsfeed.message ? twem(this.newsfeed.message) : null
+
+      if (ret) {
+        // Remove leading spaces/tabs.
+        let regExp = /^[\t ]+/gm
+        ret = ret.replace(regExp, '')
+
+        // Remove duplicate blank lines.
+        const EOL = ret.match(/\r\n/gm) ? '\r\n' : '\n'
+        regExp = new RegExp('(' + EOL + '){3,}', 'gm')
+        ret = ret.replace(regExp, EOL + EOL)
+      }
+
+      return ret
     },
     newsfeed() {
       const newsfeedStore = useNewsfeedStore()

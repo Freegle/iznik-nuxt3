@@ -31,5 +31,6 @@ android/app/src/main/assets/capacitor.config.json
 
 # public/js
 public/js/cookieyes-*
+public/js/cookieyesapp-v*
 public/js/prebid-app-*
 public/js/prebid-base-*

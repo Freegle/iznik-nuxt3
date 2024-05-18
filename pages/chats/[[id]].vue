@@ -45,7 +45,8 @@
                     class="mb-1 ml-1 ml-md-0"
                     @click="markAllRead"
                   >
-                    <v-icon icon="check" /> Mark all read
+                    <v-icon icon="check" />
+                    Mark all read
                   </b-button>
                 </div>
                 <p
@@ -192,6 +193,7 @@
             :class="{
               'sidebar-with-small-ads': smallAdVisible,
               'sidebar-with-large-ads': largeAdVisible,
+              'sidebar-without-ads': noAdsRendered,
               'ads-wrapper': true,
             }"
           >
@@ -217,7 +219,7 @@
     </div>
   </client-only>
 </template>
-<script>
+<script setup>
 import dayjs from 'dayjs'
 
 import { storeToRefs } from 'pinia'
@@ -234,6 +236,8 @@ import ExternalDa from '~/components/ExternalDa.vue'
 // We can't use async on ChatListEntry else the infinite scroll kicks in and tries to load everything while we are
 // still waiting for the import to complete.
 import ChatListEntry from '~/components/ChatListEntry.vue'
+import { useMiscStore } from '~/stores/misc'
+
 const ContactDetailsAskModal = defineAsyncComponent(() =>
   import('~/components/ContactDetailsAskModal.vue')
 )
@@ -242,320 +246,310 @@ const ChatHideModal = defineAsyncComponent(() =>
   import('~/components/ChatHideModal')
 )
 
-export default {
-  components: {
-    VisibleWhen,
-    SidebarRight,
-    ChatListEntry,
-    ContactDetailsAskModal,
-    ChatHideModal,
-    InfiniteLoading,
-    ChatMobileNavbar,
-    ExternalDa,
-  },
-  async setup(props) {
-    const chatStore = useChatStore()
-    const authStore = useAuthStore()
+const chatStore = useChatStore()
+const authStore = useAuthStore()
+const miscStore = useMiscStore()
 
-    definePageMeta({
-      layout: 'login',
-    })
+definePageMeta({
+  layout: 'login',
+})
 
-    let title = 'Chats'
-    let description =
-      "See the conversations you're having with other freeglers."
+let title = 'Chats'
+let description = "See the conversations you're having with other freeglers."
 
-    const runtimeConfig = useRuntimeConfig()
+const runtimeConfig = useRuntimeConfig()
+const route = useRoute()
+
+const myid = authStore.user?.id
+const showChats = ref(20)
+
+// When there's a flag in the chat store to show the modal.  Don't reset the value in the store here otherwise
+// reactivity will stop the modal being shown.
+const showContactDetailsAskModal =
+  storeToRefs(chatStore).showContactDetailsAskModal
+
+const id = route.params.id ? parseInt(route.params.id) : 0
+
+let chat = null
+
+const search = ref(null)
+
+if (route.query.search) {
+  search.value = route.query.search
+}
+
+if (myid) {
+  // Fetch the list of chats.
+  await chatStore.fetchChats(search.value, true, id)
+
+  // Is this chat in the list?
+  chat = chatStore.byChatId(id)
+
+  if (!chat) {
+    // Might be old.  Try fetching it specifically.
+    try {
+      chat = await chatStore.fetchChat(id)
+    } catch (e) {
+      console.log("Couldn't fetch chat", id, e)
+    }
+  } else {
+    // We have the chat, but maybe it's not quite up to date (e.g. a new message).  So fetch, but don't wait.
+    title = chat.name
+    description = 'Chat with ' + chat.name
+
+    chatStore.fetchChat(id)
+  }
+
+  if (id) {
+    // Find id in the list of chats.
+    const index = chatStore.list.findIndex((c) => c.id === id)
+    showChats.value = Math.max(showChats.value, index + 1)
+  }
+}
+
+useHead(buildHead(route, runtimeConfig, title, description))
+
+const showHideAllModal = ref(false)
+const minShowChats = ref(20)
+const searching = ref(false)
+const searchlast = ref(null)
+const complete = ref(false)
+const bump = ref(1)
+const distance = ref(1000)
+const selectedChatId = ref(null)
+const showClosed = ref(false)
+const smallAdVisible = ref(false)
+const largeAdVisible = ref(false)
+const noAdsRendered = ref(false)
+const triedAds = ref(false)
+
+const stickyAdRendered = computed(() => {
+  return miscStore.stickyAdRendered
+})
+
+const chats = computed(() => {
+  return chatStore?.list ? chatStore.list : []
+})
+const showingOlder = computed(() => {
+  return chatStore.searchSince !== null
+})
+const closedChats = computed(() => {
+  return scanChats(true, chats.value)
+})
+const closedCount = computed(() => {
+  let ret = 0
+
+  for (const chat of closedChats.value) {
+    if (chat.status === 'Closed') {
+      ret += chat.unseen
+    }
+  }
+
+  return ret
+})
+
+const filteredChats = computed(() => {
+  return scanChats(showClosed.value, chats.value)
+})
+const visibleChats = computed(() => {
+  const chats =
+    bump.value && filteredChats.value
+      ? filteredChats.value.slice(0, showChats.value)
+      : []
+
+  return chats
+})
+const mightBeOldChats = computed(() => {
+  const now = dayjs()
+
+  const me = authStore.user
+  if (me) {
+    const daysago = now.diff(dayjs(me.added), 'days')
+
+    if (daysago > 31) {
+      // They've been on the platform log enough that there might be old chats
+      return true
+    }
+  }
+
+  return false
+})
+
+watch(search, (newVal, oldVal) => {
+  showChats.value = minShowChats.value
+  bump.value++
+
+  if (!newVal) {
+    // Force a refresh to remove any old chats.
+    chatStore.fetchChats()
+  } else if (newVal.length > 2) {
+    // Force a server search to pick up old chats or more subtle matches.
+    searchMore()
+  }
+})
+
+onMounted(() => {
+  selectedChatId.value = null
+
+  if (authStore.user) {
     const route = useRoute()
+    selectedChatId.value = route.params.id ? parseInt(route.params.id) : 0
+  }
+})
 
-    const myid = authStore.user?.id
-    const showChats = ref(20)
+onBeforeUnmount(() => {
+  if (chatStore) {
+    chatStore.searchSince = null
+  }
+})
 
-    // When there's a flag in the chat store to show the modal.  Don't reset the value in the store here otherwise
-    // reactivity will stop the modal being shown.
-    const showContactDetailsAskModal =
-      storeToRefs(chatStore).showContactDetailsAskModal
+async function fetchOlder() {
+  chatStore.searchSince = '2009-09-11'
+  await chatStore.fetchChats()
+  bump.value++
+}
 
-    const id = route.params.id ? parseInt(route.params.id) : 0
+function showHideAll() {
+  showHideAllModal.value = true
+}
 
-    let chat = null
+async function hideAll() {
+  for (let i = 0; i < visibleChats.value.length; i++) {
+    await chatStore.hide(visibleChats.value[i].id)
+  }
 
-    const search = ref(null)
+  const router = useRouter()
+  router.push('/chats')
+}
 
-    if (route.query.search) {
-      search.value = route.query.search
-    }
-
-    if (myid) {
-      // Fetch the list of chats.
-      await chatStore.fetchChats(search.value, true, id)
-
-      // Is this chat in the list?
-      chat = chatStore.byChatId(id)
-
-      if (!chat) {
-        // Might be old.  Try fetching it specifically.
-        try {
-          chat = await chatStore.fetchChat(id)
-        } catch (e) {
-          console.log("Couldn't fetch chat", id, e)
-        }
-      } else {
-        // We have the chat, but maybe it's not quite up to date (e.g. a new message).  So fetch, but don't wait.
-        title = chat.name
-        description = 'Chat with ' + chat.name
-
-        chatStore.fetchChat(id)
-      }
-
-      if (id) {
-        // Find id in the list of chats.
-        const index = chatStore.list.findIndex((c) => c.id === id)
-        showChats.value = Math.max(showChats.value, index + 1)
-      }
-    }
-
-    useHead(buildHead(route, runtimeConfig, title, description))
-
-    return {
-      showContactDetailsAskModal,
-      chatStore,
-      showChats,
-      id,
-      chat,
-      search,
-    }
-  },
-  data() {
-    return {
-      showHideAllModal: false,
-      minShowChats: 20,
-      searching: false,
-      complete: false,
-      bump: 1,
-      distance: 1000,
-      selectedChatId: null,
-      showClosed: false,
-      smallAdVisible: false,
-      largeAdVisible: false,
-      triedAds: false,
-    }
-  },
-  computed: {
-    chats() {
-      return this.chatStore?.list ? this.chatStore.list : []
-    },
-    showingOlder() {
-      return this.chatStore.searchSince !== null
-    },
-    closedChats() {
-      return this.scanChats(true, this.chats)
-    },
-    closedCount() {
-      let ret = 0
-
-      for (const chat of this.closedChats) {
-        if (chat.status === 'Closed') {
-          ret += chat.unseen
-        }
-      }
-
-      return ret
-    },
-    filteredChats() {
-      return this.scanChats(this.showClosed, this.chats)
-    },
-    visibleChats() {
-      const chats =
-        this.bump && this.filteredChats
-          ? this.filteredChats.slice(0, this.showChats)
-          : []
-
-      return chats
-    },
-    mightBeOldChats() {
-      const now = dayjs()
-
-      if (this.me) {
-        const daysago = now.diff(dayjs(this.me.added), 'days')
-
-        if (daysago > 31) {
-          // They've been on the platform log enough that there might be old chats
-          return true
-        }
+function scanChats(closed, chats) {
+  if (chats && search.value) {
+    const l = search.value.toLowerCase()
+    chats = chats.filter((chat) => {
+      if (
+        chat.name.toLowerCase().includes(l) ||
+        (chat.snippet && chat.snippet.toLowerCase().includes(l))
+      ) {
+        // Found in the name of the chat (which may include a user
+        return true
       }
 
       return false
-    },
-  },
-  watch: {
-    search(newVal, oldVal) {
-      this.showChats = this.minShowChats
-      this.bump++
+    })
+  }
 
-      if (!newVal) {
-        // Force a refresh to remove any old chats.
-        this.chatStore.fetchChats()
-      } else if (newVal.length > 2) {
-        // Force a server search to pick up old chats or more subtle matches.
-        this.searchMore()
-      }
-    },
-  },
-  mounted() {
-    this.selectedChatId = null
-
-    if (this.myid) {
-      const route = useRoute()
-      this.selectedChatId = route.params.id ? parseInt(route.params.id) : 0
+  chats = chats.filter((chat) => {
+    if (id && !closed && chat.id === id) {
+      return true
     }
-  },
-  beforeUnmount() {
-    if (this.chatStore) {
-      this.chatStore.searchSince = null
+
+    if (chat.status === 'Blocked' || chat.status === 'Closed') {
+      return closed
     }
-  },
-  methods: {
-    async fetchOlder() {
-      this.chatStore.searchSince = '2009-09-11'
-      await this.chatStore.fetchChats()
-      this.bump++
-    },
-    showHideAll() {
-      this.showHideAllModal = true
-    },
-    async hideAll() {
-      for (let i = 0; i < this.visibleChats.length; i++) {
-        await this.chatStore.hide(this.visibleChats[i].id)
-      }
 
-      const router = useRouter()
-      router.push('/chats')
-    },
-    scanChats(closed, chats) {
-      if (chats && this.search) {
-        const l = this.search.toLowerCase()
-        chats = chats.filter((chat) => {
-          if (
-            chat.name.toLowerCase().includes(l) ||
-            (chat.snippet && chat.snippet.toLowerCase().includes(l))
-          ) {
-            // Found in the name of the chat (which may include a user
-            return true
-          }
+    return !closed
+  })
 
-          return false
-        })
-      }
+  // Sort by last date.
+  chats.sort((a, b) => {
+    if (a.lastdate && b.lastdate) {
+      return dayjs(b.lastdate).diff(dayjs(a.lastdate))
+    } else if (a.lastdate) {
+      return -1
+    } else if (b.lastdate) {
+      return 1
+    } else {
+      return 0
+    }
+  })
 
-      chats = chats.filter((chat) => {
-        if (this.id && !closed && chat.id === this.id) {
-          return true
-        }
+  return chats
+}
 
-        if (chat.status === 'Blocked' || chat.status === 'Closed') {
-          return closed
-        }
+function loadMore($state) {
+  // We use an infinite scroll on the list of chats because even though we have all the data in hand, the less
+  // we render onscreen the faster vue is to do so.
+  const chats = filteredChats.value
+  showChats.value++
 
-        return !closed
-      })
+  if (showChats.value > chats.length) {
+    showChats.value = chats.length
+    $state.complete()
+    complete.value = true
+  } else {
+    $state.loaded()
+  }
+}
 
-      // Sort by last date.
-      chats.sort((a, b) => {
-        if (a.lastdate && b.lastdate) {
-          return dayjs(b.lastdate).diff(dayjs(a.lastdate))
-        } else if (a.lastdate) {
-          return -1
-        } else if (b.lastdate) {
-          return 1
-        } else {
-          return 0
-        }
-      })
+async function markAllRead() {
+  for (const chat of filteredChats.value) {
+    if (chat.unseen) {
+      await chatStore.markRead(chat.id)
+    }
+  }
 
-      return chats
-    },
-    loadMore($state) {
-      // We use an infinite scroll on the list of chats because even though we have all the data in hand, the less
-      // we render onscreen the faster vue is to do so.
-      const chats = this.filteredChats
-      this.showChats++
+  chatStore.fetchChats()
+}
 
-      if (this.showChats > chats.length) {
-        this.showChats = chats.length
-        $state.complete()
-        this.complete = true
-      } else {
-        $state.loaded()
-      }
-    },
-    async markAllRead() {
-      for (const chat of this.filteredChats) {
-        if (chat.unseen) {
-          await this.chatStore.markRead(chat.id)
-        }
-      }
+function gotoChat(id) {
+  const router = useRouter()
 
-      this.chatStore.fetchChats()
-    },
-    gotoChat(id) {
-      const router = useRouter()
+  if (selectedChatId.value) {
+    // We just replace the route, which is quicker than navigating and re-rendering this page.
+    //
+    // This means that history won't get updated, which means that Back will go to the top-level /chats page.
+    // That is nice behaviour otherwise you have to hit Back a lot if you've viewed several chats.
+    selectedChatId.value = id
+    let url = id ? '/chats/' + id : '/chats'
 
-      if (this.selectedChatId) {
-        // We just replace the route, which is quicker than navigating and re-rendering this page.
-        //
-        // This means that history won't get updated, which means that Back will go to the top-level /chats page.
-        // That is nice behaviour otherwise you have to hit Back a lot if you've viewed several chats.
-        this.selectedChatId = id
-        let url = id ? '/chats/' + id : '/chats'
+    if (search.value) {
+      url += '?search=' + search.value
+    }
 
-        if (this.search) {
-          url += '?search=' + this.search
-        }
+    router.replace(url)
+  } else {
+    router.push(id ? '/chats/' + id : '/chats')
+  }
+}
 
-        router.replace(url)
-      } else {
-        router.push(id ? '/chats/' + id : '/chats')
-      }
-    },
-    async searchMore() {
-      if (this.searching) {
-        // Queue until we've finished.
-        this.searchlast = this.search
-      } else {
-        this.searching = this.search
+async function searchMore() {
+  if (searching.value) {
+    // Queue until we've finished.
+    searchlast.value = search.value
+  } else {
+    searching.value = search.value
 
-        await this.chatStore.fetchChats(this.search)
+    await chatStore.fetchChats(search.value)
 
-        this.showChats = this.minShowChats
-        this.bump++
+    showChats.value = minShowChats.value
+    bump.value++
 
-        while (this.searchlast) {
-          // We have another search queued.
-          const val2 = this.searchlast
-          this.searching = this.searchlast
-          this.searchlast = null
-          this.chatStore.searchSince = this.searchSince
-          await this.chatStore.fetchChats(val2)
-          this.showChats = this.minShowChats
-          this.bump++
-        }
+    while (searchlast.value) {
+      // We have another search queued.
+      const val2 = searchlast.value
+      searching.value = searchlast.value
+      searchlast.value = null
+      await chatStore.fetchChats(val2)
+      showChats.value = minShowChats.value
+      bump.value++
+    }
 
-        this.searching = null
-      }
-    },
-    adRendered(rendered, index, dimension) {
-      if (rendered) {
-        if (index === 0) {
-          this.largeAdVisible = true
-        } else {
-          this.smallAdVisible = true
-        }
-      }
+    searching.value = null
+  }
+}
 
-      this.triedAds = true
-    },
-  },
+function adRendered(rendered, index, dimension) {
+  if (rendered) {
+    if (index === 0) {
+      largeAdVisible.value = true
+    } else {
+      smallAdVisible.value = true
+    }
+  } else {
+    noAdsRendered.value = true
+  }
+
+  triedAds.value = true
 }
 </script>
 <style scoped lang="scss">
@@ -579,11 +573,14 @@ export default {
 
 .chatlist {
   // On mobile we substitute a different height navbar on this page.
-  height: calc(100vh - 58px - $sticky-banner-height-mobile);
+  height: calc(
+    100vh - 58px - $sticky-banner-height-mobile * v-bind('stickyAdRendered')
+  );
 
   @include media-breakpoint-up(md) {
     height: calc(
-      100vh - var(--header-navbar-height) - $sticky-banner-height-desktop
+      100vh - var(--header-navbar-height) - $sticky-banner-height-desktop *
+        v-bind('stickyAdRendered')
     );
   }
 
@@ -609,17 +606,26 @@ export default {
   border-radius: 50%;
 }
 
-.sidebar-with-small-ads .sidebar__wrapper {
+:deep(.sidebar-with-small-ads .sidebar__wrapper) {
   height: calc(
     100vh - $sidebar-ads-height-small - $sidebar-ads-label-height -
-      var(--header-navbar-height) - $sticky-banner-height-desktop
-  );
+      var(--header-navbar-height) - $sticky-banner-height-desktop *
+      v-bind('stickyAdRendered')
+  ) !important;
 }
 
-.sidebar-with-large-ads .sidebar__wrapper {
+:deep(.sidebar-with-large-ads .sidebar__wrapper) {
   height: calc(
     100vh - $sidebar-ads-height-large - $sidebar-ads-label-height -
-      var(--header-navbar-height) - $sticky-banner-height-desktop
-  );
+      var(--header-navbar-height) - $sticky-banner-height-desktop *
+      v-bind('stickyAdRendered')
+  ) !important;
+}
+
+:deep(.sidebar-without-ads .sidebar__wrapper) {
+  height: calc(
+    100vh - var(--header-navbar-height) - $sticky-banner-height-desktop *
+      v-bind('stickyAdRendered')
+  ) !important;
 }
 </style>
