@@ -284,7 +284,22 @@ function visibilityChanged(visible) {
   visibleTimer = null
 
   if (process.client) {
-    if (!window.__tcfapi) {
+    const runtimeConfig = useRuntimeConfig()
+
+    if (!runtimeConfig.public.COOKIEYES) {
+      console.log('No CookieYes in ad')
+
+      visibleTimer = null
+      isVisible.value = visible
+
+      if (visible && !shownFirst) {
+        console.log('Queue create ad', props.adUnitPath, props.divId)
+
+        if (!initialTimer) {
+          initialTimer = setTimeout(handleVisible, 100)
+        }
+      }
+    } else if (!window.__tcfapi) {
       // CookieYes not yet loaded - retry.
       console.log('CookieYes not yet loaded in ad')
       visibleTimer = window.setTimeout(() => {
@@ -312,19 +327,14 @@ function visibilityChanged(visible) {
               }
             } else {
               visibleTimer = null
+              isVisible.value = visible
 
-              try {
-                isVisible.value = visible
+              if (visible && !shownFirst) {
+                console.log('Queue create ad', props.adUnitPath, props.divId)
 
-                if (visible && !shownFirst) {
-                  console.log('Queue create ad', props.adUnitPath, props.divId)
-
-                  if (!initialTimer) {
-                    initialTimer = setTimeout(handleVisible, 100)
-                  }
+                if (!initialTimer) {
+                  initialTimer = setTimeout(handleVisible, 100)
                 }
-              } catch (e) {
-                console.log('Exception in visibilityChanged', e)
               }
             }
           } else {
