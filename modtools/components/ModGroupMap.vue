@@ -532,6 +532,7 @@ export default {
       }
     },
     shapeChanged(e) {
+      console.log("====shapeChanged")
       if (e.poly) {
         this.intersects = e.poly.intersects()
 
@@ -656,9 +657,11 @@ export default {
               })
 
               themap.addControl(drawControl)
+              console.log("====L.Draw.Event.CREATED is",L.Draw.Event.CREATED)
 
               themap.on(L.Draw.Event.CREATED, e => {
                 // const type = e.layerType;
+                console.log("===========================================================L.Draw.Event.CREATED",e)
                 const layer = e.layer
                 layer.editing.enable()
                 layer.addTo(drawnItems)
