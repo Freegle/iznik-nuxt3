@@ -171,9 +171,11 @@ import { useGroupStore } from '~/stores/group'
 import { useLocationStore } from '~/stores/location'
 
 //import LDraw from 'leaflet-draw'
+import 'leaflet-draw/dist/leaflet.draw.css'
 import 'leaflet-control-geocoder/dist/Control.Geocoder.css'
 import { attribution, osmtile, loadLeaflet } from '../composables/useMap'
 import Wkt from 'wicket'
+//import cloneDeep from 'lodash.clonedeep'
 
 import ClusterMarker from '../components/ClusterMarker'
 //import map from '@/mixins/map.js'
@@ -303,7 +305,7 @@ export default {
         if (group.region) groupname += ' (' + group.region + ')'
         return groupname
       }
-      if( this.caretaker) return 'Caretaker groups'
+      if (this.caretaker) return 'Caretaker groups'
       return 'All groups'
     },
     groupsInBounds() {
@@ -623,15 +625,16 @@ export default {
 
           try {
             if (drawnItems) {
-              console.log('################## drawnItems')
-              //const Control = await import(
-              //  'leaflet-draw/dist/leaflet.draw-src.js'
-              //)
-              //console.log('Control',Control)
-              //const drawControl = new LDraw({
+              console.log('################## drawnItems', drawnItems)
+              const fgdrawnItems = new window.L.FeatureGroup([
+                drawnItems
+              ])
+              await import(
+                'leaflet-draw/dist/leaflet.draw-src.js'
+              )
               const drawControl = new window.L.Control.Draw({
                 edit: {
-                  featureGroup: drawnItems,
+                  featureGroup: fgdrawnItems,
                   remove: false,
                   edit: false,
                   poly: {

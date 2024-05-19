@@ -59,3 +59,5 @@ A fairly minimal `package.json` is needed as `nuxt.config.ts` extends `../` and 
 * For refs use this.$refs.modal?.show() etc
 * b-img-lazy to b-img lazy
 * float-right to float-end
+
+* npm i leaflet-draw-toolbar --force
