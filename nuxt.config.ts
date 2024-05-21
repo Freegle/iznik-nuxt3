@@ -329,7 +329,10 @@ export default defineNuxtConfig({
                           }
                         }
                       }
-                    }]
+                    }],
+                    targetingControls: {
+                      addTargetingKeys: ['SOURCE']
+                    }
                  });
                  
                  // Gourmetads requires schain config.
