@@ -5,6 +5,7 @@ CONTACT=sales@zeroads.co
 
 Gumgum.com, 15952, DIRECT, ffdef49475d318a9
 rubiconproject.com, 23434, RESELLER, 0bfd66d529a55807
+rubiconproject.com, 26548, RESELLER, 0bfd66d529a55807
 pubmatic.com, 157897, RESELLER, 5d62403b186f2ace
 appnexus.com, 2758, RESELLER, f5ab79cb980f11d1
 contextweb.com, 558355, RESELLER, 89ff185a4c4e857c
