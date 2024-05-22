@@ -63,7 +63,7 @@
           >
             Reply
           </b-button>
-          <template v-if="!reply.loved">
+          <template v-if="!reply.loved && reply.userid !== myid">
             <span class="text-muted small ms-1 me-1">&bull;</span>
             <b-button
               variant="link"
