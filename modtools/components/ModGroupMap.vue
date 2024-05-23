@@ -175,7 +175,6 @@ import 'leaflet-draw/dist/leaflet.draw.css'
 import 'leaflet-control-geocoder/dist/Control.Geocoder.css'
 import { attribution, osmtile, loadLeaflet } from '../composables/useMap'
 import Wkt from 'wicket'
-//import cloneDeep from 'lodash.clonedeep'
 
 import ClusterMarker from '../components/ClusterMarker'
 //import map from '@/mixins/map.js'
@@ -250,7 +249,7 @@ export default {
       dpa: false,
       cga: true,
       shade: true,
-      labels: false,
+      labels: true,
       showDodgy: false,
       selectedName: null,
       selectedWKT: null,
@@ -492,7 +491,7 @@ export default {
           handler.enable()
         })
       }
-      callback()
+      if (callback) callback()
     },
     selectCGA(e, g) {
       this.selectedObj = g
@@ -657,11 +656,10 @@ export default {
               })
 
               themap.addControl(drawControl)
-              console.log("====L.Draw.Event.CREATED is",L.Draw.Event.CREATED)
 
               themap.on(L.Draw.Event.CREATED, e => {
                 // const type = e.layerType;
-                console.log("===========================================================L.Draw.Event.CREATED",e)
+                console.log("===========================================================L.Draw.Event.CREATED", e)
                 const layer = e.layer
                 layer.editing.enable()
                 layer.addTo(drawnItems)
@@ -773,6 +771,7 @@ export default {
 
       if (!this.selectedId) {
         // This is a new area.
+        console.log('saveArea NEW')
         await this.locationStore.add({
           name: this.selectedName,
           polygon: this.selectedWKT,
@@ -780,6 +779,7 @@ export default {
         })
       } else {
         // This is an existing area
+        console.log('saveArea UPDATE')
         await this.locationStore.update({
           id: this.selectedId,
           name: this.selectedName,
