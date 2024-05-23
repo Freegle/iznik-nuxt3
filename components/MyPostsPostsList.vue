@@ -158,6 +158,21 @@ const activePosts = computed(() => {
   return props.posts.filter((post) => !post.hasoutcome)
 })
 
+watch(activePosts, (newVal) => {
+  // For messages which are promised and not successful, we need to trigger a fetch.  This is so
+  // that we can correctly show the upcoming collections.
+  newVal.forEach((post) => {
+    if (
+      post.type === 'Offer' &&
+      post.promised &&
+      !post.successful &&
+      !messageStore.byId(post.id)
+    ) {
+      messageStore.fetch(post.id)
+    }
+  })
+})
+
 const visiblePosts = computed(() => {
   let posts = showOldPosts.value ? props.posts : activePosts.value
   posts = posts || []
