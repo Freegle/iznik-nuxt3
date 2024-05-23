@@ -12,13 +12,13 @@
       <b-form-text>
         Short name:
       </b-form-text>
-      <b-input v-model="nameshort" placeholder="e.g. EdinburghFreegle.  No spaces.  Keep it short." />
+      <b-form-input v-model="nameshort" placeholder="e.g. EdinburghFreegle.  No spaces.  Keep it short." />
     </b-form-group>
     <b-form-group>
       <b-form-text>
         Full name:
       </b-form-text>
-      <b-input v-model="namefull" placeholder="e.g. Edinburgh Freegle.  Spaces ok.  Not too long." />
+      <b-form-input v-model="namefull" placeholder="e.g. Edinburgh Freegle.  Spaces ok.  Not too long." />
     </b-form-group>
     <b-form-group>
       <b-form-text>
@@ -26,10 +26,10 @@
       </b-form-text>
       <b-row>
         <b-col cols="6">
-          <b-input v-model="lat" type="number" placeholder="Latitude" />
+          <b-form-input v-model="lat" type="number" placeholder="Latitude" />
         </b-col>
         <b-col cols="6">
-          <b-input v-model="lng" type="number" placeholder="Longitude" />
+          <b-form-input v-model="lng" type="number" placeholder="Longitude" />
         </b-col>
       </b-row>
     </b-form-group>

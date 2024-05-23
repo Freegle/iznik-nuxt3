@@ -14,9 +14,29 @@ export const useUserStore = defineStore({
       this.fetching = {}
       this.fetchingLocation = {}
     },
+    clear() { // ModTools
+      this.list = {}
+      this.locationList = {}
+      this.fetching = {}
+      this.fetchingLocation = {}
+    },
     async emailIsInUse(email) {
       const ret = await api(this.config).user.fetchByEmail(email, false)
       return ret?.user?.id
+    },
+    async fetchMT(params){
+      const { user, users } = await api(this.config).user.fetchMT(params)
+      if( user){
+        console.log("Got ONE users",user.id)
+        this.list[user.id] = user
+      }
+      if( users){
+        console.log("Got MANY users",users.length)
+        for( const user of users){
+          console.log("user.id",user.id)
+          this.list[user.id] = user
+        }
+      }
     },
     async fetch(id, force) {
       id = parseInt(id)

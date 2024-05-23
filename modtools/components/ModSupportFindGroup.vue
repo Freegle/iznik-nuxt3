@@ -53,7 +53,7 @@
           class="mr-2"
         />
         <b-form-group>
-          <b-select v-model="region" :options="regionOptions" class="font-weight-bold ml-1" />
+          <b-form-select v-model="region" :options="regionOptions" class="font-weight-bold ml-1" />
         </b-form-group>
       </div>
       <group-header :id="group.id" :key="'group-' + group.id" :group="group" :show-join="false" />

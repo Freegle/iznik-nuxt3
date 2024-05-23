@@ -1,7 +1,7 @@
 <template>
   <div>
     <label>From:</label>
-    <b-select v-model="from">
+    <b-form-select v-model="from">
       <option value="null">
         -- Please choose --
       </option>
@@ -35,7 +35,7 @@
       <option value="centralmods">
         volunteersupport@...
       </option>
-    </b-select>
+    </b-form-select>
     <label>
       To:
     </label>
@@ -46,18 +46,18 @@
     <label>
       Try hard?
     </label>
-    <b-select v-model="tryhard">
+    <b-form-select v-model="tryhard">
       <option :value="false">
         Just mail primary email
       </option>
       <option :value="true">
         Mail all email addresses we know
       </option>
-    </b-select>
+    </b-form-select>
     <label>
       Confirm receipt
     </label>
-    <b-select v-model="confirm">
+    <b-form-select v-model="confirm">
       <option :value="false">
         Don't ask to click
       </option>
@@ -66,7 +66,7 @@
       </option>
     </b-select>
     <label>Subject</label>
-    <b-input v-model="subject" placeholder="Brief subject of this message" />
+    <b-form-input v-model="subject" placeholder="Brief subject of this message" />
     <label>Text version</label>
     <b-textarea v-model="text" rows="10" />
     <label>HTML version (optional)</label>
@@ -74,28 +74,10 @@
     <NoticeMessage v-if="groupid < 0" variant="danger" class="mt-2 mb-2">
       This will go to all groups.
     </NoticeMessage>
-    <SpinButton
-      v-if="groupid < 0"
-      variant="danger"
-      label="Send to all groups"
-      name="envelope"
-      spinclass="text-white"
-      :disabled="!valid"
-      class="mt-2 mb-2"
-      size="lg"
-      :handler="send"
-    />
-    <SpinButton
-      v-else
-      variant="primary"
-      label="Send"
-      name="envelope"
-      spinclass="text-white"
-      :disabled="!valid"
-      class="mt-2 mb-2"
-      size="lg"
-      :handler="send"
-    />
+    <SpinButton v-if="groupid < 0" variant="danger" label="Send to all groups" name="envelope" spinclass="text-white" :disabled="!valid"
+      class="mt-2 mb-2" size="lg" :handler="send" />
+    <SpinButton v-else variant="primary" label="Send" name="envelope" spinclass="text-white" :disabled="!valid" class="mt-2 mb-2" size="lg"
+      :handler="send" />
     <div v-if="alerts && alerts.length">
       <b-row class="font-weight-bold">
         <b-col cols="6" lg="2">
@@ -140,7 +122,7 @@ export default {
     GroupSelect,
     VueEditor
   },
-  data: function() {
+  data: function () {
     return {
       busy: false,
       from: null,

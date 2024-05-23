@@ -26,6 +26,7 @@
   </div>
 </template>
 <script>
+import { useUserStore } from '../../stores/user'
 
 export default {
   props: {
@@ -71,27 +72,25 @@ export default {
         this.searching = true
 
         this.show = 0
-/* TODO 
-        await this.$store.dispatch('user/clear')
+        const userStore = useUserStore()
+        userStore.clear()
 
-        await this.$store.dispatch('user/fetch', {
-          search: encodeURIComponent(val),
+        await userStore.fetchMT({
+          search: val,
           emailhistory: true
         })
-
         this.searching = false
         this.searched = true
 
         // Get a copy of the results here.  The store might change later if we view a chat and have to fetch another
         // user.  That can cause us to get confused.
-        const ret = this.$store.getters['user/list']
 
         // Show most recent first
-        this.searchresults = Object.values(ret).sort((a, b) => {
+        this.searchresults = Object.values(userStore.list).sort((a, b) => {
           return (
             new Date(b.lastaccess).getTime() - new Date(a.lastaccess).getTime()
           )
-        })*/
+        })
       }
     },
     loadMoreUsers: function ($state) {

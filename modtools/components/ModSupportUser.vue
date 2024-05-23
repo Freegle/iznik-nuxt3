@@ -52,14 +52,8 @@
         <b-button variant="white" class="mr-2 mb-1" :href="user.loginlink" target="_blank" rel="noopener noreferrer">
           <v-icon icon="user" /> Impersonate - must right-click and open in Incognito/Private window
         </b-button>
-        <b-button
-          v-if="admin"
-          variant="white"
-          class="mr-2 mb-1"
-          :href="user.loginlink ? user.loginlink.replace(/http.*\?u/, 'http://localhost:3002/?u') : null"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <b-button v-if="admin" variant="white" class="mr-2 mb-1"
+          :href="user.loginlink ? user.loginlink.replace(/http.*\?u/, 'http://localhost:3002/?u') : null" target="_blank" rel="noopener noreferrer">
           <v-icon icon="user" /> Impersonate (localhost:3002)
         </b-button>
         <ModMergeButton class="mr-2 mb-1" />
@@ -115,7 +109,7 @@
           Donations
         </h3>
         <div v-for="d in user.donations" :key="'donation-' + d.id">
-          &pound;{{ d.GrossAmount }} on {{ dateshort(d.timestamp ) }} <span class="small text-muted">via {{ d.source }}</span>
+          &pound;{{ d.GrossAmount }} on {{ dateshort(d.timestamp) }} <span class="small text-muted">via {{ d.source }}</span>
           <span v-if="d.source === 'PayPalGivingFund' || d.source === 'eBay' || d.source === 'Facebook'" class="small text-muted">
             (Gift Aid claimed by them not us)
           </span>
@@ -148,7 +142,8 @@
             <div v-if="user.privateposition">
               <div v-if="user.privateposition.lat || user.privateposition.lng">
                 {{ Math.round(user.privateposition.lat * 100) / 100 }}, {{ Math.round(user.privateposition.lng * 100) / 100 }}
-                <a :href="'https://www.google.com/maps?q=' + user.privateposition.lat + ',' + user.privateposition.lng" target="_blank" rel="noopener">Show on map</a>
+                <a :href="'https://www.google.com/maps?q=' + user.privateposition.lat + ',' + user.privateposition.lng" target="_blank"
+                  rel="noopener">Show on map</a>
               </div>
               <div v-else>
                 Not known
@@ -166,35 +161,23 @@
       <ModMemberLogins :member="user" />
       <div class="d-flex justify-content-between flex-wrap">
         <b-input-group class="mt-2">
-          <b-input
-            v-model="newpassword"
-            type="text"
-            placeholder="Reset password"
-            autocomplete="off"
-            class="max"
-          />
+          <b-form-input v-model="newpassword" type="text" placeholder="Reset password" autocomplete="off" class="max" />
           <b-input-group-append>
-            <SpinButton variant="white" name="save" label="Set Password" :handler="setPassword" />
+            <SpinButton variant="white" icon-name="save" label="Set Password" @handle="setPassword" />
           </b-input-group-append>
         </b-input-group>
         <b-input-group class="mt-2">
-          <b-input
-            v-model="newemail"
-            type="text"
-            placeholder="Add email"
-            autocomplete="off"
-            class="max"
-          />
-          <b-select v-model="newEmailAs" class="max">
+          <b-form-input v-model="newemail" type="text" placeholder="Add email" autocomplete="off" class="max" />
+          <b-form-select v-model="newEmailAs" class="max">
             <option value="1">
               As Primary
             </option>
             <option value="2">
               As Secondary
             </option>
-          </b-select>
+          </b-form-select>
           <b-input-group-append>
-            <SpinButton variant="white" name="save" label="Add Email" :handler="addEmail" />
+            <SpinButton variant="white" icon-name="save" label="Add Email" @handle="addEmail" />
           </b-input-group-append>
         </b-input-group>
         <NoticeMessage v-if="emailAddError" variant="danger" class="mt-2">
@@ -268,7 +251,8 @@
             {{ timeago(membershiphistory.timestamp) }}
           </span>
         </div>
-        <b-button v-if="!showAllMembershipHistories && membershipHistoriesUnshown" variant="white" class="mt-1" @click="showAllMembershipHistories = true">
+        <b-button v-if="!showAllMembershipHistories && membershipHistoriesUnshown" variant="white" class="mt-1"
+          @click="showAllMembershipHistories = true">
           Show +{{ membershipsUnshown }}
         </b-button>
       </div>
@@ -280,14 +264,10 @@
       </h3>
       <ModMemberSummary :member="user" />
       <div v-if="messageHistoriesShown.length">
-        <b-row
-          v-for="message in messageHistoriesShown"
-          :key="'messagehistory-' + message.arrival + '-' + message.id"
-          :class="{
-            'pl-3': true,
-            strike: message.deleted
-          }"
-        >
+        <b-row v-for="message in messageHistoriesShown" :key="'messagehistory-' + message.arrival + '-' + message.id" :class="{
+    'pl-3': true,
+    strike: message.deleted
+  }">
           <b-col cols="4" md="2" class="order-1 p-1 small">
             {{ datetimeshort(message.arrival) }}
           </b-col>
@@ -321,14 +301,14 @@
       </h3>
       <div>
         <p>Moderation status:</p>
-        <b-select v-model="newsfeedmodstatus" class="mb-2 flex-shrink-1 font-weight-bold">
+        <b-form-select v-model="newsfeedmodstatus" class="mb-2 flex-shrink-1 font-weight-bold">
           <b-form-select-option value="Unmoderated">
             Unmoderated
           </b-form-select-option>
           <b-form-select-option value="Suppressed">
             Suppressed
           </b-form-select-option>
-        </b-select>
+        </b-form-select>
         <div v-for="newsfeed in user.newsfeed" :key="'newsfeed-' + newsfeed.id">
           <div class="d-flex">
             <div class="mr-2">
@@ -340,7 +320,7 @@
               {{ datetimeshort(newsfeed.timestamp) }}
             </div>
             <div class="mr-2">
-              <div v-line-clamp="2" class="" :class="{strike: newsfeed.hidden || newsfeed.deleted}">
+              <div TODOv-line-clamp="2" class="" :class="{ strike: newsfeed.hidden || newsfeed.deleted }">
                 {{ newsfeed.message }}
               </div>
               <div v-if="newsfeed.hidden" class="small">
@@ -381,13 +361,15 @@
       <ModSupportChatList :chats="chatsFiltered" :pov="user.id" />
     </b-card-body>
     <ModLogsModal ref="logs" :userid="user.id" />
-    <ConfirmModal v-if="purgeConfirm" ref="purgeConfirm" :title="'Purge ' + user.displayname + ' from the system?'" message="<p><strong>This can't be undone.</strong></p><p>Are you completely sure you want to do this?</p>" @confirm="purgeConfirmed" />
+    <ConfirmModal v-if="purgeConfirm" ref="purgeConfirm" :title="'Purge ' + user.displayname + ' from the system?'"
+      message="<p><strong>This can't be undone.</strong></p><p>Are you completely sure you want to do this?</p>" @confirm="purgeConfirmed" />
     <ProfileModal v-if="user && user.info" :id="id" ref="profile" />
     <ModSpammerReport v-if="showSpamModal" ref="spamConfirm" :user="reportUser" />
     <ModCommentAddModal v-if="addComment" ref="addComment" :user="user" @added="updateComments" />
   </b-card>
 </template>
 <script>
+/*
 //import Vue from 'vue'
 import ModLogsModal from './ModLogsModal'
 import ModSpammer from './ModSpammer'
@@ -396,7 +378,7 @@ import ModSpammerReport from './ModSpammerReport'
 const ExternalLink = () => import('~/components/ExternalLink')
 const ModCommentAddModal = () => import('~/components/ModCommentAddModal')
 
-/* TODO if (process.client) {
+TODO if (process.client) {
   const lineClamp = require('vue-line-clamp')
 
   Vue.use(lineClamp, {
@@ -407,15 +389,6 @@ const ModCommentAddModal = () => import('~/components/ModCommentAddModal')
 const SHOW = 3
 
 export default {
-  components: {
-    ModSpammerReport,
-    ModComments,
-    ModSpammer,
-    ModLogsModal,
-    ExternalLink,
-    ModCommentAddModal
-  },
-
   props: {
     id: {
       type: Number,
@@ -427,7 +400,7 @@ export default {
       default: false
     }
   },
-  data: function() {
+  data: function () {
     return {
       expanded: true,
       purgeConfirm: false,
@@ -461,12 +434,12 @@ export default {
     freegleMemberships() {
       return this.user && this.user.memberof
         ? this.user.memberof
-            .filter(m => m.type === 'Freegle')
-            .sort(function(a, b) {
-              return a.nameshort
-                .toLowerCase()
-                .localeCompare(b.nameshort.toLowerCase())
-            })
+          .filter(m => m.type === 'Freegle')
+          .sort(function (a, b) {
+            return a.nameshort
+              .toLowerCase()
+              .localeCompare(b.nameshort.toLowerCase())
+          })
         : []
     },
     memberships() {
@@ -531,7 +504,7 @@ export default {
           ? this.user.emailhistory
           : []
 
-      ret.sort(function(a, b) {
+      ret.sort(function (a, b) {
         return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
       })
 
@@ -552,12 +525,12 @@ export default {
     chatsFiltered() {
       return this.user.chatrooms
         ? this.user.chatrooms
-            .filter(c => c.chattype !== 'Mod2Mod')
-            .sort((a, b) => {
-              return (
-                new Date(b.lastdate).getTime() - new Date(a.lastdate).getTime()
-              )
-            })
+          .filter(c => c.chattype !== 'Mod2Mod')
+          .sort((a, b) => {
+            return (
+              new Date(b.lastdate).getTime() - new Date(a.lastdate).getTime()
+            )
+          })
         : []
     },
     newsfeedmodstatus: {
@@ -605,15 +578,16 @@ export default {
         this.$refs.spamConfirm.show()
       })
     },
-    async setPassword() {
+    async setPassword(callback) {
       if (this.newpassword) {
         /* TODO await this.$store.dispatch('user/edit', {
           id: this.user.id,
           password: this.newpassword
         })*/
       }
+      callback()
     },
-    async addEmail() {
+    async addEmail(callback) {
       this.emailAddError = null
 
       if (this.newemail) {
@@ -627,6 +601,7 @@ export default {
           this.emailAddError = e.message
         }
       }
+      callback()
     },
     maybeExpand() {
       // Ignore text selection
