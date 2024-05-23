@@ -16,7 +16,7 @@
       <b-form-select v-model="configid" :options="configOptions" class="mb-2 font-weight-bold" />
       <div>
         <b-input-group>
-          <b-form-input v-model="newconfigname" placeholder="Enter new name" />
+          <b-form-input v-model="newconfigname" placeholder="Enter new config name" />
           <b-input-group-append>
             <SpinButton variant="white" icon-name="plus" label="Create" @handle="create" :disabled="!newconfigname" />
           </b-input-group-append>
@@ -34,13 +34,13 @@
           This is locked by #{{ config.createdby }}. You can use, view or copy it, but you can't change or delete it.
         </span>
       </NoticeMessage>
-      <NoticeMessage v-if="config.using && config.using.length" class="mb-2">
-        <p>
+      <NoticeMessage v-if="config.using && config.using.length">
+        <div>
           This config is being used.
-        </p>
-        <b-button v-if="!showUsing" variant="link" @click="showUsing = true">
-          Show who's using it
-        </b-button>
+          <b-button v-if="!showUsing" variant="link" @click="showUsing = true">
+            Show who's using it
+          </b-button>
+        </div>
         <div v-if="showUsing">
           <div v-for="using in config.using" :key="'using-' + using.id">
             {{ using.fullname }}

@@ -12,10 +12,10 @@
       <v-icon icon="arrow-left" /> Click to enable dragging
     </b-form-checkbox>
     <div v-if="dragging">
-      <draggable :key="'list-' + bump" v-model="stdmsgscopy" group="buttons" class="d-flex justify-content-center flex-wrap" @end="updateOrder">
-        <div v-for="stdmsg in stdmsgscopy" :key="'stdmsg-' + stdmsg.id">
-          <ModSettingsStandardMessageButton v-if="visible(stdmsg)" :stdmsg="stdmsg" />
-        </div>
+      <draggable v-model="stdmsgscopy" item-key="id" group="buttons" class="d-flex justify-content-center flex-wrap" @end="updateOrder">
+        <template #item="{ element }">
+          <ModSettingsStandardMessageButton v-if="visible(element)" :stdmsg="element" />
+        </template>
       </draggable>
     </div>
     <div v-else class="d-flex justify-content-center flex-wrap">
