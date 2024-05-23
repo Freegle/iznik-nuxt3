@@ -93,4 +93,12 @@ export default {
     margin-left: 0.3em;
   }
 }
+
+.active {
+  background-color: $color-blue--light;
+
+  a {
+    color: $color-white;
+  }
+}
 </style>
