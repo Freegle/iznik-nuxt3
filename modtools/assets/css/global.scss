@@ -2,7 +2,8 @@
   z-index: 1000;
   display: flex !important;
   text-align: center;
-  position: fixed; /* or absolute */
+  position: fixed;
+  /* or absolute */
   top: calc(50% - 44px);
   font-size: 12px;
   padding: 5px;
@@ -16,9 +17,11 @@
   0% {
     opacity: 0;
   }
+
   90% {
     opacity: 0;
   }
+
   100% {
     opacity: 1;
   }
@@ -63,7 +66,7 @@ html {
 }
 
 .badge.bg-success {
-  background-color: $color-green-background!important;
+  background-color: $color-green-background !important;
   color: white !important;
 }
 
@@ -157,24 +160,29 @@ body {
 }
 
 .decornone {
+
   &:hover,
   &:focus {
     text-decoration: none;
   }
 }
 
-.fade-enter-active, .fade-leave-active {
-    transition: opacity 1s;
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 1s;
 }
-.fade-enter, .fade-leave-to {
-    opacity: 0;
+
+.fade-enter,
+.fade-leave-to {
+  opacity: 0;
 }
 
 .fadein-enter-active {
-    transition: opacity 1s;
+  transition: opacity 1s;
 }
+
 .fadein-enter {
-    opacity: 0;
+  opacity: 0;
 }
 
 .forcebreak {
@@ -192,7 +200,8 @@ body {
   color: $color-black;
 }
 
-.white, .white > a {
+.white,
+.white>a {
   color: $color-white !important;
 }
 
@@ -220,12 +229,18 @@ body {
 }
 
 .noselect {
-  -webkit-touch-callout: none; /* iOS Safari */
-  -webkit-user-select: none; /* Safari */
-  -khtml-user-select: none; /* Konqueror HTML */
-  -moz-user-select: none; /* Firefox */
-  -ms-user-select: none; /* Internet Explorer/Edge */
-  user-select: none; /* Non-prefixed version, currently
+  -webkit-touch-callout: none;
+  /* iOS Safari */
+  -webkit-user-select: none;
+  /* Safari */
+  -khtml-user-select: none;
+  /* Konqueror HTML */
+  -moz-user-select: none;
+  /* Firefox */
+  -ms-user-select: none;
+  /* Internet Explorer/Edge */
+  user-select: none;
+  /* Non-prefixed version, currently
                                   supported by Chrome and Opera */
 }
 
@@ -264,15 +279,18 @@ legend {
   0% {
     opacity: 0.25;
   }
+
   50% {
     opacity: 1.0;
   }
+
   100% {
     opacity: 0.25;
   }
 }
 
 form {
+
   label,
   .col-form-label {
     font-weight: bold;
@@ -304,7 +322,7 @@ form {
 }
 
 // Animate marker moves (as used on landing page).
-.leaflet-marker-pane > * {
+.leaflet-marker-pane>* {
   transition: transform 2s ease;
 }
 
@@ -464,7 +482,9 @@ label {
   }
 
   .popover-arrow {
-    &::before, &::after {
+
+    &::before,
+    &::after {
       border-top-color: $color-green-background !important;
     }
   }
@@ -569,6 +589,35 @@ label {
 }
 
 /* Small gap on left of #12345678 */
-svg[data-icon="hashtag"]{
+svg[data-icon="hashtag"] {
   margin-left: 0.25rem;
+}
+
+/* Used to make DIV scrollable */
+.scrollinplace {
+  overflow-x: hidden;
+  overflow-y: auto;
+  height: 75vh;
+}
+
+.card-header-tabs {
+  padding: .75rem 0 0 1rem;
+  background-color: rgba(0, 0, 0, .03);
+}
+
+.card-header-tabs .nav-link.active {
+  color: #495057;
+  background-color: #fff;
+}
+
+.card-header-tabs li button {
+  border: 1px solid #d3d3d3!important;
+}
+
+.card-body {
+  padding: 0 1rem;
+}
+
+.text-muted {
+  fill: #6c757d;
 }

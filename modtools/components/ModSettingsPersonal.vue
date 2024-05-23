@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="scrollinplace">
     <b-form-group label="Your visible name">
       <b-form-text class="mb-2">
         This is your name as displayed publicly to other users, including in the <em>$myname</em> substitution string.
