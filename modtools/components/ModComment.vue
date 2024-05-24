@@ -10,7 +10,7 @@
             class="font-weight-bold nopara" />
         </div>
       </div>
-      <!--TODO div class="small">
+      <div class="small">
         <span v-if="savedComment.byuser">
           <v-icon icon="tag" /> by {{ savedComment.byuser.displayname }}
         </span>
@@ -33,9 +33,9 @@
           </b-button>
         </span>
       </div>
-      <ConfirmModal ref="confirm" @confirm="deleteConfirmed" />
-      <ModCommentEditModal v-if="amAModOn(savedComment.groupid) || supportOrAdmin" ref="editComment" :user="user" :comment="comment"
-        @edited="updateComments" /-->
+      <ConfirmModal v-if="showConfirmDelete" ref="confirm" @confirm="deleteConfirmed" @hidden="showConfirmDelete = false" />
+      <ModCommentEditModal v-if="showCommentEditModal" ref="editComment" :user="user" :comment="comment" @edited="updateComments"
+        @hidden="showCommentEditModal = false" />
     </NoticeMessage>
   </div>
 </template>
@@ -46,7 +46,6 @@ import { useGroupStore } from '~/stores/group'
 import { useMemberStore } from '../stores/member'
 import { useUserStore } from '~/stores/user'
 import cloneDeep from 'lodash.clonedeep'
-//const ConfirmModal = () => import('~/components/ConfirmModal.vue')
 
 export default {
   components: { ReadMore },
@@ -75,6 +74,8 @@ export default {
   },
   data: function () {
     return {
+      showConfirmDelete: false,
+      showCommentEditModal: false,
       savedComment: null
     }
   },
@@ -107,21 +108,14 @@ export default {
   },
   methods: {
     async updateComments() {
-      // The server API doesn't make it easy to refresh comments on memberships, because we can't refetch a
-      // specific membership id.  Instead fetch the user and then pass any comments to the store to update there.
       const userid = this.user.userid ? this.user.userid : this.user.id
-      await this.userStore.fetch({
-        id: userid,
-        info: true
+
+      await this.userStore.fetchMT({
+        search: userid,
+        emailhistory: true
       })
 
-      const user = this.userStore.get(userid)
-
-      await this.memberStore.updateComments({
-        userid: userid,
-        comments: user.comments
-      })
-
+      const user = this.userStore.byId(userid)
       this.savedComment = user.comments.find(comm => {
         return comm.id === this.savedComment.id
       })
@@ -130,26 +124,18 @@ export default {
     },
 
     deleteIt() {
-      alert("todo")
-      //this.waitForRef('confirm', () => {
-      //  this.$refs.confirm.show()
-      //})
+      this.showConfirmDelete = true
     },
 
     async deleteConfirmed() {
-      // Go direct to API because comments aren't in the Store separately.
-      alert("todo")
-      //await this.$api.comment.del(this.comment.id)
+      await this.userStore.deleteComment(this.comment.id)
 
-      this.updateComments()
+      await this.updateComments()
     },
 
-    editIt() {
-      alert("todo")
-      //this.waitForRef('editComment', () => {
-      //  this.$refs.editComment.show()
-      //})
-    }
+    async editIt() {
+      this.showCommentEditModal = true
+    },
   }
 }
 </script>

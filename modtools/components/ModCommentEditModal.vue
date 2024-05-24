@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-modal :id="'modCommentModal-' + user.id" v-model="showModal" size="lg" no-stacking>
+    <b-modal ref="modal" :id="'modCommentModal-' + user.id" size="lg" no-stacking @hidden="onHide">
       <template #title class="w-100">
         Edit Note for {{ user.displayname }}
       </template>
@@ -43,17 +43,13 @@
 </template>
 <script>
 import { useModal } from '~/composables/useModal'
-const OurToggle = () => import('~/components/OurToggle')
+import { useUserStore } from '~/stores/user'
 
 export default {
-  components: {
-    OurToggle
-  },
-  //mixins: [modal],
   setup() {
+    const userStore = useUserStore()
     const { modal, hide } = useModal()
-
-    return { modal, hide }
+    return { userStore, modal, hide }
   },
   props: {
     user: {
@@ -77,12 +73,14 @@ export default {
     }
   },
   methods: {
+    onHide() {
+      this.$emit('hidden')
+    },
     toggleFlag() {
       this.comment.flag = !this.comment.flag
     },
     async save() {
-      // Go direct to API because comments aren't in the Store separately.
-      await this.$api.comment.save(this.comment)
+      await this.userStore.saveComment(this.comment)
       this.$emit('edited')
       this.hide()
     }

@@ -89,6 +89,12 @@ export const useUserStore = defineStore({
     async engaged(engageid) {
       await api(this.config).user.engaged(engageid)
     },
+    async deleteComment(id) {
+      await api(this.config).comment.del(id)
+    },
+    async saveComment(comment) {
+      await api(this.config).comment.save(comment)
+    },
   },
   getters: {
     byId: (state) => {

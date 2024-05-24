@@ -1,9 +1,10 @@
 <template>
   <div>
-    <ModComment v-for="comment in comments" :key="'modcomments-' + user.id + '-' + comment.id" :comment="comment" :user="user" :expand-comments="expandComments" />
+    <ModComment v-for="comment in comments" :key="'modcomments-' + user.id + '-' + comment.id" :comment="comment" :user="user"
+      :expand-comments="expandComments" />
     <div v-if="sortedComments.length > 1" class="mb-1">
       <b-button v-if="!showAll" variant="white" @click="showAll = true">
-        <v-icon icon="tag" /> Show {{ sortedComments.length - 1 | pluralize(['more note', 'more notes'], { includeNumber: true }) }}
+        <v-icon icon="tag" /> Show {{ showMore }}
       </b-button>
       <b-button v-else variant="white" @click="showAll = false">
         <v-icon icon="tag" /> Hide notes
@@ -12,6 +13,7 @@
   </div>
 </template>
 <script>
+import pluralize from 'pluralize'
 
 export default {
   props: {
@@ -25,12 +27,16 @@ export default {
       default: false
     }
   },
-  data: function() {
+  data: function () {
     return {
       showAll: false
     }
   },
   computed: {
+    showMore() {
+      pluralize.addIrregularRule('more note', 'more notes')
+      return pluralize('more note', this.sortedComments.length - 1, true)
+    },
     sortedComments() {
       const ret = this.user ? this.user.comments : []
 
