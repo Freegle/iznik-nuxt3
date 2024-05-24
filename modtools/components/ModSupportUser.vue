@@ -1,8 +1,8 @@
 <template>
-  <b-card v-if="user" no-body class="p-0">
+  <b-card v-if="user" no-body class="container p-0">
     <b-card-header class="clickme p-1" @click="maybeExpand">
       <b-row>
-        <b-col cols="10" sm="4" class="order-1 truncate" :title="user.email">
+        <b-col cols="10" lg="4" class="order-1 truncate2" :title="user.email">
           <div>
             <v-icon icon="envelope" />&nbsp;{{ user.email }}
           </div>
@@ -10,23 +10,23 @@
             TN user id <v-icon icon="hashtag" scale="0.6" />{{ user.tnuserid }}
           </div>
         </b-col>
-        <b-col cols="2" sm="1" class="order-2 order-sm-7">
-          <span class="d-block d-sm-none float-right">
+        <b-col cols="2" lg="1" class="order-2 order-lg-7">
+          <span class="d-block d-sm-none float-end">
             <v-icon v-if="!expanded" icon="caret-down" />
             <v-icon v-else icon="caret-up" />
           </span>
-          <b-button variant="white" size="sm" class="d-none d-sm-block float-right">
+          <b-button variant="white" size="sm" class="d-none d-sm-block float-end">
             <v-icon v-if="!expanded" icon="caret-down" />
             <v-icon v-else icon="caret-up" />
           </b-button>
         </b-col>
-        <b-col cols="12" sm="3" class="order-3 truncate">
+        <b-col cols="12" lg="3" class="order-3 truncate2">
           <v-icon icon="user" /> {{ user.displayname }}
         </b-col>
-        <b-col cols="5" sm="2" class="order-4">
+        <b-col cols="5" lg="2" class="order-4">
           <v-icon icon="hashtag" scale="0.75" class="text-muted" />{{ user.id }}
         </b-col>
-        <b-col cols="7" sm="2" class="order-5 text-right">
+        <b-col cols="7" lg="2" class="order-5 text-right">
           {{ timeago(user.lastaccess) }}
         </b-col>
       </b-row>
@@ -40,7 +40,7 @@
         This user has support rights.
       </NoticeMessage>
       <ModSpammer v-if="user.spammer" class="mb-2" :user="user" />
-      <ModComments :user="user" />
+      <!--ModComments :user="user" />
 
       <div class="d-flex flex-wrap">
         <b-button variant="white" class="mr-2 mb-1" @click="spamReport">
@@ -198,7 +198,7 @@
       </h3>
       <div v-if="memberships && memberships.length">
         <div v-for="membership in memberships" :key="'membership-' + membership.id">
-          <!--ModSupportMembership :membership="membership" :userid="user.id" /-->
+          <ModSupportMembership :membership="membership" :userid="user.id" />
         </div>
         <b-button v-if="!showAllMemberships && membershipsUnshown" variant="white" class="mt-1" @click="showAllMemberships = true">
           Show +{{ membershipsUnshown }}
@@ -264,10 +264,7 @@
       </h3>
       <ModMemberSummary :member="user" />
       <div v-if="messageHistoriesShown.length">
-        <b-row v-for="message in messageHistoriesShown" :key="'messagehistory-' + message.arrival + '-' + message.id" :class="{
-    'pl-3': true,
-    strike: message.deleted
-  }">
+        <b-row v-for="message in messageHistoriesShown" :key="'messagehistory-' + message.arrival + '-' + message.id" :class="{ 'pl-3': true, strike: message.deleted }">
           <b-col cols="4" md="2" class="order-1 p-1 small">
             {{ datetimeshort(message.arrival) }}
           </b-col>
@@ -358,21 +355,22 @@
       <h3 class="mt-2">
         Chats
       </h3>
-      <ModSupportChatList :chats="chatsFiltered" :pov="user.id" />
+      <ModSupportChatList :chats="chatsFiltered" :pov="user.id" /-->
     </b-card-body>
-    <ModLogsModal ref="logs" :userid="user.id" />
+    <!-- TODO ModLogsModal ref="logs" :userid="user.id" />
     <ConfirmModal v-if="purgeConfirm" ref="purgeConfirm" :title="'Purge ' + user.displayname + ' from the system?'"
       message="<p><strong>This can't be undone.</strong></p><p>Are you completely sure you want to do this?</p>" @confirm="purgeConfirmed" />
     <ProfileModal v-if="user && user.info" :id="id" ref="profile" />
     <ModSpammerReport v-if="showSpamModal" ref="spamConfirm" :user="reportUser" />
-    <ModCommentAddModal v-if="addComment" ref="addComment" :user="user" @added="updateComments" />
+    <ModCommentAddModal v-if="addComment" ref="addComment" :user="user" @added="updateComments" /-->
   </b-card>
 </template>
+
 <script>
+import { useUserStore } from '../../stores/user'
 /*
 //import Vue from 'vue'
 import ModLogsModal from './ModLogsModal'
-import ModSpammer from './ModSpammer'
 import ModComments from './ModComments'
 import ModSpammerReport from './ModSpammerReport'
 const ExternalLink = () => import('~/components/ExternalLink')
@@ -400,8 +398,13 @@ export default {
       default: false
     }
   },
+  setup() {
+    const userStore = useUserStore()
+    return { userStore }
+  },
   data: function () {
     return {
+      user: null,
       expanded: true,
       purgeConfirm: false,
       showAllMemberships: false,
@@ -417,13 +420,17 @@ export default {
       emailAddError: null
     }
   },
+  async mounted() {
+    this.expanded = this.expand
+    if (this.id) {
+      this.user = this.userStore.byId(this.id)
+      if (this.user && this.user.spammer && this.user.spammer.byuserid) {
+        await this.userStore.fetchMT({ search: this.user.spammer.byuserid })
+        this.user.spammer.byuser = await this.userStore.fetch(this.user.spammer.byuserid)
+      }
+    }
+  },
   computed: {
-    user() {
-      /* TODO const u = this.$store.getters['user/get'](this.id)
-      u.userid = this.id
-      return u*/
-      return null
-    },
     reportUser() {
       return {
         // Due to inconsistencies about userid vs id in objects.
@@ -544,9 +551,6 @@ export default {
         })*/
       }
     }
-  },
-  mounted() {
-    this.expanded = this.expand
   },
   methods: {
     logs() {

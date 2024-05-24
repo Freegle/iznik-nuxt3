@@ -10,9 +10,9 @@
       <div v-if="user.role === 'Member' || supportOrAdmin">
         <p>If you think the email is valid, you can:</p>
         <b-button variant="white" @click="unbounce">
-          <v-icon v-if="unbouncing" name="sync" class="fa-spin text-success" />
-          <v-icon v-else-if="unbounced" name="check" class="text-success" />
-          <v-icon v-else name="sync" />
+          <v-icon v-if="unbouncing" icon="sync" class="fa-spin text-success" />
+          <v-icon v-else-if="unbounced" icon="check" class="text-success" />
+          <v-icon v-else icon="sync" />
           Reactivate
         </b-button>
       </div>
@@ -24,6 +24,7 @@
   </div>
 </template>
 <script>
+import { useAuthStore } from '../../stores/auth'
 export default {
   props: {
     user: {
@@ -41,9 +42,8 @@ export default {
     async unbounce() {
       this.unbouncing = true
 
-      /* TODO await this.$store.dispatch('user/unbounce', {
-        id: this.user.userid
-      })*/
+      const authStore = useAuthStore()
+      await authStore.unbounceMT(this.user.id)
 
       this.unbouncing = false
       this.unbounced = true

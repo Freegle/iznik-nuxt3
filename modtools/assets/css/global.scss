@@ -92,6 +92,13 @@ div[variant="success"] .card-header {
   display: block;
 }
 
+.truncate2 {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -611,7 +618,7 @@ svg[data-icon="hashtag"] {
 }
 
 .card-header-tabs li button {
-  border: 1px solid #d3d3d3!important;
+  border: 1px solid #d3d3d3 !important;
 }
 
 .card-body {
@@ -620,4 +627,27 @@ svg[data-icon="hashtag"] {
 
 .text-muted {
   fill: #6c757d;
+}
+
+/* Missing from _utilities.scss for some reason */
+.order-6 {
+  order: 6 !important;
+}
+.order-7 {
+  order: 7 !important;
+}
+.order-8 {
+  order: 8 !important;
+}
+
+@media (min-width: 992px) {
+  .order-lg-6 {
+    order: 6 !important;
+  }
+  .order-lg-7 {
+    order: 7 !important;
+  }
+  .order-lg-8 {
+    order: 8 !important;
+  }
 }

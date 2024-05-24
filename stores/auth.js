@@ -439,6 +439,9 @@ export const useAuthStore = defineStore({
       await this.$api.user.unbounce(id)
       this.user.bouncing = 0
     },
+    async unbounceMT(id) {
+      await this.$api.user.unbounce(id)
+    },
     async saveAndGet(params) {
       await this.$api.session.save(params, function (data) {
         let logIt
