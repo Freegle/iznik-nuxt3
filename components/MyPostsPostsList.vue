@@ -165,7 +165,7 @@ watch(activePosts, (newVal) => {
     if (
       post.type === 'Offer' &&
       post.promised &&
-      !post.successful &&
+      !post.hasoutcome &&
       !messageStore.byId(post.id)
     ) {
       messageStore.fetch(post.id)
