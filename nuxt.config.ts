@@ -132,6 +132,22 @@ export default defineNuxtConfig({
     },
   },
 
+  hooks: {
+    // prevent some prefetch behaviour
+    'build:manifest': (manifest) => {
+      for (const key in manifest) {
+        manifest[key].dynamicImports = []
+
+        const file = manifest[key]
+        if (file.assets) {
+          file.assets = file.assets.filter(
+            (assetName) => !/.+\.(gif|jpe?g|png|svg)$/.test(assetName)
+          )
+        }
+      }
+    },
+  },
+
   nitro: {
     prerender: {
       routes: ['/404.html', '/sitemap.xml'],
@@ -191,6 +207,36 @@ export default defineNuxtConfig({
   ],
 
   vite: {
+    build: {
+      rollupOptions: {
+        output: {
+          // target ~250KB per chunk in an ideal world
+          experimentalMinChunkSize: 250 * 1024,
+          manualChunks: (id, _) => {
+            // need to avoid touching non-entrypoint files, otherwise it breaks bundling
+            // because imports aren't idempotent
+            if (
+              !id.includes('node_modules') &&
+              !id.startsWith('virtual:') &&
+              !id.includes('src') &&
+              !id.includes('assets')
+            ) {
+              // merge pages/foo/* as chunk-pg-foo, pages/bar/* as chunk-pg-bar, etc.
+              // then merge pages/* (ie no subfolder) into chunk-pg-misc
+              if (id.includes('pages')) {
+                const parts = id.split('/')
+                const folderIndex = parts.indexOf('pages')
+                if (folderIndex + 2 < parts.length) {
+                  const pageGroup = parts[folderIndex + 1]
+                  return `chunk-pg-${pageGroup}`
+                }
+                return 'chunk-pg-misc'
+              }
+            }
+          },
+        },
+      },
+    },
     css: {
       preprocessorOptions: {
         scss: {
