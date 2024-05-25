@@ -4,6 +4,7 @@ import cloneDeep from 'lodash.clonedeep'
 import Wkt from 'wicket'
 import { useAuthStore } from '~/stores/auth'
 import { fetchMe } from '~/composables/useMe'
+import { useTeamStore } from '~/stores/team'
 
 export default {
   computed: {
@@ -105,7 +106,8 @@ export default {
         if (this.supportOrAdmin) {
           ret = true
         } else {
-          const mods = this.teamStore.getTeam('ChitChat Moderation')
+          const teamStore = useTeamStore()
+          const mods = teamStore.getTeam('ChitChat Moderation')
 
           if (mods) {
             ret = !!mods.members.find((m) => this.myid === m.id)
