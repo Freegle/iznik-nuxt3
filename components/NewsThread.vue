@@ -420,23 +420,6 @@ export default {
         return 'someone'
       }
     },
-    chitChatMod() {
-      let ret = false
-
-      if (this.me) {
-        if (this.supportOrAdmin) {
-          ret = true
-        } else {
-          const mods = this.teamStore.getTeam('ChitChat Moderation')
-
-          if (mods) {
-            ret = !!mods.members.find((m) => this.myid === m.id)
-          }
-        }
-      }
-
-      return ret
-    },
   },
   mounted() {
     // Scroll down now that the child components are rendered.

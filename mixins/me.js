@@ -98,6 +98,23 @@ export default {
         (this.me.systemrole === 'Support' || this.me.systemrole === 'Admin')
       )
     },
+    chitChatMod() {
+      let ret = false
+
+      if (this.me) {
+        if (this.supportOrAdmin) {
+          ret = true
+        } else {
+          const mods = this.teamStore.getTeam('ChitChat Moderation')
+
+          if (mods) {
+            ret = !!mods.members.find((m) => this.myid === m.id)
+          }
+        }
+      }
+
+      return ret
+    },
     supporter() {
       return this.me && this.me.supporter
     },
