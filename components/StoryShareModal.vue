@@ -95,7 +95,7 @@
 // requiring them in the vue-awesome plugin.  That makes them available everywhere - but
 // increases the bundle size.  Putting them here allows better bundling.
 import { useStoryStore } from '../stores/stories'
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 
 export default {
   props: {
@@ -107,7 +107,7 @@ export default {
   async setup() {
     const storyStore = useStoryStore()
 
-    const { modal, hide } = useModal()
+    const { modal, hide } = useOurModal()
 
     try {
       await this.storyStore.fetch(this.id, true)

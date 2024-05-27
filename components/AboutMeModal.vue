@@ -67,7 +67,7 @@
 <script setup>
 import NoticeMessage from './NoticeMessage'
 import { useAuthStore } from '~/stores/auth'
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 
 const authStore = useAuthStore()
 
@@ -77,7 +77,7 @@ const props = defineProps({
 
 const emit = defineEmits(['dataChange'])
 
-const { modal, hide } = useModal()
+const { modal, hide } = useOurModal()
 
 const text = ref(authStore.user.aboutme.text)
 

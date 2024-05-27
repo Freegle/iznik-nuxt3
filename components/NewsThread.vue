@@ -3,6 +3,10 @@
     <b-card v-if="newsfeed" :class="backgroundColor" no-body>
       <b-card-body class="p-1 p-sm-2">
         <b-card-text>
+          <div v-if="mod && newsfeed.hidden" class="text-danger small mb-1">
+            This has been hidden and is only visible to volunteers and the
+            person who posted it.
+          </div>
           <div v-if="isNewsComponent">
             <b-dropdown class="float-end" right variant="white">
               <template #button-content />
@@ -25,12 +29,6 @@
               <b-dropdown-item @click="report">
                 Report this thread or one of its replies
               </b-dropdown-item>
-              <b-dropdown-item
-                v-if="myid === parseInt(newsfeed.userid) || mod"
-                @click="deleteIt"
-              >
-                Delete this thread
-              </b-dropdown-item>
               <b-dropdown-item v-if="canRefer" @click="referToOffer">
                 Refer to OFFER
               </b-dropdown-item>
@@ -47,10 +45,34 @@
                 Turn this into a Story
               </b-dropdown-item>
               <b-dropdown-item
-                v-if="supportOrAdmin && newsfeed.hidden"
+                v-if="chitChatMod && !newsfeed.hidden"
+                @click="hide"
+              >
+                Hide this thread
+              </b-dropdown-item>
+              <b-dropdown-item
+                v-if="chitChatMod && newsfeed.hidden"
                 @click="unhide"
               >
-                Unhide post
+                Unhide this thread
+              </b-dropdown-item>
+              <b-dropdown-item
+                v-if="myid === parseInt(newsfeed.userid) || mod"
+                @click="deleteIt"
+              >
+                Delete this thread
+              </b-dropdown-item>
+              <b-dropdown-item
+                v-if="chitChatMod && !newsfeed.hidden"
+                @click="mute"
+              >
+                Mute user on ChitChat
+              </b-dropdown-item>
+              <b-dropdown-item
+                v-if="chitChatMod && newsfeed.hidden"
+                @click="unmute"
+              >
+                Unmute user on ChitChat
               </b-dropdown-item>
             </b-dropdown>
             <component
@@ -68,10 +90,6 @@
               :previews="newsfeed.previews"
               class="mt-1"
             />
-            <div v-if="mod && newsfeed.hidden" class="text-danger small">
-              This has been hidden and is only visible to volunteers and the
-              person who posted it.
-            </div>
           </div>
           <notice-message v-else variant="danger">
             Unknown item type {{ newsfeed?.type }}
@@ -243,6 +261,9 @@ import NewsNoticeboard from '~/components/NewsNoticeboard'
 import NoticeMessage from '~/components/NoticeMessage'
 import NewsPreviews from '~/components/NewsPreviews'
 import ProfileImage from '~/components/ProfileImage'
+import { useTeamStore } from '~/stores/team'
+import { useAuthStore } from '~/stores/auth'
+import { useUserStore } from '~/stores/user'
 
 const NewsReportModal = defineAsyncComponent(() => import('./NewsReportModal'))
 const ConfirmModal = () =>
@@ -288,11 +309,28 @@ export default {
   emits: ['rendered'],
   async setup(props) {
     const newsfeedStore = useNewsfeedStore()
+    const teamStore = useTeamStore()
+    const authStore = useAuthStore()
+    const userStore = useUserStore()
+
+    const me = authStore.user
+
+    // Get ChitChat moderation team so that we can show extra options for them.
+    if (
+      me &&
+      (me.systemrole === 'Moderator' ||
+        me.systemrole === 'Support' ||
+        me.systemrole === 'Admin')
+    ) {
+      teamStore.fetch('ChitChat Moderation')
+    }
 
     await newsfeedStore.fetch(props.id)
 
     return {
       newsfeedStore,
+      teamStore,
+      userStore,
     }
   },
   data() {
@@ -369,6 +407,9 @@ export default {
       return this.isNewsComponent
         ? this.newsComponents[this.newsfeed?.type]
         : ''
+    },
+    user() {
+      return this.userStore.byId(this.newsfeed?.userid)
     },
     starter() {
       if (this.newsfeed.userid === this.myid) {
@@ -477,6 +518,9 @@ export default {
     async unhide() {
       await this.newsfeedStore.unhide(this.id)
     },
+    async hide() {
+      await this.newsfeedStore.hide(this.id)
+    },
     async referTo(type) {
       await this.newsfeedStore.referTo(this.id, type)
     },
@@ -496,6 +540,14 @@ export default {
       // The imageid is in this.imageid
       this.imageid = imageid
       this.imagethumb = imagethumb
+    },
+    async mute() {
+      await this.userStore.muteOnChitChat(this.newsfeed.userid)
+      await this.newsfeedStore.fetch(this.id)
+    },
+    async unmute() {
+      await this.userStore.unMuteOnChitChat(this.newsfeed.userid)
+      await this.newsfeedStore.fetch(this.id)
     },
   },
 }

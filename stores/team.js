@@ -16,7 +16,7 @@ export const useTeamStore = defineStore({
       if (team in this.fetching) {
         await this.fetching[team]
         await nextTick()
-      } else {
+      } else if (!this.list[team]) {
         this.fetching[team] = api(this.config).team.fetch({
           name: team,
         })

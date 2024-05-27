@@ -109,6 +109,7 @@ export default defineNuxtConfig({
     '/stats/**': { ssr: false },
     '/stories/**': { ssr: false },
     '/teams': { ssr: false },
+    '/adtest': { ssr: false },
 
     // Render on demand - may never be shown in a given build - then cache for a while.
     '/explore/region/**': { isr: 3600 },
@@ -158,7 +159,7 @@ export default defineNuxtConfig({
     extractCSS: true,
   },
 
-  modules: ['@pinia/nuxt', 'floating-vue/nuxt'],
+  modules: ['@pinia/nuxt', 'floating-vue/nuxt', '@bootstrap-vue-next/nuxt'],
 
   // Environment variables the client needs.
   runtimeConfig: {
@@ -187,6 +188,7 @@ export default defineNuxtConfig({
     '@fortawesome/fontawesome-svg-core/styles.css',
     '/assets/css/global.scss',
     'leaflet/dist/leaflet.css',
+    // 'bootstrap/dist/css/bootstrap.min.css',
   ],
 
   vite: {
@@ -288,6 +290,17 @@ export default defineNuxtConfig({
               window.pbjs.que = window.pbjs.que || [];
               
               window.pbjs.que.push(function() {
+                 // Custom rounding function recommended by Magnite.
+                 const roundToNearestEvenIncrement = function (number) {
+                   let ceiling = Math.ceil(number);
+                   let ceilingIsEven = ceiling % 2 === 0;
+                   if (ceilingIsEven) {
+                     return ceiling;
+                   } else {
+                     return Math.floor(number);
+                   }
+                 }
+                
                  window.pbjs.setConfig({
                    consentManagement: {
                      // We only need GDPR config.  We are interested in UK users, who are (for GDPR purposes if not
@@ -304,7 +317,36 @@ export default defineNuxtConfig({
                      //  cmpApi: 'iab',
                      //  timeout: 8000
                      // }
-                   }
+                   },
+                   cache: {
+                      url: 'https://prebid-server.rubiconproject.com/vtrack?a=26548',
+                      ignoreBidderCacheKey: true,
+                      vasttrack: true 
+                   },
+                   s2sConfig: [{
+                      accountId: '26548',
+                      bidders: ['mgnipbs'],   // PBS ‘bidder’ code that triggers the call to PBS
+                      defaultVendor: 'rubicon',
+                      coopSync: true,
+                      userSyncLimit: 8,       // syncs per page up to the publisher
+                      defaultTtl: 300,        // allow Prebid.js to cache bids for 5 minutes
+                      allowUnknownBidderCodes: true,  // so PBJS doesn't reject responses
+                      extPrebid: {
+                        cache: {      // only needed if you're running video
+                           vastxml: { returnCreative: false }
+                        },
+                        bidders: {
+                          mgnipbs: {
+                            wrappername: "26548_Freegle"
+                          }
+                        }
+                      }
+                    }],
+                    targetingControls: {
+                      addTargetingKeys: ['SOURCE']
+                    },
+                    cpmRoundingFunction : roundToNearestEvenIncrement,
+                    useBidCache: true
                  });
                  
                  // Gourmetads requires schain config.
@@ -324,7 +366,7 @@ export default defineNuxtConfig({
                          }
                        ]
                      }
-                   }
+                   },
                  }
                 });
               });  

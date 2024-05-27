@@ -17,7 +17,7 @@
                 <v-icon icon="exclamation-triangle" scale="2" /> This post has
                 not been accepted and is not public yet.
               </notice-message>
-              <MessageSummary :id="message.id" />
+              <MessageSummary :id="message.id" :replyable="false" />
               <div
                 v-if="
                   message.outcomes?.length === 0 && message.promisecount > 0
@@ -141,7 +141,7 @@
             </div>
           </b-card-header>
           <MyMessageReplySummary
-            v-if="!expanded && message.replycount > 0"
+            v-if="!expanded"
             :id="id"
             @expand="expanded = true"
           />
@@ -379,7 +379,6 @@ export default {
 
       return ret
     },
-
     replies() {
       // Show the replies with unseen messages first, then most recent
       // console.log('Sort replies', this.message.replies, this)
@@ -560,6 +559,18 @@ export default {
               this.userStore.fetch(p.userid)
             })
           }
+
+          if (newVal.replycount === 1) {
+            this.expanded = true
+          }
+        }
+      },
+    },
+    replies: {
+      immediate: true,
+      handler(newVal) {
+        if (newVal?.length === 1) {
+          this.expanded = true
         }
       },
     },

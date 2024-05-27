@@ -69,6 +69,12 @@ export const useUserStore = defineStore({
     async engaged(engageid) {
       await api(this.config).user.engaged(engageid)
     },
+    async muteOnChitChat(userid) {
+      await api(this.config).user.muteOnChitChat(userid)
+    },
+    async unMuteOnChitChat(userid) {
+      await api(this.config).user.unMuteOnChitChat(userid)
+    },
   },
   getters: {
     byId: (state) => {

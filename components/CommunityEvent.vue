@@ -130,10 +130,10 @@
   </div>
 </template>
 <script>
-import ReadMore from 'vue-read-more3/src/ReadMoreComponent'
 import { useCommunityEventStore } from '../stores/communityevent'
 import { useUserStore } from '../stores/user'
 import { useGroupStore } from '../stores/group'
+import ReadMore from '~/components/ReadMore'
 import { twem } from '~/composables/useTwem'
 const CommunityEventModal = defineAsyncComponent(() =>
   import('./CommunityEventModal')

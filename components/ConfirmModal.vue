@@ -14,7 +14,7 @@
 </template>
 
 <script setup>
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 
 const props = defineProps({
   title: {
@@ -31,7 +31,7 @@ const props = defineProps({
 
 const emit = defineEmits(['confirm'])
 
-const { modal, hide } = useModal()
+const { modal, hide } = useOurModal()
 
 function confirm() {
   emit('confirm')

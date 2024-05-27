@@ -4,6 +4,7 @@ import cloneDeep from 'lodash.clonedeep'
 import Wkt from 'wicket'
 import { useAuthStore } from '~/stores/auth'
 import { fetchMe } from '~/composables/useMe'
+import { useTeamStore } from '~/stores/team'
 
 export default {
   computed: {
@@ -97,6 +98,24 @@ export default {
         this.me &&
         (this.me.systemrole === 'Support' || this.me.systemrole === 'Admin')
       )
+    },
+    chitChatMod() {
+      let ret = false
+
+      if (this.me) {
+        if (this.supportOrAdmin) {
+          ret = true
+        } else {
+          const teamStore = useTeamStore()
+          const mods = teamStore.getTeam('ChitChat Moderation')
+
+          if (mods) {
+            ret = !!mods.members.find((m) => this.myid === m.id)
+          }
+        }
+      }
+
+      return ret
     },
     supporter() {
       return this.me && this.me.supporter

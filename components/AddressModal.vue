@@ -155,7 +155,7 @@ import { constructSingleLine } from '../composables/usePAF'
 import { useAuthStore } from '../stores/auth'
 import { attribution, osmtile } from '../composables/useMap'
 import SpinButton from './SpinButton'
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 import PostCode from '~/components/PostCode'
 
 export default {
@@ -174,7 +174,7 @@ export default {
   setup() {
     const addressStore = useAddressStore()
     const authStore = useAuthStore()
-    const { modal, hide } = useModal()
+    const { modal, hide } = useOurModal()
 
     return {
       authStore,

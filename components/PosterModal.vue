@@ -98,7 +98,7 @@
 import { useImageStore } from '../stores/image'
 import SpinButton from '~/components/SpinButton'
 import { useNoticeboardStore } from '~/stores/noticeboard'
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 
 const NoticeMessage = defineAsyncComponent(() =>
   import('~/components/NoticeMessage')
@@ -122,7 +122,7 @@ export default {
     const noticeboardStore = useNoticeboardStore()
     const imageStore = useImageStore()
 
-    const { modal, hide } = useModal()
+    const { modal, hide } = useOurModal()
 
     return {
       noticeboardStore,

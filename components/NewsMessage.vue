@@ -6,7 +6,7 @@
     <read-more
       v-else-if="newsfeed.message && emessage"
       :text="emessage"
-      :max-chars="1024"
+      :max-chars="512"
       class="font-weight-bold preline forcebreak nopara"
     />
     <div>
@@ -68,8 +68,8 @@
   </div>
 </template>
 <script>
-import ReadMore from 'vue-read-more3/src/ReadMoreComponent'
 import ChatButton from './ChatButton'
+import ReadMore from '~/components/ReadMore'
 import NewsBase from '~/components/NewsBase'
 import NewsUserIntro from '~/components/NewsUserIntro'
 

@@ -389,7 +389,7 @@ import { useImageStore } from '../stores/image'
 import EmailValidator from './EmailValidator'
 import { ref } from '#imports'
 import { twem } from '~/composables/useTwem'
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 
 const GroupSelect = defineAsyncComponent(() =>
   import('~/components/GroupSelect')
@@ -474,7 +474,7 @@ export default {
     const imageStore = useImageStore()
     const groupid = ref(null)
 
-    const { modal, hide } = useModal()
+    const { modal, hide } = useOurModal()
 
     if (props.id) {
       const v = await communityEventStore.fetch(props.id)

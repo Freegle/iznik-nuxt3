@@ -27,11 +27,11 @@
 </template>
 
 <script setup>
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 
 const emit = defineEmits(['confirm'])
 
-const { modal, hide } = useModal()
+const { modal, hide } = useOurModal()
 
 function confirm() {
   emit('confirm')

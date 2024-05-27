@@ -24,7 +24,7 @@
 import { useNewsfeedStore } from '../stores/newsfeed'
 import { useUserStore } from '../stores/user'
 import NewsLovesUserInfo from './NewsLovesUserInfo'
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 
 export default {
   components: {
@@ -40,7 +40,7 @@ export default {
     const newsfeedStore = useNewsfeedStore()
     const userStore = useUserStore()
 
-    const { modal, hide } = useModal()
+    const { modal, hide } = useOurModal()
 
     await newsfeedStore.fetch(props.id, true, true)
 

@@ -59,8 +59,7 @@
   </b-card>
 </template>
 <script>
-import ReadMore from 'vue-read-more3/src/ReadMoreComponent'
-
+import ReadMore from '~/components/ReadMore'
 export default {
   components: {
     ReadMore,

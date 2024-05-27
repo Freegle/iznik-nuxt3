@@ -24,7 +24,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 
 const props = defineProps({
   id: {
@@ -41,7 +41,7 @@ const props = defineProps({
 
 const emit = defineEmits(['confirm'])
 
-const { modal, hide } = useModal()
+const { modal, hide } = useOurModal()
 
 const title = computed(() => {
   if (props.user) {

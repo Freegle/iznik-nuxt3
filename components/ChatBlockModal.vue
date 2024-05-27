@@ -24,7 +24,7 @@
 </template>
 
 <script setup>
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 
 const props = defineProps({
   id: {
@@ -37,7 +37,7 @@ const props = defineProps({
   },
 })
 
-const { modal, hide } = useModal()
+const { modal, hide } = useOurModal()
 
 const emit = defineEmits(['confirm'])
 

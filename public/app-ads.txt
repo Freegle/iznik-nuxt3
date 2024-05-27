@@ -109,3 +109,6 @@ deepintent.com, 1255, DIRECT
 sovrn.com, 227193, DIRECT, fafdf38b16bf6b2b
 adform.com, 1655, DIRECT, 9f5210a2f0999e32
 criteo.com, B-060140, DIRECT, 9fac4a4a87c2a44f
+
+rubiconproject.com, 26548, DIRECT, 0bfd66d529a55807
+

@@ -18,7 +18,7 @@
 
 <script setup>
 import { useMessageStore } from '../stores/message'
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 import ImageCarousel from '~/components/ImageCarousel'
 
 const props = defineProps({
@@ -30,7 +30,7 @@ const props = defineProps({
 
 const messageStore = useMessageStore()
 
-const { modal } = useModal()
+const { modal } = useOurModal()
 
 const message = computed(() => {
   return messageStore?.byId(props.id)

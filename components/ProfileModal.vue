@@ -28,7 +28,7 @@
 
 <script setup>
 import { useUserStore } from '~/stores/user'
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 
 const ProfileInfo = defineAsyncComponent(() =>
   import('~/components/ProfileInfo')
@@ -52,7 +52,7 @@ const props = defineProps({
   },
 })
 
-const { modal, hide } = useModal()
+const { modal, hide } = useOurModal()
 
 await userStore.fetch(props.id)
 </script>

@@ -24,7 +24,7 @@
 
 <script>
 import { useNewsfeedStore } from '../stores/newsfeed'
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 
 export default {
   props: {
@@ -36,7 +36,7 @@ export default {
   setup() {
     const newsfeedStore = useNewsfeedStore()
 
-    const { modal, hide } = useModal()
+    const { modal, hide } = useOurModal()
 
     return {
       newsfeedStore,
