@@ -78,7 +78,7 @@
 </template>
 <script setup>
 import { storeToRefs } from 'pinia'
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 import DonationAskVideo from '~/components/DonationAskVideo.vue'
 import DonationAskQuote from '~/components/DonationAskQuote.vue'
 import DonationAskButtons2510 from '~/components/DonationAskButtons2510.vue'
@@ -96,7 +96,7 @@ const groupStore = useGroupStore()
 const donationStore = useDonationStore()
 const authStore = useAuthStore()
 
-const { modal, hide } = useModal()
+const { modal, hide } = useOurModal()
 const { variant, groupId, show } = await useDonationAskModal()
 
 const groupName = computed(() => {

@@ -126,7 +126,7 @@ import dayjs from 'dayjs'
 import { useTrystStore } from '../stores/tryst'
 import { useMessageStore } from '../stores/message'
 import SpinButton from './SpinButton'
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 
 const NoticeMessage = defineAsyncComponent(() =>
   import('~/components/NoticeMessage')
@@ -165,7 +165,7 @@ export default {
   setup() {
     const trystStore = useTrystStore()
     const messageStore = useMessageStore()
-    const { modal, hide } = useModal()
+    const { modal, hide } = useOurModal()
 
     return {
       trystStore,

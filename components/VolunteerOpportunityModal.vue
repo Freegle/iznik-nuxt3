@@ -426,7 +426,7 @@ import EmailValidator from './EmailValidator'
 import SpinButton from '~/components/SpinButton.vue'
 import { twem } from '~/composables/useTwem'
 import { ref } from '#imports'
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 const GroupSelect = defineAsyncComponent(() =>
   import('~/components/GroupSelect')
 )
@@ -503,7 +503,7 @@ export default {
     const groupStore = useGroupStore()
     const groupid = ref(null)
 
-    const { modal, hide } = useModal()
+    const { modal, hide } = useOurModal()
 
     if (props.id) {
       const v = await volunteeringStore.fetch(props.id)

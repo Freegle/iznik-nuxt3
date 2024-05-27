@@ -9,10 +9,9 @@
         <b-input-group>
           <b-form-input
             v-if="me"
-            v-model="me.phone"
+            v-model.lazy="me.phone"
             placeholder="Your mobile"
             :size="size"
-            lazy
             :class="inputClass"
           />
           <b-input-group-append v-if="!autoSave">

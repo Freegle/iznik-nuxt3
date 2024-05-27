@@ -159,7 +159,7 @@ export default defineNuxtConfig({
     extractCSS: true,
   },
 
-  modules: ['@pinia/nuxt', 'floating-vue/nuxt'],
+  modules: ['@pinia/nuxt', 'floating-vue/nuxt', '@bootstrap-vue-next/nuxt'],
 
   // Environment variables the client needs.
   runtimeConfig: {
@@ -188,6 +188,7 @@ export default defineNuxtConfig({
     '@fortawesome/fontawesome-svg-core/styles.css',
     '/assets/css/global.scss',
     'leaflet/dist/leaflet.css',
+    // 'bootstrap/dist/css/bootstrap.min.css',
   ],
 
   vite: {

@@ -60,7 +60,7 @@
 <script>
 import { useNewsfeedStore } from '../stores/newsfeed'
 import { useImageStore } from '../stores/image'
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 
 export default {
   props: {
@@ -89,7 +89,7 @@ export default {
     const newsfeedStore = useNewsfeedStore()
     const imageStore = useImageStore()
 
-    const { modal, hide } = useModal()
+    const { modal, hide } = useOurModal()
 
     return {
       newsfeedStore,

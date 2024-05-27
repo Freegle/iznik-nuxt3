@@ -205,7 +205,7 @@ import { useChatStore } from '../stores/chat'
 import OutcomeBy from './OutcomeBy'
 import SpinButton from './SpinButton'
 import NoticeMessage from '~/components/NoticeMessage'
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 
 export default {
   components: { NoticeMessage, SpinButton, OutcomeBy },
@@ -230,7 +230,7 @@ export default {
     const messageStore = useMessageStore()
     const chatStore = useChatStore()
 
-    const { modal, hide } = useModal()
+    const { modal, hide } = useOurModal()
 
     return { messageStore, chatStore, modal, hide }
   },
