@@ -290,6 +290,17 @@ export default defineNuxtConfig({
               window.pbjs.que = window.pbjs.que || [];
               
               window.pbjs.que.push(function() {
+                 // Custom rounding function recommended by Magnite.
+                 const roundToNearestEvenIncrement = function (number) {
+                   let ceiling = Math.ceil(number);
+                   let ceilingIsEven = ceiling % 2 === 0;
+                   if (ceilingIsEven) {
+                     return ceiling;
+                   } else {
+                     return Math.floor(number);
+                   }
+                 }
+                
                  window.pbjs.setConfig({
                    consentManagement: {
                      // We only need GDPR config.  We are interested in UK users, who are (for GDPR purposes if not
@@ -330,7 +341,12 @@ export default defineNuxtConfig({
                           }
                         }
                       }
-                    }]
+                    }],
+                    targetingControls: {
+                      addTargetingKeys: ['SOURCE']
+                    },
+                    cpmRoundingFunction : roundToNearestEvenIncrement,
+                    useBidCache: true
                  });
                  
                  // Gourmetads requires schain config.

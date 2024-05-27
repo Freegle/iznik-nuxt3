@@ -9,7 +9,7 @@
           <nuxt-link
             no-prefetch
             :to="
-              (messageIsFromCurrentUser ? '/myposts/' : '/message/') + refmsgid
+              (messageIsFromCurrentUser ? '/mypost/' : '/message/') + refmsgid
             "
           >
             <b-img
@@ -35,7 +35,7 @@
           <nuxt-link
             no-prefetch
             :to="
-              (messageIsFromCurrentUser ? '/myposts/' : '/message/') + refmsgid
+              (messageIsFromCurrentUser ? '/mypost/' : '/message/') + refmsgid
             "
           >
             <h4>
@@ -87,7 +87,7 @@
           <nuxt-link
             no-prefetch
             :to="
-              (messageIsFromCurrentUser ? '/myposts/' : '/message/') + refmsgid
+              (messageIsFromCurrentUser ? '/mypost/' : '/message/') + refmsgid
             "
           >
             <b-img
@@ -117,7 +117,7 @@
           <nuxt-link
             no-prefetch
             :to="
-              (messageIsFromCurrentUser ? '/myposts/' : '/message/') + refmsgid
+              (messageIsFromCurrentUser ? '/mypost/' : '/message/') + refmsgid
             "
             class="nodecor"
           >
