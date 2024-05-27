@@ -172,6 +172,10 @@ async function uploadSuccess(e) {
         externalmods: mods,
       })
 
+      console.log(
+        'Added, emit update:modelValue',
+        JSON.stringify(uploadedPhotos.value)
+      )
       emit('update:modelValue', uploadedPhotos.value)
     }
   }
@@ -186,7 +190,7 @@ function removed(e) {
       console.log('Compare', p.externaluid, e.detail.uuid)
       return p.externaluid !== e.detail.uuid
     })
-    console.log('emit modelValue')
+    console.log('emit modelValue', JSON.stringify(uploadedPhotos.value))
     emit('update:modelValue', uploadedPhotos.value)
   }
 }

@@ -44,6 +44,12 @@ lr-simple-btn button {
 lr-progress-bar {
   top: 0px !important;
   height: 100% !important;
+  padding-top: 10px;
+  padding-bottom: 10px;
+
+  .progress {
+    background-color: #61AE24D0;
+  }
 }
 
 lr-file-uploader-inline {

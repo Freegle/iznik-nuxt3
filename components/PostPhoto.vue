@@ -88,7 +88,7 @@ export default {
       default: null,
     },
     externalmods: {
-      type: Array,
+      type: Object,
       required: false,
       default: () => {},
     },

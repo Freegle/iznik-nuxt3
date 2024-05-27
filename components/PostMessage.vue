@@ -75,6 +75,7 @@
 import { uid } from '../composables/useId'
 import { useComposeStore } from '../stores/compose'
 import NumberIncrementDecrement from './NumberIncrementDecrement'
+import { ref, watch } from '#imports'
 
 const OurUploader = defineAsyncComponent(() =>
   import('~/components/OurUploader')
@@ -104,7 +105,22 @@ composeStore.setType({
 const ret = composeStore.attachments(props.id).filter((a) => 'id' in a)
 
 // Need a separate variable to avoid watching on object causing tizzy.
-const currentAtts = ref(JSON.parse(JSON.stringify(ret || [])))
+const currentAtts = ref([])
+
+watch(
+  currentAtts,
+  (newVal) => {
+    try {
+      console.log('Current atts changed', props.id, newVal)
+      composeStore.setAttachmentsForMessage(props.id, newVal)
+    } catch (e) {
+      console.error('Watch error', e)
+    }
+  },
+  { deep: true }
+)
+
+currentAtts.value = JSON.parse(JSON.stringify(ret || []))
 
 const availablenow = computed({
   get() {
@@ -137,10 +153,6 @@ const placeholder = computed(() => {
   return props.type === 'Offer'
     ? "e.g. colour, condition, size, whether it's working etc."
     : "Explain what you're looking for, and why you'd like it."
-})
-
-watch(currentAtts, (newVal) => {
-  composeStore.setAttachmentsForMessage(props.id, newVal)
 })
 
 function $id(type) {
