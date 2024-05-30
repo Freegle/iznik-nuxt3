@@ -34,7 +34,7 @@
         />
       </NoticeMessage>
       <b-card v-if="aboutme" variant="white" class="mt-2">
-        <b-card-body sub-title="" class="p-0">
+        <b-card-body sub-title="" class="p-0 mt-2">
           <div class="mb-1">
             <blockquote class="font-weight-bold">
               &quot;{{ aboutme }}&quot;
@@ -232,6 +232,7 @@ export default {
   },
   computed: {
     user() {
+      console.log('ProfileInfo ',this.id)
       return this.id ? this.userStore?.byId(this.id) : null
     },
     publicLocation() {
@@ -244,7 +245,7 @@ export default {
       return this.active('Wanted')
     },
     aboutme() {
-      return this.user?.aboutme ? twem(this.user.aboutme.text) : null
+      return this.user?.info?.aboutme ? twem(this.user?.info?.aboutme.text) : null
     },
     expectedreplies() {
       pluralize.addIrregularRule('freegler is', 'freeglers are')
@@ -253,7 +254,7 @@ export default {
     milesaway() {
       return pluralize(
         'mile',
-        milesAway(this.me?.lat, this.me?.lng, this.user?.lat, this.user?.lng),
+        milesAway(this.me?.lat, this.me?.lng, this.user?.settings?.mylocation?.lat, this.user?.settings?.mylocation?.lng),
         true
       )
     },
