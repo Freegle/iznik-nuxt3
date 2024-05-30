@@ -1,6 +1,5 @@
 <template>
-  <b-modal id="spamreportmodal" v-model="showModal" :title="(whitelist ? 'Add to Whitelist ' : 'Report Spammer ') + user.displayname" size="lg"
-    no-stacking>
+  <b-modal ref="modal" id="spamreportmodal" :title="(whitelist ? 'Add to Whitelist ' : 'Report Spammer ') + user.displayname" size="lg" no-stacking>
     <template #default>
       <div v-if="whitelist">
         <p>
@@ -69,25 +68,20 @@ export default {
   },
   data: function () {
     return {
-      showModal: false,
       reason: null
     }
   },
   methods: {
-    show(type) {
-      this.showModal = true
-    },
-
-    hide() {
-      this.showModal = false
+    show() {
+      this.modal.show()
     },
 
     async send() {
       if (this.reason) {
         if (this.whitelist) {
-          await this.spammerStore.whitelist(this.user.userid,this.reason)
+          await this.spammerStore.whitelist(this.user.userid, this.reason)
         } else {
-          await this.spammerStore.report(this.user.userid,this.reason)
+          await this.spammerStore.report(this.user.userid, this.reason)
         }
 
         this.hide()

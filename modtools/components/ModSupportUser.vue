@@ -361,7 +361,7 @@
     <!--ConfirmModal v-if="purgeConfirm" ref="purgeConfirm" :title="'Purge ' + user.displayname + ' from the system?'"
       message="<p><strong>This can't be undone.</strong></p><p>Are you completely sure you want to do this?</p>" @confirm="purgeConfirmed" /-->
     <ProfileModal v-if="showProfile&& user && user.info" :id="id" ref="profile"  @hidden="showProfile = false"/>
-    <!--ModSpammerReport v-if="showSpamModal" ref="spamConfirm" :user="reportUser" /-->
+    <ModSpammerReport v-if="showSpamModal" ref="spamConfirm" :user="reportUser" />
     <ModCommentAddModal v-if="addComment" ref="addComment" :user="user" @added="updateComments" @hidden="addComment = false" />
   </b-card>
 </template>
@@ -370,11 +370,6 @@
 import { useUserStore } from '../../stores/user'
 /*
 //import Vue from 'vue'
-import ModLogsModal from './ModLogsModal'
-import ModComments from './ModComments'
-import ModSpammerReport from './ModSpammerReport'
-const ExternalLink = () => import('~/components/ExternalLink')
-const ModCommentAddModal = () => import('~/components/ModCommentAddModal')
 
 TODO if (process.client) {
   const lineClamp = require('vue-line-clamp')
@@ -584,9 +579,7 @@ export default {
     },
     spamReport() {
       this.showSpamModal = true
-      this.waitForRef('spamConfirm', () => {
-        this.$refs.spamConfirm.show()
-      })
+      this.$refs.spamConfirm?.show()
     },
     async setPassword(callback) {
       if (this.newpassword) {
