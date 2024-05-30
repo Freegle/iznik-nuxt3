@@ -290,6 +290,7 @@ export default {
     },
     supporterInfo() {
       this.showSupporterInfo = true
+      this.$refs.supporterInfoModal?.show()
     },
   },
 }

@@ -9,7 +9,7 @@ export function useModal() {
   })
 
   function show() {
-    modal.value.show()
+    modal.value?.show()
     isShown.value = true
   }
 

@@ -359,9 +359,9 @@
     </b-card-body>
     <ModLogsModal v-if="showLogs" ref="logs" :userid="user.id" @hidden="showLogs = false" />
     <!--ConfirmModal v-if="purgeConfirm" ref="purgeConfirm" :title="'Purge ' + user.displayname + ' from the system?'"
-      message="<p><strong>This can't be undone.</strong></p><p>Are you completely sure you want to do this?</p>" @confirm="purgeConfirmed" />
-    <ProfileModal v-if="user && user.info" :id="id" ref="profile" />
-    <ModSpammerReport v-if="showSpamModal" ref="spamConfirm" :user="reportUser" /-->
+      message="<p><strong>This can't be undone.</strong></p><p>Are you completely sure you want to do this?</p>" @confirm="purgeConfirmed" /-->
+    <ProfileModal v-if="showProfile&& user && user.info" :id="id" ref="profile"  @hidden="showProfile = false"/>
+    <!--ModSpammerReport v-if="showSpamModal" ref="spamConfirm" :user="reportUser" /-->
     <ModCommentAddModal v-if="addComment" ref="addComment" :user="user" @added="updateComments" @hidden="addComment = false" />
   </b-card>
 </template>
@@ -419,6 +419,7 @@ export default {
       addComment: false,
       emailAddError: null,
       showLogs: false,
+      showProfile: false,
     }
   },
   async mounted() {
@@ -562,12 +563,12 @@ export default {
       this.$refs.logs?.show()
     },
     async profile() {
-      /* TODO await this.$store.dispatch('user/fetch', {
+      await this.userStore.fetchMT({
         id: this.id,
         info: true
-      })*/
-
-      this.$refs.profile.show()
+      })
+      this.showProfile = true
+      this.$refs.profile?.show()
     },
     purgeConfirmed() {
       /* TODO this.$store.dispatch('members/purge', {
