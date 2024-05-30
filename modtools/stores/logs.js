@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import cloneDeep from 'lodash.clonedeep'
 import api from '~/api'
 
 export const useLogsStore = defineStore({
@@ -14,20 +15,22 @@ export const useLogsStore = defineStore({
     },
     clear() {
       this.list = []
+      this.context = null
     },
     async fetch(params) {
-      console.log("logs fetch",params)
       let ret = null
-      params.context = this.context
+      delete params.context
+      if( this.context) {
+        params['context[id]'] = this.context.id
+      }
       const data = await api(this.config).logs.fetch(params)
-      console.log("logs data",data)
 
       if (params && params.id) {
         this.list.push(...data.log)
       } else {
         this.list.push(...data.logs)
         this.context = data.context
-  
+
         ret = data.context
       }
 

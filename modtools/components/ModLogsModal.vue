@@ -12,7 +12,7 @@
           </p>
           <ModLog v-for="log in logs" :key="'log-' + log.id" :log="log" />
         </div>
-        <infinite-loading :distance="200" @infinite="fetchChunk">
+        <infinite-loading :distance="200" @infinite="fetchChunk" :identifier="bump">
           <template #no-results />
           <template #no-more />
           <template #spinner>
@@ -60,6 +60,7 @@ export default {
   data: function () {
     return {
       busy: false,
+      bump: 0,
       context: null
     }
   },
@@ -73,14 +74,11 @@ export default {
 
       if (user) {
         if (user && user.info) {
-          console.log('GOT user info')
           ret = user
         } else {
-          console.log('GETTING user info')
           user = this.memberStore.getByUserId(this.userid)
 
           if (user && user.info) {
-            console.log('GORTuser info')
             ret = user
           }
         }
@@ -107,14 +105,13 @@ export default {
   },
   methods: {
     show() {
-      console.log("MLM show()")
       // Clear the log context - otherwise if we open another modal for this user then it will get confused and
       // fetch from a previous context and show no logs.
       this.logsStore.clear()
+      this.bump++
       this.modal.show()
     },
     async fetchChunk($state) {
-      console.log("MLM fetchChunk()")
       this.busy = true
       const currentCount = this.logs.length
 
@@ -124,14 +121,11 @@ export default {
         context: this.context,
         modmailsonly: this.modmailsonly
       })
-      console.log("MLM fetchChunk() len", this.logs.length)
 
       if (this.logs.length === currentCount) {
-        console.log("MLM fetchChunk() complete")
         // We've returned less than a chunk, so we must be done.
         $state.complete()
       } else {
-        console.log("MLM fetchChunk() loaded")
         $state.loaded()
       }
 
