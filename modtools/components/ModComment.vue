@@ -11,9 +11,7 @@
         </div>
       </div>
       <div class="small">
-        <span v-if="savedComment.byuser">
-          <v-icon icon="tag" /> by {{ savedComment.byuser.displayname }}
-        </span>
+        <span v-if="savedComment.byuser"><v-icon icon="tag" /> by {{ savedComment.byuser.displayname }} -</span>
         <span v-if="savedComment.date !== savedComment.reviewed">
           Created <span :title="datetimeshort(savedComment.date)">{{ datetimeshort(savedComment.date) }}</span> reviewed <span
             :title="datetimeshort(savedComment.reviewed)">{{ datetimeshort(savedComment.reviewed) }}</span>
@@ -116,9 +114,12 @@ export default {
       })
 
       const user = this.userStore.byId(userid)
-      this.savedComment = user.comments.find(comm => {
-        return comm.id === this.savedComment.id
-      })
+      this.savedComment = false
+      if (user.comments) {
+        this.savedComment = user.comments.find(comm => {
+          return comm.id === this.savedComment.id
+        })
+      }
 
       this.$emit('updated')
     },

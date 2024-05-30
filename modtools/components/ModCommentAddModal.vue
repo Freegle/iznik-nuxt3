@@ -1,21 +1,16 @@
 <template>
   <div>
-    <b-modal
-      :id="'modCommentModal-' + user.id"
-      v-model="showModal"
-      size="lg"
-      no-stacking
-    >
-    <template #title class="w-100">
+    <b-modal ref="modal" :id="'modCommentModal-' + user.id" size="lg" no-stacking>
+      <template #title class="w-100">
         Add Note for {{ user.displayname }}
       </template>
       <template #default>
         <p>
-          You can add one or more notes about members.  They'll appear in a coloured box next to the user.
+          You can add one or more notes about members. They'll appear in a coloured box next to the user.
         </p>
         <p>
           These comments can be seen by moderators, and also by members who choose to download their data under
-          GDPR.  So keep them objective, polite and factual, and without identifiable personal information please.
+          GDPR. So keep them objective, polite and factual, and without identifiable personal information please.
         </p>
         <p>
           <!-- eslint-disable-next-line -->
@@ -34,19 +29,10 @@
         <b-form-input v-model="user11" :placeholder="placeholders[11]" />
         <p class="mt-2">
           You can choose for this note to be be alerted to other groups, which will put the member in <em>Member->Review</em>
-          if they are an existing member or join a group.  Please use this only for serious issues.
+          if they are an existing member or join a group. Please use this only for serious issues.
         </p>
-        <OurToggle
-          :value="flag"
-          class="mt-2"
-          :height="30"
-          :width="250"
-          :font-size="14"
-          :sync="true"
-          :labels="{checked: 'Will alert other groups', unchecked: 'Will not alert other groups'}"
-          color="#61AE24"
-          @change="toggleFlag"
-        />
+        <OurToggle :value="flag" class="mt-2" :height="30" :width="250" :font-size="14" :sync="true"
+          :labels="{ checked: 'Will alert other groups', unchecked: 'Will not alert other groups' }" color="#61AE24" @change="toggleFlag" />
       </template>
       <template #footer>
         <b-button variant="white" @click="hide">
@@ -78,7 +64,7 @@ export default {
     const { modal, hide } = useModal()
     return { modal, hide }
   },
-  data: function() {
+  data: function () {
     return {
       user1: null,
       user2: null,

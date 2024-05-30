@@ -42,7 +42,7 @@
       <ModSpammer v-if="user.spammer" class="mb-2" :user="user" />
       <ModComments :user="user" />
 
-      <!--div class="d-flex flex-wrap">
+      <div class="d-flex flex-wrap">
         <b-button variant="white" class="mr-2 mb-1" @click="spamReport">
           <v-icon icon="ban" /> Spammer
         </b-button>
@@ -67,7 +67,7 @@
           <v-icon icon="tag" /> Add note
         </b-button>
       </div>
-      <h3 class="mt-2">
+      <!--h3 class="mt-2">
         Trust Level
       </h3>
       <p>
@@ -361,8 +361,8 @@
     <ConfirmModal v-if="purgeConfirm" ref="purgeConfirm" :title="'Purge ' + user.displayname + ' from the system?'"
       message="<p><strong>This can't be undone.</strong></p><p>Are you completely sure you want to do this?</p>" @confirm="purgeConfirmed" />
     <ProfileModal v-if="user && user.info" :id="id" ref="profile" />
-    <ModSpammerReport v-if="showSpamModal" ref="spamConfirm" :user="reportUser" />
-    <ModCommentAddModal v-if="addComment" ref="addComment" :user="user" @added="updateComments" /-->
+    <ModSpammerReport v-if="showSpamModal" ref="spamConfirm" :user="reportUser" /-->
+    <ModCommentAddModal v-if="addComment" ref="addComment" :user="user" @added="updateComments" @hidden="addComment = false" />
   </b-card>
 </template>
 
@@ -422,13 +422,7 @@ export default {
   },
   async mounted() {
     this.expanded = this.expand
-    if (this.id) {
-      this.user = this.userStore.byId(this.id)
-      if (this.user && this.user.spammer && this.user.spammer.byuserid) {
-        await this.userStore.fetchMT({ search: this.user.spammer.byuserid })
-        this.user.spammer.byuser = await this.userStore.fetch(this.user.spammer.byuserid)
-      }
-    }
+    await this.fetchUser()
   },
   computed: {
     reportUser() {
@@ -553,6 +547,15 @@ export default {
     }
   },
   methods: {
+    async fetchUser() {
+      if (this.id) {
+        this.user = this.userStore.byId(this.id)
+        if (this.user && this.user.spammer && this.user.spammer.byuserid) {
+          await this.userStore.fetchMT({ search: this.user.spammer.byuserid })
+          this.user.spammer.byuser = await this.userStore.fetch(this.user.spammer.byuserid)
+        }
+      }
+    },
     logs() {
       this.$refs.logs.show()
     },
@@ -615,24 +618,16 @@ export default {
     },
     addAComment() {
       this.addComment = true
-      this.waitForRef('addComment', () => {
-        this.$refs.addComment.show()
-      })
     },
     async updateComments() {
-      // The server API doesn't make it easy to refresh comments on memberships, because we can't refetch a
-      // specific membership id.  Instead fetch the user and then pass any comments to the store to update there.
-      /* TODO await this.$store.dispatch('user/fetch', {
-        id: this.user.id,
-        info: true
+      const userid = this.user.userid ? this.user.userid : this.user.id
+      console.log('updateComments', userid)
+
+      await this.userStore.fetchMT({
+        search: userid,
+        emailhistory: true
       })
-
-      const user = this.$store.getters['user/get'](this.user.id)
-
-      await this.$store.dispatch('members/updateComments', {
-        userid: this.user.id,
-        comments: user.comments
-      })*/
+      await this.fetchUser()
     }
   }
 }

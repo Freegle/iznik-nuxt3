@@ -1,18 +1,21 @@
 <template>
   <div>
     <b-button variant="white" @click="mergeMember">
-      <v-icon name="equals" /> Merge
+      <v-icon icon="equals" /> Merge
     </b-button>
-    <ModMergeMemberModal ref="mergemodal" />
+    <ModMergeMemberModal v-if="showMergeMemberModal" ref="mergemodal" @hidden="showMergeMemberModal = false" />
   </div>
 </template>
 <script>
 export default {
+  data() {
+    return {
+      showMergeMemberModal: false,
+    }
+  },
   methods: {
     mergeMember() {
-      this.waitForRef('mergemodal', () => {
-        this.$refs.mergemodal.show()
-      })
+      this.showMergeMemberModal = true
     }
   }
 }

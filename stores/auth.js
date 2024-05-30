@@ -495,6 +495,9 @@ export const useAuthStore = defineStore({
         await this.fetchUser()
       }
     },
+    async merge(params) {
+      await api(this.config).user.merge(params.email1, params.email2, params.id1, params.id2, params.reason)
+    },
   },
   getters: {
     member: (state) => (id) => {
