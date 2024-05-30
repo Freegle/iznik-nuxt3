@@ -12,12 +12,12 @@
           </p>
           <ModLog v-for="log in logs" :key="'log-' + log.id" :log="log" />
         </div>
-        <infinite-loading :key="'infinite-' + userid" @infinite="fetchChunk">
-          <span slot="no-results" />
-          <span slot="no-more" />
-          <span slot="spinner">
-            <b-img lazy src="~/static/loader.gif" alt="Loading" />
-          </span>
+        <infinite-loading :distance="200" @infinite="fetchChunk">
+          <template #no-results />
+          <template #no-more />
+          <template #spinner>
+            <b-img src="/loader.gif" alt="Loading" width="100px" />
+          </template>
         </infinite-loading>
       </template>
 
@@ -34,17 +34,17 @@
 import { useModal } from '~/composables/useModal'
 import InfiniteLoading from '~/components/InfiniteLoading'
 import { useLogsStore } from '../stores/logs'
-import { useAuthStore } from '../../stores/auth'
+import { useUserStore } from '../../stores/user'
 import { useMemberStore } from '../stores/member'
 
 export default {
   components: { InfiniteLoading },
   setup() {
-    const authStore = useAuthStore()
+    const userStore = useUserStore()
     const logsStore = useLogsStore()
     const memberStore = useMemberStore()
     const { modal, hide } = useModal()
-    return { authStore, logsStore, memberStore, modal, hide }
+    return { logsStore, memberStore, userStore, modal, hide }
   },
   props: {
     userid: {
@@ -69,16 +69,20 @@ export default {
     },
     user() {
       let ret = null
-      // TODO let user = this.authStore.get(this.userid)
-      let user = null
+      let user = this.userStore?.byId(this.userid)
 
-      if (user && user.info) {
-        ret = user
-      } else {
-        user = this.memberStore.getByUserId(this.userid)
-
+      if (user) {
         if (user && user.info) {
+          console.log('GOT user info')
           ret = user
+        } else {
+          console.log('GETTING user info')
+          user = this.memberStore.getByUserId(this.userid)
+
+          if (user && user.info) {
+            console.log('GORTuser info')
+            ret = user
+          }
         }
       }
 
@@ -103,12 +107,14 @@ export default {
   },
   methods: {
     show() {
+      console.log("MLM show()")
       // Clear the log context - otherwise if we open another modal for this user then it will get confused and
       // fetch from a previous context and show no logs.
       this.logsStore.clear()
       this.modal.show()
     },
     async fetchChunk($state) {
+      console.log("MLM fetchChunk()")
       this.busy = true
       const currentCount = this.logs.length
 
@@ -118,11 +124,14 @@ export default {
         context: this.context,
         modmailsonly: this.modmailsonly
       })
+      console.log("MLM fetchChunk() len", this.logs.length)
 
       if (this.logs.length === currentCount) {
+        console.log("MLM fetchChunk() complete")
         // We've returned less than a chunk, so we must be done.
         $state.complete()
       } else {
+        console.log("MLM fetchChunk() loaded")
         $state.loaded()
       }
 

@@ -1,79 +1,42 @@
 import { defineStore } from 'pinia'
-//import { nextTick } from 'vue'
-//import api from '~/api'
-// TODO
+import api from '~/api'
 
 export const useLogsStore = defineStore({
   id: 'logs',
   state: () => ({
     list: [],
-    // The context from the last fetch, used for fetchMore.
     context: null,
-  // For spotting when we clear under the feet of an outstanding fetch
-    //instance: 1
-    fetching: null,
+    params: null
   }),
   actions: {
     init(config) {
       this.config = config
     },
-    clear(){
+    clear() {
       this.list = []
     },
-    async fetch(id, force) {
-      /*if (id) {
-        // Specific address which may or may not be ours.  If it's not, we'll get an error, which is a bug.  But we
-        // also get an error if it's been deleted.  So don't log
-        try {
-          if (!this.listById[id] || force) {
-            this.listById[id] = await api(this.config).address.fetchByIdv2(
-              id,
-              false
-            )
-          }
-          return this.listById[id]
-        } catch (e) {
-          console.log('Failed to get address', e)
-          return null
-        }
-      } else if (this.fetching) {
-        await this.fetching
-        await nextTick()
+    async fetch(params) {
+      console.log("logs fetch",params)
+      let ret = null
+      params.context = this.context
+      const data = await api(this.config).logs.fetch(params)
+      console.log("logs data",data)
+
+      if (params && params.id) {
+        this.list.push(...data.log)
       } else {
-        this.fetching = api(this.config).address.fetchv2()
-        this.list = await this.fetching
-        this.list = this.list || []
+        this.list.push(...data.logs)
+        this.context = data.context
+  
+        ret = data.context
+      }
 
-        this.list.forEach((address) => {
-          this.listById[address.id] = address
-        })
-
-        this.fetching = null
-      }*/
+      return ret
     },
     async delete(id) {
-      /*await api(this.config).address.del(id)
-      delete this.listById[id]
-      await this.fetch()*/
-    },
-    /*async fetchProperties(postcodeid) {
-      const { addresses } = await api(this.config).address.fetchv1({
-        postcodeid,
-      })
-
-      addresses.forEach((address) => {
-        this.properties[address.id] = address
-      })
-    },*/
-    async update(params) {
-      ///await api(this.config).address.update(params)
-      //this.fetch(params.id, true)
     },
     async add(params) {
       return 0
-      //const { id } = await api(this.config).address.add(params)
-      //await this.fetch()
-      //return id
     },
   },
   getters: {

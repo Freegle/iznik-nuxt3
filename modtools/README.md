@@ -61,3 +61,11 @@ A fairly minimal `package.json` is needed as `nuxt.config.ts` extends `../` and 
 * float-right to float-end
 
 * npm i leaflet-draw-toolbar --force
+
+    delay(n) {
+      return new Promise(function (resolve) {
+        setTimeout(resolve, n * 1000);
+      })
+    },
+
+      await this.delay(5)

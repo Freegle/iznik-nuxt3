@@ -1,5 +1,5 @@
 <template>
-  <b-card v-if="user" no-body class="container p-0">
+  <b-card v-if="user" no-body class="container p-0 m-0">
     <b-card-header class="clickme p-1" @click="maybeExpand">
       <b-row>
         <b-col cols="10" lg="4" class="order-1 truncate2" :title="user.email">
@@ -357,8 +357,8 @@
       </h3>
       <ModSupportChatList :chats="chatsFiltered" :pov="user.id" /-->
     </b-card-body>
-    <!-- TODO ModLogsModal ref="logs" :userid="user.id" />
-    <ConfirmModal v-if="purgeConfirm" ref="purgeConfirm" :title="'Purge ' + user.displayname + ' from the system?'"
+    <ModLogsModal v-if="showLogs" ref="logs" :userid="user.id" @hidden="showLogs = false" />
+    <!--ConfirmModal v-if="purgeConfirm" ref="purgeConfirm" :title="'Purge ' + user.displayname + ' from the system?'"
       message="<p><strong>This can't be undone.</strong></p><p>Are you completely sure you want to do this?</p>" @confirm="purgeConfirmed" />
     <ProfileModal v-if="user && user.info" :id="id" ref="profile" />
     <ModSpammerReport v-if="showSpamModal" ref="spamConfirm" :user="reportUser" /-->
@@ -417,7 +417,8 @@ export default {
       newemail: null,
       newEmailAs: 1,
       addComment: false,
-      emailAddError: null
+      emailAddError: null,
+      showLogs: false,
     }
   },
   async mounted() {
@@ -557,7 +558,8 @@ export default {
       }
     },
     logs() {
-      this.$refs.logs.show()
+      this.showLogs = true
+      this.$refs.logs?.show()
     },
     async profile() {
       /* TODO await this.$store.dispatch('user/fetch', {
@@ -618,6 +620,7 @@ export default {
     },
     addAComment() {
       this.addComment = true
+      this.$refs.addComment?.show()
     },
     async updateComments() {
       const userid = this.user.userid ? this.user.userid : this.user.id
