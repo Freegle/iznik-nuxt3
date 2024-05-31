@@ -96,7 +96,12 @@
             <template #item="{ element, index }">
               <div class="bg-transparent p-0">
                 <PostPhoto
-                  v-bind="element"
+                  :id="element.id"
+                  :path="element.path"
+                  :paththumb="element.paththumb"
+                  :thumbnail="element.thumbnail"
+                  :externaluid="element.externaluid"
+                  :externalmods="element.externalmods"
                   :primary="index === 0"
                   @remove="removePhoto"
                 />

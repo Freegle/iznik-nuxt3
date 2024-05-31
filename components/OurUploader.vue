@@ -38,9 +38,7 @@
   </client-only>
 </template>
 <script setup>
-// TODO User edit of photo
 // TODO Other photos besides messages.
-// TODO Perceptual hashes.
 import { useMiscStore } from '~/stores/misc'
 import { useImageStore } from '~/stores/image'
 
@@ -167,8 +165,8 @@ async function uploadSuccess(e) {
         id: ret.id,
         path: ret.url,
         paththumb: ret.url,
-        externaluid: e.detail.uuid,
-        externalurl: e.detail.cdnUrl,
+        externaluid: ret.uid,
+        externalurl: ret.url,
         externalmods: mods,
       })
 
