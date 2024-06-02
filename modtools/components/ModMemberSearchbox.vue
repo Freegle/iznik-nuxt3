@@ -11,6 +11,12 @@
 </template>
 <script>
 export default {
+  emits: ['search'],
+  data: function () {
+    return {
+      term: null,
+    }
+  },
   props: {
     groupid: {
       type: Number,
@@ -33,31 +39,11 @@ export default {
       default: false
     }
   },
-  computed: {
-    term: {
-      get() {
-        return this.value
-      },
-      set(val) {
-        if (val) {
-          this.$emit('input', val)
-        }
-      }
-    }
-  },
   methods: {
     search() {
       // Tick to allow value to appear.
       console.log('Search', this.term)
-      /* TODO this.$nextTick(() => {
-        const url =
-          (this.spam
-            ? '/modtools/spammers/'
-            : '/modtools/members/approved/search/') +
-          (this.groupid ? this.groupid + '/' : '') +
-          this.term.trim()
-        this.$router.push(url)
-      })*/
+      this.$emit('search', this.term)
     }
   }
 }

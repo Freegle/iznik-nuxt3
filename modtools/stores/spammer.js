@@ -53,12 +53,9 @@ export const useSpammerStore = defineStore({
       // results.
       const instance = this.instance
 
-      if (params.context) {
-        // Ensure the context is a real object, in case it has been in the store.
-        const ctx = cloneDeep(params.context)
-        params.context = ctx
-      } else if (this.context) {
-        params.context = this.context
+      delete params.context
+      if (this.context) {
+        params['context[id]'] = this.context.id
       }
 
       const { spammers, context } = await api(this.config).spammers.fetch(params)
@@ -106,15 +103,15 @@ export const useSpammerStore = defineStore({
       this.removeFromList(params.id)
     },
 
-    async requestremove( params) {
+    async requestremove(params) {
       await api(this.config).spammers.add({
         id: params.id,
         userid: params.userid,
         collection: 'PendingRemove'
       })
-  
+
       this.removeFromList(params.id)
-  
+
       /* TODO dispatch(
         'auth/fetchUser',
         {
@@ -131,7 +128,7 @@ export const useSpammerStore = defineStore({
         id: params.id,
         userid: params.userid
       })
-  
+
       /* TODO dispatch(
         'auth/fetchUser',
         {
@@ -142,7 +139,7 @@ export const useSpammerStore = defineStore({
           root: true
         }
       )*/
-  
+
       this.removeFromList(params.id)
     },
     async whitelist(params) {
@@ -152,7 +149,7 @@ export const useSpammerStore = defineStore({
         reason: params.reason,
         collection: 'Whitelisted'
       })
-  
+
       /* TODO dispatch(
         'auth/fetchUser',
         {
@@ -163,10 +160,10 @@ export const useSpammerStore = defineStore({
           root: true
         }
       )*/
-  
+
       this.removeFromList(params.id)
     },
-    
+
     async hold(params) {
       await api(this.config).spammers.patch({
         id: params.id,
@@ -175,14 +172,14 @@ export const useSpammerStore = defineStore({
         collection: 'PendingAdd',
         heldby: params.myid
       })
-  
+
       this.context = null
-  
+
       this.fetch({
         collection: 'PendingAdd'
       })
     },
-  
+
     async release(params) {
       // Omitting heldby results in NULL on server.
       await api(this.config).spammers.patch({
@@ -191,14 +188,14 @@ export const useSpammerStore = defineStore({
         reason: params.reason,
         collection: 'PendingAdd'
       })
-  
+
       this.context = null
-  
+
       this.fetch({
         collection: 'PendingAdd'
       })
     },
-  
+
   },
   getters: {
     getList: (state) => (collection) => {

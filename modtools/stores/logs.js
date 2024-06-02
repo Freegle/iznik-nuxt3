@@ -1,5 +1,4 @@
 import { defineStore } from 'pinia'
-import cloneDeep from 'lodash.clonedeep'
 import api from '~/api'
 
 export const useLogsStore = defineStore({

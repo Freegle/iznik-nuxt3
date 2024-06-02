@@ -39,17 +39,20 @@
             </template>
           </b-tab>
         </b-tabs>
-        <ModMemberSearchbox v-if="tabIndex === 0" v-model="search" :groupid="groupid" spam class="mb-2" />
-        <ModMember v-for="spammer in visibleSpammers" :key="'spammer-' + tabIndex + '-' + spammer.id" :member="spammer.user" :sameip="spammer.sameip" class="mb-1" />
-        <b-img v-if="busy" src="~/static/loader.gif" alt="Loading" />
+        <ModMemberSearchbox v-if="tabIndex === 0" spam class="mb-2" @search="searched" />
+        <div v-for="spammer in visibleSpammers">
+          SPAMMER {{ spammer.id }} {{ spammer.user.id }}
+        </div>
+        <!--ModMember v-for="spammer in visibleSpammers" :key="'spammer-' + tabIndex + '-' + spammer.id" :member="spammer.user" :sameip="spammer.sameip" class="mb-1" /-->
+        <b-img v-if="busy" src="/loader.gif" alt="Loading" width="100px" />
         <div v-else-if="!spammers.length">
           Nothing to show just now.
         </div>
-        <!--infinite-loading :distance="1000" @infinite="loadMore">
+        <infinite-loading :distance="10" @infinite="loadMore">
           <span slot="no-results" />
           <span slot="no-more" />
           <span slot="spinner" />
-        </infinite-loading-->
+        </infinite-loading>
       </div>
     </div>
   </div>
@@ -62,7 +65,7 @@ export default {
     const spammerStore = useSpammerStore()
     return { spammerStore }
   },
-  data: function() {
+  data: function () {
     return {
       tabIndex: 0,
       show: 0,
@@ -151,7 +154,13 @@ export default {
     }
   },
   methods: {
-    loadMore: function($state) {
+    searched(term){
+      console.log('searched', term)
+      this.spammerStore.clear()
+      this.search = term
+    },
+    async loadMore($state) {
+      console.log('Spammers loadMore', this.show, this.spammers.length)
       this.busy = true
 
       if (this.show < this.spammers.length) {
@@ -159,31 +168,31 @@ export default {
         // Doing that means that we will complete our initial render more rapidly and thus appear faster.
         this.show++
         $state.loaded()
+        this.busy = false
       } else {
         const currentCount = this.spammers.length
 
-        this.spammerStore.fetch({
-            collection: this.collection,
-            search: this.search,
-            modtools: true
-          })
-          .then(() => {
-            this.context = this.spammerStore.getContext()
+        await this.spammerStore.fetch({
+          collection: this.collection,
+          search: this.search,
+          modtools: true
+        })
+        this.context = this.spammerStore.getContext()
 
-            if (currentCount === this.spammers.length) {
-              this.busy = false
-              $state.complete()
-            } else {
-              $state.loaded()
-              this.busy = false
-              this.show++
-            }
-          })
-          .catch(e => {
-            $state.complete()
-            this.busy = false
-            console.log('Complete on error', e)
-          })
+        if (currentCount === this.spammers.length) {
+          this.busy = false
+          $state.complete()
+        } else {
+          $state.loaded()
+          this.busy = false
+          this.show++
+        }
+        /*.catch(e => {
+        $state.complete()
+        this.busy = false
+        console.log('busy false')
+        console.log('Complete on error', e)
+      })*/
       }
     }
   }
