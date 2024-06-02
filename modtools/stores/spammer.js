@@ -1,81 +1,218 @@
 import { defineStore } from 'pinia'
-//import { nextTick } from 'vue'
-//import api from '~/api'
-// TODO
+import api from '~/api'
 
 export const useSpammerStore = defineStore({
   id: 'spammer',
   state: () => ({
+    // Use array because we need to store them in the order returned by the server.
     list: [],
+
     // The context from the last fetch, used for fetchMore.
     context: null,
-  // For spotting when we clear under the feet of an outstanding fetch
-    //instance: 1
-    fetching: null,
+
+    // For spotting when we clear under the feet of an outstanding fetch
+    instance: 1
   }),
   actions: {
     init(config) {
       this.config = config
     },
-    async fetch(id, force) {
-      /*if (id) {
-        // Specific address which may or may not be ours.  If it's not, we'll get an error, which is a bug.  But we
-        // also get an error if it's been deleted.  So don't log
-        try {
-          if (!this.listById[id] || force) {
-            this.listById[id] = await api(this.config).address.fetchByIdv2(
-              id,
-              false
-            )
-          }
-          return this.listById[id]
-        } catch (e) {
-          console.log('Failed to get address', e)
-          return null
-        }
-      } else if (this.fetching) {
-        await this.fetching
-        await nextTick()
-      } else {
-        this.fetching = api(this.config).address.fetchv2()
-        this.list = await this.fetching
-        this.list = this.list || []
+    clear() {
+      this.list = []
+      this.context = null
 
-        this.list.forEach((address) => {
-          this.listById[address.id] = address
+      if (this.instance) {
+        this.instance++
+      } else {
+        this.instance = 1
+      }
+    },
+    addAll(items) {
+      items.forEach(item => {
+        item.user.userid = item.user.id
+
+        const existing = this.list.findIndex(obj => {
+          return parseInt(obj.id) === parseInt(item.id)
         })
 
-        this.fetching = null
-      }*/
+        if (existing !== -1) {
+          this.list[existing] = item
+        } else {
+          this.list.push(item)
+        }
+      })
     },
-    async delete(id) {
-      /*await api(this.config).address.del(id)
-      delete this.listById[id]
-      await this.fetch()*/
+    removeFromList(itemid) {
+      this.list = this.list.filter(obj => {
+        return parseInt(itemid) !== parseInt(obj.id)
+      })
     },
-    /*async fetchProperties(postcodeid) {
-      const { addresses } = await api(this.config).address.fetchv1({
-        postcodeid,
+
+    async fetch(params) {
+      // Watch out for the store being cleared under the feet of this fetch. If that happens then we throw away the
+      // results.
+      const instance = this.instance
+
+      if (params.context) {
+        // Ensure the context is a real object, in case it has been in the store.
+        const ctx = cloneDeep(params.context)
+        params.context = ctx
+      } else if (this.context) {
+        params.context = this.context
+      }
+
+      const { spammers, context } = await api(this.config).spammers.fetch(params)
+      if (this.instance === instance) {
+        this.addAll(spammers)
+        this.context = context
+      }
+    },
+    async report(params) {
+      await api(this.config).spammers.add({
+        userid: params.userid,
+        collection: 'PendingAdd',
+        reason: params.reason
       })
 
-      addresses.forEach((address) => {
-        this.properties[address.id] = address
+      /* TODO dispatch(
+        'auth/fetchUser',
+        {
+          components: ['work'],
+          force: true
+        },
+        {
+          root: true
+        }
+      )*/
+    },
+    async confirm(params) {
+      await api(this.config).spammers.patch({
+        id: params.id,
+        userid: params.userid,
+        collection: 'Spammer'
       })
-    },*/
-    async update(params) {
-      ///await api(this.config).address.update(params)
-      //this.fetch(params.id, true)
+
+      /* TODO dispatch(
+        'auth/fetchUser',
+        {
+          components: ['work'],
+          force: true
+        },
+        {
+          root: true
+        }
+      )*/
+
+      this.removeFromList(params.id)
     },
-    async add(params) {
-      return 0
-      //const { id } = await api(this.config).address.add(params)
-      //await this.fetch()
-      //return id
+
+    async requestremove( params) {
+      await api(this.config).spammers.add({
+        id: params.id,
+        userid: params.userid,
+        collection: 'PendingRemove'
+      })
+  
+      this.removeFromList(params.id)
+  
+      /* TODO dispatch(
+        'auth/fetchUser',
+        {
+          components: ['work'],
+          force: true
+        },
+        {
+          root: true
+        }
+      )*/
     },
+    async remove(params) {
+      await api(this.config).spammers.del({
+        id: params.id,
+        userid: params.userid
+      })
+  
+      /* TODO dispatch(
+        'auth/fetchUser',
+        {
+          components: ['work'],
+          force: true
+        },
+        {
+          root: true
+        }
+      )*/
+  
+      this.removeFromList(params.id)
+    },
+    async whitelist(params) {
+      await api(this.config).spammers.add({
+        id: params.id,
+        userid: params.userid,
+        reason: params.reason,
+        collection: 'Whitelisted'
+      })
+  
+      /* TODO dispatch(
+        'auth/fetchUser',
+        {
+          components: ['work'],
+          force: true
+        },
+        {
+          root: true
+        }
+      )*/
+  
+      this.removeFromList(params.id)
+    },
+    
+    async hold(params) {
+      await api(this.config).spammers.patch({
+        id: params.id,
+        userid: params.userid,
+        reason: params.reason,
+        collection: 'PendingAdd',
+        heldby: params.myid
+      })
+  
+      this.context = null
+  
+      this.fetch({
+        collection: 'PendingAdd'
+      })
+    },
+  
+    async release(params) {
+      // Omitting heldby results in NULL on server.
+      await api(this.config).spammers.patch({
+        id: params.id,
+        userid: params.userid,
+        reason: params.reason,
+        collection: 'PendingAdd'
+      })
+  
+      this.context = null
+  
+      this.fetch({
+        collection: 'PendingAdd'
+      })
+    },
+  
   },
   getters: {
-    get: (state) => (id) => {
-      return state.listById(id)
+    getList: (state) => (collection) => {
+      return state.list.filter(s => s.collection === collection)
+    },
+
+    getContext: (state) => () => {
+      let ret = null
+
+      if (state.context && state.context.id) {
+        ret = state.context
+      }
+
+      return ret
     },
   },
 })
