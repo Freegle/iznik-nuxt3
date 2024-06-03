@@ -2,7 +2,7 @@
   <div class="d-flex justify-content-between mt-2 mb-2 p-2">
     <div class="d-flex flex-wrap fs">
       <MyMessageReplyUser
-        v-for="reply in message.replies"
+        v-for="reply in message?.replies"
         :id="reply.userid"
         :key="'reply-' + reply.userid"
         :profile-modal="false"
@@ -11,7 +11,7 @@
         @click="openChat(reply.userid)"
       />
     </div>
-    <div>
+    <div v-if="message?.replycount > 0">
       <b-button size="lg" variant="primary" @click="expand">
         <div class="d-flex align-items-center">
           <v-icon icon="user" class="fa-fw" />
