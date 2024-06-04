@@ -43,7 +43,7 @@
         <!--div v-for="spammer in visibleSpammers">
           SPAMMER {{ spammer.id }} {{ spammer.user.id }}
         </div-->
-        <ModMember v-for="spammer in visibleSpammers" :key="'spammer-' + tabIndex + '-' + spammer.id" :member="spammer.user" :sameip="spammer.sameip" class="mb-1" />
+        <ModMember v-for="(spammer, index) in visibleSpammers" :key="'spammer-' + tabIndex + '-' + spammer.id" :member="spammer.user" :sameip="spammer.sameip" class="mb-1" :index="index" />
         <b-img v-if="busy" src="/loader.gif" alt="Loading" width="100px" />
         <div v-else-if="!spammers.length">
           Nothing to show just now.

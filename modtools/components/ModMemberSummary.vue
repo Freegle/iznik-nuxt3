@@ -2,30 +2,33 @@
   <div>
     <h4>
       <b-badge :variant="offers > 0 ? 'success' : 'light'" title="Recent OFFERs" class="clickme" @click="showHistory('Offer')">
-        <v-icon icon="gift" class="fa-fw" /> {{ withplural('OFFER', offers, true) }}
-        
+        <v-icon icon="gift" class="fa-fw" /> {{ withplural(['OFFER', 'OFFERs'], offers, true) }}
       </b-badge>
       <b-badge :variant="wanteds > 0 ? 'success' : 'light'" title="Recent WANTEDs" class="clickme" @click="showHistory('Wanted')">
-        <v-icon icon="search" class="fa-fw" /> {{ withplural('WANTED', wanteds, true) }}
+        <v-icon icon="search" class="fa-fw" /> {{ withplural(['WANTED', 'WANTEDs'], wanteds, true) }}
       </b-badge>
       <b-badge :variant="(member.modmails && member.modmails) > 0 ? 'danger' : 'light'" title="Recent ModMails" class="clickme" @click="showModmails">
-        <v-icon icon="exclamation-triangle" class="fa-fw" />  {{ (member.modmails ? member.modmails : 0) | withplural('Modmail', member.modmails.length, true) }}
+        <v-icon icon="exclamation-triangle" class="fa-fw" /> {{ (member.modmails ? withplural('Modmail', member.modmails.length, true) : "0 Modmails")
+        }}
       </b-badge>
-      <b-badge v-if="userinfo" :variant="userinfo.repliesoffer > 0 ? 'success' : 'light'" title="Recent replies to OFFERs" class="clickme d-inline-flex">
+      <b-badge v-if="userinfo" :variant="userinfo.repliesoffer > 0 ? 'success' : 'light'" title="Recent replies to OFFERs"
+        class="clickme d-inline-flex">
         <div class="d-flex mr-1">
           <v-icon icon="gift" class="fa-fw" />
           <v-icon icon="reply" class="fa-fw" />
         </div>
         {{ userinfo.repliesoffer }}
       </b-badge>
-      <b-badge v-if="userinfo" :variant="userinfo.replieswanted > 0 ? 'success' : 'light'" title="Recent replies to WANTEDs" class="clickme d-inline-flex">
+      <b-badge v-if="userinfo" :variant="userinfo.replieswanted > 0 ? 'success' : 'light'" title="Recent replies to WANTEDs"
+        class="clickme d-inline-flex">
         <div class="d-flex mr-1">
           <v-icon icon="search" class="fa-fw" />
           <v-icon icon="reply" class="fa-fw" />
         </div>
         {{ userinfo.replieswanted }}
       </b-badge>
-      <b-badge v-if="userinfo" :variant="userinfo.expectedreplies > 0 ? 'danger' : 'light'" title="Recent outstanding replies requested" class="clickme">
+      <b-badge v-if="userinfo" :variant="userinfo.expectedreplies > 0 ? 'danger' : 'light'" title="Recent outstanding replies requested"
+        class="clickme">
         <v-icon icon="clock" class="fa-fw" /> {{ (userinfo.expectedreplies || 0) | withplural('RSVP', userinfo.expectedreplies.length, true) }}
       </b-badge>
     </h4>
@@ -34,7 +37,7 @@
   </div>
 </template>
 <script>
-import pluralize from 'pluralize'
+import { withplural } from '../composables/usePluralize'
 
 export default {
   props: {
@@ -43,7 +46,7 @@ export default {
       required: true
     }
   },
-  data: function() {
+  data: function () {
     return {
       type: null,
       showLogsModal: false
@@ -91,13 +94,6 @@ export default {
       this.waitForRef('logs', () => {
         this.$refs.logs.show()
       })
-    },
-    withplural(a, b, c) {
-      if (Array.isArray(a)) {
-        pluralize.addIrregularRule(...a)
-        a = a[0]
-      }
-      return pluralize(a, b, c)
     }
   }
 }

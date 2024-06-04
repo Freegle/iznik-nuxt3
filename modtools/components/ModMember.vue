@@ -4,9 +4,11 @@
       <b-card-header class="d-flex justify-content-between flex-wrap">
         <div>
           <div v-if="isLJ">
+            {{ index+1 }}:
             LoveJunk user #{{ user.ljuserid }}
           </div>
           <div v-else>
+            {{ index+1 }}:
             <!-- eslint-disable-next-line -->
             <v-icon icon="envelope" class="mr-1" />
             <ExternalLink :href="'mailto:' + email">{{ email }}</ExternalLink>
@@ -63,8 +65,8 @@
             :moderation="member.ourpostingstatus" :userid="member.userid" class="border border-info p-1 flex-grow-1 mr-1" @change="settingsChange" />
           <div>
             <ModMemberSummary :member="member" />
-            <!--ModMemberEngagement :member="member" />
-            <div v-if="member.info && member.info.publiclocation">
+            <ModMemberEngagement :member="member" />
+            <!--div v-if="member.info && member.info.publiclocation">
               Public location: {{ member.info.publiclocation.location }}
             </div>
             <ModMemberActions v-if="!footeractions" :userid="member.userid" :groupid="groupid" :banned="(Boolean)(member.bandate)" />
@@ -203,6 +205,10 @@ export default {
     member: {
       type: Object,
       required: true
+    },
+    index: {
+      type: Number,
+      required: false
     },
     spammerlist: {
       type: Boolean,
