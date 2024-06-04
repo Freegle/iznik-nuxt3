@@ -18,22 +18,22 @@ export default {
     }
   },
   props: {
-    groupid: {
+    groupid: { // TODO: change how used
       type: Number,
       required: false,
       default: null
     },
-    disabled: {
+    disabled: { // TODO: when used?
       type: Boolean,
       required: false,
       default: false
     },
-    value: {
+    value: { // TODO: when used?
       type: String,
       required: false,
       default: null
     },
-    spam: {
+    spam: { // TODO: when used?
       type: Boolean,
       required: false,
       default: false
@@ -41,8 +41,6 @@ export default {
   },
   methods: {
     search() {
-      // Tick to allow value to appear.
-      console.log('Search', this.term)
       this.$emit('search', this.term)
     }
   }

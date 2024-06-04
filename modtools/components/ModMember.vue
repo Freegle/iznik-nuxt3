@@ -8,7 +8,7 @@
           </div>
           <div v-else>
             <!-- eslint-disable-next-line -->
-            <v-icon name="envelope" />
+            <v-icon icon="envelope" class="mr-1" />
             <ExternalLink :href="'mailto:' + email">{{ email }}</ExternalLink>
           </div>
         </div>
@@ -17,34 +17,27 @@
           {{ member.displayname }}
         </div>
         <div v-if="member.joined">
-          <v-icon name="calendar-alt" /> {{ datetimeshort(member.joined) }}
+          <v-icon icon="calendar-alt" /> {{ datetimeshort(member.joined) }}
         </div>
         <div>
-          <v-icon name="hashtag" />{{ member.userid }}
+          <v-icon icon="hashtag" />{{ member.userid }}
         </div>
       </b-card-header>
       <b-card-body>
-        <!--ModDeletedOrForgotten :user="user" />
+        <ModDeletedOrForgotten :user="user" />
         <NoticeMessage v-if="banned" variant="danger" class="mb-2">
           This freegler is banned from this group.
         </NoticeMessage>
         <div v-if="member.heldby">
           <NoticeMessage variant="warning" class="mb-2">
             <p v-if="me.id === member.heldby.id">
-              You held this member.  Other people will see a warning to check with
+              You held this member. Other people will see a warning to check with
               you before releasing them.
             </p>
             <p v-else>
-              Held by <strong>{{ member.heldby.displayname }}</strong>.  Please check before releasing them.
+              Held by <strong>{{ member.heldby.displayname }}</strong>. Please check before releasing them.
             </p>
-            <ModMemberButton
-              v-if="member.heldby"
-              :member="member"
-              variant="warning"
-              icon="play"
-              release
-              label="Release"
-            />
+            <ModMemberButton v-if="member.heldby" :member="member" variant="warning" icon="play" release label="Release" />
           </NoticeMessage>
         </div>
         <ModComments :user="member" :expand-comments="expandComments" />
@@ -57,35 +50,28 @@
         </NoticeMessage>
         <ModBouncing v-if="member.bouncing" :user="member" />
         <NoticeMessage v-if="member.bandate">
-          Banned <span :title="datetime(member.bandate)">{{ timeago(member.bandate) }}</span> <span v-if="member.bannedby">by #{{ member.bannedby }}</span> - check logs for info.
-          <b-btn variant="link" size="sm" @click="confirmUnban">
+          Banned <span :title="datetime(member.bandate)">{{ timeago(member.bandate) }}</span> <span v-if="member.bannedby">by #{{ member.bannedby
+            }}</span> - check logs for info.
+          <b-button variant="link" size="sm" @click="confirmUnban">
             Unban
-          </b-btn>
+          </b-button>
           <ConfirmModal ref="unbanConfirm" :title="'Unban #' + member.userid" @confirm="unban" />
         </NoticeMessage>
         <div class="d-flex justify-content-between flex-wrap">
-          <SettingsGroup
-            v-if="groupid && member.ourpostingstatus"
-            :groupid="groupid"
-            :emailfrequency="member.emailfrequency"
-            :volunteeringallowed="Boolean(member.volunteeringallowed)"
-            :eventsallowed="Boolean(member.eventsallowed)"
-            :moderation="member.ourpostingstatus"
-            :userid="member.userid"
-            class="border border-info p-1 flex-grow-1 mr-1"
-            @change="settingsChange"
-          />
+          <SettingsGroup v-if="groupid && member.ourpostingstatus" :groupid="groupid" :emailfrequency="member.emailfrequency"
+            :volunteeringallowed="Boolean(member.volunteeringallowed)" :eventsallowed="Boolean(member.eventsallowed)"
+            :moderation="member.ourpostingstatus" :userid="member.userid" class="border border-info p-1 flex-grow-1 mr-1" @change="settingsChange" />
           <div>
             <ModMemberSummary :member="member" />
-            <ModMemberEngagement :member="member" />
+            <!--ModMemberEngagement :member="member" />
             <div v-if="member.info && member.info.publiclocation">
               Public location: {{ member.info.publiclocation.location }}
             </div>
             <ModMemberActions v-if="!footeractions" :userid="member.userid" :groupid="groupid" :banned="(Boolean)(member.bandate)" />
             <ModMemberships :user="member" />
             <ModMemberLogins :member="member" />
-            <b-btn v-if="member.emails && member.emails.length" variant="link" @click="showEmails = !showEmails">
-              <v-icon name="envelope" />
+            <b-button v-if="member.emails && member.emails.length" variant="link" @click="showEmails = !showEmails">
+              <v-icon icon="envelope" />
               <span v-if="showEmails">
                 <span class="d-inline d-sm-none">
                   Hide
@@ -102,24 +88,24 @@
                   Show {{ member.emails.length | pluralize('email', { includeNumber: true }) }}
                 </span>
               </span>
-            </b-btn>
-            <b-btn variant="link" @click="showHistory(null)">
+            </b-button>
+            <b-button variant="link" @click="showHistory(null)">
               View posts
-            </b-btn>
-            <b-btn variant="link" @click="showLogs">
+            </b-button>
+            <b-button variant="link" @click="showLogs">
               View logs
-            </b-btn>
-            <b-btn variant="link" :to="'/profile/' + member.userid">
+            </b-button>
+            <b-button variant="link" :to="'/profile/' + member.userid">
               View profile
-            </b-btn>
+            </b-button>
             <div v-if="showEmails">
               <div v-for="e in member.emails" :key="e.id">
-                {{ e.email }} <v-icon v-if="e.preferred" name="star" />
+                {{ e.email }} <v-icon v-if="e.preferred" icon="star" />
               </div>
-            </div>
+            </div-->
           </div>
         </div>
-        <div v-if="user && user.id && !isTN && !isLJ">
+        <!--div v-if="user && user.id && !isTN && !isLJ">
           <hr>
           <div class="d-flex justify-content-between flex-wrap">
             <OurToggle
@@ -287,7 +273,8 @@ export default {
       return ret
     },
     user() {
-      return this.userStore.get(this.member.userid)
+      return this.member
+      //return this.userStore.get(this.member.userid)
     },
     isTN() {
       let ret = false

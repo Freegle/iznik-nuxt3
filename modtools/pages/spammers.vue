@@ -40,10 +40,10 @@
           </b-tab>
         </b-tabs>
         <ModMemberSearchbox v-if="tabIndex === 0" spam class="mb-2" @search="searched" />
-        <div v-for="spammer in visibleSpammers">
+        <!--div v-for="spammer in visibleSpammers">
           SPAMMER {{ spammer.id }} {{ spammer.user.id }}
-        </div>
-        <!--ModMember v-for="spammer in visibleSpammers" :key="'spammer-' + tabIndex + '-' + spammer.id" :member="spammer.user" :sameip="spammer.sameip" class="mb-1" /-->
+        </div-->
+        <ModMember v-for="spammer in visibleSpammers" :key="'spammer-' + tabIndex + '-' + spammer.id" :member="spammer.user" :sameip="spammer.sameip" class="mb-1" />
         <b-img v-if="busy" src="/loader.gif" alt="Loading" width="100px" />
         <div v-else-if="!spammers.length">
           Nothing to show just now.
@@ -134,11 +134,6 @@ export default {
       this.spammerStore.clear()
     }
   },
-  created() {
-    /* TODO if (this.$route.params.search) {
-      this.search = this.$route.params.search
-    }*/
-  },
   mounted() {
     // Start in Pending Add if they have rights to see it.
     this.spammerStore.clear()
@@ -155,7 +150,6 @@ export default {
   },
   methods: {
     searched(term){
-      console.log('searched', term)
       this.spammerStore.clear()
       this.search = term
     },

@@ -27,6 +27,24 @@ export const useSpammerStore = defineStore({
         this.instance = 1
       }
     },
+
+    async fetch(params) {
+      // Watch out for the store being cleared under the feet of this fetch. If that happens then we throw away the
+      // results.
+      const instance = this.instance
+
+      delete params.context
+      if (this.context) {
+        params['context[id]'] = this.context.id
+      }
+
+      const { spammers, context } = await api(this.config).spammers.fetch(params)
+      if (this.instance === instance) {
+        this.addAll(spammers)
+        this.context = context
+      }
+    },
+
     addAll(items) {
       items.forEach(item => {
         item.user.userid = item.user.id
@@ -48,22 +66,6 @@ export const useSpammerStore = defineStore({
       })
     },
 
-    async fetch(params) {
-      // Watch out for the store being cleared under the feet of this fetch. If that happens then we throw away the
-      // results.
-      const instance = this.instance
-
-      delete params.context
-      if (this.context) {
-        params['context[id]'] = this.context.id
-      }
-
-      const { spammers, context } = await api(this.config).spammers.fetch(params)
-      if (this.instance === instance) {
-        this.addAll(spammers)
-        this.context = context
-      }
-    },
     async report(params) {
       await api(this.config).spammers.add({
         userid: params.userid,
