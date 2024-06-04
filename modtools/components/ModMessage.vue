@@ -298,9 +298,9 @@
 </template>
 
 <script>
-import pluralize from 'pluralize'
 import Highlighter from 'vue-highlight-words'
 
+import { withplural } from '../composables/usePluralize'
 import { useLocationStore } from '../../stores/location'
 import { useModConfigStore } from '../stores/modconfig'
 import { useMemberStore } from '../stores/member'
@@ -842,13 +842,6 @@ export default {
     backToPending() {
       this.messageStore.backToPending(this.message.id)
     },
-    withplural(a, b, c) {
-      if (Array.isArray(a)) {
-        pluralize.addIrregularRule(...a)
-        a = a[0]
-      }
-      return pluralize(a, b, c)
-    }
   }
 }
 </script>

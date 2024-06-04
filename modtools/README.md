@@ -56,6 +56,7 @@ A fairly minimal `package.json` is needed as `nuxt.config.ts` extends `../` and 
 * SpinButton has changed params inc icon-name and :handler to @handle which has param callback that must be called when complete
 * const path = computed(() => { return 0 } and access as path.value
 * Change pluralize to added withplural with number and includeNumber as extra params
+import { withplural } from '../composables/usePluralize'
 * For refs use this.$refs.modal?.show() etc
 * b-img-lazy to b-img lazy
 * float-right to float-end

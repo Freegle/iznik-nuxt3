@@ -42,7 +42,7 @@
   </div>
 </template>
 <script>
-import pluralize from 'pluralize'
+import { withplural } from '../composables/usePluralize'
 
 export default {
   data: function () {
@@ -111,13 +111,6 @@ export default {
     expand() {
       this.summary = false
     },
-    withplural(a, b, c) {
-      if (Array.isArray(a)) {
-        pluralize.addIrregularRule(...a)
-        a = a[0]
-      }
-      return pluralize(a, b, c)
-    }
   }
 }
 </script>

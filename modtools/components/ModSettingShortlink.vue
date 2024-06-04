@@ -9,21 +9,13 @@
   </div>
 </template>
 <script>
-import pluralize from 'pluralize'
+import { withplural } from '../composables/usePluralize'
+
 export default {
   props: {
     shortlink: {
       type: Object,
       required: true
-    }
-  },
-  methods: {
-    withplural(a, b, c) {
-      if (Array.isArray(a)) {
-        pluralize.addIrregularRule(...a)
-        a = a[0]
-      }
-      return pluralize(a, b, c)
     }
   }
 }

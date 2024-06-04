@@ -35,6 +35,7 @@
   </div>
 </template>
 <script>
+import { withplural } from '../composables/usePluralize'
 import ModDashboardBase from '~/components/ModDashboardBase'
 
 export default {

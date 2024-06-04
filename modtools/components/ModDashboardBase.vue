@@ -80,13 +80,6 @@ export default {
           this.fetch()
         })
       }
-    },
-    withplural(a, b, c) {
-      if (Array.isArray(a)) {
-        pluralize.addIrregularRule(...a)
-        a = a[0]
-      }
-      return pluralize(a, b, c)
     }
   }
 }
