@@ -29,7 +29,7 @@
       </b-badge>
       <b-badge v-if="userinfo" :variant="userinfo.expectedreplies > 0 ? 'danger' : 'light'" title="Recent outstanding replies requested"
         class="clickme">
-        <v-icon icon="clock" class="fa-fw" /> {{ (userinfo.expectedreplies || 0) | withplural('RSVP', userinfo.expectedreplies.length, true) }}
+        <v-icon icon="clock" class="fa-fw" /> {{ withplural(['RSVP','RSVPs'], userinfo.expectedreplies || 0, true) }}
       </b-badge>
     </h4>
     <!--ModPostingHistoryModal ref="history" :user="member" :type="type" />
@@ -39,7 +39,13 @@
 <script>
 import { withplural } from '../composables/usePluralize'
 
+import { useUserStore } from '../stores/user'
+
 export default {
+  setup() {
+    const userStore = useUserStore()
+    return { userStore }
+  },
   props: {
     member: {
       type: Object,
@@ -52,6 +58,15 @@ export default {
       showLogsModal: false
     }
   },
+  mounted() {
+    if (this.member.userid) {
+      this.userStore.fetchMT({
+        id: this.member.userid,
+        info: true
+      })
+
+    }
+  },
   computed: {
     offers() {
       return this.countType('Offer')
@@ -60,11 +75,11 @@ export default {
       return this.countType('Wanted')
     },
     userinfo() {
-      /* TODO const user = this.$store.getters['user/get'](this.member.userid)
+      const user = this.userStore.byId(this.member.userid)
 
       if (user && user.info) {
         return user.info
-      }*/
+      }
 
       return null
     }
