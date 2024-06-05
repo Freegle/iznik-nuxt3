@@ -68,7 +68,6 @@ export default {
       tabIndex: 0,
       show: 0,
       busy: false,
-      bump: 0,
       search: null
     }
   },
@@ -125,7 +124,7 @@ export default {
   watch: {
     tabIndex(newVal) {
       this.spammerStore.clear()
-      this.bump++
+      this.infiniteId++
     },
     $route(to, from) {
       // Clear store when we move away to prevent items showing again when we come back on potentially a different tab.

@@ -1,20 +1,20 @@
 <template>
   <div class="mt-2 small">
     <div v-if="memberof && memberof.length">
-      <div v-for="m in memberof" :key="'membership-' + m.membershipid" class="p-1 mr-1">
-        <strong>{{ m.namedisplay.length > 32 ? (m.namedisplay.substring(0, 32) + '...') : m.namedisplay }}</strong>
+      <div v-for="m in memberof" :key="'membership-' + m.membershipid" class="p-1 me-1">
+        <strong class="me-1">{{ m.namedisplay.length > 32 ? (m.namedisplay.substring(0, 32) + '...') : m.namedisplay }}</strong>
         <span :class="'small ' + (daysago(m.added) < 31 ? 'text-danger font-weight-bold' : 'text-muted')">{{ timeago(m.added) }}</span>
       </div>
     </div>
-    <div v-else class="p-1 mr-1">
+    <div v-else class="p-1 me-1">
       Not on any communities
     </div>
     <b-badge v-if="hiddenmemberofs" variant="info" class="clickme mb-1" @click="allmemberships = !allmemberships">
       +{{ hiddenmemberofs }} groups
     </b-badge>
     <div v-if="visibleApplied && visibleApplied.length">
-      <div v-for="m in visibleApplied" :key="'memberapplied-' + m.id + '-' + m.userid + '-' + m.added" class="p-1 mr-1">
-        <strong>Joined {{ m.namedisplay.length > 32 ? (m.namedisplay.substring(0, 32) + '...') : m.namedisplay }}</strong>
+      <div v-for="m in visibleApplied" :key="'memberapplied-' + m.id + '-' + m.userid + '-' + m.added" class="p-1 me-1">
+        <strong class="me-1">Joined {{ m.namedisplay.length > 32 ? (m.namedisplay.substring(0, 32) + '...') : m.namedisplay }}</strong>
         <span :class="'small ' + (daysago(m.added) < 31 ? 'text-danger font-weight-bold' : 'text-muted')">{{ timeago(m.added) }}</span>
       </div>
     </div>
@@ -68,7 +68,7 @@ export default {
           : 0
     },
     filteredApplied() {
-      if (!this.user || !this.user.applied) {
+      if (!this.user || !this.user.applied || !this.user.memberof) {
         return []
       }
 

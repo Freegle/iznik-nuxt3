@@ -144,12 +144,14 @@ import { withplural } from '../composables/usePluralize'
 
 import { useMemberStore } from '../stores/member'
 import { useUserStore } from '../../stores/user'
+import { useModConfigStore } from '../stores/modconfig'
 
 export default {
   setup() {
     const memberStore = useMemberStore()
     const userStore = useUserStore()
-    return { memberStore, userStore }
+    const modConfigStore = useModConfigStore()
+    return { memberStore, modConfigStore, userStore }
   },
 
   props: {
@@ -224,9 +226,10 @@ export default {
           configid = group.configid
         }
       })
-
-      /* TODO const configs = this.$store.getters['modconfigs/configs']
-      ret = configs.find(config => config.id === configid)*/
+      console.log("MM modconfig TODO", configid)
+      // TODO: fetch for configid???
+      const configs = this.modConfigStore.configs
+      ret = configs.find(config => config.id === configid)
 
       return ret
     },

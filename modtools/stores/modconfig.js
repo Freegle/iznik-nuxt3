@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import api from '~/api'
+// TODO
 
 export const useModConfigStore = defineStore({
   id: 'modconfig',
@@ -16,6 +17,7 @@ export const useModConfigStore = defineStore({
     },
 
     async fetch(params) {
+      console.log("==== useModConfigStore fetch")
       const { configs } = await this.$api.session.fetch({
         components: params.all ? ['allconfigs'] : ['configs'],
         modtools: true
@@ -27,6 +29,7 @@ export const useModConfigStore = defineStore({
     },
 
     async fetchConfig(params) {
+      console.log("==== useModConfigStore fetchConfig")
       const config = await this.$api.modconfigs.fetchConfig(params)
 
       if (config) {
