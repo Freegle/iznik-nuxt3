@@ -4,11 +4,11 @@
       <b-card-header class="d-flex justify-content-between flex-wrap">
         <div>
           <div v-if="isLJ">
-            {{ index+1 }}:
+            {{ index + 1 }}:
             LoveJunk user #{{ user.ljuserid }}
           </div>
           <div v-else>
-            {{ index+1 }}:
+            {{ index + 1 }}:
             <!-- eslint-disable-next-line -->
             <v-icon icon="envelope" class="mr-1" />
             <ExternalLink :href="'mailto:' + email">{{ email }}</ExternalLink>
@@ -66,7 +66,7 @@
           <div>
             <ModMemberSummary :member="member" />
             <ModMemberEngagement :member="member" />
-            <!--div v-if="member.info && member.info.publiclocation">
+            <div v-if="member.info && member.info.publiclocation">
               Public location: {{ member.info.publiclocation.location }}
             </div>
             <ModMemberActions v-if="!footeractions" :userid="member.userid" :groupid="groupid" :banned="(Boolean)(member.bandate)" />
@@ -79,7 +79,7 @@
                   Hide
                 </span>
                 <span class="d-none d-sm-inline">
-                  Show {{ member.emails.length | pluralize('email', { includeNumber: true }) }}
+                  Show {{ withplural('email', member.emails.length, true) }}
                 </span>
               </span>
               <span v-else>
@@ -87,7 +87,7 @@
                   {{ member.emails.length }}
                 </span>
                 <span class="d-none d-sm-inline">
-                  Show {{ member.emails.length | pluralize('email', { includeNumber: true }) }}
+                  Show {{ withplural('email', member.emails.length, true) }}
                 </span>
               </span>
             </b-button>
@@ -104,10 +104,10 @@
               <div v-for="e in member.emails" :key="e.id">
                 {{ e.email }} <v-icon v-if="e.preferred" icon="star" />
               </div>
-            </div-->
+            </div>
           </div>
         </div>
-        <!--div v-if="user && user.id && !isTN && !isLJ">
+        <div v-if="user && user.id && !isTN && !isLJ">
           <hr>
           <div class="d-flex justify-content-between flex-wrap">
             <OurToggle
@@ -119,6 +119,7 @@
               :labels="{checked: 'Chat On', unchecked: 'Chat Off'}"
               color="#61AE24"
               @change="changeNotification($event, 'email')"
+              class="mb-2"
             />
             <OurToggle
               v-model="notifications.emailmine"
@@ -129,6 +130,7 @@
               :labels="{checked: 'Own Chats On', unchecked: 'Own Chats Off'}"
               color="#61AE24"
               @change="changeNotification($event, 'emailmine')"
+              class="mb-2"
             />
             <OurToggle
               v-model="settings.notificationmails"
@@ -139,6 +141,7 @@
               :labels="{checked: 'Notification/ChitChat On', unchecked: 'Notification/ChitChat On'}"
               color="#61AE24"
               @change="changeNotifChitchat"
+              class="mb-2"
             />
             <OurToggle
               v-model="relevantallowed"
@@ -149,6 +152,7 @@
               :labels="{checked: 'Suggestions On', unchecked: 'Suggestions Off'}"
               color="#61AE24"
               @change="changeRelevant"
+              class="mb-2"
             />
             <OurToggle
               v-model="newslettersallowed"
@@ -159,6 +163,7 @@
               :labels="{checked: 'Newsletters On', unchecked: 'Newsletters Off'}"
               color="#61AE24"
               @change="changeNewsletter"
+              class="mb-2"
             />
             <OurToggle
               v-model="autorepost"
@@ -168,11 +173,12 @@
               :sync="true"
               :labels="{checked: 'Autorepost On', unchecked: 'Autorepost Off'}"
               color="#61AE24"
+              class="mb-2"
             />
           </div>
-        </div-->
+        </div>
       </b-card-body>
-      <!--b-card-footer class="d-flex justify-content-between flex-wrap">
+      <b-card-footer class="d-flex justify-content-between flex-wrap">
         <ModMemberButtons :member="member" :modconfig="modconfig" :actions="footeractions" />
         <div class="d-flex justify-content-between justify-content-md-end flex-grow-1">
           <ModRole v-if="groupid && member.role" :userid="member.userid" :groupid="groupid" :role="member.role" />
@@ -184,13 +190,15 @@
             class="ml-1"
           />
         </div>
-      </b-card-footer-->
+      </b-card-footer>
     </b-card>
     <!--ModPostingHistoryModal ref="history" :user="member" :type="type" />
     <ModLogsModal v-if="showLogsModal" ref="logs" :userid="member.userid" /-->
   </div>
 </template>
 <script>
+import { withplural } from '../composables/usePluralize'
+
 import { useMemberStore } from '../stores/member'
 import { useUserStore } from '../../stores/user'
 
@@ -280,7 +288,6 @@ export default {
     },
     user() {
       return this.member
-      //return this.userStore.get(this.member.userid)
     },
     isTN() {
       let ret = false

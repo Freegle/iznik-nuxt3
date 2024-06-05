@@ -40,15 +40,12 @@
           </b-tab>
         </b-tabs>
         <ModMemberSearchbox v-if="tabIndex === 0" spam class="mb-2" @search="searched" />
-        <!--div v-for="spammer in visibleSpammers">
-          SPAMMER {{ spammer.id }} {{ spammer.user.id }}
-        </div-->
         <ModMember v-for="(spammer, index) in visibleSpammers" :key="'spammer-' + tabIndex + '-' + spammer.id" :member="spammer.user" :sameip="spammer.sameip" class="mb-1" :index="index" />
         <b-img v-if="busy" src="/loader.gif" alt="Loading" width="100px" />
         <div v-else-if="!spammers.length">
           Nothing to show just now.
         </div>
-        <infinite-loading :distance="10" @infinite="loadMore">
+        <infinite-loading :distance="10" @infinite="loadMore" :identifier="infiniteId">
           <span slot="no-results" />
           <span slot="no-more" />
           <span slot="spinner" />
@@ -67,6 +64,7 @@ export default {
   },
   data: function () {
     return {
+      infiniteId: 0,
       tabIndex: 0,
       show: 0,
       busy: false,
@@ -152,6 +150,7 @@ export default {
     searched(term){
       this.spammerStore.clear()
       this.search = term
+      this.infiniteId++
     },
     async loadMore($state) {
       console.log('Spammers loadMore', this.show, this.spammers.length)
@@ -165,7 +164,7 @@ export default {
         this.busy = false
       } else {
         const currentCount = this.spammers.length
-
+        console.log('fetch',this.search)
         await this.spammerStore.fetch({
           collection: this.collection,
           search: this.search,
@@ -181,12 +180,6 @@ export default {
           this.busy = false
           this.show++
         }
-        /*.catch(e => {
-        $state.complete()
-        this.busy = false
-        console.log('busy false')
-        console.log('Complete on error', e)
-      })*/
       }
     }
   }
