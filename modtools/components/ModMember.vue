@@ -110,71 +110,20 @@
         <div v-if="user && user.id && !isTN && !isLJ">
           <hr>
           <div class="d-flex justify-content-between flex-wrap">
-            <OurToggle
-              v-model="notifications.email"
-              :height="30"
-              :width="200"
-              :font-size="14"
-              :sync="true"
-              :labels="{checked: 'Chat On', unchecked: 'Chat Off'}"
-              color="#61AE24"
-              @change="changeNotification($event, 'email')"
-              class="mb-2"
-            />
-            <OurToggle
-              v-model="notifications.emailmine"
-              :height="30"
-              :width="200"
-              :font-size="14"
-              :sync="true"
-              :labels="{checked: 'Own Chats On', unchecked: 'Own Chats Off'}"
-              color="#61AE24"
-              @change="changeNotification($event, 'emailmine')"
-              class="mb-2"
-            />
-            <OurToggle
-              v-model="settings.notificationmails"
-              :height="30"
-              :width="200"
-              :font-size="14"
-              :sync="true"
-              :labels="{checked: 'Notification/ChitChat On', unchecked: 'Notification/ChitChat On'}"
-              color="#61AE24"
-              @change="changeNotifChitchat"
-              class="mb-2"
-            />
-            <OurToggle
-              v-model="relevantallowed"
-              :height="30"
-              :width="200"
-              :font-size="14"
-              :sync="true"
-              :labels="{checked: 'Suggestions On', unchecked: 'Suggestions Off'}"
-              color="#61AE24"
-              @change="changeRelevant"
-              class="mb-2"
-            />
-            <OurToggle
-              v-model="newslettersallowed"
-              :height="30"
-              :width="200"
-              :font-size="14"
-              :sync="true"
-              :labels="{checked: 'Newsletters On', unchecked: 'Newsletters Off'}"
-              color="#61AE24"
-              @change="changeNewsletter"
-              class="mb-2"
-            />
-            <OurToggle
-              v-model="autorepost"
-              :height="30"
-              :width="200"
-              :font-size="14"
-              :sync="true"
-              :labels="{checked: 'Autorepost On', unchecked: 'Autorepost Off'}"
-              color="#61AE24"
-              class="mb-2"
-            />
+            <OurToggle v-model="notifications.email" :height="30" :width="200" :font-size="14" :sync="true"
+              :labels="{ checked: 'Chat On', unchecked: 'Chat Off' }" color="#61AE24" @change="changeNotification($event, 'email')" class="mb-2" />
+            <OurToggle v-model="notifications.emailmine" :height="30" :width="200" :font-size="14" :sync="true"
+              :labels="{ checked: 'Own Chats On', unchecked: 'Own Chats Off' }" color="#61AE24" @change="changeNotification($event, 'emailmine')"
+              class="mb-2" />
+            <OurToggle v-model="settings.notificationmails" :height="30" :width="200" :font-size="14" :sync="true"
+              :labels="{ checked: 'Notification/ChitChat On', unchecked: 'Notification/ChitChat On' }" color="#61AE24" @change="changeNotifChitchat"
+              class="mb-2" />
+            <OurToggle v-model="relevantallowed" :height="30" :width="200" :font-size="14" :sync="true"
+              :labels="{ checked: 'Suggestions On', unchecked: 'Suggestions Off' }" color="#61AE24" @change="changeRelevant" class="mb-2" />
+            <OurToggle v-model="newslettersallowed" :height="30" :width="200" :font-size="14" :sync="true"
+              :labels="{ checked: 'Newsletters On', unchecked: 'Newsletters Off' }" color="#61AE24" @change="changeNewsletter" class="mb-2" />
+            <OurToggle v-model="autorepost" :height="30" :width="200" :font-size="14" :sync="true"
+              :labels="{ checked: 'Autorepost On', unchecked: 'Autorepost Off' }" color="#61AE24" class="mb-2" />
           </div>
         </div>
       </b-card-body>
@@ -182,18 +131,12 @@
         <ModMemberButtons :member="member" :modconfig="modconfig" :actions="footeractions" />
         <div class="d-flex justify-content-between justify-content-md-end flex-grow-1">
           <ModRole v-if="groupid && member.role" :userid="member.userid" :groupid="groupid" :role="member.role" />
-          <ChatButton
-            :userid="member.userid"
-            :groupid="member.groupid"
-            title="Chat"
-            variant="white"
-            class="ml-1"
-          />
+          <ChatButton :userid="member.userid" :groupid="member.groupid" title="Chat" variant="white" class="ml-1" />
         </div>
       </b-card-footer>
     </b-card>
-    <!--ModPostingHistoryModal ref="history" :user="member" :type="type" />
-    <ModLogsModal v-if="showLogsModal" ref="logs" :userid="member.userid" /-->
+    <ModPostingHistoryModal v-if="showPostingHistoryModal" ref="history" :user="member" :type="type" @hidden="showPostingHistoryModal = false" />
+    <ModLogsModal v-if="showLogsModal" ref="logs" :userid="member.userid" @hidden="showLogsModal = false" />
   </div>
 </template>
 <script>
@@ -246,6 +189,7 @@ export default {
       showEmails: false,
       type: null,
       allmemberships: false,
+      showPostingHistoryModal: false,
       showLogsModal: false,
       banned: false
     }
@@ -369,19 +313,17 @@ export default {
     }
   },
   methods: {
-    showHistory(type = null) {
+    async showHistory(type = null) {
       this.type = type
-      this.waitForRef('history', () => {
-        this.$refs.history.show()
-      })
+      this.showPostingHistoryModal = true
+      await nextTick()
+      this.$refs.history.show()
     },
-    showLogs() {
+    async showLogs() {
       this.modmailsonly = false
       this.showLogsModal = true
-
-      this.waitForRef('logs', () => {
-        this.$refs.logs.show()
-      })
+      await nextTick()
+      this.$refs.logs.show()
     },
     settingsChange(e) {
       const params = {
