@@ -32,8 +32,8 @@
         <v-icon icon="clock" class="fa-fw" /> {{ withplural(['RSVP','RSVPs'], userinfo.expectedreplies || 0, true) }}
       </b-badge>
     </h4>
-    <!--ModPostingHistoryModal ref="history" :user="member" :type="type" />
-    <ModLogsModal v-if="showLogsModal" ref="logs" :userid="member.userid" modmailsonly /-->
+    <ModPostingHistoryModal v-if="showPostingHistoryModal" ref="history" :user="member" :type="type" @hidden="showPostingHistoryModal = false"/>
+    <ModLogsModal v-if="showLogsModal" ref="logs" :userid="member.userid" modmailsonly @hidden="showLogsModal = false" />
   </div>
 </template>
 <script>
@@ -55,7 +55,8 @@ export default {
   data: function () {
     return {
       type: null,
-      showLogsModal: false
+      showPostingHistoryModal: false,
+      showLogsModal: false,
     }
   },
   mounted() {
@@ -96,19 +97,18 @@ export default {
 
       return count
     },
-    showHistory(type = null) {
+    async showHistory(type = null) {
       this.type = type
-      this.waitForRef('history', () => {
-        this.$refs.history.show()
-      })
+      this.showPostingHistoryModal = true
+      await nextTick()
+      this.$refs.history.show()
     },
-    showModmails() {
+    async showModmails() {
       this.modmailsonly = true
-      this.showLogsModal = true
 
-      this.waitForRef('logs', () => {
-        this.$refs.logs.show()
-      })
+      this.showLogsModal = true
+      await nextTick()
+      this.$refs.logs.show()
     }
   }
 }
