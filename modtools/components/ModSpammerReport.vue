@@ -79,9 +79,9 @@ export default {
     async send() {
       if (this.reason) {
         if (this.whitelist) {
-          await this.spammerStore.whitelist(this.user.userid, this.reason)
+          await this.spammerStore.whitelist({ userid: this.user.userid, reason: this.reason })
         } else {
-          await this.spammerStore.report(this.user.userid, this.reason)
+          await this.spammerStore.report({ userid: this.user.userid, reason: this.reason })
         }
 
         this.hide()

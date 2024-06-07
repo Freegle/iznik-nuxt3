@@ -110,19 +110,19 @@
         <div v-if="user && user.id && !isTN && !isLJ">
           <hr>
           <div class="d-flex justify-content-between flex-wrap">
-            <OurToggle v-model="notifications.email" :height="30" :width="200" :font-size="14" :sync="true" :size="sm"
+            <OurToggle v-model="notifications.email" :height="30" :width="200" :font-size="14" :sync="true" size="sm"
               :labels="{ checked: 'Chat On', unchecked: 'Chat Off' }" color="#61AE24" @change="changeNotification($event, 'email')" class="mb-2" />
-            <OurToggle v-model="notifications.emailmine" :height="30" :width="200" :font-size="14" :sync="true" :size="sm"
+            <OurToggle v-model="notifications.emailmine" :height="30" :width="200" :font-size="14" :sync="true" size="sm"
               :labels="{ checked: 'Own Chats On', unchecked: 'Own Chats Off' }" color="#61AE24" @change="changeNotification($event, 'emailmine')"
               class="mb-2" />
-            <OurToggle v-model="settings.notificationmails" :height="30" :width="200" :font-size="14" :sync="true" :size="sm"
+            <OurToggle v-model="settings.notificationmails" :height="30" :width="200" :font-size="14" :sync="true" size="sm"
               :labels="{ checked: 'Notification/ChitChat On', unchecked: 'Notification/ChitChat On' }" color="#61AE24" @change="changeNotifChitchat"
               class="mb-2" />
-            <OurToggle v-model="relevantallowed" :height="30" :width="200" :font-size="14" :sync="true" :size="sm"
+            <OurToggle v-model="relevantallowed" :height="30" :width="200" :font-size="14" :sync="true" size="sm"
               :labels="{ checked: 'Suggestions On', unchecked: 'Suggestions Off' }" color="#61AE24" @change="changeRelevant" class="mb-2" />
-            <OurToggle v-model="newslettersallowed" :height="30" :width="200" :font-size="14" :sync="true" :size="sm"
+            <OurToggle v-model="newslettersallowed" :height="30" :width="200" :font-size="14" :sync="true" size="sm"
               :labels="{ checked: 'Newsletters On', unchecked: 'Newsletters Off' }" color="#61AE24" @change="changeNewsletter" class="mb-2" />
-            <OurToggle v-model="autorepost" :height="30" :width="200" :font-size="14" :sync="true" :size="sm"
+            <OurToggle v-model="autorepost" :height="30" :width="200" :font-size="14" :sync="true" size="sm"
               :labels="{ checked: 'Autorepost On', unchecked: 'Autorepost Off' }" color="#61AE24" class="mb-2" />
           </div>
         </div>

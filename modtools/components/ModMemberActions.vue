@@ -142,13 +142,14 @@ export default {
       await this.memberStore.updateComments(this.user.id, user.comments)
     },
     async spamReport() {
+      console.log('===spamReport 2')
       if (!this.user) {
         await this.fetchUser()
       }
 
       this.whitelist = false
       this.showSpamModal = true
-
+console.log('===this.waitForRef')
       this.waitForRef('spamConfirm', () => {
         this.$refs.spamConfirm.show()
       })

@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import api from '~/api'
+import { fetchMe } from '~/composables/useMe'
 
 export const useSpammerStore = defineStore({
   id: 'spammer',
@@ -73,16 +74,7 @@ export const useSpammerStore = defineStore({
         reason: params.reason
       })
 
-      /* TODO dispatch(
-        'auth/fetchUser',
-        {
-          components: ['work'],
-          force: true
-        },
-        {
-          root: true
-        }
-      )*/
+      await fetchMe(true, ['work','group'])
     },
     async confirm(params) {
       await api(this.config).spammers.patch({
@@ -91,16 +83,7 @@ export const useSpammerStore = defineStore({
         collection: 'Spammer'
       })
 
-      /* TODO dispatch(
-        'auth/fetchUser',
-        {
-          components: ['work'],
-          force: true
-        },
-        {
-          root: true
-        }
-      )*/
+      await fetchMe(true, ['work','group'])
 
       this.removeFromList(params.id)
     },
@@ -114,16 +97,7 @@ export const useSpammerStore = defineStore({
 
       this.removeFromList(params.id)
 
-      /* TODO dispatch(
-        'auth/fetchUser',
-        {
-          components: ['work'],
-          force: true
-        },
-        {
-          root: true
-        }
-      )*/
+      await fetchMe(true, ['work','group'])
     },
     async remove(params) {
       await api(this.config).spammers.del({
@@ -131,16 +105,7 @@ export const useSpammerStore = defineStore({
         userid: params.userid
       })
 
-      /* TODO dispatch(
-        'auth/fetchUser',
-        {
-          components: ['work'],
-          force: true
-        },
-        {
-          root: true
-        }
-      )*/
+      await fetchMe(true, ['work','group'])
 
       this.removeFromList(params.id)
     },
@@ -152,16 +117,7 @@ export const useSpammerStore = defineStore({
         collection: 'Whitelisted'
       })
 
-      /* TODO dispatch(
-        'auth/fetchUser',
-        {
-          components: ['work'],
-          force: true
-        },
-        {
-          root: true
-        }
-      )*/
+      await fetchMe(true, ['work','group'])
 
       this.removeFromList(params.id)
     },

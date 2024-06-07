@@ -10,8 +10,14 @@
   </div>
 </template>
 <script>
+      import { useSpammerStore } from '../stores/spammer'
 
 export default {
+  setup() {
+    const spammerStore = useSpammerStore()
+    return { spammerStore }
+  },
+
   props: {
     member: {
       type: Object,
@@ -150,9 +156,9 @@ export default {
           }
         } else if (this.stdmsgid) {
           // We have a standard message.  Fetch it.
-          this.stdmsg = await this.$store.dispatch('stdmsgs/fetch', {
+          /* TODO this.stdmsg = await this.$store.dispatch('stdmsgs/fetch', {
             id: this.stdmsgid
-          })
+          })*/
         }
 
         this.showStdMsgModal = true
@@ -193,16 +199,10 @@ export default {
       })*/
     },
     async spamRemove() {
-      /* TODO await this.$store.dispatch('spammers/remove', {
-        id: this.member.spammer.id,
-        userid: this.member.userid
-      })*/
+      await this.spammerStore.remove({ id: this.member.spammer.id, userid: this.member.userid })
     },
     async spamWhitelist() {
-      /* TODO await this.$store.dispatch('spammers/whitelist', {
-        id: this.member.spammer.id,
-        userid: this.member.userid
-      })*/
+      await this.spammerStore.whitelist({ id: this.member.spammer.id, userid: this.member.userid, myid: this.myid })
     },
     async spamHold() {
       /* TODO await this.$store.dispatch('spammers/hold', {
