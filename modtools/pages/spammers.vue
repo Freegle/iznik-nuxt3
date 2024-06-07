@@ -55,12 +55,14 @@
   </div>
 </template>
 <script>
+import { useAuthStore } from '../../stores/auth'
 import { useSpammerStore } from '../stores/spammer'
 
 export default {
   setup() {
+    const authStore = useAuthStore()
     const spammerStore = useSpammerStore()
-    return { spammerStore }
+    return { authStore, spammerStore }
   },
   data: function () {
     return {
@@ -73,14 +75,10 @@ export default {
   },
   computed: {
     pendingaddcount() {
-      /* TODO const work = this.$store.getters['auth/work']
-      return work.spammerpendingadd*/
-      return 101
+      return this.authStore.work? this.authStore.work.spammerpendingadd : 0
     },
     pendingremovecount() {
-      /* TODO const work = this.$store.getters['auth/work']
-      return work.spammerpendingremove*/
-      return 102
+      return this.authStore.work? this.authStore.work.spammerpendingremove : 0
     },
     spammers() {
       const ret = this.spammerStore.getList(this.collection)
