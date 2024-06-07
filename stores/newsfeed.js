@@ -174,6 +174,10 @@ export const useNewsfeedStore = defineStore({
       await api(this.config).news.unhide(id)
       await this.fetch(id, true)
     },
+    async hide(id) {
+      await api(this.config).news.hide(id)
+      await this.fetch(id, true)
+    },
     async convertToStory(id) {
       await api(this.config).news.convertToStory(id)
     },

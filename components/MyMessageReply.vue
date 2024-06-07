@@ -384,7 +384,6 @@ export default {
   }
 
   svg:nth-child(2) {
-    z-index: 10000;
     color: white;
     padding-top: 7px;
     padding-right: 7px;

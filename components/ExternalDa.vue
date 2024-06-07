@@ -284,59 +284,63 @@ function visibilityChanged(visible) {
   visibleTimer = null
 
   if (process.client) {
-    if (!window.__tcfapi) {
+    const runtimeConfig = useRuntimeConfig()
+
+    if (!runtimeConfig.public.COOKIEYES) {
+      console.log('No CookieYes in ad')
+
+      visibleTimer = null
+      isVisible.value = visible
+
+      if (visible && !shownFirst) {
+        console.log('Queue create ad', props.adUnitPath, props.divId)
+
+        if (!initialTimer) {
+          initialTimer = setTimeout(handleVisible, 100)
+        }
+      }
+    } else if (!window.getCkyConsent) {
       // CookieYes not yet loaded - retry.
       console.log('CookieYes not yet loaded in ad')
       visibleTimer = window.setTimeout(() => {
         visibilityChanged(visible)
       }, 100)
     } else {
-      window.__tcfapi(
-        'getTCData',
-        2,
-        (tcData, success) => {
-          if (success && tcData && tcData.tcString) {
-            console.log('TC data loaded and TC String set')
-            if (!window.pbjs?.version) {
-              console.log('Prebid not loaded yet')
-              prebidRetry++
+      const consent = window.getCkyConsent()
+      if (consent && consent.consentID) {
+        console.log('Consent string set')
+        if (!window.pbjs?.version) {
+          console.log('Prebid not loaded yet')
+          prebidRetry++
 
-              if (prebidRetry > 20) {
-                // Give up.  Probably blocked, so we should emit that we've not rendered an ad.  This may trigger
-                // a fallback ad.
-                emit('rendered', false)
-              } else {
-                visibleTimer = window.setTimeout(() => {
-                  visibilityChanged(visible)
-                }, 100)
-              }
-            } else {
-              visibleTimer = null
-
-              try {
-                isVisible.value = visible
-
-                if (visible && !shownFirst) {
-                  console.log('Queue create ad', props.adUnitPath, props.divId)
-
-                  if (!initialTimer) {
-                    initialTimer = setTimeout(handleVisible, 100)
-                  }
-                }
-              } catch (e) {
-                console.log('Exception in visibilityChanged', e)
-              }
-            }
+          if (prebidRetry > 20) {
+            // Give up.  Probably blocked, so we should emit that we've not rendered an ad.  This may trigger
+            // a fallback ad.
+            emit('rendered', false)
           } else {
-            // TC data not yet ready - this is expected as it requires user response.
-            console.log('TC data not yet available in ad')
             visibleTimer = window.setTimeout(() => {
               visibilityChanged(visible)
             }, 100)
           }
-        },
-        [1, 2, 3]
-      )
+        } else {
+          visibleTimer = null
+          isVisible.value = visible
+
+          if (visible && !shownFirst) {
+            console.log('Queue create ad', props.adUnitPath, props.divId)
+
+            if (!initialTimer) {
+              initialTimer = setTimeout(handleVisible, 100)
+            }
+          }
+        }
+      } else {
+        // TC data not yet ready - this is expected as it requires user response.
+        console.log('TC data not yet available in ad')
+        visibleTimer = window.setTimeout(() => {
+          visibilityChanged(visible)
+        }, 100)
+      }
     }
   }
 }

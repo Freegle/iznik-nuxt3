@@ -336,6 +336,17 @@ export default defineNuxtConfig({
               window.pbjs.que = window.pbjs.que || [];
               
               window.pbjs.que.push(function() {
+                 // Custom rounding function recommended by Magnite.
+                 const roundToNearestEvenIncrement = function (number) {
+                   let ceiling = Math.ceil(number);
+                   let ceilingIsEven = ceiling % 2 === 0;
+                   if (ceilingIsEven) {
+                     return ceiling;
+                   } else {
+                     return Math.floor(number);
+                   }
+                 }
+                
                  window.pbjs.setConfig({
                    consentManagement: {
                      // We only need GDPR config.  We are interested in UK users, who are (for GDPR purposes if not
@@ -376,7 +387,12 @@ export default defineNuxtConfig({
                           }
                         }
                       }
-                    }]
+                    }],
+                    targetingControls: {
+                      addTargetingKeys: ['SOURCE']
+                    },
+                    cpmRoundingFunction : roundToNearestEvenIncrement,
+                    useBidCache: true
                  });
                  
                  // Gourmetads requires schain config.
@@ -476,16 +492,15 @@ export default defineNuxtConfig({
                   
                   // Check that we have set the TCF string.  This only happens once the user 
                   // has responded to the cookie banner.
-                  if (window.__tcfapi) {
-                    window.__tcfapi('getTCData', 2, (tcData, success) => {
-                      if (success && tcData && tcData.tcString) {
-                        console.log('TC data loaded and TC String set');
-                        postCookieYes();
-                      } else {
-                        console.log('Failed to get TC data or string, retry.')
-                        setTimeout(checkCookieYes, 100);
-                      }
-                    }, [1,2,3]);
+                  if (window.getCkyConsent) {
+                    const consent = window.getCkyConsent()  
+                    if (consent && consent.consentID) {
+                      console.log('TC data loaded and TC String set');
+                      postCookieYes();
+                    } else {
+                      console.log('Failed to get consent ID, retry.', consent)
+                      setTimeout(checkCookieYes, 100);
+                    }
                   } else {
                     console.log('TCP API not yet loaded')
                     setTimeout(checkCookieYes, 100);

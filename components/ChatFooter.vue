@@ -182,7 +182,7 @@
           size="md"
           variant="primary"
           class="float-end ml-2 mr-2"
-          button-title="Sending..."
+          :button-title="sending ? 'Sending...' : 'Send'"
           label="Send"
           icon-name="angle-double-right"
           done-icon=""

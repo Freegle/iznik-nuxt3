@@ -17,7 +17,7 @@
                 <v-icon icon="exclamation-triangle" scale="2" /> This post has
                 not been accepted and is not public yet.
               </notice-message>
-              <MessageSummary :id="message.id" />
+              <MessageSummary :id="message.id" :replyable="false" />
               <div
                 v-if="
                   message.outcomes?.length === 0 && message.promisecount > 0
@@ -569,9 +569,7 @@ export default {
     replies: {
       immediate: true,
       handler(newVal) {
-        console.log('Replies', newVal, newVal?.length)
         if (newVal?.length === 1) {
-          console.log('Expand')
           this.expanded = true
         }
       },

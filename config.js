@@ -54,13 +54,13 @@ const CONFIG = {
         },
       },
       bids: [
-        {
-          bidder: 'pubmatic',
-          params: {
-            publisherId: '164422',
-            adSlot: '5753989',
-          },
-        },
+        // {
+        //   bidder: 'pubmatic',
+        //   params: {
+        //     publisherId: '164422',
+        //     adSlot: '5753989',
+        //   },
+        // },
         {
           bidder: 'appnexus',
           params: {
@@ -73,10 +73,10 @@ const CONFIG = {
             placementId: '32293691',
           },
         },
-        // {
-        //   bidder: 'mgnipbs',
-        //   params: {},
-        // },
+        {
+          bidder: 'mgnipbs',
+          params: {},
+        },
       ],
     },
     {
@@ -87,13 +87,13 @@ const CONFIG = {
         },
       },
       bids: [
-        {
-          bidder: 'pubmatic',
-          params: {
-            publisherId: '164422',
-            adSlot: '5753990',
-          },
-        },
+        // {
+        //   bidder: 'pubmatic',
+        //   params: {
+        //     publisherId: '164422',
+        //     adSlot: '5753990',
+        //   },
+        // },
         {
           bidder: 'appnexus',
           params: {
@@ -106,10 +106,10 @@ const CONFIG = {
             placementId: '32293692',
           },
         },
-        // {
-        //   bidder: 'mgnipbs',
-        //   params: {},
-        // },
+        {
+          bidder: 'mgnipbs',
+          params: {},
+        },
       ],
     },
     {
@@ -120,13 +120,13 @@ const CONFIG = {
         },
       },
       bids: [
-        {
-          bidder: 'pubmatic',
-          params: {
-            publisherId: '164422',
-            adSlot: '5773059',
-          },
-        },
+        // {
+        //   bidder: 'pubmatic',
+        //   params: {
+        //     publisherId: '164422',
+        //     adSlot: '5773059',
+        //   },
+        // },
         {
           bidder: 'appnexus',
           params: {
@@ -139,10 +139,10 @@ const CONFIG = {
             placementId: '32293683',
           },
         },
-        // {
-        //   bidder: 'mgnipbs',
-        //   params: {},
-        // },
+        {
+          bidder: 'mgnipbs',
+          params: {},
+        },
       ],
     },
     {
@@ -153,13 +153,13 @@ const CONFIG = {
         },
       },
       bids: [
-        {
-          bidder: 'pubmatic',
-          params: {
-            publisherId: '164422',
-            adSlot: '5753984',
-          },
-        },
+        // {
+        //   bidder: 'pubmatic',
+        //   params: {
+        //     publisherId: '164422',
+        //     adSlot: '5753984',
+        //   },
+        // },
         {
           bidder: 'appnexus',
           params: {
@@ -172,10 +172,10 @@ const CONFIG = {
             placementId: '32293685',
           },
         },
-        // {
-        //   bidder: 'mgnipbs',
-        //   params: {},
-        // },
+        {
+          bidder: 'mgnipbs',
+          params: {},
+        },
       ],
     },
     {
@@ -186,13 +186,13 @@ const CONFIG = {
         },
       },
       bids: [
-        {
-          bidder: 'pubmatic',
-          params: {
-            publisherId: '164422',
-            adSlot: '5753988',
-          },
-        },
+        // {
+        //   bidder: 'pubmatic',
+        //   params: {
+        //     publisherId: '164422',
+        //     adSlot: '5753988',
+        //   },
+        // },
         {
           bidder: 'appnexus',
           params: {
@@ -205,10 +205,10 @@ const CONFIG = {
             placementId: '32293689',
           },
         },
-        // {
-        //   bidder: 'mgnipbs',
-        //   params: {},
-        // },
+        {
+          bidder: 'mgnipbs',
+          params: {},
+        },
       ],
     },
     {
@@ -219,13 +219,13 @@ const CONFIG = {
         },
       },
       bids: [
-        {
-          bidder: 'pubmatic',
-          params: {
-            publisherId: '164422',
-            adSlot: '5775938',
-          },
-        },
+        // {
+        //   bidder: 'pubmatic',
+        //   params: {
+        //     publisherId: '164422',
+        //     adSlot: '5775938',
+        //   },
+        // },
         {
           bidder: 'appnexus',
           params: {
@@ -238,10 +238,10 @@ const CONFIG = {
             placementId: '32293701',
           },
         },
-        // {
-        //   bidder: 'mgnipbs',
-        //   params: {},
-        // },
+        {
+          bidder: 'mgnipbs',
+          params: {},
+        },
       ],
     },
     {
@@ -252,7 +252,6 @@ const CONFIG = {
         },
       },
       bids: [
-        // TODO Testing magnite.
         // {
         //   bidder: 'pubmatic',
         //   params: {
@@ -260,18 +259,18 @@ const CONFIG = {
         //     adSlot: '5753983',
         //   },
         // },
-        // {
-        //   bidder: 'appnexus',
-        //   params: {
-        //     placementId: '32336186',
-        //   },
-        // },
-        // {
-        //   bidder: 'gourmetads',
-        //   params: {
-        //     placementId: '32293682',
-        //   },
-        // },
+        {
+          bidder: 'appnexus',
+          params: {
+            placementId: '32336186',
+          },
+        },
+        {
+          bidder: 'gourmetads',
+          params: {
+            placementId: '32293682',
+          },
+        },
         {
           bidder: 'mgnipbs',
           params: {},
@@ -286,13 +285,13 @@ const CONFIG = {
         },
       },
       bids: [
-        {
-          bidder: 'pubmatic',
-          params: {
-            publisherId: '164422',
-            adSlot: '5753982',
-          },
-        },
+        // {
+        //   bidder: 'pubmatic',
+        //   params: {
+        //     publisherId: '164422',
+        //     adSlot: '5753982',
+        //   },
+        // },
         {
           bidder: 'appnexus',
           params: {
@@ -305,10 +304,10 @@ const CONFIG = {
             placementId: '32293670',
           },
         },
-        // {
-        //   bidder: 'mgnipbs',
-        //   params: {},
-        // },
+        {
+          bidder: 'mgnipbs',
+          params: {},
+        },
       ],
     },
     {
@@ -319,13 +318,13 @@ const CONFIG = {
         },
       },
       bids: [
-        {
-          bidder: 'pubmatic',
-          params: {
-            publisherId: '164422',
-            adSlot: '5753987',
-          },
-        },
+        // {
+        //   bidder: 'pubmatic',
+        //   params: {
+        //     publisherId: '164422',
+        //     adSlot: '5753987',
+        //   },
+        // },
         {
           bidder: 'appnexus',
           params: {
@@ -338,10 +337,10 @@ const CONFIG = {
             placementId: '32293688',
           },
         },
-        // {
-        //   bidder: 'mgnipbs',
-        //   params: {},
-        // },
+        {
+          bidder: 'mgnipbs',
+          params: {},
+        },
       ],
     },
     {
@@ -352,13 +351,13 @@ const CONFIG = {
         },
       },
       bids: [
-        {
-          bidder: 'pubmatic',
-          params: {
-            publisherId: '164422',
-            adSlot: '5753986',
-          },
-        },
+        // {
+        //   bidder: 'pubmatic',
+        //   params: {
+        //     publisherId: '164422',
+        //     adSlot: '5753986',
+        //   },
+        // },
         {
           bidder: 'appnexus',
           params: {
@@ -371,10 +370,10 @@ const CONFIG = {
             placementId: '32293687',
           },
         },
-        // {
-        //   bidder: 'mgnipbs',
-        //   params: {},
-        // },
+        {
+          bidder: 'mgnipbs',
+          params: {},
+        },
       ],
     },
     {
@@ -385,13 +384,13 @@ const CONFIG = {
         },
       },
       bids: [
-        {
-          bidder: 'pubmatic',
-          params: {
-            publisherId: '164422',
-            adSlot: '5753981',
-          },
-        },
+        // {
+        //   bidder: 'pubmatic',
+        //   params: {
+        //     publisherId: '164422',
+        //     adSlot: '5753981',
+        //   },
+        // },
         {
           bidder: 'appnexus',
           params: {
@@ -404,10 +403,10 @@ const CONFIG = {
             placementId: '32293654',
           },
         },
-        // {
-        //   bidder: 'mgnipbs',
-        //   params: {},
-        // },
+        {
+          bidder: 'mgnipbs',
+          params: {},
+        },
       ],
     },
     {
@@ -418,13 +417,13 @@ const CONFIG = {
         },
       },
       bids: [
-        {
-          bidder: 'pubmatic',
-          params: {
-            publisherId: '164422',
-            adSlot: '5753991',
-          },
-        },
+        // {
+        //   bidder: 'pubmatic',
+        //   params: {
+        //     publisherId: '164422',
+        //     adSlot: '5753991',
+        //   },
+        // },
         {
           bidder: 'appnexus',
           params: {
@@ -437,10 +436,10 @@ const CONFIG = {
             placementId: '32293693',
           },
         },
-        // {
-        //   bidder: 'mgnipbs',
-        //   params: {},
-        // },
+        {
+          bidder: 'mgnipbs',
+          params: {},
+        },
       ],
     },
     {
@@ -451,13 +450,13 @@ const CONFIG = {
         },
       },
       bids: [
-        {
-          bidder: 'pubmatic',
-          params: {
-            publisherId: '164422',
-            adSlot: '5753992',
-          },
-        },
+        // {
+        //   bidder: 'pubmatic',
+        //   params: {
+        //     publisherId: '164422',
+        //     adSlot: '5753992',
+        //   },
+        // },
         {
           bidder: 'appnexus',
           params: {
@@ -470,10 +469,10 @@ const CONFIG = {
             placementId: '32293694',
           },
         },
-        // {
-        //   bidder: 'mgnipbs',
-        //   params: {},
-        // },
+        {
+          bidder: 'mgnipbs',
+          params: {},
+        },
       ],
     },
     {
@@ -484,13 +483,13 @@ const CONFIG = {
         },
       },
       bids: [
-        {
-          bidder: 'pubmatic',
-          params: {
-            publisherId: '164422',
-            adSlot: '5753993',
-          },
-        },
+        // {
+        //   bidder: 'pubmatic',
+        //   params: {
+        //     publisherId: '164422',
+        //     adSlot: '5753993',
+        //   },
+        // },
         {
           bidder: 'appnexus',
           params: {
@@ -503,10 +502,10 @@ const CONFIG = {
             placementId: '32293695',
           },
         },
-        // {
-        //   bidder: 'mgnipbs',
-        //   params: {},
-        // },
+        {
+          bidder: 'mgnipbs',
+          params: {},
+        },
       ],
     },
     {
@@ -517,13 +516,13 @@ const CONFIG = {
         },
       },
       bids: [
-        {
-          bidder: 'pubmatic',
-          params: {
-            publisherId: '164422',
-            adSlot: '5753994',
-          },
-        },
+        // {
+        //   bidder: 'pubmatic',
+        //   params: {
+        //     publisherId: '164422',
+        //     adSlot: '5753994',
+        //   },
+        // },
         {
           bidder: 'appnexus',
           params: {
@@ -536,10 +535,10 @@ const CONFIG = {
             placementId: '32293696',
           },
         },
-        // {
-        //   bidder: 'mgnipbs',
-        //   params: {},
-        // },
+        {
+          bidder: 'mgnipbs',
+          params: {},
+        },
       ],
     },
     {
@@ -550,13 +549,13 @@ const CONFIG = {
         },
       },
       bids: [
-        {
-          bidder: 'pubmatic',
-          params: {
-            publisherId: '164422',
-            adSlot: '5893878',
-          },
-        },
+        // {
+        //   bidder: 'pubmatic',
+        //   params: {
+        //     publisherId: '164422',
+        //     adSlot: '5893878',
+        //   },
+        // },
         {
           bidder: 'appnexus',
           params: {
@@ -569,10 +568,10 @@ const CONFIG = {
             placementId: '32293696',
           },
         },
-        // {
-        //   bidder: 'mgnipbs',
-        //   params: {},
-        // },
+        {
+          bidder: 'mgnipbs',
+          params: {},
+        },
       ],
     },
     {
@@ -602,10 +601,10 @@ const CONFIG = {
         },
       },
       bids: [
-        // {
-        //   bidder: 'mgnipbs',
-        //   params: {}
-        // },
+        {
+          bidder: 'mgnipbs',
+          params: {},
+        },
       ],
     },
   ],

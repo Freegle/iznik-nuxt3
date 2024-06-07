@@ -43,11 +43,11 @@
             v-for="tryst in upcomingTrysts"
             :key="'tryst-' + tryst.id"
             variant="info"
-            class="d-flex justcontent-start"
+            class="text-start"
           >
             <v-icon icon="calendar-alt" class="pt-1" />&nbsp;
             <span class="font-weight-bold">{{ tryst.trystdate }}</span>
-            &nbsp;{{ tryst.name }}
+            &nbsp;{{ tryst.name }} collecting&nbsp;<em>{{ tryst.subject }}</em>
           </div>
         </div>
         <p v-if="activePosts.length > 0" class="text-muted">
@@ -158,6 +158,21 @@ const activePosts = computed(() => {
   return props.posts.filter((post) => !post.hasoutcome)
 })
 
+watch(activePosts, (newVal) => {
+  // For messages which are promised and not successful, we need to trigger a fetch.  This is so
+  // that we can correctly show the upcoming collections.
+  newVal.forEach((post) => {
+    if (
+      post.type === 'Offer' &&
+      post.promised &&
+      !post.hasoutcome &&
+      !messageStore.byId(post.id)
+    ) {
+      messageStore.fetch(post.id)
+    }
+  })
+})
+
 const visiblePosts = computed(() => {
   let posts = showOldPosts.value ? props.posts : activePosts.value
   posts = posts || []
@@ -186,10 +201,11 @@ const upcomingTrysts = computed(() => {
         if (user) {
           const tryst = trystStore?.getByUser(p.userid)
 
-          // If tryst.arrangedfor is in the future
+          // If tryst.arrangedfor is in the future or within the last hour
           if (
             tryst &&
-            new Date(tryst.arrangedfor).getTime() > new Date().getTime()
+            new Date(tryst.arrangedfor).getTime() >
+              new Date().getTime() - 60 * 60 * 1000
           ) {
             const date = tryst
               ? dayjs(tryst.arrangedfor).format('dddd Do HH:mm a')
@@ -200,6 +216,7 @@ const upcomingTrysts = computed(() => {
               name: user.displayname,
               tryst,
               trystdate: date,
+              subject: message.subject,
             })
           }
         }

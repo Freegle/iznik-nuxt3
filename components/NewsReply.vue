@@ -63,7 +63,7 @@
           >
             Reply
           </b-button>
-          <template v-if="!reply.loved">
+          <template v-if="!reply.loved && reply.userid !== myid">
             <span class="text-muted small ms-1 me-1">&bull;</span>
             <b-button
               variant="link"
@@ -131,6 +131,28 @@
               btn-class="text-muted p-0"
               title-class="ml-0"
             />
+          </template>
+          <template v-if="chitChatMod && !reply.hidden">
+            <span class="text-muted small ms-1 me-1">&bull;</span>
+            <b-button
+              variant="link"
+              size="sm"
+              class="reply__button text-muted m-0"
+              @click="hideReply"
+            >
+              Hide
+            </b-button>
+          </template>
+          <template v-if="chitChatMod && reply.hidden">
+            <span class="text-muted small ms-1 me-1">&bull;</span>
+            <b-button
+              variant="link"
+              size="sm"
+              class="reply__button text-muted m-0"
+              @click="unHideReply"
+            >
+              Unhide
+            </b-button>
           </template>
         </div>
         <NewsPreviews
@@ -525,6 +547,12 @@ export default {
       await this.newsfeedStore.unlove(this.id, this.threadhead)
 
       el.classList.remove('pulsate')
+    },
+    async unHideReply() {
+      await this.newsfeedStore.unhide(this.id)
+    },
+    async hideReply() {
+      await this.newsfeedStore.hide(this.id)
     },
     deleteReply() {
       this.showDeleteModal = true
