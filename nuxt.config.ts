@@ -2,6 +2,7 @@ import eslintPlugin from 'vite-plugin-eslint'
 import { VitePWA } from 'vite-plugin-pwa'
 import legacy from '@vitejs/plugin-legacy'
 import { sentryVitePlugin } from '@sentry/vite-plugin'
+import { splitVendorChunkPlugin } from 'vite'
 import config from './config'
 
 // @ts-ignore
@@ -203,6 +204,7 @@ export default defineNuxtConfig({
       },
     },
     plugins: [
+      splitVendorChunkPlugin(),
       VitePWA({ registerType: 'autoUpdate' }),
       // Make Lint errors cause build failures.
       eslintPlugin(),
@@ -214,21 +216,6 @@ export default defineNuxtConfig({
         project: 'nuxt3',
       }),
     ],
-    build: {
-      rollupOptions: {
-        output: {
-          manualChunks(id) {
-            if (id.includes('node_modules')) {
-              return id
-                .toString()
-                .split('node_modules/')[1]
-                .split('/')[0]
-                .toString()
-            }
-          },
-        },
-      },
-    },
   },
 
   // Sentry needs sourcemaps.
