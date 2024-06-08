@@ -219,11 +219,6 @@ export default defineNuxtConfig({
     head: {
       title: "Freegle - Don't throw it away, give it away!",
       script: [
-        // We have to load GSI before we load the cookie banner, otherwise the Google Sign-in button doesn't
-        // render.
-        {
-          src: 'https://accounts.google.com/gsi/client',
-        },
         // The ecosystem of advertising is complex.
         // - The underlying ad service is Google Tags (GPT).
         // - We use prebid (pbjs), which is some kind of ad broker which gives us a pipeline of ads to use.
@@ -410,50 +405,57 @@ export default defineNuxtConfig({
               }
             };
 
-            if ('` +
+            function postGSI() {
+              if ('` +
             config.COOKIEYES +
             `' != 'null') {
-              // First we load CookieYes, which needs to be loaded before anything else, so that
-              // we have the cookie consent.
-              console.log('Load CookieYes');
-              loadScript('` +
+                // First we load CookieYes, which needs to be loaded before anything else, so that
+                // we have the cookie consent.
+                console.log('Load CookieYes');
+                loadScript('` +
             config.COOKIEYES +
             `', false)
-            
-              // Now we wait until the CookieYes script has set its own cookie.  
-              // This might be later than when the script has loaded in pure JS terms, but we
-              // need to be sure it's loaded before we can move on.
-              function checkCookieYes() {
-                if (document.cookie.indexOf('cookieyes-consent') > -1) {
-                  console.log('CookieYes cookie is set, so CookieYes is loaded');
-                  
-                  // Check that we have set the TCF string.  This only happens once the user 
-                  // has responded to the cookie banner.
-                  if (window.getCkyConsent) {
-                    const consent = window.getCkyConsent()  
-                    if (consent && consent.consentID) {
-                      console.log('TC data loaded and TC String set');
-                      postCookieYes();
+              
+                // Now we wait until the CookieYes script has set its own cookie.  
+                // This might be later than when the script has loaded in pure JS terms, but we
+                // need to be sure it's loaded before we can move on.
+                function checkCookieYes() {
+                  if (document.cookie.indexOf('cookieyes-consent') > -1) {
+                    console.log('CookieYes cookie is set, so CookieYes is loaded');
+                    
+                    // Check that we have set the TCF string.  This only happens once the user 
+                    // has responded to the cookie banner.
+                    if (window.getCkyConsent) {
+                      const consent = window.getCkyConsent()  
+                      if (consent && consent.consentID) {
+                        console.log('TC data loaded and TC String set');
+                        postCookieYes();
+                      } else {
+                        console.log('Failed to get consent ID, retry.', consent)
+                        setTimeout(checkCookieYes, 100);
+                      }
                     } else {
-                      console.log('Failed to get consent ID, retry.', consent)
+                      console.log('TCP API not yet loaded')
                       setTimeout(checkCookieYes, 100);
                     }
                   } else {
-                    console.log('TCP API not yet loaded')
+                    console.log('CookieYes not yet loaded')
                     setTimeout(checkCookieYes, 100);
                   }
-                } else {
-                  console.log('CookieYes not yet loaded')
-                  setTimeout(checkCookieYes, 100);
                 }
+                
+                checkCookieYes();
+              } else {
+                console.log('No CookieYes to load')
+                postCookieYes();
               }
-              
-              checkCookieYes();
-            } else {
-              console.log('No CookieYes to load')
-              postCookieYes();
             }
-
+            
+            window.onGoogleLibraryLoad = postGSI
+            
+            // We have to load GSI before we load the cookie banner, otherwise the Google Sign-in button doesn't
+            // render.
+            loadScript('https://accounts.google.com/gsi/client')
           } catch (e) {
             console.error('Error initialising pbjs and googletag:', e.message);
           }`,
