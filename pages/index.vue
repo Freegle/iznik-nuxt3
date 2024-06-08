@@ -3,30 +3,9 @@
     v-if="!me"
     class="grid m-0 pl-1 pr-1 pl-sm-0 pr-sm-0 mt-0 mt-lg-5 ml-2 mr-2"
   >
-    <client-only>
-      <div class="d-none d-sm-flex eyecandy justify-content-start flex-column">
-        <VisualiseMap v-if="type === 'Map'" class="shadow flex-grow-1" />
-        <FreeglerPhotos v-else-if="type === 'Photos'" class="ps-4 h-100" />
-        <div v-else-if="type === 'Song'" class="w-100">
-          <b-img
-            v-if="!timeToPlay"
-            fluid
-            src="/songpreview.png"
-            class="flex-grow-1 w-100"
-            @click="play"
-          />
-          <video
-            v-else
-            autoplay="autoplay"
-            controls="controls"
-            poster="/songpreview.png"
-            loop="loop"
-            src="/song.mp4"
-            class="embed-responsive-item shadow flex-grow-1 w-100 bg-secondary"
-          ></video>
-        </div>
-      </div>
-    </client-only>
+    <div class="d-none d-sm-flex eyecandy justify-content-start flex-column">
+      <FreeglerPhotos class="ps-4 h-100" />
+    </div>
     <div class="info">
       <div class="d-block d-sm-none">
         <h1 class="text--large-responsive">
@@ -153,10 +132,6 @@ import { buildHead } from '../composables/useBuildHead'
 import { useMiscStore } from '../stores/misc'
 import MainFooter from '~/components/MainFooter'
 import { useRouter } from '#imports'
-import api from '~/api'
-const VisualiseMap = defineAsyncComponent(() =>
-  import('~/components/VisualiseMap')
-)
 const VisualiseList = defineAsyncComponent(() =>
   import('~/components/VisualiseList')
 )
@@ -164,7 +139,6 @@ const VisualiseList = defineAsyncComponent(() =>
 export default {
   components: {
     MainFooter,
-    VisualiseMap,
     VisualiseList,
   },
   setup() {
@@ -220,43 +194,13 @@ export default {
     return {
       userWatch: null,
       ourBackground: false,
-      type: null,
       timeToPlay: false,
     }
   },
-  async mounted() {
+  mounted() {
     if (process.client) {
-      // await this.fetchMe(['me', 'groups'])
-
       if (this.me) {
         this.goHome()
-      } else {
-        // Ensure we can still load the page if we get an API error.
-        try {
-          const runtimeConfig = useRuntimeConfig()
-          const type = await api(runtimeConfig).bandit.choose({
-            uid: 'landing',
-          })
-
-          if (type?.variant) {
-            this.type = type.variant
-
-            this.$api.bandit.shown({
-              uid: 'landing',
-              variant: this.type,
-            })
-          }
-        } catch (e) {
-          console.error(e)
-        }
-
-        if (this.type !== 'Map') {
-          // The video plays with sound, wrongly, even if the muted attribute is set.  So set it here.
-          setTimeout(() => {
-            this.timeToPlay = true
-            this.play()
-          }, 1000)
-        }
       }
     }
   },
