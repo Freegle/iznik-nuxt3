@@ -142,6 +142,13 @@ export default defineNuxtConfig({
     },
   },
 
+  render: {
+    bundleRenderer: {
+      shouldPrefetch: () => false,
+      shouldPreload: () => false,
+    },
+  },
+
   experimental: {
     emitRouteChunkError: 'reload',
     asyncContext: true,
