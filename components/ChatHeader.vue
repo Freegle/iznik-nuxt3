@@ -128,7 +128,7 @@
             </b-button>
           </div>
           <div v-if="chat.chattype === 'User2User' || !unseen" class="mr-2">
-            <template v-if="!otheruser?.deleted && chat.status === 'Closed'">
+            <template v-if="chat.status === 'Closed'">
               <b-button
                 v-b-tooltip="'Unhide this chat'"
                 variant="secondary"
@@ -148,7 +148,7 @@
                 Unhide chat
               </b-button>
             </template>
-            <template v-else-if="!otheruser?.deleted">
+            <template v-else>
               <b-button
                 v-b-tooltip="
                   'Don\'t show this chat unless there\'s a new message'
