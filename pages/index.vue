@@ -171,18 +171,44 @@ export default {
     const runtimeConfig = useRuntimeConfig()
     const route = useRoute()
 
-    useHead(
-      buildHead(
-        route,
-        runtimeConfig,
-        "Don't throw it away, give it away!",
-        "Freegle - like online dating for stuff. Got stuff you don't need? Looking for something? We'll match you with someone local. All completely free.",
-        null,
-        {
-          class: 'landing',
-        }
-      )
+    const head = buildHead(
+      route,
+      runtimeConfig,
+      "Don't throw it away, give it away!",
+      "Freegle - like online dating for stuff. Got stuff you don't need? Looking for something? We'll match you with someone local. All completely free.",
+      null,
+      {
+        class: 'landing',
+      }
     )
+
+    // Preload some images to speed page load.
+    head.link = [
+      {
+        rel: 'preload',
+        as: 'image',
+        href: '/landingpage/frame.png',
+        media: '(min-width: 576px)',
+      },
+      {
+        rel: 'preload',
+        as: 'image',
+        href: '/landingpage/Freegler1.jpeg',
+        media: '(min-width: 576px)',
+      },
+      {
+        rel: 'preload',
+        as: 'image',
+        href: '/krystal.png',
+      },
+      {
+        rel: 'preload',
+        as: 'image',
+        href: '/mythic-beasts.png',
+      },
+    ]
+
+    useHead(head)
 
     const miscStore = useMiscStore()
 
