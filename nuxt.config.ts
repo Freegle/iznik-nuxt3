@@ -142,13 +142,6 @@ export default defineNuxtConfig({
     },
   },
 
-  render: {
-    bundleRenderer: {
-      shouldPrefetch: () => false,
-      shouldPreload: () => false,
-    },
-  },
-
   experimental: {
     emitRouteChunkError: 'reload',
     asyncContext: true,
@@ -159,7 +152,7 @@ export default defineNuxtConfig({
     extractCSS: true,
   },
 
-  modules: ['@pinia/nuxt', 'floating-vue/nuxt'],
+  modules: ['@pinia/nuxt', 'floating-vue/nuxt', 'nuxt-lcp-speedup'],
 
   // Environment variables the client needs.
   runtimeConfig: {
