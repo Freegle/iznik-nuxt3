@@ -1,38 +1,57 @@
 <template>
   <div class="d-flex flex-column justify-content-between">
     <div class="flex-grow-1">
-      <BCarousel
-        class="carousel"
-        ride="carousel"
-        fade
-        background="/landingpage/frame.png"
-      >
-        <BCarouselSlide
-          v-for="img in [
-            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
-            20, 21, 22, 23, 24, 25,
-          ]"
-          :key="'slide-' + img"
+      <client-only>
+        <BCarousel
+          class="carousel"
+          ride="carousel"
+          fade
+          background="/landingpage/frame.png"
         >
-          <template #img>
-            <div class="layout">
-              <b-img
-                fluid
-                src="/landingpage/frame.png"
-                class="frame"
-                alt="Ornate gold picture frame. Image courtesy of https://pixabay.com/users/avantrend-321510/"
-              />
-              <b-img
-                fluid
-                lazy
-                :src="'/landingpage/Freegler' + img + '.jpeg'"
-                alt="Picture of a real freegler, looking happy. Photo by Alex Bamford."
-                class="image"
-              />
-            </div>
-          </template>
-        </BCarouselSlide>
-      </BCarousel>
+          <BCarouselSlide
+            v-for="img in [
+              1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+              20, 21, 22, 23, 24, 25,
+            ]"
+            :key="'slide-' + img"
+          >
+            <template #img>
+              <div class="layout">
+                <b-img
+                  fluid
+                  src="/landingpage/frame.png"
+                  class="frame"
+                  alt="Ornate gold picture frame. Image courtesy of https://pixabay.com/users/avantrend-321510/"
+                />
+                <b-img
+                  fluid
+                  lazy
+                  :src="'/landingpage/Freegler' + img + '.jpeg'"
+                  alt="Picture of a real freegler, looking happy. Photo by Alex Bamford."
+                  class="image"
+                />
+              </div>
+            </template>
+          </BCarouselSlide>
+        </BCarousel>
+        <template #fallback>
+          <div class="layout">
+            <img
+              data-v-2fbdba03=""
+              class="img-fluid frame"
+              src="/landingpage/frame.png"
+              loading="eager"
+              alt="Ornate gold picture frame. Image courtesy of https://pixabay.com/users/avantrend-321510/"
+            /><img
+              data-v-2fbdba03=""
+              class="img-fluid image"
+              src="/landingpage/Freegler4.jpeg"
+              loading="lazy"
+              alt="Picture of a real freegler, looking happy. Photo by Alex Bamford."
+            />
+          </div>
+        </template>
+      </client-only>
     </div>
     <p class="text-center text--smallest">
       Photos of real freeglers, kindly taken by
