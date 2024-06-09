@@ -1,7 +1,7 @@
 <template>
   <div class="d-flex flex-column justify-content-between">
     <div class="flex-grow-1">
-      <client-only>
+      <client-only fallback-tag="div">
         <BCarousel
           class="carousel"
           ride="carousel"
@@ -45,7 +45,7 @@
             /><img
               data-v-2fbdba03=""
               class="img-fluid image"
-              src="/landingpage/Freegler4.jpeg"
+              src="/landingpage/Freegler1.jpeg"
               loading="lazy"
               alt="Picture of a real freegler, looking happy. Photo by Alex Bamford."
             />
