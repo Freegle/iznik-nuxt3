@@ -512,7 +512,7 @@ export default defineNuxtConfig({
                     }
                   } else {
                     console.log('CookieYes not yet loaded')
-                    setTimeout(checkCookieYes, 1000);
+                    setTimeout(checkCookieYes, 100);
                   }
                 }
                 

@@ -304,7 +304,7 @@ function visibilityChanged(visible) {
       console.log('CookieYes not yet loaded in ad')
       visibleTimer = window.setTimeout(() => {
         visibilityChanged(visible)
-      }, 1000)
+      }, 100)
     } else {
       const consent = window.getCkyConsent()
       if (consent && consent.consentID) {
