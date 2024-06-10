@@ -434,15 +434,16 @@ export default defineNuxtConfig({
                     
                     // Check that we have set the TCF string.  This only happens once the user 
                     // has responded to the cookie banner.
-                    if (window.getCkyConsent) {
-                      const consent = window.getCkyConsent()  
-                      if (consent && consent.consentID) {
+                  if (window.__tcfapi) {
+                    window.__tcfapi('getTCData', 2, (tcData, success) => {
+                      if (success && tcData && tcData.tcString) {
                         console.log('TC data loaded and TC String set');
                         postCookieYes();
                       } else {
-                        console.log('Failed to get consent ID, retry.', consent)
+                        console.log('Failed to get TC data or string, retry.')
                         setTimeout(checkCookieYes, 100);
                       }
+                    }, [1,2,3]);
                     } else {
                       console.log('TCP API not yet loaded')
                       setTimeout(checkCookieYes, 100);
