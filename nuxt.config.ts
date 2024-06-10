@@ -459,6 +459,7 @@ export default defineNuxtConfig({
                 console.log('Load GPT and prebid');
                 loadScript('https://securepubads.g.doubleclick.net/tag/js/gpt.js', true)
                 loadScript('/js/prebid-app.js', true)
+                // loadScript('/js/prebid.js', true)
               } else {
                 console.log('GPT and prebid already loaded');
               }
