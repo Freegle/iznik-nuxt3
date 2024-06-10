@@ -2,6 +2,7 @@ import eslintPlugin from 'vite-plugin-eslint'
 import { VitePWA } from 'vite-plugin-pwa'
 import legacy from '@vitejs/plugin-legacy'
 import { sentryVitePlugin } from '@sentry/vite-plugin'
+import { splitVendorChunkPlugin } from 'vite'
 import config from './config'
 import fs from 'fs'
 import https from 'https'
@@ -197,7 +198,7 @@ export default defineNuxtConfig({
     extractCSS: true,
   },
 
-  modules: ['@pinia/nuxt', 'floating-vue/nuxt'],
+  modules: ['@pinia/nuxt', 'floating-vue/nuxt', 'nuxt-lcp-speedup'],
 
   // Environment variables the client needs.
   runtimeConfig: {
@@ -250,6 +251,7 @@ export default defineNuxtConfig({
       }),
     ] :
       [
+        splitVendorChunkPlugin(),
         VitePWA({ registerType: 'autoUpdate' }),
         // Make Lint errors cause build failures.
         eslintPlugin(),
@@ -273,11 +275,6 @@ export default defineNuxtConfig({
     head: {
       title: "Freegle - Don't throw it away, give it away!",
       script: [
-        // We have to load GSI before we load the cookie banner, otherwise the Google Sign-in button doesn't
-        // render.
-        {
-          src: 'https://accounts.google.com/gsi/client',
-        },
         // The ecosystem of advertising is complex.
         // - The underlying ad service is Google Tags (GPT).
         // - We use prebid (pbjs), which is some kind of ad broker which gives us a pipeline of ads to use.
@@ -426,13 +423,14 @@ export default defineNuxtConfig({
             `)
               });
 
-            function loadScript(url, block) {
+            function loadScript(url, block, onload) {
               if (url && url.length) {
                 console.log('Load script:', url);
                 var script = document.createElement('script');
                 script.defer = true;
                 script.type = 'text/javascript';
                 script.src = url;
+                if( onload) script.onload = onload
                 
                 if (block) {
                   // Block loading of this script until CookieYes has been authorised.
@@ -465,11 +463,12 @@ export default defineNuxtConfig({
               }
             };
 
-            if ('` +
+            function postGSI() {
+              if ('` +
             config.COOKIEYES +
             `' != 'null') {
-              // First we load CookieYes, which needs to be loaded before anything else, so that
-              // we have the cookie consent.
+                // First we load CookieYes, which needs to be loaded before anything else, so that
+                // we have the cookie consent.
             ` +
             (config.ISAPP ? `
                 console.log("APP ADD COOKIEYES")
@@ -481,44 +480,61 @@ export default defineNuxtConfig({
                   document.head.appendChild(script)
                 }
                 `: (`
-              loadScript('` + config.COOKIEYES + `', false)`)) + `
-            
-              // Now we wait until the CookieYes script has set its own cookie.  
-              // This might be later than when the script has loaded in pure JS terms, but we
-              // need to be sure it's loaded before we can move on.
-              function checkCookieYes() {
-                var cookies = localStorage.getItem('cookies')
+                console.log('Load CookieYes');
+                loadScript('` +
+            config.COOKIEYES +
+            `', false)`)) + `
+              
+                console.log("WAIT FOR COOKIEYES")
+                // Now we wait until the CookieYes script has set its own cookie.  
+                // This might be later than when the script has loaded in pure JS terms, but we
+                // need to be sure it's loaded before we can move on.
+                function checkCookieYes() {
+                var cookies = localStorage.getItem('cookies') // IS_APP
                 if (cookies.indexOf('cookieyes-consent') > -1) {
                 //if (document.cookie.indexOf('cookieyes-consent') > -1) {
-                  
-                  // Check that we have set the TCF string.  This only happens once the user 
-                  // has responded to the cookie banner.
-                  if (window.getCkyConsent) {
-                    const consent = window.getCkyConsent()  
-                    if (consent && consent.consentID) {
-                      console.log('TC data loaded and TC String set');
-                      postCookieYes();
+                    console.log('CookieYes cookie is set, so CookieYes is loaded');
+                    
+                    // Check that we have set the TCF string.  This only happens once the user 
+                    // has responded to the cookie banner.
+                    if (window.getCkyConsent) {
+                      const consent = window.getCkyConsent()  
+                      if (consent && consent.consentID) {
+                        console.log('TC data loaded and TC String set');
+                        postCookieYes();
+                      } else {
+                        console.log('Failed to get consent ID, retry.', consent)
+                        setTimeout(checkCookieYes, 100);
+                      }
                     } else {
-                      console.log('Failed to get consent ID, retry.', consent)
+                      console.log('TCP API not yet loaded')
                       setTimeout(checkCookieYes, 100);
                     }
                   } else {
-                    console.log('TCP API not yet loaded')
-                    setTimeout(checkCookieYes, 100);
+                    console.log('CookieYes not yet loaded')
+                    setTimeout(checkCookieYes, 1000);
                   }
-                } else {
-                  console.log('CookieYes not yet loaded')
-                  setTimeout(checkCookieYes, 100);
                 }
+                
+                checkCookieYes();
+              } else {
+                console.log('No CookieYes to load')
+                postCookieYes();
               }
-              
-              checkCookieYes();
-            } else {
-              console.log('No CookieYes to load')
-              postCookieYes();
             }
-
+           `+(config.ISAPP?
+            `
+            loadScript('https://accounts.google.com/gsi/client')
+            setTimeout(postGSI, 100)
+            `:`
+            window.onGoogleLibraryLoad = postGSI
+            
+            // We have to load GSI before we load the cookie banner, otherwise the Google Sign-in button doesn't
+            // render.
+            loadScript('https://accounts.google.com/gsi/client')
+            `) +`
           } catch (e) {
+            console.log("======== Z")
             console.error('Error initialising pbjs and googletag:', e.message);
           }`,
         },

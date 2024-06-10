@@ -452,7 +452,7 @@ export default {
       if (
         this.otheruser?.info?.ratings &&
         this.otheruser.info.ratings.Down > 2 &&
-        this.otheruser.info.ratings.Down > 2 * this.otheruser.info.ratings.Up
+        this.otheruser.info.ratings.Down * 2 > this.otheruser.info.ratings.Up
       ) {
         ret = true
       }
