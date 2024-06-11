@@ -160,7 +160,12 @@ export default defineNuxtConfig({
     extractCSS: true,
   },
 
-  modules: ['@pinia/nuxt', 'floating-vue/nuxt', '@nuxt/image', 'nuxt-lcp-speedup'],
+  modules: [
+    '@pinia/nuxt',
+    'floating-vue/nuxt',
+    '@nuxt/image',
+    'nuxt-lcp-speedup',
+  ],
 
   // Environment variables the client needs.
   runtimeConfig: {
@@ -176,6 +181,7 @@ export default defineNuxtConfig({
       GOOGLE_CLIENT_ID: config.GOOGLE_CLIENT_ID,
       USER_SITE: config.USER_SITE,
       IMAGE_SITE: config.IMAGE_SITE,
+      UPLOADCARE_PROXY: config.UPLOADCARE_PROXY,
       SENTRY_DSN: config.SENTRY_DSN,
       BUILD_DATE: new Date().toISOString(),
       NETLIFY_DEPLOY_ID: process.env.DEPLOY_ID,
@@ -572,8 +578,6 @@ export default defineNuxtConfig({
   image: {
     uploadcare: {
       provider: 'uploadcare',
-      // TODO
-      // cdnURL: 'cdn.mycompany.com',
     },
   },
 })
