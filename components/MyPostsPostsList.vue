@@ -201,10 +201,11 @@ const upcomingTrysts = computed(() => {
         if (user) {
           const tryst = trystStore?.getByUser(p.userid)
 
-          // If tryst.arrangedfor is in the future
+          // If tryst.arrangedfor is in the future or within the last hour
           if (
             tryst &&
-            new Date(tryst.arrangedfor).getTime() > new Date().getTime()
+            new Date(tryst.arrangedfor).getTime() >
+              new Date().getTime() - 60 * 60 * 1000
           ) {
             const date = tryst
               ? dayjs(tryst.arrangedfor).format('dddd Do HH:mm a')

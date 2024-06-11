@@ -182,7 +182,7 @@
           size="md"
           variant="primary"
           class="float-end ml-2 mr-2"
-          button-title="Sending..."
+          :button-title="sending ? 'Sending...' : 'Send'"
           label="Send"
           icon-name="angle-double-right"
           done-icon=""
@@ -452,7 +452,7 @@ export default {
       if (
         this.otheruser?.info?.ratings &&
         this.otheruser.info.ratings.Down > 2 &&
-        this.otheruser.info.ratings.Down > 2 * this.otheruser.info.ratings.Up
+        this.otheruser.info.ratings.Down * 2 > this.otheruser.info.ratings.Up
       ) {
         ret = true
       }

@@ -152,7 +152,6 @@ export default {
           const end = date.end + ' ' + date.endtime
           if (dayjs(start).diff(end) < 0 || dayjs(start).isSame(end, 'day')) {
             if (count === 0) {
-              console.log('Date', date)
               const startm = dayjs(start)
               let endm = dayjs(end)
               endm = endm.isSame(startm, 'day')

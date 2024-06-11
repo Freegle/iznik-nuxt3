@@ -367,7 +367,7 @@ export default {
       )
     },
     canStory() {
-      return (this.mod && this.newsfeed?.type !== 'Story') || this.admin
+      return this.mod && this.newsfeed?.type !== 'Story'
     },
     enterNewLine: {
       get() {

@@ -2,7 +2,7 @@ import eslintPlugin from 'vite-plugin-eslint'
 import { VitePWA } from 'vite-plugin-pwa'
 import legacy from '@vitejs/plugin-legacy'
 import { sentryVitePlugin } from '@sentry/vite-plugin'
-import vue from '@vitejs/plugin-vue'
+import { splitVendorChunkPlugin } from 'vite'
 import config from './config'
 
 // @ts-ignore
@@ -160,7 +160,7 @@ export default defineNuxtConfig({
     extractCSS: true,
   },
 
-  modules: ['@pinia/nuxt', 'floating-vue/nuxt', '@nuxt/image'],
+  modules: ['@pinia/nuxt', 'floating-vue/nuxt', '@nuxt/image', 'nuxt-lcp-speedup'],
 
   // Environment variables the client needs.
   runtimeConfig: {
@@ -204,6 +204,7 @@ export default defineNuxtConfig({
       },
     },
     plugins: [
+      splitVendorChunkPlugin(),
       VitePWA({ registerType: 'autoUpdate' }),
       // Make Lint errors cause build failures.
       eslintPlugin(),
@@ -227,11 +228,6 @@ export default defineNuxtConfig({
     head: {
       title: "Freegle - Don't throw it away, give it away!",
       script: [
-        // We have to load GSI before we load the cookie banner, otherwise the Google Sign-in button doesn't
-        // render.
-        {
-          src: 'https://accounts.google.com/gsi/client',
-        },
         // The ecosystem of advertising is complex.
         // - The underlying ad service is Google Tags (GPT).
         // - We use prebid (pbjs), which is some kind of ad broker which gives us a pipeline of ads to use.
@@ -418,25 +414,26 @@ export default defineNuxtConfig({
               }
             };
 
-            if ('` +
+            function postGSI() {
+              if ('` +
             config.COOKIEYES +
             `' != 'null') {
-              // First we load CookieYes, which needs to be loaded before anything else, so that
-              // we have the cookie consent.
-              console.log('Load CookieYes');
-              loadScript('` +
+                // First we load CookieYes, which needs to be loaded before anything else, so that
+                // we have the cookie consent.
+                console.log('Load CookieYes');
+                loadScript('` +
             config.COOKIEYES +
             `', false)
-            
-              // Now we wait until the CookieYes script has set its own cookie.  
-              // This might be later than when the script has loaded in pure JS terms, but we
-              // need to be sure it's loaded before we can move on.
-              function checkCookieYes() {
-                if (document.cookie.indexOf('cookieyes-consent') > -1) {
-                  console.log('CookieYes cookie is set, so CookieYes is loaded');
-                  
-                  // Check that we have set the TCF string.  This only happens once the user 
-                  // has responded to the cookie banner.
+              
+                // Now we wait until the CookieYes script has set its own cookie.  
+                // This might be later than when the script has loaded in pure JS terms, but we
+                // need to be sure it's loaded before we can move on.
+                function checkCookieYes() {
+                  if (document.cookie.indexOf('cookieyes-consent') > -1) {
+                    console.log('CookieYes cookie is set, so CookieYes is loaded');
+                    
+                    // Check that we have set the TCF string.  This only happens once the user 
+                    // has responded to the cookie banner.
                   if (window.__tcfapi) {
                     window.__tcfapi('getTCData', 2, (tcData, success) => {
                       if (success && tcData && tcData.tcString) {
@@ -447,22 +444,28 @@ export default defineNuxtConfig({
                         setTimeout(checkCookieYes, 100);
                       }
                     }, [1,2,3]);
+                    } else {
+                      console.log('TCP API not yet loaded')
+                      setTimeout(checkCookieYes, 100);
+                    }
                   } else {
-                    console.log('TCP API not yet loaded')
+                    console.log('CookieYes not yet loaded')
                     setTimeout(checkCookieYes, 100);
                   }
-                } else {
-                  console.log('CookieYes not yet loaded')
-                  setTimeout(checkCookieYes, 100);
                 }
+                
+                checkCookieYes();
+              } else {
+                console.log('No CookieYes to load')
+                postCookieYes();
               }
-              
-              checkCookieYes();
-            } else {
-              console.log('No CookieYes to load')
-              postCookieYes();
             }
-
+            
+            window.onGoogleLibraryLoad = postGSI
+            
+            // We have to load GSI before we load the cookie banner, otherwise the Google Sign-in button doesn't
+            // render.
+            loadScript('https://accounts.google.com/gsi/client')
           } catch (e) {
             console.error('Error initialising pbjs and googletag:', e.message);
           }`,
