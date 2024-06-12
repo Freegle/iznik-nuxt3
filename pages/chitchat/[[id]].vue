@@ -49,7 +49,7 @@
               <OurUploader
                 v-if="uploading"
                 class="bg-white m-0 pondrow"
-                imgtype="Newsfeed"
+                type="Newsfeed"
                 imgflag="newsfeed"
                 @photo-processed="photoProcessed"
               />

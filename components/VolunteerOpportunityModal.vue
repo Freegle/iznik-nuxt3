@@ -214,7 +214,7 @@
               <b-col>
                 <OurUploader
                   class="bg-white"
-                  imgtype="Volunteering"
+                  type="Volunteering"
                   imgflag="volunteering"
                   :ocr="true"
                   @photo-processed="photoProcessed"

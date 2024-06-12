@@ -59,8 +59,7 @@ const props = defineProps({
   },
   type: {
     type: String,
-    required: false,
-    default: 'Message',
+    required: true,
   },
 })
 
@@ -148,7 +147,6 @@ async function uploadSuccess(e) {
       const att = {
         imgtype: props.type,
         externaluid: e.detail.uuid,
-        externalurl: e.detail.cdnUrl,
         externalmods: mods,
       }
 
@@ -166,7 +164,6 @@ async function uploadSuccess(e) {
         path: ret.url,
         paththumb: ret.url,
         externaluid: ret.uid,
-        externalurl: ret.url,
         externalmods: mods,
       })
 

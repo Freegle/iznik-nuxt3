@@ -96,7 +96,7 @@
                       <b-row v-if="uploading" class="bg-white">
                         <b-col class="p-0">
                           <OurUploader
-                            imgtype="User"
+                            type="User"
                             imgflag="user"
                             :msgid="me.id"
                             @photo-processed="photoProcessed"

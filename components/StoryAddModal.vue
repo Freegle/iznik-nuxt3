@@ -54,7 +54,7 @@
           <b-col>
             <OurUploader
               class="bg-white"
-              imgtype="Story"
+              type="Story"
               imgflag="story"
               @photo-processed="photoProcessed"
             />

@@ -33,7 +33,8 @@
         v-if="!dragging"
         id="uploader"
         v-model="currentAtts"
-        :multiple="true"
+        type="Message"
+        multiple
       />
     </div>
     <div class="subject-layout mb-1 mt-1">

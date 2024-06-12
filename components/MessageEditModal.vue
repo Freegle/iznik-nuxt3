@@ -78,7 +78,7 @@
       <b-row v-if="uploading" class="bg-white">
         <b-col class="p-0">
           <OurUploader
-            imgtype="Message"
+            type="Message"
             imgflag="message"
             @photo-processed="photoProcessed"
           />

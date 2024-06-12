@@ -196,7 +196,7 @@
               <b-col>
                 <OurUploader
                   class="bg-white"
-                  imgtype="CommunityEvent"
+                  type="CommunityEvent"
                   imgflag="communityevent"
                   :ocr="true"
                   @photo-processed="photoProcessed"

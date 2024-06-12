@@ -14,8 +14,19 @@
       size="sm"
       class="mr-1 mb-1 mt-1 inline"
     />
+    <NuxtImg
+      v-if="chatmessage.image?.externaluid"
+      format="webp"
+      provider="uploadcare"
+      :src="chatmessage.image.externaluid"
+      :modifiers="chatmessage.image.externalmods"
+      alt="Chat Photo"
+      :width="200"
+      :height="200"
+      @click="zoom = true"
+    />
     <b-img
-      v-if="chatmessage.image"
+      v-else-if="chatmessage.image"
       lazy
       fluid
       class="chatimage clickme img-thumbnail rounded"
@@ -40,8 +51,16 @@
       ok-only
     >
       <template #default>
+        <NuxtImg
+          v-if="chatmessage.image?.externaluid"
+          format="webp"
+          provider="uploadcare"
+          :src="chatmessage.image.externaluid"
+          :modifiers="chatmessage.image.externalmods"
+          alt="Chat Photo"
+        />
         <b-img
-          v-if="chatmessage.image"
+          v-else-if="chatmessage.image"
           lazy
           fluid
           generator-unable-to-provide-required-alt=""
@@ -58,7 +77,6 @@
     </b-modal>
   </div>
 </template>
-
 <script>
 import ChatBase from '~/components/ChatBase'
 import ProfileImage from '~/components/ProfileImage'
@@ -81,7 +99,6 @@ export default {
   },
 }
 </script>
-
 <style scoped>
 .chatimage {
   max-height: 50vh;

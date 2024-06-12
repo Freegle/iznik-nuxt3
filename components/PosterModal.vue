@@ -43,7 +43,7 @@
       <b-col>
         <OurUploader
           class="bg-white"
-          imgtype="Noticeboard"
+          type="Noticeboard"
           imgflag="noticeboard"
           @photo-processed="photoProcessed"
         />
