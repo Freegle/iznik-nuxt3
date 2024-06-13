@@ -57,11 +57,11 @@
             </b-button>
           </div>
           <NuxtImg
-            v-if="event?.image?.imageuid"
+            v-if="event?.image?.externaluid"
             format="webp"
             provider="uploadcare"
-            :src="event.image.imageuid"
-            :modifiers="mods"
+            :src="event.image.externaluid"
+            :modifiers="event.image.externalmods"
             alt="Community Event Photo"
             class="w-100"
           />

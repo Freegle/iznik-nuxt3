@@ -92,8 +92,8 @@
             v-if="volunteering?.image?.imageuid"
             format="webp"
             provider="uploadcare"
-            :src="volunteering.image.imageuid"
-            :modifiers="mods"
+            :src="volunteering.image.externaluid"
+            :modifiers="volunteering.image.externalmods"
             alt="Volunteering Opportunity Photo"
             class="mb-2 w-100"
           />
