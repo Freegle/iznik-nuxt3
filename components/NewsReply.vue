@@ -50,7 +50,6 @@
             class="clickme replyphoto mt-2 mb-2"
             @click="showReplyPhotoModal"
           />
-          photo here
         </div>
         <div v-if="userid" class="text-muted align-items-center">
           <span class="text-muted small mr-1">
