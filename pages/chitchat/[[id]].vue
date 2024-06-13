@@ -42,7 +42,7 @@
                   format="webp"
                   provider="uploadcare"
                   :src="imageuid"
-                  :mods="imagemods"
+                  :modifiers="imagemods"
                   alt="ChitChat Photo"
                   width="100"
                   class="mt-1"

@@ -56,8 +56,17 @@
               <v-icon icon="info-circle" /> More info
             </b-button>
           </div>
+          <NuxtImg
+            v-if="event?.image?.imageuid"
+            format="webp"
+            provider="uploadcare"
+            :src="event.image.imageuid"
+            :modifiers="mods"
+            alt="Community Event Photo"
+            class="w-100"
+          />
           <b-img
-            v-if="event.image"
+            v-else-if="event.image"
             lazy
             class="w-100"
             :src="event.image.path"

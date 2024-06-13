@@ -15,7 +15,7 @@
         format="webp"
         provider="uploadcare"
         :src="newsfeed.image.externaluid"
-        :mods="newsfeed.image?.externalmod"
+        :modifiers="newsfeed.image?.externalmod"
         alt="ChitChat Image"
         sizes="100vw md:400px"
       />

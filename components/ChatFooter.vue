@@ -126,7 +126,7 @@
             format="webp"
             provider="uploadcare"
             :src="imageuid"
-            :mods="imagemods"
+            :modifiers="imagemods"
             alt="Chat Photo"
             sizes="100px sm:200px"
           />
