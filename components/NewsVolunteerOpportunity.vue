@@ -44,8 +44,19 @@
         </b-button>
       </div>
       <div class="volunteering__photo">
+        <NuxtImg
+          v-if="volunteering.photo?.externaluid"
+          format="webp"
+          provider="uploadcare"
+          :src="volunteering.photo?.externaluid"
+          :modifiers="volunteering.photo?.externalmods"
+          alt="Community Event Photo"
+          :width="200"
+          :height="200"
+          @click="moreInfo"
+        />
         <b-img
-          v-if="volunteering.image"
+          v-else-if="volunteering.image"
           rounded
           lazy
           :src="volunteering.image.paththumb"

@@ -145,7 +145,6 @@ export default {
       loaded: false,
       active: true,
       uploading: false,
-      cacheBust: Date.now(),
       image: null,
       currentAtts: [],
     }
@@ -220,8 +219,6 @@ export default {
         bust: Date.now(),
         noticeboard: true,
       })
-
-      this.cacheBust = Date.now()
     },
     rotateLeft() {
       this.rotate(90)

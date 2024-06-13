@@ -52,12 +52,7 @@
         </b-row>
         <b-row v-if="uploading">
           <b-col>
-            <OurUploader
-              class="bg-white"
-              type="Story"
-              imgflag="story"
-              @photo-processed="photoProcessed"
-            />
+            <OurUploader v-model="currentAtts" class="bg-white" type="Story" />
           </b-col>
         </b-row>
         <b-row>
@@ -83,10 +78,14 @@
                   <v-icon icon="reply" flip="horizontal" />
                 </div>
                 <div class="image">
-                  <b-img
+                  <NuxtImg
                     v-if="story.image"
-                    thumbnail
-                    :src="story.image.paththumb + '?' + cacheBust"
+                    format="webp"
+                    provider="uploadcare"
+                    :src="story.image.imageuid"
+                    :modifiers="story.image.imagemods"
+                    alt="Store Photo"
+                    width="250"
                   />
                   <b-img v-else thumbnail width="250" src="/placeholder.jpg" />
                 </div>
@@ -163,13 +162,27 @@ export default {
         story: null,
         photo: null,
       },
-      cacheBust: Date.now(),
       thankyou: false,
+      currentAtts: [],
     }
   },
   computed: {
     uploadingPhoto() {
       return this.composeStore?.uploading
+    },
+  },
+  watch: {
+    currentAtts: {
+      handler(newVal) {
+        this.uploading = false
+
+        this.story.image = {
+          id: newVal[0].id,
+          imageuid: newVal[0].externaluid,
+          imagemods: newVal[0].externalmods,
+        }
+      },
+      deep: true,
     },
   },
   methods: {
@@ -178,25 +191,20 @@ export default {
       // processed callback below.
       this.uploading = true
     },
-    photoProcessed(imageid, imagethumb, image) {
-      // We have uploaded a photo.  Remove the filepond instance.
-      this.uploading = false
-
-      this.story.image = {
-        id: imageid,
-        path: image,
-        paththumb: imagethumb,
-      }
-    },
     async rotate(deg) {
+      const curr = this.story?.image?.imagemods?.rotate || 0
+      this.story.image.imagemods.rotate = curr + deg
+
+      // Ensure between 0 and 360
+      this.story.image.imagemods.rotate =
+        (this.story.image.imagemods.rotate + 360) % 360
+
       await this.imageStore.post({
-        id: this.event.image.id,
-        rotate: deg,
+        id: this.story.image.id,
+        rotate: this.story.image.imagemods.rotate,
         bust: Date.now(),
         story: true,
       })
-
-      this.cacheBust = Date.now()
     },
     rotateLeft() {
       this.rotate(90)
