@@ -77,11 +77,7 @@
       </b-row>
       <b-row v-if="uploading" class="bg-white">
         <b-col class="p-0">
-          <OurUploader
-            type="Message"
-            imgflag="message"
-            @photo-processed="photoProcessed"
-          />
+          <OurUploader v-model="attachments" type="Message" multiple />
         </b-col>
       </b-row>
       <b-row v-if="attachments?.length">
@@ -191,8 +187,6 @@ export default {
   data() {
     return {
       uploading: false,
-      myFiles: [],
-      image: null,
       triedToSave: false,
     }
   },

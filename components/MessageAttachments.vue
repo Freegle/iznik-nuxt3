@@ -41,6 +41,7 @@
             format="webp"
             provider="uploadcare"
             :src="attachments[0].externaluid"
+            :modifiers="attachments[0].externalmods"
             alt="Item Photo"
             class="attachment"
             @error="brokenImage"
