@@ -167,6 +167,11 @@ export default {
     const message = toRaw(messageStore.byId(props.id))
     const textbody = message.textbody
     const item = message.item?.name
+    const attachments = ref(message.attachments)
+
+    if (!attachments.value) {
+      attachments.value = []
+    }
 
     return {
       messageStore,
@@ -175,7 +180,7 @@ export default {
       modal,
       hide,
       message,
-      attachments: ref(message.attachments),
+      attachments,
       edittextbody: ref(textbody),
       availablenow: ref(message.availablenow),
       availableinitially: ref(message.availableinitially),
