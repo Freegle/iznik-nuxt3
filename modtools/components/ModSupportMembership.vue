@@ -29,7 +29,7 @@
         </b-row>
         <div class="d-flex flex-wrap pt-1">
           <b-form-group label="OFFER and WANTED posts:" class="mr-5">
-            <b-form-select :value="membership.emailfrequency" @change="changeFrequency">
+            <b-form-select :modelValue="membership.emailfrequency" @change="changeFrequency">
               <option value="-1">
                 Immediately
               </option>
@@ -54,7 +54,7 @@
             </b-form-select>
           </b-form-group>
           <b-form-group label="Moderation status:" class="mr-5">
-            <b-form-select :value="membership.ourpostingstatus || 'MODERATED'" @change="changePostingStatus">
+            <b-form-select :modelValue="membership.ourpostingstatus || 'MODERATED'" @change="changePostingStatus">
               <option value="MODERATED">
                 Moderated
               </option>
@@ -67,11 +67,11 @@
             </b-form-select>
           </b-form-group>
           <b-form-group label="Community Event mails:" class="mr-5">
-            <OurToggle :value="(Boolean)(membership.eventsallowed)" class="mt-2" :height="30" :width="100" :font-size="14" :sync="true"
+            <OurToggle :modelValue="(Boolean)(membership.eventsallowed)" class="mt-2" :height="30" :width="100" :font-size="14" :sync="true"
               :labels="{ checked: 'Weekly', unchecked: 'Off' }" color="#61AE24" @change="changeEvents" />
           </b-form-group>
           <b-form-group label="Volunteer Opportunity mails:">
-            <OurToggle :value="(Boolean)(membership.volunteeringallowed)" class="mt-2" :height="30" :width="100" :font-size="14" :sync="true"
+            <OurToggle :modelValue="(Boolean)(membership.volunteeringallowed)" class="mt-2" :height="30" :width="100" :font-size="14" :sync="true"
               :labels="{ checked: 'Weekly', unchecked: 'Off' }" color="#61AE24" @change="changeVolunteering" />
           </b-form-group>
         </div>
@@ -100,30 +100,25 @@ export default {
       required: true
     }
   },
-  computed: {
-    user() {
-      let user = this.userStore?.byId(this.userid)
-      return user
-    }
-  },
   methods: {
     async changeEvents(newval) {
       const params = {
         userid: this.userid,
         groupid: this.membership.id,
-        eventsallowed: newval.value
+        eventsallowed: newval
       }
 
-      /* TODO await this.$store.dispatch('members/update', params)*/
+      await this.memberStore.update(params)
     },
     async changeVolunteering(newval) {
+      console.log('changeVolunteering',newval)
       const params = {
         userid: this.userid,
         groupid: this.membership.id,
-        volunteeringallowed: newval.value
+        volunteeringallowed: newval
       }
 
-      /* TODO await this.$store.dispatch('members/update', params)*/
+      await this.memberStore.update(params)
     },
     async changeFrequency(newval) {
       const params = {
@@ -132,7 +127,7 @@ export default {
         emailfrequency: newval
       }
 
-      /* TODO await this.$store.dispatch('members/update', params)*/
+      await this.memberStore.update(params)
     },
     async changePostingStatus(newval) {
       const params = {

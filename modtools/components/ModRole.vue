@@ -12,7 +12,13 @@
   </b-form-select>
 </template>
 <script>
+import { useMemberStore } from '../stores/member'
+
 export default {
+  setup() {
+    const memberStore = useMemberStore()
+    return { memberStore }
+  },
   props: {
     userid: {
       type: Number,
@@ -43,7 +49,7 @@ export default {
         role: this.therole
       }
 
-      /* TODO await this.$store.dispatch('members/update', params)*/
+      await this.memberStore.update(params)
     }
   }
 }
