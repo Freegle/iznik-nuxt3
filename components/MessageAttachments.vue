@@ -45,6 +45,8 @@
             :modifiers="attachments[0].externalmods"
             alt="Item Photo"
             class="attachment"
+            width="200"
+            height="200"
             @error="brokenImage"
             @click="$emit('zoom')"
           />

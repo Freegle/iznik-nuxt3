@@ -30,7 +30,6 @@
         provider="uploadcare"
         :src="externaluid"
         :modifiers="mods"
-        fit="cover"
         alt="Item Photo"
         :width="200"
         :height="200"
