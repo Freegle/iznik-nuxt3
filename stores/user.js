@@ -95,6 +95,13 @@ export const useUserStore = defineStore({
     async saveComment(comment) {
       await api(this.config).comment.save(comment)
     },
+    async edit(params) {
+      await api(this.config).user.save(params)
+    },
+    async addEmail(params) {
+      await api(this.config).user.addEmail(params.id, params.email, params.primary)
+      await this.fetch(params.id, true)
+    },
   },
   getters: {
     byId: (state) => {

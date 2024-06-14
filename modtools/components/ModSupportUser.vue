@@ -67,7 +67,7 @@
           <v-icon icon="tag" /> Add note
         </b-button>
       </div>
-      <!--h3 class="mt-2">
+      <h3 class="mt-2">
         Trust Level
       </h3>
       <p>
@@ -184,7 +184,7 @@
           {{ emailAddError }}
         </NoticeMessage>
       </div>
-      <h3 class="mt-2">
+      <!--h3 class="mt-2">
         Notifications
       </h3>
       <div v-if="user.lastpush">
@@ -583,10 +583,10 @@ export default {
     },
     async setPassword(callback) {
       if (this.newpassword) {
-        /* TODO await this.$store.dispatch('user/edit', {
+        await this.userStore.edit({
           id: this.user.id,
           password: this.newpassword
-        })*/
+        })
       }
       callback()
     },
@@ -595,11 +595,11 @@ export default {
 
       if (this.newemail) {
         try {
-          /* TODO await this.$store.dispatch('user/addEmail', {
+          await this.userStore.addEmail({
             id: this.user.id,
             email: this.newemail,
             primary: parseInt(this.newEmailAs) === 1
-          })*/
+          })
         } catch (e) {
           this.emailAddError = e.message
         }
