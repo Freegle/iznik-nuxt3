@@ -170,6 +170,7 @@ async function uploadSuccess(e) {
         'Added, emit update:modelValue',
         JSON.stringify(uploadedPhotos.value)
       )
+
       emit('update:modelValue', uploadedPhotos.value)
     }
   }

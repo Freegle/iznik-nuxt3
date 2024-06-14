@@ -581,6 +581,6 @@ export default defineNuxtConfig({
     },
 
     // We want sharp images on fancy screens.
-    densities: [1, 2, 3],
+    densities: [1, 2],
   },
 })

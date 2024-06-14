@@ -68,11 +68,13 @@ export default {
     },
     path: {
       type: String,
-      required: true,
+      required: false,
+      default: null,
     },
     paththumb: {
       type: String,
-      required: true,
+      required: false,
+      default: null,
     },
     thumbnail: {
       type: Boolean,
