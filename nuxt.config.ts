@@ -579,5 +579,8 @@ export default defineNuxtConfig({
     uploadcare: {
       provider: 'uploadcare',
     },
+
+    // We want sharp images on fancy screens.
+    densities: [1, 2, 3],
   },
 })

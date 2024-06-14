@@ -1,7 +1,18 @@
 <template>
   <span class="ProfileImage__container">
+    <NuxtImg
+      v-if="externaluid"
+      provider="uploadcare"
+      :src="externaluid"
+      :modifiers="externalmods"
+      :class="className"
+      class="circle"
+      :alt="altText"
+      :width="width"
+      :height="width"
+    />
     <b-img
-      v-if="lazy"
+      v-else-if="lazy"
       lazy
       rounded="circle"
       :thumbnail="isThumbnail"
@@ -48,6 +59,16 @@ export default {
       required: false,
       default: '',
     },
+    externaluid: {
+      type: String,
+      required: false,
+      default: null,
+    },
+    externalmods: {
+      type: Object,
+      required: false,
+      default: null,
+    },
     altText: {
       type: String,
       required: false,
@@ -93,6 +114,18 @@ export default {
       }
 
       return ret
+    },
+    width() {
+      // Return a resolution high enough for the CSS rules below.
+      if (this.className.includes('--sm')) {
+        return 25
+      } else if (this.className.includes('--md')) {
+        return 35
+      } else if (this.className.includes('--lg')) {
+        return 50
+      } else {
+        return 100
+      }
     },
   },
   methods: {
@@ -277,5 +310,9 @@ export default {
 .ourBorder {
   border: 2px solid $color-gray--dark;
   background-color: $color-gray--dark;
+}
+
+.circle {
+  border-radius: 50%;
 }
 </style>

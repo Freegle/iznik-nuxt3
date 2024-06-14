@@ -38,7 +38,6 @@
   </client-only>
 </template>
 <script setup>
-// TODO Other photos besides messages.
 import { useMiscStore } from '~/stores/misc'
 import { useImageStore } from '~/stores/image'
 
