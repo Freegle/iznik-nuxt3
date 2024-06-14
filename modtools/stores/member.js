@@ -1,7 +1,5 @@
 import { defineStore } from 'pinia'
-//import { nextTick } from 'vue'
-//import api from '~/api'
-// TODO
+import api from '~/api'
 
 export const useMemberStore = defineStore({
   id: 'member',
@@ -9,76 +7,60 @@ export const useMemberStore = defineStore({
     list: [],
     // The context from the last fetch, used for fetchMore.
     context: null,
-  // For spotting when we clear under the feet of an outstanding fetch
-    //instance: 1
-    fetching: null,
+    // For spotting when we clear under the feet of an outstanding fetch
+    instance: 1,
+    ratings: [],
   }),
   actions: {
     init(config) {
       this.config = config
     },
-    async fetch(id, force) {
-      /*if (id) {
-        // Specific address which may or may not be ours.  If it's not, we'll get an error, which is a bug.  But we
-        // also get an error if it's been deleted.  So don't log
-        try {
-          if (!this.listById[id] || force) {
-            this.listById[id] = await api(this.config).address.fetchByIdv2(
-              id,
-              false
-            )
-          }
-          return this.listById[id]
-        } catch (e) {
-          console.log('Failed to get address', e)
-          return null
+    clear() {
+      this.list = []
+      this.context = null
+      this.instance = 1
+      this.ratings = []
+    },
+    async remove(params) {
+      // Remove approved  member.
+      await api(this.config).memberships.remove(params.userid, params.groupid)
+
+      // TODO: Remove from list
+      /*commit('remove', {
+        userid: params.userid
+      })*/
+
+      /*dispatch(
+        'auth/fetchUser',
+        {
+          components: ['work'],
+          force: true
+        },
+        {
+          root: true
         }
-      } else if (this.fetching) {
-        await this.fetching
-        await nextTick()
-      } else {
-        this.fetching = api(this.config).address.fetchv2()
-        this.list = await this.fetching
-        this.list = this.list || []
-
-        this.list.forEach((address) => {
-          this.listById[address.id] = address
-        })
-
-        this.fetching = null
-      }*/
+      )*/
     },
-    async delete(id) {
-      /*await api(this.config).address.del(id)
-      delete this.listById[id]
-      await this.fetch()*/
-    },
-    /*async fetchProperties(postcodeid) {
-      const { addresses } = await api(this.config).address.fetchv1({
-        postcodeid,
-      })
-
-      addresses.forEach((address) => {
-        this.properties[address.id] = address
-      })
-    },*/
-    async update(params) {
-      ///await api(this.config).address.update(params)
-      //this.fetch(params.id, true)
-    },
-    async add(params) {
-      return 0
-      //const { id } = await api(this.config).address.add(params)
-      //await this.fetch()
-      //return id
+    async update( params) {
+      const data = await api(this.config).memberships.update(params)
+  
+      if (!data.deleted) {
+        // Fetch back the updated version.
+        /* TODO await dispatch('fetch', {
+          userid: params.userid,
+          groupid: params.groupid
+        })*/
+      }
+  
+      return data
     },
   },
   getters: {
-    get: (state) => (id) => {
+    /*get: (state) => (id) => {
       return state.listById(id)
     },
     getByUserId: (state) => (id) => {
       return null // TODO
-    },
+    },*/
   },
 })

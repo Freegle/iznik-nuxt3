@@ -6,9 +6,9 @@
           <b-col cols="12" md="4">
             <div>
               <h4>
-                <v-icon v-if="membership.role === 'Owner'" name="crown" class="text-warning" title="Owner" />
-                <v-icon v-if="membership.role === 'Moderator'" name="crown" class="text-info" title="Moderator" />
-                <v-icon v-if="membership.role === 'Member'" name="user" class="text-success" title="Member" />
+                <v-icon v-if="membership.role === 'Owner'" icon="crown" class="text-warning" title="Owner" />
+                <v-icon v-if="membership.role === 'Moderator'" icon="crown" class="text-info" title="Moderator" />
+                <v-icon v-if="membership.role === 'Member'" icon="user" class="text-success" title="Member" />
                 {{ membership.nameshort }}
               </h4>
             </div>
@@ -22,16 +22,13 @@
             <div class="d-flex flex-column justify-content-between">
               <ModRole :userid="userid" :groupid="membership.id" :role="membership.role" />
               <div>
-                <SpinButton variant="white" class="mt-1" :handler="remove" name="trash-alt" label="Remove" />
+                <SpinButton variant="white" class="mt-1" @handle="remove" icon-name="trash-alt" label="Remove" />
               </div>
             </div>
           </b-col>
         </b-row>
         <div class="d-flex flex-wrap pt-1">
-          <b-form-group
-            label="OFFER and WANTED posts:"
-            class="mr-5"
-          >
+          <b-form-group label="OFFER and WANTED posts:" class="mr-5">
             <b-form-select :value="membership.emailfrequency" @change="changeFrequency">
               <option value="-1">
                 Immediately
@@ -56,10 +53,7 @@
               </option>
             </b-form-select>
           </b-form-group>
-          <b-form-group
-            label="Moderation status:"
-            class="mr-5"
-          >
+          <b-form-group label="Moderation status:" class="mr-5">
             <b-form-select :value="membership.ourpostingstatus || 'MODERATED'" @change="changePostingStatus">
               <option value="MODERATED">
                 Moderated
@@ -73,30 +67,12 @@
             </b-form-select>
           </b-form-group>
           <b-form-group label="Community Event mails:" class="mr-5">
-            <OurToggle
-              :value="(Boolean)(membership.eventsallowed)"
-              class="mt-2"
-              :height="30"
-              :width="100"
-              :font-size="14"
-              :sync="true"
-              :labels="{checked: 'Weekly', unchecked: 'Off'}"
-              color="#61AE24"
-              @change="changeEvents"
-            />
+            <OurToggle :value="(Boolean)(membership.eventsallowed)" class="mt-2" :height="30" :width="100" :font-size="14" :sync="true"
+              :labels="{ checked: 'Weekly', unchecked: 'Off' }" color="#61AE24" @change="changeEvents" />
           </b-form-group>
           <b-form-group label="Volunteer Opportunity mails:">
-            <OurToggle
-              :value="(Boolean)(membership.volunteeringallowed)"
-              class="mt-2"
-              :height="30"
-              :width="100"
-              :font-size="14"
-              :sync="true"
-              :labels="{checked: 'Weekly', unchecked: 'Off'}"
-              color="#61AE24"
-              @change="changeVolunteering"
-            />
+            <OurToggle :value="(Boolean)(membership.volunteeringallowed)" class="mt-2" :height="30" :width="100" :font-size="14" :sync="true"
+              :labels="{ checked: 'Weekly', unchecked: 'Off' }" color="#61AE24" @change="changeVolunteering" />
           </b-form-group>
         </div>
       </b-card-body>
@@ -104,12 +80,16 @@
   </div>
 </template>
 <script>
-import ModRole from './ModRole'
-import SpinButton from './SpinButton'
-const OurToggle = () => import('~/components/OurToggle')
+import { useMemberStore } from '../stores/member'
+import { useUserStore } from '../../stores/user'
 
 export default {
-  components: { SpinButton, ModRole, OurToggle },
+  setup() {
+    const memberStore = useMemberStore()
+    const userStore = useUserStore()
+    return { memberStore, userStore }
+  },
+  emits: ['fetchuser'],
   props: {
     membership: {
       type: Object,
@@ -122,8 +102,8 @@ export default {
   },
   computed: {
     user() {
-      /* TODO return this.$store.getters['user/get'](this.userid)*/
-      return null
+      let user = this.userStore?.byId(this.userid)
+      return user
     }
   },
   methods: {
@@ -161,13 +141,15 @@ export default {
         ourpostingstatus: newval
       }
 
-      /* TODO await this.$store.dispatch('members/update', params)*/
+      await this.memberStore.update(params)
     },
-    remove() {
-      /* TODO this.$store.dispatch('members/remove', {
+    remove(callback) {
+      this.memberStore.remove({
         userid: this.userid,
         groupid: this.membership.id
-      })*/
+      })
+      this.$emit('fetchuser') // Try (but fail) to refresh membership list
+      if (callback) callback()
     }
   }
 }

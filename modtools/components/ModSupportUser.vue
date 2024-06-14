@@ -184,7 +184,7 @@
           {{ emailAddError }}
         </NoticeMessage>
       </div>
-      <!--h3 class="mt-2">
+      <h3 class="mt-2">
         Notifications
       </h3>
       <div v-if="user.lastpush">
@@ -198,7 +198,7 @@
       </h3>
       <div v-if="memberships && memberships.length">
         <div v-for="membership in memberships" :key="'membership-' + membership.id">
-          <ModSupportMembership :membership="membership" :userid="user.id" />
+          <ModSupportMembership :membership="membership" :userid="user.id" @fetchuser="fetchUser" />
         </div>
         <b-button v-if="!showAllMemberships && membershipsUnshown" variant="white" class="mt-1" @click="showAllMemberships = true">
           Show +{{ membershipsUnshown }}
@@ -207,7 +207,7 @@
       <p v-else>
         No memberships.
       </p>
-      <div v-if="user.bans">
+      <!--div v-if="user.bans">
         <div v-for="ban in user.bans" :key="'ban-' + ban.date" class="text-danger">
           Banned on {{ ban.group }} by {{ ban.byemail }} {{ timeago(ban.date) }}
         </div>
@@ -546,6 +546,7 @@ export default {
   methods: {
     async fetchUser() {
       if (this.id) {
+        console.log("MSU fetchUser",this.id)
         this.user = this.userStore.byId(this.id)
         if (this.user && this.user.spammer && this.user.spammer.byuserid) {
           await this.userStore.fetchMT({ search: this.user.spammer.byuserid })
