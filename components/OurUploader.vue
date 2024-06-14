@@ -5,6 +5,12 @@
         invisible: !visible,
       }"
     >
+      <b-img
+        v-if="busy"
+        src="/loader.gif"
+        class="fit-cover ml-2 fadein"
+        width="200px"
+      />
       <lr-config
         ref="lrconfig"
         ctx-name="my-uploader"
@@ -69,6 +75,7 @@ const emit = defineEmits(['update:modelValue'])
 const uploadedPhotos = ref([])
 const ctxProviderRef = ref(null)
 const uploader = ref(null)
+const busy = ref(false)
 
 // const fontSize = computed(() => {
 //   return uploadedPhotos.value.length > 0 ? '1rem' : '1.25rem'
@@ -133,6 +140,7 @@ function setPhotos(photos) {
 
 async function uploadSuccess(e) {
   console.log('Uploaded', e)
+  busy.value = true
 
   if (e.detail) {
     if (e.detail.status === 'success') {
@@ -172,6 +180,7 @@ async function uploadSuccess(e) {
       )
 
       emit('update:modelValue', uploadedPhotos.value)
+      busy.value = false
     }
   }
 }
@@ -197,4 +206,17 @@ function click(e) {
 <style lang="scss">
 @import 'https://cdn.jsdelivr.net/npm/@uploadcare/blocks@0.39.0/web/lr-file-uploader-inline.min.css';
 @import 'assets/css/uploader.scss';
+
+.fadein {
+  animation: 15s fadeIn;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
 </style>
