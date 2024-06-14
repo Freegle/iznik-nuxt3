@@ -42,6 +42,7 @@
           <NuxtImg
             v-if="reply?.image?.externaluid"
             format="webp"
+            fit="cover"
             provider="uploadcare"
             :src="reply?.image?.externaluid"
             :modifiers="reply?.image?.externalmods"
@@ -272,6 +273,7 @@
     <NuxtImg
       v-if="imageuid"
       format="webp"
+      fit="cover"
       provider="uploadcare"
       :src="imageuid"
       :modifiers="imagemods"

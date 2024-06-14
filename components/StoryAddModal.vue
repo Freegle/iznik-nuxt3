@@ -80,6 +80,7 @@
                 <div class="image">
                   <NuxtImg
                     v-if="story.image"
+                    fit="cover"
                     format="webp"
                     provider="uploadcare"
                     :src="story.image.imageuid"

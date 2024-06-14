@@ -46,6 +46,7 @@
       <div class="volunteering__photo">
         <NuxtImg
           v-if="volunteering.photo?.externaluid"
+          fit="cover"
           format="webp"
           provider="uploadcare"
           :src="volunteering.photo?.externaluid"

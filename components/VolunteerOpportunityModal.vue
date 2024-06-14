@@ -41,6 +41,7 @@
               <b-col>
                 <NuxtImg
                   v-if="volunteering?.image?.imageuid"
+                  fit="cover"
                   format="webp"
                   provider="uploadcare"
                   :src="volunteering.image.imageuid"
@@ -204,6 +205,7 @@
                 <div class="image">
                   <NuxtImg
                     v-if="volunteering?.image?.imageuid"
+                    fit="cover"
                     format="webp"
                     provider="uploadcare"
                     :src="volunteering.image.imageuid"

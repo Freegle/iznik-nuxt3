@@ -35,6 +35,7 @@
                 <NuxtImg
                   v-if="event?.image?.imageuid"
                   format="webp"
+                  fit="cover"
                   provider="uploadcare"
                   :src="event.image.imageuid"
                   :modifiers="event.image.imagemods"
@@ -191,6 +192,7 @@
                 <div class="image">
                   <NuxtImg
                     v-if="event?.image?.imageuid"
+                    fit="cover"
                     format="webp"
                     provider="uploadcare"
                     :src="event.image.imageuid"

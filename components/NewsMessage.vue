@@ -13,6 +13,7 @@
       <NuxtImg
         v-if="newsfeed.image?.externaluid"
         format="webp"
+        fit="cover"
         provider="uploadcare"
         :src="newsfeed.image.externaluid"
         :modifiers="newsfeed.image?.externalmod"

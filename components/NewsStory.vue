@@ -15,6 +15,7 @@
           <b-card-text class="p-2 preline">
             <NuxtImg
               v-if="story?.image?.externaluid"
+              fit="cover"
               format="webp"
               provider="uploadcare"
               :src="story?.image?.externaluid"

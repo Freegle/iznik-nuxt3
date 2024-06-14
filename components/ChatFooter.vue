@@ -123,6 +123,7 @@
         </div>
         <div v-else class="d-flex justify-content-end pt-2 pb-2">
           <NuxtImg
+            fit="cover"
             format="webp"
             provider="uploadcare"
             :src="imageuid"

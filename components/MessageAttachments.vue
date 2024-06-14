@@ -39,6 +39,7 @@
           <NuxtImg
             v-if="attachments[0].externaluid"
             format="webp"
+            fit="cover"
             provider="uploadcare"
             :src="attachments[0].externaluid"
             :modifiers="attachments[0].externalmods"

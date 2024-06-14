@@ -2,6 +2,7 @@
   <span class="ProfileImage__container">
     <NuxtImg
       v-if="externaluid"
+      fit="cover"
       provider="uploadcare"
       :src="externaluid"
       :modifiers="externalmods"

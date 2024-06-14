@@ -25,10 +25,12 @@
     <div class="image-wrapper">
       <NuxtImg
         v-if="externaluid"
+        fit="cover"
         format="webp"
         provider="uploadcare"
         :src="externaluid"
         :modifiers="mods"
+        fit="cover"
         alt="Item Photo"
         :width="200"
         :height="200"

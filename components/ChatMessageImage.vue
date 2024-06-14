@@ -16,6 +16,7 @@
     />
     <NuxtImg
       v-if="chatmessage.image?.externaluid"
+      fit="cover"
       format="webp"
       provider="uploadcare"
       :src="chatmessage.image.externaluid"
@@ -53,6 +54,7 @@
       <template #default>
         <NuxtImg
           v-if="chatmessage.image?.externaluid"
+          fit="cover"
           format="webp"
           provider="uploadcare"
           :src="chatmessage.image.externaluid"

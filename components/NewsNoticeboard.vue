@@ -20,6 +20,7 @@
       <NuxtImg
         v-if="info.photofull?.externaluid"
         format="webp"
+        fit="cover"
         provider="uploadcare"
         :src="info.photofull.externaluid"
         :modifiers="JSON.parse(info.photofull.externalmods)"
