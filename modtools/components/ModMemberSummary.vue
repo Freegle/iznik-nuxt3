@@ -7,8 +7,8 @@
       <b-badge :variant="wanteds > 0 ? 'success' : 'light'" title="Recent WANTEDs" class="clickme" @click="showHistory('Wanted')">
         <v-icon icon="search" class="fa-fw" /> {{ withplural(['WANTED', 'WANTEDs'], wanteds, true) }}
       </b-badge>
-      <b-badge :variant="(member.modmails && member.modmails) > 0 ? 'danger' : 'light'" title="Recent ModMails" class="clickme" @click="showModmails">
-        <v-icon icon="exclamation-triangle" class="fa-fw" /> {{ (member.modmails ? withplural('Modmail', member.modmails.length, true) : "0 Modmails")
+      <b-badge :variant="member.modmails > 0 ? 'danger' : 'light'" title="Recent ModMails" class="clickme" @click="showModmails">
+        <v-icon icon="exclamation-triangle" class="fa-fw" /> {{ (member.modmails ? withplural('Modmail', member.modmails, true) : "0 Modmails")
         }}
       </b-badge>
       <b-badge v-if="userinfo" :variant="userinfo.repliesoffer > 0 ? 'success' : 'light'" title="Recent replies to OFFERs"
@@ -33,7 +33,7 @@
       </b-badge>
     </h4>
     <ModPostingHistoryModal v-if="showPostingHistoryModal" ref="history" :user="member" :type="type" @hidden="showPostingHistoryModal = false"/>
-    <ModLogsModal v-if="showLogsModal" ref="logs" :userid="member.userid" modmailsonly @hidden="showLogsModal = false" />
+    <ModLogsModal v-if="showLogsModal" ref="logs" :userid="member.id" modmailsonly @hidden="showLogsModal = false" />
   </div>
 </template>
 <script>
@@ -60,9 +60,9 @@ export default {
     }
   },
   mounted() {
-    if (this.member.userid) {
+    if (this.member.id) {
       this.userStore.fetchMT({
-        id: this.member.userid,
+        id: this.member.id,
         info: true
       })
 
@@ -76,7 +76,7 @@ export default {
       return this.countType('Wanted')
     },
     userinfo() {
-      const user = this.userStore.byId(this.member.userid)
+      const user = this.userStore.byId(this.member.id)
 
       if (user && user.info) {
         return user.info

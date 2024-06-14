@@ -70,3 +70,5 @@ import { withplural } from '../composables/usePluralize'
     },
 
       await this.delay(5)
+
+CHECK ALL this.member.userid

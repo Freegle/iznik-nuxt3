@@ -207,7 +207,7 @@
       <p v-else>
         No memberships.
       </p>
-      <!--div v-if="user.bans">
+      <div v-if="user.bans">
         <div v-for="ban in user.bans" :key="'ban-' + ban.date" class="text-danger">
           Banned on {{ ban.group }} by {{ ban.byemail }} {{ timeago(ban.date) }}
         </div>
@@ -253,7 +253,7 @@
         </div>
         <b-button v-if="!showAllMembershipHistories && membershipHistoriesUnshown" variant="white" class="mt-1"
           @click="showAllMembershipHistories = true">
-          Show +{{ membershipsUnshown }}
+          Show +{{ membershipHistoriesUnshown }}
         </b-button>
       </div>
       <div v-else>
@@ -263,7 +263,7 @@
         Posting History
       </h3>
       <ModMemberSummary :member="user" />
-      <div v-if="messageHistoriesShown.length">
+      <!--div v-if="messageHistoriesShown.length">
         <b-row v-for="message in messageHistoriesShown" :key="'messagehistory-' + message.arrival + '-' + message.id" :class="{ 'pl-3': true, strike: message.deleted }">
           <b-col cols="4" md="2" class="order-1 p-1 small">
             {{ datetimeshort(message.arrival) }}
