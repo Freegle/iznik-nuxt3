@@ -1,12 +1,12 @@
 <template>
   <div>
-    <b-modal ref="modal" :id="'modPostingHistoryModal-' + user.id" :title="'Post Summary for ' + user.displayname" size="lg" no-stacking>
+    <b-modal ref="modal" :title="'Post Summary for ' + user.displayname" size="lg" no-stacking>
       <template #default>
         <NoticeMessage v-if="!messages.length" variant="info" class="mb-2">
           There are no posts to show.
         </NoticeMessage>
         <GroupSelect v-model="groupid" modonly class="mb-2" />
-        <b-row v-for="message in messages" :key="'postinghistory-' + message.id">
+        <b-row v-for="message in messages">
           <b-col cols="8" sm="3">
             <div>{{ datetimeshort(message.arrival) }}</div>
           </b-col>
@@ -90,7 +90,7 @@ export default {
         })
       }
 
-      if (this.groupid !== null) {
+      if (this.groupid !== null && this.groupid !== 0) {
         ret = ret.filter(message => {
           return message.groupid === this.groupid
         })
