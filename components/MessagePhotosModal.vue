@@ -3,10 +3,10 @@
     ref="modal"
     scrollable
     :title="message.subject"
-    size="lg"
     ok-only
     ok-variant="secondary"
     ok-title="Close"
+    fullscreen
   >
     <ImageCarousel
       v-if="message?.attachments?.length"

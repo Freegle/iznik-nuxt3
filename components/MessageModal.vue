@@ -3,6 +3,7 @@
     ref="modal"
     scrollable
     size="lg"
+    :fullscreen="showImagesProxy"
     class="hide-footer"
     body-class="p-0 p-md-3"
     header-class="p-0"
