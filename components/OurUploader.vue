@@ -53,22 +53,33 @@ const LR = await import(
   'https://cdn.jsdelivr.net/npm/@uploadcare/blocks@0.39.0/web/blocks.min.js'
 )
 
-console.log('Consider polyfile locale')
-if (shouldPolyfillLocale()) {
-  console.log('Need to polyfill Locale')
-  await import('@formatjs/intl-locale/polyfill')
-}
-
-console.log('Consider polyfile plural')
-if (shouldPolyfillPlural()) {
-  const locale = 'en'
-  const unsupportedLocale = shouldPolyfillPlural(locale)
-  console.log('Unsupported?', unsupportedLocale)
-
-  if (unsupportedLocale) {
-    await import('@formatjs/intl-pluralrules/polyfill-force')
-    await import(`@formatjs/intl-pluralrules/locale-data/${unsupportedLocale}`)
+try {
+  console.log('Consider polyfile locale')
+  if (shouldPolyfillLocale()) {
+    console.log('Need to polyfill Locale')
+    await import('@formatjs/intl-locale/polyfill')
   }
+
+  console.log('Consider polyfile plural')
+  if (shouldPolyfillPlural()) {
+    const locale = 'en'
+    const unsupportedLocale = shouldPolyfillPlural(locale)
+    console.log('Unsupported?', unsupportedLocale)
+
+    if (unsupportedLocale) {
+      console.log('Polyfill-force')
+      await import('@formatjs/intl-pluralrules/polyfill-force')
+      console.log(
+        'Polyfill-locale',
+        `@formatjs/intl-pluralrules/locale-data/${unsupportedLocale}`
+      )
+      await import(
+        `@formatjs/intl-pluralrules/locale-data/${unsupportedLocale}`
+      )
+    }
+  }
+} catch (e) {
+  console.log('Polyfills failed', e)
 }
 
 const props = defineProps({
