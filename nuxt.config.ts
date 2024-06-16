@@ -242,7 +242,7 @@ export default defineNuxtConfig({
       script: [
         {
           // Safari 12 requires this polyfill, which must be loaded early.
-          src: 'https://polyfill.io/v3/polyfill.min.js?features=globalThis%2CObject.fromEntries%2CArray.prototype.flatMap%2CArray.prototype.flat',
+          src: 'https://polyfill.io/v3/polyfill.min.js?features=globalThis%2CObject.fromEntries%2CArray.prototype.flatMap%2CArray.prototype.flat%2CString.prototype.replaceAll',
         },
         // The ecosystem of advertising is complex.
         // - The underlying ad service is Google Tags (GPT).
