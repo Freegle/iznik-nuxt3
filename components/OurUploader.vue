@@ -44,7 +44,8 @@
   </client-only>
 </template>
 <script setup>
-import { shouldPolyfill } from '@formatjs/intl-locale/should-polyfill'
+import { shouldPolyfill as shouldPolyfillLocale } from '@formatjs/intl-locale/should-polyfill'
+import { shouldPolyfill as shouldPolyfillPlural } from '@formatjs/intl-pluralrules/should-polyfill'
 import { useMiscStore } from '~/stores/misc'
 import { useImageStore } from '~/stores/image'
 
@@ -52,9 +53,22 @@ const LR = await import(
   'https://cdn.jsdelivr.net/npm/@uploadcare/blocks@0.39.0/web/blocks.min.js'
 )
 
-if (shouldPolyfill()) {
-  console.log('Need to polyfill Intl')
+console.log('Consider polyfile locale')
+if (shouldPolyfillLocale()) {
+  console.log('Need to polyfill Locale')
   await import('@formatjs/intl-locale/polyfill')
+}
+
+console.log('Consider polyfile plural')
+if (shouldPolyfillPlural()) {
+  const locale = 'en'
+  const unsupportedLocale = shouldPolyfillPlural(locale)
+  console.log('Unsupported?', unsupportedLocale)
+
+  if (unsupportedLocale) {
+    await import('@formatjs/intl-pluralrules/polyfill-force')
+    await import(`@formatjs/intl-pluralrules/locale-data/${unsupportedLocale}`)
+  }
 }
 
 const props = defineProps({
