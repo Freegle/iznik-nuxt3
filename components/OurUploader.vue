@@ -27,7 +27,6 @@
       <div class="d-flex flex-column justify-content-around align-items-start">
         <lr-file-uploader-inline
           ref="uploader"
-          css-src="https://cdn.jsdelivr.net/npm/@uploadcare/blocks@0.39.0/web/lr-file-uploader-inline.min.css"
           ctx-name="my-uploader"
           :class="configName"
           @click="click"
@@ -49,9 +48,7 @@ import { shouldPolyfill as shouldPolyfillPlural } from '@formatjs/intl-pluralrul
 import { useMiscStore } from '~/stores/misc'
 import { useImageStore } from '~/stores/image'
 
-const LR = await import(
-  'https://cdn.jsdelivr.net/npm/@uploadcare/blocks@0.39.0/web/blocks.min.js'
-)
+const LR = await import('@uploadcare/blocks/web/blocks.min.js')
 
 try {
   console.log('Consider polyfile locale')
@@ -233,7 +230,7 @@ function click(e) {
 }
 </script>
 <style lang="scss">
-@import 'https://cdn.jsdelivr.net/npm/@uploadcare/blocks@0.39.0/web/lr-file-uploader-inline.min.css';
+@import '@uploadcare/blocks/web/lr-file-uploader-inline.min.css';
 @import 'assets/css/uploader.scss';
 
 .fadein {
