@@ -1,5 +1,5 @@
 <template>
-  <div ref="wrapper" style="min-height: 80vh; min-width: 100%" class="wrapper">
+  <div ref="wrapper" style="min-height: 80vh; min-width: 95%" class="wrapper">
     <b-carousel
       :id="'message-carousel-' + messageId"
       v-model="slide"
@@ -22,14 +22,14 @@
             touch
             wheel
             gesture
-            :width="Math.round(width)"
-            :height="Math.round(height)"
+            :width="Math.round(width * 0.95)"
+            :height="Math.round(height * 0.95)"
             min-scale="1"
             :style="
               'width: ' +
-              Math.round(width) +
+              Math.round(width * 0.95) +
               'px; height: ' +
-              Math.round(height) +
+              Math.round(height * 0.95) +
               'px'
             "
           >
@@ -41,7 +41,7 @@
                 :src="attachment.externaluid"
                 :modifiers="attachment.externalmods"
                 alt="Item picture"
-                :width="Math.round(width)"
+                :width="Math.round(width * 0.95)"
               />
               <b-img
                 v-else
