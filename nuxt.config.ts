@@ -215,7 +215,7 @@ export default defineNuxtConfig({
       // Make Lint errors cause build failures.
       eslintPlugin(),
       legacy({
-        targets: ['since 2015', 'ios12'],
+        targets: ['since 2015', 'ios>=12', 'safari>=12'],
       }),
       sentryVitePlugin({
         org: 'freegle',
@@ -230,10 +230,11 @@ export default defineNuxtConfig({
     server: true,
   },
 
-  devServer: {
-    host: '127.0.0.1',
-    port: 3000,
-  },
+  // Sometimes we need to change the host when doing local testing with browser stack.
+  // devServer: {
+  //   host: '127.0.0.1',
+  //   port: 3000,
+  // },
 
   app: {
     head: {
