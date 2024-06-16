@@ -71,11 +71,9 @@ try {
       await import('@formatjs/intl-pluralrules/polyfill-force')
       console.log(
         'Polyfill-locale',
-        `@formatjs/intl-pluralrules/locale-data/${unsupportedLocale}`
+        '@formatjs/intl-pluralrules/locale-data/en'
       )
-      await import(
-        `@formatjs/intl-pluralrules/locale-data/${unsupportedLocale}`
-      )
+      await import('@formatjs/intl-pluralrules/locale-data/en')
     }
   }
 } catch (e) {

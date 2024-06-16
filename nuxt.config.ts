@@ -215,7 +215,7 @@ export default defineNuxtConfig({
       // Make Lint errors cause build failures.
       eslintPlugin(),
       legacy({
-        targets: ['since 2015'],
+        targets: ['since 2015', 'safari12', 'ios12'],
       }),
       sentryVitePlugin({
         org: 'freegle',
@@ -230,10 +230,19 @@ export default defineNuxtConfig({
     server: true,
   },
 
+  devServer: {
+    host: '127.0.0.1',
+    port: 3000,
+  },
+
   app: {
     head: {
       title: "Freegle - Don't throw it away, give it away!",
       script: [
+        {
+          // Safari 12 requires this polyfill, which must be loaded early.
+          src: 'https://polyfill.io/v3/polyfill.min.js?features=globalThis%2CObject.fromEntries%2CArray.prototype.flatMap%2CArray.prototype.flat',
+        },
         // The ecosystem of advertising is complex.
         // - The underlying ad service is Google Tags (GPT).
         // - We use prebid (pbjs), which is some kind of ad broker which gives us a pipeline of ads to use.
@@ -412,9 +421,13 @@ export default defineNuxtConfig({
                 // - GPT, which needs to be loaded before prebid.
                 // - Prebid.
                 // The ordering is ensured by using defer and appending the script.
+                //
+                // prebid isn't compatible with older browsers which don't support Object.entries.
                 console.log('Load GPT and prebid');
-                loadScript('https://securepubads.g.doubleclick.net/tag/js/gpt.js', true)
-                loadScript('/js/prebid.js', true)
+                if (Object.fromEntries) {
+                  loadScript('https://securepubads.g.doubleclick.net/tag/js/gpt.js', true)
+                  loadScript('/js/prebid.js', true)
+                }
               } else {
                 console.log('GPT and prebid already loaded');
               }
