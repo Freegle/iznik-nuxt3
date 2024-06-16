@@ -44,12 +44,18 @@
   </client-only>
 </template>
 <script setup>
+import { shouldPolyfill } from '@formatjs/intl-locale/should-polyfill'
 import { useMiscStore } from '~/stores/misc'
 import { useImageStore } from '~/stores/image'
 
 const LR = await import(
   'https://cdn.jsdelivr.net/npm/@uploadcare/blocks@0.39.0/web/blocks.min.js'
 )
+
+if (shouldPolyfill()) {
+  console.log('Need to polyfill Intl')
+  await import('@formatjs/intl-locale/polyfill')
+}
 
 const props = defineProps({
   multiple: {

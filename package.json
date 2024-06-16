@@ -38,6 +38,7 @@
     "@capacitor/android": "^3.4.3",
     "@capacitor/core": "^3.4.3",
     "@chenfengyuan/vue-number-input": "^2.0.1",
+    "@formatjs/intl-locale": "^4.0.0",
     "@fortawesome/fontawesome-svg-core": "^6.4.0",
     "@fortawesome/free-brands-svg-icons": "^6.2.0",
     "@fortawesome/free-solid-svg-icons": "^6.1.1",
