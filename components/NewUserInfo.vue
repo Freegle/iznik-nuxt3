@@ -34,6 +34,21 @@
         for that email address if you have one.
       </p>
     </b-card>
+    <b-card v-if="me" variant="white">
+      <h2 class="text-center">How often do you want emails?</h2>
+      <p class="text-center">
+        We'll email you OFFERs and WANTEDs from other freeglers. How often do
+        you want them?
+      </p>
+      <div class="d-flex justify-content-around w-100 settings">
+        <SettingsGroup
+          v-model:emailfrequency="emailSimple"
+          eventshide
+          volunteerhide
+          label="Choose OFFER/WANTED frequency:"
+        />
+      </div>
+    </b-card>
   </div>
 </template>
 <script>
@@ -50,15 +65,33 @@ export default {
   },
   setup() {
     const authStore = useAuthStore()
+    const emailSimple = ref(-1)
 
     return {
       authStore,
+      emailSimple,
     }
   },
   data() {
     return {
       newPassword: null,
     }
+  },
+  watch: {
+    async emailSimple(value) {
+      for (const group of this.myGroups) {
+        const params = {
+          userid: this.me.id,
+          groupid: group.id,
+        }
+        params.emailfrequency = value
+
+        // Don't fetch for each group.
+        await this.authStore.setGroup(params, true)
+      }
+
+      await this.authStore.fetchUser()
+    },
   },
   methods: {
     async setPassword(callback) {
@@ -72,3 +105,14 @@ export default {
   },
 }
 </script>
+<style scoped lang="scss">
+:deep(.settings) {
+  legend {
+    display: none;
+  }
+
+  select {
+    min-width: 200px;
+  }
+}
+</style>

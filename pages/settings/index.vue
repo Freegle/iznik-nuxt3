@@ -372,6 +372,7 @@
                         eventshide
                         volunteerhide
                         label="Choose OFFER/WANTED frequency:"
+                        class="mt-1 mb-1"
                       />
                       <SettingsEmailInfo
                         v-model:simple-email-setting="simpleEmailSetting"
@@ -1069,7 +1070,6 @@ export default {
       this.showAdvanced = !this.showAdvanced
     },
     async changeAllGroups(param, value) {
-      console.log('Change all', this.myGroups)
       for (const group of this.myGroups) {
         const params = {
           userid: this.me.id,
