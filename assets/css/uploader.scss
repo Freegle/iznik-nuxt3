@@ -139,6 +139,15 @@ lr-drop-area[with-icon] {
   }
 }
 
+lr-source-list {
+  lr-icon {
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+}
+
 lr-file-item {
   >.inner {
     padding-left: 0px;
