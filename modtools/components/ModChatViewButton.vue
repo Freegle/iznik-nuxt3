@@ -3,7 +3,7 @@
     <b-button variant="white" class="mr-2 mb-1" @click="view">
       <v-icon icon="comments" /> View Chat
     </b-button>
-    <!--ModChatModal v-if="showModal" :id="id" ref="modal" :pov="pov" /-->
+    <ModChatModal v-if="showModal" :id="id" ref="modChatModal" :pov="pov" @hidden="showModal = false" />
   </div>
 </template>
 <script>
@@ -28,10 +28,7 @@ export default {
   methods: {
     view() {
       this.showModal = true
-
-      this.waitForRef('modal', () => {
-        this.$refs.modal.show()
-      })
+      this.$refs.modChatModal?.show()
     }
   }
 }
