@@ -39,8 +39,8 @@
                 </div>
                 <NuxtPicture
                   v-if="imageuid"
-                  fit="cover"
                   format="webp"
+                  fit="cover"
                   provider="uploadcare"
                   :src="imageuid"
                   :modifiers="imagemods"

@@ -192,8 +192,8 @@
                 <div class="image">
                   <NuxtPicture
                     v-if="event?.image?.imageuid"
-                    fit="cover"
                     format="webp"
+                    fit="cover"
                     provider="uploadcare"
                     :src="event.image.imageuid"
                     :modifiers="mods"

@@ -2,6 +2,7 @@
   <span class="ProfileImage__container">
     <NuxtPicture
       v-if="externaluid"
+      format="webp"
       fit="cover"
       provider="uploadcare"
       :src="externaluid"
