@@ -161,6 +161,8 @@ export default {
       if (!this.chatStore.byChatId(this.id)) {
         console.log("MCM show BBB")
         try {
+          // Was https://modtools.org/api/chatrooms?id=12345&modtools=true
+          // Now https://api.ilovefreegle.org/apiv2/chat/12345?loggedInAs=98765&requestid=1
           await this.chatStore.fetchChat(this.id)
         } catch (e) {
           console.log("MCM show XXX", e.message)
