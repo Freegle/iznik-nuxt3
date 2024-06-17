@@ -141,16 +141,30 @@ function brokenImage() {
 
 .thumbnail {
   .attachment {
+    display: block;
     height: 200px;
+
+    img {
+      height: 200px;
+    }
   }
 }
 
 .notThumbnail {
   .attachment {
+    display: block;
     height: 200px;
+
+    img {
+      height: 200px;
+    }
 
     @include media-breakpoint-up(sm) {
       height: 360px;
+
+      img {
+        height: 360px;
+      }
     }
   }
 }
