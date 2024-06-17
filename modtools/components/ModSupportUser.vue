@@ -263,7 +263,7 @@
         Posting History
       </h3>
       <ModMemberSummary :member="user" />
-      <!--div v-if="messageHistoriesShown.length">
+      <div v-if="messageHistoriesShown.length">
         <b-row v-for="message in messageHistoriesShown" :key="'messagehistory-' + message.arrival + '-' + message.id" :class="{ 'pl-3': true, strike: message.deleted }">
           <b-col cols="4" md="2" class="order-1 p-1 small">
             {{ datetimeshort(message.arrival) }}
@@ -330,7 +330,7 @@
           </div>
         </div>
       </div>
-      <h3 class="mt-2">
+      <!--h3 class="mt-2">
         Recent Emails
       </h3>
       <div v-if="emailHistoriesShown.length">
@@ -535,11 +535,11 @@ export default {
       get() {
         return this.user.newsfeedmodstatus
       },
-      set(newVal) {
-        /* TODO this.$store.dispatch('user/edit', {
+      async set(newVal) {
+        await this.userStore.edit({
           id: this.user.id,
           newsfeedmodstatus: newVal
-        })*/
+        })
       }
     }
   },
