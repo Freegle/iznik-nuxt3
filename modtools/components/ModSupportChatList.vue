@@ -1,14 +1,12 @@
 <template>
   <div>
     <ModSupportChat v-for="chat in chatsShown" :key="'chathistory-' + chat.id" :chat="chat" :pov="pov" />
-    <infinite-loading :distance="1000" @infinite="loadMoreChats">
-      <span slot="no-results">
+    <infinite-loading :distance="10" @infinite="loadMoreChats">
+      <template #no-results>
         <p class="text-left">
           No chats.
         </p>
-      </span>
-      <span slot="no-more" />
-      <span slot="spinner" />
+      </template>
     </infinite-loading>
   </div>
 </template>

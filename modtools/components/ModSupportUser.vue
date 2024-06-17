@@ -330,7 +330,7 @@
           </div>
         </div>
       </div>
-      <!--h3 class="mt-2">
+      <h3 class="mt-2">
         Recent Emails
       </h3>
       <div v-if="emailHistoriesShown.length">
@@ -355,10 +355,10 @@
       <h3 class="mt-2">
         Chats
       </h3>
-      <ModSupportChatList :chats="chatsFiltered" :pov="user.id" /-->
+      <ModSupportChatList :chats="chatsFiltered" :pov="user.id" />
     </b-card-body>
     <ModLogsModal v-if="showLogs" ref="logs" :userid="user.id" @hidden="showLogs = false" />
-    <!--ConfirmModal v-if="purgeConfirm" ref="purgeConfirm" :title="'Purge ' + user.displayname + ' from the system?'"
+    <!--TODO ConfirmModal v-if="purgeConfirm" ref="purgeConfirm" :title="'Purge ' + user.displayname + ' from the system?'"
       message="<p><strong>This can't be undone.</strong></p><p>Are you completely sure you want to do this?</p>" @confirm="purgeConfirmed" /-->
     <ProfileModal v-if="showProfile&& user && user.info" :id="id" ref="profile"  @hidden="showProfile = false"/>
     <ModSpammerReport v-if="showSpamModal" ref="spamConfirm" :user="reportUser" @hidden="showSpamModal = false" />
