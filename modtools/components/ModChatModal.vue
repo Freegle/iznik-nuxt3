@@ -1,52 +1,45 @@
 <template>
   <div>
     <b-modal ref="modal" :id="'messageReportModal-' + id" size="lg" hide-header-close no-close-on-esc>
-      <template #header class="w-100">
-        <div>
-          <NoticeMessage v-if="fetcherror" variant="warning" class="mt-2">
-            <v-icon icon="info-circle" />&nbsp;Error fetching chatroom
-          </NoticeMessage>
-          <div v-else>
-            <div v-if="user1 && pov == user1.id" class="d-flex justify-content-between">
-              <div v-if="user2">
-                {{ user2.displayname }}
-                <span class="text-muted small">
-                  <v-icon name="hashtag" class="text-muted" scale="0.8" />{{ user2.id }}
-                </span>
-              </div>
-              <div v-if="user1">
-                {{ user1.displayname }}
-                <span class="text-muted small">
-                  <v-icon name="hashtag" class="text-muted" scale="0.8" />{{ user1.id }}
-                </span>
-              </div>
-              <div v-if="chat2 && chat2.group">
-                {{ chat2.group.namedisplay }} Volunteers
-              </div>
-            </div>
-            <div v-else class="d-flex justify-content-between">
-              <div v-if="user1">
-                {{ user1.displayname }}
-                <span class="text-muted small">
-                  <v-icon name="hashtag" class="text-muted" scale="0.8" />{{ user1.id }}
-                </span>
-              </div>
-              <div v-if="user2">
-                {{ user2.displayname }}
-                <span class="text-muted small">
-                  <v-icon name="hashtag" class="text-muted" scale="0.8" />{{ user2.id }}
-                </span>
-              </div>
-              <div v-if="chat2 && chat2.group">
-                {{ chat2.group.namedisplay }} Volunteers
-              </div>
-            </div>
+      <template #header>
+        <div v-if="user1 && pov == user1.id" class="d-flex justify-content-between w-100">
+          <div v-if="user2">
+            {{ user2.displayname }}
+            <span class="text-muted small">
+              <v-icon icon="hashtag" class="text-muted" scale="0.8" />{{ user2.id }}
+            </span>
+          </div>
+          <div v-if="user1">
+            {{ user1.displayname }}
+            <span class="text-muted small">
+              <v-icon icon="hashtag" class="text-muted" scale="0.8" />{{ user1.id }}
+            </span>
+          </div>
+          <div v-if="chat2 && chat2.group">
+            {{ chat2.group.namedisplay }} Volunteers
+          </div>
+        </div>
+        <div v-else class="d-flex justify-content-between w-100">
+          <div v-if="user1">
+            {{ user1.displayname }}
+            <span class="text-muted small">
+              <v-icon icon="hashtag" class="text-muted" scale="0.8" />{{ user1.id }}
+            </span>
+          </div>
+          <div v-if="user2">
+            {{ user2.displayname }}
+            <span class="text-muted small">
+              <v-icon icon="hashtag" class="text-muted" scale="0.8" />{{ user2.id }}
+            </span>
+          </div>
+          <div v-if="chat2 && chat2.group">
+            {{ chat2.group.namedisplay }} Volunteers
           </div>
         </div>
       </template>
       <template #default>
         <div v-if="chat2" ref="chatContent" class="m-0 chatContent" infinite-wrapper>
-          <infinite-loading direction="top" force-use-infinite-wrapper="true" :distance="distance" @infinite="loadMore">
+          <infinite-loading direction="top" force-use-infinite-wrapper="true" :distance="10" @infinite="loadMore">
             <span slot="no-results" />
             <span slot="no-more" />
             <span slot="spinner">
@@ -82,7 +75,7 @@ export default {
   async setup(props) {
     const { modal, hide } = useModal()
 
-    const {
+    const { // Returns wrong chat
       chat,
       otheruser,
       tooSoonToNudge,
@@ -109,6 +102,10 @@ export default {
       type: Number,
       required: true
     },
+    chat2: {
+      type: Object,
+      required: true
+    },
     pov: {
       type: Number,
       required: true
@@ -116,26 +113,27 @@ export default {
   },
   data: function () {
     return {
-      fetcherror: false,
       busy: true,
-      chat2: null
+      chatusers: [] // TODO
+      //chat2: null
     }
   },
   async mounted() {
-    console.log("MCM mounted", this.id)
+    console.log("MCM mounted", this.id, this.chat, this.messages)
     await this.show()
 
   },
   computed: {
+    // Construct basic user details by hand. u1settings and u2settings also available
     // Depending on our p.o.v. we may need to swap user1 and user2
     user1() {
       let ret = null
 
       if (this.chat2) {
-        if (this.chat2.user1 && this.chat2.user1.id === this.pov) {
-          ret = this.chat2.user2
+        if (this.chat2.user1 && this.chat2.user1 === this.pov) {
+          ret = { id: this.chat2.user2, displayname: this.chat2.u2name }
         } else {
-          ret = this.chat2.user1
+          ret = { id: this.chat2.user1, displayname: this.chat2.u1name }
         }
       }
 
@@ -145,10 +143,10 @@ export default {
       let ret = null
 
       if (this.chat2) {
-        if (this.chat2.user2 && this.chat2.user2.id === this.pov) {
-          ret = this.chat2.user2
+        if (this.chat2.user2 && this.chat2.user2 === this.pov) {
+          ret = { id: this.chat2.user2, displayname: this.chat2.u2name }
         } else {
-          ret = this.chat2.user1
+          ret = { id: this.chat2.user1, displayname: this.chat2.u1name }
         }
       }
 
@@ -157,9 +155,7 @@ export default {
   },
   methods: {
     async show() {
-      console.log("MCM show", this.id)
-      if (!this.chatStore.byChatId(this.id)) {
-        console.log("MCM show BBB")
+      /*if (!this.chatStore.byChatId(this.id)) {
         try {
           // Was https://modtools.org/api/chatrooms?id=12345&modtools=true
           // Now https://api.ilovefreegle.org/apiv2/chat/12345?loggedInAs=98765&requestid=1
@@ -170,17 +166,19 @@ export default {
         }
       }
 
-      console.log("MCM show CCC")
-
       // Take a copy rather than use computed as it may not be ours and will vanish from the store.
-      this.chat2 = this.chatStore.byChatId(this.id)
-      console.log("MCM show EEE")
+      this.chat2 = this.chatStore.byChatId(this.id)*/
+      
+      console.log("MCM show AAA")
+      await this.chatStore.fetchChats({ fetchChats: ['User2Mod', 'Mod2Mod'] }) // Wrongly gets for current user
+      await this.chatStore.fetchMessages(this.id)
+      console.log("MCM show BBB")
       this.modal.show()
     },
     closeit() {
       // We have loaded this chat into store, but it's probably not ours.  So update the list, otherwise next
       // time we go into chats we'll see weirdness.  No need to await though, and that makes closing chats sluggish.
-      /*
+      /* TODO
       const modtools = this.$store.getters['misc/get']('modtools')
       this.$store.dispatch('chats/listChats', {
         chattypes: modtools
@@ -189,6 +187,10 @@ export default {
       })
       */
       this.hide()
+    },
+    loadMore($state) {
+      console.log('MCM loadMore', this.chatmessages?.length)
+      $state.complete()
     }
   }
 }

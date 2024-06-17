@@ -7,7 +7,7 @@
     <div class="id text-muted">
       Chat <v-icon icon="hashtag" scale="0.5" class="text-muted" />{{ chat.id }}
     </div>
-    <ModChatViewButton :id="chat.id" :pov="pov" class="button" />
+    <ModChatViewButton :id="chat.id" :chat="chat" :pov="pov" class="button" />
     <div class="name d-flex">
       {{ chat.name }}&nbsp;
       <span v-if="otheruser" class="text-muted">

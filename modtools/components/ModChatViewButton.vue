@@ -3,7 +3,7 @@
     <b-button variant="white" class="mr-2 mb-1" @click="view">
       <v-icon icon="comments" /> View Chat
     </b-button>
-    <ModChatModal v-if="showModal" :id="id" ref="modChatModal" :pov="pov" @hidden="showModal = false" />
+    <ModChatModal v-if="showModal" :id="id" :chat2="chat" ref="modChatModal" :pov="pov" @hidden="showModal = false" />
   </div>
 </template>
 <script>
@@ -12,6 +12,10 @@ export default {
   props: {
     id: {
       type: Number,
+      required: true
+    },
+    chat: {
+      type: Object,
       required: true
     },
     pov: {
@@ -27,6 +31,7 @@ export default {
   },
   methods: {
     view() {
+      console.log('MCVB view', this.chat)
       this.showModal = true
       this.$refs.modChatModal?.show()
     }
