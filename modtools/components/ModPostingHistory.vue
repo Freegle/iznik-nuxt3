@@ -118,8 +118,3 @@ export default {
   }
 }
 </script>
-<style scoped>
-.marg {
-  max-width: 200px;
-}
-</style>
