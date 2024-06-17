@@ -59,6 +59,12 @@
               double-check they have transport.
             </p>
           </notice-message>
+          <notice-message v-if="thumbsdown" variant="warning">
+            <p>
+              <v-icon icon="exclamation-triangle" />&nbsp;You previously gave
+              this freegler a thumbs down.
+            </p>
+          </notice-message>
         </div>
         <b-button
           variant="warning"
@@ -440,11 +446,15 @@ export default {
         this.expectedreplies ||
         this.otheruser?.spammer ||
         this.otheruser?.deleted ||
+        this.thumbsdown ||
         this.faraway
       )
     },
     faraway() {
       return this.milesaway && this.milesaway > FAR_AWAY
+    },
+    thumbsdown() {
+      return this.otheruser?.info?.ratings?.Mine === 'Down'
     },
     badratings() {
       let ret = false
