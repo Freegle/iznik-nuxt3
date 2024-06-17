@@ -1,18 +1,18 @@
 <template>
   <div>
     <h4>
-      <b-badge :variant="offers > 0 ? 'success' : 'light'" title="Recent OFFERs" class="clickme" @click="showHistory('Offer')">
+      <b-badge :variant="offers > 0 ? 'success' : 'light'" title="Recent OFFERs" class="clickme me-2" @click="showHistory('Offer')">
         <v-icon icon="gift" class="fa-fw" /> {{ withplural(['OFFER', 'OFFERs'], offers, true) }}
       </b-badge>
-      <b-badge :variant="wanteds > 0 ? 'success' : 'light'" title="Recent WANTEDs" class="clickme" @click="showHistory('Wanted')">
+      <b-badge :variant="wanteds > 0 ? 'success' : 'light'" title="Recent WANTEDs" class="clickme me-2" @click="showHistory('Wanted')">
         <v-icon icon="search" class="fa-fw" /> {{ withplural(['WANTED', 'WANTEDs'], wanteds, true) }}
       </b-badge>
-      <b-badge :variant="member.modmails > 0 ? 'danger' : 'light'" title="Recent ModMails" class="clickme" @click="showModmails">
+      <b-badge :variant="member.modmails > 0 ? 'danger' : 'light'" title="Recent ModMails" class="clickme me-2" @click="showModmails">
         <v-icon icon="exclamation-triangle" class="fa-fw" /> {{ (member.modmails ? withplural('Modmail', member.modmails, true) : "0 Modmails")
         }}
       </b-badge>
       <b-badge v-if="userinfo" :variant="userinfo.repliesoffer > 0 ? 'success' : 'light'" title="Recent replies to OFFERs"
-        class="clickme d-inline-flex">
+        class="clickme d-inline-flex me-2">
         <div class="d-flex mr-1">
           <v-icon icon="gift" class="fa-fw" />
           <v-icon icon="reply" class="fa-fw" />
@@ -20,7 +20,7 @@
         {{ userinfo.repliesoffer }}
       </b-badge>
       <b-badge v-if="userinfo" :variant="userinfo.replieswanted > 0 ? 'success' : 'light'" title="Recent replies to WANTEDs"
-        class="clickme d-inline-flex">
+        class="clickme d-inline-flex me-2">
         <div class="d-flex mr-1">
           <v-icon icon="search" class="fa-fw" />
           <v-icon icon="reply" class="fa-fw" />
@@ -28,7 +28,7 @@
         {{ userinfo.replieswanted }}
       </b-badge>
       <b-badge v-if="userinfo" :variant="userinfo.expectedreplies > 0 ? 'danger' : 'light'" title="Recent outstanding replies requested"
-        class="clickme">
+        class="clickme me-2">
         <v-icon icon="clock" class="fa-fw" /> {{ withplural(['RSVP','RSVPs'], userinfo.expectedreplies || 0, true) }}
       </b-badge>
     </h4>

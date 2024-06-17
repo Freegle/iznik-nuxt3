@@ -1,24 +1,24 @@
 <template>
   <span class="border border-info rounded p-1">
-    <b-badge variant="light" class="clickme" title="Recent OFFERs" @click="showHistory('Offer')">
+    <b-badge variant="light" class="clickme me-2" title="Recent OFFERs" @click="showHistory('Offer')">
       <v-icon icon="gift" class="fa-fw" /> {{ offers }}
     </b-badge>
-    <b-badge variant="light" class="clickme" title="Recent WANTEDs" @click="showHistory('Wanted')">
+    <b-badge variant="light" class="clickme me-2" title="Recent WANTEDs" @click="showHistory('Wanted')">
       <v-icon icon="search" class="fa-fw" /> {{ wanteds }}
     </b-badge>
-    <b-badge :variant="user.modmails > 0 ? 'danger' : 'light'" class="clickme" title="ModMails" @click="showModmails">
+    <b-badge :variant="user.modmails > 0 ? 'danger' : 'light'" class="clickme me-2" title="ModMails" @click="showModmails">
       <v-icon icon="exclamation-triangle" class="fa-fw" /> {{ user.modmails }}
     </b-badge>
-    <b-badge v-if="userinfo" :variant="userinfo.replies > 0 ? 'success' : 'light'" title="Recent replies to OFFERs">
+    <b-badge v-if="userinfo" :variant="userinfo.replies > 0 ? 'success' : 'light'" title="Recent replies to OFFERs" class="me-2">
       <v-icon icon="gift" class="fa-fw" /><v-icon icon="reply" class="fa-fw" /> {{ userinfo.repliesoffer }}
     </b-badge>
-    <b-badge v-if="userinfo" :variant="userinfo.replies > 0 ? 'success' : 'light'" title="Recent replies to WANTEDs">
+    <b-badge v-if="userinfo" :variant="userinfo.replies > 0 ? 'success' : 'light'" title="Recent replies to WANTEDs" class="me-2">
       <v-icon icon="search" class="fa-fw" /><v-icon icon="reply" class="fa-fw" /> {{ userinfo.replieswanted }}
     </b-badge>
-    <b-badge v-if="userinfo" :variant="userinfo.expectedreplies > 0 ? 'danger' : 'light'" title="Recent outstanding replies requested">
+    <b-badge v-if="userinfo" :variant="userinfo.expectedreplies > 0 ? 'danger' : 'light'" title="Recent outstanding replies requested" class="me-2">
       <v-icon icon="clock" class="fa-fw" /> {{ userinfo.expectedreplies || 0 }}
     </b-badge>
-    <b-button variant="link" size="sm" class="clickme" @click="showHistory(null)">
+    <b-button variant="link" size="sm" class="clickme me-2" @click="showHistory(null)">
       Posts
     </b-button>
     <b-button variant="link" size="sm" @click="showLogs">
@@ -118,3 +118,8 @@ export default {
   }
 }
 </script>
+<style scoped>
+.marg {
+  max-width: 200px;
+}
+</style>
