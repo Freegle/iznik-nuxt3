@@ -34,7 +34,7 @@
             "
           >
             <template #canvas>
-              <NuxtImg
+              <NuxtPicture
                 v-if="attachment.externaluid"
                 format="webp"
                 provider="uploadcare"

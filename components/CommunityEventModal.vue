@@ -32,7 +32,7 @@
             </notice-message>
             <b-row>
               <b-col>
-                <NuxtImg
+                <NuxtPicture
                   v-if="event?.image?.imageuid"
                   format="webp"
                   fit="cover"
@@ -190,7 +190,7 @@
                   <v-icon icon="reply" flip="horizontal" />
                 </div>
                 <div class="image">
-                  <NuxtImg
+                  <NuxtPicture
                     v-if="event?.image?.imageuid"
                     fit="cover"
                     format="webp"

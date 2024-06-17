@@ -78,7 +78,7 @@
                   <v-icon icon="reply" flip="horizontal" />
                 </div>
                 <div class="image">
-                  <NuxtImg
+                  <NuxtPicture
                     v-if="story.image"
                     fit="cover"
                     format="webp"

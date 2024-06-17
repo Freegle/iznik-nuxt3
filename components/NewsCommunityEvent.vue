@@ -47,7 +47,7 @@
         </b-button>
       </div>
       <div class="communityevent__photo">
-        <NuxtImg
+        <NuxtPicture
           v-if="event.photo?.externaluid"
           format="webp"
           fit="cover"

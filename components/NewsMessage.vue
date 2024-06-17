@@ -10,7 +10,7 @@
       class="font-weight-bold preline forcebreak nopara"
     />
     <div>
-      <NuxtImg
+      <NuxtPicture
         v-if="newsfeed.image?.externaluid"
         format="webp"
         fit="cover"

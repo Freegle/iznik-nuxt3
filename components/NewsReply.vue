@@ -39,7 +39,7 @@
           <br />
         </span>
         <div v-if="reply.image">
-          <NuxtImg
+          <NuxtPicture
             v-if="reply?.image?.externaluid"
             format="webp"
             fit="cover"
@@ -270,7 +270,7 @@
         />
       </div>
     </div>
-    <NuxtImg
+    <NuxtPicture
       v-if="imageuid"
       format="webp"
       fit="cover"

@@ -37,7 +37,7 @@
                   <span class="d-none d-sm-inline">to each other</span>;
                   occasionally we may moderate to ensure things stay friendly.
                 </div>
-                <NuxtImg
+                <NuxtPicture
                   v-if="imageuid"
                   fit="cover"
                   format="webp"

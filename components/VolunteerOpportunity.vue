@@ -88,7 +88,7 @@
               <v-icon icon="info-circle" /> More info
             </b-button>
           </div>
-          <NuxtImg
+          <NuxtPicture
             v-if="volunteering?.image?.imageuid"
             fit="cover"
             format="webp"

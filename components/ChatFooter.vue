@@ -122,7 +122,7 @@
           </Dropdown>
         </div>
         <div v-else class="d-flex justify-content-end pt-2 pb-2">
-          <NuxtImg
+          <NuxtPicture
             fit="cover"
             format="webp"
             provider="uploadcare"

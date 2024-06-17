@@ -39,7 +39,7 @@
             </notice-message>
             <b-row>
               <b-col>
-                <NuxtImg
+                <NuxtPicture
                   v-if="volunteering?.image?.imageuid"
                   fit="cover"
                   format="webp"
@@ -203,7 +203,7 @@
                   <v-icon icon="reply" flip="horizontal" />
                 </div>
                 <div class="image">
-                  <NuxtImg
+                  <NuxtPicture
                     v-if="volunteering?.image?.imageuid"
                     fit="cover"
                     format="webp"

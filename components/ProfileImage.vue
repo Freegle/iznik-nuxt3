@@ -1,6 +1,6 @@
 <template>
   <span class="ProfileImage__container">
-    <NuxtImg
+    <NuxtPicture
       v-if="externaluid"
       fit="cover"
       provider="uploadcare"

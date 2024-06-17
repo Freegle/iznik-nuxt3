@@ -13,7 +13,7 @@
             {{ headline }}
           </b-card-header>
           <b-card-text class="p-2 preline">
-            <NuxtImg
+            <NuxtPicture
               v-if="story?.image?.externaluid"
               fit="cover"
               format="webp"

@@ -37,7 +37,7 @@
       <div :class="{ thumbnail: thumbnail, notThumbnail: !thumbnail }">
         <client-only>
           <div v-if="attachments[0].externaluid" ref="imagewrapper">
-            <NuxtImg
+            <NuxtPicture
               format="webp"
               fit="cover"
               provider="uploadcare"

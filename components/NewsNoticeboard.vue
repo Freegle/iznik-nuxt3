@@ -17,7 +17,7 @@
       <em v-if="info.description">"{{ info.description.trim() }}"</em>
     </notice-message>
     <div v-if="info.photo" class="noticeboard__photo">
-      <NuxtImg
+      <NuxtPicture
         v-if="info.photofull?.externaluid"
         format="webp"
         fit="cover"

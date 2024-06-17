@@ -204,7 +204,7 @@
               @handle="sendComment"
             />
           </div>
-          <NuxtImg
+          <NuxtPicture
             v-if="imageuid"
             format="webp"
             provider="uploadcare"

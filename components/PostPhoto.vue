@@ -23,7 +23,7 @@
       </div>
     </span>
     <div class="image-wrapper">
-      <NuxtImg
+      <NuxtPicture
         v-if="externaluid"
         fit="cover"
         format="webp"

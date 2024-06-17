@@ -14,7 +14,7 @@
       size="sm"
       class="mr-1 mb-1 mt-1 inline"
     />
-    <NuxtImg
+    <NuxtPicture
       v-if="chatmessage.image?.externaluid"
       fit="cover"
       format="webp"
@@ -52,7 +52,7 @@
       ok-only
     >
       <template #default>
-        <NuxtImg
+        <NuxtPicture
           v-if="chatmessage.image?.externaluid"
           fit="cover"
           format="webp"
