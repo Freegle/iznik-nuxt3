@@ -32,6 +32,7 @@
       <OurUploader
         v-if="!dragging"
         id="uploader"
+        :key="bump"
         v-model="currentAtts"
         type="Message"
         multiple
@@ -160,6 +161,8 @@ function $id(type) {
   return uid(type)
 }
 
+const bump = ref(0)
+
 function removePhoto(id) {
   // We just remove it from our store here.  The attachment on the server will get tidied up.
   composeStore.removeAttachment({
@@ -168,6 +171,10 @@ function removePhoto(id) {
   })
 
   currentAtts.value = currentAtts.value.filter((a) => a.id !== id)
+
+  if (!currentAtts.value.length) {
+    bump.value++
+  }
 }
 
 const dragging = ref(false)

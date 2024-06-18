@@ -61,7 +61,20 @@ lr-drop-area[with-icon] {
 }
 
 lr-activity-header {
-  display: none;
+  & > div {
+    display: none;
+  }
+
+  lr-icon[name="back"] {
+    svg {
+      width: 32px;
+      height: 32px;
+    }
+  }
+
+  .header-text {
+    display: none;
+  }
 }
 
 lr-upload-list {
