@@ -14,22 +14,12 @@
       :height="width"
     />
     <b-img
-      v-else-if="lazy"
-      lazy
-      rounded="circle"
-      :thumbnail="isThumbnail"
-      :class="className"
-      :alt="altText"
-      :src="validImage"
-      @error="brokenProfileImage"
-    />
-    <b-img
       v-else
       rounded="circle"
       :thumbnail="isThumbnail"
       :class="className"
       :alt="altText"
-      :src="validImage"
+      :src="proxyImage"
       @error="brokenProfileImage"
     />
     <v-icon
@@ -53,6 +43,8 @@
 // This component should be imported, rather than using async require.  This is because async requires result in more
 // Vue DOM patching overall, and this component is used in places like chat where it appears many times.  Testing shows
 // this has a significant performance benefit.
+import { imageProxy } from '~/composables/useImageProxy'
+
 export default {
   name: 'ProfileImage',
   props: {
@@ -105,6 +97,9 @@ export default {
     },
   },
   computed: {
+    proxyImage() {
+      return imageProxy(this.validImage, '/-/resize/100/-/format/webp/')
+    },
     validImage() {
       return this.image || '/defaultprofile.png'
     },

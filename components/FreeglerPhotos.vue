@@ -62,27 +62,16 @@
   </div>
 </template>
 <script setup lang="ts">
-import { useRuntimeConfig } from '#app'
+import { imageProxy } from '~/composables/useImageProxy'
 
-const runtimeConfig = useRuntimeConfig()
-const userSite = runtimeConfig.public.USER_SITE
-const proxy = runtimeConfig.public.UPLOADCARE_PROXY
-
-// We use Uploadcare's proxy to serve smaller images.
 const background = computed(() => {
-  return (
-    proxy + '/-/resize/634/-/format/webp/' + userSite + '/landingpage/frame.png'
-  )
+  return imageProxy('/landingpage/frame.png', '/-/resize/634/-/format/webp/')
 })
 
 function photo(img) {
-  return (
-    proxy +
-    '/-/resize/634/-/format/webp/' +
-    userSite +
-    '/landingpage/Freegler' +
-    img +
-    '.jpeg'
+  return imageProxy(
+    '/landingpage/Freegler' + img + '.jpeg',
+    '/-/resize/634/-/format/webp/'
   )
 }
 </script>
