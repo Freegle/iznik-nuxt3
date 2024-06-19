@@ -149,7 +149,7 @@ export function setupModMessages() {
       if (groupid.value) {
         messages = messageStore.getByGroup(groupid.value)
       } else {
-        messages = messageStore.all()
+        messages = messageStore.all
       }
 
       show.value = messages.length
