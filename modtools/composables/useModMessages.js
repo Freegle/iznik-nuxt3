@@ -53,24 +53,10 @@ const messages = computed(() => {
 const visibleMessages = computed(() => {
   const msgs = messages.value
   console.log('useModMessages visibleMessages', show.value, msgs?.length, msgs)
-  if( show.value===0 || !msgs || msgs.length===0) return []
+  if (show.value === 0 || !msgs || msgs.length === 0) return []
   return msgs.slice(0, show.value)
 })
 
-/*const work = computed(() => { // FAILS AT STARTUP AS useAuthStore NOT INITED
-  // Count for the type of work we're interested in.
-  try {
-    console.log(">>>>useModMessages get work")
-    const authStore = useAuthStore()
-    const work = authStore.work
-    console.log(">>>>useModMessages get work", workType.value, work)
-    const count = workType.value ? work[workType.value] : 0
-    return count
-  } catch (e) {
-    console.log('work e',e)
-    return 0
-  }
-})*/
 
 watch(groupid, async (newVal) => {
   console.log("useModMessages watch groupid", newVal)
@@ -98,20 +84,36 @@ watch(groupid, async (newVal) => {
   }
 })*/
 
-/*watch(work, async (newVal, oldVal) => {
-  console.log('<<<<useModMessages watch work', newVal, oldVal, modalOpen.value)
-  let doFetch = false
 
-  if (modalOpen.value && Date.now() - modalOpen.value > 10 * 60 * 1000) {
-    // We don't always seem to get the modal hidden event, so assume any modals open for a long time have actually
-    // closed.
-    modalOpen.value = null
-  }
+export function setupModMessages() {
+  const work = computed(() => {
+    // Count for the type of work we're interested in.
+    try {
+      console.log(">>>>useModMessages get work")
+      const authStore = useAuthStore()
+      const work = authStore.work
+      console.log(">>>>useModMessages get work", workType.value, work)
+      const count = workType.value ? work[workType.value] : 0
+      return count
+    } catch (e) {
+      console.log('>>>>work e', e.message)
+      return 0
+    }
+  })
+  watch(work, async (newVal, oldVal) => {
+    console.log('<<<<useModMessages watch work', newVal, oldVal, modalOpen.value)
+    let doFetch = false
 
-  const messageStore = useMessageStore()
-  const miscStore = useMiscStore()
+    /*if (modalOpen.value && Date.now() - modalOpen.value > 10 * 60 * 1000) {
+      // We don't always seem to get the modal hidden event, so assume any modals open for a long time have actually
+      // closed.
+      modalOpen.value = null
+    }*/
 
-  if (!modalOpen.value) {
+    const messageStore = useMessageStore()
+    const miscStore = useMiscStore()
+
+    //if (!modalOpen.value) {
     if (newVal > oldVal) {
       // There's new stuff to fetch.
       console.log('Fetch')
@@ -153,11 +155,9 @@ watch(groupid, async (newVal) => {
 
       show.value = messages.length
     }
-  }
-})*/
+    //}
+  })
 
-
-export function setupModMessages() {
   return {
     busy,
     context,
@@ -173,6 +173,6 @@ export function setupModMessages() {
     summary,
     messages,
     visibleMessages,
-    //work,
+    work,
   }
 }

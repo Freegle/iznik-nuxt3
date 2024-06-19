@@ -37,8 +37,8 @@ export const useAuthStore = defineStore({
     userlist: [],
     loginType: null,
     loginCount: 0,
-    work: {},
-    discourse: {},
+    work: {}, // MT
+    discourse: {}, // MT
   }),
   actions: {
     init(config) {
@@ -268,8 +268,6 @@ export const useAuthStore = defineStore({
       // We're so vain, we probably think this call is about us.
       let me = null
       let groups = null
-      let xwork = null // TODO
-      let xdiscourse = null // TODO
 
       /* TODO
       if (this.auth.jwt || this.auth.persistent) {
@@ -315,7 +313,7 @@ export const useAuthStore = defineStore({
       if (!me) {
         if( !components) components = [] // MT ADDED
         components = [ 'me', ...components] // MT ADDED
-        // console.log('useAuthStore fetchUser',components)
+        //console.log('### useAuthStore fetchUser',components)
 
         // Try the older API which will authenticate via the persistent token and PHP session.
         const ret = await this.$api.session.fetch({
@@ -329,9 +327,9 @@ export const useAuthStore = defineStore({
 
         if (ret) {
           ;({ me, groups, persistent, jwt } = ret) // MT added
-          //console.log('!!!fetchuser ret.work',ret.work)
-          xwork = ret.work // TODO
-          xdiscourse = ret.discourse // TODO
+          console.log('!!!fetchuser ret.work',ret.work)
+          this.work = ret.work
+          this.discourse = ret.discourse
     
           if (me) {
             this.setAuth(jwt, persistent)
@@ -375,11 +373,7 @@ export const useAuthStore = defineStore({
           composeStore.email = me.email
         }
 
-        this.work = xwork
-        //console.log('!!!fetchUser this.work',this.work)
-    
-        this.discourse = xdiscourse
-        // console.log('useAuthStore work discourse', work, discourse)
+        console.log('!!!useAuthStore work discourse', this.work, this.discourse)
      } else {
         // Any auth info must be invalid.
         this.setAuth(null, null)

@@ -9,6 +9,7 @@
         <ModZoomStock color-class="text-black" />
       </NoticeMessage>
       <div class="d-flex justify-content-between">
+        {{groupid}}
         <GroupSelect v-model="groupid" all modonly :work="['pending', 'pendingother']" remember="pending" />
         <b-button variant="link" @click="loadAll">
           Load all
@@ -38,7 +39,7 @@ export default {
     modMessages.workType.value = 'pending'
     return {
       miscStore,
-      ...modMessages
+      ...modMessages // busy, context, group, groupid, limit, workType, show, collection, messageTerm, memberTerm, distance, summary, messages, visibleMessages, work,
     }
   },
   mixins: [
@@ -86,7 +87,7 @@ export default {
   },
   methods: {
     async loadAll() {
-      /*
+      /* TODO
       // This is a bit of a hack - we clear the store and fetch 1000 messages, which is likely to be all of them.
       this.limit = 1000
       await this.$store.dispatch('messages/clearContext')
