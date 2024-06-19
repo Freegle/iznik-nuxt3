@@ -1,7 +1,7 @@
 <template>
   <div class="d-inline">
     <div class="position-relative d-inline">
-      <SpinButton :variant="variant" :spinclass="spinclass" :icon-name="icon" :label="label" class="mb-1" :disabled="disabled" :handler="click"
+      <SpinButton :variant="variant" :spinclass="spinclass" :icon-name="icon" :label="label" :flex="false" class="mb-1 me-1 d-inline-block" :disabled="disabled" :handler="click"
         :confirm="confirmButton" />
       <v-icon v-if="autosend" name="chevron-circle-right" title="Autosend - configured to send immediately without edit" class="autosend" />
     </div>

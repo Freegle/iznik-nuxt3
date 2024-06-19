@@ -62,7 +62,7 @@ onMounted(async () => {
   context.value = null
 
   const authStore = useAuthStore()
-  const work = authStore.work // NOT PRESENT YET
+  const work = authStore.work // IN PRACTICE, NEVER SET
   console.log('###ModMessages work', work)
   if (work) {
     const count = workType.value ? work[workType.value] : 0
