@@ -82,9 +82,9 @@
   </b-modal>
 </template>
 <script>
-import { useGroupStore } from './stores/group'
-import { useMemberStore } from './stores/member'
-import { useMessageStore } from './stores/message'
+import { useGroupStore } from '~/stores/group'
+import { useMemberStore } from '~/stores/member'
+import { useMessageStore } from '~/stores/message'
 import dayjs from 'dayjs'
 import { useModal } from '~/composables/useModal'
 //import keywords from '@/mixins/keywords.js'

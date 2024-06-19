@@ -318,6 +318,17 @@ export const useMessageStore = defineStore({
       await api(this.config).message.markSeen(ids)
       await this.fetchCount()
     },
+    async delete(params) {
+      await api(this.config).message.delete(
+        params.id,
+        params.groupid,
+        params.subject,
+        params.stdmsgid,
+        params.body
+      )
+    
+      delete this.list[params.id]
+    },
     clearContext() { // Added for ModTools
       this.context = null
     },

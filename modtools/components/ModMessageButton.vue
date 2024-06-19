@@ -1,13 +1,16 @@
 <template>
   <div class="d-inline">
     <div class="position-relative d-inline">
-      <SpinButton :variant="variant" :spinclass="spinclass" :icon-name="icon" :label="label" :flex="false" class="mb-1 me-1 d-inline-block" :disabled="disabled" :handler="click"
-        :confirm="confirmButton" />
+      <SpinButton :variant="variant" :spinclass="spinclass" :icon-name="icon" :label="label" :flex="false" class="mb-1 me-1 d-inline-block"
+        :disabled="disabled" @handle="click" :confirm="confirmButton" />
       <v-icon v-if="autosend" name="chevron-circle-right" title="Autosend - configured to send immediately without edit" class="autosend" />
     </div>
-    <ConfirmModal v-if="showDeleteModal" ref="deleteConfirm" :title="'Delete: ' + message.subject" @confirm="deleteConfirmed" />
-    <ConfirmModal v-if="showSpamModal" ref="spamConfirm" :title="'Mark as Spam: ' + message.subject" @confirm="spamConfirmed" />
-    <!--ModStdMessageModal v-if="showStdMsgModal" ref="stdmodal" :stdmsg="stdmsg" :message="message" :autosend="autosend" /-->
+    <ConfirmModal v-if="showDeleteModal" ref="deleteConfirm" :title="'Delete: ' + message.subject" @confirm="deleteConfirmed"
+      @hidden="showDeleteModal = false" />
+    <ConfirmModal v-if="showSpamModal" ref="spamConfirm" :title="'Mark as Spam: ' + message.subject" @confirm="spamConfirmed"
+      @hidden="showSpamModal = false" />
+    <ModStdMessageModal v-if="showStdMsgModal" ref="stdmodal" :stdmsg="stdmsg" :message="message" :autosend="autosend"
+      @hidden="showStdMsgModal = false" />
   </div>
 </template>
 <script>
@@ -135,7 +138,7 @@ export default {
     }
   },
   methods: {
-    async click() {
+    async click(callback) {
       if (this.approve) {
         // Standard approve button - no modal.
         await this.approveIt()
@@ -175,10 +178,10 @@ export default {
         }
 
         this.showStdMsgModal = true
-        this.waitForRef('stdmodal', () => {
-          this.$refs.stdmodal.show()
-        })
+        await nextTick()
+        this.$refs.stdmodal?.show()
       }
+      if (callback) callback()
     },
     async approveIt() {
       await this.messageStore.approve({
@@ -186,11 +189,8 @@ export default {
         groupid: this.groupid
       })
     },
-    deleteIt() {
+    async deleteIt() {
       this.showDeleteModal = true
-      this.waitForRef('deleteConfirm', () => {
-        this.$refs.deleteConfirm.show()
-      })
     },
     async deleteConfirmed() {
       await this.messageStore.delete({
