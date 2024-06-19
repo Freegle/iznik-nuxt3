@@ -75,7 +75,7 @@
           </p>
         </b-col>
       </b-row>
-      <b-row v-if="uploading" class="bg-white">
+      <b-row class="bg-white">
         <b-col class="p-0">
           <OurUploader v-model="attachments" type="Message" multiple />
         </b-col>
@@ -108,9 +108,6 @@
       </b-row>
     </template>
     <template #footer>
-      <b-button variant="secondary" class="mr-auto" @click="photoAdd">
-        <v-icon icon="camera" />&nbsp;Add photo
-      </b-button>
       <b-button variant="white" :disabled="uploadingPhoto" @click="hide">
         Cancel
       </b-button>
@@ -191,7 +188,6 @@ export default {
   },
   data() {
     return {
-      uploading: false,
       triedToSave: false,
     }
   },
@@ -275,11 +271,6 @@ export default {
       this.attachments = this.attachments.filter((item) => {
         return item.id !== id
       })
-    },
-    photoAdd() {
-      // Flag that we're uploading.  This will trigger the render of the filepond instance and subsequently the
-      // init callback below.
-      this.uploading = true
     },
     postcodeSelect(pc) {
       this.postcode = pc
