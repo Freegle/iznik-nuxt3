@@ -12,7 +12,7 @@ export const useLocationStore = defineStore({
       this.config = config
     },
     async fetch(params) {
-      console.log('useLocationStore fetch',params)
+      //console.log('useLocationStore fetch',params)
       return await api(this.config).location.fetch(params)
     },
     async fetchv2(id) {

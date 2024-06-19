@@ -348,7 +348,7 @@ export const useMessageStore = defineStore({
       // TODO}
       await this.clear()
       for(const message of messages){
-        console.log('GOT message',message.id)
+        //console.log('GOT message',message.id)
         this.list[message.id] = message
       }
     },

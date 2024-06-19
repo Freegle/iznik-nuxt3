@@ -9,7 +9,6 @@
         <ModZoomStock color-class="text-black" />
       </NoticeMessage>
       <div class="d-flex justify-content-between">
-        {{groupid}}
         <GroupSelect v-model="groupid" all modonly :work="['pending', 'pendingother']" remember="pending" />
         <b-button variant="link" @click="loadAll">
           Load all

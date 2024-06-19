@@ -392,7 +392,7 @@ export default {
 
       if (this.message && this.message.groups && this.message.groups.length) {
         const groupid = this.message.groups[0].groupid
-        console.log("groupid", groupid)
+        //console.log("groupid", groupid)
         ret = this.myGroups.find(g => parseInt(g.id) === groupid)
       }
 
@@ -552,32 +552,25 @@ export default {
       this.message.groups.forEach(g => {
         const group = this.myGroup(g.groupid)
 
-        try { // TODO remove
-          if (
-            group &&
-            (!group.settings ||
-              !group.settings.duplicates ||
-              group.settings.duplicates.check)
-          ) {
-            check = true
-            const msgtype = this.message.type.toLowerCase()
-            ret = Math.min(ret, group.settings.duplicates[msgtype])
-          }
-        } catch (e) { // TODO remove
-          console.log("duplicateAge exception", e.message)
+        //console.log("duplicateAge group", group)
+        if (
+          group &&
+          group.settings &&
+          group.settings.duplicates &&
+          group.settings.duplicates.check
+        ) {
+          check = true
+          const msgtype = this.message.type.toLowerCase()
+          ret = Math.min(ret, group.settings.duplicates[msgtype])
         }
       })
 
       return check ? ret : null
     },
     crossposts() {
-      console.log('crossposts')
-      //return [] // TODO
       return this.checkHistory(false)
     },
     duplicates() {
-      console.log('duplicates')
-      //return [] // TODO
       return this.checkHistory(true)
     },
     memberGroupIds() {

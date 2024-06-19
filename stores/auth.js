@@ -327,7 +327,7 @@ export const useAuthStore = defineStore({
 
         if (ret) {
           ;({ me, groups, persistent, jwt } = ret) // MT added
-          console.log('!!!fetchuser ret.work',ret.work)
+          // console.log('!!!fetchuser ret.work',ret.work)
           this.work = ret.work
           this.discourse = ret.discourse
     
@@ -373,7 +373,7 @@ export const useAuthStore = defineStore({
           composeStore.email = me.email
         }
 
-        console.log('!!!useAuthStore work discourse', this.work, this.discourse)
+        // console.log('!!!useAuthStore work discourse', this.work, this.discourse)
      } else {
         // Any auth info must be invalid.
         this.setAuth(null, null)

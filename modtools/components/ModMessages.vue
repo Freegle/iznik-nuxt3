@@ -27,7 +27,7 @@ const miscStore = useMiscStore()
 
 // mixin/modMessagesPage
 const {
-  busy, context, group, groupid, limit, workType, show, collection, messageTerm, memberTerm, distance, summary, messages, visibleMessages, work,
+  busy, context, group, groupid, limit, workType, show, collection, messageTerm, memberTerm, nextAfterRemoved, distance, summary, messages, visibleMessages, work,
 } = setupModMessages()
 
 
