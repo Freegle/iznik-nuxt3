@@ -157,9 +157,16 @@ function setPhotos(photos) {
     ctxProviderRef.value.removeAllFiles()
 
     photos.forEach((f) => {
-      ctxProviderRef.value.addFileFromCdnUrl(f.path, {
-        silent: true,
-      })
+      console.log('Add photo', f)
+      if (f.path) {
+        ctxProviderRef.value.addFileFromCdnUrl(f.path, {
+          silent: true,
+        })
+      } else if (f.externaluid) {
+        ctxProviderRef.value.addFileFromUuid(f.externaluid, {
+          silent: true,
+        })
+      }
     })
   }
 }
