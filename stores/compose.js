@@ -259,9 +259,14 @@ export const useComposeStore = defineStore({
       this.messages[id].attachments = attachments
     },
     removeAttachment(params) {
-      const newAtts = this.messages[params.id].attachments.filter((obj) => {
-        return parseInt(obj.id) !== parseInt(params.photoid)
-      })
+      console.log('Remove attachment', JSON.stringify(params))
+      let newAtts = []
+
+      if (this.messages[params.id].attachments) {
+        newAtts = this.messages[params.id].attachments.filter((obj) => {
+          return parseInt(obj.id) !== parseInt(params.photoid)
+        })
+      }
 
       this.messages[params.id].attachments = newAtts
     },
