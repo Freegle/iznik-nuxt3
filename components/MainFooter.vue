@@ -8,7 +8,11 @@
           href="https://affiliate.k.io/go/Freegle-Krystal"
           class="d-flex justify-content-start flex-column mr-4"
         >
-          <img src="/krystal.png" alt="Bytemark Logo" class="sponsor" />
+          <img
+            :src="imageProxy('/krystal.png', '/-/resize/165/-/format/webp/')"
+            alt="Bytemark Logo"
+            class="sponsor"
+          />
         </a>
         <a
           target="_blank"
@@ -17,7 +21,9 @@
           class="d-flex justify-content-start flex-column ml-4"
         >
           <img
-            src="/mythic-beasts.png"
+            :src="
+              imageProxy('/mythic-beasts.png', '/-/resize/165/-/format/webp/')
+            "
             alt="Mythic Beasts Logo"
             class="sponsor"
           />
