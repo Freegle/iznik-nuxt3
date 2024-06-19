@@ -8,7 +8,10 @@ export function imageProxy(img, modifiers = '') {
   const imageSite = runtimeConfig.public.IMAGE_SITE
   const proxy = runtimeConfig.public.UPLOADCARE_PROXY
 
-  if (img.startsWith(userSite) || img.startsWith(imageSite)) {
+  if (!img.startsWith('http')) {
+    // Relative URL - proxy to our site.
+    return proxy + modifiers + userSite + img
+  } else if (img.startsWith(userSite) || img.startsWith(imageSite)) {
     return proxy + modifiers + img
   } else {
     return img
