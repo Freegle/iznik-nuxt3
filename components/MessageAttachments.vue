@@ -36,28 +36,45 @@
       </div>
       <div :class="{ thumbnail: thumbnail, notThumbnail: !thumbnail }">
         <client-only>
-          <b-img
-            lazy
-            rounded
-            class="d-none d-md-block attachment p-0"
-            generator-unable-to-provide-required-alt=""
-            title="Item picture"
-            :src="thumbnail ? attachments[0].paththumb : attachments[0].path"
-            itemprop="image"
-            @error="brokenImage"
-            @click="$emit('zoom')"
-          />
-          <b-img
-            lazy
-            rounded
-            class="d-block d-md-none attachment p-0"
-            generator-unable-to-provide-required-alt=""
-            title="Item picture"
-            :src="attachments[0].path"
-            itemprop="image"
-            @error="brokenImage"
-            @click="$emit('zoom')"
-          />
+          <div v-if="attachments[0].externaluid" ref="imagewrapper">
+            <NuxtPicture
+              format="webp"
+              fit="cover"
+              provider="uploadcare"
+              :src="attachments[0].externaluid"
+              :modifiers="attachments[0].externalmods"
+              alt="Item Photo"
+              class="attachment"
+              :width="Math.round(width)"
+              :height="Math.round(height)"
+              @error="brokenImage"
+              @click="$emit('zoom')"
+            />
+          </div>
+          <div v-else>
+            <b-img
+              lazy
+              rounded
+              class="d-none d-md-block attachment p-0"
+              generator-unable-to-provide-required-alt=""
+              title="Item picture"
+              :src="thumbnail ? attachments[0].paththumb : attachments[0].path"
+              itemprop="image"
+              @error="brokenImage"
+              @click="$emit('zoom')"
+            />
+            <b-img
+              lazy
+              rounded
+              class="d-block d-md-none attachment p-0"
+              generator-unable-to-provide-required-alt=""
+              title="Item picture"
+              :src="attachments[0].path"
+              itemprop="image"
+              @error="brokenImage"
+              @click="$emit('zoom')"
+            />
+          </div>
           <template #fallback>
             <img
               class="attachment p-0"
@@ -72,44 +89,43 @@
     </button>
   </div>
 </template>
-<script>
-export default {
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-    attachments: {
-      type: Array,
-      default: () => [],
-    },
-    disabled: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    thumbnail: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    showZoom: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
+<script setup>
+import { useElementSize } from '@vueuse/core'
+
+defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  data() {
-    return {
-      defaultAttachments: false,
-    }
+  attachments: {
+    type: Array,
+    default: () => [],
   },
-  methods: {
-    brokenImage() {
-      // If the attachment image is broken, we're best off just hiding it.
-      this.defaultAttachments = true
-    },
+  disabled: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
+  thumbnail: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  showZoom: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+})
+
+const defaultAttachments = ref(false)
+const imagewrapper = ref(null)
+
+const { width, height } = useElementSize(imagewrapper)
+
+function brokenImage() {
+  // If the attachment image is broken, we're best off just hiding it.
+  defaultAttachments.value = true
 }
 </script>
 <style scoped lang="scss">
@@ -125,16 +141,30 @@ export default {
 
 .thumbnail {
   .attachment {
+    display: block;
     height: 200px;
+
+    img {
+      height: 200px;
+    }
   }
 }
 
 .notThumbnail {
   .attachment {
+    display: block;
     height: 200px;
+
+    img {
+      height: 200px;
+    }
 
     @include media-breakpoint-up(sm) {
       height: 360px;
+
+      img {
+        height: 360px;
+      }
     }
   }
 }

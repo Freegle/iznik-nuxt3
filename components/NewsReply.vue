@@ -39,13 +39,17 @@
           <br />
         </span>
         <div v-if="reply.image">
-          <b-img
-            rounded
+          <NuxtPicture
+            v-if="reply?.image?.externaluid"
+            format="webp"
+            fit="cover"
+            provider="uploadcare"
+            :src="reply?.image?.externaluid"
+            :modifiers="reply?.image?.externalmods"
+            alt="ChitChat Photo"
+            width="100"
             class="clickme replyphoto mt-2 mb-2"
-            generator-unable-to-provide-required-alt=""
-            :src="reply.image.paththumb"
             @click="showReplyPhotoModal"
-            @error="brokenImage"
           />
         </div>
         <div v-if="userid" class="text-muted align-items-center">
@@ -252,7 +256,7 @@
           </b-input-group>
         </OurAtTa>
       </div>
-      <div class="d-flex justify-content-between flex-wrap m-1">
+      <div class="d-flex justify-content-between flex-wrap m-1 mt-2">
         <b-button size="sm" variant="secondary" @click="photoAdd">
           <v-icon icon="camera" />&nbsp;Add Photo
         </b-button>
@@ -266,19 +270,22 @@
         />
       </div>
     </div>
-    <b-img
-      v-if="imageid"
-      lazy
-      thumbnail
-      :src="imagethumb"
+    <NuxtPicture
+      v-if="imageuid"
+      format="webp"
+      fit="cover"
+      provider="uploadcare"
+      :src="imageuid"
+      :modifiers="imagemods"
+      alt="ChitChat Photo"
+      width="100"
       class="mt-1 ml-4 image__uploaded"
     />
-    <OurFilePond
+    <OurUploader
       v-if="uploading"
+      v-model="currentAtts"
       class="bg-white m-0 pondrow"
-      imgtype="Newsfeed"
-      imgflag="newsfeed"
-      @photo-processed="photoProcessed"
+      type="Newsfeed"
     />
     <NewsPhotoModal
       v-if="showNewsPhotoModal && reply.image"
@@ -341,8 +348,8 @@ const ConfirmModal = defineAsyncComponent(() =>
 const NewsReplies = defineAsyncComponent(() =>
   import('~/components/NewsReplies.vue')
 )
-const OurFilePond = defineAsyncComponent(() =>
-  import('~/components/OurFilePond')
+const OurUploader = defineAsyncComponent(() =>
+  import('~/components/OurUploader')
 )
 const OurAtTa = defineAsyncComponent(() => import('~/components/OurAtTa'))
 
@@ -353,7 +360,7 @@ export default {
     NewsEditModal,
     NewsReplies,
     SpinButton,
-    OurFilePond,
+    OurUploader,
     NewsLovesModal,
     NewsUserInfo,
     NewsHighlight,
@@ -402,7 +409,8 @@ export default {
       showAllReplies: false,
       uploading: false,
       imageid: null,
-      imagethumb: null,
+      imageuid: null,
+      imagemods: null,
       showDeleteModal: false,
       showLoveModal: false,
       showEditModal: false,
@@ -410,6 +418,7 @@ export default {
       isVisible: false,
       showProfileModal: false,
       showNewsPhotoModal: false,
+      currentAtts: [],
     }
   },
   computed: {
@@ -464,6 +473,16 @@ export default {
         this.scrollIntoView()
       }
     },
+    currentAtts: {
+      handler(newVal) {
+        this.uploading = false
+
+        this.imageid = newVal[0].id
+        this.imageuid = newVal[0].externaluid
+        this.imagemods = newVal[0].externalmods
+      },
+      deep: true,
+    },
   },
   mounted() {
     // This will get propogated up the stack so that we know if the reply to which we'd like to scroll has been
@@ -510,6 +529,8 @@ export default {
 
         // And any image id
         this.imageid = null
+        this.imageuid = null
+        this.imagemods = null
 
         // Force re-render.  Store reactivity doesn't seem to work nicely with the nested reply structure we have.
         this.bump++
@@ -577,14 +598,6 @@ export default {
       // Flag that we're uploading.  This will trigger the render of the filepond instance and subsequently the
       // init callback below.
       this.uploading = true
-    },
-    photoProcessed(imageid, imagethumb) {
-      // We have uploaded a photo.  Remove the filepond instance.
-      this.uploading = false
-
-      // The imageid is in this.imageid
-      this.imageid = imageid
-      this.imagethumb = imagethumb
     },
     scrollIntoView() {
       const api = this.miscStore.apiCount

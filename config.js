@@ -14,6 +14,7 @@ const CONFIG = {
 
   // This is where images are served from.
   IMAGE_SITE: 'https://images.ilovefreegle.org',
+  UPLOADCARE_PROXY: 'https://61ddd294bd3a390019c6.ucr.io/',
 
   // OpenStreetMap Tile Server
   OSM_TILE:

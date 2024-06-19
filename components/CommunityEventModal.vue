@@ -32,7 +32,23 @@
             </notice-message>
             <b-row>
               <b-col>
-                <b-img lazy fluid :src="event.image.path" class="mb-2 w-100" />
+                <NuxtPicture
+                  v-if="event?.image?.imageuid"
+                  format="webp"
+                  fit="cover"
+                  provider="uploadcare"
+                  :src="event.image.imageuid"
+                  :modifiers="event.image.imagemods"
+                  alt="Community Event Photo"
+                  class="mb-2 w-100"
+                />
+                <b-img
+                  v-else
+                  lazy
+                  fluid
+                  :src="event.image.path"
+                  class="mb-2 w-100"
+                />
               </b-col>
             </b-row>
           </div>
@@ -174,8 +190,18 @@
                   <v-icon icon="reply" flip="horizontal" />
                 </div>
                 <div class="image">
+                  <NuxtPicture
+                    v-if="event?.image?.imageuid"
+                    format="webp"
+                    fit="cover"
+                    provider="uploadcare"
+                    :src="event.image.imageuid"
+                    :modifiers="mods"
+                    alt="Community Event Photo"
+                    class="mb-2 w-100"
+                  />
                   <b-img
-                    v-if="event.image"
+                    v-else-if="event.image"
                     fluid
                     :src="event.image.paththumb + '?' + cacheBust"
                   />
@@ -194,12 +220,10 @@
             </b-row>
             <b-row v-if="uploading">
               <b-col>
-                <OurFilePond
+                <OurUploader
+                  v-model="currentAtts"
                   class="bg-white"
-                  imgtype="CommunityEvent"
-                  imgflag="communityevent"
-                  :ocr="true"
-                  @photo-processed="photoProcessed"
+                  type="CommunityEvent"
                 />
               </b-col>
             </b-row>
@@ -394,8 +418,8 @@ import { useModal } from '~/composables/useModal'
 const GroupSelect = defineAsyncComponent(() =>
   import('~/components/GroupSelect')
 )
-const OurFilePond = defineAsyncComponent(() =>
-  import('~/components/OurFilePond')
+const OurUploader = defineAsyncComponent(() =>
+  import('~/components/OurUploader')
 )
 const StartEndCollection = defineAsyncComponent(() =>
   import('~/components/StartEndCollection')
@@ -445,7 +469,7 @@ export default {
   components: {
     EmailValidator,
     GroupSelect,
-    OurFilePond,
+    OurUploader,
     StartEndCollection,
     NoticeMessage,
     DonationButton,
@@ -512,6 +536,8 @@ export default {
       showGroupError: false,
       showDateError: false,
       description: null,
+      currentAtts: [],
+      mods: {},
     }
   },
   computed: {
@@ -581,6 +607,18 @@ export default {
       handler(newVal) {
         this.event.description = newVal
       },
+    },
+    currentAtts: {
+      handler(newVal) {
+        this.uploading = false
+
+        this.event.image = {
+          id: newVal[0].id,
+          imageuid: newVal[0].externaluid,
+          imagemods: newVal[0].externalmods,
+        }
+      },
+      deep: true,
     },
   },
   methods: {
@@ -737,40 +775,19 @@ export default {
       // processed callback below.
       this.uploading = true
     },
-    photoProcessed(imageid, imagethumb, image, ocr) {
-      // We have uploaded a photo.  Remove the filepond instance.
-      this.uploading = false
-
-      this.event.image = {
-        id: imageid,
-        path: image,
-        paththumb: imagethumb,
-      }
-
-      if (ocr) {
-        // We might have some OCR text from a poster which we can add in.
-        const p = ocr.indexOf('\n')
-        const title = p !== -1 ? ocr.substring(0, p) : null
-        const desc = p !== -1 ? ocr.substring(p + 1) : ocr
-
-        if (!this.event.title) {
-          this.event.title = title
-        }
-
-        if (!this.event.description) {
-          this.event.description = desc
-        }
-      }
-    },
     async rotate(deg) {
+      const curr = this.mods?.rotate || 0
+      this.mods.rotate = curr + deg
+
+      // Ensure between 0 and 360
+      this.mods.rotate = (this.mods.rotate + 360) % 360
+
       await this.imageStore.post({
         id: this.event.image.id,
-        rotate: deg,
+        rotate: this.mods.rotate,
         bust: Date.now(),
         communityevent: true,
       })
-
-      this.cacheBust = Date.now()
     },
     rotateLeft() {
       this.rotate(90)

@@ -58,22 +58,26 @@
       <div class="mt-3 mb-5 d-none d-md-flex">
         <div class="w-100 d-flex justify-content-around">
           <div class="mt-2 d-flex justify-content-between maxbutt">
-            <b-button
-              variant="secondary"
-              size="lg"
-              to="/give/whereami"
-              class="d-none d-md-block"
-            >
-              <v-icon icon="angle-double-left" /> Back
-            </b-button>
-            <b-button
-              v-if="emailValid && !submitting && !emailBelongsToSomeoneElse"
-              variant="primary"
-              size="lg"
-              @click="next"
-            >
-              Freegle it! <v-icon icon="angle-double-right" />
-            </b-button>
+            <div>
+              <b-button
+                variant="secondary"
+                size="lg"
+                to="/give/whereami"
+                class="d-none d-md-block"
+              >
+                <v-icon icon="angle-double-left" /> Back
+              </b-button>
+            </div>
+            <div>
+              <b-button
+                v-if="emailValid && !submitting && !emailBelongsToSomeoneElse"
+                variant="primary"
+                size="lg"
+                @click="next"
+              >
+                Freegle it! <v-icon icon="angle-double-right" />
+              </b-button>
+            </div>
           </div>
         </div>
         <div v-if="submitting" class="d-flex justify-content-around pt-2 mt-2">

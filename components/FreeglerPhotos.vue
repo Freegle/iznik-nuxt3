@@ -6,7 +6,7 @@
           class="carousel"
           ride="carousel"
           fade
-          background="/landingpage/frame.png"
+          :background="background"
         >
           <BCarouselSlide
             v-for="img in [
@@ -19,14 +19,14 @@
               <div class="layout">
                 <b-img
                   fluid
-                  src="/landingpage/frame.png"
+                  :src="background"
                   class="frame"
                   alt="Ornate gold picture frame. Image courtesy of https://pixabay.com/users/avantrend-321510/"
                 />
                 <b-img
                   fluid
                   lazy
-                  :src="'/landingpage/Freegler' + img + '.jpeg'"
+                  :src="photo(img)"
                   alt="Picture of a real freegler, looking happy. Photo by Alex Bamford."
                   class="image"
                 />
@@ -39,13 +39,13 @@
             <img
               data-v-2fbdba03=""
               class="img-fluid frame"
-              src="/landingpage/frame.png"
+              :src="background"
               loading="eager"
               alt="Ornate gold picture frame. Image courtesy of https://pixabay.com/users/avantrend-321510/"
             /><img
               data-v-2fbdba03=""
               class="img-fluid image"
-              src="/landingpage/Freegler1.jpeg"
+              :src="photo(1)"
               loading="lazy"
               alt="Picture of a real freegler, looking happy. Photo by Alex Bamford."
             />
@@ -61,7 +61,31 @@
     </p>
   </div>
 </template>
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { useRuntimeConfig } from '#app'
+
+const runtimeConfig = useRuntimeConfig()
+const userSite = runtimeConfig.public.USER_SITE
+const proxy = runtimeConfig.public.UPLOADCARE_PROXY
+
+// We use Uploadcare's proxy to serve smaller images.
+const background = computed(() => {
+  return (
+    proxy + '/-/resize/634/-/format/webp/' + userSite + '/landingpage/frame.png'
+  )
+})
+
+function photo(img) {
+  return (
+    proxy +
+    '/-/resize/634/-/format/webp/' +
+    userSite +
+    '/landingpage/Freegler' +
+    img +
+    '.jpeg'
+  )
+}
+</script>
 <style scoped lang="scss">
 .layout {
   max-height: 100%;

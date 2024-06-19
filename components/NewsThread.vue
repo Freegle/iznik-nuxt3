@@ -188,7 +188,7 @@
           </div>
           <div
             v-if="threadcomment"
-            class="d-flex justify-content-between flex-wrap m-1"
+            class="d-flex justify-content-between flex-wrap m-1 mt-2"
           >
             <b-button variant="secondary" @click="photoAdd">
               <v-icon icon="camera" /><span class="d-none d-sm-inline"
@@ -204,19 +204,21 @@
               @handle="sendComment"
             />
           </div>
-          <b-img
-            v-if="imageid"
-            lazy
-            thumbnail
-            :src="imagethumb"
+          <NuxtPicture
+            v-if="imageuid"
+            format="webp"
+            provider="uploadcare"
+            :src="imageuid"
+            :modifiers="imagemods"
+            alt="ChitChat Photo"
+            width="100"
             class="mt-1 ml-4 image__uploaded"
           />
-          <OurFilePond
+          <OurUploader
             v-if="uploading"
+            v-model="currentAtts"
             class="bg-white m-0 pondrow"
-            imgtype="Newsfeed"
-            imgflag="newsfeed"
-            @photo-processed="photoProcessed"
+            type="Newsfeed"
           />
         </span>
         <notice-message v-else>
@@ -268,8 +270,8 @@ import { useUserStore } from '~/stores/user'
 const NewsReportModal = defineAsyncComponent(() => import('./NewsReportModal'))
 const ConfirmModal = () =>
   defineAsyncComponent(() => import('~/components/ConfirmModal.vue'))
-const OurFilePond = defineAsyncComponent(() =>
-  import('~/components/OurFilePond')
+const OurUploader = defineAsyncComponent(() =>
+  import('~/components/OurUploader')
 )
 const OurAtTa = defineAsyncComponent(() => import('~/components/OurAtTa'))
 
@@ -278,7 +280,7 @@ export default {
   components: {
     NewsReplies,
     SpinButton,
-    OurFilePond,
+    OurUploader,
     NewsReportModal,
     NewsRefer,
     NewsMessage,
@@ -353,11 +355,13 @@ export default {
       },
       uploading: false,
       imageid: null,
-      imagethumb: null,
+      imageuid: null,
+      imagemods: null,
       showDeleteModal: false,
       showEditModal: false,
       showReportModal: false,
       showThis: true,
+      currentAtts: [],
     }
   },
   computed: {
@@ -421,6 +425,18 @@ export default {
       }
     },
   },
+  watch: {
+    currentAtts: {
+      handler(newVal) {
+        this.uploading = false
+
+        this.imageid = newVal[0].id
+        this.imageuid = newVal[0].externaluid
+        this.imagemods = newVal[0].externalmods
+      },
+      deep: true,
+    },
+  },
   mounted() {
     // Scroll down now that the child components are rendered.
     this.$emit('rendered')
@@ -455,6 +471,8 @@ export default {
 
         // And any image id
         this.imageid = null
+        this.imageuid = null
+        this.imagemods = null
       }
 
       if (typeof callback === 'function') {
@@ -532,14 +550,6 @@ export default {
       // Flag that we're uploading.  This will trigger the render of the filepond instance and subsequently the
       // init callback below.
       this.uploading = true
-    },
-    photoProcessed(imageid, imagethumb) {
-      // We have uploaded a photo.  Remove the filepond instance.
-      this.uploading = false
-
-      // The imageid is in this.imageid
-      this.imageid = imageid
-      this.imagethumb = imagethumb
     },
     async mute() {
       await this.userStore.muteOnChitChat(this.newsfeed.userid)

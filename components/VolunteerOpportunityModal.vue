@@ -39,7 +39,18 @@
             </notice-message>
             <b-row>
               <b-col>
+                <NuxtPicture
+                  v-if="volunteering?.image?.imageuid"
+                  fit="cover"
+                  format="webp"
+                  provider="uploadcare"
+                  :src="volunteering.image.imageuid"
+                  :modifiers="volunteering.image.imagemods"
+                  alt="Volunteer Opportunity Photo"
+                  class="mb-2 w-100"
+                />
                 <b-img
+                  v-else
                   lazy
                   fluid
                   :src="volunteering.image.path"
@@ -192,8 +203,18 @@
                   <v-icon icon="reply" flip="horizontal" />
                 </div>
                 <div class="image">
+                  <NuxtPicture
+                    v-if="volunteering?.image?.imageuid"
+                    fit="cover"
+                    format="webp"
+                    provider="uploadcare"
+                    :src="volunteering.image.imageuid"
+                    :modifiers="mods"
+                    alt="Volunteer Opportunity Photo"
+                    class="mb-2 w-100"
+                  />
                   <b-img
-                    v-if="volunteering.image"
+                    v-else-if="volunteering.image"
                     fluid
                     :src="volunteering.image.paththumb + '?' + cacheBust"
                   />
@@ -212,12 +233,10 @@
             </b-row>
             <b-row v-if="uploading">
               <b-col>
-                <OurFilePond
+                <OurUploader
+                  v-model="currentAtts"
                   class="bg-white"
-                  imgtype="Volunteering"
-                  imgflag="volunteering"
-                  :ocr="true"
-                  @photo-processed="photoProcessed"
+                  type="Volunteering"
                 />
               </b-col>
             </b-row>
@@ -430,8 +449,8 @@ import { useModal } from '~/composables/useModal'
 const GroupSelect = defineAsyncComponent(() =>
   import('~/components/GroupSelect')
 )
-const OurFilePond = defineAsyncComponent(() =>
-  import('~/components/OurFilePond')
+const OurUploader = defineAsyncComponent(() =>
+  import('~/components/OurUploader')
 )
 const StartEndCollection = defineAsyncComponent(() =>
   import('~/components/StartEndCollection')
@@ -475,7 +494,7 @@ export default {
     EmailValidator,
     SpinButton,
     GroupSelect,
-    OurFilePond,
+    OurUploader,
     StartEndCollection,
     NoticeMessage,
     DonationButton,
@@ -539,6 +558,8 @@ export default {
       uploading: false,
       showGroupError: false,
       description: null,
+      currentAtts: [],
+      mods: {},
     }
   },
   computed: {
@@ -608,6 +629,18 @@ export default {
       handler(newVal) {
         this.volunteering.description = newVal
       },
+    },
+    currentAtts: {
+      handler(newVal) {
+        this.uploading = false
+
+        this.volunteering.image = {
+          id: newVal[0].id,
+          imageuid: newVal[0].externaluid,
+          imagemods: newVal[0].externalmods,
+        }
+      },
+      deep: true,
     },
   },
   methods: {
@@ -760,28 +793,19 @@ export default {
       // processed callback below.
       this.uploading = true
     },
-    photoProcessed(imageid, imagethumb, image) {
-      // We have uploaded a photo.  Remove the filepond instance.
-      this.uploading = false
-
-      this.volunteering.image = {
-        id: imageid,
-        path: image,
-        paththumb: imagethumb,
-      }
-
-      // We don't do OCR on these - volunteer op photos are much less likely to have useful text than community
-      // events.
-    },
     async rotate(deg) {
+      const curr = this.mods?.rotate || 0
+      this.mods.rotate = curr + deg
+
+      // Ensure between 0 and 360
+      this.mods.rotate = (this.mods.rotate + 360) % 360
+
       await this.imageStore.post({
         id: this.volunteering.image.id,
-        rotate: deg,
+        rotate: this.mods.rotate,
         bust: Date.now(),
         volunteering: true,
       })
-
-      this.cacheBust = Date.now()
     },
     rotateLeft() {
       this.rotate(90)

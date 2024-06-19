@@ -10,8 +10,18 @@
       class="font-weight-bold preline forcebreak nopara"
     />
     <div>
+      <NuxtPicture
+        v-if="newsfeed.image?.externaluid"
+        format="webp"
+        fit="cover"
+        provider="uploadcare"
+        :src="newsfeed.image.externaluid"
+        :modifiers="newsfeed.image?.externalmod"
+        alt="ChitChat Image"
+        sizes="100vw md:400px"
+      />
       <b-img
-        v-if="newsfeed.image"
+        v-else-if="newsfeed.image"
         lazy
         rounded
         :src="newsfeed.image.path"

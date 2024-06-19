@@ -88,8 +88,18 @@
               <v-icon icon="info-circle" /> More info
             </b-button>
           </div>
+          <NuxtPicture
+            v-if="volunteering?.image?.imageuid"
+            fit="cover"
+            format="webp"
+            provider="uploadcare"
+            :src="volunteering.image.externaluid"
+            :modifiers="volunteering.image.externalmods"
+            alt="Volunteering Opportunity Photo"
+            class="mb-2 w-100"
+          />
           <b-img
-            v-if="volunteering.image"
+            v-else-if="volunteering.image"
             lazy
             class="w-100"
             :src="volunteering.image.path"

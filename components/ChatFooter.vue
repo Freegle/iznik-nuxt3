@@ -1,12 +1,5 @@
 <template>
   <div class="cont bg-white">
-    <div v-if="uploading" class="bg-white">
-      <OurFilePond
-        imgtype="ChatMessage"
-        imgflag="chatmessage"
-        @photo-processed="photoProcessed"
-      />
-    </div>
     <div>
       <notice-message v-if="otheruser?.deleted" variant="info" class="mb-2">
         This freegler has deleted their account, so you can't chat to them.
@@ -76,8 +69,11 @@
         </b-button>
       </div>
       <div v-if="!otheruser?.deleted">
+        <div v-if="uploading" class="bg-white">
+          <OurUploader v-model="currentAtts" type="ChatMessage" />
+        </div>
         <label for="chatmessage" class="visually-hidden">Chat message</label>
-        <div v-if="!imagethumb">
+        <div v-if="!imageid">
           <b-form-textarea
             v-if="enterNewLine && !otheruser?.spammer"
             id="chatmessage"
@@ -132,10 +128,18 @@
           </Dropdown>
         </div>
         <div v-else class="d-flex justify-content-end pt-2 pb-2">
-          <b-img :src="imagethumb" fluid class="maxheight" />
-          <div>
+          <NuxtPicture
+            format="webp"
+            fit="cover"
+            provider="uploadcare"
+            :src="imageuid"
+            :modifiers="imagemods"
+            alt="Chat Photo"
+            sizes="100px sm:200px"
+          />
+          <div class="ml-1">
             <b-button title="Remove photo" @click="removeImage">
-              <v-icon icon="times-circle" scale="1.5" />
+              <v-icon icon="trash-alt" scale="1.5" />
             </b-button>
           </div>
         </div>
@@ -333,8 +337,8 @@ import SpinButton from './SpinButton'
 import { untwem } from '~/composables/useTwem'
 
 // Don't use dynamic imports because it stops us being able to scroll to the bottom after render.
-const OurFilePond = defineAsyncComponent(() =>
-  import('~/components/OurFilePond')
+const OurUploader = defineAsyncComponent(() =>
+  import('~/components/OurUploader')
 )
 const UserRatings = defineAsyncComponent(() =>
   import('~/components/UserRatings')
@@ -370,7 +374,7 @@ export default {
     NudgeTooSoonWarningModal,
     NudgeWarningModal,
     UserRatings,
-    OurFilePond,
+    OurUploader,
     NoticeMessage,
     PromiseModal,
     AddressModal,
@@ -429,10 +433,13 @@ export default {
       ouroffers: [],
       imagethumb: null,
       imageid: null,
+      imageuid: null,
+      imagemods: null,
       showNudgeTooSoonWarningModal: false,
       showNudgeWarningModal: false,
       hideSuggestedAddress: false,
       caretPosition: { top: 0, left: 0 },
+      currentAtts: [],
     }
   },
   computed: {
@@ -587,6 +594,21 @@ export default {
           variant: 'cancel',
         })
       }
+    },
+    currentAtts: {
+      handler(newVal) {
+        // We have uploaded a photo.
+        this.uploading = false
+
+        // Show the chat busy indicator.
+        this.chatBusy = true
+
+        // We have uploaded a photo.  Post a chatmessage referencing it.
+        this.imageid = newVal[0].id
+        this.imageuid = newVal[0].externaluid
+        this.imagemods = newVal[0].externalmods
+      },
+      deep: true,
     },
   },
   mounted() {
@@ -759,17 +781,6 @@ export default {
       // If we've sent an address to someone who has recently replied to an offer, then it's quite likely that we
       // are promising the item to them.  Pop up a modified Promise modal to make it easy to do that.
       this.promise(null, true)
-    },
-    photoProcessed(imageid, imagethumb, image) {
-      // We have uploaded a photo.  Remove the filepond instance.
-      this.uploading = false
-
-      // Show the chat busy indicator.
-      this.chatBusy = true
-
-      // We have uploaded a photo.  Post a chatmessage referencing it.
-      this.imagethumb = imagethumb
-      this.imageid = imageid
     },
     removeImage() {
       this.imageid = null

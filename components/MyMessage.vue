@@ -207,11 +207,7 @@
         :id="message.id"
         @hidden="showShareModal = false"
       />
-      <MessageEditModal
-        v-if="showEditModal"
-        :id="id"
-        @hidden="showEditModal = false"
-      />
+      <MessageEditModal v-if="showEditModal" :id="id" @hidden="hidden" />
       <PromiseModal
         v-if="showPromiseModal"
         :messages="[message]"
@@ -721,6 +717,10 @@ export default {
     },
     brokenImage() {
       this.broken = true
+    },
+    hidden() {
+      this.showEditModal = false
+      this.messageStore.fetch(this.id)
     },
   },
 }
