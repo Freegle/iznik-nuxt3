@@ -34,8 +34,9 @@
               <b-col>
                 <NuxtPicture
                   v-if="event?.image?.imageuid"
+                  :key="bump"
                   format="webp"
-                  fit="cover"
+                  width="200"
                   provider="uploadcare"
                   :src="event.image.imageuid"
                   :modifiers="event.image.imagemods"
@@ -189,16 +190,17 @@
                   <v-icon icon="circle" size="2x" />
                   <v-icon icon="reply" flip="horizontal" />
                 </div>
-                <div class="image">
+                <div class="image d-flex justify-content-around">
                   <NuxtPicture
                     v-if="event?.image?.imageuid"
+                    :key="bump"
                     format="webp"
-                    fit="cover"
+                    width="200"
                     provider="uploadcare"
                     :src="event.image.imageuid"
                     :modifiers="mods"
                     alt="Community Event Photo"
-                    class="mb-2 w-100"
+                    class="mb-2"
                   />
                   <b-img
                     v-else-if="event.image"
@@ -211,22 +213,11 @@
             </b-col>
           </b-row>
           <span v-if="enabled">
-            <b-row>
-              <b-col>
-                <b-button variant="primary" class="mt-1" @click="photoAdd">
-                  <v-icon icon="camera" /> Upload photo
-                </b-button>
-              </b-col>
-            </b-row>
-            <b-row v-if="uploading">
-              <b-col>
-                <OurUploader
-                  v-model="currentAtts"
-                  class="bg-white"
-                  type="CommunityEvent"
-                />
-              </b-col>
-            </b-row>
+            <OurUploader
+              v-model="currentAtts"
+              class="bg-white"
+              type="CommunityEvent"
+            />
 
             <b-form-group
               ref="eventEdit__description"
@@ -532,12 +523,12 @@ export default {
   data() {
     return {
       cacheBust: Date.now(),
-      uploading: false,
       showGroupError: false,
       showDateError: false,
       description: null,
       currentAtts: [],
       mods: {},
+      bump: 0,
     }
   },
   computed: {
@@ -610,13 +601,13 @@ export default {
     },
     currentAtts: {
       handler(newVal) {
-        this.uploading = false
-
         this.event.image = {
           id: newVal[0].id,
           imageuid: newVal[0].externaluid,
           imagemods: newVal[0].externalmods,
         }
+
+        this.bump++
       },
       deep: true,
     },
@@ -769,11 +760,6 @@ export default {
       }
 
       this.hide()
-    },
-    photoAdd() {
-      // Flag that we're uploading.  This will trigger the render of the filepond instance and subsequently the
-      // processed callback below.
-      this.uploading = true
     },
     async rotate(deg) {
       const curr = this.mods?.rotate || 0

@@ -92,6 +92,11 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  label: {
+    type: String,
+    required: false,
+    default: null,
+  },
 })
 
 const miscStore = useMiscStore()
@@ -107,9 +112,14 @@ const busy = ref(false)
 //   return uploadedPhotos.value.length > 0 ? '1rem' : '1.25rem'
 // })
 
-// eslint-disable-next-line no-unused-vars
 const label = computed(() => {
-  return uploadedPhotos.value.length > 0 ? 'Add/edit photos' : 'Add photos'
+  if (props.label) {
+    return label
+  } else if (props.multiple) {
+    return uploadedPhotos.value.length > 0 ? 'Add/edit photos' : 'Add photos'
+  } else {
+    return uploadedPhotos.value.length > 0 ? 'Add/edit photo' : 'Add photo'
+  }
 })
 
 const configName = computed(() => {
@@ -131,7 +141,7 @@ watch(
       try {
         lrconfig.value.localeDefinitionOverride = {
           en: {
-            'drop-files-here': 'Add photos',
+            'drop-files-here': props.multiple ? 'Add photos' : 'Add photo',
             clear: 'Remove',
             'add-more': 'Add more photos',
             'src-type-local': 'Browse',
