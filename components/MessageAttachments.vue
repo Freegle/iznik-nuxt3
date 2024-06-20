@@ -123,6 +123,14 @@ const imagewrapper = ref(null)
 
 const { width, height } = useElementSize(imagewrapper)
 
+// Make width and height <= 3000 as that's an Uploadcare limit.
+if (width > 3000) {
+  width.value = 3000
+}
+if (height > 3000) {
+  height.value = 3000
+}
+
 function brokenImage() {
   // If the attachment image is broken, we're best off just hiding it.
   defaultAttachments.value = true
