@@ -596,5 +596,17 @@ export default defineNuxtConfig({
 
     // We want sharp images on fancy screens.
     densities: [1, 2],
+
+    // Uploadcare only supports images upto 3000.  So we drop the top-level screen sizes, which get doubled
+    // to produce the images requested.
+    screens: {
+      xs: 320,
+      sm: 640,
+      md: 768,
+      lg: 1024,
+      xl: 1280,
+      xxl: 1500,
+      '2xl': 1500,
+    },
   },
 })

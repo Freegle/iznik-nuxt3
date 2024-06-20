@@ -80,6 +80,14 @@ defineProps({
 const slide = ref(0)
 
 const { width, height } = useElementSize(wrapper)
+
+// Make width and height <= 3000 as that's an Uploadcare limit.
+if (width > 3000) {
+  width.value = 3000
+}
+if (height > 3000) {
+  height.value = 3000
+}
 </script>
 <style scoped lang="scss">
 :deep(.carousel-control-prev) {
