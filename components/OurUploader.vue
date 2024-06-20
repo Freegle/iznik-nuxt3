@@ -207,7 +207,7 @@ async function uploadSuccess(e) {
       //
       // Note that the URL is returned from the server because it is manipulated on there to remove EXIF,
       // so we use that rather than the URL that was returned from the uploader.
-      console.log('Post returned', ret)
+      console.log('Image post returned', ret)
       uploadedPhotos.value = props.modelValue
       uploadedPhotos.value.push({
         id: ret.id,
