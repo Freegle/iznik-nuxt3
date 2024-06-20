@@ -8,7 +8,7 @@
             <div v-if="editing" class="d-flex flex-wrap">
               <GroupSelect v-model="editgroup" modonly class="mr-1" size="lg" :disabled-except-for="memberGroupIds" />
               <div v-if="message.item && message.location" class="d-flex justify-content-start">
-                <b-form-select v-model="message.type" :options="typeOptions" class="type mr-1" size="lg" />
+                <b-form-select v-model="message.type" :options="keywordTypeOptions" class="type mr-1" size="lg" />
                 <b-form-input v-model="message.item.name" size="lg" class="mr-1" />
               </div>
               <div v-if="message.item && message.location">
@@ -20,7 +20,7 @@
                 <label class="mr-2">Subject:</label>
                 <b-form-input v-model="message.subject" size="lg" />
                 <label class="mr-2">Post type:</label>
-                <b-form-select v-model="message.type" :options="typeOptions" class="type mr-1" size="lg" />
+                <b-form-select v-model="message.type" :options="keywordTypeOptions" class="type mr-1" size="lg" />
               </div>
             </div>
             <Diff v-else-if="editreview && oldSubject && newSubject" :old="oldSubject" :new="newSubject" class="font-weight-bold" />
@@ -250,7 +250,7 @@
               @change="settingsChange" />
             <div v-if="showEmails">
               <div v-for="email in message.fromuser.emails" :key="email.id">
-                {{ email.email }} <v-icon v-if="email.preferred" name="star" />
+                {{ email.email }} <v-icon v-if="email.preferred" icon="star" />
               </div>
             </div>
             <ModMemberActions v-if="showActions && message.groups && message.groups.length" :userid="message.fromuser.id"
@@ -285,9 +285,9 @@
           <v-icon icon="times" /> Cancel
         </b-button>
         <b-button v-if="editing" variant="primary" @click="save">
-          <v-icon v-if="saving" name="sync" class="text-success fa-spin" />
-          <v-icon v-else-if="saved" name="check" class="text-success" />
-          <v-icon v-else name="save" />
+          <v-icon v-if="saving" icon="sync" class="text-success fa-spin" />
+          <v-icon v-else-if="saved" icon="check" class="text-success" />
+          <v-icon v-else icon="save" />
           Save
         </b-button>
       </b-card-footer>
@@ -307,8 +307,12 @@ import { useMemberStore } from '../stores/member'
 import { useMessageStore } from '../../stores/message'
 import { useUserStore } from '../../stores/user'
 
-//import keywords from '@/mixins/keywords.js'
 import { SUBJECT_REGEX } from '../utils/constants'
+
+import { setupKeywords } from '../composables/useKeywords'
+const {
+  keywordTypeOptions, keywordGroup, keywordGroupid
+} = setupKeywords()
 
 import { twem } from '~/composables/useTwem'
 
@@ -659,6 +663,7 @@ export default {
       })
     },
     async save() {
+      console.log('save AAA')
       this.saving = true
 
       const attids = []
@@ -669,6 +674,7 @@ export default {
 
       if (this.message.item && this.message.location) {
         // Well-structured message
+        console.log('save BBB')
         await this.messageStore.patch({
           id: this.message.id,
           msgtype: this.message.type,
@@ -677,8 +683,10 @@ export default {
           attachments: attids,
           textbody: this.message.textbody
         })
+        console.log('save BBB done')
       } else {
         // Not
+        console.log('save CCC')
         await this.messageStore.patch({
           id: this.message.id,
           msgtype: this.message.type,
@@ -690,6 +698,7 @@ export default {
 
       let alreadyon = false
 
+      console.log('save DDD')
       this.message.groups.forEach(g => {
         if (g.groupid === this.editgroup) {
           alreadyon = true
@@ -697,6 +706,7 @@ export default {
       })
 
       if (!alreadyon) {
+        console.log('save EEE')
         console.log('Need to move to group', this.editgroup)
         await this.messageStore.move({
           id: this.message.id,
@@ -706,6 +716,7 @@ export default {
 
       this.saving = false
       this.editing = false
+      console.log('save FFF')
     },
     settingsChange(e) {
       const params = {
