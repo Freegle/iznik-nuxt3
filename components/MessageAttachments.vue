@@ -47,6 +47,7 @@
               class="attachment"
               :width="Math.round(width)"
               :height="Math.round(height)"
+              preload
               @error="brokenImage"
               @click="$emit('zoom')"
             />

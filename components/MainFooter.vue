@@ -9,8 +9,9 @@
           class="d-flex justify-content-start flex-column mr-4"
         >
           <ProxyImage
+            preload
             src="/krystal.png"
-            alt="Bytemark Logo"
+            alt="Krystal Logo"
             class="sponsor"
             sizes="75px md:100px lg:165px"
           />
@@ -22,6 +23,7 @@
           class="d-flex justify-content-start flex-column ml-4"
         >
           <ProxyImage
+            preload
             src="/mythic-beasts.png"
             alt="Mythic Beasts Logo"
             class="sponsor"

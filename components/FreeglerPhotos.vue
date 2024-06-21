@@ -40,12 +40,14 @@
         <template #fallback>
           <div class="layout">
             <ProxyImage
+              preload
               src="/landingpage/frame.png"
               class-name="frame"
               alt="Ornate gold picture frame. Image courtesy of https://pixabay.com/users/avantrend-321510/"
               sizes="0px sm:576px md:768"
             />
             <ProxyImage
+              preload
               :src="photo(1)"
               alt="Picture of a real freegler, looking happy. Photo by Alex Bamford."
               class-name="image"

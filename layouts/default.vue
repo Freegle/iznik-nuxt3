@@ -61,6 +61,23 @@ export default {
       oneTap.value = true
     }
 
+    // Add the wallpaper background, proxying it from our image CDN.
+    const runtimeConfig = useRuntimeConfig()
+    const userSite = runtimeConfig.public.USER_SITE
+    const proxy = runtimeConfig.public.UPLOADCARE_PROXY
+
+    // Set background image of wallpaper.png on body
+    useHead({
+      bodyAttrs: {
+        style:
+          'background-image: url("' +
+          proxy +
+          '/-/format/webp/' +
+          userSite +
+          '/wallpaper.png")',
+      },
+    })
+
     return {
       oneTap,
       googleReady,

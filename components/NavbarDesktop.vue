@@ -8,6 +8,7 @@
       <OfflineIndicator v-if="!online" />
       <ProxyImage
         v-else
+        preload
         class="logo mr-2"
         :src="logo"
         :format="logoFormat"

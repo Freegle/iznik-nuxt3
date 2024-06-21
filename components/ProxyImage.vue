@@ -2,6 +2,7 @@
   <NuxtPicture
     :format="format"
     :fit="fit"
+    :preload="preload"
     provider="uploadcareProxy"
     :src="src"
     :modifiers="modifiers"
@@ -24,6 +25,11 @@ const props = defineProps({
     type: String,
     required: false,
     default: null,
+  },
+  preload: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
   loading: {
     type: String,
