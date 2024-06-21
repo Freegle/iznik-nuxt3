@@ -3,9 +3,12 @@
     v-if="!me"
     class="grid m-0 pl-1 pr-1 pl-sm-0 pr-sm-0 mt-0 mt-lg-5 ml-2 mr-2"
   >
-    <div class="d-none d-sm-flex eyecandy justify-content-start flex-column">
+    <VisibleWhen
+      :not="['xs']"
+      class="d-sm-flex eyecandy justify-content-start flex-column"
+    >
       <FreeglerPhotos class="ps-4 h-100" />
-    </div>
+    </VisibleWhen>
     <div class="info">
       <div class="d-block d-sm-none">
         <h1 class="text--large-responsive">
@@ -90,7 +93,9 @@
           @selected="explorePlace($event)"
         />
       </div>
-      <VisualiseList class="mb-2 d-block d-sm-none" />
+      <VisibleWhen :at="['xs']">
+        <VisualiseList class="mb-2 d-block d-sm-none" />
+      </VisibleWhen>
     </div>
     <client-only>
       <div class="app-download mt-2">
@@ -100,12 +105,12 @@
           class="mr-2"
           rel="noopener noreferrer"
         >
-          <b-img
-            lazy
+          <ProxyImage
             alt="Freegle Android app on Google Play"
             title="Freegle Android app on Google Play"
             class="app-download__image"
             src="/en-play-badge.png"
+            sizes="75px"
           />
         </a>
         <a
@@ -113,12 +118,12 @@
           target="_blank"
           rel="noopener noreferrer"
         >
-          <b-img
-            lazy
+          <ProxyImage
             alt="Freegle app for iPhone, iPad, and iPod touch"
             title="Freegle app for iPhone, iPad, and iPod Touch"
             class="app-download__image"
             src="/app-store-black-sm.png"
+            sizes="75px"
           />
         </a>
       </div>
@@ -303,6 +308,7 @@ export default {
 .eyecandy {
   grid-row: 3 / 4;
   grid-column: 1 / 3;
+  align-items: center !important;
 
   @include media-breakpoint-up(sm) {
     height: 300px;

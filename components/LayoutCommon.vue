@@ -2,6 +2,7 @@
   <div>
     <main class="ml-0 ps-0 pe-0 pageContent">
       <div class="aboveSticky" :class="{ allowAd }">
+        <!--        Breakpoint {{ breakpoint }}-->
         <slot ref="pageContent" />
       </div>
       <client-only>
@@ -134,7 +135,7 @@ export default {
   computed: {
     breakpoint() {
       const store = useMiscStore()
-      return store.getBreakpoint
+      return store.breakpoint
     },
     routePath() {
       const route = useRoute()

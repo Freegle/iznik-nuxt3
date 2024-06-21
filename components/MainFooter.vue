@@ -8,10 +8,11 @@
           href="https://affiliate.k.io/go/Freegle-Krystal"
           class="d-flex justify-content-start flex-column mr-4"
         >
-          <img
-            :src="imageProxy('/krystal.png', '/-/resize/165/-/format/webp/')"
+          <ProxyImage
+            src="/krystal.png"
             alt="Bytemark Logo"
             class="sponsor"
+            sizes="75px md:100px lg:165px"
           />
         </a>
         <a
@@ -20,12 +21,11 @@
           href="https://www.mythic-beasts.com"
           class="d-flex justify-content-start flex-column ml-4"
         >
-          <img
-            :src="
-              imageProxy('/mythic-beasts.png', '/-/resize/165/-/format/webp/')
-            "
+          <ProxyImage
+            src="/mythic-beasts.png"
             alt="Mythic Beasts Logo"
             class="sponsor"
+            sizes="75px md:100px lg:165px"
           />
         </a>
       </div>
