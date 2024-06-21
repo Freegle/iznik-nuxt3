@@ -9,6 +9,7 @@
     :alt="alt"
     :width="width"
     :height="height"
+    :loading="loading"
   />
 </template>
 <script setup>
@@ -23,6 +24,11 @@ const props = defineProps({
     type: String,
     required: false,
     default: null,
+  },
+  loading: {
+    type: String,
+    required: false,
+    default: 'lazy',
   },
   className: {
     type: String,

@@ -14,12 +14,14 @@
             <template #img>
               <div class="layout">
                 <ProxyImage
+                  loading="lazy"
                   src="/landingpage/frame.png"
                   class-name="frame"
                   alt="Ornate gold picture frame. Image courtesy of https://pixabay.com/users/avantrend-321510/"
                   sizes="0px sm:576px md:768"
                 />
                 <ProxyImage
+                  loading="lazy"
                   :src="photo(img)"
                   alt="Picture of a real freegler, looking happy. Photo by Alex Bamford."
                   class-name="image"

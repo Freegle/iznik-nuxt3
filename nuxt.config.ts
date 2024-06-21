@@ -594,7 +594,7 @@ export default defineNuxtConfig({
       provider: 'uploadcare',
 
       // On some machines we can't resolve ucarecdn.com but can resolve www.ucarecdn.com.
-      cdnURL: 'www.ucarecdn.com',
+      cdnURL: 'https://www.ucarecdn.com',
     },
 
     // We want sharp images on fancy screens.

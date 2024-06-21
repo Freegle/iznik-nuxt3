@@ -7,7 +7,7 @@
       :not="['xs']"
       class="d-sm-flex eyecandy justify-content-start flex-column"
     >
-      <FreeglerPhotos class="ps-4 h-100" />
+      <FreeglerPhotos class="ps-4 h-100 d-none d-sm-block" />
     </VisibleWhen>
     <div class="info">
       <div class="d-block d-sm-none">
@@ -93,9 +93,7 @@
           @selected="explorePlace($event)"
         />
       </div>
-      <VisibleWhen :at="['xs']">
-        <VisualiseList class="mb-2 d-block d-sm-none" />
-      </VisibleWhen>
+      <VisualiseList class="mb-2 d-block d-sm-none" />
     </div>
     <client-only>
       <div class="app-download mt-2">
