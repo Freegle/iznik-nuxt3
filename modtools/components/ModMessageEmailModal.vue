@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-modal v-if="message" ref="modal" id="modEmailMessageModal" size="lg">
+    <b-modal ref="modal" id="modEmailMessageModal" size="lg" @hidden="onHide">
       <template #title class="w-100">
         Message received by email
       </template>
@@ -11,7 +11,7 @@
         </p>
         <b-tabs content-class="mt-3">
           <b-tab title="Pretty View" active>
-            <Letter :html="html" :text="text" />
+            <Letter v-if="message" :html="html" :text="text" />
           </b-tab>
           <b-tab title="Raw Message Source">
             <NoticeMessage variant="info" class="mb-1">
@@ -19,7 +19,7 @@
               of the email is sometimes encoded, and you might not be able to read it. If you need help, ask on Tech.
             </NoticeMessage>
             <!-- eslint-disable-next-line-->
-            <pre>{{ message.message }}</pre>
+            <pre v-if="message">{{ message.message }}</pre>
           </b-tab>
         </b-tabs>
       </template>
@@ -56,14 +56,20 @@ export default {
       default: null
     }
   },
+  data() {
+    return {
+      message: null,
+    }
+  },
+  emits: ['hidden'],
   computed: {
-    message() {
-      return this.messageStore.byId(this.id)
-    },
     parsed() {
-      return this.message && this.message.message
-        ? extract(this.message.message)
-        : null
+      if (this.message) {
+        return this.message && this.message.message
+          ? extract(this.message.message)
+          : null
+      }
+      return null
     },
     text() {
       return this.parsed ? this.parsed.text : null
@@ -74,10 +80,19 @@ export default {
   },
   methods: {
     async show() {
-      this.messageStore.fetch(this.id, true, this.collection) // Too many params
+
+      //this.messageStore.fetchMT(this.id, true, this.collection)
+      // Get message directly rather than via store, to get message mail source
+      this.message = await this.messageStore.fetchMT({
+        id: this.id,
+        messagehistory: true
+      })
 
       this.showModal = true
-    }
+    },
+    onHide() {
+      this.$emit('hidden')
+    },
   }
 }
 </script>

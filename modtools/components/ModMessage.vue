@@ -292,7 +292,7 @@
         </b-button>
       </b-card-footer>
     </b-card>
-    <ModMessageEmailModal v-if="message.source === 'Email'" :id="message.id" ref="original" />
+    <ModMessageEmailModal v-if="showEmailSourceModal && (message.source === 'Email')" :id="message.id" ref="original" @hidden="showEmailSourceModal = false" />
     <div ref="bottom" />
   </div>
 </template>
@@ -376,6 +376,7 @@ export default {
     return {
       saving: false,
       saved: false,
+      showEmailSourceModal: false,
       showMailSettings: false,
       showActions: false,
       showEmails: false,
@@ -727,10 +728,10 @@ export default {
         await this.usersStore.fetch(this.message.fromuser.id)
       }
     },
-    viewSource() {
-      this.waitForRef('original', () => {
-        this.$refs.original.show()
-      })
+    async viewSource() {
+      this.showEmailSourceModal = true
+      await nextTick()
+      this.$refs.original.show()
     },
     canonSubj(subj) {
       subj = subj.toLocaleLowerCase()

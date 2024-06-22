@@ -368,6 +368,10 @@ export const useMessageStore = defineStore({
         this.list[message.id] = message
       }
     },
+    async fetchMT(params) { // Added for ModTools
+      const { message } = await api(this.config).message.fetchMT(params)
+      return message
+    }
   },
   getters: {
     byId: (state) => {
