@@ -373,7 +373,7 @@ export const useMessageStore = defineStore({
       return message
     },
     async approve(params) {
-      await await api(this.config).message.approve(
+      await api(this.config).message.approve(
         params.id,
         params.groupid,
         params.subject,
@@ -387,6 +387,22 @@ export const useMessageStore = defineStore({
 
       const authStore = useAuthStore()
       authStore.work = {}
+    },
+    async hold(params) {
+      await api(this.config).message.hold(params.id)
+      const { message } = await api(this.config).message.fetchMT({
+        id: params.id,
+        messagehistory: true
+      })
+      this.list[message.id] = message
+    },
+    async release(params) {
+      await api(this.config).message.release(params.id)
+      const { message } = await api(this.config).message.fetchMT({
+        id: params.id,
+        messagehistory: true
+      })
+      this.list[message.id] = message
     },
   },
   getters: {
