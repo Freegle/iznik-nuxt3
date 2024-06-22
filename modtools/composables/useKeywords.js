@@ -46,7 +46,7 @@ const keywordGroupid = computed(() => {
 export function setupKeywords() {
   return {
     keywordTypeOptions,
-    keywordGroup,
-    keywordGroupid
+    keywordGroup, // TODO remove
+    keywordGroupid // TODO remove
   }
 }

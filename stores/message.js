@@ -388,7 +388,23 @@ export const useMessageStore = defineStore({
       const authStore = useAuthStore()
       authStore.work = {}
     },
-    async hold(params) {
+    async reject( params) {
+      await api(this.config).message.reject(
+        params.id,
+        params.groupid,
+        params.subject,
+        params.stdmsgid,
+        params.body
+      )
+  
+      this.remove({
+        id: params.id,
+      })
+
+      const authStore = useAuthStore()
+      authStore.work = {}
+    },
+      async hold(params) {
       await api(this.config).message.hold(params.id)
       const { message } = await api(this.config).message.fetchMT({
         id: params.id,

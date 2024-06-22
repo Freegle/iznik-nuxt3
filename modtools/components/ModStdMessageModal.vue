@@ -21,7 +21,7 @@
         <b-form-select v-model="message.type" :options="typeOptions" class="type mr-1" size="lg" />
         <b-form-input v-model="message.item.name" size="lg" class="mr-1" />
         <b-input-group>
-          <Postcode :value="message.location.name" :find="false" @selected="postcodeSelect" />
+          <!--Postcode :value="message.location.name" :find="false" @selected="postcodeSelect" /-->
         </b-input-group>
       </div>
       <div v-else>
@@ -37,21 +37,21 @@
       </NoticeMessage>
       <b-form-textarea v-model="body" rows="10" class="mt-2" />
       <div v-if="stdmsg.newdelstatus && stdmsg.newdelstatus !== 'UNCHANGED'" class="mt-1">
-        <v-icon v-if="changingNewDelStatus" name="sync" class="text-success fa-spin" />
-        <v-icon v-else-if="changedNewDelStatus" name="check" class="text-success" />
-        <v-icon v-else name="cog" />
+        <v-icon v-if="changingNewDelStatus" icon="sync" class="text-success fa-spin" />
+        <v-icon v-else-if="changedNewDelStatus" icon="check" class="text-success" />
+        <v-icon v-else icon="cog" />
         Change email frequency to <em>{{ emailfrequency }}</em>
       </div>
       <div v-if="stdmsg.newmodstatus && stdmsg.newmodstatus !== 'UNCHANGED'" class="mt-1">
-        <v-icon v-if="changingNewModStatus" name="sync" class="text-success fa-spin" />
-        <v-icon v-else-if="changedNewModStatus" name="check" class="text-success" />
-        <v-icon v-else name="cog" />
+        <v-icon v-if="changingNewModStatus" icon="sync" class="text-success fa-spin" />
+        <v-icon v-else-if="changedNewModStatus" icon="check" class="text-success" />
+        <v-icon v-else icon="cog" />
         Change moderation status to <em>{{ modstatus }}</em>
       </div>
       <div v-if="stdmsg.action === 'Hold Message'" class="mt-1 text-warning">
-        <v-icon v-if="changingHold" name="sync" class="text-success fa-spin" />
-        <v-icon v-else-if="changedHold" name="check" class="text-success" />
-        <v-icon v-else name="pause" />
+        <v-icon v-if="changingHold" icon="sync" class="text-success fa-spin" />
+        <v-icon v-else-if="changedHold" icon="check" class="text-success" />
+        <v-icon v-else icon="pause" />
         Hold message
       </div>
     </template>
@@ -72,7 +72,7 @@
           </b-button>
         </div>
         <div>
-          <SpinButton ref="process" :label="processLabel" icon-name="envelope" spinclass="success" variant="primary" :handler="process" />
+          <SpinButton ref="process" :label="processLabel" icon-name="envelope" spinclass="success" variant="primary" @handle="process" />
           <b-button variant="white" @click="hide">
             Cancel
           </b-button>
@@ -85,12 +85,17 @@
 import { useGroupStore } from '~/stores/group'
 import { useMemberStore } from '~/stores/member'
 import { useMessageStore } from '~/stores/message'
+import { useUserStore } from '../stores/user'
 import dayjs from 'dayjs'
 import { useModal } from '~/composables/useModal'
 //import keywords from '@/mixins/keywords.js'
 import { SUBJECT_REGEX } from '@/utils/constants'
+//import PostCode from '~/components/PostCode'
 
 export default {
+  components: {
+    //PostCode,
+  },
   //mixins: [keywords],
   props: {
     message: {
@@ -121,9 +126,6 @@ export default {
     const userStore = useUserStore()
     return { groupStore, memberStore, messageStore, userStore, modal, hide }
   },
-  mounted(){
-console.log("MSMM mounted")
-  },
   data: function () {
     return {
       subject: null,
@@ -141,6 +143,12 @@ console.log("MSMM mounted")
     }
   },
   computed: {
+    groupid(){
+      if( Array.isArray(this.message.groups)){
+        return this.message.groups[0].groupid
+      }
+      return 0
+    },
     user() {
       return this.message ? this.message.fromuser : this.member
     },
@@ -400,7 +408,7 @@ console.log("MSMM mounted")
       const self = this
       const group = this.myGroup(this.groupid)
 
-      if (text) {
+      if (group && text) {
         text = text.replace(/\$networkname/g, 'Freegle')
         const re = new RegExp('Freegle', 'ig')
         text = text.replace(
@@ -417,8 +425,8 @@ console.log("MSMM mounted")
         text = text.replace(/\$myname/g, this.me.displayname)
         text = text.replace(/\$nummembers/g, group.membercount)
         text = text.replace(/\$nummods/g, group.modcount)
-        text = text.replace(/\$repostoffer/g, group.settings.reposts.offer)
-        text = text.replace(/\$repostwanted/g, group.settings.reposts.wanted)
+        if( group.settings && group.settings.reposts) text = text.replace(/\$repostoffer/g, group.settings.reposts.offer)
+        if( group.settings && group.settings.reposts) text = text.replace(/\$repostwanted/g, group.settings.reposts.wanted)
 
         text = text.replace(
           /\$origsubj/g,
@@ -526,7 +534,7 @@ console.log("MSMM mounted")
       return text
     },
 
-    async process() {
+    async process(callback) {
       if (
         this.stdmsg.newdelstatus &&
         this.stdmsg.newdelstatus !== 'UNCHANGED'
@@ -598,7 +606,7 @@ console.log("MSMM mounted")
           break
         case 'Leave Member':
         case 'Leave Approved Member':
-          await this.messageStore.reply( {
+          await this.messageStore.reply({
             id: this.member.userid,
             groupid: this.groupid,
             subject: subj,
@@ -659,7 +667,7 @@ console.log("MSMM mounted")
         default:
           console.error('Unknown stdmsg action', this.stdmsg.action)
       }
-
+      if (callback) callback()
       this.hide()
     },
     postcodeSelect(newpc) {
