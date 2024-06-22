@@ -82,7 +82,7 @@ export default {
     async show() {
 
       //this.messageStore.fetchMT(this.id, true, this.collection)
-      // Get message directly rather than via store, to get message mail source
+      // Get message directly rather than via store, to get message mail source TODO: OK??
       this.message = await this.messageStore.fetchMT({
         id: this.id,
         messagehistory: true

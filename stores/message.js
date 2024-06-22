@@ -371,7 +371,23 @@ export const useMessageStore = defineStore({
     async fetchMT(params) { // Added for ModTools
       const { message } = await api(this.config).message.fetchMT(params)
       return message
-    }
+    },
+    async approve(params) {
+      await await api(this.config).message.approve(
+        params.id,
+        params.groupid,
+        params.subject,
+        params.stdmsgid,
+        params.body
+      )
+  
+      this.remove({
+        id: params.id,
+      })
+
+      const authStore = useAuthStore()
+      authStore.work = {}
+    },
   },
   getters: {
     byId: (state) => {
