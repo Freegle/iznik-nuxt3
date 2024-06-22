@@ -292,7 +292,7 @@
         </b-button>
       </b-card-footer>
     </b-card>
-    <!-- TODO ModMessageEmailModal v-if="message.source === 'Email'" :id="message.id" ref="original" /-->
+    <ModMessageEmailModal v-if="message.source === 'Email'" :id="message.id" ref="original" />
     <div ref="bottom" />
   </div>
 </template>
@@ -663,7 +663,6 @@ export default {
       })
     },
     async save() {
-      console.log('save AAA')
       this.saving = true
 
       const attids = []
@@ -674,7 +673,6 @@ export default {
 
       if (this.message.item && this.message.location) {
         // Well-structured message
-        console.log('save BBB')
         await this.messageStore.patch({
           id: this.message.id,
           msgtype: this.message.type,
@@ -683,10 +681,8 @@ export default {
           attachments: attids,
           textbody: this.message.textbody
         })
-        console.log('save BBB done')
       } else {
         // Not
-        console.log('save CCC')
         await this.messageStore.patch({
           id: this.message.id,
           msgtype: this.message.type,
@@ -698,7 +694,6 @@ export default {
 
       let alreadyon = false
 
-      console.log('save DDD')
       this.message.groups.forEach(g => {
         if (g.groupid === this.editgroup) {
           alreadyon = true
@@ -706,7 +701,6 @@ export default {
       })
 
       if (!alreadyon) {
-        console.log('save EEE')
         console.log('Need to move to group', this.editgroup)
         await this.messageStore.move({
           id: this.message.id,
@@ -716,7 +710,6 @@ export default {
 
       this.saving = false
       this.editing = false
-      console.log('save FFF')
     },
     settingsChange(e) {
       const params = {

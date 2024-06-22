@@ -67,6 +67,7 @@ export const useMessageStore = defineStore({
 
           try {
             this.list[id] = await this.fetching[id]
+            //console.log('fetch',id,typeof this.list[id].fromuser)
             this.fetching[id] = null
 
             if (this.list[id]) {
@@ -262,7 +263,11 @@ export const useMessageStore = defineStore({
         id: params.id,
       })
 
-      await this.fetch(params.id, true)
+      //await this.fetch(params.id, true) // Gets message.fromuser as int not object
+      // TODO: CHECK OK SOLUTION
+      // Force MT refresh 
+      const authStore = useAuthStore()
+      authStore.work = {}
 
       return data
     },
@@ -333,7 +338,7 @@ export const useMessageStore = defineStore({
       this.context = null
     },
     async fetchMessages(params) { // Added for ModTools
-      console.log("===useMessageStore fetchMessages")
+      //console.log("===useMessageStore fetchMessages",params)
       // Watch out for the store being cleared under the feet of this fetch. If that happens then we throw away the
       // results.
       // TODO const instance = state.instance
@@ -359,7 +364,7 @@ export const useMessageStore = defineStore({
       // TODO}
       await this.clear()
       for(const message of messages){
-        //console.log('GOT message',message.id)
+        //console.log('GOT message',message.id, typeof message.fromuser)
         this.list[message.id] = message
       }
     },
