@@ -3,7 +3,7 @@
     <div class="position-relative d-inline">
       <SpinButton :variant="variant" :spinclass="spinclass" :icon-name="icon" :label="label" :flex="false" class="mb-1 me-1 d-inline-block"
         iconClass="pe-1" :disabled="disabled" @handle="click" :confirm="confirmButton" />
-      <v-icon v-if="autosend" name="chevron-circle-right" title="Autosend - configured to send immediately without edit" class="autosend" />
+      <v-icon v-if="autosend" icon="chevron-circle-right" title="Autosend - configured to send immediately without edit" class="autosend" />
     </div>
     <ConfirmModal v-if="showDeleteModal" ref="deleteConfirm" :title="'Delete: ' + message.subject" @confirm="deleteConfirmed"
       @hidden="showDeleteModal = false" />

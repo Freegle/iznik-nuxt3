@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import api from '~/api'
-// TODO
 
 export const useModConfigStore = defineStore({
   id: 'modconfig',
@@ -17,8 +16,7 @@ export const useModConfigStore = defineStore({
     },
 
     async fetch(params) {
-      console.log("==== useModConfigStore fetch")
-      const { configs } = await this.$api.session.fetch({
+      const { configs } = await api(this.config).session.fetch({
         components: params.all ? ['allconfigs'] : ['configs'],
         modtools: true
       })
@@ -30,15 +28,16 @@ export const useModConfigStore = defineStore({
 
     async fetchConfig(params) {
       console.log("==== useModConfigStore fetchConfig")
-      const config = await this.$api.modconfigs.fetchConfig(params)
+      const config = await api(this.config).modconfigs.fetchConfig(params)
 
       if (config) {
+        console.log("==== useModConfigStore config", config)
         this.current = config
       }
     },
 
     async updateConfig(params) {
-      await this.$api.modconfigs.patchConfig(params)
+      await api(this.config).modconfigs.patchConfig(params)
       const config = await this.fetchConfig({
         id: params.id,
         configuring: true
@@ -49,7 +48,7 @@ export const useModConfigStore = defineStore({
     },
 
     async add(params) {
-      const id = await this.$api.modconfigs.addModConfig(params)
+      const id = await api(this.config).modconfigs.addModConfig(params)
 
       await this.fetchConfig({
         id,
@@ -60,7 +59,7 @@ export const useModConfigStore = defineStore({
     },
 
     async delete(params) {
-      await this.$api.modconfigs.deleteConfig(params)
+      await api(this.config).modconfigs.deleteConfig(params)
     },
   }
 })

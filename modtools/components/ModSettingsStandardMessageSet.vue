@@ -33,7 +33,7 @@
 <script>
 import { useModConfigStore } from '../stores/modconfig'
 import draggable from 'vuedraggable'
-import stdmsgs from '../mixins/stdmsgs'
+import { icon, variant, copyStdMsgs } from '../composables/useStdMsgs'
 
 export default {
   setup() {
@@ -44,7 +44,6 @@ export default {
   components: {
     draggable,
   },
-  mixins: [stdmsgs],
   props: {
     cc: {
       type: String,
@@ -84,11 +83,11 @@ export default {
   },
   watch: {
     config(newval) {
-      this.stdmsgscopy = this.stdmsgCopyStdMsgs(newval)
+      this.stdmsgscopy = copyStdMsgs(newval)
     }
   },
   mounted() {
-    this.stdmsgscopy = this.stdmsgCopyStdMsgs(this.config)
+    this.stdmsgscopy = copyStdMsgs(this.config)
   },
   methods: {
     updateOrder() {
@@ -114,7 +113,7 @@ export default {
       })
 
       const config = this.modConfigStore.current
-      this.stdmsgscopy = this.stdmsgCopyStdMsgs(config)
+      this.stdmsgscopy = copyStdMsgs(config)
       this.bump++
     }
   }

@@ -7,19 +7,18 @@
   </div>
 </template>
 <script>
-import stdmsgs from '../mixins/stdmsgs'
+//import { icon, variant } from '../composables/useStdMsgs'
 
 const stdMsgModal = ref()
 
 export default {
-  mixins: [stdmsgs],
   props: {
     stdmsg: {
       type: Object,
       required: true
     }
   },
-  data: function() {
+  data: function () {
     return {
       showModal: false
     }

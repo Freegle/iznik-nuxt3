@@ -292,7 +292,8 @@
         </b-button>
       </b-card-footer>
     </b-card>
-    <ModMessageEmailModal v-if="showEmailSourceModal && (message.source === 'Email')" :id="message.id" ref="original" @hidden="showEmailSourceModal = false" />
+    <ModMessageEmailModal v-if="showEmailSourceModal && (message.source === 'Email')" :id="message.id" ref="original"
+      @hidden="showEmailSourceModal = false" />
     <div ref="bottom" />
   </div>
 </template>
@@ -387,11 +388,21 @@ export default {
       attachments: [],
       homegroup: null,
       homegroupontn: false,
-
-      groupid: 0, // TODO
     }
   },
   computed: {
+    groupid() { // moved from mixins/keywords
+      let ret = 0
+
+      if (
+        this.message &&
+        this.message.groups &&
+        this.message.groups.length
+      ) {
+        ret = this.message.groups[0].groupid
+      }
+      return ret
+    },
     group() {
       let ret = null
 

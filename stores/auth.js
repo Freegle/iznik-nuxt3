@@ -346,6 +346,13 @@ export const useAuthStore = defineStore({
             }
 
             if (me) {
+              if( groups){ // TODO Need to set configid for groups/memberships
+                for( const membership of me.memberships){
+                  const group = groups.find(g => g.id === membership.groupid)
+                  if( group) membership.configid = group.configid
+                }
+              }
+ 
               groups = me.memberships
               delete me.memberships
             }

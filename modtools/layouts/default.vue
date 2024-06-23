@@ -83,7 +83,7 @@
             Logout
           </a>
         </div>
-        <div id="mtinfo" :title="buildDate">MT-{{ version }} <br/>{{ buildDate }}</div>
+        <div id="mtinfo" :title="buildDate">MT-{{ version }} <br />{{ buildDate }}</div>
       </div>
       <div class="ml-0 pl-0 pl-sm-1 pr-0 pr-sm-1 pageContent w-100">
         <slot ref="pageContent" />
@@ -96,8 +96,9 @@
 </template>
 
 <script lang="ts">
-import { useMiscStore } from '@/stores/misc'
 import { useAuthStore } from '@/stores/auth'
+import { useMiscStore } from '@/stores/misc'
+import { useModConfigStore } from '@/stores/modconfig'
 
 export default {
   async setup() {
@@ -107,6 +108,7 @@ export default {
     const authStore = useAuthStore()
     const jwt = authStore.auth.jwt
     const miscStore = useMiscStore()
+    const modConfigStore = useModConfigStore()
     const persistent = authStore.auth.persistent
 
     if (process.client) {
@@ -132,7 +134,7 @@ export default {
     }
 
 
-    return { authStore, googleReady, miscStore, oneTap }
+    return { authStore, googleReady, miscStore, modConfigStore, oneTap }
   },
   data: function () {
     return {
@@ -201,6 +203,8 @@ export default {
     // this.miscStore.set({ key: 'modtools', value: true, }) // Already done in app.vue
 
     this.workTimer = setTimeout(this.checkWork, 0)
+
+    await this.modConfigStore.fetch({ all: true })
     /*
     // Get chats and poll regularly for new ones
     TODO
@@ -232,7 +236,7 @@ export default {
       this.$refs.loginModal.show()
     },
     async checkWork() {
-      await this.fetchMe(true, ['work','group']) // MT ADDED 'group' 
+      await this.fetchMe(true, ['work', 'group']) // MT ADDED 'group' 
       setTimeout(this.checkWork, 30000)
     },
     discourse(e) {

@@ -20,11 +20,11 @@
         :handler="outcome('Taken')" confirm />
       <SpinButton v-if="message.type === 'Wanted' && !message.outcomes.length" variant="white" class="m-1" icon-name="check" label="Mark as RECEIVED"
         :handler="outcome('Received')" confirm />
-      <SpinButton v-if="!message.outcomes.length" variant="white" class="m-1" icon-name="trash-alt" label="Mark as Withdrawn" :handler="outcome('Withdrawn')"
-        confirm />
+      <SpinButton v-if="!message.outcomes.length" variant="white" class="m-1" icon-name="trash-alt" label="Mark as Withdrawn"
+        :handler="outcome('Withdrawn')" confirm />
     </div>
     <div v-if="!editreview" class="d-lg-inline">
-      <ModMessageButton v-for="stdmsg in filtered" :key="stdmsg.id" :variant="stdmsgVariant(stdmsg)" :icon="icon(stdmsg)" :label="stdmsg.title"
+      <ModMessageButton v-for="stdmsg in filtered" :key="stdmsg.id" :variant="variant(stdmsg)" :icon="icon(stdmsg)" :label="stdmsg.title"
         :stdmsgid="stdmsg.id" :message="message" :autosend="(Boolean)(stdmsg.autosend && allowAutoSend)" />
       <b-button v-if="rareToShow && !showRare" variant="white" class="mb-1" @click="showRare = true">
         <v-icon icon="caret-down" /> +{{ rareToShow }}...
@@ -42,11 +42,11 @@
   </div>
 </template>
 <script>
-import stdmsgs from '../mixins/stdmsgs'
 import { useMessageStore } from '../../stores/message'
 import { useStdmsgStore } from '../stores/stdmsg'
+import { icon, variant, copyStdMsgs } from '../composables/useStdMsgs'
+
 export default {
-  mixins: [stdmsgs],
   props: {
     message: {
       type: Object,
@@ -105,7 +105,7 @@ export default {
     },
     stdmsgs() {
       if (this.modconfig) {
-        return this.stdmsgCopyStdMsgs(this.modconfig)
+        return copyStdMsgs(this.modconfig)
       } else {
         return []
       }

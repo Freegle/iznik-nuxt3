@@ -2,7 +2,7 @@
   <div class="d-inline">
     <div class="position-relative d-inline">
       <SpinButton :variant="variant" :icon-name="icon" :label="label" class="mb-1" :spinclass="spinclass" :disabled="disabled" @handle="click" />
-      <v-icon v-if="autosend" name="chevron-circle-right" title="Autosend - configured to send immediately without edit" class="autosend" />
+      <v-icon v-if="autosend" icon="chevron-circle-right" title="Autosend - configured to send immediately without edit" class="autosend" />
     </div>
     <ConfirmModal v-if="showDeleteModal" ref="deleteConfirm" :title="'Delete: ' + member.displayname" @confirm="deleteConfirmed" />
     <ModSpammerReport v-if="showSpamModal" ref="spamConfirm" :user="member" />
