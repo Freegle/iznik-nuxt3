@@ -167,6 +167,11 @@ export default defineNuxtConfig({
     'nuxt-lcp-speedup',
   ],
 
+  lcpSpeedup: {
+    disablePrefetchLinks: true,
+    disablePreloadLinks: true,
+  },
+
   // Environment variables the client needs.
   runtimeConfig: {
     public: {
