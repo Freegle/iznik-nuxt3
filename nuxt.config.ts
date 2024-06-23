@@ -229,6 +229,11 @@ export default defineNuxtConfig({
           'es.array.flat-map',
           'es.array.flat',
         ],
+
+        // We are seeing browsers loading both legacy and modern chunks.  This isn't supposed to happen, possibly
+        // via use of nomodule.  But it is.  So we're disabling modern chunks for now so that we don't duplicate
+        // JS.
+        renderModernChunks: false,
       }),
       sentryVitePlugin({
         org: 'freegle',
@@ -256,6 +261,12 @@ export default defineNuxtConfig({
       },
       title: "Freegle - Don't throw it away, give it away!",
       script: [
+        {
+          // This is a polyfill for Safari12.  Can't get it to work using modernPolyfills - needs to happen very
+          // early.  Safari12 doesn't work well, but this makes it functional.
+          type: 'text/javascript',
+          innerHTML: `try { if (!window.globalThis) { window.globalThis = window; } } catch (e) { console.log('Polyfill error', e.message); }`,
+        },
         // The ecosystem of advertising is complex.
         // - The underlying ad service is Google Tags (GPT).
         // - We use prebid (pbjs), which is some kind of ad broker which gives us a pipeline of ads to use.
@@ -277,8 +288,7 @@ export default defineNuxtConfig({
         {
           type: 'text/javascript',
           innerHTML:
-            `try { if (!window.globalThis) { window.globalThis = window; } } catch (e) { console.log('Polyfill error', e.message); }
-             try {
+            `try {
               window.dataLayer = window.dataLayer || [];
               function ce_gtag() {
                   window.dataLayer.push(arguments);
