@@ -204,6 +204,9 @@ export default defineNuxtConfig({
   ],
 
   vite: {
+    build: {
+      manifest: true,
+    },
     css: {
       preprocessorOptions: {
         scss: {
@@ -223,16 +226,9 @@ export default defineNuxtConfig({
       legacy({
         targets: ['since 2015', 'ios>=12', 'safari>=12'],
 
-        // Safari 12 requires some polyfills.
-        // modernPolyfills: [
-        //   'es.object.from-entries',
-        //   'es.array.flat-map',
-        //   'es.array.flat',
-        // ],
-
         // We are seeing browsers loading both legacy and modern chunks.  This isn't supposed to happen, possibly
-        // via use of nomodule.  But it is.  So we're disabling modern chunks for now so that we don't duplicate
-        // JS.
+        // via use of nomodule.  But it is, and that hurts performance (especially LCP).
+        // So we're disabling modern chunks for now so that we don't duplicate JS.
         renderModernChunks: false,
       }),
       sentryVitePlugin({
