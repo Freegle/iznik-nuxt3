@@ -63,9 +63,6 @@ export default defineNuxtConfig({
     },
   },
 
-  // If we have payload extraction turned on then our prerender fails on some routes.
-  payloadExtraction: false,
-
   routeRules: {
     // Nuxt3 has some lovely features to do with how routes are generated/cached.  We use:
     //
@@ -141,7 +138,6 @@ export default defineNuxtConfig({
 
       // Don't prerender the messages - too many
       ignore: ['/message/'],
-      crawlLinks: true,
     },
   },
 
