@@ -225,11 +225,10 @@ export default defineNuxtConfig({
 
         // Safari 12 requires some polyfills.
         modernPolyfills: [
-          'es/global-this',
-          'es/object.from-entries',
-          'es/array.flat',
-          'es/array.flat-map',
-          'es/string.replace-all',
+          'es.global-this',
+          'es.object.from-entries',
+          'es.array.flat-map',
+          'es.array.flat',
         ],
       }),
       sentryVitePlugin({
