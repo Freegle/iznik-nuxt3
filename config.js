@@ -41,6 +41,8 @@ const CONFIG = {
   // Cookie banner for this site.
   COOKIEYES: process.env.COOKIEYES || null,
 
+  TRUSTPILOT_LINK: process.env.TRUSTPILOT_LINK || null,
+
   AD_PREBID_CONFIG: [
     {
       code: '/22794232631/freegle_sticky',
