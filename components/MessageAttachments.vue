@@ -63,6 +63,7 @@
               :width="Math.round(width)"
               :height="200"
               fit="cover"
+              preload
               @error="brokenImage"
               @click="$emit('zoom')"
             />
