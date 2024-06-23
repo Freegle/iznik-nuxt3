@@ -35,7 +35,11 @@
         </client-only>
       </div>
       <div
-        :class="{ thumbnail: thumbnail, notThumbnail: !thumbnail, attachment }"
+        :class="{
+          thumbnail: thumbnail,
+          notThumbnail: !thumbnail,
+          attachment: true,
+        }"
       >
         <div ref="imagewrapper">
           <NuxtPicture
