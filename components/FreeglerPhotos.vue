@@ -53,6 +53,12 @@
               class-name="image"
               sizes="1px sm:576px md:768"
             />
+            <p class="text-center text--smallest credit">
+              Photos of real freeglers, kindly taken by
+              <ExternalLink href="https://www.alexbamford.com/"
+                >Alex Bamford</ExternalLink
+              >. Back when wearing masks was a thing...
+            </p>
           </div>
         </template>
       </client-only>
