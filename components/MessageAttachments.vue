@@ -34,55 +34,50 @@
           </b-badge>
         </client-only>
       </div>
-      <div :class="{ thumbnail: thumbnail, notThumbnail: !thumbnail }">
+      <div
+        :class="{ thumbnail: thumbnail, notThumbnail: !thumbnail, attachment }"
+      >
         <client-only>
-          <div v-if="attachments[0].externaluid" ref="imagewrapper">
+          <div ref="imagewrapper">
             <NuxtPicture
+              v-if="attachments[0].externaluid"
               format="webp"
               fit="cover"
               provider="uploadcare"
               :src="attachments[0].externaluid"
               :modifiers="attachments[0].externalmods"
               alt="Item Photo"
-              class="attachment"
               :width="Math.round(width)"
               :height="Math.round(height)"
               preload
               @error="brokenImage"
               @click="$emit('zoom')"
             />
-          </div>
-          <div v-else>
-            <b-img
-              lazy
-              rounded
-              class="d-none d-md-block attachment p-0"
-              generator-unable-to-provide-required-alt=""
-              title="Item picture"
-              :src="thumbnail ? attachments[0].paththumb : attachments[0].path"
-              itemprop="image"
-              @error="brokenImage"
-              @click="$emit('zoom')"
-            />
-            <b-img
-              lazy
-              rounded
-              class="d-block d-md-none attachment p-0"
-              generator-unable-to-provide-required-alt=""
+            <ProxyImage
+              v-else
+              class-name="p-0 rounded"
+              alt="Item picture"
               title="Item picture"
               :src="attachments[0].path"
-              itemprop="image"
+              :sizes="thumbnail ? '320px sm:200px md:200px' : '320px sm:992px'"
+              :width="Math.round(width)"
+              :height="200"
+              fit="cover"
               @error="brokenImage"
               @click="$emit('zoom')"
             />
           </div>
           <template #fallback>
-            <img
-              class="attachment p-0"
-              generator-unable-to-provide-required-alt=""
-              title="Item picture"
+            <ProxyImage
+              class="attachment p-0 rounded"
+              alt="No picture of item"
+              title="No picture of item"
               src="/camera.png"
-              itemprop="image"
+              :width="Math.round(width)"
+              :height="200"
+              :sizes="thumbnail ? '320px sm:200px md:200px' : '320px sm:992px'"
+              @error="brokenImage"
+              @click="$emit('zoom')"
             />
           </template>
         </client-only>
