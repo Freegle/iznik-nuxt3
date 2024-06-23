@@ -222,6 +222,15 @@ export default defineNuxtConfig({
       eslintPlugin(),
       legacy({
         targets: ['since 2015', 'ios>=12', 'safari>=12'],
+
+        // Safari 12 requires some polyfills.
+        modernPolyfills: [
+          'es.global-this',
+          'es.object.from-entries',
+          'es.array.flat',
+          'es.array.flat-map',
+          'es.string.replace-all',
+        ],
       }),
       sentryVitePlugin({
         org: 'freegle',
@@ -249,10 +258,6 @@ export default defineNuxtConfig({
       },
       title: "Freegle - Don't throw it away, give it away!",
       script: [
-        {
-          // Safari 12 requires this polyfill, which must be loaded early.
-          src: 'https://polyfill.io/v3/polyfill.min.js?features=globalThis%2CObject.fromEntries%2CArray.prototype.flatMap%2CArray.prototype.flat%2CString.prototype.replaceAll',
-        },
         // The ecosystem of advertising is complex.
         // - The underlying ad service is Google Tags (GPT).
         // - We use prebid (pbjs), which is some kind of ad broker which gives us a pipeline of ads to use.
