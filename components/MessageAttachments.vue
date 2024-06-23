@@ -37,51 +37,36 @@
       <div
         :class="{ thumbnail: thumbnail, notThumbnail: !thumbnail, attachment }"
       >
-        <client-only>
-          <div ref="imagewrapper">
-            <NuxtPicture
-              v-if="attachments[0].externaluid"
-              format="webp"
-              fit="cover"
-              provider="uploadcare"
-              :src="attachments[0].externaluid"
-              :modifiers="attachments[0].externalmods"
-              alt="Item Photo"
-              :width="Math.round(width)"
-              :height="200"
-              preload
-              @error="brokenImage"
-              @click="$emit('zoom')"
-            />
-            <ProxyImage
-              v-else
-              class-name="p-0 rounded"
-              alt="Item picture"
-              title="Item picture"
-              :src="attachments[0].path"
-              :sizes="thumbnail ? '320px sm:200px md:200px' : '320px sm:992px'"
-              :width="Math.round(width)"
-              :height="200"
-              fit="cover"
-              preload
-              @error="brokenImage"
-              @click="$emit('zoom')"
-            />
-          </div>
-          <template #fallback>
-            <ProxyImage
-              class="attachment p-0 rounded"
-              alt="No picture of item"
-              title="No picture of item"
-              src="/camera.png"
-              :width="Math.round(width)"
-              :height="200"
-              :sizes="thumbnail ? '320px sm:200px md:200px' : '320px sm:992px'"
-              @error="brokenImage"
-              @click="$emit('zoom')"
-            />
-          </template>
-        </client-only>
+        <div ref="imagewrapper">
+          <NuxtPicture
+            v-if="attachments[0].externaluid"
+            format="webp"
+            fit="cover"
+            provider="uploadcare"
+            :src="attachments[0].externaluid"
+            :modifiers="attachments[0].externalmods"
+            alt="Item Photo"
+            :width="Math.round(width)"
+            :height="200"
+            preload
+            @error="brokenImage"
+            @click="$emit('zoom')"
+          />
+          <ProxyImage
+            v-else
+            class-name="p-0 rounded"
+            alt="Item picture"
+            title="Item picture"
+            :src="attachments[0].path"
+            :sizes="thumbnail ? '320px sm:200px md:200px' : '320px sm:992px'"
+            :width="Math.round(width)"
+            :height="200"
+            fit="cover"
+            preload
+            @error="brokenImage"
+            @click="$emit('zoom')"
+          />
+        </div>
       </div>
     </button>
   </div>

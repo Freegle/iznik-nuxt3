@@ -36,8 +36,8 @@ const groupStore = useGroupStore()
 await groupStore.fetch()
 
 onMounted(() => {
-  // We used SSR so we have one rendeerd already.
-  timer = setTimeout(doNext, 3000)
+  // We used SSR so we have one rendered already.
+  timer = setTimeout(doNext, 4000)
 })
 
 onBeforeUnmount(() => {
