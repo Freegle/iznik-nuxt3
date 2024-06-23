@@ -63,6 +63,9 @@ export default defineNuxtConfig({
     },
   },
 
+  // If we have payload extraction turned on then our prerender fails on some routes.
+  payloadExtraction: false,
+
   routeRules: {
     // Nuxt3 has some lovely features to do with how routes are generated/cached.  We use:
     //
@@ -231,6 +234,12 @@ export default defineNuxtConfig({
   // Note that this is not the standard @vitejs/plugin-legacy, but https://www.npmjs.com/package/nuxt-vite-legacy
   legacy: {
     targets: ['chrome 49', 'since 2015', 'ios>=12', 'safari>=12'],
+    modernPolyfills: [
+      'es.global-this',
+      'es.object.from-entries',
+      'es.array.flat-map',
+      'es.array.flat',
+    ],
   },
 
   // Sentry needs sourcemaps.
