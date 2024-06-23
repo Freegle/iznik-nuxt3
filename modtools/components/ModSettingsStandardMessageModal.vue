@@ -193,9 +193,7 @@ export default {
     async show() {
       // Fetch the current value, if any, before opening the modal.
       if (this.id) {
-        await this.stdmsgStore.fetch({
-          id: this.id
-        })
+        await this.stdmsgStore.fetch(this.id)
       }
       this.modal.show()
     },

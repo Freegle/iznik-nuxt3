@@ -1,33 +1,39 @@
+import { setupModMessages } from '../composables/useModMessages'
+
 const keywordTypeOptions = computed(() => {
+  const { group } = setupModMessages()
+  const thegroup = group.value
   return [
     {
       value: 'Offer',
-      text: 'OFFER'
-      /* TODO  this.group &&
-          this.group.settings &&
-          this.group.settings.keywords &&
-          this.group.settings.keywords.offer
-          ? this.group.settings.keywords.offer
-          : 'OFFER'*/
+      text: thegroup &&
+        thegroup.settings &&
+        thegroup.settings.keywords &&
+        thegroup.settings.keywords.offer
+        ? thegroup.settings.keywords.offer
+        : 'OFFER'
     },
     {
       value: 'Wanted',
-      text: 'WANTED'
-      /* TODO  this.group &&
-          this.group.settings &&
-          this.group.settings.keywords &&
-          this.group.settings.keywords.wanted
-          ? this.group.settings.keywords.wanted
-          : 'WANTED'*/
+      text: thegroup &&
+        thegroup.settings &&
+        thegroup.settings.keywords &&
+        thegroup.settings.keywords.wanted
+        ? thegroup.settings.keywords.wanted
+        : 'WANTED'
     }
   ]
 })
 
-const keywordGroup = computed(() => {
-  return this.myGroup(this.groupid)
+/*const keywordGroup = computed(() => {
+  console.log('TODO: keywordGroup as above')
+  return null
+  return this.myGroup(groupid)
 })
 
 const keywordGroupid = computed(() => {
+  console.log('TODO: keywordGroupid as above')
+  return 0
   let ret = null
 
   if (this.member) {
@@ -41,12 +47,13 @@ const keywordGroupid = computed(() => {
   }
 
   return ret
-})
+})*/
 
 export function setupKeywords() {
+
   return {
     keywordTypeOptions,
-    keywordGroup, // TODO remove
-    keywordGroupid // TODO remove
+    // TODO keywordGroup,
+    // TODO keywordGroupid
   }
 }

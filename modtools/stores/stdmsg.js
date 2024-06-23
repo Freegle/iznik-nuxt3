@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { useModConfigStore } from '../stores/modconfig'
 import api from '~/api'
-// TODO
 
 export const useStdmsgStore = defineStore({
   id: 'stdmsg',
@@ -22,13 +21,13 @@ export const useStdmsgStore = defineStore({
         return msg.id === id
       })
     },
-    async fetch(params) {
-      const { stdmsg } = await this.$api.modconfigs.fetchStdMsg(params.id)
+    async fetch(id) {
+      const { stdmsg } = await api(this.config).modconfigs.fetchStdMsg(id)
       this.set(stdmsg)
       return stdmsg
     },
     async delete(params) {
-      await this.$api.modconfigs.deleteStdMsg(params)
+      await api(this.config).modconfigs.deleteStdMsg(params)
 
       await this.modConfigStore.fetchConfig({
         id: params.configid,
@@ -40,7 +39,7 @@ export const useStdmsgStore = defineStore({
       )
     },
     async update(params) {
-      await this.$api.modconfigs.patchStdMsg(params)
+      await api(this.config).modconfigs.patchStdMsg(params)
       await this.modConfigStore.fetchConfig({
         id: params.configid,
         configuring: true
@@ -51,7 +50,7 @@ export const useStdmsgStore = defineStore({
       )
     },
     async add(params) {
-      const { id } = await this.$api.modconfigs.addStdMsg(params)
+      const { id } = await api(this.config).modconfigs.addStdMsg(params)
       await this.modConfigStore.fetchConfig({
         id: params.configid,
         configuring: true

@@ -30,7 +30,7 @@
               <span v-else>
                 {{ eSubject }}
               </span>
-              <span v-if="message.location" class="text-muted small">{{ message.location.name }}</span>
+              <span v-if="message.location" class="text-muted small ms-1">{{ message.location.name }}</span>
               <span v-if="message.availableinitially && message.availableinitially > 1" class="small text-info">
                 <b-badge v-if="message.availableinitially === message.availablenow" variant="info">
                   {{ message.availablenow }} available
@@ -311,9 +311,6 @@ import { useUserStore } from '../../stores/user'
 import { SUBJECT_REGEX } from '../utils/constants'
 
 import { setupKeywords } from '../composables/useKeywords'
-const {
-  keywordTypeOptions, keywordGroup, keywordGroupid
-} = setupKeywords()
 
 import { twem } from '~/composables/useTwem'
 
@@ -322,7 +319,6 @@ export default {
   components: {
     Highlighter
   },
-  //mixins: [keywords],
   props: {
     message: {
       type: Object,
@@ -370,8 +366,11 @@ export default {
     const memberStore = useMemberStore()
     const messageStore = useMessageStore()
     const userStore = useUserStore()
+    const {
+      keywordTypeOptions
+    } = setupKeywords()
 
-    return { locationStore, memberStore, messageStore, modconfigStore, userStore }
+    return { locationStore, memberStore, messageStore, modconfigStore, userStore, keywordTypeOptions }
   },
   data: function () {
     return {

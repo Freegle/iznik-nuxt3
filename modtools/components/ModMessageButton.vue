@@ -172,7 +172,6 @@ export default {
           }
         } else if (this.stdmsgid) {
           // We have a standard message.  Fetch it.
-
           this.stdmsg = await this.stdmsgStore.fetch(this.stdmsgid)
         }
 

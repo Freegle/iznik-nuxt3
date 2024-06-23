@@ -18,7 +18,7 @@
         </div>
       </div>
       <div v-if="message && stdmsg.action === 'Edit' && message.item && message.location" class="d-flex justify-content-start">
-        <b-form-select v-model="message.type" :options="typeOptions" class="type mr-1" size="lg" />
+        <b-form-select v-model="message.type" :options="keywordTypeOptions" class="type mr-1" size="lg" />
         <b-form-input v-model="message.item.name" size="lg" class="mr-1" />
         <b-input-group>
           <!--Postcode :value="message.location.name" :find="false" @selected="postcodeSelect" /-->
@@ -88,15 +88,14 @@ import { useMessageStore } from '~/stores/message'
 import { useUserStore } from '../stores/user'
 import dayjs from 'dayjs'
 import { useModal } from '~/composables/useModal'
-//import keywords from '@/mixins/keywords.js'
 import { SUBJECT_REGEX } from '@/utils/constants'
 //import PostCode from '~/components/PostCode'
+import { setupKeywords } from '../composables/useKeywords'
 
 export default {
   components: {
     //PostCode,
   },
-  //mixins: [keywords],
   props: {
     message: {
       type: Object,
@@ -119,12 +118,16 @@ export default {
     }
   },
   setup() {
+    console.log('MSMM setup')
     const { modal, hide } = useModal()
     const groupStore = useGroupStore()
     const messageStore = useMessageStore()
     const memberStore = useMemberStore()
     const userStore = useUserStore()
-    return { groupStore, memberStore, messageStore, userStore, modal, hide }
+    const {
+      keywordTypeOptions
+    } = setupKeywords()
+    return { groupStore, memberStore, messageStore, userStore, keywordTypeOptions, modal, hide }
   },
   data: function () {
     return {
@@ -143,8 +146,8 @@ export default {
     }
   },
   computed: {
-    groupid(){
-      if( Array.isArray(this.message.groups)){
+    groupid() {
+      if (Array.isArray(this.message.groups)) {
         return this.message.groups[0].groupid
       }
       return 0
@@ -425,8 +428,8 @@ export default {
         text = text.replace(/\$myname/g, this.me.displayname)
         text = text.replace(/\$nummembers/g, group.membercount)
         text = text.replace(/\$nummods/g, group.modcount)
-        if( group.settings && group.settings.reposts) text = text.replace(/\$repostoffer/g, group.settings.reposts.offer)
-        if( group.settings && group.settings.reposts) text = text.replace(/\$repostwanted/g, group.settings.reposts.wanted)
+        if (group.settings && group.settings.reposts) text = text.replace(/\$repostoffer/g, group.settings.reposts.offer)
+        if (group.settings && group.settings.reposts) text = text.replace(/\$repostwanted/g, group.settings.reposts.wanted)
 
         text = text.replace(
           /\$origsubj/g,

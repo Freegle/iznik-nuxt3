@@ -78,7 +78,7 @@ export const useGroupStore = defineStore({
 
 
     async fetch(id, force) {
-      console.log('useGroupStore fetch', id)
+      //console.log('useGroupStore fetch', id)
       if (id) {
         if (isNaN(id)) {
           // Get by name.  Case-insensitive.
