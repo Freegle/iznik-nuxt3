@@ -239,6 +239,9 @@ export default defineNuxtConfig({
 
   app: {
     head: {
+      htmlAttrs: {
+        lang: 'en',
+      },
       title: "Freegle - Don't throw it away, give it away!",
       script: [
         {
