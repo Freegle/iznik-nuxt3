@@ -152,6 +152,7 @@ export default defineNuxtConfig({
   experimental: {
     emitRouteChunkError: 'reload',
     asyncContext: true,
+    payloadExtraction: true, // https://github.com/nuxt/nuxt/issues/22068
   },
 
   webpack: {
