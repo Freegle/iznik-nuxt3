@@ -66,7 +66,11 @@
               </b-col>
             </b-row>
           </div>
-          <div v-else-if="myid && message && message.fromuser === myid">
+          <div
+            v-else-if="
+              mountComplete && myid && message && message.fromuser === myid
+            "
+          >
             <MyMessage :id="id" :show-old="true" expand />
           </div>
           <div v-else class="botpad">
@@ -162,6 +166,10 @@ if (message.value) {
   )
 }
 
+// We want to delay render of MyMessage until the mount fetch is complete, as it would otherwise not
+// contain the reply information correctly.
+const mountComplete = ref(false)
+
 onMounted(async () => {
   // We need to fetch again on the client, as the server may have rendered the page with data censored, because
   // it always renders logged out.
@@ -170,5 +178,7 @@ onMounted(async () => {
   } catch (e) {
     console.log('Message fetch on mount failed', e)
   }
+
+  mountComplete.value = true
 })
 </script>
