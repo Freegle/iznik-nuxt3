@@ -225,7 +225,6 @@ export default defineNuxtConfig({
 
         // Safari 12 requires some polyfills.
         modernPolyfills: [
-          'es.global-this',
           'es.object.from-entries',
           'es.array.flat-map',
           'es.array.flat',
@@ -278,7 +277,8 @@ export default defineNuxtConfig({
         {
           type: 'text/javascript',
           innerHTML:
-            `try {
+            `try { if (!window.globalThis) { window.globalThis = window; } } catch (e) { console.log('Polyfill error', e.message); }
+             try {
               window.dataLayer = window.dataLayer || [];
               function ce_gtag() {
                   window.dataLayer.push(arguments);
