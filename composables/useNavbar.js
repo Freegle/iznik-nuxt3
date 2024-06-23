@@ -9,7 +9,6 @@ import { useChatStore } from '../stores/chat'
 import { useAuthStore } from '~/stores/auth'
 import { fetchMe } from '~/composables/useMe'
 import { useRuntimeConfig } from '#app'
-import { imageProxy } from '~/composables/useImageProxy'
 
 export const navBarHidden = ref(false)
 
@@ -49,7 +48,8 @@ export function useNavbar() {
   const online = computed(() => miscStore.online)
   const myid = computed(() => authStore.user?.id)
   const distance = ref(1000)
-  const logo = ref(imageProxy('/icon.png', '/-/resize/58/-/format/webp/'))
+  const logo = ref('/icon.png')
+  const logoFormat = ref('webp')
   const unreadNotificationCount = ref(0)
   const chatCount = computed(() => chatStore.unreadCount)
   const activePostsCount = computed(() => messageStore.activePostsCounter)
@@ -129,13 +129,8 @@ export function useNavbar() {
       const ret = await logoStore.fetch()
 
       if (ret.ret === 0 && ret.logo) {
-        logo.value = imageProxy(
-          ret.logo.path.replace(
-            /.*logos/,
-            '/logos',
-            '/-/resize/58/-/format/webp/'
-          )
-        )
+        logo.value = ret.logo.path.replace(/.*logos/, '/logos')
+        logoFormat.value = 'gif'
       }
     }, 5000)
 
@@ -259,6 +254,7 @@ export function useNavbar() {
     online,
     distance,
     logo,
+    logoFormat,
     unreadNotificationCount,
     chatCount,
     activePostsCount,

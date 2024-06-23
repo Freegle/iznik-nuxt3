@@ -98,7 +98,10 @@ export default {
   },
   computed: {
     proxyImage() {
-      return imageProxy(this.validImage, '/-/resize/100/-/format/webp/')
+      return imageProxy(this.validImage, {
+        resize: 100,
+        format: 'webp',
+      })
     },
     validImage() {
       return this.image || '/defaultprofile.png'

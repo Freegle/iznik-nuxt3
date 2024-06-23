@@ -92,37 +92,37 @@
       </div>
       <VisualiseList class="mb-2 d-block d-sm-none" />
     </div>
-    <client-only>
-      <div class="app-download mt-2">
-        <a
-          href="https://play.google.com/store/apps/details?id=org.ilovefreegle.direct"
-          target="_blank"
-          class="mr-2"
-          rel="noopener noreferrer"
-        >
-          <b-img
-            lazy
-            alt="Freegle Android app on Google Play"
-            title="Freegle Android app on Google Play"
-            class="app-download__image"
-            src="/en-play-badge.png"
-          />
-        </a>
-        <a
-          href="https://itunes.apple.com/gb/app/freegle/id970045029?ls=1&amp;mt=8"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <b-img
-            lazy
-            alt="Freegle app for iPhone, iPad, and iPod touch"
-            title="Freegle app for iPhone, iPad, and iPod Touch"
-            class="app-download__image"
-            src="/app-store-black-sm.png"
-          />
-        </a>
-      </div>
-    </client-only>
+    <div class="app-download mt-2">
+      <a
+        href="https://play.google.com/store/apps/details?id=org.ilovefreegle.direct"
+        target="_blank"
+        class="mr-2"
+        rel="noopener noreferrer"
+      >
+        <ProxyImage
+          preload
+          alt="Freegle Android app on Google Play"
+          title="Freegle Android app on Google Play"
+          class="app-download__image"
+          src="/en-play-badge.png"
+          sizes="75px"
+        />
+      </a>
+      <a
+        href="https://itunes.apple.com/gb/app/freegle/id970045029?ls=1&amp;mt=8"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <ProxyImage
+          preload
+          alt="Freegle app for iPhone, iPad, and iPod touch"
+          title="Freegle app for iPhone, iPad, and iPod Touch"
+          class="app-download__image"
+          src="/app-store-black-sm.png"
+          sizes="75px"
+        />
+      </a>
+    </div>
     <MainFooter class="thefooter" />
   </div>
 </template>
@@ -157,28 +157,24 @@ export default {
     )
 
     // Preload some images to speed page load.
+    const userSite = runtimeConfig.public.USER_SITE
+    const proxy = runtimeConfig.public.UPLOADCARE_PROXY
+
     head.link = [
       {
         rel: 'preload',
         as: 'image',
-        href: '/landingpage/frame.png',
-        media: '(min-width: 576px)',
+        href: proxy + '/-/resize/58/-/format/webp/' + userSite + '/icon.png',
       },
       {
         rel: 'preload',
         as: 'image',
-        href: '/landingpage/Freegler1.jpeg',
-        media: '(min-width: 576px)',
+        href: proxy + '/-format/webp/' + userSite + '/wallpaper.png',
       },
       {
         rel: 'preload',
         as: 'image',
-        href: '/krystal.png',
-      },
-      {
-        rel: 'preload',
-        as: 'image',
-        href: '/mythic-beasts.png',
+        href: userSite + '/loader.gif',
       },
     ]
 
@@ -303,6 +299,7 @@ export default {
 .eyecandy {
   grid-row: 3 / 4;
   grid-column: 1 / 3;
+  align-items: center !important;
 
   @include media-breakpoint-up(sm) {
     height: 300px;

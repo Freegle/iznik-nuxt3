@@ -593,6 +593,9 @@ export default defineNuxtConfig({
   image: {
     uploadcare: {
       provider: 'uploadcare',
+
+      // On some machines we can't resolve ucarecdn.com but can resolve www.ucarecdn.com.
+      cdnURL: 'https://www.ucarecdn.com',
     },
 
     // We want sharp images on fancy screens.
@@ -600,14 +603,22 @@ export default defineNuxtConfig({
 
     // Uploadcare only supports images upto 3000.  So we drop the top-level screen sizes, which get doubled
     // to produce the images requested.
+    //
+    // We also want to match the Bootstrap breakpoints.
     screens: {
       xs: 320,
-      sm: 640,
+      sm: 576,
       md: 768,
-      lg: 1024,
-      xl: 1280,
-      xxl: 1500,
-      '2xl': 1500,
+      lg: 992,
+      xl: 1200,
+      xxl: 1400,
+      '2xl': 1400,
+    },
+
+    providers: {
+      uploadcareProxy: {
+        provider: '~/providers/uploadcare-proxy.ts',
+      },
     },
   },
 })
