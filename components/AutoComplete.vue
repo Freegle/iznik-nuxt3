@@ -21,7 +21,12 @@
             @focus="handleFocus"
           />
           <b-input-group-append>
-            <b-button variant="white" class="transbord p-0 pr-2" tabindex="-1">
+            <b-button
+              variant="white"
+              class="transbord p-0 pr-2"
+              tabindex="-1"
+              aria-label="Busy indicator"
+            >
               <v-icon
                 icon="sync"
                 :class="
