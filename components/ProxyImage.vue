@@ -11,6 +11,7 @@
     :width="width"
     :height="height"
     :loading="loading"
+    :sizes="sizes"
   />
 </template>
 <script setup>
@@ -68,6 +69,11 @@ const props = defineProps({
   },
   height: {
     type: Number,
+    required: false,
+    default: null,
+  },
+  sizes: {
+    type: String,
     required: false,
     default: null,
   },

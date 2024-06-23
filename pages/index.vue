@@ -171,6 +171,11 @@ export default {
         as: 'image',
         href: proxy + '/-format/webp/' + userSite + '/wallpaper.png',
       },
+      {
+        rel: 'preload',
+        as: 'image',
+        href: userSite + '/loader.gif',
+      },
     ]
 
     useHead(head)
