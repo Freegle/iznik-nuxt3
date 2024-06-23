@@ -2,7 +2,7 @@
   <div class="d-inline">
     <div class="position-relative d-inline">
       <SpinButton :variant="variant" :spinclass="spinclass" :icon-name="icon" :label="label" :flex="false" class="mb-1 me-1 d-inline-block"
-        :disabled="disabled" @handle="click" :confirm="confirmButton" />
+        iconClass="pe-1" :disabled="disabled" @handle="click" :confirm="confirmButton" />
       <v-icon v-if="autosend" name="chevron-circle-right" title="Autosend - configured to send immediately without edit" class="autosend" />
     </div>
     <ConfirmModal v-if="showDeleteModal" ref="deleteConfirm" :title="'Delete: ' + message.subject" @confirm="deleteConfirmed"
@@ -154,9 +154,8 @@ export default {
       } else if (this.spam) {
         // Standard spam button.
         this.showSpamModal = true
-        this.waitForRef('spamConfirm', () => {
-          this.$refs.spamConfirm.show()
-        })
+        //await nextTick()
+        //this.$refs.spamConfirm?.show()
       } else if (this.approveedits) {
         await this.approveEdits()
       } else if (this.revertedits) {

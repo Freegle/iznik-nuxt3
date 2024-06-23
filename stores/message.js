@@ -259,9 +259,7 @@ export const useMessageStore = defineStore({
       const data = await api(this.config).message.save(params)
 
       // Clear from store to ensure no attachments.
-      this.remove({
-        id: params.id,
-      })
+      this.remove({ id: params.id })
 
       //await this.fetch(params.id, true) // Gets message.fromuser as int not object
       // TODO: CHECK OK SOLUTION
@@ -381,9 +379,7 @@ export const useMessageStore = defineStore({
         params.body
       )
   
-      this.remove({
-        id: params.id,
-      })
+      this.remove({ id: params.id })
 
       const authStore = useAuthStore()
       authStore.work = {}
@@ -397,14 +393,12 @@ export const useMessageStore = defineStore({
         params.body
       )
   
-      this.remove({
-        id: params.id,
-      })
+      this.remove({ id: params.id })
 
       const authStore = useAuthStore()
       authStore.work = {}
     },
-      async hold(params) {
+    async hold(params) {
       await api(this.config).message.hold(params.id)
       const { message } = await api(this.config).message.fetchMT({
         id: params.id,
@@ -419,6 +413,14 @@ export const useMessageStore = defineStore({
         messagehistory: true
       })
       this.list[message.id] = message
+    },
+    async spam(params) {
+      await api(this.config).message.spam(params.id, params.groupid)
+  
+      this.remove({ id: params.id })
+  
+      const authStore = useAuthStore()
+      authStore.work = {}
     },
   },
   getters: {
