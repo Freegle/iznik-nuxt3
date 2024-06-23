@@ -1,17 +1,17 @@
 diff --git a/node_modules/@nuxt/image/dist/runtime/components/nuxt-img.mjs b/node_modules/@nuxt/image/dist/runtime/components/nuxt-img.mjs
-index 3ac97b9..3a8bb19 100644
+index 61b828a..1a95631 100644
 --- a/node_modules/@nuxt/image/dist/runtime/components/nuxt-img.mjs
 +++ b/node_modules/@nuxt/image/dist/runtime/components/nuxt-img.mjs
-@@ -65,6 +65,7 @@ export default defineComponent({
+@@ -66,6 +66,7 @@ export default defineComponent({
+       useHead({
          link: [{
            rel: "preload",
-           as: "image",
 +          fetchPriority: "high",
+           as: "image",
            nonce: props.nonce,
            ...!isResponsive ? { href: src.value } : {
-             href: sizes.value.src,
 diff --git a/node_modules/@nuxt/image/dist/runtime/components/nuxt-picture.mjs b/node_modules/@nuxt/image/dist/runtime/components/nuxt-picture.mjs
-index c471a5e..5379ed8 100644
+index d11e82e..6b4a814 100644
 --- a/node_modules/@nuxt/image/dist/runtime/components/nuxt-picture.mjs
 +++ b/node_modules/@nuxt/image/dist/runtime/components/nuxt-picture.mjs
 @@ -49,6 +49,7 @@ export default defineComponent({
@@ -21,4 +21,4 @@ index c471a5e..5379ed8 100644
 +        fetchPriority: "high",
          as: "image",
          imagesrcset: sources.value[0].srcset,
-         nonce: props.nonce
+         nonce: props.nonce,
