@@ -169,12 +169,7 @@ export default {
       {
         rel: 'preload',
         as: 'image',
-        href: proxy + '/-format/webp/' + userSite + '/wallpaper.png',
-      },
-      {
-        rel: 'preload',
-        as: 'image',
-        href: userSite + '/loader.gif',
+        href: proxy + '/-/format/webp/' + userSite + '/wallpaper.png',
       },
     ]
 
