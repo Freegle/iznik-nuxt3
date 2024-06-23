@@ -48,7 +48,7 @@
               :modifiers="attachments[0].externalmods"
               alt="Item Photo"
               :width="Math.round(width)"
-              :height="Math.round(height)"
+              :height="200"
               preload
               @error="brokenImage"
               @click="$emit('zoom')"
