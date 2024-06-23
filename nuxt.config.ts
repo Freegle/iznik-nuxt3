@@ -1,6 +1,5 @@
 import eslintPlugin from 'vite-plugin-eslint'
 import { VitePWA } from 'vite-plugin-pwa'
-import legacy from '@vitejs/plugin-legacy'
 import { sentryVitePlugin } from '@sentry/vite-plugin'
 import { splitVendorChunkPlugin } from 'vite'
 import config from './config'
@@ -165,6 +164,7 @@ export default defineNuxtConfig({
     'floating-vue/nuxt',
     '@nuxt/image',
     'nuxt-lcp-speedup',
+    'nuxt-vite-legacy',
   ],
 
   lcpSpeedup: {
@@ -204,9 +204,6 @@ export default defineNuxtConfig({
   ],
 
   vite: {
-    build: {
-      manifest: true,
-    },
     css: {
       preprocessorOptions: {
         scss: {
@@ -223,19 +220,16 @@ export default defineNuxtConfig({
       VitePWA({ registerType: 'autoUpdate' }),
       // Make Lint errors cause build failures.
       eslintPlugin(),
-      legacy({
-        targets: ['since 2015', 'ios>=12', 'safari>=12'],
-
-        // We are seeing browsers loading both legacy and modern chunks.  This isn't supposed to happen, possibly
-        // via use of nomodule.  But it is, and that hurts performance (especially LCP).
-        // So we're disabling modern chunks for now so that we don't duplicate JS.
-        renderModernChunks: false,
-      }),
       sentryVitePlugin({
         org: 'freegle',
         project: 'nuxt3',
       }),
     ],
+  },
+
+  // Note that this is not the standard @vitejs/plugin-legacy, but https://www.npmjs.com/package/nuxt-vite-legacy
+  legacy: {
+    targets: ['chrome 49', 'since 2015', 'ios>=12', 'safari>=12'],
   },
 
   // Sentry needs sourcemaps.

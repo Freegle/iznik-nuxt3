@@ -28,6 +28,7 @@
     "lint": "^1.1.2",
     "nuxt": "^3.11.1",
     "nuxt-lcp-speedup": "^0.8.1",
+    "nuxt-vite-legacy": "^1.2.0",
     "prettier": "^2.6.2",
     "sass": "1.64.2",
     "sitemap": "^7.1.1",
