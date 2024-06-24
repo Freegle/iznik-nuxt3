@@ -286,9 +286,12 @@ export default defineNuxtConfig({
         // don't disable initial ad load - so Google will load ads immediately.
         //
         // The order in which we load scripts is excruciatingly and critically important - see below.
+        //
+        // But we want to reduce LCP, so we defer all this by loading with async.
         {
           type: 'text/javascript',
           body: true,
+          async: true,
           innerHTML:
             `try {
               window.dataLayer = window.dataLayer || [];
