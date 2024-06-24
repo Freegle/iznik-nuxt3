@@ -288,6 +288,7 @@ export default defineNuxtConfig({
         // The order in which we load scripts is excruciatingly and critically important - see below.
         {
           type: 'text/javascript',
+          body: true,
           innerHTML:
             `try {
               window.dataLayer = window.dataLayer || [];
