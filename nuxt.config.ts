@@ -132,17 +132,19 @@ export default defineNuxtConfig({
     },
   },
 
+  build: {
+    analyze: true,
+  },
+
   nitro: {
     prerender: {
       routes: ['/404.html', '/sitemap.xml'],
 
-      // Don't prerender the messages - too many
-      ignore: ['/message/'],
+      // Don't prerender the messages - too many.
+      //
+      // Also don't the payload.  This doesn't seem to have been generated and therefore breaks pre-render.
+      ignore: ['/message/', '**/_payload.json**'],
       crawlLinks: true,
-
-      // Don't allow crawler to fetch the payload.  This doesn't seem to have been generated and therefore breaks
-      // pre-render.
-      exclude: ['**/_payload.json'],
     },
   },
 
