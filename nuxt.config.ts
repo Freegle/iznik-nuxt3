@@ -132,10 +132,6 @@ export default defineNuxtConfig({
     },
   },
 
-  build: {
-    analyze: true,
-  },
-
   nitro: {
     prerender: {
       routes: ['/404.html', '/sitemap.xml'],
@@ -143,7 +139,7 @@ export default defineNuxtConfig({
       // Don't prerender the messages - too many.
       //
       // Also don't the payload.  This doesn't seem to have been generated and therefore breaks pre-render.
-      ignore: ['/message/', '**/_payload.json**'],
+      ignore: ['/message/', '**/_payload.json*'],
       crawlLinks: true,
     },
   },
@@ -172,6 +168,7 @@ export default defineNuxtConfig({
     '@nuxt/image',
     'nuxt-lcp-speedup',
     'nuxt-vite-legacy',
+    '@bootstrap-vue-next/nuxt',
   ],
 
   lcpSpeedup: {

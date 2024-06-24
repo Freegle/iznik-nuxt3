@@ -103,7 +103,7 @@
 <script>
 import { useMessageStore } from '../stores/message'
 import NoticeMessage from './NoticeMessage'
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 
 export default {
   components: { NoticeMessage },
@@ -121,7 +121,7 @@ export default {
   async setup() {
     const messageStore = useMessageStore()
 
-    const { modal, hide } = useModal()
+    const { modal, hide } = useOurModal()
 
     try {
       await messageStore.fetch(this.id, true)

@@ -131,7 +131,7 @@
 import { useStoryStore } from '../stores/stories'
 import { useComposeStore } from '../stores/compose'
 import NoticeMessage from './NoticeMessage'
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 const OurUploader = defineAsyncComponent(() =>
   import('~/components/OurUploader')
 )
@@ -146,7 +146,7 @@ export default {
     const storyStore = useStoryStore()
     const composeStore = useComposeStore()
 
-    const { modal, hide } = useModal()
+    const { modal, hide } = useOurModal()
 
     return {
       storyStore,

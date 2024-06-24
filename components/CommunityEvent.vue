@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-card v-if="event" variant="success" no-body>
+    <b-card v-if="event" no-body>
       <b-card-title
         class="bg-light px-2 mb-0 pt-2 pb-2 d-flex justify-content-between header--size4"
         :title-tag="titleTag"

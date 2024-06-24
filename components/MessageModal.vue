@@ -111,7 +111,7 @@
 
 <script setup>
 import { useMessageStore } from '../stores/message'
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 import ImageCarousel from '~/components/ImageCarousel'
 import MessageExpanded from '~/components/MessageExpanded'
 
@@ -147,7 +147,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:showImages'])
 
-const { modal, hide } = useModal()
+const { modal, hide } = useOurModal()
 
 const bumpMessage = ref(0)
 

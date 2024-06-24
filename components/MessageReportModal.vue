@@ -27,7 +27,7 @@
 <script>
 import { useMessageStore } from '~/stores/message'
 import { useChatStore } from '~/stores/chat'
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 
 export default {
   props: {
@@ -40,7 +40,7 @@ export default {
     const messageStore = useMessageStore()
     const chatStore = useChatStore()
 
-    const { modal, hide } = useModal()
+    const { modal, hide } = useOurModal()
 
     return {
       messageStore,

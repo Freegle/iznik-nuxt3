@@ -39,10 +39,10 @@
 <script setup>
 import { useMiscStore } from '../stores/misc'
 import { useAuthStore } from '../stores/auth'
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 import DonationButton from '~/components/DonationButton'
 
-const { modal, hide } = useModal()
+const { modal, hide } = useOurModal()
 
 function donateTime() {
   // Turn microvolunteering on.

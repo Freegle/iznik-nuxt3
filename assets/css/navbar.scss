@@ -144,6 +144,8 @@ svg.fa-icon {
   top: 2px;
   right: 4px;
   font-size: 11px;
+  background-color: $colour-secondary !important;
+  color: white !important;
 }
 
 .browsebadge {
@@ -151,4 +153,6 @@ svg.fa-icon {
   top: 2px;
   right: -6px;
   font-size: 11px;
+  background-color: $colour-secondary !important;
+  color: white !important;
 }

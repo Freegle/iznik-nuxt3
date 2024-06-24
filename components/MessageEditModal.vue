@@ -131,7 +131,7 @@ import { useGroupStore } from '../stores/group'
 import { uid } from '../composables/useId'
 import NumberIncrementDecrement from './NumberIncrementDecrement'
 import PostCode from '~/components/PostCode'
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 const OurUploader = defineAsyncComponent(() =>
   import('~/components/OurUploader')
 )
@@ -158,7 +158,7 @@ export default {
     const composeStore = useComposeStore()
     const groupStore = useGroupStore()
 
-    const { modal, hide } = useModal()
+    const { modal, hide } = useOurModal()
 
     // Message was fetched by parent.
     const message = toRaw(messageStore.byId(props.id))
