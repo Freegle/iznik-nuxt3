@@ -94,8 +94,10 @@
 // There are a bunch of icons we need only rarely.  By requiring them here we avoid
 // requiring them in the vue-awesome plugin.  That makes them available everywhere - but
 // increases the bundle size.  Putting them here allows better bundling.
+import VueSocialSharing from 'vue-social-sharing'
 import { useStoryStore } from '../stores/stories'
 import { useOurModal } from '~/composables/useOurModal'
+import { useNuxtApp } from '#app'
 
 export default {
   props: {
@@ -115,6 +117,11 @@ export default {
       // Must no longer exist on server.
       hide()
     }
+
+    // We install this plugin here rather than from the plugins folder to reduce page load side in the mainline
+    // case.
+    const nuxtApp = useNuxtApp()
+    nuxtApp.vueApp.use(VueSocialSharing)
 
     return {
       storyStore,

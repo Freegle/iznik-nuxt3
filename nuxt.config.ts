@@ -153,7 +153,7 @@ export default defineNuxtConfig({
     emitRouteChunkError: 'reload',
     asyncContext: true,
 
-    // Payload extraction breaks SSR with routeRules.
+    // Payload extraction breaks SSR with routeRules - see https://github.com/nuxt/nuxt/issues/22068
     renderJsonPayloads: false,
     payloadExtraction: false,
   },
