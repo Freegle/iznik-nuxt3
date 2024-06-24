@@ -8,8 +8,12 @@
     />
     <b-row>
       <b-col>
-        <b-card variant="success" no-body>
-          <b-card-header class="font-weight-bold">
+        <b-card no-body>
+          <b-card-header
+            class="font-weight-bold"
+            bg-variant="primary"
+            text-variant="white"
+          >
             {{ headline }}
           </b-card-header>
           <b-card-text class="p-2 preline">
