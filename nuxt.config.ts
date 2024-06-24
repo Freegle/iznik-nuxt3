@@ -138,6 +138,11 @@ export default defineNuxtConfig({
 
       // Don't prerender the messages - too many
       ignore: ['/message/'],
+      crawlLinks: true,
+
+      // Don't allow crawler to fetch the payload.  This doesn't seem to have been generated and therefore breaks
+      // pre-render.
+      exclude: ['**/_payload.json'],
     },
   },
 
