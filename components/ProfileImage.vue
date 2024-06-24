@@ -13,13 +13,12 @@
       :width="width"
       :height="width"
     />
-    <b-img
+    <ProxyImage
       v-else
-      rounded="circle"
-      :thumbnail="isThumbnail"
-      :class="className"
+      :src="validImage"
+      sizes="100px"
+      :class-name="className"
       :alt="altText"
-      :src="proxyImage"
       @error="brokenProfileImage"
     />
     <v-icon
@@ -43,8 +42,6 @@
 // This component should be imported, rather than using async require.  This is because async requires result in more
 // Vue DOM patching overall, and this component is used in places like chat where it appears many times.  Testing shows
 // this has a significant performance benefit.
-import { imageProxy } from '~/composables/useImageProxy'
-
 export default {
   name: 'ProfileImage',
   props: {
@@ -97,12 +94,6 @@ export default {
     },
   },
   computed: {
-    proxyImage() {
-      return imageProxy(this.validImage, {
-        resize: 100,
-        format: 'webp',
-      })
-    },
     validImage() {
       return this.image || '/defaultprofile.png'
     },
@@ -147,9 +138,16 @@ export default {
   grid-template-columns: 1fr;
   grid-template-rows: 1fr;
 
-  img {
+  :deep(picture) {
     grid-row: 1 / 2;
     grid-column: 1 / 2;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  :deep(img) {
+    border-radius: 50%;
+    object-fit: cover;
   }
 }
 
@@ -157,7 +155,7 @@ export default {
   object-fit: cover;
 }
 
-.profile--sm {
+:deep(.profile--sm img) {
   width: 20px !important;
   height: 20px !important;
   min-width: 20px !important;
@@ -175,7 +173,7 @@ export default {
   }
 }
 
-.profile--md {
+:deep(.profile--md img) {
   width: 20px !important;
   height: 20px !important;
   min-width: 20px !important;
@@ -193,7 +191,7 @@ export default {
   }
 }
 
-.profile--lg {
+:deep(.profile--lg img) {
   width: 30px !important;
   height: 30px !important;
   min-width: 30px !important;
@@ -211,7 +209,7 @@ export default {
   }
 }
 
-.profile--lg-always {
+:deep(.profile--lg-always img) {
   width: 50px !important;
   height: 50px !important;
   min-width: 50px !important;
@@ -220,7 +218,7 @@ export default {
   max-height: 50px !important;
 }
 
-.profile--xl {
+:deep(.profile--xl img) {
   width: 75px !important;
   height: 75px !important;
   min-width: 75px !important;
