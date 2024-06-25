@@ -517,9 +517,14 @@ export default defineNuxtConfig({
             
             window.onGoogleLibraryLoad = postGSI
             
-            // We have to load GSI before we load the cookie banner, otherwise the Google Sign-in button doesn't
-            // render.
-            loadScript('https://accounts.google.com/gsi/client')
+            // Don't start loading until everything else is there.  This improves apparent load time because it means
+            // we'll have loaded any SSR rendered content and images before we hit the main thread with these 
+            // large script loads.
+            addEventListener("load", (event) => {
+              // We have to load GSI first, before we load the cookie banner, otherwise the Google Sign-in button 
+              // doesn't render.
+              loadScript('https://accounts.google.com/gsi/client')
+            });
           } catch (e) {
             console.error('Error initialising pbjs and googletag:', e.message);
           }`,
