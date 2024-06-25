@@ -167,14 +167,20 @@ export default defineNuxtConfig({
     '@pinia/nuxt',
     'floating-vue/nuxt',
     '@nuxt/image',
-    'nuxt-lcp-speedup',
     'nuxt-vite-legacy',
     '@bootstrap-vue-next/nuxt',
   ],
 
-  lcpSpeedup: {
-    disablePrefetchLinks: true,
-    disablePreloadLinks: true,
+  hooks: {
+    'build:manifest': (manifest) => {
+      for (const item of Object.values(manifest)) {
+        console.log('Manifest item:', item)
+        item.dynamicImports = []
+        item.prefetch = false
+        // Removing preload links is the magic that drops the FCP on mobile
+        item.preload = false
+      }
+    },
   },
 
   // Environment variables the client needs.
