@@ -11,7 +11,6 @@
 <script>
 import ResizeObserver from 'resize-observer-polyfill'
 import { useMiscStore } from '~/stores/misc'
-
 export default {
   mounted() {
     // Spot when the elements become visible/hidden.

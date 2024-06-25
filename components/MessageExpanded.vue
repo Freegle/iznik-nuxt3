@@ -158,7 +158,7 @@ export default {
   computed: {
     breakpoint() {
       const store = useMiscStore()
-      return store.getBreakpoint
+      return store.breakpoint
     },
     message() {
       return this.messageStore?.byId(this.id)

@@ -4,9 +4,15 @@
     class="grid m-0 pl-1 pr-1 pl-sm-0 pr-sm-0 mt-0 mt-lg-5 ml-2 mr-2"
   >
     <div class="d-none d-sm-flex eyecandy justify-content-start flex-column">
-      <FreeglerPhotos class="ps-4 h-100" />
+      <FreeglerPhotos
+        v-if="!breakpoint || breakpoint !== 'xs'"
+        class="ps-4 h-100"
+      />
     </div>
     <div class="info">
+      <client-only>
+        <BreakpointFettler />
+      </client-only>
       <div class="d-block d-sm-none">
         <h1 class="text--large-responsive">
           Freegle - online dating for stuff.
@@ -90,7 +96,10 @@
           @selected="explorePlace($event)"
         />
       </div>
-      <VisualiseList class="mb-2 d-block d-sm-none" />
+      <VisualiseList
+        v-if="!breakpoint || breakpoint === 'xs'"
+        class="mb-2 d-block d-sm-none"
+      />
     </div>
     <div class="app-download mt-2">
       <a
@@ -132,6 +141,7 @@ import { buildHead } from '../composables/useBuildHead'
 import { useMiscStore } from '../stores/misc'
 import MainFooter from '~/components/MainFooter'
 import { useRouter } from '#imports'
+import BreakpointFettler from '~/components/BreakpointFettler.vue'
 const VisualiseList = defineAsyncComponent(() =>
   import('~/components/VisualiseList')
 )
@@ -140,6 +150,7 @@ export default {
   components: {
     MainFooter,
     VisualiseList,
+    BreakpointFettler,
   },
   setup() {
     const runtimeConfig = useRuntimeConfig()
@@ -187,6 +198,15 @@ export default {
       ourBackground: false,
       timeToPlay: false,
     }
+  },
+  computed: {
+    breakpoint() {
+      // We show different stuff on xs screens.  In SSR we can't tell what the screen size will be.  But removing
+      // the irrelevant option from the DOM once the client loads will save some network/CPU.
+      const store = useMiscStore()
+
+      return process.server ? null : store.breakpoint
+    },
   },
   mounted() {
     if (process.client) {
