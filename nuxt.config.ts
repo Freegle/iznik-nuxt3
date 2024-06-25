@@ -246,6 +246,7 @@ export default defineNuxtConfig({
       'es.object.from-entries',
       'es.array.flat-map',
       'es.array.flat',
+      'es.string.replace-all',
     ],
   },
 
