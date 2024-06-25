@@ -170,12 +170,18 @@ export default defineNuxtConfig({
     'nuxt-lcp-speedup',
     'nuxt-vite-legacy',
     '@bootstrap-vue-next/nuxt',
+    'nuxt-delay-hydration',
   ],
 
+  // Unclear whether LCP speedup actually helps.  We have removeModulePreload as a fallback.
   lcpSpeedup: {
     disablePrefetchLinks: true,
     disablePreloadLinks: true,
   },
+
+  // This stops nuxt running on initial browser load.  This is useful because there is a lot of JS to load, and
+  // that can get in the way of fetching and rendering what we generated in SSR.
+  delayHydration: { mode: 'init' },
 
   // Environment variables the client needs.
   runtimeConfig: {
