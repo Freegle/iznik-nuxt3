@@ -12,6 +12,7 @@
     :height="height"
     :loading="preload ? 'eager' : loading"
     :sizes="sizes"
+    :placeholder="placeholder"
   />
 </template>
 <script setup>
@@ -73,6 +74,11 @@ const props = defineProps({
     default: null,
   },
   sizes: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  placeholder: {
     type: String,
     required: false,
     default: null,

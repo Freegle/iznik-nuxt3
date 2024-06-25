@@ -34,7 +34,9 @@
           We'll match you with someone local. All completely free.
         </p>
       </div>
-      <div class="d-flex justify-content-between justify-content-lg-start">
+      <div
+        class="d-flex justify-content-between justify-content-lg-start w-100"
+      >
         <client-only>
           <b-button
             variant="primary"
