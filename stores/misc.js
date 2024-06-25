@@ -40,7 +40,6 @@ export const useMiscStore = defineStore({
       this.time = new Date()
     },
     setBreakpoint(val) {
-      console.log('Set breakpoint', val)
       this.breakpoint = val
     },
     api(diff) {

@@ -174,7 +174,6 @@ export default defineNuxtConfig({
   hooks: {
     'build:manifest': (manifest) => {
       for (const item of Object.values(manifest)) {
-        console.log('Manifest item:', item)
         item.dynamicImports = []
         item.prefetch = false
         // Removing preload links is the magic that drops the FCP on mobile
@@ -246,6 +245,7 @@ export default defineNuxtConfig({
       'es.object.from-entries',
       'es.array.flat-map',
       'es.array.flat',
+      'es.string.replace-all',
     ],
   },
 
