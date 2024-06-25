@@ -10,7 +10,7 @@
     :alt="alt"
     :width="width"
     :height="height"
-    :loading="loading"
+    :loading="preload ? 'eager' : loading"
     :sizes="sizes"
     :placeholder="placeholder"
   />
