@@ -117,7 +117,7 @@
               :filter-match="filterMatch"
             >
               <b-input-group>
-                <b-input-group-prepend>
+                <slot name="prepend">
                   <span class="input-group-text pl-1 pr-1">
                     <ProfileImage
                       v-if="me.profile.path"
@@ -128,7 +128,7 @@
                       :lazy="false"
                     />
                   </span>
-                </b-input-group-prepend>
+                </slot>
                 <AutoHeightTextarea
                   ref="threadcomment"
                   v-model="threadcomment"
@@ -157,7 +157,7 @@
               :filter-match="filterMatch"
             >
               <b-input-group>
-                <b-input-group-prepend>
+                <slot name="prepend">
                   <span class="input-group-text pl-2 pr-1">
                     <ProfileImage
                       v-if="me.profile.path"
@@ -167,7 +167,7 @@
                       size="sm"
                     />
                   </span>
-                </b-input-group-prepend>
+                </slot>
                 <AutoHeightTextarea
                   ref="threadcomment"
                   v-model="threadcomment"

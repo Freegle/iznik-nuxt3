@@ -60,7 +60,7 @@
               autocomplete="off"
               class="d-none"
             />
-            <b-input-group-append>
+            <slot name="append">
               <b-form-input
                 id="date"
                 v-model="date"
@@ -69,7 +69,7 @@
                 :min="minDate"
                 :max="maxDate"
               />
-            </b-input-group-append>
+            </slot>
           </b-input-group>
         </div>
         <div>

@@ -25,7 +25,7 @@
               label="Save"
               @handle="savePhone"
             />
-          </b-input-group-append>
+          </slot>
         </b-input-group>
         <div class="text-muted mt-1 mb-1 text--small">
           <v-icon icon="lock" /> Other freeglers won't see this.

@@ -30,11 +30,11 @@
                       v-model="me.displayname"
                       placeholder="Your name"
                     />
-                    <b-input-group-append>
+                    <slot name="append">
                       <b-button variant="white" @click="saveName">
                         <v-icon icon="save" />&nbsp;Save
                       </b-button>
-                    </b-input-group-append>
+                    </slot>
                   </b-input-group>
                 </b-col>
               </b-row>

@@ -1,6 +1,5 @@
 <template>
-  <component
-    :is="notificationType"
+  <b-dropdown
     id="notification-list"
     ref="theel"
     v-model="notificationsShown"
@@ -60,7 +59,7 @@
         <b-img lazy src="/loader.gif" alt="Loading" width="100px" />
       </template>
     </infinite-loading>
-  </component>
+  </b-dropdown>
 </template>
 <script setup>
 import { ref, watch, defineAsyncComponent } from 'vue'
@@ -91,9 +90,6 @@ defineProps({
 const notificationsShown = ref(false)
 const toShow = ref(5)
 const infiniteId = ref(0)
-const notificationType = computed(() => {
-  return 'b-dropdown'
-})
 const notifications = computed(() => {
   // return first
   return notificationStore.list

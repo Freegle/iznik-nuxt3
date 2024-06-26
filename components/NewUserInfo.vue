@@ -19,14 +19,14 @@
       <div class="d-flex justify-content-around">
         <b-input-group>
           <b-form-input v-model="newPassword" type="password" />
-          <b-input-group-append>
+          <slot name="append">
             <SpinButton
               variant="secondary"
               icon-name="save"
               label="Save"
               @handle="setPassword"
             />
-          </b-input-group-append>
+          </slot>
         </b-input-group>
       </div>
       <p class="mt-2 text-center text-muted">

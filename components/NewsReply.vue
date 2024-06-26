@@ -187,7 +187,7 @@
           class="pl-2 input-group"
           :filter-match="filterMatch"
         >
-          <b-input-group-prepend>
+          <template #prepend>
             <span class="input-group-text pl-1 pr-1">
               <ProfileImage
                 v-if="me.profile.path"
@@ -197,7 +197,7 @@
                 size="sm"
               />
             </span>
-          </b-input-group-prepend>
+          </template>
           <b-form-textarea
             ref="replybox"
             v-model="replybox"
@@ -225,7 +225,7 @@
           :filter-match="filterMatch"
         >
           <b-input-group>
-            <b-input-group-prepend>
+            <slot name="prepend">
               <span class="input-group-text pl-1 pr-1">
                 <ProfileImage
                   v-if="me.profile.path"
@@ -235,7 +235,7 @@
                   size="sm"
                 />
               </span>
-            </b-input-group-prepend>
+            </slot>
             <b-form-textarea
               ref="replybox"
               v-model="replybox"
