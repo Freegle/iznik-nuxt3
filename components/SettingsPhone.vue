@@ -15,8 +15,9 @@
             lazy
             :class="inputClass"
           />
-          <b-input-group-append v-if="!autoSave">
+          <slot name="append">
             <SpinButton
+              v-if="!autoSave"
               ref="spinButton"
               :disabled="notMobile"
               variant="white"
