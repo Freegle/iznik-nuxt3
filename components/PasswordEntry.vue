@@ -14,8 +14,6 @@
         :type="showPassword ? 'text' : 'password'"
         :placeholder="placeholder"
         class="password__input"
-        @input="$emit('update:modelValue', $event)"
-        @change="$emit('update:modelValue', $event)"
       />
       <span class="password__focus-element" />
       <b-input-group-append>
@@ -79,6 +77,11 @@ export default {
       password: null,
       showPassword: false,
     }
+  },
+  watch: {
+    password(newVal) {
+      this.$emit('update:modelValue', newVal)
+    },
   },
   mounted() {
     this.password = this.originalPassword
