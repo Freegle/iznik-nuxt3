@@ -211,6 +211,7 @@ const smallAdVisible = ref(false)
 const triedAds = ref(false)
 
 function adRendered(rendered, index, dimension) {
+  console.log('My posts rendered', rendered, index, dimension)
   if (rendered) {
     if (index === 0) {
       largeAdVisible.value = true
