@@ -69,8 +69,8 @@ const passClicks = computed(() => {
 
 const uniqueid = ref(props.adUnitPath)
 
-const maxWidth = ref(Math.max(...props.dimensions.map((d) => d[0])))
-const maxHeight = ref(Math.max(...props.dimensions.map((d) => d[1])))
+const maxWidth = computed(() => Math.max(...props.dimensions.map((d) => d[0])))
+const maxHeight = computed(() => Math.max(...props.dimensions.map((d) => d[1])))
 
 let slot = null
 
