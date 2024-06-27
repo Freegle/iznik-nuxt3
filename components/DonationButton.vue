@@ -107,6 +107,10 @@ export default {
     clicked() {
       this.$refs.paypalbutton?.firstChild?.click()
     },
+    async donateMonthly() {
+      await this.$refs.donateform.submit()
+      this.$emit('clicked')
+    },
   },
 }
 </script>
