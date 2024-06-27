@@ -216,18 +216,15 @@ function handleVisible() {
 
               if (event?.isEmpty) {
                 adShown.value = false
-                maxWidth.value = 0
-                maxHeight.value = 0
-              } else {
-                maxWidth.value = event.size[0]
-                maxHeight.value = event.size[1]
-              }
-
-              if (event?.isEmpty) {
-                adShown.value = false
                 console.log('Rendered empty', props.adUnitPath, adShown)
                 // Sentry.captureMessage('Ad rendered empty ' + props.adUnitPath)
               } else {
+                console.log(
+                  'Rendered',
+                  props.adUnitPath,
+                  event.size[0],
+                  event.size[1]
+                )
                 maxWidth.value = event.size[0]
                 maxHeight.value = event.size[1]
               }
