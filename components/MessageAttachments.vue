@@ -52,7 +52,7 @@
             alt="Item Photo"
             :width="Math.round(width)"
             :height="200"
-            preload
+            :preload="preload"
             @error="brokenImage"
             @click="$emit('zoom')"
           />
@@ -66,7 +66,7 @@
             :width="Math.round(width)"
             :height="200"
             fit="cover"
-            preload
+            :preload="preload"
             @error="brokenImage"
             @click="$emit('zoom')"
           />
@@ -98,6 +98,11 @@ defineProps({
     default: false,
   },
   showZoom: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  preload: {
     type: Boolean,
     required: false,
     default: false,

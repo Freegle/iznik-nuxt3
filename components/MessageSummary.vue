@@ -62,6 +62,7 @@
           :attachments="message.attachments"
           :disabled="message.successful"
           thumbnail
+          :preload="preload"
         />
       </div>
     </div>
@@ -124,6 +125,11 @@ export default {
       type: Boolean,
       required: false,
       default: true,
+    },
+    preload: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   setup() {
