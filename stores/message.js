@@ -329,7 +329,7 @@ export const useMessageStore = defineStore({
         params.stdmsgid,
         params.body
       )
-    
+
       delete this.list[params.id]
     },
     clearContext() { // Added for ModTools
@@ -361,7 +361,7 @@ export const useMessageStore = defineStore({
       }
       // TODO}
       await this.clear()
-      for(const message of messages){
+      for (const message of messages) {
         //console.log('GOT message',message.id, typeof message.fromuser)
         this.list[message.id] = message
       }
@@ -378,13 +378,13 @@ export const useMessageStore = defineStore({
         params.stdmsgid,
         params.body
       )
-  
+
       this.remove({ id: params.id })
 
       const authStore = useAuthStore()
       authStore.work = {}
     },
-    async reject( params) {
+    async reject(params) {
       await api(this.config).message.reject(
         params.id,
         params.groupid,
@@ -392,7 +392,21 @@ export const useMessageStore = defineStore({
         params.stdmsgid,
         params.body
       )
-  
+
+      this.remove({ id: params.id })
+
+      const authStore = useAuthStore()
+      authStore.work = {}
+    },
+    async reply(params) {
+      await api(this.config).message.reply(
+        params.id,
+        params.groupid,
+        params.subject,
+        params.stdmsgid,
+        params.body
+      )
+
       this.remove({ id: params.id })
 
       const authStore = useAuthStore()
@@ -416,9 +430,9 @@ export const useMessageStore = defineStore({
     },
     async spam(params) {
       await api(this.config).message.spam(params.id, params.groupid)
-  
+
       this.remove({ id: params.id })
-  
+
       const authStore = useAuthStore()
       authStore.work = {}
     },

@@ -291,7 +291,7 @@ export default {
     }
   },
   methods: {
-    show() {
+    async show() {
       // Calculate initial subject.  Everything apart from Edits adds a Re:.
       const defpref = this.stdmsg.action === 'Edit' ? '' : 'Re:'
 
@@ -307,7 +307,7 @@ export default {
           (this.stdmsg.subjsuff ? this.stdmsg.subjsuff : '')
       }
 
-      this.subject = this.substitutionStrings(this.subject)
+      this.subject = await this.substitutionStrings(this.subject)
 
       // Calculate initial body
       let msg = this.message ? this.message.textbody : ''
@@ -397,20 +397,20 @@ export default {
         msg = '\n\n' + (this.stdmsg.body ? this.stdmsg.body : '')
       }
 
-      this.body = this.substitutionStrings(msg).trim()
+      this.body = (await this.substitutionStrings(msg)).trim()
 
       this.showModal = true
 
       if (this.autosend && !this.warning) {
         // Start doing stuff.
-        this.waitForRef('process', () => {
-          this.$refs.process.click()
-        })
+        this.process()
       }
     },
-    substitutionStrings(text) {
+    async substitutionStrings(text) {
       const self = this
-      const group = this.myGroup(this.groupid)
+      await this.groupStore.fetchMT({ id: this.groupid })
+      const group = await this.groupStore.fetch(this.groupid)
+      if( !group) return text
 
       if (group && text) {
         text = text.replace(/\$networkname/g, 'Freegle')
