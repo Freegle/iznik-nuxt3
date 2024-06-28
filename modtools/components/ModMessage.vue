@@ -735,7 +735,7 @@ export default {
 
       if (this.showMailSettings) {
         // Get the user into the store for SettingsGroup.
-        await this.usersStore.fetch(this.message.fromuser.id)
+        await this.userStore.fetch(this.message.fromuser.id)
       }
     },
     async viewSource() {
