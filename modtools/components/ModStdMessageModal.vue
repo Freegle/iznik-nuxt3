@@ -72,7 +72,8 @@
           </b-button>
         </div>
         <div>
-          <SpinButton ref="process" :label="processLabel" icon-name="envelope" spinclass="success" variant="primary" @handle="process" />
+          <SpinButton ref="process" :label="processLabel" icon-name="envelope" spinclass="success" variant="primary" @handle="process" :flex="false"
+            iconClass="pe-1" class="m-1 d-inline-block" />
           <b-button variant="white" @click="hide">
             Cancel
           </b-button>
