@@ -24,7 +24,6 @@
             gesture
             :width="Math.round(width * 0.95)"
             :height="Math.round(height * 0.95)"
-            min-scale="1"
             :style="
               'width: ' +
               Math.round(width * 0.95) +
