@@ -66,6 +66,21 @@ export default {
     OurToggle,
   },
   props: {
+    membershipMT: { // TODO
+      type: Object,
+      required: false,
+      default: null,
+    },
+    eventsallowedMT: { // TODO
+      type: Number,
+      required: false,
+      default: null,
+    },
+    volunteeringallowedMT: { // TODO
+      type: Number,
+      required: false,
+      default: null,
+    },
     emailfrequency: {
       type: Number,
       required: false,
@@ -115,24 +130,24 @@ export default {
         if (this.membership) {
           return this.membership.emailfrequency.toString()
         }
-
         return this.emailfrequency
       },
       async set(newval) {
-        await this.changeValue('emailfrequency', newval)
+        await this.changeValue('emailfrequency', parseInt(newval))
       },
     },
     eventsallowed: {
       get() {
+        if( this.eventsallowedMT) return Boolean(this.eventsallowedMT)
         return Boolean(this.membership?.eventsallowed)
       },
       async set(newval) {
-        console.log('Set eventsallowed', newval)
         await this.changeValue('eventsallowed', newval ? 1 : 0)
       },
     },
     volunteeringallowed: {
       get() {
+        if( this.volunteeringallowedMT) return Boolean(this.volunteeringallowedMT)
         return Boolean(this.membership?.volunteeringallowed)
       },
       async set(newval) {
@@ -141,6 +156,7 @@ export default {
     },
     membership() {
       let ret = null
+      if( this.membershipMT) return this.membershipMT
 
       if (this.myGroups) {
         this.myGroups.forEach((g) => {
@@ -163,7 +179,7 @@ export default {
   },
   methods: {
     async changeValue(param, val) {
-      this.$emit('update:' + param, val)
+      this.$emit('update', {param, val})
 
       if (this.groupid) {
         const params = {

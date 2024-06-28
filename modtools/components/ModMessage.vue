@@ -244,10 +244,11 @@
                 </span>
               </b-button>
             </div>
-            <SettingsGroup v-if="showMailSettings && membership && message.groups && message.groups.length" :groupid="message.groups[0].groupid"
-              :emailfrequency="membership.emailfrequency" :volunteeringallowed="Boolean(membership.volunteeringallowed)"
-              :eventsallowed="Boolean(membership.eventsallowed)" class="border border-info mt-2 p-1" :userid="message.fromuser.id"
-              @change="settingsChange" />
+            <SettingsGroup v-if="showMailSettings && membership && message.groups && message.groups.length" :membershipMT="membership"
+              v-model:emailfrequency="membership.emailfrequency"
+              v-model:volunteeringallowedMT="membership.volunteeringallowed" 
+              v-model:eventsallowedMT="membership.eventsallowed" 
+              class="border border-info mt-2 p-1" :userid="message.fromuser.id" @update="settingsChange" />
             <div v-if="showEmails">
               <div v-for="email in message.fromuser.emails" :key="email.id">
                 {{ email.email }} <v-icon v-if="email.preferred" icon="star" />
@@ -722,13 +723,16 @@ export default {
       this.saving = false
       this.editing = false
     },
-    settingsChange(e) {
+    settingsChange(changes) {
       const params = {
         userid: this.message.fromuser.id,
         groupid: this.groupid
       }
-      params[e.param] = e.val
+      params[changes.param] = changes.val
       this.memberStore.update(params)
+    },
+    update(e) {
+      console.log('update', e)
     },
     async toggleMail() {
       this.showMailSettings = !this.showMailSettings
