@@ -218,7 +218,13 @@
                   <b-img
                     v-else-if="volunteering.image"
                     fluid
-                    :src="volunteering.image.paththumb + '?' + cacheBust"
+                    :src="
+                      volunteering.image.paththumb +
+                      '?volunteering=' +
+                      id +
+                      '-' +
+                      cacheBust
+                    "
                   />
                   <b-img v-else width="250" thumbnail src="/placeholder.jpg" />
                 </div>

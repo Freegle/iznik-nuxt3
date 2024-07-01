@@ -205,7 +205,9 @@
                   <b-img
                     v-else-if="event.image"
                     fluid
-                    :src="event.image.paththumb + '?' + cacheBust"
+                    :src="
+                      event.image.paththumb + '?event=' + id + '-' + cacheBust
+                    "
                   />
                   <b-img v-else width="250" thumbnail src="/placeholder.jpg" />
                 </div>

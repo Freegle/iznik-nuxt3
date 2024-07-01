@@ -62,7 +62,9 @@
                         />
                         <ProfileImage
                           v-else
-                          :image="profileurl + '?' + cacheBust"
+                          :image="
+                            profileurl + '?settings=' + myid + '-' + cacheBust
+                          "
                           class="mr-1 mb-1 mt-1 inline"
                           is-thumbnail
                           size="xl"
@@ -876,7 +878,7 @@ export default {
       return ret
     },
     profileurl() {
-      return this.me && this.useprofile
+      return this.me && this.useprofile && this.me.profile?.path
         ? this.me.profile.path
         : '/defaultprofile.png'
     },
