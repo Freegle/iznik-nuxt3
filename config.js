@@ -13,8 +13,13 @@ const CONFIG = {
   USER_SITE: 'https://www.ilovefreegle.org',
 
   // This is where images are served from.
+  //
+  // Old:
   IMAGE_SITE: 'https://images.ilovefreegle.org',
-  UPLOADCARE_PROXY: 'https://61ddd294bd3a390019c6.ucr.io/',
+
+  // New.  We have our own caching proxy in front of Uploadcare, to reduce costs:
+  UPLOADCARE_CDN: 'https://uploadcare-cache.ilovefreegle.org/',
+  UPLOADCARE_PROXY: 'https://uploadcare-proxy-cache.ilovefreegle.org/',
 
   // OpenStreetMap Tile Server
   OSM_TILE:

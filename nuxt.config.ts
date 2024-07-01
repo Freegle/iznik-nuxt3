@@ -197,6 +197,7 @@ export default defineNuxtConfig({
       USER_SITE: config.USER_SITE,
       IMAGE_SITE: config.IMAGE_SITE,
       UPLOADCARE_PROXY: config.UPLOADCARE_PROXY,
+      UPLOADCARE_CDN: config.UPLOADCARE_CDN,
       SENTRY_DSN: config.SENTRY_DSN,
       BUILD_DATE: new Date().toISOString(),
       NETLIFY_DEPLOY_ID: process.env.DEPLOY_ID,
@@ -627,25 +628,23 @@ export default defineNuxtConfig({
     uploadcare: {
       provider: 'uploadcare',
 
-      // On some machines we can't resolve ucarecdn.com but can resolve www.ucarecdn.com.
-      cdnURL: 'https://www.ucarecdn.com',
+      cdnURL: config.UPLOADCARE_CDN,
     },
 
     // We want sharp images on fancy screens.
     densities: [1, 2],
 
-    // Uploadcare only supports images upto 3000.  So we drop the top-level screen sizes, which get doubled
-    // to produce the images requested.
-    //
-    // We also want to match the Bootstrap breakpoints.
+    // Uploadcare only supports images upto 3000, and the screen sizes are doubled when requesting because of densities.
+    // So we already need to drop the top-level screen sizes, and we also don't want to request images which are too
+    // large because this affects our charged bandwidth.  So we only go up to 768.
     screens: {
       xs: 320,
       sm: 576,
       md: 768,
-      lg: 992,
-      xl: 1200,
-      xxl: 1400,
-      '2xl': 1400,
+      lg: 768,
+      xl: 768,
+      xxl: 768,
+      '2xl': 768,
     },
 
     providers: {
