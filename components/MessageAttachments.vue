@@ -133,9 +133,12 @@ function brokenImage() {
 @import 'bootstrap/scss/mixins/_breakpoints';
 
 .attachment {
-  object-fit: cover;
   width: 100%;
   box-shadow: 0 0 1 $color-gray--dark;
+
+  :deep(img) {
+    object-fit: cover;
+  }
 }
 
 .thumbnail {
