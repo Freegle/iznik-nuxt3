@@ -17,6 +17,7 @@
 </template>
 <script setup>
 import { defineProps } from 'vue'
+import * as Sentry from '@sentry/browser'
 
 const props = defineProps({
   src: {
@@ -86,4 +87,8 @@ const props = defineProps({
 })
 
 const isFluid = computed(() => (props.fluid ? 'img-fluid' : ''))
+
+if (props.src.indexOf('gimg_0.jpg')) {
+  Sentry.captureMessage('Broken image: ' + props.src)
+}
 </script>
