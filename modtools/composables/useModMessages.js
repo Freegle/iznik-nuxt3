@@ -53,11 +53,36 @@ const messages = computed(() => {
 
 const visibleMessages = computed(() => {
   const msgs = messages.value
-  //console.log('useModMessages visibleMessages', show.value, msgs?.length, msgs)
+  console.log('useModMessages visibleMessages', show.value, msgs?.length, msgs)
   if (show.value === 0 || !msgs || msgs.length === 0) return []
   return msgs.slice(0, show.value)
 })
 
+async function loadMore($state) {
+  const messageStore = useMessageStore()
+  if (!groupid.value) {
+    $state.complete()
+    return
+  }
+  let messages = messageStore.getByGroup(groupid.value)
+  const prevmessagecount = messages.length
+  console.log('uMM loadMore', groupid.value, messages.length)
+
+  await messageStore.fetchMessages({
+    groupid: groupid.value,
+    collection: collection.value,
+    modtools: true,
+    summary: false,
+    limit: messages.length + distance.value
+  })
+  messages = messageStore.getByGroup(groupid.value)
+  if (prevmessagecount === messages.length) {
+    $state.complete()
+  } else {
+    $state.complete()
+    //$state.loaded()
+  }
+}
 
 watch(groupid, async (newVal) => {
   //console.log("useModMessages watch groupid", newVal)
@@ -91,7 +116,7 @@ export function setupModMessages() {
       const authStore = useAuthStore()
       const work = authStore.work
       //console.log(">>>>useModMessages get work", workType.value, work)
-      if( !work) return 0
+      if (!work) return 0
       const count = workType.value ? work[workType.value] : 0
       return count
     } catch (e) {
@@ -174,5 +199,6 @@ export function setupModMessages() {
     messages,
     visibleMessages,
     work,
+    loadMore
   }
 }

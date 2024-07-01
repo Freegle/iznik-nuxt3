@@ -28,7 +28,7 @@ import dayjs from 'dayjs'
 import { useMiscStore } from '@/stores/misc'
 import ScrollToTop from '~/components/ScrollToTop'
 import me from '~/mixins/me.js'
-import { setupModMessages } from '../composables/useModMessages'
+import { setupModMessages } from '../../composables/useModMessages'
 
 export default {
   async setup() {
@@ -45,7 +45,6 @@ export default {
     me,
     /*loginRequired,
     createGroupRoute('modtools/messages/pending'),
-    modMessagesPage,
     shuffle*/
   ],
   data: function () {
