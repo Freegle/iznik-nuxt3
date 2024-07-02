@@ -6,6 +6,18 @@
           <b-img lazy alt="Facebook" src="/botleft/facebook.png" width="40" />
         </ExternalLink>
         <ExternalLink
+          href="https://www.instagram.com/thisisfreegle"
+          title="Instagram"
+        >
+          <b-img
+            lazy
+            alt="Instagram"
+            src="/botleft/instagram.png"
+            width="40"
+            class="ml-1"
+          />
+        </ExternalLink>
+        <ExternalLink
           href="https://twitter.com/thisisfreegle"
           title="Twitter"
           class="pl-1"

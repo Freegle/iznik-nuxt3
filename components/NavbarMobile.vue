@@ -44,11 +44,13 @@
         </div>
         <div class="d-flex align-items-center">
           <b-nav>
-            <nuxt-link v-if="!loggedIn" no-prefetch>
-              <div class="btn btn-white mr-2" @click="requestLogin">
-                Log in or Join
-              </div>
-            </nuxt-link>
+            <b-nav-item>
+              <nuxt-link v-if="!loggedIn" no-prefetch>
+                <div class="btn btn-white mr-2" @click="requestLogin">
+                  Log in or Join
+                </div>
+              </nuxt-link>
+            </b-nav-item>
           </b-nav>
         </div>
         <div v-if="isApp && loggedIn" class="text-white mr-3">

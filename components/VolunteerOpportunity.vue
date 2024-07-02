@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-card v-if="volunteering" variant="success" no-body>
+    <b-card v-if="volunteering" no-body>
       <b-card-title
         class="bg-light px-2 mb-0 pt-2 pb-2 d-flex justify-content-between header--size4"
         :title-tag="titleTag"
@@ -88,8 +88,18 @@
               <v-icon icon="info-circle" /> More info
             </b-button>
           </div>
+          <NuxtPicture
+            v-if="volunteering?.image?.imageuid"
+            fit="cover"
+            format="webp"
+            provider="uploadcare"
+            :src="volunteering.image.externaluid"
+            :modifiers="volunteering.image.externalmods"
+            alt="Volunteering Opportunity Photo"
+            class="mb-2 w-100"
+          />
           <b-img
-            v-if="volunteering.image"
+            v-else-if="volunteering.image"
             lazy
             class="w-100"
             :src="volunteering.image.path"

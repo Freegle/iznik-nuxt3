@@ -100,11 +100,13 @@
   </b-modal>
 </template>
 <script>
+import VueSocialSharing from 'vue-social-sharing'
 import { useMessageStore } from '../stores/message'
 import NoticeMessage from './NoticeMessage'
 import { useMobileStore } from '@/stores/mobile'
 import { Share } from '@capacitor/share';
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
+import { useNuxtApp } from '#app'
 
 export default {
   components: { NoticeMessage },
@@ -122,7 +124,7 @@ export default {
   async setup() {
     const messageStore = useMessageStore()
 
-    const { modal, hide } = useModal()
+    const { modal, hide } = useOurModal()
 
     try {
       await messageStore.fetch(this.id, true)
@@ -130,6 +132,11 @@ export default {
       // Must no longer exist on server.
       hide()
     }
+
+    // We install this plugin here rather than from the plugins folder to reduce page load side in the mainline
+    // case.
+    const nuxtApp = useNuxtApp()
+    nuxtApp.vueApp.use(VueSocialSharing)
 
     return {
       messageStore,

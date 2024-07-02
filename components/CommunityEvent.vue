@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-card v-if="event" variant="success" no-body>
+    <b-card v-if="event" no-body>
       <b-card-title
         class="bg-light px-2 mb-0 pt-2 pb-2 d-flex justify-content-between header--size4"
         :title-tag="titleTag"
@@ -56,8 +56,18 @@
               <v-icon icon="info-circle" /> More info
             </b-button>
           </div>
+          <NuxtPicture
+            v-if="event?.image?.externaluid"
+            format="webp"
+            fit="cover"
+            provider="uploadcare"
+            :src="event.image.externaluid"
+            :modifiers="event.image.externalmods"
+            alt="Community Event Photo"
+            class="w-100"
+          />
           <b-img
-            v-if="event.image"
+            v-else-if="event.image"
             lazy
             class="w-100"
             :src="event.image.path"

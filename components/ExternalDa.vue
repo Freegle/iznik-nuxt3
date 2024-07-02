@@ -71,6 +71,8 @@ const uniqueid = ref(props.adUnitPath)
 
 const maxWidth = ref(Math.max(...props.dimensions.map((d) => d[0])))
 const maxHeight = ref(Math.max(...props.dimensions.map((d) => d[1])))
+const minWidth = ref(Math.min(...props.dimensions.map((d) => d[0])))
+const minHeight = ref(Math.min(...props.dimensions.map((d) => d[1])))
 
 let slot = null
 
@@ -216,20 +218,22 @@ function handleVisible() {
 
               if (event?.isEmpty) {
                 adShown.value = false
+                console.log('Rendered empty', props.adUnitPath, adShown)
+                // Sentry.captureMessage('Ad rendered empty ' + props.adUnitPath)
                 maxWidth.value = 0
                 maxHeight.value = 0
               } else {
-                maxWidth.value = event.size[0]
-                maxHeight.value = event.size[1]
-              }
+                console.log(
+                  'Rendered',
+                  props.adUnitPath,
+                  event.size[0],
+                  event.size[1]
+                )
 
-              if (event?.isEmpty) {
-                adShown.value = false
-                console.log('Rendered empty', props.adUnitPath, adShown)
-                // Sentry.captureMessage('Ad rendered empty ' + props.adUnitPath)
-              } else {
-                maxWidth.value = event.size[0]
-                maxHeight.value = event.size[1]
+                // Sometimes we are returned silly values like 1,1, so make sure that we leave at least enough
+                // space for the minimum sized ad which we could plausibly have shown.
+                maxWidth.value = Math.max(event.size[0], minWidth.value)
+                maxHeight.value = Math.max(event.size[1], minHeight.value)
               }
 
               emit('rendered', adShown.value)

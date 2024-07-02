@@ -9,40 +9,9 @@
   >
     <template #default>
       <div class="container p-0">
-        <span @click="rotateLeft">
-          <v-icon
-            label="Rotate left"
-            class="topleft clickme"
-            title="Rotate left"
-          >
-            <v-icon icon="circle" scale="2" />
-            <v-icon icon="reply" class="image__icon" />
-          </v-icon>
-        </span>
-        <span @click="rotateRight">
-          <v-icon
-            label="Rotate right"
-            class="topright clickme"
-            title="Rotate right"
-            flip="horizontal"
-          >
-            <v-icon icon="circle" scale="2" />
-            <v-icon icon="reply" class="image__icon" />
-          </v-icon>
-        </span>
-        <span v-if="mod" @click="remove">
-          <v-icon
-            label="Remove this photo"
-            class="bottomright clickme"
-            title="Remove this photo"
-          >
-            <v-icon icon="circle" scale="2" />
-            <v-icon icon="trash-alt" class="image__icon" />
-          </v-icon>
-        </span>
         <b-img
           lazy
-          :src="src + '?' + cacheBust"
+          :src="src"
           rounded
           fluid
           generator-unable-to-provide-required-alt=""
@@ -60,7 +29,7 @@
 <script>
 import { useNewsfeedStore } from '../stores/newsfeed'
 import { useImageStore } from '../stores/image'
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 
 export default {
   props: {
@@ -76,20 +45,12 @@ export default {
       type: String,
       required: true,
     },
-    imgflag: {
-      type: String,
-      required: true,
-    },
-    imgtype: {
-      type: String,
-      required: true,
-    },
   },
   setup() {
     const newsfeedStore = useNewsfeedStore()
     const imageStore = useImageStore()
 
-    const { modal, hide } = useModal()
+    const { modal, hide } = useOurModal()
 
     return {
       newsfeedStore,
@@ -98,48 +59,7 @@ export default {
       hide,
     }
   },
-  data() {
-    return {
-      cacheBust: Date.now(),
-    }
-  },
-  computed: {
-    mod() {
-      const me = this.me
-      return (
-        me &&
-        (me.systemrole === 'Moderator' ||
-          me.systemrole === 'Admin' ||
-          me.systemrole === 'Support')
-      )
-    },
-  },
   methods: {
-    remove() {
-      this.$emit('remove', this.id)
-    },
-    async rotate(deg) {
-      const data = {
-        id: this.id,
-        rotate: deg,
-        bust: Date.now(),
-      }
-
-      data[this.imgflag] = 1
-      data.imgtype = this.imgtype
-
-      await this.imageStore.post(data)
-      this.cacheBust = Date.now()
-
-      // Refetch the newsfeed entry to update any values in the parents, via the store.
-      await this.newsfeedStore.fetch(this.newsfeedid, true)
-    },
-    rotateLeft() {
-      this.rotate(90)
-    },
-    rotateRight() {
-      this.rotate(-90)
-    },
     brokenImage(event) {
       event.target.src = '/placeholder.jpg'
     },

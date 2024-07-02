@@ -37,21 +37,24 @@
                   <span class="d-none d-sm-inline">to each other</span>;
                   occasionally we may moderate to ensure things stay friendly.
                 </div>
-                <b-img
-                  v-if="imageid"
-                  lazy
-                  thumbnail
-                  :src="imagethumb"
-                  class="image__uploaded"
+                <NuxtPicture
+                  v-if="imageuid"
+                  format="webp"
+                  fit="cover"
+                  provider="uploadcare"
+                  :src="imageuid"
+                  :modifiers="imagemods"
+                  alt="ChitChat Photo"
+                  width="100"
+                  class="mt-1"
                 />
               </b-card-text>
               <hr class="mt-1 mb-1" />
-              <OurFilePond
+              <OurUploader
                 v-if="uploading"
-                class="bg-white m-0 pondrow"
-                imgtype="Newsfeed"
-                imgflag="newsfeed"
-                @photo-processed="photoProcessed"
+                v-model="currentAtts"
+                class="bg-white m-0"
+                type="Newsfeed"
               />
               <div class="pb-1 d-flex justify-content-end">
                 <b-button variant="secondary" class="mr-2" @click="photoAdd">
@@ -121,8 +124,8 @@ import NewsThread from '~/components/NewsThread.vue'
 import { untwem } from '~/composables/useTwem'
 import { ref } from '#imports'
 
-const OurFilePond = defineAsyncComponent(() =>
-  import('~/components/OurFilePond')
+const OurUploader = defineAsyncComponent(() =>
+  import('~/components/OurUploader')
 )
 const SidebarLeft = defineAsyncComponent(() =>
   import('~/components/SidebarLeft')
@@ -145,7 +148,7 @@ export default {
     ExpectedRepliesWarning,
     NoticeMessage,
     NewsThread,
-    OurFilePond,
+    OurUploader,
     SidebarLeft,
     SidebarRight,
     NewsLocation,
@@ -254,7 +257,8 @@ export default {
       startThread: null,
       uploading: false,
       imageid: null,
-      imagethumb: null,
+      imageuid: null,
+      imagemods: null,
       distance: 1000,
       runChecks: true,
       showToolGive: false,
@@ -262,6 +266,7 @@ export default {
       showToolFind: false,
       shownToolFind: false,
       infiniteState: null,
+      currentAtts: [],
     }
   },
   computed: {
@@ -314,6 +319,18 @@ export default {
       }
 
       return []
+    },
+  },
+  watch: {
+    currentAtts: {
+      handler(newVal) {
+        this.uploading = false
+
+        this.imageid = newVal[0].id
+        this.imageuid = newVal[0].externaluid
+        this.imagemods = newVal[0].externalmods
+      },
+      deep: true,
     },
   },
   beforeCreate() {
@@ -420,6 +437,8 @@ export default {
 
         // And any image id
         this.imageid = null
+        this.imageuid = null
+        this.imagemods = null
 
         // Show from top.
         this.infiniteId++
@@ -430,14 +449,6 @@ export default {
       // Flag that we're uploading.  This will trigger the render of the filepond instance and subsequently the
       // init callback below.
       this.uploading = true
-    },
-    photoProcessed(imageid, imagethumb) {
-      // We have uploaded a photo.  Remove the filepond instance.
-      this.uploading = false
-
-      // The imageid is in this.imageid
-      this.imageid = imageid
-      this.imagethumb = imagethumb
     },
   },
 }

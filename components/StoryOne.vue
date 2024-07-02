@@ -1,7 +1,7 @@
 <template>
   <div>
-    <b-card no-body variant="success">
-      <b-card-header>
+    <b-card no-body>
+      <b-card-header bg-variant="primary" text-variant="white">
         <div v-if="story" class="d-flex justify-content-between">
           <div>&quot;{{ story.headline }}&quot;</div>
           <div>

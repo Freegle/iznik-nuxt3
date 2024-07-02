@@ -4,9 +4,15 @@
     class="grid m-0 pl-1 pr-1 pl-sm-0 pr-sm-0 mt-0 mt-lg-5 ml-2 mr-2"
   >
     <div class="d-none d-sm-flex eyecandy justify-content-start flex-column">
-      <FreeglerPhotos class="ps-4 h-100" />
+      <FreeglerPhotos
+        v-if="!breakpoint || breakpoint !== 'xs'"
+        class="ps-4 h-100"
+      />
     </div>
     <div class="info">
+      <client-only>
+        <BreakpointFettler />
+      </client-only>
       <div class="d-block d-sm-none">
         <h1 class="text--large-responsive">
           Freegle - online dating for stuff.
@@ -28,7 +34,9 @@
           We'll match you with someone local. All completely free.
         </p>
       </div>
-      <div class="d-flex justify-content-between justify-content-lg-start">
+      <div
+        class="d-flex justify-content-between justify-content-lg-start w-100"
+      >
         <client-only>
           <b-button
             variant="primary"
@@ -90,39 +98,42 @@
           @selected="explorePlace($event)"
         />
       </div>
-      <VisualiseList class="mb-2 d-block d-sm-none" />
+      <VisualiseList
+        v-if="!breakpoint || breakpoint === 'xs'"
+        class="mb-2 d-block d-sm-none"
+      />
     </div>
-    <client-only>
-      <div v-if="!isApp" class="app-download mt-2">
-        <a
-          href="https://play.google.com/store/apps/details?id=org.ilovefreegle.direct"
-          target="_blank"
-          class="mr-2"
-          rel="noopener noreferrer"
-        >
-          <b-img
-            lazy
-            alt="Freegle Android app on Google Play"
-            title="Freegle Android app on Google Play"
-            class="app-download__image"
-            src="/en-play-badge.png"
-          />
-        </a>
-        <a
-          href="https://itunes.apple.com/gb/app/freegle/id970045029?ls=1&amp;mt=8"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <b-img
-            lazy
-            alt="Freegle app for iPhone, iPad, and iPod touch"
-            title="Freegle app for iPhone, iPad, and iPod Touch"
-            class="app-download__image"
-            src="/app-store-black-sm.png"
-          />
-        </a>
-      </div>
-    </client-only>
+    <div v-if="!isApp" class="app-download mt-2">
+      <a
+        href="https://play.google.com/store/apps/details?id=org.ilovefreegle.direct"
+        target="_blank"
+        class="mr-2"
+        rel="noopener noreferrer"
+      >
+        <ProxyImage
+          preload
+          alt="Freegle Android app on Google Play"
+          title="Freegle Android app on Google Play"
+          class="app-download__image"
+          src="/en-play-badge.png"
+          sizes="75px"
+        />
+      </a>
+      <a
+        href="https://itunes.apple.com/gb/app/freegle/id970045029?ls=1&amp;mt=8"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <ProxyImage
+          preload
+          alt="Freegle app for iPhone, iPad, and iPod touch"
+          title="Freegle app for iPhone, iPad, and iPod Touch"
+          class="app-download__image"
+          src="/app-store-black-sm.png"
+          sizes="75px"
+        />
+      </a>
+    </div>
     <MainFooter class="thefooter" />
   </div>
 </template>
@@ -133,6 +144,7 @@ import { useMiscStore } from '../stores/misc'
 import { useMobileStore } from '../stores/mobile'
 import MainFooter from '~/components/MainFooter'
 import { useRouter } from '#imports'
+import BreakpointFettler from '~/components/BreakpointFettler.vue'
 const VisualiseList = defineAsyncComponent(() =>
   import('~/components/VisualiseList')
 )
@@ -141,6 +153,7 @@ export default {
   components: {
     MainFooter,
     VisualiseList,
+    BreakpointFettler,
   },
   setup() {
     const runtimeConfig = useRuntimeConfig()
@@ -158,28 +171,19 @@ export default {
     )
 
     // Preload some images to speed page load.
+    const userSite = runtimeConfig.public.USER_SITE
+    const proxy = runtimeConfig.public.UPLOADCARE_PROXY
+
     head.link = [
       {
         rel: 'preload',
         as: 'image',
-        href: '/landingpage/frame.png',
-        media: '(min-width: 576px)',
+        href: proxy + '/-/resize/58/-/format/webp/' + userSite + '/icon.png',
       },
       {
         rel: 'preload',
         as: 'image',
-        href: '/landingpage/Freegler1.jpeg',
-        media: '(min-width: 576px)',
-      },
-      {
-        rel: 'preload',
-        as: 'image',
-        href: '/krystal.png',
-      },
-      {
-        rel: 'preload',
-        as: 'image',
-        href: '/mythic-beasts.png',
+        href: proxy + '/-/format/webp/' + userSite + '/wallpaper.png',
       },
     ]
 
@@ -202,6 +206,13 @@ export default {
     isApp() {
       const mobileStore = useMobileStore()
       return mobileStore.isApp
+    },
+    breakpoint() {
+      // We show different stuff on xs screens.  In SSR we can't tell what the screen size will be.  But removing
+      // the irrelevant option from the DOM once the client loads will save some network/CPU.
+      const store = useMiscStore()
+
+      return process.server ? null : store.breakpoint
     },
   },
   mounted() {
@@ -233,9 +244,7 @@ export default {
         const router = useRouter()
         const route = useRoute()
 
-        console.log('route', route)
         if (route.path !== nextroute) {
-          console.log('Push', nextroute)
           this.$nextTick(() => {
             router.push(nextroute)
           })
@@ -310,6 +319,7 @@ export default {
 .eyecandy {
   grid-row: 3 / 4;
   grid-column: 1 / 3;
+  align-items: center !important;
 
   @include media-breakpoint-up(sm) {
     height: 300px;

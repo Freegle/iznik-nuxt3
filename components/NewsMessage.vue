@@ -10,8 +10,20 @@
       class="font-weight-bold preline forcebreak nopara"
     />
     <div>
+      <NuxtPicture
+        v-if="newsfeed.image?.externaluid"
+        format="webp"
+        fit="cover"
+        provider="uploadcare"
+        :src="newsfeed.image.externaluid"
+        :modifiers="newsfeed.image?.externalmod"
+        alt="ChitChat Image"
+        sizes="100vw md:400px"
+        :width="width"
+        :height="width"
+      />
       <b-img
-        v-if="newsfeed.image"
+        v-else-if="newsfeed.image"
         lazy
         rounded
         :src="newsfeed.image.path"
@@ -74,6 +86,7 @@ import NewsBase from '~/components/NewsBase'
 import NewsUserIntro from '~/components/NewsUserIntro'
 
 import NewsLoveComment from '~/components/NewsLoveComment'
+import { useMiscStore } from '~/stores/misc'
 const NewsShareModal = defineAsyncComponent(() =>
   import('~/components/NewsShareModal')
 )
@@ -87,6 +100,19 @@ export default {
     ReadMore,
   },
   extends: NewsBase,
+  computed: {
+    width() {
+      const miscStore = useMiscStore()
+
+      if (miscStore.breakpoint === 'xs' || miscStore.breakpoint === 'sm') {
+        // Full width image.
+        return process.server ? 400 : window.innerHeight
+      } else {
+        // 400px width image.
+        return 400
+      }
+    },
+  },
 }
 </script>
 <style scoped lang="scss">

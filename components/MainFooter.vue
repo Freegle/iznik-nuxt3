@@ -8,7 +8,13 @@
           href="https://affiliate.k.io/go/Freegle-Krystal"
           class="d-flex justify-content-start flex-column mr-4"
         >
-          <img src="/krystal.png" alt="Bytemark Logo" class="sponsor" />
+          <ProxyImage
+            preload
+            src="/krystal.png"
+            alt="Krystal Logo"
+            class="sponsor"
+            sizes="75px md:100px lg:165px"
+          />
         </a>
         <a
           target="_blank"
@@ -16,10 +22,12 @@
           href="https://www.mythic-beasts.com"
           class="d-flex justify-content-start flex-column ml-4"
         >
-          <img
+          <ProxyImage
+            preload
             src="/mythic-beasts.png"
             alt="Mythic Beasts Logo"
             class="sponsor"
+            sizes="75px md:100px lg:165px"
           />
         </a>
       </div>

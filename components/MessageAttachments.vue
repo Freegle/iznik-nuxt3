@@ -34,82 +34,97 @@
           </b-badge>
         </client-only>
       </div>
-      <div :class="{ thumbnail: thumbnail, notThumbnail: !thumbnail }">
-        <client-only>
-          <b-img
-            lazy
-            rounded
-            class="d-none d-md-block attachment p-0"
-            generator-unable-to-provide-required-alt=""
-            title="Item picture"
-            :src="thumbnail ? attachments[0].paththumb : attachments[0].path"
-            itemprop="image"
+      <div
+        :class="{
+          thumbnail: thumbnail,
+          notThumbnail: !thumbnail,
+          attachment: true,
+        }"
+      >
+        <div ref="imagewrapper">
+          <NuxtPicture
+            v-if="attachments[0].externaluid"
+            format="webp"
+            fit="cover"
+            provider="uploadcare"
+            :src="attachments[0].externaluid"
+            :modifiers="attachments[0].externalmods"
+            alt="Item Photo"
+            :width="Math.round(width)"
+            :height="200"
+            :preload="preload"
             @error="brokenImage"
             @click="$emit('zoom')"
           />
-          <b-img
-            lazy
-            rounded
-            class="d-block d-md-none attachment p-0"
-            generator-unable-to-provide-required-alt=""
+          <ProxyImage
+            v-else
+            class-name="p-0 rounded"
+            alt="Item picture"
             title="Item picture"
             :src="attachments[0].path"
-            itemprop="image"
+            :sizes="thumbnail ? '320px sm:200px' : '320px sm:576px md:768px'"
+            :width="Math.round(width)"
+            :height="200"
+            fit="cover"
+            :preload="preload"
             @error="brokenImage"
             @click="$emit('zoom')"
           />
-          <template #fallback>
-            <img
-              class="attachment p-0"
-              generator-unable-to-provide-required-alt=""
-              title="Item picture"
-              src="/camera.png"
-              itemprop="image"
-            />
-          </template>
-        </client-only>
+        </div>
       </div>
     </button>
   </div>
 </template>
-<script>
-export default {
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-    attachments: {
-      type: Array,
-      default: () => [],
-    },
-    disabled: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    thumbnail: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    showZoom: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
+<script setup>
+import { useElementSize } from '@vueuse/core'
+
+defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  data() {
-    return {
-      defaultAttachments: false,
-    }
+  attachments: {
+    type: Array,
+    default: () => [],
   },
-  methods: {
-    brokenImage() {
-      // If the attachment image is broken, we're best off just hiding it.
-      this.defaultAttachments = true
-    },
+  disabled: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
+  thumbnail: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  showZoom: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  preload: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+})
+
+const defaultAttachments = ref(false)
+const imagewrapper = ref(null)
+
+const { width, height } = useElementSize(imagewrapper)
+
+// Make width and height <= 3000 as that's an Uploadcare limit.
+if (width > 3000) {
+  width.value = 3000
+}
+if (height > 3000) {
+  height.value = 3000
+}
+
+function brokenImage() {
+  // If the attachment image is broken, we're best off just hiding it.
+  defaultAttachments.value = true
 }
 </script>
 <style scoped lang="scss">
@@ -118,23 +133,40 @@ export default {
 @import 'bootstrap/scss/mixins/_breakpoints';
 
 .attachment {
-  object-fit: cover;
   width: 100%;
   box-shadow: 0 0 1 $color-gray--dark;
+
+  :deep(img) {
+    object-fit: cover;
+  }
 }
 
 .thumbnail {
   .attachment {
+    display: block;
     height: 200px;
+
+    img {
+      height: 200px;
+    }
   }
 }
 
 .notThumbnail {
   .attachment {
+    display: block;
     height: 200px;
+
+    img {
+      height: 200px;
+    }
 
     @include media-breakpoint-up(sm) {
       height: 360px;
+
+      img {
+        height: 360px;
+      }
     }
   }
 }

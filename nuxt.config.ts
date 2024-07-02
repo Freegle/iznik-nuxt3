@@ -1,6 +1,5 @@
 import eslintPlugin from 'vite-plugin-eslint'
 import { VitePWA } from 'vite-plugin-pwa'
-import legacy from '@vitejs/plugin-legacy'
 import { sentryVitePlugin } from '@sentry/vite-plugin'
 import { splitVendorChunkPlugin } from 'vite'
 import config from './config'
@@ -175,7 +174,7 @@ export default defineNuxtConfig({
     prerender: {
       routes: ['/404.html', '/sitemap.xml'],
 
-      // Don't prerender the messages - too many
+      // Don't prerender the messages - too many.
       ignore: ['/message/'],
       crawlLinks: true,
     },
@@ -191,6 +190,10 @@ export default defineNuxtConfig({
   experimental: {
     emitRouteChunkError: 'reload',
     asyncContext: true,
+
+    // Payload extraction breaks SSR with routeRules - see https://github.com/nuxt/nuxt/issues/22068
+    renderJsonPayloads: false,
+    payloadExtraction: false,
   },
 
   webpack: {
@@ -198,7 +201,24 @@ export default defineNuxtConfig({
     extractCSS: true,
   },
 
-  modules: ['@pinia/nuxt', 'floating-vue/nuxt', 'nuxt-lcp-speedup'],
+  modules: [
+    '@pinia/nuxt',
+    'floating-vue/nuxt',
+    '@nuxt/image',
+    'nuxt-vite-legacy',
+    '@bootstrap-vue-next/nuxt',
+  ],
+
+  hooks: {
+    'build:manifest': (manifest) => {
+      for (const item of Object.values(manifest)) {
+        item.dynamicImports = []
+        item.prefetch = false
+        // Removing preload links is the magic that drops the FCP on mobile
+        item.preload = false
+      }
+    },
+  },
 
   // Environment variables the client needs.
   runtimeConfig: {
@@ -214,6 +234,8 @@ export default defineNuxtConfig({
       GOOGLE_CLIENT_ID: config.GOOGLE_CLIENT_ID,
       USER_SITE: config.USER_SITE,
       IMAGE_SITE: config.IMAGE_SITE,
+      UPLOADCARE_PROXY: config.UPLOADCARE_PROXY,
+      UPLOADCARE_CDN: config.UPLOADCARE_CDN,
       SENTRY_DSN: config.SENTRY_DSN,
       BUILD_DATE: new Date().toISOString(),
       ISAPP: config.ISAPP,
@@ -222,6 +244,7 @@ export default defineNuxtConfig({
       NETLIFY_SITE_NAME: process.env.SITE_NAME,
       MATOMO_HOST: process.env.MATOMO_HOST,
       COOKIEYES: config.COOKIEYES,
+      TRUSTPILOT_LINK: config.TRUSTPILOT_LINK,
     },
   },
 
@@ -265,16 +288,43 @@ export default defineNuxtConfig({
       ],
   },
 
+  // Note that this is not the standard @vitejs/plugin-legacy, but https://www.npmjs.com/package/nuxt-vite-legacy
+  legacy: {
+    targets: ['chrome 49', 'since 2015', 'ios>=12', 'safari>=12'],
+    modernPolyfills: [
+      'es.global-this',
+      'es.object.from-entries',
+      'es.array.flat-map',
+      'es.array.flat',
+      'es.string.replace-all',
+    ],
+  },
+
   // Sentry needs sourcemaps.
   sourcemap: {
     client: true,
     server: true,
   },
 
+  // Sometimes we need to change the host when doing local testing with browser stack.
+  devServer: {
+    host: '127.0.0.1',
+    port: 3000,
+  },
+
   app: {
     head: {
+      htmlAttrs: {
+        lang: 'en',
+      },
       title: "Freegle - Don't throw it away, give it away!",
       script: [
+        {
+          // This is a polyfill for Safari12.  Can't get it to work using modernPolyfills - needs to happen very
+          // early.  Safari12 doesn't work well, but this makes it functional.
+          type: 'text/javascript',
+          innerHTML: `try { if (!window.globalThis) { window.globalThis = window; } } catch (e) { console.log('Polyfill error', e.message); }`,
+        },
         // The ecosystem of advertising is complex.
         // - The underlying ad service is Google Tags (GPT).
         // - We use prebid (pbjs), which is some kind of ad broker which gives us a pipeline of ads to use.
@@ -293,8 +343,12 @@ export default defineNuxtConfig({
         // don't disable initial ad load - so Google will load ads immediately.
         //
         // The order in which we load scripts is excruciatingly and critically important - see below.
+        //
+        // But we want to reduce LCP, so we defer all this by loading with async.
         {
           type: 'text/javascript',
+          body: true,
+          async: true,
           innerHTML:
             `try {
               window.dataLayer = window.dataLayer || [];
@@ -454,6 +508,8 @@ export default defineNuxtConfig({
                 // - GPT, which needs to be loaded before prebid.
                 // - Prebid.
                 // The ordering is ensured by using defer and appending the script.
+                //
+                // prebid isn't compatible with older browsers which don't support Object.entries.
                 console.log('Load GPT and prebid');
                 loadScript('https://securepubads.g.doubleclick.net/tag/js/gpt.js', true)
                 loadScript('/js/prebid-app.js', true)
@@ -636,6 +692,35 @@ export default defineNuxtConfig({
           content: 'Awin',
         },
       ],
+    },
+  },
+  image: {
+    uploadcare: {
+      provider: 'uploadcare',
+
+      cdnURL: config.UPLOADCARE_CDN,
+    },
+
+    // We want sharp images on fancy screens.
+    densities: [1, 2],
+
+    // Uploadcare only supports images upto 3000, and the screen sizes are doubled when requesting because of densities.
+    // So we already need to drop the top-level screen sizes, and we also don't want to request images which are too
+    // large because this affects our charged bandwidth.  So we only go up to 768.
+    screens: {
+      xs: 320,
+      sm: 576,
+      md: 768,
+      lg: 768,
+      xl: 768,
+      xxl: 768,
+      '2xl': 768,
+    },
+
+    providers: {
+      uploadcareProxy: {
+        provider: '~/providers/uploadcare-proxy.ts',
+      },
     },
   },
 })

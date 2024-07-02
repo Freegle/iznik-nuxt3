@@ -2,6 +2,7 @@
   <div>
     <main class="ml-0 ps-0 pe-0 pageContent">
       <div class="aboveSticky" :class="{ allowAd }">
+        <!--        Breakpoint {{ breakpoint }}-->
         <slot ref="pageContent" />
       </div>
       <client-only>
@@ -64,7 +65,7 @@
       style="display: none"
     >
       <div class="text-center bg-white p-2">
-        <img src="/loader.gif" alt="Loading..." width="100px" />
+        <img src="/loader.gif" loading="lazy" alt="Loading..." width="100px" />
         <p>
           <span>Loading...</span><br /><span class="font-weight-bold"
             >Stuck here? We couldn't load our Javascript. Try refreshing. Or
@@ -135,7 +136,7 @@ export default {
   computed: {
     breakpoint() {
       const store = useMiscStore()
-      return store.getBreakpoint
+      return store.breakpoint
     },
     routePath() {
       const route = useRoute()

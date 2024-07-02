@@ -13,7 +13,13 @@ const CONFIG = {
   USER_SITE: 'https://www.ilovefreegle.org',
 
   // This is where images are served from.
+  //
+  // Old:
   IMAGE_SITE: 'https://images.ilovefreegle.org',
+
+  // New.  We have our own caching proxy in front of Uploadcare, to reduce costs:
+  UPLOADCARE_CDN: 'https://uploadcare-cache.ilovefreegle.org/',
+  UPLOADCARE_PROXY: 'https://uploadcare-proxy-cache.ilovefreegle.org/',
 
   // OpenStreetMap Tile Server
   OSM_TILE:
@@ -44,6 +50,8 @@ const CONFIG = {
   COOKIEYES: process.env.COOKIEYES || null,
   ISAPP: process.env.IZNIK_NUXT3_IS_APP === 'true',
   MOBILE_VERSION: '3.1.16',
+
+  TRUSTPILOT_LINK: process.env.TRUSTPILOT_LINK || null,
 
   AD_PREBID_CONFIG: [
     {

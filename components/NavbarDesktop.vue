@@ -6,14 +6,14 @@
   >
     <nuxt-link :to="homePage" class="navbar-brand p-0" no-prefetch>
       <OfflineIndicator v-if="!online" />
-      <b-img
+      <ProxyImage
         v-else
+        preload
         class="logo mr-2"
-        height="58"
-        width="58"
-        rounded
         :src="logo"
+        :format="logoFormat"
         alt="Home"
+        sizes="58px"
       />
     </nuxt-link>
     <b-button
@@ -244,6 +244,7 @@ const {
   online,
   distance,
   logo,
+  logoFormat,
   unreadNotificationCount,
   chatCount,
   activePostsCount,

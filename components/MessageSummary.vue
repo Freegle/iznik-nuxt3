@@ -62,6 +62,7 @@
           :attachments="message.attachments"
           :disabled="message.successful"
           thumbnail
+          :preload="preload"
         />
       </div>
     </div>
@@ -69,8 +70,22 @@
 </template>
 <script>
 import { useMessageStore } from '~/stores/message'
+const MessageFreegled = defineAsyncComponent(() =>
+  import('~/components/MessageFreegled')
+)
+const MessagePromised = defineAsyncComponent(() =>
+  import('~/components/MessagePromised')
+)
+const MessageItemLocation = defineAsyncComponent(() =>
+  import('~/components/MessageItemLocation')
+)
 
 export default {
+  components: {
+    MessageFreegled,
+    MessagePromised,
+    MessageItemLocation,
+  },
   props: {
     id: {
       type: Number,
@@ -110,6 +125,11 @@ export default {
       type: Boolean,
       required: false,
       default: true,
+    },
+    preload: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   setup() {

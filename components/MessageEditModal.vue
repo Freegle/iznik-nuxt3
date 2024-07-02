@@ -75,13 +75,9 @@
           </p>
         </b-col>
       </b-row>
-      <b-row v-if="uploading" class="bg-white">
+      <b-row class="bg-white">
         <b-col class="p-0">
-          <OurFilePond
-            imgtype="Message"
-            imgflag="message"
-            @photo-processed="photoProcessed"
-          />
+          <OurUploader v-model="attachments" type="Message" multiple />
         </b-col>
       </b-row>
       <b-row v-if="attachments?.length">
@@ -96,7 +92,12 @@
             <template #item="{ element, index }">
               <div class="bg-transparent p-0">
                 <PostPhoto
-                  v-bind="element"
+                  :id="element.id"
+                  :path="element.path"
+                  :paththumb="element.paththumb"
+                  :thumbnail="element.thumbnail"
+                  :externaluid="element.externaluid"
+                  :externalmods="element.externalmods"
                   :primary="index === 0"
                   @remove="removePhoto"
                 />
@@ -107,9 +108,6 @@
       </b-row>
     </template>
     <template #footer>
-      <b-button variant="secondary" class="mr-auto" @click="photoAdd">
-        <v-icon icon="camera" />&nbsp;Add photo
-      </b-button>
       <b-button variant="white" :disabled="uploadingPhoto" @click="hide">
         Cancel
       </b-button>
@@ -133,9 +131,9 @@ import { useGroupStore } from '../stores/group'
 import { uid } from '../composables/useId'
 import NumberIncrementDecrement from './NumberIncrementDecrement'
 import PostCode from '~/components/PostCode'
-import { useModal } from '~/composables/useModal'
-const OurFilePond = defineAsyncComponent(() =>
-  import('~/components/OurFilePond')
+import { useOurModal } from '~/composables/useOurModal'
+const OurUploader = defineAsyncComponent(() =>
+  import('~/components/OurUploader')
 )
 const PostItem = defineAsyncComponent(() => import('./PostItem'))
 const PostPhoto = defineAsyncComponent(() => import('./PostPhoto'))
@@ -144,7 +142,7 @@ export default {
   components: {
     draggable,
     NumberIncrementDecrement,
-    OurFilePond,
+    OurUploader,
     PostCode,
     PostItem,
     PostPhoto,
@@ -160,12 +158,17 @@ export default {
     const composeStore = useComposeStore()
     const groupStore = useGroupStore()
 
-    const { modal, hide } = useModal()
+    const { modal, hide } = useOurModal()
 
     // Message was fetched by parent.
     const message = toRaw(messageStore.byId(props.id))
     const textbody = message.textbody
     const item = message.item?.name
+    const attachments = ref(message.attachments)
+
+    if (!attachments.value) {
+      attachments.value = []
+    }
 
     return {
       messageStore,
@@ -174,7 +177,7 @@ export default {
       modal,
       hide,
       message,
-      attachments: ref(message.attachments),
+      attachments,
       edittextbody: ref(textbody),
       availablenow: ref(message.availablenow),
       availableinitially: ref(message.availableinitially),
@@ -185,9 +188,6 @@ export default {
   },
   data() {
     return {
-      uploading: false,
-      myFiles: [],
-      image: null,
       triedToSave: false,
     }
   },
@@ -270,26 +270,6 @@ export default {
     removePhoto(id) {
       this.attachments = this.attachments.filter((item) => {
         return item.id !== id
-      })
-    },
-    photoAdd() {
-      // Flag that we're uploading.  This will trigger the render of the filepond instance and subsequently the
-      // init callback below.
-      this.uploading = true
-    },
-    photoProcessed(imageid, imagethumb, image) {
-      // We have uploaded a photo.  Remove the filepond instance.
-      this.uploading = false
-
-      if (!this.attachments) {
-        console.log('Fix empty attach')
-        this.attachments = []
-      }
-
-      this.attachments.push({
-        id: imageid,
-        paththumb: imagethumb,
-        path: image,
       })
     },
     postcodeSelect(pc) {

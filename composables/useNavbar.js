@@ -49,6 +49,7 @@ export function useNavbar() {
   const myid = computed(() => authStore.user?.id)
   const distance = ref(1000)
   const logo = ref('/icon.png')
+  const logoFormat = ref('webp')
   const unreadNotificationCount = ref(0)
   const chatCount = computed(() => chatStore.unreadCount)
   const activePostsCount = computed(() => messageStore.activePostsCounter)
@@ -129,6 +130,7 @@ export function useNavbar() {
 
       if (ret.ret === 0 && ret.logo) {
         logo.value = ret.logo.path.replace(/.*logos/, '/logos')
+        logoFormat.value = 'gif'
       }
     }, 5000)
 
@@ -252,6 +254,7 @@ export function useNavbar() {
     online,
     distance,
     logo,
+    logoFormat,
     unreadNotificationCount,
     chatCount,
     activePostsCount,

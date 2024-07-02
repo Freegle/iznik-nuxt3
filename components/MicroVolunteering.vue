@@ -137,6 +137,8 @@
                 <MicroVolunteeringSurvey :url="task.url" @done="considerNext" />
               </div>
               <div v-else>Unknown task {{ task }}</div>
+              <p>You can also:</p>
+              <TrustPilot />
             </div>
           </b-card-text>
         </template>

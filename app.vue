@@ -16,6 +16,49 @@
       <template #fallback>
         <header>
           <nav
+            id="navbar_large"
+            data-v-454188a5=""
+            class="navbar fixed-top navbar-expand ourBack d-none d-xl-flex pl-1 pr-2 navbar-dark navbar-expand-xl"
+          >
+            <div class="container-fluid">
+              <a
+                data-v-454188a5=""
+                aria-current="page"
+                href="/"
+                class="router-link-active router-link-exact-active navbar-brand p-0"
+                ><picture data-v-454188a5="" class="logo mr-2"
+                  ><source
+                    type="image/webp"
+                    sizes="58px"
+                    srcset="
+                      https://61ddd294bd3a390019c6.ucr.io//-/format/webp/-/resize/58x//https://www.ilovefreegle.org/icon.png   58w,
+                      https://61ddd294bd3a390019c6.ucr.io//-/format/webp/-/resize/116x//https://www.ilovefreegle.org/icon.png 116w
+                    " />
+                  <img
+                    alt="Home"
+                    loading="eager"
+                    data-nuxt-pic=""
+                    src="https://61ddd294bd3a390019c6.ucr.io//-/format/png/-/resize/116x//https://www.ilovefreegle.org/icon.png"
+                    sizes="58px"
+                    srcset="
+                      https://61ddd294bd3a390019c6.ucr.io//-/format/png/-/resize/58x//https://www.ilovefreegle.org/icon.png   58w,
+                      https://61ddd294bd3a390019c6.ucr.io//-/format/png/-/resize/116x//https://www.ilovefreegle.org/icon.png 116w
+                    " /></picture></a
+              ><!----><!---->
+              <div data-v-454188a5="" class="navbar-nav ml-auto">
+                <div data-v-454188a5="" class="nav-item" no-prefetch="">
+                  <button
+                    data-v-454188a5=""
+                    class="btn btn-md btn-white mr-2"
+                    type="button"
+                  >
+                    Sign&nbsp;in
+                  </button>
+                </div>
+              </div>
+            </div>
+          </nav>
+          <nav
             class="navbar fixed-top navbar-expand ourBack d-flex justify-content-between d-xl-none showNavBarTop"
             type="dark"
           >
@@ -24,11 +67,7 @@
               <div />
               <div class="d-flex align-items-center">
                 <ul class="nav">
-                  <a
-                    ><div class="btn btn-white mr-2 trans">
-                      Log in or Join
-                    </div></a
-                  >
+                  <a><div class="btn btn-white mr-2">Log in or Join</div></a>
                 </ul>
               </div>
             </div>

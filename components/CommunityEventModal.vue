@@ -32,7 +32,24 @@
             </notice-message>
             <b-row>
               <b-col>
-                <b-img lazy fluid :src="event.image.path" class="mb-2 w-100" />
+                <NuxtPicture
+                  v-if="event?.image?.imageuid"
+                  :key="bump"
+                  format="webp"
+                  width="200"
+                  provider="uploadcare"
+                  :src="event.image.imageuid"
+                  :modifiers="event.image.imagemods"
+                  alt="Community Event Photo"
+                  class="mb-2 w-100"
+                />
+                <b-img
+                  v-else
+                  lazy
+                  fluid
+                  :src="event.image.path"
+                  class="mb-2 w-100"
+                />
               </b-col>
             </b-row>
           </div>
@@ -173,11 +190,24 @@
                   <v-icon icon="circle" size="2x" />
                   <v-icon icon="reply" flip="horizontal" />
                 </div>
-                <div class="image">
+                <div class="image d-flex justify-content-around">
+                  <NuxtPicture
+                    v-if="event?.image?.imageuid"
+                    :key="bump"
+                    format="webp"
+                    width="200"
+                    provider="uploadcare"
+                    :src="event.image.imageuid"
+                    :modifiers="mods"
+                    alt="Community Event Photo"
+                    class="mb-2"
+                  />
                   <b-img
-                    v-if="event.image"
+                    v-else-if="event.image"
                     fluid
-                    :src="event.image.paththumb + '?' + cacheBust"
+                    :src="
+                      event.image.paththumb + '?event=' + id + '-' + cacheBust
+                    "
                   />
                   <b-img v-else width="250" thumbnail src="/placeholder.jpg" />
                 </div>
@@ -185,24 +215,11 @@
             </b-col>
           </b-row>
           <span v-if="enabled">
-            <b-row>
-              <b-col>
-                <b-button variant="primary" class="mt-1" @click="photoAdd">
-                  <v-icon icon="camera" /> Upload photo
-                </b-button>
-              </b-col>
-            </b-row>
-            <b-row v-if="uploading">
-              <b-col>
-                <OurFilePond
-                  class="bg-white"
-                  imgtype="CommunityEvent"
-                  imgflag="communityevent"
-                  :ocr="true"
-                  @photo-processed="photoProcessed"
-                />
-              </b-col>
-            </b-row>
+            <OurUploader
+              v-model="currentAtts"
+              class="bg-white"
+              type="CommunityEvent"
+            />
 
             <b-form-group
               ref="eventEdit__description"
@@ -389,13 +406,13 @@ import { useImageStore } from '../stores/image'
 import EmailValidator from './EmailValidator'
 import { ref } from '#imports'
 import { twem } from '~/composables/useTwem'
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 
 const GroupSelect = defineAsyncComponent(() =>
   import('~/components/GroupSelect')
 )
-const OurFilePond = defineAsyncComponent(() =>
-  import('~/components/OurFilePond')
+const OurUploader = defineAsyncComponent(() =>
+  import('~/components/OurUploader')
 )
 const StartEndCollection = defineAsyncComponent(() =>
   import('~/components/StartEndCollection')
@@ -445,7 +462,7 @@ export default {
   components: {
     EmailValidator,
     GroupSelect,
-    OurFilePond,
+    OurUploader,
     StartEndCollection,
     NoticeMessage,
     DonationButton,
@@ -474,7 +491,7 @@ export default {
     const imageStore = useImageStore()
     const groupid = ref(null)
 
-    const { modal, hide } = useModal()
+    const { modal, hide } = useOurModal()
 
     if (props.id) {
       const v = await communityEventStore.fetch(props.id)
@@ -508,10 +525,12 @@ export default {
   data() {
     return {
       cacheBust: Date.now(),
-      uploading: false,
       showGroupError: false,
       showDateError: false,
       description: null,
+      currentAtts: [],
+      mods: {},
+      bump: 0,
     }
   },
   computed: {
@@ -581,6 +600,18 @@ export default {
       handler(newVal) {
         this.event.description = newVal
       },
+    },
+    currentAtts: {
+      handler(newVal) {
+        this.event.image = {
+          id: newVal[0].id,
+          imageuid: newVal[0].externaluid,
+          imagemods: newVal[0].externalmods,
+        }
+
+        this.bump++
+      },
+      deep: true,
     },
   },
   methods: {
@@ -732,45 +763,19 @@ export default {
 
       this.hide()
     },
-    photoAdd() {
-      // Flag that we're uploading.  This will trigger the render of the filepond instance and subsequently the
-      // processed callback below.
-      this.uploading = true
-    },
-    photoProcessed(imageid, imagethumb, image, ocr) {
-      // We have uploaded a photo.  Remove the filepond instance.
-      this.uploading = false
-
-      this.event.image = {
-        id: imageid,
-        path: image,
-        paththumb: imagethumb,
-      }
-
-      if (ocr) {
-        // We might have some OCR text from a poster which we can add in.
-        const p = ocr.indexOf('\n')
-        const title = p !== -1 ? ocr.substring(0, p) : null
-        const desc = p !== -1 ? ocr.substring(p + 1) : ocr
-
-        if (!this.event.title) {
-          this.event.title = title
-        }
-
-        if (!this.event.description) {
-          this.event.description = desc
-        }
-      }
-    },
     async rotate(deg) {
+      const curr = this.mods?.rotate || 0
+      this.mods.rotate = curr + deg
+
+      // Ensure between 0 and 360
+      this.mods.rotate = (this.mods.rotate + 360) % 360
+
       await this.imageStore.post({
         id: this.event.image.id,
-        rotate: deg,
+        rotate: this.mods.rotate,
         bust: Date.now(),
         communityevent: true,
       })
-
-      this.cacheBust = Date.now()
     },
     rotateLeft() {
       this.rotate(90)

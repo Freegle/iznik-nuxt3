@@ -52,7 +52,6 @@
         size="lg"
         :class="'font-weight-bold ' + (chooseError ? 'text-danger' : '')"
         :state="invalid ? false : null"
-        @change="selected"
       />
       <p v-if="invalid" class="invalid-feedback">
         Please select someone from the list above.
@@ -66,7 +65,6 @@
         size="lg"
         :class="'font-weight-bold ' + (chooseError ? 'text-danger' : '')"
         :state="invalid ? false : null"
-        @change="selected"
       />
       <p v-if="invalid" class="invalid-feedback">
         Please select someone from the list above.
@@ -224,9 +222,7 @@ export default {
       },
       immediate: true,
     },
-  },
-  methods: {
-    selected(userid) {
+    selectUser(userid) {
       let user = null
 
       if (userid === 0) {
@@ -243,7 +239,6 @@ export default {
       }
 
       if (user) {
-        console.log('Selected', userid, user)
         if (user.count === 0) {
           // None left.  But they wouldn't have added them unless they wanted to give them at least one.  So
           // steal one from the last person who had a count > 1.
@@ -271,6 +266,8 @@ export default {
         this.selectUser = -1
       })
     },
+  },
+  methods: {
     userOptions(small) {
       const options = []
 

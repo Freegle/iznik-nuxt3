@@ -58,6 +58,11 @@ export default {
 }
 </script>
 <style scoped lang="scss">
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/sticky-banner.scss';
+
 .sidebar__wrapper {
   display: grid;
   grid-template-rows: 1fr;
@@ -81,6 +86,12 @@ export default {
   display: grid;
   grid-template-rows: 1fr auto;
   height: calc(100vh - 68px);
+
+  padding-bottom: $sticky-banner-height-mobile;
+
+  @include media-breakpoint-up(md) {
+    padding-bottom: $sticky-banner-height-desktop;
+  }
 
   .social-media__wrapper {
     grid-row: 2 / 3;

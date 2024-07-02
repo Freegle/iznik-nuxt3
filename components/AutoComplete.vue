@@ -20,8 +20,13 @@
             @keydown="handleKeyDown"
             @focus="handleFocus"
           />
-          <b-input-group-append>
-            <b-button variant="white" class="transbord p-0 pr-2" tabindex="-1">
+          <slot name="append">
+            <b-button
+              variant="white"
+              class="transbord p-0 pr-2"
+              tabindex="-1"
+              aria-label="Busy indicator"
+            >
               <v-icon
                 icon="sync"
                 :class="
@@ -30,7 +35,7 @@
                 "
               />
             </b-button>
-          </b-input-group-append>
+          </slot>
         </b-input-group>
         <b-button
           v-if="searchbutton"
