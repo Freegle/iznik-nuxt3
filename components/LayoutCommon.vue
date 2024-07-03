@@ -8,7 +8,7 @@
       <client-only>
         <div v-if="allowAd">
           <div
-            v-if="!noAdRendered"
+            v-if="!noAdRendered && CMPComplete"
             class="d-flex justify-content-around w-100"
             :class="{
               sticky: true,
@@ -130,6 +130,7 @@ export default {
       timeTimer: null,
       adRendering: true,
       noAdRendered: false,
+      CMPComplete: false,
     }
   },
   computed: {
@@ -150,10 +151,14 @@ export default {
     },
   },
   async mounted() {
-    // Start our timer.  Holding the time in the store allows us to update the time regularly and have reactivity
-    // cause displayed fromNow() values to change, rather than starting a timer for each of them.
     if (process.client) {
+      // Start our timer.  Holding the time in the store allows us to update the time regularly and have reactivity
+      // cause displayed fromNow() values to change, rather than starting a timer for each of them.
       this.updateTime()
+
+      // Wait until we have done CMP before inserting the sticky banners, otherwise we can block clicking on the
+      // consent banner.
+      this.checkCMPComplete()
 
       // We added a basic loader into the HTML.  This helps if we are loaded on an old browser where our JS bombs
       // out - at least we display something, with a link to support.  But now we're up and running, remove that.
@@ -279,6 +284,13 @@ export default {
       this.noAdRendered = true
       const store = useMiscStore()
       store.stickyAdRendered = 1
+    },
+    checkCMPComplete() {
+      if (!window.weHaveLoadedGPT) {
+        setTimeout(this.checkCMPComplete, 100)
+      } else {
+        this.CMPComplete = true
+      }
     },
   },
 }
