@@ -6,10 +6,6 @@
         :next-after-removed="nextAfterRemoved" :summary="summary" :search="messageTerm" @destroy="destroy" />
       <div :ref="'bottom' + message.id" />
     </div>
-
-    <NoticeMessage v-if="!messages.length && !busy" class="mt-2">
-      There are no messages at the moment. This will refresh automatically.
-    </NoticeMessage>
   </div>
 </template>
 
@@ -63,14 +59,14 @@ onMounted(async () => {
   context.value = null
 
   const authStore = useAuthStore()
-  const work = authStore.work // IN PRACTICE, NEVER SET
+  const work = authStore.work // IN PRACTICE, NEVER SET TODO SO REMOVE
   console.log('###ModMessages work', work)
   if (work) {
     const count = workType.value ? work[workType.value] : 0
 
     console.log('###ModMessages onMounted', count)
     if (count > 0) {
-      await messageStore.fetchMessages({
+      await messageStore.fetchMessagesMT({
         groupid: groupid.value,
         collection: collection.value,
         modtools: true,

@@ -336,7 +336,7 @@ export const useMessageStore = defineStore({
     clearContext() { // Added for ModTools
       this.context = null
     },
-    async fetchMessages(params) { // Added for ModTools
+    async fetchMessagesMT(params) { // Added for ModTools
       //console.log("===useMessageStore fetchMessages",params)
       // Watch out for the store being cleared under the feet of this fetch. If that happens then we throw away the
       // results.
@@ -352,7 +352,7 @@ export const useMessageStore = defineStore({
 
       const data = await api(this.config).message.fetchMessages(params)
       await this.clear()
-      if( !('messages' in data)) return
+      if( !data.messages) return
       const messages = data.messages
       const context = data.context
 

@@ -11,6 +11,9 @@
       <ModtoolsViewControl />
     </div>
     <div>
+      <NoticeMessage v-if="!messages.length && !busy" class="mt-2">
+        Nothing found. If looking for a message, almost always this is because the message doesn't exist (or has been very deleted).
+      </NoticeMessage>
       <ModMessages :group="group" />
       <infinite-loading direction="top" force-use-infinite-wrapper="true" :distance="10" @infinite="loadMore" :identifier="bump">
         <span slot="no-results" />
@@ -24,7 +27,6 @@
 </template>
 
 <script>
-import dayjs from 'dayjs'
 import { useMiscStore } from '@/stores/misc'
 import { useMessageStore } from '../../stores/message'
 import ScrollToTop from '~/components/ScrollToTop'
@@ -51,6 +53,7 @@ export default {
   ],
   data: function () {
     return {
+      error: false,
       bump: 0
     }
   },
@@ -87,17 +90,14 @@ export default {
 
     async loadMore($state) {
       console.log('approved loadMore', this.groupid, this.show, this.messages.length)
-
+      this.busy = true
       if (!this.me) {
         console.log('Ignore load more on MT page with no session.')
         $state.complete()
-        return // TODO
-      }
-
-      if (this.show < this.messages.length) {
+      } else if (this.show < this.messages.length) {
         // This means that we will gradually add the messages that we have fetched from the server into the DOM.
         // Doing that means that we will complete our initial render more rapidly and thus appear faster.
-        console.log('this.show++',this.show)
+        console.log('this.show++', this.show)
         this.show++
         $state.loaded()
       } else {
@@ -131,120 +131,18 @@ export default {
         params.context = this.context
         params.limit = this.messages.length + this.distance
 
-        this.messageStore.fetchMessages(params)
-          .then(() => {
-            this.context = this.messageStore.context
+        await this.messageStore.fetchMessagesMT(params)
+        this.context = this.messageStore.context
 
-            if (currentCount === this.messages.length) {
-              //TODO this.complete = true
-              //busy.value = false
-              $state.complete()
-            } else {
-              $state.loaded()
-              //busy.value = false
-              this.show++
-            }
-          })
-          .catch(e => {
-            $state.complete()
-            console.log('Complete on error', e)
-            //busy.value = false
-          })
-      }
-
-
-    /*if (!this.groupid) {
-      console.log('uMM loadMore no groupid')
-      $state.complete()
-      return
-    }
-    let messages = messageStore.getByGroup(this.groupid)
-    const prevmessagecount = messages.length
-
-    await messageStore.fetchMessages({
-      groupid: this.groupid,
-      collection: this.collection,
-      modtools: true,
-      summary: false,
-      limit: messages.length + this.distance
-    })
-    messages = messageStore.getByGroup(this.groupid)
-    console.log('uMM loadMore NOW', prevmessagecount, messages.length)
-    if (prevmessagecount === messages.length) {
-      $state.complete()
-    } else {
-      //$state.complete()
-      $state.loaded()
-    }
-    this.show = messages.length*/
-  }
-
-
-
-  /*loadMore($state){
-  console.log("======LOAD MORE")
-  busy.value = true
- 
-  const me = true // TODO
-  if (!me) {
-    console.log('Ignore load more on MT page with no session.')
-    $state.complete()
-  } else if (show.value < messages.value.length) {
-    // This means that we will gradually add the messages that we have fetched from the server into the DOM.
-    // Doing that means that we will complete our initial render more rapidly and thus appear faster.
-    show.value++
-    $state.loaded()
-  } else {
-    const currentCount = messages.value.length
- 
-    let params
- 
-    if (messageTerm.value) {
-      params = {
-        subaction: 'searchall',
-        search: messageTerm.value,
-        exactonly: true,
-        groupid: groupid.value
-      }
-    } else if (memberTerm.value) {
-      params = {
-        subaction: 'searchmemb',
-        search: memberTerm.value,
-        groupid: groupid.value
-      }
-    } else {
-      params = {
-        groupid: groupid.value,
-        collection: collection.value,
-        modtools: true,
-        summary: false
-      }
-    }
- 
-    params.context = context.value
-    params.limit = limit.value
- 
-    messageStore.fetchMessages(params)
-      .then(() => {
-        context.value = messageStore.context
- 
-        if (currentCount === messages.value.length) {
-          //TODO this.complete = true
-          busy.value = false
+        if (currentCount === this.messages.length) {
           $state.complete()
         } else {
           $state.loaded()
-          busy.value = false
-          show.value++
+          this.show++
         }
-      })
-      .catch(e => {
-        $state.complete()
-        console.log('Complete on error', e)
-        busy.value = false
-      })
+      }
+      this.busy = false
+    }
   }
-}*/
-}
 }
 </script>

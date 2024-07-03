@@ -99,6 +99,7 @@ export function setupModMessages() {
     }
   })
   watch(work, async (newVal, oldVal) => {
+    // TODO: Only want this to run if on Pending page
     //console.log('<<<<useModMessages watch work', newVal, oldVal, modalOpen.value)
     let doFetch = false
 
@@ -134,7 +135,7 @@ export function setupModMessages() {
       await messageStore.clearContext()
       context.value = null
 
-      await messageStore.fetchMessages({
+      await messageStore.fetchMessagesMT({
         groupid: groupid.value,
         collection: collection.value,
         modtools: true,
