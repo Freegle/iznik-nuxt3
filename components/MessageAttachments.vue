@@ -62,7 +62,7 @@
             alt="Item picture"
             title="Item picture"
             :src="attachments[0].path"
-            :sizes="thumbnail ? '320px sm:200px' : '320px sm:576px md:768px'"
+            :sizes="thumbnail ? '320px' : '320px md:768px'"
             :width="Math.round(width)"
             :height="200"
             fit="cover"
