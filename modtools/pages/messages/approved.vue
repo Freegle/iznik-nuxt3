@@ -9,6 +9,9 @@
         Select a community to search messages.
       </span>
       <ModtoolsViewControl />
+    </div>
+    <div>
+      <ModMessages :group="group" />
       <infinite-loading direction="top" force-use-infinite-wrapper="true" :distance="10" @infinite="loadMore">
         <span slot="no-results" />
         <span slot="no-more" />
@@ -16,9 +19,6 @@
           <b-img lazy src="~/static/loader.gif" alt="Loading" />
         </span>
       </infinite-loading>
-    </div>
-    <div>
-      <ModMessages :group="group" />
     </div>
   </client-only>
 </template>

@@ -27,7 +27,6 @@ const summary = computed(() => {
 
 // mixin/modMessagesPage
 const messages = computed(() => {
-  //console.log('useModMessages messages', groupid.value)
   const messageStore = useMessageStore()
   let messages
 
@@ -36,6 +35,7 @@ const messages = computed(() => {
   } else {
     messages = messageStore.all
   }
+  // console.log('useModMessages messages', groupid.value, messages.length)
   // We need to sort as otherwise new messages may appear at the end.
   messages.sort((a, b) => {
     if (a.groups && b.groups) {
@@ -53,20 +53,21 @@ const messages = computed(() => {
 
 const visibleMessages = computed(() => {
   const msgs = messages.value
-  console.log('useModMessages visibleMessages', show.value, msgs?.length, msgs)
+  // console.log('useModMessages visibleMessages', show.value, msgs?.length)
   if (show.value === 0 || !msgs || msgs.length === 0) return []
   return msgs.slice(0, show.value)
 })
 
 async function loadMore($state) {
   const messageStore = useMessageStore()
+  console.log('uMM loadMore', groupid.value)
   if (!groupid.value) {
+    console.log('uMM loadMore no groupid')
     $state.complete()
     return
   }
   let messages = messageStore.getByGroup(groupid.value)
   const prevmessagecount = messages.length
-  console.log('uMM loadMore', groupid.value, messages.length)
 
   await messageStore.fetchMessages({
     groupid: groupid.value,
@@ -76,12 +77,14 @@ async function loadMore($state) {
     limit: messages.length + distance.value
   })
   messages = messageStore.getByGroup(groupid.value)
+  console.log('uMM loadMore NOW', prevmessagecount, messages.length)
   if (prevmessagecount === messages.length) {
     $state.complete()
   } else {
-    $state.complete()
-    //$state.loaded()
+    //$state.complete()
+    $state.loaded()
   }
+  show.value = messages.length
 }
 
 watch(groupid, async (newVal) => {

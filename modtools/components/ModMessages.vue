@@ -1,6 +1,5 @@
 <template>
   <div>
-    visibleMessages {{  visibleMessages.length }}
     <div v-for="(message, ix) in visibleMessages" :key="'messagelist-' + message.id" class="p-0 mt-2">
       <div :ref="'top' + message.id" />
       <ModMessage :message="message" :next="ix < visibleMessages.length - 1 ? visibleMessages[ix + 1].id : null"

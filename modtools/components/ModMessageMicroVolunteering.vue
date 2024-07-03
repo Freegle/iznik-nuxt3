@@ -1,7 +1,7 @@
 <template>
   <div>
     <div v-if="microvolunteering.result === 'Reject'" class="border border-warning rounded p-2">
-      <nuxt-link :to="'/modtools/members/approved/search/' + microvolunteering.userid">
+      <nuxt-link :to="'/members/approved/search/' + microvolunteering.userid">
         <v-icon icon="hashtag" class="text-muted" scale="0.75" />{{ microvolunteering.userid }}
       </nuxt-link>
       <span v-if="user">
@@ -22,11 +22,11 @@
       <em v-else>No comment supplied.</em>
     </div>
     <div v-if="microvolunteering.result === 'Approve'" class="border border-success rounded p-2">
-      <nuxt-link :to="'/modtools/members/approved/search/' + microvolunteering.userid">
+      <nuxt-link :to="'/members/approved/search/' + microvolunteering.userid">
         <v-icon icon="hashtag" class="text-muted" scale="0.75" />{{ microvolunteering.userid }}
       </nuxt-link>
       <span v-if="user">
-        <strong>{{ user.displayname }}</strong>
+        <strong>&nbsp;{{ user.displayname }}</strong>
         <span v-if="email">
           ({{ email }})
         </span>
@@ -38,7 +38,7 @@
 </template>
 
 <script>
-import { useUserStore } from '../stores/user'
+import { useUserStore } from '../../stores/user'
 
 export default {
   props: {
@@ -57,12 +57,12 @@ export default {
   },
   computed: {
     user() {
-      return this.userStore.get(this.microvolunteering.userid)
+      return this.userStore?.byId(this.microvolunteering.userid)
     },
     email() {
       let ret = null
 
-      if (this.user) {
+      if (this.user && this.user.emails) {
         this.user.emails.forEach(e => {
           if (!e.ourdomain && (!ret || e.preferred)) {
             ret = e.email
