@@ -3,7 +3,7 @@
     <b-input-group>
       <b-form-input v-model="term" placeholder="Email/name/id" @keyup.native.enter="search" />
       <b-input-group-append>
-        <SpinButton variant="primary" icon-name="search" label="Search" spinclass="text-white" @handle="search" :disabled="!term" />
+        <SpinButton variant="primary" icon-name="search" label="Search" spinclass="text-white" @handle="search" />
       </b-input-group-append>
     </b-input-group>
   </div>
@@ -23,7 +23,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['searched','changed'])
+const emit = defineEmits(['searched', 'changed'])
 
 const term = computed({
   get() {
@@ -35,7 +35,7 @@ const term = computed({
 })
 
 const search = async (callback) => {
-  const theterm = term.value.trim()
+  const theterm = term.value?.trim()
   emit('searched', theterm)
   if (typeof callback === 'function') {
     callback()

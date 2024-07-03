@@ -73,7 +73,7 @@ export default {
     searchedMessage(term) {
       console.log('approved searchedMessage', term)
       this.show = 0
-      this.messageTerm = term.trim()
+      this.messageTerm = term?.trim()
       this.memberTerm = null
       this.messageStore.clear()
 
@@ -87,7 +87,7 @@ export default {
       console.log('approved searchedMember', term)
       this.show = 0
       this.messageTerm = null
-      this.memberTerm = term.trim()
+      this.memberTerm = term?.trim()
       this.messageStore.clear()
 
       // Need to rerender the infinite scroll
