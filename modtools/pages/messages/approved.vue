@@ -3,8 +3,8 @@
     <ScrollToTop :prepend="groupName" />
     <div class="d-flex justify-content-between flex-wrap">
       <GroupSelect v-model="groupid" all modonly remember="approved" />
-      <ModFindMessagesFromMember @searched="searchedMember" />
-      <ModFindMessage v-if="groupid" :groupid="groupid" @searched="searchedMessage" />
+      <ModFindMessagesFromMember :memberTerm="memberTerm" @searched="searchedMember" @changed="changedMemberTerm" />
+      <ModFindMessage v-if="groupid" :groupid="groupid" :messageTerm="messageTerm" @searched="searchedMessage" @changed="changedMessageTerm" />
       <span v-else class="mt-2">
         Select a community to search messages.
       </span>
@@ -12,7 +12,7 @@
     </div>
     <div>
       <NoticeMessage v-if="!messages.length && !busy" class="mt-2">
-        Nothing found. If looking for a message, almost always this is because the message doesn't exist (or has been very deleted).
+        Nothing found. Almost always this is because the member or message doesn't exist (or has been very deleted).
       </NoticeMessage>
       <ModMessages :group="group" />
       <infinite-loading direction="top" force-use-infinite-wrapper="true" :distance="10" @infinite="loadMore" :identifier="bump">
@@ -67,6 +67,9 @@ export default {
     },
   },
   methods: {
+    changedMessageTerm(term){
+      this.messageTerm = term.trim()
+    },
     searchedMessage(term) {
       console.log('approved searchedMessage', term)
       this.show = 0
@@ -76,6 +79,9 @@ export default {
 
       // Need to rerender the infinite scroll
       this.bump++
+    },
+    changedMemberTerm(term){
+      this.memberTerm = term.trim()
     },
     searchedMember(term) {
       console.log('approved searchedMember', term)
