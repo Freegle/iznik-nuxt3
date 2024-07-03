@@ -58,35 +58,6 @@ const visibleMessages = computed(() => {
   return msgs.slice(0, show.value)
 })
 
-async function loadMore($state) {
-  const messageStore = useMessageStore()
-  console.log('uMM loadMore', groupid.value)
-  if (!groupid.value) {
-    console.log('uMM loadMore no groupid')
-    $state.complete()
-    return
-  }
-  let messages = messageStore.getByGroup(groupid.value)
-  const prevmessagecount = messages.length
-
-  await messageStore.fetchMessages({
-    groupid: groupid.value,
-    collection: collection.value,
-    modtools: true,
-    summary: false,
-    limit: messages.length + distance.value
-  })
-  messages = messageStore.getByGroup(groupid.value)
-  console.log('uMM loadMore NOW', prevmessagecount, messages.length)
-  if (prevmessagecount === messages.length) {
-    $state.complete()
-  } else {
-    //$state.complete()
-    $state.loaded()
-  }
-  show.value = messages.length
-}
-
 watch(groupid, async (newVal) => {
   //console.log("useModMessages watch groupid", newVal)
   context.value = null
@@ -201,7 +172,6 @@ export function setupModMessages() {
     summary,
     messages,
     visibleMessages,
-    work,
-    loadMore
+    work
   }
 }

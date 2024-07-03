@@ -3,18 +3,14 @@
     <b-input-group>
       <b-form-input v-model="term" placeholder="Email/name/id" @keyup.native.enter="search" />
       <b-input-group-append>
-        <SpinButton variant="primary" icon-name="search" label="Search" spinclass="text-white" :handler="search" :disabled="!term" />
+        <SpinButton variant="primary" icon-name="search" label="Search" spinclass="text-white" @handle="search" :disabled="!term" />
       </b-input-group-append>
     </b-input-group>
   </div>
 </template>
 
 <script setup>
-import { useMessageStore } from '~/stores/message'
-const messageStore = useMessageStore()
-
 const term = ref(null)
-const busy = ref(false)
 
 const props = defineProps({
   groupid: {
@@ -24,16 +20,14 @@ const props = defineProps({
   }
 })
 
-const search = async () => {
-  busy.value = true
-  const term = term.value.trim()
-  this.$emit('searched', term)
+const emit = defineEmits(['searched'])
 
-  await messageStore.clear()
-
-  await messageStore.searchMember(term, props.groupid)
-
-  busy.value = false
+const search = async (callback) => {
+  const theterm = term.value.trim()
+  emit('searched', theterm)
+  if (typeof callback === 'function') {
+    callback()
+  }
 }
 </script>
 

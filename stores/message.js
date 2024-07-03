@@ -6,6 +6,7 @@ import { GROUP_REPOSTS, MESSAGE_EXPIRE_TIME } from '~/constants'
 import { useGroupStore } from '~/stores/group'
 import { APIError } from '~/api/BaseAPI'
 import { useAuthStore } from '~/stores/auth'
+import cloneDeep from 'lodash.clonedeep'
 
 export const useMessageStore = defineStore({
   id: 'message',
@@ -349,18 +350,16 @@ export const useMessageStore = defineStore({
         params.context = this.context
       }
 
-      const { messages, context } = await api(this.config).message.fetchMessages(params)
-
-      // TODO if (state.instance === instance) {
-      // TODO  commit('addAll', messages)
+      const data = await api(this.config).message.fetchMessages(params)
+      await this.clear()
+      if( !('messages' in data)) return
+      const messages = data.messages
+      const context = data.context
 
       if (params.collection !== 'Draft') {
         // We don't use context for drafts - there aren't many.
         this.context = context
-        // TODO commit('setContext', context)
       }
-      // TODO}
-      await this.clear()
       for (const message of messages) {
         //console.log('GOT message',message.id, typeof message.fromuser)
         this.list[message.id] = message
@@ -435,6 +434,17 @@ export const useMessageStore = defineStore({
 
       const authStore = useAuthStore()
       authStore.work = {}
+    },
+    async searchMember(term, groupid) {
+      const { messages } = await api(this.config).message.fetchMessages({
+        subaction: 'searchmemb',
+        search: term,
+        groupid: groupid
+      })
+      await this.clear()
+      for (const message of messages) {
+        this.list[message.id] = message
+      }
     },
   },
   getters: {
