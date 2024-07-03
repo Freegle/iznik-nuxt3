@@ -6,9 +6,9 @@
         <slot ref="pageContent" />
       </div>
       <client-only>
-        <div v-if="allowAd">
+        <div v-if="allowAd && CMPComplete">
           <div
-            v-if="!noAdRendered && CMPComplete"
+            v-if="!noAdRendered"
             class="d-flex justify-content-around w-100"
             :class="{
               sticky: true,
