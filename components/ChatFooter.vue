@@ -135,7 +135,9 @@
             :src="imageuid"
             :modifiers="imagemods"
             alt="Chat Photo"
-            sizes="100px sm:200px"
+            :width="200"
+            :height="200"
+            sizes="200px"
           />
           <div class="ml-1">
             <b-button title="Remove photo" @click="removeImage">
