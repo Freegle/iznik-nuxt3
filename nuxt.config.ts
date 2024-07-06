@@ -651,6 +651,9 @@ export default defineNuxtConfig({
       uploadcareProxy: {
         provider: '~/providers/uploadcare-proxy.ts',
       },
+      uploadcareOurs: {
+        provider: '~/providers/uploadcare.ts',
+      },
     },
   },
 })

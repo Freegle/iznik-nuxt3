@@ -45,8 +45,7 @@
           <NuxtPicture
             v-if="attachments[0].externaluid"
             format="webp"
-            fit="cover"
-            provider="uploadcare"
+            provider="uploadcareOurs"
             :src="attachments[0].externaluid"
             :modifiers="attachments[0].externalmods"
             alt="Item Photo"
