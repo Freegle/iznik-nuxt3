@@ -41,6 +41,7 @@
                 :modifiers="attachment.externalmods"
                 alt="Item picture"
                 :width="Math.round(width * 0.95)"
+                loading="lazy"
               />
               <b-img
                 v-else
@@ -49,6 +50,7 @@
                 :src="attachment.path"
                 itemprop="image"
                 class="w-100"
+                lazy
               />
             </template>
           </zoom-pinch>
