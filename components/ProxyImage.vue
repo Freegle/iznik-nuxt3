@@ -13,6 +13,7 @@
     :loading="preload ? 'eager' : loading"
     :sizes="sizes"
     :placeholder="placeholder"
+    @error="brokenImage"
   />
 </template>
 <script setup>
@@ -90,5 +91,12 @@ const isFluid = computed(() => (props.fluid ? 'img-fluid' : ''))
 
 if (props.src.includes('gimg_0.jpg')) {
   Sentry.captureMessage('Broken image: ' + props.src)
+}
+
+const emit = defineEmits(['error'])
+
+function brokenImage(e) {
+  console.log('Proxy image broken')
+  emit('error', e)
 }
 </script>
