@@ -77,6 +77,13 @@
           </span>
         </span>
       </div>
+      <div v-if="aboutthem && !collapsed" class="d-none d-md-flex">
+        <div>"</div>
+        <blockquote class="font-weight-bold aboutthem mb-0">
+          {{ aboutthem }}
+        </blockquote>
+        <div>"</div>
+      </div>
       <b-button
         v-if="unseen"
         variant="white"
@@ -256,6 +263,13 @@
           </div>
         </div>
       </div>
+      <div v-if="aboutthem && !collapsed" class="d-flex d-md-none">
+        <div>"</div>
+        <blockquote class="font-weight-bold aboutthem mb-0">
+          {{ aboutthem }}
+        </blockquote>
+        <div>"</div>
+      </div>
       <div
         v-if="collapsed"
         class="d-flex justify-content-around clickme collapsedbutton w-100"
@@ -312,7 +326,7 @@
 import { useChatStore } from '../stores/chat'
 import { setupChat } from '../composables/useChat'
 import ProfileImage from './ProfileImage'
-import { useRouter } from '#imports'
+import { twem, useRouter } from '#imports'
 import { useMiscStore } from '~/stores/misc'
 import SupporterInfo from '~/components/SupporterInfo'
 
@@ -412,6 +426,9 @@ export default {
       }
 
       return ret
+    },
+    aboutthem() {
+      return this.otheruser?.aboutme ? twem(this.otheruser.aboutme.text) : null
     },
   },
   watch: {
@@ -543,5 +560,13 @@ pre {
 .collapsedbutton {
   top: 8px;
   position: absolute;
+}
+
+.aboutthem {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>
