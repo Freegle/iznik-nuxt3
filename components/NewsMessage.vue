@@ -19,8 +19,7 @@
         :modifiers="newsfeed.image?.externalmod"
         alt="ChitChat Image"
         sizes="100vw md:400px"
-        :width="width"
-        :height="width"
+        class="imgthumb"
       />
       <b-img
         v-else-if="newsfeed.image"
@@ -120,8 +119,10 @@ export default {
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
 
-.imgthumb {
+.imgthumb,
+:deep(.imgthumb img) {
   width: 100%;
+  object-fit: cover;
 
   @include media-breakpoint-up(md) {
     width: 400px;
