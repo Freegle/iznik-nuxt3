@@ -46,7 +46,6 @@
     </template>
   </b-modal>
 </template>
-
 <script>
 import { useTrystStore } from '../stores/tryst'
 import { useMessageStore } from '../stores/message'
