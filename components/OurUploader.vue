@@ -166,12 +166,12 @@ function setPhotos(photos) {
 
     photos.forEach((f) => {
       console.log('Add photo', f)
-      if (f.path) {
-        ctxProviderRef.value.addFileFromUrl(f.path, {
+      if (f.externaluid) {
+        ctxProviderRef.value.addFileFromUuid(f.externaluid, {
           silent: true,
         })
-      } else if (f.externaluid) {
-        ctxProviderRef.value.addFileFromUuid(f.externaluid, {
+      } else if (f.path) {
+        ctxProviderRef.value.addFileFromUrl(f.path, {
           silent: true,
         })
       }
