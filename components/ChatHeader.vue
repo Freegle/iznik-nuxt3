@@ -77,7 +77,11 @@
           </span>
         </span>
       </div>
-      <div v-if="aboutthem && !collapsed" class="d-none d-md-flex">
+      <div
+        v-if="aboutthem && !collapsed"
+        class="d-none d-md-flex"
+        @click="showInfo"
+      >
         <div>"</div>
         <blockquote class="font-weight-bold aboutthem mb-0">
           {{ aboutthem }}
@@ -263,7 +267,11 @@
           </div>
         </div>
       </div>
-      <div v-if="aboutthem && !collapsed" class="d-flex d-md-none">
+      <div
+        v-if="aboutthem && !collapsed"
+        class="d-flex d-md-none"
+        @click="showInfo"
+      >
         <div>"</div>
         <blockquote class="font-weight-bold aboutthem mb-0">
           {{ aboutthem }}
