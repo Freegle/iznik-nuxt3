@@ -5,7 +5,7 @@
     </LayoutCommon>
     <client-only>
       <GoogleOneTap v-if="oneTap" @loggedin="googleLoggedIn" />
-      <LoginModal v-if="!loggedIn" ref="loginModal" />
+      <LoginModal v-if="!loggedIn && CMPComplete" ref="loginModal" />
     </client-only>
   </div>
 </template>
@@ -91,12 +91,26 @@ watch(
   }
 )
 
+const CMPComplete = ref(false)
+
+function checkCMPComplete() {
+  if (!window.weHaveLoadedGPT) {
+    setTimeout(checkCMPComplete, 100)
+  } else {
+    CMPComplete.value = true
+  }
+}
+
 onMounted(async () => {
   // For this layout we don't need to be logged in.  So can just continue.  But we want to know first whether or
   // not we are logged in.  We might already know that from the server via cookies, but if not, find out.
   if (!loginStateKnown.value) {
     await authStore.fetchUser()
   }
+
+  // Wait until we have done CMP before showing the login button, otherwise we can block clicking on the
+  // consent banner.
+  checkCMPComplete()
 })
 
 function googleLoggedIn() {
