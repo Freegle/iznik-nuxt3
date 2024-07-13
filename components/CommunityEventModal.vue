@@ -34,7 +34,6 @@
               <b-col>
                 <NuxtPicture
                   v-if="event?.image?.imageuid"
-                  :key="bump"
                   format="webp"
                   width="200"
                   provider="uploadcare"
@@ -171,7 +170,7 @@
               </b-form-group>
             </b-col>
             <b-col v-if="enabled" cols="12" md="6">
-              <div v-if="event.image" class="container">
+              <div v-if="image" class="container">
                 <div
                   class="clickme rotateleft stacked"
                   label="Rotate left"
@@ -192,22 +191,19 @@
                 </div>
                 <div class="image d-flex justify-content-around">
                   <NuxtPicture
-                    v-if="event?.image?.imageuid"
-                    :key="bump"
+                    v-if="image?.imageuid"
                     format="webp"
                     width="200"
                     provider="uploadcare"
-                    :src="event.image.imageuid"
+                    :src="image.imageuid"
                     :modifiers="mods"
                     alt="Community Event Photo"
                     class="mb-2"
                   />
                   <b-img
-                    v-else-if="event.image"
+                    v-else-if="image"
                     fluid
-                    :src="
-                      event.image.paththumb + '?event=' + id + '-' + cacheBust
-                    "
+                    :src="image.paththumb + '?event=' + id + '-' + cacheBust"
                   />
                   <b-img v-else width="250" thumbnail src="/placeholder.jpg" />
                 </div>
@@ -530,7 +526,7 @@ export default {
       description: null,
       currentAtts: [],
       mods: {},
-      bump: 0,
+      image: null,
     }
   },
   computed: {
@@ -608,8 +604,11 @@ export default {
           imageuid: newVal[0].externaluid,
           imagemods: newVal[0].externalmods,
         }
-
-        this.bump++
+        this.image = {
+          id: newVal[0].id,
+          imageuid: newVal[0].externaluid,
+          imagemods: newVal[0].externalmods,
+        }
       },
       deep: true,
     },

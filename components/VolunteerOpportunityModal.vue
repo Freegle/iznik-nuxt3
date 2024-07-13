@@ -41,7 +41,6 @@
               <b-col>
                 <NuxtPicture
                   v-if="volunteering?.image?.imageuid"
-                  :key="bump"
                   width="200"
                   format="webp"
                   provider="uploadcare"
@@ -184,7 +183,7 @@
               </b-form-group>
             </b-col>
             <b-col v-if="enabled" cols="12" md="6">
-              <div v-if="volunteering.image" class="container">
+              <div v-if="image" class="container">
                 <div
                   class="clickme rotateleft stacked"
                   label="Rotate left"
@@ -205,25 +204,20 @@
                 </div>
                 <div class="image d-flex justify-content-around">
                   <NuxtPicture
-                    v-if="volunteering?.image?.imageuid"
-                    :key="bump"
+                    v-if="image?.imageuid"
                     format="webp"
                     width="200"
                     provider="uploadcare"
-                    :src="volunteering.image.imageuid"
+                    :src="image.imageuid"
                     :modifiers="mods"
                     alt="Volunteer Opportunity Photo"
                     class="mb-2"
                   />
                   <b-img
-                    v-else-if="volunteering.image"
+                    v-else-if="image"
                     fluid
                     :src="
-                      volunteering.image.paththumb +
-                      '?volunteering=' +
-                      id +
-                      '-' +
-                      cacheBust
+                      image.paththumb + '?volunteering=' + id + '-' + cacheBust
                     "
                   />
                   <b-img v-else width="250" thumbnail src="/placeholder.jpg" />
@@ -556,7 +550,7 @@ export default {
       description: null,
       currentAtts: [],
       mods: {},
-      bump: 0,
+      image: null,
     }
   },
   computed: {
@@ -634,8 +628,11 @@ export default {
           imageuid: newVal[0].externaluid,
           imagemods: newVal[0].externalmods,
         }
-
-        this.bump++
+        this.image = {
+          id: newVal[0].id,
+          imageuid: newVal[0].externaluid,
+          imagemods: newVal[0].externalmods,
+        }
       },
       deep: true,
     },
