@@ -370,6 +370,7 @@ const navBarBottomHidden = computed(() => {
   position: absolute;
   top: 2px;
   font-size: 11px;
+  color: white !important;
 }
 
 .botmen {
