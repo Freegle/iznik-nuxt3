@@ -1,5 +1,5 @@
 <template>
-  <div ref="wrapper" style="min-height: 80vh; min-width: 95%" class="wrapper">
+  <div ref="wrapper" class="wrapper">
     <b-carousel
       :id="'message-carousel-' + messageId"
       v-model="slide"
@@ -41,6 +41,7 @@
                 :modifiers="attachment.externalmods"
                 alt="Item picture"
                 :width="Math.round(width * 0.95)"
+                loading="lazy"
               />
               <b-img
                 v-else
@@ -49,6 +50,7 @@
                 :src="attachment.path"
                 itemprop="image"
                 class="w-100"
+                lazy
               />
             </template>
           </zoom-pinch>
@@ -89,6 +91,11 @@ if (height > 3000) {
 }
 </script>
 <style scoped lang="scss">
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/sticky-banner.scss';
+
 :deep(.carousel-control-prev) {
   z-index: 11000 !important;
 }
@@ -100,5 +107,13 @@ if (height > 3000) {
 :deep(.iiz__btn) {
   z-index: 11001;
   right: 50%;
+}
+
+.wrapper {
+  min-height: calc(80vh - $sticky-banner-height-mobile);
+
+  @include media-breakpoint-up(md) {
+    min-height: calc(80vh - $sticky-banner-height-desktop);
+  }
 }
 </style>

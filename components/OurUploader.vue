@@ -13,7 +13,7 @@
       />
       <lr-config
         ref="lrconfig"
-        ctx-name="my-uploader"
+        :ctx-name="uploaderUid"
         pubkey="61ddd294bd3a390019c6"
         :max-local-file-size-bytes="0"
         img-only
@@ -27,7 +27,7 @@
       <div class="d-flex flex-column justify-content-around align-items-start">
         <lr-file-uploader-inline
           ref="uploader"
-          ctx-name="my-uploader"
+          :ctx-name="uploaderUid"
           :class="configName"
           @click="click"
         >
@@ -35,7 +35,7 @@
       </div>
       <lr-upload-ctx-provider
         ref="ctxProviderRef"
-        ctx-name="my-uploader"
+        :ctx-name="uploaderUid"
         @file-upload-success="uploadSuccess"
         @file-removed="removed"
       ></lr-upload-ctx-provider>
@@ -45,6 +45,7 @@
 <script setup>
 import { shouldPolyfill as shouldPolyfillLocale } from '@formatjs/intl-locale/should-polyfill'
 import { shouldPolyfill as shouldPolyfillPlural } from '@formatjs/intl-pluralrules/should-polyfill'
+import { uid } from '../composables/useId'
 import { useMiscStore } from '~/stores/misc'
 import { useImageStore } from '~/stores/image'
 
@@ -102,15 +103,12 @@ const props = defineProps({
 const miscStore = useMiscStore()
 const imageStore = useImageStore()
 
+const uploaderUid = ref(uid('uploader'))
 const emit = defineEmits(['update:modelValue'])
 const uploadedPhotos = ref([])
 const ctxProviderRef = ref(null)
 const uploader = ref(null)
 const busy = ref(false)
-
-// const fontSize = computed(() => {
-//   return uploadedPhotos.value.length > 0 ? '1rem' : '1.25rem'
-// })
 
 const label = computed(() => {
   if (props.label) {
@@ -168,12 +166,12 @@ function setPhotos(photos) {
 
     photos.forEach((f) => {
       console.log('Add photo', f)
-      if (f.path) {
-        ctxProviderRef.value.addFileFromUrl(f.path, {
+      if (f.externaluid) {
+        ctxProviderRef.value.addFileFromUuid(f.externaluid, {
           silent: true,
         })
-      } else if (f.externaluid) {
-        ctxProviderRef.value.addFileFromUuid(f.externaluid, {
+      } else if (f.path) {
+        ctxProviderRef.value.addFileFromUrl(f.path, {
           silent: true,
         })
       }

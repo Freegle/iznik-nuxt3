@@ -45,7 +45,7 @@
         <div class="d-flex align-items-center">
           <b-nav>
             <b-nav-item>
-              <nuxt-link v-if="!loggedIn" no-prefetch>
+              <nuxt-link v-if="!loggedIn && CMPComplete" no-prefetch>
                 <div class="btn btn-white mr-2" @click="requestLogin">
                   Log in or Join
                 </div>
@@ -324,6 +324,20 @@ const navBarBottomHidden = computed(() => {
     navBarHidden.value
   )
 })
+
+const CMPComplete = ref(false)
+
+function checkCMPComplete() {
+  if (!window.weHaveLoadedGPT) {
+    setTimeout(checkCMPComplete, 100)
+  } else {
+    CMPComplete.value = true
+  }
+}
+
+onMounted(() => {
+  checkCMPComplete()
+})
 </script>
 <style scoped lang="scss">
 @import 'assets/css/navbar.scss';
@@ -385,6 +399,7 @@ const navBarBottomHidden = computed(() => {
   position: absolute;
   top: 2px;
   font-size: 11px;
+  color: white !important;
 }
 
 .botmen {

@@ -93,9 +93,16 @@ export default {
       default: null,
     },
   },
+  data: function () {
+    return {
+      brokenImage: false,
+    }
+  },
   computed: {
     validImage() {
-      return this.image || '/defaultprofile.png'
+      return !this.brokenImage && this.image
+        ? this.image
+        : '/defaultprofile.png'
     },
     className() {
       let ret = 'p-0 profile profile--' + this.size
@@ -121,9 +128,7 @@ export default {
   },
   methods: {
     brokenProfileImage(e) {
-      e.target.src = '/defaultprofile.png'
-      e.preventDefault()
-      e.stopPropagation()
+      this.brokenImage = true
     },
   },
 }

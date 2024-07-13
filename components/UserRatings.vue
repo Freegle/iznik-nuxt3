@@ -31,92 +31,23 @@
         <v-icon icon="thumbs-down" />&nbsp;{{ user.info.ratings.Down }}
       </b-button>
     </span>
-    <b-modal
-      v-model="showRemove"
-      scrollable
-      title="Removing a rating"
-      ok-title="Remove rating"
-      @ok="removeRating"
-    >
-      <p>
-        You've already given this freegler a
-        <span v-if="user?.info?.ratings?.Mine === 'Up'"> thumbs up </span>
-        <span v-if="user?.info?.ratings?.Mine === 'Down'"> thumbs down </span>
-        rating. You can only rate each freegler once.
-      </p>
-      <p>You can remove your rating if you wish, or cancel.</p>
-    </b-modal>
-    <b-modal
-      v-model="showDown"
-      scrollable
-      title="Giving a Thumbs Down..."
-      ok-title="Submit"
-      @ok="doSomeoneDown"
-    >
-      <p>
-        Please tell us why you're doing this. Your local volunteers may see what
-        you put, but the other freegler won't.
-      </p>
-      <div class="mt=2">
-        <b-form-group v-slot="{ ariaDescribedby }" label="What went wrong?">
-          <b-form-radio
-            v-model="reason"
-            :aria-describedby="ariaDescribedby"
-            name="reason"
-            value="NoShow"
-            >No Show</b-form-radio
-          >
-          <b-form-radio
-            v-model="reason"
-            :aria-describedby="ariaDescribedby"
-            name="reason"
-            value="Punctuality"
-            >Was late or early</b-form-radio
-          >
-          <b-form-radio
-            v-model="reason"
-            :aria-describedby="ariaDescribedby"
-            name="reason"
-            value="Ghosted"
-            >Stopped replying</b-form-radio
-          >
-          <b-form-radio
-            v-model="reason"
-            :aria-describedby="ariaDescribedby"
-            name="reason"
-            value="Rude"
-            >Unpleasant behaviour</b-form-radio
-          >
-          <b-form-radio
-            v-model="reason"
-            :aria-describedby="ariaDescribedby"
-            name="reason"
-            value="Other"
-            >Something else</b-form-radio
-          >
-        </b-form-group>
-      </div>
-      <div class="mt-2">
-        <label class="font-weight-bold" for="text">
-          Please give a bit of detail.
-        </label>
-        <b-form-textarea
-          id="text"
-          v-model="text"
-          rows="3"
-          placeholder="Explain what happened here..."
-        />
-      </div>
-      <b-alert v-model="showError" variant="danger" class="mt-2">
-        Please select a reason and add some detail. Thanks.
-      </b-alert>
-    </b-modal>
+    <UserRatingsDownModal v-if="showDown" :id="id" />
+    <UserRatingsRemoveModal v-if="showRemove" :id="id" />
   </span>
 </template>
 <script>
 import { useUserStore } from '../stores/user'
 
+const UserRatingsDownModal = defineAsyncComponent(() =>
+  import('~/components/UserRatingsDownModal')
+)
+
+const UserRatingsRemoveModal = defineAsyncComponent(() =>
+  import('~/components/UserRatingsRemoveModal')
+)
+
 export default {
+  components: { UserRatingsDownModal, UserRatingsRemoveModal },
   props: {
     id: {
       type: Number,
@@ -150,9 +81,6 @@ export default {
     return {
       showDown: false,
       showRemove: false,
-      reason: null,
-      text: null,
-      showError: false,
     }
   },
   computed: {
@@ -206,10 +134,6 @@ export default {
         await this.rate('Up')
       }
     },
-    async removeRating() {
-      this.showRemove = false
-      await this.rate(null)
-    },
     down() {
       this.showDown = false
 
@@ -218,17 +142,6 @@ export default {
       } else {
         this.showDown = true
       }
-    },
-    async doSomeoneDown(e) {
-      this.showError = false
-
-      if (!this.reason || !this.text) {
-        this.showError = true
-      } else {
-        await this.rate('Down', this.reason, this.text)
-      }
-
-      e.preventDefault()
     },
   },
 }
