@@ -53,9 +53,9 @@
         <VisibleWhen :at="['xs', 'sm', 'md']">
           <div v-if="insertAd(ix)" class="mt-3 mt-xl-2">
             <ExternalDa
-              :adUnitPath="insertAd(ix).adUnitPath"
+              :ad-unit-path="insertAd(ix).adUnitPath"
               :dimensions="insertAd(ix).dimensions"
-              :divId="insertAd(ix).divId"
+              :div-id="insertAd(ix).divId"
             />
           </div>
         </VisibleWhen>
