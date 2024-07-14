@@ -131,7 +131,7 @@
         <p>
           Privacy is a complicated and important area, which we take seriously.
           If you have questions or concerns, please
-          <nuxt-link no-prefetch to="/help"> contact us. </nuxt-link>. Our
+          <nuxt-link no-prefetch to="/help"> contact us</nuxt-link>. Our
           registered address is Weaver's Field, Loud Bridge, Chipping PR3 2NX.
         </p>
         <h3>Change History</h3>
