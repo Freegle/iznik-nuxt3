@@ -25,7 +25,7 @@
         :actions="actions"
         :show-map="true"
         class="bg-white p-2"
-        :ad-unit-path="adUnitPath"
+        :adUnitPath="adUnitPath"
         :ad-id="adId"
         @zoom="showPhotosModal"
       />

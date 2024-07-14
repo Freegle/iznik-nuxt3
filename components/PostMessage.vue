@@ -35,7 +35,7 @@
         :key="bump"
         v-model="currentAtts"
         type="Message"
-        :multiple="singleInAndroidApp"
+        multiple
       />
     </div>
     <div class="subject-layout mb-1 mt-1">
@@ -125,12 +125,6 @@ watch(
 )
 
 currentAtts.value = JSON.parse(JSON.stringify(ret || []))
-
-const singleInAndroidApp = computed(() => {
-      const mobileStore = useMobileStore()
-      if( mobileStore.isApp) return mobileStore.isiOS
-      return true
-    })
 
 const availablenow = computed({
   get() {
