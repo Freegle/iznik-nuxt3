@@ -46,10 +46,11 @@
       <VisibleWhen v-if="showAd && adId" :at="['xs', 'sm']">
         <div class="d-flex justify-content-around mt-2">
           <ExternalDa
-            :ad-unit-path="adUnitPath"
+            :adUnitPath="adUnitPath"
             :ad-id="adId"
             :dimensions="[[300, 250]]"
-            :div-id="adId"
+            :divId="adId"
+            :inModal="inModal"
             @rendered="adRendered = true"
           />
         </div>
@@ -141,6 +142,10 @@ export default {
       type: String,
       required: false,
       default: null,
+    },
+    inModal: {
+      type: Boolean,
+      default: false,
     },
   },
   setup(props) {

@@ -277,6 +277,8 @@ function handleVisible() {
         shownFirst = true
       }
     })
+  } else{
+    emit('rendered', false)
   }
 }
 
