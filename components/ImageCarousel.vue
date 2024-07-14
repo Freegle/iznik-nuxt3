@@ -16,44 +16,7 @@
         class="slide"
       >
         <div class="d-flex justify-content-around">
-          <zoom-pinch
-            :rotation="false"
-            mouse
-            touch
-            wheel
-            gesture
-            :width="Math.round(width * 0.95)"
-            :height="Math.round(height * 0.95)"
-            :style="
-              'width: ' +
-              Math.round(width * 0.95) +
-              'px; height: ' +
-              Math.round(height * 0.95) +
-              'px'
-            "
-          >
-            <template #canvas>
-              <NuxtPicture
-                v-if="attachment.externaluid"
-                format="webp"
-                provider="uploadcare"
-                :src="attachment.externaluid"
-                :modifiers="attachment.externalmods"
-                alt="Item picture"
-                :width="Math.round(width * 0.95)"
-                loading="lazy"
-              />
-              <b-img
-                v-else
-                generator-unable-to-provide-required-alt=""
-                title="Item picture"
-                :src="attachment.path"
-                itemprop="image"
-                class="w-100"
-                lazy
-              />
-            </template>
-          </zoom-pinch>
+          <PinchMe :attachment="attachment" :width="width" :height="height" />
         </div>
       </b-carousel-slide>
     </b-carousel>
@@ -61,7 +24,6 @@
 </template>
 <script setup>
 import { useElementSize } from '@vueuse/core'
-import { Zoompinch as ZoomPinch } from 'zoompinch'
 import { ref } from '#imports'
 import 'zoompinch/style.css'
 
