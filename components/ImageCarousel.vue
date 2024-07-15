@@ -1,5 +1,8 @@
 <template>
   <div ref="wrapper" class="wrapper">
+    <p class="text-center small">
+      Drag image around. Zoom with pinch (on mobile) or Ctrl+mouse wheel.
+    </p>
     <b-carousel
       :id="'message-carousel-' + messageId"
       v-model="slide"
