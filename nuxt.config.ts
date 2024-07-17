@@ -205,6 +205,7 @@ export default defineNuxtConfig({
       MATOMO_HOST: process.env.MATOMO_HOST,
       COOKIEYES: config.COOKIEYES,
       TRUSTPILOT_LINK: config.TRUSTPILOT_LINK,
+      TUS_UPLOADER: config.TUS_UPLOADER,
     },
   },
 
@@ -627,8 +628,12 @@ export default defineNuxtConfig({
   image: {
     uploadcare: {
       provider: 'uploadcare',
-
       cdnURL: config.UPLOADCARE_CDN,
+    },
+
+    weserv: {
+      provider: 'weserv',
+      baseURL: config.TUS_UPLOADER,
     },
 
     // We want sharp images on fancy screens.

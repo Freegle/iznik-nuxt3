@@ -21,6 +21,9 @@ const CONFIG = {
   UPLOADCARE_CDN: 'https://uploadcare-cache.ilovefreegle.org/',
   UPLOADCARE_PROXY: 'https://uploadcare-proxy-cache.ilovefreegle.org/',
 
+  // Very new.  Our own uploader.
+  TUS_UPLOADER: 'https://uploads.ilovefreegle.org:8080',
+
   // OpenStreetMap Tile Server
   OSM_TILE:
     process.env.OSM_TILE ||

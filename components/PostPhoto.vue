@@ -23,11 +23,10 @@
       </div>
     </span>
     <div class="image-wrapper">
-      <NuxtPicture
+      <OurUploadedImage
         v-if="externaluid"
         fit="cover"
         format="webp"
-        provider="uploadcare"
         :src="externaluid"
         :modifiers="mods"
         alt="Item Photo"
@@ -56,11 +55,12 @@
 </template>
 <script>
 import { useImageStore } from '../stores/image'
+import OurUploadedImage from '~/components/OurUploadedImage.vue'
 const ConfirmModal = () =>
   defineAsyncComponent(() => import('./ConfirmModal.vue'))
 
 export default {
-  components: { ConfirmModal },
+  components: { OurUploadedImage, ConfirmModal },
   props: {
     id: {
       type: Number,
