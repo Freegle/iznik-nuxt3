@@ -285,4 +285,9 @@ onMounted(() => {
 </script>
 <style scoped lang="scss">
 @import 'assets/css/navbar.scss';
+
+.logo :deep(img) {
+  width: 58px;
+  height: 58px;
+}
 </style>
