@@ -19,6 +19,7 @@
         :modifiers="newsfeed.image?.externalmod"
         alt="ChitChat Image"
         sizes="100vw md:400px"
+        :height="400"
         class="imgthumb"
       />
       <b-img
