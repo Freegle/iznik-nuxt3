@@ -1,5 +1,6 @@
 <template>
   <NuxtPicture
+    :key="src + '-' + modifiers"
     :format="format"
     :fit="fit"
     :preload="preload"
@@ -98,7 +99,6 @@ if (props.src.includes('gimg_0.jpg')) {
 const emit = defineEmits(['error'])
 
 // If the source contains a dash then the first part is the provider and the second part the source.
-
 const chooseProvider = computed(() => {
   const p = props.src.indexOf('-')
 
