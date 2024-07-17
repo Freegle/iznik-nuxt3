@@ -6,6 +6,13 @@
   >
     <nuxt-link :to="homePage" class="navbar-brand p-0" no-prefetch>
       <OfflineIndicator v-if="!online" />
+      <b-img
+        v-else-if="logoFormat === 'gif'"
+        class="logo mr-2"
+        :src="logo"
+        :format="logoFormat"
+        alt="Home"
+      />
       <ProxyImage
         v-else
         preload
