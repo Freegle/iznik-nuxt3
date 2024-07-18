@@ -44,8 +44,19 @@
         </b-button>
       </div>
       <div class="volunteering__photo">
+        <OurUploadedImage
+          v-if="volunteering.photo?.ouruid"
+          fit="cover"
+          format="webp"
+          :src="volunteering.photo?.ouruid"
+          :modifiers="volunteering.photo?.externalmods"
+          alt="Community Event Photo"
+          :width="200"
+          :height="200"
+          @click="moreInfo"
+        />
         <NuxtPicture
-          v-if="volunteering.photo?.externaluid"
+          v-else-if="volunteering.photo?.externaluid"
           fit="cover"
           format="webp"
           provider="uploadcare"

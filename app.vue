@@ -263,6 +263,21 @@ if (process.client) {
         window.location.reload()
       }
     }
+
+    window.onerror = function (message, url, line, col, error) {
+      // We can get this, for example if the CookieYes script is blocked.
+      console.log('Uncaught error', message, url, line, col, error)
+
+      if (url.includes('cookieyes')) {
+        // If CookieYes fails with an error, then we proceed as though it wasn't configured.
+        //
+        // This catches the error on Firefox, but not on Chrome, so it's of limited use.
+        console.log('CookieYes error')
+        if (window.postCookieYes) {
+          window.postCookieYes()
+        }
+      }
+    }
   }
 
   const chatCount = computed(() => {

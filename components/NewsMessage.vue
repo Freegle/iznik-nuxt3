@@ -10,8 +10,18 @@
       class="font-weight-bold preline forcebreak nopara"
     />
     <div>
+      <OurUploadedImage
+        v-if="newsfeed.image?.ouruid"
+        format="webp"
+        fit="cover"
+        :src="newsfeed.image.ouruid"
+        :modifiers="newsfeed.image?.externalmod"
+        alt="ChitChat Image"
+        sizes="100vw md:400px"
+        class="imgthumb"
+      />
       <NuxtPicture
-        v-if="newsfeed.image?.externaluid"
+        v-else-if="newsfeed.image?.externaluid"
         format="webp"
         fit="cover"
         provider="uploadcare"

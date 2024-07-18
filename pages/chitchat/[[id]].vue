@@ -37,8 +37,18 @@
                   <span class="d-none d-sm-inline">to each other</span>;
                   occasionally we may moderate to ensure things stay friendly.
                 </div>
+                <OurUploadedImage
+                  v-if="ouruid"
+                  format="webp"
+                  fit="cover"
+                  :src="ouruid"
+                  :modifiers="imagemods"
+                  alt="ChitChat Photo"
+                  width="100"
+                  class="mt-1"
+                />
                 <NuxtPicture
-                  v-if="imageuid"
+                  v-else-if="imageuid"
                   format="webp"
                   fit="cover"
                   provider="uploadcare"
@@ -257,6 +267,7 @@ export default {
       startThread: null,
       uploading: false,
       imageid: null,
+      ouruid: null,
       imageuid: null,
       imagemods: null,
       distance: 1000,
@@ -324,10 +335,12 @@ export default {
   watch: {
     currentAtts: {
       handler(newVal) {
+        console.log('CurrentAtts', newVal)
         this.uploading = false
 
         this.imageid = newVal[0].id
         this.imageuid = newVal[0].externaluid
+        this.ouruid = newVal[0].ouruid
         this.imagemods = newVal[0].externalmods
       },
       deep: true,
@@ -438,6 +451,7 @@ export default {
         // And any image id
         this.imageid = null
         this.imageuid = null
+        this.ouruid = null
         this.imagemods = null
 
         // Show from top.

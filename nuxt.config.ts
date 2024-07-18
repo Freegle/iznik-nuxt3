@@ -205,6 +205,8 @@ export default defineNuxtConfig({
       MATOMO_HOST: process.env.MATOMO_HOST,
       COOKIEYES: config.COOKIEYES,
       TRUSTPILOT_LINK: config.TRUSTPILOT_LINK,
+      TUS_UPLOADER: config.TUS_UPLOADER,
+      IMAGE_DELIVERY: config.IMAGE_DELIVERY,
     },
   },
 
@@ -447,7 +449,7 @@ export default defineNuxtConfig({
               }
             }
 
-            function postCookieYes() {
+            window.postCookieYes = function() {
               console.log('Consider load of GPT and prebid');
               
               if (!window.weHaveLoadedGPT) {
@@ -483,6 +485,8 @@ export default defineNuxtConfig({
                 // Now we wait until the CookieYes script has set its own cookie.  
                 // This might be later than when the script has loaded in pure JS terms, but we
                 // need to be sure it's loaded before we can move on.
+                var retries = 10
+                
                 function checkCookieYes() {
                   if (document.cookie.indexOf('cookieyes-consent') > -1) {
                     console.log('CookieYes cookie is set, so CookieYes is loaded');
@@ -493,7 +497,7 @@ export default defineNuxtConfig({
                     window.__tcfapi('getTCData', 2, (tcData, success) => {
                       if (success && tcData && tcData.tcString) {
                         console.log('TC data loaded and TC String set');
-                        postCookieYes();
+                        window.postCookieYes();
                       } else {
                         console.log('Failed to get TC data or string, retry.')
                         setTimeout(checkCookieYes, 100);
@@ -504,15 +508,43 @@ export default defineNuxtConfig({
                       setTimeout(checkCookieYes, 100);
                     }
                   } else {
-                    console.log('CookieYes not yet loaded')
-                    setTimeout(checkCookieYes, 100);
+                    console.log('CookieYes not yet loaded', retries)
+                    retries--
+                    
+                    if (retries > 0) {
+                      setTimeout(checkCookieYes, 100);
+                    } else {
+                      // It's not loaded within a reasonable length of time.  This may be because it's
+                      // blocked by a browser extension.  Try to fetch the script here - if this fails with 
+                      // an exception then it's likely to be because it's blocked.
+                      console.log('Try fetching script')
+                      fetch('` +
+            config.COOKIEYES +
+            `').then((response) => {
+                        console.log('Fetch returned', response)
+                        
+                        if (response.ok) {
+                          console.log('Worked, maybe just slow?')
+                          retries = 10  
+                          setTimeout(checkCookieYes, 100);
+                        } else {
+                          console.log('Failed - assume blocked and proceed')
+                          window.postCookieYes()
+                        }
+                      })
+                      .catch((error) => {
+                        // Assume blocked and proceed.
+                        console.log('Failed to fetch CookieYes script:', error.message)
+                        window.postCookieYes()
+                      });                    
+                    }
                   }
                 }
                 
                 checkCookieYes();
               } else {
                 console.log('No CookieYes to load')
-                postCookieYes();
+                window.postCookieYes();
               }
             }
             
@@ -627,8 +659,13 @@ export default defineNuxtConfig({
   image: {
     uploadcare: {
       provider: 'uploadcare',
-
       cdnURL: config.UPLOADCARE_CDN,
+    },
+
+    weserv: {
+      provider: 'weserv',
+      baseURL: config.TUS_UPLOADER,
+      weservURL: config.IMAGE_DELIVERY,
     },
 
     // We want sharp images on fancy screens.
