@@ -1,4 +1,5 @@
 <template>
+  {{ src }}, {{ chooseSrc }}, {{ chooseProvider }}
   <NuxtPicture
     :key="src + '-' + modifiers"
     :format="format"
@@ -20,8 +21,6 @@
 <script setup>
 import { defineProps } from 'vue'
 import * as Sentry from '@sentry/browser'
-
-const runtimeConfig = useRuntimeConfig()
 
 const props = defineProps({
   src: {
@@ -100,7 +99,7 @@ const emit = defineEmits(['error'])
 
 // If the source contains a dash then the first part is the provider and the second part the source.
 const chooseProvider = computed(() => {
-  const p = props.src.indexOf('-')
+  const p = props.src.indexOf('freegletusd-')
 
   if (p !== -1) {
     // For now we only have one such option - freegletusd, which we render using Nuxt Image's weserve provider.
@@ -112,11 +111,11 @@ const chooseProvider = computed(() => {
 })
 
 const chooseSrc = computed(() => {
-  const p = props.src.indexOf('-')
+  const p = props.src.indexOf('freegletusd-')
 
   if (p !== -1) {
     // For now we only have one such option - freegletusd, which we render by pointing at our upload server
-    return runtimeConfig.public.TUS_UPLOADER + '/' + props.src.substring(p + 1)
+    return props.src.substring(p + 12)
   }
 
   return props.src
