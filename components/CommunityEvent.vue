@@ -136,7 +136,7 @@
             thumbnail
             class="square"
             generator-unable-to-provide-required-alt=""
-            title="Opportunity photo"
+            title="Event photo"
           />
         </div>
       </b-card-body>
