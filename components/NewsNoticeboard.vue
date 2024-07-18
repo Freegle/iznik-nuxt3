@@ -19,8 +19,6 @@
     <div v-if="info.photo" class="noticeboard__photo">
       <OurUploadedImage
         v-if="info.photofull?.ouruid"
-        format="webp"
-        fit="cover"
         :src="info.photofull.ouruid"
         :modifiers="JSON.parse(info.photofull.externalmods)"
         alt="Noticeboard Photo"

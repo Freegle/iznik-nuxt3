@@ -25,8 +25,6 @@
     <div class="image-wrapper">
       <OurUploadedImage
         v-if="ouruid"
-        fit="cover"
-        format="webp"
         :src="ouruid"
         :modifiers="mods"
         alt="Item Photo"

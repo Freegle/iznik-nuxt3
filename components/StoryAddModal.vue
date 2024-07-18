@@ -80,8 +80,6 @@
                 <div class="image">
                   <OurUploadedImage
                     v-if="story.image?.ouruid"
-                    fit="cover"
-                    format="webp"
                     :src="story.image.ouruid"
                     :modifiers="story.image.imagemods"
                     alt="Store Photo"

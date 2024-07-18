@@ -49,8 +49,6 @@
       <div class="communityevent__photo">
         <OurUploadedImage
           v-if="event.photo?.ouruid"
-          format="webp"
-          fit="cover"
           :src="event.photo?.ouruid"
           :modifiers="event.photo?.externalmods"
           alt="Community Event Photo"

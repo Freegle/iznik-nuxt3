@@ -206,7 +206,6 @@
           </div>
           <OurUploadedImage
             v-if="ouruid"
-            format="webp"
             :src="ouruid"
             :modifiers="imagemods"
             alt="ChitChat Photo"

@@ -2,8 +2,6 @@
   <span class="ProfileImage__container">
     <OurUploadedImage
       v-if="ouruid"
-      format="webp"
-      fit="cover"
       :src="ouruid"
       :modifiers="externalmods"
       :class="className"

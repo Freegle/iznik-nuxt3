@@ -90,8 +90,6 @@
           </div>
           <OurUploadedImage
             v-if="volunteering?.image?.ouruid"
-            fit="cover"
-            format="webp"
             :src="volunteering.image.ouruid"
             :modifiers="volunteering.image.externalmods"
             alt="Volunteering Opportunity Photo"

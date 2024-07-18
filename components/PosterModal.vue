@@ -70,8 +70,6 @@
       <div class="image">
         <OurUploadedImage
           v-if="image?.ouruid"
-          fit="cover"
-          format="webp"
           :src="image.ouruid"
           :modifiers="image.imagemods"
           alt="Poster Photo"

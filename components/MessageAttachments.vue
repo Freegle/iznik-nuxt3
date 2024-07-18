@@ -44,7 +44,6 @@
         <div ref="imagewrapper">
           <OurUploadedImage
             v-if="attachments[0].ouruid"
-            format="webp"
             :src="attachments[0].ouruid"
             :modifiers="attachments[0].externalmods"
             alt="Item Photo"

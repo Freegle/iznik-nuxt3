@@ -12,8 +12,6 @@
     <div>
       <OurUploadedImage
         v-if="newsfeed.image?.ouruid"
-        format="webp"
-        fit="cover"
         :src="newsfeed.image.ouruid"
         :modifiers="newsfeed.image?.externalmod"
         alt="ChitChat Image"

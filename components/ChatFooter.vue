@@ -129,8 +129,6 @@
         </div>
         <div v-else class="d-flex justify-content-end pt-2 pb-2">
           <OurUploadedImage
-            format="webp"
-            fit="cover"
             :src="imageuid"
             :modifiers="imagemods"
             alt="Chat Photo"

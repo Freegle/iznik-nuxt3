@@ -34,7 +34,6 @@
               <b-col>
                 <OurUploadedImage
                   v-if="event?.image?.ouruid"
-                  format="webp"
                   width="200"
                   :src="event.image.ouruid"
                   :modifiers="event.image.imagemods"

@@ -19,8 +19,6 @@
           <b-card-text class="p-2 preline">
             <OurUploadedImage
               v-if="story?.image?.ouruid"
-              fit="cover"
-              format="webp"
               :src="story?.image?.ouruid"
               :modifiers="story?.image?.externalmods"
               alt="Freegler Story Photo"

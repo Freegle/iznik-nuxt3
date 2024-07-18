@@ -56,7 +56,7 @@ const props = defineProps({
   fit: {
     type: String,
     required: false,
-    default: 'inside',
+    default: 'cover',
   },
   format: {
     type: String,

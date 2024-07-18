@@ -46,8 +46,6 @@
       <div class="volunteering__photo">
         <OurUploadedImage
           v-if="volunteering.photo?.ouruid"
-          fit="cover"
-          format="webp"
           :src="volunteering.photo?.ouruid"
           :modifiers="volunteering.photo?.externalmods"
           alt="Community Event Photo"

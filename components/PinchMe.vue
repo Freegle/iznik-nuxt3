@@ -22,7 +22,6 @@
     <template #canvas>
       <OurUploadedImage
         v-if="attachment.ouruid"
-        format="webp"
         :src="attachment.ouruid"
         :modifiers="attachment.externalmods"
         alt="Item picture"

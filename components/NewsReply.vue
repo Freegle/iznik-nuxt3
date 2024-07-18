@@ -41,8 +41,6 @@
         <div v-if="reply.image">
           <OurUploadedImage
             v-if="reply?.image?.ouruid"
-            format="webp"
-            fit="cover"
             :src="reply?.image?.ouruid"
             :modifiers="reply?.image?.externalmods"
             alt="ChitChat Photo"

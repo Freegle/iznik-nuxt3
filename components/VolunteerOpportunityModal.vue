@@ -41,8 +41,6 @@
               <b-col>
                 <OurUploadedImage
                   v-if="volunteering?.image?.ouruid"
-                  width="200"
-                  format="webp"
                   :src="volunteering.image.ouruid"
                   :modifiers="volunteering.image.imagemods"
                   alt="Volunteer Opportunity Photo"

@@ -16,8 +16,6 @@
     />
     <OurUploadedImage
       v-if="chatmessage.image?.ouruid"
-      format="webp"
-      fit="cover"
       :src="chatmessage.image.ouruid"
       :modifiers="chatmessage.image.externalmods"
       alt="Chat Photo"
