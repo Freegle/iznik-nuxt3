@@ -449,7 +449,7 @@ export default defineNuxtConfig({
               }
             }
 
-            window.postCookieYes() {
+            window.postCookieYes = function() {
               console.log('Consider load of GPT and prebid');
               
               if (!window.weHaveLoadedGPT) {
