@@ -45,6 +45,8 @@
               thumbnail
               rounded
               lazy
+              :width="200"
+              :height="200"
               :src="story.image.paththumb"
               class="clickme float-end ml-2"
               @click="showPhotoModal"
