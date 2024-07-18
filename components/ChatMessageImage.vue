@@ -61,23 +61,25 @@
       ok-only
     >
       <template #default>
-        <NuxtPicture
-          v-if="chatmessage.image?.externaluid"
-          format="webp"
-          fit="cover"
-          provider="uploadcare"
-          :src="chatmessage.image.externaluid"
-          :modifiers="chatmessage.image.externalmods"
-          alt="Chat Photo"
-        />
-        <b-img
-          v-else-if="chatmessage.image"
-          lazy
-          fluid
-          generator-unable-to-provide-required-alt=""
-          :src="chatmessage.image.path"
-          @error="brokenImage"
-        />
+        <div class="d-flex justify-content-around">
+          <NuxtPicture
+            v-if="chatmessage.image?.externaluid"
+            format="webp"
+            fit="cover"
+            provider="uploadcare"
+            :src="chatmessage.image.externaluid"
+            :modifiers="chatmessage.image.externalmods"
+            alt="Chat Photo"
+          />
+          <b-img
+            v-else-if="chatmessage.image"
+            lazy
+            fluid
+            generator-unable-to-provide-required-alt=""
+            :src="chatmessage.image.path"
+            @error="brokenImage"
+          />
+        </div>
       </template>
       <template #footer>
         <b-button variant="outline-danger" @click="$emit('delete')">
