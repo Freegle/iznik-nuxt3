@@ -94,11 +94,21 @@ if (props.src.includes('gimg_0.jpg')) {
 }
 
 const fullSrc = computed(() => {
-  if (!props.src.startsWith('http')) {
-    return useRuntimeConfig().public.USER_SITE + props.src
-  } else {
-    return props.src
+  let ret = props.src
+
+  if (!ret.startsWith('http')) {
+    ret = useRuntimeConfig().public.USER_SITE + ret
   }
+
+  // If there is a ?, use encodeURI on that and everything after, otherwise those parameters get picked up
+  // by wsrv rather than passed on
+  if (ret.includes('?')) {
+    const [base, query] = ret.split('?')
+    const encodedQuery = encodeURIComponent(query)
+    ret = base + '?' + encodedQuery
+  }
+
+  return ret
 })
 
 const emit = defineEmits(['error'])
