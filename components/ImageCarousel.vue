@@ -1,7 +1,7 @@
 <template>
   <div ref="wrapper" class="wrapper">
     <p class="text-center small">
-      Drag image around. Zoom with pinch (on mobile) or Ctrl+mouse wheel.
+      Drag image around. Zoom with pinch (on mobile) or Ctrl+mouse wheel. Width
     </p>
     <b-carousel
       :id="'message-carousel-' + messageId"
@@ -76,6 +76,7 @@ if (height > 3000) {
 
 .wrapper {
   min-height: calc(80vh - $sticky-banner-height-mobile);
+  width: 100%;
 
   @include media-breakpoint-up(md) {
     min-height: calc(80vh - $sticky-banner-height-desktop);
