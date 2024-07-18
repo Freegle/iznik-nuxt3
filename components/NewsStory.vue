@@ -24,6 +24,7 @@
               alt="Freegler Story Photo"
               :width="200"
               :height="200"
+              class="clickme float-end ml-2"
               @click="showPhotoModal"
             />
             <NuxtPicture
@@ -36,10 +37,11 @@
               alt="Freegler Story Photo"
               :width="200"
               :height="200"
+              class="clickme float-end ml-2"
               @click="showPhotoModal"
             />
             <b-img
-              v-if="story?.image"
+              v-else-if="story?.image"
               thumbnail
               rounded
               lazy
