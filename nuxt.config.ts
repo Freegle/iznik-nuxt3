@@ -449,7 +449,7 @@ export default defineNuxtConfig({
               }
             }
 
-            function postCookieYes() {
+            window.postCookieYes() {
               console.log('Consider load of GPT and prebid');
               
               if (!window.weHaveLoadedGPT) {
@@ -495,7 +495,7 @@ export default defineNuxtConfig({
                     window.__tcfapi('getTCData', 2, (tcData, success) => {
                       if (success && tcData && tcData.tcString) {
                         console.log('TC data loaded and TC String set');
-                        postCookieYes();
+                        window.postCookieYes();
                       } else {
                         console.log('Failed to get TC data or string, retry.')
                         setTimeout(checkCookieYes, 100);
@@ -514,7 +514,7 @@ export default defineNuxtConfig({
                 checkCookieYes();
               } else {
                 console.log('No CookieYes to load')
-                postCookieYes();
+                window.postCookieYes();
               }
             }
             
