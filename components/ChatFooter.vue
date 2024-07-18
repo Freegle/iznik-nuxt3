@@ -606,7 +606,7 @@ export default {
 
         // We have uploaded a photo.  Post a chatmessage referencing it.
         this.imageid = newVal[0].id
-        this.imageuid = newVal[0].externaluid
+        this.imageuid = newVal[0].ouruid
         this.imagemods = newVal[0].externalmods
       },
       deep: true,
