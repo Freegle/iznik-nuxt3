@@ -485,7 +485,7 @@ export default defineNuxtConfig({
                 // Now we wait until the CookieYes script has set its own cookie.  
                 // This might be later than when the script has loaded in pure JS terms, but we
                 // need to be sure it's loaded before we can move on.
-                var retries = 100
+                var retries = 10
                 
                 function checkCookieYes() {
                   if (document.cookie.indexOf('cookieyes-consent') > -1) {
@@ -508,7 +508,7 @@ export default defineNuxtConfig({
                       setTimeout(checkCookieYes, 100);
                     }
                   } else {
-                    console.log('CookieYes not yet loaded')
+                    console.log('CookieYes not yet loaded', retries)
                     retries--
                     
                     if (retries > 0) {
@@ -517,14 +517,18 @@ export default defineNuxtConfig({
                       // It's not loaded within a reasonable length of time.  This may be because it's
                       // blocked by a browser extension.  Try to fetch the script here - if this fails with 
                       // an exception then it's likely to be because it's blocked.
+                      console.log('Try fetching script')
                       fetch('` +
             config.COOKIEYES +
             `').then((response) => {
+                        console.log('Fetch returned', response)
+                        
                         if (response.ok) {
-                          // Perhaps it's just slow, then.
-                          retries = 100  
+                          console.log('Worked, maybe just slow?')
+                          retries = 10  
                           setTimeout(checkCookieYes, 100);
                         } else {
+                          console.log('Failed - assume blocked and proceed')
                           window.postCookieYes()
                         }
                       })

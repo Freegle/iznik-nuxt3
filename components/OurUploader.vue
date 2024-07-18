@@ -42,13 +42,23 @@ import { DashboardModal } from '@uppy/vue'
 import Tus from '@uppy/tus'
 import Webcam from '@uppy/webcam'
 import Compressor from '@uppy/compressor'
+
+import ResizeObserver from 'resize-observer-polyfill'
 import { uid } from '../composables/useId'
-// import { useMiscStore } from '~/stores/misc'
 import { useImageStore } from '~/stores/image'
 
 const runtimeConfig = useRuntimeConfig()
 
 try {
+  console.log('Consider polyfill ResizeObserver')
+  if (!window.ResizeObserver) {
+    // Need to globally polyfill this, because the Uppy uploader uses it.
+    console.log('Polyfill ResizeObserver')
+    window.ResizeObserver = ResizeObserver
+  } else {
+    console.log('No need to polyfill ResizeObserver')
+  }
+
   console.log('Consider polyfile locale')
   if (shouldPolyfillLocale()) {
     console.log('Need to polyfill Locale')
@@ -150,26 +160,6 @@ onMounted(() => {
     console.log('Modal is open')
   })
 })
-
-// TODO Set photos?
-// function setPhotos(photos) {
-//   if (ctxProviderRef.value) {
-//     ctxProviderRef.value.removeAllFiles()
-//
-//     photos.forEach((f) => {
-//       console.log('Add photo', f)
-//       if (f.externaluid) {
-//         ctxProviderRef.value.addFileFromUuid(f.externaluid, {
-//           silent: true,
-//         })
-//       } else if (f.path) {
-//         ctxProviderRef.value.addFileFromUrl(f.path, {
-//           silent: true,
-//         })
-//       }
-//     })
-//   }
-// }
 
 async function uploadSuccess(result) {
   console.log('Uploaded', result)
