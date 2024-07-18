@@ -1,5 +1,4 @@
 <template>
-  {{ src }}, {{ chooseSrc }}, {{ chooseProvider }}
   <NuxtPicture
     :key="src + '-' + modifiers"
     :format="format"
