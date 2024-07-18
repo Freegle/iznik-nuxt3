@@ -3,8 +3,8 @@
     :format="format"
     :fit="fit"
     :preload="preload"
-    provider="uploadcareProxy"
-    :src="src"
+    provider="weserv"
+    :src="fullSrc"
     :modifiers="modifiers"
     :class="(className ? className : '') + ' ' + isFluid"
     :alt="alt"
@@ -92,6 +92,14 @@ const isFluid = computed(() => (props.fluid ? 'img-fluid' : ''))
 if (props.src.includes('gimg_0.jpg')) {
   Sentry.captureMessage('Broken image: ' + props.src)
 }
+
+const fullSrc = computed(() => {
+  if (!props.src.startsWith('http')) {
+    return useRuntimeConfig().public.USER_SITE + props.src
+  } else {
+    return props.src
+  }
+})
 
 const emit = defineEmits(['error'])
 

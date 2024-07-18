@@ -20,8 +20,17 @@
     "
   >
     <template #canvas>
+      <OurUploadedImage
+        v-if="attachment.ouruid"
+        format="webp"
+        :src="attachment.ouruid"
+        :modifiers="attachment.externalmods"
+        alt="Item picture"
+        :width="Math.round(width * 0.95)"
+        lazy
+      />
       <NuxtPicture
-        v-if="attachment.externaluid"
+        v-else-if="attachment.externaluid"
         format="webp"
         provider="uploadcare"
         :src="attachment.externaluid"

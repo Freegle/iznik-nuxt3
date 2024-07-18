@@ -17,8 +17,19 @@
       <em v-if="info.description">"{{ info.description.trim() }}"</em>
     </notice-message>
     <div v-if="info.photo" class="noticeboard__photo">
+      <OurUploadedImage
+        v-if="info.photofull?.ouruid"
+        format="webp"
+        fit="cover"
+        :src="info.photofull.ouruid"
+        :modifiers="JSON.parse(info.photofull.externalmods)"
+        alt="Noticeboard Photo"
+        width="100"
+        class="clickme replyphoto mt-2 mb-2"
+        @click="moreInfo"
+      />
       <NuxtPicture
-        v-if="info.photofull?.externaluid"
+        v-else-if="info.photofull?.externaluid"
         format="webp"
         fit="cover"
         provider="uploadcare"

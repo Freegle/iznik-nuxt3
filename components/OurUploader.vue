@@ -171,7 +171,7 @@ onMounted(() => {
 //   }
 // }
 
-function uploadSuccess(result) {
+async function uploadSuccess(result) {
   console.log('Uploaded', result)
   busy.value = true
 
@@ -211,11 +211,13 @@ function uploadSuccess(result) {
           id: ret.id,
           path: ret.url,
           paththumb: ret.url,
-          externaluid: ret.uid,
+          ouruid: ret.uid,
           externalmods: mods,
         })
       })
     })
+
+    await Promise.all(promises)
 
     emit('update:modelValue', uploadedPhotos.value)
 

@@ -128,10 +128,9 @@
           </Dropdown>
         </div>
         <div v-else class="d-flex justify-content-end pt-2 pb-2">
-          <NuxtPicture
+          <OurUploadedImage
             format="webp"
             fit="cover"
-            provider="uploadcare"
             :src="imageuid"
             :modifiers="imagemods"
             alt="Chat Photo"

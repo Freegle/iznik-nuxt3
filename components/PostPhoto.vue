@@ -24,9 +24,21 @@
     </span>
     <div class="image-wrapper">
       <OurUploadedImage
-        v-if="externaluid"
+        v-if="ouruid"
         fit="cover"
         format="webp"
+        :src="ouruid"
+        :modifiers="mods"
+        alt="Item Photo"
+        :width="200"
+        :height="200"
+        @click="$emit('click')"
+      />
+      <NuxtPicture
+        v-else-if="externaluid"
+        fit="cover"
+        format="webp"
+        provider="uploadcare"
         :src="externaluid"
         :modifiers="mods"
         alt="Item Photo"
@@ -86,6 +98,11 @@ export default {
       default: false,
     },
     externaluid: {
+      type: String,
+      required: false,
+      default: null,
+    },
+    ouruid: {
       type: String,
       required: false,
       default: null,

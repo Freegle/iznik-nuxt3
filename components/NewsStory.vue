@@ -17,8 +17,19 @@
             {{ headline }}
           </b-card-header>
           <b-card-text class="p-2 preline">
+            <OurUploadedImage
+              v-if="story?.image?.ouruid"
+              fit="cover"
+              format="webp"
+              :src="story?.image?.ouruid"
+              :modifiers="story?.image?.externalmods"
+              alt="Freegler Story Photo"
+              :width="200"
+              :height="200"
+              @click="showPhotoModal"
+            />
             <NuxtPicture
-              v-if="story?.image?.externaluid"
+              v-else-if="story?.image?.externaluid"
               fit="cover"
               format="webp"
               provider="uploadcare"

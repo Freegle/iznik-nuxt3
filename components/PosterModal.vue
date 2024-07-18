@@ -68,8 +68,17 @@
         <v-icon icon="reply" flip="horizontal" />
       </div>
       <div class="image">
+        <OurUploadedImage
+          v-if="image?.ouruid"
+          fit="cover"
+          format="webp"
+          :src="image.ouruid"
+          :modifiers="image.imagemods"
+          alt="Poster Photo"
+          width="250"
+        />
         <NuxtPicture
-          v-if="image?.imageuid"
+          v-else-if="image?.imageuid"
           fit="cover"
           format="webp"
           provider="uploadcare"

@@ -14,8 +14,19 @@
       size="sm"
       class="mr-1 mb-1 mt-1 inline"
     />
+    <OurUploadedImage
+      v-if="chatmessage.image?.ouruid"
+      format="webp"
+      fit="cover"
+      :src="chatmessage.image.ouruid"
+      :modifiers="chatmessage.image.externalmods"
+      alt="Chat Photo"
+      :width="200"
+      :height="200"
+      @click="zoom = true"
+    />
     <NuxtPicture
-      v-if="chatmessage.image?.externaluid"
+      v-else-if="chatmessage.image?.externaluid"
       format="webp"
       fit="cover"
       provider="uploadcare"

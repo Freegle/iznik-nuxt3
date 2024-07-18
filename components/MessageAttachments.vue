@@ -42,8 +42,21 @@
         }"
       >
         <div ref="imagewrapper">
+          <OurUploadedImage
+            v-if="attachments[0].ouruid"
+            format="webp"
+            :src="attachments[0].ouruid"
+            :modifiers="attachments[0].externalmods"
+            alt="Item Photo"
+            :width="Math.round(width)"
+            :height="200"
+            :sizes="thumbnail ? '200px' : '320px md:768px'"
+            :preload="preload"
+            @error="brokenImage"
+            @click="$emit('zoom')"
+          />
           <NuxtPicture
-            v-if="attachments[0].externaluid"
+            v-else-if="attachments[0].externaluid"
             format="webp"
             provider="uploadcare"
             :src="attachments[0].externaluid"

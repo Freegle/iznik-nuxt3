@@ -21,6 +21,7 @@
               :paththumb="element.paththumb"
               :thumbnail="element.thumbnail"
               :externaluid="element.externaluid"
+              :ouruid="element.ouruid"
               :externalmods="element.externalmods"
               :primary="index === 0"
               class="mr-1 mt-1 mt-md-0"

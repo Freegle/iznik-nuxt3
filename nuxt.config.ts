@@ -206,6 +206,7 @@ export default defineNuxtConfig({
       COOKIEYES: config.COOKIEYES,
       TRUSTPILOT_LINK: config.TRUSTPILOT_LINK,
       TUS_UPLOADER: config.TUS_UPLOADER,
+      IMAGE_DELIVERY: config.IMAGE_DELIVERY,
     },
   },
 
@@ -634,6 +635,7 @@ export default defineNuxtConfig({
     weserv: {
       provider: 'weserv',
       baseURL: config.TUS_UPLOADER,
+      weservURL: config.IMAGE_DELIVERY,
     },
 
     // We want sharp images on fancy screens.

@@ -32,8 +32,17 @@
             </notice-message>
             <b-row>
               <b-col>
+                <OurUploadedImage
+                  v-if="event?.image?.ouruid"
+                  format="webp"
+                  width="200"
+                  :src="event.image.ouruid"
+                  :modifiers="event.image.imagemods"
+                  alt="Community Event Photo"
+                  class="mb-2 w-100"
+                />
                 <NuxtPicture
-                  v-if="event?.image?.imageuid"
+                  v-else-if="event?.image?.imageuid"
                   format="webp"
                   width="200"
                   provider="uploadcare"

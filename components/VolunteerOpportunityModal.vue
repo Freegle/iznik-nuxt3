@@ -39,8 +39,17 @@
             </notice-message>
             <b-row>
               <b-col>
+                <OurUploadedImage
+                  v-if="volunteering?.image?.ouruid"
+                  width="200"
+                  format="webp"
+                  :src="volunteering.image.ouruid"
+                  :modifiers="volunteering.image.imagemods"
+                  alt="Volunteer Opportunity Photo"
+                  class="mb-2 w-100"
+                />
                 <NuxtPicture
-                  v-if="volunteering?.image?.imageuid"
+                  v-else-if="volunteering?.image?.imageuid"
                   width="200"
                   format="webp"
                   provider="uploadcare"
