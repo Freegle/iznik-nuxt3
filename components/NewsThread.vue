@@ -8,7 +8,7 @@
             person who posted it.
           </div>
           <div v-if="isNewsComponent">
-            <b-dropdown class="float-end" right variant="white">
+            <b-dropdown lazy class="float-end" right variant="white">
               <template #button-content />
               <b-dropdown-item
                 :href="'/chitchat/' + newsfeed?.id"
