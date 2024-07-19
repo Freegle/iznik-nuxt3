@@ -335,11 +335,10 @@ export default {
   watch: {
     currentAtts: {
       handler(newVal) {
-        console.log('CurrentAtts', newVal)
         this.uploading = false
 
         this.imageid = newVal[0].id
-        this.imageuid = newVal[0].externaluid
+        this.imageuid = newVal[0].ouruid
         this.ouruid = newVal[0].ouruid
         this.imagemods = newVal[0].externalmods
       },

@@ -164,7 +164,7 @@ export default {
 
         this.image = {
           id: newVal[0].id,
-          imageuid: newVal[0].externaluid,
+          imageuid: newVal[0].ouruid,
           imagemods: newVal[0].externalmods,
         }
       },
