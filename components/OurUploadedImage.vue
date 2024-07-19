@@ -1,5 +1,6 @@
 <template>
   <NuxtPicture
+    v-if="show"
     :key="src + '-' + modifiers"
     :format="format"
     :fit="fit"
@@ -120,8 +121,13 @@ const chooseSrc = computed(() => {
   return props.src
 })
 
+const show = ref(true)
+
 function brokenImage(e) {
   console.log('Proxy image broken')
   emit('error', e)
+  show.value = false
+
+  Sentry.captureMessage('Failed to fetch image ' + props.src)
 }
 </script>
