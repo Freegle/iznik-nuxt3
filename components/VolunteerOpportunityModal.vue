@@ -415,7 +415,7 @@
             :disabled="uploadingPhoto"
             @click="dontSave"
           >
-            Hide
+            Cancel
           </b-button>
           <SpinButton
             v-if="editing && enabled"
