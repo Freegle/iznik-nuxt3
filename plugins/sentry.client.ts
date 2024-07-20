@@ -8,7 +8,6 @@ import { defineNuxtPlugin, useRuntimeConfig } from '#app'
 import { useRouter } from '#imports'
 import { useMiscStore } from '~/stores/misc'
 import { suppressException } from '~/composables/useSuppressException'
-import config from '~/config'
 
 export default defineNuxtPlugin((nuxtApp) => {
   const config = useRuntimeConfig()
