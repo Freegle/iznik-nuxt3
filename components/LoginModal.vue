@@ -7,7 +7,7 @@
     no-fade
     size="lg"
     no-close-on-backdrop
-    no-trap
+    teleport-disabled
     :hide-header-close="forceLogin"
     :no-close-on-esc="forceLogin"
     hide-footer

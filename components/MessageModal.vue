@@ -2,6 +2,7 @@
   <b-modal
     ref="modal"
     scrollable
+    teleport-disabled
     size="lg"
     :fullscreen="showImagesProxy"
     class="hide-footer"
