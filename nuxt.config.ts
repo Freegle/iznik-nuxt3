@@ -165,7 +165,6 @@ export default defineNuxtConfig({
 
   modules: [
     '@pinia/nuxt',
-    'floating-vue/nuxt',
     '@nuxt/image',
     'nuxt-vite-legacy',
     '@bootstrap-vue-next/nuxt',

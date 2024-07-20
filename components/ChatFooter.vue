@@ -547,6 +547,7 @@ export default {
         }
       }
 
+      console.log('Return address', ret)
       return ret
     },
     showSuggested() {
@@ -849,6 +850,8 @@ export default {
 }
 </script>
 <style scoped lang="scss">
+@import 'https://unpkg.com/floating-vue@^2.0.0-beta.1/dist/style.css';
+
 .mobtext {
   text-align: center !important;
 }
