@@ -1,7 +1,17 @@
 <template>
   <span class="ProfileImage__container">
+    <OurUploadedImage
+      v-if="ouruid"
+      :src="ouruid"
+      :modifiers="externalmods"
+      :class="className"
+      class="circle"
+      :alt="altText"
+      :width="width"
+      :height="width"
+    />
     <NuxtPicture
-      v-if="externaluid"
+      v-else-if="externaluid"
       format="webp"
       fit="cover"
       provider="uploadcare"
@@ -51,6 +61,11 @@ export default {
       default: '',
     },
     externaluid: {
+      type: String,
+      required: false,
+      default: null,
+    },
+    ouruid: {
       type: String,
       required: false,
       default: null,

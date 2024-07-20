@@ -95,9 +95,9 @@
           ad-unit-path="/22794232631/freegle_product"
           ad-id="div-gpt-ad-1691925699378-0"
           class="ml-md-2 mr-md-2 mt-md-2 ml-0 mr-0 mt-0"
+          in-modal
           @close="hide"
           @zoom="showImagesProxy = true"
-          in-modal
         />
       </div>
       <div

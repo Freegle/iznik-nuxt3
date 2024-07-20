@@ -39,8 +39,15 @@
             </notice-message>
             <b-row>
               <b-col>
+                <OurUploadedImage
+                  v-if="volunteering?.image?.ouruid"
+                  :src="volunteering.image.ouruid"
+                  :modifiers="volunteering.image.imagemods"
+                  alt="Volunteer Opportunity Photo"
+                  class="mb-2 w-100"
+                />
                 <NuxtPicture
-                  v-if="volunteering?.image?.imageuid"
+                  v-else-if="volunteering?.image?.imageuid"
                   width="200"
                   format="webp"
                   provider="uploadcare"
@@ -203,11 +210,9 @@
                   <v-icon icon="reply" flip="horizontal" />
                 </div>
                 <div class="image d-flex justify-content-around">
-                  <NuxtPicture
+                  <OurUploadedImage
                     v-if="image?.imageuid"
-                    format="webp"
                     width="200"
-                    provider="uploadcare"
                     :src="image.imageuid"
                     :modifiers="mods"
                     alt="Volunteer Opportunity Photo"
@@ -625,12 +630,12 @@ export default {
       handler(newVal) {
         this.volunteering.image = {
           id: newVal[0].id,
-          imageuid: newVal[0].externaluid,
+          imageuid: newVal[0].ouruid,
           imagemods: newVal[0].externalmods,
         }
         this.image = {
           id: newVal[0].id,
-          imageuid: newVal[0].externaluid,
+          imageuid: newVal[0].ouruid,
           imagemods: newVal[0].externalmods,
         }
       },

@@ -21,6 +21,10 @@ const CONFIG = {
   UPLOADCARE_CDN: 'https://uploadcare-cache.ilovefreegle.org/',
   UPLOADCARE_PROXY: 'https://uploadcare-proxy-cache.ilovefreegle.org/',
 
+  // Very new.  Our own uploader, and delivery of those images via a cached use of wsrl.nl.
+  TUS_UPLOADER: 'https://uploads.ilovefreegle.org:8080',
+  IMAGE_DELIVERY: 'https://delivery.ilovefreegle.org',
+
   // OpenStreetMap Tile Server
   OSM_TILE:
     process.env.OSM_TILE ||
@@ -49,7 +53,7 @@ const CONFIG = {
   // Cookie banner for this site.
   COOKIEYES: process.env.COOKIEYES || null,
   ISAPP: process.env.IZNIK_NUXT3_IS_APP === 'true',
-  MOBILE_VERSION: '3.1.19',
+  MOBILE_VERSION: '3.1.20',
 
   TRUSTPILOT_LINK: process.env.TRUSTPILOT_LINK || null,
 

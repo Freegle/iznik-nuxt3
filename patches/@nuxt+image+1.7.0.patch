@@ -22,3 +22,16 @@ index d11e82e..6b4a814 100644
          as: "image",
          imagesrcset: sources.value[0].srcset,
          nonce: props.nonce,
+diff --git a/node_modules/@nuxt/image/dist/runtime/providers/weserv.mjs b/node_modules/@nuxt/image/dist/runtime/providers/weserv.mjs
+index d5123f1..2a80517 100644
+--- a/node_modules/@nuxt/image/dist/runtime/providers/weserv.mjs
++++ b/node_modules/@nuxt/image/dist/runtime/providers/weserv.mjs
+@@ -19,7 +19,7 @@ const operationsGenerator = createOperationsGenerator({
+     contrast: "con",
+     blur: "blur",
+     mirror: "flop",
+-    rotate: "rot",
++    rotate: "ro",
+     mask: "mask",
+     maskTrim: "mtrim",
+     maskBackground: "mbg"

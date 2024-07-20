@@ -1,10 +1,12 @@
 <template>
   <NuxtPicture
+    v-if="show"
+    :key="src + '-' + modifiers"
     :format="format"
     :fit="fit"
     :preload="preload"
-    provider="weserv"
-    :src="fullSrc"
+    :provider="chooseProvider"
+    :src="chooseSrc"
     :modifiers="modifiers"
     :class="(className ? className : '') + ' ' + isFluid"
     :alt="alt"
@@ -53,7 +55,7 @@ const props = defineProps({
   fit: {
     type: String,
     required: false,
-    default: 'inside',
+    default: 'cover',
   },
   format: {
     type: String,
@@ -89,32 +91,43 @@ const props = defineProps({
 
 const isFluid = computed(() => (props.fluid ? 'img-fluid' : ''))
 
-if (props.src.includes('gimg_0.jpg')) {
+if (props.src?.includes('gimg_0.jpg')) {
   Sentry.captureMessage('Broken image: ' + props.src)
 }
 
-const fullSrc = computed(() => {
-  let ret = props.src
+const emit = defineEmits(['error'])
 
-  if (!ret.startsWith('http')) {
-    ret = useRuntimeConfig().public.USER_SITE + ret
+// If the source contains a dash then the first part is the provider and the second part the source.
+const chooseProvider = computed(() => {
+  const p = props.src.indexOf('freegletusd-')
+
+  if (p !== -1) {
+    // For now we only have one such option - freegletusd, which we render using Nuxt Image's weserve provider.
+    return 'weserv'
+  } else {
+    // Defaults to uploadcare.
+    return 'uploadcare'
   }
-
-  // If there is a ?, use encodeURI on that and everything after, otherwise those parameters get picked up
-  // by wsrv rather than passed on
-  if (ret.includes('?')) {
-    const [base, query] = ret.split('?')
-    const encodedQuery = encodeURIComponent(query)
-    ret = base + '?' + encodedQuery
-  }
-
-  return ret
 })
 
-const emit = defineEmits(['error'])
+const chooseSrc = computed(() => {
+  const p = props.src.indexOf('freegletusd-')
+
+  if (p !== -1) {
+    // For now we only have one such option - freegletusd, which we render by pointing at our upload server
+    return props.src.substring(p + 12)
+  }
+
+  return props.src
+})
+
+const show = ref(true)
 
 function brokenImage(e) {
   console.log('Proxy image broken')
   emit('error', e)
+  show.value = false
+
+  Sentry.captureMessage('Failed to fetch image ' + props.src)
 }
 </script>

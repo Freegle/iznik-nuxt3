@@ -39,8 +39,17 @@
           <br />
         </span>
         <div v-if="reply.image">
+          <OurUploadedImage
+            v-if="reply?.image?.ouruid"
+            :src="reply?.image?.ouruid"
+            :modifiers="reply?.image?.externalmods"
+            alt="ChitChat Photo"
+            width="100"
+            class="clickme replyphoto mt-2 mb-2"
+            @click="showReplyPhotoModal"
+          />
           <NuxtPicture
-            v-if="reply?.image?.externaluid"
+            v-else-if="reply?.image?.externaluid"
             format="webp"
             fit="cover"
             provider="uploadcare"
@@ -478,7 +487,7 @@ export default {
         this.uploading = false
 
         this.imageid = newVal[0].id
-        this.imageuid = newVal[0].externaluid
+        this.imageuid = newVal[0].ouruid
         this.imagemods = newVal[0].externalmods
       },
       deep: true,

@@ -49,8 +49,8 @@
             :adUnitPath="adUnitPath"
             :ad-id="adId"
             :dimensions="[[300, 250]]"
-            :divId="adId"
-            :inModal="inModal"
+            :div-id="adId"
+            :in-modal="inModal"
             @rendered="adRendered = true"
           />
         </div>

@@ -68,8 +68,15 @@
         <v-icon icon="reply" flip="horizontal" />
       </div>
       <div class="image">
+        <OurUploadedImage
+          v-if="image?.ouruid"
+          :src="image.ouruid"
+          :modifiers="image.imagemods"
+          alt="Poster Photo"
+          width="250"
+        />
         <NuxtPicture
-          v-if="image?.imageuid"
+          v-else-if="image?.imageuid"
           fit="cover"
           format="webp"
           provider="uploadcare"
@@ -157,7 +164,7 @@ export default {
 
         this.image = {
           id: newVal[0].id,
-          imageuid: newVal[0].externaluid,
+          imageuid: newVal[0].ouruid,
           imagemods: newVal[0].externalmods,
         }
       },

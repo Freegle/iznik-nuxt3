@@ -209,6 +209,19 @@ export default defineNuxtPlugin((nuxtApp) => {
           // it's not really clear that it's our fault so there's no point beating ourselves up about it.
           console.log('Suppress odd Google One Tap error')
           return null
+        } else if (
+          originalExceptionMessage?.includes(
+            'Looks like your website URL has changed'
+          ) &&
+          originalExceptionStack?.includes('cookieyes')
+        ) {
+          // This is a common error that is not our fault.
+          console.log('CookieYes domain error - probably test deployment')
+          if (window.postCookieYes) {
+            window.postCookieYes()
+          }
+
+          return null
         }
       }
 

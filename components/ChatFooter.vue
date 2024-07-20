@@ -128,10 +128,7 @@
           </Dropdown>
         </div>
         <div v-else class="d-flex justify-content-end pt-2 pb-2">
-          <NuxtPicture
-            format="webp"
-            fit="cover"
-            provider="uploadcare"
+          <OurUploadedImage
             :src="imageuid"
             :modifiers="imagemods"
             alt="Chat Photo"
@@ -607,7 +604,7 @@ export default {
 
         // We have uploaded a photo.  Post a chatmessage referencing it.
         this.imageid = newVal[0].id
-        this.imageuid = newVal[0].externaluid
+        this.imageuid = newVal[0].ouruid
         this.imagemods = newVal[0].externalmods
       },
       deep: true,
