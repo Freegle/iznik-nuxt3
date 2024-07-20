@@ -7,7 +7,7 @@
     :preload="preload"
     :provider="chooseProvider"
     :src="chooseSrc"
-    :modifiers="modifiers"
+    :modifiers="modString"
     :class="(className ? className : '') + ' ' + isFluid"
     :alt="alt"
     :width="width"
@@ -28,7 +28,7 @@ const props = defineProps({
     required: true,
   },
   modifiers: {
-    type: String,
+    type: [String, Object],
     required: false,
     default: null,
   },
@@ -123,6 +123,17 @@ const chooseSrc = computed(() => {
 
 const show = ref(true)
 
+const modString = computed(() => {
+  if (!props.modifiers) {
+    return null
+  }
+
+  if (typeof props.modifiers === 'string') {
+    return JSON.parse(props.modifiers)
+  } else {
+    return props.modifiers
+  }
+})
 function brokenImage(e) {
   console.log('Proxy image broken')
   emit('error', e)
