@@ -6,6 +6,7 @@
     v-model="showModal"
     no-fade
     size="lg"
+    no-close-on-backdrop
     :hide-header-close="forceLogin"
     :no-close-on-esc="forceLogin"
     hide-footer

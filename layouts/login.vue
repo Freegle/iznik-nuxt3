@@ -13,7 +13,6 @@
         v-if="!loggedIn"
         ref="loginModal"
         :key="'login-' + bumpLogin"
-        @hidden="hidden"
       />
     </client-only>
   </div>
@@ -109,13 +108,6 @@ export default {
     },
   },
   methods: {
-    hidden() {
-      // If we have hidden the login modal but are not yet logged in, then show it again.
-      // We do this because no-close-on-backdrop breaks CookieYes by intercepting clicks on the cookie banner.
-      if (!this.loggedIn) {
-        this.$refs.loginModal.show()
-      }
-    },
     googleLoggedIn() {
       // OneTap has logged us in.  Re-render the page as logged in.
       this.bump++
