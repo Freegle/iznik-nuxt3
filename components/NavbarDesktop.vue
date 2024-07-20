@@ -234,7 +234,7 @@
         </li>
       </ul>
     </div>
-    <div v-if="!loggedIn && CMPComplete" class="navbar-nav ml-auto">
+    <div v-if="!loggedIn" class="navbar-nav ml-auto">
       <div class="nav-item" no-prefetch>
         <b-button variant="white" class="mr-2" @click="requestLogin">
           Sign&nbsp;in
@@ -275,20 +275,6 @@ const AboutMeModal = defineAsyncComponent(() =>
 const NotificationOptions = defineAsyncComponent(() =>
   import('~/components/NotificationOptions')
 )
-
-const CMPComplete = ref(false)
-
-function checkCMPComplete() {
-  if (!window.weHaveLoadedGPT) {
-    setTimeout(checkCMPComplete, 100)
-  } else {
-    CMPComplete.value = true
-  }
-}
-
-onMounted(() => {
-  checkCMPComplete()
-})
 </script>
 <style scoped lang="scss">
 @import 'assets/css/navbar.scss';
