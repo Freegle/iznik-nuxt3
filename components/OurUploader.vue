@@ -160,8 +160,8 @@ onMounted(() => {
     hideProgressAfterFinish: true,
     restrictions: {
       allowedFileTypes: ['image/*', '.jpg', '.jpeg', '.png', '.gif', '.heic'],
+      maxNumberOfFiles: props.multiple ? 10 : 1,
     },
-    maxNumberOfFiles: props.multiple ? 10 : 1,
   })
     .use(Webcam)
     .use(Tus, { endpoint: runtimeConfig.public.TUS_UPLOADER })
