@@ -165,6 +165,7 @@ onMounted(() => {
   })
     .use(Webcam, {
       modes: ['picture'],
+      facingMode: ['environment'],
     })
     .use(Tus, { endpoint: runtimeConfig.public.TUS_UPLOADER })
     .use(Compressor)
