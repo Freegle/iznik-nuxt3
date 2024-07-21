@@ -70,7 +70,7 @@
       </div>
       <div v-if="!otheruser?.deleted">
         <div v-if="uploading" class="bg-white">
-          <OurUploader v-model="currentAtts" type="ChatMessage" />
+          <OurUploader v-model="currentAtts" type="ChatMessage" start-open />
         </div>
         <label for="chatmessage" class="visually-hidden">Chat message</label>
         <div v-if="!imageid">

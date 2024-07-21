@@ -42,6 +42,7 @@ import { DashboardModal } from '@uppy/vue'
 import Tus from '@uppy/tus'
 import Webcam from '@uppy/webcam'
 import Compressor from '@uppy/compressor'
+import { nextTick } from 'vue'
 
 import ResizeObserver from 'resize-observer-polyfill'
 import { uid } from '../composables/useId'
@@ -105,12 +106,17 @@ const props = defineProps({
     required: false,
     default: null,
   },
+  startOpen: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
 })
 
 // const miscStore = useMiscStore()
 const imageStore = useImageStore()
 
-const modalOpen = ref(false)
+const modalOpen = ref(props.false)
 
 function handleClose() {
   modalOpen.value = false
@@ -140,7 +146,13 @@ watch(dashboard, (newVal) => {
 })
 
 onMounted(() => {
-  console.log('Mounted', '#' + uploaderUid.value, dashboard.value)
+  console.log(
+    'Mounted',
+    '#' + uploaderUid.value,
+    dashboard.value,
+    props.multiple,
+    props.startOpen
+  )
   uppy = new Uppy({
     allowMultipleUploads: props.multiple,
     autoProceed: true,
@@ -159,6 +171,12 @@ onMounted(() => {
   uppy.on('dashboard:modal-open', () => {
     console.log('Modal is open')
   })
+
+  if (props.startOpen) {
+    nextTick(() => {
+      modalOpen.value = true
+    })
+  }
 })
 
 async function uploadSuccess(result) {
