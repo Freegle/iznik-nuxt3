@@ -41,34 +41,14 @@
             :attachments="message.attachments"
           />
           <hr />
-          <div class="d-flex justify-content-between p-2 mb-2 p-md-0 mb-md-0">
-            <div class="w-50 pl-2">
-              <b-button
-                size="md"
-                variant="primary"
-                block
-                class="d-block d-md-none"
-                @click="showImagesProxy = false"
-              >
-                View description
-              </b-button>
-              <b-button
-                size="lg"
-                variant="primary"
-                block
-                class="d-none d-md-block"
-                @click="showImagesProxy = false"
-              >
-                View description
-              </b-button>
-            </div>
-            <div class="pr-2 w-50">
+          <div class="d-flex justify-content-around p-2 mb-2 p-md-0 mb-md-0">
+            <div>
               <b-button
                 variant="secondary"
                 size="md"
                 class="w-100 d-block d-md-none"
                 block
-                @click="hide"
+                @click="showImagesProxy = false"
               >
                 Close
               </b-button>
@@ -77,7 +57,7 @@
                 size="lg"
                 class="w-100 d-none d-md-block"
                 block
-                @click="hide"
+                @click="showImagesProxy = false"
               >
                 Close
               </b-button>

@@ -39,7 +39,7 @@
         <div
           v-if="!message.attachments || !message.attachments?.length"
           class="d-flex d-md-none"
-          @click="zoom"
+          @click="expand"
         >
           <MessageTag :id="id" class="ps-2 pe-2" inline />
           <div class="flex-grow-1" />
@@ -56,7 +56,7 @@
           </b-button>
         </client-only>
       </div>
-      <div class="image-wrapper" @click="zoom">
+      <div class="image-wrapper" @click="expand">
         <MessageAttachments
           :id="id"
           :attachments="message.attachments"
@@ -173,17 +173,9 @@ export default {
         await this.messageStore.view(this.id)
       }
     },
-    expand() {
-      this.$emit('expand')
-    },
-    zoom(e) {
+    expand(e) {
       if (this.message) {
-        if (!this.message.attachments || !this.message.attachments?.length) {
-          // No photos - show the description.
-          this.$emit('expand')
-        } else {
-          this.$emit('zoom')
-        }
+        this.$emit('expand')
 
         e.preventDefault()
         e.stopPropagation()

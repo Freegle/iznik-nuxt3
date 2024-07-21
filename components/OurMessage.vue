@@ -43,7 +43,6 @@
         class="mt-3"
         :matchedon="matchedon"
         @expand="expand"
-        @zoom="zoom"
       />
       <MessageModal
         v-if="expanded"
