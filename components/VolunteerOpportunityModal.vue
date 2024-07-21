@@ -802,10 +802,10 @@ export default {
       })
     },
     rotateLeft() {
-      this.rotate(90)
+      this.rotate(-0)
     },
     rotateRight() {
-      this.rotate(-90)
+      this.rotate(90)
     },
   },
 }
