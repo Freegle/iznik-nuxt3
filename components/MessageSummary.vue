@@ -177,8 +177,10 @@ export default {
       if (this.message) {
         this.$emit('expand')
 
-        e.preventDefault()
-        e.stopPropagation()
+        if (e) {
+          e.preventDefault()
+          e.stopPropagation()
+        }
       }
     },
   },
