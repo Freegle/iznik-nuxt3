@@ -27,7 +27,7 @@
             />
           </VisibleWhen>
         </div>
-        <b-button variant="white" class="noborder p-0 mt-1 mb-1" @click="hide">
+        <b-button variant="white" class="noborder p-0 mt-1 mb-1" @click="close">
           <v-icon icon="times-circle" class="fa-2x" />
         </b-button>
       </div>
@@ -35,6 +35,17 @@
     <template #default>
       <div v-if="message">
         <div v-if="showImagesProxy">
+          <div>
+            <b-button
+              variant="primary"
+              size="md"
+              class="w-100 d-block d-md-none"
+              block
+              @click="showImagesProxy = false"
+            >
+              <v-icon icon="angle-double-left" /> Back to description
+            </b-button>
+          </div>
           <ImageCarousel
             v-if="message?.attachments?.length"
             :message-id="id"
@@ -45,17 +56,8 @@
             <div>
               <b-button
                 variant="secondary"
-                size="md"
-                class="w-100 d-block d-md-none"
-                block
-                @click="showImagesProxy = false"
-              >
-                Close
-              </b-button>
-              <b-button
-                variant="secondary"
                 size="lg"
-                class="w-100 d-none d-md-block"
+                class="d-none d-md-block"
                 block
                 @click="showImagesProxy = false"
               >
@@ -90,7 +92,6 @@
     </template>
   </b-modal>
 </template>
-
 <script setup>
 import { useMessageStore } from '../stores/message'
 import { useOurModal } from '~/composables/useOurModal'
@@ -146,6 +147,14 @@ const showImagesProxy = computed({
     emit('update:showImages', value)
   },
 })
+
+function close() {
+  if (showImagesProxy.value) {
+    showImagesProxy.value = false
+  } else {
+    hide()
+  }
+}
 </script>
 
 <style scoped lang="scss">
