@@ -245,7 +245,6 @@ async function uploadSuccess(result) {
 </script>
 <style lang="scss">
 @import '@uppy/core/dist/style.css';
-@import '@uppy/dashboard/dist/style.css';
 @import '@uppy/webcam/dist/style.css';
 @import 'assets/css/uploader.scss';
 
