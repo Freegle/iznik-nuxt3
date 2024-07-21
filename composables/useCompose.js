@@ -280,7 +280,6 @@ export async function freegleIt(type, router) {
       })
     } else {
       // Was probably already submitted
-      console.log('Router', router)
       router.push({
         name: 'myposts',
       })

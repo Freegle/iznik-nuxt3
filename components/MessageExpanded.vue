@@ -50,6 +50,7 @@
             :ad-id="adId"
             :dimensions="[[300, 250]]"
             :div-id="adId"
+            :in-modal="inModal"
             @rendered="adRendered = true"
           />
         </div>
@@ -141,6 +142,10 @@ export default {
       type: String,
       required: false,
       default: null,
+    },
+    inModal: {
+      type: Boolean,
+      default: false,
     },
   },
   setup(props) {

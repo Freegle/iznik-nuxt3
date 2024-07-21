@@ -47,8 +47,17 @@
         </b-button>
       </div>
       <div class="communityevent__photo">
+        <OurUploadedImage
+          v-if="event.photo?.ouruid"
+          :src="event.photo?.ouruid"
+          :modifiers="event.photo?.externalmods"
+          alt="Community Event Photo"
+          :width="200"
+          :height="200"
+          @click="moreInfo"
+        />
         <NuxtPicture
-          v-if="event.photo?.externaluid"
+          v-else-if="event.photo?.externaluid"
           format="webp"
           fit="cover"
           provider="uploadcare"

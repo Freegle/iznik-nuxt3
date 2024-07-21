@@ -97,6 +97,7 @@
                   :paththumb="element.paththumb"
                   :thumbnail="element.thumbnail"
                   :externaluid="element.externaluid"
+                  :ouruid="element.ouruid"
                   :externalmods="element.externalmods"
                   :primary="index === 0"
                   @remove="removePhoto"

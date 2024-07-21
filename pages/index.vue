@@ -239,9 +239,7 @@ export default {
         const router = useRouter()
         const route = useRoute()
 
-        console.log('route', route)
         if (route.path !== nextroute) {
-          console.log('Push', nextroute)
           this.$nextTick(() => {
             router.push(nextroute)
           })

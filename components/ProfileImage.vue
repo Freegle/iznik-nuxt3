@@ -1,7 +1,17 @@
 <template>
   <span class="ProfileImage__container">
+    <OurUploadedImage
+      v-if="ouruid"
+      :src="ouruid"
+      :modifiers="externalmods"
+      :class="className"
+      class="circle"
+      :alt="altText"
+      :width="width"
+      :height="width"
+    />
     <NuxtPicture
-      v-if="externaluid"
+      v-else-if="externaluid"
       format="webp"
       fit="cover"
       provider="uploadcare"
@@ -55,6 +65,11 @@ export default {
       required: false,
       default: null,
     },
+    ouruid: {
+      type: String,
+      required: false,
+      default: null,
+    },
     externalmods: {
       type: Object,
       required: false,
@@ -93,9 +108,16 @@ export default {
       default: null,
     },
   },
+  data: function () {
+    return {
+      brokenImage: false,
+    }
+  },
   computed: {
     validImage() {
-      return this.image || '/defaultprofile.png'
+      return !this.brokenImage && this.image
+        ? this.image
+        : '/defaultprofile.png'
     },
     className() {
       let ret = 'p-0 profile profile--' + this.size
@@ -121,9 +143,7 @@ export default {
   },
   methods: {
     brokenProfileImage(e) {
-      e.target.src = '/defaultprofile.png'
-      e.preventDefault()
-      e.stopPropagation()
+      this.brokenImage = true
     },
   },
 }

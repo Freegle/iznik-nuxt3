@@ -128,14 +128,13 @@
           </Dropdown>
         </div>
         <div v-else class="d-flex justify-content-end pt-2 pb-2">
-          <NuxtPicture
-            format="webp"
-            fit="cover"
-            provider="uploadcare"
+          <OurUploadedImage
             :src="imageuid"
             :modifiers="imagemods"
             alt="Chat Photo"
-            sizes="100px sm:200px"
+            :width="200"
+            :height="200"
+            sizes="200px"
           />
           <div class="ml-1">
             <b-button title="Remove photo" @click="removeImage">
@@ -548,6 +547,7 @@ export default {
         }
       }
 
+      console.log('Return address', ret)
       return ret
     },
     showSuggested() {
@@ -605,7 +605,7 @@ export default {
 
         // We have uploaded a photo.  Post a chatmessage referencing it.
         this.imageid = newVal[0].id
-        this.imageuid = newVal[0].externaluid
+        this.imageuid = newVal[0].ouruid
         this.imagemods = newVal[0].externalmods
       },
       deep: true,
@@ -850,6 +850,8 @@ export default {
 }
 </script>
 <style scoped lang="scss">
+@import 'https://unpkg.com/floating-vue@^2.0.0-beta.1/dist/style.css';
+
 .mobtext {
   text-align: center !important;
 }

@@ -39,6 +39,10 @@ export default {
     const jwt = authStore.auth.jwt
     const persistent = authStore.auth.persistent
 
+    const runtimeConfig = useRuntimeConfig()
+    const userSite = runtimeConfig.public.USER_SITE
+    const proxy = runtimeConfig.public.UPLOADCARE_PROXY
+
     if (jwt || persistent) {
       // We have some credentials, which may or may not be valid on the server.  If they are, then we can crack on and
       // start rendering the page.  This will be quicker than waiting for GoogleOneTap to load on the client and tell us
@@ -59,6 +63,23 @@ export default {
     if (!ready.value) {
       // We don't have a valid JWT.  See if OneTap can sign us in.
       oneTap.value = true
+    }
+
+    if (proxy) {
+      // Add the wallpaper background, proxying it from our image CDN.
+      // Set background image of wallpaper.png on body
+      const bg =
+        'background-image: url("' +
+        proxy +
+        '/-/format/webp/' +
+        userSite +
+        '/wallpaper.png")'
+
+      useHead({
+        bodyAttrs: {
+          style: bg,
+        },
+      })
     }
 
     return {

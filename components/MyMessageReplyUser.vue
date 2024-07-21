@@ -76,7 +76,7 @@ const replyuser = computed(() => {
 
 .truncatename {
   white-space: nowrap;
-  max-width: 32rem;
+  max-width: 11rem;
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: normal;

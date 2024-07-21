@@ -9,6 +9,7 @@
       :show-promised="false"
       :show-location="false"
       class="w-100 mb-2"
+      preload
       @click.prevent.self
     />
   </div>

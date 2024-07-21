@@ -132,7 +132,7 @@ export function useNavbar() {
         logo.value = ret.logo.path.replace(/.*logos/, '/logos')
         logoFormat.value = 'gif'
       }
-    }, 5000)
+    }, 500000)
 
     getCounts()
   })

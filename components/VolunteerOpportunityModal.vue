@@ -39,9 +39,15 @@
             </notice-message>
             <b-row>
               <b-col>
+                <OurUploadedImage
+                  v-if="volunteering?.image?.ouruid"
+                  :src="volunteering.image.ouruid"
+                  :modifiers="volunteering.image.imagemods"
+                  alt="Volunteer Opportunity Photo"
+                  class="mb-2 w-100"
+                />
                 <NuxtPicture
-                  v-if="volunteering?.image?.imageuid"
-                  :key="bump"
+                  v-else-if="volunteering?.image?.imageuid"
                   width="200"
                   format="webp"
                   provider="uploadcare"
@@ -184,7 +190,7 @@
               </b-form-group>
             </b-col>
             <b-col v-if="enabled" cols="12" md="6">
-              <div v-if="volunteering.image" class="container">
+              <div v-if="image" class="container">
                 <div
                   class="clickme rotateleft stacked"
                   label="Rotate left"
@@ -204,21 +210,20 @@
                   <v-icon icon="reply" flip="horizontal" />
                 </div>
                 <div class="image d-flex justify-content-around">
-                  <NuxtPicture
-                    v-if="volunteering?.image?.imageuid"
-                    :key="bump"
-                    format="webp"
+                  <OurUploadedImage
+                    v-if="image?.imageuid"
                     width="200"
-                    provider="uploadcare"
-                    :src="volunteering.image.imageuid"
+                    :src="image.imageuid"
                     :modifiers="mods"
                     alt="Volunteer Opportunity Photo"
                     class="mb-2"
                   />
                   <b-img
-                    v-else-if="volunteering.image"
+                    v-else-if="image"
                     fluid
-                    :src="volunteering.image.paththumb + '?' + cacheBust"
+                    :src="
+                      image.paththumb + '?volunteering=' + id + '-' + cacheBust
+                    "
                   />
                   <b-img v-else width="250" thumbnail src="/placeholder.jpg" />
                 </div>
@@ -410,7 +415,7 @@
             :disabled="uploadingPhoto"
             @click="dontSave"
           >
-            Hide
+            Cancel
           </b-button>
           <SpinButton
             v-if="editing && enabled"
@@ -550,7 +555,7 @@ export default {
       description: null,
       currentAtts: [],
       mods: {},
-      bump: 0,
+      image: null,
     }
   },
   computed: {
@@ -625,11 +630,14 @@ export default {
       handler(newVal) {
         this.volunteering.image = {
           id: newVal[0].id,
-          imageuid: newVal[0].externaluid,
+          imageuid: newVal[0].ouruid,
           imagemods: newVal[0].externalmods,
         }
-
-        this.bump++
+        this.image = {
+          id: newVal[0].id,
+          imageuid: newVal[0].ouruid,
+          imagemods: newVal[0].externalmods,
+        }
       },
       deep: true,
     },

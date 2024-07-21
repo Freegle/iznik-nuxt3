@@ -42,17 +42,29 @@
         }"
       >
         <div ref="imagewrapper">
+          <OurUploadedImage
+            v-if="attachments[0].ouruid"
+            :src="attachments[0].ouruid"
+            :modifiers="attachments[0].externalmods"
+            alt="Item Photo"
+            :width="Math.round(width)"
+            :height="200"
+            :sizes="thumbnail ? '200px' : '320px md:768px'"
+            :preload="preload"
+            @error="brokenImage"
+            @click="$emit('zoom')"
+          />
           <NuxtPicture
-            v-if="attachments[0].externaluid"
+            v-else-if="attachments[0].externaluid"
             format="webp"
-            fit="cover"
             provider="uploadcare"
             :src="attachments[0].externaluid"
             :modifiers="attachments[0].externalmods"
             alt="Item Photo"
             :width="Math.round(width)"
             :height="200"
-            preload
+            :sizes="thumbnail ? '200px' : '320px md:768px'"
+            :preload="preload"
             @error="brokenImage"
             @click="$emit('zoom')"
           />
@@ -62,11 +74,11 @@
             alt="Item picture"
             title="Item picture"
             :src="attachments[0].path"
-            :sizes="thumbnail ? '320px sm:200px md:200px' : '320px sm:992px'"
+            :sizes="thumbnail ? '200px' : '320px md:768px'"
             :width="Math.round(width)"
             :height="200"
             fit="cover"
-            preload
+            :preload="preload"
             @error="brokenImage"
             @click="$emit('zoom')"
           />
@@ -102,6 +114,11 @@ defineProps({
     required: false,
     default: false,
   },
+  preload: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
 })
 
 const defaultAttachments = ref(false)
@@ -128,9 +145,12 @@ function brokenImage() {
 @import 'bootstrap/scss/mixins/_breakpoints';
 
 .attachment {
-  object-fit: cover;
   width: 100%;
   box-shadow: 0 0 1 $color-gray--dark;
+
+  :deep(img) {
+    object-fit: cover;
+  }
 }
 
 .thumbnail {

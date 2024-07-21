@@ -8,7 +8,7 @@
             person who posted it.
           </div>
           <div v-if="isNewsComponent">
-            <b-dropdown class="float-end" right variant="white">
+            <b-dropdown lazy class="float-end" right variant="white">
               <template #button-content />
               <b-dropdown-item
                 :href="'/chitchat/' + newsfeed?.id"
@@ -204,8 +204,16 @@
               @handle="sendComment"
             />
           </div>
+          <OurUploadedImage
+            v-if="ouruid"
+            :src="ouruid"
+            :modifiers="imagemods"
+            alt="ChitChat Photo"
+            width="100"
+            class="mt-1 ml-4 image__uploaded"
+          />
           <NuxtPicture
-            v-if="imageuid"
+            v-else-if="imageuid"
             format="webp"
             provider="uploadcare"
             :src="imageuid"
@@ -355,6 +363,7 @@ export default {
       },
       uploading: false,
       imageid: null,
+      ouruid: null,
       imageuid: null,
       imagemods: null,
       showDeleteModal: false,
@@ -431,7 +440,8 @@ export default {
         this.uploading = false
 
         this.imageid = newVal[0].id
-        this.imageuid = newVal[0].externaluid
+        this.imageuid = newVal[0].ouruid
+        this.ouruid = newVal[0].ouruid
         this.imagemods = newVal[0].externalmods
       },
       deep: true,
@@ -472,6 +482,7 @@ export default {
         // And any image id
         this.imageid = null
         this.imageuid = null
+        this.ouruid = null
         this.imagemods = null
       }
 

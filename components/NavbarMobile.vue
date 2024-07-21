@@ -351,6 +351,7 @@ const navBarBottomHidden = computed(() => {
   top: 1px;
   right: -1px;
   font-size: 11px;
+  color: white !important;
 }
 
 .browsebadge2 {
@@ -358,6 +359,7 @@ const navBarBottomHidden = computed(() => {
   top: 1px;
   right: -7px;
   font-size: 11px;
+  color: white !important;
 }
 
 .chatup {
@@ -368,6 +370,7 @@ const navBarBottomHidden = computed(() => {
   position: absolute;
   top: 2px;
   font-size: 11px;
+  color: white !important;
 }
 
 .botmen {

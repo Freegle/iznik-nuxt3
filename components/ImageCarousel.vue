@@ -1,5 +1,8 @@
 <template>
-  <div ref="wrapper" style="min-height: 80vh; min-width: 95%" class="wrapper">
+  <div ref="wrapper" class="wrapper">
+    <p class="text-center small">
+      Drag image around. Zoom with pinch (on mobile) or Ctrl+mouse wheel. Width
+    </p>
     <b-carousel
       :id="'message-carousel-' + messageId"
       v-model="slide"
@@ -16,43 +19,7 @@
         class="slide"
       >
         <div class="d-flex justify-content-around">
-          <zoom-pinch
-            :rotation="false"
-            mouse
-            touch
-            wheel
-            gesture
-            :width="Math.round(width * 0.95)"
-            :height="Math.round(height * 0.95)"
-            min-scale="1"
-            :style="
-              'width: ' +
-              Math.round(width * 0.95) +
-              'px; height: ' +
-              Math.round(height * 0.95) +
-              'px'
-            "
-          >
-            <template #canvas>
-              <NuxtPicture
-                v-if="attachment.externaluid"
-                format="webp"
-                provider="uploadcare"
-                :src="attachment.externaluid"
-                :modifiers="attachment.externalmods"
-                alt="Item picture"
-                :width="Math.round(width * 0.95)"
-              />
-              <b-img
-                v-else
-                generator-unable-to-provide-required-alt=""
-                title="Item picture"
-                :src="attachment.path"
-                itemprop="image"
-                class="w-100"
-              />
-            </template>
-          </zoom-pinch>
+          <PinchMe :attachment="attachment" :width="width" :height="height" />
         </div>
       </b-carousel-slide>
     </b-carousel>
@@ -60,7 +27,6 @@
 </template>
 <script setup>
 import { useElementSize } from '@vueuse/core'
-import { Zoompinch as ZoomPinch } from 'zoompinch'
 import { ref } from '#imports'
 import 'zoompinch/style.css'
 
@@ -90,6 +56,11 @@ if (height > 3000) {
 }
 </script>
 <style scoped lang="scss">
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/sticky-banner.scss';
+
 :deep(.carousel-control-prev) {
   z-index: 11000 !important;
 }
@@ -101,5 +72,14 @@ if (height > 3000) {
 :deep(.iiz__btn) {
   z-index: 11001;
   right: 50%;
+}
+
+.wrapper {
+  min-height: calc(80vh - $sticky-banner-height-mobile);
+  width: 100%;
+
+  @include media-breakpoint-up(md) {
+    min-height: calc(80vh - $sticky-banner-height-desktop);
+  }
 }
 </style>
