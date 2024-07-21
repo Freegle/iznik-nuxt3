@@ -163,7 +163,9 @@ onMounted(() => {
       maxNumberOfFiles: props.multiple ? 10 : 1,
     },
   })
-    .use(Webcam)
+    .use(Webcam, {
+      modes: ['picture'],
+    })
     .use(Tus, { endpoint: runtimeConfig.public.TUS_UPLOADER })
     .use(Compressor)
   uppy.on('complete', uploadSuccess)
