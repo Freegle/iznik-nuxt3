@@ -14,7 +14,6 @@
       size="sm"
       class="mr-1 mb-1 mt-1 inline"
     />
-    Mods {{ typeof chatmessage.image.externalmods }}
     <OurUploadedImage
       v-if="chatmessage.image?.ouruid"
       :src="chatmessage.image.ouruid"
