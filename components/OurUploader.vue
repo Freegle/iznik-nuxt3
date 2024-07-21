@@ -116,7 +116,7 @@ const props = defineProps({
 // const miscStore = useMiscStore()
 const imageStore = useImageStore()
 
-const modalOpen = ref(props.false)
+const modalOpen = ref(props.startOpen)
 
 function handleClose() {
   modalOpen.value = false
