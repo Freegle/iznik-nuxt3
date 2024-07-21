@@ -124,7 +124,7 @@ function handleClose() {
 
 const uploaderUid = ref(uid('uploader'))
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'closed'])
 const uploadedPhotos = ref([])
 const busy = ref(false)
 const dashboard = ref(null)
@@ -154,7 +154,6 @@ onMounted(() => {
     props.startOpen
   )
   uppy = new Uppy({
-    allowMultipleUploads: props.multiple,
     autoProceed: true,
     closeAfterFinish: true,
     hidePauseResumeButton: true,
@@ -162,7 +161,7 @@ onMounted(() => {
     restrictions: {
       allowedFileTypes: ['image/*', '.jpg', '.jpeg', '.png', '.gif', '.heic'],
     },
-    maxNumberOfFiles: 10,
+    maxNumberOfFiles: props.multiple ? 10 : 1,
   })
     .use(Webcam)
     .use(Tus, { endpoint: runtimeConfig.public.TUS_UPLOADER })
@@ -170,6 +169,10 @@ onMounted(() => {
   uppy.on('complete', uploadSuccess)
   uppy.on('dashboard:modal-open', () => {
     console.log('Modal is open')
+  })
+  uppy.on('dashboard:modal-closed', () => {
+    console.log('Modal is closed')
+    emit('closed')
   })
 
   if (props.startOpen) {
