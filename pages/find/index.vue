@@ -122,6 +122,14 @@ export default {
 
     return await setup('Wanted')
   },
+  mounted() {
+    if (this.$gtm.enabled()) {
+      this.$gtm.trackEvent({
+        event: 'Give an Item',
+        label: 'QxhuCP7av7kZELy618UD',
+      })
+    }
+  },
   methods: {
     deleteItem,
     addItem,

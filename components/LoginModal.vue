@@ -442,6 +442,14 @@ export default {
     hide() {
       this.pleaseShowModal = false
     },
+    gtmRegister() {
+      if (this.$gtm.enabled()) {
+        this.$gtm.trackEvent({
+          event: 'Register with Website',
+          label: 'EcEMCPvav7kZELy618UD',
+        })
+      }
+    },
     loginNative(e) {
       this.loginType = 'Freegle'
 
@@ -473,6 +481,8 @@ export default {
         ) {
           this.nativeLoginError = 'Please fill out the form.'
         } else {
+          this.gtmRegister()
+
           this.authStore
             .signUp({
               firstname: this.firstname,

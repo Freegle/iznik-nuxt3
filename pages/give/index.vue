@@ -121,6 +121,14 @@ export default {
 
     return await setup('Offer')
   },
+  mounted() {
+    if (this.$gtm.enabled()) {
+      this.$gtm.trackEvent({
+        event: 'Give an Item',
+        label: 'YqHzCIHbv7kZELy618UD',
+      })
+    }
+  },
   methods: {
     deleteItem,
     addItem,
