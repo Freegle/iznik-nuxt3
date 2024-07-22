@@ -16,6 +16,8 @@ import https from 'https'
 //    - MARKETING_VERSION eg 3.1.9 TWICE
 //
 // If npm reinstall, comment out line 40 of node_modules\@capacitor\cli\dist\android\run.js //await common_1.runTask
+// Ensure in here android\app\src\main\AndroidManifest.xml
+//  <uses-permission android:name="android.permission.CAMERA" />
 
 console.log("CHECK PREBID SCRIPT CHANGES")
 const prebidCurrent = fs.readFileSync('public/js/prebid.js')
