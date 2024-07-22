@@ -70,7 +70,12 @@
       </div>
       <div v-if="!otheruser?.deleted">
         <div v-if="uploading" class="bg-white">
-          <OurUploader v-model="currentAtts" type="ChatMessage" />
+          <OurUploader
+            v-model="currentAtts"
+            type="ChatMessage"
+            start-open
+            @closed="uploading = false"
+          />
         </div>
         <label for="chatmessage" class="visually-hidden">Chat message</label>
         <div v-if="!imageid">
@@ -547,6 +552,7 @@ export default {
         }
       }
 
+      console.log('Return address', ret)
       return ret
     },
     showSuggested() {
@@ -849,6 +855,8 @@ export default {
 }
 </script>
 <style scoped lang="scss">
+@import 'https://unpkg.com/floating-vue@^2.0.0-beta.1/dist/style.css';
+
 .mobtext {
   text-align: center !important;
 }

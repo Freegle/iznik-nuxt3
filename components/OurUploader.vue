@@ -42,6 +42,7 @@ import { DashboardModal } from '@uppy/vue'
 import Tus from '@uppy/tus'
 import Webcam from '@uppy/webcam'
 import Compressor from '@uppy/compressor'
+import { nextTick } from 'vue'
 
 import ResizeObserver from 'resize-observer-polyfill'
 import { uid } from '../composables/useId'
@@ -105,12 +106,17 @@ const props = defineProps({
     required: false,
     default: null,
   },
+  startOpen: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
 })
 
 // const miscStore = useMiscStore()
 const imageStore = useImageStore()
 
-const modalOpen = ref(false)
+const modalOpen = ref(props.startOpen)
 
 function handleClose() {
   modalOpen.value = false
@@ -118,7 +124,7 @@ function handleClose() {
 
 const uploaderUid = ref(uid('uploader'))
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'closed'])
 const uploadedPhotos = ref([])
 const busy = ref(false)
 const dashboard = ref(null)
@@ -140,25 +146,46 @@ watch(dashboard, (newVal) => {
 })
 
 onMounted(() => {
-  console.log('Mounted', '#' + uploaderUid.value, dashboard.value)
+  console.log(
+    'Mounted',
+    '#' + uploaderUid.value,
+    dashboard.value,
+    props.multiple,
+    props.startOpen
+  )
   uppy = new Uppy({
-    allowMultipleUploads: props.multiple,
     autoProceed: true,
     closeAfterFinish: true,
     hidePauseResumeButton: true,
     hideProgressAfterFinish: true,
     restrictions: {
       allowedFileTypes: ['image/*', '.jpg', '.jpeg', '.png', '.gif', '.heic'],
+      maxNumberOfFiles: props.multiple ? 10 : 1,
     },
-    maxNumberOfFiles: 10,
   })
-    .use(Webcam)
+    .use(Webcam, {
+      modes: ['picture'],
+      mobileNativeCamera: true,
+      videoConstraints: {
+        facingMode: 'environment',
+      },
+    })
     .use(Tus, { endpoint: runtimeConfig.public.TUS_UPLOADER })
     .use(Compressor)
   uppy.on('complete', uploadSuccess)
   uppy.on('dashboard:modal-open', () => {
     console.log('Modal is open')
   })
+  uppy.on('dashboard:modal-closed', () => {
+    console.log('Modal is closed')
+    emit('closed')
+  })
+
+  if (props.startOpen) {
+    nextTick(() => {
+      modalOpen.value = true
+    })
+  }
 })
 
 async function uploadSuccess(result) {
@@ -220,7 +247,6 @@ async function uploadSuccess(result) {
 </script>
 <style lang="scss">
 @import '@uppy/core/dist/style.css';
-@import '@uppy/dashboard/dist/style.css';
 @import '@uppy/webcam/dist/style.css';
 @import 'assets/css/uploader.scss';
 

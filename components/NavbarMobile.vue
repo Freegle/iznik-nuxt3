@@ -45,7 +45,7 @@
         <div class="d-flex align-items-center">
           <b-nav>
             <b-nav-item>
-              <nuxt-link v-if="!loggedIn && CMPComplete" no-prefetch>
+              <nuxt-link v-if="!loggedIn" no-prefetch>
                 <div class="btn btn-white mr-2" @click="requestLogin">
                   Log in or Join
                 </div>
@@ -323,20 +323,6 @@ const navBarBottomHidden = computed(() => {
     route.path.startsWith('/chat') ||
     navBarHidden.value
   )
-})
-
-const CMPComplete = ref(false)
-
-function checkCMPComplete() {
-  if (!window.weHaveLoadedGPT) {
-    setTimeout(checkCMPComplete, 100)
-  } else {
-    CMPComplete.value = true
-  }
-}
-
-onMounted(() => {
-  checkCMPComplete()
 })
 </script>
 <style scoped lang="scss">

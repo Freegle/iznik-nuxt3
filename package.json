@@ -19,12 +19,13 @@
     "ignore": "4.0.6"
   },
   "devDependencies": {
+    "@bootstrap-vue-next/nuxt": "^0.24.1",
     "@capacitor/cli": "^5.0.0",
-    "@bootstrap-vue-next/nuxt": "^0.22.1",
     "@nuxt/image": "^1.5.0",
     "@nuxtjs/eslint-config": "^12.0.0",
     "@nuxtjs/eslint-module": "^4.0.2",
     "@vue-leaflet/vue-leaflet": "^0.6.1",
+    "@zadigetvoltaire/nuxt-gtm": "^0.0.13",
     "eslint": "^8.36.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.0.0",
@@ -88,6 +89,7 @@
     "capacitor-zoom-android": "^5.0.0",
     "cordova-plugin-calendar": "github:uzurv/Calendar-PhoneGap-Plugin-ios-17-support",
     "cordova-plugin-inappbrowser": "^6.0.0",
+    "bootstrap-vue-next": "^0.24.1",
     "core-js": "^3.33.0",
     "dayjs": "^1.11.0",
     "eslint-plugin-import": "^2.27.5",

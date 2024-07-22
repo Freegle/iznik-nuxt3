@@ -20,233 +20,252 @@ export default defineNuxtPlugin((nuxtApp) => {
     useMiscStore().unloading = true
   } */
 
-  Sentry.init({
-    app: vueApp,
-    dsn: config.public.SENTRY_DSN,
-    // Some errors seem benign, and so we ignore them on the client side rather than clutter our sentry logs.
-    ignoreErrors: [
-      'ResizeObserver loop limit exceeded', // Benign - see https://stackoverflow.com/questions/49384120/resizeobserver-loop-limit-exceeded
-      'ResizeObserver loop completed with undelivered notifications.',
-      'Navigation cancelled from ', // This can happen if someone clicks twice in quick succession
+  // If we initialise Sentry before CookieYes then it seems to attach a click handler which blocks clicking on the
+  // CookieYes banner.
+  function checkCMPComplete() {
+    const runTimeConfig = useRuntimeConfig()
+    if (runTimeConfig.public.COOKIEYES && !window.weHaveLoadedGPT) {
+      setTimeout(checkCMPComplete, 100)
+    } else {
+      console.log('Init Sentry')
+      Sentry.init({
+        app: [vueApp],
+        dsn: config.public.SENTRY_DSN,
+        // Some errors seem benign, and so we ignore them on the client side rather than clutter our sentry logs.
+        ignoreErrors: [
+          'ResizeObserver loop limit exceeded', // Benign - see https://stackoverflow.com/questions/49384120/resizeobserver-loop-limit-exceeded
+          'ResizeObserver loop completed with undelivered notifications.',
+          'Navigation cancelled from ', // This can happen if someone clicks twice in quick succession
 
-      // These are very commonly errors caused by fetch() being aborted during page navigation.  See for example
-      // https://forum.sentry.io/t/typeerror-failed-to-fetch-reported-over-and-overe/8447
-      'TypeError: Failed to fetch',
-      'TypeError: NetworkError when attempting to fetch resource.',
-      'TypeError: Unable to preload',
-    ],
-    integrations: [
-      new Sentry.BrowserTracing({
-        routingInstrumentation: Sentry.vueRouterInstrumentation(router),
-        tracePropagationTargets: ['localhost', 'ilovefreegle.org', /^\//],
-      }),
-      new HttpClientIntegration(),
-      new ExtraErrorDataIntegration(),
-    ],
-    logErrors: false, // Note that this doesn't seem to work with nuxt 3
-    tracesSampleRate: config.public.SENTRY_TRACES_SAMPLE_RATE || 1.0, // Sentry recommends adjusting this value in production
-    debug: config.public.SENTRY_ENABLE_DEBUG || false, // Enable debug mode
-    environment: config.public.ENVIRONMENT || 'dev', // Set environment
-    // The following enables exceptions to be logged to console despite logErrors being set to false (preventing them from being passed to the default Vue err handler)
-    beforeSend(event, hint) {
-      // console.log("====== SENTRY beforeSend")
-      if (useMiscStore()?.unloading) {
-        // All network requests are aborted during unload, and so we'll get spurious errors.  Ignore them.
-        console.log('Ignore error in unload')
-        return null
-      }
+          // These are very commonly errors caused by fetch() being aborted during page navigation.  See for example
+          // https://forum.sentry.io/t/typeerror-failed-to-fetch-reported-over-and-overe/8447
+          'TypeError: Failed to fetch',
+          'TypeError: NetworkError when attempting to fetch resource.',
+          'TypeError: Unable to preload',
+        ],
+        integrations: [
+          new Integrations.BrowserTracing({
+            routingInstrumentation: Sentry.vueRouterInstrumentation(router),
+            tracePropagationTargets: ['localhost', 'ilovefreegle.org', /^\//],
+          }),
+          new HttpClientIntegration(),
+          new ExtraErrorDataIntegration(),
+        ],
+        logErrors: false, // Note that this doesn't seem to work with nuxt 3
+        tracesSampleRate: config.public.SENTRY_TRACES_SAMPLE_RATE || 1.0, // Sentry recommends adjusting this value in production
+        debug: config.public.SENTRY_ENABLE_DEBUG || false, // Enable debug mode
+        environment: config.public.ENVIRONMENT || 'dev', // Set environment
+        // The following enables exceptions to be logged to console despite logErrors being set to false (preventing them from being passed to the default Vue err handler)
+        beforeSend(event, hint) {
+          if (useMiscStore()?.unloading) {
+            // All network requests are aborted during unload, and so we'll get spurious errors.  Ignore them.
+            console.log('Ignore error in unload')
+            return null
+          }
 
-      // Ignore crawlers, which seems to abort pre-fetching of some assets.
-      const userAgent = window.navigator.userAgent?.toLowerCase()
+          // Ignore crawlers, which seems to abort pre-fetching of some assets.
+          const userAgent = window.navigator.userAgent?.toLowerCase()
 
-      if (
-        userAgent.includes('bingpreview') ||
-        userAgent.includes('bingbot') ||
-        userAgent.includes('linespider') ||
-        userAgent.includes('yisou')
-      ) {
-        return null
-      }
+          if (
+            userAgent.includes('bingpreview') ||
+            userAgent.includes('bingbot') ||
+            userAgent.includes('linespider') ||
+            userAgent.includes('yisou')
+          ) {
+            return null
+          }
 
-      // HeadlessChrome triggers an error in Google sign-in.  It's not a real user.
-      if (userAgent.includes('headlesschrome')) {
-        return null
-      }
+          // HeadlessChrome triggers an error in Google sign-in.  It's not a real user.
+          if (userAgent.includes('headlesschrome')) {
+            return null
+          }
 
-      // Check if it is an exception, and if so, log it.
-      if (event.exception) {
-        console.error(`[Exeption for Sentry]: (${hint.originalException})`, {
-          event,
-          hint,
+          // Check if it is an exception, and if so, log it.
+          if (event.exception) {
+            console.error(
+              `[Exeption for Sentry]: (${hint.originalException})`,
+              {
+                event,
+                hint,
+              }
+            )
+          }
+
+          if (hint) {
+            const originalException = hint?.originalException
+            const originalExceptionString = originalException?.toString()
+            const originalExceptionStack = originalException?.stack
+            const originalExceptionMessage = originalException?.message
+            const originalExceptionName = originalException?.name
+
+            // Add some more detail if we can.
+            if (originalException instanceof Event) {
+              event.extra.isTrusted = originalException.isTrusted
+              event.extra.detail = originalException.detail
+              event.extra.type = originalException.type
+            }
+
+            console.log(
+              'Original exception was',
+              originalException,
+              typeof originalException,
+              originalExceptionString,
+              originalExceptionStack,
+              originalExceptionMessage
+            )
+
+            if (!originalException) {
+              // There's basically no info to report, so there's nothing we can do.  Suppress it.
+              console.log('No info - suppress exception')
+              return null
+            } else if (originalExceptionStack?.includes('/gpt/')) {
+              // Google ads are not our problem.
+              console.log('Google ads - suppress exception')
+              return null
+            } else if (
+              originalExceptionStack?.includes('/pageFold/') ||
+              originalExceptionStack?.includes('/strikeforce/') ||
+              originalExceptionStack?.includes('/ads/js/')
+            ) {
+              // This is a flaky ad library
+              console.log('Pagefold, ads - suppress exception')
+              return null
+            } else if (
+              (originalExceptionStack?.includes('bootstrap-vue-next') &&
+                originalExceptionString?.match('removeAttribute')) ||
+              originalExceptionStack?.match('_isWithActiveTrigger ')
+            ) {
+              // This seems to be a bug in bootstrap, and doesn't affect the user.
+              console.log('Suppress Bootstrap tooltip exception')
+              return null
+            } else if (originalExceptionString?.match(/Down for maintenance/)) {
+              console.log('Maintenance - suppress exception', this)
+              return null
+            } else if (
+              originalExceptionString?.match(/Piwik undefined after waiting/)
+            ) {
+              // Some privacy blockers can cause this.
+              console.log('Suppress Piwik/Matomo exception')
+              return null
+            } else if (
+              originalExceptionString?.match(/Google ad script blocked/)
+            ) {
+              console.log('AdBlocker - no need to log.', this)
+              return null
+            } else if (
+              originalExceptionString?.match(
+                /Attempt to use history.replaceState/
+              )
+            ) {
+              console.log('History.replaceState too often')
+              return null
+            } else if (suppressException(originalException)) {
+              console.log('Suppress exception')
+              return null
+            } else if (originalExceptionName === 'TypeError') {
+              console.log('TypeError')
+              if (
+                originalExceptionMessage?.match(
+                  /can't redefine non-configurable property "userAgent"/
+                )
+              ) {
+                // This exception happens a lot, and the best guess I can find is that it is a bugged browser
+                // extension.
+                console.log('Suppress userAgent')
+                return null
+              } else if (originalExceptionMessage?.match(/cancelled/)) {
+                // This probably happens due to the user changing their mind and navigating away immediately.
+                console.log('Suppress cancelled')
+                return null
+              } else if (
+                originalExceptionString?.match(/Object.checkLanguage/)
+              ) {
+                // Some auto translation thing.
+                console.log('Translate exception cancelled')
+                return null
+              } else if (originalExceptionString?.match(/\/js\/gpt/)) {
+                // Error inside Google Ads.
+                console.log('Ad error ignored')
+                return null
+              } else if (
+                originalExceptionString?.match(
+                  /NetworkError when attempting to fetch resource./
+                )
+              ) {
+                // Flaky network.
+                console.log('Suppress flaky network')
+                return null
+              }
+            } else if (originalExceptionName === 'ReferenceError') {
+              console.log('ReferenceError')
+              if (
+                originalExceptionMessage?.match(/Can't find variable: fieldset/)
+              ) {
+                // This happens because of an old bug which is now fixed:
+                // https://codereview.chromium.org/2343013005
+                console.log('Old Chrome fieldset bug')
+                return null
+              }
+            } else if (originalExceptionName === 'SecurityError') {
+              if (
+                (originalExceptionMessage?.match('Blocked a frame') &&
+                  originalExceptionStack?.match('isRef')) ||
+                originalExceptionStack?.match('popupInterval')
+              ) {
+                // See https://stackoverflow.com/questions/39081098/close-a-window-opened-with-window-open-after-clicking-a-button
+                console.log(
+                  'Suppress error caused by a bug in vue-social-sharing.'
+                )
+                return null
+              }
+            } else if (
+              originalExceptionStack?.includes('_.ae') &&
+              originalExceptionStack?.includes('/gsi/client')
+            ) {
+              // This is an error in Google One Tap sign-in, often preceded by a console log about malformed JSON
+              // response.  It's possible that it relates to multiple account sign in.  I've failed to reproduce it, and
+              // it's not really clear that it's our fault so there's no point beating ourselves up about it.
+              console.log('Suppress odd Google One Tap error')
+              return null
+            } else if (
+              originalExceptionMessage?.includes(
+                'Looks like your website URL has changed'
+              ) &&
+              originalExceptionStack?.includes('cookieyes')
+            ) {
+              // This is a common error that is not our fault.
+              console.log('CookieYes domain error - probably test deployment')
+              if (window.postCookieYes) {
+                window.postCookieYes()
+              }
+
+              return null
+            }
+          }
+
+          // Continue sending to Sentry
+          return event
+        },
+      })
+
+      vueApp.mixin(
+        Sentry.createTracingMixins({
+          trackComponents: true,
+          timeout: 2000,
+          hooks: ['activate', 'mount', 'update'],
         })
-      }
-
-      if (hint) {
-        const originalException = hint?.originalException
-        const originalExceptionString = originalException?.toString()
-        const originalExceptionStack = originalException?.stack
-        const originalExceptionMessage = originalException?.message
-        const originalExceptionName = originalException?.name
-
-        // Add some more detail if we can.
-        if (originalException instanceof Event) {
-          event.extra.isTrusted = originalException.isTrusted
-          event.extra.detail = originalException.detail
-          event.extra.type = originalException.type
-        }
-
-        console.log(
-          'Original exception was',
-          originalException,
-          typeof originalException,
-          originalExceptionString,
-          originalExceptionStack,
-          originalExceptionMessage
-        )
-
-        if (!originalException) {
-          // There's basically no info to report, so there's nothing we can do.  Suppress it.
-          console.log('No info - suppress exception')
-          return null
-        } else if (originalExceptionStack?.includes('/gpt/')) {
-          // Google ads are not our problem.
-          console.log('Google ads - suppress exception')
-          return null
-        } else if (
-          originalExceptionStack?.includes('/pageFold/') ||
-          originalExceptionStack?.includes('/strikeforce/') ||
-          originalExceptionStack?.includes('/ads/js/')
-        ) {
-          // This is a flaky ad library
-          console.log('Pagefold, ads - suppress exception')
-          return null
-        } else if (
-          (originalExceptionStack?.includes('bootstrap-vue-next') &&
-            originalExceptionString?.match('removeAttribute')) ||
-          originalExceptionStack?.match('_isWithActiveTrigger ')
-        ) {
-          // This seems to be a bug in bootstrap, and doesn't affect the user.
-          console.log('Suppress Bootstrap tooltip exception')
-          return null
-        } else if (originalExceptionString?.match(/Down for maintenance/)) {
-          console.log('Maintenance - suppress exception', this)
-          return null
-        } else if (
-          originalExceptionString?.match(/Piwik undefined after waiting/)
-        ) {
-          // Some privacy blockers can cause this.
-          console.log('Suppress Piwik/Matomo exception')
-          return null
-        } else if (originalExceptionString?.match(/Google ad script blocked/)) {
-          console.log('AdBlocker - no need to log.', this)
-          return null
-        } else if (
-          originalExceptionString?.match(/Attempt to use history.replaceState/)
-        ) {
-          console.log('History.replaceState too often')
-          return null
-        } else if (suppressException(originalException)) {
-          console.log('Suppress exception')
-          return null
-        } else if (originalExceptionName === 'TypeError') {
-          console.log('TypeError')
-          if (
-            originalExceptionMessage?.match(
-              /can't redefine non-configurable property "userAgent"/
-            )
-          ) {
-            // This exception happens a lot, and the best guess I can find is that it is a bugged browser
-            // extension.
-            console.log('Suppress userAgent')
-            return null
-          } else if (originalExceptionMessage?.match(/cancelled/)) {
-            // This probably happens due to the user changing their mind and navigating away immediately.
-            console.log('Suppress cancelled')
-            return null
-          } else if (originalExceptionString?.match(/Object.checkLanguage/)) {
-            // Some auto translation thing.
-            console.log('Translate exception cancelled')
-            return null
-          } else if (originalExceptionString?.match(/\/js\/gpt/)) {
-            // Error inside Google Ads.
-            console.log('Ad error ignored')
-            return null
-          } else if (
-            originalExceptionString?.match(
-              /NetworkError when attempting to fetch resource./
-            )
-          ) {
-            // Flaky network.
-            console.log('Suppress flaky network')
-            return null
-          }
-        } else if (originalExceptionName === 'ReferenceError') {
-          console.log('ReferenceError')
-          if (
-            originalExceptionMessage?.match(/Can't find variable: fieldset/)
-          ) {
-            // This happens because of an old bug which is now fixed:
-            // https://codereview.chromium.org/2343013005
-            console.log('Old Chrome fieldset bug')
-            return null
-          }
-        } else if (originalExceptionName === 'SecurityError') {
-          if (
-            (originalExceptionMessage?.match('Blocked a frame') &&
-              originalExceptionStack?.match('isRef')) ||
-            originalExceptionStack?.match('popupInterval')
-          ) {
-            // See https://stackoverflow.com/questions/39081098/close-a-window-opened-with-window-open-after-clicking-a-button
-            console.log('Suppress error caused by a bug in vue-social-sharing.')
-            return null
-          }
-        } else if (
-          originalExceptionStack?.includes('_.ae') &&
-          originalExceptionStack?.includes('/gsi/client')
-        ) {
-          // This is an error in Google One Tap sign-in, often preceded by a console log about malformed JSON
-          // response.  It's possible that it relates to multiple account sign in.  I've failed to reproduce it, and
-          // it's not really clear that it's our fault so there's no point beating ourselves up about it.
-          console.log('Suppress odd Google One Tap error')
-          return null
-        } else if (
-          originalExceptionMessage?.includes(
-            'Looks like your website URL has changed'
-          ) &&
-          originalExceptionStack?.includes('cookieyes')
-        ) {
-          // This is a common error that is not our fault.
-          console.log('CookieYes domain error - probably test deployment')
-          if (window.postCookieYes) {
-            window.postCookieYes()
-          }
-
-          return null
-        }
-      }
-
-      // Continue sending to Sentry
-      return event
-    },
+      )
+      Sentry.attachErrorHandler(vueApp, {
+        logErrors: false,
+        attachProps: true,
+        trackComponents: true,
+        timeout: 2000,
+        hooks: ['activate', 'mount', 'update'],
+      })
+    }
   }
-  //,
-  //Sentry.init
-  )
 
-  vueApp.mixin(
-    Sentry.createTracingMixins({
-      trackComponents: true,
-      timeout: 2000,
-      hooks: ['activate', 'mount', 'update'],
-    })
-  )
-  Sentry.attachErrorHandler(vueApp, {
-    logErrors: false,
-    attachProps: true,
-    trackComponents: true,
-    timeout: 2000,
-    hooks: ['activate', 'mount', 'update'],
-  })
+  checkCMPComplete()
 
   return {
     provide: {

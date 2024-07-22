@@ -203,10 +203,10 @@ export default defineNuxtConfig({
 
   modules: [
     '@pinia/nuxt',
-    'floating-vue/nuxt',
     '@nuxt/image',
     'nuxt-vite-legacy',
     '@bootstrap-vue-next/nuxt',
+    '@zadigetvoltaire/nuxt-gtm',
   ],
 
   hooks: {
@@ -247,6 +247,15 @@ export default defineNuxtConfig({
       TRUSTPILOT_LINK: config.TRUSTPILOT_LINK,
       TUS_UPLOADER: config.TUS_UPLOADER,
       IMAGE_DELIVERY: config.IMAGE_DELIVERY,
+
+      gtm: {
+        id: process.env.GTM_ID || 'not configured',
+        defer: true,
+        compatibility: true,
+        debug: true,
+        enabled: !!process.env.GTM_ID,
+        enableRouterSync: false,
+      },
     },
   },
 

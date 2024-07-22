@@ -10,7 +10,7 @@
         @complete="googleLoaded"
       />
       <LoginModal
-        v-if="!loggedIn && CMPComplete"
+        v-if="!loggedIn"
         ref="loginModal"
         :key="'login-' + bumpLogin"
       />
@@ -93,7 +93,6 @@ export default {
     return {
       bump: 0,
       bumpLogin: 0,
-      CMPComplete: false,
     }
   },
   watch: {
@@ -109,11 +108,6 @@ export default {
         }
       },
     },
-  },
-  mounted() {
-    // Wait until we have done CMP before showing the login modal, otherwise we can block clicking on the
-    // consent banner.
-    this.checkCMPComplete()
   },
   methods: {
     googleLoggedIn() {
@@ -135,13 +129,6 @@ export default {
       } else {
         // We need to force the login modal to rerender, otherwise the login button doesn't always show.
         this.bumpLogin++
-      }
-    },
-    checkCMPComplete() {
-      if (!window.weHaveLoadedGPT) {
-        setTimeout(this.checkCMPComplete, 100)
-      } else {
-        this.CMPComplete = true
       }
     },
   },
