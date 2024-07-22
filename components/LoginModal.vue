@@ -443,7 +443,7 @@ export default {
       this.pleaseShowModal = false
     },
     gtmRegister() {
-      if (this.$gtm.enabled()) {
+      if (this.$gtm?.enabled()) {
         this.$gtm.trackEvent({
           event: 'Register with Website',
           label: 'EcEMCPvav7kZELy618UD',

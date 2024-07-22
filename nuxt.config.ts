@@ -168,7 +168,7 @@ export default defineNuxtConfig({
     '@nuxt/image',
     'nuxt-vite-legacy',
     '@bootstrap-vue-next/nuxt',
-    '@zadigetvoltaire/nuxt-gtm',
+    process.env.GTM_ID ? '@zadigetvoltaire/nuxt-gtm' : null,
   ],
 
   hooks: {
@@ -208,14 +208,19 @@ export default defineNuxtConfig({
       TUS_UPLOADER: config.TUS_UPLOADER,
       IMAGE_DELIVERY: config.IMAGE_DELIVERY,
 
-      gtm: {
-        id: process.env.GTM_ID || 'not configured',
-        defer: true,
-        compatibility: true,
-        debug: true,
-        enabled: !!process.env.GTM_ID,
-        enableRouterSync: false,
-      },
+      ...(process.env.GTM_ID
+        ? {
+            gtm: {
+              id: process.env.GTM_ID,
+              defer: true,
+              compatibility: true,
+              debug: true,
+              enabled: !!process.env.GTM_ID,
+              enableRouterSync: false,
+              devtools: true,
+            },
+          }
+        : {}),
     },
   },
 
