@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="!contacts || !contacts.length" class="layout">
+    <div v-if="!contactsAvailable" class="layout">
       <div>
         <b-button variant="primary" size="lg" @click="getContacts">
           Invite your friends!
@@ -41,6 +41,7 @@
             '&text=' +
             encodeURIComponent(invitation)
           "
+          @click="chosen"
         >
           <b-button variant="primary" class="mb-1 mr-1">
             <v-icon :icon="['fab', 'whatsapp']" /> {{ phone.name }}
@@ -58,6 +59,7 @@
           :href="
             'sms://' + phone.phone + ';?&body=' + encodeURIComponent(invitation)
           "
+          @click="chosen"
         >
           <b-button variant="primary" class="mb-1 mr-1">
             <v-icon icon="sms" /> {{ phone.name }}
@@ -79,6 +81,7 @@
             encodeURIComponent(invitation)
           "
           class="mb-1 mr-1"
+          @click="chosen"
         >
           <b-button variant="primary">
             <v-icon icon="envelope" /> {{ email.email }}
@@ -99,6 +102,11 @@ export default {
       required: false,
       default: 'h3',
     },
+    trustPilot: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
   },
   data() {
     return {
@@ -108,6 +116,9 @@ export default {
     }
   },
   computed: {
+    contactsAvailable() {
+      return this.contacts?.length
+    },
     emails() {
       const ret = []
 
@@ -158,8 +169,24 @@ export default {
       return ret
     },
   },
+  mounted() {
+    this.$api.bandit.shown({
+      uid: 'Invite',
+      variant: 'microvolunteering',
+    })
+  },
   methods: {
+    chosen() {
+      this.$emit('invited')
+
+      this.$api.bandit.chosen({
+        uid: 'Invite',
+        variant: 'microvolunteering',
+      })
+    },
     async getContacts() {
+      this.chosen()
+
       this.contacts = await navigator.contacts.select(
         ['name', 'email', 'tel'],
         {
@@ -179,11 +206,14 @@ export default {
   display: grid;
   grid-template-columns: 1fr;
   grid-template-rows: auto auto;
+  grid-row-gap: 20px;
   grid-column-gap: 10px;
 
   @include media-breakpoint-up(md) {
     grid-template-columns: auto auto;
+    grid-column-gap: 20px;
     grid-template-rows: auto;
+    grid-row-gap: 0px;
   }
 }
 </style>

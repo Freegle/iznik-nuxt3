@@ -136,9 +136,15 @@
               <div v-else-if="task.type === 'Survey2'">
                 <MicroVolunteeringSurvey :url="task.url" @done="considerNext" />
               </div>
+              <div v-else-if="task.type === 'Invite'">
+                <MicroVolunteeringInvite
+                  v-if="navigator?.contacts"
+                  @done="considerNext"
+                />
+              </div>
               <div v-else>Unknown task {{ task }}</div>
-              <p>You can also:</p>
-              <TrustPilot />
+              <!--              <p>You can also:</p>-->
+              <!--              <TrustPilot />-->
             </div>
           </b-card-text>
         </template>
@@ -183,6 +189,9 @@ const MicroVolunteeringSimilarTerms = defineAsyncComponent(() =>
 const MicroVolunteeringSurvey = defineAsyncComponent(() =>
   import('./MicroVolunteeringSurvey')
 )
+const MicroVolunteeringInvite = defineAsyncComponent(() =>
+  import('./MicroVolunteeringInvite')
+)
 
 export default {
   components: {
@@ -191,6 +200,7 @@ export default {
     MicroVolunteeringSimilarTerms,
     MicroVolunteeringFacebook,
     MicroVolunteeringSurvey,
+    MicroVolunteeringInvite,
   },
   props: {
     force: {
@@ -238,7 +248,7 @@ export default {
         }
       })
 
-      console.log('Ask due', askDue)
+      console.log('Ask due', askDue, props.force)
 
       if (!allowed) {
         // Not on a group with this function enabled.
@@ -286,6 +296,13 @@ export default {
     }
   },
   async mounted() {
+    const supported =
+      'contacts' in window.navigator && 'ContactsManager' in window
+
+    if (supported) {
+      this.types.push('Invite')
+    }
+
     if (this.fetchTask) {
       await this.getTask()
     }
@@ -314,6 +331,8 @@ export default {
         } else if (this.task.type === 'PhotoRotate') {
           this.showTask = true
         } else if (this.task.type === 'Survey2') {
+          this.showTask = true
+        } else if (this.task.type === 'Invite') {
           this.showTask = true
         } else {
           this.doneForNow()
