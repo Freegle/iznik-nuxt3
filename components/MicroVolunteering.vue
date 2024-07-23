@@ -213,7 +213,7 @@ export default {
     const microVolunteeringStore = useMicroVolunteeringStore()
     const miscStore = useMiscStore()
     const authStore = useAuthStore()
-    const debug = true
+    const debug = false
 
     if (debug) {
       miscStore.set({
