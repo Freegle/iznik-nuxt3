@@ -92,7 +92,7 @@ function prev() {
   z-index: 11000 !important;
   position: fixed;
   border: none;
-  opacity: 0.3;
+  opacity: 0.5;
 
   :deep(svg) {
     width: 50px;
