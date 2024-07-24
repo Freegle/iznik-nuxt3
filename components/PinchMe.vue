@@ -6,8 +6,9 @@
     mouse
     touch
     wheel
+    bounds
     gesture
-    :min-scale="0.1"
+    :min-scale="1"
     :max-scale="10"
     :width="Math.round(width * 0.95)"
     :height="Math.round(height * 0.95)"
