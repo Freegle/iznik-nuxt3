@@ -16,7 +16,9 @@
 // If we're showing a scrollbar, then increase the number of rows.
 //
 // We don't shrink.  If you're reading this, why not code it?
+import { mapWritableState } from 'pinia'
 import { ref } from '#imports'
+import { useMiscStore } from '~/stores/misc'
 
 export default {
   props: {
@@ -65,11 +67,16 @@ export default {
       timer: null,
     }
   },
+  computed: {
+    ...mapWritableState(useMiscStore, ['lastTyping']),
+  },
   watch: {
     modelValue(newVal) {
       this.currentValue = newVal
     },
     currentValue(newVal) {
+      this.lastTyping = Date.now()
+
       if (newVal && !this.timer) {
         // Starting the timer here avoids having the timer run for empty textareas, which happen a lot in ChitChat.
         this.checkRows()

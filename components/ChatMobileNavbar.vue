@@ -54,7 +54,7 @@
   </div>
 </template>
 <script setup>
-import { setNavBarHidden } from '../composables/useNavbar'
+import { clearNavBarTimeout, setNavBarHidden } from '../composables/useNavbar'
 import { useNavbar, navBarHidden } from '~/composables/useNavbar'
 import { useChatStore } from '~/stores/chat'
 import { setupChat } from '~/composables/useChat'
@@ -79,6 +79,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  clearNavBarTimeout()
   window.removeEventListener('scroll', handleScroll)
 })
 

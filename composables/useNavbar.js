@@ -9,28 +9,59 @@ import { useChatStore } from '../stores/chat'
 import { useAuthStore } from '~/stores/auth'
 import { fetchMe } from '~/composables/useMe'
 import { useRuntimeConfig } from '#app'
+import { TYPING_TIME_INVERVAL } from '~/constants'
 
 export const navBarHidden = ref(false)
 
 let navBarTimeout = null
 
-export function setNavBarHidden(hidden) {
-  // Hide the navbar when typing.
-  //
-  // Start a timer to show the navbars again after a delay.
-  if (navBarHidden.value !== hidden) {
-    navBarHidden.value = hidden
-  }
-
+export function clearNavBarTimeout() {
   if (navBarTimeout) {
     clearTimeout(navBarTimeout)
     navBarTimeout = null
   }
+}
 
-  if (hidden) {
-    navBarTimeout = setTimeout(() => {
-      navBarHidden.value = false
-    }, 5000)
+export function setNavBarHidden(hideRequest) {
+  // Hide the navbar when typing.
+  //
+  // Start a timer to show the navbars again after a delay.
+  if (navBarHidden.value !== hideRequest) {
+    function maybeHide(hidden) {
+      clearNavBarTimeout()
+
+      if (!hidden) {
+        // If we've been typing recently then we don't want to show the navbar.  This stops it sliding up
+        // and obscuring the chat box.
+        const lastTyping = useMiscStore().lastTyping
+        if (
+          lastTyping &&
+          new Date().getTime() - lastTyping < TYPING_TIME_INVERVAL
+        ) {
+          // We're still typing.  Keep the navbar hidden and check whether to show it again later.
+          console.log('Still typing - hide navbar')
+          navBarHidden.value = true
+          navBarTimeout = setTimeout(maybeHide, 5000, false)
+        } else {
+          // We're not still typing.  We can show the navbar.
+          console.log(
+            'Not still typing - show',
+            new Date().getTime(),
+            useMiscStore().lastTyping
+          )
+
+          navBarHidden.value = false
+        }
+      } else {
+        // We want to hide the navbar, and start a timer to show it again later if we're not still typing.
+        console.log('Hide now, check later')
+        navBarHidden.value = true
+
+        navBarTimeout = setTimeout(maybeHide, 5000, false)
+      }
+    }
+
+    maybeHide(hideRequest)
   }
 }
 
