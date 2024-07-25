@@ -28,7 +28,7 @@
           </VisibleWhen>
         </div>
         <div
-          class="closebutton mt-1 mb-1 pr-1 d-flex justify-content-end"
+          class="closebutton mt-1 mb-1 d-flex justify-content-around"
           @click="close"
         >
           <v-icon icon="times-circle" class="fa-2x" />
