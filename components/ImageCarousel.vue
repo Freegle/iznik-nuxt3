@@ -9,6 +9,7 @@
       img-width="100%"
       :interval="0"
       no-touch
+      fade
       :controls="false"
     >
       <b-carousel-slide
