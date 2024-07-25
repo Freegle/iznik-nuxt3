@@ -77,7 +77,7 @@ function next() {
   slide.value++
 }
 function prev() {
-  slide.value++
+  slide.value--
 }
 </script>
 <style scoped lang="scss">
