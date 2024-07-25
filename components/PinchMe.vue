@@ -6,7 +6,6 @@
     mouse
     touch
     wheel
-    bounds
     gesture
     :min-scale="0.5"
     :max-scale="10"
