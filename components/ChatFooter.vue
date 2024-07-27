@@ -330,6 +330,7 @@
 import pluralize from 'pluralize'
 import getCaretCoordinates from 'textarea-caret'
 import { Dropdown } from 'floating-vue'
+import { mapWritableState } from 'pinia'
 import { FAR_AWAY, TYPING_TIME_INVERVAL } from '../constants'
 import { setupChat } from '../composables/useChat'
 import { useMiscStore } from '../stores/misc'
@@ -433,7 +434,6 @@ export default {
       sendmessage: null,
       RSVP: false,
       likelymsg: null,
-      lastTyping: null,
       ouroffers: [],
       imagethumb: null,
       imageid: null,
@@ -447,6 +447,7 @@ export default {
     }
   },
   computed: {
+    ...mapWritableState(useMiscStore, ['lastTyping']),
     height() {
       // Bootstrap Vue Next doesn't yet have autoresizing.
       return this.sendmessage ? 'height: 12em' : 'height: 6em'
@@ -552,7 +553,6 @@ export default {
         }
       }
 
-      console.log('Return address', ret)
       return ret
     },
     showSuggested() {
@@ -792,10 +792,10 @@ export default {
       this.imagethumb = null
     },
     async typing() {
-      // Let the server know that we are typing, no more frequently than every 10 seconds.
       const now = new Date().getTime()
 
       if (!this.lastTyping || now - this.lastTyping > TYPING_TIME_INVERVAL) {
+        // Let the server know that we are typing, no more frequently than every 10 seconds.
         await this.chatStore.typing(this.id)
         this.lastTyping = now
       }

@@ -4,8 +4,13 @@
       <b-card-body class="p-1 p-sm-2">
         <b-card-text>
           <div v-if="mod && newsfeed.hidden" class="text-danger small mb-1">
-            This has been hidden and is only visible to volunteers and the
-            person who posted it.
+            This has been hidden
+            <UserName
+              v-if="newsfeed.hiddenby"
+              :id="newsfeed.hiddenby"
+              intro="by"
+            />
+            and is only visible to volunteers and the person who posted it.
           </div>
           <div v-if="isNewsComponent">
             <b-dropdown lazy class="float-end" right variant="white">

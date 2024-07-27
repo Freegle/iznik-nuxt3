@@ -175,8 +175,13 @@
           size="sm"
         />
         <div v-if="mod && reply.hidden" class="text-danger small">
-          This has been hidden and is only visible to volunteers and the person
-          who posted it.
+          This has been hidden by
+          <UserName
+            v-if="newsfeed.hiddenby"
+            :id="newsfeed.hiddenby"
+            intro="by"
+          />
+          and is only visible to volunteers and the person who posted it.
         </div>
       </div>
     </div>

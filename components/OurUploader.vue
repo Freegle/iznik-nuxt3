@@ -164,8 +164,10 @@ onMounted(() => {
     },
   })
     .use(Webcam, {
+      mirror: false,
       modes: ['picture'],
       mobileNativeCamera: true,
+      showVideoSourceDropdown: true,
       videoConstraints: {
         facingMode: 'environment',
       },

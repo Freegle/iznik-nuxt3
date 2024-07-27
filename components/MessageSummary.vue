@@ -169,7 +169,7 @@ export default {
   },
   methods: {
     async view() {
-      if (this.me && this.message.unseen) {
+      if (this.me && this.message?.unseen) {
         await this.messageStore.view(this.id)
       }
     },

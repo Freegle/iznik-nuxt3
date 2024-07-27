@@ -7,7 +7,7 @@
     touch
     wheel
     gesture
-    :min-scale="0.1"
+    :min-scale="0.5"
     :max-scale="10"
     :width="Math.round(width * 0.95)"
     :height="Math.round(height * 0.95)"

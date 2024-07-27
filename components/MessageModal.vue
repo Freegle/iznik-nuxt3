@@ -27,9 +27,12 @@
             />
           </VisibleWhen>
         </div>
-        <b-button variant="white" class="noborder p-0 mt-1 mb-1" @click="close">
+        <div
+          class="closebutton mt-1 mb-1 d-flex justify-content-around"
+          @click="close"
+        >
           <v-icon icon="times-circle" class="fa-2x" />
-        </b-button>
+        </div>
       </div>
     </template>
     <template #default>
@@ -207,6 +210,11 @@ function close() {
   width: 100%;
   align-items: center;
   grid-template-rows: 1fr;
-  grid-template-columns: calc(100% - 3rem) 3rem;
+  grid-template-columns: calc(100% - 5rem) 5rem;
+
+  .closebutton {
+    max-width: 5rem;
+    align-content: end;
+  }
 }
 </style>

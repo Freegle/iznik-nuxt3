@@ -225,7 +225,7 @@
 </template>
 <script setup>
 import { useRoute } from 'vue-router'
-import { setNavBarHidden } from '../composables/useNavbar'
+import { clearNavBarTimeout, setNavBarHidden } from '../composables/useNavbar'
 import NavbarMobilePost from './NavbarMobilePost'
 import { useNavbar, navBarHidden } from '~/composables/useNavbar'
 import { useMiscStore } from '~/stores/misc'
@@ -293,6 +293,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  clearNavBarTimeout()
   window.removeEventListener('scroll', handleScroll)
 })
 

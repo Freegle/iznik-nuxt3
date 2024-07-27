@@ -1,7 +1,7 @@
 <template>
   <div ref="wrapper" class="wrapper">
     <p class="text-center small">
-      Drag image around. Zoom with pinch (on mobile) or Ctrl+mouse wheel. Width
+      Drag image around. Zoom with pinch (on mobile) or Ctrl+mouse wheel.
     </p>
     <b-carousel
       :id="'message-carousel-' + messageId"
@@ -9,7 +9,8 @@
       img-width="100%"
       :interval="0"
       no-touch
-      :controls="attachments?.length > 1"
+      fade
+      :controls="false"
     >
       <b-carousel-slide
         v-for="(attachment, index) in attachments"
@@ -23,6 +24,22 @@
         </div>
       </b-carousel-slide>
     </b-carousel>
+    <div v-if="attachments?.length > 1">
+      <Teleport to="body">
+        <b-button v-if="slide > 0" class="prev" @click="prev">
+          <v-icon icon="arrow-circle-left" scale="2" />
+        </b-button>
+      </Teleport>
+      <Teleport to="body">
+        <b-button
+          v-if="slide < attachments.length - 1"
+          class="next"
+          @click="next"
+        >
+          <v-icon icon="arrow-circle-right" />
+        </b-button>
+      </Teleport>
+    </div>
   </div>
 </template>
 <script setup>
@@ -54,6 +71,15 @@ if (width > 3000) {
 if (height > 3000) {
   height.value = 3000
 }
+
+// We have these buttons teleported to body because otherwise we can't do a position fixed, which doesn't work in
+// a modal where a transform has been applied.
+function next() {
+  slide.value++
+}
+function prev() {
+  slide.value--
+}
 </script>
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';
@@ -61,17 +87,27 @@ if (height > 3000) {
 @import 'bootstrap/scss/mixins/_breakpoints';
 @import 'assets/css/sticky-banner.scss';
 
-:deep(.carousel-control-prev) {
+.prev,
+.next {
+  background-color: transparent;
   z-index: 11000 !important;
+  position: fixed;
+  border: none;
+  opacity: 0.5;
+
+  :deep(svg) {
+    width: 50px;
+    height: 50px;
+  }
 }
 
-:deep(.carousel-control-next) {
-  z-index: 11000 !important;
+.prev {
+  top: 50vh;
+  left: 20px;
 }
-
-:deep(.iiz__btn) {
-  z-index: 11001;
-  right: 50%;
+.next {
+  top: 50vh;
+  right: 20px;
 }
 
 .wrapper {

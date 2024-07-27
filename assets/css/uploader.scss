@@ -2,6 +2,7 @@
 @import 'bootstrap/scss/_functions';
 @import 'bootstrap/scss/_variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/sticky-banner.scss';
 
 .uppy-Dashboard-poweredBy {
   display: none !important;
@@ -3732,4 +3733,12 @@ a.uppy-Dashboard-poweredBy {
   height: 18px;
   font-size: 9px;
   line-height: 18px;
+}
+
+.uppy-Webcam-buttonContainer {
+  padding-bottom: $sticky-banner-height-mobile;
+
+  @include media-breakpoint-up(md) {
+      padding-bottom: 0;
+  }
 }
