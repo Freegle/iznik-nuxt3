@@ -137,7 +137,7 @@
                 <MicroVolunteeringSurvey :url="task.url" @done="considerNext" />
               </div>
               <div v-else-if="task.type === 'Invite'">
-                <MicroVolunteeringInvite @done="considerNext" />
+                <MicroVolunteeringInvite @next="considerNext" />
               </div>
               <div v-else>Unknown task {{ task }}</div>
               <!--              <p>You can also:</p>-->

@@ -74,12 +74,22 @@
               </b-card-header>
               <b-card-text class="p-2">
                 <p>
-                  You can also donate by bank transfer to sort code 60-83-01,
-                  account number 20339094. The name of the account is Freegle
-                  Limited, and the bank is Unity Trust Bank.
+                  You can also donate by transfer to sort code 60-83-01, account
+                  number 20339094. The account name is Freegle Limited, and the
+                  bank is Unity Trust Bank.
                 </p>
                 <p>
-                  If you do this, please complete a Gift Aid
+                  Please use a reference of
+                  <span v-if="myid" class="text-danger font-weight-bold">{{
+                    myid
+                  }}</span>
+                  <span v-else class="text-danger font-weight-bold">
+                    your email
+                  </span>
+                  so we know who it comes from!
+                </p>
+                <p>
+                  If you can, please make a Gift Aid
                   <!-- eslint-disable-next-line -->
                 Declaration <nuxt-link no-prefetch to="/giftaid">here</nuxt-link>.
                 </p>
@@ -96,11 +106,19 @@
                 <p>
                   Please make it payable to Freegle Limited and send to Freegle,
                   64A North Road, Ormesby, Great Yarmouth NR29 3LE. Please
-                  include your Freegle email, so we can work out who it comes
-                  from!
+                  include
+                  <span v-if="myid">
+                    reference
+                    <span class="font-weight-bold text-danger">{{ myid }}</span
+                    >,
+                  </span>
+                  <span v-else class="font-weight-bold text-danger"
+                    >your email,</span
+                  >
+                  so we know who it comes from!
                 </p>
                 <p>
-                  If you do this, please complete a Gift Aid
+                  If you can, please make a Gift Aid
                   <!-- eslint-disable-next-line -->
                 Declaration <nuxt-link  no-prefetch to="/giftaid">here</nuxt-link>.
                 </p>
