@@ -9,7 +9,7 @@
       placeholder="Tell your friends why they should get freegling!"
       class="mt-2 mb-2 border border-primary"
     />
-    <b-list-group :key="'messageshare-' + bump" horizontal class="flex-wrap">
+    <b-list-group horizontal class="flex-wrap">
       <b-list-group-item>
         <ShareNetwork
           network="facebook"
