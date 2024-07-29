@@ -120,16 +120,6 @@ export default {
         variant: 'microvolunteering',
       })
     },
-    async getContacts() {
-      this.chosen()
-
-      this.contacts = await navigator.contacts.select(
-        ['name', 'email', 'tel'],
-        {
-          multiple: true,
-        }
-      )
-    },
   },
 }
 </script>
