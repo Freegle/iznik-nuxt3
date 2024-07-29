@@ -1,7 +1,7 @@
 <template>
   <div ref="wrapper" class="wrapper">
     <p class="text-center small">
-      Drag image around. Zoom with pinch (on mobile) or Ctrl+mouse wheel. Width
+      Drag image around. Zoom with pinch (on mobile) or Ctrl+mouse wheel.
     </p>
     <b-carousel
       :id="'message-carousel-' + messageId"
@@ -9,6 +9,7 @@
       img-width="100%"
       :interval="0"
       no-touch
+      fade
       :controls="false"
     >
       <b-carousel-slide
