@@ -140,7 +140,8 @@ export default {
       this.$emit('remove', this.id)
     },
     async rotate(deg) {
-      const curr = this.mods?.rotate || 0
+      this.mods = this.mods ? this.mods : {}
+      const curr = this.mods.rotate || 0
       this.mods.rotate = curr + deg
 
       // Ensure between 0 and 360
