@@ -6,7 +6,7 @@
           <div v-if="mod && newsfeed.hidden" class="text-danger small mb-1">
             This has been hidden
             <UserName
-              v-if="newsfeed.hiddenby"
+              v-if="newsfeed?.hiddenby"
               :id="newsfeed.hiddenby"
               intro="by"
             />

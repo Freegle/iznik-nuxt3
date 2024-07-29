@@ -177,7 +177,7 @@
         <div v-if="mod && reply.hidden" class="text-danger small">
           This has been hidden by
           <UserName
-            v-if="newsfeed.hiddenby"
+            v-if="newsfeed?.hiddenby"
             :id="newsfeed.hiddenby"
             intro="by"
           />
