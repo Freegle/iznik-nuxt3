@@ -54,13 +54,37 @@
   </div>
 </template>
 <script setup>
+import { useRoute } from 'vue-router'
+import { buildHead } from '~/composables/useBuildHead'
+
+const runtimeConfig = useRuntimeConfig()
+const route = useRoute()
+
 definePageMeta({
   layout: 'no-navbar',
 })
 
+buildHead(
+  route,
+  runtimeConfig,
+  'National Reuse Day 2024',
+  'Celebrate reuse and get involved',
+  runtimeConfig.public.USER_SITE + '/councils/NationalReuseDay.png'
+)
+
+function removeNavbar() {
+  // Remove nav elements from the DOM.  Bit hacky, but it'll do.
+  const navbars = document.querySelectorAll('.navbar')
+
+  navbars.forEach((navbar) => {
+    navbar.remove()
+  })
+
+  setTimeout(removeNavbar, 100)
+}
+
 onMounted(() => {
-  // Remove nav elements from the DOM.
-  document.querySelector('.navbar').remove()
+  removeNavbar()
 })
 </script>
 <style scoped lang="scss">
@@ -95,5 +119,9 @@ onMounted(() => {
 
 :deep(.image) {
   width: 50vw;
+
+  img {
+    width: 50vw;
+  }
 }
 </style>
