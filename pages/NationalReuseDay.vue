@@ -8,7 +8,7 @@
           preload
           src="/councils/NationalReuseDay.png"
           alt="National Reuse Day logo"
-          class-name="image"
+          class-name="image mt-2"
         />
       </div>
       <div class="spacer" />
@@ -100,7 +100,7 @@ onMounted(() => {
 }
 
 .spacer {
-  height: 100px;
+  height: 80px;
 }
 
 .boxes {
