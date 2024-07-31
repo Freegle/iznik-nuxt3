@@ -13,16 +13,13 @@
           v-else-if="multiple || !modelValue.length"
           class="d-flex justify-content-around"
         >
-          <b-button
-            :id="uploaderUid"
-            variant="primary"
-            @click="modalOpen = true"
-          >
+          <b-button :id="uploaderUid" variant="primary" @click="openModal">
             {{ label }}
           </b-button>
         </div>
       </div>
       <DashboardModal
+        ref="dashboard"
         :uppy="uppy"
         :open="modalOpen"
         :props="{
@@ -42,7 +39,6 @@ import { DashboardModal } from '@uppy/vue'
 import Tus from '@uppy/tus'
 import Webcam from '@uppy/webcam'
 import Compressor from '@uppy/compressor'
-import { nextTick } from 'vue'
 
 import ResizeObserver from 'resize-observer-polyfill'
 import { uid } from '../composables/useId'
@@ -122,12 +118,18 @@ function handleClose() {
   modalOpen.value = false
 }
 
+function openModal() {
+  console.log('Open modal', uppy)
+  const DashboardModal = uppy.getPlugin('DashboardModal')
+  console.log('Got dashboard', DashboardModal)
+  DashboardModal.openModal()
+}
+
 const uploaderUid = ref(uid('uploader'))
 
 const emit = defineEmits(['update:modelValue', 'closed'])
 const uploadedPhotos = ref([])
 const busy = ref(false)
-const dashboard = ref(null)
 
 const label = computed(() => {
   if (props.label) {
@@ -141,8 +143,14 @@ const label = computed(() => {
 
 let uppy = null
 
-watch(dashboard, (newVal) => {
+const dashboard = ref(null)
+
+watch(dashboard, (newVal, oldVal) => {
   console.log('Dashboard changed', newVal)
+
+  if (newVal && !oldVal && props.startOpen) {
+    openModal()
+  }
 })
 
 onMounted(() => {
@@ -182,12 +190,6 @@ onMounted(() => {
     console.log('Modal is closed')
     emit('closed')
   })
-
-  if (props.startOpen) {
-    nextTick(() => {
-      modalOpen.value = true
-    })
-  }
 })
 
 async function uploadSuccess(result) {
