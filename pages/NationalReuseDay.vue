@@ -6,7 +6,7 @@
       <div class="d-flex justify-content-around">
         <ProxyImage
           preload
-          src="/councils/NationalReuseDay.png"
+          src="/councils/NationalReuseDay2.png"
           alt="National Reuse Day logo"
           class-name="image mt-2"
         />
