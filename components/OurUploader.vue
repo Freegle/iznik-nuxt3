@@ -23,7 +23,7 @@
         :uppy="uppy"
         :open="modalOpen"
         :props="{
-          onRequestCloseModal: handleClose,
+          onRequestCloseModal: closeModal,
           closeAfterFinish: true,
         }"
       />
@@ -113,10 +113,6 @@ const props = defineProps({
 const imageStore = useImageStore()
 
 const modalOpen = ref(props.startOpen)
-
-function handleClose() {
-  modalOpen.value = false
-}
 
 function openModal() {
   const DashboardModal = uppy.getPlugin('DashboardModal')
