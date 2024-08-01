@@ -54,7 +54,7 @@
 import { Zoompinch as ZoomPinch } from 'zoompinch'
 import { ref } from '#imports'
 
-defineProps({
+const props = defineProps({
   attachment: {
     type: Object,
     required: true,
@@ -66,6 +66,11 @@ defineProps({
   height: {
     type: Number,
     required: true,
+  },
+  zoom: {
+    type: Number,
+    required: false,
+    default: 1,
   },
 })
 
@@ -89,6 +94,14 @@ watch(
     })
   }
 )
+
+watch(
+  () => props.zoom,
+  (newVal) => {
+    zoompinchRef.value?.applyTransform(newVal, [0.5, 0.5], [0.5, 0.5], false)
+  }
+)
+
 onMounted(() => {
   console.log('zl', zoompinchRef)
   fit()
