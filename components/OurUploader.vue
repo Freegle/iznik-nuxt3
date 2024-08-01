@@ -1,6 +1,6 @@
 <template>
   <client-only>
-    <div class="wrapper">
+    <div class="wrapper" @dragenter="openModal">
       <div class="d-flex flex-column justify-content-around">
         <v-icon
           v-if="!busy"
