@@ -602,16 +602,18 @@ export default {
     },
     currentAtts: {
       handler(newVal) {
-        // We have uploaded a photo.
-        this.uploading = false
+        if (newVal) {
+          // We have uploaded a photo.
+          this.uploading = false
 
-        // Show the chat busy indicator.
-        this.chatBusy = true
+          // Show the chat busy indicator.
+          this.chatBusy = true
 
-        // We have uploaded a photo.  Post a chatmessage referencing it.
-        this.imageid = newVal[0].id
-        this.imageuid = newVal[0].ouruid
-        this.imagemods = newVal[0].externalmods
+          // We have uploaded a photo.  Post a chatmessage referencing it.
+          this.imageid = newVal[0].id
+          this.imageuid = newVal[0].ouruid
+          this.imagemods = newVal[0].externalmods
+        }
       },
       deep: true,
     },
