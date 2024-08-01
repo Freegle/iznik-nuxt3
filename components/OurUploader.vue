@@ -23,7 +23,7 @@
         :uppy="uppy"
         :open="modalOpen"
         :props="{
-          onRequestCloseModal: handleClose,
+          onRequestCloseModal: closeModal,
           closeAfterFinish: true,
         }"
       />
@@ -114,15 +114,18 @@ const imageStore = useImageStore()
 
 const modalOpen = ref(props.startOpen)
 
-function handleClose() {
-  modalOpen.value = false
+function openModal() {
+  const DashboardModal = uppy.getPlugin('DashboardModal')
+  if (DashboardModal) {
+    DashboardModal.openModal()
+  }
 }
 
-function openModal() {
-  console.log('Open modal', uppy)
+function closeModal() {
   const DashboardModal = uppy.getPlugin('DashboardModal')
-  console.log('Got dashboard', DashboardModal)
-  DashboardModal.openModal()
+  if (DashboardModal) {
+    DashboardModal.closeModal()
+  }
 }
 
 const uploaderUid = ref(uid('uploader'))
@@ -244,6 +247,8 @@ async function uploadSuccess(result) {
 
     // Reset the uploader so that if we go back in we won't see photos which have already been uploaded.  This is
     // because control of the photos is handed over to our code, rather than the uploader.
+    console.log('Reset uploader')
+    closeModal()
     uppy.clear()
     busy.value = false
   }

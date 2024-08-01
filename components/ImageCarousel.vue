@@ -1,8 +1,34 @@
 <template>
   <div ref="wrapper" class="wrapper">
-    <p class="text-center small">
-      Drag image around. Zoom with pinch (on mobile) or Ctrl+mouse wheel.
-    </p>
+    <div class="d-flex justify-content-center mt-2 mb-2">
+      <div class="d-flex flex-column justify-content-around">
+        <b-button
+          variant="white "
+          class="mr-1"
+          size="xs"
+          @click="zoom = Math.max(0, zoom - 0.1)"
+        >
+          <v-icon icon="circle-minus" /> Zoom out
+        </b-button>
+      </div>
+      <div
+        class="d-flex flex-column justify-content-around ml-1 mr-1 ml-md-2 mr-md-2"
+      >
+        <div class="small">
+          Drag image around. Zoom pinch (on mobile) or Ctrl+mouse wheel.
+        </div>
+      </div>
+      <div class="d-flex flex-column justify-content-around">
+        <b-button
+          variant="white"
+          class="mr-1"
+          size="xs"
+          @click="zoom = Math.min(10, zoom + 0.1)"
+        >
+          <v-icon icon="circle-plus" /> Zoom in
+        </b-button>
+      </div>
+    </div>
     <b-carousel
       :id="'message-carousel-' + messageId"
       v-model="slide"
@@ -20,7 +46,12 @@
         class="slide"
       >
         <div class="d-flex justify-content-around">
-          <PinchMe :attachment="attachment" :width="width" :height="height" />
+          <PinchMe
+            :attachment="attachment"
+            :width="width"
+            :height="height"
+            :zoom="zoom"
+          />
         </div>
       </b-carousel-slide>
     </b-carousel>
@@ -59,6 +90,8 @@ defineProps({
     required: true,
   },
 })
+
+const zoom = ref(1)
 
 const slide = ref(0)
 
