@@ -119,10 +119,17 @@ function handleClose() {
 }
 
 function openModal() {
-  console.log('Open modal', uppy)
   const DashboardModal = uppy.getPlugin('DashboardModal')
-  console.log('Got dashboard', DashboardModal)
-  DashboardModal.openModal()
+  if (DashboardModal) {
+    DashboardModal.openModal()
+  }
+}
+
+function closeModal() {
+  const DashboardModal = uppy.getPlugin('DashboardModal')
+  if (DashboardModal) {
+    DashboardModal.closeModal()
+  }
 }
 
 const uploaderUid = ref(uid('uploader'))
@@ -244,6 +251,8 @@ async function uploadSuccess(result) {
 
     // Reset the uploader so that if we go back in we won't see photos which have already been uploaded.  This is
     // because control of the photos is handed over to our code, rather than the uploader.
+    console.log('Reset uploader')
+    closeModal()
     uppy.clear()
     busy.value = false
   }
