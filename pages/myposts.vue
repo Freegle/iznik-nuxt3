@@ -4,6 +4,7 @@
       v-if="showDonationAskModal"
       @hidden="showDonationAskModal = false"
     />
+    <DeliveryAskModal v-if="askDelivery" :ids="ids" />
 
     <b-container fluid class="p-0 p-xl-2">
       <h1 class="visually-hidden">My posts</h1>
@@ -94,7 +95,6 @@
   </client-only>
 </template>
 <script setup>
-import { useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useMessageStore } from '../stores/message'
 import { useSearchStore } from '../stores/search'
@@ -120,7 +120,7 @@ const searchStore = useSearchStore()
 const trystStore = useTrystStore()
 
 const runtimeConfig = useRuntimeConfig()
-const route = useRoute()
+const ids = ref([])
 
 definePageMeta({
   layout: 'login',
@@ -128,7 +128,7 @@ definePageMeta({
 
 useHead(
   buildHead(
-    route,
+    useRouter().currentRoute.value,
     runtimeConfig,
     'My Posts',
     "See OFFERs/WANTEDs that you've posted, and replies to them.",
@@ -211,7 +211,6 @@ const smallAdVisible = ref(false)
 const triedAds = ref(false)
 
 function adRendered(rendered, index, dimension) {
-  console.log('My posts rendered', rendered, index, dimension)
   if (rendered) {
     if (index === 0) {
       largeAdVisible.value = true
@@ -224,9 +223,21 @@ function adRendered(rendered, index, dimension) {
 }
 
 trystStore.fetch()
-// onMounted(() => {
-//   showDonationAskModal.value = true
-// })
+
+// If we have just submitted some posts then we will have been passed ids.
+// In that case, we might want to ask if we can deliver.
+const askDelivery = ref(false)
+
+onMounted(() => {
+  if (window.history.state?.ids) {
+    // We have just submitted.  Grab the ids and clear it out so that we don't show the modal next time.
+    ids.value = window.history.state.ids
+    window.history.replaceState({ ids: null }, null)
+    askDelivery.value = true
+  }
+
+  // showDonationAskModal.value = true
+})
 </script>
 <style scoped lang="scss">
 @import 'assets/css/sticky-banner.scss';

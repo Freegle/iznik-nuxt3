@@ -1,5 +1,5 @@
 import { useRoute } from 'vue-router'
-import { ref, computed } from '#imports'
+import { ref, computed, navigateTo } from '#imports'
 import { useComposeStore } from '~/stores/compose'
 import { useGroupStore } from '~/stores/group'
 import { useMessageStore } from '~/stores/message'
@@ -251,9 +251,15 @@ export async function freegleIt(type, router) {
     const params = {
       newuser: null,
       newpassword: null,
+      ids: [],
     }
 
     await results.forEach(async (res) => {
+      console.log('Consider result', res, type)
+      if (type === 'Offer' && res.id) {
+        params.ids.push(res.id)
+      }
+
       if (res.newuser) {
         params.newuser = res.newuser
         params.newpassword = res.newpassword
@@ -268,22 +274,17 @@ export async function freegleIt(type, router) {
 
     if (results.length > 0 && results[0].groupid) {
       results.forEach((res) => {
-        console.log('Process result', res)
         promises.push(messageStore.fetch(res.id))
       })
 
       await Promise.all(promises)
-
-      router.push({
-        name: 'myposts',
-        params,
-      })
-    } else {
-      // Was probably already submitted
-      router.push({
-        name: 'myposts',
-      })
     }
+
+    // We don't have a parameter, so we pass the data in the history state to avoid it showing up in the URL.
+    navigateTo({
+      name: 'myposts',
+      state: params,
+    })
   } catch (e) {
     console.log('Submit failed', e, e?.response?.data?.ret)
     this.submitting = false
