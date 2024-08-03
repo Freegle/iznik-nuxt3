@@ -374,7 +374,7 @@ export const useComposeStore = defineStore({
       return results
     },
     prune() {
-      if (!Array.isArray(this.messages)) {
+      if (this.messages && !Array.isArray(this.messages)) {
         // This is bad data.
         console.log('Bad compose messages, discard')
         this.messages = []

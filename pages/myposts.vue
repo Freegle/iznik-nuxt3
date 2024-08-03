@@ -45,6 +45,8 @@
               <JobsTopBar />
             </VisibleWhen>
 
+            <NewUserInfo v-if="newUserPassword" :password="newUserPassword" />
+
             <MyPostsPostsList
               v-if="offers"
               type="Offer"
@@ -121,6 +123,7 @@ const trystStore = useTrystStore()
 
 const runtimeConfig = useRuntimeConfig()
 const ids = ref([])
+const newUserPassword = ref(null)
 
 definePageMeta({
   layout: 'login',
@@ -232,7 +235,12 @@ onMounted(() => {
   if (window.history.state?.ids) {
     // We have just submitted.  Grab the ids and clear it out so that we don't show the modal next time.
     ids.value = window.history.state.ids
-    window.history.replaceState({ ids: null }, null)
+    newUserPassword.value = window.history.state.newpassword
+
+    window.setTimeout(() => {
+      window.history.replaceState({ ids: null }, null)
+    }, 5000)
+
     askDelivery.value = true
   }
 

@@ -1,5 +1,5 @@
 import { useRoute } from 'vue-router'
-import { ref, computed, navigateTo } from '#imports'
+import { ref, computed } from '#imports'
 import { useComposeStore } from '~/stores/compose'
 import { useGroupStore } from '~/stores/group'
 import { useMessageStore } from '~/stores/message'
@@ -264,9 +264,13 @@ export async function freegleIt(type, router) {
         params.newuser = res.newuser
         params.newpassword = res.newpassword
 
-        // Fetch the session so that we know we're logged in, and so that we have permission to fetch messages
+        // Make sure we're logged in, and so that we have permission to fetch messages
         // below.
-        await authStore.fetchUser()
+        console.log('Login', composeStore.email)
+        await authStore.login({
+          email: composeStore.email,
+          password: params.newpassword,
+        })
       }
     })
 
@@ -280,11 +284,13 @@ export async function freegleIt(type, router) {
       await Promise.all(promises)
     }
 
-    // We don't have a parameter, so we pass the data in the history state to avoid it showing up in the URL.
-    navigateTo({
+    // We pass the data in the history state to avoid it showing up in the URL.
+    console.log('Navigate to myposts', params)
+    router.push({
       name: 'myposts',
       state: params,
     })
+    console.log('Navigated')
   } catch (e) {
     console.log('Submit failed', e, e?.response?.data?.ret)
     this.submitting = false
