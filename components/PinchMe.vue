@@ -18,7 +18,7 @@
       touch
       wheel
       gesture
-      :min-scale="0.5"
+      :min-scale="1"
       :max-scale="10"
       :width="imageWidth"
       :height="imageHeight"
@@ -101,6 +101,7 @@ watch(
 watch(
   () => props.zoom,
   (newVal) => {
+    console.log('Zoom to', newVal)
     transform.value.scale = newVal
   }
 )

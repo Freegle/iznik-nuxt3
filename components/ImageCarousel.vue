@@ -6,7 +6,7 @@
           variant="white "
           class="mr-1"
           size="xs"
-          @click="zoom = Math.max(0, zoom - 0.1)"
+          @click="zoom = Math.max(1, zoom - 0.1)"
         >
           <v-icon icon="circle-minus" /> Zoom out
         </b-button>
@@ -106,9 +106,11 @@ if (height > 3000) {
 // We have these buttons teleported to body because otherwise we can't do a position fixed, which doesn't work in
 // a modal where a transform has been applied.
 function next() {
+  zoom.value = 1
   slide.value++
 }
 function prev() {
+  zoom.value = 1
   slide.value--
 }
 </script>
