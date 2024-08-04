@@ -1,16 +1,6 @@
 <template>
-  <zoom-pinch
-    ref="zoompinchRef"
-    v-model:transform="transform"
-    :rotation="false"
-    mouse
-    touch
-    wheel
-    gesture
-    :min-scale="0.5"
-    :max-scale="10"
-    :width="Math.round(width * 0.95)"
-    :height="Math.round(height * 0.95)"
+  <div
+    class="pinchwrapper justify-content-around"
     :style="
       'width: ' +
       Math.round(width * 0.95) +
@@ -19,39 +9,52 @@
       'px'
     "
   >
-    <template #canvas>
-      <OurUploadedImage
-        v-if="attachment.ouruid"
-        :src="attachment.ouruid"
-        :modifiers="attachment.externalmods"
-        alt="Item picture"
-        :width="Math.round(width * 0.95)"
-        lazy
-      />
-      <NuxtPicture
-        v-else-if="attachment.externaluid"
-        format="webp"
-        provider="uploadcare"
-        :src="attachment.externaluid"
-        :modifiers="attachment.externalmods"
-        alt="Item picture"
-        :width="Math.round(width * 0.95)"
-        lazy
-      />
-      <b-img
-        v-else
-        generator-unable-to-provide-required-alt=""
-        title="Item picture"
-        :src="attachment.path"
-        itemprop="image"
-        class="w-100"
-        lazy
-      />
-    </template>
-  </zoom-pinch>
+    <zoom-pinch
+      ref="zoompinchRef"
+      v-model:transform="transform"
+      class="zoompinch"
+      :rotation="false"
+      mouse
+      touch
+      wheel
+      gesture
+      :min-scale="0.5"
+      :max-scale="10"
+      :width="imageWidth"
+      :height="imageHeight"
+    >
+      <template #canvas>
+        <OurUploadedImage
+          v-if="attachment.ouruid"
+          :src="attachment.ouruid"
+          :modifiers="attachment.externalmods"
+          alt="Item picture"
+          lazy
+        />
+        <NuxtPicture
+          v-else-if="attachment.externaluid"
+          format="webp"
+          provider="uploadcare"
+          :src="attachment.externaluid"
+          :modifiers="attachment.externalmods"
+          alt="Item picture"
+          lazy
+        />
+        <b-img
+          v-else
+          generator-unable-to-provide-required-alt=""
+          title="Item picture"
+          :src="attachment.path"
+          itemprop="image"
+          lazy
+        />
+      </template>
+    </zoom-pinch>
+  </div>
 </template>
 <script setup>
 import { Zoompinch as ZoomPinch } from 'zoompinch'
+import { onBeforeUnmount } from 'vue'
 import { ref } from '#imports'
 
 const props = defineProps({
@@ -78,32 +81,73 @@ const zoompinchRef = ref(null)
 const transform = ref({ x: 0, y: 0, scale: 1, rotate: 0 })
 
 function fit() {
-  transform.value = { x: 0, y: 0, scale: 1, rotate: 0 }
-  // zoompinchRef.value?.applyTransform(1, [0.5, 0.5], [1, 1])
+  requestAnimationFrame(() => {
+    transform.value = { x: 0, y: 0, scale: 1, rotate: 0 }
+  })
 }
 
 onMounted(() => {
+  console.log('Mounted', fit)
   setTimeout(() => fit(true))
 })
 
 watch(
   () => zoompinchRef.value?.wrapperBounds,
-  () => {
-    requestAnimationFrame(() => {
-      zoompinchRef.value?.applyTransform(1, [0.5, 0.5], [0.5, 0.5], false)
-    })
+  (newVal) => {
+    fit()
   }
 )
 
 watch(
   () => props.zoom,
   (newVal) => {
-    zoompinchRef.value?.applyTransform(newVal, [0.5, 0.5], [0.5, 0.5], false)
+    transform.value.scale = newVal
   }
 )
 
+let monitorTimeout = null
+const imageWidth = ref(props.width)
+const imageHeight = ref(props.height)
+
+function getNaturalSizes() {
+  const parent = zoompinchRef.value?.$el
+
+  if (parent) {
+    const img = parent.querySelector('img')
+    if (
+      img &&
+      img.naturalWidth &&
+      img.naturalHeight &&
+      img.naturalHeight !== imageHeight.value &&
+      img.naturalWidth !== imageWidth.value
+    ) {
+      imageWidth.value = img.naturalWidth
+      imageHeight.value = img.naturalHeight
+      fit()
+    }
+  }
+
+  monitorTimeout = setTimeout(getNaturalSizes, 100)
+}
+
 onMounted(() => {
   console.log('zl', zoompinchRef)
+  getNaturalSizes()
   fit()
 })
+
+onBeforeUnmount(() => {
+  clearTimeout(monitorTimeout)
+})
 </script>
+<style scoped lang="scss">
+.zoompinch {
+  width: 100%;
+  height: 100%;
+  cursor: move;
+}
+
+:deep(.wrapper) {
+  border: none;
+}
+</style>
