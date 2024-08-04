@@ -232,7 +232,7 @@ trystStore.fetch()
 const askDelivery = ref(false)
 
 onMounted(() => {
-  if (window.history.state?.ids) {
+  if (window.history.state?.ids?.length) {
     // We have just submitted.  Grab the ids and clear it out so that we don't show the modal next time.
     ids.value = window.history.state.ids
     newUserPassword.value = window.history.state.newpassword
