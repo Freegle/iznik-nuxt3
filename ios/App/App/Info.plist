@@ -69,8 +69,6 @@
 	<string>To invite a friend to use Freegle</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>To find your location when offering an item</string>
-	<key>NSLocationAlwaysUsageDescription</key>
-	<string>To find your location when offering an item</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>To find your location when offering an item</string>
 	<key>NSMicrophoneUsageDescription</key>

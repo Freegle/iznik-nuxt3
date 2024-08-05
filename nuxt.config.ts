@@ -10,7 +10,7 @@ import https from 'https'
 // - config.js: MOBILE_VERSION eg 3.1.9
 // - android\app\build.gradle
 //    - versionCode eg 1202
-//    - versionName eg "3.1.9"
+//    - versionName eg "3.2.0"
 // - ios\App\App.xcodeproj\project.pbxproj
 //    - CURRENT_PROJECT_VERSION eg 1200 TWICE
 //    - MARKETING_VERSION eg 3.1.9 TWICE

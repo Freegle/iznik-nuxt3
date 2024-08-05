@@ -16,11 +16,12 @@ import { defineStore } from 'pinia'
 import { Device } from '@capacitor/device'
 import { Badge } from '@capawesome/capacitor-badge'
 //import { PushNotifications } from '@capacitor/push-notifications'
-import { PushNotifications } from '@freegle/capacitor-push-notifications'
+/* 2024-08 import { PushNotifications } from '@freegle/capacitor-push-notifications'*/
+import { PushNotifications } from '@freegle/capacitor-push-notifications-cap6'
 import { useAuthStore } from '~/stores/auth'
 import { AppLauncher } from '@capacitor/app-launcher'
 import api from '~/api'
-import { ZoomPlugin } from 'capacitor-zoom-android';
+/* 2024-08 import { ZoomPlugin } from 'capacitor-zoom-android';*/
 import { App } from '@capacitor/app';
 import { useRouter } from '#imports'
 import { useChatStore } from '~/stores/chat'
@@ -67,9 +68,9 @@ export const useMobileStore = defineStore({ // Do not persist
       await this.initPushNotifications()
       await this.checkForAppUpdate()
       await this.initWakeUpActions()
-      if (!this.isiOS) {
+      /* 2024-08 if (!this.isiOS) {
         Capacitor.Plugins.ZoomPlugin.enableZoom()
-      }
+      }*/
       // Sentry.captureMessage("Something went wrong A");
       // Sentry.captureException("Test Captured Exception three");
     },
@@ -97,9 +98,9 @@ export const useMobileStore = defineStore({ // Do not persist
     },
     //////////////
     async enableAndroidPinchZoom() {
-      if (!this.isiOS) {
+      /* 2024-08 if (!this.isiOS) {
         ZoomPlugin.enableZoom()
-      }
+      }*/
     },
     extractQueryStringParams(url) {
       let urlParams = false
@@ -214,9 +215,9 @@ export const useMobileStore = defineStore({ // Do not persist
 
       let permStatus = await PushNotifications.checkPermissions();
       console.log('checkPermissions:', permStatus)
-      /* PushNotifications.checkPermissions().then((result) => {
-        console.log('checkPermissions:', result) // Android always returns "granted"
-      })*/
+      // PushNotifications.checkPermissions().then((result) => {
+      //  console.log('checkPermissions:', result) // Android always returns "granted"
+      //})
 
       // On success, we should be able to receive notifications
       await PushNotifications.addListener('registration',
@@ -319,10 +320,11 @@ export const useMobileStore = defineStore({ // Do not persist
       const router = useRouter()
 
       console.log('handleNotification', notification)
+      /* 2024-08
       PushNotifications.getDeliveredNotifications().then(notificationList => {
         console.log("getDeliveredNotifications")
         console.log("getDeliveredNotifications", notificationList)
-      })
+      })*/
 
       //console.log('push notification', notificationType)
       console.log(notification)

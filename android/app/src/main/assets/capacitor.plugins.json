@@ -12,7 +12,7 @@
 		"classpath": "com.capacitorjs.plugins.network.NetworkPlugin"
 	},
 	{
-		"pkg": "@freegle/capacitor-push-notifications",
+		"pkg": "@freegle/capacitor-push-notifications-cap6",
 		"classpath": "com.capacitorjs.plugins.pushnotifications.PushNotificationsPlugin"
 	},
 	{
@@ -34,10 +34,6 @@
 	{
 		"pkg": "@capacitor/share",
 		"classpath": "com.capacitorjs.plugins.share.SharePlugin"
-	},
-	{
-		"pkg": "capacitor-zoom-android",
-		"classpath": "com.ecc521.capacitorzoomandroid.ZoomPluginPlugin"
 	},
 	{
 		"pkg": "@capacitor/app",

@@ -11,8 +11,8 @@ project(':capacitor-device').projectDir = new File('../node_modules/@capacitor/d
 include ':capacitor-network'
 project(':capacitor-network').projectDir = new File('../node_modules/@capacitor/network/android')
 
-include ':freegle-capacitor-push-notifications'
-project(':freegle-capacitor-push-notifications').projectDir = new File('../node_modules/@freegle/capacitor-push-notifications/android')
+include ':freegle-capacitor-push-notifications-cap6'
+project(':freegle-capacitor-push-notifications-cap6').projectDir = new File('../node_modules/@freegle/capacitor-push-notifications-cap6/android')
 
 include ':capawesome-capacitor-badge'
 project(':capawesome-capacitor-badge').projectDir = new File('../node_modules/@capawesome/capacitor-badge/android')
@@ -28,9 +28,6 @@ project(':capacitor-camera').projectDir = new File('../node_modules/@capacitor/c
 
 include ':capacitor-share'
 project(':capacitor-share').projectDir = new File('../node_modules/@capacitor/share/android')
-
-include ':capacitor-zoom-android'
-project(':capacitor-zoom-android').projectDir = new File('../node_modules/capacitor-zoom-android/android')
 
 include ':capacitor-app'
 project(':capacitor-app').projectDir = new File('../node_modules/@capacitor/app/android')
