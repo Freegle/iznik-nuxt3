@@ -110,6 +110,11 @@ export function dateshort(val) {
   return dayjs(val).format('MMM DD, YYYY')
 }
 
+export function dateonlyNoYear(val) {
+  console.log('Format', val)
+  return dayjs(val).format('Do MMMM')
+}
+
 export function weekdayshort(val) {
   return dayjs(val).format('dddd Do HH:mm a')
 }

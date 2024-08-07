@@ -39,6 +39,7 @@ const props = defineProps({
 })
 
 const messageStore = useMessageStore()
+const emit = defineEmits(['hide'])
 
 async function maybe() {
   const promises = []
@@ -60,6 +61,7 @@ async function maybe() {
   })
 
   await Promise.all(promises)
+  emit('hide')
   hide()
 }
 
@@ -69,6 +71,7 @@ async function no() {
     variant: 'no',
   })
 
+  emit('hide')
   hide()
 }
 

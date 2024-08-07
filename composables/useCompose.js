@@ -252,6 +252,7 @@ export async function freegleIt(type, router) {
       newuser: null,
       newpassword: null,
       ids: [],
+      type,
     }
 
     await results.forEach(async (res) => {

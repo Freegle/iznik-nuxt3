@@ -4,6 +4,7 @@
       v-if="showDonationAskModal"
       @hidden="showDonationAskModal = false"
     />
+    <DeadlineAskModal v-if="askDeadline" :ids="ids" @hide="maybeAskDelivery" />
     <DeliveryAskModal v-if="askDelivery" :ids="ids" />
 
     <b-container fluid class="p-0 p-xl-2">
@@ -123,6 +124,7 @@ const trystStore = useTrystStore()
 
 const runtimeConfig = useRuntimeConfig()
 const ids = ref([])
+const type = ref(null)
 const newUserPassword = ref(null)
 
 definePageMeta({
@@ -230,18 +232,29 @@ trystStore.fetch()
 // If we have just submitted some posts then we will have been passed ids.
 // In that case, we might want to ask if we can deliver.
 const askDelivery = ref(false)
+const askDeadline = ref(false)
+
+function maybeAskDelivery() {
+  if (type.value === 'Offer') {
+    askDelivery.value = true
+  }
+}
 
 onMounted(() => {
+  type.value = window.history.state?.type || null
+
+  if (type.value) {
+    askDeadline.value = true
+
+    window.setTimeout(() => {
+      window.history.replaceState({ ids: null, type: null }, null)
+    }, 5000)
+  }
+
   if (window.history.state?.ids?.length) {
     // We have just submitted.  Grab the ids and clear it out so that we don't show the modal next time.
     ids.value = window.history.state.ids
     newUserPassword.value = window.history.state.newpassword
-
-    window.setTimeout(() => {
-      window.history.replaceState({ ids: null }, null)
-    }, 5000)
-
-    askDelivery.value = true
   }
 
   // showDonationAskModal.value = true
