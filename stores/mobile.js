@@ -21,7 +21,6 @@ import { PushNotifications } from '@freegle/capacitor-push-notifications-cap6'
 import { useAuthStore } from '~/stores/auth'
 import { AppLauncher } from '@capacitor/app-launcher'
 import api from '~/api'
-/* 2024-08 import { ZoomPlugin } from 'capacitor-zoom-android';*/
 import { App } from '@capacitor/app';
 import { useRouter } from '#imports'
 import { useChatStore } from '~/stores/chat'
@@ -63,14 +62,10 @@ export const useMobileStore = defineStore({ // Do not persist
     async initApp() {
       await this.getDeviceInfo()
       await this.fixIOSwindowOpen()
-      await this.enableAndroidPinchZoom()
       await this.initDeepLinks()
       await this.initPushNotifications()
       await this.checkForAppUpdate()
       await this.initWakeUpActions()
-      /* 2024-08 if (!this.isiOS) {
-        Capacitor.Plugins.ZoomPlugin.enableZoom()
-      }*/
       // Sentry.captureMessage("Something went wrong A");
       // Sentry.captureException("Test Captured Exception three");
     },
@@ -97,11 +92,6 @@ export const useMobileStore = defineStore({ // Do not persist
       }
     },
     //////////////
-    async enableAndroidPinchZoom() {
-      /* 2024-08 if (!this.isiOS) {
-        ZoomPlugin.enableZoom()
-      }*/
-    },
     extractQueryStringParams(url) {
       let urlParams = false
       const qm = url.indexOf('?')

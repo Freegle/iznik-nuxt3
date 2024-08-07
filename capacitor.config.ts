@@ -19,6 +19,7 @@ const config: CapacitorConfig = {
   appName: 'Freegle',
   webDir: '.output/public',
   bundledWebRuntime: false,
+  zoomEnabled: true,
   cordova: {
     "preferences": { // Get from iznik-nuxt/mobile/freegle/android/config.xml and package.json
       "CameraUsesGeolocation": "true",
@@ -44,7 +45,6 @@ const config: CapacitorConfig = {
       "@codetrix-studio/capacitor-google-auth", // C5 OK
       "@capacitor/camera",
       "@capacitor/share",
-      // C6 remove "capacitor-zoom-android",
       "@capacitor/app",
     ],
     buildOptions: { // new creds which are not used. unsigned version needs signed with FREEGLE_KEYSTORE and FREEGLE_KEYSTORE_PASSWORD
