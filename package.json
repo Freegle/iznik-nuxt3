@@ -11,7 +11,9 @@
   "engines": {
     "node": ">=17.9.1"
   },
-  "comments": {},
+  "comments": {
+    "comment1": "switch to @codetrix-studio/capacitor-google-auth: ^4.0.0 when released"
+  },
   "overrides": {
     "vue-mention": {
       "floating-vue": "^5.2.2"
@@ -40,7 +42,6 @@
     "vite-plugin-pwa": "^0.17.4"
   },
   "dependencies": {
-    "@freegle/capacitor-push-notifications-cap6": "github:Freegle/capacitor-push-notifications-cap6",
     "@capacitor-community/apple-sign-in": "^6.0.0",
     "@capacitor-community/facebook-login": "^6.0.0",
     "@capacitor/android": "^6.0.0",
@@ -54,13 +55,14 @@
     "@capacitor/share": "^6.0.0",
     "@capawesome/capacitor-badge": "^6.0.0",
     "@chenfengyuan/vue-number-input": "^2.0.1",
-    "@codetrix-studio/capacitor-google-auth": "^3.4.0-rc.4",
+    "@codetrix-studio/capacitor-google-auth": "github:CodetrixStudio/CapacitorGoogleAuth",
     "@formatjs/intl-locale": "^4.0.0",
     "@formatjs/intl-pluralrules": "^5.2.14",
     "@fortawesome/fontawesome-svg-core": "^6.4.0",
     "@fortawesome/free-brands-svg-icons": "^6.2.0",
     "@fortawesome/free-solid-svg-icons": "^6.1.1",
     "@fortawesome/vue-fontawesome": "^3.0.0-5",
+    "@freegle/capacitor-push-notifications-cap6": "github:Freegle/capacitor-push-notifications-cap6",
     "@pinia/nuxt": "0.4.6",
     "@popperjs/core": "^2.11.4",
     "@sentry/integrations": "^7.99.0",

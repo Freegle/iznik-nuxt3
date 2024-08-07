@@ -32,17 +32,17 @@ const config: CapacitorConfig = {
   },
   android: {
     includePlugins: [
-      "cordova-plugin-calendar", // C5 OK https://github.com/uzurv/Calendar-PhoneGap-Plugin-ios-17-support
-      "cordova-plugin-inappbrowser", // C5 OK
-      "@capacitor/app-launcher", // C5 OK
+      "cordova-plugin-calendar", // C6 https://github.com/uzurv/Calendar-PhoneGap-Plugin-ios-17-support
+      "cordova-plugin-inappbrowser", // C6 OK
+      "@capacitor/app-launcher", // C6 OK
       "@capacitor/browser",
-      "@capacitor/device", // C5 OK
+      "@capacitor/device", // C6 OK
       "@capacitor/network",
       "@freegle/capacitor-push-notifications-cap6", // 2024-08
       // "@capacitor/push-notifications",
       "@capawesome/capacitor-badge",
-      "@capacitor-community/facebook-login", // C5 OK
-      "@codetrix-studio/capacitor-google-auth", // C5 OK
+      "@capacitor-community/facebook-login", // C6
+      "@codetrix-studio/capacitor-google-auth", // C6 on github repo
       "@capacitor/camera",
       "@capacitor/share",
       "@capacitor/app",
@@ -69,7 +69,7 @@ const config: CapacitorConfig = {
       "@freegle/capacitor-push-notifications-cap6", // 2024-08
       "@capawesome/capacitor-badge",
       "@capacitor-community/facebook-login",
-      "@capacitor-community/apple-sign-in",
+      "@capacitor-community/apple-sign-in", // C6
       "@codetrix-studio/capacitor-google-auth",
       "@capacitor/camera",
       "@capacitor/share",
