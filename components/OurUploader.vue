@@ -41,6 +41,7 @@ import Webcam from '@uppy/webcam'
 import Compressor from '@uppy/compressor'
 
 import ResizeObserver from 'resize-observer-polyfill'
+import hasOwn from 'object.hasown'
 import { uid } from '../composables/useId'
 import { useImageStore } from '~/stores/image'
 
@@ -56,13 +57,13 @@ try {
     console.log('No need to polyfill ResizeObserver')
   }
 
-  console.log('Consider polyfile locale')
+  console.log('Consider polyfill locale')
   if (shouldPolyfillLocale()) {
     console.log('Need to polyfill Locale')
     await import('@formatjs/intl-locale/polyfill')
   }
 
-  console.log('Consider polyfile plural')
+  console.log('Consider polyfill plural')
   if (shouldPolyfillPlural()) {
     const locale = 'en'
     const unsupportedLocale = shouldPolyfillPlural(locale)
@@ -77,6 +78,12 @@ try {
       )
       await import('@formatjs/intl-pluralrules/locale-data/en')
     }
+  }
+
+  console.log('Consider polyfill hasOwn')
+  if (!Object.hasOwn) {
+    console.log('polyfill hasOwn')
+    hasOwn.shim()
   }
 } catch (e) {
   console.log('Polyfills failed', e)
