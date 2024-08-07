@@ -70,15 +70,18 @@ async function setDeadline() {
   )
 
   props.ids.forEach((id) => {
-    promises.push(
-      messageStore.patch({
-        id,
-        deadline:
-          deadline.value !== defaultDeadline
-            ? new Date(deadline.value).toISOString()
-            : null,
-      })
-    )
+    if (deadline.value) {
+      console.log('Save deadline', deadline.value)
+      promises.push(
+        messageStore.patch({
+          id,
+          deadline:
+            deadline.value !== defaultDeadline
+              ? new Date(deadline.value).toISOString()
+              : null,
+        })
+      )
+    }
   })
 
   await Promise.all(promises)
