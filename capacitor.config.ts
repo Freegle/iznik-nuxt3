@@ -70,7 +70,7 @@ const config: CapacitorConfig = {
       "@capawesome/capacitor-badge",
       "@capacitor-community/facebook-login", // C6: broken: limited login
       "@capacitor-community/apple-sign-in", // C6
-      "@codetrix-studio/capacitor-google-auth", // C6 on github repo LOGOUT FAIL
+      "@codetrix-studio/capacitor-google-auth", // C6 on github repo OK
       "@capacitor/camera",
       "@capacitor/share",
       "@capacitor/app",
