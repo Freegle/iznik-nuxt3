@@ -67,7 +67,7 @@
           </span>
           <NewsUserInfo :id="id" class="mr-1 d-inline" />
         </div>
-        <div class="d-flex flex-row align-items-center">
+        <div class="d-flex flex-row align-items-center flex-wrap">
           <b-button
             variant="link"
             size="sm"

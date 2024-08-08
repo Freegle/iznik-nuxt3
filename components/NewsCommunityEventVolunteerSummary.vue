@@ -1,6 +1,5 @@
 <template>
-  <b-card body-class="p-1">
-    {{ firstEvent }}
+  <b-card body-class="p-1 ps-0 pe-0">
     <div class="small text-center">
       <span v-if="communityEvents?.length"
         >Community Events
@@ -81,16 +80,16 @@ if (communityEvents.length > 0) {
 .summlayout {
   display: grid;
   grid-template-rows: 1fr;
-  grid-template-columns: auto 10rem;
+  grid-template-columns: calc(100vw - 10rem) 10rem;
   justify-content: space-between;
 
   :deep(.title) {
     grid-column: 1 / 2;
-    width: 100%;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     display: block;
+    text-align: start;
   }
 
   :deep(.others) {
