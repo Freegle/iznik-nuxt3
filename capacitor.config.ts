@@ -69,7 +69,7 @@ const config: CapacitorConfig = {
       "@freegle/capacitor-push-notifications-cap6", // 2024-08
       "@capawesome/capacitor-badge",
       "@capacitor-community/facebook-login", // C6: broken: limited login
-      "@capacitor-community/apple-sign-in", // C6
+      "@capacitor-community/apple-sign-in", // C6 OK
       "@codetrix-studio/capacitor-google-auth", // C6 on github repo OK
       "@capacitor/camera",
       "@capacitor/share",
