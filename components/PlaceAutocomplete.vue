@@ -32,12 +32,15 @@
       :on-select="select"
       :size="30"
       variant="success"
+      :on-before-ajax="postcodeSearch"
     />
     <div />
   </div>
 </template>
 <script>
 import AutoComplete from '~/components/AutoComplete'
+import { POSTCODE_REGEX } from '~/constants'
+import { useLocationStore } from '~/stores/location'
 
 export default {
   components: {
@@ -65,6 +68,13 @@ export default {
       default: 'lg',
     },
   },
+  setup() {
+    const locationStore = useLocationStore()
+
+    return {
+      locationStore,
+    }
+  },
   data() {
     return {
       results: [],
@@ -78,6 +88,36 @@ export default {
     },
   },
   methods: {
+    async postcodeSearch(val) {
+      const ret = []
+
+      if (POSTCODE_REGEX.test(val)) {
+        // We have a probable postcode.  We can search for it.  This is because our list of postcodes is more
+        // reliable than the Photon geocoder handling of postcodes.
+        const loc = await this.locationStore.fetch({
+          typeahead: val,
+        })
+
+        if (loc?.locations?.length) {
+          loc.locations.forEach((l) => {
+            const bbox = [
+              [l.lat - 0.01, l.lng - 0.01],
+              [l.lat + 0.01, l.lng + 0.01],
+            ]
+
+            ret.push({
+              id: -l.id,
+              name: l.area?.name ? l.name + ', ' + l.area.name : l.name,
+              lat: l.lat,
+              lng: l.lng,
+              bbox,
+            })
+          })
+        }
+      }
+
+      return ret
+    },
     process(results) {
       const ret = []
 

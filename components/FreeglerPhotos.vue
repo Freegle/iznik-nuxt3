@@ -3,7 +3,12 @@
     <div class="flex-grow-1">
       <client-only fallback-tag="div">
         <!--    todo    ride="carousel"-->
-        <BCarousel class="carousel" fade background="/landingpage/frame.png">
+        <BCarousel
+          class="carousel"
+          background="/landingpage/frame.png"
+          ride="carousel"
+          fade
+        >
           <BCarouselSlide
             v-for="img in [
               1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
@@ -127,6 +132,13 @@ function photo(img) {
       padding: 7vh;
       max-height: 50vh;
     }
+  }
+}
+
+:deep {
+  .carousel-item-start {
+    transition: opacity 0s 0s;
+    display: none;
   }
 }
 </style>

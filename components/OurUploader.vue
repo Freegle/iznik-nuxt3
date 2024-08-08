@@ -1,6 +1,6 @@
 <template>
   <client-only>
-    <div class="wrapper">
+    <div class="wrapper" @dragenter="openModal">
       <div class="d-flex flex-column justify-content-around">
         <v-icon
           v-if="!busy"
@@ -41,6 +41,7 @@ import Webcam from '@uppy/webcam'
 import Compressor from '@uppy/compressor'
 
 import ResizeObserver from 'resize-observer-polyfill'
+import hasOwn from 'object.hasown'
 import { uid } from '../composables/useId'
 import { useImageStore } from '~/stores/image'
 
@@ -56,13 +57,13 @@ try {
     console.log('No need to polyfill ResizeObserver')
   }
 
-  console.log('Consider polyfile locale')
+  console.log('Consider polyfill locale')
   if (shouldPolyfillLocale()) {
     console.log('Need to polyfill Locale')
     await import('@formatjs/intl-locale/polyfill')
   }
 
-  console.log('Consider polyfile plural')
+  console.log('Consider polyfill plural')
   if (shouldPolyfillPlural()) {
     const locale = 'en'
     const unsupportedLocale = shouldPolyfillPlural(locale)
@@ -77,6 +78,12 @@ try {
       )
       await import('@formatjs/intl-pluralrules/locale-data/en')
     }
+  }
+
+  console.log('Consider polyfill hasOwn')
+  if (!Object.hasOwn) {
+    console.log('polyfill hasOwn')
+    hasOwn.shim()
   }
 } catch (e) {
   console.log('Polyfills failed', e)
@@ -207,38 +214,41 @@ async function uploadSuccess(result) {
       // We've uploaded a file.  Find what is after the last slash
 
       let uid = r.tus?.uploadUrl
-      console.log('Initial', uid)
-      uid = 'freegletusd-' + uid.substring(uid.lastIndexOf('/') + 1)
-      console.log('Got uid', r, uid)
 
-      //  Create the attachment on the server which references the uploaded image.
-      const mods = {}
+      if (uid) {
+        console.log('Initial', uid)
+        uid = 'freegletusd-' + uid.substring(uid.lastIndexOf('/') + 1)
+        console.log('Got uid', r, uid)
 
-      const att = {
-        imgtype: props.type,
-        externaluid: uid,
-        externalmods: mods,
-      }
+        //  Create the attachment on the server which references the uploaded image.
+        const mods = {}
 
-      const p = imageStore.post(att)
-      promises.push(p)
-
-      p.then((ret) => {
-        // Set up our local attachment info.  This will get used in the parents to attach to whatever objects
-        // these photos relate to.
-        //
-        // Note that the URL is returned from the server because it is manipulated on there to remove EXIF,
-        // so we use that rather than the URL that was returned from the uploader.
-        console.log('Image post returned', ret)
-        uploadedPhotos.value = props.modelValue
-        uploadedPhotos.value.push({
-          id: ret.id,
-          path: ret.url,
-          paththumb: ret.url,
-          ouruid: ret.uid,
+        const att = {
+          imgtype: props.type,
+          externaluid: uid,
           externalmods: mods,
+        }
+
+        const p = imageStore.post(att)
+        promises.push(p)
+
+        p.then((ret) => {
+          // Set up our local attachment info.  This will get used in the parents to attach to whatever objects
+          // these photos relate to.
+          //
+          // Note that the URL is returned from the server because it is manipulated on there to remove EXIF,
+          // so we use that rather than the URL that was returned from the uploader.
+          console.log('Image post returned', ret)
+          uploadedPhotos.value = props.modelValue
+          uploadedPhotos.value.push({
+            id: ret.id,
+            path: ret.url,
+            paththumb: ret.url,
+            ouruid: ret.uid,
+            externalmods: mods,
+          })
         })
-      })
+      }
     })
 
     await Promise.all(promises)

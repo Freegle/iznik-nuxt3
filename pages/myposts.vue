@@ -4,6 +4,8 @@
       v-if="showDonationAskModal"
       @hidden="showDonationAskModal = false"
     />
+    <DeadlineAskModal v-if="askDeadline" :ids="ids" @hide="maybeAskDelivery" />
+    <DeliveryAskModal v-if="askDelivery" :ids="ids" />
 
     <b-container fluid class="p-0 p-xl-2">
       <h1 class="visually-hidden">My posts</h1>
@@ -44,6 +46,8 @@
             <VisibleWhen :at="['xs', 'sm', 'md']">
               <JobsTopBar />
             </VisibleWhen>
+
+            <NewUserInfo v-if="newUserPassword" :password="newUserPassword" />
 
             <MyPostsPostsList
               v-if="offers"
@@ -95,7 +99,6 @@
   </client-only>
 </template>
 <script setup>
-import { useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useMessageStore } from '../stores/message'
 import { useSearchStore } from '../stores/search'
@@ -121,7 +124,9 @@ const searchStore = useSearchStore()
 const trystStore = useTrystStore()
 
 const runtimeConfig = useRuntimeConfig()
-const route = useRoute()
+const ids = ref([])
+const type = ref(null)
+const newUserPassword = ref(null)
 
 definePageMeta({
   layout: 'login',
@@ -129,7 +134,7 @@ definePageMeta({
 
 useHead(
   buildHead(
-    route,
+    useRouter().currentRoute.value,
     runtimeConfig,
     'My Posts',
     "See OFFERs/WANTEDs that you've posted, and replies to them.",
@@ -212,7 +217,6 @@ const smallAdVisible = ref(false)
 const triedAds = ref(false)
 
 function adRendered(rendered, index, dimension) {
-  console.log('My posts rendered', rendered, index, dimension)
   if (rendered) {
     if (index === 0) {
       largeAdVisible.value = true
@@ -225,9 +229,37 @@ function adRendered(rendered, index, dimension) {
 }
 
 trystStore.fetch()
-// onMounted(() => {
-//   showDonationAskModal.value = true
-// })
+
+// If we have just submitted some posts then we will have been passed ids.
+// In that case, we might want to ask if we can deliver.
+const askDelivery = ref(false)
+const askDeadline = ref(false)
+
+function maybeAskDelivery() {
+  if (type.value === 'Offer') {
+    askDelivery.value = true
+  }
+}
+
+onMounted(() => {
+  type.value = window.history.state?.type || null
+
+  if (type.value) {
+    askDeadline.value = true
+
+    window.setTimeout(() => {
+      window.history.replaceState({ ids: null, type: null }, null)
+    }, 5000)
+  }
+
+  if (window.history.state?.ids?.length) {
+    // We have just submitted.  Grab the ids and clear it out so that we don't show the modal next time.
+    ids.value = window.history.state.ids
+    newUserPassword.value = window.history.state.newpassword
+  }
+
+  // showDonationAskModal.value = true
+})
 </script>
 <style scoped lang="scss">
 @import 'assets/css/sticky-banner.scss';

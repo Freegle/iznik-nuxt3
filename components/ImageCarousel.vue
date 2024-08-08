@@ -6,17 +6,15 @@
           variant="white "
           class="mr-1"
           size="xs"
-          @click="zoom = Math.max(0, zoom - 0.1)"
+          @click="zoom = Math.max(1, zoom - 0.1)"
         >
           <v-icon icon="circle-minus" /> Zoom out
         </b-button>
       </div>
       <div
-        class="d-flex flex-column justify-content-around ml-1 mr-1 ml-md-2 mr-md-2"
+        class="d-flex flex-column justify-content-around ml-1 mr-1 ml-md-4 mr-md-4"
       >
-        <div class="small">
-          Drag image around. Zoom pinch (on mobile) or Ctrl+mouse wheel.
-        </div>
+        <div class="small">Drag image around</div>
       </div>
       <div class="d-flex flex-column justify-content-around">
         <b-button
@@ -108,9 +106,11 @@ if (height > 3000) {
 // We have these buttons teleported to body because otherwise we can't do a position fixed, which doesn't work in
 // a modal where a transform has been applied.
 function next() {
+  zoom.value = 1
   slide.value++
 }
 function prev() {
+  zoom.value = 1
   slide.value--
 }
 </script>
@@ -144,11 +144,11 @@ function prev() {
 }
 
 .wrapper {
-  min-height: calc(80vh - $sticky-banner-height-mobile);
+  min-height: calc(100vh - $sticky-banner-height-mobile - 144px);
   width: 100%;
 
   @include media-breakpoint-up(md) {
-    min-height: calc(80vh - $sticky-banner-height-desktop);
+    min-height: calc(100vh - $sticky-banner-height-desktop - 144px);
   }
 }
 </style>
