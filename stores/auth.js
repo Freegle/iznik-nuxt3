@@ -151,7 +151,8 @@ export const useAuthStore = defineStore({
         }
 
         try {
-          await GoogleAuth.signOut();
+          await GoogleAuth.initialize()
+          await GoogleAuth.signOut()
         } catch (e) {
           console.log('Ignore Google signOut error', e)
         }
