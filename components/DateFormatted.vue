@@ -10,6 +10,7 @@ import {
   datetimeshort,
   dateshort,
   weekdayshort,
+  dateonlyNoYear,
 } from '../composables/useTimeFormat'
 
 export default {
@@ -31,6 +32,9 @@ export default {
       switch (this.format) {
         case 'dateonly':
           ret = dateonly(this.value)
+          break
+        case 'dateonlyNoYear':
+          ret = dateonlyNoYear(this.value)
           break
         case 'dateshort':
           ret = dateshort(this.value)

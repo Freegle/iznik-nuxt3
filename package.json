@@ -106,6 +106,7 @@
     "lodash.clonedeep": "^4.5.0",
     "lodash.get": "^4.4.2",
     "mitt": "^3.0.0",
+    "object.hasown": "github:es-shims/Object.hasOwn",
     "patch-package": "^6.4.7",
     "path-browserify": "^1.0.1",
     "pinia": "^2.0.17",
