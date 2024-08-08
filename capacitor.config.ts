@@ -41,8 +41,8 @@ const config: CapacitorConfig = {
       "@freegle/capacitor-push-notifications-cap6", // 2024-08
       // "@capacitor/push-notifications",
       "@capawesome/capacitor-badge",
-      "@capacitor-community/facebook-login", // C6
-      "@codetrix-studio/capacitor-google-auth", // C6 on github repo
+      "@capacitor-community/facebook-login", // C6 OK
+      "@codetrix-studio/capacitor-google-auth", // C6 on github repo OK
       "@capacitor/camera",
       "@capacitor/share",
       "@capacitor/app",
@@ -68,9 +68,9 @@ const config: CapacitorConfig = {
       //"@capacitor/push-notifications",
       "@freegle/capacitor-push-notifications-cap6", // 2024-08
       "@capawesome/capacitor-badge",
-      "@capacitor-community/facebook-login",
+      "@capacitor-community/facebook-login", // C6: broken: limited login
       "@capacitor-community/apple-sign-in", // C6
-      "@codetrix-studio/capacitor-google-auth",
+      "@codetrix-studio/capacitor-google-auth", // C6 on github repo LOGOUT FAIL
       "@capacitor/camera",
       "@capacitor/share",
       "@capacitor/app",
