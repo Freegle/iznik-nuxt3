@@ -657,7 +657,7 @@ export default {
         ]
         try{
           const response = await FacebookLogin.login({ permissions: FACEBOOK_PERMISSIONS })
-          // console.log("Facebook response", response) // recentlyGrantedPermissions, recentlyDeniedPermissions
+          console.log("Facebook response", response) // recentlyGrantedPermissions, recentlyDeniedPermissions
           if (response && response.accessToken) {
             // Login successful.
             this.loginWaitMessage = "Please wait..."
