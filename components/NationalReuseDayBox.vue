@@ -14,10 +14,22 @@
 </template>
 <script setup>
 const props = defineProps({
-  title: String,
-  description: String,
-  url: String,
-  colour: String,
+  title: {
+    type: String,
+    required: true,
+  },
+  description: {
+    type: String,
+    required: true,
+  },
+  url: {
+    type: String,
+    required: true,
+  },
+  colour: {
+    type: String,
+    required: true,
+  },
 })
 
 const boxClass = computed(() => {
