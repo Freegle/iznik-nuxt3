@@ -148,6 +148,24 @@ svg.fa-icon {
   color: white !important;
 }
 
+.communityeventsbadge {
+  position: absolute;
+  top: 2px;
+  right: -2px;
+  font-size: 11px;
+  background-color: $colour-secondary !important;
+  color: white !important;
+}
+
+.volunteeropportunitiesbadge {
+  position: absolute;
+  top: 2px;
+  right: 9px;
+  font-size: 11px;
+  background-color: $colour-secondary !important;
+  color: white !important;
+}
+
 .browsebadge {
   position: absolute;
   top: 2px;

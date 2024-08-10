@@ -10,6 +10,8 @@ import { useAuthStore } from '~/stores/auth'
 import { fetchMe } from '~/composables/useMe'
 import { useRuntimeConfig } from '#app'
 import { TYPING_TIME_INVERVAL } from '~/constants'
+import { useCommunityEventStore } from '~/stores/communityevent'
+import { useVolunteeringStore } from '~/stores/volunteering'
 
 export const navBarHidden = ref(false)
 
@@ -73,6 +75,8 @@ export function useNavbar() {
   const notificationStore = useNotificationStore()
   const chatStore = useChatStore()
   const logoStore = useLogoStore()
+  const communityEventStore = useCommunityEventStore()
+  const volunteeringStore = useVolunteeringStore()
   const route = useRoute()
   const router = useRouter()
 
@@ -148,8 +152,28 @@ export function useNavbar() {
     return pluralize('unseen post', messageStore.count, true)
   })
 
-  const activePostsCountPlural = ref(() => {
+  const activePostsCountPlural = computed(() => {
     return pluralize('open post', activePostsCount.value, {
+      includeNumber: true,
+    })
+  })
+
+  const communityEventCount = computed(() => {
+    return Object.keys(communityEventStore.forUser)?.length || 0
+  })
+
+  const communityEventCountPlural = computed(() => {
+    return pluralize('community event', communityEventCount.value, {
+      includeNumber: true,
+    })
+  })
+
+  const volunteerOpportunityCount = computed(() => {
+    return Object.keys(volunteeringStore.list)?.length || 0
+  })
+
+  const volunteerOpportunityCountPlural = ref(() => {
+    return pluralize('volunteer opportunity', volunteerOpportunityCount.value, {
       includeNumber: true,
     })
   })
@@ -210,6 +234,8 @@ export function useNavbar() {
         const distance = settings?.newsfeedarea || 0
         await newsfeedStore.fetchCount(distance, false)
         await messageStore.fetchCount(me?.settings?.browseView, false)
+        await communityEventStore.fetchList()
+        await volunteeringStore.fetchList()
 
         // We might get logged out during awaits.
         if (
@@ -294,6 +320,10 @@ export function useNavbar() {
     newsCountPlural,
     browseCount,
     browseCountPlural,
+    communityEventCount,
+    communityEventCountPlural,
+    volunteerOpportunityCount,
+    volunteerOpportunityCountPlural,
     showAboutMeModal,
     homePage,
     showBackButton,
