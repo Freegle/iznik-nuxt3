@@ -233,13 +233,30 @@ export function useNavbar() {
         const settings = me?.settings
         const distance = settings?.newsfeedarea || 0
         await newsfeedStore.fetchCount(distance, false)
-        await messageStore.fetchCount(me?.settings?.browseView, false)
-        await communityEventStore.fetchList()
-        await volunteeringStore.fetchList()
 
         // We might get logged out during awaits.
+        if (!myid.value) {
+          throw new Error('Not logged in')
+        }
+
+        await messageStore.fetchCount(me?.settings?.browseView, false)
+
+        if (!myid.value) {
+          throw new Error('Not logged in')
+        }
+
+        await communityEventStore.fetchList()
+
+        if (!myid.value) {
+          throw new Error('Not logged in')
+        }
+
+        await volunteeringStore.fetchList()
+        if (!myid.value) {
+          throw new Error('Not logged in')
+        }
+
         if (
-          myid.value &&
           route.path !== '/profile/' + myid.value &&
           !route.path.includes('/unsubscribe')
         ) {
