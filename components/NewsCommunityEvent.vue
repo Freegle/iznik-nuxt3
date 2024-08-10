@@ -10,10 +10,14 @@
         size="lg"
       />
       <div>
-        <span class="text-success font-weight-bold">{{
-          user.displayname
-        }}</span>
-        created an event<span class="d-none d-md-inline-block">:</span
+        <span v-if="user.id">
+          <span class="text-success font-weight-bold">{{
+            user.displayname
+          }}</span>
+          created an event</span
+        >
+        <span v-else> An event was created</span>
+        <span class="d-none d-md-inline-block">:</span
         ><br class="d-block d-md-none" />
         &nbsp;<strong>{{ event.title }}</strong>
         <br />
