@@ -27,8 +27,8 @@ const config: CapacitorConfig = {
     }
   },
   server: {
-    hostname: 'ilovefreegle.org',
-    androidScheme: "https" // http
+    // hostname: 'ilovefreegle.org', localhost by default
+    androidScheme: "http" // https by default but keep as http for backwards compatibility
   },
   android: {
     includePlugins: [
