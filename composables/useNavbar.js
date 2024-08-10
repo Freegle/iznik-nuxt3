@@ -159,7 +159,7 @@ export function useNavbar() {
   })
 
   const communityEventCount = computed(() => {
-    return Object.keys(communityEventStore.forUser)?.length || 0
+    return communityEventStore.count
   })
 
   const communityEventCountPlural = computed(() => {
@@ -169,7 +169,7 @@ export function useNavbar() {
   })
 
   const volunteerOpportunityCount = computed(() => {
-    return Object.keys(volunteeringStore.list)?.length || 0
+    return volunteeringStore.count
   })
 
   const volunteerOpportunityCountPlural = ref(() => {
