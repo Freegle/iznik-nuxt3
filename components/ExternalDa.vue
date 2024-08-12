@@ -17,7 +17,8 @@
             height: maxHeight + 'px',
           }"
         >
-          Ad goes here {{ dimensions }}, {{ adSenseId }},{{ adSenseSlot }}
+          Ad goes here {{ dimensions }}, id {{ adSenseId }}, slot
+          {{ adSenseSlot }}
           <div v-if="adSense">
             <Adsbygoogle
               v-if="adSenseSlot"
