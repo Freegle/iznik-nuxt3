@@ -172,12 +172,6 @@ export default defineNuxtConfig({
     ['@nuxtjs/google-adsense'],
   ],
 
-  'google-adsense': {
-    id: process.env.GOOGLE_ADSENSE_ID,
-    test: process.env.GOOGLE_ADSENSE_TEST_MODE === 'true',
-    hideFilled: true,
-  },
-
   hooks: {
     'build:manifest': (manifest) => {
       for (const item of Object.values(manifest)) {
@@ -214,8 +208,14 @@ export default defineNuxtConfig({
       TRUSTPILOT_LINK: config.TRUSTPILOT_LINK,
       TUS_UPLOADER: config.TUS_UPLOADER,
       IMAGE_DELIVERY: config.IMAGE_DELIVERY,
+
       GOOGLE_ADSENSE_ID: config.GOOGLE_ADSENSE_ID,
       GOOGLE_ADSENSE_TEST_MODE: config.GOOGLE_ADSENSE_TEST_MODE,
+      googleAdsense: {
+        id: process.env.GOOGLE_ADSENSE_ID,
+        test: process.env.GOOGLE_ADSENSE_TEST_MODE === 'true',
+        hideFilled: true,
+      },
 
       ...(process.env.GTM_ID
         ? {

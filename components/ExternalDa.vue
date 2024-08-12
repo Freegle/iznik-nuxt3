@@ -17,12 +17,9 @@
             height: maxHeight + 'px',
           }"
         >
-          Ad goes here {{ dimensions }}, id {{ adSenseId }}, slot
-          {{ adSenseSlot }}
           <div v-if="adSense">
             <Adsbygoogle
               v-if="adSenseSlot"
-              :id="adSenseId"
               page-url="https://www.ilovefreegle.org/Croydon-Freegle"
               :ad-slot="adSenseSlot"
             />
@@ -94,12 +91,6 @@ const AD_REFRESH_TIMEOUT = 31000
 // We can either run with Ad Sense or with Prebid.  Ad Sense is the default.
 const adSense = ref(true)
 
-const adSenseId = computed(() => {
-  const runtimeConfig = useRuntimeConfig()
-  console.log('Runtime', runtimeConfig.public)
-  return runtimeConfig.public.GOOGLE_ADSENSE_ID
-})
-
 const adSenseSlot = computed(() => {
   // Dimensions is an array of dimensions.
   console.log('Dimensions', props.dimensions)
@@ -122,7 +113,7 @@ const adSenseSlot = computed(() => {
 
 function refreshAd() {
   if (
-    (adSense.value && adSenseId.value) ||
+    adSense.value ||
     (window.googletag?.pubads &&
       typeof window.googletag?.pubads === 'function' &&
       typeof window.googletag?.pubads().refresh === 'function' &&
