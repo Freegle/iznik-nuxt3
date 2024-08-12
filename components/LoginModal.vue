@@ -665,6 +665,7 @@ export default {
             await this.authStore.login({
               fblogin: 1,
               fbaccesstoken: accessToken,
+              fblimited: this.isiOS
             })
             // We are now logged in.
             self.pleaseShowModal = false
