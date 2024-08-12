@@ -169,7 +169,13 @@ export default defineNuxtConfig({
     'nuxt-vite-legacy',
     '@bootstrap-vue-next/nuxt',
     process.env.GTM_ID ? '@zadigetvoltaire/nuxt-gtm' : null,
+    ['@nuxtjs/google-adsense'],
   ],
+
+  'google-adsense': {
+    id: process.env.GOOGLE_ADSENSE_ID,
+    hideFilled: true,
+  },
 
   hooks: {
     'build:manifest': (manifest) => {
@@ -207,6 +213,7 @@ export default defineNuxtConfig({
       TRUSTPILOT_LINK: config.TRUSTPILOT_LINK,
       TUS_UPLOADER: config.TUS_UPLOADER,
       IMAGE_DELIVERY: config.IMAGE_DELIVERY,
+      AD_SENSE_ID: process.env.GOOGLE_ADSENSE_ID,
 
       ...(process.env.GTM_ID
         ? {

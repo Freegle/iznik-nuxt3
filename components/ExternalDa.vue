@@ -17,7 +17,15 @@
             height: maxHeight + 'px',
           }"
         >
-          <div :id="divId" />
+          Ad goes here {{ dimensions }}, {{ adSenseId }},{{ adSenseSlot }}
+          <div v-if="adSense">
+            <Adsbygoogle
+              v-if="adSenseSlot"
+              :id="adSenseId"
+              :ad-slot="adSenseSlot"
+            />
+          </div>
+          <div v-else :id="divId" />
         </div>
         <!--    <div class="bg-white">-->
         <!--      Path {{ adUnitPath }} id {{ divId }} dimensions {{ dimensions }}-->
@@ -81,75 +89,111 @@ let visibleTimer = null
 const PREBID_TIMEOUT = 2000
 const AD_REFRESH_TIMEOUT = 31000
 
+// We can either run with Ad Sense or with Prebid.  Ad Sense is the default.
+const adSense = ref(true)
+
+const adSenseId = computed(() => {
+  const runtimeConfig = useRuntimeConfig()
+  return runtimeConfig.public.GOOGLE_ADSENSE_ID
+})
+
+const adSenseSlot = computed(() => {
+  // Dimensions is an array of dimensions.
+  console.log('Dimensions', props.dimensions)
+  let slot = null
+
+  props.dimensions.forEach((d) => {
+    console.log('Dimension', d)
+    if (d[0] === 320 && d[1] === 50) {
+      slot = '5832702875'
+    } else if (d[0] === 300 && d[1] === 250) {
+      slot = '8180600393'
+    } else if (d[0] === 728 && d[1] === 90) {
+      slot = '1595844892'
+    }
+  })
+
+  console.log('Returning slot', slot)
+  return slot
+})
+
 function refreshAd() {
   if (
-    window.googletag?.pubads &&
-    typeof window.googletag?.pubads === 'function' &&
-    typeof window.googletag?.pubads().refresh === 'function' &&
-    !unmounted.value
+    (adSense.value && adSenseId.value) ||
+    (window.googletag?.pubads &&
+      typeof window.googletag?.pubads === 'function' &&
+      typeof window.googletag?.pubads().refresh === 'function' &&
+      !unmounted.value)
   ) {
     // Don't refresh if the ad is not visible or tab is not active.
     if (isVisible.value && miscStore.visible) {
-      // Refreshing an ad is a bit more complex because we're using prebid.  That means we have to request the
-      // bids, and then once we've got those, refresh the ad slot to kick Google to render the ad.
-      console.log('Request bids for ad', props.adUnitPath)
+      if (adSense.value) {
+        // Ad Sense.
+        console.log('Refresh adSense')
+      } else {
+        // Prebid.
+        //
+        // Refreshing an ad is a bit more complex because we're using prebid.  That means we have to request the
+        // bids, and then once we've got those, refresh the ad slot to kick Google to render the ad.
+        console.log('Request bids for ad', props.adUnitPath)
 
-      window.pbjs.que.push(function () {
-        window.pbjs.requestBids({
-          timeout: PREBID_TIMEOUT,
-          adUnitCodes: [props.adUnitPath],
-          bidsBackHandler: function (bids, timedOut, auctionId) {
-            const runtimeConfig = useRuntimeConfig()
-            const api = Api(runtimeConfig)
+        window.pbjs.que.push(function () {
+          window.pbjs.requestBids({
+            timeout: PREBID_TIMEOUT,
+            adUnitCodes: [props.adUnitPath],
+            bidsBackHandler: function (bids, timedOut, auctionId) {
+              const runtimeConfig = useRuntimeConfig()
+              const api = Api(runtimeConfig)
 
-            if (timedOut) {
-              api.bandit.chosen({
-                uid: 'prebid',
-                variant: 'timeout',
-              })
-            } else if (bids?.length) {
-              console.log(
-                'Got bids back',
-                props.adUnitPath,
-                bids,
-                timedOut,
-                auctionId
-              )
+              if (timedOut) {
+                api.bandit.chosen({
+                  uid: 'prebid',
+                  variant: 'timeout',
+                })
+              } else if (bids?.length) {
+                console.log(
+                  'Got bids back',
+                  props.adUnitPath,
+                  bids,
+                  timedOut,
+                  auctionId
+                )
 
-              api.bandit.chosen({
-                uid: 'prebid',
-                variant: 'bids',
-              })
-            } else {
-              console.log(
-                'Got no bids back',
-                props.adUnitPath,
-                bids,
-                timedOut,
-                auctionId
-              )
+                api.bandit.chosen({
+                  uid: 'prebid',
+                  variant: 'bids',
+                })
+              } else {
+                console.log(
+                  'Got no bids back',
+                  props.adUnitPath,
+                  bids,
+                  timedOut,
+                  auctionId
+                )
 
-              api.bandit.chosen({
-                uid: 'prebid',
-                variant: 'nobids',
-              })
-            }
+                api.bandit.chosen({
+                  uid: 'prebid',
+                  variant: 'nobids',
+                })
+              }
 
-            window.pbjs.setTargetingForGPTAsync([props.adUnitPath])
+              window.pbjs.setTargetingForGPTAsync([props.adUnitPath])
 
-            if (slot) {
-              window.googletag.pubads().refresh([slot])
+              if (slot) {
+                window.googletag.pubads().refresh([slot])
 
-              console.log('Refreshed slot', props.adUnitPath)
-            } else {
-              console.error(
-                'No slot found to refresh found for',
-                props.adUnitPath
-              )
-            }
-          },
+                console.log('Refreshed slot', props.adUnitPath)
+              } else {
+                console.error(
+                  'No slot found to refresh found for',
+                  props.adUnitPath
+                )
+              }
+            },
+          })
         })
-      })
+      }
     } else {
       // console.log('Not refreshing ad', props.adUnitPath, isVisible.value)
     }
@@ -176,107 +220,112 @@ function handleVisible() {
     props.inModal,
     document.body.classList.contains('modal-open')
   )
+
   if (
     isVisible.value &&
     (props.inModal || !document.body.classList.contains('modal-open'))
   ) {
-    console.log('Queue GPT commands', props.divId)
+    if (adSense.value) {
+      refreshAd()
+    } else {
+      console.log('Queue GPT commands', props.divId)
 
-    // Sometimes GPT is blocked, so we push the command but it never runs.
-    // Start a fallback timer for that.
-    if (!GPTTimer) {
-      GPTTimer = setTimeout(() => {
-        console.log("GPT didn't run", props.divId)
-        GPTTimer = null
-        GPTFailed = true
-        emit('rendered', false)
-      }, 1000)
-    }
+      // Sometimes GPT is blocked, so we push the command but it never runs.
+      // Start a fallback timer for that.
+      if (!GPTTimer) {
+        GPTTimer = setTimeout(() => {
+          console.log("GPT didn't run", props.divId)
+          GPTTimer = null
+          GPTFailed = true
+          emit('rendered', false)
+        }, 1000)
+      }
 
-    window.googletag.cmd.push(function () {
-      if (GPTFailed) {
-        console.log('GPT already timed out')
-      } else {
-        clearTimeout(GPTTimer)
-        console.log('Execute GPT define slot', props.divId)
-        slot = window.googletag
-          .defineSlot(props.adUnitPath, props.dimensions, props.divId)
-          .addService(window.googletag.pubads())
+      window.googletag.cmd.push(function () {
+        if (GPTFailed) {
+          console.log('GPT already timed out')
+        } else {
+          clearTimeout(GPTTimer)
+          console.log('Execute GPT define slot', props.divId)
+          slot = window.googletag
+            .defineSlot(props.adUnitPath, props.dimensions, props.divId)
+            .addService(window.googletag.pubads())
 
-        console.log('Add event listeners', props.adUnitPath)
-        window.googletag
-          .pubads()
-          .addEventListener('slotRenderEnded', (event) => {
-            if (event?.slot.getAdUnitPath() === props.adUnitPath) {
-              console.log(
-                'Rendered',
-                uniqueid.value,
-                'empty',
-                event?.isEmpty,
-                event
-              )
-
-              if (event?.isEmpty) {
-                adShown.value = false
-                console.log('Rendered empty', props.adUnitPath, adShown)
-                // Sentry.captureMessage('Ad rendered empty ' + props.adUnitPath)
-                maxWidth.value = 0
-                maxHeight.value = 0
-              } else {
+          console.log('Add event listeners', props.adUnitPath)
+          window.googletag
+            .pubads()
+            .addEventListener('slotRenderEnded', (event) => {
+              if (event?.slot.getAdUnitPath() === props.adUnitPath) {
                 console.log(
                   'Rendered',
-                  props.adUnitPath,
-                  event.size[0],
-                  event.size[1]
+                  uniqueid.value,
+                  'empty',
+                  event?.isEmpty,
+                  event
                 )
 
-                // Sometimes we are returned silly values like 1,1, so make sure that we leave at least enough
-                // space for the minimum sized ad which we could plausibly have shown.
-                maxWidth.value = Math.max(event.size[0], minWidth.value)
-                maxHeight.value = Math.max(event.size[1], minHeight.value)
+                if (event?.isEmpty) {
+                  adShown.value = false
+                  console.log('Rendered empty', props.adUnitPath, adShown)
+                  // Sentry.captureMessage('Ad rendered empty ' + props.adUnitPath)
+                  maxWidth.value = 0
+                  maxHeight.value = 0
+                } else {
+                  console.log(
+                    'Rendered',
+                    props.adUnitPath,
+                    event.size[0],
+                    event.size[1]
+                  )
+
+                  // Sometimes we are returned silly values like 1,1, so make sure that we leave at least enough
+                  // space for the minimum sized ad which we could plausibly have shown.
+                  maxWidth.value = Math.max(event.size[0], minWidth.value)
+                  maxHeight.value = Math.max(event.size[1], minHeight.value)
+                }
+
+                emit('rendered', adShown.value)
               }
-
-              emit('rendered', adShown.value)
-            }
-          })
-          .addEventListener('slotVisibilityChanged', (event) => {
-            if (event?.slot.getAdUnitPath() === props.adUnitPath) {
-              if (event.inViewPercentage < 51 && miscStore.visible) {
-                // const msg =
-                //   'Visibility of slot ' +
-                //   props.adUnitPath +
-                //   ' changed. New visibility: ' +
-                //   event.inViewPercentage +
-                //   '%.Viewport size: ' +
-                //   window.innerWidth +
-                //   'x' +
-                //   window.innerHeight
-                //
-                // console.log(msg)
-                // Sentry.captureMessage(msg)
+            })
+            .addEventListener('slotVisibilityChanged', (event) => {
+              if (event?.slot.getAdUnitPath() === props.adUnitPath) {
+                if (event.inViewPercentage < 51 && miscStore.visible) {
+                  // const msg =
+                  //   'Visibility of slot ' +
+                  //   props.adUnitPath +
+                  //   ' changed. New visibility: ' +
+                  //   event.inViewPercentage +
+                  //   '%.Viewport size: ' +
+                  //   window.innerWidth +
+                  //   'x' +
+                  //   window.innerHeight
+                  //
+                  // console.log(msg)
+                  // Sentry.captureMessage(msg)
+                }
               }
+            })
+
+          console.log('Excute GPT display', props.divId)
+          window.googletag.display(props.divId)
+
+          if (window.googletag.pubads().isInitialLoadDisabled()) {
+            // We need to refresh the ad because we called disableInitialLoad.  That's what you do when
+            // using prebid.
+            console.log('Displayed, now trigger refresh', props.adUnitPath)
+            refreshAd()
+          } else {
+            console.log('Displayed and rendered, refresh timer')
+
+            if (!refreshTimer) {
+              refreshTimer = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
             }
-          })
-
-        console.log('Excute GPT display', props.divId)
-        window.googletag.display(props.divId)
-
-        if (window.googletag.pubads().isInitialLoadDisabled()) {
-          // We need to refresh the ad because we called disableInitialLoad.  That's what you do when
-          // using prebid.
-          console.log('Displayed, now trigger refresh', props.adUnitPath)
-          refreshAd()
-        } else {
-          console.log('Displayed and rendered, refresh timer')
-
-          if (!refreshTimer) {
-            refreshTimer = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
           }
-        }
 
-        shownFirst = true
-      }
-    })
+          shownFirst = true
+        }
+      })
+    }
   } else {
     emit('rendered', false)
   }
