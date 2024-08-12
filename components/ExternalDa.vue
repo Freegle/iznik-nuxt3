@@ -22,6 +22,7 @@
             <Adsbygoogle
               v-if="adSenseSlot"
               :id="adSenseId"
+              page-url="https://www.ilovefreegle.org/Croydon-Freegle"
               :ad-slot="adSenseSlot"
             />
           </div>

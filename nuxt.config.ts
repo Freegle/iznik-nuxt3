@@ -174,6 +174,7 @@ export default defineNuxtConfig({
 
   'google-adsense': {
     id: process.env.GOOGLE_ADSENSE_ID,
+    test: process.env.GOOGLE_ADSENSE_TEST_MODE === 'true',
     hideFilled: true,
   },
 
@@ -214,6 +215,7 @@ export default defineNuxtConfig({
       TUS_UPLOADER: config.TUS_UPLOADER,
       IMAGE_DELIVERY: config.IMAGE_DELIVERY,
       AD_SENSE_ID: process.env.GOOGLE_ADSENSE_ID,
+      GOOGLE_ADSENSE_TEST_MODE: process.env.GOOGLE_ADSENSE_TEST_MODE,
 
       ...(process.env.GTM_ID
         ? {
