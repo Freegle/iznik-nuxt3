@@ -1,3 +1,5 @@
+@import 'assets/css/sticky-banner.scss';
+
 #serverloader {
   z-index: 1000;
   display: flex !important;
@@ -95,10 +97,6 @@ div[variant="success"] .card-header {
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-body {
-  background-image: url('/wallpaper.png');
 }
 
 // We have to go to some effort to style the resize grip.  We can't have it in a scoped style otherwise it won't
@@ -248,7 +246,7 @@ legend {
 }
 
 .sidebar__wrapper {
-  height: calc(100vh - var(--header-navbar-height) - var(--ads-label-height));
+  height: calc(100vh - var(--header-navbar-height) - var(--ads-label-height) - $sticky-banner-height-desktop);
 
   .card-body .card {
     border-radius: unset;
@@ -324,7 +322,12 @@ form {
 .modal-content {
   // Need to make this scrollable so that e.g. login modal can all be accessed on screens with small height.
   overflow-y: auto !important;
-  max-height: calc(100% - 50px) !important;
+
+  max-height: calc(100% - $sticky-banner-height-mobile) !important;
+
+  @include media-breakpoint-up(md) {
+    max-height: calc(100% - $sticky-banner-height-desktop) !important;
+  }
 }
 
 label {
@@ -338,6 +341,11 @@ label {
 // Don't underlink link buttons:
 .btn-link:not(:hover) {
   text-decoration: none;
+}
+
+.btn-xl {
+  padding: 10px 20px;
+  font-size: 20px;
 }
 
 // Bootstrap 4 class compatibility.
@@ -540,6 +548,10 @@ label {
   background-color: $color-green-background !important;
 }
 
+.ourBackLight {
+  background-color: $colour-success-bg !important;
+}
+
 .v-popper--theme-mentionable {
   .v-popper__inner {
     border-radius: 0px !important;
@@ -566,7 +578,5 @@ label {
   --popper-theme-border-radius: 6px;
   --popper-theme-padding: 10px;
   --popper-theme-box-shadow: 0 6px 30px -6px rgba(0, 0, 0, 0.25);
-  --ads-height: 258px;
-  --ads-label-height: 42px;
   --header-navbar-height: 76px;
 }

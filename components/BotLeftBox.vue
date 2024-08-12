@@ -6,6 +6,18 @@
           <b-img lazy alt="Facebook" src="/botleft/facebook.png" width="40" />
         </ExternalLink>
         <ExternalLink
+          href="https://www.instagram.com/thisisfreegle"
+          title="Instagram"
+        >
+          <b-img
+            lazy
+            alt="Instagram"
+            src="/botleft/instagram.png"
+            width="40"
+            class="ml-1"
+          />
+        </ExternalLink>
+        <ExternalLink
           href="https://twitter.com/thisisfreegle"
           title="Twitter"
           class="pl-1"
@@ -14,7 +26,7 @@
         </ExternalLink>
       </div>
       <ExternalLink
-        href="https://github.com/Freegle/iznik-nuxt"
+        href="https://github.com/Freegle/iznik-nuxt3"
         title="We're open source - find us on GitHub"
       >
         <b-img

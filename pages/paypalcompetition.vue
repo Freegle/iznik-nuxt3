@@ -2,8 +2,8 @@
   <b-row class="m-0">
     <b-col cols="0" md="3" />
     <b-col cols="12" md="6" class="mt-2">
-      <b-card no-body variant="success">
-        <b-card-header>
+      <b-card no-body>
+        <b-card-header bg-variant="primary" text-variant="white">
           <h1>Help Freegle win funds to keep going!</h1>
         </b-card-header>
         <b-card-text class="p-2">

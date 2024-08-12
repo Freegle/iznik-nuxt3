@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <span>
     <Highlighter
       v-if="text"
       :search-words="searchWords"
@@ -27,7 +27,7 @@
         >{{ lessStr }}</a
       >
     </span>
-  </div>
+  </span>
 </template>
 <script>
 // Originally based on https://github.com/orlyyani/read-more

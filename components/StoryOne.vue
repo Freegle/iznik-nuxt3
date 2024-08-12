@@ -1,7 +1,7 @@
 <template>
   <div>
-    <b-card no-body variant="success">
-      <b-card-header>
+    <b-card no-body>
+      <b-card-header bg-variant="primary" text-variant="white">
         <div v-if="story" class="d-flex justify-content-between">
           <div>&quot;{{ story.headline }}&quot;</div>
           <div>
@@ -98,10 +98,10 @@
   </div>
 </template>
 <script>
-import ReadMore from 'vue-read-more3/src/ReadMoreComponent'
 import { defineAsyncComponent } from 'vue'
 import { useStoryStore } from '../stores/stories'
 import { useUserStore } from '../stores/user'
+import ReadMore from '~/components/ReadMore'
 const StoryShareModal = defineAsyncComponent(() =>
   import('~/components/StoryShareModal')
 )

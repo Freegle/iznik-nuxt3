@@ -2,87 +2,69 @@
   <div class="border border-success rounded mb-1">
     <div class="layout mb-1">
       <div class="divider" />
-      <div class="d-flex flex-column justify-content-start user">
-        <div
-          v-if="replyuser"
-          class="d-flex mr-4 clickme"
-          @click="showProfileModal"
-        >
-          <ProfileImage
-            :image="replyuser.profile.paththumb"
-            class="m-1 d-none d-md-block"
-            is-thumbnail
-            size="sm"
-          />
-          <ProfileImage
-            :image="replyuser.profile.paththumb"
-            class="m-1 d-block d-md-none"
-            is-thumbnail
-            size="lg"
-          />
-          <!-- eslint-disable-next-line -->
-            <span class="align-middle mt-1" v-if="unseen > 0"><strong>{{ replyuser.displayname }}</strong></span>
-          <!-- eslint-disable-next-line -->
-            <span v-else class="align-middle mt-1"><strong>{{ replyuser.displayname }}</strong></span>
-        </div>
+      <div class="user d-flex flex-wrap">
+        <MyMessageReplyUser :id="replyuser?.id" />
       </div>
-      <div class="badges d-flex flex-wrap justify-content-end">
-        <div class="mt-1 mr-1 d-flex flex-column justify-content-center">
-          <b-badge v-if="closest" variant="info" pill class="pb-1">
+      <div class="badges d-flex flex-wrap">
+        <div class="mt-1 mb-1 ms-1 d-flex flex-column justify-content-center">
+          <b-badge v-if="closest" variant="info" pill class="pb-1 text-white">
             Nearby
           </b-badge>
         </div>
-        <div class="mt-1 mr-1 d-flex flex-column justify-content-center">
-          <b-badge v-if="best" variant="info" pill class="pb-1">
+        <div class="mt-1 mb-1 ms-1 d-flex flex-column justify-content-center">
+          <b-badge v-if="best" variant="info" pill class="pb-1 text-white">
             Good rating
           </b-badge>
         </div>
-        <div class="mt-1 mr-1 d-flex flex-column justify-content-center">
-          <b-badge v-if="quickest" variant="info" pill class="pb-1">
+        <div class="mt-1 mb-1 ms-1 d-flex flex-column justify-content-center">
+          <b-badge v-if="quickest" variant="info" pill class="pb-1 text-white">
             Quick reply
           </b-badge>
         </div>
         <SupporterInfo
           v-if="replyuser?.supporter"
-          class="mt-1 mr-1 d-flex flex-column justify-content-center"
+          class="ms-1 d-flex flex-column justify-content-center"
         />
       </div>
       <div
-        class="pl-1 flex-shrink-1 ratings d-flex d-md-none justify-content-end"
+        class="pl-1 flex-shrink-1 ratings d-flex d-md-none justify-content-end align-self-center m-0"
       >
         <UserRatings v-if="replyuser?.id" :id="replyuser?.id" size="sm" />
       </div>
       <div
-        class="pl-1 flex-shrink-1 ratings d-none d-md-flex justify-content-end w-100 pr-1"
+        class="pl-1 flex-shrink-1 ratings d-none d-md-flex justify-content-end w-100 pr-1 m-0"
       >
         <UserRatings :id="replyuser?.id" />
       </div>
       <div class="d-flex flex-column justify-content-center wrote">
-        <div>
-          <div class="text-muted small mb-1">
+        <div class="d-flex flex-wrap">
+          <span v-if="unseen > 0" class="bg-white snippet text-primary mr-w">
+            {{ chat?.snippet }}...
+          </span>
+          <span v-else-if="chat?.snippet" class="bg-white snippet mr-2">
+            {{ chat?.snippet }}...
+          </span>
+          <span v-else class="ml-4"> ... </span>
+          <div
+            class="text-muted small mb-1 d-flex flex-column justify-content-around"
+          >
             <span :title="replylocale">
               {{ replyago }}
             </span>
           </div>
-          <span v-if="unseen > 0" class="bg-white snippet text-primary">
-            {{ chat?.snippet }}...
-          </span>
-          <span v-else-if="chat?.snippet" class="bg-white snippet">
-            {{ chat?.snippet }}...
-          </span>
-          <span v-else class="ml-4"> ... </span>
         </div>
       </div>
       <div class="d-flex flex-column justify-content-center ml-2 buttons">
-        <div>
+        <div class="d-flex w-100 justify-content-between">
           <b-button
             v-if="promised && !taken && !withdrawn"
             variant="warning"
             class="align-middle mt-1 mb-1 mr-2"
+            :size="buttonSize"
             @click="unpromise"
           >
             <div class="d-flex">
-              <span class="stacked">
+              <span class="stacked mt-1">
                 <v-icon icon="handshake" />
                 <v-icon icon="slash" class="unpromise__slash" /> </span
               >&nbsp;Unpromise
@@ -92,6 +74,7 @@
             v-else-if="message.type === 'Offer' && !taken && !withdrawn"
             variant="primary"
             class="align-middle mt-1 mb-1 mr-2"
+            :size="buttonSize"
             @click="promise"
           >
             <v-icon icon="handshake" /> Promise
@@ -99,6 +82,7 @@
           <b-button
             variant="secondary"
             class="align-middle mt-1 mb-1 mr-1"
+            :size="buttonSize"
             @click="openChat"
           >
             <b-badge v-if="unseen > 0" variant="danger">
@@ -128,11 +112,6 @@
       :selected-user="replyuser?.id"
       @hidden="showRenegeModal = false"
     />
-    <ProfileModal
-      v-if="showProfile && reply && replyuser"
-      :id="replyuser.id"
-      @hidden="showProfile = false"
-    />
   </div>
 </template>
 <script>
@@ -141,17 +120,14 @@ import { useMessageStore } from '../stores/message'
 import { useChatStore } from '../stores/chat'
 import { useRouter } from '#imports'
 import SupporterInfo from '~/components/SupporterInfo'
-import ProfileImage from '~/components/ProfileImage'
 import { timeago, datelocale } from '~/composables/useTimeFormat'
+import { useMiscStore } from '~/stores/misc'
 
 const UserRatings = defineAsyncComponent(() =>
   import('~/components/UserRatings')
 )
 const PromiseModal = defineAsyncComponent(() => import('./PromiseModal'))
 const RenegeModal = defineAsyncComponent(() => import('./RenegeModal'))
-const ProfileModal = defineAsyncComponent(() =>
-  import('~/components/ProfileModal')
-)
 
 export default {
   components: {
@@ -159,8 +135,6 @@ export default {
     UserRatings,
     PromiseModal,
     RenegeModal,
-    ProfileImage,
-    ProfileModal,
   },
   props: {
     message: {
@@ -210,6 +184,7 @@ export default {
     const userStore = useUserStore()
     const messageStore = useMessageStore()
     const chatStore = useChatStore()
+    const miscStore = useMiscStore()
 
     const promises = []
 
@@ -235,11 +210,11 @@ export default {
       userStore,
       messageStore,
       chatStore,
+      miscStore,
     }
   },
   data() {
     return {
-      showProfile: false,
       showPromiseModal: false,
       showRenegeModal: false,
     }
@@ -280,6 +255,10 @@ export default {
 
       return false
     },
+    buttonSize() {
+      const breakpoint = this.miscStore.breakpoint
+      return breakpoint === 'xs' || breakpoint === 'sm' ? 'sm' : 'md'
+    },
   },
   methods: {
     openChat() {
@@ -291,9 +270,6 @@ export default {
     },
     unpromise() {
       this.showRenegeModal = true
-    },
-    showProfileModal() {
-      this.showProfile = true
     },
   },
 }
@@ -311,9 +287,12 @@ export default {
   padding-left: 4px;
   padding-right: 4px;
   word-wrap: break-word;
-  line-height: 1.75;
-  font-size: 125%;
+  line-height: 1.5;
   font-weight: bold;
+
+  @include media-breakpoint-up(md) {
+    font-size: 125%;
+  }
 }
 
 .unpromise__slash {
@@ -329,21 +308,21 @@ export default {
 
   .user {
     grid-row: 1 / 2;
-    grid-column: 1 / 3;
+    grid-column: 1 / 2;
     align-self: start;
     font-size: 150%;
   }
 
   .badges {
     grid-row: 2 / 3;
-    grid-column: 2 / 3;
-    align-self: end;
+    grid-column: 1 / 3;
+    justify-self: end;
   }
 
   .ratings {
-    grid-row: 2 / 3;
-    grid-column: 1 / 2;
-    justify-self: start;
+    grid-row: 1 / 2;
+    grid-column: 2 / 3;
+    align-self: end;
     margin-top: 0.5rem;
     margin-right: 0.5rem;
   }
@@ -420,7 +399,6 @@ export default {
   }
 
   svg:nth-child(2) {
-    z-index: 10000;
     color: white;
     padding-top: 7px;
     padding-right: 7px;

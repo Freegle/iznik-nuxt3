@@ -9,7 +9,7 @@
           <nuxt-link
             no-prefetch
             :to="
-              (messageIsFromCurrentUser ? '/myposts/' : '/message/') + refmsgid
+              (messageIsFromCurrentUser ? '/mypost/' : '/message/') + refmsgid
             "
           >
             <b-img
@@ -35,7 +35,7 @@
           <nuxt-link
             no-prefetch
             :to="
-              (messageIsFromCurrentUser ? '/myposts/' : '/message/') + refmsgid
+              (messageIsFromCurrentUser ? '/mypost/' : '/message/') + refmsgid
             "
           >
             <h4>
@@ -87,7 +87,7 @@
           <nuxt-link
             no-prefetch
             :to="
-              (messageIsFromCurrentUser ? '/myposts/' : '/message/') + refmsgid
+              (messageIsFromCurrentUser ? '/mypost/' : '/message/') + refmsgid
             "
           >
             <b-img
@@ -102,21 +102,22 @@
               @error="brokenImage"
             />
           </nuxt-link>
-          <ProfileImage
-            :image="me.profile.path"
-            class="mr-1 mb-1 mt-1 inline"
-            is-thumbnail
-            size="sm"
-          />
-          <span class="small black"
-            >You promised <strong>{{ otheruser.displayname }}</strong
-            >:</span
-          >
-          <br />
+          <div class="d-flex justify-content-start align-items-center">
+            <ProfileImage
+              :image="me.profile.path"
+              class="mr-1 inline"
+              is-thumbnail
+              size="sm"
+            />
+            <div class="small black">
+              You promised <strong>{{ otheruser.displayname }}</strong
+              >:
+            </div>
+          </div>
           <nuxt-link
             no-prefetch
             :to="
-              (messageIsFromCurrentUser ? '/myposts/' : '/message/') + refmsgid
+              (messageIsFromCurrentUser ? '/mypost/' : '/message/') + refmsgid
             "
             class="nodecor"
           >

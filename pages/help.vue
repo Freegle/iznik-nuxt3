@@ -372,8 +372,9 @@
                 email="media@ilovefreegle.org"
                 text="media@ilovefreegle.org"
               />. Please use this if you are a member of the media and want to
-              help publicise Freegle. For urgent press enquiries only, call +44
-              (0)7962 449573.
+              help publicise Freegle.
+              <!--              For urgent press enquiries only, call +44-->
+              <!--              (0)7962 449573.-->
             </li>
           </ul>
           <p>This version of the site was built on {{ version }}.</p>

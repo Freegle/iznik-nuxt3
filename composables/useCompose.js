@@ -33,15 +33,16 @@ export function setup(type) {
     },
   })
 
+  const me = computed(() => authStore.user)
+
   const email = computed({
     get() {
       // See if we have a local email stored from last time we were logged in.
       let email = composeStore.email
-      const me = authStore.user
 
-      if (!email && me && me.email) {
+      if (!email && me.value?.email) {
         // If we're logged in, then we have an email from that which takes precedence.
-        email = me.email
+        email = me.value.email
       }
 
       return email
@@ -108,7 +109,7 @@ export function setup(type) {
     initialPostcode: ref(initialPostcode),
     group,
     postcode,
-    closed: computed(() => group?.settings?.closed),
+    closed: computed(() => group?.value?.settings?.closed),
     ids,
     notblank: computed(() => {
       let ret = false
@@ -144,7 +145,7 @@ export function setup(type) {
       const me = authStore.user
       const em = email.value + ''
 
-      if (email && me) {
+      if (email.value && me) {
         ret = !me.emails?.find((e) => {
           return (
             em
@@ -250,16 +251,27 @@ export async function freegleIt(type, router) {
     const params = {
       newuser: null,
       newpassword: null,
+      ids: [],
+      type,
     }
 
     await results.forEach(async (res) => {
+      console.log('Consider result', res, type)
+      if (type === 'Offer' && res.id) {
+        params.ids.push(res.id)
+      }
+
       if (res.newuser) {
         params.newuser = res.newuser
         params.newpassword = res.newpassword
 
-        // Fetch the session so that we know we're logged in, and so that we have permission to fetch messages
+        // Make sure we're logged in, and so that we have permission to fetch messages
         // below.
-        await authStore.fetchUser()
+        console.log('Login', composeStore.email)
+        await authStore.login({
+          email: composeStore.email,
+          password: params.newpassword,
+        })
       }
     })
 
@@ -267,23 +279,19 @@ export async function freegleIt(type, router) {
 
     if (results.length > 0 && results[0].groupid) {
       results.forEach((res) => {
-        console.log('Process result', res)
         promises.push(messageStore.fetch(res.id))
       })
 
       await Promise.all(promises)
-
-      router.push({
-        name: 'myposts',
-        params,
-      })
-    } else {
-      // Was probably already submitted
-      console.log('Router', router)
-      router.push({
-        name: 'myposts',
-      })
     }
+
+    // We pass the data in the history state to avoid it showing up in the URL.
+    console.log('Navigate to myposts', params)
+    router.push({
+      name: 'myposts',
+      state: params,
+    })
+    console.log('Navigated')
   } catch (e) {
     console.log('Submit failed', e, e?.response?.data?.ret)
     this.submitting = false

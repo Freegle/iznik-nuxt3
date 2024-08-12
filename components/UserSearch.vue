@@ -1,6 +1,6 @@
 <template>
   <div class="d-flex gap-3">
-    <b-button :to="'/browse/' + search.term" variant="white d-inline">
+    <b-button :to="'/browse/' + search.term" variant="white d-inline text-wrap">
       <v-icon icon="search" /> {{ search.term }}
       <span class="text-muted small">{{ searchAgo }}</span>
     </b-button>

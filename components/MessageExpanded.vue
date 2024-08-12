@@ -48,8 +48,9 @@
           <ExternalDa
             :ad-unit-path="adUnitPath"
             :ad-id="adId"
-            :dimensions="[300, 250]"
-            :div-id="adId + '-' + id"
+            :dimensions="[[300, 250]]"
+            :div-id="adId"
+            :in-modal="inModal"
             @rendered="adRendered = true"
           />
         </div>
@@ -142,6 +143,10 @@ export default {
       required: false,
       default: null,
     },
+    inModal: {
+      type: Boolean,
+      default: false,
+    },
   },
   setup(props) {
     const messageStore = useMessageStore()
@@ -158,7 +163,7 @@ export default {
   computed: {
     breakpoint() {
       const store = useMiscStore()
-      return store.getBreakpoint
+      return store.breakpoint
     },
     message() {
       return this.messageStore?.byId(this.id)

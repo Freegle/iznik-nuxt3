@@ -245,19 +245,31 @@ export const useAuthStore = defineStore({
       return { unknown, worked }
     },
     async signUp(params) {
-      const res = await this.$api.user.signUp(params, false)
-      const { ret, status, jwt, persistent } = res
+      try {
+        const res = await this.$api.user.signUp(params, false)
+        const { ret, status, jwt, persistent } = res
 
-      if (res.ret === 0) {
-        this.forceLogin = false
+        if (res.ret === 0) {
+          this.forceLogin = false
 
-        this.setAuth(jwt, persistent)
+          this.setAuth(jwt, persistent)
 
-        // We need to fetch the user to get the groups, persistent token etc.
-        await this.fetchUser()
-      } else {
-        // Register failed.
-        throw new SignUpError(ret, status)
+          // We need to fetch the user to get the groups, persistent token etc.
+          await this.fetchUser()
+        } else {
+          // Register failed.
+          throw new SignUpError(ret, status)
+        }
+      } catch (e) {
+        console.log('exception', e.response.data)
+        if (e?.response?.data?.ret === 2) {
+          throw new SignUpError(2, e.response.data.status)
+        } else {
+          throw new SignUpError(
+            e?.response?.data?.ret,
+            e?.response?.data?.status
+          )
+        }
       }
 
       this.loginCount++
@@ -285,8 +297,9 @@ export const useAuthStore = defineStore({
           groups = me.memberships
           delete me.memberships
 
-          if (!this.auth.jwt && process.client) {
-            // Pick up the JWT for later from the old API.  No need to wait, though.
+          if (process.client) {
+            // Check the old API.  Partly in case we need a JWT, partly to check we are
+            // logged in on both.  No need to wait, though.
             this.$api.session
               .fetch({
                 webversion: this.config.public.BUILD_DATE,
@@ -299,7 +312,15 @@ export const useAuthStore = defineStore({
                 if (ret) {
                   ;({ me, persistent, jwt } = ret)
                   if (me) {
-                    this.setAuth(jwt, persistent)
+                    if (!this.auth.jwt) {
+                      this.setAuth(jwt, persistent)
+                    }
+                  } else {
+                    // We are logged in on the v2 API but not the v1 API.  Force ourselves to be logged out,
+                    // which will then force a login when required and sort this out.
+                    console.error('Logged in on v2 API but not v1 API, log out')
+                    this.setAuth(null, null)
+                    this.setUser(null)
                   }
                 }
               })

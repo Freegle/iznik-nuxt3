@@ -39,7 +39,7 @@ export const useComposeStore = defineStore({
     emailAt: null,
     postcode: null,
     group: null,
-    messages: [],
+    messages: {},
     attachmentBump: 1,
     _progress: 1,
     max: 4,
@@ -75,7 +75,7 @@ export const useComposeStore = defineStore({
     async createDraft(message, email) {
       const attids = []
 
-      // extract id from message.attachments
+      // Extract the server attachment id from message.attachments.
       if (message.attachments) {
         for (const attachment of message.attachments) {
           attids.push(attachment.id)
@@ -259,9 +259,14 @@ export const useComposeStore = defineStore({
       this.messages[id].attachments = attachments
     },
     removeAttachment(params) {
-      const newAtts = this.messages[params.id].attachments.filter((obj) => {
-        return parseInt(obj.id) !== parseInt(params.photoid)
-      })
+      console.log('Remove attachment', JSON.stringify(params))
+      let newAtts = []
+
+      if (this.messages[params.id]?.attachments) {
+        newAtts = this.messages[params.id].attachments.filter((obj) => {
+          return parseInt(obj.id) !== parseInt(params.photoid)
+        })
+      }
 
       this.messages[params.id].attachments = newAtts
     },
@@ -369,7 +374,7 @@ export const useComposeStore = defineStore({
       return results
     },
     prune() {
-      if (!Array.isArray(this.messages)) {
+      if (this.messages && !Array.isArray(this.messages)) {
         // This is bad data.
         console.log('Bad compose messages, discard')
         this.messages = []

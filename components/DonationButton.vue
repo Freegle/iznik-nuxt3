@@ -105,6 +105,13 @@ export default {
       e.stopPropagation()
     },
     clicked() {
+      if (this.$gtm?.enabled()) {
+        this.$gtm.trackEvent({
+          event: 'Donate',
+          label: 'Z1RRCIfbv7kZELy618UD',
+        })
+      }
+
       this.$refs.paypalbutton?.firstChild?.click()
     },
     async donateMonthly() {

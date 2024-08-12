@@ -5,6 +5,7 @@
     :data-client_id="clientId"
     data-callback="handleGoogleCredentialsResponse"
     data-auto_select="true"
+    data-use_fedcm_for_prompt="true"
   />
 </template>
 <script>
@@ -35,7 +36,9 @@ export default {
   mounted() {
     const self = this
 
-    // Fallback in case the script load just quietly fails.  We've seen this on some Firefox versions.
+    // Fallback in case:
+    // - Whe script load just quietly fails.  We've seen this on some Firefox versions.
+    // - The notification is not displayed.  As of 2024 with OneTap migrating to FedCM we can't find this out.
     setTimeout(() => {
       console.log('One Tap fallback')
       self.$emit('complete')
@@ -43,53 +46,28 @@ export default {
 
     if (!this.loggedIn) {
       try {
+        // GSI script was loaded in nuxt.config.js
         console.log('Set credentials response')
+        window.google.accounts.id.initialize({
+          client_id: this.clientId,
+          callback: this.handleGoogleCredentialsResponse,
+        })
+
         window.handleGoogleCredentialsResponse =
           this.handleGoogleCredentialsResponse
 
         console.log('Set show')
         this.show = true
-        console.log('Load SDK')
-        ;(function (d, s, id) {
-          try {
-            console.log('SDK callback')
-            const fjs = d.getElementsByTagName(s)[0]
-            if (d.getElementById(id)) {
-              self.$emit('complete')
-              return
-            }
-            console.log('Load GSI')
-            const js = d.createElement(s)
-            js.id = id
-            js.src = 'https://accounts.google.com/gsi/client'
-            js.onload = (e) => {
-              console.log('GSI loaded')
-              try {
-                window.google.accounts.id.prompt((notification) => {
-                  console.log('One Tap prompt returned', notification)
+        try {
+          window.google.accounts.id.prompt(() => {
+            console.log('One Tap prompt returned')
+            self.$emit('complete')
+          })
+        } catch (e) {
+          console.error('One Tap error', e)
+          self.$emit('complete')
+        }
 
-                  if (
-                    notification.isNotDisplayed() ||
-                    !notification.isDisplayed()
-                  ) {
-                    console.log('One Tap not displayed')
-                    self.$emit('complete')
-                  }
-                })
-              } catch (e) {
-                console.error('One Tap error', e)
-                self.$emit('complete')
-              }
-            }
-            js.onerror = (e) => {
-              console.log('Error loading Google One Tap', e)
-              self.$emit('complete')
-            }
-            fjs.parentNode.insertBefore(js, fjs)
-          } catch (e) {
-            console.log('Exception in SDK callback', e)
-          }
-        })(document, 'script', 'google-jssdk')
         console.log('Loaded SDK')
       } catch (e) {
         console.log('Failed to load One Tap', e)

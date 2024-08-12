@@ -5,7 +5,7 @@
       :key="bump"
       v-observe-visibility="{
         callback: visibilityChanged,
-        intersection: {
+        options: {
           rootMargin: '0px 0px ' + distance + 'px 0px',
         },
       }"

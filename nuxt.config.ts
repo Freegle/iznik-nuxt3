@@ -1,7 +1,7 @@
-import { VitePWA } from 'vite-plugin-pwa'
 import eslintPlugin from 'vite-plugin-eslint'
-import legacy from '@vitejs/plugin-legacy'
+import { VitePWA } from 'vite-plugin-pwa'
 import { sentryVitePlugin } from '@sentry/vite-plugin'
+import { splitVendorChunkPlugin } from 'vite'
 import config from './config'
 
 // @ts-ignore
@@ -109,6 +109,7 @@ export default defineNuxtConfig({
     '/stats/**': { ssr: false },
     '/stories/**': { ssr: false },
     '/teams': { ssr: false },
+    '/adtest': { ssr: false },
 
     // Render on demand - may never be shown in a given build - then cache for a while.
     '/explore/region/**': { isr: 3600 },
@@ -135,7 +136,7 @@ export default defineNuxtConfig({
     prerender: {
       routes: ['/404.html', '/sitemap.xml'],
 
-      // Don't prerender the messages - too many
+      // Don't prerender the messages - too many.
       ignore: ['/message/'],
       crawlLinks: true,
     },
@@ -151,6 +152,10 @@ export default defineNuxtConfig({
   experimental: {
     emitRouteChunkError: 'reload',
     asyncContext: true,
+
+    // Payload extraction breaks SSR with routeRules - see https://github.com/nuxt/nuxt/issues/22068
+    renderJsonPayloads: false,
+    payloadExtraction: false,
   },
 
   webpack: {
@@ -158,17 +163,24 @@ export default defineNuxtConfig({
     extractCSS: true,
   },
 
-  modules: ['@pinia/nuxt'],
-
-  buildModules: [
-    [
-      '@pinia/nuxt',
-      {
-        autoImports: ['defineStore'],
-      },
-    ],
-    'floating-vue/nuxt',
+  modules: [
+    '@pinia/nuxt',
+    '@nuxt/image',
+    'nuxt-vite-legacy',
+    '@bootstrap-vue-next/nuxt',
+    process.env.GTM_ID ? '@zadigetvoltaire/nuxt-gtm' : null,
   ],
+
+  hooks: {
+    'build:manifest': (manifest) => {
+      for (const item of Object.values(manifest)) {
+        item.dynamicImports = []
+        item.prefetch = false
+        // Removing preload links is the magic that drops the FCP on mobile
+        item.preload = false
+      }
+    },
+  },
 
   // Environment variables the client needs.
   runtimeConfig: {
@@ -184,12 +196,31 @@ export default defineNuxtConfig({
       GOOGLE_CLIENT_ID: config.GOOGLE_CLIENT_ID,
       USER_SITE: config.USER_SITE,
       IMAGE_SITE: config.IMAGE_SITE,
+      UPLOADCARE_PROXY: config.UPLOADCARE_PROXY,
+      UPLOADCARE_CDN: config.UPLOADCARE_CDN,
       SENTRY_DSN: config.SENTRY_DSN,
       BUILD_DATE: new Date().toISOString(),
       NETLIFY_DEPLOY_ID: process.env.DEPLOY_ID,
       NETLIFY_SITE_NAME: process.env.SITE_NAME,
       MATOMO_HOST: process.env.MATOMO_HOST,
       COOKIEYES: config.COOKIEYES,
+      TRUSTPILOT_LINK: config.TRUSTPILOT_LINK,
+      TUS_UPLOADER: config.TUS_UPLOADER,
+      IMAGE_DELIVERY: config.IMAGE_DELIVERY,
+
+      ...(process.env.GTM_ID
+        ? {
+            gtm: {
+              id: process.env.GTM_ID,
+              defer: true,
+              compatibility: true,
+              debug: true,
+              enabled: !!process.env.GTM_ID,
+              enableRouterSync: false,
+              devtools: true,
+            },
+          }
+        : {}),
     },
   },
 
@@ -212,16 +243,26 @@ export default defineNuxtConfig({
       },
     },
     plugins: [
+      splitVendorChunkPlugin(),
       VitePWA({ registerType: 'autoUpdate' }),
       // Make Lint errors cause build failures.
       eslintPlugin(),
-      legacy({
-        targets: ['since 2015'],
-      }),
       sentryVitePlugin({
         org: 'freegle',
         project: 'nuxt3',
       }),
+    ],
+  },
+
+  // Note that this is not the standard @vitejs/plugin-legacy, but https://www.npmjs.com/package/nuxt-vite-legacy
+  legacy: {
+    targets: ['chrome 49', 'since 2015', 'ios>=12', 'safari>=12'],
+    modernPolyfills: [
+      'es.global-this',
+      'es.object.from-entries',
+      'es.array.flat-map',
+      'es.array.flat',
+      'es.string.replace-all',
     ],
   },
 
@@ -231,9 +272,306 @@ export default defineNuxtConfig({
     server: true,
   },
 
+  // Sometimes we need to change the host when doing local testing with browser stack.
+  devServer: {
+    host: '127.0.0.1',
+    port: 3000,
+  },
+
   app: {
     head: {
+      htmlAttrs: {
+        lang: 'en',
+      },
       title: "Freegle - Don't throw it away, give it away!",
+      script: [
+        {
+          // This is a polyfill for Safari12.  Can't get it to work using modernPolyfills - needs to happen very
+          // early.  Safari12 doesn't work well, but this makes it functional.
+          type: 'text/javascript',
+          innerHTML: `try { if (!window.globalThis) { window.globalThis = window; } } catch (e) { console.log('Polyfill error', e.message); }`,
+        },
+        // The ecosystem of advertising is complex.
+        // - The underlying ad service is Google Tags (GPT).
+        // - We use prebid (pbjs), which is some kind of ad broker which gives us a pipeline of ads to use.
+        //   We can also define our own ads in GPT.
+        // - Google and prebid both require use of a Consent Management Platform (CMP) so that the
+        //   user has indicated whether we have permission to show personalised ads.  We use CookieYes.
+        // - So we need to signal to Google and prebid which CMP we're using, which we do via window.dataLayer,
+        //   window.gtag and window.pbjs.
+        // - We also have to define the possible advertising slots available to prebid so that it knows what to bid on.
+        //   We do this once, here, for all slots. Only some slots may appear on any given page - they are
+        //   defined and added in ExternalDa.
+        // - When using prebid, we disable the initial ad load because it doesn't happen until after the prebid,
+        //   inside ExternalDa.
+        //
+        // During development we don't have a CMP because CookieYes doesn't work on localhost.  So in that case we
+        // don't disable initial ad load - so Google will load ads immediately.
+        //
+        // The order in which we load scripts is excruciatingly and critically important - see below.
+        //
+        // But we want to reduce LCP, so we defer all this by loading with async.
+        {
+          type: 'text/javascript',
+          body: true,
+          async: true,
+          innerHTML:
+            `try {
+              window.dataLayer = window.dataLayer || [];
+              function ce_gtag() {
+                  window.dataLayer.push(arguments);
+              }
+              ce_gtag("consent", "default", {
+                  ad_storage: "denied",
+                  ad_user_data: "denied", 
+                  ad_personalization: "denied",
+                  analytics_storage: "denied",
+                  functionality_storage: "denied",
+                  personalization_storage: "denied",
+                  security_storage: "granted",
+                  // wait_for_update shouldn't apply because we force the CMP to load before gtag.
+                  wait_for_update: 2000,
+              });
+              ce_gtag("set", "ads_data_redaction", true);
+              ce_gtag("set", "url_passthrough", true);
+              
+              console.log('Initialising pbjs and googletag...');
+              window.googletag = window.googletag || {};
+              window.googletag.cmd = window.googletag.cmd || [];
+              window.googletag.cmd.push(function() {
+                // On the dev server, where COOKIEYES is not set, we want ads to load immediately.
+              ` +
+            (config.COOKIEYES
+              ? `window.googletag.pubads().disableInitialLoad()`
+              : '') +
+            `
+                window.googletag.pubads().enableSingleRequest()
+                window.googletag.enableServices()
+              });
+              
+              window.pbjs = window.pbjs || {};
+              window.pbjs.que = window.pbjs.que || [];
+              
+              window.pbjs.que.push(function() {
+                 // Custom rounding function recommended by Magnite.
+                 const roundToNearestEvenIncrement = function (number) {
+                   let ceiling = Math.ceil(number);
+                   let ceilingIsEven = ceiling % 2 === 0;
+                   if (ceilingIsEven) {
+                     return ceiling;
+                   } else {
+                     return Math.floor(number);
+                   }
+                 }
+                
+                 window.pbjs.setConfig({
+                   consentManagement: {
+                     // We only need GDPR config.  We are interested in UK users, who are (for GDPR purposes if not
+                     // political purposes) inside the EU. 
+                     gdpr: {
+                      cmpApi: 'iab',
+                      allowAuctionWithoutConsent: false,
+                      timeout: 3000
+                     },
+                     // usp: {
+                     //  timeout: 8000 
+                     // },
+                     // gpp: {
+                     //  cmpApi: 'iab',
+                     //  timeout: 8000
+                     // }
+                   },
+                   cache: {
+                      url: 'https://prebid-server.rubiconproject.com/vtrack?a=26548',
+                      ignoreBidderCacheKey: true,
+                      vasttrack: true 
+                   },
+                   s2sConfig: [{
+                      accountId: '26548',
+                      bidders: ['mgnipbs'],   // PBS ‘bidder’ code that triggers the call to PBS
+                      defaultVendor: 'rubicon',
+                      coopSync: true,
+                      userSyncLimit: 8,       // syncs per page up to the publisher
+                      defaultTtl: 300,        // allow Prebid.js to cache bids for 5 minutes
+                      allowUnknownBidderCodes: true,  // so PBJS doesn't reject responses
+                      extPrebid: {
+                        cache: {      // only needed if you're running video
+                           vastxml: { returnCreative: false }
+                        },
+                        bidders: {
+                          mgnipbs: {
+                            wrappername: "26548_Freegle"
+                          }
+                        }
+                      }
+                    }],
+                    targetingControls: {
+                      addTargetingKeys: ['SOURCE']
+                    },
+                    cpmRoundingFunction : roundToNearestEvenIncrement,
+                    useBidCache: true
+                 });
+                 
+                 // Gourmetads requires schain config.
+                 pbjs.setBidderConfig({
+                  "bidders": ['gourmetads'],   
+                  "config": {
+                   "schain": {
+                     "validation": "relaxed",
+                     "config": {
+                       "ver":"1.0",
+                       "complete": 1,
+                       "nodes": [
+                         {
+                           "asi":"gourmetads.com",
+                           "sid":"16593",
+                           "hp":1
+                         }
+                       ]
+                     }
+                   },
+                 }
+                });
+              });  
+                 
+              window.pbjs.que.push(function() {
+                 console.log('Add PBJS ad units', ` +
+            JSON.stringify(config.AD_PREBID_CONFIG) +
+            `);
+                 window.pbjs.addAdUnits(` +
+            JSON.stringify(config.AD_PREBID_CONFIG) +
+            `)
+              });
+
+            function loadScript(url, block) {
+              if (url && url.length) {
+                console.log('Load script:', url);
+                var script = document.createElement('script');
+                script.defer = true;
+                script.type = 'text/javascript';
+                script.src = url;
+                
+                if (block) {
+                  // Block loading of this script until CookieYes has been authorised.
+                  // It's not clear that this blocking works, but it does no harm to 
+                  // ask for it.
+                  console.log('Set CookieYes script block', url);
+                  script.setAttribute('data-cookieyes', 'cookieyes-advertisement')
+                }
+                
+                document.head.appendChild(script);
+              }
+            }
+
+            window.postCookieYes = function() {
+              console.log('Consider load of GPT and prebid');
+              
+              if (!window.weHaveLoadedGPT) {
+                window.weHaveLoadedGPT = true;
+                
+                // We need to load:
+                // - GPT, which needs to be loaded before prebid.
+                // - Prebid.
+                // The ordering is ensured by using defer and appending the script.
+                //
+                // prebid isn't compatible with older browsers which don't support Object.entries.
+                console.log('Load GPT and prebid');
+                if (Object.fromEntries) {
+                  loadScript('https://securepubads.g.doubleclick.net/tag/js/gpt.js', true)
+                  loadScript('/js/prebid.js', true)
+                }
+              } else {
+                console.log('GPT and prebid already loaded');
+              }
+            };
+
+            function postGSI() {
+              if ('` +
+            config.COOKIEYES +
+            `' != 'null') {
+                // First we load CookieYes, which needs to be loaded before anything else, so that
+                // we have the cookie consent.
+                console.log('Load CookieYes');
+                loadScript('` +
+            config.COOKIEYES +
+            `', false)
+              
+                // Now we wait until the CookieYes script has set its own cookie.  
+                // This might be later than when the script has loaded in pure JS terms, but we
+                // need to be sure it's loaded before we can move on.
+                var retries = 10
+                
+                function checkCookieYes() {
+                  if (document.cookie.indexOf('cookieyes-consent') > -1) {
+                    console.log('CookieYes cookie is set, so CookieYes is loaded');
+                    
+                    // Check that we have set the TCF string.  This only happens once the user 
+                    // has responded to the cookie banner.
+                  if (window.__tcfapi) {
+                    window.__tcfapi('getTCData', 2, (tcData, success) => {
+                      if (success && tcData && tcData.tcString) {
+                        console.log('TC data loaded and TC String set');
+                        window.postCookieYes();
+                      } else {
+                        console.log('Failed to get TC data or string, retry.')
+                        setTimeout(checkCookieYes, 100);
+                      }
+                    }, [1,2,3]);
+                    } else {
+                      console.log('TCP API not yet loaded')
+                      setTimeout(checkCookieYes, 100);
+                    }
+                  } else {
+                    console.log('CookieYes not yet loaded', retries)
+                    retries--
+                    
+                    if (retries > 0) {
+                      setTimeout(checkCookieYes, 100);
+                    } else {
+                      // It's not loaded within a reasonable length of time.  This may be because it's
+                      // blocked by a browser extension.  Try to fetch the script here - if this fails with 
+                      // an exception then it's likely to be because it's blocked.
+                      console.log('Try fetching script')
+                      fetch('` +
+            config.COOKIEYES +
+            `').then((response) => {
+                        console.log('Fetch returned', response)
+                        
+                        if (response.ok) {
+                          console.log('Worked, maybe just slow?')
+                          retries = 10  
+                          setTimeout(checkCookieYes, 100);
+                        } else {
+                          console.log('Failed - assume blocked and proceed')
+                          window.postCookieYes()
+                        }
+                      })
+                      .catch((error) => {
+                        // Assume blocked and proceed.
+                        console.log('Failed to fetch CookieYes script:', error.message)
+                        window.postCookieYes()
+                      });                    
+                    }
+                  }
+                }
+                
+                checkCookieYes();
+              } else {
+                console.log('No CookieYes to load')
+                window.postCookieYes();
+              }
+            }
+            
+            window.onGoogleLibraryLoad = postGSI
+            
+            // We have to load GSI before we load the cookie banner, otherwise the Google Sign-in button doesn't
+            // render.
+            loadScript('https://accounts.google.com/gsi/client')
+          } catch (e) {
+            console.error('Error initialising pbjs and googletag:', e.message);
+          }`,
+        },
+      ],
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
@@ -330,6 +668,40 @@ export default defineNuxtConfig({
           content: 'Awin',
         },
       ],
+    },
+  },
+  image: {
+    uploadcare: {
+      provider: 'uploadcare',
+      cdnURL: config.UPLOADCARE_CDN,
+    },
+
+    weserv: {
+      provider: 'weserv',
+      baseURL: config.TUS_UPLOADER,
+      weservURL: config.IMAGE_DELIVERY,
+    },
+
+    // We want sharp images on fancy screens.
+    densities: [1, 2],
+
+    // Uploadcare only supports images upto 3000, and the screen sizes are doubled when requesting because of densities.
+    // So we already need to drop the top-level screen sizes, and we also don't want to request images which are too
+    // large because this affects our charged bandwidth.  So we only go up to 768.
+    screens: {
+      xs: 320,
+      sm: 576,
+      md: 768,
+      lg: 768,
+      xl: 768,
+      xxl: 768,
+      '2xl': 768,
+    },
+
+    providers: {
+      uploadcareProxy: {
+        provider: '~/providers/uploadcare-proxy.ts',
+      },
     },
   },
 })

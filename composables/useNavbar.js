@@ -9,28 +9,61 @@ import { useChatStore } from '../stores/chat'
 import { useAuthStore } from '~/stores/auth'
 import { fetchMe } from '~/composables/useMe'
 import { useRuntimeConfig } from '#app'
+import { TYPING_TIME_INVERVAL } from '~/constants'
+import { useCommunityEventStore } from '~/stores/communityevent'
+import { useVolunteeringStore } from '~/stores/volunteering'
 
 export const navBarHidden = ref(false)
 
 let navBarTimeout = null
 
-export function setNavBarHidden(hidden) {
-  // Hide the navbar when typing.
-  //
-  // Start a timer to show the navbars again after a delay.
-  if (navBarHidden.value !== hidden) {
-    navBarHidden.value = hidden
-  }
-
+export function clearNavBarTimeout() {
   if (navBarTimeout) {
     clearTimeout(navBarTimeout)
     navBarTimeout = null
   }
+}
 
-  if (hidden) {
-    navBarTimeout = setTimeout(() => {
-      navBarHidden.value = false
-    }, 5000)
+export function setNavBarHidden(hideRequest) {
+  // Hide the navbar when typing.
+  //
+  // Start a timer to show the navbars again after a delay.
+  if (navBarHidden.value !== hideRequest) {
+    function maybeHide(hidden) {
+      clearNavBarTimeout()
+
+      if (!hidden) {
+        // If we've been typing recently then we don't want to show the navbar.  This stops it sliding up
+        // and obscuring the chat box.
+        const lastTyping = useMiscStore().lastTyping
+        if (
+          lastTyping &&
+          new Date().getTime() - lastTyping < TYPING_TIME_INVERVAL
+        ) {
+          // We're still typing.  Keep the navbar hidden and check whether to show it again later.
+          console.log('Still typing - hide navbar')
+          navBarHidden.value = true
+          navBarTimeout = setTimeout(maybeHide, 5000, false)
+        } else {
+          // We're not still typing.  We can show the navbar.
+          console.log(
+            'Not still typing - show',
+            new Date().getTime(),
+            useMiscStore().lastTyping
+          )
+
+          navBarHidden.value = false
+        }
+      } else {
+        // We want to hide the navbar, and start a timer to show it again later if we're not still typing.
+        console.log('Hide now, check later')
+        navBarHidden.value = true
+
+        navBarTimeout = setTimeout(maybeHide, 5000, false)
+      }
+    }
+
+    maybeHide(hideRequest)
   }
 }
 
@@ -42,6 +75,8 @@ export function useNavbar() {
   const notificationStore = useNotificationStore()
   const chatStore = useChatStore()
   const logoStore = useLogoStore()
+  const communityEventStore = useCommunityEventStore()
+  const volunteeringStore = useVolunteeringStore()
   const route = useRoute()
   const router = useRouter()
 
@@ -49,6 +84,7 @@ export function useNavbar() {
   const myid = computed(() => authStore.user?.id)
   const distance = ref(1000)
   const logo = ref('/icon.png')
+  const logoFormat = ref('webp')
   const unreadNotificationCount = ref(0)
   const chatCount = computed(() => chatStore.unreadCount)
   const activePostsCount = computed(() => messageStore.activePostsCounter)
@@ -116,8 +152,28 @@ export function useNavbar() {
     return pluralize('unseen post', messageStore.count, true)
   })
 
-  const activePostsCountPlural = ref(() => {
+  const activePostsCountPlural = computed(() => {
     return pluralize('open post', activePostsCount.value, {
+      includeNumber: true,
+    })
+  })
+
+  const communityEventCount = computed(() => {
+    return communityEventStore.count
+  })
+
+  const communityEventCountPlural = computed(() => {
+    return pluralize('community event', communityEventCount.value, {
+      includeNumber: true,
+    })
+  })
+
+  const volunteerOpportunityCount = computed(() => {
+    return volunteeringStore.count
+  })
+
+  const volunteerOpportunityCountPlural = ref(() => {
+    return pluralize('volunteer opportunity', volunteerOpportunityCount.value, {
       includeNumber: true,
     })
   })
@@ -129,8 +185,9 @@ export function useNavbar() {
 
       if (ret.ret === 0 && ret.logo) {
         logo.value = ret.logo.path.replace(/.*logos/, '/logos')
+        logoFormat.value = 'gif'
       }
-    }, 5000)
+    }, 500000)
 
     getCounts()
   })
@@ -176,7 +233,28 @@ export function useNavbar() {
         const settings = me?.settings
         const distance = settings?.newsfeedarea || 0
         await newsfeedStore.fetchCount(distance, false)
+
+        // We might get logged out during awaits.
+        if (!myid.value) {
+          throw new Error('Not logged in')
+        }
+
         await messageStore.fetchCount(me?.settings?.browseView, false)
+
+        if (!myid.value) {
+          throw new Error('Not logged in')
+        }
+
+        await communityEventStore.fetchList()
+
+        if (!myid.value) {
+          throw new Error('Not logged in')
+        }
+
+        await volunteeringStore.fetchList()
+        if (!myid.value) {
+          throw new Error('Not logged in')
+        }
 
         if (
           route.path !== '/profile/' + myid.value &&
@@ -192,11 +270,13 @@ export function useNavbar() {
           await messageStore.fetchActivePostCount()
         }
 
-        unreadNotificationCount.value = await notificationStore.fetchCount()
+        if (myid.value) {
+          unreadNotificationCount.value = await notificationStore.fetchCount()
 
-        if (unreadNotificationCount.value) {
-          // Fetch the notifications too, so that we can be quick if they view them.
-          notificationStore.fetchList()
+          if (myid.value && unreadNotificationCount.value) {
+            // Fetch the notifications too, so that we can be quick if they view them.
+            notificationStore.fetchList()
+          }
         }
 
         const runtimeConfig = useRuntimeConfig()
@@ -248,6 +328,7 @@ export function useNavbar() {
     online,
     distance,
     logo,
+    logoFormat,
     unreadNotificationCount,
     chatCount,
     activePostsCount,
@@ -256,6 +337,10 @@ export function useNavbar() {
     newsCountPlural,
     browseCount,
     browseCountPlural,
+    communityEventCount,
+    communityEventCountPlural,
+    volunteerOpportunityCount,
+    volunteerOpportunityCountPlural,
     showAboutMeModal,
     homePage,
     showBackButton,

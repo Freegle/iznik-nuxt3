@@ -15,8 +15,9 @@
             lazy
             :class="inputClass"
           />
-          <b-input-group-append v-if="!autoSave">
+          <slot name="append">
             <SpinButton
+              v-if="!autoSave"
               ref="spinButton"
               :disabled="notMobile"
               variant="white"
@@ -25,7 +26,7 @@
               label="Save"
               @handle="savePhone"
             />
-          </b-input-group-append>
+          </slot>
         </b-input-group>
         <div class="text-muted mt-1 mb-1 text--small">
           <v-icon icon="lock" /> Other freeglers won't see this.
@@ -117,7 +118,10 @@ export default {
         await this.authStore.saveAndGet({
           phone: this.me.phone,
         })
-        callback()
+
+        if (callback) {
+          callback()
+        }
       }
     },
     async removePhone() {

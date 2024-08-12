@@ -1,9 +1,19 @@
 <template>
-  <div v-if="message" :id="'msg-' + id" class="position-relative">
-    <template v-if="message.successful">
+  <div
+    v-if="message"
+    :id="'msg-' + id"
+    v-observe-visibility="{
+      callback: view,
+      options: {
+        observeFullElement: true,
+      },
+    }"
+    class="position-relative"
+  >
+    <template v-if="message.successful && showFreegled">
       <MessageFreegled :id="id" />
     </template>
-    <template v-else-if="message.promised">
+    <template v-else-if="message.promised && showPromised">
       <MessagePromised
         :id="id"
         summary
@@ -18,6 +28,7 @@
         :matchedon="matchedon"
         class="mb-1 header-title"
         :expanded="false"
+        :show-location="showLocation"
       />
       <MessageHistory
         :id="id"
@@ -28,7 +39,7 @@
         <div
           v-if="!message.attachments || !message.attachments?.length"
           class="d-flex d-md-none"
-          @click="zoom"
+          @click="expand"
         >
           <MessageTag :id="id" class="ps-2 pe-2" inline />
           <div class="flex-grow-1" />
@@ -39,27 +50,42 @@
         v-if="!message.successful && replyable"
         class="header-expand mt-2 mt-sm-0"
       >
-        <b-button variant="primary" class="mt-2" @click="expand">
-          {{ expandButtonText }}
-        </b-button>
+        <client-only>
+          <b-button variant="primary" class="mt-2" @click="expand">
+            {{ expandButtonText }}
+          </b-button>
+        </client-only>
       </div>
-      <div class="image-wrapper" @click="zoom">
+      <div class="image-wrapper" @click="expandAndAttachments">
         <MessageAttachments
           :id="id"
           :attachments="message.attachments"
           :disabled="message.successful"
           thumbnail
+          :preload="preload"
         />
       </div>
     </div>
-    <div v-observe-visibility="view" />
   </div>
 </template>
-
 <script>
 import { useMessageStore } from '~/stores/message'
+const MessageFreegled = defineAsyncComponent(() =>
+  import('~/components/MessageFreegled')
+)
+const MessagePromised = defineAsyncComponent(() =>
+  import('~/components/MessagePromised')
+)
+const MessageItemLocation = defineAsyncComponent(() =>
+  import('~/components/MessageItemLocation')
+)
 
 export default {
+  components: {
+    MessageFreegled,
+    MessagePromised,
+    MessageItemLocation,
+  },
   props: {
     id: {
       type: Number,
@@ -85,6 +111,26 @@ export default {
       required: false,
       default: null,
     },
+    showFreegled: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
+    showPromised: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
+    showLocation: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
+    preload: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   setup() {
     const messageStore = useMessageStore()
@@ -100,11 +146,12 @@ export default {
     classes() {
       const ret = {
         messagecard: true,
-        freegled: this.message?.successful,
+        freegled: this.message?.successful && this.showFreegled,
         offer: this.message.type === 'Offer',
         wanted: this.message.type === 'Wanted',
         clickme: !this.message?.successful,
         promisedfade:
+          this.showPromised &&
           this.message?.promised &&
           this.replyable &&
           !this.message?.promisedtome &&
@@ -122,26 +169,31 @@ export default {
   },
   methods: {
     async view() {
-      if (this.me && this.message.unseen) {
+      if (this.me && this.message?.unseen) {
         await this.messageStore.view(this.id)
       }
-
-      this.$emit('view')
     },
-    expand() {
-      this.$emit('expand')
-    },
-    zoom(e) {
+    expand(e) {
       if (this.message) {
-        if (!this.message.attachments || !this.message.attachments?.length) {
-          // No photos - show the description.
-          this.$emit('expand')
-        } else {
-          this.$emit('zoom')
-        }
+        this.$emit('expand')
 
-        e.preventDefault()
-        e.stopPropagation()
+        if (e) {
+          e.preventDefault()
+          e.stopPropagation()
+        }
+      }
+    },
+    expandAndAttachments(e) {
+      // This is a slightly different case because on My Posts we want to trigger an image zoom (there is no expand
+      // on My Posts).
+      if (this.message) {
+        this.$emit('expand')
+        this.$emit('attachments')
+
+        if (e) {
+          e.preventDefault()
+          e.stopPropagation()
+        }
       }
     },
   },

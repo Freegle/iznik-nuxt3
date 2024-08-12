@@ -1,6 +1,6 @@
 import { onUnmounted } from 'vue'
 
-export function useModal() {
+export function useOurModal() {
   const modal = ref()
   const isShown = ref(false)
 

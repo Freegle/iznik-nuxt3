@@ -171,8 +171,8 @@ const onClick = () => {
     } else {
       done.value = false
       loading.value = true
-      emit('handle', finishSpinner)
       timer = setTimeout(forgottenCallback, 20 * 1000)
+      emit('handle', finishSpinner)
     }
   }
 }

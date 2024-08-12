@@ -31,22 +31,21 @@
       spellcheck="true"
       class="mb-1"
     />
-    <b-row>
+    <b-row v-if="uploading">
+      <b-col>
+        <OurUploader
+          v-model="currentAtts"
+          class="bg-white"
+          type="Noticeboard"
+        />
+      </b-col>
+    </b-row>
+    <b-row v-else>
       <b-col>
         <b-button variant="primary" class="mt-1 mb-2" @click="photoAdd">
           <v-icon icon="camera" />
           Upload photo
         </b-button>
-      </b-col>
-    </b-row>
-    <b-row v-if="uploading">
-      <b-col>
-        <OurFilePond
-          class="bg-white"
-          imgtype="Noticeboard"
-          imgflag="noticeboard"
-          @photo-processed="photoProcessed"
-        />
       </b-col>
     </b-row>
     <div v-if="image" class="container mt-4 mb-4">
@@ -69,7 +68,23 @@
         <v-icon icon="reply" flip="horizontal" />
       </div>
       <div class="image">
-        <b-img v-if="image" fluid :src="image.paththumb + '?' + cacheBust" />
+        <OurUploadedImage
+          v-if="image?.ouruid"
+          :src="image.ouruid"
+          :modifiers="image.imagemods"
+          alt="Poster Photo"
+          width="250"
+        />
+        <NuxtPicture
+          v-else-if="image?.imageuid"
+          fit="cover"
+          format="webp"
+          provider="uploadcare"
+          :src="image.imageuid"
+          :modifiers="image.imagemods"
+          alt="Poster Photo"
+          width="250"
+        />
         <b-img v-else width="250" thumbnail src="/placeholder.jpg" />
       </div>
     </div>
@@ -98,7 +113,7 @@
 import { useImageStore } from '../stores/image'
 import SpinButton from '~/components/SpinButton'
 import { useNoticeboardStore } from '~/stores/noticeboard'
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 
 const NoticeMessage = defineAsyncComponent(() =>
   import('~/components/NoticeMessage')
@@ -106,8 +121,8 @@ const NoticeMessage = defineAsyncComponent(() =>
 const DraggableMap = defineAsyncComponent(() =>
   import('~/components/DraggableMap')
 )
-const OurFilePond = defineAsyncComponent(() =>
-  import('~/components/OurFilePond')
+const OurUploader = defineAsyncComponent(() =>
+  import('~/components/OurUploader')
 )
 
 export default {
@@ -115,14 +130,14 @@ export default {
     DraggableMap,
     NoticeMessage,
     SpinButton,
-    OurFilePond,
+    OurUploader,
   },
   emits: ['hidden'],
   setup() {
     const noticeboardStore = useNoticeboardStore()
     const imageStore = useImageStore()
 
-    const { modal, hide } = useModal()
+    const { modal, hide } = useOurModal()
 
     return {
       noticeboardStore,
@@ -138,9 +153,23 @@ export default {
       loaded: false,
       active: true,
       uploading: false,
-      cacheBust: Date.now(),
       image: null,
+      currentAtts: [],
     }
+  },
+  watch: {
+    currentAtts: {
+      handler(newVal) {
+        this.uploading = false
+
+        this.image = {
+          id: newVal[0].id,
+          imageuid: newVal[0].ouruid,
+          imagemods: newVal[0].externalmods,
+        }
+      },
+      deep: true,
+    },
   },
   methods: {
     async submit(callback) {
@@ -185,31 +214,25 @@ export default {
       // processed callback below.
       this.uploading = true
     },
-    photoProcessed(imageid, imagethumb, image, ocr) {
-      // We have uploaded a photo.  Remove the filepond instance.
-      this.uploading = false
-
-      this.image = {
-        id: imageid,
-        path: image,
-        paththumb: imagethumb,
-      }
-    },
     async rotate(deg) {
+      const curr = this.image?.imagemods?.rotate || 0
+      this.image.imagemods.rotate = curr + deg
+
+      // Ensure between 0 and 360
+      this.image.imagemods.rotate = (this.image.imagemods.rotate + 360) % 360
+
       await this.imageStore.post({
         id: this.image.id,
-        rotate: deg,
+        rotate: this.image.imagemods.rotate,
         bust: Date.now(),
         noticeboard: true,
       })
-
-      this.cacheBust = Date.now()
     },
     rotateLeft() {
-      this.rotate(90)
+      this.rotate(-90)
     },
     rotateRight() {
-      this.rotate(-90)
+      this.rotate(90)
     },
   },
 }

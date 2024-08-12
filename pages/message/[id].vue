@@ -11,7 +11,7 @@
           >
             <ExternalDa
               ad-unit-path="/22794232631/freegle_productemail"
-              :dimensions="[300, 250]"
+              :dimensions="[[300, 250]]"
               div-id="div-gpt-ad-1691925773522-0"
               class="mt-2"
             />
@@ -66,7 +66,11 @@
               </b-col>
             </b-row>
           </div>
-          <div v-else-if="myid && message && message.fromuser === myid">
+          <div
+            v-else-if="
+              mountComplete && myid && message && message.fromuser === myid
+            "
+          >
             <MyMessage :id="id" :show-old="true" expand />
           </div>
           <div v-else class="botpad">
@@ -78,7 +82,7 @@
                 hide-close
                 record-view
                 ad-unit-path="/22794232631/freegle_productemail"
-                ad-id="div-gpt-ad-1691925773522-2"
+                ad-id="div-gpt-ad-1691925773522-0"
                 @not-found="error = true"
               />
             </VisibleWhen>
@@ -99,12 +103,12 @@
             class="position-fixed"
             style="width: 300px"
           >
-            <ExternalDa
-              ad-unit-path="/22794232631/freegle_productemail"
-              :dimensions="[300, 250]"
-              div-id="div-gpt-ad-1691925773522-1"
-              class="mt-2"
-            />
+            <!--            <ExternalDa-->
+            <!--              ad-unit-path="/22794232631/freegle_productemail"-->
+            <!--              :dimensions="[[300, 250]]"-->
+            <!--              div-id="div-gpt-ad-1691925773522-0"-->
+            <!--              class="mt-2"-->
+            <!--            />-->
           </VisibleWhen>
         </b-col>
       </b-row>
@@ -162,6 +166,10 @@ if (message.value) {
   )
 }
 
+// We want to delay render of MyMessage until the mount fetch is complete, as it would otherwise not
+// contain the reply information correctly.
+const mountComplete = ref(false)
+
 onMounted(async () => {
   // We need to fetch again on the client, as the server may have rendered the page with data censored, because
   // it always renders logged out.
@@ -170,5 +178,7 @@ onMounted(async () => {
   } catch (e) {
     console.log('Message fetch on mount failed', e)
   }
+
+  mountComplete.value = true
 })
 </script>

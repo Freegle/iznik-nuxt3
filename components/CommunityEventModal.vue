@@ -32,13 +32,37 @@
             </notice-message>
             <b-row>
               <b-col>
-                <b-img lazy fluid :src="event.image.path" class="mb-2 w-100" />
+                <OurUploadedImage
+                  v-if="event?.image?.ouruid"
+                  width="200"
+                  :src="event.image.ouruid"
+                  :modifiers="event.image.imagemods"
+                  alt="Community Event Photo"
+                  class="mb-2 w-100"
+                />
+                <NuxtPicture
+                  v-else-if="event?.image?.imageuid"
+                  format="webp"
+                  width="200"
+                  provider="uploadcare"
+                  :src="event.image.imageuid"
+                  :modifiers="event.image.imagemods"
+                  alt="Community Event Photo"
+                  class="mb-2 w-100"
+                />
+                <b-img
+                  v-else
+                  lazy
+                  fluid
+                  :src="event.image.path"
+                  class="mb-2 w-100"
+                />
               </b-col>
             </b-row>
           </div>
           <b-row>
             <!-- eslint-disable-next-line-->
-            <b-col class="mb-2 prewrap font-weight-bold forcebreak">{{ description }}</b-col>
+            <b-col class="mb-2 prewrap font-weight-bold forcebreak">{{ event.description }}</b-col>
           </b-row>
           <b-row>
             <b-col cols="4" md="3" class="field"> Where</b-col>
@@ -104,8 +128,9 @@
             </b-col>
           </b-row>
           <br />
-          <p v-if="user" class="text-muted">
-            Posted by {{ user.displayname }}
+          <p class="text-muted">
+            Posted
+            <span v-if="user?.id">by {{ user.displayname }}</span>
             <span v-for="(group, index) in groups" :key="index">
               <span v-if="index > 0">, </span><span v-else>on </span>
               {{ group.namedisplay }}
@@ -154,7 +179,7 @@
               </b-form-group>
             </b-col>
             <b-col v-if="enabled" cols="12" md="6">
-              <div v-if="event.image" class="container">
+              <div v-if="image" class="container">
                 <div
                   class="clickme rotateleft stacked"
                   label="Rotate left"
@@ -173,11 +198,19 @@
                   <v-icon icon="circle" size="2x" />
                   <v-icon icon="reply" flip="horizontal" />
                 </div>
-                <div class="image">
+                <div class="image d-flex justify-content-around">
+                  <OurUploadedImage
+                    v-if="image?.imageuid"
+                    width="200"
+                    :src="image.imageuid"
+                    :modifiers="mods"
+                    alt="Community Event Photo"
+                    class="mb-2"
+                  />
                   <b-img
-                    v-if="event.image"
+                    v-else-if="image"
                     fluid
-                    :src="event.image.paththumb + '?' + cacheBust"
+                    :src="image.paththumb + '?event=' + id + '-' + cacheBust"
                   />
                   <b-img v-else width="250" thumbnail src="/placeholder.jpg" />
                 </div>
@@ -185,24 +218,11 @@
             </b-col>
           </b-row>
           <span v-if="enabled">
-            <b-row>
-              <b-col>
-                <b-button variant="primary" class="mt-1" @click="photoAdd">
-                  <v-icon icon="camera" /> Upload photo
-                </b-button>
-              </b-col>
-            </b-row>
-            <b-row v-if="uploading">
-              <b-col>
-                <OurFilePond
-                  class="bg-white"
-                  imgtype="CommunityEvent"
-                  imgflag="communityevent"
-                  :ocr="true"
-                  @photo-processed="photoProcessed"
-                />
-              </b-col>
-            </b-row>
+            <OurUploader
+              v-model="currentAtts"
+              class="bg-white"
+              type="CommunityEvent"
+            />
 
             <b-form-group
               ref="eventEdit__description"
@@ -212,7 +232,7 @@
             >
               <Field
                 id="description"
-                v-model="event.description"
+                v-model="description"
                 name="description"
                 class="form-control mt-2"
                 as="textarea"
@@ -362,7 +382,7 @@
             :disabled="uploadingPhoto"
             @click="dontSave"
           >
-            Hide
+            Cancel
           </b-button>
           <SpinButton
             v-if="editing && enabled"
@@ -389,13 +409,13 @@ import { useImageStore } from '../stores/image'
 import EmailValidator from './EmailValidator'
 import { ref } from '#imports'
 import { twem } from '~/composables/useTwem'
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 
 const GroupSelect = defineAsyncComponent(() =>
   import('~/components/GroupSelect')
 )
-const OurFilePond = defineAsyncComponent(() =>
-  import('~/components/OurFilePond')
+const OurUploader = defineAsyncComponent(() =>
+  import('~/components/OurUploader')
 )
 const StartEndCollection = defineAsyncComponent(() =>
   import('~/components/StartEndCollection')
@@ -445,7 +465,7 @@ export default {
   components: {
     EmailValidator,
     GroupSelect,
-    OurFilePond,
+    OurUploader,
     StartEndCollection,
     NoticeMessage,
     DonationButton,
@@ -474,7 +494,7 @@ export default {
     const imageStore = useImageStore()
     const groupid = ref(null)
 
-    const { modal, hide } = useModal()
+    const { modal, hide } = useOurModal()
 
     if (props.id) {
       const v = await communityEventStore.fetch(props.id)
@@ -508,9 +528,12 @@ export default {
   data() {
     return {
       cacheBust: Date.now(),
-      uploading: false,
       showGroupError: false,
       showDateError: false,
+      description: null,
+      currentAtts: [],
+      mods: {},
+      image: null,
     }
   },
   computed: {
@@ -551,12 +574,6 @@ export default {
     isExisting() {
       return Boolean(this.event?.id)
     },
-    description() {
-      let desc = this.event?.description
-      desc = desc ? twem(desc) : ''
-      desc = desc.trim()
-      return desc
-    },
     enabled() {
       const group = this.groupStore.get(this.groupid)
 
@@ -569,6 +586,38 @@ export default {
       }
 
       return ret
+    },
+  },
+  watch: {
+    event: {
+      handler(newVal) {
+        let desc = newVal?.description
+        desc = desc ? twem(desc) : ''
+        desc = desc.trim()
+
+        this.description = desc
+      },
+      immediate: true,
+    },
+    description: {
+      handler(newVal) {
+        this.event.description = newVal
+      },
+    },
+    currentAtts: {
+      handler(newVal) {
+        this.event.image = {
+          id: newVal[0].id,
+          imageuid: newVal[0].ouruid,
+          imagemods: newVal[0].externalmods,
+        }
+        this.image = {
+          id: newVal[0].id,
+          imageuid: newVal[0].ouruid,
+          imagemods: newVal[0].externalmods,
+        }
+      },
+      deep: true,
     },
   },
   methods: {
@@ -720,51 +769,25 @@ export default {
 
       this.hide()
     },
-    photoAdd() {
-      // Flag that we're uploading.  This will trigger the render of the filepond instance and subsequently the
-      // processed callback below.
-      this.uploading = true
-    },
-    photoProcessed(imageid, imagethumb, image, ocr) {
-      // We have uploaded a photo.  Remove the filepond instance.
-      this.uploading = false
-
-      this.event.image = {
-        id: imageid,
-        path: image,
-        paththumb: imagethumb,
-      }
-
-      if (ocr) {
-        // We might have some OCR text from a poster which we can add in.
-        const p = ocr.indexOf('\n')
-        const title = p !== -1 ? ocr.substring(0, p) : null
-        const desc = p !== -1 ? ocr.substring(p + 1) : ocr
-
-        if (!this.event.title) {
-          this.event.title = title
-        }
-
-        if (!this.event.description) {
-          this.event.description = desc
-        }
-      }
-    },
     async rotate(deg) {
+      const curr = this.mods?.rotate || 0
+      this.mods.rotate = curr + deg
+
+      // Ensure between 0 and 360
+      this.mods.rotate = (this.mods.rotate + 360) % 360
+
       await this.imageStore.post({
         id: this.event.image.id,
-        rotate: deg,
+        rotate: this.mods.rotate,
         bust: Date.now(),
         communityevent: true,
       })
-
-      this.cacheBust = Date.now()
     },
     rotateLeft() {
-      this.rotate(90)
+      this.rotate(-90)
     },
     rotateRight() {
-      this.rotate(-90)
+      this.rotate(90)
     },
   },
 }

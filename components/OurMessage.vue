@@ -43,7 +43,6 @@
         class="mt-3"
         :matchedon="matchedon"
         @expand="expand"
-        @zoom="zoom"
       />
       <MessageModal
         v-if="expanded"
@@ -55,7 +54,6 @@
         @hidden="expanded = false"
       />
     </div>
-    <div v-observe-visibility="visibilityChanged" />
   </div>
 </template>
 
@@ -276,11 +274,6 @@ export default {
         }
 
         this.$emit('view')
-      }
-    },
-    visibilityChanged(vis) {
-      if (vis) {
-        this.$emit('visible', this.id)
       }
     },
   },

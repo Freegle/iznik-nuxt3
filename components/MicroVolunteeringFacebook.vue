@@ -36,7 +36,9 @@
   </div>
 </template>
 <script>
+import VueSocialSharing from 'vue-social-sharing'
 import { useMicroVolunteeringStore } from '../stores/microvolunteering'
+import { useNuxtApp } from '#app'
 
 export default {
   props: {
@@ -47,6 +49,11 @@ export default {
   },
   setup() {
     const microVolunteeringStore = useMicroVolunteeringStore()
+
+    // We install this plugin here rather than from the plugins folder to reduce page load side in the mainline
+    // case.
+    const nuxtApp = useNuxtApp()
+    nuxtApp.vueApp.use(VueSocialSharing)
 
     return {
       microVolunteeringStore,

@@ -20,7 +20,7 @@
           v-if="online && showBackButton"
           ref="mobileNav"
           variant="white"
-          class="nohover ml-3"
+          class="nohover ml-2 mr-1"
           @click="backButton"
         >
           <v-icon icon="arrow-left" />
@@ -31,6 +31,7 @@
         <NotificationOptions
           v-if="online && !showBackButton && loggedIn"
           v-model:unread-notification-count="unreadNotificationCount"
+          v-model:shown="notificationsShown"
           :distance="distance"
           :small-screen="true"
           @show-about-me="showAboutMe"
@@ -43,11 +44,13 @@
         </div>
         <div class="d-flex align-items-center">
           <b-nav>
-            <nuxt-link v-if="!loggedIn" no-prefetch>
-              <div class="btn btn-white mr-2" @click="requestLogin">
-                Log in or Join
-              </div>
-            </nuxt-link>
+            <b-nav-item>
+              <nuxt-link v-if="!loggedIn" no-prefetch>
+                <div class="btn btn-white mr-2" @click="requestLogin">
+                  Log in or Join
+                </div>
+              </nuxt-link>
+            </b-nav-item>
           </b-nav>
         </div>
         <b-dropdown
@@ -217,7 +220,7 @@
 </template>
 <script setup>
 import { useRoute } from 'vue-router'
-import { setNavBarHidden } from '../composables/useNavbar'
+import { clearNavBarTimeout, setNavBarHidden } from '../composables/useNavbar'
 import NavbarMobilePost from './NavbarMobilePost'
 import { useNavbar, navBarHidden } from '~/composables/useNavbar'
 import { useMiscStore } from '~/stores/misc'
@@ -260,19 +263,34 @@ const title = computed(() => {
   return useMiscStore().pageTitle
 })
 
+const notificationsShown = ref(false)
+
+watch(notificationsShown, (newVal) => {
+  console.log('Notifications shown', newVal)
+  if (newVal && navBarHidden.value) {
+    setNavBarHidden(false)
+  }
+})
+
 // We want to hide the navbars when you scroll down.
 onMounted(() => {
   window.addEventListener('scroll', handleScroll)
 })
 
 onBeforeUnmount(() => {
+  clearNavBarTimeout()
   window.removeEventListener('scroll', handleScroll)
 })
 
 function handleScroll() {
   const scrollY = window.scrollY
 
-  if (scrollY > 200 && !navBarHidden.value) {
+  if (notificationsShown.value) {
+    if (navBarHidden.value) {
+      // Don't hide the navbar if the notifications are visible.s
+      setNavBarHidden(false)
+    }
+  } else if (scrollY > 200 && !navBarHidden.value) {
     // Scrolling down.  Hide the navbars.
     setNavBarHidden(true)
   } else if (scrollY < 100 && navBarHidden.value) {
@@ -295,6 +313,7 @@ const navBarBottomHidden = computed(() => {
 </script>
 <style scoped lang="scss">
 @import 'assets/css/navbar.scss';
+@import 'assets/css/sticky-banner.scss';
 
 #navbar-mobile {
   // Set all children to display: none except the last one.  This means that normally we'll display the navbar
@@ -308,7 +327,11 @@ const navBarBottomHidden = computed(() => {
 }
 
 .navbot {
-  margin-bottom: 50px;
+  margin-bottom: $sticky-banner-height-mobile;
+
+  @include media-breakpoint-up(md) {
+    margin-bottom: $sticky-banner-height-desktop;
+  }
 }
 
 :deep(.dropdown-toggle) {
@@ -329,6 +352,7 @@ const navBarBottomHidden = computed(() => {
   top: 1px;
   right: -1px;
   font-size: 11px;
+  color: white !important;
 }
 
 .browsebadge2 {
@@ -336,6 +360,7 @@ const navBarBottomHidden = computed(() => {
   top: 1px;
   right: -7px;
   font-size: 11px;
+  color: white !important;
 }
 
 .chatup {
@@ -346,6 +371,7 @@ const navBarBottomHidden = computed(() => {
   position: absolute;
   top: 2px;
   font-size: 11px;
+  color: white !important;
 }
 
 .botmen {

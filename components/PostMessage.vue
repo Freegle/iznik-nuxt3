@@ -1,39 +1,28 @@
 <template>
   <div>
-    <div class="d-flex flex-wrap">
+    <div class="photoholder">
+      <label for="uploader" class="d-none d-md-block mt-2">
+        Please add photos:
+      </label>
       <draggable
-        v-model="attachments"
-        class="d-flex flex-wrap w-100"
+        v-model="currentAtts"
+        class="d-flex flex-wrap pl-2 mt-2 mb-2"
         :item-key="(el) => `image-${el.id}`"
         :animation="150"
         ghost-class="ghost"
+        @start="dragging = true"
+        @end="dragging = false"
       >
-        <template #header>
-          <div
-            class="photoholder bg-dark-subtle d-flex flex-column align-items-center justify-content-around mr-md-1"
-          >
-            <v-icon icon="camera" class="camera text-faded" />
-            <b-button
-              variant="primary"
-              size="lg"
-              :class="{
-                'ml-3': true,
-                'mr-3': true,
-                invisible: uploading && hidingPhotoButton,
-              }"
-              @click="photoAdd"
-              @drop.prevent="drop"
-              @dragover.prevent
-            >
-              <span v-if="attachments?.length === 1"> Add more photos </span>
-              <span v-else> Add photos </span>
-            </b-button>
-          </div>
-        </template>
         <template #item="{ element, index }">
           <div class="bg-transparent p-0">
             <PostPhoto
-              v-bind="element"
+              :id="element.id"
+              :path="element.path"
+              :paththumb="element.paththumb"
+              :thumbnail="element.thumbnail"
+              :externaluid="element.externaluid"
+              :ouruid="element.ouruid"
+              :externalmods="element.externalmods"
               :primary="index === 0"
               class="mr-1 mt-1 mt-md-0"
               @remove="removePhoto"
@@ -41,19 +30,15 @@
           </div>
         </template>
       </draggable>
-      <hr />
-    </div>
-    <div v-if="uploading" class="bg-white">
-      <OurFilePond
-        ref="filepond"
-        imgtype="Message"
-        imgflag="message"
-        :browse="pondBrowse"
-        :multiple="true"
-        @photo-processed="photoProcessed"
-        @all-processed="allProcessed"
-        @init="hidePhotoButton"
-      />
+      <div class="ml-2">
+        <OurUploader
+          v-if="!dragging"
+          :key="bump"
+          v-model="currentAtts"
+          type="Message"
+          multiple
+        />
+      </div>
     </div>
     <div class="subject-layout mb-1 mt-1">
       <div class="d-flex flex-column">
@@ -78,7 +63,9 @@
       />
     </div>
     <div class="d-flex flex-column mt-2">
-      <label :for="$id('description')">Please give a few details:</label>
+      <label :for="$id('description')" class="mb-1"
+        >Please give a few details:</label
+      >
       <b-form-textarea
         :id="$id('description')"
         v-model="description"
@@ -88,156 +75,111 @@
     </div>
   </div>
 </template>
-<script>
-import draggable from 'vuedraggable'
+<script setup>
 import { uid } from '../composables/useId'
 import { useComposeStore } from '../stores/compose'
-import { useMessageStore } from '../stores/message'
-import { useMiscStore } from '../stores/misc'
 import NumberIncrementDecrement from './NumberIncrementDecrement'
+import { ref, watch } from '#imports'
 
-const OurFilePond = defineAsyncComponent(() =>
-  import('~/components/OurFilePond')
+const OurUploader = defineAsyncComponent(() =>
+  import('~/components/OurUploader')
 )
-const PostPhoto = defineAsyncComponent(() => import('~/components/PostPhoto'))
 const PostItem = defineAsyncComponent(() => import('~/components/PostItem'))
+const draggable = defineAsyncComponent(() => import('vuedraggable'))
 
-export default {
-  components: {
-    NumberIncrementDecrement,
-    OurFilePond,
-    PostPhoto,
-    PostItem,
-    draggable,
+const props = defineProps({
+  id: {
+    type: Number,
+    required: false,
+    default: null,
   },
-  props: {
-    id: {
-      type: Number,
-      required: false,
-      default: null,
-    },
-    type: {
-      type: String,
-      required: true,
-    },
+  type: {
+    type: String,
+    required: true,
   },
-  setup(props) {
-    const composeStore = useComposeStore()
-    const messageStore = useMessageStore()
+})
 
-    composeStore.setType({
-      id: props.id,
-      type: props.type,
-    })
+const composeStore = useComposeStore()
 
-    return { composeStore, messageStore }
-  },
-  data() {
-    return {
-      uploading: false,
-      myFiles: [],
-      pondBrowse: true,
-      hidingPhotoButton: false,
+composeStore.setType({
+  id: props.id,
+  type: props.type,
+})
+
+const ret = composeStore.attachments(props.id).filter((a) => 'id' in a)
+
+// Need a separate variable to avoid watching on object causing tizzy.
+const currentAtts = ref([])
+
+watch(
+  currentAtts,
+  (newVal) => {
+    try {
+      console.log('Current atts changed', props.id, newVal)
+      composeStore.setAttachmentsForMessage(props.id, newVal)
+    } catch (e) {
+      console.error('Watch error', e)
     }
   },
-  computed: {
-    breakpoint() {
-      const store = useMiscStore()
-      return store.getBreakpoint
-    },
-    availablenow: {
-      get() {
-        const msg = this.composeStore?.message(this.id)
-        return msg &&
-          'availablenow' in msg &&
-          typeof msg.availablenow !== 'undefined'
-          ? msg.availablenow
-          : 1
-      },
-      set(newValue) {
-        this.composeStore.setAvailableNow(this.id, newValue)
-      },
-    },
-    description: {
-      get() {
-        const msg = this.composeStore?.message(this.id)
-        return msg?.description
-      },
-      set(newValue) {
-        this.composeStore.setDescription({
-          id: this.id,
-          description: newValue,
-        })
-      },
-    },
-    attachments: {
-      get() {
-        return this.composeStore?.attachments(this.id)
-      },
-      set(value) {
-        return this.composeStore?.setAttachmentsForMessage(this.id, value)
-      },
-    },
-    placeholder() {
-      return this.type === 'Offer'
-        ? "e.g. colour, condition, size, whether it's working etc."
-        : "Explain what you're looking for, and why you'd like it."
-    },
+  { deep: true }
+)
+
+currentAtts.value = JSON.parse(JSON.stringify(ret || []))
+
+const availablenow = computed({
+  get() {
+    const msg = composeStore?.message(props.id)
+    return msg &&
+      'availablenow' in msg &&
+      typeof msg.availablenow !== 'undefined'
+      ? msg.availablenow
+      : 1
   },
-  methods: {
-    photoAdd() {
-      // Flag that we're uploading.  This will trigger the render of the filepond instance and subsequently the
-      // init callback below.
-      this.uploading = true
-    },
-    photoProcessed(imageid, imagethumb, image) {
-      // We have uploaded a photo.  Remove the filepond instance.
-      const att = {
-        id: imageid,
-        paththumb: imagethumb,
-        path: image,
-      }
-
-      this.composeStore.addAttachment({
-        id: this.id,
-        attachment: att,
-      })
-    },
-    allProcessed() {
-      this.uploading = false
-    },
-    removePhoto(id) {
-      this.composeStore.removeAttachment({
-        id: this.id,
-        photoid: id,
-      })
-    },
-    async drop(e) {
-      // Although it's probably not widely used (I didn't know it even worked) in the old code you could drag and drog
-      // a file onto the Add photos button.  So we should handle that too here.
-      const droppedFiles = e.dataTransfer.files
-
-      if (!droppedFiles) {
-        return
-      }
-
-      this.uploading = droppedFiles.length
-      this.pondBrowse = false
-
-      // Give pond time to render.
-      await this.$nextTick()
-      ;[...droppedFiles].forEach((f) => {
-        this.$refs.filepond.addFile(f)
-      })
-    },
-    hidePhotoButton() {
-      this.hidingPhotoButton = true
-    },
-    $id(type) {
-      return uid(type)
-    },
+  set(newValue) {
+    composeStore.setAvailableNow(props.id, newValue)
   },
+})
+
+const description = computed({
+  get() {
+    const msg = composeStore?.message(props.id)
+    return msg?.description
+  },
+  set(newValue) {
+    composeStore.setDescription({
+      id: props.id,
+      description: newValue,
+    })
+  },
+})
+
+const placeholder = computed(() => {
+  return props.type === 'Offer'
+    ? "e.g. colour, condition, size, whether it's working etc."
+    : "Explain what you're looking for, and why you'd like it."
+})
+
+function $id(type) {
+  return uid(type)
 }
+
+const bump = ref(0)
+
+function removePhoto(id) {
+  // We just remove it from our store here.  The attachment on the server will get tidied up.
+  composeStore.removeAttachment({
+    id: props.id,
+    photoid: id,
+  })
+
+  currentAtts.value = currentAtts.value.filter((a) => a.id !== id)
+
+  if (!currentAtts.value.length) {
+    bump.value++
+  }
+}
+
+const dragging = ref(false)
 </script>
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';
@@ -289,15 +231,10 @@ export default {
 
 .photoholder {
   min-height: max(100px, 15vh);
-  max-height: min(300px, 25vh, 50%);
   width: 100%;
 
-  svg {
-    font-size: min(8.75rem, 7.5vh);
-  }
-
   @include media-breakpoint-up(md) {
-    width: 200px;
+    min-height: unset;
   }
 }
 

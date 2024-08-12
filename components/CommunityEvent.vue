@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-card v-if="event" variant="success" no-body>
+    <b-card v-if="event" no-body>
       <b-card-title
         class="bg-light px-2 mb-0 pt-2 pb-2 d-flex justify-content-between header--size4"
         :title-tag="titleTag"
@@ -56,8 +56,25 @@
               <v-icon icon="info-circle" /> More info
             </b-button>
           </div>
+          <OurUploadedImage
+            v-if="event?.image?.ouruid"
+            :src="event.image.ouruid"
+            :modifiers="event.image.externalmods"
+            alt="Community Event Photo"
+            class="w-100"
+          />
+          <NuxtPicture
+            v-else-if="event?.image?.externaluid"
+            format="webp"
+            fit="cover"
+            provider="uploadcare"
+            :src="event.image.externaluid"
+            :modifiers="event.image.externalmods"
+            alt="Community Event Photo"
+            class="w-100"
+          />
           <b-img
-            v-if="event.image"
+            v-else-if="event.image"
             lazy
             class="w-100"
             :src="event.image.path"
@@ -117,7 +134,7 @@
             thumbnail
             class="square"
             generator-unable-to-provide-required-alt=""
-            title="Opportunity photo"
+            title="Event photo"
           />
         </div>
       </b-card-body>
@@ -130,10 +147,10 @@
   </div>
 </template>
 <script>
-import ReadMore from 'vue-read-more3/src/ReadMoreComponent'
 import { useCommunityEventStore } from '../stores/communityevent'
 import { useUserStore } from '../stores/user'
 import { useGroupStore } from '../stores/group'
+import ReadMore from '~/components/ReadMore'
 import { twem } from '~/composables/useTwem'
 const CommunityEventModal = defineAsyncComponent(() =>
   import('./CommunityEventModal')

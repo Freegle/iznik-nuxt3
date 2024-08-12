@@ -30,11 +30,11 @@
                       v-model="me.displayname"
                       placeholder="Your name"
                     />
-                    <b-input-group-append>
+                    <slot name="append">
                       <b-button variant="white" @click="saveName">
                         <v-icon icon="save" />&nbsp;Save
                       </b-button>
-                    </b-input-group-append>
+                    </slot>
                   </b-input-group>
                 </b-col>
               </b-row>
@@ -42,14 +42,33 @@
                 <b-col cols="12" xl="6">
                   <b-card>
                     <b-card-body class="text-center p-2">
-                      <div class="d-flex justify-content-around">
+                      <div :key="bump" class="d-flex justify-content-around">
                         <ProfileImage
+                          v-if="!me || !useprofile"
+                          image="/defaultprofile.png"
+                          class="mr-1 mb-1 mt-1 inline"
+                          is-thumbnail
+                          size="xl"
+                          alt-text="Default profile image"
+                        />
+                        <ProfileImage
+                          v-else-if="me?.profile?.externaluid"
+                          :externaluid="me.profile.externaluid"
+                          :externalmods="me.profile.externalmods"
+                          class="mr-1 mb-1 mt-1 inline"
+                          is-thumbnail
+                          size="xl"
+                          alt-text="My profile image"
+                        />
+                        <ProfileImage
+                          v-else
                           :image="
-                            useprofile ? profileurl + '?' + cacheBust : null
+                            profileurl + '?settings=' + myid + '-' + cacheBust
                           "
                           class="mr-1 mb-1 mt-1 inline"
                           is-thumbnail
                           size="xl"
+                          alt-text="My profile image"
                         />
                       </div>
                       <div class="d-flex justify-content-around mb-2">
@@ -64,7 +83,12 @@
                         class="d-flex justify-content-around align-items-center"
                       >
                         <div
-                          v-if="me.profile.ours && useprofile"
+                          v-if="
+                            (me.profile.ours || me.profile.externaluid) &&
+                            useprofile &&
+                            !showProfileModal &&
+                            !uploading
+                          "
                           class="clickme image__icon stacked mt-2"
                           title="Rotate left"
                           @click="rotateLeft"
@@ -72,7 +96,14 @@
                           <v-icon icon="circle" size="2x" />
                           <v-icon icon="reply" class="pl-2" />
                         </div>
+                        <div
+                          v-if="uploading"
+                          class="bg-white d-flex justify-content-around"
+                        >
+                          <OurUploader v-model="currentAtts" type="User" />
+                        </div>
                         <b-button
+                          v-else
                           variant="secondary"
                           class="mt-2"
                           @click="uploadProfile"
@@ -80,7 +111,12 @@
                           <v-icon icon="camera" /> Upload photo
                         </b-button>
                         <div
-                          v-if="me.profile.ours && useprofile"
+                          v-if="
+                            (me.profile.ours || me.profile.externaluid) &&
+                            useprofile &&
+                            !showProfileModal &&
+                            !uploading
+                          "
                           class="clickme image__icon stacked mt-2"
                           title="Rotate right"
                           @click="rotateRight"
@@ -89,16 +125,6 @@
                           <v-icon icon="reply" flip="horizontal" class="pr-2" />
                         </div>
                       </div>
-                      <b-row v-if="uploading" class="bg-white">
-                        <b-col class="p-0">
-                          <OurFilePond
-                            imgtype="User"
-                            imgflag="user"
-                            :msgid="me.id"
-                            @photo-processed="photoProcessed"
-                          />
-                        </b-col>
-                      </b-row>
                       <div v-if="supporter" class="mt-4">
                         <SupporterInfo size="lg" :hidden="!showSupporter" />
                         <b-button
@@ -368,6 +394,7 @@
                         eventshide
                         volunteerhide
                         label="Choose OFFER/WANTED frequency:"
+                        class="mt-1 mb-1"
                       />
                       <SettingsEmailInfo
                         v-model:simple-email-setting="simpleEmailSetting"
@@ -686,10 +713,13 @@ import PostCode from '~/components/PostCode'
 
 import SettingsGroup from '~/components/SettingsGroup'
 import NoticeMessage from '~/components/NoticeMessage'
-import OurFilePond from '~/components/OurFilePond'
+import OurUploader from '~/components/OurUploader'
 import OurToggle from '~/components/OurToggle'
 import DonationButton from '~/components/DonationButton'
 import PasswordEntry from '~/components/PasswordEntry'
+import { fetchMe } from '~/composables/useMe'
+import { useImageStore } from '~/stores/image'
+
 const EmailConfirmModal = defineAsyncComponent(() =>
   import('~/components/EmailConfirmModal')
 )
@@ -719,7 +749,7 @@ export default {
     SettingsGroup,
     NoticeMessage,
     ProfileImage,
-    OurFilePond,
+    OurUploader,
     DonationButton,
     PasswordEntry,
   },
@@ -746,11 +776,13 @@ export default {
     const miscStore = useMiscStore()
     const authStore = useAuthStore()
     const addressStore = useAddressStore()
+    const imageStore = useImageStore()
 
     return {
       miscStore,
       authStore,
       addressStore,
+      imageStore,
     }
   },
   data() {
@@ -769,6 +801,8 @@ export default {
       showAboutMeModal: false,
       showProfileModal: false,
       showEmailConfirmModal: false,
+      currentAtts: [],
+      bump: 0,
     }
   },
   computed: {
@@ -845,7 +879,7 @@ export default {
       return ret
     },
     profileurl() {
-      return this.me && this.useprofile
+      return this.me && this.useprofile && this.me.profile?.path
         ? this.me.profile.path
         : '/defaultprofile.png'
     },
@@ -957,6 +991,33 @@ export default {
         : []
     },
   },
+  watch: {
+    currentAtts: {
+      async handler(newVal) {
+        this.uploading = false
+
+        if (newVal?.length) {
+          // We want to replace our profile picture.  The API for this is a bit odd - msgid will get used as the
+          // id of the user.
+          const atts = {
+            externaluid: newVal[0].ouruid,
+            externalmods: newVal[0].externalmods,
+            imgtype: 'User',
+            msgid: this.myid,
+          }
+
+          console.log('Post image', atts)
+          await this.imageStore.post(atts)
+        }
+
+        // Refresh the user - which in turn should update the image displayed.
+        await fetchMe(true)
+
+        this.bump++
+      },
+      deep: true,
+    },
+  },
   async mounted() {
     await this.update()
     this.autoreposts = !this.me?.settings?.autorepostsdisable
@@ -1056,16 +1117,15 @@ export default {
             settings,
           })
         }
-
-        callback()
       }
+
+      callback()
     },
     toggleAdvanced(e) {
       e.preventDefault()
       this.showAdvanced = !this.showAdvanced
     },
     async changeAllGroups(param, value) {
-      console.log('Change all', this.myGroups)
       for (const group of this.myGroups) {
         const params = {
           userid: this.me.id,
@@ -1132,32 +1192,38 @@ export default {
       await this.addressStore.fetch()
       this.showAddressModal = true
     },
-    photoProcessed(imageid, imagethumb, image) {
-      // We have uploaded a photo.  Remove the filepond instance.
-      this.uploading = false
-
-      this.$router.go()
-    },
     uploadProfile() {
       this.uploading = true
     },
     async rotate(deg) {
+      let curr = 0
+
+      if (this.me.profile.externaluid) {
+        curr = this.me.profile.externalmods?.rotate || 0
+      }
+
+      curr += deg
+
+      // Ensure between 0 and 360
+      curr = (curr + 360) % 360
+
       await this.imageStore.post({
-        id: this.event.image.id,
-        rotate: deg,
+        id: this.me.profile.id,
+        rotate: curr,
         bust: Date.now(),
         user: true,
       })
 
+      // Refresh the user - which in turn should update the image displayed.
+      await fetchMe(true)
+
       this.cacheBust = Date.now()
     },
     rotateLeft() {
-      this.rotate(90)
-      this.cacheBust = Date.now()
+      this.rotate(-90)
     },
     rotateRight() {
-      this.rotate(-90)
-      this.cacheBust = Date.now()
+      this.rotate(90)
     },
   },
 }

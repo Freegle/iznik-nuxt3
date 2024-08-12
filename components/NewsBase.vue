@@ -5,6 +5,7 @@
 import { useNewsfeedStore } from '../stores/newsfeed'
 import { useUserStore } from '../stores/user'
 import { twem } from '~/composables/useTwem'
+import { URL_REGEX } from '~/constants'
 
 export default {
   components: {},
@@ -24,7 +25,25 @@ export default {
   },
   computed: {
     emessage() {
-      return this.newsfeed.message ? twem(this.newsfeed.message) : null
+      let ret = this.newsfeed.message ? twem(this.newsfeed.message) : null
+
+      if (ret) {
+        // Remove leading spaces/tabs.
+        let regExp = /^[\t ]+/gm
+        ret = ret.replace(regExp, '')
+
+        // Remove duplicate blank lines.
+        const EOL = ret.match(/\r\n/gm) ? '\r\n' : '\n'
+        regExp = new RegExp('(' + EOL + '){3,}', 'gm')
+        ret = ret.replace(regExp, EOL + EOL)
+      }
+
+      if (this.newsfeed.type === 'Alert') {
+        // Make links clickable.
+        ret = ret.replace(URL_REGEX, '<a href="$1" target="_blank">$1</a>')
+      }
+
+      return ret
     },
     newsfeed() {
       const newsfeedStore = useNewsfeedStore()

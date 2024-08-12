@@ -1,12 +1,5 @@
 <template>
   <div class="cont bg-white">
-    <div v-if="uploading" class="bg-white">
-      <OurFilePond
-        imgtype="ChatMessage"
-        imgflag="chatmessage"
-        @photo-processed="photoProcessed"
-      />
-    </div>
     <div>
       <notice-message v-if="otheruser?.deleted" variant="info" class="mb-2">
         This freegler has deleted their account, so you can't chat to them.
@@ -59,6 +52,12 @@
               double-check they have transport.
             </p>
           </notice-message>
+          <notice-message v-if="thumbsdown" variant="warning">
+            <p>
+              <v-icon icon="exclamation-triangle" />&nbsp;You previously gave
+              this freegler a thumbs down.
+            </p>
+          </notice-message>
         </div>
         <b-button
           variant="warning"
@@ -70,59 +69,81 @@
         </b-button>
       </div>
       <div v-if="!otheruser?.deleted">
+        <div v-if="uploading" class="bg-white">
+          <OurUploader
+            v-model="currentAtts"
+            type="ChatMessage"
+            start-open
+            @closed="uploading = false"
+          />
+        </div>
         <label for="chatmessage" class="visually-hidden">Chat message</label>
-        <div v-if="!imagethumb">
-          <Popper
-            :show="showSuggested"
+        <div v-if="!imageid">
+          <b-form-textarea
+            v-if="enterNewLine && !otheruser?.spammer"
+            id="chatmessage"
+            ref="chatarea"
+            v-model="sendmessage"
+            placeholder="Type here..."
+            enterkeyhint="enter"
+            :style="height"
+            @keydown="typing"
+            @focus="markRead"
+          />
+          <b-form-textarea
+            v-else-if="!otheruser?.spammer"
+            id="chatmessage"
+            ref="chatarea"
+            v-model="sendmessage"
+            placeholder="Type here..."
+            :style="height"
+            enterkeyhint="send"
+            autocapitalize="none"
+            @keydown="typing"
+            @keydown.enter.exact.prevent
+            @keyup.enter.exact="send"
+            @keydown.enter.shift.exact.prevent="newline"
+            @keydown.alt.shift.enter.exact.prevent="newline"
+            @focus="markRead"
+          />
+          <Dropdown
             placement="top"
-            arrow
-            class="w-100 m-0 p-0 border-0"
+            :shown="showSuggested"
+            :triggers="[]"
+            :auto-hide="false"
+            class="position-absolute"
+            :style="
+              caretPosition
+                ? {
+                    top: `${caretPosition.top}px`,
+                    left: `${caretPosition.left}px`,
+                  }
+                : {}
+            "
           >
-            <b-form-textarea
-              v-if="enterNewLine && !otheruser?.spammer"
-              id="chatmessage"
-              ref="chatarea"
-              v-model="sendmessage"
-              placeholder="Type here..."
-              enterkeyhint="enter"
-              :style="height"
-              @keydown="typing"
-              @focus="markRead"
-            />
-            <b-form-textarea
-              v-else-if="!otheruser?.spammer"
-              id="chatmessage"
-              ref="chatarea"
-              v-model="sendmessage"
-              placeholder="Type here..."
-              :style="height"
-              enterkeyhint="send"
-              autocapitalize="none"
-              @keydown="typing"
-              @keydown.enter.exact.prevent
-              @keyup.enter.exact="send"
-              @keydown.enter.shift.exact.prevent="newline"
-              @keydown.alt.shift.enter.exact.prevent="newline"
-              @focus="markRead"
-            />
-            <template #content>
-              <strong>{{ suggestedAddress?.address?.singleline }}</strong>
-              <div class="d-flex justify-content-between flex-wrap mt-2">
-                <b-button variant="primary" @click="sendSuggestedAddress">
-                  Send address
-                </b-button>
-                <b-button variant="secondary" @click="rejectSuggestedAddress">
-                  Cancel
-                </b-button>
+            <template #popper>
+              <div
+                style="cursor: pointer"
+                class="px-2 py-2"
+                @mousedown="applySuggestedAddress()"
+              >
+                {{ suggestedAddress?.address?.singleline }}
               </div>
             </template>
-          </Popper>
+          </Dropdown>
         </div>
         <div v-else class="d-flex justify-content-end pt-2 pb-2">
-          <b-img :src="imagethumb" fluid class="maxheight" />
-          <div>
+          <OurUploadedImage
+            :src="imageuid"
+            :modifiers="imagemods"
+            alt="Chat Photo"
+            :width="200"
+            :height="200"
+            sizes="200px"
+          />
+          <div class="ml-1">
             <b-button title="Remove photo" @click="removeImage">
-              <v-icon icon="times-circle" scale="1.5" />
+              <v-icon icon="trash-alt" scale="1.5" />
             </b-button>
           </div>
         </div>
@@ -175,7 +196,7 @@
           size="md"
           variant="primary"
           class="float-end ml-2 mr-2"
-          button-title="Sending..."
+          :button-title="sending ? 'Sending...' : 'Send'"
           label="Send"
           icon-name="angle-double-right"
           done-icon=""
@@ -307,7 +328,9 @@
 </template>
 <script>
 import pluralize from 'pluralize'
-import Popper from 'vue3-popper'
+import getCaretCoordinates from 'textarea-caret'
+import { Dropdown } from 'floating-vue'
+import { mapWritableState } from 'pinia'
 import { FAR_AWAY, TYPING_TIME_INVERVAL } from '../constants'
 import { setupChat } from '../composables/useChat'
 import { useMiscStore } from '../stores/misc'
@@ -319,8 +342,8 @@ import SpinButton from './SpinButton'
 import { untwem } from '~/composables/useTwem'
 
 // Don't use dynamic imports because it stops us being able to scroll to the bottom after render.
-const OurFilePond = defineAsyncComponent(() =>
-  import('~/components/OurFilePond')
+const OurUploader = defineAsyncComponent(() =>
+  import('~/components/OurUploader')
 )
 const UserRatings = defineAsyncComponent(() =>
   import('~/components/UserRatings')
@@ -356,14 +379,14 @@ export default {
     NudgeTooSoonWarningModal,
     NudgeWarningModal,
     UserRatings,
-    OurFilePond,
+    OurUploader,
     NoticeMessage,
     PromiseModal,
     AddressModal,
     ProfileModal,
     ChatRSVPModal,
     MicroVolunteering,
-    Popper,
+    Dropdown,
   },
   props: {
     id: { type: Number, required: true },
@@ -411,16 +434,20 @@ export default {
       sendmessage: null,
       RSVP: false,
       likelymsg: null,
-      lastTyping: null,
       ouroffers: [],
       imagethumb: null,
       imageid: null,
+      imageuid: null,
+      imagemods: null,
       showNudgeTooSoonWarningModal: false,
       showNudgeWarningModal: false,
       hideSuggestedAddress: false,
+      caretPosition: { top: 0, left: 0 },
+      currentAtts: [],
     }
   },
   computed: {
+    ...mapWritableState(useMiscStore, ['lastTyping']),
     height() {
       // Bootstrap Vue Next doesn't yet have autoresizing.
       return this.sendmessage ? 'height: 12em' : 'height: 6em'
@@ -431,11 +458,15 @@ export default {
         this.expectedreplies ||
         this.otheruser?.spammer ||
         this.otheruser?.deleted ||
+        this.thumbsdown ||
         this.faraway
       )
     },
     faraway() {
       return this.milesaway && this.milesaway > FAR_AWAY
+    },
+    thumbsdown() {
+      return this.otheruser?.info?.ratings?.Mine === 'Down'
     },
     badratings() {
       let ret = false
@@ -443,7 +474,7 @@ export default {
       if (
         this.otheruser?.info?.ratings &&
         this.otheruser.info.ratings.Down > 2 &&
-        this.otheruser.info.ratings.Down > 2 * this.otheruser.info.ratings.Up
+        this.otheruser.info.ratings.Down * 2 > this.otheruser.info.ratings.Up
       ) {
         ret = true
       }
@@ -529,6 +560,15 @@ export default {
     },
   },
   watch: {
+    suggestedAddress: {
+      handler(newVal) {
+        if (newVal?.address?.singleline?.length !== newVal?.matchedLength) {
+          this.hideSuggestedAddress = false
+          this.updateCaretPosition()
+        }
+      },
+      deep: true,
+    },
     sendmessage(newVal, oldVal) {
       // This will result in the chat header shrinking once you start typing, to give more room, and then
       // expanding back again if you delete everything.
@@ -560,6 +600,23 @@ export default {
         })
       }
     },
+    currentAtts: {
+      handler(newVal) {
+        if (newVal) {
+          // We have uploaded a photo.
+          this.uploading = false
+
+          // Show the chat busy indicator.
+          this.chatBusy = true
+
+          // We have uploaded a photo.  Post a chatmessage referencing it.
+          this.imageid = newVal[0].id
+          this.imageuid = newVal[0].ouruid
+          this.imagemods = newVal[0].externalmods
+        }
+      },
+      deep: true,
+    },
   },
   mounted() {
     setTimeout(() => {
@@ -567,6 +624,27 @@ export default {
     }, 30000)
   },
   methods: {
+    updateCaretPosition() {
+      const textarea = this.$refs.chatarea.$el
+      const caretPosition = getCaretCoordinates(textarea, textarea.selectionEnd)
+      const textareaPosition = textarea.getBoundingClientRect()
+      this.caretPosition = {
+        top: caretPosition.top + textareaPosition.top,
+        left: caretPosition.left + textareaPosition.left,
+      }
+    },
+    applySuggestedAddress() {
+      const matchedLength = this.suggestedAddress.matchedLength
+      const suggestedAddress = this.suggestedAddress.address.singleline
+      // No need to apply suggestion if length of match and address are equal
+      if (matchedLength === suggestedAddress.length) {
+        return
+      }
+      this.sendmessage =
+        this.sendmessage.substring(0, this.sendmessage.length - matchedLength) +
+        this.suggestedAddress.address.singleline
+      this.hideSuggestedAddress = true
+    },
     async markRead() {
       await this.chatStore.markRead(this.id)
       this._updateAfterSend()
@@ -711,26 +789,15 @@ export default {
       // are promising the item to them.  Pop up a modified Promise modal to make it easy to do that.
       this.promise(null, true)
     },
-    photoProcessed(imageid, imagethumb, image) {
-      // We have uploaded a photo.  Remove the filepond instance.
-      this.uploading = false
-
-      // Show the chat busy indicator.
-      this.chatBusy = true
-
-      // We have uploaded a photo.  Post a chatmessage referencing it.
-      this.imagethumb = imagethumb
-      this.imageid = imageid
-    },
     removeImage() {
       this.imageid = null
       this.imagethumb = null
     },
     async typing() {
-      // Let the server know that we are typing, no more frequently than every 10 seconds.
       const now = new Date().getTime()
 
       if (!this.lastTyping || now - this.lastTyping > TYPING_TIME_INVERVAL) {
+        // Let the server know that we are typing, no more frequently than every 10 seconds.
         await this.chatStore.typing(this.id)
         this.lastTyping = now
       }
@@ -790,6 +857,8 @@ export default {
 }
 </script>
 <style scoped lang="scss">
+@import 'https://unpkg.com/floating-vue@^2.0.0-beta.1/dist/style.css';
+
 .mobtext {
   text-align: center !important;
 }

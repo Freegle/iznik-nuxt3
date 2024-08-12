@@ -7,13 +7,20 @@
     <nuxt-link :to="homePage" class="navbar-brand p-0" no-prefetch>
       <OfflineIndicator v-if="!online" />
       <b-img
-        v-else
+        v-else-if="logoFormat === 'gif'"
         class="logo mr-2"
-        height="58"
-        width="58"
-        rounded
         :src="logo"
+        :format="logoFormat"
         alt="Home"
+      />
+      <ProxyImage
+        v-else
+        preload
+        class="logo mr-2"
+        :src="logo"
+        :format="logoFormat"
+        alt="Home"
+        sizes="58px"
       />
     </nuxt-link>
     <b-button
@@ -135,9 +142,19 @@
             to="/communityevents"
             @mousedown="maybeReload('/communityevents')"
           >
-            <v-icon icon="calendar-alt" class="fa-2x" />
-            <br />
-            <span class="nav-item__text">Events</span>
+            <div class="position-relative">
+              <v-icon icon="calendar-alt" class="fa-2x" />
+              <br />
+              <b-badge
+                v-if="communityEventCount"
+                variant="info"
+                class="communityeventsbadge"
+                :title="communityEventCountPlural"
+              >
+                {{ communityEventCount }}
+              </b-badge>
+              <span class="nav-item__text">Events</span>
+            </div>
           </nuxt-link>
         </li>
         <li>
@@ -147,10 +164,19 @@
             class="nav-link text-center small p-0"
             to="/volunteerings"
             @mousedown="maybeReload('/volunteerings')"
-          >
-            <v-icon icon="hands-helping" class="fa-2x" />
-            <br />
-            <span class="nav-item__text">Volunteer</span>
+            ><div class="position-relative">
+              <v-icon icon="hands-helping" class="fa-2x" />
+              <br />
+              <b-badge
+                v-if="volunteerOpportunityCount"
+                variant="info"
+                class="volunteeropportunitiesbadge"
+                :title="volunteerOpportunityCountPlural"
+              >
+                {{ volunteerOpportunityCount }}
+              </b-badge>
+              <span class="nav-item__text">Volunteer</span>
+            </div>
           </nuxt-link>
         </li>
       </ul>
@@ -244,12 +270,17 @@ const {
   online,
   distance,
   logo,
+  logoFormat,
   unreadNotificationCount,
   chatCount,
   activePostsCount,
   activePostsCountPlural,
   newsCount,
   newsCountPlural,
+  communityEventCount,
+  communityEventCountPlural,
+  volunteerOpportunityCount,
+  volunteerOpportunityCountPlural,
   browseCount,
   browseCountPlural,
   showAboutMeModal,
@@ -270,4 +301,9 @@ const NotificationOptions = defineAsyncComponent(() =>
 </script>
 <style scoped lang="scss">
 @import 'assets/css/navbar.scss';
+
+.logo :deep(img) {
+  width: 58px;
+  height: 58px;
+}
 </style>

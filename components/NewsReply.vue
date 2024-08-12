@@ -3,14 +3,13 @@
     v-observe-visibility="visibilityChanged"
     :class="{ 'bg-info': scrollToThis }"
   >
-    <div class="reply">
+    <div v-if="mod || myid === reply.userid || !reply.hidden" class="reply">
       <div
         class="clickme align-top"
         title="Click to see their profile"
         @click="showInfo"
       >
         <ProfileImage
-          v-if="reply.profile?.id"
           :image="reply.profile?.paththumb"
           class="ml-1 mr-2 mt-1 mb-1 inline"
           :is-moderator="Boolean(reply.showmod && reply.replyto === threadhead)"
@@ -40,13 +39,26 @@
           <br />
         </span>
         <div v-if="reply.image">
-          <b-img
-            rounded
+          <OurUploadedImage
+            v-if="reply?.image?.ouruid"
+            :src="reply?.image?.ouruid"
+            :modifiers="reply?.image?.externalmods"
+            alt="ChitChat Photo"
+            width="100"
             class="clickme replyphoto mt-2 mb-2"
-            generator-unable-to-provide-required-alt=""
-            :src="reply.image.paththumb"
             @click="showReplyPhotoModal"
-            @error="brokenImage"
+          />
+          <NuxtPicture
+            v-else-if="reply?.image?.externaluid"
+            format="webp"
+            fit="cover"
+            provider="uploadcare"
+            :src="reply?.image?.externaluid"
+            :modifiers="reply?.image?.externalmods"
+            alt="ChitChat Photo"
+            width="100"
+            class="clickme replyphoto mt-2 mb-2"
+            @click="showReplyPhotoModal"
           />
         </div>
         <div v-if="userid" class="text-muted align-items-center">
@@ -55,7 +67,7 @@
           </span>
           <NewsUserInfo :id="id" class="mr-1 d-inline" />
         </div>
-        <div class="d-flex flex-row align-items-center">
+        <div class="d-flex flex-row align-items-center flex-wrap">
           <b-button
             variant="link"
             size="sm"
@@ -64,7 +76,7 @@
           >
             Reply
           </b-button>
-          <template v-if="!reply.loved">
+          <template v-if="!reply.loved && reply.userid !== myid">
             <span class="text-muted small ms-1 me-1">&bull;</span>
             <b-button
               variant="link"
@@ -133,6 +145,28 @@
               title-class="ml-0"
             />
           </template>
+          <template v-if="chitChatMod && !reply.hidden">
+            <span class="text-muted small ms-1 me-1">&bull;</span>
+            <b-button
+              variant="link"
+              size="sm"
+              class="reply__button text-muted m-0"
+              @click="hideReply"
+            >
+              Hide
+            </b-button>
+          </template>
+          <template v-if="chitChatMod && reply.hidden">
+            <span class="text-muted small ms-1 me-1">&bull;</span>
+            <b-button
+              variant="link"
+              size="sm"
+              class="reply__button text-muted m-0"
+              @click="unHideReply"
+            >
+              Unhide
+            </b-button>
+          </template>
         </div>
         <NewsPreviews
           v-if="reply.previews?.length"
@@ -140,9 +174,15 @@
           class="mt-1"
           size="sm"
         />
-        <div v-if="reply.hidden" class="text-danger small">
-          This has been hidden and is only visible to volunteers and the person
-          who posted it.
+        <div v-if="mod && reply.hidden" class="text-danger small">
+          This has been hidden by
+          <UserName
+            v-if="newsfeed?.hiddenby"
+            :id="newsfeed.hiddenby"
+            intro="by"
+          />
+          <span v-else>the system</span>
+          and is only visible to volunteers and the person who posted it.
         </div>
       </div>
     </div>
@@ -162,7 +202,7 @@
           class="pl-2 input-group"
           :filter-match="filterMatch"
         >
-          <b-input-group-prepend>
+          <template #prepend>
             <span class="input-group-text pl-1 pr-1">
               <ProfileImage
                 v-if="me.profile.path"
@@ -172,7 +212,7 @@
                 size="sm"
               />
             </span>
-          </b-input-group-prepend>
+          </template>
           <b-form-textarea
             ref="replybox"
             v-model="replybox"
@@ -191,7 +231,7 @@
         v-else
         class="w-100"
         @keyup.enter.exact.prevent
-        @keydown.enter.exact="sendReply"
+        @keydown.enter.exact.prevent="sendReply"
       >
         <OurAtTa
           ref="at"
@@ -200,7 +240,7 @@
           :filter-match="filterMatch"
         >
           <b-input-group>
-            <b-input-group-prepend>
+            <slot name="prepend">
               <span class="input-group-text pl-1 pr-1">
                 <ProfileImage
                   v-if="me.profile.path"
@@ -210,7 +250,7 @@
                   size="sm"
                 />
               </span>
-            </b-input-group-prepend>
+            </slot>
             <b-form-textarea
               ref="replybox"
               v-model="replybox"
@@ -231,7 +271,7 @@
           </b-input-group>
         </OurAtTa>
       </div>
-      <div class="d-flex justify-content-between flex-wrap m-1">
+      <div class="d-flex justify-content-between flex-wrap m-1 mt-2">
         <b-button size="sm" variant="secondary" @click="photoAdd">
           <v-icon icon="camera" />&nbsp;Add Photo
         </b-button>
@@ -245,19 +285,22 @@
         />
       </div>
     </div>
-    <b-img
-      v-if="imageid"
-      lazy
-      thumbnail
-      :src="imagethumb"
+    <NuxtPicture
+      v-if="imageuid"
+      format="webp"
+      fit="cover"
+      provider="uploadcare"
+      :src="imageuid"
+      :modifiers="imagemods"
+      alt="ChitChat Photo"
+      width="100"
       class="mt-1 ml-4 image__uploaded"
     />
-    <OurFilePond
+    <OurUploader
       v-if="uploading"
+      v-model="currentAtts"
       class="bg-white m-0 pondrow"
-      imgtype="Newsfeed"
-      imgflag="newsfeed"
-      @photo-processed="photoProcessed"
+      type="Newsfeed"
     />
     <NewsPhotoModal
       v-if="showNewsPhotoModal && reply.image"
@@ -320,8 +363,8 @@ const ConfirmModal = defineAsyncComponent(() =>
 const NewsReplies = defineAsyncComponent(() =>
   import('~/components/NewsReplies.vue')
 )
-const OurFilePond = defineAsyncComponent(() =>
-  import('~/components/OurFilePond')
+const OurUploader = defineAsyncComponent(() =>
+  import('~/components/OurUploader')
 )
 const OurAtTa = defineAsyncComponent(() => import('~/components/OurAtTa'))
 
@@ -332,7 +375,7 @@ export default {
     NewsEditModal,
     NewsReplies,
     SpinButton,
-    OurFilePond,
+    OurUploader,
     NewsLovesModal,
     NewsUserInfo,
     NewsHighlight,
@@ -381,7 +424,8 @@ export default {
       showAllReplies: false,
       uploading: false,
       imageid: null,
-      imagethumb: null,
+      imageuid: null,
+      imagemods: null,
       showDeleteModal: false,
       showLoveModal: false,
       showEditModal: false,
@@ -389,6 +433,7 @@ export default {
       isVisible: false,
       showProfileModal: false,
       showNewsPhotoModal: false,
+      currentAtts: [],
     }
   },
   computed: {
@@ -443,6 +488,16 @@ export default {
         this.scrollIntoView()
       }
     },
+    currentAtts: {
+      handler(newVal) {
+        this.uploading = false
+
+        this.imageid = newVal[0].id
+        this.imageuid = newVal[0].ouruid
+        this.imagemods = newVal[0].externalmods
+      },
+      deep: true,
+    },
   },
   mounted() {
     // This will get propogated up the stack so that we know if the reply to which we'd like to scroll has been
@@ -489,6 +544,8 @@ export default {
 
         // And any image id
         this.imageid = null
+        this.imageuid = null
+        this.imagemods = null
 
         // Force re-render.  Store reactivity doesn't seem to work nicely with the nested reply structure we have.
         this.bump++
@@ -527,6 +584,12 @@ export default {
 
       el.classList.remove('pulsate')
     },
+    async unHideReply() {
+      await this.newsfeedStore.unhide(this.id)
+    },
+    async hideReply() {
+      await this.newsfeedStore.hide(this.id)
+    },
     deleteReply() {
       this.showDeleteModal = true
     },
@@ -550,14 +613,6 @@ export default {
       // Flag that we're uploading.  This will trigger the render of the filepond instance and subsequently the
       // init callback below.
       this.uploading = true
-    },
-    photoProcessed(imageid, imagethumb) {
-      // We have uploaded a photo.  Remove the filepond instance.
-      this.uploading = false
-
-      // The imageid is in this.imageid
-      this.imageid = imageid
-      this.imagethumb = imagethumb
     },
     scrollIntoView() {
       const api = this.miscStore.apiCount

@@ -9,7 +9,7 @@
       <b-button
         variant="secondary"
         :aria-label="addButtonLabel"
-        class="mr-1"
+        class="mr-1 towardstop"
         @click="showModal"
       >
         <v-icon icon="plus" /> Add
@@ -122,5 +122,9 @@ function showModal() {
 
 :deep(a) {
   text-decoration: none;
+}
+
+.towardstop {
+  z-index: 1000;
 }
 </style>

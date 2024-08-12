@@ -7,7 +7,7 @@
       icon-name="calendar-alt"
       add-button-label="Add community event"
       item-description="These are local events, posted by other freeglers like you."
-      no-items-message="No community events to show yet.  Do you know of any you could add?"
+      no-items-message="Village fete, jumble sale, interesting local event?  Add it here!"
       feature-component="CommunityEvent"
       add-modal-component="CommunityEventModal"
       item-key="event-"

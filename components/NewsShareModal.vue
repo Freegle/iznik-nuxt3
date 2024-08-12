@@ -93,7 +93,9 @@
 </template>
 
 <script>
-import { useModal } from '~/composables/useModal'
+import VueSocialSharing from 'vue-social-sharing'
+import { useOurModal } from '~/composables/useOurModal'
+import { useNuxtApp } from '#app'
 
 export default {
   props: {
@@ -103,7 +105,12 @@ export default {
     },
   },
   setup() {
-    const { modal, hide } = useModal()
+    const { modal, hide } = useOurModal()
+
+    // We install this plugin here rather than from the plugins folder to reduce page load side in the mainline
+    // case.
+    const nuxtApp = useNuxtApp()
+    nuxtApp.vueApp.use(VueSocialSharing)
 
     return { modal, hide }
   },

@@ -2,12 +2,13 @@
   <div class="d-flex flex-column">
     <b-form-group
       :label="label"
-      label-for="email"
+      :label-for="uniqueId"
       label-class="mt-0"
       :state="true"
     >
       <VeeForm ref="form" as="">
         <Field
+          :id="uniqueId"
           ref="email"
           v-model="currentEmail"
           :rules="validateEmail"
@@ -39,6 +40,7 @@
 <script>
 import { Field, ErrorMessage, Form as VeeForm } from 'vee-validate'
 import { useDomainStore } from '../stores/domain'
+import { uid } from '../composables/useId'
 import { ref } from '#imports'
 import { EMAIL_REGEX } from '~/constants'
 
@@ -96,6 +98,11 @@ export default {
     return {
       suggestedDomains: [],
     }
+  },
+  computed: {
+    uniqueId() {
+      return uid('login-')
+    },
   },
   watch: {
     email(newVal) {
@@ -178,6 +185,9 @@ export default {
         isValidDomain ||
         "Please check your email domain - maybe you've made a typo?"
       )
+    },
+    focus() {
+      this.$refs.form.validate()
     },
   },
 }
