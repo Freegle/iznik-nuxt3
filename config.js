@@ -52,6 +52,9 @@ const CONFIG = {
 
   TRUSTPILOT_LINK: process.env.TRUSTPILOT_LINK || null,
 
+  GOOGLE_ADSENSE_ID: process.env.GOOGLE_ADSENSE_ID || 'ca-pub-9017028318226154',
+  GOOGLE_ADSENSE_TEST_MODE: process.env.GOOGLE_ADSENSE_TEST_MODE,
+
   AD_PREBID_CONFIG: [
     {
       code: '/22794232631/freegle_sticky',

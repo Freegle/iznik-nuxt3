@@ -96,6 +96,7 @@ const adSense = ref(true)
 
 const adSenseId = computed(() => {
   const runtimeConfig = useRuntimeConfig()
+  console.log('Runtime', runtimeConfig.public)
   return runtimeConfig.public.GOOGLE_ADSENSE_ID
 })
 

@@ -214,8 +214,8 @@ export default defineNuxtConfig({
       TRUSTPILOT_LINK: config.TRUSTPILOT_LINK,
       TUS_UPLOADER: config.TUS_UPLOADER,
       IMAGE_DELIVERY: config.IMAGE_DELIVERY,
-      GOOGLE_ADSENSE_ID: process.env.GOOGLE_ADSENSE_ID,
-      GOOGLE_ADSENSE_TEST_MODE: process.env.GOOGLE_ADSENSE_TEST_MODE,
+      GOOGLE_ADSENSE_ID: config.GOOGLE_ADSENSE_ID,
+      GOOGLE_ADSENSE_TEST_MODE: config.GOOGLE_ADSENSE_TEST_MODE,
 
       ...(process.env.GTM_ID
         ? {
