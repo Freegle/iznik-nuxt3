@@ -21,7 +21,7 @@
             <Adsbygoogle
               v-if="adSenseSlot"
               ref="adsbygoogle"
-              page-url="https://www.ilovefreegle.org/explore/Croydon-Freegle"
+              :page-url="pageUrl"
               :ad-slot="adSenseSlot"
             />
           </div>
@@ -38,7 +38,9 @@
 import { ref, computed, onBeforeUnmount } from '#imports'
 import { useMiscStore } from '~/stores/misc'
 import Api from '~/api'
+import { useAuthStore } from '~/stores/auth'
 
+const authStore = useAuthStore()
 const miscStore = useMiscStore()
 const unmounted = ref(false)
 
@@ -108,6 +110,32 @@ const adSenseSlot = computed(() => {
   })
 
   return slot
+})
+
+const pageUrl = computed(() => {
+  // Our ads are shown behind login, so we want to give AdSense a page containing similar content.
+  // If we are a member of a group then we can give that, otherwise default to Croydon as that's
+  // an active group.
+  //
+  // This isn't quite as good as using the home group, but it's quick and good enough for most
+  // users.
+  const myGroups = authStore.groups
+
+  let added = null
+  let nameshort = null
+
+  if (myGroups?.length) {
+    myGroups.forEach((g) => {
+      if (!added || g.added > added) {
+        added = g.added
+        nameshort = g.nameshort
+      }
+    })
+  }
+
+  return nameshort
+    ? 'https://www.ilovefreegle.org/explore/' + nameshort
+    : 'https://www.ilovefreegle.org/explore/Croydon-Freegle'
 })
 
 // We want to spot when an ad has been rendered and whether it's unfilled.  isUnfilled is supposed to be exposed
