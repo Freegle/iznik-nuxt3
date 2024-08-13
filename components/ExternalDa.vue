@@ -182,7 +182,6 @@ function refreshAd() {
       if (adSense.value) {
         // Ad Sense.
         if (adsbygoogle.value) {
-          console.log('Refresh AdSense', adsbygoogle.value)
           adsbygoogle.value.updateAd()
         }
       } else {
