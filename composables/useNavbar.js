@@ -281,7 +281,10 @@ export function useNavbar() {
 
         const runtimeConfig = useRuntimeConfig()
 
-        if (runtimeConfig.public.NETLIFY_DEPLOY_ID) {
+        if (
+          runtimeConfig.public.NETLIFY_DEPLOY_ID &&
+          runtimeConfig.public.NETLIFY_BRANCH === 'production'
+        ) {
           try {
             const response = await fetch(
               `https://api.netlify.com/api/v1/sites/${runtimeConfig.public.NETLIFY_SITE_NAME}.netlify.com`

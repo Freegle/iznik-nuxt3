@@ -211,6 +211,7 @@ export default defineNuxtConfig({
       BUILD_DATE: new Date().toISOString(),
       NETLIFY_DEPLOY_ID: process.env.DEPLOY_ID,
       NETLIFY_SITE_NAME: process.env.SITE_NAME,
+      NETLIFY_BRANCH: process.env.BRANCH,
       MATOMO_HOST: process.env.MATOMO_HOST,
       COOKIEYES: config.COOKIEYES,
       TRUSTPILOT_LINK: config.TRUSTPILOT_LINK,
