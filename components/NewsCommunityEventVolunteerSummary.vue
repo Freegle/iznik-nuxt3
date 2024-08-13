@@ -68,7 +68,7 @@ if (communityEvents.length > 0) {
 
 const volopTitle = ref(null)
 
-if (communityEvents.length > 0) {
+if (volunteerOpportunities.length > 0) {
   volunteeringStore.fetch(volunteerOpportunities[0]).then((firstOp) => {
     if (firstOp) {
       volopTitle.value = firstOp.title
