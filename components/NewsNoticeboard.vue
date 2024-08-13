@@ -124,6 +124,11 @@ export default {
           const desc = twem(info.description)
           info.description = desc
         }
+
+        const p = info?.photofull?.externaluid.indexOf('freegletusd-')
+        if (p !== -1) {
+          info.photofull.ouruid = info.photofull.externaluid
+        }
       } catch (e) {
         console.log('Invalid noticeboard', this.newsfeed)
       }
