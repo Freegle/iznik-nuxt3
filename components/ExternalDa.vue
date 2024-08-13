@@ -20,7 +20,8 @@
           <div v-if="adSense">
             <Adsbygoogle
               v-if="adSenseSlot"
-              page-url="https://www.ilovefreegle.org/Croydon-Freegle"
+              ref="adsbygoogle"
+              page-url="https://www.ilovefreegle.org/explore/Croydon-Freegle"
               :ad-slot="adSenseSlot"
             />
           </div>
@@ -90,14 +91,13 @@ const AD_REFRESH_TIMEOUT = 31000
 
 // We can either run with Ad Sense or with Prebid.  Ad Sense is the default.
 const adSense = ref(true)
+const adsbygoogle = ref(null)
 
 const adSenseSlot = computed(() => {
   // Dimensions is an array of dimensions.
-  console.log('Dimensions', props.dimensions)
   let slot = null
 
   props.dimensions.forEach((d) => {
-    console.log('Dimension', d)
     if (d[0] === 320 && d[1] === 50) {
       slot = '5832702875'
     } else if (d[0] === 300 && d[1] === 250) {
@@ -107,9 +107,39 @@ const adSenseSlot = computed(() => {
     }
   })
 
-  console.log('Returning slot', slot)
   return slot
 })
+
+// We want to spot when an ad has been rendered and whether it's unfilled.  isUnfilled is supposed to be exposed
+// by the component, but that doesn't seem to work.
+let fillTimer = null
+
+function checkRendered() {
+  // Find ins element inside adsbygoogle ref
+  const el = adsbygoogle.value?.$el
+  let retry = true
+
+  if (el) {
+    // Get data value of adsbygoogle-status
+    if (el.dataset.adsbygoogleStatus === 'done') {
+      if (el.dataset.adStatus === 'filled') {
+        console.log('Filled', props.adUnitPath)
+        emit('rendered', true)
+      } else {
+        console.log('Unfilled', props.adUnitPath)
+        emit('rendered', false)
+      }
+
+      retry = false
+    }
+  }
+
+  if (retry) {
+    fillTimer = setTimeout(checkRendered, 100)
+  }
+}
+
+fillTimer = setTimeout(checkRendered, 100)
 
 function refreshAd() {
   if (
@@ -123,7 +153,10 @@ function refreshAd() {
     if (isVisible.value && miscStore.visible) {
       if (adSense.value) {
         // Ad Sense.
-        console.log('Refresh adSense')
+        if (adsbygoogle.value) {
+          console.log('Refresh AdSense', adsbygoogle.value)
+          adsbygoogle.value.updateAd()
+        }
       } else {
         // Prebid.
         //
@@ -220,7 +253,8 @@ function handleVisible() {
     (props.inModal || !document.body.classList.contains('modal-open'))
   ) {
     if (adSense.value) {
-      refreshAd()
+      // The ad will be shown and rendered.  Start the refresh timer.
+      refreshTimer = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
     } else {
       console.log('Queue GPT commands', props.divId)
 
@@ -327,6 +361,14 @@ function handleVisible() {
 
 let prebidRetry = 0
 
+function unPauseAdSense(visible) {
+  console.log('Unpause AdSense?', visible)
+  if (adSense.value && visible && window.adsbygoogle) {
+    // We paused ads on page load - time to enable them
+    window.adsbygoogle.pauseAdRequests = 0
+  }
+}
+
 function visibilityChanged(visible) {
   // We need to wait for CookieYes, then the TC data, then prebid being loaded.  This is triggered in nuxt.config.ts.
   // Check the status here rather than on component load, as it might not be available yet.
@@ -339,6 +381,8 @@ function visibilityChanged(visible) {
       console.log('No CookieYes in ad')
 
       visibleTimer = null
+
+      unPauseAdSense(visible)
       isVisible.value = visible
 
       if (visible && !shownFirst) {
@@ -376,6 +420,8 @@ function visibilityChanged(visible) {
               }
             } else {
               visibleTimer = null
+
+              unPauseAdSense(visible)
               isVisible.value = visible
 
               if (visible && !shownFirst) {
@@ -404,6 +450,10 @@ onBeforeUnmount(() => {
   unmounted.value = true
 
   try {
+    if (fillTimer) {
+      clearTimeout(fillTimer)
+    }
+
     if (refreshTimer) {
       clearTimeout(refreshTimer)
     }

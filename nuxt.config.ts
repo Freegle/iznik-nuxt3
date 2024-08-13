@@ -169,7 +169,15 @@ export default defineNuxtConfig({
     'nuxt-vite-legacy',
     '@bootstrap-vue-next/nuxt',
     process.env.GTM_ID ? '@zadigetvoltaire/nuxt-gtm' : null,
-    ['@nuxtjs/google-adsense'],
+    [
+      '@nuxtjs/google-adsense',
+      {
+        id: process.env.GOOGLE_ADSENSE_ID,
+        test: process.env.GOOGLE_ADSENSE_TEST_MODE === 'true',
+        pauseOnLoad: true,
+        hideFilled: true,
+      },
+    ],
   ],
 
   hooks: {
@@ -211,11 +219,6 @@ export default defineNuxtConfig({
 
       GOOGLE_ADSENSE_ID: config.GOOGLE_ADSENSE_ID,
       GOOGLE_ADSENSE_TEST_MODE: config.GOOGLE_ADSENSE_TEST_MODE,
-      googleAdsense: {
-        id: process.env.GOOGLE_ADSENSE_ID,
-        test: process.env.GOOGLE_ADSENSE_TEST_MODE === 'true',
-        hideFilled: true,
-      },
 
       ...(process.env.GTM_ID
         ? {
@@ -343,7 +346,7 @@ export default defineNuxtConfig({
               });
               ce_gtag("set", "ads_data_redaction", true);
               ce_gtag("set", "url_passthrough", true);
-              
+
               console.log('Initialising pbjs and googletag...');
               window.googletag = window.googletag || {};
               window.googletag.cmd = window.googletag.cmd || [];
@@ -357,7 +360,7 @@ export default defineNuxtConfig({
                 window.googletag.pubads().enableSingleRequest()
                 window.googletag.enableServices()
               });
-              
+            
               window.pbjs = window.pbjs || {};
               window.pbjs.que = window.pbjs.que || [];
               
