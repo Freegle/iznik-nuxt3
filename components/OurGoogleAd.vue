@@ -1,20 +1,11 @@
 <template>
-  <div
-    v-if="adShown !== false"
-    :style="{
-      'max-width': maxWidth,
-      'min-width': minWidth,
-      width: calcWidth,
-      height: calcHeight,
-    }"
-  >
-    <Adsbygoogle
-      v-if="showAd"
-      ref="adsbygoogle"
-      :page-url="pageUrl"
-      :ad-slot="adSenseSlot"
-    />
-  </div>
+  <Adsbygoogle
+    v-if="showAd"
+    ref="adsbygoogle"
+    :style="adStyle"
+    :page-url="pageUrl"
+    :ad-slot="adSenseSlot"
+  />
 </template>
 <script setup>
 import { ref, computed, onBeforeUnmount } from '#imports'
@@ -59,25 +50,31 @@ const props = defineProps({
   },
 })
 
-// See https://support.google.com/adsense/answer/9183363 for background.
-const calcWidth = computed(() => {
-  if (props.maxWidth) {
-    // We are specifying a min and max width.  Return a width of 100% and Google will choose.
-    return '100%'
-  } else {
-    return null
+const adStyle = computed(() => {
+  // See https://support.google.com/adsense/answer/9183363 for background.
+  const ret = {
+    width: '100%',
   }
-})
 
-const calcHeight = computed(() => {
-  if (props.maxHeight) {
-    // We are specifying a height.  Use the max height - Google max choose an ad that is shorter.
-    // minHeight isn't used.
-    return props.maxHeight
-  } else {
-    // We are happy with any height.
-    return null
+  if (props.maxWidth !== null) {
+    ret['max-width'] = props.maxWidth
+    ret.width = props.maxWidth
   }
+
+  if (props.minWidth !== null) {
+    ret['min-width'] = props.minWidth
+  }
+
+  if (props.minHeight !== null) {
+    ret['min-height'] = props.minHeight
+  }
+
+  if (props.maxHeight !== null) {
+    ret['max-height'] = props.maxHeight
+    ret.height = props.maxHeight
+  }
+
+  return ret
 })
 
 const showAd = ref(false)
@@ -136,27 +133,22 @@ const pageUrl = computed(() => {
 // by the component, but that doesn't seem to work.
 let fillTimer = null
 
-// Start off shown state as unknown.  If we don't fill it, then we will collapse.
-const adShown = ref(null)
-
 function checkRendered() {
-  // Find ins element inside adsbygoogle ref
   fillTimer = null
   const el = adsbygoogle.value?.$el
   let retry = true
 
   if (el) {
-    // Get data value of adsbygoogle-status
-    if (el.dataset.adsbygoogleStatus === 'done') {
-      if (el.dataset.adStatus === 'filled') {
+    if (el.dataset.adStatus) {
+      const adStatus = el.dataset.adStatus
+      if (adStatus === 'filled') {
         console.log('Filled', props.adUnitPath)
-        adShown.value = true
+        emit('rendered', true)
       } else {
         console.log('Unfilled', props.adUnitPath)
-        adShown.value = false
+        emit('rendered', false)
       }
 
-      emit('rendered', adShown.value)
       refreshTimer = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
       retry = false
     }
@@ -180,24 +172,28 @@ watch(
     immediate: true,
   }
 )
+
 function refreshAd() {
-  adShown.value = null
+  console.log('Refresh', miscStore.visible)
   refreshTimer = null
 
   // Don't refresh if the ad is not visible or tab is not active.
-  if (isVisible.value && miscStore.visible) {
+  if (miscStore.visible) {
+    console.log('Visible')
     if (adsbygoogle.value) {
       fillTimer = setTimeout(checkRendered, 100)
+
+      // updateAd method doesn't seem to do the trick so re-render.
       adsbygoogle.value.updateAd()
+      console.log('refreshed')
     }
   } else {
-    // console.log('Not refreshing ad', props.adUnitPath, isVisible.value)
+    // console.log('Not refreshing ad', props.adUnitPath)
   }
 
   refreshTimer = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
 }
 
-const isVisible = ref(false)
 const emit = defineEmits(['rendered'])
 
 function unPauseAdSense() {

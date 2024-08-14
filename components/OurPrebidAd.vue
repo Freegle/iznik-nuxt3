@@ -68,7 +68,7 @@ function refreshAd() {
     !unmounted.value
   ) {
     // Don't refresh if the ad is not visible or tab is not active.
-    if (isVisible.value && miscStore.visible) {
+    if (miscStore.visible) {
       // Refreshing an ad is a bit more complex because we're using prebid.  That means we have to request the
       // bids, and then once we've got those, refresh the ad slot to kick Google to render the ad.
       console.log('Request bids for ad', props.adUnitPath)
@@ -130,14 +130,13 @@ function refreshAd() {
         })
       })
     } else {
-      // console.log('Not refreshing ad', props.adUnitPath, isVisible.value)
+      // console.log('Not refreshing ad', props.adUnitPath)
     }
 
     refreshTimer = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
   }
 }
 
-const isVisible = ref(false)
 const emit = defineEmits(['rendered'])
 
 // We want to wait until an ad has been viewable for 100ms.  That reduces the impact of fast scrolling or
