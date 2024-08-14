@@ -79,10 +79,18 @@ const passClicks = computed(() => {
 
 const uniqueid = ref(props.adUnitPath)
 
-const maxWidth = ref(Math.max(...props.dimensions.map((d) => d[0])))
-const maxHeight = ref(Math.max(...props.dimensions.map((d) => d[1])))
-const minWidth = ref(Math.min(...props.dimensions.map((d) => d[0])))
-const minHeight = ref(Math.min(...props.dimensions.map((d) => d[1])))
+const maxWidth = ref(0)
+const maxHeight = ref(0)
+const minWidth = ref(0)
+const minHeight = ref(0)
+
+function resetMax() {
+  maxWidth.value = ref(Math.max(...props.dimensions.map((d) => d[0])))
+  maxHeight.value = ref(Math.max(...props.dimensions.map((d) => d[1])))
+  minWidth.value = ref(Math.min(...props.dimensions.map((d) => d[0])))
+  minHeight.value = ref(Math.min(...props.dimensions.map((d) => d[1])))
+}
+resetMax()
 
 let slot = null
 
@@ -94,6 +102,24 @@ const AD_REFRESH_TIMEOUT = 31000
 // We can either run with Ad Sense or with Prebid.  Ad Sense is the default.
 const adSense = ref(true)
 const adsbygoogle = ref(null)
+
+const dimensionsIndex = computed(() => {
+  let ret = null
+
+  for (let i = 1; i < props.dimensions.length; i++) {
+    const d = props.dimensions[i]
+
+    if (d[0] === 320 && d[1] === 50) {
+      ret = i
+    } else if (d[0] === 300 && d[1] === 250) {
+      ret = i
+    } else if (d[0] === 728 && d[1] === 90) {
+      ret = i
+    }
+  }
+
+  return ret
+})
 
 const adSenseSlot = computed(() => {
   // Dimensions is an array of dimensions.
@@ -152,9 +178,11 @@ function checkRendered() {
     if (el.dataset.adsbygoogleStatus === 'done') {
       if (el.dataset.adStatus === 'filled') {
         console.log('Filled', props.adUnitPath)
-        emit('rendered', true)
+        emit('rendered', true, dimensionsIndex.value)
       } else {
         console.log('Unfilled', props.adUnitPath)
+        maxWidth.value = 0
+        maxHeight.value = 0
         emit('rendered', false)
       }
 
@@ -179,6 +207,9 @@ function refreshAd() {
   ) {
     // Don't refresh if the ad is not visible or tab is not active.
     if (isVisible.value && miscStore.visible) {
+      // Reserve visible space for it.
+      resetMax()
+
       if (adSense.value) {
         // Ad Sense.
         if (adsbygoogle.value) {

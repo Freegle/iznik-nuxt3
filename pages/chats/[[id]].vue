@@ -538,7 +538,8 @@ async function searchMore() {
   }
 }
 
-function adRendered(rendered, index, dimension) {
+function adRendered(rendered, index) {
+  console.log('Chat ad rendered', rendered, index)
   if (rendered) {
     if (index === 0) {
       largeAdVisible.value = true
