@@ -16,10 +16,13 @@
         id="deadline"
         v-model="deadline"
         type="date"
-        :min="new Date(Date.now()).toISOString().substring(0, 10)"
+        :min="today"
         :max="defaultDeadline"
         placeholder="Click to enter a date"
       />
+      <NoticeMessage v-if="deadline === today" variant="warning" class="mt-2">
+        Are you sure you want your post to stop showing after today?
+      </NoticeMessage>
     </template>
     <template #footer>
       <div class="d-flex justify-content-end w-100">
@@ -58,6 +61,9 @@ const defaultDeadline = new Date(
   .substring(0, 10)
 
 const deadline = ref(defaultDeadline)
+const today = computed(() => {
+  return new Date(Date.now()).toISOString().substring(0, 10)
+})
 
 async function setDeadline() {
   const promises = []
