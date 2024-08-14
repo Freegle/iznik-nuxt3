@@ -149,7 +149,9 @@ function checkRendered() {
         emit('rendered', false)
       }
 
-      refreshTimer = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
+      if (!refreshTimer) {
+        refreshTimer = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
+      }
       retry = false
     }
   }
@@ -174,7 +176,7 @@ watch(
 )
 
 function refreshAd() {
-  console.log('Refresh', miscStore.visible)
+  console.log('Refresh', miscStore.visible, props.adUnitPath)
   refreshTimer = null
 
   // Don't refresh if the ad is not visible or tab is not active.
