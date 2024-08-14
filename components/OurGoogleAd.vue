@@ -1,10 +1,20 @@
 <template>
-  <Adsbygoogle
-    v-if="showAd && adSenseSlot"
-    ref="adsbygoogle"
-    :page-url="pageUrl"
-    :ad-slot="adSenseSlot"
-  />
+  <div
+    v-if="adShown !== false"
+    :style="{
+      'max-width': maxWidth,
+      'min-width': minWidth,
+      width: calcWidth,
+      height: calcHeight,
+    }"
+  >
+    <Adsbygoogle
+      v-if="showAd"
+      ref="adsbygoogle"
+      :page-url="pageUrl"
+      :ad-slot="adSenseSlot"
+    />
+  </div>
 </template>
 <script setup>
 import { ref, computed, onBeforeUnmount } from '#imports'
@@ -19,12 +29,23 @@ const props = defineProps({
     type: String,
     required: true,
   },
-  dimensions: {
-    type: Array,
-    required: true,
+  minWidth: {
+    type: String,
+    required: false,
+    default: null,
   },
-  variableDimensions: {
-    type: Array,
+  maxWidth: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  minHeight: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  maxHeight: {
+    type: String,
     required: false,
     default: null,
   },
@@ -38,19 +59,28 @@ const props = defineProps({
   },
 })
 
-const showAd = ref(false)
-const maxWidth = ref(0)
-const maxHeight = ref(0)
-const minWidth = ref(0)
-const minHeight = ref(0)
+// See https://support.google.com/adsense/answer/9183363 for background.
+const calcWidth = computed(() => {
+  if (props.maxWidth) {
+    // We are specifying a min and max width.  Return a width of 100% and Google will choose.
+    return '100%'
+  } else {
+    return null
+  }
+})
 
-function resetMax() {
-  maxWidth.value = ref(Math.max(...props.dimensions.map((d) => d[0])))
-  maxHeight.value = ref(Math.max(...props.dimensions.map((d) => d[1])))
-  minWidth.value = ref(Math.min(...props.dimensions.map((d) => d[0])))
-  minHeight.value = ref(Math.min(...props.dimensions.map((d) => d[1])))
-}
-resetMax()
+const calcHeight = computed(() => {
+  if (props.maxHeight) {
+    // We are specifying a height.  Use the max height - Google max choose an ad that is shorter.
+    // minHeight isn't used.
+    return props.maxHeight
+  } else {
+    // We are happy with any height.
+    return null
+  }
+})
+
+const showAd = ref(false)
 
 let refreshTimer = null
 const visibleTimer = null
@@ -60,17 +90,18 @@ const adsbygoogle = ref(null)
 
 const adSenseSlot = computed(() => {
   // Dimensions is an array of dimensions.
-  let slot = null
+  const slot = '9463528951'
 
-  props.dimensions.forEach((d) => {
-    if (d[0] === 320 && d[1] === 50) {
-      slot = '5832702875'
-    } else if (d[0] === 300 && d[1] === 250) {
-      slot = '8180600393'
-    } else if (d[0] === 728 && d[1] === 90) {
-      slot = '1595844892'
-    }
-  })
+  // Old code from using fixed size slots - now we have responsive.
+  // props.dimensions.forEach((d) => {
+  // if (d[0] === 320 && d[1] === 50) {
+  //   slot = '5832702875'
+  // } else if (d[0] === 300 && d[1] === 250) {
+  //   slot = '8180600393'
+  // } else if (d[0] === 728 && d[1] === 90) {
+  //   slot = '1595844892'
+  // }
+  // })
 
   return slot
 })
@@ -105,6 +136,9 @@ const pageUrl = computed(() => {
 // by the component, but that doesn't seem to work.
 let fillTimer = null
 
+// Start off shown state as unknown.  If we don't fill it, then we will collapse.
+const adShown = ref(null)
+
 function checkRendered() {
   // Find ins element inside adsbygoogle ref
   fillTimer = null
@@ -116,14 +150,13 @@ function checkRendered() {
     if (el.dataset.adsbygoogleStatus === 'done') {
       if (el.dataset.adStatus === 'filled') {
         console.log('Filled', props.adUnitPath)
-        emit('rendered', true)
+        adShown.value = true
       } else {
         console.log('Unfilled', props.adUnitPath)
-        maxWidth.value = 0
-        maxHeight.value = 0
-        emit('rendered', false)
+        adShown.value = false
       }
 
+      emit('rendered', adShown.value)
       refreshTimer = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
       retry = false
     }
@@ -142,17 +175,19 @@ watch(
       showAd.value = true
       fillTimer = setTimeout(checkRendered, 100)
     }
+  },
+  {
+    immediate: true,
   }
 )
 function refreshAd() {
+  adShown.value = null
   refreshTimer = null
 
   // Don't refresh if the ad is not visible or tab is not active.
   if (isVisible.value && miscStore.visible) {
-    // Reserve visible space for it.
-    resetMax()
-
     if (adsbygoogle.value) {
+      fillTimer = setTimeout(checkRendered, 100)
       adsbygoogle.value.updateAd()
     }
   } else {

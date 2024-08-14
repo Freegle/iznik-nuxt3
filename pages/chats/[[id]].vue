@@ -154,7 +154,8 @@
               >
                 <ExternalDa
                   ad-unit-path="/22794232631/freegle_chat_app"
-                  :dimensions="[300, 50]"
+                  max-height="50px"
+                  max-width="300px"
                   div-id="div-gpt-ad-1691925773522-0"
                   class="mt-2"
                 />
@@ -199,10 +200,8 @@
           >
             <ExternalDa
               ad-unit-path="/22794232631/freegle_chat_desktop"
-              :dimensions="[
-                [300, 600],
-                [300, 250],
-              ]"
+              max-width="300px"
+              max-height="600px"
               div-id="div-gpt-ad-1692867596111-0"
               class="mt-2"
               @rendered="adRendered"

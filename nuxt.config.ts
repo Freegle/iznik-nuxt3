@@ -175,7 +175,6 @@ export default defineNuxtConfig({
         id: process.env.GOOGLE_ADSENSE_ID,
         test: process.env.GOOGLE_ADSENSE_TEST_MODE === 'true',
         pauseOnLoad: true,
-        hideFilled: true,
       },
     ],
   ],
@@ -305,6 +304,10 @@ export default defineNuxtConfig({
           innerHTML: `try { if (!window.globalThis) { window.globalThis = window; } } catch (e) { console.log('Polyfill error', e.message); }`,
         },
         // The ecosystem of advertising is complex.
+        //
+        // We might use AdSense.  That's fairly simple.
+        //
+        // Or we might use prebid:
         // - The underlying ad service is Google Tags (GPT).
         // - We use prebid (pbjs), which is some kind of ad broker which gives us a pipeline of ads to use.
         //   We can also define our own ads in GPT.
@@ -488,10 +491,11 @@ export default defineNuxtConfig({
                 // The ordering is ensured by using defer and appending the script.
                 //
                 // prebid isn't compatible with older browsers which don't support Object.entries.
-                console.log('Load GPT and prebid');
                 if (Object.fromEntries) {
-                  loadScript('https://securepubads.g.doubleclick.net/tag/js/gpt.js', true)
-                  loadScript('/js/prebid.js', true)
+                  // Currently using AdSense so don't need to load GPT and prebid.
+                  // console.log('Load GPT and prebid');
+                  // loadScript('https://securepubads.g.doubleclick.net/tag/js/gpt.js', true)
+                  // loadScript('/js/prebid.js', true)
                 }
               } else {
                 console.log('GPT and prebid already loaded');

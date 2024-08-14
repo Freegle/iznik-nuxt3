@@ -15,8 +15,10 @@
             v-if="adSense"
             ref="googlead"
             :ad-unit-path="adUnitPath"
-            :dimensions="dimensions"
-            :variable-dimensions="variableDimensions"
+            :min-width="minWidth"
+            :max-width="maxWidth"
+            :min-height="minHeight"
+            :max-height="maxHeight"
             :div-id="divId"
             :render-ad="renderAd"
             @rendered="rippleRendered"
@@ -25,8 +27,10 @@
             v-else
             ref="prebidad"
             :ad-unit-path="adUnitPath"
-            :dimensions="dimensions"
-            :variable-dimensions="variableDimensions"
+            :min-width="minWidth"
+            :max-width="maxWidth"
+            :min-height="minHeight"
+            :max-height="maxHeight"
             :div-id="divId"
             :render-ad="renderAd"
             @rendered="rippleRendered"
@@ -44,12 +48,23 @@ const props = defineProps({
     type: String,
     required: true,
   },
-  dimensions: {
-    type: Array,
-    required: true,
+  minWidth: {
+    type: String,
+    required: false,
+    default: null,
   },
-  variableDimensions: {
-    type: Array,
+  maxWidth: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  minHeight: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  maxHeight: {
+    type: String,
     required: false,
     default: null,
   },
@@ -175,6 +190,7 @@ function checkStillVisible() {
     isVisible.value &&
     (props.inModal || !document.body.classList.contains('modal-open'))
   ) {
+    console.log('Render')
     renderAd.value = true
   } else {
     emit('rendered', false)

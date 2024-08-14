@@ -2,6 +2,7 @@
   <div :id="divId" />
 </template>
 <script setup>
+// TODO Needs reworking for responsive ads a la OurGoogleAd
 import { ref, onBeforeUnmount } from '#imports'
 import { useMiscStore } from '~/stores/misc'
 import Api from '~/api'
@@ -16,10 +17,26 @@ const props = defineProps({
   },
   dimensions: {
     type: Array,
-    required: true,
+    required: false,
+    default: null,
   },
-  variableDimensions: {
-    type: Array,
+  minWidth: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  maxWidth: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  minHeight: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  maxHeight: {
+    type: String,
     required: false,
     default: null,
   },
@@ -37,19 +54,6 @@ const adShown = ref(true)
 
 const uniqueid = ref(props.adUnitPath)
 
-const maxWidth = ref(0)
-const maxHeight = ref(0)
-const minWidth = ref(0)
-const minHeight = ref(0)
-
-function resetMax() {
-  maxWidth.value = ref(Math.max(...props.dimensions.map((d) => d[0])))
-  maxHeight.value = ref(Math.max(...props.dimensions.map((d) => d[1])))
-  minWidth.value = ref(Math.min(...props.dimensions.map((d) => d[0])))
-  minHeight.value = ref(Math.min(...props.dimensions.map((d) => d[1])))
-}
-resetMax()
-
 let slot = null
 
 let refreshTimer = null
@@ -65,9 +69,6 @@ function refreshAd() {
   ) {
     // Don't refresh if the ad is not visible or tab is not active.
     if (isVisible.value && miscStore.visible) {
-      // Reserve visible space for it.
-      resetMax()
-
       // Refreshing an ad is a bit more complex because we're using prebid.  That means we have to request the
       // bids, and then once we've got those, refresh the ad slot to kick Google to render the ad.
       console.log('Request bids for ad', props.adUnitPath)
@@ -188,8 +189,9 @@ watch(
                   adShown.value = false
                   console.log('Rendered empty', props.adUnitPath, adShown)
                   // Sentry.captureMessage('Ad rendered empty ' + props.adUnitPath)
-                  maxWidth.value = 0
-                  maxHeight.value = 0
+                  // TODO
+                  // maxWidth.value = 0
+                  // maxHeight.value = 0
                 } else {
                   console.log(
                     'Rendered',
@@ -200,8 +202,9 @@ watch(
 
                   // Sometimes we are returned silly values like 1,1, so make sure that we leave at least enough
                   // space for the minimum sized ad which we could plausibly have shown.
-                  maxWidth.value = Math.max(event.size[0], minWidth.value)
-                  maxHeight.value = Math.max(event.size[1], minHeight.value)
+                  // TODO
+                  // maxWidth.value = Math.max(event.size[0], minWidth.value)
+                  // maxHeight.value = Math.max(event.size[1], minHeight.value)
                 }
 
                 emit('rendered', adShown.value)
@@ -244,6 +247,9 @@ watch(
         }
       })
     }
+  },
+  {
+    immediate: true,
   }
 )
 

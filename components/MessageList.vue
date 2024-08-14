@@ -54,7 +54,8 @@
           <div v-if="insertAd(ix)" class="mt-3 mt-xl-2">
             <ExternalDa
               :ad-unit-path="insertAd(ix).adUnitPath"
-              :dimensions="insertAd(ix).dimensions"
+              max-height="250px"
+              max-width="100vw"
               :div-id="insertAd(ix).divId"
             />
           </div>

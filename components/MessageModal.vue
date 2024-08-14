@@ -20,7 +20,8 @@
           >
             <ExternalDa
               ad-unit-path="/22794232631/freegle_modal_app"
-              :dimensions="[[320, 50]]"
+              max-width="320px"
+              max-height="50px"
               div-id="div-gpt-ad-1711542403014-0"
               in-modal
             />

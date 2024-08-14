@@ -18,7 +18,8 @@
             <VisibleWhen :at="['xs', 'sm']" class="sticky">
               <ExternalDa
                 ad-unit-path="/22794232631/freegle_sticky"
-                :dimensions="[[320, 50]]"
+                max-height="50px"
+                max-width="100vw"
                 div-id="div-gpt-ad-1699973618906-0"
                 @rendered="adRendered"
                 @failed="adFailed"
@@ -27,7 +28,8 @@
             <VisibleWhen :at="['md', 'lg', 'xl', 'xxl']">
               <ExternalDa
                 ad-unit-path="/22794232631/freegle_sticky_desktop"
-                :dimensions="[[728, 90]]"
+                max-height="90px"
+                max-width="100vw"
                 div-id="div-gpt-ad-1707999304775-0"
                 pixel
                 @rendered="adRendered"

@@ -18,10 +18,8 @@
           >
             <ExternalDa
               ad-unit-path="/22794232631/freegle_myposts_desktop"
-              :dimensions="[
-                [300, 600],
-                [300, 250],
-              ]"
+              max-width="300px"
+              max-height="600px"
               div-id="div-gpt-ad-1692868003771-0"
               class="mt-2"
             />
@@ -82,10 +80,8 @@
           >
             <ExternalDa
               ad-unit-path="/22794232631/freegle_myposts_desktop_right"
-              :dimensions="[
-                [300, 600],
-                [300, 250],
-              ]"
+              max-width="300px"
+              max-height="600px"
               div-id="div-gpt-ad-1709056727559-0"
               class="mt-2"
               @rendered="adRendered"
@@ -113,6 +109,7 @@ import MyPostsPostsList from '~/components/MyPostsPostsList.vue'
 import MyPostsSearchesList from '~/components/MyPostsSearchesList.vue'
 import { useDonationAskModal } from '~/composables/useDonationAskModal'
 import { useTrystStore } from '~/stores/tryst'
+import ExternalDa from '~/components/ExternalDa.vue'
 const DonationAskModal = defineAsyncComponent(() =>
   import('~/components/DonationAskModal')
 )

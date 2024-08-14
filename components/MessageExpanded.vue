@@ -48,7 +48,8 @@
           <ExternalDa
             :ad-unit-path="adUnitPath"
             :ad-id="adId"
-            :dimensions="[[300, 250]]"
+            max-height="250px"
+            max-width="300px"
             :div-id="adId"
             :in-modal="inModal"
             @rendered="adRendered = true"
