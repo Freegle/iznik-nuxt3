@@ -1,6 +1,6 @@
 <template>
   <div class="sidebar__wrapper">
-    <div class="d-flex flex-column justify-content-between mh-100 pl-3">
+    <div class="d-flex flex-column justify-content-between mh-100">
       <div>
         <DonationMonthly
           v-if="supporter && !donor"
