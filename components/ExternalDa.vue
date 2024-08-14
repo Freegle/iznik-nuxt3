@@ -10,39 +10,34 @@
       class="pointer"
     >
       <div v-if="isVisible">
-        <div
-          class="d-flex w-100 justify-content-around"
-          :style="{
-            width: maxWidth + 'px',
-            height: maxHeight + 'px',
-          }"
-        >
-          <div v-if="adSense">
-            <Adsbygoogle
-              v-if="adSenseSlot"
-              ref="adsbygoogle"
-              :page-url="pageUrl"
-              :ad-slot="adSenseSlot"
-            />
-          </div>
-          <div v-else :id="divId" />
+        <div class="d-flex w-100 justify-content-around">
+          <OurGoogleAd
+            v-if="adSense"
+            ref="googlead"
+            :ad-unit-path="adUnitPath"
+            :dimensions="dimensions"
+            :variable-dimensions="variableDimensions"
+            :div-id="divId"
+            :render-ad="renderAd"
+            @rendered="rippleRendered"
+          />
+          <OurPrebidAd
+            v-else
+            ref="prebidad"
+            :ad-unit-path="adUnitPath"
+            :dimensions="dimensions"
+            :variable-dimensions="variableDimensions"
+            :div-id="divId"
+            :render-ad="renderAd"
+            @rendered="rippleRendered"
+          />
         </div>
-        <!--    <div class="bg-white">-->
-        <!--      Path {{ adUnitPath }} id {{ divId }} dimensions {{ dimensions }}-->
-        <!--    </div>-->
       </div>
     </div>
   </client-only>
 </template>
 <script setup>
 import { ref, computed, onBeforeUnmount } from '#imports'
-import { useMiscStore } from '~/stores/misc'
-import Api from '~/api'
-import { useAuthStore } from '~/stores/auth'
-
-const authStore = useAuthStore()
-const miscStore = useMiscStore()
-const unmounted = ref(false)
 
 const props = defineProps({
   adUnitPath: {
@@ -53,13 +48,14 @@ const props = defineProps({
     type: Array,
     required: true,
   },
+  variableDimensions: {
+    type: Array,
+    required: false,
+    default: null,
+  },
   divId: {
     type: String,
     required: true,
-  },
-  pixel: {
-    type: Boolean,
-    default: false,
   },
   inModal: {
     type: Boolean,
@@ -71,233 +67,102 @@ const props = defineProps({
   },
 })
 
-const adShown = ref(true)
-
-const passClicks = computed(() => {
-  return !adShown.value
-})
-
-const uniqueid = ref(props.adUnitPath)
-
-const maxWidth = ref(0)
-const maxHeight = ref(0)
-const minWidth = ref(0)
-const minHeight = ref(0)
-
-function resetMax() {
-  maxWidth.value = ref(Math.max(...props.dimensions.map((d) => d[0])))
-  maxHeight.value = ref(Math.max(...props.dimensions.map((d) => d[1])))
-  minWidth.value = ref(Math.min(...props.dimensions.map((d) => d[0])))
-  minHeight.value = ref(Math.min(...props.dimensions.map((d) => d[1])))
-}
-resetMax()
-
-let slot = null
-
-let refreshTimer = null
-let visibleTimer = null
-const PREBID_TIMEOUT = 2000
-const AD_REFRESH_TIMEOUT = 31000
+const emit = defineEmits(['rendered'])
 
 // We can either run with Ad Sense or with Prebid.  Ad Sense is the default.
 const adSense = ref(true)
-const adsbygoogle = ref(null)
+const renderAd = ref(false)
+const adShown = ref(true)
 
-const dimensionsIndex = computed(() => {
-  let ret = null
-
-  for (let i = 1; i < props.dimensions.length; i++) {
-    const d = props.dimensions[i]
-
-    if (d[0] === 320 && d[1] === 50) {
-      ret = i
-    } else if (d[0] === 300 && d[1] === 250) {
-      ret = i
-    } else if (d[0] === 728 && d[1] === 90) {
-      ret = i
-    }
-  }
-
-  return ret
-})
-
-const adSenseSlot = computed(() => {
-  // Dimensions is an array of dimensions.
-  let slot = null
-
-  props.dimensions.forEach((d) => {
-    if (d[0] === 320 && d[1] === 50) {
-      slot = '5832702875'
-    } else if (d[0] === 300 && d[1] === 250) {
-      slot = '8180600393'
-    } else if (d[0] === 728 && d[1] === 90) {
-      slot = '1595844892'
-    }
-  })
-
-  return slot
-})
-
-const pageUrl = computed(() => {
-  // Our ads are shown behind login, so we want to give AdSense a page containing similar content.
-  // If we are a member of a group then we can give that, otherwise default to Croydon as that's
-  // an active group.
-  //
-  // This isn't quite as good as using the home group, but it's quick and good enough for most
-  // users.
-  const myGroups = authStore.groups
-
-  let added = null
-  let nameshort = null
-
-  if (myGroups?.length) {
-    myGroups.forEach((g) => {
-      if (!added || g.added > added) {
-        added = g.added
-        nameshort = g.nameshort
-      }
-    })
-  }
-
-  return nameshort
-    ? 'https://www.ilovefreegle.org/explore/' + nameshort
-    : 'https://www.ilovefreegle.org/explore/Croydon-Freegle'
-})
-
-// We want to spot when an ad has been rendered and whether it's unfilled.  isUnfilled is supposed to be exposed
-// by the component, but that doesn't seem to work.
-let fillTimer = null
-
-function checkRendered() {
-  // Find ins element inside adsbygoogle ref
-  const el = adsbygoogle.value?.$el
-  let retry = true
-
-  if (el) {
-    // Get data value of adsbygoogle-status
-    if (el.dataset.adsbygoogleStatus === 'done') {
-      if (el.dataset.adStatus === 'filled') {
-        console.log('Filled', props.adUnitPath)
-        emit('rendered', true, dimensionsIndex.value)
-      } else {
-        console.log('Unfilled', props.adUnitPath)
-        maxWidth.value = 0
-        maxHeight.value = 0
-        emit('rendered', false)
-      }
-
-      retry = false
-    }
-  }
-
-  if (retry) {
-    fillTimer = setTimeout(checkRendered, 100)
-  }
-}
-
-fillTimer = setTimeout(checkRendered, 100)
-
-function refreshAd() {
-  if (
-    adSense.value ||
-    (window.googletag?.pubads &&
-      typeof window.googletag?.pubads === 'function' &&
-      typeof window.googletag?.pubads().refresh === 'function' &&
-      !unmounted.value)
-  ) {
-    // Don't refresh if the ad is not visible or tab is not active.
-    if (isVisible.value && miscStore.visible) {
-      // Reserve visible space for it.
-      resetMax()
-
-      if (adSense.value) {
-        // Ad Sense.
-        if (adsbygoogle.value) {
-          adsbygoogle.value.updateAd()
-        }
-      } else {
-        // Prebid.
-        //
-        // Refreshing an ad is a bit more complex because we're using prebid.  That means we have to request the
-        // bids, and then once we've got those, refresh the ad slot to kick Google to render the ad.
-        console.log('Request bids for ad', props.adUnitPath)
-
-        window.pbjs.que.push(function () {
-          window.pbjs.requestBids({
-            timeout: PREBID_TIMEOUT,
-            adUnitCodes: [props.adUnitPath],
-            bidsBackHandler: function (bids, timedOut, auctionId) {
-              const runtimeConfig = useRuntimeConfig()
-              const api = Api(runtimeConfig)
-
-              if (timedOut) {
-                api.bandit.chosen({
-                  uid: 'prebid',
-                  variant: 'timeout',
-                })
-              } else if (bids?.length) {
-                console.log(
-                  'Got bids back',
-                  props.adUnitPath,
-                  bids,
-                  timedOut,
-                  auctionId
-                )
-
-                api.bandit.chosen({
-                  uid: 'prebid',
-                  variant: 'bids',
-                })
-              } else {
-                console.log(
-                  'Got no bids back',
-                  props.adUnitPath,
-                  bids,
-                  timedOut,
-                  auctionId
-                )
-
-                api.bandit.chosen({
-                  uid: 'prebid',
-                  variant: 'nobids',
-                })
-              }
-
-              window.pbjs.setTargetingForGPTAsync([props.adUnitPath])
-
-              if (slot) {
-                window.googletag.pubads().refresh([slot])
-
-                console.log('Refreshed slot', props.adUnitPath)
-              } else {
-                console.error(
-                  'No slot found to refresh found for',
-                  props.adUnitPath
-                )
-              }
-            },
-          })
-        })
-      }
-    } else {
-      // console.log('Not refreshing ad', props.adUnitPath, isVisible.value)
-    }
-
-    refreshTimer = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
-  }
-}
-
+let prebidRetry = 0
+let visibleAndScriptsLoadedTimer = null
 const isVisible = ref(false)
-let shownFirst = false
-const emit = defineEmits(['rendered'])
+let firstBecomeVisible = false
+
+function visibilityChanged(visible) {
+  // The DOM element may have become visible.  But that isn't the end of the story.
+  //
+  // We need to wait for CookieYes, then the TC data, then prebid being loaded.  This is triggered in nuxt.config.ts.
+  // Check the status here rather than on component load, as it might not be available yet.
+  visibleAndScriptsLoadedTimer = null
+
+  if (process.client) {
+    const runtimeConfig = useRuntimeConfig()
+
+    if (!runtimeConfig.public.COOKIEYES) {
+      // Not using CookieYes, e.g. in dev.
+      console.log('No CookieYes in ad')
+      isVisible.value = visible
+
+      if (visible && !firstBecomeVisible) {
+        // We might want to show the ad now, if we stay visible for a little while.
+        firstBecomeVisible = true
+
+        if (!checkStillVisibleTimer) {
+          checkStillVisibleTimer = setTimeout(checkStillVisible, 100)
+        }
+      }
+    } else if (!window.__tcfapi) {
+      // CookieYes not yet loaded - retry.
+      console.log('CookieYes not yet loaded in ad')
+      visibleAndScriptsLoadedTimer = window.setTimeout(() => {
+        visibilityChanged(visible)
+      }, 100)
+    } else {
+      // CookieYes is loaded.  Now we have to wait until they've given consent.
+      window.__tcfapi(
+        'getTCData',
+        2,
+        (tcData, success) => {
+          if (success && tcData && tcData.tcString) {
+            // The user has responded to the cookie banner.
+            console.log('TC data loaded and TC String set')
+            if (!adSense.value && !window.pbjs?.version) {
+              // Prebid required but not loaded yet.
+              prebidRetry++
+
+              if (prebidRetry > 20) {
+                // Give up.  Probably blocked, so we should emit that we've not rendered an ad.  This may trigger
+                // a fallback ad.
+                console.log('Give up on prebid load')
+                emit('rendered', false)
+              } else {
+                // Try again for prebid later.
+                visibleAndScriptsLoadedTimer = setTimeout(() => {
+                  visibilityChanged(visible)
+                }, 100)
+              }
+            } else {
+              // Prebid has loaded.  We might want to show the ad now, if we stay visible for a little while.
+              console.log('Prebid loaded or not required')
+              isVisible.value = visible
+
+              if (visible && !firstBecomeVisible) {
+                if (!checkStillVisibleTimer) {
+                  checkStillVisibleTimer = setTimeout(checkStillVisible, 100)
+                }
+              }
+            }
+          } else {
+            // TC data not yet ready - the user hasn't yet responded to the cookie banner.
+            // Try again later.
+            console.log('TC data not yet available in ad')
+            visibleAndScriptsLoadedTimer = window.setTimeout(() => {
+              visibilityChanged(visible)
+            }, 100)
+          }
+        },
+        [1, 2, 3]
+      )
+    }
+  }
+}
 
 // We want to wait until an ad has been viewable for 100ms.  That reduces the impact of fast scrolling or
 // redirects.
-let initialTimer = null
-let GPTTimer = null
-let GPTFailed = false
+let checkStillVisibleTimer = null
 
-function handleVisible() {
+function checkStillVisible() {
   // Check if the ad is still visible after this delay, and no modal is open.
   console.log(
     'Check if ad still visible',
@@ -310,218 +175,25 @@ function handleVisible() {
     isVisible.value &&
     (props.inModal || !document.body.classList.contains('modal-open'))
   ) {
-    if (adSense.value) {
-      // The ad will be shown and rendered.  Start the refresh timer.
-      refreshTimer = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
-    } else {
-      console.log('Queue GPT commands', props.divId)
-
-      // Sometimes GPT is blocked, so we push the command but it never runs.
-      // Start a fallback timer for that.
-      if (!GPTTimer) {
-        GPTTimer = setTimeout(() => {
-          console.log("GPT didn't run", props.divId)
-          GPTTimer = null
-          GPTFailed = true
-          emit('rendered', false)
-        }, 1000)
-      }
-
-      window.googletag.cmd.push(function () {
-        if (GPTFailed) {
-          console.log('GPT already timed out')
-        } else {
-          clearTimeout(GPTTimer)
-          console.log('Execute GPT define slot', props.divId)
-          slot = window.googletag
-            .defineSlot(props.adUnitPath, props.dimensions, props.divId)
-            .addService(window.googletag.pubads())
-
-          console.log('Add event listeners', props.adUnitPath)
-          window.googletag
-            .pubads()
-            .addEventListener('slotRenderEnded', (event) => {
-              if (event?.slot.getAdUnitPath() === props.adUnitPath) {
-                console.log(
-                  'Rendered',
-                  uniqueid.value,
-                  'empty',
-                  event?.isEmpty,
-                  event
-                )
-
-                if (event?.isEmpty) {
-                  adShown.value = false
-                  console.log('Rendered empty', props.adUnitPath, adShown)
-                  // Sentry.captureMessage('Ad rendered empty ' + props.adUnitPath)
-                  maxWidth.value = 0
-                  maxHeight.value = 0
-                } else {
-                  console.log(
-                    'Rendered',
-                    props.adUnitPath,
-                    event.size[0],
-                    event.size[1]
-                  )
-
-                  // Sometimes we are returned silly values like 1,1, so make sure that we leave at least enough
-                  // space for the minimum sized ad which we could plausibly have shown.
-                  maxWidth.value = Math.max(event.size[0], minWidth.value)
-                  maxHeight.value = Math.max(event.size[1], minHeight.value)
-                }
-
-                emit('rendered', adShown.value)
-              }
-            })
-            .addEventListener('slotVisibilityChanged', (event) => {
-              if (event?.slot.getAdUnitPath() === props.adUnitPath) {
-                if (event.inViewPercentage < 51 && miscStore.visible) {
-                  // const msg =
-                  //   'Visibility of slot ' +
-                  //   props.adUnitPath +
-                  //   ' changed. New visibility: ' +
-                  //   event.inViewPercentage +
-                  //   '%.Viewport size: ' +
-                  //   window.innerWidth +
-                  //   'x' +
-                  //   window.innerHeight
-                  //
-                  // console.log(msg)
-                  // Sentry.captureMessage(msg)
-                }
-              }
-            })
-
-          console.log('Excute GPT display', props.divId)
-          window.googletag.display(props.divId)
-
-          if (window.googletag.pubads().isInitialLoadDisabled()) {
-            // We need to refresh the ad because we called disableInitialLoad.  That's what you do when
-            // using prebid.
-            console.log('Displayed, now trigger refresh', props.adUnitPath)
-            refreshAd()
-          } else {
-            console.log('Displayed and rendered, refresh timer')
-
-            if (!refreshTimer) {
-              refreshTimer = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
-            }
-          }
-
-          shownFirst = true
-        }
-      })
-    }
+    renderAd.value = true
   } else {
     emit('rendered', false)
   }
 }
 
-let prebidRetry = 0
-
-function unPauseAdSense(visible) {
-  console.log('Unpause AdSense?', visible)
-  if (adSense.value && visible && window.adsbygoogle) {
-    // We paused ads on page load - time to enable them
-    window.adsbygoogle.pauseAdRequests = 0
-  }
+function rippleRendered(rendered) {
+  adShown.value = rendered
+  emit('rendered', rendered)
 }
 
-function visibilityChanged(visible) {
-  // We need to wait for CookieYes, then the TC data, then prebid being loaded.  This is triggered in nuxt.config.ts.
-  // Check the status here rather than on component load, as it might not be available yet.
-  visibleTimer = null
-
-  if (process.client) {
-    const runtimeConfig = useRuntimeConfig()
-
-    if (!runtimeConfig.public.COOKIEYES) {
-      console.log('No CookieYes in ad')
-
-      visibleTimer = null
-
-      unPauseAdSense(visible)
-      isVisible.value = visible
-
-      if (visible && !shownFirst) {
-        console.log('Queue create ad', props.adUnitPath, props.divId)
-
-        if (!initialTimer) {
-          initialTimer = setTimeout(handleVisible, 100)
-        }
-      }
-    } else if (!window.__tcfapi) {
-      // CookieYes not yet loaded - retry.
-      console.log('CookieYes not yet loaded in ad')
-      visibleTimer = window.setTimeout(() => {
-        visibilityChanged(visible)
-      }, 100)
-    } else {
-      window.__tcfapi(
-        'getTCData',
-        2,
-        (tcData, success) => {
-          if (success && tcData && tcData.tcString) {
-            console.log('TC data loaded and TC String set')
-            if (!window.pbjs?.version) {
-              console.log('Prebid not loaded yet')
-              prebidRetry++
-
-              if (prebidRetry > 20) {
-                // Give up.  Probably blocked, so we should emit that we've not rendered an ad.  This may trigger
-                // a fallback ad.
-                emit('rendered', false)
-              } else {
-                visibleTimer = window.setTimeout(() => {
-                  visibilityChanged(visible)
-                }, 100)
-              }
-            } else {
-              visibleTimer = null
-
-              unPauseAdSense(visible)
-              isVisible.value = visible
-
-              if (visible && !shownFirst) {
-                console.log('Queue create ad', props.adUnitPath, props.divId)
-
-                if (!initialTimer) {
-                  initialTimer = setTimeout(handleVisible, 100)
-                }
-              }
-            }
-          } else {
-            // TC data not yet ready - this is expected as it requires user response.
-            console.log('TC data not yet available in ad')
-            visibleTimer = window.setTimeout(() => {
-              visibilityChanged(visible)
-            }, 100)
-          }
-        },
-        [1, 2, 3]
-      )
-    }
-  }
-}
+const passClicks = computed(() => {
+  return !adShown.value
+})
 
 onBeforeUnmount(() => {
-  unmounted.value = true
-
   try {
-    if (fillTimer) {
-      clearTimeout(fillTimer)
-    }
-
-    if (refreshTimer) {
-      clearTimeout(refreshTimer)
-    }
-
-    if (visibleTimer) {
-      clearTimeout(visibleTimer)
-    }
-
-    if (window.googletag?.destroySlots) {
-      window.googletag.destroySlots([slot])
+    if (visibleAndScriptsLoadedTimer) {
+      clearTimeout(visibleAndScriptsLoadedTimer)
     }
   } catch (e) {
     console.log('Exception in onBeforeUnmount', e)
@@ -529,10 +201,6 @@ onBeforeUnmount(() => {
 })
 </script>
 <style scoped lang="scss">
-.textsize {
-  font-size: 0.75rem;
-}
-
 .pointer {
   pointer-events: v-bind(passClicks);
 }

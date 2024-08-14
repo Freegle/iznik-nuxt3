@@ -20,7 +20,6 @@
                 ad-unit-path="/22794232631/freegle_sticky"
                 :dimensions="[[320, 50]]"
                 div-id="div-gpt-ad-1699973618906-0"
-                pixel
                 @rendered="adRendered"
                 @failed="adFailed"
               />
