@@ -17,10 +17,6 @@ const CONFIG = {
   // Old:
   IMAGE_SITE: 'https://images.ilovefreegle.org',
 
-  // New.  We have our own caching proxy in front of Uploadcare, to reduce costs:
-  UPLOADCARE_CDN: 'https://uploadcare-cache.ilovefreegle.org/',
-  UPLOADCARE_PROXY: 'https://uploadcare-proxy-cache.ilovefreegle.org/',
-
   // Very new.  Our own uploader, and delivery of those images via a cached use of wsrl.nl.
   TUS_UPLOADER: 'https://uploads.ilovefreegle.org:8080',
   IMAGE_DELIVERY: 'https://delivery.ilovefreegle.org',

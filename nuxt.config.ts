@@ -205,8 +205,6 @@ export default defineNuxtConfig({
       GOOGLE_CLIENT_ID: config.GOOGLE_CLIENT_ID,
       USER_SITE: config.USER_SITE,
       IMAGE_SITE: config.IMAGE_SITE,
-      UPLOADCARE_PROXY: config.UPLOADCARE_PROXY,
-      UPLOADCARE_CDN: config.UPLOADCARE_CDN,
       SENTRY_DSN: config.SENTRY_DSN,
       BUILD_DATE: new Date().toISOString(),
       NETLIFY_DEPLOY_ID: process.env.DEPLOY_ID,
@@ -714,12 +712,6 @@ export default defineNuxtConfig({
       xl: 768,
       xxl: 768,
       '2xl': 768,
-    },
-
-    providers: {
-      uploadcareProxy: {
-        provider: '~/providers/uploadcare-proxy.ts',
-      },
     },
   },
 })
