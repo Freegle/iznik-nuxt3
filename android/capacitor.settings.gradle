@@ -17,8 +17,8 @@ project(':freegle-capacitor-push-notifications-cap6').projectDir = new File('../
 include ':capawesome-capacitor-badge'
 project(':capawesome-capacitor-badge').projectDir = new File('../node_modules/@capawesome/capacitor-badge/android')
 
-include ':capacitor-community-facebook-login'
-project(':capacitor-community-facebook-login').projectDir = new File('../node_modules/@capacitor-community/facebook-login/android')
+include ':whiteguru-capacitor-plugin-facebook-login'
+project(':whiteguru-capacitor-plugin-facebook-login').projectDir = new File('../node_modules/@whiteguru/capacitor-plugin-facebook-login/android')
 
 include ':codetrix-studio-capacitor-google-auth'
 project(':codetrix-studio-capacitor-google-auth').projectDir = new File('../node_modules/@codetrix-studio/capacitor-google-auth/android')
