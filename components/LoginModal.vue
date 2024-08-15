@@ -240,7 +240,8 @@ import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth'
 import { SignInWithApple } from '@capacitor-community/apple-sign-in'
 //import { FacebookLogin } from '@capacitor-community/facebook-login'
 import { FacebookLogin } from '@whiteguru/capacitor-plugin-facebook-login' // FacebookLimitedLoginResponse
-// Also see android\app\src\main\java\org\ilovefreegle\direct\MainActivity.java
+// https://github.com/dragermrb/capacitor-plugin-facebook-login
+// Also see android\app\src\main\java\org\ilovefreegle\direct\MainActivity.java now removed
 // and ios\App\App\AppDelegate.swift
 import { appYahooLogin } from '../composables/app-yahoo'
 
