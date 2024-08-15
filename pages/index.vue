@@ -171,10 +171,10 @@ export default {
 
     // Preload some images to speed page load.
     const userSite = runtimeConfig.public.USER_SITE
-    const proxy = runtimeConfig.public.UPLOADCARE_PROXY
+    const proxy = runtimeConfig.public.IMAGE_DELIVERY
 
     const bg = proxy + '?url=' + userSite + '/wallpaper.png&output=webp'
-    const logo = proxy + '?url=' + userSite + '/icon.png&output=webp&w-58'
+    const logo = proxy + '?url=' + userSite + '/icon.png&output=webp&w=58'
 
     head.link = [
       {
