@@ -325,7 +325,7 @@ export default {
   }
 }
 
-.ourBorder {
+:deep(.ourBorder img) {
   border: 2px solid $color-gray--dark;
   background-color: $color-gray--dark;
 }
