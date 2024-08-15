@@ -20,8 +20,8 @@
 		"classpath": "io.capawesome.capacitorjs.plugins.badge.BadgePlugin"
 	},
 	{
-		"pkg": "@capacitor-community/facebook-login",
-		"classpath": "com.getcapacitor.community.facebooklogin.FacebookLogin"
+		"pkg": "@whiteguru/capacitor-plugin-facebook-login",
+		"classpath": "com.whiteguru.capacitor.plugin.facebooklogin.FacebookLoginPlugin"
 	},
 	{
 		"pkg": "@codetrix-studio/capacitor-google-auth",

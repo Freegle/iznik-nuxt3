@@ -43,7 +43,6 @@
   },
   "dependencies": {
     "@capacitor-community/apple-sign-in": "^6.0.0",
-    "@capacitor-community/facebook-login": "^6.0.0",
     "@capacitor/android": "^6.0.0",
     "@capacitor/app": "^6.0.0",
     "@capacitor/app-launcher": "^6.0.0",
@@ -87,6 +86,7 @@
     "@vueform/toggle": "^2.1.2",
     "@vuelidate/core": "^2.0.0-alpha.41",
     "@vuelidate/validators": "^2.0.0-alpha.29",
+    "@whiteguru/capacitor-plugin-facebook-login": "^6.0.1",
     "add": "^2.0.6",
     "autoprefixer": "10.4.5",
     "bootstrap": "5.3.1",

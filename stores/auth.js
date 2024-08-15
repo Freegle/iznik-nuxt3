@@ -4,7 +4,8 @@ import { useComposeStore } from '../stores/compose'
 import api from '~/api'
 import { useCookie } from '#imports'
 import { useMobileStore } from '@/stores/mobile'
-import { FacebookLogin } from '@capacitor-community/facebook-login'
+// import { FacebookLogin } from '@capacitor-community/facebook-login'
+import { FacebookLogin } from '@whiteguru/capacitor-plugin-facebook-login'
 import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth'
 
 export const useAuthStore = defineStore({

@@ -14,7 +14,7 @@ dependencies {
     implementation project(':capacitor-network')
     implementation project(':freegle-capacitor-push-notifications-cap6')
     implementation project(':capawesome-capacitor-badge')
-    implementation project(':capacitor-community-facebook-login')
+    implementation project(':whiteguru-capacitor-plugin-facebook-login')
     implementation project(':codetrix-studio-capacitor-google-auth')
     implementation project(':capacitor-camera')
     implementation project(':capacitor-share')

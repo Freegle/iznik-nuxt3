@@ -238,7 +238,10 @@ import { useMobileStore } from '@/stores/mobile'
 import me from '~/mixins/me.js'
 import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth'
 import { SignInWithApple } from '@capacitor-community/apple-sign-in'
-import { FacebookLogin } from '@capacitor-community/facebook-login'
+//import { FacebookLogin } from '@capacitor-community/facebook-login'
+import { FacebookLogin } from '@whiteguru/capacitor-plugin-facebook-login' // FacebookLimitedLoginResponse
+// Also see android\app\src\main\java\org\ilovefreegle\direct\MainActivity.java
+// and ios\App\App\AppDelegate.swift
 import { appYahooLogin } from '../composables/app-yahoo'
 
 const NoticeMessage = defineAsyncComponent(() =>
@@ -656,16 +659,27 @@ export default {
           //'user_gender',
         ]
         try{
-          const response = await FacebookLogin.login({ permissions: FACEBOOK_PERMISSIONS })
-          console.log("Facebook response", response) // recentlyGrantedPermissions, recentlyDeniedPermissions
-          if (response && response.accessToken) {
-            // Login successful.
+          let accessToken = false
+          if( this.isiOS){
+            console.log("iOS try FacebookLogin.loginWithLimitedTracking")
+            // response = await (<FacebookLimitedLoginResponse>(FacebookLogin.loginWithLimitedTracking({ permissions: FACEBOOK_PERMISSIONS })))
+            const response = await FacebookLogin.loginWithLimitedTracking({ permissions: FACEBOOK_PERMISSIONS })
+            console.log("Facebook limited response", response) // recentlyGrantedPermissions, recentlyDeniedPermissions
+            if (response && response.authenticationToken) accessToken = response.authenticationToken
+          } else {
+            console.log("Android try FacebookLogin.login")
+            const response = await FacebookLogin.login({ permissions: FACEBOOK_PERMISSIONS })
+            console.log("Facebook response", response) // recentlyGrantedPermissions, recentlyDeniedPermissions
+            if (response && response.accessToken) accessToken = response.accessToken
+          }
+          if (accessToken) {
+            console.log("accessToken", accessToken) // recentlyGrantedPermissions, recentlyDeniedPermissions
+          //if (response && response.accessToken) {
+              // Login successful.
             this.loginWaitMessage = "Please wait..."
-            const accessToken = response.accessToken.token
-            console.log("accessToken", accessToken)
             await this.authStore.login({
               fblogin: 1,
-              fbaccesstoken: accessToken,
+              fbaccesstoken: accessToken.token,
               fblimited: this.isiOS
             })
             // We are now logged in.

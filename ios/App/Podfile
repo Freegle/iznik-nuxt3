@@ -16,7 +16,7 @@ def capacitor_pods
   pod 'CapacitorNetwork', :path => '../../node_modules/@capacitor/network'
   pod 'FreegleCapacitorPushNotificationsCap6', :path => '../../node_modules/@freegle/capacitor-push-notifications-cap6'
   pod 'CapawesomeCapacitorBadge', :path => '../../node_modules/@capawesome/capacitor-badge'
-  pod 'CapacitorCommunityFacebookLogin', :path => '../../node_modules/@capacitor-community/facebook-login'
+  pod 'WhiteguruCapacitorPluginFacebookLogin', :path => '../../node_modules/@whiteguru/capacitor-plugin-facebook-login'
   pod 'CapacitorCommunityAppleSignIn', :path => '../../node_modules/@capacitor-community/apple-sign-in'
   pod 'CodetrixStudioCapacitorGoogleAuth', :path => '../../node_modules/@codetrix-studio/capacitor-google-auth'
   pod 'CapacitorCamera', :path => '../../node_modules/@capacitor/camera'
