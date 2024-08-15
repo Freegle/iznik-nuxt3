@@ -19,13 +19,13 @@ import https from 'https'
 // Ensure in here android\app\src\main\AndroidManifest.xml
 //  <uses-permission android:name="android.permission.CAMERA" />
 
-console.log("CHECK PREBID SCRIPT CHANGES")
-const prebidCurrent = fs.readFileSync('public/js/prebid.js')
-const prebidBase = fs.readFileSync('public/js/prebid-base.js')
-if (prebidCurrent.compare(prebidBase) !== 0) {
-  console.error('public/js/prebid.js NOT THE SAME AS public/js/prebid-base.js', prebidCurrent.length, prebidBase.length)
-  process.exit(1)
-}
+//console.log("CHECK PREBID SCRIPT CHANGES")
+//const prebidCurrent = fs.readFileSync('public/js/prebid.js')
+//const prebidBase = fs.readFileSync('public/js/prebid-base.js')
+//if (prebidCurrent.compare(prebidBase) !== 0) {
+//  console.error('public/js/prebid.js NOT THE SAME AS public/js/prebid-base.js', prebidCurrent.length, prebidBase.length)
+//  process.exit(1)
+//}
 
 if (config.COOKIEYES) {
   console.log('CHECK COOKIEYES SCRIPT CHANGES')
@@ -209,6 +209,15 @@ export default defineNuxtConfig({
     'nuxt-vite-legacy',
     '@bootstrap-vue-next/nuxt',
     process.env.GTM_ID ? '@zadigetvoltaire/nuxt-gtm' : null,
+    [
+      '@nuxtjs/google-adsense',
+      {
+        id: process.env.GOOGLE_ADSENSE_ID,
+        test: process.env.GOOGLE_ADSENSE_TEST_MODE === 'true',
+        hideUnfilled: false,
+        pauseOnLoad: true,
+      },
+    ],
   ],
 
   hooks: {
@@ -236,19 +245,21 @@ export default defineNuxtConfig({
       GOOGLE_CLIENT_ID: config.GOOGLE_CLIENT_ID,
       USER_SITE: config.USER_SITE,
       IMAGE_SITE: config.IMAGE_SITE,
-      UPLOADCARE_PROXY: config.UPLOADCARE_PROXY,
-      UPLOADCARE_CDN: config.UPLOADCARE_CDN,
       SENTRY_DSN: config.SENTRY_DSN,
       BUILD_DATE: new Date().toISOString(),
       ISAPP: config.ISAPP,
       MOBILE_VERSION: config.MOBILE_VERSION,
       NETLIFY_DEPLOY_ID: process.env.DEPLOY_ID,
       NETLIFY_SITE_NAME: process.env.SITE_NAME,
+      NETLIFY_BRANCH: process.env.BRANCH,
       MATOMO_HOST: process.env.MATOMO_HOST,
       COOKIEYES: config.COOKIEYES,
       TRUSTPILOT_LINK: config.TRUSTPILOT_LINK,
       TUS_UPLOADER: config.TUS_UPLOADER,
       IMAGE_DELIVERY: config.IMAGE_DELIVERY,
+
+      GOOGLE_ADSENSE_ID: config.GOOGLE_ADSENSE_ID,
+      GOOGLE_ADSENSE_TEST_MODE: config.GOOGLE_ADSENSE_TEST_MODE,
 
       ...(process.env.GTM_ID
         ? {
@@ -344,6 +355,10 @@ export default defineNuxtConfig({
           innerHTML: `try { if (!window.globalThis) { window.globalThis = window; } } catch (e) { console.log('Polyfill error', e.message); }`,
         },
         // The ecosystem of advertising is complex.
+        //
+        // We might use AdSense.  That's fairly simple.
+        //
+        // Or we might use prebid:
         // - The underlying ad service is Google Tags (GPT).
         // - We use prebid (pbjs), which is some kind of ad broker which gives us a pipeline of ads to use.
         //   We can also define our own ads in GPT.
@@ -386,7 +401,7 @@ export default defineNuxtConfig({
               });
               ce_gtag("set", "ads_data_redaction", true);
               ce_gtag("set", "url_passthrough", true);
-              
+
               console.log('Initialising pbjs and googletag...');
               window.googletag = window.googletag || {};
               window.googletag.cmd = window.googletag.cmd || [];
@@ -400,7 +415,7 @@ export default defineNuxtConfig({
                 window.googletag.pubads().enableSingleRequest()
                 window.googletag.enableServices()
               });
-              
+            
               window.pbjs = window.pbjs || {};
               window.pbjs.que = window.pbjs.que || [];
               
@@ -528,10 +543,12 @@ export default defineNuxtConfig({
                 // The ordering is ensured by using defer and appending the script.
                 //
                 // prebid isn't compatible with older browsers which don't support Object.entries.
-                console.log('Load GPT and prebid');
-                loadScript('https://securepubads.g.doubleclick.net/tag/js/gpt.js', true)
-                loadScript('/js/prebid-app.js', true)
-                // loadScript('/js/prebid.js', true)
+                if (Object.fromEntries) {
+                  // Currently using AdSense so don't need to load GPT and prebid.
+                  // console.log('Load GPT and prebid');
+                  // loadScript('https://securepubads.g.doubleclick.net/tag/js/gpt.js', true)
+                  // loadScript('/js/prebid.js', true)
+                }
               } else {
                 console.log('GPT and prebid already loaded');
               }
@@ -768,12 +785,6 @@ export default defineNuxtConfig({
       xl: 768,
       xxl: 768,
       '2xl': 768,
-    },
-
-    providers: {
-      uploadcareProxy: {
-        provider: '~/providers/uploadcare-proxy.ts',
-      },
     },
   },
 })

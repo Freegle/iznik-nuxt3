@@ -126,6 +126,26 @@ const allOfEm = computed(() => {
   }
 })
 
+watch(
+  allOfEm,
+  (newVal) => {
+    if (newVal?.length && !groupid.value) {
+      // Save the max event we have seen.
+      const max = newVal.reduce((a, b) => Math.max(a, b), -Infinity)
+
+      const authStore = useAuthStore()
+      const me = useAuthStore().user
+      const settings = me?.settings
+
+      settings.lastCommunityEvent = max
+      authStore.saveAndGet({
+        settings,
+      })
+    }
+  },
+  { immediate: true }
+)
+
 const events = computed(() => {
   return allOfEm.value.slice(0, toShow.value)
 })

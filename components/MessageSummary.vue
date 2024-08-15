@@ -56,7 +56,7 @@
           </b-button>
         </client-only>
       </div>
-      <div class="image-wrapper" @click="expand">
+      <div class="image-wrapper" @click="expandAndAttachments">
         <MessageAttachments
           :id="id"
           :attachments="message.attachments"
@@ -176,6 +176,19 @@ export default {
     expand(e) {
       if (this.message) {
         this.$emit('expand')
+
+        if (e) {
+          e.preventDefault()
+          e.stopPropagation()
+        }
+      }
+    },
+    expandAndAttachments(e) {
+      // This is a slightly different case because on My Posts we want to trigger an image zoom (there is no expand
+      // on My Posts).
+      if (this.message) {
+        this.$emit('expand')
+        this.$emit('attachments')
 
         if (e) {
           e.preventDefault()

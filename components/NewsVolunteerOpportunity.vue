@@ -45,21 +45,21 @@
       </div>
       <div class="volunteering__photo">
         <OurUploadedImage
-          v-if="volunteering.photo?.ouruid"
-          :src="volunteering.photo?.ouruid"
-          :modifiers="volunteering.photo?.externalmods"
+          v-if="volunteering.image?.ouruid"
+          :src="volunteering.image?.ouruid"
+          :modifiers="volunteering.image?.externalmods"
           alt="Community Event Photo"
           :width="200"
           :height="200"
           @click="moreInfo"
         />
         <NuxtPicture
-          v-else-if="volunteering.photo?.externaluid"
+          v-else-if="volunteering.image?.externaluid"
           fit="cover"
           format="webp"
           provider="uploadcare"
-          :src="volunteering.photo?.externaluid"
-          :modifiers="volunteering.photo?.externalmods"
+          :src="volunteering.image?.externaluid"
+          :modifiers="volunteering.image?.externalmods"
           alt="Community Event Photo"
           :width="200"
           :height="200"

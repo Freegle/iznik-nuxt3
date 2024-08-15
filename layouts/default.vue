@@ -22,7 +22,7 @@ const LoginModal = defineAsyncComponent(() => import('~/components/LoginModal'))
 
 const runtimeConfig = useRuntimeConfig()
 const userSite = runtimeConfig.public.USER_SITE
-const proxy = runtimeConfig.public.UPLOADCARE_PROXY
+const proxy = runtimeConfig.public.IMAGE_DELIVERY
 const mobileStore = useMobileStore()
 
 let ready = false
@@ -61,13 +61,14 @@ if (!ready && !mobileStore.isApp) {
 
 if (proxy) {
   // Add the wallpaper background, proxying it from our image CDN.
-  // Set background image of wallpaper.png on body
   const bg =
     'background-image: url("' +
     proxy +
-    '/-/format/webp/' +
+    '?url=' +
     userSite +
-    '/wallpaper.png")'
+    '/wallpaper.png' +
+    '&output=webp")'
+
   useHead({
     bodyAttrs: {
       style: bg,

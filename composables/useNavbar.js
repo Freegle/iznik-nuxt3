@@ -10,6 +10,8 @@ import { useAuthStore } from '~/stores/auth'
 import { fetchMe } from '~/composables/useMe'
 import { useRuntimeConfig } from '#app'
 import { TYPING_TIME_INVERVAL } from '~/constants'
+import { useCommunityEventStore } from '~/stores/communityevent'
+import { useVolunteeringStore } from '~/stores/volunteering'
 
 export const navBarHidden = ref(false)
 
@@ -73,6 +75,8 @@ export function useNavbar() {
   const notificationStore = useNotificationStore()
   const chatStore = useChatStore()
   const logoStore = useLogoStore()
+  const communityEventStore = useCommunityEventStore()
+  const volunteeringStore = useVolunteeringStore()
   const route = useRoute()
   const router = useRouter()
 
@@ -148,8 +152,28 @@ export function useNavbar() {
     return pluralize('unseen post', messageStore.count, true)
   })
 
-  const activePostsCountPlural = ref(() => {
+  const activePostsCountPlural = computed(() => {
     return pluralize('open post', activePostsCount.value, {
+      includeNumber: true,
+    })
+  })
+
+  const communityEventCount = computed(() => {
+    return communityEventStore.count
+  })
+
+  const communityEventCountPlural = computed(() => {
+    return pluralize('community event', communityEventCount.value, {
+      includeNumber: true,
+    })
+  })
+
+  const volunteerOpportunityCount = computed(() => {
+    return volunteeringStore.count
+  })
+
+  const volunteerOpportunityCountPlural = ref(() => {
+    return pluralize('volunteer opportunity', volunteerOpportunityCount.value, {
       includeNumber: true,
     })
   })
@@ -209,11 +233,30 @@ export function useNavbar() {
         const settings = me?.settings
         const distance = settings?.newsfeedarea || 0
         await newsfeedStore.fetchCount(distance, false)
-        await messageStore.fetchCount(me?.settings?.browseView, false)
 
         // We might get logged out during awaits.
+        if (!myid.value) {
+          throw new Error('Not logged in')
+        }
+
+        await messageStore.fetchCount(me?.settings?.browseView, false)
+
+        if (!myid.value) {
+          throw new Error('Not logged in')
+        }
+
+        await communityEventStore.fetchList()
+
+        if (!myid.value) {
+          throw new Error('Not logged in')
+        }
+
+        await volunteeringStore.fetchList()
+        if (!myid.value) {
+          throw new Error('Not logged in')
+        }
+
         if (
-          myid.value &&
           route.path !== '/profile/' + myid.value &&
           !route.path.includes('/unsubscribe')
         ) {
@@ -238,7 +281,10 @@ export function useNavbar() {
 
         const runtimeConfig = useRuntimeConfig()
 
-        if (runtimeConfig.public.NETLIFY_DEPLOY_ID) {
+        if (
+          runtimeConfig.public.NETLIFY_DEPLOY_ID &&
+          runtimeConfig.public.NETLIFY_BRANCH === 'production'
+        ) {
           try {
             const response = await fetch(
               `https://api.netlify.com/api/v1/sites/${runtimeConfig.public.NETLIFY_SITE_NAME}.netlify.com`
@@ -294,6 +340,10 @@ export function useNavbar() {
     newsCountPlural,
     browseCount,
     browseCountPlural,
+    communityEventCount,
+    communityEventCountPlural,
+    volunteerOpportunityCount,
+    volunteerOpportunityCountPlural,
     showAboutMeModal,
     homePage,
     showBackButton,

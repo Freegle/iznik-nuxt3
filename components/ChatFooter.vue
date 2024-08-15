@@ -216,30 +216,42 @@
       <div class="d-flex d-lg-none justify-content-between align-middle">
         <div
           v-if="chat && chat.chattype === 'User2User' && otheruser"
-          v-b-tooltip="'Promise an item to this freegler'"
           class="ml-1 mr-2"
           @click="promise(null)"
         >
-          <v-icon scale="2" icon="handshake" class="fa-mob" />
+          <v-icon
+            scale="2"
+            icon="handshake"
+            class="fa-mob"
+            :class="{ shrink: shrink }"
+          />
           <div class="mobtext text--smallest">Promise</div>
         </div>
         <div
           v-if="chat && chat.chattype === 'User2User' && otheruser"
-          v-b-tooltip="'Send your address'"
           disabled
           class="mr-2"
           @click="addressBook"
         >
-          <v-icon scale="3" icon="address-book" class="fa-mob" />
+          <v-icon
+            scale="3"
+            icon="address-book"
+            class="fa-mob"
+            :class="{ shrink: shrink }"
+          />
           <div class="mobtext text--smallest">Address</div>
         </div>
         <div
           v-if="chat && chat.chattype === 'User2Mod' && mod"
-          v-b-tooltip="'Report as spammer'"
           class="mr-2"
           @click="spamReport"
         >
-          <v-icon scale="2" icon="ban" class="fa-mob" />
+          <v-icon
+            scale="2"
+            icon="ban"
+            class="fa-mob"
+            :class="{ shrink: shrink }"
+          />
           <div class="mobtext text--smallest">Spammer</div>
         </div>
         <div
@@ -249,28 +261,39 @@
             otheruser &&
             !tooSoonToNudge
           "
-          v-b-tooltip="'Waiting for a reply?  Nudge this freegler.'"
           class="mr-2"
           @click="nudge"
         >
-          <v-icon scale="2" icon="bell" class="fa-mob" />
+          <v-icon
+            scale="2"
+            icon="bell"
+            class="fa-mob"
+            :class="{ shrink: shrink }"
+          />
           <div class="mobtext text--smallest">Nudge</div>
         </div>
         <div
           v-if="
             chat && chat.chattype === 'User2User' && otheruser && tooSoonToNudge
           "
-          v-b-tooltip="
-            'You need to wait a day since the last message before nudging.'
-          "
           class="mr-2"
           @click="nudgeTooSoon"
         >
-          <v-icon scale="2" icon="bell" class="fa-mob" />
+          <v-icon
+            scale="2"
+            icon="bell"
+            class="fa-mob"
+            :class="{ shrink: shrink }"
+          />
           <div class="mobtext text--smallest">Nudge</div>
         </div>
         <div class="" @click="photoAdd">
-          <v-icon scale="2" icon="camera" class="fa-mob" />
+          <v-icon
+            scale="2"
+            icon="camera"
+            class="fa-mob"
+            :class="{ shrink: shrink }"
+          />
           <div class="mobtext text--smallest">Photo</div>
         </div>
         <SpinButton
@@ -278,6 +301,7 @@
           size="md"
           label="Send"
           icon-name="angle-double-right"
+          :class="{ shrink: shrink }"
           done-icon=""
           iconlast
           @handle="send"
@@ -448,9 +472,14 @@ export default {
   },
   computed: {
     ...mapWritableState(useMiscStore, ['lastTyping']),
+    shrink() {
+      return this.sendmessage?.length > 120
+    },
     height() {
       // Bootstrap Vue Next doesn't yet have autoresizing.
-      return this.sendmessage ? 'height: 12em' : 'height: 6em'
+      const height = Math.min(6, Math.round(this.sendmessage?.length / 60))
+
+      return 'height: ' + (height + 6) + 'em'
     },
     noticesToShow() {
       return (
@@ -866,6 +895,10 @@ export default {
 .fa-mob {
   height: 2rem;
   width: 100%;
+}
+
+.shrink {
+  height: 0.8rem;
 }
 
 .nocolor {

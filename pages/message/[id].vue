@@ -11,7 +11,8 @@
           >
             <ExternalDa
               ad-unit-path="/22794232631/freegle_productemail"
-              :dimensions="[[300, 250]]"
+              max-height="600px"
+              max-width="300px"
               div-id="div-gpt-ad-1691925773522-0"
               class="mt-2"
             />
@@ -97,18 +98,19 @@
             </VisibleWhen>
           </div>
         </b-col>
-        <b-col cols="0" xl="3" class="d-none d-xl-block">
+        <b-col cols="0" xl="3" class="d-none d-xl-flex justify-content-end">
           <VisibleWhen
             :not="['xs', 'sm', 'md', 'lg']"
             class="position-fixed"
             style="width: 300px"
           >
-            <!--            <ExternalDa-->
-            <!--              ad-unit-path="/22794232631/freegle_productemail"-->
-            <!--              :dimensions="[[300, 250]]"-->
-            <!--              div-id="div-gpt-ad-1691925773522-0"-->
-            <!--              class="mt-2"-->
-            <!--            />-->
+            <ExternalDa
+              ad-unit-path="/22794232631/freegle_productemail"
+              max-height="600px"
+              max-width="300px"
+              div-id="div-gpt-ad-1691925773522-0"
+              class="mt-2"
+            />
           </VisibleWhen>
         </b-col>
       </b-row>

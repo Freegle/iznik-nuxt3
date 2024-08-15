@@ -11,10 +11,8 @@
           >
             <ExternalDa
               ad-unit-path="/22794232631/freegle_home_left"
-              :dimensions="[
-                [300, 600],
-                [300, 250],
-              ]"
+              max-height="600px"
+              max-width="250px"
               div-id="div-gpt-ad-1693235056629-0"
               class="mt-2"
               show-logged-out
@@ -48,10 +46,8 @@
           </p>
           <ExternalDa
             ad-unit-path="/22794232631/appnexus_test"
-            :dimensions="[
-              [600, 500],
-              [300, 600],
-            ]"
+            max-height="600px"
+            max-width="500px"
             div-id="div-gpt-ad-appnexus-test-0"
             class="mt-2"
             show-logged-out
@@ -76,10 +72,8 @@
             >
               <ExternalDa
                 ad-unit-path="/22794232631/freegle_home"
-                :dimensions="[
-                  [300, 600],
-                  [300, 250],
-                ]"
+                max-height="600px"
+                max-width="300px"
                 div-id="div-gpt-ad-1691925450433-0"
                 class="mt-2"
                 show-logged-out
