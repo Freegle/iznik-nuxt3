@@ -662,6 +662,7 @@ export default {
             // Login successful.
             this.loginWaitMessage = "Please wait..."
             const accessToken = response.accessToken.token
+            console.log("accessToken", accessToken)
             await this.authStore.login({
               fblogin: 1,
               fbaccesstoken: accessToken,
