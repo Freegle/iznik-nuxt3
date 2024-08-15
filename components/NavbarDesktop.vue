@@ -142,9 +142,19 @@
             to="/communityevents"
             @mousedown="maybeReload('/communityevents')"
           >
-            <v-icon icon="calendar-alt" class="fa-2x" />
-            <br />
-            <span class="nav-item__text">Events</span>
+            <div class="position-relative">
+              <v-icon icon="calendar-alt" class="fa-2x" />
+              <br />
+              <b-badge
+                v-if="communityEventCount"
+                variant="info"
+                class="communityeventsbadge"
+                :title="communityEventCountPlural"
+              >
+                {{ communityEventCount }}
+              </b-badge>
+              <span class="nav-item__text">Events</span>
+            </div>
           </nuxt-link>
         </li>
         <li>
@@ -154,10 +164,19 @@
             class="nav-link text-center small p-0"
             to="/volunteerings"
             @mousedown="maybeReload('/volunteerings')"
-          >
-            <v-icon icon="hands-helping" class="fa-2x" />
-            <br />
-            <span class="nav-item__text">Volunteer</span>
+            ><div class="position-relative">
+              <v-icon icon="hands-helping" class="fa-2x" />
+              <br />
+              <b-badge
+                v-if="volunteerOpportunityCount"
+                variant="info"
+                class="volunteeropportunitiesbadge"
+                :title="volunteerOpportunityCountPlural"
+              >
+                {{ volunteerOpportunityCount }}
+              </b-badge>
+              <span class="nav-item__text">Volunteer</span>
+            </div>
           </nuxt-link>
         </li>
       </ul>
@@ -258,6 +277,10 @@ const {
   activePostsCountPlural,
   newsCount,
   newsCountPlural,
+  communityEventCount,
+  communityEventCountPlural,
+  volunteerOpportunityCount,
+  volunteerOpportunityCountPlural,
   browseCount,
   browseCountPlural,
   showAboutMeModal,

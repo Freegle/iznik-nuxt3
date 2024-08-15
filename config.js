@@ -17,10 +17,6 @@ const CONFIG = {
   // Old:
   IMAGE_SITE: 'https://images.ilovefreegle.org',
 
-  // New.  We have our own caching proxy in front of Uploadcare, to reduce costs:
-  UPLOADCARE_CDN: 'https://uploadcare-cache.ilovefreegle.org/',
-  UPLOADCARE_PROXY: 'https://uploadcare-proxy-cache.ilovefreegle.org/',
-
   // Very new.  Our own uploader, and delivery of those images via a cached use of wsrl.nl.
   TUS_UPLOADER: 'https://uploads.ilovefreegle.org:8080',
   IMAGE_DELIVERY: 'https://delivery.ilovefreegle.org',
@@ -53,9 +49,12 @@ const CONFIG = {
   // Cookie banner for this site.
   COOKIEYES: process.env.COOKIEYES || null,
   ISAPP: process.env.IZNIK_NUXT3_IS_APP === 'true',
-  MOBILE_VERSION: '3.2.0',
+  MOBILE_VERSION: '3.2.1',
 
   TRUSTPILOT_LINK: process.env.TRUSTPILOT_LINK || null,
+
+  GOOGLE_ADSENSE_ID: process.env.GOOGLE_ADSENSE_ID,
+  GOOGLE_ADSENSE_TEST_MODE: process.env.GOOGLE_ADSENSE_TEST_MODE,
 
   AD_PREBID_CONFIG: [
     {

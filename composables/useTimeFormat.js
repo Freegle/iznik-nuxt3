@@ -111,7 +111,6 @@ export function dateshort(val) {
 }
 
 export function dateonlyNoYear(val) {
-  console.log('Format', val)
   return dayjs(val).format('Do MMMM')
 }
 

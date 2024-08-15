@@ -8,7 +8,7 @@
         v-b-tooltip.bottom="uptitle"
         :size="size"
         :variant="user.info.ratings.Up > 0 ? 'primary' : 'white'"
-        :disabled="disabled || user.id === myid ? 'true' : undefined"
+        :disabled="disabled || user.id === myid"
         :class="{
           mine: user.info.ratings.Mine === 'Up',
           'mr-1': true,
@@ -21,7 +21,7 @@
         v-b-tooltip.bottom="downtitle"
         :size="size"
         :variant="user.info.ratings.Down > 0 ? 'warning' : 'white'"
-        :disabled="disabled || user.id === myid ? 'true' : undefined"
+        :disabled="disabled || user.id === myid"
         :class="{
           mine: user.info.ratings.Mine === 'Down',
           'ml-1': true,

@@ -181,6 +181,7 @@
             :id="newsfeed.hiddenby"
             intro="by"
           />
+          <span v-else>the system</span>
           and is only visible to volunteers and the person who posted it.
         </div>
       </div>

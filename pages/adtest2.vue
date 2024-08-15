@@ -11,10 +11,8 @@
           </p>
           <ExternalDa
             ad-unit-path="/22794232631/freegle_home_left"
-            :dimensions="[
-              [300, 600],
-              [300, 250],
-            ]"
+            max-height="600px"
+            max-width="300px"
             div-id="div-gpt-ad-1693235056629-0"
             class="mt-2"
             show-logged-out

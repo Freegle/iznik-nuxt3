@@ -27,7 +27,10 @@
       <h1 class="text-white truncate text-center header--size5 m-0">
         {{ chat.name }}
       </h1>
-      <div v-if="!otheruser?.deleted && milesaway" class="text-white small">
+      <div
+        v-if="!otheruser?.deleted && milesaway"
+        class="text-white small text-truncate"
+      >
         {{ milesstring }}
       </div>
     </div>
