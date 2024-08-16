@@ -120,8 +120,6 @@ const width = computed(() => {
     } else {
       return 200
     }
-  } else if (miscStore.breakpoint === 'xs' || miscStore.breakpoint === 'sm') {
-    return 320
   } else {
     return 768
   }
@@ -130,8 +128,10 @@ const width = computed(() => {
 const height = computed(() => {
   if (props.thumbnail) {
     return width.value
-  } else {
+  } else if (miscStore.breakpoint === 'xs' || miscStore.breakpoint === 'sm') {
     return 150
+  } else {
+    return 200
   }
 })
 
