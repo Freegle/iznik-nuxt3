@@ -138,6 +138,7 @@ export default {
     classes() {
       const ret = {
         messagecard: true,
+        'pb-0': true,
         freegled: this.message?.successful && this.showFreegled,
         offer: this.message.type === 'Offer',
         wanted: this.message.type === 'Wanted',
@@ -204,7 +205,7 @@ export default {
 }
 
 .messagecard {
-  padding: 16px;
+  padding: 10px;
   border-radius: 4px;
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
   border: solid 1px $color-gray--light;
@@ -214,6 +215,7 @@ export default {
   grid-template-columns: minmax(0, 1fr);
 
   @include media-breakpoint-up(md) {
+    padding: 16px;
     grid-template-columns: $thumbnail-size-md 1fr;
     grid-column-gap: 1rem;
     grid-template-rows: max-content max-content max-content auto auto auto;

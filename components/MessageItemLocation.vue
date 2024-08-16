@@ -164,7 +164,7 @@ export default {
 
 .item {
   display: inline-block;
-  width: min($thumbnail-size, 35vw);
+  width: min($thumbnail-size, calc(45vw - 30px));
 
   @include media-breakpoint-up(md) {
     width: 100%;
