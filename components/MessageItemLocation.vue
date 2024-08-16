@@ -128,6 +128,7 @@ export default {
 @import 'bootstrap/scss/_functions';
 @import 'bootstrap/scss/_variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/message-images.scss';
 
 .item {
   font-size: 1rem;
@@ -163,7 +164,7 @@ export default {
 
 .item {
   display: inline-block;
-  width: 150px;
+  width: min($thumbnail-size, 35vw);
 
   @include media-breakpoint-up(md) {
     width: 100%;
