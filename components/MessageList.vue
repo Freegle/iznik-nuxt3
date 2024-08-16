@@ -35,7 +35,6 @@
               <div
                 :id="'messagewrapper-' + m.id"
                 :ref="'messagewrapper-' + m.id"
-                class="itemwidth"
               >
                 <OurMessage :id="m.id" :matchedon="m.matchedon" record-view />
               </div>
@@ -43,7 +42,6 @@
                 v-if="ix + 1 < deDuplicatedMessages.length"
                 :id="'messagewrapper-' + deDuplicatedMessages[ix + 1].id"
                 :ref="'messagewrapper-' + deDuplicatedMessages[ix + 1].id"
-                class="itemwidth"
               >
                 <OurMessage
                   :id="deDuplicatedMessages[ix + 1].id"
@@ -622,8 +620,4 @@ export default {
 @import 'bootstrap/scss/_functions';
 @import 'bootstrap/scss/_variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
-
-.itemwidth {
-  min-width: 250px;
-}
 </style>

@@ -163,6 +163,10 @@ export default {
 
 .item {
   display: inline-block;
-  width: 200px;
+  width: 150px;
+
+  @include media-breakpoint-up(md) {
+    width: 100%;
+  }
 }
 </style>

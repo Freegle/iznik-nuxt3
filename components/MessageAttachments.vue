@@ -115,7 +115,11 @@ const miscStore = useMiscStore()
 
 const width = computed(() => {
   if (props.thumbnail) {
-    return 200
+    if (miscStore.breakpoint === 'xs' || miscStore.breakpoint === 'sm') {
+      return 150
+    } else {
+      return 200
+    }
   } else if (miscStore.breakpoint === 'xs' || miscStore.breakpoint === 'sm') {
     return 320
   } else {
@@ -127,7 +131,7 @@ const height = computed(() => {
   if (props.thumbnail) {
     return width.value
   } else {
-    return 200
+    return 150
   }
 })
 
@@ -152,10 +156,10 @@ function brokenImage() {
 .thumbnail {
   .attachment {
     display: block;
-    height: 200px;
+    height: 150px;
 
     img {
-      height: 200px;
+      height: 150px;
     }
   }
 }
@@ -163,10 +167,10 @@ function brokenImage() {
 .notThumbnail {
   .attachment {
     display: block;
-    height: 200px;
+    height: 150px;
 
     img {
-      height: 200px;
+      height: 150px;
     }
 
     @include media-breakpoint-up(sm) {
@@ -205,6 +209,6 @@ function brokenImage() {
 .bg {
   background-color: $color-gray--light;
   width: 100%;
-  height: 200px;
+  height: 150px;
 }
 </style>
