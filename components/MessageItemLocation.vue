@@ -21,9 +21,12 @@
           }"
           itemprop="name"
         >
-          <a class="nodecor" :href="'/message/' + id" @click="block">{{
-            item
-          }}</a>
+          <a
+            class="nodecor text-truncate item"
+            :href="'/message/' + id"
+            @click="block"
+            >{{ item }}</a
+          >
         </span>
       </div>
       <div>
@@ -38,7 +41,7 @@
         </client-only>
       </div>
     </h3>
-    <div v-if="showLocation" class="location">
+    <div v-if="showLocation" class="location text-truncate">
       {{ location }}
     </div>
   </div>
@@ -122,7 +125,17 @@ export default {
 }
 </script>
 <style scoped lang="scss">
+@import 'bootstrap/scss/_functions';
+@import 'bootstrap/scss/_variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
+
 .item {
+  font-size: 1rem;
+
+  @include media-breakpoint-up(md) {
+    font-size: 1.5rem;
+  }
+
   color: $colour-info-fg !important;
 
   a {
@@ -141,6 +154,15 @@ export default {
 
 .location {
   color: $color-gray--darker !important;
-  font-size: 1.25rem;
+  font-size: 0.8rem;
+
+  @include media-breakpoint-up(md) {
+    font-size: 1.25rem;
+  }
+}
+
+.item {
+  display: inline-block;
+  width: 200px;
 }
 </style>

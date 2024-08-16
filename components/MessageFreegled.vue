@@ -84,15 +84,23 @@ export default {
 }
 </script>
 <style scoped lang="scss">
+@import 'bootstrap/scss/_functions';
+@import 'bootstrap/scss/_variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
+
 .freegled__image {
   position: absolute;
-  width: 225px;
   z-index: 2;
   transform: rotate(15deg);
-  top: 30%;
-
-  // Centre the absolute positioned div in its container
+  top: 50%;
   left: 50%;
-  margin-left: -125px;
+
+  width: 150px;
+  margin-left: -75px;
+
+  @include media-breakpoint-up(md) {
+    width: 225px;
+    margin-left: -125px;
+  }
 }
 </style>

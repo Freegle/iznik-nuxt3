@@ -6,12 +6,12 @@
       class="text--small"
     >
       <client-only>
-        <span :title="group.arrival"
-          >{{ timeago(group.arrival, true) }} on
+        <span :title="group.arrival" class="time"
+          >{{ timeago(group.arrival, true) }} <span v-if="!summary">on</span>
         </span>
       </client-only>
       <nuxt-link
-        v-if="group.groupid in groups"
+        v-if="group.groupid in groups && !summary"
         no-prefetch
         :to="'/explore/' + groups[group.groupid].exploreLink + '?noguard=true'"
         :title="'Click to view ' + groups[group.groupid].namedisplay"
@@ -21,7 +21,7 @@
       &nbsp;
       <client-only>
         <b-button
-          v-if="displayMessageLink"
+          v-if="!summary"
           variant="link"
           :to="'/message/' + message.id"
           class="text-faded text-decoration-none"
@@ -30,9 +30,9 @@
           #{{ message.id }}
         </b-button>
       </client-only>
-      <span v-if="approvedby" class="text-muted small">
+      <div v-if="approvedby && !summary" class="text-faded small">
         Approved by {{ approvedby }}
-      </span>
+      </div>
     </div>
   </div>
 </template>
@@ -51,8 +51,9 @@ export default {
       type: Number,
       required: true,
     },
-    displayMessageLink: {
+    summary: {
       type: Boolean,
+      required: false,
       default: false,
     },
   },
@@ -142,7 +143,15 @@ export default {
 }
 </script>
 <style scoped lang="scss">
+@import 'bootstrap/scss/_functions';
+@import 'bootstrap/scss/_variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
+
 .time {
-  color: $colour-success-fg;
+  font-size: 0.75rem;
+
+  @include media-breakpoint-up(md) {
+    font-size: 1rem;
+  }
 }
 </style>

@@ -1,96 +1,83 @@
 <template>
-  <div>
+  <button class="p-0 border-0" :disabled="disabled">
+    <MessageTag :id="id" class="ps-2 pe-2" />
     <div
-      v-if="defaultAttachments || !attachments?.length"
-      class="d-none d-md-block"
+      v-if="!defaultAttachments && !thumbnail && attachments?.length"
+      class="photozoom"
+      @click="$emit('zoom')"
     >
-      <MessageTag :id="id" def class="ps-2 pe-2" />
-      <div class="d-flex justify-content-around bg rounded">
-        <client-only>
-          <b-img
-            src="/camera.png"
-            class="align-self-center justify-self-center w-100 rounded h-100 fit-cover"
-          />
-        </client-only>
+      View larger image
+    </div>
+    <div class="photobadge d-flex">
+      <client-only>
+        <b-badge v-if="attachments?.length > 1" @click="$emit('zoom')">
+          1 / {{ attachments?.length }} <v-icon icon="camera" />
+        </b-badge>
+      </client-only>
+    </div>
+    <div
+      :class="{
+        thumbnail: thumbnail,
+        notThumbnail: !thumbnail,
+        attachment: true,
+      }"
+    >
+      <div ref="imagewrapper">
+        <b-img
+          v-if="defaultAttachments || !attachments?.length"
+          :width="width"
+          :height="height"
+          src="/camera.png"
+          class="align-self-center justify-self-center rounded h-100 fit-cover"
+        />
+        <OurUploadedImage
+          v-else-if="attachments[0].ouruid"
+          :src="attachments[0].ouruid"
+          :modifiers="attachments[0].externalmods"
+          alt="Item Photo"
+          :width="width"
+          :height="height"
+          :sizes="thumbnail ? '200px' : '320px md:768px'"
+          :preload="preload"
+          @error="brokenImage"
+          @click="$emit('zoom')"
+        />
+        <NuxtPicture
+          v-else-if="attachments[0].externaluid"
+          format="webp"
+          provider="uploadcare"
+          :src="attachments[0].externaluid"
+          :modifiers="attachments[0].externalmods"
+          alt="Item Photo"
+          :width="width"
+          :height="height"
+          :sizes="thumbnail ? '200px' : '320px md:768px'"
+          :preload="preload"
+          @error="brokenImage"
+          @click="$emit('zoom')"
+        />
+        <ProxyImage
+          v-else
+          class-name="p-0 rounded"
+          alt="Item picture"
+          title="Item picture"
+          :src="attachments[0].path"
+          :sizes="thumbnail ? '200px' : '320px md:768px'"
+          :width="width"
+          :height="height"
+          fit="cover"
+          :preload="preload"
+          @error="brokenImage"
+          @click="$emit('zoom')"
+        />
       </div>
     </div>
-    <button
-      v-else-if="attachments?.length"
-      class="w-100 p-0 border-0"
-      :disabled="disabled"
-    >
-      <MessageTag :id="id" class="ps-2 pe-2" />
-      <div
-        v-if="!thumbnail && attachments?.length"
-        class="photozoom"
-        @click="$emit('zoom')"
-      >
-        View larger image
-      </div>
-      <div class="photobadge d-flex">
-        <client-only>
-          <b-badge v-if="attachments?.length > 1" @click="$emit('zoom')">
-            1 / {{ attachments?.length }} <v-icon icon="camera" />
-          </b-badge>
-        </client-only>
-      </div>
-      <div
-        :class="{
-          thumbnail: thumbnail,
-          notThumbnail: !thumbnail,
-          attachment: true,
-        }"
-      >
-        <div ref="imagewrapper">
-          <OurUploadedImage
-            v-if="attachments[0].ouruid"
-            :src="attachments[0].ouruid"
-            :modifiers="attachments[0].externalmods"
-            alt="Item Photo"
-            :width="Math.round(width)"
-            :height="200"
-            :sizes="thumbnail ? '200px' : '320px md:768px'"
-            :preload="preload"
-            @error="brokenImage"
-            @click="$emit('zoom')"
-          />
-          <NuxtPicture
-            v-else-if="attachments[0].externaluid"
-            format="webp"
-            provider="uploadcare"
-            :src="attachments[0].externaluid"
-            :modifiers="attachments[0].externalmods"
-            alt="Item Photo"
-            :width="Math.round(width)"
-            :height="200"
-            :sizes="thumbnail ? '200px' : '320px md:768px'"
-            :preload="preload"
-            @error="brokenImage"
-            @click="$emit('zoom')"
-          />
-          <ProxyImage
-            v-else
-            class-name="p-0 rounded"
-            alt="Item picture"
-            title="Item picture"
-            :src="attachments[0].path"
-            :sizes="thumbnail ? '200px' : '320px md:768px'"
-            :width="Math.round(width)"
-            :height="200"
-            fit="cover"
-            :preload="preload"
-            @error="brokenImage"
-            @click="$emit('zoom')"
-          />
-        </div>
-      </div>
-    </button>
-  </div>
+  </button>
 </template>
 <script setup>
-import { useElementSize } from '@vueuse/core'
+import { useMiscStore } from '~/stores/misc'
 
-defineProps({
+const props = defineProps({
   id: {
     type: Number,
     required: true,
@@ -124,15 +111,25 @@ defineProps({
 const defaultAttachments = ref(false)
 const imagewrapper = ref(null)
 
-const { width, height } = useElementSize(imagewrapper)
+const miscStore = useMiscStore()
 
-// Make width and height <= 3000 as that's an Uploadcare limit.
-if (width > 3000) {
-  width.value = 3000
-}
-if (height > 3000) {
-  height.value = 3000
-}
+const width = computed(() => {
+  if (props.thumbnail) {
+    return 200
+  } else if (miscStore.breakpoint === 'xs' || miscStore.breakpoint === 'sm') {
+    return 320
+  } else {
+    return 768
+  }
+})
+
+const height = computed(() => {
+  if (props.thumbnail) {
+    return width.value
+  } else {
+    return 200
+  }
+})
 
 function brokenImage() {
   // If the attachment image is broken, we're best off just hiding it.
@@ -145,7 +142,6 @@ function brokenImage() {
 @import 'bootstrap/scss/mixins/_breakpoints';
 
 .attachment {
-  width: 100%;
   box-shadow: 0 0 1 $color-gray--dark;
 
   :deep(img) {
