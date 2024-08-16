@@ -193,6 +193,7 @@ export default {
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/message-images.scss';
 
 .card-body {
   padding: 0px;
@@ -213,7 +214,7 @@ export default {
   grid-template-columns: minmax(0, 1fr);
 
   @include media-breakpoint-up(md) {
-    grid-template-columns: 200px 1fr;
+    grid-template-columns: $thumbnail-size-md 1fr;
     grid-column-gap: 1rem;
     grid-template-rows: max-content max-content max-content auto auto auto;
   }
