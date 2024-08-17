@@ -1,5 +1,5 @@
 diff --git a/node_modules/@nuxtjs/google-adsense/dist/module.mjs b/node_modules/@nuxtjs/google-adsense/dist/module.mjs
-index 1993df5..ff819c3 100644
+index 1993df5..5385a62 100644
 --- a/node_modules/@nuxtjs/google-adsense/dist/module.mjs
 +++ b/node_modules/@nuxtjs/google-adsense/dist/module.mjs
 @@ -15,7 +15,7 @@ function initializeAdClient(options) {
@@ -11,3 +11,12 @@ index 1993df5..ff819c3 100644
      };`
    );
  }
+@@ -28,7 +28,7 @@ function createScriptMeta(script) {
+   };
+ }
+ 
+-const ADSENSE_URL = "//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js";
++const ADSENSE_URL = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js";
+ const TEST_ID = "ca-google";
+ const module = defineNuxtModule({
+   meta: {
