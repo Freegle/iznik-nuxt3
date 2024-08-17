@@ -43,7 +43,7 @@
         />
       </div>
       <MessageHistoryExpanded :id="id" class="d-block d-md-none mt-2 mt-md-0" />
-      <VisibleWhen v-if="showAd && adId" :at="['xs', 'sm']">
+      <VisibleWhen v-if="showAd && adId && !noAd" :at="['xs', 'sm']">
         <div class="d-flex justify-content-around mt-2">
           <ExternalDa
             :adUnitPath="adUnitPath"
@@ -52,7 +52,7 @@
             max-width="300px"
             :div-id="adId"
             :in-modal="inModal"
-            @rendered="adRendered = true"
+            @rendered="rendered"
           />
         </div>
       </VisibleWhen>
@@ -159,6 +159,7 @@ export default {
     return {
       replied: false,
       adRendered: false,
+      noAd: false,
     }
   },
   computed: {
@@ -235,6 +236,10 @@ export default {
     sent() {
       this.$emit('close')
       this.replied = true
+    },
+    rendered(shown) {
+      this.adRendered = true
+      this.noAd = !shown
     },
   },
 }

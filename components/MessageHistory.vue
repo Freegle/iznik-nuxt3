@@ -7,11 +7,12 @@
     >
       <client-only>
         <span :title="group.arrival" class="time"
-          >{{ timeago(group.arrival, true) }} <span v-if="!summary">on</span>
+          >{{ timeago(group.arrival, true) }}
+          <span v-if="showSummaryDetails">on </span>
         </span>
       </client-only>
       <nuxt-link
-        v-if="group.groupid in groups && !summary"
+        v-if="group.groupid in groups && showSummaryDetails"
         no-prefetch
         :to="'/explore/' + groups[group.groupid].exploreLink + '?noguard=true'"
         :title="'Click to view ' + groups[group.groupid].namedisplay"
@@ -21,7 +22,7 @@
       &nbsp;
       <client-only>
         <b-button
-          v-if="!summary"
+          v-if="showSummaryDetails"
           variant="link"
           :to="'/message/' + message.id"
           class="text-faded text-decoration-none"
@@ -30,19 +31,21 @@
           #{{ message.id }}
         </b-button>
       </client-only>
-      <div v-if="approvedby && !summary" class="text-faded small">
+      <div v-if="approvedby && showSummaryDetails" class="text-faded small">
         Approved by {{ approvedby }}
       </div>
     </div>
   </div>
 </template>
 <script>
+import { mapState } from 'pinia'
 import dayjs from 'dayjs'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useMessageStore } from '~/stores/message'
 import { useGroupStore } from '~/stores/group'
 import { timeago } from '~/composables/useTimeFormat'
+import { useMiscStore } from '~/stores/misc'
 
 export default {
   name: 'MessageHistory',
@@ -87,6 +90,12 @@ export default {
     return { groupStore, messageStore, authStore, userStore, timeago }
   },
   computed: {
+    ...mapState(useMiscStore, ['breakpoint']),
+    showSummaryDetails() {
+      return (
+        !this.summary || (this.breakpoint !== 'xs' && this.breakpoint !== 'sm')
+      )
+    },
     approvedby() {
       let approvedby = ''
 
