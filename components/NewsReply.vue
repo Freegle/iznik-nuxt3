@@ -44,7 +44,7 @@
             :src="reply?.image?.ouruid"
             :modifiers="reply?.image?.externalmods"
             alt="ChitChat Photo"
-            width="100"
+            :width="100"
             class="clickme replyphoto mt-2 mb-2"
             @click="showReplyPhotoModal"
           />
@@ -56,7 +56,7 @@
             :src="reply?.image?.externaluid"
             :modifiers="reply?.image?.externalmods"
             alt="ChitChat Photo"
-            width="100"
+            :width="100"
             class="clickme replyphoto mt-2 mb-2"
             @click="showReplyPhotoModal"
           />
