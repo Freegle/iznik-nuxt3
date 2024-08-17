@@ -49,9 +49,9 @@
             :ad-unit-path="adUnitPath"
             :ad-id="adId"
             max-height="250px"
-            max-width="300px"
             :div-id="adId"
             :in-modal="inModal"
+            show-logged-out
             @rendered="rendered"
           />
         </div>
