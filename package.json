@@ -12,7 +12,8 @@
     "node": ">=17.9.1"
   },
   "comments": {
-    "comment1": "switch to @codetrix-studio/capacitor-google-auth: ^4.0.0 when released"
+    "comment1": "switch to @codetrix-studio/capacitor-google-auth: ^4.0.0 when released",
+    "comment2": "When isapp: node_modules/@nuxtjs/google-adsense/dist/module.mjs needs to use https as per patch/@nuxtjs+google-adsense+3.0.0.patch"
   },
   "overrides": {
     "vue-mention": {
