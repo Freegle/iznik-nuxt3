@@ -1,96 +1,82 @@
 <template>
-  <div>
+  <button class="p-0 border-0" :disabled="disabled">
+    <MessageTag :id="id" class="ps-2 pe-2" />
     <div
-      v-if="defaultAttachments || !attachments?.length"
-      class="d-none d-md-block"
+      v-if="!defaultAttachments && !thumbnail && attachments?.length"
+      class="photozoom"
+      @click="$emit('zoom')"
     >
-      <MessageTag :id="id" def class="ps-2 pe-2" />
-      <div class="d-flex justify-content-around bg rounded">
-        <client-only>
-          <b-img
-            src="/camera.png"
-            class="align-self-center justify-self-center w-100 rounded h-100 fit-cover"
-          />
-        </client-only>
-      </div>
+      View larger image
     </div>
-    <button
-      v-else-if="attachments?.length"
-      class="w-100 p-0 border-0"
-      :disabled="disabled"
+    <div class="photobadge d-flex">
+      <client-only>
+        <b-badge v-if="attachments?.length > 1" @click="$emit('zoom')">
+          1 / {{ attachments?.length }} <v-icon icon="camera" />
+        </b-badge>
+      </client-only>
+    </div>
+    <div
+      ref="imagewrapper"
+      :class="{
+        thumbnail: thumbnail,
+        notThumbnail: !thumbnail,
+        'w-100': !thumbnail,
+      }"
     >
-      <MessageTag :id="id" class="ps-2 pe-2" />
-      <div
-        v-if="!thumbnail && attachments?.length"
-        class="photozoom"
+      <b-img
+        v-if="defaultAttachments || !attachments?.length"
+        :width="width"
+        :height="height"
+        src="/camera.png"
+        class="align-self-center justify-self-center rounded h-100 fit-cover"
+      />
+      <OurUploadedImage
+        v-else-if="attachments[0].ouruid"
+        :src="attachments[0].ouruid"
+        :modifiers="attachments[0].externalmods"
+        alt="Item Photo"
+        :width="width"
+        :height="height"
+        :sizes="thumbnail ? '200px' : '320px md:768px'"
+        :preload="preload"
+        @error="brokenImage"
         @click="$emit('zoom')"
-      >
-        View larger image
-      </div>
-      <div class="photobadge d-flex">
-        <client-only>
-          <b-badge v-if="attachments?.length > 1" @click="$emit('zoom')">
-            1 / {{ attachments?.length }} <v-icon icon="camera" />
-          </b-badge>
-        </client-only>
-      </div>
-      <div
-        :class="{
-          thumbnail: thumbnail,
-          notThumbnail: !thumbnail,
-          attachment: true,
-        }"
-      >
-        <div ref="imagewrapper">
-          <OurUploadedImage
-            v-if="attachments[0].ouruid"
-            :src="attachments[0].ouruid"
-            :modifiers="attachments[0].externalmods"
-            alt="Item Photo"
-            :width="Math.round(width)"
-            :height="200"
-            :sizes="thumbnail ? '200px' : '320px md:768px'"
-            :preload="preload"
-            @error="brokenImage"
-            @click="$emit('zoom')"
-          />
-          <NuxtPicture
-            v-else-if="attachments[0].externaluid"
-            format="webp"
-            provider="uploadcare"
-            :src="attachments[0].externaluid"
-            :modifiers="attachments[0].externalmods"
-            alt="Item Photo"
-            :width="Math.round(width)"
-            :height="200"
-            :sizes="thumbnail ? '200px' : '320px md:768px'"
-            :preload="preload"
-            @error="brokenImage"
-            @click="$emit('zoom')"
-          />
-          <ProxyImage
-            v-else
-            class-name="p-0 rounded"
-            alt="Item picture"
-            title="Item picture"
-            :src="attachments[0].path"
-            :sizes="thumbnail ? '200px' : '320px md:768px'"
-            :width="Math.round(width)"
-            :height="200"
-            fit="cover"
-            :preload="preload"
-            @error="brokenImage"
-            @click="$emit('zoom')"
-          />
-        </div>
-      </div>
-    </button>
-  </div>
+      />
+      <NuxtPicture
+        v-else-if="attachments[0].externaluid"
+        format="webp"
+        provider="uploadcare"
+        :src="attachments[0].externaluid"
+        :modifiers="attachments[0].externalmods"
+        alt="Item Photo"
+        :width="width"
+        :height="height"
+        :sizes="thumbnail ? '200px' : '320px md:768px'"
+        :preload="preload"
+        @error="brokenImage"
+        @click="$emit('zoom')"
+      />
+      <ProxyImage
+        v-else
+        class-name="p-0 rounded"
+        alt="Item picture"
+        title="Item picture"
+        :src="attachments[0].path"
+        :sizes="thumbnail ? '200px' : '320px md:768px'"
+        :width="width"
+        :height="height"
+        fit="cover"
+        :preload="preload"
+        @error="brokenImage"
+        @click="$emit('zoom')"
+      />
+    </div>
+  </button>
 </template>
 <script setup>
-import { useElementSize } from '@vueuse/core'
+import { useMiscStore } from '~/stores/misc'
 
-defineProps({
+const props = defineProps({
   id: {
     type: Number,
     required: true,
@@ -124,15 +110,34 @@ defineProps({
 const defaultAttachments = ref(false)
 const imagewrapper = ref(null)
 
-const { width, height } = useElementSize(imagewrapper)
+const miscStore = useMiscStore()
 
-// Make width and height <= 3000 as that's an Uploadcare limit.
-if (width > 3000) {
-  width.value = 3000
-}
-if (height > 3000) {
-  height.value = 3000
-}
+const width = computed(() => {
+  // We need to pass in explicit values.  Find the element and get the width set by CSS, which will be using the
+  // values in message-images.scss
+  let ret = 150
+
+  if (props.thumbnail) {
+    if (imagewrapper.value) {
+      const styles = window.getComputedStyle(imagewrapper.value)
+      ret = parseInt(styles.getPropertyValue('width').replace('px', ''))
+    }
+  } else {
+    ret = 768
+  }
+
+  return ret
+})
+
+const height = computed(() => {
+  if (props.thumbnail) {
+    return width.value
+  } else if (miscStore.breakpoint === 'xs' || miscStore.breakpoint === 'sm') {
+    return 150
+  } else {
+    return 200
+  }
+})
 
 function brokenImage() {
   // If the attachment image is broken, we're best off just hiding it.
@@ -143,43 +148,30 @@ function brokenImage() {
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/message-images.scss';
 
-.attachment {
-  width: 100%;
+:deep(.thumbnail img) {
+  object-fit: cover;
+  display: block;
+  height: min($thumbnail-size, calc(45vw - 30px));
+  width: min($thumbnail-size, calc(45vw - 30px));
   box-shadow: 0 0 1 $color-gray--dark;
 
-  :deep(img) {
-    object-fit: cover;
+  @include media-breakpoint-up(md) {
+    height: $thumbnail-size-md;
+    width: $thumbnail-size-md;
   }
 }
 
-.thumbnail {
-  .attachment {
-    display: block;
-    height: 200px;
+:deep(.notThumbnail img) {
+  object-fit: cover;
+  width: 100% !important;
+  display: block;
+  height: $thumbnail-size;
+  box-shadow: 0 0 1 $color-gray--dark;
 
-    img {
-      height: 200px;
-    }
-  }
-}
-
-.notThumbnail {
-  .attachment {
-    display: block;
-    height: 200px;
-
-    img {
-      height: 200px;
-    }
-
-    @include media-breakpoint-up(sm) {
-      height: 360px;
-
-      img {
-        height: 360px;
-      }
-    }
+  @include media-breakpoint-up(md) {
+    height: $notthumbnail-size-md;
   }
 }
 
@@ -209,6 +201,6 @@ function brokenImage() {
 .bg {
   background-color: $color-gray--light;
   width: 100%;
-  height: 200px;
+  height: 150px;
 }
 </style>

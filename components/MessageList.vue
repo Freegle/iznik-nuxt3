@@ -16,51 +16,69 @@
       >
         <MessageListCounts v-if="browseCount" @mark-seen="markSeen" />
       </div>
-      <div
-        v-for="(message, ix) in deDuplicatedMessages"
-        :key="'messagelist-' + message.id"
-      >
-        <MessageListUpToDate
-          v-if="
-            !loading &&
-            selectedSort === 'Unseen' &&
-            showCountsUnseen &&
-            message.id === firstSeenMessage
-          "
-        />
+      <VisibleWhen :at="['xs', 'sm']">
         <div
-          :id="'messagewrapper-' + message.id"
-          :ref="'messagewrapper-' + message.id"
-          class="p-0"
+          v-for="(m, ix) in deDuplicatedMessages"
+          :key="'messagelist-' + m.id"
         >
-          <VisibleWhen :at="['xs', 'sm', 'md', 'lg']">
-            <OurMessage
-              :id="message.id"
-              :matchedon="message.matchedon"
-              record-view
+          <div v-if="ix % 2 === 0">
+            <MessageListUpToDate
+              v-if="
+                (!loading &&
+                  selectedSort === 'Unseen' &&
+                  showCountsUnseen &&
+                  deDuplicatedMessages[ix]?.id === firstSeenMessage) ||
+                deDuplicatedMessages[ix + 1]?.id === firstSeenMessage
+              "
             />
-          </VisibleWhen>
-          <VisibleWhen :not="['xs', 'sm', 'md', 'lg']">
-            <OurMessage
-              :id="message.id"
-              :matchedon="message.matchedon"
-              record-view
-              ad-unit-path="/22794232631/freegle_product"
-              ad-id="div-gpt-ad-1691925699378-0"
-            />
-          </VisibleWhen>
+            <div class="d-flex flex-wrap justify-content-around">
+              <div
+                :id="'messagewrapper-' + m.id"
+                :ref="'messagewrapper-' + m.id"
+              >
+                <OurMessage :id="m.id" :matchedon="m.matchedon" record-view />
+              </div>
+              <div
+                v-if="ix + 1 < deDuplicatedMessages.length"
+                :id="'messagewrapper-' + deDuplicatedMessages[ix + 1].id"
+                :ref="'messagewrapper-' + deDuplicatedMessages[ix + 1].id"
+              >
+                <OurMessage
+                  :id="deDuplicatedMessages[ix + 1].id"
+                  :matchedon="deDuplicatedMessages[ix + 1].matchedon"
+                  record-view
+                />
+              </div>
+            </div>
+          </div>
         </div>
-        <VisibleWhen :at="['xs', 'sm', 'md']">
-          <div v-if="insertAd(ix)" class="mt-3 mt-xl-2">
-            <ExternalDa
-              :ad-unit-path="insertAd(ix).adUnitPath"
-              max-height="250px"
-              max-width="100vw"
-              :div-id="insertAd(ix).divId"
+      </VisibleWhen>
+      <VisibleWhen :not="['xs', 'sm']">
+        <div
+          v-for="message in deDuplicatedMessages"
+          :key="'messagelist-' + message.id"
+        >
+          <MessageListUpToDate
+            v-if="
+              !loading &&
+              selectedSort === 'Unseen' &&
+              showCountsUnseen &&
+              message.id === firstSeenMessage
+            "
+          />
+          <div
+            :id="'messagewrapper-' + message.id"
+            :ref="'messagewrapper-' + message.id"
+            class=""
+          >
+            <OurMessage
+              :id="message.id"
+              :matchedon="message.matchedon"
+              record-view
             />
           </div>
-        </VisibleWhen>
-      </div>
+        </div>
+      </VisibleWhen>
     </div>
     <infinite-loading
       v-if="messagesForList?.length"
@@ -598,3 +616,8 @@ export default {
   },
 }
 </script>
+<style scoped lang="scss">
+@import 'bootstrap/scss/_functions';
+@import 'bootstrap/scss/_variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
+</style>
