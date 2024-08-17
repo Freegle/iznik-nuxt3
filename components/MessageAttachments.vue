@@ -1,5 +1,5 @@
 <template>
-  <button class="p-0 border-0" :disabled="disabled">
+  <button class="p-0 border-0 w-100" :disabled="disabled">
     <MessageTag :id="id" class="ps-2 pe-2" />
     <div
       v-if="!defaultAttachments && !thumbnail && attachments?.length"
