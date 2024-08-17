@@ -9,25 +9,40 @@
         doesn't matter after a certain date, you can tell us.
       </p>
       <p>That way you don't get replies you don't want.</p>
-      <label class="font-weight-bold mb-1" for="deadline">
-        Set a deadline:
-      </label>
-      <b-input
-        id="deadline"
-        v-model="deadline"
-        type="date"
-        :min="today"
-        :max="defaultDeadline"
-        placeholder="Click to enter a date"
-      />
+      <div v-if="showInput">
+        <label class="font-weight-bold mb-1" for="deadline">
+          Set a deadline:
+        </label>
+        <b-input
+          id="deadline"
+          v-model="deadline"
+          type="date"
+          :min="today"
+          :max="defaultDeadline"
+          placeholder="Click to enter a date"
+        />
+      </div>
+      <p v-else class="font-weight-bold">Set a deadline?</p>
       <NoticeMessage v-if="deadline === today" variant="warning" class="mt-2">
         Are you sure you want your post to stop showing after today?
       </NoticeMessage>
     </template>
     <template #footer>
-      <div class="d-flex justify-content-end w-100">
+      <div
+        v-if="!showInput"
+        class="d-flex justify-content-between flex-wrap w-100"
+      >
+        <b-button variant="secondary" @click="showInput = true">
+          Yes, set a deadline
+        </b-button>
+        <b-button variant="secondary" @click="noDeadline">
+          No deadline
+        </b-button>
+      </div>
+      <div v-else class="d-flex justify-content-between w-100">
+        <b-button variant="secondary" @click="noDeadline"> Cancel </b-button>
         <b-button variant="primary" @click="setDeadline">
-          <v-icon icon="save" />&nbsp;Save
+          <v-icon icon="save" />&nbsp;Save deadline
         </b-button>
       </div>
     </template>
@@ -52,6 +67,8 @@ const props = defineProps({
 
 const messageStore = useMessageStore()
 const emit = defineEmits(['hide'])
+
+const showInput = ref(false)
 
 // Set deadline to date of MESSAGE_EXPIRE_TIME days from now
 const defaultDeadline = new Date(
@@ -91,6 +108,16 @@ async function setDeadline() {
   })
 
   await Promise.all(promises)
+  emit('hide')
+  hide()
+}
+
+async function noDeadline() {
+  await api.bandit.chosen({
+    uid: 'deadline',
+    variant: 'no',
+  })
+
   emit('hide')
   hide()
 }

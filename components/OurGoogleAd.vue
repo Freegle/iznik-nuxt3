@@ -132,6 +132,7 @@ const pageUrl = computed(() => {
 // We want to spot when an ad has been rendered and whether it's filled.  isUnfilled is supposed to be exposed
 // by the component, but that doesn't seem to work.
 let fillTimer = null
+let renderRetry = 30
 
 function checkRendered() {
   fillTimer = null
@@ -157,7 +158,14 @@ function checkRendered() {
   }
 
   if (retry) {
-    fillTimer = setTimeout(checkRendered, 100)
+    renderRetry--
+
+    if (renderRetry > 0) {
+      fillTimer = setTimeout(checkRendered, 100)
+    } else {
+      // Give up.
+      emit('rendered', false)
+    }
   }
 }
 
