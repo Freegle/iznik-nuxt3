@@ -12,9 +12,9 @@
             <ExternalDa
               ad-unit-path="/22794232631/freegle_productemail"
               max-height="600px"
-              max-width="300px"
               div-id="div-gpt-ad-1691925773522-0"
               class="mt-2"
+              show-logged-out
             />
           </VisibleWhen>
         </b-col>
@@ -106,10 +106,10 @@
           >
             <ExternalDa
               ad-unit-path="/22794232631/freegle_productemail"
-              max-height="600px"
               max-width="300px"
               div-id="div-gpt-ad-1691925773522-0"
               class="mt-2"
+              show-logged-out
             />
           </VisibleWhen>
         </b-col>
