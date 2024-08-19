@@ -1,7 +1,11 @@
 <template>
   <client-only>
     <ChatNotVisible v-if="notVisible" id="notvisible" />
-    <div v-else-if="me" class="chatHolder">
+    <div
+      v-else-if="me"
+      :key="'chatHolder-' + stickyAdRendered"
+      class="chatHolder"
+    >
       <ChatHeader :id="id" ref="chatheader" class="chatTitle" />
       <div
         v-if="chat && chatmessages?.length"
