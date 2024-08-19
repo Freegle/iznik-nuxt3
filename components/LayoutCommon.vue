@@ -81,6 +81,12 @@
           v-if="replyToSend"
           ref="replyToPostChatButton"
           :userid="replyToUser"
+          @sent="replySent"
+        />
+        <InterestedInOthersModal
+          v-if="showInterestedModal"
+          :msgid="interestedInOthersMsgid"
+          :userid="interestedInOthersUserId"
         />
       </div>
       <BreakpointFettler />
@@ -101,6 +107,7 @@ import replyToPost from '@/mixins/replyToPost'
 import ChatButton from '~/components/ChatButton'
 import { navBarHidden } from '~/composables/useNavbar'
 import VisibleWhen from '~/components/VisibleWhen.vue'
+import InterestedInOthersModal from '~/components/InterestedInOthersModal.vue'
 
 const SupportLink = defineAsyncComponent(() =>
   import('~/components/SupportLink')
@@ -116,6 +123,7 @@ const ExternalDa = defineAsyncComponent(() => import('~/components/ExternalDa'))
 
 export default {
   components: {
+    InterestedInOthersModal,
     BouncingEmail,
     SupportLink,
     BreakpointFettler,
@@ -131,6 +139,9 @@ export default {
       timeTimer: null,
       adRendering: true,
       noAdRendered: false,
+      interestedInOthersMsgid: null,
+      interestedInOthersUserId: null,
+      showInterestedModal: false,
     }
   },
   computed: {
@@ -221,6 +232,8 @@ export default {
         // causes us to navigate away and back again.  Fetch the relevant message.
         const messageStore = useMessageStore()
         await messageStore.fetch(this.replyToSend.replyMsgId, true)
+        this.interestedInOthersUserId = this.replyToUser
+        this.interestedInOthersMsgid = this.replyToSend.replyMsgId
         this.replyToPost()
       }
 
@@ -280,6 +293,9 @@ export default {
       this.noAdRendered = true
       const store = useMiscStore()
       store.stickyAdRendered = 1
+    },
+    replySent() {
+      this.showInterestedModal = true
     },
   },
 }

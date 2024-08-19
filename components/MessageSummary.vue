@@ -43,7 +43,7 @@
         class="header-expand mt-2 mt-sm-0 d-none d-md-block"
       >
         <client-only>
-          <b-button variant="primary" class="mt-2" @click="expand">
+          <b-button variant="primary" class="mt-2 mb-2" @click="expand">
             {{ expandButtonText }}
           </b-button>
         </client-only>

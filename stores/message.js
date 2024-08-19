@@ -337,9 +337,7 @@ export const useMessageStore = defineStore({
     },
     all: (state) => Object.values(state.list),
     byUser: (state) => (userid) => {
-      return Object.values(state.list).filter((msg) => {
-        return msg.fromuser === userid
-      })
+      return state.byUserList[userid] || []
     },
   },
 })
