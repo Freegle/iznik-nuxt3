@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="freegleg">
     <b-img lazy src="/freegled.jpg" class="freegled__image" />
     <b-popover
       v-model="showing"

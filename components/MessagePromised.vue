@@ -1,5 +1,5 @@
 <template>
-  <div @click="$emit('click')">
+  <div class="promised" @click="$emit('click')">
     <div v-if="summary">
       <b-img lazy src="/promised.jpg" class="promised__image" />
       <b-popover

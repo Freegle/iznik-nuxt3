@@ -31,6 +31,7 @@
         :show-location="showLocation"
       />
       <MessageHistory :id="id" summary class="mb-1 header-history" />
+      <div class="spacer" />
       <div class="mb-1 header-description">
         <MessageDescription
           :id="id"
@@ -48,7 +49,10 @@
           </b-button>
         </client-only>
       </div>
-      <div class="image-wrapper" @click="expandAndAttachments">
+      <div
+        class="image-wrapper d-flex justify-content-around mb-2"
+        @click="expandAndAttachments"
+      >
         <MessageAttachments
           :id="id"
           :attachments="message.attachments"
@@ -213,6 +217,7 @@ export default {
   display: grid;
   align-items: start;
   grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto auto 1fr auto auto;
 
   @include media-breakpoint-up(md) {
     padding: 16px;
@@ -240,16 +245,26 @@ export default {
 
   .header-history {
     grid-column: 1 / 2;
-    grid-row: 2 / 3;
+    grid-row: 3 / 4;
 
     @include media-breakpoint-up(md) {
       grid-column: 2 / 3;
+      grid-row: 2 / 3;
+    }
+  }
+
+  .spacer {
+    grid-column: 1 / 2;
+    grid-row: 4 / 5;
+
+    @include media-breakpoint-up(md) {
+      height: 0px;
     }
   }
 
   .header-description {
     grid-column: 1 / 2;
-    grid-row: 4 / 5;
+    grid-row: 5 / 6;
 
     @include media-breakpoint-up(md) {
       grid-column: 2 / 3;
@@ -261,7 +276,7 @@ export default {
     position: relative;
 
     grid-column: 1 / 2;
-    grid-row: 3 / 4;
+    grid-row: 5 / 6;
 
     @include media-breakpoint-up(md) {
       grid-column: 1 / 2;
@@ -272,7 +287,7 @@ export default {
 
   .header-expand {
     grid-column: 1 / 2;
-    grid-row: 5 / 6;
+    grid-row: 6 / 7;
     align-self: end;
     justify-self: end;
 

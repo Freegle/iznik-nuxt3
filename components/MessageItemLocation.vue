@@ -22,7 +22,7 @@
           itemprop="name"
         >
           <a
-            class="nodecor text-truncate item"
+            class="nodecor text-wrap item"
             :href="'/message/' + id"
             @click="block"
             >{{ item }}</a
@@ -164,7 +164,7 @@ export default {
 
 .item {
   display: inline-block;
-  width: min($thumbnail-size, calc(45vw - 30px));
+  width: max($thumbnail-size, calc(50vw - 2rem));
 
   @include media-breakpoint-up(md) {
     width: 100%;

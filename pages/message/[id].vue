@@ -79,6 +79,7 @@
             <VisibleWhen :at="['xs', 'sm', 'md', 'lg']">
               <OurMessage
                 :id="id"
+                class="mt-3"
                 :start-expanded="true"
                 hide-close
                 record-view
@@ -90,6 +91,7 @@
             <VisibleWhen :not="['xs', 'sm', 'md', 'lg']">
               <OurMessage
                 :id="id"
+                class="mt-3"
                 :start-expanded="true"
                 hide-close
                 record-view

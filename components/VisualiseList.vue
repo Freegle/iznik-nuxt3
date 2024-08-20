@@ -139,7 +139,7 @@ function doNext() {
 
   .item {
     a {
-      width: 100%;
+      width: 100% !important;
       text-align: center;
     }
   }
