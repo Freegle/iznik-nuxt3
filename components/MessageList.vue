@@ -31,10 +31,11 @@
                 deDuplicatedMessages[ix + 1]?.id === firstSeenMessage
               "
             />
-            <div class="d-flex flex-wrap justify-content-around">
+            <div class="twocolumn">
               <div
                 :id="'messagewrapper-' + m.id"
                 :ref="'messagewrapper-' + m.id"
+                class="onecolumn"
               >
                 <OurMessage :id="m.id" :matchedon="m.matchedon" record-view />
               </div>
@@ -42,6 +43,7 @@
                 v-if="ix + 1 < deDuplicatedMessages.length"
                 :id="'messagewrapper-' + deDuplicatedMessages[ix + 1].id"
                 :ref="'messagewrapper-' + deDuplicatedMessages[ix + 1].id"
+                class="onecolumn"
               >
                 <OurMessage
                   :id="deDuplicatedMessages[ix + 1].id"
@@ -620,4 +622,35 @@ export default {
 @import 'bootstrap/scss/_functions';
 @import 'bootstrap/scss/_variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+
+.twocolumn {
+  display: grid;
+  grid-template-rows: 2.5px 1fr 2.5px;
+  grid-template-columns: 1fr 1fr;
+  grid-column-gap: 5px;
+
+  > div {
+    grid-row: 2 / 3;
+  }
+
+  .onecolumn {
+    height: 100%;
+
+    :deep(div) {
+      height: 100%;
+
+      .messagecard div {
+        div {
+          height: unset;
+        }
+      }
+    }
+
+    :deep(.freegled),
+    :deep(.promised),
+    :deep(.image-wrapper) {
+      height: unset;
+    }
+  }
+}
 </style>

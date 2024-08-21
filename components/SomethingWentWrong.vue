@@ -48,6 +48,7 @@
   </client-only>
 </template>
 <script>
+import { mapState } from 'pinia'
 import NoticeMessage from './NoticeMessage'
 import { useMiscStore } from '~/stores/misc'
 import SupportLink from '~/components/SupportLink'
@@ -66,22 +67,16 @@ export default {
     }
   },
   computed: {
-    somethingWentWrong() {
-      const miscStore = useMiscStore()
-      return miscStore.somethingWentWrong
-    },
-    needToReload() {
-      const miscStore = useMiscStore()
-      return miscStore.needToReload
-    },
-    offline() {
-      const miscStore = useMiscStore()
-      return !miscStore.online
-    },
+    ...mapState(useMiscStore, [
+      'somethingWentWrong',
+      'needToReload',
+      'offline',
+      'unloading',
+    ]),
   },
   watch: {
     somethingWentWrong(newVal) {
-      if (newVal) {
+      if (newVal && !this.unloading) {
         this.showError = true
         setTimeout(() => {
           this.showError = false
@@ -91,6 +86,11 @@ export default {
     needToReload(newVal) {
       if (newVal) {
         this.showReload = true
+      }
+    },
+    unloading(newVal) {
+      if (newVal) {
+        this.showError = false
       }
     },
   },

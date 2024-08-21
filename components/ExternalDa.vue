@@ -90,6 +90,7 @@ const renderAd = ref(false)
 const adShown = ref(true)
 
 let prebidRetry = 0
+let tcDataRetry = 0
 let visibleAndScriptsLoadedTimer = null
 const isVisible = ref(false)
 let firstBecomeVisible = false
@@ -162,9 +163,18 @@ function visibilityChanged(visible) {
             // TC data not yet ready - the user hasn't yet responded to the cookie banner.
             // Try again later.
             console.log('TC data not yet available in ad')
-            visibleAndScriptsLoadedTimer = window.setTimeout(() => {
-              visibilityChanged(visible)
-            }, 100)
+            tcDataRetry++
+
+            if (tcDataRetry > 50) {
+              // Give up.  Probably blocked, so we should emit that we've not rendered an ad.  This may trigger
+              // a fallback ad.
+              console.log('Give up on TC data load')
+              emit('rendered', false)
+            } else {
+              visibleAndScriptsLoadedTimer = window.setTimeout(() => {
+                visibilityChanged(visible)
+              }, 100)
+            }
           }
         },
         [1, 2, 3]

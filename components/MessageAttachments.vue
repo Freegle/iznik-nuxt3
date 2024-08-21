@@ -1,5 +1,5 @@
 <template>
-  <button class="p-0 border-0 w-100" :disabled="disabled">
+  <button class="p-0 border-0" :disabled="disabled">
     <MessageTag :id="id" class="ps-2 pe-2" />
     <div
       v-if="!defaultAttachments && !thumbnail && attachments?.length"
@@ -28,7 +28,7 @@
         :width="width"
         :height="height"
         src="/camera.png"
-        class="align-self-center justify-self-center rounded h-100 fit-cover"
+        class="align-self-center justify-self-center h-100 fit-cover"
       />
       <OurUploadedImage
         v-else-if="attachments[0].ouruid"
@@ -150,16 +150,16 @@ function brokenImage() {
 @import 'bootstrap/scss/mixins/_breakpoints';
 @import 'assets/css/message-images.scss';
 
-:deep(.thumbnail img) {
+:deep(.thumbnail img, .thumbnail picture) {
   object-fit: cover;
   display: block;
-  height: min($thumbnail-size, calc(45vw - 30px));
-  width: min($thumbnail-size, calc(45vw - 30px));
+  height: max($thumbnail-size, calc(calc(50vw - 2rem))) !important;
+  width: max($thumbnail-size, calc(calc(50vw - 2rem))) !important;
   box-shadow: 0 0 1 $color-gray--dark;
 
   @include media-breakpoint-up(md) {
-    height: $thumbnail-size-md;
-    width: $thumbnail-size-md;
+    height: $thumbnail-size-md !important;
+    width: $thumbnail-size-md !important;
   }
 }
 
@@ -179,7 +179,6 @@ function brokenImage() {
   right: 10px;
   position: absolute;
   bottom: 10px;
-  border-radius: 4px;
 
   :deep(.badge) {
     background-color: $color-gray--darker !important;

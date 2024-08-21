@@ -14,6 +14,10 @@ export default {
           replyingAt: replyStore.replyingAt,
         }
 
+        // ret.replyMsgId = 108251567
+        // ret.replyMessage = 'I am a reply message'
+        // ret.replyingAt = Date.now()
+
         if (
           ret &&
           ret.replyingAt &&
@@ -53,6 +57,9 @@ export default {
           // Double-click can result in coming through here after the reply has been sent and cleared.
 
           // Create the chat and send the first message.
+          const replyStore = useReplyStore()
+          const replySent = this.replyToSend.replyMsgId
+
           console.log(
             'Now open chat',
             this.replyToSend.replyMessage,
@@ -68,14 +75,13 @@ export default {
           )
 
           // Clear the store of any message to avoid repeatedly sending it.
-          const replyStore = useReplyStore()
           replyStore.replyMsgId = null
           replyStore.replyMessage = null
           replyStore.replyingAt = Date.now()
 
           this.replying = false
 
-          this.$emit('sent')
+          this.$emit('sent', replySent)
         })
       }
     },

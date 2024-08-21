@@ -176,6 +176,12 @@ onMounted(() => {
     closeAfterFinish: true,
     hidePauseResumeButton: true,
     hideProgressAfterFinish: true,
+    locale: {
+      strings: {
+        dropPasteImportFiles: '%{browseFiles} or import from',
+        browseFiles: 'Browse files',
+      },
+    },
     restrictions: {
       allowedFileTypes: ['image/*', '.jpg', '.jpeg', '.png', '.gif', '.heic'],
       maxNumberOfFiles: props.multiple ? 10 : 1,
