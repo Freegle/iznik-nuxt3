@@ -37,7 +37,7 @@ if (config.COOKIEYES) {
     res.on('end', () => {
       try {
         if (cookieyesCurrent !== cookieyesBase) {
-          console.error('config.COOKIEYES NOT THE SAME AS public/js/cookieyes-base.js', cookieyesCurrent.length, cookieyesBase.length)
+          console.error('config.COOKIEYES NOT THE SAME AS public/js/cookieyes-base.js', config.COOKIEYES)
           process.exit(1)
         }
       } catch (error) { console.error(error.message) }
