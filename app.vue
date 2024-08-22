@@ -123,6 +123,7 @@ import { useMiscStore } from './stores/misc'
 import { computed, watch, reloadNuxtApp } from '#imports'
 // polyfills
 import 'core-js/actual/array/to-sorted'
+import { useConfigStore } from '~/stores/config'
 
 const route = useRoute()
 const loadingIndicatorThrottle = ref(5000)
@@ -148,6 +149,7 @@ const authStore = useAuthStore()
 const userStore = useUserStore()
 const isochroneStore = useIsochroneStore()
 const composeStore = useComposeStore()
+const configStore = useConfigStore()
 const chatStore = useChatStore()
 const addressStore = useAddressStore()
 const trystStore = useTrystStore()
@@ -189,6 +191,7 @@ searchStore.init(runtimeConfig)
 storyStore.init(runtimeConfig)
 volunteeringStore.init(runtimeConfig)
 communityEventStore.init(runtimeConfig)
+configStore.init(runtimeConfig)
 jobStore.init(runtimeConfig)
 teamStore.init(runtimeConfig)
 donationStore.init(runtimeConfig)

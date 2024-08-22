@@ -42,6 +42,7 @@
 </template>
 <script setup>
 import { ref, computed, onBeforeUnmount } from '#imports'
+import { useConfigStore } from '~/stores/config'
 
 const props = defineProps({
   adUnitPath: {
@@ -187,7 +188,7 @@ function visibilityChanged(visible) {
 // redirects.
 let checkStillVisibleTimer = null
 
-function checkStillVisible() {
+async function checkStillVisible() {
   // Check if the ad is still visible after this delay, and no modal is open.
   console.log(
     'Check if ad still visible',
@@ -200,8 +201,16 @@ function checkStillVisible() {
     isVisible.value &&
     (props.inModal || !document.body.classList.contains('modal-open'))
   ) {
-    console.log('Render')
-    renderAd.value = true
+    // Check if we are showing ads.
+    const configStore = useConfigStore()
+    const showingAds = await configStore.fetch('ads_enabled')
+
+    if (showingAds?.length && parseInt(showingAds[0].value)) {
+      renderAd.value = true
+    } else {
+      console.log('Ads disabled in server config')
+      emit('rendered', false)
+    }
   } else {
     emit('rendered', false)
   }
