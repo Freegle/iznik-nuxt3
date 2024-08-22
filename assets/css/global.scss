@@ -246,7 +246,8 @@ legend {
 }
 
 .sidebar__wrapper {
-  height: calc(100vh - var(--header-navbar-height) - var(--ads-label-height) - $sticky-banner-height-desktop);
+  height: calc(100vh - var(--header-navbar-height) - $sticky-banner-height-desktop - $ads-cta);
+  overflow-y: scroll;
 
   .card-body .card {
     border-radius: unset;

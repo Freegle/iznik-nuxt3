@@ -1,11 +1,24 @@
 <template>
-  <Adsbygoogle
-    v-if="showAd"
-    ref="adsbygoogle"
-    :style="adStyle"
-    :page-url="pageUrl"
-    :ad-slot="adSenseSlot"
-  />
+  <div v-if="showAd">
+    <div
+      v-if="showTestAd"
+      :style="{
+        'min-height': minHeight,
+        'min-width': minWidth,
+        height: '100%',
+        width: '100%',
+        'background-color': 'red',
+      }"
+    >
+      <p class="text-white text-center">Test ad</p>
+    </div>
+    <Adsbygoogle
+      ref="adsbygoogle"
+      :style="adStyle"
+      :page-url="pageUrl"
+      :ad-slot="adSenseSlot"
+    />
+  </div>
 </template>
 <script setup>
 import { ref, computed, onBeforeUnmount } from '#imports'
@@ -14,6 +27,10 @@ import { useAuthStore } from '~/stores/auth'
 
 const authStore = useAuthStore()
 const miscStore = useMiscStore()
+
+// Set this true to ensure that something always fills a slot.  Useful for testing ad layout.
+const AD_TEST = false
+const showTestAd = ref(false)
 
 const props = defineProps({
   adUnitPath: {
@@ -147,7 +164,12 @@ function checkRendered() {
         emit('rendered', true)
       } else {
         console.log('Unfilled', props.adUnitPath)
-        emit('rendered', false)
+        if (!AD_TEST) {
+          emit('rendered', false)
+        } else {
+          showTestAd.value = true
+          emit('rendered', true)
+        }
       }
 
       if (!refreshTimer) {

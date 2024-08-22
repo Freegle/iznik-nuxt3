@@ -1,0 +1,83 @@
+<template>
+  <client-only>
+    <b-row class="m-0">
+      <b-col cols="0" md="3" />
+      <b-col cols="12" md="6" class="mt-2">
+        <b-card no-body class="mt-1 p-4">
+          <h1>Free To Use - Not Free To Run!</h1>
+          <div class="d-flex">
+            <div>
+              <p>
+                <strong
+                  >Hate ads? Your donation will help us turn them off for
+                  everyone today.</strong
+                >
+              </p>
+              <p>
+                There are some things we have to pay for to keep going. Ads
+                support this - but ideally we wouldn't have them.
+                <strong
+                  >If we raise
+                  <span v-if="adsOffTarget"
+                    >&pound;{{ adsOffTarget }} more</span
+                  >
+                  <span v-else>enough</span> in donations today, we'll turn them
+                  off</strong
+                >
+                and heave a sigh of relief.
+              </p>
+            </div>
+            <vue-thermometer
+              :key="adsOffTarget"
+              :value="adsOffTarget"
+              :min="0"
+              :max="adsOffTargetMax"
+              :options="thermOptions"
+              scale="£"
+            />
+          </div>
+          <p>If you're able to donate:</p>
+          <div class="d-flex flex-wrap justify-content-between mt-2 mb-3">
+            <donation-button value="5" class="mb-1" @clicked="score(5)" />
+            <donation-button value="10" class="mb-1" @clicked="score(10)" />
+            <donation-button value="15" class="mb-1" @clicked="score(15)" />
+          </div>
+          <p>Regular monthly donations are especially helpful.</p>
+          <p>
+            Other ways to donate are <nuxt-link to="/donate">here</nuxt-link>.
+          </p>
+        </b-card>
+      </b-col>
+    </b-row>
+  </client-only>
+</template>
+<script setup>
+import { useConfigStore } from '~/stores/config'
+
+const configStore = useConfigStore()
+const showingAds = await configStore.fetch('ads_off_target')
+
+const adsOffTarget = ref(
+  showingAds?.length && parseInt(showingAds[0].value)
+    ? parseInt(showingAds[0].value)
+    : null
+)
+
+const target = await configStore.fetch('ads_off_target_max')
+
+const adsOffTargetMax = ref(
+  target?.length && parseInt(target[0].value) ? parseInt(target[0].value) : null
+)
+
+const thermOptions = {
+  thermo: {
+    color: 'darkgreen',
+    backgroundColor: 'white',
+    frameColor: 'black',
+    ticks: 11,
+    ticksEnabled: true,
+    tickColor: 'black',
+    tickWidth: '1',
+  },
+}
+</script>

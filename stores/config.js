@@ -25,7 +25,6 @@ export const useConfigStore = defineStore({
         } else {
           this.fetching[key] = api(this.config).config.fetchv2(key, false)
           const ret = await this.fetching[key]
-          console.log('Fetched', ret)
           this.list[key] = {
             values: ret,
             addedToCache: Math.round(Date.now() / 1000),

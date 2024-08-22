@@ -43,6 +43,7 @@
 <script setup>
 import { ref, computed, onBeforeUnmount } from '#imports'
 import { useConfigStore } from '~/stores/config'
+import { useMiscStore } from '~/stores/misc'
 
 const props = defineProps({
   adUnitPath: {
@@ -209,7 +210,9 @@ async function checkStillVisible() {
       renderAd.value = true
     } else {
       console.log('Ads disabled in server config')
+      useMiscStore().adsDisabled = true
       emit('rendered', false)
+      emit('disabled')
     }
   } else {
     emit('rendered', false)

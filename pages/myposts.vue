@@ -70,23 +70,8 @@
           </div>
         </b-col>
         <b-col cols="0" lg="3" class="p-0 pl-1">
-          <VisibleWhen
-            :at="['xl', 'xxl']"
-            :class="{
-              'sidebar-with-small-ads': smallAdVisible,
-              'sidebar-with-large-ads': largeAdVisible,
-              'ads-wrapper': true,
-            }"
-          >
-            <ExternalDa
-              ad-unit-path="/22794232631/freegle_myposts_desktop_right"
-              max-width="300px"
-              max-height="600px"
-              div-id="div-gpt-ad-1709056727559-0"
-              class="mt-2"
-              @rendered="adRendered"
-            />
-            <SidebarRight v-if="triedAds" :show-job-opportunities="true" />
+          <VisibleWhen :at="['xl', 'xxl']">
+            <SidebarRight :show-job-opportunities="true" />
           </VisibleWhen>
         </b-col>
       </b-row>
@@ -208,22 +193,6 @@ function forceLogin() {
   authStore.forceLogin = true
 }
 
-const largeAdVisible = ref(false)
-const smallAdVisible = ref(false)
-const triedAds = ref(false)
-
-function adRendered(rendered, index, dimension) {
-  if (rendered) {
-    if (index === 0) {
-      largeAdVisible.value = true
-    } else {
-      smallAdVisible.value = true
-    }
-  }
-
-  triedAds.value = true
-}
-
 trystStore.fetch()
 
 // If we have just submitted some posts then we will have been passed ids.
@@ -260,18 +229,4 @@ onMounted(() => {
 <style scoped lang="scss">
 @import 'assets/css/sticky-banner.scss';
 @import 'assets/css/sidebar-ads.scss';
-
-.sidebar-with-small-ads .sidebar__wrapper {
-  height: calc(
-    100vh - $sidebar-ads-height-small - $sidebar-ads-label-height -
-      var(--header-navbar-height) - $sticky-banner-height-desktop
-  );
-}
-
-.sidebar-with-large-ads .sidebar__wrapper {
-  height: calc(
-    100vh - $sidebar-ads-height-large - $sidebar-ads-label-height -
-      var(--header-navbar-height) - $sticky-banner-height-desktop
-  );
-}
 </style>

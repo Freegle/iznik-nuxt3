@@ -179,34 +179,14 @@
               <span v-else> No chats to show. </span>
             </p>
             <ChatPane
-              v-else-if="selectedChatId"
               :id="selectedChatId"
               :key="'chatpane-' + selectedChatId"
             />
-            <p v-else class="text-center text-info font-weight-bold mt-2">
-              Please click on a chat in the left pane.
-            </p>
           </VisibleWhen>
         </b-col>
         <b-col cols="0" xl="3" class="p-0 pl-1">
-          <VisibleWhen
-            :at="['xl', 'xxl']"
-            :class="{
-              'sidebar-with-small-ads': smallAdVisible,
-              'sidebar-with-large-ads': largeAdVisible,
-              'sidebar-without-ads': noAdsRendered,
-              'ads-wrapper': true,
-            }"
-          >
-            <ExternalDa
-              ad-unit-path="/22794232631/freegle_chat_desktop"
-              max-width="300px"
-              max-height="600px"
-              div-id="div-gpt-ad-1692867596111-0"
-              class="mt-2"
-              @rendered="adRendered"
-            />
-            <SidebarRight v-if="triedAds" :show-job-opportunities="true" />
+          <VisibleWhen :at="['xl', 'xxl']">
+            <SidebarRight :show-job-opportunities="true" />
           </VisibleWhen>
         </b-col>
       </b-row>
@@ -317,10 +297,6 @@ const bump = ref(1)
 const distance = ref(1000)
 const selectedChatId = ref(null)
 const showClosed = ref(false)
-const smallAdVisible = ref(false)
-const largeAdVisible = ref(false)
-const noAdsRendered = ref(false)
-const triedAds = ref(false)
 
 const stickyAdRendered = computed(() => {
   return miscStore.stickyAdRendered
@@ -536,21 +512,6 @@ async function searchMore() {
     searching.value = null
   }
 }
-
-function adRendered(rendered, index) {
-  console.log('Chat ad rendered', rendered, index)
-  if (rendered) {
-    if (index === 0) {
-      largeAdVisible.value = true
-    } else {
-      smallAdVisible.value = true
-    }
-  } else {
-    noAdsRendered.value = true
-  }
-
-  triedAds.value = true
-}
 </script>
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';
@@ -604,28 +565,5 @@ function adRendered(rendered, index) {
 
 .closedCount {
   border-radius: 50%;
-}
-
-:deep(.sidebar-with-small-ads .sidebar__wrapper) {
-  height: calc(
-    100vh - $sidebar-ads-height-small - $sidebar-ads-label-height -
-      var(--header-navbar-height) - $sticky-banner-height-desktop *
-      v-bind('stickyAdRendered')
-  ) !important;
-}
-
-:deep(.sidebar-with-large-ads .sidebar__wrapper) {
-  height: calc(
-    100vh - $sidebar-ads-height-large - $sidebar-ads-label-height -
-      var(--header-navbar-height) - $sticky-banner-height-desktop *
-      v-bind('stickyAdRendered')
-  ) !important;
-}
-
-:deep(.sidebar-without-ads .sidebar__wrapper) {
-  height: calc(
-    100vh - var(--header-navbar-height) - $sticky-banner-height-desktop *
-      v-bind('stickyAdRendered')
-  ) !important;
 }
 </style>

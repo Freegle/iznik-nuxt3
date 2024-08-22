@@ -263,6 +263,10 @@ const title = computed(() => {
   return useMiscStore().pageTitle
 })
 
+const stickyAdRendered = computed(() => {
+  return useMiscStore().stickyAdRendered
+})
+
 const notificationsShown = ref(false)
 
 watch(notificationsShown, (newVal) => {
@@ -327,10 +331,12 @@ const navBarBottomHidden = computed(() => {
 }
 
 .navbot {
-  margin-bottom: $sticky-banner-height-mobile;
+  margin-bottom: calc($sticky-banner-height-mobile * v-bind(stickyAdRendered));
 
   @include media-breakpoint-up(md) {
-    margin-bottom: $sticky-banner-height-desktop;
+    margin-bottom: calc(
+      $sticky-banner-height-desktop * v-bind(stickyAdRendered)
+    );
   }
 }
 

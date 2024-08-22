@@ -1,28 +1,26 @@
 <template>
   <div class="sidebar__wrapper">
     <div class="d-flex flex-column justify-content-between mh-100">
-      <div>
-        <DonationMonthly
-          v-if="supporter && !donor"
-          class="w-100"
-          variant="sidebar"
-        />
-      </div>
-      <JobsSidebar
-        v-if="showJobOpportunities"
-        :class="itemclass"
-        :shown-love-junk="shown"
+      <ExternalDa
+        v-if="adShown"
+        ad-unit-path="/22794232631/freegle_myposts_desktop_right"
+        max-width="300px"
+        max-height="600px"
+        div-id="div-gpt-ad-1709056727559-0"
+        class="mt-2"
+        @rendered="adRendered"
       />
+      <JobsSidebar v-if="showJobOpportunities" class="jobs mt-2" />
     </div>
   </div>
 </template>
 <script>
 import JobsSidebar from './JobsSidebar'
-import DonationMonthly from '~/components/DonationMonthly'
+import ExternalDa from '~/components/ExternalDa.vue'
 
 export default {
   components: {
-    DonationMonthly,
+    ExternalDa,
     JobsSidebar,
   },
   props: {
@@ -31,24 +29,20 @@ export default {
       required: false,
     },
   },
-  data() {
+  data: function () {
     return {
-      shown: false,
+      adShown: true,
     }
   },
-  computed: {
-    itemclass() {
-      return 'sidebar__full mt-2'
+  methods: {
+    adRendered(adShown) {
+      this.adShown = adShown
     },
   },
 }
 </script>
 <style scoped>
-.sidebar__item {
-  flex: 0 1 50%;
-  overflow-y: auto;
-}
-.sidebar__full {
+.jobs {
   flex: 0 1 100%;
   overflow-y: auto;
 }
