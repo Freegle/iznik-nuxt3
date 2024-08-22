@@ -633,6 +633,16 @@ export default {
     grid-row: 2 / 3;
   }
 
+  :deep(.header-title) {
+    display: flex;
+    flex-direction: column;
+
+    .spacer {
+      display: flex;
+      flex-grow: 1;
+    }
+  }
+
   .onecolumn {
     height: 100%;
 

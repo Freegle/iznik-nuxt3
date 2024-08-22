@@ -41,6 +41,7 @@
         </client-only>
       </div>
     </h3>
+    <div class="spacer" />
     <div v-if="showLocation" class="location text-truncate">
       {{ location }}
     </div>

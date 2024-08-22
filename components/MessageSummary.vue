@@ -31,7 +31,6 @@
         :show-location="showLocation"
       />
       <MessageHistory :id="id" summary class="mb-1 header-history" />
-      <div class="spacer" />
       <div class="mb-1 header-description">
         <MessageDescription
           :id="id"
@@ -50,7 +49,7 @@
         </client-only>
       </div>
       <div
-        class="image-wrapper d-flex justify-content-around mb-2"
+        class="image-wrapper d-flex justify-content-around mb-2 mb-md-3"
         @click="expandAndAttachments"
       >
         <MessageAttachments
@@ -217,7 +216,7 @@ export default {
   display: grid;
   align-items: start;
   grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: auto auto auto 1fr auto auto;
+  grid-template-rows: 1fr min-content;
 
   @include media-breakpoint-up(md) {
     padding: 16px;
@@ -253,18 +252,9 @@ export default {
     }
   }
 
-  .spacer {
-    grid-column: 1 / 2;
-    grid-row: 4 / 5;
-
-    @include media-breakpoint-up(md) {
-      height: 0px;
-    }
-  }
-
   .header-description {
     grid-column: 1 / 2;
-    grid-row: 5 / 6;
+    grid-row: 4 / 5;
 
     @include media-breakpoint-up(md) {
       grid-column: 2 / 3;
