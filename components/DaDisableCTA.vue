@@ -3,7 +3,7 @@
     v-if="adsEnabled"
     class="d-flex justify-content-around small w-100 bg-white border border-top"
   >
-    <div class="text-small">
+    <div class="text-small text-danger">
       Hate ads? &pound;{{ adsOffTarget }}
       in donations stops them for everyone today
       <nuxt-link to="/adsoff">Learn more</nuxt-link>
