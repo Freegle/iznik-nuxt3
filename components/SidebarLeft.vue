@@ -7,7 +7,6 @@
       max-height="600px"
       :div-id="adDivId"
       class="mt-2"
-      @rendered="adRendered"
     />
     <CommunityEventSidebar
       v-if="showCommunityEvents"
