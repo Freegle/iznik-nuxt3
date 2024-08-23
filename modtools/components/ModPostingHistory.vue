@@ -62,7 +62,7 @@ export default {
         return this.user.info
       }
 
-      const user = this.userStore.get(this.user.id)
+      const user = this.userStore.byId(this.userid)
 
       if (user && user.info) {
         return user.info

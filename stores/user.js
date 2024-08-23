@@ -24,7 +24,7 @@ export const useUserStore = defineStore({
       const ret = await api(this.config).user.fetchByEmail(email, false)
       return ret?.user?.id
     },
-    async fetchMT(params){
+    async fetchMT(params){ // id, info, search, emailhistory
       const { user, users } = await api(this.config).user.fetchMT(params)
       if( user){
         console.log("Got ONE users",user.id)

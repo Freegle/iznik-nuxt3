@@ -60,7 +60,7 @@ export default {
       return this.groupStore.get(this.groupid)
     },
     user() {
-      return this.userStore.get(this.userid)
+      return this.userStore.byId(this.userid)
     }
   },
   mounted() {

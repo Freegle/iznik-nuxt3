@@ -109,7 +109,7 @@
               </div>
             </div>
             <div v-if="message.fromuser">
-              <ModComments :user="message.fromuser" />
+              <ModComments :user="message.fromuser" @updateComments="updateComments" />
               <ModSpammer v-if="message.fromuser.spammer" :user="message.fromuser" />
               <NoticeMessage v-if="message.fromuser && message.fromuser.activedistance > 50" variant="warning" class="mb-2">
                 This freegler recently active on groups {{ message.fromuser.activedistance }} miles apart.
@@ -255,7 +255,7 @@
               </div>
             </div>
             <ModMemberActions v-if="showActions && message.groups && message.groups.length" :userid="message.fromuser.id"
-              :groupid="message.groups[0].groupid" />
+              :groupid="message.groups[0].groupid" @commentadded="updateComments" />
           </b-col>
         </b-row>
         <div v-if="review && message.groups && message.groups.length" class="mt-1">
@@ -622,6 +622,9 @@ export default {
     this.$emit('destroy', this.message.id, this.next)
   },
   methods: {
+    updateComments(){
+      this.message.fromuser = this.userStore.byId(this.message.fromuser.id)
+    },
     imageAdded(id) {
       let ret = false
 

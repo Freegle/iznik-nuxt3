@@ -1,7 +1,7 @@
 <template>
   <div>
     <ModComment v-for="comment in comments" :key="'modcomments-' + user.id + '-' + comment.id" :comment="comment" :user="user"
-      :expand-comments="expandComments" />
+      :expand-comments="expandComments" @updated="updated" />
     <div v-if="sortedComments.length > 1" class="mb-1">
       <b-button v-if="!showAll" variant="white" @click="showAll = true">
         <v-icon icon="tag" /> Show {{ showMore }}
@@ -65,6 +65,11 @@ export default {
       } else {
         return []
       }
+    },
+  },
+  methods: {
+    updated() {
+      this.$emit('updateComments')
     }
   }
 }

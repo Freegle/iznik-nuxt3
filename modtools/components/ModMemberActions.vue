@@ -88,7 +88,7 @@ export default {
     async fetchUser() {
       await this.userStore.fetch(this.userid, true)
 
-      this.user = this.userStore.get(this.userid)
+      this.user = this.userStore.byId(this.userid)
     },
     async remove() {
       if (!this.user) {
@@ -96,10 +96,7 @@ export default {
       }
 
       this.removeConfirm = true
-
-      this.waitForRef('removeConfirm', () => {
-        this.$refs.removeConfirm.show()
-      })
+      this.$refs.removeConfirm?.show()
     },
     removeConfirmed() {
       this.memberStore.remove(this.userid, this.groupid)
@@ -114,10 +111,7 @@ export default {
       }
 
       this.banConfirm = true
-
-      this.waitForRef('banConfirm', () => {
-        this.$refs.banConfirm.show()
-      })
+      this.$refs.banConfirm?.show()
     },
     banConfirmed() {
       this.memberStore.ban(this.userid, this.groupid)
@@ -128,18 +122,19 @@ export default {
       }
 
       this.addComment = true
-      this.waitForRef('addComment', () => {
-        this.$refs.addComment.show()
-      })
+      this.$refs.addComment?.show()
     },
     async updateComments() {
       // The server API doesn't make it easy to refresh comments on memberships, because we can't refetch a
       // specific membership id.  Instead fetch the user and then pass any comments to the store to update there.
-      await this.userStore.fetch(this.userid, true)
+      await this.userStore.fetchMT({
+        search: this.userid,
+        emailhistory: true
+      })
 
-      const user = this.userStore.get(this.userid)
+      this.user = this.userStore.byId(this.userid)
 
-      await this.memberStore.updateComments(this.user.id, user.comments)
+      this.$emit('commentadded')
     },
     async spamReport() {
       console.log('===spamReport 2')
@@ -149,10 +144,7 @@ export default {
 
       this.whitelist = false
       this.showSpamModal = true
-console.log('===this.waitForRef')
-      this.waitForRef('spamConfirm', () => {
-        this.$refs.spamConfirm.show()
-      })
+      this.$refs.spamConfirm?.show()
     },
     async spamWhitelist() {
       if (!this.user) {
@@ -161,10 +153,7 @@ console.log('===this.waitForRef')
 
       this.whitelist = true
       this.showSpamModal = true
-
-      this.waitForRef('spamConfirm', () => {
-        this.$refs.spamConfirm.show()
-      })
+      this.$refs.spamConfirm?.show()
     }
   }
 }
