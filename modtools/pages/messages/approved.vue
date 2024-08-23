@@ -95,7 +95,7 @@ export default {
     },
 
     async loadMore($state) {
-      console.log('approved loadMore', this.groupid, this.show, this.messages.length)
+      //console.log('approved loadMore', this.groupid, this.show, this.messages.length)
       this.busy = true
       if (!this.me) {
         console.log('Ignore load more on MT page with no session.')
@@ -103,11 +103,11 @@ export default {
       } else if (this.show < this.messages.length) {
         // This means that we will gradually add the messages that we have fetched from the server into the DOM.
         // Doing that means that we will complete our initial render more rapidly and thus appear faster.
-        console.log('this.show++', this.show)
+        //console.log('this.show++', this.show)
         this.show++
         $state.loaded()
       } else {
-        console.log('Actually loadMore')
+        //console.log('Actually loadMore')
         const currentCount = this.messages.length
 
         let params
