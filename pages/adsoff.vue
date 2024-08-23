@@ -9,22 +9,24 @@
             <div>
               <p>
                 <strong
-                  >Hate ads? Your donation will help us turn them off for
-                  everyone for the next 24 hours.</strong
+                  >Hate ads? Your donation could help us turn them off for
+                  everyone.</strong
                 >
               </p>
               <p>
                 There are some things we have to pay for to keep going. Ads
-                support this - but ideally we wouldn't have them.
+                support this - but wouldn't it be nice not to have them?
+              </p>
+              <p v-if="adsOffTarget <= 0">
+                Right now we've raised enough in donations over the last 24
+                hours, so ads are off. Thanks!
+              </p>
+              <p v-else>
                 <strong
-                  >If we raise
-                  <span v-if="adsOffTarget"
-                    >&pound;{{ adsOffTarget }} more</span
-                  >
-                  <span v-else>enough</span> in donations, we'll turn them
-                  off</strong
+                  >Right now we still need &pound;{{ adsOffTarget }}</strong
                 >
-                for 24 hours and heave a sigh of relief.
+                to reach our target of &pound;{{ adsOffTargetMax }} over the
+                last 24 hours. Can you help?
               </p>
             </div>
             <vue-thermometer
