@@ -186,7 +186,11 @@
         </b-col>
         <b-col cols="0" xl="3" class="p-0 pl-1">
           <VisibleWhen :at="['xl', 'xxl']">
-            <SidebarRight :show-job-opportunities="true" />
+            <SidebarRight
+              :show-job-opportunities="true"
+              ad-unit-path="/22794232631/freegle_chat_app"
+              ad-div-id="div-gpt-ad-1691925773522-0"
+            />
           </VisibleWhen>
         </b-col>
       </b-row>

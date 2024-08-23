@@ -159,6 +159,7 @@ function checkRendered() {
   if (el) {
     if (el.dataset.adStatus) {
       const adStatus = el.dataset.adStatus
+      console.log('Ad status', adStatus, props.adUnitPath)
       if (adStatus === 'filled') {
         console.log('Filled', props.adUnitPath)
         emit('rendered', true)

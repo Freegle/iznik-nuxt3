@@ -7,12 +7,18 @@
       </div>
       <client-only>
         <div v-if="allowAd">
-          <div class="sticky w-100">
-            <DaDisableCTA v-if="!adRendering" />
+          <div
+            class="sticky w-100 d-flex flex-column justify-content-end"
+            :class="{
+              allowClicks: !stickyAdRendered,
+              'bg-white': stickyAdRendered,
+            }"
+          >
+            <DaDisableCTA v-if="!adRendering && stickyAdRendered" />
             <div
               class="d-flex justify-content-around w-100"
               :class="{
-                adRendering,
+                adRendering: adRendering && !firstRender,
               }"
             >
               <VisibleWhen :at="['xs', 'sm']">
@@ -31,7 +37,6 @@
                   max-height="90px"
                   max-width="100vw"
                   div-id="div-gpt-ad-1707999304775-0"
-                  pixel
                   @rendered="adRendered"
                 />
               </VisibleWhen>
@@ -125,7 +130,7 @@ export default {
       showLoader: true,
       timeTimer: null,
       adRendering: true,
-      noAdRendered: false,
+      firstRender: true,
       interestedInOthersMsgid: null,
       interestedInOthersUserId: null,
       showInterestedModal: false,
@@ -271,11 +276,14 @@ export default {
     adRendered(adShown) {
       console.log('Layout ad rendered', adShown, adShown ? 1 : 0)
       this.adRendering = false
+      this.firstRender = false
       const store = useMiscStore()
       store.stickyAdRendered = adShown ? 1 : 0
     },
     adFailed() {
       console.log('Layout ad failed, not rendered')
+      this.adRendering = false
+      this.firstRender = false
       const store = useMiscStore()
       store.stickyAdRendered = 0
     },
@@ -323,24 +331,26 @@ body.modal-open {
   position: fixed;
   bottom: 0;
 
-  background-color: $color-gray--dark !important;
+  &.allowClicks {
+    pointer-events: none;
+  }
+
+  .adRendering {
+    background-color: $color-gray--dark;
+  }
 
   @include media-breakpoint-up(lg) {
     background-color: transparent;
-
-    .adRendering {
-      background-color: $color-gray--dark;
-    }
   }
 
   z-index: 10000;
 
   margin-top: 2px;
   width: 320px;
-  height: calc($sticky-banner-height-mobile * v-bind(stickyAdRendered));
+  height: $sticky-banner-height-mobile;
 
   @include media-breakpoint-up(md) {
-    height: calc($sticky-banner-height-desktop * v-bind(stickyAdRendered));
+    height: $sticky-banner-height-desktop;
   }
 }
 

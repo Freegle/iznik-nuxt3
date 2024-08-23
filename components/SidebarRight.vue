@@ -1,17 +1,15 @@
 <template>
   <div class="sidebar__wrapper">
-    <div class="d-flex flex-column justify-content-between mh-100">
-      <ExternalDa
-        v-if="adShown"
-        ad-unit-path="/22794232631/freegle_myposts_desktop_right"
-        max-width="300px"
-        max-height="600px"
-        div-id="div-gpt-ad-1709056727559-0"
-        class="mt-2"
-        @rendered="adRendered"
-      />
-      <JobsSidebar v-if="showJobOpportunities" class="jobs mt-2" />
-    </div>
+    <ExternalDa
+      v-if="adUnitPath"
+      :ad-unit-path="adUnitPath"
+      max-width="300px"
+      max-height="600px"
+      :div-id="adDivId"
+      class="da"
+      @rendered="adRendered"
+    />
+    <JobsSidebar v-if="showJobOpportunities" class="jobs border-bottom" />
   </div>
 </template>
 <script>
@@ -27,23 +25,42 @@ export default {
     showJobOpportunities: {
       type: Boolean,
       required: false,
+      default: false,
     },
-  },
-  data: function () {
-    return {
-      adShown: true,
-    }
-  },
-  methods: {
-    adRendered(adShown) {
-      this.adShown = adShown
+    adUnitPath: {
+      type: String,
+      required: false,
+      default: null,
+    },
+    adDivId: {
+      type: String,
+      required: false,
+      default: null,
     },
   },
 }
 </script>
-<style scoped>
-.jobs {
-  flex: 0 1 100%;
-  overflow-y: auto;
+<style scoped lang="scss">
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/sticky-banner.scss';
+@import 'assets/css/navbar.scss';
+
+.sidebar__wrapper {
+  height: calc(100vh - $sticky-banner-height-desktop - $navbar-height - 10px);
+  display: grid;
+  grid-template-rows: max-content minmax(0, 1fr);
+  grid-row-gap: 10px;
+  grid-template-columns: minmax(0, 1fr);
+  overflow-y: hidden;
+
+  .da {
+    grid-row: 1 / 2;
+  }
+
+  .jobs {
+    grid-row: 2 / 3;
+  }
 }
 </style>

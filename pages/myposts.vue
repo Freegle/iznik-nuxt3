@@ -11,21 +11,11 @@
       <h1 class="visually-hidden">My posts</h1>
       <b-row class="m-0">
         <b-col cols="0" lg="3" class="p-0 pr-1">
-          <VisibleWhen
-            :not="['xs', 'sm', 'md', 'lg']"
-            class="position-fixed"
-            style="width: 300px"
-          >
-            <ExternalDa
-              ad-unit-path="/22794232631/freegle_myposts_desktop"
-              max-width="300px"
-              max-height="600px"
-              div-id="div-gpt-ad-1692868003771-0"
-              class="mt-2"
-            />
-          </VisibleWhen>
           <VisibleWhen :at="['lg', 'xl', 'xxl']">
-            <SidebarLeft />
+            <SidebarLeft
+              ad-unit-path="/22794232631/freegle_myposts_desktop"
+              ad-div-id="div-gpt-ad-1692868003771-0"
+            />
           </VisibleWhen>
         </b-col>
         <b-col cols="12" lg="6" class="p-0">
@@ -71,7 +61,11 @@
         </b-col>
         <b-col cols="0" lg="3" class="p-0 pl-1">
           <VisibleWhen :at="['xl', 'xxl']">
-            <SidebarRight :show-job-opportunities="true" />
+            <SidebarRight
+              :show-job-opportunities="true"
+              ad-unit-path="/22794232631/freegle_myposts_desktop_right"
+              ad-div-id="div-gpt-ad-1709056727559-0"
+            />
           </VisibleWhen>
         </b-col>
       </b-row>
@@ -94,7 +88,6 @@ import MyPostsPostsList from '~/components/MyPostsPostsList.vue'
 import MyPostsSearchesList from '~/components/MyPostsSearchesList.vue'
 import { useDonationAskModal } from '~/composables/useDonationAskModal'
 import { useTrystStore } from '~/stores/tryst'
-import ExternalDa from '~/components/ExternalDa.vue'
 const DonationAskModal = defineAsyncComponent(() =>
   import('~/components/DonationAskModal')
 )

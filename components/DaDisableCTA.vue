@@ -4,8 +4,8 @@
     class="d-flex justify-content-around small w-100 bg-white border border-top"
   >
     <div class="text-small">
-      &pound;{{ adsOffTarget }}
-      donations to stop ads today
+      Hate ads? &pound;{{ adsOffTarget }}
+      donations stops them for today
       <nuxt-link to="/adsoff">Learn more</nuxt-link>
     </div>
   </div>
@@ -21,3 +21,20 @@ const adsEnabled = p2?.length && parseInt(p2[0].value)
 const adsOffTarget =
   p1?.length && parseInt(p1[0].value) ? parseInt(p1[0].value) : null
 </script>
+<style scoped lang="scss">
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
+
+.text-small {
+  font-size: 0.5rem;
+
+  @include media-breakpoint-up(sm) {
+    font-size: 0.75rem;
+  }
+
+  @include media-breakpoint-up(md) {
+    font-size: 1rem;
+  }
+}
+</style>

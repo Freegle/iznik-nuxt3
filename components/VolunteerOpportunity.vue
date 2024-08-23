@@ -88,29 +88,30 @@
               <v-icon icon="info-circle" /> More info
             </b-button>
           </div>
-          <OurUploadedImage
-            v-if="volunteering?.image?.ouruid"
-            :src="volunteering.image.ouruid"
-            :modifiers="volunteering.image.externalmods"
-            alt="Volunteering Opportunity Photo"
-            class="mb-2 w-100"
-          />
-          <NuxtPicture
-            v-else-if="volunteering?.image?.externaluid"
-            fit="cover"
-            format="webp"
-            provider="uploadcare"
-            :src="volunteering.image.externaluid"
-            :modifiers="volunteering.image.externalmods"
-            alt="Volunteering Opportunity Photo"
-            class="mb-2 w-100"
-          />
-          <b-img
-            v-else-if="volunteering.image"
-            lazy
-            class="w-100"
-            :src="volunteering.image.path"
-          />
+          <div class="image-wrapper summary">
+            <OurUploadedImage
+              v-if="volunteering?.image?.ouruid"
+              :src="volunteering.image.ouruid"
+              :modifiers="volunteering.image.externalmods"
+              alt="Volunteering Opportunity Photo"
+              class="mb-2"
+            />
+            <NuxtPicture
+              v-else-if="volunteering?.image?.externaluid"
+              fit="cover"
+              format="webp"
+              provider="uploadcare"
+              :src="volunteering.image.externaluid"
+              :modifiers="volunteering.image.externalmods"
+              alt="Volunteering Opportunity Photo"
+              class="mb-2"
+            />
+            <b-img
+              v-else-if="volunteering.image"
+              lazy
+              :src="volunteering.image.path"
+            />
+          </div>
         </div>
         <div v-else class="volunteerop">
           <div class="volunteerop__body">
@@ -160,16 +161,30 @@
               </b-button>
             </div>
           </div>
-          <b-img
-            v-if="volunteering.image"
-            lazy
-            :src="volunteering.image.path"
-            rounded
-            thumbnail
-            class="square"
-            generator-unable-to-provide-required-alt=""
-            title="Opportunity photo"
-          />
+          <div class="image-wrapper">
+            <OurUploadedImage
+              v-if="volunteering?.image?.ouruid"
+              :src="volunteering.image.ouruid"
+              :modifiers="volunteering.image.externalmods"
+              alt="Volunteering Opportunity Photo"
+              class="mb-2"
+            />
+            <NuxtPicture
+              v-else-if="volunteering?.image?.externaluid"
+              fit="cover"
+              format="webp"
+              provider="uploadcare"
+              :src="volunteering.image.externaluid"
+              :modifiers="volunteering.image.externalmods"
+              alt="Volunteering Opportunity Photo"
+              class="mb-2"
+            />
+            <b-img
+              v-else-if="volunteering.image"
+              lazy
+              :src="volunteering.image.path"
+            />
+          </div>
         </div>
       </b-card-body>
     </b-card>
@@ -320,10 +335,19 @@ export default {
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
 
-.square {
-  object-fit: cover;
-  width: 200px;
-  height: 200px;
+.image-wrapper {
+  :deep(img) {
+    object-fit: cover;
+    width: 200px;
+    height: 200px;
+  }
+
+  &.summary {
+    :deep(img) {
+      width: 100%;
+      height: unset;
+    }
+  }
 }
 
 .volunteerop__link {
