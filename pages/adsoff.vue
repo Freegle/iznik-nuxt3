@@ -10,7 +10,7 @@
               <p>
                 <strong
                   >Hate ads? Your donation will help us turn them off for
-                  everyone today.</strong
+                  everyone for the next 24 hours.</strong
                 >
               </p>
               <p>
@@ -21,10 +21,10 @@
                   <span v-if="adsOffTarget"
                     >&pound;{{ adsOffTarget }} more</span
                   >
-                  <span v-else>enough</span> in donations today, we'll turn them
+                  <span v-else>enough</span> in donations, we'll turn them
                   off</strong
                 >
-                and heave a sigh of relief.
+                for 24 hours and heave a sigh of relief.
               </p>
             </div>
             <vue-thermometer

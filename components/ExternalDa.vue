@@ -84,7 +84,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['rendered'])
+const emit = defineEmits(['rendered', 'disabled'])
 
 // We can either run with Ad Sense or with Prebid.  Ad Sense is the default.
 const adSense = ref(true)
