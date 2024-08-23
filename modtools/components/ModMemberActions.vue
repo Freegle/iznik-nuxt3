@@ -19,7 +19,7 @@
       @confirm="removeConfirmed" />
     <ConfirmModal v-if="removeConfirm && !groupname" ref="removeConfirm" title="Please select a group first." />
     <ModBanMemberConfirmModal v-if="banConfirm" ref="banConfirm" :userid="userid" :groupid="groupid" @confirm="banConfirmed" />
-    <ModCommentAddModal v-if="addComment" ref="addComment" :user="user" :groupid="groupid" @added="updateComments" />
+    <ModCommentAddModal v-if="addComment" ref="addComment" :user="user" :groupid="groupid" :groupname="groupname" @added="commentadded" />
     <ModSpammerReport v-if="showSpamModal" ref="spamConfirm" :user="reportUser" :whitelist="whitelist" />
   </div>
 </template>
@@ -124,15 +124,11 @@ export default {
       this.addComment = true
       this.$refs.addComment?.show()
     },
-    async updateComments() {
-      // The server API doesn't make it easy to refresh comments on memberships, because we can't refetch a
-      // specific membership id.  Instead fetch the user and then pass any comments to the store to update there.
+    async commentadded() {
       await this.userStore.fetchMT({
         search: this.userid,
         emailhistory: true
       })
-
-      this.user = this.userStore.byId(this.userid)
 
       this.$emit('commentadded')
     },

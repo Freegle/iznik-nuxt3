@@ -32,8 +32,8 @@
         </span>
       </div>
       <ConfirmModal v-if="showConfirmDelete" ref="confirm" @confirm="deleteConfirmed" @hidden="showConfirmDelete = false" />
-      <ModCommentEditModal v-if="showCommentEditModal" ref="editComment" :user="user" :comment="comment" @edited="updateComments"
-        @hidden="showCommentEditModal = false" />
+      <ModCommentEditModal v-if="showCommentEditModal" ref="editComment" :user="user" :comment="comment" :groupname="groupname"
+        @edited="updateComments" @hidden="showCommentEditModal = false" />
     </NoticeMessage>
   </div>
 </template>

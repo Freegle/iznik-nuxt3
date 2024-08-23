@@ -2,7 +2,7 @@
   <div>
     <b-modal ref="modal" :id="'modCommentModal-' + user.id" size="lg" no-stacking>
       <template #title class="w-100">
-        Add Note for {{ user.displayname }}
+        Add Note for {{ user.displayname }} <span v-if="groupname">on</span> {{  groupname }}
       </template>
       <template #default>
         <p>
@@ -58,6 +58,9 @@ export default {
       type: Number,
       required: false,
       default: null
+    },
+    groupname: {
+      type: String
     }
   },
   setup() {
