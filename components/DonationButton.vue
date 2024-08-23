@@ -75,7 +75,7 @@ export default {
       }
     },
     show() {
-      return this.value ? '£' + this.value : this.props.text
+      return this.value ? '£' + this.value : null
     },
   },
   mounted() {
