@@ -25,8 +25,8 @@
                 <strong
                   >Right now we still need &pound;{{ adsOffTarget }}</strong
                 >
-                to reach our target of &pound;{{ adsOffTargetMax }} over the
-                last 24 hours. Can you help?
+                to reach our donation target of &pound;{{ adsOffTargetMax }}
+                over the last 24 hours.
               </p>
             </div>
             <vue-thermometer
@@ -38,7 +38,7 @@
               scale="£"
             />
           </div>
-          <p>If you're able to donate:</p>
+          <p><strong>Can you help turn ads off for a bit?</strong></p>
           <div class="d-flex flex-wrap justify-content-between mt-2 mb-3">
             <donation-button value="5" class="mb-1" @clicked="score(5)" />
             <donation-button value="10" class="mb-1" @clicked="score(10)" />
