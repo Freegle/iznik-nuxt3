@@ -5,7 +5,7 @@
   >
     <div class="text-small">
       Hate ads? &pound;{{ adsOffTarget }}
-      donations stops them for today
+      donations stops them for everyone today
       <nuxt-link to="/adsoff">Learn more</nuxt-link>
     </div>
   </div>

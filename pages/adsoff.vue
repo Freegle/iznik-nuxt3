@@ -29,7 +29,7 @@
             </div>
             <vue-thermometer
               :key="adsOffTarget"
-              :value="adsOffTarget"
+              :value="adsOffTargetMax - adsOffTarget"
               :min="0"
               :max="adsOffTargetMax"
               :options="thermOptions"
