@@ -13,7 +13,7 @@ const summary = computed(() => {
 })
 
 const toggleView = (c, e) => {
-  miscStore.set({ key: 'modtoolsMessagesApprovedSummary', value: c.value })
+  miscStore.set({ key: 'modtoolsMessagesApprovedSummary', value: c })
 }
 
 </script>
