@@ -137,11 +137,10 @@ export default {
     }
   },
   computed: {
-    ...mapState(useMiscStore, [
-      'breakpoint',
-      'adsDisabled',
-      'stickyAdRendered',
-    ]),
+    ...mapState(useMiscStore, ['breakpoint', 'adsDisabled']),
+    stickyAdRendered() {
+      return useMiscStore().stickyAdRendered
+    },
     routePath() {
       const route = useRoute()
       return route?.path
