@@ -11,7 +11,7 @@
     >
       <div v-if="isVisible">
         <div class="d-flex w-100 justify-content-around">
-          <OurGoogleAd
+          <OurGoogleDa
             v-if="adSense"
             ref="googlead"
             :ad-unit-path="adUnitPath"
@@ -23,7 +23,7 @@
             :render-ad="renderAd"
             @rendered="rippleRendered"
           />
-          <OurPrebidAd
+          <OurPrebidDa
             v-else
             ref="prebidad"
             :ad-unit-path="adUnitPath"

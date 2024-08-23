@@ -1,7 +1,12 @@
 <template>
   <div v-if="showAd">
+    <div v-if="adsBlocked" class="bg-white text-center">
+      Maybe you're using an ad blocker? We don't like ads much either. If we
+      raised enough in donations, we could turn them off for everyone.
+      <donation-button value="1" class="mb-1" text="Donate £1" />
+    </div>
     <div
-      v-if="showTestAd"
+      v-else-if="showTestAd"
       :style="{
         'min-height': minHeight,
         'min-width': minWidth,
@@ -13,6 +18,7 @@
       <p class="text-white text-center">Test ad</p>
     </div>
     <Adsbygoogle
+      v-else
       ref="adsbygoogle"
       :style="adStyle"
       :page-url="pageUrl"
@@ -66,6 +72,9 @@ const props = defineProps({
     required: true,
   },
 })
+
+const emit = defineEmits(['rendered'])
+const adsBlocked = ref(false)
 
 const adStyle = computed(() => {
   // See https://support.google.com/adsense/answer/9183363 for background.
@@ -196,9 +205,11 @@ watch(
   () => props.renderAd,
   (newVal) => {
     if (newVal) {
-      unPauseAdSense()
+      if (unPauseAdSense()) {
+        fillTimer = setTimeout(checkRendered, 100)
+      }
+
       showAd.value = true
-      fillTimer = setTimeout(checkRendered, 100)
     }
   },
   {
@@ -227,13 +238,17 @@ function refreshAd() {
   refreshTimer = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
 }
 
-const emit = defineEmits(['rendered'])
-
 function unPauseAdSense() {
   console.log('Unpause AdSense')
-  if (window.adsbygoogle) {
+  if (window.adsbygoogle?.loaded) {
     // We paused ads on page load - time to enable them
     window.adsbygoogle.pauseAdRequests = 0
+    return true
+  } else {
+    console.log('No AdSense loaded')
+    adsBlocked.value = true
+    emit('rendered', true)
+    return false
   }
 }
 

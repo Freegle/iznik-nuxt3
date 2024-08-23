@@ -2,7 +2,7 @@
   <div :id="divId" />
 </template>
 <script setup>
-// TODO Needs reworking for responsive ads a la OurGoogleAd
+// TODO Needs reworking for responsive ads a la OurGoogleDa
 import { ref, onBeforeUnmount } from '#imports'
 import { useMiscStore } from '~/stores/misc'
 import Api from '~/api'
