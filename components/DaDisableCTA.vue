@@ -30,11 +30,11 @@ const adsOffTarget =
   font-size: 0.5rem;
 
   @include media-breakpoint-up(sm) {
-    font-size: 0.75rem;
+    font-size: 0.65rem;
   }
 
   @include media-breakpoint-up(md) {
-    font-size: 1rem;
+    font-size: 0.8rem;
   }
 }
 </style>
