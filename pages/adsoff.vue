@@ -26,7 +26,7 @@
                   >Right now we still need &pound;{{ adsOffTarget }}</strong
                 >
                 to reach our donation target of &pound;{{ adsOffTargetMax }}
-                over the last 24 hours.
+                over the last 24 hours. Once we reach that, we'll turn ads off.
               </p>
             </div>
             <vue-thermometer
