@@ -59,12 +59,12 @@ onMounted(async () => {
   context.value = null
 
   const authStore = useAuthStore()
-  const work = authStore.work // IN PRACTICE, NEVER SET TODO SO REMOVE
-  console.log('###ModMessages work', work)
+  const work = authStore.work // IN PRACTICE, NEVER SET SO REMOVE TODO
+  // console.log('###ModMessages work', work)
   if (work) {
     const count = workType.value ? work[workType.value] : 0
 
-    console.log('###ModMessages onMounted', count)
+    // console.log('###ModMessages onMounted', count)
     if (count > 0) {
       await messageStore.fetchMessagesMT({
         groupid: groupid.value,

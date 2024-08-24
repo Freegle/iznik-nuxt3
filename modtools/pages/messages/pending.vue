@@ -16,7 +16,7 @@
       </div>
       <NoticeMessage v-if="!messages.length && !busy" class="mt-2">
         There are no messages at the moment. This will refresh automatically.
-    </NoticeMessage>
+      </NoticeMessage>
       <ModMessages />
 
       <ModAffiliationConfirmModal v-if="affiliationGroup" ref="affiliation" :groupid="affiliationGroup" />
