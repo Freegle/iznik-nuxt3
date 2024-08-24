@@ -55,6 +55,7 @@
 </template>
 <script setup>
 import { useConfigStore } from '~/stores/config'
+import Api from '~/api'
 
 const configStore = useConfigStore()
 const showingAds = await configStore.fetch('ads_off_target')
@@ -81,5 +82,22 @@ const thermOptions = {
     tickColor: 'black',
     tickWidth: '1',
   },
+}
+
+const runtimeConfig = useRuntimeConfig()
+const api = Api(runtimeConfig)
+
+onMounted(async () => {
+  await api.bandit.shown({
+    uid: 'adsoff',
+    variant: 'page',
+  })
+})
+
+function score(amount) {
+  api.bandit.chosen({
+    uid: 'adsoff',
+    variant: 'page',
+  })
 }
 </script>
