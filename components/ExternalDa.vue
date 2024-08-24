@@ -213,7 +213,10 @@ async function checkStillVisible() {
       me.donated &&
       new Date(me.donated) > new Date(Date.now() - 31 * 24 * 60 * 60 * 1000)
 
-    if (recentDonor || (showingAds?.length && parseInt(showingAds[0].value))) {
+    if (recentDonor) {
+      console.log('Ads disabled as recent donor')
+      emit('rendered', false)
+    } else if (showingAds?.length && parseInt(showingAds[0].value)) {
       renderAd.value = true
     } else {
       console.log('Ads disabled in server config')
