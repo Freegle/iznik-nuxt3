@@ -1,8 +1,8 @@
 <template>
   <div v-if="showAd">
     <div v-if="adsBlocked" class="bg-white text-center">
-      Maybe you're using an ad blocker? We don't like ads much either. If we
-      raised enough in donations, we could turn them off for everyone.
+      Maybe you're using an ad blocker? We don't like ads much either. If you
+      donate, we'll turn ads for you for a month.
       <donation-button value="1" class="mb-1" text="Donate £1" />
     </div>
     <div
