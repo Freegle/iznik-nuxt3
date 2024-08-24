@@ -66,7 +66,7 @@
                 <b-button v-if="message.source === 'Email'" variant="white" class="mt-2" @click="viewSource">
                   <v-icon icon="book-open" /><span class="d-none d-sm-inline"> View Email Source</span>
                 </b-button>
-                <SpinButton v-if="message.groups[0].collection === 'Approved'" class="mt-2" variant="white" :handler="backToPending" icon-name="reply"
+                <SpinButton v-if="message.groups[0].collection === 'Approved'" class="mt-2" variant="white" @handle="backToPending" icon-name="reply"
                   label="Back to Pending" confirm />
               </div>
               <div class="ml-2">
@@ -854,8 +854,9 @@ export default {
       // Fetch the message again to revert any changes.
       this.messageStore.fetch(this.message.id)
     },
-    backToPending() {
-      this.messageStore.backToPending(this.message.id)
+    async backToPending(callback) {
+      await this.messageStore.backToPending(this.message.id)
+      callback()
     },
   }
 }
