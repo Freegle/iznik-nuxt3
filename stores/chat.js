@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router'
 import api from '~/api'
 import { useAuthStore } from '~/stores/auth'
 import { useMessageStore } from '~/stores/message'
+import { useMiscStore } from '~/stores/misc'
 
 export const useChatStore = defineStore({
   id: 'chat',
@@ -26,6 +27,9 @@ export const useChatStore = defineStore({
       if (this.searchSince) {
         since = dayjs(this.searchSince).toISOString()
       }
+      // TODO Amend ChatAPI v2 to support chattypes
+      //const miscStore = useMiscStore() // MT ADDED
+      //const chattypes = miscStore.modtools ? ['User2Mod', 'Mod2Mod'] : ['User2User', 'User2Mod'],
 
       const chats = await api(this.config).chat.listChats(
         since,
@@ -256,12 +260,24 @@ export const useChatStore = defineStore({
       return (id) => state.listByChatMessageId[id]
     },
     unreadCount: (state) => {
+      const miscStore = useMiscStore() // MT ADDED
+      if( miscStore.modtools) return -98
       // count chats with unseen messages
       let ret = 0
 
       // Scan listBychatId adding chat.unseen
       Object.keys(state.listByChatId).forEach((key) => {
-        if (state.listByChatId[key].status !== 'Closed') {
+        if (miscStore.modtools) {
+          const chat = state.listByChatId[key]
+          console.log('unreadCount',chat.chattype,chat.unseen,chat.user1)
+          // We count chats between mods, and chats between other members and mods.
+          if (chat.chattype === 'Mod2Mod') {
+            ret += chat.unseen
+          } else if (chat.chattype === 'User2Mod') { // TODO && chat.user1 !== myid
+            ret += chat.unseen
+          }
+          // Otherwise we count chats between users, and our chats to mods.
+        } else if (state.listByChatId[key].status !== 'Closed') {
           ret += state.listByChatId[key].unseen
         }
       })
