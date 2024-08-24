@@ -369,6 +369,14 @@ export const useMessageStore = defineStore({
       const { message } = await api(this.config).message.fetchMT(params)
       return message
     },
+    async approveedits(params) {
+      await api(this.config).message.approveEdits(params.id)
+  
+      this.remove({ id: params.id })
+  
+      const authStore = useAuthStore()
+      authStore.work = {}
+    },
     async backToPending(id){
       await api(this.config).message.update({
         id,

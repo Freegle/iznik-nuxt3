@@ -4,11 +4,9 @@
   </div>
 </template>
 <script>
-import DiffPart from './DiffPart'
-import {Diff}  from 'diff'
+import { diffChars } from 'diff'
 
 export default {
-  components: { DiffPart },
   props: {
     old: {
       type: String,
@@ -27,7 +25,7 @@ export default {
         return null
       }
 
-      const ret = Diff.diffChars(this.old, this.new)
+      const ret = diffChars(this.old, this.new)
       return ret
     }
   }
