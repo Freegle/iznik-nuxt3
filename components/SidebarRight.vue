@@ -7,7 +7,6 @@
       max-height="600px"
       :div-id="adDivId"
       class="da"
-      @rendered="adRendered"
     />
     <JobsSidebar v-if="showJobOpportunities" class="jobs border-bottom" />
   </div>
