@@ -702,6 +702,11 @@ export default {
       }
     },
     applySuggestedAddress(address) {
+      this.$api.bandit.chosen({
+        uid: 'SuggestedAddress',
+        variant: 'chosen',
+      })
+
       const matchedLength = address.matchedLength
       const suggestedAddress = address.address.singleline
 
