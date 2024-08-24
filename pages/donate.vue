@@ -182,6 +182,21 @@
               </b-card-text>
             </b-card>
           </b-col>
+          <b-col cols="12" lg="6">
+            <b-card class="mt-2 mb-2" no-body>
+              <b-card-header bg-variant="primary" text-variant="white">
+                With Google Pay
+              </b-card-header>
+              <b-card-text class="p-2">
+                <p>You can donate £1 to help us with Google Pay.</p>
+                <p v-if="showThanks">Thank you for donating!</p>
+                <GooglePay
+                  total-price="1.00"
+                  @payment-success="showThanks = true"
+                />
+              </b-card-text>
+            </b-card>
+          </b-col>
         </b-row>
       </b-col>
     </b-row>
@@ -201,6 +216,11 @@ export default {
     ExternalLink,
     DonationThermometer,
     DonationButton,
+  },
+  data: function () {
+    return {
+      showThanks: false,
+    }
   },
   ...mapState(useDonationStore, ['target']),
   setup() {
