@@ -37,6 +37,7 @@
     "vite-plugin-pwa": "^0.17.4"
   },
   "dependencies": {
+    "@algorithm.ts/lcs": "^4.0.3",
     "@capacitor/android": "^3.4.3",
     "@capacitor/core": "^3.4.3",
     "@chenfengyuan/vue-number-input": "^2.0.1",

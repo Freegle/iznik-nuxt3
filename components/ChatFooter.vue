@@ -84,6 +84,7 @@
             id="chatmessage"
             ref="chatarea"
             v-model="sendmessage"
+            debounce="500"
             placeholder="Type here..."
             enterkeyhint="enter"
             :style="height"
@@ -95,6 +96,7 @@
             id="chatmessage"
             ref="chatarea"
             v-model="sendmessage"
+            debounce="500"
             placeholder="Type here..."
             :style="height"
             enterkeyhint="send"
@@ -107,6 +109,7 @@
             @focus="markRead"
           />
           <Dropdown
+            v-if="showSuggested"
             placement="top"
             :shown="showSuggested"
             :triggers="[]"
@@ -122,12 +125,19 @@
             "
           >
             <template #popper>
-              <div
-                style="cursor: pointer"
-                class="px-2 py-2"
-                @mousedown="applySuggestedAddress()"
-              >
-                {{ suggestedAddress?.address?.singleline }}
+              <div class="addresspop">
+                <div class="text--small text-center">
+                  Click to insert an address or keep typing:
+                </div>
+                <div
+                  v-for="address in suggestedAddresses"
+                  :key="address.address.id"
+                  style="cursor: pointer"
+                  class="text-truncate"
+                  @mousedown="applySuggestedAddress(address)"
+                >
+                  <strong>{{ address.address.singleline }}</strong>
+                </div>
               </div>
             </template>
           </Dropdown>
@@ -355,6 +365,7 @@ import pluralize from 'pluralize'
 import getCaretCoordinates from 'textarea-caret'
 import { Dropdown } from 'floating-vue'
 import { mapWritableState } from 'pinia'
+import { findLengthOfLCS } from '@algorithm.ts/lcs'
 import { FAR_AWAY, TYPING_TIME_INVERVAL } from '../constants'
 import { setupChat } from '../composables/useChat'
 import { useMiscStore } from '../stores/misc'
@@ -456,6 +467,8 @@ export default {
       showProfileModal: false,
       showAddress: false,
       sendmessage: null,
+      sendmessageLazy: null,
+      sendmessageLazyTimer: null,
       RSVP: false,
       likelymsg: null,
       ouroffers: [],
@@ -548,50 +561,66 @@ export default {
 
       return ret
     },
-    suggestedAddress() {
-      let ret = null
-      let bestMatch = 0
-      let bestAddr = null
+    possibleAddressesLower() {
+      return this.possibleAddresses.map((addr) => {
+        const thisone = addr
+        thisone.singlelower = addr.singleline.toLowerCase()
+        return thisone
+      })
+    },
+    suggestedAddresses() {
+      let ret = []
 
-      const sendMessageLength = this.sendmessage?.length
-      const possibleAddressesLength = this.possibleAddresses?.length
-      const sendLower = this.sendmessage?.toLowerCase()
+      const sendMessageLength = this.sendmessageLazy?.length
 
-      if (sendMessageLength >= 3 && possibleAddressesLength) {
-        // Scan through the possible addresses, looking for the longest prefix of the address which appears as a
-        // suffix of the typed message.  This finds when they're typing a possibly matching address.
-        for (let i = 0; i < possibleAddressesLength; i++) {
-          const addr = this.possibleAddresses[i].singleline.toLowerCase()
+      if (sendMessageLength) {
+        // We want to look for the number of words in common between the send message and the possible addresses.
+        // We use a standard implementation of the LCS algorithm, operating on the individual words in each.
+        const possibleAddressesLength = this.possibleAddressesLower?.length
+        const sendLower =
+          this.sendmessageLazy?.toLowerCase().match(/\S+/g) || []
 
-          for (let j = 1; j <= addr.length; j++) {
-            const prefix = addr.substring(0, j)
-            const suffix = sendLower.substring(sendLower.length - j)
+        if (sendMessageLength >= 3 && possibleAddressesLength) {
+          for (let i = 0; i < possibleAddressesLength; i++) {
+            const singleLower =
+              this.possibleAddressesLower[i].singlelower.match(/\S+/g) || []
 
-            if (prefix === suffix && prefix.length > bestMatch) {
-              bestMatch = prefix.length
-              bestAddr = this.possibleAddresses[i]
+            const LCS = findLengthOfLCS(
+              sendLower.length,
+              singleLower.length,
+              (x, y) => {
+                const ret = sendLower[x].localeCompare(singleLower[y]) === 0
+                return ret
+              }
+            )
+
+            if (LCS > 1) {
+              // Two words - plausible match.
+              ret.push({
+                address: this.possibleAddresses[i],
+                matchedLength: LCS,
+              })
             }
           }
         }
-      }
 
-      if (bestMatch >= 3) {
-        ret = {
-          address: bestAddr,
-          matchedLength: bestMatch,
-        }
+        ret = ret.filter(
+          (v, i, a) => a.findIndex((t) => t.address.id === v.address.id) === i
+        )
+
+        ret.sort((a, b) => b.matchedLength - a.matchedLength)
       }
 
       return ret
     },
     showSuggested() {
-      return !this.hideSuggestedAddress && this.suggestedAddress !== null
+      return !!(!this.hideSuggestedAddress && this.suggestedAddresses?.length)
     },
   },
   watch: {
-    suggestedAddress: {
+    suggestedAddresses: {
       handler(newVal) {
-        if (newVal?.address?.singleline?.length !== newVal?.matchedLength) {
+        if (newVal?.length) {
           this.hideSuggestedAddress = false
           this.updateCaretPosition()
         }
@@ -599,9 +628,19 @@ export default {
       deep: true,
     },
     sendmessage(newVal, oldVal) {
-      // This will result in the chat header shrinking once you start typing, to give more room, and then
-      // expanding back again if you delete everything.
-      this.$emit('typing', newVal?.length)
+      if (!this.sendmessageLazyTimer) {
+        // This will result in the chat header shrinking once you start typing, to give more room, and then
+        // expanding back again if you delete everything.
+        this.$emit('typing', newVal)
+
+        // We want to occasionally check for new addresses to show.  But we don't want to do it on
+        // every key stroke, as that might be slow.  So we update the value which will kick the computed
+        // property on a timer.
+        this.sendmessageLazyTimer = setTimeout(() => {
+          this.sendmessageLazy = this.sendmessage
+          this.sendmessageLazyTimer = null
+        }, 1000)
+      }
     },
     me: {
       async handler(newVal, oldVal) {
@@ -662,16 +701,18 @@ export default {
         left: caretPosition.left + textareaPosition.left,
       }
     },
-    applySuggestedAddress() {
-      const matchedLength = this.suggestedAddress.matchedLength
-      const suggestedAddress = this.suggestedAddress.address.singleline
+    applySuggestedAddress(address) {
+      const matchedLength = address.matchedLength
+      const suggestedAddress = address.address.singleline
+
       // No need to apply suggestion if length of match and address are equal
       if (matchedLength === suggestedAddress.length) {
         return
       }
+
       this.sendmessage =
         this.sendmessage.substring(0, this.sendmessage.length - matchedLength) +
-        this.suggestedAddress.address.singleline
+        address.address.singleline
       this.hideSuggestedAddress = true
     },
     async markRead() {
@@ -883,9 +924,17 @@ export default {
       })
     },
   },
+  onBeforeUnmount() {
+    if (this.sendmessageLazyTimer) {
+      clearTimeout(this.sendmessageLazyTimer)
+    }
+  },
 }
 </script>
 <style scoped lang="scss">
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
 @import 'https://unpkg.com/floating-vue@^2.0.0-beta.1/dist/style.css';
 
 .mobtext {
@@ -923,5 +972,15 @@ export default {
 
 :deep(textarea) {
   transition: height 1s;
+}
+
+.addresspop {
+  max-height: 6rem;
+  max-width: 30rem;
+  overflow-y: scroll;
+
+  @include media-breakpoint-up(md) {
+    max-height: 10rem;
+  }
 }
 </style>
