@@ -3,8 +3,8 @@
     v-if="adsEnabled"
     class="d-flex justify-content-around small w-100 bg-white border border-top"
   >
-    <div class="text-small text-danger">
-      Hate ads? If you donate, we'll turn them off for a month.
+    <div class="text-small text-danger font-weight-bold">
+      Hate ads? Us too. Donate, and we'll turn them off for a month.
       <nuxt-link to="/adsoff">Learn more</nuxt-link>
     </div>
   </div>

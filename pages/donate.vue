@@ -191,6 +191,7 @@
                 <p>You can donate £1 to help us with Google Pay.</p>
                 <p v-if="showThanks">Thank you for donating!</p>
                 <GooglePay
+                  v-else
                   total-price="1.00"
                   @payment-success="showThanks = true"
                 />
