@@ -9,8 +9,7 @@
             <div>
               <p>
                 <strong
-                  >Hate ads? Your donation could help us turn them off for
-                  everyone.</strong
+                  >Hate ads? Donate and we'll turn them off for a month.</strong
                 >
               </p>
               <p>
@@ -19,14 +18,17 @@
               </p>
               <p v-if="adsOffTarget <= 0">
                 Right now we've raised enough in donations over the last 24
-                hours, so ads are off. Thanks!
+                hours, so ads are off for everyone. Thanks!
               </p>
               <p v-else>
-                <strong
-                  >Right now we still need &pound;{{ adsOffTarget }}</strong
-                >
+                <span v-if="recentDonor"
+                  >You've donated, so ads are off for you.
+                </span>
+                Right now we still need &pound;{{ adsOffTarget }}
+
                 to reach our donation target of &pound;{{ adsOffTargetMax }}
-                over the last 24 hours. Once we reach that, we'll turn ads off.
+                over the last 24 hours. Once we reach that, we'll turn ads off
+                for everyone.
               </p>
             </div>
             <vue-thermometer
@@ -38,11 +40,15 @@
               scale="£"
             />
           </div>
-          <p><strong>Can you help turn ads off for a bit?</strong></p>
+          <p>
+            <strong
+              >If you donate, we'll turn ads off for you for a month:</strong
+            >
+          </p>
           <div class="d-flex flex-wrap justify-content-between mt-2 mb-3">
+            <donation-button value="1" class="mb-1" @clicked="score(1)" />
             <donation-button value="5" class="mb-1" @clicked="score(5)" />
             <donation-button value="10" class="mb-1" @clicked="score(10)" />
-            <donation-button value="15" class="mb-1" @clicked="score(15)" />
           </div>
           <p>Regular monthly donations are especially helpful.</p>
           <p>
