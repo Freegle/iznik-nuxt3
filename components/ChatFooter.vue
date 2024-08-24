@@ -976,7 +976,7 @@ export default {
 
 .addresspop {
   max-height: 6rem;
-  max-width: max(100vw, 30rem);
+  max-width: min(100vw, 30rem);
   overflow-y: scroll;
 
   @include media-breakpoint-up(md) {
