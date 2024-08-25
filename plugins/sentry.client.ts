@@ -240,10 +240,10 @@ export default defineNuxtPlugin((nuxtApp) => {
 
               return null
             } else if (
-              originalExceptionMessage.includes(
+              originalExceptionMessage?.includes(
                 'Attempted to load an infinite number of tiles'
               ) ||
-              originalExceptionMessage.includes(
+              originalExceptionMessage?.includes(
                 "Cannot read properties of null (reading 'latLngToLayerPoint')"
               )
             ) {
