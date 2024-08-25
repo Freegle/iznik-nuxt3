@@ -8,7 +8,9 @@
             class="d-flex flex-column align-content-around text-center font-weight-bold"
           >
             £1
-            <GooglePay total-price="1.00" />
+            <client-only>
+              <GooglePay total-price="1.00" />
+            </client-only>
           </div>
           <div
             class="d-flex flex-column align-content-around text-center font-weight-bold"
