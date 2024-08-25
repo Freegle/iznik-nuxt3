@@ -239,6 +239,16 @@ export default defineNuxtPlugin((nuxtApp) => {
               }
 
               return null
+            } else if (
+              originalExceptionMessage.includes(
+                'Attempted to load an infinite number of tiles'
+              ) ||
+              originalExceptionMessage.includes(
+                "Cannot read properties of null (reading 'latLngToLayerPoint')"
+              )
+            ) {
+              // This is a leaflet error - don't understand it, but not our fault.
+              return null
             }
           }
 
