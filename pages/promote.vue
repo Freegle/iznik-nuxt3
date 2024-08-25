@@ -91,7 +91,7 @@
           </a>
         </div>
       </div>
-      <div v-if="language === 'Welsh'" class="d-flex flex-wrap">
+      <div v-if="language === 'Welsh'" class="d-flex flex-wrap mt-2">
         <div class="mr-1">
           <h3 class="header--size4">A4</h3>
           <a href="/posters/A4Welsh.jpg" target="_blank">
