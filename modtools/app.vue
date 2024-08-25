@@ -46,6 +46,7 @@ import { useMemberStore } from './stores/member'
 import { useModConfigStore } from './stores/modconfig'
 import { useSpammerStore } from './stores/spammer'
 import { useStdmsgStore } from './stores/stdmsg'
+import { usePublicityStore } from '@/stores/publicity'
 
 const route = useRoute()
 const loadingIndicatorThrottle = ref(5000)
@@ -98,6 +99,7 @@ const memberStore = useMemberStore()
 const modconfigStore = useModConfigStore()
 const spammerStore = useSpammerStore()
 const stdmsgStore = useStdmsgStore()
+const publicityStore = usePublicityStore()
 
 miscStore.init(runtimeConfig)
 groupStore.init(runtimeConfig)
@@ -134,6 +136,7 @@ memberStore.init(runtimeConfig)
 modconfigStore.init(runtimeConfig)
 spammerStore.init(runtimeConfig)
 stdmsgStore.init(runtimeConfig)
+publicityStore.init(runtimeConfig)
 
 miscStore.modtools = true
 
