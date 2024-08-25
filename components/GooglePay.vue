@@ -13,6 +13,11 @@ export default {
       required: true,
     },
   },
+  async setup() {
+    console.log('Load Google Pay script')
+    await loadScript('https://pay.google.com/gp/p/js/pay.js')
+    console.log('Google Pay script loaded')
+  },
   data: () => ({
     config: {
       /**
@@ -67,12 +72,10 @@ export default {
     },
   }),
   computed: {},
-  async mounted() {
-    console.log('Load Google Pay script')
-    await loadScript('https://pay.google.com/gp/p/js/pay.js')
-    console.log('Google Pay script loaded')
-    await this.$nextTick()
+  mounted() {
+    console.log('Mounted')
     this.loadGooglePay()
+    console.log('Triggered loadGooglePay')
   },
   methods: {
     loadGooglePay() {
