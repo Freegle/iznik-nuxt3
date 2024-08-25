@@ -13,21 +13,21 @@
     <!-- eslint-disable-next-line-->
     <b-card-body v-html="item.iframe" />
     <b-card-footer :key="'sharelist-' + actioned.length">
-      <b-btn variant="white" class="mb-1 mr-1" @click="shareAll">
+      <b-button variant="white" class="mb-1 mr-1" @click="shareAll">
         <v-icon name="share-alt" />
         Share all
-      </b-btn>
-      <b-btn v-for="group in groups" :key="'socialaction-' + group.id" :variant="isActioned(group.id) ? 'white' : 'primary'" class="mb-1 mr-1"
+      </b-button>
+      <b-button v-for="group in groups" :key="'socialaction-' + group.id" :variant="isActioned(group.id) ? 'white' : 'primary'" class="mb-1 mr-1"
         :disabled="isActioned(group.id)" @click="share(group)">
         <v-icon v-if="isActioned(group.id)" name="check" />
         <v-icon v-else-if="isBusy(group.id)" name="sync" class="fa-spin" />
         <v-icon v-else name="share-alt" />
         {{ group.namedisplay }}
-      </b-btn>
-      <b-btn variant="danger" class="mb-1 mr-1" @click="hideAll">
+      </b-button>
+      <b-button variant="danger" class="mb-1 mr-1" @click="hideAll">
         <v-icon name="trash-alt" />
         Hide all
-      </b-btn>
+      </b-button>
     </b-card-footer>
   </b-card>
 </template>
