@@ -643,6 +643,34 @@ export default {
     }
   }
 
+  :deep(.header-description.noAttachments) {
+    grid-row: 5 / 6;
+
+    .textbody {
+      margin-top: 50px;
+      font-size: 1rem;
+      height: 100px;
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+    }
+
+    .description {
+      display: block !important;
+    }
+  }
+
+  :deep(.messagecard.noAttachments) {
+    .image-wrapper {
+      button {
+        background-color: transparent;
+      }
+
+      .thumbnail img {
+        opacity: 0;
+      }
+    }
+  }
+
   .onecolumn {
     height: 100%;
 
@@ -656,7 +684,7 @@ export default {
       }
     }
 
-    :deep(.freegled),
+    :deep(.freegleg),
     :deep(.promised),
     :deep(.image-wrapper) {
       height: unset;
