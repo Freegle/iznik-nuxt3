@@ -564,7 +564,7 @@ export default {
     possibleAddressesLower() {
       return this.possibleAddresses.map((addr) => {
         const thisone = addr
-        thisone.singlelower = addr.singleline.toLowerCase()
+        thisone.singlelower = addr.singleline.toLowerCase().match(/\S+/g) || []
         return thisone
       })
     },
@@ -582,8 +582,7 @@ export default {
 
         if (sendMessageLength >= 3 && possibleAddressesLength) {
           for (let i = 0; i < possibleAddressesLength; i++) {
-            const singleLower =
-              this.possibleAddressesLower[i].singlelower.match(/\S+/g) || []
+            const singleLower = this.possibleAddressesLower[i].singlelower
 
             const LCS = findLengthOfLCS(
               sendLower.length,
