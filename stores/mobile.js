@@ -153,7 +153,12 @@ export const useMobileStore = defineStore({ // Do not persist
                 k: params.k,
               })
             }
-            router.push(route)
+            console.log('appUrlOpen soon',route)
+            setTimeout(() => {
+              console.log('appUrlOpen',route)
+              router.push(route)
+            }, 1500)
+            
           }
         })
       }
@@ -403,7 +408,10 @@ export const useMobileStore = defineStore({ // Do not persist
         console.log('router.currentRoute', router.currentRoute)
         if (router.currentRoute.path !== this.route) {
           console.log('GO TO ', this.route)
-          router.push({ path: this.route })  // Often doesn't work as intended when starting app from scratch as this routing is too early. Delaying doesn't seem to help.
+          //setTimeout(() => {
+            router.push(this.route)
+          //}, 1500)
+        //router.push({ path: this.route })  // Often doesn't work as intended when starting app from scratch as this routing is too early. Delaying doesn't seem to help.
         }
       }
 
