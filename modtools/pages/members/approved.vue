@@ -58,8 +58,6 @@ export default {
   data: function() {
     return {
       collection: 'Approved',
-      search: null,
-      filter: '0',
       showAddMember: false,
       showBanMember: false,
     }

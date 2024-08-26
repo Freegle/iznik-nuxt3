@@ -1,6 +1,6 @@
 import { useAuthStore } from '@/stores/auth'
 import { useGroupStore } from '@/stores/group'
-import { useMessageStore } from '../../stores/message'
+import { useMemberStore } from '../stores/member'
 import { useMiscStore } from '@/stores/misc'
 
 const busy = ref(false)
@@ -8,6 +8,8 @@ const context = ref(null)
 const groupid = ref(0)
 const group = ref(null)
 const limit = ref(2)
+const search = ref(null)
+const filter = ref('0')
 const workType = ref(null)
 const show = ref(0)
 
@@ -19,26 +21,31 @@ const nextAfterRemoved = ref(null)
 
 const distance = ref(10)
 
-const summary = computed(() => {
+/*const summary = computed(() => {
   const miscStore = useMiscStore()
   const ret = miscStore.get('modtoolsMessagesApprovedSummary')
   return ret === undefined ? false : ret
-})
+})*/
 
-// mixin/modMessagesPage
+// mixin/modMembersPage
 const members = computed(() => {
-  return []
-  const messageStore = useMessageStore()
-  let messages
+  console.log('useModMembers members',groupid.value)
+  const memberStore = useMemberStore()
+  let members
 
   if (groupid.value) {
-    messages = messageStore.getByGroup(groupid.value)
+    members = memberStore.getByGroup(groupid.value)
   } else {
-    messages = messageStore.all
+    members = memberStore.all
   }
-  // console.log('useModMessages messages', groupid.value, messages.length)
-  // We need to sort as otherwise new messages may appear at the end.
-  messages.sort((a, b) => {
+  console.log('useModMembers members members')
+  if( !members){
+    console.log('useModMembers no members')
+    return []
+  }
+  console.log('useModMembers members', groupid.value, members.length)
+  // We need to sort as otherwise new members may appear at the end.
+  members.sort((a, b) => {
     if (a.groups && b.groups) {
       return (
         new Date(b.groups[0].arrival).getTime() -
@@ -49,22 +56,23 @@ const members = computed(() => {
     }
   })
 
-  return messages
+  console.log('useModMembers members sorted')
+  return members
 })
 
 const visibleMembers = computed(() => {
   const mbrs = members.value
-  // console.log('useModMessages visibleMembers', show.value, mbrs?.length)
+  // console.log('useModMembers visibleMembers', show.value, mbrs?.length)
   if (show.value === 0 || !mbrs || mbrs.length === 0) return []
   return mbrs.slice(0, show.value)
 })
 
 watch(groupid, async (newVal) => {
-  //console.log("useModMessages watch groupid", newVal)
+  //console.log("useModMembers watch groupid", newVal)
   context.value = null
   show.value = 0
-  const messageStore = useMessageStore()
-  messageStore.clear()
+  const memberStore = useMemberStore()
+  memberStore.clear()
 
   const groupStore = useGroupStore()
   await groupStore.fetchMT({
@@ -74,12 +82,24 @@ watch(groupid, async (newVal) => {
 })
 
 watch(group, async (newValue, oldValue) => {
-  //console.log("===useModMessages watch group", newValue, oldValue, groupid.value)
+  console.log("===useModMembers watch group", newValue, oldValue, groupid.value)
   // We have this watch because we may need to fetch a group that we have remembered.  The mounted()
   // call may happen before we have restored the persisted state, so we can't initiate the fetch there.
   if (oldValue === null || oldValue.id !== groupid.value) {
     const groupStore = useGroupStore()
     await groupStore.fetch(groupid.value)
+    
+    const memberStore = useMemberStore()
+    await memberStore.fetchMembers({
+      groupid: groupid.value,
+      collection: collection.value,
+      modtools: true,
+      summary: false,
+      context: context.value,
+      limit: limit.value,
+      search: search.value,
+      filter: filter.value
+    })
   }
 })
 
@@ -90,18 +110,18 @@ export function setupModMembers() {
     try {
       const authStore = useAuthStore()
       const work = authStore.work
-      //console.log(">>>>useModMessages get work", workType.value, work)
+      //console.log(">>>>useModMembers get work", workType.value, work)
       if (!work) return 0
       const count = workType.value ? work[workType.value] : 0
       return count
     } catch (e) {
-      console.log('>>>>useModMessages exception', e.message)
+      console.log('>>>>useModMembers exception', e.message)
       return 0
     }
   })
   watch(work, async (newVal, oldVal) => {
     // TODO: Only want this to run if on Pending page
-    //console.log('<<<<useModMessages watch work', newVal, oldVal, modalOpen.value)
+    //console.log('<<<<useModMembers watch work', newVal, oldVal, modalOpen.value)
     let doFetch = false
 
     /* TODO if (modalOpen.value && Date.now() - modalOpen.value > 10 * 60 * 1000) {
@@ -111,14 +131,14 @@ export function setupModMembers() {
     }*/
 
 
-    /* TODO const messageStore = useMessageStore()
+    /* TODO const memberStore = useMemberStore()
     const miscStore = useMiscStore()
 
     //if (!modalOpen.value) {
     if (newVal > oldVal) {
       // There's new stuff to fetch.
       //console.log('Fetch')
-      await messageStore.clearContext()
+      await memberStore.clearContext()
       doFetch = true
     } else {
       const visible = miscStore.get('visible')
@@ -127,17 +147,17 @@ export function setupModMembers() {
       if (!visible) {
         // If we're not visible, then clear what we have in the store.  We don't want to do that under our own
         // feet, but if we do this then we will pick up changes from other people and avoid confusion.
-        await messageStore.clear()
+        await memberStore.clear()
         doFetch = true
       }
     }
 
     if (doFetch) {
       //console.log('Fetch')
-      await messageStore.clearContext()
+      await memberStore.clearContext()
       context.value = null
 
-      await messageStore.fetchMessagesMT({
+      await memberStore.fetchMembersMT({
         groupid: groupid.value,
         collection: collection.value,
         modtools: true,
@@ -146,15 +166,15 @@ export function setupModMembers() {
       })
 
       // Force them to show.
-      let messages
+      let members
 
       if (groupid.value) {
-        messages = messageStore.getByGroup(groupid.value)
+        members = memberStore.getByGroup(groupid.value)
       } else {
-        messages = messageStore.all
+        members = memberStore.all
       }
 
-      show.value = messages.length
+      show.value = members.length
     }
     //}
     */
@@ -166,6 +186,8 @@ export function setupModMembers() {
     group,
     groupid,
     limit,
+    search,
+    filter,
     workType,
     show,
     collection,
@@ -173,7 +195,7 @@ export function setupModMembers() {
     memberTerm,
     nextAfterRemoved,
     distance,
-    summary,
+    //summary,
     members,
     visibleMembers,
     work

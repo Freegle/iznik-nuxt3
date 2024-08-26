@@ -21,6 +21,67 @@ export const useMemberStore = defineStore({
       this.instance = 1
       this.ratings = []
     },
+    async fetchMembers(params) {
+      // Watch out for the store being cleared under the feet of this fetch. If that happens then we throw away the
+      // results.
+      const instance = this.instance
+  
+      if (params.context) {
+        // Ensure the context is a real object, in case it has been in the store.
+        const ctx = cloneDeep(params.context)
+        params.context = ctx
+      } else if (this.context) {
+        params.context = this.context
+      }
+  
+      const {
+        members,
+        context,
+        ratings
+      } = await api(this.config).memberships.fetchMembers(params)
+  
+      if (this.instance === instance) {
+        for (let i = 0; i < members.length; i++) {
+          // The server doesn't return the collection but this is useful to have in the store.
+          members[i].collection = params.collection
+        }
+
+        console.log('members',members)
+        this.addAll(members)
+        console.log('fetchMembers ADDED')
+  
+        if (ratings && ratings.length) {
+          this.ratings = ratings
+        }
+  
+        this.context = context
+        console.log('fetchMembers DONE')
+      }
+    },
+    addAll(members){
+      members.forEach(member => {
+        const existing = this.list.findIndex(obj => {
+          return parseInt(obj.id) === parseInt(member.id)
+        })
+  
+        this.list[member.id] = member
+        /*if (existing !== -1) {
+          this.list[member.id] = member
+        } else {
+          this.list.push(item)
+        }*/
+      })
+      },
+  
+    async fetch(params) {
+      // Don't log errors on fetches of individual members
+      const { member } = await this.$api.memberships.fetch(params, data => {
+        return data.ret !== 3
+      })
+  
+      commit('add', member)
+    },
+  
     async remove(params) {
       // Remove approved  member.
       await api(this.config).memberships.remove(params.userid, params.groupid)
@@ -56,11 +117,12 @@ export const useMemberStore = defineStore({
     },
   },
   getters: {
-    /*get: (state) => (id) => {
-      return state.listById(id)
+    all: (state) => Object.values(state.list),
+    getByGroup: (state) => (groupid) => {
+      const ret = state.list.filter(member => {
+        return parseInt(member.groupid) === parseInt(groupid)
+      })
+      return ret
     },
-    getByUserId: (state) => (id) => {
-      return null // TODO
-    },*/
   },
 })
