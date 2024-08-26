@@ -153,11 +153,9 @@ export const useMobileStore = defineStore({ // Do not persist
                 k: params.k,
               })
             }
-            console.log('appUrlOpen soon',route)
             setTimeout(() => {
-              console.log('appUrlOpen',route)
               router.push(route)
-            }, 1500)
+            }, 500)
             
           }
         })
