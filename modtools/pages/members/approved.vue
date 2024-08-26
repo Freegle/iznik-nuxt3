@@ -4,6 +4,7 @@
       <ScrollToTop :prepend="groupName" />
       <div class="d-flex justify-content-between flex-wrap">
         <GroupSelect v-model="groupid" modonly remember="membersapproved" />
+        groupid {{groupid}}
         <div v-if="groupid" class="d-flex">
           <ModMemberTypeSelect :filter="filter" />
           <b-button v-if="groupid" variant="white" class="ml-2" @click="addMember">
@@ -20,8 +21,8 @@
         <ModMemberSearchbox v-model="search" :groupid="groupid" />
       </div>
       <div v-if="groupid">
-        <p v-if="memberCount" class="mt-1">
-          This group has {{ memberCount | pluralize('member', { includeNumber: true }) }}.
+        <p v-if="group" class="mt-1">
+          This group has {{ withplural('member', group.membercount, true) }}.
         </p>
         <NoticeMessage v-if="!members.length && !busy" class="mt-2">
           There are no members to show at the moment.
@@ -36,18 +37,22 @@
   </div>
 </template>
 <script>
+import { useGroupStore } from '@/stores/group'
 import { useMiscStore } from '@/stores/misc'
 import { setupModMembers } from '../../composables/useModMembers'
+import { withplural } from '../composables/usePluralize'
 
 export default {
   async setup() {
+    const groupStore = useGroupStore()
     const miscStore = useMiscStore()
     const modMembers = setupModMembers()
     //modMembers.collection.value = 'Pending'
     //modMembers.workType.value = 'pending'
     return {
+      groupStore,
       miscStore,
-      ...modMembers // busy, context, group, groupid, limit, workType, show, collection, messageTerm, memberTerm, distance, summary, messages, visibleMessages, work,
+      ...modMembers // busy, context, group, groupid, limit, workType, show, collection, messageTerm, memberTerm, distance, summary, members, visibleMembers, work,
     }
   },
   data: function() {
@@ -55,17 +60,15 @@ export default {
       collection: 'Approved',
       search: null,
       filter: '0',
-      memberCount: 0,
       showAddMember: false,
       showBanMember: false,
     }
   },
   computed: {
     groupName() {
-      if (this.groupid) {
-        //TODO return this.$store.getters['group/get'](this.groupid)?.namedisplay
+      if (this.group) {
+        return this.group.namedisplay
       }
-
       return null
     }
   },
@@ -75,10 +78,17 @@ export default {
         // Cleared box.
         //TODO this.$router.push('/modtools/members/approved/' + this.groupid)
       }
+    },
+    groupid(newVal) {
+      console.log('TODO APPROVED groupid',newVal)
+      if (newVal) {
+      }
     }
   },
   async mounted() {
+    console.log("approved mounted")
     if (!this.groupid) {
+      console.log("approved mounted no groupid")
       // If we have not selected a group, check if we are only a mod on one.  If so, then go to that group so that
       // we don't need to bother selecting it.  We do this here because the interaction with createGroupRoute would
       // be complex.
@@ -94,13 +104,6 @@ export default {
       if (countmod === 1) {
         //TODO this.$router.push('/modtools/members/approved/' + lastmod)
       }
-    } else {
-      // Make sure we have the member count.
-      await this.$store.dispatch('group/fetch', {
-        id: this.groupid
-      })
-      //TODO const group = this.$store.getters['group/get'](this.groupid)
-      //TODO this.memberCount = group.membercount
     }
   },
   methods: {
