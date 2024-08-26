@@ -104,7 +104,7 @@ export default {
     }
   },
   methods: {
-    addMember() {
+    async addMember() {
       this.showAddMember = true
       this.$refs.addmodal?.show()
     },

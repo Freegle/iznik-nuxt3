@@ -1,7 +1,7 @@
 <template>
   <div>
     <b-modal ref="modal" id="banMemberModal" title="Ban Member" size="lg" no-stacking>
-      <template slot="default">
+      <template #default>
         <NoticeMessage variant="info" class="mb-2">
           This will ban someone from your community. Please be responsible in how you use this feature.
         </NoticeMessage>
@@ -11,7 +11,7 @@
         </p>
         <b-form-input v-model="userid" type="number" placeholder="Enter their userid" class="mt-2 mb-2" />
       </template>
-      <template slot="modal-footer" slot-scope="{ cancel }">
+      <template #footer>
         <b-button variant="white" @click="hide">
           Close
         </b-button>
@@ -27,8 +27,8 @@ import { useModal } from '~/composables/useModal'
 
 export default {
   setup() {
-    const { modal, hide } = useModal()
-    return { modal, hide }
+    const { modal, show, hide } = useModal()
+    return { modal, show, hide }
   },
   props: {
     groupid: {

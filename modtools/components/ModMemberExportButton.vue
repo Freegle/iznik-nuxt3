@@ -6,7 +6,10 @@
       <v-icon icon="download" /> Export
     </b-button>
     <b-modal v-if="showExportModal" ref="exportmodal" id="exportmodal" title="Member Export" no-stacking>
-      <template slot="default">
+      <template #default>
+        <p>
+          TODO
+        </p>
         <p>
           This will export the members of this community. It's very slow, but you probably won't need to do it often.
         </p>
@@ -14,7 +17,7 @@
           <b-progress-bar :value="progressValue" />
         </b-progress>
       </template>
-      <template slot="modal-footer">
+      <template #footer>
         <b-button variant="white" @click="cancelit">
           Cancel
         </b-button>
@@ -29,8 +32,8 @@ import saveAs from 'save-file'
 
 export default {
   setup() {
-    const { modal, hide } = useModal()
-    return { modal, hide }
+    const { modal, show, hide } = useModal()
+    return { modal, show, hide }
   },
   props: {
     groupid: {
@@ -59,8 +62,9 @@ export default {
     }
   },
   methods: {
-    download() {
+    async download() {
       this.showExportModal = true
+      await nextTick()
       this.$refs.exportmodal?.show()
       this.exportChunk()
     },

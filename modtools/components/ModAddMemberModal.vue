@@ -37,8 +37,8 @@ import { useModal } from '~/composables/useModal'
 
 export default {
   setup() {
-    const { modal, hide } = useModal()
-    return { modal, hide }
+    const { modal, show, hide } = useModal()
+    return { modal, show, hide }
   },
   props: {
     groupid: {
