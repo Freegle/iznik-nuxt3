@@ -3,9 +3,9 @@
     <b-button :disabled="!admin" variant="white"
       :title="admin ? 'Export' : 'This is now disabled for GDPR reasons.  If you wish to diaffiliate from Freegle please mail newgroups@ilovefreegle.org'"
       @click="download">
-      <v-icon name="download" /> Export
+      <v-icon icon="download" /> Export
     </b-button>
-    <b-modal id="exportmodal" v-model="showModal" title="Member Export" no-stacking>
+    <b-modal v-if="showExportModal" ref="exportmodal" id="exportmodal" title="Member Export" no-stacking>
       <template slot="default">
         <p>
           This will export the members of this community. It's very slow, but you probably won't need to do it often.
@@ -23,10 +23,15 @@
   </div>
 </template>
 <script>
+import { useModal } from '~/composables/useModal'
 import saveAs from 'save-file'
 //const createCsvWriter = require('csv-writer').createObjectCsvStringifier
 
 export default {
+  setup() {
+    const { modal, hide } = useModal()
+    return { modal, hide }
+  },
   props: {
     groupid: {
       type: Number,
@@ -35,7 +40,7 @@ export default {
   },
   data: function () {
     return {
-      showModal: false,
+      showExportModal: false,
       context: null,
       cancelled: false,
       limit: 100,
@@ -55,12 +60,13 @@ export default {
   },
   methods: {
     download() {
-      this.showModal = true
+      this.showExportModal = true
+      this.$refs.exportmodal?.show()
       this.exportChunk()
     },
     cancelit() {
       this.cancelled = true
-      this.showModal = false
+      this.showExportModal = false
     },
     async exportChunk() {
       console.log('exportChunk TODO')
@@ -173,7 +179,7 @@ export default {
         const blob = new Blob([str], { type: 'text/csv;charset=utf-8' })
         await saveAs(blob, 'members.csv')
 
-        this.showModal = false
+        this.showExportModal = false
       }
     }
   }

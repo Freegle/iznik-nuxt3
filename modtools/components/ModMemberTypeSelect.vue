@@ -1,5 +1,5 @@
 <template>
-  <b-select v-model="type">
+  <b-form-select v-model="type">
     <option value="0">
       All members
     </option>
@@ -15,12 +15,12 @@
     <option value="5">
       Banned
     </option>
-  </b-select>
+  </b-form-select>
 </template>
 <script>
 export default {
   props: {
-    value: {
+    filter: {
       type: String,
       required: true
     }
@@ -28,7 +28,7 @@ export default {
   computed: {
     type: {
       get() {
-        return this.value
+        return this.filter
       },
       set(val) {
         this.$emit('input', val + '')

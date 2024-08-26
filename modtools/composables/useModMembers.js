@@ -26,7 +26,8 @@ const summary = computed(() => {
 })
 
 // mixin/modMessagesPage
-const messages = computed(() => {
+const members = computed(() => {
+  return []
   const messageStore = useMessageStore()
   let messages
 
@@ -51,11 +52,11 @@ const messages = computed(() => {
   return messages
 })
 
-const visibleMessages = computed(() => {
-  const msgs = messages.value
-  // console.log('useModMessages visibleMessages', show.value, msgs?.length)
-  if (show.value === 0 || !msgs || msgs.length === 0) return []
-  return msgs.slice(0, show.value)
+const visibleMembers = computed(() => {
+  const mbrs = members.value
+  // console.log('useModMessages visibleMembers', show.value, mbrs?.length)
+  if (show.value === 0 || !mbrs || mbrs.length === 0) return []
+  return mbrs.slice(0, show.value)
 })
 
 watch(groupid, async (newVal) => {
@@ -109,7 +110,8 @@ export function setupModMembers() {
       modalOpen.value = null
     }*/
 
-    const messageStore = useMessageStore()
+
+    /* TODO const messageStore = useMessageStore()
     const miscStore = useMiscStore()
 
     //if (!modalOpen.value) {
@@ -155,6 +157,7 @@ export function setupModMembers() {
       show.value = messages.length
     }
     //}
+    */
   })
 
   return {
@@ -171,8 +174,8 @@ export function setupModMembers() {
     nextAfterRemoved,
     distance,
     summary,
-    messages,
-    visibleMessages,
+    members,
+    visibleMembers,
     work
   }
 }

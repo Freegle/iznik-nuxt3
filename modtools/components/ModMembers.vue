@@ -11,15 +11,16 @@ import { useAuthStore } from '~/stores/auth'
 import { useGroupStore } from '~/stores/group';
 import { useMessageStore } from '~/stores/message'
 import { useMiscStore } from '~/stores/misc';
+import { setupModMembers } from '../composables/useModMembers'
 
 const authStore = useAuthStore()
 const groupStore = useGroupStore()
 const messageStore = useMessageStore()
 const miscStore = useMiscStore()
 
-const visibleMembers = computed(() => {
-  return []
-})
+const {
+  busy, context, group, groupid, limit, workType, show, collection, messageTerm, memberTerm, nextAfterRemoved, distance, summary, members, visibleMembers, work,
+} = setupModMembers()
 
 onMounted(async () => {
   console.log('###ModMembers onMounted')

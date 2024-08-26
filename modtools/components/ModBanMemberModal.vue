@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-modal id="banMemberModal" v-model="showModal" title="Ban Member" size="lg" no-stacking>
+    <b-modal ref="modal" id="banMemberModal" title="Ban Member" size="lg" no-stacking>
       <template slot="default">
         <NoticeMessage variant="info" class="mb-2">
           This will ban someone from your community. Please be responsible in how you use this feature.
@@ -9,10 +9,10 @@
           This could be someone who is already a member, someone who has left, or someone who has not joined yet. You can find their userid from Logs
           or by mailing Support.
         </p>
-        <b-input v-model="userid" type="number" placeholder="Enter their userid" class="mt-2 mb-2" />
+        <b-form-input v-model="userid" type="number" placeholder="Enter their userid" class="mt-2 mb-2" />
       </template>
       <template slot="modal-footer" slot-scope="{ cancel }">
-        <b-button variant="white" @click="cancel">
+        <b-button variant="white" @click="hide">
           Close
         </b-button>
         <b-button variant="primary" :disabled="!userid" @click="ban">
@@ -23,10 +23,13 @@
   </div>
 </template>
 <script>
-//import modal from '@/mixins/modal'
+import { useModal } from '~/composables/useModal'
 
 export default {
-  //mixins: [modal],
+  setup() {
+    const { modal, hide } = useModal()
+    return { modal, hide }
+  },
   props: {
     groupid: {
       type: Number,

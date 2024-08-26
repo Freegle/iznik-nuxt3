@@ -5,17 +5,17 @@
       <div class="d-flex justify-content-between flex-wrap">
         <GroupSelect v-model="groupid" modonly remember="membersapproved" />
         <div v-if="groupid" class="d-flex">
-          <ModMemberTypeSelect v-model="filter" />
+          <ModMemberTypeSelect :filter="filter" />
           <b-button v-if="groupid" variant="white" class="ml-2" @click="addMember">
-            <v-icon name="plus" /> Add
+            <v-icon icon="plus" /> Add
           </b-button>
           <b-button v-if="groupid" variant="white" class="ml-2" @click="banMember">
-            <v-icon name="trash-alt" /> Ban
+            <v-icon icon="trash-alt" /> Ban
           </b-button>
-          <ModAddMemberModal v-if="groupid" ref="addmodal" :groupid="groupid" />
-          <ModBanMemberModal v-if="groupid" ref="banmodal" :groupid="groupid" />
+          <ModAddMemberModal v-if="showAddMember" ref="addmodal" :groupid="groupid" @hidden="showAddMember = false"/>
+          <ModBanMemberModal v-if="showBanMember" ref="banmodal" :groupid="groupid" @hidden="showBanMember = false"/>
           <ModMergeButton class="ml-2" />
-          <ModMemberExportButton v-if="groupid" class="ml-2" :groupid="groupid" />
+          <ModMemberExportButton class="ml-2" :groupid="groupid" />
         </div>
         <ModMemberSearchbox v-model="search" :groupid="groupid" />
       </div>
@@ -23,10 +23,6 @@
         <p v-if="memberCount" class="mt-1">
           This group has {{ memberCount | pluralize('member', { includeNumber: true }) }}.
         </p>
-        <div v-for="member in visibleMembers" :key="'memberlist-' + member.id" class="p-0 mt-2">
-          <ModMember :member="member" :actions="false" :expand-comments="parseInt(filter) === 1" />
-        </div>
-
         <NoticeMessage v-if="!members.length && !busy" class="mt-2">
           There are no members to show at the moment.
         </NoticeMessage>
@@ -59,7 +55,9 @@ export default {
       collection: 'Approved',
       search: null,
       filter: '0',
-      memberCount: 0
+      memberCount: 0,
+      showAddMember: false,
+      showBanMember: false,
     }
   },
   computed: {
@@ -107,11 +105,11 @@ export default {
   },
   methods: {
     addMember() {
-      // TODO Have showaddmodal
+      this.showAddMember = true
       this.$refs.addmodal?.show()
     },
     banMember() {
-      // TODO Have showbanmodal
+      this.showBanMember = true
       this.$refs.banmodal?.show()
     }
   }
