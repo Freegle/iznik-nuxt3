@@ -17,7 +17,7 @@
           <ModMergeButton class="ml-2" />
           <ModMemberExportButton class="ml-2" :groupid="groupid" />
         </div>
-        <ModMemberSearchbox v-model="search" :groupid="groupid" />
+        <ModMemberSearchbox @search="this.search = $event" />
       </div>
       <div v-if="groupid && group">
         <p class="mt-1">
@@ -79,11 +79,16 @@ export default {
     }
   },
   watch: {
-    filter(newVal){
+    filter(newVal) {
       console.log('NEW filter', newVal)
       this.bump++
       this.memberStore.clear()
-    }
+    },
+    search(newVal) {
+      console.log('NEW search', newVal)
+      this.bump++
+      this.memberStore.clear()
+    },
     /*search(newVal) {
       if (!newVal) {
         // Cleared box.
@@ -144,10 +149,9 @@ export default {
             filter: this.filter
           })
 
-          if( this.show < this.members.length){
+          if (this.show < this.members.length) { // Just inc by one rather than set to this.members.length
             this.show++
           }
-          //this.show = this.members.length
           if (this.show === this.group.membercount) {
             $state.complete()
           }
@@ -165,7 +169,7 @@ export default {
     banMember() {
       this.showBanMember = true
       this.$refs.banmodal?.show()
-    }
+    },
   }
 }
 </script>
