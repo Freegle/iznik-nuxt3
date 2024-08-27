@@ -490,7 +490,7 @@ export default {
     },
     height() {
       // Bootstrap Vue Next doesn't yet have autoresizing.
-      const height = Math.min(6, Math.round(this.sendmessage?.length / 60))
+      const height = Math.min(6, Math.round(this.sendmessageLazy?.length / 60))
 
       return 'height: ' + (height + 6) + 'em'
     },
