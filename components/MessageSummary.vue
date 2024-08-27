@@ -23,6 +23,7 @@
         :id="id"
         class="mb-1 header-history"
         :display-message-link="mod"
+        :message="message"
       />
       <div class="mb-1 header-description">
         <div

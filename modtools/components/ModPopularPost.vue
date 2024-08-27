@@ -25,23 +25,11 @@
       <p>
         Hop over to &lt;shortlink will be automatically inserted here&gt; to see what else is being given away, or to ask for stuff you'd like.
       </p>
-      <MessageSummary :id="message.id" :replyable="false" />
+      <MessageSummary :id="message.id" :replyable="false" :message="message" />
     </b-card-body>
     <b-card-footer>
-      <SpinButton
-        variant="white"
-        name="share-alt"
-        :label="'Share on ' + group.namedisplay"
-        @handle="share"
-        class="mt-1 mb-1"
-      />
-      <SpinButton
-        variant="white"
-        name="trash-alt"
-        :label="'Hide for ' + group.namedisplay"
-        @handle="hide"
-        class="mt-1 mb-1"
-      />
+      <SpinButton variant="white" icon-name="share-alt" :label="'Share on ' + group.namedisplay" @handle="share" class="mt-1 mb-1" />
+      <SpinButton variant="white" icon-name="trash-alt" :label="'Hide for ' + group.namedisplay" @handle="hide" class="mt-1 mb-1" />
     </b-card-footer>
   </b-card>
 </template>
@@ -63,7 +51,7 @@ export default {
       required: true
     }
   },
-  data: function() {
+  data: function () {
     return {
       show: true
     }
@@ -73,7 +61,7 @@ export default {
       return this.messageStore.byId(this.item.msgid)
     },
     group() {
-      return this.groupStore.byId(this.item.groupid)
+      return this.groupStore.get(this.item.groupid)
     }
   },
   mounted() {
