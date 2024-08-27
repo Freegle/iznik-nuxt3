@@ -20,15 +20,15 @@
 <script>
 export default {
   props: {
-    filter: {
+    value: {
       type: String,
-      required: true
+      required: false
     }
   },
   computed: {
-    type: {
+    type: { // Seems to work when called with v-model="xxx"
       get() {
-        return this.filter
+        return this.value
       },
       set(val) {
         this.$emit('input', val + '')

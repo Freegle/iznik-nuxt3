@@ -54,10 +54,9 @@
         <NoticeMessage v-if="member.bandate">
           Banned <span :title="datetime(member.bandate)">{{ timeago(member.bandate) }}</span> <span v-if="member.bannedby">by #{{ member.bannedby
             }}</span> - check logs for info.
-          <b-button variant="link" size="sm" @click="confirmUnban">
+          <b-button variant="link" size="sm" @click="confirmUnban(member)">
             Unban
           </b-button>
-          <ConfirmModal ref="unbanConfirm" :title="'Unban #' + member.userid" @confirm="unban" />
         </NoticeMessage>
         <div class="d-flex justify-content-between flex-wrap">
           <SettingsGroup v-if="groupid && member.ourpostingstatus" :groupid="groupid" :emailfrequency="member.emailfrequency"
@@ -137,6 +136,7 @@
     </b-card>
     <ModPostingHistoryModal v-if="showPostingHistoryModal" ref="history" :user="member" :type="type" @hidden="showPostingHistoryModal = false" />
     <ModLogsModal v-if="showLogsModal" ref="logs" :userid="member.userid" @hidden="showLogsModal = false" />
+    <ConfirmModal v-if="showUnbanModal" ref="unbanConfirm" :title="showUnbanModalTitle" @confirm="unban" @hidden="showUnbanModal = false" />
   </div>
 </template>
 <script>
@@ -193,6 +193,8 @@ export default {
       allmemberships: false,
       showPostingHistoryModal: false,
       showLogsModal: false,
+      showUnbanModal: false,
+      showUnbanModalTitle: '',
       banned: false
     }
   },
@@ -367,12 +369,13 @@ export default {
         newslettersallowed: e.value
       })
     },
-    confirmUnban() {
-      this.waitForRef('unbanConfirm', () => {
-        this.$refs.unbanConfirm.show()
-      })
+    confirmUnban(member) {
+      this.showUnbanModal = true
+      this.showUnbanModalTitle = 'Unban #77' + member.userid
+      this.$refs.unbanConfirm?.show()
     },
     async unban() {
+      this.showUnbanModal = false
       await this.memberStore.unban({
         userid: this.user.id,
         groupid: this.groupid

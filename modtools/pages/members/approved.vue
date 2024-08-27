@@ -5,7 +5,7 @@
       <div class="d-flex justify-content-between flex-wrap">
         <GroupSelect v-model="groupid" modonly remember="membersapproved" />
         <div v-if="groupid" class="d-flex">
-          <ModMemberTypeSelect :filter="filter" />
+          <ModMemberTypeSelect v-model="filter" />
           <b-button v-if="groupid" variant="white" class="ml-2" @click="addMember">
             <v-icon icon="plus" /> Add
           </b-button>
@@ -56,7 +56,6 @@ export default {
     const miscStore = useMiscStore()
     const modMembers = setupModMembers()
     modMembers.collection.value = 'Approved'
-    //modMembers.workType.value = 'pending'
     return {
       groupStore,
       memberStore,
@@ -66,7 +65,6 @@ export default {
   },
   data: function () {
     return {
-      //collection: 'Approved',
       showAddMember: false,
       showBanMember: false,
       bump: 0
@@ -81,6 +79,11 @@ export default {
     }
   },
   watch: {
+    filter(newVal){
+      console.log('NEW filter', newVal)
+      this.bump++
+      this.memberStore.clear()
+    }
     /*search(newVal) {
       if (!newVal) {
         // Cleared box.
