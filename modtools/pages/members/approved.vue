@@ -4,7 +4,6 @@
       <ScrollToTop :prepend="groupName" />
       <div class="d-flex justify-content-between flex-wrap">
         <GroupSelect v-model="groupid" modonly remember="membersapproved" />
-        groupid {{ groupid }}
         <div v-if="groupid" class="d-flex">
           <ModMemberTypeSelect :filter="filter" />
           <b-button v-if="groupid" variant="white" class="ml-2" @click="addMember">
@@ -82,7 +81,7 @@ export default {
     }
   },
   watch: {
-    search(newVal) {
+    /*search(newVal) {
       if (!newVal) {
         // Cleared box.
         //TODO this.$router.push('/modtools/members/approved/' + this.groupid)
@@ -92,7 +91,7 @@ export default {
       console.log('TODO APPROVED groupid', newVal)
       if (newVal) {
       }
-    }
+    }*/
   },
   async mounted() {
     console.log("approved mounted")
@@ -121,19 +120,17 @@ export default {
         $state.complete()
         return
       }
-      console.log('approved loadMore', this.groupid, this.show, this.members.length, this.group.membercount)
       this.busy = true
       if (this.show < this.members.length) {
         this.show++
         $state.loaded()
       } else {
-        console.log('Actually loadMore', this.members.length)
         if (this.members.length === this.group.membercount) {
           $state.complete()
         } else {
           this.limit += this.distance
 
-          console.log('fetchMembers', {
+          await this.memberStore.fetchMembers({
             groupid: this.groupid,
             collection: this.collection,
             modtools: true,
@@ -143,24 +140,11 @@ export default {
             search: this.search,
             filter: this.filter
           })
-          //if (this.limit < 6) {
-            await this.memberStore.fetchMembers({
-              groupid: this.groupid,
-              collection: this.collection,
-              modtools: true,
-              summary: false,
-              context: this.context,
-              limit: this.limit,
-              search: this.search,
-              filter: this.filter
-            })
-          //} else{
-          //  $state.loaded()
-          //  return
-          //}
-          console.log('NOW', this.members.length)
 
-          this.show = this.members.length
+          if( this.show < this.members.length){
+            this.show++
+          }
+          //this.show = this.members.length
           if (this.show === this.group.membercount) {
             $state.complete()
           }

@@ -27,13 +27,12 @@ export const useMemberStore = defineStore({
       // results.
       const instance = this.instance
   
-      if (this.context) {
+      if (!params.context) {
         params.context = this.context
       }
       if (params.context) {
         // Ensure the context is a real object, in case it has been in the store.
-        const ctx = cloneDeep(params.context)
-        params.context = ctx
+        params.context = cloneDeep(params.context)
       }
   
       const {
@@ -48,13 +47,11 @@ export const useMemberStore = defineStore({
           members[i].collection = params.collection
         }
 
-        console.log('members',members.length)
         members.forEach(member => {
           this.list[member.id] = member
         })
   
         if (ratings && ratings.length) {
-          console.log('ratings',ratings.length)
           this.ratings = ratings
         }
   

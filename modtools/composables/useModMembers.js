@@ -7,7 +7,7 @@ const busy = ref(false)
 const context = ref(null)
 const groupid = ref(0)
 const group = ref(null)
-const limit = ref(2)
+const limit = ref(0)
 const search = ref(null)
 const filter = ref('0')
 const workType = ref(null)
@@ -19,7 +19,7 @@ const memberTerm = ref(null)
 const modalOpen = ref(false)
 const nextAfterRemoved = ref(null)
 
-const distance = ref(2)
+const distance = ref(10)
 
 /*const summary = computed(() => {
   const miscStore = useMiscStore()
@@ -54,7 +54,7 @@ const members = computed(() => {
     }
   })
 
-  console.log('useModMembers members sorted', members.length)
+  //console.log('useModMembers members sorted', members.length)
   return members
 })
 
@@ -79,7 +79,7 @@ watch(groupid, async (newVal) => {
   group.value = await groupStore.fetch(newVal)
 })
 
-watch(group, async (newValue, oldValue) => {
+/*watch(group, async (newValue, oldValue) => {
   console.log("===useModMembers watch group", newValue, oldValue, groupid.value)
   // We have this watch because we may need to fetch a group that we have remembered.  The mounted()
   // call may happen before we have restored the persisted state, so we can't initiate the fetch there.
@@ -88,6 +88,7 @@ watch(group, async (newValue, oldValue) => {
     await groupStore.fetch(groupid.value)
     
     const memberStore = useMemberStore()
+    console.log('-------------------------------------fetchMembers')
     await memberStore.fetchMembers({
       groupid: groupid.value,
       collection: collection.value,
@@ -99,7 +100,7 @@ watch(group, async (newValue, oldValue) => {
       filter: filter.value
     })
   }
-})
+})*/
 
 
 export function setupModMembers() {

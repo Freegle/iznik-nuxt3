@@ -342,12 +342,12 @@ export const useMessageStore = defineStore({
       // results.
       // TODO const instance = state.instance
 
+      if (!params.context) {
+        params.context = this.context
+      }
       if (params.context) {
         // Ensure the context is a real object, in case it has been in the store.
-        const ctx = cloneDeep(params.context)
-        params.context = ctx
-      } else if (this.context) {
-        params.context = this.context
+        params.context = cloneDeep(params.context)
       }
 
       const data = await api(this.config).message.fetchMessages(params)
