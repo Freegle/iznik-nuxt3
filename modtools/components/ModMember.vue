@@ -226,7 +226,7 @@ export default {
           configid = group.configid
         }
       })
-      console.log("MM modconfig TODO", configid)
+      //console.log("MM modconfig TODO", configid)
       // TODO: fetch for configid???
       const configs = this.modConfigStore.configs
       ret = configs.find(config => config.id === configid)

@@ -346,10 +346,14 @@ export const useAuthStore = defineStore({
             }
 
             if (me) {
-              if( groups){ // TODO Need to set configid for groups/memberships
+              if( groups){ // TODO Check: MT needs group info in groups/memberships
                 for( const membership of me.memberships){
                   const group = groups.find(g => g.id === membership.groupid)
-                  if( group) membership.configid = group.configid
+                  if( group) {
+                    membership.configid = group.configid
+                    membership.type = group.type
+                    membership.facebook = group.facebook
+                  }
                 }
               }
  

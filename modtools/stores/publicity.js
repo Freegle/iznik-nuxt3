@@ -26,6 +26,7 @@ export const usePublicityStore = defineStore({
       } else {
         if (socialactions) {
           for (const item of socialactions) {
+            item.iframe = item.iframe.replace('height="500"','height="550"') // Tell Ed to fix at server
             this.list[item.id] = item
           }
         }

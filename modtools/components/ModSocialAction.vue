@@ -14,18 +14,18 @@
     <b-card-body v-html="item.iframe" />
     <b-card-footer :key="'sharelist-' + actioned.length">
       <b-button variant="white" class="mb-1 mr-1" @click="shareAll">
-        <v-icon name="share-alt" />
+        <v-icon icon="share-alt" />
         Share all
       </b-button>
       <b-button v-for="group in groups" :key="'socialaction-' + group.id" :variant="isActioned(group.id) ? 'white' : 'primary'" class="mb-1 mr-1"
         :disabled="isActioned(group.id)" @click="share(group)">
-        <v-icon v-if="isActioned(group.id)" name="check" />
-        <v-icon v-else-if="isBusy(group.id)" name="sync" class="fa-spin" />
-        <v-icon v-else name="share-alt" />
+        <v-icon v-if="isActioned(group.id)" icon="check" />
+        <v-icon v-else-if="isBusy(group.id)" icon="sync" class="fa-spin" />
+        <v-icon v-else icon="share-alt" />
         {{ group.namedisplay }}
       </b-button>
       <b-button variant="danger" class="mb-1 mr-1" @click="hideAll">
-        <v-icon name="trash-alt" />
+        <v-icon icon="trash-alt" />
         Hide all
       </b-button>
     </b-card-footer>

@@ -1,10 +1,11 @@
+import cloneDeep from 'lodash.clonedeep'
 import { defineStore } from 'pinia'
 import api from '~/api'
 
 export const useMemberStore = defineStore({
   id: 'member',
   state: () => ({
-    list: [],
+    list: {},
     // The context from the last fetch, used for fetchMore.
     context: null,
     // For spotting when we clear under the feet of an outstanding fetch
@@ -16,7 +17,7 @@ export const useMemberStore = defineStore({
       this.config = config
     },
     clear() {
-      this.list = []
+      this.list = {}
       this.context = null
       this.instance = 1
       this.ratings = []
@@ -26,12 +27,13 @@ export const useMemberStore = defineStore({
       // results.
       const instance = this.instance
   
+      if (this.context) {
+        params.context = this.context
+      }
       if (params.context) {
         // Ensure the context is a real object, in case it has been in the store.
         const ctx = cloneDeep(params.context)
         params.context = ctx
-      } else if (this.context) {
-        params.context = this.context
       }
   
       const {
@@ -46,44 +48,31 @@ export const useMemberStore = defineStore({
           members[i].collection = params.collection
         }
 
-        console.log('members',members)
-        this.addAll(members)
-        console.log('fetchMembers ADDED')
+        console.log('members',members.length)
+        members.forEach(member => {
+          this.list[member.id] = member
+        })
   
         if (ratings && ratings.length) {
+          console.log('ratings',ratings.length)
           this.ratings = ratings
         }
   
         this.context = context
-        console.log('fetchMembers DONE')
       }
     },
-    addAll(members){
-      members.forEach(member => {
-        const existing = this.list.findIndex(obj => {
-          return parseInt(obj.id) === parseInt(member.id)
-        })
-  
-        this.list[member.id] = member
-        /*if (existing !== -1) {
-          this.list[member.id] = member
-        } else {
-          this.list.push(item)
-        }*/
-      })
-      },
-  
     async fetch(params) {
       // Don't log errors on fetches of individual members
-      const { member } = await this.$api.memberships.fetch(params, data => {
-        return data.ret !== 3
-      })
-  
-      commit('add', member)
+      console.log('useMemberStore fetch',params)
+      const { member } = await api(this.config).memberships.fetch(params)
+      //const { member } = await this.$api.memberships.fetch(params, data => {
+      //  return data.ret !== 3
+      //})
+      this.list[member.id] = member
     },
   
     async remove(params) {
-      // Remove approved  member.
+      // Remove approved member.
       await api(this.config).memberships.remove(params.userid, params.groupid)
 
       // TODO: Remove from list
@@ -119,7 +108,7 @@ export const useMemberStore = defineStore({
   getters: {
     all: (state) => Object.values(state.list),
     getByGroup: (state) => (groupid) => {
-      const ret = state.list.filter(member => {
+      const ret = Object.values(state.list).filter(member => {
         return parseInt(member.groupid) === parseInt(groupid)
       })
       return ret

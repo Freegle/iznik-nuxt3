@@ -74,28 +74,33 @@ export default class BaseAPI {
       headers['Cache-Control'] =
         'max-age=0, must-revalidate, no-cache, no-store, private'
 
-        if (method === 'GET' && config?.params) {
+      if (method === 'GET' && config?.params) {
         // Remove falsey values from the params.
         config.params = Object.fromEntries(
           Object.entries(config.params).filter(([_, v]) => v)
         )
         config.params.modtools = miscStore.modtools // MT ADDED
 
-        // MT ADDED cope with arrays eg components['me','work']
+        // MT ADDED cope with arrays and objects eg components: ['me','work'] or context: { "Added": 12345678, "id": 12345 }
         Object.keys(config.params).forEach((c) => {
           const v = config.params[c]
-          if( Array.isArray(v)) {
+          if (Array.isArray(v)) {
             delete config.params[c]
-            for( let ix=0; ix<v.length; ix++){
-              config.params[c+'['+ix+']'] = v[ix]
+            for (let ix = 0; ix < v.length; ix++) {
+              config.params[c + '[' + ix + ']'] = v[ix]
             }
+          } else if (typeof v === 'object' && v !== null) {
+            delete config.params[c]
+            Object.keys(v).forEach((cp) => {
+              config.params[c + '[' + cp + ']'] = v[cp]
+            })
           }
         })
         // URL encode the parameters if any
         const urlParams = new URLSearchParams(config.params).toString()
-        // console.log('BaseAPI $request',path, config.params, urlParams)
+        //console.log('BaseAPI $request',path, config.params, urlParams)
 
-        if (urlParams.length) { 
+        if (urlParams.length) {
           path += '&' + urlParams
         }
       } else if (method !== 'POST') {
@@ -118,12 +123,12 @@ export default class BaseAPI {
 
       await miscStore.waitForOnline()
       miscStore.api(1)
-      ;[status, data] = await ourFetch(this.config.public.APIv1 + path, {
-        ...config,
-        body,
-        method,
-        headers,
-      })
+        ;[status, data] = await ourFetch(this.config.public.APIv1 + path, {
+          ...config,
+          body,
+          method,
+          headers,
+        })
 
       if (data.jwt && data.jwt !== authStore.auth.jwt && data.persistent) {
         // We've been given a new JWT.  Use it in future.  This can happen after user merge or periodically when
@@ -136,7 +141,7 @@ export default class BaseAPI {
         // when you're leaving a page.  No point in rippling those errors up to result in Sentry errors.
         // Swallow these by returning a problem that never resolves.  Possible memory leak but it's a rare case.
         console.log('Aborted - ignore')
-        return new Promise(function (resolve) {})
+        return new Promise(function (resolve) { })
       }
     } finally {
       useMiscStore().api(-1)
@@ -180,13 +185,13 @@ export default class BaseAPI {
         if (log) {
           Sentry.captureMessage(
             'API request failed ' +
-              path +
-              ' returned HTTP ' +
-              status +
-              ' ret ' +
-              retstr +
-              ' status ' +
-              statusstr
+            path +
+            ' returned HTTP ' +
+            status +
+            ' ret ' +
+            retstr +
+            ' status ' +
+            statusstr
           )
         }
 
@@ -364,12 +369,12 @@ export default class BaseAPI {
 
       await miscStore.waitForOnline()
       miscStore.api(1)
-      ;[status, data] = await ourFetch(this.config.public.APIv2 + path, {
-        ...config,
-        body,
-        method,
-        headers,
-      })
+        ;[status, data] = await ourFetch(this.config.public.APIv2 + path, {
+          ...config,
+          body,
+          method,
+          headers,
+        })
 
       if (status === 401) {
         // Not authorised - our JWT and/or persistent token must be wrong.  Clear them.  This may force a login, or
@@ -389,7 +394,7 @@ export default class BaseAPI {
         // when you're leaving a page.  No point in rippling those errors up to result in Sentry errors.
         // Swallow these by returning a problem that never resolves.  Possible memory leak but it's a rare case.
         console.log('Aborted - ignore')
-        return new Promise(function (resolve) {})
+        return new Promise(function (resolve) { })
       }
     } finally {
       useMiscStore().api(-1)
@@ -416,13 +421,13 @@ export default class BaseAPI {
       if (log) {
         Sentry.captureMessage(
           'API2 request failed ' +
-            path +
-            ' returned HTTP ' +
-            status +
-            ' status ' +
-            statusstr +
-            ' data length ' +
-            (data ? data.length : 0)
+          path +
+          ' returned HTTP ' +
+          status +
+          ' status ' +
+          statusstr +
+          ' data length ' +
+          (data ? data.length : 0)
         )
       }
 

@@ -4,7 +4,7 @@
       <ScrollToTop :prepend="groupName" />
       <div class="d-flex justify-content-between flex-wrap">
         <GroupSelect v-model="groupid" modonly remember="membersapproved" />
-        groupid {{groupid}}
+        groupid {{ groupid }}
         <div v-if="groupid" class="d-flex">
           <ModMemberTypeSelect :filter="filter" />
           <b-button v-if="groupid" variant="white" class="ml-2" @click="addMember">
@@ -13,15 +13,15 @@
           <b-button v-if="groupid" variant="white" class="ml-2" @click="banMember">
             <v-icon icon="trash-alt" /> Ban
           </b-button>
-          <ModAddMemberModal v-if="showAddMember" ref="addmodal" :groupid="groupid" @hidden="showAddMember = false"/>
-          <ModBanMemberModal v-if="showBanMember" ref="banmodal" :groupid="groupid" @hidden="showBanMember = false"/>
+          <ModAddMemberModal v-if="showAddMember" ref="addmodal" :groupid="groupid" @hidden="showAddMember = false" />
+          <ModBanMemberModal v-if="showBanMember" ref="banmodal" :groupid="groupid" @hidden="showBanMember = false" />
           <ModMergeButton class="ml-2" />
           <ModMemberExportButton class="ml-2" :groupid="groupid" />
         </div>
         <ModMemberSearchbox v-model="search" :groupid="groupid" />
       </div>
-      <div v-if="groupid">
-        <p v-if="group" class="mt-1">
+      <div v-if="groupid && group">
+        <p class="mt-1">
           This group has {{ withplural('member', group.membercount, true) }}.
         </p>
         <NoticeMessage v-if="!members.length && !busy" class="mt-2">
@@ -29,6 +29,13 @@
         </NoticeMessage>
 
         <ModMembers />
+        <infinite-loading direction="top" force-use-infinite-wrapper="true" :distance="distance" @infinite="loadMore" :identifier="bump">
+          <span slot="no-results" />
+          <span slot="no-more" />
+          <span slot="spinner">
+            <b-img lazy src="~/static/loader.gif" alt="Loading" />
+          </span>
+        </infinite-loading>
       </div>
       <NoticeMessage v-else variant="info" class="mt-2">
         Please select a community or search for someone across all your communities.
@@ -39,27 +46,31 @@
 <script>
 import { useGroupStore } from '@/stores/group'
 import { useMiscStore } from '@/stores/misc'
+import { useMemberStore } from '../stores/member'
 import { setupModMembers } from '../../composables/useModMembers'
 import { withplural } from '../composables/usePluralize'
 
 export default {
   async setup() {
     const groupStore = useGroupStore()
+    const memberStore = useMemberStore()
     const miscStore = useMiscStore()
     const modMembers = setupModMembers()
-    //modMembers.collection.value = 'Pending'
+    modMembers.collection.value = 'Approved'
     //modMembers.workType.value = 'pending'
     return {
       groupStore,
+      memberStore,
       miscStore,
       ...modMembers // busy, context, group, groupid, limit, workType, show, collection, messageTerm, memberTerm, distance, summary, members, visibleMembers, work,
     }
   },
-  data: function() {
+  data: function () {
     return {
-      collection: 'Approved',
+      //collection: 'Approved',
       showAddMember: false,
       showBanMember: false,
+      bump: 0
     }
   },
   computed: {
@@ -78,7 +89,7 @@ export default {
       }
     },
     groupid(newVal) {
-      console.log('TODO APPROVED groupid',newVal)
+      console.log('TODO APPROVED groupid', newVal)
       if (newVal) {
       }
     }
@@ -105,6 +116,61 @@ export default {
     }
   },
   methods: {
+    async loadMore($state) {
+      if (!this.group) {
+        $state.complete()
+        return
+      }
+      console.log('approved loadMore', this.groupid, this.show, this.members.length, this.group.membercount)
+      this.busy = true
+      if (this.show < this.members.length) {
+        this.show++
+        $state.loaded()
+      } else {
+        console.log('Actually loadMore', this.members.length)
+        if (this.members.length === this.group.membercount) {
+          $state.complete()
+        } else {
+          this.limit += this.distance
+
+          console.log('fetchMembers', {
+            groupid: this.groupid,
+            collection: this.collection,
+            modtools: true,
+            summary: false,
+            context: this.context,
+            limit: this.limit,
+            search: this.search,
+            filter: this.filter
+          })
+          //if (this.limit < 6) {
+            await this.memberStore.fetchMembers({
+              groupid: this.groupid,
+              collection: this.collection,
+              modtools: true,
+              summary: false,
+              context: this.context,
+              limit: this.limit,
+              search: this.search,
+              filter: this.filter
+            })
+          //} else{
+          //  $state.loaded()
+          //  return
+          //}
+          console.log('NOW', this.members.length)
+
+          this.show = this.members.length
+          if (this.show === this.group.membercount) {
+            $state.complete()
+          }
+          else {
+            $state.loaded()
+          }
+        }
+      }
+      this.busy = false
+    },
     async addMember() {
       this.showAddMember = true
       this.$refs.addmodal?.show()

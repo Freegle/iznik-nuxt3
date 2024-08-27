@@ -19,7 +19,7 @@ const memberTerm = ref(null)
 const modalOpen = ref(false)
 const nextAfterRemoved = ref(null)
 
-const distance = ref(10)
+const distance = ref(2)
 
 /*const summary = computed(() => {
   const miscStore = useMiscStore()
@@ -29,7 +29,7 @@ const distance = ref(10)
 
 // mixin/modMembersPage
 const members = computed(() => {
-  console.log('useModMembers members',groupid.value)
+  //console.log('useModMembers members',groupid.value)
   const memberStore = useMemberStore()
   let members
 
@@ -38,12 +38,10 @@ const members = computed(() => {
   } else {
     members = memberStore.all
   }
-  console.log('useModMembers members members')
   if( !members){
     console.log('useModMembers no members')
     return []
   }
-  console.log('useModMembers members', groupid.value, members.length)
   // We need to sort as otherwise new members may appear at the end.
   members.sort((a, b) => {
     if (a.groups && b.groups) {
@@ -56,7 +54,7 @@ const members = computed(() => {
     }
   })
 
-  console.log('useModMembers members sorted')
+  console.log('useModMembers members sorted', members.length)
   return members
 })
 
