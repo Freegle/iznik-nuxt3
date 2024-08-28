@@ -102,7 +102,11 @@ export const useUserStore = defineStore({
       await api(this.config).user.addEmail(params.id, params.email, params.primary)
       await this.fetch(params.id, true)
     },
-  },
+    async add(params) {
+      const ret = await api(this.config).user.add(params.email)
+      return ret.id
+    },
+    },
   getters: {
     byId: (state) => {
       return (id) => state.list[id]

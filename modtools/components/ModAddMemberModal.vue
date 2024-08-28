@@ -4,7 +4,7 @@
       <template #default>
         <div v-if="addedId">
           We've added them. In case you need it, their id is
-          <v-icon name="hashtag" class="text-muted" scale="0.75" />{{ addedId }}.
+          <v-icon icon="hashtag" class="text-muted" scale="0.75" />{{ addedId }}.
         </div>
         <div v-else>
           <NoticeMessage variant="info">
@@ -15,17 +15,13 @@
             If they've not used Freegle before, they will get the standard Freegle welcome mail with an invented
             password so that they can log in.
           </p>
-          <p>
-            Please let them know why you've added them:
-          </p>
-          <b-form-textarea v-model="reason" rows="5" placeholder="Why have you added them?" />
         </div>
       </template>
       <template #footer>
         <b-button variant="white" @click="hide">
           Close
         </b-button>
-        <b-button v-if="!addedId" variant="primary" :disabled="!email || !reason" @click="add">
+        <b-button v-if="!addedId" variant="primary" :disabled="!email" @click="add">
           Add
         </b-button>
       </template>
@@ -33,12 +29,16 @@
   </div>
 </template>
 <script>
+import { useMemberStore } from '../stores/member'
+import { useUserStore } from '../stores/user'
 import { useModal } from '~/composables/useModal'
 
 export default {
   setup() {
+    const memberStore = useMemberStore()
+    const userStore = useUserStore()
     const { modal, show, hide } = useModal()
-    return { modal, show, hide }
+    return { memberStore, userStore, modal, show, hide }
   },
   props: {
     groupid: {
@@ -49,22 +49,21 @@ export default {
   data: function () {
     return {
       email: null,
-      reason: null,
       addedId: null
     }
   },
   methods: {
     async add() {
-      /* TODO this.addedId = await this.$store.dispatch('user/add', {
+      this.addedId = await this.userStore.add({
         email: this.email
       })
 
       if (this.addedId) {
-        await this.$store.dispatch('members/add', {
+        await this.memberStore.add({
           userid: this.addedId,
           groupid: this.groupid
         })
-      }*/
+      }
     }
   }
 }

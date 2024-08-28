@@ -57,7 +57,10 @@ A fairly minimal `package.json` is needed as `nuxt.config.ts` extends `../` and 
 * const path = computed(() => { return 0 } and access as path.value
 * Change pluralize to added withplural with number and includeNumber as extra params
 import { withplural } from '../composables/usePluralize'
-* For waitForRef refs use this.$refs.modal?.show() etc
+* For waitForRef refs use this.$refs.modal?.show() etc. Within modal component:
+    const { modal, show, hide } = useModal()
+    defineExpose({ show })
+
 * b-img-lazy to b-img lazy
 * float-right to float-end
 

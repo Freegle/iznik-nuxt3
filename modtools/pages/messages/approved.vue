@@ -18,8 +18,8 @@
       <infinite-loading direction="top" force-use-infinite-wrapper="true" :distance="10" @infinite="loadMore" :identifier="bump">
         <template #no-results />
         <template #no-more>
-            END OF LIST
-          </template>
+          <p class="p-2">END OF LIST</p>
+        </template>
         <template #spinner>
           <b-img lazy src="/loader.gif" alt="Loading" />
         </template>

@@ -33,7 +33,7 @@
             There are no members to show at the moment.
           </template>
           <template #no-more>
-            END OF LIST
+            <p class="p-2">END OF LIST</p>
           </template>
           <template #spinner>
             <b-img lazy src="/loader.gif" alt="Loading" />
@@ -128,7 +128,7 @@ export default {
   },
   methods: {
     async loadMore($state) {
-      console.log('approved loadMore')
+      //console.log('approved loadMore')
       if (!this.group) {
         $state.complete()
         return

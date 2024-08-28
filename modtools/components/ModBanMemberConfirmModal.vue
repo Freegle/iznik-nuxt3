@@ -1,7 +1,10 @@
 <template>
   <div>
-    <b-modal id="banMemberModal" v-model="showModal" title="Ban Member" size="lg" no-stacking>
+    <b-modal id="banMemberModal" ref="modal" title="Ban Member" size="lg" no-stacking>
       <template #default>
+        <NoticeMessage v-if="homefail" variant="danger" class="mb-2">
+          TO DO: Get code working to check if this group is user's home group
+        </NoticeMessage>
         <NoticeMessage v-if="homeGroup" variant="danger" class="mb-2">
           <p>
             You are banning this member on their home group. This should be an absolute last resort - it's
@@ -29,16 +32,18 @@
   </div>
 </template>
 <script>
-import { useModal } from '~/composables/useModal'
+import Wkt from 'wicket'
 import { useGroupStore } from '../../stores/group'
 import { useUserStore } from '../../stores/user'
+import { useModal } from '~/composables/useModal'
+import cloneDeep from 'lodash.clonedeep'
 
 export default {
   setup() {
-    const { modal, hide } = useModal()
     const groupStore = useGroupStore()
     const userStore = useUserStore()
-    return { groupStore, userStore, modal, hide }
+    const { modal, show, hide } = useModal()
+    return { groupStore, userStore, modal, show, hide }
   },
   props: {
     userid: {
@@ -52,6 +57,7 @@ export default {
   },
   data: function () {
     return {
+      homefail: false,
       homeGroup: false
     }
   },
@@ -63,30 +69,44 @@ export default {
       return this.userStore.byId(this.userid)
     }
   },
-  mounted() {
+  async mounted() {
+    //console.log('mounted', cloneDeep(this.group))
+    await this.groupStore.listMT({
+      grouptype: 'Freegle'
+    })
+
     const area = this.group.poly || this.group.polyofficial
-    console.log('Area', area)
+    if (area) {
+      console.log('Area', area)
 
-    const Wkt = require('wicket')
-    const wkt = new Wkt.Wkt()
-    wkt.read(area)
-    const obj = wkt.toObject()
-    const bounds = obj.getBounds()
-    console.log('Bounds', bounds, this.user)
+      try {
+        const wkt = new Wkt.Wkt()
+        console.log('Area2')
+        wkt.read(area)
+        console.log('Area3', wkt.type)
+        const obj = wkt.toObject()
+        console.log('Area4')
+        const bounds = obj.getBounds()
+        console.log('Bounds', bounds, this.user)
 
-    const lat = this.user.settings?.mylocation?.lat
-    const lng = this.user.settings?.mylocation?.lng
-    console.log(
-      'Check home',
-      this.user.memberof.length,
-      bounds,
-      lat,
-      lng,
-      bounds.contains([lat, lng])
-    )
+        const lat = this.user.settings?.mylocation?.lat
+        const lng = this.user.settings?.mylocation?.lng
+        console.log(
+          'Check home',
+          this.user.memberof.length,
+          bounds,
+          lat,
+          lng,
+          bounds.contains([lat, lng])
+        )
 
-    if (this.user.memberof.length === 1 || bounds.contains([lat, lng])) {
-      this.homeGroup = true
+        if (this.user.memberof.length === 1 || bounds.contains([lat, lng])) {
+          this.homeGroup = true
+        }
+      } catch (e) {
+        this.homefail = true
+        console.error(e)
+      }
     }
   },
   methods: {
