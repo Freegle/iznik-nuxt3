@@ -57,7 +57,7 @@ export default {
           },
         ],
         merchantInfo: {
-          merchantId: '12345678901234567890',
+          merchantId: 'BCR2DN4T6OLMZ5BG',
           merchantName: 'Freegle',
         },
         transactionInfo: {
