@@ -26,7 +26,6 @@
         <NoticeMessage v-if="!members.length" class="mt-2">
           There are no members to show at the moment.
         </NoticeMessage>
-
         <ModMembers />
         <infinite-loading direction="top" force-use-infinite-wrapper="true" :distance="distance" @infinite="loadMore" :identifier="bump">
           <template #no-results>
@@ -156,7 +155,10 @@ export default {
           if (this.show < this.members.length) { // Just inc by one rather than set to this.members.length
             this.show++
           }
-          if (received === 0) {
+          if( this.show > this.members.length) {
+            this.show = this.members.length
+          }
+          if (received === 0 || (this.show === this.members.length)) {
             $state.complete()
           }
           else {

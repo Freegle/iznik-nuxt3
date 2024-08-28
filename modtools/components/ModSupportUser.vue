@@ -264,7 +264,8 @@
       </h3>
       <ModMemberSummary :member="user" />
       <div v-if="messageHistoriesShown.length">
-        <b-row v-for="message in messageHistoriesShown" :key="'messagehistory-' + message.arrival + '-' + message.id" :class="{ 'pl-3': true, strike: message.deleted }">
+        <b-row v-for="message in messageHistoriesShown" :key="'messagehistory-' + message.arrival + '-' + message.id"
+          :class="{ 'pl-3': true, strike: message.deleted }">
           <b-col cols="4" md="2" class="order-1 p-1 small">
             {{ datetimeshort(message.arrival) }}
           </b-col>
@@ -358,15 +359,16 @@
       <ModSupportChatList :chats="chatsFiltered" :pov="user.id" />
     </b-card-body>
     <ModLogsModal v-if="showLogs" ref="logs" :userid="user.id" @hidden="showLogs = false" />
-    <!--TODO ConfirmModal v-if="purgeConfirm" ref="purgeConfirm" :title="'Purge ' + user.displayname + ' from the system?'"
-      message="<p><strong>This can't be undone.</strong></p><p>Are you completely sure you want to do this?</p>" @confirm="purgeConfirmed" /-->
-    <ProfileModal v-if="showProfile&& user && user.info" :id="id" ref="profile"  @hidden="showProfile = false"/>
+    <ConfirmModal v-if="purgeConfirm" ref="purgeConfirm" :title="'Purge ' + user.displayname + ' '+user.email+' from the system?'"
+      message="<p><strong>This can't be undone.</strong></p><p>Are you completely sure you want to do this?</p>" @confirm="purgeConfirmed" />
+    <ProfileModal v-if="showProfile && user && user.info" :id="id" ref="profile" @hidden="showProfile = false" />
     <ModSpammerReport v-if="showSpamModal" ref="spamConfirm" :user="reportUser" @hidden="showSpamModal = false" />
     <ModCommentAddModal v-if="addComment" ref="addComment" :user="user" @added="updateComments" @hidden="addComment = false" />
   </b-card>
 </template>
 
 <script>
+import { useMemberStore } from '../stores/member'
 import { useUserStore } from '../../stores/user'
 /*
 //import Vue from 'vue'
@@ -394,8 +396,9 @@ export default {
     }
   },
   setup() {
+    const memberStore = useMemberStore()
     const userStore = useUserStore()
-    return { userStore }
+    return { memberStore, userStore }
   },
   data: function () {
     return {
@@ -546,7 +549,7 @@ export default {
   methods: {
     async fetchUser() {
       if (this.id) {
-        console.log("MSU fetchUser",this.id)
+        console.log("MSU fetchUser", this.id)
         this.user = this.userStore.byId(this.id)
         if (this.user && this.user.spammer && this.user.spammer.byuserid) {
           await this.userStore.fetchMT({ search: this.user.spammer.byuserid })
@@ -567,16 +570,11 @@ export default {
       this.$refs.profile?.show()
     },
     purgeConfirmed() {
-      /* TODO this.$store.dispatch('members/purge', {
-        userid: this.id
-      })*/
+      this.userStore.purge(this.id)
     },
     purge() {
       this.purgeConfirm = true
-
-      this.waitForRef('purgeConfirm', () => {
-        this.$refs.purgeConfirm.show()
-      })
+      this.$refs.purgeConfirm?.show()
     },
     spamReport() {
       this.showSpamModal = true

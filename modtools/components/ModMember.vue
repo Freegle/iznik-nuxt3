@@ -376,10 +376,7 @@ export default {
     },
     async unban() {
       this.showUnbanModal = false
-      await this.memberStore.unban({
-        userid: this.user.id,
-        groupid: this.groupid
-      })
+      await this.memberStore.unban(this.user.id, this.groupid)
     }
   }
 }

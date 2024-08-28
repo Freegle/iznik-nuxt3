@@ -106,7 +106,10 @@ export const useUserStore = defineStore({
       const ret = await api(this.config).user.add(params.email)
       return ret.id
     },
+    async purge(id) {
+      await api(this.config).user.purge(id)
     },
+  },
   getters: {
     byId: (state) => {
       return (id) => state.list[id]

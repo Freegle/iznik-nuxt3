@@ -109,7 +109,13 @@ export const useMemberStore = defineStore({
       this.context = null
       const ret = await api(this.config).memberships.put(params)
       return ret.id
-    }
+    },
+    async ban(userid, groupid) {
+      await api(this.config).memberships.ban(userid, groupid)
+    },
+    async unban(userid, groupid) {
+      await api(this.config).memberships.unban(userid, groupid)
+    },
   },
   getters: {
     all: (state) => Object.values(state.list),
