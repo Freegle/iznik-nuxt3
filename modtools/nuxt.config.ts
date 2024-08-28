@@ -37,9 +37,10 @@ const config = defineNuxtConfig({
   postcss: { // https://answers.netlify.com/t/javascript-heap-out-of-memory-when-trying-to-build-a-nuxt-app/93138/13
     plugins: {
       cssnano:
-        process.env.NODE_ENV === 'production'
-          ? { preset: ['default', { discardComments: { removeAll: true } }] }
-          : false, // disable cssnano when not in production      
+      { preset: ['default', { discardComments: { removeAll: true } }] }
+        //process.env.NODE_ENV === 'production'
+        //  ? { preset: ['default', { discardComments: { removeAll: true } }] }
+        //  : false, // disable cssnano when not in production      
     }
   },
   modules: [
