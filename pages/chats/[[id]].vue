@@ -233,6 +233,10 @@ const chatStore = useChatStore()
 const authStore = useAuthStore()
 const miscStore = useMiscStore()
 
+const stickyAdRendered = computed(() => {
+  return miscStore.stickyAdRendered
+})
+
 definePageMeta({
   layout: 'login',
 })
@@ -301,10 +305,6 @@ const bump = ref(1)
 const distance = ref(1000)
 const selectedChatId = ref(null)
 const showClosed = ref(false)
-
-const stickyAdRendered = computed(() => {
-  return miscStore.stickyAdRendered
-})
 
 const chats = computed(() => {
   return chatStore?.list ? chatStore.list : []

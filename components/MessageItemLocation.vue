@@ -132,12 +132,6 @@ export default {
 @import 'assets/css/message-images.scss';
 
 .item {
-  font-size: 1rem;
-
-  @include media-breakpoint-up(md) {
-    font-size: 1.5rem;
-  }
-
   color: $colour-info-fg !important;
 
   a {
@@ -147,7 +141,21 @@ export default {
   font-weight: bold !important;
   text-overflow: ellipsis;
   overflow: hidden;
-  display: block;
+  display: inline-block;
+
+  @media only screen and (max-width: 360px) {
+    width: 100%;
+  }
+
+  @media only screen and (min-width: 360px) {
+    font-size: 1rem;
+    width: max($thumbnail-size, calc(50vw - 2rem));
+  }
+
+  @include media-breakpoint-up(md) {
+    font-size: 1.5rem;
+    width: 100%;
+  }
 }
 
 .nowrap {
@@ -160,15 +168,6 @@ export default {
 
   @include media-breakpoint-up(md) {
     font-size: 1.25rem;
-  }
-}
-
-.item {
-  display: inline-block;
-  width: max($thumbnail-size, calc(50vw - 2rem));
-
-  @include media-breakpoint-up(md) {
-    width: 100%;
   }
 }
 </style>

@@ -624,10 +624,18 @@ export default {
 @import 'bootstrap/scss/mixins/_breakpoints';
 
 .twocolumn {
-  display: grid;
+  display: flex;
+  flex-wrap: wrap !important;
   grid-template-rows: 2.5px 1fr 2.5px;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   grid-column-gap: 5px;
+
+  @media only screen and (min-width: 360px) {
+    display: grid;
+    grid-template-rows: 2.5px 1fr 2.5px;
+    grid-template-columns: 1fr 1fr;
+    grid-column-gap: 5px;
+  }
 
   > div {
     grid-row: 2 / 3;
@@ -673,6 +681,14 @@ export default {
 
   .onecolumn {
     height: 100%;
+
+    @media only screen and (max-width: 360px) {
+      width: 100%;
+    }
+
+    @media only screen and (min-width: 360px) {
+      width: unset;
+    }
 
     :deep(div) {
       height: 100%;
