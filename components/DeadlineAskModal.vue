@@ -8,7 +8,7 @@
         We'll show your post to other freeglers for a while. But if your post
         doesn't matter after a certain date, you can tell us.
       </p>
-      <p>That way you don't get replies you don't want.</p>
+      <p>That way you won't get replies you don't want.</p>
       <div v-if="showInput">
         <label class="font-weight-bold mb-1" for="deadline">
           Set a deadline:
