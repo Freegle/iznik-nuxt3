@@ -218,12 +218,6 @@ export default {
     DonationThermometer,
     DonationButton,
   },
-  data: function () {
-    return {
-      showThanks: false,
-    }
-  },
-  ...mapState(useDonationStore, ['target']),
   setup() {
     const runtimeConfig = useRuntimeConfig()
     const route = useRoute()
@@ -237,5 +231,11 @@ export default {
       )
     )
   },
+  data: function () {
+    return {
+      showThanks: false,
+    }
+  },
+  ...mapState(useDonationStore, ['target']),
 }
 </script>
