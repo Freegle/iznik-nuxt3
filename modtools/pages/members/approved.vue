@@ -29,11 +29,11 @@
 
         <ModMembers />
         <infinite-loading direction="top" force-use-infinite-wrapper="true" :distance="distance" @infinite="loadMore" :identifier="bump">
-          <span slot="no-results" />
-          <span slot="no-more" />
-          <span slot="spinner">
-            <b-img lazy src="~/static/loader.gif" alt="Loading" />
-          </span>
+          <template #no-results />
+          <template #no-more />
+          <template #spinner >
+            <b-img lazy src="/loader.gif" alt="Loading" />
+          </template>
         </infinite-loading>
       </div>
       <NoticeMessage v-else variant="info" class="mt-2">

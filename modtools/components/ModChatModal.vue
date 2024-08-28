@@ -40,11 +40,11 @@
       <template #default>
         <div v-if="chat2" ref="chatContent" class="m-0 chatContent" infinite-wrapper>
           <infinite-loading direction="top" force-use-infinite-wrapper="true" :distance="10" @infinite="loadMore">
-            <span slot="no-results" />
-            <span slot="no-more" />
-            <span slot="spinner">
-              <b-img lazy src="~/static/loader.gif" alt="Loading" />
-            </span>
+            <template #no-results />
+            <template #no-more />
+            <template #spinner>
+              <b-img lazy src="/loader.gif" alt="Loading" />
+            </template>
           </infinite-loading>
           <ul v-for="chatmessage in chatmessages" :key="'chatmessage-' + chatmessage.id" class="p-0 pt-1 list-unstyled mb-1">
             <li v-if="chatmessage">
@@ -168,7 +168,7 @@ export default {
 
       // Take a copy rather than use computed as it may not be ours and will vanish from the store.
       this.chat2 = this.chatStore.byChatId(this.id)*/
-      
+
       console.log("MCM show AAA")
       await this.chatStore.fetchChats({ fetchChats: ['User2Mod', 'Mod2Mod'] }) // Wrongly gets for current user
       await this.chatStore.fetchMessages(this.id)

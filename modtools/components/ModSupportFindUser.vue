@@ -13,13 +13,13 @@
     <div v-if="!searching && searchuser && searched">
       <ModSupportUser v-for="user in visible" :id="user.id" :key="user.id" :expand="expand" />
       <infinite-loading :distance="200" @infinite="loadMoreUsers">
-        <div slot="no-results">
+        <template #no-results>
           <p class="text-left">
             No users found.
           </p>
-        </div>
-        <span slot="no-more" />
-        <span slot="spinner" />
+        </template>
+        <template #no-more />
+        <template #spinner />
       </infinite-loading>
     </div>
   </div>

@@ -46,9 +46,11 @@
           Nothing to show just now.
         </div>
         <infinite-loading :distance="10" @infinite="loadMore" :identifier="infiniteId">
-          <span slot="no-results" />
-          <span slot="no-more" />
-          <span slot="spinner" />
+          <template #no-results />
+          <template #no-more />
+          <template #spinner >
+            <b-img lazy src="/loader.gif" alt="Loading" />
+          </template>
         </infinite-loading>
       </div>
     </div>

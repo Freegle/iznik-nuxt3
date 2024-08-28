@@ -16,11 +16,11 @@
       </NoticeMessage>
       <ModMessages :group="group" />
       <infinite-loading direction="top" force-use-infinite-wrapper="true" :distance="10" @infinite="loadMore" :identifier="bump">
-        <span slot="no-results" />
-        <span slot="no-more" />
-        <span slot="spinner">
-          <b-img lazy src="~/static/loader.gif" alt="Loading" />
-        </span>
+        <template #no-results />
+        <template #no-more />
+        <template #spinner>
+          <b-img lazy src="/loader.gif" alt="Loading" />
+        </template>
       </infinite-loading>
     </div>
   </client-only>
@@ -67,7 +67,7 @@ export default {
     },
   },
   methods: {
-    changedMessageTerm(term){
+    changedMessageTerm(term) {
       this.messageTerm = term.trim()
     },
     searchedMessage(term) {
@@ -80,7 +80,7 @@ export default {
       // Need to rerender the infinite scroll
       this.bump++
     },
-    changedMemberTerm(term){
+    changedMemberTerm(term) {
       this.memberTerm = term.trim()
     },
     searchedMember(term) {

@@ -96,7 +96,7 @@
       </b-row>
       <ModAlertHistory v-for="alert in alerts" :key="'alert-' + alert.id" :alert="alert" />
     </div>
-    <b-img v-else-if="busy" src="~/static/loader.gif" alt="Loading" class="d-block" />
+    <b-img v-else-if="busy" src="/loader.gif" alt="Loading" class="d-block" />
     <b-button v-else variant="white" size="lg" class="mt-2 mb-2 d-block" @click="fetch">
       Show history
     </b-button>

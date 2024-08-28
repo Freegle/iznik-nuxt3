@@ -17,11 +17,11 @@
     <ModLog v-for="log in logs" :key="'log-' + log.id" :log="log" />
 
     <infinite-loading :distance="distance" @infinite="loadMore">
-      <span slot="no-results" />
-      <span slot="no-more" />
-      <span slot="spinner">
-        <b-img lazy src="~/static/loader.gif" alt="Loading" />
-      </span>
+      <template #no-results />
+      <template #no-more />
+      <template #spinner>
+        <b-img lazy src="/loader.gif" alt="Loading" />
+      </template>
     </infinite-loading>
   </div>
 </template>

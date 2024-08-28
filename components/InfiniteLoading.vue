@@ -11,6 +11,10 @@
       }"
       class="infinite-loader mb-4"
     >
+      <slot v-if="isFirstLoad" name="spinner"></slot>
+      <slot v-if="isShowNoResults" name="no-results"></slot>
+      <slot v-if="isShowNoMore" name="no-more"></slot>
+      
       <slot v-if="state == 'loading'" name="spinner"></slot>
       <slot v-if="state == 'complete'" name="complete"></slot>
       <slot v-if="state == 'error'" name="error"></slot>
@@ -33,6 +37,8 @@ export default {
   data() {
     return {
       state: 'ready',
+      isFirstLoad: true, // save the current loading whether it is the first loading
+      noresults: false,
       bump: 0,
       visible: false,
       timer: null,
@@ -78,6 +84,20 @@ export default {
     // Vue3 has Suspense I can't see an easy way of waiting for all renders to finish.
     this.timer = setTimeout(this.fallback, 100)
   },
+  computed: {
+    isShowNoResults() {
+      return (
+        this.state === 'complete'
+        && this.isFirstLoad
+      )
+    },
+    isShowNoMore() {
+      return (
+        this.state === 'complete'
+        && !this.isFirstLoad
+      )
+    }
+  },
   methods: {
     fallback() {
       this.timer = null
@@ -105,6 +125,7 @@ export default {
       this.state = 'loading'
     },
     loaded() {
+      this.isFirstLoad = false
       this.state = 'loaded'
     },
     complete() {
