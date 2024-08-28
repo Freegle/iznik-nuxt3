@@ -14,7 +14,6 @@
       <slot v-if="isFirstLoad" name="spinner"></slot>
       <slot v-if="isShowNoResults" name="no-results"></slot>
       <slot v-if="isShowNoMore" name="no-more"></slot>
-      
       <slot v-if="state == 'loading'" name="spinner"></slot>
       <slot v-if="state == 'complete'" name="complete"></slot>
       <slot v-if="state == 'error'" name="error"></slot>

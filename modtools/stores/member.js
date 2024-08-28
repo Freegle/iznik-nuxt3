@@ -23,6 +23,7 @@ export const useMemberStore = defineStore({
       this.ratings = []
     },
     async fetchMembers(params) {
+      let received = 0
       // Watch out for the store being cleared under the feet of this fetch. If that happens then we throw away the
       // results.
       const instance = this.instance
@@ -46,7 +47,7 @@ export const useMemberStore = defineStore({
           // The server doesn't return the collection but this is useful to have in the store.
           members[i].collection = params.collection
         }
-
+        received += members.length
         members.forEach(member => {
           this.list[member.id] = member
         })
@@ -57,6 +58,7 @@ export const useMemberStore = defineStore({
   
         this.context = context
       }
+      return received
     },
     async fetch(params) {
       // Don't log errors on fetches of individual members

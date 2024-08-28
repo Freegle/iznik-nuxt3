@@ -17,7 +17,9 @@
       <ModMessages :group="group" />
       <infinite-loading direction="top" force-use-infinite-wrapper="true" :distance="10" @infinite="loadMore" :identifier="bump">
         <template #no-results />
-        <template #no-more />
+        <template #no-more>
+            END OF LIST
+          </template>
         <template #spinner>
           <b-img lazy src="/loader.gif" alt="Loading" />
         </template>

@@ -23,15 +23,19 @@
         <p class="mt-1">
           This group has {{ withplural('member', group.membercount, true) }}.
         </p>
-        <NoticeMessage v-if="!members.length && !busy" class="mt-2">
+        <NoticeMessage v-if="!members.length" class="mt-2">
           There are no members to show at the moment.
         </NoticeMessage>
 
         <ModMembers />
         <infinite-loading direction="top" force-use-infinite-wrapper="true" :distance="distance" @infinite="loadMore" :identifier="bump">
-          <template #no-results />
-          <template #no-more />
-          <template #spinner >
+          <template #no-results>
+            There are no members to show at the moment.
+          </template>
+          <template #no-more>
+            END OF LIST
+          </template>
+          <template #spinner>
             <b-img lazy src="/loader.gif" alt="Loading" />
           </template>
         </infinite-loading>
@@ -124,11 +128,11 @@ export default {
   },
   methods: {
     async loadMore($state) {
+      console.log('approved loadMore')
       if (!this.group) {
         $state.complete()
         return
       }
-      this.busy = true
       if (this.show < this.members.length) {
         this.show++
         $state.loaded()
@@ -138,7 +142,7 @@ export default {
         } else {
           this.limit += this.distance
 
-          await this.memberStore.fetchMembers({
+          const received = await this.memberStore.fetchMembers({
             groupid: this.groupid,
             collection: this.collection,
             modtools: true,
@@ -152,7 +156,7 @@ export default {
           if (this.show < this.members.length) { // Just inc by one rather than set to this.members.length
             this.show++
           }
-          if (this.show === this.group.membercount) {
+          if (received === 0) {
             $state.complete()
           }
           else {
@@ -160,7 +164,6 @@ export default {
           }
         }
       }
-      this.busy = false
     },
     async addMember() {
       this.showAddMember = true
