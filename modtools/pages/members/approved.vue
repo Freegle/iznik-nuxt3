@@ -26,7 +26,6 @@
         <NoticeMessage v-if="!members.length" class="mt-2">
           There are no members to show at the moment.
         </NoticeMessage>
-        {{ nodeenv }}
         <ModMembers />
         <infinite-loading direction="top" force-use-infinite-wrapper="true" :distance="distance" @infinite="loadMore" :identifier="bump">
           <template #no-results>
@@ -75,10 +74,6 @@ export default {
     }
   },
   computed: {
-    nodeenv(){
-      const runtimeConfig = useRuntimeConfig()
-      return runtimeConfig.public.NODE_ENV
-    },
     groupName() {
       if (this.group) {
         return this.group.namedisplay
