@@ -3,7 +3,7 @@
     <!--    eslint-disable -->
     <google-pay-button
       v-if="paymentRequest"
-      environment="TEST"
+      environment="PRODUCTION"
       :button-color="buttonColor"
       :button-type="buttonType"
       :button-size-mode="isCustomSize ? 'fill' : 'static'"
