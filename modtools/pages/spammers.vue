@@ -21,10 +21,10 @@
               </h2>
             </template>
           </b-tab>
-          <b-tab v-if="hasPermissionSpamAdmin" id="Whitelisted">
+          <b-tab v-if="hasPermissionSpamAdmin" id="Safelisted">
             <template v-slot:title>
               <h2 class="ml-2 mr-2">
-                Whitelisted
+                Safelisted
               </h2>
             </template>
           </b-tab>
@@ -39,14 +39,18 @@
             </template>
           </b-tab>
         </b-tabs>
+        <p v-if="tabIndex === 0" spam class="p-2" >
+          To remove from spammer list, please mail geeks.
+        </p>
+        <p v-if="tabIndex === 2" spam class="p-2" >
+          To remove from safe list, please mail geeks.
+        </p>
         <ModMemberSearchbox v-if="tabIndex === 0" spam class="mb-2" @search="searched" />
         <ModMember v-for="(spammer, index) in visibleSpammers" :key="'spammer-' + tabIndex + '-' + spammer.id" :member="spammer.user" :sameip="spammer.sameip" class="mb-1" :index="index" />
-        <b-img v-if="busy" src="/loader.gif" alt="Loading" width="100px" />
-        <div v-else-if="!spammers.length">
-          Nothing to show just now.
-        </div>
         <infinite-loading :distance="10" @infinite="loadMore" :identifier="infiniteId">
-          <template #no-results />
+          <template #no-results >
+            Nothing to show just now.
+          </template>
           <template #no-more />
           <template #spinner >
             <b-img lazy src="/loader.gif" alt="Loading" />
@@ -152,7 +156,7 @@ export default {
       this.infiniteId++
     },
     async loadMore($state) {
-      console.log('Spammers loadMore', this.show, this.spammers.length)
+      //console.log('Spammers loadMore', this.show, this.spammers.length)
       this.busy = true
 
       if (this.show < this.spammers.length) {
@@ -163,7 +167,7 @@ export default {
         this.busy = false
       } else {
         const currentCount = this.spammers.length
-        console.log('fetch',this.search)
+        //console.log('fetch',this.search)
         await this.spammerStore.fetch({
           collection: this.collection,
           search: this.search,

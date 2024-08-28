@@ -9,8 +9,8 @@
     <b-button v-if="!spam" variant="white" @click="spamReport">
       <v-icon icon="ban" /> Spammer
     </b-button>
-    <b-button v-if="supportOrAdmin" variant="white" @click="spamWhitelist">
-      <v-icon icon="check" /> Whitelist
+    <b-button v-if="supportOrAdmin" variant="white" @click="spamSafelist">
+      <v-icon icon="check" /> Safelist
     </b-button>
     <b-button v-if="groupid" variant="white" @click="addAComment">
       <v-icon icon="tag" /> Add note
@@ -20,7 +20,7 @@
     <ConfirmModal v-if="removeConfirm && !groupname" ref="removeConfirm" title="Please select a group first." />
     <ModBanMemberConfirmModal v-if="banConfirm" ref="banConfirm" :userid="userid" :groupid="groupid" @confirm="banConfirmed" />
     <ModCommentAddModal v-if="addComment" ref="addComment" :user="user" :groupid="groupid" :groupname="groupname" @added="commentadded" />
-    <ModSpammerReport v-if="showSpamModal" ref="spamConfirm" :user="reportUser" :whitelist="whitelist" />
+    <ModSpammerReport v-if="showSpamModal" ref="spamConfirm" :user="reportUser" :safelist="safelist" />
   </div>
 </template>
 <script>
@@ -63,7 +63,7 @@ export default {
       addComment: false,
       user: null,
       showSpamModal: false,
-      whitelist: false
+      safelist: false
     }
   },
   computed: {
@@ -138,16 +138,16 @@ export default {
         await this.fetchUser()
       }
 
-      this.whitelist = false
+      this.safelist = false
       this.showSpamModal = true
       this.$refs.spamConfirm?.show()
     },
-    async spamWhitelist() {
+    async spamSafelist() {
       if (!this.user) {
         await this.fetchUser()
       }
 
-      this.whitelist = true
+      this.safelist = true
       this.showSpamModal = true
       this.$refs.spamConfirm?.show()
     }

@@ -75,7 +75,7 @@ export default {
       required: false,
       default: false
     },
-    spamwhitelist: {
+    spamsafelist: {
       type: Boolean,
       required: false,
       default: false
@@ -139,8 +139,8 @@ export default {
         await this.spamRequestRemove()
       } else if (this.spamremove) {
         await this.spamRemove()
-      } else if (this.spamwhitelist) {
-        await this.spamWhitelist()
+      } else if (this.spamsafelist) {
+        await this.spamSafelist()
       } else if (this.spamhold) {
         await this.spamHold()
       } else if (this.spamignore) {
@@ -187,10 +187,10 @@ export default {
       })
     },
     async spamConfirm() {
-      /* TODO await this.$store.dispatch('spammers/confirm', {
+      await this.spammerStore.confirm({
         id: this.member.spammer.id,
         userid: this.member.userid
-      })*/
+      })
     },
     async spamRequestRemove() {
       /* TODO await this.$store.dispatch('spammers/requestremove', {
@@ -201,21 +201,15 @@ export default {
     async spamRemove() {
       await this.spammerStore.remove({ id: this.member.spammer.id, userid: this.member.userid })
     },
-    async spamWhitelist() {
-      await this.spammerStore.whitelist({ id: this.member.spammer.id, userid: this.member.userid, myid: this.myid })
+    async spamSafelist() {
+      await this.spammerStore.safelist({ id: this.member.spammer.id, userid: this.member.userid, myid: this.myid })
     },
     async spamHold() {
-      /* TODO await this.$store.dispatch('spammers/hold', {
+      await this.spammerStore.hold({
         id: this.member.spammer.id,
         userid: this.member.userid,
         myid: this.myid
-      })*/
-    },
-    async spamIgnore() {
-      /* TODO await this.$store.dispatch('members/spamignore', {
-        userid: this.member.userid,
-        groupid: this.groupid
-      })*/
+      })
     },
     async deleteConfirmed() {
       /* TODO await this.$store.dispatch('members/delete', {
@@ -224,10 +218,10 @@ export default {
       })*/
     },
     async releaseIt() {
-      /* TODO await this.$store.dispatch('spammers/release', {
+      await this.spammerStore.release({
         id: this.member.spammer.id,
         userid: this.member.userid
-      })*/
+      })
     }
   }
 }

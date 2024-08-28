@@ -55,7 +55,7 @@ export default {
         case 'Spammer': {
           return 'danger'
         }
-        case 'Whitelisted': {
+        case 'Safelisted': {
           return 'primary'
         }
         default: {
@@ -68,8 +68,8 @@ export default {
         case 'Spammer': {
           return 'Confirmed Spammer'
         }
-        case 'Whitelisted': {
-          return 'Whitelisted'
+        case 'Safelisted': {
+          return 'Safelisted'
         }
         case 'PendingAdd': {
           return 'Unconfirmed Spammer'

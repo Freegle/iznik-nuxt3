@@ -42,8 +42,8 @@
           :member="member"
           variant="primary"
           icon="check"
-          spamwhitelist
-          label="Whitelist"
+          spamsafelist
+          label="Safelist"
         />
         <ModMemberButton
           v-else-if="!member.heldby"

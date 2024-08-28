@@ -83,21 +83,14 @@ export default {
   },
   watch: {
     filter(newVal) {
-      console.log('NEW filter', newVal)
       this.bump++
       this.memberStore.clear()
     },
     search(newVal) {
-      console.log('NEW search', newVal)
       this.bump++
       this.memberStore.clear()
     },
-    /*search(newVal) {
-      if (!newVal) {
-        // Cleared box.
-        //TODO this.$router.push('/modtools/members/approved/' + this.groupid)
-      }
-    },
+    /*
     groupid(newVal) {
       console.log('TODO APPROVED groupid', newVal)
       if (newVal) {

@@ -1,9 +1,9 @@
 <template>
-  <b-modal ref="modal" id="spamreportmodal" :title="(whitelist ? 'Add to Whitelist ' : 'Report Spammer ') + user.displayname" size="lg" no-stacking>
+  <b-modal ref="modal" id="spamreportmodal" :title="(safelist ? 'Add to Safelist ' : 'Report Spammer ') + user.displayname" size="lg" no-stacking>
     <template #default>
-      <div v-if="whitelist">
+      <div v-if="safelist">
         <p>
-          You should only whitelist people who have a legitimate reason to join many communities. Usually this is
+          You should only safelist people who have a legitimate reason to join many communities. Usually this is
           because they are doing something for Freegle across the UK.
         </p>
       </div>
@@ -36,8 +36,8 @@
       <b-button variant="white" @click="hide">
         Cancel
       </b-button>
-      <b-button v-if="whitelist" variant="danger" @click="send">
-        Add to Whitelist
+      <b-button v-if="safelist" variant="danger" @click="send">
+        Add to Safelist
       </b-button>
       <b-button v-else variant="primary" @click="send">
         Send Report
@@ -55,7 +55,7 @@ export default {
       type: Object,
       required: true
     },
-    whitelist: {
+    safelist: {
       type: Boolean,
       required: false,
       default: false
@@ -78,8 +78,8 @@ export default {
 
     async send() {
       if (this.reason) {
-        if (this.whitelist) {
-          await this.spammerStore.whitelist({ userid: this.user.userid, reason: this.reason })
+        if (this.safelist) {
+          await this.spammerStore.safelist({ userid: this.user.userid, reason: this.reason })
         } else {
           await this.spammerStore.report({ userid: this.user.userid, reason: this.reason })
         }

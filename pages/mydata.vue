@@ -632,7 +632,7 @@
                     </b-row>
                   </template>
                 </ShowMore>
-                <h2>Whitelisted domains</h2>
+                <h2>Safelisted domains</h2>
                 <p>
                   You see chat messages to review, and some of these may contain
                   links. These are domains where you have marked a link as not

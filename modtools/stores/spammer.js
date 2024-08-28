@@ -109,7 +109,7 @@ export const useSpammerStore = defineStore({
 
       this.removeFromList(params.id)
     },
-    async whitelist(params) {
+    async safelist(params) {
       await api(this.config).spammers.add({
         id: params.id,
         userid: params.userid,

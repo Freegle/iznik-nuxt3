@@ -10,7 +10,7 @@
       the button below.
     </p>
     <p>
-      Whitelisted people are those who have good reasons to join many groups, who we flag up so that you don't
+      Safelisted people are those who have good reasons to join many groups, who we flag up so that you don't
       accidentally think they're spammers.
     </p>
     <p>
