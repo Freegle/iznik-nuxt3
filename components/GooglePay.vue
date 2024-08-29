@@ -7,7 +7,7 @@
       :button-color="buttonColor"
       :button-type="buttonType"
       :button-size-mode="isCustomSize ? 'fill' : 'static'"
-      :paymentRequest.prop="paymentRequest"
+      v-bind:paymentRequest.prop="paymentRequest"
       :style="{ width: `${buttonWidth}px`, height: `${buttonHeight}px` }"
       @loadpaymentdata="onLoadPaymentData"
       @error="onError"
@@ -31,7 +31,6 @@ export default {
     isCustomSize: false,
     buttonWidth: 240,
     buttonHeight: 40,
-    isTop: window === window.top,
   }),
   computed: {
     paymentRequest() {
@@ -44,6 +43,7 @@ export default {
             parameters: {
               allowedAuthMethods: ['PAN_ONLY', 'CRYPTOGRAM_3DS'],
               allowedCardNetworks: ['AMEX', 'VISA', 'MASTERCARD'],
+              billingAddressRequired: false,
             },
             tokenizationSpecification: {
               type: 'PAYMENT_GATEWAY',
@@ -62,10 +62,10 @@ export default {
         },
         transactionInfo: {
           totalPriceStatus: 'FINAL',
-          totalPriceLabel: 'Total',
+          totalPriceLabel: 'Donation',
           totalPrice: this.totalPrice,
           currencyCode: 'GBP',
-          countryCode: 'gb',
+          countryCode: 'GB',
         },
       }
     },
