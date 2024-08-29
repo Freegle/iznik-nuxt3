@@ -62,7 +62,6 @@ export default {
     },
     identifier() {
       // We've been asked to kick the component to reset it.
-      console.log('Bump')
       this.bump++
       this.emit()
     },

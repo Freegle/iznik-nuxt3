@@ -23,6 +23,7 @@ export const useMemberStore = defineStore({
       this.ratings = []
     },
     async fetchMembers(params) {
+      // console.log('useMemberStore fetchMembers',params)
       let received = 0
       // Watch out for the store being cleared under the feet of this fetch. If that happens then we throw away the
       // results.
@@ -58,6 +59,7 @@ export const useMemberStore = defineStore({
 
         this.context = context
       }
+      // console.log('useMemberStore fetchMembers received',received)
       return received
     },
     async fetch(params) {

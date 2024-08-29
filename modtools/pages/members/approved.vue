@@ -17,7 +17,7 @@
           <ModMergeButton class="ml-2" />
           <ModMemberExportButton class="ml-2" :groupid="groupid" />
         </div>
-        <ModMemberSearchbox @search="this.search = $event" />
+        <ModMemberSearchbox @search="startsearch" />
       </div>
       <div v-if="groupid && group">
         <p class="mt-1">
@@ -26,6 +26,7 @@
         <NoticeMessage v-if="!members.length" class="mt-2">
           There are no members to show at the moment.
         </NoticeMessage>
+        <!-- show: {{ show }}. members: {{ members.length }}. visibleMembers: {{ visibleMembers.length }}. search {{ search }} -->
         <ModMembers />
         <infinite-loading direction="top" force-use-infinite-wrapper="true" :distance="distance" @infinite="loadMore" :identifier="bump">
           <template #no-results>
@@ -86,24 +87,21 @@ export default {
       this.bump++
       this.memberStore.clear()
     },
-    search(newVal) {
+    groupid(newVal) {
       this.bump++
       this.memberStore.clear()
-    },
-    /*
-    groupid(newVal) {
-      console.log('TODO APPROVED groupid', newVal)
-      if (newVal) {
-      }
-    }*/
+    }
   },
   async mounted() {
-    console.log("approved mounted")
+
+    // reset infiniteLoading on return to page
+    this.search = null
+    this.memberStore.clear()
+    this.bump++
+
     if (!this.groupid) {
-      console.log("approved mounted no groupid")
       // If we have not selected a group, check if we are only a mod on one.  If so, then go to that group so that
-      // we don't need to bother selecting it.  We do this here because the interaction with createGroupRoute would
-      // be complex.
+      // we don't need to bother selecting it.
       let countmod = 0
       let lastmod = null
       this.myGroups.forEach(g => {
@@ -114,13 +112,13 @@ export default {
       })
 
       if (countmod === 1) {
-        //TODO this.$router.push('/modtools/members/approved/' + lastmod)
+        this.groupid = lastmod
       }
     }
   },
   methods: {
     async loadMore($state) {
-      //console.log('approved loadMore')
+      //console.log('approved loadMore', this.show, this.members?.length, this.visibleMembers?.length)
       if (!this.group) {
         $state.complete()
         return
@@ -148,7 +146,7 @@ export default {
           if (this.show < this.members.length) { // Just inc by one rather than set to this.members.length
             this.show++
           }
-          if( this.show > this.members.length) {
+          if (this.show > this.members.length) {
             this.show = this.members.length
           }
           if (received === 0 || (this.show === this.members.length)) {
@@ -168,6 +166,12 @@ export default {
       this.showBanMember = true
       this.$refs.banmodal?.show()
     },
+    startsearch(search) {
+      // Initiate search again even if search has not changed
+      this.search = search
+      this.memberStore.clear()
+      this.bump++
+    }
   }
 }
 </script>

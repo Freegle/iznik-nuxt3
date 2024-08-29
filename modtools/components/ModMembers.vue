@@ -13,8 +13,4 @@ const {
  filter, visibleMembers,
 } = setupModMembers()
 
-//onMounted(async () => {
-//  console.log('###ModMembers onMounted')
-//})
-
 </script>
