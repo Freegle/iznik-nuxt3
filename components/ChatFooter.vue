@@ -78,16 +78,16 @@
           />
         </div>
         <label for="chatmessage" class="visually-hidden">Chat message</label>
-        <div v-if="!imageid">
+        <div v-if="!imageid" :style="height">
           <b-form-textarea
             v-if="enterNewLine && !otheruser?.spammer"
             id="chatmessage"
             ref="chatarea"
             v-model="sendmessage"
             debounce="500"
+            class="h-100"
             placeholder="Type here..."
             enterkeyhint="enter"
-            :style="height"
             @keydown="typing"
             @focus="markRead"
           />
@@ -97,8 +97,8 @@
             ref="chatarea"
             v-model="sendmessage"
             debounce="500"
+            class="h-100"
             placeholder="Type here..."
-            :style="height"
             enterkeyhint="send"
             autocapitalize="none"
             @keydown="typing"
@@ -109,7 +109,6 @@
             @focus="markRead"
           />
           <Dropdown
-            v-if="showSuggested"
             placement="top"
             :shown="showSuggested"
             :triggers="[]"
@@ -125,19 +124,12 @@
             "
           >
             <template #popper>
-              <div class="addresspop">
-                <div class="text--small text-center">
-                  Click to insert an address or keep typing:
-                </div>
-                <div
-                  v-for="address in suggestedAddresses"
-                  :key="address.address.id"
-                  style="cursor: pointer"
-                  class="text-truncate"
-                  @mousedown="applySuggestedAddress(address)"
-                >
-                  <strong>{{ address.address.singleline }}</strong>
-                </div>
+              <div
+                style="cursor: pointer"
+                class="px-2 py-2"
+                @mousedown="applySuggestedAddress()"
+              >
+                {{ suggestedAddress?.address?.singleline }}
               </div>
             </template>
           </Dropdown>
@@ -365,7 +357,6 @@ import pluralize from 'pluralize'
 import getCaretCoordinates from 'textarea-caret'
 import { Dropdown } from 'floating-vue'
 import { mapWritableState } from 'pinia'
-import { findLengthOfLCS } from '@algorithm.ts/lcs'
 import { FAR_AWAY, TYPING_TIME_INVERVAL } from '../constants'
 import { setupChat } from '../composables/useChat'
 import { useMiscStore } from '../stores/misc'
@@ -467,8 +458,6 @@ export default {
       showProfileModal: false,
       showAddress: false,
       sendmessage: null,
-      sendmessageLazy: null,
-      sendmessageLazyTimer: null,
       RSVP: false,
       likelymsg: null,
       ouroffers: [],
@@ -490,7 +479,7 @@ export default {
     },
     height() {
       // Bootstrap Vue Next doesn't yet have autoresizing.
-      const height = Math.min(6, Math.round(this.sendmessageLazy?.length / 60))
+      const height = Math.min(6, Math.round(this.sendmessage?.length / 60))
 
       return 'height: ' + (height + 6) + 'em'
     },
@@ -561,85 +550,61 @@ export default {
 
       return ret
     },
-    possibleAddressesLower() {
-      return this.possibleAddresses.map((addr) => {
-        const thisone = addr
-        thisone.singlelower = addr.singleline.toLowerCase().match(/\S+/g) || []
-        return thisone
-      })
-    },
-    suggestedAddresses() {
-      let ret = []
+    suggestedAddress() {
+      let ret = null
+      let bestMatch = 0
+      let bestAddr = null
 
-      const sendMessageLength = this.sendmessageLazy?.length
+      const sendMessageLength = this.sendmessage?.length
+      const possibleAddressesLength = this.possibleAddresses?.length
+      const sendLower = this.sendmessage?.toLowerCase()
 
-      if (sendMessageLength) {
-        // We want to look for the number of words in common between the send message and the possible addresses.
-        // We use a standard implementation of the LCS algorithm, operating on the individual words in each.
-        const possibleAddressesLength = this.possibleAddressesLower?.length
-        const sendLower =
-          this.sendmessageLazy?.toLowerCase().match(/\S+/g) || []
+      if (sendMessageLength >= 3 && possibleAddressesLength) {
+        // Scan through the possible addresses, looking for the longest prefix of the address which appears as a
+        // suffix of the typed message.  This finds when they're typing a possibly matching address.
+        for (let i = 0; i < possibleAddressesLength; i++) {
+          const addr = this.possibleAddresses[i].singleline.toLowerCase()
 
-        if (sendMessageLength >= 3 && possibleAddressesLength) {
-          for (let i = 0; i < possibleAddressesLength; i++) {
-            const singleLower = this.possibleAddressesLower[i].singlelower
+          for (let j = 1; j <= addr.length; j++) {
+            const prefix = addr.substring(0, j)
+            const suffix = sendLower.substring(sendLower.length - j)
 
-            const LCS = findLengthOfLCS(
-              sendLower.length,
-              singleLower.length,
-              (x, y) => {
-                const ret = sendLower[x].localeCompare(singleLower[y]) === 0
-                return ret
-              }
-            )
-
-            if (LCS > 1) {
-              // Two words - plausible match.
-              ret.push({
-                address: this.possibleAddresses[i],
-                matchedLength: LCS,
-              })
+            if (prefix === suffix && prefix.length > bestMatch) {
+              bestMatch = prefix.length
+              bestAddr = this.possibleAddresses[i]
             }
           }
         }
+      }
 
-        ret = ret.filter(
-          (v, i, a) => a.findIndex((t) => t.address.id === v.address.id) === i
-        )
-
-        ret.sort((a, b) => b.matchedLength - a.matchedLength)
+      if (bestMatch >= 3) {
+        ret = {
+          address: bestAddr,
+          matchedLength: bestMatch,
+        }
       }
 
       return ret
     },
     showSuggested() {
-      return !!(!this.hideSuggestedAddress && this.suggestedAddresses?.length)
+      return !this.hideSuggestedAddress && this.suggestedAddress !== null
     },
   },
   watch: {
-    suggestedAddresses: {
-      handler(newVal) {
-        if (newVal?.length) {
+    suggestedAddress: {
+      async handler(newVal) {
+        if (newVal?.address?.singleline?.length !== newVal?.matchedLength) {
           this.hideSuggestedAddress = false
+          await this.$nextTick()
           this.updateCaretPosition()
         }
       },
       deep: true,
     },
     sendmessage(newVal, oldVal) {
-      if (!this.sendmessageLazyTimer) {
-        // This will result in the chat header shrinking once you start typing, to give more room, and then
-        // expanding back again if you delete everything.
-        this.$emit('typing', newVal)
-
-        // We want to occasionally check for new addresses to show.  But we don't want to do it on
-        // every key stroke, as that might be slow.  So we update the value which will kick the computed
-        // property on a timer.
-        this.sendmessageLazyTimer = setTimeout(() => {
-          this.sendmessageLazy = this.sendmessage
-          this.sendmessageLazyTimer = null
-        }, 1000)
-      }
+      // This will result in the chat header shrinking once you start typing, to give more room, and then
+      // expanding back again if you delete everything.
+      this.$emit('typing', newVal?.length)
     },
     me: {
       async handler(newVal, oldVal) {
@@ -700,24 +665,28 @@ export default {
         left: caretPosition.left + textareaPosition.left,
       }
     },
-    applySuggestedAddress(address) {
-      this.$api.bandit.chosen({
-        uid: 'SuggestedAddress',
-        variant: 'chosen',
-      })
-
-      const matchedLength = address.matchedLength
-      const suggestedAddress = address.address.singleline
-
+    async applySuggestedAddress() {
+      const matchedLength = this.suggestedAddress.matchedLength
+      const suggestedAddress = this.suggestedAddress.address.singleline
       // No need to apply suggestion if length of match and address are equal
       if (matchedLength === suggestedAddress.length) {
         return
       }
-
       this.sendmessage =
         this.sendmessage.substring(0, this.sendmessage.length - matchedLength) +
-        address.address.singleline
+        this.suggestedAddress.address.singleline +
+        ' '
       this.hideSuggestedAddress = true
+      await this.$nextTick()
+      const el = this.$refs.chatarea?.$el
+
+      if (el) {
+        setTimeout(() => {
+          // Focus at end of text.
+          el.focus()
+          el.selectionStart = this.sendmessage.length
+        }, 100)
+      }
     },
     async markRead() {
       await this.chatStore.markRead(this.id)
@@ -928,17 +897,9 @@ export default {
       })
     },
   },
-  onBeforeUnmount() {
-    if (this.sendmessageLazyTimer) {
-      clearTimeout(this.sendmessageLazyTimer)
-    }
-  },
 }
 </script>
 <style scoped lang="scss">
-@import 'bootstrap/scss/functions';
-@import 'bootstrap/scss/variables';
-@import 'bootstrap/scss/mixins/_breakpoints';
 @import 'https://unpkg.com/floating-vue@^2.0.0-beta.1/dist/style.css';
 
 .mobtext {
@@ -976,15 +937,5 @@ export default {
 
 :deep(textarea) {
   transition: height 1s;
-}
-
-.addresspop {
-  max-height: 6rem;
-  max-width: min(100vw, 30rem);
-  overflow-y: scroll;
-
-  @include media-breakpoint-up(md) {
-    max-height: 10rem;
-  }
 }
 </style>
