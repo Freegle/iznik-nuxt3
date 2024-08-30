@@ -186,7 +186,7 @@ onMounted(() => {
       },
     },
     restrictions: {
-      allowedFileTypes: ['image/*', '.jpg', '.jpeg', '.png', '.gif', '.heic'],
+      // allowedFileTypes: ['image/*', '.jpg', '.jpeg', '.png', '.gif', '.heic'],
       maxNumberOfFiles: props.multiple ? 10 : 1,
     },
   })
