@@ -201,6 +201,38 @@ onMounted(() => {
     })
     .use(Tus, { endpoint: runtimeConfig.public.TUS_UPLOADER })
     .use(Compressor)
+  uppy.on('file-added', (file) => {
+    console.log('Added file', file)
+  })
+  uppy.on('files-added', (files) => {
+    console.log('Added files', files)
+  })
+  uppy.on('file-removed', (file) => {
+    console.log('Removed file', file)
+  })
+  uppy.on('progress', (progress) => {
+    // progress: integer (total progress percentage)
+    console.log('Progress', progress)
+  })
+  uppy.on('preprocess-progress', (progress) => {
+    // progress: integer (total progress percentage)
+    console.log('Preprocess progress', progress)
+  })
+  uppy.on('upload-progress', (file, progress) => {
+    // file: { id, name, type, ... }
+    // progress: { uploader, bytesUploaded, bytesTotal }
+    console.log(
+      'Upload progress',
+      file.id,
+      progress.bytesUploaded,
+      progress.bytesTotal
+    )
+  })
+  uppy.on('upload-pause', (file, isPaused) => {
+    // file: { id, name, type, ... }
+    // progress: { uploader, bytesUploaded, bytesTotal }
+    console.log('Upload paused', file, isPaused)
+  })
   uppy.on('complete', uploadSuccess)
   uppy.on('dashboard:modal-open', () => {
     console.log('Uploader modal is open')
@@ -210,6 +242,31 @@ onMounted(() => {
         Sentry.captureMessage('Uppy timed out')
       }, 10000)
     }
+  })
+  uppy.on('postprocess-progress', (progress) => {
+    // progress: integer (total progress percentage)
+    console.log('Postprocess progress', progress)
+  })
+  uppy.on('upload-success', (file, response) => {
+    console.log('Upload success', file, response)
+  })
+  uppy.on('complete', (result) => {
+    console.log('Complete', result)
+  })
+  uppy.on('error', (error) => {
+    console.error('Upload error', error)
+  })
+  uppy.on('upload-retry', (fileID) => {
+    console.log('upload retried:', fileID)
+  })
+  uppy.on('upload-stalled', (error, files) => {
+    console.log('upload seems stalled', error, files)
+  })
+  uppy.on('retry-all', (fileIDs) => {
+    console.log('upload retried:', fileIDs)
+  })
+  uppy.on('restriction-failed', (file, error) => {
+    console.log('Restriction failed', file, error)
   })
   uppy.on('dashboard:modal-closed', () => {
     console.log('Uploader modal is closed')
