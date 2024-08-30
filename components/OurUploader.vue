@@ -240,7 +240,7 @@ onMounted(() => {
       uppyTimer = setTimeout(() => {
         console.log('Uppy timed out')
         Sentry.captureMessage('Uppy timed out')
-      }, 10000)
+      }, 30000)
     }
   })
   uppy.on('postprocess-progress', (progress) => {
