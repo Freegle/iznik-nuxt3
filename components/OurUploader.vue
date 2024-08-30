@@ -42,6 +42,7 @@ import Compressor from '@uppy/compressor'
 
 import ResizeObserver from 'resize-observer-polyfill'
 import hasOwn from 'object.hasown'
+import * as Sentry from '@sentry/browser'
 import { uid } from '../composables/useId'
 import { useImageStore } from '~/stores/image'
 
@@ -163,9 +164,11 @@ watch(dashboard, (newVal, oldVal) => {
   }
 })
 
+let uppyTimer = null
+
 onMounted(() => {
   console.log(
-    'Mounted',
+    'Uploader mounted',
     '#' + uploaderUid.value,
     dashboard.value,
     props.multiple,
@@ -200,16 +203,34 @@ onMounted(() => {
     .use(Compressor)
   uppy.on('complete', uploadSuccess)
   uppy.on('dashboard:modal-open', () => {
-    console.log('Modal is open')
+    console.log('Uploader modal is open')
+    if (!uppyTimer) {
+      uppyTimer = setTimeout(() => {
+        console.log('Uppy timed out')
+        Sentry.captureMessage('Uppy timed out')
+      }, 10000)
+    }
   })
   uppy.on('dashboard:modal-closed', () => {
-    console.log('Modal is closed')
+    console.log('Uploader modal is closed')
+    if (uppyTimer) {
+      clearTimeout(uppyTimer)
+      uppyTimer = null
+    }
     emit('closed')
   })
 })
 
+onBeforeUnmount(() => {
+  if (uppyTimer) {
+    console.log('Uploader unmounted')
+    clearTimeout(uppyTimer)
+    uppyTimer = null
+  }
+})
+
 async function uploadSuccess(result) {
-  console.log('Uploaded', result)
+  console.log('Upload success', result)
   busy.value = true
 
   if (result.successful) {
