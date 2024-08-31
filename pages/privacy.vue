@@ -2,7 +2,6 @@
   <client-only>
     <div class="d-flex justify-content-center">
       <div class="privacy__container px-3 bg-white">
-        <h1 class="text-center">Privacy</h1>
         <p>
           We won’t pass on your email address to any organisation outside
           Freegle, and other freeglers can't see it (unless your community
@@ -16,9 +15,9 @@
         </p>
         <p>
           We try to protect you from spammers and fraudsters. Sometimes our
-          volunteers may read what you write to check that it's not spam,
-          phishing or fraud. If we happen to find something which is against
-          Freegle rules, we may take further action.
+          volunteers may read what you write in Chat to other freeglers to check
+          that it's not spam, phishing or fraud. If we happen to find something
+          which is against Freegle rules, we may take further action.
         </p>
         <p>
           If you put phone numbers, email addresses or postal addresses into
@@ -115,7 +114,8 @@
         </p>
         <h2>Deleting your data</h2>
         <p>
-          If you want to leave Freegle, please go
+          We'll delete your data automatically if you're inactive for six
+          months. If you want to leave Freegle, please go
           <!-- eslint-disable-next-line -->
         <nuxt-link  no-prefetch to="/unsubscribe">here</nuxt-link>.
         </p>
@@ -127,6 +127,8 @@
           theory. If this happens then we will be in touch with you to discuss
           what should happen to your details.
         </p>
+        <h2>Legal Basis</h2>
+        <p>We operate under the legal basis of Legitimate Interest.</p>
         <h2>Got questions?</h2>
         <p>
           Privacy is a complicated and important area, which we take seriously.
@@ -134,9 +136,20 @@
           <nuxt-link no-prefetch to="/help"> contact us</nuxt-link>. Our
           registered address is Weaver's Field, Loud Bridge, Chipping PR3 2NX.
         </p>
+        <p>
+          If you're unhappy, you can also contact the Information Commissioner's
+          Office
+          <ExternalLink href="https://ico.org.uk/make-a-complain"
+            >here</ExternalLink
+          >.
+        </p>
         <h3>Change History</h3>
         <p>Here are the changes to this page.</p>
         <ul class>
+          <li>
+            24/08/2024: Update to mention legal basis, retention period,
+            complain to ICO.
+          </li>
           <li>
             15/04/2024: Update to mention case where a community leaves Freegle.
           </li>

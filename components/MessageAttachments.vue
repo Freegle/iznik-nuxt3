@@ -1,5 +1,5 @@
 <template>
-  <button class="p-0 border-0" :disabled="disabled">
+  <button class="p-0 border-0 position-relative" :disabled="disabled">
     <MessageTag :id="id" class="ps-2 pe-2" />
     <div
       v-if="!defaultAttachments && !thumbnail && attachments?.length"
@@ -154,7 +154,7 @@ function brokenImage() {
   object-fit: cover;
   display: block;
   height: max($thumbnail-size, calc(calc(50vw - 2rem))) !important;
-  width: max($thumbnail-size, calc(calc(50vw - 2rem))) !important;
+  width: max($thumbnail-size, calc(calc(50vw - 22.5px))) !important;
   box-shadow: 0 0 1 $color-gray--dark;
 
   @include media-breakpoint-up(md) {

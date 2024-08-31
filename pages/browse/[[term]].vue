@@ -4,21 +4,11 @@
       <h1 class="visually-hidden">Browse items</h1>
       <b-row class="m-0">
         <b-col cols="0" lg="3" class="p-0 pr-1">
-          <VisibleWhen
-            :not="['xs', 'sm', 'md', 'lg']"
-            class="position-fixed"
-            style="width: 300px"
-          >
-            <ExternalDa
-              ad-unit-path="/22794232631/freegle_home_left"
-              max-height="600px"
-              max-width="300px"
-              div-id="div-gpt-ad-1693235056629-0"
-              class="mt-2"
-            />
-          </VisibleWhen>
           <VisibleWhen :at="['lg', 'xl', 'xxl']">
-            <SidebarLeft />
+            <SidebarLeft
+              ad-unit-path="/22794232631/freegle_home_left"
+              ad-div-id="div-gpt-ad-1693235056629-0"
+            />
           </VisibleWhen>
         </b-col>
         <b-col cols="12" lg="6" class="p-0">

@@ -1,6 +1,12 @@
 <template>
   <client-only>
     <ChatNotVisible v-if="notVisible" id="notvisible" />
+    <p
+      v-else-if="!id"
+      class="text-center text-info font-weight-bold mt-2 chatHolder"
+    >
+      Please click on a chat in the left pane.
+    </p>
     <div v-else-if="me" class="chatHolder">
       <ChatHeader :id="id" ref="chatheader" class="chatTitle" />
       <div

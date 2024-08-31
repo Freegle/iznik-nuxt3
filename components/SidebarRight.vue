@@ -1,55 +1,65 @@
 <template>
   <div class="sidebar__wrapper">
-    <div class="d-flex flex-column justify-content-between mh-100">
-      <div>
-        <DonationMonthly
-          v-if="supporter && !donor"
-          class="w-100"
-          variant="sidebar"
-        />
-      </div>
-      <JobsSidebar
-        v-if="showJobOpportunities"
-        :class="itemclass"
-        :shown-love-junk="shown"
-      />
-    </div>
+    <ExternalDa
+      v-if="adUnitPath"
+      :ad-unit-path="adUnitPath"
+      max-width="300px"
+      max-height="600px"
+      :div-id="adDivId"
+      class="da"
+    />
+    <JobsSidebar v-if="showJobOpportunities" class="jobs border-bottom" />
   </div>
 </template>
 <script>
 import JobsSidebar from './JobsSidebar'
-import DonationMonthly from '~/components/DonationMonthly'
+import ExternalDa from '~/components/ExternalDa.vue'
 
 export default {
   components: {
-    DonationMonthly,
+    ExternalDa,
     JobsSidebar,
   },
   props: {
     showJobOpportunities: {
       type: Boolean,
       required: false,
+      default: false,
     },
-  },
-  data() {
-    return {
-      shown: false,
-    }
-  },
-  computed: {
-    itemclass() {
-      return 'sidebar__full mt-2'
+    adUnitPath: {
+      type: String,
+      required: false,
+      default: null,
+    },
+    adDivId: {
+      type: String,
+      required: false,
+      default: null,
     },
   },
 }
 </script>
-<style scoped>
-.sidebar__item {
-  flex: 0 1 50%;
-  overflow-y: auto;
-}
-.sidebar__full {
-  flex: 0 1 100%;
-  overflow-y: auto;
+<style scoped lang="scss">
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/sticky-banner.scss';
+@import 'assets/css/navbar.scss';
+
+.sidebar__wrapper {
+  height: calc(100vh - $sticky-banner-height-desktop - $navbar-height - 10px);
+  display: grid;
+  grid-template-rows: max-content minmax(0, 1fr);
+  grid-row-gap: 10px;
+  grid-template-columns: minmax(0, 1fr);
+  overflow-y: hidden;
+
+  .da {
+    grid-row: 1 / 2;
+  }
+
+  .jobs {
+    grid-row: 2 / 3;
+  }
 }
 </style>

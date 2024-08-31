@@ -624,17 +624,71 @@ export default {
 @import 'bootstrap/scss/mixins/_breakpoints';
 
 .twocolumn {
-  display: grid;
+  display: flex;
+  flex-wrap: wrap !important;
   grid-template-rows: 2.5px 1fr 2.5px;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   grid-column-gap: 5px;
+
+  @media only screen and (min-width: 360px) {
+    display: grid;
+    grid-template-rows: 2.5px 1fr 2.5px;
+    grid-template-columns: 1fr 1fr;
+    grid-column-gap: 5px;
+  }
 
   > div {
     grid-row: 2 / 3;
   }
 
+  :deep(.header-title) {
+    display: flex;
+    flex-direction: column;
+
+    .spacer {
+      display: flex;
+      flex-grow: 1;
+    }
+  }
+
+  :deep(.header-description.noAttachments) {
+    grid-row: 5 / 6;
+
+    .textbody {
+      margin-top: 50px;
+      font-size: 1rem;
+      height: 100px;
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+    }
+
+    .description {
+      display: block !important;
+    }
+  }
+
+  :deep(.messagecard.noAttachments) {
+    .image-wrapper {
+      button {
+        background-color: transparent;
+      }
+
+      .thumbnail img {
+        opacity: 0;
+      }
+    }
+  }
+
   .onecolumn {
     height: 100%;
+
+    @media only screen and (max-width: 360px) {
+      width: 100%;
+    }
+
+    @media only screen and (min-width: 360px) {
+      width: unset;
+    }
 
     :deep(div) {
       height: 100%;
@@ -646,7 +700,7 @@ export default {
       }
     }
 
-    :deep(.freegled),
+    :deep(.freegleg),
     :deep(.promised),
     :deep(.image-wrapper) {
       height: unset;

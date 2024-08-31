@@ -56,29 +56,24 @@
               <v-icon icon="info-circle" /> More info
             </b-button>
           </div>
-          <OurUploadedImage
-            v-if="event?.image?.ouruid"
-            :src="event.image.ouruid"
-            :modifiers="event.image.externalmods"
-            alt="Community Event Photo"
-            class="w-100"
-          />
-          <NuxtPicture
-            v-else-if="event?.image?.externaluid"
-            format="webp"
-            fit="cover"
-            provider="uploadcare"
-            :src="event.image.externaluid"
-            :modifiers="event.image.externalmods"
-            alt="Community Event Photo"
-            class="w-100"
-          />
-          <b-img
-            v-else-if="event.image"
-            lazy
-            class="w-100"
-            :src="event.image.path"
-          />
+          <div class="image-wrapper summary">
+            <OurUploadedImage
+              v-if="event?.image?.ouruid"
+              :src="event.image.ouruid"
+              :modifiers="event.image.externalmods"
+              alt="Community Event Photo"
+            />
+            <NuxtPicture
+              v-else-if="event?.image?.externaluid"
+              format="webp"
+              fit="cover"
+              provider="uploadcare"
+              :src="event.image.externaluid"
+              :modifiers="event.image.externalmods"
+              alt="Community Event Photo"
+            />
+            <b-img v-else-if="event.image" lazy :src="event.image.path" />
+          </div>
         </div>
         <div v-else class="event">
           <div class="event__body">
@@ -126,16 +121,24 @@
               </b-button>
             </div>
           </div>
-          <b-img
-            v-if="event.image"
-            lazy
-            :src="event.image.path"
-            rounded
-            thumbnail
-            class="square"
-            generator-unable-to-provide-required-alt=""
-            title="Event photo"
-          />
+          <div class="image-wrapper">
+            <OurUploadedImage
+              v-if="event?.image?.ouruid"
+              :src="event.image.ouruid"
+              :modifiers="event.image.externalmods"
+              alt="Community Event Photo"
+            />
+            <NuxtPicture
+              v-else-if="event?.image?.externaluid"
+              format="webp"
+              fit="cover"
+              provider="uploadcare"
+              :src="event.image.externaluid"
+              :modifiers="event.image.externalmods"
+              alt="Community Event Photo"
+            />
+            <b-img v-else-if="event.image" lazy :src="event.image.path" />
+          </div>
         </div>
       </b-card-body>
     </b-card>
@@ -278,10 +281,19 @@ export default {
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
 
-.square {
-  object-fit: cover;
-  width: 200px;
-  height: 200px;
+.image-wrapper {
+  :deep(img) {
+    object-fit: cover;
+    width: 200px;
+    height: 200px;
+  }
+
+  &.summary {
+    :deep(img) {
+      width: 100%;
+      height: unset;
+    }
+  }
 }
 
 .event__link {

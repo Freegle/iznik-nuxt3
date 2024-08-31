@@ -1,17 +1,24 @@
 <template>
   <div class="freegleg">
-    <b-img lazy src="/freegled.jpg" class="freegled__image" />
-    <b-popover
-      v-model="showing"
-      :content="title"
-      placement="top"
-      variant="primary"
-      triggers="hover"
-      :target="'msg-' + id"
-      custom-class="primary"
-      @shown="shown"
-      @hidden="hidden"
-    />
+    <div v-if="summary">
+      <b-img lazy src="/freegled.jpg" class="freegled__image" />
+      <b-popover
+        v-model="showing"
+        :content="title"
+        placement="top"
+        variant="primary"
+        triggers="hover"
+        :target="'msg-' + id"
+        custom-class="primary"
+        @shown="shown"
+        @hidden="hidden"
+      />
+    </div>
+    <div v-else>
+      <notice-message variant="warning">
+        This item has already been successfully freegled.
+      </notice-message>
+    </div>
   </div>
 </template>
 <script>
@@ -22,6 +29,11 @@ export default {
     id: {
       type: Number,
       required: true,
+    },
+    summary: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   setup() {

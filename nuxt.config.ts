@@ -150,6 +150,7 @@ export default defineNuxtConfig({
     '/stories/**': { ssr: false },
     '/teams': { ssr: false },
     '/adtest': { ssr: false },
+    '/googlepay': { ssr: false },
 
     // Render on demand - may never be shown in a given build - then cache for a while.
     '/explore/region/**': { isr: 3600 },

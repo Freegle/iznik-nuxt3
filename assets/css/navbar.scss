@@ -2,6 +2,12 @@
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
 
+$navbar-height: calc(8px + 8px + 64px);
+
+@include media-breakpoint-up(md) {
+  $navbar-height: calc(8px + 8px + 58px);
+}
+
 #navbar_large .nav-item {
   text-align: center;
 }

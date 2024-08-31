@@ -78,15 +78,16 @@
           />
         </div>
         <label for="chatmessage" class="visually-hidden">Chat message</label>
-        <div v-if="!imageid">
+        <div v-if="!imageid" :style="height">
           <b-form-textarea
             v-if="enterNewLine && !otheruser?.spammer"
             id="chatmessage"
             ref="chatarea"
             v-model="sendmessage"
+            debounce="500"
+            class="h-100"
             placeholder="Type here..."
             enterkeyhint="enter"
-            :style="height"
             @keydown="typing"
             @focus="markRead"
           />
@@ -95,8 +96,9 @@
             id="chatmessage"
             ref="chatarea"
             v-model="sendmessage"
+            debounce="500"
+            class="h-100"
             placeholder="Type here..."
-            :style="height"
             enterkeyhint="send"
             autocapitalize="none"
             @keydown="typing"
@@ -590,9 +592,10 @@ export default {
   },
   watch: {
     suggestedAddress: {
-      handler(newVal) {
+      async handler(newVal) {
         if (newVal?.address?.singleline?.length !== newVal?.matchedLength) {
           this.hideSuggestedAddress = false
+          await this.$nextTick()
           this.updateCaretPosition()
         }
       },
@@ -662,7 +665,7 @@ export default {
         left: caretPosition.left + textareaPosition.left,
       }
     },
-    applySuggestedAddress() {
+    async applySuggestedAddress() {
       const matchedLength = this.suggestedAddress.matchedLength
       const suggestedAddress = this.suggestedAddress.address.singleline
       // No need to apply suggestion if length of match and address are equal
@@ -671,8 +674,19 @@ export default {
       }
       this.sendmessage =
         this.sendmessage.substring(0, this.sendmessage.length - matchedLength) +
-        this.suggestedAddress.address.singleline
+        this.suggestedAddress.address.singleline +
+        ' '
       this.hideSuggestedAddress = true
+      await this.$nextTick()
+      const el = this.$refs.chatarea?.$el
+
+      if (el) {
+        setTimeout(() => {
+          // Focus at end of text.
+          el.focus()
+          el.selectionStart = this.sendmessage.length
+        }, 100)
+      }
     },
     async markRead() {
       await this.chatStore.markRead(this.id)

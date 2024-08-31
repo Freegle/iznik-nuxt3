@@ -124,6 +124,7 @@ import { useMiscStore } from './stores/misc'
 import { computed, watch, reloadNuxtApp } from '#imports'
 // polyfills
 import 'core-js/actual/array/to-sorted'
+import { useConfigStore } from '~/stores/config'
 
 const route = useRoute()
 const loadingIndicatorThrottle = ref(5000)
@@ -140,7 +141,12 @@ let ready = false
 // Starting with around Nuxt 3.4.1, when we first access the config (here) it has public as we'd expect, but
 // if we store that and access it later, we are just looking at the contents of public.  I don't understand why
 // this is, but we don't expect the config to change, so we take a copy here.
-const runtimeConfig = JSON.parse(JSON.stringify(useRuntimeConfig()))
+const runtimeConfig = JSON.parse(
+  JSON.stringify({
+    public: useRuntimeConfig().public,
+    app: useRuntimeConfig().app,
+  })
+)
 
 const miscStore = useMiscStore()
 const groupStore = useGroupStore()
@@ -149,6 +155,7 @@ const authStore = useAuthStore()
 const userStore = useUserStore()
 const isochroneStore = useIsochroneStore()
 const composeStore = useComposeStore()
+const configStore = useConfigStore()
 const chatStore = useChatStore()
 const addressStore = useAddressStore()
 const trystStore = useTrystStore()
@@ -191,6 +198,7 @@ searchStore.init(runtimeConfig)
 storyStore.init(runtimeConfig)
 volunteeringStore.init(runtimeConfig)
 communityEventStore.init(runtimeConfig)
+configStore.init(runtimeConfig)
 jobStore.init(runtimeConfig)
 teamStore.init(runtimeConfig)
 donationStore.init(runtimeConfig)

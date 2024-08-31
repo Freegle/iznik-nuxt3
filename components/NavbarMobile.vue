@@ -278,6 +278,10 @@ const refresh = () => { // IS_APP
   window.location.reload(true)  // Works, but causes a complete reload from scratch. this.$router.go() doesn't work in iOS app
 }
 
+const stickyAdRendered = computed(() => {
+  return useMiscStore().stickyAdRendered
+})
+
 const notificationsShown = ref(false)
 
 watch(notificationsShown, (newVal) => {
@@ -342,10 +346,12 @@ const navBarBottomHidden = computed(() => {
 }
 
 .navbot {
-  margin-bottom: $sticky-banner-height-mobile;
+  margin-bottom: calc($sticky-banner-height-mobile * v-bind(stickyAdRendered));
 
   @include media-breakpoint-up(md) {
-    margin-bottom: $sticky-banner-height-desktop;
+    margin-bottom: calc(
+      $sticky-banner-height-desktop * v-bind(stickyAdRendered)
+    );
   }
 }
 

@@ -100,7 +100,7 @@
           text-anchor="middle"
           xml:space="preserve"
         >
-          {{ tick }}{{ scale }}
+          {{ scale }}{{ tick }}
         </text>
       </g>
     </svg>

@@ -8,7 +8,8 @@
     >
       <div class="d-flex align-items-center">
         <div :id="uniqueId" ref="paypalbutton" class="mr-2" @click="suppress" />
-        <div v-if="!show">Donate</div>
+        <div v-if="text">{{ text }}</div>
+        <div v-else-if="!show">Donate</div>
         <div v-else>{{ show }}</div>
       </div>
     </b-button>
@@ -27,6 +28,11 @@ export default {
       default: false,
     },
     value: {
+      type: String,
+      required: false,
+      default: null,
+    },
+    text: {
       type: String,
       required: false,
       default: null,
@@ -69,7 +75,7 @@ export default {
       }
     },
     show() {
-      return this.value ? '£' + this.value : this.$props.show
+      return this.value ? '£' + this.value : null
     },
   },
   mounted() {

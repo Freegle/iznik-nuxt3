@@ -11,7 +11,7 @@
     >
       <div v-if="isVisible">
         <div class="d-flex w-100 justify-content-around">
-          <OurGoogleAd
+          <OurGoogleDa
             v-if="adSense"
             ref="googlead"
             :ad-unit-path="adUnitPath"
@@ -23,7 +23,7 @@
             :render-ad="renderAd"
             @rendered="rippleRendered"
           />
-          <OurPrebidAd
+          <OurPrebidDa
             v-else
             ref="prebidad"
             :ad-unit-path="adUnitPath"
@@ -42,6 +42,9 @@
 </template>
 <script setup>
 import { ref, computed, onBeforeUnmount } from '#imports'
+import { useConfigStore } from '~/stores/config'
+import { useMiscStore } from '~/stores/misc'
+import { useAuthStore } from '~/stores/auth'
 
 const props = defineProps({
   adUnitPath: {
@@ -82,7 +85,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['rendered'])
+const emit = defineEmits(['rendered', 'disabled'])
 
 // We can either run with Ad Sense or with Prebid.  Ad Sense is the default.
 const adSense = ref(true)
@@ -187,7 +190,7 @@ function visibilityChanged(visible) {
 // redirects.
 let checkStillVisibleTimer = null
 
-function checkStillVisible() {
+async function checkStillVisible() {
   // Check if the ad is still visible after this delay, and no modal is open.
   console.log(
     'Check if ad still visible',
@@ -200,8 +203,27 @@ function checkStillVisible() {
     isVisible.value &&
     (props.inModal || !document.body.classList.contains('modal-open'))
   ) {
-    console.log('Render')
-    renderAd.value = true
+    // Check if we are showing ads.
+    const configStore = useConfigStore()
+    const showingAds = await configStore.fetch('ads_enabled')
+    const me = useAuthStore().user
+
+    const recentDonor =
+      me &&
+      me.donated &&
+      new Date(me.donated) > new Date(Date.now() - 31 * 24 * 60 * 60 * 1000)
+
+    if (recentDonor) {
+      console.log('Ads disabled as recent donor')
+      emit('rendered', false)
+    } else if (showingAds?.length && parseInt(showingAds[0].value)) {
+      renderAd.value = true
+    } else {
+      console.log('Ads disabled in server config')
+      useMiscStore().adsDisabled = true
+      emit('rendered', false)
+      emit('disabled')
+    }
   } else {
     emit('rendered', false)
   }
