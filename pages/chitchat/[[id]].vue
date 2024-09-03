@@ -106,6 +106,7 @@
                 :distance="distance"
                 @infinite="loadMore"
               />
+              <div class="adpad" />
             </div>
           </div>
         </b-col>
@@ -285,6 +286,9 @@ export default {
     }
   },
   computed: {
+    stickyAdRendered() {
+      return this.miscStore.stickyAdRendered
+    },
     selectedArea: {
       get() {
         const settings = this.me.settings
@@ -474,6 +478,7 @@ export default {
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/sticky-banner.scss';
 
 :deep(.post__button) {
   @include media-breakpoint-up(sm) {
@@ -492,5 +497,15 @@ export default {
 
 .image__uploaded {
   width: 100px;
+}
+
+.adpad {
+  margin-bottom: calc($sticky-banner-height-mobile * v-bind(stickyAdRendered));
+
+  @include media-breakpoint-up(md) {
+    padding-bottom: calc(
+      $sticky-banner-height-desktop * v-bind(stickyAdRendered)
+    );
+  }
 }
 </style>
