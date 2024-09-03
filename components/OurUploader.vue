@@ -205,10 +205,6 @@ onMounted(() => {
     })
     .use(Tus, { endpoint: runtimeConfig.public.TUS_UPLOADER })
     .use(Compressor)
-  uppy.on('before-file-added', (file) => {
-    console.log('Before file added', file)
-    return true
-  })
   uppy.on('file-added', (file) => {
     console.log('Added file', file)
   })
