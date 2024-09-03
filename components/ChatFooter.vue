@@ -84,7 +84,7 @@
             id="chatmessage"
             ref="chatarea"
             v-model="sendmessage"
-            debounce="500"
+            :debounce="debounce"
             class="h-100"
             placeholder="Type here..."
             enterkeyhint="enter"
@@ -96,14 +96,14 @@
             id="chatmessage"
             ref="chatarea"
             v-model="sendmessage"
-            debounce="500"
+            :debounce="debounce"
             class="h-100"
             placeholder="Type here..."
             enterkeyhint="send"
             autocapitalize="none"
             @keydown="typing"
             @keydown.enter.exact.prevent
-            @keyup.enter.exact="send"
+            @keyup.enter.exact="sendOnEnter"
             @keydown.enter.shift.exact.prevent="newline"
             @keydown.alt.shift.enter.exact.prevent="newline"
             @focus="markRead"
@@ -449,6 +449,7 @@ export default {
   },
   data() {
     return {
+      debounce: 500,
       sending: false,
       uploading: false,
       showMicrovolunteering: false,
@@ -768,6 +769,12 @@ export default {
     },
     showInfo() {
       this.showProfileModal = true
+    },
+    sendOnEnter() {
+      // Because of debounce, we might not have the full message yet.  Start a timer.
+      setTimeout(() => {
+        this.send()
+      }, this.debounce + 100)
     },
     async send(callback) {
       if (!this.sending) {
