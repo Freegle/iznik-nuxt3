@@ -17,11 +17,11 @@
       <ModMessageButton :message="message" variant="danger" icon="trash-alt" delete label="Delete" />
       <ModMessageButton :message="message" variant="danger" icon="ban" spam label="Spam" />
       <SpinButton v-if="message.type === 'Offer' && !message.outcomes.length" variant="white" class="m-1" icon-name="check" label="Mark as TAKEN"
-        :handler="outcome('Taken')" confirm />
+        @handle="outcome($event, 'Taken')" confirm :flex="false" />
       <SpinButton v-if="message.type === 'Wanted' && !message.outcomes.length" variant="white" class="m-1" icon-name="check" label="Mark as RECEIVED"
-        :handler="outcome('Received')" confirm />
+        @handle="outcome($event, 'Received')" confirm :flex="false" />
       <SpinButton v-if="!message.outcomes.length" variant="white" class="m-1" icon-name="trash-alt" label="Mark as Withdrawn"
-        :handler="outcome('Withdrawn')" confirm />
+        @handle="outcome($event, 'Withdrawn')" confirm :flex="false" />
     </div>
     <div v-if="!editreview" class="d-lg-inline">
       <ModMessageButton v-for="stdmsg in filtered" :key="stdmsg.id" :variant="variant(stdmsg)" :icon="icon(stdmsg)" :label="stdmsg.title"
@@ -143,16 +143,14 @@ export default {
 
       return ret
     },
-    outcome(type) {
+    outcome(callback, type) {
       const self = this
-
-      return async function () {
-        await this.messageStore.update({
-          action: 'Outcome',
-          id: self.message.id,
-          outcome: type
-        })
-      }
+      this.messageStore.updateMT({
+        action: 'Outcome',
+        id: self.message.id,
+        outcome: type
+      })
+      if (callback) callback()
     }
   }
 }

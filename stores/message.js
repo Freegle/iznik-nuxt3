@@ -249,12 +249,16 @@ export const useMessageStore = defineStore({
             (curMessage) => curMessage.id === params.id
           )
           if (index !== -1) {
+            console.log('UMS update F')
             this.byUserList[userUid][index] = message
           }
         }
       }
 
       return data
+    },
+    async updateMT(params) { // Rely on refresh elsewhere
+      return await api(this.config).message.update(params)
     },
     async patch(params) {
       const data = await api(this.config).message.save(params)

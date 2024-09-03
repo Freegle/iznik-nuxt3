@@ -54,6 +54,7 @@ A fairly minimal `package.json` is needed as `nuxt.config.ts` extends `../` and 
 * Change `this.$store.getters['misc/time']` into `this.miscStore.time`
 * And... miscStore.get('dashboardShowInfo') and miscStore.set({ key: 'dashboardShowInfo', value: newValue })
 * SpinButton has changed params inc icon-name and :handler to @handle which has param callback that must be called when complete
+  To have inline use :flex="false"
 * const path = computed(() => { return 0 } and access as path.value
 * Change pluralize to added withplural with number and includeNumber as extra params
 import { withplural } from '../composables/usePluralize'
