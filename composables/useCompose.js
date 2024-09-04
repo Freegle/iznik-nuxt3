@@ -108,7 +108,7 @@ export function setup(type) {
     initialPostcode: ref(initialPostcode),
     group,
     postcode,
-    closed: computed(() => group?.settings?.closed),
+    closed: computed(() => group.value?.settings?.closed),
     ids,
     notblank: computed(() => {
       let ret = false
@@ -144,7 +144,7 @@ export function setup(type) {
       const me = authStore.user
       const em = email.value + ''
 
-      if (email && me) {
+      if (email.value && me) {
         ret = !me.emails?.find((e) => {
           return (
             em

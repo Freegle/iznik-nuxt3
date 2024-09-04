@@ -20,7 +20,7 @@
           <span>Loading...</span><br /><span class="font-weight-bold"
             >Stuck here? We couldn't load our Javascript. Try refreshing. Or
             Chrome.</span
-          ><br /><SupportLink text="No luck? Contact us" />
+          ><br />
         </p>
       </div>
     </div>

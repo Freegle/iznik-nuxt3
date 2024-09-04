@@ -93,37 +93,7 @@ export const useMiscStore = defineStore({
         }
       }
     },
-    async checkOnline() {
-      if (this.visible) {
-        try {
-          const response = await this.fetchWithTimeout(
-            this.config.public.APIv2 + '/online',
-            null,
-            5000
-          )
-
-          if (response?.status === 200) {
-            const rsp = await response.json()
-
-            if (!this.online) {
-              console.log('Back online')
-              this.online = rsp.online
-            }
-          } else {
-            // Null response happens when we time out
-            console.log('Offline', response)
-            this.online = false
-          }
-        } catch (e) {
-          if (this.online) {
-            console.log('Gone offline', e)
-            this.online = false
-          }
-        }
-      }
-
-      this.onlineTimer = setTimeout(this.checkOnline, 1000)
-    },
+    async checkOnline() {},
     waitForOnline() {
       if (this.online) {
         return

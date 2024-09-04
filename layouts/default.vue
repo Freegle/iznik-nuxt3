@@ -3,9 +3,7 @@
     <LayoutCommon :key="'nuxt-' + bump">
       <slot />
     </LayoutCommon>
-    <client-only>
-      <LoginModal v-if="!loggedIn" ref="loginModal" />
-    </client-only>
+    <client-only> </client-only>
   </div>
 </template>
 <script>
