@@ -9,8 +9,8 @@
         // document.cookie.split(";").map(
         (function(r){var n=e(r.split("="),2),o=n[0],i=n[1];o&&(t[o.trim()]=i)}))}catch(t){}return t},
         i._ckySetCookie=function(t,e){ // Freegle
-          var r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:0,n=arguments.length>3&&void 0!==arguments[3]?arguments[3]:i._ckyStore._rootDomain,o=new Date,s=0===r?0:o.setTime(o.getTime()+24*r*
-          //document.cookie="".concat(t,"=").concat(e,"; expires=").concat(new Date(s).toUTCString(),"; path=/;domain=").concat(n,"; SameSite=Strict; 
+          var r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:0,n=arguments.length>3&&void 0!==arguments[3]?arguments[3]:i._ckyStore._rootDomain,o=new Date,s=0===r?0:o.setTime(o.getTime()+24*r*60*60*1e3);
+          //document.cookie="".concat(t,"=").concat(e,"; expires=").concat(new Date(s).toUTCString(),"; path=/;domain=").concat(n,"; SameSite=Strict; secure")
             var newcookie = "".concat(t, "=").concat(e, "")
             var cookies = localStorage.getItem('cookies')
             if (!cookies) cookies = ''
