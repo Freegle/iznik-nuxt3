@@ -578,8 +578,9 @@ export default {
       }
     },
 
-    doAjax(val) {
+    async doAjax(val) {
       this.invalid = false
+      let beforeAjaxResult = []
 
       if (this.ajaxInProgress) {
         // We're already doing a request.  Don't send another one, partly out of politeness to the server, and
@@ -594,8 +595,10 @@ export default {
       } else {
         // Callback Event
         if (this.onBeforeAjax) {
-          this.onBeforeAjax(val)
+          // This might return some results - if so they should be shown first.
+          beforeAjaxResult = await this.onBeforeAjax(val)
         }
+
         // Compose Params
         const params = this.composeParams(val.trim())
         // Init Ajax
@@ -606,22 +609,26 @@ export default {
 
         ajax.open('GET', `${this.url}?${params}`, true)
         this.composeHeader(ajax)
+
         // Callback Event
         ajax.addEventListener('progress', data => {
           if (data.lengthComputable && this.onAjaxProgress)
             this.onAjaxProgress(data)
         })
+
         // On Done
         ajax.addEventListener('loadend', e => {
           const { status, responseText } = e.target
 
           if (status === 200) {
             const json = JSON.parse(responseText)
+
             // Callback Event
             if (this.onAjaxLoaded) {
               this.onAjaxLoaded(json)
             }
-            this.json = this.process ? this.process(json) : json
+
+            this.json = beforeAjaxResult.concat(this.process ? this.process(json) : json)
 
             if (this.restrict && (!this.json || this.json.length === 0)) {
               // What we have doesn't match.  Indicate that we have selected an invalid value.
@@ -641,7 +648,7 @@ export default {
           // We no longer have a request in progress.
           this.ajaxInProgress = null
         })
-        // Send Ajax
+
         ajax.send()
       }
     },

@@ -11,7 +11,7 @@
     class="position-relative"
   >
     <template v-if="message.successful && showFreegled">
-      <MessageFreegled :id="id" />
+      <MessageFreegled :id="id" summary />
     </template>
     <template v-else-if="message.promised && showPromised">
       <MessagePromised
@@ -26,42 +26,43 @@
       <MessageItemLocation
         :id="id"
         :matchedon="matchedon"
-        class="mb-1 header-title"
+        class="header-title"
         :expanded="false"
         :show-location="showLocation"
       />
-      <MessageHistory
-        :id="id"
-        class="mb-1 header-history"
-        :display-message-link="mod"
-      />
-      <div class="mb-1 header-description">
-        <div
-          v-if="!message.attachments || !message.attachments?.length"
-          class="d-flex d-md-none"
-          @click="zoom"
-        >
-          <MessageTag :id="id" class="ps-2 pe-2" inline />
-          <div class="flex-grow-1" />
-        </div>
-        <MessageDescription :id="id" :matchedon="matchedon" />
+      <MessageHistory :id="id" summary class="mb-1 header-history" />
+      <div
+        class="mb-1 header-description"
+        :class="{
+          noAttachments: !message?.attachments?.length,
+        }"
+      >
+        <MessageDescription
+          :id="id"
+          :matchedon="matchedon"
+          class="d-none d-md-block description"
+        />
       </div>
       <div
         v-if="!message.successful && replyable"
-        class="header-expand mt-2 mt-sm-0"
+        class="header-expand mt-2 mt-sm-0 d-none d-md-block"
       >
         <client-only>
-          <b-button variant="primary" class="mt-2" @click="expand">
+          <b-button variant="primary" class="mt-2 mb-2" @click="expand">
             {{ expandButtonText }}
           </b-button>
         </client-only>
       </div>
-      <div class="image-wrapper" @click="zoom">
+      <div
+        class="image-wrapper d-flex justify-content-around mb-2 mb-md-3"
+        @click="expandAndAttachments"
+      >
         <MessageAttachments
           :id="id"
           :attachments="message.attachments"
           :disabled="message.successful"
           thumbnail
+          :preload="preload"
         />
       </div>
     </div>
@@ -125,6 +126,11 @@ export default {
       required: false,
       default: true,
     },
+    preload: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   setup() {
     const messageStore = useMessageStore()
@@ -140,6 +146,7 @@ export default {
     classes() {
       const ret = {
         messagecard: true,
+        'pb-0': true,
         freegled: this.message?.successful && this.showFreegled,
         offer: this.message.type === 'Offer',
         wanted: this.message.type === 'Wanted',
@@ -150,8 +157,7 @@ export default {
           this.replyable &&
           !this.message?.promisedtome &&
           !this.message?.successful,
-        'p-2': true,
-        'p-sm-3': true,
+        noAttachments: !this.message?.attachments?.length,
       }
 
       if (this.bgClass) {
@@ -163,24 +169,31 @@ export default {
   },
   methods: {
     async view() {
-      if (this.me && this.message.unseen) {
+      if (this.me && this.message?.unseen) {
         await this.messageStore.view(this.id)
       }
     },
-    expand() {
-      this.$emit('expand')
-    },
-    zoom(e) {
+    expand(e) {
       if (this.message) {
-        if (!this.message.attachments || !this.message.attachments?.length) {
-          // No photos - show the description.
-          this.$emit('expand')
-        } else {
-          this.$emit('zoom')
-        }
+        this.$emit('expand')
 
-        e.preventDefault()
-        e.stopPropagation()
+        if (e) {
+          e.preventDefault()
+          e.stopPropagation()
+        }
+      }
+    },
+    expandAndAttachments(e) {
+      // This is a slightly different case because on My Posts we want to trigger an image zoom (there is no expand
+      // on My Posts).
+      if (this.message) {
+        this.$emit('expand')
+        this.$emit('attachments')
+
+        if (e) {
+          e.preventDefault()
+          e.stopPropagation()
+        }
       }
     },
   },
@@ -190,6 +203,7 @@ export default {
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/message-images.scss';
 
 .card-body {
   padding: 0px;
@@ -200,7 +214,7 @@ export default {
 }
 
 .messagecard {
-  padding: 16px;
+  padding: 10px;
   border-radius: 4px;
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
   border: solid 1px $color-gray--light;
@@ -208,9 +222,11 @@ export default {
   display: grid;
   align-items: start;
   grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: 1fr min-content;
 
-  @include media-breakpoint-up(sm) {
-    grid-template-columns: 200px 1fr;
+  @include media-breakpoint-up(md) {
+    padding: 16px;
+    grid-template-columns: $thumbnail-size-md 1fr;
     grid-column-gap: 1rem;
     grid-template-rows: max-content max-content max-content auto auto auto;
   }
@@ -227,17 +243,18 @@ export default {
     grid-column: 1 / 2;
     grid-row: 1 / 2;
 
-    @include media-breakpoint-up(sm) {
+    @include media-breakpoint-up(md) {
       grid-column: 2 / 3;
     }
   }
 
   .header-history {
     grid-column: 1 / 2;
-    grid-row: 2 / 3;
+    grid-row: 3 / 4;
 
-    @include media-breakpoint-up(sm) {
+    @include media-breakpoint-up(md) {
       grid-column: 2 / 3;
+      grid-row: 2 / 3;
     }
   }
 
@@ -245,7 +262,7 @@ export default {
     grid-column: 1 / 2;
     grid-row: 4 / 5;
 
-    @include media-breakpoint-up(sm) {
+    @include media-breakpoint-up(md) {
       grid-column: 2 / 3;
       grid-row: 3 / 4;
     }
@@ -255,30 +272,22 @@ export default {
     position: relative;
 
     grid-column: 1 / 2;
-    grid-row: 3 / 4;
+    grid-row: 5 / 6;
 
-    @include media-breakpoint-up(sm) {
+    @include media-breakpoint-up(md) {
       grid-column: 1 / 2;
       grid-row: 1 / 5;
       width: unset;
-    }
-
-    &.noattachments {
-      display: none;
-
-      @include media-breakpoint-up(md) {
-        display: block;
-      }
     }
   }
 
   .header-expand {
     grid-column: 1 / 2;
-    grid-row: 5 / 6;
+    grid-row: 6 / 7;
     align-self: end;
     justify-self: end;
 
-    @include media-breakpoint-up(sm) {
+    @include media-breakpoint-up(md) {
       grid-column: 2 / 3;
       grid-row: 4 / 5;
     }

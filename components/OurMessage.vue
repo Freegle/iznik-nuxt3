@@ -3,7 +3,7 @@
     v-if="message"
     :id="'msg-' + id"
     ref="msg"
-    class="position-relative ms-2 me-2 ms-sm-0 me-sm-0"
+    class="position-relative"
     itemscope
     itemtype="http://schema.org/Product"
   >
@@ -40,10 +40,8 @@
         :id="message.id"
         :expand-button-text="expandButtonText"
         :replyable="replyable"
-        class="mt-3"
         :matchedon="matchedon"
         @expand="expand"
-        @zoom="zoom"
       />
       <MessageModal
         v-if="expanded"

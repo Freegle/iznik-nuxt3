@@ -118,7 +118,10 @@ export default {
         await this.authStore.saveAndGet({
           phone: this.me.phone,
         })
-        callback()
+
+        if (callback) {
+          callback()
+        }
       }
     },
     async removePhone() {

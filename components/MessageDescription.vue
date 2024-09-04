@@ -1,23 +1,27 @@
 <template>
-  <div v-if="textbody && textbody !== 'null'" class="textbody">
-    <span class="d-none" itemprop="description">{{ description }} </span>
-    <Highlighter
-      v-if="matchedon"
-      :search-words="[matchedon.word]"
-      :text-to-highlight="textbody"
-      highlight-class-name="highlight"
-      auto-escape
-    />
-    <span v-else>{{ textbody }}</span>
+  <div>
+    <div v-if="textbody && textbody !== 'null'" class="textbody">
+      <span class="d-none" itemprop="description">{{ description }} </span>
+      <Highlighter
+        v-if="matchedon"
+        :search-words="[matchedon.word]"
+        :text-to-highlight="textbody"
+        highlight-class-name="highlight"
+        auto-escape
+      />
+      <span v-else>{{ textbody }}</span>
+    </div>
+    <MessageDeadline :id="id" class="mt-2" />
   </div>
 </template>
 <script>
 import Highlighter from 'vue-highlight-words'
 import { useMessageStore } from '~/stores/message'
 import { twem } from '~/composables/useTwem'
+import MessageDeadline from '~/components/MessageDeadline.vue'
 
 export default {
-  components: { Highlighter },
+  components: { MessageDeadline, Highlighter },
   props: {
     id: {
       type: Number,

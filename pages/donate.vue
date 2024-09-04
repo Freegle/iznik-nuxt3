@@ -74,12 +74,22 @@
               </b-card-header>
               <b-card-text class="p-2">
                 <p>
-                  You can also donate by bank transfer to sort code 60-83-01,
-                  account number 20339094. The name of the account is Freegle
-                  Limited, and the bank is Unity Trust Bank.
+                  You can also donate by transfer to sort code 60-83-01, account
+                  number 20339094. The account name is Freegle Limited, and the
+                  bank is Unity Trust Bank.
                 </p>
                 <p>
-                  If you do this, please complete a Gift Aid
+                  Please use a reference of
+                  <span v-if="myid" class="text-danger font-weight-bold">{{
+                    myid
+                  }}</span>
+                  <span v-else class="text-danger font-weight-bold">
+                    your email
+                  </span>
+                  so we know who it comes from!
+                </p>
+                <p>
+                  If you can, please make a Gift Aid
                   <!-- eslint-disable-next-line -->
                 Declaration <nuxt-link no-prefetch to="/giftaid">here</nuxt-link>.
                 </p>
@@ -96,11 +106,19 @@
                 <p>
                   Please make it payable to Freegle Limited and send to Freegle,
                   64A North Road, Ormesby, Great Yarmouth NR29 3LE. Please
-                  include your Freegle email, so we can work out who it comes
-                  from!
+                  include
+                  <span v-if="myid">
+                    reference
+                    <span class="font-weight-bold text-danger">{{ myid }}</span
+                    >,
+                  </span>
+                  <span v-else class="font-weight-bold text-danger"
+                    >your email,</span
+                  >
+                  so we know who it comes from!
                 </p>
                 <p>
-                  If you do this, please complete a Gift Aid
+                  If you can, please make a Gift Aid
                   <!-- eslint-disable-next-line -->
                 Declaration <nuxt-link  no-prefetch to="/giftaid">here</nuxt-link>.
                 </p>
@@ -164,6 +182,22 @@
               </b-card-text>
             </b-card>
           </b-col>
+          <b-col cols="12" lg="6">
+            <b-card class="mt-2 mb-2" no-body>
+              <b-card-header bg-variant="primary" text-variant="white">
+                With Google Pay
+              </b-card-header>
+              <b-card-text class="p-2">
+                <p>You can donate £1 to help us with Google Pay.</p>
+                <p v-if="showThanks">Thank you for donating!</p>
+                <GooglePay
+                  v-else
+                  total-price="1.00"
+                  @payment-success="showThanks = true"
+                />
+              </b-card-text>
+            </b-card>
+          </b-col>
         </b-row>
       </b-col>
     </b-row>
@@ -184,7 +218,6 @@ export default {
     DonationThermometer,
     DonationButton,
   },
-  ...mapState(useDonationStore, ['target']),
   setup() {
     const runtimeConfig = useRuntimeConfig()
     const route = useRoute()
@@ -198,5 +231,11 @@ export default {
       )
     )
   },
+  data: function () {
+    return {
+      showThanks: false,
+    }
+  },
+  ...mapState(useDonationStore, ['target']),
 }
 </script>

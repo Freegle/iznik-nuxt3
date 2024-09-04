@@ -27,8 +27,6 @@
           :style="'width: ' + mapWidth + '; height: ' + mapWidth + 'px'"
           :min-zoom="5"
           :max-zoom="13"
-          @ready="idle"
-          @moveend="boundsChanged"
         >
           <l-tile-layer :url="osmtile" :attribution="attribution" />
           <LeafletHeatmap
@@ -145,16 +143,25 @@ export default {
         const maxlog = Math.log10(max)
         const range = maxlog - minlog
         const lineartolog = function (n) {
-          return (Math.log10(n) - minlog) / range
+          if (range) {
+            return (Math.log10(n) - minlog) / range
+          } else {
+            return n
+          }
         }
 
         data.forEach((d) => {
           if (this.bounds.contains([d[0], d[1]])) {
-            weighted.push([d[0], d[1], 1 - lineartolog(1 - d[2] / max)])
+            const val = 1 - lineartolog(1 - d[2] / max)
+            console.log(val, max, minlog, maxlog)
+            if (Number.isFinite(val)) {
+              weighted.push([d[0], d[1], val])
+            }
           }
         })
       }
 
+      console.log(weighted)
       return weighted
     },
   },

@@ -118,10 +118,19 @@ export default {
       return ret
     },
     supporter() {
-      return this.me && this.me.supporter
+      return this.me?.supporter
     },
     donor() {
-      return this.me && this.me.donor
+      return this.me?.donated
+    },
+    recentDonor() {
+      const donated = this.me?.donated
+
+      // If donated and within last 31 days
+      return (
+        donated &&
+        new Date(donated) > new Date(Date.now() - 31 * 24 * 60 * 60 * 1000)
+      )
     },
     amMicroVolunteering() {
       return (

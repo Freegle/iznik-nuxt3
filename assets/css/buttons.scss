@@ -83,3 +83,9 @@ button {
     color: $color-gray--normal !important;
   }
 }
+
+.badge {
+  &.text-bg-info {
+    color: white !important;
+  }
+}

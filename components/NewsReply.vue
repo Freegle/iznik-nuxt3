@@ -39,15 +39,24 @@
           <br />
         </span>
         <div v-if="reply.image">
+          <OurUploadedImage
+            v-if="reply?.image?.ouruid"
+            :src="reply?.image?.ouruid"
+            :modifiers="reply?.image?.externalmods"
+            alt="ChitChat Photo"
+            :width="100"
+            class="clickme replyphoto mt-2 mb-2"
+            @click="showReplyPhotoModal"
+          />
           <NuxtPicture
-            v-if="reply?.image?.externaluid"
+            v-else-if="reply?.image?.externaluid"
             format="webp"
             fit="cover"
             provider="uploadcare"
             :src="reply?.image?.externaluid"
             :modifiers="reply?.image?.externalmods"
             alt="ChitChat Photo"
-            width="100"
+            :width="100"
             class="clickme replyphoto mt-2 mb-2"
             @click="showReplyPhotoModal"
           />
@@ -58,7 +67,7 @@
           </span>
           <NewsUserInfo :id="id" class="mr-1 d-inline" />
         </div>
-        <div class="d-flex flex-row align-items-center">
+        <div class="d-flex flex-row align-items-center flex-wrap">
           <b-button
             variant="link"
             size="sm"
@@ -166,8 +175,14 @@
           size="sm"
         />
         <div v-if="mod && reply.hidden" class="text-danger small">
-          This has been hidden and is only visible to volunteers and the person
-          who posted it.
+          This has been hidden by
+          <UserName
+            v-if="newsfeed?.hiddenby"
+            :id="newsfeed.hiddenby"
+            intro="by"
+          />
+          <span v-else>the system</span>
+          and is only visible to volunteers and the person who posted it.
         </div>
       </div>
     </div>
@@ -478,7 +493,7 @@ export default {
         this.uploading = false
 
         this.imageid = newVal[0].id
-        this.imageuid = newVal[0].externaluid
+        this.imageuid = newVal[0].ouruid
         this.imagemods = newVal[0].externalmods
       },
       deep: true,

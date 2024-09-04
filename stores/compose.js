@@ -39,7 +39,7 @@ export const useComposeStore = defineStore({
     emailAt: null,
     postcode: null,
     group: null,
-    messages: [],
+    messages: {},
     attachmentBump: 1,
     _progress: 1,
     max: 4,
@@ -262,6 +262,8 @@ export const useComposeStore = defineStore({
       console.log('Remove attachment', JSON.stringify(params))
       let newAtts = []
 
+      this.ensureMessage(params.id)
+
       if (this.messages[params.id]?.attachments) {
         newAtts = this.messages[params.id].attachments.filter((obj) => {
           return parseInt(obj.id) !== parseInt(params.photoid)
@@ -374,7 +376,7 @@ export const useComposeStore = defineStore({
       return results
     },
     prune() {
-      if (!Array.isArray(this.messages)) {
+      if (this.messages && !Array.isArray(this.messages)) {
         // This is bad data.
         console.log('Bad compose messages, discard')
         this.messages = []

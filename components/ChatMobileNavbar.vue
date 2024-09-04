@@ -27,7 +27,10 @@
       <h1 class="text-white truncate text-center header--size5 m-0">
         {{ chat.name }}
       </h1>
-      <div v-if="!otheruser?.deleted && milesaway" class="text-white small">
+      <div
+        v-if="!otheruser?.deleted && milesaway"
+        class="text-white small text-truncate"
+      >
         {{ milesstring }}
       </div>
     </div>
@@ -54,7 +57,7 @@
   </div>
 </template>
 <script setup>
-import { setNavBarHidden } from '../composables/useNavbar'
+import { clearNavBarTimeout, setNavBarHidden } from '../composables/useNavbar'
 import { useNavbar, navBarHidden } from '~/composables/useNavbar'
 import { useChatStore } from '~/stores/chat'
 import { setupChat } from '~/composables/useChat'
@@ -79,6 +82,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  clearNavBarTimeout()
   window.removeEventListener('scroll', handleScroll)
 })
 

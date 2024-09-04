@@ -10,10 +10,14 @@
         size="lg"
       />
       <div>
-        <span class="text-success font-weight-bold">{{
-          user.displayname
-        }}</span>
-        created an event<span class="d-none d-md-inline-block">:</span
+        <span v-if="user.id">
+          <span class="text-success font-weight-bold">{{
+            user.displayname
+          }}</span>
+          created an event</span
+        >
+        <span v-else> An event was created</span>
+        <span class="d-none d-md-inline-block">:</span
         ><br class="d-block d-md-none" />
         &nbsp;<strong>{{ event.title }}</strong>
         <br />
@@ -47,23 +51,32 @@
         </b-button>
       </div>
       <div class="communityevent__photo">
+        <OurUploadedImage
+          v-if="event.image?.ouruid"
+          :src="event.image?.ouruid"
+          :modifiers="event.image?.externalmods"
+          alt="Community Event Photo"
+          :width="200"
+          :height="200"
+          @click="moreInfo"
+        />
         <NuxtPicture
-          v-if="event.photo?.externaluid"
+          v-else-if="event.image?.externaluid"
           format="webp"
           fit="cover"
           provider="uploadcare"
-          :src="event.photo?.externaluid"
-          :modifiers="event.photo?.externalmods"
+          :src="event.image?.externaluid"
+          :modifiers="event.image?.externalmods"
           alt="Community Event Photo"
           :width="200"
           :height="200"
           @click="moreInfo"
         />
         <b-img
-          v-else-if="event.photo"
+          v-else-if="event.image"
           rounded
           lazy
-          :src="event.photo.paththumb"
+          :src="event.image.paththumb"
           class="clickme mt-2 mt-md-0 w-100"
           @click="moreInfo"
         />

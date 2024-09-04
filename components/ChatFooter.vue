@@ -70,18 +70,24 @@
       </div>
       <div v-if="!otheruser?.deleted">
         <div v-if="uploading" class="bg-white">
-          <OurUploader v-model="currentAtts" type="ChatMessage" />
+          <OurUploader
+            v-model="currentAtts"
+            type="ChatMessage"
+            start-open
+            @closed="uploading = false"
+          />
         </div>
         <label for="chatmessage" class="visually-hidden">Chat message</label>
-        <div v-if="!imageid">
+        <div v-if="!imageid" :style="height">
           <b-form-textarea
             v-if="enterNewLine && !otheruser?.spammer"
             id="chatmessage"
             ref="chatarea"
             v-model="sendmessage"
+            :debounce="debounce"
+            class="h-100"
             placeholder="Type here..."
             enterkeyhint="enter"
-            :style="height"
             @keydown="typing"
             @focus="markRead"
           />
@@ -90,13 +96,14 @@
             id="chatmessage"
             ref="chatarea"
             v-model="sendmessage"
+            :debounce="debounce"
+            class="h-100"
             placeholder="Type here..."
-            :style="height"
             enterkeyhint="send"
             autocapitalize="none"
             @keydown="typing"
             @keydown.enter.exact.prevent
-            @keyup.enter.exact="send"
+            @keyup.enter.exact="sendOnEnter"
             @keydown.enter.shift.exact.prevent="newline"
             @keydown.alt.shift.enter.exact.prevent="newline"
             @focus="markRead"
@@ -128,14 +135,13 @@
           </Dropdown>
         </div>
         <div v-else class="d-flex justify-content-end pt-2 pb-2">
-          <NuxtPicture
-            format="webp"
-            fit="cover"
-            provider="uploadcare"
+          <OurUploadedImage
             :src="imageuid"
             :modifiers="imagemods"
             alt="Chat Photo"
-            sizes="100px sm:200px"
+            :width="200"
+            :height="200"
+            sizes="200px"
           />
           <div class="ml-1">
             <b-button title="Remove photo" @click="removeImage">
@@ -212,30 +218,42 @@
       <div class="d-flex d-lg-none justify-content-between align-middle">
         <div
           v-if="chat && chat.chattype === 'User2User' && otheruser"
-          v-b-tooltip="'Promise an item to this freegler'"
           class="ml-1 mr-2"
           @click="promise(null)"
         >
-          <v-icon scale="2" icon="handshake" class="fa-mob" />
+          <v-icon
+            scale="2"
+            icon="handshake"
+            class="fa-mob"
+            :class="{ shrink: shrink }"
+          />
           <div class="mobtext text--smallest">Promise</div>
         </div>
         <div
           v-if="chat && chat.chattype === 'User2User' && otheruser"
-          v-b-tooltip="'Send your address'"
           disabled
           class="mr-2"
           @click="addressBook"
         >
-          <v-icon scale="3" icon="address-book" class="fa-mob" />
+          <v-icon
+            scale="3"
+            icon="address-book"
+            class="fa-mob"
+            :class="{ shrink: shrink }"
+          />
           <div class="mobtext text--smallest">Address</div>
         </div>
         <div
           v-if="chat && chat.chattype === 'User2Mod' && mod"
-          v-b-tooltip="'Report as spammer'"
           class="mr-2"
           @click="spamReport"
         >
-          <v-icon scale="2" icon="ban" class="fa-mob" />
+          <v-icon
+            scale="2"
+            icon="ban"
+            class="fa-mob"
+            :class="{ shrink: shrink }"
+          />
           <div class="mobtext text--smallest">Spammer</div>
         </div>
         <div
@@ -245,28 +263,39 @@
             otheruser &&
             !tooSoonToNudge
           "
-          v-b-tooltip="'Waiting for a reply?  Nudge this freegler.'"
           class="mr-2"
           @click="nudge"
         >
-          <v-icon scale="2" icon="bell" class="fa-mob" />
+          <v-icon
+            scale="2"
+            icon="bell"
+            class="fa-mob"
+            :class="{ shrink: shrink }"
+          />
           <div class="mobtext text--smallest">Nudge</div>
         </div>
         <div
           v-if="
             chat && chat.chattype === 'User2User' && otheruser && tooSoonToNudge
           "
-          v-b-tooltip="
-            'You need to wait a day since the last message before nudging.'
-          "
           class="mr-2"
           @click="nudgeTooSoon"
         >
-          <v-icon scale="2" icon="bell" class="fa-mob" />
+          <v-icon
+            scale="2"
+            icon="bell"
+            class="fa-mob"
+            :class="{ shrink: shrink }"
+          />
           <div class="mobtext text--smallest">Nudge</div>
         </div>
         <div class="" @click="photoAdd">
-          <v-icon scale="2" icon="camera" class="fa-mob" />
+          <v-icon
+            scale="2"
+            icon="camera"
+            class="fa-mob"
+            :class="{ shrink: shrink }"
+          />
           <div class="mobtext text--smallest">Photo</div>
         </div>
         <SpinButton
@@ -274,6 +303,7 @@
           size="md"
           label="Send"
           icon-name="angle-double-right"
+          :class="{ shrink: shrink }"
           done-icon=""
           iconlast
           @handle="send"
@@ -326,6 +356,7 @@
 import pluralize from 'pluralize'
 import getCaretCoordinates from 'textarea-caret'
 import { Dropdown } from 'floating-vue'
+import { mapWritableState } from 'pinia'
 import { FAR_AWAY, TYPING_TIME_INVERVAL } from '../constants'
 import { setupChat } from '../composables/useChat'
 import { useMiscStore } from '../stores/misc'
@@ -418,6 +449,7 @@ export default {
   },
   data() {
     return {
+      debounce: 500,
       sending: false,
       uploading: false,
       showMicrovolunteering: false,
@@ -429,7 +461,6 @@ export default {
       sendmessage: null,
       RSVP: false,
       likelymsg: null,
-      lastTyping: null,
       ouroffers: [],
       imagethumb: null,
       imageid: null,
@@ -443,9 +474,15 @@ export default {
     }
   },
   computed: {
+    ...mapWritableState(useMiscStore, ['lastTyping']),
+    shrink() {
+      return this.sendmessage?.length > 120
+    },
     height() {
       // Bootstrap Vue Next doesn't yet have autoresizing.
-      return this.sendmessage ? 'height: 12em' : 'height: 6em'
+      const height = Math.min(6, Math.round(this.sendmessage?.length / 60))
+
+      return 'height: ' + (height + 6) + 'em'
     },
     noticesToShow() {
       return (
@@ -556,9 +593,10 @@ export default {
   },
   watch: {
     suggestedAddress: {
-      handler(newVal) {
+      async handler(newVal) {
         if (newVal?.address?.singleline?.length !== newVal?.matchedLength) {
           this.hideSuggestedAddress = false
+          await this.$nextTick()
           this.updateCaretPosition()
         }
       },
@@ -597,16 +635,18 @@ export default {
     },
     currentAtts: {
       handler(newVal) {
-        // We have uploaded a photo.
-        this.uploading = false
+        if (newVal) {
+          // We have uploaded a photo.
+          this.uploading = false
 
-        // Show the chat busy indicator.
-        this.chatBusy = true
+          // Show the chat busy indicator.
+          this.chatBusy = true
 
-        // We have uploaded a photo.  Post a chatmessage referencing it.
-        this.imageid = newVal[0].id
-        this.imageuid = newVal[0].externaluid
-        this.imagemods = newVal[0].externalmods
+          // We have uploaded a photo.  Post a chatmessage referencing it.
+          this.imageid = newVal[0].id
+          this.imageuid = newVal[0].ouruid
+          this.imagemods = newVal[0].externalmods
+        }
       },
       deep: true,
     },
@@ -626,7 +666,7 @@ export default {
         left: caretPosition.left + textareaPosition.left,
       }
     },
-    applySuggestedAddress() {
+    async applySuggestedAddress() {
       const matchedLength = this.suggestedAddress.matchedLength
       const suggestedAddress = this.suggestedAddress.address.singleline
       // No need to apply suggestion if length of match and address are equal
@@ -635,8 +675,19 @@ export default {
       }
       this.sendmessage =
         this.sendmessage.substring(0, this.sendmessage.length - matchedLength) +
-        this.suggestedAddress.address.singleline
+        this.suggestedAddress.address.singleline +
+        ' '
       this.hideSuggestedAddress = true
+      await this.$nextTick()
+      const el = this.$refs.chatarea?.$el
+
+      if (el) {
+        setTimeout(() => {
+          // Focus at end of text.
+          el.focus()
+          el.selectionStart = this.sendmessage.length
+        }, 100)
+      }
     },
     async markRead() {
       await this.chatStore.markRead(this.id)
@@ -719,6 +770,12 @@ export default {
     showInfo() {
       this.showProfileModal = true
     },
+    sendOnEnter() {
+      // Because of debounce, we might not have the full message yet.  Start a timer.
+      setTimeout(() => {
+        this.send()
+      }, this.debounce + 100)
+    },
     async send(callback) {
       if (!this.sending) {
         if (this.imageid) {
@@ -787,10 +844,10 @@ export default {
       this.imagethumb = null
     },
     async typing() {
-      // Let the server know that we are typing, no more frequently than every 10 seconds.
       const now = new Date().getTime()
 
       if (!this.lastTyping || now - this.lastTyping > TYPING_TIME_INVERVAL) {
+        // Let the server know that we are typing, no more frequently than every 10 seconds.
         await this.chatStore.typing(this.id)
         this.lastTyping = now
       }
@@ -850,6 +907,8 @@ export default {
 }
 </script>
 <style scoped lang="scss">
+@import 'https://unpkg.com/floating-vue@^2.0.0-beta.1/dist/style.css';
+
 .mobtext {
   text-align: center !important;
 }
@@ -857,6 +916,10 @@ export default {
 .fa-mob {
   height: 2rem;
   width: 100%;
+}
+
+.shrink {
+  height: 0.8rem;
 }
 
 .nocolor {

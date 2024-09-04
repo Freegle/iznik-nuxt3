@@ -26,11 +26,7 @@
             <div class="header--size4 item">
               {{ message.subject }}
             </div>
-            <MessageHistory
-              :id="id"
-              class="mb-1 header-history"
-              :display-message-link="sm"
-            />
+            <MessageHistory :id="id" class="mb-1 header-history" />
           </div>
         </div>
         <notice-message

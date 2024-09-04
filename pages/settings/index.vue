@@ -42,7 +42,7 @@
                 <b-col cols="12" xl="6">
                   <b-card>
                     <b-card-body class="text-center p-2">
-                      <div class="d-flex justify-content-around">
+                      <div :key="bump" class="d-flex justify-content-around">
                         <ProfileImage
                           v-if="!me || !useprofile"
                           image="/defaultprofile.png"
@@ -62,7 +62,9 @@
                         />
                         <ProfileImage
                           v-else
-                          :image="profileurl + '?' + cacheBust"
+                          :image="
+                            profileurl + '?settings=' + myid + '-' + cacheBust
+                          "
                           class="mr-1 mb-1 mt-1 inline"
                           is-thumbnail
                           size="xl"
@@ -800,6 +802,7 @@ export default {
       showProfileModal: false,
       showEmailConfirmModal: false,
       currentAtts: [],
+      bump: 0,
     }
   },
   computed: {
@@ -876,7 +879,7 @@ export default {
       return ret
     },
     profileurl() {
-      return this.me && this.useprofile
+      return this.me && this.useprofile && this.me.profile?.path
         ? this.me.profile.path
         : '/defaultprofile.png'
     },
@@ -993,20 +996,24 @@ export default {
       async handler(newVal) {
         this.uploading = false
 
-        // We want to replace our profile picture.  The API for this is a bit odd - msgid will get used as the
-        // id of the user.
-        const atts = {
-          externaluid: newVal[0].externaluid,
-          externalmods: newVal[0].externalmods,
-          imgtype: 'User',
-          msgid: this.myid,
-        }
+        if (newVal?.length) {
+          // We want to replace our profile picture.  The API for this is a bit odd - msgid will get used as the
+          // id of the user.
+          const atts = {
+            externaluid: newVal[0].ouruid,
+            externalmods: newVal[0].externalmods,
+            imgtype: 'User',
+            msgid: this.myid,
+          }
 
-        console.log('Post image', atts)
-        await this.imageStore.post(atts)
+          console.log('Post image', atts)
+          await this.imageStore.post(atts)
+        }
 
         // Refresh the user - which in turn should update the image displayed.
         await fetchMe(true)
+
+        this.bump++
       },
       deep: true,
     },
@@ -1213,10 +1220,10 @@ export default {
       this.cacheBust = Date.now()
     },
     rotateLeft() {
-      this.rotate(90)
+      this.rotate(-90)
     },
     rotateRight() {
-      this.rotate(-90)
+      this.rotate(90)
     },
   },
 }

@@ -9,6 +9,8 @@
       :show-promised="false"
       :show-location="false"
       class="w-100 mb-2"
+      preload
+      wide
       @click.prevent.self
     />
   </div>
@@ -123,5 +125,23 @@ function doNext() {
 
 .minheight {
   min-height: 320px;
+}
+
+// Hack MessageSummary to look better in this context.
+:deep {
+  img {
+    width: 100% !important;
+  }
+
+  .header-title {
+    width: 100% !important;
+  }
+
+  .item {
+    a {
+      width: 100% !important;
+      text-align: center;
+    }
+  }
 }
 </style>

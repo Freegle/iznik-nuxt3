@@ -7,7 +7,15 @@
         Wouldn't the world be better if more people freegled more often? You can
         help!
       </p>
-      <div v-if="contactPicker">
+      <div>
+        <p>
+          Freegle spreads by <strong>word of mouth</strong>. Maybe you've got
+          friends, family or work colleagues who've never heard of us, and who
+          could help themseves or others by freegling?
+        </p>
+        <p>
+          Personalise your message and send it to them using the buttons below.
+        </p>
         <InviteSomeone />
         <hr />
         <h2 class="header--size2">Other ways to help</h2>
@@ -82,8 +90,22 @@
             </b-button>
           </a>
         </div>
+        <div class="mr-1">
+          <h3 class="header--size4">A5 x 2</h3>
+          <a href="/posters/A5x2.jpg" target="_blank">
+            <b-img
+              lazy
+              src="/posters/A5x2.jpg"
+              class="poster border border-dark mb-2"
+            />
+            <br />
+            <b-button variant="secondary" size="lg" class="mt-2 mb-2">
+              Download poster
+            </b-button>
+          </a>
+        </div>
       </div>
-      <div v-if="language === 'Welsh'" class="d-flex flex-wrap">
+      <div v-if="language === 'Welsh'" class="d-flex flex-wrap mt-2">
         <div class="mr-1">
           <h3 class="header--size4">A4</h3>
           <a href="/posters/A4Welsh.jpg" target="_blank">
@@ -249,17 +271,6 @@ export default {
       language: 'English',
       showPosterModal: false,
     }
-  },
-  computed: {
-    contactPicker() {
-      if (process.server) {
-        return false
-      } else {
-        const ret =
-          'contacts' in window.navigator && 'ContactsManager' in window
-        return ret
-      }
-    },
   },
   methods: {
     added() {

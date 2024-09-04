@@ -16,50 +16,71 @@
       >
         <MessageListCounts v-if="browseCount" @mark-seen="markSeen" />
       </div>
-      <div
-        v-for="(message, ix) in deDuplicatedMessages"
-        :key="'messagelist-' + message.id"
-      >
-        <MessageListUpToDate
-          v-if="
-            !loading &&
-            selectedSort === 'Unseen' &&
-            showCountsUnseen &&
-            message.id === firstSeenMessage
-          "
-        />
+      <VisibleWhen :at="['xs', 'sm']">
         <div
-          :id="'messagewrapper-' + message.id"
-          :ref="'messagewrapper-' + message.id"
-          class="p-0"
+          v-for="(m, ix) in deDuplicatedMessages"
+          :key="'messagelist-' + m.id"
         >
-          <VisibleWhen :at="['xs', 'sm', 'md', 'lg']">
-            <OurMessage
-              :id="message.id"
-              :matchedon="message.matchedon"
-              record-view
+          <div v-if="ix % 2 === 0">
+            <MessageListUpToDate
+              v-if="
+                (!loading &&
+                  selectedSort === 'Unseen' &&
+                  showCountsUnseen &&
+                  deDuplicatedMessages[ix]?.id === firstSeenMessage) ||
+                deDuplicatedMessages[ix + 1]?.id === firstSeenMessage
+              "
             />
-          </VisibleWhen>
-          <VisibleWhen :not="['xs', 'sm', 'md', 'lg']">
-            <OurMessage
-              :id="message.id"
-              :matchedon="message.matchedon"
-              record-view
-              ad-unit-path="/22794232631/freegle_product"
-              ad-id="div-gpt-ad-1691925699378-0"
-            />
-          </VisibleWhen>
+            <div class="twocolumn">
+              <div
+                :id="'messagewrapper-' + m.id"
+                :ref="'messagewrapper-' + m.id"
+                class="onecolumn"
+              >
+                <OurMessage :id="m.id" :matchedon="m.matchedon" record-view />
+              </div>
+              <div
+                v-if="ix + 1 < deDuplicatedMessages.length"
+                :id="'messagewrapper-' + deDuplicatedMessages[ix + 1].id"
+                :ref="'messagewrapper-' + deDuplicatedMessages[ix + 1].id"
+                class="onecolumn"
+              >
+                <OurMessage
+                  :id="deDuplicatedMessages[ix + 1].id"
+                  :matchedon="deDuplicatedMessages[ix + 1].matchedon"
+                  record-view
+                />
+              </div>
+            </div>
+          </div>
         </div>
-        <VisibleWhen :at="['xs', 'sm', 'md']">
-          <div v-if="insertAd(ix)" class="mt-3 mt-xl-2">
-            <ExternalDa
-              :ad-unit-path="insertAd(ix).adUnitPath"
-              :dimensions="insertAd(ix).dimensions"
-              :div-id="insertAd(ix).divId"
+      </VisibleWhen>
+      <VisibleWhen :not="['xs', 'sm']">
+        <div
+          v-for="message in deDuplicatedMessages"
+          :key="'messagelist-' + message.id"
+        >
+          <MessageListUpToDate
+            v-if="
+              !loading &&
+              selectedSort === 'Unseen' &&
+              showCountsUnseen &&
+              message.id === firstSeenMessage
+            "
+          />
+          <div
+            :id="'messagewrapper-' + message.id"
+            :ref="'messagewrapper-' + message.id"
+            class=""
+          >
+            <OurMessage
+              :id="message.id"
+              :matchedon="message.matchedon"
+              record-view
             />
           </div>
-        </VisibleWhen>
-      </div>
+        </div>
+      </VisibleWhen>
     </div>
     <infinite-loading
       v-if="messagesForList?.length"
@@ -597,3 +618,93 @@ export default {
   },
 }
 </script>
+<style scoped lang="scss">
+@import 'bootstrap/scss/_functions';
+@import 'bootstrap/scss/_variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
+
+.twocolumn {
+  display: flex;
+  flex-wrap: wrap !important;
+  grid-template-rows: 2.5px 1fr 2.5px;
+  grid-template-columns: 1fr;
+  grid-column-gap: 5px;
+
+  @media only screen and (min-width: 360px) {
+    display: grid;
+    grid-template-rows: 2.5px 1fr 2.5px;
+    grid-template-columns: 1fr 1fr;
+    grid-column-gap: 5px;
+  }
+
+  > div {
+    grid-row: 2 / 3;
+  }
+
+  :deep(.header-title) {
+    display: flex;
+    flex-direction: column;
+
+    .spacer {
+      display: flex;
+      flex-grow: 1;
+    }
+  }
+
+  :deep(.header-description.noAttachments) {
+    grid-row: 5 / 6;
+
+    .textbody {
+      margin-top: 50px;
+      font-size: 1rem;
+      height: 100px;
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+    }
+
+    .description {
+      display: block !important;
+    }
+  }
+
+  :deep(.messagecard.noAttachments) {
+    .image-wrapper {
+      button {
+        background-color: transparent;
+      }
+
+      .thumbnail img {
+        opacity: 0;
+      }
+    }
+  }
+
+  .onecolumn {
+    height: 100%;
+
+    @media only screen and (max-width: 360px) {
+      width: 100%;
+    }
+
+    @media only screen and (min-width: 360px) {
+      width: unset;
+    }
+
+    :deep(div) {
+      height: 100%;
+
+      .messagecard div {
+        div {
+          height: unset;
+        }
+      }
+    }
+
+    :deep(.freegleg),
+    :deep(.promised),
+    :deep(.image-wrapper) {
+      height: unset;
+    }
+  }
+}
+</style>

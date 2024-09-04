@@ -6,7 +6,7 @@
       </label>
       <draggable
         v-model="currentAtts"
-        class="d-flex flex-wrap pl-2 mt-2"
+        class="d-flex flex-wrap pl-2 mt-2 mb-2"
         :item-key="(el) => `image-${el.id}`"
         :animation="150"
         ghost-class="ghost"
@@ -21,6 +21,7 @@
               :paththumb="element.paththumb"
               :thumbnail="element.thumbnail"
               :externaluid="element.externaluid"
+              :ouruid="element.ouruid"
               :externalmods="element.externalmods"
               :primary="index === 0"
               class="mr-1 mt-1 mt-md-0"
@@ -29,14 +30,15 @@
           </div>
         </template>
       </draggable>
-      <OurUploader
-        v-if="!dragging"
-        id="uploader"
-        :key="bump"
-        v-model="currentAtts"
-        type="Message"
-        multiple
-      />
+      <div class="ml-2">
+        <OurUploader
+          v-if="!dragging"
+          :key="bump"
+          v-model="currentAtts"
+          type="Message"
+          multiple
+        />
+      </div>
     </div>
     <div class="subject-layout mb-1 mt-1">
       <div class="d-flex flex-column">

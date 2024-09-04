@@ -21,7 +21,7 @@ const LoginModal = defineAsyncComponent(() => import('~/components/LoginModal'))
 
 const runtimeConfig = useRuntimeConfig()
 const userSite = runtimeConfig.public.USER_SITE
-const proxy = runtimeConfig.public.UPLOADCARE_PROXY
+const proxy = runtimeConfig.public.IMAGE_DELIVERY
 
 let ready = false
 const oneTap = ref(false)
@@ -59,15 +59,17 @@ if (!ready) {
 
 if (proxy) {
   // Add the wallpaper background, proxying it from our image CDN.
-  // Set background image of wallpaper.png on body
+  const bg =
+    'background-image: url("' +
+    proxy +
+    '?url=' +
+    userSite +
+    '/wallpaper.png' +
+    '&output=webp")'
+
   useHead({
     bodyAttrs: {
-      style:
-        'background-image: url("' +
-        proxy +
-        '/-/format/webp/' +
-        userSite +
-        '/wallpaper.png")',
+      style: bg,
     },
   })
 }

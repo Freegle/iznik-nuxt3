@@ -37,8 +37,18 @@
                   <span class="d-none d-sm-inline">to each other</span>;
                   occasionally we may moderate to ensure things stay friendly.
                 </div>
+                <OurUploadedImage
+                  v-if="ouruid"
+                  format="webp"
+                  fit="cover"
+                  :src="ouruid"
+                  :modifiers="imagemods"
+                  alt="ChitChat Photo"
+                  width="100"
+                  class="mt-1"
+                />
                 <NuxtPicture
-                  v-if="imageuid"
+                  v-else-if="imageuid"
                   format="webp"
                   fit="cover"
                   provider="uploadcare"
@@ -96,12 +106,17 @@
                 :distance="distance"
                 @infinite="loadMore"
               />
+              <div class="adpad" />
             </div>
           </div>
         </b-col>
         <b-col cols="0" lg="3" class="p-0 pl-1">
           <VisibleWhen :at="['lg', 'xl', 'xxl']">
-            <SidebarRight show-job-opportunities />
+            <SidebarRight
+              show-job-opportunities
+              ad-unit-path="/22794232631/freegle_chat_app"
+              ad-div-id="div-gpt-ad-1691925773522-0"
+            />
           </VisibleWhen>
         </b-col>
       </b-row>
@@ -257,6 +272,7 @@ export default {
       startThread: null,
       uploading: false,
       imageid: null,
+      ouruid: null,
       imageuid: null,
       imagemods: null,
       distance: 1000,
@@ -270,6 +286,9 @@ export default {
     }
   },
   computed: {
+    stickyAdRendered() {
+      return this.miscStore.stickyAdRendered
+    },
     selectedArea: {
       get() {
         const settings = this.me.settings
@@ -327,7 +346,8 @@ export default {
         this.uploading = false
 
         this.imageid = newVal[0].id
-        this.imageuid = newVal[0].externaluid
+        this.imageuid = newVal[0].ouruid
+        this.ouruid = newVal[0].ouruid
         this.imagemods = newVal[0].externalmods
       },
       deep: true,
@@ -438,6 +458,7 @@ export default {
         // And any image id
         this.imageid = null
         this.imageuid = null
+        this.ouruid = null
         this.imagemods = null
 
         // Show from top.
@@ -457,6 +478,7 @@ export default {
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/sticky-banner.scss';
 
 :deep(.post__button) {
   @include media-breakpoint-up(sm) {
@@ -475,5 +497,15 @@ export default {
 
 .image__uploaded {
   width: 100px;
+}
+
+.adpad {
+  margin-bottom: calc($sticky-banner-height-mobile * v-bind(stickyAdRendered));
+
+  @include media-breakpoint-up(md) {
+    padding-bottom: calc(
+      $sticky-banner-height-desktop * v-bind(stickyAdRendered)
+    );
+  }
 }
 </style>

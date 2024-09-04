@@ -1,12 +1,40 @@
 <template>
-  <div ref="wrapper" style="min-height: 80vh; min-width: 95%" class="wrapper">
+  <div ref="wrapper" class="wrapper">
+    <div class="d-flex justify-content-center mt-2 mb-2">
+      <div class="d-flex flex-column justify-content-around">
+        <b-button
+          variant="white "
+          class="mr-1"
+          size="xs"
+          @click="zoom = Math.max(1, zoom - 0.1)"
+        >
+          <v-icon icon="circle-minus" /> Zoom out
+        </b-button>
+      </div>
+      <div
+        class="d-flex flex-column justify-content-around ml-1 mr-1 ml-md-4 mr-md-4"
+      >
+        <div class="small">Drag image around</div>
+      </div>
+      <div class="d-flex flex-column justify-content-around">
+        <b-button
+          variant="white"
+          class="mr-1"
+          size="xs"
+          @click="zoom = Math.min(10, zoom + 0.1)"
+        >
+          <v-icon icon="circle-plus" /> Zoom in
+        </b-button>
+      </div>
+    </div>
     <b-carousel
       :id="'message-carousel-' + messageId"
       v-model="slide"
       img-width="100%"
       :interval="0"
       no-touch
-      :controls="attachments?.length > 1"
+      fade
+      :controls="false"
     >
       <b-carousel-slide
         v-for="(attachment, index) in attachments"
@@ -16,51 +44,35 @@
         class="slide"
       >
         <div class="d-flex justify-content-around">
-          <zoom-pinch
-            :rotation="false"
-            mouse
-            touch
-            wheel
-            gesture
-            :width="Math.round(width * 0.95)"
-            :height="Math.round(height * 0.95)"
-            min-scale="1"
-            :style="
-              'width: ' +
-              Math.round(width * 0.95) +
-              'px; height: ' +
-              Math.round(height * 0.95) +
-              'px'
-            "
-          >
-            <template #canvas>
-              <NuxtPicture
-                v-if="attachment.externaluid"
-                format="webp"
-                provider="uploadcare"
-                :src="attachment.externaluid"
-                :modifiers="attachment.externalmods"
-                alt="Item picture"
-                :width="Math.round(width * 0.95)"
-              />
-              <b-img
-                v-else
-                generator-unable-to-provide-required-alt=""
-                title="Item picture"
-                :src="attachment.path"
-                itemprop="image"
-                class="w-100"
-              />
-            </template>
-          </zoom-pinch>
+          <PinchMe
+            :attachment="attachment"
+            :width="width"
+            :height="height"
+            :zoom="zoom"
+          />
         </div>
       </b-carousel-slide>
     </b-carousel>
+    <div v-if="attachments?.length > 1">
+      <Teleport to="body">
+        <b-button v-if="slide > 0" class="prev" @click="prev">
+          <v-icon icon="arrow-circle-left" scale="2" />
+        </b-button>
+      </Teleport>
+      <Teleport to="body">
+        <b-button
+          v-if="slide < attachments.length - 1"
+          class="next"
+          @click="next"
+        >
+          <v-icon icon="arrow-circle-right" />
+        </b-button>
+      </Teleport>
+    </div>
   </div>
 </template>
 <script setup>
 import { useElementSize } from '@vueuse/core'
-import { Zoompinch as ZoomPinch } from 'zoompinch'
 import { ref } from '#imports'
 import 'zoompinch/style.css'
 
@@ -77,6 +89,8 @@ defineProps({
   },
 })
 
+const zoom = ref(1)
+
 const slide = ref(0)
 
 const { width, height } = useElementSize(wrapper)
@@ -88,18 +102,53 @@ if (width > 3000) {
 if (height > 3000) {
   height.value = 3000
 }
+
+// We have these buttons teleported to body because otherwise we can't do a position fixed, which doesn't work in
+// a modal where a transform has been applied.
+function next() {
+  zoom.value = 1
+  slide.value++
+}
+function prev() {
+  zoom.value = 1
+  slide.value--
+}
 </script>
 <style scoped lang="scss">
-:deep(.carousel-control-prev) {
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/sticky-banner.scss';
+
+.prev,
+.next {
+  background-color: transparent;
   z-index: 11000 !important;
+  position: fixed;
+  border: none;
+  opacity: 0.5;
+
+  :deep(svg) {
+    width: 50px;
+    height: 50px;
+  }
 }
 
-:deep(.carousel-control-next) {
-  z-index: 11000 !important;
+.prev {
+  top: 50vh;
+  left: 20px;
+}
+.next {
+  top: 50vh;
+  right: 20px;
 }
 
-:deep(.iiz__btn) {
-  z-index: 11001;
-  right: 50%;
+.wrapper {
+  min-height: calc(100vh - $sticky-banner-height-mobile - 144px);
+  width: 100%;
+
+  @include media-breakpoint-up(md) {
+    min-height: calc(100vh - $sticky-banner-height-desktop - 144px);
+  }
 }
 </style>

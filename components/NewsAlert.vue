@@ -17,11 +17,12 @@
     </div>
     <!-- eslint-disable-next-line-->
     <div v-if="newsfeed.html" v-html="newsfeed.html" />
-    <span
+    <!-- eslint-disable-next-line-->
+    <div
       v-else-if="newsfeed.message"
       class="font-weight-bold preline forcebreak"
-      >{{ emessage }}</span
-    >
+      v-html="emessage"
+    />
     <div>
       <b-img
         v-if="newsfeed.image"

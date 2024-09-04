@@ -4,27 +4,27 @@
       <div class="divider" />
       <div class="user d-flex flex-wrap">
         <MyMessageReplyUser :id="replyuser?.id" />
-        <div class="badges d-flex flex-wrap align-self-center">
-          <div class="mt-1 mb-1 ms-1 d-flex flex-column justify-content-center">
-            <b-badge v-if="closest" variant="info" pill class="pb-1">
-              Nearby
-            </b-badge>
-          </div>
-          <div class="mt-1 mb-1 ms-1 d-flex flex-column justify-content-center">
-            <b-badge v-if="best" variant="info" pill class="pb-1">
-              Good rating
-            </b-badge>
-          </div>
-          <div class="mt-1 mb-1 ms-1 d-flex flex-column justify-content-center">
-            <b-badge v-if="quickest" variant="info" pill class="pb-1">
-              Quick reply
-            </b-badge>
-          </div>
-          <SupporterInfo
-            v-if="replyuser?.supporter"
-            class="ms-1 d-flex flex-column justify-content-center"
-          />
+      </div>
+      <div class="badges d-flex flex-wrap">
+        <div class="mt-1 mb-1 ms-1 d-flex flex-column justify-content-center">
+          <b-badge v-if="closest" variant="info" pill class="pb-1 text-white">
+            Nearby
+          </b-badge>
         </div>
+        <div class="mt-1 mb-1 ms-1 d-flex flex-column justify-content-center">
+          <b-badge v-if="best" variant="info" pill class="pb-1 text-white">
+            Good rating
+          </b-badge>
+        </div>
+        <div class="mt-1 mb-1 ms-1 d-flex flex-column justify-content-center">
+          <b-badge v-if="quickest" variant="info" pill class="pb-1 text-white">
+            Quick reply
+          </b-badge>
+        </div>
+        <SupporterInfo
+          v-if="replyuser?.supporter"
+          class="ms-1 d-flex flex-column justify-content-center"
+        />
       </div>
       <div
         class="pl-1 flex-shrink-1 ratings d-flex d-md-none justify-content-end align-self-center m-0"
@@ -37,27 +37,30 @@
         <UserRatings :id="replyuser?.id" />
       </div>
       <div class="d-flex flex-column justify-content-center wrote">
-        <div>
-          <div class="text-muted small mb-1">
+        <div class="d-flex flex-wrap">
+          <span v-if="unseen > 0" class="bg-white snippet text-primary mr-w">
+            {{ chat?.snippet }}...
+          </span>
+          <span v-else-if="chat?.snippet" class="bg-white snippet mr-2">
+            {{ chat?.snippet }}...
+          </span>
+          <span v-else class="ml-4"> ... </span>
+          <div
+            class="text-muted small mb-1 d-flex flex-column justify-content-around"
+          >
             <span :title="replylocale">
               {{ replyago }}
             </span>
           </div>
-          <span v-if="unseen > 0" class="bg-white snippet text-primary">
-            {{ chat?.snippet }}...
-          </span>
-          <span v-else-if="chat?.snippet" class="bg-white snippet">
-            {{ chat?.snippet }}...
-          </span>
-          <span v-else class="ml-4"> ... </span>
         </div>
       </div>
       <div class="d-flex flex-column justify-content-center ml-2 buttons">
-        <div>
+        <div class="d-flex w-100 justify-content-between">
           <b-button
             v-if="promised && !taken && !withdrawn"
             variant="warning"
             class="align-middle mt-1 mb-1 mr-2"
+            :size="buttonSize"
             @click="unpromise"
           >
             <div class="d-flex">
@@ -71,6 +74,7 @@
             v-else-if="message.type === 'Offer' && !taken && !withdrawn"
             variant="primary"
             class="align-middle mt-1 mb-1 mr-2"
+            :size="buttonSize"
             @click="promise"
           >
             <v-icon icon="handshake" /> Promise
@@ -78,6 +82,7 @@
           <b-button
             variant="secondary"
             class="align-middle mt-1 mb-1 mr-1"
+            :size="buttonSize"
             @click="openChat"
           >
             <b-badge v-if="unseen > 0" variant="danger">
@@ -116,6 +121,7 @@ import { useChatStore } from '../stores/chat'
 import { useRouter } from '#imports'
 import SupporterInfo from '~/components/SupporterInfo'
 import { timeago, datelocale } from '~/composables/useTimeFormat'
+import { useMiscStore } from '~/stores/misc'
 
 const UserRatings = defineAsyncComponent(() =>
   import('~/components/UserRatings')
@@ -178,6 +184,7 @@ export default {
     const userStore = useUserStore()
     const messageStore = useMessageStore()
     const chatStore = useChatStore()
+    const miscStore = useMiscStore()
 
     const promises = []
 
@@ -203,6 +210,7 @@ export default {
       userStore,
       messageStore,
       chatStore,
+      miscStore,
     }
   },
   data() {
@@ -247,6 +255,10 @@ export default {
 
       return false
     },
+    buttonSize() {
+      const breakpoint = this.miscStore.breakpoint
+      return breakpoint === 'xs' || breakpoint === 'sm' ? 'sm' : 'md'
+    },
   },
   methods: {
     openChat() {
@@ -276,8 +288,11 @@ export default {
   padding-right: 4px;
   word-wrap: break-word;
   line-height: 1.5;
-  font-size: 125%;
   font-weight: bold;
+
+  @include media-breakpoint-up(md) {
+    font-size: 125%;
+  }
 }
 
 .unpromise__slash {
@@ -293,21 +308,21 @@ export default {
 
   .user {
     grid-row: 1 / 2;
-    grid-column: 1 / 3;
+    grid-column: 1 / 2;
     align-self: start;
     font-size: 150%;
   }
 
   .badges {
     grid-row: 2 / 3;
-    grid-column: 2 / 3;
-    align-self: end;
+    grid-column: 1 / 3;
+    justify-self: end;
   }
 
   .ratings {
-    grid-row: 2 / 3;
-    grid-column: 1 / 2;
-    justify-self: start;
+    grid-row: 1 / 2;
+    grid-column: 2 / 3;
+    align-self: end;
     margin-top: 0.5rem;
     margin-right: 0.5rem;
   }

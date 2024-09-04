@@ -23,8 +23,17 @@
       </div>
     </span>
     <div class="image-wrapper">
+      <OurUploadedImage
+        v-if="ouruid"
+        :src="ouruid"
+        :modifiers="mods"
+        alt="Item Photo"
+        :width="200"
+        :height="200"
+        @click="$emit('click')"
+      />
       <NuxtPicture
-        v-if="externaluid"
+        v-else-if="externaluid"
         fit="cover"
         format="webp"
         provider="uploadcare"
@@ -56,11 +65,12 @@
 </template>
 <script>
 import { useImageStore } from '../stores/image'
+import OurUploadedImage from '~/components/OurUploadedImage.vue'
 const ConfirmModal = () =>
   defineAsyncComponent(() => import('./ConfirmModal.vue'))
 
 export default {
-  components: { ConfirmModal },
+  components: { OurUploadedImage, ConfirmModal },
   props: {
     id: {
       type: Number,
@@ -86,6 +96,11 @@ export default {
       default: false,
     },
     externaluid: {
+      type: String,
+      required: false,
+      default: null,
+    },
+    ouruid: {
       type: String,
       required: false,
       default: null,
@@ -125,7 +140,8 @@ export default {
       this.$emit('remove', this.id)
     },
     async rotate(deg) {
-      const curr = this.mods?.rotate || 0
+      this.mods = this.mods ? this.mods : {}
+      const curr = this.mods.rotate || 0
       this.mods.rotate = curr + deg
 
       // Ensure between 0 and 360
@@ -139,10 +155,10 @@ export default {
       })
     },
     rotateLeft() {
-      this.rotate(90)
+      this.rotate(-90)
     },
     rotateRight() {
-      this.rotate(-90)
+      this.rotate(90)
     },
   },
 }

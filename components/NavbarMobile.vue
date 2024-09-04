@@ -220,7 +220,7 @@
 </template>
 <script setup>
 import { useRoute } from 'vue-router'
-import { setNavBarHidden } from '../composables/useNavbar'
+import { clearNavBarTimeout, setNavBarHidden } from '../composables/useNavbar'
 import NavbarMobilePost from './NavbarMobilePost'
 import { useNavbar, navBarHidden } from '~/composables/useNavbar'
 import { useMiscStore } from '~/stores/misc'
@@ -263,6 +263,10 @@ const title = computed(() => {
   return useMiscStore().pageTitle
 })
 
+const stickyAdRendered = computed(() => {
+  return useMiscStore().stickyAdRendered
+})
+
 const notificationsShown = ref(false)
 
 watch(notificationsShown, (newVal) => {
@@ -278,6 +282,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  clearNavBarTimeout()
   window.removeEventListener('scroll', handleScroll)
 })
 
@@ -326,10 +331,12 @@ const navBarBottomHidden = computed(() => {
 }
 
 .navbot {
-  margin-bottom: $sticky-banner-height-mobile;
+  margin-bottom: calc($sticky-banner-height-mobile * v-bind(stickyAdRendered));
 
   @include media-breakpoint-up(md) {
-    margin-bottom: $sticky-banner-height-desktop;
+    margin-bottom: calc(
+      $sticky-banner-height-desktop * v-bind(stickyAdRendered)
+    );
   }
 }
 
@@ -351,6 +358,7 @@ const navBarBottomHidden = computed(() => {
   top: 1px;
   right: -1px;
   font-size: 11px;
+  color: white !important;
 }
 
 .browsebadge2 {
@@ -358,6 +366,7 @@ const navBarBottomHidden = computed(() => {
   top: 1px;
   right: -7px;
   font-size: 11px;
+  color: white !important;
 }
 
 .chatup {
@@ -368,6 +377,7 @@ const navBarBottomHidden = computed(() => {
   position: absolute;
   top: 2px;
   font-size: 11px;
+  color: white !important;
 }
 
 .botmen {

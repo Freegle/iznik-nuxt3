@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="bg-white">
     <div class="d-flex align-items-start justify-content-between mb-1">
       <h2 class="header--size4 pl-2">
         <nuxt-link :to="link" class="title__link" no-prefetch>

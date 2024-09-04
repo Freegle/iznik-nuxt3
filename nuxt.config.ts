@@ -110,6 +110,7 @@ export default defineNuxtConfig({
     '/stories/**': { ssr: false },
     '/teams': { ssr: false },
     '/adtest': { ssr: false },
+    '/googlepay': { ssr: false },
 
     // Render on demand - may never be shown in a given build - then cache for a while.
     '/explore/region/**': { isr: 3600 },
@@ -165,10 +166,19 @@ export default defineNuxtConfig({
 
   modules: [
     '@pinia/nuxt',
-    'floating-vue/nuxt',
     '@nuxt/image',
     'nuxt-vite-legacy',
     '@bootstrap-vue-next/nuxt',
+    process.env.GTM_ID ? '@zadigetvoltaire/nuxt-gtm' : null,
+    [
+      '@nuxtjs/google-adsense',
+      {
+        id: process.env.GOOGLE_ADSENSE_ID,
+        test: process.env.GOOGLE_ADSENSE_TEST_MODE === 'true',
+        hideUnfilled: false,
+        pauseOnLoad: true,
+      },
+    ],
   ],
 
   hooks: {
@@ -196,14 +206,33 @@ export default defineNuxtConfig({
       GOOGLE_CLIENT_ID: config.GOOGLE_CLIENT_ID,
       USER_SITE: config.USER_SITE,
       IMAGE_SITE: config.IMAGE_SITE,
-      UPLOADCARE_PROXY: config.UPLOADCARE_PROXY,
       SENTRY_DSN: config.SENTRY_DSN,
       BUILD_DATE: new Date().toISOString(),
       NETLIFY_DEPLOY_ID: process.env.DEPLOY_ID,
       NETLIFY_SITE_NAME: process.env.SITE_NAME,
+      NETLIFY_BRANCH: process.env.BRANCH,
       MATOMO_HOST: process.env.MATOMO_HOST,
       COOKIEYES: config.COOKIEYES,
       TRUSTPILOT_LINK: config.TRUSTPILOT_LINK,
+      TUS_UPLOADER: config.TUS_UPLOADER,
+      IMAGE_DELIVERY: config.IMAGE_DELIVERY,
+
+      GOOGLE_ADSENSE_ID: config.GOOGLE_ADSENSE_ID,
+      GOOGLE_ADSENSE_TEST_MODE: config.GOOGLE_ADSENSE_TEST_MODE,
+
+      ...(process.env.GTM_ID
+        ? {
+            gtm: {
+              id: process.env.GTM_ID,
+              defer: true,
+              compatibility: true,
+              debug: true,
+              enabled: !!process.env.GTM_ID,
+              enableRouterSync: false,
+              devtools: true,
+            },
+          }
+        : {}),
     },
   },
 
@@ -275,6 +304,10 @@ export default defineNuxtConfig({
           innerHTML: `try { if (!window.globalThis) { window.globalThis = window; } } catch (e) { console.log('Polyfill error', e.message); }`,
         },
         // The ecosystem of advertising is complex.
+        //
+        // We might use AdSense.  That's fairly simple.
+        //
+        // Or we might use prebid:
         // - The underlying ad service is Google Tags (GPT).
         // - We use prebid (pbjs), which is some kind of ad broker which gives us a pipeline of ads to use.
         //   We can also define our own ads in GPT.
@@ -317,7 +350,7 @@ export default defineNuxtConfig({
               });
               ce_gtag("set", "ads_data_redaction", true);
               ce_gtag("set", "url_passthrough", true);
-              
+
               console.log('Initialising pbjs and googletag...');
               window.googletag = window.googletag || {};
               window.googletag.cmd = window.googletag.cmd || [];
@@ -331,7 +364,7 @@ export default defineNuxtConfig({
                 window.googletag.pubads().enableSingleRequest()
                 window.googletag.enableServices()
               });
-              
+            
               window.pbjs = window.pbjs || {};
               window.pbjs.que = window.pbjs.que || [];
               
@@ -446,7 +479,7 @@ export default defineNuxtConfig({
               }
             }
 
-            function postCookieYes() {
+            window.postCookieYes = function() {
               console.log('Consider load of GPT and prebid');
               
               if (!window.weHaveLoadedGPT) {
@@ -458,10 +491,11 @@ export default defineNuxtConfig({
                 // The ordering is ensured by using defer and appending the script.
                 //
                 // prebid isn't compatible with older browsers which don't support Object.entries.
-                console.log('Load GPT and prebid');
                 if (Object.fromEntries) {
-                  loadScript('https://securepubads.g.doubleclick.net/tag/js/gpt.js', true)
-                  loadScript('/js/prebid.js', true)
+                  // Currently using AdSense so don't need to load GPT and prebid.
+                  // console.log('Load GPT and prebid');
+                  // loadScript('https://securepubads.g.doubleclick.net/tag/js/gpt.js', true)
+                  // loadScript('/js/prebid.js', true)
                 }
               } else {
                 console.log('GPT and prebid already loaded');
@@ -482,6 +516,8 @@ export default defineNuxtConfig({
                 // Now we wait until the CookieYes script has set its own cookie.  
                 // This might be later than when the script has loaded in pure JS terms, but we
                 // need to be sure it's loaded before we can move on.
+                var retries = 10
+                
                 function checkCookieYes() {
                   if (document.cookie.indexOf('cookieyes-consent') > -1) {
                     console.log('CookieYes cookie is set, so CookieYes is loaded');
@@ -492,7 +528,7 @@ export default defineNuxtConfig({
                     window.__tcfapi('getTCData', 2, (tcData, success) => {
                       if (success && tcData && tcData.tcString) {
                         console.log('TC data loaded and TC String set');
-                        postCookieYes();
+                        window.postCookieYes();
                       } else {
                         console.log('Failed to get TC data or string, retry.')
                         setTimeout(checkCookieYes, 100);
@@ -503,15 +539,43 @@ export default defineNuxtConfig({
                       setTimeout(checkCookieYes, 100);
                     }
                   } else {
-                    console.log('CookieYes not yet loaded')
-                    setTimeout(checkCookieYes, 100);
+                    console.log('CookieYes not yet loaded', retries)
+                    retries--
+                    
+                    if (retries > 0) {
+                      setTimeout(checkCookieYes, 100);
+                    } else {
+                      // It's not loaded within a reasonable length of time.  This may be because it's
+                      // blocked by a browser extension.  Try to fetch the script here - if this fails with 
+                      // an exception then it's likely to be because it's blocked.
+                      console.log('Try fetching script')
+                      fetch('` +
+            config.COOKIEYES +
+            `').then((response) => {
+                        console.log('Fetch returned', response)
+                        
+                        if (response.ok) {
+                          console.log('Worked, maybe just slow?')
+                          retries = 10  
+                          setTimeout(checkCookieYes, 100);
+                        } else {
+                          console.log('Failed - assume blocked and proceed')
+                          window.postCookieYes()
+                        }
+                      })
+                      .catch((error) => {
+                        // Assume blocked and proceed.
+                        console.log('Failed to fetch CookieYes script:', error.message)
+                        window.postCookieYes()
+                      });                    
+                    }
                   }
                 }
                 
                 checkCookieYes();
               } else {
                 console.log('No CookieYes to load')
-                postCookieYes();
+                window.postCookieYes();
               }
             }
             
@@ -626,32 +690,29 @@ export default defineNuxtConfig({
   image: {
     uploadcare: {
       provider: 'uploadcare',
+      cdnURL: config.UPLOADCARE_CDN,
+    },
 
-      // On some machines we can't resolve ucarecdn.com but can resolve www.ucarecdn.com.
-      cdnURL: 'https://www.ucarecdn.com',
+    weserv: {
+      provider: 'weserv',
+      baseURL: config.TUS_UPLOADER,
+      weservURL: config.IMAGE_DELIVERY,
     },
 
     // We want sharp images on fancy screens.
     densities: [1, 2],
 
-    // Uploadcare only supports images upto 3000.  So we drop the top-level screen sizes, which get doubled
-    // to produce the images requested.
-    //
-    // We also want to match the Bootstrap breakpoints.
+    // Uploadcare only supports images upto 3000, and the screen sizes are doubled when requesting because of densities.
+    // So we already need to drop the top-level screen sizes, and we also don't want to request images which are too
+    // large because this affects our charged bandwidth.  So we only go up to 768.
     screens: {
       xs: 320,
       sm: 576,
       md: 768,
-      lg: 992,
-      xl: 1200,
-      xxl: 1400,
-      '2xl': 1400,
-    },
-
-    providers: {
-      uploadcareProxy: {
-        provider: '~/providers/uploadcare-proxy.ts',
-      },
+      lg: 768,
+      xl: 768,
+      xxl: 768,
+      '2xl': 768,
     },
   },
 })

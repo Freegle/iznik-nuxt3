@@ -32,9 +32,16 @@
             </notice-message>
             <b-row>
               <b-col>
+                <OurUploadedImage
+                  v-if="event?.image?.ouruid"
+                  width="200"
+                  :src="event.image.ouruid"
+                  :modifiers="event.image.imagemods"
+                  alt="Community Event Photo"
+                  class="mb-2 w-100"
+                />
                 <NuxtPicture
-                  v-if="event?.image?.imageuid"
-                  :key="bump"
+                  v-else-if="event?.image?.imageuid"
                   format="webp"
                   width="200"
                   provider="uploadcare"
@@ -121,8 +128,9 @@
             </b-col>
           </b-row>
           <br />
-          <p v-if="user" class="text-muted">
-            Posted by {{ user.displayname }}
+          <p class="text-muted">
+            Posted
+            <span v-if="user?.id">by {{ user.displayname }}</span>
             <span v-for="(group, index) in groups" :key="index">
               <span v-if="index > 0">, </span><span v-else>on </span>
               {{ group.namedisplay }}
@@ -171,7 +179,7 @@
               </b-form-group>
             </b-col>
             <b-col v-if="enabled" cols="12" md="6">
-              <div v-if="event.image" class="container">
+              <div v-if="image" class="container">
                 <div
                   class="clickme rotateleft stacked"
                   label="Rotate left"
@@ -191,21 +199,18 @@
                   <v-icon icon="reply" flip="horizontal" />
                 </div>
                 <div class="image d-flex justify-content-around">
-                  <NuxtPicture
-                    v-if="event?.image?.imageuid"
-                    :key="bump"
-                    format="webp"
+                  <OurUploadedImage
+                    v-if="image?.imageuid"
                     width="200"
-                    provider="uploadcare"
-                    :src="event.image.imageuid"
+                    :src="image.imageuid"
                     :modifiers="mods"
                     alt="Community Event Photo"
                     class="mb-2"
                   />
                   <b-img
-                    v-else-if="event.image"
+                    v-else-if="image"
                     fluid
-                    :src="event.image.paththumb + '?' + cacheBust"
+                    :src="image.paththumb + '?event=' + id + '-' + cacheBust"
                   />
                   <b-img v-else width="250" thumbnail src="/placeholder.jpg" />
                 </div>
@@ -377,7 +382,7 @@
             :disabled="uploadingPhoto"
             @click="dontSave"
           >
-            Hide
+            Cancel
           </b-button>
           <SpinButton
             v-if="editing && enabled"
@@ -528,7 +533,7 @@ export default {
       description: null,
       currentAtts: [],
       mods: {},
-      bump: 0,
+      image: null,
     }
   },
   computed: {
@@ -603,11 +608,14 @@ export default {
       handler(newVal) {
         this.event.image = {
           id: newVal[0].id,
-          imageuid: newVal[0].externaluid,
+          imageuid: newVal[0].ouruid,
           imagemods: newVal[0].externalmods,
         }
-
-        this.bump++
+        this.image = {
+          id: newVal[0].id,
+          imageuid: newVal[0].ouruid,
+          imagemods: newVal[0].externalmods,
+        }
       },
       deep: true,
     },
@@ -776,10 +784,10 @@ export default {
       })
     },
     rotateLeft() {
-      this.rotate(90)
+      this.rotate(-90)
     },
     rotateRight() {
-      this.rotate(-90)
+      this.rotate(90)
     },
   },
 }

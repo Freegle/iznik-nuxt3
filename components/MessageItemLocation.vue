@@ -21,9 +21,12 @@
           }"
           itemprop="name"
         >
-          <a class="nodecor" :href="'/message/' + id" @click="block">{{
-            item
-          }}</a>
+          <a
+            class="nodecor text-wrap item"
+            :href="'/message/' + id"
+            @click="block"
+            >{{ item }}</a
+          >
         </span>
       </div>
       <div>
@@ -38,7 +41,8 @@
         </client-only>
       </div>
     </h3>
-    <div v-if="showLocation" class="location">
+    <div class="spacer" />
+    <div v-if="showLocation" class="location text-truncate">
       {{ location }}
     </div>
   </div>
@@ -122,6 +126,11 @@ export default {
 }
 </script>
 <style scoped lang="scss">
+@import 'bootstrap/scss/_functions';
+@import 'bootstrap/scss/_variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/message-images.scss';
+
 .item {
   color: $colour-info-fg !important;
 
@@ -132,7 +141,21 @@ export default {
   font-weight: bold !important;
   text-overflow: ellipsis;
   overflow: hidden;
-  display: block;
+  display: inline-block;
+
+  @media only screen and (max-width: 360px) {
+    width: 100%;
+  }
+
+  @media only screen and (min-width: 360px) {
+    font-size: 1rem;
+    width: max($thumbnail-size, calc(50vw - 2rem));
+  }
+
+  @include media-breakpoint-up(md) {
+    font-size: 1.5rem;
+    width: 100%;
+  }
 }
 
 .nowrap {
@@ -141,6 +164,10 @@ export default {
 
 .location {
   color: $color-gray--darker !important;
-  font-size: 1.25rem;
+  font-size: 0.8rem;
+
+  @include media-breakpoint-up(md) {
+    font-size: 1.25rem;
+  }
 }
 </style>

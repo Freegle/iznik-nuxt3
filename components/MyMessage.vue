@@ -8,16 +8,16 @@
           :border-variant="expanded ? 'success' : 'secondary'"
         >
           <b-card-header header-tag="header" class="p-0" role="tab">
-            <div
-              :v-b-toggle="'mypost-' + message.id"
-              class="bg-white clickme"
-              @click="toggle"
-            >
+            <div class="bg-white clickme">
               <notice-message v-if="rejected" class="mb-3" variant="warning">
                 <v-icon icon="exclamation-triangle" scale="2" /> This post has
                 not been accepted and is not public yet.
               </notice-message>
-              <MessageSummary :id="message.id" :replyable="false" />
+              <MessageSummary
+                :id="message.id"
+                :replyable="false"
+                @attachments="showPhotos"
+              />
               <div
                 v-if="
                   message.outcomes?.length === 0 && message.promisecount > 0
@@ -188,9 +188,7 @@
           </b-collapse>
         </b-card>
         <MessagePhotosModal
-          v-if="
-            showMessagePhotosModal && expanded && message.attachments?.length
-          "
+          v-if="showMessagePhotosModal && message.attachments?.length"
           :id="message.id"
           @hidden="showMessagePhotosModal = false"
         />
@@ -604,10 +602,8 @@ export default {
         this.visible = isVisible
       }
     },
-    toggle() {
-      this.expanded = !this.expanded
-    },
     showPhotos() {
+      console.log('Show photos')
       this.showMessagePhotosModal = true
     },
     countUnseen(reply) {

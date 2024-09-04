@@ -1,6 +1,6 @@
 <template>
   <div class="mb-2 mt-2">
-    <OurMessage v-if="msgid" :id="msgid" record-view />
+    <OurMessage v-if="msgid" :id="msgid" record-view class="mt-3" />
     <MessageList
       :messages-for-list="messagesToShow"
       :selected-group="id"

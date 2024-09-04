@@ -3,6 +3,7 @@ import dayjs from 'dayjs'
 import { nextTick } from 'vue'
 import api from '~/api'
 import { earliestDate, addStrings } from '~/composables/useTimeFormat'
+import { useAuthStore } from '~/stores/auth'
 
 export const useCommunityEventStore = defineStore({
   id: 'communityevent',
@@ -120,6 +121,14 @@ export const useCommunityEventStore = defineStore({
   getters: {
     byId: (state) => (id) => {
       return state.list[id]
+    },
+    count: (state) => {
+      const lastCommunityEvent =
+        useAuthStore().user?.settings?.lastCommunityEvent || 0
+
+      return state.forUser.filter((item) => {
+        return item.id > lastCommunityEvent
+      }).length
     },
   },
 })

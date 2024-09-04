@@ -1,7 +1,6 @@
 <template>
   <b-modal
     ref="modal"
-    scrollable
     :title="message.subject"
     ok-only
     ok-variant="secondary"

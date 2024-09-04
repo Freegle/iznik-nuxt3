@@ -1,26 +1,24 @@
 <template>
   <div class="sidebar__wrapper">
-    <div class="sidebar__info pr-3">
-      <CommunityEventSidebar
-        v-if="showCommunityEvents"
-        class="flex-grow-1 sidebar__community-event"
-      />
-      <hr
-        v-if="showCommunityEvents && showVolunteerOpportunities"
-        class="m-0 hr1"
-      />
-      <VolunteerOpportunitySidebar
-        v-if="showVolunteerOpportunities"
-        class="flex-grow-1 sidebar__volunteer-opportunity"
-      />
-      <hr
-        v-if="showCommunityEvents && showVolunteerOpportunities"
-        class="mt-0 hr2"
-      />
-    </div>
-    <div class="sidebar__botleft align-content-end">
-      <BotLeftBox v-if="showBotLeft" class="social-media__wrapper ml-2" />
-    </div>
+    <ExternalDa
+      v-if="adUnitPath"
+      :ad-unit-path="adUnitPath"
+      max-width="300px"
+      max-height="600px"
+      :div-id="adDivId"
+      class="mt-2"
+    />
+    <CommunityEventSidebar
+      v-if="showCommunityEvents"
+      class="overflow-y-scroll border-bottom"
+    />
+    <VolunteerOpportunitySidebar
+      v-if="showVolunteerOpportunities"
+      class="overflow-y-scroll border-top border-bottom"
+    />
+  </div>
+  <div class="sidebar__botleft align-content-end">
+    <BotLeftBox v-if="showBotLeft" class="social-media__wrapper ml-2" />
   </div>
 </template>
 <script>
@@ -54,6 +52,16 @@ export default {
       required: false,
       default: true,
     },
+    adUnitPath: {
+      type: String,
+      required: false,
+      default: null,
+    },
+    adDivId: {
+      type: String,
+      required: false,
+      default: null,
+    },
   },
 }
 </script>
@@ -62,64 +70,25 @@ export default {
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
 @import 'assets/css/sticky-banner.scss';
+@import 'assets/css/navbar.scss';
 
 .sidebar__wrapper {
+  height: calc(
+    100vh - $sticky-banner-height-desktop - $navbar-height - 75px - 10px
+  );
   display: grid;
-  grid-template-rows: 1fr;
-  grid-template-columns: 100%;
-  height: 100vh;
-}
-
-.sidebar__info {
-  grid-row: 1 / 2;
-  grid-column: 1 / 2;
-  display: grid;
-  grid-template-rows: 1fr auto 1fr auto 70px;
-  grid-template-columns: 1fr;
+  grid-auto-rows: minmax(0, 1fr);
   grid-row-gap: 10px;
-  height: calc(100vh - 100px);
+  grid-template-columns: minmax(0, 1fr);
+  overflow-y: hidden;
+
+  div {
+    border-bottom: 1px lightgrey;
+  }
 }
 
 .sidebar__botleft {
-  grid-row: 1 / 2;
-  grid-column: 1 / 2;
-  display: grid;
-  grid-template-rows: 1fr auto;
-  height: calc(100vh - 68px);
-
-  padding-bottom: $sticky-banner-height-mobile;
-
-  @include media-breakpoint-up(md) {
-    padding-bottom: $sticky-banner-height-desktop;
-  }
-
-  .social-media__wrapper {
-    grid-row: 2 / 3;
-    padding-bottom: 10px;
-  }
-}
-
-.sidebar__community-event {
-  grid-row: 1 / 2;
-  overflow-y: auto;
-  scrollbar-gutter: stable;
-}
-
-.hr1 {
-  grid-row: 2 / 3;
-}
-
-.sidebar__volunteer-opportunity {
-  grid-row: 3 / 4;
-  overflow-y: auto;
-  scrollbar-gutter: stable;
-}
-
-.hr2 {
-  grid-row: 4 / 5;
-}
-
-.social-media__wrapper {
-  grid-row: 5 / 6;
+  position: fixed;
+  bottom: $sticky-banner-height-desktop;
 }
 </style>

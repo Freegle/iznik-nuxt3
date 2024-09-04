@@ -323,7 +323,6 @@ export default {
   },
   methods: {
     took(users) {
-      console.log('Took', users)
       this.tookUsers = users
     },
     async submit(callback) {

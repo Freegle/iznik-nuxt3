@@ -1,63 +1,70 @@
 <template>
   <client-only>
-    <div
-      :class="{
-        invisible: !visible,
-      }"
-    >
-      <b-img
-        v-if="busy"
-        src="/loader.gif"
-        class="fit-cover ml-2 fadein"
-        width="200px"
-      />
-      <lr-config
-        ref="lrconfig"
-        ctx-name="my-uploader"
-        pubkey="61ddd294bd3a390019c6"
-        :max-local-file-size-bytes="0"
-        img-only
-        source-list="local, camera"
-        :multiple="multiple"
-        image-shrink="1024x1024 95%"
-        remove-copyright
-        :thumb-size="thumbSize"
-        debug
-      ></lr-config>
-      <div class="d-flex flex-column justify-content-around align-items-start">
-        <lr-file-uploader-inline
-          ref="uploader"
-          ctx-name="my-uploader"
-          :class="configName"
-          @click="click"
+    <div class="wrapper" @dragenter="openModal">
+      <div class="d-flex flex-column justify-content-around">
+        <v-icon
+          v-if="!busy"
+          size="6x"
+          icon="camera"
+          class="camera text-faded"
+        />
+        <b-img v-if="busy" src="/loader.gif" class="fit-cover fadein loader" />
+        <div
+          v-else-if="multiple || !modelValue.length"
+          class="d-flex justify-content-around"
         >
-        </lr-file-uploader-inline>
+          <b-button :id="uploaderUid" variant="primary" @click="openModal">
+            {{ label }}
+          </b-button>
+        </div>
       </div>
-      <lr-upload-ctx-provider
-        ref="ctxProviderRef"
-        ctx-name="my-uploader"
-        @file-upload-success="uploadSuccess"
-        @file-removed="removed"
-      ></lr-upload-ctx-provider>
+      <DashboardModal
+        ref="dashboard"
+        :uppy="uppy"
+        :open="modalOpen"
+        :props="{
+          onRequestCloseModal: closeModal,
+          closeAfterFinish: true,
+        }"
+      />
     </div>
   </client-only>
 </template>
 <script setup>
 import { shouldPolyfill as shouldPolyfillLocale } from '@formatjs/intl-locale/should-polyfill'
 import { shouldPolyfill as shouldPolyfillPlural } from '@formatjs/intl-pluralrules/should-polyfill'
-import { useMiscStore } from '~/stores/misc'
+// eslint-disable-next-line import/no-named-as-default
+import Uppy from '@uppy/core'
+import { DashboardModal } from '@uppy/vue'
+import Tus from '@uppy/tus'
+import Webcam from '@uppy/webcam'
+import Compressor from '@uppy/compressor'
+
+import ResizeObserver from 'resize-observer-polyfill'
+import hasOwn from 'object.hasown'
+import * as Sentry from '@sentry/browser'
+import { uid } from '../composables/useId'
 import { useImageStore } from '~/stores/image'
 
-const LR = await import('@uploadcare/blocks/web/blocks.min.js')
+const runtimeConfig = useRuntimeConfig()
 
 try {
-  console.log('Consider polyfile locale')
+  console.log('Consider polyfill ResizeObserver')
+  if (!window.ResizeObserver) {
+    // Need to globally polyfill this, because the Uppy uploader uses it.
+    console.log('Polyfill ResizeObserver')
+    window.ResizeObserver = ResizeObserver
+  } else {
+    console.log('No need to polyfill ResizeObserver')
+  }
+
+  console.log('Consider polyfill locale')
   if (shouldPolyfillLocale()) {
     console.log('Need to polyfill Locale')
     await import('@formatjs/intl-locale/polyfill')
   }
 
-  console.log('Consider polyfile plural')
+  console.log('Consider polyfill plural')
   if (shouldPolyfillPlural()) {
     const locale = 'en'
     const unsupportedLocale = shouldPolyfillPlural(locale)
@@ -72,6 +79,12 @@ try {
       )
       await import('@formatjs/intl-pluralrules/locale-data/en')
     }
+  }
+
+  console.log('Consider polyfill hasOwn')
+  if (!Object.hasOwn) {
+    console.log('polyfill hasOwn')
+    hasOwn.shim()
   }
 } catch (e) {
   console.log('Polyfills failed', e)
@@ -97,157 +110,247 @@ const props = defineProps({
     required: false,
     default: null,
   },
+  startOpen: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
 })
 
-const miscStore = useMiscStore()
+// const miscStore = useMiscStore()
 const imageStore = useImageStore()
 
-const emit = defineEmits(['update:modelValue'])
-const uploadedPhotos = ref([])
-const ctxProviderRef = ref(null)
-const uploader = ref(null)
-const busy = ref(false)
+const modalOpen = ref(props.startOpen)
 
-// const fontSize = computed(() => {
-//   return uploadedPhotos.value.length > 0 ? '1rem' : '1.25rem'
-// })
+function openModal() {
+  const DashboardModal = uppy.getPlugin('DashboardModal')
+  if (DashboardModal) {
+    DashboardModal.openModal()
+  }
+}
+
+function closeModal() {
+  const DashboardModal = uppy.getPlugin('DashboardModal')
+  if (DashboardModal) {
+    DashboardModal.closeModal()
+  }
+}
+
+const uploaderUid = ref(uid('uploader'))
+
+const emit = defineEmits(['update:modelValue', 'closed'])
+const uploadedPhotos = ref([])
+const busy = ref(false)
 
 const label = computed(() => {
   if (props.label) {
     return label
   } else if (props.multiple) {
-    return uploadedPhotos.value.length > 0 ? 'Add/edit photos' : 'Add photos'
+    return props.modelValue.length > 0 ? 'Add more photos' : 'Add photos'
   } else {
-    return uploadedPhotos.value.length > 0 ? 'Add/edit photo' : 'Add photo'
+    return 'Add photo'
   }
 })
 
-const configName = computed(() => {
-  return uploadedPhotos.value.length ? 'my-config2' : 'my-config'
-})
+let uppy = null
 
-const thumbSize = computed(() => {
-  return miscStore.breakpoint === 'xs' || miscStore.breakpoint === 'sm'
-    ? 100
-    : 200
-})
+const dashboard = ref(null)
 
-const lrconfig = ref(null)
+watch(dashboard, (newVal, oldVal) => {
+  console.log('Dashboard changed', newVal)
 
-watch(
-  lrconfig,
-  (newVal) => {
-    if (newVal) {
-      try {
-        lrconfig.value.localeDefinitionOverride = {
-          en: {
-            'drop-files-here': props.multiple ? 'Add photos' : 'Add photo',
-            clear: 'Remove',
-            'add-more': 'Add more photos',
-            'src-type-local': 'Browse',
-          },
-        }
-        LR.registerBlocks(LR)
-        setPhotos(props.modelValue)
-        visible.value = true
-      } catch (e) {
-        console.error('Failed in mount', e)
-      }
-    }
-  },
-  {
-    immediate: true,
+  if (newVal && !oldVal && props.startOpen) {
+    openModal()
   }
-)
+})
 
-const visible = ref(false)
+let uppyTimer = null
 
-function setPhotos(photos) {
-  if (ctxProviderRef.value) {
-    ctxProviderRef.value.removeAllFiles()
-
-    photos.forEach((f) => {
-      console.log('Add photo', f)
-      if (f.path) {
-        ctxProviderRef.value.addFileFromUrl(f.path, {
-          silent: true,
-        })
-      } else if (f.externaluid) {
-        ctxProviderRef.value.addFileFromUuid(f.externaluid, {
-          silent: true,
-        })
-      }
+onMounted(() => {
+  console.log(
+    'Uploader mounted',
+    '#' + uploaderUid.value,
+    dashboard.value,
+    props.multiple,
+    props.startOpen
+  )
+  uppy = new Uppy({
+    autoProceed: true,
+    closeAfterFinish: true,
+    hidePauseResumeButton: true,
+    hideProgressAfterFinish: true,
+    locale: {
+      strings: {
+        dropPasteImportFiles: '%{browseFiles} or import from',
+        browseFiles: 'Browse files',
+      },
+    },
+    restrictions: {
+      // allowedFileTypes: ['image/*', '.jpg', '.jpeg', '.png', '.gif', '.heic'],
+      maxNumberOfFiles: props.multiple ? 10 : 1,
+    },
+  })
+    .use(Webcam, {
+      mirror: false,
+      modes: ['picture'],
+      mobileNativeCamera: true,
+      showVideoSourceDropdown: true,
+      videoConstraints: {
+        facingMode: 'environment',
+      },
     })
-  }
-}
+    .use(Tus, { endpoint: runtimeConfig.public.TUS_UPLOADER })
+    .use(Compressor)
+  uppy.on('file-added', (file) => {
+    console.log('Added file', file)
+  })
+  uppy.on('files-added', (files) => {
+    console.log('Added files', files)
+  })
+  uppy.on('file-removed', (file) => {
+    console.log('Removed file', file)
+  })
+  uppy.on('progress', (progress) => {
+    // progress: integer (total progress percentage)
+    console.log('Progress', progress)
+  })
+  uppy.on('preprocess-progress', (progress) => {
+    // progress: integer (total progress percentage)
+    console.log('Preprocess progress', progress)
+  })
+  uppy.on('upload-progress', (file, progress) => {
+    // file: { id, name, type, ... }
+    // progress: { uploader, bytesUploaded, bytesTotal }
+    console.log(
+      'Upload progress',
+      file.id,
+      progress.bytesUploaded,
+      progress.bytesTotal
+    )
+  })
+  uppy.on('upload-pause', (file, isPaused) => {
+    // file: { id, name, type, ... }
+    // progress: { uploader, bytesUploaded, bytesTotal }
+    console.log('Upload paused', file, isPaused)
+  })
+  uppy.on('complete', uploadSuccess)
+  uppy.on('dashboard:modal-open', () => {
+    console.log('Uploader modal is open')
+    if (!uppyTimer) {
+      uppyTimer = setTimeout(() => {
+        console.log('Uppy timed out')
+        Sentry.captureMessage('Uppy timed out')
+      }, 30000)
+    }
+  })
+  uppy.on('postprocess-progress', (progress) => {
+    // progress: integer (total progress percentage)
+    console.log('Postprocess progress', progress)
+  })
+  uppy.on('upload-success', (file, response) => {
+    console.log('Upload success', file, response)
+  })
+  uppy.on('complete', (result) => {
+    console.log('Complete', result)
+  })
+  uppy.on('error', (error) => {
+    console.error('Upload error', error)
+  })
+  uppy.on('upload-retry', (fileID) => {
+    console.log('upload retried:', fileID)
+  })
+  uppy.on('upload-stalled', (error, files) => {
+    console.log('upload seems stalled', error, files)
+  })
+  uppy.on('retry-all', (fileIDs) => {
+    console.log('upload retried:', fileIDs)
+  })
+  uppy.on('restriction-failed', (file, error) => {
+    console.log('Restriction failed', file, error)
+  })
+  uppy.on('dashboard:modal-closed', () => {
+    console.log('Uploader modal is closed')
+    if (uppyTimer) {
+      clearTimeout(uppyTimer)
+      uppyTimer = null
+    }
+    emit('closed')
+  })
+})
 
-async function uploadSuccess(e) {
-  console.log('Uploaded', e)
+onBeforeUnmount(() => {
+  if (uppyTimer) {
+    console.log('Uploader unmounted')
+    clearTimeout(uppyTimer)
+    uppyTimer = null
+  }
+})
+
+async function uploadSuccess(result) {
+  console.log('Upload success', result)
   busy.value = true
 
-  if (e.detail) {
-    if (e.detail.status === 'success') {
-      // We've uploaded a file.  Create the attachment on the server which references the uploaded image.
-      //
-      // Say we'd like it back in webp format for efficiency.
-      const mods = {
-        format: 'webp',
+  if (result.successful) {
+    // Iterate result.successful array
+    const promises = []
+
+    result.successful.forEach((r) => {
+      // We've uploaded a file.  Find what is after the last slash
+
+      let uid = r.tus?.uploadUrl
+
+      if (uid) {
+        console.log('Initial', uid)
+        uid = 'freegletusd-' + uid.substring(uid.lastIndexOf('/') + 1)
+        console.log('Got uid', r, uid)
+
+        //  Create the attachment on the server which references the uploaded image.
+        const mods = {}
+
+        const att = {
+          imgtype: props.type,
+          externaluid: uid,
+          externalmods: mods,
+        }
+
+        const p = imageStore.post(att)
+        promises.push(p)
+
+        p.then((ret) => {
+          // Set up our local attachment info.  This will get used in the parents to attach to whatever objects
+          // these photos relate to.
+          //
+          // Note that the URL is returned from the server because it is manipulated on there to remove EXIF,
+          // so we use that rather than the URL that was returned from the uploader.
+          console.log('Image post returned', ret)
+          uploadedPhotos.value = props.modelValue
+          uploadedPhotos.value.push({
+            id: ret.id,
+            path: ret.url,
+            paththumb: ret.url,
+            ouruid: ret.uid,
+            externalmods: mods,
+          })
+        })
       }
-
-      const att = {
-        imgtype: props.type,
-        externaluid: e.detail.uuid,
-        externalmods: mods,
-      }
-
-      const ret = await imageStore.post(att)
-
-      // Set up our local attachment info.  This will get used in the parents to attach to whatever objects
-      // these photos relate to.
-      //
-      // Note that the URL is returned from the server because it is manipulated on there to remove EXIF,
-      // so we use that rather than the URL that was returned from the uploader.
-      console.log('Image post returned', ret)
-      uploadedPhotos.value = props.modelValue
-      uploadedPhotos.value.push({
-        id: ret.id,
-        path: ret.url,
-        paththumb: ret.url,
-        externaluid: ret.uid,
-        externalmods: mods,
-      })
-
-      console.log(
-        'Added, emit update:modelValue',
-        JSON.stringify(uploadedPhotos.value)
-      )
-
-      emit('update:modelValue', uploadedPhotos.value)
-      busy.value = false
-    }
-  }
-}
-
-function removed(e) {
-  // We don't need to tidy up our server object - that will happen anyway.  Just remove from our
-  // local attachment info.
-  console.log('File removed', e?.detail?.uuid, JSON.stringify(e))
-  if (e?.detail?.uuid) {
-    uploadedPhotos.value = uploadedPhotos.value.filter((p) => {
-      console.log('Compare', p.externaluid, e.detail.uuid)
-      return p.externaluid !== e.detail.uuid
     })
-    console.log('emit modelValue', JSON.stringify(uploadedPhotos.value))
-    emit('update:modelValue', uploadedPhotos.value)
-  }
-}
 
-function click(e) {
-  console.log('Clicked', e)
+    await Promise.all(promises)
+
+    emit('update:modelValue', uploadedPhotos.value)
+
+    // Reset the uploader so that if we go back in we won't see photos which have already been uploaded.  This is
+    // because control of the photos is handed over to our code, rather than the uploader.
+    console.log('Reset uploader')
+    closeModal()
+    uppy.clear()
+    busy.value = false
+  }
 }
 </script>
 <style lang="scss">
-@import '@uploadcare/blocks/web/lr-file-uploader-inline.min.css';
+@import '@uppy/core/dist/style.css';
+@import '@uppy/webcam/dist/style.css';
 @import 'assets/css/uploader.scss';
 
 .fadein {
@@ -261,5 +364,16 @@ function click(e) {
   100% {
     opacity: 1;
   }
+}
+
+.wrapper {
+  border: 1px lightgray dashed;
+  width: 200px;
+  height: 200px;
+  align-content: center;
+}
+
+.loader {
+  width: 200px;
 }
 </style>

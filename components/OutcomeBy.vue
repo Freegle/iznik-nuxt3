@@ -83,6 +83,7 @@ import { useMessageStore } from '../stores/message'
 import UserRatings from './UserRatings'
 import NumberIncrementDecrement from './NumberIncrementDecrement'
 import { ref } from '#imports'
+import { useUserStore } from '~/stores/user'
 
 export default {
   components: { NumberIncrementDecrement, UserRatings },
@@ -121,6 +122,7 @@ export default {
   },
   async setup(props) {
     const messageStore = useMessageStore()
+    const userStore = useUserStore()
 
     if (props.msgid) {
       await messageStore.fetch(props.msgid)
@@ -152,6 +154,7 @@ export default {
 
     return {
       messageStore,
+      userStore,
       initiallySelectedUsers,
       currentlySelectedUsers,
       selectUser,
@@ -168,7 +171,7 @@ export default {
   },
   computed: {
     repliers() {
-      const ret = []
+      let ret = []
 
       if (this.message?.replies) {
         this.message.replies.forEach((u) => {
@@ -180,6 +183,26 @@ export default {
           }
         })
       }
+
+      // Might be promised to someone who didn't reply - for example if they replied about something else and
+      // then this was added in.
+      if (this.message?.promises) {
+        this.message.promises.forEach((u) => {
+          if (u.userid > 0) {
+            const user = this.userStore.byId(u.userid)
+
+            ret.push({
+              userid: u.userid,
+              displayname: user?.displayname,
+            })
+          }
+        })
+      }
+
+      // Make ret unique by userid
+      ret = ret.filter(
+        (v, i, a) => a.findIndex((t) => t.userid === v.userid) === i
+      )
 
       return ret
     },
@@ -216,6 +239,16 @@ export default {
     },
   },
   watch: {
+    repliers: {
+      handler(newVal) {
+        newVal.forEach((u) => {
+          if (!u.displayname) {
+            this.userStore.fetch(u.userid)
+          }
+        })
+      },
+      immediate: true,
+    },
     currentlySelectedUsers: {
       handler(newVal) {
         this.$emit('tookUsers', newVal)

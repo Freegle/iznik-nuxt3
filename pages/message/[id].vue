@@ -11,9 +11,10 @@
           >
             <ExternalDa
               ad-unit-path="/22794232631/freegle_productemail"
-              :dimensions="[[300, 250]]"
+              max-height="600px"
               div-id="div-gpt-ad-1691925773522-0"
               class="mt-2"
+              show-logged-out
             />
           </VisibleWhen>
         </b-col>
@@ -32,7 +33,13 @@
             class="bg-white p-2"
           >
             <h1>Sorry, that post isn't around any more.</h1>
-            <div>
+            <div v-if="message.deadline">
+              <p>
+                There was a deadline of
+                {{ dateonlyNoYear(message.deadline) }}.
+              </p>
+            </div>
+            <div v-else>
               <p>
                 If it was an OFFER, it's probably been TAKEN. If it was a
                 WANTED, it's probably been RECEIVED.
@@ -78,6 +85,7 @@
             <VisibleWhen :at="['xs', 'sm', 'md', 'lg']">
               <OurMessage
                 :id="id"
+                class="mt-3"
                 :start-expanded="true"
                 hide-close
                 record-view
@@ -89,6 +97,7 @@
             <VisibleWhen :not="['xs', 'sm', 'md', 'lg']">
               <OurMessage
                 :id="id"
+                class="mt-3"
                 :start-expanded="true"
                 hide-close
                 record-view
@@ -97,18 +106,19 @@
             </VisibleWhen>
           </div>
         </b-col>
-        <b-col cols="0" xl="3" class="d-none d-xl-block">
+        <b-col cols="0" xl="3" class="d-none d-xl-flex justify-content-end">
           <VisibleWhen
             :not="['xs', 'sm', 'md', 'lg']"
             class="position-fixed"
             style="width: 300px"
           >
-            <!--            <ExternalDa-->
-            <!--              ad-unit-path="/22794232631/freegle_productemail"-->
-            <!--              :dimensions="[[300, 250]]"-->
-            <!--              div-id="div-gpt-ad-1691925773522-0"-->
-            <!--              class="mt-2"-->
-            <!--            />-->
+            <ExternalDa
+              ad-unit-path="/22794232631/freegle_productemail"
+              max-width="300px"
+              div-id="div-gpt-ad-1691925773522-0"
+              class="mt-2"
+              show-logged-out
+            />
           </VisibleWhen>
         </b-col>
       </b-row>

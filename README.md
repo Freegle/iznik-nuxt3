@@ -41,7 +41,7 @@ Then start the dev server:
 npm run dev
 ```
 
-This will serve up the site at [localhost:3002](http://localhost:3002).
+This will serve up the site at [127.0.0.1:3002](http://127.0.0.1:3002).  **If you use localhost instead of 127.0.0.1 you may find page load extremely slow.**
 
 It will watch for changes and do hot module reloading.  Occasionally you'll need to restart Vite when it doesn't 
 pick up a change.

@@ -33,6 +33,7 @@ export const useNewsfeedStore = defineStore({
     },
     async fetchCount(distance, log = true) {
       this.lastDistance = distance
+      distance = distance || 'anywhere'
       const ret = await api(this.config).news.count(distance, log)
       this.count = ret?.count || 0
       return this.count
@@ -79,6 +80,7 @@ export const useNewsfeedStore = defineStore({
     },
     async fetchFeed(distance) {
       this.lastDistance = distance
+      distance = distance || 'anywhere'
       this.feed = await api(this.config).news.fetch(null, distance)
       return this.feed
     },

@@ -6,12 +6,13 @@
       class="text--small"
     >
       <client-only>
-        <span :title="group.arrival"
-          >{{ timeago(group.arrival, true) }} on
+        <span :title="group.arrival" class="time"
+          >{{ timeago(group.arrival, true) }}
+          <span v-if="showSummaryDetails">on </span>
         </span>
       </client-only>
       <nuxt-link
-        v-if="group.groupid in groups"
+        v-if="group.groupid in groups && showSummaryDetails"
         no-prefetch
         :to="'/explore/' + groups[group.groupid].exploreLink + '?noguard=true'"
         :title="'Click to view ' + groups[group.groupid].namedisplay"
@@ -21,7 +22,7 @@
       &nbsp;
       <client-only>
         <b-button
-          v-if="displayMessageLink"
+          v-if="showSummaryDetails"
           variant="link"
           :to="'/message/' + message.id"
           class="text-faded text-decoration-none"
@@ -30,19 +31,21 @@
           #{{ message.id }}
         </b-button>
       </client-only>
-      <span v-if="approvedby" class="text-muted small">
+      <div v-if="approvedby && showSummaryDetails" class="text-faded small">
         Approved by {{ approvedby }}
-      </span>
+      </div>
     </div>
   </div>
 </template>
 <script>
+import { mapState } from 'pinia'
 import dayjs from 'dayjs'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useMessageStore } from '~/stores/message'
 import { useGroupStore } from '~/stores/group'
 import { timeago } from '~/composables/useTimeFormat'
+import { useMiscStore } from '~/stores/misc'
 
 export default {
   name: 'MessageHistory',
@@ -51,8 +54,9 @@ export default {
       type: Number,
       required: true,
     },
-    displayMessageLink: {
+    summary: {
       type: Boolean,
+      required: false,
       default: false,
     },
   },
@@ -86,6 +90,12 @@ export default {
     return { groupStore, messageStore, authStore, userStore, timeago }
   },
   computed: {
+    ...mapState(useMiscStore, ['breakpoint']),
+    showSummaryDetails() {
+      return (
+        !this.summary || (this.breakpoint !== 'xs' && this.breakpoint !== 'sm')
+      )
+    },
     approvedby() {
       let approvedby = ''
 
@@ -142,7 +152,15 @@ export default {
 }
 </script>
 <style scoped lang="scss">
+@import 'bootstrap/scss/_functions';
+@import 'bootstrap/scss/_variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
+
 .time {
-  color: $colour-success-fg;
+  font-size: 0.75rem;
+
+  @include media-breakpoint-up(md) {
+    font-size: 1rem;
+  }
 }
 </style>

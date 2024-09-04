@@ -3,8 +3,8 @@
     :format="format"
     :fit="fit"
     :preload="preload"
-    provider="uploadcareProxy"
-    :src="src"
+    provider="weserv"
+    :src="fullSrc"
     :modifiers="modifiers"
     :class="(className ? className : '') + ' ' + isFluid"
     :alt="alt"
@@ -13,10 +13,12 @@
     :loading="preload ? 'eager' : loading"
     :sizes="sizes"
     :placeholder="placeholder"
+    @error="brokenImage"
   />
 </template>
 <script setup>
 import { defineProps } from 'vue'
+import * as Sentry from '@sentry/browser'
 
 const props = defineProps({
   src: {
@@ -86,4 +88,33 @@ const props = defineProps({
 })
 
 const isFluid = computed(() => (props.fluid ? 'img-fluid' : ''))
+
+if (props.src.includes('gimg_0.jpg')) {
+  Sentry.captureMessage('Broken image: ' + props.src)
+}
+
+const fullSrc = computed(() => {
+  let ret = props.src
+
+  if (!ret.startsWith('http')) {
+    ret = useRuntimeConfig().public.USER_SITE + ret
+  }
+
+  // If there is a ?, use encodeURI on that and everything after, otherwise those parameters get picked up
+  // by wsrv rather than passed on
+  if (ret.includes('?')) {
+    const [base, query] = ret.split('?')
+    const encodedQuery = encodeURIComponent(query)
+    ret = base + '?' + encodedQuery
+  }
+
+  return ret
+})
+
+const emit = defineEmits(['error'])
+
+function brokenImage(e) {
+  console.log('Proxy image broken')
+  emit('error', e)
+}
 </script>

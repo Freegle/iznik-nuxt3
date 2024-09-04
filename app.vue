@@ -123,6 +123,7 @@ import { useMiscStore } from './stores/misc'
 import { computed, watch, reloadNuxtApp } from '#imports'
 // polyfills
 import 'core-js/actual/array/to-sorted'
+import { useConfigStore } from '~/stores/config'
 
 const route = useRoute()
 const loadingIndicatorThrottle = ref(5000)
@@ -139,7 +140,12 @@ let ready = false
 // Starting with around Nuxt 3.4.1, when we first access the config (here) it has public as we'd expect, but
 // if we store that and access it later, we are just looking at the contents of public.  I don't understand why
 // this is, but we don't expect the config to change, so we take a copy here.
-const runtimeConfig = JSON.parse(JSON.stringify(useRuntimeConfig()))
+const runtimeConfig = JSON.parse(
+  JSON.stringify({
+    public: useRuntimeConfig().public,
+    app: useRuntimeConfig().app,
+  })
+)
 
 const miscStore = useMiscStore()
 const groupStore = useGroupStore()
@@ -148,6 +154,7 @@ const authStore = useAuthStore()
 const userStore = useUserStore()
 const isochroneStore = useIsochroneStore()
 const composeStore = useComposeStore()
+const configStore = useConfigStore()
 const chatStore = useChatStore()
 const addressStore = useAddressStore()
 const trystStore = useTrystStore()
@@ -189,6 +196,7 @@ searchStore.init(runtimeConfig)
 storyStore.init(runtimeConfig)
 volunteeringStore.init(runtimeConfig)
 communityEventStore.init(runtimeConfig)
+configStore.init(runtimeConfig)
 jobStore.init(runtimeConfig)
 teamStore.init(runtimeConfig)
 donationStore.init(runtimeConfig)
@@ -261,6 +269,21 @@ if (process.client) {
         console.error('Unhandled rejection - may break Nuxt - reload')
         ev.preventDefault()
         window.location.reload()
+      }
+    }
+
+    window.onerror = function (message, url, line, col, error) {
+      // We can get this, for example if the CookieYes script is blocked.
+      console.log('Uncaught error', message, url, line, col, error)
+
+      if (url.includes('cookieyes')) {
+        // If CookieYes fails with an error, then we proceed as though it wasn't configured.
+        //
+        // This catches the error on Firefox, but not on Chrome, so it's of limited use.
+        console.log('CookieYes error')
+        if (window.postCookieYes) {
+          window.postCookieYes()
+        }
       }
     }
   }

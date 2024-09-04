@@ -71,6 +71,9 @@
     <div v-else-if="chatmessage?.type === 'ScheduleUpdated'">
       <!--      This type has been retired.-->
     </div>
+    <div v-else-if="chatmessage?.type === 'Reminder'">
+      <chat-message-reminder :id="id" :chatid="chatid" :pov="pov" />
+    </div>
     <div v-else>
       Unknown chat message type {{ chatmessage?.type }}, {{ chat }}
       {{ chatmessage }}
@@ -134,6 +137,7 @@ import ChatMessageAddress from './ChatMessageAddress'
 import ChatMessageNudge from './ChatMessageNudge'
 import ChatMessageDateRead from './ChatMessageDateRead'
 import ChatMessageModMail from './ChatMessageModMail'
+import ChatMessageReminder from './ChatMessageReminder'
 import SupportLink from '~/components/SupportLink.vue'
 import ChatMessageWarning from '~/components/ChatMessageWarning'
 import 'vue-simple-context-menu/dist/vue-simple-context-menu.css'
@@ -161,6 +165,7 @@ export default {
     ChatMessageReport,
     ChatMessageNudge,
     ChatMessageModMail,
+    ChatMessageReminder,
     SupportLink,
   },
   props: {

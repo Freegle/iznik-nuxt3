@@ -28,6 +28,18 @@
               : 'Can you help?  If you have what they\'re looking for, let them know.'
           "
         >
+          <div class="d-flex flex-wrap">
+            <div v-if="message.deliverypossible" class="mb-2 mr-2">
+              <b-badge
+                v-b-tooltip="
+                  'They have said they may be able to deliver.  No guarantees - it needs to be convenient for them - but you can ask.'
+                "
+                variant="info"
+                ><v-icon icon="info-circle" /> Delivery may be possible</b-badge
+              >
+            </div>
+            <MessageDeadline :id="id" class="mb-2" />
+          </div>
           <Field
             v-if="message.type == 'Offer'"
             :id="'replytomessage-' + message.id"
