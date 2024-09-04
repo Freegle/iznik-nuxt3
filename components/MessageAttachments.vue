@@ -153,8 +153,8 @@ function brokenImage() {
 :deep(.thumbnail img, .thumbnail picture) {
   object-fit: cover;
   display: block;
-  height: max($thumbnail-size, calc(calc(50vw - 2rem))) !important;
-  width: max($thumbnail-size, calc(calc(50vw - 22.5px))) !important;
+  height: max($thumbnail-size, calc(50vw - 2rem)) !important;
+  width: min(calc(50vw - 22.5px), 100%) !important;
   box-shadow: 0 0 1 $color-gray--dark;
 
   @include media-breakpoint-up(md) {
