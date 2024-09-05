@@ -135,16 +135,13 @@ export default {
         ready = true
       }
     }
-    console.log("SETUP WORK", authStore.work)
-    const totalCount = authStore.work?.total // + authStore.work.chatCount
-    const title = totalCount > 0 ? `(${totalCount}) ModTools` : 'ModTools'
     const runtimeConfig = useRuntimeConfig()
     const route = useRoute()
     useHead(
       buildHead(
         route,
         runtimeConfig,
-        title,
+        'ModTools',
         'Moderation tool for Freegle volunteers'
       )
     )
@@ -165,7 +162,6 @@ export default {
   },
   computed: {
     discourseCount() {
-      console.log("default discourseCount")
       const discourse = this.authStore.discourse
       return discourse
         ? discourse.notifications + discourse.newtopics + discourse.unreadtopics
@@ -181,7 +177,6 @@ export default {
       return work.total
     },
     work() {
-      console.log("default WORK", this.authStore.work.total)
       return this.authStore.work
     },
     version() {
@@ -255,8 +250,6 @@ export default {
     },
     async checkWork() {
       await this.fetchMe(true, ['work', 'group']) // MT ADDED 'group' TODO get chatcount
-
-      console.log("default checkWork menuCount", this.menuCount)
 
       const chatStore = useChatStore()
       this.chatcount = chatStore ? Math.min(99, chatStore.unreadCount) : 0

@@ -5,6 +5,10 @@ export default class ChatAPI extends BaseAPI {
     return this.$getv2(`/chat/${chatid}/message`)
   }
 
+  async listChatsMT(params) {
+    return await this.$get('/chat/rooms',params)
+  }
+
   async listChats(since, search, keepChat, logError) {
     return await this.$getv2(
       '/chat?includeClosed=true',

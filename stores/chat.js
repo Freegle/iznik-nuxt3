@@ -28,15 +28,23 @@ export const useChatStore = defineStore({
         since = dayjs(this.searchSince).toISOString()
       }
       // TODO Amend ChatAPI v2 to support chattypes
-      //const miscStore = useMiscStore() // MT ADDED
-      //const chattypes = miscStore.modtools ? ['User2Mod', 'Mod2Mod'] : ['User2User', 'User2Mod'],
-
-      const chats = await api(this.config).chat.listChats(
-        since,
-        search,
-        keepChat,
-        logError
-      )
+      let chats = []
+      const miscStore = useMiscStore() // MT ADDED
+      if( miscStore.modtools){
+        const { chatrooms } = await api(this.config).chat.listChatsMT({
+          chattypes: ['User2Mod', 'Mod2Mod']
+        })
+        chats = chatrooms
+      }
+      else {
+        chats = await api(this.config).chat.listChats(
+          since,
+          search,
+          keepChat,
+          logError
+        )
+      }
+      if( !chats) return
 
       this.list = chats
 
@@ -261,19 +269,20 @@ export const useChatStore = defineStore({
     },
     unreadCount: (state) => {
       const miscStore = useMiscStore() // MT ADDED
-      if( miscStore.modtools) return 0 / -98
       // count chats with unseen messages
       let ret = 0
+      const authStore = useAuthStore()
+      const myid = authStore.user?.id
 
       // Scan listBychatId adding chat.unseen
       Object.keys(state.listByChatId).forEach((key) => {
         if (miscStore.modtools) {
           const chat = state.listByChatId[key]
-          console.log('unreadCount',chat.chattype,chat.unseen,chat.user1)
+          //console.log('unreadCount',chat.chattype,chat.unseen,chat.user1,chat.user2,myid)
           // We count chats between mods, and chats between other members and mods.
           if (chat.chattype === 'Mod2Mod') {
             ret += chat.unseen
-          } else if (chat.chattype === 'User2Mod') { // TODO && chat.user1 !== myid
+          } else if (chat.chattype === 'User2Mod' && chat.user1 !== myid) {
             ret += chat.unseen
           }
           // Otherwise we count chats between users, and our chats to mods.
