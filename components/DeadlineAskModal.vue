@@ -99,7 +99,8 @@ async function setDeadline() {
         messageStore.patch({
           id,
           deadline:
-            deadline.value !== defaultDeadline
+            deadline.value !== defaultDeadline &&
+            (!deadline.value || deadline.value > '1970-01-01')
               ? new Date(deadline.value).toISOString()
               : null,
         })

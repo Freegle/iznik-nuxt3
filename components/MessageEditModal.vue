@@ -206,7 +206,11 @@ export default {
       attachments,
       edittextbody: ref(textbody),
       availablenow: ref(message.availablenow),
-      deadline: ref(new Date(message.deadline).toISOString().substring(0, 10)),
+      deadline: ref(
+        message.deadline
+          ? new Date(message.deadline).toISOString().substring(0, 10)
+          : null
+      ),
       availableinitially: ref(message.availableinitially),
       type: ref(message.type),
       edititem: ref(item),
@@ -289,7 +293,10 @@ export default {
           attachments: attids,
           availablenow: this.availablenow,
           availableinitially: this.availablenow,
-          deadline: this.deadline ? this.deadline : null,
+          deadline:
+            this.deadline && this.deadline > '1970-01-01'
+              ? this.deadline
+              : null,
         }
 
         this.$emit('hidden')
