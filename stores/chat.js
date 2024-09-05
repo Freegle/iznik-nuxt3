@@ -261,7 +261,7 @@ export const useChatStore = defineStore({
     },
     unreadCount: (state) => {
       const miscStore = useMiscStore() // MT ADDED
-      if( miscStore.modtools) return -98
+      if( miscStore.modtools) return 0 / -98
       // count chats with unseen messages
       let ret = 0
 

@@ -83,17 +83,6 @@ import dayjs from 'dayjs'
 
 const miscStore = useMiscStore()
 const groupStore = useGroupStore()
-const runtimeConfig = useRuntimeConfig()
-const route = useRoute()
-
-useHead(
-  buildHead(
-    route,
-    runtimeConfig,
-    'ModTools',
-    'Moderation tool for Freegle volunteers'
-  )
-)
 
 /*const version = computed(() => {
   return runtimeConfig.public.VERSION

@@ -24,7 +24,7 @@
             <b-button variant="white" class="menu" @click="toggleMenu">
               <v-icon icon="bars" class="" />
             </b-button>
-            <b-badge v-show="menuCount" v-if="!showMenu" variant="danger" class="menuCount position-absolute" @click="toggleMenu">
+            <b-badge v-show="menuCount" variant="danger" class="menuCount position-absolute" @click="toggleMenu">
               {{ menuCount }}
             </b-badge>
           </div>
@@ -97,8 +97,11 @@
 
 <script lang="ts">
 import { useAuthStore } from '@/stores/auth'
+import { useChatStore } from '@/stores/chat'
 import { useMiscStore } from '@/stores/misc'
 import { useModConfigStore } from '@/stores/modconfig'
+
+import { buildHead } from '~/composables/useMTBuildHead'
 
 export default {
   async setup() {
@@ -132,7 +135,19 @@ export default {
         ready = true
       }
     }
-
+    console.log("SETUP WORK", authStore.work)
+    const totalCount = authStore.work?.total // + authStore.work.chatCount
+    const title = totalCount > 0 ? `(${totalCount}) ModTools` : 'ModTools'
+    const runtimeConfig = useRuntimeConfig()
+    const route = useRoute()
+    useHead(
+      buildHead(
+        route,
+        runtimeConfig,
+        title,
+        'Moderation tool for Freegle volunteers'
+      )
+    )
 
     return { authStore, googleReady, miscStore, modConfigStore, oneTap }
   },
@@ -150,6 +165,7 @@ export default {
   },
   computed: {
     discourseCount() {
+      console.log("default discourseCount")
       const discourse = this.authStore.discourse
       return discourse
         ? discourse.notifications + discourse.newtopics + discourse.unreadtopics
@@ -160,10 +176,12 @@ export default {
       return this.showMenu ? 'slide-in' : 'slide-out'
     },
     menuCount() {
-      const work = this.authStore.work
+      const work = this.authStore?.work
+      if( !work || !work.total) return 0
       return work.total
     },
     work() {
+      console.log("default WORK", this.authStore.work.total)
       return this.authStore.work
     },
     version() {
@@ -236,7 +254,15 @@ export default {
       this.$refs.loginModal.show()
     },
     async checkWork() {
-      await this.fetchMe(true, ['work', 'group']) // MT ADDED 'group' 
+      await this.fetchMe(true, ['work', 'group']) // MT ADDED 'group' TODO get chatcount
+
+      console.log("default checkWork menuCount", this.menuCount)
+
+      const chatStore = useChatStore()
+      this.chatcount = chatStore ? Math.min(99, chatStore.unreadCount) : 0
+      const totalCount = this.work?.total + this.chatcount
+      const title = totalCount > 0 ? `(${totalCount}) ModTools` : 'ModTools'
+      document.title = title
       setTimeout(this.checkWork, 30000)
     },
     discourse(e) {
@@ -429,7 +455,7 @@ body.modal-open {
 
 @include media-breakpoint-up(sm) {
   .menuCount {
-    right: 15px;
+    right: 2px;
     top: 5px;
   }
 }
