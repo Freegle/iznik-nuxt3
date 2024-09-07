@@ -74,81 +74,64 @@
             v-model="currentAtts"
             type="ChatMessage"
             start-open
-            @closed="uploading = false"
+            multiple
           />
         </div>
         <label for="chatmessage" class="visually-hidden">Chat message</label>
-        <div v-if="!imageid" :style="height">
-          <b-form-textarea
-            v-if="enterNewLine && !otheruser?.spammer"
-            id="chatmessage"
-            ref="chatarea"
-            v-model="sendmessage"
-            :debounce="debounce"
-            class="h-100"
-            placeholder="Type here..."
-            enterkeyhint="enter"
-            @keydown="typing"
-            @focus="markRead"
-          />
-          <b-form-textarea
-            v-else-if="!otheruser?.spammer"
-            id="chatmessage"
-            ref="chatarea"
-            v-model="sendmessage"
-            :debounce="debounce"
-            class="h-100"
-            placeholder="Type here..."
-            enterkeyhint="send"
-            autocapitalize="none"
-            @keydown="typing"
-            @keydown.enter.exact.prevent
-            @keyup.enter.exact="sendOnEnter"
-            @keydown.enter.shift.exact.prevent="newline"
-            @keydown.alt.shift.enter.exact.prevent="newline"
-            @focus="markRead"
-          />
-          <Dropdown
-            placement="top"
-            :shown="showSuggested"
-            :triggers="[]"
-            :auto-hide="false"
-            class="position-absolute"
-            :style="
-              caretPosition
-                ? {
-                    top: `${caretPosition.top}px`,
-                    left: `${caretPosition.left}px`,
-                  }
-                : {}
-            "
-          >
-            <template #popper>
-              <div
-                style="cursor: pointer"
-                class="px-2 py-2"
-                @mousedown="applySuggestedAddress()"
-              >
-                {{ suggestedAddress?.address?.singleline }}
-              </div>
-            </template>
-          </Dropdown>
-        </div>
-        <div v-else class="d-flex justify-content-end pt-2 pb-2">
-          <OurUploadedImage
-            :src="imageuid"
-            :modifiers="imagemods"
-            alt="Chat Photo"
-            :width="200"
-            :height="200"
-            sizes="200px"
-          />
-          <div class="ml-1">
-            <b-button title="Remove photo" @click="removeImage">
-              <v-icon icon="trash-alt" scale="1.5" />
-            </b-button>
-          </div>
-        </div>
+        <b-form-textarea
+          v-if="enterNewLine && !otheruser?.spammer"
+          id="chatmessage"
+          ref="chatarea"
+          v-model="sendmessage"
+          :debounce="debounce"
+          class="h-100"
+          placeholder="Type here..."
+          enterkeyhint="enter"
+          @keydown="typing"
+          @focus="markRead"
+        />
+        <b-form-textarea
+          v-else-if="!otheruser?.spammer"
+          id="chatmessage"
+          ref="chatarea"
+          v-model="sendmessage"
+          :debounce="debounce"
+          class="h-100"
+          placeholder="Type here..."
+          enterkeyhint="send"
+          autocapitalize="none"
+          @keydown="typing"
+          @keydown.enter.exact.prevent
+          @keyup.enter.exact="sendOnEnter"
+          @keydown.enter.shift.exact.prevent="newline"
+          @keydown.alt.shift.enter.exact.prevent="newline"
+          @focus="markRead"
+        />
+        <Dropdown
+          placement="top"
+          :shown="showSuggested"
+          :triggers="[]"
+          :auto-hide="false"
+          class="position-absolute"
+          :style="
+            caretPosition
+              ? {
+                  top: `${caretPosition.top}px`,
+                  left: `${caretPosition.left}px`,
+                }
+              : {}
+          "
+        >
+          <template #popper>
+            <div
+              style="cursor: pointer"
+              class="px-2 py-2"
+              @mousedown="applySuggestedAddress()"
+            >
+              {{ suggestedAddress?.address?.singleline }}
+            </div>
+          </template>
+        </Dropdown>
       </div>
     </div>
     <div
@@ -462,10 +445,6 @@ export default {
       RSVP: false,
       likelymsg: null,
       ouroffers: [],
-      imagethumb: null,
-      imageid: null,
-      imageuid: null,
-      imagemods: null,
       showNudgeTooSoonWarningModal: false,
       showNudgeWarningModal: false,
       hideSuggestedAddress: false,
@@ -634,18 +613,25 @@ export default {
       }
     },
     currentAtts: {
-      handler(newVal) {
-        if (newVal) {
-          // We have uploaded a photo.
+      async handler(newVal) {
+        if (newVal?.length) {
+          this.sending = true
+
+          console.log('Upload photos', JSON.stringify(newVal))
+
+          const promises = []
+
+          newVal.forEach((att) => {
+            console.log('Send', att.id, this.id)
+            promises.push(this.chatStore.send(this.id, null, null, att.id))
+          })
+
+          await Promise.all(promises)
+
+          await this._updateAfterSend()
+          this.sending = false
           this.uploading = false
-
-          // Show the chat busy indicator.
-          this.chatBusy = true
-
-          // We have uploaded a photo.  Post a chatmessage referencing it.
-          this.imageid = newVal[0].id
-          this.imageuid = newVal[0].ouruid
-          this.imagemods = newVal[0].externalmods
+          this.currentAtts = []
         }
       },
       deep: true,
@@ -778,47 +764,37 @@ export default {
     },
     async send(callback) {
       if (!this.sending) {
-        if (this.imageid) {
+        let msg = this.sendmessage
+
+        if (msg) {
           this.sending = true
 
-          await this.chatStore.send(this.id, null, null, this.imageid)
+          // If the current last message in this chat is an "interested" from the other party, then we're going to ask
+          // if they expect a reply.
+          const RSVP =
+            this.chatmessages.length &&
+            this.chatmessages[this.chatmessages.length - 1].type ===
+              'Interested' &&
+            this.chatmessages[this.chatmessages.length - 1].userid !==
+              this.myid &&
+            this.chat.chattype === 'User2User'
+
+          // Encode up any emojis.
+          msg = untwem(msg)
+
+          // Send it
+          await this.chatStore.send(this.id, msg)
+
+          // Clear the message now it's sent.
+          this.sendmessage = ''
+
           await this._updateAfterSend()
-          this.sending = false
-          this.imagethumb = null
-          this.imageid = null
-        } else {
-          let msg = this.sendmessage
 
-          if (msg) {
-            this.sending = true
-
-            // If the current last message in this chat is an "interested" from the other party, then we're going to ask
-            // if they expect a reply.
-            const RSVP =
-              this.chatmessages.length &&
-              this.chatmessages[this.chatmessages.length - 1].type ===
-                'Interested' &&
-              this.chatmessages[this.chatmessages.length - 1].userid !==
-                this.myid &&
-              this.chat.chattype === 'User2User'
-
-            // Encode up any emojis.
-            msg = untwem(msg)
-
-            // Send it
-            await this.chatStore.send(this.id, msg)
-
-            // Clear the message now it's sent.
-            this.sendmessage = ''
-
-            await this._updateAfterSend()
-
-            if (RSVP) {
-              this.RSVP = true
-            } else {
-              // We've sent a message.  This would be a good time to do some microvolunteering.
-              this.showMicrovolunteering = true
-            }
+          if (RSVP) {
+            this.RSVP = true
+          } else {
+            // We've sent a message.  This would be a good time to do some microvolunteering.
+            this.showMicrovolunteering = true
           }
         }
       }
@@ -838,10 +814,6 @@ export default {
       // If we've sent an address to someone who has recently replied to an offer, then it's quite likely that we
       // are promising the item to them.  Pop up a modified Promise modal to make it easy to do that.
       this.promise(null, true)
-    },
-    removeImage() {
-      this.imageid = null
-      this.imagethumb = null
     },
     async typing() {
       const now = new Date().getTime()
