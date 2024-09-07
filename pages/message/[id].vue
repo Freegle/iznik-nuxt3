@@ -33,7 +33,7 @@
             class="bg-white p-2"
           >
             <h1>Sorry, that post isn't around any more.</h1>
-            <div v-if="message.deadline">
+            <div v-if="message?.deadline">
               <p>
                 There was a deadline of
                 {{ dateonlyNoYear(message.deadline) }}.
