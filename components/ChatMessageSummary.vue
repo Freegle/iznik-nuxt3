@@ -11,7 +11,7 @@
         <div class="messagecard p-2">
           <div class="image-wrapper">
             <OurUploadedImage
-              v-if="attachment.ouruid"
+              v-if="attachment?.ouruid"
               :src="attachment.ouruid"
               :modifiers="attachment.externalmods"
               alt="Item Photo"
@@ -19,11 +19,11 @@
               @error="brokenImage"
             />
             <ProxyImage
-              v-else
+              v-else-if="attachment?.paththumb"
               class-name="p-0 rounded"
               alt="Item picture"
               title="Item picture"
-              :src="attachment"
+              :src="attachment.paththumb"
               :width="200"
               fit="cover"
               @error="brokenImage"
