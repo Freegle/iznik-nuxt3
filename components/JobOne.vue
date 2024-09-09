@@ -2,13 +2,15 @@
   <div v-if="job" @click="clicked">
     <div v-if="summary" class="ml-2 mr-2">
       <ExternalLink :href="job.url">
-        <h4>
+        <h4 :class="className">
           {{ title }}
-          <span v-if="job.location" class="text-muted">
-            {{ location }}
+          <span v-if="job.location" class="text-muted small">
+            <span class="small">
+              {{ location }}
+            </span>
           </span>
         </h4>
-        <p class="text-truncate mt-2 d-none d-lg-block black">
+        <p v-if="showBody" class="text-truncate mt-2 d-none d-lg-block black">
           {{ body }}
         </p>
       </ExternalLink>
@@ -71,6 +73,16 @@ export default {
       type: Boolean,
       required: false,
       default: false,
+    },
+    showBody: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
+    className: {
+      type: String,
+      required: false,
+      default: '',
     },
   },
   setup() {

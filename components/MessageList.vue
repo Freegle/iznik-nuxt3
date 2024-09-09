@@ -7,7 +7,10 @@
       show-join
       :show-give-find="showGiveFind"
     />
-    <JobsTopBar v-if="jobs" class="d-none d-md-block" />
+    <JobsTopBar
+      v-if="jobs && !JOBS_ADS_INSTEAD_OF_GOOGLE_ADS"
+      class="d-none d-md-block"
+    />
     <h2 class="visually-hidden">List of wanteds and offers</h2>
     <div id="visobserver" v-observe-visibility="visibilityChanged" />
     <div v-if="deDuplicatedMessages?.length" id="messageList">

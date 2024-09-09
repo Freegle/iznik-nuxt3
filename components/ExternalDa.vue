@@ -11,8 +11,19 @@
     >
       <div v-if="isVisible">
         <div class="d-flex w-100 justify-content-around">
+          <JobsDaSlot
+            v-if="JOBS_ADS_INSTEAD_OF_GOOGLE_ADS"
+            :min-width="minWidth"
+            :max-width="maxWidth"
+            :min-height="minHeight"
+            :max-height="maxHeight"
+            :class="{
+              'text-center': maxWidth === '100vw',
+            }"
+            @rendered="rippleRendered"
+          />
           <OurGoogleDa
-            v-if="adSense"
+            v-else-if="adSense"
             ref="googlead"
             :ad-unit-path="adUnitPath"
             :min-width="minWidth"
@@ -45,6 +56,7 @@ import { ref, computed, onBeforeUnmount } from '#imports'
 import { useConfigStore } from '~/stores/config'
 import { useMiscStore } from '~/stores/misc'
 import { useAuthStore } from '~/stores/auth'
+import { JOBS_ADS_INSTEAD_OF_GOOGLE_ADS } from '~/constants'
 
 const props = defineProps({
   adUnitPath: {

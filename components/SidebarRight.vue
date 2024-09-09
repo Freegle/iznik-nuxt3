@@ -8,7 +8,10 @@
       :div-id="adDivId"
       class="da"
     />
-    <JobsSidebar v-if="showJobOpportunities" class="jobs border-bottom" />
+    <JobsSidebar
+      v-if="showJobOpportunities && !JOBS_ADS_INSTEAD_OF_GOOGLE_ADS"
+      class="jobs border-bottom"
+    />
   </div>
 </template>
 <script>
