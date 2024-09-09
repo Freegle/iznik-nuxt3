@@ -189,8 +189,14 @@ onMounted(() => {
       allowedFileTypes: ['image/*', '.jpg', '.jpeg', '.png', '.gif', '.heic'],
       maxNumberOfFiles: props.multiple ? 10 : 1,
     },
-    onBeforeFileAdded: (currentFile, files) => {
-      console.log('onBeforeFileAdded', currentFile, files?.length)
+    onBeforeFileAdded: (currentFile, files) => { // You can return true to keep the file as is, false to remove the file, or return a modified file.
+      console.log('onBeforeFileAdded', currentFile)
+      //currentFile.data.arrayBuffer().then((buffer)=>{
+      //  const clone = new File([buffer], currentFile.data.name, { type: currentFile.data.type })
+      //  currentFile.data = clone
+      //  console.log('onBeforeFileAdded cloned', currentFile)
+      //})
+      //return clone
       return true
     }
   })
@@ -204,7 +210,7 @@ onMounted(() => {
       },
     })
     .use(Tus, { endpoint: runtimeConfig.public.TUS_UPLOADER })
-    .use(Compressor)
+    .use(Compressor) // Removing may help some users
   uppy.on('file-added', (file) => {
     console.log('Added file', file)
   })
