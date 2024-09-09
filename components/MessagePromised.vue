@@ -3,6 +3,7 @@
     <div v-if="summary">
       <b-img lazy src="/promised.jpg" class="promised__image" />
       <b-popover
+        v-if="message.fromuser !== myid"
         v-model="showing"
         :content="title"
         placement="top"
@@ -26,6 +27,8 @@
   </div>
 </template>
 <script>
+import { useMessageStore } from '~/stores/message'
+
 export default {
   props: {
     id: {
@@ -43,6 +46,11 @@ export default {
       default: false,
     },
   },
+  setup() {
+    const messageStore = useMessageStore()
+
+    return { messageStore }
+  },
   data: function () {
     return {
       scrollHandler: null,
@@ -56,6 +64,9 @@ export default {
       } else {
         return 'This has been promised to you.'
       }
+    },
+    message() {
+      return this.messageStore?.byId(this.id)
     },
   },
   beforeUnmount() {
