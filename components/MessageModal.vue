@@ -16,7 +16,7 @@
           <VisibleWhen
             v-if="bumpMessage > 0"
             :at="['xs', 'sm']"
-            class="maybeAd"
+            class="maybeAd text-bg-dark"
           >
             <ExternalDa
               ad-unit-path="/22794232631/freegle_modal_app"

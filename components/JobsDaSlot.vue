@@ -27,28 +27,43 @@
     </NoticeMessage>
     <div v-else-if="list.length">
       <h2 class="visually-hidden">Jobs</h2>
-      <div class="d-flex">
-        <ul class="list-unstyled">
-          <li v-for="job in list" :key="'job-' + job.job_reference">
-            <JobOne
-              :id="job.id"
-              :summary="true"
-              :show-body="false"
-              class-name="header--size5 mb-0"
-            />
-          </li>
-        </ul>
-        <div>
-          <b-button to="/jobs" variant="primary" class="mt-1 mb-1 mr-1">
-            <span class="d-inline d-md-none"
-              >Jobs&nbsp;<v-icon icon="angle-double-right"
-            /></span>
-            <span class="d-none d-md-inline"
-              >More&nbsp;jobs&nbsp;<v-icon icon="angle-double-right"
-            /></span>
+      <div></div>
+      <ul
+        class="list-unstyled"
+        :style="{
+          maxHeight: maxHeight,
+          minHeight: minHeight,
+          maxWidth: maxWidth,
+          minWidth: minWidth,
+          overflowY: 'scroll',
+          overflowX: 'wrap',
+        }"
+      >
+        <li v-for="(job, index) in list" :key="'job-' + job.job_reference">
+          <b-button
+            v-if="index === 0 && minWidth === '100vw'"
+            to="/jobs"
+            variant="link"
+            class="seemore"
+          >
+            See more jobs <v-icon icon="angle-double-right" />
           </b-button>
-        </div>
-      </div>
+          <JobOne
+            :id="job.id"
+            :summary="true"
+            :show-body="false"
+            class-name="header--size5 mb-0"
+          />
+          <b-button
+            v-if="index + 1 === list.length && minWidth !== '100vw'"
+            to="/jobs"
+            variant="link"
+            class="seemore"
+          >
+            See more jobs <v-icon icon="angle-double-right" />
+          </b-button>
+        </li>
+      </ul>
     </div>
   </div>
 </template>
@@ -135,7 +150,19 @@ export default {
 }
 </script>
 <style scoped lang="scss">
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
+
 :deep(a) {
   text-decoration: none;
+}
+
+:deep(.seemore) {
+  font-size: 0.6rem !important;
+
+  @include media-breakpoint-up(md) {
+    font-size: 0.8rem !important;
+  }
 }
 </style>
