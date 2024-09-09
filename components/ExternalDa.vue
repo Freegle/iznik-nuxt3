@@ -10,9 +10,9 @@
       class="pointer"
     >
       <div v-if="isVisible">
-        <div class="d-flex w-100 justify-content-around">
+        <div class="d-flex w-100 justify-content-md-around">
           <JobsDaSlot
-            v-if="JOBS_ADS_INSTEAD_OF_GOOGLE_ADS"
+            v-if="JOBS_ADS_INSTEAD_OF_GOOGLE_ADS && renderAd"
             :min-width="minWidth"
             :max-width="maxWidth"
             :min-height="minHeight"
@@ -231,7 +231,7 @@ async function checkStillVisible() {
     } else if (showingAds?.length && parseInt(showingAds[0].value)) {
       renderAd.value = true
     } else {
-      console.log('Ads disabled in server config')
+      console.log('Ads disabled in server config', showingAds)
       useMiscStore().adsDisabled = true
       emit('rendered', false)
       emit('disabled')

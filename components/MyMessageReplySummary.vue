@@ -1,6 +1,9 @@
 <template>
-  <div class="d-flex justify-content-between mt-2 mb-2 p-2">
-    <div class="d-flex flex-wrap fs">
+  <div
+    v-if="message?.replycount > 0"
+    class="d-flex justify-content-between flex-wrap mt-2 mb-2 p-2"
+  >
+    <div class="d-flex flex-wrap fs mb-2">
       <MyMessageReplyUser
         v-for="reply in message?.replies"
         :id="reply.userid"
@@ -11,7 +14,7 @@
         @click="openChat(reply.userid)"
       />
     </div>
-    <div v-if="message?.replycount > 0">
+    <div>
       <b-button size="lg" variant="primary" @click="expand">
         <div class="d-flex align-items-center">
           <v-icon icon="user" class="fa-fw" />

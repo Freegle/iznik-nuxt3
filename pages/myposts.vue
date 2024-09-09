@@ -40,26 +40,14 @@
             <NewUserInfo v-if="newUserPassword" :password="newUserPassword" />
 
             <MyPostsPostsList
-              v-if="offers"
-              type="Offer"
-              :posts="offers"
-              :loading="offersLoading"
+              :posts="posts"
+              :loading="loading"
               :default-expanded="posts.length <= 5"
-              :show="shownOffersCount"
-              @load-more="loadMoreOffers"
+              :show="shownCount"
+              @load-more="loadMore"
             />
 
-            <MyPostsPostsList
-              v-if="wanteds"
-              type="Wanted"
-              :posts="wanteds"
-              :loading="wantedsLoading"
-              :default-expanded="posts.length <= 5"
-              :show="shownWantedsCount"
-              @load-more="loadMoreWanteds"
-            />
-
-            <MyPostsSearchesList />
+            <MyPostsSearchesList v-if="loadedMore" />
           </div>
         </b-col>
         <b-col cols="0" lg="3" class="p-0 pl-1">
@@ -132,20 +120,17 @@ const myid = computed(() => authStore.user?.id)
 // `posts` holds both OFFERs and WANTEDs (both old and active)
 const posts = computed(() => messageStore.byUserList[myid.value] || [])
 
-const offersLoading = ref(true)
-const wantedsLoading = ref(true)
+const loading = ref(true)
 
 watch(
   myid,
   async (newMyid) => {
     if (newMyid) {
-      offersLoading.value = true
-      wantedsLoading.value = true
+      loading.value = true
 
       await messageStore.fetchByUser(newMyid, false, true)
 
-      offersLoading.value = false
-      wantedsLoading.value = false
+      loading.value = false
 
       // No need to wait for searches - often below the fold.
       searchStore.fetch(newMyid)
@@ -156,34 +141,18 @@ watch(
   }
 )
 
-const shownOffersCount = ref(1)
-const offers = computed(() => {
-  return posts.value.filter((message) => message.type === 'Offer')
-})
+const shownCount = ref(1)
+const loadedMore = ref(false)
 
-function loadMoreOffers(infiniteLoaderInstance) {
-  shownOffersCount.value++
+function loadMore(infiniteLoaderInstance) {
+  shownCount.value++
 
-  if (shownOffersCount.value > offers.value.length) {
-    shownOffersCount.value = offers.value.length
+  if (shownCount.value > posts.value.length) {
+    shownCount.value = posts.value.length
   }
 
+  loadedMore.value = true
   infiniteLoaderInstance.loaded()
-}
-
-const shownWantedsCount = ref(1)
-const wanteds = computed(() => {
-  return posts.value.filter((message) => message.type === 'Wanted')
-})
-
-function loadMoreWanteds(infiniteLoaderInstance) {
-  shownWantedsCount.value++
-
-  if (shownWantedsCount.value > wanteds.value.length) {
-    shownWantedsCount.value = wanteds.value.length
-  }
-
-  infiniteLoaderInstance.complete()
 }
 
 function forceLogin() {
