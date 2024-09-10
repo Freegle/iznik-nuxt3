@@ -176,6 +176,7 @@ onMounted(() => {
   )
   uppy = new Uppy({
     autoProceed: true,
+    waitForThumbnailsBeforeUpload: true,
     closeAfterFinish: true,
     hidePauseResumeButton: true,
     hideProgressAfterFinish: true,
@@ -233,6 +234,9 @@ onMounted(() => {
     // progress: { uploader, bytesUploaded, bytesTotal }
     console.log('Upload paused', file, isPaused)
   })
+  uppy.on('upload', (uploadID, files) => {
+    console.log('Upload started', uploadID, files)
+  })
   uppy.on('complete', uploadSuccess)
   uppy.on('dashboard:modal-open', () => {
     console.log('Uploader modal is open')
@@ -275,6 +279,9 @@ onMounted(() => {
       uppyTimer = null
     }
     emit('closed')
+  })
+  uppy.on('thumbnail:generated', (file, preview) => {
+    console.log('Thumbnail generated', file)
   })
 })
 
