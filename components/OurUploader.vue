@@ -258,7 +258,8 @@ onMounted(() => {
     console.log('Complete', result)
   })
   uppy.on('error', (error) => {
-    console.error('Upload error', error)
+    console.error('Upload error, retry', error)
+    uppy.retryAll()
   })
   uppy.on('upload-retry', (fileID) => {
     console.log('upload retried:', fileID)
