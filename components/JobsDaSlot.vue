@@ -145,7 +145,7 @@ export default {
     ...mapState(useJobStore, ['blocked']),
     list() {
       // Return the list in a random order - we might have multiple ad slots per page.
-      const list = this.jobStore?.list.slice(0, 30)
+      const list = this.jobStore?.list.slice(0, 20)
       for (let i = list.length - 1; i >= 0; i--) {
         const j = Math.floor(Math.random() * (i + 1))
         const temp = list[i]
