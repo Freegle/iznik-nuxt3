@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="location"
-    class="mb-2 jobbox bg-light overflow-hidden forcewrap"
+    class="jobbox bg-light overflow-hidden forcewrap"
     :style="{
       maxHeight: maxHeight,
       minHeight: minHeight,
@@ -25,45 +25,54 @@
       </p>
       <donation-button />
     </NoticeMessage>
-    <div v-else-if="list.length">
+    <div v-else-if="list.length" style="font-size: 10px">
       <h2 class="visually-hidden">Jobs</h2>
-      <div></div>
-      <ul
-        class="list-unstyled"
+      <b-button
+        v-if="minWidth === '100vw'"
+        to="/jobs"
+        variant="link"
+        class="seemore p-0"
+      >
+        See more jobs <v-icon icon="angle-double-right" />
+      </b-button>
+      <div
+        :class="{
+          'card-columns': minWidth === '100vw',
+        }"
         :style="{
           maxHeight: maxHeight,
           minHeight: minHeight,
           maxWidth: maxWidth,
           minWidth: minWidth,
-          overflowY: 'scroll',
-          overflowX: 'wrap',
         }"
       >
-        <li v-for="(job, index) in list" :key="'job-' + job.job_reference">
-          <b-button
-            v-if="index === 0 && minWidth === '100vw'"
-            to="/jobs"
-            variant="link"
-            class="seemore"
-          >
-            See more jobs <v-icon icon="angle-double-right" />
-          </b-button>
-          <JobOne
-            :id="job.id"
-            :summary="true"
-            :show-body="false"
-            class-name="header--size5 mb-0"
-          />
-          <b-button
-            v-if="index + 1 === list.length && minWidth !== '100vw'"
-            to="/jobs"
-            variant="link"
-            class="seemore"
-          >
-            See more jobs <v-icon icon="angle-double-right" />
-          </b-button>
-        </li>
-      </ul>
+        <b-card
+          v-for="job in list"
+          :key="'job-' + job.job_reference"
+          no-body
+          class="mb-0"
+          :class="{
+            'w-100': minWidth !== '100vw',
+          }"
+        >
+          <b-card-body class="p-0">
+            <JobOne
+              :id="job.id"
+              :summary="true"
+              :show-body="false"
+              class-name="header--size5 mb-0"
+            />
+          </b-card-body>
+        </b-card>
+      </div>
+      <b-button
+        v-if="minWidth !== '100vw'"
+        to="/jobs"
+        variant="link"
+        class="seemore p-0"
+      >
+        See more jobs <v-icon icon="angle-double-right" />
+      </b-button>
     </div>
   </div>
 </template>
@@ -136,7 +145,7 @@ export default {
     ...mapState(useJobStore, ['blocked']),
     list() {
       // Return the list in a random order - we might have multiple ad slots per page.
-      const list = this.jobStore?.list.slice(0, 10)
+      const list = this.jobStore?.list.slice(0, 30)
       for (let i = list.length - 1; i >= 0; i--) {
         const j = Math.floor(Math.random() * (i + 1))
         const temp = list[i]
@@ -163,6 +172,14 @@ export default {
 
   @include media-breakpoint-up(md) {
     font-size: 0.8rem !important;
+  }
+}
+
+:deep(.header--size5) {
+  font-size: 0.8rem;
+
+  @include media-breakpoint-up(md) {
+    font-size: 1.25rem;
   }
 }
 </style>
