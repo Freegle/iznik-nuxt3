@@ -24,6 +24,7 @@
         :open="modalOpen"
         :props="{
           onRequestCloseModal: closeModal,
+          waitForThumbnailsBeforeUpload: true,
           closeAfterFinish: true,
         }"
       />
@@ -176,7 +177,6 @@ onMounted(() => {
   )
   uppy = new Uppy({
     autoProceed: true,
-    waitForThumbnailsBeforeUpload: true,
     closeAfterFinish: true,
     hidePauseResumeButton: true,
     hideProgressAfterFinish: true,
