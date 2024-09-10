@@ -20,7 +20,6 @@
       :modifiers="chatmessage.image.externalmods"
       alt="Chat Photo"
       :width="200"
-      :height="200"
       @click="zoom = true"
     />
     <NuxtPicture

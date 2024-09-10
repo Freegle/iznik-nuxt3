@@ -29,7 +29,6 @@
         :modifiers="mods"
         alt="Item Photo"
         :width="200"
-        :height="200"
         @click="$emit('click')"
       />
       <NuxtPicture

@@ -3,6 +3,7 @@
     <div v-if="summary">
       <b-img lazy src="/freegled.jpg" class="freegled__image" />
       <b-popover
+        v-if="message.fromuser !== myid"
         v-model="showing"
         :content="title"
         placement="top"
@@ -49,7 +50,6 @@ export default {
       showing: false,
     }
   },
-
   computed: {
     message() {
       return this.messageStore?.byId(this.id)

@@ -24,6 +24,7 @@
         :open="modalOpen"
         :props="{
           onRequestCloseModal: closeModal,
+          waitForThumbnailsBeforeUpload: true,
           closeAfterFinish: true,
         }"
       />
@@ -243,6 +244,9 @@ onMounted(() => {
     // progress: { uploader, bytesUploaded, bytesTotal }
     console.log('Upload paused', file, isPaused)
   })
+  uppy.on('upload', (uploadID, files) => {
+    console.log('Upload started', uploadID, files)
+  })
   uppy.on('complete', uploadSuccess)
   uppy.on('dashboard:modal-open', () => {
     console.log('Uploader modal is open')
@@ -264,7 +268,8 @@ onMounted(() => {
     console.log('Complete', result)
   })
   uppy.on('error', (error) => {
-    console.error('Upload error', error)
+    console.error('Upload error, retry', error)
+    uppy.retryAll()
   })
   uppy.on('upload-retry', (fileID) => {
     console.log('upload retried:', fileID)
@@ -285,6 +290,9 @@ onMounted(() => {
       uppyTimer = null
     }
     emit('closed')
+  })
+  uppy.on('thumbnail:generated', (file, preview) => {
+    console.log('Thumbnail generated', file)
   })
 })
 

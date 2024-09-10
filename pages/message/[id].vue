@@ -33,7 +33,13 @@
             class="bg-white p-2"
           >
             <h1>Sorry, that post isn't around any more.</h1>
-            <div>
+            <div v-if="message?.deadline">
+              <p>
+                There was a deadline of
+                {{ dateonlyNoYear(message.deadline) }}.
+              </p>
+            </div>
+            <div v-else>
               <p>
                 If it was an OFFER, it's probably been TAKEN. If it was a
                 WANTED, it's probably been RECEIVED.

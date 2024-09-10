@@ -153,7 +153,10 @@
             @hidden="expanded = false"
           >
             <div v-if="expanded">
-              <b-card-body class="p-2">
+              <b-card-body
+                v-if="replies?.length > 0 || willAutoRepost"
+                class="p-2"
+              >
                 <b-card-text>
                   <table
                     v-if="replies?.length > 0"

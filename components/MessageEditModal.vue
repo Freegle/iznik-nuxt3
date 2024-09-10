@@ -59,6 +59,20 @@
             :min="1"
           />
         </b-col>
+        <b-col cols="6" md="3">
+          <div class="mt-3">
+            <label :for="deadline"> Deadline </label>
+            <b-input
+              id="deadline"
+              v-model="deadline"
+              size="lg"
+              type="date"
+              :min="today"
+              :max="defaultDeadline"
+              placeholder="Click to enter a deadline"
+            />
+          </div>
+        </b-col>
       </b-row>
       <b-row>
         <b-col>
@@ -133,6 +147,7 @@ import { uid } from '../composables/useId'
 import NumberIncrementDecrement from './NumberIncrementDecrement'
 import PostCode from '~/components/PostCode'
 import { useOurModal } from '~/composables/useOurModal'
+import { MESSAGE_EXPIRE_TIME } from '~/constants'
 const OurUploader = defineAsyncComponent(() =>
   import('~/components/OurUploader')
 )
@@ -171,6 +186,16 @@ export default {
       attachments.value = []
     }
 
+    const defaultDeadline = new Date(
+      Date.now() + MESSAGE_EXPIRE_TIME * 24 * 60 * 60 * 1000
+    )
+      .toISOString()
+      .substring(0, 10)
+
+    const today = computed(() => {
+      return new Date(Date.now()).toISOString().substring(0, 10)
+    })
+
     return {
       messageStore,
       composeStore,
@@ -181,10 +206,17 @@ export default {
       attachments,
       edittextbody: ref(textbody),
       availablenow: ref(message.availablenow),
+      deadline: ref(
+        message.deadline
+          ? new Date(message.deadline).toISOString().substring(0, 10)
+          : null
+      ),
       availableinitially: ref(message.availableinitially),
       type: ref(message.type),
       edititem: ref(item),
       postcode: ref(message.location),
+      defaultDeadline,
+      today,
     }
   },
   data() {
@@ -261,6 +293,10 @@ export default {
           attachments: attids,
           availablenow: this.availablenow,
           availableinitially: this.availablenow,
+          deadline:
+            this.deadline && this.deadline > '1970-01-01'
+              ? this.deadline
+              : null,
         }
 
         this.$emit('hidden')

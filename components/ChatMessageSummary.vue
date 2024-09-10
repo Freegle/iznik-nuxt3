@@ -10,15 +10,22 @@
       <div class="clickme" @click="click">
         <div class="messagecard p-2">
           <div class="image-wrapper">
-            <b-img
-              v-if="!imageBroken && attachment"
-              lazy
-              rounded
-              generator-unable-to-provide-required-alt=""
+            <OurUploadedImage
+              v-if="attachment?.ouruid"
+              :src="attachment.ouruid"
+              :modifiers="attachment.externalmods"
+              alt="Item Photo"
+              :width="100"
+              @error="brokenImage"
+            />
+            <ProxyImage
+              v-else-if="attachment?.paththumb"
+              class-name="p-0 rounded"
+              alt="Item picture"
               title="Item picture"
-              :src="attachment"
-              itemprop="image"
-              class="attachment"
+              :src="attachment.paththumb"
+              :width="200"
+              fit="cover"
               @error="brokenImage"
             />
           </div>
@@ -125,7 +132,7 @@ export default {
     },
     attachment() {
       return this.message?.attachments?.length
-        ? this.message.attachments[0].paththumb
+        ? this.message.attachments[0]
         : null
     },
     sm() {

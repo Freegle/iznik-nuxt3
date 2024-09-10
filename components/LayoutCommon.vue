@@ -27,6 +27,7 @@
                     ad-unit-path="/22794232631/freegle_sticky"
                     max-height="50px"
                     max-width="100vw"
+                    min-width="100vw"
                     div-id="div-gpt-ad-1699973618906-0"
                     @rendered="adRendered"
                     @failed="adFailed"
@@ -39,6 +40,7 @@
                     ad-unit-path="/22794232631/freegle_sticky_desktop"
                     max-height="90px"
                     max-width="100vw"
+                    min-width="100vw"
                     div-id="div-gpt-ad-1707999304775-0"
                     @rendered="adRendered"
                   />
