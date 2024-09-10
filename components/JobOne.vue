@@ -2,7 +2,7 @@
   <div v-if="job" @click="clicked">
     <div v-if="summary" class="ml-2 mr-2">
       <ExternalLink :href="job.url">
-        <h4 :class="className">
+        <h4 :class="className" class="text-truncate">
           {{ title }}
           <span v-if="job.location" class="text-muted small">
             <span class="small">
