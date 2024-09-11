@@ -19,6 +19,11 @@ export function useModal() {
   }
 
   const unregisterNavigationGuard = useRouter().beforeEach((to, from, next) => {
+    if( isShown.value){
+      console.log('GUARD NAV STOPPED')
+    } else {
+      console.log('GUARD OK OK OK')
+    }
     if (to?.query?.noguard) {
       // This is a special query parameter we add to skip the guard.  This is used when we are navigating from
       // within a modal where the guard would otherwise suppress the navigation because it thinks we are trying

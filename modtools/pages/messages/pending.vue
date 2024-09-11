@@ -2,8 +2,8 @@
   <div>
     <client-only>
       <ScrollToTop />
-      <ModCakeModal />
-      <ModAimsModal ref="aims" />
+      <ModCakeModal v-if="showCakeModal" ref="showCakeModal" @hidden="showCakeModal = false"/>
+      <ModAimsModal v-if="showAimsModal" ref="showAimsModal" @hidden="showAimsModal = false"/>
       <!--      <ModFreeStock class="mb-2" />-->
       <NoticeMessage variant="info" class="mb-2 d-block d-md-none">
         <ModZoomStock color-class="text-black" />
@@ -28,6 +28,7 @@
 
 <script>
 import dayjs from 'dayjs'
+import { useAuthStore } from '@/stores/auth'
 import { useMiscStore } from '@/stores/misc'
 import ScrollToTop from '~/components/ScrollToTop'
 import me from '~/mixins/me.js'
@@ -35,11 +36,13 @@ import { setupModMessages } from '../../composables/useModMessages'
 
 export default {
   async setup() {
+    const authStore = useAuthStore()
     const miscStore = useMiscStore()
     const modMessages = setupModMessages()
     modMessages.collection.value = 'Pending'
     modMessages.workType.value = 'pending'
     return {
+      authStore,
       miscStore,
       ...modMessages // busy, context, group, groupid, limit, workType, show, collection, messageTerm, memberTerm, distance, summary, messages, visibleMessages, work,
     }
@@ -52,11 +55,13 @@ export default {
   ],
   data: function () {
     return {
+      showCakeModal: false,
+      showAimsModal: false,
       affiliationGroup: null
     }
   },
 
-  mounted() {
+  async mounted() {
     // Consider affiliation ask.
     const lastask = this.miscStore.get('lastaffiliationask')
     const now = new Date().getTime()
@@ -83,6 +88,29 @@ export default {
       }
 
       this.miscStore.set({ key: 'lastaffiliationask', value: now })
+    }
+
+    // AIMS
+    const me = this.authStore.user
+    const lastaimsshow = me?.settings?.lastaimsshow
+
+    if (
+      !lastaimsshow ||
+      dayjs().diff(dayjs(lastaimsshow), 'days') > 365
+    ) {
+      this.showAimsModal = true
+
+      const settings = me.settings
+      settings.lastaimsshow = dayjs().toISOString()
+      await this.authStore.saveAndGet({
+        settings: settings
+      })
+    }
+
+    // CAKE
+    if (!this.miscStore.get('cakeasked')) {
+      this.showCakeModal = true
+      this.miscStore.set({ key: 'cakeasked', value: true })
     }
 
   },

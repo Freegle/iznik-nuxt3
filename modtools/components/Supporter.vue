@@ -13,13 +13,11 @@
       <v-icon icon="trophy" />
       Supporter
     </b-badge>
-    <SupporterInfoModal ref="modal" />
+    <SupporterInfoModal v-if="showSupporterInfoModal" ref="showSupporterInfoModal" @hidden="showSupporterInfoModal = false" />
   </div>
 </template>
 <script>
-import SupporterInfoModal from '~/components/SupporterInfoModal'
 export default {
-  components: { SupporterInfoModal },
   props: {
     size: {
       type: String,
@@ -32,11 +30,15 @@ export default {
       default: false
     }
   },
+  data() {
+    return {
+      showSupporterInfoModal: false,
+    }
+  },  
   methods: {
     showModal(e) {
-      this.$refs.modal.show()
-      e.preventDefault()
-      e.stopPropagation()
+      this.showSupporterInfoModal = true
+      this.$refs.showSupporterInfoModal?.show()
     }
   }
 }

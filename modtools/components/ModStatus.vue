@@ -1,5 +1,4 @@
 <template>
-  <!-- DONE -->
   <span title="Platform Status - click for more info" class="clickme" @click="clicked">
     <span v-if="!tried" class="trying" />
     <span v-else-if="error" class="error" />
@@ -85,7 +84,7 @@ export default {
   },
   mounted() {
     this.checkStatus()
-    this.modal.hide()
+    this.hide()
   },
   beforeDestroy() {
     if (this.timer) {

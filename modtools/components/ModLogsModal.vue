@@ -43,7 +43,7 @@ export default {
     const userStore = useUserStore()
     const logsStore = useLogsStore()
     const memberStore = useMemberStore()
-    const { modal, hide } = useModal()
+    const { modal, hide } = useModal(227)
     return { logsStore, memberStore, userStore, modal, hide }
   },
   props: {

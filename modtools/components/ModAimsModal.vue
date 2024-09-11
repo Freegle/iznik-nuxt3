@@ -59,35 +59,12 @@
   </div>
 </template>
 <script>
-import dayjs from 'dayjs'
 import { useModal } from '~/composables/useModal'
-import { useAuthStore } from '@/stores/auth'
 
 export default {
   setup() {
-    const authStore = useAuthStore()
-    const { modal, hide } = useModal()
-    return { authStore, modal, hide }
+    const { modal, hide } = useModal(224)
+    return { modal, hide }
   },
-  async mounted() {
-    const me = this.authStore.user
-    const lastshow = me?.settings?.lastaimsshow
-
-    this.modal.hide()
-    if (
-      !lastshow ||
-      dayjs(lastshow).diff(dayjs(), 'days') >= 365
-    ) {
-      this.modal.show()
-
-      const settings = me.settings
-      settings.lastaimsshow = dayjs().toISOString()
-      await this.authStore.saveAndGet({
-        settings: settings
-      })
-    }
-  },
-  methods: {
-  }
 }
 </script>

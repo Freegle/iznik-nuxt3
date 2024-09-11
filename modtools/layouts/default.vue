@@ -90,7 +90,7 @@
       </div>
     </div>
     <ChatPopups v-if="loggedIn" class="d-none d-sm-block" />
-    <LoginModal v-if="complete" ref="loginModal" :key="'login-' + bumpLogin" />
+    <LoginModal v-if="!loggedIn" ref="loginModal" :key="'login-' + bumpLogin" />
     <div id="sizer" ref="sizer" class="d-none d-lg-block" />
   </div>
 </template>
@@ -155,7 +155,7 @@ export default {
       sliding: false,
       timeTimer: null,
       chatCount: 0,
-      complete: true,  // CC
+      // complete: true,  // CC
       bump: 0,
       bumpLogin: 0
     }
