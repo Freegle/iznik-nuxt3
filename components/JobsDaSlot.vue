@@ -144,7 +144,8 @@ export default {
   computed: {
     ...mapState(useJobStore, ['blocked']),
     list() {
-      // Return the list in a random order - we might have multiple ad slots per page.
+      // Return the list in a random order - we might have multiple ad slots per page.  By taking the top 20 we've
+      // already selected a set which is a balance between close and well-paid.
       const list = this.jobStore?.list.slice(0, 20)
       for (let i = list.length - 1; i >= 0; i--) {
         const j = Math.floor(Math.random() * (i + 1))

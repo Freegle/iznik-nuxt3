@@ -46,7 +46,8 @@ export const useJobStore = defineStore({
       // for us.  But if the CPC is the same, then we can randomise the order - perhaps increasing the
       // chances of a click.
       this.list.forEach((j) => {
-        j.sortBy = j.cpc.toFixed(3) + '-' + Math.random()
+        const dist = j.dist ? j.dist : 0.01
+        j.sortBy = (j.cpc / dist).toFixed(3) + '-' + Math.random()
       })
 
       this.list.sort((a, b) => {

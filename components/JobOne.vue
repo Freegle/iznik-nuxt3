@@ -15,12 +15,7 @@
         </p>
       </ExternalLink>
     </div>
-    <b-card
-      v-else
-      no-body
-      variant="info"
-      :class="highlight ? 'job-row bg-info' : 'job-row'"
-    >
+    <b-card v-else no-body :class="highlight ? 'job-row bg-info' : 'job-row'">
       <b-card-body class="job-row">
         <b-card-title class="job-title">
           {{ title }}
