@@ -13,6 +13,20 @@ export const useStoryStore = defineStore({
       this.config = config
       this.fetching = {}
     },
+    async fetchMT(params) {
+      const { story, stories } = await api(this.config).stories.fetch(params)
+      if (params.id && story) {
+        this.list[story.id] = story
+      } else {
+        this.list = {}
+
+        if (stories) {
+          for (const story of stories) {
+            this.list[story.id] = story
+          }
+        }
+      }
+    },
     async fetch(id, force) {
       if (force || !this.list[id]) {
         if (this.fetching[id]) {
