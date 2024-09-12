@@ -117,47 +117,6 @@ export default {
     }
   },
   methods: {
-    async loadMore($state) {
-      //console.log('approved loadMore', this.show, this.members?.length, this.visibleMembers?.length)
-      if (!this.group) {
-        $state.complete()
-        return
-      }
-      if (this.show < this.members.length) {
-        this.show++
-        $state.loaded()
-      } else {
-        if (this.members.length === this.group.membercount) {
-          $state.complete()
-        } else {
-          this.limit += this.distance
-
-          const received = await this.memberStore.fetchMembers({
-            groupid: this.groupid,
-            collection: this.collection,
-            modtools: true,
-            summary: false,
-            context: this.context,
-            limit: this.limit,
-            search: this.search,
-            filter: this.filter
-          })
-
-          if (this.show < this.members.length) { // Just inc by one rather than set to this.members.length
-            this.show++
-          }
-          if (this.show > this.members.length) {
-            this.show = this.members.length
-          }
-          if (received === 0 || (this.show === this.members.length)) {
-            $state.complete()
-          }
-          else {
-            $state.loaded()
-          }
-        }
-      }
-    },
     async addMember() {
       this.showAddMember = true
       this.$refs.addmodal?.show()

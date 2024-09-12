@@ -66,6 +66,48 @@ const visibleMembers = computed(() => {
   return mbrs.slice(0, show.value)
 })
 
+const loadMore = async function ($state) {
+  //console.log('approved loadMore', show.value, members.value.length, visibleMembers.value.length)
+  if (!group.value) {
+    $state.complete()
+    return
+  }
+  if (show.value < members.value.length) {
+    show.value++
+    $state.loaded()
+  } else {
+    if (members.value.length === group.value.membercount) {
+      $state.complete()
+    } else {
+      limit.value += distance.value
+      const memberStore = useMemberStore()
+      const received = await memberStore.fetchMembers({
+        groupid: groupid.value,
+        collection: collection.value,
+        modtools: true,
+        summary: false,
+        context: context.value,
+        limit: limit.value,
+        search: search.value,
+        filter: filter.value
+      })
+
+      if (show.value < members.value.length) { // Just inc by one rather than set to members.value.length
+        show.value++
+      }
+      if (show.value > members.value.length) {
+        show.value = members.value.length
+      }
+      if (received === 0 || (show.value === members.value.length)) {
+        $state.complete()
+      }
+      else {
+        $state.loaded()
+      }
+    }
+  }
+}
+
 watch(groupid, async (newVal) => {
   //console.log("useModMembers watch groupid", newVal)
   context.value = null
@@ -198,6 +240,7 @@ export function setupModMembers() {
     //summary,
     members,
     visibleMembers,
-    work
+    work,
+    loadMore
   }
 }
