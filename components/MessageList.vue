@@ -7,10 +7,6 @@
       show-join
       :show-give-find="showGiveFind"
     />
-    <JobsTopBar
-      v-if="jobs && !JOBS_ADS_INSTEAD_OF_GOOGLE_ADS"
-      class="d-none d-md-block"
-    />
     <h2 class="visually-hidden">List of wanteds and offers</h2>
     <div id="visobserver" v-observe-visibility="visibilityChanged" />
     <div v-if="deDuplicatedMessages?.length" id="messageList">
@@ -119,8 +115,6 @@ const OurMessage = defineAsyncComponent(() =>
 const GroupHeader = defineAsyncComponent(() =>
   import('~/components/GroupHeader.vue')
 )
-const JobsTopBar = defineAsyncComponent(() => import('~/components/JobsTopBar'))
-
 const MIN_TO_SHOW = 10
 const SHOW_AD_EVERY = 5
 
@@ -130,7 +124,6 @@ export default {
     OurMessage,
     GroupHeader,
     InfiniteLoading,
-    JobsTopBar,
     VisibleWhen,
   },
   props: {

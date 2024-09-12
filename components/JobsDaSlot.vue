@@ -76,88 +76,91 @@
     </div>
   </div>
 </template>
-<script>
-import { mapState } from 'pinia'
+<script setup>
 import { useJobStore } from '../stores/job'
 import { useAuthStore } from '../stores/auth'
-import { useMiscStore } from '../stores/misc'
+import { onBeforeUnmount } from '#imports'
 const JobOne = defineAsyncComponent(() => import('./JobOne'))
 const NoticeMessage = defineAsyncComponent(() => import('./NoticeMessage'))
 const DonationButton = defineAsyncComponent(() => import('./DonationButton'))
 
-export default {
-  components: {
-    NoticeMessage,
-    JobOne,
-    DonationButton,
+defineProps({
+  minWidth: {
+    type: String,
+    required: false,
+    default: null,
   },
-  props: {
-    minWidth: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    maxWidth: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    minHeight: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    maxHeight: {
-      type: String,
-      required: false,
-      default: null,
-    },
+  maxWidth: {
+    type: String,
+    required: false,
+    default: null,
   },
-  async setup() {
-    const jobStore = useJobStore()
-    const authStore = useAuthStore()
-    const miscStore = useMiscStore()
-
-    const me = authStore.user
-    const lat = me?.lat
-    const lng = me?.lng
-
-    const location = computed(() => me?.settings?.mylocation?.name || null)
-
-    if (location.value && lat && lng) {
-      try {
-        await jobStore.fetch(lat, lng)
-      } catch (e) {
-        console.log('Jobs fetch failed', e)
-      }
-    }
-
-    return {
-      jobStore,
-      location,
-      miscStore,
-    }
+  minHeight: {
+    type: String,
+    required: false,
+    default: null,
   },
-  mounted() {
-    this.$emit('rendered', true)
+  maxHeight: {
+    type: String,
+    required: false,
+    default: null,
   },
-  computed: {
-    ...mapState(useJobStore, ['blocked']),
-    list() {
-      // Return the list in a random order - we might have multiple ad slots per page.  By taking the top 20 we've
-      // already selected a set which is a balance between close and well-paid.
-      const list = this.jobStore?.list.slice(0, 20)
-      for (let i = list.length - 1; i >= 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1))
-        const temp = list[i]
-        list[i] = list[j]
-        list[j] = temp
-      }
+})
 
-      return list
-    },
-  },
+const emit = defineEmits(['rendered', 'borednow'])
+
+const jobStore = useJobStore()
+const authStore = useAuthStore()
+
+const me = authStore.user
+const lat = me?.lat
+const lng = me?.lng
+
+const location = computed(() => me?.settings?.mylocation?.name || null)
+
+if (location.value && lat && lng) {
+  try {
+    await jobStore.fetch(lat, lng)
+  } catch (e) {
+    console.log('Jobs fetch failed', e)
+  }
 }
+
+let refreshTimer = null
+const AD_REFRESH_TIMEOUT = 31000
+
+onMounted(() => {
+  emit('rendered', true)
+  refreshTimer = setTimeout(() => {
+    // We only show the jobs for a while.  If people don't engage with them on initial page load they're not likely
+    // to, so we might as well shift to showing other ads so that we get some revenue.
+    emit('borednow')
+  }, AD_REFRESH_TIMEOUT)
+})
+
+onBeforeUnmount(() => {
+  if (refreshTimer) {
+    clearTimeout(refreshTimer)
+  }
+})
+
+const blocked = computed(() => {
+  return jobStore.blocked
+})
+
+const list = computed(() => {
+  // Return the list in a random order - we might have multiple ad slots per page.  By taking the top 20 we've
+  // already selected a set which is a balance between close and well-paid.
+  const list = jobStore?.list.slice(0, 20)
+  for (let i = list.length - 1; i >= 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    const temp = list[i]
+    list[i] = list[j]
+    list[j] = temp
+  }
+
+  return list
+})
 </script>
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';

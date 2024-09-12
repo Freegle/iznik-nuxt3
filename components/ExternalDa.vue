@@ -12,7 +12,7 @@
       <div v-if="isVisible">
         <div class="d-flex w-100 justify-content-md-around">
           <JobsDaSlot
-            v-if="JOBS_ADS_INSTEAD_OF_GOOGLE_ADS && renderAd"
+            v-if="renderAd && !boredWithJobs"
             :min-width="minWidth"
             :max-width="maxWidth"
             :min-height="minHeight"
@@ -21,6 +21,7 @@
               'text-center': maxWidth === '100vw',
             }"
             @rendered="rippleRendered"
+            @borednow="boredWithJobs = true"
           />
           <OurGoogleDa
             v-else-if="adSense"
@@ -56,7 +57,6 @@ import { ref, computed, onBeforeUnmount } from '#imports'
 import { useConfigStore } from '~/stores/config'
 import { useMiscStore } from '~/stores/misc'
 import { useAuthStore } from '~/stores/auth'
-import { JOBS_ADS_INSTEAD_OF_GOOGLE_ADS } from '~/constants'
 
 const props = defineProps({
   adUnitPath: {
@@ -103,6 +103,7 @@ const emit = defineEmits(['rendered', 'disabled'])
 const adSense = ref(true)
 const renderAd = ref(false)
 const adShown = ref(true)
+const boredWithJobs = ref(false)
 
 let prebidRetry = 0
 let tcDataRetry = 0

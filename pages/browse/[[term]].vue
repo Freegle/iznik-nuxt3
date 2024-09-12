@@ -22,10 +22,6 @@
             />
           </div>
           <div v-if="initialBounds">
-            <JobsTopBar
-              v-if="!JOBS_ADS_INSTEAD_OF_GOOGLE_ADS"
-              class="d-none d-md-block"
-            />
             <NoticeMessage
               v-if="noMessagesNoLocation"
               variant="warning"
