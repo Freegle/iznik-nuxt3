@@ -1,9 +1,11 @@
 <template>
   <div class="box-wrapper">
     <ExternalLink :href="url">
-      <div class="box" :class="boxClass">
+      <div :class="boxClass" class="box">
         <div class="button">
-          <h2 class="text-center">{{ title }}</h2>
+          <h2 class="text-center mb-0 ms-2 me-2">
+            {{ title }}
+          </h2>
         </div>
       </div>
       <p class="text-center mt-2 font-weight-normal">
@@ -47,9 +49,23 @@ const boxClass = computed(() => {
   border-radius: 10px;
   border: 3px solid white;
   padding: 10px;
-  width: 200px;
-  height: 150px;
+  width: 150px;
+  height: 100px;
   align-content: center;
+
+  @include media-breakpoint-up(md) {
+    width: 200px;
+    height: 150px;
+  }
+}
+
+p {
+  font-size: 0.75rem;
+  width: 150px;
+
+  @include media-breakpoint-up(md) {
+    width: 200px;
+  }
 }
 
 .box-wrapper {
@@ -57,7 +73,14 @@ const boxClass = computed(() => {
 }
 
 h2 {
-  color: white !important;
+  color: black !important;
+  background-color: white !important;
+  box-shadow: 0 0 9px 10px white;
+  font-size: 1rem;
+
+  @include media-breakpoint-up(md) {
+    font-size: 1rem;
+  }
 }
 
 :deep(.magenta) {

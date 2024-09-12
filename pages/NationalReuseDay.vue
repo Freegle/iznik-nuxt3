@@ -2,7 +2,6 @@
   <div class="wrapper d-flex flex-column justify-content-around">
     <div class="inner">
       <h1 class="text-center text-white">National Reuse Day 2024</h1>
-      <p class="text-center">Intro text blah blah blah</p>
       <div class="d-flex justify-content-around">
         <ProxyImage
           preload
@@ -11,8 +10,29 @@
           class-name="image mt-2"
         />
       </div>
+      <div class="d-flex justify-content-around">
+        <b-card class="bg-white cardwidth">
+          <p>
+            Join Freegle as we celebrate National Reuse Day On Friday 18th
+            October. #NationalReuseDay is an annual event which celebrates the
+            wonderful and powerful act of REUSE - in all its forms. Let's work
+            together to put #Reuse firmly into the spotlight!
+          </p>
+          <p>
+            This year we will be asking people to #ChooseToReuse everyday,
+            because it's simple, anyone can do it and it's a great way for
+            everyone to:
+          </p>
+          <ul class="list-unstyled mb-0">
+            <li>✅ Save money.</li>
+            <li>✅ Cut waste.</li>
+            <li>✅ Help others.</li>
+            <li>✅ Protect the planet.</li>
+          </ul>
+        </b-card>
+      </div>
       <div class="spacer" />
-      <div class="boxes">
+      <div class="boxes ml-2 mr-2">
         <NationalReuseDayBox
           title="Video"
           description="Watch and share our new A-Z of Freegle!"
@@ -96,7 +116,6 @@ onMounted(() => {
   background-color: #5eca24;
   color: $color-white;
   font-weight: bold;
-  height: 100vh;
 }
 
 .spacer {
@@ -118,9 +137,25 @@ onMounted(() => {
 }
 
 :deep(.image) {
-  width: 50vw;
+  width: 100vw;
 
   img {
+    width: 100vw;
+  }
+
+  @include media-breakpoint-up(md) {
+    width: 50vw;
+
+    img {
+      width: 50vw;
+    }
+  }
+}
+
+.cardwidth {
+  width: 100vw;
+
+  @include media-breakpoint-up(md) {
     width: 50vw;
   }
 }
