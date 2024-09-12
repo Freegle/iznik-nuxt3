@@ -124,7 +124,11 @@ onMounted(() => {
 }
 
 .spacer {
-  height: 80px;
+  height: 30px;
+
+  @include media-breakpoint-up(md) {
+    height: 80px;
+  }
 }
 
 .boxes {
@@ -132,12 +136,13 @@ onMounted(() => {
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr 1fr;
   grid-column-gap: 50px;
-  grid-row-gap: 50px;
+  grid-row-gap: 0px;
   justify-items: center;
 
   @include media-breakpoint-up(md) {
     grid-template-columns: 1fr 1fr 1fr;
     grid-template-rows: 1fr 1fr;
+    grid-row-gap: 50px;
   }
 }
 
