@@ -23,7 +23,6 @@ export default {
   computed: {
     stories() {
       const stories = this.storyStore.list
-      //const stories = null
 
       if (stories) {
         return Object.values(stories)
