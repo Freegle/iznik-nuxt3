@@ -84,12 +84,17 @@ definePageMeta({
   layout: 'no-navbar',
 })
 
-buildHead(
-  route,
-  runtimeConfig,
-  'National Reuse Day 2024',
-  'Celebrate reuse and get involved',
-  runtimeConfig.public.USER_SITE + '/councils/NationalReuseDay.png'
+useHead(
+  buildHead(
+    route,
+    runtimeConfig,
+    'National Reuse Day 2024',
+    'Celebrate reuse and get involved',
+    runtimeConfig.public.USER_SITE + '/councils/NationalReuseDay.png',
+    {
+      style: 'background-color: #5eca24',
+    }
+  )
 )
 
 function removeNavbar() {
@@ -113,9 +118,9 @@ onMounted(() => {
 @import 'bootstrap/scss/mixins/_breakpoints';
 
 .wrapper {
-  background-color: #5eca24;
   color: $color-white;
   font-weight: bold;
+  height: 100vh;
 }
 
 .spacer {
