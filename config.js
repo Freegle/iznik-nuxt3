@@ -10,16 +10,18 @@ const CONFIG = {
   APIv2: process.env.IZNIK_API_V2 || 'https://api.ilovefreegle.org/apiv2',
 
   // This is where the user site is.
-  USER_SITE: 'https://www.ilovefreegle.org',
+  USER_SITE: process.env.USER_SITE || 'https://www.ilovefreegle.org',
 
   // This is where images are served from.
   //
   // Old:
-  IMAGE_SITE: 'https://images.ilovefreegle.org',
+  IMAGE_SITE: process.env.IMAGE_SITE || 'https://images.ilovefreegle.org',
 
   // Very new.  Our own uploader, and delivery of those images via a cached use of wsrl.nl.
-  TUS_UPLOADER: 'https://uploads.ilovefreegle.org:8080',
-  IMAGE_DELIVERY: 'https://delivery.ilovefreegle.org',
+  TUS_UPLOADER:
+    process.env.TUS_UPLOADER || 'https://uploads.ilovefreegle.org:8080',
+  IMAGE_DELIVERY:
+    process.env.IMAGE_DELIVERY || 'https://delivery.ilovefreegle.org',
 
   // OpenStreetMap Tile Server
   OSM_TILE:
