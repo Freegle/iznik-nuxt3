@@ -64,64 +64,7 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
-    // Nuxt3 has some lovely features to do with how routes are generated/cached.  We use:
-    //
-    // prerender: true - this will be generated at build time.
-    // static: true - this is generated on demand, and then cached until the next build
-    // isr: 'time' - this is generated on demand each 'time' period.
-    // ssr: false - this is client-side rendered.
-    //
-    // There are potential issues where a deployment happens while a page is partway through loading assets, or
-    // later loads assets which are no longer present.  Nuxt3 now has a fallback of reloading the page when
-    // it detects a failed chunk load.
-    '/': { prerender: true },
-    '/explore': { prerender: true },
-    '/unsubscribe**': { prerender: true },
-    '/about': { prerender: true },
-    '/disclaimer': { prerender: true },
-    '/donate': { prerender: true },
-    '/find': { prerender: true },
-    '/forgot': { prerender: true },
-    '/give': { prerender: true },
-    '/help': { prerender: true },
-    '/maintenance': { prerender: true },
-    '/mobile': { prerender: true },
-    '/privacy': { prerender: true },
-    '/unsubscribe': { prerender: true },
-    '/yahoologin': { prerender: true },
-
-    // These pages are for logged-in users, or aren't performance-critical enough to render on the server.
-    '/browse/**': { ssr: false },
-    '/chats/**': { ssr: false },
-    '/chitchat/**': { ssr: false },
-    '/donated': { ssr: false },
-    '/giftaid': { ssr: false },
-    '/job/**': { ssr: false },
-    '/jobs': { ssr: false },
-    '/merge/**': { ssr: false },
-    '/myposts': { ssr: false },
-    '/mypost/**': { ssr: false },
-    '/noticeboards/**': { ssr: false },
-    '/post': { ssr: false },
-    '/profile/**': { ssr: false },
-    '/promote': { ssr: false },
-    '/settings/**': { ssr: false },
-    '/stats/**': { ssr: false },
-    '/stories/**': { ssr: false },
-    '/teams': { ssr: false },
-    '/adtest': { ssr: false },
-    '/googlepay': { ssr: false },
-
-    // Render on demand - may never be shown in a given build - then cache for a while.
-    '/explore/region/**': { isr: 3600 },
-    '/communityevent/**': { isr: 3600 },
-    '/communityevents/**': { isr: 3600 },
-    '/explore/**': { isr: 3600 },
-    '/message/**': { isr: 600 },
-    '/story/**': { isr: 3600 },
-    '/shortlink/**': { isr: 600 },
-    '/volunteering/**': { isr: 3600 },
-    '/volunteerings/**': { isr: 3600 },
+    // For private groups we don't want any pre-rendering as we don't care about the content being on Google.
 
     // Allow CORS for chunk fetches - required for Netlify hosting.
     '/_nuxt/**': {
