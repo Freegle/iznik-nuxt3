@@ -62,7 +62,8 @@ export default {
 
     if (!ready.value) {
       // We don't have a valid JWT.  See if OneTap can sign us in.
-      oneTap.value = true
+      // For private groups, we want email-only signin.
+      // oneTap.value = true
     }
 
     if (proxy) {

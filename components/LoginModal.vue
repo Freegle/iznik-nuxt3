@@ -94,8 +94,15 @@
       <div class="signin__section--freegle">
         <h3 class="header--size5 pb-0">
           <span v-if="signUp"> Create an account on Freegle </span>
-          <span v-else>Continue with your Freegle account</span>
+          <span v-else
+            >Log in with your school email address and your Freegle
+            password</span
+          >
         </h3>
+        <p>
+          Your account will have been set up automatically and you'll have been
+          emailed a password.
+        </p>
         <b-form
           id="loginform"
           ref="form"
@@ -184,13 +191,13 @@
               I forgot my password
             </nuxt-link>
             <p class="mb-0 text-center">
-              <b-button
-                variant="link"
-                class="ps-1 pe-0 py-0 border-0 align-top"
-                @click="clickShowSignUp"
-              >
-                New freegler? Register
-              </b-button>
+              <!--              <b-button-->
+              <!--                variant="link"-->
+              <!--                class="ps-1 pe-0 py-0 border-0 align-top"-->
+              <!--                @click="clickShowSignUp"-->
+              <!--              >-->
+              <!--                New freegler? Register-->
+              <!--              </b-button>-->
             </p>
           </div>
           <div v-if="signUp" class="d-flex justify-content-around">
@@ -292,11 +299,8 @@ export default {
     ...mapState(useAuthStore, ['loggedInEver']),
     ...mapWritableState(useAuthStore, ['loginType', 'forceLogin']),
     signUp() {
-      if (this.forceSignIn) {
-        return false
-      } else {
-        return !this.loggedInEver || this.showSignUp
-      }
+      // On private groups accounts are created externally.
+      return false
     },
     referToGoogleButton() {
       return (
@@ -792,6 +796,7 @@ $color-google: #4285f4;
 $color-yahoo: #6b0094;
 
 .signin__section--social {
+  display: none;
   flex: 0 1 auto;
 
   @include media-breakpoint-up(lg) {
@@ -803,7 +808,7 @@ $color-yahoo: #6b0094;
   flex: 0 1 auto;
 
   @include media-breakpoint-up(lg) {
-    flex: 0 1 44%;
+    flex: 0 1 100%;
   }
 }
 
@@ -855,7 +860,7 @@ $color-yahoo: #6b0094;
 }
 
 .divider__wrapper {
-  display: flex;
+  display: none;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
