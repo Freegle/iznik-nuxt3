@@ -206,7 +206,11 @@
                 <v-icon icon="lock" /> This is private. Other freeglers can't
                 see this.
               </p>
-              <div class="d-flex">
+              <div v-if="privateGroup">
+                <label> Your email address: </label>
+                <p>{{ me.email }}</p>
+              </div>
+              <div v-else class="d-flex">
                 <EmailValidator
                   ref="email"
                   v-model:email="me.email"
@@ -227,7 +231,7 @@
               <div
                 v-if="otheremails.length"
                 :key="JSON.stringify(otheremails) + me.email"
-                class="mt-1 mb-3"
+                class="mt-2 mb-3"
               >
                 <p class="m-0">Other emails:</p>
                 <EmailOwn
@@ -258,7 +262,7 @@
                   />
                 </b-col>
               </b-row>
-              <b-row>
+              <b-row v-if="!privateGroup">
                 <b-col cols="12">
                   <b-form-group label="Your Postcode:">
                     <div class="d-flex flex-wrap align-items-start">
@@ -279,7 +283,7 @@
                   </b-form-group>
                 </b-col>
               </b-row>
-              <b-row>
+              <b-row v-if="!privateGroup">
                 <b-col>
                   <hr />
                   <b-button variant="secondary" size="lg" to="/unsubscribe">
@@ -291,6 +295,7 @@
             </b-card-body>
           </b-card>
           <b-card
+            v-if="!privateGroup"
             border-variant="info"
             header-bg-variant="info"
             header-text-variant="white"
@@ -402,7 +407,7 @@
                     </div>
                   </div>
                   <b-button
-                    v-if="!showAdvanced"
+                    v-if="!showAdvanced && !privateGroup"
                     variant="link"
                     size="sm"
                     class="p-0"
@@ -549,6 +554,7 @@
             <div v-else>You're not a member of any communities yet.</div>
           </b-card>
           <b-card
+            v-if="!privateGroup"
             border-variant="info"
             header-bg-variant="info"
             header-text-variant="white"
@@ -649,7 +655,7 @@
                   @change="changeNewLine"
                 />
               </b-form-group>
-              <b-form-group>
+              <b-form-group v-if="!privateGroup">
                 <h3 class="header--size5 header5__color mt-2">Auto-reposts</h3>
                 <p>
                   In most Freegle communities, your OFFER/WANTED posts will be
@@ -803,6 +809,7 @@ export default {
       showEmailConfirmModal: false,
       currentAtts: [],
       bump: 0,
+      privateGroup: true,
     }
   },
   computed: {

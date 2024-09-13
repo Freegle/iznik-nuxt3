@@ -128,27 +128,6 @@
           />
           <div class="chatup text-white">Chats</div>
         </div>
-        <nuxt-link
-          no-prefetch
-          class="nav-link text-center p-0 botmen"
-          to="/myposts"
-          @click="clickedMobileNav"
-          @mousedown="maybeReload('/myposts')"
-        >
-          <div class="position-relative">
-            <v-icon icon="home" class="fa-fw2" />
-            <br />
-            <b-badge
-              v-if="activePostsCount"
-              variant="info"
-              class="mypostsbadge2"
-              :title="activePostsCountPlural"
-            >
-              {{ activePostsCount }}
-            </b-badge>
-            <span class="nav-item__text">My&nbsp;Posts</span>
-          </div>
-        </nuxt-link>
         <div class="postWrapper">
           <NavbarMobilePost class="navpost" />
           <div class="d-flex justify-content-around navpostnav">
@@ -170,6 +149,28 @@
         <nuxt-link
           no-prefetch
           class="nav-link text-center p-0 botmen"
+          to="/myposts"
+          @click="clickedMobileNav"
+          @mousedown="maybeReload('/myposts')"
+        >
+          <div class="position-relative">
+            <v-icon icon="home" class="fa-fw2" />
+            <br />
+            <b-badge
+              v-if="activePostsCount"
+              variant="info"
+              class="mypostsbadge2"
+              :title="activePostsCountPlural"
+            >
+              {{ activePostsCount }}
+            </b-badge>
+            <span class="nav-item__text">My&nbsp;Posts</span>
+          </div>
+        </nuxt-link>
+        <nuxt-link
+          v-if="socialAllowed"
+          no-prefetch
+          class="nav-link text-center p-0 botmen"
           to="/chitchat"
           @click="clickedMobileNav"
           @mousedown="maybeReload('/chitchat')"
@@ -189,6 +190,7 @@
           </div>
         </nuxt-link>
         <nuxt-link
+          v-if="socialAllowed"
           no-prefetch
           class="nav-link text-center p-0 botmen"
           to="/promote"
@@ -314,6 +316,8 @@ const navBarBottomHidden = computed(() => {
     navBarHidden.value
   )
 })
+
+const socialAllowed = ref(false)
 </script>
 <style scoped lang="scss">
 @import 'assets/css/navbar.scss';

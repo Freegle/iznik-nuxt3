@@ -111,7 +111,7 @@
             </div>
           </nuxt-link>
         </li>
-        <li>
+        <li v-if="socialAllowed">
           <nuxt-link
             id="menu-option-chitchat"
             no-prefetch
@@ -134,7 +134,7 @@
             </div>
           </nuxt-link>
         </li>
-        <li>
+        <li v-if="socialAllowed">
           <nuxt-link
             id="menu-option-communityevents"
             no-prefetch
@@ -157,7 +157,7 @@
             </div>
           </nuxt-link>
         </li>
-        <li>
+        <li v-if="socialAllowed">
           <nuxt-link
             id="menu-option-volunteering"
             no-prefetch
@@ -198,7 +198,7 @@
             :is-list-item="true"
           />
         </li>
-        <li>
+        <li v-if="socialAllowed">
           <nuxt-link
             id="menu-option-spread"
             no-prefetch
@@ -298,6 +298,8 @@ const AboutMeModal = defineAsyncComponent(() =>
 const NotificationOptions = defineAsyncComponent(() =>
   import('~/components/NotificationOptions')
 )
+
+const socialAllowed = ref(false)
 </script>
 <style scoped lang="scss">
 @import 'assets/css/navbar.scss';
@@ -305,5 +307,6 @@ const NotificationOptions = defineAsyncComponent(() =>
 .logo :deep(img) {
   width: 58px;
   height: 58px;
+  border-radius: var(--bs-border-radius) !important;
 }
 </style>

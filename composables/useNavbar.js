@@ -83,7 +83,7 @@ export function useNavbar() {
   const online = computed(() => miscStore.online)
   const myid = computed(() => authStore.user?.id)
   const distance = ref(1000)
-  const logo = ref('/icon.png')
+  const logo = ref('/icon.png?oxfordhigh')
   const logoFormat = ref('webp')
   const unreadNotificationCount = ref(0)
   const chatCount = computed(() => chatStore.unreadCount)
@@ -187,7 +187,7 @@ export function useNavbar() {
         logo.value = ret.logo.path.replace(/.*logos/, '/logos')
         logoFormat.value = 'gif'
       }
-    }, 500000)
+    }, 5000)
 
     getCounts()
   })

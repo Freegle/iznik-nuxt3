@@ -35,7 +35,11 @@
           <v-icon icon="angle-right" size="2x" class="back" />
         </div>
       </div>
-      <div class="mt-2 bg-white p-2 d-flex clickme" @click="goto('/chitchat')">
+      <div
+        v-if="socialAllowed"
+        class="mt-2 bg-white p-2 d-flex clickme"
+        @click="goto('/chitchat')"
+      >
         <div class="d-flex flex-column justify-content-around pl-2 pr-3">
           <v-icon icon="coffee" class="back fa-1-5x" />
         </div>
@@ -50,6 +54,7 @@
         </div>
       </div>
       <div
+        v-if="socialAllowed"
         class="mt-2 bg-white p-2 d-flex clickme"
         @click="goto('/communityevents')"
       >
@@ -67,6 +72,7 @@
         </div>
       </div>
       <div
+        v-if="socialAllowed"
         class="mt-2 bg-white p-2 d-flex clickme"
         @click="goto('/volunteerings')"
       >
@@ -89,6 +95,11 @@
 </template>
 <script>
 export default {
+  data: function () {
+    return {
+      socialAllowed: false,
+    }
+  },
   methods: {
     goto(path) {
       const router = useRouter()

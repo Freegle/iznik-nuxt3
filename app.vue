@@ -26,25 +26,16 @@
                 aria-current="page"
                 href="/"
                 class="router-link-active router-link-exact-active navbar-brand p-0"
-                ><picture data-v-454188a5="" class="logo mr-2"
-                  ><source
-                    type="image/webp"
-                    sizes="58px"
-                    srcset="
-                      https://61ddd294bd3a390019c6.ucr.io//-/format/webp/-/resize/58x//https://www.ilovefreegle.org/icon.png   58w,
-                      https://61ddd294bd3a390019c6.ucr.io//-/format/webp/-/resize/116x//https://www.ilovefreegle.org/icon.png 116w
-                    " />
-                  <img
-                    alt="Home"
-                    loading="eager"
-                    data-nuxt-pic=""
-                    src="https://61ddd294bd3a390019c6.ucr.io//-/format/png/-/resize/116x//https://www.ilovefreegle.org/icon.png"
-                    sizes="58px"
-                    srcset="
-                      https://61ddd294bd3a390019c6.ucr.io//-/format/png/-/resize/58x//https://www.ilovefreegle.org/icon.png   58w,
-                      https://61ddd294bd3a390019c6.ucr.io//-/format/png/-/resize/116x//https://www.ilovefreegle.org/icon.png 116w
-                    " /></picture></a
-              ><!----><!---->
+              >
+                <ProxyImage
+                  preload
+                  alt="Freegle Logo"
+                  title="Click to go to Home page"
+                  class="logo mr-2 rounded"
+                  src="/icon.png?oxfordhigh"
+                  sizes="58px"
+                />
+              </a>
               <div data-v-454188a5="" class="navbar-nav ml-auto">
                 <div data-v-454188a5="" class="nav-item" no-prefetch="">
                   <button
