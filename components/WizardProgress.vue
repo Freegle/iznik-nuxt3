@@ -1,5 +1,5 @@
 <template>
-  <div class="wizard">
+  <div class="wizard d-none">
     <div class="wizard__step" :class="{ active: activeStage === 1 }">
       <div>&nbsp;</div>
       <div class="wizard__progress">

@@ -6,7 +6,7 @@
       </div>
       <b-row class="m-0">
         <b-col cols="12" lg="8" class="p-0 layout fader" offset-lg="2">
-          <h1 class="text-center">First, what are you looking for?</h1>
+          <h1 class="text-center d-none">First, what are you looking for?</h1>
           <ul
             v-for="(id, index) in ids"
             :key="'post-' + id"
