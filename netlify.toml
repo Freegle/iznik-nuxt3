@@ -1,6 +1,6 @@
 # Return 404 for requests from old code.  This avoids the function call, which costs.
 [build]
-command = "cd modtools && npm i && nuxt build"
+command = "export NODE_OPTIONS=--max_old_space_size=6000 && cd modtools && npm i && nuxt build"
 publish = "modtools/dist"
 
 [[redirects]]
