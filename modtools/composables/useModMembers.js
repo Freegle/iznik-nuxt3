@@ -67,7 +67,7 @@ const visibleMembers = computed(() => {
 })
 
 const loadMore = async function ($state) {
-  //console.log('approved loadMore', show.value, members.value.length, visibleMembers.value.length)
+  console.log('approved loadMore', group.value, show.value, members.value.length, visibleMembers.value.length)
   if (!group.value) {
     $state.complete()
     return
