@@ -32,7 +32,7 @@
                   alt="Freegle Logo"
                   title="Click to go to Home page"
                   class="logo mr-2 rounded"
-                  src="/icon.png?oxfordhigh3"
+                  src="/icon.png%3Foxfordhigh4"
                   sizes="58px"
                 />
               </a>
