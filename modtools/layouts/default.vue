@@ -5,10 +5,10 @@
         <b-img class="logo clickme" fluid rounded :src="logo" alt="Home" @click="clicklogo" />
         <ModStatus class="status" />
       </b-navbar-brand>
-      <ModZoomStock class="d-none d-md-block text-white" />
+<!--      <ModZoomStock class="d-none d-md-block text-white" />-->
       <b-navbar-nav class="d-flex align-items-center">
         <b-nav-item v-if="loggedIn" id="menu-option-modtools-discourse2" class="text-center p-0 mr-4" @click="discourse">
-          <div id="discourseIcon" class="position-relative small">
+          <div id="discourseIcon" class="position-relative small d-none">
             <v-icon :icon="['fab', 'discourse']" class="fa-2x" />
             <div class="d-none d-xl-block">
               Us
@@ -52,27 +52,13 @@
           Members
         </div>
         <ModMenuItemLeft link="/members/approved" name="Approved" indent />
-        <ModMenuItemLeft link="/members/review" name="Member Review" :count="['spammembers']" indent />
         <ModMenuItemLeft link="/chats/review" name="Chat Review" :count="['chatreview']" :othercount="['chatreviewother']" indent />
-        <ModMenuItemLeft link="/members/related" name="Related" :count="['relatedmembers']" indent />
-        <ModMenuItemLeft link="/members/stories" name="Stories" indent :count="['stories']" />
-        <ModMenuItemLeft v-if="hasPermissionNewsletter" link="/members/newsletter" name="Newsletter" indent :count="['newsletterstories']" />
-        <ModMenuItemLeft v-if="hasPermissionGiftAid" link="/giftaid" name="Gift Aid" indent :count="['giftaid']" />
         <ModMenuItemLeft link="/members/feedback" name="Feedback" indent :othercount="['happiness']" />
-        <ModMenuItemLeft link="/members/microvolunteering" indent name="MicroVols" />
         <ModMenuItemLeft link="/members/notes" name="Notes" indent />
-        <hr>
-        <hr>
-        <ModMenuItemLeft link="/communityevents" name="Events" :count="['pendingevents']" />
-        <ModMenuItemLeft link="/volunteering" name="Volunteering" :count="['pendingvolunteering']" />
-        <ModMenuItemLeft link="/publicity" name="Publicity" :count="['socialactions', 'popularposts']" />
-        <ModMenuItemLeft link="/admins" name="Admins" :count="['pendingadmins']" />
-        <ModMenuItemLeft link="/spammers" name="Spammers" :count="hasPermissionSpamAdmin ? ['spammerpendingadd', 'spammerpendingremove'] : []" />
         <hr>
         <ModMenuItemLeft link="/logs" name="Logs" />
         <ModMenuItemLeft v-if="supportOrAdmin" link="/support" name="Support" />
         <ModMenuItemLeft link="/settings" name="Settings" />
-        <ModMenuItemLeft link="/teams" name="Teams" />
         <div>
           <ExternalLink href="https://wiki.ilovefreegle.org/ModTools" class="pl-1">
             Help

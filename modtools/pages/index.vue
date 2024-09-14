@@ -6,12 +6,9 @@
     <h2>Hello, {{ me.displayname }}</h2>
     <p>Here's your dashboard, where you can see what your communities have been doing recently.</p>
     <!-- eslint-disable-next-line -->
-    <p>Need temporary help moderating? Mail <ExternalLink href="mailto:mentors@ilovefreegle.org">mentors@ilovefreegle.org</ExternalLink>
-    </p>
+<!--    <p>Need temporary help moderating? Mail <ExternalLink href="mailto:mentors@ilovefreegle.org">mentors@ilovefreegle.org</ExternalLink>-->
+<!--    </p>-->
 
-    <ModDashboardDiscourseTopics v-if="start" :groupid="groupid" :group-name="groupName" :start="start" :end="end" class="mb-2" />
-    <ModMissingFacebook />
-    <ModMissingProfile class="mt-1" />
     <div class="d-flex mb-2 mt-2 flex-wrap">
       <div class="borderit d-flex flex-column">
         <label for="dashboardgroup">Choose community:</label>

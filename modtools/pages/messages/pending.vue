@@ -5,9 +5,9 @@
       <ModCakeModal v-if="showCakeModal" ref="showCakeModal" @hidden="showCakeModal = false"/>
       <ModAimsModal v-if="showAimsModal" ref="showAimsModal" @hidden="showAimsModal = false"/>
       <!--      <ModFreeStock class="mb-2" />-->
-      <NoticeMessage variant="info" class="mb-2 d-block d-md-none">
-        <ModZoomStock color-class="text-black" />
-      </NoticeMessage>
+<!--      <NoticeMessage variant="info" class="mb-2 d-block d-md-none">-->
+<!--        <ModZoomStock color-class="text-black" />-->
+<!--      </NoticeMessage>-->
       <div class="d-flex justify-content-between">
         <GroupSelect v-model="groupid" all modonly :work="['pending', 'pendingother']" remember="pending" />
         <b-button variant="link" @click="loadAll">
@@ -98,19 +98,21 @@ export default {
       !lastaimsshow ||
       dayjs().diff(dayjs(lastaimsshow), 'days') > 365
     ) {
-      this.showAimsModal = true
-
-      const settings = me.settings
-      settings.lastaimsshow = dayjs().toISOString()
-      await this.authStore.saveAndGet({
-        settings: settings
-      })
+      // No need to show this for private groups.
+      // this.showAimsModal = true
+      //
+      // const settings = me.settings
+      // settings.lastaimsshow = dayjs().toISOString()
+      // await this.authStore.saveAndGet({
+      //   settings: settings
+      // })
     }
 
     // CAKE
     if (!this.miscStore.get('cakeasked')) {
-      this.showCakeModal = true
-      this.miscStore.set({ key: 'cakeasked', value: true })
+      // No cake for private groups.
+      // this.showCakeModal = true
+      // this.miscStore.set({ key: 'cakeasked', value: true })
     }
 
   },
