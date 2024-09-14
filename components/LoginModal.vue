@@ -6,7 +6,8 @@
     v-model="showModal"
     no-fade
     size="lg"
-    no-close-on-backdrop
+    no-trap
+    :no-close-on-backdrop="forceLogin"
     :hide-header-close="forceLogin"
     :no-close-on-esc="forceLogin"
     hide-footer
@@ -31,7 +32,7 @@
       public - you can hide your real name and picture from Settings. Logging in
       adds cookies and local storage. Read
       <nuxt-link no-prefetch target="_blank" to="/terms"
-        >Terms of Use</nuxt-link
+      >Terms of Use</nuxt-link
       >
       and
       <nuxt-link no-prefetch target="_blank" to="/privacy">Privacy</nuxt-link>
@@ -56,7 +57,7 @@
             class="social-button__image"
           />
           <span class="p-2 text--medium font-weight-bold"
-            >Continue with Facebook</span
+          >Continue with Facebook</span
           >
         </b-button>
         <div
@@ -74,7 +75,7 @@
             class="social-button__image"
           />
           <span class="p-2 text--medium font-weight-bold"
-            >Continue with Yahoo</span
+          >Continue with Yahoo</span
           >
         </b-button>
         <notice-message v-if="socialblocked" variant="warning">
@@ -93,8 +94,15 @@
       <div class="signin__section--freegle">
         <h3 class="header--size5 pb-0">
           <span v-if="signUp"> Create an account on Freegle </span>
-          <span v-else>Continue with your Freegle account</span>
+          <span v-else
+          >Log in with your school email address and your Freegle
+            password</span
+          >
         </h3>
+        <p>
+          Your account will have been set up automatically and you'll have been
+          emailed a password.
+        </p>
         <b-form
           id="loginform"
           ref="form"
@@ -183,13 +191,13 @@
               I forgot my password
             </nuxt-link>
             <p class="mb-0 text-center">
-              <b-button
-                variant="link"
-                class="ps-1 pe-0 py-0 border-0 align-top"
-                @click="clickShowSignUp"
-              >
-                New freegler? Register
-              </b-button>
+              <!--              <b-button-->
+              <!--                variant="link"-->
+              <!--                class="ps-1 pe-0 py-0 border-0 align-top"-->
+              <!--                @click="clickShowSignUp"-->
+              <!--              >-->
+              <!--                New freegler? Register-->
+              <!--              </b-button>-->
             </p>
           </div>
           <div v-if="signUp" class="d-flex justify-content-around">
@@ -291,11 +299,8 @@ export default {
     ...mapState(useAuthStore, ['loggedInEver']),
     ...mapWritableState(useAuthStore, ['loginType', 'forceLogin']),
     signUp() {
-      if (this.forceSignIn) {
-        return false
-      } else {
-        return !this.loggedInEver || this.showSignUp
-      }
+      // On private groups accounts are created externally.
+      return false
     },
     referToGoogleButton() {
       return (
@@ -372,6 +377,33 @@ export default {
       this.nativeLoginError = null
       this.buttonClicked = false
     },
+    signUp: {
+      immediate: true,
+      handler(newVal) {
+        if (newVal) {
+          this.$api.bandit.shown({
+            uid: 'signUpModal',
+            variant: 'facebook',
+          })
+          this.$api.bandit.shown({
+            uid: 'signUpModal',
+            variant: 'google',
+          })
+          this.$api.bandit.shown({
+            uid: 'signUpModal',
+            variant: 'yahoo',
+          })
+          this.$api.bandit.shown({
+            uid: 'signUpModal',
+            variant: 'native',
+          })
+          this.$api.bandit.shown({
+            uid: 'signUpModal',
+            variant: 'signin',
+          })
+        }
+      },
+    },
   },
   beforeUnmount() {
     if (this.bumpTimer) {
@@ -414,8 +446,23 @@ export default {
     hide() {
       this.pleaseShowModal = false
     },
+    gtmRegister() {
+      if (this.$gtm?.enabled()) {
+        this.$gtm.trackEvent({
+          event: 'Register with Website',
+          label: 'EcEMCPvav7kZELy618UD',
+        })
+      }
+    },
     loginNative(e) {
       this.loginType = 'Freegle'
+
+      if (this.signUp) {
+        this.$api.bandit.chosen({
+          uid: 'signUpModal',
+          variant: 'native',
+        })
+      }
 
       const self = this
       this.nativeLoginError = null
@@ -438,6 +485,8 @@ export default {
         ) {
           this.nativeLoginError = 'Please fill out the form.'
         } else {
+          this.gtmRegister()
+
           this.authStore
             .signUp({
               firstname: this.firstname,
@@ -531,6 +580,13 @@ export default {
     async loginFacebook() {
       this.loginType = 'Facebook'
 
+      if (this.signUp) {
+        await this.$api.bandit.chosen({
+          uid: 'signUpModal',
+          variant: 'facebook',
+        })
+      }
+
       this.nativeLoginError = null
       this.socialLoginError = null
       try {
@@ -572,6 +628,13 @@ export default {
       if (response?.credential) {
         console.log('Signed in')
 
+        if (this.signUp) {
+          await this.$api.bandit.chosen({
+            uid: 'signUpModal',
+            variant: 'google',
+          })
+        }
+
         try {
           await this.authStore.login({
             googlejwt: response.credential,
@@ -588,8 +651,15 @@ export default {
         this.socialLoginError = 'Google login failed: ' + response.error
       }
     },
-    loginYahoo() {
+    async loginYahoo() {
       this.loginType = 'Yahoo'
+
+      if (this.signUp) {
+        await this.$api.bandit.chosen({
+          uid: 'signUpModal',
+          variant: 'yahoo',
+        })
+      }
 
       // Sadly Yahoo doesn't support a Javascript-only OAuth flow, so far as I can tell.  So what we do is
       // redirect to Yahoo, which returns back to us with a code parameter, which we then pass to the server
@@ -603,11 +673,11 @@ export default {
         '&redirect_uri=' +
         encodeURIComponent(
           window.location.protocol +
-            '//' +
-            window.location.hostname +
-            (window.location.port ? ':' + window.location.port : '') +
-            '/yahoologin?returnto=' +
-            this.$route.fullPath
+          '//' +
+          window.location.hostname +
+          (window.location.port ? ':' + window.location.port : '') +
+          '/yahoologin?returnto=' +
+          this.$route.fullPath
         ) +
         '&response_type=code&language=en-us&scope=sdpp-w'
 
@@ -624,6 +694,11 @@ export default {
       this.forceSignIn = true
       e.preventDefault()
       e.stopPropagation()
+
+      this.$api.bandit.chosen({
+        uid: 'signUpModal',
+        variant: 'signin',
+      })
     },
     togglePassword() {
       this.showPassword = !this.showPassword
@@ -721,6 +796,7 @@ $color-google: #4285f4;
 $color-yahoo: #6b0094;
 
 .signin__section--social {
+  display: none;
   flex: 0 1 auto;
 
   @include media-breakpoint-up(lg) {
@@ -732,7 +808,7 @@ $color-yahoo: #6b0094;
   flex: 0 1 auto;
 
   @include media-breakpoint-up(lg) {
-    flex: 0 1 44%;
+    flex: 0 1 100%;
   }
 }
 
@@ -784,7 +860,7 @@ $color-yahoo: #6b0094;
 }
 
 .divider__wrapper {
-  display: flex;
+  display: none;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
