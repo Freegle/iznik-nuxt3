@@ -45,6 +45,7 @@
             <NoticeMessage
               v-if="browseView === 'nearby' && !isochrones.length"
               variant="warning"
+              class="d-none"
             >
               <p class="font-weight-bold">
                 What's your postcode? We'll show you posts nearby.

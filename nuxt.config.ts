@@ -47,7 +47,7 @@ export default defineNuxtConfig({
   // Sometimes when debugging it's useful to set ssr: false, because the errors are clearer when generated on the client.
   // @ts-ignore
   target: 'server',
-  ssr: true,
+  ssr: false, // Don't need SSR for private groups.
   spaLoadingTemplate: false,
 
   // This makes Netlify serve assets from the perm link for the build, which avoids missing chunk problems when

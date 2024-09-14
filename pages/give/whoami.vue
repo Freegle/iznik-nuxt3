@@ -173,6 +173,9 @@ export default {
     if (this.loggedIn) {
       this.email = this.me.email
       this.emailValid = this.email?.length
+
+      // Can skip email for private groups.
+      this.next()
     }
   },
   methods: {

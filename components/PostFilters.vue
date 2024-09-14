@@ -108,7 +108,7 @@
       <b-button
         variant="white"
         title="Show map and post filters"
-        class="ms-2"
+        class="ms-2 d-none"
         @click="showFilters = true"
       >
         <div class="d-flex">

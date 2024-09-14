@@ -83,20 +83,22 @@
       >
         Don't throw it away, give it away!
       </div>
-      <h2
-        class="text--medium-responsive font-weight-bold black d-none d-md-block"
-      >
-        Just looking?
-      </h2>
-      <div
-        class="d-flex justify-content-around justify-content-lg-start flex-wrap mt-2 mt-md-0"
-      >
-        <PlaceAutocomplete
-          class="mb-2"
-          labeltext="See what's being freegled near you:"
-          labeltext-sr="Enter your location and"
-          @selected="explorePlace($event)"
-        />
+      <div class="d-none">
+        <h2
+          class="text--medium-responsive font-weight-bold black d-none d-md-block"
+        >
+          Just looking?
+        </h2>
+        <div
+          class="d-flex justify-content-around justify-content-lg-start flex-wrap mt-2 mt-md-0"
+        >
+          <PlaceAutocomplete
+            class="mb-2"
+            labeltext="See what's being freegled near you:"
+            labeltext-sr="Enter your location and"
+            @selected="explorePlace($event)"
+          />
+        </div>
       </div>
       <VisualiseList
         v-if="!breakpoint || breakpoint === 'xs'"

@@ -159,7 +159,8 @@ const askDeadline = ref(false)
 
 function maybeAskDelivery() {
   if (type.value === 'Offer') {
-    askDelivery.value = true
+    // Don't ask for private groups - on a single location.
+    // askDelivery.value = true
   }
 }
 

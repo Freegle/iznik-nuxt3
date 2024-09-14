@@ -12,8 +12,8 @@
       <div class="font-weight-bold">Tell us about yourself!</div>
       <div v-if="!notification.text">
         <p>
-          You can introduce to other freeglers by telling us a bit about you.
-          You'll get a better response and it makes freegling more fun.
+          You can introduce yourself to other freeglers. You'll get a better
+          response and it makes freegling more fun.
         </p>
         <b-button variant="primary" class="m-1 mb-3" @click="showModal"
           >Introduce yourself</b-button

@@ -1,7 +1,7 @@
 <template>
   <nav class="bg-transparent pr-2">
     <div class="d-flex justify-content-between">
-      <div class="d-flex">
+      <div class="d-none">
         <ExternalLink href="https://www.facebook.com/Freegle/" title="Facebook">
           <b-img lazy alt="Facebook" src="/botleft/facebook.png" width="40" />
         </ExternalLink>

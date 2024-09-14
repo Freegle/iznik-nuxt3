@@ -13,7 +13,7 @@
       <PostCode
         class="justify-content-center"
         :value="initialPostcode"
-        @selected="postcodeSelect"
+        @selected="submit"
         @cleared="postcodeClear"
       />
       <div v-if="!closed && postcodeValid" class="text-center">
@@ -137,6 +137,13 @@ export default {
   methods: {
     postcodeSelect,
     postcodeClear,
+    submit(pc) {
+      if (this.initialPostcode) {
+        // Can skip location for private groups.
+        this.postcodeSelect(pc)
+        this.$router.push('/give/whoami')
+      }
+    },
   },
 }
 </script>

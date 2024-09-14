@@ -54,7 +54,7 @@
                   class="ml-2"
                 >
                   <span v-if="searching" class="pulsate"> Searching... </span>
-                  <span v-else> No chats to show. </span>
+                  <span v-else> No chats with other freeglers yet. </span>
                 </p>
                 <div v-else>
                   <div
@@ -176,7 +176,7 @@
               class="ml-2"
             >
               <span v-if="searching" class="pulsate"> Searching... </span>
-              <span v-else> No chats to show. </span>
+              <span v-else> No chats with other freeglers yet. </span>
             </p>
             <ChatPane
               :id="selectedChatId"

@@ -110,6 +110,11 @@ export default {
     const runtimeConfig = useRuntimeConfig()
     const route = useRoute()
 
+    // Force login on private groups.
+    definePageMeta({
+      layout: 'login',
+    })
+
     useHead(
       buildHead(
         route,
