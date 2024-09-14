@@ -83,7 +83,7 @@ export function useNavbar() {
   const online = computed(() => miscStore.online)
   const myid = computed(() => authStore.user?.id)
   const distance = ref(1000)
-  const logo = ref('/icon.png?oxfordhigh')
+  const logo = ref('/icon.png?oxfordhigh2')
   const logoFormat = ref('webp')
   const unreadNotificationCount = ref(0)
   const chatCount = computed(() => chatStore.unreadCount)
