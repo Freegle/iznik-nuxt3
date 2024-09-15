@@ -26,7 +26,7 @@
               {{ user.displayname }}
             </b-col>
             <b-col cols="12" md="3">
-              {{ withplural('post', user.posts, true) }}
+              {{ pluralise('post', user.posts, true) }}
             </b-col>
           </b-row>
         </b-card-body>
@@ -35,7 +35,7 @@
   </div>
 </template>
 <script>
-import { withplural } from '../composables/usePluralize'
+import { pluralise } from '../composables/usePluralise'
 import ModDashboardBase from '~/components/ModDashboardBase'
 
 export default {
