@@ -31,6 +31,16 @@
         <p class="text--medium-responsive black font-weight-bold">
           Even if you think history is rubbish, you can make rubbish history!
         </p>
+        <h2 class="header--size5 mb-3">
+          If you have questions, you can contact
+          <ExternalLink href="mailto:k.sheppard@oxf.gdst.net"
+            >Mrs Sheppard</ExternalLink
+          >
+          or
+          <ExternalLink href="mailto:M.Roy-Romahi@oxf.gdst.net"
+            >Maya</ExternalLink
+          >.
+        </h2>
       </div>
       <div
         class="d-flex justify-content-between justify-content-lg-start w-100"
@@ -79,7 +89,7 @@
       <div
         class="font-weight-bold text-header text--medium-responsive mt-3 mb-4 d-none d-md-block"
       >
-        Don't throw it away, give it away!
+        Go Beyond recycling, start reusing!
       </div>
       <div class="d-none">
         <h2

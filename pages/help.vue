@@ -20,17 +20,9 @@
         <hr />
         <div ref="faq">
           <HelpQuestion id="unsubscribe" :matches="matches">
-            <template #title>How do I leave/unsubscribe?</template>
+            <template #title>Has Maya added some help questions yet?</template>
             <template #default>
-              <p>
-                If you'd like to leave Freegle, then go
-                <nuxt-link no-prefetch to="/unsubscribe">here</nuxt-link>.
-              </p>
-              <p>
-                But if you're just getting more emails than you want, you can
-                reduce the number and frequency of emails from
-                <nuxt-link no-prefetch to="/settings">Settings</nuxt-link>.
-              </p>
+              <p>No.</p>
             </template>
           </HelpQuestion>
           <HelpQuestion id="toomanyemails" :matches="matches">
@@ -90,58 +82,7 @@
             <div>
               <p>
                 <!-- eslint-disable-next-line-->
-                You can do this from your <nuxt-link  no-prefetch to="/settings">Settings</nuxt-link>, in the <em>Personal Information</em> section.
-              </p>
-            </div>
-          </HelpQuestion>
-          <HelpQuestion id="gdpr" :matches="matches">
-            <template #title>What data do you store about me?</template>
-            <p>
-              If you're really into privacy or GDPR, you can see what data we
-              store about you, and download it,
-              <nuxt-link no-prefetch to="/mydata">here</nuxt-link>.
-            </p>
-          </HelpQuestion>
-          <HelpQuestion id="app" :matches="matches">
-            <template #title>Do you have a mobile app?</template>
-            <div>
-              <p>
-                We do! Freegling is easy on mobiles and tablets, and you get
-                notifications of replies so you don't have to rely on email.
-                Download using these links or search for Freegle in your app
-                store - it's free!
-              </p>
-              <div class="d-flex justify-content-between">
-                <a
-                  href="https://play.google.com/store/apps/details?id=org.ilovefreegle.direct"
-                  class="mt-2"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <img
-                    alt="Freegle Android app on Google Play"
-                    title="Freegle Android app on Google Play"
-                    class="img-responsive"
-                    src="/en-play-badge.png"
-                  />
-                </a>
-                <a
-                  href="https://itunes.apple.com/gb/app/freegle/id970045029?ls=1&amp;mt=8"
-                  class="mt-2"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <img
-                    alt="Freegle app for iPhone, iPad, and iPod touch"
-                    title="Freegle app for iPhone, iPad, and iPod touch"
-                    class="img-responsive"
-                    src="/app-store-black-sm.png"
-                  />
-                </a>
-              </div>
-              <p class="mt-2">
-                The app is only available in the UK app stores. We support
-                Android 5.1/iOS 13 or later.
+                You can't - you need to use your school address.
               </p>
             </div>
           </HelpQuestion>
@@ -173,45 +114,10 @@
             </div>
           </HelpQuestion>
           <HelpQuestion id="rules" :matches="matches">
-            <template #title>What are your rules?</template>
+            <template #title>What are the rules?</template>
             <template #default>
               <TermsOfUse />
             </template>
-          </HelpQuestion>
-          <HelpQuestion id="integrations" :matches="matches">
-            <template #title>
-              How do TrashNothing and LoveJunk relate to Freegle?
-            </template>
-            <div>
-              <p>
-                <ExternalLink href="https://trashnothing.com">
-                  TrashNothing
-                </ExternalLink>
-                is another platform for reuse. We're friends with them. It's
-                very much like Freegle, but it has a different interface.
-              </p>
-              <p>
-                We've done a nice integration with them, so that when you post
-                on Freegle most posts get shown on TrashNothing and vice versa,
-                and things like thumbs up/down work too. You'll get replies from
-                TrashNothing members, though you might not notice. So far as
-                you're concerned, they're just other freeglers.
-              </p>
-              <p>
-                <ExternalLink href="https://lovejunk.com">
-                  LoveJunk
-                </ExternalLink>
-                is another reuse platform. Mostly it's for paid disposal of
-                things you don't need any more - similar to a council bulky
-                waste collection.
-              </p>
-              <p>
-                LoveJunk pays Freegle a bit each month for Freegle posts to get
-                shown on there, so you might get replies from LoveJunk reusers.
-                Again, you might not notice that they are from LoveJunk - just
-                treat them like you would do any other freeglers.
-              </p>
-            </div>
           </HelpQuestion>
           <hr class="mt-4" />
           <h2>Can I help Freegle?</h2>
@@ -219,92 +125,14 @@
             <template #title>Can I volunteer?</template>
             <div>
               <p>
-                Yes! Freegle is run by volunteers. The first stage is to become
-                a Freegle Supporter, by donating time or funds (whichever you're
-                able).
-              </p>
-              <b-button variant="primary" class="mb-2" @click="supporterInfo">
-                Find out more
-              </b-button>
-              <SupporterInfoModal
-                v-if="showInfoModal"
-                ref="supporterInfoModal"
-                @hidden="showInfoModal = false"
-              />
-              <p>
-                If you'd like to spread the word you can download a poster or
-                ask for "business cards" to hand out:
-              </p>
-              <b-button to="/promote" variant="primary" class="mb-2">
-                Find out more
-              </b-button>
-              <p>
-                If you would like to help run one of the local communities,
-                which is a good place to start, please use the
-                <em>Contact</em> button below.
-              </p>
-              <p>
-                You can also volunteer nationally. We really need people in
-                these areas:
-              </p>
-              <ul>
-                <li>
-                  Publicity: if you can help locally or nationally, especially
-                  with councils, we'd love to hear from you.
-                </li>
-                <li>
-                  Fundraising: we run on volunteers and donations, and just
-                  about get by, but we could do so much more with more.
-                </li>
-                <li>
-                  Graphics: we need people who can produce striking images,
-                  posters, etc.
-                </li>
-                <li>
-                  User Experience (UX): if you work in this area we could use
-                  your help.
-                </li>
-                <li>
-                  IT geeks who know some of these: VueJS/Bootstrap
-                  4/CSS/PHP/Percona/nginx - find us on
-                  <a
-                    target="_blank"
-                    href="https://github.com/Freegle"
-                    rel="noopener noreferrer"
-                    >GitHub</a
-                  >.
-                </li>
-              </ul>
-              <p>
-                <!-- eslint-disable-next-line -->
-                You can reach us at <ExternalLink href="mailto:volunteers@ilovefreegle.org">volunteers@ilovefreegle.org</ExternalLink>.
-              </p>
-              <p>
-                Or if you'd like to donate to our charity, you can do that
-                <nuxt-link no-prefetch to="/donate"> here </nuxt-link> or here:
-              </p>
-              <p>
-                <DonationButton :direct-donation="true" />
-              </p>
-            </div>
-          </HelpQuestion>
-          <HelpQuestion id="donate" :matches="matches">
-            <template #title>How do I donate?</template>
-            <div>
-              <p>
-                If you're able to donate to keep Freegle running, you can do
-                that here:
-              </p>
-              <DonationButton :direct-donation="true" class="mb-1" />
-              <p>Monthly donations are particularly welcome.</p>
-              <p>
-                If you don't use PayPal, there are other ways to donate
-                <nuxt-link no-prefetch to="/donate">here</nuxt-link>.
-              </p>
-              <p>
-                We can get even more from your donation if you're able to
-                complete a gift aid declaration
-                <nuxt-link no-prefetch to="/giftaid">here</nuxt-link>.
+                Yes! Talk to
+                <ExternalLink href="mailto:k.sheppard@oxf.gdst.net"
+                  >Mrs Sheppard</ExternalLink
+                >
+                or
+                <ExternalLink href="mailto:M.Roy-Romahi@oxf.gdst.net"
+                  >Maya</ExternalLink
+                >
               </p>
             </div>
           </HelpQuestion>
@@ -312,73 +140,18 @@
         <hr />
         <h2 class="header--size1">Something else?</h2>
         <p>
-          If your question isn't answered above, or you wish to compliment or
-          complain, then you can <strong>contact your volunteer team</strong>,
-          who will be happy to hear whether Freegle is doing a great job or
-          needs changing.
+          If you have questions, you can contact
+          <ExternalLink href="mailto:k.sheppard@oxf.gdst.net"
+            >Mrs Sheppard</ExternalLink
+          >
+          or
+          <ExternalLink href="mailto:M.Roy-Romahi@oxf.gdst.net"
+            >Maya</ExternalLink
+          >.
         </p>
-        <h3 class="header--size5">
-          Which Freegle community do you need help with?
-        </h3>
-        <b-card v-if="loggedIn" no-body>
-          <b-card-body class="p-3">
-            <GroupRememberSelect
-              v-model="contactGroupId"
-              remember="contactmods"
-              class="mb-3"
-            />
-            <ChatButton
-              :groupid="contactGroupId"
-              size="md"
-              title="Contact community volunteers"
-              variant="primary"
-              class="mb-2"
-            />
-          </b-card-body>
-        </b-card>
-        <div class="text-muted">
-          <hr />
-          <p>
-            Your local volunteers will usually be the best way for you to get
-            help, and it helps us if you use them where possible.
-          </p>
-          <div v-if="!loggedIn" class="mb-1">
-            <notice-message>
-              Please log in using the menu option at the top to contact your
-              community volunteers.
-            </notice-message>
-          </div>
-          <p>But you can also contact:</p>
-          <ul>
-            <li>
-              Our support volunteers at <SupportLink />. They deal with
-              questions about this site, or problems with freegling where your
-              local community volunteers can't help.
-            </li>
-            <li>
-              Our national mailbox volunteers at
-              <SupportLink
-                email="info@ilovefreegle.org"
-                text="info@ilovefreegle.org"
-              />. They deal with more general questions about Freegle which
-              aren't specific to one community, or if you have issues you can't
-              resolve with your local team. Please be aware that we have very
-              limited powers. Local communities are autonomous, but we can help
-              negotiate, explain and make suggestions where appropriate.
-            </li>
-            <li>
-              Our media volunteers at
-              <SupportLink
-                email="media@ilovefreegle.org"
-                text="media@ilovefreegle.org"
-              />. Please use this if you are a member of the media and want to
-              help publicise Freegle.
-              <!--              For urgent press enquiries only, call +44-->
-              <!--              (0)7962 449573.-->
-            </li>
-          </ul>
-          <p>This version of the site was built on {{ version }}.</p>
-        </div>
+
+        <p></p>
+        <p>This version of the site was built on {{ version }}.</p>
       </b-col>
       <b-col cols="0" md="3" />
     </b-row>
@@ -392,9 +165,6 @@ import ExternalLink from '../components/ExternalLink'
 import HelpQuestion from '~/components/HelpQuestion'
 import { buildHead } from '~/composables/useBuildHead'
 import VisibleWhen from '~/components/VisibleWhen'
-const SupporterInfoModal = defineAsyncComponent(() =>
-  import('~/components/SupporterInfoModal.vue')
-)
 const SidebarLeft = defineAsyncComponent(() =>
   import('~/components/SidebarLeft')
 )
@@ -403,7 +173,6 @@ export default {
   components: {
     ExternalLink,
     HelpQuestion,
-    SupporterInfoModal,
     VisibleWhen,
     SidebarLeft,
   },
