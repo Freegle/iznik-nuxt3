@@ -183,7 +183,7 @@ export default {
     const userSite = runtimeConfig.public.USER_SITE
     const proxy = runtimeConfig.public.IMAGE_DELIVERY
 
-    const bg = proxy + '?url=' + userSite + '/wallpaper.png&output=webp'
+    const bg = proxy + '?url=' + userSite + '/wallpaper2.png&output=webp'
     const logo = proxy + '?url=' + userSite + '/icon.png&output=webp&w=58'
 
     head.link = [

@@ -61,6 +61,6 @@ await userStore.fetch(props.id)
 .coverphoto {
   min-height: 100px !important;
   width: 100% !important;
-  background-image: url('/wallpaper.png');
+  background-image: url('/wallpaper2.png');
 }
 </style>

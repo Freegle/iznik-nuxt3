@@ -64,7 +64,7 @@ if (proxy) {
     proxy +
     '?url=' +
     userSite +
-    '/wallpaper.png' +
+    '/wallpaper2.png' +
     '&output=webp")'
 
   useHead({
