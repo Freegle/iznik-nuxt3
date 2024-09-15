@@ -24,14 +24,12 @@
         </p>
       </div>
       <div class="d-none d-sm-block">
-        <h1 class="text--largest-responsive">
-          Freegle - like online dating for stuff.
-        </h1>
+        <h1 class="text--largest-responsive">Oxford High Freegle</h1>
         <p class="text--medium-responsive black font-weight-bold">
           Got stuff you don't need? Looking for something?
         </p>
         <p class="text--medium-responsive black font-weight-bold">
-          We'll match you with someone local. All completely free.
+          Even if you think history is rubbish, you can make rubbish history!
         </p>
       </div>
       <div

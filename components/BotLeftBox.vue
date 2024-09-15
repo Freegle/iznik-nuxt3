@@ -34,7 +34,7 @@
           alt="GitHub"
           src="/botleft/github.svg"
           width="40"
-          class="mr-1"
+          class="ml-1 mr-1"
         />
       </ExternalLink>
     </div>
