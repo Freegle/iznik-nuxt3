@@ -546,14 +546,12 @@ export default defineNuxtConfig({
         {
           hid: 'description',
           name: 'description',
-          content:
-            "Give and get stuff for free in your local community.  Don't just recycle - reuse, freecycle and freegle!",
+          content: 'Oxford High Freegle - Go Beyond recycling, start reusing!',
         },
         {
           hid: 'apple-mobile-web-app-title',
           name: 'apple-mobile-web-app-title',
-          content:
-            "Give and get stuff for free in your local community.  Don't just recycle - reuse, freecycle and freegle!",
+          content: 'Oxford High Freegle - Go Beyond recycling, start reusing!',
         },
 
         {
@@ -565,7 +563,7 @@ export default defineNuxtConfig({
         {
           hid: 'og:title',
           property: 'og:title',
-          content: "Freegle - Don't throw it away, give it away!",
+          content: 'Oxford High Freegle - Go Beyond recycling, start reusing!',
         },
         { hid: 'og:site_name', property: 'og:site_name', content: 'Freegle' },
         {
@@ -581,8 +579,7 @@ export default defineNuxtConfig({
         {
           hid: 'og:description',
           property: 'og:description',
-          content:
-            "Give and get stuff for free in your local community.  Don't just recycle - reuse, freecycle and freegle!",
+          content: 'Oxford High Freegle - Go Beyond recycling, start reusing!',
         },
         {
           hid: 'fb:app_id',
@@ -593,13 +590,12 @@ export default defineNuxtConfig({
         {
           hid: 'twitter:title',
           name: 'twitter:title',
-          content: "Freegle - Don't throw it away, give it away!",
+          content: 'Oxford High Freegle - Go Beyond recycling, start reusing!',
         },
         {
           hid: 'twitter:description',
           name: 'twitter:description',
-          content:
-            "Give and get stuff for free in your local community.  Don't just recycle - reuse, freecycle and freegle!",
+          content: 'Oxford High Freegle - Go Beyond recycling, start reusing!',
         },
         {
           hid: 'twitter:image',
