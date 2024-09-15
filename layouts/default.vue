@@ -59,13 +59,7 @@ if (!ready) {
 
 if (proxy) {
   // Add the wallpaper background, proxying it from our image CDN.
-  const bg =
-    'background-image: url("' +
-    proxy +
-    '?url=' +
-    userSite +
-    '/wallpaper2.png' +
-    '&output=webp")'
+  const bg = 'background-image: url("' + '/wallpaper2.png' + ')'
 
   useHead({
     bodyAttrs: {

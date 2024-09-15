@@ -40,7 +40,6 @@ export default {
     const persistent = authStore.auth.persistent
 
     const runtimeConfig = useRuntimeConfig()
-    const userSite = runtimeConfig.public.USER_SITE
     const proxy = runtimeConfig.public.IMAGE_DELIVERY
 
     if (jwt || persistent) {
@@ -68,13 +67,7 @@ export default {
 
     if (proxy) {
       // Add the wallpaper background, proxying it from our image CDN.
-      const bg =
-        'background-image: url("' +
-        proxy +
-        '?url=' +
-        userSite +
-        '/wallpaper2.png' +
-        '&output=webp")'
+      const bg = 'background-image: url("' + '/wallpaper2.png' + '")'
 
       useHead({
         bodyAttrs: {
