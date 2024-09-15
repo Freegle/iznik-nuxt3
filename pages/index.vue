@@ -31,16 +31,6 @@
         <p class="text--medium-responsive black font-weight-bold">
           Even if you think history is rubbish, you can make rubbish history!
         </p>
-        <h2 class="header--size5 mb-3">
-          If you have questions, you can contact
-          <ExternalLink href="mailto:k.sheppard@oxf.gdst.net"
-            >Mrs Sheppard</ExternalLink
-          >
-          or
-          <ExternalLink href="mailto:M.Roy-Romahi@oxf.gdst.net"
-            >Maya</ExternalLink
-          >.
-        </h2>
       </div>
       <div
         class="d-flex justify-content-between justify-content-lg-start w-100"

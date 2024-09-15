@@ -20,7 +20,6 @@ const GoogleOneTap = defineAsyncComponent(() =>
 const LoginModal = defineAsyncComponent(() => import('~/components/LoginModal'))
 
 const runtimeConfig = useRuntimeConfig()
-const userSite = runtimeConfig.public.USER_SITE
 const proxy = runtimeConfig.public.IMAGE_DELIVERY
 
 let ready = false
