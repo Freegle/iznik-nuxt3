@@ -2,7 +2,7 @@
   <div>
     <NoticeMessage v-if="missing.length" variant="warning" class="mt-1">
       <div v-if="summary">
-        <v-icon icon="exclamation-triangle" /> {{ missing.length | pluralize(['group is', 'groups are'], { includeNumber: true }) }} missing taglines or profile pictures.
+        <v-icon icon="exclamation-triangle" /> {{ withplural(['group is', 'groups are'], missing.length, true) }} missing taglines or profile pictures.
         <b-button variant="white" @click="expand">
           Click to view
         </b-button>
@@ -19,6 +19,8 @@
 </template>
 
 <script>
+import { withplural } from '../composables/usePluralize'
+
 export default {
   data: function() {
     return {

@@ -1,11 +1,10 @@
 import pluralize from 'pluralize'
 
-export function withplural(a, b, c) {
-  if (Array.isArray(a)) {
-    // Don't use addIrregularRule which converts to lower-case
-    pluralize.addPluralRule(a[0], a[1])
-    a = a[1]
+export function withplural(word, count, withnumber) {
+  if (Array.isArray(word)) {
+    let rv = withnumber ? count + ' ' : ''
+    return rv + ((count === 1) ? word[0] : word[1])
   }
-  return pluralize(a, b, c)
+  return pluralize(word, count, withnumber)
 }
 
