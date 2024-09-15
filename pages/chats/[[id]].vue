@@ -205,7 +205,6 @@
 <script setup>
 import dayjs from 'dayjs'
 
-import { storeToRefs } from 'pinia'
 import { buildHead } from '../../composables/useBuildHead'
 import { useAuthStore } from '../../stores/auth'
 import { ref, useRoute, useRouter } from '#imports'
@@ -252,8 +251,9 @@ const showChats = ref(20)
 
 // When there's a flag in the chat store to show the modal.  Don't reset the value in the store here otherwise
 // reactivity will stop the modal being shown.
-const showContactDetailsAskModal =
-  storeToRefs(chatStore).showContactDetailsAskModal
+//
+// Don't ask for contact details on private group.
+const showContactDetailsAskModal = false
 
 const id = route.params.id ? parseInt(route.params.id) : 0
 
