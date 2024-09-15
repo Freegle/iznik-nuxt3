@@ -231,6 +231,12 @@ export default defineNuxtConfig({
     server: true,
   },
 
+
+  // Sometimes we need to change the host when doing local testing with browser stack.
+  devServer: {
+    host: '127.0.0.1',
+    port: 3000,
+  },
   app: {
     head: {
       title: "Freegle - Don't throw it away, give it away!",
