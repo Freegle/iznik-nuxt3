@@ -145,6 +145,11 @@ export default {
         'Moderation tool for Freegle volunteers'
       )
     )
+    useHead({
+      bodyAttrs: {
+        class: 'bodyMT'
+      }
+    })
 
     return { authStore, googleReady, miscStore, modConfigStore, oneTap }
   },
@@ -173,7 +178,7 @@ export default {
     },
     menuCount() {
       const work = this.authStore?.work
-      if( !work || !work.total) return 0
+      if (!work || !work.total) return 0
       return work.total
     },
     work() {
@@ -355,7 +360,7 @@ nav .navbar-nav li a.nuxt-link-active[data-v-314f53c6] {
 }
 
 .navback {
-  background-color: $color-modtools-blue--dark;
+  background-color: $color-modtools-navbar-background;
 }
 
 nav .navbar-nav li a,
