@@ -198,7 +198,7 @@ export default {
 <style scoped lang="scss">
 //@import 'color-vars';
 
-::v-deep h5 {
+:deep(h5) {
   width: 100%;
 }
 

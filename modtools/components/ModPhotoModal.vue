@@ -59,7 +59,7 @@ export default {
   height: 200px;
 }
 
-::v-deep img {
+:deep(img) {
   width: 100%;
 }
 </style>

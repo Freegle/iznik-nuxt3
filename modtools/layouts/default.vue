@@ -332,7 +332,7 @@ html {
 }
 
 /* Style the external nav-link class */
-::v-deep .nav-link {
+:deep(.nav-link) {
   padding-left: 2px !important;
   padding-right: 2px !important;
   padding-top: 0px !important;
