@@ -48,10 +48,10 @@ const config = defineNuxtConfig({
   ],
 
   // Sometimes we need to change the host when doing local testing with browser stack.
-  devServer: {
-    host: '127.0.0.1',
-    port: 3000,
-  },
+  //devServer: {
+  //  host: '127.0.0.1',
+  //  port: 3000,
+  //},
   app: {
     head: { // Overrides and inherits ones not set here
       title: "ModTools",
