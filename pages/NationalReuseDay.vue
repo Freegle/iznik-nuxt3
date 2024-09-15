@@ -11,7 +11,7 @@
         />
       </div>
       <div class="d-flex justify-content-around">
-        <b-card class="bg-white cardwidth">
+        <b-card class="cardwidth">
           <p>
             Join Freegle as we celebrate National Reuse Day On Friday 18th
             October. #NationalReuseDay is an annual event which celebrates the
@@ -40,7 +40,8 @@
           colour="magenta"
         />
         <NationalReuseDayBox
-          title="Resources"
+          title=""
+          image="/NRD/resources.png"
           description="Free communications assets and key links"
           url="https://councils.ilovefreegle.org/"
           colour="blue"
@@ -92,7 +93,7 @@ useHead(
     'Celebrate reuse and get involved',
     runtimeConfig.public.USER_SITE + '/councils/NationalReuseDay.png',
     {
-      style: 'background-color: #5eca24',
+      style: 'background-color: rgb(100 169 63)',
     }
   )
 )
@@ -164,6 +165,7 @@ onMounted(() => {
 
 .cardwidth {
   width: 100vw;
+  background-color: #f7f5ef;
 
   @include media-breakpoint-up(md) {
     width: 50vw;

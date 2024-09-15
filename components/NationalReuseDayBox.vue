@@ -1,7 +1,15 @@
 <template>
   <div class="box-wrapper">
     <ExternalLink :href="url">
-      <div :class="boxClass" class="box">
+      <div
+        :class="boxClass"
+        class="box"
+        :style="
+          'background-image: url(' +
+          image +
+          '); background-size: cover; background-repeat: no-repease; background-position: center center'
+        "
+      >
         <div class="button">
           <h2 class="text-center mb-0 ms-2 me-2">
             {{ title }}
@@ -31,6 +39,11 @@ const props = defineProps({
   colour: {
     type: String,
     required: true,
+  },
+  image: {
+    type: String,
+    required: false,
+    default: '',
   },
 })
 
@@ -74,8 +87,7 @@ p {
 
 h2 {
   color: black !important;
-  background-color: white !important;
-  box-shadow: 0 0 9px 10px white;
+  background-color: #f7f5ef !important;
   font-size: 1rem;
 
   @include media-breakpoint-up(md) {
