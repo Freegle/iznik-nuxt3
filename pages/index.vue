@@ -100,7 +100,7 @@
       </div>
       <VisualiseList
         v-if="!breakpoint || breakpoint === 'xs'"
-        class="mb-2 d-block d-sm-none"
+        class="mt-2 mb-2 d-block d-sm-none"
       />
     </div>
     <div class="app-download mt-2">
