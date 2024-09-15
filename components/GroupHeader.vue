@@ -27,7 +27,7 @@
           {{ group.membercount.toLocaleString() }} current freeglers.
         </div>
       </div>
-      <div class="group__links text-muted small">
+      <div class="group__links text-muted small d-none">
         See
         <!--eslint-disable-next-line-->
         <nuxt-link no-prefetch :to="{ path: '/communityevents/' + group.id }">community events</nuxt-link>,

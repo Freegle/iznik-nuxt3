@@ -151,7 +151,7 @@
           <b-button
             v-b-tooltip="'Send your address'"
             variant="secondary"
-            class="mr-2"
+            class="mr-2 d-none"
             @click="addressBook"
           >
             <v-icon icon="address-book" class="fa-fw" />&nbsp;Address
@@ -215,7 +215,7 @@
         <div
           v-if="chat && chat.chattype === 'User2User' && otheruser"
           disabled
-          class="mr-2"
+          class="mr-2 d-none"
           @click="addressBook"
         >
           <v-icon
