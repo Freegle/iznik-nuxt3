@@ -31,9 +31,9 @@ export default {
     }
   },
   async mounted() {
-    console.log('TODO stories.vue this.storyStore.fetchMT reviewed: 0 NOT GETTING THROUGH')
     await this.storyStore.fetchMT({
-      reviewed: 0 // TODO Fix as removed by BaseAPI remving falsey values
+      reviewed: 0,
+      dontzapfalsey: true, // Stop BaseAPI from removing above zero value
     })
   },
 
