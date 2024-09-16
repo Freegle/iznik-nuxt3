@@ -76,9 +76,9 @@ export default class BaseAPI {
 
       if (method === 'GET' && config?.params) {
         // Remove falsey values from the params. MT remove as it is important to pass some zeroes
-        //config.params = Object.fromEntries(
-        //  Object.entries(config.params).filter(([_, v]) => v)
-        //)
+        config.params = Object.fromEntries(
+          Object.entries(config.params).filter(([_, v]) => v)
+        )
         config.params.modtools = miscStore.modtools // MT ADDED
 
         // MT ADDED cope with arrays and objects eg components: ['me','work'] or context: { "Added": 12345678, "id": 12345 }
