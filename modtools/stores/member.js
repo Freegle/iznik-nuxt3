@@ -23,7 +23,7 @@ export const useMemberStore = defineStore({
       this.ratings = []
     },
     async fetchMembers(params) {
-      // console.log('useMemberStore fetchMembers',params)
+      //console.log('useMemberStore fetchMembers',params)
       let received = 0
       // Watch out for the store being cleared under the feet of this fetch. If that happens then we throw away the
       // results.
@@ -36,6 +36,8 @@ export const useMemberStore = defineStore({
         // Ensure the context is a real object, in case it has been in the store.
         params.context = cloneDeep(params.context)
       }
+      if( !params.context) delete params.context
+      if( !params.search) delete params.search
 
       const {
         members,

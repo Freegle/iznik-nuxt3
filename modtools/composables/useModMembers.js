@@ -67,7 +67,7 @@ const visibleMembers = computed(() => {
 })
 
 const loadMore = async function ($state) {
-  console.log('approved loadMore', group.value, show.value, members.value.length, visibleMembers.value.length)
+  // console.log('useModMembers loadMore', group.value!=null, show.value, members.value.length, visibleMembers.value.length)
   if (!group.value) {
     $state.complete()
     return
@@ -81,7 +81,7 @@ const loadMore = async function ($state) {
     } else {
       limit.value += distance.value
       const memberStore = useMemberStore()
-      const received = await memberStore.fetchMembers({
+      const params = {
         groupid: groupid.value,
         collection: collection.value,
         modtools: true,
@@ -90,7 +90,8 @@ const loadMore = async function ($state) {
         limit: limit.value,
         search: search.value,
         filter: filter.value
-      })
+      }
+      const received = await memberStore.fetchMembers(params)
 
       if (show.value < members.value.length) { // Just inc by one rather than set to members.value.length
         show.value++
