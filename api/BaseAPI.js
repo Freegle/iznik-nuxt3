@@ -75,7 +75,7 @@ export default class BaseAPI {
         'max-age=0, must-revalidate, no-cache, no-store, private'
 
       if (method === 'GET' && config?.params) {
-        // Remove falsey values from the params. MT remove as it is important to pass some zeroes
+        // Remove falsey values from the params. ???MT remove as it is important to pass some zeroes
         config.params = Object.fromEntries(
           Object.entries(config.params).filter(([_, v]) => v)
         )
