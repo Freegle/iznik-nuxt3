@@ -93,12 +93,6 @@ export default {
   components: {
     GChart,
   },
-  //layout: 'modtools',
-  mixins: [
-    //loginRequired,
-    //createGroupRoute('modtools/members/feedback'),
-    //modMembersPage
-  ],
   async setup() {
     const memberStore = useMemberStore()
     const modMembers = setupModMembers()

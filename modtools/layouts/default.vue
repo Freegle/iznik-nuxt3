@@ -205,13 +205,17 @@ export default {
     },
   },
   async mounted() {
-    // TODO
-    console.log('MODTOOLS.VUE mounted TODO')
-
     // For this layout we don't need to be logged in.  So can just continue.  But we want to know first whether or
     // not we are logged in.  We might already know that from the server via cookies, but if not, find out.
     if (!this.loginStateKnown) {
       await this.authStore.fetchUser()
+    }
+
+    // If not logged in then show loginModal
+    const me = this.authStore.user
+    if (!me || !me.id) {
+      this.$refs.loginModal.show()
+      return
     }
 
     // Start our timer.  Holding the time in the store allows us to update the time regularly and have reactivity

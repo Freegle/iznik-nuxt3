@@ -27,7 +27,6 @@ import { useMemberStore } from '../stores/member'
 import { setupModMembers } from '../../composables/useModMembers'
 
 export default {
-  //mixins: [loginRequired, modMembersPage],
   async setup() {
     const groupStore = useGroupStore()
     const memberStore = useMemberStore()

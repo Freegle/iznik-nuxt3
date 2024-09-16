@@ -13,7 +13,6 @@
 import { useStoryStore } from '@/stores/stories'
 
 export default {
-  //mixins: [loginRequired],
   async setup() {
     const storyStore = useStoryStore()
     return {
