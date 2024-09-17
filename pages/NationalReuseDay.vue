@@ -34,19 +34,21 @@
       <div class="spacer" />
       <div class="boxes ml-2 mr-2">
         <NationalReuseDayBox
-          title="Video"
+          title="A-Z Film"
           description="Watch and share our new A-Z of Freegle!"
+          image="/NRD/A-Zfilm.png"
           url="https://example.com"
           colour="magenta"
         />
         <NationalReuseDayBox
-          title=""
+          title="Resources"
           image="/NRD/resources.png"
           description="Free communications assets and key links"
           url="https://councils.ilovefreegle.org/"
           colour="blue"
         />
         <NationalReuseDayBox
+          image="/NRD/ReuseStories.png"
           title="Share your reuse story"
           description="Tell us why you love Freegle and find out what others are saying too"
           url="https://www.ilovefreegle.org/stories"
@@ -54,17 +56,20 @@
         />
         <NationalReuseDayBox
           title="Freegle something"
+          image="/NRD/FreegleIt.png"
           description="Give and get for free, locally!"
           url="https://www.ilovefreegle.org"
           colour="gold"
         />
         <NationalReuseDayBox
           title="Quiz"
+          image="/NRD/ReuseQuiz.png"
           description="Test your knowledge and discover fun facts about reuse!"
           url="https://councils.ilovefreegle.org/"
           colour="orange"
         />
         <NationalReuseDayBox
+          image="/NRD/TellAFriend.png"
           title="Refer a friend to Freegle"
           description="Get more reuse happening by spreading the word"
           url="https://www.ilovefreegle.org/promote"

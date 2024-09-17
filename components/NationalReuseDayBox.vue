@@ -1,5 +1,5 @@
 <template>
-  <div class="box-wrapper">
+  <div class="box-wrapper" :title="title">
     <ExternalLink :href="url">
       <div
         :class="boxClass"
@@ -9,13 +9,7 @@
           image +
           '); background-size: cover; background-repeat: no-repease; background-position: center center'
         "
-      >
-        <div class="button">
-          <h2 class="text-center mb-0 ms-2 me-2">
-            {{ title }}
-          </h2>
-        </div>
-      </div>
+      ></div>
       <p class="text-center mt-2 font-weight-normal">
         {{ description }}
       </p>
