@@ -83,7 +83,6 @@
           id="chatmessage"
           ref="chatarea"
           v-model="sendmessage"
-          :debounce="debounce"
           class="h-100"
           placeholder="Type here..."
           enterkeyhint="enter"
@@ -95,7 +94,6 @@
           id="chatmessage"
           ref="chatarea"
           v-model="sendmessage"
-          :debounce="debounce"
           class="h-100"
           placeholder="Type here..."
           enterkeyhint="send"
@@ -432,7 +430,6 @@ export default {
   },
   data() {
     return {
-      debounce: 500,
       sending: false,
       uploading: false,
       showMicrovolunteering: false,
@@ -461,7 +458,7 @@ export default {
       // Bootstrap Vue Next doesn't yet have autoresizing.
       const height = Math.min(6, Math.round(this.sendmessage?.length / 60))
 
-      return 'height: ' + (height + 6) + 'em'
+      return height + 6 + 'rem'
     },
     noticesToShow() {
       return (
@@ -757,10 +754,7 @@ export default {
       this.showProfileModal = true
     },
     sendOnEnter() {
-      // Because of debounce, we might not have the full message yet.  Start a timer.
-      setTimeout(() => {
-        this.send()
-      }, this.debounce + 100)
+      this.send()
     },
     async send(callback) {
       if (!this.sending) {
@@ -916,5 +910,7 @@ export default {
 
 :deep(textarea) {
   transition: height 1s;
+
+  height: v-bind(height) !important;
 }
 </style>
