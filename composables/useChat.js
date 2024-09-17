@@ -100,6 +100,15 @@ export function setupChat(selectedChatId, chatMessageId) {
     chatmessage = computed(() => chatStore.messageById(chatMessageId))
   }
 
+  // We use the time when this was instantiated.  This is to avoid tooSoonToNudge getting recalculated and
+  // therefore forcing re-renders, which we've seen when doing perf analysis.
+  // It doesn't matter too much if we say that it's too soon to nudge until the next
+  // refresh.
+  const now = new Date().getTime()
+  const tooSoonToNudge = computed(() => {
+    return lastfromme.value > 0 && now - lastfromme.value < 24 * 60 * 60 * 1000
+  })
+
   return {
     chat,
     unseen,
@@ -107,12 +116,7 @@ export function setupChat(selectedChatId, chatMessageId) {
     otheruser,
     mymessages,
     lastfromme,
-    tooSoonToNudge: computed(() => {
-      return (
-        lastfromme.value > 0 &&
-        new Date().getTime() - lastfromme.value < 24 * 60 * 60 * 1000
-      )
-    }),
+    tooSoonToNudge,
     milesaway,
     milesstring,
     chatStore,
