@@ -667,6 +667,7 @@ export default {
           availablenow: this.message.availablenow,
           type: this.message.type,
           repostof: this.id,
+          deadline: null,
         },
         this.me
       )
