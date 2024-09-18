@@ -60,7 +60,7 @@
       <h4 class="mt-2">
         Group Info
       </h4>
-      Group id <v-icon name="hashtag" class="text-muted" scale="0.75" /><strong>{{ group.id }}</strong>.
+      Group id <v-icon icon="hashtag" class="text-muted" scale="0.75" /><strong>{{ group.id }}</strong>.
       <br>
       <br>
       <Clipboard v-if="group.url" class="mr-3 mb-1" :value="group.url" />
@@ -98,7 +98,7 @@
       </div>
       <br>
       Affiliation last confirmed: {{ dateonly(group.affiliationconfirmed) }} by
-      <v-icon name="hashtag" class="text-muted" scale="0.75" />{{ group.affiliationconfirmedby }}
+      <v-icon icon="hashtag" class="text-muted" scale="0.75" />{{ group.affiliationconfirmedby }}
       <br>
       <h4 class="mt-2">
         Centre

@@ -31,7 +31,7 @@ import { useChatMessageStore } from '../stores/chatmessages'
 const REVIEWCHAT = null
 
 export default {
-  async setup() {
+  setup() {
     const chatMessageStore = useChatMessageStore()
     return {
       chatMessageStore,
@@ -57,8 +57,7 @@ export default {
       })
     },
     messages() {
-      return []
-      //return this.$store.getters['chatmessages/getMessages'](REVIEWCHAT)
+      return this.chatMessageStore.getMessages(REVIEWCHAT)
     },
     work() {
       // Count for the type of work we're interested in.
@@ -92,16 +91,17 @@ export default {
   },
   methods: {
     loadMore: function ($state) {
-      $state.complete()
-      /*if (this.show < this.messages.length) {
+      console.log('review loadMore', this.show, this.messages.length)
+      if (this.show < this.messages.length) {
         // This means that we will gradually add the messages that we have fetched from the server into the DOM.
         // Doing that means that we will complete our initial render more rapidly and thus appear faster.
         this.show++
         $state.loaded()
       } else {
         const currentCount = this.messages.length
+        $state.complete()
 
-        this.$store
+        /*this.$store
           .dispatch('chatmessages/fetch', {
             chatid: REVIEWCHAT,
             context: this.context,
@@ -121,8 +121,8 @@ export default {
           .catch(e => {
             $state.complete()
             console.log('Complete on error', e)
-          })
-      }*/
+          })*/
+      }
     },
     async clearAndLoad() {
       // There's new stuff to do.  Reload.

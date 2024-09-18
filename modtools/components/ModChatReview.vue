@@ -29,7 +29,11 @@
           </span>
         </NoticeMessage>
         <div class="rounded bg-white p-2 font-weight-bold border border-warning mb-2">
-          <ChatMessage :chat="message.chatroom" :chatmessage="message" :otheruser="message.fromuser" last :chatusers="chatusers" highlight-emails />
+          <!--ChatMessage :id="message.id" :chatid="message.chatid" last  highlight-emails /-->
+          {{ message }}
+
+          <!--ChatMessage :chatid="message.chatroom.id" :chatmessage="message" :otheruser="message.fromuser" last highlight-emails :id="message.id" /--> 
+          <!-- :chatusers="chatusers" -->
         </div>
         <ModSpammer v-if="message.touser.spammer" :user="message.touser" />
         <div class="d-flex justify-content-between flex-wrap">
@@ -95,15 +99,26 @@
         </div>
       </b-card-footer>
     </b-card>
-    <ModChatNoteModal v-if="message" ref="modnote" :chatid="message.chatid" />
+    <!-- TODO ModChatNoteModal v-if="message" ref="modnote" :chatid="message.chatid" /-->
     <ModMessageEmailModal v-if="showOriginal" :id="message.bymailid" ref="original" />
   </div>
 </template>
 <script>
+import { useChatMessageStore } from '../stores/chatmessages'
 
 export default {
   //mixins: [chat],
+  setup() {
+    const chatMessageStore = useChatMessageStore()
+    return {
+      chatMessageStore,
+    }
+  },
   props: {
+    id: { // Was in mixins/chat.js
+      type: Number,
+      required: true
+    },
     message: {
       type: Object,
       required: true
@@ -115,6 +130,11 @@ export default {
     }
   },
   computed: {
+    chatusers() { // Was in mixins/chat.js
+      // This is a bit expensive in the store, so it's better to get it here and pass it down than potentially to
+      // get it in each message we render.
+      return this.chatMessageStore.getUsers(this.id)
+    },
     reviewreason() {
       let ret = null
 

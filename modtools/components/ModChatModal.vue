@@ -48,9 +48,13 @@
           </infinite-loading>
           <ul v-for="chatmessage in chatmessages" :key="'chatmessage-' + chatmessage.id" class="p-0 pt-1 list-unstyled mb-1">
             <li v-if="chatmessage">
-              <ChatMessage :key="'chatmessage-' + chatmessage.id" :chatmessage="chatmessage" :chat="chat2"
+              TODO
+              <!--ChatMessage :key="'chatmessage-' + chatmessage.id" :id="chatmessage.id" :chatid="chatmessage.chatid" :last="chatmessage.id === chatmessages[chatmessages.length - 1].id" :pov="pov" class="mb-1" /-->
+                {{ chatmessage }}
+
+              <!--ChatMessage :key="'chatmessage-' + chatmessage.id" :chatmessage="chatmessage" :chat="chat2"
                 :otheruser="chat2.user1 && pov === chat2.user1.id ? chat2.user2 : chat2.user1"
-                :last="chatmessage.id === chatmessages[chatmessages.length - 1].id" :pov="pov" :chatusers="chatusers" />
+                :last="chatmessage.id === chatmessages[chatmessages.length - 1].id" :pov="pov" :chatusers="chatusers" /-->
             </li>
           </ul>
         </div>
@@ -68,10 +72,10 @@ import { useModal } from '~/composables/useModal'
 import { setupChat } from '~/composables/useChat'
 //import chatCollate from '@/mixins/chatCollate.js'
 //import chat from '@/mixins/chat.js'
-const ChatMessage = () => import('~/components/ChatMessage')
+//const ChatMessage = () => import('~/components/ChatMessage')
 
 export default {
-  components: { ChatMessage },
+  //components: { ChatMessage },
   async setup(props) {
     const { modal, hide } = useModal()
 
