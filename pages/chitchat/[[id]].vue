@@ -326,7 +326,7 @@ export default {
   methods: {
     runCheck() {
       // People sometimes try to use chitchat to offer/request items, despite what are technically known as
-      // Fuck Off Obvious Big Buttons.  Catch the most obvious attempts and redirect them.
+      // Very Obvious Big Buttons.  Catch the most obvious attempts and redirect them.
       if (this.runChecks) {
         let msg = this.startThread
 
