@@ -1,5 +1,5 @@
 <template>
-  <div class="box-wrapper" :title="title">
+  <div class="box-wrapper d-flex justify-content-around" :title="title">
     <ExternalLink :href="url">
       <div
         :class="boxClass"
@@ -60,7 +60,7 @@ const boxClass = computed(() => {
   height: 100px;
   align-content: center;
 
-  @include media-breakpoint-up(md) {
+  @include media-breakpoint-up(xl) {
     width: 200px;
     height: 150px;
   }
@@ -70,7 +70,7 @@ p {
   font-size: 0.75rem;
   width: 150px;
 
-  @include media-breakpoint-up(md) {
+  @include media-breakpoint-up(xl) {
     width: 200px;
   }
 }
