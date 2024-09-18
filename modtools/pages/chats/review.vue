@@ -1,10 +1,161 @@
 <template>
   <div>
-    <h1>Chats - review</h1>
-    <nuxt-link to="10">10</nuxt-link>
+    <client-only>
+      <ModHelpChatReview />
+      <div>
+        <div v-for="message in visibleMessages" :key="'messagelist-' + message.id" class="p-0 mt-2">
+          <ModChatReview :id="message.chatid" :message="message" />
+        </div>
 
-</div>
+        <infinite-loading direction="top" force-use-infinite-wrapper="body" :distance="distance" @infinite="loadMore" :identifier="bump">
+          <template #no-results>
+            <p class="p-2">There are no chat messages to review at the moment.</p>
+          </template>
+          <template #no-more>Quoth the Raven "Nevermore."</template>
+          <template #spinner>
+            <b-img lazy src="/loader.gif" alt="Loading" />
+          </template>
+        </infinite-loading>
+
+      </div>
+      <SpinButton v-if="visibleMessages && visibleMessages.length > 1" class="mt-2" icon-name="trash-alt" label="Delete All" variant="white"
+        @handle="deleteAll" />
+      <ConfirmModal v-if="showDeleteModal" ref="deleteConfirm" title="Delete all chat messages?" @confirm="deleteConfirmed" />
+    </client-only>
+  </div>
 </template>
+<script>
+import { useChatMessageStore } from '../stores/chatmessages'
 
-<script setup>
+// We need an id for the store.  The null value is a special case used just for retrieving chat review messages.
+const REVIEWCHAT = null
+
+export default {
+  async setup() {
+    const chatMessageStore = useChatMessageStore()
+    return {
+      chatMessageStore,
+    }
+  },
+  data: function () {
+    return {
+      context: null,
+      // We fetch less stuff at once for MT.  This is because for slow devices and networks the time to fetch and
+      // render is significant, and each of these consumes a lot of screen space.  So by fetching and rendering less,
+      // we increase how fast it feels.
+      distance: 1000,
+      limit: 5,
+      show: 0,
+      bump: 0,
+      showDeleteModal: false
+    }
+  },
+  computed: {
+    visibleMessages() {
+      return this.messages.slice(0, this.show).filter(message => {
+        return message !== null
+      })
+    },
+    messages() {
+      return []
+      //return this.$store.getters['chatmessages/getMessages'](REVIEWCHAT)
+    },
+    work() {
+      // Count for the type of work we're interested in.
+      return -98
+      //const work = this.$store.getters['auth/work']
+      //return work.chatreview
+    },
+    modalOpen() {
+      return false
+      // TODO return this.$store.getters['misc/get']('modalOpen')
+    }
+  },
+  watch: {
+    work(newVal, oldVal) {
+      if (!this.modalOpen) {
+        if (newVal > oldVal) {
+          this.clearAndLoad()
+        } else {
+          const visible = true
+          // TODO const visible = this.$store.getters['misc/get']('visible')
+
+          if (!visible) {
+            this.clearAndLoad()
+          }
+        }
+      }
+    }
+  },
+  async mounted() {
+    await this.clearAndLoad()
+  },
+  methods: {
+    loadMore: function ($state) {
+      $state.complete()
+      /*if (this.show < this.messages.length) {
+        // This means that we will gradually add the messages that we have fetched from the server into the DOM.
+        // Doing that means that we will complete our initial render more rapidly and thus appear faster.
+        this.show++
+        $state.loaded()
+      } else {
+        const currentCount = this.messages.length
+
+        this.$store
+          .dispatch('chatmessages/fetch', {
+            chatid: REVIEWCHAT,
+            context: this.context,
+            limit: this.limit
+          })
+          .then(() => {
+            this.context = this.$store.getters['chatmessages/getContext']
+
+            if (currentCount === this.messages.length) {
+              this.complete = true
+              $state.complete()
+            } else {
+              $state.loaded()
+              this.show++
+            }
+          })
+          .catch(e => {
+            $state.complete()
+            console.log('Complete on error', e)
+          })
+      }*/
+    },
+    async clearAndLoad() {
+      // There's new stuff to do.  Reload.
+      // We don't want to pick up any real chat messages.
+      await this.chatMessageStore.clearContext({
+        chatid: REVIEWCHAT
+      })
+
+      await this.chatMessageStore.clearMessages({
+        chatid: REVIEWCHAT
+      })
+
+      await this.chatMessageStore.fetch({
+        chatid: REVIEWCHAT,
+        limit: this.limit
+      })
+
+      this.bump++
+    },
+    deleteAll(callback) {
+      this.showDeleteModal = true
+      callback()
+    },
+    async deleteConfirmed() {
+      await this.visibleMessages.forEach(async m => {
+        if (!m.widerchatreview) {
+          await this.$store.dispatch('chatmessages/reject', {
+            id: m.id,
+            chatid: null
+          })
+        }
+      })
+    }
+  }
+}
 </script>

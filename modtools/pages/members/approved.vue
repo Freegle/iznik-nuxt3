@@ -49,7 +49,7 @@
 <script>
 import { useGroupStore } from '@/stores/group'
 import { useMiscStore } from '@/stores/misc'
-import { useMemberStore } from '../stores/member'
+import { useMemberStore } from '@/stores/member'
 import { setupModMembers } from '../../composables/useModMembers'
 import { pluralise } from '../composables/usePluralise'
 
