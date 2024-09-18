@@ -36,7 +36,7 @@
                 everyone to:bbbb
               </p>
               <ul class="list-unstyled mb-0">
-                <li>b✅ Save money.</li>
+                <li>✅ Save money.</li>
                 <li>✅ Cut waste.</li>
                 <li>✅ Help others.</li>
                 <li>✅ Protect the planet.</li>
