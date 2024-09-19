@@ -72,7 +72,7 @@ const boxClass = computed(() => {
 }
 
 p {
-  font-size: 0.75rem;
+  font-size: 0.9rem;
   width: 120px;
 
   @include media-breakpoint-up(md) {

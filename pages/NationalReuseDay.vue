@@ -7,8 +7,8 @@
           <div class="d-flex justify-content-around">
             <ProxyImage
               preload
-              src="/councils/NationalReuseDay2.png"
-              alt="National Reuse Day logo"
+              src="/NRD/Banner.png"
+              alt="National Reuse Day banner"
               class-name="image mt-2 w-100"
             />
           </div>
@@ -25,7 +25,7 @@
           <div class="boxes ml-2 mr-2 d-flex flex-wrap justify-content-between">
             <NationalReuseDayBox
               title="A-Z Film"
-              description="Watch and share our new Free Shop film!"
+              description="Watch and share our new film about the Freegle Free Shop."
               image="/NRD/A-Zfilm.png"
               url="https://www.youtube.com/embed/1rjCVHPOIpA"
               colour="magenta"
@@ -33,21 +33,21 @@
             <NationalReuseDayBox
               title="Resources"
               image="/NRD/resources.png"
-              description="Free communications assets and key links"
-              url="https://councils.ilovefreegle.org/"
+              description="Free communications assets, images and press release."
+              url="https://drive.google.com/drive/folders/1TuJV6LOVv_1x3UMmUBhhkCsc48uhDwA4?usp=share_link"
               colour="blue"
             />
             <NationalReuseDayBox
               image="/NRD/ReuseStories.png"
               title="Share your reuse story"
-              description="Tell us why you love Freegle and find out what others are saying too"
+              description="Tell us why you love Freegle and find out what others are saying too."
               url="https://www.ilovefreegle.org/stories"
               colour="purple"
             />
             <NationalReuseDayBox
               title="Freegle something"
               image="/NRD/FreegleIt.png"
-              description="Give and get for free, locally!"
+              description="Give and get stuff for free, locally."
               url="https://www.ilovefreegle.org"
               colour="gold"
             />
@@ -61,7 +61,7 @@
             <NationalReuseDayBox
               image="/NRD/TellAFriend.png"
               title="Refer a friend to Freegle"
-              description="Get more reuse happening by spreading the word"
+              description="Get more reuse happening by spreading the word."
               url="https://www.ilovefreegle.org/promote"
               colour="blue"
             />
@@ -85,6 +85,13 @@
                 <li>✅ Help others.</li>
                 <li>✅ Protect the planet.</li>
               </ul>
+              <p class="mt-2">
+                For more information about National Reuse Day contact us here:
+                <SupportLink
+                  email="info@ilovefreegle.org"
+                  text="info@ilovefreegle.org"
+                />.
+              </p>
             </b-card>
           </div>
         </div>
