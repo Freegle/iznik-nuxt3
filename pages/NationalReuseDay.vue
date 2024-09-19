@@ -182,6 +182,9 @@ onMounted(() => {
 p,
 li {
   color: #343841;
+}
+
+:deep(p, li) {
   font-family: 'Varela Round', 'Source Sans Pro', -apple-system,
     BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
