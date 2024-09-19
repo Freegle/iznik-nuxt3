@@ -103,18 +103,20 @@ definePageMeta({
   layout: 'no-navbar',
 })
 
-useHead(
-  buildHead(
-    route,
-    runtimeConfig,
-    'National Reuse Day 2024',
-    'Celebrate reuse and get involved',
-    runtimeConfig.public.USER_SITE + '/councils/NationalReuseDay.png',
-    {
-      style: 'background-color: rgb(100 169 63)',
-    }
-  )
+const head = buildHead(
+  route,
+  runtimeConfig,
+  'National Reuse Day 2024',
+  'Celebrate reuse and get involved',
+  runtimeConfig.public.USER_SITE + '/councils/NationalReuseDay.png',
+  {
+    style: 'background-color: rgb(100 169 63)',
+  }
 )
+
+head.style = ['https://fonts.googleapis.com/css?family=Varela+Round']
+
+useHead(head)
 
 function removeNavbar() {
   // Remove nav elements from the DOM.  Bit hacky, but it'll do.
@@ -181,5 +183,7 @@ onMounted(() => {
 p,
 li {
   color: #343841;
+  font-family: 'Varela Round', 'Source Sans Pro', -apple-system,
+    BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 </style>
