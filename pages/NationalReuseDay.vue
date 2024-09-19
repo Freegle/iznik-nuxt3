@@ -4,7 +4,6 @@
     <b-col cols="12" md="6">
       <div class="wrapper d-flex flex-column justify-content-around">
         <div class="inner">
-          <h1 class="text-center text-white">National Reuse Day 2024</h1>
           <div class="d-flex justify-content-around">
             <ProxyImage
               preload
@@ -22,32 +21,11 @@
               />
             </div>
           </div>
-          <div class="d-flex justify-content-around">
-            <b-card class="cardwidth">
-              <p>
-                Join Freegle as we celebrate National Reuse Day On Friday 18th
-                October. #NationalReuseDay is an annual event which celebrates
-                the wonderful and powerful act of REUSE - in all its forms.
-                Let's work together to put #Reuse firmly into the spotlight!
-              </p>
-              <p>
-                This year we will be asking people to #ChooseToReuse everyday,
-                because it's simple, anyone can do it and it's a great way for
-                everyone to:bbbb
-              </p>
-              <ul class="list-unstyled mb-0">
-                <li>✅ Save money.</li>
-                <li>✅ Cut waste.</li>
-                <li>✅ Help others.</li>
-                <li>✅ Protect the planet.</li>
-              </ul>
-            </b-card>
-          </div>
           <div class="spacer" />
           <div class="boxes ml-2 mr-2 d-flex flex-wrap justify-content-between">
             <NationalReuseDayBox
               title="A-Z Film"
-              description="Watch and share our new A-Z of Freegle!"
+              description="Watch and share our new Free Shop film!"
               image="/NRD/A-Zfilm.png"
               url="https://www.youtube.com/embed/1rjCVHPOIpA"
               colour="magenta"
@@ -87,6 +65,27 @@
               url="https://www.ilovefreegle.org/promote"
               colour="blue"
             />
+          </div>
+          <div class="d-flex justify-content-around">
+            <b-card class="cardwidth">
+              <p>
+                Join Freegle as we celebrate National Reuse Day On Friday 18th
+                October. #NationalReuseDay is an annual event which celebrates
+                the wonderful and powerful act of REUSE - in all its forms.
+                Let's work together to put #Reuse firmly into the spotlight!
+              </p>
+              <p>
+                This year we will be asking people to #ChooseToReuse everyday,
+                because it's simple, anyone can do it and it's a great way for
+                everyone to:
+              </p>
+              <ul class="list-unstyled mb-0">
+                <li>✅ Save money.</li>
+                <li>✅ Cut waste.</li>
+                <li>✅ Help others.</li>
+                <li>✅ Protect the planet.</li>
+              </ul>
+            </b-card>
           </div>
         </div>
       </div>
@@ -147,7 +146,7 @@ onMounted(() => {
   height: 30px;
 
   @include media-breakpoint-up(md) {
-    height: 80px;
+    height: 40px;
   }
 }
 
@@ -162,7 +161,7 @@ onMounted(() => {
   @include media-breakpoint-up(md) {
     grid-template-columns: 1fr 1fr 1fr;
     grid-template-rows: 1fr 1fr;
-    grid-row-gap: 50px;
+    grid-row-gap: 20px;
   }
 }
 
@@ -177,5 +176,10 @@ onMounted(() => {
 
 :deep(.image img) {
   width: 100%;
+}
+
+p,
+li {
+  color: #343841;
 }
 </style>
