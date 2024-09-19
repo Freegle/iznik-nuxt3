@@ -141,7 +141,6 @@ onMounted(() => {
 .wrapper {
   color: $color-white;
   font-weight: bold;
-  height: 100vh;
 }
 
 .spacer {

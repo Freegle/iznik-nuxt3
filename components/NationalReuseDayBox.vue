@@ -56,9 +56,14 @@ const boxClass = computed(() => {
   border-radius: 10px;
   border: 3px solid white;
   padding: 10px;
-  width: 150px;
-  height: 100px;
+  width: 120px;
+  height: 90px;
   align-content: center;
+
+  @include media-breakpoint-up(md) {
+    width: 200px;
+    height: 150px;
+  }
 
   @include media-breakpoint-up(xl) {
     width: 200px;
@@ -68,7 +73,11 @@ const boxClass = computed(() => {
 
 p {
   font-size: 0.75rem;
-  width: 150px;
+  width: 120px;
+
+  @include media-breakpoint-up(md) {
+    width: 150px;
+  }
 
   @include media-breakpoint-up(xl) {
     width: 200px;
@@ -76,7 +85,15 @@ p {
 }
 
 .box-wrapper {
-  width: 200px;
+  width: 120px;
+
+  @include media-breakpoint-up(md) {
+    width: 150px;
+  }
+
+  @include media-breakpoint-up(xl) {
+    width: 200px;
+  }
 }
 
 h2 {
