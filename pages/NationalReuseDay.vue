@@ -27,7 +27,7 @@
               title="A-Z Film"
               description="Watch and share our new film about the Freegle Free Shop."
               image="/NRD/A-Zfilm.png"
-              url="https://ilovefreegle.org/shortlink/FreeShopVideo"
+              url="https://www.youtube.com/embed/1rjCVHPOIpA"
               colour="magenta"
             />
             <NationalReuseDayBox
