@@ -106,6 +106,7 @@
           @focus="markRead"
         />
         <Dropdown
+          v-if="showSuggested"
           placement="top"
           :shown="showSuggested"
           :triggers="[]"
@@ -580,8 +581,10 @@ export default {
     },
     sendmessage(newVal, oldVal) {
       // This will result in the chat header shrinking once you start typing, to give more room, and then
-      // expanding back again if you delete everything.
-      this.$emit('typing', newVal?.length)
+      // expanding back again if you delete everything.  Only emit the event when the state changes.
+      if ((newVal && !oldVal) || (!newVal && oldVal)) {
+        this.$emit('typing', newVal?.length)
+      }
     },
     me: {
       async handler(newVal, oldVal) {

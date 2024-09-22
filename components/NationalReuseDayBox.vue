@@ -1,5 +1,5 @@
 <template>
-  <div class="box-wrapper">
+  <div class="box-wrapper d-flex justify-content-around" :title="title">
     <ExternalLink :href="url">
       <div
         :class="boxClass"
@@ -9,13 +9,7 @@
           image +
           '); background-size: cover; background-repeat: no-repease; background-position: center center'
         "
-      >
-        <div class="button">
-          <h2 class="text-center mb-0 ms-2 me-2">
-            {{ title }}
-          </h2>
-        </div>
-      </div>
+      ></div>
       <p class="text-center mt-2 font-weight-normal">
         {{ description }}
       </p>
@@ -62,27 +56,44 @@ const boxClass = computed(() => {
   border-radius: 10px;
   border: 3px solid white;
   padding: 10px;
-  width: 150px;
-  height: 100px;
+  width: 120px;
+  height: 90px;
   align-content: center;
 
   @include media-breakpoint-up(md) {
     width: 200px;
     height: 150px;
   }
+
+  @include media-breakpoint-up(xl) {
+    width: 200px;
+    height: 150px;
+  }
 }
 
 p {
-  font-size: 0.75rem;
-  width: 150px;
+  font-size: 0.9rem;
+  width: 120px;
 
   @include media-breakpoint-up(md) {
+    width: 150px;
+  }
+
+  @include media-breakpoint-up(xl) {
     width: 200px;
   }
 }
 
 .box-wrapper {
-  width: 200px;
+  width: 120px;
+
+  @include media-breakpoint-up(md) {
+    width: 150px;
+  }
+
+  @include media-breakpoint-up(xl) {
+    width: 200px;
+  }
 }
 
 h2 {
