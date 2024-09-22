@@ -19,10 +19,44 @@
         />
         <hr />
         <div ref="faq">
-          <HelpQuestion id="unsubscribe" :matches="matches">
-            <template #title>Has Maya added some help questions yet?</template>
+          <HelpQuestion id="wheremeet" :matches="matches">
+            <template #title>Where can we meet to make the exchange?</template>
             <template #default>
-              <p>No.</p>
+              <p>
+                It must be on the school site - the crush hall and Ada Benson
+                atrium are designated areas.
+              </p>
+            </template>
+          </HelpQuestion>
+          <HelpQuestion id="whatpost" :matches="matches">
+            <template #title>What can I post?</template>
+            <template #default>
+              <p>
+                At the moment this is a site designated for school items only -
+                eg. books, PE kit, stationery.
+              </p>
+            </template>
+          </HelpQuestion>
+          <HelpQuestion id="unkind" :matches="matches">
+            <template #title
+              >What do I do if someone is being abusive/unkind on the
+              site?</template
+            >
+            <template #default>
+              <p>
+                Please report them to a safeguarding lead or any teacher, this
+                is meant to be a safe space!
+              </p>
+            </template>
+          </HelpQuestion>
+          <HelpQuestion id="chat" :matches="matches">
+            <template #title
+              >Can I use the messaging function to chat to friends?</template
+            >
+            <template #default>
+              <p>
+                Keep in mind that message conversations can be viewed by staff.
+              </p>
             </template>
           </HelpQuestion>
           <HelpQuestion id="toomanyemails" :matches="matches">
