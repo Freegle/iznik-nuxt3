@@ -316,7 +316,7 @@ export default {
       showMessagePhotosModal: false,
       broken: false,
       triedToRepost: false,
-      data: 0,
+      bump: 0,
     }
   },
   computed: {
