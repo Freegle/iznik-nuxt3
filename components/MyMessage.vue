@@ -1,6 +1,6 @@
 <template>
   <div v-observe-visibility="visibilityChanged">
-    <div v-if="visible && !hide && message?.id">
+    <div v-if="visible && message?.id">
       <div v-if="showOld || !message.outcomes || !message.outcomes.length">
         <b-card
           no-body
@@ -15,6 +15,7 @@
               </notice-message>
               <MessageSummary
                 :id="message.id"
+                :key="'summary-' + bump"
                 :replyable="false"
                 @attachments="showPhotos"
               />
@@ -200,7 +201,7 @@
         v-if="showOutcomeModal"
         :id="id"
         :type="outcomeType"
-        @outcome="hide = true"
+        @outcome="bump++"
         @hidden="showOutcomeModal = false"
       />
       <MessageShareModal
@@ -307,7 +308,6 @@ export default {
       visible: false,
       maxChars: 60,
       expanded: false,
-      hide: false,
       showOutcomeModal: false,
       outcomeType: null,
       showEditModal: false,
@@ -316,6 +316,7 @@ export default {
       showMessagePhotosModal: false,
       broken: false,
       triedToRepost: false,
+      data: 0,
     }
   },
   computed: {
