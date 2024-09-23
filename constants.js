@@ -58,7 +58,3 @@ export const TYPING_TIME_INVERVAL = 10000
 
 // The 37 miles figure comes from research from someone we shall call Clement.
 export const FAR_AWAY = 37
-
-// For testing whether job ads are more lucrative than Google Ads.  Once we know the answer, we'll
-// tidy the code.
-export const JOBS_ADS_INSTEAD_OF_GOOGLE_ADS = true

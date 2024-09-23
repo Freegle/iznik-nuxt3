@@ -42,17 +42,6 @@ export const useJobStore = defineStore({
         this.blocked = true
       }
 
-      // We want to show jobs with the ones with the highest CPC first, because that will generate the most
-      // for us.  But if the CPC is the same, then we can randomise the order - perhaps increasing the
-      // chances of a click.
-      this.list.forEach((j) => {
-        j.sortBy = j.cpc.toFixed(3) + '-' + Math.random()
-      })
-
-      this.list.sort((a, b) => {
-        return a.sortBy.localeCompare(b.sortBy)
-      })
-
       return this.list
     },
     log(params) {

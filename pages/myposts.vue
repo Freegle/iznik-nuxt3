@@ -31,13 +31,6 @@
             </b-button>
           </div>
           <div v-else>
-            <VisibleWhen
-              v-if="!JOBS_ADS_INSTEAD_OF_GOOGLE_ADS"
-              :at="['xs', 'sm', 'md']"
-            >
-              <JobsTopBar />
-            </VisibleWhen>
-
             <NewUserInfo v-if="newUserPassword" :password="newUserPassword" />
 
             <MyPostsPostsList
@@ -75,12 +68,10 @@ import VisibleWhen from '~/components/VisibleWhen'
 import SidebarLeft from '~/components/SidebarLeft'
 import SidebarRight from '~/components/SidebarRight'
 import ExpectedRepliesWarning from '~/components/ExpectedRepliesWarning'
-import JobsTopBar from '~/components/JobsTopBar'
 import MyPostsPostsList from '~/components/MyPostsPostsList.vue'
 import MyPostsSearchesList from '~/components/MyPostsSearchesList.vue'
 import { useDonationAskModal } from '~/composables/useDonationAskModal'
 import { useTrystStore } from '~/stores/tryst'
-import { JOBS_ADS_INSTEAD_OF_GOOGLE_ADS } from '~/constants'
 const DonationAskModal = defineAsyncComponent(() =>
   import('~/components/DonationAskModal')
 )

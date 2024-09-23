@@ -5,13 +5,9 @@ import Wkt from 'wicket'
 import { useAuthStore } from '~/stores/auth'
 import { fetchMe } from '~/composables/useMe'
 import { useTeamStore } from '~/stores/team'
-import { JOBS_ADS_INSTEAD_OF_GOOGLE_ADS } from '~/constants'
 
 export default {
   computed: {
-    JOBS_ADS_INSTEAD_OF_GOOGLE_ADS() {
-      return JOBS_ADS_INSTEAD_OF_GOOGLE_ADS
-    },
     loginStateKnown() {
       const authStore = useAuthStore()
       return authStore.loginStateKnown

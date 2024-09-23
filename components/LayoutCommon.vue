@@ -8,7 +8,7 @@
       <client-only>
         <div v-if="allowAd">
           <div
-            class="sticky w-100 d-flex flex-column justify-content-end"
+            class="sticky w-100 d-flex flex-column"
             :class="{
               allowClicks: !stickyAdRendered,
               'bg-white': stickyAdRendered,

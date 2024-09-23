@@ -129,8 +129,8 @@ function doNext() {
 
 // Hack MessageSummary to look better in this context.
 :deep {
-  img {
-    width: 100% !important;
+  .thumbnail img {
+    width: unset !important;
   }
 
   .header-title {

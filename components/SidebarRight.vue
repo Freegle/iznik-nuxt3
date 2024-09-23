@@ -8,20 +8,14 @@
       :div-id="adDivId"
       class="da"
     />
-    <JobsSidebar
-      v-if="showJobOpportunities && !JOBS_ADS_INSTEAD_OF_GOOGLE_ADS"
-      class="jobs border-bottom"
-    />
   </div>
 </template>
 <script>
-import JobsSidebar from './JobsSidebar'
 import ExternalDa from '~/components/ExternalDa.vue'
 
 export default {
   components: {
     ExternalDa,
-    JobsSidebar,
   },
   props: {
     showJobOpportunities: {

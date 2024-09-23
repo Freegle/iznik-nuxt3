@@ -1,11 +1,15 @@
 <template>
-  <div class="box-wrapper">
+  <div class="box-wrapper d-flex justify-content-around" :title="title">
     <ExternalLink :href="url">
-      <div class="box" :class="boxClass">
-        <div class="button">
-          <h2 class="text-center">{{ title }}</h2>
-        </div>
-      </div>
+      <div
+        :class="boxClass"
+        class="box"
+        :style="
+          'background-image: url(' +
+          image +
+          '); background-size: cover; background-repeat: no-repease; background-position: center center'
+        "
+      ></div>
       <p class="text-center mt-2 font-weight-normal">
         {{ description }}
       </p>
@@ -30,6 +34,11 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  image: {
+    type: String,
+    required: false,
+    default: '',
+  },
 })
 
 const boxClass = computed(() => {
@@ -47,17 +56,54 @@ const boxClass = computed(() => {
   border-radius: 10px;
   border: 3px solid white;
   padding: 10px;
-  width: 200px;
-  height: 150px;
+  width: 120px;
+  height: 90px;
   align-content: center;
+
+  @include media-breakpoint-up(md) {
+    width: 200px;
+    height: 150px;
+  }
+
+  @include media-breakpoint-up(xl) {
+    width: 200px;
+    height: 150px;
+  }
+}
+
+p {
+  font-size: 0.9rem;
+  width: 120px;
+
+  @include media-breakpoint-up(md) {
+    width: 150px;
+  }
+
+  @include media-breakpoint-up(xl) {
+    width: 200px;
+  }
 }
 
 .box-wrapper {
-  width: 200px;
+  width: 120px;
+
+  @include media-breakpoint-up(md) {
+    width: 150px;
+  }
+
+  @include media-breakpoint-up(xl) {
+    width: 200px;
+  }
 }
 
 h2 {
-  color: white !important;
+  color: black !important;
+  background-color: #f7f5ef !important;
+  font-size: 1rem;
+
+  @include media-breakpoint-up(md) {
+    font-size: 1rem;
+  }
 }
 
 :deep(.magenta) {
