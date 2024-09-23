@@ -43,6 +43,7 @@
     "vite-plugin-pwa": "^0.17.4"
   },
   "dependencies": {
+    "@algorithm.ts/lcs": "^4.0.3",
     "@capacitor-community/apple-sign-in": "^6.0.0",
     "@capacitor/android": "^6.0.0",
     "@capacitor/app": "^6.0.0",
@@ -54,7 +55,6 @@
     "@capacitor/network": "^6.0.0",
     "@capacitor/share": "^6.0.0",
     "@capawesome/capacitor-badge": "^6.0.0",
-    "@algorithm.ts/lcs": "^4.0.3",
     "@chenfengyuan/vue-number-input": "^2.0.1",
     "@codetrix-studio/capacitor-google-auth": "github:CodetrixStudio/CapacitorGoogleAuth",
     "@formatjs/intl-locale": "^4.0.0",
