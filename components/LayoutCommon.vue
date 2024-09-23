@@ -220,10 +220,16 @@ export default {
       const runtimeConfig = useRuntimeConfig()
       const { $sentrySetContext, $sentrySetUser } = useNuxtApp()
 
-      $sentrySetContext('builddate', {
+      const sentryParams = {
         buildDate: runtimeConfig.public.BUILD_DATE,
         deployId: runtimeConfig.public.DEPLOY_ID,
-      })
+      }
+      if(  runtimeConfig.public.ISAPP){
+        console.log('LAYOUT mobileVersion',runtimeConfig.public.MOBILE_VERSION)
+        sentryParams.mobileVersion = runtimeConfig.public.MOBILE_VERSION
+      }
+
+      $sentrySetContext('builddate', sentryParams)
 
       if (this.me) {
         // Set the context for sentry so that we know which users are having errors.
