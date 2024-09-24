@@ -4,10 +4,19 @@
     <p
       v-else-if="!id"
       class="text-center text-info font-weight-bold mt-2 chatHolder"
+      :class="{
+        stickyAdRendered,
+      }"
     >
       Please click on a chat in the left pane.
     </p>
-    <div v-else-if="me" class="chatHolder">
+    <div
+      v-else-if="me"
+      class="chatHolder"
+      :class="{
+        stickyAdRendered,
+      }"
+    >
       <ChatHeader :id="id" ref="chatheader" class="chatTitle" />
       <div
         v-if="chat && chatmessages?.length"
@@ -241,15 +250,18 @@ function typing(val) {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: calc(
-    v-bind(theHeight) - $sticky-banner-height-mobile * v-bind(stickyAdRendered)
-  );
+  height: v-bind(theHeight);
 
   @include media-breakpoint-up(md) {
-    height: calc(
-      v-bind(theHeight) - $sticky-banner-height-desktop *
-        v-bind(stickyAdRendered)
-    );
+    height: v-bind(theHeight);
+  }
+
+  &.stickyAdRendered {
+    height: calc(v-bind(theHeight) - $sticky-banner-height-mobile);
+
+    @include media-breakpoint-up(md) {
+      height: calc(v-bind(theHeight) - $sticky-banner-height-desktop);
+    }
   }
 }
 

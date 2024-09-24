@@ -18,11 +18,7 @@
     <!-- eslint-disable-next-line-->
     <div v-if="newsfeed.html" v-html="newsfeed.html" />
     <!-- eslint-disable-next-line-->
-    <div
-      v-else-if="newsfeed.message"
-      class="font-weight-bold preline forcebreak"
-      v-html="emessage"
-    />
+    <div v-else-if="newsfeed.message" class="font-weight-bold preline forcebreak" v-html="emessage" />
     <div>
       <b-img
         v-if="newsfeed.image"
