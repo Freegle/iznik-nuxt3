@@ -8,6 +8,9 @@
       v-if="me || showLoggedOut"
       v-observe-visibility="visibilityChanged"
       class="pointer"
+      :class="{
+        'bg-white': adShown,
+      }"
     >
       <div v-if="isVisible">
         <div class="d-flex w-100 justify-content-md-around">
