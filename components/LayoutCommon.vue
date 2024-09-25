@@ -1,7 +1,13 @@
 <template>
   <div>
     <main class="ml-0 ps-0 pe-0 pageContent">
-      <div class="aboveSticky" :class="{ allowAd }">
+      <div
+        class="aboveSticky"
+        :class="{
+          allowAd,
+          stickyAdRendered,
+        }"
+      >
         <!--        Breakpoint {{ breakpoint }}-->
         <slot ref="pageContent" />
       </div>
@@ -360,15 +366,11 @@ body.modal-open {
 }
 
 .aboveSticky {
-  &.allowAd {
-    padding-bottom: calc(
-      ($sticky-banner-height-mobile + 2px) * v-bind(stickyAdRendered)
-    );
+  &.allowAd.stickyAdRendered {
+    padding-bottom: calc($sticky-banner-height-mobile + 2px);
 
     @include media-breakpoint-up(md) {
-      padding-bottom: calc(
-        ($sticky-banner-height-desktop + 2px) * v-bind(stickyAdRendered)
-      );
+      padding-bottom: calc($sticky-banner-height-desktop + 2px);
     }
   }
 }

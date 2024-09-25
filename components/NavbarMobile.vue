@@ -96,6 +96,7 @@
         :class="{
           hideNavBarBottom: navBarBottomHidden,
           showNavBarBottom: !navBarBottomHidden,
+          stickyAdRendered,
         }"
       >
         <nuxt-link
@@ -334,13 +335,11 @@ const socialAllowed = ref(false)
   }
 }
 
-.navbot {
-  margin-bottom: calc($sticky-banner-height-mobile * v-bind(stickyAdRendered));
+.navbot.stickyAdRendered {
+  margin-bottom: $sticky-banner-height-mobile;
 
   @include media-breakpoint-up(md) {
-    margin-bottom: calc(
-      $sticky-banner-height-desktop * v-bind(stickyAdRendered)
-    );
+    margin-bottom: $sticky-banner-height-desktop;
   }
 }
 
