@@ -12,7 +12,7 @@
         </b-card-body>
       </b-card>
       <NoticeMessage
-        v-if="user.supporter"
+        v-if="user.supporter && false"
         variant="primary"
         class="supporter d-flex justify-content-between flex-wrap"
       >

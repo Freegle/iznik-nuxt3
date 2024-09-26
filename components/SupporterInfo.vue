@@ -1,5 +1,6 @@
 <template>
   <div
+    class="d-none"
     :class="{
       hidden: hidden,
     }"
