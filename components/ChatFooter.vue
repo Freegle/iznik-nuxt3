@@ -788,10 +788,10 @@ export default {
           await this._updateAfterSend()
 
           if (RSVP) {
-            this.RSVP = true
+            this.RSVP = false
           } else {
             // We've sent a message.  This would be a good time to do some microvolunteering.
-            this.showMicrovolunteering = true
+            this.showMicrovolunteering = false
           }
         }
       }

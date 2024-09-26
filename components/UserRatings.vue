@@ -1,5 +1,5 @@
 <template>
-  <span class="d-inline user-ratings">
+  <span class="d-none user-ratings">
     <span v-if="user?.info?.ratings">
       <span v-if="showName">
         {{ user.displayname }}
