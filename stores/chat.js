@@ -15,11 +15,53 @@ export const useChatStore = defineStore({
     messages: {},
     searchSince: null,
     showContactDetailsAskModal: false,
+    currentChatMT: null,
+    lastSearchMT: null,
   }),
   actions: {
     init(config) {
       this.config = config
       this.route = useRoute()
+    },
+    async listChatsMT(params){
+      console.log('useChatStore listChatsMT', params)
+      params = params || {
+        chattypes: ['User2Mod', 'Mod2Mod'],
+        search: params && params.search ? params.search : null
+      }
+      params.summary = true
+  
+      this.lastSearchMT = params.search
+  
+      try {
+        let current = null
+  
+        // We might have a current chat selected.  We want to make sure that we don't lose it.  This can happen if
+        // we search for an old chat that we wouldn't normally return.
+        const chatid = parseInt(this.currentChatMT)
+        current = chatid && this.list[chatid] ? this.list[chatid] : null
+  
+        const { chatrooms } = await api(this.config).chat.listChatsMT(params)
+        //console.log('useChatStore listChatsMT chatrooms', chatrooms)
+        this.list = chatrooms
+        chatrooms.forEach((c) => {
+          // If we already have the chat with this date then don't set it - this avoids reactivity causing a slew of
+          // component updates for no good reason.
+          if (
+            !this.listByChatId[c.id] ||
+            this.listByChatId[c.id].lastdate !== c.lastdate
+          ) {
+            this.listByChatId[c.id] = c
+          }
+        })
+  
+      } catch (e) {
+        // This happens a lot on mobile when the network is flaky.  It's not necessarily an end-user visible error,
+        // so there is no point letting it ripple up to Sentry.
+        if (!params.noerror) {
+          throw e
+        }
+      }
     },
     async fetchChats(search, logError, keepChat) {
       let since = null
@@ -66,7 +108,20 @@ export const useChatStore = defineStore({
       }
     },
     async fetchMessages(id, force) {
-      const messages = await api(this.config).chat.fetchMessages(id)
+      // console.log('fetchMessages A',id)
+
+      let messages = []
+      const miscStore = useMiscStore() // MT ADDED
+      if( miscStore.modtools){
+        const params = {
+          limit: 10,
+          modtools: true
+        }
+        const { chatmessages } = await api(this.config).chat.fetchMessagesMT(id,params)
+        messages = chatmessages
+      } else{
+        messages = await api(this.config).chat.fetchMessages(id)
+      }
 
       const update = () => {
         this.messages[id] = messages

@@ -104,14 +104,15 @@
   </div>
 </template>
 <script>
-import { useChatMessageStore } from '../stores/chatmessages'
+import { useChatStore } from '~/stores/chat'
+//import { useModChatsStore } from '../stores/modchats'
 
 export default {
   //mixins: [chat],
   setup() {
-    const chatMessageStore = useChatMessageStore()
+    const chatStore = useChatStore()
     return {
-      chatMessageStore,
+      chatStore,
     }
   },
   props: {
@@ -133,7 +134,7 @@ export default {
     chatusers() { // Was in mixins/chat.js
       // This is a bit expensive in the store, so it's better to get it here and pass it down than potentially to
       // get it in each message we render.
-      return this.chatMessageStore.getUsers(this.id)
+      return this.chatStore.getUsers(this.id)
     },
     reviewreason() {
       let ret = null
