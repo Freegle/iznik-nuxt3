@@ -5,13 +5,13 @@
     </p>
     <p v-else>
       During this time there have been
-      <strong>{{ withplural('new post', RecentCounts.newmessages, true) }}</strong> and
-      <strong>{{ withplural('new member', RecentCounts.newmembers, true) }}</strong>.
+      <strong>{{ pluralise('new post', RecentCounts.newmessages, true) }}</strong> and
+      <strong>{{ pluralise('new member', RecentCounts.newmembers, true) }}</strong>.
     </p>
   </div>
 </template>
 <script>
-import { withplural } from '../composables/usePluralize'
+import { pluralise } from '../composables/usePluralise'
 import ModDashboardBase from '~/components/ModDashboardBase'
 
 export default {

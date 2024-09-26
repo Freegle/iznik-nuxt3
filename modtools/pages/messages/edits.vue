@@ -12,8 +12,6 @@
 </template>
 <script>
 import { useMiscStore } from '@/stores/misc'
-// import loginRequired from '@/mixins/loginRequired'
-// import createGroupRoute from '@/mixins/createGroupRoute'
 import ScrollToTop from '~/components/ScrollToTop'
 import { setupModMessages } from '../../composables/useModMessages'
 
@@ -28,11 +26,6 @@ export default {
       ...modMessages // busy, context, group, groupid, limit, workType, show, collection, messageTerm, memberTerm, distance, summary, messages, visibleMessages, work,
     }
   },
-  mixins: [
-    //loginRequired,
-    //createGroupRoute('modtools/messages/edits'),
-    //modMessagesPage
-  ],
   data: function() {
     return {
     }

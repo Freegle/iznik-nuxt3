@@ -78,7 +78,7 @@
                   Hide
                 </span>
                 <span class="d-none d-sm-inline">
-                  Show {{ withplural('email', member.emails.length, true) }}
+                  Show {{ pluralise('email', member.emails.length, true) }}
                 </span>
               </span>
               <span v-else>
@@ -86,7 +86,7 @@
                   {{ member.emails.length }}
                 </span>
                 <span class="d-none d-sm-inline">
-                  Show {{ withplural('email', member.emails.length, true) }}
+                  Show {{ pluralise('email', member.emails.length, true) }}
                 </span>
               </span>
             </b-button>
@@ -140,7 +140,7 @@
   </div>
 </template>
 <script>
-import { withplural } from '../composables/usePluralize'
+import { pluralise } from '../composables/usePluralise'
 
 import { useMemberStore } from '../stores/member'
 import { useUserStore } from '../../stores/user'

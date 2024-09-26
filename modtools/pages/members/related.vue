@@ -31,7 +31,6 @@ import { useMemberStore } from '../stores/member'
 import { setupModMembers } from '../../composables/useModMembers'
 
 export default {
-  //mixins: [loginRequired, modMembersPage],
   async setup() {
     const groupStore = useGroupStore()
     const memberStore = useMemberStore()
@@ -42,7 +41,7 @@ export default {
       groupStore,
       memberStore,
       miscStore,
-      ...modMembers // busy, context, group, groupid, limit, workType, show, collection, messageTerm, memberTerm, distance, summary, members, visibleMembers, work,
+      ...modMembers // busy, context, group, groupid, limit, workType, show, collection, messageTerm, memberTerm, distance, summary, members, visibleMembers, work, loadMore
     }
   },
   data: function () {

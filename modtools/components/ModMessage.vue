@@ -212,15 +212,15 @@
                     Hide
                   </span>
                   <span class="d-none d-sm-inline">
-                    Hide {{ withplural('email', message.fromuser.emails.length, true) }}
+                    Hide {{ pluralise('email', message.fromuser.emails.length, true) }}
                   </span>
                 </span>
                 <span v-else>
                   <span class="d-inline d-sm-none">
-                    <v-icon icon="envelope" /> {{ withplural('email', message.fromuser.emails.length, true) }}
+                    <v-icon icon="envelope" /> {{ pluralise('email', message.fromuser.emails.length, true) }}
                   </span>
                   <span class="d-none d-sm-inline">
-                    Show {{ withplural('email', message.fromuser.emails.length, true) }}
+                    Show {{ pluralise('email', message.fromuser.emails.length, true) }}
                   </span>
                 </span>
               </b-button>
@@ -302,7 +302,7 @@
 <script>
 import Highlighter from 'vue-highlight-words'
 
-import { withplural } from '../composables/usePluralize'
+import { pluralise } from '../composables/usePluralise'
 import { useLocationStore } from '../../stores/location'
 import { useModConfigStore } from '../stores/modconfig'
 import { useMemberStore } from '../stores/member'

@@ -10,7 +10,7 @@
   </div>
 </template>
 <script>
-      import { useSpammerStore } from '../stores/spammer'
+import { useSpammerStore } from '../stores/spammer'
 
 export default {
   setup() {

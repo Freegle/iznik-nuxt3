@@ -850,27 +850,27 @@ export default {
 }
 
 /* Having trouble getting the CSS in here, so inlined.  Also added images. */
-::v-deep .leaflet-draw-section {
+:deep(.leaflet-draw-section) {
   position: relative;
 }
 
-::v-deep .leaflet-draw-toolbar {
+:deep(.leaflet-draw-toolbar) {
   margin-top: 12px;
 }
 
-::v-deep .leaflet-draw-toolbar-top {
+:deep(.leaflet-draw-toolbar-top) {
   margin-top: 0;
 }
 
-::v-deep .leaflet-draw-toolbar-notop a:first-child {
+:deep(.leaflet-draw-toolbar-notop a:first-child) {
   border-top-right-radius: 0;
 }
 
-::v-deep .leaflet-draw-toolbar-nobottom a:last-child {
+:deep(.leaflet-draw-toolbar-nobottom a:last-child) {
   border-bottom-right-radius: 0;
 }
 
-::v-deep .leaflet-draw-toolbar a {
+:deep(.leaflet-draw-toolbar a) {
   background-image: url('/drawtoolbar/spritesheet.png');
   background-image: linear-gradient(transparent, transparent),
     url('/drawtoolbar/spritesheet.svg');
@@ -879,19 +879,19 @@ export default {
   background-clip: padding-box;
 }
 
-::v-deep .leaflet-retina .leaflet-draw-toolbar a {
+:deep(.leaflet-retina .leaflet-draw-toolbar a) {
   background-image: url('/drawtoolbar/spritesheet-2x.png');
   background-image: linear-gradient(transparent, transparent),
     url('/drawtoolbar/spritesheet.svg');
 }
 
-::v-deep .leaflet-draw a {
+:deep(.leaflet-draw a) {
   display: block;
   text-align: center;
   text-decoration: none;
 }
 
-::v-deep .leaflet-draw a .sr-only {
+:deep(.leaflet-draw a .sr-only) {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -902,7 +902,7 @@ export default {
   border: 0;
 }
 
-::v-deep .leaflet-draw-actions {
+:deep(.leaflet-draw-actions) {
   display: none;
   list-style: none;
   margin: 0;
@@ -913,44 +913,44 @@ export default {
   white-space: nowrap;
 }
 
-::v-deep .leaflet-touch .leaflet-draw-actions {
+:deep(.leaflet-touch .leaflet-draw-actions) {
   left: 32px;
 }
 
-::v-deep .leaflet-right .leaflet-draw-actions {
+:deep(.leaflet-right .leaflet-draw-actions) {
   right: 26px;
   left: auto;
 }
 
-::v-deep .leaflet-touch .leaflet-right .leaflet-draw-actions {
+:deep(.leaflet-touch .leaflet-right .leaflet-draw-actions) {
   right: 32px;
   left: auto;
 }
 
-::v-deep .leaflet-draw-actions li {
+:deep(.leaflet-draw-actions li) {
   display: inline-block;
 }
 
-::v-deep .leaflet-draw-actions li:first-child a {
+:deep(.leaflet-draw-actions li:first-child a) {
   border-left: 0;
 }
 
-::v-deep .leaflet-draw-actions li:last-child a {
+:deep(.leaflet-draw-actions li:last-child a) {
   -webkit-border-radius: 0 4px 4px 0;
   border-radius: 0 4px 4px 0;
 }
 
-::v-deep .leaflet-right .leaflet-draw-actions li:last-child a {
+:deep(.leaflet-right .leaflet-draw-actions li:last-child a) {
   -webkit-border-radius: 0;
   border-radius: 0;
 }
 
-::v-deep .leaflet-right .leaflet-draw-actions li:first-child a {
+:deep(.leaflet-right .leaflet-draw-actions li:first-child a) {
   -webkit-border-radius: 4px 0 0 4px;
   border-radius: 4px 0 0 4px;
 }
 
-::v-deep .leaflet-draw-actions a {
+:deep(.leaflet-draw-actions a) {
   background-color: #919187;
   border-left: 1px solid #aaa;
   color: #fff;
@@ -962,121 +962,121 @@ export default {
   height: 28px;
 }
 
-::v-deep .leaflet-touch .leaflet-draw-actions a {
+:deep(.leaflet-touch .leaflet-draw-actions a) {
   font-size: 12px;
   line-height: 30px;
   height: 30px;
 }
 
-::v-deep .leaflet-draw-actions-bottom {
+:deep(.leaflet-draw-actions-bottom) {
   margin-top: 0;
 }
 
-::v-deep .leaflet-draw-actions-top {
+:deep(.leaflet-draw-actions-top) {
   margin-top: 1px;
 }
 
-::v-deep .leaflet-draw-actions-top a,
-.leaflet-draw-actions-bottom a {
+:deep(.leaflet-draw-actions-top a),
+:deep(.leaflet-draw-actions-bottom a) {
   height: 27px;
   line-height: 27px;
 }
 
-::v-deep .leaflet-draw-actions a:hover {
+:deep(.leaflet-draw-actions a:hover) {
   background-color: #a0a098;
 }
 
-::v-deep .leaflet-draw-actions-top.leaflet-draw-actions-bottom a {
+:deep(.leaflet-draw-actions-top.leaflet-draw-actions-bottom a) {
   height: 26px;
   line-height: 26px;
 }
 
-::v-deep .leaflet-draw-toolbar .leaflet-draw-draw-polyline {
+:deep(.leaflet-draw-toolbar .leaflet-draw-draw-polyline) {
   background-position: -2px -2px;
 }
 
-::v-deep .leaflet-touch .leaflet-draw-toolbar .leaflet-draw-draw-polyline {
+:deep(.leaflet-touch .leaflet-draw-toolbar .leaflet-draw-draw-polyline) {
   background-position: 0 -1px;
 }
 
-::v-deep .leaflet-draw-toolbar .leaflet-draw-draw-polygon {
+:deep(.leaflet-draw-toolbar .leaflet-draw-draw-polygon) {
   background-position: -31px -2px;
 }
 
-::v-deep .leaflet-touch .leaflet-draw-toolbar .leaflet-draw-draw-polygon {
+:deep(.leaflet-touch .leaflet-draw-toolbar .leaflet-draw-draw-polygon) {
   background-position: -29px -1px;
 }
 
-::v-deep .leaflet-draw-toolbar .leaflet-draw-draw-rectangle {
+:deep(.leaflet-draw-toolbar .leaflet-draw-draw-rectangle) {
   background-position: -62px -2px;
 }
 
-::v-deep .leaflet-touch .leaflet-draw-toolbar .leaflet-draw-draw-rectangle {
+:deep(.leaflet-touch .leaflet-draw-toolbar .leaflet-draw-draw-rectangle) {
   background-position: -60px -1px;
 }
 
-::v-deep .leaflet-draw-toolbar .leaflet-draw-draw-circle {
+:deep(.leaflet-draw-toolbar .leaflet-draw-draw-circle) {
   background-position: -92px -2px;
 }
 
-::v-deep .leaflet-touch .leaflet-draw-toolbar .leaflet-draw-draw-circle {
+:deep(.leaflet-touch .leaflet-draw-toolbar .leaflet-draw-draw-circle) {
   background-position: -90px -1px;
 }
 
-::v-deep .leaflet-draw-toolbar .leaflet-draw-draw-marker {
+:deep(.leaflet-draw-toolbar .leaflet-draw-draw-marker) {
   background-position: -122px -2px;
 }
 
-::v-deep .leaflet-touch .leaflet-draw-toolbar .leaflet-draw-draw-marker {
+:deep(.leaflet-touch .leaflet-draw-toolbar .leaflet-draw-draw-marker) {
   background-position: -120px -1px;
 }
 
-::v-deep .leaflet-draw-toolbar .leaflet-draw-draw-circlemarker {
+:deep(.leaflet-draw-toolbar .leaflet-draw-draw-circlemarker) {
   background-position: -273px -2px;
 }
 
-::v-deep .leaflet-touch .leaflet-draw-toolbar .leaflet-draw-draw-circlemarker {
+:deep(.leaflet-touch .leaflet-draw-toolbar .leaflet-draw-draw-circlemarker) {
   background-position: -271px -1px;
 }
 
-::v-deep .leaflet-draw-toolbar .leaflet-draw-edit-edit {
+:deep(.leaflet-draw-toolbar .leaflet-draw-edit-edit) {
   background-position: -152px -2px;
 }
 
-::v-deep .leaflet-touch .leaflet-draw-toolbar .leaflet-draw-edit-edit {
+:deep(.leaflet-touch .leaflet-draw-toolbar .leaflet-draw-edit-edit) {
   background-position: -150px -1px;
 }
 
-::v-deep .leaflet-draw-toolbar .leaflet-draw-edit-remove {
+:deep(.leaflet-draw-toolbar .leaflet-draw-edit-remove) {
   background-position: -182px -2px;
 }
 
-::v-deep .leaflet-touch .leaflet-draw-toolbar .leaflet-draw-edit-remove {
+:deep(.leaflet-touch .leaflet-draw-toolbar .leaflet-draw-edit-remove) {
   background-position: -180px -1px;
 }
 
-::v-deep .leaflet-draw-toolbar .leaflet-draw-edit-edit.leaflet-disabled {
+:deep(.leaflet-draw-toolbar .leaflet-draw-edit-edit.leaflet-disabled) {
   background-position: -212px -2px;
 }
 
-::v-deep .leaflet-touch .leaflet-draw-toolbar .leaflet-draw-edit-edit.leaflet-disabled {
+:deep(.leaflet-touch .leaflet-draw-toolbar .leaflet-draw-edit-edit.leaflet-disabled) {
   background-position: -210px -1px;
 }
 
-::v-deep .leaflet-draw-toolbar .leaflet-draw-edit-remove.leaflet-disabled {
+:deep(.leaflet-draw-toolbar .leaflet-draw-edit-remove.leaflet-disabled) {
   background-position: -242px -2px;
 }
 
-::v-deep .leaflet-touch .leaflet-draw-toolbar .leaflet-draw-edit-remove.leaflet-disabled {
+:deep(.leaflet-touch .leaflet-draw-toolbar .leaflet-draw-edit-remove.leaflet-disabled) {
   background-position: -240px -2px;
 }
 
-::v-deep .leaflet-mouse-marker {
+:deep(.leaflet-mouse-marker) {
   background-color: #fff;
   cursor: crosshair;
 }
 
-::v-deep .leaflet-draw-tooltip {
+:deep(.leaflet-draw-tooltip) {
   background: #363636;
   background: rgba(0, 0, 0, 0.5);
   border: 1px solid transparent;
@@ -1093,7 +1093,7 @@ export default {
   z-index: 6;
 }
 
-::v-deep .leaflet-draw-tooltip:before {
+:deep(.leaflet-draw-tooltip:before) {
   border-right: 6px solid black;
   border-right-color: rgba(0, 0, 0, 0.5);
   border-top: 6px solid transparent;
@@ -1104,25 +1104,25 @@ export default {
   left: -7px;
 }
 
-::v-deep .leaflet-error-draw-tooltip {
+:deep(.leaflet-error-draw-tooltip) {
   background-color: #f2dede;
   border: 1px solid #e6b6bd;
   color: #b94a48;
 }
 
-::v-deep .leaflet-error-draw-tooltip:before {
+:deep(.leaflet-error-draw-tooltip:before) {
   border-right-color: #e6b6bd;
 }
 
-::v-deep .leaflet-draw-tooltip-single {
+:deep(.leaflet-draw-tooltip-single) {
   margin-top: -12px;
 }
 
-::v-deep .leaflet-draw-tooltip-subtext {
+:deep(.leaflet-draw-tooltip-subtext) {
   color: #f8d5e4;
 }
 
-::v-deep .leaflet-draw-guide-dash {
+:deep(.leaflet-draw-guide-dash) {
   font-size: 1%;
   opacity: 0.6;
   position: absolute;
@@ -1130,7 +1130,7 @@ export default {
   height: 5px;
 }
 
-::v-deep .leaflet-edit-marker-selected {
+:deep(.leaflet-edit-marker-selected) {
   background-color: rgba(254, 87, 161, 0.1);
   border: 4px dashed rgba(254, 87, 161, 0.6);
   -webkit-border-radius: 4px;
@@ -1138,15 +1138,15 @@ export default {
   box-sizing: content-box;
 }
 
-::v-deep .leaflet-edit-move {
+:deep(.leaflet-edit-move) {
   cursor: move;
 }
 
-::v-deep .leaflet-edit-resize {
+:deep(.leaflet-edit-resize) {
   cursor: pointer;
 }
 
-::v-deep .leaflet-oldie .leaflet-draw-toolbar {
+:deep(.leaflet-oldie .leaflet-draw-toolbar) {
   border: 1px solid #999;
 }
 </style>

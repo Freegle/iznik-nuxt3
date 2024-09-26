@@ -2,13 +2,13 @@
   <div>
     <h4>
       <b-badge :variant="offers > 0 ? 'success' : 'light'" title="Recent OFFERs" class="clickme me-2" @click="showHistory('Offer')">
-        <v-icon icon="gift" class="fa-fw" /> {{ withplural(['OFFER', 'OFFERs'], offers, true) }}
+        <v-icon icon="gift" class="fa-fw" /> {{ pluralise(['OFFER', 'OFFERs'], offers, true) }}
       </b-badge>
       <b-badge :variant="wanteds > 0 ? 'success' : 'light'" title="Recent WANTEDs" class="clickme me-2" @click="showHistory('Wanted')">
-        <v-icon icon="search" class="fa-fw" /> {{ withplural(['WANTED', 'WANTEDs'], wanteds, true) }}
+        <v-icon icon="search" class="fa-fw" /> {{ pluralise(['WANTED', 'WANTEDs'], wanteds, true) }}
       </b-badge>
       <b-badge :variant="member.modmails > 0 ? 'danger' : 'light'" title="Recent ModMails" class="clickme me-2" @click="showModmails">
-        <v-icon icon="exclamation-triangle" class="fa-fw" /> {{ (member.modmails ? withplural('Modmail', member.modmails, true) : "0 Modmails")
+        <v-icon icon="exclamation-triangle" class="fa-fw" /> {{ (member.modmails ? pluralise('Modmail', member.modmails, true) : "0 Modmails")
         }}
       </b-badge>
       <b-badge v-if="userinfo" :variant="userinfo.repliesoffer > 0 ? 'success' : 'light'" title="Recent replies to OFFERs"
@@ -29,7 +29,7 @@
       </b-badge>
       <b-badge v-if="userinfo" :variant="userinfo.expectedreplies > 0 ? 'danger' : 'light'" title="Recent outstanding replies requested"
         class="clickme me-2">
-        <v-icon icon="clock" class="fa-fw" /> {{ withplural(['RSVP','RSVPs'], userinfo.expectedreplies || 0, true) }}
+        <v-icon icon="clock" class="fa-fw" /> {{ pluralise(['RSVP','RSVPs'], userinfo.expectedreplies || 0, true) }}
       </b-badge>
     </h4>
     <ModPostingHistoryModal v-if="showPostingHistoryModal" ref="history" :user="member" :type="type" @hidden="showPostingHistoryModal = false"/>
@@ -37,7 +37,7 @@
   </div>
 </template>
 <script>
-import { withplural } from '../composables/usePluralize'
+import { pluralise } from '../composables/usePluralise'
 
 import { useUserStore } from '../stores/user'
 

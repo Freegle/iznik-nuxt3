@@ -131,6 +131,11 @@ export default {
         'Moderation tool for Freegle volunteers'
       )
     )
+    useHead({
+      bodyAttrs: {
+        class: 'bodyMT'
+      }
+    })
 
     return { authStore, googleReady, miscStore, modConfigStore, oneTap }
   },
@@ -159,7 +164,7 @@ export default {
     },
     menuCount() {
       const work = this.authStore?.work
-      if( !work || !work.total) return 0
+      if (!work || !work.total) return 0
       return work.total
     },
     work() {
@@ -186,13 +191,17 @@ export default {
     },
   },
   async mounted() {
-    // TODO
-    console.log('MODTOOLS.VUE mounted TODO')
-
     // For this layout we don't need to be logged in.  So can just continue.  But we want to know first whether or
     // not we are logged in.  We might already know that from the server via cookies, but if not, find out.
     if (!this.loginStateKnown) {
       await this.authStore.fetchUser()
+    }
+
+    // If not logged in then show loginModal
+    const me = this.authStore.user
+    if (!me || !me.id) {
+      this.$refs.loginModal.show()
+      return
     }
 
     // Start our timer.  Holding the time in the store allows us to update the time regularly and have reactivity
@@ -313,7 +322,7 @@ html {
 }
 
 /* Style the external nav-link class */
-::v-deep .nav-link {
+:deep(.nav-link) {
   padding-left: 2px !important;
   padding-right: 2px !important;
   padding-top: 0px !important;
@@ -341,7 +350,7 @@ nav .navbar-nav li a.nuxt-link-active[data-v-314f53c6] {
 }
 
 .navback {
-  background-color: $color-modtools-blue--dark;
+  background-color: $color-modtools-navbar-background;
 }
 
 nav .navbar-nav li a,

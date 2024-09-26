@@ -58,6 +58,7 @@
             <ModMemberHappiness v-if="item.type === 'Member' && filterMatch(item.object)" :id="item.object.id" />
           </div>
         </b-tab>
+        
         <b-tab>
           <template v-slot:title>
             <h4 class="header--size4 ml-2 mr-2">
@@ -83,6 +84,8 @@
   </div>
 </template>
 <script>
+import dayjs from 'dayjs'
+import { useMemberStore } from '@/stores/member'
 import { GChart } from 'vue-google-charts'
 import { setupModMembers } from '../../composables/useModMembers'
 
@@ -90,25 +93,20 @@ export default {
   components: {
     GChart,
   },
-  //layout: 'modtools',
-  mixins: [
-    //loginRequired,
-    //createGroupRoute('modtools/members/feedback'),
-    //modMembersPage
-  ],
   async setup() {
+    const memberStore = useMemberStore()
     const modMembers = setupModMembers()
     modMembers.collection.value = 'Happiness'
     return {
-      ...modMembers // busy, context, group, groupid, limit, workType, show, collection, messageTerm, memberTerm, distance, summary, members, visibleMembers, work,
+      memberStore,
+      ...modMembers // busy, context, group, groupid, limit, workType, show, collection, messageTerm, memberTerm, distance, summary, members, visibleMembers, work, loadMore
     }
   },
   data: function() {
     return {
       happinessData: [],
-      bump: 0
-      /*collection: 'Happiness',
-      filter: 'Comments',
+      bump: 0,
+      //collection: 'Happiness',
       happinessOptions: {
         // title: 'Freegler Feedback',
         chartArea: {
@@ -124,7 +122,7 @@ export default {
         }
       },
       // Get everything (probably) so that the ratings and feedback are interleaved.
-      limit: 1000*/
+      //limit: 1000
     }
   },
   computed: {
@@ -133,6 +131,7 @@ export default {
       return []
     },
     sortedItems() {
+      console.log('sortedItems A')
       const objs = []
 
       this.members.forEach(m => {
@@ -152,6 +151,7 @@ export default {
           id: 'rating-' + r.id
         })
       })
+      console.log('sortedItems B', objs.length)
 
       objs.sort(function(a, b) {
         return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
@@ -160,22 +160,23 @@ export default {
       return objs
     },
     visibleItems() {
-      //return this.sortedItems.slice(0, this.toShow)
-      return this.sortedItems
+      console.log('visibleItems',this.show)
+      return this.sortedItems.slice(0, this.show)
+      //return this.sortedItems
     }
   },
   watch: {
     filter() {
       this.context = null
       this.show = 0
-      this.$store.dispatch('members/clear')
+      this.memberStore.clear()
+      this.bump++
     }
   },
   async mounted() {
-    /*const start = this.$dayjs()
-      .subtract(1, 'year')
-      .toDate()
-
+    this.filter = 'Comments'
+    const start = dayjs().subtract(1, 'year').toDate().toISOString()
+    console.log('feedback mounted',start)
     const ret = await this.$api.dashboard.fetch({
       components: ['Happiness'],
       start: start,
@@ -191,7 +192,7 @@ export default {
       ret.Happiness.forEach(h => {
         this.happinessData.push([h.happiness, h.count])
       })
-    }*/
+    }
   },
   methods: {
     filterMatch(member) {

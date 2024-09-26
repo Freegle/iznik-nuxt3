@@ -21,7 +21,7 @@
       </div>
       <div v-if="groupid && group">
         <p class="mt-1">
-          This group has {{ withplural('member', group.membercount, true) }}.
+          This group has {{ pluralise('member', group.membercount, true) }}.
         </p>
         <NoticeMessage v-if="!members.length" class="mt-2">
           There are no members to show at the moment.
@@ -49,9 +49,9 @@
 <script>
 import { useGroupStore } from '@/stores/group'
 import { useMiscStore } from '@/stores/misc'
-import { useMemberStore } from '../stores/member'
+import { useMemberStore } from '@/stores/member'
 import { setupModMembers } from '../../composables/useModMembers'
-import { withplural } from '../composables/usePluralize'
+import { pluralise } from '../composables/usePluralise'
 
 export default {
   async setup() {
@@ -64,7 +64,7 @@ export default {
       groupStore,
       memberStore,
       miscStore,
-      ...modMembers // busy, context, group, groupid, limit, workType, show, collection, messageTerm, memberTerm, distance, summary, members, visibleMembers, work,
+      ...modMembers // busy, context, group, groupid, limit, workType, show, collection, messageTerm, memberTerm, distance, summary, members, visibleMembers, work, loadMore
     }
   },
   data: function () {

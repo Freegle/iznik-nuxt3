@@ -49,9 +49,6 @@ export default {
   },
   mixins: [
     me,
-    /*loginRequired,
-    createGroupRoute('modtools/messages/pending'),
-    shuffle*/
   ],
   data: function () {
     return {

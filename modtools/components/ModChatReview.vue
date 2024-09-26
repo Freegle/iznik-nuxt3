@@ -1,0 +1,327 @@
+<template>
+  <div>
+    <b-card no-body>
+      <b-card-header>
+        <div class="d-flex justify-content-between flex-wrap">
+          <div class="d-flex justify-content-start flex-wrap">
+            <ModChatReviewUser :user="message.fromuser" class="mr-2" tag="From: " :groupid="message.group.id" />
+            <v-icon icon="arrow-circle-right" scale="2" class="mt-1 text-info" />
+            <ModChatReviewUser :user="message.touser" class="ml-2" tag="To: " :groupid="message.group.id" />
+          </div>
+          <b-button v-if="message.bymailid" size="lg" variant="white" @click="viewOriginal">
+            <v-icon icon="info-circle" /> View original email
+          </b-button>
+        </div>
+      </b-card-header>
+      <b-card-body>
+        <NoticeMessage v-if="message.reviewreason" class="mb-2">
+          This is here because: {{ reviewreason }}
+        </NoticeMessage>
+        <NoticeMessage v-if="message.held" class="mb-2" variant="warning">
+          <span v-if="me.id === message.held.id">
+            You held this {{ timeago(message.held.timestamp) }}. Other can't release it or act on it.
+          </span>
+          <span v-else>
+            Held by <strong>
+              <ExternalLink :href="'mailto:' + message.held.email">{{ message.held.name }}</ExternalLink>
+            </strong>
+            {{ timeago(message.held.timestamp) }}. Please check with them if you think it should be released.
+          </span>
+        </NoticeMessage>
+        <div class="rounded bg-white p-2 font-weight-bold border border-warning mb-2">
+          <!--ChatMessage :id="message.id" :chatid="message.chatid" last  highlight-emails /-->
+          {{ message }}
+
+          <!--ChatMessage :chatid="message.chatroom.id" :chatmessage="message" :otheruser="message.fromuser" last highlight-emails :id="message.id" /--> 
+          <!-- :chatusers="chatusers" -->
+        </div>
+        <ModSpammer v-if="message.touser.spammer" :user="message.touser" />
+        <div class="d-flex justify-content-between flex-wrap">
+          <span>
+            {{ timeago(message.date) }}
+          </span>
+          <span v-if="message.widerchatreview" class="text-danger">
+            <v-icon icon="info-circle" />
+            <em>Quicker Chat Review</em>
+          </span>
+          <span>
+            <v-icon icon="info-circle" /> {{ message.touser.displayname }} is on {{ message.group.namedisplay }}
+            <span v-if="!message.widerchatreview">, which you mod.
+              <b-button :to="'/modtools/members/approved/search/' + message.group.id + '/' + message.touser.id" variant="link"
+                class="p-0 border-0 align-top">
+                Go to membership
+              </b-button>
+            </span>
+          </span>
+          <span>
+            <v-icon icon="hashtag" class="text-muted" scale="0.75" />{{ message.id }}
+          </span>
+        </div>
+        <ModSpammer v-if="message.fromuser.spammer" :user="message.fromuser" />
+        <div class="d-flex justify-content-around">
+          <div v-if="!message.widerchatreview">
+            <span>
+              <!-- eslint-disable-next-line -->
+              <v-icon icon="info-circle" /> {{ message.fromuser.displayname }} is
+              <span>
+                <span v-if="message.groupfrom">on {{ message.groupfrom.namedisplay }}, which you mod</span><span v-else>not on any groups which you
+                  actively mod.</span>
+                <b-button v-if="message.groupfrom" :to="'/modtools/members/approved/search/' + message.groupfrom.id + '/' + message.fromuser.id"
+                  variant="link" class="p-0 border-0 align-top">
+                  Go to membership
+                </b-button>
+              </span>
+            </span>
+          </div>
+        </div>
+      </b-card-body>
+      <b-card-footer>
+        <div class="d-flex flex-wrap justify-content-start">
+          <template v-if="!message.widerchatreview">
+            <ModChatViewButton :id="message.chatid" :pov="message.touser.id" />
+            <b-button v-if="message.held && me.id === message.held.id" variant="warning" class="mr-2 mb-1" @click="release">
+              <v-icon icon="play" /> Release
+            </b-button>
+            <SpinButton v-if="!message.held" icon-name="exclamation-triangle" label="Add Mod Message" variant="warning" class="mr-2 mb-1"
+              @handle="modnote" />
+            <SpinButton v-if="!message.held" icon-name="eraser" label="Remove highlighted emails" variant="warning" class="mr-2 mb-1"
+              @handle="redactEmails" />
+          </template>
+          <SpinButton v-if="!message.held" icon-name="check" label="Approve - Not Spam" spinclass="text-white" variant="primary" class="mr-2 mb-1"
+            @handle="approve" />
+          <template v-if="!message.widerchatreview">
+            <SpinButton v-if="!message.held" icon-name="check" label="Approve and whitelist" spinclass="text-white" variant="primary"
+              class="mr-2 mb-1" confirm @handle="whitelist" />
+            <SpinButton v-if="!message.held" icon-name="pause" label="Hold" variant="warning" class="mr-2 mb-1" @handle="hold" />
+            <SpinButton v-if="!message.held" icon-name="trash-alt" label="Delete" variant="danger" class="mr-2 mb-1" confirm @handle="reject" />
+            <SpinButton v-if="!message.held" icon-name="ban" label="Spam" variant="danger" class="mr-2 mb-1" confirm @handle="reject" />
+          </template>
+        </div>
+      </b-card-footer>
+    </b-card>
+    <!-- TODO ModChatNoteModal v-if="message" ref="modnote" :chatid="message.chatid" /-->
+    <ModMessageEmailModal v-if="showOriginal" :id="message.bymailid" ref="original" />
+  </div>
+</template>
+<script>
+import { useChatMessageStore } from '../stores/chatmessages'
+
+export default {
+  //mixins: [chat],
+  setup() {
+    const chatMessageStore = useChatMessageStore()
+    return {
+      chatMessageStore,
+    }
+  },
+  props: {
+    id: { // Was in mixins/chat.js
+      type: Number,
+      required: true
+    },
+    message: {
+      type: Object,
+      required: true
+    }
+  },
+  data: function () {
+    return {
+      showOriginal: false
+    }
+  },
+  computed: {
+    chatusers() { // Was in mixins/chat.js
+      // This is a bit expensive in the store, so it's better to get it here and pass it down than potentially to
+      // get it in each message we render.
+      return this.chatMessageStore.getUsers(this.id)
+    },
+    reviewreason() {
+      let ret = null
+
+      if (this.message && this.message.reviewreason) {
+        switch (this.message.reviewreason) {
+          case 'Last': {
+            ret = 'Earlier message is held for review, so this one is too.'
+            break
+          }
+          case 'Force': {
+            ret = 'Possible spam.'
+            break
+          }
+          case 'Fully': {
+            ret = 'This member is set to have all chat messages reviewed.'
+            break
+          }
+          case 'TooMany': {
+            ret =
+              'This member has sent a lot of chat messages recently, which can indicate scammers/spammers.'
+            break
+          }
+          case 'User': {
+            ret =
+              'The member was been flagged for review, so this message was flagged too.  Please check the member logs for more info.'
+            break
+          }
+          case 'UnknownMessage': {
+            ret =
+              'This is a reply to a post we cannot find.  Sometimes that is a spammer using old data.'
+            break
+          }
+          case 'Spam': {
+            ret =
+              "This message failed spam checks, but we don't have any more information about why."
+            break
+          }
+          case 'CountryBlocked': {
+            ret = 'It comes from a country we are blocking.'
+            break
+          }
+          case 'IPUsedForDifferentUsers': {
+            ret =
+              'The same IP address has been used for a lot of different users.'
+            break
+          }
+          case 'IPUsedForDifferentGroups': {
+            ret =
+              ' The same IP address has been used for a lot of different groups.'
+            break
+          }
+          case 'SubjectUsedForDifferentGroups': {
+            ret =
+              'The same subject line has been used on a lot of different groups.'
+            break
+          }
+          case 'SpamAssassin': {
+            ret = 'The SpamAssassin filter thinks it might be spam.'
+            break
+          }
+          case 'Greetings spam': {
+            ret = 'It looks like a particular kind of greetings spam.'
+            break
+          }
+          case 'Referenced known spammer': {
+            ret = 'It refers to a known spammer.'
+            break
+          }
+          case 'Known spam keyword': {
+            ret = 'It uses a known spam keyword.'
+            break
+          }
+          case 'URL on DBL': {
+            ret = 'It refers to a suspicious website.'
+            break
+          }
+          case 'BulkVolunteerMail': {
+            ret = 'They have mailed many volunteer@ emails.'
+            break
+          }
+          case 'UsedOurDomain': {
+            ret = 'They have used our web domain in a suspicious way.'
+            break
+          }
+          case 'WorryWord': {
+            ret = 'It uses a known Worry Word.'
+            break
+          }
+          case 'Script': {
+            ret = 'It contains a suspicious <script> tag.'
+            break
+          }
+          case 'Link': {
+            ret = 'It contains a link.'
+            break
+          }
+          case 'Money': {
+            ret = 'It looks like it refers to money.'
+            break
+          }
+          case 'Email': {
+            ret = 'It contains an email address.'
+            break
+          }
+          case 'Language': {
+            ret =
+              'It might not be in English, so needs checking via Google Translate.'
+            break
+          }
+          case 'SameImage': {
+            ret =
+              'Same image sent many times recently, which sometimes indicates spam.'
+            break
+          }
+          default: {
+            ret = this.message.reviewreason
+          }
+        }
+      }
+
+      return ret
+    }
+  },
+  methods: {
+    async release(callback) {
+      await this.$store.dispatch('chatmessages/release', {
+        id: this.message.id,
+        chatid: null
+      })
+      callback()
+    },
+    async hold(callback) {
+      await this.$store.dispatch('chatmessages/hold', {
+        id: this.message.id,
+        chatid: null
+      })
+      callback()
+    },
+    async approve(callback) {
+      await this.$store.dispatch('chatmessages/approve', {
+        id: this.message.id,
+        chatid: null
+      })
+      callback()
+    },
+    async reject(callback) {
+      await this.$store.dispatch('chatmessages/reject', {
+        id: this.message.id,
+        chatid: null
+      })
+      callback()
+    },
+    async whitelist(callback) {
+      await this.$store.dispatch('chatmessages/whitelist', {
+        id: this.message.id,
+        chatid: null
+      })
+      callback()
+    },
+    modnote(callback) {
+      this.waitForRef('modnote', () => {
+        this.$refs.modnote.show()
+      })
+      callback()
+    },
+    async redactEmails(callback) {
+      await this.$store.dispatch('chatmessages/redact', {
+        id: this.message.id,
+        chatid: null
+      })
+      callback()
+    },
+    viewOriginal() {
+      this.showOriginal = true
+      this.waitForRef('original', () => {
+        this.$refs.original.show()
+      })
+      callback()
+    }
+  }
+}
+</script>
+<style scoped lang="scss">
+//@import 'color-vars';
+
+.highlight {
+  color: $color-blue--base;
+  background-color: initial;
+}
+</style>

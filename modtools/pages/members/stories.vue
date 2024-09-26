@@ -13,7 +13,6 @@
 import { useStoryStore } from '@/stores/stories'
 
 export default {
-  //mixins: [loginRequired],
   async setup() {
     const storyStore = useStoryStore()
     return {
@@ -33,7 +32,8 @@ export default {
   },
   async mounted() {
     await this.storyStore.fetchMT({
-      reviewed: 0
+      reviewed: 0,
+      dontzapfalsey: true, // Stop BaseAPI from removing above zero value
     })
   },
 

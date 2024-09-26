@@ -2,7 +2,7 @@
   <div>
     <NoticeMessage v-if="invalid.length" variant="danger">
       <div v-if="summary">
-        <v-icon icon="exclamation-triangle" /> {{ invalid.length }} Facebook {{ withplural(['page has', 'pages have'], invalid.length) }} become
+        <v-icon icon="exclamation-triangle" /> {{ invalid.length }} Facebook {{ pluralise(['page has', 'pages have'], invalid.length) }} become
         unlinked.
         <b-button variant="white" @click="expand">
           Click to view
@@ -23,7 +23,7 @@
     </NoticeMessage>
     <NoticeMessage v-if="notlinked.length" variant="warning" class="mt-1">
       <div v-if="summary">
-        <v-icon icon="exclamation-triangle" /> {{ withplural(['community needs', 'communities need'], notlinked.length, true) }} to be linked to a
+        <v-icon icon="exclamation-triangle" /> {{ pluralise(['community needs', 'communities need'], notlinked.length, true) }} to be linked to a
         Facebook page.
         <b-button variant="white" @click="expand">
           Click to view
@@ -42,7 +42,7 @@
   </div>
 </template>
 <script>
-import { withplural } from '../composables/usePluralize'
+import { pluralise } from '../composables/usePluralise'
 
 export default {
   data: function () {

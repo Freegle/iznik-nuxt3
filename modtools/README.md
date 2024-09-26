@@ -56,8 +56,8 @@ A fairly minimal `package.json` is needed as `nuxt.config.ts` extends `../` and 
 * SpinButton has changed params inc icon-name and :handler to @handle which has param callback that must be called when complete
   To have inline use :flex="false"
 * const path = computed(() => { return 0 } and access as path.value
-* Change pluralize to added withplural with number and includeNumber as extra params
-import { withplural } from '../composables/usePluralize'
+* Change pluralize to added pluralise with number and includeNumber as extra params
+  import { pluralise } from '../composables/usePluralise'
 * For waitForRef refs use this.$refs.modal?.show() etc. Within modal component:
     const { modal, show, hide } = useModal()
     defineExpose({ show })

@@ -29,12 +29,12 @@
             </b-col>
             <b-col cols="6" sm="2">
               <div>
-                <v-icon icon="eye" /> web {{ withplural('view', msg.views, true) }}
+                <v-icon icon="eye" /> web {{ pluralise('view', msg.views, true) }}
               </div>
             </b-col>
             <b-col cols="6" sm="2">
               <div>
-                <v-icon icon="reply" /> {{ withplural(['reply', 'replies'], msg.replies, true) }}
+                <v-icon icon="reply" /> {{ pluralise(['reply', 'replies'], msg.replies, true) }}
               </div>
             </b-col>
           </b-row>
@@ -44,7 +44,7 @@
   </div>
 </template>
 <script>
-import { withplural } from '../composables/usePluralize'
+import { pluralise } from '../composables/usePluralise'
 import ModDashboardBase from '~/components/ModDashboardBase'
 
 export default {

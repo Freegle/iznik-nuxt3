@@ -5,6 +5,24 @@ export default class ChatAPI extends BaseAPI {
     return this.$getv2(`/chat/${chatid}/message`)
   }
 
+  async fetchMT(chatid, { limit, context }) {
+    if( chatid) {
+      return this.$get(
+        `/chat/rooms/${chatid}/messages`,
+        { limit, context })
+        /*function(data) {
+          if (data && data.ret === 2) {
+            // We handle this in the chat page
+            return false
+          } else {
+            return true
+          }
+        }
+      )*/
+    }
+    return await this.$get(`/chatmessages`, { limit, context })    
+  }
+
   async listChatsMT(params) {
     return await this.$get('/chat/rooms',params)
   }

@@ -73,14 +73,11 @@
   </div>
 </template>
 <script>
-//import loginRequired from '@/mixins/loginRequired.js'
 import NoticeMessage from '~/components/NoticeMessage'
 import { useChatStore } from '../stores/chat'
 import { useMessageStore } from '~/stores/message'
 
 export default {
-  //mixins: [loginRequired], TODO
-  layout: 'modtools',
   async setup() {
     const chatStore = useChatStore()
     const messageStore = useMessageStore()

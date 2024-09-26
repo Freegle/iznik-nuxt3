@@ -76,7 +76,6 @@ import { useMiscStore } from '@/stores/misc'
 import { useGroupStore } from '@/stores/group'
 import { buildHead } from '~/composables/useMTBuildHead'
 import dayjs from 'dayjs'
-// TODO mixins: [loginRequired],
 
 const miscStore = useMiscStore()
 const groupStore = useGroupStore()
