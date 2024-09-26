@@ -18,8 +18,7 @@ const CONFIG = {
   IMAGE_SITE: process.env.IMAGE_SITE || 'https://images.ilovefreegle.org',
 
   // Very new.  Our own uploader, and delivery of those images via a cached use of wsrl.nl.
-  TUS_UPLOADER:
-    process.env.TUS_UPLOADER || 'https://uploads.ilovefreegle.org:8080',
+  TUS_UPLOADER: process.env.TUS_UPLOADER || 'https://uploads.ilovefreegle.org',
   IMAGE_DELIVERY:
     process.env.IMAGE_DELIVERY || 'https://delivery.ilovefreegle.org',
 
