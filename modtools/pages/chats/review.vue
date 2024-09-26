@@ -25,16 +25,17 @@
   </div>
 </template>
 <script>
-import { useChatMessageStore } from '../stores/chatmessages'
+import { useChatStore } from '~/stores/chat'
+//import { useModChatsStore } from '../stores/modchats'
 
 // We need an id for the store.  The null value is a special case used just for retrieving chat review messages.
 const REVIEWCHAT = null
 
 export default {
   setup() {
-    const chatMessageStore = useChatMessageStore()
+    const chatStore = useChatStore()
     return {
-      chatMessageStore,
+      chatStore,
     }
   },
   data: function () {
@@ -57,7 +58,7 @@ export default {
       })
     },
     messages() {
-      return this.chatMessageStore.getMessages(REVIEWCHAT)
+      return this.chatStore.getMessages(REVIEWCHAT)
     },
     work() {
       // Count for the type of work we're interested in.
@@ -127,15 +128,15 @@ export default {
     async clearAndLoad() {
       // There's new stuff to do.  Reload.
       // We don't want to pick up any real chat messages.
-      await this.chatMessageStore.clearContext({
+      await this.chatStore.clearContext({
         chatid: REVIEWCHAT
       })
 
-      await this.chatMessageStore.clearMessages({
+      await this.chatStore.clearMessages({
         chatid: REVIEWCHAT
       })
 
-      await this.chatMessageStore.fetch({
+      await this.chatStore.fetch({
         chatid: REVIEWCHAT,
         limit: this.limit
       })

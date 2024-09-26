@@ -4,8 +4,17 @@ export default class ChatAPI extends BaseAPI {
   fetchMessages(chatid) {
     return this.$getv2(`/chat/${chatid}/message`)
   }
+  fetchMessagesMT(chatid,params) {
+    return this.$get(`/chat/rooms/${chatid}/messages`,params)
+  }
+
+  async fetchMT2(params) {
+    console.log('ChatAPI fetchMT2',params)
+    return await this.$get('/chat/rooms',params)
+  }
 
   async fetchMT(chatid, { limit, context }) {
+    console.log('ChatAPI fetchMT',chatid, limit, context)
     if( chatid) {
       return this.$get(
         `/chat/rooms/${chatid}/messages`,
@@ -20,10 +29,12 @@ export default class ChatAPI extends BaseAPI {
         }
       )*/
     }
-    return await this.$get(`/chatmessages`, { limit, context })    
+    return await this.$get('/chat/rooms')
+    //return await this.$get(`/chatmessages`, { limit, context })    
   }
 
   async listChatsMT(params) {
+    console.log('ChatAPI listChatsMT', params)
     return await this.$get('/chat/rooms',params)
   }
 
