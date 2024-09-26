@@ -92,6 +92,7 @@
                 max-width="300px"
                 div-id="div-gpt-ad-1691925450433-0"
                 class="mt-2"
+                :jobs="false"
               />
             </VisibleWhen>
           </div>

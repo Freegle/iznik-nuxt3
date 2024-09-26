@@ -118,6 +118,7 @@
               div-id="div-gpt-ad-1691925773522-0"
               class="mt-2"
               show-logged-out
+              :jobs="false"
             />
           </VisibleWhen>
         </b-col>

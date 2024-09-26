@@ -98,6 +98,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  jobs: {
+    type: Boolean,
+    default: true,
+  },
 })
 
 const emit = defineEmits(['rendered', 'disabled'])
@@ -106,7 +110,7 @@ const emit = defineEmits(['rendered', 'disabled'])
 const adSense = ref(true)
 const renderAd = ref(false)
 const adShown = ref(true)
-const boredWithJobs = ref(false)
+const boredWithJobs = ref(!props.jobs)
 
 let prebidRetry = 0
 let tcDataRetry = 0
