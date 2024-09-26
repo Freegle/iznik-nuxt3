@@ -67,10 +67,7 @@
               <strong class="ml-1">{{ replytime }}</strong
               ><span class="d-none d-md-inline">.</span>
             </span>
-            <span
-              v-if="!otheruser?.deleted && milesaway"
-              class="d-none d-md-block"
-            >
+            <span v-if="!otheruser?.deleted && milesaway" class="d-none">
               About <strong>{{ milesstring }}</strong
               >.
             </span>

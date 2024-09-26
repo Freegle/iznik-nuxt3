@@ -63,7 +63,11 @@
           {{ groups[group.groupid].namedisplay }}
         </nuxt-link>
       </div>
-      <span v-if="milesaway" class="align-middle" @click="showProfileModal">
+      <span
+        v-if="milesaway"
+        class="align-middle d-none"
+        @click="showProfileModal"
+      >
         About {{ milesPlural }} away
       </span>
     </div>
