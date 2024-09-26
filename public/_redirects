@@ -27,7 +27,7 @@
 /.well-known/* / 404!
 
 # Proxy old /api endpoint which is still used by apps which haven't updated.
-/api* https://fdapilive.ilovefreegle.org/api/:splat 200!
+/api* https://master--freegle-oxfordhighapiv2.netlify.app/api/:splat 200!
 
 # Old endpoints.
 /mygroups* /browse:splat 200!

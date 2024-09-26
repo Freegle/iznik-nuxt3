@@ -59,7 +59,7 @@
         :pov="pov"
       />
     </div>
-    <div v-else-if="chatmessage.type === 'ReportedUser'">
+    <div v-else-if="chatmessage?.type === 'ReportedUser'">
       <chat-message-report :id="id" :chatid="chatid" :pov="pov" />
     </div>
     <div v-else-if="chatmessage?.type === 'ModMail'">
