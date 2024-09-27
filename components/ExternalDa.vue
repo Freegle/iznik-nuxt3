@@ -12,7 +12,13 @@
         'bg-white': adShown,
       }"
     >
-      <div v-if="isVisible">
+      <div
+        v-if="isVisible"
+        :class="{
+          boredWithJobs,
+          jobs,
+        }"
+      >
         <div class="d-flex w-100 justify-content-md-around">
           <JobsDaSlot
             v-if="renderAd && !boredWithJobs"
