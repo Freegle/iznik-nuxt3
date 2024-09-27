@@ -29,10 +29,10 @@
           </span>
         </NoticeMessage>
         <div class="rounded bg-white p-2 font-weight-bold border border-warning mb-2">
-          <!--ChatMessage :id="message.id" :chatid="message.chatid" last  highlight-emails /-->
-          {{ message }}
+          <ChatMessage :id="message.id" :chatid="message.chatid" last  highlight-emails isMT />
+          <!--{{ message }}-->
 
-          <!--ChatMessage :chatid="message.chatroom.id" :chatmessage="message" :otheruser="message.fromuser" last highlight-emails :id="message.id" /--> 
+          <!-- OLD ChatMessage :chatid="message.chatroom.id" :chatmessage="message" :otheruser="message.fromuser" last highlight-emails :id="message.id" /--> 
           <!-- :chatusers="chatusers" -->
         </div>
         <ModSpammer v-if="message.touser.spammer" :user="message.touser" />
@@ -105,7 +105,6 @@
 </template>
 <script>
 import { useChatStore } from '~/stores/chat'
-//import { useModChatsStore } from '../stores/modchats'
 
 export default {
   //mixins: [chat],

@@ -47,14 +47,12 @@
 import dayjs from 'dayjs'
 import { pluralise } from '../composables/usePluralise'
 import { useChatStore } from '~/stores/chat'
-//import { useModChatsStore } from '../stores/modchats'
 import { useAuthStore } from '../../stores/auth'
 //import { setupChat } from '../composables/useChat'
 
 export default {
   async setup(props) {
     const chatStore = useChatStore()
-    //const modChatsStore = useModChatsStore()
     const authStore = useAuthStore()
     /*const {
       chat,
@@ -71,7 +69,6 @@ export default {
       //otheruser,
       //tooSoonToNudge,
       //miscStore,
-      // modChatsStore,
       //messageStore,
       //addressStore,
       //chatmessages,
@@ -98,7 +95,7 @@ export default {
   computed: {
     messages() {
       return []
-      //return this.modChatsStore.getMessages(REVIEWCHAT)
+      //return this.chatStore.getMessages(REVIEWCHAT)
     },
     /*milesaway(){
       this.authStore.user?.lat,

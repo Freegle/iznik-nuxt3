@@ -11,7 +11,7 @@
           <template #no-results>
             <p class="p-2">There are no chat messages to review at the moment.</p>
           </template>
-          <template #no-more>Quoth the Raven "Nevermore."</template>
+          <template #no-more></template>
           <template #spinner>
             <b-img lazy src="/loader.gif" alt="Loading" />
           </template>
@@ -26,7 +26,6 @@
 </template>
 <script>
 import { useChatStore } from '~/stores/chat'
-//import { useModChatsStore } from '../stores/modchats'
 
 // We need an id for the store.  The null value is a special case used just for retrieving chat review messages.
 const REVIEWCHAT = null
@@ -58,7 +57,7 @@ export default {
       })
     },
     messages() {
-      return this.chatStore.getMessages(REVIEWCHAT)
+      return this.chatStore.messagesById(REVIEWCHAT)
     },
     work() {
       // Count for the type of work we're interested in.
@@ -126,18 +125,16 @@ export default {
       }
     },
     async clearAndLoad() {
+      console.log('review clearAndLoad')
       // There's new stuff to do.  Reload.
       // We don't want to pick up any real chat messages.
-      await this.chatStore.clearContext({
-        chatid: REVIEWCHAT
-      })
+      await this.chatStore.clear()
 
-      await this.chatStore.clearMessages({
-        chatid: REVIEWCHAT
-      })
-
-      await this.chatStore.fetch({
+      /*await this.chatStore.fetch({
         chatid: REVIEWCHAT,
+        limit: this.limit
+      })*/
+      await this.chatStore.fetchReviewChatsMT(REVIEWCHAT, {
         limit: this.limit
       })
 
