@@ -106,7 +106,12 @@
                 :distance="distance"
                 @infinite="loadMore"
               />
-              <div class="adpad" />
+              <div
+                class="adpad"
+                :class="{
+                  stickyAdRendered,
+                }"
+              />
             </div>
           </div>
         </b-col>
@@ -499,13 +504,11 @@ export default {
   width: 100px;
 }
 
-.adpad {
-  margin-bottom: calc($sticky-banner-height-mobile * v-bind(stickyAdRendered));
+.adpad.stickyAdRendered {
+  margin-bottom: $sticky-banner-height-mobile;
 
   @include media-breakpoint-up(md) {
-    padding-bottom: calc(
-      $sticky-banner-height-desktop * v-bind(stickyAdRendered)
-    );
+    padding-bottom: $sticky-banner-height-desktop;
   }
 }
 </style>

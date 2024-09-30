@@ -8,8 +8,17 @@
       v-if="me || showLoggedOut"
       v-observe-visibility="visibilityChanged"
       class="pointer"
+      :class="{
+        'bg-white': adShown,
+      }"
     >
-      <div v-if="isVisible">
+      <div
+        v-if="isVisible"
+        :class="{
+          boredWithJobs,
+          jobs,
+        }"
+      >
         <div class="d-flex w-100 justify-content-md-around">
           <JobsDaSlot
             v-if="renderAd && !boredWithJobs"
@@ -95,6 +104,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  jobs: {
+    type: Boolean,
+    default: true,
+  },
 })
 
 const emit = defineEmits(['rendered', 'disabled'])
@@ -103,7 +116,7 @@ const emit = defineEmits(['rendered', 'disabled'])
 const adSense = ref(true)
 const renderAd = ref(false)
 const adShown = ref(true)
-const boredWithJobs = ref(false)
+const boredWithJobs = ref(!props.jobs)
 
 let prebidRetry = 0
 let tcDataRetry = 0

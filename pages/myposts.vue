@@ -47,7 +47,7 @@
         <b-col cols="0" lg="3" class="p-0 pl-1">
           <VisibleWhen :at="['xl', 'xxl']">
             <SidebarRight
-              :show-job-opportunities="true"
+              :show-job-opportunities="false"
               ad-unit-path="/22794232631/freegle_myposts_desktop_right"
               ad-div-id="div-gpt-ad-1709056727559-0"
             />

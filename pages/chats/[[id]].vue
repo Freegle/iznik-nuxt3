@@ -20,7 +20,12 @@
                 : ['xs', 'sm', 'md', 'lg', 'xl', 'xxl']
             "
           >
-            <div class="chatlist">
+            <div
+              class="chatlist"
+              :class="{
+                stickyAdRendered,
+              }"
+            >
               <div class="notda">
                 <div
                   class="d-flex justify-content-between flex-wrap mb-2 mt-3 border-bottom"
@@ -187,7 +192,7 @@
         <b-col cols="0" xl="3" class="p-0 pl-1">
           <VisibleWhen :at="['xl', 'xxl']">
             <SidebarRight
-              :show-job-opportunities="true"
+              show-job-opportunities
               ad-unit-path="/22794232631/freegle_chat_app"
               ad-div-id="div-gpt-ad-1691925773522-0"
             />
@@ -538,15 +543,20 @@ async function searchMore() {
 
 .chatlist {
   // On mobile we substitute a different height navbar on this page.
-  height: calc(
-    100vh - 58px - $sticky-banner-height-mobile * v-bind('stickyAdRendered')
-  );
+  height: calc(100vh - 58px);
 
   @include media-breakpoint-up(md) {
-    height: calc(
-      100vh - var(--header-navbar-height) - $sticky-banner-height-desktop *
-        v-bind('stickyAdRendered')
-    );
+    height: calc(100vh - var(--header-navbar-height));
+  }
+
+  &.stickyAdRendered {
+    height: calc(100vh - 58px - $sticky-banner-height-mobile);
+
+    @include media-breakpoint-up(md) {
+      height: calc(
+        100vh - var(--header-navbar-height) - $sticky-banner-height-desktop
+      );
+    }
   }
 
   display: flex;

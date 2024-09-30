@@ -1,6 +1,6 @@
 <template>
   <client-only>
-    <div class="d-flex justify-content-around">
+    <div v-if="!unloading" class="d-flex justify-content-around">
       <NoticeMessage
         v-if="showError"
         variant="danger"
@@ -30,7 +30,7 @@
         </div>
       </NoticeMessage>
       <NoticeMessage
-        v-if="showReload && !snoozeReload"
+        v-else-if="showReload && !snoozeReload"
         variant="info"
         class="posit text-center"
         show
@@ -76,7 +76,7 @@ export default {
   },
   watch: {
     somethingWentWrong(newVal) {
-      if (newVal && !this.unloading) {
+      if (newVal) {
         this.showError = true
         setTimeout(() => {
           this.showError = false
@@ -86,11 +86,6 @@ export default {
     needToReload(newVal) {
       if (newVal) {
         this.showReload = true
-      }
-    },
-    unloading(newVal) {
-      if (newVal) {
-        this.showError = false
       }
     },
   },

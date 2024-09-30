@@ -7,6 +7,7 @@
       max-height="600px"
       :div-id="adDivId"
       class="da"
+      :jobs="showJobOpportunities"
     />
   </div>
 </template>
