@@ -125,7 +125,7 @@ export const useMobileStore = defineStore({ // Do not persist
 
             // Don't log as we might have been logged out since we were last active.
             chatStore.fetchChats(null, false)
-          } catch (e){}
+          } catch (e) { }
         })
       }
     },
@@ -135,6 +135,7 @@ export const useMobileStore = defineStore({ // Do not persist
     async initDeepLinks() {
       if (process.client) {
         App.addListener('appUrlOpen', async event => {
+          console.log('appUrlOpen', event.url)
           // url eg https://www.ilovefreegle.org/chats/123456?u=98765&src=chatnotif
           const lookfor = 'ilovefreegle.org'
           const ilfpos = event.url.indexOf(lookfor)
@@ -153,10 +154,34 @@ export const useMobileStore = defineStore({ // Do not persist
                 k: params.k,
               })
             }
+            if (route.indexOf('one-click-unsubscribe') !== -1) {  // Special handling of one-click-unsubscribe as that page dies
+              // /one-click-unsubscribe/uuu/kkk
+              const ustart = route.indexOf('/', 1)
+              if (ustart !== -1) {
+                const kstart = route.indexOf('/', ustart + 1)
+                if (kstart !== -1) {
+                  const uid = parseInt(route.substring(ustart + 1, kstart))
+                  const key = route.substring(kstart + 1)
+                  const authStore = useAuthStore()
+                  const loggedInAs = authStore.user?.id
+                  if (loggedInAs === uid) {
+                    const ret = await authStore.forget()
+
+                    if (!ret) {
+                      authStore.forceLogin = false
+                      router.push('/unsubscribe/unsubscribed')
+                      return
+                    }
+                  }
+                }
+              }
+              // Fallback to unsubscribe
+              router.push('/unsubscribe')
+              return
+            }
             setTimeout(() => {
               router.push(route)
             }, 500)
-            
           }
         })
       }
@@ -323,8 +348,8 @@ export const useMobileStore = defineStore({ // Do not persist
       console.log(notification)
       const data = notification.data
       let foreground = false
-      if( 'foreground' in data){
-        console.log('--- FOREGROUND',data.foreground)
+      if ('foreground' in data) {
+        console.log('--- FOREGROUND', data.foreground)
         foreground = data.foreground
       } else console.log('--- FOREGROUND NOT SET')
 
@@ -393,23 +418,23 @@ export const useMobileStore = defineStore({ // Do not persist
       const appState = await App.getState() // isActive true at startup and when app active; false when in background
       const active = appState ? appState.isActive : false
       let okToMove = false
-      if( this.isiOS){
+      if (this.isiOS) {
         okToMove = !active // Do not have push foreground flag, so: do not move if active, even if just started
       } else { // isAndroid
         okToMove = (!foreground && active) || // Just started
-                   (foreground && !active)   // foreground && activeIn background
+          (foreground && !active)   // foreground && activeIn background
       }
-      console.log('this.isiOS',this.isiOS, 'active', active, 'okToMove', okToMove)
-      
+      console.log('this.isiOS', this.isiOS, 'active', active, 'okToMove', okToMove)
+
       if (this.route && okToMove) {
         this.route = this.route.replace('/chat/', '/chats/') // Match redirects in nuxt.config.js
         console.log('router.currentRoute', router.currentRoute)
         if (router.currentRoute.path !== this.route) {
           console.log('GO TO ', this.route)
           //setTimeout(() => {
-            router.push(this.route)
+          router.push(this.route)
           //}, 1500)
-        //router.push({ path: this.route })  // Often doesn't work as intended when starting app from scratch as this routing is too early. Delaying doesn't seem to help.
+          //router.push({ path: this.route })  // Often doesn't work as intended when starting app from scratch as this routing is too early. Delaying doesn't seem to help.
         }
       }
 
