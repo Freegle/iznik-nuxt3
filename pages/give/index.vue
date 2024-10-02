@@ -7,11 +7,6 @@
       <b-row class="m-0">
         <b-col cols="12" lg="8" class="p-0 layout fader" offset-lg="2">
           <h1 class="text-center d-none">First, tell us about your item</h1>
-          <NoticeMessage variant="danger">
-            There's a problem with uploading photos - probably caused by
-            security on the school network. We're looking into working around
-            that.
-          </NoticeMessage>
           <ul
             v-for="(id, index) in ids"
             :key="'post-' + id"
