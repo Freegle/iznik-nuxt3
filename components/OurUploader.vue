@@ -212,6 +212,7 @@ onMounted(() => {
       },
     })
     .use(Tus, { endpoint: runtimeConfig.public.TUS_UPLOADER })
+    //.use(Tus, { endpoint: runtimeConfig.public.TUS_UPLOADER }) // Try chunkSize?
     //.use(Tus, { endpoint: runtimeConfig.public.TUS_UPLOADER, overridePatchMethod: true })
     //.use(UppyFreegle)
     .use(Compressor) // Removing may help some users

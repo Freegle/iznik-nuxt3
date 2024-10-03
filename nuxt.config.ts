@@ -18,6 +18,9 @@ import https from 'https'
 // If npm reinstall, comment out line 40 of node_modules\@capacitor\cli\dist\android\run.js //await common_1.runTask
 // Ensure in here android\app\src\main\AndroidManifest.xml
 //  <uses-permission android:name="android.permission.CAMERA" />
+//
+// node_modules/tus-js-client/lib.esm/upload.js
+//         console.log('tus: failed to upload chunk at offset',_this8._offset, err)
 
 //console.log("CHECK PREBID SCRIPT CHANGES")
 //const prebidCurrent = fs.readFileSync('public/js/prebid.js')
