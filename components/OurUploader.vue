@@ -40,6 +40,7 @@ import { DashboardModal } from '@uppy/vue'
 import Tus from '@uppy/tus'
 import Webcam from '@uppy/webcam'
 import Compressor from '@uppy/compressor'
+//import UppyFreegle from '../composables/uppyFreeglePlugin'
 
 import ResizeObserver from 'resize-observer-polyfill'
 import hasOwn from 'object.hasown'
@@ -210,7 +211,9 @@ onMounted(() => {
         facingMode: 'environment',
       },
     })
-    .use(Tus, { endpoint: runtimeConfig.public.TUS_UPLOADER, overridePatchMethod: true })
+    .use(Tus, { endpoint: runtimeConfig.public.TUS_UPLOADER })
+    //.use(Tus, { endpoint: runtimeConfig.public.TUS_UPLOADER, overridePatchMethod: true })
+    //.use(UppyFreegle)
     .use(Compressor) // Removing may help some users
   uppy.on('file-added', (file) => {
     console.log('Added file', file)
