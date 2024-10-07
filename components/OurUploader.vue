@@ -200,7 +200,10 @@ onMounted(() => {
         facingMode: 'environment',
       },
     })
-    .use(Tus, { endpoint: runtimeConfig.public.TUS_UPLOADER })
+    .use(Tus, {
+      endpoint: runtimeConfig.public.TUS_UPLOADER,
+      uploadDataDuringCreation: true,
+    })
     .use(Compressor)
   uppy.on('file-added', (file) => {
     console.log('Added file', file)
