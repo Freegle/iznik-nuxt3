@@ -32,20 +32,29 @@
               This is a suggested ADMIN. All local communities will get "copies" of this (unless they've opted out),
               and mods can then edit/approve/reject them. Members won't receive multiple copies.
             </NoticeMessage>
-            <!--VeeForm ref="form">
+            <VeeForm ref="form">
               <b-form-group label="Subject of ADMIN:" label-for="subject" label-class="mb-0">
-                <b-form-input id="subject" v-model="subject" class="mb-3" type="text"
+
+                <Field id="subject" v-model="subject" name="subject" type="text" placeholder="Subject (don't include ADMIN - added automatically)"
+                  :rules="validateSubject" class="form-control" />
+                <ErrorMessage name="subject" class="text-danger font-weight-bold" />
+
+                <!--b-form-input id="subject" v-model="subject" class="mb-3" type="text"
                   placeholder="Subject (don't include ADMIN - added automatically)" :validation="$v.subject" :validation-enabled="validationEnabled"
                   :validation-messages="{
                     required: 'Please add a subject'
                   }" />
+                  :rules="validateTitle"-->
               </b-form-group>
               <b-form-group label="Body of ADMIN:" label-for="body" label-class="mb-0">
-                <b-form-textarea id="body" v-model="body" rows="15" max-rows="8" spellcheck="true"
+                <Field id="body" v-model="body" name="body" rows="15" max-rows="8" spellcheck="true" type="textarea"
+                  placeholder="Put your message in here.  Plain-text only." :rules="validateBody" class="form-control" />
+                <ErrorMessage name="body" class="text-danger font-weight-bold" />
+                <!--b-form-textarea id="body" v-model="body" rows="15" max-rows="8" spellcheck="true"
                   placeholder="Put your message in here.  Plain-text only." class="mb-3" :validation="$v.body" :validation-enabled="validationEnabled"
                   :validation-messages="{
                     required: 'Please add the message'
-                  }" />
+                  }" /-->
               </b-form-group>
               <p>
                 You can optionally add a big button into the ADMIN, and specify where it will go.
@@ -56,7 +65,7 @@
               <b-form-group label="Call To Action link:" label-for="ctalink" label-class="mb-0">
                 <b-form-input id="ctalink" v-model="ctalink" class="mb-3" placeholder="(Optional) Link for a big button" />
               </b-form-group>
-            </VeeForm-->
+            </VeeForm>
             <b-button class="mt-2 mb-2" size="lg" :variant="groupidcreate < 0 ? 'danger' : 'primary'"
               :disabled="groupidcreate <= 0 && groupidcreate !== -2" @click="create">
               <v-icon v-if="created" icon="check" />
@@ -182,13 +191,10 @@ export default {
     }
   },
   async mounted() {
-    console.log('admins mounted')
     for (const group of this.myGroups) {
-      console.log('admins', group.id)
       await this.groupStore.fetchMT({ id: group.id })
     }
 
-    //await this.groupStore.fetchMT({ id: this.groupidshow })
     this.fetch(this.groupidshow)
   },
   methods: {
@@ -199,6 +205,13 @@ export default {
       this.fetch(this.groupidprevious)
     },
     async create() {
+      console.log('create')
+      const validate = await this.$refs.form.validate()
+      if (!validate.valid) {
+        console.log('create fail', validate)
+        return
+      }
+
       /*
       this.$v.$touch()
 
@@ -232,16 +245,24 @@ export default {
       await this.adminsStore.fetch({
         groupid: groupid
       })
-    }
-  },
-  validations: {
-    body: {
-      required
     },
-    subject: {
-      required,
-      noAdmin
-    }
-  }
+    validateSubject(value) {
+      if (!value) {
+        return 'Please enter a subject.'
+      }
+
+      if (value.toLowerCase().indexOf('admin') !== -1) {
+        return 'Do not include ADMIN in your subject.'
+      }
+
+      return true
+    },
+    validateBody(value){
+      if (!value) {
+        return 'Please add the message.'
+      }
+      return true
+    },
+  },
 }
 </script>

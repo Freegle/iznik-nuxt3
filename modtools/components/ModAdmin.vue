@@ -205,6 +205,7 @@ export default {
 
       await this.adminsStore.approve({ id: this.admin.id })
 
+      // TODO fetch work
       //this.fetchMe(['work'])
     }
   }
