@@ -19,14 +19,35 @@ export const useAdminsStore = defineStore({
     },
     async fetch(params) {
       const { admin, admins } = await api(this.config).admins.fetch(params)
-      console.log('useAdminsStore',admin, admins)
+      //console.log('useAdminsStore', admin, admins)
       if (params && params.id) {
         this.list[params.id] = admin
       } else {
-        for( const admin of admins){
+        for (const admin of admins) {
           this.list[admin.id] = admin
         }
       }
+    },
+    async edit(params) {
+      await api(this.config).admins.patch(params)
+      await api(this.config).admins.fetch(params)
+    },
+    async delete(params) {
+      await api(this.config).admins.del(params)
+      this.clearAdmin(params.id)
+    },
+    async hold(params) {
+      await api(this.config).admins.hold(params.id)
+      await this.fetch({ id: params.id })
+
+      // TODO fetch work
+    },
+
+    async release(params) {
+      await api(this.config).admins.release(params.id)
+      await this.fetch({ id: params.id })
+
+      // TODO fetch work
     }
   },
   getters: {

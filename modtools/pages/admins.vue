@@ -4,9 +4,9 @@
       <div>
         <ModHelpAdmins />
         <b-tabs content-class="mt-3" card>
-          <b-tab active @click="fetchPending">
+          <b-tab active>
             <template v-slot:title>
-              <h2 class="ml-2 mr-2">
+              <h2 class="ml-2 mr-2" @click="fetchPending">
                 Pending
                 <b-badge v-if="pendingcount" variant="danger">
                   {{ pendingcount }}
@@ -71,9 +71,9 @@
             </b-button>
             <p>It's a good idea to have a fellow mod take a look at an ADMIN before it goes out, to spot typos.</p>
           </b-tab>
-          <b-tab @click="fetchPrevious">
+          <b-tab>
             <template v-slot:title>
-              <h2 class="ml-2 mr-2">
+              <h2 class="ml-2 mr-2" @click="fetchPrevious">
                 Previous
               </h2>
             </template>
@@ -182,6 +182,7 @@ export default {
     }
   },
   async mounted() {
+    console.log('admins mounted')
     for (const group of this.myGroups) {
       console.log('admins', group.id)
       await this.groupStore.fetchMT({ id: group.id })

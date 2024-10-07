@@ -1,11 +1,10 @@
 <template>
   <div>
     <b-card no-body>
-      <b-card-header class="clickme" @click="expanded = !expanded">
+      <b-card-header class="clickme" @click.prevent="expanded = !expanded">
         <b-row>
           <b-col cols="6" md="2">
             <v-icon icon="hashtag" class="text-muted" scale="0.75" />{{ admin.id }}
-            {{expanded}}
           </b-col>
           <b-col cols="6" md="3" class="small">
             Created {{ timeago(admin.created) }}
@@ -22,7 +21,7 @@
             {{ admin.subject }}
           </b-col>
           <b-col cols="12" md="3">
-            <span class="d-block float-right">
+            <span class="d-block float-end">
               <v-icon v-if="!expanded" icon="caret-down" />
               <v-icon v-else icon="caret-up" />
             </span>
@@ -96,7 +95,7 @@
         <b-button v-if="!admin.heldby || admin.heldby === myid" variant="white" @click="save">
           <v-icon v-if="saving" icon="sync" class="text-success fa-spin" />
           <v-icon v-else-if="saved" icon="check" class="text-success" />
-          <v-icon v-else icon="save" />
+          <v-icon v-else icon="save"/>
           Save changes
         </b-button>
         <b-button v-if="!admin.heldby" variant="white" @click="hold">
@@ -137,7 +136,7 @@ export default {
   },
   data: function () {
     return {
-      expanded: true,
+      expanded: false,
       saving: false,
       saved: false,
       showConfirmModal: false,
@@ -164,7 +163,7 @@ export default {
     }
   },
   mounted() {
-    //this.expanded = this.open
+    this.expanded = this.open
 
     if (this.admin.heldby) {
       // Get them in store so we can display their name.
@@ -173,19 +172,16 @@ export default {
   },
   methods: {
     deleteIt() {
-      this.waitForRef('deleteConfirm', () => {
-        this.$refs.deleteConfirm.show()
-      })
+      this.showConfirmModal = true
     },
     deleteConfirmed() {
-      this.$store.dispatch('admins/delete', {
-        id: this.id
-      })
+      console.log('deleteConfirmed')
+      this.adminsStore.delete({ id: this.id })
     },
     async save() {
       this.saving = true
 
-      await this.$store.dispatch('admins/edit', {
+      await this.adminsStore.edit({
         id: this.admin.id,
         subject: this.admin.subject,
         text: this.admin.text,
@@ -199,23 +195,17 @@ export default {
       }, 2000)
     },
     hold() {
-      this.$store.dispatch('admins/hold', {
-        id: this.admin.id
-      })
+      this.adminsStore.hold({ id: this.admin.id })
     },
     release() {
-      this.$store.dispatch('admins/release', {
-        id: this.admin.id
-      })
+      this.adminsStore.release({ id: this.admin.id })
     },
     async approve() {
       await this.save()
 
-      await this.$store.dispatch('admins/approve', {
-        id: this.admin.id
-      })
+      await this.adminsStore.approve({ id: this.admin.id })
 
-      this.fetchMe(['work'])
+      //this.fetchMe(['work'])
     }
   }
 }
