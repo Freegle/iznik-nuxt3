@@ -121,7 +121,7 @@
       <h4 class="mt-2">
         CGA
       </h4>
-      <b-textarea v-model="group.cga" rows="4" class="mb-2" />
+      <b-form-textarea v-model="group.cga" rows="4" class="mb-2" />
       <p v-if="CGAerror" class="text-danger">
         {{ CGAerror }}
       </p>
@@ -129,7 +129,7 @@
       <h4 class="mt-2">
         DPA
       </h4>
-      <b-textarea v-model="group.dpa" rows="4" class="mb-2" />
+      <b-form-textarea v-model="group.dpa" rows="4" class="mb-2" />
       <p v-if="DPAerror" class="text-danger">
         {{ DPAerror }}
       </p>

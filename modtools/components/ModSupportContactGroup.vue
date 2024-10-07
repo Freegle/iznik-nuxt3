@@ -68,7 +68,7 @@
     <label>Subject</label>
     <b-form-input v-model="subject" placeholder="Brief subject of this message" />
     <label>Text version</label>
-    <b-textarea v-model="text" rows="10" />
+    <b-form-textarea v-model="text" rows="10" />
     <label>HTML version (optional)</label>
     <VueEditor v-model="html" :editor-options="editorOptions" class="bg-white" />
     <NoticeMessage v-if="groupid < 0" variant="danger" class="mt-2 mb-2">

@@ -39,13 +39,13 @@
         <!-- eslint-disable-next-line -->
         <ExternalLink href="https://arthur-e.github.io/Wicket/sandbox-gmaps3.html">this</ExternalLink>.
       </b-form-text>
-      <b-textarea v-model="cga" rows="5" placeholder="Core Group Area (WKT format)" />
+      <b-form-textarea v-model="cga" rows="5" placeholder="Core Group Area (WKT format)" />
     </b-form-group>
     <b-form-group>
       <b-form-text>
         Default Posting Area (or empty).
       </b-form-text>
-      <b-textarea v-model="dpa" rows="5" placeholder="Default Posting Area (WKT format)" />
+      <b-form-textarea v-model="dpa" rows="5" placeholder="Default Posting Area (WKT format)" />
     </b-form-group>
     <SpinButton
       variant="primary"
