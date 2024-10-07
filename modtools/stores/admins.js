@@ -28,6 +28,16 @@ export const useAdminsStore = defineStore({
         }
       }
     },
+    async add(params) {
+      await api(this.config).admins.add(params)
+    },
+    async approve(params) {
+      await api(this.config).admins.patch({
+        id: params.id,
+        pending: 0
+      })
+      await this.fetch({ id: params.id })
+    },
     async edit(params) {
       await api(this.config).admins.patch(params)
       await api(this.config).admins.fetch(params)
@@ -39,14 +49,11 @@ export const useAdminsStore = defineStore({
     async hold(params) {
       await api(this.config).admins.hold(params.id)
       await this.fetch({ id: params.id })
-
       // TODO fetch work
     },
-
     async release(params) {
       await api(this.config).admins.release(params.id)
       await this.fetch({ id: params.id })
-
       // TODO fetch work
     }
   },

@@ -95,7 +95,7 @@
         <b-button v-if="!admin.heldby || admin.heldby === myid" variant="white" @click="save">
           <v-icon v-if="saving" icon="sync" class="text-success fa-spin" />
           <v-icon v-else-if="saved" icon="check" class="text-success" />
-          <v-icon v-else icon="save"/>
+          <v-icon v-else icon="save" />
           Save changes
         </b-button>
         <b-button v-if="!admin.heldby" variant="white" @click="hold">
@@ -175,7 +175,6 @@ export default {
       this.showConfirmModal = true
     },
     deleteConfirmed() {
-      console.log('deleteConfirmed')
       this.adminsStore.delete({ id: this.id })
     },
     async save() {

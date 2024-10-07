@@ -34,27 +34,14 @@
             </NoticeMessage>
             <VeeForm ref="form">
               <b-form-group label="Subject of ADMIN:" label-for="subject" label-class="mb-0">
-
                 <Field id="subject" v-model="subject" name="subject" type="text" placeholder="Subject (don't include ADMIN - added automatically)"
                   :rules="validateSubject" class="form-control" />
                 <ErrorMessage name="subject" class="text-danger font-weight-bold" />
-
-                <!--b-form-input id="subject" v-model="subject" class="mb-3" type="text"
-                  placeholder="Subject (don't include ADMIN - added automatically)" :validation="$v.subject" :validation-enabled="validationEnabled"
-                  :validation-messages="{
-                    required: 'Please add a subject'
-                  }" />
-                  :rules="validateTitle"-->
               </b-form-group>
               <b-form-group label="Body of ADMIN:" label-for="body" label-class="mb-0">
-                <Field id="body" v-model="body" name="body" rows="15" max-rows="8" spellcheck="true" type="textarea"
+                <Field as="textarea" id="body" v-model="body" name="body" rows="15" max-rows="8" spellcheck="true" type="textarea"
                   placeholder="Put your message in here.  Plain-text only." :rules="validateBody" class="form-control" />
                 <ErrorMessage name="body" class="text-danger font-weight-bold" />
-                <!--b-form-textarea id="body" v-model="body" rows="15" max-rows="8" spellcheck="true"
-                  placeholder="Put your message in here.  Plain-text only." class="mb-3" :validation="$v.body" :validation-enabled="validationEnabled"
-                  :validation-messages="{
-                    required: 'Please add the message'
-                  }" /-->
               </b-form-group>
               <p>
                 You can optionally add a big button into the ADMIN, and specify where it will go.
@@ -205,24 +192,14 @@ export default {
       this.fetch(this.groupidprevious)
     },
     async create() {
-      console.log('create')
       const validate = await this.$refs.form.validate()
       if (!validate.valid) {
-        console.log('create fail', validate)
-        return
-      }
-
-      /*
-      this.$v.$touch()
-
-      if (this.$v.$anyError) {
-        this.validationFocusFirstError()
         return
       }
 
       this.creating = true
 
-      await this.$api.admins.add({
+      await this.adminsStore.add({
         groupid: this.groupidcreate > 0 ? this.groupidcreate : null,
         subject: this.subject,
         text: this.body,
@@ -237,8 +214,8 @@ export default {
         this.created = false
       }, 2000)
 
-      this.fetchMe(['work'])
-      */
+      // TODO fetch work
+      //this.fetchMe(['work'])
     },
     async fetch(groupid) {
       await this.adminsStore.clear()
