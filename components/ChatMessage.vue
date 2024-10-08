@@ -17,7 +17,7 @@
     />
     <div v-else-if="chatmessage?.type === 'Interested'">
       <chat-message-interested
-        v-if="otheruser || chat.chattype === 'User2Mod'"
+        v-if="isMT || otheruser || chat.chattype === 'User2Mod'"
         :id="id"
         :chatid="chatid"
         :pov="pov"
@@ -191,6 +191,11 @@ export default {
       type: Number,
       required: false,
       default: null,
+    },
+    isMT: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   async setup(props) {

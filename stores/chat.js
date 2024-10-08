@@ -19,6 +19,16 @@ export const useChatStore = defineStore({
     lastSearchMT: null,
   }),
   actions: {
+    clear(){
+      this.list = []
+      this.listByChatId = {}
+      this.listByChatMessageId = {}
+      this.messages = {}
+      this.searchSince = null
+      this.showContactDetailsAskModal = false
+      this.currentChatMT = null
+      this.lastSearchMT = null
+    },
     init(config) {
       this.config = config
       this.route = useRoute()
@@ -63,6 +73,22 @@ export const useChatStore = defineStore({
         }
       }
     },
+    async fetchReviewChatsMT(id, params){
+      this.clear()
+      const { chatmessages, chatreports } = await api(this.config).chat.fetchReviewChatsMT(params)
+      const messages = chatmessages
+      this.messages[id] = messages
+
+      console.log('fetchReviewChatsMT TODO: set message.refmsgid after loading message into messageStore')
+      messages.forEach((m) => {
+        /* TODO Also load message into messageStore
+        if( m.refmsg) {
+          m.refmsgid = m.refmsg.id
+        }*/
+        this.listByChatId[m.chatid] = m.chatroom
+        this.listByChatMessageId[m.id] = m
+      })
+  },
     async fetchChats(search, logError, keepChat) {
       let since = null
 
@@ -73,13 +99,13 @@ export const useChatStore = defineStore({
       let chats = []
       const miscStore = useMiscStore() // MT ADDED
       if( miscStore.modtools){
-        const { chatrooms } = await api(this.config).chat.listChatsMT({
+        const { chatrooms } = await api(this.config).chat.listChatsMT({ // v1: /chat/rooms
           chattypes: ['User2Mod', 'Mod2Mod']
         })
         chats = chatrooms
       }
       else {
-        chats = await api(this.config).chat.listChats(
+        chats = await api(this.config).chat.listChats( // v2: /chat
           since,
           search,
           keepChat,

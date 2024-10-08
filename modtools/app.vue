@@ -41,7 +41,7 @@ import { computed, watch, reloadNuxtApp } from '#imports'
 // polyfills
 import 'core-js/actual/array/to-sorted'
 
-//import { useModChatsStore } from './stores/modchats'
+import { useAdminsStore } from './stores/admins'
 import { useLogsStore } from './stores/logs'
 import { useMemberStore } from './stores/member'
 import { useModConfigStore } from './stores/modconfig'
@@ -95,7 +95,7 @@ const domainStore = useDomainStore()
 const logoStore = useLogoStore()
 const locationStore = useLocationStore()
 const shortlinkStore = useShortlinkStore()
-//const modChatsStore = useModChatsStore()
+const adminsStore = useAdminsStore()
 const logsStore = useLogsStore()
 const memberStore = useMemberStore()
 const modconfigStore = useModConfigStore()
@@ -133,7 +133,7 @@ domainStore.init(runtimeConfig)
 logoStore.init(runtimeConfig)
 locationStore.init(runtimeConfig)
 shortlinkStore.init(runtimeConfig)
-//modChatsStore.init(runtimeConfig)
+adminsStore.init(runtimeConfig)
 logsStore.init(runtimeConfig)
 memberStore.init(runtimeConfig)
 modconfigStore.init(runtimeConfig)
