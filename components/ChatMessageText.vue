@@ -72,6 +72,7 @@ export default {
       )
     },
     searchwords() { // :search-words validator needs string but regexEmail is RegExp
+      // https://www.npmjs.com/package/vue-highlight-words
       // :search-words="[regexEmail]"
       // Could try :autoEscape="false"
       let sw = this.regexEmail.toString()

@@ -14,10 +14,6 @@ export default {
       type: Number,
       required: true
     },
-    chat: {
-      type: Object,
-      required: true
-    },
     pov: {
       type: Number,
       required: false,
@@ -31,7 +27,7 @@ export default {
   },
   methods: {
     view() {
-      console.log('MCVB view', this.chat)
+      console.log('MCVB view')
       this.showModal = true
       this.$refs.modChatModal?.show()
     }
