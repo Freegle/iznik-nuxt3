@@ -1,5 +1,5 @@
 <template>
-  <div :class="selected ? 'selected' : ''" @click="selectMe">
+  <div :class="{ selected, strike: chatmessage.reviewrejected }" @click="selectMe">
     <div v-if="chatmessage?.type === 'Default'">
       <chat-message-text
         :id="id"
@@ -16,6 +16,7 @@
       @delete="showDeleteMessageModal"
     />
     <div v-else-if="chatmessage?.type === 'Interested'">
+      INTERESTED!
       <chat-message-interested
         v-if="isMT || otheruser || chat.chattype === 'User2Mod'"
         :id="id"
@@ -122,6 +123,7 @@
 </template>
 <script>
 import { useChatStore } from '../stores/chat'
+import { useMiscStore } from '~/stores/misc'
 import { setupChat } from '../composables/useChat'
 import ChatMessageText from './ChatMessageText'
 import ChatMessageImage from './ChatMessageImage'

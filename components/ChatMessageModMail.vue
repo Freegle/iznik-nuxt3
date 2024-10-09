@@ -20,6 +20,11 @@
                 </h4>
               </div>
               <h4 v-else>Message from Freegle Volunteers</h4>
+              <div v-if="realMod" class="text-muted small">
+                <div class="small">
+                  (Sent by <v-icon icon="hashtag" class="text-muted" scale="0.5" />{{ chatmessage.userid }})
+                </div>
+              </div>
             </b-card-title>
             <b-card-text>
               <div :class="emessage ? 'media-body chatMessage' : 'media-body'">
@@ -53,7 +58,7 @@
                 </b-button>
               </div>
               <NoticeMessage
-                v-else-if="chat.chattype === 'User2User'"
+                v-else-if="!modtools && (chat.chattype === 'User2User')"
                 variant="warning"
                 class="mt-2"
               >
@@ -84,6 +89,7 @@
 </template>
 <script>
 import { useComposeStore } from '../stores/compose'
+import { useMiscStore } from '~/stores/misc'
 import { fetchReferencedMessage } from '../composables/useChat'
 import NoticeMessage from './NoticeMessage'
 import ChatButton from './ChatButton'
@@ -111,12 +117,24 @@ export default {
     }
   },
   computed: {
+    modtools(){
+      const miscStore = useMiscStore()
+      return miscStore.modtools
+    },
     group() {
       return this.chat && this.chat.group ? this.chat.group : null
     },
     amUser() {
-      return this.chat && this.chat.user && this.chat.user.id === this.myid
+      return this.chat && this.chat.user && this.chat.user.id === this.myid // TODO: Needs fixing for MT when viewing others' chat
     },
+    realMod() {
+      return (
+        this.realMe &&
+        (this.realMe.systemrole === 'Moderator' ||
+          this.realMe.systemrole === 'Support' ||
+          this.realMe.systemrole === 'Admin')
+      )
+    }
   },
   methods: {
     async repost() {

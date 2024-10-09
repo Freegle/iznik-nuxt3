@@ -29,8 +29,7 @@
           </span>
         </NoticeMessage>
         <div class="rounded bg-white p-2 font-weight-bold border border-warning mb-2">
-          <ChatMessage :id="message.id" :chatid="message.chatid" last  highlight-emails isMT />
-          <!--{{ message }}-->
+          <ChatMessage :id="message.id" :chatid="message.chatid" last highlight-emails isMT />
 
           <!-- OLD ChatMessage :chatid="message.chatroom.id" :chatmessage="message" :otheruser="message.fromuser" last highlight-emails :id="message.id" /--> 
           <!-- :chatusers="chatusers" -->
@@ -47,7 +46,7 @@
           <span>
             <v-icon icon="info-circle" /> {{ message.touser.displayname }} is on {{ message.group.namedisplay }}
             <span v-if="!message.widerchatreview">, which you mod.
-              <b-button :to="'/modtools/members/approved/search/' + message.group.id + '/' + message.touser.id" variant="link"
+              <b-button :to="'/members/approved/search/' + message.group.id + '/' + message.touser.id" variant="link"
                 class="p-0 border-0 align-top">
                 Go to membership
               </b-button>
@@ -66,7 +65,7 @@
               <span>
                 <span v-if="message.groupfrom">on {{ message.groupfrom.namedisplay }}, which you mod</span><span v-else>not on any groups which you
                   actively mod.</span>
-                <b-button v-if="message.groupfrom" :to="'/modtools/members/approved/search/' + message.groupfrom.id + '/' + message.fromuser.id"
+                <b-button v-if="message.groupfrom" :to="'/members/approved/search/' + message.groupfrom.id + '/' + message.fromuser.id"
                   variant="link" class="p-0 border-0 align-top">
                   Go to membership
                 </b-button>
@@ -99,12 +98,15 @@
         </div>
       </b-card-footer>
     </b-card>
-    <!-- TODO ModChatNoteModal v-if="message" ref="modnote" :chatid="message.chatid" /-->
+    <ModChatNoteModal v-if="showModChatNoteModal && message" ref="modnote" :chatid="message.chatid" @hidden="showModChatNoteModal = false" />
     <ModMessageEmailModal v-if="showOriginal" :id="message.bymailid" ref="original" />
   </div>
 </template>
 <script>
 import { useChatStore } from '~/stores/chat'
+
+// We need an id for the store.  The null value is a special case used just for retrieving chat review messages.
+const REVIEWCHAT = null
 
 export default {
   //mixins: [chat],
@@ -114,6 +116,7 @@ export default {
       chatStore,
     }
   },
+  emits: ['reload'],
   props: {
     id: { // Was in mixins/chat.js
       type: Number,
@@ -126,7 +129,8 @@ export default {
   },
   data: function () {
     return {
-      showOriginal: false
+      showOriginal: false,
+      showModChatNoteModal: false
     }
   },
   computed: {
@@ -259,59 +263,47 @@ export default {
     }
   },
   methods: {
-    async release(callback) {
-      await this.$store.dispatch('chatmessages/release', {
-        id: this.message.id,
-        chatid: null
-      })
-      callback()
+    async release() {
+      await this.$api.chat.sendMT({ id: this.message.id, action: 'Release' })
+      this.$emit('reload')
     },
     async hold(callback) {
-      await this.$store.dispatch('chatmessages/hold', {
-        id: this.message.id,
-        chatid: null
-      })
+      await this.$api.chat.sendMT({ id: this.message.id, action: 'Hold' })
+      this.$emit('reload')
       callback()
     },
     async approve(callback) {
-      await this.$store.dispatch('chatmessages/approve', {
-        id: this.message.id,
-        chatid: null
-      })
+      await this.$api.chat.sendMT({ id: this.message.id, action: 'Approve' })
+      this.$emit('reload')
       callback()
     },
     async reject(callback) {
-      await this.$store.dispatch('chatmessages/reject', {
-        id: this.message.id,
-        chatid: null
-      })
+      await this.$api.chat.sendMT({ id: this.message.id, action: 'Reject' })
+      //this.chatStore.removeMessageMT(REVIEWCHAT,this.message.id)
+      //console.log('reject',this.message.id, this.chatStore.messages[REVIEWCHAT])
+      this.$emit('reload')
       callback()
     },
     async whitelist(callback) {
-      await this.$store.dispatch('chatmessages/whitelist', {
-        id: this.message.id,
-        chatid: null
-      })
+      await this.$api.chat.sendMT({ id: this.message.id, action: 'ApproveAllFuture' })
+      this.$emit('reload')
       callback()
     },
-    modnote(callback) {
-      this.waitForRef('modnote', () => {
-        this.$refs.modnote.show()
-      })
+    async modnote(callback) {
+      this.showModChatNoteModal = true
+      await nextTick()
+      this.$refs.modnote?.show()
       callback()
     },
     async redactEmails(callback) {
-      await this.$store.dispatch('chatmessages/redact', {
-        id: this.message.id,
-        chatid: null
-      })
+      await this.$api.chat.sendMT({ id: this.message.id, action: 'Redact' })
+      this.$emit('reload')
       callback()
     },
-    viewOriginal() {
+    async viewOriginal() {
       this.showOriginal = true
-      this.waitForRef('original', () => {
-        this.$refs.original.show()
-      })
+      await nextTick()
+      this.$refs.original?.show()
       callback()
     }
   }

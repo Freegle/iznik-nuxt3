@@ -4,7 +4,7 @@
       <ModHelpChatReview />
       <div>
         <div v-for="message in visibleMessages" :key="'messagelist-' + message.id" class="p-0 mt-2">
-          <ModChatReview :id="message.chatid" :message="message" />
+          <ModChatReview :id="message.chatid" :message="message" @reload="reload"/>
         </div>
 
         <infinite-loading direction="top" force-use-infinite-wrapper="body" :distance="distance" @infinite="loadMore" :identifier="bump">
@@ -52,6 +52,7 @@ export default {
   },
   computed: {
     visibleMessages() {
+      //console.log('visibleMessages',this.show, this.messages.length)
       return this.messages.slice(0, this.show).filter(message => {
         return message !== null
       })
@@ -124,16 +125,15 @@ export default {
           })*/
       }
     },
+    async reload(){
+      await this.clearAndLoad()
+    },
     async clearAndLoad() {
       console.log('review clearAndLoad')
       // There's new stuff to do.  Reload.
       // We don't want to pick up any real chat messages.
       await this.chatStore.clear()
 
-      /*await this.chatStore.fetch({
-        chatid: REVIEWCHAT,
-        limit: this.limit
-      })*/
       await this.chatStore.fetchReviewChatsMT(REVIEWCHAT, {
         limit: this.limit
       })

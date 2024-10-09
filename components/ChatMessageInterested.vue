@@ -3,6 +3,7 @@
     class="chatMessageWrapper pb-1"
     :class="{ myChatMessage: messageIsFromCurrentUser }"
   >
+  INTERESTING!
     <div class="chatMessage forcebreak chatMessage__owner">
       <div v-if="chatmessage.userid != myid">
         <ChatMessageSummary
