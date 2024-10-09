@@ -11,7 +11,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     if (err instanceof MaintenanceError) {
       // This is thrown in response to API return codes from the server.
       throw err
-    } else if (err instanceof APIError && vm && vm.$bvToast) {
+    } else if (err instanceof APIError && vm) { // && vm.$bvToast NOT PRESENT
       const { request, response } = err
       try {
         // We have seen Sentry issues which look as though our console.error log here is itself causing an exception,

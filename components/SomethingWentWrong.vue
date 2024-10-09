@@ -85,6 +85,8 @@ export default {
         this.showError = true
         setTimeout(() => {
           this.showError = false
+          const miscStore = useMiscStore()
+          miscStore.somethingWentWrong = false
         }, 10000)
       }
     },
