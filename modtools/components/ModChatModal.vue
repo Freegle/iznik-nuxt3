@@ -50,7 +50,7 @@
             <li v-if="chatmessage">
               TODO
               <!--ChatMessage :key="'chatmessage-' + chatmessage.id" :id="chatmessage.id" :chatid="chatmessage.chatid" :last="chatmessage.id === chatmessages[chatmessages.length - 1].id" :pov="pov" class="mb-1" /-->
-                {{ chatmessage }}
+              {{ chatmessage }}
 
               <!--ChatMessage :key="'chatmessage-' + chatmessage.id" :chatmessage="chatmessage" :chat="chat2"
                 :otheruser="chat2.user1 && pov === chat2.user1.id ? chat2.user2 : chat2.user1"
@@ -106,10 +106,6 @@ export default {
       type: Number,
       required: true
     },
-    chat2: {
-      type: Object,
-      required: true
-    },
     pov: {
       type: Number,
       required: true
@@ -118,8 +114,8 @@ export default {
   data: function () {
     return {
       busy: true,
+      chat2: null,
       chatusers: [] // TODO
-      //chat2: null
     }
   },
   async mounted() {
@@ -135,12 +131,11 @@ export default {
 
       if (this.chat2) {
         if (this.chat2.user1 && this.chat2.user1 === this.pov) {
-          ret = { id: this.chat2.user2, displayname: this.chat2.u2name }
+          ret = this.chat2.user2
         } else {
-          ret = { id: this.chat2.user1, displayname: this.chat2.u1name }
+          ret = this.chat2.user1
         }
       }
-
       return ret
     },
     user2() {
@@ -148,9 +143,9 @@ export default {
 
       if (this.chat2) {
         if (this.chat2.user2 && this.chat2.user2 === this.pov) {
-          ret = { id: this.chat2.user2, displayname: this.chat2.u2name }
+          ret = this.chat2.user2
         } else {
-          ret = { id: this.chat2.user1, displayname: this.chat2.u1name }
+          ret = this.chat2.user1
         }
       }
 
@@ -159,24 +154,9 @@ export default {
   },
   methods: {
     async show() {
-      /*if (!this.chatStore.byChatId(this.id)) {
-        try {
-          // Was https://modtools.org/api/chatrooms?id=12345&modtools=true
-          // Now https://api.ilovefreegle.org/apiv2/chat/12345?loggedInAs=98765&requestid=1
-          await this.chatStore.fetchChat(this.id)
-        } catch (e) {
-          console.log("MCM show XXX", e.message)
-          this.fetcherror = true
-        }
-      }
-
-      // Take a copy rather than use computed as it may not be ours and will vanish from the store.
-      this.chat2 = this.chatStore.byChatId(this.id)*/
-
-      console.log("MCM show AAA")
       await this.chatStore.fetchChats({ fetchChats: ['User2Mod', 'Mod2Mod'] }) // Wrongly gets for current user
       await this.chatStore.fetchMessages(this.id)
-      console.log("MCM show BBB")
+      this.chat2 = this.chatStore.byChatId(this.id)
       this.modal.show()
     },
     closeit() {
