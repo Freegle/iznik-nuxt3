@@ -29,8 +29,7 @@
           </span>
         </NoticeMessage>
         <div class="rounded bg-white p-2 font-weight-bold border border-warning mb-2">
-          <ChatMessage :id="message.id" :chatid="message.chatid" last  highlight-emails isMT />
-          <!--{{ message }}-->
+          <ChatMessage :id="message.id" :chatid="message.chatid" last highlight-emails isMT />
 
           <!-- OLD ChatMessage :chatid="message.chatroom.id" :chatmessage="message" :otheruser="message.fromuser" last highlight-emails :id="message.id" /--> 
           <!-- :chatusers="chatusers" -->
@@ -106,6 +105,9 @@
 <script>
 import { useChatStore } from '~/stores/chat'
 
+// We need an id for the store.  The null value is a special case used just for retrieving chat review messages.
+const REVIEWCHAT = null
+
 export default {
   //mixins: [chat],
   setup() {
@@ -114,6 +116,7 @@ export default {
       chatStore,
     }
   },
+  emits: ['reload'],
   props: {
     id: { // Was in mixins/chat.js
       type: Number,
@@ -260,45 +263,30 @@ export default {
     }
   },
   methods: {
-    async release(callback) {
-      await this.$store.dispatch('chatmessages/release', {
-        id: this.message.id,
-        chatid: null
-      })
-      callback()
+    async release() {
+      await this.$api.chat.sendMT({ id: this.message.id, action: 'Release' })
+      this.$emit('reload')
     },
     async hold(callback) {
-      await this.$store.dispatch('chatmessages/hold', {
-        id: this.message.id,
-        chatid: null
-      })
+      await this.$api.chat.sendMT({ id: this.message.id, action: 'Hold' })
+      this.$emit('reload')
       callback()
     },
     async approve(callback) {
-      await this.$store.dispatch('chatmessages/approve', {
-        id: this.message.id,
-        chatid: null
-      })
+      await this.$api.chat.sendMT({ id: this.message.id, action: 'Approve' })
+      this.$emit('reload')
       callback()
     },
     async reject(callback) {
-
-      console.log('reject',this.message.id)
       await this.$api.chat.sendMT({ id: this.message.id, action: 'Reject' })
-
-      // Then clearMessage(id,chatid) this.message.id,chatid
-      //this.fetchMessages(chatId, true)
-      /*await this.$store.dispatch('chatmessages/reject', {
-        id: this.message.id,
-        chatid: null
-      })*/
+      //this.chatStore.removeMessageMT(REVIEWCHAT,this.message.id)
+      //console.log('reject',this.message.id, this.chatStore.messages[REVIEWCHAT])
+      this.$emit('reload')
       callback()
     },
     async whitelist(callback) {
-      await this.$store.dispatch('chatmessages/whitelist', {
-        id: this.message.id,
-        chatid: null
-      })
+      await this.$api.chat.sendMT({ id: this.message.id, action: 'ApproveAllFuture' })
+      this.$emit('reload')
       callback()
     },
     async modnote(callback) {
@@ -308,17 +296,14 @@ export default {
       callback()
     },
     async redactEmails(callback) {
-      await this.$store.dispatch('chatmessages/redact', {
-        id: this.message.id,
-        chatid: null
-      })
+      await this.$api.chat.sendMT({ id: this.message.id, action: 'Redact' })
+      this.$emit('reload')
       callback()
     },
-    viewOriginal() {
+    async viewOriginal() {
       this.showOriginal = true
-      this.waitForRef('original', () => {
-        this.$refs.original.show()
-      })
+      await nextTick()
+      this.$refs.original?.show()
       callback()
     }
   }
