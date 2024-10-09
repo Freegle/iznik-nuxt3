@@ -99,7 +99,7 @@
         </div>
       </b-card-footer>
     </b-card>
-    <!-- TODO ModChatNoteModal v-if="message" ref="modnote" :chatid="message.chatid" /-->
+    <ModChatNoteModal v-if="showModChatNoteModal && message" ref="modnote" :chatid="message.chatid" @hidden="showModChatNoteModal = false" />
     <ModMessageEmailModal v-if="showOriginal" :id="message.bymailid" ref="original" />
   </div>
 </template>
@@ -126,7 +126,8 @@ export default {
   },
   data: function () {
     return {
-      showOriginal: false
+      showOriginal: false,
+      showModChatNoteModal: false
     }
   },
   computed: {
@@ -281,10 +282,16 @@ export default {
       callback()
     },
     async reject(callback) {
-      await this.$store.dispatch('chatmessages/reject', {
+
+      console.log('reject',this.message.id)
+      await this.$api.chat.sendMT({ id: this.message.id, action: 'Reject' })
+
+      // Then clearMessage(id,chatid) this.message.id,chatid
+      //this.fetchMessages(chatId, true)
+      /*await this.$store.dispatch('chatmessages/reject', {
         id: this.message.id,
         chatid: null
-      })
+      })*/
       callback()
     },
     async whitelist(callback) {
@@ -294,10 +301,10 @@ export default {
       })
       callback()
     },
-    modnote(callback) {
-      this.waitForRef('modnote', () => {
-        this.$refs.modnote.show()
-      })
+    async modnote(callback) {
+      this.showModChatNoteModal = true
+      await nextTick()
+      this.$refs.modnote?.show()
       callback()
     },
     async redactEmails(callback) {

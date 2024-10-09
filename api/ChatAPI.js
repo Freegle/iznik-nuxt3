@@ -78,6 +78,10 @@ export default class ChatAPI extends BaseAPI {
     return await this.$postv2('/chat/' + data.roomid + '/message', data)
   }
 
+  async sendMT(data) {
+    return await this.$post('/chatmessages', data)
+  }
+
   nudge(chatid) {
     return this.$post('/chatrooms', {
       id: chatid,

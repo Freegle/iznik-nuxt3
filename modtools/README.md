@@ -47,6 +47,7 @@ A fairly minimal `package.json` is needed as `nuxt.config.ts` extends `../` and 
 
 * b-btn to b-button, b-select to b-form-select, date-picker to OurDatePicker, b-input to b-form-input, b-textarea to b-form-textarea
 * b-modal <template #default> <template #footer> useModal, etc. Do not use v-if on b-modal
+  add @hidden="onHide" emits: ['hidden'] onHide() { this.$emit('hidden') }
   add v-if and @hidden <ModLogsModal v-if="showLogsModal" @hidden="showLogsModal = false" />
   and if needed, in modal add show() { this.modal.show() }
 * Use icon in <v-icon :icon="['fab', 'discourse']" scale="2" />

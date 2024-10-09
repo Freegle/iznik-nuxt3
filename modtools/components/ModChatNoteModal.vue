@@ -1,12 +1,12 @@
 <template>
   <div>
-    <b-modal id="modNoteModal" v-model="showModal" size="lg" no-stacking>
-      <template slot="modal-title" class="w-100">
+    <b-modal ref="modal" id="modNoteModal" size="lg" @hidden="onHide">
+      <template #title>
         <div v-if="chat && user1 && user2">
           Add Mod Note to chat between {{ user1.displayname }} and {{ user2.displayname }}
         </div>
       </template>
-      <template slot="default">
+      <template #default>
         <p>
           This will add a note from the moderators, which will be visible to everyone in this chat.
         </p>
@@ -28,8 +28,8 @@
         </label>
         <b-form-textarea id="note" v-model="note" placeholder="Add your note here" />
       </template>
-      <template slot="modal-footer" slot-scope="{ cancel }">
-        <b-button variant="white" @click="cancel">
+      <template #footer>
+        <b-button variant="white" @click="hide">
           Close
         </b-button>
         <b-button variant="primary" :disabled="!note || groupid <= 0" @click="addit">
@@ -40,14 +40,23 @@
   </div>
 </template>
 <script>
+import { useModal } from '~/composables/useModal'
+import { untwem } from '~/composables/useTwem'
+import { useChatStore } from '../stores/chat'
 
 export default {
+  setup() {
+    const chatStore = useChatStore()
+    const { modal, hide } = useModal()
+    return { chatStore, modal, hide }
+  },
   props: {
     chatid: {
       type: Number,
       required: true
     }
   },
+  emits: ['hidden'],
   data: function () {
     return {
       chat: null,
@@ -65,27 +74,24 @@ export default {
   },
   methods: {
     async show() {
-      /*
-      await this.$store.dispatch('chats/fetch', {
-        id: this.chatid
-      })
-
-      // Take a copy rather than use computed as it isn't ours and will vanish from the store.
-      this.chat = this.$store.getters['chats/get'](this.chatid)
-
-      this.showModal = true
-      */
+      // TODO? Take a copy rather than use computed as it isn't ours and will vanish from the store.
+      this.chat = this.chatStore.byChatId(this.chatid)
+    },
+    onHide() {
+      this.$emit('hidden')
     },
     async addit() {
       // Encode up any emojis.
-      let msg = twem.untwem(this.$twemoji, this.note)
+      let msg = untwem(this.note)
 
       const group = this.myGroup(this.groupid)
 
       msg += `\n\n${group.namedisplay} Volunteer`
 
-      // Send it
-      await this.$store.dispatch('chatmessages/send', {
+      console.log('addit',msg)
+
+      // Send it (direct)
+      await this.$api.chat.sendMT({
         roomid: this.chatid,
         message: msg,
         modnote: true
