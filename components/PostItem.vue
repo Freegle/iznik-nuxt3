@@ -143,6 +143,12 @@ export default {
             'These should be undamaged and suitable for the child’s weight and height, and fit securely in the vehicle.',
           keywords: ['car seat', 'carseat', 'child car'],
         },
+        {
+          type: 'Annotated textbooks',
+          message:
+            "The English teachers have asked that we don't allow requests for annotated textbooks.",
+          keywords: ['annotated'],
+        },
       ],
     }
   },
