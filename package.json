@@ -3,7 +3,8 @@
   "scripts": {
     "dev": "nuxi dev --port=3002",
     "build": "nuxi build",
-    "generate": "SET APP_ENV=production&&nuxi generate",
+    "generate": "nuxi generate",
+    "appprod": "SET APP_ENV=production&&nuxi generate",
     "appdebug": "SET APP_ENV=debug&&nuxi generate",
     "start": "node .output/server/index.mjs",
     "postinstall": "patch-package",
