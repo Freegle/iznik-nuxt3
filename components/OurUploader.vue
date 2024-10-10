@@ -2,95 +2,24 @@
   <client-only>
     <div class="wrapper" @dragenter="openModal">
       <div class="d-flex flex-column justify-content-around">
-        <v-icon
-          v-if="!busy"
-          size="6x"
-          icon="camera"
-          class="camera text-faded"
-        />
+        <v-icon v-if="!busy" size="6x" icon="camera" class="camera text-faded" />
         <b-img v-if="busy" src="/loader.gif" class="fit-cover fadein loader" />
-        <div
-          v-else-if="multiple || !modelValue.length"
-          class="d-flex justify-content-around"
-        >
+        <div v-else-if="multiple || !modelValue.length" class="d-flex justify-content-around">
           <b-button :id="uploaderUid" variant="primary" @click="openModal">
             {{ label }}
           </b-button>
         </div>
+        <p>{{ loading }}</p>
       </div>
-      <DashboardModal
-        ref="dashboard"
-        :uppy="uppy"
-        :open="modalOpen"
-        :props="{
-          onRequestCloseModal: closeModal,
-          waitForThumbnailsBeforeUpload: true,
-          closeAfterFinish: true,
-        }"
-      />
     </div>
   </client-only>
 </template>
 <script setup>
-import { shouldPolyfill as shouldPolyfillLocale } from '@formatjs/intl-locale/should-polyfill'
-import { shouldPolyfill as shouldPolyfillPlural } from '@formatjs/intl-pluralrules/should-polyfill'
-// eslint-disable-next-line import/no-named-as-default
-import Uppy from '@uppy/core'
-import { DashboardModal } from '@uppy/vue'
-import Tus from '@uppy/tus'
-import Webcam from '@uppy/webcam'
-import Compressor from '@uppy/compressor'
-//import UppyFreegle from '../composables/uppyFreeglePlugin'
-
-import ResizeObserver from 'resize-observer-polyfill'
-import hasOwn from 'object.hasown'
-import * as Sentry from '@sentry/browser'
-import { uid } from '../composables/useId'
-import { useImageStore } from '~/stores/image'
+import { Camera, CameraResultType } from '@capacitor/camera'
+import * as tus from 'tus-js-client'
+import { useImageStore } from '../stores/image'
 
 const runtimeConfig = useRuntimeConfig()
-
-try {
-  console.log('Consider polyfill ResizeObserver')
-  if (!window.ResizeObserver) {
-    // Need to globally polyfill this, because the Uppy uploader uses it.
-    console.log('Polyfill ResizeObserver')
-    window.ResizeObserver = ResizeObserver
-  } else {
-    console.log('No need to polyfill ResizeObserver')
-  }
-
-  console.log('Consider polyfill locale')
-  if (shouldPolyfillLocale()) {
-    console.log('Need to polyfill Locale')
-    await import('@formatjs/intl-locale/polyfill')
-  }
-
-  console.log('Consider polyfill plural')
-  if (shouldPolyfillPlural()) {
-    const locale = 'en'
-    const unsupportedLocale = shouldPolyfillPlural(locale)
-    console.log('Unsupported?', unsupportedLocale)
-
-    if (unsupportedLocale) {
-      console.log('Polyfill-force')
-      await import('@formatjs/intl-pluralrules/polyfill-force')
-      console.log(
-        'Polyfill-locale',
-        '@formatjs/intl-pluralrules/locale-data/en'
-      )
-      await import('@formatjs/intl-pluralrules/locale-data/en')
-    }
-  }
-
-  console.log('Consider polyfill hasOwn')
-  if (!Object.hasOwn) {
-    console.log('polyfill hasOwn')
-    hasOwn.shim()
-  }
-} catch (e) {
-  console.log('Polyfills failed', e)
-}
 
 const props = defineProps({
   multiple: {
@@ -121,24 +50,11 @@ const props = defineProps({
 
 // const miscStore = useMiscStore()
 const imageStore = useImageStore()
+const loading = ref('')
 
 const modalOpen = ref(props.startOpen)
 
-function openModal() {
-  const DashboardModal = uppy.getPlugin('DashboardModal')
-  if (DashboardModal) {
-    DashboardModal.openModal()
-  }
-}
-
-function closeModal() {
-  const DashboardModal = uppy.getPlugin('DashboardModal')
-  if (DashboardModal) {
-    DashboardModal.closeModal()
-  }
-}
-
-const uploaderUid = ref(uid('uploader'))
+let toggle = 0
 
 const emit = defineEmits(['update:modelValue', 'closed'])
 const uploadedPhotos = ref([])
@@ -154,248 +70,120 @@ const label = computed(() => {
   }
 })
 
-let uppy = null
+let upload = null
 
-const dashboard = ref(null)
-
-watch(dashboard, (newVal, oldVal) => {
-  console.log('Dashboard changed', newVal)
-
-  if (newVal && !oldVal && props.startOpen) {
-    openModal()
+function resetUpload() {
+  if (upload) {
+    upload.abort()
+    upload = null
   }
-})
+}
 
-let uppyTimer = null
-
-onMounted(() => {
-  console.log(
-    'Uploader mounted',
-    '#' + uploaderUid.value,
-    dashboard.value,
-    props.multiple,
-    props.startOpen
-  )
-  uppy = new Uppy({
-    autoProceed: true,
-    closeAfterFinish: true,
-    hidePauseResumeButton: true,
-    hideProgressAfterFinish: true,
-    locale: {
-      strings: {
-        dropPasteImportFiles: '%{browseFiles} or import from',
-        browseFiles: 'Browse files',
-      },
-    },
-    restrictions: {
-      allowedFileTypes: ['image/*', '.jpg', '.jpeg', '.png', '.gif', '.heic'],
-      maxNumberOfFiles: props.multiple ? 10 : 1,
-    },
-    onBeforeFileAdded: (currentFile, files) => { // You can return true to keep the file as is, false to remove the file, or return a modified file.
-      console.log('onBeforeFileAdded', currentFile)
-      //currentFile.data.arrayBuffer().then((buffer)=>{
-      //  const clone = new File([buffer], currentFile.data.name, { type: currentFile.data.type })
-      //  currentFile.data = clone
-      //  console.log('onBeforeFileAdded cloned', currentFile)
-      //})
-      //return clone
-      return true
-    }
-  })
-    .use(Webcam, {
-      mirror: false,
-      modes: ['picture'],
-      mobileNativeCamera: true,
-      showVideoSourceDropdown: true,
-      videoConstraints: {
-        facingMode: 'environment',
-      },
+async function openModal() {
+  console.log('openModal A')
+  resetUpload()
+  toggle = ++toggle % 3
+  //const resultType = toggle === 0 ? CameraResultType.Uri : (toggle === 1 ? CameraResultType.DataUrl : CameraResultType.Base64)
+  const resultType = CameraResultType.Uri
+  try {
+    const image = await Camera.getPhoto({
+      quality: 75,
+      height: 1024,
+      allowEditing: false,
+      resultType
     })
-    .use(Tus, { endpoint: runtimeConfig.public.TUS_UPLOADER })
-    //.use(Tus, { endpoint: runtimeConfig.public.TUS_UPLOADER }) // Try chunkSize?
-    //.use(Tus, { endpoint: runtimeConfig.public.TUS_UPLOADER, overridePatchMethod: true })
-    //.use(UppyFreegle)
-    .use(Compressor) // Removing may help some users
-  uppy.on('file-added', (file) => {
-    console.log('Added file', file)
-  })
-  uppy.on('files-added', (files) => {
-    console.log('Added files', files)
-  })
-  uppy.on('file-removed', (file) => {
-    console.log('Removed file', file)
-  })
-  uppy.on('progress', (progress) => {
-    // progress: integer (total progress percentage)
-    console.log('Progress', progress)
-  })
-  uppy.on('preprocess-progress', (progress) => {
-    // progress: integer (total progress percentage)
-    console.log('Preprocess progress', progress)
-  })
-  uppy.on('upload-progress', (file, progress) => {
-    // file: { id, name, type, ... }
-    // progress: { uploader, bytesUploaded, bytesTotal }
-    console.log(
-      'Upload progress',
-      file.id,
-      progress.bytesUploaded,
-      progress.bytesTotal
-    )
-  })
-  uppy.on('upload-pause', (file, isPaused) => {
-    // file: { id, name, type, ... }
-    // progress: { uploader, bytesUploaded, bytesTotal }
-    console.log('Upload paused', file, isPaused)
-  })
-  uppy.on('upload', (uploadID, files) => {
-    console.log('Upload started', uploadID, files)
-  })
-  uppy.on('complete', uploadSuccess)
-  uppy.on('dashboard:modal-open', () => {
-    console.log('Uploader modal is open')
-    if (!uppyTimer) {
-      uppyTimer = setTimeout(() => {
-        console.log('Uppy timed out')
-        Sentry.captureMessage('Uppy timed out')
-      }, 30000)
-    }
-  })
-  uppy.on('postprocess-progress', (progress) => {
-    // progress: integer (total progress percentage)
-    console.log('Postprocess progress', progress)
-  })
-  uppy.on('upload-success', (file, response) => {
-    console.log('Upload success', file, response)
-  })
-  uppy.on('complete', (result) => {
-    console.log('Complete', result)
-  })
-  uppy.on('error', (error) => {
-    console.error('Upload error, retry', error)
-    uppy.retryAll()
-  })
-  uppy.on('upload-retry', (fileID) => {
-    console.log('upload retried:', fileID)
-  })
-  uppy.on('upload-stalled', (error, files) => {
-    console.log('upload seems stalled', error, files)
-  })
-  uppy.on('retry-all', (fileIDs) => {
-    console.log('upload retried:', fileIDs)
-  })
-  uppy.on('restriction-failed', (file, error) => {
-    console.log('Restriction failed', file, error)
-  })
-  uppy.on('dashboard:modal-closed', () => {
-    console.log('Uploader modal is closed')
-    if (uppyTimer) {
-      clearTimeout(uppyTimer)
-      uppyTimer = null
-    }
-    emit('closed')
-  })
-  uppy.on('thumbnail:generated', (file, preview) => {
-    console.log('Thumbnail generated', file)
-  })
-})
+    loading.value = 'Uploading'
 
-onBeforeUnmount(() => {
-  if (uppyTimer) {
-    console.log('Uploader unmounted')
-    clearTimeout(uppyTimer)
-    uppyTimer = null
-  }
-})
+    // image.webPath will contain a path that can be set as an image src.
+    // You can access the original file using image.path, which can be
+    // passed to the Filesystem API to read the raw data of the image,
+    // if desired (or pass resultType: CameraResultType.Base64 to getPhoto)
+    console.log('openModal B', image)
+    var imageUrl = image.webPath
+    console.log('openModal C', imageUrl)
 
-async function uploadSuccess(result) {
-  console.log('Upload success', result)
-  busy.value = true
+    // Can be set to the src of an image now
+    console.log('openModal D', image.webPath, image.format)
 
-  if (result.successful) {
-    // Iterate result.successful array
-    const promises = []
+    const response = await fetch(image.webPath)
+    const file = await response.blob()
+    console.log('openModal E', file)
 
-    result.successful.forEach((r) => {
-      // We've uploaded a file.  Find what is after the last slash
 
-      let uid = r.tus?.uploadUrl
+    // Create a new tus upload
+    upload = new tus.Upload(file, {
+      endpoint: runtimeConfig.public.TUS_UPLOADER,
+      retryDelays: [0, 3000, 5000, 10000, 20000],
+      /*metadata: {
+        filename: uid,
+        filetype: image.format,
+      },*/
+      onError: function (error) {
+        console.log('Failed because: ' + error)
+        loading.value = 'Upload failed because: ' + error
+      },
+      onProgress: function (bytesUploaded, bytesTotal) {
+        const percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2)
+        console.log(bytesUploaded, bytesTotal, percentage + '%')
+        loading.value = 'Uploading '+percentage + '%'
+      },
+      onSuccess: async function (payload) {
+        console.log('upload.url', payload, upload.url)
+        console.log('payload',payload)
+        const { lastResponse } = payload
+        console.log('lastResponse',lastResponse)
+        loading.value = 'Uploading nearly done'
 
-      if (uid) {
-        console.log('Initial', uid)
+        let uid = upload.url
         uid = 'freegletusd-' + uid.substring(uid.lastIndexOf('/') + 1)
-        console.log('Got uid', r, uid)
 
-        //  Create the attachment on the server which references the uploaded image.
         const mods = {}
-
         const att = {
           imgtype: props.type,
           externaluid: uid,
           externalmods: mods,
         }
+        console.log('att', att)
 
-        const p = imageStore.post(att)
-        promises.push(p)
-
-        p.then((ret) => {
-          // Set up our local attachment info.  This will get used in the parents to attach to whatever objects
-          // these photos relate to.
-          //
-          // Note that the URL is returned from the server because it is manipulated on there to remove EXIF,
-          // so we use that rather than the URL that was returned from the uploader.
-          console.log('Image post returned', ret)
-          uploadedPhotos.value = props.modelValue
-          uploadedPhotos.value.push({
-            id: ret.id,
-            path: ret.url,
-            paththumb: ret.url,
-            ouruid: ret.uid,
-            externalmods: mods,
-          })
+        const ret = await imageStore.post(att)
+        console.log('ret', ret)
+        uploadedPhotos.value = props.modelValue
+        uploadedPhotos.value.push({
+          id: ret.id,
+          path: ret.url,
+          paththumb: ret.url,
+          ouruid: ret.uid,
+          externalmods: mods,
         })
-      }
+        console.log('pushed')
+        emit('update:modelValue', uploadedPhotos.value)
+        console.log('emitted')
+        loading.value = ''
+      },
     })
 
-    await Promise.all(promises)
+    // Check if there are any previous uploads to continue.
+    upload.findPreviousUploads().then(function (previousUploads) {
+      // Found previous uploads so we select the first one.
+      if (previousUploads.length) {
+        upload.resumeFromPreviousUpload(previousUploads[0])
+      }
 
-    emit('update:modelValue', uploadedPhotos.value)
-
-    // Reset the uploader so that if we go back in we won't see photos which have already been uploaded.  This is
-    // because control of the photos is handed over to our code, rather than the uploader.
-    console.log('Reset uploader')
-    closeModal()
-    uppy.clear()
-    busy.value = false
+      // Start the upload
+      upload.start()
+    })
+  }
+  catch (e) {
+    loading.value = ''
+    console.log('openModal', e.message)
   }
 }
+
+onMounted(() => {
+})
+
+onBeforeUnmount(() => {
+})
+
 </script>
-<style lang="scss">
-@import '@uppy/core/dist/style.css';
-@import '@uppy/webcam/dist/style.css';
-@import 'assets/css/uploader.scss';
-
-.fadein {
-  animation: 15s fadeIn;
-}
-
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
-.wrapper {
-  border: 1px lightgray dashed;
-  width: 200px;
-  height: 200px;
-  align-content: center;
-}
-
-.loader {
-  width: 200px;
-}
-</style>
+<style lang="scss"></style>

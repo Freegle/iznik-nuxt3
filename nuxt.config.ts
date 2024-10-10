@@ -29,6 +29,9 @@ import https from 'https'
 //  console.error('public/js/prebid.js NOT THE SAME AS public/js/prebid-base.js', prebidCurrent.length, prebidBase.length)
 //  process.exit(1)
 //}
+console.log('config.NODE_ENV',config.NODE_ENV)
+console.log('config.APP_ENV',config.APP_ENV)
+const production = config.APP_ENV=='production'
 
 if (config.COOKIEYES) {
   console.log('CHECK COOKIEYES SCRIPT CHANGES')
@@ -299,13 +302,14 @@ export default defineNuxtConfig({
         },
       },
     },
-    plugins: config.ISAPP ? [
+    plugins: config.ISAPP && production ? [
       sentryVitePlugin({
         org: 'freegle',
         project: 'capacitor',
         authToken: config.SENTRY_AUTH_TOKEN,
       }),
     ] :
+    config.ISAPP ? [] :
       [
         splitVendorChunkPlugin(),
         VitePWA({ registerType: 'autoUpdate' }),

@@ -3,7 +3,8 @@
   "scripts": {
     "dev": "nuxi dev --port=3002",
     "build": "nuxi build",
-    "generate": "nuxi generate",
+    "generate": "SET APP_ENV=production&&nuxi generate",
+    "appdebug": "SET APP_ENV=debug&&nuxi generate",
     "start": "node .output/server/index.mjs",
     "postinstall": "patch-package",
     "lint": "eslint --fix --ext .js,.jsx,.ts,.vue ."
@@ -124,6 +125,7 @@
     "textarea-caret": "^3.1.0",
     "turf-distance": "^3.0.12",
     "turf-point": "^2.0.1",
+    "tus-js-client": "^4.2.3",
     "twemoji": "^14.0.2",
     "upgrade": "^1.1.0",
     "vee-validate": "^4.7.1",
