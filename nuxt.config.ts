@@ -31,7 +31,7 @@ import https from 'https'
 //}
 console.log('config.NODE_ENV',config.NODE_ENV)
 console.log('config.APP_ENV',config.APP_ENV)
-const production = config.APP_ENV=='production'
+const production = config.APP_ENV ? config.APP_ENV=='production' : true
 
 if (config.COOKIEYES) {
   console.log('CHECK COOKIEYES SCRIPT CHANGES')
