@@ -64,7 +64,7 @@ const label = computed(() => {
   if (props.label) {
     return label
   } else if (props.multiple) {
-    return props.modelValue.length > 0 ? 'Add more photos' : 'Add photos'
+    return props.modelValue.length > 0 ? 'Add another photo' : 'Add photo'
   } else {
     return 'Add photo'
   }
