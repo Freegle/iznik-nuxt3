@@ -130,8 +130,10 @@ async function openModal() {
       onSuccess: async function (payload) {
         console.log('upload.url', payload, upload.url)
         console.log('payload',payload)
-        const { lastResponse } = payload
-        console.log('lastResponse',lastResponse)
+        if( payload){
+          const { lastResponse } = payload
+          console.log('lastResponse',lastResponse)
+        }
         loading.value = 'Uploading nearly done'
 
         let uid = upload.url
