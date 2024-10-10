@@ -52,9 +52,7 @@ const props = defineProps({
 const imageStore = useImageStore()
 const loading = ref('')
 
-const modalOpen = ref(props.startOpen)
-
-let toggle = 0
+// const modalOpen = ref(props.startOpen)
 
 const emit = defineEmits(['update:modelValue', 'closed'])
 const uploadedPhotos = ref([])
@@ -82,15 +80,12 @@ function resetUpload() {
 async function openModal() {
   console.log('openModal A')
   resetUpload()
-  toggle = ++toggle % 3
-  //const resultType = toggle === 0 ? CameraResultType.Uri : (toggle === 1 ? CameraResultType.DataUrl : CameraResultType.Base64)
-  const resultType = CameraResultType.Uri
   try {
     const image = await Camera.getPhoto({
       quality: 75,
       height: 1024,
       allowEditing: false,
-      resultType
+      resultType: CameraResultType.Uri
     })
     loading.value = 'Uploading'
 
@@ -99,8 +94,8 @@ async function openModal() {
     // passed to the Filesystem API to read the raw data of the image,
     // if desired (or pass resultType: CameraResultType.Base64 to getPhoto)
     console.log('openModal B', image)
-    var imageUrl = image.webPath
-    console.log('openModal C', imageUrl)
+    // var imageUrl = image.webPath
+    // console.log('openModal C', imageUrl)
 
     // Can be set to the src of an image now
     console.log('openModal D', image.webPath, image.format)
@@ -109,15 +104,14 @@ async function openModal() {
     const file = await response.blob()
     console.log('openModal E', file)
 
-
-    // Create a new tus upload
+// Create a new tus upload
     upload = new tus.Upload(file, {
       endpoint: runtimeConfig.public.TUS_UPLOADER,
       retryDelays: [0, 3000, 5000, 10000, 20000],
-      /*metadata: {
-        filename: uid,
-        filetype: image.format,
-      },*/
+      //metadata: {
+      //  filename: uid,
+      //  filetype: image.format,
+      //},
       onError: function (error) {
         console.log('Failed because: ' + error)
         loading.value = 'Upload failed because: ' + error
