@@ -3,7 +3,6 @@
     class="chatMessageWrapper pb-1"
     :class="{ myChatMessage: messageIsFromCurrentUser }"
   >
-  INTERESTING!
     <div class="chatMessage forcebreak chatMessage__owner">
       <div v-if="chatmessage.userid != myid">
         <ChatMessageSummary
@@ -12,6 +11,13 @@
           :chatid="chatid"
           class="mt-1 mb-2"
         />
+        <div v-if="modtools">
+          <ExternalLink v-if="modtoolsLink" :href="modtoolsLink">
+            <b-button variant="white">
+              View message on ModTools
+            </b-button>
+          </ExternalLink>
+        </div>
         <div>
           <!-- eslint-disable-next-line -->
           <span v-if="(chatmessage.secondsago < 60) || (chatmessage.id > chat.lastmsgseen)" class="prewrap font-weight-bold" v-html="emessage" />
@@ -152,6 +158,7 @@
 import Highlighter from 'vue-highlight-words'
 import { fetchReferencedMessage } from '../composables/useChat'
 import { useMessageStore } from '../stores/message'
+import { useMiscStore } from '../stores/misc'
 import ChatBase from '~/components/ChatBase'
 import ProfileImage from '~/components/ProfileImage'
 import ChatMessageSummary from '~/components/ChatMessageSummary'
@@ -179,6 +186,11 @@ export default {
       outcomeType: null,
       showPromise: false,
     }
+  },
+  computed: {
+    modtools() {
+      return useMiscStore().modtools
+    },
   },
   methods: {
     promise(e) {

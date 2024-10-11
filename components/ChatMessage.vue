@@ -16,7 +16,6 @@
       @delete="showDeleteMessageModal"
     />
     <div v-else-if="chatmessage?.type === 'Interested'">
-      INTERESTED!
       <chat-message-interested
         v-if="isMT || otheruser || chat.chattype === 'User2Mod'"
         :id="id"

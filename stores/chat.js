@@ -79,13 +79,13 @@ export const useChatStore = defineStore({
       const messages = chatmessages
       const deduped = [] // Chat review seems to have duplicate message id so only save first
 
-      console.log('fetchReviewChatsMT TODO: set message.refmsgid after loading message into messageStore',messages.length)
+      const messageStore = useMessageStore()
       messages.forEach((m) => {
         if( !deduped.find((m2) => m2.id===m.id)) deduped.push(m)
-        /* TODO Also load message into messageStore
         if( m.refmsg) {
           m.refmsgid = m.refmsg.id
-        }*/
+          messageStore.fetch(m.refmsg.id, true)
+        }
         this.listByChatId[m.chatid] = m.chatroom
         this.listByChatMessageId[m.id] = m
       })

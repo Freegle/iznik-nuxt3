@@ -58,6 +58,7 @@ export default {
 
     const me = authStore.user
 
+    console.log('MESSAGEHISTORY', me?.systemrole)
     if (
       me &&
       (me.systemrole === 'Moderator' ||
