@@ -171,6 +171,32 @@
             </b-button>
           </div>
         </span>
+        <span v-if="chat && chat.chattype === 'User2Mod'">
+          <b-button v-if="mod" variant="secondary" @click="spamReport">
+            <v-icon icon="ban" /> Spammer
+          </b-button>
+          <external-link v-if="chat && chat.chattype === 'User2Mod' && mod" href="https://discourse.ilovefreegle.org/c/central" class="nocolor btn btn-secondary">
+            <v-icon icon="question-circle" /> Central
+          </external-link>
+          <b-button
+            v-if="chat && chat.chattype === 'User2Mod' && mod"
+            v-b-tooltip.hover.top
+            title="Ask Support for help"
+            variant="secondary"
+            @click="confirmReferToSupport"
+          >
+            <v-icon icon="question-circle" /> Refer to Support
+          </b-button>
+          <b-button
+            v-if="chat && chat.chattype === 'User2Mod' && mod"
+            v-b-tooltip.hover.top
+            title="Ask Support for help"
+            variant="secondary"
+            @click="addAComment"
+          >
+            <v-icon icon="tag" /> Add note
+          </b-button>
+        </span>
         <SpinButton
           size="md"
           variant="primary"
