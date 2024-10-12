@@ -28,7 +28,7 @@
         :src="ouruid"
         :modifiers="mods"
         alt="Item Photo"
-        :width="200"
+        :width="width"
         @click="$emit('click')"
       />
       <NuxtPicture
@@ -39,8 +39,8 @@
         :src="externaluid"
         :modifiers="mods"
         alt="Item Photo"
-        :width="200"
-        :height="200"
+        :width="width"
+        :height="width"
         @click="$emit('click')"
       />
       <b-img
@@ -65,6 +65,7 @@
 <script>
 import { useImageStore } from '../stores/image'
 import OurUploadedImage from '~/components/OurUploadedImage.vue'
+import { useMiscStore } from '~/stores/misc'
 const ConfirmModal = () =>
   defineAsyncComponent(() => import('./ConfirmModal.vue'))
 
@@ -112,9 +113,11 @@ export default {
   },
   setup() {
     const imageStore = useImageStore()
+    const miscStore = useMiscStore()
 
     return {
       imageStore,
+      miscStore,
     }
   },
   data() {
@@ -122,6 +125,11 @@ export default {
       confirm: false,
       mods: {},
     }
+  },
+  computed: {
+    width() {
+      return this.miscStore.breakpoint === 'xs' ? 100 : 200
+    },
   },
   watch: {
     externalmods: {
@@ -164,6 +172,9 @@ export default {
 </script>
 <style scoped lang="scss">
 @import 'assets/css/_color-vars.scss';
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
 
 .bottomright {
   bottom: 12px;
@@ -211,11 +222,20 @@ export default {
 
 .square {
   object-fit: cover;
-  width: 200px;
-  height: 200px;
-  max-width: 200px;
-  min-width: 200px;
-  min-height: 200px;
-  max-height: 200px;
+  width: 125px;
+  height: 125px;
+  max-width: 125px;
+  min-width: 125px;
+  min-height: 125px;
+  max-height: 125px;
+
+  @include media-breakpoint-up(sm) {
+    width: 200px;
+    height: 200px;
+    max-width: 200px;
+    min-width: 200px;
+    min-height: 200px;
+    max-height: 200px;
+  }
 }
 </style>

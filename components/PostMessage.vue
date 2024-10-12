@@ -13,6 +13,17 @@
         @start="dragging = true"
         @end="dragging = false"
       >
+        <template #header>
+          <div class="mr-2 mb-1">
+            <OurUploader
+              v-if="!dragging"
+              :key="bump"
+              v-model="currentAtts"
+              type="Message"
+              multiple
+            />
+          </div>
+        </template>
         <template #item="{ element, index }">
           <div class="bg-transparent p-0">
             <PostPhoto
@@ -30,15 +41,6 @@
           </div>
         </template>
       </draggable>
-      <div class="ml-2">
-        <OurUploader
-          v-if="!dragging"
-          :key="bump"
-          v-model="currentAtts"
-          type="Message"
-          multiple
-        />
-      </div>
     </div>
     <div class="subject-layout mb-1 mt-1">
       <div class="d-flex flex-column">
@@ -50,7 +52,7 @@
           :model-value="type"
           disabled
           class="type text-uppercase bg-white mt-1"
-          size="lg"
+          :size="inputSize"
         />
       </div>
       <PostItem :id="id" ref="item" :type="type" class="item pt-1" />
@@ -60,6 +62,7 @@
         label="Quantity"
         append-text=" available"
         class="count pt-1"
+        :size="numberInputSize"
       />
     </div>
     <div class="d-flex flex-column mt-2">
@@ -71,6 +74,7 @@
         v-model="description"
         :placeholder="placeholder"
         class="description"
+        :size="textareaSize"
       />
     </div>
   </div>
@@ -80,6 +84,7 @@ import { uid } from '../composables/useId'
 import { useComposeStore } from '../stores/compose'
 import NumberIncrementDecrement from './NumberIncrementDecrement'
 import { ref, watch } from '#imports'
+import { useMiscStore } from '~/stores/misc'
 
 const OurUploader = defineAsyncComponent(() =>
   import('~/components/OurUploader')
@@ -180,6 +185,16 @@ function removePhoto(id) {
 }
 
 const dragging = ref(false)
+
+const miscStore = useMiscStore()
+
+const inputSize = computed(() => (miscStore.breakpoint === 'xs' ? 'md' : 'lg'))
+const numberInputSize = computed(() =>
+  miscStore.breakpoint === 'xs' ? 'small' : 'normal'
+)
+const textareaSize = computed(() =>
+  miscStore.breakpoint === 'xs' ? 'sm' : 'md'
+)
 </script>
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';
@@ -188,9 +203,13 @@ const dragging = ref(false)
 
 .subject-layout {
   display: grid;
-  grid-template-columns: 1fr 50px 1fr;
+  grid-template-columns: 1fr 25px 1fr;
   grid-template-rows: auto auto;
   grid-column-gap: 5px;
+
+  @include media-breakpoint-up(sm) {
+    grid-template-columns: 1fr 50px 1fr;
+  }
 
   @include media-breakpoint-up(md) {
     grid-template-columns: 1fr 3fr auto;
