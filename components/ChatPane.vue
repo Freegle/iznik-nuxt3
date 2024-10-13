@@ -251,6 +251,7 @@ function typing(val) {
   flex-direction: column;
   justify-content: space-between;
   height: v-bind(theHeight);
+  transition: height 1s;
 
   @include media-breakpoint-up(md) {
     height: v-bind(theHeight);

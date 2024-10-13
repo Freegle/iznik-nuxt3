@@ -154,7 +154,7 @@
               </div>
               <VisibleWhen
                 v-if="!selectedChatId"
-                :at="['xs', 'sm', 'md', 'lg']"
+                :at="['md', 'lg']"
                 class="chatda"
               >
                 <ExternalDa
