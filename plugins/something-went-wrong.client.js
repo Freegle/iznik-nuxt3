@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/browser'
 import { APIError, MaintenanceError } from '@/api/BaseAPI'
 import { useMiscStore } from '~/stores/misc'
 import { useRouter } from '#imports'
@@ -30,6 +31,8 @@ export default defineNuxtPlugin((nuxtApp) => {
       const miscStore = useMiscStore()
       miscStore.somethingWentWrong = true
 
+      Sentry.captureMessage('API error')
+
       return true
     } else if (suppressException(err)) {
       return true
@@ -51,6 +54,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     } else {
       const miscStore = useMiscStore()
       miscStore.somethingWentWrong = true
+      Sentry.captureMessage('Unhandled promise')
     }
   })
 })
