@@ -44,17 +44,17 @@ export default defineNuxtPlugin((nuxtApp) => {
   }
 
   window.addEventListener('unhandledrejection', function (event) {
-    console.error('Unhandled promise rejection', event)
     const reason = event?.reason?.message
 
     if (reason?.includes('Maintenance error')) {
       // The API may throw this, and it may not get caught.
       const router = useRouter()
       router.push('/maintenance')
-    } else {
+    } else if (reason) {
+      // No point alerting the user if we have no info.
       const miscStore = useMiscStore()
       miscStore.somethingWentWrong = true
-      Sentry.captureMessage('Unhandled promise')
+      Sentry.captureMessage('Unhandled promise', reason)
     }
   })
 })
