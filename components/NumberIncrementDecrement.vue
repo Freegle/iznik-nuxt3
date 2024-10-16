@@ -16,6 +16,7 @@
       :min="min"
       :max="max"
       :size="size"
+      :class="'inputsize-' + size"
       @update:model-value="update"
     />
     <div v-if="appendText" class="available text-muted small">
@@ -105,6 +106,15 @@ export default {
   padding-bottom: 0.7rem !important;
   padding-left: 1rem;
   padding-right: 1rem;
+}
+
+:deep(.inputsize-small input) {
+  font-size: 1rem !important;
+  line-height: 1.5rem !important;
+  padding-top: 0.2rem !important;
+  padding-bottom: 0.5rem !important;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
 }
 
 .available {

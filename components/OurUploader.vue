@@ -4,7 +4,7 @@
       <div class="d-flex flex-column justify-content-around">
         <v-icon
           v-if="!busy"
-          size="6x"
+          :size="iconSize"
           icon="camera"
           class="camera text-faded"
         />
@@ -13,7 +13,12 @@
           v-else-if="multiple || !modelValue.length"
           class="d-flex justify-content-around"
         >
-          <b-button :id="uploaderUid" variant="primary" @click="openModal">
+          <b-button
+            :id="uploaderUid"
+            variant="primary"
+            :size="buttonSize"
+            @click="openModal"
+          >
             {{ label }}
           </b-button>
         </div>
@@ -46,6 +51,7 @@ import hasOwn from 'object.hasown'
 import * as Sentry from '@sentry/browser'
 import { uid } from '../composables/useId'
 import { useImageStore } from '~/stores/image'
+import { useMiscStore } from '~/stores/misc'
 
 const runtimeConfig = useRuntimeConfig()
 
@@ -118,10 +124,13 @@ const props = defineProps({
   },
 })
 
-// const miscStore = useMiscStore()
+const miscStore = useMiscStore()
 const imageStore = useImageStore()
 
 const modalOpen = ref(props.startOpen)
+
+const buttonSize = computed(() => (miscStore.breakpoint === 'xs' ? 'xs' : 'md'))
+const iconSize = computed(() => (miscStore.breakpoint === 'xs' ? '4x' : '6x'))
 
 function openModal() {
   const DashboardModal = uppy.getPlugin('DashboardModal')
@@ -147,7 +156,7 @@ const label = computed(() => {
   if (props.label) {
     return label
   } else if (props.multiple) {
-    return props.modelValue.length > 0 ? 'Add more photos' : 'Add photos'
+    return 'Add photos'
   } else {
     return 'Add photo'
   }
@@ -200,7 +209,10 @@ onMounted(() => {
         facingMode: 'environment',
       },
     })
-    .use(Tus, { endpoint: runtimeConfig.public.TUS_UPLOADER })
+    .use(Tus, {
+      endpoint: runtimeConfig.public.TUS_UPLOADER,
+      uploadDataDuringCreation: true,
+    })
     .use(Compressor)
   uppy.on('file-added', (file) => {
     console.log('Added file', file)
@@ -360,6 +372,9 @@ async function uploadSuccess(result) {
 @import '@uppy/core/dist/style.css';
 @import '@uppy/webcam/dist/style.css';
 @import 'assets/css/uploader.scss';
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
 
 .fadein {
   animation: 15s fadeIn;
@@ -376,12 +391,21 @@ async function uploadSuccess(result) {
 
 .wrapper {
   border: 1px lightgray dashed;
-  width: 200px;
-  height: 200px;
+  width: 125px;
+  height: 125px;
   align-content: center;
+
+  @include media-breakpoint-up(sm) {
+    width: 200px;
+    height: 200px;
+  }
 }
 
 .loader {
-  width: 200px;
+  width: 125px;
+
+  @include media-breakpoint-up(sm) {
+    width: 200px;
+  }
 }
 </style>

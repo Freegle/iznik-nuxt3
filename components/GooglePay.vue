@@ -8,6 +8,7 @@
       :button-type="buttonType"
       :button-size-mode="isCustomSize ? 'fill' : 'static'"
       v-bind:paymentRequest.prop="paymentRequest"
+      v-bind:onPaymentAuthorized.prop="onPaymentDataAuthorized"
       :style="{ width: `${buttonWidth}px`, height: `${buttonHeight}px` }"
       @loadpaymentdata="onLoadPaymentData"
       @error="onError"
@@ -76,6 +77,16 @@ export default {
     },
     onError: (event) => {
       console.error('error', event.error)
+    },
+    onPaymentDataAuthorized: (paymentData) => {
+      console.log('payment authorized', paymentData)
+
+      return {
+        transactionState: 'SUCCESS',
+      }
+    },
+    onReadyToPayChange: (event) => {
+      console.log('ready to pay change', event.detail)
     },
   },
 }
