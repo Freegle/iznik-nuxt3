@@ -606,15 +606,17 @@ export default {
     },
     currentAtts: {
       handler(newVal) {
-        this.event.image = {
-          id: newVal[0].id,
-          imageuid: newVal[0].ouruid,
-          imagemods: newVal[0].externalmods,
-        }
-        this.image = {
-          id: newVal[0].id,
-          imageuid: newVal[0].ouruid,
-          imagemods: newVal[0].externalmods,
+        if (newVal?.length) {
+          this.event.image = {
+            id: newVal[0].id,
+            imageuid: newVal[0].ouruid,
+            imagemods: newVal[0].externalmods,
+          }
+          this.image = {
+            id: newVal[0].id,
+            imageuid: newVal[0].ouruid,
+            imagemods: newVal[0].externalmods,
+          }
         }
       },
       deep: true,
