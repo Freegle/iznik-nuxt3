@@ -88,7 +88,7 @@ export const useMobileStore = defineStore({ // Do not persist
       const prevwindowopener = window.open
       window.open = (url) => {
         console.log('App window.open', url)
-        AppLauncher.openUrl({ url: this.href })
+        AppLauncher.openUrl({ url })
       }
     },
     //////////////
