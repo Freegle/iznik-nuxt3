@@ -59,10 +59,18 @@
   </b-card>
 </template>
 <script>
+import { AppLauncher } from '@capacitor/app-launcher'
+import { useMobileStore } from '@/stores/mobile'
 import ReadMore from '~/components/ReadMore'
 export default {
   components: {
     ReadMore,
+  },
+  setup() {
+    const mobileStore = useMobileStore()
+    return {
+      mobileStore,
+    }
   },
   props: {
     preview: {
@@ -77,7 +85,13 @@ export default {
   },
   methods: {
     open() {
-      window.open(this.preview.url)
+      if (this.mobileStore.isApp) {
+        let url = this.preview.url
+        AppLauncher.openUrl({ url })
+        return false
+      } else {
+        window.open(this.preview.url)
+      }
     },
     brokenImage(event) {
       event.target.src = '/placeholder.jpg'

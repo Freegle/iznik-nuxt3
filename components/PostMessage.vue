@@ -83,7 +83,6 @@
 import { uid } from '../composables/useId'
 import { useComposeStore } from '../stores/compose'
 import { useMobileStore } from '../stores/mobile'
-import { useMiscStore } from '../stores/misc'
 import NumberIncrementDecrement from './NumberIncrementDecrement'
 import { ref, watch } from '#imports'
 import { useMiscStore } from '~/stores/misc'
