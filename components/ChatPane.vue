@@ -15,6 +15,7 @@
       class="chatHolder"
       :class="{
         stickyAdRendered,
+        navBarHidden,
       }"
     >
       <ChatHeader :id="id" ref="chatheader" class="chatTitle" />
@@ -92,23 +93,6 @@ function resize() {
 }
 
 const stickyAdRendered = computed(() => miscStore.stickyAdRendered)
-
-const theHeight = computed(() => {
-  const vh100 = Math.max(
-    document.documentElement.clientHeight,
-    windowHeight.value || 0
-  )
-
-  let ret = null
-
-  if (miscStore.breakpoint === 'xs' || miscStore.breakpoint === 'sm') {
-    ret = navBarHidden.value ? vh100 : vh100 - 60
-  } else {
-    ret = vh100 - 78
-  }
-
-  return ret + 'px'
-})
 
 const ChatNotVisible = defineAsyncComponent(() =>
   import('~/components/ChatNotVisible.vue')
@@ -246,21 +230,40 @@ function typing(val) {
 @import 'bootstrap/scss/mixins/_breakpoints';
 @import 'assets/css/sticky-banner.scss';
 
+// The height is complex:
+// - By default we use the whole height.
+// - If the navbar is visible, we subtract that - different height on mobile and desktop.
+// - If a sticky ad is shown, we subtract that.
+// We are suspicious of v-bind not working, so we do this purely using classes.
 .chatHolder {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: v-bind(theHeight);
+  transition: height 1s;
+
+  height: calc(100vh - 60px);
 
   @include media-breakpoint-up(md) {
-    height: v-bind(theHeight);
+    height: calc(100vh - 78px);
+  }
+
+  &.navBarHidden {
+    height: 100vh;
   }
 
   &.stickyAdRendered {
-    height: calc(v-bind(theHeight) - $sticky-banner-height-mobile);
+    height: calc(100vh - 60px - $sticky-banner-height-mobile);
 
     @include media-breakpoint-up(md) {
-      height: calc(v-bind(theHeight) - $sticky-banner-height-desktop);
+      height: calc(100vh - 78px - $sticky-banner-height-desktop);
+    }
+
+    &.navBarHidden {
+      height: calc(100vh - $sticky-banner-height-mobile);
+
+      @include media-breakpoint-up(md) {
+        height: calc(100vh - $sticky-banner-height-desktop);
+      }
     }
   }
 }

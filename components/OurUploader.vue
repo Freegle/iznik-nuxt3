@@ -78,7 +78,7 @@ function resetUpload() {
 }
 
 async function openModal() {
-  console.log('openModal A')
+  // console.log('openModal A')
   resetUpload()
   try {
     const image = await Camera.getPhoto({
@@ -93,16 +93,16 @@ async function openModal() {
     // You can access the original file using image.path, which can be
     // passed to the Filesystem API to read the raw data of the image,
     // if desired (or pass resultType: CameraResultType.Base64 to getPhoto)
-    console.log('openModal B', image)
+    // console.log('openModal B', image)
     // var imageUrl = image.webPath
     // console.log('openModal C', imageUrl)
 
     // Can be set to the src of an image now
-    console.log('openModal D', image.webPath, image.format)
+    // console.log('openModal D', image.webPath, image.format)
 
     const response = await fetch(image.webPath)
     const file = await response.blob()
-    console.log('openModal E', file)
+    // console.log('openModal E', file)
 
 // Create a new tus upload
     upload = new tus.Upload(file, {
@@ -118,16 +118,16 @@ async function openModal() {
       },
       onProgress: function (bytesUploaded, bytesTotal) {
         const percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2)
-        console.log(bytesUploaded, bytesTotal, percentage + '%')
+        // console.log(bytesUploaded, bytesTotal, percentage + '%')
         loading.value = 'Uploading '+percentage + '%'
       },
       onSuccess: async function (payload) {
-        console.log('upload.url', payload, upload.url)
-        console.log('payload',payload)
-        if( payload){
-          const { lastResponse } = payload
-          console.log('lastResponse',lastResponse)
-        }
+        // console.log('upload.url', payload, upload.url)
+        // console.log('payload',payload)
+        //if( payload){
+        //  const { lastResponse } = payload
+        //  console.log('lastResponse',lastResponse)
+        //}
         loading.value = 'Uploading nearly done'
 
         let uid = upload.url
@@ -139,10 +139,10 @@ async function openModal() {
           externaluid: uid,
           externalmods: mods,
         }
-        console.log('att', att)
+        // console.log('att', att)
 
         const ret = await imageStore.post(att)
-        console.log('ret', ret)
+        // console.log('ret', ret)
         uploadedPhotos.value = props.modelValue
         uploadedPhotos.value.push({
           id: ret.id,
@@ -151,9 +151,9 @@ async function openModal() {
           ouruid: ret.uid,
           externalmods: mods,
         })
-        console.log('pushed')
+        // console.log('pushed')
         emit('update:modelValue', uploadedPhotos.value)
-        console.log('emitted')
+        // console.log('emitted')
         loading.value = ''
       },
     })

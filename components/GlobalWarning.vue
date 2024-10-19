@@ -1,47 +1,29 @@
 <template>
   <div>
     <PrivacyUpdate />
-    <div v-if="false">
-      <NoticeMessage v-if="show" variant="info">
-        <div class="d-flex justify-content-between">
-          <b-img
-            src="/national_reuse_day_2023_Logo_round_500x500px.png"
-            class="mr-2 float-start logo"
-          />
-          <div>
-            <p>
-              Are you ready to shine a light on reuse for
-              <b>#NationalReuseDay2023</b> on Friday 20 October? A day to
-              celebrate all things #Reuse, organised by Freegle, the reuse
-              experts.
-            </p>
-          </div>
+    <div v-if="show" class="d-flex justify-content-around">
+      <nuxt-link to="/NationalReuseDay" class="grid">
+        <div
+          class="d-flex justify-content-end hide clickme"
+          title="Hide banner"
+          @click="hideIt"
+        >
+          <v-icon icon="times-circle" scale="1.5" class="text-white" />
         </div>
-        <div class="d-flex justify-content-between flex-wrap">
-          <ExternalLink
-            href="https://mailchi.mp/896a4360914b/freegle-bites-april-17353736"
-          >
-            <b-button variant="white" class="mt-2">
-              Find out how to get involved
-            </b-button>
-          </ExternalLink>
-          <b-button variant="link" @click="hideit"> Hide this </b-button>
-        </div>
-      </NoticeMessage>
-      <div v-else class="text-danger text-end clickme" @click="showit">
-        Show notice.
-      </div>
+        <b-img class="banner" src="/NRD/Banner.png" />
+      </nuxt-link>
+    </div>
+    <div v-else class="text-danger text-end clickme" @click="showit">
+      Show notice.
     </div>
   </div>
 </template>
 <script>
-import NoticeMessage from './NoticeMessage'
-import ExternalLink from './ExternalLink'
 import { useMiscStore } from '~/stores/misc'
 import PrivacyUpdate from '~/components/PrivacyUpdate.vue'
 
 export default {
-  components: { PrivacyUpdate, ExternalLink, NoticeMessage },
+  components: { PrivacyUpdate },
   setup() {
     const miscStore = useMiscStore()
     return { miscStore }
@@ -52,7 +34,8 @@ export default {
     },
   },
   methods: {
-    hideit() {
+    hideIt(e) {
+      e.preventDefault()
       this.miscStore.set({
         key: 'hideglobalwarning',
         value: true,
@@ -78,6 +61,24 @@ export default {
   @include media-breakpoint-up(md) {
     width: 125px;
     height: 125px;
+  }
+}
+
+.grid {
+  display: grid;
+  grid-template-rows: 1fr;
+  grid-template-columns: 1fr;
+
+  .banner {
+    grid-row: 1 / 1;
+    grid-column: 1 / 1;
+  }
+
+  .hide {
+    grid-row: 1 / 1;
+    grid-column: 1 / 1;
+    align-content: end;
+    z-index: 1000;
   }
 }
 </style>

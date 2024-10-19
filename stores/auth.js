@@ -350,6 +350,11 @@ export const useAuthStore = defineStore({
                   }
                 }
               })
+              .catch((e) => {
+                // Need to catch this to prevent a Sentry error when we're logged out - which is a perfectly normal
+                // case.
+                console.log('Exception on old API', e)
+              })
           }
         }
       }

@@ -8,42 +8,32 @@
         Please don't leave them hanging! Let them know if you're no longer
         interested, or other people will see that you haven't replied yet.
       </p>
-      <div v-for="chat in chats" :key="'expectedreply-' + chat.id">
-        <b-button variant="primary" size="lg" @click="go(chat.id)">
-          Reply to {{ chat.name }} now
-        </b-button>
-      </div>
+      <ExpectedRepliesChat
+        v-for="chatid in chats"
+        :id="chatid"
+        :key="'expectedreply-' + chatid"
+      />
     </NoticeMessage>
   </div>
 </template>
-<script>
+<script setup>
 import pluralize from 'pluralize'
 import NoticeMessage from './NoticeMessage'
-import { useRouter } from '#imports'
+import ExpectedRepliesChat from '~/components/ExpectedRepliesChat.vue'
 
-export default {
-  components: { NoticeMessage },
-  props: {
-    count: {
-      type: Number,
-      required: true,
-    },
-    chats: {
-      type: Array,
-      required: true,
-    },
+const props = defineProps({
+  count: {
+    type: Number,
+    required: true,
   },
-  computed: {
-    replies() {
-      pluralize.addIrregularRule('freegler is', 'freeglers are')
-      return pluralize('freegler is', this.count, true)
-    },
+  chats: {
+    type: Array,
+    required: true,
   },
-  methods: {
-    go(id) {
-      const router = useRouter()
-      router.push('/chats/' + id)
-    },
-  },
-}
+})
+
+const replies = computed(() => {
+  pluralize.addIrregularRule('freegler is', 'freeglers are')
+  return pluralize('freegler is', props.count, true)
+})
 </script>

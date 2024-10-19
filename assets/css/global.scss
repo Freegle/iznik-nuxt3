@@ -570,6 +570,12 @@ label {
   }
 }
 
+.hideshort {
+  @media (max-height: 800px) {
+    display: none;
+  }
+}
+
 :root {
   --popper-theme-background-color: white;
   --popper-theme-background-color-hover: white;
