@@ -348,12 +348,14 @@ export default {
   watch: {
     currentAtts: {
       handler(newVal) {
-        this.uploading = false
+        if (newVal?.length) {
+          this.uploading = false
 
-        this.imageid = newVal[0].id
-        this.imageuid = newVal[0].ouruid
-        this.ouruid = newVal[0].ouruid
-        this.imagemods = newVal[0].externalmods
+          this.imageid = newVal[0].id
+          this.imageuid = newVal[0].ouruid
+          this.ouruid = newVal[0].ouruid
+          this.imagemods = newVal[0].externalmods
+        }
       },
       deep: true,
     },
