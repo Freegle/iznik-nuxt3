@@ -1,7 +1,7 @@
 <template>
-  <div>
+  <div v-if="false">
     <PrivacyUpdate />
-    <div v-if="show && false" class="d-flex justify-content-around">
+    <div v-if="show" class="d-flex justify-content-around">
       <nuxt-link to="/NationalReuseDay" class="grid">
         <div
           class="d-flex justify-content-end hide clickme"
