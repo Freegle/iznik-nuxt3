@@ -98,9 +98,6 @@
           @selected="explorePlace($event)"
         />
       </div>
-      <nuxt-link to="/NationalReuseDay" class="">
-        <b-img class="w-100" src="/NRD/Banner.png" />
-      </nuxt-link>
       <VisualiseList
         v-if="!breakpoint || breakpoint === 'xs'"
         class="mt-2 mb-2 d-block d-sm-none"
