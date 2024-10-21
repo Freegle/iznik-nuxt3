@@ -5,7 +5,11 @@
         <h1>Fetching your data</h1>
         <b-alert v-if="error" variant="danger" :model-value="true">
           <!-- eslint-disable-next-line -->
-          Something went wrong.  Please try again, and if this keeps happening then contact <ExternalLink href="mailto:support@ilovefreegle.org">support@ilovefreegle.org</ExternalLink>.
+          Something went wrong. Please try again, and if this keeps happening then contact
+          <ExternalLink href="mailto:support@ilovefreegle.org"
+            >support@ilovefreegle.org</ExternalLink
+          >
+          .
         </b-alert>
         <div v-else>
           <div v-if="status">
@@ -34,14 +38,18 @@
               <p class="mt-2">
                 There may be a lot of information here, so if you have any
                 questions, please
-                <nuxt-link to="/help"> contact us </nuxt-link>.
+                <nuxt-link to="/help"> contact us</nuxt-link>
+                .
               </p>
               <p>
                 Freegle volunteers may also have some personal data,
                 predominately in the form of email correspondence about Freegle
                 matters. If you want access to this please request this
                 <!-- eslint-disable-next-line -->
-                formally via the <ExternalLink href="mailto:DPO@ilovefreegle.org">Data Protection Officer (DPO)</ExternalLink>
+                formally via the
+                <ExternalLink href="mailto:DPO@ilovefreegle.org"
+                  >Data Protection Officer (DPO)</ExternalLink
+                >
                 who will organise the return of this additional information.
               </p>
               <h2>About you</h2>
@@ -196,7 +204,7 @@
                   <b-col cols="4">
                     {{ email.email }}
                   </b-col>
-                  <b-col cols="3"> added {{ dateonly(email.added) }} </b-col>
+                  <b-col cols="3"> added {{ dateonly(email.added) }}</b-col>
                   <b-col cols="3">
                     <span v-if="email.validated">
                       validated {{ dateonly(email.validated) }}
@@ -311,7 +319,8 @@
                 Which communities you are a member of. You can change your
                 settings or leave groups from
                 <!-- eslint-disable-next-line-->
-                <nuxt-link to="/settings">Settings</nuxt-link>.
+                <nuxt-link to="/settings">Settings</nuxt-link>
+                .
               </p>
               <ShowMore :items="status.data.memberships">
                 <template #item="s">
@@ -351,7 +360,7 @@
                   <b-col>
                     {{ s.item.namedisplay }}
                   </b-col>
-                  <b-col> joined {{ dateonly(s.item.added) }} </b-col>
+                  <b-col> joined {{ dateonly(s.item.added) }}</b-col>
                 </b-row>
               </ShowMore>
               <h2>Searches</h2>
@@ -581,7 +590,7 @@
                     <b-col cols="2">
                       {{ s.item.source }}
                     </b-col>
-                    <b-col cols="2"> ref {{ s.item.TransactionID }} </b-col>
+                    <b-col cols="2"> ref {{ s.item.TransactionID }}</b-col>
                     <b-col cols="2" class="forcebreak">
                       {{ s.item.Payer }}
                     </b-col>
@@ -591,7 +600,7 @@
                     <b-col cols="2">
                       {{ dateonly(s.item.timestamp) }}
                     </b-col>
-                    <b-col cols="2"> &pound;{{ s.item.GrossAmount }} </b-col>
+                    <b-col cols="2"> &pound;{{ s.item.GrossAmount }}</b-col>
                   </b-row>
                 </template>
               </ShowMore>
@@ -747,9 +756,9 @@
               <h2>Exports</h2>
               <p>These are any other times you've viewed this data.</p>
               <b-row class="font-weight-bold">
-                <b-col cols="4"> Requested </b-col>
-                <b-col cols="4"> Started </b-col>
-                <b-col cols="4"> Completed </b-col>
+                <b-col cols="4"> Requested</b-col>
+                <b-col cols="4"> Started</b-col>
+                <b-col cols="4"> Completed</b-col>
               </b-row>
               <ShowMore :items="status.data.exports">
                 <template #item="s">
@@ -863,7 +872,9 @@ export default {
         '/export?id=' +
         this.id +
         '&tag=' +
-        this.tag
+        this.tag +
+        '&persistent=' +
+        JSON.stringify(this.authStore?.auth?.persistent)
       )
     },
   },
@@ -927,12 +938,6 @@ export default {
         console.log('Error', e)
         this.error = true
       }
-    },
-    showEvent(id) {
-      this.$refs['eventmodal-' + id].show()
-    },
-    download() {
-      window.open(this.downloadlink)
     },
   },
 }
