@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="false">
     <PrivacyUpdate />
     <div v-if="show" class="d-flex justify-content-around">
       <nuxt-link to="/NationalReuseDay" class="grid">
