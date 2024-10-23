@@ -189,7 +189,9 @@
               </b-card-header>
               <b-card-text class="p-2">
                 <p>This doesn't work yet.</p>
-                <JustGivingDonationButton />
+                <client-only>
+                  <JustGivingDonationButton />
+                </client-only>
               </b-card-text>
             </b-card>
           </b-col>
