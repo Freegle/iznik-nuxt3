@@ -185,16 +185,11 @@
           <b-col cols="12" lg="6">
             <b-card class="mt-2 mb-2" no-body>
               <b-card-header bg-variant="primary" text-variant="white">
-                With Google Pay
+                With JustGiving
               </b-card-header>
               <b-card-text class="p-2">
-                <p>You can donate £1 to help us with Google Pay.</p>
-                <p v-if="showThanks">Thank you for donating!</p>
-                <GooglePay
-                  v-else
-                  total-price="1.00"
-                  @payment-success="showThanks = true"
-                />
+                <p>This doesn't work yet.</p>
+                <JustGivingDonationButton />
               </b-card-text>
             </b-card>
           </b-col>
@@ -211,9 +206,11 @@ import DonationThermometer from '~/components/DonationThermometer'
 import DonationButton from '~/components/DonationButton'
 import ExternalLink from '~/components/ExternalLink'
 import { buildHead } from '~/composables/useBuildHead'
+import JustGivingDonationButton from '~/components/JustGivingDonationButton.vue'
 
 export default {
   components: {
+    JustGivingDonationButton,
     ExternalLink,
     DonationThermometer,
     DonationButton,
@@ -232,9 +229,7 @@ export default {
     )
   },
   data: function () {
-    return {
-      showThanks: false,
-    }
+    return {}
   },
   ...mapState(useDonationStore, ['target']),
 }
