@@ -1,24 +1,29 @@
 <template>
-  <button
-    data-jg-donate-button
-    data-link-id="fx6eedvc49"
-    data-market-code="GB"
-    data-donate-button-type="justgivingSmall"
-    data-link-type="givingCheckout"
-    data-popup-checkout="true"
-    data-show-payment-logos="false"
-    class="jgbutton"
-  >
-    <b-img src="https://www.jg-cdn.com/buttons/donate-with-jg.svg" />
-  </button>
+  <client-only>
+    <button
+      ref="jgbutton"
+      data-jg-donate-button
+      data-linkId="fx6eedvc49"
+      data-marketCode="GB"
+      data-donateButtonType="justgivingSmall"
+      data-linkType="givingCheckout"
+      data-popupCheckout="true"
+      data-showPaymentLogos="false"
+      class="jgbutton"
+    >
+      <b-img src="https://www.jg-cdn.com/buttons/donate-with-jg.svg" />
+    </button>
+  </client-only>
 </template>
 <script setup>
-const jgbutton = ref(null)
+const jgbutton = ref()
 
 watch(
   jgbutton,
   (newVal) => {
+    console.log('Watch', newVal)
     if (newVal) {
+      console.log('Add script')
       const script = document.createElement('script')
       script.setAttribute('data-version', '2')
       script.setAttribute('data-widgetType', 'attachCheckout')
@@ -33,6 +38,7 @@ watch(
   },
   {
     immediate: true,
+    deep: true,
   }
 )
 </script>
