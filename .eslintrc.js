@@ -27,7 +27,6 @@ module.exports = {
       },
     ],
     'vue/script-setup-uses-vars': 'error',
-    'vue/attribute-hyphenation': 'off',
   },
   overrides: [
     {
