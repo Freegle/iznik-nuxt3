@@ -183,7 +183,7 @@
             </b-card>
           </b-col>
           <b-col cols="12" lg="6">
-            <b-card class="mt-2 mb-4" no-body>
+            <b-card class="mt-2 mb-2" no-body>
               <b-card-header bg-variant="primary" text-variant="white">
                 With JustGiving
               </b-card-header>
