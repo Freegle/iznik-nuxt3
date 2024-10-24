@@ -6,6 +6,8 @@ import config from './config'
 
 // @ts-ignore
 export default defineNuxtConfig({
+  compatibilityDate: '2024-10-23',
+
   // Rendering modes are confusing.
   //
   // - target can be:
