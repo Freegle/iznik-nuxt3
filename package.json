@@ -28,7 +28,7 @@
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.0.0",
     "lint": "^1.1.2",
-    "nuxt": "^3.11.1",
+    "nuxt": "^3.13.2",
     "nuxt-vite-legacy": "^1.2.0",
     "prettier": "^2.6.2",
     "sass": "1.64.2",
