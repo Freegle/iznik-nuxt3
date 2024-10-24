@@ -330,6 +330,10 @@ body.modal-open {
   flex-direction: column;
   max-height: 100vh;
 
+  @supports (height: 100dvh) {
+    max-height: 100dvh;
+  }
+
   margin-top: v-bind(marginTop);
   transition: margin-top 1s;
 

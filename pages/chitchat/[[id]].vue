@@ -495,6 +495,10 @@ export default {
 
 .newsfeedHolder {
   height: calc(100vh - 74px);
+
+  @supports (height: 100dvh) {
+    height: calc(100dvh - 74px);
+  }
 }
 
 .tab-content,

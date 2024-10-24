@@ -76,6 +76,13 @@ export default {
   height: calc(
     100vh - $sticky-banner-height-desktop - $navbar-height - 75px - 10px
   );
+
+  @supports (height: 100dvh) {
+    height: calc(
+      100dvh - $sticky-banner-height-desktop - $navbar-height - 75px - 10px
+    );
+  }
+
   display: grid;
   grid-auto-rows: minmax(0, 1fr);
   grid-row-gap: 10px;

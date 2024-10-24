@@ -328,6 +328,11 @@ export default {
     grid-column: 1 / 2;
     // 100vh includes the header and margins etc so they need to be taken off
     height: max(500px, calc(100vh - 450px));
+
+    @supports (height: 100dvh) {
+      height: max(500px, calc(100dvh - 450px));
+    }
+
     max-height: 800px;
   }
 }

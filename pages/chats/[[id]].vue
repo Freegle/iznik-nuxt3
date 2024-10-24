@@ -559,6 +559,24 @@ async function searchMore() {
     }
   }
 
+  @supports (height: 100dvh) {
+    height: calc(100dvh - 58px);
+
+    @include media-breakpoint-up(md) {
+      height: calc(100dvh - var(--header-navbar-height));
+    }
+
+    &.stickyAdRendered {
+      height: calc(100dvh - 58px - $sticky-banner-height-mobile);
+
+      @include media-breakpoint-up(md) {
+        height: calc(
+          100dvh - var(--header-navbar-height) - $sticky-banner-height-desktop
+        );
+      }
+    }
+  }
+
   display: flex;
   flex-direction: column;
 

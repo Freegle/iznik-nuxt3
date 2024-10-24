@@ -150,5 +150,13 @@ function prev() {
   @include media-breakpoint-up(md) {
     min-height: calc(100vh - $sticky-banner-height-desktop - 144px);
   }
+
+  @supports (height: 100dvh) {
+    min-height: calc(100dvh - $sticky-banner-height-mobile - 144px);
+
+    @include media-breakpoint-up(md) {
+      min-height: calc(100dvh - $sticky-banner-height-desktop - 144px);
+    }
+  }
 }
 </style>

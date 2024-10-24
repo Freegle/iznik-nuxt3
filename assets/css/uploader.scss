@@ -2731,6 +2731,10 @@ button.uppy-Dashboard-Item-progressIndicator:focus .uppy-Dashboard-Item-progress
 
 .uppy-Dashboard-isFixed {
   height: 100vh;
+
+  @supports (height: 100dvh) {
+    height: 100dvh;
+  }
   overflow: hidden;
 }
 

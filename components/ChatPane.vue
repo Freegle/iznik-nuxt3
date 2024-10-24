@@ -266,6 +266,34 @@ function typing(val) {
       }
     }
   }
+
+  @supports (height: 100dvh) {
+    height: calc(100dvh - 60px);
+
+    @include media-breakpoint-up(md) {
+      height: calc(100dvh - 78px);
+    }
+
+    &.navBarHidden {
+      height: 100dvh;
+    }
+
+    &.stickyAdRendered {
+      height: calc(100dvh - 60px - $sticky-banner-height-mobile);
+
+      @include media-breakpoint-up(md) {
+        height: calc(100dvh - 78px - $sticky-banner-height-desktop);
+      }
+
+      &.navBarHidden {
+        height: calc(100dvh - $sticky-banner-height-mobile);
+
+        @include media-breakpoint-up(md) {
+          height: calc(100dvh - $sticky-banner-height-desktop);
+        }
+      }
+    }
+  }
 }
 
 .chatTitle {
