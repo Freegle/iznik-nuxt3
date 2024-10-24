@@ -193,9 +193,9 @@
               </b-card-header>
               <b-card-text class="p-2">
                 <p>This doesn't work yet.</p>
-                <div v-if="showJG">
+                <client-only>
                   <JustGivingDonationButton />
-                </div>
+                </client-only>
               </b-card-text>
             </b-card>
           </b-col>
@@ -236,11 +236,6 @@ export default {
         "We're free to use, but not free to run.  Can you help us keep going?"
       )
     )
-  },
-  data: function () {
-    return {
-      showJG: false,
-    }
   },
   ...mapState(useDonationStore, ['target']),
 }
