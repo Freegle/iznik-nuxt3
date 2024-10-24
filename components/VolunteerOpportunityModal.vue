@@ -442,6 +442,7 @@ import SpinButton from '~/components/SpinButton.vue'
 import { twem } from '~/composables/useTwem'
 import { ref } from '#imports'
 import { useOurModal } from '~/composables/useOurModal'
+import { useImageStore } from '~/stores/image'
 const GroupSelect = defineAsyncComponent(() =>
   import('~/components/GroupSelect')
 )
@@ -516,6 +517,7 @@ export default {
     const composeStore = useComposeStore()
     const userStore = useUserStore()
     const groupStore = useGroupStore()
+    const imageStore = useImageStore()
     const groupid = ref(null)
 
     const { modal, hide } = useOurModal()
@@ -540,6 +542,7 @@ export default {
       composeStore,
       userStore,
       groupStore,
+      imageStore,
       groupid,
       oldPhoto,
       modal,
