@@ -1,0 +1,95 @@
+diff --git a/node_modules/@vue/runtime-dom/dist/runtime-dom.cjs.js b/node_modules/@vue/runtime-dom/dist/runtime-dom.cjs.js
+index bdc666c..13c93ed 100644
+--- a/node_modules/@vue/runtime-dom/dist/runtime-dom.cjs.js
++++ b/node_modules/@vue/runtime-dom/dist/runtime-dom.cjs.js
+@@ -19,9 +19,11 @@ const nodeOps = {
+     parent.insertBefore(child, anchor || null);
+   },
+   remove: (child) => {
+-    const parent = child.parentNode;
+-    if (parent) {
+-      parent.removeChild(child);
++    if (child) {
++      const parent = child.parentNode;
++      if (parent) {
++        parent.removeChild(child);
++      }
+     }
+   },
+   createElement: (tag, namespace, is, props) => {
+diff --git a/node_modules/@vue/runtime-dom/dist/runtime-dom.cjs.prod.js b/node_modules/@vue/runtime-dom/dist/runtime-dom.cjs.prod.js
+index d472404..e3f5ebf 100644
+--- a/node_modules/@vue/runtime-dom/dist/runtime-dom.cjs.prod.js
++++ b/node_modules/@vue/runtime-dom/dist/runtime-dom.cjs.prod.js
+@@ -19,9 +19,11 @@ const nodeOps = {
+     parent.insertBefore(child, anchor || null);
+   },
+   remove: (child) => {
+-    const parent = child.parentNode;
+-    if (parent) {
+-      parent.removeChild(child);
++    if (child) {
++      const parent = child.parentNode;
++      if (parent) {
++        parent.removeChild(child);
++      }
+     }
+   },
+   createElement: (tag, namespace, is, props) => {
+diff --git a/node_modules/@vue/runtime-dom/dist/runtime-dom.esm-browser.js b/node_modules/@vue/runtime-dom/dist/runtime-dom.esm-browser.js
+index 92e1959..cda3f25 100644
+--- a/node_modules/@vue/runtime-dom/dist/runtime-dom.esm-browser.js
++++ b/node_modules/@vue/runtime-dom/dist/runtime-dom.esm-browser.js
+@@ -9602,9 +9602,11 @@ const nodeOps = {
+     parent.insertBefore(child, anchor || null);
+   },
+   remove: (child) => {
+-    const parent = child.parentNode;
+-    if (parent) {
+-      parent.removeChild(child);
++    if (child) {
++      const parent = child.parentNode;
++      if (parent) {
++        parent.removeChild(child);
++      }
+     }
+   },
+   createElement: (tag, namespace, is, props) => {
+diff --git a/node_modules/@vue/runtime-dom/dist/runtime-dom.esm-bundler.js b/node_modules/@vue/runtime-dom/dist/runtime-dom.esm-bundler.js
+index 442487e..5eacb48 100644
+--- a/node_modules/@vue/runtime-dom/dist/runtime-dom.esm-bundler.js
++++ b/node_modules/@vue/runtime-dom/dist/runtime-dom.esm-bundler.js
+@@ -16,9 +16,11 @@ const nodeOps = {
+     parent.insertBefore(child, anchor || null);
+   },
+   remove: (child) => {
+-    const parent = child.parentNode;
+-    if (parent) {
+-      parent.removeChild(child);
++    if (child) {
++      const parent = child.parentNode;
++      if (parent) {
++        parent.removeChild(child);
++      }
+     }
+   },
+   createElement: (tag, namespace, is, props) => {
+diff --git a/node_modules/@vue/runtime-dom/dist/runtime-dom.global.js b/node_modules/@vue/runtime-dom/dist/runtime-dom.global.js
+index 84dc78c..d39f595 100644
+--- a/node_modules/@vue/runtime-dom/dist/runtime-dom.global.js
++++ b/node_modules/@vue/runtime-dom/dist/runtime-dom.global.js
+@@ -9599,9 +9599,11 @@ Component that was made reactive: `,
+       parent.insertBefore(child, anchor || null);
+     },
+     remove: (child) => {
+-      const parent = child.parentNode;
+-      if (parent) {
+-        parent.removeChild(child);
++      if (child) {
++        const parent = child.parentNode;
++        if (parent) {
++          parent.removeChild(child);
++        }
+       }
+     },
+     createElement: (tag, namespace, is, props) => {
