@@ -318,6 +318,7 @@ export default {
         }
 
         return (
+          item.userid === 0 ||
           item.userid !== ret[index - 1].userid ||
           item.message !== ret[index - 1].message
         )
