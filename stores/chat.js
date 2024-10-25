@@ -147,13 +147,11 @@ export const useChatStore = defineStore({
       }
     },
     async fetchMessages(id, force) {
-      // console.log('fetchMessages A',id)
-
       let messages = []
       const miscStore = useMiscStore() // MT ADDED
       if( miscStore.modtools){
         const params = {
-          limit: 10,
+          //limit: 10, // NO: so new messages are picked up
           modtools: true
         }
         const { chatmessages } = await api(this.config).chat.fetchMessagesMT(id,params)

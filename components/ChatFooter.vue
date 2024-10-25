@@ -614,6 +614,7 @@ export default {
       this._updateAfterSend()
     },
     async _updateAfterSend() {
+      console.log("_updateAfterSend")
       this.sending = false
 
       // Fetch the messages again to pick up the new one.
@@ -691,7 +692,6 @@ export default {
       this.showProfileModal = true
     },
     async send(callback) {
-      console.log('ChatFooter send A')
       if (!this.sending) {
         if (this.imageid) {
           this.sending = true
@@ -702,7 +702,6 @@ export default {
           this.imagethumb = null
           this.imageid = null
         } else {
-          console.log('ChatFooter send F')
           let msg = this.sendmessage
 
           if (msg) {
@@ -722,7 +721,6 @@ export default {
             msg = untwem(msg)
 
             // Send it
-            console.log('ChatFooter send M', this.id, msg)
             await this.chatStore.send(this.id, msg)
 
             // Clear the message now it's sent.
