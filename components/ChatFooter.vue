@@ -329,6 +329,9 @@
       @hidden="showNudgeWarningModal = false"
     />
     <MicroVolunteering v-if="showMicrovolunteering" />
+    <ConfirmModal v-if="showConfirmModal" title="Refer this chat to Support?" message="The Support volunteers will have a look at the chat and get back to you by email." @confirm="referToSupport" @hidden="showConfirmModal = false"/>
+    <ModSpammerReport v-if="showSpamModal && modchatuser" ref="spamConfirm" :user="modchatuser" @hidden="showSpamModal = false" />
+    <ModCommentAddModal v-if="addComment && modchatuser" ref="addComment" :user="modchatuser" :groupid="chat.groupid" />
   </div>
 </template>
 <script>
@@ -341,6 +344,7 @@ import { useMessageStore } from '../stores/message'
 import { fetchOurOffers } from '../composables/useThrottle'
 import { useAuthStore } from '../stores/auth'
 import { useAddressStore } from '../stores/address'
+import { useUserStore } from '~/stores/user'
 import SpinButton from './SpinButton'
 import { untwem } from '~/composables/useTwem'
 
@@ -399,6 +403,7 @@ export default {
     const miscStore = useMiscStore()
     const messageStore = useMessageStore()
     const addressStore = useAddressStore()
+    const userStore = useUserStore()
 
     const {
       chat,
@@ -410,6 +415,12 @@ export default {
       milesstring,
     } = await setupChat(props.id)
 
+    const modchatuser = ref(null)
+    if( chat.value.user1id){
+      await userStore.fetch(chat.value.user1id)
+      modchatuser.value = userStore.byId(chat.value.user1id)
+    }
+
     return {
       chat,
       otheruser,
@@ -418,10 +429,12 @@ export default {
       chatStore,
       messageStore,
       addressStore,
+      userStore,
       chatmessages,
       authStore,
       milesaway,
       milesstring,
+      modchatuser,
     }
   },
   data() {
@@ -444,6 +457,9 @@ export default {
       showNudgeTooSoonWarningModal: false,
       showNudgeWarningModal: false,
       hideSuggestedAddress: false,
+      showSpamModal: false,
+      showConfirmModal: false,
+      addComment: false,
     }
   },
   computed: {
@@ -812,6 +828,22 @@ export default {
         message: this.sendmessage,
       })
     },
+    spamReport() {
+      this.showSpamModal = true
+      this.$refs.spamConfirm?.show()
+    },
+    async referToSupport() {
+      await this.chatStore.referToSupport({
+        id: this.id
+      })
+    },
+    confirmReferToSupport() {
+      this.showConfirmModal = true
+    },
+    async addAComment() {
+      this.addComment = true
+      this.$refs.addComment?.show()
+    }
   },
 }
 </script>

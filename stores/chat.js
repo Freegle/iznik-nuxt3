@@ -344,6 +344,9 @@ export const useChatStore = defineStore({
       await api(this.config).chat.rsvp(id, roomid, value)
       await this.fetchChat(roomid)
     },
+    async referToSupport(params) {
+      await api(this.config).referToSupport(params.id)
+    },
   },
   getters: {
     byChatId: (state) => {

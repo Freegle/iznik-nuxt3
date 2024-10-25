@@ -38,7 +38,6 @@ export default class ChatAPI extends BaseAPI {
   }
 
   async listChatsMT(params) {
-    console.log('ChatAPI listChatsMT', params)
     return await this.$get('/chat/rooms',params)
   }
 
@@ -111,5 +110,9 @@ export default class ChatAPI extends BaseAPI {
 
   typing(chatid) {
     return this.$post('/chatrooms', { id: chatid, action: 'Typing' })
+  }
+
+  referToSupport(chatid) {
+    return this.$post('/chatrooms', { id: chatid, action: 'ReferToSupport' })
   }
 }

@@ -12,8 +12,7 @@
             </div>
           </b-card-body>
         </b-card>
-        {{bump}} - {{ showChats }} - {{ visibleChats.length }}
-        <ChatListEntry v-for="chat in visibleChats" :id="chat.id" :key="'chat-' + chat.id"
+        <ChatListEntry v-for="chat in visibleChats" :id="chat.id" :key="'chat-' + chat.id + bump"
           :class="{ active: chat && selectedChatId === parseInt(chat.id) }" @click="gotoChat(chat.id)" />
         <p v-if="!visibleChats || !visibleChats.length" class="ml-2">
           <span v-if="searching" class="pulsate">
@@ -49,6 +48,7 @@ import { pluralise } from '../composables/usePluralise'
 import { useChatStore } from '~/stores/chat'
 import { useAuthStore } from '../../stores/auth'
 //import { setupChat } from '../composables/useChat'
+import { useRouter } from '#imports'
 
 export default {
   async setup(props) {
@@ -78,6 +78,7 @@ export default {
   },
   data: function () {
     return {
+      id: 0,
       //showHideAllModal: false,
       //minShowChats: 20,
       showChats: 20,
@@ -91,6 +92,13 @@ export default {
       showClosed: false,
       //adsVisible: false,
     }
+  },
+  async created() {
+    const route = useRoute()
+    this.id = 'id' in route.params ? parseInt(route.params.id) : 0
+    if (isNaN(this.id)) this.id = 0
+    if( this.id) this.selectedChatId = this.id
+    console.log('[[id]] created', route.params.id, this.id)
   },
   computed: {
     messages() {
@@ -107,7 +115,6 @@ export default {
       return pluralise('mile', milesaway.value, true) + ' away'
     },
     chats() {
-      //console.log('[[id]] chats', this.chatStore?.list.length)
       return this.chatStore?.list ? this.chatStore.list : []
     },
     showingOlder() {
@@ -129,7 +136,6 @@ export default {
       return ret
     },
     filteredChats() {
-      //console.log('[[id]] filteredChats', this.showClosed, this.chats.length)
       return this.scanChats(this.showClosed, this.chats)
     },
     visibleChats() {
@@ -137,7 +143,6 @@ export default {
         this.bump && this.filteredChats
           ? this.filteredChats.slice(0, this.showChats)
           : []
-
       return chats
     },
     mightBeOldChats() {
@@ -155,13 +160,12 @@ export default {
       return false
     },
   },
-  mounted() {
-    this.listChats()
-    //await this.clearAndLoad()
+  async mounted() {
+    this.chatStore.clear()
+    await this.listChats()
   },
   methods: {
     async listChats(age) {
-      console.log('listChats', age)
       const params = {
         chattypes: ['User2Mod', 'Mod2Mod']
       }
@@ -188,17 +192,20 @@ export default {
           return false
         })
       }
-      chats = chats.filter((chat) => {
-        if (this.id && !closed && chat.id === this.id) {
-          return true
-        }
+      if (this.id) {
+        chats = chats.filter((chat) => {
+          if (!chat.id || !this.id) return false
+          if (this.id && !closed && chat.id === this.id) {
+            return true
+          }
 
-        if (chat.status === 'Blocked' || chat.status === 'Closed') {
-          return closed
-        }
+          if (chat.status === 'Blocked' || chat.status === 'Closed') {
+            return closed
+          }
 
-        return !closed
-      })
+          return !closed
+        })
+      }
 
       // Sort by last date.
       chats.sort((a, b) => {
@@ -242,13 +249,13 @@ export default {
     },
     gotoChat(id) {
       console.log('gotoChat', id)
-      this.selectedChatId = id
+      const router = useRouter()
+      router.push('/chats/' + id)
     }
   }
 }
 </script>
 <style scoped lang="scss">
-//@import 'color-vars';
 
 .chatback {
   background-color: $color-yellow--light;
