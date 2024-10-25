@@ -85,6 +85,8 @@ export default {
 
     const { chat, otheruser } = await setupChat(props.id)
 
+    console.log('chatPane setup',chat.value)
+
     if (props.id) {
       if (!chatStore.byChatId(props.id)) {
         // It might be an old chat which doesn't appear in our recent ones, but which we are specifically trying

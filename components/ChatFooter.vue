@@ -691,6 +691,7 @@ export default {
       this.showProfileModal = true
     },
     async send(callback) {
+      console.log('ChatFooter send A')
       if (!this.sending) {
         if (this.imageid) {
           this.sending = true
@@ -701,6 +702,7 @@ export default {
           this.imagethumb = null
           this.imageid = null
         } else {
+          console.log('ChatFooter send F')
           let msg = this.sendmessage
 
           if (msg) {
@@ -720,6 +722,7 @@ export default {
             msg = untwem(msg)
 
             // Send it
+            console.log('ChatFooter send M', this.id, msg)
             await this.chatStore.send(this.id, msg)
 
             // Clear the message now it's sent.
@@ -771,9 +774,10 @@ export default {
     async typing() {
       // Let the server know that we are typing, no more frequently than every 10 seconds.
       const now = new Date().getTime()
-
+console.log('typing A',this.id)
       if (!this.lastTyping || now - this.lastTyping > TYPING_TIME_INVERVAL) {
         await this.chatStore.typing(this.id)
+        console.log('typing B')
         this.lastTyping = now
       }
     },

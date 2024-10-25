@@ -136,8 +136,14 @@ export const useChatStore = defineStore({
     },
     async fetchChat(id) {
       if (id > 0) {
-        const chat = await api(this.config).chat.fetchChat(id, false)
-        this.listByChatId[id] = chat
+        const miscStore = useMiscStore() // MT ADDED
+        if( miscStore.modtools){
+          const chat = await api(this.config).chat.fetchMessagesMT(id)
+          this.listByChatId[id] = chat
+        } else {
+          const chat = await api(this.config).chat.fetchChat(id, false)
+          this.listByChatId[id] = chat
+        }
       }
     },
     async fetchMessages(id, force) {
@@ -224,7 +230,12 @@ export const useChatStore = defineStore({
         data.refmsgid = refmsgid
       }
 
-      await api(this.config).chat.send(data)
+      const miscStore = useMiscStore() // MT ADDED
+      if (miscStore.modtools) {
+        await api(this.config).chat.sendMT(data)
+      } else {
+        await api(this.config).chat.send(data)
+      }
 
       // Get the latest messages back.
       this.fetchMessages(chatid)
