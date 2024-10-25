@@ -74,10 +74,11 @@ export default {
   mounted() {
     if (!this.user.info) {
       // Fetch with info so that we can display more.
-      this.userStore.fetch({
-        id: this.user.id,
-        info: true
-      })
+      this.userStore.fetch(this.user.id)
+      // TODO this.userStore.fetch({
+      //  id: this.user.id,
+      //  info: true
+      //})
     }
   },
   methods: {

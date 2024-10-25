@@ -46,7 +46,7 @@
             <div v-if="message.deliverypossible" class="text-info small">
               Delivery possible
             </div>
-            <MessageHistory :message="message" modinfo display-message-link />
+            <MessageHistory :id="message.id" :message="message" modinfo display-message-link />
             <div v-if="homegroup && message && message.groups && message.groups.length && homegroup !== message.groups[0].namedisplay"
               class="small text-danger">
               Possibly should be on {{ homegroup }}
@@ -251,10 +251,9 @@
               </b-button>
             </div>
             <SettingsGroup v-if="showMailSettings && membership && message.groups && message.groups.length" :membershipMT="membership"
-              v-model:emailfrequency="membership.emailfrequency"
-              v-model:volunteeringallowedMT="membership.volunteeringallowed" 
-              v-model:eventsallowedMT="membership.eventsallowed" 
-              class="border border-info mt-2 p-1" :userid="message.fromuser.id" @update="settingsChange" />
+              v-model:emailfrequency="membership.emailfrequency" v-model:volunteeringallowedMT="membership.volunteeringallowed"
+              v-model:eventsallowedMT="membership.eventsallowed" class="border border-info mt-2 p-1" :userid="message.fromuser.id"
+              @update="settingsChange" />
             <div v-if="showEmails">
               <div v-for="email in message.fromuser.emails" :key="email.id">
                 {{ email.email }} <v-icon v-if="email.preferred" icon="star" />
@@ -628,7 +627,7 @@ export default {
     this.$emit('destroy', this.message.id, this.next)
   },
   methods: {
-    updateComments(){
+    updateComments() {
       this.message.fromuser = this.userStore.byId(this.message.fromuser.id)
     },
     imageAdded(id) {

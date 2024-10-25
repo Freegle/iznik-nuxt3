@@ -50,7 +50,7 @@ export default {
       default: false,
     },
   },
-  setup(props) {
+  async setup(props) {
     const groupStore = useGroupStore()
     const messageStore = useMessageStore()
     const authStore = useAuthStore()
@@ -58,7 +58,6 @@ export default {
 
     const me = authStore.user
 
-    console.log('MESSAGEHISTORY', me?.systemrole)
     if (
       me &&
       (me.systemrole === 'Moderator' ||
@@ -71,8 +70,9 @@ export default {
       if (message?.groups) {
         // Might fail, e.g. network, but we don't much mind if it does - we'd just not show the approving mod.
         for (const group of message.groups) {
+          await groupStore.fetch(group.id)
           if (group?.approvedby) {
-            userStore.fetch(group.approvedby)
+            userStore.fetch(group.approvedby.id)
           }
         }
       }
@@ -87,7 +87,7 @@ export default {
       if (this.mod) {
         for (const group of this.message?.groups) {
           if (group?.approvedby) {
-            const mod = this.userStore?.byId(group.approvedby)
+            const mod = this.userStore?.byId(group.approvedby.id)
             approvedby = mod?.displayname
           }
         }
