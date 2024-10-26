@@ -614,7 +614,6 @@ export default {
       this._updateAfterSend()
     },
     async _updateAfterSend() {
-      console.log("_updateAfterSend")
       this.sending = false
 
       // Fetch the messages again to pick up the new one.
@@ -622,7 +621,11 @@ export default {
       this.$emit('scrollbottom')
 
       // We also want to trigger an update in the chat list.
+      if( this.miscStore.modtools){
+        await this.chatStore.listChatsMT()
+      } else {
       await this.chatStore.fetchChat(this.id)
+      }
     },
     async doNudge() {
       await this.chatStore.nudge(this.id)
