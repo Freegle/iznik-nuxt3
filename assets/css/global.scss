@@ -581,6 +581,11 @@ label {
   }
 }
 
+// This is blocking the sign-in button.
+#credential_picker_container {
+  margin-top: 200px;
+}
+
 :root {
   --popper-theme-background-color: white;
   --popper-theme-background-color-hover: white;
