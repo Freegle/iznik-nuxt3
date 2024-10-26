@@ -1,12 +1,13 @@
 <template>
   <button
+    ref="jgbutton"
     data-jg-donate-button
-    data-link-id="fx6eedvc49"
-    data-market-code="GB"
-    data-donate-button-type="justgivingSmall"
-    data-link-type="givingCheckout"
-    data-popup-checkout="true"
-    data-show-payment-logos="false"
+    data-linkid="fx6eedvc49"
+    data-marketcode="GB"
+    data-donatebuttontype="justgivingSmall"
+    data-linktype="givingCheckout"
+    data-popupcheckout="true"
+    data-showpaymentlogos="false"
     class="jgbutton"
   >
     <b-img src="https://www.jg-cdn.com/buttons/donate-with-jg.svg" />
@@ -20,6 +21,7 @@ onMounted(() => {
     jgbutton,
     (newVal) => {
       if (newVal) {
+        console.log('Add JG script')
         const script = document.createElement('script')
         script.setAttribute('data-version', '2')
         script.setAttribute('data-widgetType', 'attachCheckout')
@@ -34,6 +36,7 @@ onMounted(() => {
     },
     {
       immediate: true,
+      deep: true,
     }
   )
 })
