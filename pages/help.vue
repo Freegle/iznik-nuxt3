@@ -345,11 +345,11 @@
               variant="primary"
               class="mb-2"
             />
-            <p  class="clickme">
+            <p>
               Mobile version: {{ mobileVersion }}<br/>
-              {{ deviceuserinfo}}<br/>
-              <a href="#" @click="copydeviceuserinfo">{{ deviceuserinfocopied }}</a>
+              {{ deviceuserinfo}}
             </p>
+            <b-button variant="white" @click="copydeviceuserinfo">{{ deviceuserinfocopied }}</b-button>
           </b-card-body>
         </b-card>
         <div class="text-muted">
@@ -524,7 +524,8 @@ export default {
       window.localStorage.removeItem('rateappnotagain')
       this.$refs.rateappmodal.show()
     },
-    async copydeviceuserinfo(){
+    async copydeviceuserinfo(e){
+      console.log('copydeviceuserinfo',e)
       let infotocopy = 'Mobile version: '+this.mobileVersion+'. '
       if( this.deviceuserinfo) infotocopy += this.deviceuserinfo
       await navigator.clipboard.writeText(infotocopy)
@@ -532,6 +533,11 @@ export default {
       setTimeout(() => {
         this.deviceuserinfocopied = 'Copy app and device info'
       }, 3000)
+      if (e) {
+        e.preventDefault()
+        e.stopPropagation()
+        e.stopImmediatePropagation()
+      }
       return false
     }
 
