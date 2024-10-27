@@ -345,7 +345,11 @@
               variant="primary"
               class="mb-2"
             />
-            {{ deviceuserinfo}}
+            <p  class="clickme">
+              Mobile version: {{ mobileVersion }}<br/>
+              {{ deviceuserinfo}}<br/>
+              <a href="#" @click="copydeviceuserinfo">{{ deviceuserinfocopied }}</a>
+            </p>
           </b-card-body>
         </b-card>
         <div class="text-muted">
@@ -437,14 +441,14 @@ export default {
       forIndex: [],
       contactGroupId: null,
       showInfoModal: false,
+      deviceuserinfocopied: 'Copy app and device info'
     }
   },
   computed: {
     deviceuserinfo(){
       const mobileStore = useMobileStore()
-      let deviceuserinfo = mobileStore.deviceuserinfo
-      if( deviceuserinfo) deviceuserinfo = 'Your device info: ' + deviceuserinfo
-      return deviceuserinfo
+      if( !mobileStore.deviceuserinfo) return false
+      return 'Device info: '+ mobileStore.deviceuserinfo
     },
     matches() {
       if (!this.searcher || !this.question) {
@@ -520,6 +524,17 @@ export default {
       window.localStorage.removeItem('rateappnotagain')
       this.$refs.rateappmodal.show()
     },
+    async copydeviceuserinfo(){
+      let infotocopy = 'Mobile version: '+this.mobileVersion+'. '
+      if( this.deviceuserinfo) infotocopy += this.deviceuserinfo
+      await navigator.clipboard.writeText(infotocopy)
+      this.deviceuserinfocopied = 'Device info copied'
+      setTimeout(() => {
+        this.deviceuserinfocopied = 'Copy app and device info'
+      }, 3000)
+      return false
+    }
+
   },
 }
 </script>
