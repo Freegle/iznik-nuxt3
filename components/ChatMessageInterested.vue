@@ -80,7 +80,7 @@
             :selected-message="refmsg.id"
             :users="otheruser ? [otheruser] : []"
             :selected-user="otheruser ? otheruser.id : null"
-            @hidden="showPromise = false"
+            @hidden="promised"
           />
         </div>
       </div>
@@ -154,6 +154,7 @@ import { useMessageStore } from '../stores/message'
 import ChatBase from '~/components/ChatBase'
 import ProfileImage from '~/components/ProfileImage'
 import ChatMessageSummary from '~/components/ChatMessageSummary'
+import { useChatStore } from '~/stores/chat'
 const OutcomeModal = () =>
   defineAsyncComponent(() => import('~/components/OutcomeModal'))
 const PromiseModal = defineAsyncComponent(() =>
@@ -187,6 +188,12 @@ export default {
       }
 
       this.showPromise = true
+    },
+    promised() {
+      // Might have a new chat message to show from promising.
+      this.showPromise = false
+      const chatStore = useChatStore()
+      chatStore.fetchChat(this.chatid)
     },
     async outcome(type, e) {
       if (e) {
