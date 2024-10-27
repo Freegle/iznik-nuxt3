@@ -345,6 +345,7 @@
               variant="primary"
               class="mb-2"
             />
+            {{ deviceuserinfo}}
           </b-card-body>
         </b-card>
         <div class="text-muted">
@@ -439,6 +440,12 @@ export default {
     }
   },
   computed: {
+    deviceuserinfo(){
+      const mobileStore = useMobileStore()
+      let deviceuserinfo = mobileStore.deviceuserinfo
+      if( deviceuserinfo) deviceuserinfo = 'Your device info: ' + deviceuserinfo
+      return deviceuserinfo
+    },
     matches() {
       if (!this.searcher || !this.question) {
         return this.forIndex.map((o) => o.id)

@@ -233,6 +233,8 @@ export default {
       if(  runtimeConfig.public.ISAPP){
         console.log('LAYOUT mobileVersion',runtimeConfig.public.MOBILE_VERSION)
         sentryParams.mobileVersion = runtimeConfig.public.MOBILE_VERSION
+        const mobileStore = useMobileStore()
+        sentryParams.deviceuserinfo = mobileStore.deviceuserinfo
       }
 
       $sentrySetContext('builddate', sentryParams)

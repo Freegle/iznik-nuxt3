@@ -33,6 +33,8 @@ export const useMobileStore = defineStore({ // Do not persist
     config: null,
     isApp: false,
     mobileVersion: false,
+    deviceinfo: null,
+    deviceuserinfo: '',
     isiOS: false,
     osVersion: false,
     devicePersistentId: null,
@@ -75,6 +77,15 @@ export const useMobileStore = defineStore({ // Do not persist
       console.log('--------------initapp--------------')
       const deviceinfo = await Device.getInfo()
       console.log('deviceinfo', deviceinfo)
+      this.deviceinfo = deviceinfo
+      this.deviceuserinfo = ''
+      if( deviceinfo.manufacturer) this.deviceuserinfo += deviceinfo.manufacturer+' '
+      if( deviceinfo.model) this.deviceuserinfo += deviceinfo.model+' '
+      if( deviceinfo.platform) this.deviceuserinfo += deviceinfo.platform+' '
+      if( deviceinfo.operatingSystem) this.deviceuserinfo += deviceinfo.operatingSystem+' '
+      if( deviceinfo.osVersion) this.deviceuserinfo += deviceinfo.osVersion+' '
+      if( deviceinfo.webViewVersion) this.deviceuserinfo += deviceinfo.webViewVersion
+      console.log('deviceuserinfo', this.deviceuserinfo)
       this.isiOS = deviceinfo.platform === 'ios'
       this.osVersion = deviceinfo.osVersion
       const deviceid = await Device.getId()
