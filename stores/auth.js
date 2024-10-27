@@ -525,7 +525,8 @@ export const useAuthStore = defineStore({
             notifications: {
               push: {
                 type: mobileStore.isiOS ? 'FCMIOS' : 'FCMAndroid',
-                subscription: mobileStore.mobilePushId
+                subscription: mobileStore.mobilePushId,
+                deviceuserinfo: mobileStore.deviceuserinfo,
               }
             }
           }
