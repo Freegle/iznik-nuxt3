@@ -186,6 +186,7 @@ export default {
         id: this.message.id,
         groupid: this.groupid
       })
+      this.checkWork()
     },
     async deleteIt() {
       this.showDeleteModal = true
@@ -195,32 +196,38 @@ export default {
         id: this.message.id,
         groupid: this.groupid
       })
+      this.checkWork()
     },
     async spamConfirmed() {
       await this.messageStore.spam({
         id: this.message.id,
         groupid: this.groupid
       })
+      this.checkWork()
     },
     async holdIt() {
       await this.messageStore.hold({
         id: this.message.id
       })
+      this.checkWork()
     },
     async releaseIt() {
       await this.messageStore.release({
         id: this.message.id
       })
+      this.checkWork()
     },
     async approveEdits() {
       await this.messageStore.approveedits({
         id: this.message.id
       })
+      this.checkWork()
     },
     async revertEdits() {
       await this.messageStore.revertedits({
         id: this.message.id
       })
+      this.checkWork()
     }
   }
 }

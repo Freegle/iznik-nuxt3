@@ -30,7 +30,6 @@
 import dayjs from 'dayjs'
 import { useAuthStore } from '@/stores/auth'
 import { useMiscStore } from '@/stores/misc'
-import ScrollToTop from '~/components/ScrollToTop'
 import me from '~/mixins/me.js'
 import { setupModMessages } from '../../composables/useModMessages'
 
@@ -39,6 +38,7 @@ export default {
     const authStore = useAuthStore()
     const miscStore = useMiscStore()
     const modMessages = setupModMessages()
+    //modMessages.collection.value = ['Pending','PendingOther']
     modMessages.collection.value = 'Pending'
     modMessages.workType.value = 'pending'
     return {

@@ -27,7 +27,8 @@ export const useMiscStore = defineStore({
     onlineTimer: null,
     online: true,
     pageTitle: null,
-    modtools: false, // TODO
+    modtools: false,
+    worktimer: false,
   }),
   actions: {
     init(config) {

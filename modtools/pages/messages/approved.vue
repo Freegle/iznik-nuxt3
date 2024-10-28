@@ -31,7 +31,6 @@
 <script>
 import { useMiscStore } from '@/stores/misc'
 import { useMessageStore } from '../../stores/message'
-import ScrollToTop from '~/components/ScrollToTop'
 import me from '~/mixins/me.js'
 import { setupModMessages } from '../../composables/useModMessages'
 

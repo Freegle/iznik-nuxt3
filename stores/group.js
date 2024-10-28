@@ -29,7 +29,7 @@ export const useGroupStore = defineStore({
     },
 
     async fetchMT({ id, polygon, showmods, sponsors, tnkey }) {
-      console.log('useGroupStore fetchMT', id, polygon)
+      //console.log('useGroupStore fetchMT', id, polygon)
       if (!id) return null
       polygon = Object.is(polygon, undefined) ? false : polygon
       sponsors = Object.is(sponsors, undefined) ? false : sponsors
@@ -63,6 +63,7 @@ export const useGroupStore = defineStore({
         if (ret && ret.groups) {
           const g = ret.groups.find((g) => g.id === group.id)
           if (g && g.work) {
+            //console.log('useGroupStore g.work',g.work)
             this.list[group.id].work = g.work
           }
         }

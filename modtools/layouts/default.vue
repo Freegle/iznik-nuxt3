@@ -98,7 +98,6 @@
 
 <script lang="ts">
 import { useAuthStore } from '@/stores/auth'
-import { useChatStore } from '@/stores/chat'
 import { useMiscStore } from '@/stores/misc'
 import { useModConfigStore } from '@/stores/modconfig'
 
@@ -225,7 +224,9 @@ export default {
 
     // this.miscStore.set({ key: 'modtools', value: true, }) // Already done in app.vue
 
-    this.workTimer = setTimeout(this.checkWork, 0)
+    // Check for work in global modtools/mixins/modme
+    const miscStore = useMiscStore()
+    miscStore.workTimer = setTimeout(this.checkWork, 0)
 
     await this.modConfigStore.fetch({ all: true })
     /*
@@ -235,8 +236,10 @@ export default {
 
   },
   beforeDestroy() {
-    if (this.workTimer) {
-      clearTimeout(this.workTimer)
+    const miscStore = useMiscStore()
+    if (miscStore.workTimer) {
+      clearTimeout(miscStore.workTimer)
+      miscStore.workTimer = false
     }
   },
   methods: {
@@ -257,16 +260,6 @@ export default {
     requestLogin() {
       console.log('MODTOOLS.VUE requestLogin')
       this.$refs.loginModal.show()
-    },
-    async checkWork() {
-      await this.fetchMe(true, ['work', 'group']) // MT ADDED 'group' TODO get chatcount
-
-      const chatStore = useChatStore()
-      this.chatcount = chatStore ? Math.min(99, chatStore.unreadCount) : 0
-      const totalCount = this.work?.total + this.chatcount
-      const title = totalCount > 0 ? `(${totalCount}) ModTools` : 'ModTools'
-      document.title = title
-      setTimeout(this.checkWork, 30000)
     },
     discourse(e) {
       window.open('https://discourse.ilovefreegle.org/')

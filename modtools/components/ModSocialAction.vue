@@ -153,7 +153,7 @@ export default {
       return this.busy.indexOf(groupid) !== -1
     },
     updateWork() {
-      // TODO this.fetchMe(['work']) in useMe.js
+      this.checkWork()
     }
   }
 }

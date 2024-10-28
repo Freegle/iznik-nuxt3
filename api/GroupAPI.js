@@ -11,7 +11,6 @@ export default class GroupAPI extends BaseAPI {
   }
 
   async fetchMT(id, polygon, showmods, sponsors, tnkey, log) {
-    console.log('fetchMT',id)
     const { group } = await this.$get(
       '/group',
       { id, polygon, showmods, sponsors, tnkey },

@@ -2,6 +2,7 @@
   <div>
     <div v-for="(message, ix) in visibleMessages" :key="'messagelist-' + message.id" class="p-0 mt-2">
       <div :ref="'top' + message.id" />
+      {{ visibleMessages.length }}
       <ModMessage :message="message" :next="ix < visibleMessages.length - 1 ? visibleMessages[ix + 1].id : null" :editreview="editreview"
         :next-after-removed="nextAfterRemoved" :summary="summary" :search="messageTerm" @destroy="destroy" />
       <div :ref="'bottom' + message.id" />
@@ -21,7 +22,7 @@ const groupStore = useGroupStore()
 const messageStore = useMessageStore()
 const miscStore = useMiscStore()
 
-// mixin/modMessagesPage
+// composables/modMessagesPage
 const {
   busy, context, group, groupid, limit, workType, show, collection, messageTerm, memberTerm, nextAfterRemoved, distance, summary, messages, visibleMessages, work,
 } = setupModMessages()
@@ -32,7 +33,7 @@ const props = defineProps({
 })
 
 
-// mixin/modMessagesPage
+// composables/modMessagesPage
 onMounted(async () => {
   console.log('###ModMessages onMounted', groupid.value)
   // Ensure we have no cached messages for other searches/groups
@@ -61,7 +62,7 @@ onMounted(async () => {
 
   const authStore = useAuthStore()
   const work = authStore.work // IN PRACTICE, NEVER SET SO REMOVE TODO
-  // console.log('###ModMessages work', work)
+  console.log('###ModMessages work', work, workType.value)
   if (work) {
     const count = workType.value ? work[workType.value] : 0
 
