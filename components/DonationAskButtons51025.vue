@@ -23,6 +23,7 @@
         to keep us running.
       </p>
       <div class="d-flex justify-content-between flex-wrap">
+        <JustGivingDonationButton class="mb-1" />
         <donation-button value="5" class="mb-1" @clicked="score(5)" />
         <donation-button value="10" class="mb-1" @clicked="score(10)" />
         <donation-button value="25" class="mb-1" @clicked="score(25)" />

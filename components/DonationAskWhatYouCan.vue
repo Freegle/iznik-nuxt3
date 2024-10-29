@@ -21,7 +21,10 @@
         <strong> Please donate what you can </strong>
         to keep us running.
       </p>
-      <donation-button @clicked="score(5)" />
+      <div class="d-flex flex-wrap">
+        <JustGivingDonationButton class="mb-1" />
+        <donation-button @clicked="score(5)" />
+      </div>
       <div class="mt-2 mb-4 d-flex border border-secondary rounded p-2">
         <SupporterInfo size="lg" class="mr-2 align-self-center" />
         <div>

@@ -192,7 +192,6 @@
                 With JustGiving
               </b-card-header>
               <b-card-text class="p-2">
-                <p>This doesn't work yet.</p>
                 <client-only>
                   <JustGivingDonationButton />
                 </client-only>
