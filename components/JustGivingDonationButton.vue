@@ -28,7 +28,8 @@ onMounted(() => {
 
         script.setAttribute(
           'src',
-          'https://www.justgiving.com/widgets/scripts/widget.js'
+          // 'https://www.justgiving.com/widgets/scripts/widget.js'
+          '/justgiving/widget.js'
         )
 
         document.body.appendChild(script)

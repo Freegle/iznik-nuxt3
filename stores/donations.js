@@ -16,5 +16,10 @@ export const useDonationStore = defineStore({
       this.target = vals.target
       this.raised = vals.raised
     },
+    async add(userid, amount, date) {
+      const ret = await api(this.config).donations.add(userid, amount, date)
+
+      return ret?.id
+    },
   },
 })
