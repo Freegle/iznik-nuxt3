@@ -57,7 +57,6 @@
           :modifiers="event.image?.externalmods"
           alt="Community Event Photo"
           :width="200"
-          :height="200"
           @click="moreInfo"
         />
         <NuxtPicture
