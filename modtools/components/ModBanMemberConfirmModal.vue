@@ -19,6 +19,11 @@
           Please be responsible in how you use this feature - it should
           be a last resort.
         </NoticeMessage>
+        <p>
+          You must enter a reason for banning a member.  This will be flagged to any other groups that a
+          member is on.
+        </p>
+        <b-form-input v-model="reason" type="text" placeholder="Enter a reason" class="mt-2 mb-2" />
       </template>
       <template #footer>
         <b-button variant="white" @click="hide">
@@ -58,7 +63,8 @@ export default {
   data: function () {
     return {
       homefail: false,
-      homeGroup: false
+      homeGroup: false,
+      reason: null,
     }
   },
   computed: {
@@ -91,16 +97,11 @@ export default {
 
         const lat = this.user.settings?.mylocation?.lat
         const lng = this.user.settings?.mylocation?.lng
-        console.log(
-          'Check home',
-          this.user.memberof.length,
-          bounds,
-          lat,
-          lng,
-          bounds.contains([lat, lng])
-        )
 
-        if (this.user.memberof.length === 1 || bounds.contains([lat, lng])) {
+        if (
+          (lat || lng) &&
+          (this.user.memberof.length === 1 || bounds.contains([lat, lng]))
+        ) {
           this.homeGroup = true
         }
       } catch (e) {
@@ -111,8 +112,10 @@ export default {
   },
   methods: {
     ban() {
-      this.$emit('confirm')
-      this.hide()
+      if (this.reason) {
+        this.$emit('confirm', this.reason)
+        this.hide()
+      }
     }
   }
 }

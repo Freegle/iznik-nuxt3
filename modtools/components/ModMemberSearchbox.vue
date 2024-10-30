@@ -1,9 +1,9 @@
 <template>
   <b-input-group class="flex max">
     <b-form-input v-model="term" type="text" placeholder="Search email/name/id" :disabled="disabled" autocapitalize="none"
-      @keyup.native.enter="search" />
+      @keyup.native.enter="dosearch" />
     <b-input-group-append>
-      <b-button variant="primary" :disabled="disabled" @click="search">
+      <b-button variant="primary" :disabled="disabled" @click="dosearch">
         <v-icon icon="search" />
       </b-button>
     </b-input-group-append>
@@ -28,7 +28,7 @@ export default {
       required: false,
       default: false
     },
-    value: { // TODO: when used?
+    search: { // TODO: when used?
       type: String,
       required: false,
       default: null
@@ -39,8 +39,11 @@ export default {
       default: false
     }
   },
+  mounted() {
+    this.term = this.search
+  },
   methods: {
-    search() {
+    dosearch() {
       this.$emit('search', this.term)
     }
   }

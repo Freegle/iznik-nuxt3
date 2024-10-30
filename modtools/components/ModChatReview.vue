@@ -46,7 +46,7 @@
           <span>
             <v-icon icon="info-circle" /> {{ message.touser.displayname }} is on {{ message.group.namedisplay }}
             <span v-if="!message.widerchatreview">, which you mod.
-              <b-button :to="'/members/approved/search/' + message.group.id + '/' + message.touser.id" variant="link"
+              <b-button :to="'/members/approved/' + message.group.id + '/' + message.touser.id" variant="link"
                 class="p-0 border-0 align-top">
                 Go to membership
               </b-button>
@@ -65,7 +65,7 @@
               <span>
                 <span v-if="message.groupfrom">on {{ message.groupfrom.namedisplay }}, which you mod</span><span v-else>not on any groups which you
                   actively mod.</span>
-                <b-button v-if="message.groupfrom" :to="'/members/approved/search/' + message.groupfrom.id + '/' + message.fromuser.id"
+                <b-button v-if="message.groupfrom" :to="'/members/approved/' + message.groupfrom.id + '/' + message.fromuser.id"
                   variant="link" class="p-0 border-0 align-top">
                   Go to membership
                 </b-button>

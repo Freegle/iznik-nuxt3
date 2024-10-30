@@ -3,7 +3,7 @@
     <client-only>
       <ScrollToTop :prepend="groupName" />
       <div class="d-flex justify-content-between flex-wrap">
-        <GroupSelect v-model="groupid" modonly remember="membersapproved" />
+        <GroupSelect v-model="chosengroupid" modonly remember="membersapproved" />
         <div v-if="groupid" class="d-flex">
           <ModMemberTypeSelect v-model="filter" />
           <b-button v-if="groupid" variant="white" class="ml-2" @click="addMember">
@@ -17,7 +17,7 @@
           <ModMergeButton class="ml-2" />
           <ModMemberExportButton class="ml-2" :groupid="groupid" />
         </div>
-        <ModMemberSearchbox @search="startsearch" />
+        <ModMemberSearchbox :search="search" @search="startsearch" />
       </div>
       <div v-if="groupid && group">
         <p class="mt-1">
@@ -26,7 +26,6 @@
         <NoticeMessage v-if="!members.length" class="mt-2">
           There are no members to show at the moment.
         </NoticeMessage>
-        <!-- show: {{ show }}. members: {{ members.length }}. visibleMembers: {{ visibleMembers.length }}. search {{ search }} -->
         <ModMembers />
         <infinite-loading direction="top" force-use-infinite-wrapper="true" :distance="distance" @infinite="loadMore" :identifier="bump">
           <template #no-results>
@@ -50,8 +49,8 @@
 import { useGroupStore } from '@/stores/group'
 import { useMiscStore } from '@/stores/misc'
 import { useMemberStore } from '@/stores/member'
-import { setupModMembers } from '../../composables/useModMembers'
-import { pluralise } from '../composables/usePluralise'
+import { setupModMembers } from '@/composables/useModMembers'
+import { pluralise } from '@/composables/usePluralise'
 
 export default {
   async setup() {
@@ -69,6 +68,7 @@ export default {
   },
   data: function () {
     return {
+      chosengroupid: 0,
       showAddMember: false,
       showBanMember: false,
       bump: 0
@@ -87,15 +87,25 @@ export default {
       this.bump++
       this.memberStore.clear()
     },
+    chosengroupid(newVal) {
+      const router = useRouter()
+      console.log('chosengroupid', newVal)
+      this.groupid = newVal
+      router.push('/members/approved/' + newVal)
+    },
     groupid(newVal) {
       this.bump++
       this.memberStore.clear()
-    }
+    },
   },
   async mounted() {
+    const route = useRoute()
+    if (('id' in route.params) && route.params.id) this.groupid = parseInt(route.params.id)
+    this.search = null
+    if (('term' in route.params) && route.params.term) this.search = route.params.term
+    console.log('mounted', this.groupid, this.search) 
 
     // reset infiniteLoading on return to page
-    this.search = null
     this.memberStore.clear()
     this.bump++
 
@@ -113,6 +123,8 @@ export default {
 
       if (countmod === 1) {
         this.groupid = lastmod
+        const router = useRouter()
+        router.push('/members/approved/' + lastmod)
       }
     }
   },
@@ -126,9 +138,17 @@ export default {
       this.$refs.banmodal?.show()
     },
     startsearch(search) {
+      console.log('startsearch',search,this.groupid)
       // Initiate search again even if search has not changed
+      search = search.trim()
       this.search = search
       this.memberStore.clear()
+      const router = useRouter()
+      if (this.groupid && search) {
+        router.push('/members/approved/' + this.groupid + '/' + search)
+      } else if( this.groupid){
+        router.push('/members/approved/' + this.groupid)
+      }
       this.bump++
     }
   }

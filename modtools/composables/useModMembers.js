@@ -110,7 +110,7 @@ const loadMore = async function ($state) {
 }
 
 watch(groupid, async (newVal) => {
-  //console.log("useModMembers watch groupid", newVal)
+  console.log("useModMembers watch groupid", newVal)
   context.value = null
   show.value = 0
   const memberStore = useMemberStore()

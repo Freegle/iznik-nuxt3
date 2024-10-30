@@ -122,10 +122,8 @@ export default {
     },
     clicklink() {
       const miscStore = useMiscStore()
-
       if (miscStore.modtools) {
-        return 'javascript:alert("TODO modtools/components/MessageUserInfo.vue clicklink")'
-        //return '/members/approved/search/' + this.user.id
+        return '/members/approved/' + this.groupid + '/' + this.user.id
       } else {
         return '/profile/' + this.user.id
       }
