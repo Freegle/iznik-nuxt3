@@ -56,7 +56,8 @@ export default {
   },
   mounted() {
     // Clear the user cache to make sure we don't display any results before we've searched.
-    // TODO this.$store.dispatch('user/clear')
+    const userStore = useUserStore()
+    userStore.clear()
 
     if (this.id) {
       this.searchuser = this.id

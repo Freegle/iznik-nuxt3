@@ -27,15 +27,14 @@ export const useUserStore = defineStore({
     async fetchMT(params){ // id, info, search, emailhistory
       const { user, users } = await api(this.config).user.fetchMT(params)
       if( user){
-        console.log("Got ONE users",user.id)
         this.list[user.id] = user
+        return user
       }
       if( users){
-        console.log("Got MANY users",users.length)
         for( const user of users){
-          console.log("user.id",user.id)
           this.list[user.id] = user
         }
+        return users
       }
     },
     async fetch(id, force) {

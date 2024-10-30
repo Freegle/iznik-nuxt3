@@ -64,6 +64,14 @@
             </template>
             <!--ModSupportAddGroup /-->
           </b-tab>
+          <b-tab>
+            <template v-slot:title>
+              <h2 class="ml-2 mr-2">
+                Check Volunteers
+              </h2>
+            </template>
+            <ModSupportCheckVolunteers />
+          </b-tab>
         </b-tabs>
       </div>
     </div>
