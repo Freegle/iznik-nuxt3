@@ -1,17 +1,27 @@
 <template>
-  <div v-if="false">
+  <div v-if="true">
     <PrivacyUpdate />
     <div v-if="show" class="d-flex justify-content-around">
-      <nuxt-link to="/NationalReuseDay" class="grid">
-        <div
-          class="d-flex justify-content-end hide clickme"
-          title="Hide banner"
-          @click="hideIt"
-        >
-          <v-icon icon="times-circle" scale="1.5" class="text-white" />
-        </div>
-        <b-img class="banner" src="/NRD/Banner.png" />
-      </nuxt-link>
+      <ExternalLink
+        href="https://www.adsmartfromsky.co.uk/local-heroes-voting/?pid=114546"
+        class="d-none d-md-block w-100"
+      >
+        <ProxyImage
+          src="/SkyAd.png"
+          alt="Vote for us banner"
+          sizes="1px sm:576px md:768px"
+        />
+      </ExternalLink>
+      <!--      <nuxt-link to="/NationalReuseDay" class="grid">-->
+      <!--        <div-->
+      <!--          class="d-flex justify-content-end hide clickme"-->
+      <!--          title="Hide banner"-->
+      <!--          @click="hideIt"-->
+      <!--        >-->
+      <!--          <v-icon icon="times-circle" scale="1.5" class="text-white" />-->
+      <!--        </div>-->
+      <!--        <b-img class="banner" src="/NRD/Banner.png" />-->
+      <!--      </nuxt-link>-->
     </div>
     <div v-else class="text-danger text-end clickme" @click="showit">
       Show notice.
@@ -80,5 +90,9 @@ export default {
     align-content: end;
     z-index: 1000;
   }
+}
+
+:deep(img) {
+  width: 100%;
 }
 </style>

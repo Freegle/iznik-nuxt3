@@ -5,7 +5,7 @@
         <b-col cols="12" lg="6" class="p-0 mt-1" offset-lg="3">
           <div>
             <h1>Volunteer Opportunities</h1>
-            <GlobalWarning />
+            <GlobalMessage />
             <p>
               Are you a charity or good cause that needs volunteers? Ask our
               lovely community of freeglers to help.
@@ -68,7 +68,7 @@ import { buildHead } from '../../composables/useBuildHead'
 import { useVolunteeringStore } from '../../stores/volunteering'
 import { useGroupStore } from '../../stores/group'
 import { useAuthStore } from '../../stores/auth'
-import GlobalWarning from '~/components/GlobalWarning'
+import GlobalMessage from '~/components/GlobalMessage'
 import { ref, computed, useRoute, useRouter } from '#imports'
 import InfiniteLoading from '~/components/InfiniteLoading'
 import GroupSelect from '~/components/GroupSelect'

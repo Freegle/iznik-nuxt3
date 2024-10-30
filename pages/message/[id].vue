@@ -81,7 +81,7 @@
             <MyMessage :id="id" :show-old="true" expand />
           </div>
           <div v-else class="botpad">
-            <GlobalWarning />
+            <GlobalMessage />
             <VisibleWhen :at="['xs', 'sm', 'md', 'lg']">
               <OurMessage
                 :id="id"

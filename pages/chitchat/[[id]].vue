@@ -8,7 +8,7 @@
           </VisibleWhen>
         </b-col>
         <b-col cols="12" lg="6" class="newsfeedHolder p-0">
-          <GlobalWarning />
+          <GlobalMessage />
           <ExpectedRepliesWarning
             v-if="me && me.expectedreplies"
             :count="me.expectedreplies"
@@ -136,7 +136,7 @@ import { useNewsfeedStore } from '../../stores/newsfeed'
 import { useAuthStore } from '../../stores/auth'
 import NewsCommunityEventVolunteerSummary from '../../components/NewsCommunityEventVolunteerSummary'
 import VisibleWhen from '~/components/VisibleWhen'
-import GlobalWarning from '~/components/GlobalWarning'
+import GlobalMessage from '~/components/GlobalMessage'
 import NoticeMessage from '~/components/NoticeMessage'
 import AutoHeightTextarea from '~/components/AutoHeightTextarea'
 import InfiniteLoading from '~/components/InfiniteLoading'
@@ -164,7 +164,7 @@ export default {
   components: {
     NewsCommunityEventVolunteerSummary,
     VisibleWhen,
-    GlobalWarning,
+    GlobalMessage,
     ExpectedRepliesWarning,
     NoticeMessage,
     NewsThread,

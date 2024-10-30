@@ -14,7 +14,7 @@
         <b-col cols="12" lg="6" class="p-0">
           <MicroVolunteering />
           <div>
-            <GlobalWarning />
+            <GlobalMessage />
             <ExpectedRepliesWarning
               v-if="me && me.expectedreplies"
               :count="me.expectedreplies"
@@ -128,8 +128,8 @@ export default {
     PostMapAndList: defineAsyncComponent(() =>
       import('~/components/PostMapAndList')
     ),
-    GlobalWarning: defineAsyncComponent(() =>
-      import('~/components/GlobalWarning')
+    GlobalMessage: defineAsyncComponent(() =>
+      import('~/components/GlobalMessage')
     ),
     AboutMeModal: defineAsyncComponent(() =>
       import('~/components/AboutMeModal')
