@@ -17,9 +17,7 @@ export default {
       return this.hasPermission('Newsletter')
     },
     hasPermissionSpamAdmin() {
-      console.log("hasPermissionSpamAdmin", this.hasPermission('SpamAdmin'))
-      // TODO return this.hasPermission('SpamAdmin')
-      return true
+      return this.hasPermission('SpamAdmin')
     },
     hasPermissionGiftAid() {
       return this.hasPermission('GiftAid')

@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { LoginError, SignUpError } from '../api/BaseAPI'
 import { useComposeStore } from '../stores/compose'
+import { useMiscStore } from '../stores/misc'
 import api from '~/api'
 
 export const useAuthStore = defineStore({
@@ -171,6 +172,9 @@ export const useAuthStore = defineStore({
 
           return logIt
         })
+        console.log('auth login',res)
+        console.log('auth login user',res.user)
+        console.log('auth login user permissions',res.user?.permissions)
 
         const { ret, status, persistent, jwt } = res
 
@@ -268,6 +272,7 @@ export const useAuthStore = defineStore({
       // We're so vain, we probably think this call is about us.
       let me = null
       let groups = null
+      const miscStore = useMiscStore()
 
       /* TODO
       if (this.auth.jwt || this.auth.persistent) {
@@ -313,13 +318,12 @@ export const useAuthStore = defineStore({
       if (!me) {
         if( !components) components = [] // MT ADDED
         components = [ 'me', ...components] // MT ADDED
-        //console.log('### useAuthStore fetchUser',components)
+        // console.log('### useAuthStore fetchUser',components)
 
         // Try the older API which will authenticate via the persistent token and PHP session.
         const ret = await this.$api.session.fetch({
           webversion: this.config.public.BUILD_DATE,
           components,
-          //components: ['me'],
         })
 
         let persistent = null
@@ -327,7 +331,7 @@ export const useAuthStore = defineStore({
 
         if (ret) {
           ;({ me, groups, persistent, jwt } = ret) // MT added
-          // console.log('!!!fetchuser ret.work',ret.work)
+          // console.log('!!!fetchuser ret.me',me)
           this.work = ret.work
           this.discourse = ret.discourse
     
@@ -337,17 +341,18 @@ export const useAuthStore = defineStore({
 
           if (jwt) {
             // Now use the JWT on the new API.
+            let mev2 = null
             try {
-              me = await this.$api.session.fetchv2({
+              mev2 = await this.$api.session.fetchv2({
                 webversion: this.config.public.BUILD_DATE,
               })
             } catch (e) {
               console.log('exception')
             }
 
-            if (me) {
+            if (mev2) {
               if( groups){ // TODO Check: MT needs group info in groups/memberships
-                for( const membership of me.memberships){
+                for( const membership of mev2.memberships){
                   const group = groups.find(g => g.id === membership.groupid)
                   if( group) {
                     membership.configid = group.configid
@@ -357,8 +362,8 @@ export const useAuthStore = defineStore({
                 }
               }
  
-              groups = me.memberships
-              delete me.memberships
+              groups = mev2.memberships
+              delete mev2.memberships
             }
           }
         }
