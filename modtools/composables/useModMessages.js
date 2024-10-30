@@ -52,13 +52,13 @@ const messages = computed(() => {
 
 const visibleMessages = computed(() => {
   const msgs = messages.value
-  console.log('useModMessages visibleMessages', show.value, msgs?.length)
+  //console.log('useModMessages visibleMessages', show.value, msgs?.length)
   if (show.value === 0 || !msgs || msgs.length === 0) return []
   return msgs.slice(0, show.value)
 })
 
 watch(groupid, async (newVal) => {
-  console.log("useModMessages watch groupid", newVal)
+  //console.log("useModMessages watch groupid", newVal)
   context.value = null
   show.value = 0
   const messageStore = useMessageStore()
@@ -72,7 +72,7 @@ watch(groupid, async (newVal) => {
 })
 
 watch(group, async (newValue, oldValue) => {
-  console.log("===useModMessages watch group", newValue, oldValue, groupid.value)
+  //console.log("===useModMessages watch group", newValue, oldValue, groupid.value)
   // We have this watch because we may need to fetch a group that we have remembered.  The mounted()
   // call may happen before we have restored the persisted state, so we can't initiate the fetch there.
   if (oldValue === null || oldValue.id !== groupid.value) {

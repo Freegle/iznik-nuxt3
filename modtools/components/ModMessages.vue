@@ -2,7 +2,6 @@
   <div>
     <div v-for="(message, ix) in visibleMessages" :key="'messagelist-' + message.id" class="p-0 mt-2">
       <div :ref="'top' + message.id" />
-      {{ visibleMessages.length }}
       <ModMessage :message="message" :next="ix < visibleMessages.length - 1 ? visibleMessages[ix + 1].id : null" :editreview="editreview"
         :next-after-removed="nextAfterRemoved" :summary="summary" :search="messageTerm" @destroy="destroy" />
       <div :ref="'bottom' + message.id" />
