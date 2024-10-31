@@ -11,6 +11,10 @@ export default {
   // This is where images are served from.
   IMAGE_SITE: 'https://images.ilovefreegle.org',
 
+  // Very new.  Our own uploader, and delivery of those images via a cached use of wsrl.nl.
+  TUS_UPLOADER: 'https://uploads.ilovefreegle.org:8080',
+  IMAGE_DELIVERY: 'https://delivery.ilovefreegle.org',
+
   // OpenStreetMap Tile Server
   OSM_TILE:
     process.env.OSM_TILE ||
@@ -35,4 +39,9 @@ export default {
 
   // Cookie banner for this site.
   COOKIEYES: process.env.COOKIEYES || null,
+
+  TRUSTPILOT_LINK: process.env.TRUSTPILOT_LINK || null,
+
+  GOOGLE_ADSENSE_ID: process.env.GOOGLE_ADSENSE_ID,
+  GOOGLE_ADSENSE_TEST_MODE: process.env.GOOGLE_ADSENSE_TEST_MODE,
 }

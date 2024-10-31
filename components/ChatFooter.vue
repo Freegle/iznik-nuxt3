@@ -662,8 +662,6 @@ export default {
         if (newVal?.length) {
           this.sending = true
 
-          console.log('Upload photos', JSON.stringify(newVal))
-
           const promises = []
 
           newVal.forEach((att) => {
@@ -732,7 +730,11 @@ export default {
       this.$emit('scrollbottom')
 
       // We also want to trigger an update in the chat list.
-      await this.chatStore.fetchChat(this.id)
+      if( this.miscStore.modtools){
+        await this.chatStore.listChatsMT()
+      } else {
+        await this.chatStore.fetchChat(this.id)
+      }
     },
     async doNudge() {
       await this.chatStore.nudge(this.id)

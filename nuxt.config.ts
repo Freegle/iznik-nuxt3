@@ -190,6 +190,9 @@ export default defineNuxtConfig({
       NETLIFY_SITE_NAME: process.env.SITE_NAME,
       MATOMO_HOST: process.env.MATOMO_HOST,
       COOKIEYES: config.COOKIEYES,
+      TRUSTPILOT_LINK: config.TRUSTPILOT_LINK,
+      TUS_UPLOADER: config.TUS_UPLOADER,
+      IMAGE_DELIVERY: config.IMAGE_DELIVERY,
     },
   },
 
