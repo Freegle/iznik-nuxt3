@@ -23,7 +23,6 @@
       Monthly donations are particularly helpful.
     </p>
     <div class="d-flex flex-wrap justify-content-between mt-2">
-      <JustGivingDonationButton class="mb-1" />
       <donation-button value="1" class="mb-1" @clicked="score(1)" />
       <donation-button value="5" class="mb-1" @clicked="score(5)" />
       <donation-button value="10" class="mb-1" @clicked="score(10)" />
