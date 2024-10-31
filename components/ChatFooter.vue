@@ -58,6 +58,7 @@
               this freegler a thumbs down.
             </p>
           </notice-message>
+          <ModComments v-if="mod && chat && chat.chattype === 'User2Mod' && otheruser" :user="otheruser" class="mt-1" />
         </div>
         <b-button
           variant="warning"
@@ -508,7 +509,11 @@ export default {
         this.otheruser?.spammer ||
         this.otheruser?.deleted ||
         this.thumbsdown ||
-        this.faraway
+        this.faraway ||
+        (this.miscStore.modtools &&
+          this.otheruser &&
+          this.otheruser.comments &&
+          this.otheruser.comments.length)
       )
     },
     faraway() {

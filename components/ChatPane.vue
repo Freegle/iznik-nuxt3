@@ -98,8 +98,19 @@ export default {
         chatStore.fetchMessages(props.id)
 
         // Fetch the user.
-        if (chat?.value?.otheruid) {
-          await userStore.fetch(chat.value.otheruid)
+        if( miscStore.modtools){
+          if( chat.value.user1id){
+            // Need to get user.info using api v2 but user.comments using api v1
+            chat.value.otheruid = chat.value.user1id
+            await userStore.fetch(chat.value.otheruid)
+            const userv2 = userStore.byId(chat.value.otheruid)
+            await userStore.fetchMT({ id: chat.value.otheruid})
+            const user = userStore.byId(chat.value.otheruid)
+            user.info = userv2.info
+            if( user.spammer && user.spammer.collection==='Whitelisted') user.spammer = false
+          }
+        } else  if (chat?.value?.otheruid) {
+            await userStore.fetch(chat.value.otheruid)
         }
       }
     }
