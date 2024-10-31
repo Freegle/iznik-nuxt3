@@ -34,7 +34,7 @@ const props = defineProps({
 
 // composables/modMessagesPage
 onMounted(async () => {
-  console.log('###ModMessages onMounted', groupid.value)
+  //console.log('###ModMessages onMounted', groupid.value)
   // Ensure we have no cached messages for other searches/groups
   messageStore.clear()
 
@@ -61,7 +61,7 @@ onMounted(async () => {
 
   const authStore = useAuthStore()
   const work = authStore.work // IN PRACTICE, NEVER SET SO REMOVE TODO
-  console.log('###ModMessages work', work, workType.value)
+  //console.log('###ModMessages work', work, workType.value)
   if (work) {
     const count = workType.value ? work[workType.value] : 0
 

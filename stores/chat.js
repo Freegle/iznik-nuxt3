@@ -34,7 +34,6 @@ export const useChatStore = defineStore({
       this.route = useRoute()
     },
     async listChatsMT(params){
-      console.log('useChatStore listChatsMT', params)
       params = params || {
         chattypes: ['User2Mod', 'Mod2Mod'],
         search: params && params.search ? params.search : null
@@ -52,7 +51,6 @@ export const useChatStore = defineStore({
         current = chatid && this.list[chatid] ? this.list[chatid] : null
   
         const { chatrooms } = await api(this.config).chat.listChatsMT(params)
-        //console.log('useChatStore listChatsMT chatrooms', chatrooms)
         this.list = chatrooms
         chatrooms.forEach((c) => {
           // If we already have the chat with this date then don't set it - this avoids reactivity causing a slew of

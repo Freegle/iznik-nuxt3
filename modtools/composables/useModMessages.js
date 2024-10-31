@@ -34,7 +34,7 @@ const messages = computed(() => {
   } else {
     messages = messageStore.all
   }
-  // console.log('useModMessages messages', groupid.value, messages.length)
+  //console.log('---messages', groupid.value, messages.length)
   // We need to sort as otherwise new messages may appear at the end.
   messages.sort((a, b) => {
     if (a.groups && b.groups) {
@@ -52,7 +52,7 @@ const messages = computed(() => {
 
 const visibleMessages = computed(() => {
   const msgs = messages.value
-  //console.log('useModMessages visibleMessages', show.value, msgs?.length)
+  //console.log('---visibleMessages', show.value, msgs?.length)
   if (show.value === 0 || !msgs || msgs.length === 0) return []
   return msgs.slice(0, show.value)
 })
@@ -60,22 +60,21 @@ const visibleMessages = computed(() => {
 watch(groupid, async (newVal) => {
   //console.log("useModMessages watch groupid", newVal)
   context.value = null
-  show.value = 0
-  const messageStore = useMessageStore()
-  messageStore.clear()
 
   const groupStore = useGroupStore()
   await groupStore.fetchMT({
     id: newVal
   })
   group.value = await groupStore.fetch(newVal)
+
+  show.value = messages.value.length
 })
 
 watch(group, async (newValue, oldValue) => {
   //console.log("===useModMessages watch group", newValue, oldValue, groupid.value)
   // We have this watch because we may need to fetch a group that we have remembered.  The mounted()
   // call may happen before we have restored the persisted state, so we can't initiate the fetch there.
-  if (oldValue === null || oldValue.id !== groupid.value) {
+  if (!oldValue || oldValue.id !== groupid.value) {
     const groupStore = useGroupStore()
     await groupStore.fetch(groupid.value)
   }
@@ -88,10 +87,17 @@ export function setupModMessages() {
     try {
       const authStore = useAuthStore()
       const work = authStore.work
-      //console.log(">>>>useModMessages get work", workType.value, work)
+      //console.log(">>>>useModMessages get work", workType.value) // , work
       if (!work) return 0
-      const count = workType.value ? work[workType.value] : 0
-      return count
+      if( !workType.value) return 0
+      if( Array.isArray(workType.value)){
+        let count = 0
+        for( const worktype of workType.value){
+          count += work[worktype]
+        }
+        return count
+      }
+      return work[workType.value]
     } catch (e) {
       console.log('>>>>useModMessages exception', e.message)
       return 0
@@ -130,13 +136,14 @@ export function setupModMessages() {
     }
 
     if (doFetch) {
-      //console.log('Fetch')
+      //console.log('useModMessages watch work',collection.value)
+      
       await messageStore.clearContext()
       context.value = null
 
       await messageStore.fetchMessagesMT({
         groupid: groupid.value,
-        collection: collection.value,
+        collection: collection.value, // Pending also gets PendingOther
         modtools: true,
         summary: false,
         limit: Math.max(limit.value, newVal)
