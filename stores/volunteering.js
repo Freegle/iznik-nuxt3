@@ -16,6 +16,11 @@ export const useVolunteeringStore = defineStore({
       this.config = config
       this.fetching = {}
     },
+    clear(){
+      this.list = {}
+      this.forUser = []
+      this.forGroup = []
+    },
     async fetch(id, force) {
       try {
         if (force || !this.list[id]) {
