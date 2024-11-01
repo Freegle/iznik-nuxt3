@@ -130,6 +130,8 @@
                       :image="
                         boardmember?.profile?.default
                           ? null
+                          : boardmember?.profile?.url
+                          ? boardmember.profile.url
                           : boardmember?.profile?.turl
                       "
                       class="mr-2"
