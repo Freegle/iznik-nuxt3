@@ -67,44 +67,36 @@ const visibleMembers = computed(() => {
 })
 
 const loadMore = async function ($state) {
-  // console.log('useModMembers loadMore', group.value!=null, show.value, members.value.length, visibleMembers.value.length)
-  if (!group.value) {
-    $state.complete()
-    return
-  }
+  //console.log('useModMembers loadMore', group.value, show.value, members.value.length, visibleMembers.value.length)
   if (show.value < members.value.length) {
     show.value++
     $state.loaded()
   } else {
-    if (members.value.length === group.value.membercount) {
-      $state.complete()
-    } else {
-      limit.value += distance.value
-      const memberStore = useMemberStore()
-      const params = {
-        groupid: groupid.value,
-        collection: collection.value,
-        modtools: true,
-        summary: false,
-        context: context.value,
-        limit: limit.value,
-        search: search.value,
-        filter: filter.value
-      }
-      const received = await memberStore.fetchMembers(params)
+    limit.value += distance.value
+    const memberStore = useMemberStore()
+    const params = {
+      groupid: groupid.value,
+      collection: collection.value,
+      modtools: true,
+      summary: false,
+      context: context.value,
+      limit: limit.value,
+      search: search.value,
+      filter: filter.value
+    }
+    const received = await memberStore.fetchMembers(params)
 
-      if (show.value < members.value.length) { // Just inc by one rather than set to members.value.length
-        show.value++
-      }
-      if (show.value > members.value.length) {
-        show.value = members.value.length
-      }
-      if (received === 0 || (show.value === members.value.length)) {
-        $state.complete()
-      }
-      else {
-        $state.loaded()
-      }
+    if (show.value < members.value.length) { // Just inc by one rather than set to members.value.length
+      show.value++
+    }
+    if (show.value > members.value.length) {
+      show.value = members.value.length
+    }
+    if (received === 0 || (show.value === members.value.length)) {
+      $state.complete()
+    }
+    else {
+      $state.loaded()
     }
   }
 }

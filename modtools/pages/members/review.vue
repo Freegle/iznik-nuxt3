@@ -5,7 +5,10 @@
       <ModHelpMemberReview />
       <ModPostcodeTester />
 
-      <ModMembers />
+      <div v-for="(member, ix) in visibleMembers" :key="'memberlist-' + member.id" class="p-0 mt-2">
+        <ModMemberReview :member="member" />
+      </div>
+
       <infinite-loading direction="top" force-use-infinite-wrapper="true" :distance="distance" @infinite="loadMore" :identifier="bump">
         <template #no-results>
           <p class="p-2">There are no members to review at the moment.</p>
@@ -33,6 +36,8 @@ export default {
     const miscStore = useMiscStore()
     const modMembers = setupModMembers()
     modMembers.collection.value = 'Spam'
+    modMembers.groupid.value = 0
+    modMembers.group.value = null
     return {
       groupStore,
       memberStore,
