@@ -26,7 +26,7 @@
           label="Remove"
           class="mr-2 mb-1"
         />
-        <b-button :to="'/members/approved/search/' + membership.id + '/' + member.userid" variant="secondary" class="mb-1">
+        <b-button :to="'/members/approved/' + membership.id + '/' + member.userid" variant="secondary" class="mb-1">
           Go to membership
         </b-button>
       </div>
