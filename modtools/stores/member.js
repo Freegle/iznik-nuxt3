@@ -72,7 +72,18 @@ export const useMemberStore = defineStore({
       this.list[member.id] = member
     },
 
+    async spamignore(params) {
+      // TODO Not defined
+      await api(this.config).user.edit({
+        id: params.userid,
+        groupid: params.groupid,
+        suspectcount: 0,
+        suspectreason: null
+      })
+    },
+
     async remove(userid, groupid) {
+      // TODO Does not work
       // Remove approved member.
       this.context = null
       console.log('remove', userid, groupid)

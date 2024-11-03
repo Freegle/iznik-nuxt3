@@ -4,7 +4,8 @@
       <b-card-header class="d-flex justify-content-between flex-wrap">
         <div>
           <!-- eslint-disable-next-line -->
-          <v-icon icon="envelope" /> <ExternalLink :href="'mailto:' + email">{{ email }}</ExternalLink>
+          <v-icon icon="envelope" />
+          <ExternalLink :href="'mailto:' + email">{{ email }}</ExternalLink>
         </div>
         <div>
           <ProfileImage :image="member.profile.turl" class="ml-1 mb-1 inline" is-thumbnail size="sm" />
@@ -22,20 +23,13 @@
         <div v-if="member.heldby">
           <NoticeMessage variant="warning" class="mb-2">
             <p v-if="me.id === member.heldby.id">
-              You held this member.  Other people will see a warning to check with
+              You held this member. Other people will see a warning to check with
               you before releasing them.
             </p>
             <p v-else>
-              Held by <strong>{{ member.heldby.displayname }}</strong>.  Please check before releasing them.
+              Held by <strong>{{ member.heldby.displayname }}</strong>. Please check before releasing them.
             </p>
-            <ModMemberButton
-              v-if="member.heldby"
-              :member="member"
-              variant="warning"
-              icon="play"
-              release
-              label="Release"
-            />
+            <ModMemberButton v-if="member.heldby" :member="member" variant="warning" icon="play" release label="Release" />
           </NoticeMessage>
         </div>
         <ModComments :user="member" />
@@ -51,12 +45,13 @@
         </NoticeMessage>
         <ModBouncing v-if="member.bouncing" :user="member" />
         <NoticeMessage v-if="member.bandate">
-          Banned <span :title="datetime(member.bandate)">{{ timeago(member.bandate) }}</span> <span v-if="member.bannedby">by #{{ member.bannedby }}</span> - check logs for info.
+          Banned <span :title="datetime(member.bandate)">{{ timeago(member.bandate) }}</span> <span v-if="member.bannedby">by #{{ member.bannedby
+            }}</span> - check logs for info.
         </NoticeMessage>
         <div class="d-flex justify-content-between flex-wrap">
           <div>
             <ModMemberSummary :member="member" />
-            <div v-if="member.lastaccess" :class="'mb-1 ' + (inactive ? 'text-danger': '')">
+            <div v-if="member.lastaccess" :class="'mb-1 ' + (inactive ? 'text-danger' : '')">
               Last active: {{ timeago(member.lastaccess) }}
               <span v-if="inactive">
                 - won't send mails
@@ -97,7 +92,7 @@
             <b-button variant="link" @click="showLogs">
               View logs
             </b-button>
-            <b-button variant="link" :to="'/profile/' + member.userid">
+            <b-button variant="link" :href="'https://ilovefreegle.org/profile/' + member.userid" target="_blank">
               View profile
             </b-button>
             <div v-if="showEmails">
@@ -113,61 +108,49 @@
         </b-badge>
       </b-card-body>
     </b-card>
-    <ModPostingHistoryModal ref="history" :user="member" :type="type" />
-    <ModLogsModal ref="logs" :userid="member.userid" />
+    <ModPostingHistoryModal v-if="showPostingHistoryModal" ref="history" :user="member" :type="type" @hidden="showPostingHistoryModal = false" />
+    <ModLogsModal v-if="showLogsModal" ref="logs" :userid="member.userid" @hidden="showLogsModal = false" />
   </div>
 </template>
 <script>
+import dayjs from 'dayjs'
 import { pluralise } from '../composables/usePluralise'
+import { useUserStore } from '../stores/user'
 
 const MEMBERSHIPS_SHOW = 3
 
 export default {
   name: 'ModMember',
+  setup() {
+    const userStore = useUserStore()
+    return {
+      userStore,
+    }
+  },
   props: {
     member: {
       type: Object,
       required: true
     }
   },
-  data: function() {
+  data: function () {
     return {
       saving: false,
       saved: false,
       showEmails: false,
       type: null,
       allmemberships: false,
-      showSpamModal: false
+      showSpamModal: false,
+      showPostingHistoryModal: false,
+      showLogsModal: false,
     }
   },
   computed: {
-    reviewgroups() {
-      let ms = null
-
-      if (this.member && this.member.memberof) {
-        ms = this.member.memberof
-      } else if (this.user && this.user.memberof) {
-        ms = this.user.memberof
-      }
-
-      if (!ms) {
-        return null
-      }
-
-      return ms.filter(g => {
-        return (
-          this.amActiveModOn(g.id) &&
-          ('reviewrequestedat' in g || g.collection === 'Spam')
-        )
-      })
-    },
     allmemberof() {
       let ms = []
 
       if (this.member && this.member.memberof) {
         ms = this.member.memberof
-      } else if (this.user && this.user.memberof) {
-        ms = this.user.memberof
       }
 
       if (!ms) {
@@ -192,13 +175,13 @@ export default {
           a.reviewrequestedat &&
           (!a.reviewedat ||
             new Date(a.reviewrequestedat).getTime() >
-              new Date(a.reviewedat).getTime())
+            new Date(a.reviewedat).getTime())
         const breview =
           this.amAModOn(b.id) &&
           b.reviewrequestedat &&
           (!b.reviewedat ||
             new Date(b.reviewrequestedat).getTime() >
-              new Date(b.reviewedat).getTime())
+            new Date(b.reviewedat).getTime())
 
         if (areview && !breview) {
           return -1
@@ -232,120 +215,36 @@ export default {
     },
     inactive() {
       // This code matches server code in sendOurMails.
-      return false
-      /* TODO
       return (
         this.member &&
         this.member.lastaccess &&
-        this.$dayjs().diff(this.$dayjs(this.member.lastaccess), 'days') >=
+        dayjs().diff(dayjs(this.member.lastaccess), 'day') >=
           365 / 2
-      )*/
+      )
     },
-    user() {
-      return this.$store.getters['user/get'](this.member.userid)
-    },
-    reportUser() {
-      return {
-        // Due to inconsistencies about userid vs id in objects.
-        userid: this.user.id,
-        displayname: this.user.displayname
-      }
-    },
-    settings() {
-      if (this.user && this.user.settings && this.user.settings) {
-        return this.user.settings
-      } else {
-        return {}
-      }
-    },
-    notifications() {
-      let ret = {}
-
-      if (this.settings && this.settings.notifications) {
-        ret = this.settings.notifications
-      } else {
-        ret = {
-          email: true,
-          emailmine: false,
-          push: true,
-          facebook: true,
-          app: true
-        }
-      }
-
-      return ret
-    },
-    relevantallowed: {
-      get() {
-        return this.user && Boolean(this.user.relevantallowed)
-      },
-      set(newval) {
-        this.user.relevantallowed = newval
-      }
-    },
-    newslettersallowed: {
-      get() {
-        return this.user && Boolean(this.user.newslettersallowed)
-      },
-      set(newval) {
-        this.user.newslettersallowed = newval
-      }
-    }
   },
-  mounted() {
+  async mounted() {
     if (!this.member.info) {
       // Fetch with info so that we can display more.
-      this.$store.dispatch('user/fetch', {
+      this.userStore.fetchMT({
         id: this.member.userid,
         info: true
       })
     }
   },
   methods: {
-    showHistory(type = null) {
+    async showHistory(type = null) {
       this.type = type
-      this.waitForRef('history', () => {
-        this.$refs.history.show()
-      })
+      this.showPostingHistoryModal = true
+      await nextTick()
+      this.$refs.history.show()
     },
-    showLogs() {
+    async showLogs() {
       this.modmailsonly = false
-
-      this.waitForRef('logs', () => {
-        this.$refs.logs.show()
-      })
+      this.showLogsModal = true
+      await nextTick()
+      this.$refs.logs.show()
     },
-    async changeNotification(e, type) {
-      const settings = this.settings
-      const notifications = this.notifications
-      notifications[type] = e.value
-      settings.notifications = notifications
-
-      await this.$store.dispatch('user/edit', {
-        id: this.user.id,
-        settings: settings
-      })
-    },
-    async changeRelevant(e) {
-      await this.$store.dispatch('user/edit', {
-        id: this.user.id,
-        relevantallowed: e.value
-      })
-    },
-    async changeNotifChitchat(e) {
-      const settings = this.user.settings
-      settings.notificationmails = e.value
-      await this.$store.dispatch('user/edit', {
-        id: this.user.id,
-        settings: settings
-      })
-    },
-    async changeNewsletter(e) {
-      await this.$store.dispatch('user/edit', {
-        id: this.user.id,
-        newslettersallowed: e.value
-      })
-    }
   }
 }
 </script>

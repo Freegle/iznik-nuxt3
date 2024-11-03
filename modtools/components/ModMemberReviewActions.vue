@@ -31,12 +31,20 @@
         </b-button>
       </div>
     </b-card-body>
-    <ConfirmModal ref="removeConfirm" :title="'Remove ' + member.displayname + ' from ' + membership.namedisplay + '?'" @confirm="removeConfirmed" />
+    <ConfirmModal v-if="showConfirmModal" ref="removeConfirm" :title="'Remove ' + member.displayname + ' from ' + membership.namedisplay + '?'" @confirm="removeConfirmed" @hidden="showConfirmModal = false" />
   </b-card>
 </template>
 <script>
+import dayjs from 'dayjs'
+import { useMemberStore } from '../stores/member'
 
 export default {
+  setup() {
+    const memberStore = useMemberStore()
+    return {
+      memberStore,
+    }
+  },
   props: {
     member: {
       type: Object,
@@ -49,7 +57,8 @@ export default {
   },
   data: function() {
     return {
-      reviewed: false
+      reviewed: false,
+      showConfirmModal: false
     }
   },
   computed: {
@@ -67,9 +76,9 @@ export default {
   },
   methods: {
     async remove(callback) {
-      await this.waitForRef('removeConfirm', () => {
-        this.$refs.removeConfirm.show()
-      })
+      this.showConfirmModal = true
+      await nextTick()
+      this.$refs.removeConfirm.show()
 
       setTimeout(() => {
         this.reviewed = true
@@ -77,7 +86,7 @@ export default {
       }, 2000)
     },
     async removeConfirmed() {
-      await this.$store.dispatch('members/remove', {
+      await this.memberStore.remove({
         userid: this.member.userid,
         groupid: this.membership.id
       })
@@ -87,7 +96,7 @@ export default {
       }, 2000)
     },
     async ignore(callback) {
-      await this.$store.dispatch('members/spamignore', {
+      await this.memberStore.spamignore({
         userid: this.member.userid,
         groupid: this.membership.id
       })
@@ -98,8 +107,7 @@ export default {
       }, 2000)
     },
     daysago(d) {
-      return 1234
-      // TODO return this.$dayjs().diff(this.$dayjs(d), 'days')
+      return dayjs().diff(dayjs(d), 'day')
     }
   }
 }
