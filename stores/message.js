@@ -271,6 +271,7 @@ export const useMessageStore = defineStore({
       // Force MT refresh 
       const authStore = useAuthStore()
       authStore.work = {}
+      // TODO: call this.checkWork()
 
       return data
     },
@@ -378,8 +379,8 @@ export const useMessageStore = defineStore({
   
       this.remove({ id: params.id })
   
-      const authStore = useAuthStore()
-      authStore.work = {}
+      //const authStore = useAuthStore()
+      //authStore.work = {}
     },
     async backToPending(id){
       await api(this.config).message.update({
@@ -399,8 +400,8 @@ export const useMessageStore = defineStore({
 
       this.remove({ id: params.id })
 
-      const authStore = useAuthStore()
-      authStore.work = {}
+      //const authStore = useAuthStore()
+      //authStore.work = {}
     },
     async reject(params) {
       await api(this.config).message.reject(
@@ -413,8 +414,8 @@ export const useMessageStore = defineStore({
 
       this.remove({ id: params.id })
 
-      const authStore = useAuthStore()
-      authStore.work = {}
+      //const authStore = useAuthStore()
+      //authStore.work = {}
     },
     async reply(params) {
       await api(this.config).message.reply(
@@ -427,8 +428,8 @@ export const useMessageStore = defineStore({
 
       this.remove({ id: params.id })
 
-      const authStore = useAuthStore()
-      authStore.work = {}
+      //const authStore = useAuthStore()
+      //authStore.work = {}
     },
     async hold(params) {
       await api(this.config).message.hold(params.id)
@@ -451,8 +452,8 @@ export const useMessageStore = defineStore({
 
       this.remove({ id: params.id })
 
-      const authStore = useAuthStore()
-      authStore.work = {}
+      //const authStore = useAuthStore()
+      //authStore.work = {}
     },
     async searchMember(term, groupid) {
       const { messages } = await api(this.config).message.fetchMessages({

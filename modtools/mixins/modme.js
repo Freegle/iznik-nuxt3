@@ -38,6 +38,13 @@ export default {
       const member = authStore.member(groupid)
       return member === 'Moderator' || member === 'Owner'
     },
+    deferCheckWork(){
+      const miscStore = useMiscStore()
+      if (miscStore.workTimer) {
+        clearTimeout(miscStore.workTimer)
+      }
+      miscStore.workTimer = setTimeout(this.checkWork, 30000)
+    },
     async checkWork() {
       const miscStore = useMiscStore()
       if (miscStore.workTimer) {
