@@ -74,8 +74,7 @@ export const useMemberStore = defineStore({
     },
 
     async spamignore(params) {
-      // TODO Not defined
-      await api(this.config).user.edit({
+      await api(this.config).user.save({
         id: params.userid,
         groupid: params.groupid,
         suspectcount: 0,
@@ -101,16 +100,6 @@ export const useMemberStore = defineStore({
       this.removemembership(memberid, groupid, userid)
 
       // TODO: Get work
-      /*dispatch(
-        'auth/fetchUser',
-        {
-          components: ['work'],
-          force: true
-        },
-        {
-          root: true
-        }
-      )*/
     },
     async update(params) {
       const data = await api(this.config).memberships.update(params)
