@@ -59,7 +59,7 @@ export const useMemberStore = defineStore({
 
         this.context = context
       }
-      // console.log('useMemberStore fetchMembers received',received)
+      // console.log('useMemberStore fetchMembers this.list',this.list)
       return received
     },
     async fetch(params) {
@@ -70,6 +70,7 @@ export const useMemberStore = defineStore({
       //  return data.ret !== 3
       //})
       this.list[member.id] = member
+      console.log('useMemberStore fetch this.list',this.list)
     },
 
     async spamignore(params) {
@@ -82,18 +83,24 @@ export const useMemberStore = defineStore({
       })
     },
 
-    async remove(userid, groupid) {
-      // TODO Does not work
+    removemembership(memberid, groupid, userid) {
+      const member = this.list[memberid]
+      if( !member) return
+      member.memberof = member.memberof.filter(g =>{
+        return g.id!==groupid
+      })
+    },
+  
+
+    async remove(memberid, userid, groupid) {
       // Remove approved member.
       this.context = null
-      console.log('remove', userid, groupid)
       await api(this.config).memberships.remove(userid, groupid)
 
       // TODO: Remove from list
-      /*commit('remove', {
-        userid: params.userid
-      })*/
+      this.removemembership(memberid, groupid, userid)
 
+      // TODO: Get work
       /*dispatch(
         'auth/fetchUser',
         {

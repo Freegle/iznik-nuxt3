@@ -102,7 +102,7 @@
             </div>
           </div>
         </div>
-        <ModMemberReviewActions v-for="m in memberof" :key="'membership-' + m.membershipid" :membership="m" :member="member" class="p-1 mr-1" />
+        <ModMemberReviewActions :memberid="member.id" v-for="m in memberof" :key="'membership-' + m.membershipid" :membership="m" :member="member" class="p-1 mr-1" />
         <b-badge v-if="hiddenmemberofs" variant="info" class="clickme mb-1" @click="allmemberships = !allmemberships">
           +{{ hiddenmemberofs }} groups
         </b-badge>

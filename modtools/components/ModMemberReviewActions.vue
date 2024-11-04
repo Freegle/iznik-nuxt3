@@ -46,6 +46,10 @@ export default {
     }
   },
   props: {
+    memberid: {
+      type: Number,
+      required: true
+    },
     member: {
       type: Object,
       required: true
@@ -86,10 +90,7 @@ export default {
       }, 2000)
     },
     async removeConfirmed() {
-      await this.memberStore.remove({
-        userid: this.member.userid,
-        groupid: this.membership.id
-      })
+      await this.memberStore.remove(this.memberid, this.member.userid, this.membership.id)
 
       setTimeout(() => {
         this.reviewed = true
