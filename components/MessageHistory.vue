@@ -72,7 +72,8 @@ export default {
         for (const group of message.groups) {
           await groupStore.fetch(group.id)
           if (group?.approvedby) {
-            userStore.fetch(group.approvedby.id)
+            const approver = Number.isInteger(group.approvedby) ? group.approvedby : group.approvedby.id
+            userStore.fetch(approver)
           }
         }
       }

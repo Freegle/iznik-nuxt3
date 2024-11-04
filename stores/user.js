@@ -39,6 +39,10 @@ export const useUserStore = defineStore({
     },
     async fetch(id, force) {
       id = parseInt(id)
+      if( isNaN(id)){
+        console.trace()
+        return
+      }
 
       if (force || !this.list[id]) {
         if (this.fetching[id]) {
