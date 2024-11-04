@@ -67,8 +67,8 @@ export default {
       //return work.chatreview
     },
     modalOpen() {
-      return false
-      // TODO return this.$store.getters['misc/get']('modalOpen')
+      const bodyoverflow = document.body.style.overflow
+      return bodyoverflow === 'hidden'
     }
   },
   watch: {

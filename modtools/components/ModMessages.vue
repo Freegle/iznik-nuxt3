@@ -42,40 +42,19 @@ onMounted(async () => {
     groupStore.fetch(groupid.value)
   }
 
-  /*// Keep track of whether we have a modal open, so that we don't clear messages under its feet.
-  //
-  // We don't always seem to get the hidden event, so we store the timestamp so that we can time out our belief
-  // that the modal is open.
-  this.$root.$on('bv::modal::show', (bvEvent, modalId) => {
-    modalOpen.value = Date.now()
-    console.log('Modal open')
-  })
-
-  this.$root.$on('bv::modal::hidden', (bvEvent, modalId) => {
-    modalOpen.value = null
-    console.log('Modal closed')
-  })*/
-
   await messageStore.clearContext()
   context.value = null
 
-  const authStore = useAuthStore()
-  const work = authStore.work // IN PRACTICE, NEVER SET SO REMOVE TODO
-  //console.log('###ModMessages work', work, workType.value)
-  if (work) {
-    const count = workType.value ? work[workType.value] : 0
-
-    // console.log('###ModMessages onMounted', count)
-    if (count > 0) {
-      await messageStore.fetchMessagesMT({
-        groupid: groupid.value,
-        collection: collection.value,
-        modtools: true,
-        summary: false,
-        limit: Math.max(limit.value, count)
-      })
-      show.value = messages.value.length
-    }
+  const count = work.value
+  if (count > 0) {
+    await messageStore.fetchMessagesMT({
+      groupid: groupid.value,
+      collection: collection.value,
+      modtools: true,
+      summary: false,
+      limit: Math.max(limit.value, count)
+    })
+    show.value = messages.value.length
   }
 })
 

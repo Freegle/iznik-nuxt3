@@ -40,8 +40,8 @@ export default {
     const modMessages = setupModMessages()
     //modMessages.collection.value = ['Pending','PendingOther']
     modMessages.collection.value = 'Pending'
-    modMessages.workType.value = ['pending','pendingother']
-    //modMessages.workType.value = 'pending'
+    //modMessages.workType.value = ['pending','pendingother']
+    modMessages.workType.value = 'pending'
     return {
       authStore,
       miscStore,

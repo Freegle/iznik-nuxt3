@@ -14,7 +14,6 @@ const show = ref(0)
 const collection = ref(null)
 const messageTerm = ref(null)
 const memberTerm = ref(null)
-const modalOpen = ref(false)
 const nextAfterRemoved = ref(null)
 
 const distance = ref(10)
@@ -58,7 +57,7 @@ const visibleMessages = computed(() => {
 })
 
 watch(groupid, async (newVal) => {
-  //console.log("useModMessages watch groupid", newVal)
+  console.log("useModMessages watch groupid", newVal)
   context.value = null
 
   const groupStore = useGroupStore()
@@ -89,10 +88,10 @@ export function setupModMessages() {
       const work = authStore.work
       //console.log(">>>>useModMessages get work", workType.value) // , work
       if (!work) return 0
-      if( !workType.value) return 0
-      if( Array.isArray(workType.value)){
+      if (!workType.value) return 0
+      if (Array.isArray(workType.value)) {
         let count = 0
-        for( const worktype of workType.value){
+        for (const worktype of workType.value) {
           count += work[worktype]
         }
         return count
@@ -104,63 +103,58 @@ export function setupModMessages() {
     }
   })
   watch(work, async (newVal, oldVal) => {
-    // TODO: Only want this to run if on Pending page
-    //console.log('<<<<useModMessages watch work', newVal, oldVal, modalOpen.value)
+    if( collection.value!=='Pending') return
     let doFetch = false
-
-    /* TODO if (modalOpen.value && Date.now() - modalOpen.value > 10 * 60 * 1000) {
-      // We don't always seem to get the modal hidden event, so assume any modals open for a long time have actually
-      // closed.
-      modalOpen.value = null
-    }*/
 
     const messageStore = useMessageStore()
     const miscStore = useMiscStore()
 
-    //if (!modalOpen.value) {
-    if (newVal > oldVal) {
-      // There's new stuff to fetch.
-      //console.log('Fetch')
-      await messageStore.clearContext()
-      doFetch = true
-    } else {
-      const visible = miscStore.get('visible')
-      //console.log('Visible', visible)
-
-      if (!visible) {
-        // If we're not visible, then clear what we have in the store.  We don't want to do that under our own
-        // feet, but if we do this then we will pick up changes from other people and avoid confusion.
-        await messageStore.clear()
+    const bodyoverflow = document.body.style.overflow
+    if (bodyoverflow !== 'hidden') {
+      console.log('<<<<useModMessages watch work', newVal, oldVal)
+      if (newVal > oldVal) {
+        // There's new stuff to fetch.
+        //console.log('Fetch')
+        await messageStore.clearContext()
         doFetch = true
-      }
-    }
-
-    if (doFetch) {
-      //console.log('useModMessages watch work',collection.value)
-      
-      await messageStore.clearContext()
-      context.value = null
-
-      await messageStore.fetchMessagesMT({
-        groupid: groupid.value,
-        collection: collection.value, // Pending also gets PendingOther
-        modtools: true,
-        summary: false,
-        limit: Math.max(limit.value, newVal)
-      })
-
-      // Force them to show.
-      let messages
-
-      if (groupid.value) {
-        messages = messageStore.getByGroup(groupid.value)
       } else {
-        messages = messageStore.all
+        const visible = miscStore.get('visible')
+        //console.log('Visible', visible)
+
+        if (!visible) {
+          // If we're not visible, then clear what we have in the store.  We don't want to do that under our own
+          // feet, but if we do this then we will pick up changes from other people and avoid confusion.
+          await messageStore.clear()
+          doFetch = true
+        }
       }
 
-      show.value = messages.length
+      if (doFetch) {
+        //console.log('useModMessages watch work',collection.value)
+
+        await messageStore.clearContext()
+        context.value = null
+
+        await messageStore.fetchMessagesMT({
+          groupid: groupid.value,
+          collection: collection.value, // Pending also gets PendingOther
+          modtools: true,
+          summary: false,
+          limit: Math.max(limit.value, newVal)
+        })
+
+        // Force them to show.
+        let messages
+
+        if (groupid.value) {
+          messages = messageStore.getByGroup(groupid.value)
+        } else {
+          messages = messageStore.all
+        }
+
+        show.value = messages.length
+      }
     }
-    //}
   })
 
   return {
