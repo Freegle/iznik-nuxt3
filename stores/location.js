@@ -37,8 +37,12 @@ export const useLocationStore = defineStore({
     },
     async update(params){
       await api(this.config).location.update(params)
+    },
+    async convertKML(kml) {
+      const { wkt } = await api(this.config).location.convertKML(kml)
+      return wkt
     }
-  },
+    },
   getters: {
     byId: (state) => (id) => {
       return state.list[id]

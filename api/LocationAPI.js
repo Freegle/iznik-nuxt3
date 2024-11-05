@@ -25,4 +25,11 @@ export default class LocationAPI extends BaseAPI {
       groupid,
     })
   }
+
+  convertKML(kml) {
+    return this.$post('/locations/kml', {
+      action: 'ConvertKML',
+      kml
+    })
+  }
 }

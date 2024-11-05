@@ -143,6 +143,7 @@
             Please zoom in further to see locations.
           </NoticeMessage>
           <ModPostcodeTester />
+          <ModConvertKML />
           <b-card v-if="dodgyInBounds.length" no-body style="max-height: 600px; overflow-y: scroll">
             <b-card-header class="bg-warning d-flex justify-content-between">
               Mapping Changes
