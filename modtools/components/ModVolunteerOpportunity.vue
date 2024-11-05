@@ -31,15 +31,15 @@
         <VolunteerOpportunity :item="volunteering" :summary="false" />
       </b-card-body>
       <b-card-footer>
-        <b-btn variant="primary" class="mr-1" @click="approve">
+        <b-button variant="primary" class="mr-1" @click="approve">
           <v-icon icon="check" /> Approve
-        </b-btn>
-        <b-btn variant="white" class="mr-1" @click="edit">
+        </b-button>
+        <b-button variant="white" class="mr-1" @click="edit">
           <v-icon icon="pen" /> Edit
-        </b-btn>
-        <b-btn variant="danger" class="mr-1" @click="deleteme">
+        </b-button>
+        <b-button variant="danger" class="mr-1" @click="deleteme">
           <v-icon icon="trash-alt" /> Delete
-        </b-btn>
+        </b-button>
         <ChatButton
           v-if="volunteering.groups && volunteering.groups.length && volunteering.user"
           :userid="volunteering.user.id"

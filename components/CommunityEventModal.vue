@@ -465,6 +465,11 @@ export default {
       required: false,
       default: false,
     },
+    ismod: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   async setup(props) {
     const communityEventStore = useCommunityEventStore()
@@ -528,7 +533,7 @@ export default {
       return ret
     },
     canmodify() {
-      return this.event?.userid === this.myid
+      return this.ismod || this.event?.userid === this.myid
     },
     groups() {
       const ret = []

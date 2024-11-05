@@ -1,8 +1,110 @@
 <template>
   <div>
-    <h1>Community events!</h1>
+    <div v-for="event in events" :key="'eventlist-' + event.id" class="p-0 mt-2">
+      <ModCommunityEvent :event="event" />
+    </div>
+    <NoticeMessage v-if="!Object.keys(events).length && !busy" class="mt-2">
+      There are no community events to review at the moment. This will refresh automatically.
+    </NoticeMessage>
+
+    <infinite-loading force-use-infinite-wrapper="body" :distance="distance" @infinite="loadMore">
+      <template #no-results />
+      <template #no-more />
+      <template #spinner>
+        <b-img lazy src="/loader.gif" alt="Loading" />
+      </template>
+    </infinite-loading>
   </div>
 </template>
+<script>
+import { useAuthStore } from '@/stores/auth'
+import { useCommunityEventStore } from '../stores/communityevent'
+import { useMiscStore } from '@/stores/misc'
 
-<script setup>
+export default {
+  setup() {
+    const communityEventStore = useCommunityEventStore()
+    const miscStore = useMiscStore()
+    return { communityEventStore, miscStore }
+  },
+  data: function () {
+    return {
+      distance: 1000,
+      limit: 2,
+      show: 0,
+      busy: false
+    }
+  },
+  computed: {
+    events() {
+      return Object.values(this.communityEventStore.list)
+    },
+    work() {
+      // Count for the type of work we're interested in.
+      const authStore = useAuthStore()
+      const work = authStore.work
+      if (!work) return 0
+      console.log('communityevents work', work.pendingevents)
+      return work.pendingevents
+    },
+    //context() {
+    //  return this.$store.getters['communityevents/getContext']
+    //}
+  },
+  watch: {
+    work(newVal, oldVal) {
+      console.log('communityevents work changed', newVal, oldVal)
+      if (newVal > oldVal) {
+        // There's new stuff to do.  Reload.
+        // TODO this.communityEventStore.clear()
+      } else {
+        /* In Nuxt 2 this visible was set if we are visible
+        const visible = this.miscStore.get('visible')
+        if (!visible) {
+          this.communityEventStore.clear()
+        }*/
+      }
+    }
+  },
+  mounted() {
+    // We don't want to pick up any approved events.
+    this.communityEventStore.clear()
+  },
+  methods: {
+    loadMore: async function ($state) {
+      console.log('events loadMore AAA', this.show, this.events.length)
+      this.busy = true
+
+      if (this.show < this.events.length) {
+        // This means that we will gradually add the events that we have fetched from the server into the DOM.
+        // Doing that means that we will complete our initial render more rapidly and thus appear faster.
+        this.show++
+        $state.loaded()
+      } else {
+        const currentCount = this.events.length
+
+        await this.communityEventStore.fetchMT({
+          context: this.context,
+          limit: this.limit,
+          pending: true
+        })
+        console.log('events loadMore BBB', this.show, this.events.length)
+        this.complete = true
+        $state.complete()
+
+        /*if (currentCount === this.events.length) {
+          this.complete = true
+          $state.complete()
+        } else {
+          $state.loaded()
+          this.show++
+        }*/
+        this.busy = false
+      }
+    }
+  }
+}
 </script>
+<style scoped lang="scss">
+//@import 'color-vars';
+</style>

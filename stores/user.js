@@ -40,6 +40,7 @@ export const useUserStore = defineStore({
     async fetch(id, force) {
       id = parseInt(id)
       if( isNaN(id)){
+        console.log("USEUSERSTORE FETCH ID NULL")
         console.trace()
         return
       }
