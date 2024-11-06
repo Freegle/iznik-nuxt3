@@ -186,7 +186,7 @@ export default {
         id: this.message.id,
         groupid: this.groupid
       })
-      this.checkWork()
+      this.deferCheckWork()
     },
     async deleteIt() {
       this.showDeleteModal = true
