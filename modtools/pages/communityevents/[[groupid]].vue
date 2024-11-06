@@ -30,14 +30,12 @@ export default {
   data: function () {
     return {
       distance: 1000,
-      limit: 2,
-      show: 0,
       busy: false
     }
   },
   computed: {
     events() {
-      return Object.values(this.communityEventStore.list)
+      return Object.values(this.communityEventStore.list).filter((e) => e !== null)
     },
     work() {
       // Count for the type of work we're interested in.
@@ -53,12 +51,12 @@ export default {
   },
   watch: {
     work(newVal, oldVal) {
-      console.log('communityevents work changed', newVal, oldVal)
+      console.log('TODO communityevents work changed', newVal, oldVal)
       if (newVal > oldVal) {
         // There's new stuff to do.  Reload.
         // TODO this.communityEventStore.clear()
       } else {
-        /* In Nuxt 2 this visible was set if we are visible
+        /* In Nuxt 2 miscStore visible was set if we are visible
         const visible = this.miscStore.get('visible')
         if (!visible) {
           this.communityEventStore.clear()
@@ -72,39 +70,21 @@ export default {
   },
   methods: {
     loadMore: async function ($state) {
-      console.log('events loadMore AAA', this.show, this.events.length)
+      console.log('events loadMore AAA', this.events.length)
       this.busy = true
 
-      if (this.show < this.events.length) {
-        // This means that we will gradually add the events that we have fetched from the server into the DOM.
-        // Doing that means that we will complete our initial render more rapidly and thus appear faster.
-        this.show++
-        $state.loaded()
-      } else {
-        const currentCount = this.events.length
-
-        await this.communityEventStore.fetchMT({
-          context: this.context,
-          limit: this.limit,
-          pending: true
-        })
-        console.log('events loadMore BBB', this.show, this.events.length)
-        this.complete = true
-        $state.complete()
-
-        /*if (currentCount === this.events.length) {
-          this.complete = true
-          $state.complete()
-        } else {
-          $state.loaded()
-          this.show++
-        }*/
-        this.busy = false
-      }
+      await this.communityEventStore.fetchMT({
+        context: null,
+        limit: 0,
+        pending: true
+      })
+      console.log('events loadMore BBB', this.events.length)
+      this.complete = true
+      $state.complete()
+      this.busy = false
     }
   }
 }
 </script>
 <style scoped lang="scss">
-//@import 'color-vars';
-</style>
+//@import 'color-vars';</style>
