@@ -141,7 +141,8 @@
           </b-row>
           <br />
           <p v-if="user" class="text-muted">
-            Posted by {{ user.displayname }}
+            Posted
+            <span v-if="user.displayname">by {{ user.displayname }}</span>
             <span v-for="(group, index) in groups" :key="index">
               <span v-if="index > 0">, </span><span v-else>on </span>
               {{ group.namedisplay }}
