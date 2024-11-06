@@ -16,6 +16,9 @@
 </template>
 <script setup>
 import '@google-pay/button-element'
+import { loadScript } from 'vue-plugin-load-script'
+
+await loadScript('https://pay.google.com/gp/p/js/pay.js')
 
 const props = defineProps({
   totalPrice: {
