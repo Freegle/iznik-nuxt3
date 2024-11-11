@@ -231,7 +231,7 @@ export default {
     }
 
     if (process.client) {
-      if (this.replyToSend) {
+      if (this.replyToSend?.replyMsgId) {
         // We have loaded the site with a reply that needs sending.  This happens if we force login in a way that
         // causes us to navigate away and back again.  Fetch the relevant message.
         const messageStore = useMessageStore()

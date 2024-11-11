@@ -34,7 +34,7 @@ export default {
       return null
     },
     replyToUser() {
-      if (this.replyToSend) {
+      if (this.replyToSend?.replyMsgId) {
         const messageStore = useMessageStore()
         const msg = messageStore.byId(this.replyToSend.replyMsgId)
 
