@@ -6,7 +6,7 @@
       chatmessage?.bymailid ||
       chatmessage?.gap
     "
-    class="text-muted fontsize"
+    class="text-muted fontsize mb-1"
   >
     <div v-if="!messageIsFromCurrentUser">
       <span

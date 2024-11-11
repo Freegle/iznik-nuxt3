@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-row class="pb-1">
+    <b-row>
       <b-col>
         <b-card border-variant="warning">
           <b-card-title>

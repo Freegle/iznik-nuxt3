@@ -1,6 +1,6 @@
 <template>
   <div
-    class="chatMessageWrapper pb-1"
+    class="chatMessageWrapper"
     :class="{ myChatMessage: messageIsFromCurrentUser }"
   >
     <div class="chatMessage forcebreak chatMessage__owner">
