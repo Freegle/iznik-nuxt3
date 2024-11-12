@@ -261,7 +261,10 @@ export const useChatStore = defineStore({
 
       // Scan listBychatId adding chat.unseen
       Object.keys(state.listByChatId).forEach((key) => {
-        if (state.listByChatId[key].status !== 'Closed') {
+        if (
+          state.listByChatId[key].status !== 'Closed' &&
+          state.listByChatId[key].status !== 'Blocked'
+        ) {
           ret += state.listByChatId[key].unseen
         }
       })
