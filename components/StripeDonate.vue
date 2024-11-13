@@ -6,7 +6,6 @@
 </template>
 <script setup>
 import { loadStripe } from '@stripe/stripe-js'
-import * as Sentry from '@sentry/browser'
 import { uid } from '../composables/useId'
 
 const props = defineProps({
@@ -16,24 +15,9 @@ const props = defineProps({
   },
 })
 
+const emit = defineEmits(['loaded', 'error'])
+
 const uniqueId = uid('stripe-donate-')
-
-const prices = {
-  1: 'price_1QJv67P3oIVajsTkkkkofJdK',
-  2: 'price_1QK244P3oIVajsTkYcUs6kEM',
-  5: 'price_1QJv7GP3oIVajsTkPVwk699D',
-  10: 'price_1QJv7GP3oIVajsTkTG7RGAUA',
-  15: 'price_1QK24rP3oIVajsTkwkXPms9B',
-  25: 'price_1QK24VP3oIVajsTk3e57kF5S',
-}
-
-// Find price ID from props.price, if exists; else default to 1 and log error to Sentry.
-let priceId = prices[props.price]
-
-if (!priceId) {
-  priceId = prices[0]
-  Sentry.captureException(new Error('Invalid price ID'))
-}
 
 const runtimeConfig = useRuntimeConfig()
 const stripe = await loadStripe(runtimeConfig.public.STRIPE_PUBLISHABLE_KEY)
@@ -50,7 +34,7 @@ const options = {
 }
 const elements = stripe.elements({
   mode: 'payment',
-  amount: props.price,
+  amount: props.price * 100, // Price is in pence
   currency: 'gbp',
   appearance,
 })
@@ -65,9 +49,11 @@ onMounted(() => {
   expressCheckoutElement.mount('#' + uniqueId)
   expressCheckoutElement.on('ready', (event) => {
     console.log('Express checkout ready', event)
+    emit('loaded')
   })
   expressCheckoutElement.on('loaderror', (event) => {
     console.log('Express checkout loadError', event)
+    emit('error')
   })
   expressCheckoutElement.on('change', (event) => {
     console.log('Express checkout change', event)
