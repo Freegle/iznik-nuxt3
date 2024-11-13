@@ -22,7 +22,7 @@
         <strong> please donate </strong>
         to keep us running.
       </p>
-      <b-button-group class="d-none d-md-block mt-1">
+      <b-button-group class="d-none d-md-block mt-1 mb-2">
         <b-button
           :pressed="price === 2"
           :variant="price === 2 ? 'primary' : 'white'"
