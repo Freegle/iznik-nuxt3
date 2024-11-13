@@ -33,12 +33,13 @@ export const useChatStore = defineStore({
       this.config = config
       this.route = useRoute()
     },
-    async listChatsMT(params){
+    async listChatsMT(params, selectedChatId){
       params = params || {
         chattypes: ['User2Mod', 'Mod2Mod'],
         search: params && params.search ? params.search : null
       }
       params.summary = true
+      //console.log('uCS listChatsMT', params)
   
       this.lastSearchMT = params.search
   
@@ -53,6 +54,7 @@ export const useChatStore = defineStore({
         const { chatrooms } = await api(this.config).chat.listChatsMT(params)
         this.list = chatrooms
         chatrooms.forEach((c) => {
+          //console.log('uCS listChatsMT',c.id)
           // If we already have the chat with this date then don't set it - this avoids reactivity causing a slew of
           // component updates for no good reason.
           if (
@@ -63,6 +65,12 @@ export const useChatStore = defineStore({
           }
         })
   
+        if( selectedChatId){
+          //console.log('uCS listChatsMT selectedChatId', selectedChatId)
+          const { chatroom } = await api(this.config).chat.fetchChatMT(selectedChatId)
+          //console.log('uCS listChatsMT selectedChat', chatroom)
+          this.listByChatId[chatroom.id] = chatroom
+        }
       } catch (e) {
         // This happens a lot on mobile when the network is flaky.  It's not necessarily an end-user visible error,
         // so there is no point letting it ripple up to Sentry.
@@ -136,7 +144,9 @@ export const useChatStore = defineStore({
       if (id > 0) {
         const miscStore = useMiscStore() // MT ADDED
         if( miscStore.modtools){
-          const chat = await api(this.config).chat.fetchMessagesMT(id)
+          console.log('uCS fetchChat',id)
+          const chat = await api(this.config).chat.fetchChatMT(id)
+          //const chat = await api(this.config).chat.fetchMessagesMT(id)
           this.listByChatId[id] = chat
         } else {
           const chat = await api(this.config).chat.fetchChat(id, false)

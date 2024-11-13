@@ -1,14 +1,17 @@
 <template>
-  <div> <!--v-b-visible="visible"-->
+  <div>
     <b-card no-body>
       <b-card-header :header-bg-variant="rating.reviewrequired ? 'warning' : 'default'" class="d-flex justify-content-between flex-wrap">
         <div>
           <!-- eslint-disable-next-line-->
-          <nuxt-link :to="'/members/approved/' + rating.groupid + '/' + rating.rater"><strong>{{ rating.raterdisplayname }}</strong> (<v-icon icon="hashtag" class="text-muted" scale="0.75" />{{ rating.rater }})</nuxt-link>
+          <nuxt-link :to="'/members/approved/' + rating.groupid + '/' + rating.rater"><strong>{{ rating.raterdisplayname }}</strong> (<v-icon
+              icon="hashtag" class="text-muted" scale="0.75" />{{ rating.rater }})</nuxt-link>
+          &hairsp;
           <span v-if="rating.rating === 'Down'" class="text-danger font-weight-bold">gave a thumbs down to</span>
           <span v-else-if="rating.rating === 'Up'" class="text-success font-weight-bold">gave a thumbs up to</span>
           <!-- eslint-disable-next-line-->
-          <nuxt-link :to="'/members/approved/' + rating.groupid + '/' + rating.ratee"><strong>{{ rating.rateedisplayname }}</strong> (<v-icon icon="hashtag" class="text-muted" scale="0.75" />{{ rating.ratee }})</nuxt-link>
+          &hairsp;<nuxt-link :to="'/members/approved/' + rating.groupid + '/' + rating.ratee"><strong>{{ rating.rateedisplayname }}</strong> (<v-icon
+              icon="hashtag" class="text-muted" scale="0.75" />{{ rating.ratee }})</nuxt-link>
         </div>
         <div>
           {{ timeago(rating.timestamp) }},
@@ -25,58 +28,61 @@
           <strong>{{ rating.reason }}</strong>: &quot;{{ rating.text }}&quot;
         </p>
         <div class="d-flex flex-wrap justify-content-between">
-          <ChatButton
-            :userid="rating.rater"
-            :groupid="rating.groupid"
-            :title="'Chat to ' + rating.raterdisplayname"
-            variant="white"
-          />
-          <ChatButton
-            :userid="rating.ratee"
-            :groupid="rating.groupid"
-            :title="'Chat to ' + rating.rateedisplayname"
-            variant="white"
-          />
+          <ChatButton :userid="rating.rater" :groupid="rating.groupid" :title="'Chat to ' + rating.raterdisplayname" variant="white" />
+          <ChatButton :userid="rating.ratee" :groupid="rating.groupid" :title="'Chat to ' + rating.rateedisplayname" variant="white" />
         </div>
       </b-card-body>
     </b-card>
   </div>
 </template>
 <script>
-//import ChatButton from './ChatButton'
+import { useUserStore } from '../stores/user'
 
 export default {
-  //components: { ChatButton },
   props: {
     rating: {
       type: Object,
       required: true
     }
   },
+  setup() {
+    const userStore = useUserStore()
+    return {
+      userStore,
+    }
+  },
+  async mounted() {
+    // TODO: This probably marks as reviewed too early: need to use visible
+    if (this.rating.reviewrequired) {
+      // Mark this as reviewed.  They've had a chance to see it.
+      this.userStore.ratingReviewed({
+        id: this.rating.id
+      })
+    }
+
+    if (this.rating.rater) {
+      this.userStore.fetchMT({ id: this.rating.rater })
+    }
+  },
   computed: {
     groupName() {
       let ret = null
 
-      if (this.rater) {
-        this.rater.memberof.forEach(g => {
-          if (g.id === this.rating.groupid && this.amAModOn(g.id)) {
-            ret = g.namedisplay
-          }
-        })
+      if (this.rating.rater) {
+        const rater = this.userStore.byId(this.rating.rater)
+        if (rater) {
+          rater.memberof.forEach(g => {
+            if (g.id === this.rating.groupid && this.amAModOn(g.id)) {
+              ret = g.namedisplay
+            }
+          })
+        }
       }
 
       return ret
     }
   },
   methods: {
-    /* TODO visible(val) {
-      if (val && this.rating.reviewrequired) {
-        // Mark this as reviewed.  They've had a chance to see it.
-        this.$store.dispatch('user/ratingReviewed', {
-          id: this.rating.id
-        })
-      }
-    }*/
   }
 }
 </script>

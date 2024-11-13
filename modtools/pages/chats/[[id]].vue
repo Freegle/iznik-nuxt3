@@ -166,6 +166,7 @@ export default {
   },
   methods: {
     async listChats(age) {
+      console.log('chats [[id]] listChats', this.id)
       const params = {
         chattypes: ['User2Mod', 'Mod2Mod']
       }
@@ -173,7 +174,7 @@ export default {
         params.age = age
       }
 
-      await this.chatStore.listChatsMT(params)
+      await this.chatStore.listChatsMT(params, this.id)
       this.bump++
     },
     scanChats(closed, chats) {

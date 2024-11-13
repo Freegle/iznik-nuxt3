@@ -3,7 +3,7 @@
     <client-only>
       <ScrollToTop />
       <ModHelpFeedback />
-      <b-tabs content-class="mt-3" card>
+      <b-tabs v-model="tabIndex" content-class="mt-3" card>
         <b-tab active>
           <template v-slot:title>
             <h4 class="header--size4 ml-2 mr-2">
@@ -36,16 +36,8 @@
                 This is what people have said over the last year<span v-if="!groupid"> across all of Freegle</span>.
               </p>
               <div class="d-flex flex-wrap justify-content-between">
-                <GChart
-                  type="PieChart"
-                  :data="happinessData"
-                  :options="happinessOptions"
-                />
-                <GChart
-                  type="BarChart"
-                  :data="happinessData"
-                  :options="happinessOptions"
-                />
+                <GChart type="PieChart" :data="happinessData" :options="happinessOptions" />
+                <GChart type="BarChart" :data="happinessData" :options="happinessOptions" />
               </div>
             </b-card-text>
           </b-card>
@@ -53,12 +45,11 @@
           <NoticeMessage v-if="!members.length && !busy" class="mt-2">
             There are no items to show at the moment.
           </NoticeMessage>
-
           <div v-for="item in visibleItems" :key="'memberlist-' + item.id" class="p-0 mt-2">
             <ModMemberHappiness v-if="item.type === 'Member' && filterMatch(item.object)" :id="item.object.id" />
           </div>
         </b-tab>
-        
+
         <b-tab>
           <template v-slot:title>
             <h4 class="header--size4 ml-2 mr-2">
@@ -66,8 +57,8 @@
             </h4>
           </template>
 
-          <div v-for="item in visibleItems" :key="'memberlist-' + item.id" class="p-0 mt-2">
-            <ModMemberRating v-if="item.type === 'Rating'" :rating="item.object" class="mt-2" />
+          <div v-for="item in ratings" :key="'ratinglist-' + item.id" class="p-0 mt-2">
+            <ModMemberRating :rating="item" class="mt-2" />
           </div>
         </b-tab>
       </b-tabs>
@@ -97,13 +88,15 @@ export default {
     const memberStore = useMemberStore()
     const modMembers = setupModMembers()
     modMembers.collection.value = 'Happiness'
+    modMembers.limit.value = 1000 // Get everything (probably) so that the ratings and feedback are interleaved.
     return {
       memberStore,
       ...modMembers // busy, context, group, groupid, limit, workType, show, collection, messageTerm, memberTerm, distance, summary, members, visibleMembers, work, loadMore
     }
   },
-  data: function() {
+  data: function () {
     return {
+      tabIndex: 0,
       happinessData: [],
       bump: 0,
       //collection: 'Happiness',
@@ -121,17 +114,18 @@ export default {
           3: { offset: 0.2 }
         }
       },
-      // Get everything (probably) so that the ratings and feedback are interleaved.
-      //limit: 1000
     }
+  },
+  async mounted() {
+    this.filter = 'Comments'
+    await this.getHappiness()
   },
   computed: {
     ratings() {
-      // TODO return this.$store.getters['members/getRatings']
-      return []
+      return this.memberStore.ratings
     },
     sortedItems() {
-      console.log('sortedItems A')
+      //console.log('sortedItems A', this.members.length, this.ratings.length)
       const objs = []
 
       this.members.forEach(m => {
@@ -142,25 +136,16 @@ export default {
           id: 'member-' + m.id
         })
       })
+      //console.log('sortedItems B', objs.length)
 
-      this.ratings.forEach(r => {
-        objs.push({
-          type: 'Rating',
-          object: r,
-          timestamp: r.timestamp,
-          id: 'rating-' + r.id
-        })
-      })
-      console.log('sortedItems B', objs.length)
-
-      objs.sort(function(a, b) {
+      objs.sort(function (a, b) {
         return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
       })
 
       return objs
     },
     visibleItems() {
-      console.log('visibleItems',this.show)
+      //console.log('visibleItems', this.show)
       return this.sortedItems.slice(0, this.show)
       //return this.sortedItems
     }
@@ -171,30 +156,37 @@ export default {
       this.show = 0
       this.memberStore.clear()
       this.bump++
-    }
-  },
-  async mounted() {
-    this.filter = 'Comments'
-    const start = dayjs().subtract(1, 'year').toDate().toISOString()
-    console.log('feedback mounted',start)
-    const ret = await this.$api.dashboard.fetch({
-      components: ['Happiness'],
-      start: start,
-      end: new Date().toISOString(),
-      allgroups: !this.groupid,
-      group: this.groupid > 0 ? this.groupid : null,
-      systemwide: this.groupid < 0
-    })
-
-    if (ret.Happiness) {
-      this.happinessData = [['Feedback', 'Count']]
-
-      ret.Happiness.forEach(h => {
-        this.happinessData.push([h.happiness, h.count])
-      })
-    }
+    },
+    async groupid() {
+      this.getHappiness()
+      this.bump++
+    },
+    tabIndex() {
+      console.log('tabIndex changed', this.show)
+      this.bump++
+    },
   },
   methods: {
+    async getHappiness() {
+      const start = dayjs().subtract(1, 'year').toDate().toISOString()
+      //console.log('feedback getHappiness', start)
+      const ret = await this.$api.dashboard.fetch({
+        components: ['Happiness'],
+        start: start,
+        end: new Date().toISOString(),
+        allgroups: !this.groupid,
+        group: this.groupid > 0 ? this.groupid : null,
+        systemwide: this.groupid < 0
+      })
+
+      if (ret.Happiness) {
+        this.happinessData = [['Feedback', 'Count']]
+        ret.Happiness.forEach(h => {
+          this.happinessData.push([h.happiness, h.count])
+        })
+      }
+
+    },
     filterMatch(member) {
       const val = member.happiness
 
@@ -223,38 +215,45 @@ export default {
       return false
     },
     async markAll() {
-      await this.$store.dispatch('members/clear')
+      await this.memberStore.clear()
 
-      await this.$store.dispatch('members/fetchMembers', {
+      const params = {
         groupid: this.groupid,
         collection: this.collection,
         modtools: true,
         summary: false,
         context: null,
         limit: 1000
-      })
+      }
+      console.log('markAll', params)
+
+      await this.memberStore.fetchMembers(params)
+      console.log('markAll received')
 
       this.$nextTick(() => {
         this.members.forEach(async member => {
+          console.log('markAll member', member.id, member.reviewed)
           if (!member.reviewed) {
-            await this.$store.dispatch('members/happinessReviewed', {
+            const params = {
               userid: member.fromuser,
               groupid: member.groupid,
               happinessid: member.id
-            })
+            }
+            console.log('markAll happinessReviewed', params)
+            await this.memberStore.happinessReviewed(params)
           }
         })
-
         this.ratings.forEach(async rating => {
           if (rating.reviewrequired) {
-            await this.$store.dispatch('user/ratingReviewed', {
+            console.log('markAll ratingReviewed', { id: rating.id })
+            /*await this.$store.dispatch('user/ratingReviewed', {
               id: rating.id
-            })
+            })*/
           }
         })
 
-        this.fetchMe(['work'])
       })
+      // this.fetchMe(['work'])
     }
   }
 }

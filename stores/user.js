@@ -113,6 +113,9 @@ export const useUserStore = defineStore({
     async purge(id) {
       await api(this.config).user.purge(id)
     },
+    async ratingReviewed(params) {
+      await api(this.config).ratingReviewed(params.id)
+    },
   },
   getters: {
     byId: (state) => {

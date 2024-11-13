@@ -53,6 +53,10 @@ export default class ChatAPI extends BaseAPI {
     )
   }
 
+  fetchChatMT(chatid) {
+    return this.$get('/chatrooms', { id:chatid })
+  }
+
   fetchChat(chatid, logError) {
     return this.$getv2('/chat/' + chatid, {}, logError)
   }

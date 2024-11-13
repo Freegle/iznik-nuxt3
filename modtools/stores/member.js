@@ -125,6 +125,14 @@ export const useMemberStore = defineStore({
     async unban(userid, groupid) {
       await api(this.config).memberships.unban(userid, groupid)
     },
+    async happinessReviewed(params) {
+      await api(this.config).memberships.happinessReviewed({
+        userid: params.userid,
+        groupid: params.groupid,
+        happinessid: params.happinessid,
+        action: 'HappinessReviewed'
+      })
+    },
   },
   getters: {
     all: (state) => Object.values(state.list),
@@ -134,5 +142,13 @@ export const useMemberStore = defineStore({
       })
       return ret
     },
+    get: (state) => (id) => {
+      const ret = Object.values(state.list).filter(member => {
+        return parseInt(member.id) === parseInt(id)
+      })
+      if( ret) return ret[0]
+      return ret
+    },
+    //getRatings: state => state.ratings
   },
 })

@@ -1,7 +1,7 @@
 <template>
-  <div> <!--v-b-visible="visible"-->
+  <div>
     <b-card no-body>
-      <b-card-header :header-bg-variant="variant">
+      <b-card-header :class="variant">
         <b-row>
           <b-col cols="2" class="text-center">
             <v-icon :icon="icon" scale="2" />
@@ -27,7 +27,8 @@
             {{ member.message.subject }}
           </b-col>
           <b-col cols="4">
-            <b-button :to="'/members/approved/' + member.groupid + '/' + member.user.id" variant="link" :class="(icon === 'meh' ? 'text-dark' : 'text-white') + ' p-0'">
+            <b-button :to="'/members/approved/' + member.groupid + '/' + member.user.id" variant="link"
+              :class="(icon === 'meh' ? 'text-dark' : 'text-white') + ' p-0'">
               <v-icon icon="hashtag" scale="0.75" />{{ member.message.id }}
               <span v-if="groupname">
                 on {{ groupname }}
@@ -39,12 +40,7 @@
       <b-card-body>
         <div class="d-flex justify-content-between flex-wrap">
           {{ member.comments }}&nbsp;
-          <ChatButton
-            :userid="member.user.id"
-            :groupid="member.groupid"
-            title="Chat"
-            variant="white"
-          />
+          <ChatButton :userid="member.user.id" :groupid="member.groupid" title="Chat" variant="white" />
         </div>
       </b-card-body>
     </b-card>
@@ -52,14 +48,8 @@
 </template>
 <script>
 import { useMemberStore } from '../stores/member'
-//import Vue from 'vue'
-//import { VBVisiblePlugin } from 'bootstrap-vue'
-//import ChatButton from './ChatButton'
-
-//Vue.use(VBVisiblePlugin)
 
 export default {
-  //components: { ChatButton },
   async setup() {
     const memberStore = useMemberStore()
     return {
@@ -79,11 +69,11 @@ export default {
     variant() {
       switch (this.member.happiness) {
         case 'Happy':
-          return 'success'
+          return 'bg-success'
         case 'Unhappy':
-          return 'warning'
+          return 'bg-warning'
         default:
-          return 'light'
+          return 'bg-light'
       }
     },
     icon() {
@@ -116,19 +106,18 @@ export default {
       return ret
     }
   },
-  mounted() {},
-  methods: {
-    visible(val) {
-      return true
-      /* TODO if (val && !this.member.reviewed) {
-        // Mark this as reviewed.  They've had a chance to see it.
-        this.$store.dispatch('members/happinessReviewed', {
-          userid: this.member.user.id,
-          groupid: this.member.groupid,
-          happinessid: this.member.id
-        })
-      }*/
+  mounted() {
+    // TODO: This probably marks as reviewed too early: need to use visible
+    if (!this.member.reviewed) {
+      // Mark this as reviewed.  They've had a chance to see it.
+      this.memberStore.happinessReviewed({
+        userid: this.member.user.id,
+        groupid: this.member.groupid,
+        happinessid: this.member.id
+      })
     }
+  },
+  methods: {
   }
 }
 </script>

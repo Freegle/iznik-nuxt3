@@ -3,7 +3,9 @@ import { useAuthStore } from '@/stores/auth'
 import { useGroupStore } from '@/stores/group'
 import { useMemberStore } from '../stores/member'
 import { useMiscStore } from '@/stores/misc'
+import { CaptureConsole } from '@sentry/integrations'
 
+const bump = ref(0)
 const busy = ref(false)
 const context = ref(null)
 const groupid = ref(0)
@@ -30,7 +32,7 @@ const distance = ref(10)
 
 // mixin/modMembersPage
 const members = computed(() => {
-  //console.log('useModMembers members',groupid.value)
+  //console.log('UMM members',groupid.value, bump.value)
   const memberStore = useMemberStore()
   let members
 
@@ -39,8 +41,8 @@ const members = computed(() => {
   } else {
     members = memberStore.all
   }
-  if( !members){
-    console.log('useModMembers no members')
+  if (!members) {
+    //console.log('UMM no members')
     return []
   }
   // We need to sort as otherwise new members may appear at the end.
@@ -55,24 +57,32 @@ const members = computed(() => {
     }
   })
 
-  //console.log('useModMembers members sorted', members.length)
-  return members
+  //console.log('UMM members sorted', members.length)
+  //for( const member of members){
+  //  console.log('UMM', member)
+  //}
+return members
 })
 
 const visibleMembers = computed(() => {
   const mbrs = members.value
-  // console.log('useModMembers visibleMembers', show.value, mbrs?.length)
+  //console.log('UMM visibleMembers', show.value, mbrs?.length)
   if (show.value === 0 || !mbrs || mbrs.length === 0) return []
   return mbrs.slice(0, show.value)
 })
 
 const loadMore = async function ($state) {
-  //console.log('useModMembers loadMore', group.value, show.value, members.value.length, visibleMembers.value.length)
+  //console.log('UMM loadMore', show.value, groupid.value, members.value.length, visibleMembers.value.length)
   if (show.value < members.value.length) {
+    //console.log('UMM loadMore inc show')
     show.value++
     $state.loaded()
   } else {
-    limit.value += distance.value
+    const membersstart = members.value.length
+    if( limit.value===distance.value){
+      limit.value += distance.value
+    }
+    //console.log('UMM actually loadMore', show.value, groupid.value, members.value.length, limit.value, search.value, filter.value)
     const memberStore = useMemberStore()
     const params = {
       groupid: groupid.value,
@@ -85,6 +95,7 @@ const loadMore = async function ($state) {
       filter: filter.value
     }
     const received = await memberStore.fetchMembers(params)
+    //console.log('UMM got', members.value.length)
 
     if (show.value < members.value.length) { // Just inc by one rather than set to members.value.length
       show.value++
@@ -98,11 +109,15 @@ const loadMore = async function ($state) {
     else {
       $state.loaded()
     }
+    if( membersstart !== members.value.length){
+      bump.value++
+    }
+    //console.log('UMM end', show.value, members.value.length)
   }
 }
 
 watch(groupid, async (newVal) => {
-  console.log("useModMembers watch groupid", newVal)
+  //console.log("UMM watch groupid", newVal)
   context.value = null
   show.value = 0
   const memberStore = useMemberStore()
@@ -116,7 +131,7 @@ watch(groupid, async (newVal) => {
 })
 
 /*watch(group, async (newValue, oldValue) => {
-  console.log("===useModMembers watch group", newValue, oldValue, groupid.value)
+  console.log("===UMM watch group", newValue, oldValue, groupid.value)
   // We have this watch because we may need to fetch a group that we have remembered.  The mounted()
   // call may happen before we have restored the persisted state, so we can't initiate the fetch there.
   if (oldValue === null || oldValue.id !== groupid.value) {
@@ -145,18 +160,18 @@ export function setupModMembers() {
     try {
       const authStore = useAuthStore()
       const work = authStore.work
-      //console.log(">>>>useModMembers get work", workType.value, work)
+      //console.log(">>>>UMM get work", workType.value, work)
       if (!work) return 0
       const count = workType.value ? work[workType.value] : 0
       return count
     } catch (e) {
-      console.log('>>>>useModMembers exception', e.message)
+      console.log('>>>>UMM exception', e.message)
       return 0
     }
   })
   watch(work, async (newVal, oldVal) => {
     // TODO: Only want this to run if on Pending page
-    //console.log('<<<<useModMembers watch work', newVal, oldVal, modalOpen.value)
+    //console.log('<<<<UMM watch work', newVal, oldVal, modalOpen.value)
     let doFetch = false
 
     /* TODO if (modalOpen.value && Date.now() - modalOpen.value > 10 * 60 * 1000) {
