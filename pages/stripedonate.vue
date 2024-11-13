@@ -4,18 +4,29 @@
       <div class="d-flex justify-content-around">
         <div class="d-flex flex-column">
           <p>This is a test page for Stripe Donate.</p>
-          <div class="d-flex flex-column justify-content-between">
-            <div
-              class="d-flex flex-column align-content-around text-center font-weight-bold"
-            >
-              <StripeDonate :price="1000" />
-            </div>
-          </div>
+          <b-button variant="primary" @click="openModal"
+            >Open donation modal</b-button
+          >
+          <DonationAskModal
+            v-if="showDonationAskModal"
+            variant="stripe"
+            @hidden="showDonationAskModal = false"
+          />
         </div>
       </div>
     </div>
   </client-only>
 </template>
 <script setup>
-import StripeDonate from '~/components/StripeDonate.vue'
+import { useDonationAskModal } from '~/composables/useDonationAskModal'
+
+const showDonationAskModal = ref(false)
+
+onMounted(async () => {
+  await useDonationAskModal()
+})
+
+function openModal() {
+  showDonationAskModal.value = true
+}
 </script>

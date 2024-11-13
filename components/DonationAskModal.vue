@@ -15,6 +15,17 @@
           @score="score"
         />
       </div>
+      <div v-else-if="variant === 'stripe'">
+        <DonationAskStripe
+          :groupid="groupId"
+          :groupname="groupName"
+          :target="target"
+          :raised="raised"
+          :target-met="targetMet"
+          :donated="donated"
+          @score="score"
+        />
+      </div>
       <div v-else-if="variant === 'quote'">
         <DonationAskQuote
           :groupid="groupId"
@@ -85,6 +96,7 @@ import DonationAskButtons2510 from '~/components/DonationAskButtons2510.vue'
 import DonationAskButtons51025 from '~/components/DonationAskButtons51025.vue'
 import DonationAskImpact from '~/components/DonationAskImpact.vue'
 import DonationAskWhatYouCan from '~/components/DonationAskWhatYouCan.vue'
+import DonationAskStripe from '~/components/DonationAskStripe.vue'
 import { useDonationAskModal } from '~/composables/useDonationAskModal'
 import { useGroupStore } from '~/stores/group'
 import { useDonationStore } from '~/stores/donations'
@@ -92,12 +104,20 @@ import Api from '~/api'
 import { useAuthStore } from '~/stores/auth'
 import { dateshort } from '~/composables/useTimeFormat'
 
+const props = defineProps({
+  variant: {
+    type: String,
+    required: false,
+    default: 'null',
+  },
+})
+
 const groupStore = useGroupStore()
 const donationStore = useDonationStore()
 const authStore = useAuthStore()
 
 const { modal, hide } = useOurModal()
-const { variant, groupId, show } = await useDonationAskModal()
+const { variant, groupId, show } = await useDonationAskModal(props.variant)
 
 const groupName = computed(() => {
   if (groupId.value && !targetMet.value) {

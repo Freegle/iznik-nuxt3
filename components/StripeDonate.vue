@@ -1,6 +1,5 @@
 <template>
-  <div>
-    {{ price }}
+  <div class="height">
     <div :id="uniqueId" />
   </div>
 </template>
@@ -64,3 +63,8 @@ onMounted(() => {
   console.log('Mounted express checkout')
 })
 </script>
+<style scoped lang="scss">
+.height {
+  min-height: 48px;
+}
+</style>
