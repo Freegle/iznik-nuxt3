@@ -103,7 +103,7 @@ export default {
     if (('id' in route.params) && route.params.id) this.groupid = parseInt(route.params.id)
     this.search = null
     if (('term' in route.params) && route.params.term) this.search = route.params.term
-    console.log('mounted', this.groupid, this.search) 
+    //console.log('mounted', this.groupid, this.search) 
 
     // reset infiniteLoading on return to page
     this.memberStore.clear()

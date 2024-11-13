@@ -92,7 +92,7 @@ const loadMore = async function ($state) {
       context: context.value,
       limit: limit.value,
       search: search.value,
-      filter: filter.value
+      filter: filter.value,
     }
     const received = await memberStore.fetchMembers(params)
     //console.log('UMM got', members.value.length)

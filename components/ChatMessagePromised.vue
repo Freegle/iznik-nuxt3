@@ -1,5 +1,5 @@
 <template>
-  <div class="pb-1 clearfix">
+  <div class="clearfix">
     <div v-if="chatmessage.userid != myid" class="media">
       <div v-if="!refmsg">
         This chat message refers to a post which has been deleted.
