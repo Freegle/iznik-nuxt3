@@ -51,7 +51,10 @@ export default {
       return authStore.work
     },
     getClass() {
-      return 'pl-1 ' + (this.$route.path === this.link ? 'active' : '')
+      let linkmatch = this.$route.path === this.link
+      const linklen = this.link.length
+      if (linklen > 0 && (this.$route.path.substr(0, linklen) === this.link)) linkmatch = true
+      return 'pl-1 ' + (linkmatch ? 'active' : '')
     }
   },
   methods: {
