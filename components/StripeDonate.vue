@@ -42,7 +42,11 @@ const appearance = {
   /* appearance */
 }
 const options = {
-  /* options */
+  paymentMethods: {
+    // In dev, we can't use Google/Apple pay because we aren't over HTTPS and the domain isn't registered.
+    googlePay: process.dev ? 'never' : 'auto',
+    applePay: process.dev ? 'never' : 'auto',
+  },
 }
 const elements = stripe.elements({
   mode: 'payment',
@@ -59,5 +63,18 @@ onMounted(() => {
   )
   const expressCheckoutElement = elements.create('expressCheckout', options)
   expressCheckoutElement.mount('#' + uniqueId)
+  expressCheckoutElement.on('ready', (event) => {
+    console.log('Express checkout ready', event)
+  })
+  expressCheckoutElement.on('loaderror', (event) => {
+    console.log('Express checkout loadError', event)
+  })
+  expressCheckoutElement.on('change', (event) => {
+    console.log('Express checkout change', event)
+  })
+  expressCheckoutElement.on('loaderstart', (event) => {
+    console.log('Express checkout loadStart', event)
+  })
+  console.log('Mounted express checkout')
 })
 </script>

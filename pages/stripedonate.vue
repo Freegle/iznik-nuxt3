@@ -8,12 +8,7 @@
             <div
               class="d-flex flex-column align-content-around text-center font-weight-bold"
             >
-              <StripeDonate :price="1" />
-            </div>
-            <div
-              class="d-flex flex-column align-content-around text-center font-weight-bold"
-            >
-              <StripeDonate :price="5" />
+              <StripeDonate :price="10" />
             </div>
           </div>
         </div>
