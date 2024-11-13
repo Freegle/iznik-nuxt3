@@ -3,27 +3,17 @@
     <div class="example">
       <div class="d-flex justify-content-around">
         <div class="d-flex flex-column">
-          <p>This is a test page for Google Pay.</p>
+          <p>This is a test page for Stripe Donate.</p>
           <div class="d-flex flex-wrap justify-content-between">
             <div
               class="d-flex flex-column align-content-around text-center font-weight-bold"
             >
-              £1
-              <client-only>
-                <GooglePay total-price="1.00" />
-              </client-only>
+              <StripeDonate price="1" />
             </div>
             <div
               class="d-flex flex-column align-content-around text-center font-weight-bold"
             >
-              £5
-              <GooglePay total-price="5.00" />
-            </div>
-            <div
-              class="d-flex flex-column align-content-around text-center font-weight-bold"
-            >
-              £10
-              <GooglePay total-price="10.00" />
+              <StripeDonate price="5" />
             </div>
           </div>
         </div>
@@ -31,4 +21,6 @@
     </div>
   </client-only>
 </template>
-<script setup></script>
+<script setup>
+import StripeDonate from '~/components/StripeDonate.vue'
+</script>
