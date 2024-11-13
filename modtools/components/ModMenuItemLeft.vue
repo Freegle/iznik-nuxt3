@@ -53,7 +53,7 @@ export default {
     getClass() {
       let linkmatch = this.$route.path === this.link
       const linklen = this.link.length
-      if (linklen > 0 && (this.$route.path.substr(0, linklen) === this.link)) linkmatch = true
+      if (linklen > 1 && (this.$route.path.substr(0, linklen) === this.link)) linkmatch = true
       return 'pl-1 ' + (linkmatch ? 'active' : '')
     }
   },
