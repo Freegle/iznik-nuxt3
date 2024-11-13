@@ -1,13 +1,13 @@
 <template>
   <div>
     {{ price }}
-    <b-button variant="primary" @click="submit">Pay now!</b-button>
+    <div :id="uniqueId" />
   </div>
 </template>
 <script setup>
 import { loadStripe } from '@stripe/stripe-js'
 import * as Sentry from '@sentry/browser'
-import { useComposeStore } from '~/stores/compose'
+import { uid } from '../composables/useId'
 
 const props = defineProps({
   price: {
@@ -15,6 +15,8 @@ const props = defineProps({
     required: true,
   },
 })
+
+const uniqueId = uid('stripe-donate-')
 
 const prices = {
   1: 'price_1QJv67P3oIVajsTkkkkofJdK',
@@ -34,25 +36,28 @@ if (!priceId) {
 }
 
 const runtimeConfig = useRuntimeConfig()
-const userSite = runtimeConfig.public.USER_SITE
 const stripe = await loadStripe(runtimeConfig.public.STRIPE_PUBLISHABLE_KEY)
 
-async function submit() {
-  const composeStore = useComposeStore()
-  const email = composeStore.email
-
-  const { error } = await stripe.redirectToCheckout({
-    lineItems: [
-      {
-        price: priceId,
-        quantity: 1,
-      },
-    ],
-    mode: 'payment',
-    successUrl: userSite + '/donated',
-    cancelUrl: userSite + '/donate',
-    customerEmail: email,
-  })
-  console.log('Error', error)
+const appearance = {
+  /* appearance */
 }
+const options = {
+  /* options */
+}
+const elements = stripe.elements({
+  mode: 'payment',
+  amount: props.price,
+  currency: 'gbp',
+  appearance,
+})
+
+onMounted(() => {
+  console.log(
+    'Mounted for #',
+    uniqueId,
+    document.getElementById(uniqueId) !== null
+  )
+  const expressCheckoutElement = elements.create('expressCheckout', options)
+  expressCheckoutElement.mount('#' + uniqueId)
+})
 </script>
