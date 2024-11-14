@@ -51,7 +51,8 @@ const options = {
 
 const elements = stripe.elements({
   mode: 'payment',
-  amount: props.price * 100, // Price is in pence
+  // amount: props.price * 100, // Price is in pence
+  amount: 30,
   currency: 'gbp',
   appearance,
 })
