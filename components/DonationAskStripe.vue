@@ -24,13 +24,13 @@
       </p>
       <b-button-group class="d-none d-md-block mt-1 mb-2">
         <b-button
-          :pressed="price === 2"
-          :variant="price === 2 ? 'primary' : 'white'"
+          :pressed="price === 0.3"
+          :variant="price === 0.3 ? 'primary' : 'white'"
           size="lg"
           class="shadow-none"
-          @click="price = 2"
+          @click="price = 0.3"
         >
-          Donate £2
+          Donate £0.30
         </b-button>
         <b-button
           :pressed="price === 5"

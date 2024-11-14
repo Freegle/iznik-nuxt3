@@ -1,86 +1,91 @@
 <template>
   <b-modal ref="modal" scrollable :title="title" size="lg" no-stacking>
     <template #default>
-      <p v-if="donated">
-        You've already donated to Freegle (on {{ donated }}). Thank you.
-      </p>
-      <div v-if="variant === 'video'">
-        <DonationAskVideo
-          :groupid="groupId"
-          :groupname="groupName"
-          :target="target"
-          :raised="raised"
-          :target-met="targetMet"
-          :donated="donated"
-          @score="score"
-        />
-      </div>
-      <div v-else-if="variant === 'stripe'">
-        <DonationAskStripe
-          :groupid="groupId"
-          :groupname="groupName"
-          :target="target"
-          :raised="raised"
-          :target-met="targetMet"
-          :donated="donated"
-          @score="score"
-          @success="hide"
-        />
-      </div>
-      <div v-else-if="variant === 'quote'">
-        <DonationAskQuote
-          :groupid="groupId"
-          :groupname="groupName"
-          :target="target"
-          :raised="raised"
-          :target-met="targetMet"
-          :donated="donated"
-          @score="score"
-        />
-      </div>
-      <div v-else-if="variant === 'buttons2510'">
-        <DonationAskButtons2510
-          :groupid="groupId"
-          :groupname="groupName"
-          :target="target"
-          :raised="raised"
-          :target-met="targetMet"
-          :donated="donated"
-          @score="score"
-        />
-      </div>
-      <div v-else-if="variant === 'buttons51025'">
-        <DonationAskButtons51025
-          :groupid="groupId"
-          :groupname="groupName"
-          :target="target"
-          :raised="raised"
-          :target-met="targetMet"
-          :donated="donated"
-          @score="score"
-        />
-      </div>
-      <div v-else-if="variant === 'impact'">
-        <DonationAskImpact
-          :groupname="groupName"
-          :groupid="groupId"
-          :target="target"
-          :raised="raised"
-          :target-met="targetMet"
-          :donated="donated"
-          @score="score"
-        />
+      <div v-if="thankyou">
+        <DonationThank />
       </div>
       <div v-else>
-        <DonationAskWhatYouCan
-          :groupname="groupName"
-          :groupid="groupId"
-          :target="target"
-          :raised="raised"
-          :target-met="targetMet"
-          :donated="donated"
-          @score="score"
-        />
+        <p v-if="donated">
+          You've already donated to Freegle (on {{ donated }}). Thank you.
+        </p>
+        <div v-if="variant === 'video'">
+          <DonationAskVideo
+            :groupid="groupId"
+            :groupname="groupName"
+            :target="target"
+            :raised="raised"
+            :target-met="targetMet"
+            :donated="donated"
+            @score="score"
+          />
+        </div>
+        <div v-else-if="variant === 'stripe'">
+          <DonationAskStripe
+            :groupid="groupId"
+            :groupname="groupName"
+            :target="target"
+            :raised="raised"
+            :target-met="targetMet"
+            :donated="donated"
+            @score="score"
+            @success="thankyou = true"
+          />
+        </div>
+        <div v-else-if="variant === 'quote'">
+          <DonationAskQuote
+            :groupid="groupId"
+            :groupname="groupName"
+            :target="target"
+            :raised="raised"
+            :target-met="targetMet"
+            :donated="donated"
+            @score="score"
+          />
+        </div>
+        <div v-else-if="variant === 'buttons2510'">
+          <DonationAskButtons2510
+            :groupid="groupId"
+            :groupname="groupName"
+            :target="target"
+            :raised="raised"
+            :target-met="targetMet"
+            :donated="donated"
+            @score="score"
+          />
+        </div>
+        <div v-else-if="variant === 'buttons51025'">
+          <DonationAskButtons51025
+            :groupid="groupId"
+            :groupname="groupName"
+            :target="target"
+            :raised="raised"
+            :target-met="targetMet"
+            :donated="donated"
+            @score="score"
+          />
+        </div>
+        <div v-else-if="variant === 'impact'">
+          <DonationAskImpact
+            :groupname="groupName"
+            :groupid="groupId"
+            :target="target"
+            :raised="raised"
+            :target-met="targetMet"
+            :donated="donated"
+            @score="score"
+          />
+        </div>
+        <div v-else>
+          <DonationAskWhatYouCan
+            :groupname="groupName"
+            :groupid="groupId"
+            :target="target"
+            :raised="raised"
+            :target-met="targetMet"
+            :donated="donated"
+            @score="score"
+          />
+        </div>
       </div>
     </template>
     <template #footer>
@@ -116,6 +121,8 @@ const props = defineProps({
 const groupStore = useGroupStore()
 const donationStore = useDonationStore()
 const authStore = useAuthStore()
+
+const thankyou = ref(false)
 
 const { modal, hide } = useOurModal()
 const { variant, groupId, show } = await useDonationAskModal(props.variant)
