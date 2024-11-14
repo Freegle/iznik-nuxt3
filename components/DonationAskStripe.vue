@@ -107,7 +107,7 @@ export default {
   data() {
     return {
       monthly: false,
-      price: 2,
+      price: 0.3,
     }
   },
   methods: {
