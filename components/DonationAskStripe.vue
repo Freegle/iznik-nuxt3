@@ -28,31 +28,32 @@
           :variant="price === 0.3 ? 'primary' : 'white'"
           size="lg"
           class="shadow-none"
-          @click="price = 0.3"
+          @click="setPrice(0.3)"
         >
-          Donate £0.30
+          <span class="d-none d-md-inline">Donate </span>£0.30
         </b-button>
         <b-button
           :pressed="price === 5"
           :variant="price === 5 ? 'primary' : 'white'"
           size="lg"
           class="shadow-none"
-          @click="price = 5"
+          @click="setPrice(5)"
         >
-          Donate £5
+          <span class="d-none d-md-inline">Donate </span>£5
         </b-button>
         <b-button
           :pressed="price === 10"
           :variant="price === 10 ? 'primary' : 'white'"
           size="lg"
           class="shadow-none"
-          @click="price = 10"
+          @click="setPrice(10)"
         >
-          Donate £10
+          <span class="d-none d-md-inline">Donate </span>£10
         </b-button>
       </b-button-group>
       <div class="mt-2 mb-2 w-100">
-        <StripeDonate :key="price" :price="price" @success="$emit('success')" />
+        <StripeDonate :key="price" :price="price" @success="succeeded" />
+        <div ref="belowStripe" />
       </div>
       <p class="mt-2 small">
         You'll get a cute little
@@ -113,6 +114,14 @@ export default {
   methods: {
     score(amount) {
       this.$emit('score', amount)
+    },
+    setPrice(price) {
+      this.price = price
+      this.$refs.belowStripe.scrollIntoView()
+    },
+    succeeded() {
+      this.score(this.rpice)
+      this.$emit('success')
     },
   },
 }
