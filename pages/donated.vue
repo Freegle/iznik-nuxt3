@@ -7,7 +7,7 @@
           <h1>Thank you!</h1>
         </b-card-header>
         <b-card-text class="p-2">
-          <DonatedThank />
+          <DonationThank />
         </b-card-text>
       </b-card>
     </b-col>
@@ -16,11 +16,11 @@
 <script>
 import { useRoute } from 'vue-router'
 import { buildHead } from '~/composables/useBuildHead'
-import DonatedThank from '~/components/DonatedThank.vue'
+import DonationThank from '~/components/DonationThank.vue'
 
 export default {
   components: {
-    DonatedThank,
+    DonationThank,
   },
   setup() {
     const runtimeConfig = useRuntimeConfig()
