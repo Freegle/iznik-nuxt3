@@ -1,17 +1,20 @@
 <template>
   <div>
-    <!--ModMicrovolunteeringModal ref="modal" :user="user" :item-ids="itemIds" /-->
-    <b-btn variant="link" @click="showModal">
+    <ModMicrovolunteeringModal v-if="showMicrovolunteeringModal" ref="microvolunteering" :user="user" :item-ids="itemIds" @hidden="showMicrovolunteeringModal = false"/>
+    <b-button variant="link" @click="showModal">
       View
-    </b-btn>
+    </b-button>
   </div>
 </template>
 <script>
-//import ModMicrovolunteeringModal from '@/components/ModMicrovolunteeringModal'
 
 export default {
   components: {
-    //ModMicrovolunteeringModal
+  },
+  data: function () {
+    return {
+      showMicrovolunteeringModal: false,
+    }
   },
   props: {
     user: {
@@ -29,8 +32,10 @@ export default {
     }
   },
   methods: {
-    showModal() {
-      this.$refs.modal.show()
+    async showModal() {
+      this.showMicrovolunteeringModal = true
+      await nextTick()
+      this.$refs.microvolunteering?.show()
     }
   }
 }

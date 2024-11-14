@@ -1,19 +1,14 @@
 <template>
   <div>
     <client-only>
-      <b-modal
-        id="aboutmemodal"
-        v-model="showModal"
-        :title="'Microvolunteering for ' + user.displayname"
-        size="xl"
-      >
-        <template slot="default">
+      <b-modal ref="modal" id="aboutmemodal" :title="'Microvolunteering for ' + user.displayname" size="xl">
+        <template #default>
           <div v-for="item in itemIds" :key="'item-' + item" class="p-0 mt-2">
             <ModMicrovolunteering :id="item" />
           </div>
         </template>
-        <template slot="modal-footer" slot-scope="{ cancel }">
-          <b-button variant="white" @click="cancel">
+        <template #footer>
+          <b-button variant="white" @click="hide">
             Cancel
           </b-button>
         </template>
@@ -22,14 +17,13 @@
   </div>
 </template>
 <script>
-import modal from '@/mixins/modal'
-import ModMicrovolunteering from '~/components/ModMicrovolunteering'
+import { useModal } from '~/composables/useModal'
 
 export default {
-  components: {
-    ModMicrovolunteering
+  setup() {
+    const { modal, hide } = useModal()
+    return { modal, hide }
   },
-  mixins: [modal],
   props: {
     user: {
       type: Object,
@@ -38,6 +32,11 @@ export default {
     itemIds: {
       type: Array,
       required: true
+    }
+  },
+  methods: {
+    show() {
+      this.modal.show()
     }
   }
 }

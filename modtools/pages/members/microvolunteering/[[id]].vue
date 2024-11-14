@@ -6,7 +6,7 @@
       <GroupSelect v-model="groupid" modonly all remember="membersmicrovol" :disabled="busy" />
 
       <div v-if="busy" class="d-flex justify-content-around">
-        <b-img lazy src="~/static/loader.gif" alt="Loading" />
+        <b-img lazy src="/loader.gif" alt="Loading" />
       </div>
       <div v-else-if="!groupid" class="mt-2">
         <NoticeMessage variant="warning">
@@ -29,7 +29,7 @@
           <b-tbody>
             <b-tr v-for="user in topUsers" :key="user.userid">
               <b-td>
-                <nuxt-link :to="'/modtools/members/approved/search/' + groupid + '/' + user.userid">
+                <nuxt-link :to="'/members/approved/' + groupid + '/' + user.userid">
                   <v-icon icon="hashtag" scale="0.8" />{{ user.userid }}
                 </nuxt-link>
               </b-td>
@@ -53,12 +53,8 @@
                 </div>
               </b-td>
               <b-td>
-                <GChart
-                  type="AreaChart"
-                  :data="activityData(userActivity[user.userid])"
-                  :options="activityOptions"
-                  style="width: 300px; height: 100px;"
-                />
+                <GChart type="AreaChart" :data="activityData(userActivity[user.userid])" :options="activityOptions"
+                  style="width: 300px; height: 100px;" />
               </b-td>
               <b-td>
                 <ModMicrovolunteeringDetailsButton :user="userActivity[user.userid][0].user" :items="userActivity[user.userid]" />
@@ -71,16 +67,23 @@
   </div>
 </template>
 <script>
+import dayjs from 'dayjs'
 import { GChart } from 'vue-google-charts'
-//import { TablePlugin } from 'bootstrap-vue'
-//Vue.use(TablePlugin)
+import { useMicroVolunteeringStore } from '../stores/microvolunteering'
 
 export default {
   components: {
     GChart,
   },
+  setup() {
+    const microVolunteeringStore = useMicroVolunteeringStore()
+    return {
+      microVolunteeringStore,
+    }
+  },
   data() {
     return {
+      groupid: 0,
       busy: true
     }
   },
@@ -99,9 +102,8 @@ export default {
       }
     },
     items() {
-      return []
-      const items = Object.values(this.$store.getters['microvolunteering/list'])
-      items.sort(function(a, b) {
+      const items = Object.values(this.microVolunteeringStore.list)
+      items.sort(function (a, b) {
         return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
       })
 
@@ -131,7 +133,7 @@ export default {
         }
       }
 
-      ret2.sort(function(a, b) {
+      ret2.sort(function (a, b) {
         return b.count - a.count
       })
 
@@ -158,23 +160,24 @@ export default {
   },
   watch: {
     groupid(newVal) {
+      this.microVolunteeringStore.clear()
       this.fetch()
     }
   },
   mounted() {
-    //this.$store.dispatch('microvolunteering/clear')
-    //this.fetch()
+    this.microVolunteeringStore.clear()
+    this.fetch()
   },
   methods: {
     async fetch() {
       this.busy = true
 
       if (this.groupid) {
-        const start = this.$dayjs()
+        const start = dayjs()
           .subtract(90, 'day')
           .format('YYYY-MM-DD')
 
-        await this.$store.dispatch('microvolunteering/fetch', {
+        this.microVolunteeringStore.fetch({
           list: true,
           groupid: this.groupid,
           limit: 10000,
@@ -190,14 +193,14 @@ export default {
       // Empty out the series so that we get data at each point.
       for (let i = 0; i <= 90; i++) {
         dates[
-          this.$dayjs()
+          dayjs()
             .subtract(i, 'day')
             .format('YYYY-MM-DD')
         ] = 0
       }
 
       data.forEach(d => {
-        const date = this.$dayjs(d.timestamp).format('YYYY-MM-DD')
+        const date = dayjs(d.timestamp).format('YYYY-MM-DD')
 
         if (!dates[date]) {
           dates[date] = 0
@@ -244,4 +247,3 @@ select {
   max-width: 300px;
 }
 </style>
-

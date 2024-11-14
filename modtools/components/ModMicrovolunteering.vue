@@ -1,6 +1,8 @@
 <template>
   <div>
-    <b-card no-body>
+    {{id}}
+    <span v-if="!item">NO ITEM</span>
+    <b-card  v-if="item" no-body>
       <b-card-body>
         <div class="layout">
           <div class="date small">
@@ -34,17 +36,16 @@
             </div>
           </div>
           <div class="object">
-            <nuxt-link v-if="item.rotatedimage" :to="'/modtools/message/' + item.rotatedimage.msgid">
+            <nuxt-link v-if="item.rotatedimage" :to="'/message/' + item.rotatedimage.msgid">
               <b-img thumbnail :src="item.rotatedimage.thumb" class="thumb" />
             </nuxt-link>
-            <nuxt-link v-else-if="item.message" :to="'/modtools/message/' + item.message.id">
-              <v-icon name="hashtag" class="text-muted" scale="0.75" />{{ item.message.id }} {{ item.message.subject }}
+            <nuxt-link v-else-if="item.message" :to="'/message/' + item.message.id">
+              <v-icon icon="hashtag" class="text-muted" scale="0.75" />{{ item.message.id }} {{ item.message.subject }}
             </nuxt-link>
             <div v-else-if="item.item1">
               <em>{{ item.item1.name }}</em> <span class="text-muted">and</span> <em>{{ item.item2.name }}</em>
             </div>
             <div v-else>
-              <!--              {{ item }}-->
             </div>
           </div>
         </div>
@@ -53,6 +54,7 @@
   </div>
 </template>
 <script>
+import { useMicroVolunteeringStore } from '../stores/microvolunteering'
 export default {
   props: {
     id: {
@@ -60,9 +62,15 @@ export default {
       required: true
     }
   },
+  setup() {
+    const microVolunteeringStore = useMicroVolunteeringStore()
+    return {
+      microVolunteeringStore,
+    }
+  },
   computed: {
     item() {
-      return this.$store.getters['microvolunteering/get'](this.id)
+      return this.microVolunteeringStore.byId(this.id)
     },
     email() {
       let ret = null
@@ -81,10 +89,10 @@ export default {
 }
 </script>
 <style scoped lang="scss">
-@import 'color-vars';
-@import '~bootstrap/scss/functions';
-@import '~bootstrap/scss/variables';
-@import '~bootstrap/scss/mixins/_breakpoints';
+//@import 'color-vars';
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
 
 .thumb {
   width: 100px;
