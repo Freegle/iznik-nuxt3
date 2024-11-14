@@ -1,4 +1,4 @@
-// CSP.  See also _hedaers.
+// CSP.  See also _headers.
 export default defineEventHandler((event) => {
   // Disabled because we show ads which come in from a variety of domains.
   // event.node.res.setHeader(
