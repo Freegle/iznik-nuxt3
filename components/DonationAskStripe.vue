@@ -24,13 +24,13 @@
       </p>
       <b-button-group class="d-flex flex-wrap mt-1 mb-2">
         <b-button
-          :pressed="price === 0.3"
-          :variant="price === 0.3 ? 'primary' : 'white'"
+          :pressed="price === 1"
+          :variant="price === 1 ? 'primary' : 'white'"
           size="lg"
           class="shadow-none"
-          @click="setPrice(0.3)"
+          @click="setPrice(1)"
         >
-          <span class="d-none d-md-inline">Donate </span>£0.30
+          <span class="d-none d-md-inline">Donate </span>£1
         </b-button>
         <b-button
           :pressed="price === 5"
@@ -108,7 +108,7 @@ export default {
   data() {
     return {
       monthly: false,
-      price: 0.3,
+      price: 1,
     }
   },
   methods: {
