@@ -52,7 +52,7 @@
         </b-button>
       </b-button-group>
       <div class="mt-2 mb-2 w-100">
-        <StripeDonate :key="price" :price="price" />
+        <StripeDonate :key="price" :price="price" @success="$emit('success')" />
       </div>
       <p class="mt-2 small">
         You'll get a cute little

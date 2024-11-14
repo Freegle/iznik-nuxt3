@@ -24,6 +24,7 @@
           :target-met="targetMet"
           :donated="donated"
           @score="score"
+          @success="hide"
         />
       </div>
       <div v-else-if="variant === 'quote'">

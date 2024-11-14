@@ -27,7 +27,7 @@ const props = defineProps({
 
 const loading = ref(true)
 
-const emit = defineEmits(['loaded', 'error'])
+const emit = defineEmits(['loaded', 'error', 'success'])
 
 const uniqueId = uid('stripe-donate-')
 
@@ -108,12 +108,15 @@ onMounted(() => {
         redirect: 'if_required',
       })
 
+      console.log('Confirm payment returned', error)
+
       if (error) {
         console.error('Confirm payment error', error)
         emit('error')
       } else {
         // The payment UI automatically closes with a success animation.
         // Your customer is redirected to your `return_url` if required.
+        emit('success')
       }
     }
   })
