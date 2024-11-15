@@ -11,6 +11,7 @@
 </template>
 <script setup>
 import { loadStripe } from '@stripe/stripe-js'
+import * as Sentry from '@sentry/browser'
 import { uid } from '../composables/useId'
 import { useDonationStore } from '~/stores/donations'
 
@@ -71,6 +72,9 @@ onMounted(() => {
   })
   expressCheckoutElement.on('loaderror', (event) => {
     console.log('Express checkout loadError', event)
+    Sentry.captureMessage('Stripe Express Checkout load error', {
+      extra: event,
+    })
     emit('error')
   })
   expressCheckoutElement.on('change', (event) => {
@@ -84,6 +88,9 @@ onMounted(() => {
 
     if (submitError) {
       console.error('Payment submit error')
+      Sentry.captureMessage('Stripe Express Checkout load error', {
+        extra: event,
+      })
       emit('error')
     } else {
       // Create the PaymentIntent and obtain clientSecret
@@ -111,6 +118,9 @@ onMounted(() => {
 
       if (error) {
         console.error('Confirm payment error', error)
+        Sentry.captureMessage('Confirm payment error', {
+          extra: event,
+        })
         emit('error')
       } else {
         // The payment UI automatically closes with a success animation.
