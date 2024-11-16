@@ -114,7 +114,7 @@ const props = defineProps({
   variant: {
     type: String,
     required: false,
-    default: 'null',
+    default: null,
   },
 })
 

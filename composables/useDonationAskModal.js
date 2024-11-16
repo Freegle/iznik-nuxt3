@@ -48,7 +48,7 @@ export function useDonationAskModal(requestedVariant = null) {
       variant.value = requestedVariant
     }
 
-    if (!variant.value) {
+    if (typeof variant.value === 'undefined' || !variant.value) {
       try {
         if (!requestedVariant) {
           requestedVariant = {
