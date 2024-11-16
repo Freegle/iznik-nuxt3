@@ -55,7 +55,7 @@
     "@capacitor/device": "^6.0.0",
     "@capacitor/ios": "^6.0.0",
     "@capacitor/network": "^6.0.0",
-    "@capacitor/share": "^6.0.0",
+    "@capacitor/share": "^6.0.2",
     "@capawesome/capacitor-badge": "^6.0.0",
     "@chenfengyuan/vue-number-input": "^2.0.1",
     "@codetrix-studio/capacitor-google-auth": "github:CodetrixStudio/CapacitorGoogleAuth",
