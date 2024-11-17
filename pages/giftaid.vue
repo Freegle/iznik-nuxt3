@@ -149,6 +149,15 @@
               all my donations it is my responsibility to pay any difference.
             </NoticeMessage>
           </div>
+          <b-form-checkbox
+            v-else
+            v-model="marketingconsent"
+            size="lg"
+            class="mt-2"
+          >
+            I'm happy for Freegle to keep in touch with me by email about ways I
+            can support Freegle in future campaigns (please tick box).
+          </b-form-checkbox>
           <SpinButton
             icon-name="save"
             size="lg"
