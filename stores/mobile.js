@@ -478,7 +478,7 @@ export const useMobileStore = defineStore({ // Do not persist
       const requiredKey = this.isiOS ? 'app_fd_version_ios_required' : 'app_fd_version_android_required'
       const latestKey = this.isiOS ? 'app_fd_version_ios_latest' : 'app_fd_version_android_latest'
 
-      const reqdValues = await api(this.config).config.get({ key: requiredKey })
+      const reqdValues = await api(this.config).config.fetchv2(requiredKey)
       if (reqdValues && reqdValues.length === 1) {
         const requiredVersion = reqdValues[0].value
         if (requiredVersion) {
@@ -490,7 +490,7 @@ export const useMobileStore = defineStore({ // Do not persist
         }
       }
 
-      const latestValues = await api(this.config).config.get({ key: latestKey })
+      const latestValues = await api(this.config).config.fetchv2(latestKey)
       if (latestValues && latestValues.length === 1) {
         const latestVersion = latestValues[0].value
         if (latestVersion) {
