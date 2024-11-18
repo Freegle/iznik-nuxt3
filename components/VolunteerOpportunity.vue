@@ -339,7 +339,6 @@ export default {
   :deep(img) {
     object-fit: cover;
     width: 200px;
-    height: 200px;
   }
 
   &.summary {
