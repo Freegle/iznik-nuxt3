@@ -1,0 +1,131 @@
+<template>
+  <div v-if="!hide">
+    <b-row>
+      <b-col cols="6" md="3" class="pl-3">
+        <div>
+          <b-input v-model="giftaid.fullname" :class="{ 'border-danger': nameInvalid }" />
+          <div v-if="email">
+            <!-- eslint-disable-next-line -->
+            <ExternalLink :href="'mailto:' + email + '?subject=A question about your Gift Aid declaration'"><v-icon icon="envelope" />&nbsp;{{ email
+              }}</ExternalLink>
+          </div>
+          <NoticeMessage v-if="giftaid.donations" variant="info">
+            Total donations &pound;{{ giftaid.donations }}
+          </NoticeMessage>
+          <NoticeMessage v-else variant="danger">
+            No donations found - check in case they are using multiple email addresses.
+          </NoticeMessage>
+          <span class="small text-muted">
+            {{ timeago(giftaid.timestamp) }}
+            <v-icon icon="hashtag" class="text-muted" scale="0.75" />{{ giftaid.userid }}
+          </span>
+        </div>
+      </b-col>
+      <b-col cols="6" md="5">
+        <b-textarea v-model="giftaid.homeaddress" rows="4" />
+        <b-input v-model="giftaid.housenameornumber" :class="{ 'border-danger': houseInvalid, 'mt-1': true }" placeholder="House name or number" />
+        <b-input v-model="giftaid.postcode" :class="{ 'border-danger': postcodeInvalid, 'mt-1': true }" placeholder="Postcode" />
+      </b-col>
+      <b-col cols="6" md="4" class="d-flex justify-content-between">
+        <SpinButton variant="white" icon-name="save" label="Save Changes" @handle="save" />
+        <SpinButton variant="warning" icon-name="trash-alt" label="Give Up" @handle="giveup" confirm />
+        <SpinButton variant="success" icon-name="check" label="Looks Good" @handle="reviewed"
+          :disabled="houseInvalid || postcodeInvalid || nameInvalid" />
+      </b-col>
+    </b-row>
+    <b-row>
+      <b-col>
+        <hr>
+      </b-col>
+    </b-row>
+  </div>
+</template>
+<script>
+
+export default {
+  props: {
+    giftaid: {
+      type: Object,
+      required: true
+    }
+  },
+  data: function () {
+    return {
+      hide: false
+    }
+  },
+  computed: {
+    nameInvalid() {
+      return this.giftaid.fullname.indexOf(' ') === -1
+    },
+    postcodeInvalid() {
+      return !this.giftaid.postcode || this.giftaid.postcode.indexOf(' ') === -1
+    },
+    houseInvalid() {
+      return !this.giftaid.housenameornumber
+    },
+    email() {
+      let email = null
+
+      if (this.giftaid.email) {
+        this.giftaid.email.forEach(e => {
+          if (!e.ourdomain && (e.preferred || email === null)) {
+            email = e.email
+          }
+        })
+      }
+
+      return email
+    }
+  },
+  methods: {
+    save(callback) {
+      const {
+        id,
+        period,
+        fullname,
+        homeaddress,
+        postcode,
+        housenameornumber
+      } = this.giftaid
+      this.$api.giftaid.edit(
+        id,
+        period,
+        fullname,
+        homeaddress,
+        postcode,
+        housenameornumber,
+        false
+      )
+      callback()
+    },
+    reviewed(callback) {
+      this.$api.giftaid.edit(
+        this.giftaid.id,
+        null,
+        null,
+        null,
+        null,
+        null,
+        true
+      )
+      callback()
+      this.hide = true
+    },
+    giveup(callback) {
+      this.$api.giftaid.edit(
+        this.giftaid.id,
+        null,
+        null,
+        null,
+        null,
+        null,
+        false,
+        true
+      )
+      this.hide = true
+      callback()
+    }
+  }
+}
+</script>
