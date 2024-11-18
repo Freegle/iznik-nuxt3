@@ -17,6 +17,7 @@
     "diff": "^5.2.0",
     "leaflet-draw": "^1.0.4",
     "letterparser": "^0.1.4",
+    "papaparse": "^5.4.1",
     "quill-html-edit-button": "^2.2.13",
     "turf-area": "^3.0.12",
     "turf-buffer": "^3.0.12",
