@@ -10,27 +10,33 @@
   </div>
 </template>
 <script>
+import { useStoryStore } from '../stores/stories'
 
 export default {
-  components: {
+  setup() {
+    const storyStore = useStoryStore()
+    return {
+      storyStore,
+    }
+  },
+  async mounted() {
+    console.log('newsletter mounted')
+    await this.storyStore.fetchMT({
+      newsletter: true,
+      dontzapfalsey: true, // Stop BaseAPI from removing above zero value
+    })
   },
   computed: {
     stories() {
-      /*const stories = this.$store.getters['stories/list']
+      const stories = this.storyStore.list
 
       if (stories) {
         return Object.values(stories)
-      }*/
+      }
 
       return []
     }
   },
-  async fetch() {
-    /*await this.$store.dispatch('stories/fetch', {
-      newsletter: true
-    })*/
-  },
-
   methods: {}
 }
 </script>
