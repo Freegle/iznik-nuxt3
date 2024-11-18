@@ -15,6 +15,7 @@ export const useUserStore = defineStore({
       this.fetchingLocation = {}
     },
     clear() { // ModTools
+      console.log('uUS clear')
       this.list = {}
       this.locationList = {}
       this.fetching = {}
@@ -114,7 +115,7 @@ export const useUserStore = defineStore({
       await api(this.config).user.purge(id)
     },
     async ratingReviewed(params) {
-      await api(this.config).ratingReviewed(params.id)
+      await api(this.config).user.ratingReviewed(params.id)
     },
   },
   getters: {
