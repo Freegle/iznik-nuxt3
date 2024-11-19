@@ -2,16 +2,33 @@
   <client-only>
     <div class="d-flex justify-content-center">
       <div class="privacy__container px-3 bg-white">
+        <h2>1. What data we process</h2>
         <p>
-          We won’t pass on your email address to any organisation outside
-          Freegle, and other freeglers can't see it (unless your community
-          leaves Freegle - see below).
+          We process your email address, name, approximate location, and profile
+          picture. If you log in using a social login (Facebook/Google/Yahoo)
+          then we will obtain these details from them.
         </p>
         <p>
-          Other freeglers can see your name, profile picture and approximate
-          location. If you don't want that, you can change it in
+          All OFFER/WANTED posts are public, so if you put phone numbers, email
+          addresses or postal addresses into them, other people will be able to
+          see them. If you're concerned about this, don't do it!
+        </p>
+        <h2>2. How we process data</h2>
+        <p>
+          We use your email address to send you various emails about your posts
+          and posts from other freeglers. You can change the emails you receive
+          or turn them off from
           <!-- eslint-disable-next-line-->
-        <nuxt-link  no-prefetch to="/settings">Settings</nuxt-link>.
+          <nuxt-link  no-prefetch to="/settings">Settings</nuxt-link>.
+          your email address to any organisation outside Freegle, and freeglers
+          it (unless your community leaves Freegle - see below).
+        </p>
+        <p>
+          We show you your name, profile picture and approximate location to
+          other freeglers to make the site more engaging and show that freeglers
+          are real people. If you don't want that, you can change it in
+          <!-- eslint-disable-next-line-->
+          <nuxt-link  no-prefetch to="/settings">Settings</nuxt-link>.
         </p>
         <p>
           We try to protect you from spammers and fraudsters. Sometimes our
@@ -20,23 +37,18 @@
           which is against Freegle rules, we may take further action.
         </p>
         <p>
-          If you put phone numbers, email addresses or postal addresses into
-          your posts on Freegle, other people will be able to see them. If
-          you're concerned about this, don't do it!
-        </p>
-        <p>
           So that potential new users can see what is being offered on Freegle,
           we make some details of posts public, i.e. the item name, approximate
           location, the description and any photos. No personal details are made
           public unless in this information.
         </p>
-        <h2>Cookies and Tracking</h2>
+        <h2>3. Cookies and Tracking</h2>
         <p>
           You'll have seen lots of irritating popups on websites about consent
           for cookies. We have one of those too. Sorry, but it's the law. Here
           are some technical details.
         </p>
-        <h3>Necessary function</h3>
+        <h3>3.1 Necessary function</h3>
         <p>
           We store some things which are strictly necessary to make the site
           work.
@@ -68,7 +80,7 @@
             not to use any cookies.
           </li>
         </ul>
-        <h3>Optional function</h3>
+        <h3>3.2 Optional function</h3>
         <p>We store some other things which help make the site better.</p>
         <ul>
           <li>
@@ -112,22 +124,26 @@
           use, it's not free to run, so it helps if you
           <nuxt-link no-prefetch to="/donate">donate</nuxt-link>.
         </p>
-        <h2>Deleting your data</h2>
+        <h2>4. Deleting your data</h2>
         <p>
           We'll delete your data automatically if you're inactive for six
           months. If you want to leave Freegle, please go
           <!-- eslint-disable-next-line -->
         <nuxt-link  no-prefetch to="/unsubscribe">here</nuxt-link>.
         </p>
-        <p>Once you leave, this will delete all your personal data.</p>
-        <h4>Communities leaving Freegle</h4>
+        <p>
+          Once you leave, this will delete all your personal data within 14
+          days. If you change your mind before then, or left by mistake, you can
+          log back in to reactivate your account.
+        </p>
+        <h2>5. Communities leaving Freegle</h2>
         <p>
           Freegle communities may in theory choose to leave Freegle and move
           somewhere else. This has never actually happened, but it's possible in
           theory. If this happens then we will be in touch with you to discuss
           what should happen to your details.
         </p>
-        <h2>Legal Basis</h2>
+        <h2>6. Legal Basis</h2>
         <p>We operate under the legal basis of Legitimate Interest.</p>
         <h2>Got questions?</h2>
         <p>
@@ -146,6 +162,10 @@
         <h3>Change History</h3>
         <p>Here are the changes to this page.</p>
         <ul class>
+          <li>
+            19/11/2024: Update after Facebook request to clarify what data we
+            store and how we process it.
+          </li>
           <li>
             24/08/2024: Update to mention legal basis, retention period,
             complain to ICO.
