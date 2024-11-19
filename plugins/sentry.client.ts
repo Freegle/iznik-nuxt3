@@ -249,6 +249,11 @@ export default defineNuxtPlugin((nuxtApp) => {
             ) {
               // This is a leaflet error - don't understand it, but not our fault.
               return null
+            } else if (
+              originalExceptionMessage?.includes('@webkit-masked-url://hidden/')
+            ) {
+              // Webkit issue - see https://github.com/getsentry/sentry-javascript/discussions/5875
+              return null
             }
           }
 
