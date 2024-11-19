@@ -105,8 +105,7 @@
           <b-col>
             <NoticeMessage variant="info">
               We may share your story - on here, on social media and so on. This
-              helps get more people freegling. We won't use your name or email
-              address.
+              helps get more people freegling. We won't use your email address.
             </NoticeMessage>
           </b-col>
         </b-row>

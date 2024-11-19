@@ -181,7 +181,7 @@ onMounted(() => {
     newUserPassword.value = window.history.state.newpassword
   }
 
-  // showDonationAskModal.value = true
+  showDonationAskModal.value = true
 })
 </script>
 <style scoped lang="scss">

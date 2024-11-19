@@ -271,7 +271,7 @@ export default {
     }
 
     if (process.client) {
-      if (this.replyToSend) {
+      if (this.replyToSend?.replyMsgId) {
         // We have loaded the site with a reply that needs sending.  This happens if we force login in a way that
         // causes us to navigate away and back again.  Fetch the relevant message.
         const messageStore = useMessageStore()
@@ -369,6 +369,10 @@ body.modal-open {
   display: flex;
   flex-direction: column;
   max-height: 100vh;
+
+  @supports (height: 100dvh) {
+    max-height: 100dvh;
+  }
 
   margin-top: v-bind(marginTop);
   transition: margin-top 1s;

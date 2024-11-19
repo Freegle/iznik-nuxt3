@@ -155,6 +155,11 @@ export default {
     //We need to subtract space for the navbar, the ad bar, and also allow some extra because of the way vh works
     //mobile browsers.
     min-height: calc(100vh - 84px - $sticky-banner-height-mobile - 84px);
+
+    @supports (height: 100dvh) {
+      min-height: calc(100dvh - 84px - $sticky-banner-height-mobile - 84px);
+    }
+
     display: flex;
     flex-direction: column;
     justify-content: space-between;

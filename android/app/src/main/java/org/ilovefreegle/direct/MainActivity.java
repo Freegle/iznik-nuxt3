@@ -13,6 +13,7 @@ public class MainActivity extends BridgeActivity {
     //Log.e("PHDCC","org.ilovefreegle.direct onCreate A");
     super.onCreate(savedInstanceState);
     registerPlugin(GoogleAuth.class);
+    registerPlugin(com.getcapacitor.community.stripe.StripePlugin.class);
     //registerPlugin(FacebookLogin.class);
     //registerPlugin(FreegleFCMPlugin.class);
   }

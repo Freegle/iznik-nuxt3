@@ -4,7 +4,7 @@ import { useRuntimeConfig } from '#app'
 import Api from '~/api'
 import { useMobileStore } from '~/stores/mobile'
 
-export function useDonationAskModal(requestedVariant) {
+export function useDonationAskModal(requestedVariant = null) {
   const authStore = useAuthStore()
   const miscStore = useMiscStore()
   const runtimeConfig = useRuntimeConfig()
@@ -12,7 +12,7 @@ export function useDonationAskModal(requestedVariant) {
 
   const me = authStore.user
 
-  const variant = ref(null)
+  const variant = ref(requestedVariant)
   const groupId = ref(null)
 
   const { $bus } = useNuxtApp()
@@ -43,35 +43,38 @@ export function useDonationAskModal(requestedVariant) {
       value: new Date().getTime(),
     })
 
-    // We need to decide which variant of donation ask to show.
-    variant.value = requestedVariant
+    console.log('Show', variant.value, requestedVariant)
+    if (requestedVariant) {
+      // We need to decide which variant of donation ask to show.
+      variant.value = requestedVariant
+    }
 
-    try {
-      if (!requestedVariant) {
-        requestedVariant = {
-          variant: 'buttons2510',
-        }
+    if (typeof variant.value === 'undefined' || !variant.value) {
+      try {
+        if (!requestedVariant) {
+          requestedVariant = {
+            variant: 'buttons2510',
+          }
 
-        const mobileStore = useMobileStore()
-        if( mobileStore.isApp){
-          const rateappnotagain = window.localStorage.getItem('rateappnotagain')
-          if( !rateappnotagain){
-            if( Math.random() > 0.5) requestedVariant = { variant: 'rateapp' }
+          const mobileStore = useMobileStore()
+          if( mobileStore.isApp){
+            const rateappnotagain = window.localStorage.getItem('rateappnotagain')
+            if( !rateappnotagain){
+              if( Math.random() > 0.5) requestedVariant = { variant: 'rateapp' }
+            }
+          }
+    
+          requestedVariant = await api.bandit.choose({
+            uid: 'donation',
+          })
+
+          if (requestedVariant) {
+            variant.value = requestedVariant.variant
           }
         }
-  
-        if( !requestedVariant){
-        requestedVariant = await api.bandit.choose({
-          uid: 'donation',
-        })
-        }
-
-        if (requestedVariant) {
-          variant.value = requestedVariant.variant
-        }
+      } catch (e) {
+        console.error('Get variant failed')
       }
-    } catch (e) {
-      console.error('Get variant failed')
     }
 
     showDonationAskModal.value = true

@@ -9,7 +9,7 @@
       <b-row class="m-0">
         <b-col cols="12" lg="6" offset-lg="3" class="p-0">
           <div>
-            <GlobalWarning />
+            <GlobalMessage />
             <MyMessage
               v-if="message?.fromuser === myid"
               :id="id"
@@ -51,7 +51,7 @@ import { buildHead } from '~/composables/useBuildHead'
 import { useMessageStore } from '~/stores/message'
 import { useAuthStore } from '~/stores/auth'
 import NoticeMessage from '~/components/NoticeMessage'
-import GlobalWarning from '~/components/GlobalWarning'
+import GlobalMessage from '~/components/GlobalMessage'
 import { useDonationAskModal } from '~/composables/useDonationAskModal'
 const MyMessage = defineAsyncComponent(() =>
   import('~/components/MyMessage.vue')
@@ -64,7 +64,7 @@ export default {
   components: {
     NoticeMessage,
     MyMessage,
-    GlobalWarning,
+    GlobalMessage,
     DonationAskModal,
   },
   async setup(props) {

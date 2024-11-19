@@ -1,7 +1,7 @@
 <template>
   <client-only>
     <div class="layout fader">
-      <GlobalWarning />
+      <GlobalMessage />
       <div class="d-none d-md-flex justify-content-around">
         <WizardProgress :active-stage="2" class="maxbutt" />
       </div>
@@ -91,7 +91,7 @@ import { useRoute } from 'vue-router'
 import { buildHead } from '../../composables/useBuildHead'
 import NoticeMessage from '~/components/NoticeMessage'
 import ExternalLink from '~/components/ExternalLink'
-import GlobalWarning from '~/components/GlobalWarning'
+import GlobalMessage from '~/components/GlobalMessage'
 import PostCode from '~/components/PostCode'
 import { setup, postcodeSelect, postcodeClear } from '~/composables/useCompose'
 
@@ -102,7 +102,7 @@ export default {
   options: () => {},
   components: {
     ExternalLink,
-    GlobalWarning,
+    GlobalMessage,
     NoticeMessage,
     PostCode,
     ComposeGroup,
@@ -161,6 +161,11 @@ select {
     //We need to subtract space for the navbar, the ad bar, and also allow some extra because of the way vh works
     //mobile browsers.
     min-height: calc(100vh - 84px - $sticky-banner-height-mobile - 84px);
+
+    @supports (height: 100dvh) {
+      min-height: calc(100dvh - 84px - $sticky-banner-height-mobile - 84px);
+    }
+
     display: flex;
     flex-direction: column;
     justify-content: space-between;

@@ -41,6 +41,15 @@ export default {
     // - The notification is not displayed.  As of 2024 with OneTap migrating to FedCM we can't find this out.
     setTimeout(() => {
       console.log('One Tap fallback')
+
+      // Remove DOM element with id credential_picker_container if present
+      const element = document.getElementById('credential_picker_container')
+      if (element) {
+        // This can block other clicks.
+        console.log('Removing OneTap credential_picker_container')
+        element.remove()
+      }
+
       self.$emit('complete')
     }, 15000)
 

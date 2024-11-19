@@ -2,25 +2,37 @@
   <div>
     <div
       v-if="fromuser"
-      class="grey p-2 clickme"
+      class="grey p-2 clickme minwidth"
       :title="'Click to view profile for ' + fromuser.displayname"
     >
-      <div class="d-flex">
+      <div class="d-flex align-content-center">
         <ProfileImage
           v-if="fromuser?.profile"
           :image="fromuser.profile.paththumb"
-          class="mr-1 mb-1 inline"
+          class="mr-1 inline"
           is-thumbnail
           size="md"
           @click="showProfileModal"
         />
-        <div
-          class="d-flex justify-content-between flex-wrap order-0"
-          @click="showProfileModal"
-        >
-          <div class="text-muted align-middle decornone d-flex">
-            Posted by {{ fromuser?.displayname }}
-          </div>
+        <div class="d-flex flex-column order-0" @click="showProfileModal">
+          <span class="text-success font-weight-bold">{{
+            fromuser?.displayname
+          }}</span>
+          <span
+            v-if="fromuser?.info?.openoffers + fromuser?.info?.openwanteds > 0"
+            class="text--small"
+            @click="showProfileModal"
+          >
+            <span v-if="fromuser.info.openoffers" class="text-success">
+              {{ openOfferPlural }}
+            </span>
+            <span v-if="fromuser.info.openoffers && fromuser.info.openwanteds">
+              &bull;
+            </span>
+            <span v-if="fromuser.info.openwanteds" class="text-success">
+              {{ openWantedPlural }}
+            </span>
+          </span>
         </div>
         <nuxt-link
           v-if="message.interacted"
@@ -33,25 +45,13 @@
         </nuxt-link>
       </div>
       <SupporterInfo v-if="fromuser?.supporter" class="d-inline" />
-      <div
-        v-if="fromuser?.info?.openoffers + fromuser?.info?.openwanteds > 0"
-        @click="showProfileModal"
-      >
-        <span v-if="fromuser.info.openoffers" class="text-success">
-          {{ openOfferPlural }}
-        </span>
-        <span v-if="fromuser.info.openoffers && fromuser.info.openwanteds">
-          &bull;
-        </span>
-        <span v-if="fromuser.info.openwanteds" class="text-success">
-          {{ openWantedPlural }}
-        </span>
+      <div v-if="milesaway" class="align-middle" @click="showProfileModal">
+        About {{ milesPlural }} away
       </div>
       <div
         v-for="group in message.groups"
         :key="'message-' + message.id + '-' + group.id"
       >
-        <span :title="group.arrival">{{ timeago(group.arrival) }} on </span>
         <nuxt-link
           v-if="group.groupid in groups"
           no-prefetch
@@ -59,13 +59,14 @@
             '/explore/' + groups[group.groupid].exploreLink + '?noguard=true'
           "
           :title="'Click to view ' + groups[group.groupid].namedisplay"
+          class="font-weight-bold text-success nodecor"
         >
           {{ groups[group.groupid].namedisplay }}
         </nuxt-link>
+        <span class="ml-1 small text-muted" :title="group.arrival">{{
+          timeago(group.arrival)
+        }}</span>
       </div>
-      <span v-if="milesaway" class="align-middle" @click="showProfileModal">
-        About {{ milesPlural }} away
-      </span>
     </div>
     <ProfileModal
       v-if="showProfile && message && fromuser"
@@ -180,5 +181,9 @@ export default {
 <style scoped lang="scss">
 .grey {
   background-color: $color-gray--lighter;
+}
+
+.minwidth {
+  min-width: 250px;
 }
 </style>

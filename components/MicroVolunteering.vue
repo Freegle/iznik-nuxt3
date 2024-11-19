@@ -405,7 +405,7 @@ export default {
 
       this.miscStore.set({
         key: 'microvolunteeringlastask',
-        value: Date.now(),
+        value: tomorrow.getTime(),
       })
     },
   },

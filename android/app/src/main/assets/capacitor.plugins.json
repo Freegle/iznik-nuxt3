@@ -1,5 +1,9 @@
 [
 	{
+		"pkg": "@capacitor-community/stripe",
+		"classpath": "com.getcapacitor.community.stripe.StripePlugin"
+	},
+	{
 		"pkg": "@capacitor/app-launcher",
 		"classpath": "com.capacitorjs.plugins.applauncher.AppLauncherPlugin"
 	},

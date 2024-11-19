@@ -31,8 +31,8 @@
                     type="image/webp"
                     sizes="58px"
                     srcset="
-                      https://61ddd294bd3a390019c6.ucr.io//-/format/webp/-/resize/58x//https://www.ilovefreegle.org/icon.png   58w,
-                      https://61ddd294bd3a390019c6.ucr.io//-/format/webp/-/resize/116x//https://www.ilovefreegle.org/icon.png 116w
+                      https://delivery.ilovefreegle.org/?filename=icon.png&we&w=58&output=png&fit=inside&url=https://www.ilovefreegle.org/icon.png   58w,
+                      https://delivery.ilovefreegle.org/?filename=icon.png&we&w=116&output=png&fit=inside&url=https://www.ilovefreegle.org/icon.png 116w
                     " />
                   <img
                     alt="Home"
@@ -41,8 +41,8 @@
                     src="https://61ddd294bd3a390019c6.ucr.io//-/format/png/-/resize/116x//https://www.ilovefreegle.org/icon.png"
                     sizes="58px"
                     srcset="
-                      https://61ddd294bd3a390019c6.ucr.io//-/format/png/-/resize/58x//https://www.ilovefreegle.org/icon.png   58w,
-                      https://61ddd294bd3a390019c6.ucr.io//-/format/png/-/resize/116x//https://www.ilovefreegle.org/icon.png 116w
+                      https://delivery.ilovefreegle.org/?filename=icon.png&we&w=58&output=png&fit=inside&url=https://www.ilovefreegle.org/icon.png   58w,
+                      https://delivery.ilovefreegle.org/?filename=icon.png&we&w=116&output=png&fit=inside&url=https://www.ilovefreegle.org/icon.png 116w
                     " /></picture></a
               ><!----><!---->
               <div data-v-454188a5="" class="navbar-nav ml-auto">

@@ -38,6 +38,18 @@
     <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id"/>
     <meta-data android:name="com.facebook.sdk.ClientToken" android:value="@string/facebook_client_token"/>
     <meta-data android:name="com.google.firebase.messaging.default_notification_icon" android:resource="@drawable/fr_icon" />
+
+    <meta-data android:name="com.google.android.gms.wallet.api.enabled" android:value="true" />
+    <meta-data android:name="com.getcapacitor.community.stripe.enable_google_pay" android:value="@bool/enable_google_pay"/>
+    <meta-data android:name="com.getcapacitor.community.stripe.publishable_key" android:value="@string/publishable_key"/>
+    <meta-data android:name="com.getcapacitor.community.stripe.country_code" android:value="@string/country_code"/>
+    <meta-data android:name="com.getcapacitor.community.stripe.merchant_display_name" android:value="@string/merchant_display_name"/>
+    <meta-data android:name="com.getcapacitor.community.stripe.google_pay_is_testing" android:value="@bool/google_pay_is_testing"/>
+    <meta-data android:name="com.getcapacitor.community.stripe.email_address_required" android:value="@bool/email_address_required"/>
+    <meta-data android:name="com.getcapacitor.community.stripe.phone_number_required" android:value="@bool/phone_number_required"/>
+    <meta-data android:name="com.getcapacitor.community.stripe.billing_address_required" android:value="@bool/billing_address_required"/>
+    <meta-data android:name="com.getcapacitor.community.stripe.billing_address_format" android:value="@string/billing_address_format"/>
+    <meta-data android:name="com.getcapacitor.community.stripe.google_pay_existing_payment_method_required" android:value="@bool/google_pay_existing_payment_method_required"/>
   </application>
 
   <!-- Permissions -->

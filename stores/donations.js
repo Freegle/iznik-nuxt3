@@ -16,5 +16,18 @@ export const useDonationStore = defineStore({
       this.target = vals.target
       this.raised = vals.raised
     },
+    async add(userid, amount, date) {
+      const ret = await api(this.config).donations.add(userid, amount, date)
+
+      return ret?.id
+    },
+    async stripeIntent(amount, paymentType) {
+      const ret = await api(this.config).donations.stripeIntent(
+        amount,
+        paymentType
+      )
+      console.log('API returned', ret)
+      return ret?.intent
+    },
   },
 })

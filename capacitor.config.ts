@@ -34,6 +34,7 @@ const config: CapacitorConfig = {
     includePlugins: [
       "cordova-plugin-calendar", // C6 https://github.com/uzurv/Calendar-PhoneGap-Plugin-ios-17-support
       "cordova-plugin-inappbrowser", // C6 OK
+      "@capacitor-community/stripe",
       "@capacitor/app-launcher", // C6 OK
       "@capacitor/browser",
       "@capacitor/device", // C6 OK
@@ -62,6 +63,7 @@ const config: CapacitorConfig = {
     includePlugins: [
       "cordova-plugin-calendar", // iOS 17: https://github.com/uzurv/Calendar-PhoneGap-Plugin-ios-17-support
       "cordova-plugin-inappbrowser",
+      "@capacitor-community/stripe",
       "@capacitor/app-launcher",
       "@capacitor/browser",
       "@capacitor/device",

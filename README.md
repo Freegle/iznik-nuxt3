@@ -20,12 +20,12 @@ hear about it; you can mail <geeks@ilovefreegle.org>.
 
 # Development
 
-Currently only tested on node v17.9.1 and npm v9.4.0.  Requires node v17 or later because it relies on fetch()
-which hasn't yet been fully backported to v16.
+Currently only tested on node v18 and npm v9.7.  Won't work on v16 because it relies on fetch()
+which hasn't been fully backported to v16.
 
 Then install all the dependencies:
 ```
-npm install --legacy-peer-deps
+npm i
 ```
 
 Set some environment variables:

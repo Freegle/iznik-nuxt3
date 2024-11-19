@@ -23,6 +23,14 @@
       :width="width"
       :height="width"
     />
+    <b-img
+      v-else-if="image?.indexOf('data:image') === 0"
+      :class-name="className"
+      :src="image"
+      :alt="altText"
+      :width="width"
+      :height="width"
+    />
     <ProxyImage
       v-else
       :src="validImage"

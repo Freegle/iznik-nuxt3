@@ -8,7 +8,7 @@
           </VisibleWhen>
         </b-col>
         <b-col cols="12" lg="6" class="newsfeedHolder p-0">
-          <GlobalWarning />
+          <GlobalMessage />
           <ExpectedRepliesWarning
             v-if="me && me.expectedreplies"
             :count="me.expectedreplies"
@@ -32,6 +32,29 @@
                   placeholder="What's going on in your world?"
                   class="border border-primary"
                 />
+                <NoticeMessage
+                  v-if="showGiveFind"
+                  ref="giveFind"
+                  variant="warning"
+                  class="mt-2"
+                >
+                  <p>
+                    If you're giving something away or looking for something,
+                    please click here. Chitchat is for other discussion.
+                  </p>
+                  <div class="d-flex justify-content-between flex-wrap w-100">
+                    <div class="post__button d-flex justify-content-around">
+                      <b-button to="/give" variant="primary">
+                        Give stuff
+                      </b-button>
+                    </div>
+                    <div class="post__button d-flex justify-content-around">
+                      <b-button to="/find" variant="secondary">
+                        Ask for stuff
+                      </b-button>
+                    </div>
+                  </div>
+                </NoticeMessage>
                 <div class="small text-muted">
                   Everything here is public. Be kind
                   <span class="d-none d-sm-inline">to each other</span>;
@@ -136,7 +159,7 @@ import { useNewsfeedStore } from '../../stores/newsfeed'
 import { useAuthStore } from '../../stores/auth'
 import NewsCommunityEventVolunteerSummary from '../../components/NewsCommunityEventVolunteerSummary'
 import VisibleWhen from '~/components/VisibleWhen'
-import GlobalWarning from '~/components/GlobalWarning'
+import GlobalMessage from '~/components/GlobalMessage'
 import NoticeMessage from '~/components/NoticeMessage'
 import AutoHeightTextarea from '~/components/AutoHeightTextarea'
 import InfiniteLoading from '~/components/InfiniteLoading'
@@ -164,7 +187,7 @@ export default {
   components: {
     NewsCommunityEventVolunteerSummary,
     VisibleWhen,
-    GlobalWarning,
+    GlobalMessage,
     ExpectedRepliesWarning,
     NoticeMessage,
     NewsThread,
@@ -282,12 +305,10 @@ export default {
       imagemods: null,
       distance: 1000,
       runChecks: true,
-      showToolGive: false,
-      shownToolGive: false,
-      showToolFind: false,
-      shownToolFind: false,
       infiniteState: null,
       currentAtts: [],
+      showGiveFind: false,
+      shownGiveFind: false,
     }
   },
   computed: {
@@ -318,6 +339,7 @@ export default {
         }
 
         return (
+          item.userid === 0 ||
           item.userid !== ret[index - 1].userid ||
           item.message !== ret[index - 1].message
         )
@@ -367,17 +389,21 @@ export default {
     // Stop timers which would otherwise kill garbage collection.
     this.runChecks = false
   },
+  mounted() {
+    this.runCheck()
+  },
   methods: {
     runCheck() {
       // People sometimes try to use chitchat to offer/request items, despite what are technically known as
       // Fuck Off Obvious Big Buttons.  Catch the most obvious attempts and redirect them.
       if (this.runChecks) {
         let msg = this.startThread
+        console.log('Check msg')
 
         if (msg) {
           msg = msg.toLowerCase()
 
-          if (!this.shownToolGive) {
+          if (!this.shownGiveFind) {
             for (const word of [
               'offer',
               'giving away',
@@ -386,19 +412,14 @@ export default {
               'collection only',
             ]) {
               if (msg.length && msg.includes(word)) {
-                this.showToolGive = true
-                this.shownToolGive = true
-                this.$refs.givebutton.$el.scrollIntoView()
-                window.scrollBy(0, -100)
-
-                setTimeout(() => {
-                  this.showToolGive = false
-                }, 5000)
+                this.showGiveFind = true
+                this.shownGiveFind = true
+                this.scrollToGiveFind(true)
               }
             }
           }
 
-          if (!this.shownToolFind) {
+          if (!this.shownGiveFind) {
             for (const word of [
               'wanted',
               'wanting',
@@ -411,14 +432,9 @@ export default {
               'if anyone has',
             ]) {
               if (msg.length && msg.includes(word)) {
-                this.showToolFind = true
-                this.shownToolFind = true
-                this.$refs.findbutton.$el.scrollIntoView()
-                window.scrollBy(0, -100)
-
-                setTimeout(() => {
-                  this.showToolFind = false
-                }, 5000)
+                this.showGiveFind = true
+                this.shownGiveFind = true
+                this.scrollToGiveFind(false)
               }
             }
           }
@@ -478,6 +494,26 @@ export default {
       // init callback below.
       this.uploading = true
     },
+    scrollToGiveFind(give) {
+      this.$nextTick(() => {
+        if (this.$refs.giveFind) {
+          this.$refs.giveFind.$el.scrollIntoView()
+
+          setTimeout(() => {
+            if (give && this.$refs.givebutton?.$el) {
+              this.$refs.givebutton.$el.scrollIntoView()
+            } else if (!give && this.$refs.findbutton?.$el) {
+              this.$refs.findbutton.$el.scrollIntoView()
+            }
+          }, 500)
+        }
+
+        window.scrollBy(0, 100)
+        setTimeout(() => {
+          this.showGiveFind = false
+        }, 30000)
+      })
+    },
   },
 }
 </script>
@@ -495,6 +531,10 @@ export default {
 
 .newsfeedHolder {
   height: calc(100vh - 74px);
+
+  @supports (height: 100dvh) {
+    height: calc(100dvh - 74px);
+  }
 }
 
 .tab-content,

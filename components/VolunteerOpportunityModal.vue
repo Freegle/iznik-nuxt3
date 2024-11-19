@@ -141,7 +141,8 @@
           </b-row>
           <br />
           <p v-if="user" class="text-muted">
-            Posted by {{ user.displayname }}
+            Posted
+            <span v-if="user.displayname">by {{ user.displayname }}</span>
             <span v-for="(group, index) in groups" :key="index">
               <span v-if="index > 0">, </span><span v-else>on </span>
               {{ group.namedisplay }}
@@ -442,6 +443,7 @@ import SpinButton from '~/components/SpinButton.vue'
 import { twem } from '~/composables/useTwem'
 import { ref } from '#imports'
 import { useOurModal } from '~/composables/useOurModal'
+import { useImageStore } from '~/stores/image'
 const GroupSelect = defineAsyncComponent(() =>
   import('~/components/GroupSelect')
 )
@@ -516,6 +518,7 @@ export default {
     const composeStore = useComposeStore()
     const userStore = useUserStore()
     const groupStore = useGroupStore()
+    const imageStore = useImageStore()
     const groupid = ref(null)
 
     const { modal, hide } = useOurModal()
@@ -540,6 +543,7 @@ export default {
       composeStore,
       userStore,
       groupStore,
+      imageStore,
       groupid,
       oldPhoto,
       modal,

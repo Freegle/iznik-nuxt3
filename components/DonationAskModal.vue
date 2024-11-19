@@ -1,79 +1,96 @@
 <template>
   <b-modal ref="modal" scrollable :title="title" size="lg" no-stacking>
     <template #default>
-      <p v-if="donated">
-        You've already donated to Freegle (on {{ donated }}). Thank you.
-      </p>
-      <div v-if="variant === 'video'">
-        <DonationAskVideo
-          :groupid="groupId"
-          :groupname="groupName"
-          :target="target"
-          :raised="raised"
-          :target-met="targetMet"
-          :donated="donated"
-          @score="score"
-        />
-      </div>
-      <div v-else-if="variant === 'quote'">
-        <DonationAskQuote
-          :groupid="groupId"
-          :groupname="groupName"
-          :target="target"
-          :raised="raised"
-          :target-met="targetMet"
-          :donated="donated"
-          @score="score"
-        />
-      </div>
-      <div v-else-if="variant === 'buttons2510'">
-        <DonationAskButtons2510
-          :groupid="groupId"
-          :groupname="groupName"
-          :target="target"
-          :raised="raised"
-          :target-met="targetMet"
-          :donated="donated"
-          @score="score"
-        />
-      </div>
-      <div v-else-if="variant === 'buttons51025'">
-        <DonationAskButtons51025
-          :groupid="groupId"
-          :groupname="groupName"
-          :target="target"
-          :raised="raised"
-          :target-met="targetMet"
-          :donated="donated"
-          @score="score"
-        />
-      </div>
-      <div v-else-if="variant === 'rateapp'">
-        <RateAppAsk
-        @hide="hide"
-        />
-      </div>
-      <div v-else-if="variant === 'impact'">
-        <DonationAskImpact
-          :groupname="groupName"
-          :groupid="groupId"
-          :target="target"
-          :raised="raised"
-          :target-met="targetMet"
-          :donated="donated"
-          @score="score"
-        />
+      <div v-if="thankyou">
+        <DonationThank />
       </div>
       <div v-else>
-        <DonationAskWhatYouCan
-          :groupname="groupName"
-          :groupid="groupId"
-          :target="target"
-          :raised="raised"
-          :target-met="targetMet"
-          :donated="donated"
-          @score="score"
-        />
+        <p v-if="donated">
+          You've already donated to Freegle (on {{ donated }}). Thank you.
+        </p>
+        <div v-if="variant === 'video'">
+          <DonationAskVideo
+            :groupid="groupId"
+            :groupname="groupName"
+            :target="target"
+            :raised="raised"
+            :target-met="targetMet"
+            :donated="donated"
+            @score="score"
+          />
+        </div>
+        <div v-else-if="variant === 'rateapp'">
+          <RateAppAsk
+            @hide="hide"
+          />
+        </div>
+        <div v-else-if="variant === 'stripe'">
+          <DonationAskStripe
+            :groupid="groupId"
+            :groupname="groupName"
+            :target="target"
+            :raised="raised"
+            :target-met="targetMet"
+            :donated="donated"
+            @score="score"
+            @success="thankyou = true"
+          />
+        </div>
+        <div v-else-if="variant === 'quote'">
+          <DonationAskQuote
+            :groupid="groupId"
+            :groupname="groupName"
+            :target="target"
+            :raised="raised"
+            :target-met="targetMet"
+            :donated="donated"
+            @score="score"
+          />
+        </div>
+        <div v-else-if="variant === 'buttons2510'">
+          <DonationAskButtons2510
+            :groupid="groupId"
+            :groupname="groupName"
+            :target="target"
+            :raised="raised"
+            :target-met="targetMet"
+            :donated="donated"
+            @score="score"
+          />
+        </div>
+        <div v-else-if="variant === 'buttons51025'">
+          <DonationAskButtons51025
+            :groupid="groupId"
+            :groupname="groupName"
+            :target="target"
+            :raised="raised"
+            :target-met="targetMet"
+            :donated="donated"
+            @score="score"
+          />
+        </div>
+        <div v-else-if="variant === 'impact'">
+          <DonationAskImpact
+            :groupname="groupName"
+            :groupid="groupId"
+            :target="target"
+            :raised="raised"
+            :target-met="targetMet"
+            :donated="donated"
+            @score="score"
+          />
+        </div>
+        <div v-else>
+          <DonationAskWhatYouCan
+            :groupname="groupName"
+            :groupid="groupId"
+            :target="target"
+            :raised="raised"
+            :target-met="targetMet"
+            :donated="donated"
+            @score="score"
+          />
+        </div>
       </div>
     </template>
     <template #footer>
@@ -90,6 +107,7 @@ import DonationAskButtons2510 from '~/components/DonationAskButtons2510.vue'
 import DonationAskButtons51025 from '~/components/DonationAskButtons51025.vue'
 import DonationAskImpact from '~/components/DonationAskImpact.vue'
 import DonationAskWhatYouCan from '~/components/DonationAskWhatYouCan.vue'
+import DonationAskStripe from '~/components/DonationAskStripe.vue'
 import { useDonationAskModal } from '~/composables/useDonationAskModal'
 import { useGroupStore } from '~/stores/group'
 import { useDonationStore } from '~/stores/donations'
@@ -98,12 +116,22 @@ import { useAuthStore } from '~/stores/auth'
 import { dateshort } from '~/composables/useTimeFormat'
 import RateAppAsk from '~/components/RateAppAsk.vue'
 
+const props = defineProps({
+  variant: {
+    type: String,
+    required: false,
+    default: null,
+  },
+})
+
 const groupStore = useGroupStore()
 const donationStore = useDonationStore()
 const authStore = useAuthStore()
 
+const thankyou = ref(false)
+
 const { modal, hide } = useOurModal()
-const { variant, groupId, show } = await useDonationAskModal()
+const { variant, groupId, show } = await useDonationAskModal(props.variant)
 
 const groupName = computed(() => {
   if (groupId.value && !targetMet.value) {

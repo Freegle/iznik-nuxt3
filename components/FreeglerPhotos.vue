@@ -23,14 +23,14 @@
                   src="/landingpage/frame.png"
                   class-name="frame"
                   alt="Ornate gold picture frame. Image courtesy of https://pixabay.com/users/avantrend-321510/"
-                  sizes="1px sm:576px md:768"
+                  sizes="1px sm:576px md:76px"
                 />
                 <ProxyImage
                   loading="lazy"
                   :src="photo(img)"
                   alt="Picture of a real freegler, looking happy. Photo by Alex Bamford."
                   class-name="image"
-                  sizes="1px sm:576px md:768"
+                  sizes="1px sm:576px md:768px"
                 />
                 <p class="text-center text--smallest credit">
                   Photos of real freeglers, kindly taken by
@@ -49,14 +49,14 @@
               src="/landingpage/frame.png"
               class-name="frame"
               alt="Ornate gold picture frame. Image courtesy of https://pixabay.com/users/avantrend-321510/"
-              sizes="1px sm:576px md:768"
+              sizes="1px sm:576px md:768px"
             />
             <ProxyImage
               preload
               :src="photo(1)"
               alt="Picture of a real freegler, looking happy. Photo by Alex Bamford."
               class-name="image"
-              sizes="1px sm:576px md:768"
+              sizes="1px sm:576px md:768px"
             />
             <p class="text-center text--smallest credit">
               Photos of real freeglers, kindly taken by

@@ -89,6 +89,10 @@ const props = defineProps({
     type: Number,
     default: 500,
   },
+  handleParam: {
+    type: [String, Number, Object, Array],
+    default: null,
+  },
 })
 
 const emit = defineEmits(['handle'])
@@ -172,7 +176,7 @@ const onClick = () => {
       done.value = false
       loading.value = true
       timer = setTimeout(forgottenCallback, 20 * 1000)
-      emit('handle', finishSpinner)
+      emit('handle', finishSpinner, props.handleParam)
     }
   }
 }
@@ -181,7 +185,7 @@ const confirmed = () => {
   actionConfirmed.value = true
   done.value = false
   loading.value = true
-  emit('handle', finishSpinner)
+  emit('handle', finishSpinner, props.handleParam)
   timer = setTimeout(forgottenCallback, 20 * 1000)
 }
 

@@ -7,14 +7,7 @@
           <h1>Thank you!</h1>
         </b-card-header>
         <b-card-text class="p-2">
-          <p>
-            Thanks very much for donating to us. We'll use your money wisely.
-          </p>
-          <p>
-            You can also support us by putting up posters, inviting people, and
-            more. See <nuxt-link no-prefetch to="/promote">here</nuxt-link>.
-          </p>
-          <p>Happy freegling!</p>
+          <DonationThank />
         </b-card-text>
       </b-card>
     </b-col>
@@ -23,8 +16,12 @@
 <script>
 import { useRoute } from 'vue-router'
 import { buildHead } from '~/composables/useBuildHead'
+import DonationThank from '~/components/DonationThank.vue'
 
 export default {
+  components: {
+    DonationThank,
+  },
   setup() {
     const runtimeConfig = useRuntimeConfig()
     const route = useRoute()
