@@ -3,7 +3,7 @@
     <b-row>
       <b-col cols="6" md="3" class="pl-3">
         <div>
-          <b-input v-model="giftaid.fullname" :class="{ 'border-danger': nameInvalid }" />
+          <b-form-input v-model="giftaid.fullname" :class="{ 'border-danger': nameInvalid }" />
           <div v-if="email">
             <!-- eslint-disable-next-line -->
             <ExternalLink :href="'mailto:' + email + '?subject=A question about your Gift Aid declaration'"><v-icon icon="envelope" />&nbsp;{{ email
@@ -22,11 +22,11 @@
         </div>
       </b-col>
       <b-col cols="6" md="5">
-        <b-textarea v-model="giftaid.homeaddress" rows="4" />
-        <b-input v-model="giftaid.housenameornumber" :class="{ 'border-danger': houseInvalid, 'mt-1': true }" placeholder="House name or number" />
-        <b-input v-model="giftaid.postcode" :class="{ 'border-danger': postcodeInvalid, 'mt-1': true }" placeholder="Postcode" />
+        <b-form-textarea v-model="giftaid.homeaddress" rows="4" />
+        <b-form-input v-model="giftaid.housenameornumber" :class="{ 'border-danger': houseInvalid, 'mt-1': true }" placeholder="House name or number" />
+        <b-form-input v-model="giftaid.postcode" :class="{ 'border-danger': postcodeInvalid, 'mt-1': true }" placeholder="Postcode" />
       </b-col>
-      <b-col cols="6" md="4" class="d-flex justify-content-between">
+      <b-col cols="6" md="4" class="">
         <SpinButton variant="white" icon-name="save" label="Save Changes" @handle="save" />
         <SpinButton variant="warning" icon-name="trash-alt" label="Give Up" @handle="giveup" confirm />
         <SpinButton variant="success" icon-name="check" label="Looks Good" @handle="reviewed"
