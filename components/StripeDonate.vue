@@ -4,7 +4,7 @@
       v-if="loading"
       class="d-flex flex-column justify-content-around text-center pulsate text-muted w-100"
     >
-      Loading payment methods...
+      Loading donation methods...
     </div>
     <div :id="uniqueId"></div>
   </div>
