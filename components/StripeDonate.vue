@@ -3,11 +3,32 @@
     <div v-if="loading" class="d-flex flex-column justify-content-around text-center pulsate text-muted w-100">
       Loading payment methods...
     </div>
-    <div :id="uniqueId"></div>
+    <div class="d-flex justify-content-between flex-wrap">
+      <b-button v-if="isGooglePayAvailable" variant="primary" size="lg" aria-label="Donate to Freegle with Google Pay" @click="useGooglePay">
+        <div class="d-flex align-items-center">
+          <img src="/GooglePayButton.png" class="w-100" />
+        </div>
+      </b-button>
+      <div class="mx-auto w-100">
+        <b-button v-if="isApplePayAvailable" block variant="primary" size="lg" aria-label="Donate to Freegle with Apple Pay" @click="useApplePay">
+          <div class="d-flex align-items-center" style="color: black;">
+            Pay with&nbsp; <b-img lazy alt="Apple Pay" src="/Apple_Pay_Mark_RGB_041619.svg" class="" style="height:40px;" />
+          </div>
+        </b-button>
+      </div>
+      <b-button v-if="isPayPalAvailable" variant="primary" size="lg" aria-label="Donate to Freegle with PayPay or a card" @click="usePayPalCard">
+        <div class="d-flex align-items-center">
+          <img src="/PayPalButton.png" class="w-100" />
+        </div>
+      </b-button>
+
+    </div>
   </div>
 </template>
 <script setup>
-import { Stripe, PaymentSheetEventsEnum, GooglePayEventsEnum } from '@capacitor-community/stripe'
+
+// https://www.ilovefreegle.org/donated/
+import { Stripe, PaymentSheetEventsEnum, GooglePayEventsEnum, ApplePayEventsEnum } from '@capacitor-community/stripe'
 
 import { uid } from '../composables/useId'
 import { useDonationStore } from '~/stores/donations'
@@ -23,114 +44,176 @@ const props = defineProps({
 })
 
 const loading = ref(true)
+const isApplePayAvailable = ref(false)
+const isGooglePayAvailable = ref(false)
+const isPayPalAvailable = ref(false)
+const intent = ref(false)
 
 const emit = defineEmits(['loaded', 'error', 'success'])
 
-const uniqueId = uid('stripe-donate-')
-
+console.log('Stripe.initialize', runtimeConfig.public.STRIPE_PUBLISHABLE_KEY)
 Stripe.initialize({
   publishableKey: runtimeConfig.public.STRIPE_PUBLISHABLE_KEY,
 })
 
 onMounted(async () => {
   try {
-    console.log(
-      'Mounted for #',
-      uniqueId,
-      document.getElementById(uniqueId) !== null
-    )
-    console.log('props.price', props.price)
+    console.log('Stripe props.price', props.price)
 
     Stripe.addListener(PaymentSheetEventsEnum.Failed, (e) => {
-      console.log('PaymentSheetEventsEnum.Failed', e);
+      console.log('Stripe PaymentSheetEventsEnum.Failed', e)
     })
     Stripe.addListener(PaymentSheetEventsEnum.FailedToLoad, (e) => {
-      console.log('PaymentSheetEventsEnum.FailedToLoad', e);
+      console.log('Stripe PaymentSheetEventsEnum.FailedToLoad', e)
     })
     Stripe.addListener(PaymentSheetEventsEnum.Loaded, () => {
-      console.log('PaymentSheetEventsEnum.Loaded');
+      console.log('Stripe PaymentSheetEventsEnum.Loaded')
     })
     Stripe.addListener(PaymentSheetEventsEnum.Canceled, () => {
-      console.log('PaymentSheetEventsEnum.Canceled');
+      console.log('Stripe PaymentSheetEventsEnum.Canceled')
     })
     Stripe.addListener(PaymentSheetEventsEnum.Completed, () => {
-      console.log('PaymentSheetEventsEnum.Completed');
+      console.log('Stripe PaymentSheetEventsEnum.Completed')
     })
     Stripe.addListener(GooglePayEventsEnum.Failed, (e) => {
-      console.log('GooglePayEventsEnum.Failed', e);
+      console.log('Stripe GooglePayEventsEnum.Failed', e)
     })
     Stripe.addListener(GooglePayEventsEnum.FailedToLoad, (e) => {
-      console.log('GooglePayEventsEnum.FailedToLoad', e);
+      console.log('Stripe GooglePayEventsEnum.FailedToLoad', e)
     })
     Stripe.addListener(GooglePayEventsEnum.Loaded, () => {
-      console.log('GooglePayEventsEnum.Loaded');
+      console.log('Stripe GooglePayEventsEnum.Loaded')
     })
     Stripe.addListener(GooglePayEventsEnum.Canceled, () => {
-      console.log('GooglePayEventsEnum.Canceled');
+      console.log('Stripe GooglePayEventsEnum.Canceled')
     })
     Stripe.addListener(GooglePayEventsEnum.Completed, () => {
-      console.log('GooglePayEventsEnum.Completed');
+      console.log('Stripe GooglePayEventsEnum.Completed')
     })
-    Stripe.addListener(GooglePayEventsEnum.Completed, () => {
-      console.log('GooglePayEventsEnum.Completed');
-    });
-
-
-    const intent = await donationStore.stripeIntent(
-      props.price,
-    )
-    console.log('Intent', intent)
-
-    const isGooglePayAvailable = await Stripe.isGooglePayAvailable()
-    console.log('isGooglePayAvailable', isGooglePayAvailable)
-    if (isGooglePayAvailable === undefined) {
-      // disable to use Google Pay
-      //    return;
-    }
-
-    await Stripe.createPaymentSheet({
-      paymentIntentClientSecret: intent.client_secret,
-      //customerId: customer,
-      //customerEphemeralKeySecret: ephemeralKey,
-      enableGooglePay: true,
-      //enableApplePay: false,
-      merchantDisplayName: 'Freegle',
+    Stripe.addListener(ApplePayEventsEnum.applePayFailed, (e) => {
+      console.log('Stripe ApplePayEventsEnum.Failed', e)
     })
-    console.log('createPaymentSheet')
+    Stripe.addListener(ApplePayEventsEnum.applePayFailedToLoad, (e) => {
+      console.log('Stripe ApplePayEventsEnum.applePayFailedToLoad', e)
+    })
+    Stripe.addListener(ApplePayEventsEnum.applePayLoaded, () => {
+      console.log('Stripe ApplePayEventsEnum.applePayLoaded')
+    })
+    Stripe.addListener(ApplePayEventsEnum.applePayCompleted, () => {
+      console.log('Stripe ApplePayEventsEnum.applePayCompleted')
+    })
+    Stripe.addListener(ApplePayEventsEnum.applePayCanceled, () => {
+      console.log('Stripe ApplePayEventsEnum.applePayCanceled')
+    })
+    Stripe.addListener(ApplePayEventsEnum.applePayDidSelectShippingContact, () => {
+      console.log('Stripe ApplePayEventsEnum.applePayDidSelectShippingContact')
+    })
+    Stripe.addListener(ApplePayEventsEnum.applePayDidCreatePaymentMethod, () => {
+      console.log('Stripe ApplePayEventsEnum.applePayDidCreatePaymentMethod')
+    })
 
-    const result = await Stripe.presentPaymentSheet()
-    console.log('presentPaymentSheet', result.paymentResult, result)
-    if (result.paymentResult === PaymentSheetEventsEnum.Completed) {
-      // Happy path
-      console.log('Happy path')
-    }
-    console.log('DONE')
+    intent.value = await donationStore.stripeIntent({
+      amount: props.price,
+      test: true,
+    })
+    console.log('Stripe Intent', intent.value)
 
-    /*
-      // Prepare Google Pay
-      await Stripe.createGooglePay({
-      paymentIntentClientSecret: paymentIntent,
-  
-      // Web only. Google Pay on Android App doesn't need
-      paymentSummaryItems: [{
-        label: 'Product Name',
-        amount: 1099.00
-      }],
-      merchantIdentifier: 'merchant.com.getcapacitor.stripe',
-      countryCode: 'US',
-      currency: 'USD',
-    });
-  
-      // Present Google Pay
-    const result = await Stripe.presentGooglePay();
-    if (result.paymentResult === GooglePayEventsEnum.Completed) {
-      // Happy path
+    try {
+      await Stripe.isApplePayAvailable()
+      isApplePayAvailable.value = true
+    } catch (e) {
+      // eg Not implemented on Android.
     }
-    */
+    isApplePayAvailable.value = true
+    console.log('Stripe isApplePayAvailable', isApplePayAvailable.value)
+
+    try {
+      await Stripe.isGooglePayAvailable()
+      isGooglePayAvailable.value = true
+    } catch (e) {
+      // eg Not implemented on Device.
+    }
+    console.log('Stripe isGooglePayAvailable', isGooglePayAvailable.value)
+
+    isPayPalAvailable.value = true
   } catch (e) {
-    console.log('Exception', e.message)
+    console.log('Stripe Exception', e.message)
   }
+  loading.value = false
+  emit('loaded')
 })
+
+async function useGooglePay() {
+  console.log('useGooglePay')
+  console.log('Stripe createGooglePay BEFORE')
+  // Prepare Google Pay
+  await Stripe.createGooglePay({
+    paymentIntentClientSecret: intent.value.client_secret,
+
+    merchantIdentifier: 'org.ilovefreegle.direct',
+    countryCode: 'GB',
+    currency: 'GBP',
+  })
+  console.log('Stripe createGooglePay AFTER')
+
+  // Present Google Pay
+  const result = await Stripe.presentGooglePay()
+  console.log('Stripe presentGooglePay', result.paymentResult, result)
+  if (result.paymentResult === GooglePayEventsEnum.Completed) {
+    // Happy path
+    console.log('Stripe Happy path')
+    emit('success')
+  }
+  console.log('Stripe DONE')
+}
+
+
+async function usePayPalCard() {
+  console.log('usePayPalCard')
+  await Stripe.createPaymentSheet({
+    paymentIntentClientSecret: intent.value.client_secret,
+    //customerId: customer,
+    //customerEphemeralKeySecret: ephemeralKey,
+    //enableGooglePay: true,
+    //enableApplePay: false,
+    merchantDisplayName: 'Freegle',
+  })
+  console.log('Stripe createPaymentSheet')
+
+  const result = await Stripe.presentPaymentSheet()
+  console.log('Stripe presentPaymentSheet', result.paymentResult, result)
+  if (result.paymentResult === PaymentSheetEventsEnum.Completed) {
+    // Happy path
+    console.log('Stripe Happy path')
+    emit('success')
+  }
+  console.log('Stripe DONE')
+}
+
+
+async function useApplePay() {
+  console.log('useApplePay')
+  await Stripe.createApplePay({
+    paymentIntentClientSecret: intent.value.client_secret,
+    paymentSummaryItems: [{
+      label: 'Donation',
+      amount: props.price
+    }],
+    merchantDisplayName: 'Freegle',
+    countryCode: 'GB',
+    currency: 'GBP',
+  });
+  // Present Apple Pay
+  const result = await Stripe.presentApplePay()
+  console.log('Stripe presentApplePay', result.paymentResult, result)
+  if (result.paymentResult === ApplePayEventsEnum.Completed) {
+    // Happy path
+    console.log('Stripe Happy path')
+    emit('success')
+  }
+  console.log('Stripe DONE')
+}
+
 </script>
 <style scoped lang="scss">
 .height {

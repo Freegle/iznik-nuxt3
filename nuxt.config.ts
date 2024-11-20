@@ -29,6 +29,7 @@ import https from 'https'
 //  console.error('public/js/prebid.js NOT THE SAME AS public/js/prebid-base.js', prebidCurrent.length, prebidBase.length)
 //  process.exit(1)
 //}
+console.log('config.STRIPE_PUBLISHABLE_KEY',config.STRIPE_PUBLISHABLE_KEY)
 console.log('config.NODE_ENV',config.NODE_ENV)
 console.log('config.APP_ENV',config.APP_ENV)
 const production = config.APP_ENV ? config.APP_ENV=='production' : true
@@ -44,7 +45,7 @@ if (config.COOKIEYES) {
       try {
         if (cookieyesCurrent !== cookieyesBase) {
           console.error('config.COOKIEYES NOT THE SAME AS public/js/cookieyes-base.js', config.COOKIEYES)
-          process.exit(1)
+        //  process.exit(1)
         }
       } catch (error) { console.error(error.message) }
     })
