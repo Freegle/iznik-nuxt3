@@ -45,7 +45,7 @@ if (config.COOKIEYES) {
       try {
         if (cookieyesCurrent !== cookieyesBase) {
           console.error('config.COOKIEYES NOT THE SAME AS public/js/cookieyes-base.js', config.COOKIEYES)
-        //  process.exit(1)
+          process.exit(1)
         }
       } catch (error) { console.error(error.message) }
     })

@@ -121,7 +121,6 @@ onMounted(async () => {
     } catch (e) {
       // eg Not implemented on Android.
     }
-    isApplePayAvailable.value = true
     console.log('Stripe isApplePayAvailable', isApplePayAvailable.value)
 
     try {
@@ -193,10 +192,11 @@ async function useApplePay() {
   await Stripe.createApplePay({
     paymentIntentClientSecret: intent.value.client_secret,
     paymentSummaryItems: [{
-      label: 'Donation',
+      label: 'Freegle Donation',
       amount: props.price
     }],
-    merchantDisplayName: 'Freegle',
+    merchantIdentifier: 'Freegle',
+    //merchantDisplayName: 'Freegle',
     countryCode: 'GB',
     currency: 'GBP',
   });
