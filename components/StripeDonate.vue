@@ -9,13 +9,11 @@
           <img src="/GooglePayButton.png" class="w-100" />
         </div>
       </b-button>
-      <div class="mx-auto w-100">
-        <b-button v-if="isApplePayAvailable" block variant="primary" size="lg" aria-label="Donate to Freegle with Apple Pay" @click="useApplePay">
-          <div class="d-flex align-items-center" style="color: black;">
-            Pay with&nbsp; <b-img lazy alt="Apple Pay" src="/Apple_Pay_Mark_RGB_041619.svg" class="" style="height:40px;" />
-          </div>
-        </b-button>
-      </div>
+      <b-button v-if="isApplePayAvailable" variant="primary" size="lg" aria-label="Donate to Freegle with Apple Pay" @click="useApplePay">
+        <div class="d-flex align-items-center">
+          <img src="/ApplePayButton.jpg" class="w-100" />
+        </div>
+      </b-button>
       <b-button v-if="isPayPalAvailable" variant="primary" size="lg" aria-label="Donate to Freegle with PayPay or a card" @click="usePayPalCard">
         <div class="d-flex align-items-center">
           <img src="/PayPalButton.png" class="w-100" />
@@ -30,7 +28,6 @@
 // https://www.ilovefreegle.org/donated/
 import { Stripe, PaymentSheetEventsEnum, GooglePayEventsEnum, ApplePayEventsEnum } from '@capacitor-community/stripe'
 
-import { uid } from '../composables/useId'
 import { useDonationStore } from '~/stores/donations'
 
 const runtimeConfig = useRuntimeConfig()
@@ -114,7 +111,7 @@ onMounted(async () => {
 
     intent.value = await donationStore.stripeIntent({
       amount: props.price,
-      test: true,
+      //test: true,
     })
     console.log('Stripe Intent', intent.value)
 
