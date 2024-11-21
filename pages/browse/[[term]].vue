@@ -52,20 +52,20 @@
               <PostCode @selected="savePostcode" />
             </NoticeMessage>
             <PostFilters
-              v-model:forceShowFilters="forceShowFilters"
-              v-model:selectedGroup="selectedGroup"
-              v-model:selectedType="selectedType"
-              v-model:selectedSort="selectedSort"
+              v-model:force-show-filters="forceShowFilters"
+              v-model:selected-group="selectedGroup"
+              v-model:selected-type="selectedType"
+              v-model:selected-sort="selectedSort"
               v-model:search="searchTerm"
               class="mt-2 mt-md-0"
             />
             <PostMapAndList
               :key="'map-' + bump"
-              v-model:messagesOnMapCount="messagesOnMapCount"
+              v-model:messages-on-map-count="messagesOnMapCount"
               v-model:search="searchTerm"
-              v-model:selectedGroup="selectedGroup"
-              v-model:selectedType="selectedType"
-              v-model:selectedSort="selectedSort"
+              v-model:selected-group="selectedGroup"
+              v-model:selected-type="selectedType"
+              v-model:selected-sort="selectedSort"
               :initial-bounds="initialBounds"
               force-messages
               group-info
@@ -348,9 +348,14 @@ export default {
             // way we can display the list rapidly.  Fetching this and the isochrones in parallel reduces latency.
             promises.push(this.isochroneStore.fetchMessages(true))
 
-            await Promise.all(promises)
+            try {
+              await Promise.all(promises)
+              this.initialBounds = this.isochroneStore.bounds
+            } catch (e) {
+              // If this fails revert to a default view.
+            }
           }
-
+        } else {
           this.initialBounds = this.isochroneStore.bounds
         }
 
