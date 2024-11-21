@@ -138,7 +138,7 @@
           </p>
           <div class="d-flex justify-content-between flex-wrap w-100 mt-2">
             <b-button
-              v-if="inviteAccepted && !force"
+              v-if="inviteAccepted"
               variant="white"
               class="mb-1"
               @click="stopIt"
@@ -197,10 +197,9 @@ if (debug) {
 }
 
 const me = authStore.user
+console.log('Me?', me)
 
-const inviteAccepted = computed(() => {
-  return me?.trustlevel && me.trustlevel !== 'Declined'
-})
+const inviteAccepted = ref(me?.trustlevel && me.trustlevel !== 'Declined')
 
 const allowed = ref(debug)
 
@@ -248,8 +247,6 @@ async function getTask() {
     } else if (task.value.type === 'Invite') {
       showTask.value = true
     }
-
-    console.log('Show?', showTask.value)
   }
 
   bump.value++
@@ -293,7 +290,13 @@ async function inviteResponse(callback, response) {
       marketingconsent: 1,
     })
 
-    allowed.value = true
+    inviteAccepted.value = true
+
+    authStore.groups.forEach((g) => {
+      if (g.microvolunteeringallowed) {
+        allowed.value = true
+      }
+    })
 
     await getTask()
   } else {

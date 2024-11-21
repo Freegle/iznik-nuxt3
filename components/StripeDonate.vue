@@ -173,6 +173,12 @@ async function usePayPalCard() {
     //enableGooglePay: true,
     //enableApplePay: false,
     merchantDisplayName: 'Freegle',
+    /**
+     * iOS Only
+     * @url https://stripe.com/docs/payments/accept-a-payment?platform=ios&ui=payment-sheet#userinterfacestyle
+     * @default undefined
+     */
+    //returnURL:
   })
   console.log('Stripe createPaymentSheet')
 

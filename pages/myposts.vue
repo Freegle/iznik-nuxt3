@@ -32,6 +32,16 @@
           </div>
           <div v-else>
             <NewUserInfo v-if="newUserPassword" :password="newUserPassword" />
+            <div v-else-if="type === 'Offer' && !donated">
+              <NoticeMessage
+                type="info"
+                class="text-center font-weight-bold text-danger"
+              >
+                We're a charity - free to use, but not free to run. Help us keep
+                going by donating £1?
+                <StripeDonate :price="1" @success="donationMade" />
+              </NoticeMessage>
+            </div>
 
             <MyPostsPostsList
               :posts="posts"
@@ -72,6 +82,8 @@ import MyPostsPostsList from '~/components/MyPostsPostsList.vue'
 import MyPostsSearchesList from '~/components/MyPostsSearchesList.vue'
 import { useDonationAskModal } from '~/composables/useDonationAskModal'
 import { useTrystStore } from '~/stores/tryst'
+import { useRuntimeConfig } from '#app'
+import Api from '~/api'
 const DonationAskModal = defineAsyncComponent(() =>
   import('~/components/DonationAskModal')
 )
@@ -82,9 +94,11 @@ const searchStore = useSearchStore()
 const trystStore = useTrystStore()
 
 const runtimeConfig = useRuntimeConfig()
+const api = Api(runtimeConfig)
 const ids = ref([])
 const type = ref(null)
 const newUserPassword = ref(null)
+const donated = ref(false)
 
 definePageMeta({
   layout: 'login',
@@ -173,6 +187,13 @@ onMounted(() => {
     window.setTimeout(() => {
       window.history.replaceState({ ids: null, type: null }, null)
     }, 5000)
+
+    if (type.value === 'Offer' && myid) {
+      api.bandit.shown({
+        uid: 'donation',
+        variant: 'mypostoffer',
+      })
+    }
   }
 
   if (window.history.state?.ids?.length) {
@@ -181,8 +202,17 @@ onMounted(() => {
     newUserPassword.value = window.history.state.newpassword
   }
 
-  showDonationAskModal.value = true
+  //showDonationAskModal.value = true
 })
+
+function donationMade() {
+  api.bandit.chosen({
+    uid: 'donation',
+    variant: 'mypostoffer',
+  })
+
+  donated.value = true
+}
 </script>
 <style scoped lang="scss">
 @import 'assets/css/sticky-banner.scss';
