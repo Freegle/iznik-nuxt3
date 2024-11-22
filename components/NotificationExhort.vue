@@ -20,7 +20,6 @@
     </div>
   </div>
 </template>
-
 <script>
 import { setupNotification } from '../composables/useNotification'
 

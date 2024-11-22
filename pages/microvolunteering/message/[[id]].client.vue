@@ -43,19 +43,10 @@ definePageMeta({
 })
 
 const route = useRoute()
-const msgid = route.params.id
+const msgid = parseInt(route.params.id)
 
 const miscStore = useMiscStore()
 const authStore = useAuthStore()
-const debug = false
-
-if (debug) {
-  miscStore.set({
-    key: 'microvolunteeringlastask',
-    value: null,
-  })
-}
-
 const done = ref(false)
 
 async function stopIt() {
