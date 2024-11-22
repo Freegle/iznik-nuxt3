@@ -29,9 +29,11 @@
 import { Stripe, PaymentSheetEventsEnum, GooglePayEventsEnum, ApplePayEventsEnum } from '@capacitor-community/stripe'
 
 import { useDonationStore } from '~/stores/donations'
+import { useMobileStore } from '@/stores/mobile'
 
 const runtimeConfig = useRuntimeConfig()
 const donationStore = useDonationStore()
+const mobileStore = useMobileStore()
 
 const props = defineProps({
   price: {
@@ -56,82 +58,88 @@ Stripe.initialize({
 onMounted(async () => {
   try {
     console.log('Stripe props.price', props.price)
+    if (mobileStore.isApp && !mobileStore.isiOS) { // Disable on iOS for now
 
-    Stripe.addListener(PaymentSheetEventsEnum.Failed, (e) => {
-      console.log('Stripe PaymentSheetEventsEnum.Failed', e)
-    })
-    Stripe.addListener(PaymentSheetEventsEnum.FailedToLoad, (e) => {
-      console.log('Stripe PaymentSheetEventsEnum.FailedToLoad', e)
-    })
-    Stripe.addListener(PaymentSheetEventsEnum.Loaded, () => {
-      console.log('Stripe PaymentSheetEventsEnum.Loaded')
-    })
-    Stripe.addListener(PaymentSheetEventsEnum.Canceled, () => {
-      console.log('Stripe PaymentSheetEventsEnum.Canceled')
-    })
-    Stripe.addListener(PaymentSheetEventsEnum.Completed, () => {
-      console.log('Stripe PaymentSheetEventsEnum.Completed')
-    })
-    Stripe.addListener(GooglePayEventsEnum.Failed, (e) => {
-      console.log('Stripe GooglePayEventsEnum.Failed', e)
-    })
-    Stripe.addListener(GooglePayEventsEnum.FailedToLoad, (e) => {
-      console.log('Stripe GooglePayEventsEnum.FailedToLoad', e)
-    })
-    Stripe.addListener(GooglePayEventsEnum.Loaded, () => {
-      console.log('Stripe GooglePayEventsEnum.Loaded')
-    })
-    Stripe.addListener(GooglePayEventsEnum.Canceled, () => {
-      console.log('Stripe GooglePayEventsEnum.Canceled')
-    })
-    Stripe.addListener(GooglePayEventsEnum.Completed, () => {
-      console.log('Stripe GooglePayEventsEnum.Completed')
-    })
-    Stripe.addListener(ApplePayEventsEnum.applePayFailed, (e) => {
-      console.log('Stripe ApplePayEventsEnum.Failed', e)
-    })
-    Stripe.addListener(ApplePayEventsEnum.applePayFailedToLoad, (e) => {
-      console.log('Stripe ApplePayEventsEnum.applePayFailedToLoad', e)
-    })
-    Stripe.addListener(ApplePayEventsEnum.applePayLoaded, () => {
-      console.log('Stripe ApplePayEventsEnum.applePayLoaded')
-    })
-    Stripe.addListener(ApplePayEventsEnum.applePayCompleted, () => {
-      console.log('Stripe ApplePayEventsEnum.applePayCompleted')
-    })
-    Stripe.addListener(ApplePayEventsEnum.applePayCanceled, () => {
-      console.log('Stripe ApplePayEventsEnum.applePayCanceled')
-    })
-    Stripe.addListener(ApplePayEventsEnum.applePayDidSelectShippingContact, () => {
-      console.log('Stripe ApplePayEventsEnum.applePayDidSelectShippingContact')
-    })
-    Stripe.addListener(ApplePayEventsEnum.applePayDidCreatePaymentMethod, () => {
-      console.log('Stripe ApplePayEventsEnum.applePayDidCreatePaymentMethod')
-    })
+      Stripe.addListener(PaymentSheetEventsEnum.Failed, (e) => {
+        console.log('Stripe PaymentSheetEventsEnum.Failed', e)
+      })
+      Stripe.addListener(PaymentSheetEventsEnum.FailedToLoad, (e) => {
+        console.log('Stripe PaymentSheetEventsEnum.FailedToLoad', e)
+      })
+      Stripe.addListener(PaymentSheetEventsEnum.Loaded, () => {
+        console.log('Stripe PaymentSheetEventsEnum.Loaded')
+      })
+      Stripe.addListener(PaymentSheetEventsEnum.Canceled, () => {
+        console.log('Stripe PaymentSheetEventsEnum.Canceled')
+      })
+      Stripe.addListener(PaymentSheetEventsEnum.Completed, () => {
+        console.log('Stripe PaymentSheetEventsEnum.Completed')
+      })
+      if (!mobileStore.isiOS) {
+        Stripe.addListener(GooglePayEventsEnum.Failed, (e) => {
+          console.log('Stripe GooglePayEventsEnum.Failed', e)
+        })
+        Stripe.addListener(GooglePayEventsEnum.FailedToLoad, (e) => {
+          console.log('Stripe GooglePayEventsEnum.FailedToLoad', e)
+        })
+        Stripe.addListener(GooglePayEventsEnum.Loaded, () => {
+          console.log('Stripe GooglePayEventsEnum.Loaded')
+        })
+        Stripe.addListener(GooglePayEventsEnum.Canceled, () => {
+          console.log('Stripe GooglePayEventsEnum.Canceled')
+        })
+        Stripe.addListener(GooglePayEventsEnum.Completed, () => {
+          console.log('Stripe GooglePayEventsEnum.Completed')
+        })
+      } else { //iOS
+        Stripe.addListener(ApplePayEventsEnum.applePayFailed, (e) => {
+          console.log('Stripe ApplePayEventsEnum.Failed', e)
+        })
+        Stripe.addListener(ApplePayEventsEnum.applePayFailedToLoad, (e) => {
+          console.log('Stripe ApplePayEventsEnum.applePayFailedToLoad', e)
+        })
+        Stripe.addListener(ApplePayEventsEnum.applePayLoaded, () => {
+          console.log('Stripe ApplePayEventsEnum.applePayLoaded')
+        })
+        Stripe.addListener(ApplePayEventsEnum.applePayCompleted, () => {
+          console.log('Stripe ApplePayEventsEnum.applePayCompleted')
+        })
+        Stripe.addListener(ApplePayEventsEnum.applePayCanceled, () => {
+          console.log('Stripe ApplePayEventsEnum.applePayCanceled')
+        })
+        Stripe.addListener(ApplePayEventsEnum.applePayDidSelectShippingContact, () => {
+          console.log('Stripe ApplePayEventsEnum.applePayDidSelectShippingContact')
+        })
+        Stripe.addListener(ApplePayEventsEnum.applePayDidCreatePaymentMethod, () => {
+          console.log('Stripe ApplePayEventsEnum.applePayDidCreatePaymentMethod')
+        })
+      }
 
-    intent.value = await donationStore.stripeIntent({
-      amount: props.price,
-      //test: true,
-    })
-    console.log('Stripe Intent', intent.value)
+      intent.value = await donationStore.stripeIntent({
+        amount: props.price,
+        //test: true,
+      })
+      console.log('Stripe Intent', intent.value)
 
-    try {
-      await Stripe.isApplePayAvailable()
-      isApplePayAvailable.value = true
-    } catch (e) {
-      // eg Not implemented on Android.
+      if (!mobileStore.isiOS) { // Android
+        try {
+          await Stripe.isGooglePayAvailable()
+          isGooglePayAvailable.value = true
+        } catch (e) {
+          // eg Not implemented on Device.
+        }
+      } else { // iOS
+        try {
+          await Stripe.isApplePayAvailable()
+          isApplePayAvailable.value = true
+        } catch (e) {
+          // eg Not implemented on Android.
+        }
+      }
+      console.log('Stripe isGooglePayAvailable', isGooglePayAvailable.value)
+      console.log('Stripe isApplePayAvailable', isApplePayAvailable.value)
+      isPayPalAvailable.value = true
     }
-    console.log('Stripe isApplePayAvailable', isApplePayAvailable.value)
-
-    try {
-      await Stripe.isGooglePayAvailable()
-      isGooglePayAvailable.value = true
-    } catch (e) {
-      // eg Not implemented on Device.
-    }
-    console.log('Stripe isGooglePayAvailable', isGooglePayAvailable.value)
-
-    isPayPalAvailable.value = true
   } catch (e) {
     console.log('Stripe Exception', e.message)
   }
@@ -157,7 +165,7 @@ async function useGooglePay() {
   console.log('Stripe presentGooglePay', result.paymentResult, result)
   if (result.paymentResult === GooglePayEventsEnum.Completed) {
     // Happy path
-    console.log('Stripe Happy path')
+    console.log('Stripe GooglePay successful')
     emit('success')
   }
   console.log('Stripe DONE')
@@ -185,8 +193,7 @@ async function usePayPalCard() {
   const result = await Stripe.presentPaymentSheet()
   console.log('Stripe presentPaymentSheet', result.paymentResult, result)
   if (result.paymentResult === PaymentSheetEventsEnum.Completed) {
-    // Happy path
-    console.log('Stripe Happy path')
+    console.log('Stripe PayPal/card successful')
     emit('success')
   }
   console.log('Stripe DONE')
@@ -210,8 +217,7 @@ async function useApplePay() {
   const result = await Stripe.presentApplePay()
   console.log('Stripe presentApplePay', result.paymentResult, result)
   if (result.paymentResult === ApplePayEventsEnum.Completed) {
-    // Happy path
-    console.log('Stripe Happy path')
+    console.log('Stripe ApplePay successful')
     emit('success')
   }
   console.log('Stripe DONE')

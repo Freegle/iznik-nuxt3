@@ -38,11 +38,13 @@ export function useDonationAskModal(requestedVariant = null) {
   const showDonationAskModal = ref(false)
 
   async function show(requestedVariant) {
+    const mobileStore = useMobileStore()
     miscStore.set({
       key: 'lastdonationask',
       value: new Date().getTime(),
     })
 
+    console.log('stripe uDAM start', variant.value, requestedVariant)
     console.log('Show', variant.value, requestedVariant)
     if (requestedVariant) {
       // We need to decide which variant of donation ask to show.
@@ -56,17 +58,26 @@ export function useDonationAskModal(requestedVariant = null) {
             variant: 'buttons2510',
           }
 
-          const mobileStore = useMobileStore()
+          let gotnow = false
           if( mobileStore.isApp){
             const rateappnotagain = window.localStorage.getItem('rateappnotagain')
             if( !rateappnotagain){
-              if( Math.random() > 0.5) requestedVariant = { variant: 'rateapp' }
+              const acertainratio = Math.random()
+              console.log('stripe acertainratio', acertainratio)
+              if( acertainratio > 0.7) {
+                requestedVariant = { variant: 'rateapp' }
+                gotnow = true
+                console.log('stripe uDAM rateapp', variant.value, requestedVariant)
+              }
             }
           }
     
-          requestedVariant = await api.bandit.choose({
-            uid: 'donation',
-          })
+          if (!gotnow) {
+            requestedVariant = await api.bandit.choose({
+              uid: 'donation',
+            })
+            console.log('stripe uDAM chosen', variant.value, requestedVariant)
+          }
 
           if (requestedVariant) {
             variant.value = requestedVariant.variant
@@ -76,6 +87,10 @@ export function useDonationAskModal(requestedVariant = null) {
         console.error('Get variant failed')
       }
     }
+    if( mobileStore.isApp && mobileStore.isiOS && (variant.value == 'stripe')){
+      variant.value = 'rateapp'
+      console.log('stripe uDAM iOS', variant.value)
+    }
 
     showDonationAskModal.value = true
 
@@ -84,6 +99,7 @@ export function useDonationAskModal(requestedVariant = null) {
       uid: 'donation',
       variant: variant.value,
     })
+    console.log('stripe uDAM end', variant.value)
   }
 
   return { showDonationAskModal, variant, groupId, show }
