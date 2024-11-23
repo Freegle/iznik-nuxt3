@@ -28,7 +28,7 @@ const props = defineProps({
 
 const loading = ref(true)
 
-const emit = defineEmits(['loaded', 'error', 'success'])
+const emit = defineEmits(['loaded', 'error', 'success', 'noPaymentMethods'])
 
 const uniqueId = uid('stripe-donate-')
 
@@ -68,7 +68,13 @@ onMounted(() => {
   expressCheckoutElement.on('ready', (event) => {
     console.log('Express checkout ready', event)
     loading.value = false
-    emit('loaded')
+
+    if (!event.availablePaymentMethods?.length) {
+      console.log('No Stripe payment methods available')
+      emit('noPaymentMethods')
+    } else {
+      emit('loaded')
+    }
   })
   expressCheckoutElement.on('loaderror', (event) => {
     console.log('Express checkout loadError', event)
