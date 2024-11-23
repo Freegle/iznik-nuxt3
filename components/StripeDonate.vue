@@ -70,6 +70,7 @@ onMounted(() => {
     loading.value = false
 
     if (!event.availablePaymentMethods?.length) {
+      // We've seen this happen on Brave.
       console.log('No Stripe payment methods available')
       emit('noPaymentMethods')
     } else {
