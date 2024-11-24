@@ -135,7 +135,7 @@ const modString = computed(() => {
   }
 })
 function brokenImage(e) {
-  console.log('Proxy image broken')
+  console.log('Our uploaded image broken', props.src)
   emit('error', e)
   show.value = false
 
