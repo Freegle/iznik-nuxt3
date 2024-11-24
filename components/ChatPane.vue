@@ -106,8 +106,10 @@ export default {
             const userv2 = userStore.byId(chat.value.otheruid)
             await userStore.fetchMT({ id: chat.value.otheruid})
             const user = userStore.byId(chat.value.otheruid)
-            user.info = userv2.info
-            if( user.spammer && user.spammer.collection==='Whitelisted') user.spammer = false
+            if( user && user.info){
+              user.info = userv2.info
+              if( user.spammer && user.spammer.collection==='Whitelisted') user.spammer = false
+            }
           }
         } else  if (chat?.value?.otheruid) {
             await userStore.fetch(chat.value.otheruid)
