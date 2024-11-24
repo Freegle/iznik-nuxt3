@@ -123,7 +123,7 @@ export default defineNuxtPlugin((nuxtApp) => {
               return null
             } else if (
               originalExceptionStack?.includes('/Cannot unmountComponent') &&
-              originalExceptionString?.match('Cannot destructure property')
+              originalExceptionString?.match('destructure')
             ) {
               console.log('Vue unmount error - suppress')
               return null
