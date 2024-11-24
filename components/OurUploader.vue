@@ -40,7 +40,6 @@
 <script setup>
 import { shouldPolyfill as shouldPolyfillLocale } from '@formatjs/intl-locale/should-polyfill'
 import { shouldPolyfill as shouldPolyfillPlural } from '@formatjs/intl-pluralrules/should-polyfill'
-// eslint-disable-next-line import/no-named-as-default
 import Uppy from '@uppy/core'
 import { DashboardModal } from '@uppy/vue'
 import Tus from '@uppy/tus'
