@@ -48,7 +48,7 @@ const isGooglePayAvailable = ref(false)
 const isPayPalAvailable = ref(false)
 const intent = ref(false)
 
-const emit = defineEmits(['loaded', 'error', 'success'])
+const emit = defineEmits(['loaded', 'error', 'success', 'noPaymentMethods'])
 
 console.log('Stripe.initialize', runtimeConfig.public.STRIPE_PUBLISHABLE_KEY)
 Stripe.initialize({

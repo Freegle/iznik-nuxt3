@@ -98,7 +98,7 @@ export default {
   grid-template-columns: repeat(3, 90px);
   grid-template-rows: repeat(3, 90px);
 
-  @include media-breakpoint-up(md) {
+  @include media-breakpoint-up(sm) {
     grid-template-columns: repeat(3, 140px);
     grid-template-rows: repeat(3, 140px);
   }

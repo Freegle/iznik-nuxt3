@@ -52,7 +52,18 @@
         </b-button>
       </b-button-group>
       <div class="mt-2 mb-2 w-100">
-        <StripeDonate :key="price" :price="price" @success="succeeded" />
+        <StripeDonate
+          :key="price"
+          :price="price"
+          @success="succeeded"
+          @no-payment-methods="noMethods"
+        />
+        <DonationButton
+          v-if="payPalFallback"
+          :text="`Donate £${price}`"
+          :value="price"
+          class="mb-4"
+        />
         <div ref="belowStripe" />
       </div>
       <p class="mt-2 small">
@@ -109,6 +120,7 @@ export default {
     return {
       monthly: false,
       price: 1,
+      payPalFallback: false,
     }
   },
   methods: {
@@ -122,6 +134,9 @@ export default {
     succeeded() {
       this.score(this.rpice)
       this.$emit('success')
+    },
+    noMethods() {
+      this.payPalFallback = true
     },
   },
 }

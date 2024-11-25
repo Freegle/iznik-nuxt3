@@ -46,7 +46,7 @@
       <MessageModal
         v-if="expanded"
         :id="message.id"
-        v-model:showImages="showImages"
+        v-model:show-images="showImages"
         :replyable="replyable"
         :hide-close="hideClose"
         :actions="actions"

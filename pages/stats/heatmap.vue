@@ -25,14 +25,16 @@
           v-model:bounds="bounds"
           v-model:zoom="zoom"
           :style="'width: ' + mapWidth + '; height: ' + mapWidth + 'px'"
-          :min-zoom="5"
-          :max-zoom="13"
+          :min-zoom="minZoom"
+          :max-zoom="maxZoom"
         >
           <l-tile-layer :url="osmtile" :attribution="attribution" />
           <LeafletHeatmap
             v-if="weightedData?.length && zoom"
             :lat-lngs="weightedData"
             :radius="zoom * 3"
+            :max-opacity="1"
+            :min-opacity="minOpacity"
             :gradient="{
               0.05: 'darkblue',
               0.1: 'darkgreen',
@@ -90,6 +92,8 @@ export default {
       center: [53.945, -2.5209],
       bounds: null,
       zoom: 6,
+      minZoom: 5,
+      maxZoom: 13,
       max: 0,
     }
   },
@@ -153,16 +157,23 @@ export default {
         data.forEach((d) => {
           if (this.bounds.contains([d[0], d[1]])) {
             const val = 1 - lineartolog(1 - d[2] / max)
-            console.log(val, max, minlog, maxlog)
+            // console.log(val, max, minlog, maxlog)
             if (Number.isFinite(val)) {
               weighted.push([d[0], d[1], val])
             }
           }
         })
+
+        console.log('Weighted', max, minlog, maxlog, weighted, this.heatMapData)
       }
 
-      console.log(weighted)
       return weighted
+    },
+    minOpacity() {
+      return (
+        0.05 +
+        (0.1 * (this.zoom - this.minZoom)) / (this.maxZoom - this.minZoom)
+      )
     },
   },
   async mounted() {

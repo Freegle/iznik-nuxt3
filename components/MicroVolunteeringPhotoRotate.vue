@@ -48,7 +48,7 @@ export default {
   width: 80px;
   height: 80px;
 
-  @include media-breakpoint-up(md) {
+  @include media-breakpoint-up(sm) {
     width: 120px;
     height: 120px;
   }

@@ -123,6 +123,12 @@ export default defineNuxtPlugin((nuxtApp) => {
               console.log('Google ads - suppress exception')
               return null
             } else if (
+              originalExceptionStack?.includes('Cannot unmountComponent') &&
+              originalExceptionString?.includes('destructure')
+            ) {
+              console.log('Vue unmount error - suppress')
+              return null
+            } else if (
               originalExceptionStack?.includes('/pageFold/') ||
               originalExceptionStack?.includes('/strikeforce/') ||
               originalExceptionStack?.includes('/ads/js/')
