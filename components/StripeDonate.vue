@@ -19,7 +19,9 @@
           <img src="/PayPalButton.png" class="w-100" />
         </div>
       </b-button>
-
+      <p v-if="!isGooglePayAvailable && !isApplePayAvailable && !isPayPalAvailable">
+        Sorry, there are no payments methods available on your phone.
+      </p>
     </div>
   </div>
 </template>
@@ -39,6 +41,11 @@ const props = defineProps({
   price: {
     type: Number,
     required: true,
+  },
+  monthly: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
 })
 
@@ -143,8 +150,13 @@ onMounted(async () => {
   } catch (e) {
     console.log('Stripe Exception', e.message)
   }
+  if (isGooglePayAvailable.value || isApplePayAvailable.value || isPayPalAvailable.value) {
+    emit('loaded')
+  } else {
+    emit('noPaymentMethods')
+  }
+
   loading.value = false
-  emit('loaded')
 })
 
 async function useGooglePay() {
