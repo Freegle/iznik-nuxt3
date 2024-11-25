@@ -22,46 +22,48 @@
         <strong> please donate </strong>
         to keep us running.
       </p>
-      <b-button-group class="d-flex flex-wrap mt-1 mb-2">
+      <b-button-group class="d-flex flex-wrap mt-1 mb-2 mr-2">
         <b-button
-          :pressed="price === 1"
-          :variant="price === 1 ? 'primary' : 'white'"
+          v-for="amount in amounts"
+          :key="'donate-' + amount"
+          :pressed="price === amount"
+          :variant="price === amount ? 'primary' : 'white'"
           size="lg"
           class="shadow-none"
-          @click="setPrice(1)"
+          @click="setPrice(amount)"
         >
-          <span class="d-none d-md-inline">Donate </span>£1
+          <span class="d-none d-md-inline">Donate </span>£{{ amount }}
         </b-button>
-        <b-button
-          :pressed="price === 5"
-          :variant="price === 5 ? 'primary' : 'white'"
-          size="lg"
-          class="shadow-none"
-          @click="setPrice(5)"
-        >
-          <span class="d-none d-md-inline">Donate </span>£5
-        </b-button>
-        <b-button
-          :pressed="price === 10"
-          :variant="price === 10 ? 'primary' : 'white'"
-          size="lg"
-          class="shadow-none"
-          @click="setPrice(10)"
-        >
-          <span class="d-none d-md-inline">Donate </span>£10
-        </b-button>
+        <div class="text-muted text-small">
+          <b-input-group prepend="Other:">
+            <b-input
+              v-model="otherAmount"
+              type="number"
+              min="1"
+              step="0.50"
+              size="lg"
+              class="otherWidth"
+            />
+          </b-input-group>
+        </div>
       </b-button-group>
+      <!--      <BFormCheckbox id="monthly" v-model="monthly" name="monthly" class="mb-2">-->
+      <!--        Monthly donations are really helpful-->
+      <!--      TODO-->
+      <!--      </BFormCheckbox>-->
+
       <div class="mt-2 mb-2 w-100">
         <StripeDonate
           :key="price"
           :price="price"
+          :monthly="monthly"
           @success="succeeded"
           @no-payment-methods="noMethods"
         />
         <DonationButton
           v-if="payPalFallback"
           :text="`Donate £${price}`"
-          :value="price"
+          :value="price + ''"
           class="mb-4"
         />
         <div ref="belowStripe" />
@@ -69,7 +71,7 @@
       <p class="mt-2 small">
         You'll get a cute little
         <SupporterInfo size="sm" class="d-inline" />
-        badge so that other people can see you're a committed freegler.
+        badge so that people can see you're a committed freegler.
         <!-- eslint-disable-next-line -->
         Anything you can give is very welcome. You can find other ways to donate (e.g. bank transfer or cheque) <nuxt-link no-prefetch to="/donate?noguard=true">here</nuxt-link>.
       </p>
@@ -115,13 +117,36 @@ export default {
       type: String,
       default: null,
     },
+    amounts: {
+      type: Array,
+      required: false,
+      default: () => [1, 5, 10],
+    },
+    default: {
+      type: Number,
+      required: false,
+      default: 1,
+    },
   },
   data() {
     return {
       monthly: false,
       price: 1,
       payPalFallback: false,
+      otherAmount: null,
     }
+  },
+  watch: {
+    otherAmount(newVal) {
+      if (newVal) {
+        this.price = parseFloat(newVal)
+      } else {
+        this.price = this.default
+      }
+    },
+  },
+  created() {
+    this.price = this.default
   },
   methods: {
     score(amount) {
@@ -132,7 +157,7 @@ export default {
       this.$refs.belowStripe.scrollIntoView()
     },
     succeeded() {
-      this.score(this.rpice)
+      this.score(this.price)
       this.$emit('success')
     },
     noMethods() {
@@ -141,3 +166,8 @@ export default {
   },
 }
 </script>
+<style scoped lang="scss">
+.otherWidth {
+  width: 6rem;
+}
+</style>

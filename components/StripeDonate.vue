@@ -24,6 +24,11 @@ const props = defineProps({
     type: Number,
     required: true,
   },
+  monthly: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
 })
 
 const loading = ref(true)
@@ -51,7 +56,7 @@ const options = {
 }
 
 const elements = stripe.elements({
-  mode: 'payment',
+  mode: props.monthly ? 'subscription' : 'payment',
   amount: props.price * 100, // Price is in pence
   currency: 'gbp',
   appearance,
@@ -69,7 +74,7 @@ onMounted(() => {
     console.log('Express checkout ready', event)
     loading.value = false
 
-    if (!event.availablePaymentMethods?.length) {
+    if (!event.availablePaymentMethods) {
       // We've seen this happen on Brave.
       console.log('No Stripe payment methods available')
       emit('noPaymentMethods')
