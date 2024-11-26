@@ -73,7 +73,7 @@ export function setupChat(selectedChatId, chatMessageId) {
     let user = null
 
     if( chat?.value?.chattype==='User2Mod'){
-      chat.value.otheruid = chat.value.user1id
+      chat.value.otheruid = chat.value.user1id || chat.value.user1?.id
     }
 
     if (chat?.value?.otheruid) {
