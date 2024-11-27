@@ -10,11 +10,18 @@ const config = defineNuxtConfig({
   extends: [
     '../'
   ],
+  compatibilityDate: '2024-11-26',
   css: [
     '@fortawesome/fontawesome-svg-core/styles.css',
     '/assets/css/global.scss',
     'leaflet/dist/leaflet.css',
   ],
+  /*modules: [
+    '@pinia/nuxt',
+    '@nuxt/image',
+    'nuxt-vite-legacy',
+    '@bootstrap-vue-next/nuxt'
+  ],*/
   runtimeConfig: {
     public: {
       VERSION: version,

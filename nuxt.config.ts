@@ -151,6 +151,10 @@ export default defineNuxtConfig({
   experimental: {
     emitRouteChunkError: 'reload',
     asyncContext: true,
+
+    // Payload extraction breaks SSR with routeRules - see https://github.com/nuxt/nuxt/issues/22068
+    renderJsonPayloads: false,
+    payloadExtraction: false,
   },
 
   webpack: {
@@ -158,9 +162,24 @@ export default defineNuxtConfig({
     extractCSS: true,
   },
 
-  modules: ['@pinia/nuxt'],
+  modules: [
+    '@pinia/nuxt',
+    '@nuxt/image',
+    'nuxt-vite-legacy',
+    '@bootstrap-vue-next/nuxt',
+    /*process.env.GTM_ID ? '@zadigetvoltaire/nuxt-gtm' : null,
+    [
+      '@nuxtjs/google-adsense',
+      {
+        id: process.env.GOOGLE_ADSENSE_ID,
+        test: process.env.GOOGLE_ADSENSE_TEST_MODE === 'true',
+        hideUnfilled: false,
+        pauseOnLoad: true,
+      },
+    ],*/
+  ],
 
-  buildModules: [
+  /*buildModules: [
     [
       '@pinia/nuxt',
       {
@@ -168,7 +187,24 @@ export default defineNuxtConfig({
       },
     ],
     'floating-vue/nuxt',
-  ],
+  ],*/
+
+  hooks: {
+    'build:manifest': (manifest) => {
+      for (const item of Object.values(manifest)) {
+        item.dynamicImports = []
+        item.prefetch = false
+        // Removing preload links is the magic that drops the FCP on mobile
+        item.preload = false
+      }
+    },
+    close: (nuxt) => {
+      // Required to stop build hanging - see https://github.com/nuxt/cli/issues/193
+      if (!nuxt.options._prepare) {
+        process.exit()
+      }
+    },
+  },
 
   // Environment variables the client needs.
   runtimeConfig: {
@@ -225,6 +261,18 @@ export default defineNuxtConfig({
         org: 'freegle',
         project: 'modtools',
       }),
+    ],
+  },
+
+  // Note that this is not the standard @vitejs/plugin-legacy, but https://www.npmjs.com/package/nuxt-vite-legacy
+  legacy: {
+    targets: ['chrome 49', 'since 2015', 'ios>=12', 'safari>=12'],
+    modernPolyfills: [
+      'es.global-this',
+      'es.object.from-entries',
+      'es.array.flat-map',
+      'es.array.flat',
+      'es.string.replace-all',
     ],
   },
 
