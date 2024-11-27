@@ -123,7 +123,7 @@ export default {
   },
   setup() {
     const miscStore = useMiscStore()
-    const groupStore = useGroupStore
+    const groupStore = useGroupStore()
 
     return { miscStore, groupStore }
   },

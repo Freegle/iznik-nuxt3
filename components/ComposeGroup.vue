@@ -8,7 +8,6 @@
 <script>
 import { useComposeStore } from '../stores/compose'
 import { useMiscStore } from '~/stores/misc'
-import { useGroupStore } from '~/stores/group'
 import api from '~/api'
 
 export default {
@@ -21,10 +20,9 @@ export default {
   },
   setup() {
     const miscStore = useMiscStore()
-    const groupStore = useGroupStore
     const composeStore = useComposeStore()
 
-    return { miscStore, groupStore, composeStore }
+    return { miscStore, composeStore }
   },
   computed: {
     group: {
