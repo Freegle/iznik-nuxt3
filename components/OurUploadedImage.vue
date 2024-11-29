@@ -19,8 +19,6 @@
   />
 </template>
 <script setup>
-// This import gives a build warning, but removing it causes 500 errors.  So don't.
-import { defineProps } from 'vue'
 import * as Sentry from '@sentry/browser'
 
 const props = defineProps({
