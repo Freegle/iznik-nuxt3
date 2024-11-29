@@ -1,17 +1,25 @@
 <template>
-  <div>
-    <b-img lazy src="/freegled.jpg" class="freegled__image" />
-    <b-popover
-      v-model="showing"
-      :content="title"
-      placement="top"
-      variant="primary"
-      triggers="hover"
-      :target="'msg-' + id"
-      custom-class="primary"
-      @shown="shown"
-      @hidden="hidden"
-    />
+  <div class="freegleg">
+    <div v-if="summary">
+      <b-img lazy src="/freegled.jpg" class="freegled__image" />
+      <b-popover
+        v-if="message.fromuser !== myid"
+        v-model="showing"
+        :content="title"
+        placement="top"
+        variant="primary"
+        triggers="hover"
+        :target="'msg-' + id"
+        custom-class="primary"
+        @shown="shown"
+        @hidden="hidden"
+      />
+    </div>
+    <div v-else>
+      <notice-message variant="warning">
+        This item has already been successfully freegled.
+      </notice-message>
+    </div>
   </div>
 </template>
 <script>
@@ -22,6 +30,11 @@ export default {
     id: {
       type: Number,
       required: true,
+    },
+    summary: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   setup() {
@@ -37,7 +50,6 @@ export default {
       showing: false,
     }
   },
-
   computed: {
     message() {
       return this.messageStore?.byId(this.id)
@@ -84,15 +96,23 @@ export default {
 }
 </script>
 <style scoped lang="scss">
+@import 'bootstrap/scss/_functions';
+@import 'bootstrap/scss/_variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
+
 .freegled__image {
   position: absolute;
-  width: 225px;
   z-index: 2;
   transform: rotate(15deg);
-  top: 30%;
-
-  // Centre the absolute positioned div in its container
+  top: 50%;
   left: 50%;
-  margin-left: -125px;
+
+  width: 150px;
+  margin-left: -75px;
+
+  @include media-breakpoint-up(md) {
+    width: 225px;
+    margin-left: -125px;
+  }
 }
 </style>

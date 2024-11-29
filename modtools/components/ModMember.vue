@@ -26,7 +26,7 @@
         </div>
       </b-card-header>
       <b-card-body>
-        <ModDeletedOrForgotten :user="user" />
+        <ModDeletedOrForgotten v-if="user" :user="user" />
         <NoticeMessage v-if="banned" variant="danger" class="mb-2">
           This freegler is banned from this group.
         </NoticeMessage>

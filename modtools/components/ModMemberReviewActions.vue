@@ -81,8 +81,7 @@ export default {
   methods: {
     async remove(callback) {
       this.showConfirmModal = true
-      await nextTick()
-      this.$refs.removeConfirm.show()
+      this.$refs.removeConfirm?.show()
 
       setTimeout(() => {
         this.reviewed = true

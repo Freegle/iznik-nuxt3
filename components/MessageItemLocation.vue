@@ -21,20 +21,28 @@
           }"
           itemprop="name"
         >
-          {{ item }}
+          <a
+            class="nodecor text-wrap item"
+            :href="'/message/' + id"
+            @click="block"
+            >{{ item }}</a
+          >
         </span>
       </div>
       <div>
-        <b-badge
-          v-if="message && message.availablenow > 1"
-          variant="info"
-          class="ms-2 me-2 mt-0 align-top"
-        >
-          {{ message.availablenow ? message.availablenow : '0' }} left
-        </b-badge>
+        <client-only>
+          <b-badge
+            v-if="message && message.availablenow > 1"
+            variant="info"
+            class="ms-2 me-2 mt-0 align-top"
+          >
+            {{ message.availablenow ? message.availablenow : '0' }} left
+          </b-badge>
+        </client-only>
       </div>
     </h3>
-    <div class="location">
+    <div class="spacer" />
+    <div v-if="showLocation" class="location text-truncate">
       {{ location }}
     </div>
   </div>
@@ -65,6 +73,11 @@ export default {
       type: Boolean,
       required: false,
       default: false,
+    },
+    showLocation: {
+      type: Boolean,
+      required: false,
+      default: true,
     },
   },
   setup() {
@@ -105,15 +118,44 @@ export default {
       return ret ? twem(ret) : null
     },
   },
+  methods: {
+    block(e) {
+      e.preventDefault()
+    },
+  },
 }
 </script>
 <style scoped lang="scss">
+@import 'bootstrap/scss/_functions';
+@import 'bootstrap/scss/_variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/message-images.scss';
+
 .item {
   color: $colour-info-fg !important;
+
+  a {
+    color: $colour-info-fg !important;
+  }
+
   font-weight: bold !important;
   text-overflow: ellipsis;
   overflow: hidden;
-  display: block;
+  display: inline-block;
+
+  @media only screen and (max-width: 360px) {
+    width: 100%;
+  }
+
+  @media only screen and (min-width: 360px) {
+    font-size: 1rem;
+    width: max($thumbnail-size, calc(50vw - 2rem));
+  }
+
+  @include media-breakpoint-up(md) {
+    font-size: 1.5rem;
+    width: 100%;
+  }
 }
 
 .nowrap {
@@ -122,6 +164,10 @@ export default {
 
 .location {
   color: $color-gray--darker !important;
-  font-size: 1.25rem;
+  font-size: 0.8rem;
+
+  @include media-breakpoint-up(md) {
+    font-size: 1.25rem;
+  }
 }
 </style>

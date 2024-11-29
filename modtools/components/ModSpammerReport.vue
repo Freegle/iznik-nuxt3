@@ -46,7 +46,7 @@
   </b-modal>
 </template>
 <script>
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 import { useSpammerStore } from '../stores/spammer'
 
 export default {
@@ -62,7 +62,7 @@ export default {
     }
   },
   setup() {
-    const { modal, hide } = useModal()
+    const { modal, hide } = useOurModal()
     const spammerStore = useSpammerStore()
     return { spammerStore, modal, hide }
   },

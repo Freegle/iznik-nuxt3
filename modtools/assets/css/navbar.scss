@@ -2,6 +2,12 @@
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
 
+$navbar-height: calc(8px + 8px + 64px);
+
+@include media-breakpoint-up(md) {
+  $navbar-height: calc(8px + 8px + 58px);
+}
+
 #navbar_large .nav-item {
   text-align: center;
 }
@@ -144,6 +150,26 @@ svg.fa-icon {
   top: 2px;
   right: 4px;
   font-size: 11px;
+  background-color: $colour-secondary !important;
+  color: white !important;
+}
+
+.communityeventsbadge {
+  position: absolute;
+  top: 2px;
+  right: -2px;
+  font-size: 11px;
+  background-color: $colour-secondary !important;
+  color: white !important;
+}
+
+.volunteeropportunitiesbadge {
+  position: absolute;
+  top: 2px;
+  right: 9px;
+  font-size: 11px;
+  background-color: $colour-secondary !important;
+  color: white !important;
 }
 
 .browsebadge {
@@ -151,4 +177,6 @@ svg.fa-icon {
   top: 2px;
   right: -6px;
   font-size: 11px;
+  background-color: $colour-secondary !important;
+  color: white !important;
 }

@@ -17,10 +17,12 @@
         <h2>{{ team.name }}</h2>
         <b-input-group v-if="supportOrAdmin" class="mt-2 mb-2">
           <b-form-input v-model="memberToAdd" type="number" placeholder="Add member by ID" />
-          <b-input-group-append>
-            <SpinButton variant="primary" icon-name="plus" label="Add" spinclass="text-white" @handle="addMember($event, team.name)"
-              :disabled="!memberToAdd" />
-          </b-input-group-append>
+          <b-input-group>
+            <slot name="append">
+              <SpinButton variant="primary" icon-name="plus" label="Add" spinclass="text-white" @handle="addMember($event, team.name)"
+                :disabled="!memberToAdd" />
+            </slot>
+          </b-input-group>
         </b-input-group>
         <NoticeMessage v-if="!team.active" variant="info">
           This team is not active at the moment.

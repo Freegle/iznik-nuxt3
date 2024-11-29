@@ -117,7 +117,7 @@
               <b-button v-if="!readonly" variant="secondary" class="mt-2 d-block" @click="uploadProfile">
                 <v-icon icon="camera" /> Upload photo
               </b-button>
-              <OurFilePond v-if="uploadingProfile" imgtype="Group" imgflag="group" :groupid="groupid" @photoProcessed="profileUploaded" />
+              <OurUploader v-if="uploadingProfile" imgtype="Group" imgflag="group" :groupid="groupid" @photoProcessed="profileUploaded" />
             </b-form-group>
             <ModGroupSetting :groupid="groupid" name="tagline" label="Tagline"
               description="This should be short and snappy. Include some local reference that people in your area will feel connected to." />
@@ -153,6 +153,100 @@
                 <ModGroupSetting :groupid="groupid" name="settings.keywords.received" label="RECEIVED keyword" class="mr-2" />
               </div>
             </b-form-group>
+          </b-card-body>
+        </b-collapse>
+      </b-card>
+      <b-card no-body class="mb-2">
+        <b-card-header>
+          <b-button v-b-toggle.accordion-rules block href="#" variant="secondary">
+            Rules
+          </b-button>
+        </b-card-header>
+        <b-collapse id="accordion-rules" accordion="settings-accordion" role="tabpanel">
+          <b-card-body>
+            <p>
+              This section records information about rules you might have on your group.
+            </p>
+            <p>
+              When we ask <strong>do you allow any</strong>, you should answer yes if you
+              allow any at all, even if you don't allow all of them. For example, if you allow
+              some requests for animals, but not all, answer <em>Yes</em>. Similarly, if you allow
+              tickets but not coupons, answer <em>Yes</em>. Only answer <em>No</em> if you do not allow any
+              <strong>at all</strong>.
+            </p>
+            <p v-if="readonly" class="text-info">
+              Only owners can change these rules.
+            </p>
+            <div class="d-flex flex-wrap">
+              <strong class="mr-1 mt-2">Copy rules from:</strong>
+              <GroupSelect v-model="copyfrom" modonly class="mb-2 mr-2" />
+              <div>
+                <b-button variant="secondary" :disabled="copyfrom <= 0" @click="copy">
+                  <v-icon icon="copy" /> Copy
+                </b-button>
+              </div>
+            </div>
+            <div :key="rulesBump">
+              <h4>Rules about the group</h4>
+              <ModGroupRule :groupid="groupid" name="fullymoderated" label="Do you moderate all posts?" type="toggle" toggle-checked="Yes"
+                toggle-unchecked="No" />
+              <ModGroupRule :groupid="groupid" name="requirefirstpostoffer" label="Do you require a member’s first post to be an Offer?" type="toggle"
+                toggle-checked="Yes" toggle-unchecked="No" />
+              <ModGroupRule :groupid="groupid" name="limitconcurrentwanteds" label="Do you limit the number of Wanted posts allowed at one time?"
+                type="toggle" toggle-checked="Yes" toggle-unchecked="No" />
+              <ModGroupRule :groupid="groupid" name="restrictcrossposting" label="Do you restrict cross-posting to other groups?" type="toggle"
+                toggle-checked="Yes" toggle-unchecked="No" />
+              <ModGroupRule :groupid="groupid" name="allowloans" label="Do you allow any loans or requests to borrow?" type="toggle"
+                toggle-checked="Yes" toggle-unchecked="No" />
+              <ModGroupRule :groupid="groupid" name="suggesteddonations" label="Do you allow suggested donations to charity to obtain items?"
+                type="toggle" toggle-checked="Yes" toggle-unchecked="No" />
+              <ModGroupRule :groupid="groupid" name="declareselling"
+                label="Do you inform members that they must declare if they intend to sell items on?" type="toggle" toggle-checked="Yes"
+                toggle-unchecked="No" />
+              <ModGroupRule :groupid="groupid" name="restrictpersonalinfo"
+                label="Do you restrict personal info in posts eg telephone numbers, addresses?" type="toggle" toggle-checked="Yes"
+                toggle-unchecked="No" />
+              <ModGroupRule :groupid="groupid" name="restrictpersonalinfo" label="Do you remove any members purely for being out of your group area?"
+                type="toggle" toggle-checked="Yes" toggle-unchecked="No" />
+              <h4>Rules about specific items</h4>
+              <ModGroupRule :groupid="groupid" name="animalswanted" label="Do you allow any requests for animals on your group?" type="toggle"
+                toggle-checked="Yes" toggle-unchecked="No" />
+              <ModGroupRule :groupid="groupid" name="animalsoffer" label="Do you allow any offers of animals for rehoming on your group?"
+                type="toggle" toggle-checked="Yes" toggle-unchecked="No" />
+              <ModGroupRule :groupid="groupid" name="weapons" label="Do you allow any requests or offers of weapons on your group?" type="toggle"
+                toggle-checked="Yes" toggle-unchecked="No" />
+              <ModGroupRule :groupid="groupid" name="firearms"
+                label="Do you allow any offers or requests for guns if members have a firearms license?" type="toggle" toggle-checked="Yes"
+                toggle-unchecked="No" />
+              <ModGroupRule :groupid="groupid" name="knives" label="Do you allow any offers or requests for household or craft knives?" type="toggle"
+                toggle-checked="Yes" toggle-unchecked="No" />
+              <ModGroupRule :groupid="groupid" name="knivesrestrict"
+                label="If so, do you restrict these to over 18s and only if personally collected?" type="toggle" toggle-checked="Yes"
+                toggle-unchecked="No" />
+              <ModGroupRule :groupid="groupid" name="medicationsprescription" label="Do you allow any offers or requests for prescription medication?"
+                type="toggle" toggle-checked="Yes" toggle-unchecked="No" />
+              <ModGroupRule :groupid="groupid" name="medicationsotc" label="Do you allow any offers or requests for over-the-counter medication?"
+                type="toggle" toggle-checked="Yes" toggle-unchecked="No" />
+              <ModGroupRule :groupid="groupid" name="medicationsanimals" label="Do you allow any offers or requests for medication for animals?"
+                type="toggle" toggle-checked="Yes" toggle-unchecked="No" />
+              <ModGroupRule :groupid="groupid" name="contactlenses" label="Do you allow any offers or requests for Contact Lenses?" type="toggle"
+                toggle-checked="Yes" toggle-unchecked="No" />
+              <ModGroupRule :groupid="groupid" name="contactlensessolutions" label="Do you allow any offers or requests for Contact Lens Solutions?"
+                type="toggle" toggle-checked="Yes" toggle-unchecked="No" />
+              <ModGroupRule :groupid="groupid" name="tobacco" label="Do you allow any offers or requests for tobacco?" type="toggle"
+                toggle-checked="Yes" toggle-unchecked="No" />
+              <ModGroupRule :groupid="groupid" name="vaping" label="Do you allow any offers or requests for Vaping products?" type="toggle"
+                toggle-checked="Yes" toggle-unchecked="No" />
+              <ModGroupRule :groupid="groupid" name="alcohol" label="Do you allow any offers or requests for Alcohol?" type="toggle"
+                toggle-checked="Yes" toggle-unchecked="No" />
+              <ModGroupRule :groupid="groupid" name="gascylinders" label="Do you allow any offers or requests for Gas Cylinders?" type="toggle"
+                toggle-checked="Yes" toggle-unchecked="No" />
+              <ModGroupRule :groupid="groupid" name="tickets" label="Do you allow any offers or requests for vouchers, coupons or tickets?"
+                type="toggle" toggle-checked="Yes" toggle-unchecked="No" />
+              <h4>Other rules</h4>
+              <ModGroupRule :groupid="groupid" name="other"
+                label="Please add in information about any rules you have which aren't covered by the questions above." type="textarea" />
+            </div>
           </b-card-body>
         </b-collapse>
       </b-card>
@@ -501,9 +595,11 @@ export default {
   },
   data: function () {
     return {
+      copyfrom: null,
       groupid: null,
       uploadingProfile: false,
       editingDescription: false,
+      rulesBump: 0,
       toolbarOptions: [
         [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
         ['bold', 'italic', 'underline', 'strike'],
@@ -521,8 +617,7 @@ export default {
       return this.group.myrole !== 'Owner'
     },
     group() {
-      const g = this.groupStore.get(this.groupid)
-
+      //const g = this.groupStore.get(this.groupid)
       return this.groupStore.get(this.groupid)
     },
     shortlinks() {
@@ -661,6 +756,25 @@ export default {
 
       this.editingDescription = false
       callback()
+    },
+    async copy() {
+      await this.groupStore.fetchMT({ id: this.copyfrom })
+
+      const copyfrom = this.groupStore.get(this.copyfrom)
+
+      if (copyfrom) {
+        let rules = copyfrom.rules
+        rules = typeof rules === 'string' ? JSON.parse(rules) : rules
+
+        await this.groupStore.updateMT({
+          id: this.groupid,
+          rules: rules
+        })
+
+        await this.groupStore.fetchMT({ id: this.groupid })
+
+        this.rulesBump++
+      }
     }
   }
 }

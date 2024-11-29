@@ -23,11 +23,11 @@
   </div>
 </template>
 <script>
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 
 export default {
   setup() {
-    const { modal, show, hide } = useModal()
+    const { modal, show, hide } = useOurModal()
     return { modal, show, hide }
   },
   props: {

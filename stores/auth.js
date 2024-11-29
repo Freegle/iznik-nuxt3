@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { LoginError, SignUpError } from '../api/BaseAPI'
 import { useComposeStore } from '../stores/compose'
-import { useMiscStore } from '../stores/misc'
 import api from '~/api'
 
 export const useAuthStore = defineStore({
@@ -251,19 +250,31 @@ export const useAuthStore = defineStore({
       return { unknown, worked }
     },
     async signUp(params) {
-      const res = await this.$api.user.signUp(params, false)
-      const { ret, status, jwt, persistent } = res
+      try {
+        const res = await this.$api.user.signUp(params, false)
+        const { ret, status, jwt, persistent } = res
 
-      if (res.ret === 0) {
-        this.forceLogin = false
+        if (res.ret === 0) {
+          this.forceLogin = false
 
-        this.setAuth(jwt, persistent)
+          this.setAuth(jwt, persistent)
 
-        // We need to fetch the user to get the groups, persistent token etc.
-        await this.fetchUser()
-      } else {
-        // Register failed.
-        throw new SignUpError(ret, status)
+          // We need to fetch the user to get the groups, persistent token etc.
+          await this.fetchUser()
+        } else {
+          // Register failed.
+          throw new SignUpError(ret, status)
+        }
+      } catch (e) {
+        console.log('exception', e.response.data)
+        if (e?.response?.data?.ret === 2) {
+          throw new SignUpError(2, e.response.data.status)
+        } else {
+          throw new SignUpError(
+            e?.response?.data?.ret,
+            e?.response?.data?.status
+          )
+        }
       }
 
       this.loginCount++
@@ -272,7 +283,6 @@ export const useAuthStore = defineStore({
       // We're so vain, we probably think this call is about us.
       let me = null
       let groups = null
-      const miscStore = useMiscStore()
 
       /* TODO
       if (this.auth.jwt || this.auth.persistent) {
@@ -293,8 +303,9 @@ export const useAuthStore = defineStore({
           groups = me.memberships
           delete me.memberships
 
-          if (!this.auth.jwt && process.client) {
-            // Pick up the JWT for later from the old API.  No need to wait, though.
+          if (process.client) {
+            // Check the old API.  Partly in case we need a JWT, partly to check we are
+            // logged in on both.  No need to wait, though.
             this.$api.session
               .fetch({
                 webversion: this.config.public.BUILD_DATE,
@@ -307,13 +318,26 @@ export const useAuthStore = defineStore({
                 if (ret) {
                   ;({ me, persistent, jwt } = ret)
                   if (me) {
-                    this.setAuth(jwt, persistent)
+                    if (!this.auth.jwt) {
+                      this.setAuth(jwt, persistent)
+                    }
+                  } else {
+                    // We are logged in on the v2 API but not the v1 API.  Force ourselves to be logged out,
+                    // which will then force a login when required and sort this out.
+                    console.error('Logged in on v2 API but not v1 API, log out')
+                    this.setAuth(null, null)
+                    this.setUser(null)
                   }
                 }
               })
+              .catch((e) => {
+                // Need to catch this to prevent a Sentry error when we're logged out - which is a perfectly normal
+                // case.
+                console.log('Exception on old API', e)
+              })
           }
         }
-      } */
+      }*/
 
       if (!me) {
         if( !components) components = [] // MT ADDED
@@ -323,7 +347,7 @@ export const useAuthStore = defineStore({
         // Try the older API which will authenticate via the persistent token and PHP session.
         const ret = await this.$api.session.fetch({
           webversion: this.config.public.BUILD_DATE,
-          components,
+          components
         })
 
         let persistent = null
@@ -331,10 +355,9 @@ export const useAuthStore = defineStore({
 
         if (ret) {
           ;({ me, groups, persistent, jwt } = ret) // MT added
-          // console.log('!!!fetchuser ret.me',me)
           this.work = ret.work
           this.discourse = ret.discourse
-    
+
           if (me) {
             this.setAuth(jwt, persistent)
           }
@@ -361,7 +384,7 @@ export const useAuthStore = defineStore({
                   }
                 }
               }
- 
+
               groups = mev2.memberships
               delete mev2.memberships
             }
@@ -388,9 +411,7 @@ export const useAuthStore = defineStore({
           // because persisted.
           composeStore.email = me.email
         }
-
-        // console.log('!!!useAuthStore work discourse', this.work, this.discourse)
-     } else {
+      } else {
         // Any auth info must be invalid.
         this.setAuth(null, null)
         this.setUser(null)

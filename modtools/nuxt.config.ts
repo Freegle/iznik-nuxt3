@@ -49,10 +49,10 @@ const config = defineNuxtConfig({
         //  : false, // disable cssnano when not in production      
     }
   },
-  modules: [
+  /*modules: [
   ],
   plugins: [
-  ],
+  ],*/
 
   // Sometimes we need to change the host when doing local testing with browser stack.
   devServer: {

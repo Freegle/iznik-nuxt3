@@ -3,8 +3,18 @@
     <b-card v-if="newsfeed" :class="backgroundColor" no-body>
       <b-card-body class="p-1 p-sm-2">
         <b-card-text>
+          <div v-if="mod && newsfeed.hidden" class="text-danger small mb-1">
+            This has been hidden
+            <UserName
+              v-if="newsfeed?.hiddenby"
+              :id="newsfeed.hiddenby"
+              intro="by"
+            />
+            <span v-else>the system</span>
+            and is only visible to volunteers and the person who posted it.
+          </div>
           <div v-if="isNewsComponent">
-            <b-dropdown class="float-end" right variant="white">
+            <b-dropdown lazy class="float-end" right variant="white">
               <template #button-content />
               <b-dropdown-item
                 :href="'/chitchat/' + newsfeed?.id"
@@ -25,12 +35,6 @@
               <b-dropdown-item @click="report">
                 Report this thread or one of its replies
               </b-dropdown-item>
-              <b-dropdown-item
-                v-if="myid === parseInt(newsfeed.userid) || mod"
-                @click="deleteIt"
-              >
-                Delete this thread
-              </b-dropdown-item>
               <b-dropdown-item v-if="canRefer" @click="referToOffer">
                 Refer to OFFER
               </b-dropdown-item>
@@ -47,10 +51,34 @@
                 Turn this into a Story
               </b-dropdown-item>
               <b-dropdown-item
-                v-if="supportOrAdmin && newsfeed.hidden"
+                v-if="chitChatMod && !newsfeed.hidden"
+                @click="hide"
+              >
+                Hide this thread
+              </b-dropdown-item>
+              <b-dropdown-item
+                v-if="chitChatMod && newsfeed.hidden"
                 @click="unhide"
               >
-                Unhide post
+                Unhide this thread
+              </b-dropdown-item>
+              <b-dropdown-item
+                v-if="myid === parseInt(newsfeed.userid) || mod"
+                @click="deleteIt"
+              >
+                Delete this thread
+              </b-dropdown-item>
+              <b-dropdown-item
+                v-if="chitChatMod && !newsfeed.hidden"
+                @click="mute"
+              >
+                Mute user on ChitChat
+              </b-dropdown-item>
+              <b-dropdown-item
+                v-if="chitChatMod && newsfeed.hidden"
+                @click="unmute"
+              >
+                Unmute user on ChitChat
               </b-dropdown-item>
             </b-dropdown>
             <component
@@ -68,10 +96,6 @@
               :previews="newsfeed.previews"
               class="mt-1"
             />
-            <div v-if="mod && newsfeed.hidden" class="text-danger small">
-              This has been hidden and is only visible to volunteers and the
-              person who posted it.
-            </div>
           </div>
           <notice-message v-else variant="danger">
             Unknown item type {{ newsfeed?.type }}
@@ -99,7 +123,7 @@
               :filter-match="filterMatch"
             >
               <b-input-group>
-                <b-input-group-prepend>
+                <slot name="prepend">
                   <span class="input-group-text pl-1 pr-1">
                     <ProfileImage
                       v-if="me.profile.path"
@@ -110,7 +134,7 @@
                       :lazy="false"
                     />
                   </span>
-                </b-input-group-prepend>
+                </slot>
                 <AutoHeightTextarea
                   ref="threadcomment"
                   v-model="threadcomment"
@@ -129,7 +153,7 @@
           <div
             v-else
             @keyup.enter.exact.prevent
-            @keydown.enter.exact="sendComment"
+            @keydown.enter.exact.prevent="sendComment"
           >
             <OurAtTa
               v-if="!newsfeed.deleted"
@@ -139,7 +163,7 @@
               :filter-match="filterMatch"
             >
               <b-input-group>
-                <b-input-group-prepend>
+                <slot name="prepend">
                   <span class="input-group-text pl-2 pr-1">
                     <ProfileImage
                       v-if="me.profile.path"
@@ -149,7 +173,7 @@
                       size="sm"
                     />
                   </span>
-                </b-input-group-prepend>
+                </slot>
                 <AutoHeightTextarea
                   ref="threadcomment"
                   v-model="threadcomment"
@@ -170,7 +194,7 @@
           </div>
           <div
             v-if="threadcomment"
-            class="d-flex justify-content-between flex-wrap m-1"
+            class="d-flex justify-content-between flex-wrap m-1 mt-2"
           >
             <b-button variant="secondary" @click="photoAdd">
               <v-icon icon="camera" /><span class="d-none d-sm-inline"
@@ -186,19 +210,29 @@
               @handle="sendComment"
             />
           </div>
-          <b-img
-            v-if="imageid"
-            lazy
-            thumbnail
-            :src="imagethumb"
+          <OurUploadedImage
+            v-if="ouruid"
+            :src="ouruid"
+            :modifiers="imagemods"
+            alt="ChitChat Photo"
+            width="100"
             class="mt-1 ml-4 image__uploaded"
           />
-          <OurFilePond
+          <NuxtPicture
+            v-else-if="imageuid"
+            format="webp"
+            provider="uploadcare"
+            :src="imageuid"
+            :modifiers="imagemods"
+            alt="ChitChat Photo"
+            width="100"
+            class="mt-1 ml-4 image__uploaded"
+          />
+          <OurUploader
             v-if="uploading"
+            v-model="currentAtts"
             class="bg-white m-0 pondrow"
-            imgtype="Newsfeed"
-            imgflag="newsfeed"
-            @photo-processed="photoProcessed"
+            type="Newsfeed"
           />
         </span>
         <notice-message v-else>
@@ -243,12 +277,15 @@ import NewsNoticeboard from '~/components/NewsNoticeboard'
 import NoticeMessage from '~/components/NoticeMessage'
 import NewsPreviews from '~/components/NewsPreviews'
 import ProfileImage from '~/components/ProfileImage'
+import { useTeamStore } from '~/stores/team'
+import { useAuthStore } from '~/stores/auth'
+import { useUserStore } from '~/stores/user'
 
 const NewsReportModal = defineAsyncComponent(() => import('./NewsReportModal'))
 const ConfirmModal = () =>
   defineAsyncComponent(() => import('~/components/ConfirmModal.vue'))
-const OurFilePond = defineAsyncComponent(() =>
-  import('~/components/OurFilePond')
+const OurUploader = defineAsyncComponent(() =>
+  import('~/components/OurUploader')
 )
 const OurAtTa = defineAsyncComponent(() => import('~/components/OurAtTa'))
 
@@ -257,7 +294,7 @@ export default {
   components: {
     NewsReplies,
     SpinButton,
-    OurFilePond,
+    OurUploader,
     NewsReportModal,
     NewsRefer,
     NewsMessage,
@@ -288,11 +325,28 @@ export default {
   emits: ['rendered'],
   async setup(props) {
     const newsfeedStore = useNewsfeedStore()
+    const teamStore = useTeamStore()
+    const authStore = useAuthStore()
+    const userStore = useUserStore()
+
+    const me = authStore.user
+
+    // Get ChitChat moderation team so that we can show extra options for them.
+    if (
+      me &&
+      (me.systemrole === 'Moderator' ||
+        me.systemrole === 'Support' ||
+        me.systemrole === 'Admin')
+    ) {
+      teamStore.fetch('ChitChat Moderation')
+    }
 
     await newsfeedStore.fetch(props.id)
 
     return {
       newsfeedStore,
+      teamStore,
+      userStore,
     }
   },
   data() {
@@ -315,11 +369,14 @@ export default {
       },
       uploading: false,
       imageid: null,
-      imagethumb: null,
+      ouruid: null,
+      imageuid: null,
+      imagemods: null,
       showDeleteModal: false,
       showEditModal: false,
       showReportModal: false,
       showThis: true,
+      currentAtts: [],
     }
   },
   computed: {
@@ -329,7 +386,7 @@ export default {
       )
     },
     canStory() {
-      return (this.mod && this.newsfeed?.type !== 'Story') || this.admin
+      return this.mod && this.newsfeed?.type !== 'Story'
     },
     enterNewLine: {
       get() {
@@ -370,6 +427,9 @@ export default {
         ? this.newsComponents[this.newsfeed?.type]
         : ''
     },
+    user() {
+      return this.userStore.byId(this.newsfeed?.userid)
+    },
     starter() {
       if (this.newsfeed.userid === this.myid) {
         return 'you'
@@ -378,6 +438,19 @@ export default {
       } else {
         return 'someone'
       }
+    },
+  },
+  watch: {
+    currentAtts: {
+      handler(newVal) {
+        this.uploading = false
+
+        this.imageid = newVal[0].id
+        this.imageuid = newVal[0].ouruid
+        this.ouruid = newVal[0].ouruid
+        this.imagemods = newVal[0].externalmods
+      },
+      deep: true,
     },
   },
   mounted() {
@@ -414,6 +487,9 @@ export default {
 
         // And any image id
         this.imageid = null
+        this.imageuid = null
+        this.ouruid = null
+        this.imagemods = null
       }
 
       if (typeof callback === 'function') {
@@ -477,6 +553,9 @@ export default {
     async unhide() {
       await this.newsfeedStore.unhide(this.id)
     },
+    async hide() {
+      await this.newsfeedStore.hide(this.id)
+    },
     async referTo(type) {
       await this.newsfeedStore.referTo(this.id, type)
     },
@@ -489,13 +568,13 @@ export default {
       // init callback below.
       this.uploading = true
     },
-    photoProcessed(imageid, imagethumb) {
-      // We have uploaded a photo.  Remove the filepond instance.
-      this.uploading = false
-
-      // The imageid is in this.imageid
-      this.imageid = imageid
-      this.imagethumb = imagethumb
+    async mute() {
+      await this.userStore.muteOnChitChat(this.newsfeed.userid)
+      await this.newsfeedStore.fetch(this.id)
+    },
+    async unmute() {
+      await this.userStore.unMuteOnChitChat(this.newsfeed.userid)
+      await this.newsfeedStore.fetch(this.id)
     },
   },
 }

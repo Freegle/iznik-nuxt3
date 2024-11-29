@@ -31,7 +31,7 @@
 </template>
 
 <script>
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 import InfiniteLoading from '~/components/InfiniteLoading'
 import { useLogsStore } from '../stores/logs'
 import { useUserStore } from '../../stores/user'
@@ -43,7 +43,7 @@ export default {
     const userStore = useUserStore()
     const logsStore = useLogsStore()
     const memberStore = useMemberStore()
-    const { modal, hide } = useModal(227)
+    const { modal, hide } = useOurModal(227)
     return { logsStore, memberStore, userStore, modal, hide }
   },
   props: {

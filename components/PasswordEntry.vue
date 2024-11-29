@@ -14,11 +14,9 @@
         :type="showPassword ? 'text' : 'password'"
         :placeholder="placeholder"
         class="password__input"
-        @input="$emit('update:modelValue', $event)"
-        @change="$emit('update:modelValue', $event)"
       />
       <span class="password__focus-element" />
-      <b-input-group-append>
+      <slot name="append">
         <b-button
           variant="white"
           class="showpassword__button"
@@ -31,8 +29,8 @@
             <v-icon v-if="showPassword" icon="slash" class="superimpose" />
           </div>
         </b-button>
-      </b-input-group-append>
-      <b-input-group-append v-if="showSaveOption">
+      </slot>
+      <slot v-if="showSaveOption" name="append">
         <SpinButton
           variant="primary"
           aria-label="Save password"
@@ -40,7 +38,7 @@
           label="Save"
           @handle="savePassword"
         />
-      </b-input-group-append>
+      </slot>
     </b-input-group>
   </b-form-group>
 </template>
@@ -79,6 +77,11 @@ export default {
       password: null,
       showPassword: false,
     }
+  },
+  watch: {
+    password(newVal) {
+      this.$emit('update:modelValue', newVal)
+    },
   },
   mounted() {
     this.password = this.originalPassword

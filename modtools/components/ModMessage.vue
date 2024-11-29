@@ -273,7 +273,7 @@
         </div>
         <b-row v-if="uploading" class="bg-white">
           <b-col class="p-0">
-            <OurFilePond imgtype="Message" imgflag="message" @photoProcessed="photoProcessed" />
+            <OurUploader imgtype="Message" imgflag="message" @photoProcessed="photoProcessed" />
           </b-col>
         </b-row>
       </b-card-body>

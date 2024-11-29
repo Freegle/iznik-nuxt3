@@ -34,7 +34,7 @@ const props = defineProps({
   },
   icon: {
     type: String,
-    required: false,
+    required: true,
   },
 })
 

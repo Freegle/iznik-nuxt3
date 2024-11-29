@@ -1,6 +1,6 @@
 import { VitePWA } from 'vite-plugin-pwa'
 import eslintPlugin from 'vite-plugin-eslint'
-import legacy from '@vitejs/plugin-legacy'
+//import legacy from '@vitejs/plugin-legacy'
 import { sentryVitePlugin } from '@sentry/vite-plugin'
 import config from './config'
 
@@ -165,7 +165,7 @@ export default defineNuxtConfig({
   modules: [
     '@pinia/nuxt',
     '@nuxt/image',
-    'nuxt-vite-legacy',
+//    'nuxt-vite-legacy',
     '@bootstrap-vue-next/nuxt',
     /*process.env.GTM_ID ? '@zadigetvoltaire/nuxt-gtm' : null,
     [
@@ -224,11 +224,13 @@ export default defineNuxtConfig({
       BUILD_DATE: new Date().toISOString(),
       NETLIFY_DEPLOY_ID: process.env.DEPLOY_ID,
       NETLIFY_SITE_NAME: process.env.SITE_NAME,
+      NETLIFY_BRANCH: process.env.BRANCH,
       MATOMO_HOST: process.env.MATOMO_HOST,
       COOKIEYES: config.COOKIEYES,
       TRUSTPILOT_LINK: config.TRUSTPILOT_LINK,
       TUS_UPLOADER: config.TUS_UPLOADER,
       IMAGE_DELIVERY: config.IMAGE_DELIVERY,
+      STRIPE_PUBLISHABLE_KEY: config.STRIPE_PUBLISHABLE_KEY,
     },
   },
 
@@ -254,9 +256,9 @@ export default defineNuxtConfig({
       VitePWA({ registerType: 'autoUpdate' }),
       // Make Lint errors cause build failures.
       // eslintPlugin(),
-      legacy({
-        targets: ['since 2015'],
-      }),
+      //legacy({
+      //  targets: ['since 2015'],
+      //}),
       sentryVitePlugin({
         org: 'freegle',
         project: 'modtools',
@@ -265,7 +267,7 @@ export default defineNuxtConfig({
   },
 
   // Note that this is not the standard @vitejs/plugin-legacy, but https://www.npmjs.com/package/nuxt-vite-legacy
-  legacy: {
+  /*legacy: {
     targets: ['chrome 49', 'since 2015', 'ios>=12', 'safari>=12'],
     modernPolyfills: [
       'es.global-this',
@@ -274,7 +276,7 @@ export default defineNuxtConfig({
       'es.array.flat',
       'es.string.replace-all',
     ],
-  },
+  },*/
 
   // Sentry needs sourcemaps.
   sourcemap: {
@@ -387,6 +389,34 @@ export default defineNuxtConfig({
           content: 'Awin',
         },
       ],
+    },
+  },
+  image: {
+    uploadcare: {
+      provider: 'uploadcare',
+      cdnURL: config.UPLOADCARE_CDN,
+    },
+
+    weserv: {
+      provider: 'weserv',
+      baseURL: config.TUS_UPLOADER,
+      weservURL: config.IMAGE_DELIVERY,
+    },
+
+    // We want sharp images on fancy screens.
+    densities: [1, 2],
+
+    // Uploadcare only supports images upto 3000, and the screen sizes are doubled when requesting because of densities.
+    // So we already need to drop the top-level screen sizes, and we also don't want to request images which are too
+    // large because this affects our charged bandwidth.  So we only go up to 768.
+    screens: {
+      xs: 320,
+      sm: 576,
+      md: 768,
+      lg: 768,
+      xl: 768,
+      xxl: 768,
+      '2xl': 768,
     },
   },
 })

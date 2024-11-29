@@ -27,7 +27,10 @@
       <h1 class="text-white truncate text-center header--size5 m-0">
         {{ chat.name }}
       </h1>
-      <div v-if="!otheruser?.deleted && milesaway" class="text-white small">
+      <div
+        v-if="!otheruser?.deleted && milesaway"
+        class="text-white small text-truncate"
+      >
         {{ milesstring }}
       </div>
     </div>
@@ -47,14 +50,14 @@
     </div>
     <ProfileModal
       v-if="showProfileModal"
-      :id="otheruser.id"
+      :id="otheruser?.id"
       close-on-message
       @hidden="showProfileModal = false"
     />
   </div>
 </template>
 <script setup>
-import { setNavBarHidden } from '../composables/useNavbar'
+import { clearNavBarTimeout, setNavBarHidden } from '../composables/useNavbar'
 import { useNavbar, navBarHidden } from '~/composables/useNavbar'
 import { useChatStore } from '~/stores/chat'
 import { setupChat } from '~/composables/useChat'
@@ -79,6 +82,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  clearNavBarTimeout()
   window.removeEventListener('scroll', handleScroll)
 })
 
@@ -106,9 +110,9 @@ function showInfo() {
   display: grid;
   grid-template-columns:
     0.25em 40px 50px calc(
-      100vw - 0.5em - 40px - 0.25em - 50px - 0.25em - 100px - 0.5em
+      100vw - 0.5em - 40px - 0.25em - 50px - 0.25em - 110px - 0.5em
     )
-    100px 0.25em;
+    110px 0.25em;
   grid-column-gap: 0.25em;
 
   .offline,

@@ -1,22 +1,42 @@
 <template>
   <span class="ProfileImage__container">
-    <b-img
-      v-if="lazy"
-      lazy
-      rounded="circle"
-      :thumbnail="isThumbnail"
+    <OurUploadedImage
+      v-if="ouruid"
+      :src="ouruid"
+      :modifiers="externalmods"
       :class="className"
+      class="circle"
       :alt="altText"
-      :src="validImage"
-      @error="brokenProfileImage"
+      :width="width"
+      :height="width"
+    />
+    <NuxtPicture
+      v-else-if="externaluid"
+      format="webp"
+      fit="cover"
+      provider="uploadcare"
+      :src="externaluid"
+      :modifiers="externalmods"
+      :class="className"
+      class="circle"
+      :alt="altText"
+      :width="width"
+      :height="width"
     />
     <b-img
-      v-else
-      rounded="circle"
-      :thumbnail="isThumbnail"
-      :class="className"
+      v-else-if="image?.indexOf('data:image') === 0"
+      :class-name="className"
+      :src="image"
       :alt="altText"
+      :width="width"
+      :height="width"
+    />
+    <ProxyImage
+      v-else
       :src="validImage"
+      sizes="100px"
+      :class-name="className"
+      :alt="altText"
       @error="brokenProfileImage"
     />
     <v-icon
@@ -47,6 +67,21 @@ export default {
       type: String,
       required: false,
       default: '',
+    },
+    externaluid: {
+      type: String,
+      required: false,
+      default: null,
+    },
+    ouruid: {
+      type: String,
+      required: false,
+      default: null,
+    },
+    externalmods: {
+      type: Object,
+      required: false,
+      default: null,
     },
     altText: {
       type: String,
@@ -81,9 +116,16 @@ export default {
       default: null,
     },
   },
+  data: function () {
+    return {
+      brokenImage: false,
+    }
+  },
   computed: {
     validImage() {
-      return this.image || '/defaultprofile.png'
+      return !this.brokenImage && this.image
+        ? this.image
+        : '/defaultprofile.png'
     },
     className() {
       let ret = 'p-0 profile profile--' + this.size
@@ -94,12 +136,22 @@ export default {
 
       return ret
     },
+    width() {
+      // Return a resolution high enough for the CSS rules below.
+      if (this.className.includes('--sm')) {
+        return 25
+      } else if (this.className.includes('--md')) {
+        return 35
+      } else if (this.className.includes('--lg')) {
+        return 50
+      } else {
+        return 100
+      }
+    },
   },
   methods: {
     brokenProfileImage(e) {
-      e.target.src = '/defaultprofile.png'
-      e.preventDefault()
-      e.stopPropagation()
+      this.brokenImage = true
     },
   },
 }
@@ -114,9 +166,16 @@ export default {
   grid-template-columns: 1fr;
   grid-template-rows: 1fr;
 
-  img {
+  :deep(picture) {
     grid-row: 1 / 2;
     grid-column: 1 / 2;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  :deep(img) {
+    border-radius: 50%;
+    object-fit: cover;
   }
 }
 
@@ -124,7 +183,7 @@ export default {
   object-fit: cover;
 }
 
-.profile--sm {
+:deep(.profile--sm img) {
   width: 20px !important;
   height: 20px !important;
   min-width: 20px !important;
@@ -142,7 +201,7 @@ export default {
   }
 }
 
-.profile--md {
+:deep(.profile--md img) {
   width: 20px !important;
   height: 20px !important;
   min-width: 20px !important;
@@ -160,7 +219,7 @@ export default {
   }
 }
 
-.profile--lg {
+:deep(.profile--lg img) {
   width: 30px !important;
   height: 30px !important;
   min-width: 30px !important;
@@ -178,7 +237,7 @@ export default {
   }
 }
 
-.profile--lg-always {
+:deep(.profile--lg-always img) {
   width: 50px !important;
   height: 50px !important;
   min-width: 50px !important;
@@ -187,7 +246,7 @@ export default {
   max-height: 50px !important;
 }
 
-.profile--xl {
+:deep(.profile--xl img) {
   width: 75px !important;
   height: 75px !important;
   min-width: 75px !important;
@@ -274,8 +333,12 @@ export default {
   }
 }
 
-.ourBorder {
+:deep(.ourBorder img) {
   border: 2px solid $color-gray--dark;
   background-color: $color-gray--dark;
+}
+
+.circle {
+  border-radius: 50%;
 }
 </style>

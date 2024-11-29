@@ -1,8 +1,8 @@
 <template>
-  <component
-    :is="notificationType"
+  <b-dropdown
     id="notification-list"
     ref="theel"
+    v-model="notificationsShown"
     class="white text-center notification-list topstack"
     :variant="smallScreen ? 'transparent' : ''"
     toggle-class="notification-list__dropdown-toggle p-xl-0"
@@ -59,7 +59,7 @@
         <b-img lazy src="/loader.gif" alt="Loading" width="100px" />
       </template>
     </infinite-loading>
-  </component>
+  </b-dropdown>
 </template>
 <script setup>
 import { ref, watch, defineAsyncComponent } from 'vue'
@@ -87,11 +87,9 @@ defineProps({
   },
 })
 
+const notificationsShown = ref(false)
 const toShow = ref(5)
 const infiniteId = ref(0)
-const notificationType = computed(() => {
-  return 'b-dropdown'
-})
 const notifications = computed(() => {
   // return first
   return notificationStore.list
@@ -128,10 +126,18 @@ const markAllRead = async () => {
   await notificationStore.allSeen()
 }
 
-const emit = defineEmits(['update:unreadNotificationCount', 'showAboutMe'])
+const emit = defineEmits([
+  'update:notificationsShown',
+  'update:unreadNotificationCount',
+  'showAboutMe',
+])
 
 watch(unreadNotificationCount, (newVal) => {
   emit('update:unreadNotificationCount', newVal)
+})
+
+watch(notificationsShown, (newVal) => {
+  emit('update:notificationsShown', newVal)
 })
 
 const showAboutMe = () => {

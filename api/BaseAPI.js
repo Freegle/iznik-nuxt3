@@ -75,7 +75,7 @@ export default class BaseAPI {
         'max-age=0, must-revalidate, no-cache, no-store, private'
 
       if (method === 'GET' && config?.params) {
-        // Remove falsey values from the params - unless MY needs to send a zero
+        // Remove falsey values from the params - unless MT needs to send a zero
         if( !config?.params.dontzapfalsey){
           config.params = Object.fromEntries(
             Object.entries(config.params).filter(([_, v]) => v)
@@ -100,7 +100,6 @@ export default class BaseAPI {
         })
         // URL encode the parameters if any
         const urlParams = new URLSearchParams(config.params).toString()
-        //console.log('BaseAPI $request',path, config.params, urlParams)
 
         if (urlParams.length) {
           path += '&' + urlParams
@@ -110,6 +109,7 @@ export default class BaseAPI {
         if (!config?.params) {
           config.params = {}
         }
+
         config.params.modtools = miscStore.modtools // MT ADDED
 
         // JSON-encode these for to pass.
@@ -119,18 +119,19 @@ export default class BaseAPI {
         if (!config.data) {
           config.data = {}
         }
+
         config.data.modtools = miscStore.modtools // MT ADDED
         body = JSON.stringify(config.data)
       }
 
       await miscStore.waitForOnline()
       miscStore.api(1)
-        ;[status, data] = await ourFetch(this.config.public.APIv1 + path, {
-          ...config,
-          body,
-          method,
-          headers,
-        })
+      ;[status, data] = await ourFetch(this.config.public.APIv1 + path, {
+        ...config,
+        body,
+        method,
+        headers,
+      })
 
       if (data.jwt && data.jwt !== authStore.auth.jwt && data.persistent && (path.substring(0,5)!='/user')) { // Stop MT add user from switching identity
         // We've been given a new JWT.  Use it in future.  This can happen after user merge or periodically when
@@ -143,7 +144,7 @@ export default class BaseAPI {
         // when you're leaving a page.  No point in rippling those errors up to result in Sentry errors.
         // Swallow these by returning a problem that never resolves.  Possible memory leak but it's a rare case.
         console.log('Aborted - ignore')
-        return new Promise(function (resolve) { })
+        return new Promise(function (resolve) {})
       }
     } finally {
       useMiscStore().api(-1)
@@ -187,13 +188,13 @@ export default class BaseAPI {
         if (log) {
           Sentry.captureMessage(
             'API request failed ' +
-            path +
-            ' returned HTTP ' +
-            status +
-            ' ret ' +
-            retstr +
-            ' status ' +
-            statusstr
+              path +
+              ' returned HTTP ' +
+              status +
+              ' ret ' +
+              retstr +
+              ' status ' +
+              statusstr
           )
         }
 
@@ -365,18 +366,18 @@ export default class BaseAPI {
           config.data = {}
         }
 
-        config.data.modtools = miscStore.modtools // MT ADDED
+        config.params.modtools = miscStore.modtools // MT ADDED
         body = JSON.stringify(config.data)
       }
 
       await miscStore.waitForOnline()
       miscStore.api(1)
-        ;[status, data] = await ourFetch(this.config.public.APIv2 + path, {
-          ...config,
-          body,
-          method,
-          headers,
-        })
+      ;[status, data] = await ourFetch(this.config.public.APIv2 + path, {
+        ...config,
+        body,
+        method,
+        headers,
+      })
 
       if (status === 401) {
         // Not authorised - our JWT and/or persistent token must be wrong.  Clear them.  This may force a login, or
@@ -396,7 +397,7 @@ export default class BaseAPI {
         // when you're leaving a page.  No point in rippling those errors up to result in Sentry errors.
         // Swallow these by returning a problem that never resolves.  Possible memory leak but it's a rare case.
         console.log('Aborted - ignore')
-        return new Promise(function (resolve) { })
+        return new Promise(function (resolve) {})
       }
     } finally {
       useMiscStore().api(-1)
@@ -423,13 +424,13 @@ export default class BaseAPI {
       if (log) {
         Sentry.captureMessage(
           'API2 request failed ' +
-          path +
-          ' returned HTTP ' +
-          status +
-          ' status ' +
-          statusstr +
-          ' data length ' +
-          (data ? data.length : 0)
+            path +
+            ' returned HTTP ' +
+            status +
+            ' status ' +
+            statusstr +
+            ' data length ' +
+            (data ? data.length : 0)
         )
       }
 

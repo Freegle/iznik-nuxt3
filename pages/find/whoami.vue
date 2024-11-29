@@ -58,22 +58,26 @@
       <div class="mt-3 mb-5 d-none d-md-flex">
         <div class="w-100 d-flex justify-content-around">
           <div class="mt-2 d-flex justify-content-between maxbutt">
-            <b-button
-              variant="secondary"
-              size="lg"
-              to="/find/whereami"
-              class="d-none d-md-block"
-            >
-              <v-icon icon="angle-double-left" /> Back
-            </b-button>
-            <b-button
-              v-if="emailValid && !submitting && !emailBelongsToSomeoneElse"
-              variant="primary"
-              size="lg"
-              @click="next"
-            >
-              Freegle it! <v-icon icon="angle-double-right" />
-            </b-button>
+            <div>
+              <b-button
+                variant="secondary"
+                size="lg"
+                to="/find/whereami"
+                class="d-none d-md-block"
+              >
+                <v-icon icon="angle-double-left" /> Back
+              </b-button>
+            </div>
+            <div>
+              <b-button
+                v-if="emailValid && !submitting && !emailBelongsToSomeoneElse"
+                variant="primary"
+                size="lg"
+                @click="next"
+              >
+                Freegle it! <v-icon icon="angle-double-right" />
+              </b-button>
+            </div>
           </div>
         </div>
         <div v-if="submitting" class="d-flex justify-content-around pt-2 mt-2">
@@ -203,6 +207,7 @@ export default {
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/sticky-banner.scss';
 
 .fader {
   background-color: rgba(246, 246, 236, 0.6);
@@ -214,7 +219,12 @@ export default {
   .layout {
     //We need to subtract space for the navbar, the ad bar, and also allow some extra because of the way vh works
     //mobile browsers.
-    min-height: calc(100vh - 84px - 52px - 84px);
+    min-height: calc(100vh - 84px - $sticky-banner-height-mobile - 84px);
+
+    @supports (height: 100dvh) {
+      min-height: calc(100dvh - 84px - $sticky-banner-height-mobile - 84px);
+    }
+
     display: flex;
     flex-direction: column;
     justify-content: space-between;

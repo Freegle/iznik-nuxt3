@@ -42,13 +42,13 @@
   </div>
 </template>
 <script>
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 import { useUserStore } from '~/stores/user'
 
 export default {
   setup() {
     const userStore = useUserStore()
-    const { modal, hide } = useModal()
+    const { modal, hide } = useOurModal()
     return { userStore, modal, hide }
   },
   props: {

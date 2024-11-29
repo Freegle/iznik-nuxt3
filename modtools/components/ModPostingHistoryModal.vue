@@ -41,13 +41,13 @@
 </template>
 
 <script>
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 import { useGroupStore } from '../../stores/group'
 
 export default {
   setup() {
     const groupStore = useGroupStore()
-    const { modal, hide } = useModal()
+    const { modal, hide } = useOurModal()
     return { groupStore, modal, hide }
   },
   props: {

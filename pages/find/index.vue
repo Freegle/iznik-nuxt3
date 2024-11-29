@@ -6,7 +6,9 @@
       </div>
       <b-row class="m-0">
         <b-col cols="12" lg="8" class="p-0 layout fader" offset-lg="2">
-          <h1 class="text-center">First, what are you looking for?</h1>
+          <h1 class="text-center hideshort">
+            First, what are you looking for?
+          </h1>
           <ul
             v-for="(id, index) in ids"
             :key="'post-' + id"
@@ -61,7 +63,7 @@
           <div class="mt-1 d-block d-md-none">
             <b-button
               variant="primary"
-              :disabled="uploadingPhoto"
+              :disabled="uploadingPhoto || !messageValid"
               size="lg"
               block
               to="/find/whereami"
@@ -122,6 +124,14 @@ export default {
 
     return await setup('Wanted')
   },
+  mounted() {
+    if (this.$gtm?.enabled()) {
+      this.$gtm.trackEvent({
+        event: 'Give an Item',
+        label: 'QxhuCP7av7kZELy618UD',
+      })
+    }
+  },
   methods: {
     deleteItem,
     addItem,
@@ -132,6 +142,7 @@ export default {
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/sticky-banner.scss';
 
 .cg {
   flex-basis: 25%;
@@ -142,11 +153,16 @@ export default {
   width: 33vw;
 }
 
-@include media-breakpoint-down(md) {
+@include media-breakpoint-down(sm) {
   .layout {
     //We need to subtract space for the navbar, the ad bar, and also allow some extra because of the way vh works
     //mobile browsers.
-    min-height: calc(100vh - 84px - 52px - 84px);
+    min-height: calc(100vh - 84px - $sticky-banner-height-mobile - 84px);
+
+    @supports (height: 100dvh) {
+      min-height: calc(100dvh - 84px - $sticky-banner-height-mobile - 84px);
+    }
+
     display: flex;
     flex-direction: column;
     justify-content: space-between;

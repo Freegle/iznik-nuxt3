@@ -6,7 +6,8 @@
     v-model="showModal"
     no-fade
     size="lg"
-    no-close-on-backdrop
+    no-trap
+    :no-close-on-backdrop="forceLogin"
     :hide-header-close="forceLogin"
     :no-close-on-esc="forceLogin"
     hide-footer
@@ -105,40 +106,18 @@
           @submit="loginNative"
         >
           <div v-if="signUp">
-            <b-form-group
-              id="firstnameGroup"
-              label="First name"
-              label-for="firstname"
-            >
+            <b-form-group id="nameGroup" label="Your name" label-for="fullname">
               <b-form-input
-                id="firstname"
-                ref="firstname"
-                v-model="firstname"
-                name="firstname"
+                id="fullname"
+                ref="fullname"
+                v-model="fullname"
+                name="fullname"
                 :class="{
                   'mb-3': true,
-                  'border-danger': firstNameError,
+                  'border-danger': fullNameError,
                 }"
-                autocomplete="given-name"
-                placeholder="Your first name"
-              />
-            </b-form-group>
-            <b-form-group
-              id="lastnameGroup"
-              label="Last name"
-              label-for="lastname"
-            >
-              <b-form-input
-                id="lastname"
-                ref="lastname"
-                v-model="lastname"
-                name="lastname"
-                :class="{
-                  'mb-3': true,
-                  'border-danger': lastNameError,
-                }"
-                autocomplete="family-name"
-                placeholder="Your last or family name"
+                autocomplete="name"
+                placeholder="Your full name"
               />
             </b-form-group>
           </div>
@@ -240,8 +219,7 @@ export default {
   data() {
     return {
       bump: Date.now(),
-      firstname: null,
-      lastname: null,
+      fullname: null,
       email: null,
       emailValid: false,
       password: null,
@@ -307,14 +285,11 @@ export default {
     referToYahooButton() {
       return this.email && this.email.toLowerCase().includes('yahoo')
     },
-    firstNameError() {
-      return this.nativeBump && this.buttonClicked && !this.firstname
-    },
-    lastNameError() {
-      return this.nativeBump && this.buttonClicked && !this.lastname
+    fullNameError() {
+      return this.nativeBump && this.buttonClicked && !this.fullname
     },
     formFields() {
-      return [this.firstname, this.lastname, this.email, this.password]
+      return [this.fullname, this.email, this.password]
     },
     emailError() {
       return (
@@ -372,6 +347,33 @@ export default {
       this.nativeLoginError = null
       this.buttonClicked = false
     },
+    signUp: {
+      immediate: true,
+      handler(newVal) {
+        if (newVal) {
+          this.$api.bandit.shown({
+            uid: 'signUpModal',
+            variant: 'facebook',
+          })
+          this.$api.bandit.shown({
+            uid: 'signUpModal',
+            variant: 'google',
+          })
+          this.$api.bandit.shown({
+            uid: 'signUpModal',
+            variant: 'yahoo',
+          })
+          this.$api.bandit.shown({
+            uid: 'signUpModal',
+            variant: 'native',
+          })
+          this.$api.bandit.shown({
+            uid: 'signUpModal',
+            variant: 'signin',
+          })
+        }
+      },
+    },
   },
   beforeUnmount() {
     if (this.bumpTimer) {
@@ -414,8 +416,23 @@ export default {
     hide() {
       this.pleaseShowModal = false
     },
+    gtmRegister() {
+      if (this.$gtm?.enabled()) {
+        this.$gtm.trackEvent({
+          event: 'Register with Website',
+          label: 'EcEMCPvav7kZELy618UD',
+        })
+      }
+    },
     loginNative(e) {
       this.loginType = 'Freegle'
+
+      if (this.signUp) {
+        this.$api.bandit.chosen({
+          uid: 'signUpModal',
+          variant: 'native',
+        })
+      }
 
       const self = this
       this.nativeLoginError = null
@@ -426,22 +443,17 @@ export default {
 
       // Probably this is someone who is already a user and is trying to log in, but has cleared their cache
       // (so we've forgotten that they've previously signed in) and hasn't noticed that they need to switch.
-      const confused =
-        !this.firstname && !this.lastname && this.email && this.password
+      const confused = !this.fullname && this.email && this.password
 
       if (!confused && this.signUp) {
-        if (
-          !this.firstname ||
-          !this.lastname ||
-          this.emailError ||
-          !this.password
-        ) {
+        if (!this.fullname || this.emailError || !this.password) {
           this.nativeLoginError = 'Please fill out the form.'
         } else {
+          this.gtmRegister()
+
           this.authStore
             .signUp({
-              firstname: this.firstname,
-              lastname: this.lastname,
+              fullname: this.fullname,
               email: this.email,
               password: this.password,
             })
@@ -531,6 +543,13 @@ export default {
     async loginFacebook() {
       this.loginType = 'Facebook'
 
+      if (this.signUp) {
+        await this.$api.bandit.chosen({
+          uid: 'signUpModal',
+          variant: 'facebook',
+        })
+      }
+
       this.nativeLoginError = null
       this.socialLoginError = null
       try {
@@ -572,6 +591,13 @@ export default {
       if (response?.credential) {
         console.log('Signed in')
 
+        if (this.signUp) {
+          await this.$api.bandit.chosen({
+            uid: 'signUpModal',
+            variant: 'google',
+          })
+        }
+
         try {
           await this.authStore.login({
             googlejwt: response.credential,
@@ -588,8 +614,15 @@ export default {
         this.socialLoginError = 'Google login failed: ' + response.error
       }
     },
-    loginYahoo() {
+    async loginYahoo() {
       this.loginType = 'Yahoo'
+
+      if (this.signUp) {
+        await this.$api.bandit.chosen({
+          uid: 'signUpModal',
+          variant: 'yahoo',
+        })
+      }
 
       // Sadly Yahoo doesn't support a Javascript-only OAuth flow, so far as I can tell.  So what we do is
       // redirect to Yahoo, which returns back to us with a code parameter, which we then pass to the server
@@ -624,6 +657,11 @@ export default {
       this.forceSignIn = true
       e.preventDefault()
       e.stopPropagation()
+
+      this.$api.bandit.chosen({
+        uid: 'signUpModal',
+        variant: 'signin',
+      })
     },
     togglePassword() {
       this.showPassword = !this.showPassword

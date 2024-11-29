@@ -31,13 +31,13 @@
 <script>
 import { useMemberStore } from '../stores/member'
 import { useUserStore } from '../stores/user'
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 
 export default {
   setup() {
     const memberStore = useMemberStore()
     const userStore = useUserStore()
-    const { modal, show, hide } = useModal()
+    const { modal, show, hide } = useOurModal()
     return { memberStore, userStore, modal, show, hide }
   },
   props: {

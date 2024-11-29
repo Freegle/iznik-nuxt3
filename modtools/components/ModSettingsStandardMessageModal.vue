@@ -107,7 +107,7 @@
   </div>
 </template>
 <script>
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 import { useModConfigStore } from '../stores/modconfig'
 import { useStdmsgStore } from '../stores/stdmsg'
 
@@ -115,7 +115,7 @@ export default {
   setup() {
     const modConfigStore = useModConfigStore()
     const stdmsgStore = useStdmsgStore()
-    const { modal, hide } = useModal()
+    const { modal, hide } = useOurModal()
     return { modConfigStore, stdmsgStore, modal, hide }
   },
   props: {

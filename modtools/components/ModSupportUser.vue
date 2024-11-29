@@ -110,10 +110,11 @@
         </h3>
         <div v-for="d in user.donations" :key="'donation-' + d.id">
           <div v-if="!d.GrossAmount">
-            {{ dateshort(d.timestamp ) }} <span class="small text-muted">Probable donation via JustGiving; amount unknown; gift aid claimed by them not us</span>
+            {{ dateshort(d.timestamp) }} <span class="small text-muted">Probable donation via JustGiving; amount unknown; gift aid claimed by them
+              not us</span>
           </div>
           <div v-else>
-            &pound;{{ d.GrossAmount }} on {{ dateshort(d.timestamp ) }} <span class="small text-muted">via {{ d.source }}</span>
+            &pound;{{ d.GrossAmount }} on {{ dateshort(d.timestamp) }} <span class="small text-muted">via {{ d.source }}</span>
             <span v-if="d.source === 'PayPalGivingFund' || d.source === 'eBay' || d.source === 'Facebook'" class="small text-muted">
               (Gift Aid claimed by them not us)
             </span>
@@ -167,9 +168,11 @@
       <div class="d-flex justify-content-between flex-wrap">
         <b-input-group class="mt-2">
           <b-form-input v-model="newpassword" type="text" placeholder="Reset password" autocomplete="off" class="max" />
-          <b-input-group-append>
-            <SpinButton variant="white" icon-name="save" label="Set Password" @handle="setPassword" />
-          </b-input-group-append>
+          <b-input-group>
+            <slot name="append">
+              <SpinButton variant="white" icon-name="save" label="Set Password" @handle="setPassword" />
+            </slot>
+          </b-input-group>
         </b-input-group>
         <b-input-group class="mt-2">
           <b-form-input v-model="newemail" type="text" placeholder="Add email" autocomplete="off" class="max" />
@@ -181,9 +184,11 @@
               As Secondary
             </option>
           </b-form-select>
-          <b-input-group-append>
-            <SpinButton variant="white" icon-name="save" label="Add Email" @handle="addEmail" />
-          </b-input-group-append>
+          <b-input-group>
+            <slot name="append">
+              <SpinButton variant="white" icon-name="save" label="Add Email" @handle="addEmail" />
+            </slot>
+          </b-input-group>
         </b-input-group>
         <NoticeMessage v-if="emailAddError" variant="danger" class="mt-2">
           {{ emailAddError }}
@@ -364,7 +369,7 @@
       <ModSupportChatList :chats="chatsFiltered" :pov="user.id" />
     </b-card-body>
     <ModLogsModal v-if="showLogs" ref="logs" :userid="user.id" @hidden="showLogs = false" />
-    <ConfirmModal v-if="purgeConfirm" ref="purgeConfirm" :title="'Purge ' + user.displayname + ' '+user.email+' from the system?'"
+    <ConfirmModal v-if="purgeConfirm" ref="purgeConfirm" :title="'Purge ' + user.displayname + ' ' + user.email + ' from the system?'"
       message="<p><strong>This can't be undone.</strong></p><p>Are you completely sure you want to do this?</p>" @confirm="purgeConfirmed" />
     <ProfileModal v-if="showProfile && user && user.info" :id="id" ref="profile" @hidden="showProfile = false" />
     <ModSpammerReport v-if="showSpamModal" ref="spamConfirm" :user="reportUser" @hidden="showSpamModal = false" />

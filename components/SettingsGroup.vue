@@ -32,7 +32,6 @@
             :height="30"
             :width="100"
             font-size="14"
-            size="sm"
             :sync="true"
             :labels="{ checked: 'Sending weekly', unchecked: 'Not sending' }"
             color="#61AE24"
@@ -47,7 +46,6 @@
             :height="30"
             :width="100"
             font-size="14"
-            size="sm"
             :sync="true"
             :labels="{ checked: 'Sending weekly', unchecked: 'Not sending' }"
             color="#61AE24"
@@ -130,10 +128,11 @@ export default {
         if (this.membership) {
           return this.membership.emailfrequency.toString()
         }
+
         return this.emailfrequency
       },
       async set(newval) {
-        await this.changeValue('emailfrequency', parseInt(newval))
+        await this.changeValue('emailfrequency', newval)
       },
     },
     eventsallowed: {
@@ -142,6 +141,7 @@ export default {
         return Boolean(this.membership?.eventsallowed)
       },
       async set(newval) {
+        console.log('Set eventsallowed', newval)
         await this.changeValue('eventsallowed', newval ? 1 : 0)
       },
     },
@@ -179,7 +179,7 @@ export default {
   },
   methods: {
     async changeValue(param, val) {
-      this.$emit('update', {param, val})
+      this.$emit('update:' + param, val)
 
       if (this.groupid) {
         const params = {

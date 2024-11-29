@@ -39,7 +39,7 @@
 </template>
 
 <script>
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 import { useMiscStore } from '../../stores/misc'
 import { useUserStore } from '../../stores/user'
 
@@ -47,7 +47,7 @@ export default {
   setup() {
     const miscStore = useMiscStore()
     const userStore = useUserStore()
-    const { modal, hide } = useModal()
+    const { modal, hide } = useOurModal()
     return { miscStore, userStore, modal, hide }
   },
   methods: {

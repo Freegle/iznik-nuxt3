@@ -1,191 +1,280 @@
 <template>
-  <!--
-  If you don't like ads, then you can use an ad blocker.  Plus you could donate to us
-  at https://www.ilovefreegle.org/donate - if we got enough donations we would be delighted not to show ads.
-   -->
-  <div v-observe-visibility="visibilityChanged" class="pointer">
-    <div v-if="isVisible" class="d-flex w-100 justify-content-around">
-      <div
-        :id="divId"
-        :ref="adUnitPath"
-        :key="'adUnit-' + adUnitPath"
-        :style="{
-          'max-width': dimensions[0] + 'px',
-          'max-height': dimensions[1] + 'px',
-        }"
-      />
-    </div>
-    <p
-      v-if="isVisible && adShown"
-      class="text-center textsize d-none d-md-block"
+  <client-only>
+    <!--
+    If you don't like ads, then you can use an ad blocker.  Plus you could donate to us
+    at https://www.ilovefreegle.org/donate - if we got enough donations we would be delighted not to show ads.
+     -->
+    <div
+      v-if="me || showLoggedOut"
+      v-observe-visibility="visibilityChanged"
+      class="pointer"
+      :class="{
+        'bg-white': adShown,
+      }"
     >
-      Advertisement. These help Freegle keep going.
-    </p>
-    <!--    <div class="bg-white">-->
-    <!--      Path {{ adUnitPath }} id {{ divId }} dimensions {{ dimensions }}-->
-    <!--    </div>-->
-  </div>
+      <div
+        v-if="isVisible"
+        :class="{
+          boredWithJobs,
+          jobs,
+        }"
+      >
+        <div class="d-flex w-100 justify-content-md-around">
+          <JobsDaSlot
+            v-if="renderAd && !boredWithJobs"
+            :min-width="minWidth"
+            :max-width="maxWidth"
+            :min-height="minHeight"
+            :max-height="maxHeight"
+            :class="{
+              'text-center': maxWidth === '100vw',
+            }"
+            @rendered="rippleRendered"
+            @borednow="boredWithJobs = true"
+          />
+          <OurGoogleDa
+            v-else-if="adSense"
+            ref="googlead"
+            :ad-unit-path="adUnitPath"
+            :min-width="minWidth"
+            :max-width="maxWidth"
+            :min-height="minHeight"
+            :max-height="maxHeight"
+            :div-id="divId"
+            :render-ad="renderAd"
+            @rendered="rippleRendered"
+          />
+          <OurPrebidDa
+            v-else
+            ref="prebidad"
+            :ad-unit-path="adUnitPath"
+            :min-width="minWidth"
+            :max-width="maxWidth"
+            :min-height="minHeight"
+            :max-height="maxHeight"
+            :div-id="divId"
+            :render-ad="renderAd"
+            @rendered="rippleRendered"
+          />
+        </div>
+      </div>
+    </div>
+  </client-only>
 </template>
 <script setup>
-import { nextTick } from 'vue'
 import { ref, computed, onBeforeUnmount } from '#imports'
+import { useConfigStore } from '~/stores/config'
+import { useMiscStore } from '~/stores/misc'
+import { useAuthStore } from '~/stores/auth'
 
 const props = defineProps({
   adUnitPath: {
     type: String,
     required: true,
   },
-  dimensions: {
-    type: Array,
-    required: true,
+  minWidth: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  maxWidth: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  minHeight: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  maxHeight: {
+    type: String,
+    required: false,
+    default: null,
   },
   divId: {
     type: String,
     required: true,
   },
-  pixel: {
+  inModal: {
     type: Boolean,
     default: false,
   },
+  showLoggedOut: {
+    type: Boolean,
+    default: false,
+  },
+  jobs: {
+    type: Boolean,
+    default: true,
+  },
 })
 
+const emit = defineEmits(['rendered', 'disabled'])
+
+// We can either run with Ad Sense or with Prebid.  Ad Sense is the default.
+const adSense = ref(true)
+const renderAd = ref(false)
 const adShown = ref(true)
+const boredWithJobs = ref(!props.jobs)
+
+let prebidRetry = 0
+let tcDataRetry = 0
+let visibleAndScriptsLoadedTimer = null
+const isVisible = ref(false)
+let firstBecomeVisible = false
+
+function visibilityChanged(visible) {
+  // The DOM element may have become visible.  But that isn't the end of the story.
+  //
+  // We need to wait for CookieYes, then the TC data, then prebid being loaded.  This is triggered in nuxt.config.ts.
+  // Check the status here rather than on component load, as it might not be available yet.
+  visibleAndScriptsLoadedTimer = null
+
+  if (process.client) {
+    const runtimeConfig = useRuntimeConfig()
+
+    if (!runtimeConfig.public.COOKIEYES) {
+      // Not using CookieYes, e.g. in dev.
+      console.log('No CookieYes in ad')
+      isVisible.value = visible
+
+      if (visible && !firstBecomeVisible) {
+        // We might want to show the ad now, if we stay visible for a little while.
+        firstBecomeVisible = true
+
+        if (!checkStillVisibleTimer) {
+          checkStillVisibleTimer = setTimeout(checkStillVisible, 100)
+        }
+      }
+    } else if (!window.__tcfapi) {
+      // CookieYes not yet loaded - retry.
+      console.log('CookieYes not yet loaded in ad')
+      visibleAndScriptsLoadedTimer = window.setTimeout(() => {
+        visibilityChanged(visible)
+      }, 100)
+    } else {
+      // CookieYes is loaded.  Now we have to wait until they've given consent.
+      window.__tcfapi(
+        'getTCData',
+        2,
+        (tcData, success) => {
+          if (success && tcData && tcData.tcString) {
+            // The user has responded to the cookie banner.
+            console.log('TC data loaded and TC String set')
+            if (!adSense.value && !window.pbjs?.version) {
+              // Prebid required but not loaded yet.
+              prebidRetry++
+
+              if (prebidRetry > 20) {
+                // Give up.  Probably blocked, so we should emit that we've not rendered an ad.  This may trigger
+                // a fallback ad.
+                console.log('Give up on prebid load')
+                emit('rendered', false)
+              } else {
+                // Try again for prebid later.
+                visibleAndScriptsLoadedTimer = setTimeout(() => {
+                  visibilityChanged(visible)
+                }, 100)
+              }
+            } else {
+              // Prebid has loaded.  We might want to show the ad now, if we stay visible for a little while.
+              console.log('Prebid loaded or not required')
+              isVisible.value = visible
+
+              if (visible && !firstBecomeVisible) {
+                if (!checkStillVisibleTimer) {
+                  checkStillVisibleTimer = setTimeout(checkStillVisible, 100)
+                }
+              }
+            }
+          } else {
+            // TC data not yet ready - the user hasn't yet responded to the cookie banner.
+            // Try again later.
+            console.log('TC data not yet available in ad')
+            tcDataRetry++
+
+            if (tcDataRetry > 50) {
+              // Give up.  Probably blocked, so we should emit that we've not rendered an ad.  This may trigger
+              // a fallback ad.
+              console.log('Give up on TC data load')
+              emit('rendered', false)
+            } else {
+              visibleAndScriptsLoadedTimer = window.setTimeout(() => {
+                visibilityChanged(visible)
+              }, 100)
+            }
+          }
+        },
+        [1, 2, 3]
+      )
+    }
+  }
+}
+
+// We want to wait until an ad has been viewable for 100ms.  That reduces the impact of fast scrolling or
+// redirects.
+let checkStillVisibleTimer = null
+
+async function checkStillVisible() {
+  // Check if the ad is still visible after this delay, and no modal is open.
+  console.log(
+    'Check if ad still visible',
+    isVisible.value,
+    props.inModal,
+    document.body.classList.contains('modal-open')
+  )
+
+  if (
+    isVisible.value &&
+    (props.inModal || !document.body.classList.contains('modal-open'))
+  ) {
+    // Check if we are showing ads.
+    const configStore = useConfigStore()
+    const showingAds = await configStore.fetch('ads_enabled')
+    const me = useAuthStore().user
+
+    const recentDonor =
+      me &&
+      me.donated &&
+      new Date(me.donated) > new Date(Date.now() - 31 * 24 * 60 * 60 * 1000)
+
+    if (recentDonor) {
+      console.log('Ads disabled as recent donor')
+      emit('rendered', false)
+    } else if (showingAds?.length && parseInt(showingAds[0].value)) {
+      renderAd.value = true
+    } else {
+      console.log('Ads disabled in server config', showingAds)
+      useMiscStore().adsDisabled = true
+      emit('rendered', false)
+      emit('disabled')
+    }
+  } else {
+    emit('rendered', false)
+  }
+}
+
+function rippleRendered(rendered) {
+  adShown.value = rendered
+  emit('rendered', rendered)
+}
 
 const passClicks = computed(() => {
   return !adShown.value
 })
 
-const uniqueid = ref(props.adUnitPath)
-let blocked = false
-
-const p = new Promise((resolve, reject) => {
-  try {
-    const already = document.getElementById('gpt-script')
-    if (already) {
-      resolve()
-    } else {
-      const s = document.createElement('script')
-      s.setAttribute(
-        'src',
-        'https://securepubads.g.doubleclick.net/tag/js/gpt.js'
-      )
-      s.id = 'gpt-script'
-      s.onload = () => resolve()
-      s.onerror = () => {
-        console.log('Google ad script blocked')
-        blocked = true
-        resolve()
-      }
-      document.head.appendChild(s)
-    }
-  } catch (e) {
-    console.log('Load of Google ad script failed', e)
-    resolve()
-  }
-})
-
-await p
-
-let slot = null
-
-const timer = ref(null)
-
 onBeforeUnmount(() => {
   try {
-    if (timer.value) {
-      clearTimeout(timer)
-    }
-
-    if (window.googletag?.destroySlots) {
-      window.googletag.destroySlots([slot])
+    if (visibleAndScriptsLoadedTimer) {
+      clearTimeout(visibleAndScriptsLoadedTimer)
     }
   } catch (e) {
     console.log('Exception in onBeforeUnmount', e)
   }
 })
-
-const isVisible = ref(false)
-let shownFirst = false
-
-const emit = defineEmits(['rendered'])
-
-async function visibilityChanged(visible) {
-  if (!blocked) {
-    try {
-      if (visible && !shownFirst) {
-        isVisible.value = visible
-        shownFirst = true
-
-        await nextTick()
-
-        window.googletag = window.googletag || { cmd: [] }
-        window.googletag.cmd.push(function () {
-          const dims = [props.dimensions]
-
-          if (props.pixel) {
-            dims.push([1, 1])
-          }
-
-          window.googletag.pubads().collapseEmptyDivs()
-          slot = window.googletag
-            .defineSlot(uniqueid.value, dims, props.divId)
-            .addService(window.googletag.pubads())
-
-          window.googletag
-            .pubads()
-            .addEventListener('slotRenderEnded', (event) => {
-              if (event?.slot === slot && event?.isEmpty) {
-                adShown.value = false
-              }
-              emit('rendered', adShown.value)
-
-              // We refresh the ad slot.  This increases views.  Google doesn't like it if this is more frequent than
-              // every 30s.
-              if (!timer.value) {
-                timer.value = setTimeout(() => {
-                  if (
-                    window.googletag?.pubads &&
-                    typeof window.googletag?.pubads === 'function' &&
-                    typeof window.googletag?.pubads().refresh === 'function'
-                  ) {
-                    window.googletag.pubads().refresh([slot])
-                  }
-                }, 45000)
-              }
-            })
-            .addEventListener('slotVisibilityChanged', (event) => {
-              if (event.inViewPercentage < 51) {
-                console.log(
-                  `Visibility of slot ${event.slot.getSlotElementId()} changed. New visibility: ${
-                    event.inViewPercentage
-                  }%.Viewport size: ${window.innerWidth}x${window.innerHeight}`
-                )
-              }
-            })
-
-          window.googletag.enableServices()
-        })
-
-        window.googletag.cmd.push(function () {
-          try {
-            window.googletag.display(props.divId)
-          } catch (e) {
-            console.log('Exception in ad display', e)
-            emit('rendered', false)
-          }
-        })
-      }
-    } catch (e) {
-      console.log('Exception in visibilityChanged', e)
-    }
-  }
-}
 </script>
 <style scoped lang="scss">
-.textsize {
-  font-size: 0.75rem;
-}
-
 .pointer {
   pointer-events: v-bind(passClicks);
 }

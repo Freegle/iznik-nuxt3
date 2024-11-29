@@ -6,7 +6,7 @@
     </div>
     <ConfirmModal v-if="showDeleteModal" ref="deleteConfirm" :title="'Delete: ' + member.displayname" @confirm="deleteConfirmed" />
     <ModSpammerReport v-if="showSpamModal" ref="spamConfirm" :user="member" />
-    <!--ModStdMessageModal v-if="showStdMsgModal" ref="stdmodal" :stdmsg="stdmsg" :member="member" :autosend="autosend" TODO /-->
+    <ModStdMessageModal v-if="showStdMsgModal" ref="stdmodal" :stdmsg="stdmsg" :member="member" :autosend="autosend" />
   </div>
 </template>
 <script>
@@ -156,19 +156,19 @@ export default {
           }
         } else if (this.stdmsgid) {
           // We have a standard message.  Fetch it.
+          alert("TODO MMB1")
           /* TODO this.stdmsg = await this.$store.dispatch('stdmsgs/fetch', {
             id: this.stdmsgid
           })*/
         }
 
         this.showStdMsgModal = true
-        this.waitForRef('stdmodal', () => {
-          this.$refs.stdmodal.show()
-        })
+        this.$refs.stdmodal?.show()
       }
       if (callback) callback()
     },
     async approveIt() {
+      alert("TODO MMB2")
       /* TODO await this.$store.dispatch('members/approve', {
         id: this.member.userid,
         groupid: this.groupid
@@ -176,15 +176,11 @@ export default {
     },
     deleteIt() {
       this.showDeleteModal = true
-      this.waitForRef('deleteConfirm', () => {
-        this.$refs.deleteConfirm.show()
-      })
+      this.$refs.deleteConfirm?.show()
     },
     spamReport() {
       this.showSpamModal = true
-      this.waitForRef('spamConfirm', () => {
-        this.$refs.spamConfirm.show()
-      })
+      this.$refs.spamConfirm?.show()
     },
     async spamConfirm() {
       await this.spammerStore.confirm({
@@ -193,6 +189,7 @@ export default {
       })
     },
     async spamRequestRemove() {
+      alert("TODO MMB3")
       /* TODO await this.$store.dispatch('spammers/requestremove', {
         id: this.member.spammer.id,
         userid: this.member.userid
@@ -212,6 +209,7 @@ export default {
       })
     },
     async deleteConfirmed() {
+      alert("TODO MMB4")
       /* TODO await this.$store.dispatch('members/delete', {
         id: this.member.userid,
         groupid: this.groupid

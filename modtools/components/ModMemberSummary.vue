@@ -29,10 +29,10 @@
       </b-badge>
       <b-badge v-if="userinfo" :variant="userinfo.expectedreplies > 0 ? 'danger' : 'light'" title="Recent outstanding replies requested"
         class="clickme me-2">
-        <v-icon icon="clock" class="fa-fw" /> {{ pluralise(['RSVP','RSVPs'], userinfo.expectedreplies || 0, true) }}
+        <v-icon icon="clock" class="fa-fw" /> {{ pluralise(['RSVP', 'RSVPs'], userinfo.expectedreplies || 0, true) }}
       </b-badge>
     </h4>
-    <ModPostingHistoryModal v-if="showPostingHistoryModal" ref="history" :user="member" :type="type" @hidden="showPostingHistoryModal = false"/>
+    <ModPostingHistoryModal v-if="showPostingHistoryModal" ref="history" :user="member" :type="type" @hidden="showPostingHistoryModal = false" />
     <ModLogsModal v-if="showLogsModal" ref="logs" :userid="member.id" modmailsonly @hidden="showLogsModal = false" />
   </div>
 </template>
@@ -89,14 +89,12 @@ export default {
     countType(type) {
       let count = 0
 
-      if( !this.member || !this.member.messagehistory){
-        return 0
-      }
-      
-      for (const [key, entry] of Object.entries(this.member.messagehistory)) {
-        if (entry.type === type && entry.daysago < 31 && !entry.deleted) {
-          count++
-        }
+      if (this.member && this.member.messagehistory) {
+        this.member.messagehistory.forEach(entry => {
+          if (entry.type === type && entry.daysago < 31 && !entry.deleted) {
+            count++
+          }
+        })
       }
 
       return count

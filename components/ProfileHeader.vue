@@ -1,7 +1,7 @@
 <template>
   <div v-if="user" class="d-flex w-100">
     <ProfileImage
-      :image="user.profile.url"
+      :image="user.profile.path"
       class="mb-1 mt-1 inline mr-2"
       is-thumbnail
       size="xl"

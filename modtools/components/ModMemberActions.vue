@@ -145,7 +145,6 @@ export default {
       this.$emit('commentadded')
     },
     async spamReport() {
-      console.log('===spamReport 2')
       if (!this.user) {
         await this.fetchUser()
       }

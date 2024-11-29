@@ -1,9 +1,10 @@
+@import 'assets/css/sticky-banner.scss';
+
 #serverloader {
   z-index: 1000;
   display: flex !important;
   text-align: center;
-  position: fixed;
-  /* or absolute */
+  position: fixed; /* or absolute */
   top: calc(50% - 44px);
   font-size: 12px;
   padding: 5px;
@@ -17,11 +18,9 @@
   0% {
     opacity: 0;
   }
-
   90% {
     opacity: 0;
   }
-
   100% {
     opacity: 1;
   }
@@ -66,7 +65,7 @@ html {
 }
 
 .badge.bg-success {
-  background-color: $color-green-background !important;
+  background-color: $color-green-background!important;
   color: white !important;
 }
 
@@ -107,9 +106,6 @@ div[variant="success"] .card-header {
   text-overflow: ellipsis;
 }
 
-body {
-  background-image: url('/wallpaper.png');
-}
 body.bodyMT{
   background: #dff2d1;
 }
@@ -170,29 +166,24 @@ body.bodyMT{
 }
 
 .decornone {
-
   &:hover,
   &:focus {
     text-decoration: none;
   }
 }
 
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 1s;
+.fade-enter-active, .fade-leave-active {
+    transition: opacity 1s;
 }
-
-.fade-enter,
-.fade-leave-to {
-  opacity: 0;
+.fade-enter, .fade-leave-to {
+    opacity: 0;
 }
 
 .fadein-enter-active {
-  transition: opacity 1s;
+    transition: opacity 1s;
 }
-
 .fadein-enter {
-  opacity: 0;
+    opacity: 0;
 }
 
 .forcebreak {
@@ -210,8 +201,7 @@ body.bodyMT{
   color: $color-black;
 }
 
-.white,
-.white>a {
+.white, .white > a {
   color: $color-white !important;
 }
 
@@ -239,18 +229,12 @@ body.bodyMT{
 }
 
 .noselect {
-  -webkit-touch-callout: none;
-  /* iOS Safari */
-  -webkit-user-select: none;
-  /* Safari */
-  -khtml-user-select: none;
-  /* Konqueror HTML */
-  -moz-user-select: none;
-  /* Firefox */
-  -ms-user-select: none;
-  /* Internet Explorer/Edge */
-  user-select: none;
-  /* Non-prefixed version, currently
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently
                                   supported by Chrome and Opera */
 }
 
@@ -273,7 +257,13 @@ legend {
 }
 
 .sidebar__wrapper {
-  height: calc(100vh - 68px);
+  height: calc(100vh - var(--header-navbar-height) - $sticky-banner-height-desktop - $ads-cta);
+
+  @supports (height: 100dvh) {
+    height: calc(100dvh - var(--header-navbar-height) - $sticky-banner-height-desktop - $ads-cta);
+  }
+
+  overflow-y: scroll;
 
   .card-body .card {
     border-radius: unset;
@@ -289,18 +279,15 @@ legend {
   0% {
     opacity: 0.25;
   }
-
   50% {
     opacity: 1.0;
   }
-
   100% {
     opacity: 0.25;
   }
 }
 
 form {
-
   label,
   .col-form-label {
     font-weight: bold;
@@ -332,7 +319,7 @@ form {
 }
 
 // Animate marker moves (as used on landing page).
-.leaflet-marker-pane>* {
+.leaflet-marker-pane > * {
   transition: transform 2s ease;
 }
 
@@ -352,7 +339,12 @@ form {
 .modal-content {
   // Need to make this scrollable so that e.g. login modal can all be accessed on screens with small height.
   overflow-y: auto !important;
-  max-height: calc(100% - 50px) !important;
+
+  max-height: calc(100% - $sticky-banner-height-mobile) !important;
+
+  @include media-breakpoint-up(md) {
+    max-height: calc(100% - $sticky-banner-height-desktop) !important;
+  }
 }
 
 label {
@@ -366,6 +358,11 @@ label {
 // Don't underlink link buttons:
 .btn-link:not(:hover) {
   text-decoration: none;
+}
+
+.btn-xl {
+  padding: 10px 20px;
+  font-size: 20px;
 }
 
 // Bootstrap 4 class compatibility.
@@ -492,9 +489,7 @@ label {
   }
 
   .popover-arrow {
-
-    &::before,
-    &::after {
+    &::before, &::after {
       border-top-color: $color-green-background !important;
     }
   }
@@ -570,6 +565,10 @@ label {
   background-color: $color-green-background !important;
 }
 
+.ourBackLight {
+  background-color: $colour-success-bg !important;
+}
+
 .v-popper--theme-mentionable {
   .v-popper__inner {
     border-radius: 0px !important;
@@ -587,6 +586,12 @@ label {
   }
 }
 
+.hideshort {
+  @media (max-height: 800px) {
+    display: none;
+  }
+}
+
 :root {
   --popper-theme-background-color: white;
   --popper-theme-background-color-hover: white;
@@ -596,6 +601,7 @@ label {
   --popper-theme-border-radius: 6px;
   --popper-theme-padding: 10px;
   --popper-theme-box-shadow: 0 6px 30px -6px rgba(0, 0, 0, 0.25);
+  --header-navbar-height: 76px;
 }
 
 /* Small gap on left of #12345678 */

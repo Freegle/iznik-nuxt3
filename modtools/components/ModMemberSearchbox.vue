@@ -2,11 +2,13 @@
   <b-input-group class="flex max">
     <b-form-input v-model="term" type="text" placeholder="Search email/name/id" :disabled="disabled" autocapitalize="none"
       @keyup.native.enter="dosearch" />
-    <b-input-group-append>
-      <b-button variant="primary" :disabled="disabled" @click="dosearch">
-        <v-icon icon="search" />
-      </b-button>
-    </b-input-group-append>
+    <b-input-group>
+      <slot name="append">
+        <b-button variant="primary" :disabled="disabled" @click="dosearch">
+          <v-icon icon="search" />
+        </b-button>
+      </slot>
+    </b-input-group>
   </b-input-group>
 </template>
 <script>

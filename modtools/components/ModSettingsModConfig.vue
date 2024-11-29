@@ -17,9 +17,11 @@
       <div>
         <b-input-group>
           <b-form-input v-model="newconfigname" placeholder="Enter new config name" />
-          <b-input-group-append>
-            <SpinButton variant="white" icon-name="plus" label="Create" @handle="create" :disabled="!newconfigname" />
-          </b-input-group-append>
+          <b-input-group>
+            <slot name="append">
+              <SpinButton variant="white" icon-name="plus" label="Create" @handle="create" :disabled="!newconfigname" />
+            </slot>
+          </b-input-group>
         </b-input-group>
       </div>
     </div>
@@ -138,9 +140,11 @@
       <div class="d-flex justify-content-between">
         <b-input-group class="mt-2">
           <b-form-input v-model="copyconfigname" placeholder="Copy this whole config to..." />
-          <b-input-group-append>
-            <SpinButton variant="white" icon-name="plus" label="Copy" @handle="copy" :disabled="!copyconfigname" />
-          </b-input-group-append>
+          <b-input-group>
+            <slot name="append">
+              <SpinButton variant="white" icon-name="plus" label="Copy" @handle="copy" :disabled="!copyconfigname" />
+            </slot>
+          </b-input-group>
         </b-input-group>
         <b-button v-if="!locked && (!config || !config.using || !config.using.length)" variant="white" class="mt-2" @click="deleteIt">
           <v-icon icon="trash-alt" /> Delete

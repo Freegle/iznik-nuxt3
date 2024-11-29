@@ -3,6 +3,7 @@ import dayjs from 'dayjs'
 import { nextTick } from 'vue'
 import api from '~/api'
 import { earliestDate, addStrings } from '~/composables/useTimeFormat'
+import { useAuthStore } from '~/stores/auth'
 import { useMiscStore } from '@/stores/misc'
 
 export const useCommunityEventStore = defineStore({
@@ -66,15 +67,6 @@ export const useCommunityEventStore = defineStore({
     },
     async fetch(id, force) {
       try {
-        const miscStore = useMiscStore()
-        if( miscStore.modtools){
-          await this.fetchMT({
-            id,
-            limit: 1,
-            pending: true
-          })
-          return this.list[id]
-        }
         if (force || !this.list[id]) {
           if (this.fetching[id]) {
             await this.fetching[id]
@@ -177,6 +169,14 @@ export const useCommunityEventStore = defineStore({
   getters: {
     byId: (state) => (id) => {
       return state.list[id]
+    },
+    count: (state) => {
+      const lastCommunityEvent =
+        useAuthStore().user?.settings?.lastCommunityEvent || 0
+
+      return state.forUser.filter((item) => {
+        return item.id > lastCommunityEvent
+      }).length
     },
   },
 })

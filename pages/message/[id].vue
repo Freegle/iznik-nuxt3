@@ -11,9 +11,10 @@
           >
             <ExternalDa
               ad-unit-path="/22794232631/freegle_productemail"
-              :dimensions="[300, 250]"
+              max-height="600px"
               div-id="div-gpt-ad-1691925773522-0"
               class="mt-2"
+              show-logged-out
             />
           </VisibleWhen>
         </b-col>
@@ -32,7 +33,13 @@
             class="bg-white p-2"
           >
             <h1>Sorry, that post isn't around any more.</h1>
-            <div>
+            <div v-if="message?.deadline">
+              <p>
+                There was a deadline of
+                {{ dateonlyNoYear(message.deadline) }}.
+              </p>
+            </div>
+            <div v-else>
               <p>
                 If it was an OFFER, it's probably been TAKEN. If it was a
                 WANTED, it's probably been RECEIVED.
@@ -66,25 +73,31 @@
               </b-col>
             </b-row>
           </div>
-          <div v-else-if="myid && message && message.fromuser === myid">
+          <div
+            v-else-if="
+              mountComplete && myid && message && message.fromuser === myid
+            "
+          >
             <MyMessage :id="id" :show-old="true" expand />
           </div>
           <div v-else class="botpad">
-            <GlobalWarning />
+            <GlobalMessage />
             <VisibleWhen :at="['xs', 'sm', 'md', 'lg']">
               <OurMessage
                 :id="id"
+                class="mt-3"
                 :start-expanded="true"
                 hide-close
                 record-view
                 ad-unit-path="/22794232631/freegle_productemail"
-                ad-id="div-gpt-ad-1691925773522-2"
+                ad-id="div-gpt-ad-1691925773522-0"
                 @not-found="error = true"
               />
             </VisibleWhen>
             <VisibleWhen :not="['xs', 'sm', 'md', 'lg']">
               <OurMessage
                 :id="id"
+                class="mt-3"
                 :start-expanded="true"
                 hide-close
                 record-view
@@ -93,7 +106,7 @@
             </VisibleWhen>
           </div>
         </b-col>
-        <b-col cols="0" xl="3" class="d-none d-xl-block">
+        <b-col cols="0" xl="3" class="d-none d-xl-flex justify-content-end">
           <VisibleWhen
             :not="['xs', 'sm', 'md', 'lg']"
             class="position-fixed"
@@ -101,9 +114,11 @@
           >
             <ExternalDa
               ad-unit-path="/22794232631/freegle_productemail"
-              :dimensions="[300, 250]"
-              div-id="div-gpt-ad-1691925773522-1"
+              max-width="300px"
+              div-id="div-gpt-ad-1691925773522-0"
               class="mt-2"
+              show-logged-out
+              :jobs="false"
             />
           </VisibleWhen>
         </b-col>
@@ -162,6 +177,10 @@ if (message.value) {
   )
 }
 
+// We want to delay render of MyMessage until the mount fetch is complete, as it would otherwise not
+// contain the reply information correctly.
+const mountComplete = ref(false)
+
 onMounted(async () => {
   // We need to fetch again on the client, as the server may have rendered the page with data censored, because
   // it always renders logged out.
@@ -170,5 +189,7 @@ onMounted(async () => {
   } catch (e) {
     console.log('Message fetch on mount failed', e)
   }
+
+  mountComplete.value = true
 })
 </script>

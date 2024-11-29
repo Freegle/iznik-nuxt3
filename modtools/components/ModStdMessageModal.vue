@@ -88,7 +88,7 @@ import { useMemberStore } from '~/stores/member'
 import { useMessageStore } from '~/stores/message'
 import { useUserStore } from '../stores/user'
 import dayjs from 'dayjs'
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 import { SUBJECT_REGEX } from '@/utils/constants'
 //import PostCode from '~/components/PostCode'
 import { setupKeywords } from '../composables/useKeywords'
@@ -120,7 +120,7 @@ export default {
   },
   setup() {
     console.log('MSMM setup')
-    const { modal, hide } = useModal()
+    const { modal, hide } = useOurModal()
     const groupStore = useGroupStore()
     const messageStore = useMessageStore()
     const memberStore = useMemberStore()

@@ -40,14 +40,14 @@
 import Wkt from 'wicket'
 import { useGroupStore } from '../../stores/group'
 import { useUserStore } from '../../stores/user'
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 import cloneDeep from 'lodash.clonedeep'
 
 export default {
   setup() {
     const groupStore = useGroupStore()
     const userStore = useUserStore()
-    const { modal, show, hide } = useModal()
+    const { modal, show, hide } = useOurModal()
     return { groupStore, userStore, modal, show, hide }
   },
   props: {

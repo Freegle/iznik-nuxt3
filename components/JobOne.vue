@@ -2,23 +2,20 @@
   <div v-if="job" @click="clicked">
     <div v-if="summary" class="ml-2 mr-2">
       <ExternalLink :href="job.url">
-        <h4>
+        <h4 :class="className" class="text-truncate">
           {{ title }}
-          <span v-if="job.location" class="text-muted">
-            {{ location }}
+          <span v-if="job.location" class="text-muted small">
+            <span class="small">
+              {{ location }}
+            </span>
           </span>
         </h4>
-        <p class="text-truncate mt-2 d-none d-lg-block black">
+        <p v-if="showBody" class="text-truncate mt-2 d-none d-lg-block black">
           {{ body }}
         </p>
       </ExternalLink>
     </div>
-    <b-card
-      v-else
-      no-body
-      variant="info"
-      :class="highlight ? 'job-row bg-info' : 'job-row'"
-    >
+    <b-card v-else no-body :class="highlight ? 'job-row bg-info' : 'job-row'">
       <b-card-body class="job-row">
         <b-card-title class="job-title">
           {{ title }}
@@ -71,6 +68,16 @@ export default {
       type: Boolean,
       required: false,
       default: false,
+    },
+    showBody: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
+    className: {
+      type: String,
+      required: false,
+      default: '',
     },
   },
   setup() {

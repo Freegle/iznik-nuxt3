@@ -133,10 +133,15 @@
                   @done="considerNext"
                 />
               </div>
-              <div v-else-if="task.type === 'Survey'">
-                <MicroVolunteeringSurvey @done="considerNext" />
+              <div v-else-if="task.type === 'Survey2'">
+                <MicroVolunteeringSurvey :url="task.url" @done="considerNext" />
+              </div>
+              <div v-else-if="task.type === 'Invite'">
+                <MicroVolunteeringInvite @next="considerNext" />
               </div>
               <div v-else>Unknown task {{ task }}</div>
+              <!--              <p>You can also:</p>-->
+              <!--              <TrustPilot />-->
             </div>
           </b-card-text>
         </template>
@@ -181,6 +186,9 @@ const MicroVolunteeringSimilarTerms = defineAsyncComponent(() =>
 const MicroVolunteeringSurvey = defineAsyncComponent(() =>
   import('./MicroVolunteeringSurvey')
 )
+const MicroVolunteeringInvite = defineAsyncComponent(() =>
+  import('./MicroVolunteeringInvite')
+)
 
 export default {
   components: {
@@ -189,6 +197,7 @@ export default {
     MicroVolunteeringSimilarTerms,
     MicroVolunteeringFacebook,
     MicroVolunteeringSurvey,
+    MicroVolunteeringInvite,
   },
   props: {
     force: {
@@ -201,7 +210,7 @@ export default {
     const microVolunteeringStore = useMicroVolunteeringStore()
     const miscStore = useMiscStore()
     const authStore = useAuthStore()
-    const debug = true
+    const debug = false
 
     if (debug) {
       miscStore.set({
@@ -226,15 +235,26 @@ export default {
       // already declined and b) we couldn't save a decline.
       const lastAsk = miscStore.get('microvolunteeringlastask')
       const askDue =
-        !lastAsk || Date.now() - new Date(lastAsk).getTime() > 60 * 60 * 1000
+        !lastAsk ||
+        Date.now() - new Date(lastAsk).getTime() > 60 * 60 * 1000 ||
+        debug
 
       // Check if we're on a group with microvolunteering enabled.
-      let allowed = false
+      let allowed = debug
       authStore.groups.forEach((g) => {
         if (g.microvolunteeringallowed) {
           allowed = true
         }
       })
+
+      console.log(
+        'Ask due',
+        askDue,
+        props.force,
+        allowed,
+        daysago,
+        me?.trustlevel
+      )
 
       if (!allowed) {
         // Not on a group with this function enabled.
@@ -245,12 +265,12 @@ export default {
       } else if (props.force) {
         // Forced.  Get task in mounted().
         fetchTask.value = true
-      } else if (daysago > 7) {
+      } else if (daysago > 7 || debug) {
         // They're not a new member.  We might want to ask them.
-        if (me?.trustlevel === 'Declined') {
+        if (me?.trustlevel === 'Declined' && !debug) {
           // We're not forced to do this, and they've said they don't want to.
           emit('verified')
-        } else if (inviteAccepted.value) {
+        } else if (inviteAccepted.value || debug) {
           // They're up for this.  Get a task in mounted().
           fetchTask.value = true
         } else {
@@ -277,7 +297,7 @@ export default {
       message: null,
       todo: 5,
       done: 0,
-      types: ['CheckMessage', 'PhotoRotate', 'Survey'],
+      types: ['CheckMessage', 'PhotoRotate', 'Survey2', 'Invite'],
       bump: 1,
     }
   },
@@ -309,7 +329,9 @@ export default {
           this.showTask = true
         } else if (this.task.type === 'PhotoRotate') {
           this.showTask = true
-        } else if (this.task.type === 'Survey') {
+        } else if (this.task.type === 'Survey2') {
+          this.showTask = true
+        } else if (this.task.type === 'Invite') {
           this.showTask = true
         } else {
           this.doneForNow()
@@ -367,7 +389,7 @@ export default {
         await this.authStore.saveMicrovolunteering('Declined')
       }
 
-      this.fetchMe() // TODO ['me', 'groups']
+      this.fetchMe(['me', 'groups'])
 
       this.showInvite = false
     },
@@ -383,7 +405,7 @@ export default {
 
       this.miscStore.set({
         key: 'microvolunteeringlastask',
-        value: Date.now(),
+        value: tomorrow.getTime(),
       })
     },
   },

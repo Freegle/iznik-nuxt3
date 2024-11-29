@@ -6,7 +6,6 @@ import { GROUP_REPOSTS, MESSAGE_EXPIRE_TIME } from '~/constants'
 import { useGroupStore } from '~/stores/group'
 import { APIError } from '~/api/BaseAPI'
 import { useAuthStore } from '~/stores/auth'
-import cloneDeep from 'lodash.clonedeep'
 
 export const useMessageStore = defineStore({
   id: 'message',
@@ -20,7 +19,6 @@ export const useMessageStore = defineStore({
     // In bounds
     bounds: {},
     activePostsCounter: 0,
-
   }),
   actions: {
     init(config) {
@@ -62,13 +60,12 @@ export const useMessageStore = defineStore({
             }
           }
         } else {
-          this.fetchingCount++
-          this.fetching[id] = api(this.config).message.fetch(id, false)
-          this.fetchingCount--
-
           try {
+            this.fetchingCount++
+            this.fetching[id] = api(this.config).message.fetch(id, false)
+            this.fetchingCount--
+
             this.list[id] = await this.fetching[id]
-            //console.log('fetch',id,typeof this.list[id].fromuser)
             this.fetching[id] = null
 
             if (this.list[id]) {
@@ -105,7 +102,10 @@ export const useMessageStore = defineStore({
       if (left.length) {
         this.fetchingCount++
         try {
-          const msgs = await api(this.config).message.fetch(left.join(','))
+          const msgs = await api(this.config).message.fetch(
+            left.join(','),
+            false
+          )
 
           if (msgs && msgs.forEach) {
             msgs.forEach((msg) => {
@@ -130,20 +130,27 @@ export const useMessageStore = defineStore({
         }
       }
     },
-    async fetchInBounds(swlat, swlng, nelat, nelng, groupid) {
-      // Don't cache this, as it might change.
-      const ret = await api(this.config).message.inbounds(
-        swlat,
-        swlng,
-        nelat,
-        nelng,
-        groupid
-      )
-
+    async fetchInBounds(swlat, swlng, nelat, nelng, groupid, limit, cache) {
+      let ret = []
       const key =
         swlat + ':' + swlng + ':' + nelat + ':' + nelng + ':' + groupid
 
-      this.bounds[key] = ret
+      if (cache && this.bounds[key]) {
+        ret = this.bounds[key]
+      } else {
+        // Don't cache this, as it might change.
+        ret = await api(this.config).message.inbounds(
+          swlat,
+          swlng,
+          nelat,
+          nelng,
+          groupid,
+          limit
+        )
+
+        this.bounds[key] = ret
+      }
+
       return ret
     },
     async search(params) {
@@ -249,7 +256,6 @@ export const useMessageStore = defineStore({
             (curMessage) => curMessage.id === params.id
           )
           if (index !== -1) {
-            console.log('UMS update F')
             this.byUserList[userUid][index] = message
           }
         }
@@ -264,7 +270,9 @@ export const useMessageStore = defineStore({
       const data = await api(this.config).message.save(params)
 
       // Clear from store to ensure no attachments.
-      this.remove({ id: params.id })
+      this.remove({
+        id: params.id,
+      })
 
       //await this.fetch(params.id, true) // Gets message.fromuser as int not object
       // TODO: CHECK OK SOLUTION
@@ -479,9 +487,7 @@ export const useMessageStore = defineStore({
     },
     all: (state) => Object.values(state.list),
     byUser: (state) => (userid) => {
-      return Object.values(state.list).filter((msg) => {
-        return msg.fromuser === userid
-      })
+      return state.byUserList[userid] || []
     },
     getByGroup: (state) => (groupid) => { // Added for ModTools
       const ret = Object.values(state.list).filter(message => {

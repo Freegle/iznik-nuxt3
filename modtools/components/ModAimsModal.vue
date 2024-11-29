@@ -59,11 +59,11 @@
   </div>
 </template>
 <script>
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 
 export default {
   setup() {
-    const { modal, hide } = useModal(224)
+    const { modal, hide } = useOurModal(224)
     return { modal, hide }
   },
 }

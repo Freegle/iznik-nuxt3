@@ -40,14 +40,14 @@
   </div>
 </template>
 <script>
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 import { untwem } from '~/composables/useTwem'
 import { useChatStore } from '../stores/chat'
 
 export default {
   setup() {
     const chatStore = useChatStore()
-    const { modal, hide } = useModal()
+    const { modal, hide } = useOurModal()
     return { chatStore, modal, hide }
   },
   props: {

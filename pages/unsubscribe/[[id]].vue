@@ -14,6 +14,7 @@
             If you need help, please mail <ExternalLink href="mailto:support@ilovefreegle.org">our Support Volunteers</ExternalLink>.
             </p>
           </NoticeMessage>
+          <DeletedRestore v-else-if="me?.deleted" :bottom="false" />
           <div v-else>
             <h1>Want to leave Freegle?</h1>
             <p>
@@ -148,6 +149,9 @@ const NoticeMessage = defineAsyncComponent(() =>
 const ExternalLink = defineAsyncComponent(() =>
   import('~/components/ExternalLink')
 )
+const DeletedRestore = defineAsyncComponent(() =>
+  import('~/components/DeletedRestore')
+)
 
 export default {
   components: {
@@ -158,6 +162,7 @@ export default {
     ConfirmModal,
     NoticeMessage,
     ExternalLink,
+    DeletedRestore,
   },
   mixins: [buildHead],
   setup() {

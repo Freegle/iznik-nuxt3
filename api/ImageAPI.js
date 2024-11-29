@@ -5,7 +5,7 @@ export default class ImageAPI extends BaseAPI {
     return await this.$post('/image', params)
   }
 
-  async postForm(params) {
-    return await this.$postForm('/image', params)
+  async postForm(params, log = true) {
+    return await this.$postForm('/image', params, log)
   }
 }

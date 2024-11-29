@@ -26,13 +26,13 @@
   </div>
 </template>
 <script>
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 import saveAs from 'save-file'
 //const createCsvWriter = require('csv-writer').createObjectCsvStringifier
 
 export default {
   setup() {
-    const { modal, show, hide } = useModal()
+    const { modal, show, hide } = useOurModal()
     return { modal, show, hide }
   },
   props: {

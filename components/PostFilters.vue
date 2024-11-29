@@ -80,11 +80,11 @@
             size="lg"
             @keyup.enter.exact="doSearch"
           />
-          <b-input-group-append>
+          <slot name="append">
             <b-button variant="secondary" title="Search" @click="doSearch">
               <v-icon icon="search" />
             </b-button>
-          </b-input-group-append>
+          </slot>
         </b-input-group>
       </div>
     </b-collapse>
@@ -99,11 +99,11 @@
           size="lg"
           @keyup.enter.exact="doSearch"
         />
-        <b-input-group-append>
+        <slot name="append">
           <b-button variant="secondary" title="Search" @click="doSearch">
             <v-icon icon="search" />
           </b-button>
-        </b-input-group-append>
+        </slot>
       </b-input-group>
       <b-button
         variant="white"

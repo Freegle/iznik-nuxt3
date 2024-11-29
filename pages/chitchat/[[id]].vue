@@ -8,7 +8,7 @@
           </VisibleWhen>
         </b-col>
         <b-col cols="12" lg="6" class="newsfeedHolder p-0">
-          <GlobalWarning />
+          <GlobalMessage />
           <ExpectedRepliesWarning
             v-if="me && me.expectedreplies"
             :count="me.expectedreplies"
@@ -32,26 +32,62 @@
                   placeholder="What's going on in your world?"
                   class="border border-primary"
                 />
+                <NoticeMessage
+                  v-if="showGiveFind"
+                  ref="giveFind"
+                  variant="warning"
+                  class="mt-2"
+                >
+                  <p>
+                    If you're giving something away or looking for something,
+                    please click here. Chitchat is for other discussion.
+                  </p>
+                  <div class="d-flex justify-content-between flex-wrap w-100">
+                    <div class="post__button d-flex justify-content-around">
+                      <b-button to="/give" variant="primary">
+                        Give stuff
+                      </b-button>
+                    </div>
+                    <div class="post__button d-flex justify-content-around">
+                      <b-button to="/find" variant="secondary">
+                        Ask for stuff
+                      </b-button>
+                    </div>
+                  </div>
+                </NoticeMessage>
                 <div class="small text-muted">
                   Everything here is public. Be kind
                   <span class="d-none d-sm-inline">to each other</span>;
                   occasionally we may moderate to ensure things stay friendly.
                 </div>
-                <b-img
-                  v-if="imageid"
-                  lazy
-                  thumbnail
-                  :src="imagethumb"
-                  class="image__uploaded"
+                <OurUploadedImage
+                  v-if="ouruid"
+                  format="webp"
+                  fit="cover"
+                  :src="ouruid"
+                  :modifiers="imagemods"
+                  alt="ChitChat Photo"
+                  width="100"
+                  class="mt-1"
+                />
+                <NuxtPicture
+                  v-else-if="imageuid"
+                  format="webp"
+                  fit="cover"
+                  provider="uploadcare"
+                  :src="imageuid"
+                  :modifiers="imagemods"
+                  alt="ChitChat Photo"
+                  width="100"
+                  class="mt-1"
                 />
               </b-card-text>
               <hr class="mt-1 mb-1" />
-              <OurFilePond
+              <OurUploader
                 v-if="uploading"
-                class="bg-white m-0 pondrow"
-                imgtype="Newsfeed"
-                imgflag="newsfeed"
-                @photo-processed="photoProcessed"
+                v-model="currentAtts"
+                class="bg-white m-0"
+                type="Newsfeed"
               />
               <div class="pb-1 d-flex justify-content-end">
                 <b-button variant="secondary" class="mr-2" @click="photoAdd">
@@ -93,12 +129,22 @@
                 :distance="distance"
                 @infinite="loadMore"
               />
+              <div
+                class="adpad"
+                :class="{
+                  stickyAdRendered,
+                }"
+              />
             </div>
           </div>
         </b-col>
         <b-col cols="0" lg="3" class="p-0 pl-1">
           <VisibleWhen :at="['lg', 'xl', 'xxl']">
-            <SidebarRight show-job-opportunities />
+            <SidebarRight
+              show-job-opportunities
+              ad-unit-path="/22794232631/freegle_chat_app"
+              ad-div-id="div-gpt-ad-1691925773522-0"
+            />
           </VisibleWhen>
         </b-col>
       </b-row>
@@ -113,7 +159,7 @@ import { useNewsfeedStore } from '../../stores/newsfeed'
 import { useAuthStore } from '../../stores/auth'
 import NewsCommunityEventVolunteerSummary from '../../components/NewsCommunityEventVolunteerSummary'
 import VisibleWhen from '~/components/VisibleWhen'
-import GlobalWarning from '~/components/GlobalWarning'
+import GlobalMessage from '~/components/GlobalMessage'
 import NoticeMessage from '~/components/NoticeMessage'
 import AutoHeightTextarea from '~/components/AutoHeightTextarea'
 import InfiniteLoading from '~/components/InfiniteLoading'
@@ -121,8 +167,8 @@ import NewsThread from '~/components/NewsThread.vue'
 import { untwem } from '~/composables/useTwem'
 import { ref } from '#imports'
 
-const OurFilePond = defineAsyncComponent(() =>
-  import('~/components/OurFilePond')
+const OurUploader = defineAsyncComponent(() =>
+  import('~/components/OurUploader')
 )
 const SidebarLeft = defineAsyncComponent(() =>
   import('~/components/SidebarLeft')
@@ -141,11 +187,11 @@ export default {
   components: {
     NewsCommunityEventVolunteerSummary,
     VisibleWhen,
-    GlobalWarning,
+    GlobalMessage,
     ExpectedRepliesWarning,
     NoticeMessage,
     NewsThread,
-    OurFilePond,
+    OurUploader,
     SidebarLeft,
     SidebarRight,
     NewsLocation,
@@ -254,17 +300,21 @@ export default {
       startThread: null,
       uploading: false,
       imageid: null,
-      imagethumb: null,
+      ouruid: null,
+      imageuid: null,
+      imagemods: null,
       distance: 1000,
       runChecks: true,
-      showToolGive: false,
-      shownToolGive: false,
-      showToolFind: false,
-      shownToolFind: false,
       infiniteState: null,
+      currentAtts: [],
+      showGiveFind: false,
+      shownGiveFind: false,
     }
   },
   computed: {
+    stickyAdRendered() {
+      return this.miscStore.stickyAdRendered
+    },
     selectedArea: {
       get() {
         const settings = this.me.settings
@@ -289,6 +339,7 @@ export default {
         }
 
         return (
+          item.userid === 0 ||
           item.userid !== ret[index - 1].userid ||
           item.message !== ret[index - 1].message
         )
@@ -316,6 +367,21 @@ export default {
       return []
     },
   },
+  watch: {
+    currentAtts: {
+      handler(newVal) {
+        if (newVal?.length) {
+          this.uploading = false
+
+          this.imageid = newVal[0].id
+          this.imageuid = newVal[0].ouruid
+          this.ouruid = newVal[0].ouruid
+          this.imagemods = newVal[0].externalmods
+        }
+      },
+      deep: true,
+    },
+  },
   beforeCreate() {
     this.id = this.$route.params.id
   },
@@ -323,17 +389,21 @@ export default {
     // Stop timers which would otherwise kill garbage collection.
     this.runChecks = false
   },
+  mounted() {
+    this.runCheck()
+  },
   methods: {
     runCheck() {
       // People sometimes try to use chitchat to offer/request items, despite what are technically known as
-      // Very Obvious Big Buttons.  Catch the most obvious attempts and redirect them.
+      // Fuck Off Obvious Big Buttons.  Catch the most obvious attempts and redirect them.
       if (this.runChecks) {
         let msg = this.startThread
+        console.log('Check msg')
 
         if (msg) {
           msg = msg.toLowerCase()
 
-          if (!this.shownToolGive) {
+          if (!this.shownGiveFind) {
             for (const word of [
               'offer',
               'giving away',
@@ -342,19 +412,14 @@ export default {
               'collection only',
             ]) {
               if (msg.length && msg.includes(word)) {
-                this.showToolGive = true
-                this.shownToolGive = true
-                this.$refs.givebutton.$el.scrollIntoView()
-                window.scrollBy(0, -100)
-
-                setTimeout(() => {
-                  this.showToolGive = false
-                }, 5000)
+                this.showGiveFind = true
+                this.shownGiveFind = true
+                this.scrollToGiveFind(true)
               }
             }
           }
 
-          if (!this.shownToolFind) {
+          if (!this.shownGiveFind) {
             for (const word of [
               'wanted',
               'wanting',
@@ -367,14 +432,9 @@ export default {
               'if anyone has',
             ]) {
               if (msg.length && msg.includes(word)) {
-                this.showToolFind = true
-                this.shownToolFind = true
-                this.$refs.findbutton.$el.scrollIntoView()
-                window.scrollBy(0, -100)
-
-                setTimeout(() => {
-                  this.showToolFind = false
-                }, 5000)
+                this.showGiveFind = true
+                this.shownGiveFind = true
+                this.scrollToGiveFind(false)
               }
             }
           }
@@ -420,6 +480,9 @@ export default {
 
         // And any image id
         this.imageid = null
+        this.imageuid = null
+        this.ouruid = null
+        this.imagemods = null
 
         // Show from top.
         this.infiniteId++
@@ -431,13 +494,25 @@ export default {
       // init callback below.
       this.uploading = true
     },
-    photoProcessed(imageid, imagethumb) {
-      // We have uploaded a photo.  Remove the filepond instance.
-      this.uploading = false
+    scrollToGiveFind(give) {
+      this.$nextTick(() => {
+        if (this.$refs.giveFind) {
+          this.$refs.giveFind.$el.scrollIntoView()
 
-      // The imageid is in this.imageid
-      this.imageid = imageid
-      this.imagethumb = imagethumb
+          setTimeout(() => {
+            if (give && this.$refs.givebutton?.$el) {
+              this.$refs.givebutton.$el.scrollIntoView()
+            } else if (!give && this.$refs.findbutton?.$el) {
+              this.$refs.findbutton.$el.scrollIntoView()
+            }
+          }, 500)
+        }
+
+        window.scrollBy(0, 100)
+        setTimeout(() => {
+          this.showGiveFind = false
+        }, 30000)
+      })
     },
   },
 }
@@ -446,6 +521,7 @@ export default {
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/sticky-banner.scss';
 
 :deep(.post__button) {
   @include media-breakpoint-up(sm) {
@@ -455,6 +531,10 @@ export default {
 
 .newsfeedHolder {
   height: calc(100vh - 74px);
+
+  @supports (height: 100dvh) {
+    height: calc(100dvh - 74px);
+  }
 }
 
 .tab-content,
@@ -464,5 +544,13 @@ export default {
 
 .image__uploaded {
   width: 100px;
+}
+
+.adpad.stickyAdRendered {
+  margin-bottom: $sticky-banner-height-mobile;
+
+  @include media-breakpoint-up(md) {
+    padding-bottom: $sticky-banner-height-desktop;
+  }
 }
 </style>

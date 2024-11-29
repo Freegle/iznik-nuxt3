@@ -52,7 +52,7 @@
         These are the posts marked as TAKEN/RECEIVED.
       </p>
       <p v-if="graphType === 'Donations'">
-        These are donations received via PayPal.
+        These are donations received via PayPal or Stripe.
       </p>
       <p v-if="graphType === 'ActiveUsers'">
         This is the number of freeglers active in the 30 days before each date.
@@ -177,7 +177,7 @@ export default {
         Wanteds: 'WANTEDs only',
         Weight: 'Weights',
         Outcomes: 'Successful',
-        Donations: 'PayPal Donations',
+        Donations: 'PayPal or Stripe Donations',
         ActiveUsers: 'Active freeglers',
       },
       units: 'year',
@@ -244,7 +244,7 @@ export default {
       ret.push({ value: 'Replies', text: 'Replies' })
 
       if (this.donations) {
-        ret.push({ value: 'Donations', text: 'PayPal Donations' })
+        ret.push({ value: 'Donations', text: 'PayPal or Stripe Donations' })
       }
 
       return ret

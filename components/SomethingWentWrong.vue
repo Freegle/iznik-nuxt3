@@ -1,6 +1,6 @@
 <template>
   <client-only>
-    <div class="d-flex justify-content-around">
+    <div v-if="!unloading" class="d-flex justify-content-around">
       <NoticeMessage
         v-if="showError"
         variant="danger"
@@ -30,7 +30,7 @@
         </div>
       </NoticeMessage>
       <NoticeMessage
-        v-if="showReload && !snoozeReload"
+        v-else-if="showReload && !snoozeReload"
         variant="info"
         class="posit text-center"
         show
@@ -48,6 +48,7 @@
   </client-only>
 </template>
 <script>
+import { mapState } from 'pinia'
 import NoticeMessage from './NoticeMessage'
 import { useMiscStore } from '~/stores/misc'
 import SupportLink from '~/components/SupportLink'
@@ -66,18 +67,12 @@ export default {
     }
   },
   computed: {
-    somethingWentWrong() {
-      const miscStore = useMiscStore()
-      return miscStore.somethingWentWrong
-    },
-    needToReload() {
-      const miscStore = useMiscStore()
-      return miscStore.needToReload
-    },
-    offline() {
-      const miscStore = useMiscStore()
-      return !miscStore.online
-    },
+    ...mapState(useMiscStore, [
+      'somethingWentWrong',
+      'needToReload',
+      'offline',
+      'unloading',
+    ]),
   },
   watch: {
     somethingWentWrong(newVal) {
@@ -85,8 +80,6 @@ export default {
         this.showError = true
         setTimeout(() => {
           this.showError = false
-          const miscStore = useMiscStore()
-          miscStore.somethingWentWrong = false
         }, 10000)
       }
     },

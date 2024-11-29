@@ -8,16 +8,45 @@
     />
     <b-row>
       <b-col>
-        <b-card variant="success" no-body>
-          <b-card-header class="font-weight-bold">
+        <b-card no-body>
+          <b-card-header
+            class="font-weight-bold"
+            bg-variant="primary"
+            text-variant="white"
+          >
             {{ headline }}
           </b-card-header>
           <b-card-text class="p-2 preline">
+            <OurUploadedImage
+              v-if="story?.image?.ouruid"
+              :src="story?.image?.ouruid"
+              :modifiers="story?.image?.externalmods"
+              alt="Freegler Story Photo"
+              :width="200"
+              :height="200"
+              class="clickme float-end ml-2"
+              @click="showPhotoModal"
+            />
+            <NuxtPicture
+              v-else-if="story?.image?.externaluid"
+              fit="cover"
+              format="webp"
+              provider="uploadcare"
+              :src="story?.image?.externaluid"
+              :modifiers="story?.image?.externalmods"
+              alt="Freegler Story Photo"
+              :width="200"
+              :height="200"
+              class="clickme float-end ml-2"
+              @click="showPhotoModal"
+            />
             <b-img
-              v-if="story?.image"
+              v-else-if="story?.image"
               thumbnail
               rounded
               lazy
+              :width="200"
+              :height="200"
               :src="story.image.paththumb"
               class="clickme float-end ml-2"
               @click="showPhotoModal"
@@ -78,9 +107,9 @@
   </div>
 </template>
 <script>
-import ReadMore from 'vue-read-more3/src/ReadMoreComponent'
 import { useStoryStore } from '../stores/stories'
 import { useNewsfeedStore } from '../stores/newsfeed'
+import ReadMore from '~/components/ReadMore'
 import { twem } from '~/composables/useTwem'
 import NewsBase from '~/components/NewsBase'
 

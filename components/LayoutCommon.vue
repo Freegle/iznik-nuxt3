@@ -1,35 +1,61 @@
 <template>
   <div>
     <main class="ml-0 ps-0 pe-0 pageContent">
-      <div class="aboveSticky">
+      <div
+        class="aboveSticky"
+        :class="{
+          allowAd,
+          stickyAdRendered,
+        }"
+      >
+        <!--        Breakpoint {{ breakpoint }}-->
         <slot ref="pageContent" />
       </div>
-      <VisibleWhen :at="['xs', 'sm', 'md', 'lg']">
-        <div
-          v-if="allowAd && !noAdRendered"
-          class="d-flex justify-content-around w-100 sticky"
-          style="height: 52px"
-        >
-          <ExternalDa
-            ad-unit-path="/22794232631/freegle_sticky"
-            :dimensions="[320, 50]"
-            div-id="div-gpt-ad-1699973618906-0"
-            class="sticky"
-            style="width: 320px; height: 50px; margin-top: 2px"
-            pixel
-            @rendered="adRendered"
-          />
+      <client-only>
+        <div v-if="allowAd">
+          <div
+            class="sticky w-100 d-flex flex-column"
+            :class="{
+              allowClicks: !stickyAdRendered,
+              'bg-white': stickyAdRendered,
+            }"
+          >
+            <DaDisableCTA v-if="!adRendering && stickyAdRendered" />
+            <div
+              class="d-flex justify-content-around w-100"
+              :class="{
+                adRendering: adRendering && !firstRender,
+              }"
+            >
+              <KeepAlive>
+                <VisibleWhen :at="['xs', 'sm']">
+                  <ExternalDa
+                    ad-unit-path="/22794232631/freegle_sticky"
+                    max-height="50px"
+                    max-width="100vw"
+                    min-width="100vw"
+                    div-id="div-gpt-ad-1699973618906-0"
+                    @rendered="adRendered"
+                    @failed="adFailed"
+                  />
+                </VisibleWhen>
+              </KeepAlive>
+              <KeepAlive>
+                <VisibleWhen :at="['md', 'lg', 'xl', 'xxl']">
+                  <ExternalDa
+                    ad-unit-path="/22794232631/freegle_sticky_desktop"
+                    max-height="90px"
+                    max-width="100vw"
+                    min-width="100vw"
+                    div-id="div-gpt-ad-1707999304775-0"
+                    @rendered="adRendered"
+                  />
+                </VisibleWhen>
+              </KeepAlive>
+            </div>
+          </div>
         </div>
-        <div
-          v-else
-          class="sticky ourBack w-100 text-center d-flex flex-column justify-content-center"
-          style="height: 52px"
-        >
-          <nuxt-link to="/donate" class="text-white nodecor">
-            Help keep Freegle running. Click to donate.
-          </nuxt-link>
-        </div>
-      </VisibleWhen>
+      </client-only>
     </main>
     <client-only>
       <DeletedRestore />
@@ -43,7 +69,7 @@
       style="display: none"
     >
       <div class="text-center bg-white p-2">
-        <img src="/loader.gif" alt="Loading..." width="100px" />
+        <img src="/loader.gif" loading="lazy" alt="Loading..." width="100px" />
         <p>
           <span>Loading...</span><br /><span class="font-weight-bold"
             >Stuck here? We couldn't load our Javascript. Try refreshing. Or
@@ -58,6 +84,12 @@
           v-if="replyToSend"
           ref="replyToPostChatButton"
           :userid="replyToUser"
+          @sent="replySent"
+        />
+        <InterestedInOthersModal
+          v-if="showInterestedModal"
+          :msgid="interestedInOthersMsgid"
+          :userid="interestedInOthersUserId"
         />
       </div>
       <BreakpointFettler />
@@ -68,6 +100,7 @@
 </template>
 <script>
 import { useRoute } from 'vue-router'
+import { mapState } from 'pinia'
 import { useAuthStore } from '../stores/auth'
 import SomethingWentWrong from './SomethingWentWrong'
 import { useNotificationStore } from '~/stores/notification'
@@ -76,8 +109,10 @@ import { useMiscStore } from '~/stores/misc'
 import { useChatStore } from '~/stores/chat'
 import replyToPost from '@/mixins/replyToPost'
 import ChatButton from '~/components/ChatButton'
-import VisibleWhen from '~/components/VisibleWhen'
 import { navBarHidden } from '~/composables/useNavbar'
+import VisibleWhen from '~/components/VisibleWhen.vue'
+import InterestedInOthersModal from '~/components/InterestedInOthersModal.vue'
+
 const SupportLink = defineAsyncComponent(() =>
   import('~/components/SupportLink')
 )
@@ -87,10 +122,12 @@ const BouncingEmail = defineAsyncComponent(() =>
 const BreakpointFettler = defineAsyncComponent(() =>
   import('~/components/BreakpointFettler')
 )
+
 const ExternalDa = defineAsyncComponent(() => import('~/components/ExternalDa'))
 
 export default {
   components: {
+    InterestedInOthersModal,
     BouncingEmail,
     SupportLink,
     BreakpointFettler,
@@ -104,13 +141,17 @@ export default {
     return {
       showLoader: true,
       timeTimer: null,
-      noAdRendered: false,
+      adRendering: true,
+      firstRender: true,
+      interestedInOthersMsgid: null,
+      interestedInOthersUserId: null,
+      showInterestedModal: false,
     }
   },
   computed: {
-    breakpoint() {
-      const store = useMiscStore()
-      return store.getBreakpoint
+    ...mapState(useMiscStore, ['breakpoint', 'adsDisabled']),
+    stickyAdRendered() {
+      return useMiscStore().stickyAdRendered
     },
     routePath() {
       const route = useRoute()
@@ -125,9 +166,9 @@ export default {
     },
   },
   async mounted() {
-    // Start our timer.  Holding the time in the store allows us to update the time regularly and have reactivity
-    // cause displayed fromNow() values to change, rather than starting a timer for each of them.
     if (process.client) {
+      // Start our timer.  Holding the time in the store allows us to update the time regularly and have reactivity
+      // cause displayed fromNow() values to change, rather than starting a timer for each of them.
       this.updateTime()
 
       // We added a basic loader into the HTML.  This helps if we are loaded on an old browser where our JS bombs
@@ -146,30 +187,6 @@ export default {
       // Get chats and poll regularly for new ones
       const chatStore = useChatStore()
       chatStore.pollForChatUpdates()
-    } else if (process.client) {
-      // We only add the cookie banner for logged out users.  This reduces costs.  For logged-in users, we assume
-      // they have already seen the banner and specified a preference if they care.
-      const runtimeConfig = useRuntimeConfig()
-
-      console.log(
-        'Consider adding cookie banner',
-        runtimeConfig.public.COOKIEYES
-      )
-
-      if (runtimeConfig.public.COOKIEYES) {
-        console.log('Add it')
-        const cookieScript = document.getElementById('cookieyes')
-
-        if (!cookieScript) {
-          const script = document.createElement('script')
-          script.id = 'cookieyes'
-          script.setAttribute('src', runtimeConfig.public.COOKIEYES)
-
-          document.head.appendChild(script)
-        }
-      } else {
-        console.log('No cookie banner')
-      }
     }
 
     try {
@@ -214,11 +231,13 @@ export default {
     }
 
     if (process.client) {
-      if (this.replyToSend) {
+      if (this.replyToSend?.replyMsgId) {
         // We have loaded the site with a reply that needs sending.  This happens if we force login in a way that
         // causes us to navigate away and back again.  Fetch the relevant message.
         const messageStore = useMessageStore()
         await messageStore.fetch(this.replyToSend.replyMsgId, true)
+        this.interestedInOthersUserId = this.replyToUser
+        this.interestedInOthersMsgid = this.replyToSend.replyMsgId
         this.replyToPost()
       }
 
@@ -266,7 +285,21 @@ export default {
       }
     },
     adRendered(adShown) {
-      this.noAdRendered = !adShown
+      console.log('Layout ad rendered', adShown, adShown ? 1 : 0)
+      this.adRendering = false
+      this.firstRender = false
+      const store = useMiscStore()
+      store.stickyAdRendered = adShown ? 1 : 0
+    },
+    adFailed() {
+      console.log('Layout ad failed, not rendered')
+      this.adRendering = false
+      this.firstRender = false
+      const store = useMiscStore()
+      store.stickyAdRendered = 0
+    },
+    replySent() {
+      this.showInterestedModal = true
     },
   },
 }
@@ -275,6 +308,7 @@ export default {
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/sticky-banner.scss';
 
 html {
   box-sizing: border-box;
@@ -296,6 +330,10 @@ body.modal-open {
   flex-direction: column;
   max-height: 100vh;
 
+  @supports (height: 100dvh) {
+    max-height: 100dvh;
+  }
+
   margin-top: v-bind(marginTop);
   transition: margin-top 1s;
 
@@ -307,19 +345,37 @@ body.modal-open {
 .sticky {
   position: fixed;
   bottom: 0;
-  background-color: $color-green-background;
+
+  &.allowClicks {
+    pointer-events: none;
+  }
+
+  .adRendering {
+    background-color: $color-gray--dark;
+  }
+
+  @include media-breakpoint-up(lg) {
+    background-color: transparent;
+  }
+
   z-index: 10000;
 
+  margin-top: 2px;
+  width: 320px;
+  height: $sticky-banner-height-mobile;
+
   @include media-breakpoint-up(md) {
-    display: none !important;
+    height: $sticky-banner-height-desktop;
   }
 }
 
 .aboveSticky {
-  padding-bottom: 52px;
+  &.allowAd.stickyAdRendered {
+    padding-bottom: calc($sticky-banner-height-mobile + 2px);
 
-  @include media-breakpoint-up(md) {
-    padding-bottom: unset;
+    @include media-breakpoint-up(md) {
+      padding-bottom: calc($sticky-banner-height-desktop + 2px);
+    }
   }
 }
 </style>

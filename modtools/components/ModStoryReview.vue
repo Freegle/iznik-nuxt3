@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-card no-body>
+    <b-card v-if="show" no-body>
       <b-card-header>
         <div class="d-flex justify-content-between flex-wrap w-100">
           <span v-if="story.user">
@@ -49,8 +49,18 @@
   </div>
 </template>
 <script>
+import { useGroupStore } from '../stores/group'
+import { useStoryStore } from '../stores/stories'
 
 export default {
+  setup() {
+    const groupStore = useGroupStore()
+    const storyStore = useStoryStore()
+    return {
+      groupStore,
+      storyStore,
+    }
+  },
   props: {
     story: {
       type: Object,
@@ -62,10 +72,15 @@ export default {
       default: false
     }
   },
+  data: function () {
+    return {
+      show: true
+    }
+  },
   computed: {
     groupname() {
       let ret = null
-      const group = this.$store.getters['group/get'](this.story.groupid)
+      const group = this.groupStore.get(this.story.groupid)
 
       if (group) {
         ret = group.namedisplay
@@ -76,19 +91,16 @@ export default {
   },
   methods: {
     async useForNewsletter() {
-      /* TODO await this.$store.dispatch('stories/useForNewsletter', {
-        id: this.story.id
-      })*/
+      await this.$api.stories.useForNewsletter(this.story.id)
+      this.show = false
     },
     async useForPublicity() {
-      /* TODO await this.$store.dispatch('stories/useForPublicity', {
-        id: this.story.id
-      })*/
+      await this.$api.stories.useForPublicity(this.story.id)
+      this.show = false
     },
     async dontUseForPublicity() {
-      /* TODO await this.$store.dispatch('stories/dontUseForPublicity', {
-        id: this.story.id
-      })*/
+      await this.$api.stories.dontUseForPublicity(this.story.id)
+      this.show = false
     }
   }
 }

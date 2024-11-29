@@ -1,7 +1,7 @@
 <template>
   <div v-if="newsfeed" class="d-flex align-items-center">
     <SpinButton
-      v-if="!newsfeed.loved"
+      v-if="!newsfeed.loved && newsfeed.userid !== myid"
       variant="link"
       size="sm"
       icon-name="heart"

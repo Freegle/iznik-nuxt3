@@ -5,14 +5,12 @@ export const useLocationStore = defineStore({
   id: 'location',
   state: () => ({
     list: {},
-    dodgy: {},
   }),
   actions: {
     init(config) {
       this.config = config
     },
     async fetch(params) {
-      //console.log('useLocationStore fetch',params)
       return await api(this.config).location.fetch(params)
     },
     async fetchv2(id) {
@@ -42,7 +40,7 @@ export const useLocationStore = defineStore({
       const { wkt } = await api(this.config).location.convertKML(kml)
       return wkt
     }
-    },
+  },
   getters: {
     byId: (state) => (id) => {
       return state.list[id]

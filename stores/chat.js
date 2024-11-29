@@ -108,6 +108,7 @@ export const useChatStore = defineStore({
       if (this.searchSince) {
         since = dayjs(this.searchSince).toISOString()
       }
+
       // TODO Amend ChatAPI v2 to support chattypes
       let chats = []
       const miscStore = useMiscStore() // MT ADDED
@@ -126,7 +127,7 @@ export const useChatStore = defineStore({
         )
       }
       if( !chats) return
-
+    
       this.list = chats
 
       chats.forEach((c) => {
@@ -236,12 +237,7 @@ export const useChatStore = defineStore({
         data.refmsgid = refmsgid
       }
 
-      const miscStore = useMiscStore() // MT ADDED
-      if (miscStore.modtools) {
-        await api(this.config).chat.sendMT(data)
-      } else {
-        await api(this.config).chat.send(data)
-      }
+      await api(this.config).chat.send(data)
 
       // Get the latest messages back.
       this.fetchMessages(chatid)
@@ -297,11 +293,10 @@ export const useChatStore = defineStore({
 
       return id
     },
-    async openChatToMods(groupid, userid) {
+    async openChatToMods(groupid) {
       const id = await this.openChat({
         chattype: 'User2Mod',
         groupid,
-        userid,
       })
 
       return id
@@ -362,9 +357,6 @@ export const useChatStore = defineStore({
       await api(this.config).chat.rsvp(id, roomid, value)
       await this.fetchChat(roomid)
     },
-    async referToSupport(params) {
-      await api(this.config).referToSupport(params.id)
-    },
   },
   getters: {
     byChatId: (state) => {
@@ -377,25 +369,15 @@ export const useChatStore = defineStore({
       return (id) => state.listByChatMessageId[id]
     },
     unreadCount: (state) => {
-      const miscStore = useMiscStore() // MT ADDED
       // count chats with unseen messages
       let ret = 0
-      const authStore = useAuthStore()
-      const myid = authStore.user?.id
 
       // Scan listBychatId adding chat.unseen
       Object.keys(state.listByChatId).forEach((key) => {
-        if (miscStore.modtools) {
-          const chat = state.listByChatId[key]
-          //console.log('unreadCount',chat.chattype,chat.unseen,chat.user1,chat.user2,myid)
-          // We count chats between mods, and chats between other members and mods.
-          if (chat.chattype === 'Mod2Mod') {
-            ret += chat.unseen
-          } else if (chat.chattype === 'User2Mod' && chat.user1 !== myid) {
-            ret += chat.unseen
-          }
-          // Otherwise we count chats between users, and our chats to mods.
-        } else if (state.listByChatId[key].status !== 'Closed') {
+        if (
+          state.listByChatId[key].status !== 'Closed' &&
+          state.listByChatId[key].status !== 'Blocked'
+        ) {
           ret += state.listByChatId[key].unseen
         }
       })

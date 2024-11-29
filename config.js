@@ -8,7 +8,9 @@ export default {
   // This is where the user site is.
   USER_SITE: 'https://www.ilovefreegle.org',
 
-  // This is where images are served from.
+// This is where images are served from.
+  //
+  // Old:
   IMAGE_SITE: 'https://images.ilovefreegle.org',
 
   // Very new.  Our own uploader, and delivery of those images via a cached use of wsrl.nl.
@@ -44,4 +46,5 @@ export default {
 
   GOOGLE_ADSENSE_ID: process.env.GOOGLE_ADSENSE_ID,
   GOOGLE_ADSENSE_TEST_MODE: process.env.GOOGLE_ADSENSE_TEST_MODE,
+  STRIPE_PUBLISHABLE_KEY: process.env.STRIPE_PUBLISHABLE_KEY,
 }

@@ -25,16 +25,16 @@
           v-model:bounds="bounds"
           v-model:zoom="zoom"
           :style="'width: ' + mapWidth + '; height: ' + mapWidth + 'px'"
-          :min-zoom="5"
-          :max-zoom="13"
-          @ready="idle"
-          @moveend="boundsChanged"
+          :min-zoom="minZoom"
+          :max-zoom="maxZoom"
         >
           <l-tile-layer :url="osmtile" :attribution="attribution" />
           <LeafletHeatmap
             v-if="weightedData?.length && zoom"
             :lat-lngs="weightedData"
             :radius="zoom * 3"
+            :max-opacity="1"
+            :min-opacity="minOpacity"
             :gradient="{
               0.05: 'darkblue',
               0.1: 'darkgreen',
@@ -92,6 +92,8 @@ export default {
       center: [53.945, -2.5209],
       bounds: null,
       zoom: 6,
+      minZoom: 5,
+      maxZoom: 13,
       max: 0,
     }
   },
@@ -145,17 +147,33 @@ export default {
         const maxlog = Math.log10(max)
         const range = maxlog - minlog
         const lineartolog = function (n) {
-          return (Math.log10(n) - minlog) / range
+          if (range) {
+            return (Math.log10(n) - minlog) / range
+          } else {
+            return n
+          }
         }
 
         data.forEach((d) => {
           if (this.bounds.contains([d[0], d[1]])) {
-            weighted.push([d[0], d[1], 1 - lineartolog(1 - d[2] / max)])
+            const val = 1 - lineartolog(1 - d[2] / max)
+            // console.log(val, max, minlog, maxlog)
+            if (Number.isFinite(val)) {
+              weighted.push([d[0], d[1], val])
+            }
           }
         })
+
+        console.log('Weighted', max, minlog, maxlog, weighted, this.heatMapData)
       }
 
       return weighted
+    },
+    minOpacity() {
+      return (
+        0.05 +
+        (0.1 * (this.zoom - this.minZoom)) / (this.maxZoom - this.minZoom)
+      )
     },
   },
   async mounted() {

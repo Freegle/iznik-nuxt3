@@ -1,7 +1,23 @@
 <template>
-  <div>
+  <client-only>
     <ChatNotVisible v-if="notVisible" id="notvisible" />
-    <div v-else-if="me" class="chatHolder" :style="theHeight">
+    <p
+      v-else-if="!id"
+      class="text-center text-info font-weight-bold mt-2 chatHolder"
+      :class="{
+        stickyAdRendered,
+      }"
+    >
+      Please click on a chat in the left pane.
+    </p>
+    <div
+      v-else-if="me"
+      class="chatHolder"
+      :class="{
+        stickyAdRendered,
+        navBarHidden,
+      }"
+    >
       <ChatHeader :id="id" ref="chatheader" class="chatTitle" />
       <div
         v-if="chat && chatmessages?.length"
@@ -45,45 +61,109 @@
         @scrollbottom="checkScroll"
       />
     </div>
-  </div>
+  </client-only>
 </template>
-<script>
-import { useChatStore } from '../stores/chat'
+<script setup>
 import { navBarHidden } from '../composables/useNavbar'
-import { useMiscStore } from '../stores/misc'
 import ChatHeader from './ChatHeader'
 import ChatFooter from './ChatFooter'
 import ChatTypingIndicator from './ChatTypingIndicator'
 import { useUserStore } from '~/stores/user'
+import { useChatStore } from '~/stores/chat'
+import { useMiscStore } from '~/stores/misc'
 import { setupChat } from '~/composables/useChat'
 
 // Don't use dynamic imports because it stops us being able to scroll to the bottom after render.
 import ChatMessage from '~/components/ChatMessage.vue'
+import { useAuthStore } from '~/stores/auth'
+
+const chatStore = useChatStore()
+const userStore = useUserStore()
+const miscStore = useMiscStore()
+const authStore = useAuthStore()
+
+const props = defineProps({
+  id: { type: Number, required: true },
+})
+
+const windowHeight = ref(window.innerHeight)
+
+function resize() {
+  windowHeight.value = window.innerHeight
+}
+
+const stickyAdRendered = computed(() => miscStore.stickyAdRendered)
 
 const ChatNotVisible = defineAsyncComponent(() =>
   import('~/components/ChatNotVisible.vue')
 )
 
-export default {
-  components: {
-    ChatTypingIndicator,
-    ChatHeader,
-    ChatFooter,
-    ChatMessage,
-    ChatNotVisible,
-  },
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-  },
-  async setup(props) {
-    const chatStore = useChatStore()
-    const userStore = useUserStore()
-    const miscStore = useMiscStore()
+const { chat } = await setupChat(props.id)
 
-    const { chat, otheruser } = await setupChat(props.id)
+if (props.id) {
+  if (!chatStore.byChatId(props.id)) {
+    // It might be an old chat which doesn't appear in our recent ones, but which we are specifically trying
+    // to go to.  Fetch all the chats.
+    chatStore.searchSince = '2009-09-11'
+    await chatStore.fetchChats()
+  }
+
+  if (chat?.value) {
+    // Fetch the messages.  No need to wait, as we might already have the messages in store.
+    chatStore.fetchMessages(props.id)
+
+    // Fetch the user.
+    if( miscStore.modtools){
+      if( chat.value.user1id){
+        // Need to get user.info using api v2 but user.comments using api v1
+        chat.value.otheruid = chat.value.user1id
+        await userStore.fetch(chat.value.otheruid)
+        const userv2 = userStore.byId(chat.value.otheruid)
+        await userStore.fetchMT({ id: chat.value.otheruid})
+        const user = userStore.byId(chat.value.otheruid)
+        if( user && user.info){
+          user.info = userv2.info
+          if( user.spammer && user.spammer.collection==='Whitelisted') user.spammer = false
+        }
+      }
+    } else  if (chat?.value?.otheruid) {
+        await userStore.fetch(chat.value.otheruid)
+    }
+  }
+}
+
+// Reverse the chatmessages because we use flex-direction: column-reverse for scrolling reasons.
+const chatmessages = computed(() => {
+  const msgs = chatStore.messagesById(props.id)
+  return msgs ? msgs.slice().reverse() : []
+})
+
+const messagesToShow = ref(0)
+const chatBusy = ref(false)
+const topVisible = ref(true)
+const scrollTimer = ref(null)
+const scrollInterval = ref(50)
+const loaded = ref(false)
+
+const notVisible = computed(() => {
+  let ret = false
+  if (props.id && !chatStore?.byChatId(props.id)) {
+    // This isn't a chat we can see.
+    ret = true
+  }
+
+  return ret
+})
+
+const opacity = computed(() => {
+  // Until we've finished our initial render, don't show anything.  Reduces flicker.
+  return loaded.value ? 1 : 0
+})
+
+const me = computed(() => authStore.user)
+watch(me, async (newVal, oldVal) => {
+  if (!oldVal && newVal) {
+    await chatStore.fetchChats()
 
     if (props.id) {
       if (!chatStore.byChatId(props.id)) {
@@ -93,168 +173,140 @@ export default {
         await chatStore.fetchChats()
       }
 
-      if (chat?.value) {
-        // Fetch the messages.  No need to wait, as we might already have the messages in store.
-        chatStore.fetchMessages(props.id)
+      chatStore.fetchMessages(props.id)
 
-        // Fetch the user.
-        if( miscStore.modtools){
-          if( chat.value.user1id){
-            // Need to get user.info using api v2 but user.comments using api v1
-            chat.value.otheruid = chat.value.user1id
-            await userStore.fetch(chat.value.otheruid)
-            const userv2 = userStore.byId(chat.value.otheruid)
-            await userStore.fetchMT({ id: chat.value.otheruid})
-            const user = userStore.byId(chat.value.otheruid)
-            if( user && user.info){
-              user.info = userv2.info
-              if( user.spammer && user.spammer.collection==='Whitelisted') user.spammer = false
-            }
-          }
-        } else  if (chat?.value?.otheruid) {
-            await userStore.fetch(chat.value.otheruid)
-        }
+      // Fetch the user.
+      if (chat?.value?.otheruid) {
+        await userStore.fetch(chat.value.otheruid)
       }
     }
+  }
+})
 
-    // Reverse the chatmessages because we use flex-direction: column-reverse for scrolling reasons.
-    const chatmessages = computed(() => {
-      const msgs = chatStore.messagesById(props.id)
-      return msgs ? msgs.slice().reverse() : []
-    })
+onMounted(() => {
+  scrollTimer.value = setTimeout(checkScroll, scrollInterval.value)
 
-    return { chatStore, userStore, miscStore, chat, chatmessages, otheruser }
-  },
-  data() {
-    return {
-      messagesToShow: 0,
-      chatBusy: false,
-      topVisible: true,
-      scrollTimer: null,
-      scrollInterval: 50,
-      loaded: false,
-    }
-  },
-  computed: {
-    notVisible() {
-      let ret = false
-      if (this.id && !this.chatStore?.byChatId(this.id)) {
-        // This isn't a chat we can see.
-        ret = true
-      }
+  resize()
+  window.addEventListener('resize', resize)
+})
 
-      return ret
-    },
-    opacity() {
-      // Until we've finished our initial render, don't show anything.  Reduces flicker.
-      return this.loaded ? 1 : 0
-    },
-    theHeight() {
-      const vh100 = Math.max(
-        document.documentElement.clientHeight,
-        window.innerHeight || 0
-      )
+onBeforeUnmount(() => {
+  if (scrollTimer.value) {
+    clearTimeout(scrollTimer.value)
+  }
 
-      let ret = null
+  window.removeEventListener('resize', resize)
+})
 
-      if (
-        this.miscStore.breakpoint === 'xs' ||
-        this.miscStore.breakpoint === 'sm'
-      ) {
-        // On mobile there is a sticky ad at the bottom and we want to make sure the buttons show.
-        ret = navBarHidden.value ? vh100 - 52 : vh100 - 60 - 52
-      } else {
-        ret = vh100 - 74
-      }
+function checkScroll() {
+  scrollTimer.value = null
 
-      return 'height: ' + ret + 'px'
-    },
-  },
-  watch: {
-    async me(newVal, oldVal) {
-      if (!oldVal && newVal) {
-        await this.chatStore.fetchChats()
+  if (topVisible.value && messagesToShow.value < chatmessages?.value?.length) {
+    // We can see the top and we're not showing everything yet.  We need to show more.
+    //
+    // We used to use a computed property based on this index.  But that meant that the computed property
+    // had a new value each time we changed this, which forced re-render of each of the messages.  By referencing
+    // messagesToShow in the v-for loop we only trigger a render of the new items.
+    messagesToShow.value = Math.min(
+      chatmessages?.value?.length,
+      messagesToShow?.value + 10
+    )
 
-        if (this.id) {
-          if (!this.chatStore.byChatId(this.id)) {
-            // It might be an old chat which doesn't appear in our recent ones, but which we are specifically trying
-            // to go to.  Fetch all the chats.
-            this.chatStore.searchSince = '2009-09-11'
-            await this.chatStore.fetchChats()
-          }
+    scrollTimer.value = setTimeout(checkScroll, scrollInterval.value)
+  } else if (!loaded.value) {
+    // We have finished loading - either we've we shown enough to hide the top, or we have loaded everything.
+    loaded.value = true
+  }
+}
 
-          this.chatStore.fetchMessages(this.id)
+function topChanged(isVisible) {
+  topVisible.value = isVisible
 
-          // Fetch the user.
-          if (this.chat?.value?.otheruid) {
-            await this.userStore.fetch(this.chat.value.otheruid)
-          }
-        }
-      }
-    },
-  },
-  mounted() {
-    this.scrollTimer = setTimeout(this.checkScroll, this.scrollInterval)
-  },
-  beforeUnmount() {
-    if (this.scrollTimer) {
-      clearTimeout(this.scrollTimer)
-    }
-  },
-  methods: {
-    checkScroll() {
-      this.scrollTimer = null
+  if (topVisible.value && !scrollTimer.value) {
+    // We don't want to do this too frequently.
+    scrollTimer.value = setTimeout(checkScroll, scrollInterval.value)
+  }
+}
 
-      if (this.topVisible && this.messagesToShow < this.chatmessages?.length) {
-        // We can see the top and we're not showing everything yet.  We need to show more.
-        //
-        // We used to use a computed property based on this index.  But that meant that the computed property
-        // had a new value each time we changed this, which forced re-render of each of the messages.  By referencing
-        // messagesToShow in the v-for loop we only trigger a render of the new items.
-        this.messagesToShow = Math.min(
-          this.chatmessages?.length,
-          this.messagesToShow + 10
-        )
+const chatheader = ref(null)
 
-        this.scrollTimer = setTimeout(this.checkScroll, this.scrollInterval)
-      } else if (!this.loaded) {
-        // We have finished loading - either we've we shown enough to hide the top, or we have loaded everything.
-        this.loaded = true
-      }
-    },
-    topChanged(isVisible) {
-      this.topVisible = isVisible
-
-      if (this.topVisible && !this.scrollTimer) {
-        // We don't want to do this too frequently.
-        this.scrollTimer = setTimeout(this.checkScroll, this.scrollInterval)
-      }
-    },
-    typing(val) {
-      if (
-        this.miscStore.breakpoint === 'xs' ||
-        this.miscStore.breakpoint === 'sm'
-      ) {
-        // Also collapse the chat header, to make even more room.
-        this.$refs.chatheader.collapse(val)
-      }
-    },
-  },
+function typing(val) {
+  if (miscStore.breakpoint === 'xs' || miscStore.breakpoint === 'sm') {
+    // Also collapse the chat header, to make even more room.
+    chatheader.value.collapse(val)
+  }
 }
 </script>
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/sticky-banner.scss';
 
-.chatpane {
-  min-height: 100vh;
-}
-
+// The height is complex:
+// - By default we use the whole height.
+// - If the navbar is visible, we subtract that - different height on mobile and desktop.
+// - If a sticky ad is shown, we subtract that.
+// We are suspicious of v-bind not working, so we do this purely using classes.
 .chatHolder {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  transition: height 1s;
+
+  height: calc(100vh - 60px);
+
+  @include media-breakpoint-up(md) {
+    height: calc(100vh - 78px);
+  }
+
+  &.navBarHidden {
+    height: 100vh;
+  }
+
+  &.stickyAdRendered {
+    height: calc(100vh - 60px - $sticky-banner-height-mobile);
+
+    @include media-breakpoint-up(md) {
+      height: calc(100vh - 78px - $sticky-banner-height-desktop);
+    }
+
+    &.navBarHidden {
+      height: calc(100vh - $sticky-banner-height-mobile);
+
+      @include media-breakpoint-up(md) {
+        height: calc(100vh - $sticky-banner-height-desktop);
+      }
+    }
+  }
+
+  @supports (height: 100dvh) {
+    height: calc(100dvh - 60px);
+
+    @include media-breakpoint-up(md) {
+      height: calc(100dvh - 78px);
+    }
+
+    &.navBarHidden {
+      height: 100dvh;
+    }
+
+    &.stickyAdRendered {
+      height: calc(100dvh - 60px - $sticky-banner-height-mobile);
+
+      @include media-breakpoint-up(md) {
+        height: calc(100dvh - 78px - $sticky-banner-height-desktop);
+      }
+
+      &.navBarHidden {
+        height: calc(100dvh - $sticky-banner-height-mobile);
+
+        @include media-breakpoint-up(md) {
+          height: calc(100dvh - $sticky-banner-height-desktop);
+        }
+      }
+    }
+  }
 }
 
 .chatTitle {

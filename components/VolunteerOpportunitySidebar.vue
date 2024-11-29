@@ -7,7 +7,7 @@
       icon-name="hands-helping"
       add-button-label="Add volunteer opportunity"
       item-description="Are you a charity or good cause that needs volunteers?"
-      no-items-message="Are you a charity or good cause that needs volunteers?  Why not add your volunteer opportunities here?"
+      no-items-message="Charity or good cause?  Add your volunteer opportunities here!"
       feature-component="VolunteerOpportunity"
       add-modal-component="VolunteerOpportunityModal"
       item-key="volunteering-"

@@ -10,6 +10,7 @@
     </p>
 
     <ModDashboardDiscourseTopics v-if="start" :groupid="groupid" :group-name="groupName" :start="start" :end="end" class="mb-2" />
+    <ModMissingRules />
     <ModMissingFacebook />
     <ModMissingProfile class="mt-1" />
     <div class="d-flex mb-2 mt-2 flex-wrap">

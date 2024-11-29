@@ -85,7 +85,7 @@
               worked, so it's likely to be an underestimate. Benefit and CO2 are
               calculated using a
               <a
-                href="https://wrap.org.uk/resources/tool/benefits-reuse-tool"
+                href="https://www.wrap.ngo/resources/tool/environmental-and-economic-benefits-re-use"
                 target="_blank"
                 rel="noopener noreferrer"
                 >tool from WRAP</a
@@ -163,7 +163,7 @@ export default {
           runtimeConfig,
           'Statistics for ' + groupname,
           'See stats and graphs for ' + groupname,
-          group ? group.profile : null
+          group.value?.profile ? group.value?.profile : null
         )
       )
     } else {

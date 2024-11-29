@@ -1,5 +1,5 @@
 <template>
-  <div :class="{ selected, strike: chatmessage.reviewrejected }" @click="selectMe">
+  <div :class="selected ? 'selected' : ''" @click="selectMe">
     <div v-if="chatmessage?.type === 'Default'">
       <chat-message-text
         :id="id"
@@ -71,6 +71,9 @@
     <div v-else-if="chatmessage?.type === 'ScheduleUpdated'">
       <!--      This type has been retired.-->
     </div>
+    <div v-else-if="chatmessage?.type === 'Reminder'">
+      <chat-message-reminder :id="id" :chatid="chatid" :pov="pov" />
+    </div>
     <div v-else>
       Unknown chat message type {{ chatmessage?.type }}, {{ chat }}
       {{ chatmessage }}
@@ -122,7 +125,6 @@
 </template>
 <script>
 import { useChatStore } from '../stores/chat'
-import { useMiscStore } from '~/stores/misc'
 import { setupChat } from '../composables/useChat'
 import ChatMessageText from './ChatMessageText'
 import ChatMessageImage from './ChatMessageImage'
@@ -135,6 +137,7 @@ import ChatMessageAddress from './ChatMessageAddress'
 import ChatMessageNudge from './ChatMessageNudge'
 import ChatMessageDateRead from './ChatMessageDateRead'
 import ChatMessageModMail from './ChatMessageModMail'
+import ChatMessageReminder from './ChatMessageReminder'
 import SupportLink from '~/components/SupportLink.vue'
 import ChatMessageWarning from '~/components/ChatMessageWarning'
 import 'vue-simple-context-menu/dist/vue-simple-context-menu.css'
@@ -162,6 +165,7 @@ export default {
     ChatMessageReport,
     ChatMessageNudge,
     ChatMessageModMail,
+    ChatMessageReminder,
     SupportLink,
   },
   props: {
@@ -306,7 +310,7 @@ export default {
   border-radius: 10px;
   padding: 2px 4px 2px 4px;
   word-wrap: break-word;
-  line-height: 1.75;
+  line-height: 1.5;
 
   @include media-breakpoint-up(md) {
     padding: 4px 8px 4px 8px;

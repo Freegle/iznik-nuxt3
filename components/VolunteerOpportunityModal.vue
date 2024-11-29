@@ -39,7 +39,25 @@
             </notice-message>
             <b-row>
               <b-col>
+                <OurUploadedImage
+                  v-if="volunteering?.image?.ouruid"
+                  :src="volunteering.image.ouruid"
+                  :modifiers="volunteering.image.imagemods"
+                  alt="Volunteer Opportunity Photo"
+                  class="mb-2 w-100"
+                />
+                <NuxtPicture
+                  v-else-if="volunteering?.image?.imageuid"
+                  width="200"
+                  format="webp"
+                  provider="uploadcare"
+                  :src="volunteering.image.imageuid"
+                  :modifiers="volunteering.image.imagemods"
+                  alt="Volunteer Opportunity Photo"
+                  class="mb-2 w-100"
+                />
                 <b-img
+                  v-else
                   lazy
                   fluid
                   :src="volunteering.image.path"
@@ -50,7 +68,7 @@
           </div>
           <b-row>
             <!-- eslint-disable-next-line-->
-            <b-col class="mb-2 prewrap font-weight-bold forcebreak">{{ description }}</b-col>
+            <b-col class="mb-2 prewrap font-weight-bold forcebreak">{{ volunteering.description }}</b-col>
           </b-row>
           <b-row class="mt-2">
             <b-col cols="4" md="3" class="field"> Time commitment</b-col>
@@ -123,7 +141,8 @@
           </b-row>
           <br />
           <p v-if="user" class="text-muted">
-            Posted by {{ user.displayname }}
+            Posted
+            <span v-if="user.displayname">by {{ user.displayname }}</span>
             <span v-for="(group, index) in groups" :key="index">
               <span v-if="index > 0">, </span><span v-else>on </span>
               {{ group.namedisplay }}
@@ -172,7 +191,7 @@
               </b-form-group>
             </b-col>
             <b-col v-if="enabled" cols="12" md="6">
-              <div v-if="volunteering.image" class="container">
+              <div v-if="image" class="container">
                 <div
                   class="clickme rotateleft stacked"
                   label="Rotate left"
@@ -191,11 +210,21 @@
                   <v-icon icon="circle" size="2x" />
                   <v-icon icon="reply" flip="horizontal" />
                 </div>
-                <div class="image">
+                <div class="image d-flex justify-content-around">
+                  <OurUploadedImage
+                    v-if="image?.imageuid"
+                    width="200"
+                    :src="image.imageuid"
+                    :modifiers="mods"
+                    alt="Volunteer Opportunity Photo"
+                    class="mb-2"
+                  />
                   <b-img
-                    v-if="volunteering.image"
+                    v-else-if="image"
                     fluid
-                    :src="volunteering.image.paththumb + '?' + cacheBust"
+                    :src="
+                      image.paththumb + '?volunteering=' + id + '-' + cacheBust
+                    "
                   />
                   <b-img v-else width="250" thumbnail src="/placeholder.jpg" />
                 </div>
@@ -203,24 +232,11 @@
             </b-col>
           </b-row>
           <span v-if="enabled">
-            <b-row>
-              <b-col>
-                <b-button variant="primary" class="mt-1" @click="photoAdd">
-                  <v-icon icon="camera" /> Upload photo
-                </b-button>
-              </b-col>
-            </b-row>
-            <b-row v-if="uploading">
-              <b-col>
-                <OurFilePond
-                  class="bg-white"
-                  imgtype="Volunteering"
-                  imgflag="volunteering"
-                  :ocr="true"
-                  @photo-processed="photoProcessed"
-                />
-              </b-col>
-            </b-row>
+            <OurUploader
+              v-model="currentAtts"
+              class="bg-white"
+              type="Volunteering"
+            />
 
             <b-form-group
               ref="volunteering__description"
@@ -230,7 +246,7 @@
             >
               <Field
                 id="description"
-                v-model="volunteering.description"
+                v-model="description"
                 name="description"
                 class="form-control mt-2"
                 as="textarea"
@@ -400,7 +416,7 @@
             :disabled="uploadingPhoto"
             @click="dontSave"
           >
-            Hide
+            Cancel
           </b-button>
           <SpinButton
             v-if="editing && enabled"
@@ -426,12 +442,13 @@ import EmailValidator from './EmailValidator'
 import SpinButton from '~/components/SpinButton.vue'
 import { twem } from '~/composables/useTwem'
 import { ref } from '#imports'
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
+import { useImageStore } from '~/stores/image'
 const GroupSelect = defineAsyncComponent(() =>
   import('~/components/GroupSelect')
 )
-const OurFilePond = defineAsyncComponent(() =>
-  import('~/components/OurFilePond')
+const OurUploader = defineAsyncComponent(() =>
+  import('~/components/OurUploader')
 )
 const StartEndCollection = defineAsyncComponent(() =>
   import('~/components/StartEndCollection')
@@ -475,7 +492,7 @@ export default {
     EmailValidator,
     SpinButton,
     GroupSelect,
-    OurFilePond,
+    OurUploader,
     StartEndCollection,
     NoticeMessage,
     DonationButton,
@@ -501,9 +518,10 @@ export default {
     const composeStore = useComposeStore()
     const userStore = useUserStore()
     const groupStore = useGroupStore()
+    const imageStore = useImageStore()
     const groupid = ref(null)
 
-    const { modal, hide } = useModal()
+    const { modal, hide } = useOurModal()
 
     if (props.id) {
       const v = await volunteeringStore.fetch(props.id)
@@ -525,6 +543,7 @@ export default {
       composeStore,
       userStore,
       groupStore,
+      imageStore,
       groupid,
       oldPhoto,
       modal,
@@ -536,8 +555,11 @@ export default {
   data() {
     return {
       cacheBust: Date.now(),
-      uploading: false,
       showGroupError: false,
+      description: null,
+      currentAtts: [],
+      mods: {},
+      image: null,
     }
   },
   computed: {
@@ -578,12 +600,6 @@ export default {
     isExisting() {
       return Boolean(this.volunteering?.id)
     },
-    description() {
-      let desc = this.volunteering?.description
-      desc = desc ? twem(desc) : ''
-      desc = desc.trim()
-      return desc
-    },
     enabled() {
       const group = this.groupStore.get(this.groupid)
 
@@ -596,6 +612,40 @@ export default {
       }
 
       return ret
+    },
+  },
+  watch: {
+    event: {
+      handler(newVal) {
+        let desc = newVal?.description
+        desc = desc ? twem(desc) : ''
+        desc = desc.trim()
+
+        this.description = desc
+      },
+      immediate: true,
+    },
+    description: {
+      handler(newVal) {
+        this.volunteering.description = newVal
+      },
+    },
+    currentAtts: {
+      handler(newVal) {
+        if (newVal?.length) {
+          this.volunteering.image = {
+            id: newVal[0].id,
+            imageuid: newVal[0].ouruid,
+            imagemods: newVal[0].externalmods,
+          }
+          this.image = {
+            id: newVal[0].id,
+            imageuid: newVal[0].ouruid,
+            imagemods: newVal[0].externalmods,
+          }
+        }
+      },
+      deep: true,
     },
   },
   methods: {
@@ -743,39 +793,25 @@ export default {
 
       this.hide()
     },
-    photoAdd() {
-      // Flag that we're uploading.  This will trigger the render of the filepond instance and subsequently the
-      // processed callback below.
-      this.uploading = true
-    },
-    photoProcessed(imageid, imagethumb, image) {
-      // We have uploaded a photo.  Remove the filepond instance.
-      this.uploading = false
-
-      this.volunteering.image = {
-        id: imageid,
-        path: image,
-        paththumb: imagethumb,
-      }
-
-      // We don't do OCR on these - volunteer op photos are much less likely to have useful text than community
-      // events.
-    },
     async rotate(deg) {
+      const curr = this.mods?.rotate || 0
+      this.mods.rotate = curr + deg
+
+      // Ensure between 0 and 360
+      this.mods.rotate = (this.mods.rotate + 360) % 360
+
       await this.imageStore.post({
         id: this.volunteering.image.id,
-        rotate: deg,
+        rotate: this.mods.rotate,
         bust: Date.now(),
         volunteering: true,
       })
-
-      this.cacheBust = Date.now()
     },
     rotateLeft() {
-      this.rotate(90)
+      this.rotate(-0)
     },
     rotateRight() {
-      this.rotate(-90)
+      this.rotate(90)
     },
   },
 }

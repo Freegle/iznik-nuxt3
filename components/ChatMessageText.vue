@@ -1,6 +1,6 @@
 <template>
   <div
-    class="chatMessageWrapper pb-1"
+    class="chatMessageWrapper"
     :class="{ myChatMessage: messageIsFromCurrentUser }"
   >
     <div class="chatMessage forcebreak chatMessage__owner">
@@ -21,7 +21,7 @@
         <span v-if="messageIsNew" class="font-weight-bold">
           <Highlighter
             :text-to-highlight="emessage"
-            :search-words=searchwords
+            :search-words="[regexEmail]"
             highlight-class-name="highlight"
             class="prewrap"
           />
@@ -29,7 +29,7 @@
         <span v-else>
           <Highlighter
             :text-to-highlight="emessage"
-            :search-words=searchwords
+            :search-words="[regexEmail]"
             highlight-class-name="highlight"
             class="preline forcebreak"
           />
@@ -71,20 +71,6 @@ export default {
         this.chatmessage?.id > this.chat?.lastmsgseen
       )
     },
-    searchwords() { // :search-words validator needs string but regexEmail is RegExp
-      // https://www.npmjs.com/package/vue-highlight-words
-      // :search-words="[regexEmail]"
-      // Could try :autoEscape="false"
-      let sw = this.regexEmail.toString()
-      if(sw.length>2) { sw = sw.substring(1,sw.length-1) }
-      console.log('ChatMessageText: Fix Highlighter searchwords') // this.regexEmail.toString())
-      // sw = `^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$`
-      // sw = `(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))`
-      // console.log(sw)
-      return [sw]
-      //return ["[ch]"]
-    }
-    
   },
 }
 </script>

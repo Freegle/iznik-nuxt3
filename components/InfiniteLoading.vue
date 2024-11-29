@@ -5,15 +5,13 @@
       :key="bump"
       v-observe-visibility="{
         callback: visibilityChanged,
-        intersection: {
+        options: {
           rootMargin: '0px 0px ' + distance + 'px 0px',
         },
       }"
       class="infinite-loader mb-4"
     >
-      <slot v-if="isFirstLoad" name="spinner"></slot>
-      <slot v-if="isShowNoResults" name="no-results"></slot>
-      <slot v-if="isShowNoMore" name="no-more"></slot>
+      <slot v-if="state == 'loading'" name="spinner"></slot>
       <slot v-if="state == 'complete'" name="complete"></slot>
       <slot v-if="state == 'error'" name="error"></slot>
     </div>
@@ -35,8 +33,6 @@ export default {
   data() {
     return {
       state: 'ready',
-      isFirstLoad: true, // save the current loading whether it is the first loading
-      noresults: false,
       bump: 0,
       visible: false,
       timer: null,
@@ -62,6 +58,7 @@ export default {
     },
     identifier() {
       // We've been asked to kick the component to reset it.
+      console.log('Bump')
       this.bump++
       this.emit()
     },
@@ -80,20 +77,6 @@ export default {
     // that what happens in response to our emit will result in all the components being rendered, and although
     // Vue3 has Suspense I can't see an easy way of waiting for all renders to finish.
     this.timer = setTimeout(this.fallback, 100)
-  },
-  computed: {
-    isShowNoResults() {
-      return (
-        this.state === 'complete'
-        && this.isFirstLoad
-      )
-    },
-    isShowNoMore() {
-      return (
-        this.state === 'complete'
-        && !this.isFirstLoad
-      )
-    }
   },
   methods: {
     fallback() {
@@ -122,11 +105,9 @@ export default {
       this.state = 'loading'
     },
     loaded() {
-      this.isFirstLoad = false
       this.state = 'loaded'
     },
     complete() {
-      this.isFirstLoad = false
       this.state = 'complete'
     },
     error() {

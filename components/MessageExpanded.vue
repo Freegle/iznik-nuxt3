@@ -43,14 +43,16 @@
         />
       </div>
       <MessageHistoryExpanded :id="id" class="d-block d-md-none mt-2 mt-md-0" />
-      <VisibleWhen v-if="showAd && adId" :at="['xs', 'sm']">
+      <VisibleWhen v-if="showAd && adId && !noAd" :at="['xs', 'sm']">
         <div class="d-flex justify-content-around mt-2">
           <ExternalDa
             :ad-unit-path="adUnitPath"
             :ad-id="adId"
-            :dimensions="[300, 250]"
-            :div-id="adId + '-' + id"
-            @rendered="adRendered = true"
+            max-height="250px"
+            :div-id="adId"
+            :in-modal="inModal"
+            show-logged-out
+            @rendered="rendered"
           />
         </div>
       </VisibleWhen>
@@ -142,6 +144,10 @@ export default {
       required: false,
       default: null,
     },
+    inModal: {
+      type: Boolean,
+      default: false,
+    },
   },
   setup(props) {
     const messageStore = useMessageStore()
@@ -153,12 +159,13 @@ export default {
     return {
       replied: false,
       adRendered: false,
+      noAd: false,
     }
   },
   computed: {
     breakpoint() {
       const store = useMiscStore()
-      return store.getBreakpoint
+      return store.breakpoint
     },
     message() {
       return this.messageStore?.byId(this.id)
@@ -229,6 +236,10 @@ export default {
     sent() {
       this.$emit('close')
       this.replied = true
+    },
+    rendered(shown) {
+      this.adRendered = true
+      this.noAd = !shown
     },
   },
 }

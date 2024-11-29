@@ -8,31 +8,6 @@ export default class ChatAPI extends BaseAPI {
     return this.$get(`/chat/rooms/${chatid}/messages`,params)
   }
 
-  /*async fetchMT2(params) {
-    console.log('ChatAPI fetchMT2',params)
-    return await this.$get('/chat/rooms',params)
-  }
-
-  async fetchMT(chatid, { limit, context }) {
-    console.log('ChatAPI fetchMT',chatid, limit, context)
-    if( chatid) {
-      return this.$get(
-        `/chat/rooms/${chatid}/messages`,
-        { limit, context })
-        //function(data) {
-        //  if (data && data.ret === 2) {
-        //    // We handle this in the chat page
-        //    return false
-        //  } else {
-        //    return true
-        //  }
-        //}
-      //)
-    }
-    return await this.$get('/chat/rooms')
-    //return await this.$get(`/chatmessages`, { limit, context })    
-  }*/
-
   async fetchReviewChatsMT(params){
     return await this.$get(`/chatmessages`, params)
   }

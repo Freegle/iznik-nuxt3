@@ -41,7 +41,7 @@
 </template>
 <script>
 import { useChatStore } from '../stores/chat'
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 
 export default {
   components: {},
@@ -58,7 +58,7 @@ export default {
   setup() {
     const chatStore = useChatStore()
 
-    const { modal, hide } = useModal()
+    const { modal, hide } = useOurModal()
 
     return {
       chatStore,

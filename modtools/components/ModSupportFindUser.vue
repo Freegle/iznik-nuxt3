@@ -3,12 +3,14 @@
     <b-input-group class="mb-2">
       <b-form-input v-model="searchuser" placeholder="Email, numerical id, or ~- encoded id" class="max" :disabled="searching" autocapitalize="none"
         autocomplete="off" @keyup="searched = false" @keyup.enter.exact="usersearch" />
-      <b-input-group-append>
-        <b-button variant="primary" @click="usersearch">
-          <v-icon v-if="searching" icon="sync" class="fa-spin" />
-          <v-icon v-else icon="search" /> Find user
-        </b-button>
-      </b-input-group-append>
+      <b-input-group>
+        <slot name="append">
+          <b-button variant="primary" @click="usersearch">
+            <v-icon v-if="searching" icon="sync" class="fa-spin" />
+            <v-icon v-else icon="search" /> Find user
+          </b-button>
+        </slot>
+      </b-input-group>
     </b-input-group>
     <div v-if="!searching && searchuser && searched">
       <ModSupportUser v-for="user in visible" :id="user.id" :key="user.id" :expand="expand" />

@@ -1,11 +1,23 @@
 <template>
   <div>
-    <b-card v-if="event" variant="success" no-body>
-      <b-card-title class="bg-light px-2 mb-0 pt-2 pb-2 d-flex justify-content-between header--size4" :title-tag="titleTag">
-        <nuxt-link no-prefetch :to="'/communityevent/' + event.id" class="event__link text-truncate">
+    <b-card v-if="event" no-body>
+      <b-card-title
+        class="bg-light px-2 mb-0 pt-2 pb-2 d-flex justify-content-between header--size4"
+        :title-tag="titleTag"
+      >
+        <nuxt-link
+          no-prefetch
+          :to="'/communityevent/' + event.id"
+          class="event__link text-truncate"
+        >
           {{ event.title }}
         </nuxt-link>
-        <nuxt-link v-if="!summary" no-prefetch :to="'/communityevent/' + event.id" class="event__link small text-muted">
+        <nuxt-link
+          v-if="!summary"
+          no-prefetch
+          :to="'/communityevent/' + event.id"
+          class="event__link small text-muted"
+        >
           #{{ event.id }}
         </nuxt-link>
       </b-card-title>
@@ -33,12 +45,35 @@
             </p>
           </div>
           <div class="text-center mt-2 mb-2">
-            <b-button variant="secondary" size="sm" :aria-label="'More info about ' + event.title + ' community event'
-      " @click="showEventModal">
+            <b-button
+              variant="secondary"
+              size="sm"
+              :aria-label="
+                'More info about ' + event.title + ' community event'
+              "
+              @click="showEventModal"
+            >
               <v-icon icon="info-circle" /> More info
             </b-button>
           </div>
-          <b-img v-if="event.image" lazy class="w-100" :src="event.image.path" />
+          <div class="image-wrapper summary">
+            <OurUploadedImage
+              v-if="event?.image?.ouruid"
+              :src="event.image.ouruid"
+              :modifiers="event.image.externalmods"
+              alt="Community Event Photo"
+            />
+            <NuxtPicture
+              v-else-if="event?.image?.externaluid"
+              format="webp"
+              fit="cover"
+              provider="uploadcare"
+              :src="event.image.externaluid"
+              :modifiers="event.image.externalmods"
+              alt="Community Event Photo"
+            />
+            <b-img v-else-if="event.image" lazy :src="event.image.path" />
+          </div>
         </div>
         <div v-else class="event">
           <div class="event__body">
@@ -55,7 +90,10 @@
                 {{ event.location }}
               </div>
             </div>
-            <div v-if="event.groups && event.groups.length > 0" class="d-flex flex-row mt-1">
+            <div
+              v-if="event.groups && event.groups.length > 0"
+              class="d-flex flex-row mt-1"
+            >
               <v-icon icon="users" class="fa-fw mt-1" />
               <div class="ml-2 small">
                 Posted on
@@ -65,28 +103,57 @@
                 </span>
               </div>
             </div>
-            <read-more v-if="description" :text="description" :max-chars="300" class="ml-1 font-weight-bold preline forcebreak nopara mt-1" />
+            <read-more
+              v-if="description"
+              :text="description"
+              :max-chars="300"
+              class="ml-1 font-weight-bold preline forcebreak nopara mt-1"
+            />
             <div class="mt-2 mb-2 ml-1">
-              <b-button variant="secondary" :aria-label="'More info about ' + event.title + ' community event'
-      " @click="showEventModal">
+              <b-button
+                variant="secondary"
+                :aria-label="
+                  'More info about ' + event.title + ' community event'
+                "
+                @click="showEventModal"
+              >
                 <v-icon icon="info-circle" /> More info
               </b-button>
             </div>
           </div>
-          <b-img v-if="event.image" lazy :src="event.image.path" rounded thumbnail class="square" generator-unable-to-provide-required-alt=""
-            title="Opportunity photo" />
+          <div class="image-wrapper">
+            <OurUploadedImage
+              v-if="event?.image?.ouruid"
+              :src="event.image.ouruid"
+              :modifiers="event.image.externalmods"
+              alt="Community Event Photo"
+            />
+            <NuxtPicture
+              v-else-if="event?.image?.externaluid"
+              format="webp"
+              fit="cover"
+              provider="uploadcare"
+              :src="event.image.externaluid"
+              :modifiers="event.image.externalmods"
+              alt="Community Event Photo"
+            />
+            <b-img v-else-if="event.image" lazy :src="event.image.path" />
+          </div>
         </div>
       </b-card-body>
     </b-card>
-    <CommunityEventModal v-if="showModal" :id="id" @hidden="showModal = false" />
+    <CommunityEventModal
+      v-if="showModal"
+      :id="id"
+      @hidden="showModal = false"
+    />
   </div>
 </template>
-
 <script>
-import ReadMore from 'vue-read-more3/src/ReadMoreComponent'
 import { useCommunityEventStore } from '../stores/communityevent'
 import { useUserStore } from '../stores/user'
 import { useGroupStore } from '../stores/group'
+import ReadMore from '~/components/ReadMore'
 import { twem } from '~/composables/useTwem'
 const CommunityEventModal = defineAsyncComponent(() =>
   import('./CommunityEventModal')
@@ -209,16 +276,23 @@ export default {
   },
 }
 </script>
-
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
 
-.square {
-  object-fit: cover;
-  width: 200px;
-  height: 200px;
+.image-wrapper {
+  :deep(img) {
+    object-fit: cover;
+    width: 200px;
+  }
+
+  &.summary {
+    :deep(img) {
+      width: 100%;
+      height: unset;
+    }
+  }
 }
 
 .event__link {

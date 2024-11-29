@@ -8,9 +8,11 @@
         </p>
         <b-input-group>
           <b-form-input v-model="search" placeholder="Search for gift aid record" @keyup="checkSearch" />
-          <b-input-group-append>
-            <SpinButton variant="white" icon-name="search" label="Search" @handle="doSearch" />
-          </b-input-group-append>
+          <b-input-group>
+            <slot name="append">
+              <SpinButton variant="white" icon-name="search" label="Search" @handle="doSearch" />
+            </slot>
+          </b-input-group>
         </b-input-group>
         <div v-for="result in results" :key="result.id" class="mt-2">
           <div class="d-flex flex-wrap">

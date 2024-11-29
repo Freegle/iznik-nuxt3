@@ -5,7 +5,7 @@
         <b-col cols="12" lg="6" class="p-0 mt-1" offset-lg="3">
           <div>
             <h1>Community Events</h1>
-            <GlobalWarning />
+            <GlobalMessage />
             <p>These are local events, posted by other freeglers like you.</p>
             <div class="d-flex justify-content-between mb-3">
               <GroupSelect
@@ -64,7 +64,7 @@ import { useCommunityEventStore } from '../../stores/communityevent'
 import { useGroupStore } from '../../stores/group'
 import { useAuthStore } from '../../stores/auth'
 import NoticeMessage from '../../components/NoticeMessage'
-import GlobalWarning from '~/components/GlobalWarning'
+import GlobalMessage from '~/components/GlobalMessage'
 import { ref, computed, useRouter } from '#imports'
 import InfiniteLoading from '~/components/InfiniteLoading'
 import GroupSelect from '~/components/GroupSelect'
@@ -125,6 +125,26 @@ const allOfEm = computed(() => {
     return communityEventStore.forUser
   }
 })
+
+watch(
+  allOfEm,
+  (newVal) => {
+    if (newVal?.length && !groupid.value) {
+      // Save the max event we have seen.
+      const max = newVal.reduce((a, b) => Math.max(a, b), -Infinity)
+
+      const authStore = useAuthStore()
+      const me = useAuthStore().user
+      const settings = me?.settings
+
+      settings.lastCommunityEvent = max
+      authStore.saveAndGet({
+        settings,
+      })
+    }
+  },
+  { immediate: true }
+)
 
 const events = computed(() => {
   return allOfEm.value.slice(0, toShow.value)

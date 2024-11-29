@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="bg-white">
     <div class="d-flex align-items-start justify-content-between mb-1">
       <h2 class="header--size4 pl-2">
         <nuxt-link :to="link" class="title__link" no-prefetch>
@@ -9,7 +9,7 @@
       <b-button
         variant="secondary"
         :aria-label="addButtonLabel"
-        class="mr-1"
+        class="mr-1 towardstop"
         @click="showModal"
       >
         <v-icon icon="plus" /> Add
@@ -122,5 +122,9 @@ function showModal() {
 
 :deep(a) {
   text-decoration: none;
+}
+
+.towardstop {
+  z-index: 1000;
 }
 </style>

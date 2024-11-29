@@ -2,7 +2,7 @@
   <div v-if="volunteering">
     <div class="d-flex">
       <ProfileImage
-        v-if="user.profile.paththumb"
+        v-if="user?.profile?.paththumb"
         :image="user.profile.paththumb"
         class="ml-1 mr-2 mb-1 inline"
         is-thumbnail
@@ -10,12 +10,15 @@
         size="lg"
       />
       <div>
-        <span class="text-success font-weight-bold">{{
-          user.displayname
-        }}</span>
-        posted a volunteering opportunity<span class="d-none d-md-inline-block"
-          >:</span
-        ><br class="d-block d-md-none font-weight-bold" />
+        <span v-if="user?.id">
+          <span class="text-success font-weight-bold">{{
+            user.displayname
+          }}</span>
+          posted a volunteering opportunity
+        </span>
+        <span v-else> Volunteering opportunity</span>
+        <span class="d-none d-md-inline-block">:</span>
+        <br class="d-block d-md-none font-weight-bold" />
         &nbsp;{{ volunteering.title }}
         <br />
         <span class="text-muted small">
@@ -44,8 +47,28 @@
         </b-button>
       </div>
       <div class="volunteering__photo">
+        <OurUploadedImage
+          v-if="volunteering.image?.ouruid"
+          :src="volunteering.image?.ouruid"
+          :modifiers="volunteering.image?.externalmods"
+          alt="Community Event Photo"
+          :width="200"
+          @click="moreInfo"
+        />
+        <NuxtPicture
+          v-else-if="volunteering.image?.externaluid"
+          fit="cover"
+          format="webp"
+          provider="uploadcare"
+          :src="volunteering.image?.externaluid"
+          :modifiers="volunteering.image?.externalmods"
+          alt="Community Event Photo"
+          :width="200"
+          :height="200"
+          @click="moreInfo"
+        />
         <b-img
-          v-if="volunteering.image"
+          v-else-if="volunteering.image"
           rounded
           lazy
           :src="volunteering.image.paththumb"

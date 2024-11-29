@@ -46,11 +46,10 @@
     </template>
   </b-modal>
 </template>
-
 <script>
 import { useTrystStore } from '../stores/tryst'
 import { useMessageStore } from '../stores/message'
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 import UserRatings from '~/components/UserRatings'
 import DateFormatted from '~/components/DateFormatted'
 
@@ -88,7 +87,7 @@ export default {
     const trystStore = useTrystStore()
     const messageStore = useMessageStore()
 
-    const { modal, hide } = useModal()
+    const { modal, hide } = useOurModal()
 
     await trystStore.fetch()
 

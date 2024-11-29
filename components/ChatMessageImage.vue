@@ -14,8 +14,28 @@
       size="sm"
       class="mr-1 mb-1 mt-1 inline"
     />
+    <OurUploadedImage
+      v-if="chatmessage.image?.ouruid"
+      :src="chatmessage.image.ouruid"
+      :modifiers="chatmessage.image.externalmods"
+      alt="Chat Photo"
+      :width="200"
+      @click="zoom = true"
+    />
+    <NuxtPicture
+      v-else-if="chatmessage.image?.externaluid"
+      format="webp"
+      fit="cover"
+      provider="uploadcare"
+      :src="chatmessage.image.externaluid"
+      :modifiers="chatmessage.image.externalmods"
+      alt="Chat Photo"
+      :width="200"
+      :height="200"
+      @click="zoom = true"
+    />
     <b-img
-      v-if="chatmessage.image"
+      v-else-if="chatmessage.image"
       lazy
       fluid
       class="chatimage clickme img-thumbnail rounded"
@@ -40,14 +60,25 @@
       ok-only
     >
       <template #default>
-        <b-img
-          v-if="chatmessage.image"
-          lazy
-          fluid
-          generator-unable-to-provide-required-alt=""
-          :src="chatmessage.image.path"
-          @error="brokenImage"
-        />
+        <div class="d-flex justify-content-around">
+          <NuxtPicture
+            v-if="chatmessage.image?.externaluid"
+            format="webp"
+            fit="cover"
+            provider="uploadcare"
+            :src="chatmessage.image.externaluid"
+            :modifiers="chatmessage.image.externalmods"
+            alt="Chat Photo"
+          />
+          <b-img
+            v-else-if="chatmessage.image"
+            lazy
+            fluid
+            generator-unable-to-provide-required-alt=""
+            :src="chatmessage.image.path"
+            @error="brokenImage"
+          />
+        </div>
       </template>
       <template #footer>
         <b-button variant="outline-danger" @click="$emit('delete')">
@@ -58,7 +89,6 @@
     </b-modal>
   </div>
 </template>
-
 <script>
 import ChatBase from '~/components/ChatBase'
 import ProfileImage from '~/components/ProfileImage'
@@ -81,7 +111,6 @@ export default {
   },
 }
 </script>
-
 <style scoped>
 .chatimage {
   max-height: 50vh;

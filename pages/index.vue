@@ -3,47 +3,44 @@
     v-if="!me"
     class="grid m-0 pl-1 pr-1 pl-sm-0 pr-sm-0 mt-0 mt-lg-5 ml-2 mr-2"
   >
-    <client-only>
-      <VisibleWhen
-        :not="['xs']"
-        class="map justify-content-start flex-column d-flex"
-      >
-        <VisualiseMap v-if="type === 'Map'" class="shadow flex-grow-1" />
-        <div v-else-if="type === 'Song'" class="w-100">
-          <b-img
-            v-if="!timeToPlay"
-            fluid
-            src="/songpreview.png"
-            class="flex-grow-1 w-100"
-            @click="play"
-          />
-          <video
-            v-else
-            autoplay="autoplay"
-            controls="controls"
-            poster="/songpreview.png"
-            loop="loop"
-            src="/song.mp4"
-            class="embed-responsive-item shadow flex-grow-1 w-100 bg-secondary"
-          ></video>
-        </div>
-      </VisibleWhen>
-    </client-only>
+    <div class="d-none d-sm-flex eyecandy justify-content-start flex-column">
+      <FreeglerPhotos
+        v-if="!breakpoint || breakpoint !== 'xs'"
+        class="ps-4 h-100"
+      />
+    </div>
     <div class="info">
-      <h1 class="text--largest-responsive">
-        Freegle - like online dating for stuff.
-      </h1>
-      <p class="text--medium-responsive black font-weight-bold">
-        Got stuff you don't need? Looking for something?
-      </p>
-      <p class="text--medium-responsive black font-weight-bold">
-        We'll match you with someone local. All completely free.
-      </p>
       <client-only>
-        <div class="d-flex justify-content-between justify-content-lg-start">
+        <BreakpointFettler />
+      </client-only>
+      <div class="d-block d-sm-none">
+        <h1 class="text--large-responsive">
+          Freegle - online dating for stuff.
+        </h1>
+        <p class="text--medium-responsive black font-weight-bold">
+          Got things you don't need? Need stuff?
+          <br />
+          Match with someone local. Completely free.
+        </p>
+      </div>
+      <div class="d-none d-sm-block">
+        <h1 class="text--largest-responsive">
+          Freegle - like online dating for stuff.
+        </h1>
+        <p class="text--medium-responsive black font-weight-bold">
+          Got stuff you don't need? Looking for something?
+        </p>
+        <p class="text--medium-responsive black font-weight-bold">
+          We'll match you with someone local. All completely free.
+        </p>
+      </div>
+      <div
+        class="d-flex justify-content-between justify-content-lg-start w-100"
+      >
+        <client-only>
           <b-button
             variant="primary"
-            size="lg"
+            size="xl"
             to="/give"
             class="text--medium-responsive ml-1 ml-sm-0"
             @click="clicked('give')"
@@ -53,67 +50,90 @@
           <div style="width: 4vw" class="d-none d-lg-block" />
           <b-button
             variant="secondary"
-            size="lg"
+            size="xl"
             to="/find"
             class="text--medium-responsive mr-1 mr-sm-0"
             @click="clicked('ask')"
           >
             Ask for Stuff
           </b-button>
-        </div>
-      </client-only>
+          <template #fallback>
+            <a
+              variant="primary"
+              size="xl"
+              href="/give"
+              class="btn btn-xl btn-primary text--medium-responsive ml-1 ml-sm-0"
+            >
+              Give Stuff
+            </a>
+            <div style="width: 4rem" class="d-none d-lg-block" />
+            <a
+              variant="secondary"
+              size="xl"
+              href="/find"
+              class="btn btn-xl btn-secondary text--medium-responsive mr-1 ml-sm-0"
+            >
+              Ask for Stuff
+            </a>
+          </template>
+        </client-only>
+      </div>
       <div
-        class="font-weight-bold text-header text--medium-responsive mt-3 mb-4"
+        class="font-weight-bold text-header text--medium-responsive mt-3 mb-4 d-none d-md-block"
       >
         Don't throw it away, give it away!
       </div>
-      <h2 class="text--medium-responsive font-weight-bold black">
+      <h2
+        class="text--medium-responsive font-weight-bold black d-none d-md-block"
+      >
         Just looking?
       </h2>
-      <client-only>
-        <div
-          class="d-flex justify-content-around justify-content-lg-start flex-wrap"
-        >
-          <PlaceAutocomplete
-            class="mb-2"
-            labeltext="See what's being freegled near you."
-            labeltext-sr="Enter your location and"
-            @selected="explorePlace($event)"
-          />
-        </div>
-      </client-only>
-    </div>
-    <client-only>
-      <div class="app-download mt-2">
-        <a
-          href="https://play.google.com/store/apps/details?id=org.ilovefreegle.direct"
-          target="_blank"
-          class="mr-2"
-          rel="noopener noreferrer"
-        >
-          <b-img
-            lazy
-            alt="Freegle Android app on Google Play"
-            title="Freegle Android app on Google Play"
-            class="app-download__image"
-            src="/en-play-badge.png"
-          />
-        </a>
-        <a
-          href="https://itunes.apple.com/gb/app/freegle/id970045029?ls=1&amp;mt=8"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <b-img
-            lazy
-            alt="Freegle app for iPhone, iPad, and iPod touch"
-            title="Freegle app for iPhone, iPad, and iPod Touch"
-            class="app-download__image"
-            src="/app-store-black-sm.png"
-          />
-        </a>
+      <div
+        class="d-flex justify-content-around justify-content-lg-start flex-wrap mt-2 mt-md-0"
+      >
+        <PlaceAutocomplete
+          class="mb-2"
+          labeltext="See what's being freegled near you:"
+          labeltext-sr="Enter your location and"
+          @selected="explorePlace($event)"
+        />
       </div>
-    </client-only>
+      <VisualiseList
+        v-if="!breakpoint || breakpoint === 'xs'"
+        class="mt-2 mb-2 d-block d-sm-none"
+      />
+    </div>
+    <div class="app-download mt-2">
+      <a
+        href="https://play.google.com/store/apps/details?id=org.ilovefreegle.direct"
+        target="_blank"
+        class="mr-2"
+        rel="noopener noreferrer"
+      >
+        <ProxyImage
+          preload
+          alt="Freegle Android app on Google Play"
+          title="Freegle Android app on Google Play"
+          class="app-download__image"
+          src="/en-play-badge.png"
+          sizes="75px"
+        />
+      </a>
+      <a
+        href="https://itunes.apple.com/gb/app/freegle/id970045029?ls=1&amp;mt=8"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <ProxyImage
+          preload
+          alt="Freegle app for iPhone, iPad, and iPod touch"
+          title="Freegle app for iPhone, iPad, and iPod Touch"
+          class="app-download__image"
+          src="/app-store-black-sm.png"
+          sizes="75px"
+        />
+      </a>
+    </div>
     <MainFooter class="thefooter" />
   </div>
 </template>
@@ -123,32 +143,53 @@ import { buildHead } from '../composables/useBuildHead'
 import { useMiscStore } from '../stores/misc'
 import MainFooter from '~/components/MainFooter'
 import { useRouter } from '#imports'
-import api from '~/api'
-const VisualiseMap = defineAsyncComponent(() =>
-  import('~/components/VisualiseMap')
+import BreakpointFettler from '~/components/BreakpointFettler.vue'
+const VisualiseList = defineAsyncComponent(() =>
+  import('~/components/VisualiseList')
 )
 
 export default {
   components: {
     MainFooter,
-    VisualiseMap,
+    VisualiseList,
+    BreakpointFettler,
   },
   setup() {
     const runtimeConfig = useRuntimeConfig()
     const route = useRoute()
 
-    useHead(
-      buildHead(
-        route,
-        runtimeConfig,
-        "Don't throw it away, give it away!",
-        "Freegle - like online dating for stuff. Got stuff you don't need? Looking for something? We'll match you with someone local. All completely free.",
-        null,
-        {
-          class: 'landing',
-        }
-      )
+    const head = buildHead(
+      route,
+      runtimeConfig,
+      "Don't throw it away, give it away!",
+      "Freegle - like online dating for stuff. Got stuff you don't need? Looking for something? We'll match you with someone local. All completely free.",
+      null,
+      {
+        class: 'landing',
+      }
     )
+
+    // Preload some images to speed page load.
+    const userSite = runtimeConfig.public.USER_SITE
+    const proxy = runtimeConfig.public.IMAGE_DELIVERY
+
+    const bg = proxy + '?url=' + userSite + '/wallpaper.png&output=webp'
+    const logo = proxy + '?url=' + userSite + '/icon.png&output=webp&w=58'
+
+    head.link = [
+      {
+        rel: 'preload',
+        as: 'image',
+        href: logo,
+      },
+      {
+        rel: 'preload',
+        as: 'image',
+        href: bg,
+      },
+    ]
+
+    useHead(head)
 
     const miscStore = useMiscStore()
 
@@ -160,38 +201,22 @@ export default {
     return {
       userWatch: null,
       ourBackground: false,
-      type: null,
       timeToPlay: false,
     }
   },
-  async mounted() {
-    if (process.client) {
-      // IN MASTER await this.fetchMe(['me', 'groups'])
+  computed: {
+    breakpoint() {
+      // We show different stuff on xs screens.  In SSR we can't tell what the screen size will be.  But removing
+      // the irrelevant option from the DOM once the client loads will save some network/CPU.
+      const store = useMiscStore()
 
+      return process.server ? null : store.breakpoint
+    },
+  },
+  mounted() {
+    if (process.client) {
       if (this.me) {
         this.goHome()
-      } else {
-        // Ensure we can still load the page if we get an API error.
-        try {
-          const runtimeConfig = useRuntimeConfig()
-          const type = await api(runtimeConfig).bandit.choose({
-            uid: 'landing',
-          })
-
-          if (type?.variant) {
-            this.type = type.variant
-          }
-        } catch (e) {
-          console.error(e)
-        }
-
-        if (this.type !== 'Map') {
-          // The video plays with sound, wrongly, even if the muted attribute is set.  So set it here.
-          setTimeout(() => {
-            this.timeToPlay = true
-            this.play()
-          }, 1000)
-        }
       }
     }
   },
@@ -217,9 +242,7 @@ export default {
         const router = useRouter()
         const route = useRoute()
 
-        console.log('route', route)
         if (route.path !== nextroute) {
-          console.log('Push', nextroute)
           this.$nextTick(() => {
             router.push(nextroute)
           })
@@ -256,8 +279,11 @@ export default {
       if (process.client) {
         try {
           const videoEl = document.querySelector('video')
-          videoEl.muted = true
-          await videoEl.play()
+
+          if (videoEl) {
+            videoEl.muted = true
+            await videoEl.play()
+          }
         } catch (e) {
           console.log('Video play failed', e)
         }
@@ -288,9 +314,10 @@ export default {
   }
 }
 
-.map {
+.eyecandy {
   grid-row: 3 / 4;
   grid-column: 1 / 3;
+  align-items: center !important;
 
   @include media-breakpoint-up(sm) {
     height: 300px;
@@ -300,7 +327,12 @@ export default {
     grid-row: 1 / 3;
     grid-column: 1 / 2;
     // 100vh includes the header and margins etc so they need to be taken off
-    height: calc(100vh - 150px);
+    height: max(500px, calc(100vh - 450px));
+
+    @supports (height: 100dvh) {
+      height: max(500px, calc(100dvh - 450px));
+    }
+
     max-height: 800px;
   }
 }

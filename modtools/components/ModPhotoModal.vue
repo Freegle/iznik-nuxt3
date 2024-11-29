@@ -13,7 +13,7 @@
 </template>
 
 <script>
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 import { useMessageStore } from '../../stores/message'
 
 export default {
@@ -28,7 +28,7 @@ export default {
     }
   },
   setup() {
-    const { modal, hide } = useModal()
+    const { modal, hide } = useOurModal()
     const messageStore = useMessageStore()
     return { messageStore, modal, hide }
   },

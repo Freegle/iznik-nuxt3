@@ -16,7 +16,7 @@
             variant="info"
             class="lg ml-2"
           >
-            {{ left }} left
+            {{ message.availablenow }} left
           </b-badge>
         </div>
       </h3>
@@ -55,7 +55,7 @@
           :taken-by="takenBy"
           :choose-error="chooseError"
           :invalid="submittedWithNoSelectedUser"
-          @took-users="tookUsers = $event"
+          @took-users="took"
         />
       </div>
       <div v-if="showCompletion">
@@ -205,7 +205,7 @@ import { useChatStore } from '../stores/chat'
 import OutcomeBy from './OutcomeBy'
 import SpinButton from './SpinButton'
 import NoticeMessage from '~/components/NoticeMessage'
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 
 export default {
   components: { NoticeMessage, SpinButton, OutcomeBy },
@@ -230,7 +230,7 @@ export default {
     const messageStore = useMessageStore()
     const chatStore = useChatStore()
 
-    const { modal, hide } = useModal()
+    const { modal, hide } = useOurModal()
 
     return { messageStore, chatStore, modal, hide }
   },
@@ -322,9 +322,14 @@ export default {
     },
   },
   methods: {
+    took(users) {
+      this.tookUsers = users
+    },
     async submit(callback) {
       if (this.type === 'Taken' && !this.tookUsers.length) {
-        return (this.submittedWithNoSelectedUser = true)
+        callback()
+        this.submittedWithNoSelectedUser = true
+        return
       } else {
         this.submittedWithNoSelectedUser = false
       }
@@ -334,6 +339,7 @@ export default {
 
       if (this.submitDisabled) {
         this.chooseError = true
+        callback()
       } else {
         if (this.type === 'Withdrawn' || this.type === 'Received') {
           complete = true
@@ -366,11 +372,11 @@ export default {
             comment: this.comments,
             message: this.completionMessage,
           })
-
-          this.hide()
         }
+
+        callback()
+        this.hide()
       }
-      callback()
     },
     onHide() {
       // We're having trouble capturing events from this modal, so use root as a bus.

@@ -129,6 +129,7 @@ export default {
 @import 'bootstrap/scss/_functions.scss';
 @import 'bootstrap/scss/_variables.scss';
 @import 'bootstrap/scss/mixins/_breakpoints.scss';
+@import 'assets/css/sticky-banner.scss';
 
 .chatname {
   color: $colour-info-fg;
@@ -143,7 +144,11 @@ export default {
   scroll-padding-top: 10px;
 
   @include media-breakpoint-up(sm) {
-    grid-template-columns: min-content calc(98% - 50px);
+    grid-template-columns: min-content calc(98% - $sticky-banner-height-mobile);
+  }
+
+  @include media-breakpoint-up(md) {
+    grid-template-columns: min-content calc(98% - $sticky-banner-height-desktop);
   }
 }
 </style>

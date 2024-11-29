@@ -31,6 +31,7 @@
           onRequestCloseModal: closeModal,
           waitForThumbnailsBeforeUpload: true,
           closeAfterFinish: true,
+          showNativePhotoCameraButton: true,
         }"
       />
     </div>
@@ -39,11 +40,9 @@
 <script setup>
 import { shouldPolyfill as shouldPolyfillLocale } from '@formatjs/intl-locale/should-polyfill'
 import { shouldPolyfill as shouldPolyfillPlural } from '@formatjs/intl-pluralrules/should-polyfill'
-// eslint-disable-next-line import/no-named-as-default
 import Uppy from '@uppy/core'
 import { DashboardModal } from '@uppy/vue'
 import Tus from '@uppy/tus'
-import Webcam from '@uppy/webcam'
 import Compressor from '@uppy/compressor'
 
 import ResizeObserver from 'resize-observer-polyfill'
@@ -200,15 +199,6 @@ onMounted(() => {
       maxNumberOfFiles: props.multiple ? 10 : 1,
     },
   })
-    .use(Webcam, {
-      mirror: false,
-      modes: ['picture'],
-      mobileNativeCamera: true,
-      showVideoSourceDropdown: true,
-      videoConstraints: {
-        facingMode: 'environment',
-      },
-    })
     .use(Tus, {
       endpoint: runtimeConfig.public.TUS_UPLOADER,
       uploadDataDuringCreation: true,

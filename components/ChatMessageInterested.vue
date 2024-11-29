@@ -1,6 +1,6 @@
 <template>
   <div
-    class="chatMessageWrapper pb-1"
+    class="chatMessageWrapper"
     :class="{ myChatMessage: messageIsFromCurrentUser }"
   >
     <div class="chatMessage forcebreak chatMessage__owner">
@@ -87,7 +87,7 @@
             :selected-message="refmsg.id"
             :users="otheruser ? [otheruser] : []"
             :selected-user="otheruser ? otheruser.id : null"
-            @hidden="showPromise = false"
+            @hidden="promised"
           />
         </div>
       </div>
@@ -162,6 +162,7 @@ import { useMiscStore } from '../stores/misc'
 import ChatBase from '~/components/ChatBase'
 import ProfileImage from '~/components/ProfileImage'
 import ChatMessageSummary from '~/components/ChatMessageSummary'
+import { useChatStore } from '~/stores/chat'
 const OutcomeModal = () =>
   defineAsyncComponent(() => import('~/components/OutcomeModal'))
 const PromiseModal = defineAsyncComponent(() =>
@@ -200,6 +201,12 @@ export default {
       }
 
       this.showPromise = true
+    },
+    promised() {
+      // Might have a new chat message to show from promising.
+      this.showPromise = false
+      const chatStore = useChatStore()
+      chatStore.fetchChat(this.chatid)
     },
     async outcome(type, e) {
       if (e) {

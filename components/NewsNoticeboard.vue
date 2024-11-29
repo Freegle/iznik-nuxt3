@@ -17,8 +17,29 @@
       <em v-if="info.description">"{{ info.description.trim() }}"</em>
     </notice-message>
     <div v-if="info.photo" class="noticeboard__photo">
+      <OurUploadedImage
+        v-if="info.photofull?.ouruid"
+        :src="info.photofull.ouruid"
+        :modifiers="JSON.parse(info.photofull.externalmods)"
+        alt="Noticeboard Photo"
+        width="100"
+        class="clickme replyphoto mt-2 mb-2"
+        @click="moreInfo"
+      />
+      <NuxtPicture
+        v-else-if="info.photofull?.externaluid"
+        format="webp"
+        fit="cover"
+        provider="uploadcare"
+        :src="info.photofull.externaluid"
+        :modifiers="JSON.parse(info.photofull.externalmods)"
+        alt="Noticeboard Photo"
+        width="100"
+        class="clickme replyphoto mt-2 mb-2"
+        @click="moreInfo"
+      />
       <b-img
-        v-if="info.photo"
+        v-else-if="info.photo"
         rounded
         lazy
         :src="photo"
@@ -102,6 +123,11 @@ export default {
         if (info?.description) {
           const desc = twem(info.description)
           info.description = desc
+        }
+
+        const p = info?.photofull?.externaluid.indexOf('freegletusd-')
+        if (p !== -1) {
+          info.photofull.ouruid = info.photofull.externaluid
         }
       } catch (e) {
         console.log('Invalid noticeboard', this.newsfeed)

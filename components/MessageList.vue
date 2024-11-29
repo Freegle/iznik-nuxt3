@@ -7,7 +7,6 @@
       show-join
       :show-give-find="showGiveFind"
     />
-    <JobsTopBar v-if="jobs" class="d-none d-md-block" />
     <h2 class="visually-hidden">List of wanteds and offers</h2>
     <div id="visobserver" v-observe-visibility="visibilityChanged" />
     <div v-if="deDuplicatedMessages?.length" id="messageList">
@@ -15,78 +14,72 @@
         v-if="!loading && selectedSort === 'Unseen' && showCountsUnseen && me"
       >
         <MessageListCounts v-if="browseCount" @mark-seen="markSeen" />
-        <MessageListUpToDate
-          v-if="deDuplicatedMessages[0].id === firstSeenMessage"
-        />
       </div>
-      <div
-        :id="'messagewrapper-' + deDuplicatedMessages[0].id"
-        :ref="'messagewrapper-' + deDuplicatedMessages[0].id"
-        class="p-0"
-      >
-        <OurMessage
-          :id="deDuplicatedMessages[0].id"
-          :matchedon="deDuplicatedMessages[0].matchedon"
-          record-view
-        />
-      </div>
-      <VisibleWhen
-        v-if="deDuplicatedMessages.length"
-        :not="['xs', 'sm', 'md', 'lg']"
-      >
-        <ExternalDa
-          ad-unit-path="/22794232631/freegle_feed_desktop"
-          :dimensions="[728, 90]"
-          div-id="div-gpt-ad-1692867153277-0"
-          class="mt-2"
-        />
-      </VisibleWhen>
-      <VisibleWhen
-        v-if="deDuplicatedMessages.length"
-        :at="['xs', 'sm', 'md', 'lg']"
-      >
-        <ExternalDa
-          ad-unit-path="/22794232631/freegle_feed_app"
-          :dimensions="[300, 250]"
-          div-id="div-gpt-ad-1692867324381-0"
-          class="mt-3"
-        />
-      </VisibleWhen>
-      <div
-        v-for="message in deDuplicatedMessages.slice(1)"
-        :key="'messagelist-' + message.id"
-      >
-        <MessageListUpToDate
-          v-if="
-            !loading &&
-            selectedSort === 'Unseen' &&
-            showCountsUnseen &&
-            message.id === firstSeenMessage
-          "
-        />
+      <VisibleWhen :at="['xs', 'sm']">
         <div
-          :id="'messagewrapper-' + message.id"
-          :ref="'messagewrapper-' + message.id"
-          class="p-0"
+          v-for="(m, ix) in deDuplicatedMessages"
+          :key="'messagelist-' + m.id"
         >
-          <VisibleWhen :at="['xs', 'sm', 'md', 'lg']">
-            <OurMessage
-              :id="message.id"
-              :matchedon="message.matchedon"
-              record-view
+          <div v-if="ix % 2 === 0">
+            <MessageListUpToDate
+              v-if="
+                (!loading &&
+                  selectedSort === 'Unseen' &&
+                  showCountsUnseen &&
+                  deDuplicatedMessages[ix]?.id === firstSeenMessage) ||
+                deDuplicatedMessages[ix + 1]?.id === firstSeenMessage
+              "
             />
-          </VisibleWhen>
-          <VisibleWhen :not="['xs', 'sm', 'md', 'lg']">
-            <OurMessage
-              :id="message.id"
-              :matchedon="message.matchedon"
-              record-view
-              ad-unit-path="/22794232631/freegle_product"
-              ad-id="div-gpt-ad-1691925699378-0"
-            />
-          </VisibleWhen>
+            <div class="twocolumn">
+              <div
+                :id="'messagewrapper-' + m.id"
+                :ref="'messagewrapper-' + m.id"
+                class="onecolumn"
+              >
+                <OurMessage :id="m.id" :matchedon="m.matchedon" record-view />
+              </div>
+              <div
+                v-if="ix + 1 < deDuplicatedMessages.length"
+                :id="'messagewrapper-' + deDuplicatedMessages[ix + 1].id"
+                :ref="'messagewrapper-' + deDuplicatedMessages[ix + 1].id"
+                class="onecolumn"
+              >
+                <OurMessage
+                  :id="deDuplicatedMessages[ix + 1].id"
+                  :matchedon="deDuplicatedMessages[ix + 1].matchedon"
+                  record-view
+                />
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      </VisibleWhen>
+      <VisibleWhen :not="['xs', 'sm']">
+        <div
+          v-for="message in deDuplicatedMessages"
+          :key="'messagelist-' + message.id"
+        >
+          <MessageListUpToDate
+            v-if="
+              !loading &&
+              selectedSort === 'Unseen' &&
+              showCountsUnseen &&
+              message.id === firstSeenMessage
+            "
+          />
+          <div
+            :id="'messagewrapper-' + message.id"
+            :ref="'messagewrapper-' + message.id"
+            class=""
+          >
+            <OurMessage
+              :id="message.id"
+              :matchedon="message.matchedon"
+              record-view
+            />
+          </div>
+        </div>
+      </VisibleWhen>
     </div>
     <infinite-loading
       v-if="messagesForList?.length"
@@ -115,15 +108,15 @@ import MessageListUpToDate from './MessageListUpToDate'
 import { ref } from '#imports'
 import InfiniteLoading from '~/components/InfiniteLoading'
 import { useMiscStore } from '~/stores/misc'
+import VisibleWhen from '~/components/VisibleWhen'
 const OurMessage = defineAsyncComponent(() =>
   import('~/components/OurMessage.vue')
 )
 const GroupHeader = defineAsyncComponent(() =>
   import('~/components/GroupHeader.vue')
 )
-const JobsTopBar = defineAsyncComponent(() => import('~/components/JobsTopBar'))
-
 const MIN_TO_SHOW = 10
+const SHOW_AD_EVERY = 5
 
 export default {
   components: {
@@ -131,7 +124,7 @@ export default {
     OurMessage,
     GroupHeader,
     InfiniteLoading,
-    JobsTopBar,
+    VisibleWhen,
   },
   props: {
     messagesForList: {
@@ -228,6 +221,7 @@ export default {
       messageStore,
       miscStore,
       toShow,
+      SHOW_AD_EVERY,
     }
   },
   data() {
@@ -447,13 +441,17 @@ export default {
           })
 
           if (ids.length) {
-            console.log('Unseen duplicates', ids)
             this.messageStore.markSeen(ids)
           }
         }
       },
       immediate: true,
     },
+  },
+  beforeUnmount() {
+    if (this.markSeenTimer) {
+      clearTimeout(this.markSeenTimer)
+    }
   },
   methods: {
     async loadMore($state) {
@@ -537,11 +535,172 @@ export default {
         }
       }, 100)
     },
-    beforeUnmount() {
-      if (this.markSeenTimer) {
-        clearTimeout(this.markSeenTimer)
+    insertAd(ix) {
+      // We show an ad occasionally in the feed.
+      if (ix % this.SHOW_AD_EVERY !== 0) {
+        return false
       }
+
+      // We have to insert a different ad slot each time - Google doesn't let you repeat them.  And we need to
+      // have different variants for desktop and mobile.
+      const desktop = !['xs', 'sm', 'md', 'lg'].includes(
+        this.miscStore.breakpoint
+      )
+
+      ix = ix / 10
+
+      const ads = desktop
+        ? {
+            0: {
+              adUnitPath: '/22794232631/freegle_feed_desktop',
+              dimensions: [[728, 90]],
+              divId: 'div-gpt-ad-1692867153277-0',
+            },
+            1: {
+              adUnitPath: '/22794232631/freegle_feed_desktop_2',
+              dimensions: [[728, 90]],
+              divId: 'div-gpt-ad-1708280158016-0',
+            },
+            2: {
+              adUnitPath: '/22794232631/freegle_feed_desktop_3',
+              dimensions: [[728, 90]],
+              divId: 'div-gpt-ad-1708280229653-0',
+            },
+            3: {
+              adUnitPath: '/22794232631/freegle_feed_desktop_4',
+              dimensions: [[728, 90]],
+              divId: 'div-gpt-ad-1708280290737-0',
+            },
+            4: {
+              adUnitPath: '/22794232631/freegle_feed_desktop_5',
+              dimensions: [[728, 90]],
+              divId: 'div-gpt-ad-1708280362777-0',
+            },
+          }
+        : {
+            0: {
+              adUnitPath: '/22794232631/freegle_feed_app',
+              dimensions: [[300, 250]],
+              divId: 'div-gpt-ad-1692867324381-0',
+            },
+            1: {
+              adUnitPath: '/22794232631/freegle_feed_app_2',
+              dimensions: [[300, 250]],
+              divId: 'div-gpt-ad-1707999616879-0',
+            },
+            2: {
+              adUnitPath: '/22794232631/freegle_feed_app_3',
+              dimensions: [[300, 250]],
+              divId: 'div-gpt-ad-1707999845886-0',
+            },
+            3: {
+              adUnitPath: '/22794232631/freegle_feed_app_4',
+              dimensions: [[300, 250]],
+              divId: 'div-gpt-ad-1707999962593-0',
+            },
+            4: {
+              adUnitPath: '/22794232631/freegle_feed_app_5',
+              dimensions: [[300, 250]],
+              divId: 'div-gpt-ad-1708000097990-0',
+            },
+          }
+
+      if (ix < ads.length) {
+        return false
+      }
+
+      return ads[ix]
     },
   },
 }
 </script>
+<style scoped lang="scss">
+@import 'bootstrap/scss/_functions';
+@import 'bootstrap/scss/_variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
+
+.twocolumn {
+  display: flex;
+  flex-wrap: wrap !important;
+  grid-template-rows: 2.5px 1fr 2.5px;
+  grid-template-columns: 1fr;
+  grid-column-gap: 5px;
+
+  @media only screen and (min-width: 360px) {
+    display: grid;
+    grid-template-rows: 2.5px 1fr 2.5px;
+    grid-template-columns: 1fr 1fr;
+    grid-column-gap: 5px;
+  }
+
+  > div {
+    grid-row: 2 / 3;
+  }
+
+  :deep(.header-title) {
+    display: flex;
+    flex-direction: column;
+
+    .spacer {
+      display: flex;
+      flex-grow: 1;
+    }
+  }
+
+  :deep(.header-description.noAttachments) {
+    grid-row: 5 / 6;
+
+    .textbody {
+      margin-top: 50px;
+      font-size: 1rem;
+      height: 100px;
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+    }
+
+    .description {
+      display: block !important;
+    }
+  }
+
+  :deep(.messagecard.noAttachments) {
+    .image-wrapper {
+      button {
+        background-color: transparent;
+      }
+
+      .thumbnail img {
+        opacity: 0;
+      }
+    }
+  }
+
+  .onecolumn {
+    height: 100%;
+
+    @media only screen and (max-width: 360px) {
+      width: 100%;
+    }
+
+    @media only screen and (min-width: 360px) {
+      width: unset;
+    }
+
+    :deep(div) {
+      height: 100%;
+
+      .messagecard div {
+        div {
+          height: unset;
+        }
+      }
+    }
+
+    :deep(.freegleg),
+    :deep(.promised),
+    :deep(.image-wrapper) {
+      height: unset;
+    }
+  }
+}
+</style>

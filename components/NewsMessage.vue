@@ -6,12 +6,32 @@
     <read-more
       v-else-if="newsfeed.message && emessage"
       :text="emessage"
-      :max-chars="1024"
+      :max-chars="512"
       class="font-weight-bold preline forcebreak nopara"
     />
     <div>
+      <OurUploadedImage
+        v-if="newsfeed.image?.ouruid"
+        :src="newsfeed.image.ouruid"
+        :modifiers="newsfeed.image?.externalmod"
+        alt="ChitChat Image"
+        sizes="100vw md:400px"
+        class="imgthumb"
+      />
+      <NuxtPicture
+        v-else-if="newsfeed.image?.externaluid"
+        format="webp"
+        fit="cover"
+        provider="uploadcare"
+        :src="newsfeed.image.externaluid"
+        :modifiers="newsfeed.image?.externalmod"
+        alt="ChitChat Image"
+        sizes="100vw md:400px"
+        :height="400"
+        class="imgthumb"
+      />
       <b-img
-        v-if="newsfeed.image"
+        v-else-if="newsfeed.image"
         lazy
         rounded
         :src="newsfeed.image.path"
@@ -68,12 +88,13 @@
   </div>
 </template>
 <script>
-import ReadMore from 'vue-read-more3/src/ReadMoreComponent'
 import ChatButton from './ChatButton'
+import ReadMore from '~/components/ReadMore'
 import NewsBase from '~/components/NewsBase'
 import NewsUserIntro from '~/components/NewsUserIntro'
 
 import NewsLoveComment from '~/components/NewsLoveComment'
+import { useMiscStore } from '~/stores/misc'
 const NewsShareModal = defineAsyncComponent(() =>
   import('~/components/NewsShareModal')
 )
@@ -87,6 +108,19 @@ export default {
     ReadMore,
   },
   extends: NewsBase,
+  computed: {
+    width() {
+      const miscStore = useMiscStore()
+
+      if (miscStore.breakpoint === 'xs' || miscStore.breakpoint === 'sm') {
+        // Full width image.
+        return process.server ? 400 : window.innerHeight
+      } else {
+        // 400px width image.
+        return 400
+      }
+    },
+  },
 }
 </script>
 <style scoped lang="scss">
@@ -94,8 +128,10 @@ export default {
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
 
-.imgthumb {
+.imgthumb,
+:deep(.imgthumb img) {
   width: 100%;
+  object-fit: cover;
 
   @include media-breakpoint-up(md) {
     width: 400px;

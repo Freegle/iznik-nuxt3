@@ -3,6 +3,7 @@ import dayjs from 'dayjs'
 import { nextTick } from 'vue'
 import api from '~/api'
 import { addStrings, earliestDate } from '~/composables/useTimeFormat'
+import { useAuthStore } from '~/stores/auth'
 
 export const useVolunteeringStore = defineStore({
   id: 'volunteering',
@@ -127,6 +128,14 @@ export const useVolunteeringStore = defineStore({
   getters: {
     byId: (state) => (id) => {
       return state.list[id]
+    },
+    count: (state) => {
+      const lastVolunteerOpportunity =
+        useAuthStore().user?.settings?.lastVolunteerOpportunity || 0
+
+      return state.forUser.filter((item) => {
+        return item.id > lastVolunteerOpportunity
+      }).length
     },
   },
 })

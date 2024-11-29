@@ -66,7 +66,7 @@
   </div>
 </template>
 <script>
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 import { setupChat } from '~/composables/useChat'
 //import chatCollate from '@/mixins/chatCollate.js'
 //import chat from '@/mixins/chat.js'
@@ -75,7 +75,7 @@ import { setupChat } from '~/composables/useChat'
 export default {
   //components: { ChatMessage },
   async setup(props) {
-    const { modal, hide } = useModal()
+    const { modal, hide } = useOurModal()
 
     const { // Returns wrong chat
       chat,

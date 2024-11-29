@@ -1,8 +1,9 @@
 <template>
-  <div @click="$emit('click')">
+  <div class="promised" @click="$emit('click')">
     <div v-if="summary">
       <b-img lazy src="/promised.jpg" class="promised__image" />
       <b-popover
+        v-if="message.fromuser !== myid"
         v-model="showing"
         :content="title"
         placement="top"
@@ -26,6 +27,8 @@
   </div>
 </template>
 <script>
+import { useMessageStore } from '~/stores/message'
+
 export default {
   props: {
     id: {
@@ -43,6 +46,11 @@ export default {
       default: false,
     },
   },
+  setup() {
+    const messageStore = useMessageStore()
+
+    return { messageStore }
+  },
   data: function () {
     return {
       scrollHandler: null,
@@ -56,6 +64,9 @@ export default {
       } else {
         return 'This has been promised to you.'
       }
+    },
+    message() {
+      return this.messageStore?.byId(this.id)
     },
   },
   beforeUnmount() {
@@ -86,15 +97,23 @@ export default {
 }
 </script>
 <style scoped lang="scss">
+@import 'bootstrap/scss/_functions';
+@import 'bootstrap/scss/_variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
+
 .promised__image {
   position: absolute;
-  width: 225px;
   z-index: 2;
   transform: rotate(15deg);
-  top: 30%;
-
-  // Centre the absolute positioned div in its container
+  top: 50%;
   left: 50%;
-  margin-left: -125px;
+
+  width: 150px;
+  margin-left: -75px;
+
+  @include media-breakpoint-up(md) {
+    width: 225px;
+    margin-left: -125px;
+  }
 }
 </style>

@@ -145,7 +145,6 @@ export default {
     },
     groups() {
       let ret = []
-      // MT ADDED
       if (this.listall) {
         ret = Object.values(this.groupStore.list).filter((g) => {
           //console.log('===GroupSelect groups A',g.id)
@@ -270,28 +269,27 @@ export default {
         if (val && this.restrict) this.selectedGroup = 0
       },
     },
-    groupOptions: {
-      immediate: true,
-      handler(val) {
-         //console.log('===GroupSelect watch groupOptions',val)
-         // If we only have one real group then don't force them to choose.
-         let count = 0
-         let group = null
-         val.forEach((option) => {
-           if (option.value > 0) {
-             group = option.value
-             count++
-           }
-         })
-    
-         if (count === 1 && this.selectedGroup === 0) {
-           this.selectedGroup = group
-         }
-      },
-    },
+    // groupOptions: {
+    //   immediate: true,
+    //   handler(val) {
+    //     // If we only have one real group then don't force them to choose.
+    //     let count = 0
+    //     let group = null
+    //     val.forEach((option) => {
+    //       if (option.value > 0) {
+    //         group = option.value
+    //         count++
+    //       }
+    //     })
+    //
+    //     if (count === 1 && this.selectedGroup === 0) {
+    //       this.selectedGroup = group
+    //     }
+    //   },
+    // },
   },
   async mounted() {
-      // MT ADDED
+    // MT CHANGED
     if (this.listall) {
       await this.groupStore.listMT({
         grouptype: 'Freegle'

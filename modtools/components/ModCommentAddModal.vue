@@ -46,7 +46,7 @@
   </div>
 </template>
 <script>
-import { useModal } from '~/composables/useModal'
+import { useOurModal } from '~/composables/useOurModal'
 
 export default {
   props: {
@@ -64,7 +64,7 @@ export default {
     }
   },
   setup() {
-    const { modal, hide } = useModal()
+    const { modal, hide } = useOurModal()
     return { modal, hide }
   },
   data: function () {
