@@ -20,4 +20,10 @@ export default class DonationsAPI extends BaseAPI {
       paymenttype: paymentType,
     })
   }
+
+  stripeSubscription(amount) {
+    return this.$post('/stripecreatesubscription', {
+      amount,
+    })
+  }
 }

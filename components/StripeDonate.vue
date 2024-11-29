@@ -7,6 +7,9 @@
       Loading donation methods...
     </div>
     <div :id="uniqueId"></div>
+    <NoticeMessage v-if="error" variant="error">
+      {{ error }}
+    </NoticeMessage>
   </div>
 </template>
 <script setup>
@@ -55,12 +58,28 @@ const options = {
   },
 }
 
-const elements = stripe.elements({
-  mode: props.monthly ? 'subscription' : 'payment',
-  amount: props.price * 100, // Price is in pence
-  currency: 'gbp',
-  appearance,
-})
+let elements = null
+
+if (props.monthly) {
+  console.log('Create elements for subscription', event)
+  const res = await donationStore.stripeSubscription(props.price)
+  console.log('Subscription returned', res)
+
+  elements = stripe.elements({
+    clientSecret: res.clientSecret,
+    appearance,
+  })
+} else {
+  console.log('Create elements for one-off payment')
+  elements = stripe.elements({
+    mode: 'payment',
+    amount: props.price * 100, // Price is in pence
+    currency: 'gbp',
+    appearance,
+  })
+}
+
+const error = ref(null)
 
 onMounted(() => {
   console.log(
@@ -104,9 +123,9 @@ onMounted(() => {
         extra: event,
       })
       emit('error')
-    } else {
+    } else if (!props.monthly) {
       // Create the PaymentIntent and obtain clientSecret
-      console.log('Confirm', event)
+      console.log('One-off', event)
       const res = await donationStore.stripeIntent(
         props.price,
         event.expressPaymentType
@@ -137,6 +156,27 @@ onMounted(() => {
       } else {
         // The payment UI automatically closes with a success animation.
         // Your customer is redirected to your `return_url` if required.
+        emit('success')
+      }
+    } else {
+      const { error } = await stripe.confirmPayment({
+        // `Elements` instance that was used to create the Payment Element
+        elements,
+        confirmParams: {
+          return_url: 'https://example.com/order/123/complete',
+        },
+      })
+
+      if (error) {
+        console.error('Create subscription error', error)
+        Sentry.captureMessage('Create subscription  error', {
+          extra: event,
+        })
+
+        error.value = error.message
+
+        emit('error')
+      } else {
         emit('success')
       }
     }

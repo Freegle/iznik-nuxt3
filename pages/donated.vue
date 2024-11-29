@@ -4,7 +4,7 @@
     <b-col cols="12" md="6" class="mt-2">
       <b-card no-body>
         <b-card-header bg-variant="primary">
-          <h1>Thank you!</h1>
+          <h1 class="text-white">Thank you!</h1>
         </b-card-header>
         <b-card-text class="p-2">
           <DonationThank />
