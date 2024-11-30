@@ -162,6 +162,7 @@ export default {
       this.$emit('success')
     },
     noMethods() {
+      console.log('No payment methods')
       this.payPalFallback = true
     },
   },

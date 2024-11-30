@@ -94,7 +94,7 @@ onMounted(() => {
     loading.value = false
 
     if (
-      !typeof event.availablePaymentMethods !== 'object' ||
+      typeof event.availablePaymentMethods !== 'object' ||
       !Object.keys(event.availablePaymentMethods).length
     ) {
       // We've seen this happen on Brave.
