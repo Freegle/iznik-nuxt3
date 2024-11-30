@@ -1,6 +1,4 @@
-# ads.txt file for ilovefreegle.org, updated 13/12/2023
+# ads.txt file for ilovefreegle.org, updated 29/07/2024
 OWNERDOMAIN=ilovefreegle.org
-CONTACT=sales@zeroads.co
-
-
-Gumgum.com, 15952, DIRECT, ffdef49475d318a9
+CONTACT=geeks@ilovefreegle.org
+google.com, pub-9017028318226154, DIRECT, f08c47fec0942fa0

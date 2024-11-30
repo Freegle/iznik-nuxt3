@@ -1,8 +1,8 @@
-// OLD
+// NEW
 import eslintPlugin from 'vite-plugin-eslint'
 import { VitePWA } from 'vite-plugin-pwa'
 import { sentryVitePlugin } from '@sentry/vite-plugin'
-
+import { splitVendorChunkPlugin } from 'vite'
 import config from './config'
 
 // @ts-ignore
@@ -48,7 +48,6 @@ export default defineNuxtConfig({
   // Sometimes when debugging it's useful to set ssr: false, because the errors are clearer when generated on the client.
   // @ts-ignore
   target: 'server',
-  
   ssr: true,
   spaLoadingTemplate: false,
 
@@ -111,6 +110,11 @@ export default defineNuxtConfig({
     '/stats/**': { ssr: false },
     '/stories/**': { ssr: false },
     '/teams': { ssr: false },
+    '/adtest': { ssr: false },
+    '/googlepay': { ssr: false },
+    '/stripedonate': { ssr: false },
+    '/microvolunteering': { ssr: false },
+    '/paypalcompetition': { ssr: false },
 
     // Render on demand - may never be shown in a given build - then cache for a while.
     '/explore/region/**': { isr: 3600 },
@@ -137,7 +141,7 @@ export default defineNuxtConfig({
     prerender: {
       routes: ['/404.html', '/sitemap.xml'],
 
-      // Don't prerender the messages - too many
+      // Don't prerender the messages - too many.
       ignore: ['/message/'],
       crawlLinks: true,
     },
@@ -167,7 +171,7 @@ export default defineNuxtConfig({
   modules: [
     '@pinia/nuxt',
     '@nuxt/image',
-//    'nuxt-vite-legacy',
+    //'nuxt-vite-legacy',
     '@bootstrap-vue-next/nuxt',
     /*process.env.GTM_ID ? '@zadigetvoltaire/nuxt-gtm' : null,
     [
@@ -180,16 +184,6 @@ export default defineNuxtConfig({
       },
     ],*/
   ],
-
-  /*buildModules: [
-    [
-      '@pinia/nuxt',
-      {
-        autoImports: ['defineStore'],
-      },
-    ],
-    'floating-vue/nuxt',
-  ],*/
 
   hooks: {
     'build:manifest': (manifest) => {
@@ -233,6 +227,8 @@ export default defineNuxtConfig({
       TUS_UPLOADER: config.TUS_UPLOADER,
       IMAGE_DELIVERY: config.IMAGE_DELIVERY,
       STRIPE_PUBLISHABLE_KEY: config.STRIPE_PUBLISHABLE_KEY,
+      GOOGLE_ADSENSE_ID: config.GOOGLE_ADSENSE_ID,
+      GOOGLE_ADSENSE_TEST_MODE: config.GOOGLE_ADSENSE_TEST_MODE,
     },
   },
 
@@ -255,12 +251,10 @@ export default defineNuxtConfig({
       },
     },
     plugins: [
+      splitVendorChunkPlugin(),
       VitePWA({ registerType: 'autoUpdate' }),
       // Make Lint errors cause build failures.
-      // eslintPlugin(),
-      //legacy({
-      //  targets: ['since 2015'],
-      //}),
+      //eslintPlugin(),
       sentryVitePlugin({
         org: 'freegle',
         project: 'modtools',
@@ -286,7 +280,6 @@ export default defineNuxtConfig({
     server: true,
   },
 
-
   // Sometimes we need to change the host when doing local testing with browser stack.
   devServer: {
     host: '127.0.0.1',
@@ -294,7 +287,18 @@ export default defineNuxtConfig({
   },
   app: {
     head: {
+      htmlAttrs: {
+        lang: 'en',
+      },
       title: "Freegle - Don't throw it away, give it away!",
+      script: [
+        {
+          // This is a polyfill for Safari12.  Can't get it to work using modernPolyfills - needs to happen very
+          // early.  Safari12 doesn't work well, but this makes it functional.
+          type: 'text/javascript',
+          innerHTML: `try { if (!window.globalThis) { window.globalThis = window; } } catch (e) { console.log('Polyfill error', e.message); }`,
+        },
+      ],
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
@@ -421,4 +425,6 @@ export default defineNuxtConfig({
       '2xl': 768,
     },
   },
+
+  compatibilityDate: '2024-11-29',
 })

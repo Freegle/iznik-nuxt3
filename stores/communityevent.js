@@ -4,7 +4,6 @@ import { nextTick } from 'vue'
 import api from '~/api'
 import { earliestDate, addStrings } from '~/composables/useTimeFormat'
 import { useAuthStore } from '~/stores/auth'
-import { useMiscStore } from '@/stores/misc'
 
 export const useCommunityEventStore = defineStore({
   id: 'communityevent',

@@ -74,6 +74,7 @@ import {
   faMeh,
   faMinus,
   faPause, // ModTools
+  faMinusCircle,
   faPen,
   faPlay,
   faPlus,
@@ -183,6 +184,7 @@ library.add(
   faMeh,
   faMinus,
   faPause, // ModTools
+  faMinusCircle,
   faPen,
   faPlay,
   faPlus,

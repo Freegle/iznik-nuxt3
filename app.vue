@@ -5,12 +5,75 @@
         <NavbarDesktop />
         <NavbarMobile />
       </header>
-      <div class="position-absolute top-50 start-50 translate-middle z-3">
+      <div
+        class="position-absolute top-50 start-50 translate-middle z-3 pointer-none"
+      >
         <LoadingIndicator
           with-transition
           :throttle="loadingIndicatorThrottle"
         />
       </div>
+      <template #fallback>
+        <header>
+          <nav
+            id="navbar_large"
+            data-v-454188a5=""
+            class="navbar fixed-top navbar-expand ourBack d-none d-xl-flex pl-1 pr-2 navbar-dark navbar-expand-xl"
+          >
+            <div class="container-fluid">
+              <a
+                data-v-454188a5=""
+                aria-current="page"
+                href="/"
+                class="router-link-active router-link-exact-active navbar-brand p-0"
+                ><picture data-v-454188a5="" class="logo mr-2"
+                  ><source
+                    type="image/webp"
+                    sizes="58px"
+                    srcset="
+                      https://delivery.ilovefreegle.org/?filename=icon.png&we&w=58&output=png&fit=inside&url=https://www.ilovefreegle.org/icon.png   58w,
+                      https://delivery.ilovefreegle.org/?filename=icon.png&we&w=116&output=png&fit=inside&url=https://www.ilovefreegle.org/icon.png 116w
+                    " />
+                  <img
+                    alt="Home"
+                    loading="eager"
+                    data-nuxt-pic=""
+                    src="https://61ddd294bd3a390019c6.ucr.io//-/format/png/-/resize/116x//https://www.ilovefreegle.org/icon.png"
+                    sizes="58px"
+                    srcset="
+                      https://delivery.ilovefreegle.org/?filename=icon.png&we&w=58&output=png&fit=inside&url=https://www.ilovefreegle.org/icon.png   58w,
+                      https://delivery.ilovefreegle.org/?filename=icon.png&we&w=116&output=png&fit=inside&url=https://www.ilovefreegle.org/icon.png 116w
+                    " /></picture></a
+              ><!----><!---->
+              <div data-v-454188a5="" class="navbar-nav ml-auto">
+                <div data-v-454188a5="" class="nav-item" no-prefetch="">
+                  <button
+                    data-v-454188a5=""
+                    class="btn btn-md btn-white mr-2"
+                    type="button"
+                  >
+                    Sign&nbsp;in
+                  </button>
+                </div>
+              </div>
+            </div>
+          </nav>
+          <nav
+            class="navbar fixed-top navbar-expand ourBack d-flex justify-content-between d-xl-none showNavBarTop"
+            type="dark"
+          >
+            <div class="container-fluid">
+              <div />
+              <div />
+              <div class="d-flex align-items-center">
+                <ul class="nav">
+                  <a><div class="btn btn-white mr-2">Log in or Join</div></a>
+                </ul>
+              </div>
+            </div>
+          </nav>
+        </header>
+      </template>
     </client-only>
     <div
       v-if="ready"
@@ -60,12 +123,14 @@ import { useMiscStore } from './stores/misc'
 import { computed, watch, reloadNuxtApp } from '#imports'
 // polyfills
 import 'core-js/actual/array/to-sorted'
+import { useConfigStore } from '~/stores/config'
 
 const route = useRoute()
 const loadingIndicatorThrottle = ref(5000)
 const { isLoading } = useLoadingIndicator({
   throttle: loadingIndicatorThrottle.value,
 })
+
 // Don't render the app until we've done everything in here.
 let ready = false
 
@@ -75,7 +140,12 @@ let ready = false
 // Starting with around Nuxt 3.4.1, when we first access the config (here) it has public as we'd expect, but
 // if we store that and access it later, we are just looking at the contents of public.  I don't understand why
 // this is, but we don't expect the config to change, so we take a copy here.
-const runtimeConfig = JSON.parse(JSON.stringify(useRuntimeConfig()))
+const runtimeConfig = JSON.parse(
+  JSON.stringify({
+    public: useRuntimeConfig().public,
+    app: useRuntimeConfig().app,
+  })
+)
 
 const miscStore = useMiscStore()
 const groupStore = useGroupStore()
@@ -84,6 +154,7 @@ const authStore = useAuthStore()
 const userStore = useUserStore()
 const isochroneStore = useIsochroneStore()
 const composeStore = useComposeStore()
+const configStore = useConfigStore()
 const chatStore = useChatStore()
 const addressStore = useAddressStore()
 const trystStore = useTrystStore()
@@ -125,6 +196,7 @@ searchStore.init(runtimeConfig)
 storyStore.init(runtimeConfig)
 volunteeringStore.init(runtimeConfig)
 communityEventStore.init(runtimeConfig)
+configStore.init(runtimeConfig)
 jobStore.init(runtimeConfig)
 teamStore.init(runtimeConfig)
 donationStore.init(runtimeConfig)
@@ -199,6 +271,21 @@ if (process.client) {
         window.location.reload()
       }
     }
+
+    window.onerror = function (message, url, line, col, error) {
+      // We can get this, for example if the CookieYes script is blocked.
+      console.log('Uncaught error', message, url, line, col, error)
+
+      if (url.includes('cookieyes')) {
+        // If CookieYes fails with an error, then we proceed as though it wasn't configured.
+        //
+        // This catches the error on Firefox, but not on Chrome, so it's of limited use.
+        console.log('CookieYes error')
+        if (window.postCookieYes) {
+          window.postCookieYes()
+        }
+      }
+    }
   }
 
   const chatCount = computed(() => {
@@ -227,9 +314,18 @@ if (process.client) {
 }
 ready = true
 </script>
-
 <style lang="scss">
 .nuxt-layout-wrapper {
   transition: all 0.25s;
+}
+
+.trans {
+  background-color: transparent !important;
+  color: transparent !important;
+  border: none !important;
+}
+
+.pointer-none {
+  pointer-events: none;
 }
 </style>
