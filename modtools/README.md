@@ -78,3 +78,7 @@ A fairly minimal `package.json` is needed as `nuxt.config.ts` extends `../` and 
       await this.delay(5)
 
 CHECK ALL this.member.userid
+
+REMOVED to get it to build:
+    "@vitejs/plugin-legacy": "^5.2.0",
+    "nuxt-vite-legacy": "^1.2.0",

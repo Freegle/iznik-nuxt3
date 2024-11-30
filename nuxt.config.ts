@@ -1,7 +1,8 @@
-import { VitePWA } from 'vite-plugin-pwa'
+// OLD
 import eslintPlugin from 'vite-plugin-eslint'
-//import legacy from '@vitejs/plugin-legacy'
+import { VitePWA } from 'vite-plugin-pwa'
 import { sentryVitePlugin } from '@sentry/vite-plugin'
+
 import config from './config'
 
 // @ts-ignore
@@ -47,6 +48,7 @@ export default defineNuxtConfig({
   // Sometimes when debugging it's useful to set ssr: false, because the errors are clearer when generated on the client.
   // @ts-ignore
   target: 'server',
+  
   ssr: true,
   spaLoadingTemplate: false,
 
