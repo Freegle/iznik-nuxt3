@@ -32,7 +32,9 @@
           class="shadow-none"
           @click="setPrice(amount)"
         >
-          <span class="d-none d-md-inline">Donate </span>£{{ amount }}
+          <span class="d-none d-md-inline"
+            ><span v-if="!monthly">Donate </span></span
+          >£{{ amount }}<span v-if="monthly"> monthly</span>
         </b-button>
         <div class="text-muted text-small">
           <b-input-group prepend="Other:">
@@ -47,14 +49,13 @@
           </b-input-group>
         </div>
       </b-button-group>
-      <!--      <BFormCheckbox id="monthly" v-model="monthly" name="monthly" class="mb-2">-->
-      <!--        Monthly donations are really helpful-->
-      <!--      TODO-->
-      <!--      </BFormCheckbox>-->
+      <BFormCheckbox id="monthly" v-model="monthly" name="monthly" class="mb-2">
+        <v-icon icon="arrow-left" /> Monthly donations are really helpful
+      </BFormCheckbox>
 
       <div class="mt-2 mb-2 w-100">
         <StripeDonate
-          :key="price"
+          :key="price + monthly"
           :price="price"
           :monthly="monthly"
           @success="succeeded"
@@ -169,5 +170,9 @@ export default {
 <style scoped lang="scss">
 .otherWidth {
   width: 6rem;
+}
+
+:deep(.form-check-input) {
+  border: 1px solid red;
 }
 </style>

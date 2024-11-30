@@ -19,7 +19,6 @@
   />
 </template>
 <script setup>
-import { defineProps } from 'vue'
 import * as Sentry from '@sentry/browser'
 
 const props = defineProps({

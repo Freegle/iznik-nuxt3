@@ -1,4 +1,8 @@
-export default {
+const ADS_SMALL_BANNER_SIZES = [[320, 50]]
+const ADS_MEDIUM_BANNER_SIZES = [[728, 90]]
+const ADS_SQUARISH_SIZES = [[300, 250]]
+
+const CONFIG = {
   // Legacy API, especially mod ops.
   APIv1: process.env.IZNIK_API_V1 || 'https://fdapilive.ilovefreegle.org/api',
 
@@ -8,7 +12,7 @@ export default {
   // This is where the user site is.
   USER_SITE: 'https://www.ilovefreegle.org',
 
-// This is where images are served from.
+  // This is where images are served from.
   //
   // Old:
   IMAGE_SITE: 'https://images.ilovefreegle.org',
@@ -25,7 +29,7 @@ export default {
   // Geocode server
   GEOCODE: process.env.GEOCODE || 'https://geocode.ilovefreegle.org/api',
 
-  // Google keys from scenic-oxygen-849 project.
+  // Google keys from scenic-oxygen-849 project accessed from Freegle Geeks.
   GOOGLE_MAPS_KEY: 'AIzaSyCdTSJKGWJUOx2pq1Y0f5in5g4kKAO5dgg',
   GOOGLE_API_KEY: 'AIzaSyArVxoX781qdcbmQZi1PKHX-qa0bPbboH4',
   GOOGLE_CLIENT_ID:
@@ -48,3 +52,5 @@ export default {
   GOOGLE_ADSENSE_TEST_MODE: process.env.GOOGLE_ADSENSE_TEST_MODE,
   STRIPE_PUBLISHABLE_KEY: process.env.STRIPE_PUBLISHABLE_KEY,
 }
+
+export default CONFIG

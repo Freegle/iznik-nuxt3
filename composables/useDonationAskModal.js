@@ -35,7 +35,6 @@ export function useDonationAskModal(requestedVariant = null) {
   })
 
   const showDonationAskModal = ref(false)
-
   async function show(requestedVariant) {
     miscStore.set({
       key: 'lastdonationask',

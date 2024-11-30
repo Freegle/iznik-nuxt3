@@ -1,0 +1,4 @@
+# ads.txt file for ilovefreegle.org, updated 10/04/2024
+OWNERDOMAIN=ilovefreegle.org
+CONTACT=geeks@ilovefreegle.org
+google.com, pub-9017028318226154, DIRECT, f08c47fec0942fa0

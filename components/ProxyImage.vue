@@ -1,7 +1,4 @@
 <template>
-  <!--div>
-    ProxyImage <img :src="src" /> {{ src }}
-  </div-->
   <NuxtPicture
     :format="format"
     :fit="fit"
@@ -20,7 +17,6 @@
   />
 </template>
 <script setup>
-import { defineProps } from 'vue'
 import * as Sentry from '@sentry/browser'
 
 const props = defineProps({

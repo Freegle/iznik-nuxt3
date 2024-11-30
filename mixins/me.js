@@ -4,6 +4,7 @@ import cloneDeep from 'lodash.clonedeep'
 import Wkt from 'wicket'
 import { useAuthStore } from '~/stores/auth'
 import { fetchMe } from '~/composables/useMe'
+import { useTeamStore } from '~/stores/team'
 
 export default {
   computed: {
@@ -35,6 +36,19 @@ export default {
     },
     loggedIn() {
       return this.me !== null
+    },
+    myGroupIds() {
+      const authStore = useAuthStore()
+      let ret = []
+
+      if (this.me) {
+        ret = authStore.groups.map((g) => {
+          // Memberships have an id of the membership whereas we want the groups to have the id of the group.
+          return g.groupid
+        })
+      }
+
+      return ret
     },
     myGroups() {
       const authStore = useAuthStore()
@@ -85,11 +99,38 @@ export default {
         (this.me.systemrole === 'Support' || this.me.systemrole === 'Admin')
       )
     },
+    chitChatMod() {
+      let ret = false
+
+      if (this.me) {
+        if (this.supportOrAdmin) {
+          ret = true
+        } else {
+          const teamStore = useTeamStore()
+          const mods = teamStore.getTeam('ChitChat Moderation')
+
+          if (mods) {
+            ret = !!mods.members.find((m) => this.myid === m.id)
+          }
+        }
+      }
+
+      return ret
+    },
     supporter() {
-      return this.me && this.me.supporter
+      return this.me?.supporter
     },
     donor() {
-      return this.me && this.me.donor
+      return this.me?.donated
+    },
+    recentDonor() {
+      const donated = this.me?.donated
+
+      // If donated and within last 31 days
+      return (
+        donated &&
+        new Date(donated) > new Date(Date.now() - 31 * 24 * 60 * 60 * 1000)
+      )
     },
     amMicroVolunteering() {
       return (
