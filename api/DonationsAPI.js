@@ -17,4 +17,10 @@ export default class DonationsAPI extends BaseAPI {
   stripeIntent(params) {
     return this.$post('/stripecreateintent', params)
   }
+
+  stripeSubscription(amount) {
+    return this.$post('/stripecreatesubscription', {
+      amount,
+    })
+  }
 }

@@ -13,32 +13,56 @@
               ref="thermo"
               class="text-center"
             />
-            <p>
-              Thank you! It's nice of you to even think about supporting us.
-            </p>
-            <p>
-              We provide a free service and keep costs low thanks to our large
-              number of committed volunteers - but there are some things we have
-              to pay for to keep going.
-            </p>
-            <p>
-              Freegle is relatively unusual, especially in the charity world.
-              Most websites host a few web pages which change quite rarely, for
-              a relatively small number of active users at any one time. We have
-              an active service where there are changes happening continuously,
-              and we send out hundreds of thousands of emails a day. You can
-              certainly get a cheap and cheerful charity website that doesn’t do
-              much for a few quid a year, but you can’t run something like
-              Freegle that way. It’s a different kettle of fish. It’s not even a
-              kettle, and they’re not fish.
-            </p>
-            <p v-if="false" class="font-weight-bold">
-              This month we're trying to raise &pound;{{ target }} from
-              donations - can you help?
-            </p>
-            <h3>If you can, please donate &pound;3.</h3>
-            <p>...but anything you can give is very welcome.</p>
-            <donation-button :direct-donation="true" value="3" />
+            <DonationThank v-if="success" />
+            <div v-else>
+              <p>
+                Thank you! It's nice of you to even think about supporting us.
+              </p>
+              <p>
+                We provide a free service and keep costs low thanks to our large
+                number of committed volunteers - but there are some things we
+                have to pay for to keep going.
+              </p>
+              <p>
+                Freegle is relatively unusual, especially in the charity world.
+                Most websites host a few web pages which change quite rarely,
+                for a relatively small number of active users at any one time.
+                We have an active service where there are changes happening
+                continuously, and we send out hundreds of thousands of emails a
+                day. You can certainly get a cheap and cheerful charity website
+                that doesn’t do much for a few quid a year, but you can’t run
+                something like Freegle that way. It’s a different kettle of
+                fish. It’s not even a kettle, and they’re not fish.
+              </p>
+              <p v-if="false" class="font-weight-bold">
+                This month we're trying to raise &pound;{{ target }} from
+                donations - can you help?
+              </p>
+              <h3>If you can, please donate &pound;3.</h3>
+              <p>...but anything you can give is very welcome.</p>
+              <BFormCheckbox
+                v-if="!payPalFallback"
+                id="monthly"
+                v-model="monthly"
+                name="monthly"
+                class="mb-2"
+              >
+                <v-icon icon="arrow-left" /> Monthly donations are really
+                helpful
+              </BFormCheckbox>
+              <DonationButton
+                v-if="payPalFallback"
+                text="Donate £3"
+                :value="3"
+              />
+              <StripeDonate
+                v-else
+                :price="3"
+                :monthly="monthly"
+                @success="succeeded"
+                @no-payment-methods="noMethods"
+              />
+            </div>
           </b-card-text>
         </b-card>
         <b-card no-body class="mt-2">
@@ -186,18 +210,6 @@
               </b-card-text>
             </b-card>
           </b-col>
-          <b-col cols="12" lg="6">
-            <b-card class="mt-2 mb-2" no-body>
-              <b-card-header bg-variant="primary" text-variant="white">
-                With JustGiving
-              </b-card-header>
-              <b-card-text class="p-2">
-                <client-only>
-                  <JustGivingDonationButton />
-                </client-only>
-              </b-card-text>
-            </b-card>
-          </b-col>
         </b-row>
       </b-col>
     </b-row>
@@ -212,13 +224,8 @@ import DonationButton from '~/components/DonationButton'
 import ExternalLink from '~/components/ExternalLink'
 import { buildHead } from '~/composables/useBuildHead'
 
-const JustGivingDonationButton = defineAsyncComponent(() =>
-  import('~/components/JustGivingDonationButton.vue')
-)
-
 export default {
   components: {
-    JustGivingDonationButton,
     ExternalLink,
     DonationThermometer,
     DonationButton,
@@ -236,6 +243,26 @@ export default {
       )
     )
   },
+  data: function () {
+    return {
+      monthly: false,
+      success: false,
+      payPalFallback: false,
+    }
+  },
   ...mapState(useDonationStore, ['target']),
+  methods: {
+    succeeded() {
+      this.success = true
+    },
+    noMethods() {
+      this.payPalFallback = true
+    },
+  },
 }
 </script>
+<style scoped lang="scss">
+:deep(.form-check-input) {
+  border: 1px solid red;
+}
+</style>

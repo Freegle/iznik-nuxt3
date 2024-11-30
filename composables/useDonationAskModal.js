@@ -36,7 +36,6 @@ export function useDonationAskModal(requestedVariant = null) {
   })
 
   const showDonationAskModal = ref(false)
-
   async function show(requestedVariant) {
     const mobileStore = useMobileStore()
     miscStore.set({

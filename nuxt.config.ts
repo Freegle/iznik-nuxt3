@@ -96,6 +96,7 @@ export default defineNuxtConfig({
   // Sometimes when debugging it's useful to set ssr: false, because the errors are clearer when generated on the client.
   // @ts-ignore
   target: config.ISAPP ? 'static' : 'server',
+  
   ssr: !config.ISAPP,
   spaLoadingTemplate: false,
 
@@ -778,6 +779,7 @@ export default defineNuxtConfig({
       ],
     },
   },
+
   image: {
     uploadcare: {
       provider: 'uploadcare',
@@ -806,4 +808,6 @@ export default defineNuxtConfig({
       '2xl': 768,
     },
   },
+
+  compatibilityDate: '2024-11-29',
 })

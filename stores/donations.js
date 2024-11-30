@@ -29,5 +29,10 @@ export const useDonationStore = defineStore({
       console.log('API returned', ret)
       return ret?.intent
     },
+    async stripeSubscription(amount) {
+      const ret = await api(this.config).donations.stripeSubscription(amount)
+      console.log('API returned', ret)
+      return ret
+    },
   },
 })
