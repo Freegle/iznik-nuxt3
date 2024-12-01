@@ -97,6 +97,7 @@
             @keydown="typing"
             @keydown.enter.exact.prevent
             @keyup.enter.exact="send"
+            @keyup.ctrl.alt.enter.exact.prevent="send"
             @keydown.enter.shift.exact.prevent="newline"
             @keydown.alt.shift.enter.exact.prevent="newline"
             @focus="markRead"
