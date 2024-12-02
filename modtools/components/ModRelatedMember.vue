@@ -46,6 +46,7 @@
   </b-card>
 </template>
 <script>
+import dayjs from 'dayjs'
 
 const LONG_THRESHOLD = 4
 
@@ -94,8 +95,8 @@ export default {
       return m1 <= m2 ? this.member : this.member.relatedto
     },
     activeSameDay() {
-      return this.$dayjs(this.user1.lastaccess).isSame(
-        this.$dayjs(this.user2.lastaccess),
+      return dayjs(this.user1.lastaccess).isSame(
+        dayjs(this.user2.lastaccess),
         'day'
       )
     },
