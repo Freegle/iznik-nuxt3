@@ -106,7 +106,7 @@ const fullSrc = computed(() => {
     const encodedQuery = encodeURIComponent(query)
     ret = base + '?' + encodedQuery
   }
-
+  //console.log('fullSrc',ret)
   return ret
 })
 
