@@ -27,7 +27,7 @@ export function useOurModal() {
     } else {
       console.log('GUARD OK OK OK')
     }
-    console.log('Guard', to?.query)
+    //console.log('Guard', to?.query)
     if (to?.query?.noguard) {
       // This is a special query parameter we add to skip the guard.  This is used when we are navigating from
       // within a modal where the guard would otherwise suppress the navigation because it thinks we are trying

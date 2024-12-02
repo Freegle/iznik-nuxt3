@@ -4,6 +4,7 @@ import { nextTick } from 'vue'
 import api from '~/api'
 import { earliestDate, addStrings } from '~/composables/useTimeFormat'
 import { useAuthStore } from '~/stores/auth'
+import { useMiscStore } from '@/stores/misc'
 
 export const useCommunityEventStore = defineStore({
   id: 'communityevent',
@@ -66,6 +67,15 @@ export const useCommunityEventStore = defineStore({
     },
     async fetch(id, force) {
       try {
+        const miscStore = useMiscStore()
+        if( miscStore.modtools){
+          await this.fetchMT({
+            id,
+            limit: 1,
+            pending: true
+          })
+          return this.list[id]
+        }
         if (force || !this.list[id]) {
           if (this.fetching[id]) {
             await this.fetching[id]

@@ -237,7 +237,12 @@ export const useChatStore = defineStore({
         data.refmsgid = refmsgid
       }
 
-      await api(this.config).chat.send(data)
+      const miscStore = useMiscStore() // MT ADDED
+      if (miscStore.modtools) {
+        await api(this.config).chat.sendMT(data)
+      } else {
+        await api(this.config).chat.send(data)
+      }
 
       // Get the latest messages back.
       this.fetchMessages(chatid)
@@ -371,10 +376,23 @@ export const useChatStore = defineStore({
     unreadCount: (state) => {
       // count chats with unseen messages
       let ret = 0
+      const miscStore = useMiscStore() // MT ADDED
+      const authStore = useAuthStore()
+      const myid = authStore.user?.id
 
       // Scan listBychatId adding chat.unseen
       Object.keys(state.listByChatId).forEach((key) => {
-        if (
+        if (miscStore.modtools) {
+          const chat = state.listByChatId[key]
+          //console.log('unreadCount',chat.chattype,chat.unseen,chat.user1,chat.user2,myid)
+          // We count chats between mods, and chats between other members and mods.
+          if (chat.chattype === 'Mod2Mod') {
+            ret += chat.unseen
+          } else if (chat.chattype === 'User2Mod' && chat.user1 !== myid) {
+            ret += chat.unseen
+          }
+          // Otherwise we count chats between users, and our chats to mods.
+        } else if (
           state.listByChatId[key].status !== 'Closed' &&
           state.listByChatId[key].status !== 'Blocked'
         ) {

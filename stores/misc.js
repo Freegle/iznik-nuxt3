@@ -30,6 +30,8 @@ export const useMiscStore = defineStore({
     stickyAdRendered: 0,
     adsDisabled: false,
     lastTyping: null,
+    modtools: false,
+    worktimer: false,
   }),
   actions: {
     init(config) {
