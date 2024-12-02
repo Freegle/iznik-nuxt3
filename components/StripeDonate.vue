@@ -93,7 +93,10 @@ onMounted(() => {
     console.log('Express checkout ready', event)
     loading.value = false
 
-    if (!event.availablePaymentMethods) {
+    if (
+      typeof event.availablePaymentMethods !== 'object' ||
+      !Object.keys(event.availablePaymentMethods).length
+    ) {
       // We've seen this happen on Brave.
       console.log('No Stripe payment methods available')
       emit('noPaymentMethods')
