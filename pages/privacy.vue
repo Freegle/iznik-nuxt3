@@ -20,13 +20,13 @@
           or turn them off from
           <!-- eslint-disable-next-line-->
           <nuxt-link  no-prefetch to="/settings">Settings</nuxt-link>.
-          your email address to any organisation outside Freegle, and freeglers
-          it (unless your community leaves Freegle - see below).
+          show your email address to any organisation outside Freegle, and
+          freeglers it (unless your community leaves Freegle - see below).
         </p>
         <p>
-          We show you your name, profile picture and approximate location to
-          other freeglers to make the site more engaging and show that freeglers
-          are real people. If you don't want that, you can change it in
+          We show your name, profile picture and approximate location to other
+          freeglers to make the site more engaging and show that freeglers are
+          real people. If you don't want that, you can change it in
           <!-- eslint-disable-next-line-->
           <nuxt-link  no-prefetch to="/settings">Settings</nuxt-link>.
         </p>

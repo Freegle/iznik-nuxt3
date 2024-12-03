@@ -122,7 +122,7 @@ onMounted(async () => {
         })
       }
 
-      if (props.monthly) {
+      if (props.monthly) { // monthly never set in app as not supported
         intent.value = await donationStore.stripeSubscription(props.price)
         console.log('Stripe subscription Intent', intent.value)
       } else {

@@ -49,9 +49,9 @@
           </b-input-group>
         </div>
       </b-button-group>
-      <BFormCheckbox id="monthly" v-model="monthly" name="monthly" class="mb-2">
+      <!--BFormCheckbox id="monthly" v-model="monthly" name="monthly" class="mb-2">
         <v-icon icon="arrow-left" /> Monthly donations are really helpful
-      </BFormCheckbox>
+      </BFormCheckbox-->
 
       <div class="mt-2 mb-2 w-100">
         <StripeDonate

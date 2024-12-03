@@ -40,7 +40,7 @@
               </p>
               <h3>If you can, please donate &pound;3.</h3>
               <p>...but anything you can give is very welcome.</p>
-              <BFormCheckbox
+              <!--BFormCheckbox
                 v-if="!payPalFallback"
                 id="monthly"
                 v-model="monthly"
@@ -49,7 +49,7 @@
               >
                 <v-icon icon="arrow-left" /> Monthly donations are really
                 helpful
-              </BFormCheckbox>
+              </BFormCheckbox-->
               <DonationButton
                 v-if="payPalFallback"
                 text="Donate £3"
