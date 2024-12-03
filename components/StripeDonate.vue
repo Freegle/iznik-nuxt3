@@ -122,11 +122,16 @@ onMounted(async () => {
         })
       }
 
-      intent.value = await donationStore.stripeIntent({
-        amount: props.price,
-        //test: true,
-      })
-      console.log('Stripe Intent', intent.value)
+      if (props.monthly) {
+        intent.value = await donationStore.stripeSubscription(props.price)
+        console.log('Stripe subscription Intent', intent.value)
+      } else {
+        intent.value = await donationStore.stripeIntent({
+          amount: props.price,
+          //test: true,
+        })
+        console.log('Stripe single payment Intent', intent.value)
+      }
 
       if (!mobileStore.isiOS) { // Android
         try {
