@@ -10,9 +10,10 @@
             Some old logs are removed to save space: login/logout after 1 year, bounces over 90 days, logs about deleted messages,
             deleted users.
           </p>
+          {{ logs.length }}
           <ModLog v-for="log in logs" :key="'log-' + log.id" :log="log" />
         </div>
-        <infinite-loading :distance="200" @infinite="fetchChunk" :identifier="bump">
+        <infinite-loading :distance="200" @infinite="fetchChunk">
           <template #no-results />
           <template #no-more />
           <template #spinner>
@@ -60,7 +61,6 @@ export default {
   data: function () {
     return {
       busy: false,
-      bump: 0,
       context: null
     }
   },
@@ -108,7 +108,6 @@ export default {
       // Clear the log context - otherwise if we open another modal for this user then it will get confused and
       // fetch from a previous context and show no logs.
       this.logsStore.clear()
-      this.bump++
       this.modal.show()
     },
     async fetchChunk($state) {

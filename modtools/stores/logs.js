@@ -19,8 +19,8 @@ export const useLogsStore = defineStore({
     async fetch(params) {
       let ret = null
       delete params.context
-      if( this.context) {
-        params['context[id]'] = this.context.id
+      if (this.context) {
+        params['context'] = { id: this.context.id }
       }
       const data = await api(this.config).logs.fetch(params)
 
