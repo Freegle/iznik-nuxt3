@@ -63,7 +63,7 @@ export const useMobileStore = defineStore({ // Do not persist
     //////////////
     async initApp() {
       await this.getDeviceInfo()
-      await this.fixIOSwindowOpen()
+      await this.fixWindowOpen()
       await this.initDeepLinks()
       await this.initPushNotifications()
       await this.checkForAppUpdate()
@@ -79,12 +79,12 @@ export const useMobileStore = defineStore({ // Do not persist
       console.log('deviceinfo', deviceinfo)
       this.deviceinfo = deviceinfo
       this.deviceuserinfo = ''
-      if( deviceinfo.manufacturer) this.deviceuserinfo += deviceinfo.manufacturer+' '
-      if( deviceinfo.model) this.deviceuserinfo += deviceinfo.model+' '
-      if( deviceinfo.platform) this.deviceuserinfo += deviceinfo.platform+' '
-      if( deviceinfo.operatingSystem) this.deviceuserinfo += deviceinfo.operatingSystem+' '
-      if( deviceinfo.osVersion) this.deviceuserinfo += deviceinfo.osVersion+' '
-      if( deviceinfo.webViewVersion) this.deviceuserinfo += deviceinfo.webViewVersion
+      if (deviceinfo.manufacturer) this.deviceuserinfo += deviceinfo.manufacturer + ' '
+      if (deviceinfo.model) this.deviceuserinfo += deviceinfo.model + ' '
+      if (deviceinfo.platform) this.deviceuserinfo += deviceinfo.platform + ' '
+      if (deviceinfo.operatingSystem) this.deviceuserinfo += deviceinfo.operatingSystem + ' '
+      if (deviceinfo.osVersion) this.deviceuserinfo += deviceinfo.osVersion + ' '
+      if (deviceinfo.webViewVersion) this.deviceuserinfo += deviceinfo.webViewVersion
       console.log('deviceuserinfo', this.deviceuserinfo)
       this.isiOS = deviceinfo.platform === 'ios'
       this.osVersion = deviceinfo.osVersion
@@ -93,13 +93,18 @@ export const useMobileStore = defineStore({ // Do not persist
       this.devicePersistentId = deviceid.identifier
     },
     //////////////
-    async fixIOSwindowOpen() {
-
-      // Make window.open work in iOS app TODO is this needed?
+    // External links should be opened with ExternalLink but catch calls to window.open here
+    // Internal links are handled internally and external links use AppLauncher
+    async fixWindowOpen() {
       const prevwindowopener = window.open
       window.open = (url) => {
         console.log('App window.open', url)
-        AppLauncher.openUrl({ url })
+        if (url.substring(0, 4) !== 'http') {
+          const router = useRouter()
+          router.push(url)
+        } else {
+          AppLauncher.openUrl({ url })
+        }
       }
     },
     //////////////
