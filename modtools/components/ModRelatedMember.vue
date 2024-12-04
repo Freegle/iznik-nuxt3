@@ -46,6 +46,7 @@
   </b-card>
 </template>
 <script>
+import { useMemberStore } from '../stores/member'
 import dayjs from 'dayjs'
 
 const LONG_THRESHOLD = 4
@@ -244,18 +245,20 @@ export default {
       return ret
     },
     async ask() {
-      /* TODO await this.$store.dispatch('members/askMerge', {
+      const memberStore = useMemberStore()
+      await memberStore.askMerge({
         user1: this.user1.id,
         user2: this.user2.id
-      })*/
+      })
 
       this.updateWork()
     },
     async ignore() {
-      /* TODO await this.$store.dispatch('members/ignoreMerge', {
+      const memberStore = useMemberStore()
+      await memberStore.ignoreMerge({
         user1: this.user1.id,
         user2: this.user2.id
-      })*/
+      })
 
       this.updateWork()
     },

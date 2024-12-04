@@ -42,7 +42,6 @@ const members = computed(() => {
     members = memberStore.all
   }
   if (!members) {
-    //console.log('UMM no members')
     return []
   }
   // We need to sort as otherwise new members may appear at the end.
@@ -61,7 +60,7 @@ const members = computed(() => {
   //for( const member of members){
   //  console.log('UMM', member)
   //}
-return members
+  return members
 })
 
 const visibleMembers = computed(() => {
@@ -79,10 +78,10 @@ const loadMore = async function ($state) {
     $state.loaded()
   } else {
     const membersstart = members.value.length
-    if( limit.value===distance.value){
+    if (limit.value === distance.value) {
       limit.value += distance.value
     }
-    //console.log('UMM actually loadMore', show.value, groupid.value, members.value.length, limit.value, search.value, filter.value)
+    //console.log('UMM actually loadMore show', show.value, 'groupid', groupid.value, 'members', members.value.length, 'limit', limit.value, 'search', search.value, 'filter', filter.value)
     const memberStore = useMemberStore()
     const params = {
       groupid: groupid.value,
@@ -94,7 +93,9 @@ const loadMore = async function ($state) {
       search: search.value,
       filter: filter.value,
     }
+    //console.log('UMM fetchMembers', params)
     const received = await memberStore.fetchMembers(params)
+    //console.log('UMM received', received)
     //console.log('UMM got', members.value.length)
 
     if (show.value < members.value.length) { // Just inc by one rather than set to members.value.length
@@ -109,7 +110,7 @@ const loadMore = async function ($state) {
     else {
       $state.loaded()
     }
-    if( membersstart !== members.value.length){
+    if (membersstart !== members.value.length) {
       bump.value++
     }
     //console.log('UMM end', show.value, members.value.length)
@@ -124,10 +125,13 @@ watch(groupid, async (newVal) => {
   memberStore.clear()
 
   const groupStore = useGroupStore()
-  await groupStore.fetchMT({
-    id: newVal
-  })
-  group.value = await groupStore.fetch(newVal)
+  if (newVal > 0) {
+    await groupStore.fetchMT({
+      id: newVal
+    })
+    group.value = await groupStore.fetch(newVal)
+  }
+  bump.value++
 })
 
 /*watch(group, async (newValue, oldValue) => {
@@ -231,6 +235,7 @@ export function setupModMembers() {
   })
 
   return {
+    bump,
     busy,
     context,
     group,

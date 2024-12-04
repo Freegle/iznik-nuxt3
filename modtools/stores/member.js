@@ -43,6 +43,8 @@ export const useMemberStore = defineStore({
         ratings
       } = await api(this.config).memberships.fetchMembers(params)
 
+      //console.log('fetchMembers', this.instance, instance, members.length)
+
       if (this.instance === instance) {
         for (let i = 0; i < members.length; i++) {
           // The server doesn't return the collection but this is useful to have in the store.
@@ -59,18 +61,18 @@ export const useMemberStore = defineStore({
 
         this.context = context
       }
-      // console.log('useMemberStore fetchMembers this.list',this.list)
+      //console.log('useMemberStore fetchMembers this.list',this.list)
       return received
     },
     async fetch(params) {
       // Don't log errors on fetches of individual members
-      console.log('useMemberStore fetch', params)
+      //console.log('useMemberStore fetch', params)
       const { member } = await api(this.config).memberships.fetch(params)
       //const { member } = await this.$api.memberships.fetch(params, data => {
       //  return data.ret !== 3
       //})
       this.list[member.id] = member
-      console.log('useMemberStore fetch this.list',this.list)
+      //console.log('useMemberStore fetch this.list',this.list)
     },
 
     async spamignore(params) {
@@ -84,12 +86,12 @@ export const useMemberStore = defineStore({
 
     removemembership(memberid, groupid, userid) {
       const member = this.list[memberid]
-      if( !member) return
-      member.memberof = member.memberof.filter(g =>{
-        return g.id!==groupid
+      if (!member) return
+      member.memberof = member.memberof.filter(g => {
+        return g.id !== groupid
       })
     },
-  
+
 
     async remove(memberid, userid, groupid) {
       // Remove approved member.
@@ -133,6 +135,14 @@ export const useMemberStore = defineStore({
         action: 'HappinessReviewed'
       })
     },
+    async askMerge(params) {
+      await api(this.config).merge.ask(params)
+      delete this.list[params.user1]
+    },
+    async ignoreMerge(params) {
+      await api(this.config).merge.ignore(params)
+      delete this.list[params.user1]
+    },
   },
   getters: {
     all: (state) => Object.values(state.list),
@@ -140,13 +150,14 @@ export const useMemberStore = defineStore({
       const ret = Object.values(state.list).filter(member => {
         return parseInt(member.groupid) === parseInt(groupid)
       })
+      //console.log('memberStore:',groupid, ret.length)
       return ret
     },
     get: (state) => (id) => {
       const ret = Object.values(state.list).filter(member => {
         return parseInt(member.id) === parseInt(id)
       })
-      if( ret) return ret[0]
+      if (ret) return ret[0]
       return ret
     },
     //getRatings: state => state.ratings

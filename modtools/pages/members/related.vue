@@ -35,28 +35,32 @@ export default {
     const groupStore = useGroupStore()
     const memberStore = useMemberStore()
     const miscStore = useMiscStore()
-    const modMembers = setupModMembers()
-    modMembers.collection.value = 'Related'
+    const { bump, collection, distance, groupid, loadMore } = setupModMembers()
+    collection.value = 'Related'
     return {
       groupStore,
       memberStore,
       miscStore,
-      ...modMembers // busy, context, group, groupid, limit, workType, show, collection, messageTerm, memberTerm, distance, summary, members, visibleMembers, work, loadMore
+      groupid,
+      bump,
+      distance,
+      groupid,
+      loadMore,
     }
   },
   data: function () {
     return {
-      bump: 0
     }
   },
   async mounted() {
     // reset infiniteLoading on return to page
     this.memberStore.clear()
-    this.bump++
   },
   computed: {
-    /*members() {
-      return this.$store.getters['members/getAll']
+    members() {
+      if( !this.memberStore) return []
+      return this.memberStore.all
+      //return this.$store.getters['members/getAll']
     },
     visibleMembers() {
       const ret = this.members.filter(member => {
@@ -82,7 +86,7 @@ export default {
       })
 
       return ret
-    }*/
+    }
   },
   methods: {
     active(member) {
