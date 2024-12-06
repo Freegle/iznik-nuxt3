@@ -365,7 +365,13 @@ export const useChatStore = defineStore({
   },
   getters: {
     byChatId: (state) => {
-      return (id) => state.listByChatId[id]
+      return (id) => {
+        const chatroom = state.listByChatId[id]
+        if( chatroom && !chatroom.user1id && chatroom.user1){
+          chatroom.user1id = chatroom.user1.id
+        }
+        return chatroom
+      }
     },
     messagesById: (state) => {
       return (id) => (state.messages[id] ? state.messages[id] : [])

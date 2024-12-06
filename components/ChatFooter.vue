@@ -359,6 +359,9 @@
       @hidden="showNudgeWarningModal = false"
     />
     <MicroVolunteering v-if="showMicrovolunteering" />
+    <ConfirmModal v-if="showConfirmModal" title="Refer this chat to Support?" message="The Support volunteers will have a look at the chat and get back to you by email." @confirm="referToSupport" @hidden="showConfirmModal = false"/>
+    <ModSpammerReport v-if="showSpamModal && modchatuser" ref="spamConfirm" :user="modchatuser" @hidden="showSpamModal = false" />
+    <ModCommentAddModal v-if="addComment && modchatuser" ref="addComment" :user="modchatuser" :groupid="chat.groupid" />
   </div>
 </template>
 <script>
@@ -932,6 +935,7 @@ export default {
       this.showConfirmModal = true
     },
     async addAComment() {
+    console.log("addAComment")
       this.addComment = true
       this.$refs.addComment?.show()
     }
