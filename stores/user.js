@@ -126,7 +126,12 @@ export const useUserStore = defineStore({
   },
   getters: {
     byId: (state) => {
-      return (id) => state.list[id]
+      return (id) => {
+        if( !id) return null
+        const user = state.list[id]
+        if( user && user.spammer && user.spammer.collection === 'Whitelisted') user.spammer = false
+        return user
+      }
     },
     publicLocationById: (state) => {
       return (id) => state.locationList[id]

@@ -121,13 +121,12 @@ if (props.id) {
         const userv2 = userStore.byId(chat.value.otheruid)
         await userStore.fetchMT({ id: chat.value.otheruid})
         const user = userStore.byId(chat.value.otheruid)
-        if( user && user.info){
+        if( user && !user.info){
           user.info = userv2.info
-          if( user.spammer && user.spammer.collection==='Whitelisted') user.spammer = false
         }
       }
     } else  if (chat?.value?.otheruid) {
-        await userStore.fetch(chat.value.otheruid)
+      await userStore.fetch(chat.value.otheruid)
     }
   }
 }
