@@ -91,6 +91,7 @@ import { useIsochroneStore } from '~/stores/isochrone'
 import { attribution, osmtile } from '~/composables/useMap'
 import 'leaflet-control-geocoder/dist/Control.Geocoder.css'
 import 'leaflet-gesture-handling/dist/leaflet-gesture-handling.css'
+import { useAuthorityStore } from '~/stores/authority'
 
 export default {
   components: {
@@ -163,18 +164,30 @@ export default {
       required: false,
       default: false,
     },
+    isochroneOverride: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+    authorityid: {
+      type: Number,
+      required: false,
+      default: null,
+    },
   },
-  setup(props) {
+  setup() {
     const miscStore = useMiscStore()
     const groupStore = useGroupStore()
     const messageStore = useMessageStore()
     const isochroneStore = useIsochroneStore()
+    const authorityStore = useAuthorityStore()
 
     return {
       miscStore,
       groupStore,
       messageStore,
       isochroneStore,
+      authorityStore,
       Wkt,
       osmtile: osmtile(),
       attribution: attribution(),
@@ -310,7 +323,9 @@ export default {
         : []
     },
     isochrones() {
-      return this.isochroneStore?.list
+      return this.isochroneOverride
+        ? [this.isochroneOverride]
+        : this.isochroneStore?.list
     },
     isochroneGEOJSONs() {
       const ret = []
@@ -564,6 +579,7 @@ export default {
           this.$emit('update:bounds', this.mapObject.getBounds())
           this.$emit('update:zoom', this.mapObject.getZoom())
           this.$emit('update:centre', this.mapObject.getCenter())
+          this.$emit('idle', this.mapObject)
         }
       } catch (e) {
         console.error('Error in map idle', e)
@@ -643,6 +659,18 @@ export default {
             )
           }
         }
+      } else if (this.authorityid) {
+        // We are trying to show posts within a specific authority
+        console.log('Get messages within authority')
+        ret = await this.authorityStore.fetchMessages(this.authorityid)
+
+        // And fetch the others, so that we can show them as secondary.
+        this.secondaryMessageList = await this.messageStore.fetchInBounds(
+          swlat,
+          swlng,
+          nelat,
+          nelng
+        )
       } else if (this.showIsochrones) {
         // We are trying to show posts nearby.
         if (this.isochrones?.length) {
@@ -817,7 +845,10 @@ export default {
         }
       })
 
-      if (countInBounds >= this.manyToShow) {
+      if (this.isochroneOverride) {
+        // Don't want to autozoom out in this case - stay where we're put.
+        this.shownMany = true
+      } else if (countInBounds >= this.manyToShow) {
         // We have seen lots, so we don't need to do the auto zoom out thing now.
         this.shownMany = true
       } else if (

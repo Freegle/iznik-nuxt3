@@ -20,8 +20,10 @@
           or turn them off from
           <!-- eslint-disable-next-line-->
           <nuxt-link  no-prefetch to="/settings">Settings</nuxt-link>.
-          show your email address to any organisation outside Freegle, and
-          freeglers it (unless your community leaves Freegle - see below).
+          <!-- eslint-disable-next-line-->
+          We won't show your email address to any organisation outside Freegle,
+          and other freeglers won't see it (unless your community leaves Freegle
+          - see below).
         </p>
         <p>
           We show your name, profile picture and approximate location to other
