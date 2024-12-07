@@ -8,7 +8,7 @@
             <div class="bg-white pb-2">
               <h1>
                 <div class="d-flex justify-content-between">
-                  <div class="ms-1 flex-shrink-1">
+                  <div class="ms-1 ms-md-2 flex-shrink-1">
                     Welcome to Essex Freegle!
                     <br />
                     <div class="subtitle">
