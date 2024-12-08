@@ -1,14 +1,9 @@
 <template>
   <div>
-    <AutocompleteLocal
-      v-model="searchgroup"
-      :items="groupitems"
-      class="max"
-      size="40"
-      placeholder="Start typing a group name..."
-      :disabled="loading"
-    />
-    <div v-if="group && group.url">
+    <AutocompleteLocal v-model="searchgroup" :items="groupitems" class="max" size="40" placeholder="Start typing a community name..."
+      :disabled="loading" />
+    <span v-if="group">TODO group.url {{ group.url }}</span>
+    <div v-if="group">
       <h3 class="mt-2">
         {{ group.nameshort }}
       </h3>
@@ -16,42 +11,14 @@
         {{ group.namedisplay }}
       </h4>
       <div class="d-flex">
-        <OurToggle
-          :value="(Boolean)(group.publish)"
-          :height="36"
-          :width="150"
-          :font-size="14"
-          :labels="{unchecked: 'Not visible', checked: 'Visible on site'}"
-          disabled
-          class="mr-2"
-        />
-        <OurToggle
-          :value="(Boolean)(group.ontn)"
-          :height="36"
-          :width="150"
-          :font-size="14"
-          :labels="{unchecked: 'Not on TN', checked: 'On TN'}"
-          disabled
-          class="mr-2"
-        />
-        <OurToggle
-          :value="(Boolean)(group.onlovejunk)"
-          :height="36"
-          :width="150"
-          :font-size="14"
-          :labels="{unchecked: 'Not on LoveJunk', checked: 'On LoveJunk'}"
-          disabled
-          class="mr-2"
-        />
-        <OurToggle
-          :value="(Boolean)(group.onmap)"
-          :height="36"
-          :width="150"
-          :font-size="14"
-          :labels="{unchecked: 'No on map', checked: 'On map'}"
-          disabled
-          class="mr-2"
-        />
+        <OurToggle :value="(Boolean)(group.publish)" :height="36" :width="150" :font-size="14"
+          :labels="{ unchecked: 'Not visible', checked: 'Visible on site' }" disabled class="mr-2" />
+        <OurToggle :value="(Boolean)(group.ontn)" :height="36" :width="150" :font-size="14" :labels="{ unchecked: 'Not on TN', checked: 'On TN' }"
+          disabled class="mr-2" />
+        <OurToggle :value="(Boolean)(group.onlovejunk)" :height="36" :width="150" :font-size="14"
+          :labels="{ unchecked: 'Not on LoveJunk', checked: 'On LoveJunk' }" disabled class="mr-2" />
+        <OurToggle :value="(Boolean)(group.onmap)" :height="36" :width="150" :font-size="14" :labels="{ unchecked: 'No on map', checked: 'On map' }"
+          disabled class="mr-2" />
         <b-form-group>
           <b-form-select v-model="region" :options="regionOptions" class="font-weight-bold ml-1" />
         </b-form-group>
@@ -63,11 +30,13 @@
       Group id <v-icon icon="hashtag" class="text-muted" scale="0.75" /><strong>{{ group.id }}</strong>.
       <br>
       <br>
-      <Clipboard v-if="group.url" class="mr-3 mb-1" :value="group.url" />
-      Explore page:
-      <ExternalLink :href="group.url">
-        {{ group.url }}
-      </ExternalLink>
+      <div v-if="group.url">
+        <Clipboard v-if="group.url" class="mr-3 mb-1" :value="group.url" />
+        Explore page:
+        <ExternalLink :href="group.url">
+          {{ group.url }}
+        </ExternalLink>
+      </div>
       <br>
       <Clipboard v-if="group.modsemail" class="mr-3 mb-1" :value="group.modsemail" />
       Volunteers email:
@@ -117,7 +86,7 @@
         <b-form-input v-model="group.altlat" type="number" class="mr-2 flex-shrink-1" />
         <b-form-input v-model="group.altlng" type="number" class="mr-2 flex-shrink-1" />
       </div>
-      <SpinButton variant="white" name="save" label="Save Update" :handler="saveCentres" class="mt-2" />
+      <SpinButton variant="white" icon-name="save" label="Save Update" @handle="saveCentres" class="mt-2" />
       <h4 class="mt-2">
         CGA
       </h4>
@@ -125,7 +94,7 @@
       <p v-if="CGAerror" class="text-danger">
         {{ CGAerror }}
       </p>
-      <SpinButton variant="white" name="save" label="Save Update" :handler="saveCGA" />
+      <SpinButton variant="white" icon-name="save" label="Save Update" @handle="saveCGA" />
       <h4 class="mt-2">
         DPA
       </h4>
@@ -133,44 +102,29 @@
       <p v-if="DPAerror" class="text-danger">
         {{ DPAerror }}
       </p>
-      <SpinButton variant="white" name="save" label="Save Update" :handler="saveDPA" />
+      <SpinButton variant="white" icon-name="save" label="Save Update" @handle="saveDPA" />
       <h4 class="mt-2">
         Volunteers
       </h4>
-      <OurToggle
-        :value="(Boolean)(!group.mentored)"
-        :height="36"
-        :width="170"
-        :font-size="14"
-        :labels="{checked: 'Local Volunteers', unchecked: 'Caretakers'}"
-        disabled
-        class="mr-2"
-      />
+      <OurToggle :value="(Boolean)(!group.mentored)" :height="36" :width="170" :font-size="14"
+        :labels="{ checked: 'Local Volunteers', unchecked: 'Caretakers' }" disabled class="mr-2" />
       <b-img v-if="fetchingVolunteers" src="/loader.gif" alt="Loading" class="d-block" />
-      <ModSupportFindGroupVolunteer v-for="volunteer in sortedVolunteers" :key="'volunteer-' + volunteer.id" :volunteer="volunteer" :groupid="group.id " />
+      <ModSupportFindGroupVolunteer v-for="volunteer in sortedVolunteers" :key="'volunteer-' + volunteer.id" :volunteer="volunteer"
+        :groupid="group.id" />
     </div>
   </div>
 </template>
 <script>
-import ModSupportFindGroupVolunteer from './ModSupportFindGroupVolunteer'
-import SpinButton from './SpinButton'
-import Clipboard from './Clipboard'
-import GroupHeader from '~/components/GroupHeader'
-import AutocompleteLocal from '~/components/AutocompleteLocal'
-const OurToggle = () => import('~/components/OurToggle')
-const ExternalLink = () => import('~/components/ExternalLink')
+import { useGroupStore } from '../stores/group'
 
 export default {
-  components: {
-    Clipboard,
-    SpinButton,
-    ModSupportFindGroupVolunteer,
-    OurToggle,
-    AutocompleteLocal,
-    GroupHeader,
-    ExternalLink
+  async setup() {
+    const groupStore = useGroupStore()
+    await groupStore.listMT({ grouptype: 'Freegle' })
+
+    return { groupStore }
   },
-  data: function() {
+  data: function () {
     return {
       loading: false,
       searchgroup: null,
@@ -181,8 +135,8 @@ export default {
   },
   computed: {
     groups() {
-      /* TODO return Object.values(this.$store.getters['group/list'])*/
-      return []
+      const groups = Object.values(this.groupStore.list)
+      return groups
     },
     groupitems() {
       const ret = []
@@ -225,8 +179,7 @@ export default {
       return ret
     },
     group() {
-      /* TODO return this.$store.getters['group/get'](this.groupid)*/
-      return null
+      return this.groupStore.get(this.groupid)
     },
     volunteers() {
       /* TODO return this.$store.getters['members/getByGroup'](this.groupid)*/
@@ -329,6 +282,7 @@ export default {
       } catch (e) {
         this.CGAerror = e.message
       }
+      callback()
     },
     async saveDPA() {
       this.DPAerror = null
@@ -340,8 +294,9 @@ export default {
       } catch (e) {
         this.DPAerror = e.message
       }
+      callback()
     },
-    async saveCentres() {
+    async saveCentres(callback) {
       /* TODO await this.$store.dispatch('group/update', {
         id: this.groupid,
         lat: this.group.lat,
@@ -349,6 +304,7 @@ export default {
         altlat: this.group.altlat,
         altlng: this.group.altlng
       })*/
+      callback()
     }
   }
 }

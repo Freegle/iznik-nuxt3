@@ -14,10 +14,10 @@
           <b-tab>
             <template v-slot:title>
               <h2 class="ml-2 mr-2">
-                Find Group
+                Find Community
               </h2>
             </template>
-            <!--ModSupportFindGroup /-->
+            <ModSupportFindGroup />
           </b-tab>
           <b-tab>
             <template v-slot:title>

@@ -62,6 +62,8 @@ export default {
         const totalCount = this.work?.total + this.chatcount
         const title = totalCount > 0 ? `(${totalCount}) ModTools` : 'ModTools'
         document.title = title
+        const now = new Date()
+        console.log('[[[CHECK WORK]]]',now.toLocaleString(), this.work, title)
       }
       miscStore.workTimer = setTimeout(this.checkWork, 30000)
     },

@@ -342,7 +342,7 @@ export const useAuthStore = defineStore({
       if (!me) {
         if( !components) components = [] // MT ADDED
         components = [ 'me', ...components] // MT ADDED
-        // console.log('### useAuthStore fetchUser',components)
+        console.log('### useAuthStore fetchUser',components)
 
         // Try the older API which will authenticate via the persistent token and PHP session.
         const ret = await this.$api.session.fetch({
@@ -355,6 +355,7 @@ export const useAuthStore = defineStore({
 
         if (ret) {
           ;({ me, groups, persistent, jwt } = ret) // MT added
+          console.log('### useAuthStore ret.work',ret.work)
           this.work = ret.work
           this.discourse = ret.discourse
 
