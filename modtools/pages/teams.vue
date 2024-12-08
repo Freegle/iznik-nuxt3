@@ -15,6 +15,12 @@
       </div>
       <div v-if="selected && team && team.members" class="mt-2">
         <h2>{{ team.name }}</h2>
+        <p v-if="team.supporttools" class="font-weight-bold">
+          Members of this team have Support Tools access.
+        </p>
+        <p v-else class="font-weight-normal">
+          Members of this team don't need Support Tools access.
+        </p>
         <b-input-group v-if="supportOrAdmin" class="mt-2 mb-2">
           <b-form-input v-model="memberToAdd" type="number" placeholder="Add member by ID" />
           <b-input-group>
