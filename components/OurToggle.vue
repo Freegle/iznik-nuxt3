@@ -8,6 +8,7 @@
       :class="variant + ' toggle-' + size"
       :width="100"
       :height="50"
+      :disabled="disabled"
     />
   </div>
 </template>
@@ -41,6 +42,11 @@ export default {
       type: String,
       required: false,
       default: 'green',
+    },
+    disabled: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   setup(props) {

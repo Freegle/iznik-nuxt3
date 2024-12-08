@@ -101,7 +101,7 @@
       <h4 class="mt-2">
         Volunteers
       </h4>
-      <OurToggle :value="(Boolean)(!group.mentored)" :height="36" :width="170" :font-size="14"
+      <OurToggle :modelValue="(Boolean)(!group.mentored)" :height="36" :width="170" :font-size="14"
         :labels="{ checked: 'Local Volunteers', unchecked: 'Caretakers' }" disabled class="mr-2" />
       <b-img v-if="fetchingVolunteers" src="/loader.gif" alt="Loading" class="d-block" />
       <ModSupportFindGroupVolunteer v-for="volunteer in sortedVolunteers" :key="'volunteer-' + volunteer.id" :volunteer="volunteer"
