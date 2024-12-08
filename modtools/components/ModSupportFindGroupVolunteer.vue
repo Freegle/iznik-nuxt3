@@ -1,7 +1,7 @@
 <template>
   <b-row>
     <b-col cols="4" md="2" class="order-1 ">
-      <v-icon name="hashtag" class="text-muted" scale="0.75" />{{ volunteer.userid }}
+      <v-icon icon="hashtag" class="text-muted" scale="0.75" />{{ volunteer.userid }}
     </b-col>
     <b-col cols="12" md="3" class="order-4 order-md-2">
       {{ volunteer.displayname }}
@@ -41,7 +41,6 @@ export default {
   },
   computed: {
     active() {
-      console.log(this.volunteer.displayname, this.volunteer.settings.active)
       if (
         this.volunteer &&
         this.volunteer.settings &&

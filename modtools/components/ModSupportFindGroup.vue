@@ -10,14 +10,15 @@
       <h4 v-if="canonGroupName(group.namedisplay) !== canonGroupName(group.nameshort)" class="text-muted">
         {{ group.namedisplay }}
       </h4>
+      group.publish {{ group.publish }} {{(Boolean)(group.publish)}}
       <div class="d-flex">
-        <OurToggle :value="(Boolean)(group.publish)" :height="36" :width="150" :font-size="14"
+        <OurToggle :modelValue="(Boolean)(group.publish)" :height="36" :width="150" :font-size="14"
           :labels="{ unchecked: 'Not visible', checked: 'Visible on site' }" disabled class="mr-2" />
-        <OurToggle :value="(Boolean)(group.ontn)" :height="36" :width="150" :font-size="14" :labels="{ unchecked: 'Not on TN', checked: 'On TN' }"
+        <OurToggle :modelValue="(Boolean)(group.ontn)" :height="36" :width="150" :font-size="14" :labels="{ unchecked: 'Not on TN', checked: 'On TN' }"
           disabled class="mr-2" />
-        <OurToggle :value="(Boolean)(group.onlovejunk)" :height="36" :width="150" :font-size="14"
+        <OurToggle :modelValue="(Boolean)(group.onlovejunk)" :height="36" :width="150" :font-size="14"
           :labels="{ unchecked: 'Not on LoveJunk', checked: 'On LoveJunk' }" disabled class="mr-2" />
-        <OurToggle :value="(Boolean)(group.onmap)" :height="36" :width="150" :font-size="14" :labels="{ unchecked: 'No on map', checked: 'On map' }"
+        <OurToggle :modelValue="(Boolean)(group.onmap)" :height="36" :width="150" :font-size="14" :labels="{ unchecked: 'Not on map', checked: 'On map' }"
           disabled class="mr-2" />
         <b-form-group>
           <b-form-select v-model="region" :options="regionOptions" class="font-weight-bold ml-1" />
@@ -116,13 +117,16 @@
 </template>
 <script>
 import { useGroupStore } from '../stores/group'
+import { useMemberStore } from '../stores/member'
 
 export default {
   async setup() {
     const groupStore = useGroupStore()
+    const memberStore = useMemberStore()
+
     await groupStore.listMT({ grouptype: 'Freegle' })
 
-    return { groupStore }
+    return { groupStore, memberStore }
   },
   data: function () {
     return {
@@ -182,8 +186,7 @@ export default {
       return this.groupStore.get(this.groupid)
     },
     volunteers() {
-      /* TODO return this.$store.getters['members/getByGroup'](this.groupid)*/
-      return []
+      return this.memberStore.getByGroup(this.groupid)
     },
     sortedVolunteers() {
       const r = this.volunteers
@@ -233,28 +236,29 @@ export default {
   watch: {
     async groupid(id) {
       if (id) {
+        console.log('MSFG watch groupid', id)
         // Get the full group info
-        /* TODO await this.$store.dispatch('group/fetch', {
+        await this.groupStore.fetchMT({
           id: id,
           polygon: true
         })
 
         // And the list of volunteers
         this.fetchingVolunteers = true
-        this.$store.dispatch('members/clear')
+        this.memberStore.clear()
 
-        await this.$store.dispatch('members/fetchMembers', {
+        await this.memberStore.fetchMembers({
           groupid: this.groupid,
           collection: 'Approved',
           modtools: true,
           summary: false,
           limit: 1000,
           filter: 2
-        })*/
+        })
 
         this.fetchingVolunteers = false
       } else {
-        /* TODO this.$store.dispatch('members/clear')*/
+        this.memberStore.clear()
       }
     }
   },
