@@ -43,6 +43,7 @@ export default {
   },
   methods: {
     async ban() {
+      alert('MBMM ban')
       /* TODO await this.$store.dispatch('members/ban', {
         userid: this.userid,
         groupid: this.groupid

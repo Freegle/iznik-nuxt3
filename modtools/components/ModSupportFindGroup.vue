@@ -220,17 +220,16 @@ export default {
         return this.group.region
       },
       set(newval) {
-        /* TODO this.$store.dispatch('group/update', {
+        this.groupStore.updateMT({
           id: this.group.id,
           region: newval
-        })*/
+        })
       }
     }
   },
   watch: {
     async groupid(id) {
       if (id) {
-        console.log('MSFG watch groupid', id)
         // Get the full group info
         await this.groupStore.fetchMT({
           id: id,
@@ -256,16 +255,6 @@ export default {
       }
     }
   },
-  async mounted() {
-    // Grab the list of groups
-    this.loading = true
-
-    /* TODO await this.$store.dispatch('group/list', {
-      grouptype: 'Freegle'
-    })*/
-
-    this.loading = false
-  },
   methods: {
     canonGroupName(name) {
       return name ? name.toLowerCase().replace(/-|_| /g, '') : null
@@ -273,10 +262,10 @@ export default {
     async saveCGA() {
       this.CGAerror = null
       try {
-        /* TODO await this.$store.dispatch('group/update', {
+        this.groupStore.updateMT({
           id: this.groupid,
           polyofficial: this.group.cga
-        })*/
+        })
       } catch (e) {
         this.CGAerror = e.message
       }
@@ -285,23 +274,29 @@ export default {
     async saveDPA() {
       this.DPAerror = null
       try {
-        /* TODO await this.$store.dispatch('group/update', {
+        this.groupStore.updateMT({
           id: this.groupid,
           poly: this.group.dpa
-        })*/
+        })
       } catch (e) {
         this.DPAerror = e.message
       }
       callback()
     },
     async saveCentres(callback) {
-      /* TODO await this.$store.dispatch('group/update', {
+      console.log('saveCentres A',this.groupid, this.group.lat, this.group.lng, this.group.altlat, this.group.altlng)
+      if( this.group.lat) this.group.lat = parseFloat(this.group.lat)
+      if( this.group.lng) this.group.lng = parseFloat(this.group.lng)
+      if( this.group.altlat) this.group.altlat = parseFloat(this.group.altlat)
+      if( this.group.altlng) this.group.altlng = parseFloat(this.group.altlng)
+      console.log('saveCentres B',this.groupid, this.group.lat, this.group.lng, this.group.altlat, this.group.altlng)
+      this.groupStore.updateMT({
         id: this.groupid,
         lat: this.group.lat,
         lng: this.group.lng,
         altlat: this.group.altlat,
         altlng: this.group.altlng
-      })*/
+      })
       callback()
     }
   }
