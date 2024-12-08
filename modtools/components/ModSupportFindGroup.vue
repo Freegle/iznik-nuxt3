@@ -2,24 +2,22 @@
   <div>
     <AutocompleteLocal v-model="searchgroup" :items="groupitems" class="max" size="40" placeholder="Start typing a community name..."
       :disabled="loading" />
-    <span v-if="group">TODO group.url {{ group.url }}</span>
-    <div v-if="group">
+    <div v-if="group && group.url">
       <h3 class="mt-2">
         {{ group.nameshort }}
       </h3>
       <h4 v-if="canonGroupName(group.namedisplay) !== canonGroupName(group.nameshort)" class="text-muted">
         {{ group.namedisplay }}
       </h4>
-      group.publish {{ group.publish }} {{(Boolean)(group.publish)}}
       <div class="d-flex">
         <OurToggle :modelValue="(Boolean)(group.publish)" :height="36" :width="150" :font-size="14"
           :labels="{ unchecked: 'Not visible', checked: 'Visible on site' }" disabled class="mr-2" />
-        <OurToggle :modelValue="(Boolean)(group.ontn)" :height="36" :width="150" :font-size="14" :labels="{ unchecked: 'Not on TN', checked: 'On TN' }"
-          disabled class="mr-2" />
+        <OurToggle :modelValue="(Boolean)(group.ontn)" :height="36" :width="150" :font-size="14"
+          :labels="{ unchecked: 'Not on TN', checked: 'On TN' }" disabled class="mr-2" />
         <OurToggle :modelValue="(Boolean)(group.onlovejunk)" :height="36" :width="150" :font-size="14"
           :labels="{ unchecked: 'Not on LoveJunk', checked: 'On LoveJunk' }" disabled class="mr-2" />
-        <OurToggle :modelValue="(Boolean)(group.onmap)" :height="36" :width="150" :font-size="14" :labels="{ unchecked: 'Not on map', checked: 'On map' }"
-          disabled class="mr-2" />
+        <OurToggle :modelValue="(Boolean)(group.onmap)" :height="36" :width="150" :font-size="14"
+          :labels="{ unchecked: 'Not on map', checked: 'On map' }" disabled class="mr-2" />
         <b-form-group>
           <b-form-select v-model="region" :options="regionOptions" class="font-weight-bold ml-1" />
         </b-form-group>
@@ -31,13 +29,9 @@
       Group id <v-icon icon="hashtag" class="text-muted" scale="0.75" /><strong>{{ group.id }}</strong>.
       <br>
       <br>
-      <div v-if="group.url">
-        <Clipboard v-if="group.url" class="mr-3 mb-1" :value="group.url" />
-        Explore page:
-        <ExternalLink :href="group.url">
-          {{ group.url }}
-        </ExternalLink>
-      </div>
+      <Clipboard v-if="group.url" class="mr-3 mb-1" :value="group.url" />
+      Explore page:
+      <ExternalLink :href="group.url">{{ group.url }}</ExternalLink>
       <br>
       <Clipboard v-if="group.modsemail" class="mr-3 mb-1" :value="group.modsemail" />
       Volunteers email:
