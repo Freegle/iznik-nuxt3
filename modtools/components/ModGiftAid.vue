@@ -18,8 +18,8 @@
           </NoticeMessage>
           <span class="small text-muted">
             {{ timeago(giftaid.timestamp) }}
-            User ID <v-icon name="hashtag" class="text-muted" scale="0.75" />{{ giftaid.userid }}
-            Gift Aid ID <v-icon name="hashtag" class="text-muted" scale="0.75" />{{ giftaid.id }}
+            User ID <v-icon icon="hashtag" class="text-muted" scale="0.75" />{{ giftaid.userid }}
+            Gift Aid ID <v-icon icon="hashtag" class="text-muted" scale="0.75" />{{ giftaid.id }}
           </span>
         </div>
       </b-col>
