@@ -177,8 +177,6 @@ export default {
       return ret
     },
     group() {
-      const g = this.groupStore.get(this.groupid)
-      if( g) console.log('group.cga',g.cga)
       return this.groupStore.get(this.groupid)
     },
     volunteers() {
