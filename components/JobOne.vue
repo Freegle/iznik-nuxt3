@@ -122,6 +122,11 @@ export default {
       this.jobStore.log({
         id: this.job.id,
       })
+
+      // Route to jobs page to encourage viewing of more jobs.
+      if (this.$router?.currentRoute?.value?.path !== '/jobs') {
+        this.$router.push('/jobs')
+      }
     },
     filterNonsense(val) {
       return val
