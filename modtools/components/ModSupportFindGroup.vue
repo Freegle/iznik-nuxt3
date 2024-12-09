@@ -284,12 +284,6 @@ export default {
       callback()
     },
     async saveCentres(callback) {
-      console.log('saveCentres A',this.groupid, this.group.lat, this.group.lng, this.group.altlat, this.group.altlng)
-      if( this.group.lat) this.group.lat = parseFloat(this.group.lat)
-      if( this.group.lng) this.group.lng = parseFloat(this.group.lng)
-      if( this.group.altlat) this.group.altlat = parseFloat(this.group.altlat)
-      if( this.group.altlng) this.group.altlng = parseFloat(this.group.altlng)
-      console.log('saveCentres B',this.groupid, this.group.lat, this.group.lng, this.group.altlat, this.group.altlng)
       this.groupStore.updateMT({
         id: this.groupid,
         lat: this.group.lat,
