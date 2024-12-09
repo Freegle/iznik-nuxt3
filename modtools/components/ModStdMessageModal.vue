@@ -89,7 +89,7 @@ import { useMessageStore } from '~/stores/message'
 import { useUserStore } from '../stores/user'
 import dayjs from 'dayjs'
 import { useOurModal } from '~/composables/useOurModal'
-import { SUBJECT_REGEX } from '@/utils/constants'
+import { SUBJECT_REGEX } from '../../constants'
 //import PostCode from '~/components/PostCode'
 import { setupKeywords } from '../composables/useKeywords'
 

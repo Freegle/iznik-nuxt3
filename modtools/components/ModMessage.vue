@@ -314,7 +314,7 @@ import { useMemberStore } from '../stores/member'
 import { useMessageStore } from '../../stores/message'
 import { useUserStore } from '../../stores/user'
 
-import { SUBJECT_REGEX } from '../utils/constants'
+import { SUBJECT_REGEX } from '../../constants'
 
 import { setupKeywords } from '../composables/useKeywords'
 
