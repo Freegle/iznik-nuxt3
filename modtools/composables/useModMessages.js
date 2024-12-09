@@ -57,7 +57,7 @@ const visibleMessages = computed(() => {
 })
 
 watch(groupid, async (newVal) => {
-  console.log("useModMessages watch groupid", newVal)
+  //console.log("useModMessages watch groupid", newVal)
   context.value = null
 
   const groupStore = useGroupStore()
@@ -86,7 +86,7 @@ export function setupModMessages() {
     try {
       const authStore = useAuthStore()
       const work = authStore.work
-      //console.log(">>>>useModMessages get work", workType.value) // , work
+      //console.log(">>>>useModMessages get work", workType.value, work)
       if (!work) return 0
       if (!workType.value) return 0
       if (Array.isArray(workType.value)) {
@@ -111,7 +111,7 @@ export function setupModMessages() {
 
     const bodyoverflow = document.body.style.overflow
     if (bodyoverflow !== 'hidden') {
-      console.log('<<<<useModMessages watch work', newVal, oldVal)
+      //console.log('<<<<useModMessages watch work. newVal:', newVal, 'oldVal:', oldVal)
       if (newVal > oldVal) {
         // There's new stuff to fetch.
         //console.log('Fetch')

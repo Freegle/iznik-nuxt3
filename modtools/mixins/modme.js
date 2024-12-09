@@ -46,6 +46,8 @@ export default {
       miscStore.workTimer = setTimeout(this.checkWork, 30000)
     },
     async checkWork() {
+      const authStore = useAuthStore()
+      const chatStore = useChatStore()
       const miscStore = useMiscStore()
       if (miscStore.workTimer) {
         clearTimeout(miscStore.workTimer)
@@ -53,17 +55,14 @@ export default {
 
       // Do not check for work and therefore refresh while any modal is open
       const bodyoverflow = document.body.style.overflow
-      //console.log('[[[CHECK WORK]]]',bodyoverflow)
       if (bodyoverflow !== 'hidden') {
         await this.fetchMe(true, ['work', 'group']) // MT ADDED 'group'
 
-        const chatStore = useChatStore()
         this.chatcount = chatStore ? Math.min(99, chatStore.unreadCount) : 0
-        const totalCount = this.work?.total + this.chatcount
+        const work = authStore.work
+        const totalCount = work?.total + this.chatcount
         const title = totalCount > 0 ? `(${totalCount}) ModTools` : 'ModTools'
         document.title = title
-        const now = new Date()
-        console.log('[[[CHECK WORK]]]',now.toLocaleString(), this.work, title)
       }
       miscStore.workTimer = setTimeout(this.checkWork, 30000)
     },

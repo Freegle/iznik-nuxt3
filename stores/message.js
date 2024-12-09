@@ -278,6 +278,7 @@ export const useMessageStore = defineStore({
       // TODO: CHECK OK SOLUTION
       // Force MT refresh 
       const authStore = useAuthStore()
+      console.log("!!!useMessageStore reset authStore.work")
       authStore.work = {}
       // TODO: call this.checkWork()
 
