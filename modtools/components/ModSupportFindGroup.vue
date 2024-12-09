@@ -177,6 +177,8 @@ export default {
       return ret
     },
     group() {
+      const g = this.groupStore.get(this.groupid)
+      if( g) console.log('group.cga',g.cga)
       return this.groupStore.get(this.groupid)
     },
     volunteers() {
@@ -259,10 +261,11 @@ export default {
     canonGroupName(name) {
       return name ? name.toLowerCase().replace(/-|_| /g, '') : null
     },
-    async saveCGA() {
+    async saveCGA(callback) {
+      console.log('saveCGA',this.group.cga)
       this.CGAerror = null
       try {
-        this.groupStore.updateMT({
+        await this.groupStore.updateMT({
           id: this.groupid,
           polyofficial: this.group.cga
         })
@@ -271,10 +274,10 @@ export default {
       }
       callback()
     },
-    async saveDPA() {
+    async saveDPA(callback) {
       this.DPAerror = null
       try {
-        this.groupStore.updateMT({
+        await this.groupStore.updateMT({
           id: this.groupid,
           poly: this.group.dpa
         })
