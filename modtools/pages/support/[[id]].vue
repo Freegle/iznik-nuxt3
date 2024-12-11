@@ -26,19 +26,16 @@
               </h2>
             </template>
             <p>
-              You can search for message by id, or by subject.  This will only return the first few results, so the more
+              You can search for message by id, or by subject. This will only return the first few results, so the more
               specific, the better.
             </p>
-            <!--ModFindMessage /-->
+            <ModFindMessage :messageTerm="messageTerm" @searched="searchedMessage" @changed="changedMessageTerm" />
             <div v-if="messages" class="mt-2">
-              Message list TODO
-              <!--ModMessage
-                v-for="message in messages"
-                :key="'message-' + message.id"
-                :message="message"
-                noactions
-              /-->
+              <ModMessage v-for="message in messages" :key="'message-' + message.id" :message="message" noactions />
             </div>
+            <NoticeMessage v-if="error" class="mt-2" variant="warning">
+              Couldn't fetch that message. Almost always this is because the message doesn't exist (or has been very deleted).
+            </NoticeMessage>
           </b-tab>
           <b-tab>
             <template v-slot:title>
@@ -93,13 +90,14 @@ export default {
   },
   data() {
     return {
+      error: false,
+      messageTerm: null,
       id: 0
     }
   },
   computed: {
     messages() {
-      /* TODO this.messageStore.all()*/
-      return []
+      return this.messageStore.all
     }
   },
   async created() {
@@ -107,6 +105,46 @@ export default {
     this.id = 'id' in route.params ? parseInt(route.params.id) : 0
     this.chatStore.list = [] // this.chatStore.clear()
     this.messageStore.clear()
+  },
+  methods: {
+    changedMessageTerm(term) {
+      this.messageTerm = term.trim()
+    },
+    async searchedMessage() {
+      const term = this.messageTerm
+      await this.messageStore.clearContext()
+      await this.messageStore.clear()
+
+      if (term) {
+        if (!isNaN(term)) {
+          // This is a raw message id
+          await this.searchById(term)
+        } else if (term.substring(0, 1) === '#' && !isNaN(term.substring(1))) {
+          // This is a #id
+          await this.searchById(term.substring(1))
+        } else {
+          await this.searchBySubject(term)
+        }
+      }
+    },
+
+    async searchById(id) {
+      this.error = false
+
+      try {
+        const message = await this.messageStore.fetchMT({ id: id, messagehistory: true })
+        if( message) this.messageStore.list[id] = message
+      } catch (e) {
+        console.log("Couldn't fetch", e)
+        this.error = true
+      }
+
+    },
+    async searchBySubject(subj) {
+      this.error = false
+
+      await this.messageStore.searchMT({ term: subj, groupid: this.groupid })
+    }
   }
 }
 </script>

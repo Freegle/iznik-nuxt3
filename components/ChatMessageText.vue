@@ -21,17 +21,19 @@
         <span v-if="messageIsNew" class="font-weight-bold">
           <Highlighter
             :text-to-highlight="emessage"
-            :search-words="[regexEmail]"
+            :search-words="[regexEmail.toString()]"
             highlight-class-name="highlight"
             class="prewrap"
           />
         </span>
         <span v-else>
+          <!-- TODO FIX regexEmail which fails validator test in Highlighter -->
           <Highlighter
             :text-to-highlight="emessage"
-            :search-words="[regexEmail]"
+            :searchWords="[regexEmail.toString()]"
             highlight-class-name="highlight"
             class="preline forcebreak"
+            :autoEscape="false"
           />
         </span>
         <b-img

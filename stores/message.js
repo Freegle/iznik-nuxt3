@@ -1,3 +1,4 @@
+import cloneDeep from 'lodash.clonedeep'
 import { defineStore } from 'pinia'
 import dayjs from 'dayjs'
 import { nextTick } from 'vue'
@@ -157,6 +158,18 @@ export const useMessageStore = defineStore({
       await this.clear()
       const ret = await api(this.config).message.search(params)
       return ret
+    },
+    async searchMT(params) {
+      const { messages } = await api(this.config).message.fetchMessages({
+        subaction: 'searchall',
+        search: params.term,
+        exactonly: true,
+        groupid: params.groupid
+      })
+      for (const message of messages) {
+        //console.log('GOT message',message.id, typeof message.fromuser)
+        this.list[message.id] = message
+      }
     },
     async fetchMyGroups(gid) {
       let ret = null
