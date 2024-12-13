@@ -43,7 +43,7 @@
                 List Groups
               </h2>
             </template>
-            <!--ModSupportListGroups /-->
+            <ModSupportListGroups />
           </b-tab>
           <b-tab>
             <template v-slot:title>

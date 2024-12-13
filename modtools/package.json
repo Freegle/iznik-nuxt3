@@ -13,8 +13,10 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@handsontable/vue3": "^14.6.1",
     "@vueup/vue-quill": "^1.2.0",
     "diff": "^5.2.0",
+    "handsontable": "^14.6.1",
     "leaflet-draw": "^1.0.4",
     "letterparser": "^0.1.4",
     "papaparse": "^5.4.1",
