@@ -1,6 +1,6 @@
 <template>
   <div>
-    <SpinButton variant="primary" icon-name="users" label="Fetch Groups" spinclass="text-white" @handle="fetchGroups" />
+    <SpinButton variant="primary" icon-name="users" label="Fetch communities" spinclass="text-white" @handle="fetchCommunities" />
     <div v-if="fetched && groups && groups.length" class="mt-2">
       <p>
         Here you can see info about all Freegle groups. Click on the column headings to sort. Click on the dropdown
@@ -9,34 +9,65 @@
       <p>
         Groups with the ID in light blue are caretaker groups.
       </p>
-      <!--div v-for="group in groups">
-        {{group.id}} - {{ group.nameshort }}
-      </div-->
-      <hot-table ref="hot" width="100%" :height="height + 'px'" :data="groups" :col-headers="headers" license-key="non-commercial-and-evaluation"
-        class="bg-white" :column-sorting="true" :dropdown-menu="true" :filters="true" :cells="cells" :columns="columns" :manual-column-freeze="true"
-        :after-render="afterRender" />
+      <hot-table ref="hot" width="100%" :height="height + 'px'" :data="groups" license-key="non-commercial-and-evaluation"
+        class="bg-white" :dropdown-menu="true" :filters="true" :cells="cells" :manual-column-freeze="true" 
+        :after-render="afterRender">
+        <hot-column title="ID" data="id" :renderer="idRenderer">
+        </hot-column>
+        <hot-column title="Short Name" data="nameshort">
+        </hot-column>
+        <hot-column title="Display Name" data="namedisplay">
+        </hot-column>
+        <hot-column title="Last Auto-Approve" data="lastautoapprove" :renderer="dateRenderer">
+        </hot-column>
+        <hot-column title="Auto-Approve %" data="recentautoapprovespercent" :renderer="autoApprovesRenderer">
+        </hot-column>
+        <hot-column title="Auto-Approves" data="recentautoapproves" :renderer="centreRenderer">
+        </hot-column>
+        <hot-column title="Active Mods" data="activemodcount" :renderer="centreRenderer">
+        </hot-column>
+        <hot-column title="Last Moderated" data="lastmoderated" :renderer="dateRenderer">
+        </hot-column>
+        <hot-column title="Publish?" data="publish" :renderer="boolRenderer">
+        </hot-column>
+        <hot-column title="FD?" data="onhere" :renderer="boolRenderer">
+        </hot-column>
+        <hot-column title="TN?" data="ontn" :renderer="boolRenderer">
+        </hot-column>
+        <hot-column title="LJ?" data="onlovejunk" :renderer="boolRenderer">
+        </hot-column>
+        <hot-column title="Region" data="region">
+        </hot-column>
+        <hot-column title="Lat" data="lat" :renderer="latlngRenderer">
+        </hot-column>
+        <hot-column title="Lng" data="lng" :renderer="latlngRenderer">
+        </hot-column>
+        <hot-column title="Founded" data="founded">
+        </hot-column>
+        <hot-column title="Affiliation Confirmed" data="affiliationconfirmed" :renderer="dateRenderer">
+        </hot-column>
+        <hot-column title="Backup Owners Active" data="backupownersactive" :renderer="centreRenderer">
+        </hot-column>
+        <hot-column title="Backup Mods Active" data="backupmodsactive" :renderer="centreRenderer">
+        </hot-column>
+      </hot-table>
     </div>
   </div>
 </template>
 <script>
 import dayjs from 'dayjs'
 import { useGroupStore } from '../stores/group'
-import { HotTable } from '@handsontable/vue3'
+import { HotTable, HotColumn } from '@handsontable/vue3'
 import { registerAllModules } from 'handsontable/registry'
 import 'handsontable/dist/handsontable.full.css'
 
 registerAllModules()
 // https://handsontable.com/docs/javascript-data-grid/vue3-custom-renderer-example/
-/*let HotTable, Handsontable
-
-if (process.client) {
-  HotTable = require('@handsontable/vue3').HotTable
-  Handsontable = require('handsontable').default
-}*/
 
 export default {
   components: {
-    HotTable
+    HotTable, 
+    HotColumn
   },
   setup() {
     const groupStore = useGroupStore()
@@ -47,139 +78,7 @@ export default {
       busy: false,
       fetched: false,
       height: 600,
-      headers: [
-        'ID',
-        'Short Name',
-        'Display Name',
-        'Last Auto-Approve',
-        'Auto-Approve %',
-        'Auto-Approves',
-        'Active Mods',
-        'Last Moderated',
-        'Publish?',
-        'FD?',
-        'TN?',
-        'LJ?',
-        'Region',
-        'Lat',
-        'Lng',
-        'Founded',
-        'Affiliation Confirmed',
-        'Backup Owners Active',
-        'Backup Mods Active'
-      ],
       atts: [],
-      columns: [
-        {
-          renderer(instance, td, row, col, prop, value) {
-            console.log(row, col, prop, value)
-            td.innerText = 'HI' + row;
-
-            return td;
-            //return colourMentor(instance, td, row, col, prop, value)
-          }
-        },
-        /*{
-          data: 'id',
-          type: 'numeric',
-          renderer: this.colourMentor
-        },*/
-        {
-          data: 'nameshort',
-          type: 'text'
-        },
-        {
-          data: 'namedisplay',
-          type: 'text'
-        },
-        {
-          renderer(instance, td, row, col, prop, value) {
-            console.log(row, col, prop, value)
-            td.innerText = 'LO' + value;
-
-            return td;
-          }
-        },
-        /*{
-          data: 'lastautoapprove',
-          type: 'text',
-          renderer: this.forceDate
-        },
-        {
-          data: 'recentautoapprovespercent',
-          type: 'numeric',
-          renderer: this.autoApproves
-        },
-        {
-          data: 'recentautoapproves',
-          type: 'numeric',
-          renderer: this.forceNumeric
-        },
-        {
-          data: 'activemodcount',
-          type: 'numeric',
-          renderer: this.forceNumeric
-        },
-        {
-          data: 'lastmoderated',
-          type: 'text',
-          renderer: this.forceDate
-        },
-        {
-          data: 'publish',
-          type: 'checkbox',
-          renderer: this.forceBool
-        },
-        {
-          data: 'onhere',
-          type: 'checkbox',
-          renderer: this.forceBool
-        },
-        {
-          data: 'ontn',
-          type: 'checkbox',
-          renderer: this.forceBool
-        },
-        {
-          data: 'onlovejunk',
-          type: 'checkbox',
-          renderer: this.forceBool
-        },
-        {
-          data: 'region',
-          type: 'text'
-        },
-        {
-          data: 'lat',
-          type: 'numeric',
-          renderer: this.latLng
-        },
-        {
-          data: 'lng',
-          type: 'numeric',
-          renderer: this.latLng
-        },
-        {
-          data: 'founded',
-          type: 'text',
-          renderer: this.forceDate
-        },
-        {
-          data: 'affiliationconfirmed',
-          type: 'text',
-          renderer: this.forceDate
-        },
-        {
-          data: 'backupownersactive',
-          type: 'numeric',
-          renderer: this.forceNumeric
-        },
-        {
-          data: 'backupmodsactive',
-          type: 'numeric',
-          renderer: this.forceNumeric
-        }*/
-      ]
     }
   },
   computed: {
@@ -190,9 +89,8 @@ export default {
           .toLowerCase()
           .localeCompare(b.nameshort.toLowerCase())
       })
-
       return ret
-    }
+    },
   },
   async mounted() {
     this.checkHeight()
@@ -203,7 +101,54 @@ export default {
     }
   },
   methods: {
-    async fetchGroups(callback) {
+    idRenderer(_instance, td, _row, _col, _prop, value){
+      const group = this.groupStore.get(value)
+      if (group && group.mentored) {
+        td.style.backgroundColor = 'lightblue'
+      }
+      td.innerHTML = value
+    },
+    dateRenderer(_instance, td, _row, _col, _prop, value){
+      let val = '-'
+      td.style.textAlign = 'center'
+
+      if (value) {
+        val = dayjs(value).format('YYYY-MM-DD')
+      }
+      td.innerHTML = val
+    },
+    autoApprovesRenderer(_instance, td, _row, _col, _prop, value){
+      const group = this.groups[_row]
+      let auto = parseInt(value)
+      if (group && group.publish) {
+
+        if (auto >= 50) {
+          td.style.backgroundColor = 'orange'
+        }
+      } else {
+        td.innerHTML = auto
+      }
+      td.style.textAlign = 'center'
+      auto = Math.abs(auto)
+      td.innerHTML = auto+'%'
+    },
+    centreRenderer(_instance, td, _row, _col, _prop, value){
+      td.style.textAlign = 'center'
+      td.innerHTML = value
+    },
+    latlngRenderer(_instance, td, _row, _col, _prop, value){
+      td.style.textAlign = 'center'
+      let val = parseFloat(value)
+      val = Math.round(val*100)/100
+      td.innerHTML = val
+    },
+    boolRenderer(_instance, td, _row, _col, _prop, value){
+      td.style.textAlign = 'center'
+      td.innerHTML = value==1?'Y':'N'
+    },
+
+
+    async fetchCommunities(callback) {
       await this.groupStore.listMT({
         grouptype: 'Freegle',
         support: true
@@ -217,153 +162,6 @@ export default {
       return {
         editor: false
       }
-    },
-    forceBool(hotInstance, td, row, column, prop, value, cellProperties) {
-      Handsontable.renderers.CheckboxRenderer.call(
-        this,
-        hotInstance,
-        td,
-        row,
-        column,
-        prop,
-        Boolean(parseInt(value)),
-        cellProperties
-      )
-    },
-    colourMentor(instance, td, row, col, prop, value) {
-      //const group = this.groups[row]
-      console.log(row, col, prop, value)
-      td.innerText = 'HI '+row;
-      //td.innerText = 'HI ' + group.id;
-
-      return td;
-    },
-
-    /*colourMentor(hotInstance, td, row, column, prop, value, cellProperties) {
-      const group = this.groupStore.get(value)
-
-      if (group && group.mentored) {
-        td.style.backgroundColor = 'lightblue'
-      }
-
-      Handsontable.renderers.NumericRenderer.call(
-        this,
-        hotInstance,
-        td,
-        row,
-        column,
-        prop,
-        parseInt(value),
-        cellProperties
-      )
-    },*/
-    forceNumeric(hotInstance, td, row, column, prop, value, cellProperties) {
-      Handsontable.renderers.NumericRenderer.call(
-        this,
-        hotInstance,
-        td,
-        row,
-        column,
-        prop,
-        parseInt(value),
-        cellProperties
-      )
-    },
-    autoApproves(hotInstance, td, row, column, prop, value, cellProperties) {
-      // We don't want to highlight the colour for unpublished groups, because they're not actually causing any
-      // issues.
-      const publish = cellProperties.instance.getDataAtRow(row)[8]
-
-      if (publish) {
-        let auto = parseInt(value)
-
-        if (auto >= 50) {
-          td.style.backgroundColor = 'orange'
-        }
-
-        auto = Math.abs(auto)
-
-        Handsontable.renderers.NumericRenderer.call(
-          this,
-          hotInstance,
-          td,
-          row,
-          column,
-          prop,
-          auto,
-          cellProperties
-        )
-      } else {
-        Handsontable.renderers.TextRenderer.call(
-          this,
-          hotInstance,
-          td,
-          row,
-          column,
-          prop,
-          '-',
-          cellProperties
-        )
-      }
-    },
-    forceDate(hotInstance, td, row, column, prop, value, cellProperties) {
-      let val = '-'
-      td.style.textAlign = 'right'
-
-      if (value) {
-        val = dayjs(value).format('YYYY-MM-DD')
-      }
-
-      Handsontable.renderers.TextRenderer.call(
-        this,
-        hotInstance,
-        td,
-        row,
-        column,
-        prop,
-        val,
-        cellProperties
-      )
-    },
-    numberDash(hotInstance, td, row, column, prop, value, cellProperties) {
-      const val = parseInt(value)
-
-      if (val) {
-        Handsontable.renderers.NumericRenderer.call(
-          this,
-          hotInstance,
-          td,
-          row,
-          column,
-          prop,
-          val,
-          cellProperties
-        )
-      } else {
-        td.style.textAlign = 'right'
-        Handsontable.renderers.TextRenderer.call(
-          this,
-          hotInstance,
-          td,
-          row,
-          column,
-          prop,
-          '-',
-          cellProperties
-        )
-      }
-    },
-    latLng(hotInstance, td, row, column, prop, value, cellProperties) {
-      Handsontable.renderers.NumericRenderer.call(
-        this,
-        hotInstance,
-        td,
-        row,
-        column,
-        prop,
-        Math.round(parseFloat(value) * 100) / 100,
-        cellProperties
-      )
     },
     afterRender() {
       const inst = this.$refs.hot.hotInstance

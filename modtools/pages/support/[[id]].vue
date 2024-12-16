@@ -40,7 +40,7 @@
           <b-tab>
             <template v-slot:title>
               <h2 class="ml-2 mr-2">
-                List Groups
+                List Communities
               </h2>
             </template>
             <ModSupportListGroups />
