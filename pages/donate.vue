@@ -40,6 +40,16 @@
               </p>
               <h3>If you can, please donate &pound;3.</h3>
               <p>...but anything you can give is very welcome.</p>
+              <b-input-group prepend="£">
+                <b-input
+                  v-model="amount"
+                  type="number"
+                  min="1"
+                  step="1"
+                  size="lg"
+                  class="amountwidth"
+                />
+              </b-input-group>
               <BFormCheckbox
                 v-if="!payPalFallback"
                 id="monthly"
@@ -52,12 +62,14 @@
               </BFormCheckbox>
               <DonationButton
                 v-if="payPalFallback"
-                text="Donate £3"
-                :value="3"
+                :key="amount"
+                :text="'Donate £' + amount3"
+                :value="amount"
               />
               <StripeDonate
                 v-else
-                :price="3"
+                :key="amount"
+                :price="amount"
                 :monthly="monthly"
                 @success="succeeded"
                 @no-payment-methods="noMethods"
@@ -265,6 +277,7 @@ export default {
       monthly: false,
       success: false,
       payPalFallback: false,
+      amount: 3,
     }
   },
   ...mapState(useDonationStore, ['target']),
@@ -281,5 +294,9 @@ export default {
 <style scoped lang="scss">
 :deep(.form-check-input) {
   border: 1px solid red;
+}
+
+.amountwidth {
+  max-width: 5rem;
 }
 </style>

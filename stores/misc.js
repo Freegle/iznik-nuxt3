@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+//import api from '~/api' // REMOVE FROM MT AS GENERATES SOME CIRCULAR REFERENCE
 
 export const useMiscStore = defineStore({
   id: 'misc',
@@ -11,7 +12,7 @@ export const useMiscStore = defineStore({
             // These are sticky preferences.
             {
               storage: localStorage,
-              paths: ['vals'],
+              paths: ['vals', 'source'],
             },
           ],
   },
@@ -32,6 +33,7 @@ export const useMiscStore = defineStore({
     lastTyping: null,
     modtools: false,
     worktimer: false,
+    source: null,
   }),
   actions: {
     init(config) {
@@ -45,6 +47,10 @@ export const useMiscStore = defineStore({
     },
     setBreakpoint(val) {
       this.breakpoint = val
+    },
+    setSource(val) {
+      this.source = val
+      //api(this.config).logs.src(val) // REMOVE FROM MT AS GENERATES SOME CIRCULAR REFERENCE
     },
     api(diff) {
       this.apiCount += diff

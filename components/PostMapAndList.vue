@@ -10,7 +10,7 @@
       v-model:zoom="zoom"
       v-model:centre="centre"
       v-model:loading="loading"
-      :show-isochrones="browseView === 'nearby'"
+      :show-isochrones="showIsochrones"
       :initial-bounds="initialBounds"
       :height-fraction="heightFraction"
       :min-zoom="minZoom"
@@ -23,14 +23,17 @@
       :groupid="selectedGroup"
       :region="region"
       :can-hide="canHide"
+      :isochrone-override="isochroneOverride"
+      :authorityid="authorityid"
       @searched="searched"
       @messages="messagesChanged($event)"
       @groups="groupsChanged($event)"
+      @idle="$emit('idle', $event)"
     />
     <div v-observe-visibility="mapVisibilityChanged" />
     <div class="rest">
       <div
-        v-if="closestGroups?.length && !mapHidden"
+        v-if="showClosestGroups && closestGroups?.length && !mapHidden"
         class="mb-1 border p-2 bg-white"
       >
         <h2 class="visually-hidden">Nearby commmunities</h2>
@@ -124,7 +127,6 @@ import { mapState } from 'pinia'
 import { defineAsyncComponent } from 'vue'
 import { useGroupStore } from '../stores/group'
 import { useMessageStore } from '../stores/message'
-import { calculateMapHeight } from '../composables/useMap'
 import { ref } from '#imports'
 import { useAuthStore } from '~/stores/auth'
 import { useMiscStore } from '~/stores/misc'
@@ -226,6 +228,21 @@ export default {
       required: false,
       default: 'Unseen',
     },
+    showClosestGroups: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
+    isochroneOverride: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+    authorityid: {
+      type: Number,
+      required: false,
+      default: null,
+    },
   },
   setup(props) {
     console.log('PostMapSetup')
@@ -276,8 +293,12 @@ export default {
   },
   computed: {
     ...mapState(useIsochroneStore, { isochroneBounds: 'bounds' }),
-    mapHeight() {
-      return calculateMapHeight(this.heightFraction)
+    showIsochrones() {
+      if (this.isochroneOverride) {
+        return true
+      } else {
+        return this.browseView === 'nearby'
+      }
     },
     mapHidden() {
       return this.miscStore?.get('hidepostmap')
@@ -322,10 +343,6 @@ export default {
 
       return regions
     },
-    messageCount() {
-      const count = this.messages ? this.messages.length : 0
-      return count
-    },
     messagesForList() {
       let msgs = []
 
@@ -336,9 +353,6 @@ export default {
       }
 
       return msgs
-    },
-    messagesForListIds() {
-      return this.messagesForList.map((m) => parseInt(m.id))
     },
     filteredMessages() {
       let ret = []

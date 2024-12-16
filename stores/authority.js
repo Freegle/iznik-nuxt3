@@ -19,6 +19,10 @@ export const useAuthorityStore = defineStore({
 
       return this.list[id]
     },
+    async fetchMessages(id) {
+      const messages = await api(this.config).authority.fetchMessages(id)
+      return messages
+    },
   },
   getters: {
     byId: (state) => {

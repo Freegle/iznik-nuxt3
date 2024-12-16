@@ -256,7 +256,7 @@ export default {
       return false
     },
     buttonSize() {
-      const breakpoint = this.miscStore.breakpoint
+      const breakpoint = this.miscStore?.breakpoint
       return breakpoint === 'xs' || breakpoint === 'sm' ? 'sm' : 'md'
     },
   },
