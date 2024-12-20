@@ -220,7 +220,7 @@
               <p>
                 You can read about who we are, how we're funded, and our legal
                 structure
-                <nuxt-link no-prefetch to="/unsubscribe">here</nuxt-link>.
+                <nuxt-link no-prefetch to="/about">here</nuxt-link>.
               </p>
             </div>
           </HelpQuestion>
