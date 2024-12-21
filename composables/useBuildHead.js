@@ -34,7 +34,28 @@ export function buildHead(
     },
   ]
 
-  const retImage = image || runtimeConfig.public.USER_SITE + '/icon.png'
+  let retImage = image || runtimeConfig.public.USER_SITE + '/icon.png'
+
+  if (retImage.includes(runtimeConfig.public.IMAGE_DELIVERY) + '/?url=') {
+    // We've seen problems with Facebook preview failing to fetch images from weserv, so strip this back to the
+    // original image URL.
+    const p = retImage.indexOf('=')
+    retImage = retImage.slice(p + 1)
+
+    // Need to remove URL parameters as those are for the transforms.  This might lead to preview being
+    // rotated incorrectly, but there we go.
+    let q = retImage.indexOf('?')
+    if (q > -1) {
+      retImage = retImage.slice(0, q)
+    }
+
+    q = retImage.indexOf('&')
+    if (q > -1) {
+      retImage = retImage.slice(0, q)
+    }
+
+    retImage = decodeURIComponent(retImage)
+  }
 
   meta.push({
     hid: 'og:image',
