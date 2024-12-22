@@ -1,7 +1,7 @@
 <template>
   <div v-observe-visibility="visibilityChanged">
     <div v-if="visible && message?.id">
-      <div v-if="showOld || !message.outcomes || !message.outcomes.length">
+      <div v-if="showOld || !message.outcomes?.length">
         <b-card
           no-body
           class="mb-1 bnuorder"
@@ -75,7 +75,7 @@
                   RECEIVED
                 </b-button>
                 <b-button
-                  v-if="!rejected"
+                  v-if="!rejected && !message.outcomes?.length"
                   variant="secondary"
                   class="mr-2 mb-1"
                   @click="edit"
