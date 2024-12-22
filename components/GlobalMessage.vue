@@ -4,6 +4,15 @@
     <div v-if="new Date().getTime() < new Date('2025-01-03')">
       <b-card v-if="show">
         <div class="christmaslayout">
+          <b-button
+            variant="link"
+            size="xs"
+            class="close p-0"
+            title="Hide banner"
+            @click="hideIt"
+          >
+            Hide
+          </b-button>
           <b-img
             src="/logos/Christmas.gif"
             alt="Christmas GIF"
@@ -53,11 +62,12 @@ export default {
   data: function () {
     return {
       thanks: false,
+      warningid: 'hideglobalwarning20241222',
     }
   },
   computed: {
     show() {
-      return !this.miscStore?.get('hideglobalwarning')
+      return !this.miscStore?.get(this.warningid)
     },
     breakpoint() {
       const store = useMiscStore()
@@ -66,15 +76,16 @@ export default {
   },
   methods: {
     hideIt(e) {
+      console.log('Hide', this.warningid)
       e.preventDefault()
       this.miscStore.set({
-        key: 'hideglobalwarning',
+        key: this.warningid,
         value: true,
       })
     },
     showit() {
       this.miscStore.set({
-        key: 'hideglobalwarning',
+        key: this.warningid,
         value: false,
       })
     },
@@ -143,6 +154,13 @@ export default {
   grid-template-columns: min-content 1fr;
   grid-column-gap: 1rem;
   font-weight: bold;
+
+  .close {
+    grid-row: 1 / 2;
+    grid-column: 1 / 3;
+    justify-self: end;
+    color: black;
+  }
 
   .logo,
   .thanks {
