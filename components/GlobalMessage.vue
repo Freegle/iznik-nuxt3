@@ -1,29 +1,36 @@
 <template>
-  <div v-if="true">
+  <div v-if="!me?.settings?.pledge2025">
     <PrivacyUpdate />
-    <div v-if="new Date().getTime() < new Date('2024-12-05')">
-      <div v-if="show" class="d-flex justify-content-around">
-        <ExternalLink
-          href="https://www.adsmartfromsky.co.uk/local-heroes-voting/?pid=114546"
-          class="d-none d-md-block w-100"
-        >
-          <ProxyImage
-            src="/SkyAd.png"
-            alt="Vote for us banner"
-            sizes="1px sm:576px md:768px"
-          />
-        </ExternalLink>
-        <!--      <nuxt-link to="/NationalReuseDay" class="grid">-->
-        <!--        <div-->
-        <!--          class="d-flex justify-content-end hide clickme"-->
-        <!--          title="Hide banner"-->
-        <!--          @click="hideIt"-->
-        <!--        >-->
-        <!--          <v-icon icon="times-circle" scale="1.5" class="text-white" />-->
-        <!--        </div>-->
-        <!--        <b-img class="banner" src="/NRD/Banner.png" />-->
-        <!--      </nuxt-link>-->
-      </div>
+    <div v-if="new Date().getTime() < new Date('2025-01-03')">
+      <b-card v-if="show" body-class="d-flex justify-content-around">
+        <b-img
+          src="/logos/Christmas.gif"
+          alt="Christmas GIF"
+          class="christmas rounded"
+        />
+        <div class="ml-2 font-weight-bold">
+          <div v-if="thanks">
+            <p>
+              Thanks! You'll be making the world better, one act of kindness at
+              a time.
+            </p>
+          </div>
+          <div v-else>
+            <p>
+              Merry Whatevermas to you and yours, from all the volunteers at
+              Freegle!
+            </p>
+            <p>
+              And if you're making resolutions this New Year, why not pledge to
+              freegle one extra thing a month throughout the year? We'll track
+              your freegles and let you know how you do!
+            </p>
+            <b-button size="lg" variant="primary" @click="pledge">
+              I'll sign the Freegle pledge!
+            </b-button>
+          </div>
+        </div>
+      </b-card>
       <div v-else class="text-danger text-end clickme" @click="showit">
         Show notice.
       </div>
@@ -33,6 +40,7 @@
 <script>
 import { useMiscStore } from '~/stores/misc'
 import PrivacyUpdate from '~/components/PrivacyUpdate.vue'
+import { useAuthStore } from '~/stores/auth'
 
 export default {
   components: { PrivacyUpdate },
@@ -40,9 +48,18 @@ export default {
     const miscStore = useMiscStore()
     return { miscStore }
   },
+  data: function () {
+    return {
+      thanks: false,
+    }
+  },
   computed: {
     show() {
       return !this.miscStore?.get('hideglobalwarning')
+    },
+    breakpoint() {
+      const store = useMiscStore()
+      return store.breakpoint
     },
   },
   methods: {
@@ -58,6 +75,16 @@ export default {
         key: 'hideglobalwarning',
         value: false,
       })
+    },
+    async pledge() {
+      const authStore = useAuthStore()
+      const settings = authStore.user.settings
+      settings.pledge2025 = true
+      await authStore.saveAndGet({
+        settings,
+      })
+
+      this.thanks = true
     },
   },
 }
@@ -96,5 +123,13 @@ export default {
 
 :deep(img) {
   width: 100%;
+}
+
+:deep(.christmas) {
+  max-width: 100px;
+
+  @include media-breakpoint-up(md) {
+    max-width: 200px;
+  }
 }
 </style>
