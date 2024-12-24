@@ -66,11 +66,7 @@ export default {
   computed: {
     groups() {
       const ret = Object.values(this.groupStore.list)
-      for( const g of ret){ // TODO UNDO
-        g.rules = null
-      }
       return ret
-      //return Object.values(this.groupStore.list)
     }
   },
   async mounted() {

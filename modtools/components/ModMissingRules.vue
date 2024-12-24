@@ -50,7 +50,6 @@ export default {
       const ret = []
 
       for (const group of Object.values(this.groupStore.list)) {
-        group.rules = false // TODO UNDO
         if (
           group.type === 'Freegle' &&
           group.myrole === 'Owner' &&
