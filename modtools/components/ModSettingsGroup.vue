@@ -198,7 +198,7 @@
                 toggle-checked="Yes" toggle-unchecked="No" />
               <ModGroupRule :groupid="groupid" name="allowloans" label="Do you allow any loans or requests to borrow?" type="toggle"
                 toggle-checked="Yes" toggle-unchecked="No" />
-              <ModGroupRule :groupid="groupid" name="suggesteddonations" label="Do you allow suggested donations to charity to obtain items?"
+              <ModGroupRule :groupid="groupid" name="suggesteddonations" label="Do you allow people to ask for a donation to charity when offering items?"
                 type="toggle" toggle-checked="Yes" toggle-unchecked="No" />
               <ModGroupRule :groupid="groupid" name="declareselling"
                 label="Do you inform members that they must declare if they intend to sell items on?" type="toggle" toggle-checked="Yes"

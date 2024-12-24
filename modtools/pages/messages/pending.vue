@@ -20,6 +20,7 @@
       <ModMessages />
 
       <ModAffiliationConfirmModal v-if="affiliationGroup" ref="affiliation" :groupid="affiliationGroup" />
+      <ModRulesModal v-if="rulesGroup" ref="rules" />
 
       <div ref="end" />
     </client-only>
@@ -29,6 +30,7 @@
 <script>
 import dayjs from 'dayjs'
 import { useAuthStore } from '@/stores/auth'
+import { useGroupStore } from '../stores/group'
 import { useMiscStore } from '@/stores/misc'
 import me from '~/mixins/me.js'
 import { setupModMessages } from '../../composables/useModMessages'
@@ -36,6 +38,7 @@ import { setupModMessages } from '../../composables/useModMessages'
 export default {
   async setup() {
     const authStore = useAuthStore()
+    const groupStore = useGroupStore()
     const miscStore = useMiscStore()
     const modMessages = setupModMessages()
     //modMessages.collection.value = ['Pending','PendingOther']
@@ -44,6 +47,7 @@ export default {
     modMessages.workType.value = 'pending'
     return {
       authStore,
+      groupStore,
       miscStore,
       ...modMessages // busy, context, group, groupid, limit, workType, show, collection, messageTerm, memberTerm, distance, summary, messages, visibleMessages, work,
     }
@@ -55,11 +59,26 @@ export default {
     return {
       showCakeModal: false,
       showAimsModal: false,
-      affiliationGroup: null
+      affiliationGroup: null,
+      rulesGroup: null
     }
   },
-
+  computed: {
+    groups() {
+      const ret = Object.values(this.groupStore.list)
+      for( const g of ret){ // TODO UNDO
+        g.rules = null
+      }
+      return ret
+      //return Object.values(this.groupStore.list)
+    }
+  },
   async mounted() {
+    // Get groups with MT info
+    for (const g of this.myGroups) {
+      await this.groupStore.fetchMT({id:g.id})
+    }
+
     // Consider affiliation ask.
     const lastask = this.miscStore.get('lastaffiliationask')
     const now = new Date().getTime()
@@ -69,15 +88,14 @@ export default {
       function shuffleArray(array) {
         return array.sort(() => Math.random() - 0.5);
       }
-      const myGroups = shuffleArray(this.myGroups) // me
-      console.log('myGroups', myGroups.length)
+      const groups = shuffleArray(this.groups)
 
-      for (const group of myGroups) {
-        console.log('group', group.nameshort)
-        if (group.role === 'Owner' || group.role === 'Moderator') {
+      for (const group of groups) {
+        // console.log('group', group.nameshort)
+        if (group.myrole === 'Owner' || group.myrole === 'Moderator') {
           const postdate = dayjs(group.affiliationconfirmed)
           const daysago = dayjs().diff(postdate, 'day')
-          console.log('daysago', daysago)
+          // console.log('daysago', daysago)
           if (!group.affiliationconfirmed || daysago > 365) {
             this.affiliationGroup = group.id
             break
@@ -86,6 +104,14 @@ export default {
       }
 
       this.miscStore.set({ key: 'lastaffiliationask', value: now })
+    }
+
+    // Find a group that we have owner status on and are not a backup where there are no rules set.
+    for (const group of this.groups) {
+      if (group.type === 'Freegle' && group.myrole === 'Owner' && !group.rules) {
+        this.rulesGroup = group.id
+        break
+      }
     }
 
     // AIMS

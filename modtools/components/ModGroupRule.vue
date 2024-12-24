@@ -3,7 +3,7 @@
     <b-form-text v-if="description" class="mb-2">
       {{ description }}
     </b-form-text>
-    <b-form-text v-if="!haveValue" class="mb-2 text-small text-muted">
+    <b-form-text :class="{ invisible: haveValue }" class="mb-2 text-small text-muted">
       No answer given yet.
     </b-form-text>
     <b-input-group v-if="type === 'input'">
@@ -126,7 +126,7 @@ export default {
     this.getValueFromGroup()
   },
   methods: {
-    async tooglesave(){
+    async tooglesave() {
       this.value = !this.value
       await this.save()
     },

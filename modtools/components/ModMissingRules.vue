@@ -3,7 +3,7 @@
     <NoticeMessage v-if="invalid.length" variant="danger">
       <div v-if="summary">
         <div>
-          <v-icon name="exclamation-triangle" /> {{ invalid.length }} groups are missing group rules. Please add them.
+          <v-icon icon="exclamation-triangle" /> {{ invalid.length }} groups are missing group rules. Please add them.
         </div>
         <b-button variant="white" class="mt-2" @click="expand">
           Click to view
@@ -19,17 +19,27 @@
           Please go to the <em>Rules</em> section of the group settings and respond to each question. You can
           copy the rules if you have multiple groups.
         </p>
-        <div v-for="(inv) of invalid" :key="'fbinvalid-' + inv.id">
-          Click to add rules for <nuxt-link :to="'/settings/'"> <!-- TODO: Fix going into community ie + inv.id -->
-            {{ inv.namedisplay }}
-          </nuxt-link>
-        </div>
+        <NuxtLink v-for="(inv) of invalid" :to="'/settings/' + inv.id + '?noguard=true'">Click to add rules for {{ inv.namedisplay }}<br></NuxtLink>
       </div>
     </NoticeMessage>
   </div>
 </template>
 <script>
+import { useGroupStore } from '../stores/group'
+
 export default {
+  setup() {
+    const groupStore = useGroupStore()
+    return {
+      groupStore,
+    }
+  },
+  props: {
+    expanded: {
+      type: Boolean,
+      default: false
+    }
+  },
   data: function () {
     return {
       summary: true
@@ -39,10 +49,11 @@ export default {
     invalid() {
       const ret = []
 
-      for (const group of this.myGroups) {
+      for (const group of Object.values(this.groupStore.list)) {
+        group.rules = false // TODO UNDO
         if (
           group.type === 'Freegle' &&
-          group.role === 'Owner' &&
+          group.myrole === 'Owner' &&
           !group.rules &&
           group.publish
         ) {
@@ -51,6 +62,15 @@ export default {
       }
 
       return ret
+    }
+  },
+  async mounted() {
+    for (const g of this.myGroups) {
+      await this.groupStore.fetchMT({ id: g.id })
+    }
+
+    if (this.expanded) {
+      this.summary = false
     }
   },
   methods: {
