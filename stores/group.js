@@ -162,7 +162,32 @@ export const useGroupStore = defineStore({
       })
       await this.fetch(params.id)
     },
-  },
+    async addgroup(params) {
+      const id = await api(this.config).group.add({
+        grouptype: 'Freegle',
+        action: 'Create',
+        name: params.nameshort
+      })
+  
+      api(this.config).patch({
+        id: id,
+        namefull: params.namefull,
+        publish: 0,
+        polyofficial: params.cga,
+        poly: params.dpa,
+        lat: params.lat,
+        lng: params.lng,
+        onyahoo: 0,
+        onhere: 1,
+        ontn: 1,
+        onlovejunk: 1,
+        licenserequired: 0,
+        showonyahoo: 0
+      })
+  
+      return id
+    },
+    },
   getters: {
     get: (state) => (idOrName) => {
       let ret = null

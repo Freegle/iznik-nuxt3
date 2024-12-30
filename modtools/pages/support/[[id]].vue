@@ -56,10 +56,10 @@
           <b-tab>
             <template v-slot:title>
               <h2 class="ml-2 mr-2">
-                Add Group
+                Add Community
               </h2>
             </template>
-            <!--ModSupportAddGroup /-->
+            <ModSupportAddGroup />
           </b-tab>
           <b-tab>
             <template v-slot:title>

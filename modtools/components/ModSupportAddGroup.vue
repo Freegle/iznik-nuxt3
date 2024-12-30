@@ -1,7 +1,8 @@
 <template>
   <div>
     <p>
-      This lets you add a new Freegle group.
+      NOT TESTED IN MT3.
+      This lets you add a new Freegle community.
       This will be added with you as an Owner.  It will be set not to be published.
     </p>
     <NoticeMessage variant="warning" class="mb-2">
@@ -49,16 +50,21 @@
     </b-form-group>
     <SpinButton
       variant="primary"
-      name="save"
+      icon-name="save"
       label="Add Group"
       spinclass="text-white"
-      :handler="add"
+      @handle="add"
       :disabled="!valid"
     />
   </div>
 </template>
 <script>
+import { useGroupStore } from '../stores/group'
 export default {
+  setup() {
+    const groupStore = useGroupStore()
+    return { groupStore }
+  },
   data: function() {
     return {
       nameshort: null,
@@ -75,8 +81,16 @@ export default {
     }
   },
   methods: {
-    async add() {
-      /* TODO await this.$store.dispatch('group/add', {
+    async add(callback) {
+      console.log('group/add', {
+        nameshort: this.nameshort,
+        namefull: this.namefull,
+        cga: this.cga,
+        dpa: this.dpa,
+        lat: this.lat,
+        lng: this.lng
+      })
+      /* TODO await this.groupStore.add({
         nameshort: this.nameshort,
         namefull: this.namefull,
         cga: this.cga,
@@ -84,6 +98,7 @@ export default {
         lat: this.lat,
         lng: this.lng
       })*/
+      callback()
     }
   }
 }
