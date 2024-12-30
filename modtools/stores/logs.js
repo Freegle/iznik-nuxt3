@@ -36,10 +36,17 @@ export const useLogsStore = defineStore({
       return ret
     },
     async delete(id) {
+      // TODO
+      console.log('useLogsStore delete TODO')
     },
     async add(params) {
+      // TODO
+      console.log('useLogsStore add TODO')
       return 0
     },
+    setParams(params) {
+      this.params = params
+    }
   },
   getters: {
     get: (state) => (id) => {

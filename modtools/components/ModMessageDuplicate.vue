@@ -1,6 +1,6 @@
 <template>
   <div class="text-danger small">
-    Duplicate of <v-icon icon="hashtag" class="text-muted" scale="0.5" /><nuxt-link :to="'/modtools/message/' + message.id">
+    Duplicate of <v-icon icon="hashtag" class="text-muted" scale="0.5" /><nuxt-link :to="'/message/' + message.id">
       {{ message.id }}
     </nuxt-link>
     <em>{{ message.subject }}</em>

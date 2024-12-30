@@ -4,7 +4,7 @@
       Crosspost
       <v-icon icon="hashtag" class="text-muted" scale="0.5" />
       {{ message.id }}
-      <nuxt-link :to="'/modtools/message/' + message.id">
+      <nuxt-link :to="'/message/' + message.id">
         <em>{{ message.subject }}</em>
         {{ timeago(message.arrival) }} on <em>{{ groupname }}</em>
       </nuxt-link>

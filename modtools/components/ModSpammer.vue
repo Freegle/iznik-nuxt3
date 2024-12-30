@@ -26,7 +26,7 @@
     <notice-message v-if="sameip && sameip.length" variant="warning">
       <p>
         Recently active on the same IP address:
-        <nuxt-link v-for="userid in sameip" :key="userid" :to="'/modtools/support/' + userid">
+        <nuxt-link v-for="userid in sameip" :key="userid" :to="'/support/' + userid">
           <v-icon icon="hashtag" class="text-muted" scale="0.5" /><strong>{{ userid }}</strong>&nbsp;
         </nuxt-link>.
       </p>

@@ -26,11 +26,73 @@
   </div>
 </template>
 <script>
-import logsPage from '@/mixins/logsPage.js'
-import ModLog from '~/components/ModLog'
+import { useLogsStore } from './stores/logs'
 
 export default {
-  components: { ModLog },
-  mixins: [logsPage]
+  setup() {
+    const logsStore = useLogsStore()
+    return { logsStore }
+  },
+  emits: ['busy', 'idle'],
+  props:{
+    groupid: {
+      type: Number,
+      required: false,
+      default: null,
+    },
+  },
+  data: function () {
+    return {
+      distance: 1000,
+      limit: 50,
+      show: 0,
+      busy: false
+    }
+  },
+
+  computed: {
+    logs() {
+      return this.logsStore.list
+    }
+  },
+
+
+  methods: {
+    async loadMore($state) {
+      this.busy = true
+      this.$emit('busy')
+      const params = this.logsStore.params
+
+      if (this.show < this.logs.length) {
+        this.show++
+        $state.loaded()
+      } else {
+        const currentCount = this.logs.length
+        try {
+          await this.logsStore.fetch({
+            limit: this.limit,
+            groupid: this.groupid,
+            logtype: params.type,
+            search: params.search
+          })
+
+          const logs = this.logsStore.list
+
+          if (currentCount === logs.length) {
+            $state.complete()
+          } else {
+            $state.loaded()
+            this.show++
+          }
+        } catch (e) {
+          $state.complete()
+          console.log('Complete on error', e)
+        }
+      }
+
+      this.busy = false
+      this.$emit('idle')
+    }
+  }
 }
 </script>
