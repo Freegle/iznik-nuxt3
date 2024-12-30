@@ -16,15 +16,13 @@ export const useAlertStore = defineStore({
     },
     async fetch(params) {
       const { alerts, alert } = await api(this.config).alert.fetch(params)
-      //console.log('useAlertStore', alerts, alert)
       if (alerts) {
-        for( const analert of alerts){
+        for (const analert of alerts) {
           this.list[analert.id] = analert
         }
       } else {
         this.list[alert.id] = alert
       }
-      //console.log('useAlertStore this.list', this.list)
     },
     async add(params) {
       const { id } = await api(this.config).alert.add(params)

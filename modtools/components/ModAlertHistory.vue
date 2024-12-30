@@ -25,8 +25,8 @@
         Show Details
       </b-button>
     </b-col>
-    <ModAlertHistoryDetailsModal v-if="showDetails" :id="alert.id" ref="detailsModal" />
-    <ModAlertHistoryStatsModal v-if="showStats" :id="alert.id" ref="statsModal" />
+    <ModAlertHistoryDetailsModal v-if="showDetails" :id="alert.id" ref="detailsModal" @hidden="showDetails = false" />
+    <ModAlertHistoryStatsModal v-if="showStats" :id="alert.id" ref="statsModal" @hidden="showStats = false" />
   </b-row>
 </template>
 <script>
@@ -38,7 +38,7 @@ export default {
       required: true
     }
   },
-  data: function() {
+  data: function () {
     return {
       showDetails: false,
       showStats: false
@@ -47,17 +47,11 @@ export default {
   methods: {
     details() {
       this.showDetails = true
-
-      //this.waitForRef('detailsModal', () => {
-      //  this.$refs.detailsModal.show()
-      //})
+      this.$refs.detailsModal?.show()
     },
     stats() {
       this.showStats = true
-
-      //this.waitForRef('statsModal', () => {
-      //  this.$refs.statsModal.show()
-      //})
+      this.$refs.statsModal?.show()
     }
   }
 }

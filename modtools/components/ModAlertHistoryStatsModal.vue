@@ -71,7 +71,6 @@ export default {
   computed: {
     alert() {
       return this.alertStore.get(this.id)
-      //return this.$store.getters['alert/get'](this.id)
     },
     groupData() {
       if (this.alert) {
@@ -107,14 +106,10 @@ export default {
       }
     }
   },
+  async mounted(){
+    //await this.alertStore.fetch({ id: this.id })
+  },
   methods: {
-    async show() {
-      //await this.$store.dispatch('alert/fetch', {
-      //  id: this.id
-      //})
-
-      this.modal.show()
-    }
   }
 }
 </script>

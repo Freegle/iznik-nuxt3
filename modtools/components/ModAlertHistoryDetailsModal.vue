@@ -39,19 +39,14 @@ export default {
   },
   computed: {
     alert() {
-      console.log("MAHDM alert", this.id)
       const a = this.alertStore.get(this.id)
-      console.log("MAHDM a", a)
       return this.alertStore.get(this.id)
     }
   },
+  async mounted(){
+    //await this.alertStore.fetch({ id: this.id })
+  },
   methods: {
-    async show() {
-      console.log("MAHDM show", this.id)
-      await this.alertStore.fetch({ id: this.id })
-
-      //this.modal.show()
-    }
   }
 }
 </script>
