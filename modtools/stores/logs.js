@@ -35,15 +35,14 @@ export const useLogsStore = defineStore({
 
       return ret
     },
+    /* TODO UNUSED
     async delete(id) {
-      // TODO
-      console.log('useLogsStore delete TODO')
+      console.log('useLogsStore delete')
     },
     async add(params) {
-      // TODO
-      console.log('useLogsStore add TODO')
+      console.log('useLogsStore add')
       return 0
-    },
+    },*/
     setParams(params) {
       this.params = params
     }

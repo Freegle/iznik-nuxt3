@@ -19,7 +19,6 @@ export const useAdminsStore = defineStore({
     },
     async fetch(params) {
       const { admin, admins } = await api(this.config).admins.fetch(params)
-      //console.log('useAdminsStore', admin, admins)
       if (params && params.id) {
         this.list[params.id] = admin
       } else {
