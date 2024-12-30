@@ -9,7 +9,7 @@
               This message needs editing so that we know where it is.  Please put in a postcode
               (it doesn't have to be exactly right - do your best based on the subject).
               <b-input-group>
-                <Postcode class="mt-2" value="" :find="false" @selected="postcodeSelect" />
+                <PostCode class="mt-2" value="" :find="false" @selected="postcodeSelect" />
               </b-input-group>
             </NoticeMessage>
             <div v-if="editing" class="d-flex flex-wrap">
