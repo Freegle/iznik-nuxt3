@@ -42,6 +42,7 @@ import { computed, watch, reloadNuxtApp } from '#imports'
 import 'core-js/actual/array/to-sorted'
 
 import { useAdminsStore } from './stores/admins'
+import { useAlertStore } from './stores/alert'
 import { useCommentStore } from './stores/comment'
 import { useLogsStore } from './stores/logs'
 import { useMemberStore } from './stores/member'
@@ -102,6 +103,7 @@ const logoStore = useLogoStore()
 const locationStore = useLocationStore()
 const shortlinkStore = useShortlinkStore()
 const adminsStore = useAdminsStore()
+const alertStore = useAlertStore()
 const commentStore = useCommentStore()
 const logsStore = useLogsStore()
 const memberStore = useMemberStore()
@@ -141,6 +143,7 @@ logoStore.init(runtimeConfig)
 locationStore.init(runtimeConfig)
 shortlinkStore.init(runtimeConfig)
 adminsStore.init(runtimeConfig)
+alertStore.init(runtimeConfig)
 commentStore.init(runtimeConfig)
 logsStore.init(runtimeConfig)
 memberStore.init(runtimeConfig)

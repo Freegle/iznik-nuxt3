@@ -48,10 +48,10 @@
           <b-tab>
             <template v-slot:title>
               <h2 class="ml-2 mr-2">
-                Contact Group
+                Contact Community
               </h2>
             </template>
-            <!--ModSupportContactGroup /-->
+            <ModSupportContactGroup />
           </b-tab>
           <b-tab>
             <template v-slot:title>

@@ -64,20 +64,21 @@
       <option :value="true">
         Ask them to click to confirm receipt
       </option>
-    </b-select>
+    </b-form-select>
     <label>Subject</label>
     <b-form-input v-model="subject" placeholder="Brief subject of this message" />
     <label>Text version</label>
     <b-form-textarea v-model="text" rows="10" />
     <label>HTML version (optional)</label>
-    <VueEditor v-model="html" :editor-options="editorOptions" class="bg-white" />
+    VueEditor VueEditor VueEditorVueEditorVueEditor
+    <!--VueEditor v-model="html" :editor-options="editorOptions" class="bg-white" /-->
     <NoticeMessage v-if="groupid < 0" variant="danger" class="mt-2 mb-2">
       This will go to all groups.
     </NoticeMessage>
-    <SpinButton v-if="groupid < 0" variant="danger" label="Send to all groups" name="envelope" spinclass="text-white" :disabled="!valid"
-      class="mt-2 mb-2" size="lg" :handler="send" />
-    <SpinButton v-else variant="primary" label="Send" name="envelope" spinclass="text-white" :disabled="!valid" class="mt-2 mb-2" size="lg"
-      :handler="send" />
+    <SpinButton v-if="groupid < 0" variant="danger" label="Send to all groups" icon-name="envelope" spinclass="text-white" :disabled="!valid"
+      class="mt-2 mb-2" size="lg" @handle="send" />
+    <SpinButton v-else variant="primary" label="Send" icon-name="envelope" spinclass="text-white" :disabled="!valid" class="mt-2 mb-2" size="lg"
+      @handle="send" />
     <div v-if="alerts && alerts.length">
       <b-row class="font-weight-bold">
         <b-col cols="6" lg="2">
@@ -103,10 +104,10 @@
   </div>
 </template>
 <script>
-import GroupSelect from './GroupSelect'
+import { useAlertStore } from './stores/alert'
 import ModAlertHistory from './ModAlertHistory'
 
-let VueEditor, htmlEditButton
+/*let VueEditor, htmlEditButton
 
 if (process.client) {
   const Quill = require('vue2-editor').Quill
@@ -114,13 +115,17 @@ if (process.client) {
   htmlEditButton = require('quill-html-edit-button').htmlEditButton
   VueEditor = require('vue2-editor').VueEditor
   Quill.register('modules/htmlEditButton', htmlEditButton)
-}
+}*/
 
 export default {
   components: {
     ModAlertHistory,
-    GroupSelect,
-    VueEditor
+    //GroupSelect,
+    //VueEditor
+  },
+  setup() {
+    const alertStore = useAlertStore()
+    return { alertStore }
   },
   data: function () {
     return {
@@ -139,22 +144,23 @@ export default {
       }
     }
   },
+  mounted() {
+    // this.alertStore.clear()
+  },
   computed: {
     valid() {
       return this.from && this.subject && this.text && this.groupid
     },
     alerts() {
-      /* TODO const alerts = Object.values(this.$store.getters['alert/list'])
-      alerts.sort(function(a, b) {
+      const alerts = Object.values(this.alertStore.list)
+      alerts.sort(function (a, b) {
         return new Date(b.created).getTime() - new Date(a.created).getTime()
       })
-
-      return alerts*/
-      return []
+      return alerts
     }
   },
   methods: {
-    async send() {
+    async send(callback) {
       const data = {
         from: this.from,
         subject: this.subject,
@@ -171,11 +177,12 @@ export default {
       }
 
       /* TODO await this.$store.dispatch('alert/add', data)*/
+      callback()
     },
     async fetch() {
       this.busy = true
 
-      /* TODO await this.$store.dispatch('alert/fetch')*/
+      await this.alertStore.fetch()
 
       this.busy = false
     }
