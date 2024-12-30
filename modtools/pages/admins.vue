@@ -141,8 +141,8 @@ export default {
         if (group) {
           if (
             group.type === 'Freegle' &&
-            (!this.modonly ||
-              group.role === 'Owner' ||
+            //(!this.modonly ||
+            ( group.role === 'Owner' ||
               group.role === 'Moderator')
           ) {
             if (group.work && group.work.pendingadmins) {
