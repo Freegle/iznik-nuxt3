@@ -42,7 +42,7 @@ export default {
       const authStore = useAuthStore()
       const work = authStore.work
       if (!work) return 0
-      console.log('communityevents work', work.pendingevents)
+      console.log('TODO communityevents work', work.pendingevents)
       return work.pendingevents
     },
     //context() {
@@ -70,7 +70,6 @@ export default {
   },
   methods: {
     loadMore: async function ($state) {
-      console.log('events loadMore AAA', this.events.length)
       this.busy = true
 
       await this.communityEventStore.fetchMT({
@@ -78,7 +77,6 @@ export default {
         limit: 0,
         pending: true
       })
-      console.log('events loadMore BBB', this.events.length)
       this.complete = true
       $state.complete()
       this.busy = false
