@@ -68,10 +68,13 @@
     <label>Subject</label>
     <b-form-input v-model="subject" placeholder="Brief subject of this message" />
     <label>Text version</label>
-    <b-form-textarea v-model="text" rows="10" />
+    <b-form-textarea v-model="text" rows="6" />
     <label>HTML version (optional)</label>
-    VueEditor VueEditor VueEditorVueEditorVueEditor
-    <!--VueEditor v-model="html" :editor-options="editorOptions" class="bg-white" /-->
+    <client-only>
+      <div class="bg-white">
+        <QuillEditor :modules="quillModules" theme="snow" :toolbar="toolbarOptions" v-model:content="html" contentType="html" class="bg-white" />
+      </div>
+    </client-only>
     <NoticeMessage v-if="groupid < 0" variant="danger" class="mt-2 mb-2">
       This will go to all groups.
     </NoticeMessage>
@@ -104,6 +107,10 @@
   </div>
 </template>
 <script>
+import { QuillEditor } from '@vueup/vue-quill';
+import '@vueup/vue-quill/dist/vue-quill.snow.css';
+import htmlEditButton from "quill-html-edit-button";
+
 import { useAlertStore } from './stores/alert'
 import ModAlertHistory from './ModAlertHistory'
 
@@ -120,12 +127,16 @@ if (process.client) {
 export default {
   components: {
     ModAlertHistory,
-    //GroupSelect,
-    //VueEditor
+    QuillEditor
   },
   setup() {
     const alertStore = useAlertStore()
-    return { alertStore }
+    const quillModules = {
+      name: 'htmlEditButton',
+      module: htmlEditButton,
+      options: {} // https://github.com/benwinding/quill-html-edit-button?tab=readme-ov-file#options
+    }
+    return { alertStore, quillModules }
   },
   data: function () {
     return {
@@ -137,11 +148,16 @@ export default {
       subject: null,
       text: null,
       html: null,
-      editorOptions: {
-        modules: {
-          htmlEditButton: {}
-        }
-      }
+      toolbarOptions: [
+        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+        ['bold', 'italic', 'underline', 'strike'],
+        ['blockquote', 'code-block'],
+        [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'list': 'check' }],
+        [{ 'indent': '-1' }, { 'indent': '+1' }],
+        [{ 'color': [] }, { 'background': [] }],
+        ['link', 'image', 'video'],
+        ['clean']
+      ]
     }
   },
   mounted() {
@@ -176,7 +192,7 @@ export default {
         data.groupid = 'AllFreegle'
       }
 
-      /* TODO await this.$store.dispatch('alert/add', data)*/
+      await this.alertStore.add(data)
       callback()
     },
     async fetch() {
