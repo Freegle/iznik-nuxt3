@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-modal ref="modal" id="modRulesModal" size="lg" no-stacking>
+    <b-modal ref="modal" id="modRulesModal" size="lg" no-stacking no-close-on-backdrop no-close-on-esc hide-header-close>
       <template #title>
         Please configure group rules
       </template>
@@ -8,8 +8,9 @@
         <ModMissingRules expanded />
       </template>
       <template #footer>
-        <b-button variant="secondary" @click="hide">
+        <b-button variant="secondary" :disabled="enableIn > 0" @click="hide">
           Not now
+          <span v-if="enableIn > 0">({{ enableIn }})</span>
         </b-button>
       </template>
     </b-modal>
@@ -24,11 +25,39 @@ export default {
     return { modal, show, hide }
   },
   data: function () {
-    return {}
+    return {
+      enableIn: 0,
+      timer: null
+    }
   },
   computed: {
     group() {
       return this.myGroup(this.groupid)
+    },
+    delay() {
+      const now = new Date()
+      const start = new Date(now.getFullYear(), 0, 0)
+      const diff = now - start
+      const oneDay = 1000 * 60 * 60 * 24
+      return Math.floor(diff / oneDay + 10)
+    }
+  },
+  mounted() {
+    this.enableIn = this.delay
+    this.timer = setTimeout(this.tick, 1000)
+  },
+  beforeDestroy() {
+    if (this.timer) {
+      clearTimeout(this.timer)
+    }
+  },
+  methods: {
+    tick() {
+      this.timer = null
+      if (this.enableIn > 0) {
+        this.enableIn -= 1
+        this.timer = setTimeout(this.tick, 1000)
+      }
     }
   }
 }
