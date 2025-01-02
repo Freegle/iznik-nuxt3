@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!me?.settings?.pledge2025">
+  <div v-if="me && !me?.settings?.pledge2025">
     <PrivacyUpdate />
     <div v-if="new Date().getTime() < new Date('2025-01-03')">
       <b-card v-if="show">
@@ -91,13 +91,16 @@ export default {
     },
     async pledge() {
       const authStore = useAuthStore()
-      const settings = authStore.user.settings
-      settings.pledge2025 = true
-      await authStore.saveAndGet({
-        settings,
-      })
 
-      this.thanks = true
+      if (authStore.user) {
+        const settings = authStore.user.settings
+        settings.pledge2025 = true
+        await authStore.saveAndGet({
+          settings,
+        })
+
+        this.thanks = true
+      }
     },
   },
 }
