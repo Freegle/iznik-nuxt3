@@ -36,6 +36,7 @@
               <b-form-group label="Subject of ADMIN:" label-for="subject" label-class="mb-0">
                 <p>
                   ADMINs come in two flavours:
+                </p>
                 <ul>
                   <li>
                     Essential - everyone must receive them. These are important announcements about the running
@@ -46,7 +47,6 @@
                     are less important or encouragements to freegle more.
                   </li>
                 </ul>
-                </p>
                 <OurToggle v-model="essential" class="mt-2" :height="30" :width="150" :font-size="14" :sync="true"
                   :labels="{ checked: 'Essential', unchecked: 'Newsletter' }" color="#61AE24" />
               </b-form-group>
