@@ -36,7 +36,10 @@ export function buildHead(
 
   let retImage = image || runtimeConfig.public.USER_SITE + '/icon.png'
 
-  if (retImage?.includes(runtimeConfig.public.IMAGE_DELIVERY) + '/?url=') {
+  if (
+    typeof retImage === 'string' &&
+    retImage?.includes(runtimeConfig.public.IMAGE_DELIVERY) + '/?url='
+  ) {
     // We've seen problems with Facebook preview failing to fetch images from weserv, so strip this back to the
     // original image URL.
     const p = retImage.indexOf('=')
