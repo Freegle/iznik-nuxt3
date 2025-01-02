@@ -2,6 +2,10 @@
   <div>
     <!-- TODO -->
     <client-only>
+      <div v-for="chat in chatlist">
+        CHAT {{ chat.id }}
+      </div>
+
       <b-list-group horizontal class="p-0 m-0 list-unstyled chatPopups">
         <b-list-group-item v-for="chat in chatlist" :key="'popupchat-' + chat.id" class="bg-transparent">
           <!-- ChatPopup :id="chat.id" /-->
@@ -58,7 +62,7 @@ export default {
           }
         }
       }
-      // console.log('ChatPopups chatlist', ret)
+      console.log('ChatPopups chatlist', ret)
 
       return ret
     }
