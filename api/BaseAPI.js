@@ -167,7 +167,7 @@ export default class BaseAPI {
         const log = typeof logError === 'function' ? logError(data) : logError
         console.log('Log it?', log)
 
-        if (log) {
+        if (log && (status !== null || retstr !== 'Unknown' || statusstr !== 'Unknown')) {
           Sentry.captureMessage(
             'API request failed ' +
               path +
