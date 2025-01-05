@@ -1,63 +1,30 @@
 <template>
-  <div :class="selected ? 'selected' : ''" @click="selectMe">
+  <div :class="{
+    selected: selected,
+    strike: chatmessage.reviewrejected || chatmessage.deleted
+  }" @click="selectMe">
     <div v-if="chatmessage?.type === 'Default'">
-      <chat-message-text
-        :id="id"
-        :chatid="chatid"
-        :pov="pov"
-        :highlight-emails="highlightEmails"
-      />
+      <chat-message-text :id="id" :chatid="chatid" :pov="pov" :highlight-emails="highlightEmails" />
     </div>
-    <chat-message-image
-      v-else-if="chatmessage?.type === 'Image'"
-      :id="id"
-      :chatid="chatid"
-      :pov="pov"
-      @delete="showDeleteMessageModal"
-    />
+    <chat-message-image v-else-if="chatmessage?.type === 'Image'" :id="id" :chatid="chatid" :pov="pov" @delete="showDeleteMessageModal" />
     <div v-else-if="chatmessage?.type === 'Interested'">
-      <chat-message-interested
-        v-if="isMT || otheruser || chat.chattype === 'User2Mod'"
-        :id="id"
-        :chatid="chatid"
-        :pov="pov"
-        :highlight-emails="highlightEmails"
-      />
+      <chat-message-interested v-if="isMT || otheruser || chat.chattype === 'User2Mod'" :id="id" :chatid="chatid" :pov="pov"
+        :highlight-emails="highlightEmails" />
     </div>
     <div v-else-if="chatmessage?.type === 'Completed'">
       <chat-message-completed :id="id" :chatid="chatid" :pov="pov" />
     </div>
     <div v-else-if="chatmessage?.type === 'Promised'">
-      <chat-message-promised
-        v-if="otheruser"
-        :id="id"
-        :chatid="chatid"
-        :pov="pov"
-      />
+      <chat-message-promised v-if="otheruser" :id="id" :chatid="chatid" :pov="pov" />
     </div>
     <div v-else-if="chatmessage?.type === 'Reneged'">
-      <chat-message-reneged
-        v-if="otheruser"
-        :id="id"
-        :chatid="chatid"
-        :pov="pov"
-      />
+      <chat-message-reneged v-if="otheruser" :id="id" :chatid="chatid" :pov="pov" />
     </div>
     <div v-else-if="chatmessage?.type === 'Address'">
-      <chat-message-address
-        v-if="otheruser"
-        :id="id"
-        :chatid="chatid"
-        :pov="pov"
-      />
+      <chat-message-address v-if="otheruser" :id="id" :chatid="chatid" :pov="pov" />
     </div>
     <div v-else-if="chatmessage?.type === 'Nudge'">
-      <chat-message-nudge
-        v-if="otheruser"
-        :id="id"
-        :chatid="chatid"
-        :pov="pov"
-      />
+      <chat-message-nudge v-if="otheruser" :id="id" :chatid="chatid" :pov="pov" />
     </div>
     <div v-else-if="chatmessage.type === 'ReportedUser'">
       <chat-message-report :id="id" :chatid="chatid" :pov="pov" />
@@ -81,11 +48,7 @@
     <chat-message-warning v-if="phoneNumber" />
     <chat-message-date-read :id="id" :chatid="chatid" :last="last" :pov="pov" />
 
-    <ConfirmModal
-      v-if="showConfirmModal"
-      @confirm="deleteMessage"
-      @hidden="showConfirmModal = false"
-    >
+    <ConfirmModal v-if="showConfirmModal" @confirm="deleteMessage" @hidden="showConfirmModal = false">
       <p>
         We will delete this from our system, so you will no longer see it here.
       </p>
@@ -95,26 +58,19 @@
       </p>
       <p>Are you sure you want to delete the message?</p>
     </ConfirmModal>
-    <ResultModal
-      v-if="showDeleteMessageResultModal"
-      :title="
-        deleteMessageSucceeded ? 'Delete Succeeded' : 'Sorry, that didn\'t work'
-      "
-      @hidden="showDeleteMessageResultModal = false"
-    >
+    <ResultModal v-if="showDeleteMessageResultModal" :title="deleteMessageSucceeded ? 'Delete Succeeded' : 'Sorry, that didn\'t work'
+      " @hidden="showDeleteMessageResultModal = false">
       <template v-if="deleteMessageSucceeded">
         <p>We've deleted your chat message.</p>
       </template>
       <template v-else>
-        <p>Please contact <SupportLink /> if you need further help.</p>
+        <p>Please contact
+          <SupportLink /> if you need further help.
+        </p>
       </template>
     </ResultModal>
     <div v-if="selected">
-      <b-button
-        v-if="chatmessage?.userid !== myid"
-        variant="link"
-        @click="markUnread"
-      >
+      <b-button v-if="chatmessage?.userid !== myid" variant="link" @click="markUnread">
         Mark unread
       </b-button>
       <b-button v-else variant="link" @click="showDeleteMessageModal">
