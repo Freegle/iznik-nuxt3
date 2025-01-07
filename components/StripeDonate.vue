@@ -161,8 +161,14 @@ onMounted(() => {
         })
         emit('error')
       } else {
-        // The payment UI automatically closes with a success animation.
-        // Your customer is redirected to your `return_url` if required.
+        // The payment UI is support to automatically close. But we have
+        // seen a PayPal overlay persist, so remove that if it's present.
+        const overlap = document.querySelectorAll('[data-testid="overlay"]')
+
+        overlap.forEach((el) => {
+          el.remove()
+        })
+
         emit('success')
       }
     } else {

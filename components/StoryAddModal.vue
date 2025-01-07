@@ -19,8 +19,11 @@
               v-model="story.headline"
               spellcheck="true"
               maxlength="140"
-              placeholder="Give us a soundbite!"
+              placeholder="Give us a summary!"
               class="mb-1"
+              :class="{
+                'is-invalid': noHeadline,
+              }"
             />
             <h3>Your story</h3>
             <p>Ok, now tell us why you freegle!</p>
@@ -29,6 +32,9 @@
               spellcheck="true"
               rows="5"
               class="mb-1"
+              :class="{
+                'is-invalid': noStory,
+              }"
               placeholder="What have you given, what have you received, how does it feel, who have you met...?"
             />
             <h3>Add a photo</h3>
@@ -171,6 +177,8 @@ export default {
       },
       thankyou: false,
       currentAtts: [],
+      noHeadline: false,
+      noStory: false,
     }
   },
   computed: {
@@ -226,6 +234,9 @@ export default {
       this.story.image = null
     },
     async submit() {
+      this.noHeadline = false
+      this.noStory = false
+
       if (this.story.headline && this.story.story) {
         await this.storyStore.add(
           this.story.headline,
@@ -235,6 +246,14 @@ export default {
         )
 
         this.thankyou = true
+      } else {
+        if (!this.story.headline) {
+          this.noHeadline = true
+        }
+
+        if (!this.story.story) {
+          this.noStory = true
+        }
       }
     },
   },

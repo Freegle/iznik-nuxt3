@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import api from '~/api'
 
 export const useMiscStore = defineStore({
   id: 'misc',
@@ -11,7 +12,7 @@ export const useMiscStore = defineStore({
             // These are sticky preferences.
             {
               storage: localStorage,
-              paths: ['vals'],
+              paths: ['vals', 'source'],
             },
           ],
   },
@@ -30,6 +31,7 @@ export const useMiscStore = defineStore({
     stickyAdRendered: 0,
     adsDisabled: false,
     lastTyping: null,
+    source: null,
   }),
   actions: {
     init(config) {
@@ -43,6 +45,10 @@ export const useMiscStore = defineStore({
     },
     setBreakpoint(val) {
       this.breakpoint = val
+    },
+    setSource(val) {
+      this.source = val
+      api(this.config).logs.src(val)
     },
     api(diff) {
       this.apiCount += diff
