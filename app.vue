@@ -289,6 +289,14 @@ if (process.client) {
         }
       }
     }
+
+    // Extract any src parameter from the url
+    const src = new URLSearchParams(window.location.search).get('src')
+    if (src) {
+      // Store the source in the store
+      console.log('Record source in store', src)
+      miscStore.setSource(src)
+    }
   }
 
   const chatCount = computed(() => {

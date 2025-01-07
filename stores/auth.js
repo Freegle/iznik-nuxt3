@@ -7,6 +7,7 @@ import { useMobileStore } from '@/stores/mobile'
 // import { FacebookLogin } from '@capacitor-community/facebook-login'
 import { FacebookLogin } from '@whiteguru/capacitor-plugin-facebook-login'
 import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth'
+import { useMiscStore } from '~/stores/misc'
 
 export const useAuthStore = defineStore({
   id: 'auth',
@@ -76,6 +77,13 @@ export const useAuthStore = defineStore({
             facebook: true,
             app: true,
           }
+        }
+
+        const miscStore = useMiscStore()
+        if (!this.user.source && miscStore.source) {
+          // Record that this user came from this source.
+          console.log('Logged in and no source - update', value)
+          this.saveAndGet({ source: miscStore.source })
         }
 
         // Ensure we don't store any password (it shouldn't get persisted anyway, but let's be careful).

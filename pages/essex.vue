@@ -6,43 +6,51 @@
         <b-col cols="12" lg="6" class="p-0">
           <div>
             <div class="bg-white pb-2">
-              <h1>
-                <div class="d-flex justify-content-between">
-                  <div class="ms-1 ms-md-2 flex-shrink-1">
-                    Welcome to Essex Freegle!
-                    <br />
-                    <div class="subtitle">
-                      All across Essex people are already saving pre-loved items
-                      from going to landfill. Why not join them?
-                    </div>
+              <div class="subtitle pl-2">
+                <ExternalLink
+                  href="https://loveessex.org/"
+                  class="p-2 mr-2 mt-1 mb-1 float-end"
+                >
+                  <div class="imglayout">
+                    <b-img
+                      src="/essex/REUSE_Freegle.png"
+                      alt="Image of freegling a pushchair"
+                      class="pushchair"
+                    />
+                    <b-img
+                      src="/essex/love-essex-logo-transparent.png"
+                      alt="Love Essex logo"
+                      class="logo"
+                    />
                   </div>
-                  <div class="p-2 mr-2 mt-1">
-                    <ExternalLink href="https://loveessex.org/">
-                      <b-img
-                        src="https://www.loveessex.org/themes/custom/love_essex/assets/images/logos/love-essex-logo-transparent.png"
-                        alt="Love Essex logo"
-                        class="bg-green"
-                        width="150"
-                      />
-                    </ExternalLink>
-                  </div>
-                </div>
-              </h1>
-              <hr class="text-muted mt-0" />
-              <p class="text-center font-weight-bold">
-                Dive straight in! Give something away or ask for what you need.
-                Everything on Freegle is completely free.
-              </p>
+                </ExternalLink>
+                <p class="font-weight-bold">
+                  <span class="d-none d-md-inline">
+                    All across Essex people are already saving pre-loved items
+                    from going to landfill. Why not join them?
+                  </span>
+                  <span class="d-inline d-md-none">
+                    Across Essex people are saving pre-loved items from
+                    landfill. Join in!
+                  </span>
+                </p>
+                <p>
+                  <span class="d-none d-md-inline">Dive straight in! </span>Give
+                  <span class="d-none d-md-inline">something </span>away, ask
+                  for what you need, or scroll down for things other people are
+                  freegling.
+                </p>
+                <p class="font-weight-bold">
+                  Everything on Freegle is completely free.
+                </p>
+              </div>
+              <hr class="text-muted m-0 mb-1" />
               <GiveAsk />
-              <p class="text-center font-weight-bold mt-1">
-                Or scroll down for things other people are freegling.
-              </p>
             </div>
             <client-only>
               <PostMapAndList
                 v-if="initialBounds"
                 :initial-bounds="initialBounds"
-                class="mt-2"
                 show-start-message
                 :show-closest-groups="false"
                 force-messages
@@ -67,6 +75,7 @@ import { buildHead } from '../../../composables/useBuildHead'
 import { useAuthorityStore } from '~/stores/authority'
 import { loadLeaflet } from '~/composables/useMap'
 
+console.log('Starting Essex page')
 const runtimeConfig = useRuntimeConfig()
 const route = useRoute()
 
@@ -74,7 +83,7 @@ useHead(
   buildHead(
     route,
     runtimeConfig,
-    'Explore Essex Freegle',
+    'Essex Freegle',
     "There are lots of lovely communities of freeglers in Essex. Shall we see what they're up to?",
     null,
     {
@@ -124,8 +133,46 @@ function idle(map) {
 }
 </script>
 <style scoped lang="scss">
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
+
 .subtitle {
   font-size: 1rem;
   color: black;
+
+  min-height: 200px;
+
+  @include media-breakpoint-up(md) {
+    min-height: 250px;
+  }
+}
+
+.imglayout {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+
+  .logo {
+    grid-row: 1 / 2;
+    grid-column: 1 / 2;
+    width: 70px;
+    margin-left: 30px;
+
+    @include media-breakpoint-up(md) {
+      width: 100px;
+      margin-left: 50px;
+    }
+  }
+
+  .pushchair {
+    grid-row: 1 / 2;
+    grid-column: 1 / 2;
+    height: 200px;
+
+    @include media-breakpoint-up(md) {
+      height: 250px;
+    }
+  }
 }
 </style>

@@ -380,7 +380,7 @@ export default {
       }
     },
     showGroups(newVal) {
-      if (!newVal) {
+      if (!newVal && !this.authorityid) {
         this.getMessages()
       }
     },

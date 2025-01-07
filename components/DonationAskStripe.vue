@@ -86,11 +86,13 @@
   </div>
 </template>
 <script>
+import DonationButton from './DonationButton'
 import SupporterInfo from './SupporterInfo'
 
 export default {
   components: {
     SupporterInfo,
+    DonationButton,
   },
   props: {
     groupid: {

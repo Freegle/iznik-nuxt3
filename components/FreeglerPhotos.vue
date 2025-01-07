@@ -2,7 +2,6 @@
   <div class="d-flex flex-column justify-content-between">
     <div class="flex-grow-1">
       <client-only fallback-tag="div">
-        <!--    todo    ride="carousel"-->
         <BCarousel
           class="carousel"
           background="/landingpage/frame.png"
@@ -23,7 +22,7 @@
                   src="/landingpage/frame.png"
                   class-name="frame"
                   alt="Ornate gold picture frame. Image courtesy of https://pixabay.com/users/avantrend-321510/"
-                  sizes="1px sm:576px md:76px"
+                  sizes="1px sm:576px md:768px"
                 />
                 <ProxyImage
                   loading="lazy"

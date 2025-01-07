@@ -33,18 +33,39 @@
             class="bg-white p-2"
           >
             <h1>Sorry, that post isn't around any more.</h1>
-            <div v-if="message?.deadline">
-              <p>
-                There was a deadline of
-                {{ dateonlyNoYear(message.deadline) }}.
-              </p>
-            </div>
+            <p
+              v-if="
+                message.outcomes?.length &&
+                message.outcomes[0].outcome === 'Taken'
+              "
+            >
+              It was successfully taken.
+            </p>
+            <p
+              v-else-if="
+                message.outcomes?.length &&
+                message.outcomes[0].outcome === 'Received'
+              "
+            >
+              It was successfully received.
+            </p>
+            <p
+              v-else-if="
+                message.outcomes?.length &&
+                message.outcomes[0].outcome === 'Withdrawn'
+              "
+            >
+              It was withdrawn.
+            </p>
+            <p v-else-if="message?.deadline">
+              There was a deadline of
+              {{ dateonlyNoYear(message.deadline) }}.
+            </p>
             <div v-else>
               <p>
                 If it was an OFFER, it's probably been TAKEN. If it was a
                 WANTED, it's probably been RECEIVED.
               </p>
-              <p>Why not look for something else?</p>
             </div>
             <b-row>
               <b-col cols="5" class="mt-1">
