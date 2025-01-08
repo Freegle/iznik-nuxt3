@@ -63,7 +63,7 @@
               <DonationButton
                 v-if="payPalFallback"
                 :key="amount"
-                :text="'Donate £' + amount3"
+                :text="'Donate £' + amount"
                 :value="amount"
               />
               <StripeDonate
