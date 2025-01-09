@@ -35,24 +35,24 @@
             <h1>Sorry, that post isn't around any more.</h1>
             <p
               v-if="
-                message.outcomes?.length &&
-                message.outcomes[0].outcome === 'Taken'
+                message?.outcomes?.length &&
+                message?.outcomes[0].outcome === 'Taken'
               "
             >
               It was successfully taken.
             </p>
             <p
               v-else-if="
-                message.outcomes?.length &&
-                message.outcomes[0].outcome === 'Received'
+                message?.outcomes?.length &&
+                message?.outcomes[0].outcome === 'Received'
               "
             >
               It was successfully received.
             </p>
             <p
               v-else-if="
-                message.outcomes?.length &&
-                message.outcomes[0].outcome === 'Withdrawn'
+                message?.outcomes?.length &&
+                message?.outcomes[0].outcome === 'Withdrawn'
               "
             >
               It was withdrawn.
