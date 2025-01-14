@@ -11,6 +11,7 @@
               :initial-bounds="initialBounds"
               class="mt-2"
               show-start-message
+              :min-zoom="minZoom"
             />
           </div>
           <b-alert v-else :model-value="true" variant="danger">
@@ -57,10 +58,11 @@ export default {
     const groupStore = useGroupStore()
     const place = route.params.place ? JSON.parse(route.params.place) : null
     const initialBounds = place && place.bbox ? place.bbox : null
+    const minZoom = place?.minZoom
 
     await groupStore.fetch()
 
-    return { groupStore, place, initialBounds }
+    return { groupStore, place, initialBounds, minZoom }
   },
 }
 </script>
