@@ -236,7 +236,7 @@
       <DeadlineAskModal
         v-if="askDeadline"
         :ids="[id]"
-        :set="message.deadline.substring(0, 10)"
+        :set="message.deadline?.substring(0, 10)"
       />
     </div>
   </div>

@@ -98,6 +98,7 @@
                       @click="gotoChat(c.id)"
                     >
                       <ChatListEntry
+                        v-if="c.lastmsg > 0"
                         :id="c.id"
                         :active="selectedChatId === c?.id"
                       />
@@ -114,6 +115,7 @@
                       @click="gotoChat(c.id)"
                     >
                       <ChatListEntry
+                        v-if="c.lastmsg > 0"
                         :id="c.id"
                         :active="selectedChatId === c?.id"
                       />

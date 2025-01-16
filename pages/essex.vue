@@ -46,6 +46,15 @@
               </div>
               <hr class="text-muted m-0 mb-1" />
               <GiveAsk />
+              <client-only class="pl-2">
+                <PlaceAutocomplete
+                  class="mb-2"
+                  labeltext="Or enter your location and we'll help you join your local
+                  Freegle community."
+                  labeltext-sr="Enter your location"
+                  @selected="explorePlace($event)"
+                />
+              </client-only>
             </div>
             <client-only>
               <PostMapAndList
@@ -130,6 +139,11 @@ function idle(map) {
 
     addedPolygon.value = true
   }
+}
+function explorePlace(place) {
+  const router = useRouter()
+  place.minZoom = 12
+  router.push('/explore/place/' + JSON.stringify(place))
 }
 </script>
 <style scoped lang="scss">
