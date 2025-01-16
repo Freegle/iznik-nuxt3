@@ -251,7 +251,8 @@ export default defineNuxtPlugin((nuxtApp) => {
               ) ||
               originalExceptionMessage?.includes(
                 "Cannot read properties of null (reading 'latLngToLayerPoint')"
-              )
+              ) ||
+              originalExceptionMessage?.includes('latLngToLayerPoint')
             ) {
               // This is a leaflet error - don't understand it, but not our fault.
               return null
