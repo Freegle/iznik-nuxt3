@@ -664,13 +664,7 @@ export default {
         console.log('Get messages within authority')
         ret = await this.authorityStore.fetchMessages(this.authorityid)
 
-        // And fetch the others, so that we can show them as secondary.
-        this.secondaryMessageList = await this.messageStore.fetchInBounds(
-          swlat,
-          swlng,
-          nelat,
-          nelng
-        )
+        // Don't fetch the other messages - this may return so many it's too much load on the client.
       } else if (this.showIsochrones) {
         // We are trying to show posts nearby.
         if (this.isochrones?.length) {

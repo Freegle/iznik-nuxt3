@@ -6,6 +6,8 @@ import config from './config'
 
 // @ts-ignore
 export default defineNuxtConfig({
+  devtools: { enabled: true },
+
   // Rendering modes are confusing.
   //
   // - target can be:

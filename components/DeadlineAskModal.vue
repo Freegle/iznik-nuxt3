@@ -1,7 +1,8 @@
 <template>
   <b-modal ref="modal" scrollable no-stacking>
     <template #title>
-      <h2>Is there a deadline?</h2>
+      <h2 v-if="set">Set a deadline</h2>
+      <h2 v-else>Is there a deadline?</h2>
     </template>
     <template #default>
       <p>
@@ -63,12 +64,17 @@ const props = defineProps({
     type: Array,
     required: true,
   },
+  set: {
+    type: Date,
+    required: false,
+    default: null,
+  },
 })
 
 const messageStore = useMessageStore()
 const emit = defineEmits(['hide'])
 
-const showInput = ref(false)
+const showInput = ref(props.set !== null)
 
 // Set deadline to date of MESSAGE_EXPIRE_TIME days from now
 const defaultDeadline = new Date(
@@ -77,7 +83,7 @@ const defaultDeadline = new Date(
   .toISOString()
   .substring(0, 10)
 
-const deadline = ref(defaultDeadline)
+const deadline = ref(props.set ? props.set : defaultDeadline)
 const today = computed(() => {
   return new Date(Date.now()).toISOString().substring(0, 10)
 })

@@ -1,7 +1,7 @@
 <template>
   <div v-observe-visibility="visibilityChanged">
     <div v-if="visible && message?.id">
-      <div v-if="showOld || !message.outcomes || !message.outcomes.length">
+      <div v-if="showOld || !message.outcomes?.length">
         <b-card
           no-body
           class="mb-1 bnuorder"
@@ -75,7 +75,7 @@
                   RECEIVED
                 </b-button>
                 <b-button
-                  v-if="!rejected"
+                  v-if="!rejected && !message.outcomes?.length"
                   variant="secondary"
                   class="mr-2 mb-1"
                   @click="edit"
@@ -93,6 +93,22 @@
                 </b-button>
                 <b-button
                   v-if="
+                    !rejected &&
+                    message.deadline &&
+                    new Date(message.deadline).getTime() <
+                      new Date().getTime() &&
+                    message.location &&
+                    message.item
+                  "
+                  variant="primary"
+                  class="mr-2 mb-1"
+                  @click="extendDeadline"
+                >
+                  <v-icon class="d-none d-sm-inline" icon="sync" /> Extend
+                  deadline
+                </b-button>
+                <b-button
+                  v-else-if="
                     !rejected &&
                     message.canrepost &&
                     message.location &&
@@ -217,6 +233,11 @@
         :users="replyusers"
         @hidden="showPromiseModal = false"
       />
+      <DeadlineAskModal
+        v-if="askDeadline"
+        :ids="[id]"
+        :set="message.deadline?.substring(0, 10)"
+      />
     </div>
   </div>
 </template>
@@ -317,6 +338,7 @@ export default {
       broken: false,
       triedToRepost: false,
       bump: 0,
+      askDeadline: false,
     }
   },
   computed: {
@@ -595,6 +617,8 @@ export default {
         case 'promise':
           this.showPromiseModal = true
           break
+        case 'extend':
+          this.askDeadline = true
       }
     }
   },
@@ -722,6 +746,9 @@ export default {
     hidden() {
       this.showEditModal = false
       this.messageStore.fetch(this.id)
+    },
+    extendDeadline() {
+      this.askDeadline = true
     },
   },
 }

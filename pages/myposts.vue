@@ -38,7 +38,17 @@
               >
                 We're a charity - free to use, but not free to run. Help us keep
                 going by donating £1?
-                <StripeDonate :price="1" @success="donationMade" />
+                <DonationButton
+                  v-if="payPalFallback"
+                  :text="'Donate £1'"
+                  :value="1"
+                />
+                <StripeDonate
+                  v-else
+                  :price="1"
+                  @success="donationMade"
+                  @no-payment-methods="noMethods"
+                />
               </NoticeMessage>
             </div>
 
@@ -210,6 +220,12 @@ function donationMade() {
   })
 
   donated.value = true
+}
+
+const payPalFallback = ref(false)
+
+function noMethods() {
+  payPalFallback.value = true
 }
 </script>
 <style scoped lang="scss">

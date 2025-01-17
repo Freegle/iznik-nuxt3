@@ -30,11 +30,11 @@
       <li>You must be aged 13 or over, as there is user-generated content.</li>
       <li>
         <!-- eslint-disable-next-line-->
-        We'll keep your personal data private - see <nuxt-link no-prefetch to="/privacy">privacy page</nuxt-link>.
+        We'll keep your personal data private - see <nuxt-link no-prefetch to="/privacy">privacy policy</nuxt-link>.
       </li>
       <li>
         <!-- eslint-disable-next-line-->
-        Your posts will be public - see <nuxt-link no-prefetch to="/privacy">privacy page</nuxt-link>.
+        Your posts will be public - see <nuxt-link no-prefetch to="/privacy">privacy policy</nuxt-link>.
       </li>
       <li>
         <!-- eslint-disable-next-line-->

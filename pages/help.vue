@@ -97,8 +97,9 @@
           <HelpQuestion id="gdpr" :matches="matches">
             <template #title>What data do you store about me?</template>
             <p>
-              If you're really into privacy or GDPR, you can see what data we
-              store about you, and download it,
+              If you're really into privacy or GDPR, you can read our
+              <nuxt-link no-prefetch to="/privacy">privacy policy</nuxt-link>.
+              You can see what data we store about you, and download it,
               <nuxt-link no-prefetch to="/mydata">here</nuxt-link>.
             </p>
           </HelpQuestion>
@@ -210,6 +211,16 @@
                 shown on there, so you might get replies from LoveJunk reusers.
                 Again, you might not notice that they are from LoveJunk - just
                 treat them like you would do any other freeglers.
+              </p>
+            </div>
+          </HelpQuestion>
+          <HelpQuestion id="about" :matches="matches">
+            <template #title> How is Freegle run and funded? </template>
+            <div>
+              <p>
+                You can read about who we are, how we're funded, and our legal
+                structure
+                <nuxt-link no-prefetch to="/about">here</nuxt-link>.
               </p>
             </div>
           </HelpQuestion>
