@@ -10,6 +10,7 @@
       </NoticeMessage-->
       <div class="d-flex justify-content-between">
         <GroupSelect v-model="groupid" all modonly :work="['pending', 'pendingother']" remember="pending" />
+        <ModtoolsViewControl misckey="modtoolsMessagesPendingSummary" />
         <b-button variant="link" @click="loadAll">
           Load all
         </b-button>
@@ -41,6 +42,7 @@ export default {
     const groupStore = useGroupStore()
     const miscStore = useMiscStore()
     const modMessages = setupModMessages()
+    modMessages.summarykey.value = 'modtoolsMessagesPendingSummary'
     //modMessages.collection.value = ['Pending','PendingOther']
     modMessages.collection.value = 'Pending'
     //modMessages.workType.value = ['pending','pendingother']

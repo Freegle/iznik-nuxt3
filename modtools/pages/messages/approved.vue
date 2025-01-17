@@ -8,7 +8,7 @@
       <span v-else class="mt-2">
         Select a community to search messages.
       </span>
-      <ModtoolsViewControl />
+      <ModtoolsViewControl misckey="modtoolsMessagesApprovedSummary" />
     </div>
     <div>
       <NoticeMessage v-if="!messages.length && !busy" class="mt-2">
@@ -39,6 +39,7 @@ export default {
     const messageStore = useMessageStore()
     const miscStore = useMiscStore()
     const modMessages = setupModMessages()
+    modMessages.summarykey.value = 'modtoolsMessagesApprovedSummary'
     modMessages.collection.value = 'Approved'
     // modMessages.workType.value = 'approved'
     return {

@@ -4,16 +4,21 @@
 </template>
 
 <script setup>
-import { useMiscStore } from '~/stores/misc';
+import { useMiscStore } from '~/stores/misc'
 const miscStore = useMiscStore()
 
+const props = defineProps({
+  misckey: { type: String, required: true },
+})
+
+
 const summary = computed(() => {
-  const ret = miscStore.get('modtoolsMessagesApprovedSummary')
+  const ret = miscStore.get(props.misckey)
   return typeof ret === 'undefined' ? false : ret
 })
 
 const toggleView = (c, e) => {
-  miscStore.set({ key: 'modtoolsMessagesApprovedSummary', value: c })
+  miscStore.set({ key: props.misckey, value: c })
 }
 
 </script>

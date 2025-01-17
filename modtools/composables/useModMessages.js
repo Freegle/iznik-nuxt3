@@ -3,6 +3,7 @@ import { useGroupStore } from '@/stores/group'
 import { useMessageStore } from '../../stores/message'
 import { useMiscStore } from '@/stores/misc'
 
+const summarykey = ref(false)
 const busy = ref(false)
 const context = ref(null)
 const groupid = ref(0)
@@ -19,8 +20,9 @@ const nextAfterRemoved = ref(null)
 const distance = ref(10)
 
 const summary = computed(() => {
+  if( !summarykey.value) return false
   const miscStore = useMiscStore()
-  const ret = miscStore.get('modtoolsMessagesApprovedSummary')
+  const ret = miscStore.get(summarykey.value)
   return ret === undefined ? false : ret
 })
 
@@ -170,6 +172,7 @@ export function setupModMessages() {
     memberTerm,
     nextAfterRemoved,
     distance,
+    summarykey,
     summary,
     messages,
     visibleMessages,
