@@ -62,11 +62,7 @@
               </BFormCheckbox-->
               <DonationButton
                 v-if="payPalFallback"
-<<<<<<< HEAD
-                :key="amount"
-=======
                 :key="amount + '-fallback'"
->>>>>>> production
                 :text="'Donate £' + amount"
                 :value="amount"
               />
