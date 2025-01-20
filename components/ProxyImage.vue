@@ -106,14 +106,15 @@ const fullSrc = computed(() => {
     const encodedQuery = encodeURIComponent(query)
     ret = base + '?' + encodedQuery
   }
-  //console.log('fullSrc',ret)
+if( props.src!=ret) console.log('fullSrc', ret)
   return ret
 })
 
 const emit = defineEmits(['error'])
 
 function brokenImage(e) {
-  console.log('Proxy image broken',e)
+  console.log('===', props.src, fullSrc.value, props.src, props.modifiers, props.preload, props.loading, props.className, props.fluid, props.fit, props.format, props.alt, props.width, props.height, props.alt, props.placeholder)
+  console.log('Proxy image broken', e)
   emit('error', e)
 }
 </script>

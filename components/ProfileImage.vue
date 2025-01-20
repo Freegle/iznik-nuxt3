@@ -151,7 +151,6 @@ export default {
   },
   methods: {
     brokenProfileImage(e) {
-      console.log('PI brokenProfileImage',this.image)
       this.brokenImage = true
     },
   },
