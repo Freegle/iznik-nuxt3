@@ -206,7 +206,7 @@
               <ModGroupRule :groupid="groupid" name="restrictpersonalinfo"
                 label="Do you restrict personal info in posts eg telephone numbers, addresses?" type="toggle" toggle-checked="Yes"
                 toggle-unchecked="No" />
-              <ModGroupRule :groupid="groupid" name="restrictpersonalinfo" label="Do you remove any members purely for being out of your group area?"
+              <ModGroupRule :groupid="groupid" name="restrictdistance" label="Do you remove any members purely for being out of your group area?"
                 type="toggle" toggle-checked="Yes" toggle-unchecked="No" />
               <h4>Rules about specific items</h4>
               <ModGroupRule :groupid="groupid" name="animalswanted" label="Do you allow any requests for animals on your group?" type="toggle"
