@@ -27,7 +27,6 @@ export default {
   },
   methods: {
     view() {
-      console.log('MCVB view')
       this.showModal = true
       this.$refs.modChatModal?.show()
     }

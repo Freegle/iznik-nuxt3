@@ -52,6 +52,7 @@ export const useChatStore = defineStore({
         current = chatid && this.list[chatid] ? this.list[chatid] : null
   
         const { chatrooms } = await api(this.config).chat.listChatsMT(params)
+        //console.log('uCS listChatsMT',chatrooms)
         this.list = chatrooms
         chatrooms.forEach((c) => {
           //console.log('uCS listChatsMT',c.id)
@@ -62,7 +63,8 @@ export const useChatStore = defineStore({
             this.listByChatId[c.id].lastdate !== c.lastdate
           ) {
             this.listByChatId[c.id] = c
-          }
+          // console.log('uCS listChatsMT',c.id, c)
+        }
         })
   
         if( selectedChatId){
@@ -145,10 +147,10 @@ export const useChatStore = defineStore({
       if (id > 0) {
         const miscStore = useMiscStore() // MT ADDED
         if( miscStore.modtools){
-          console.log('uCS fetchChat',id)
-          const chat = await api(this.config).chat.fetchChatMT(id)
-          //const chat = await api(this.config).chat.fetchMessagesMT(id)
-          this.listByChatId[id] = chat
+          //console.log('uCS fetchChat',id)
+          const { chatroom } = await api(this.config).chat.fetchChatMT(id)
+          this.list[id] = chatroom
+          this.listByChatId[id] = chatroom
         } else {
           const chat = await api(this.config).chat.fetchChat(id, false)
           this.listByChatId[id] = chat

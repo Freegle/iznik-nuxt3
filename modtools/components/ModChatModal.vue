@@ -117,7 +117,6 @@ export default {
     }
   },
   async mounted() {
-    console.log("MCM mounted", this.id, this.chat, this.messages)
     await this.show()
 
   },
@@ -128,7 +127,7 @@ export default {
       let ret = null
 
       if (this.chat2) {
-        if (this.chat2.user1 && this.chat2.user1 === this.pov) {
+        if (this.chat2.user1 && this.chat2.user1.id === this.pov) {
           ret = this.chat2.user2
         } else {
           ret = this.chat2.user1
@@ -140,7 +139,7 @@ export default {
       let ret = null
 
       if (this.chat2) {
-        if (this.chat2.user2 && this.chat2.user2 === this.pov) {
+        if (this.chat2.user2 && this.chat2.user2.id === this.pov) {
           ret = this.chat2.user2
         } else {
           ret = this.chat2.user1
@@ -152,7 +151,8 @@ export default {
   },
   methods: {
     async show() {
-      await this.chatStore.fetchChats({ fetchChats: ['User2Mod', 'Mod2Mod'] }) // Wrongly gets for current user
+      //await this.chatStore.listChatsMT({ chattypes: ['User2Mod', 'Mod2Mod'] }, this.id)
+      await this.chatStore.fetchChat(this.id)
       await this.chatStore.fetchMessages(this.id)
       this.chat2 = this.chatStore.byChatId(this.id)
       this.modal.show()
@@ -171,7 +171,6 @@ export default {
       this.hide()
     },
     loadMore($state) {
-      console.log('MCM loadMore', this.chatmessages?.length)
       $state.complete()
     }
   }

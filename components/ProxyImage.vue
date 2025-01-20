@@ -1,4 +1,5 @@
 <template>
+  <!-- TODO: Fix up so that NuxtPicture works. Seems to go wrong in MT chats list -->
   <span :class="className"><img :src="src" :alt="alt" :width="width" :height="height":placeholder="placeholder"/></span>
   <!--NuxtPicture
     :format="format"
