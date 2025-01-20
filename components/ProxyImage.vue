@@ -1,5 +1,6 @@
 <template>
-  <NuxtPicture
+  <span :class="className"><img :src="src" :alt="alt" :width="width" :height="height":placeholder="placeholder"/></span>
+  <!--NuxtPicture
     :format="format"
     :fit="fit"
     :preload="preload"
@@ -14,7 +15,7 @@
     :sizes="sizes"
     :placeholder="placeholder"
     @error="brokenImage"
-  />
+  /-->
 </template>
 <script setup>
 import * as Sentry from '@sentry/browser'
@@ -113,7 +114,7 @@ if( props.src!=ret) console.log('fullSrc', ret)
 const emit = defineEmits(['error'])
 
 function brokenImage(e) {
-  console.log('===', props.src, fullSrc.value, props.src, props.modifiers, props.preload, props.loading, props.className, props.fluid, props.fit, props.format, props.alt, props.width, props.height, props.alt, props.placeholder)
+  console.log('===', props.src, fullSrc.value, props.src, props.modifiers, props.preload, props.loading, props.className, props.fluid, props.fit, props.format, props.alt, props.width, props.height, props.sizes, props.placeholder)
   console.log('Proxy image broken', e)
   emit('error', e)
 }
