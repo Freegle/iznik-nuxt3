@@ -1,8 +1,6 @@
 <template>
   <div>
-    volunteerings: {{ volunteerings.length }}
     <div v-for="volunteering in volunteerings" :key="'volunteeringlist-' + volunteering.id" class="p-0 mt-2">
-      {{ volunteering.id }} {{ volunteering.pending }}
       <ModVolunteerOpportunity :id="volunteering.id" :volunteering="volunteering" />
     </div>
     <NoticeMessage v-if="!Object.keys(volunteerings).length && !busy" class="mt-2">
@@ -44,7 +42,6 @@ export default {
   },
   computed: {
     volunteerings() {
-      console.log('id vs',Object.values(this.volunteeringStore.list))
       return Object.values(this.volunteeringStore.list)
     },
     volwork() {

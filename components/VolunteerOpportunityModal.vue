@@ -191,7 +191,7 @@
               </b-form-group>
             </b-col>
             <b-col v-if="enabled" cols="12" md="6">
-              <div v-if="image" class="container">
+              <div v-if="volunteering.image" class="container">
                 <div
                   class="clickme rotateleft stacked"
                   label="Rotate left"
@@ -212,18 +212,18 @@
                 </div>
                 <div class="image d-flex justify-content-around">
                   <OurUploadedImage
-                    v-if="image?.imageuid"
-                    width="200"
-                    :src="image.imageuid"
+                    v-if="volunteering.image?.imageuid"
+                    :width="200"
+                    :src="volunteering.image.imageuid"
                     :modifiers="mods"
                     alt="Volunteer Opportunity Photo"
                     class="mb-2"
                   />
                   <b-img
-                    v-else-if="image"
+                    v-else-if="volunteering.image"
                     fluid
                     :src="
-                      image.paththumb + '?volunteering=' + id + '-' + cacheBust
+                      volunteering.image.paththumb + '?volunteering=' + id + '-' + cacheBust
                     "
                   />
                   <b-img v-else width="250" thumbnail src="/placeholder.jpg" />
@@ -574,6 +574,9 @@ export default {
       if (!ret) {
         ret = initialVolunteering()
       }
+      if( ret) {
+        this.description = ret.description
+      }
 
       return ret
     },
@@ -618,7 +621,7 @@ export default {
   watch: {
     event: {
       handler(newVal) {
-        console.log('VOM event handler',newVal)
+        // console.log('VOM event handler',newVal)
         let desc = newVal?.description
         desc = desc ? twem(desc) : ''
         desc = desc.trim()
@@ -629,7 +632,6 @@ export default {
     },
     description: {
       handler(newVal) {
-        console.log('VOM description handler',newVal)
         this.volunteering.description = newVal
       },
     },
@@ -753,9 +755,7 @@ export default {
           newdates: wip.dates,
         })
 
-        const miscStore = useMiscStore()
-        console.log('miscStore.modtools', miscStore.modtools)
-        await this.volunteeringStore.save(wip, miscStore.modtools)
+        await this.volunteeringStore.save(wip)
 
         this.added = true
       } else {

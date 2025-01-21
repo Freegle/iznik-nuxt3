@@ -4,6 +4,7 @@ import { nextTick } from 'vue'
 import api from '~/api'
 import { addStrings, earliestDate } from '~/composables/useTimeFormat'
 import { useAuthStore } from '~/stores/auth'
+import { useMiscStore } from '~/stores/misc'
 
 export const useVolunteeringStore = defineStore({
   id: 'volunteering',
@@ -67,22 +68,34 @@ export const useVolunteeringStore = defineStore({
           }
           this.list[item.id] = item
         }
-        console.log('uVS fetchMT',Object.values(this.list).length)
         //this.context = context
       }
   },
     async fetch(id, force) {
       try {
-        console.log('uVS fetch',id,this.list[id])
+        const miscStore = useMiscStore()
         if (force || !this.list[id]) {
           if (this.fetching[id]) {
             await this.fetching[id]
             await nextTick()
           } else {
-            console.log('uVS refetch',id)
-            this.fetching[id] = api(this.config).volunteering.fetch(id, false)
+            if( miscStore.modtools) {
+              this.fetching[id] = api(this.config).volunteering.fetchMT({ id, pending: true})
+            } else {
+              this.fetching[id] = api(this.config).volunteering.fetch(id, false)
+            }
             let item = await this.fetching[id]
-            console.log('uVS refetched',item)
+            if( item.volunteering) {
+              item = item.volunteering
+              item.image = item.photo
+              item.userid = item.user.id
+              item.groupsmt = item.groups
+              const groups = []
+              for( const group of item.groups){
+                groups.push(group.id)
+              }
+              item.groups = groups
+            }
             item = addStrings(item, false)
 
             if (item.dates) {
@@ -99,7 +112,6 @@ export const useVolunteeringStore = defineStore({
 
             this.list[id] = item
             this.fetching[id] = null
-            console.log('uVS fetch',Object.values(this.list).length)
           }
         }
       } catch (e) {
@@ -165,13 +177,9 @@ export const useVolunteeringStore = defineStore({
 
       return id
     },
-    async save(data,modtools) {
+    async save(data) {
       await api(this.config).volunteering.save(data)
-      if( modtools){
-        this.list[data.id] = data
-      } else {
-        await this.fetch(data.id, true)
-      }
+      await this.fetch(data.id, true)
     },
     async renew(id) {
       await api(this.config).volunteering.renew(id)
