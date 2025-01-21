@@ -22,15 +22,67 @@ export const useVolunteeringStore = defineStore({
       this.forUser = []
       this.forGroup = []
     },
+    async fetchMT(params) {
+      if (!params) {
+        params = {
+          systemwide: true
+        }
+      } else if (!params.groupid) {
+        // Not a specific group - get all of them including systemwide ones.
+        params.systemwide = true
+      }
+  
+      const {
+        volunteering,
+        volunteerings,
+        context
+      } = await api(this.config).volunteering.fetchMT(params)
+
+      if (params && params.id) {
+        this.list[params.id] = volunteering
+      } else {
+        this.list = {}
+        for( const volunteering of volunteerings){
+          if( this.list[volunteering.id]) continue
+          const item = addStrings(volunteering, false)
+          // Convert to v2 format
+          item.image = item.photo
+          item.userid = item.user.id
+          item.groupsmt = item.groups
+          const groups = []
+          for( const group of item.groups){
+            groups.push(group.id)
+          }
+          item.groups = groups
+          if (item.dates) {
+            // API returns dates in ISO8601 but our code wants them split into date and time
+            item.earliestDate = earliestDate(item.dates)
+            item.earliestDateOfAll = earliestDate(item.dates, true)
+            item.dates.forEach((date, index) => {
+              item.dates[index].starttime = dayjs(date.start).format('HH:mm')
+              item.dates[index].start = dayjs(date.start).format('YYYY-MM-DD')
+              item.dates[index].endtime = dayjs(date.end).format('HH:mm')
+              item.dates[index].end = dayjs(date.end).format('YYYY-MM-DD')
+            })
+          }
+          this.list[item.id] = item
+        }
+        console.log('uVS fetchMT',Object.values(this.list).length)
+        //this.context = context
+      }
+  },
     async fetch(id, force) {
       try {
+        console.log('uVS fetch',id,this.list[id])
         if (force || !this.list[id]) {
           if (this.fetching[id]) {
             await this.fetching[id]
             await nextTick()
           } else {
+            console.log('uVS refetch',id)
             this.fetching[id] = api(this.config).volunteering.fetch(id, false)
             let item = await this.fetching[id]
+            console.log('uVS refetched',item)
             item = addStrings(item, false)
 
             if (item.dates) {
@@ -47,6 +99,7 @@ export const useVolunteeringStore = defineStore({
 
             this.list[id] = item
             this.fetching[id] = null
+            console.log('uVS fetch',Object.values(this.list).length)
           }
         }
       } catch (e) {
@@ -75,7 +128,7 @@ export const useVolunteeringStore = defineStore({
     },
     async delete(id) {
       await api(this.config).volunteering.del(id)
-      this.list[id] = null
+      delete this.list[id]
     },
     async setDates(params) {
       const promises = []
@@ -112,9 +165,13 @@ export const useVolunteeringStore = defineStore({
 
       return id
     },
-    async save(data) {
+    async save(data,modtools) {
       await api(this.config).volunteering.save(data)
-      await this.fetch(data.id, true)
+      if( modtools){
+        this.list[data.id] = data
+      } else {
+        await this.fetch(data.id, true)
+      }
     },
     async renew(id) {
       await api(this.config).volunteering.renew(id)

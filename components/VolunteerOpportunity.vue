@@ -217,6 +217,10 @@ export default {
       type: Boolean,
       required: true,
     },
+    item: {
+      type: Object,
+      required: false,
+    },
     id: {
       type: Number,
       required: true,
@@ -262,6 +266,7 @@ export default {
   },
   computed: {
     volunteering() {
+      if( this.item) return this.item
       const v = this.volunteeringStore?.byId(this.id)
 
       if (v) {
@@ -313,7 +318,7 @@ export default {
       return warn
     },
     mine() {
-      return this.user.id === this.myid
+      return this.user?.id === this.myid
     },
   },
   methods: {

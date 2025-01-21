@@ -1,13 +1,15 @@
 <template>
   <div>
+    volunteerings: {{ volunteerings.length }}
     <div v-for="volunteering in volunteerings" :key="'volunteeringlist-' + volunteering.id" class="p-0 mt-2">
-      <ModVolunteerOpportunity :volunteering="volunteering" />
+      {{ volunteering.id }} {{ volunteering.pending }}
+      <ModVolunteerOpportunity :id="volunteering.id" :volunteering="volunteering" />
     </div>
     <NoticeMessage v-if="!Object.keys(volunteerings).length && !busy" class="mt-2">
       There are no volunteer opportunities to review at the moment. This will refresh automatically.
     </NoticeMessage>
 
-    <infinite-loading :distance="distance" @infinite="loadMore">
+    <infinite-loading :distance="distance" @infinite="loadMore" :identifier="bump">
       <template #no-results>
       </template>
       <template #no-more />
@@ -16,13 +18,18 @@
   </div>
 </template>
 <script>
+import { useAuthStore } from '@/stores/auth'
+import { useMiscStore } from '~/stores/misc'
 import { useVolunteeringStore } from '@/stores/volunteering'
 
 export default {
   setup() {
-    console.log('volunteering setup')
+    const authStore = useAuthStore()
+    const miscStore = useMiscStore()
     const volunteeringStore = useVolunteeringStore()
     return {
+      authStore,
+      miscStore,
       volunteeringStore,
     }
   },
@@ -31,21 +38,18 @@ export default {
       distance: 1000,
       limit: 2,
       show: 0,
+      bump: 0,
       busy: false
     }
   },
   computed: {
     volunteerings() {
-      return []
-      //this.volunteeringStore.fetchGroup()
-      //return this.volunteeringStore.forGroup
+      console.log('id vs',Object.values(this.volunteeringStore.list))
+      return Object.values(this.volunteeringStore.list)
     },
     volwork() {
       // Count for the type of work we're interested in.
-      console.log('volunteering work', this.work)
-      return 0
-      //const work = this.$store.getters['auth/work']
-      //return work.pendingvolunteerings
+      return this.authStore.work ? this.authStore.work.pendingvolunteering : 0
     },
     context() {
       return null
@@ -55,26 +59,25 @@ export default {
   watch: {
     volwork(newVal, oldVal) {
       console.log('volunteering watch volwork', newVal, oldVal)
-      /* TODO if (newVal > oldVal) {
+      if (newVal > oldVal) {
         // There's new stuff to do.  Reload.
-        this.$store.dispatch('volunteerops/clear')
+        this.volunteeringStore.clear()
+        this.bump++
       } else {
-        const visible = this.$store.getters['misc/get']('visible')
+        const visible = this.miscStore.get('visible')
   
         if (!visible) {
-          this.$store.dispatch('volunteerops/clear')
+          this.volunteeringStore.clear()
         }
-      }*/
+      }
     }
   },
   mounted() {
     // We don't want to pick up any approved volunteerings.
-    console.log('volunteering mounted')
     this.volunteeringStore.clear()
   },
   methods: {
-    loadMore: function ($state) {
-      console.log('volunteering loadMore A')
+    loadMore: async function ($state) {
       this.busy = true
 
       if (this.show < this.volunteerings.length) {
@@ -84,32 +87,22 @@ export default {
         $state.loaded()
       } else {
         const currentCount = this.volunteerings.length
-        console.log('volunteering loadMore', currentCount)
-        $state.complete()
         this.busy = false
 
-        /*this.$store
-          .dispatch('volunteerops/fetch', {
-            context: this.context,
-            limit: this.limit,
-            pending: true
-          })
-          .then(() => {
-            if (currentCount === this.volunteerings.length) {
-              this.complete = true
-              $state.complete()
-            } else {
-              $state.loaded()
-              this.show++
-            }
-          })
-          .catch(e => {
-            $state.complete()
-            console.log('Complete on error', e)
-          })
-          .finally(() => {
-            this.busy = false
-          })*/
+        await this.volunteeringStore.fetchMT({
+          //context: this.context,
+          limit: this.limit,
+          pending: true
+        })
+        //console.log('volunteering loadMore got', currentCount, this.volunteerings.length)
+        if (currentCount === this.volunteerings.length) {
+          this.complete = true
+          $state.complete()
+        } else {
+          $state.loaded()
+          this.show++
+        }
+        this.busy = false
       }
     }
   }

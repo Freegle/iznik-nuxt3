@@ -142,7 +142,7 @@
           <br />
           <p v-if="user" class="text-muted">
             Posted
-            <span v-if="user.displayname">by {{ user.displayname }}</span>
+            <span v-if="user.displayname">by {{ user.displayname }}&nbsp;</span>
             <span v-for="(group, index) in groups" :key="index">
               <span v-if="index > 0">, </span><span v-else>on </span>
               {{ group.namedisplay }}
@@ -443,6 +443,7 @@ import SpinButton from '~/components/SpinButton.vue'
 import { twem } from '~/composables/useTwem'
 import { ref } from '#imports'
 import { useOurModal } from '~/composables/useOurModal'
+import { useMiscStore } from '~/stores/misc'
 import { useImageStore } from '~/stores/image'
 const GroupSelect = defineAsyncComponent(() =>
   import('~/components/GroupSelect')
@@ -617,6 +618,7 @@ export default {
   watch: {
     event: {
       handler(newVal) {
+        console.log('VOM event handler',newVal)
         let desc = newVal?.description
         desc = desc ? twem(desc) : ''
         desc = desc.trim()
@@ -627,6 +629,7 @@ export default {
     },
     description: {
       handler(newVal) {
+        console.log('VOM description handler',newVal)
         this.volunteering.description = newVal
       },
     },
@@ -750,7 +753,9 @@ export default {
           newdates: wip.dates,
         })
 
-        await this.volunteeringStore.save(wip)
+        const miscStore = useMiscStore()
+        console.log('miscStore.modtools', miscStore.modtools)
+        await this.volunteeringStore.save(wip, miscStore.modtools)
 
         this.added = true
       } else {

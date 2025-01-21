@@ -18,8 +18,8 @@
             </span>
           </b-col>
           <b-col cols="12" md="4">
-            <span v-if="volunteering.groups && volunteering.groups.length">
-              on {{ volunteering.groups[0].nameshort }}
+            <span v-if="volunteering.groupsmt && volunteering.groupsmt.length">
+              on {{ volunteering.groupsmt[0].nameshort }}
             </span>
           </b-col>
         </b-row>
@@ -28,7 +28,7 @@
         <NoticeMessage v-if="volunteering.groups.length && volunteering.groups[0].ourPostingStatus === 'PROHIBITED'" variant="danger" class="mb-2">
           This member is set not to be able to post OFFERs/WANTEDs.
         </NoticeMessage>
-        <VolunteerOpportunity :item="volunteering" :summary="false" />
+        <VolunteerOpportunity :id="volunteering.id" :item="volunteering" :summary="false" />
       </b-card-body>
       <b-card-footer>
         <b-button variant="primary" class="mr-1" @click="approve">
@@ -52,6 +52,7 @@
     </b-card>
     <VolunteerOpportunityModal
         v-if="modalShown"
+        :id="volunteering.id"
         :volunteering="volunteering"
         :start-edit="true"
         @hidden="modalShown = false"
@@ -59,8 +60,15 @@
   </div>
 </template>
 <script>
+import { useVolunteeringStore } from '@/stores/volunteering'
 
 export default {
+  setup() {
+    const volunteeringStore = useVolunteeringStore()
+    return {
+      volunteeringStore,
+    }
+  },
   props: {
     volunteering: {
       type: Object,
@@ -78,12 +86,10 @@ export default {
       this.$refs.volunteeringmodal?.show()
     },
     deleteme() {
-      this.$store.dispatch('volunteerops/delete', {
-        id: this.volunteering.id
-      })
+      this.volunteeringStore.delete(this.volunteering.id)
     },
     approve() {
-      this.$store.dispatch('volunteerops/save', {
+      this.volunteeringStore.save({
         id: this.volunteering.id,
         pending: false
       })
