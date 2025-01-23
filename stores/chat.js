@@ -300,10 +300,11 @@ export const useChatStore = defineStore({
 
       return id
     },
-    async openChatToMods(groupid) {
+    async openChatToMods(groupid, userid) {
       const id = await this.openChat({
         chattype: 'User2Mod',
         groupid,
+        userid
       })
 
       return id

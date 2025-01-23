@@ -43,7 +43,7 @@
         <ChatButton
           v-if="volunteering.groups && volunteering.groups.length && volunteering.user"
           :userid="volunteering.user.id"
-          :groupid="volunteering.groups[0].id"
+          :groupid="volunteering.groups[0]"
           title="Chat"
           variant="white"
           class="mr-1"
