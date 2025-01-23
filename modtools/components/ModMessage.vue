@@ -6,7 +6,7 @@
         <div class="d-flex justify-content-between">
           <div class="flex-grow-1">
             <NoticeMessage v-if="editing && !message.lat && !message.lng" variant="danger" class="mb-2 mr-2">
-              This message needs editing so that we know where it is.  Please put in a postcode
+              This message needs editing so that we know where it is. Please put in a postcode
               (it doesn't have to be exactly right - do your best based on the subject).
               <b-input-group>
                 <PostCode class="mt-2" value="" :find="false" @selected="postcodeSelect" />
@@ -292,7 +292,8 @@
         <NoticeMessage v-else-if="!editing && !message.lat && !message.lng" variant="danger" class="mb-2">
           This message needs editing so that we know where it is.
         </NoticeMessage>
-        <ModMessageButtons v-else-if="!editing " :message="message" :modconfig="modconfig" :editreview="editreview" :cantpost="membership && membership.ourpostingstatus === 'PROHIBITED'" />
+        <ModMessageButtons v-else-if="!editing" :message="message" :modconfig="modconfig" :editreview="editreview"
+          :cantpost="membership && membership.ourpostingstatus === 'PROHIBITED'" />
         <b-button v-if="editing" variant="secondary" class="mr-auto" @click="photoAdd">
           <v-icon icon="camera" />&nbsp;Add photo
         </b-button>

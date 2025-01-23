@@ -125,7 +125,7 @@ export default {
       return this.chat && this.chat.group ? this.chat.group : null
     },
     amUser() {
-      return this.chat && this.chat.user && this.chat.user.id === this.myid // TODO: Needs fixing for MT when viewing others' chat
+      return this.chat && this.chat.user && this.chat.user.id === this.myid // NOTTODO: ChatMessageModMail NEVER USED.Needs fixing for MT when viewing others' chat
     },
     realMod() {
       return (

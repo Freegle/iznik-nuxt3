@@ -33,7 +33,7 @@
             :width="100"
             font-size="14"
             :sync="true"
-            :labels="{ checked: 'Sending weekly', unchecked: 'Not sending' }"
+            :labels="{ checked: 'Weekly', unchecked: 'Not sending' }"
             color="#61AE24"
           />
         </b-form-group>
@@ -47,7 +47,7 @@
             :width="100"
             font-size="14"
             :sync="true"
-            :labels="{ checked: 'Sending weekly', unchecked: 'Not sending' }"
+            :labels="{ checked: 'Weekly', unchecked: 'Not sending' }"
             color="#61AE24"
           />
         </b-form-group>
@@ -64,17 +64,17 @@ export default {
     OurToggle,
   },
   props: {
-    membershipMT: { // TODO
+    membershipMT: {
       type: Object,
       required: false,
       default: null,
     },
-    eventsallowedMT: { // TODO
+    eventsallowedMT: {
       type: Number,
       required: false,
       default: null,
     },
-    volunteeringallowedMT: { // TODO
+    volunteeringallowedMT: {
       type: Number,
       required: false,
       default: null,
@@ -141,7 +141,6 @@ export default {
         return Boolean(this.membership?.eventsallowed)
       },
       async set(newval) {
-        console.log('Set eventsallowed', newval)
         await this.changeValue('eventsallowed', newval ? 1 : 0)
       },
     },
@@ -179,7 +178,7 @@ export default {
   },
   methods: {
     async changeValue(param, val) {
-      this.$emit('update:' + param, val)
+      this.$emit('update', { param, val })
 
       if (this.groupid) {
         const params = {
