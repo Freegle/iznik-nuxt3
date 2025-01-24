@@ -48,12 +48,10 @@ export const useAdminsStore = defineStore({
     async hold(params) {
       await api(this.config).admins.hold(params.id)
       await this.fetch({ id: params.id })
-      // TODO fetch work
     },
     async release(params) {
       await api(this.config).admins.release(params.id)
       await this.fetch({ id: params.id })
-      // TODO fetch work
     }
   },
   getters: {
