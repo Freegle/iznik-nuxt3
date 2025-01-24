@@ -580,7 +580,8 @@ export default {
       this.$refs.logs?.show()
     },
     async profile() {
-      await this.userStore.fetchMT({
+      console.log('MSU profile', this.id)
+      await this.userStore.fetchMT({ // TODO Might need to be search: this.id
         id: this.id,
         info: true
       })

@@ -91,17 +91,17 @@ export const useMemberStore = defineStore({
       await api(this.config).memberships.remove(userid, groupid)
 
       // Remove from list: either use given membershipid or find matching userid/groupid
-      if( membershipid){
-        const member = this.list[membershipid]
+      if (membershipid) {
+        // const member = this.list[membershipid]
         delete this.list[membershipid]
       } else {
         let foundid = false
-        for( const membership of Object.values(this.list)){
-          if( (membership.userid === userid) && (membership.groupid=== groupid)){
+        for (const membership of Object.values(this.list)) {
+          if ((membership.userid === userid) && (membership.groupid === groupid)) {
             foundid = membership.id
           }
         }
-        if( foundid){
+        if (foundid) {
           delete this.list[foundid]
         }
       }

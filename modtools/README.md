@@ -82,3 +82,5 @@ CHECK ALL this.member.userid
 REMOVED to get it to build:
     "@vitejs/plugin-legacy": "^5.2.0",
     "nuxt-vite-legacy": "^1.2.0",
+
+this.checkWork(true)
