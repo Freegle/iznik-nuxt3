@@ -213,6 +213,7 @@
       <h3 class="mt-2">
         Memberships
       </h3>
+      {{ this.user.memberof.length }}
       <div v-if="memberships && memberships.length">
         <div v-for="membership in memberships" :key="'membership-' + membership.id">
           <ModSupportMembership :membership="membership" :userid="user.id" @fetchuser="fetchUser" />
@@ -566,7 +567,7 @@ export default {
   methods: {
     async fetchUser() {
       if (this.id) {
-        console.log("MSU fetchUser", this.id)
+        await this.userStore.fetchMT({ search: this.id, emailhistory: true, info: true })
         this.user = this.userStore.byId(this.id)
         if (this.user && this.user.spammer && this.user.spammer.byuserid) {
           await this.userStore.fetchMT({ search: this.user.spammer.byuserid })

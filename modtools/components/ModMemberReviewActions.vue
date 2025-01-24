@@ -89,7 +89,7 @@ export default {
       }, 2000)
     },
     async removeConfirmed() {
-      await this.memberStore.remove(this.memberid, this.member.userid, this.membership.id)
+      await this.memberStore.remove(this.member.userid, this.membership.id)
 
       setTimeout(() => {
         this.reviewed = true

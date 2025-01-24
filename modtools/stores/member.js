@@ -5,7 +5,7 @@ import api from '~/api'
 export const useMemberStore = defineStore({
   id: 'member',
   state: () => ({
-    list: {},
+    list: {}, // membershipid: member
     // The context from the last fetch, used for fetchMore.
     context: null,
     // For spotting when we clear under the feet of an outstanding fetch
@@ -84,22 +84,27 @@ export const useMemberStore = defineStore({
       })
     },
 
-    removemembership(memberid, groupid, userid) {
-      const member = this.list[memberid]
-      if (!member) return
-      member.memberof = member.memberof.filter(g => {
-        return g.id !== groupid
-      })
-    },
-
-
-    async remove(memberid, userid, groupid) {
+    async remove(userid, groupid, membershipid) { // membershipid may be undefined
       // Remove approved member.
+      console.log('UMS remove', userid, groupid)
       this.context = null
       await api(this.config).memberships.remove(userid, groupid)
 
-      // TODO: Remove from list
-      this.removemembership(memberid, groupid, userid)
+      // Remove from list: either use given membershipid or find matching userid/groupid
+      if( membershipid){
+        const member = this.list[membershipid]
+        delete this.list[membershipid]
+      } else {
+        let foundid = false
+        for( const membership of Object.values(this.list)){
+          if( (membership.userid === userid) && (membership.groupid=== groupid)){
+            foundid = membership.id
+          }
+        }
+        if( foundid){
+          delete this.list[foundid]
+        }
+      }
 
       // TODO: Get work
     },

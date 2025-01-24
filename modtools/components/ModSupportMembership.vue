@@ -80,6 +80,7 @@
   </div>
 </template>
 <script>
+// membership.id is groupid and membership.membershipid is membershipid
 import { useMemberStore } from '../stores/member'
 import { useUserStore } from '../../stores/user'
 
@@ -139,11 +140,8 @@ export default {
       await this.memberStore.update(params)
     },
     remove(callback) {
-      this.memberStore.remove({
-        userid: this.userid,
-        groupid: this.membership.id
-      })
-      this.$emit('fetchuser') // Try (but fail) to refresh membership list
+      this.memberStore.remove(this.userid,this.membership.id, this.membership.membershipid)
+      this.$emit('fetchuser')
       if (callback) callback()
     }
   }
