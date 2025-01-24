@@ -29,7 +29,7 @@
         </b-row>
         <div class="d-flex flex-wrap pt-1">
           <b-form-group label="OFFER and WANTED posts:" class="mr-5">
-            <b-form-select :modelValue="membership.emailfrequency" @change="changeFrequency">
+            <b-form-select v-model="membership.emailfrequency" @change="changeFrequency">
               <option value="-1">
                 Immediately
               </option>
@@ -54,7 +54,7 @@
             </b-form-select>
           </b-form-group>
           <b-form-group label="Moderation status:" class="mr-5">
-            <b-form-select :modelValue="membership.ourpostingstatus || 'MODERATED'" @change="changePostingStatus">
+            <b-form-select v-model="membership.ourpostingstatus" @change="changePostingStatus">
               <option value="MODERATED">
                 Moderated
               </option>
@@ -112,7 +112,6 @@ export default {
       await this.memberStore.update(params)
     },
     async changeVolunteering(newval) {
-      console.log('changeVolunteering',newval)
       const params = {
         userid: this.userid,
         groupid: this.membership.id,
@@ -121,20 +120,20 @@ export default {
 
       await this.memberStore.update(params)
     },
-    async changeFrequency(newval) {
+    async changeFrequency(newval) { // newval not used but this.membership.emailfrequency has new value
       const params = {
         userid: this.userid,
         groupid: this.membership.id,
-        emailfrequency: newval
+        emailfrequency: this.membership.emailfrequency
       }
 
       await this.memberStore.update(params)
     },
-    async changePostingStatus(newval) {
+    async changePostingStatus(newval) { // newval not used but this.membership.ourpostingstatus has new value
       const params = {
         userid: this.userid,
         groupid: this.membership.id,
-        ourpostingstatus: newval
+        ourpostingstatus: this.membership.ourpostingstatus
       }
 
       await this.memberStore.update(params)
@@ -143,6 +142,7 @@ export default {
       this.memberStore.remove(this.userid,this.membership.id, this.membership.membershipid)
       this.$emit('fetchuser')
       if (callback) callback()
+      this.checkWork(true)
     }
   }
 }

@@ -213,7 +213,6 @@
       <h3 class="mt-2">
         Memberships
       </h3>
-      {{ this.user.memberof.length }}
       <div v-if="memberships && memberships.length">
         <div v-for="membership in memberships" :key="'membership-' + membership.id">
           <ModSupportMembership :membership="membership" :userid="user.id" @fetchuser="fetchUser" />

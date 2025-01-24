@@ -105,20 +105,9 @@ export const useMemberStore = defineStore({
           delete this.list[foundid]
         }
       }
-
-      // TODO: Get work
     },
     async update(params) {
       const data = await api(this.config).memberships.update(params)
-
-      if (!data.deleted) {
-        // Fetch back the updated version.
-        /* TODO await dispatch('fetch', {
-          userid: params.userid,
-          groupid: params.groupid
-        })*/
-      }
-
       return data
     },
     async add(params) {
