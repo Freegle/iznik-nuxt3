@@ -1,17 +1,17 @@
 <template>
   <div>
-    <!-- TODO -->
-    <client-only>
+    TODO ChatPopups.vue NOT USED NOW
+    <!--client-only>
       <div v-for="chat in chatlist">
         CHAT {{ chat.id }}
       </div>
 
       <b-list-group horizontal class="p-0 m-0 list-unstyled chatPopups">
         <b-list-group-item v-for="chat in chatlist" :key="'popupchat-' + chat.id" class="bg-transparent">
-          <!-- ChatPopup :id="chat.id" /-->
+          <ChatPopup :id="chat.id" />
         </b-list-group-item>
       </b-list-group>
-    </client-only>
+    </client-only-->
   </div>
 </template>
 <style>

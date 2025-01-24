@@ -184,6 +184,7 @@ export default {
     },
     deleteConfirmed() {
       this.adminsStore.delete({ id: this.id })
+      this.checkWork(true)
     },
     async save() {
       this.saving = true
@@ -203,17 +204,18 @@ export default {
     },
     hold() {
       this.adminsStore.hold({ id: this.admin.id })
+      this.checkWork(true)
     },
     release() {
       this.adminsStore.release({ id: this.admin.id })
+      this.checkWork(true)
     },
     async approve() {
       await this.save()
 
       await this.adminsStore.approve({ id: this.admin.id })
 
-      // TODO fetch work
-      //this.fetchMe(['work'])
+      this.checkWork(true)
     }
   }
 }

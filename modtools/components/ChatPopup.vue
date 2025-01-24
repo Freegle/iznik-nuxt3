@@ -1,6 +1,6 @@
 <template>
   <div>
-    <!-- TODO -->
+    TODO ChatPopup.vue NOT USED NOW
   </div>
 </template>
 <script>

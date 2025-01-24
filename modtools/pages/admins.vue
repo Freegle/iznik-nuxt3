@@ -234,8 +234,7 @@ export default {
           this.created = false
         }, 2000)
 
-        // TODO fetch work
-        //this.fetchMe(['work'])
+        this.checkWork(true)
       }
     },
     async fetch(groupid) {
