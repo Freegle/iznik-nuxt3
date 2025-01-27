@@ -1,3 +1,5 @@
+// SEE WORK EXPLANATION IN useModMessages.js
+
 import cloneDeep from 'lodash.clonedeep'
 import { defineStore } from 'pinia'
 import dayjs from 'dayjs'
@@ -7,6 +9,7 @@ import { GROUP_REPOSTS, MESSAGE_EXPIRE_TIME } from '~/constants'
 import { useGroupStore } from '~/stores/group'
 import { APIError } from '~/api/BaseAPI'
 import { useAuthStore } from '~/stores/auth'
+import { useMiscStore } from '@/stores/misc'
 
 export const useMessageStore = defineStore({
   id: 'message',
@@ -287,13 +290,15 @@ export const useMessageStore = defineStore({
         id: params.id,
       })
 
-      //await this.fetch(params.id, true) // Gets message.fromuser as int not object
-      // TODO: CHECK OK SOLUTION
-      // Force MT refresh 
-      const authStore = useAuthStore()
-      console.log("!!!useMessageStore reset authStore.work")
-      authStore.work = {}
-      // TODO: call this.checkWork()
+      const miscStore = useMiscStore()
+      if( miscStore.modtools){
+        const message = await this.fetchMT({ id: params.id, messagehistory: true })
+        if( message){
+          this.list[message.id] = message
+        }
+      } else {
+        await this.fetch(params.id, true) // Gets message.fromuser as int not object
+      }
 
       return data
     },
@@ -400,9 +405,6 @@ export const useMessageStore = defineStore({
       await api(this.config).message.approveEdits(params.id)
   
       this.remove({ id: params.id })
-  
-      //const authStore = useAuthStore()
-      //authStore.work = {}
     },
     async backToPending(id){
       await api(this.config).message.update({
@@ -421,9 +423,6 @@ export const useMessageStore = defineStore({
       )
 
       this.remove({ id: params.id })
-
-      //const authStore = useAuthStore()
-      //authStore.work = {}
     },
     async reject(params) {
       await api(this.config).message.reject(
@@ -435,9 +434,6 @@ export const useMessageStore = defineStore({
       )
 
       this.remove({ id: params.id })
-
-      //const authStore = useAuthStore()
-      //authStore.work = {}
     },
     async reply(params) {
       await api(this.config).message.reply(
@@ -449,9 +445,6 @@ export const useMessageStore = defineStore({
       )
 
       this.remove({ id: params.id })
-
-      //const authStore = useAuthStore()
-      //authStore.work = {}
     },
     async hold(params) {
       await api(this.config).message.hold(params.id)
@@ -473,9 +466,6 @@ export const useMessageStore = defineStore({
       await api(this.config).message.spam(params.id, params.groupid)
 
       this.remove({ id: params.id })
-
-      //const authStore = useAuthStore()
-      //authStore.work = {}
     },
     async searchMember(term, groupid) {
       const { messages } = await api(this.config).message.fetchMessages({

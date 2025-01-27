@@ -672,6 +672,7 @@ export default {
           console.error('Unknown stdmsg action', this.stdmsg.action)
       }
       if (callback) callback()
+      this.checkWorkDeferGetMessages()
       this.hide()
     },
     postcodeSelect(newpc) {

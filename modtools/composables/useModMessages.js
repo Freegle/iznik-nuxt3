@@ -1,3 +1,13 @@
+// Try to make Messages+Pending page as smooth as possible with correct work counts:
+// - Normally the background timed update of authStore.work forces a complete page reload as detected in useModMessages watch(work)
+// - The page reload happens because the message store list is updated in messageStore.fetchMessagesMT()
+// To avoid this problem, when a message is approved for example:
+// - the store removes the approved message from the list
+// - ModMessageButton approveIt()  calls modme checkWorkDeferGetMessages()
+// - This sets miscStore.deferGetMessages
+// - which in turn stops useModMessages watch(work) from updating the messages list
+// - until another timed update occurs
+
 import { useAuthStore } from '@/stores/auth'
 import { useGroupStore } from '@/stores/group'
 import { useMessageStore } from '../../stores/message'
@@ -105,11 +115,14 @@ export function setupModMessages() {
     }
   })
   watch(work, async (newVal, oldVal) => {
+    //console.log('<<<<useModMessages watch work. oldVal:', oldVal, 'newVal:', newVal)
     if( collection.value!=='Pending') return
     let doFetch = false
 
     const messageStore = useMessageStore()
     const miscStore = useMiscStore()
+    //console.log('uMM watch work deferGetMessages',miscStore.deferGetMessages)
+    if( miscStore.deferGetMessages) return
 
     const bodyoverflow = document.body.style.overflow
     if (bodyoverflow !== 'hidden') {

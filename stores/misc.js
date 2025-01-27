@@ -33,6 +33,7 @@ export const useMiscStore = defineStore({
     lastTyping: null,
     modtools: false,
     worktimer: false,
+    deferGetMessages: false,
     source: null,
   }),
   actions: {

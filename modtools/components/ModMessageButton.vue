@@ -14,6 +14,8 @@
   </div>
 </template>
 <script>
+// SEE WORK EXPLANATION IN useModMessages.js
+
 import { useMessageStore } from '../../stores/message'
 import { useStdmsgStore } from '../stores/stdmsg'
 
@@ -154,8 +156,6 @@ export default {
       } else if (this.spam) {
         // Standard spam button.
         this.showSpamModal = true
-        //await nextTick()
-        //this.$refs.spamConfirm?.show()
       } else if (this.approveedits) {
         await this.approveEdits()
       } else if (this.revertedits) {
@@ -186,7 +186,7 @@ export default {
         id: this.message.id,
         groupid: this.groupid
       })
-      this.deferCheckWork()
+      this.checkWorkDeferGetMessages()
     },
     async deleteIt() {
       this.showDeleteModal = true
@@ -196,38 +196,38 @@ export default {
         id: this.message.id,
         groupid: this.groupid
       })
-      this.checkWork()
+      this.checkWorkDeferGetMessages()
     },
     async spamConfirmed() {
       await this.messageStore.spam({
         id: this.message.id,
         groupid: this.groupid
       })
-      this.checkWork()
+      this.checkWorkDeferGetMessages()
     },
     async holdIt() {
       await this.messageStore.hold({
         id: this.message.id
       })
-      this.checkWork()
+      this.checkWorkDeferGetMessages()
     },
     async releaseIt() {
       await this.messageStore.release({
         id: this.message.id
       })
-      this.checkWork()
+      this.checkWorkDeferGetMessages()
     },
     async approveEdits() {
       await this.messageStore.approveedits({
         id: this.message.id
       })
-      this.checkWork()
+      this.checkWorkDeferGetMessages()
     },
     async revertEdits() {
       await this.messageStore.revertedits({
         id: this.message.id
       })
-      this.checkWork()
+      this.checkWorkDeferGetMessages()
     }
   }
 }

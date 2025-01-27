@@ -86,7 +86,6 @@ export const useMemberStore = defineStore({
 
     async remove(userid, groupid, membershipid) { // membershipid may be undefined
       // Remove approved member.
-      console.log('UMS remove', userid, groupid)
       this.context = null
       await api(this.config).memberships.remove(userid, groupid)
 

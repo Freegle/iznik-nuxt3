@@ -38,6 +38,7 @@ export default {
       const member = authStore.member(groupid)
       return member === 'Moderator' || member === 'Owner'
     },
+    // SEE WORK EXPLANATION IN useModMessages.js
     deferCheckWork(){
       const miscStore = useMiscStore()
       if (miscStore.workTimer) {
@@ -45,9 +46,14 @@ export default {
       }
       miscStore.workTimer = setTimeout(this.checkWork, 30000)
     },
+    checkWorkDeferGetMessages(){
+      const miscStore = useMiscStore()
+      miscStore.deferGetMessages = true
+      this.checkWork()
+    },
     async checkWork(force) {
       const now = new Date()
-      console.log('CHECKWORK modme',force, now.toISOString().substring(11))
+      // console.log('CHECKWORK modme',force, now.toISOString().substring(11))
       const authStore = useAuthStore()
       const chatStore = useChatStore()
       const miscStore = useMiscStore()
@@ -58,7 +64,7 @@ export default {
       // Do not check for work and therefore refresh while any modal is open
       const bodyoverflow = document.body.style.overflow
       if (force || (bodyoverflow !== 'hidden')) {
-        //console.log('CHECKWORK DO modme',force, now.toISOString().substring(11))
+        console.log('CHECKWORK DO modme',force, now.toISOString().substring(11))
         await this.fetchMe(true, ['work', 'group']) // MT ADDED 'group'
 
         this.chatcount = chatStore ? Math.min(99, chatStore.unreadCount) : 0
@@ -67,6 +73,7 @@ export default {
         const title = totalCount > 0 ? `(${totalCount}) ModTools` : 'ModTools'
         document.title = title
       }
+      miscStore.deferGetMessages = false
       miscStore.workTimer = setTimeout(this.checkWork, 30000)
     },
   },

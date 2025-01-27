@@ -84,5 +84,8 @@ REMOVED to get it to build:
     "nuxt-vite-legacy": "^1.2.0",
 
 this.checkWork(true)
+this.deferCheckWork()
+this.checkWorkDeferGetMessages()
+// SEE WORK EXPLANATION IN useModMessages.js
 
 <b-form-select v-model="whatever" @change="change"> needs v-model and newval is invalid but this.whatever has been updated

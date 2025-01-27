@@ -1,6 +1,5 @@
 <template>
   <div :class="getClass">
-    <!-- DONE -->
     <!-- eslint-disable-next-line -->
     <span v-if="indent" class="pl-3" /><nuxt-link :to="link" @mousedown.native="click">{{ name }}</nuxt-link>
     <b-badge v-if="count && getCount(count)" :variant="countVariant">
