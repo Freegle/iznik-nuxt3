@@ -375,7 +375,7 @@ export default {
     },
     confirmUnban(member) {
       this.showUnbanModal = true
-      this.showUnbanModalTitle = 'Unban #77' + member.userid
+      this.showUnbanModalTitle = 'Unban #' + member.userid
       this.$refs.unbanConfirm?.show()
     },
     async unban() {

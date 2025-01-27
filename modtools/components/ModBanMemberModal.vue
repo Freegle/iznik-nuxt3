@@ -23,6 +23,7 @@
   </div>
 </template>
 <script>
+import { useMemberStore } from '@/stores/member'
 import { useOurModal } from '~/composables/useOurModal'
 
 export default {
@@ -43,11 +44,8 @@ export default {
   },
   methods: {
     async ban() {
-      alert('MBMM ban')
-      /* TODO await this.$store.dispatch('members/ban', {
-        userid: this.userid,
-        groupid: this.groupid
-      })*/
+      const memberStore = useMemberStore()
+      await memberStore.ban(this.userid, this.groupid)
 
       this.hide()
     }
