@@ -52,9 +52,10 @@ export default {
         return this.membership.ourpostingstatus || 'MODERATED'
       },
       async set(val) {
+        const groupid = this.membership.groupid ?? this.membership.id
         await this.userStore.edit({
           id: this.user.id,
-          groupid: this.membership.groupid,
+          groupid,
           ourPostingStatus: val
         })
       }
@@ -64,9 +65,10 @@ export default {
         return this.user.trustlevel ? this.user.trustlevel : null
       },
       async set(val) {
+        const groupid = this.membership.groupid ?? this.membership.id
         await this.userStore.edit({
           id: this.user.id,
-          groupid: this.membership.groupid,
+          groupid,
           trustlevel: val
         })
       }
