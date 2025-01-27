@@ -32,7 +32,6 @@ const props = defineProps({
 })
 
 
-// composables/modMessagesPage
 onMounted(async () => {
   //console.log('###ModMessages onMounted', groupid.value)
   // Ensure we have no cached messages for other searches/groups

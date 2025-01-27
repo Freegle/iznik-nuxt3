@@ -137,8 +137,8 @@ export default {
 
   },
   methods: {
+    /* 
     async loadAll() {
-      /* TODO
       // This is a bit of a hack - we clear the store and fetch 1000 messages, which is likely to be all of them.
       this.limit = 1000
       await this.$store.dispatch('messages/clearContext')
@@ -158,8 +158,8 @@ export default {
             self.$refs.end.scrollIntoView()
           })
         }
-      })*/
-    },
+      })
+    },*/
     destroy(oldid, nextid) {
       this.nextAfterRemoved = nextid
     }

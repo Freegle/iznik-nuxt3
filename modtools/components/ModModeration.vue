@@ -54,7 +54,7 @@ export default {
       async set(val) {
         await this.userStore.edit({
           id: this.user.id,
-          groupid: this.membership.id,
+          groupid: this.membership.groupid,
           ourPostingStatus: val
         })
       }
@@ -66,7 +66,7 @@ export default {
       async set(val) {
         await this.userStore.edit({
           id: this.user.id,
-          groupid: this.membership.id,
+          groupid: this.membership.groupid,
           trustlevel: val
         })
       }

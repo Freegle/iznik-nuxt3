@@ -423,7 +423,6 @@ export default {
 
       if (this.message && this.message.groups && this.message.groups.length) {
         const groupid = this.message.groups[0].groupid
-        //console.log("groupid", groupid)
         ret = this.myGroups.find(g => parseInt(g.id) === groupid)
       }
 

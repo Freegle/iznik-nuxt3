@@ -22,6 +22,13 @@
           @handle="leaveGroup"
         />
       </b-col>
+      <b-col v-if="moderation && membership">
+        <b-form-group
+          label="Moderation status:"
+        >
+          <ModModeration v-if="user" :membership="membership" :user="user" size="md" />
+        </b-form-group>
+      </b-col>
     </b-row>
     <b-row>
       <b-col v-if="!eventshide" cols="12" sm="6">
@@ -57,6 +64,8 @@
 </template>
 <script>
 import { useAuthStore } from '../stores/auth'
+//import { useMiscStore } from '../stores/misc'
+import { useUserStore } from '../stores/user'
 import OurToggle from '~/components/OurToggle'
 
 export default {
@@ -94,6 +103,16 @@ export default {
       required: false,
       default: false,
     },
+    moderation: {
+      type: String,
+      required: false,
+      default: null
+    },
+    userid: {
+      type: Number,
+      required: false,
+      default: null
+    },
     label: {
       type: String,
       required: false,
@@ -110,11 +129,17 @@ export default {
       default: false,
     },
   },
-  setup() {
+  async setup(props) {
     const authStore = useAuthStore()
+    const userStore = useUserStore()
+
+    if( props.userid){
+      await userStore.fetch(props.userid)
+    }
 
     return {
       authStore,
+      userStore,
     }
   },
   data() {
@@ -123,6 +148,12 @@ export default {
     }
   },
   computed: {
+    //modtools() {
+    //  return useMiscStore().modtools
+    //},
+    user() {
+      return this.userid ? this.userStore.byId(this.userid) : null
+    },
     emailfreq: {
       get() {
         if (this.membership) {
@@ -179,10 +210,11 @@ export default {
   methods: {
     async changeValue(param, val) {
       this.$emit('update', { param, val })
+      const userid = this.userid ?? this.myid
 
       if (this.groupid) {
         const params = {
-          userid: this.myid,
+          userid,
           groupid: this.groupid,
         }
 

@@ -59,7 +59,7 @@
           </b-button>
         </NoticeMessage>
         <div class="d-flex justify-content-between flex-wrap">
-          <SettingsGroup v-if="groupid && member.ourpostingstatus" :groupid="groupid" :emailfrequency="member.emailfrequency"
+          <SettingsGroup v-if="groupid && member.ourpostingstatus" :groupid="groupid" :emailfrequency="member.emailfrequency" :membershipMT="member"
             :volunteeringallowed="Boolean(member.volunteeringallowed)" :eventsallowed="Boolean(member.eventsallowed)"
             :moderation="member.ourpostingstatus" :userid="member.userid" class="border border-info p-1 flex-grow-1 mr-1" @change="settingsChange" />
           <div>
