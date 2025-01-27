@@ -50,10 +50,6 @@
             <li v-if="chatmessage">
               <ChatMessage :key="'chatmessage-' + chatmessage.id" :id="chatmessage.id" :chatid="chatmessage.chatid"
                 :last="chatmessage.id === chatmessages[chatmessages.length - 1].id" :pov="pov" class="mb-1" />
-
-              <!--ChatMessage :key="'chatmessage-' + chatmessage.id" :chatmessage="chatmessage" :chat="chat2"
-                :otheruser="chat2.user1 && pov === chat2.user1.id ? chat2.user2 : chat2.user1"
-                :last="chatmessage.id === chatmessages[chatmessages.length - 1].id" :pov="pov" :chatusers="chatusers" /-->
             </li>
           </ul>
         </div>
@@ -114,7 +110,6 @@ export default {
     return {
       busy: true,
       chat2: null,
-      chatusers: [] // TODO
     }
   },
   async mounted() {
@@ -159,9 +154,10 @@ export default {
       this.modal.show()
     },
     closeit() {
+      // console.log('MCM closeit', this.id)
       // We have loaded this chat into store, but it's probably not ours.  So update the list, otherwise next
       // time we go into chats we'll see weirdness.  No need to await though, and that makes closing chats sluggish.
-      /* TODO
+      /* MT3: Not done yet - is it needed?
       const modtools = this.$store.getters['misc/get']('modtools')
       this.$store.dispatch('chats/listChats', {
         chattypes: modtools
