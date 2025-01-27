@@ -473,8 +473,7 @@ export default {
   },
   async mounted() {
     await loadLeaflet()
-    // Add the draw toolbar as per https://github.com/vue-leaflet/Vue2Leaflet/issues/331
-    //this.waitForRef('map', () => {
+    // ready() called when ready
   },
   methods: {
     clearSelection(callback) {
@@ -495,12 +494,14 @@ export default {
       if (callback) callback()
     },
     selectCGA(e, g) {
+      console.log('selectCGA')
       this.selectedObj = g
       this.selectedName = g.nameshort + ' CGA'
       this.selectedWKT = g.polyofficial
       this.bump++
 
       if (this.supportOrAdmin) {
+        console.log('selectCGA EDITING', e.sourceTarget)
         e.sourceTarget.editing.enable()
       }
     },

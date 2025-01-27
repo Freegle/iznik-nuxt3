@@ -74,7 +74,7 @@ export default {
   },
   methods: {
     async show() {
-      // TODO? Take a copy rather than use computed as it isn't ours and will vanish from the store.
+      // Take a copy rather than use computed as it isn't ours and will vanish from the store.
       this.chat = this.chatStore.byChatId(this.chatid)
     },
     onHide() {
