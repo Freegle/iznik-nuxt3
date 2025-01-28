@@ -18,7 +18,6 @@
     "diff": "^5.2.0",
     "handsontable": "^14.6.1",
     "leaflet-draw": "^1.0.4",
-    "leaflet-draw-toolbar": "^0.3.0-alpha.1",
     "letterparser": "^0.1.4",
     "papaparse": "^5.4.1",
     "quill-html-edit-button": "^2.2.13",
