@@ -87,7 +87,7 @@
                 <l-geojson v-for="(d, i) in overlappingCGAs" :key="'cgaoverlap-' + i" :geojson="d" :options="cgaOverlapOptions" :z-index-offset="0" />
               </div>
               <div v-if="groupid">
-                <l-feature-group>
+                <l-feature-group ref="fglocations" @ready="fgready">
                   <div v-if="zoom >= 12">
                     <ModGroupMapLocation v-for="l in locationsInBounds" :key="'location-' + l.id" :ref="'location-' + l.id" :location="l"
                       :selected="selectedObj === l" :shade="shade" :labels="labels" :map="mapObject" @click="selectLocation(l)" :bump="bump" />
@@ -537,9 +537,9 @@ export default {
       }
     },
     shapeChanged(e) {
-      console.log("====shapeChanged",e.type, e)
+      console.log("====shapeChanged", e.type, e)
       if (e.poly) {
-        console.log("====shapeChanged e.poly",e.poly)
+        console.log("====shapeChanged e.poly", e.poly)
         this.intersects = e.poly.intersects()
 
         const wkt = new Wkt.Wkt()
@@ -548,13 +548,33 @@ export default {
         this.selectedWKT = wkt.write()
       }
     },
+    async fgready() { // TODO: remove when working
+      console.log('+++FGREADY')
+      const self = this
+
+      try {
+        if (process.client) {
+          if (this.$refs.fglocations) {
+            let thefg = this.$refs.fglocations.leafletObject
+            console.log('fglocations', this.$refs.fglocations)
+            console.log('fglocations.layerType', this.$refs.fglocations.layerType)
+            console.log('thefg', thefg)
+            const fglayers = thefg.getLayers()
+            console.log('fglayers A', fglayers)
+          }
+        }
+      } catch (e) {
+        console.log('fgready FAIL', e.message)
+      }
+    },
     async ready() {
+      console.log('+++READY')
       const self = this
 
       if (process.client) {
         if (this.$refs.map) {
           let themap = this.$refs.map.leafletObject
-          console.log('themap A',themap)
+          console.log('themap A', themap)
           this.mapObject = themap
 
           const { Geocoder } = await import(
@@ -626,28 +646,42 @@ export default {
           // Last layer is drawn items.  Seems to be, anyway.  Need to use this so that we can turn on editing for
           // the locations we've already got, as well as any new ones we draw.
 
-          let drawnItems = null
-          //let drawnItems = []
+          // TODO: Editing polygons does not work and adding them is tricky
+          // The old way of finding drawnItems does not seem to find a FeatureGroup
+          // so bodge a new one that contains the last layer.
+          // But various calls to layer editing.enable() do not work
 
-          console.log('##################')
-          /*themap.eachLayer(l => {
-            if( l instanceof window.L.FeatureGroup){
-              console.log('FOUND FEATUREGROUP',l)
-            }
-            console.log('NOT FOUND FEATUREGROUP',l)
+          if (this.$refs.fglocations) {
+            let thefg = this.$refs.fglocations.leafletObject
+            const fglayers = thefg.getLayers()
+            console.log('fglayers B', fglayers)
+          }
+
+          let drawnItems = null
+
+          /*//console.log('##################')
+          //let drawnItems = []
+          themap.eachLayer(l => {
+            const newl = { ...l }
+            console.log('newl',newl)
+            //if( l instanceof window.L.FeatureGroup){
+            //  console.log('FOUND FEATUREGROUP',l)
+            //}
+            //console.log('NOT FOUND FEATUREGROUP',l)
           })*/
 
           themap.eachLayer(l => {
             //console.log('>>> l')
-            //cloneDeep(data)
             //drawnItems.push(l)
             drawnItems = l
           })
 
           try {
+            console.log('################## drawnItems', drawnItems)
             if (drawnItems) {
-              console.log('################## drawnItems', drawnItems)
-              const fgdrawnItems = new window.L.FeatureGroup(drawnItems)
+              //const fgdrawnItems = new window.L.FeatureGroup(drawnItems)
+              const fgdrawnItems = new window.L.FeatureGroup()
+              console.log('--------- fgdrawnItems', fgdrawnItems)
               //const fgdrawnItems = drawnItems
               console.log('LOAD leaflet.draw-src.js')
               const drawsrc = await import(
@@ -658,7 +692,7 @@ export default {
                 edit: {
                   featureGroup: fgdrawnItems,
                   remove: false,
-                  edit: false, // Disables the edit layer control
+                  //edit: false, // {...} or false disables the edit layer control
                   poly: {
                     allowIntersection: false
                   }
@@ -677,7 +711,7 @@ export default {
                 }
               })
 
-              console.log('themap B',this.$refs.map.leafletObject)
+              console.log('themap B', this.$refs.map.leafletObject)
 
               themap.addControl(drawControl)
 
@@ -783,7 +817,7 @@ export default {
         }
 
         // Sometimes the map needs a kick to show correctly.
-        if (this.$refs.map && this.$refs.map.leafletObject){
+        if (this.$refs.map && this.$refs.map.leafletObject) {
           this.$refs.map.leafletObject.invalidateSize()
         }
       }
