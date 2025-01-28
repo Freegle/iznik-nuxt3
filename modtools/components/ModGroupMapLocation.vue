@@ -75,11 +75,11 @@ export default {
   },
   methods: {
     select(e) {
-      console.log("select", e.sourceTarget)
+      console.log("MGML select", e.sourceTarget)
       this.obj = e.sourceTarget
       if (this.obj) {
-        console.log("select", this.obj.editing)
-        //      this.obj.editing.enable()
+        console.log("MGML select editing", this.obj.editing)
+        if( this.obj.editing) this.obj.editing.enable()
         this.$emit('click')
       }
     }

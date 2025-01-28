@@ -74,7 +74,7 @@
               :style="'width: 100%; height: ' + mapHeight + 'px'" @update:bounds="boundsChanged" @update:zoom="boundsChanged" @ready="ready"
               @moveend="idle">
               <l-tile-layer :url="osmtile" :attribution="attribution" />
-              <l-control position="topright" />
+              <!--l-control position="topright" /-->
               <div v-if="cga">
                 <l-geojson v-for="(c, i) in CGAs" :key="'cga-' + i" :geojson="c.json" :options="cgaOptions" :z-index-offset="2"
                   @click="selectCGA($event, c.group)" />
@@ -166,6 +166,7 @@
   </div>
 </template>
 <script>
+// https://leaflet.github.io/Leaflet.draw/docs/leaflet-draw-latest.html
 import { useRuntimeConfig } from '#app'
 
 import { useGroupStore } from '~/stores/group'
@@ -191,6 +192,7 @@ const CGA_BOUNDARY_COLOUR = 'darkgreen'
 const DPA_BOUNDARY_COLOUR = 'darkblue'
 // const CENTRE_FILL_COLOUR = 'darkgreen'
 // const CENTRE_BORDER_COLOUR = 'darkgrey'
+
 
 export default {
   components: {
@@ -501,8 +503,10 @@ export default {
       this.bump++
 
       if (this.supportOrAdmin) {
-        console.log('selectCGA EDITING', e.sourceTarget)
-        e.sourceTarget.editing.enable()
+        console.log('selectCGA EDITING', e.sourceTarget?.editing)
+        if (e.sourceTarget?.editing) {
+          e.sourceTarget.editing.enable()
+        }
       }
     },
     selectDPA(e, g) {
@@ -533,8 +537,9 @@ export default {
       }
     },
     shapeChanged(e) {
-      console.log("====shapeChanged")
+      console.log("====shapeChanged",e.type, e)
       if (e.poly) {
+        console.log("====shapeChanged e.poly",e.poly)
         this.intersects = e.poly.intersects()
 
         const wkt = new Wkt.Wkt()
@@ -548,7 +553,8 @@ export default {
 
       if (process.client) {
         if (this.$refs.map) {
-          const themap = this.$refs.map.leafletObject
+          let themap = this.$refs.map.leafletObject
+          console.log('themap A',themap)
           this.mapObject = themap
 
           const { Geocoder } = await import(
@@ -619,26 +625,40 @@ export default {
 
           // Last layer is drawn items.  Seems to be, anyway.  Need to use this so that we can turn on editing for
           // the locations we've already got, as well as any new ones we draw.
+
           let drawnItems = null
+          //let drawnItems = []
+
+          console.log('##################')
+          /*themap.eachLayer(l => {
+            if( l instanceof window.L.FeatureGroup){
+              console.log('FOUND FEATUREGROUP',l)
+            }
+            console.log('NOT FOUND FEATUREGROUP',l)
+          })*/
 
           themap.eachLayer(l => {
+            //console.log('>>> l')
+            //cloneDeep(data)
+            //drawnItems.push(l)
             drawnItems = l
           })
 
           try {
             if (drawnItems) {
               console.log('################## drawnItems', drawnItems)
-              const fgdrawnItems = new window.L.FeatureGroup([
-                drawnItems
-              ])
-              await import(
+              const fgdrawnItems = new window.L.FeatureGroup(drawnItems)
+              //const fgdrawnItems = drawnItems
+              console.log('LOAD leaflet.draw-src.js')
+              const drawsrc = await import(
                 'leaflet-draw/dist/leaflet.draw-src.js'
               )
+              console.log('LOADED leaflet.draw-src.js')
               const drawControl = new window.L.Control.Draw({
                 edit: {
                   featureGroup: fgdrawnItems,
                   remove: false,
-                  edit: false,
+                  edit: false, // Disables the edit layer control
                   poly: {
                     allowIntersection: false
                   }
@@ -647,7 +667,7 @@ export default {
                 draw: {
                   polyline: false,
                   polygon: {
-                    allowIntersection: false,
+                    allowIntersection: true,
                     showArea: true
                   },
                   rectangle: false,
@@ -657,6 +677,8 @@ export default {
                 }
               })
 
+              console.log('themap B',this.$refs.map.leafletObject)
+
               themap.addControl(drawControl)
 
               themap.on(L.Draw.Event.CREATED, e => {
@@ -664,13 +686,12 @@ export default {
                 console.log("===========================================================L.Draw.Event.CREATED", e)
                 const layer = e.layer
                 layer.editing.enable()
-                layer.addTo(drawnItems)
+                layer.addTo(fgdrawnItems)
 
                 const wkt = new Wkt.Wkt()
                 wkt.fromObject(layer)
                 this.selectedWKT = wkt.write()
               })
-
               themap.on(L.Draw.Event.DRAWVERTEX, this.shapeChanged)
               themap.on(L.Draw.Event.EDITVERTEX, this.shapeChanged)
             }
@@ -740,7 +761,6 @@ export default {
       }
     },
     async boundsChanged() {
-      // console.log('===boundsChanged')
       if (this.$refs.map && this.$refs.map.leafletObject) {
         this.bounds = this.$refs.map.leafletObject.getBounds()
         // console.log('===boundsChanged', this.bounds)
@@ -763,7 +783,9 @@ export default {
         }
 
         // Sometimes the map needs a kick to show correctly.
-        this.$refs.map.leafletObject.invalidateSize()
+        if (this.$refs.map && this.$refs.map.leafletObject){
+          this.$refs.map.leafletObject.invalidateSize()
+        }
       }
 
       this.busy = false
