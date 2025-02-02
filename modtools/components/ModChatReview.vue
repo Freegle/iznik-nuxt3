@@ -4,9 +4,9 @@
       <b-card-header>
         <div class="d-flex justify-content-between flex-wrap">
           <div class="d-flex justify-content-start flex-wrap">
-            <ModChatReviewUser :user="message.fromuser" class="mr-2" tag="From: " :groupid="message.group.id" />
+            <ModChatReviewUser :user="message.fromuser" class="mr-2" tag="From: " :groupid="message.group.id" @reload="reload"/>
             <v-icon icon="arrow-circle-right" scale="2" class="mt-1 text-info" />
-            <ModChatReviewUser :user="message.touser" class="ml-2" tag="To: " :groupid="message.group.id" />
+            <ModChatReviewUser :user="message.touser" class="ml-2" tag="To: " :groupid="message.group.id"  @reload="reload"/>
           </div>
           <b-button v-if="message.bymailid" size="lg" variant="white" @click="viewOriginal">
             <v-icon icon="info-circle" /> View original email
@@ -19,7 +19,7 @@
         </NoticeMessage>
         <NoticeMessage v-if="message.held" class="mb-2" variant="warning">
           <span v-if="me.id === message.held.id">
-            You held this {{ timeago(message.held.timestamp) }}. Other can't release it or act on it.
+            You held this {{ timeago(message.held.timestamp) }}. Others can't release it or act on it.
           </span>
           <span v-else>
             Held by <strong>
@@ -263,6 +263,9 @@ export default {
     }
   },
   methods: {
+    reload(){
+      this.$emit('reload')
+    },
     async release() {
       await this.$api.chat.sendMT({ id: this.message.id, action: 'Release' })
       this.$emit('reload')

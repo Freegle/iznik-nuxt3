@@ -74,7 +74,7 @@ export default {
   async setup(props) {
     const { modal, hide } = useOurModal()
 
-    const { // Returns wrong chat
+    const { // TODO Returns wrong chat
       chat,
       otheruser,
       tooSoonToNudge,

@@ -14,7 +14,7 @@
         <div v-if="modtools">
           <ExternalLink v-if="modtoolsLink" :href="modtoolsLink">
             <b-button variant="white">
-              View message on ModTools
+              View message on Freegle
             </b-button>
           </ExternalLink>
         </div>
@@ -180,7 +180,15 @@ export default {
   },
   extends: ChatBase,
   async setup(props) {
-    await fetchReferencedMessage(props.chatid, props.id)
+    const { chat, otheruser, chatmessage } = await setupChat(
+      props.chatid,
+      props.id
+    )
+    return {
+      chat,
+      chatmessage,
+      otheruser,
+    }
   },
   data() {
     return {
@@ -192,6 +200,12 @@ export default {
   computed: {
     modtools() {
       return useMiscStore().modtools
+    },
+    modtoolsLink() {
+      //console.log('modtoolsLink',this.chatid,this.id, this.chatmessage.refmsgid, this.chatmessage.group.id)
+      return 'https://ilovefreegle.org/message/'+this.chatmessage?.refmsgid
+      // TODO link to message on ModTools ie within Messages+Approved. Need to switch to NuxtLink
+      //return '/messages/approved/?groupid='+this.chatmessage.group.id+'&msgid='+this.chatmessage.refmsgid
     },
   },
   methods: {

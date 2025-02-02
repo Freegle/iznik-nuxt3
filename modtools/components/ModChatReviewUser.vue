@@ -26,10 +26,8 @@
   </div>
 </template>
 <script>
-
-const REVIEWCHAT = null
-
 export default {
+  emits: ['reload'],
   props: {
     user: {
       type: Object,
@@ -68,25 +66,10 @@ export default {
   methods: {
     addAComment() {
       this.addComment = true
-      this.waitForRef('addComment', () => {
-        this.$refs.addComment.show()
-      })
+      this.$refs.addComment?.show()
     },
     updateComments() {
-      // Bit fiddly.  The user is in the chat messages in the store, not in the user store, so we need to refetch
-      // everything up to where we're at.
-      const messages = this.$store.getters['chatmessages/getMessages'](
-        REVIEWCHAT
-      )
-
-      this.$store.dispatch('chatmessages/clearContext', {
-        chatid: REVIEWCHAT
-      })
-
-      this.$store.dispatch('chatmessages/fetch', {
-        chatid: REVIEWCHAT,
-        limit: messages.length
-      })
+      this.$emit('reload')
     }
   }
 }
