@@ -1,6 +1,6 @@
 <template>
   <!-- eslint-disable-next-line -->
-  <a :href="href" target="_blank" rel="noopener noreferrer"><slot /></a>
+  <a :href="carefulHref" target="_blank" rel="noopener noreferrer"><slot /></a>
 </template>
 <script>
 export default {
@@ -8,6 +8,11 @@ export default {
     href: {
       type: String,
       required: true,
+    },
+  },
+  computed: {
+    carefulHref() {
+      return this.href.startsWith('http') ? this.href : 'https://' + this.href
     },
   },
 }
