@@ -14,7 +14,7 @@
         <div v-if="modtools">
           <ExternalLink v-if="modtoolsLink" :href="modtoolsLink">
             <b-button variant="white">
-              View message on Freegle
+              View message on ModTools
             </b-button>
           </ExternalLink>
         </div>
@@ -202,9 +202,8 @@ export default {
       return useMiscStore().modtools
     },
     modtoolsLink() {
-      //console.log('modtoolsLink',this.chatid,this.id, this.chatmessage.refmsgid, this.chatmessage.group.id)
-      return 'https://ilovefreegle.org/message/'+this.chatmessage?.refmsgid
-      // TODO link to message on ModTools ie within Messages+Approved. Need to switch to NuxtLink
+      return '/message/'+this.chatmessage?.refmsgid
+      // As an alternative: could link to message ie within Messages+Approved. Need to switch to NuxtLink
       //return '/messages/approved/?groupid='+this.chatmessage.group.id+'&msgid='+this.chatmessage.refmsgid
     },
   },

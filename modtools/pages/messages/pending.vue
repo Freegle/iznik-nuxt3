@@ -106,7 +106,7 @@ export default {
 
     // Find a group that we have owner status on and are not a backup where there are no rules set.
     for (const group of this.groups) {
-      if (group.type === 'Freegle' && group.myrole === 'Owner' && !group.rules) {
+      if (group.type === 'Freegle' && group.myrole === 'Owner' && !group.rules && group.publish) {
         this.rulesGroup = group.id
         break
       }
