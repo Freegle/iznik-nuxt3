@@ -43,6 +43,7 @@
                   v-if="showMap && selectedAddressObject"
                   ref="map"
                   :zoom="16"
+                  :max-zoom="17"
                   :center="[
                     selectedAddressObject.lat,
                     selectedAddressObject.lng,
@@ -266,16 +267,19 @@ export default {
     markerLatLng: {
       get() {
         if (!this.selectedAddressObject) {
+          console.log('get markerLatLng NULL')
           return null
         }
 
         if (this.selectedAddressObject.lat || this.selectedAddressObject.lng) {
+          console.log('get markerLatLng point', this.selectedAddressObject)
           return [
             this.selectedAddressObject.lat,
             this.selectedAddressObject.lng,
           ]
         }
 
+        console.log('get markerLatLng postcode', this.selectedAddressObject.postcode)
         return [
           this.selectedAddressObject.postcode.lat,
           this.selectedAddressObject.postcode.lng,
@@ -383,6 +387,7 @@ export default {
       this.hide()
     },
     async updateMarker(val) {
+      console.log('updateMarker',val)
       await this.addressStore.update({
         id: this.selectedAddress,
         lat: val.lat,

@@ -1,6 +1,6 @@
 <template>
   <!-- eslint-disable-next-line -->
-  <a :href="href" target="_blank" rel="noopener noreferrer" @click="openInBrowser"><slot /></a>
+  <a :href="carefulHref" target="_blank" rel="noopener noreferrer" @click="openInBrowser"><slot /></a>
 </template>
 <script>
 import { AppLauncher } from '@capacitor/app-launcher'
@@ -25,7 +25,7 @@ export default {
   methods: {
     async openInBrowser() {
       if (this.mobileStore.isApp) {
-        let url = this.href
+        let url = this.carefulHref
         /*const freeglein = 'https://freegle.in/'
         if( url.startsWith(freeglein)){
           const sname = url.substring(freeglein.length)
@@ -40,6 +40,11 @@ export default {
         return false
       }
       return true
+    },
+  },
+  computed: {
+    carefulHref() {
+      return this.href.startsWith('http') ? this.href : 'https://' + this.href
     },
   },
 }
