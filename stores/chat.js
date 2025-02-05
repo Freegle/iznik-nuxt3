@@ -85,11 +85,14 @@ export const useChatStore = defineStore({
       this.clear()
       const { chatmessages, chatreports } = await api(this.config).chat.fetchReviewChatsMT(params)
       const messages = chatmessages
-      const deduped = [] // Chat review seems to have duplicate message id so only save first
+      const deduped = [] // Chat review seems to have duplicate message id so only save last
 
       const messageStore = useMessageStore()
       messages.forEach((m) => {
-        if( !deduped.find((m2) => m2.id===m.id)) deduped.push(m)
+        const foundIndex = deduped.findIndex((m2) => m2.id===m.id)
+        if( foundIndex===-1) deduped.push(m)
+        else deduped[foundIndex] = m
+
         if( m.refmsg) {
           m.refmsgid = m.refmsg.id
           messageStore.fetch(m.refmsg.id, true)
