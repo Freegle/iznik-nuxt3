@@ -35,7 +35,7 @@
                   :center="center"
                   :style="'width: ' + mapWidth + '; height: ' + mapWidth + 'px'"
                   :min-zoom="5"
-                  :max-zoom="17"
+                  :max-zoom="maxZoom"
                 >
                   <l-tile-layer :url="osmtile()" :attribution="attribution()" />
                   <l-marker
@@ -68,6 +68,8 @@ import { loadLeaflet, attribution, osmtile } from '~/composables/useMap'
 import NoticeboardDetails from '~/components/NoticeboardDetails'
 import { buildHead } from '~/composables/useBuildHead'
 import { useNoticeboardStore } from '~/stores/noticeboard'
+import { MAX_MAP_ZOOM } from '~/constants'
+
 const PosterModal = defineAsyncComponent(() =>
   import('~/components/PosterModal')
 )
@@ -114,6 +116,8 @@ const mapWidth = computed(() => {
 
   return width
 })
+
+const maxZoom = MAX_MAP_ZOOM
 </script>
 <script>
 export default {

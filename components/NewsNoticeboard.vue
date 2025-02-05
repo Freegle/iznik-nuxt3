@@ -54,6 +54,7 @@
     <l-map
       ref="map"
       :zoom="14"
+      :max-zoom="maxZoom"
       :center="[info.lat, info.lng]"
       :style="'width: 100%; height: 200px'"
     >
@@ -86,6 +87,8 @@ import NewsUserIntro from '~/components/NewsUserIntro'
 import NewsLoveComment from '~/components/NewsLoveComment'
 import NoticeMessage from '~/components/NoticeMessage'
 import { attribution, osmtile } from '~/composables/useMap'
+import { MAX_MAP_ZOOM } from '~/constants'
+
 const NewsShareModal = defineAsyncComponent(() =>
   import('~/components/NewsShareModal')
 )
@@ -115,6 +118,9 @@ export default {
     }
   },
   computed: {
+    maxZoom() {
+      return MAX_MAP_ZOOM
+    },
     info() {
       let info = {}
       try {
