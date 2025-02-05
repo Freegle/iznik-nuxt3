@@ -69,7 +69,7 @@
         </p>
       </template>
     </ResultModal>
-    <div v-if="selected">
+    <div v-if="selected && !isMT">
       <b-button v-if="chatmessage?.userid !== myid" variant="link" @click="markUnread">
         Mark unread
       </b-button>

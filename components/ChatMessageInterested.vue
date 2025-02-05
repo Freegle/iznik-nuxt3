@@ -33,6 +33,7 @@
         </div>
         <div
           v-if="
+            !modtools &&
             refmsg &&
             refmsg.type === 'Offer' &&
             (!refmsg.outcomes || !refmsg.outcomes.length)
