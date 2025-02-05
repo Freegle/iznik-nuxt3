@@ -4,7 +4,7 @@
       <ScrollToTop />
       <GroupSelect v-model="groupid" all modonly :work="['editreview']" remember="edits" />
       <NoticeMessage v-if="!messages.length && !busy" class="mt-2">
-        There are no messages at the moment.  This will refresh automatically.
+        There are no messages at the moment. This will refresh automatically.
       </NoticeMessage>
       <ModMessages editreview />
     </client-only>
@@ -26,7 +26,7 @@ export default {
       ...modMessages // busy, context, group, groupid, limit, workType, show, collection, messageTerm, memberTerm, distance, summary, messages, visibleMessages, work,
     }
   },
-  data: function() {
+  data: function () {
     return {
     }
   }

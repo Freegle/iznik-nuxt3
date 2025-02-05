@@ -406,6 +406,11 @@ export const useMessageStore = defineStore({
   
       this.remove({ id: params.id })
     },
+    async revertedits(params) {
+      await api(this.config).message.revertEdits(params.id)
+  
+      this.remove({ id: params.id })
+    },
     async backToPending(id){
       await api(this.config).message.update({
         id,

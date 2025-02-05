@@ -33,7 +33,7 @@ const props = defineProps({
 
 
 onMounted(async () => {
-  //console.log('###ModMessages onMounted', groupid.value)
+  // console.log('###ModMessages onMounted', groupid.value, collection.value, work.value)
   // Ensure we have no cached messages for other searches/groups
   messageStore.clear()
 

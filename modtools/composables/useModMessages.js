@@ -30,7 +30,7 @@ const nextAfterRemoved = ref(null)
 const distance = ref(10)
 
 const summary = computed(() => {
-  if( !summarykey.value) return false
+  if (!summarykey.value) return false
   const miscStore = useMiscStore()
   const ret = miscStore.get(summarykey.value)
   return ret === undefined ? false : ret
@@ -98,7 +98,7 @@ export function setupModMessages() {
     try {
       const authStore = useAuthStore()
       const work = authStore.work
-      //console.log(">>>>useModMessages get work", workType.value, work)
+      // console.log(">>>>useModMessages get work", workType.value, work)
       if (!work) return 0
       if (!workType.value) return 0
       if (Array.isArray(workType.value)) {
@@ -115,14 +115,14 @@ export function setupModMessages() {
     }
   })
   watch(work, async (newVal, oldVal) => {
-    //console.log('<<<<useModMessages watch work. oldVal:', oldVal, 'newVal:', newVal)
-    if( collection.value!=='Pending') return
+    // console.log('<<<<useModMessages watch work. oldVal:', oldVal, 'newVal:', newVal)
+    // if( collection.value!=='Pending') return
     let doFetch = false
 
     const messageStore = useMessageStore()
     const miscStore = useMiscStore()
     //console.log('uMM watch work deferGetMessages',miscStore.deferGetMessages)
-    if( miscStore.deferGetMessages) return
+    if (miscStore.deferGetMessages) return
 
     const bodyoverflow = document.body.style.overflow
     if (bodyoverflow !== 'hidden') {
