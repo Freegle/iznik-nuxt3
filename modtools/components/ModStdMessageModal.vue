@@ -21,8 +21,7 @@
         <b-form-select v-model="message.type" :options="keywordTypeOptions" class="type mr-1" size="lg" />
         <b-form-input v-model="message.item.name" size="lg" class="mr-1" />
         <b-input-group>
-          TODO Postcode
-          <!--Postcode :value="message.location.name" :find="false" @selected="postcodeSelect" /-->
+          <PostCode :value="message.location.name" :find="false" @selected="postcodeSelect" />
         </b-input-group>
       </div>
       <div v-else>
@@ -94,12 +93,10 @@ import { useUserStore } from '../stores/user'
 import dayjs from 'dayjs'
 import { useOurModal } from '~/composables/useOurModal'
 import { SUBJECT_REGEX } from '~/constants'
-//import PostCode from '~/components/PostCode'
 import { setupKeywords } from '../composables/useKeywords'
 
 export default {
   components: {
-    //PostCode,
   },
   props: {
     message: {
