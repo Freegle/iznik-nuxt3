@@ -21,6 +21,7 @@
         <b-form-select v-model="message.type" :options="keywordTypeOptions" class="type mr-1" size="lg" />
         <b-form-input v-model="message.item.name" size="lg" class="mr-1" />
         <b-input-group>
+          TODO Postcode
           <!--Postcode :value="message.location.name" :find="false" @selected="postcodeSelect" /-->
         </b-input-group>
       </div>
@@ -152,10 +153,18 @@ export default {
   },
   computed: {
     groupid() {
-      if (Array.isArray(this.message?.groups)) {
-        return this.message.groups[0].groupid
+      let ret = null
+
+      if (this.member) {
+        ret = this.member.groupid
+      } else if (
+        this.message &&
+        this.message.groups &&
+        this.message.groups.length
+      ) {
+        ret = this.message.groups[0].groupid
       }
-      return 0
+      return ret
     },
     user() {
       return this.message ? this.message.fromuser : this.member
@@ -302,7 +311,6 @@ export default {
   methods: {
     async show() {
       // Calculate initial subject.  Everything apart from Edits adds a Re:.
-      console.log('MSM show', this.stdmsg.subjpref)
       const defpref = this.stdmsg.action === 'Edit' ? '' : 'Re:'
 
       if (this.member) {
@@ -554,7 +562,6 @@ export default {
       this.replyTooShort = false
 
       const msglen = this.body.length - this.bodyInitialLength
-      console.log('Len', msglen, this.body.length, this.bodyInitialLength)
 
       if (this.stdmsg.action !== 'Edit' && msglen >= 0 && msglen < 30) {
         this.replyTooShort = true
@@ -630,14 +637,7 @@ export default {
             break
           case 'Leave Member':
           case 'Leave Approved Member':
-            console.log('MSMM reply', {
-              id: this.member.userid,
-              groupid: this.groupid,
-              subject: subj,
-              body: body,
-              stdmsgid: this.stdmsg.id
-            })
-            await this.messageStore.reply({
+            await this.memberStore.reply({
               id: this.member.userid,
               groupid: this.groupid,
               subject: subj,
@@ -666,7 +666,7 @@ export default {
             break
           case 'Delete Member':
           case 'Delete Approved Member':
-            await this.messageStore.delete({
+            await this.memberStore.delete({
               id: this.member.userid,
               groupid: this.groupid,
               subject: subj,

@@ -22,6 +22,26 @@ export const useMemberStore = defineStore({
       this.instance = 1
       this.ratings = []
     },
+    async reply(params) {
+      await api(this.config).memberships.reply(
+        params.id,
+        params.groupid,
+        params.subject,
+        params.stdmsgid,
+        params.body
+      )
+    },
+    async delete(params) {
+      await api(this.config).memberships.delete(
+        params.id,
+        params.groupid,
+        params.subject,
+        params.stdmsgid,
+        params.body
+      )
+
+      delete this.list[params.id]
+    },
     async fetchMembers(params) {
       //console.log('useMemberStore fetchMembers',params)
       let received = 0

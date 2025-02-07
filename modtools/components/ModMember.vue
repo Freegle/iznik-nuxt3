@@ -1,6 +1,5 @@
 <template>
   <div v-if="member">
-    MODMEMBER
     <b-card bg-variant="white" no-body>
       <b-card-header class="d-flex justify-content-between flex-wrap">
         <div>
