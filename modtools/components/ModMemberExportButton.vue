@@ -8,10 +8,10 @@
     <b-modal v-if="showExportModal" ref="exportmodal" id="exportmodal" title="Member Export" no-stacking>
       <template #default>
         <p>
-          TODO
+          This will export the members of this community. It's very slow, but you probably won't need to do it often.
         </p>
         <p>
-          This will export the members of this community. It's very slow, but you probably won't need to do it often.
+          Export in progress...
         </p>
         <b-progress height="48px" class="mt-2" animate variant="success">
           <b-progress-bar :value="progressValue" />
@@ -28,12 +28,16 @@
 <script>
 import { useOurModal } from '~/composables/useOurModal'
 import saveAs from 'save-file'
-//const createCsvWriter = require('csv-writer').createObjectCsvStringifier
+import { createObjectCsvWriter } from 'csv-writer'
+import { useGroupStore } from '../stores/group'
+import { useMemberStore } from '../stores/member'
 
 export default {
   setup() {
+    const groupStore = useGroupStore()
+    const memberStore = useMemberStore()
     const { modal, show, hide } = useOurModal()
-    return { modal, show, hide }
+    return { groupStore, memberStore, modal, show, hide }
   },
   props: {
     groupid: {
@@ -53,7 +57,7 @@ export default {
   },
   computed: {
     group() {
-      // TODO return this.$store.getters['group/get'](this.groupid)
+      return this.groupStore.get(this.groupid)
     },
     progressValue() {
       return this.group && this.group.membercount
@@ -73,11 +77,9 @@ export default {
       this.showExportModal = false
     },
     async exportChunk() {
-      console.log('exportChunk TODO')
-      return
       if (!this.cancelled) {
-        await this.$store.dispatch('members/clear')
-        await this.$store.dispatch('members/fetchMembers', {
+        await this.memberStore.clear()
+        await this.memberStore.fetchMembers({
           groupid: this.groupid,
           collection: 'Approved',
           modtools: true,
@@ -87,10 +89,10 @@ export default {
         })
       }
 
-      const members = this.$store.getters['members/getByGroup'](this.groupid)
+      const members = this.memberStore.getByGroup(this.groupid)
       this.fetched += members.length
 
-      const writer = createCsvWriter({
+      const writer = createObjectCsvWriter({
         path: 'members.csv',
         header: [
           { id: 'id', title: 'Id' },
@@ -169,7 +171,7 @@ export default {
         })
       })
 
-      this.context = this.$store.getters['members/getContext']
+      this.context = this.memberStore.context
 
       if (members.length) {
         // More to get
@@ -179,7 +181,7 @@ export default {
       } else {
         // Got them all.
         const str =
-          writer.getHeaderString() + writer.stringifyRecords(this.exportList)
+          writer.csvStringifier.getHeaderString() + writer.csvStringifier.stringifyRecords(this.exportList)
         const blob = new Blob([str], { type: 'text/csv;charset=utf-8' })
         await saveAs(blob, 'members.csv')
 
