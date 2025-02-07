@@ -297,7 +297,8 @@ export default {
     }
 
     for (const g of this.groups) {
-      await this.groupStore.fetchMT({id:g.id})
+      // MT CHANGED
+      await this.groupStore.fetchMT({id:g.id, polygon: true})
     }
     
     if (this.remember) {

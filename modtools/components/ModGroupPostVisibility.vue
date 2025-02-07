@@ -39,7 +39,7 @@
         </label>
         <SpinButton icon-name="save" label="Save" variant="primary" @handle="save" />
       </div>
-      <l-map ref="map" :zoom="7" :center="[group.lat, group.lng]" :style="'width: 100%; height: 600px'">
+      <l-map ref="map" :zoom="7" :max-zoom="17" :center="[group.lat, group.lng]" :style="'width: 100%; height: 600px'" @ready="ready">
         <l-tile-layer :url="osmtile" :attribution="attribution" />
         <l-geojson v-if="CGA" :geojson="CGA" :options="cgaOptions" />
         <l-geojson v-if="visibility" :geojson="visibility" :options="visibilityOptions" />
@@ -48,20 +48,22 @@
   </div>
 </template>
 <script>
+// We can't easily go back from a postvisibility polygon to the scale value.  
+// So: display correct postvisibility polygon but scale is always reset to just group
 import { useGroupStore } from '../../stores/group'
 import turfbuffer from 'turf-buffer'
-
-let Wkt = null
-
-/* TODO if (process.client) {
-  Wkt = require('wicket')
-  require('wicket/wicket-leaflet')
-}*/
+import Wkt from 'wicket'
+import { attribution, osmtile, loadLeaflet } from '../composables/useMap'
 
 export default {
-  setup() {
+  setup(props) {
     const groupStore = useGroupStore()
-    return { groupStore }
+    return {
+      groupStore,
+      Wkt,
+      osmtile: osmtile(),
+      attribution: attribution()
+    }
   },
   props: {
     groupid: {
@@ -78,14 +80,8 @@ export default {
     }
   },
   computed: {
-    async group() {
-      return await this.groupStore.get(this.groupid)
-    },
-    osmtile() {
-      return process.env.OSM_TILE
-    },
-    attribution() {
-      return 'Map data &copy; <a href="https://www.openstreetmap.org/" rel="noopener noreferrer">OpenStreetMap</a> contributors'
+    group() {
+      return this.groupStore.get(this.groupid)
     },
     CGA() {
       const wkt = new Wkt.Wkt()
@@ -93,7 +89,7 @@ export default {
         wkt.read(this.group.dpa || this.group.cga)
         return wkt.toJson()
       } catch (e) {
-        console.log('WKT error', this.boundary, e)
+        console.log('WKT error', e)
       }
 
       return null
@@ -139,8 +135,9 @@ export default {
       this.changed = true
     }
   },
-  mounted() {
+  async mounted() {
     this.getValueFromGroup()
+    await loadLeaflet()
   },
   methods: {
     async getValueFromGroup() {
@@ -151,24 +148,32 @@ export default {
       }
     },
     toggleView(c, e) {
-      this.showing = c.value
+      this.showing = c
 
-      if (!c.value) {
+      if (!c) {
         this.value = null
       } else {
         this.zoomToCGA()
       }
     },
+    async ready() {
+      if (process.client) {
+        this.zoomToCGA()
+      }
+    },
     zoomToCGA() {
-      this.waitForRef('map', () => {
-        const area = this.group.dpa || this.group.cga
-        const wkt = new Wkt.Wkt()
-        wkt.read(area)
-        const mapobj = this.$refs.map.leafletObject
-        const obj = wkt.toObject(mapobj.defaults)
-        const bounds = obj.getBounds()
-        this.$refs.map.fitBounds(bounds.pad(0.1))
-      })
+      try {
+        if (this.$refs.map?.leafletObject) {
+          const area = this.group.dpa || this.group.cga
+          const wkt = new Wkt.Wkt()
+          const x = wkt.read(area)
+          const obj = wkt.toObject()
+          const bounds = obj.getBounds()
+          this.$refs.map.leafletObject.fitBounds(bounds.pad(0.1))
+        }
+      } catch (e) {
+        console.log('zoomToCGA error', e)
+      }
     },
     async save(callback) {
       const wkt = new Wkt.Wkt()
