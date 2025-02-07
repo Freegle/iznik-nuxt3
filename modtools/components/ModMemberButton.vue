@@ -10,12 +10,16 @@
   </div>
 </template>
 <script>
+import { useStdmsgStore } from './stores/stdmsg'
+import { useModConfigStore } from '../stores/modconfig'
 import { useSpammerStore } from '../stores/spammer'
 
 export default {
   setup() {
+    const modConfigStore = useModConfigStore()
     const spammerStore = useSpammerStore()
-    return { spammerStore }
+    const stdmsgStore = useStdmsgStore()
+    return { modConfigStore, spammerStore, stdmsgStore }
   },
 
   props: {
@@ -156,13 +160,12 @@ export default {
           }
         } else if (this.stdmsgid) {
           // We have a standard message.  Fetch it.
-          alert("TODO MMB1")
-          /* TODO this.stdmsg = await this.$store.dispatch('stdmsgs/fetch', {
-            id: this.stdmsgid
-          })*/
+
+          this.stdmsg = await this.stdmsgStore.fetch(this.stdmsgid)
         }
 
         this.showStdMsgModal = true
+        await this.$nextTick()
         this.$refs.stdmodal?.show()
       }
       if (callback) callback()
