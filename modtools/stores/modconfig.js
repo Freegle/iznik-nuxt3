@@ -27,11 +27,9 @@ export const useModConfigStore = defineStore({
     },
 
     async fetchConfig(params) {
-      console.log("==== useModConfigStore fetchConfig")
       const config = await api(this.config).modconfigs.fetchConfig(params)
 
       if (config) {
-        console.log("==== useModConfigStore config", config)
         this.current = config
       }
     },
