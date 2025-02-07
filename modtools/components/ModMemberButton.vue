@@ -10,16 +10,18 @@
   </div>
 </template>
 <script>
-import { useStdmsgStore } from './stores/stdmsg'
+import { useMemberStore } from '../stores/member'
 import { useModConfigStore } from '../stores/modconfig'
 import { useSpammerStore } from '../stores/spammer'
+import { useStdmsgStore } from './stores/stdmsg'
 
 export default {
   setup() {
+    const memberStore = useMemberStore()
     const modConfigStore = useModConfigStore()
     const spammerStore = useSpammerStore()
     const stdmsgStore = useStdmsgStore()
-    return { modConfigStore, spammerStore, stdmsgStore }
+    return { memberStore, modConfigStore, spammerStore, stdmsgStore }
   },
 
   props: {
@@ -171,8 +173,8 @@ export default {
       if (callback) callback()
     },
     async approveIt() {
-      alert("TODO MMB2")
-      /* TODO await this.$store.dispatch('members/approve', {
+      alert('MMB memberStore.approve NOT DEFINED')
+      /*await this.memberStore.approve({
         id: this.member.userid,
         groupid: this.groupid
       })*/
@@ -192,11 +194,10 @@ export default {
       })
     },
     async spamRequestRemove() {
-      alert("TODO MMB3")
-      /* TODO await this.$store.dispatch('spammers/requestremove', {
+      await this.spammerStore.requestremove({
         id: this.member.spammer.id,
         userid: this.member.userid
-      })*/
+      })
     },
     async spamRemove() {
       await this.spammerStore.remove({ id: this.member.spammer.id, userid: this.member.userid })
@@ -212,11 +213,10 @@ export default {
       })
     },
     async deleteConfirmed() {
-      alert("TODO MMB4")
-      /* TODO await this.$store.dispatch('members/delete', {
+      await this.memberStore.delete({
         id: this.member.userid,
         groupid: this.groupid
-      })*/
+      })
     },
     async releaseIt() {
       await this.spammerStore.release({
