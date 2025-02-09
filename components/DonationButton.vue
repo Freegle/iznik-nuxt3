@@ -41,6 +41,12 @@ export default {
   async setup() {
     await loadScript('https://www.paypalobjects.com/donate/sdk/donate-sdk.js')
   },
+  watch: {
+    value(newVal) {
+      console.log('DonateButton watch value', newVal, this.value)
+      this.makeButton()
+    }
+  },
   computed: {
     uniqueId() {
       return uid('donation-')
@@ -90,6 +96,7 @@ export default {
       }
     },
     makeButton() {
+      console.log('DonationButton makeButton', this.buttonId)
       const self = this
       window.PayPal.Donation.Button({
         env: 'production',
