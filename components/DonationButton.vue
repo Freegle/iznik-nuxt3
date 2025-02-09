@@ -96,6 +96,7 @@ export default {
       }
     },
     makeButton() {
+      document.getElementById(this.uniqueId).innerHTML = ''
       console.log('DonationButton makeButton', this.buttonId)
       const self = this
       window.PayPal.Donation.Button({
