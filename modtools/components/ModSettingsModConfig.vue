@@ -227,7 +227,6 @@ export default {
         this.showUsing = false
 
         if (newval) {
-          console.log("ModSettingsModConfig WATCH newval") // TODO
           await this.modConfigStore.fetchConfig({
             id: newval,
             configuring: true
