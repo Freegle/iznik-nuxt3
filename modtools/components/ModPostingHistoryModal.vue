@@ -101,8 +101,8 @@ export default {
   },
   mounted() {
     // Not all the groups we show will be ours, so get them all for the group name.
-    // TODO
-    //this.groupStore.list({
+    // TODO: This gets all groups but cannot decide if needed:
+    //this.groupStore.listMT({
     //  grouptype: 'Freegle'
     //})
   },
