@@ -1,5 +1,6 @@
 <template>
   <div>
+    <div id="visobserver" v-observe-visibility="visibilityChanged" />
     <b-card no-body>
       <b-card-header :class="variant">
         <b-row>
@@ -47,6 +48,7 @@
   </div>
 </template>
 <script>
+// import VisibleWhen from '~/components/VisibleWhen'
 import { useMemberStore } from '../stores/member'
 
 export default {
@@ -107,17 +109,18 @@ export default {
     }
   },
   mounted() {
-    // TODO: This probably marks as reviewed too early: need to use visible
-    if (!this.member.reviewed) {
-      // Mark this as reviewed.  They've had a chance to see it.
-      this.memberStore.happinessReviewed({
-        userid: this.member.user.id,
-        groupid: this.member.groupid,
-        happinessid: this.member.id
-      })
-    }
   },
   methods: {
+    visibilityChanged(visible) {
+      if (visible && !this.member.reviewed) {
+        // Mark this as reviewed.  They've had a chance to see it.
+        this.memberStore.happinessReviewed({
+          userid: this.member.user.id,
+          groupid: this.member.groupid,
+          happinessid: this.member.id
+        })
+      }
+    }
   }
 }
 </script>
