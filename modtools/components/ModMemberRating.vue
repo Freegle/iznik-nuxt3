@@ -1,5 +1,6 @@
 <template>
   <div>
+    <div id="visobserver" v-observe-visibility="visibilityChanged" />
     <b-card no-body>
       <b-card-header :header-bg-variant="rating.reviewrequired ? 'warning' : 'default'" class="d-flex justify-content-between flex-wrap">
         <div>
@@ -51,18 +52,7 @@ export default {
       userStore,
     }
   },
-  async mounted() {
-    // TODO: This probably marks as reviewed too early: need to use visible
-    if (this.rating.reviewrequired) {
-      // Mark this as reviewed.  They've had a chance to see it.
-      this.userStore.ratingReviewed({
-        id: this.rating.id
-      })
-    }
-
-    if (this.rating.rater) {
-      this.userStore.fetchMT({ id: this.rating.rater })
-    }
+  mounted() {
   },
   computed: {
     groupName() {
@@ -83,6 +73,21 @@ export default {
     }
   },
   methods: {
+    visibilityChanged(visible) {
+      console.log('MMR visibilityChanged', visible, this.rating.reviewrequired)
+      if (visible) {
+        if (this.rating.reviewrequired) {
+          // Mark this as reviewed.  They've had a chance to see it.
+          this.userStore.ratingReviewed({
+            id: this.rating.id
+          })
+        }
+
+        //if (this.rating.rater) {
+        //  this.userStore.fetchMT({ id: this.rating.rater })
+        //}
+      }
+    }
   }
 }
 </script>

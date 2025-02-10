@@ -138,7 +138,6 @@ export default {
       this.$refs.banmodal?.show()
     },
     startsearch(search) {
-      console.log('startsearch',search,this.groupid)
       // Initiate search again even if search has not changed
       search = search.trim()
       this.search = search

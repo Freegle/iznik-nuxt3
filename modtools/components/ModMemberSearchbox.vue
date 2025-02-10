@@ -1,10 +1,9 @@
 <template>
   <b-input-group class="flex max">
-    <b-form-input v-model="term" type="text" placeholder="Search email/name/id" :disabled="disabled" autocapitalize="none"
-      @keyup.native.enter="dosearch" />
+    <b-form-input v-model="term" type="text" placeholder="Search email/name/id" autocapitalize="none" @keyup.native.enter="dosearch" />
     <b-input-group>
       <slot name="append">
-        <b-button variant="primary" :disabled="disabled" @click="dosearch">
+        <b-button variant="primary" @click="dosearch">
           <v-icon icon="search" />
         </b-button>
       </slot>
@@ -20,26 +19,11 @@ export default {
     }
   },
   props: {
-    groupid: { // TODO: change how used
-      type: Number,
-      required: false,
-      default: null
-    },
-    disabled: { // TODO: when used?
-      type: Boolean,
-      required: false,
-      default: false
-    },
-    search: { // TODO: when used?
+    search: {
       type: String,
       required: false,
       default: null
     },
-    spam: { // TODO: when used?
-      type: Boolean,
-      required: false,
-      default: false
-    }
   },
   mounted() {
     this.term = this.search
