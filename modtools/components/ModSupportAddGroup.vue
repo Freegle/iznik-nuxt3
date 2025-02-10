@@ -90,14 +90,14 @@ export default {
         lat: this.lat,
         lng: this.lng
       })
-      /* TODO await this.groupStore.add({
+      await this.groupStore.addgroup({
         nameshort: this.nameshort,
         namefull: this.namefull,
         cga: this.cga,
         dpa: this.dpa,
         lat: this.lat,
         lng: this.lng
-      })*/
+      })
       callback()
     }
   }

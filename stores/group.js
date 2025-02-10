@@ -169,7 +169,7 @@ export const useGroupStore = defineStore({
         name: params.nameshort
       })
   
-      api(this.config).patch({
+      api(this.config).group.patch({
         id: id,
         namefull: params.namefull,
         publish: 0,
@@ -187,7 +187,7 @@ export const useGroupStore = defineStore({
   
       return id
     },
-    },
+  },
   getters: {
     get: (state) => (idOrName) => {
       let ret = null
