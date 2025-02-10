@@ -387,16 +387,6 @@
 <script>
 import { useMemberStore } from '../stores/member'
 import { useUserStore } from '../../stores/user'
-/*
-//import Vue from 'vue'
-
-TODO if (process.client) {
-  const lineClamp = require('vue-line-clamp')
-
-  Vue.use(lineClamp, {
-    textOverflow: 'ellipsis'
-  })
-}*/
 
 const SHOW = 3
 
