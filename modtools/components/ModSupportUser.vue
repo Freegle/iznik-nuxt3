@@ -335,7 +335,7 @@
               {{ datetimeshort(newsfeed.timestamp) }}
             </div>
             <div class="mr-2">
-              <div TODOv-line-clamp="2" class="" :class="{ strike: newsfeed.hidden || newsfeed.deleted }">
+              <div class="line-clamp-2" :style="{ strike: newsfeed.hidden || newsfeed.deleted }">
                 {{ newsfeed.message }}
               </div>
               <div v-if="newsfeed.hidden" class="small">
