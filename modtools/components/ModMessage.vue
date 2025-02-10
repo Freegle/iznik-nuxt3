@@ -15,7 +15,7 @@
             <div v-if="editing" class="d-flex flex-wrap">
               <GroupSelect v-model="editgroup" modonly class="mr-1" size="lg" :disabled-except-for="memberGroupIds" />
               <div v-if="message.item && message.location" class="d-flex justify-content-start">
-                <b-form-select v-model="message.type" :options="keywordTypeOptions" class="type mr-1" size="lg" />
+                <b-form-select v-model="message.type" :options="typeOptions" class="type mr-1" size="lg" />
                 <b-form-input v-model="message.item.name" size="lg" class="mr-1" />
               </div>
               <div v-if="message.item && message.location">
@@ -27,7 +27,7 @@
                 <label class="mr-2">Subject:</label>
                 <b-form-input v-model="message.subject" size="lg" />
                 <label class="mr-2">Post type:</label>
-                <b-form-select v-model="message.type" :options="keywordTypeOptions" class="type mr-1" size="lg" />
+                <b-form-select v-model="message.type" :options="typeOptions" class="type mr-1" size="lg" />
               </div>
             </div>
             <Diff v-else-if="editreview && oldSubject && newSubject" :old="oldSubject" :new="newSubject" class="font-weight-bold" />
@@ -383,10 +383,10 @@ export default {
     const messageStore = useMessageStore()
     const userStore = useUserStore()
     const {
-      keywordTypeOptions
+      typeOptions
     } = setupKeywords()
 
-    return { locationStore, memberStore, messageStore, modconfigStore, userStore, keywordTypeOptions }
+    return { locationStore, memberStore, messageStore, modconfigStore, userStore, typeOptions }
   },
   data: function () {
     return {

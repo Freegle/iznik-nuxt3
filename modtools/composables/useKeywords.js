@@ -1,6 +1,6 @@
 import { setupModMessages } from '../composables/useModMessages'
 
-const keywordTypeOptions = computed(() => {
+const typeOptions = computed(() => {
   const { group } = setupModMessages()
   const thegroup = group.value
   return [
@@ -25,14 +25,13 @@ const keywordTypeOptions = computed(() => {
   ]
 })
 
-/*const keywordGroup = computed(() => {
-  console.log('TODO: keywordGroup as above')
+/* group and groupid no longer used
+const keywordGroup = computed(() => {
   return null
   return this.myGroup(groupid)
 })
 
 const keywordGroupid = computed(() => {
-  console.log('TODO: keywordGroupid as above')
   return 0
   let ret = null
 
@@ -52,8 +51,8 @@ const keywordGroupid = computed(() => {
 export function setupKeywords() {
 
   return {
-    keywordTypeOptions,
-    // TODO keywordGroup,
-    // TODO keywordGroupid
+    typeOptions,
+    // keywordGroup,
+    // keywordGroupid
   }
 }

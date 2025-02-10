@@ -18,7 +18,7 @@
         </div>
       </div>
       <div v-if="message && stdmsg.action === 'Edit' && message.item && message.location" class="d-flex justify-content-start">
-        <b-form-select v-model="message.type" :options="keywordTypeOptions" class="type mr-1" size="lg" />
+        <b-form-select v-model="message.type" :options="typeOptions" class="type mr-1" size="lg" />
         <b-form-input v-model="message.item.name" size="lg" class="mr-1" />
         <b-input-group>
           <PostCode :value="message.location.name" :find="false" @selected="postcodeSelect" />
@@ -126,9 +126,9 @@ export default {
     const memberStore = useMemberStore()
     const userStore = useUserStore()
     const {
-      keywordTypeOptions
+      typeOptions
     } = setupKeywords()
-    return { groupStore, memberStore, messageStore, userStore, keywordTypeOptions, modal, hide }
+    return { groupStore, memberStore, messageStore, userStore, typeOptions, modal, hide }
   },
   data: function () {
     return {
