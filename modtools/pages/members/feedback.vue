@@ -91,7 +91,7 @@ export default {
     modMembers.limit.value = 1000 // Get everything (probably) so that the ratings and feedback are interleaved.
     return {
       memberStore,
-      ...modMembers // busy, context, group, groupid, limit, workType, show, collection, messageTerm, memberTerm, distance, summary, members, visibleMembers, work, loadMore
+      ...modMembers // busy, context, group, groupid, limit, show, collection, messageTerm, memberTerm, distance, summary, members, visibleMembers, loadMore
     }
   },
   data: function () {

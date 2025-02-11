@@ -42,7 +42,7 @@ export default {
       groupStore,
       memberStore,
       miscStore,
-      ...modMembers // busy, context, group, groupid, limit, workType, show, collection, messageTerm, memberTerm, distance, summary, members, visibleMembers, work, loadMore
+      ...modMembers // busy, context, group, groupid, limit, show, collection, messageTerm, memberTerm, distance, summary, members, visibleMembers, loadMore
     }
   },
   data: function () {

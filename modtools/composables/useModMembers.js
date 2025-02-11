@@ -1,9 +1,7 @@
-// TODO Needs big clean up
-import { useAuthStore } from '@/stores/auth'
+// Simplified from MT2 mixin/modMembersPage
+
 import { useGroupStore } from '@/stores/group'
 import { useMemberStore } from '../stores/member'
-import { useMiscStore } from '@/stores/misc'
-import { CaptureConsole } from '@sentry/integrations'
 
 const bump = ref(0)
 const busy = ref(false)
@@ -13,24 +11,17 @@ const group = ref(null)
 const limit = ref(0)
 const search = ref(null)
 const filter = ref('0')
-const workType = ref(null)
+// const workType = ref(null)
 const show = ref(0)
 
 const collection = ref(null)
 const messageTerm = ref(null)
 const memberTerm = ref(null)
-const modalOpen = ref(false)
 const nextAfterRemoved = ref(null)
 
 const distance = ref(10)
 
-/*const summary = computed(() => {
-  const miscStore = useMiscStore()
-  const ret = miscStore.get('modtoolsMessagesApprovedSummary')
-  return ret === undefined ? false : ret
-})*/
 
-// mixin/modMembersPage
 const members = computed(() => {
   //console.log('UMM members',groupid.value, bump.value)
   const memberStore = useMemberStore()
@@ -118,7 +109,7 @@ const loadMore = async function ($state) {
 }
 
 watch(groupid, async (newVal) => {
-  //console.log("UMM watch groupid", newVal)
+  // console.log("UMM watch groupid", newVal)
   context.value = null
   show.value = 0
   const memberStore = useMemberStore()
@@ -134,37 +125,13 @@ watch(groupid, async (newVal) => {
   bump.value++
 })
 
-/*watch(group, async (newValue, oldValue) => {
-  console.log("===UMM watch group", newValue, oldValue, groupid.value)
-  // We have this watch because we may need to fetch a group that we have remembered.  The mounted()
-  // call may happen before we have restored the persisted state, so we can't initiate the fetch there.
-  if (oldValue === null || oldValue.id !== groupid.value) {
-    const groupStore = useGroupStore()
-    await groupStore.fetch(groupid.value)
-    
-    const memberStore = useMemberStore()
-    console.log('-------------------------------------fetchMembers')
-    await memberStore.fetchMembers({
-      groupid: groupid.value,
-      collection: collection.value,
-      modtools: true,
-      summary: false,
-      context: context.value,
-      limit: limit.value,
-      search: search.value,
-      filter: filter.value
-    })
-  }
-})*/
-
-
 export function setupModMembers() {
-  const work = computed(() => {
+  /* MT3 NOT USED const work = computed(() => {
     // Count for the type of work we're interested in.
     try {
       const authStore = useAuthStore()
       const work = authStore.work
-      //console.log(">>>>UMM get work", workType.value, work)
+      console.log(">>>>UMM get work", workType.value, work)
       if (!work) return 0
       const count = workType.value ? work[workType.value] : 0
       return count
@@ -172,88 +139,27 @@ export function setupModMembers() {
       console.log('>>>>UMM exception', e.message)
       return 0
     }
-  })
-  watch(work, async (newVal, oldVal) => {
-    // TODO: Only want this to run if on Pending page
-    //console.log('<<<<UMM watch work', newVal, oldVal, modalOpen.value)
-    let doFetch = false
-
-    /* TODO if (modalOpen.value && Date.now() - modalOpen.value > 10 * 60 * 1000) {
-      // We don't always seem to get the modal hidden event, so assume any modals open for a long time have actually
-      // closed.
-      modalOpen.value = null
-    }*/
-
-
-    /* TODO const memberStore = useMemberStore()
-    const miscStore = useMiscStore()
-
-    //if (!modalOpen.value) {
-    if (newVal > oldVal) {
-      // There's new stuff to fetch.
-      //console.log('Fetch')
-      await memberStore.clearContext()
-      doFetch = true
-    } else {
-      const visible = miscStore.get('visible')
-      //console.log('Visible', visible)
-
-      if (!visible) {
-        // If we're not visible, then clear what we have in the store.  We don't want to do that under our own
-        // feet, but if we do this then we will pick up changes from other people and avoid confusion.
-        await memberStore.clear()
-        doFetch = true
-      }
-    }
-
-    if (doFetch) {
-      //console.log('Fetch')
-      await memberStore.clearContext()
-      context.value = null
-
-      await memberStore.fetchMembersMT({
-        groupid: groupid.value,
-        collection: collection.value,
-        modtools: true,
-        summary: false,
-        limit: Math.max(limit.value, newVal)
-      })
-
-      // Force them to show.
-      let members
-
-      if (groupid.value) {
-        members = memberStore.getByGroup(groupid.value)
-      } else {
-        members = memberStore.all
-      }
-
-      show.value = members.length
-    }
-    //}
-    */
-  })
+  })*/
 
   return {
-    bump,
-    busy,
-    context,
-    group,
-    groupid,
-    limit,
-    search,
-    filter,
-    workType,
+    bump, // Y
+    busy, // Y
+    context, // ?
+    group, // ?
+    groupid, // Y
+    limit, // Y
+    search, // Y
+    filter, // Y
+    // workType, // N
     show,
-    collection,
+    collection, // Y
     messageTerm,
     memberTerm,
     nextAfterRemoved,
-    distance,
-    //summary,
+    distance, // Y
     members,
-    visibleMembers,
-    work,
-    loadMore
+    visibleMembers, // Y
+    // work, // N
+    loadMore // Y
   }
 }
