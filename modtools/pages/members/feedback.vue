@@ -77,6 +77,7 @@
 <script>
 import dayjs from 'dayjs'
 import { useMemberStore } from '@/stores/member'
+import { useUserStore } from '../stores/user'
 import { GChart } from 'vue-google-charts'
 import { setupModMembers } from '../../composables/useModMembers'
 
@@ -87,10 +88,12 @@ export default {
   async setup() {
     const memberStore = useMemberStore()
     const modMembers = setupModMembers()
+    const userStore = useUserStore()
     modMembers.collection.value = 'Happiness'
     modMembers.limit.value = 1000 // Get everything (probably) so that the ratings and feedback are interleaved.
     return {
       memberStore,
+      userStore,
       ...modMembers // busy, context, group, groupid, limit, show, collection, messageTerm, memberTerm, distance, summary, members, visibleMembers, loadMore
     }
   },
@@ -232,23 +235,23 @@ export default {
 
       this.$nextTick(() => {
         this.members.forEach(async member => {
-          console.log('markAll member', member.id, member.reviewed)
+          // console.log('markAll member', member.id, member.reviewed)
           if (!member.reviewed) {
             const params = {
               userid: member.fromuser,
               groupid: member.groupid,
               happinessid: member.id
             }
-            console.log('markAll happinessReviewed', params)
+            // console.log('markAll happinessReviewed', params)
             await this.memberStore.happinessReviewed(params)
           }
         })
         this.ratings.forEach(async rating => {
           if (rating.reviewrequired) {
-            console.log('markAll ratingReviewed', { id: rating.id })
-            /*TODO await this.$store.dispatch('user/ratingReviewed', {
-              id: rating.id
-            })*/
+            // console.log('markAll ratingReviewed', { id: rating.id })
+            await this.userStore.ratingReviewed({
+              id: this.rating.id
+            })
           }
         })
 

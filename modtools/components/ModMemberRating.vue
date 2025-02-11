@@ -83,7 +83,7 @@ export default {
           })
         }
 
-        //if (this.rating.rater) {
+        //TODO if (this.rating.rater) {
         //  this.userStore.fetchMT({ id: this.rating.rater })
         //}
       }
