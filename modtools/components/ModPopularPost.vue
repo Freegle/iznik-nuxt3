@@ -70,9 +70,6 @@ export default {
     this.groupStore.fetch(this.item.groupid)
   },
   methods: {
-    updateWork() {
-      //this.fetchMe(['work'])
-    },
     async share() {
       await this.publicityStore.sharePopularPost({
         groupid: this.item.groupid,

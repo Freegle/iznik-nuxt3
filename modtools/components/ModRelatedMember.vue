@@ -263,7 +263,7 @@ export default {
       this.updateWork()
     },
     updateWork() {
-      this.fetchMe(['work'])
+      this.fetchMe(true, ['work'])
     }
   }
 }

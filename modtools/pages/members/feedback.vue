@@ -246,14 +246,14 @@ export default {
         this.ratings.forEach(async rating => {
           if (rating.reviewrequired) {
             console.log('markAll ratingReviewed', { id: rating.id })
-            /*await this.$store.dispatch('user/ratingReviewed', {
+            /*TODO await this.$store.dispatch('user/ratingReviewed', {
               id: rating.id
             })*/
           }
         })
 
       })
-      // this.fetchMe(['work'])
+      this.fetchMe(true, ['work'])
     }
   }
 }

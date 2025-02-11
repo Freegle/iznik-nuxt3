@@ -121,7 +121,7 @@
             </b-form-group>
             <ModGroupSetting :groupid="groupid" name="tagline" label="Tagline"
               description="This should be short and snappy. Include some local reference that people in your area will feel connected to." />
-            <!--          TODO MT POSTLAUNCH Worry words in group description-->
+            <!--          TODO-ED MT POSTLAUNCH Worry words in group description-->
             <ModGroupSetting :groupid="groupid" name="welcomemail" label="Welcome email"
               description="This is emailed out to new members.  Keep it short.  Positive - use 'do' not 'don't'." type="textarea" :rows="10" />
             <b-form-group label="Description">
@@ -722,7 +722,7 @@ export default {
         settings
       })
 
-      this.fetchMe() // TODO ['me', 'groups']
+      this.fetchMe(true, ['groups'])
     },
     uploadProfile() {
       this.uploadingProfile = true
