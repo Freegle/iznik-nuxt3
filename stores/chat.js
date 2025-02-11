@@ -17,6 +17,7 @@ export const useChatStore = defineStore({
     showContactDetailsAskModal: false,
     currentChatMT: null,
     lastSearchMT: null,
+    currentCountMT: 0
   }),
   actions: {
     clear(){
@@ -39,7 +40,7 @@ export const useChatStore = defineStore({
         search: params && params.search ? params.search : null
       }
       params.summary = true
-      //console.log('uCS listChatsMT', params)
+      // console.log('uCS listChatsMT', params)
   
       this.lastSearchMT = params.search
   
@@ -80,6 +81,32 @@ export const useChatStore = defineStore({
           throw e
         }
       }
+    },
+    async fetchLatestChatsMT() { // MT ADDED
+      const now = new Date()
+      
+      const authStore = useAuthStore()
+      const me = authStore.user
+
+      if (me && me.id) {
+        const newCount = await api(this.config).chat.unseenCountMT()
+        // console.log('fetchLatestChats BBB', this.currentCountMT, newCount)
+        
+        if (newCount !== this.currentCountMT) {
+          if( !this.lastSearchMT){
+            this.currentCountMT = newCount
+            this.listChatsMT({
+              chattypes: ['User2Mod', 'Mod2Mod'],
+              summary: true,
+              noerror: true
+            })
+          }
+        }
+      }
+
+      // Continuously check for updated chats. Would be nice if this was event driven instead but requires server work.
+      // No need to clear the timeout
+      setTimeout(this.fetchLatestChatsMT, 30000)
     },
     async fetchReviewChatsMT(id, params){
       this.clear()

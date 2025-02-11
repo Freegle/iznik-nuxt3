@@ -18,7 +18,7 @@
             </b-badge>
           </div>
         </b-nav-item>
-        <ChatMenu v-if="loggedIn" id="menu-option-modtools-chat2" :is-list-item="true" :chat-count.sync="chatCount" class="mr-4" />
+        <ChatMenu v-if="loggedIn" id="menu-option-modtools-chat2" :is-list-item="true" class="mr-4" />
         <b-nav-item v-if="loggedIn">
           <div class="position-relative">
             <b-button variant="white" class="menu" @click="toggleMenu">
@@ -98,6 +98,7 @@
 
 <script lang="ts">
 import { useAuthStore } from '@/stores/auth'
+import { useChatStore } from '@/stores/chat'
 import { useMiscStore } from '@/stores/misc'
 import { useModConfigStore } from '@/stores/modconfig'
 
@@ -110,6 +111,7 @@ export default {
     const googleReady = ref(false)
     const authStore = useAuthStore()
     const jwt = authStore.auth.jwt
+    const chatStore = useChatStore()
     const miscStore = useMiscStore()
     const modConfigStore = useModConfigStore()
     const persistent = authStore.auth.persistent
@@ -151,7 +153,7 @@ export default {
       }
     })
 
-    return { authStore, googleReady, miscStore, modConfigStore, oneTap }
+    return { authStore, chatStore, googleReady, miscStore, modConfigStore, oneTap }
   },
   data: function () {
     return {
@@ -229,11 +231,9 @@ export default {
     miscStore.workTimer = setTimeout(this.checkWork, 0)
 
     await this.modConfigStore.fetch({ all: true })
-    /*
-    // Get chats and poll regularly for new ones
-    TODO
-    this.$store.dispatch('chats/fetchLatestChats')*/
 
+    // Get chats and poll regularly for new ones
+    this.chatStore.fetchLatestChatsMT()
   },
   beforeDestroy() {
     const miscStore = useMiscStore()

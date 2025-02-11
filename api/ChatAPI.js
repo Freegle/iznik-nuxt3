@@ -8,6 +8,14 @@ export default class ChatAPI extends BaseAPI {
     return this.$get(`/chat/rooms/${chatid}/messages`,params)
   }
 
+  async unseenCountMT() {
+    const { count } = await this.$get('/chatrooms', {
+      count: true,
+      chattypes: ['User2Mod', 'Mod2Mod']
+    })
+    return count
+  }
+
   async fetchReviewChatsMT(params){
     return await this.$get(`/chatmessages`, params)
   }
