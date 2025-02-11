@@ -81,19 +81,19 @@
             <b-button v-if="message.held && me.id === message.held.id" variant="warning" class="mr-2 mb-1" @click="release">
               <v-icon icon="play" /> Release
             </b-button>
-            <SpinButton v-if="!message.held" icon-name="exclamation-triangle" label="Add Mod Message" variant="warning" class="mr-2 mb-1"
+            <SpinButton v-if="!message.held || me.id === message.held.id" icon-name="exclamation-triangle" label="Add Mod Message" variant="warning" class="mr-2 mb-1"
               @handle="modnote" />
-            <SpinButton v-if="!message.held" icon-name="eraser" label="Remove highlighted emails" variant="warning" class="mr-2 mb-1"
+            <SpinButton v-if="!message.held || me.id === message.held.id" icon-name="eraser" label="Remove highlighted emails" variant="warning" class="mr-2 mb-1"
               @handle="redactEmails" />
           </template>
-          <SpinButton v-if="!message.held" icon-name="check" label="Approve - Not Spam" spinclass="text-white" variant="primary" class="mr-2 mb-1"
+          <SpinButton v-if="!message.held || me.id === message.held.id" icon-name="check" label="Approve - Not Spam" spinclass="text-white" variant="primary" class="mr-2 mb-1"
             @handle="approve" />
           <template v-if="!message.widerchatreview">
             <SpinButton v-if="!message.held" icon-name="check" label="Approve and whitelist" spinclass="text-white" variant="primary"
               class="mr-2 mb-1" confirm @handle="whitelist" />
-            <SpinButton v-if="!message.held" icon-name="pause" label="Hold" variant="warning" class="mr-2 mb-1" @handle="hold" />
-            <SpinButton v-if="!message.held" icon-name="trash-alt" label="Delete" variant="danger" class="mr-2 mb-1" confirm @handle="reject" />
-            <SpinButton v-if="!message.held" icon-name="ban" label="Spam" variant="danger" class="mr-2 mb-1" confirm @handle="reject" />
+            <SpinButton v-if="!message.held || me.id === message.held.id" icon-name="pause" label="Hold" variant="warning" class="mr-2 mb-1" @handle="hold" />
+            <SpinButton v-if="!message.held || me.id === message.held.id" icon-name="trash-alt" label="Delete" variant="danger" class="mr-2 mb-1" confirm @handle="reject" />
+            <SpinButton v-if="!message.held || me.id === message.held.id" icon-name="ban" label="Spam" variant="danger" class="mr-2 mb-1" confirm @handle="reject" />
           </template>
         </div>
       </b-card-footer>

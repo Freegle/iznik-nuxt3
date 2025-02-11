@@ -3,35 +3,27 @@
     <b-card-body class="p-2">
       <div>
         <strong>{{ membership.namedisplay.length > 32 ? (membership.namedisplay.substring(0, 32) + '...') : membership.namedisplay }}</strong>
-        <span :class="'small ' + (daysago(membership.added) < 31 ? 'text-danger font-weight-bold' : 'text-muted')">joined {{ timeago(membership.added) }}</span>
+        <span :class="'small ' + (daysago(membership.added) < 31 ? 'text-danger font-weight-bold' : 'text-muted')">joined {{ timeago(membership.added)
+          }}</span>
         <span v-if="membership.reviewreason" class="text-danger ml-1 mr-1">
           <span v-if="membership.reviewrequestedat" class="text-dark small ">flagged {{ timeago(membership.reviewrequestedat) }}</span>
           {{ membership.reviewreason }}
         </span>
       </div>
       <div v-if="amAModOn(membership.id) && needsReview" class="d-flex mt-2 flex-wrap">
-        <SpinButton
-          icon-name="check"
-          spinclass="success"
-          variant="primary"
-          @handle="ignore"
-          label="Ignore"
-          class="mr-2 mb-1"
-        />
-        <SpinButton
-        icon-name="trash-alt"
-          spinclass="success"
-          variant="warning"
-          @handle="remove"
-          label="Remove"
-          class="mr-2 mb-1"
-        />
+        <SpinButton v-if="!member.heldby || member.heldby.id === myid" icon-name="check" spinclass="success" variant="primary" @handle="ignore"
+          label="Ignore" class="mr-2 mb-1" />
+        <SpinButton v-if="!member.heldby || member.heldby.id === myid" icon-name="trash-alt" spinclass="success" variant="warning" @handle="remove"
+          label="Remove" class="mr-2 mb-1" />
+        <ModMemberButton v-if="!member.heldby" :member="member" variant="warning" icon="pause" reviewhold label="Hold" class="mr-2 mb-1" />
+        <ModMemberButton v-else :member="member" variant="warning" icon="play" reviewrelease label="Release" class="mr-2 mb-1" />
         <b-button :to="'/members/approved/' + membership.id + '/' + member.userid" variant="secondary" class="mb-1">
           Go to membership
         </b-button>
       </div>
     </b-card-body>
-    <ConfirmModal v-if="showConfirmModal" ref="removeConfirm" :title="'Remove ' + member.displayname + ' from ' + membership.namedisplay + '?'" @confirm="removeConfirmed" @hidden="showConfirmModal = false" />
+    <ConfirmModal v-if="showConfirmModal" ref="removeConfirm" :title="'Remove ' + member.displayname + ' from ' + membership.namedisplay + '?'"
+      @confirm="removeConfirmed" @hidden="showConfirmModal = false" />
   </b-card>
 </template>
 <script>
@@ -59,7 +51,7 @@ export default {
       required: true
     }
   },
-  data: function() {
+  data: function () {
     return {
       reviewed: false,
       showConfirmModal: false
@@ -74,7 +66,7 @@ export default {
       return (
         !this.membership.reviewedat ||
         new Date(this.membership.reviewrequestedat).getTime() >=
-          new Date(this.membership.reviewedat).getTime()
+        new Date(this.membership.reviewedat).getTime()
       )
     }
   },

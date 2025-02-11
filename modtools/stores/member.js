@@ -1,6 +1,7 @@
 import cloneDeep from 'lodash.clonedeep'
 import { defineStore } from 'pinia'
 import api from '~/api'
+import { useAuthStore } from '~/stores/auth'
 
 export const useMemberStore = defineStore({
   id: 'member',
@@ -21,6 +22,15 @@ export const useMemberStore = defineStore({
       this.context = null
       this.instance = 1
       this.ratings = []
+    },
+    reviewHeld(params) {
+      Object.keys(this.list).forEach(key => {
+        if (
+          parseInt(this.list[key].membershipid) === parseInt(params.membershipid)
+        ) {
+          this.list[key].heldby = params.heldby
+        }
+      })
     },
     async reply(params) {
       await api(this.config).memberships.reply(
@@ -146,6 +156,25 @@ export const useMemberStore = defineStore({
         groupid: params.groupid,
         happinessid: params.happinessid,
         action: 'HappinessReviewed'
+      })
+    },
+    async reviewHold(params) {
+      await api(this.config).memberships.reviewHold(params.membershipid)
+      const authStore = useAuthStore()
+      const me = authStore.user
+      this.reviewHeld({
+        heldby: {
+          id: me.id
+        },
+        membershipid: params.membershipid
+      })
+    },
+
+    async reviewRelease(params) {
+      await api(this.config).memberships.reviewRelease(params.membershipid)
+      this.reviewHeld({
+        heldby: null,
+        membershipid: params.membershipid
       })
     },
     async askMerge(params) {

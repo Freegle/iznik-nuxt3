@@ -41,7 +41,7 @@
       <b-card-body>
         <div class="d-flex justify-content-between flex-wrap">
           {{ member.comments }}&nbsp;
-          <ChatButton :userid="member.user.id" :groupid="member.groupid" title="Chat" variant="white" />
+          <ChatButton :userid="member.user.id" :groupid="member.groupid" chattype="User2Mod" title="Chat" variant="white" />
         </div>
       </b-card-body>
     </b-card>
