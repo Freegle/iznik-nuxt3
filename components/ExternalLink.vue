@@ -12,7 +12,9 @@ export default {
   },
   computed: {
     carefulHref() {
-      return this.href.startsWith('http') ? this.href : 'https://' + this.href
+      return this.href.startsWith('http') || this.href.startsWith('mailto')
+        ? this.href
+        : 'https://' + this.href
     },
   },
 }
