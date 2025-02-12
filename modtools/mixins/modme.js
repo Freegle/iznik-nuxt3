@@ -64,7 +64,7 @@ export default {
       // Do not check for work and therefore refresh while any modal is open
       const bodyoverflow = document.body.style.overflow
       if (force || (bodyoverflow !== 'hidden')) {
-        console.log('CHECKWORK DO modme',force, now.toISOString().substring(11))
+        console.log('CHECKWORK modme',force??'', now.toISOString().substring(11))
         await this.fetchMe(true, ['work', 'group']) // MT ADDED 'group'
 
         this.chatcount = chatStore ? Math.min(99, chatStore.unreadCount) : 0

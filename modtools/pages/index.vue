@@ -71,7 +71,7 @@
       <ModDashboardImpact :groupid="groupid" :start="start" :group-name="groupName" :end="end" class="mt-2" />
       <ActivityGraph :groupid="groupidi" :group-name="groupName" :start="start" :end="end" offers wanteds weights donations successful activeusers
         approvedmembers :systemwide="groupidi < 0" />
-      <!--      TODO MT POSTLAUNCH TN vs email vs web stats-->
+      <!--      TODO-ED MT POSTLAUNCH TN vs email vs web stats-->
     </div>
   </div>
 </template>

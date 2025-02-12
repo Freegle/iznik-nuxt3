@@ -25,6 +25,7 @@
   </div>
 </template>
 <script>
+import { useAuthStore } from '@/stores/auth'
 import { useChatStore } from '~/stores/chat'
 
 // We need an id for the store.  The null value is a special case used just for retrieving chat review messages.
@@ -32,8 +33,10 @@ const REVIEWCHAT = null
 
 export default {
   setup() {
+    const authStore = useAuthStore()
     const chatStore = useChatStore()
     return {
+      authStore,
       chatStore,
     }
   },
@@ -61,10 +64,9 @@ export default {
       return this.chatStore.messagesById(REVIEWCHAT)
     },
     work() {
-      // Count for the type of work we're interested in.
-      return -98
-      //const work = this.$store.getters['auth/work']
-      //return work.chatreview
+      const work = this.authStore.work
+      console.log('chats review work',work?.chatreview)
+      return work?.chatreview
     },
     modalOpen() {
       const bodyoverflow = document.body.style.overflow
@@ -73,6 +75,8 @@ export default {
   },
   watch: {
     work(newVal, oldVal) {
+      // TODO: The page is always going to be visible so why might we not be?
+      console.log('TODO chats review work watch',newVal, oldVal)
       if (!this.modalOpen) {
         if (newVal > oldVal) {
           this.clearAndLoad()
