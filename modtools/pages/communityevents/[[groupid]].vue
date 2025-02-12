@@ -51,6 +51,7 @@ export default {
   },
   watch: {
     work(newVal, oldVal) {
+      // TODO: The page is always going to be visible so why might we not be?
       console.log('TODO communityevents work changed', newVal, oldVal)
       if (newVal > oldVal) {
         // There's new stuff to do.  Reload.
