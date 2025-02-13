@@ -44,9 +44,9 @@ export default {
     const modMessages = setupModMessages()
     modMessages.summarykey.value = 'modtoolsMessagesPendingSummary'
     //modMessages.collection.value = ['Pending','PendingOther']
-    modMessages.collection.value = 'Pending'
-    //modMessages.workType.value = ['pending','pendingother']
-    modMessages.workType.value = 'pending'
+    modMessages.collection.value = 'Pending' // Pending also gets PendingOther
+    modMessages.workType.value = ['pending','pendingother']
+    //modMessages.workType.value = 'pending'
     return {
       authStore,
       groupStore,

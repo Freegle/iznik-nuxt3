@@ -69,7 +69,7 @@ const visibleMessages = computed(() => {
 })
 
 watch(groupid, async (newVal) => {
-  //console.log("useModMessages watch groupid", newVal)
+  console.log("useModMessages watch groupid", newVal)
   context.value = null
 
   const groupStore = useGroupStore()
@@ -115,7 +115,7 @@ export function setupModMessages() {
     }
   })
   watch(work, async (newVal, oldVal) => {
-    // console.log('<<<<useModMessages watch work. oldVal:', oldVal, 'newVal:', newVal)
+    console.log('<<<<useModMessages watch work. oldVal:', oldVal, 'newVal:', newVal)
     // if( collection.value!=='Pending') return
     let doFetch = false
 
@@ -145,7 +145,7 @@ export function setupModMessages() {
       }
 
       if (doFetch) {
-        //console.log('useModMessages watch work',collection.value)
+        console.log('useModMessages watch work doFetch',collection.value)
 
         await messageStore.clearContext()
         context.value = null
