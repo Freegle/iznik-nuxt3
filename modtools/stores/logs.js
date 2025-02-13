@@ -35,7 +35,7 @@ export const useLogsStore = defineStore({
 
       return ret
     },
-    /* TODO UNUSED
+    /* MT3 UNUSED
     async delete(id) {
       console.log('useLogsStore delete')
     },

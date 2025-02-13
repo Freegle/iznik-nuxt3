@@ -46,26 +46,28 @@ export default {
     },
     volwork() {
       // Count for the type of work we're interested in.
+      console.log('TODO volunteering volwork', this.authStore.work?.pendingvolunteering)
       return this.authStore.work ? this.authStore.work.pendingvolunteering : 0
     },
-    context() {
+    /* MT3 removed context() {
       return null
-      // TODO return this.$store.getters['volunteerops/getContext']
-    }
+      // return this.$store.getters['volunteerops/getContext']
+    }*/
   },
   watch: {
     volwork(newVal, oldVal) {
+      // TODO: The page is always going to be visible so why might we not be?
       console.log('volunteering watch volwork', newVal, oldVal)
       if (newVal > oldVal) {
         // There's new stuff to do.  Reload.
         this.volunteeringStore.clear()
         this.bump++
       } else {
-        const visible = this.miscStore.get('visible')
+        /*const visible = this.miscStore.get('visible')
   
         if (!visible) {
           this.volunteeringStore.clear()
-        }
+        }*/
       }
     }
   },
