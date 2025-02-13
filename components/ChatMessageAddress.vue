@@ -27,6 +27,7 @@
                   <l-map
                     ref="map"
                     :zoom="16"
+                    :max-zoom="maxZoom"
                     :center="[address.lat, address.lng]"
                     :style="'width: 100%; height: 200px'"
                   >
@@ -90,6 +91,7 @@
                   <l-map
                     ref="map"
                     :zoom="14"
+                    :max-zoom="maxZoom"
                     :center="[address.lat, address.lng]"
                     :style="'width: 100%; height: 200px'"
                   >
@@ -135,6 +137,7 @@ import ChatBase from '~/components/ChatBase'
 import { constructMultiLine } from '~/composables/usePAF'
 import { attribution, osmtile } from '~/composables/useMap'
 import { ref } from '#imports'
+import { MAX_MAP_ZOOM } from '~/constants'
 
 export default {
   components: { ExternalLink },
@@ -170,6 +173,9 @@ export default {
     }
   },
   computed: {
+    maxZoom() {
+      return MAX_MAP_ZOOM
+    },
     multiline() {
       return constructMultiLine(this.address)
     },

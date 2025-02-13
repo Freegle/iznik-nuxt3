@@ -148,6 +148,14 @@ export default {
       let isValidDomain = true
       const domain = value.substring(value.indexOf('@') + 1)
 
+      const runtimeConfig = useRuntimeConfig()
+      const userDomain = runtimeConfig.public.USER_DOMAIN
+
+      if (domain?.indexOf(userDomain) !== -1) {
+        // Users can't add an email which is for our own domain.
+        return false
+      }
+
       try {
         const request = domainValidationCache.has(domain)
           ? domainValidationCache.get(domain)
@@ -161,6 +169,7 @@ export default {
       } catch (_) {
         // if something doesn't work with google domain check we ignore this check
       }
+
       return isValidDomain
     },
     async validateEmail(value) {

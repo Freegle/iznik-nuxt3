@@ -216,6 +216,7 @@ export default defineNuxtConfig({
       GOOGLE_API_KEY: config.GOOGLE_API_KEY,
       GOOGLE_CLIENT_ID: config.GOOGLE_CLIENT_ID,
       USER_SITE: config.USER_SITE,
+      USER_DOMAIN: config.USER_DOMAIN,
       IMAGE_SITE: config.IMAGE_SITE,
       SENTRY_DSN: config.SENTRY_DSN,
       BUILD_DATE: new Date().toISOString(),
