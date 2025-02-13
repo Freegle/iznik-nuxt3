@@ -370,9 +370,6 @@ export const useMessageStore = defineStore({
     },
     async fetchMessagesMT(params) { // Added for ModTools
       //console.log("===useMessageStore fetchMessagesMT",params)
-      // Watch out for the store being cleared under the feet of this fetch. If that happens then we throw away the
-      // results.
-      // TODO const instance = state.instance
 
       if (!params.context) {
         params.context = this.context
