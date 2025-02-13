@@ -32,33 +32,21 @@ export const useStdmsgStore = defineStore({
       await this.modConfigStore.fetchConfig({
         id: params.configid,
         configuring: true
-      }
-        /* UNUSED TODO ,{
-          root: true
-        }*/
-      )
+      })
     },
     async update(params) {
       await api(this.config).modconfigs.patchStdMsg(params)
       await this.modConfigStore.fetchConfig({
         id: params.configid,
         configuring: true
-      }
-        /* UNUSED TODO ,{
-          root: true
-        }*/
-      )
+      })
     },
     async add(params) {
       const { id } = await api(this.config).modconfigs.addStdMsg(params)
       await this.modConfigStore.fetchConfig({
         id: params.configid,
         configuring: true
-      }
-        /* UNUSED TODO ,{
-          root: true
-        }*/
-      )
+      })
       return id
     }
   }
