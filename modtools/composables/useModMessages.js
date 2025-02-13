@@ -45,7 +45,7 @@ const messages = computed(() => {
   } else {
     messages = messageStore.all
   }
-  //console.log('---messages', groupid.value, messages.length)
+  // console.log('---messages groupid:', groupid.value, 'messages:', messages.length)
   // We need to sort as otherwise new messages may appear at the end.
   messages.sort((a, b) => {
     if (a.groups && b.groups) {
@@ -68,31 +68,58 @@ const visibleMessages = computed(() => {
   return msgs.slice(0, show.value)
 })
 
-watch(groupid, async (newVal) => {
-  console.log("useModMessages watch groupid", newVal)
-  context.value = null
-
-  const groupStore = useGroupStore()
-  await groupStore.fetchMT({
-    id: newVal
-  })
-  group.value = await groupStore.fetch(newVal)
-
-  show.value = messages.value.length
-})
-
-watch(group, async (newValue, oldValue) => {
-  //console.log("===useModMessages watch group", newValue, oldValue, groupid.value)
-  // We have this watch because we may need to fetch a group that we have remembered.  The mounted()
-  // call may happen before we have restored the persisted state, so we can't initiate the fetch there.
-  if (!oldValue || oldValue.id !== groupid.value) {
-    const groupStore = useGroupStore()
-    await groupStore.fetch(groupid.value)
-  }
-})
-
-
 export function setupModMessages() {
+  watch(groupid, async (newVal) => {
+    // console.log("useModMessages watch groupid AAA", newVal)
+    context.value = null
+
+    const groupStore = useGroupStore()
+    await groupStore.fetchMT({ id: newVal })
+    group.value = await groupStore.fetch(newVal)
+    await getMessages()
+
+    show.value = messages.value.length
+  })
+
+  /*watch(group, async (newValue, oldValue) => {
+    console.log("===useModMessages watch group", newValue?.id, oldValue?.id, groupid.value)
+    // We have this watch because we may need to fetch a group that we have remembered.  The mounted()
+    // call may happen before we have restored the persisted state, so we can't initiate the fetch there.
+    if (!oldValue || oldValue.id !== groupid.value) {
+      const groupStore = useGroupStore()
+      await groupStore.fetch(groupid.value)
+    }
+  })*/
+
+  const getMessages = async (workCount) => {
+    // console.log('getMessages', collection.value, groupid.value, workCount)
+
+    const messageStore = useMessageStore()
+    messageStore.clearContext()
+    context.value = null
+
+    const params = {
+      groupid: groupid.value,
+      collection: collection.value, // Pending also gets PendingOther
+      modtools: true,
+      summary: false,
+      //limit: Math.max(limit.value, newVal)
+    }
+    if (workCount) params.limit = Math.max(limit.value, workCount)
+    await messageStore.fetchMessagesMT(params)
+
+    // Force them to show.
+    let messages
+
+    if (groupid.value) {
+      messages = messageStore.getByGroup(groupid.value)
+    } else {
+      messages = messageStore.all
+    }
+
+    show.value = messages.length
+  }
+
   const work = computed(() => {
     // Count for the type of work we're interested in.
     try {
@@ -114,23 +141,22 @@ export function setupModMessages() {
       return 0
     }
   })
+
   watch(work, async (newVal, oldVal) => {
-    console.log('<<<<useModMessages watch work. oldVal:', oldVal, 'newVal:', newVal)
+    // console.log('<<<<useModMessages watch work. oldVal:', oldVal, 'newVal:', newVal)
     // if( collection.value!=='Pending') return
     let doFetch = false
 
     const messageStore = useMessageStore()
     const miscStore = useMiscStore()
-    //console.log('uMM watch work deferGetMessages',miscStore.deferGetMessages)
+    // console.log('uMM getMessages',miscStore.deferGetMessages)
     if (miscStore.deferGetMessages) return
 
     const bodyoverflow = document.body.style.overflow
     if (bodyoverflow !== 'hidden') {
-      //console.log('<<<<useModMessages watch work. newVal:', newVal, 'oldVal:', oldVal)
       if (newVal > oldVal) {
         // There's new stuff to fetch.
         //console.log('Fetch')
-        await messageStore.clearContext()
         doFetch = true
       } else {
         const visible = miscStore.get('visible')
@@ -145,29 +171,7 @@ export function setupModMessages() {
       }
 
       if (doFetch) {
-        console.log('useModMessages watch work doFetch',collection.value)
-
-        await messageStore.clearContext()
-        context.value = null
-
-        await messageStore.fetchMessagesMT({
-          groupid: groupid.value,
-          collection: collection.value, // Pending also gets PendingOther
-          modtools: true,
-          summary: false,
-          limit: Math.max(limit.value, newVal)
-        })
-
-        // Force them to show.
-        let messages
-
-        if (groupid.value) {
-          messages = messageStore.getByGroup(groupid.value)
-        } else {
-          messages = messageStore.all
-        }
-
-        show.value = messages.length
+        getMessages(newVal)
       }
     }
   })
