@@ -17,78 +17,84 @@
         This item is {{ milesaway }} miles away. Before replying, are you sure
         you can collect from there?
       </NoticeMessage>
-      <VeeForm ref="form">
-        <b-form-group
-          class="flex-grow-1"
-          label="Your reply:"
-          :label-for="'replytomessage-' + message.id"
-          :description="
-            message.type === 'Offer'
-              ? 'Explain why you\'d like it.  It\'s not always first come first served.  If appropriate, ask if it\'s working. Always be polite.'
-              : 'Can you help?  If you have what they\'re looking for, let them know.'
-          "
-        >
-          <div class="d-flex flex-wrap">
-            <div v-if="message.deliverypossible" class="mb-2 mr-2">
-              <b-badge
-                v-b-tooltip="
-                  'They have said they may be able to deliver.  No guarantees - it needs to be convenient for them - but you can ask.'
-                "
-                variant="info"
-                ><v-icon icon="info-circle" /> Delivery may be possible</b-badge
-              >
+      <NoticeMessage v-if="me?.deleted" variant="danger" class="mt-2 mb-1">
+        You can't reply until you've decided whether to restore your account.
+      </NoticeMessage>
+      <div v-else>
+        <VeeForm ref="form">
+          <b-form-group
+            class="flex-grow-1"
+            label="Your reply:"
+            :label-for="'replytomessage-' + message.id"
+            :description="
+              message.type === 'Offer'
+                ? 'Explain why you\'d like it.  It\'s not always first come first served.  If appropriate, ask if it\'s working. Always be polite.'
+                : 'Can you help?  If you have what they\'re looking for, let them know.'
+            "
+          >
+            <div class="d-flex flex-wrap">
+              <div v-if="message.deliverypossible" class="mb-2 mr-2">
+                <b-badge
+                  v-b-tooltip="
+                    'They have said they may be able to deliver.  No guarantees - it needs to be convenient for them - but you can ask.'
+                  "
+                  variant="info"
+                  ><v-icon icon="info-circle" /> Delivery may be
+                  possible</b-badge
+                >
+              </div>
+              <MessageDeadline :id="id" class="mb-2" />
             </div>
-            <MessageDeadline :id="id" class="mb-2" />
-          </div>
-          <Field
+            <Field
+              v-if="message.type == 'Offer'"
+              :id="'replytomessage-' + message.id"
+              v-model="reply"
+              name="reply"
+              :rules="validateReply"
+              as="textarea"
+              rows="3"
+              max-rows="8"
+              class="border border-success w-100"
+            />
+            <Field
+              v-if="message.type == 'Wanted'"
+              :id="'replytomessage-' + message.id"
+              v-model="reply"
+              name="reply"
+              :rules="validateReply"
+              as="textarea"
+              rows="3"
+              max-rows="8"
+              class="flex-grow-1 w-100"
+            />
+          </b-form-group>
+          <ErrorMessage name="reply" class="text-danger font-weight-bold" />
+          <b-form-group
             v-if="message.type == 'Offer'"
-            :id="'replytomessage-' + message.id"
-            v-model="reply"
-            name="reply"
-            :rules="validateReply"
-            as="textarea"
-            rows="3"
-            max-rows="8"
-            class="border border-success w-100"
-          />
-          <Field
-            v-if="message.type == 'Wanted'"
-            :id="'replytomessage-' + message.id"
-            v-model="reply"
-            name="reply"
-            :rules="validateReply"
-            as="textarea"
-            rows="3"
-            max-rows="8"
-            class="flex-grow-1 w-100"
-          />
-        </b-form-group>
-        <ErrorMessage name="reply" class="text-danger font-weight-bold" />
-        <b-form-group
-          v-if="message.type == 'Offer'"
-          class="mt-1"
-          label="When could you collect?"
-          :label-for="'replytomessage2-' + message.id"
-          description="Suggest days and times you could collect if you're chosen.  Your plans might change but this speeds up making arrangements."
-        >
-          <Field
-            :id="'replytomessage2-' + message.id"
-            v-model="collect"
-            name="collect"
-            :rules="validateCollect"
-            class="border border-success w-100"
-            as="textarea"
-            rows="2"
-            max-rows="2"
-          />
-        </b-form-group>
-        <ErrorMessage name="collect" class="text-danger font-weight-bold" />
-      </VeeForm>
-      <p v-if="me && !alreadyAMember" class="text--small text-muted">
-        You're not yet a member of this community; we'll join you. Change emails
-        or leave communities from
-        <em>Settings</em>.
-      </p>
+            class="mt-1"
+            label="When could you collect?"
+            :label-for="'replytomessage2-' + message.id"
+            description="Suggest days and times you could collect if you're chosen.  Your plans might change but this speeds up making arrangements."
+          >
+            <Field
+              :id="'replytomessage2-' + message.id"
+              v-model="collect"
+              name="collect"
+              :rules="validateCollect"
+              class="border border-success w-100"
+              as="textarea"
+              rows="2"
+              max-rows="2"
+            />
+          </b-form-group>
+          <ErrorMessage name="collect" class="text-danger font-weight-bold" />
+        </VeeForm>
+        <p v-if="me && !alreadyAMember" class="text--small text-muted">
+          You're not yet a member of this community; we'll join you. Change
+          emails or leave communities from
+          <em>Settings</em>.
+        </p>
+      </div>
       <div v-if="!me">
         <NewFreegler class="mt-2" />
       </div>
@@ -100,7 +106,10 @@
           Close
         </b-button>
       </div>
-      <div v-if="!fromme" class="pl-2 w-50 justify-content-end d-flex">
+      <div
+        v-if="!fromme && !me?.deleted"
+        class="pl-2 w-50 justify-content-end d-flex"
+      >
         <SpinButton
           v-if="!me"
           variant="primary"
