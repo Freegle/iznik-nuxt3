@@ -158,7 +158,6 @@ import { attribution, osmtile } from '../composables/useMap'
 import SpinButton from './SpinButton'
 import { useOurModal } from '~/composables/useOurModal'
 import PostCode from '~/components/PostCode'
-import { MAX_MAP_ZOOM } from '~/constants'
 
 export default {
   components: {
