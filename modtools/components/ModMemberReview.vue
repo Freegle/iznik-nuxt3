@@ -29,7 +29,7 @@
             <p v-else>
               Held by <strong>{{ member.heldby.displayname }}</strong>. Please check before releasing them.
             </p>
-            <ModMemberButton v-if="member.heldby" :member="member" variant="warning" icon="play" release label="Release" />
+            <ModMemberButton v-if="member.heldby" :member="member" variant="warning" icon="play" reviewrelease label="Release" />
           </NoticeMessage>
         </div>
         <ModComments :user="member" />

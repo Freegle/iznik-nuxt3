@@ -234,12 +234,14 @@ export default {
     },
     async reviewHoldIt() {
       await this.memberStore.reviewHold({
-        membershipid: this.member.membershipid
+        membershipid: this.member.membershipid,
+        groupid: this.groupid
       })
     },
     async reviewReleaseIt() {
       await this.memberStore.reviewRelease({
-        membershipid: this.member.membershipid
+        membershipid: this.member.membershipid,
+        groupid: this.groupid
       })
     },
     async releaseIt() {

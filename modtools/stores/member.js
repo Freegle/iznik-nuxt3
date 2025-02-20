@@ -159,7 +159,7 @@ export const useMemberStore = defineStore({
       })
     },
     async reviewHold(params) {
-      await api(this.config).memberships.reviewHold(params.membershipid)
+      await api(this.config).memberships.reviewHold(params.membershipid, params.groupid)
       const authStore = useAuthStore()
       const me = authStore.user
       this.reviewHeld({
@@ -171,7 +171,7 @@ export const useMemberStore = defineStore({
     },
 
     async reviewRelease(params) {
-      await api(this.config).memberships.reviewRelease(params.membershipid)
+      await api(this.config).memberships.reviewRelease(params.membershipid, params.groupid)
       this.reviewHeld({
         heldby: null,
         membershipid: params.membershipid
