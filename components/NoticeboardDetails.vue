@@ -9,6 +9,7 @@
           <l-map
             ref="map"
             :zoom="14"
+            :max-zoom="maxZoom"
             :center="center"
             :style="'width: 100%; height: 200px'"
           >
@@ -111,6 +112,7 @@ import NoticeMessage from './NoticeMessage'
 import SpinButton from './SpinButton'
 import NoticeboardCheck from './NoticeboardCheck'
 import { attribution, osmtile } from '~/composables/useMap'
+import { MAX_MAP_ZOOM } from '~/constants'
 
 export default {
   components: { NoticeboardCheck, SpinButton, NoticeMessage },
@@ -151,6 +153,9 @@ export default {
     }
   },
   computed: {
+    maxZoom() {
+      return MAX_MAP_ZOOM
+    },
     added() {
       return this.noticeboard
         ? dayjs(this.noticeboard.added).format('Do MMMM, YYYY')

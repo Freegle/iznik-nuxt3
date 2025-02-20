@@ -17,9 +17,10 @@
           posted a volunteering opportunity
         </span>
         <span v-else> Volunteering opportunity</span>
-        <span class="d-none d-md-inline-block">:</span>
-        <br class="d-block d-md-none font-weight-bold" />
-        &nbsp;{{ volunteering.title }}
+        <span class="d-none d-md-inline-block">:</span
+        ><span class="d-block d-md-none" /><span class="d-none d-md-inline"
+          >&nbsp;</span
+        ><strong>{{ volunteering.title }}</strong>
         <br />
         <span class="text-muted small">
           {{ timeago(newsfeed.added) }}

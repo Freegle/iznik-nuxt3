@@ -20,7 +20,7 @@
       </NoticeMessage>
       <NoticeMessage v-if="warn" variant="warning" class="mt-1">
         <h1 class="header--size3">
-          <v-icon icon="info-circle" size="1-75x" />
+          <v-icon icon="info-circle" scale="1-75x" />
           {{ warn.type }}
         </h1>
         <p>
@@ -142,6 +142,12 @@ export default {
           message:
             'These should be undamaged and suitable for the child’s weight and height, and fit securely in the vehicle.',
           keywords: ['car seat', 'carseat', 'child car'],
+        },
+        {
+          type: 'Knives',
+          message:
+            'Knives should only be given to those over 18 years of age, and must be collected and handed over in person (not left for collection in an agreed safe place). Knives shouldn’t be carried openly on the street, so should be wrapped or in a container.',
+          keywords: ['knife', 'knives', 'sword', 'swords'],
         },
       ],
     }

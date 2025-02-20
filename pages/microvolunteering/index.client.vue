@@ -303,7 +303,7 @@ async function inviteResponse(callback, response) {
     await authStore.saveMicrovolunteering('Declined')
   }
 
-  fetchMe(['me', 'groups'])
+  fetchMe(true)
 
   callback()
 }

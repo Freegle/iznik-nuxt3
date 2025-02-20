@@ -18,8 +18,9 @@
         >
         <span v-else> An event was created</span>
         <span class="d-none d-md-inline-block">:</span
-        ><br class="d-block d-md-none" />
-        &nbsp;<strong>{{ event.title }}</strong>
+        ><span class="d-block d-md-none" /><span class="d-none d-md-inline"
+          >&nbsp;</span
+        ><strong>{{ event.title }}</strong>
         <br />
         <span class="text-muted small">
           {{ timeago(newsfeed.added) }}

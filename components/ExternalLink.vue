@@ -1,6 +1,6 @@
 <template>
   <!-- eslint-disable-next-line -->
-  <a :href="carefulHref" target="_blank" rel="noopener noreferrer" @click="openInBrowser"><slot /></a>
+  <a :href="carefulHref" target="target" rel="noopener noreferrer" @click="openInBrowser"><slot /></a>
 </template>
 <script>
 import { AppLauncher } from '@capacitor/app-launcher'
@@ -44,7 +44,12 @@ export default {
   },
   computed: {
     carefulHref() {
-      return this.href.startsWith('http') ? this.href : 'https://' + this.href
+      return this.href.startsWith('http') || this.href.startsWith('mailto')
+        ? this.href
+        : 'https://' + this.href
+    },
+    target() {
+      return this.href.startsWith('mailto') ? '_self' : '_blank'
     },
   },
 }
