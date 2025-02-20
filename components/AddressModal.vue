@@ -43,7 +43,7 @@
                   v-if="showMap && selectedAddressObject"
                   ref="map"
                   :zoom="16"
-                  :max-zoom="maxZoom"
+                  :max-zoom="16"
                   :center="[
                     selectedAddressObject.lat,
                     selectedAddressObject.lng,
@@ -198,9 +198,6 @@ export default {
     }
   },
   computed: {
-    maxZoom() {
-      return MAX_MAP_ZOOM
-    },
     addresses() {
       return this.addressStore?.list
     },
