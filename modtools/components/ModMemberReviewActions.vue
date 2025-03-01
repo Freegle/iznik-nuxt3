@@ -4,19 +4,31 @@
       <div>
         <strong>{{ membership.namedisplay.length > 32 ? (membership.namedisplay.substring(0, 32) + '...') : membership.namedisplay }}</strong>
         <span :class="'small ' + (daysago(membership.added) < 31 ? 'text-danger font-weight-bold' : 'text-muted')">joined {{ timeago(membership.added)
-          }}</span>
+        }}</span>
         <span v-if="membership.reviewreason" class="text-danger ml-1 mr-1">
           <span v-if="membership.reviewrequestedat" class="text-dark small ">flagged {{ timeago(membership.reviewrequestedat) }}</span>
           {{ membership.reviewreason }}
         </span>
       </div>
+      <div v-if="amAModOn(membership.id) && needsReview && membership.heldby">
+        <NoticeMessage variant="warning" class="mt-2 mb-2">
+          <p v-if="me.id === membership.heldby">
+            You held this member. Other people will see a warning to check with
+            you before releasing them.
+          </p>
+          <p v-else>
+            Held by <v-icon name="hashtag" class="text-muted" scale="0.5" /><strong>{{ membership.heldby }}</strong>. Please check before releasing
+            them.
+          </p>
+        </NoticeMessage>
+      </div>
       <div v-if="amAModOn(membership.id) && needsReview" class="d-flex mt-2 flex-wrap">
-        <SpinButton v-if="!member.heldby || member.heldby.id === myid" icon-name="check" spinclass="success" variant="primary" @handle="ignore"
-          label="Ignore" class="mr-2 mb-1" />
-        <SpinButton v-if="!member.heldby || member.heldby.id === myid" icon-name="trash-alt" spinclass="success" variant="warning" @handle="remove"
-          label="Remove" class="mr-2 mb-1" />
-        <ModMemberButton v-if="!member.heldby" :member="member" variant="warning" icon="pause" reviewhold label="Hold" class="mr-2 mb-1" />
-        <ModMemberButton v-else :member="member" variant="warning" icon="play" reviewrelease label="Release" class="mr-2 mb-1" />
+        <SpinButton v-if="!membership.heldby || membership.heldby.id === myid" icon-name="check" spinclass="success" variant="primary"
+          @handle="ignore" label="Ignore" class="mr-2 mb-1" />
+        <SpinButton v-if="!membership.heldby || membership.heldby.id === myid" icon-name="trash-alt" spinclass="success" variant="warning"
+          @handle="remove" label="Remove" class="mr-2 mb-1" />
+        <ModMemberButton v-if="!membership.heldby" :member="membership" variant="warning" icon="pause" reviewhold label="Hold" class="mr-2 mb-1" />
+        <ModMemberButton v-else :member="membership" variant="warning" icon="play" reviewrelease label="Release" class="mr-2 mb-1" />
         <b-button :to="'/members/approved/' + membership.id + '/' + member.userid" variant="secondary" class="mb-1">
           Go to membership
         </b-button>
@@ -58,6 +70,17 @@ export default {
     }
   },
   computed: {
+    groupid() {
+      let ret = null
+
+      this.member.memberof.forEach(h => {
+        if (h.id === this.membership.id) {
+          ret = h.id
+        }
+      })
+
+      return ret
+    },
     needsReview() {
       if (this.reviewed) {
         return false

@@ -115,6 +115,11 @@ export default {
       type: Boolean,
       required: false,
       default: false
+    },
+    reviewgroupid: {
+      type: Number,
+      required: false,
+      default: null
     }
   },
   data: function () {
@@ -235,13 +240,13 @@ export default {
     async reviewHoldIt() {
       await this.memberStore.reviewHold({
         membershipid: this.member.membershipid,
-        groupid: this.groupid
+        groupid: this.reviewgroupid
       })
     },
     async reviewReleaseIt() {
       await this.memberStore.reviewRelease({
         membershipid: this.member.membershipid,
-        groupid: this.groupid
+        groupid: this.reviewgroupid
       })
     },
     async releaseIt() {

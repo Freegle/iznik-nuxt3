@@ -3,6 +3,9 @@
     <b-card bg-variant="white" no-body>
       <b-card-header class="d-flex justify-content-between flex-wrap">
         <div>
+          <div v-if="isLJ">
+            LoveJunk user #{{ user.ljuserid }}
+          </div>
           <!-- eslint-disable-next-line -->
           <v-icon icon="envelope" />
           <ExternalLink :href="'mailto:' + email">{{ email }}</ExternalLink>
@@ -20,18 +23,6 @@
         </div>
       </b-card-header>
       <b-card-body>
-        <div v-if="member.heldby">
-          <NoticeMessage variant="warning" class="mb-2">
-            <p v-if="me.id === member.heldby.id">
-              You held this member. Other people will see a warning to check with
-              you before releasing them.
-            </p>
-            <p v-else>
-              Held by <strong>{{ member.heldby.displayname }}</strong>. Please check before releasing them.
-            </p>
-            <ModMemberButton v-if="member.heldby" :member="member" variant="warning" icon="play" reviewrelease label="Release" />
-          </NoticeMessage>
-        </div>
         <ModComments :user="member" />
         <ModSpammer v-if="member.spammer" :user="member" />
         <NoticeMessage v-if="member.systemrole !== 'User'" variant="info">
@@ -46,7 +37,7 @@
         <ModBouncing v-if="member.bouncing" :user="member" />
         <NoticeMessage v-if="member.bandate">
           Banned <span :title="datetime(member.bandate)">{{ timeago(member.bandate) }}</span> <span v-if="member.bannedby">by #{{ member.bannedby
-            }}</span> - check logs for info.
+          }}</span> - check logs for info.
         </NoticeMessage>
         <div class="d-flex justify-content-between flex-wrap">
           <div>
@@ -102,7 +93,8 @@
             </div>
           </div>
         </div>
-        <ModMemberReviewActions :memberid="member.id" v-for="m in memberof" :key="'membership-' + m.membershipid" :membership="m" :member="member" class="p-1 mr-1" />
+        <ModMemberReviewActions :memberid="member.id" v-for="m in memberof" :key="'membership-' + m.membershipid" :membership="m" :member="member"
+          class="p-1 mr-1" />
         <b-badge v-if="hiddenmemberofs" variant="info" class="clickme mb-1" @click="allmemberships = !allmemberships">
           +{{ hiddenmemberofs }} groups
         </b-badge>
@@ -146,6 +138,9 @@ export default {
     }
   },
   computed: {
+    isLJ() {
+      return this.user && this.user.ljuserid
+    },
     allmemberof() {
       let ms = []
 
@@ -219,7 +214,7 @@ export default {
         this.member &&
         this.member.lastaccess &&
         dayjs().diff(dayjs(this.member.lastaccess), 'day') >=
-          365 / 2
+        365 / 2
       )
     },
   },
