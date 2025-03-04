@@ -11,6 +11,7 @@ const CONFIG = {
 
   // This is where the user site is.
   USER_SITE: 'https://www.ilovefreegle.org',
+  USER_DOMAIN: 'ilovefreegle.org',
 
   // This is where images are served from.
   //

@@ -251,9 +251,17 @@ export default defineNuxtPlugin((nuxtApp) => {
               ) ||
               originalExceptionMessage?.includes(
                 "Cannot read properties of null (reading 'latLngToLayerPoint')"
-              )
+              ) ||
+              originalExceptionMessage?.includes('latLngToLayerPoint')
             ) {
               // This is a leaflet error - don't understand it, but not our fault.
+              return null
+            } else if (
+              originalExceptionMessage?.includes(
+                "All 'ins' elements in the DOM with class=adsbygoogle already have ads"
+              )
+            ) {
+              // This is a Google Ads error, and not our fault.
               return null
             } else if (
               originalExceptionMessage?.includes('@webkit-masked-url://hidden/')

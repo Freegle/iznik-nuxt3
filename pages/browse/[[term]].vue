@@ -376,27 +376,35 @@ export default {
 
             this.myGroups.forEach(async (g) => {
               if (g.bbox) {
-                await loadLeaflet()
-                const wkt = new Wkt.Wkt()
-                wkt.read(g.bbox)
-                const obj = wkt.toObject()
+                try {
+                  await loadLeaflet()
+                  const wkt = new Wkt.Wkt()
+                  wkt.read(g.bbox)
+                  const obj = wkt.toObject()
 
-                if (obj?.getBounds) {
-                  const thisbounds = obj.getBounds()
-                  const thissw = thisbounds.getSouthWest()
-                  const thisne = thisbounds.getNorthEast()
+                  if (obj?.getBounds) {
+                    const thisbounds = obj.getBounds()
+                    const thissw = thisbounds.getSouthWest()
+                    const thisne = thisbounds.getNorthEast()
 
-                  if (
-                    mylat >= thissw.lat &&
-                    mylat <= thisne.lat &&
-                    mylng >= thissw.lng &&
-                    mylng <= thisne.lng
-                  ) {
-                    swlat = (thissw.lat + thisne.lat) / 2
-                    swlng = thissw.lng
-                    nelat = (thissw.lat + thisne.lat) / 2
-                    nelng = thisne.lng
+                    if (
+                      mylat >= thissw.lat &&
+                      mylat <= thisne.lat &&
+                      mylng >= thissw.lng &&
+                      mylng <= thisne.lng
+                    ) {
+                      swlat = (thissw.lat + thisne.lat) / 2
+                      swlng = thissw.lng
+                      nelat = (thissw.lat + thisne.lat) / 2
+                      nelng = thisne.lng
+                    }
                   }
+                } catch (e) {
+                  console.error(
+                    'Failed to parse group bounding box',
+                    e?.message,
+                    g.bbox
+                  )
                 }
               }
             })

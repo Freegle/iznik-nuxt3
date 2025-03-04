@@ -113,6 +113,16 @@
               >here</ExternalLink
             >.
           </li>
+          <li>
+            All or partial advertising on this Website or App is managed by
+            Playwire LLC. If Playwire publisher advertising services are used,
+            Playwire LLC may collect and use certain aggregated and anonymized
+            data for advertising purposes. To learn more about the types of data
+            collected, how data is used and your choices as a user, please visit
+            <ExternalLink href="https://www.playwire.com/privacy-policy"
+              >https://www.playwire.com/privacy-policy</ExternalLink
+            >.
+          </li>
         </ul>
         <p>
           If you are concerned about these, you can also install a privacy
@@ -164,6 +174,7 @@
         <h3>Change History</h3>
         <p>Here are the changes to this page.</p>
         <ul class>
+          <li>26/02/2025: Add Playwire information for advertising.</li>
           <li>
             19/11/2024: Update after Facebook request to clarify what data we
             store and how we process it.

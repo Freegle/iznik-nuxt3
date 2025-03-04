@@ -43,6 +43,7 @@
                   v-if="showMap && selectedAddressObject"
                   ref="map"
                   :zoom="16"
+                  :max-zoom="16"
                   :center="[
                     selectedAddressObject.lat,
                     selectedAddressObject.lng,

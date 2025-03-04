@@ -18,7 +18,7 @@
                 :zoom="5"
                 :style="'width: ' + mapWidth + '; height: ' + mapWidth + 'px'"
                 :min-zoom="5"
-                :max-zoom="17"
+                :max-zoom="maxZoom"
                 :bounds="bounds"
                 @ready="setBounds"
               >
@@ -67,6 +67,7 @@ import { loadLeaflet, attribution, osmtile } from '~/composables/useMap'
 import { buildHead } from '~/composables/useBuildHead'
 import { useNoticeboardStore } from '~/stores/noticeboard'
 import { useAuthorityStore } from '~/stores/authority'
+import { MAX_MAP_ZOOM } from '~/constants'
 
 const runtimeConfig = useRuntimeConfig()
 const route = useRoute()
@@ -125,4 +126,6 @@ function goto(id) {
   const router = useRouter()
   router.push('/noticeboards/' + id)
 }
+
+const maxZoom = MAX_MAP_ZOOM
 </script>

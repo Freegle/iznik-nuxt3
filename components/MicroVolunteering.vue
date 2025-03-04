@@ -389,7 +389,7 @@ export default {
         await this.authStore.saveMicrovolunteering('Declined')
       }
 
-      this.fetchMe(['me', 'groups'])
+      this.fetchMe(true)
 
       this.showInvite = false
     },
