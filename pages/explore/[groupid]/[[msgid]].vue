@@ -34,20 +34,34 @@ const group = computed(() => {
 
 if (id) {
   // Fetch the specific group.
-  await groupStore.fetch(id, true)
+  try {
+    await groupStore.fetch(id, true)
+  } catch (e) {
+    console.error('Failed to fetch group', e.message)
+  }
 
   if (group.value) {
-    useHead(
-      buildHead(
-        route,
-        runtimeConfig,
-        'Explore ' + group.value.namedisplay,
-        group.value.description
-          ? group.value.description
-          : "Give and get stuff for free. Offer things you don't need, and ask for things you'd like. Don't just recycle - reuse with Freegle!",
-        group.value.profile ? group.value.profile : '/icon.png'
-      )
+    const head = buildHead(
+      route,
+      runtimeConfig,
+      'Explore ' + group.value.namedisplay,
+      group.value.description
+        ? group.value.description
+        : "Give and get stuff for free. Offer things you don't need, and ask for things you'd like. Don't just recycle - reuse with Freegle!",
+      group.value.profile ? group.value.profile : '/icon.png'
     )
+
+    if (!group.value.publish) {
+      head.meta = [{ name: 'robots', content: 'noindex' }]
+    }
+
+    useHead(head)
+  } else {
+    // Make sure it's not indexed.
+    useHead({
+      title: 'Community not found',
+      meta: [{ name: 'robots', content: 'noindex' }],
+    })
   }
 } else {
   // Fetch all groups for the map.  No need to await - rendering the map is eye candy.

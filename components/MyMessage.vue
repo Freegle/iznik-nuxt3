@@ -11,7 +11,8 @@
             <div class="bg-white clickme">
               <notice-message v-if="rejected" class="mb-3" variant="warning">
                 <v-icon icon="exclamation-triangle" scale="2" /> This post has
-                not been accepted and is not public yet.
+                been returned to you by the volunteers, as it is not yet suitable.
+                It is not public yet.
               </notice-message>
               <MessageSummary
                 :id="message.id"
@@ -699,11 +700,11 @@ export default {
 
       // Set the current location and nearby groups, too, since we're about to use them
       if (this.message.location) {
-        const loc = await this.locationStore.fetch({
-          typeahead: this.message.location.name,
-        })
+        const loc = await this.locationStore.typeahead(
+          this.message.location.name
+        )
 
-        await this.composeStore.setPostcode(loc.locations[0])
+        await this.composeStore.setPostcode(loc[0])
       }
 
       await this.composeStore.setAttachmentsForMessage(

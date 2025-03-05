@@ -85,8 +85,8 @@
                 </div>
                 <div class="image">
                   <OurUploadedImage
-                    v-if="story.image?.ouruid"
-                    :src="story.image.ouruid"
+                    v-if="story.image?.imageuid"
+                    :src="story.image.imageuid"
                     :modifiers="story.image.imagemods"
                     alt="Store Photo"
                     width="250"
@@ -144,6 +144,7 @@ import { useStoryStore } from '../stores/stories'
 import { useComposeStore } from '../stores/compose'
 import NoticeMessage from './NoticeMessage'
 import { useOurModal } from '~/composables/useOurModal'
+import { useImageStore } from '~/stores/image'
 const OurUploader = defineAsyncComponent(() =>
   import('~/components/OurUploader')
 )
@@ -157,12 +158,14 @@ export default {
   setup() {
     const storyStore = useStoryStore()
     const composeStore = useComposeStore()
+    const imageStore = useImageStore()
 
     const { modal, hide } = useOurModal()
 
     return {
       storyStore,
       composeStore,
+      imageStore,
       modal,
       hide,
     }
