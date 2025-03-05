@@ -183,3 +183,5 @@ yieldmo.com, 2990721854664024411, DIRECT
 
 
 playwire.com,1025311,DIRECT
+
+managerdomain=playwire.com
