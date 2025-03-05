@@ -28,3 +28,9 @@ from = "/uimg*"
 to = "/"
 status = 404
 force = true
+
+[[redirects]]
+from = "/ads.txt"
+to = "https://config.playwire.com/dyn_ads/1025311/75051/ads.txt"
+status = 200
+force = true
