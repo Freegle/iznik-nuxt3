@@ -11,8 +11,8 @@
             <div class="bg-white clickme">
               <notice-message v-if="rejected" class="mb-3" variant="warning">
                 <v-icon icon="exclamation-triangle" scale="2" /> This post has
-                been returned to you by the volunteers, as it is not yet suitable.
-                It is not public yet.
+                been returned to you by the volunteers, as it is not yet
+                suitable. It is not public yet.
               </notice-message>
               <MessageSummary
                 :id="message.id"
