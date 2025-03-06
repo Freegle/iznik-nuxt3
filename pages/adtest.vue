@@ -34,15 +34,8 @@
           </p>
           <p>
             To debug this page, you can add
-            <em>?pbjs_debug=true&pubmaticTest=true</em>
-            to the URL. This will produce output from prebid in the Developer
-            Console, and will force Pubmatic to win the sticky footer ad auction
-            showing a test ad.
-          </p>
-          <p>
-            You should also see the AppNexus test ad here - this is triggered
-            using a test placement id. It is a bit flaky so may only appear
-            after 30s or so.
+            <em>?pw_test_ads=true</em>
+            to the URL. This will show a test ad.
           </p>
           <ExternalDa
             ad-unit-path="/22794232631/appnexus_test"
@@ -52,16 +45,6 @@
             class="mt-2"
             show-logged-out
           />
-          <!--          <p>You should also see a Magnite text ad here:</p>-->
-          <!--          <ExternalDa-->
-          <!--            ad-unit-path="/22794232631/freegle_chat_desktop"-->
-          <!--            :dimensions="[-->
-          <!--                [300, 600],-->
-          <!--                [300, 250],-->
-          <!--              ]"-->
-          <!--            div-id="div-gpt-ad-1692867596111-0"-->
-          <!--            class="mt-2"-->
-          <!--          />-->
         </b-col>
         <b-col cols="0" lg="3" class="p-0 pl-1">
           <div class="d-flex justify-content-end">

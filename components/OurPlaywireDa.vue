@@ -4,7 +4,9 @@
       Maybe you're using an ad blocker? We don't like ads much either.
       <DaDisableCTA />
     </div>
-    <div v-else :id="divId" :style="adStyle" />
+    <div v-else :id="divId" ref="daDiv" :key="bump" :style="adStyle">
+      Ad of type {{ theType }} from {{ maxHeight }} x {{ maxWidth }}
+    </div>
   </div>
 </template>
 <script setup>
@@ -45,6 +47,8 @@ const props = defineProps({
   },
 })
 
+const bump = ref(0)
+const daDiv = ref(null)
 const emit = defineEmits(['rendered'])
 const adsBlocked = ref(false)
 
@@ -104,6 +108,8 @@ function checkRendered() {
   }
 }
 
+const theType = ref(null)
+
 watch(
   () => props.renderAd,
   (newVal) => {
@@ -113,6 +119,28 @@ watch(
 
       // Let the div get created and then ensure we've loaded the Playwire code.
       nextTick(() => {
+        function addAd() {
+          // See https://support.playwire.com/docs/ad-units-array-for-ads-api for the types.
+          //
+          // We don't use spaNewPage as in the example because our ads are added more dynamically than
+          // that.
+          const height = window.getComputedStyle(daDiv.value, null).maxHeight
+          console.log('Ad has height', height)
+          if (height === '50px' || height === '90px') {
+            theType.value = 'leaderboard_atf'
+          } else {
+            theType.value = 'med_rect_atf'
+          }
+
+          bump.value++
+
+          console.log('Execute queued spaAddAds')
+          window.ramp.spaAddAds({
+            type: theType.value,
+            selector: '#' + props.divId,
+          })
+        }
+
         if (!window.ramp) {
           // We haven't loaded the Playwire code yet.
           console.log('Load playwire code')
@@ -127,31 +155,13 @@ watch(
 
           const configScript = document.createElement('script')
           configScript.src =
-            'https://cdn.intergient.com/' +
-            pubId +
-            '/' +
-            websiteId +
-            // '/ramp.js?pw_test_ads=true' +
-            '/ramp.js'
+            'https://cdn.intergient.com/' + pubId + '/' + websiteId + '/ramp.js'
 
           configScript.onload = () => {
             // Playwire code loaded. Now we can add our ad.
-            console.log('Playwire code loaded, call spaAddAds')
+            console.log('Playwire code loaded, queue spaAddAds')
 
-            // See https://support.playwire.com/docs/ad-units-array-for-ads-api for the types.
-            //
-            // We don't use spaNewPage as in the example because our ads are added more dynamically than
-            // that.
-            const theType =
-              props.maxHeight >= 90 ? 'med_rect_atf' : 'leaderboard_atf'
-
-            window.ramp.que.push(() => {
-              console.log('Execute queued spaAddAds')
-              window.ramp.spaAddAds({
-                type: theType,
-                selector: '#' + props.divId,
-              })
-            })
+            window.ramp.que.push(addAd)
           }
 
           configScript.onerror = (e) => {
@@ -160,6 +170,10 @@ watch(
 
           document.body.appendChild(configScript)
           console.log('Appended to DOM')
+        } else {
+          // The code is already loaded - we can add the add.
+          console.log('Already loaded code, queue ad')
+          window.ramp.que.push(addAd)
         }
       })
     }
