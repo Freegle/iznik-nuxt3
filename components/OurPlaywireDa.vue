@@ -1,0 +1,185 @@
+<template>
+  <div v-if="showAd">
+    <div v-if="adsBlocked" class="bg-white text-center">
+      Maybe you're using an ad blocker? We don't like ads much either.
+      <DaDisableCTA />
+    </div>
+    <div v-else :id="divId" :style="adStyle" />
+  </div>
+</template>
+<script setup>
+import { ref, computed, onBeforeUnmount, nextTick } from '#imports'
+
+const props = defineProps({
+  adUnitPath: {
+    type: String,
+    required: true,
+  },
+  minWidth: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  maxWidth: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  minHeight: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  maxHeight: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  divId: {
+    type: String,
+    required: true,
+  },
+  renderAd: {
+    type: Boolean,
+    required: true,
+  },
+})
+
+const emit = defineEmits(['rendered'])
+const adsBlocked = ref(false)
+
+const adStyle = computed(() => {
+  // See https://support.google.com/adsense/answer/9183363 for background.
+  const ret = {
+    width: '100%',
+  }
+
+  if (props.maxWidth !== null) {
+    ret['max-width'] = props.maxWidth
+    ret.width = props.maxWidth
+  }
+
+  if (props.minWidth !== null) {
+    ret['min-width'] = props.minWidth
+  }
+
+  if (props.minHeight !== null) {
+    ret['min-height'] = props.minHeight
+  }
+
+  if (props.maxHeight !== null) {
+    ret['max-height'] = props.maxHeight
+    ret.height = props.maxHeight
+  }
+
+  return ret
+})
+
+const showAd = ref(false)
+
+const visibleTimer = null
+
+// We want to spot when an ad has been rendered and whether it's filled.  isUnfilled is supposed to be exposed
+// by the component, but that doesn't seem to work.
+let fillTimer = null
+let renderRetry = 30
+
+function checkRendered() {
+  fillTimer = null
+  const retry = false
+
+  // No need to refresh ad - Playwire ads do that themselves.
+  // TODO How to check rendered.
+  emit('rendered', true)
+
+  if (retry) {
+    renderRetry--
+
+    if (renderRetry > 0) {
+      fillTimer = setTimeout(checkRendered, 100)
+    } else {
+      // Give up.
+      emit('rendered', false)
+    }
+  }
+}
+
+watch(
+  () => props.renderAd,
+  (newVal) => {
+    if (newVal) {
+      fillTimer = setTimeout(checkRendered, 100)
+      showAd.value = true
+
+      // Let the div get created and then ensure we've loaded the Playwire code.
+      nextTick(() => {
+        if (!window.ramp) {
+          // We haven't loaded the Playwire code yet.
+          console.log('Load playwire code')
+          window.ramp = window.ramp || {}
+          window.ramp.que = window.ramp.que || []
+          window.ramp.passiveMode = true
+
+          // Load the Ramp configuration script
+          const runtimeConfig = useRuntimeConfig()
+          const pubId = runtimeConfig.public.PLAYWIRE_PUB_ID
+          const websiteId = runtimeConfig.public.PLAYWIRE_WEBSITE_ID
+
+          const configScript = document.createElement('script')
+          configScript.src =
+            'https://cdn.intergient.com/' +
+            pubId +
+            '/' +
+            websiteId +
+            // '/ramp.js?pw_test_ads=true' +
+            '/ramp.js'
+
+          configScript.onload = () => {
+            // Playwire code loaded. Now we can add our ad.
+            console.log('Playwire code loaded, call spaAddAds')
+
+            // See https://support.playwire.com/docs/ad-units-array-for-ads-api for the types.
+            //
+            // We don't use spaNewPage as in the example because our ads are added more dynamically than
+            // that.
+            const theType =
+              props.maxHeight >= 90 ? 'med_rect_atf' : 'leaderboard_atf'
+
+            window.ramp.que.push(() => {
+              console.log('Execute queued spaAddAds')
+              window.ramp.spaAddAds({
+                type: theType,
+                selector: '#' + props.divId,
+              })
+            })
+          }
+
+          configScript.onerror = (e) => {
+            console.log('Error loading Playwire code', e)
+          }
+
+          document.body.appendChild(configScript)
+          console.log('Appended to DOM')
+        }
+      })
+    }
+  },
+  {
+    immediate: true,
+  }
+)
+
+onBeforeUnmount(() => {
+  try {
+    if (fillTimer) {
+      clearTimeout(fillTimer)
+    }
+
+    if (visibleTimer) {
+      clearTimeout(visibleTimer)
+    }
+  } catch (e) {
+    console.log('Exception in onBeforeUnmount', e)
+  }
+})
+</script>
