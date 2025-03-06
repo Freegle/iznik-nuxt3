@@ -19,7 +19,7 @@ import { useAuthStore } from '~/stores/auth'
 
 const authStore = useAuthStore()
 const me = ref(useAuthStore().user)
-const lastUpdate = dayjs('2024-08-24')
+const lastUpdate = dayjs('2025-02-26')
 
 if (me.value && !me.value?.settings?.lastPrivacySeen) {
   // Not seen any privacy notice so far.  Mark the current date as the last seen.

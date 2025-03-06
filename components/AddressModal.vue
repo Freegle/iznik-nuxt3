@@ -43,7 +43,7 @@
                   v-if="showMap && selectedAddressObject"
                   ref="map"
                   :zoom="16"
-                  :max-zoom="maxZoom"
+                  :max-zoom="16"
                   :center="[
                     selectedAddressObject.lat,
                     selectedAddressObject.lng,
@@ -158,7 +158,6 @@ import { attribution, osmtile } from '../composables/useMap'
 import SpinButton from './SpinButton'
 import { useOurModal } from '~/composables/useOurModal'
 import PostCode from '~/components/PostCode'
-import { MAX_MAP_ZOOM } from '~/constants'
 
 export default {
   components: {
@@ -198,9 +197,6 @@ export default {
     }
   },
   computed: {
-    maxZoom() {
-      return MAX_MAP_ZOOM
-    },
     addresses() {
       return this.addressStore?.list
     },
