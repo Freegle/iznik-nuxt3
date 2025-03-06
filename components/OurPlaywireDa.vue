@@ -123,7 +123,6 @@ watch(
           // We don't use spaNewPage as in the example because our ads are added more dynamically than
           // that.
           const height = window.getComputedStyle(daDiv.value, null).maxHeight
-          console.log('Ad has height', height)
           if (height === '50px' || height === '90px') {
             theType.value = 'leaderboard_atf'
           } else {
