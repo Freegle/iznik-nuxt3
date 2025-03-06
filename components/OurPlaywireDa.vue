@@ -4,9 +4,7 @@
       Maybe you're using an ad blocker? We don't like ads much either.
       <DaDisableCTA />
     </div>
-    <div v-else :id="divId" ref="daDiv" :key="bump" :style="adStyle">
-      Ad of type {{ theType }} from {{ maxHeight }} x {{ maxWidth }}
-    </div>
+    <div v-else :id="divId" ref="daDiv" :key="bump" :style="adStyle"></div>
   </div>
 </template>
 <script setup>
