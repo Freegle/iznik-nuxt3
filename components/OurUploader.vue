@@ -8,6 +8,10 @@
           <b-button :id="uploaderUid" variant="primary" @click="openModal">
             {{ label }}
           </b-button>
+          &nbsp;
+          <b-button variant="primary" @click="choosePhoto">
+            {{ chooselabel }}
+          </b-button>
         </div>
         <p>{{ loading }}</p>
       </div>
@@ -15,7 +19,7 @@
   </client-only>
 </template>
 <script setup>
-import { Camera, CameraResultType } from '@capacitor/camera'
+import { Camera, CameraSource, CameraResultType } from '@capacitor/camera'
 import * as tus from 'tus-js-client'
 import { useImageStore } from '../stores/image'
 
@@ -62,9 +66,19 @@ const label = computed(() => {
   if (props.label) {
     return label
   } else if (props.multiple) {
-    return props.modelValue.length > 0 ? 'Add another photo' : 'Add photo'
+    return props.modelValue.length > 0 ? 'Take another photo' : 'Take photo'
   } else {
-    return 'Add photo'
+    return 'Take photo'
+  }
+})
+
+const chooselabel = computed(() => {
+  if (props.label) {
+    return label
+  } else if (props.multiple) {
+    return props.modelValue.length > 0 ? 'Choose more photos' : 'Choose photos'
+  } else {
+    return 'Choose photo'
   }
 })
 
@@ -85,7 +99,8 @@ async function openModal() {
       quality: 75,
       height: 1024,
       allowEditing: false,
-      resultType: CameraResultType.Uri
+      resultType: CameraResultType.Uri,
+      source: CameraSource.Camera
     })
     loading.value = 'Uploading'
 
@@ -102,9 +117,20 @@ async function openModal() {
 
     const response = await fetch(image.webPath)
     const file = await response.blob()
-    // console.log('openModal E', file)
+    await uploadOneFile(file)
+  }
+  catch (e) {
+    loading.value = ''
+    console.log('openModal', e.message)
+  }
+}
 
-// Create a new tus upload
+// Return Promise that completes when upload succeeds or errors
+function uploadOneFile(file){
+    // console.log('uploadOneFile A', file)
+    return new Promise(function (resolve, reject) {
+    resetUpload()
+    // Create a new tus upload
     upload = new tus.Upload(file, {
       endpoint: runtimeConfig.public.TUS_UPLOADER,
       retryDelays: [0, 3000, 5000, 10000, 20000],
@@ -115,6 +141,7 @@ async function openModal() {
       onError: function (error) {
         console.log('Failed because: ' + error)
         loading.value = 'Upload failed because: ' + error
+        reject()
       },
       onProgress: function (bytesUploaded, bytesTotal) {
         const percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2)
@@ -155,6 +182,7 @@ async function openModal() {
         emit('update:modelValue', uploadedPhotos.value)
         // console.log('emitted')
         loading.value = ''
+        resolve()
       },
     })
 
@@ -168,10 +196,31 @@ async function openModal() {
       // Start the upload
       upload.start()
     })
+  })
+}
+
+
+async function choosePhoto() {
+  // console.log('choosePhoto A')
+  try {
+    const images = await Camera.pickImages({
+      quality: 75,
+      height: 1024,
+      allowEditing: false
+    })
+    loading.value = 'Uploading'
+
+    console.log(images)
+    for( const image of images.photos){
+      console.log(image.webPath)
+      const response = await fetch(image.webPath)
+      const file = await response.blob()
+      await uploadOneFile(file)
+    }
   }
   catch (e) {
     loading.value = ''
-    console.log('openModal', e.message)
+    console.log('choosePhoto', e.message)
   }
 }
 
