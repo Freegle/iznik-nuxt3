@@ -76,12 +76,7 @@
                   RECEIVED
                 </b-button>
                 <b-button
-                  v-if="
-                    !rejected &&
-                    message.type === 'Offer' &&
-                    !taken &&
-                    !message.replies?.length
-                  "
+                  v-if="!rejected && message.type === 'Offer' && !taken"
                   variant="primary"
                   class="mr-1 mb-1"
                   @click="showPromiseModal = true"
@@ -551,19 +546,21 @@ export default {
         }
       }
 
-      if (!ret.length) {
-        // We have no likely candidates for people to promise to.  This can happen if someone replies in a
-        // chat asking informally for multiple items.  So include all the chat users.
-        const chats = this.chatStore?.list ? this.chatStore.list : []
-        const visibleChats = this.scanChats(chats)
+      // We want to add all the recent chat users.  This allows us to promise to
+      // people who reply in a chat asking informally for multiple items.
+      const chats = this.chatStore?.list ? this.chatStore.list : []
+      const visibleChats = this.scanChats(chats)
 
-        visibleChats.forEach((chat) => {
-          if (chat.chattype === 'User2User' && chat.otheruid) {
-            ret.push(chat.otheruid)
-            retids[chat.otheruid] = true
-          }
-        })
-      }
+      visibleChats.forEach((chat) => {
+        if (
+          chat.chattype === 'User2User' &&
+          chat.otheruid &&
+          !retids[chat.otheruid]
+        ) {
+          ret.push(chat.otheruid)
+          retids[chat.otheruid] = true
+        }
+      })
 
       return ret
     },
@@ -641,7 +638,6 @@ export default {
     },
     replyuserids(newVal) {
       // Make sure we have them in store.
-      console.log('Replyuserids', newVal)
       newVal.forEach((uid) => {
         this.userStore.fetch(uid)
       })
