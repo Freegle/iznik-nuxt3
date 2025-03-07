@@ -350,7 +350,7 @@ export default {
     async onShow(date) {
       this.message = this.selectedMessage
 
-      this.currentlySelected = null
+      this.currentlySelected = 0
 
       if (this.selectedUser) {
         this.currentlySelected = this.selectedUser
