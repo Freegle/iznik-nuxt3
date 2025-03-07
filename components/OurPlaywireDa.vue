@@ -4,7 +4,15 @@
       Maybe you're using an ad blocker? We don't like ads much either.
       <DaDisableCTA />
     </div>
-    <div v-else :id="divId" ref="daDiv" :style="adStyle"></div>
+    <div
+      v-else
+      :id="divId"
+      ref="daDiv"
+      :style="adStyle"
+      :class="{
+        theType,
+      }"
+    ></div>
   </div>
 </template>
 <script setup>
@@ -125,7 +133,15 @@ watch(
           if (height === '50px' || height === '90px') {
             theType.value = 'leaderboard_atf'
           } else {
-            theType.value = 'med_rect_atf'
+            // See if we already have a med_rect; if so we should use the alternate type value as Playwire
+            // doesn't like multiple ads of the same type.
+            const existing = document.querySelector('.med_rect_atf')
+
+            if (existing) {
+              theType.value = 'med_rect_btf'
+            } else {
+              theType.value = 'med_rect_atf'
+            }
           }
 
           console.log(
