@@ -4,7 +4,7 @@
       Maybe you're using an ad blocker? We don't like ads much either.
       <DaDisableCTA />
     </div>
-    <div v-else :id="divId" ref="daDiv" :key="bump" :style="adStyle"></div>
+    <div v-else :id="divId" ref="daDiv" :style="adStyle"></div>
   </div>
 </template>
 <script setup>
@@ -45,7 +45,6 @@ const props = defineProps({
   },
 })
 
-const bump = ref(0)
 const daDiv = ref(null)
 const emit = defineEmits(['rendered'])
 const adsBlocked = ref(false)
@@ -129,8 +128,10 @@ watch(
             theType.value = 'med_rect_atf'
           }
 
-          bump.value++
-
+          console.log(
+            'Ad container in DOM?',
+            window.getElementById(props.divId) !== null
+          )
           console.log('Execute queued spaAddAds')
           window.ramp.spaAddAds({
             type: theType.value,
@@ -156,17 +157,17 @@ watch(
 
           configScript.onload = () => {
             // Playwire code loaded. Now we can add our ad.
-            console.log('Playwire code loaded, queue spaAddAds')
+            console.log('Playwire script loaded, queue spaAddAds')
 
             window.ramp.que.push(addAd)
           }
 
           configScript.onerror = (e) => {
-            console.log('Error loading Playwire code', e)
+            console.log('Error loading Playwire script', e)
           }
 
           document.body.appendChild(configScript)
-          console.log('Appended to DOM')
+          console.log('Appended Playwire script to DOM')
         } else {
           // The code is already loaded - we can add the add.
           console.log('Already loaded code, queue ad')
