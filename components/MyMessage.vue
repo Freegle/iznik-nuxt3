@@ -747,11 +747,11 @@ export default {
 
       // Set the current location and nearby groups, too, since we're about to use them
       if (this.message.location) {
-        const loc = await this.locationStore.typeahead(
-          this.message.location.name
-        )
+        const loc = await this.locationStore.fetch({
+          typeahead: this.message.location.name,
+        })
 
-        await this.composeStore.setPostcode(loc[0])
+        await this.composeStore.setPostcode(loc.locations[0])
       }
 
       await this.composeStore.setAttachmentsForMessage(
