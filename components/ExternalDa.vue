@@ -234,10 +234,12 @@ async function checkStillVisible() {
     const showingAds = await configStore.fetch('ads_enabled')
     const me = useAuthStore().user
 
+    // Add grace period for donations - technically we want it to be 31 days, but for people who have a direct
+    // debit set up we might not have manually processed those donations for a while.
     const recentDonor =
       me &&
       me.donated &&
-      new Date(me.donated) > new Date(Date.now() - 31 * 24 * 60 * 60 * 1000)
+      new Date(me.donated) > new Date(Date.now() - 45 * 24 * 60 * 60 * 1000)
 
     if (recentDonor) {
       console.log('Ads disabled as recent donor')
