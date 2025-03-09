@@ -1,5 +1,5 @@
 // Checked logged in. If not, go to /login
-// On very first load of session, authStore user will not be valid yet as layout mounted() has not been called to check
+// On very first load of session, authStore user will not be valid yet as layout setup() has not been called to check
 // In this case, go to the login page and bounce back if need be
 
 import { useAuthStore } from '~/stores/auth'
