@@ -148,11 +148,17 @@ watch(
             'Ad container really in DOM?',
             window.getElementById(props.divId) !== null
           )
-          console.log('Execute queued spaAddAds')
-          window.ramp.spaAddAds({
-            type: theType.value,
-            selector: '#' + props.divId,
-          })
+          console.log('Execute queued spaAddAds', theType.value)
+          try {
+            window.ramp.spaAddAds({
+              type: theType.value,
+              selector: '#' + props.divId,
+            })
+          } catch (e) {
+            console.log('Failed to inject ad', e)
+          }
+
+          console.log('Called spaAddAds')
         }
 
         if (!window.ramp) {
