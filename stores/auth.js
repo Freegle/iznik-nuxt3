@@ -153,30 +153,35 @@ export const useAuthStore = defineStore({
       }
 
       if( mobileStore.isApp){
-        /* TODOTODO try {
-          console.log('Try Facebook signOut')
-          // TODOTODO await FacebookLogin.logout();
+        try {
+          console.log('Try Facebook logout')
+          const runtimeConfig = useRuntimeConfig()
+          await SocialLogin.initialize({
+            facebook: {
+              appId: runtimeConfig.public.FACEBOOK_APPID,
+              clientToken: runtimeConfig.public.FACEBOOK_CLIENTID,
+            },
+              })
+          await SocialLogin.logout({ provider: 'facebook' })
+          console.log('Facebook logout OK')
         } catch (e) {
           console.log('Ignore Facebook logout error', e)
-        }*/
+        }
 
         try {
-          // TODOTODO: Google and Facbook signOut
-          console.log('Try Google / Facebook signOut')
+          // TODOTODO: Google logout
+          console.log('Try Google logout')
           const runtimeConfig = useRuntimeConfig()
           await SocialLogin.initialize({
             google: {
               webClientId: runtimeConfig.public.GOOGLE_CLIENT_ID, // the web client id for Android and Web
               iOSClientId: runtimeConfig.public.GOOGLE_IOS_CLIENT_ID, // for iOS
             },
-            facebook: {
-              appId: runtimeConfig.public.FACEBOOK_APPID,
-              clientToken: runtimeConfig.public.FACEBOOK_CLIENTID,
-            },
-              })
-          await SocialLogin.signOut()
+          })
+          await SocialLogin.logout({ provider: 'google' })
+          console.log('Google logout OK')
         } catch (e) {
-          console.log('Ignore Google signOut error', e)
+          console.log('Ignore Google logout error', e)
         }
 
         this.logoutPushId()
