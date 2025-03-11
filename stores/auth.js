@@ -5,8 +5,8 @@ import api from '~/api'
 import { useCookie } from '#imports'
 import { useMobileStore } from '@/stores/mobile'
 // import { FacebookLogin } from '@capacitor-community/facebook-login'
-import { FacebookLogin } from '@whiteguru/capacitor-plugin-facebook-login'
-import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth'
+// TODOTODO import { FacebookLogin } from '@whiteguru/capacitor-plugin-facebook-login'
+import { SocialLogin } from '@capgo/capacitor-social-login'
 import { useMiscStore } from '~/stores/misc'
 
 export const useAuthStore = defineStore({
@@ -153,15 +153,28 @@ export const useAuthStore = defineStore({
       }
 
       if( mobileStore.isApp){
-        try {
-          await FacebookLogin.logout();
+        /* TODOTODO try {
+          console.log('Try Facebook signOut')
+          // TODOTODO await FacebookLogin.logout();
         } catch (e) {
           console.log('Ignore Facebook logout error', e)
-        }
+        }*/
 
         try {
-          await GoogleAuth.initialize()
-          await GoogleAuth.signOut()
+          // TODOTODO: Google and Facbook signOut
+          console.log('Try Google / Facebook signOut')
+          const runtimeConfig = useRuntimeConfig()
+          await SocialLogin.initialize({
+            google: {
+              webClientId: runtimeConfig.public.GOOGLE_CLIENT_ID, // the web client id for Android and Web
+              iOSClientId: runtimeConfig.public.GOOGLE_IOS_CLIENT_ID, // for iOS
+            },
+            facebook: {
+              appId: runtimeConfig.public.FACEBOOK_APPID,
+              clientToken: runtimeConfig.public.FACEBOOK_CLIENTID,
+            },
+              })
+          await SocialLogin.signOut()
         } catch (e) {
           console.log('Ignore Google signOut error', e)
         }

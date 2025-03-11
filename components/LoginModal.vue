@@ -214,10 +214,10 @@ import EmailValidator from './EmailValidator'
 import { useAuthStore } from '~/stores/auth'
 import { useMobileStore } from '@/stores/mobile'
 import me from '~/mixins/me.js'
-import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth'
+import { SocialLogin } from '@capgo/capacitor-social-login'
 import { SignInWithApple } from '@capacitor-community/apple-sign-in'
 //import { FacebookLogin } from '@capacitor-community/facebook-login'
-import { FacebookLogin } from '@whiteguru/capacitor-plugin-facebook-login' // FacebookLimitedLoginResponse
+// TODOTODO import { FacebookLogin } from '@whiteguru/capacitor-plugin-facebook-login' // FacebookLimitedLoginResponse
 // https://github.com/dragermrb/capacitor-plugin-facebook-login
 // Also see android\app\src\main\java\org\ilovefreegle\direct\MainActivity.java now removed
 // and ios\App\App\AppDelegate.swift
@@ -357,12 +357,14 @@ export default {
         this.pleaseShowModal = newVal
 
         if (newVal) {
+          if( this.isApp){
+            this.initializeAppSocialLogins()
+            return
+          }
           if (!this.initialisedSocialLogin) {
             // We only use the Google and Facebook SDKs in login, so we can install them here in the modal.  This means we
             // don't load the scripts for every page.
-            if( !this.isApp){
-              this.installFacebookSDK()
-            }
+            this.installFacebookSDK()
             this.initialisedSocialLogin = true
           }
 
@@ -620,15 +622,26 @@ export default {
 
       if( this.isApp) {
         console.log("Facebook app start")
+
         const FACEBOOK_PERMISSIONS = [
           'email',
+          //'public_profile'
           //'user_birthday',
           //'user_photos',
           //'user_gender',
         ]
         try{
+          // TODOTODO
+          const response = await SocialLogin.login({
+            provider: 'facebook',
+            options: {
+              permissions: FACEBOOK_PERMISSIONS,
+            },
+          })
+          console.log("Facebook response", response) // recentlyGrantedPermissions, recentlyDeniedPermissions
           let accessToken = false
-          if( this.isiOS){
+          if( response && response.result) accessToken = response.result.accessToken
+          /*if( this.isiOS){
             console.log("iOS try FacebookLogin.loginWithLimitedTracking")
             // response = await (<FacebookLimitedLoginResponse>(FacebookLogin.loginWithLimitedTracking({ permissions: FACEBOOK_PERMISSIONS })))
             const response = await FacebookLogin.loginWithLimitedTracking({ permissions: FACEBOOK_PERMISSIONS })
@@ -639,7 +652,7 @@ export default {
             const response = await FacebookLogin.login({ permissions: FACEBOOK_PERMISSIONS })
             console.log("Facebook response", response) // recentlyGrantedPermissions, recentlyDeniedPermissions
             if (response && response.accessToken) accessToken = response.accessToken
-          }
+          }*/
           if (accessToken) {
             console.log("accessToken", accessToken) // recentlyGrantedPermissions, recentlyDeniedPermissions
           //if (response && response.accessToken) {
@@ -738,23 +751,29 @@ export default {
       }
     },
     async loginGoogleApp() {
-      // https://github.com/CodetrixStudio/CapacitorGoogleAuth
+      // https://github.com/Cap-go/capacitor-social-login
       // Only works in Android when app signed correctly
       try{
         console.log('loginGoogleApp')
-        const response = await GoogleAuth.signIn();
-        //console.log(response)
-        if( response.authentication && response.authentication.idToken) {
+        const response = await SocialLogin.login({
+          provider: 'google',
+          options: {
+            scopes: ['email', 'profile'],
+            forceRefreshToken: true // if you need refresh token
+          }
+        })
+        console.log(response)
+        if( response.result && response.result.idToken) {
           this.loginWaitMessage = "Please wait..."
           await this.authStore.login({
-              googlejwt: response.authentication.idToken,
+              googlejwt: response.result.idToken,
               googlelogin: true
             })
           // We are now logged in.
           console.log('Logged in')
           self.pleaseShowModal = false
         } else{
-          this.socialLoginError = 'Google: no authentication.idToken found'
+          this.socialLoginError = 'Google: no result.idToken found'
         }
         this.loginWaitMessage = null
       } catch( e){
@@ -903,9 +922,23 @@ export default {
       this.forceLogin = false
       this.$router.push('/forgot')
     },
+    async initializeAppSocialLogins() {
+      console.log('APP: Set up SocialLogin for google and facebook')
+      await SocialLogin.initialize({
+        google: {
+          webClientId: this.clientId, // Use Web Client ID for all platforms
+          iOSClientId: this.runtimeConfig.public.GOOGLE_IOS_CLIENT_ID, // for iOS
+          //mode: 'offline' // replaces grantOfflineAccess
+        },
+        facebook: {
+          appId: this.runtimeConfig.public.FACEBOOK_APPID,
+          clientToken: this.runtimeConfig.public.FACEBOOK_CLIENTID,
+        },
+      })
+    },
     async installGoogleSDK() {
       if( this.isApp){
-        GoogleAuth.initialize()
+        initializeAppSocialLogins()
       } else {
       if (
         window &&

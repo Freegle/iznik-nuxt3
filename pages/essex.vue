@@ -80,7 +80,7 @@
 <script setup>
 import { useRoute } from 'vue-router'
 import Wkt from 'wicket'
-import { buildHead } from '../../../composables/useBuildHead'
+import { buildHead } from '../composables/useBuildHead'
 import { useAuthorityStore } from '~/stores/authority'
 import { loadLeaflet } from '~/composables/useMap'
 

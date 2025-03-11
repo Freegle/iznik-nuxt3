@@ -334,7 +334,8 @@
 import { useChatStore } from '../stores/chat'
 import { setupChat } from '../composables/useChat'
 import ProfileImage from './ProfileImage'
-import { twem, useRouter } from '#imports'
+import { useRouter } from '#imports'
+import { twem } from '~/composables/useTwem'
 import { useMiscStore } from '~/stores/misc'
 import SupporterInfo from '~/components/SupporterInfo'
 

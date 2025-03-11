@@ -14,17 +14,17 @@ project(':capacitor-device').projectDir = new File('../node_modules/@capacitor/d
 include ':capacitor-network'
 project(':capacitor-network').projectDir = new File('../node_modules/@capacitor/network/android')
 
-include ':freegle-capacitor-push-notifications-cap6'
-project(':freegle-capacitor-push-notifications-cap6').projectDir = new File('../node_modules/@freegle/capacitor-push-notifications-cap6/android')
+include ':freegle-capacitor-push-notifications-cap7'
+project(':freegle-capacitor-push-notifications-cap7').projectDir = new File('../node_modules/@freegle/capacitor-push-notifications-cap7/android')
 
 include ':capawesome-capacitor-badge'
 project(':capawesome-capacitor-badge').projectDir = new File('../node_modules/@capawesome/capacitor-badge/android')
 
-include ':whiteguru-capacitor-plugin-facebook-login'
-project(':whiteguru-capacitor-plugin-facebook-login').projectDir = new File('../node_modules/@whiteguru/capacitor-plugin-facebook-login/android')
+include ':capgo-capacitor-social-login'
+project(':capgo-capacitor-social-login').projectDir = new File('../node_modules/@capgo/capacitor-social-login/android')
 
-include ':codetrix-studio-capacitor-google-auth'
-project(':codetrix-studio-capacitor-google-auth').projectDir = new File('../node_modules/@codetrix-studio/capacitor-google-auth/android')
+include ':capacitor-status-bar'
+project(':capacitor-status-bar').projectDir = new File('../node_modules/@capacitor/status-bar/android')
 
 include ':capacitor-camera'
 project(':capacitor-camera').projectDir = new File('../node_modules/@capacitor/camera/android')

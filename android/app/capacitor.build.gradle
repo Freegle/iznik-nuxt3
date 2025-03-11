@@ -2,8 +2,8 @@
 
 android {
   compileOptions {
-      sourceCompatibility JavaVersion.VERSION_17
-      targetCompatibility JavaVersion.VERSION_17
+      sourceCompatibility JavaVersion.VERSION_21
+      targetCompatibility JavaVersion.VERSION_21
   }
 }
 
@@ -13,10 +13,10 @@ dependencies {
     implementation project(':capacitor-app-launcher')
     implementation project(':capacitor-device')
     implementation project(':capacitor-network')
-    implementation project(':freegle-capacitor-push-notifications-cap6')
+    implementation project(':freegle-capacitor-push-notifications-cap7')
     implementation project(':capawesome-capacitor-badge')
-    implementation project(':whiteguru-capacitor-plugin-facebook-login')
-    implementation project(':codetrix-studio-capacitor-google-auth')
+    implementation project(':capgo-capacitor-social-login')
+    implementation project(':capacitor-status-bar')
     implementation project(':capacitor-camera')
     implementation project(':capacitor-share')
     implementation project(':capacitor-app')

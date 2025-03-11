@@ -16,7 +16,7 @@
 		"classpath": "com.capacitorjs.plugins.network.NetworkPlugin"
 	},
 	{
-		"pkg": "@freegle/capacitor-push-notifications-cap6",
+		"pkg": "@freegle/capacitor-push-notifications-cap7",
 		"classpath": "com.capacitorjs.plugins.pushnotifications.PushNotificationsPlugin"
 	},
 	{
@@ -24,12 +24,12 @@
 		"classpath": "io.capawesome.capacitorjs.plugins.badge.BadgePlugin"
 	},
 	{
-		"pkg": "@whiteguru/capacitor-plugin-facebook-login",
-		"classpath": "com.whiteguru.capacitor.plugin.facebooklogin.FacebookLoginPlugin"
+		"pkg": "@capgo/capacitor-social-login",
+		"classpath": "ee.forgr.capacitor.social.login.SocialLoginPlugin"
 	},
 	{
-		"pkg": "@codetrix-studio/capacitor-google-auth",
-		"classpath": "com.codetrixstudio.capacitor.GoogleAuth.GoogleAuth"
+		"pkg": "@capacitor/status-bar",
+		"classpath": "com.capacitorjs.plugins.statusbar.StatusBarPlugin"
 	},
 	{
 		"pkg": "@capacitor/camera",

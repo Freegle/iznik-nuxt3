@@ -16,8 +16,9 @@ import { defineStore } from 'pinia'
 import { Device } from '@capacitor/device'
 import { Badge } from '@capawesome/capacitor-badge'
 //import { PushNotifications } from '@capacitor/push-notifications'
-/* 2024-08 import { PushNotifications } from '@freegle/capacitor-push-notifications'*/
-import { PushNotifications } from '@freegle/capacitor-push-notifications-cap6'
+// Removed 2024-08 import { PushNotifications } from '@freegle/capacitor-push-notifications'
+// Removed 2025-03 import { PushNotifications } from '@freegle/capacitor-push-notifications-cap6'
+import { PushNotifications } from '@freegle/capacitor-push-notifications-cap7' // 2025-03
 import { useAuthStore } from '~/stores/auth'
 import { AppLauncher } from '@capacitor/app-launcher'
 import api from '~/api'

@@ -259,6 +259,7 @@ export default defineNuxtConfig({
       OSM_TILE: config.OSM_TILE,
       GEOCODE: config.GEOCODE,
       FACEBOOK_APPID: config.FACEBOOK_APPID,
+      FACEBOOK_CLIENTID: config.FACEBOOK_CLIENTID,
       YAHOO_CLIENTID: config.YAHOO_CLIENTID,
       GOOGLE_MAPS_KEY: config.GOOGLE_MAPS_KEY,
       GOOGLE_API_KEY: config.GOOGLE_API_KEY,

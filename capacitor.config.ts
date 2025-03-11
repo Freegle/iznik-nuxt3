@@ -1,5 +1,21 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
+// App-specific tests
+// - Status bar shows correctly on A15, pre-A15 and iOS - OK 11/3/25
+// - Camera: take photo and select one or more photos - OK 11/3/25
+// - Yahoo: login - OK 11/3/25
+// - Google: login - capacitor-social-login - OK 11/3/25
+// - Facebook: login - capacitor-social-login - OK 11/3/25
+// - Stripe payment
+// - Push notifications - OK 11/3/25
+// - Home screen badge count 
+// - Share
+// - Deep links
+// - Android pinch zoom
+// - Set iOS window.open
+// - Get device info
+// - Add to calendar
+
 const frconfig = {  // TODO
   GOOGLE_CLIENT_ID: '423761283916-1rpa8120tpudgv4nf44cpmlf8slqbf4f.apps.googleusercontent.com',  // OK as serverClientId - SERVER_CLIENT_ID
   GOOGLE_IOS_CLIENT_ID: '423761283916-2kavl4pp132cmjormmifomo2r8hhta52.apps.googleusercontent.com'
@@ -35,19 +51,22 @@ const config: CapacitorConfig = {
   android: {
     includePlugins: [
       "cordova-plugin-calendar", // C6 https://github.com/uzurv/Calendar-PhoneGap-Plugin-ios-17-support
-      "cordova-plugin-inappbrowser", // C6 OK
+      "cordova-plugin-inappbrowser", // C7 OK Yahoo
       "@capacitor-community/stripe",
-      "@capacitor/app-launcher", // C6 OK
+      "@capacitor/app-launcher", // C7 OK eg donate
       "@capacitor/browser",
       "@capacitor/device", // C6 OK
       "@capacitor/network",
-      "@freegle/capacitor-push-notifications-cap6", // 2024-08
       // "@capacitor/push-notifications",
+      // "@freegle/capacitor-push-notifications-cap6", // 2024-08
+      "@freegle/capacitor-push-notifications-cap7", // 2025-03
       "@capawesome/capacitor-badge",
       //"@capacitor-community/facebook-login", // C6 OK
-      "@whiteguru/capacitor-plugin-facebook-login", // C6
-      "@codetrix-studio/capacitor-google-auth", // C6 on github repo OK
-      "@capacitor/camera",
+      //"@whiteguru/capacitor-plugin-facebook-login", // C6
+      // "@codetrix-studio/capacitor-google-auth", // C6 on github repo OK
+      "@capgo/capacitor-social-login", // C7
+      "@capacitor/status-bar", // C7 OK
+      "@capacitor/camera", // C7 OK
       "@capacitor/share",
       "@capacitor/app",
     ],
@@ -71,18 +90,27 @@ const config: CapacitorConfig = {
       "@capacitor/device",
       "@capacitor/network",
       //"@capacitor/push-notifications",
-      "@freegle/capacitor-push-notifications-cap6", // 2024-08
+      //"@freegle/capacitor-push-notifications-cap6", // 2024-08
+      "@freegle/capacitor-push-notifications-cap7", // 2025-03
       "@capawesome/capacitor-badge",
       //"@capacitor-community/facebook-login", // C6: broken: limited login
-      "@whiteguru/capacitor-plugin-facebook-login", // C6
+      //"@whiteguru/capacitor-plugin-facebook-login", // C6
       "@capacitor-community/apple-sign-in", // C6 OK
-      "@codetrix-studio/capacitor-google-auth", // C6 on github repo OK
+      // "@codetrix-studio/capacitor-google-auth", // C6 on github repo OK
+      "@capgo/capacitor-social-login", // C7
+      "@capacitor/status-bar",
       "@capacitor/camera",
       "@capacitor/share",
       "@capacitor/app",
     ] 
   },
   plugins: {
+    StatusBar: { 
+      // android\app\src\main\res\values\styles.xml
+      // Add this twice: <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
+      overlaysWebView: false,
+      "backgroundColor": "#33880800" // Nominally green but completely transparent
+    },
     PushNotifications: {
       //presentationOptions: ["badge", "sound", "alert"],
       presentationOptions: ["badge", "alert"],
@@ -91,13 +119,13 @@ const config: CapacitorConfig = {
       "persist": true,
       "autoClear": false
     },
-    "GoogleAuth": {
+    /* "GoogleAuth": { // TODOTODO
       "scopes": ["profile", "email"],
       "serverClientId": frconfig.GOOGLE_CLIENT_ID,
       "forceCodeForRefreshToken": true,
       "androidClientId": frconfig.GOOGLE_CLIENT_ID,
       "iosClientId": frconfig.GOOGLE_IOS_CLIENT_ID,
-    },
+    },*/
   },
 };
 
