@@ -1,16 +1,17 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 // App-specific tests
-// - Status bar shows correctly on A15, pre-A15 and iOS - OK 11/3/25
-// - Camera: take photo and select one or more photos - OK 11/3/25
-// - Yahoo: login - OK 11/3/25
+// - Status bar shows correctly on A15, pre-A15 and iOS - AOK iOK 11/3/25
+// - Camera: take photo and select one or more photos - AOK iOK 11/3/25
+// - Yahoo: login - AOK iOK 11/3/25
 // - Google: login - capacitor-social-login - OK 11/3/25
 // - Facebook: login - capacitor-social-login - OK 11/3/25
+// - Apple: login - iOK 11/3/25
 // - Stripe payment
 // - Push notifications - OK 11/3/25
 // - Home screen badge count 
 // - Share
-// - Deep links
+// - Deep links = AOK 11/3/25
 // - Android pinch zoom
 // - Set iOS window.open
 // - Get device info

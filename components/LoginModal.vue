@@ -632,12 +632,14 @@ export default {
         ]
         try{
           // TODOTODO
-          const response = await SocialLogin.login({
+          const loginOptions = {
             provider: 'facebook',
             options: {
               permissions: FACEBOOK_PERMISSIONS,
             },
-          })
+          }
+          if( this.isiOS) loginOptions.options.limitedLogin = true
+          const response = await SocialLogin.login(loginOptions)
           console.log("Facebook response", response) // recentlyGrantedPermissions, recentlyDeniedPermissions
           let accessToken = false
           if( response && response.result) accessToken = response.result.accessToken
@@ -655,6 +657,7 @@ export default {
           }*/
           if (accessToken) {
             console.log("accessToken", accessToken) // recentlyGrantedPermissions, recentlyDeniedPermissions
+            console.log("fbaccesstoken", accessToken.token)
           //if (response && response.accessToken) {
               // Login successful.
             this.loginWaitMessage = "Please wait..."
