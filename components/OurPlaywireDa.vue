@@ -145,7 +145,7 @@ watch(
           }
 
           console.log(
-            'Ad container in DOM?',
+            'Ad container really in DOM?',
             window.getElementById(props.divId) !== null
           )
           console.log('Execute queued spaAddAds')
