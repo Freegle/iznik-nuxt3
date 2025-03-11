@@ -4,6 +4,8 @@ import Capacitor
 import FBSDKCoreKit // capacitor-community/facebook-login
 import Firebase // @capacitor/push-notifications https://devdactic.com/push-notifications-ionic-capacitor
 
+import GoogleSignIn
+
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
@@ -45,6 +47,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Called when the app was launched with a url. Feel free to add additional processing here,
         // but if you want the App API to support tracking app url opens, make sure to keep this call
         // WAS return ApplicationDelegateProxy.shared.application(app, open: url, options: options)
+        
+        var handled: Bool
+
+        handled = GIDSignIn.sharedInstance.handle(url)
+        if handled {
+          return true
+        }        
+        
         if (FBSDKCoreKit.ApplicationDelegate.shared.application(  // capacitor-community/facebook-login
             app,
             open: url,
