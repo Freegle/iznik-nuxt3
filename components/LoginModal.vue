@@ -909,12 +909,17 @@ export default {
     },
     async initializeAppSocialLogins() {
       console.log('APP: Set up SocialLogin for google and facebook')
+      console.log('iOSClientId', this.runtimeConfig.public.GOOGLE_IOS_CLIENT_ID) // YOUR_DOT_REVERSED_IOS_CLIENT_ID in Info.plist
+      const initGoogleParams = {
+        // webClientId: this.clientId, // Use Web Client ID for all platforms
+        // iOSClientId: this.runtimeConfig.public.GOOGLE_IOS_CLIENT_ID, // for iOS
+        // iOSServerClientId: 'iOSServerClientId' // the iOS server client id (required in mode offline)
+        // mode: 'offline' // replaces grantOfflineAccess
+      }
+      if( this.isiOS) initGoogleParams.iOSClientId = this.runtimeConfig.public.GOOGLE_IOS_CLIENT_ID // for iOS
+      else initGoogleParams.webClientId = this.clientId, // Use Web Client ID for all platforms
       await SocialLogin.initialize({
-        google: {
-          webClientId: this.clientId, // Use Web Client ID for all platforms
-          iOSClientId: this.runtimeConfig.public.GOOGLE_IOS_CLIENT_ID, // for iOS
-          //mode: 'offline' // replaces grantOfflineAccess
-        },
+        google: initGoogleParams,
         facebook: {
           appId: this.runtimeConfig.public.FACEBOOK_APPID,
           clientToken: this.runtimeConfig.public.FACEBOOK_CLIENTID,
