@@ -2,7 +2,7 @@
 import UIKit
 import Capacitor
 import FBSDKCoreKit // capacitor-community/facebook-login
-// import Firebase // @capacitor/push-notifications https://devdactic.com/push-notifications-ionic-capacitor
+import Firebase // @capacitor/push-notifications https://devdactic.com/push-notifications-ionic-capacitor
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -15,7 +15,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             application,
             didFinishLaunchingWithOptions: launchOptions
         )
-        //FirebaseApp.configure()
+        FirebaseApp.configure()
         return true
     }
 
