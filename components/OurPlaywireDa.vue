@@ -16,7 +16,7 @@
   </div>
 </template>
 <script setup>
-import { ref, computed, onBeforeUnmount, nextTick } from '#imports'
+import { ref, computed, nextTick } from '#imports'
 
 const props = defineProps({
   adUnitPath: {
@@ -180,7 +180,6 @@ watch(
           configScript.onload = () => {
             // Playwire code loaded. Now we can add our ad.
             console.log('Playwire script loaded, queue spaAddAds')
-
             window.ramp.que.push(addAd)
           }
 
@@ -212,6 +211,8 @@ onBeforeUnmount(() => {
     if (visibleTimer) {
       clearTimeout(visibleTimer)
     }
+
+    window.ramp.destroyUnits(theType.value)
   } catch (e) {
     console.log('Exception in onBeforeUnmount', e)
   }
