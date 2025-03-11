@@ -4,8 +4,6 @@ import { useComposeStore } from '../stores/compose'
 import api from '~/api'
 import { useCookie } from '#imports'
 import { useMobileStore } from '@/stores/mobile'
-// import { FacebookLogin } from '@capacitor-community/facebook-login'
-// TODOTODO import { FacebookLogin } from '@whiteguru/capacitor-plugin-facebook-login'
 import { SocialLogin } from '@capgo/capacitor-social-login'
 import { useMiscStore } from '~/stores/misc'
 
@@ -169,7 +167,6 @@ export const useAuthStore = defineStore({
         }
 
         try {
-          // TODOTODO: Google logout
           console.log('Try Google logout')
           const runtimeConfig = useRuntimeConfig()
           await SocialLogin.initialize({

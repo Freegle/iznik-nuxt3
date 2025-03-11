@@ -3,8 +3,6 @@ package org.ilovefreegle.direct;
 import android.util.Log;
 import com.getcapacitor.BridgeActivity;
 import android.os.Bundle;
-//import com.getcapacitor.community.facebooklogin.FacebookLogin;
-//import org.ilovefreegle.nuxt3fcm.FreegleFCMPlugin;
 import ee.forgr.capacitor.social.login.GoogleProvider;
 import ee.forgr.capacitor.social.login.SocialLoginPlugin;
 import ee.forgr.capacitor.social.login.ModifiedMainActivityForSocialLoginPlugin;
@@ -19,8 +17,6 @@ public class MainActivity extends BridgeActivity implements ModifiedMainActivity
     //Log.e("PHDCC","org.ilovefreegle.direct onCreate A");
     super.onCreate(savedInstanceState);
     registerPlugin(com.getcapacitor.community.stripe.StripePlugin.class);
-    //registerPlugin(FacebookLogin.class);
-    //registerPlugin(FreegleFCMPlugin.class);
   }
 
   @Override

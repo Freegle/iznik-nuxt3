@@ -1,3 +1,4 @@
+// Freegle: changes made as per https://github.com/Cap-go/capacitor-social-login?tab=readme-ov-file#ios-configuration-1
 import UIKit
 import Capacitor
 import FBSDKCoreKit // capacitor-community/facebook-login

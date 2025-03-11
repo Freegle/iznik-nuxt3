@@ -4,8 +4,8 @@ import { CapacitorConfig } from '@capacitor/cli';
 // - Status bar shows correctly on A15, pre-A15 and iOS - AOK iOK 11/3/25
 // - Camera: take photo and select one or more photos - AOK iOK 11/3/25
 // - Yahoo: login - AOK iOK 11/3/25
-// - Google: login - capacitor-social-login - OK 11/3/25
-// - Facebook: login - capacitor-social-login - OK 11/3/25
+// - Google: login - capacitor-social-login - AOK 11/3/25
+// - Facebook: login - capacitor-social-login - AOK iOK 11/3/25
 // - Apple: login - iOK 11/3/25
 // - Stripe payment
 // - Push notifications - OK 11/3/25
@@ -56,15 +56,11 @@ const config: CapacitorConfig = {
       "@capacitor-community/stripe",
       "@capacitor/app-launcher", // C7 OK eg donate
       "@capacitor/browser",
-      "@capacitor/device", // C6 OK
+      "@capacitor/device", // C7 OK
       "@capacitor/network",
       // "@capacitor/push-notifications",
-      // "@freegle/capacitor-push-notifications-cap6", // 2024-08
-      "@freegle/capacitor-push-notifications-cap7", // 2025-03
+      "@freegle/capacitor-push-notifications-cap7", // C7 2025-03
       "@capawesome/capacitor-badge",
-      //"@capacitor-community/facebook-login", // C6 OK
-      //"@whiteguru/capacitor-plugin-facebook-login", // C6
-      // "@codetrix-studio/capacitor-google-auth", // C6 on github repo OK
       "@capgo/capacitor-social-login", // C7
       "@capacitor/status-bar", // C7 OK
       "@capacitor/camera", // C7 OK
@@ -91,12 +87,9 @@ const config: CapacitorConfig = {
       "@capacitor/device",
       "@capacitor/network",
       //"@capacitor/push-notifications",
-      //"@freegle/capacitor-push-notifications-cap6", // 2024-08
       "@freegle/capacitor-push-notifications-cap7", // 2025-03
       "@capawesome/capacitor-badge",
-      //"@capacitor-community/facebook-login", // C6: broken: limited login
-      //"@whiteguru/capacitor-plugin-facebook-login", // C6
-      "@capacitor-community/apple-sign-in", // C6 OK
+      "@capacitor-community/apple-sign-in", // C7 OK
       // "@codetrix-studio/capacitor-google-auth", // C6 on github repo OK
       "@capgo/capacitor-social-login", // C7
       "@capacitor/status-bar",

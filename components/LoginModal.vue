@@ -214,13 +214,8 @@ import EmailValidator from './EmailValidator'
 import { useAuthStore } from '~/stores/auth'
 import { useMobileStore } from '@/stores/mobile'
 import me from '~/mixins/me.js'
-import { SocialLogin } from '@capgo/capacitor-social-login'
+import { SocialLogin } from '@capgo/capacitor-social-login' // Required changes in ios\App\App\AppDelegate.swift ETC
 import { SignInWithApple } from '@capacitor-community/apple-sign-in'
-//import { FacebookLogin } from '@capacitor-community/facebook-login'
-// TODOTODO import { FacebookLogin } from '@whiteguru/capacitor-plugin-facebook-login' // FacebookLimitedLoginResponse
-// https://github.com/dragermrb/capacitor-plugin-facebook-login
-// Also see android\app\src\main\java\org\ilovefreegle\direct\MainActivity.java now removed
-// and ios\App\App\AppDelegate.swift
 import { appYahooLogin } from '../composables/app-yahoo'
 
 const NoticeMessage = defineAsyncComponent(() =>
@@ -623,44 +618,30 @@ export default {
       if( this.isApp) {
         console.log("Facebook app start")
 
-        const FACEBOOK_PERMISSIONS = [
-          'email',
-          //'public_profile'
-          //'user_birthday',
-          //'user_photos',
-          //'user_gender',
-        ]
         try{
-          // TODOTODO
           const loginOptions = {
             provider: 'facebook',
             options: {
-              permissions: FACEBOOK_PERMISSIONS,
+              permissions: [
+                'email',
+                //'public_profile'
+                //'user_birthday',
+                //'user_photos',
+                //'user_gender',
+              ]
             },
           }
           if( this.isiOS) loginOptions.options.limitedLogin = true
           const response = await SocialLogin.login(loginOptions)
-          console.log("Facebook response", response) // recentlyGrantedPermissions, recentlyDeniedPermissions
+          //console.log("Facebook response", response)
           let accessToken = false
           if( response && response.result) {
             accessToken = response.result.accessToken.token
             if( this.isiOS) accessToken = response.result.idToken
           }
-          /*if( this.isiOS){
-            console.log("iOS try FacebookLogin.loginWithLimitedTracking")
-            // response = await (<FacebookLimitedLoginResponse>(FacebookLogin.loginWithLimitedTracking({ permissions: FACEBOOK_PERMISSIONS })))
-            const response = await FacebookLogin.loginWithLimitedTracking({ permissions: FACEBOOK_PERMISSIONS })
-            console.log("Facebook limited response", response) // recentlyGrantedPermissions, recentlyDeniedPermissions
-            if (response && response.authenticationToken) accessToken = response.authenticationToken
-          } else {
-            console.log("Android try FacebookLogin.login")
-            const response = await FacebookLogin.login({ permissions: FACEBOOK_PERMISSIONS })
-            console.log("Facebook response", response) // recentlyGrantedPermissions, recentlyDeniedPermissions
-            if (response && response.accessToken) accessToken = response.accessToken
-          }*/
           if (accessToken) {
-            console.log("accessToken", accessToken) // recentlyGrantedPermissions, recentlyDeniedPermissions
-              // Login successful.
+            console.log("accessToken", accessToken)
+            // Login successful.
             this.loginWaitMessage = "Please wait..."
             await this.authStore.login({
               fblogin: 1,
