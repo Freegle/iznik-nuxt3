@@ -737,13 +737,12 @@ export default {
     },
     async loginGoogleApp() {
       // https://github.com/Cap-go/capacitor-social-login
-      // Only works in Android when app signed correctly
       try{
         console.log('loginGoogleApp')
         const response = await SocialLogin.login({
           provider: 'google',
           options: {
-            scopes: ['email', 'profile'],
+            scopes: ['email'],
             forceRefreshToken: true, // Android: if you need refresh token
             forcePrompt: true // iOS: Force account selection prompt
           }
