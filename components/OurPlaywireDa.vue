@@ -125,40 +125,40 @@ watch(
       // Let the div get created and then ensure we've loaded the Playwire code.
       nextTick(() => {
         function addAd() {
-          // See https://support.playwire.com/docs/ad-units-array-for-ads-api for the types.
-          //
-          // We don't use spaNewPage as in the example because our ads are added more dynamically than
-          // that.
-          const height = window.getComputedStyle(daDiv.value, null).maxHeight
-          if (height === '50px' || height === '90px') {
-            theType.value = 'leaderboard_atf'
-          } else {
-            // See if we already have a med_rect; if so we should use the alternate type value as Playwire
-            // doesn't like multiple ads of the same type.
-            const existing = document.querySelector('.med_rect_atf')
-
-            if (existing) {
-              theType.value = 'med_rect_btf'
-            } else {
-              theType.value = 'med_rect_atf'
-            }
-          }
-
-          console.log(
-            'Ad container really in DOM?',
-            window.getElementById(props.divId) !== null
-          )
-          console.log('Execute queued spaAddAds', theType.value)
           try {
+            // See https://support.playwire.com/docs/ad-units-array-for-ads-api for the types.
+            //
+            // We don't use spaNewPage as in the example because our ads are added more dynamically than
+            // that.
+            const height = window.getComputedStyle(daDiv.value, null).maxHeight
+            if (height === '50px' || height === '90px') {
+              theType.value = 'leaderboard_atf'
+            } else {
+              // See if we already have a med_rect; if so we should use the alternate type value as Playwire
+              // doesn't like multiple ads of the same type.
+              const existing = document.querySelector('.med_rect_atf')
+
+              if (existing) {
+                theType.value = 'med_rect_btf'
+              } else {
+                theType.value = 'med_rect_atf'
+              }
+            }
+
+            console.log(
+              'Ad container really in DOM?',
+              window.getElementById(props.divId) !== null
+            )
+            console.log('Execute queued spaAddAds', theType.value)
             window.ramp.spaAddAds({
               type: theType.value,
               selector: '#' + props.divId,
             })
+
+            console.log('Called spaAddAds')
           } catch (e) {
             console.log('Failed to inject ad', e)
           }
-
-          console.log('Called spaAddAds')
         }
 
         if (!window.ramp) {
