@@ -642,7 +642,10 @@ export default {
           const response = await SocialLogin.login(loginOptions)
           console.log("Facebook response", response) // recentlyGrantedPermissions, recentlyDeniedPermissions
           let accessToken = false
-          if( response && response.result) accessToken = response.result.accessToken
+          if( response && response.result) {
+            accessToken = response.result.accessToken.token
+            if( this.isiOS) accessToken = response.result.idToken
+          }
           /*if( this.isiOS){
             console.log("iOS try FacebookLogin.loginWithLimitedTracking")
             // response = await (<FacebookLimitedLoginResponse>(FacebookLogin.loginWithLimitedTracking({ permissions: FACEBOOK_PERMISSIONS })))
@@ -657,13 +660,11 @@ export default {
           }*/
           if (accessToken) {
             console.log("accessToken", accessToken) // recentlyGrantedPermissions, recentlyDeniedPermissions
-            console.log("fbaccesstoken", accessToken.token)
-          //if (response && response.accessToken) {
               // Login successful.
             this.loginWaitMessage = "Please wait..."
             await this.authStore.login({
               fblogin: 1,
-              fbaccesstoken: accessToken.token,
+              fbaccesstoken: accessToken,
               fblimited: this.isiOS
             })
             // We are now logged in.
