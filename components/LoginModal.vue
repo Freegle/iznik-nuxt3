@@ -922,7 +922,7 @@ export default {
         initGoogleParams.iOSClientId = this.runtimeConfig.public.GOOGLE_IOS_CLIENT_ID // for iOS
       }
       else {
-        initGoogleParams.webClientId = this.clientId, // Use Web Client ID for all platforms
+        initGoogleParams.webClientId = this.clientId // Use Web Client ID for all platforms
       }
       await SocialLogin.initialize({
         google: initGoogleParams,
