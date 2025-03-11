@@ -18,8 +18,6 @@
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
 	<string>$(MARKETING_VERSION)</string>
-	<key>GIDClientID</key>
-	<string>com.googleusercontent.apps.423761283916-2kavl4pp132cmjormmifomo2r8hhta52</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -28,11 +26,6 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>com.googleusercontent.apps.423761283916-2kavl4pp132cmjormmifomo2r8hhta52</string>
-			</array>
-		</dict>
-		<dict>
-			<key>CFBundleURLSchemes</key>
-			<array>
 				<string>fb134980666550322</string>
 			</array>
 		</dict>
