@@ -4,15 +4,15 @@ import { CapacitorConfig } from '@capacitor/cli';
 // - Status bar shows correctly on A15, pre-A15 and iOS - AOK iOK 11/3/25
 // - Camera: take photo and select one or more photos - AOK iOK 11/3/25
 // - Yahoo: login - AOK iOK 11/3/25
-// - Google: login - capacitor-social-login - AOK 11/3/25
+// - Google: login - capacitor-social-login - AOK iOK 12/3/25
 // - Facebook: login - capacitor-social-login - AOK iOK 11/3/25
 // - Apple: login - iOK 11/3/25
-// - Stripe payment - pages/myposts.vue#L215
-// - Push notifications - OK 11/3/25
+// - Stripe payment - pages/myposts.vue#L215 - AOK 12/3/25
+// - Push notifications - AOK 11/3/25
 // - Home screen badge count 
-// - Share
+// - Share - AOK 12/3/25
 // - Deep links = AOK 11/3/25
-// - Android pinch zoom
+// - Android pinch zoom - AOK 12/3/25
 // - Set iOS window.open
 // - Get device info
 // - Add to calendar

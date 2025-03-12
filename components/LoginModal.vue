@@ -640,7 +640,7 @@ export default {
             if( this.isiOS) accessToken = response.result.idToken
           }
           if (accessToken) {
-            console.log("accessToken", accessToken)
+            //console.log("accessToken", accessToken)
             // Login successful.
             this.loginWaitMessage = "Please wait..."
             await this.authStore.login({
@@ -747,7 +747,7 @@ export default {
             forcePrompt: true // iOS: Force account selection prompt
           }
         })
-        console.log(response)
+        //console.log(response)
         if( response.result && response.result.idToken) {
           this.loginWaitMessage = "Please wait..."
           await this.authStore.login({
@@ -909,24 +909,20 @@ export default {
     },
     async initializeAppSocialLogins() {
       console.log('APP: Set up SocialLogin for google and facebook')
-      console.log('iOSClientId', this.runtimeConfig.public.GOOGLE_IOS_CLIENT_ID) // YOUR_DOT_REVERSED_IOS_CLIENT_ID in Info.plist
       const initGoogleParams = {
-        // webClientId: this.clientId, // Use Web Client ID for all platforms
-        // iOSClientId: this.runtimeConfig.public.GOOGLE_IOS_CLIENT_ID, // for iOS
-        // iOSServerClientId: 'iOSServerClientId' // the iOS server client id (required in mode offline)
+        webClientId: this.clientId, // Use Web Client ID for all platforms
+        iOSClientId: this.runtimeConfig.public.GOOGLE_IOS_CLIENT_ID, // for iOS
+        iOSServerClientId: this.clientId // the iOS server client id (required in mode offline)
         // mode: 'offline' // replaces grantOfflineAccess
       }
-      console.log('this.isiOS', this.isiOS)
-      if( this.isiOS) {
+      /*if( this.isiOS) {
         initGoogleParams.iOSClientId = this.runtimeConfig.public.GOOGLE_IOS_CLIENT_ID // for iOS
         initGoogleParams.webClientId = this.clientId // Use Web Client ID for all platforms
         initGoogleParams.iOSServerClientId = this.clientId
-        //initGoogleParams.mode = 'offline'
       }
       else {
         initGoogleParams.webClientId = this.clientId // Use Web Client ID for all platforms
-      }
-      console.log('initGoogleParams',initGoogleParams)
+      }*/
       await SocialLogin.initialize({
         google: initGoogleParams,
         facebook: {
