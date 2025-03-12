@@ -7,11 +7,11 @@ import { CapacitorConfig } from '@capacitor/cli';
 // - Google: login - capacitor-social-login - AOK iOK 12/3/25
 // - Facebook: login - capacitor-social-login - AOK iOK 11/3/25
 // - Apple: login - iOK 11/3/25
-// - Stripe payment - pages/myposts.vue#L215 - AOK 12/3/25
-// - Push notifications - AOK 11/3/25
-// - Home screen badge count 
-// - Share - AOK 12/3/25
-// - Deep links = AOK 11/3/25
+// - Stripe payment - pages/myposts.vue#L215 - AOK iOK 12/3/25
+// - Push notifications - AOK iOK 12/3/25
+// - Home screen badge count - AOK iOK 12/3/25
+// - Share - AOK iOK 12/3/25
+// - Deep links = AOK iOK 11/3/25
 // - Android pinch zoom - AOK 12/3/25
 // - Set iOS window.open
 // - Get device info
