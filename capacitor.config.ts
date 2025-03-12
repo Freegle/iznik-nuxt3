@@ -7,7 +7,7 @@ import { CapacitorConfig } from '@capacitor/cli';
 // - Google: login - capacitor-social-login - AOK 11/3/25
 // - Facebook: login - capacitor-social-login - AOK iOK 11/3/25
 // - Apple: login - iOK 11/3/25
-// - Stripe payment
+// - Stripe payment - pages/myposts.vue#L215
 // - Push notifications - OK 11/3/25
 // - Home screen badge count 
 // - Share
@@ -16,11 +16,6 @@ import { CapacitorConfig } from '@capacitor/cli';
 // - Set iOS window.open
 // - Get device info
 // - Add to calendar
-
-const frconfig = {  // TODO
-  GOOGLE_CLIENT_ID: '423761283916-1rpa8120tpudgv4nf44cpmlf8slqbf4f.apps.googleusercontent.com',  // OK as serverClientId - SERVER_CLIENT_ID
-  GOOGLE_IOS_CLIENT_ID: '423761283916-2kavl4pp132cmjormmifomo2r8hhta52.apps.googleusercontent.com'
-}
 
 const AndroidKeyStorePath = process.env['FREEGLE_NUXT3_KEYSTORE_PATH']
 if (typeof AndroidKeyStorePath !== "string") throw "process.env.FREEGLE_NUXT3_KEYSTORE_PATH not set"
@@ -113,13 +108,6 @@ const config: CapacitorConfig = {
       "persist": true,
       "autoClear": false
     },
-    /* "GoogleAuth": { // TODOTODO
-      "scopes": ["profile", "email"],
-      "serverClientId": frconfig.GOOGLE_CLIENT_ID,
-      "forceCodeForRefreshToken": true,
-      "androidClientId": frconfig.GOOGLE_CLIENT_ID,
-      "iosClientId": frconfig.GOOGLE_IOS_CLIENT_ID,
-    },*/
   },
 };
 
