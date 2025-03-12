@@ -100,7 +100,7 @@
       v-if="replyuser && showPromiseModal"
       :messages="[message]"
       :selected-message="message.id"
-      :users="[replyuser]"
+      :users="replyusers"
       :selected-user="replyuser?.id"
       @hidden="showPromiseModal = false"
     />
@@ -115,6 +115,7 @@
   </div>
 </template>
 <script>
+import dayjs from 'dayjs'
 import { useUserStore } from '../stores/user'
 import { useMessageStore } from '../stores/message'
 import { useChatStore } from '../stores/chat'
@@ -190,6 +191,11 @@ export default {
 
     promises.push(userStore.fetch(props.reply.userid))
 
+    if (chatStore.list?.length === 0) {
+      // Need to fetch chats
+      promises.push(chatStore.fetchChats)
+    }
+
     const chat = chatStore.toUser(props.reply.userid)
 
     if (!chat) {
@@ -226,6 +232,65 @@ export default {
     replyuser() {
       return this.userStore?.byId(this.reply.userid)
     },
+    replyuserids() {
+      const ret = []
+
+      if (this.replyuser) {
+        ret.push(this.replyuser.id)
+      }
+
+      let chats = this.chatStore?.list ? this.chatStore.list : []
+
+      chats = chats.filter((chat) => {
+        if (chat.status === 'Blocked' || chat.status === 'Closed') {
+          return false
+        }
+
+        if (chat.chattype !== 'User2User') {
+          return false
+        }
+
+        return true
+      })
+
+      console.log('Filtered chats', chats)
+
+      // Sort by last date.
+      chats.sort((a, b) => {
+        if (a.lastdate && b.lastdate) {
+          return dayjs(b.lastdate).diff(dayjs(a.lastdate))
+        } else if (a.lastdate) {
+          return -1
+        } else if (b.lastdate) {
+          return 1
+        } else {
+          return 0
+        }
+      })
+
+      chats.forEach((chat) => {
+        if (chat.otheruid && chat.otheruid !== this.replyuser?.id) {
+          ret.push(chat.otheruid)
+        }
+      })
+
+      return ret
+    },
+    replyusers() {
+      // Get the users in replyuserids from store
+      const ret = []
+
+      this.replyuserids.forEach((uid) => {
+        const u = this.userStore?.byId(uid)
+
+        if (u) {
+          ret.push(u)
+        }
+      })
+
+      console.log('Reply users', ret)
+      return ret
+    },
     replyago() {
       return timeago(this.chat?.lastdate)
     },
@@ -258,6 +323,17 @@ export default {
     buttonSize() {
       const breakpoint = this.miscStore?.breakpoint
       return breakpoint === 'xs' || breakpoint === 'sm' ? 'sm' : 'md'
+    },
+  },
+  watch: {
+    replyuserids: {
+      immediate: true,
+      handler(newVal) {
+        console.log('Ensure in store', newVal)
+        newVal.forEach((uid) => {
+          this.userStore.fetch(uid)
+        })
+      },
     },
   },
   methods: {

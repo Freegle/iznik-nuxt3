@@ -350,7 +350,7 @@ export default {
     async onShow(date) {
       this.message = this.selectedMessage
 
-      this.currentlySelected = null
+      this.currentlySelected = 0
 
       if (this.selectedUser) {
         this.currentlySelected = this.selectedUser
@@ -376,23 +376,12 @@ export default {
         })
       }
     },
-    onContext(ctx) {
-      if (ctx.selectedYMD) {
-        this.formattedDate = dayjs(ctx.selectedYMD).format('dddd Do')
-      } else {
-        this.formattedDate = null
-      }
-    },
     deleteTryst() {
       this.trystStore.delete(this.tryst.id)
     },
     clearTryst() {
       this.date = null
       this.time = null
-    },
-    considerOddTime() {
-      this.showOddTime =
-        this.time && (this.time < '07:00' || this.time > '21:00')
     },
   },
 }
