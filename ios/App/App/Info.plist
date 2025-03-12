@@ -18,8 +18,6 @@
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
 	<string>$(MARKETING_VERSION)</string>
-	<key>GIDClientID</key>
-	<string>com.googleusercontent.apps.423761283916-2kavl4pp132cmjormmifomo2r8hhta52</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -104,21 +102,21 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
-  <key>FacebookAutoLogAppEventsEnabled</key>
-  <false/>
-  <key>FacebookAdvertiserIDCollectionEnabled</key>
-  <false/>
-  <key>ITSAppUsesNonExemptEncryption</key>
-  <false/>
-  <key>UIFileSharingEnabled</key>
-  <true/>
-  <key>LSSupportsOpeningDocumentsInPlace</key>
-  <true/>
-  <key>NSCalendarsFullAccessUsageDescription</key>
-  <string>To save Freegle handover appointments to your calendar</string>
-  <key>NSCalendarsWriteOnlyAccessUsageDescription</key>
-  <string>To save Freegle handover appointments to your calendar</string>
-  <key>NSCalendarsUsageDescription</key>
-  <string>To save Freegle handover appointments to your calendar</string>
+	<key>FacebookAutoLogAppEventsEnabled</key>
+	<false/>
+	<key>FacebookAdvertiserIDCollectionEnabled</key>
+	<false/>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<key>UIFileSharingEnabled</key>
+	<true/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>To save Freegle handover appointments to your calendar</string>
+	<key>NSCalendarsWriteOnlyAccessUsageDescription</key>
+	<string>To save Freegle handover appointments to your calendar</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>To save Freegle handover appointments to your calendar</string>
 </dict>
 </plist>
