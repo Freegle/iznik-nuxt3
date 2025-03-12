@@ -11,7 +11,8 @@
             <div class="bg-white clickme">
               <notice-message v-if="rejected" class="mb-3" variant="warning">
                 <v-icon icon="exclamation-triangle" scale="2" /> This post has
-                not been accepted and is not public yet.
+                been returned to you by the volunteers, as it is not yet
+                suitable. It is not public yet.
               </notice-message>
               <MessageSummary
                 :id="message.id"
@@ -41,7 +42,7 @@
                 <b-button
                   v-if="rejected && message.location && message.item"
                   variant="warning"
-                  class="mr-2 mb-1"
+                  class="mr-1 mb-1"
                   @click="repost"
                 >
                   <v-icon class="d-none d-sm-inline" icon="pen" /> Edit and
@@ -50,7 +51,7 @@
                 <b-button
                   v-if="rejected && !withdrawn"
                   variant="secondary"
-                  class="mr-2 mb-1"
+                  class="mr-1 mb-1"
                   @click="outcome('Withdrawn', $event)"
                 >
                   <v-icon class="d-none d-sm-inline" icon="trash-alt" />
@@ -59,7 +60,7 @@
                 <b-button
                   v-if="!rejected && message.type === 'Offer' && !taken"
                   variant="primary"
-                  class="mr-2 mb-1"
+                  class="mr-1 mb-1"
                   @click="outcome('Taken', $event)"
                 >
                   <v-icon class="d-none d-sm-inline" icon="check" /> Mark as
@@ -68,16 +69,25 @@
                 <b-button
                   v-if="!rejected && message.type === 'Wanted' && !received"
                   variant="primary"
-                  class="mr-2 mb-1"
+                  class="mr-1 mb-1"
                   @click="outcome('Received', $event)"
                 >
                   <v-icon class="d-none d-sm-inline" icon="check" /> Mark as
                   RECEIVED
                 </b-button>
                 <b-button
+                  v-if="!rejected && message.type === 'Offer' && !taken"
+                  variant="primary"
+                  class="mr-1 mb-1"
+                  @click="showPromiseModal = true"
+                >
+                  <v-icon class="d-none d-sm-inline" icon="handshake" />
+                  Promise
+                </b-button>
+                <b-button
                   v-if="!rejected && !message.outcomes?.length"
                   variant="secondary"
-                  class="mr-2 mb-1"
+                  class="mr-1 mb-1"
                   @click="edit"
                 >
                   <v-icon class="d-none d-sm-inline" icon="pen" /> Edit
@@ -85,7 +95,7 @@
                 <b-button
                   v-if="!rejected && !taken && !received && !withdrawn"
                   variant="secondary"
-                  class="mr-2 mb-1"
+                  class="mr-1 mb-1"
                   @click="outcome('Withdrawn', $event)"
                 >
                   <v-icon class="d-none d-sm-inline" icon="trash-alt" />
@@ -101,7 +111,7 @@
                     message.item
                   "
                   variant="primary"
-                  class="mr-2 mb-1"
+                  class="mr-1 mb-1"
                   @click="extendDeadline"
                 >
                   <v-icon class="d-none d-sm-inline" icon="sync" /> Extend
@@ -115,7 +125,7 @@
                     message.item
                   "
                   variant="secondary"
-                  class="mr-2 mb-1"
+                  class="mr-1 mb-1"
                   @click="repost"
                 >
                   <v-icon class="d-none d-sm-inline" icon="sync" /> Repost
@@ -131,12 +141,14 @@
                 >
                   <b-button
                     variant="secondary"
-                    class="mr-2 mb-1"
+                    class="mr-1 mb-1"
                     title="You will be able to repost this soon"
                     @click.stop="repostWhenUnavailable"
                   >
                     <v-icon class="d-none d-sm-inline" icon="sync" /> Repost
-                    <span class="small">{{ timeago(message.repostat) }}</span>
+                    <span class="repostsmall">{{
+                      timeago(message.repostat)
+                    }}</span>
                   </b-button>
                   <p
                     class="invalid-feedback position-absolute bg-white text-center"
@@ -149,7 +161,7 @@
                   v-if="!rejected"
                   variant="secondary"
                   title="Share"
-                  class="mr-2 mb-1"
+                  class="mr-1 mb-1"
                   @click="share"
                 >
                   <v-icon class="d-none d-sm-inline" icon="share-alt" /> Share
@@ -497,6 +509,20 @@ export default {
       return ret
     },
     replyusers() {
+      // Get the users in replyuserids from store
+      const ret = []
+
+      this.replyuserids.forEach((uid) => {
+        const u = this.userStore?.byId(uid)
+
+        if (u) {
+          ret.push(u)
+        }
+      })
+
+      return ret
+    },
+    replyuserids() {
       const ret = []
       const retids = []
 
@@ -519,6 +545,22 @@ export default {
           }
         }
       }
+
+      // We want to add all the recent chat users.  This allows us to promise to
+      // people who reply in a chat asking informally for multiple items.
+      const chats = this.chatStore?.list ? this.chatStore.list : []
+      const visibleChats = this.scanChats(chats)
+
+      visibleChats.forEach((chat) => {
+        if (
+          chat.chattype === 'User2User' &&
+          chat.otheruid &&
+          !retids[chat.otheruid]
+        ) {
+          ret.push(chat.otheruid)
+          retids[chat.otheruid] = true
+        }
+      })
 
       return ret
     },
@@ -593,6 +635,12 @@ export default {
           this.expanded = true
         }
       },
+    },
+    replyuserids(newVal) {
+      // Make sure we have them in store.
+      newVal.forEach((uid) => {
+        this.userStore.fetch(uid)
+      })
     },
   },
   mounted() {
@@ -750,6 +798,30 @@ export default {
     extendDeadline() {
       this.askDeadline = true
     },
+    scanChats(chats) {
+      chats = chats.filter((chat) => {
+        if (chat.status === 'Blocked' || chat.status === 'Closed') {
+          return false
+        }
+
+        return true
+      })
+
+      // Sort by last date.
+      chats.sort((a, b) => {
+        if (a.lastdate && b.lastdate) {
+          return dayjs(b.lastdate).diff(dayjs(a.lastdate))
+        } else if (a.lastdate) {
+          return -1
+        } else if (b.lastdate) {
+          return 1
+        } else {
+          return 0
+        }
+      })
+
+      return chats
+    },
   },
 }
 </script>
@@ -793,5 +865,9 @@ img.attachment {
 
 :deep(.messagecard) {
   border-radius: 0px !important;
+}
+
+.repostsmall {
+  font-size: 0.5rem;
 }
 </style>
