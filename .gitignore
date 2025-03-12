@@ -34,3 +34,8 @@ public/js/cookieyes-*
 public/js/cookieyesapp-v*
 public/js/prebid-app-*
 public/js/prebid-base-*
+.vs
+*.sh
+*.txt
+resources
+save
