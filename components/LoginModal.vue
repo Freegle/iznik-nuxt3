@@ -919,6 +919,9 @@ export default {
       console.log('this.isiOS', this.isiOS)
       if( this.isiOS) {
         initGoogleParams.iOSClientId = this.runtimeConfig.public.GOOGLE_IOS_CLIENT_ID // for iOS
+        initGoogleParams.webClientId = this.clientId // Use Web Client ID for all platforms
+        initGoogleParams.iOSServerClientId = this.clientId
+        initGoogleParams.mode = 'offline'
       }
       else {
         initGoogleParams.webClientId = this.clientId // Use Web Client ID for all platforms

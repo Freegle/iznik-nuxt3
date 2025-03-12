@@ -264,6 +264,7 @@ export default defineNuxtConfig({
       GOOGLE_MAPS_KEY: config.GOOGLE_MAPS_KEY,
       GOOGLE_API_KEY: config.GOOGLE_API_KEY,
       GOOGLE_CLIENT_ID: config.GOOGLE_CLIENT_ID,
+      GOOGLE_IOS_CLIENT_ID: config.GOOGLE_IOS_CLIENT_ID,
       USER_SITE: config.USER_SITE,
       USER_DOMAIN: config.USER_DOMAIN,
       IMAGE_SITE: config.IMAGE_SITE,
