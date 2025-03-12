@@ -923,6 +923,7 @@ export default {
       else {
         initGoogleParams.webClientId = this.clientId // Use Web Client ID for all platforms
       }
+      console.log('initGoogleParams',initGoogleParams)
       await SocialLogin.initialize({
         google: initGoogleParams,
         facebook: {
