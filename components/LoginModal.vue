@@ -672,6 +672,7 @@ export default {
       this.$router.push('/forgot')
     },
     installGoogleSDK() {
+      console.log('INSTALL GOOGLE SDK')
       if (
         window &&
         window.google &&
