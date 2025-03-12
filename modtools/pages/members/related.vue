@@ -60,7 +60,6 @@ export default {
     members() {
       if( !this.memberStore) return []
       return this.memberStore.all
-      //return this.$store.getters['members/getAll']
     },
     visibleMembers() {
       const ret = this.members.filter(member => {
