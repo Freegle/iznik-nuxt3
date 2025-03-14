@@ -293,7 +293,7 @@
         <NoticeMessage v-else-if="!editing && !message.lat && !message.lng" variant="danger" class="mb-2">
           This message needs editing so that we know where it is.
         </NoticeMessage>
-        <ModMessageButtons v-if="message.heldby && message.heldby.id === myid && !editing" :message="message" :modconfig="modconfig" :editreview="editreview" :cantpost="membership && membership.ourpostingstatus === 'PROHIBITED'" />
+        <ModMessageButtons v-if="(!message.heldby || message.heldby && message.heldby.id === myid) && !editing" :message="message" :modconfig="modconfig" :editreview="editreview" :cantpost="membership && membership.ourpostingstatus === 'PROHIBITED'" />
         <b-button v-if="editing" variant="secondary" class="mr-auto" @click="photoAdd">
           <v-icon icon="camera" />&nbsp;Add photo
         </b-button>
