@@ -174,8 +174,8 @@ export const useComposeStore = defineStore({
     },
     setPostcode(postcode) {
       // Want to make sure we don't store too much data.
-      console.log('Set postcode', postcode.name)
-      if (postcode && postcode.groupsnear) {
+      console.log('Set postcode', postcode?.name)
+      if (postcode?.groupsnear) {
         const pc = { ...postcode }
 
         pc.groupsnear = []
