@@ -5,7 +5,7 @@
 import { useAuthStore } from '~/stores/auth'
 
 export default defineNuxtRouteMiddleware((to, from) => {
-  console.log('authuser.global.ts',to.path)
+  // console.log('authuser.global.ts',to.path)
   const authStore = useAuthStore()
   if (to.path === '/login' || to.path === '/forgot' || to.path === '/yahoologin/') {
     // Accessing login, forgot and yahoologin pages always OK
@@ -13,7 +13,6 @@ export default defineNuxtRouteMiddleware((to, from) => {
   }
   const me = authStore.user
   if (me === null || !me.id) {
-    console.log('authuser.global.ts PLEASE LOGIN')
     // If me not set yet, then go to login page and bounce back if need be
     return navigateTo('/login?return='+to.path)
   }
