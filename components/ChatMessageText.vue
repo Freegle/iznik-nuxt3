@@ -44,17 +44,21 @@
           />
         </span>
       </div>
-      <l-map
-        v-if="lat || lng"
-        ref="map"
-        :zoom="16"
-        :max-zoom="maxZoom"
-        :center="[lat, lng]"
-        :style="'width: 100%; height: 200px'"
-      >
-        <l-tile-layer :url="osmtile" :attribution="attribution" />
-        <l-marker :lat-lng="[lat, lng]" :interactive="false" />
-      </l-map>
+      <div v-if="lat || lng">
+        <l-map
+          ref="map"
+          :zoom="16"
+          :max-zoom="maxZoom"
+          :center="[lat, lng]"
+          :style="'width: 100%; height: 200px'"
+        >
+          <l-tile-layer :url="osmtile" :attribution="attribution" />
+          <l-marker :lat-lng="[lat, lng]" :interactive="false" />
+        </l-map>
+        <div class="small text-muted">
+          (Map shows approximate location of {{ postcode }})
+        </div>
+      </div>
     </div>
     <div class="chatMessageProfilePic">
       <ProfileImage
