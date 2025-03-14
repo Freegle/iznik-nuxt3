@@ -643,7 +643,7 @@ export default {
             this.$route.fullPath
         ) +
         '&response_type=code&language=en-us&scope=sdpp-w'
-
+      console.log('loginYahoo',url)
       window.location = url
     },
     clickShowSignUp(e) {

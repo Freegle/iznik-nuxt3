@@ -17,6 +17,8 @@
 import { useAuthStore } from '~/stores/auth'
 import { useRoute, useRouter } from '#imports'
 
+console.log('yahoologin AAA')
+
 // Use the empty layout, otherwise we load Google sign-in, which might cause this page to re-render and hit
 // Yahoo twice for the same code.
 definePageMeta({
@@ -35,6 +37,7 @@ let code = route.query.code
 const authStore = useAuthStore()
 
 if (authStore.user) {
+  console.log('yahoologin BBB')
   // We are logged in.  Go back to where we want to be.
   if (returnto) {
     // Go where we want to be.  Make sure we remove the code to avoid us trying to log in again.
@@ -43,9 +46,11 @@ if (authStore.user) {
     router.push('/')
   }
 } else if (!code) {
+  console.log('yahoologin CCC')
   // Probably they rejected our authorisation.  Just go back to the same page we were at.
   // window.location = returnto
 } else {
+  console.log('yahoologin DDD')
   // We have a code.  Use it on the server to log in.
   //
   // Sometimes Yahoo returns an array.  Lord knows why.
