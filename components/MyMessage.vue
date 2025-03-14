@@ -751,7 +751,7 @@ export default {
           typeahead: this.message.location.name,
         })
 
-        await this.composeStore.postcode = loc.locations[0]
+        this.composeStore.postcode = loc.locations[0]
       }
 
       await this.composeStore.setAttachmentsForMessage(
