@@ -35,6 +35,7 @@
             :on-select="select"
             :size="10"
             :variant="variant"
+            not-found-message="Not a valid postcode."
             @invalid="invalid"
           />
         </div>
