@@ -747,7 +747,7 @@ export default {
 
       // Set the current location and nearby groups, too, since we're about to use them
       if (this.message.location) {
-        const loc = await this.locationStore.fetch({
+        const loc = await useLocationStore().fetch({
           typeahead: this.message.location.name,
         })
 
