@@ -18,7 +18,6 @@
             :init-value="wip"
             restrict
             :url="source"
-            param="typeahead"
             :custom-params="{ pconly: pconly }"
             anchor="name"
             label=""
@@ -165,7 +164,7 @@ export default {
   computed: {
     source() {
       const runtimeConfig = useRuntimeConfig()
-      return runtimeConfig.public.APIv1 + '/locations'
+      return runtimeConfig.public.APIv2 + '/location/typeahead'
     },
   },
   beforeUnmount() {
@@ -213,9 +212,9 @@ export default {
       const names = []
       const ret = []
 
-      if (results && results.locations) {
-        for (let i = 0; i < results.locations.length && names.length < 5; i++) {
-          const loc = results.locations[i]
+      if (results) {
+        for (let i = 0; i < results.length && names.length < 5; i++) {
+          const loc = results[i]
 
           if (!names.includes(loc.name)) {
             names.push(loc.name)
@@ -228,18 +227,21 @@ export default {
       return ret
     },
     async select(pc) {
+      console.log('Select', pc)
       if (pc) {
-        // We have the name.  We need the full postcode.
-        const loc = await this.locationStore.fetch({
-          typeahead: pc.name,
-        })
+        if (pc.name && !pc.id) {
+          // Find the location this corresponds to.
+          const locs = await this.locationStore.typeahead(pc.name)
 
-        if (loc?.locations?.length === 1) {
-          this.$emit('selected', loc.locations[0])
+          if (locs?.length) {
+            pc = locs[0]
+          }
         }
+        this.$emit('selected', pc)
       } else {
         this.$emit('cleared')
       }
+
       this.locationFailed = false
     },
     findLoc(callback) {
@@ -253,22 +255,15 @@ export default {
         ) {
           navigator.geolocation.getCurrentPosition(
             async (position) => {
-              const res = await this.locationStore.fetch({
-                lat: position.coords.latitude,
-                lng: position.coords.longitude,
-              })
+              const res = await this.locationStore.fetchByLatLng(
+                position.coords.latitude,
+                position.coords.longitude
+              )
 
-              if (
-                res.ret === 0 &&
-                res.location &&
-                res.location.name &&
-                this.$refs.autocomplete
-              ) {
+              if ((res.lat || res.lng) && this.$refs.autocomplete) {
                 // Got it - put it in the autocomplete input, and indicate that we've selected it.
-                this.$refs.autocomplete.setValue(res.location.name)
-                await this.select({
-                  name: res.location.name,
-                })
+                this.$refs.autocomplete.setValue(res.name)
+                await this.select(res)
 
                 // Show the user we've done this, and make them think.
                 this.showLocated = true
