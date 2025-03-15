@@ -23,10 +23,11 @@ export default defineNuxtPlugin({
         // Flag as reloading to suppress errors.
         useMiscStore().unloading = true
 
-        reloadNuxtApp({
-          path: window?.location?.pathname ? window.location.pathname : '/',
-          persistState: true,
-        })
+        // reloadNuxtApp({
+        //   path: window?.location?.pathname ? window.location.pathname : '/',
+        //   persistState: true,
+        // })
+        // TODO Problems with reloadNuxtApp?
       } else {
         console.log('Ignore chunk error during reload')
       }
