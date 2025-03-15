@@ -747,9 +747,9 @@ export default {
 
       // Set the current location and nearby groups, too, since we're about to use them
       if (this.message.location) {
-        const loc = await useLocationStore().fetch({
-          typeahead: this.message.location.name,
-        })
+        const loc = await useLocationStore().typeahead(
+          this.message.location.name
+        )
 
         this.composeStore.postcode = loc.locations[0]
       }
