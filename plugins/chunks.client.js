@@ -1,5 +1,4 @@
 import { defineNuxtPlugin } from '#app/nuxt'
-import { reloadNuxtApp } from '#app/composables/chunk'
 import { useMiscStore } from '~/stores/misc'
 
 // On Netlify, we link to the permanently available version of the site, and so we shouldn't have issues with
