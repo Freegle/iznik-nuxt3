@@ -30,7 +30,7 @@
               'text-center': maxWidth === '100vw',
             }"
             @rendered="rippleRendered"
-            @borednow="boredWithJobs = true"
+            @borednow="setBored"
           />
           <OurGoogleDa
             v-else-if="adSense"
@@ -66,6 +66,8 @@ import { ref, computed, onBeforeUnmount } from '#imports'
 import { useConfigStore } from '~/stores/config'
 import { useMiscStore } from '~/stores/misc'
 import { useAuthStore } from '~/stores/auth'
+
+const miscStore = useMiscStore()
 
 const props = defineProps({
   adUnitPath: {
@@ -116,7 +118,15 @@ const emit = defineEmits(['rendered', 'disabled'])
 const adSense = ref(true)
 const renderAd = ref(false)
 const adShown = ref(true)
-const boredWithJobs = ref(!props.jobs)
+const boredWithJobs = computed(() => miscStore.boredWithJobs)
+
+function setBored() {
+  // Using the store, but non-persisted, means that we'll show job ads on initial page load, but then other ads
+  // thereafter, including after page transition.
+  //
+  // This means that if they're not interested in job ads we'll get more ad views.
+  miscStore.boredWithJobs = true
+}
 
 let prebidRetry = 0
 let tcDataRetry = 0

@@ -177,18 +177,23 @@ export function postcodeSelect(pc) {
 
   const currentpc = composeStore.postcode
 
-  if (!currentpc || currentpc.id !== pc.id) {
-    // The postcode has genuinely changed or been set for the first time.  We don't want to go through this code
-    // if the postcode is the same, otherwise we'll reset the group (which might have been changed from the first,
-    // for example in the give flow if you choose a different group.
-    console.log('Set it')
+  if (
+    !currentpc ||
+    currentpc.id !== pc.id ||
+    (!currentpc.groupsnear && pc.groupsnear)
+  ) {
+    // The postcode has genuinely changed, or been set for the first time, or had new group info
+    // added.
+    //
+    // We don't want to go through this code if the postcode is the same, otherwise we'll reset
+    // the group (which might have been changed from the first, for example in the give flow
+    // if you choose a different group.
+    console.log('Set compose postcode', pc)
     composeStore.setPostcode(pc)
 
     // If we don't have a group currently which is in the list near this postcode, choose the closest.  That
     // allows people to select further away groups if they wish.
     const groupid = composeStore.group
-
-    console.log('Conside pc', pc)
 
     if (pc && pc.groupsnear) {
       let found = false
@@ -199,9 +204,9 @@ export function postcodeSelect(pc) {
       }
 
       if (!found) {
-        console.log('not found')
+        console.log('Current group not found in list')
         if (pc.groupsnear.length) {
-          console.log('set', pc.groupsnear[0].id)
+          console.log('Use new nearby group', pc.groupsnear[0].id)
           composeStore.group = pc.groupsnear[0].id
         }
       } else {

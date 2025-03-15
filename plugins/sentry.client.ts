@@ -41,6 +41,7 @@ export default defineNuxtPlugin((nuxtApp) => {
           'TypeError: Failed to fetch',
           'TypeError: NetworkError when attempting to fetch resource.',
           'TypeError: Unable to preload',
+          'Window closed',
         ],
         integrations: [
           new Integrations.BrowserTracing({

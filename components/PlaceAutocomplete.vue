@@ -94,12 +94,10 @@ export default {
       if (POSTCODE_REGEX.test(val)) {
         // We have a probable postcode.  We can search for it.  This is because our list of postcodes is more
         // reliable than the Photon geocoder handling of postcodes.
-        const loc = await this.locationStore.fetch({
-          typeahead: val,
-        })
+        const loc = await this.locationStore.typeahead(val)
 
-        if (loc?.locations?.length) {
-          loc.locations.forEach((l) => {
+        if (loc?.length) {
+          loc.forEach((l) => {
             const bbox = [
               [l.lat - 0.01, l.lng - 0.01],
               [l.lat + 0.01, l.lng + 0.01],

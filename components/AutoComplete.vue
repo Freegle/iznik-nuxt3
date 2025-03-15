@@ -87,7 +87,7 @@
       </client-only>
     </div>
     <div v-if="invalid" class="text-danger text-center">
-      Sorry, we can't find that.
+      {{ notFoundMessage }}
     </div>
     <div
       v-show="showList && json.length"
@@ -280,6 +280,12 @@ export default {
       type: String,
       required: false,
       default: null
+    },
+
+    notFoundMessage: {
+      type: String,
+      required: false,
+      default: 'Sorry, we can\'t find that.'
     }
   },
 
