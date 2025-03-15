@@ -1,4 +1,5 @@
 import { defineNuxtPlugin } from '#app/nuxt'
+import { reloadNuxtApp } from '#app/composables/chunk'
 import { useMiscStore } from '~/stores/misc'
 
 // On Netlify, we link to the permanently available version of the site, and so we shouldn't have issues with
@@ -22,11 +23,10 @@ export default defineNuxtPlugin({
         // Flag as reloading to suppress errors.
         useMiscStore().unloading = true
 
-        // reloadNuxtApp({
-        //   path: window?.location?.pathname ? window.location.pathname : '/',
-        //   persistState: true,
-        // })
-        // TODO Problems with reloadNuxtApp?
+        reloadNuxtApp({
+          path: window?.location?.pathname ? window.location.pathname : '/',
+          persistState: true,
+        })
       } else {
         console.log('Ignore chunk error during reload')
       }
