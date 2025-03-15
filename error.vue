@@ -41,8 +41,7 @@
             </p>
           </div>
           <p>
-            <nuxt-link no-prefetch to="/">Click here</nuxt-link> to go back to
-            the home page
+            <a href="/" no-prefetch>Click here</a> to go back to the home page
           </p>
           <p>
             <!-- eslint-disable-next-line -->
