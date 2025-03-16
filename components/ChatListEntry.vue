@@ -19,7 +19,7 @@
         </div>
         <div class="small text-muted" :title="dateFormatted">
           <span v-if="chat.lastdate">
-            {{ timeago(chat.lastdate) }}
+            {{ lastdateago }}
           </span>
           <span v-else> &nbsp; </span>
         </div>
@@ -40,7 +40,7 @@ import SupporterInfo from '~/components/SupporterInfo'
 import { twem } from '~/composables/useTwem'
 import ProfileImage from '~/components/ProfileImage'
 import { useChatStore } from '~/stores/chat'
-import { datetime } from '~/composables/useTimeFormat'
+import { datetime, timeago } from '~/composables/useTimeFormat'
 
 export default {
   components: {
@@ -90,6 +90,13 @@ export default {
       // The way the snippet is constructed might lead to backslashes if we have an emoji.
       ret = ret.replace(/\\*$/, '') + '...'
       return ret
+    },
+    lastdateago() {
+      if (this.chat.lastdate) {
+        return timeago(this.chat.lastdate)
+      }
+
+      return null
     },
   },
   mounted() {

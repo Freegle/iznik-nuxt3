@@ -16,7 +16,7 @@
         <span v-if="appendBold"> "{{ appendBold }}" </span>
         <br />
         <span class="text-muted small pl-0">
-          {{ timeago(newsfeed?.added) }}
+          {{ addedago }}
         </span>
         <NewsUserInfo :id="newsfeed.id" />
       </div>
