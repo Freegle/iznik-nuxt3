@@ -19,7 +19,7 @@
         </div>
         <div class="small text-muted" :title="dateFormatted">
           <span v-if="chat.lastdate">
-            {{ timeago2(chat.lastdate) }}
+            {{ timeago(chat.lastdate) }}
           </span>
           <span v-else> &nbsp; </span>
         </div>
@@ -40,7 +40,7 @@ import SupporterInfo from '~/components/SupporterInfo'
 import { twem } from '~/composables/useTwem'
 import ProfileImage from '~/components/ProfileImage'
 import { useChatStore } from '~/stores/chat'
-import { datetime, timeago } from '~/composables/useTimeFormat'
+import { datetime } from '~/composables/useTimeFormat'
 
 export default {
   components: {
@@ -80,10 +80,6 @@ export default {
       }
 
       return null
-    },
-    timeago2(dt){
-      console.log('ChatListEntry timeago',dt)
-      return timeago(dt)
     },
     esnippet() {
       if (this.chat.snippet === 'null') {
