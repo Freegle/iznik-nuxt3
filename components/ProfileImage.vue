@@ -34,7 +34,7 @@
     <ProxyImage
       v-else
       :src="validImage"
-      sizes="100px"
+      sizes="100px sm:25px"
       :class-name="className"
       :alt="altText"
       @error="brokenProfileImage"
@@ -137,6 +137,7 @@ export default {
       return ret
     },
     width() {
+      console.log(this.className)
       // Return a resolution high enough for the CSS rules below.
       if (this.className.includes('--sm')) {
         return 25

@@ -22,6 +22,7 @@
                 <v-icon icon="hashtag" scale="0.75" class="text-muted" />{{ user.id }}
               </b-col>
               <b-col cols="6" class="text-success font-weight-bold">
+                XXX
                 <ProfileImage :image="user.profile.turl" is-thumbnail size="sm"
                   :is-moderator="user.systemrole === 'Moderator' || user.systemrole === 'Support' || user.systemrole === 'Admin'" />
                 {{ user.displayname }}
