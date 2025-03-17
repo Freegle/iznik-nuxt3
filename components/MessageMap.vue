@@ -21,6 +21,7 @@
   </l-map>
 </template>
 <script>
+import { useMiscStore } from '~/stores/misc'
 import HomeIcon from './HomeIcon'
 import { MAX_MAP_ZOOM } from '~/constants'
 import { attribution, osmtile } from '~/composables/useMap'
@@ -64,8 +65,9 @@ export default {
     if (process.client) {
       L = await import('leaflet/dist/leaflet-src.esm')
     }
+    const miscStore = useMiscStore()
 
-    return { L, osmtile: osmtile(), attribution: attribution() }
+    return { L, miscStore, osmtile: osmtile(), attribution: attribution() }
   },
   computed: {
     mapOptions() {
@@ -78,9 +80,10 @@ export default {
       }
     },
     blurmarker() {
+      const modtools = this.miscStore.modtools
       return this.L
         ? new this.L.Icon({
-            iconUrl: '/blurmarker.png',
+            iconUrl: modtools ? '/bluering.png' : '/blurmarker.png',
             iconSize: [100, 100],
           })
         : null

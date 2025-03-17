@@ -13,7 +13,8 @@
               </b-input-group>
             </NoticeMessage>
             <div v-if="editing" class="d-flex flex-wrap">
-              <GroupSelect v-model="editgroup" modonly class="mr-1" size="lg" :disabled-except-for="memberGroupIds" />
+              <GroupSelect v-model="editgroup" modonly class="mr-1" size="lg" :disabled-except-for="memberGroupIds"
+                :disabled="message.fromuser.tnuserid" />
               <div v-if="message.item && message.location" class="d-flex justify-content-start">
                 <b-form-select v-model="message.type" :options="typeOptions" class="type mr-1" size="lg" />
                 <b-form-input v-model="message.item.name" size="lg" class="mr-1" />
@@ -292,8 +293,7 @@
         <NoticeMessage v-else-if="!editing && !message.lat && !message.lng" variant="danger" class="mb-2">
           This message needs editing so that we know where it is.
         </NoticeMessage>
-        <ModMessageButtons v-if="!editing" :message="message" :modconfig="modconfig" :editreview="editreview"
-          :cantpost="membership && membership.ourpostingstatus === 'PROHIBITED'" />
+        <ModMessageButtons v-if="(!message.heldby || message.heldby && message.heldby.id === myid) && !editing" :message="message" :modconfig="modconfig" :editreview="editreview" :cantpost="membership && membership.ourpostingstatus === 'PROHIBITED'" />
         <b-button v-if="editing" variant="secondary" class="mr-auto" @click="photoAdd">
           <v-icon icon="camera" />&nbsp;Add photo
         </b-button>
@@ -318,6 +318,7 @@
 import Highlighter from 'vue-highlight-words'
 
 import { pluralise } from '../composables/usePluralise'
+import { useGroupStore } from '../stores/group'
 import { useLocationStore } from '../../stores/location'
 import { useModConfigStore } from '../stores/modconfig'
 import { useMemberStore } from '../stores/member'
@@ -377,6 +378,7 @@ export default {
     }
   },
   setup() {
+    const groupStore = useGroupStore()
     const locationStore = useLocationStore()
     const modconfigStore = useModConfigStore()
     const memberStore = useMemberStore()
@@ -386,7 +388,7 @@ export default {
       typeOptions
     } = setupKeywords()
 
-    return { locationStore, memberStore, messageStore, modconfigStore, userStore, typeOptions }
+    return { groupStore, locationStore, memberStore, messageStore, modconfigStore, userStore, typeOptions }
   },
   data: function () {
     return {
@@ -403,6 +405,7 @@ export default {
       attachments: [],
       homegroup: null,
       homegroupontn: false,
+      historyGroups: {}
     }
   },
   computed: {
@@ -418,12 +421,27 @@ export default {
       }
       return ret
     },
-    group() {
+    messageGroup() {
       let ret = null
 
       if (this.message && this.message.groups && this.message.groups.length) {
-        const groupid = this.message.groups[0].groupid
-        ret = this.myGroups.find(g => parseInt(g.id) === groupid)
+        ret = this.message.groups[0].groupid
+      }
+
+      return ret
+    },
+    messageHistory() {
+      return this.message &&
+        this.message.fromuser &&
+        this.message.fromuser.messagehistory
+        ? this.message.fromuser.messagehistory
+        : []
+    },
+    group() {
+      let ret = null
+
+      if (this.messageGroup) {
+        ret = this.myGroups.find(g => parseInt(g.id) === this.messageGroup)
       }
 
       return ret
@@ -625,6 +643,19 @@ export default {
         this.$refs.bottom.scrollIntoView()
         this.$refs.top.scrollIntoView(true)
       }
+    },
+    messageHistory: {
+      immediate: true,
+      handler: async function (newVal) {
+        // We want to ensure that we have the groups for any message history, so that we can use them in canonSubj.
+        // console.log('ModMessage: watch messageHistory',newVal)
+        const self = this
+        await newVal.forEach(async function (message) {
+          if (!self.historyGroups[message.groupid]) {
+            self.historyGroups[message.groupid] = await self.groupStore.fetchMT({ id: message.groupid })
+          }
+        })
+      }
     }
   },
   mounted() {
@@ -730,7 +761,6 @@ export default {
       })
 
       if (!alreadyon) {
-        console.log('Need to move to group', this.editgroup)
         await this.messageStore.move({
           id: this.message.id,
           groupid: this.editgroup
@@ -764,7 +794,19 @@ export default {
       await nextTick()
       this.$refs.original.show()
     },
-    canonSubj(subj) {
+    canonSubj(message) {
+      let subj = message.subject
+      const group = this.historyGroups[message.groupid]
+
+      if (group && group.settings && group.settings.keywords) {
+        const keyword =
+          message.type === 'Offer'
+            ? group.settings.keywords.offer
+            : group.settings.keywords.wanted
+        if (keyword) {
+          subj = subj.replace(keyword, message.type.toUpperCase())
+        }
+      }
       subj = subj.toLocaleLowerCase()
 
       // Remove any group tag
@@ -785,7 +827,7 @@ export default {
     },
     checkHistory(duplicateCheck) {
       const ret = []
-      const subj = this.canonSubj(this.message.subject)
+      const subj = this.canonSubj(this.message)
       const dupids = []
       const crossids = []
 
@@ -800,7 +842,7 @@ export default {
             this.duplicateAge &&
             message.daysago <= this.duplicateAge
           ) {
-            if (this.canonSubj(message.subject) === subj) {
+            if (this.canonSubj(message) === subj) {
               // No point displaying any group tag in the duplicate.
               message.subject = message.subject.replace(/\[.*\](.*)/, '$1')
 

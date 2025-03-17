@@ -90,6 +90,7 @@
       </div>
     </div>
     <!--ChatPopups v-if="loggedIn" class="d-none d-sm-block" /-->
+    <GoogleOneTap v-if="oneTap" @loggedin="googleLoggedIn" />
     <LoginModal v-if="!loggedIn" ref="loginModal" :key="'login-' + bumpLogin" />
     <div id="sizer" ref="sizer" class="d-none d-lg-block" />
     <SomethingWentWrong />
@@ -136,6 +137,10 @@ export default {
       if (user) {
         ready = true
       }
+    }
+    if (!ready) {
+      // We don't have a valid JWT.  See if OneTap can sign us in.
+      oneTap.value = true
     }
     const runtimeConfig = useRuntimeConfig()
     const route = useRoute()

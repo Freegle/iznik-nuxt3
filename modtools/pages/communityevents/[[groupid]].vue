@@ -45,9 +45,6 @@ export default {
       console.log('TODO communityevents work', work.pendingevents)
       return work.pendingevents
     },
-    //context() {
-    //  return this.$store.getters['communityevents/getContext']
-    //}
   },
   watch: {
     work(newVal, oldVal) {

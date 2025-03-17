@@ -108,11 +108,9 @@ export default {
     },
     group() {
       return this.groupStore.get(this.groupid)
-      //return this.$store.getters['group/get'](this.groupid)
     },
     haveValue() {
       let rules = this.groupStore.get(this.groupid).rules || {}
-      //let rules = this.$store.getters['group/get'](this.groupid).rules || {}
       rules = typeof rules === 'string' ? JSON.parse(rules) : rules
       return this.name in rules
     }

@@ -62,6 +62,38 @@ const config = defineNuxtConfig({
   app: {
     head: { // Overrides and inherits ones not set here
       title: "ModTools",
+      script: [
+        {
+          type: 'text/javascript',
+          body: true,
+          async: true,
+          innerHTML:
+            `try {
+            function loadScript(url, block) {
+              if (url && url.length) {
+                console.log('Load script:', url);
+                var script = document.createElement('script');
+                script.defer = true;
+                script.type = 'text/javascript';
+                script.src = url;
+                
+                if (block) {
+                  // Block loading of this script until CookieYes has been authorised.
+                  // It's not clear that this blocking works, but it does no harm to 
+                  // ask for it.
+                  console.log('Set CookieYes script block', url);
+                  script.setAttribute('data-cookieyes', 'cookieyes-advertisement')
+                }
+                
+                document.head.appendChild(script);
+              }
+            }
+            loadScript('https://accounts.google.com/gsi/client')
+          } catch (e) {
+            console.error('Error initialising google:', e.message);
+          }`
+        }
+      ],
       meta: [
         { name: 'robots', content: 'noindex' },
         { charset: 'utf-8' },

@@ -49,10 +49,6 @@ export default {
       console.log('TODO volunteering volwork', this.authStore.work?.pendingvolunteering)
       return this.authStore.work ? this.authStore.work.pendingvolunteering : 0
     },
-    /* MT3 removed context() {
-      return null
-      // return this.$store.getters['volunteerops/getContext']
-    }*/
   },
   watch: {
     volwork(newVal, oldVal) {
