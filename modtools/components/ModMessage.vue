@@ -293,7 +293,8 @@
         <NoticeMessage v-else-if="!editing && !message.lat && !message.lng" variant="danger" class="mb-2">
           This message needs editing so that we know where it is.
         </NoticeMessage>
-        <ModMessageButtons v-if="(!message.heldby || message.heldby && message.heldby.id === myid) && !editing" :message="message" :modconfig="modconfig" :editreview="editreview" :cantpost="membership && membership.ourpostingstatus === 'PROHIBITED'" />
+        <ModMessageButtons v-if="(!message.heldby || message.heldby && message.heldby.id === myid) && !editing" :message="message"
+          :modconfig="modconfig" :editreview="editreview" :cantpost="membership && membership.ourpostingstatus === 'PROHIBITED'" />
         <b-button v-if="editing" variant="secondary" class="mr-auto" @click="photoAdd">
           <v-icon icon="camera" />&nbsp;Add photo
         </b-button>
@@ -392,6 +393,7 @@ export default {
   },
   data: function () {
     return {
+      group: null,
       saving: false,
       saved: false,
       showEmailSourceModal: false,
@@ -437,15 +439,16 @@ export default {
         ? this.message.fromuser.messagehistory
         : []
     },
-    group() {
+    /*group() {
       let ret = null
 
       if (this.messageGroup) {
         ret = this.myGroups.find(g => parseInt(g.id) === this.messageGroup)
+        console.log('MM group polygon', ret.polygon!=null)
       }
 
       return ret
-    },
+    },*/
     position() {
       let ret = null
 
@@ -658,10 +661,18 @@ export default {
       }
     }
   },
-  mounted() {
+  async mounted() {
     this.expanded = !this.summary
     this.attachments = this.message.attachments
     this.findHomeGroup()
+    if (this.messageGroup) {
+      const g = this.myGroups.find(g => parseInt(g.id) === this.messageGroup)
+      if (g) {
+        await this.groupStore.fetchMT({ id: g.id, polygon: true })
+        this.group = this.groupStore.get(g.id)
+      }
+    }
+
   },
   beforeDestroy() {
     this.$emit('destroy', this.message.id, this.next)
