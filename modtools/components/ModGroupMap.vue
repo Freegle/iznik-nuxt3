@@ -79,14 +79,13 @@
     </b-modal>
     <b-row class="m-0">
       <b-col ref="mapcont" cols="12" md="9" class="p-0">
-        <div>
+        <div :style="'width: 100%; height: ' + mapHeight + 'px'">
           <l-map
             ref="mapObject"
             :zoom="zoom"
             :min-zoom="5"
             :max-zoom="17"
             :options="{ dragging: dragging, touchZoom: true }"
-            :style="'width: 100%; height: ' + mapHeight + 'px'"
             :use-global-leaflet="true"
             @update:bounds="boundsChanged"
             @update:zoom="boundsChanged"
@@ -689,11 +688,12 @@ function ready() {
   } else {
     zoom.value = 13
   }
+
+  idle()
 }
 
 async function idle() {
-  boundsChanged()
-
+  console.log('Map idle', zoom.value)
   if (props.groupid) {
     const group = groupStore.get(props.groupid)
 
@@ -705,6 +705,7 @@ async function idle() {
         // we don't fetch them for the whole country.
         initialGroupZoomed.value = true
         const area = group.poly || group.polyofficial
+        console.log('Zoom to area', area)
         if (area) {
           const wkt = new Wkt.Wkt()
           wkt.read(area)
@@ -722,20 +723,7 @@ async function idle() {
       }
 
       if (bounds) {
-        busy.value = true
-
-        const data = {
-          swlat: bounds.getSouthWest().lat,
-          swlng: bounds.getSouthWest().lng,
-          nelat: bounds.getNorthEast().lat,
-          nelng: bounds.getNorthEast().lng,
-          dodgy: showDodgy.value,
-          areas: zoom.value >= 12,
-        }
-
-        await fetchLocations(data)
-
-        busy.value = false
+        boundsChanged()
       }
     }
   } else if (!initialGroupZoomed.value) {
@@ -826,8 +814,12 @@ async function fetchLocations(data) {
 
     if (zoom.value >= 12) {
       const ret = await locationStore.fetch(data)
-      locations.value = ret.locations
-      dodgy.value = ret.dodgy
+      console.log('Fetch returned', ret)
+
+      if (ret?.locations) {
+        locations.value = ret.locations
+        dodgy.value = ret.dodgy
+      }
     }
   }
 }

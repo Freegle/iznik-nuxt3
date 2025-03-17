@@ -12,7 +12,12 @@ export const useLocationStore = defineStore({
     },
     async fetch(params) {
       const response = await api(this.config).location.fetch(params)
-      return response ? response.location : null
+
+      if (response?.locations) {
+        return response
+      } else {
+        return response?.location ? response.location : response?.locations
+      }
     },
     async fetchv2(id) {
       const loc = await api(this.config).location.fetchv2(id)
@@ -28,19 +33,18 @@ export const useLocationStore = defineStore({
       // Server doesn't support fetching of an individual location so we don't fetch.
       delete this.list[loc.id]
     },
-    async add(params){
+    async add(params) {
       const { id } = await api(this.config).location.add(params)
       // Server doesn't support fetching of an individual location so we don't fetch.
       return id
-  
     },
-    async update(params){
+    async update(params) {
       await api(this.config).location.update(params)
     },
     async convertKML(kml) {
       const { wkt } = await api(this.config).location.convertKML(kml)
       return wkt
-    }
+    },
   },
   getters: {
     byId: (state) => (id) => {
