@@ -692,7 +692,7 @@ function ready() {
   idle()
 }
 
-async function idle() {
+function idle() {
   console.log('Map idle', zoom.value)
   if (props.groupid) {
     const group = groupStore.get(props.groupid)
