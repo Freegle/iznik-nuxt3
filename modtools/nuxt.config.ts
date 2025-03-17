@@ -70,7 +70,7 @@ const config = defineNuxtConfig({
         { name: 'supported-color-schemes', content: 'light' },
         { name: 'color-scheme', content: 'light' },
         { name: 'facebook-domain-verification', content: '', },
-      ]
+      ],
     }
   }
 })
