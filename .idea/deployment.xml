@@ -114,6 +114,13 @@
           </mappings>
         </serverdata>
       </paths>
+      <paths name="oxfordhigh">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="restarters.net">
         <serverdata>
           <mappings>

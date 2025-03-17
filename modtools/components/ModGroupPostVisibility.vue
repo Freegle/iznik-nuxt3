@@ -41,8 +41,8 @@
       </div>
       <l-map ref="map" :zoom="7" :max-zoom="17" :center="[group.lat, group.lng]" :style="'width: 100%; height: 600px'" @ready="ready">
         <l-tile-layer :url="osmtile" :attribution="attribution" />
-        <l-geojson v-if="CGA" :geojson="CGA" :options="cgaOptions" />
-        <l-geojson v-if="visibility" :geojson="visibility" :options="visibilityOptions" />
+        <l-geo-json v-if="CGA" :geojson="CGA" :options="cgaOptions" />
+        <l-geo-json v-if="visibility" :geojson="visibility" :options="visibilityOptions" />
       </l-map>
     </div>
   </div>
