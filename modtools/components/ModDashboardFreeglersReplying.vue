@@ -21,7 +21,7 @@
               <v-icon icon="hashtag" scale="0.75" class="text-muted" />{{ user.id }}
             </b-col>
             <b-col cols="8" md="6" class="text-success font-weight-bold">
-              <ProfileImage :image="user.profile.turl" is-thumbnail size="sm"
+              <ProfileImage :image="user.profile.turl" is-thumbnail size="sm" class="breakgrid"
                 :is-moderator="user.systemrole === 'Moderator' || user.systemrole === 'Support' || user.systemrole === 'Admin'" />
               {{ user.displayname }}
             </b-col>

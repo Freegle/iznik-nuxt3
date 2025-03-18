@@ -162,6 +162,11 @@ export default {
 @import 'bootstrap/scss/_variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
 
+.breakgrid,
+.breakgrid .ProfileImage__moderator{
+  display: inline !important;
+}
+
 .ProfileImage__container {
   display: grid;
   grid-template-columns: 1fr;

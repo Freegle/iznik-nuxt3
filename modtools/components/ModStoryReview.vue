@@ -4,7 +4,7 @@
       <b-card-header>
         <div class="d-flex justify-content-between flex-wrap w-100">
           <span v-if="story.user">
-            <ProfileImage :image="story.user.profile.turl" class="mr-1 ml-1 mb-1 mt-1 inline" is-thumbnail size="sm" />
+            <ProfileImage :image="story.user.profile.turl" class="mr-1 ml-1 mb-1 mt-1 inline breakgrid" is-thumbnail size="sm" />
             <strong>{{ story.user.email }}</strong>
             <span class="small">
               <v-icon icon="hashtag" scale="0.75" class="text-muted" />{{ story.user.id }}
