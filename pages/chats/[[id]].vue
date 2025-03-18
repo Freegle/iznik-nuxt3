@@ -69,7 +69,7 @@
                     <b-button
                       variant="link"
                       size="sm"
-                      @click="showClosed = !showClosed"
+                      @click="toggleShowClosed"
                     >
                       <b-badge
                         v-if="closedCount"
@@ -311,7 +311,13 @@ const complete = ref(false)
 const bump = ref(1)
 const distance = ref(1000)
 const selectedChatId = ref(null)
-const showClosed = ref(false)
+const showClosed = computed(() => chatStore.showClosed)
+
+function toggleShowClosed() {
+  chatStore.showClosed = !chatStore.showClosed
+  showChats.value = 20
+  bump.value++
+}
 
 const chats = computed(() => {
   return chatStore?.list ? chatStore.list : []
@@ -337,6 +343,7 @@ const closedCount = computed(() => {
 const filteredChats = computed(() => {
   return scanChats(showClosed.value, chats.value)
 })
+
 const visibleChats = computed(() => {
   const chats =
     bump.value && filteredChats.value
@@ -345,6 +352,7 @@ const visibleChats = computed(() => {
 
   return chats
 })
+
 const mightBeOldChats = computed(() => {
   const now = dayjs()
 

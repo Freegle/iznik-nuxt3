@@ -14,6 +14,7 @@ export const useChatStore = defineStore({
     messages: {},
     searchSince: null,
     showContactDetailsAskModal: false,
+    showClosed: false,
   }),
   actions: {
     init(config) {
