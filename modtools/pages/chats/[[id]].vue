@@ -178,7 +178,7 @@ export default {
       this.bump++
     },
     scanChats(closed, chats) {
-      //console.log('scanChats', closed, chats.length)
+      //console.log('scanChats', closed, chats.length,this.id)
       if (chats && this.search) {
         const l = this.search.toLowerCase()
         chats = chats.filter((chat) => {
@@ -208,8 +208,13 @@ export default {
         })
       }
 
-      // Sort by last date.
+      // Sort to show unseen first then more recent first
       chats.sort((a, b) => {
+        if (a.unseen === 0 && b.unseen > 0) {
+          return 1
+        } else if (a.unseen > 0 && b.unseen === 0) {
+          return -1
+        }
         if (a.lastdate && b.lastdate) {
           return dayjs(b.lastdate).diff(dayjs(a.lastdate))
         } else if (a.lastdate) {
@@ -242,11 +247,12 @@ export default {
     async markAllRead() {
       for (const chat of this.filteredChats) {
         if (chat.unseen) {
-          await this.modChatsStore.markRead(chat.id)
+          await this.chatStore.markRead(chat.id)
         }
       }
 
-      this.modChatsStore.fetchChats()
+      this.chatStore.clear()
+      await this.listChats()
     },
     gotoChat(id) {
       console.log('gotoChat', id)

@@ -56,7 +56,7 @@ export const useChatStore = defineStore({
         //console.log('uCS listChatsMT',chatrooms)
         this.list = chatrooms
         chatrooms.forEach((c) => {
-          //console.log('uCS listChatsMT',c.id)
+          //console.log('uCS listChatsMT',c.unseen)
           // If we already have the chat with this date then don't set it - this avoids reactivity causing a slew of
           // component updates for no good reason.
           if (
