@@ -43,7 +43,7 @@ const members = computed(() => {
         new Date(a.groups[0].arrival).getTime()
       )
     } else {
-      return new Date(b.arrival).getTime() - new Date(a.arrival).getTime()
+      return new Date(b.joined).getTime() - new Date(a.joined).getTime()
     }
   })
 
@@ -88,6 +88,7 @@ const loadMore = async function ($state) {
     const received = await memberStore.fetchMembers(params)
     //console.log('UMM received', received)
     //console.log('UMM got', members.value.length)
+    context.value = memberStore.context
 
     if (show.value < members.value.length) { // Just inc by one rather than set to members.value.length
       show.value++
