@@ -62,7 +62,7 @@ export default {
   mounted() {
     if (this.member.id) {
       this.userStore.fetchMT({
-        id: this.member.id,
+        id: this.member.userid,
         info: true
       })
 
@@ -76,7 +76,7 @@ export default {
       return this.countType('Wanted')
     },
     userinfo() {
-      const user = this.userStore.byId(this.member.id)
+      const user = this.userStore.byId(this.member.userid)
 
       if (user && user.info) {
         return user.info
