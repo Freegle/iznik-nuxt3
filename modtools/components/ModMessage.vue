@@ -656,7 +656,7 @@ export default {
         const self = this
         await newVal.forEach(async function (message) {
           if (!self.historyGroups[message.groupid]) {
-            self.historyGroups[message.groupid] = await self.modGroupStore.fetchMT({ id: message.groupid })
+            self.historyGroups[message.groupid] = await self.modGroupStore.fetchIfNeedBeMT(message.groupid)
           }
         })
       }
@@ -669,7 +669,7 @@ export default {
     if (this.messageGroup) {
       const g = this.myGroups.find(g => parseInt(g.id) === this.messageGroup)
       if (g) {
-        await this.modGroupStore.fetchMT({ id: g.id, polygon: true })
+        await this.modGroupStore.fetchIfNeedBeMT(g.id)
         this.group = this.modGroupStore.get(g.id)
         //console.log('MM mounted group',this.group.settings)
       }

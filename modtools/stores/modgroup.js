@@ -1,5 +1,6 @@
 import cloneDeep from 'lodash.clonedeep'
 import { useAuthStore } from '~/stores/auth'
+import { useGroupStore } from '~/stores/group'
 import { defineStore } from 'pinia'
 import api from '~/api'
 
@@ -7,6 +8,7 @@ export const useModGroupStore = defineStore({
   id: 'modgroups',
   state: () => ({
     list: {},
+    getting: [],
   }),
   actions: {
     init(config) {
@@ -15,8 +17,10 @@ export const useModGroupStore = defineStore({
     },
     clear() {
       this.list = {}
+      this.getting = []
     },
     async getModGroups() {
+      console.log('--- uMGS getModGroups')
       const authStore = useAuthStore()
       const me = authStore.user
       let myGroups = []
@@ -41,10 +45,15 @@ export const useModGroupStore = defineStore({
 
       this.clear()
       for (const g of myGroups) {
+        this.getting.push(g.id)
+      }
+      for (const g of myGroups) {
         await this.fetchGroupMT(g.id)
       }
+      this.getting = []
     },
     async fetchGroupMT(id) {
+      const groupStore = useGroupStore()
       if (typeof id !== 'number') {
         console.error('fetchGroupMT has duff parameters')
         return null
@@ -57,9 +66,21 @@ export const useModGroupStore = defineStore({
 
       const group = await api(this.config).group.fetchMT(id, polygon, showmods, sponsors, tnkey)
       if (group) {
+        const ret = await api(this.config).session.fetch({
+          webversion: this.config.public.BUILD_DATE,
+          components: ['groups'],
+        })
+        if (ret && ret.groups) {
+          const g = ret.groups.find((g) => g.id === group.id)
+          if (g && g.work) {
+            //console.log('useGroupStore g.work',g.work)
+            group.work = g.work
+          }
+        }
         this.list[group.id] = group
+        groupStore.list[group.id] = group // Set in root group store as well
       }
-      //console.log('=== uMGS fetchGroupMT',group!==null)
+      //console.log('=== uMGS fetchGroupMT',id, group!==null)
     },
     async listMT(params) {
       console.error('uMGS listMT not implemented')
@@ -73,7 +94,19 @@ export const useModGroupStore = defineStore({
         })
       }*/
     },
-    async fetchMT({ id, polygon, showmods, sponsors, tnkey }) {
+    async fetchIfNeedBeMT(id) {
+      if( !id) return
+      if( this.list[id]) return
+      if( this.getting.includes(id)){
+        // console.error('uMGS fetchIfNeedBeMT getting',id)
+        return
+      }
+      //console.error('uMGS fetchIfNeedBeMT get',id)
+      this.getting.push(id)
+      await this.fetchGroupMT(id)
+    },
+
+    /*async fetchMT({ id, polygon, showmods, sponsors, tnkey }) {
       console.log('TODO useModGroupStore fetchMT', id)
       if (!id) return null
       polygon = Object.is(polygon, undefined) ? false : polygon
@@ -87,16 +120,6 @@ export const useModGroupStore = defineStore({
         showmods,
         sponsors,
         tnkey
-        /*,
-        function (data) {
-          console.log('fetchMT log',data?.ret)
-          if (data && data.ret === 10) {
-            // Not hosting a group isn't worth logging.
-            return false
-          } else {
-            return true
-          }
-        }*/
       )
       if (group) {
         this.list[group.id] = group
@@ -113,7 +136,7 @@ export const useModGroupStore = defineStore({
           }
         }
       }
-    },
+    },*/
     async updateMT(params) {
       console.log('useModGroupStore updateMT', params)
       await api(this.config).group.patch(params)

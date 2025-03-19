@@ -118,10 +118,8 @@ watch(groupid, async (newVal) => {
 
   const modGroupStore = useModGroupStore()
   if (newVal > 0) {
-    await modGroupStore.fetchMT({
-      id: newVal
-    })
-    group.value = await modGroupStore.fetch(newVal)
+    await modGroupStore.fetchIfNeedBeMT(newVal)
+    group.value = await modGroupStore.get(newVal)
   }
   bump.value++
 })

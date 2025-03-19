@@ -425,8 +425,8 @@ export default {
     },
     async substitutionStrings(text) {
       const self = this
-      await this.modGroupStore.fetchMT({ id: this.groupid })
-      const group = await this.modGroupStore.fetch(this.groupid)
+      await this.modGroupStore.fetchIfNeedBeMT(this.groupid)
+      const group = this.modGroupStore.get(this.groupid)
       if (!group) return text
 
       if (group && text) {

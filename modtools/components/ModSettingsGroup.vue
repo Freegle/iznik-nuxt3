@@ -698,11 +698,7 @@ export default {
       if (!this.groupid) return
       this.editingDescription = false
 
-      await this.modGroupStore.fetchMT({
-        id: this.groupid,
-        polygon: true,
-        tnkey: true
-      })
+      await this.modGroupStore.fetchIfNeedBeMT(this.groupid)
 
       this.shortlinkStore.fetch(0, this.groupid)
     },
@@ -758,7 +754,7 @@ export default {
       callback()
     },
     async copy() {
-      await this.modGroupStore.fetchMT({ id: this.copyfrom })
+      await this.modGroupStore.fetchIfNeedBeMT(this.copyfrom)
 
       const copyfrom = this.modGroupStore.get(this.copyfrom)
 
@@ -771,7 +767,7 @@ export default {
           rules: rules
         })
 
-        await this.modGroupStore.fetchMT({ id: this.groupid })
+        await this.modGroupStore.fetchGroupMT(this.groupid) // Reload group
 
         this.rulesBump++
       }

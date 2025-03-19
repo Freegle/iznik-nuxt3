@@ -231,10 +231,7 @@ export default {
     async groupid(id) {
       if (id) {
         // Get the full group info
-        await this.modGroupStore.fetchMT({
-          id: id,
-          polygon: true
-        })
+        await this.modGroupStore.fetchIfNeedBeMT(id)
 
         // And the list of volunteers
         this.fetchingVolunteers = true

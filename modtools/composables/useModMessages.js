@@ -73,8 +73,8 @@ export function setupModMessages() {
     context.value = null
 
     const modGroupStore = useModGroupStore()
-    await modGroupStore.fetchMT({ id: newVal })
-    group.value = await modGroupStore.get(newVal)
+    await modGroupStore.fetchIfNeedBeMT(newVal)
+    group.value = modGroupStore.get(newVal)
     await getMessages()
 
     show.value = messages.value.length
@@ -86,7 +86,7 @@ export function setupModMessages() {
     // call may happen before we have restored the persisted state, so we can't initiate the fetch there.
     if (!oldValue || oldValue.id !== groupid.value) {
       const modGroupStore = useModGroupStore()
-      await modGroupStore.fetch(groupid.value)
+      await modGroupStore.get(groupid.value)
     }
   })*/
 

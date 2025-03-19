@@ -65,7 +65,7 @@ export default {
   },
   async mounted() {
     for (const g of this.myGroups) {
-      await this.modGroupStore.fetchMT({ id: g.id })
+      await this.modGroupStore.fetchIfNeedBeMT(g.id)
     }
 
     if (this.expanded) {
