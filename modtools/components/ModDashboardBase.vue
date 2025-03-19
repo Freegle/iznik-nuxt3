@@ -69,8 +69,8 @@ export default {
           this[comp] = res[comp]
         })
 
-        this.loading = false
       }
+      this.loading = false
     },
     maybeFetch() {
       if (!this.loading) {
