@@ -27,6 +27,7 @@
 <script>
 import { useAuthStore } from '@/stores/auth'
 import { useChatStore } from '~/stores/chat'
+import { useModGroupStore } from '@/stores/modgroup'
 
 // We need an id for the store.  The null value is a special case used just for retrieving chat review messages.
 const REVIEWCHAT = null
@@ -92,6 +93,8 @@ export default {
     }
   },
   async mounted() {
+    const modGroupStore = useModGroupStore()
+    await modGroupStore.getModGroups()
     await this.clearAndLoad()
   },
   methods: {

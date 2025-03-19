@@ -1,6 +1,6 @@
 // Simplified from MT2 mixin/modMembersPage
 
-import { useGroupStore } from '@/stores/group'
+import { useModGroupStore } from '@/stores/modgroup'
 import { useMemberStore } from '../stores/member'
 
 const bump = ref(0)
@@ -116,12 +116,12 @@ watch(groupid, async (newVal) => {
   const memberStore = useMemberStore()
   memberStore.clear()
 
-  const groupStore = useGroupStore()
+  const modGroupStore = useModGroupStore()
   if (newVal > 0) {
-    await groupStore.fetchMT({
+    await modGroupStore.fetchMT({
       id: newVal
     })
-    group.value = await groupStore.fetch(newVal)
+    group.value = await modGroupStore.fetch(newVal)
   }
   bump.value++
 })

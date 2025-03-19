@@ -25,13 +25,13 @@
   </div>
 </template>
 <script>
-import { useGroupStore } from '../stores/group'
+import { useModGroupStore } from '@/stores/modgroup'
 
 export default {
   setup() {
-    const groupStore = useGroupStore()
+    const modGroupStore = useModGroupStore()
     return {
-      groupStore,
+      modGroupStore,
     }
   },
   props: {
@@ -49,7 +49,7 @@ export default {
     invalid() {
       const ret = []
 
-      for (const group of Object.values(this.groupStore.list)) {
+      for (const group of Object.values(this.modGroupStore.list)) {
         if (
           group.type === 'Freegle' &&
           group.myrole === 'Owner' &&
@@ -65,7 +65,7 @@ export default {
   },
   async mounted() {
     for (const g of this.myGroups) {
-      await this.groupStore.fetchMT({ id: g.id })
+      await this.modGroupStore.fetchMT({ id: g.id })
     }
 
     if (this.expanded) {

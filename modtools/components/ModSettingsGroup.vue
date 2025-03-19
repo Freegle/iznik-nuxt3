@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="d-flex justify-content-between flex-wrap">
-      <GroupSelect v-model="groupid" modonly />
+      <ModGroupSelect v-model="groupid" modonly />
     </div>
     <div v-if="group && group.mysettings" class="mt-2 scrollinplace">
       <NoticeMessage v-if="group.settings.closed" variant="danger" class="mb-1">
@@ -179,7 +179,7 @@
             </p>
             <div class="d-flex flex-wrap">
               <strong class="mr-1 mt-2">Copy rules from:</strong>
-              <GroupSelect v-model="copyfrom" modonly class="mb-2 mr-2" />
+              <ModGroupSelect v-model="copyfrom" modonly class="mb-2 mr-2" />
               <div>
                 <b-button variant="secondary" :disabled="copyfrom <= 0 || copyfrom === groupid" @click="copy">
                   <v-icon icon="copy" /> Copy to {{ group.nameshort }}
@@ -565,7 +565,7 @@ import '@vueup/vue-quill/dist/vue-quill.snow.css';
 import htmlEditButton from "quill-html-edit-button";
 
 import { useAuthStore } from '../stores/auth'
-import { useGroupStore } from '../../stores/group'
+import { useModGroupStore } from '@/stores/modgroup'
 import { useModConfigStore } from '../stores/modconfig'
 import { useShortlinkStore } from '../../stores/shortlinks'
 import api from '~/api'
@@ -576,7 +576,7 @@ export default {
   },
   setup() {
     const authStore = useAuthStore()
-    const groupStore = useGroupStore()
+    const modGroupStore = useModGroupStore()
     const modConfigStore = useModConfigStore()
     const shortlinkStore = useShortlinkStore()
     const quillModules = {
@@ -584,7 +584,7 @@ export default {
       module: htmlEditButton,
       options: {} // https://github.com/benwinding/quill-html-edit-button?tab=readme-ov-file#options
     }
-    return { authStore, groupStore, modConfigStore, shortlinkStore, quillModules }
+    return { authStore, modGroupStore, modConfigStore, shortlinkStore, quillModules }
   },
   props: {
     initialGroup: {
@@ -617,8 +617,8 @@ export default {
       return this.group.myrole !== 'Owner'
     },
     group() {
-      //const g = this.groupStore.get(this.groupid)
-      return this.groupStore.get(this.groupid)
+      //const g = this.modGroupStore.get(this.groupid)
+      return this.modGroupStore.get(this.groupid)
     },
     shortlinks() {
       return this.shortlinkStore.list
@@ -698,7 +698,7 @@ export default {
       if (!this.groupid) return
       this.editingDescription = false
 
-      await this.groupStore.fetchMT({
+      await this.modGroupStore.fetchMT({
         id: this.groupid,
         polygon: true,
         tnkey: true
@@ -732,7 +732,7 @@ export default {
       this.uploadingProfile = false
 
       // Set the image id in the group.
-      this.groupStore.updateMT({
+      this.modGroupStore.updateMT({
         id: this.groupid,
         profile: imageid
       })
@@ -746,10 +746,10 @@ export default {
 
       data[name] = val
 
-      this.groupStore.updateMT(data)
+      this.modGroupStore.updateMT(data)
     },
     async saveDescription(callback) {
-      await this.groupStore.updateMT({
+      await this.modGroupStore.updateMT({
         id: this.groupid,
         description: this.group.description
       })
@@ -758,20 +758,20 @@ export default {
       callback()
     },
     async copy() {
-      await this.groupStore.fetchMT({ id: this.copyfrom })
+      await this.modGroupStore.fetchMT({ id: this.copyfrom })
 
-      const copyfrom = this.groupStore.get(this.copyfrom)
+      const copyfrom = this.modGroupStore.get(this.copyfrom)
 
       if (copyfrom) {
         let rules = copyfrom.rules
         rules = typeof rules === 'string' ? JSON.parse(rules) : rules
 
-        await this.groupStore.updateMT({
+        await this.modGroupStore.updateMT({
           id: this.groupid,
           rules: rules
         })
 
-        await this.groupStore.fetchMT({ id: this.groupid })
+        await this.modGroupStore.fetchMT({ id: this.groupid })
 
         this.rulesBump++
       }

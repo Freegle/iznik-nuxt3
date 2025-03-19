@@ -3,7 +3,7 @@
     <client-only>
       <ScrollToTop :prepend="groupName" />
       <div class="d-flex justify-content-between flex-wrap">
-        <GroupSelect v-model="chosengroupid" modonly remember="membersapproved" />
+        <ModGroupSelect v-model="chosengroupid" modonly remember="membersapproved" />
         <div v-if="groupid" class="d-flex">
           <ModMemberTypeSelect v-model="filter" />
           <b-button v-if="groupid" variant="white" class="ml-2" @click="addMember">
@@ -46,21 +46,19 @@
   </div>
 </template>
 <script>
-import { useGroupStore } from '@/stores/group'
 import { useMiscStore } from '@/stores/misc'
 import { useMemberStore } from '@/stores/member'
+import { useModGroupStore } from '@/stores/modgroup'
 import { setupModMembers } from '@/composables/useModMembers'
 import { pluralise } from '@/composables/usePluralise'
 
 export default {
   async setup() {
-    const groupStore = useGroupStore()
     const memberStore = useMemberStore()
     const miscStore = useMiscStore()
     const modMembers = setupModMembers()
     modMembers.collection.value = 'Approved'
     return {
-      groupStore,
       memberStore,
       miscStore,
       ...modMembers // busy, context, group, groupid, limit, show, collection, messageTerm, memberTerm, distance, summary, members, visibleMembers, loadMore
@@ -104,6 +102,9 @@ export default {
     this.search = null
     if (('term' in route.params) && route.params.term) this.search = route.params.term
     //console.log('mounted', this.groupid, this.search) 
+
+    const modGroupStore = useModGroupStore()
+    await modGroupStore.getModGroups()
 
     // reset infiniteLoading on return to page
     this.memberStore.clear()

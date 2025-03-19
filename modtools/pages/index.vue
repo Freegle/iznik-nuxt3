@@ -17,7 +17,7 @@
     <div class="d-flex mb-2 mt-2 flex-wrap">
       <div class="borderit d-flex flex-column">
         <label for="dashboardgroup">Choose community:</label>
-        <GroupSelect id="dashboardgroup" v-model="groupidi" all modonly :systemwide="admin" active @input="update" />
+        <ModGroupSelect id="dashboardgroup" v-model="groupidi" all modonly :systemwide="admin" active @input="update" />
       </div>
       <div class="borderit d-flex flex-column">
         <label for="showInfo">Show info from:</label>
@@ -78,12 +78,12 @@
 
 <script setup>
 import { useMiscStore } from '@/stores/misc'
-import { useGroupStore } from '@/stores/group'
+import { useModGroupStore } from '@/stores/modgroup'
 import { buildHead } from '~/composables/useMTBuildHead'
 import dayjs from 'dayjs'
 
 const miscStore = useMiscStore()
-const groupStore = useGroupStore()
+const modGroupStore = useModGroupStore()
 
 /*const version = computed(() => {
   return runtimeConfig.public.VERSION
@@ -107,6 +107,7 @@ const groupidi = computed({
   },
   set: (newValue) => {
     groupid.value = newValue
+    console.log('groupidi set', newValue)
     miscStore.set({ key: 'groupidi', value: newValue })
   }
 })
@@ -131,7 +132,7 @@ const groupName = computed(() => {
   } else if (!groupid.value) {
     return 'all my communities'
   } else {
-    const group = groupStore.get(groupid.value)
+    const group = modGroupStore.get(groupid.value)
 
     if (group) {
       return group.namedisplay
@@ -154,12 +155,11 @@ watch(showInfo, () => {
 
 watch(groupid, async () => {
   console.log('index.vue watch groupid', groupid.value)
-  await groupStore.fetchMT({
-    id: groupid.value
-  })
 })
 
-onMounted(() => {
+onMounted(async () => {
+  await modGroupStore.getModGroups()
+
   // Volunteers' Week is between 1st and 7th June every year.
   if (
     dayjs().get('month') === 5 &&

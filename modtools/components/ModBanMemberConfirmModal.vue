@@ -38,17 +38,17 @@
 </template>
 <script>
 import Wkt from 'wicket'
-import { useGroupStore } from '../../stores/group'
+import { useModGroupStore } from '@/stores/modgroup'
 import { useUserStore } from '../../stores/user'
 import { useOurModal } from '~/composables/useOurModal'
 import cloneDeep from 'lodash.clonedeep'
 
 export default {
   setup() {
-    const groupStore = useGroupStore()
+    const modGroupStore = useModGroupStore()
     const userStore = useUserStore()
     const { modal, show, hide } = useOurModal()
-    return { groupStore, userStore, modal, show, hide }
+    return { modGroupStore, userStore, modal, show, hide }
   },
   props: {
     userid: {
@@ -69,7 +69,7 @@ export default {
   },
   computed: {
     group() {
-      return this.groupStore.get(this.groupid)
+      return this.modGroupStore.get(this.groupid)
     },
     user() {
       return this.userStore.byId(this.userid)
@@ -77,9 +77,9 @@ export default {
   },
   async mounted() {
     //console.log('mounted', cloneDeep(this.group))
-    await this.groupStore.listMT({
-      grouptype: 'Freegle'
-    })
+    // TODO: Why: await this.modGroupStore.listMT({
+    //  grouptype: 'Freegle'
+    // })
 
     const area = this.group.poly || this.group.polyofficial
     if (area) {

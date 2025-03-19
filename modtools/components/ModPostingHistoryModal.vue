@@ -5,7 +5,7 @@
         <NoticeMessage v-if="!messages.length" variant="info" class="mb-2">
           There are no posts to show.
         </NoticeMessage>
-        <GroupSelect v-model="groupid" modonly class="mb-2" />
+        <ModGroupSelect v-model="groupid" modonly class="mb-2" />
         <b-row v-for="message in messages">
           <b-col cols="8" sm="3">
             <div>{{ datetimeshort(message.arrival) }}</div>

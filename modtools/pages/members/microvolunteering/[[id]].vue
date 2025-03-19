@@ -3,7 +3,7 @@
     <client-only>
       <ScrollToTop />
       <ModHelpMicrovolunteering />
-      <GroupSelect v-model="groupid" modonly all remember="membersmicrovol" :disabled="busy" />
+      <ModGroupSelect v-model="groupid" modonly all remember="membersmicrovol" :disabled="busy" />
 
       <div v-if="busy" class="d-flex justify-content-around">
         <b-img lazy src="/loader.gif" alt="Loading" />
@@ -67,6 +67,7 @@
   </div>
 </template>
 <script>
+import { useModGroupStore } from '@/stores/modgroup'
 import dayjs from 'dayjs'
 import { GChart } from 'vue-google-charts'
 import { useMicroVolunteeringStore } from '../stores/microvolunteering'
@@ -164,7 +165,9 @@ export default {
       this.fetch()
     }
   },
-  mounted() {
+  async mounted() {
+    const modGroupStore = useModGroupStore()
+    await modGroupStore.getModGroups()
     this.microVolunteeringStore.clear()
     this.fetch()
   },

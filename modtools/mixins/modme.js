@@ -4,10 +4,12 @@
 import { useAuthStore } from '~/stores/auth'
 import { useChatStore } from '@/stores/chat'
 import { useMiscStore } from '@/stores/misc'
+import { useModGroupStore } from '@/stores/modgroup'
 
 export default {
   data: function() {
     return {
+      modgroups: [],
       workTimer: false,
     }
   },
@@ -28,10 +30,14 @@ export default {
       const perms = this.me ? this.me.permissions : null
       return perms && perms.indexOf(perm) !== -1
     },
-    myGroup(groupid) {
-      return groupid
-        ? this.myGroups.find(g => parseInt(g.id) === groupid)
-        : null
+    myModGroups() {
+      const modGroupStore = useModGroupStore()
+      return this.modgroups
+    },
+    myModGroup(groupid) {
+      //console.log("modme.js myModGroup",groupid)
+      const modGroupStore = useModGroupStore()
+      return modGroupStore.get(groupid)
     },
     amAModOn(groupid){
       const authStore = useAuthStore()

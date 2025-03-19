@@ -41,12 +41,12 @@
   </b-form-group>
 </template>
 <script>
-import { useGroupStore } from '../../stores/group'
+import { useModGroupStore } from '@/stores/modgroup'
 
 export default {
   setup() {
-    const groupStore = useGroupStore()
-    return { groupStore }
+    const modGroupStore = useModGroupStore()
+    return { modGroupStore }
   },
   props: {
     name: {
@@ -107,10 +107,10 @@ export default {
       return this.group.myrole !== 'Owner'
     },
     group() {
-      return this.groupStore.get(this.groupid)
+      return this.modGroupStore.get(this.groupid)
     },
     haveValue() {
-      let rules = this.groupStore.get(this.groupid).rules || {}
+      let rules = this.modGroupStore.get(this.groupid).rules || {}
       rules = typeof rules === 'string' ? JSON.parse(rules) : rules
       return this.name in rules
     }
@@ -129,17 +129,17 @@ export default {
       await this.save()
     },
     async save() {
-      let rules = this.groupStore.get(this.groupid).rules || {}
+      let rules = this.modGroupStore.get(this.groupid).rules || {}
       rules = typeof rules === 'string' ? JSON.parse(rules) : rules
       rules[this.name] = this.value
 
-      await this.groupStore.updateMT({
+      await this.modGroupStore.updateMT({
         id: this.groupid,
         rules: rules
       })
     },
     getValueFromGroup() {
-      let rules = this.groupStore.get(this.groupid).rules || {}
+      let rules = this.modGroupStore.get(this.groupid).rules || {}
       rules = typeof rules === 'string' ? JSON.parse(rules) : rules
 
       const name = this.name

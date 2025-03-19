@@ -2,7 +2,7 @@
   <client-only>
     <ScrollToTop :prepend="groupName" />
     <div class="d-flex justify-content-between flex-wrap">
-      <GroupSelect v-model="groupid" all modonly remember="approved" />
+      <ModGroupSelect v-model="groupid" all modonly remember="approved" />
       <ModFindMessagesFromMember :memberTerm="memberTerm" @searched="searchedMember" @changed="changedMemberTerm" />
       <ModFindMessage v-if="groupid" :groupid="groupid" :messageTerm="messageTerm" @searched="searchedMessage" @changed="changedMessageTerm" />
       <span v-else class="mt-2">
@@ -31,6 +31,7 @@
 <script>
 import { useMiscStore } from '@/stores/misc'
 import { useMessageStore } from '../../stores/message'
+import { useModGroupStore } from '@/stores/modgroup'
 import me from '~/mixins/me.js'
 import { setupModMessages } from '../../composables/useModMessages'
 
@@ -64,6 +65,10 @@ export default {
 
       return null
     },
+  },
+  async mounted() {
+    const modGroupStore = useModGroupStore()
+    await modGroupStore.getModGroups()
   },
   methods: {
     changedMessageTerm(term) {

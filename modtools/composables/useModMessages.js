@@ -9,7 +9,7 @@
 // - until another timed update occurs
 
 import { useAuthStore } from '@/stores/auth'
-import { useGroupStore } from '@/stores/group'
+import { useModGroupStore } from '@/stores/modgroup'
 import { useMessageStore } from '../../stores/message'
 import { useMiscStore } from '@/stores/misc'
 
@@ -70,12 +70,11 @@ const visibleMessages = computed(() => {
 
 export function setupModMessages() {
   watch(groupid, async (newVal) => {
-    // console.log("useModMessages watch groupid AAA", newVal)
     context.value = null
 
-    const groupStore = useGroupStore()
-    await groupStore.fetchMT({ id: newVal })
-    group.value = await groupStore.fetch(newVal)
+    const modGroupStore = useModGroupStore()
+    await modGroupStore.fetchMT({ id: newVal })
+    group.value = await modGroupStore.get(newVal)
     await getMessages()
 
     show.value = messages.value.length
@@ -86,8 +85,8 @@ export function setupModMessages() {
     // We have this watch because we may need to fetch a group that we have remembered.  The mounted()
     // call may happen before we have restored the persisted state, so we can't initiate the fetch there.
     if (!oldValue || oldValue.id !== groupid.value) {
-      const groupStore = useGroupStore()
-      await groupStore.fetch(groupid.value)
+      const modGroupStore = useModGroupStore()
+      await modGroupStore.fetch(groupid.value)
     }
   })*/
 

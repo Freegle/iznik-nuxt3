@@ -22,7 +22,7 @@
         <label for="groupid">
           We'll add 'Group X Volunteer' to the end of the note.
         </label>
-        <GroupSelect id="groupid" v-model="groupid" modonly class="mb-2" />
+        <ModGroupSelect id="groupid" v-model="groupid" modonly class="mb-2" />
         <label for="note">
           Your note:
         </label>

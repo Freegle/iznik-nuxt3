@@ -110,17 +110,17 @@
   </div>
 </template>
 <script>
-import { useGroupStore } from '../stores/group'
+import { useModGroupStore } from '@/stores/modgroup'
 import { useMemberStore } from '../stores/member'
 
 export default {
   async setup() {
-    const groupStore = useGroupStore()
+    const modGroupStore = useModGroupStore()
     const memberStore = useMemberStore()
 
-    await groupStore.listMT({ grouptype: 'Freegle' })
+    await modGroupStore.listMT({ grouptype: 'Freegle' })
 
-    return { groupStore, memberStore }
+    return { modGroupStore, memberStore }
   },
   data: function () {
     return {
@@ -133,7 +133,7 @@ export default {
   },
   computed: {
     groups() {
-      const groups = Object.values(this.groupStore.list)
+      const groups = Object.values(this.modGroupStore.list)
       return groups
     },
     groupitems() {
@@ -177,7 +177,7 @@ export default {
       return ret
     },
     group() {
-      return this.groupStore.get(this.groupid)
+      return this.modGroupStore.get(this.groupid)
     },
     volunteers() {
       return this.memberStore.getByGroup(this.groupid)
@@ -220,7 +220,7 @@ export default {
         return this.group.region
       },
       set(newval) {
-        this.groupStore.updateMT({
+        this.modGroupStore.updateMT({
           id: this.group.id,
           region: newval
         })
@@ -231,7 +231,7 @@ export default {
     async groupid(id) {
       if (id) {
         // Get the full group info
-        await this.groupStore.fetchMT({
+        await this.modGroupStore.fetchMT({
           id: id,
           polygon: true
         })
@@ -263,7 +263,7 @@ export default {
       console.log('saveCGA',this.group.cga)
       this.CGAerror = null
       try {
-        await this.groupStore.updateMT({
+        await this.modGroupStore.updateMT({
           id: this.groupid,
           polyofficial: this.group.cga
         })
@@ -275,7 +275,7 @@ export default {
     async saveDPA(callback) {
       this.DPAerror = null
       try {
-        await this.groupStore.updateMT({
+        await this.modGroupStore.updateMT({
           id: this.groupid,
           poly: this.group.dpa
         })
@@ -285,7 +285,7 @@ export default {
       callback()
     },
     async saveCentres(callback) {
-      this.groupStore.updateMT({
+      this.modGroupStore.updateMT({
         id: this.groupid,
         lat: this.group.lat,
         lng: this.group.lng,

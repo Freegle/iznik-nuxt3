@@ -16,66 +16,6 @@ export const useGroupStore = defineStore({
       this.fetching = {}
     },
 
-    async listMT(params) {
-      const groups = await api(this.config).group.listMT(params)
-      this.list = {}
-      this.allGroups = {}
-      if (groups) {
-        groups.forEach((g) => {
-          this.allGroups[g.nameshort.toLowerCase()] = g
-          this.list[g.id] = g
-        })
-      }
-    },
-
-    async fetchMT({ id, polygon, showmods, sponsors, tnkey }) {
-      //console.log('useGroupStore fetchMT', id, polygon, tnkey)
-      if (!id) return null
-      polygon = Object.is(polygon, undefined) ? false : polygon
-      sponsors = Object.is(sponsors, undefined) ? false : sponsors
-      showmods = Object.is(showmods, undefined) ? false : showmods
-      tnkey = Object.is(tnkey, undefined) ? true : tnkey // Always get tnkey
-
-      const group = await api(this.config).group.fetchMT(
-        id,
-        polygon,
-        showmods,
-        sponsors,
-        tnkey
-        /*,
-        function (data) {
-          console.log('fetchMT log',data?.ret)
-          if (data && data.ret === 10) {
-            // Not hosting a group isn't worth logging.
-            return false
-          } else {
-            return true
-          }
-        }*/
-      )
-      if (group) {
-        this.list[group.id] = group
-
-        const ret = await api(this.config).session.fetch({
-          webversion: this.config.public.BUILD_DATE,
-          components: ['groups'],
-        })
-        if (ret && ret.groups) {
-          const g = ret.groups.find((g) => g.id === group.id)
-          if (g && g.work) {
-            //console.log('useGroupStore g.work',g.work)
-            this.list[group.id].work = g.work
-          }
-        }
-      }
-    },
-    async updateMT(params) {
-      await api(this.config).group.patch(params)
-      await this.fetchMT({
-        id: params.id,
-        polygon: true
-      })
-    },
 
     async fetch(id, force) {
       if (id) {

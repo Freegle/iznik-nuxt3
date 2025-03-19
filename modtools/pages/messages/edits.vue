@@ -2,7 +2,7 @@
   <div>
     <client-only>
       <ScrollToTop />
-      <GroupSelect v-model="groupid" all modonly :work="['editreview']" remember="edits" />
+      <ModGroupSelect v-model="groupid" all modonly :work="['editreview']" remember="edits" />
       <NoticeMessage v-if="!messages.length && !busy" class="mt-2">
         There are no messages at the moment. This will refresh automatically.
       </NoticeMessage>
@@ -12,6 +12,7 @@
 </template>
 <script>
 import { useMiscStore } from '@/stores/misc'
+import { useModGroupStore } from '@/stores/modgroup'
 import ScrollToTop from '~/components/ScrollToTop'
 import { setupModMessages } from '../../composables/useModMessages'
 
@@ -29,6 +30,10 @@ export default {
   data: function () {
     return {
     }
-  }
+  },
+  async mounted() {
+    const modGroupStore = useModGroupStore()
+    await modGroupStore.getModGroups()
+  },
 }
 </script>

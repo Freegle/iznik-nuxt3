@@ -86,7 +86,7 @@
   </b-modal>
 </template>
 <script>
-import { useGroupStore } from '~/stores/group'
+import { useModGroupStore } from '@/stores/modgroup'
 import { useMemberStore } from '~/stores/member'
 import { useMessageStore } from '~/stores/message'
 import { useUserStore } from '../stores/user'
@@ -121,14 +121,14 @@ export default {
   },
   setup() {
     const { modal, hide } = useOurModal()
-    const groupStore = useGroupStore()
+    const modGroupStore = useModGroupStore()
     const messageStore = useMessageStore()
     const memberStore = useMemberStore()
     const userStore = useUserStore()
     const {
       typeOptions
     } = setupKeywords()
-    return { groupStore, memberStore, messageStore, userStore, typeOptions, modal, hide }
+    return { modGroupStore, memberStore, messageStore, userStore, typeOptions, modal, hide }
   },
   data: function () {
     return {
@@ -425,8 +425,8 @@ export default {
     },
     async substitutionStrings(text) {
       const self = this
-      await this.groupStore.fetchMT({ id: this.groupid })
-      const group = await this.groupStore.fetch(this.groupid)
+      await this.modGroupStore.fetchMT({ id: this.groupid })
+      const group = await this.modGroupStore.fetch(this.groupid)
       if (!group) return text
 
       if (group && text) {

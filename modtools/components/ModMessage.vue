@@ -13,7 +13,7 @@
               </b-input-group>
             </NoticeMessage>
             <div v-if="editing" class="d-flex flex-wrap">
-              <GroupSelect v-model="editgroup" modonly class="mr-1" size="lg" :disabled-except-for="memberGroupIds"
+              <ModGroupSelect v-model="editgroup" modonly class="mr-1" size="lg" :disabled-except-for="memberGroupIds"
                 :disabled="message.fromuser.tnuserid" />
               <div v-if="message.item && message.location" class="d-flex justify-content-start">
                 <b-form-select v-model="message.type" :options="typeOptions" class="type mr-1" size="lg" />
@@ -319,7 +319,7 @@
 import Highlighter from 'vue-highlight-words'
 
 import { pluralise } from '../composables/usePluralise'
-import { useGroupStore } from '../stores/group'
+import { useModGroupStore } from '@/stores/modgroup'
 import { useLocationStore } from '../../stores/location'
 import { useModConfigStore } from '../stores/modconfig'
 import { useMemberStore } from '../stores/member'
@@ -379,7 +379,7 @@ export default {
     }
   },
   setup() {
-    const groupStore = useGroupStore()
+    const modGroupStore = useModGroupStore()
     const locationStore = useLocationStore()
     const modconfigStore = useModConfigStore()
     const memberStore = useMemberStore()
@@ -389,7 +389,7 @@ export default {
       typeOptions
     } = setupKeywords()
 
-    return { groupStore, locationStore, memberStore, messageStore, modconfigStore, userStore, typeOptions }
+    return { modGroupStore, locationStore, memberStore, messageStore, modconfigStore, userStore, typeOptions }
   },
   data: function () {
     return {
@@ -601,13 +601,13 @@ export default {
       let check = false
 
       this.message.groups.forEach(g => {
-        const group = this.myGroup(g.groupid)
+        const group = this.myModGroup(g.groupid)
 
-        //console.log("duplicateAge group", group)
+        //console.log("duplicateAge group", group?.settings?.duplicates)
         if (
           group &&
           group.settings &&
-          group.settings.duplicates &&
+          group.settings.duplicates && // TODO: MT group does not have settings
           group.settings.duplicates.check
         ) {
           check = true
@@ -616,6 +616,7 @@ export default {
         }
       })
 
+      //console.log('checkHistory duplicateAge',check,ret)
       return check ? ret : null
     },
     crossposts() {
@@ -655,7 +656,7 @@ export default {
         const self = this
         await newVal.forEach(async function (message) {
           if (!self.historyGroups[message.groupid]) {
-            self.historyGroups[message.groupid] = await self.groupStore.fetchMT({ id: message.groupid })
+            self.historyGroups[message.groupid] = await self.modGroupStore.fetchMT({ id: message.groupid })
           }
         })
       }
@@ -668,8 +669,9 @@ export default {
     if (this.messageGroup) {
       const g = this.myGroups.find(g => parseInt(g.id) === this.messageGroup)
       if (g) {
-        await this.groupStore.fetchMT({ id: g.id, polygon: true })
-        this.group = this.groupStore.get(g.id)
+        await this.modGroupStore.fetchMT({ id: g.id, polygon: true })
+        this.group = this.modGroupStore.get(g.id)
+        //console.log('MM mounted group',this.group.settings)
       }
     }
 
@@ -809,7 +811,7 @@ export default {
       let subj = message.subject
       const group = this.historyGroups[message.groupid]
 
-      if (group && group.settings && group.settings.keywords) {
+      if (group && group.settings && group.settings.keywords) { // TODO: MT group does not have settings
         const keyword =
           message.type === 'Offer'
             ? group.settings.keywords.offer
@@ -853,6 +855,7 @@ export default {
             this.duplicateAge &&
             message.daysago <= this.duplicateAge
           ) {
+            //if( duplicateCheck) console.log('checkHistory check',message)
             if (this.canonSubj(message) === subj) {
               // No point displaying any group tag in the duplicate.
               message.subject = message.subject.replace(/\[.*\](.*)/, '$1')
@@ -881,7 +884,7 @@ export default {
           }
         })
       }
-
+      //if( duplicateCheck) console.log('checkHistory duplicateCheck',ret)
       return ret
     },
     photoAdd() {

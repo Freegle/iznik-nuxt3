@@ -3,7 +3,7 @@
     <client-only>
       <ScrollToTop />
       <ModHelpComments />
-      <GroupSelect v-model="groupid" modonly all />
+      <ModGroupSelect v-model="groupid" modonly all />
       <ModCommentUser v-for="comment in visibleComments" :key="'commentlist-' + comment.id" :comment="comment" class="p-0 mt-2" />
       <NoticeMessage v-if="!comments.length && !busy" class="mt-2">
         There are no comments to show at the moment.
@@ -21,6 +21,7 @@
 </template>
 <script>
 import { useCommentStore } from '../stores/comment'
+import { useModGroupStore } from '@/stores/modgroup'
 
 export default {
   setup() {
@@ -66,7 +67,9 @@ export default {
       this.context = null
     }
   },
-  mounted() {
+  async mounted() {
+    const modGroupStore = useModGroupStore()
+    await modGroupStore.getModGroups()
     this.commentStore.clear()
   },
   methods: {

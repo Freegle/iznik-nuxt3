@@ -18,7 +18,7 @@
 <script>
 import cloneDeep from 'lodash.clonedeep'
 import { useMiscStore } from '~/stores/misc'
-import { useGroupStore } from '~/stores/group'
+import { useModGroupStore } from '~/stores/modgroup'
 
 export default {
   props: {
@@ -123,9 +123,9 @@ export default {
   },
   setup() {
     const miscStore = useMiscStore()
-    const groupStore = useGroupStore()
+    const modGroupStore = useModGroupStore()
 
-    return { miscStore, groupStore }
+    return { miscStore, modGroupStore }
   },
   computed: {
     selectedGroup: {
@@ -146,11 +146,18 @@ export default {
     groups() {
       let ret = []
       if (this.listall) {
-        ret = Object.values(this.groupStore.list).filter((g) => {
+        ret = Object.values(this.modGroupStore.list).filter((g) => {
+          //console.log('===GroupSelect groups A',g.id)
           return g.id
         })
       } else {
         ret = this.myGroups
+        //console.log('===GroupSelect groups B',this.modGroupStore.list)
+        for( const g of ret){
+          if( this.modGroupStore.list[g.id]){
+            g.work = this.modGroupStore.list[g.id].work
+          }
+        }
       }
 
       ret = ret || []
@@ -282,8 +289,11 @@ export default {
     // },
   },
   async mounted() {
+    // MT CHANGED
     if (this.listall) {
-      await this.groupStore.fetch()
+      await this.modGroupStore.listMT({
+        grouptype: 'Freegle'
+      })
     }
 
     if (this.remember) {

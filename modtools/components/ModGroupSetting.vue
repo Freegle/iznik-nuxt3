@@ -38,12 +38,12 @@
   </b-form-group>
 </template>
 <script>
-import { useGroupStore } from '../../stores/group'
+import { useModGroupStore } from '@/stores/modgroup'
 
 export default {
   setup() {
-    const groupStore = useGroupStore()
-    return { groupStore }
+    const modGroupStore = useModGroupStore()
+    return { modGroupStore }
   },
   props: {
     name: {
@@ -105,7 +105,7 @@ export default {
       return this.group.myrole !== 'Owner'
     },
     group() {
-      return this.groupStore.get(this.groupid)
+      return this.modGroupStore.get(this.groupid)
     }
   },
   watch: {
@@ -174,18 +174,18 @@ export default {
         } else {
           // Lower down - we send the top one but we need to modify it wherever it is.
           const top = this.name.substring(0, p)
-          const topobj = this.groupStore.get(this.groupid)
+          const topobj = this.modGroupStore.get(this.groupid)
 
           this.setDeep(topobj, this.name.split('.'), val)
           data[top] = topobj[top]
         }
 
-        await this.groupStore.updateMT(data)
+        await this.modGroupStore.updateMT(data)
       }
       if (typeof callbackorvalue === 'function') callbackorvalue()
     },
     getValueFromGroup() {
-      let obj = this.groupStore.get(this.groupid)
+      let obj = this.modGroupStore.get(this.groupid)
 
       if (obj) {
         let name = this.name

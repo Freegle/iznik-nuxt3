@@ -47,6 +47,7 @@ import { useCommentStore } from './stores/comment'
 import { useLogsStore } from './stores/logs'
 import { useMemberStore } from './stores/member'
 import { useModConfigStore } from './stores/modconfig'
+import { useModGroupStore } from '@/stores/modgroup'
 import { useSpammerStore } from './stores/spammer'
 import { useStdmsgStore } from './stores/stdmsg'
 import { usePublicityStore } from '@/stores/publicity'
@@ -108,6 +109,7 @@ const commentStore = useCommentStore()
 const logsStore = useLogsStore()
 const memberStore = useMemberStore()
 const modconfigStore = useModConfigStore()
+const modGroupStore = useModGroupStore()
 const spammerStore = useSpammerStore()
 const stdmsgStore = useStdmsgStore()
 const publicityStore = usePublicityStore()
@@ -148,6 +150,7 @@ commentStore.init(runtimeConfig)
 logsStore.init(runtimeConfig)
 memberStore.init(runtimeConfig)
 modconfigStore.init(runtimeConfig)
+modGroupStore.init(runtimeConfig)
 spammerStore.init(runtimeConfig)
 stdmsgStore.init(runtimeConfig)
 publicityStore.init(runtimeConfig)

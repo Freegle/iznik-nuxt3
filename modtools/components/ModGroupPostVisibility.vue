@@ -50,16 +50,16 @@
 <script>
 // We can't easily go back from a postvisibility polygon to the scale value.  
 // So: display correct postvisibility polygon but scale is always reset to just group
-import { useGroupStore } from '../../stores/group'
+import { useModGroupStore } from '@/stores/modgroup'
 import turfbuffer from 'turf-buffer'
 import Wkt from 'wicket'
 import { attribution, osmtile, loadLeaflet } from '../composables/useMap'
 
 export default {
   setup(props) {
-    const groupStore = useGroupStore()
+    const modGroupStore = useModGroupStore()
     return {
-      groupStore,
+      modGroupStore,
       Wkt,
       osmtile: osmtile(),
       attribution: attribution()
@@ -81,7 +81,7 @@ export default {
   },
   computed: {
     group() {
-      return this.groupStore.get(this.groupid)
+      return this.modGroupStore.get(this.groupid)
     },
     CGA() {
       const wkt = new Wkt.Wkt()
@@ -141,7 +141,7 @@ export default {
   },
   methods: {
     async getValueFromGroup() {
-      const obj = await this.groupStore.get(this.groupid)
+      const obj = await this.modGroupStore.get(this.groupid)
 
       if (obj) {
         this.value = obj.postvisibility
@@ -179,7 +179,7 @@ export default {
       const wkt = new Wkt.Wkt()
       wkt.read(JSON.stringify(this.visibility))
 
-      await this.groupStore.updateMT({
+      await this.modGroupStore.updateMT({
         id: this.groupid,
         postvisibility: wkt.toString()
       })

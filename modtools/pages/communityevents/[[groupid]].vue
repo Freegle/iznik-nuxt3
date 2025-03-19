@@ -20,6 +20,7 @@
 import { useAuthStore } from '@/stores/auth'
 import { useCommunityEventStore } from '../stores/communityevent'
 import { useMiscStore } from '@/stores/misc'
+import { useModGroupStore } from '@/stores/modgroup'
 
 export default {
   setup() {
@@ -62,7 +63,9 @@ export default {
       }
     }
   },
-  mounted() {
+  async mounted() {
+    const modGroupStore = useModGroupStore()
+    await modGroupStore.getModGroups()
     // We don't want to pick up any approved events.
     this.communityEventStore.clear()
   },

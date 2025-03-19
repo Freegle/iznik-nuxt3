@@ -13,7 +13,7 @@
                 </b-badge>
               </h2>
             </template>
-            <GroupSelect v-model="groupidshow" all modonly :work="['pendingadmins']" class="mb-2" />
+            <ModGroupSelect v-model="groupidshow" all modonly :work="['pendingadmins']" class="mb-2" />
             <div v-if="pending.length">
               <ModAdmin v-for="admin in pending" :id="admin.id" :key="'pendingadmin-' + admin.id" :open="pending.length === 1" />
             </div>
@@ -27,7 +27,7 @@
                 Create
               </h2>
             </template>
-            <GroupSelect v-model="groupidcreate" modonly :systemwide="supportOrAdmin" class="mb-2" />
+            <ModGroupSelect v-model="groupidcreate" modonly :systemwide="supportOrAdmin" class="mb-2" />
             <NoticeMessage v-if="groupidcreate < 0" class="mt-1 mb-1" variant="danger">
               This is a suggested ADMIN. All local communities will get "copies" of this (unless they've opted out),
               and mods can then edit/approve/reject them. Members won't receive multiple copies.
@@ -90,7 +90,7 @@
                 Previous
               </h2>
             </template>
-            <GroupSelect v-model="groupidprevious" modonly class="mb-2" />
+            <ModGroupSelect v-model="groupidprevious" modonly class="mb-2" />
             <p>
               If an ADMIN shows as queued for send, it usually takes a few minutes. If we are sending a lot of
               ADMINs it can take a few hours.
@@ -114,7 +114,7 @@
 import { defineRule, Form as VeeForm, Field, ErrorMessage } from 'vee-validate'
 import { required, email, min, max } from '@vee-validate/rules'
 import { useAdminsStore } from '../stores/admins'
-import { useGroupStore } from '~/stores/group'
+import { useModGroupStore } from '@/stores/modgroup'
 
 defineRule('required', required)
 defineRule('email', email)
@@ -133,8 +133,8 @@ export default {
   },
   setup() {
     const adminsStore = useAdminsStore()
-    const groupStore = useGroupStore()
-    return { adminsStore, groupStore }
+    const modGroupStore = useModGroupStore()
+    return { adminsStore, modGroupStore }
   },
   data: function () {
     return {
@@ -155,7 +155,7 @@ export default {
       let count = 0
 
       for (const g of this.myGroups) {
-        const group = this.groupStore.get(g.id)
+        const group = this.modGroupStore.get(g.id)
         if (group) {
           if (
             group.type === 'Freegle' &&
@@ -196,9 +196,7 @@ export default {
     }
   },
   async mounted() {
-    for (const group of this.myGroups) {
-      await this.groupStore.fetchMT({ id: group.id })
-    }
+    await this.modGroupStore.getModGroups()
 
     this.fetch(this.groupidshow)
   },

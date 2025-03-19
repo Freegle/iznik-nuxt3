@@ -103,6 +103,7 @@ import Papa from 'papaparse'
 import dayjs from 'dayjs'
 import { useDonationStore } from '~/stores/donations'
 import { useUserStore } from '~/stores/user'
+import { useModGroupStore } from '@/stores/modgroup'
 
 export default {
   async setup() {
@@ -131,6 +132,8 @@ export default {
     }
   },
   async mounted() {
+    const modGroupStore = useModGroupStore()
+    await modGroupStore.getModGroups()
     //this.date = dayjs()
     await this.getGiftAid()
   },

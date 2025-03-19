@@ -47,6 +47,7 @@ import dayjs from 'dayjs'
 import { pluralise } from '../composables/usePluralise'
 import { useChatStore } from '~/stores/chat'
 import { useAuthStore } from '../../stores/auth'
+import { useModGroupStore } from '@/stores/modgroup'
 //import { setupChat } from '../composables/useChat'
 import { useRouter } from '#imports'
 
@@ -64,6 +65,7 @@ export default {
     } = await setupChat(props.id)*/
 
     return {
+      authStore,
       chatStore,
       //chat,
       //otheruser,
@@ -72,7 +74,6 @@ export default {
       //messageStore,
       //addressStore,
       //chatmessages,
-      authStore,
       // milesaway,
     }
   },
@@ -161,6 +162,8 @@ export default {
     },
   },
   async mounted() {
+    const modGroupStore = useModGroupStore()
+    await modGroupStore.getModGroups()
     this.chatStore.clear()
     await this.listChats()
   },

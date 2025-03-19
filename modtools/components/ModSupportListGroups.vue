@@ -56,7 +56,7 @@
 </template>
 <script>
 import dayjs from 'dayjs'
-import { useGroupStore } from '../stores/group'
+import { useModGroupStore } from '@/stores/modgroup'
 import { HotTable, HotColumn } from '@handsontable/vue3'
 import { registerAllModules } from 'handsontable/registry'
 import 'handsontable/dist/handsontable.full.css'
@@ -70,8 +70,8 @@ export default {
     HotColumn
   },
   setup() {
-    const groupStore = useGroupStore()
-    return { groupStore }
+    const modGroupStore = useModGroupStore()
+    return { modGroupStore }
   },
   data: function () {
     return {
@@ -83,7 +83,7 @@ export default {
   },
   computed: {
     groups() {
-      const ret = Object.values(this.groupStore.list)
+      const ret = Object.values(this.modGroupStore.list)
       ret.sort((a, b) => {
         return a.nameshort
           .toLowerCase()
@@ -102,7 +102,7 @@ export default {
   },
   methods: {
     idRenderer(_instance, td, _row, _col, _prop, value){
-      const group = this.groupStore.get(value)
+      const group = this.modGroupStore.get(value)
       if (group && group.mentored) {
         td.style.backgroundColor = 'lightblue'
       }
@@ -149,7 +149,7 @@ export default {
 
 
     async fetchCommunities(callback) {
-      await this.groupStore.listMT({
+      await this.modGroupStore.listMT({
         grouptype: 'Freegle',
         support: true
       })

@@ -78,9 +78,9 @@
   </div>
 </template>
 <script>
-import NoticeMessage from '~/components/NoticeMessage'
 import { useChatStore } from '../stores/chat'
 import { useMessageStore } from '~/stores/message'
+import { useModGroupStore } from '@/stores/modgroup'
 
 export default {
   async setup() {
@@ -105,6 +105,10 @@ export default {
     this.id = 'id' in route.params ? parseInt(route.params.id) : 0
     this.chatStore.list = [] // this.chatStore.clear()
     this.messageStore.clear()
+  },
+  async mounted() {
+    const modGroupStore = useModGroupStore()
+    await modGroupStore.getModGroups()
   },
   methods: {
     changedMessageTerm(term) {

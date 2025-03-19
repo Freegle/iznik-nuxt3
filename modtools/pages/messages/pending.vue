@@ -9,7 +9,7 @@
         <ModZoomStock color-class="text-black" />
       </NoticeMessage-->
       <div class="d-flex justify-content-between">
-        <GroupSelect v-model="groupid" all modonly :work="['pending', 'pendingother']" remember="pending" />
+        <ModGroupSelect v-model="groupid" all modonly :work="['pending', 'pendingother']" remember="pending" />
         <ModtoolsViewControl misckey="modtoolsMessagesPendingSummary" />
         <!--b-button variant="link" @click="loadAll">
           Load all
@@ -31,16 +31,16 @@
 <script>
 import dayjs from 'dayjs'
 import { useAuthStore } from '@/stores/auth'
-import { useGroupStore } from '../stores/group'
 import { useMiscStore } from '@/stores/misc'
+import { useModGroupStore } from '@/stores/modgroup'
 import me from '~/mixins/me.js'
 import { setupModMessages } from '../../composables/useModMessages'
 
 export default {
   async setup() {
     const authStore = useAuthStore()
-    const groupStore = useGroupStore()
     const miscStore = useMiscStore()
+    const modGroupStore = useModGroupStore()
     const modMessages = setupModMessages()
     modMessages.summarykey.value = 'modtoolsMessagesPendingSummary'
     //modMessages.collection.value = ['Pending','PendingOther']
@@ -49,8 +49,8 @@ export default {
     //modMessages.workType.value = 'pending'
     return {
       authStore,
-      groupStore,
       miscStore,
+      modGroupStore,
       ...modMessages // busy, context, group, groupid, limit, workType, show, collection, messageTerm, memberTerm, distance, summary, messages, visibleMessages, work,
     }
   },
@@ -67,15 +67,13 @@ export default {
   },
   computed: {
     groups() {
-      const ret = Object.values(this.groupStore.list)
+      const ret = Object.values(this.modGroupStore.list)
       return ret
     }
   },
   async mounted() {
     // Get groups with MT info
-    for (const g of this.myGroups) {
-      await this.groupStore.fetchMT({id:g.id})
-    }
+    await this.modGroupStore.getModGroups()
 
     // Consider affiliation ask.
     const lastask = this.miscStore.get('lastaffiliationask')

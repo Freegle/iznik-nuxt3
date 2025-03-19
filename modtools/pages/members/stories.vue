@@ -10,6 +10,7 @@
   </div>
 </template>
 <script>
+import { useModGroupStore } from '@/stores/modgroup'
 import { useStoryStore } from '@/stores/stories'
 
 export default {
@@ -31,6 +32,8 @@ export default {
     }
   },
   async mounted() {
+    const modGroupStore = useModGroupStore()
+    await modGroupStore.getModGroups()
     await this.storyStore.fetchMT({
       reviewed: 0,
       dontzapfalsey: true, // Stop BaseAPI from removing above zero value

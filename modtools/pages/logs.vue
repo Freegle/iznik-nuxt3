@@ -9,7 +9,7 @@
           </h2>
         </template>
         <div class="d-flex flex-wrap">
-          <GroupSelect v-model="groupid" modonly />
+          <ModGroupSelect v-model="groupid" modonly />
           <b-input-group class="flex max">
             <b-form-input v-model="term" type="text" placeholder="Search name/email/subject" autocapitalize="none" @keyup.native.enter="search" />
             <b-button variant="primary" :disabled="busy" @click="search">
@@ -25,7 +25,7 @@
           </h2>
         </template>
         <div class="d-flex flex-wrap">
-          <GroupSelect v-model="groupid" modonly />
+          <ModGroupSelect v-model="groupid" modonly />
           <b-input-group class="flex max">
             <b-form-input v-model="term" type="text" placeholder="Search name/email/subject" autocapitalize="none" @keyup.native.enter="search" />
             <b-button variant="primary" @click="search">
@@ -40,6 +40,7 @@
 </template>
 <script>
 import { useLogsStore } from './stores/logs'
+import { useModGroupStore } from '@/stores/modgroup'
 
 export default {
   setup() {
@@ -60,7 +61,9 @@ export default {
       this.clear(this.type)
     }
   },
-  mounted() {
+  async mounted() {
+    const modGroupStore = useModGroupStore()
+    await modGroupStore.getModGroups()
     this.clear(this.type)
   },
   methods: {

@@ -24,14 +24,13 @@
   </div>
 </template>
 <script>
-import { useGroupStore } from '@/stores/group'
 import { useMiscStore } from '@/stores/misc'
 import { useMemberStore } from '../stores/member'
+import { useModGroupStore } from '@/stores/modgroup'
 import { setupModMembers } from '../../composables/useModMembers'
 
 export default {
   async setup() {
-    const groupStore = useGroupStore()
     const memberStore = useMemberStore()
     const miscStore = useMiscStore()
     const modMembers = setupModMembers()
@@ -39,7 +38,6 @@ export default {
     modMembers.groupid.value = 0
     modMembers.group.value = null
     return {
-      groupStore,
       memberStore,
       miscStore,
       ...modMembers // busy, context, group, groupid, limit, show, collection, messageTerm, memberTerm, distance, summary, members, visibleMembers, loadMore
@@ -51,6 +49,8 @@ export default {
     }
   },
   async mounted() {
+    const modGroupStore = useModGroupStore()
+    await modGroupStore.getModGroups()
     // reset infiniteLoading on return to page
     this.memberStore.clear()
     this.bump++

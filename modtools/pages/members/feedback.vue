@@ -11,7 +11,7 @@
             </h4>
           </template>
           <div class="d-flex justify-content-between">
-            <GroupSelect v-model="groupid" modonly all remember="membersfeedback" />
+            <ModGroupSelect v-model="groupid" modonly all remember="membersfeedback" />
             <b-form-select v-model="filter">
               <option value="Comments">
                 With Comments
@@ -77,6 +77,7 @@
 <script>
 import dayjs from 'dayjs'
 import { useMemberStore } from '@/stores/member'
+import { useModGroupStore } from '@/stores/modgroup'
 import { useUserStore } from '../stores/user'
 import { GChart } from 'vue-google-charts'
 import { setupModMembers } from '../../composables/useModMembers'
@@ -120,6 +121,8 @@ export default {
     }
   },
   async mounted() {
+    const modGroupStore = useModGroupStore()
+    await modGroupStore.getModGroups()
     this.filter = 'Comments'
     await this.getHappiness()
   },

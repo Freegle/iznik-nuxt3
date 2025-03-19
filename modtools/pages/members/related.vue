@@ -3,7 +3,7 @@
     <client-only>
       <ScrollToTop />
       <ModHelpRelated />
-      <GroupSelect v-model="groupid" all modonly systemwide :work="['relatedmembers']" remember="membersrelated" />
+      <ModGroupSelect v-model="groupid" all modonly systemwide :work="['relatedmembers']" remember="membersrelated" />
 
       <div v-for="(member, ix) in visibleMembers" :key="'memberlist-' + member.id" class="p-0 mt-2">
         <ModRelatedMember :member="member" />
@@ -28,6 +28,7 @@
 import { useGroupStore } from '@/stores/group'
 import { useMiscStore } from '@/stores/misc'
 import { useMemberStore } from '../stores/member'
+import { useModGroupStore } from '@/stores/modgroup'
 import { setupModMembers } from '../../composables/useModMembers'
 
 export default {
@@ -53,6 +54,8 @@ export default {
     }
   },
   async mounted() {
+    const modGroupStore = useModGroupStore()
+    await modGroupStore.getModGroups()
     // reset infiniteLoading on return to page
     this.memberStore.clear()
   },

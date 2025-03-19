@@ -18,6 +18,7 @@
 <script>
 import { useAuthStore } from '@/stores/auth'
 import { useMiscStore } from '~/stores/misc'
+import { useModGroupStore } from '@/stores/modgroup'
 import { useVolunteeringStore } from '@/stores/volunteering'
 
 export default {
@@ -67,7 +68,9 @@ export default {
       }
     }
   },
-  mounted() {
+  async mounted() {
+    const modGroupStore = useModGroupStore()
+    await modGroupStore.getModGroups()
     // We don't want to pick up any approved volunteerings.
     this.volunteeringStore.clear()
   },
