@@ -393,7 +393,6 @@ export default {
   },
   data: function () {
     return {
-      group: null,
       saving: false,
       saved: false,
       showEmailSourceModal: false,
@@ -439,16 +438,15 @@ export default {
         ? this.message.fromuser.messagehistory
         : []
     },
-    /*group() {
+    group() {
       let ret = null
 
       if (this.messageGroup) {
-        ret = this.myGroups.find(g => parseInt(g.id) === this.messageGroup)
-        console.log('MM group polygon', ret.polygon!=null)
+        ret = this.myModGroups.find(g => parseInt(g.id) === this.messageGroup)
       }
 
       return ret
-    },*/
+    },
     position() {
       let ret = null
 
@@ -504,7 +502,7 @@ export default {
       let ret = null
       let configid = null
 
-      this.myGroups.forEach(group => {
+      this.myModGroups.forEach(group => {
         if (group.id === this.groupid) {
           configid = group.configid
         }
@@ -666,15 +664,6 @@ export default {
     this.expanded = !this.summary
     this.attachments = this.message.attachments
     this.findHomeGroup()
-    if (this.messageGroup) {
-      const g = this.myGroups.find(g => parseInt(g.id) === this.messageGroup)
-      if (g) {
-        await this.modGroupStore.fetchIfNeedBeMT(g.id)
-        this.group = this.modGroupStore.get(g.id)
-        //console.log('MM mounted group',this.group.settings)
-      }
-    }
-
   },
   beforeDestroy() {
     this.$emit('destroy', this.message.id, this.next)

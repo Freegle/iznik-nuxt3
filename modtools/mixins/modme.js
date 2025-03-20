@@ -24,15 +24,16 @@ export default {
     hasPermissionGiftAid() {
       return this.hasPermission('GiftAid')
     },
+    // Needed for some modtoolstasks but /mixins/me.js/myGroups() OK for most mod tasks as it is a copy of modgroup.list
+    myModGroups() { // But do we need to do other stuff in myGroups() eg sorting?
+      const modGroupStore = useModGroupStore()
+      return Object.values(modGroupStore.list)
+    },
   },
   methods: {
     hasPermission(perm) {
       const perms = this.me ? this.me.permissions : null
       return perms && perms.indexOf(perm) !== -1
-    },
-    myModGroups() {
-      const modGroupStore = useModGroupStore()
-      return this.modgroups
     },
     myModGroup(groupid) {
       //console.log("modme.js myModGroup",groupid)

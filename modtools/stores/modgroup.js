@@ -52,19 +52,18 @@ export const useModGroupStore = defineStore({
       }
       this.getting = []
     },
+    // Called at page mount to get mod's groups
+    // Also called if need be fetchIfNeedBeMT
+    // And called to reload after any changes
     async fetchGroupMT(id) {
       const groupStore = useGroupStore()
-      if (typeof id !== 'number') {
-        console.error('fetchGroupMT has duff parameters')
-        return null
-      }
       //console.log('--- uMGS fetchGroupMT', id)
       const polygon = true
       const sponsors = true
       const showmods = true
       const tnkey = true
 
-      const group = await api(this.config).group.fetchMT(id, polygon, showmods, sponsors, tnkey)
+      const group = await api(this.config).group.fetchGroupMT(id, polygon, showmods, sponsors, tnkey)
       if (group) {
         const ret = await api(this.config).session.fetch({
           webversion: this.config.public.BUILD_DATE,
@@ -95,9 +94,9 @@ export const useModGroupStore = defineStore({
       }*/
     },
     async fetchIfNeedBeMT(id) {
-      if( !id) return
-      if( this.list[id]) return
-      if( this.getting.includes(id)){
+      if (!id) return
+      if (this.list[id]) return
+      if (this.getting.includes(id)) {
         // console.error('uMGS fetchIfNeedBeMT getting',id)
         return
       }
@@ -106,53 +105,23 @@ export const useModGroupStore = defineStore({
       await this.fetchGroupMT(id)
     },
 
-    /*async fetchMT({ id, polygon, showmods, sponsors, tnkey }) {
-      console.log('TODO useModGroupStore fetchMT', id)
-      if (!id) return null
-      polygon = Object.is(polygon, undefined) ? false : polygon
-      sponsors = Object.is(sponsors, undefined) ? false : sponsors
-      showmods = Object.is(showmods, undefined) ? false : showmods
-      tnkey = Object.is(tnkey, undefined) ? true : tnkey // Always get tnkey
-
-      const group = await api(this.config).group.fetchMT(
-        id,
-        polygon,
-        showmods,
-        sponsors,
-        tnkey
-      )
-      if (group) {
-        this.list[group.id] = group
-
-        const ret = await api(this.config).session.fetch({
-          webversion: this.config.public.BUILD_DATE,
-          components: ['groups'],
-        })
-        if (ret && ret.groups) {
-          const g = ret.groups.find((g) => g.id === group.id)
-          if (g && g.work) {
-            //console.log('useGroupStore g.work',g.work)
-            this.list[group.id].work = g.work
-          }
-        }
-      }
-    },*/
     async updateMT(params) {
       console.log('useModGroupStore updateMT', params)
       await api(this.config).group.patch(params)
-      await this.fetchMT({
-        id: params.id,
-        polygon: true
-      })
+      await this.fetchGroupMT(params.id)
     },
   },
   getters: {
     get: (state) => (id) => {
       id = parseInt(id)
-      if (!id) return null
-      //const g = state.list[id] ? state.list[id] : null
+      if (!id) {
+        console.error('uMGS id not present')
+        return null
+      }
+      const g = state.list[id] ? state.list[id] : null
       //console.log('uMGS get', id, g)
-      return state.list[id] ? state.list[id] : null
+      if (!g) console.error('uMGS group not found for id', id)
+      return g
     }
   }
 })
