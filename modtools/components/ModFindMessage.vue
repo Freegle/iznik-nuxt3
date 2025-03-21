@@ -2,11 +2,9 @@
   <div>
     <b-input-group>
       <b-form-input v-model="term" placeholder="Message id/subject" @keyup.native.enter="search" />
-      <b-input-group>
-        <slot name="append">
-          <SpinButton variant="primary" icon-name="search" label="Search" spinclass="text-white" @handle="search" />
-        </slot>
-      </b-input-group>
+      <slot name="append">
+        <SpinButton variant="primary" icon-name="search" label="Search" spinclass="text-white" @handle="search" />
+      </slot>
     </b-input-group>
   </div>
 </template>

@@ -6,11 +6,9 @@
       </b-form-text>
       <b-input-group>
         <b-form-input v-model="me.displayname" placeholder="Your name" />
-        <b-input-group>
-          <slot name="append">
-            <SpinButton variant="white" icon-name="save" label="Save" @handle="saveName" />
-          </slot>
-        </b-input-group>
+        <slot name="append">
+          <SpinButton variant="white" icon-name="save" label="Save" @handle="saveName" />
+        </slot>
       </b-input-group>
     </b-form-group>
     <b-form-group label="Your email address">
@@ -20,11 +18,9 @@
       </b-form-text>
       <b-input-group id="input-email">
         <b-form-input v-model="me.email" placeholder="Your email" label="Your email address" type="email" />
-        <b-input-group>
-          <slot name="append">
-            <SpinButton variant="white" icon-name="save" label="Save" @handle="saveEmail" />
-          </slot>
-        </b-input-group>
+        <slot name="append">
+          <SpinButton variant="white" icon-name="save" label="Save" @handle="saveEmail" />
+        </slot>
       </b-input-group>
     </b-form-group>
     <b-form-group label="Moderation Notifications (Active)">

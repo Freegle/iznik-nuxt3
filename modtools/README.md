@@ -46,7 +46,7 @@ A fairly minimal `package.json` is needed as `nuxt.config.ts` extends `../` and 
 ## Upgrade notes
 
 * b-btn to b-button, b-select to b-form-select, date-picker to OurDatePicker, b-input to b-form-input, b-textarea to b-form-textarea
-  b-input-group-append -> <b-input-group> <slot name="append">
+  b-input-group-append -> <slot name="append">
 * b-modal <template #default> <template #footer> useOurModal, etc. Do not use v-if on b-modal
   add @hidden="onHide" emits: ['hidden'] onHide() { this.$emit('hidden') }
   add v-if and @hidden <ModLogsModal v-if="showLogsModal" @hidden="showLogsModal = false" />

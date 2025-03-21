@@ -118,9 +118,10 @@ export const useModGroupStore = defineStore({
   },
   getters: {
     get: (state) => (id) => {
+      const idwas = id
       id = parseInt(id)
       if (!id) {
-        console.error('uMGS id not present')
+        console.error('uMGS id not present',idwas)
         return null
       }
       const g = state.list[id] ? state.list[id] : null

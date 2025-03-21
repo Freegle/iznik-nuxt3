@@ -23,12 +23,10 @@
         </p>
         <b-input-group v-if="supportOrAdmin" class="mt-2 mb-2">
           <b-form-input v-model="memberToAdd" type="number" placeholder="Add member by ID" />
-          <b-input-group>
-            <slot name="append">
-              <SpinButton variant="primary" icon-name="plus" label="Add" spinclass="text-white" @handle="addMember($event, team.name)"
-                :disabled="!memberToAdd" />
-            </slot>
-          </b-input-group>
+          <slot name="append">
+            <SpinButton variant="primary" icon-name="plus" label="Add" spinclass="text-white" @handle="addMember($event, team.name)"
+              :disabled="!memberToAdd" />
+          </slot>
         </b-input-group>
         <NoticeMessage v-if="!team.active" variant="info">
           This team is not active at the moment.
@@ -61,7 +59,7 @@ const teams = computed(() => {
   return teamStore.all
 })
 
-onMounted( () => {
+onMounted(() => {
   modGroupStore.getModGroups()
   teamStore.fetch()
 })

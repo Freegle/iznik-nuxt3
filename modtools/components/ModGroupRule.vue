@@ -8,19 +8,15 @@
     </b-form-text>
     <b-input-group v-if="type === 'input'">
       <b-input v-model="value" />
-      <b-input-group>
-        <slot name="append">
-          <SpinButton variant="white" icon-name="save" label="Save" @handle="save" :disabled="readonly" />
-        </slot>
-      </b-input-group>
+      <slot name="append">
+        <SpinButton variant="white" icon-name="save" label="Save" @handle="save" :disabled="readonly" />
+      </slot>
     </b-input-group>
     <b-input-group v-if="type === 'number'">
       <b-input v-model="value" type="number" :step="step" />
-      <b-input-group>
-        <slot name="append">
-          <SpinButton variant="white" icon-name="save" label="Save" @handle="save" :disabled="readonly" />
-        </slot>
-      </b-input-group>
+      <slot name="append">
+        <SpinButton variant="white" icon-name="save" label="Save" @handle="save" :disabled="readonly" />
+      </slot>
     </b-input-group>
     <div v-else-if="type === 'textarea'">
       <b-row>

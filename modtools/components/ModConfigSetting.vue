@@ -5,11 +5,9 @@
     </b-form-text>
     <b-input-group v-if="type === 'input'">
       <b-form-input v-model="value" :disabled="disabled" />
-      <b-input-group v-if="!disabled">
-        <slot name="append">
-          <SpinButton variant="white" icon-name="save" label="Save" @handle="save" />
-        </slot>
-      </b-input-group>
+      <slot name="append" v-if="!disabled">
+        <SpinButton variant="white" icon-name="save" label="Save" @handle="save" />
+      </slot>
     </b-input-group>
     <div v-else-if="type === 'textarea'">
       <b-row>

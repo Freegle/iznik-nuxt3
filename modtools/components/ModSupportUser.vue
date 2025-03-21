@@ -175,11 +175,9 @@
       <div class="d-flex justify-content-between flex-wrap">
         <b-input-group class="mt-2">
           <b-form-input v-model="newpassword" type="text" placeholder="Reset password" autocomplete="off" class="max" />
-          <b-input-group>
-            <slot name="append">
-              <SpinButton variant="white" icon-name="save" label="Set Password" @handle="setPassword" />
-            </slot>
-          </b-input-group>
+          <slot name="append">
+            <SpinButton variant="white" icon-name="save" label="Set Password" @handle="setPassword" />
+          </slot>
         </b-input-group>
         <b-input-group class="mt-2">
           <b-form-input v-model="newemail" type="text" placeholder="Add email" autocomplete="off" class="max" />
@@ -191,11 +189,9 @@
               As Secondary
             </option>
           </b-form-select>
-          <b-input-group>
-            <slot name="append">
-              <SpinButton variant="white" icon-name="save" label="Add Email" @handle="addEmail" />
-            </slot>
-          </b-input-group>
+          <slot name="append">
+            <SpinButton variant="white" icon-name="save" label="Add Email" @handle="addEmail" />
+          </slot>
         </b-input-group>
         <NoticeMessage v-if="emailAddError" variant="danger" class="mt-2">
           {{ emailAddError }}
