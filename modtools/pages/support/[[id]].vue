@@ -106,9 +106,9 @@ export default {
     this.chatStore.list = [] // this.chatStore.clear()
     this.messageStore.clear()
   },
-  async mounted() {
+  mounted() {
     const modGroupStore = useModGroupStore()
-    await modGroupStore.getModGroups()
+    modGroupStore.getModGroups()
   },
   methods: {
     changedMessageTerm(term) {

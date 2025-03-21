@@ -8,7 +8,7 @@ export const useModGroupStore = defineStore({
   id: 'modgroups',
   state: () => ({
     list: {},
-    getting: [],
+    getting: [], // To avoid repeat gettings
   }),
   actions: {
     init(config) {
@@ -19,8 +19,8 @@ export const useModGroupStore = defineStore({
       this.list = {}
       this.getting = []
     },
-    async getModGroups() {
-      console.log('--- uMGS getModGroups')
+    getModGroups() { // Do not clear groups info but (start to) get all again
+      //console.log('--- uMGS getModGroups')
       const authStore = useAuthStore()
       const me = authStore.user
       let myGroups = []
@@ -42,20 +42,23 @@ export const useModGroupStore = defineStore({
         })
       }
 
-
-      this.clear()
+      //this.clear()
+      this.getting = []
       for (const g of myGroups) {
         this.getting.push(g.id)
       }
       for (const g of myGroups) {
-        await this.fetchGroupMT(g.id)
+        this.fetchGroupMT(g.id) // This returns immediately so non-blocking
       }
-      this.getting = []
+      //console.log('--- uMGS getModGroups DONE', this.getting)
     },
-    // Called at page mount to get mod's groups
+
+    // Called by getModGroups at page mount to get mod's groups
     // Also called if need be fetchIfNeedBeMT
     // And called to reload after any changes
+    // (still may have duplicate requests at page start if fetchIfNeedBeMT too quick)
     async fetchGroupMT(id) {
+      if (!id) { console.error('fetchGroupMT with zero id'); return }
       const groupStore = useGroupStore()
       //console.log('--- uMGS fetchGroupMT', id)
       const polygon = true
@@ -80,6 +83,8 @@ export const useModGroupStore = defineStore({
         groupStore.list[group.id] = group // Set in root group store as well
       }
       //console.log('=== uMGS fetchGroupMT',id, group!==null)
+      const gettingix = this.getting.indexOf(id)
+      if (gettingix !== -1) this.getting.splice(gettingix, 1)
     },
     async listMT(params) {
       console.error('uMGS listMT not implemented')
@@ -97,10 +102,10 @@ export const useModGroupStore = defineStore({
       if (!id) return
       if (this.list[id]) return
       if (this.getting.includes(id)) {
-        // console.error('uMGS fetchIfNeedBeMT getting',id)
+        //console.error('uMGS fetchIfNeedBeMT getting', id)
         return
       }
-      //console.error('uMGS fetchIfNeedBeMT get',id)
+      //console.error('uMGS fetchIfNeedBeMT get', id)
       this.getting.push(id)
       await this.fetchGroupMT(id)
     },
@@ -120,7 +125,8 @@ export const useModGroupStore = defineStore({
       }
       const g = state.list[id] ? state.list[id] : null
       //console.log('uMGS get', id, g)
-      if (!g) console.error('uMGS group not found for id', id)
+      // OK if not found initially as it should appear soon enough
+      // if (!g) console.error('uMGS group not found for id', id)
       return g
     }
   }

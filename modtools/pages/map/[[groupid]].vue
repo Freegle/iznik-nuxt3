@@ -39,7 +39,7 @@ const caretaker = computed(() => {
 const loaded = ref(false)
 
 onMounted(async () => {
-  await modGroupStore.getModGroups()
+  modGroupStore.getModGroups()
   // Get the data before we load the map to avoid timing windows.
   // Get CGAs and DPAs for all groups - but no locations
   await modGroupStore.listMT({

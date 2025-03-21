@@ -61,8 +61,8 @@ const teams = computed(() => {
   return teamStore.all
 })
 
-onMounted( async () => {
-  await modGroupStore.getModGroups()
+onMounted( () => {
+  modGroupStore.getModGroups()
   teamStore.fetch()
 })
 

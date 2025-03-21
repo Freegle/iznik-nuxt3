@@ -53,9 +53,9 @@ export default {
     return {
     }
   },
-  async mounted() {
+  mounted() {
     const modGroupStore = useModGroupStore()
-    await modGroupStore.getModGroups()
+    modGroupStore.getModGroups()
     // reset infiniteLoading on return to page
     this.memberStore.clear()
   },

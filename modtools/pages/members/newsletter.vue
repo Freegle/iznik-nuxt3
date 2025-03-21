@@ -22,7 +22,7 @@ export default {
   },
   async mounted() {
     const modGroupStore = useModGroupStore()
-    await modGroupStore.getModGroups()
+    modGroupStore.getModGroups()
     console.log('newsletter mounted')
     await this.storyStore.fetchMT({
       newsletter: true,

@@ -195,8 +195,8 @@ export default {
       this.fetch(newval)
     }
   },
-  async mounted() {
-    await this.modGroupStore.getModGroups()
+  mounted() {
+    this.modGroupStore.getModGroups()
 
     this.fetch(this.groupidshow)
   },

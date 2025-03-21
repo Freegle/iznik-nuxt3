@@ -33,7 +33,7 @@ export default {
   },
   async mounted() {
     const modGroupStore = useModGroupStore()
-    await modGroupStore.getModGroups()
+    modGroupStore.getModGroups()
     await this.storyStore.fetchMT({
       reviewed: 0,
       dontzapfalsey: true, // Stop BaseAPI from removing above zero value

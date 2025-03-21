@@ -66,9 +66,9 @@ export default {
       return null
     },
   },
-  async mounted() {
+  mounted() {
     const modGroupStore = useModGroupStore()
-    await modGroupStore.getModGroups()
+    modGroupStore.getModGroups()
   },
   methods: {
     changedMessageTerm(term) {

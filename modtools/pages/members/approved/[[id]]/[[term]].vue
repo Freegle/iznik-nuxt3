@@ -96,7 +96,7 @@ export default {
       this.memberStore.clear()
     },
   },
-  async mounted() {
+  mounted() {
     const route = useRoute()
     if (('id' in route.params) && route.params.id) this.groupid = parseInt(route.params.id)
     this.search = null
@@ -104,7 +104,7 @@ export default {
     //console.log('mounted', this.groupid, this.search) 
 
     const modGroupStore = useModGroupStore()
-    await modGroupStore.getModGroups()
+    modGroupStore.getModGroups()
 
     // reset infiniteLoading on return to page
     this.memberStore.clear()

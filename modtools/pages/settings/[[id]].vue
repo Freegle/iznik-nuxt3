@@ -52,9 +52,9 @@ const loadGroup = ref(null)
 const route = useRoute()
 loadGroup.value = parseInt(route.params.id) || null
 
-onMounted(async () => {
+onMounted(() => {
   const modGroupStore = useModGroupStore()
-  await modGroupStore.getModGroups()
+  modGroupStore.getModGroups()
   if (loadGroup.value) {
     // We've been asked to load group setting.
     tabIndex.value = 1

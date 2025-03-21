@@ -73,7 +73,7 @@ export default {
   },
   async mounted() {
     // Get groups with MT info
-    await this.modGroupStore.getModGroups()
+    this.modGroupStore.getModGroups()
 
     // Consider affiliation ask.
     const lastask = this.miscStore.get('lastaffiliationask')

@@ -136,9 +136,9 @@ export default {
       this.spammerStore.clear()
     }
   },
-  async mounted() {
+  mounted() {
     const modGroupStore = useModGroupStore()
-    await modGroupStore.getModGroups()
+    modGroupStore.getModGroups()
     // Start in Pending Add if they have rights to see it.
     this.spammerStore.clear()
 

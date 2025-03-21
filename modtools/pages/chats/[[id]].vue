@@ -163,7 +163,7 @@ export default {
   },
   async mounted() {
     const modGroupStore = useModGroupStore()
-    await modGroupStore.getModGroups()
+    modGroupStore.getModGroups()
     this.chatStore.clear()
     await this.listChats()
   },

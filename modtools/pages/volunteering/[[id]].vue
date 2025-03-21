@@ -68,9 +68,9 @@ export default {
       }
     }
   },
-  async mounted() {
+  mounted() {
     const modGroupStore = useModGroupStore()
-    await modGroupStore.getModGroups()
+    modGroupStore.getModGroups()
     // We don't want to pick up any approved volunteerings.
     this.volunteeringStore.clear()
   },

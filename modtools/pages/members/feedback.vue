@@ -122,7 +122,7 @@ export default {
   },
   async mounted() {
     const modGroupStore = useModGroupStore()
-    await modGroupStore.getModGroups()
+    modGroupStore.getModGroups()
     this.filter = 'Comments'
     await this.getHappiness()
   },

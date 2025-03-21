@@ -61,9 +61,9 @@ export default {
       this.clear(this.type)
     }
   },
-  async mounted() {
+  mounted() {
     const modGroupStore = useModGroupStore()
-    await modGroupStore.getModGroups()
+    modGroupStore.getModGroups()
     this.clear(this.type)
   },
   methods: {

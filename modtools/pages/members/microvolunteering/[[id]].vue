@@ -165,9 +165,9 @@ export default {
       this.fetch()
     }
   },
-  async mounted() {
+  mounted() {
     const modGroupStore = useModGroupStore()
-    await modGroupStore.getModGroups()
+    modGroupStore.getModGroups()
     this.microVolunteeringStore.clear()
     this.fetch()
   },

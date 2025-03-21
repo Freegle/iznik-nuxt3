@@ -67,9 +67,9 @@ export default {
       this.context = null
     }
   },
-  async mounted() {
+  mounted() {
     const modGroupStore = useModGroupStore()
-    await modGroupStore.getModGroups()
+    modGroupStore.getModGroups()
     this.commentStore.clear()
   },
   methods: {

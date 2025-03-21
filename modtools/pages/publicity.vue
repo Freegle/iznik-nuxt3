@@ -48,7 +48,7 @@ export default {
   },
   async mounted() {
     const modGroupStore = useModGroupStore()
-    await modGroupStore.getModGroups()
+    modGroupStore.getModGroups()
     await this.publicityStore.clear()
     await this.publicityStore.fetch({ reviewed: 0 })
     console.log('Fetched publicity')

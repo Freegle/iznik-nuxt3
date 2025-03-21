@@ -31,9 +31,9 @@ export default {
     return {
     }
   },
-  async mounted() {
+  mounted() {
     const modGroupStore = useModGroupStore()
-    await modGroupStore.getModGroups()
+    modGroupStore.getModGroups()
   },
 }
 </script>
