@@ -28,7 +28,17 @@
             >
               <div class="notda">
                 <div
-                  class="d-flex justify-content-between flex-wrap mb-2 mt-3 border-bottom"
+                  v-if="me?.settings?.simplemail === 'None'"
+                  class="text-danger text--smallest d-flex justify-content-around mb-1"
+                >
+                  <div>
+                    Emails off. Check here regularly. Change in
+                    <nuxt-link no-prefetch to="/settings">Settings</nuxt-link>.
+                  </div>
+                </div>
+                <div v-else class="mt-3"></div>
+                <div
+                  class="d-flex justify-content-between flex-wrap mb-2 border-bottom"
                 >
                   <form
                     role="search"
