@@ -29,7 +29,7 @@
     </div>
     <div v-else-if="type === 'toggle'">
       <OurToggle v-model="value" class="mt-2" :height="30" :width="toggleWidth" :font-size="14" :sync="true"
-        :labels="{ checked: toggleChecked, unchecked: toggleUnchecked }" color="#61AE24" :disabled="readonly" @change="save" />
+        :labels="{ checked: toggleChecked, unchecked: toggleUnchecked }" variant="modgreen" :disabled="readonly" @change="save" />
     </div>
   </b-form-group>
 </template>

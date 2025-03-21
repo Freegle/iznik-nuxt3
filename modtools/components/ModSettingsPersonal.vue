@@ -43,14 +43,14 @@
         Play beep when new ModTools work arrives.
       </b-form-text>
       <OurToggle v-model="beep" class="mt-2" :height="30" :width="150" :font-size="14" :sync="true"
-        :labels="{ checked: 'Play beep', unchecked: 'Stay quiet' }" color="#61AE24" />
+        :labels="{ checked: 'Play beep', unchecked: 'Stay quiet' }" variant="modgreen" />
     </b-form-group>
     <b-form-group label="Show me as a volunteer?">
       <b-form-text class="mb-2">
         We can show members who the volunteers on a group are, to make it seem more friendly. You can choose whether we show you.
       </b-form-text>
       <OurToggle v-model="showme" class="mt-2" :height="30" :width="150" :font-size="14" :sync="true"
-        :labels="{ checked: 'Show me', unchecked: 'Hide me' }" color="#61AE24" />
+        :labels="{ checked: 'Show me', unchecked: 'Hide me' }" variant="modgreen" />
     </b-form-group>
     <b-form-group label="Email me about ChitChat?">
       <b-form-text class="mb-2">
@@ -59,7 +59,7 @@
         you are an active mod on.
       </b-form-text>
       <OurToggle v-model="modnotifnewsfeed" class="mt-2" :height="30" :width="150" :font-size="14" :sync="true"
-        :labels="{ checked: 'Mail me', unchecked: 'Don\'t mail' }" color="#61AE24" />
+        :labels="{ checked: 'Mail me', unchecked: 'Don\'t mail' }" variant="modgreen" />
     </b-form-group>
     <b-form-group label="Enter send vs newline">
       <b-form-text class="mb-2">
@@ -69,7 +69,7 @@
         this device.
       </b-form-text>
       <OurToggle v-model="enterAddsNewLine" class="mt-2" :height="30" :width="150" :font-size="14" :sync="true"
-        :labels="{ checked: 'Send message', unchecked: 'Insert new line' }" color="#61AE24" />
+        :labels="{ checked: 'Send message', unchecked: 'Insert new line' }" variant="modgreen" />
     </b-form-group>
     <b-form-group label="Would you like some cake?">
       <ModCake />

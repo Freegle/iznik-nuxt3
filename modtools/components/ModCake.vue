@@ -28,7 +28,7 @@
       :font-size="14"
       :sync="true"
       :labels="{checked: 'Cake please', unchecked: 'No cake thanks'}"
-      color="#61AE24"
+      variant="modgreen"
     />
     <div v-if="modcake">
       <p>

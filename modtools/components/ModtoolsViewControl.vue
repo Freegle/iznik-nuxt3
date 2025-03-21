@@ -1,6 +1,6 @@
 <template>
   <OurToggle :value="summary" class="mt-2" :height="30" :width="150" :font-size="14" :sync="true"
-    :labels="{ checked: 'Summary View', unchecked: 'Detailed View' }" color="#61AE24" @change="toggleView" />
+    :labels="{ checked: 'Summary View', unchecked: 'Detailed View' }" variant="modgreen" @change="toggleView" />
 </template>
 
 <script setup>

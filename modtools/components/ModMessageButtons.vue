@@ -33,7 +33,7 @@
     <client-only>
       <div class="mt-1 mb-1 d-flex flex-wrap">
         <OurToggle v-model="allowAutoSend" :height="30" :width="150" :font-size="14" :sync="true" class="mr-1"
-          :labels="{ checked: 'Allow autosend', unchecked: 'Edit first' }" color="#61AE24" />
+          :labels="{ checked: 'Allow autosend', unchecked: 'Edit first' }" variant="modgreen" />
         <div class="small text-muted mt-1">
           Standard messages can be configured to send in a single click. This toggle temporarily disables that so you can edit first.
         </div>

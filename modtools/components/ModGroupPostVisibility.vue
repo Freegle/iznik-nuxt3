@@ -23,7 +23,7 @@
       Click the toggle to show the map.
     </p>
     <OurToggle :value="showing" class="mt-2" :height="30" :width="150" :font-size="14" :sync="true"
-      :labels="{ checked: 'Show map', unchecked: 'Hide map' }" color="#61AE24" @change="toggleView" />
+      :labels="{ checked: 'Show map', unchecked: 'Hide map' }" variant="modgreen" @change="toggleView" />
     <div v-if="showing">
       <p>
         This map shows your Core Group Area (CGA) in dark blue. You can control how far outside this area

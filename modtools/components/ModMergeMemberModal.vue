@@ -12,7 +12,7 @@
           </NoticeMessage>
           <div v-if="supportOrAdmin" class="d-flex justify-content-around">
             <OurToggle v-model="byemail" class="mt-4" :height="30" :width="150" :font-size="14" :sync="true"
-              :labels="{ checked: 'Merge by email', unchecked: 'Merge by user id' }" color="#61AE24" />
+              :labels="{ checked: 'Merge by email', unchecked: 'Merge by user id' }" variant="modgreen" />
           </div>
           <div v-if="byemail">
             <p class="mt-2">

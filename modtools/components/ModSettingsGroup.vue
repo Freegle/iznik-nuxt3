@@ -76,7 +76,7 @@
                 We notify you about work to do for active communities.
               </b-form-text>
               <OurToggle v-model="active" class="mt-2" :height="30" :width="150" :font-size="14" :sync="true"
-                :labels="{ checked: 'Active', unchecked: 'Backup' }" color="#61AE24" />
+                :labels="{ checked: 'Active', unchecked: 'Backup' }" variant="modgreen" />
             </b-form-group>
             <b-form-group label="Standard Messages to use for this community:">
               <b-form-text class="mb-2">

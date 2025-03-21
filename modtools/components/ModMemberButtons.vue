@@ -131,7 +131,7 @@
           :sync="true"
           class="mr-1"
           :labels="{checked: 'Allow autosend', unchecked: 'Edit first'}"
-          color="#61AE24"
+          variant="modgreen"
         />
         <div class="small text-muted mt-1">
           Standard messages can be configured to send in a single click.  This toggle temporarily disables that so you can edit first.

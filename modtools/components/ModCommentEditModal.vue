@@ -28,7 +28,7 @@
           if they are an existing member or join a group. Please use this only for serious issues.
         </p>
         <OurToggle :value="comment.flag" class="mt-2" :height="30" :width="250" :font-size="14" :sync="true"
-          :labels="{ checked: 'Will alert other groups', unchecked: 'Will not alert other groups' }" color="#61AE24" @change="toggleFlag" />
+          :labels="{ checked: 'Will alert other groups', unchecked: 'Will not alert other groups' }" variant="modgreen" @change="toggleFlag" />
       </template>
       <template #footer>
         <b-button variant="white" @click="hide">

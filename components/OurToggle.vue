@@ -73,6 +73,11 @@ export default {
   --toggle-border-on: #61ae24;
 }
 
+.modgreen {
+  --toggle-bg-on: #338808;
+  --toggle-border-on: #338808;
+}
+
 :deep(.toggle-off) {
   padding-right: 0.25rem;
   justify-content: flex-start !important;

@@ -68,11 +68,11 @@
           </b-form-group>
           <b-form-group label="Community Event mails:" class="mr-5">
             <OurToggle :modelValue="(Boolean)(membership.eventsallowed)" class="mt-2" :height="30" :width="100" :font-size="14" :sync="true"
-              :labels="{ checked: 'Weekly', unchecked: 'Off' }" color="#61AE24" @change="changeEvents" />
+              :labels="{ checked: 'Weekly', unchecked: 'Off' }" variant="modgreen" @change="changeEvents" />
           </b-form-group>
           <b-form-group label="Volunteer Opportunity mails:">
             <OurToggle :modelValue="(Boolean)(membership.volunteeringallowed)" class="mt-2" :height="30" :width="100" :font-size="14" :sync="true"
-              :labels="{ checked: 'Weekly', unchecked: 'Off' }" color="#61AE24" @change="changeVolunteering" />
+              :labels="{ checked: 'Weekly', unchecked: 'Off' }" variant="modgreen" @change="changeVolunteering" />
           </b-form-group>
         </div>
       </b-card-body>

@@ -48,7 +48,7 @@
                   </li>
                 </ul>
                 <OurToggle v-model="essential" class="mt-2" :height="30" :width="150" :font-size="14" :sync="true"
-                  :labels="{ checked: 'Essential', unchecked: 'Newsletter' }" color="#61AE24" />
+                  :labels="{ checked: 'Essential', unchecked: 'Newsletter' }" variant="modgreen" />
               </b-form-group>
               <b-form-group label="Subject of ADMIN:" label-for="subject" label-class="mb-0">
                 <Field id="subject" v-model="subject" name="subject" type="text" placeholder="Subject (don't include ADMIN - added automatically)"
