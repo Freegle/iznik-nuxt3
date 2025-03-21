@@ -8,7 +8,7 @@
       <!--ModZoomStock class="d-none d-md-block text-white" /-->
       <b-navbar-nav class="d-flex align-items-center">
         <b-nav-item v-if="loggedIn" id="menu-option-modtools-discourse2" class="text-center p-0 mr-4" @click="discourse">
-          <div id="discourseIcon" class="position-relative small">
+          <div id="discourseIcon" class="position-relative">
             <v-icon :icon="['fab', 'discourse']" class="fa-2x" />
             <div class="d-none d-xl-block">
               Us

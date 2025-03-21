@@ -133,7 +133,7 @@ export default {
   },
   computed: {
     groups() {
-      const groups = Object.values(this.modGroupStore.list)
+      const groups = Object.values(this.modGroupStore.allGroups)
       return groups
     },
     groupitems() {

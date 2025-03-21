@@ -9,6 +9,7 @@ export const useModGroupStore = defineStore({
   state: () => ({
     list: {},
     getting: [], // To avoid repeat gettings
+    allGroups: {},
   }),
   actions: {
     init(config) {
@@ -87,16 +88,15 @@ export const useModGroupStore = defineStore({
       if (gettingix !== -1) this.getting.splice(gettingix, 1)
     },
     async listMT(params) {
-      console.error('uMGS listMT not implemented')
-      /*const groups = await api(this.config).group.listMT(params)
-      this.list = {}
+      console.log('uMGS listMT implemented: getting allGroups')
+      const groups = await api(this.config).group.listMT(params)
+      //this.list = {}
       this.allGroups = {}
       if (groups) {
         groups.forEach((g) => {
-          this.allGroups[g.nameshort.toLowerCase()] = g
-          this.list[g.id] = g
+          this.allGroups[g.id] = g
         })
-      }*/
+      }
     },
     async fetchIfNeedBeMT(id) {
       if (!id) return
@@ -129,6 +129,11 @@ export const useModGroupStore = defineStore({
       // OK if not found initially as it should appear soon enough
       // if (!g) console.error('uMGS group not found for id', id)
       return g
-    }
+    },
+    getfromall: (state) => (id) => {
+      if (!id) return null
+      return state.allGroups[id] ? state.allGroups[id] : null
+    },
+    
   }
 })

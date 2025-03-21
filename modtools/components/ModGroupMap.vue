@@ -283,7 +283,7 @@ import turfintersect from 'turf-intersect'
 import turfarea from 'turf-area'
 import ClusterMarker from '../components/ClusterMarker'
 import { attribution, osmtile } from '../composables/useMap'
-import { useGroupStore } from '~/stores/group'
+import { useModGroupStore } from '@/stores/modgroup'
 import { useLocationStore } from '~/stores/location'
 
 let Wkt = null
@@ -322,7 +322,7 @@ const props = defineProps({
   },
 })
 
-const groupStore = useGroupStore()
+const modGroupStore = useModGroupStore()
 const locationStore = useLocationStore()
 const mapObject = ref(null)
 // const serviceUrl = useRuntimeConfig().public.GEOCODE
@@ -360,7 +360,7 @@ const mapHeight = computed(() => {
 })
 
 const allgroups = computed(() => {
-  let groups = Object.values(groupStore.list)
+  let groups = Object.values(modGroupStore.allGroups)
 
   if (props.caretaker) {
     groups = groups.filter((g) => g.mentored)
@@ -370,7 +370,8 @@ const allgroups = computed(() => {
 })
 
 const group = computed(() => {
-  return props.groupid ? groupStore.get(props.groupid) : null
+  if( !props.groupid) return null
+  return modGroupStore.getfromall(props.groupid)
 })
 
 const CGAs = computed(() => {
@@ -693,18 +694,19 @@ function ready() {
 }
 
 function idle() {
-  console.log('Map idle', zoom.value)
+  console.log('Map idle', zoom.value, props.groupid)
   if (props.groupid) {
-    const group = groupStore.get(props.groupid)
+    const thegroup = group.value
 
-    if (group) {
+    if (thegroup) {
+      console.log('Map idle thegroup', thegroup)
       let bounds
 
       if (!initialGroupZoomed.value) {
         // Zoom the map to fit the DPA/CGA of the group.  We need to do this before fetching the locations so that
         // we don't fetch them for the whole country.
         initialGroupZoomed.value = true
-        const area = group.poly || group.polyofficial
+        const area = thegroup.poly || thegroup.polyofficial
         console.log('Zoom to area', area)
         if (area) {
           const wkt = new Wkt.Wkt()

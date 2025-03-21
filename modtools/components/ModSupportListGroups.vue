@@ -83,7 +83,7 @@ export default {
   },
   computed: {
     groups() {
-      const ret = Object.values(this.modGroupStore.list)
+      const ret = Object.values(this.modGroupStore.allGroups)
       ret.sort((a, b) => {
         return a.nameshort
           .toLowerCase()
