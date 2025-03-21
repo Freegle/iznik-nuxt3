@@ -6,7 +6,7 @@ export function suppressException(err) {
     err.stack?.includes('LMap') ||
     err.stack?.includes('LMarker') ||
     err.stack?.includes('layer') ||
-    err.stack?.includes('Map container not found')
+    err.message?.includes('Map container not found')
   ) {
     // Leaflet throws all kinds of errors when the DOM elements are removed.  Ignore them all.
     console.log('Leaflet in stack - ignore')
