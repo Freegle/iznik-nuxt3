@@ -21,6 +21,7 @@
               v-model="currentAtts"
               type="Message"
               multiple
+              :recognise="currentAtts?.length === 0"
             />
           </div>
         </template>
@@ -41,6 +42,18 @@
           </div>
         </template>
       </draggable>
+    </div>
+    <div v-if="AIInfoAdded" class="text-smallest d-flex flex-wrap">
+      <b-button variant="link" size="sm" @click="clearAIInfo">
+        <v-icon icon="trash-alt" /> Remove AI text
+      </b-button>
+      <div
+        v-b-tooltip="
+          'This is experimental text added by AI based on the photo.  Feel free to remove it and write your own.'
+        "
+      >
+        <v-icon icon="question-circle" class="mr-1 mt-2" />
+      </div>
     </div>
     <div class="subject-layout mb-1 mt-1">
       <div class="d-flex flex-column">
@@ -85,6 +98,7 @@ import { useComposeStore } from '../stores/compose'
 import NumberIncrementDecrement from './NumberIncrementDecrement'
 import { ref, watch } from '#imports'
 import { useMiscStore } from '~/stores/misc'
+import { useImageStore } from '~/stores/image'
 
 const OurUploader = defineAsyncComponent(() =>
   import('~/components/OurUploader')
@@ -105,6 +119,7 @@ const props = defineProps({
 })
 
 const composeStore = useComposeStore()
+const imageStore = useImageStore()
 
 composeStore.setType({
   id: props.id,
@@ -116,12 +131,36 @@ const ret = composeStore.attachments(props.id).filter((a) => 'id' in a)
 // Need a separate variable to avoid watching on object causing tizzy.
 const currentAtts = ref([])
 
+const AIInfoAdded = ref(false)
+
 watch(
   currentAtts,
   (newVal) => {
     try {
       console.log('Current atts changed', props.id, newVal)
       composeStore.setAttachmentsForMessage(props.id, newVal)
+
+      const message = composeStore.message(props.id)
+
+      if (newVal[0].info.shortDescription && !message.item) {
+        const item = newVal[0].info.shortDescription.replace(/[,.;:!?]$/, '')
+        composeStore.setItem({
+          id: props.id,
+          item,
+        })
+
+        AIInfoAdded.value = true
+      }
+
+      if (newVal[0].info.longDescription && !message.description) {
+        composeStore.setDescription({
+          id: props.id,
+          description:
+            newVal[0].info.longDescription + '\r\n\r\n(AI text based on photo)',
+        })
+
+        AIInfoAdded.value = true
+      }
     } catch (e) {
       console.error('Watch error', e)
     }
@@ -195,6 +234,21 @@ const numberInputSize = computed(() =>
 const textareaSize = computed(() =>
   miscStore.breakpoint === 'xs' ? 'sm' : 'md'
 )
+
+function clearAIInfo() {
+  composeStore.setItem({
+    id: props.id,
+    item: '',
+  })
+  composeStore.setDescription({
+    id: props.id,
+    description: '',
+  })
+
+  imageStore.rateRecognise(currentAtts.value[0].id, 'Bad')
+
+  AIInfoAdded.value = false
+}
 </script>
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';
