@@ -43,18 +43,17 @@
         </template>
       </draggable>
     </div>
-    <div v-if="AIInfoAdded" class="text-smallest d-flex flex-wrap">
-      <b-button variant="link" size="sm" @click="clearAIInfo">
-        <v-icon icon="trash-alt" /> Remove AI text
-      </b-button>
-      <div
-        v-b-tooltip="
-          'This is experimental text added by AI based on the photo.  Feel free to remove it and write your own.'
-        "
-      >
-        <v-icon icon="question-circle" class="mr-1 mt-2" />
+    <NoticeMessage v-if="AIInfoAdded && !AIRated" variant="info">
+      <p>As an experiment, we're generating AI text. Was this useful?</p>
+      <div class="d-flex justify-content-between flex-wrap">
+        <b-button variant="secondary" size="sm" @click="clearAIInfo">
+          <v-icon icon="times-circle" /> No - remove
+        </b-button>
+        <b-button variant="secondary" size="sm" @click="keepAIInfo">
+          <v-icon icon="check-circle" /> Yes - keep
+        </b-button>
       </div>
-    </div>
+    </NoticeMessage>
     <div class="subject-layout mb-1 mt-1">
       <div class="d-flex flex-column">
         <label :for="$id('posttype')" class="d-none d-md-block pl-1">
@@ -235,6 +234,8 @@ const textareaSize = computed(() =>
   miscStore.breakpoint === 'xs' ? 'sm' : 'md'
 )
 
+const AIRated = ref(false)
+
 function clearAIInfo() {
   composeStore.setItem({
     id: props.id,
@@ -248,6 +249,12 @@ function clearAIInfo() {
   imageStore.rateRecognise(currentAtts.value[0].id, 'Bad')
 
   AIInfoAdded.value = false
+  AIRated.value = true
+}
+
+function keepAIInfo() {
+  imageStore.rateRecognise(currentAtts.value[0].id, 'Good')
+  AIRated.value = true
 }
 </script>
 <style scoped lang="scss">
