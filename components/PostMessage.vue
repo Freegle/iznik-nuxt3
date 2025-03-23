@@ -21,7 +21,7 @@
               v-model="currentAtts"
               type="Message"
               multiple
-              :recognise="currentAtts?.length === 0"
+              :recognise="currentAtts?.length === 0 && type === 'Offer'"
             />
           </div>
         </template>
