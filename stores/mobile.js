@@ -356,124 +356,132 @@ export const useMobileStore = defineStore({ // Do not persist
     async handleNotification(notification) {
       const router = useRouter()
 
-      console.log('handleNotification', notification)
-      /* 2024-08
-      PushNotifications.getDeliveredNotifications().then(notificationList => {
-        console.log("getDeliveredNotifications")
-        console.log("getDeliveredNotifications", notificationList)
-      })*/
+      console.log('handleNotification A', notification)
+      try {
+        /* 2024-08
+        PushNotifications.getDeliveredNotifications().then(notificationList => {
+          console.log("getDeliveredNotifications")
+          console.log("getDeliveredNotifications", notificationList)
+        })*/
 
-      //console.log('push notification', notificationType)
-      console.log(notification)
-      const data = notification.data
-      let foreground = false
-      if ('foreground' in data) {
-        console.log('--- FOREGROUND', data.foreground)
-        foreground = data.foreground
-      } else console.log('--- FOREGROUND NOT SET')
+        //console.log('push notification', notificationType)
+        console.log(notification)
+        const data = notification.data
+        let foreground = false
+        if ('foreground' in data) {
+          console.log('--- FOREGROUND', data.foreground)
+          foreground = data.foreground
+        } else console.log('--- FOREGROUND NOT SET')
 
-      // let msgid = new Date().getTime() // Can't tell if double event if notId not given
-      let msgid = 0
-      if ('notId' in data) {
-        msgid = data.notId
-      }
-      //const doubleEvent = !foreground && msgid !== 0 && msgid === lastPushMsgid
-      //lastPushMsgid = msgid
-      if (!('count' in data)) {
-        data.count = 0
-      }
-      if (!('modtools' in data)) {
-        data.modtools = 0
-      }
-      const modtools = data.modtools == '1'
-      this.modtools = modtools
-      data.count = parseInt(data.badge)
-      //console.log('foreground ' + foreground + ' double ' + doubleEvent + ' msgid: ' + msgid + ' count: ' + data.count + ' modtools: ' + modtools)
-      if (data.count === 0) {
-        //PushNotifications.removeAllDeliveredNotifications()
-        //mobilePush.clearAllNotifications() // no success and error fns given
-        console.log('clearAllNotifications TODO')
-      }
-      console.log('handleNotification badgeCount', data.count)
-      this.setBadgeCount(data.count)
-      //mobilePush.setApplicationIconBadgeNumber(function () { }, function () { }, data.count)
-
-      if (!this.isiOS && 'inlineReply' in data) {
-        const inlineReply = data.inlineReply.trim()
-        console.log('======== inlineReply', inlineReply)
-        if (inlineReply) {
-          this.inlineReply = inlineReply
-          this.chatid = parseInt(data.chatids)
+        // let msgid = new Date().getTime() // Can't tell if double event if notId not given
+        let msgid = 0
+        if ('notId' in data) {
+          msgid = data.notId
         }
-      }
-
-      // Pass route to go to (or update) but only if in background or just starting app
-      // Note: if in foreground then rely on count updates to inform user
-      if ('route' in data) {
-        this.route = data.route // eg /chat/123456 or /chats
-      }
-
-      if (this.inlineReply) {
-        const params = {
-          roomid: this.chatid,
-          message: this.inlineReply
+        //const doubleEvent = !foreground && msgid !== 0 && msgid === lastPushMsgid
+        //lastPushMsgid = msgid
+        if (!('count' in data)) {
+          data.count = 0
         }
-        // CC TODO store.$api.chat.send(params)
-        this.inlineReply = false
-        this.pushed = false
+        if (!('modtools' in data)) {
+          data.modtools = 0
+        }
+        const modtools = data.modtools == '1'
+        this.modtools = modtools
+        data.count = parseInt(data.badge)
+        //console.log('foreground ' + foreground + ' double ' + doubleEvent + ' msgid: ' + msgid + ' count: ' + data.count + ' modtools: ' + modtools)
+        if (data.count === 0) {
+          //PushNotifications.removeAllDeliveredNotifications()
+          //mobilePush.clearAllNotifications() // no success and error fns given
+          console.log('clearAllNotifications TODO')
+        }
+        console.log('handleNotification badgeCount', data.count)
+        this.setBadgeCount(data.count)
+        //mobilePush.setApplicationIconBadgeNumber(function () { }, function () { }, data.count)
+
+        if (!this.isiOS && 'inlineReply' in data) {
+          const inlineReply = data.inlineReply.trim()
+          console.log('======== inlineReply', inlineReply)
+          if (inlineReply) {
+            this.inlineReply = inlineReply
+            this.chatid = parseInt(data.chatids)
+          }
+        }
+        console.log('handleNotification B', this.inlineReply, this.chatid)
+
+        // Pass route to go to (or update) but only if in background or just starting app
+        // Note: if in foreground then rely on count updates to inform user
+        if ('route' in data) {
+          this.route = data.route // eg /chat/123456 or /chats
+        }
+        console.log('handleNotification C', this.route)
+
+        if (this.inlineReply) {
+          const params = {
+            roomid: this.chatid,
+            message: this.inlineReply
+          }
+          // CC TODO store.$api.chat.send(params)
+          this.inlineReply = false
+          this.pushed = false
+          this.route = false
+          return
+        }
+        //store.dispatch('notifications/count')
+        //store.dispatch('chats/listChats')
+        //await api(this.config).chat.listChats(since, search)
+        /*if (this.modtools) {
+          store.dispatch('auth/fetchUser', {
+            components: ['work'],
+            force: true
+          })
+        }*/
+
+        console.log('handleNotification D')
+        const appState = await App.getState() // isActive true at startup and when app active; false when in background
+        const active = appState ? appState.isActive : false
+        console.log('handleNotification E', active)
+        let okToMove = false
+        if (this.isiOS) {
+          okToMove = !active // Do not have push foreground flag, so: do not move if active, even if just started
+        } else { // isAndroid
+          okToMove = (!foreground && active) || // Just started
+            (foreground && !active)   // foreground && activeIn background
+        }
+        console.log('this.isiOS', this.isiOS, 'active', active, 'okToMove', okToMove)
+
+        if (this.route && okToMove) {
+          this.route = this.route.replace('/chat/', '/chats/') // Match redirects in nuxt.config.js
+          console.log('router.currentRoute', router.currentRoute)
+          if (router.currentRoute.path !== this.route) {
+            console.log('GO TO ', this.route)
+            //setTimeout(() => {
+            router.push(this.route)
+            //}, 1500)
+            //router.push({ path: this.route })  // Often doesn't work as intended when starting app from scratch as this routing is too early. Delaying doesn't seem to help.
+          }
+        }
+
         this.route = false
-        return
+
+
+        // iOS needs to be told when we've finished: do it after a short delay to allow our code to run
+        /*if (this.isiOS) {
+          setTimeout(function () {
+            mobilePush.finish(
+              function () {
+                console.log('iOS push finished OK')
+              },
+              function () {
+                console.log('iOS push finished error')
+              },
+              data.notId
+            )
+          }, 50)
+        }*/
+      } catch (e) {
+        console.log('hangleNotification exception', e.message)
       }
-      //store.dispatch('notifications/count')
-      //store.dispatch('chats/listChats')
-      //await api(this.config).chat.listChats(since, search)
-      /*if (this.modtools) {
-        store.dispatch('auth/fetchUser', {
-          components: ['work'],
-          force: true
-        })
-      }*/
-
-      const appState = await App.getState() // isActive true at startup and when app active; false when in background
-      const active = appState ? appState.isActive : false
-      let okToMove = false
-      if (this.isiOS) {
-        okToMove = !active // Do not have push foreground flag, so: do not move if active, even if just started
-      } else { // isAndroid
-        okToMove = (!foreground && active) || // Just started
-          (foreground && !active)   // foreground && activeIn background
-      }
-      console.log('this.isiOS', this.isiOS, 'active', active, 'okToMove', okToMove)
-
-      if (this.route && okToMove) {
-        this.route = this.route.replace('/chat/', '/chats/') // Match redirects in nuxt.config.js
-        console.log('router.currentRoute', router.currentRoute)
-        if (router.currentRoute.path !== this.route) {
-          console.log('GO TO ', this.route)
-          //setTimeout(() => {
-          router.push(this.route)
-          //}, 1500)
-          //router.push({ path: this.route })  // Often doesn't work as intended when starting app from scratch as this routing is too early. Delaying doesn't seem to help.
-        }
-      }
-
-      this.route = false
-
-
-      // iOS needs to be told when we've finished: do it after a short delay to allow our code to run
-      /*if (this.isiOS) {
-        setTimeout(function () {
-          mobilePush.finish(
-            function () {
-              console.log('iOS push finished OK')
-            },
-            function () {
-              console.log('iOS push finished error')
-            },
-            data.notId
-          )
-        }, 50)
-      }*/
     },
     //////////////
     async checkForAppUpdate($api, $axios, store, router) {
