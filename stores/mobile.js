@@ -297,6 +297,7 @@ export const useMobileStore = defineStore({ // Do not persist
       await PushNotifications.addListener('pushNotificationActionPerformed',
         (n) => {
           console.log('Push action performed:', n)
+          if( n.notification) n.notification.okToMove = true // If you tap notif when in foreground then OK to move
           this.handleNotification(n.notification)
         }
       )
@@ -453,6 +454,7 @@ export const useMobileStore = defineStore({ // Do not persist
           okToMove = (!foreground && active) || // Just started
             (foreground && !active)   // foreground && activeIn background
         }
+        if( notification.okToMove) okToMove = true // pushNotificationActionPerformed
         console.log('this.isiOS', this.isiOS, 'active', active, 'okToMove', okToMove)
 
         if (this.route && okToMove) {
