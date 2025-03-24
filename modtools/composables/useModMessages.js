@@ -18,7 +18,7 @@ const busy = ref(false)
 const context = ref(null)
 const groupid = ref(0)
 const group = ref(null)
-const limit = ref(2)
+const limit = ref(10)
 const workType = ref(null)
 const show = ref(0)
 
@@ -48,16 +48,18 @@ const messages = computed(() => {
   // console.log('---messages groupid:', groupid.value, 'messages:', messages.length)
   // We need to sort as otherwise new messages may appear at the end.
   messages.sort((a, b) => {
-    if (a.groups && b.groups) {
-      return (
+  if (a.groups && b.groups) {
+    //console.log('---messages sort:', a.groups[0].arrival, b.groups[0].arrival)
+    return (
         new Date(b.groups[0].arrival).getTime() -
         new Date(a.groups[0].arrival).getTime()
       )
     } else {
+      //console.log('###messages sort:', a.arrival, b.arrival)
       return new Date(b.arrival).getTime() - new Date(a.arrival).getTime()
     }
   })
-
+  console.log('###messages sort:', messages[0]?.groups[0]?.arrival)
   return messages
 })
 
@@ -91,7 +93,7 @@ export function setupModMessages() {
   })*/
 
   const getMessages = async (workCount) => {
-    // console.log('getMessages', collection.value, groupid.value, workCount)
+    console.log('getMessages', collection.value, groupid.value, workCount)
 
     const messageStore = useMessageStore()
     messageStore.clearContext()
@@ -105,6 +107,7 @@ export function setupModMessages() {
       //limit: Math.max(limit.value, newVal)
     }
     if (workCount) params.limit = Math.max(limit.value, workCount)
+    console.log('uMM getMessages',params.limit)
     await messageStore.fetchMessagesMT(params)
 
     // Force them to show.
