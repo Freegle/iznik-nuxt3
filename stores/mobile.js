@@ -297,6 +297,7 @@ export const useMobileStore = defineStore({ // Do not persist
       await PushNotifications.addListener('pushNotificationActionPerformed',
         (notification) => {
           console.log('Push action performed:', notification)
+          this.handleNotification(notification)
         }
       )
       console.log('addListener pushNotificationActionPerformed done')
