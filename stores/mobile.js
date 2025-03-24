@@ -359,7 +359,11 @@ export const useMobileStore = defineStore({ // Do not persist
       const router = useRouter()
 
       console.log('handleNotification A', notification)
-      try {
+      if( !notification){
+        console.error('--- notification NOT SET')
+        return
+      }
+    try {
         /* 2024-08
         PushNotifications.getDeliveredNotifications().then(notificationList => {
           console.log("getDeliveredNotifications")
@@ -443,10 +447,9 @@ export const useMobileStore = defineStore({ // Do not persist
           })
         }*/
 
-        console.log('handleNotification D')
         const appState = await App.getState() // isActive true at startup and when app active; false when in background
         const active = appState ? appState.isActive : false
-        console.log('handleNotification E', active)
+        //console.log('handleNotification E', active)
         let okToMove = false
         if (this.isiOS) {
           okToMove = !active // iOS: Do not have push foreground flag, so: do not move if active, even if just started
