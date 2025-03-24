@@ -449,8 +449,9 @@ export const useMobileStore = defineStore({ // Do not persist
         console.log('handleNotification E', active)
         let okToMove = false
         if (this.isiOS) {
-          okToMove = !active // Do not have push foreground flag, so: do not move if active, even if just started
+          okToMove = !active // iOS: Do not have push foreground flag, so: do not move if active, even if just started
         } else { // isAndroid
+          // DO NOT DO THIS - loses typed in replies:  okToMove = true // Android: OK to move even when in foreground as any reply saved
           okToMove = (!foreground && active) || // Just started
             (foreground && !active)   // foreground && activeIn background
         }
