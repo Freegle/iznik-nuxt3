@@ -85,6 +85,7 @@ export default {
       showChats: 20,
       search: null,
       searching: false,
+      searchlast: null,
       //complete: false,
       limit: 5,
       bump: 1,
@@ -98,8 +99,23 @@ export default {
     const route = useRoute()
     this.id = 'id' in route.params ? parseInt(route.params.id) : 0
     if (isNaN(this.id)) this.id = 0
-    if( this.id) this.selectedChatId = this.id
+    if (this.id) this.selectedChatId = this.id
     console.log('[[id]] created', route.params.id, this.id)
+  },
+  watch: {
+    search(newVal, oldVal) {
+      console.log('search changed to', newVal)
+      this.showChats = 0
+      this.bump = Date.now()
+
+      if (!newVal) {
+        // Force a refresh to remove any old chats.
+        this.listChats()
+      } else {
+        // Force a server search to pick up old chats or more subtle matches.
+        this.searchMore()
+      }
+    }
   },
   computed: {
     messages() {
@@ -168,13 +184,16 @@ export default {
     await this.listChats()
   },
   methods: {
-    async listChats(age) {
-      console.log('chats [[id]] listChats', this.id)
+    async listChats(age, search) {
+      //console.log('chats [[id]] listChats', this.id)
       const params = {
         chattypes: ['User2Mod', 'Mod2Mod']
       }
       if (age) {
         params.age = age
+      }
+      if (search) {
+        params.search = search
       }
 
       await this.chatStore.listChatsMT(params, this.id)
@@ -182,7 +201,8 @@ export default {
     },
     scanChats(closed, chats) {
       //console.log('scanChats', closed, chats.length,this.id)
-      if (chats && this.search) {
+      // We apply the search on names in here so that we can respond on the client rapidly while the background server search is more thorough.
+      if (chats && this.search && this.searching) {
         const l = this.search.toLowerCase()
         chats = chats.filter((chat) => {
           if (
@@ -261,12 +281,32 @@ export default {
       console.log('gotoChat', id)
       const router = useRouter()
       router.push('/chats/' + id)
+    },
+    async searchMore() {
+      //console.log('searchMore', this.search, this.searchlast)
+      if (this.searching) {
+        // Queue until we've finished.
+        this.searchlast = this.search
+      } else {
+        this.searching = this.search
+
+        await this.listChats(null, this.search)
+
+        while (this.searchlast) {
+          // We have another search queued.
+          const val2 = this.searchlast
+          this.searching = this.searchlast
+          this.searchlast = null
+          await this.listChats(null, val2)
+        }
+
+        this.searching = null
+      }
     }
   }
 }
 </script>
 <style scoped lang="scss">
-
 .chatback {
   background-color: $color-yellow--light;
 }
