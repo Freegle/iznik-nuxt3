@@ -295,9 +295,9 @@ export const useMobileStore = defineStore({ // Do not persist
 
       // Method called when tapping on a notification
       await PushNotifications.addListener('pushNotificationActionPerformed',
-        (notification) => {
-          console.log('Push action performed:', notification)
-          this.handleNotification(notification)
+        (n) => {
+          console.log('Push action performed:', n)
+          this.handleNotification(n.notification)
         }
       )
       console.log('addListener pushNotificationActionPerformed done')
@@ -368,6 +368,10 @@ export const useMobileStore = defineStore({ // Do not persist
         //console.log('push notification', notificationType)
         console.log(notification)
         const data = notification.data
+        if( !data){
+          console.error('--- notification.data NOT SET')
+          return
+        }
         let foreground = false
         if ('foreground' in data) {
           console.log('--- FOREGROUND', data.foreground)
