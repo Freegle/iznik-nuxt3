@@ -504,7 +504,7 @@ export default {
 
       this.myModGroups.forEach(group => {
         if (group.id === this.groupid) {
-          configid = group.configid
+          configid = group.mysettings?.configid
         }
       })
 
