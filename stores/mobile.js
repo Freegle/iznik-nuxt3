@@ -158,6 +158,7 @@ export const useMobileStore = defineStore({ // Do not persist
           const ilfpos = event.url.indexOf(lookfor)
           if (ilfpos !== false) {
             const route = event.url.substring(ilfpos + lookfor.length)
+            console.log('appUrlOpen route', route)
             const router = useRouter()
             if (route.indexOf('src=forgotpass') !== -1) {  // Special handling of forgotpass
               // /settings?u=uuu&k=kkk&src=forgotpass
@@ -197,6 +198,7 @@ export const useMobileStore = defineStore({ // Do not persist
               return
             }
             setTimeout(() => {
+              console.log('appUrlOpen route push', route)
               router.push(route)
             }, 500)
           }
