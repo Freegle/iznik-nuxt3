@@ -151,15 +151,17 @@ watch(
         AIInfoAdded.value = true
       }
 
-      if (newVal[0].info.longDescription && !message.description) {
-        composeStore.setDescription({
-          id: props.id,
-          description:
-            newVal[0].info.longDescription + '\r\n\r\n(AI text based on photo)',
-        })
-
-        AIInfoAdded.value = true
-      }
+      // AI description may not be useful.
+      //
+      // if (newVal[0].info.longDescription && !message.description) {
+      //   composeStore.setDescription({
+      //     id: props.id,
+      //     description:
+      //       newVal[0].info.longDescription + '\r\n\r\n(AI text based on photo)',
+      //   })
+      //
+      //   AIInfoAdded.value = true
+      // }
     } catch (e) {
       console.error('Watch error', e)
     }
@@ -241,10 +243,10 @@ function clearAIInfo() {
     id: props.id,
     item: '',
   })
-  composeStore.setDescription({
-    id: props.id,
-    description: '',
-  })
+  // composeStore.setDescription({
+  //   id: props.id,
+  //   description: '',
+  // })
 
   imageStore.rateRecognise(currentAtts.value[0].id, 'Bad')
 
