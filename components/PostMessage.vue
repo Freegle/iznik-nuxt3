@@ -140,6 +140,7 @@ watch(
       console.log('Current atts changed', props.id, newVal)
       composeStore.setAttachmentsForMessage(props.id, newVal)
 
+      /* Remove AI text from app
       const message = composeStore.message(props.id)
 
       if (newVal[0].info.shortDescription && !message.item) {
@@ -162,7 +163,7 @@ watch(
       //   })
       //
       //   AIInfoAdded.value = true
-      // }
+      // }*/
     } catch (e) {
       console.error('Watch error', e)
     }
