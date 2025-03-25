@@ -2,13 +2,8 @@
   <client-only>
     <div class="maptools d-flex mb-1 justify-content-between">
       <div class="d-flex">
-        <v-icon
-          icon="sync"
-          :class="
-            busy ? 'text-success fa-spin ml-4 mt-1' : 'text-faded ml-4 mt-1'
-          "
-          scale="2"
-        />
+        <v-icon icon="sync" :class="busy ? 'text-success fa-spin ml-4 mt-1' : 'text-faded ml-4 mt-1'
+          " scale="2" />
       </div>
       <b-form-checkbox v-if="groups || groupid" v-model="cga" class="ml-2">
         <strong style="color: darkgreen">Show CGAs</strong>
@@ -16,29 +11,17 @@
       <b-form-checkbox v-if="groups || groupid" v-model="dpa" class="ml-2">
         <strong style="color: darkblue">Show DPAs</strong>
       </b-form-checkbox>
-      <b-form-checkbox
-        v-if="groupid"
-        v-model="labels"
-        class="ml-2 font-weight-bold"
-      >
+      <b-form-checkbox v-if="groupid" v-model="labels" class="ml-2 font-weight-bold">
         Labels
       </b-form-checkbox>
-      <b-form-checkbox
-        v-model="shade"
-        class="ml-2 font-weight-bold"
-        @click="dobump"
-      >
+      <b-form-checkbox v-model="shade" class="ml-2 font-weight-bold" @click="dobump">
         Shade areas
       </b-form-checkbox>
       <b-form-checkbox v-model="showDodgy" class="ml-2 font-weight-bold">
         Areas to Review
       </b-form-checkbox>
     </div>
-    <b-modal
-      id="mappingChanges"
-      ref="mappingChanges"
-      v-model="showMappingChanges"
-    >
+    <b-modal id="mappingChanges" ref="mappingChanges" v-model="showMappingChanges">
       <p>
         If you have the "Areas to Review" checkbox ticked, you'll see the red
         circles for postcodes which might need better mapping.
@@ -80,99 +63,37 @@
     <b-row class="m-0">
       <b-col ref="mapcont" cols="12" md="9" class="p-0">
         <div :style="'width: 100%; height: ' + mapHeight + 'px'">
-          <l-map
-            ref="mapObject"
-            :zoom="zoom"
-            :min-zoom="5"
-            :max-zoom="17"
-            :options="{ dragging: dragging, touchZoom: true }"
-            :use-global-leaflet="true"
-            @update:bounds="boundsChanged"
-            @update:zoom="boundsChanged"
-            @ready="ready"
-            @moveend="idle"
-          >
+          <l-map ref="mapObject" :zoom="zoom" :min-zoom="5" :max-zoom="17" :options="{ dragging: dragging, touchZoom: true }"
+            :use-global-leaflet="true" @update:bounds="boundsChanged" @update:zoom="boundsChanged" @ready="ready" @moveend="idle">
             <l-tile-layer :url="osmtile()" :attribution="attribution()" />
             <div v-if="cga" id="cgahere">
-              <l-geo-json
-                v-for="(c, i) in CGAs"
-                :key="'cga-' + i"
-                :geojson="c.json"
-                :options="cgaOptions"
-                :z-index-offset="2"
-                @click="selectCGA($event, c.group)"
-              />
+              <l-geo-json ref="cgasjson" v-for="(c, i) in CGAs" :key="'cga-' + i" :geojson="c.json" :options="cgaOptions" :z-index-offset="2"
+                @click="selectCGA($event, c.group, i)" />
             </div>
             <div v-if="dpa" id="dpahere">
-              <l-geo-json
-                v-for="(d, i) in DPAs"
-                :key="'dpa-' + i"
-                :geojson="d.json"
-                :options="dpaOptions"
-                :z-index-offset="1"
-                @click="selectDPA($event, d.group)"
-              />
+              <l-geo-json ref="dgasjson" v-for="(d, i) in DPAs" :key="'dpa-' + i" :geojson="d.json" :options="dpaOptions" :z-index-offset="1"
+                @click="selectDPA($event, d.group, i)" />
             </div>
             <div v-if="overlaps && showDodgy && !groupid" id="overlaphere">
-              <l-geo-json
-                v-for="(d, i) in overlappingCGAs"
-                :key="'cgaoverlap-' + i"
-                :geojson="d"
-                :options="cgaOverlapOptions"
-                :z-index-offset="0"
-              />
+              <l-geo-json v-for="(d, i) in overlappingCGAs" :key="'cgaoverlap-' + i" :geojson="d" :options="cgaOverlapOptions" :z-index-offset="0" />
             </div>
             <div v-if="groupid && zoom >= 12" id="maplocationshere">
-              <ModGroupMapLocation
-                v-for="l in locationsInBounds"
-                :key="'location-' + l.id"
-                :ref="'location-' + l.id"
-                :location="l"
-                :selected="selectedObj === l"
-                :selectable="!selectedObj"
-                :shade="shade"
-                :labels="labels"
-                @click="selectLocation(l)"
-                @edit="selectedWKT = $event"
-              />
+              <ModGroupMapLocation v-for="l in locationsInBounds" :key="'location-' + l.id" :ref="'location-' + l.id" :location="l"
+                :selected="selectedObj === l" :selectable="!selectedObj" :shade="shade" :labels="labels" @click="selectLocation(l)"
+                @edit="selectedWKT = $event" />
             </div>
             <div v-if="showDodgy && groupid" id="dodgyhere">
-              <ClusterMarker
-                v-if="mapObject && zoom < 10"
-                :markers="dodgyInBounds"
-                :map="mapObject"
-              />
+              <ClusterMarker v-if="mapObject && zoom < 10" :markers="dodgyInBounds" :map="mapObject" />
               <l-feature-group v-else>
-                <l-circle-marker
-                  v-if="highlighted"
-                  :key="'highlighted-' + highlighted.id"
-                  :lat-lng="[highlighted.lat, highlighted.lng]"
-                  :interactive="false"
-                  :radius="5"
-                  color="blue"
-                />
-                <l-circle-marker
-                  v-for="d in dodgyInBounds"
-                  :key="d.id"
-                  :lat-lng="d"
-                  :radius="5"
-                  color="red"
-                  @click="selected = d"
-                />
+                <l-circle-marker v-if="highlighted" :key="'highlighted-' + highlighted.id" :lat-lng="[highlighted.lat, highlighted.lng]"
+                  :interactive="false" :radius="5" color="blue" />
+                <l-circle-marker v-for="d in dodgyInBounds" :key="d.id" :lat-lng="d" :radius="5" color="red" @click="selected = d" />
               </l-feature-group>
             </div>
 
             <div v-if="groups && zoom > 7" id="groupcentershere">
-              <l-circle-marker
-                v-for="g in allgroups"
-                :key="'groupcentre-' + g.id"
-                :lat-lng="[g.lat, g.lng]"
-                :radius="10"
-                color="darkgreen"
-                :fill="true"
-                fill-color="darkgreen"
-                :fill-opacity="1"
-              />
+              <l-circle-marker v-for="g in allgroups" :key="'groupcentre-' + g.id" :lat-lng="[g.lat, g.lng]" :radius="10" color="darkgreen"
+                :fill="true" fill-color="darkgreen" :fill-opacity="1" />
             </div>
           </l-map>
         </div>
@@ -185,12 +106,7 @@
               Zoom/pan locked while area selected. Use Cancel to free.
             </p>
             <div v-if="groupid">
-              <b-form-input
-                v-model="selectedName"
-                placeholder="Enter area name"
-                size="lg"
-                class="mb-1"
-              />
+              <b-form-input v-model="selectedName" placeholder="Enter area name" size="lg" class="mb-1" />
               <b-form-textarea v-model="selectedWKT" rows="4" />
             </div>
             <div v-else>
@@ -201,31 +117,11 @@
               Crosses over itself - not valid
             </p>
           </b-card-body>
-          <b-card-footer
-            v-if="groupid"
-            class="d-flex justify-content-between flex-wrap"
-          >
-            <SpinButton
-              variant="primary"
-              icon-name="save"
-              label="Save"
-              spinclass="text-white"
-              :disabled="!selectedName || !selectedWKT || intersects"
-              @handle="saveArea"
-            />
-            <SpinButton
-              variant="white"
-              icon-name="times"
-              label="Cancel"
-              @handle="clearSelection"
-            />
-            <SpinButton
-              v-if="selectedId"
-              variant="danger"
-              icon-name="trash-alt"
-              label="Delete"
-              @handle="deleteArea"
-            />
+          <b-card-footer v-if="groupid" class="d-flex justify-content-between flex-wrap">
+            <SpinButton variant="primary" icon-name="save" label="Save" spinclass="text-white" :disabled="!selectedName || !selectedWKT || intersects"
+              @handle="saveArea" />
+            <SpinButton variant="white" icon-name="times" label="Cancel" @handle="clearSelection" />
+            <SpinButton v-if="selectedId" variant="danger" icon-name="trash-alt" label="Delete" @handle="deleteArea" />
           </b-card-footer>
         </b-card>
         <NoticeMessage v-if="zoom < 12" variant="danger" show class="mb-2">
@@ -233,11 +129,7 @@
         </NoticeMessage>
         <ModPostcodeTester />
         <ModConvertKML />
-        <b-card
-          v-if="dodgyInBounds.length"
-          no-body
-          style="max-height: 600px; overflow-y: scroll"
-        >
+        <b-card v-if="dodgyInBounds.length" no-body style="max-height: 600px; overflow-y: scroll">
           <b-card-header class="bg-warning d-flex justify-content-between">
             Mapping Changes
             <b-button variant="white" @click="showMappingChanges = true">
@@ -246,13 +138,7 @@
           </b-card-header>
           <b-card-body>
             <div v-if="dodgyInBounds.length < 200">
-              <ModChangedMapping
-                v-for="d in dodgyInBounds"
-                :key="d.id"
-                :changed="d"
-                :highlighted="highlighted"
-                @click="highlightPostcode(d)"
-              />
+              <ModChangedMapping v-for="d in dodgyInBounds" :key="d.id" :changed="d" :highlighted="highlighted" @click="highlightPostcode(d)" />
             </div>
             <p v-else>Too many changes to show; zoom in.</p>
           </b-card-body>
@@ -285,6 +171,7 @@ import ClusterMarker from '../components/ClusterMarker'
 import { attribution, osmtile } from '../composables/useMap'
 import { useModGroupStore } from '@/stores/modgroup'
 import { useLocationStore } from '~/stores/location'
+import { useAuthStore } from '@/stores/auth'
 
 let Wkt = null
 
@@ -349,6 +236,21 @@ const locations = ref([])
 const dodgy = ref([])
 const bump = ref(0)
 
+const cgasjson = ref(null)
+const editingcga = ref(null)
+const dgasjson = ref(null)
+const editingdga = ref(null)
+
+const supportOrAdmin = computed(() => {
+  const authStore = useAuthStore()
+  const me = authStore.user
+  return (
+    me &&
+    (me.systemrole === 'Support' || me.systemrole === 'Admin')
+  )
+})
+
+
 const mapHeight = computed(() => {
   let height = 0
 
@@ -370,7 +272,7 @@ const allgroups = computed(() => {
 })
 
 const group = computed(() => {
-  if( !props.groupid) return null
+  if (!props.groupid) return null
   return modGroupStore.getfromall(props.groupid)
 })
 
@@ -532,6 +434,14 @@ function clearSelection(callback) {
   selectedWKT.value = null
   dragging.value = true
   bump.value++
+  if (editingcga.value) {
+    editingcga.value.leafletObject.pm.disable()
+    editingcga.value = null
+  }
+  if (editingdga.value) {
+    editingdga.value.leafletObject.pm.disable()
+    editingdga.value = null
+  }
 
   // Re-enable map movement.
   mapObject.value.leafletObject._handlers.forEach(function (handler) {
@@ -541,30 +451,56 @@ function clearSelection(callback) {
   if (callback) callback()
 }
 
-function selectCGA(e, g) {
-  console.log('selectCGA')
+function selectCGA(e, g, i) {
+  console.log('selectCGA', supportOrAdmin.value, i)
   selectedObj.value = g
   selectedName.value = g.nameshort + ' CGA'
   selectedWKT.value = g.polyofficial
   bump.value++
 
-  if (props.supportOrAdmin) {
-    console.log('selectCGA EDITING', e.sourceTarget?.editing)
-    if (e.sourceTarget?.editing) {
-      e.sourceTarget.editing.enable()
-    }
+  if (supportOrAdmin.value) {
+    const allcgas = cgasjson.value
+    editingcga.value = allcgas[i]
+    console.log('selectCGA EDITING B', editingcga.value)
+    //if (e.sourceTarget?.editing) {
+    //  e.sourceTarget.editing.enable()
+    //}
+    editingcga.value.leafletObject.pm.enable({
+      allowSelfIntersection: false,
+      snappable: false, // Has big effect on performance when there are many layers on the map.
+    })
+    editingcga.value.leafletObject.on('pm:edit', (f) => {
+      const wkt = new Wkt.Wkt()
+      wkt.fromObject(f.layer)
+      const json = wkt.write()
+      console.log('CGA pm:edit', json)
+      //emit('edit', json)
+    })
   }
 }
 
-function selectDPA(e, g) {
-  console.log('selectDPA')
+function selectDPA(e, g, i) {
+  console.log('selectDGA', supportOrAdmin.value, i)
   selectedObj.value = g
   selectedName.value = g.nameshort + ' DPA'
   selectedWKT.value = g.poly
   bump.value++
 
-  if (props.supportOrAdmin) {
-    e.sourceTarget.editing.enable()
+  if (supportOrAdmin.value) {
+    const alldgas = dgasjson.value
+    editingdga.value = alldgas[i]
+    console.log('selectDPA EDITING B', editingdga.value)
+    editingdga.value.leafletObject.pm.enable({
+      allowSelfIntersection: false,
+      snappable: false, // Has big effect on performance when there are many layers on the map.
+    })
+    editingdga.value.leafletObject.on('pm:edit', (f) => {
+      const wkt = new Wkt.Wkt()
+      wkt.fromObject(f.layer)
+      const json = wkt.write()
+      console.log('DGA pm:edit', json)
+      //emit('edit', json)
+    })
   }
 }
 
@@ -618,8 +554,10 @@ function ready() {
   })
 
   mapObject.value.leafletObject.on('pm:drawend', (e) => {
+    console.log('MGM pm:drawend')
     // We've created a new polygon.  Extract the WKT and show it in the box.
     const drawLayers = mapObject.value.leafletObject.pm.getGeomanDrawLayers()
+    console.log('MGM pm:drawend', drawLayers.length)
 
     if (drawLayers.length) {
       const wkt = new Wkt.Wkt()
@@ -627,6 +565,7 @@ function ready() {
       selectedWKT.value = wkt.write()
       selectedObj.value = null
       bump.value++
+      console.log('MGM pm:drawend Z', selectedWKT.value)
     }
   })
 
@@ -707,7 +646,7 @@ function idle() {
         // we don't fetch them for the whole country.
         initialGroupZoomed.value = true
         const area = thegroup.poly || thegroup.polyofficial
-        console.log('Zoom to area', area)
+        //console.log('Zoom to area', area)
         if (area) {
           const wkt = new Wkt.Wkt()
           wkt.read(area)
@@ -803,6 +742,7 @@ async function deleteArea(callback) {
   lastLocationFetch.value = null
   busy.value = false
   callback()
+  await boundsChanged() // reload map
 }
 
 async function fetchLocations(data) {
