@@ -63,7 +63,7 @@
         </div>
         <div v-if="userid" class="text-muted align-items-center">
           <span class="text-muted small mr-1">
-            {{ timeago(reply.added) }}
+            {{ replyaddedago }}
           </span>
           <NewsUserInfo :id="id" class="mr-1 d-inline" />
         </div>
@@ -348,6 +348,7 @@ import NewsHighlight from '~/components/NewsHighlight'
 import ChatButton from '~/components/ChatButton'
 import NewsPreviews from '~/components/NewsPreviews'
 import ProfileImage from '~/components/ProfileImage'
+import { timeago } from '~/composables/useTimeFormat'
 
 const NewsPhotoModal = defineAsyncComponent(() =>
   import('./NewsPhotoModal.vue')
@@ -445,6 +446,9 @@ export default {
     },
     reply() {
       return this.newsfeedStore?.byId(this.id)
+    },
+    replyaddedago() {
+      return timeago(this.reply.added)
     },
     ids() {
       return this.reply?.replies

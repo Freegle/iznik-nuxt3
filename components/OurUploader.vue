@@ -121,6 +121,11 @@ const props = defineProps({
     required: false,
     default: false,
   },
+  recognise: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
 })
 
 const miscStore = useMiscStore()
@@ -321,6 +326,7 @@ async function uploadSuccess(result) {
           imgtype: props.type,
           externaluid: uid,
           externalmods: mods,
+          recognise: props.recognise,
         }
 
         const p = imageStore.post(att)
@@ -340,6 +346,7 @@ async function uploadSuccess(result) {
             paththumb: ret.url,
             ouruid: ret.uid,
             externalmods: mods,
+            info: ret.info,
           })
         })
       }

@@ -58,7 +58,7 @@
             </div>
             <div class="text-muted small d-flex justify-content-between">
               <span>
-                {{ timeago(story.date) }}
+                {{ storydateago }}
                 <span v-if="user?.displayname"> by {{ user.displayname }}</span>
                 <span v-if="userLocation?.display">
                   in {{ userLocation.display }}
@@ -102,6 +102,8 @@ import { defineAsyncComponent } from 'vue'
 import { useStoryStore } from '../stores/stories'
 import { useUserStore } from '../stores/user'
 import ReadMore from '~/components/ReadMore'
+import { timeago } from '~/composables/useTimeFormat'
+
 const StoryShareModal = defineAsyncComponent(() =>
   import('~/components/StoryShareModal')
 )
@@ -138,6 +140,11 @@ export default {
       showShare: false,
       showPhotoModal: false,
     }
+  },
+  computed: {
+    storydateago() {
+      return timeago(this.story.date)
+    },
   },
   methods: {
     share() {
