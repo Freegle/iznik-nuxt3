@@ -149,6 +149,12 @@ export default {
             'Knives should only be given to those over 18 years of age, and must be collected and handed over in person (not left for collection in an agreed safe place). Knives shouldn’t be carried openly on the street, so should be wrapped or in a container.',
           keywords: ['knife', 'knives', 'sword', 'swords'],
         },
+        {
+          type: 'Free',
+          message:
+            "Everything on Freegle is given away freely.  You don't need to say that - and it keeps things simpler if you remove it.",
+          keywords: ['free', 'giving away'],
+        },
       ],
     }
   },
