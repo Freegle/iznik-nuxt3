@@ -217,6 +217,49 @@ export default {
         365 / 2
       )
     },
+    user() {
+      return this.userStore.byId(this.member.userid)
+    },
+    settings() {
+      if (this.user && this.user.settings && this.user.settings) {
+        return this.user.settings
+      } else {
+        return {}
+      }
+    },
+    notifications() {
+      let ret = {}
+
+      if (this.settings && this.settings.notifications) {
+        ret = this.settings.notifications
+      } else {
+        ret = {
+          email: true,
+          emailmine: false,
+          push: true,
+          facebook: true,
+          app: true
+        }
+      }
+
+      return ret
+    },
+    relevantallowed: {
+      get() {
+        return this.user && Boolean(this.user.relevantallowed)
+      },
+      set(newval) {
+        this.user.relevantallowed = newval
+      }
+    },
+    newslettersallowed: {
+      get() {
+        return this.user && Boolean(this.user.newslettersallowed)
+      },
+      set(newval) {
+        this.user.newslettersallowed = newval
+      }
+    }
   },
   async mounted() {
     if (!this.member.info) {

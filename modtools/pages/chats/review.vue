@@ -66,7 +66,7 @@ export default {
     },
     work() {
       const work = this.authStore.work
-      console.log('chats review work',work?.chatreview)
+      //console.log('chats review work',work?.chatreview)
       return work?.chatreview
     },
     modalOpen() {
@@ -99,7 +99,7 @@ export default {
   },
   methods: {
     loadMore: function ($state) {
-      console.log('review loadMore', this.show, this.messages.length)
+      //console.log('review loadMore', this.show, this.messages.length)
       if (this.show < this.messages.length) {
         // This means that we will gradually add the messages that we have fetched from the server into the DOM.
         // Doing that means that we will complete our initial render more rapidly and thus appear faster.

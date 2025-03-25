@@ -43,7 +43,7 @@ export default {
       const authStore = useAuthStore()
       const work = authStore.work
       if (!work) return 0
-      console.log('TODO communityevents work', work.pendingevents)
+      //console.log('TODO communityevents work', work.pendingevents)
       return work.pendingevents
     },
   },

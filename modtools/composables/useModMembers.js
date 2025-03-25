@@ -13,6 +13,7 @@ const search = ref(null)
 const filter = ref('0')
 // const workType = ref(null)
 const show = ref(0)
+const sort = ref(true)
 
 const collection = ref(null)
 const messageTerm = ref(null)
@@ -36,16 +37,22 @@ const members = computed(() => {
     return []
   }
   // We need to sort as otherwise new members may appear at the end.
-  members.sort((a, b) => {
-    if (a.groups && b.groups) {
-      return (
-        new Date(b.groups[0].arrival).getTime() -
-        new Date(a.groups[0].arrival).getTime()
-      )
-    } else {
-      return new Date(b.joined).getTime() - new Date(a.joined).getTime()
-    }
-  })
+  if (sort.value) {
+    members.sort((a, b) => {
+      if (a.groups && b.groups) {
+        return (
+          new Date(b.groups[0].arrival).getTime() -
+          new Date(a.groups[0].arrival).getTime()
+        )
+      } else {
+        return new Date(b.joined).getTime() - new Date(a.joined).getTime()
+      }
+    })
+  } else {
+    members.sort((a, b) => {
+      return a.rawindex - b.rawindex
+    })
+  }
 
   //console.log('UMM members sorted', members.length)
   //for( const member of members){
@@ -151,6 +158,7 @@ export function setupModMembers() {
     filter, // Y
     // workType, // N
     show,
+    sort,
     collection, // Y
     messageTerm,
     memberTerm,

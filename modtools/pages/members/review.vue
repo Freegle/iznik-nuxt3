@@ -34,6 +34,8 @@ export default {
     const memberStore = useMemberStore()
     const miscStore = useMiscStore()
     const modMembers = setupModMembers()
+    modMembers.context.value = null
+    modMembers.sort.value = false
     modMembers.collection.value = 'Spam'
     modMembers.groupid.value = 0
     modMembers.group.value = null

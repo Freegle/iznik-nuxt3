@@ -12,6 +12,7 @@ export const useMemberStore = defineStore({
     // For spotting when we clear under the feet of an outstanding fetch
     instance: 1,
     ratings: [],
+    rawindex: 0,
   }),
   actions: {
     init(config) {
@@ -22,6 +23,7 @@ export const useMemberStore = defineStore({
       this.context = null
       this.instance = 1
       this.ratings = []
+      this.rawindex = 0
     },
     reviewHeld(params) {
       Object.keys(this.list).forEach(key => {
@@ -66,6 +68,9 @@ export const useMemberStore = defineStore({
         // Ensure the context is a real object, in case it has been in the store.
         params.context = cloneDeep(params.context)
       }
+      //if (params.context) {
+      //  console.log('fetchMembers params.context', params.context)
+      //}
 
       const {
         members,
@@ -82,6 +87,7 @@ export const useMemberStore = defineStore({
         }
         received += members.length
         members.forEach(member => {
+          member.rawindex = this.rawindex++
           this.list[member.id] = member
         })
 
