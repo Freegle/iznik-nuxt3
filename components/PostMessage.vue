@@ -141,7 +141,7 @@ watch(
 
       const message = composeStore.message(props.id)
 
-      if (newVal[0].info.shortDescription && !message.item) {
+      if (newVal[0].info?.shortDescription && !message.item) {
         const item = newVal[0].info.shortDescription.replace(/[,.;:!?]$/, '')
         composeStore.setItem({
           id: props.id,
