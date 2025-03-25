@@ -248,7 +248,9 @@ function clearAIInfo() {
   //   description: '',
   // })
 
-  imageStore.rateRecognise(currentAtts.value[0].id, 'Bad')
+  if (currentAtts?.value.length) {
+    imageStore.rateRecognise(currentAtts.value[0].id, 'Bad')
+  }
 
   AIInfoAdded.value = false
   AIRated.value = true
