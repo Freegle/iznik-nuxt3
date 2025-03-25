@@ -21,6 +21,7 @@
               v-model="currentAtts"
               type="Message"
               multiple
+              :recognise="currentAtts?.length === 0 && type === 'Offer'"
             />
           </div>
         </template>
@@ -42,6 +43,17 @@
         </template>
       </draggable>
     </div>
+    <NoticeMessage v-if="AIInfoAdded && !AIRated" variant="info">
+      <p>As an experiment, we're generating AI text. Was this useful?</p>
+      <div class="d-flex justify-content-between flex-wrap">
+        <b-button variant="secondary" size="sm" @click="clearAIInfo">
+          <v-icon icon="times-circle" /> No - remove
+        </b-button>
+        <b-button variant="secondary" size="sm" @click="keepAIInfo">
+          <v-icon icon="check-circle" /> Yes - keep
+        </b-button>
+      </div>
+    </NoticeMessage>
     <div class="subject-layout mb-1 mt-1">
       <div class="d-flex flex-column">
         <label :for="$id('posttype')" class="d-none d-md-block pl-1">
@@ -86,6 +98,7 @@ import { useMobileStore } from '../stores/mobile'
 import NumberIncrementDecrement from './NumberIncrementDecrement'
 import { ref, watch } from '#imports'
 import { useMiscStore } from '~/stores/misc'
+import { useImageStore } from '~/stores/image'
 
 const OurUploader = defineAsyncComponent(() =>
   import('~/components/OurUploader')
@@ -106,6 +119,7 @@ const props = defineProps({
 })
 
 const composeStore = useComposeStore()
+const imageStore = useImageStore()
 
 composeStore.setType({
   id: props.id,
@@ -117,12 +131,38 @@ const ret = composeStore.attachments(props.id).filter((a) => 'id' in a)
 // Need a separate variable to avoid watching on object causing tizzy.
 const currentAtts = ref([])
 
+const AIInfoAdded = ref(false)
+
 watch(
   currentAtts,
   (newVal) => {
     try {
       console.log('Current atts changed', props.id, newVal)
       composeStore.setAttachmentsForMessage(props.id, newVal)
+
+      const message = composeStore.message(props.id)
+
+      if (newVal[0].info.shortDescription && !message.item) {
+        const item = newVal[0].info.shortDescription.replace(/[,.;:!?]$/, '')
+        composeStore.setItem({
+          id: props.id,
+          item,
+        })
+
+        AIInfoAdded.value = true
+      }
+
+      // AI description may not be useful.
+      //
+      // if (newVal[0].info.longDescription && !message.description) {
+      //   composeStore.setDescription({
+      //     id: props.id,
+      //     description:
+      //       newVal[0].info.longDescription + '\r\n\r\n(AI text based on photo)',
+      //   })
+      //
+      //   AIInfoAdded.value = true
+      // }
     } catch (e) {
       console.error('Watch error', e)
     }
@@ -196,6 +236,29 @@ const numberInputSize = computed(() =>
 const textareaSize = computed(() =>
   miscStore.breakpoint === 'xs' ? 'sm' : 'md'
 )
+
+const AIRated = ref(false)
+
+function clearAIInfo() {
+  composeStore.setItem({
+    id: props.id,
+    item: '',
+  })
+  // composeStore.setDescription({
+  //   id: props.id,
+  //   description: '',
+  // })
+
+  imageStore.rateRecognise(currentAtts.value[0].id, 'Bad')
+
+  AIInfoAdded.value = false
+  AIRated.value = true
+}
+
+function keepAIInfo() {
+  imageStore.rateRecognise(currentAtts.value[0].id, 'Good')
+  AIRated.value = true
+}
 </script>
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';

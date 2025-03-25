@@ -16,7 +16,7 @@
         <span v-if="appendBold"> "{{ appendBold }}" </span>
         <br />
         <span class="text-muted small pl-0">
-          {{ timeago(newsfeed?.added) }}
+          {{ addedago }}
         </span>
         <NewsUserInfo :id="newsfeed.id" />
       </div>
@@ -34,6 +34,7 @@
   </div>
 </template>
 <script>
+import { timeago } from '~/composables/useTimeFormat'
 import NewsUserInfo from '~/components/NewsUserInfo'
 import ProfileImage from '~/components/ProfileImage'
 const ProfileModal = defineAsyncComponent(() =>
@@ -70,6 +71,20 @@ export default {
     return {
       showProfileModal: false,
     }
+  },
+  computed: {
+    addedago() {
+      return timeago(this.newsfeed.added)
+    },
+    mod() {
+      const me = this.me
+      return (
+        me &&
+        (me.systemrole === 'Moderator' ||
+          me.systemrole === 'Admin' ||
+          me.systemrole === 'Support')
+      )
+    },
   },
   methods: {
     showInfo() {

@@ -146,9 +146,7 @@
                     @click.stop="repostWhenUnavailable"
                   >
                     <v-icon class="d-none d-sm-inline" icon="sync" /> Repost
-                    <span class="repostsmall">{{
-                      timeago(message.repostat)
-                    }}</span>
+                    <span class="repostsmall">{{ repostatago }}</span>
                   </b-button>
                   <p
                     class="invalid-feedback position-absolute bg-white text-center"
@@ -210,8 +208,7 @@
                   <p v-else class="text-muted">
                     No replies yet.
                     <span v-if="willAutoRepost"
-                      >Will auto-repost
-                      {{ timeago(message.canrepostat) }}.</span
+                      >Will auto-repost {{ canrepostatago }}.</span
                     >
                   </p>
                 </b-card-text>
@@ -266,6 +263,8 @@ import { milesAway } from '../composables/useDistance'
 import { datetimeshort } from '../composables/useTimeFormat'
 import { useRouter } from '#imports'
 import MyMessagePromisedTo from '~/components/MyMessagePromisedTo'
+import { timeago } from '~/composables/useTimeFormat'
+
 const MyMessageReply = defineAsyncComponent(() =>
   import('./MyMessageReply.vue')
 )
@@ -608,6 +607,20 @@ export default {
       const now = dayjs()
 
       return d.isAfter(now)
+    },
+    repostatago() {
+      if (this.message.repostat) {
+        return timeago(this.message.repostat)
+      }
+
+      return null
+    },
+    canrepostatago() {
+      if (this.message.canrepostat) {
+        return timeago(this.message.canrepostat)
+      }
+
+      return null
     },
   },
   watch: {

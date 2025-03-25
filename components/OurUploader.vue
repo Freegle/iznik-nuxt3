@@ -50,6 +50,11 @@ const props = defineProps({
     required: false,
     default: false,
   },
+  recognise: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
 })
 
 // const miscStore = useMiscStore()
@@ -156,6 +161,7 @@ function uploadOneFile(file){
         //  console.log('lastResponse',lastResponse)
         //}
         loading.value = 'Uploading nearly done'
+        const promises = []
 
         let uid = upload.url
         uid = 'freegletusd-' + uid.substring(uid.lastIndexOf('/') + 1)
@@ -165,20 +171,32 @@ function uploadOneFile(file){
           imgtype: props.type,
           externaluid: uid,
           externalmods: mods,
+          recognise: props.recognise,
         }
         // console.log('att', att)
 
-        const ret = await imageStore.post(att)
-        // console.log('ret', ret)
-        uploadedPhotos.value = props.modelValue
-        uploadedPhotos.value.push({
-          id: ret.id,
-          path: ret.url,
-          paththumb: ret.url,
-          ouruid: ret.uid,
-          externalmods: mods,
+        const p = imageStore.post(att)
+        promises.push(p)
+
+        p.then((ret) => {
+          // Set up our local attachment info.  This will get used in the parents to attach to whatever objects
+          // these photos relate to.
+          //
+          // Note that the URL is returned from the server because it is manipulated on there to remove EXIF,
+          // so we use that rather than the URL that was returned from the uploader.
+          console.log('Image post returned', ret)
+          uploadedPhotos.value = props.modelValue
+          uploadedPhotos.value.push({
+            id: ret.id,
+            path: ret.url,
+            paththumb: ret.url,
+            ouruid: ret.uid,
+            externalmods: mods,
+            info: ret.info,
+          })
         })
         // console.log('pushed')
+        await Promise.all(promises)
         emit('update:modelValue', uploadedPhotos.value)
         // console.log('emitted')
         loading.value = ''

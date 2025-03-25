@@ -58,7 +58,7 @@
               <span class="d-none d-md-inline">Last seen</span>
               <span class="d-inline d-md-none">Seen</span>
               <!-- eslint-disable-next-line-->
-              <strong :title="datetimeshort(otheruser.lastaccess)" class="ml-1" >{{ timeago(otheruser.lastaccess) }}</strong>
+              <strong :title="datetimeshort(otheruser.lastaccess)" class="ml-1" >{{ otheraccess }}</strong>
               <span class="d-none d-md-inline">.</span>
             </span>
             <span v-if="replytime" class="d-inline d-md-block">
@@ -338,6 +338,7 @@ import { useRouter } from '#imports'
 import { twem } from '~/composables/useTwem'
 import { useMiscStore } from '~/stores/misc'
 import SupporterInfo from '~/components/SupporterInfo'
+import { timeago } from '~/composables/useTimeFormat'
 
 const ChatBlockModal = defineAsyncComponent(() => import('./ChatBlockModal'))
 const ChatHideModal = defineAsyncComponent(() => import('./ChatHideModal'))
@@ -438,6 +439,9 @@ export default {
     },
     aboutthem() {
       return this.otheruser?.aboutme ? twem(this.otheruser.aboutme.text) : null
+    },
+    otheraccess() {
+      return timeago(this.otheruser.lastaccess)
     },
   },
   watch: {

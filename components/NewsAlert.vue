@@ -11,7 +11,7 @@
         <span class="text-success font-weight-bold pl-2"> Freegle </span>
         <br />
         <span class="text-muted small pl-2">
-          {{ timeago(newsfeed.added) }}
+          {{ addedago }}
         </span>
       </div>
     </div>
