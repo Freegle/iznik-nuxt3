@@ -45,6 +45,7 @@ export const useModGroupStore = defineStore({
 
       //this.clear()
       this.getting = []
+      const self = this
       for (const g of myGroups) {
         this.getting.push(g.id)
       }
@@ -83,7 +84,7 @@ export const useModGroupStore = defineStore({
         this.list[group.id] = group
         groupStore.list[group.id] = group // Set in root group store as well
       }
-      //console.log('=== uMGS fetchGroupMT',id, group!==null)
+      //console.log('=== uMGS fetchGroupMT', id, group !== null)
       const gettingix = this.getting.indexOf(id)
       if (gettingix !== -1) this.getting.splice(gettingix, 1)
     },
@@ -103,6 +104,13 @@ export const useModGroupStore = defineStore({
       if (this.list[id]) return
       if (this.getting.includes(id)) {
         //console.error('uMGS fetchIfNeedBeMT getting', id)
+        const until = (predFn) => {
+          const poll = (done) => (predFn() ? done() : setTimeout(() => poll(done), 100))
+          return new Promise(poll)
+        }
+        const self = this
+        await until(() => self.list[id]) // Wait until group has arrived
+        //console.error('uMGS fetchIfNeedBeMT GOT', this.list[id])
         return
       }
       //console.error('uMGS fetchIfNeedBeMT get', id)
@@ -121,7 +129,7 @@ export const useModGroupStore = defineStore({
       const idwas = id
       id = parseInt(id)
       if (!id) {
-        console.error('uMGS id not present',idwas)
+        console.error('uMGS id not present', idwas)
         return null
       }
       const g = state.list[id] ? state.list[id] : null
@@ -134,6 +142,6 @@ export const useModGroupStore = defineStore({
       if (!id) return null
       return state.allGroups[id] ? state.allGroups[id] : null
     },
-    
+
   }
 })

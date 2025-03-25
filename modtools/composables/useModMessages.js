@@ -93,7 +93,7 @@ export function setupModMessages() {
   })*/
 
   const getMessages = async (workCount) => {
-    console.log('getMessages', collection.value, groupid.value, workCount)
+    //console.log('getMessages', collection.value, groupid.value, workCount)
 
     const messageStore = useMessageStore()
     messageStore.clearContext()
@@ -107,7 +107,7 @@ export function setupModMessages() {
       //limit: Math.max(limit.value, newVal)
     }
     if (workCount) params.limit = Math.max(limit.value, workCount)
-    console.log('uMM getMessages',params.limit)
+    //console.log('uMM getMessages',params.limit)
     await messageStore.fetchMessagesMT(params)
 
     // Force them to show.

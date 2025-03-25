@@ -2,7 +2,7 @@
   <div>
     <b-modal ref="modal" :id="'modCommentModal-' + user.id" size="lg" no-stacking>
       <template #title class="w-100">
-        Add Note for {{ user.displayname }} <span v-if="groupname">on</span> {{  groupname }}
+        Add Note for {{ user.displayname }} <span v-if="groupname">on</span> {{ groupname }}
       </template>
       <template #default>
         <p>
@@ -46,6 +46,8 @@
   </div>
 </template>
 <script>
+import { setupModMembers } from '../composables/useModMembers'
+import { useUserStore } from '~/stores/user'
 import { useOurModal } from '~/composables/useOurModal'
 
 export default {
@@ -64,8 +66,9 @@ export default {
     }
   },
   setup() {
+    const { bump, context } = setupModMembers()
     const { modal, hide } = useOurModal()
-    return { modal, hide }
+    return { bump, context, modal, hide }
   },
   data: function () {
     return {
@@ -91,7 +94,7 @@ export default {
     }
   },
   methods: {
-    show(){
+    show() {
       this.user1 = null
       this.user2 = null
       this.user3 = null
@@ -127,6 +130,14 @@ export default {
         user11: this.user11,
         flag: this.flag
       })
+
+      const userStore = useUserStore()
+      await userStore.fetchMT({
+        search: this.user.id,
+        emailhistory: true
+      })
+      this.context = null
+      this.bump++
 
       this.$emit('added')
       this.hide()

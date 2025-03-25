@@ -44,6 +44,7 @@ import { useGroupStore } from '~/stores/group'
 import { useMemberStore } from '../stores/member'
 import { useUserStore } from '~/stores/user'
 import cloneDeep from 'lodash.clonedeep'
+import { setupModMembers } from '../composables/useModMembers'
 
 export default {
   components: { ReadMore },
@@ -52,7 +53,8 @@ export default {
     const groupStore = useGroupStore()
     const memberStore = useMemberStore()
     const userStore = useUserStore()
-    return { groupStore, memberStore, userStore }
+    const { bump, context } = setupModMembers()
+    return { bump, context, groupStore, memberStore, userStore }
   },
 
   props: {
@@ -106,6 +108,7 @@ export default {
   },
   methods: {
     async updateComments() {
+      console.log('MC updateComments')
       const userid = this.user.userid ? this.user.userid : this.user.id
 
       await this.userStore.fetchMT({
@@ -114,13 +117,15 @@ export default {
       })
 
       const user = this.userStore.byId(userid)
+      const savedCommentId = this.savedComment.id
       this.savedComment = false
       if (user.comments) {
         this.savedComment = user.comments.find(comm => {
-          return comm.id === this.savedComment.id
+          return comm.id === savedCommentId
         })
       }
-
+      this.context = null
+      this.bump++
       this.$emit('updated')
     },
 
@@ -130,8 +135,7 @@ export default {
 
     async deleteConfirmed() {
       await this.userStore.deleteComment(this.comment.id)
-
-      await this.updateComments()
+      this.updateComments()
     },
 
     async editIt() {
