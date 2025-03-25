@@ -34,6 +34,7 @@ export default {
   },
   methods: {
     async removePhoto(id) {
+      console.log('MP removePhoto', id, this.message.id)
       const attachments = []
 
       this.message.attachments.forEach(a => {
@@ -42,7 +43,7 @@ export default {
         }
       })
 
-      await this.messageStore.patch(this.message.id, attachments)
+      await this.messageStore.patch({ id: this.message.id, attachments })
     }
   }
 }

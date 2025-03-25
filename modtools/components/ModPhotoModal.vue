@@ -42,7 +42,7 @@ export default {
         }
       })
 
-      await this.messageStore.patch(this.message.id, attachments)
+      await this.messageStore.patch({ id: this.message.id, attachments })
     }
   }
 }
