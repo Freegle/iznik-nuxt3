@@ -369,7 +369,7 @@ export const useMessageStore = defineStore({
       this.context = null
     },
     async fetchMessagesMT(params) { // Added for ModTools
-      console.log("===useMessageStore fetchMessagesMT",params)
+      //console.log("===useMessageStore fetchMessagesMT",params)
 
       if (!params.context) {
         params.context = this.context
@@ -380,7 +380,6 @@ export const useMessageStore = defineStore({
       }
 
       const data = await api(this.config).message.fetchMessages(params)
-      await this.clear()
       if( !data.messages) return
       const messages = data.messages
       const context = data.context

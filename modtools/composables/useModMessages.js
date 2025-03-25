@@ -59,7 +59,7 @@ const messages = computed(() => {
       return new Date(b.arrival).getTime() - new Date(a.arrival).getTime()
     }
   })
-  console.log('###messages sort:', messages[0]?.groups[0]?.arrival)
+  //console.log('###messages sort:', messages[0]?.groups[0]?.arrival)
   return messages
 })
 
