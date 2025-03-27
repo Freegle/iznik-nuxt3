@@ -64,14 +64,15 @@
       <b-col ref="mapcont" cols="12" md="9" class="p-0">
         <div :style="'width: 100%; height: ' + mapHeight + 'px'">
           <l-map ref="mapObject" :zoom="zoom" :min-zoom="5" :max-zoom="17" :options="{ dragging: dragging, touchZoom: true }"
-            :use-global-leaflet="true" @update:bounds="boundsChanged" @update:zoom="boundsChanged" @ready="ready" @moveend="idle">
+            :center="[53.945, -2.5209]" :use-global-leaflet="true" @update:bounds="boundsChanged" @update:zoom="boundsChanged" @ready="ready"
+            @moveend="idle"> <!-- centre on Dunsop Bridge so caretaker map loads -->
             <l-tile-layer :url="osmtile()" :attribution="attribution()" />
             <div v-if="cga" id="cgahere">
               <l-geo-json ref="cgasjson" v-for="(c, i) in CGAs" :key="'cga-' + i" :geojson="c.json" :options="cgaOptions" :z-index-offset="2"
                 @click="selectCGA($event, c.group, i)" />
             </div>
             <div v-if="dpa" id="dpahere">
-              <l-geo-json ref="dgasjson" v-for="(d, i) in DPAs" :key="'dpa-' + i" :geojson="d.json" :options="dpaOptions" :z-index-offset="1"
+              <l-geo-json ref="dpasjson" v-for="(d, i) in DPAs" :key="'dpa-' + i" :geojson="d.json" :options="dpaOptions" :z-index-offset="1"
                 @click="selectDPA($event, d.group, i)" />
             </div>
             <div v-if="overlaps && showDodgy && !groupid" id="overlaphere">
@@ -99,7 +100,7 @@
         </div>
       </b-col>
       <b-col cols="12" md="3">
-        <b-card v-if="selectedWKT" class="mb-2" no-body>
+        <b-card v-if="selectedName || selectedWKT" class="mb-2" no-body>
           <b-card-header class="bg-info"> Area Details </b-card-header>
           <b-card-body>
             <p class="text-danger font-weight-bold">
@@ -107,17 +108,17 @@
             </p>
             <div v-if="groupid">
               <b-form-input v-model="selectedName" placeholder="Enter area name" size="lg" class="mb-1" />
-              <b-form-textarea v-model="selectedWKT" rows="4" />
+              <b-form-textarea v-if="selectedWKT" v-model="selectedWKT" rows="4" />
             </div>
             <div v-else>
               <h5>{{ selectedName }}</h5>
-              <b-form-textarea v-model="selectedWKT" rows="4" readonly />
+              <b-form-textarea v-if="selectedWKT" v-model="selectedWKT" rows="4" readonly />
             </div>
             <p v-if="intersects" class="text-danger">
               Crosses over itself - not valid
             </p>
           </b-card-body>
-          <b-card-footer v-if="groupid" class="d-flex justify-content-between flex-wrap">
+          <b-card-footer class="d-flex justify-content-between flex-wrap">
             <SpinButton variant="primary" icon-name="save" label="Save" spinclass="text-white" :disabled="!selectedName || !selectedWKT || intersects"
               @handle="saveArea" />
             <SpinButton variant="white" icon-name="times" label="Cancel" @handle="clearSelection" />
@@ -162,7 +163,7 @@ import {
 import '@geoman-io/leaflet-geoman-free'
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css'
 
-import 'leaflet-control-geocoder/dist/Control.Geocoder.css'
+// import 'leaflet-control-geocoder/dist/Control.Geocoder.css'
 
 import turfpolygon from 'turf-polygon'
 import turfintersect from 'turf-intersect'
@@ -238,8 +239,25 @@ const bump = ref(0)
 
 const cgasjson = ref(null)
 const editingcga = ref(null)
-const dgasjson = ref(null)
-const editingdga = ref(null)
+const dpasjson = ref(null)
+const editingdpa = ref(null)
+
+watch(shade, async (newVal, oldVal) => {
+  const allcgas = cgasjson.value
+  if (allcgas) {
+    const cgaoptions = cgaOptions.value
+    for (const cga of allcgas) {
+      cga.leafletObject.setStyle(cgaoptions)
+    }
+  }
+  const alldpas = dpasjson.value
+  if (alldpas) {
+    const dpaoptions = dpaOptions.value
+    for (const dpa of alldpas) {
+      dpa.leafletObject.setStyle(dpaoptions)
+    }
+  }
+})
 
 const supportOrAdmin = computed(() => {
   const authStore = useAuthStore()
@@ -328,9 +346,9 @@ const overlappingCGAs = computed(() => {
         const p1 = turfpolygon(CGAs.value[i].json.coordinates)
         const p2 = turfpolygon(CGAs.value[j].json.coordinates)
         const intersection = turfintersect(p1, p2)
-
         if (intersection) {
-          if (turfarea(intersection) > 500) {
+          //console.log('intersection',intersection)
+          /* TODO FIX if (turfarea(intersection) > 500) {
             console.log(
               'Intersection',
               i,
@@ -342,12 +360,12 @@ const overlappingCGAs = computed(() => {
 
             // Don't return too many for the same polygon.
             break
-          }
+          }*/
+          ret.push(intersection)
         }
       } catch (e) {
         console.log('Compare ', CGAs.value[i], CGAs.value[j])
         console.log('Check failed', e)
-        break // TODO
       }
     }
   }
@@ -367,7 +385,7 @@ const locationsInBounds = computed(() => {
       ) {
         const wkt = new Wkt.Wkt()
         try {
-          console.log('Wkt.Wkt C') // , location.polygon
+          //console.log('Wkt.Wkt C') // , location.polygon
           wkt.read(location.polygon)
           location.json = wkt.toJson()
           ret.push(location)
@@ -380,17 +398,17 @@ const locationsInBounds = computed(() => {
 
   return ret
 })
-const cgaOptions = {
+const cgaOptions = computed(() => ({
   fillColor: AREA_FILL_COLOUR,
   fillOpacity: shade.value ? FILL_OPACITY : 0,
   color: CGA_BOUNDARY_COLOUR,
-}
+}))
 
-const dpaOptions = {
+const dpaOptions = computed(() => ({
   fillColor: AREA_FILL_COLOUR,
   fillOpacity: shade.value ? FILL_OPACITY : 0,
   color: DPA_BOUNDARY_COLOUR,
-}
+}))
 
 const cgaOverlapOptions = {
   fillColor: OVERLAP_COLOUR,
@@ -401,9 +419,9 @@ const cgaOverlapOptions = {
 const dodgyInBounds = computed(() => {
   let ret = []
 
-  if (props.bounds && props.dodgy) {
-    ret = props.dodgy.filter(
-      (d) => props.bounds && props.bounds.contains([d.lat, d.lng])
+  if (bounds.value && dodgy.value) {
+    ret = dodgy.value.filter(
+      (d) => bounds.value && bounds.value.contains([d.lat, d.lng])
     )
   }
 
@@ -438,10 +456,12 @@ function clearSelection(callback) {
     editingcga.value.leafletObject.pm.disable()
     editingcga.value = null
   }
-  if (editingdga.value) {
-    editingdga.value.leafletObject.pm.disable()
-    editingdga.value = null
+  if (editingdpa.value) {
+    editingdpa.value.leafletObject.pm.disable()
+    editingdpa.value = null
   }
+
+  boundsChanged() // re-get areas
 
   // Re-enable map movement.
   mapObject.value.leafletObject._handlers.forEach(function (handler) {
@@ -452,19 +472,19 @@ function clearSelection(callback) {
 }
 
 function selectCGA(e, g, i) {
-  console.log('selectCGA', supportOrAdmin.value, i)
-  selectedObj.value = g
   selectedName.value = g.nameshort + ' CGA'
+  selectedWKT.value = null
+  selectedObj.value = null
+  /* Disable CGA editing here
+  console.log('selectCGA', supportOrAdmin.value, i)
   selectedWKT.value = g.polyofficial
+  selectedObj.value = g
   bump.value++
 
   if (supportOrAdmin.value) {
     const allcgas = cgasjson.value
     editingcga.value = allcgas[i]
     console.log('selectCGA EDITING B', editingcga.value)
-    //if (e.sourceTarget?.editing) {
-    //  e.sourceTarget.editing.enable()
-    //}
     editingcga.value.leafletObject.pm.enable({
       allowSelfIntersection: false,
       snappable: false, // Has big effect on performance when there are many layers on the map.
@@ -476,37 +496,41 @@ function selectCGA(e, g, i) {
       console.log('CGA pm:edit', json)
       //emit('edit', json)
     })
-  }
+  }*/
 }
 
 function selectDPA(e, g, i) {
-  console.log('selectDGA', supportOrAdmin.value, i)
-  selectedObj.value = g
   selectedName.value = g.nameshort + ' DPA'
+  selectedWKT.value = null
+  selectedObj.value = null
+  /* Disable DPA editing here
+  console.log('selectDPA', supportOrAdmin.value, i)
   selectedWKT.value = g.poly
+  selectedObj.value = g
   bump.value++
 
   if (supportOrAdmin.value) {
-    const alldgas = dgasjson.value
-    editingdga.value = alldgas[i]
-    console.log('selectDPA EDITING B', editingdga.value)
-    editingdga.value.leafletObject.pm.enable({
+    const alldpas = dpasjson.value
+    editingdpa.value = alldpas[i]
+    console.log('selectDPA EDITING B', editingdpa.value)
+    editingdpa.value.leafletObject.pm.enable({
       allowSelfIntersection: false,
       snappable: false, // Has big effect on performance when there are many layers on the map.
     })
-    editingdga.value.leafletObject.on('pm:edit', (f) => {
+    editingdpa.value.leafletObject.on('pm:edit', (f) => {
       const wkt = new Wkt.Wkt()
       wkt.fromObject(f.layer)
       const json = wkt.write()
-      console.log('DGA pm:edit', json)
+      console.log('DPA pm:edit', json)
       //emit('edit', json)
     })
   }
+    */
 }
 
 function selectLocation(l) {
   // Don't allow multiple selections.
-  console.log('Select location', l, JSON.stringify(selectedWKT.value))
+  //console.log('Select location', l, JSON.stringify(selectedWKT.value))
   if (!selectedWKT.value) {
     selectedId.value = l.id
     selectedObj.value = l
@@ -524,7 +548,7 @@ function selectLocation(l) {
 }
 
 function ready() {
-  console.log('Map ready', mapObject.value)
+  //console.log('Map ready', mapObject.value)
   mapObject.value.leafletObject.pm.setLang('en_gb')
   mapObject.value.leafletObject.pm.setGlobalOptions({
     allowSelfIntersection: false,
@@ -542,7 +566,7 @@ function ready() {
     drawRectangle: false,
     drawLine: false,
     drawText: false,
-    editMode: true,
+    editMode: false,
     dragMode: false,
     cutPolygon: false,
     removalMode: false,
@@ -554,10 +578,10 @@ function ready() {
   })
 
   mapObject.value.leafletObject.on('pm:drawend', (e) => {
-    console.log('MGM pm:drawend')
+    //console.log('MGM pm:drawend')
     // We've created a new polygon.  Extract the WKT and show it in the box.
     const drawLayers = mapObject.value.leafletObject.pm.getGeomanDrawLayers()
-    console.log('MGM pm:drawend', drawLayers.length)
+    //console.log('MGM pm:drawend', drawLayers.length)
 
     if (drawLayers.length) {
       const wkt = new Wkt.Wkt()
@@ -565,7 +589,7 @@ function ready() {
       selectedWKT.value = wkt.write()
       selectedObj.value = null
       bump.value++
-      console.log('MGM pm:drawend Z', selectedWKT.value)
+      //console.log('MGM pm:drawend Z', selectedWKT.value)
     }
   })
 
@@ -633,18 +657,19 @@ function ready() {
 }
 
 function idle() {
-  console.log('Map idle', zoom.value, props.groupid)
+  //console.log('Map idle', zoom.value, props.groupid)
   if (props.groupid) {
     const thegroup = group.value
 
     if (thegroup) {
-      console.log('Map idle thegroup', thegroup)
+      //console.log('Map idle thegroup', thegroup)
       let bounds
 
       if (!initialGroupZoomed.value) {
         // Zoom the map to fit the DPA/CGA of the group.  We need to do this before fetching the locations so that
         // we don't fetch them for the whole country.
         initialGroupZoomed.value = true
+        //console.log('===idle thegroup',thegroup.id)
         const area = thegroup.poly || thegroup.polyofficial
         //console.log('Zoom to area', area)
         if (area) {
@@ -656,7 +681,11 @@ function idle() {
             [bounds.getSouthWest().lat, bounds.getSouthWest().lng],
             [bounds.getNorthEast().lat, bounds.getNorthEast().lng],
           ]
-          mapObject.value.leafletObject.fitBounds(abounds)
+          //console.log('===idle fitBounds A',abounds)
+          setTimeout(() => { // Delay so initial move works
+            //console.log('===idle fitBounds B',abounds)
+            mapObject.value.leafletObject.fitBounds(abounds)
+          }, 1000)
         }
       } else {
         // Get the locations in this area
@@ -669,7 +698,7 @@ function idle() {
     }
   } else if (!initialGroupZoomed.value) {
     initialGroupZoomed.value = true
-    mapObject.value.setView([53.945, -2.5209], 6) // Show UK centred on Dunsop Bridge
+    mapObject.value.leafletObject.setView([53.945, -2.5209], 6) // Show UK centred on Dunsop Bridge
   }
 }
 
@@ -685,8 +714,8 @@ async function boundsChanged() {
     swlng: bounds.value.getSouthWest().lng,
     nelat: bounds.value.getNorthEast().lat,
     nelng: bounds.value.getNorthEast().lng,
-    dodgy: props.showDodgy,
-    areas: props.zoom >= 12,
+    dodgy: showDodgy.value,
+    areas: zoom.value >= 12,
   }
 
   if (group.value) {
@@ -721,9 +750,8 @@ async function saveArea(callback) {
     })
   }
 
-  clearSelection()
+  clearSelection() // which calls boundsChanged()
   lastLocationFetch.value = null
-  boundsChanged()
 
   busy.value = false
   callback()
@@ -749,14 +777,14 @@ async function fetchLocations(data) {
   const thisFetch = JSON.stringify(data)
 
   if (lastLocationFetch.value === thisFetch) {
-    console.log('Already fetching, skip')
+    //console.log('Already fetching, skip')
   } else {
-    console.log('===Fetch', thisFetch, lastLocationFetch.value)
+    //console.log('===Fetch', thisFetch, lastLocationFetch.value)
     lastLocationFetch.value = thisFetch
 
     if (zoom.value >= 12) {
       const ret = await locationStore.fetch(data)
-      console.log('Fetch returned', ret)
+      //console.log('Fetch returned', ret)
 
       if (ret?.locations) {
         locations.value = ret.locations

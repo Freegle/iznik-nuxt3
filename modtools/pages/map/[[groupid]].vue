@@ -30,7 +30,6 @@ const all = computed(() => {
 const caretaker = computed(() => {
   const caretaker =
     'groupid' in route.params ? route.params.groupid === 'caretaker' : false
-  console.log('caretaker', caretaker)
   return 'groupid' in route.params
     ? route.params.groupid === 'caretaker'
     : false

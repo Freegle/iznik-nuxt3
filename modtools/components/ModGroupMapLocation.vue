@@ -58,10 +58,10 @@ const props = defineProps({
 
 const emit = defineEmits(['click', 'edit'])
 
-const locationOptions = computed(() => ({
+const locationOptions = computed(() => ({ // Needs to be set using setStyle ie not reactive
   fillColor: AREA_FILL_COLOUR,
   fillOpacity: props.shade ? FILL_OPACITY : 0,
-  color: props.selected ? SELECTED : AREA_BOUNDARY_COLOUR,
+  color: AREA_BOUNDARY_COLOUR // Just keep always as blue: props.selected ? SELECTED : AREA_BOUNDARY_COLOUR,
 }))
 
 const centre = computed(() => {
@@ -96,6 +96,15 @@ const select = (e) => {
 const geojson = ref(null)
 
 watch(
+  () => props.shade,
+  (shade) => {
+    geojson.value.leafletObject.setStyle(locationOptions.value)
+  },
+  {
+    immediate: true,
+  }
+)
+watch(
   () => props.selected,
   (selected) => {
     if (selected) {
@@ -105,6 +114,7 @@ watch(
         snappable: false, // Has big effect on performance when there are many layers on the map.
       })
       geojson.value.leafletObject.on('pm:edit', (f) => {
+        console.log('MGML pm:drawend')
         const wkt = new Wkt.Wkt()
         wkt.fromObject(f.layer)
         const json = wkt.write()
@@ -113,6 +123,7 @@ watch(
     } else {
       geojson.value.leafletObject.pm.disable()
     }
+    geojson.value.leafletObject.setStyle(locationOptions.value)
   },
   {
     immediate: true,
