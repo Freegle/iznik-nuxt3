@@ -171,9 +171,12 @@ function uploadOneFile(file){
           imgtype: props.type,
           externaluid: uid,
           externalmods: mods,
-          recognise: props.recognise,
+          recognise: props.recognise && !recognised,
         }
         // console.log('att', att)
+
+        // Only recognise the first photo.
+        recognised = true
 
         const p = imageStore.post(att)
         promises.push(p)

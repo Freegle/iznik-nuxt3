@@ -53,7 +53,7 @@
         <v-icon icon="arrow-left" /> Monthly donations are really helpful
       </BFormCheckbox-->
 
-      <div class="mt-2 mb-2 w-100">
+      <div v-if="parseFloat(price)" class="mt-2 mb-2 w-100">
         <StripeDonate
           :key="price + monthly"
           :price="price"
