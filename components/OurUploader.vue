@@ -308,6 +308,7 @@ async function uploadSuccess(result) {
   if (result.successful) {
     // Iterate result.successful array
     const promises = []
+    let recognised = false
 
     result.successful.forEach((r) => {
       // We've uploaded a file.  Find what is after the last slash
@@ -326,8 +327,11 @@ async function uploadSuccess(result) {
           imgtype: props.type,
           externaluid: uid,
           externalmods: mods,
-          recognise: props.recognise,
+          recognise: props.recognise && !recognised,
         }
+
+        // Only recognise the first photo.
+        recognised = true
 
         const p = imageStore.post(att)
         promises.push(p)

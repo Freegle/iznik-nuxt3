@@ -139,18 +139,18 @@ watch(
       console.log('Current atts changed', props.id, newVal)
       composeStore.setAttachmentsForMessage(props.id, newVal)
 
-      const message = composeStore.message(props.id)
-
-      if (newVal[0].info.shortDescription && !message.item) {
-        const item = newVal[0].info.shortDescription.replace(/[,.;:!?]$/, '')
-        composeStore.setItem({
-          id: props.id,
-          item,
-        })
-
-        AIInfoAdded.value = true
-      }
-
+      // const message = composeStore.message(props.id)
+      //
+      // if (newVal[0].info?.shortDescription && !message.item) {
+      //   const item = newVal[0].info.shortDescription.replace(/[,.;:!?]$/, '')
+      //   composeStore.setItem({
+      //     id: props.id,
+      //     item,
+      //   })
+      //
+      //   AIInfoAdded.value = true
+      // }
+      //
       // AI description may not be useful.
       //
       // if (newVal[0].info.longDescription && !message.description) {
@@ -248,7 +248,9 @@ function clearAIInfo() {
   //   description: '',
   // })
 
-  imageStore.rateRecognise(currentAtts.value[0].id, 'Bad')
+  if (currentAtts?.value.length) {
+    imageStore.rateRecognise(currentAtts.value[0].id, 'Bad')
+  }
 
   AIInfoAdded.value = false
   AIRated.value = true
