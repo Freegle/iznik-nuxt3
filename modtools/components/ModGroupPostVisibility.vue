@@ -39,152 +39,152 @@
         </label>
         <SpinButton icon-name="save" label="Save" variant="primary" @handle="save" />
       </div>
-      <l-map ref="map" :zoom="7" :max-zoom="17" :center="[group.lat, group.lng]" :style="'width: 100%; height: 600px'" @ready="ready">
-        <l-tile-layer :url="osmtile" :attribution="attribution" />
-        <l-geo-json v-if="CGA" :geojson="CGA" :options="cgaOptions" />
-        <l-geo-json v-if="visibility" :geojson="visibility" :options="visibilityOptions" />
-      </l-map>
+      <div :style="'width: 100%; height: 600px'">
+        <l-map ref="mapObject" :zoom="7" :max-zoom="17" :center="[group.lat, group.lng]" @ready="ready">
+          <l-tile-layer :url="osmtile()" :attribution="attribution()" />
+          <l-geo-json ref="cgaobj" v-if="CGA" :geojson="CGA" :options="cgaOptions" />
+          <l-geo-json v-if="visibility" :geojson="visibility" :options="visibilityOptions" />
+        </l-map>
+      </div>
     </div>
   </div>
 </template>
-<script>
+<script setup>
 // We can't easily go back from a postvisibility polygon to the scale value.  
 // So: display correct postvisibility polygon but scale is always reset to just group
 import { useModGroupStore } from '@/stores/modgroup'
 import turfbuffer from 'turf-buffer'
 import Wkt from 'wicket'
-import { attribution, osmtile, loadLeaflet } from '../composables/useMap'
+import 'leaflet'
+import 'leaflet/dist/leaflet.css'
+import { attribution, osmtile } from '../composables/useMap'
+import { LMap, LTileLayer, LGeoJson } from '@vue-leaflet/vue-leaflet'
 
-export default {
-  setup(props) {
-    const modGroupStore = useModGroupStore()
-    return {
-      modGroupStore,
-      Wkt,
-      osmtile: osmtile(),
-      attribution: attribution()
-    }
-  },
-  props: {
-    groupid: {
-      type: Number,
-      required: true
-    }
-  },
-  data: function () {
-    return {
-      showing: false,
-      value: null,
-      scale: 0,
-      changed: false
-    }
-  },
-  computed: {
-    group() {
-      return this.modGroupStore.get(this.groupid)
-    },
-    CGA() {
-      const wkt = new Wkt.Wkt()
-      try {
-        wkt.read(this.group.dpa || this.group.cga)
-        return wkt.toJson()
-      } catch (e) {
-        console.log('WKT error', e)
-      }
+const modGroupStore = useModGroupStore()
 
+const props = defineProps({
+  groupid: {
+    type: Number,
+    required: true
+  }
+})
+
+const mapObject = ref(null)
+const cgaobj = ref(null)
+const showing = ref(false)
+const value = ref(null)
+const scale = ref(0)
+const changed = ref(false)
+
+watch(
+  () => props.groupid,
+  (newVal) => {
+    getValueFromGroup()
+    changed.value = false
+  }
+)
+
+watch(scale, async (newVal) => {
+  changed.value = true
+})
+
+const group = computed(() => {
+  return modGroupStore.get(props.groupid)
+})
+
+
+const CGA = computed(() => {
+  const wkt = new Wkt.Wkt()
+  try {
+    wkt.read(group.value.dpa || group.value.cga)
+    return wkt.toJson()
+  } catch (e) {
+    console.log('WKT error', e)
+  }
+
+  return null
+})
+
+const visibility = computed(() => {
+  if (!changed.value && group.value.postvisibility) {
+    // We can't easily go back from a postvisibility polygon to the scale value.  So we return the polygon if set.
+    const wkt = new Wkt.Wkt()
+    wkt.read(group.value.postvisibility)
+    return wkt.toJson()
+  } else {
+    // Scale the CGA.
+    const theCGA = CGA.value
+
+    if (theCGA) {
+      return turfbuffer(theCGA, scale.value, 'meters')
+    } else {
       return null
-    },
-    visibility() {
-      if (!this.changed && this.group.postvisibility) {
-        // We can't easily go back from a postvisibility polygon to the scale value.  So we return the polygon if
-        // set.
-        const wkt = new Wkt.Wkt()
-        wkt.read(this.group.postvisibility)
-        return wkt.toJson()
-      } else {
-        // Scale the CGA.
-        const CGA = this.CGA
-
-        if (CGA) {
-          return turfbuffer(CGA, this.scale, 'meters')
-        } else {
-          return null
-        }
-      }
-    },
-    cgaOptions() {
-      return {
-        fillColor: 'darkblue',
-        fillOpacity: 0.5,
-        color: 'black'
-      }
-    },
-    visibilityOptions() {
-      return {
-        fillColor: 'lightblue',
-        fillOpacity: 0.5,
-        color: 'darkgrey'
-      }
-    }
-  },
-  watch: {
-    groupid(newval) {
-      this.getValueFromGroup()
-    },
-    scale(newVal) {
-      this.changed = true
-    }
-  },
-  async mounted() {
-    this.getValueFromGroup()
-    await loadLeaflet()
-  },
-  methods: {
-    async getValueFromGroup() {
-      const obj = await this.modGroupStore.get(this.groupid)
-
-      if (obj) {
-        this.value = obj.postvisibility
-      }
-    },
-    toggleView(c, e) {
-      this.showing = c
-
-      if (!c) {
-        this.value = null
-      } else {
-        this.zoomToCGA()
-      }
-    },
-    async ready() {
-      if (process.client) {
-        this.zoomToCGA()
-      }
-    },
-    zoomToCGA() {
-      try {
-        if (this.$refs.map?.leafletObject) {
-          const area = this.group.dpa || this.group.cga
-          const wkt = new Wkt.Wkt()
-          const x = wkt.read(area)
-          const obj = wkt.toObject()
-          const bounds = obj.getBounds()
-          this.$refs.map.leafletObject.fitBounds(bounds.pad(0.1))
-        }
-      } catch (e) {
-        console.log('zoomToCGA error', e)
-      }
-    },
-    async save(callback) {
-      const wkt = new Wkt.Wkt()
-      wkt.read(JSON.stringify(this.visibility))
-
-      await this.modGroupStore.updateMT({
-        id: this.groupid,
-        postvisibility: wkt.toString()
-      })
-      callback()
     }
   }
+})
+
+const cgaOptions = computed(() => {
+  return {
+    fillColor: 'darkblue',
+    fillOpacity: 0.5,
+    color: 'black'
+  }
+})
+const visibilityOptions = computed(() => {
+  return {
+    fillColor: 'lightblue',
+    fillOpacity: 0.5,
+    color: 'darkgrey'
+  }
+})
+
+onMounted(async () => {
+  getValueFromGroup()
+})
+
+async function getValueFromGroup() {
+  const obj = await modGroupStore.get(props.groupid)
+
+  if (obj) {
+    value.value = obj.postvisibility
+  }
 }
+
+function toggleView(c, e) {
+  showing.value = c
+
+  if (!c) {
+    value.value = null
+  } else {
+    zoomToCGA()
+  }
+}
+
+async function ready() {
+  if (process.client) {
+    zoomToCGA()
+  }
+}
+
+function zoomToCGA() {
+  try {
+    if (mapObject.value?.leafletObject && cgaobj.value?.leafletObject) {
+      const bounds = cgaobj.value.leafletObject.getBounds()
+      mapObject.value.leafletObject.fitBounds(bounds.pad(0.1))
+    }
+  } catch (e) {
+    console.log('zoomToCGA error', e)
+  }
+}
+async function save(callback) {
+  const wkt = new Wkt.Wkt()
+  wkt.read(JSON.stringify(visibility.value))
+
+  await modGroupStore.updateMT({
+    id: props.groupid,
+    postvisibility: wkt.toString()
+  })
+  callback()
+}
+
 </script>

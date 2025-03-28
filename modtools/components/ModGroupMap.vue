@@ -171,8 +171,6 @@ import {
 import '@geoman-io/leaflet-geoman-free'
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css'
 
-// import 'leaflet-control-geocoder/dist/Control.Geocoder.css'
-
 import turfpolygon from 'turf-polygon'
 import turfintersect from 'turf-intersect'
 import turfarea from 'turf-area'
