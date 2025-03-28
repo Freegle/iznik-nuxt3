@@ -153,15 +153,16 @@ function uploadOneFile(file){
         // console.log(bytesUploaded, bytesTotal, percentage + '%')
         loading.value = 'Uploading '+percentage + '%'
       },
-      onSuccess: async function (payload) {
-        // console.log('upload.url', payload, upload.url)
-        // console.log('payload',payload)
-        //if( payload){
-        //  const { lastResponse } = payload
+      onSuccess: async function (result) {
+        // console.log('upload.url', result, upload.url)
+        // console.log('result',result)
+        //if( result){
+        //  const { lastResponse } = result
         //  console.log('lastResponse',lastResponse)
         //}
         loading.value = 'Uploading nearly done'
         const promises = []
+        let recognised = false
 
         let uid = upload.url
         uid = 'freegletusd-' + uid.substring(uid.lastIndexOf('/') + 1)
