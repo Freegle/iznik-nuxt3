@@ -28,6 +28,7 @@
   </div>
 </template>
 <script>
+import { dateonly } from '~/composables/useTimeFormat'
 export default {
   props: {
     chat: {
@@ -40,5 +41,8 @@ export default {
       showMessages: false,
     }
   },
+  methods: {
+    dateonly
+  }
 }
 </script>

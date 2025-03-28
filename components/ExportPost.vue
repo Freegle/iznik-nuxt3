@@ -21,6 +21,7 @@
   </div>
 </template>
 <script>
+import { dateonly } from '~/composables/useTimeFormat'
 import VueJsonPretty from 'vue-json-pretty'
 
 export default {
@@ -38,5 +39,8 @@ export default {
       showJSON: false,
     }
   },
+  methods: {
+    dateonly
+  }
 }
 </script>

@@ -820,6 +820,7 @@
   </div>
 </template>
 <script>
+import { dateonly, datetime } from '~/composables/useTimeFormat'
 import pluralize from 'pluralize'
 import ShowMore from '../components/ShowMore'
 import { useAuthStore } from '../stores/auth'
@@ -904,6 +905,8 @@ export default {
     }
   },
   methods: {
+    dateonly,
+    datetime,
     periodPlural(val) {
       pluralize('hour', val, true)
     },

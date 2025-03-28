@@ -260,10 +260,9 @@ import { useUserStore } from '../stores/user'
 import { useTrystStore } from '../stores/tryst'
 import { useLocationStore } from '../stores/location'
 import { milesAway } from '../composables/useDistance'
-import { datetimeshort } from '../composables/useTimeFormat'
 import { useRouter } from '#imports'
 import MyMessagePromisedTo from '~/components/MyMessagePromisedTo'
-import { timeago } from '~/composables/useTimeFormat'
+import { timeago, datetimeshort } from '~/composables/useTimeFormat'
 
 const MyMessageReply = defineAsyncComponent(() =>
   import('./MyMessageReply.vue')

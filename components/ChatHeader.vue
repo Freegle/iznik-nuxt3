@@ -338,7 +338,7 @@ import { useRouter } from '#imports'
 import { twem } from '~/composables/useTwem'
 import { useMiscStore } from '~/stores/misc'
 import SupporterInfo from '~/components/SupporterInfo'
-import { timeago } from '~/composables/useTimeFormat'
+import { timeago, datetimeshort } from '~/composables/useTimeFormat'
 
 const ChatBlockModal = defineAsyncComponent(() => import('./ChatBlockModal'))
 const ChatHideModal = defineAsyncComponent(() => import('./ChatHideModal'))
@@ -452,6 +452,7 @@ export default {
     },
   },
   methods: {
+    datetimeshort,
     collapse(val) {
       this.collapsed = val
     },

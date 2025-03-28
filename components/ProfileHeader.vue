@@ -56,6 +56,7 @@
   </div>
 </template>
 <script>
+import { dateonly } from '~/composables/useTimeFormat'
 import { useUserStore } from '../stores/user'
 import ProfileImage from '~/components/ProfileImage'
 import ChatButton from '~/components/ChatButton'
@@ -103,6 +104,9 @@ export default {
       return this.id ? this.userStore?.byId(this.id) : null
     },
   },
+  methods: {
+    dateonly
+  }
 }
 </script>
 <style scoped lang="scss">

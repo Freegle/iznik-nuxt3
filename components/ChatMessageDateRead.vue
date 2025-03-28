@@ -96,6 +96,7 @@
 import { setupChat } from '../composables/useChat'
 import { useUserStore } from '../stores/user'
 import ChatBase from './ChatBase'
+import { datetimeshort, timeadapt } from '~/composables/useTimeFormat'
 
 export default {
   extends: ChatBase,
@@ -141,6 +142,10 @@ export default {
       return this.chatMessageUser?.displayname
     },
   },
+  methods: {
+    datetimeshort,
+    timeadapt
+  }
 }
 </script>
 <style scoped lang="scss">

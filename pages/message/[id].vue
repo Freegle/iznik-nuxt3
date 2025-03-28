@@ -154,6 +154,7 @@ import { useMessageStore } from '~/stores/message'
 import { twem } from '~/composables/useTwem'
 import MyMessage from '~/components/MyMessage'
 import { ref, onMounted } from '#imports'
+import { dateonlyNoYear } from '~/composables/useTimeFormat'
 
 const runtimeConfig = useRuntimeConfig()
 const route = useRoute()
