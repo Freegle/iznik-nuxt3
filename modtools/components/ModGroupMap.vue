@@ -100,6 +100,14 @@
         </div>
       </b-col>
       <b-col cols="12" md="3">
+        <b-input-group>
+          <slot name="prepend">
+            <b-input v-model="searchplace" type="string" placeholder="Place to search for" />
+          </slot>
+          <b-button variant="white" @click="search">
+            Search
+          </b-button>
+        </b-input-group>
         <b-card v-if="selectedName || selectedWKT" class="mb-2" no-body>
           <b-card-header class="bg-info"> Area Details </b-card-header>
           <b-card-body>
@@ -173,6 +181,7 @@ import { attribution, osmtile } from '../composables/useMap'
 import { useModGroupStore } from '@/stores/modgroup'
 import { useLocationStore } from '~/stores/location'
 import { useAuthStore } from '@/stores/auth'
+import { POSTCODE_REGEX } from '~/constants'
 
 let Wkt = null
 
@@ -236,6 +245,7 @@ const bounds = ref(null)
 const locations = ref([])
 const dodgy = ref([])
 const bump = ref(0)
+const searchplace = ref('')
 
 const cgasjson = ref(null)
 const editingcga = ref(null)
@@ -592,61 +602,7 @@ function ready() {
       //console.log('MGM pm:drawend Z', selectedWKT.value)
     }
   })
-
-  // TODO Geocoder is trashing L, which makes the drawing tools fail.
-  // Probably easiest to add a separate search box outside the map.
-  // const { Geocoder } = await import('leaflet-control-geocoder/src/control')
-  // const { Photon } = await import(
-  //   'leaflet-control-geocoder/src/geocoders/photon'
-  // )
-  //
-  // new Geocoder({
-  //   placeholder: 'Search for a place...',
-  //   defaultMarkGeocode: false,
-  //   geocoder: new Photon({
-  //     geocodingQueryParams: {
-  //       bbox: '-7.57216793459, 49.959999905, 1.68153079591, 58.6350001085',
-  //     },
-  //     nameProperties: ['name', 'street', 'suburb', 'hamlet', 'town', 'city'],
-  //     serviceUrl,
-  //   }),
-  //   collapsed: false,
-  // })
-  //   .on('markgeocode', function (e) {
-  //     if (e && e.geocode && e.geocode.bbox) {
-  //       const bbox = e.geocode.bbox
-  //
-  //       const sw = bbox.getSouthWest()
-  //       const ne = bbox.getNorthEast()
-  //       console.log('BBOX', bbox, sw, ne)
-  //
-  //       const bounds = new window.L.LatLngBounds([
-  //         [sw.lat, sw.lng],
-  //         [ne.lat, ne.lng],
-  //       ]).pad(0.1)
-  //
-  //       // For reasons I don't understand, leaflet throws errors if we don't make these local here.
-  //       const swlat = bounds.getSouthWest().lat
-  //       const swlng = bounds.getSouthWest().lng
-  //       const nelat = bounds.getNorthEast().lat
-  //       const nelng = bounds.getNorthEast().lng
-  //
-  //       // Empty out the query box so that the dropdown closes.
-  //       this.setQuery('')
-  //       zoom.value = 14
-  //
-  //       nextTick(() => {
-  //         // Move the map to the location we've found.
-  //         console.log('Fly to', swlat, swlng, nelat, nelng)
-  //         mapObject.value.flyToBounds([
-  //           [swlat, swlng],
-  //           [nelat, nelng],
-  //         ])
-  //       })
-  //     }
-  //   })
-  //   .addTo(mapObject.value.leafletObject)
-
+  
   if (props.groups) {
     zoom.value = 5
   } else {
@@ -804,6 +760,69 @@ function dobump() {
   setTimeout(() => {
     bump.value++
   }, 500)
+}
+const encodeParams = false
+const customParams = {
+  bbox: '-7.57216793459,49.959999905,1.68153079591,58.6350001085',
+}
+
+function composeParams(val) {
+  const encode = val => (encodeParams ? encodeURIComponent(val) : val)
+  let params = `q=${encode(val)}`
+  if (customParams) {
+    Object.keys(customParams).forEach(key => {
+      params += `&${key}=${encode(customParams[key])}`
+    })
+  }
+  return params
+}
+
+// Search:
+// - If looks like a postcode then look up our list of postcodes
+// - Otherwise do photo search
+// Do not use leaflet geocoder as this trashes L which makes the drawing tools fail.
+
+async function search() {
+  const runtimeConfig = useRuntimeConfig()
+  const gc = runtimeConfig.public.GEOCODE
+
+  // Do postcode search
+  if (POSTCODE_REGEX.test(searchplace.value)) {
+    // We have a probable postcode.  We can search for it.  This is because our list of postcodes is more
+    // reliable than the Photon geocoder handling of postcodes.
+    const loc = await locationStore.fetch({
+      typeahead: searchplace.value,
+    })
+
+    if (loc?.locations?.length > 0) {
+      const l0 = loc.locations[0]
+      if (l0.area) {
+        const latlng = new window.L.LatLng(l0.area.lat, l0.area.lng)
+        mapObject.value.leafletObject.setView(latlng, 14)
+        return
+      }
+    }
+  }
+
+  // Do general search
+  const params = composeParams(searchplace.value)
+  const ajax = new XMLHttpRequest()
+  ajax.open('GET', `${gc}?${params}`, true)
+  ajax.addEventListener('loadend', e => {
+    const { status, responseText } = e.target
+
+    if (status === 200) {
+      const json = JSON.parse(responseText)
+      if( Array.isArray(json.features) && (json.features.length>0)){
+        const f0 = json.features[0]
+        if( f0.geometry && f0.geometry.coordinates && f0.geometry.coordinates.length==2){
+          const latlng = new window.L.LatLng(f0.geometry.coordinates[1], f0.geometry.coordinates[0])
+          mapObject.value.leafletObject.setView(latlng, 14)
+        }
+      }
+    }
+  })
+  ajax.send()
 }
 </script>
 <style scoped>

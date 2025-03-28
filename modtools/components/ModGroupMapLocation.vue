@@ -98,7 +98,7 @@ const geojson = ref(null)
 watch(
   () => props.shade,
   (shade) => {
-    geojson.value.leafletObject.setStyle(locationOptions.value)
+    if( geojson.value) geojson.value.leafletObject.setStyle(locationOptions.value)
   },
   {
     immediate: true,
@@ -107,6 +107,7 @@ watch(
 watch(
   () => props.selected,
   (selected) => {
+    if( !geojson.value) return
     if (selected) {
       // Enable this object for editing and watch for changes.
       geojson.value.leafletObject.pm.enable({
