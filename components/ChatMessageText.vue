@@ -127,6 +127,9 @@ export default {
         }
         //if (++count === 10) break
       }
+      if (lastix < giventext.length) {
+        highlightedText += giventext.substring(lastix)
+      }
 
       return highlightedText
     }
