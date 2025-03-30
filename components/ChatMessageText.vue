@@ -4,46 +4,49 @@
     :class="{ myChatMessage: messageIsFromCurrentUser }"
   >
     <div class="chatMessage forcebreak chatMessage__owner">
-      <span v-if="!highlightEmails">
-        <span v-if="messageIsNew" class="prewrap font-weight-bold">{{
-          emessage
-        }}</span>
-        <span v-else class="preline forcebreak">{{ emessage }}</span>
-        <b-img
-          v-if="chatmessage?.image"
-          fluid
-          :src="chatmessage?.image.path"
-          lazy
-          rounded
-        />
-      </span>
-      <span v-else>
-        <span v-if="messageIsNew" class="font-weight-bold">
-          <Highlighter
-            :text-to-highlight="emessage"
-            :search-words="[regexEmail.toString()]"
-            highlight-class-name="highlight"
-            class="prewrap"
+      <div>
+        <span v-if="!highlightEmails">
+          <span v-if="messageIsNew" class="prewrap font-weight-bold">{{
+            emessage
+          }}</span>
+          <span v-else class="preline forcebreak">{{ emessage }}</span>
+          <b-img
+            v-if="chatmessage?.image"
+            fluid
+            :src="chatmessage?.image.path"
+            lazy
+            rounded
           />
         </span>
         <span v-else>
-          <!-- TODO FIX regexEmail which fails validator test in Highlighter -->
-          <Highlighter
-            :text-to-highlight="emessage"
-            :searchWords="[regexEmail.toString()]"
-            highlight-class-name="highlight"
-            class="preline forcebreak"
-            :autoEscape="false"
+            <span v-if="messageIsNew" class="font-weight-bold" v-html="highlightedEmails('highlight prewrap')">
+            </span>
+            <span v-else v-html="highlightedEmails('highlight preline forcebreak')">
+            </span>
+            <b-img
+            v-if="chatmessage?.image"
+            fluid
+            :src="chatmessage?.image.path"
+            lazy
+            rounded
           />
         </span>
-        <b-img
-          v-if="chatmessage?.image"
-          fluid
-          :src="chatmessage?.image.path"
-          lazy
-          rounded
-        />
-      </span>
+      </div>
+      <!--div v-if="lat || lng">
+        <l-map
+          ref="map"
+          :zoom="16"
+          :max-zoom="maxZoom"
+          :center="[lat, lng]"
+          :style="'width: 100%; height: 200px'"
+        >
+          <l-tile-layer :url="osmtile" :attribution="attribution" />
+          <l-marker :lat-lng="[lat, lng]" :interactive="false" />
+        </l-map>
+        <div class="small text-muted">
+          (Map shows approximate location of {{ postcode }})
+        </div>
+      </div-->
     </div>
     <div class="chatMessageProfilePic">
       <ProfileImage
@@ -59,6 +62,10 @@
 import Highlighter from 'vue-highlight-words'
 import ChatBase from '~/components/ChatBase'
 import ProfileImage from '~/components/ProfileImage'
+import { MAX_MAP_ZOOM, POSTCODE_REGEX } from '~/constants'
+import { attribution, osmtile } from '~/composables/useMap'
+import { useLocationStore } from '~/stores/location'
+import { LMap, LTileLayer, LMarker } from '@vue-leaflet/vue-leaflet'
 
 export default {
   components: {
@@ -66,13 +73,77 @@ export default {
     Highlighter,
   },
   extends: ChatBase,
+  data: function () {
+    return {
+      lat: null,
+      lng: null,
+    }
+  },
   computed: {
+    osmtile: () => osmtile(),
+    attribution: () => attribution(),
+    maxZoom() {
+      return MAX_MAP_ZOOM
+    },
     messageIsNew() {
       return (
         this.chatmessage?.secondsago < 60 ||
         this.chatmessage?.id > this.chat?.lastmsgseen
       )
     },
+    postcode() {
+      let ret = null
+
+      const postcode = this.chatmessage?.message.match(POSTCODE_REGEX)
+
+      if (postcode?.length) {
+        if (!postcode[0].includes(' ')) {
+          // Make sure we have a space in the right place, because this helps with autocomplete
+          ret = postcode[0].replace(/^(.*)(\d)/, '$1 $2')
+        } else {
+          ret = postcode[0]
+        }
+      }
+
+      return ret
+    },
+  },
+  methods:{
+    highlightedEmails(c) {
+      const regex = new RegExp(this.regexEmailMT)
+      let count = 0
+      const giventext = this.emessage
+      let highlightedText = ''
+      let lastix = 0
+      let match
+      while ((match = regex.exec(giventext))) {
+        let start = match.index
+        let end = regex.lastIndex
+        // Do not highlight zero-length matches
+        if (end > start) {
+          highlightedText += giventext.substring(lastix, start)
+          highlightedText += `<span class="${c}">` + giventext.substring(start, end) + '</span>'
+          lastix = end
+        }
+        //if (++count === 10) break
+      }
+
+      return highlightedText
+    }
+  },
+  async mounted() {
+    console.log('Mounted, postcode', this.postcode)
+    if (this.postcode) {
+      // Use typeahead to find the postcode location.
+      const locationStore = useLocationStore()
+      const locs = await locationStore.typeahead(this.postcode)
+      console.log('Typeahead returned', locs)
+
+      if (locs?.length) {
+        this.lat = locs[0].lat
+        this.lng = locs[0].lng
+      }
+    }
   },
 }
 </script>
