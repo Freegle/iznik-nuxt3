@@ -109,10 +109,17 @@ export default {
     },
   },
   methods:{
+    // Replace Highlighter with highlightedEmails as it does not support regex for emails
+    makesafeforhtml(input) {
+      input = input.replace(/&/g, '&amp;')
+      input = input.replace(/</g, '&lt;')
+      input = input.replace(/>/g, '&gt;')
+      return input;
+    },
     highlightedEmails(c) {
       const regex = new RegExp(this.regexEmailMT)
-      let count = 0
-      const giventext = this.emessage
+      //let count = 0
+      const giventext = this.makesafeforhtml(this.emessage)
       let highlightedText = ''
       let lastix = 0
       let match
