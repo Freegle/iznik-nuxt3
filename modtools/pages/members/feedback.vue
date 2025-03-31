@@ -253,7 +253,7 @@ export default {
           if (rating.reviewrequired) {
             // console.log('markAll ratingReviewed', { id: rating.id })
             await this.userStore.ratingReviewed({
-              id: this.rating.id
+              id: rating.id
             })
           }
         })
