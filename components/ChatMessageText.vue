@@ -146,6 +146,7 @@ export default {
     if (this.postcode) {
       // Use typeahead to find the postcode location.
       const locationStore = useLocationStore()
+      if( locationStore && locationStore.typeahead){
       const locs = await locationStore.typeahead(this.postcode)
       console.log('Typeahead returned', locs)
 
@@ -153,6 +154,7 @@ export default {
         this.lat = locs[0].lat
         this.lng = locs[0].lng
       }
+    }
     }
   },
 }
