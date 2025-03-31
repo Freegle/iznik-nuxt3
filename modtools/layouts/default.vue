@@ -24,7 +24,7 @@
             <b-button variant="white" class="menu" @click="toggleMenu">
               <v-icon icon="bars" class="" />
             </b-button>
-            <b-badge v-show="menuCount" variant="danger" class="menuCount position-absolute" @click="toggleMenu">
+            <b-badge v-show="menuCount" v-if="!showMenu" variant="danger" class="menuCount position-absolute" @click="toggleMenu">
               {{ menuCount }}
             </b-badge>
           </div>
