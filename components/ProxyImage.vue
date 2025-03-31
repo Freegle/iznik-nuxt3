@@ -1,6 +1,6 @@
 <template>
   <!-- TODO: Fix up so that NuxtPicture works. Seems to go wrong in MT chats list -->
-   <!-- fullSrc comes from src and chat.icon which seems to be different from FD - but raw src seems OK -->
+  <!-- fullSrc comes from src and chat.icon which seems to be different from FD - but raw src seems OK -->
   <span :class="className"><img :src="src" :alt="alt" :width="width" :height="height":placeholder="placeholder"/></span>
   <!--NuxtPicture
     :format="format"

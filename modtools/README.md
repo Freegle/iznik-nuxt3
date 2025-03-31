@@ -43,6 +43,9 @@ A fairly minimal `package.json` is needed as `nuxt.config.ts` extends `../` and 
 * Loads of TODOs to check inc some in base code
 * Cope on mobile ie left menu
 
+* components/ProxyImage.vue Fix up so that NuxtPicture works. Seems to go wrong in MT chats list -->
+  <!-- fullSrc comes from src and chat.icon which seems to be different from FD - but raw src seems OK -->
+
 ## Upgrade notes
 
 * b-btn to b-button, b-select to b-form-select, date-picker to OurDatePicker, b-input to b-form-input, b-textarea to b-form-textarea
