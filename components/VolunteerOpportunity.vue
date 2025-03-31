@@ -243,7 +243,7 @@ export default {
 
     if (props.id) {
       const v = await volunteeringStore.fetch(props.id)
-      if (v) {
+      if (v && v.userid) {
         await userStore.fetch(v.userid)
 
         v.groups?.forEach(async (id) => {

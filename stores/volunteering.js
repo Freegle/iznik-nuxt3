@@ -48,7 +48,7 @@ export const useVolunteeringStore = defineStore({
           const item = addStrings(volunteering, false)
           // Convert to v2 format
           item.image = item.photo
-          item.userid = item.user.id
+          item.userid = item.user?.id
           item.groupsmt = item.groups
           const groups = []
           for( const group of item.groups){

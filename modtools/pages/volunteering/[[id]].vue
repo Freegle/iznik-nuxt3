@@ -55,16 +55,16 @@ export default {
     volwork(newVal, oldVal) {
       // TODO: The page is always going to be visible so why might we not be?
       console.log('volunteering watch volwork', newVal, oldVal)
-      if (newVal > oldVal) {
+      if (newVal && oldVal && (newVal > oldVal)) {
         // There's new stuff to do.  Reload.
         this.volunteeringStore.clear()
         this.bump++
       } else {
-        /*const visible = this.miscStore.get('visible')
+        //const visible = this.miscStore.get('visible')
   
-        if (!visible) {
-          this.volunteeringStore.clear()
-        }*/
+        //if (!visible) {
+        //  this.volunteeringStore.clear()
+        //}
       }
     }
   },
