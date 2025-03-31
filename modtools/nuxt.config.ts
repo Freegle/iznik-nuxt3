@@ -2,9 +2,10 @@ import fs from 'fs'
 
 const packageJson = fs.readFileSync('./package.json', 'utf8')
 const version = JSON.parse(packageJson).version || 0
+//import config from '../config'
 console.log('Building iznik-modtools', version)
 
-const config = defineNuxtConfig({
+export default defineNuxtConfig({
   // target: 'static',
   ssr: false,
   extends: [
@@ -44,9 +45,9 @@ const config = defineNuxtConfig({
   postcss: { // https://answers.netlify.com/t/javascript-heap-out-of-memory-when-trying-to-build-a-nuxt-app/93138/13
     plugins: {
       cssnano: false // disable cssnano
-        //process.env.NODE_ENV === 'production'
-        //  ? { preset: ['default', { discardComments: { removeAll: true } }] }
-        //  : false, // disable cssnano when not in production      
+      //process.env.NODE_ENV === 'production'
+      //  ? { preset: ['default', { discardComments: { removeAll: true } }] }
+      //  : false, // disable cssnano when not in production      
     }
   },
   /*modules: [
@@ -103,11 +104,34 @@ const config = defineNuxtConfig({
         { name: 'color-scheme', content: 'light' },
         { name: 'facebook-domain-verification', content: '', },
       ],
-    }
-  }
+    },
+  },
+  /*image: {
+    uploadcare: {
+      provider: 'uploadcare',
+      cdnURL: config.UPLOADCARE_CDN,
+    },
+
+    weserv: {
+      provider: 'weserv',
+      baseURL: config.TUS_UPLOADER,
+      weservURL: config.IMAGE_DELIVERY,
+    },
+
+    // We want sharp images on fancy screens.
+    densities: [1, 2],
+
+    // Uploadcare only supports images upto 3000, and the screen sizes are doubled when requesting because of densities.
+    // So we already need to drop the top-level screen sizes, and we also don't want to request images which are too
+    // large because this affects our charged bandwidth.  So we only go up to 768.
+    screens: {
+      xs: 320,
+      sm: 576,
+      md: 768,
+      lg: 768,
+      xl: 768,
+      xxl: 768,
+      '2xl': 768,
+    },
+  }*/
 })
-
-// Can we remove config.app.head.meta.unwanted here - no
-// console.log(config.app?.head.meta)
-
-export default config
