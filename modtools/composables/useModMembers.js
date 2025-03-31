@@ -9,7 +9,7 @@ const context = ref(null)
 const groupid = ref(0)
 const group = ref(null)
 const limit = ref(0)
-const search = ref(null)
+const search = ref('')
 const filter = ref('0')
 // const workType = ref(null)
 const show = ref(0)
@@ -31,7 +31,8 @@ const members = computed(() => {
   if (groupid.value) {
     members = memberStore.getByGroup(groupid.value)
   } else {
-    members = memberStore.all
+    members = Object.values(memberStore.list)
+    console.log('UMM members all list',members.length)
   }
   if (!members) {
     return []
@@ -70,6 +71,7 @@ const visibleMembers = computed(() => {
 
 const loadMore = async function ($state) {
   //console.log('UMM loadMore', show.value, groupid.value, members.value.length, visibleMembers.value.length)
+  //console.log('UMM loadMore', context.value)
   if (show.value < members.value.length) {
     //console.log('UMM loadMore inc show')
     show.value++
@@ -117,7 +119,7 @@ const loadMore = async function ($state) {
 }
 
 watch(groupid, async (newVal) => {
-  // console.log("UMM watch groupid", newVal)
+  //console.log("UMM watch groupid", newVal)
   context.value = null
   show.value = 0
   const memberStore = useMemberStore()

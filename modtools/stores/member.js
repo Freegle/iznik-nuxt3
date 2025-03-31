@@ -61,9 +61,9 @@ export const useMemberStore = defineStore({
       // results.
       const instance = this.instance
 
-      if (!params.context) {
-        params.context = this.context
-      }
+      //if (!params.context) {
+      //  params.context = this.context
+      //}
       if (params.context) {
         // Ensure the context is a real object, in case it has been in the store.
         params.context = cloneDeep(params.context)
@@ -193,7 +193,6 @@ export const useMemberStore = defineStore({
     },
   },
   getters: {
-    all: (state) => Object.values(state.list),
     getByGroup: (state) => (groupid) => {
       const ret = Object.values(state.list).filter(member => {
         return parseInt(member.groupid) === parseInt(groupid)

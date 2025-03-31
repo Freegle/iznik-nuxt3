@@ -11,9 +11,10 @@ export function useOurModal() {
   function show() {
     if( !modal.value){
       console.error('useOurModal show problem')
-    } else
-    modal.value.show()
-    isShown.value = true
+    } else{
+      modal.value.show()
+      isShown.value = true
+    }
   }
 
   function hide() {

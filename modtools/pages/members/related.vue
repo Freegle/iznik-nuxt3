@@ -62,7 +62,8 @@ export default {
   computed: {
     members() {
       if( !this.memberStore) return []
-      return this.memberStore.all
+      console.log('members related all list')
+      return Object.values(this.memberStore.list)
     },
     visibleMembers() {
       const ret = this.members.filter(member => {

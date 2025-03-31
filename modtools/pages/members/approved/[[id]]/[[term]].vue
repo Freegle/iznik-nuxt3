@@ -19,8 +19,8 @@
         </div>
         <ModMemberSearchbox :search="search" @search="startsearch" />
       </div>
-      <div v-if="groupid && group">
-        <p class="mt-1">
+      <div v-if="id || term">
+        <p v-if="groupid && group" class="mt-1">
           This group has {{ pluralise('member', group.membercount, true) }}.
         </p>
         <NoticeMessage v-if="!members.length" class="mt-2">
@@ -57,6 +57,7 @@ export default {
     const memberStore = useMemberStore()
     const miscStore = useMiscStore()
     const modMembers = setupModMembers()
+    modMembers.context.value = null
     modMembers.collection.value = 'Approved'
     return {
       memberStore,
@@ -73,6 +74,16 @@ export default {
     }
   },
   computed: {
+    id() {
+      const route = useRoute()
+      if (('id' in route.params) && route.params.id) return parseInt(route.params.id)
+      return 0
+    },
+    term() {
+      const route = useRoute()
+      if (('term' in route.params) && route.params.term) return route.params.term
+      return null
+    },
     groupName() {
       if (this.group) {
         return this.group.namedisplay
@@ -87,9 +98,17 @@ export default {
     },
     chosengroupid(newVal) {
       const router = useRouter()
-      console.log('chosengroupid', newVal)
-      this.groupid = newVal
-      router.push('/members/approved/' + newVal)
+      if (newVal !== this.id) {
+        if (newVal === 0) {
+          //console.log('chosengroupid GO HOME')
+          router.push('/members/approved/')
+        } else {
+          //console.log('chosengroupid GOTO',newVal)
+          router.push('/members/approved/' + newVal)
+        }
+      } else {
+        //console.log('chosengroupid SAME')
+      }
     },
     groupid(newVal) {
       this.bump++
@@ -98,17 +117,17 @@ export default {
   },
   mounted() {
     const route = useRoute()
-    if (('id' in route.params) && route.params.id) this.groupid = parseInt(route.params.id)
-    this.search = null
+    this.groupid = this.id
+    this.chosengroupid = this.id
+    this.search = ''
     if (('term' in route.params) && route.params.term) this.search = route.params.term
-    //console.log('mounted', this.groupid, this.search) 
+    //console.log('members approved mounted', this.groupid, this.search)
 
     const modGroupStore = useModGroupStore()
     modGroupStore.getModGroups()
 
     // reset infiniteLoading on return to page
     this.memberStore.clear()
-    this.bump++
 
     if (!this.groupid) {
       // If we have not selected a group, check if we are only a mod on one.  If so, then go to that group so that
@@ -128,6 +147,7 @@ export default {
         router.push('/members/approved/' + lastmod)
       }
     }
+    this.bump++
   },
   methods: {
     async addMember() {
@@ -142,12 +162,15 @@ export default {
       // Initiate search again even if search has not changed
       search = search.trim()
       this.search = search
+      this.context = null
       this.memberStore.clear()
       const router = useRouter()
-      if (this.groupid && search) {
+      if (search) {
         router.push('/members/approved/' + this.groupid + '/' + search)
-      } else if( this.groupid){
+      } else if (this.groupid) {
         router.push('/members/approved/' + this.groupid)
+      } else {
+        router.push('/members/approved/')
       }
       this.bump++
     }
