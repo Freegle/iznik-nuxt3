@@ -371,18 +371,19 @@ export const useMessageStore = defineStore({
     async fetchMessagesMT(params) { // Added for ModTools
       //console.log("===useMessageStore fetchMessagesMT",params)
 
-      if (!params.context) {
-        params.context = this.context
-      }
+      //if (!params.context) {
+      //  params.context = this.context
+      //}
       if (params.context) {
         // Ensure the context is a real object, in case it has been in the store.
         params.context = cloneDeep(params.context)
       }
+      //console.log("===fetchMessMT",params.context)
 
       const data = await api(this.config).message.fetchMessages(params)
       if( !data.messages) return
       const messages = data.messages
-      const context = data.context
+      const context = data.context // Can be undefined if search complete
 
       if (params.collection !== 'Draft') {
         // We don't use context for drafts - there aren't many.
@@ -392,6 +393,7 @@ export const useMessageStore = defineStore({
         //console.log('GOT message',message.id, typeof message.fromuser)
         this.list[message.id] = message
       }
+      //console.log('---fetchMessMT',this.context?.Date,this.context?.id, Object.values(this.list).length, messages.length)
     },
     async fetchMT(params) { // Added for ModTools
       const { message } = await api(this.config).message.fetchMT(params)

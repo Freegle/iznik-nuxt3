@@ -79,6 +79,7 @@ export default {
       this.show = 0
       this.messageTerm = term?.trim()
       this.memberTerm = null
+      this.context = null
       this.messageStore.clear()
 
       // Need to rerender the infinite scroll
@@ -92,6 +93,7 @@ export default {
       this.show = 0
       this.messageTerm = null
       this.memberTerm = term?.trim()
+      this.context = null
       this.messageStore.clear()
 
       // Need to rerender the infinite scroll
@@ -140,9 +142,11 @@ export default {
 
         params.context = this.context
         params.limit = this.messages.length + this.distance
+        //console.log('Approved loadMore DO',params)
 
         await this.messageStore.fetchMessagesMT(params)
         this.context = this.messageStore.context
+        //console.log('Approved LoadMore GOT',this.context)
 
         if (currentCount === this.messages.length) {
           $state.complete()
