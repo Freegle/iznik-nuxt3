@@ -48,11 +48,21 @@
             :key="'post-' + post.id"
             class="p-0 text-start mt-1"
           >
-            <MyMessage
-              :id="post.id"
-              :show-old="showOldPosts"
-              :expand="defaultExpanded"
-            />
+            <Suspense>
+              <MyMessage
+                :id="post.id"
+                :show-old="showOldPosts"
+                :expand="defaultExpanded"
+                class="minheight"
+              />
+              <template #fallback>
+                <div class="w-100 d-flex justify-content-center text-center">
+                  <client-only>
+                    <b-img lazy src="/loader.gif" alt="Loading" width="100px" />
+                  </client-only>
+                </div>
+              </template>
+            </Suspense>
           </div>
           <b-img
             v-if="loading"
