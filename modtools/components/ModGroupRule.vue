@@ -4,7 +4,7 @@
       <b-form-text v-if="description" class="mb-2">
         {{ description }}
       </b-form-text>
-      <b-form-text v-if="!haveValue" class="mb-2 text-small text-muted">
+      <b-form-text v-if="!haveValue" class="mb-2 text-small dangerimp">
         No answer given yet.
       </b-form-text>
       <b-input-group v-if="type === 'input'">
@@ -33,7 +33,8 @@
       </div>
       <div v-else-if="type === 'toggle'">
         <OurToggle v-model="value" class="mt-2" :height="30" :width="toggleWidth" :font-size="14" :sync="true"
-          :labels="{ checked: toggleChecked, unchecked: toggleUnchecked }" variant="modgreen" :disabled="readonly" @change="save" />
+          :labels="{ checked: haveValue ? toggleChecked : 'N/A', unchecked: haveValue ? toggleUnchecked : 'N/A' }" variant="modgreen"
+          :disabled="readonly" @change="save" />
       </div>
     </b-form-group>
     <div v-if="newRule" class="text-danger font-weight-bold">
@@ -168,5 +169,10 @@ export default {
 input,
 select {
   max-width: 300px;
+}
+
+.dangerimp {
+  color: $color-red !important;
+  font-weight: bold;
 }
 </style>
