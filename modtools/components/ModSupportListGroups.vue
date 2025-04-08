@@ -24,6 +24,8 @@
         </hot-column>
         <hot-column title="Auto-Approves" data="recentautoapproves" :renderer="centreRenderer">
         </hot-column>
+        <hot-column title="Active-owner" data="activeownercount" :renderer="centreRenderer">
+        </hot-column>
         <hot-column title="Active Mods" data="activemodcount" :renderer="centreRenderer">
         </hot-column>
         <hot-column title="Last Moderated" data="lastmoderated" :renderer="dateRenderer">

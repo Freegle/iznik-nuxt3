@@ -1,40 +1,45 @@
 <template>
-  <b-form-group :label="label" class="mb-4">
-    <b-form-text v-if="description" class="mb-2">
-      {{ description }}
-    </b-form-text>
-    <b-form-text :class="{ invisible: haveValue }" class="mb-2 text-small text-muted">
-      No answer given yet.
-    </b-form-text>
-    <b-input-group v-if="type === 'input'">
-      <b-input v-model="value" />
-      <slot name="append">
-        <SpinButton variant="white" icon-name="save" label="Save" @handle="save" :disabled="readonly" />
-      </slot>
-    </b-input-group>
-    <b-input-group v-if="type === 'number'">
-      <b-input v-model="value" type="number" :step="step" />
-      <slot name="append">
-        <SpinButton variant="white" icon-name="save" label="Save" @handle="save" :disabled="readonly" />
-      </slot>
-    </b-input-group>
-    <div v-else-if="type === 'textarea'">
-      <b-row>
-        <b-col>
-          <b-form-textarea v-model="value" :rows="rows" />
-        </b-col>
-      </b-row>
-      <b-row>
-        <b-col>
-          <SpinButton variant="white" icon-name="save" label="Save" @handle="save" class="mt-2" :disabled="readonly" />
-        </b-col>
-      </b-row>
+  <div class="d-flex mb-3">
+    <b-form-group :label="label">
+      <b-form-text v-if="description" class="mb-2">
+        {{ description }}
+      </b-form-text>
+      <b-form-text v-if="!haveValue" class="mb-2 text-small text-muted">
+        No answer given yet.
+      </b-form-text>
+      <b-input-group v-if="type === 'input'">
+        <b-input v-model="value" />
+        <slot name="append">
+          <SpinButton variant="white" icon-name="save" label="Save" @handle="save" :disabled="readonly" />
+        </slot>
+      </b-input-group>
+      <b-input-group v-if="type === 'number'">
+        <b-input v-model="value" type="number" :step="step" />
+        <slot name="append">
+          <SpinButton variant="white" icon-name="save" label="Save" @handle="save" :disabled="readonly" />
+        </slot>
+      </b-input-group>
+      <div v-else-if="type === 'textarea'">
+        <b-row>
+          <b-col>
+            <b-form-textarea v-model="value" :rows="rows" />
+          </b-col>
+        </b-row>
+        <b-row>
+          <b-col>
+            <SpinButton variant="white" icon-name="save" label="Save" @handle="save" class="mt-2" :disabled="readonly" />
+          </b-col>
+        </b-row>
+      </div>
+      <div v-else-if="type === 'toggle'">
+        <OurToggle v-model="value" class="mt-2" :height="30" :width="toggleWidth" :font-size="14" :sync="true"
+          :labels="{ checked: toggleChecked, unchecked: toggleUnchecked }" variant="modgreen" :disabled="readonly" @change="save" />
+      </div>
+    </b-form-group>
+    <div v-if="newRule" class="text-danger font-weight-bold">
+      &nbsp;New
     </div>
-    <div v-else-if="type === 'toggle'">
-      <OurToggle v-model="value" class="mt-2" :height="30" :width="toggleWidth" :font-size="14" :sync="true"
-        :labels="{ checked: toggleChecked, unchecked: toggleUnchecked }" variant="modgreen" :disabled="readonly" @change="tooglesave" />
-    </div>
-  </b-form-group>
+  </div>
 </template>
 <script>
 import { useModGroupStore } from '@/stores/modgroup'
@@ -91,6 +96,11 @@ export default {
       type: String,
       required: false,
       default: null
+    },
+    newRule: {
+      type: Boolean,
+      required: false,
+      default: false
     }
   },
   data: function () {

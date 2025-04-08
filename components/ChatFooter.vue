@@ -196,7 +196,7 @@
           <b-button
             v-if="chat && chat.chattype === 'User2Mod' && mod"
             v-b-tooltip.hover.top
-            title="Ask Support for help"
+            title="Add a note for this member, and optionally alert other groups"
             variant="secondary"
             @click="addAComment"
           >

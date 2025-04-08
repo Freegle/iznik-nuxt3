@@ -2,8 +2,8 @@
   <div>
     <client-only>
       <ScrollToTop />
-      <ModCakeModal v-if="showCakeModal" ref="showCakeModal" @hidden="showCakeModal = false"/>
-      <ModAimsModal v-if="showAimsModal" ref="showAimsModal" @hidden="showAimsModal = false"/>
+      <ModCakeModal v-if="showCakeModal" ref="showCakeModal" @hidden="showCakeModal = false" />
+      <ModAimsModal v-if="showAimsModal" ref="showAimsModal" @hidden="showAimsModal = false" />
       <!--      <ModFreeStock class="mb-2" />-->
       <!--NoticeMessage variant="info" class="mb-2 d-block d-md-none">
         <ModZoomStock color-class="text-black" />
@@ -45,7 +45,7 @@ export default {
     modMessages.summarykey.value = 'modtoolsMessagesPendingSummary'
     //modMessages.collection.value = ['Pending','PendingOther']
     modMessages.collection.value = 'Pending' // Pending also gets PendingOther
-    modMessages.workType.value = ['pending','pendingother']
+    modMessages.workType.value = ['pending', 'pendingother']
     //modMessages.workType.value = 'pending'
     return {
       authStore,
@@ -62,12 +62,49 @@ export default {
       showCakeModal: false,
       showAimsModal: false,
       affiliationGroup: null,
-      rulesGroup: null
+      shownRulePopup: false
     }
   },
   computed: {
     groups() {
       const ret = Object.values(this.modGroupStore.list)
+      return ret
+    },
+    rulesGroup() {
+      if (!this.modGroupStore.received) return null
+      let ret = null
+      const mygroups = this.myGroups // myGroups has correct role
+      for (const group of this.groups) {
+        const mygroup = mygroups.find((g) => g.id === group.id)
+        const rules = group.rules ? JSON.parse(group.rules) : null
+        const missingRules = group.rules
+          ? [
+            'limitgroups',
+            'wastecarrier',
+            'carboot',
+            'chineselanterns',
+            'carseats',
+            'pondlife',
+            'copyright',
+            'porn'
+          ].filter(rule => !Object.keys(rules).includes(rule))
+          : null
+
+        if (
+          group.type === 'Freegle' &&
+          mygroup?.role === 'Owner' &&
+          group.publish &&
+          (!group.rules || (missingRules && missingRules.length))
+        ) {
+          //console.log('Missing rules', group.nameshort, missingRules)
+          ret = group.id
+          break
+        }
+      }
+      if (ret && !this.shownRulePopup) {
+        this.shownRulePopup = true
+        this.$refs.rules?.show()
+      }
       return ret
     }
   },
@@ -102,13 +139,6 @@ export default {
       this.miscStore.set({ key: 'lastaffiliationask', value: now })
     }
 
-    // Find a group that we have owner status on and are not a backup where there are no rules set.
-    for (const group of this.groups) {
-      if (group.type === 'Freegle' && group.myrole === 'Owner' && !group.rules && group.publish) {
-        this.rulesGroup = group.id
-        break
-      }
-    }
 
     // AIMS
     const me = this.authStore.user
@@ -132,7 +162,6 @@ export default {
       this.showCakeModal = true
       this.miscStore.set({ key: 'cakeasked', value: true })
     }
-
   },
   methods: {
     /* 

@@ -1,5 +1,22 @@
 <template>
   <div>
+    <NoticeMessage v-if="newRulesMissing.length" variant="danger">
+      <p>
+        We are collecting information about which rules groups have - see
+        <ExternalLink href="https://discourse.ilovefreegle.org/t/collecting-information-about-group-rules/8070">
+          here
+        </ExternalLink>.
+        We'll use this to help freeglers get things right more often.
+      </p>
+      <p>
+        Based on your feedback, we've added some more rule questions. Please respond to each question
+        in Settings which is flagged with <span class="text-danger font-weight-bold">New</span>. You can copy the rules if you have
+        multiple groups and they are the same.
+      </p>
+      <a v-for="(inv) of newRulesMissing" :key="'fbinvalid-' + inv.id" :href="'/settings/' + inv.id">
+        Click to add rules for {{ inv.namedisplay }} (missing: {{ inv.missing }})<br>
+      </a>
+    </NoticeMessage>
     <NoticeMessage v-if="invalid.length" variant="danger">
       <div v-if="summary">
         <div>
@@ -46,17 +63,65 @@ export default {
     }
   },
   computed: {
+    groups() {
+      const ret = Object.values(this.modGroupStore.list)
+      return ret
+    },
     invalid() {
       const ret = []
+      const mygroups = this.myGroups // myGroups has correct role
 
-      for (const group of Object.values(this.modGroupStore.list)) {
+      for (const group of this.groups) {
+        const mygroup = mygroups.find((g) => g.id === group.id)
         if (
           group.type === 'Freegle' &&
-          group.myrole === 'Owner' &&
+          mygroup?.role === 'Owner' &&
           !group.rules &&
           group.publish
         ) {
           ret.push(group)
+        }
+      }
+
+      return ret
+    },
+    newRulesMissing() {
+      const ret = []
+      const mygroups = this.myGroups // myGroups has correct role
+
+      for (const group of this.groups) {
+        const mygroup = mygroups.find((g) => g.id === group.id)
+        if (
+          group.type === 'Freegle' &&
+          mygroup?.role === 'Owner' &&
+          group.rules &&
+          group.publish
+        ) {
+          const rules = group.rules ? JSON.parse(group.rules) : null
+
+          // Check if the rules object is missing any values from ['A', 'B', 'C']
+          const missingRules = group.rules
+            ? [
+              'limitgroups',
+              'wastecarrier',
+              'carboot',
+              'chineselanterns',
+              'carseats',
+              'pondlife',
+              'copyright',
+              'porn'
+            ].filter(rule => !Object.keys(rules).includes(rule))
+            : null
+
+          if (missingRules.length > 0) {
+            // Take upto 3 missing rules, add an ellipsis if more, convert to a string
+            // and push to the ret array
+            group.missing =
+              missingRules.length > 3
+                ? missingRules.slice(0, 3).join(',') + '...'
+                : missingRules.slice(0, 3).join(',')
+            ret.push(group)
+          }
         }
       }
 

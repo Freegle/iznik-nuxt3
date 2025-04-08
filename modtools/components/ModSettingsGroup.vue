@@ -194,12 +194,15 @@
                 toggle-checked="Yes" toggle-unchecked="No" />
               <ModGroupRule :groupid="groupid" name="limitconcurrentwanteds" label="Do you limit the number of Wanted posts allowed at one time?"
                 type="toggle" toggle-checked="Yes" toggle-unchecked="No" />
+              <ModGroupRule :groupid="groupid" name="limitgroups" label="Do you limit the number of groups a member can join?" type="toggle"
+                toggle-checked="Yes" toggle-unchecked="No" new-rule />
               <ModGroupRule :groupid="groupid" name="restrictcrossposting" label="Do you restrict cross-posting to other groups?" type="toggle"
                 toggle-checked="Yes" toggle-unchecked="No" />
               <ModGroupRule :groupid="groupid" name="allowloans" label="Do you allow any loans or requests to borrow?" type="toggle"
                 toggle-checked="Yes" toggle-unchecked="No" />
-              <ModGroupRule :groupid="groupid" name="suggesteddonations" label="Do you allow people to ask for a donation to charity when offering items?"
-                type="toggle" toggle-checked="Yes" toggle-unchecked="No" />
+              <ModGroupRule :groupid="groupid" name="suggesteddonations"
+                label="Do you allow people to ask for a donation to charity when offering items?" type="toggle" toggle-checked="Yes"
+                toggle-unchecked="No" />
               <ModGroupRule :groupid="groupid" name="declareselling"
                 label="Do you inform members that they must declare if they intend to sell items on?" type="toggle" toggle-checked="Yes"
                 toggle-unchecked="No" />
@@ -243,6 +246,20 @@
                 toggle-checked="Yes" toggle-unchecked="No" />
               <ModGroupRule :groupid="groupid" name="tickets" label="Do you allow any offers or requests for vouchers, coupons or tickets?"
                 type="toggle" toggle-checked="Yes" toggle-unchecked="No" />
+              <ModGroupRule :groupid="groupid" name="carboot" label="Do you allow any requests for items to sell at car boot sales?" type="toggle"
+                toggle-checked="Yes" toggle-unchecked="No" new-rule />
+              <ModGroupRule :groupid="groupid" name="chineselanterns" label="Do you allow any offers or requests for Chinese Lanterns?" type="toggle"
+                toggle-checked="Yes" toggle-unchecked="No" new-rule />
+              <ModGroupRule :groupid="groupid" name="carseats" label="Do you allow any offers or requests for Child/Baby Car Seats?" type="toggle"
+                toggle-checked="Yes" toggle-unchecked="No" new-rule />
+              <ModGroupRule :groupid="groupid" name="pondlife"
+                label="Do you allow any offers or requests for pondlife (eg frog spawn) or pond plants?" type="toggle" toggle-checked="Yes"
+                toggle-unchecked="No" new-rule />
+              <ModGroupRule :groupid="groupid" name="copyright"
+                label="Do you allow any offers or requests for original items subject to copyright, eg computer software or games, music, films?"
+                type="toggle" toggle-checked="Yes" toggle-unchecked="No" new-rule />
+              <ModGroupRule :groupid="groupid" name="porn" label="Do you allow any offers or requests for items that you consider pornographic?"
+                type="toggle" toggle-checked="Yes" toggle-unchecked="No" new-rule />
               <h4>Other rules</h4>
               <ModGroupRule :groupid="groupid" name="other"
                 label="Please add in information about any rules you have which aren't covered by the questions above." type="textarea" />

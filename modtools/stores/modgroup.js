@@ -10,6 +10,7 @@ export const useModGroupStore = defineStore({
     list: {},
     getting: [], // To avoid repeat gettings
     allGroups: {},
+    received: false
   }),
   actions: {
     init(config) {
@@ -19,6 +20,7 @@ export const useModGroupStore = defineStore({
     clear() {
       this.list = {}
       this.getting = []
+      this.received = false
     },
     getModGroups() { // Do not clear groups info but (start to) get all again
       //console.log('--- uMGS getModGroups')
@@ -87,6 +89,9 @@ export const useModGroupStore = defineStore({
       //console.log('=== uMGS fetchGroupMT', id, group !== null)
       const gettingix = this.getting.indexOf(id)
       if (gettingix !== -1) this.getting.splice(gettingix, 1)
+      if (this.getting.length === 0) {
+        this.received = true
+      }
     },
     async listMT(params) {
       console.log('uMGS listMT implemented: getting allGroups')
