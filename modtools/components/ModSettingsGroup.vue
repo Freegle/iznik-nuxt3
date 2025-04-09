@@ -246,6 +246,8 @@
                 toggle-checked="Yes" toggle-unchecked="No" />
               <ModGroupRule :groupid="groupid" name="tickets" label="Do you allow any offers or requests for vouchers, coupons or tickets?"
                 type="toggle" toggle-checked="Yes" toggle-unchecked="No" />
+              <ModGroupRule :groupid="groupid" name="wastecarrier" label="Do you ask for a waste carrier license in any requests for scrap metal?"
+                type="toggle" toggle-checked="Yes" toggle-unchecked="No" new-rule />
               <ModGroupRule :groupid="groupid" name="carboot" label="Do you allow any requests for items to sell at car boot sales?" type="toggle"
                 toggle-checked="Yes" toggle-unchecked="No" new-rule />
               <ModGroupRule :groupid="groupid" name="chineselanterns" label="Do you allow any offers or requests for Chinese Lanterns?" type="toggle"
