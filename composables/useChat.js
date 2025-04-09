@@ -83,13 +83,18 @@ export function setupChat(selectedChatId, chatMessageId) {
     return user
   })
 
-  const milesaway = computed(() =>
-    milesAway(
-      authStore.user?.lat,
-      authStore.user?.lng,
-      otheruser?.value?.lat,
-      otheruser?.value?.lng
-    )
+  const milesaway = computed(() => {
+    if( authStore.user?.lat && otheruser?.value?.lat){
+      return milesAway(
+        authStore.user?.lat,
+        authStore.user?.lng,
+        otheruser?.value?.lat,
+        otheruser?.value?.lng
+      )
+    }
+    if( otheruser?.value?.info?.milesaway) return otheruser?.value?.info?.milesaway
+    return null
+  }
   )
 
   const milesstring = computed(
