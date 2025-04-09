@@ -157,7 +157,7 @@ const pageUrl = computed(() => {
 // We want to spot when an ad has been rendered and whether it's filled.  isUnfilled is supposed to be exposed
 // by the component, but that doesn't seem to work.
 let fillTimer = null
-let renderRetry = 30
+let renderRetry = AD_REFRESH_TIMEOUT / 1000
 
 function checkRendered() {
   fillTimer = null
@@ -184,6 +184,7 @@ function checkRendered() {
       if (!refreshTimer) {
         refreshTimer = setTimeout(refreshAd, AD_REFRESH_TIMEOUT)
       }
+
       retry = false
     }
   }
@@ -224,6 +225,9 @@ function refreshAd() {
   if (miscStore.visible) {
     console.log('Visible')
     if (adsbygoogle.value) {
+      // Need to check again if it's rendered, and so we also need to reset the
+      // retry count.
+      renderRetry = AD_REFRESH_TIMEOUT / 1000
       fillTimer = setTimeout(checkRendered, 100)
 
       // updateAd method doesn't seem to do the trick so re-render.
