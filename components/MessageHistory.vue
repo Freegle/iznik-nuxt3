@@ -31,9 +31,33 @@
           #{{ message.id }}
         </b-button>
       </client-only>
+      <span v-if="modinfo">
+        via {{ source }},
+        <span v-if="message.fromip">
+          from IP
+          <span v-if="message.fromip.length > 16">
+            hash {{ message.fromip }}
+          </span>
+          <span v-else>
+            address {{ message.fromip }}
+          </span>
+          <span v-if="message.fromcountry">
+            in
+            <span :class="message.fromcountry === 'United Kingdom' ? '' : 'text-danger'">{{ message.fromcountry }}.</span>
+          </span>
+        </span>
+        <span v-else>
+          IP unavailable.
+        </span>
+      </span>
       <div v-if="approvedby && showSummaryDetails" class="text-faded small">
         Approved by {{ approvedby }}
       </div>
+    </div>
+    <div v-if="modinfo && message.postings && message.postings.length && message.postings[0].date !== message.date" class="small">
+      <span v-if="!today">
+        First posted on {{ message.postings[0].namedisplay }} on {{ datetime(message.postings[0].date) }}
+      </span>
     </div>
   </div>
 </template>
@@ -58,6 +82,14 @@ export default {
       type: Boolean,
       required: false,
       default: false,
+    },
+    displayMessageLink: {
+      type: Boolean,
+      default: false
+    },
+    modinfo: {
+      type: Boolean,
+      default: false
     },
   },
   setup(props) {
