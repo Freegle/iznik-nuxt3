@@ -522,11 +522,11 @@ export default {
     },
     replyuserids() {
       const ret = []
-      const retids = []
+      const retids = {}
 
       if (this.message?.replies) {
         for (const reply of this.message.replies) {
-          if (!retids.includes(reply.userid)) {
+          if (!retids[reply.userid]) {
             ret.push(reply.userid)
             retids[reply.userid] = true
           }
@@ -537,7 +537,7 @@ export default {
       // hasn't replied, during the course of a chat.
       if (this.message?.promises) {
         for (const promise of this.message.promises) {
-          if (!retids.includes(promise.userid)) {
+          if (!retids[promise.userid]) {
             ret.push(promise.userid)
             retids[promise.userid] = true
           }

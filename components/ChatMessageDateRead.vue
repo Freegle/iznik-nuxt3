@@ -83,7 +83,7 @@
       </span>
       <b-badge
         v-if="chatmessage?.replyexpected && !chatmessage?.replyreceived"
-        variant="info"
+        variant="danger"
         class="ml-1"
       >
         RSVP - reply requested
