@@ -234,10 +234,10 @@ export default {
       if (this.replyToSend?.replyMsgId) {
         // We have loaded the site with a reply that needs sending.  This happens if we force login in a way that
         // causes us to navigate away and back again.  Fetch the relevant message.
-        const messageStore = useMessageStore()
-        await messageStore.fetch(this.replyToSend.replyMsgId, true)
         this.interestedInOthersUserId = this.replyToUser
         this.interestedInOthersMsgid = this.replyToSend.replyMsgId
+        const messageStore = useMessageStore()
+        await messageStore.fetch(this.replyToSend.replyMsgId, true)
         this.replyToPost()
       }
 
