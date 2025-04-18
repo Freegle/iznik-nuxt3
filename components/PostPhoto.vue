@@ -29,7 +29,7 @@
         :modifiers="mods"
         alt="Item Photo"
         :width="width"
-        @click="$emit('click')"
+        @click="clicked"
       />
       <NuxtPicture
         v-else-if="externaluid"
@@ -41,7 +41,7 @@
         alt="Item Photo"
         :width="width"
         :height="width"
-        @click="$emit('click')"
+        @click="clicked"
       />
       <b-img
         v-else-if="thumbnail"
@@ -50,9 +50,9 @@
         rounded
         thumbnail
         class="square"
-        @click="$emit('click')"
+        @click="clicked"
       />
-      <b-img v-else lazy :src="path" rounded @click="$emit('click')" />
+      <b-img v-else lazy :src="path" rounded @click="clicked" />
     </div>
     <ConfirmModal
       v-if="confirm"
@@ -140,6 +140,10 @@ export default {
     },
   },
   methods: {
+    clicked(){
+      this.$emit('click')
+      this.$emit('clicked') // for MT
+    },
     remove() {
       this.confirm = true
     },
@@ -153,15 +157,15 @@ export default {
 
       // Ensure between 0 and 360
       this.mods.rotate = (this.mods.rotate + 360) % 360
-
       await this.imageStore.post({
         id: this.id,
         rotate: this.mods.rotate,
         bust: Date.now(),
         type: 'Message',
       })
+      this.$emit('updated')
     },
-    rotateLeft() {
+    rotateLeft(e) {
       this.rotate(-90)
     },
     rotateRight() {

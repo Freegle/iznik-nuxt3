@@ -1,7 +1,7 @@
 <template>
   <b-modal ref="modal" :id="'photoModal-' + attachment.id" :title="message.subject" size="lg" no-stacking ok-only>
     <template #default>
-      <PostPhoto v-bind="attachment" :thumbnail="false" @remove="removePhoto" />
+      <PostPhoto v-bind="attachment" :thumbnail="false" @remove="removePhoto" @updated="updatedPhoto" :externalmods="externalmods" />
     </template>
 
     <template #footer>
@@ -25,14 +25,21 @@ export default {
     message: {
       type: Object,
       required: true
-    }
+    },
+    externalmods: {
+      type: Object,
+      required: true
+    },
   },
   setup() {
-    const { modal, hide } = useOurModal()
+    const { modal, show, hide } = useOurModal()
     const messageStore = useMessageStore()
-    return { messageStore, modal, hide }
+    return { messageStore, modal, show, hide }
   },
   methods: {
+    async updatedPhoto() {
+      await this.messageStore.patch({ id: this.message.id })
+    },
     async removePhoto(id) {
       const attachments = []
 

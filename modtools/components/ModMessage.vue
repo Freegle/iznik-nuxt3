@@ -281,7 +281,7 @@
         </div>
         <b-row v-if="uploading" class="bg-white">
           <b-col class="p-0">
-            <OurUploader imgtype="Message" imgflag="message" @photoProcessed="photoProcessed" />
+            <OurUploader type="Message" v-model="attachments" multiple />
           </b-col>
         </b-row>
       </b-card-body>
@@ -880,18 +880,6 @@ export default {
       // Flag that we're uploading.  This will trigger the render of the filepond instance and subsequently the
       // init callback below.
       this.uploading = true
-    },
-    photoProcessed(imageid, imagethumb, image) {
-      // We have uploaded a photo.  Remove the filepond instance.
-      this.uploading = false
-
-      this.attachments.push({
-        id: imageid,
-        paththumb: imagethumb,
-        path: image
-      })
-
-      this.messageStore.fetch(this.message.id)
     },
     async findHomeGroup() {
       if (this.message && this.message.lat && this.message.lng) {

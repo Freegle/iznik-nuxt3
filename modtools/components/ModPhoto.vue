@@ -1,7 +1,7 @@
 <template>
   <span class="clickme">
-    <PostPhoto v-bind="attachment" @remove="removePhoto" @click="zoom = true" />
-    <ModPhotoModal v-if="zoom" :attachment="attachment" :message="message" />
+    <PostPhoto v-bind="attachment" @remove="removePhoto" @updated="updatedPhoto" @clicked="showModal" :externalmods="mods"/>
+    <ModPhotoModal v-if="zoom" ref="modphotomodal" :attachment="attachment" :message="message" :externalmods="mods"/>
   </span>
 </template>
 
@@ -32,7 +32,19 @@ export default {
       zoom: false
     }
   },
+  computed: {
+    mods(){
+      if( this.attachment.mods){
+        return JSON.parse(this.attachment.mods)
+      }
+      return null
+    }
+  },
   methods: {
+    showModal() {
+      this.zoom = true
+      this.$refs.modphotomodal?.show()
+    },
     async removePhoto(id) {
       console.log('MP removePhoto', id, this.message.id)
       const attachments = []
@@ -44,6 +56,9 @@ export default {
       })
 
       await this.messageStore.patch({ id: this.message.id, attachments })
+    },
+    async updatedPhoto() {
+      await this.messageStore.patch({ id: this.message.id })
     }
   }
 }
