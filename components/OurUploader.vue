@@ -121,6 +121,11 @@ const props = defineProps({
     required: false,
     default: false,
   },
+  groupid: {
+    type: Number,
+    required: false,
+    default: null
+  },
 })
 
 const miscStore = useMiscStore()
@@ -147,7 +152,7 @@ function closeModal() {
 
 const uploaderUid = ref(uid('uploader'))
 
-const emit = defineEmits(['update:modelValue', 'closed'])
+const emit = defineEmits(['update:modelValue', 'closed', 'photoProcessed'])
 const uploadedPhotos = ref([])
 const busy = ref(false)
 
@@ -322,6 +327,7 @@ async function uploadSuccess(result) {
           externaluid: uid,
           externalmods: mods,
         }
+        if( props.groupid) att.groupid = props.groupid
 
         const p = imageStore.post(att)
         promises.push(p)
@@ -341,6 +347,9 @@ async function uploadSuccess(result) {
             ouruid: ret.uid,
             externalmods: mods,
           })
+          if( props.groupid) {
+            emit('photoProcessed', ret.id)
+          }
         })
       }
     })

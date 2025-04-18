@@ -124,7 +124,7 @@ export const useModGroupStore = defineStore({
     },
 
     async updateMT(params) {
-      console.log('useModGroupStore updateMT', params)
+      //console.log('useModGroupStore updateMT', params)
       await api(this.config).group.patch(params)
       await this.fetchGroupMT(params.id)
     },

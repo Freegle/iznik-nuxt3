@@ -117,7 +117,7 @@
               <b-button v-if="!readonly" variant="secondary" class="mt-2 d-block" @click="uploadProfile">
                 <v-icon icon="camera" /> Upload photo
               </b-button>
-              <OurUploader v-if="uploadingProfile" type="Group" imgflag="group" :groupid="groupid" @photoProcessed="profileUploaded" />
+              <OurUploader v-if="uploadingProfile" type="Group" :groupid="groupid" @photoProcessed="photoProcessed" />
             </b-form-group>
             <ModGroupSetting :groupid="groupid" name="tagline" label="Tagline"
               description="This should be short and snappy. Include some local reference that people in your area will feel connected to." />
@@ -742,15 +742,17 @@ export default {
     uploadProfile() {
       this.uploadingProfile = true
     },
-    profileUploaded(imageid, imagethumb, image) {
-      // We have uploaded a photo.  Remove the filepond instance.
+    photoProcessed(imageid) {
+      // We have uploaded a photo.  Remove the uploader
       this.uploadingProfile = false
 
       // Set the image id in the group.
-      this.modGroupStore.updateMT({
-        id: this.groupid,
-        profile: imageid
-      })
+      if (imageid) {
+        this.modGroupStore.updateMT({
+          id: this.groupid,
+          profile: imageid
+        })
+      }
     },
     saveGroupSetting(name, val) {
       // Note that we get a sneaky progress indicator and success from SpinButton even though actually we're doing the
