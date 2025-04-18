@@ -117,7 +117,7 @@
               <b-button v-if="!readonly" variant="secondary" class="mt-2 d-block" @click="uploadProfile">
                 <v-icon icon="camera" /> Upload photo
               </b-button>
-              <OurUploader v-if="uploadingProfile" imgtype="Group" imgflag="group" :groupid="groupid" @photoProcessed="profileUploaded" />
+              <OurUploader v-if="uploadingProfile" type="Group" imgflag="group" :groupid="groupid" @photoProcessed="profileUploaded" />
             </b-form-group>
             <ModGroupSetting :groupid="groupid" name="tagline" label="Tagline"
               description="This should be short and snappy. Include some local reference that people in your area will feel connected to." />
