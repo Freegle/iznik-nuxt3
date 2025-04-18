@@ -140,6 +140,7 @@ export default {
 
     async editIt() {
       this.showCommentEditModal = true
+      this.$emit('editing')
     },
   }
 }

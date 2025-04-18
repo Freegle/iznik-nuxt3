@@ -58,7 +58,7 @@
               this freegler a thumbs down.
             </p>
           </notice-message>
-          <ModComments v-if="mod && chat && chat.chattype === 'User2Mod' && otheruser" :user="otheruser" class="mt-1" />
+          <ModComments v-if="mod && chat && chat.chattype === 'User2Mod' && otheruser" :user="otheruser" class="mt-1" @editing="editing" />
         </div>
         <b-button
           variant="warning"
@@ -474,6 +474,7 @@ export default {
       uploading: false,
       showMicrovolunteering: false,
       showNotices: true,
+      dontHideNotices: false,
       showPromise: false,
       showPromiseMaybe: false,
       showProfileModal: false,
@@ -685,10 +686,13 @@ export default {
   },
   mounted() {
     setTimeout(() => {
-      this.showNotices = false
+      if( !this.dontHideNotices) this.showNotices = false
     }, 30000)
   },
   methods: {
+    editing(){
+      this.dontHideNotices = true
+    },
     updateCaretPosition() {
       const textarea = this.$refs.chatarea.$el
       const caretPosition = getCaretCoordinates(textarea, textarea.selectionEnd)
