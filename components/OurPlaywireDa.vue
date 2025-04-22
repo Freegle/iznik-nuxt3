@@ -16,7 +16,7 @@
   </div>
 </template>
 <script setup>
-import { ref, computed, nextTick } from '#imports'
+import { ref, computed, nextTick, onBeforeRouteLeave } from '#imports'
 
 const props = defineProps({
   adUnitPath: {
@@ -202,7 +202,7 @@ watch(
   }
 )
 
-onBeforeUnmount(async () => {
+async function leaving() {
   try {
     if (fillTimer) {
       clearTimeout(fillTimer)
@@ -218,5 +218,10 @@ onBeforeUnmount(async () => {
   } catch (e) {
     console.log('Exception in onBeforeUnmount', e)
   }
-})
+}
+
+onBeforeUnmount(leaving)
+
+// onBeforeUnmount doesn't always seem to get called.
+onBeforeRouteLeave(leaving)
 </script>
