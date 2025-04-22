@@ -202,7 +202,7 @@ watch(
   }
 )
 
-onBeforeUnmount(() => {
+onBeforeUnmount(async () => {
   try {
     if (fillTimer) {
       clearTimeout(fillTimer)
@@ -213,7 +213,7 @@ onBeforeUnmount(() => {
     }
 
     console.log('Destroying', theType.value)
-    window.ramp.destroyUnits(theType.value)
+    await window.ramp.destroyUnits(theType.value)
     console.log('Destroyed', theType.value)
   } catch (e) {
     console.log('Exception in onBeforeUnmount', e)
