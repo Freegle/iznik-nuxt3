@@ -212,7 +212,9 @@ onBeforeUnmount(() => {
       clearTimeout(visibleTimer)
     }
 
+    console.log('Destroying', theType.value)
     window.ramp.destroyUnits(theType.value)
+    console.log('Destroyed', theType.value)
   } catch (e) {
     console.log('Exception in onBeforeUnmount', e)
   }
