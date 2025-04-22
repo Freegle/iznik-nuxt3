@@ -174,7 +174,8 @@ export const useComposeStore = defineStore({
     },
     setPostcode(postcode) {
       // Want to make sure we don't store too much data.
-      if (postcode && postcode.groupsnear) {
+      console.log('Set postcode', postcode?.name)
+      if (postcode?.groupsnear) {
         const pc = { ...postcode }
 
         pc.groupsnear = []
@@ -184,14 +185,12 @@ export const useComposeStore = defineStore({
             id: group.id,
             nameshort: group.nameshort,
             namedisplay: group.namedisplay,
-            type: group.type,
             settings: {
               closed: group.settings.closed,
             },
           })
         }
 
-        console.log('Store pc', pc)
         this.postcode = pc
       }
     },
@@ -504,6 +503,7 @@ export const useComposeStore = defineStore({
       return state.postcode?.name
     },
     noGroups: (state) => {
+      console.log('Compute nogroups', state.postcode)
       return !state.postcode?.groupsnear?.length
     },
   },

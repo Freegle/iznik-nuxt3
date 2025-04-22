@@ -1,45 +1,41 @@
 <template>
-  <div v-if="me && !me?.settings?.pledge2025">
+  <div>
     <PrivacyUpdate />
-    <div v-if="new Date().getTime() < new Date('2025-01-03')">
+    <div v-if="oxfordshire">
       <b-card v-if="show">
-        <div class="christmaslayout">
-          <b-button
-            variant="link"
-            size="xs"
-            class="close p-0"
-            title="Hide banner"
-            @click="hideIt"
-          >
-            Hide
-          </b-button>
-          <b-img
-            src="/logos/Christmas.gif"
-            alt="Christmas GIF"
-            class="christmas rounded logo"
-          />
-          <template v-if="thanks">
-            <p class="thanks">
-              Thanks! You'll be making the world better, one act of kindness at
-              a time.
-            </p>
-          </template>
-          <template v-else>
-            <p class="merry">
-              Merry Whatevermas to you and yours, from all the volunteers at
-              Freegle!
-            </p>
-            <p class="resolution">
-              And if you're making resolutions this New Year, why not pledge to
-              freegle one extra thing a month throughout the year? We'll track
-              your freegles and let you know how you do!
-            </p>
-            <div class="pledge">
-              <b-button size="lg" variant="primary" @click="pledge">
-                I'll sign the Freegle pledge!
+        <div class="grid">
+          <div class="hide">
+            <b-button
+              variant="link"
+              size="xs"
+              class="p-0"
+              title="Hide banner"
+              @click="hideIt"
+            >
+              Hide
+            </b-button>
+          </div>
+          <div class="banner">
+            <b-img
+              lazy
+              alt="Brand The Bus"
+              src="https://images-oxfordbus.passenger-website.com/inline-images/1024x512%20Logos%20only_0.png"
+              style="width: 200px"
+              class="rounded mr-2"
+            />
+            <div>
+              <p class="header--size2 mb-0">Please vote for us!</p>
+              <p>Help Freegle get free ads on the side of Oxfordshire buses!</p>
+              <b-button
+                variant="primary"
+                size="lg"
+                href="https://forms.office.com/Pages/ResponsePage.aspx?id=G4CaewiZuk6gbSGK0YIk47DitQdE945DlWwLZDtsWnBUNDNNNURMNUxEWVY3WERZMENFN1NZRUxCUSQlQCN0PWcu"
+                target="_blank"
+              >
+                Click to vote - we're Entry 61
               </b-button>
             </div>
-          </template>
+          </div>
         </div>
       </b-card>
       <div v-else class="text-danger text-end clickme" @click="showit">
@@ -57,15 +53,42 @@ export default {
   components: { PrivacyUpdate },
   setup() {
     const miscStore = useMiscStore()
-    return { miscStore }
+    const authStore = useAuthStore()
+
+    return { miscStore, authStore }
   },
   data: function () {
     return {
       thanks: false,
-      warningid: 'hideglobalwarning20241222',
+      warningid: 'hideglobalwarning202503072',
     }
   },
   computed: {
+    oxfordshire() {
+      // Is the current date before 1st April 2025?
+      const now = new Date()
+      const apr2025 = new Date('2025-04-01')
+
+      if (now >= apr2025) {
+        return false
+      }
+
+      let ret = false
+
+      const groupids = [
+        21555, 21671, 21579, 21694, 21317, 21464, 21324, 21235, 21256,
+      ]
+
+      const myGroups = this.authStore.groups
+
+      myGroups.forEach((g) => {
+        if (groupids.includes(g.groupid)) {
+          ret = true
+        }
+      })
+
+      return ret
+    },
     show() {
       return !this.miscStore?.get(this.warningid)
     },
@@ -76,7 +99,6 @@ export default {
   },
   methods: {
     hideIt(e) {
-      console.log('Hide', this.warningid)
       e.preventDefault()
       this.miscStore.set({
         key: this.warningid,
@@ -127,12 +149,14 @@ export default {
   .banner {
     grid-row: 1 / 1;
     grid-column: 1 / 1;
+    display: flex;
+    flex-wrap: wrap;
   }
 
   .hide {
     grid-row: 1 / 1;
     grid-column: 1 / 1;
-    align-content: end;
+    justify-self: end;
     z-index: 1000;
   }
 }
@@ -148,57 +172,6 @@ export default {
   @include media-breakpoint-up(md) {
     max-width: 200px;
     max-height: 200px;
-  }
-}
-
-.christmaslayout {
-  display: grid;
-  grid-template-rows: min-content min-content min-content;
-  grid-template-columns: min-content 1fr;
-  grid-column-gap: 1rem;
-  font-weight: bold;
-
-  .close {
-    grid-row: 1 / 2;
-    grid-column: 1 / 3;
-    justify-self: end;
-    color: black;
-  }
-
-  .logo,
-  .thanks {
-    grid-row: 1 / 2;
-    grid-column: 1 / 2;
-
-    @include media-breakpoint-up(md) {
-      grid-row: 1 / 3;
-      grid-column: 1 / 2;
-    }
-  }
-
-  .merry {
-    grid-row: 1 / 2;
-    grid-column: 2 / 3;
-  }
-
-  .resolution {
-    grid-row: 2 / 3;
-    grid-column: 1 / 3;
-
-    @include media-breakpoint-up(md) {
-      grid-row: 2 / 3;
-      grid-column: 2 / 3;
-    }
-  }
-
-  .pledge {
-    grid-row: 3 / 4;
-    grid-column: 1 / 3;
-
-    @include media-breakpoint-up(md) {
-      grid-row: 3 / 4;
-      grid-column: 2 / 3;
-    }
   }
 }
 </style>

@@ -30,7 +30,7 @@
               'text-center': maxWidth === '100vw',
             }"
             @rendered="rippleRendered"
-            @borednow="boredWithJobs = true"
+            @borednow="setBored"
           />
           <OurPlaywireDa
             v-else-if="playWire"
@@ -78,6 +78,8 @@ import { ref, computed, onBeforeUnmount } from '#imports'
 import { useConfigStore } from '~/stores/config'
 import { useMiscStore } from '~/stores/misc'
 import { useAuthStore } from '~/stores/auth'
+
+const miscStore = useMiscStore()
 
 const props = defineProps({
   adUnitPath: {
@@ -129,9 +131,15 @@ const playWire = ref(true)
 const adSense = ref(false)
 const renderAd = ref(false)
 const adShown = ref(true)
+const boredWithJobs = computed(() => miscStore.boredWithJobs)
 
-// TODO const boredWithJobs = ref(!props.jobs)
-const boredWithJobs = ref(true)
+function setBored() {
+  // Using the store, but non-persisted, means that we'll show job ads on initial page load, but then other ads
+  // thereafter, including after page transition.
+  //
+  // This means that if they're not interested in job ads we'll get more ad views.
+  miscStore.boredWithJobs = true
+}
 
 let prebidRetry = 0
 let tcDataRetry = 0
@@ -249,10 +257,12 @@ async function checkStillVisible() {
     const showingAds = await configStore.fetch('ads_enabled')
     const me = useAuthStore().user
 
+    // Add grace period for donations - technically we want it to be 31 days, but for people who have a direct
+    // debit set up we might not have manually processed those donations for a while.
     const recentDonor =
       me &&
       me.donated &&
-      new Date(me.donated) > new Date(Date.now() - 31 * 24 * 60 * 60 * 1000)
+      new Date(me.donated) > new Date(Date.now() - 45 * 24 * 60 * 60 * 1000)
 
     if (recentDonor) {
       console.log('Ads disabled as recent donor')

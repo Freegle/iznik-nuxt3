@@ -10,7 +10,6 @@
  */
 
 
-import ActivityAPI from './ActivityAPI.js'
 import AddressAPI from './AddressAPI.js'
 import AdminsAPI from './AdminsAPI.js'
 import AlertAPI from './AlertAPI.js'
@@ -54,7 +53,6 @@ import VisualiseAPI from './VisualiseAPI.js'
 import VolunteeringAPI from './VolunteeringAPI.js'
 
 interface API {
-  activity: ActivityAPI;
   address: AddressAPI;
   admins: AdminsAPI;
   alert: AlertAPI;

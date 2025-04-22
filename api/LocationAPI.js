@@ -1,12 +1,23 @@
 import BaseAPI from '@/api/BaseAPI'
 
 export default class LocationAPI extends BaseAPI {
-  fetch(params) {
-    return this.$get('/locations', params)
+  typeahead(query) {
+    return this.$getv2('/location/typeahead?q=' + encodeURIComponent(query))
+  }
+
+  latlng(lat, lng) {
+    return this.$getv2('/location/latlng', {
+      lat,
+      lng,
+    })
   }
 
   fetchv2(id) {
     return this.$getv2('/location/' + id)
+  }
+
+  fetchAddresses(id) {
+    return this.$getv2('/location/' + id + '/addresses')
   }
 
   add(data) {

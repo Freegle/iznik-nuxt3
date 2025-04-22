@@ -14,6 +14,7 @@ export const useChatStore = defineStore({
     messages: {},
     searchSince: null,
     showContactDetailsAskModal: false,
+    showClosed: false,
   }),
   actions: {
     init(config) {
@@ -235,7 +236,11 @@ export const useChatStore = defineStore({
         const search = this.route?.query?.search || null
 
         // Don't want to log any errors to Sentry - they can happen due to timing windows.
-        await this.fetchChats(search, false, keepChat)
+        try {
+          await this.fetchChats(search, false, keepChat)
+        } catch (e) {
+          console.log('Ignore fetch chat error during poll', e)
+        }
       }
 
       setTimeout(this.pollForChatUpdates, 30000)

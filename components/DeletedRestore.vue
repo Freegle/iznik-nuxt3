@@ -17,8 +17,8 @@
         <div v-if="me.forgotten">
           <p class="text--large font-weight-bold">
             <v-icon icon="exclamation-triangle" />
-            You deleted your account {{ timeago(me.deleted) }}. Your data has
-            now been removed.
+            You deleted your account {{ medeleted }}. Your data has now been
+            removed.
           </p>
           <p>If you'd like to rejoin, we'd love to have you.</p>
           <b-button variant="primary" class="mt-2" size="lg" @click="rejoin"
@@ -28,8 +28,8 @@
         <div v-else>
           <p class="text--large font-weight-bold">
             <v-icon icon="exclamation-triangle" />
-            You deleted your account {{ timeago(me.deleted) }}. It will be
-            completely removed soon.
+            You deleted your account {{ medeleted }}. It will be completely
+            removed soon.
           </p>
           <p class="font-weight-bold">
             Meanwhile, other freeglers can't see your details, posts or chats.
@@ -52,6 +52,7 @@
 </template>
 <script setup>
 import { useAuthStore } from '../stores/auth'
+import { timeago } from '~/composables/useTimeFormat'
 
 const authStore = useAuthStore()
 
@@ -75,6 +76,10 @@ async function rejoin() {
   const router = useRouter()
   router.push('/')
 }
+
+const medeleted = computed(() => {
+  return authStore?.me?.deleted ? timeago(authStore.me.deleted) : null
+})
 </script>
 <style scoped>
 .bottom {

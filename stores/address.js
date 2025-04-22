@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { nextTick } from 'vue'
+import convertStructuredToUnstructured from 'postman-paf'
 import api from '~/api'
 
 export const useAddressStore = defineStore({
@@ -51,8 +52,63 @@ export const useAddressStore = defineStore({
       await this.fetch()
     },
     async fetchProperties(postcodeid) {
-      const { addresses } = await api(this.config).address.fetchv1({
-        postcodeid,
+      const addresses = await api(this.config).location.fetchAddresses(
+        postcodeid
+      )
+      console.log('Returned addresses', addresses)
+
+      // Add the singleline property to each address
+      addresses.forEach((address) => {
+        // "locations.name as postcode, "+
+        // "buildingname, "+
+        // "buildingnumber, "+
+        // "p.subbuildingname, "+
+        // "departmentname, "+
+        // "dependentlocality, "+
+        // "doubledependentlocality, "+
+        // "dependentthoroughfaredescriptor, "+
+        // "organisationname, "+
+        // "suorganisationindicator, "+
+        // "deliverypointsuffix, "+
+        // "udprn, "+
+        // "posttown, "+
+        // "postcodetype, "+
+        // "pobox, "+
+        // "thoroughfaredescriptor "+
+
+        const toConvert = {
+          postcode: address.postcode,
+          buildingName: address.buildingname,
+          buildingNumber: address.buildingnumber,
+          subBuildingName: address.subbuildingname,
+          departmentName: address.departmentname,
+          dependentLocality: address.dependentlocality,
+          doubleDependentLocality: address.doubledependentlocality,
+          dependentThoroughfareDescriptor:
+            address.dependentthoroughfaredescriptor,
+          organisationName: address.organisationname,
+          suOrganisationIndicator: address.suorganisationindicator,
+          deliveryPointSuffix: address.deliverypointsuffix,
+          udprn: address.udprn,
+          postTown: address.posttown,
+          postcodeType: address.postcodetype,
+          poBoxNumber: address.pobox,
+          thoroughfareDescriptor: address.thoroughfaredescriptor,
+        }
+
+        console.log('Converting', toConvert)
+        const converted = convertStructuredToUnstructured(toConvert)
+        console.log('Converted', converted)
+        address.singleline = ''
+
+        for (let line = 1; line <= 5; line++) {
+          if (converted['line' + line]) {
+            address.singleline += converted['line' + line] + ', '
+          }
+        }
+
+        address.singleline += ' ' + address.postcode
+        console.log('Single line', address.singleline)
       })
 
       if (addresses?.length) {

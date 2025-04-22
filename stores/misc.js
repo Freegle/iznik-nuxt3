@@ -30,6 +30,7 @@ export const useMiscStore = defineStore({
     pageTitle: null,
     stickyAdRendered: 0,
     adsDisabled: false,
+    boredWithJobs: false,
     lastTyping: null,
     source: null,
   }),

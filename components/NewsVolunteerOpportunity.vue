@@ -23,7 +23,7 @@
         ><strong>{{ volunteering.title }}</strong>
         <br />
         <span class="text-muted small">
-          {{ timeago(newsfeed.added) }}
+          {{ addedago }}
           on
           <span v-for="groupid in volunteering.groups" :key="groupid">
             <span v-if="group(groupid)">
