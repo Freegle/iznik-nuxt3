@@ -212,9 +212,12 @@ async function leaving() {
       clearTimeout(visibleTimer)
     }
 
-    console.log('Destroying', theType.value)
-    await window.ramp.destroyUnits(theType.value)
-    console.log('Destroyed', theType.value)
+    if (window.ramp?.destroyUnits) {
+      // We need to destroy the ad unit.
+      console.log('Destroying ad unit', props.adUnitPath)
+      window.ramp.destroyUnits(props.adUnitPath)
+      console.log('Destroyed', theType.value)
+    }
   } catch (e) {
     console.log('Exception in onBeforeUnmount', e)
   }

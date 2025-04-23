@@ -1,7 +1,5 @@
-# ads.txt file for ilovefreegle.org, updated 29/07/2024
-OWNERDOMAIN=ilovefreegle.org
-CONTACT=geeks@ilovefreegle.org
-google.com, pub-9017028318226154, DIRECT, f08c47fec0942fa0
+# Playwire Ads.txt file v9.8
+contact=sales@playwire.com
 
 # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 # @                                                                                        @
@@ -68,6 +66,7 @@ themediagrid.com, 6QY7B4, DIRECT, 35d5010d7789b49d
 themediagrid.com, KA3Q45, DIRECT, 35d5010d7789b49d
 
 #Media.net
+media.net, 8CUIBM874, DIRECT
 media.net, 8CUP47128, DIRECT
 media.net, 8CU11059L, DIRECT
 
@@ -113,6 +112,7 @@ themediagrid.com, HW1PGR, RESELLER, 35d5010d7789b49d
 #Rubicon
 rubiconproject.com, 12556, DIRECT, 0bfd66d529a55807
 rubiconproject.com, 18110, DIRECT, 0bfd66d529a55807
+rubiconproject.com, 27232, DIRECT, 0bfd66d529a55807 #flex
 
 #Sharethrough
 sharethrough.com, 5b0da9d4, DIRECT, d53b998a7bd4ecd2
@@ -179,9 +179,4 @@ rubiconproject.com, 20986, RESELLER, 0bfd66d529a55807
 
 #Yieldmo
 yieldmo.com, 2990721854664024411, DIRECT
-
-
-
-playwire.com,1025311,DIRECT
-
-managerdomain=playwire.com
+playwire.com,1025311,DIRECT managerdomain=playwire.com
