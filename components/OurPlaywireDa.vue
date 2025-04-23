@@ -215,7 +215,7 @@ async function leaving() {
     if (window.ramp?.destroyUnits) {
       // We need to destroy the ad unit.
       console.log('Destroying ad unit', props.adUnitPath)
-      window.ramp.destroyUnits(props.adUnitPath)
+      await window.ramp.destroyUnits(props.adUnitPath)
       console.log('Destroyed', theType.value)
     }
   } catch (e) {
