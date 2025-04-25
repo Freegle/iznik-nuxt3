@@ -2,8 +2,8 @@
   <client-only>
     <ScrollToTop :prepend="groupName" />
     <div class="d-flex justify-content-between flex-wrap">
-      <ModGroupSelect v-model="groupid" all modonly remember="approved" />
-      <ModFindMessagesFromMember :memberTerm="memberTerm" @searched="searchedMember" @changed="changedMemberTerm" />
+      <ModGroupSelect v-model="chosengroupid" all modonly remember="approved" />
+      <ModFindMessagesFromMember @searched="searchedMember" />
       <ModFindMessage v-if="groupid" :groupid="groupid" :messageTerm="messageTerm" @searched="searchedMessage" @changed="changedMessageTerm" />
       <span v-else class="mt-2">
         Select a community to search messages.
@@ -29,17 +29,27 @@
 </template>
 
 <script>
+// Handles:
+//  /messages/approved
+//  /messages/approved/<groupid>
+//  /messages/approved/<groupid>/<term>
+// Once mounted:
+//  - changing group changes URL - though sometimes doesn't work
+//  - Email/name/id search doesn't change URL
+//  - Message id/subject search changes URL <term>
+
 import { useMiscStore } from '@/stores/misc'
-import { useMessageStore } from '../../stores/message'
+import { useMessageStore } from '@/stores/message'
 import { useModGroupStore } from '@/stores/modgroup'
 import me from '~/mixins/me.js'
-import { setupModMessages } from '../../composables/useModMessages'
+import { setupModMessages } from '@/composables/useModMessages'
+import { captureConsoleIntegration } from '@sentry/integrations'
 
 export default {
   async setup() {
     const messageStore = useMessageStore()
     const miscStore = useMiscStore()
-    const modMessages = setupModMessages()
+    const modMessages = setupModMessages(true)
     modMessages.summarykey.value = 'modtoolsMessagesApprovedSummary'
     modMessages.collection.value = 'Approved'
     // modMessages.workType.value = 'approved'
@@ -53,11 +63,17 @@ export default {
   ],
   data: function () {
     return {
+      chosengroupid: 0,
       error: false,
       bump: 0
     }
   },
   computed: {
+    id() { // Given groupid
+      const route = useRoute()
+      if (('id' in route.params) && route.params.id) return parseInt(route.params.id)
+      return 0
+    },
     groupName() {
       if (this.group) {
         return this.group.namedisplay
@@ -66,30 +82,54 @@ export default {
       return null
     },
   },
+  watch: {
+    chosengroupid(newVal) {
+      const router = useRouter()
+      if (newVal !== this.id) {
+        this.$nextTick(() => {
+          if (newVal === 0) {
+            //console.log('chosengroupid GO HOME')
+            router.push('/messages/approved/')
+          } else {
+            //console.log('chosengroupid GOTO', newVal, typeof newVal)
+            this.groupid = newVal // Sometimes royte change does not work so save as groupid just in case
+            router.push('/messages/approved/' + newVal)
+          }
+        })
+      } else {
+        //console.log('chosengroupid SAME')
+      }
+    },
+  },
   mounted() {
     const modGroupStore = useModGroupStore()
     modGroupStore.getModGroups()
+    const route = useRoute()
+    this.groupid = this.id
+    this.chosengroupid = this.id
+    this.memberTerm = ''
+    this.messageTerm = ''
+    if (('term' in route.params) && route.params.term) this.messageTerm = route.params.term
+    if (this.messageTerm) {
+      this.searchedMessage(this.messageTerm)
+    }
   },
   methods: {
     changedMessageTerm(term) {
       this.messageTerm = term.trim()
     },
     searchedMessage(term) {
-      console.log('approved searchedMessage', term)
-      this.show = 0
-      this.messageTerm = term?.trim()
-      this.memberTerm = null
-      this.context = null
-      this.messageStore.clear()
-
-      // Need to rerender the infinite scroll
-      this.bump++
-    },
-    changedMemberTerm(term) {
-      this.memberTerm = term.trim()
+      const router = useRouter()
+      term = term.trim()
+      if (term.length > 0) {
+        router.push('/messages/approved/' + this.groupid + '/' + term)
+      } else if (this.groupid) {
+        router.push('/messages/approved/' + this.groupid)
+      } else {
+        router.push('/messages/approved/')
+      }
     },
     searchedMember(term) {
-      console.log('approved searchedMember', term)
       this.show = 0
       this.messageTerm = null
       this.memberTerm = term?.trim()
@@ -101,7 +141,6 @@ export default {
     },
 
     async loadMore($state) {
-      //console.log('approved loadMore', this.groupid, this.show, this.messages.length)
       this.busy = true
       if (!this.me) {
         console.log('Ignore load more on MT page with no session.')
@@ -114,7 +153,9 @@ export default {
         $state.loaded()
       } else {
         //console.log('Actually loadMore')
-        const currentCount = this.messages.length
+        //const currentCount = this.messages.length
+        const currentCount = Object.keys(this.messageStore.list).length // Use total messages found, not just this,messages as this stops too soon
+        //console.log('Actually loadMore', currentCount)
 
         let params
 
@@ -126,10 +167,13 @@ export default {
             groupid: this.groupid
           }
         } else if (this.memberTerm) {
-          params = {
+          params = { // TODO: Need to keep fetching as first found batch may not contain
             subaction: 'searchmemb',
             search: this.memberTerm,
-            groupid: this.groupid
+            //groupid: this.groupid // TODO: First fetch without this and then second with, with context
+          }
+          if (this.context) { // To get it to work for this case, only set groupid if already got a context!
+            params.groupid = this.groupid
           }
         } else {
           params = {
@@ -142,13 +186,16 @@ export default {
 
         params.context = this.context
         params.limit = this.messages.length + this.distance
-        //console.log('Approved loadMore DO',params)
+        //console.log('Approved loadMore DO', params, '>>>', Object.keys(this.messageStore.list).length, this.context)
 
+        //params.debug = '[[term]] loadMore',
         await this.messageStore.fetchMessagesMT(params)
         this.context = this.messageStore.context
-        //console.log('Approved LoadMore GOT',this.context)
+        //console.log('Approved LoadMore GOT', this.context)
+        //console.log('Approved LoadMore GOT', currentCount, this.messages.length, '>>>', Object.keys(this.messageStore.list).length)
 
-        if (currentCount === this.messages.length) {
+        //if (currentCount === this.messages.length) {
+        if (currentCount === Object.keys(this.messageStore.list).length) {
           $state.complete()
         } else {
           $state.loaded()

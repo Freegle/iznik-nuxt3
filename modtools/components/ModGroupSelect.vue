@@ -1,18 +1,7 @@
 <template>
   <div>
-    <label
-      v-if="label"
-      for="communitieslist"
-      :class="labelSrOnly ? 'visually-hidden' : ''"
-      >{{ label }}</label
-    >
-    <b-form-select
-      id="communitieslist"
-      v-model="selectedGroup"
-      :size="size"
-      :options="groupOptions"
-      :disabled="disabled"
-    />
+    <label v-if="label" for="communitieslist" :class="labelSrOnly ? 'visually-hidden' : ''">{{ label }}</label>
+    <b-form-select id="communitieslist" v-model="selectedGroup" :size="size" :options="groupOptions" :disabled="disabled" />
   </div>
 </template>
 <script>
@@ -152,12 +141,13 @@ export default {
         })
       } else {
         ret = this.myGroups
-        //console.log('===GroupSelect groups B',this.modGroupStore.list)
+        /* Used to be needed to get latest work but now not
         for( const g of ret){
+          console.log('===GroupSelect group',g.work)
           if( this.modGroupStore.list[g.id]){
             g.work = this.modGroupStore.list[g.id].work
           }
-        }
+        }*/
       }
 
       ret = ret || []
@@ -179,6 +169,7 @@ export default {
       return groups
     },
     groupOptions() {
+      //console.log('MGS groupOptions')
       const groups = []
 
       if (this.customName) {
@@ -195,8 +186,8 @@ export default {
           text: this.active
             ? '-- My active communities --'
             : this.allMy
-            ? '-- All my communities --'
-            : '-- All communities --',
+              ? '-- All my communities --'
+              : '-- All communities --',
           selected: this.selectedGroup === 0,
         })
       } else {
@@ -228,6 +219,7 @@ export default {
           group.role === 'Owner' ||
           group.role === 'Moderator'
         ) {
+          //console.log('MGS groupOptions group',group.namedisplay, group.work)
           let text = group.namedisplay
 
           if (this.work) {
@@ -296,8 +288,9 @@ export default {
       })
     }
 
-    if (this.remember) {
+    if (this.remember && !this.modelValue) {
       let val = this.miscStore.get('groupselect-' + this.remember)
+      //console.log('ModGroupSelect',this.modelValue,val)
 
       if (typeof val !== 'undefined') {
         val = parseInt(val)

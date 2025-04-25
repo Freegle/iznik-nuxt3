@@ -36,7 +36,7 @@ export default {
     const groupStore = useGroupStore()
     const memberStore = useMemberStore()
     const miscStore = useMiscStore()
-    const { bump, collection, distance, groupid, loadMore } = setupModMembers()
+    const { bump, collection, distance, groupid, loadMore } = setupModMembers(true)
     collection.value = 'Related'
     return {
       groupStore,

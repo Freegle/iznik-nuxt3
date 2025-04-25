@@ -7,7 +7,7 @@ import { useMiscStore } from '@/stores/misc'
 import { useModGroupStore } from '@/stores/modgroup'
 
 export default {
-  data: function() {
+  data: function () {
     return {
       modgroups: [],
       workTimer: false,
@@ -40,20 +40,20 @@ export default {
       const modGroupStore = useModGroupStore()
       return modGroupStore.get(groupid)
     },
-    amAModOn(groupid){
+    amAModOn(groupid) {
       const authStore = useAuthStore()
       const member = authStore.member(groupid)
       return member === 'Moderator' || member === 'Owner'
     },
     // SEE WORK EXPLANATION IN useModMessages.js
-    deferCheckWork(){
+    deferCheckWork() {
       const miscStore = useMiscStore()
       if (miscStore.workTimer) {
         clearTimeout(miscStore.workTimer)
       }
       miscStore.workTimer = setTimeout(this.checkWork, 30000)
     },
-    checkWorkDeferGetMessages(){
+    checkWorkDeferGetMessages() {
       const miscStore = useMiscStore()
       miscStore.deferGetMessages = true
       this.checkWork()
@@ -71,7 +71,7 @@ export default {
       // Do not check for work and therefore refresh while any modal is open
       const bodyoverflow = document.body.style.overflow
       if (force || (bodyoverflow !== 'hidden')) {
-        console.log('CHECKWORK modme',force??'', now.toISOString().substring(11))
+        console.log('CHECKWORK modme', force ?? '', now.toISOString().substring(11))
         await this.fetchMe(true, ['work', 'group']) // MT ADDED 'group'
 
         this.chatcount = chatStore ? Math.min(99, chatStore.unreadCount) : 0

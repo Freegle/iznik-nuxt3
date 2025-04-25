@@ -88,8 +88,8 @@ export default {
   },
   async setup() {
     const memberStore = useMemberStore()
-    const modMembers = setupModMembers()
     const userStore = useUserStore()
+    const modMembers = setupModMembers(true)
     modMembers.collection.value = 'Happiness'
     modMembers.limit.value = 1000 // Get everything (probably) so that the ratings and feedback are interleaved.
     return {

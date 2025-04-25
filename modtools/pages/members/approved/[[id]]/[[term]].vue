@@ -56,13 +56,13 @@ export default {
   async setup() {
     const memberStore = useMemberStore()
     const miscStore = useMiscStore()
-    const modMembers = setupModMembers()
+    const modMembers = setupModMembers(true)
     modMembers.context.value = null
     modMembers.collection.value = 'Approved'
     return {
       memberStore,
       miscStore,
-      ...modMembers // busy, context, group, groupid, limit, show, collection, messageTerm, memberTerm, distance, summary, members, visibleMembers, loadMore
+      ...modMembers // bump, busy, context, group, groupid, limit, search, filter, show, sort, collection, messageTerm, memberTerm, nextAfterRemoved, distance, members, visibleMembers, loadMore
     }
   },
   data: function () {
@@ -70,7 +70,6 @@ export default {
       chosengroupid: 0,
       showAddMember: false,
       showBanMember: false,
-      bump: 0
     }
   },
   computed: {
@@ -93,10 +92,12 @@ export default {
   },
   watch: {
     filter(newVal) {
+      //console.log('[[term]] filter', newVal)
       this.bump++
       this.memberStore.clear()
     },
     chosengroupid(newVal) {
+      //console.log('chosengroupid', newVal)
       const router = useRouter()
       if (newVal !== this.id) {
         if (newVal === 0) {
@@ -110,10 +111,11 @@ export default {
         //console.log('chosengroupid SAME')
       }
     },
-    groupid(newVal) {
+    /*groupid(newVal) {
+      console.log('[[term]] groupid', newVal)
       this.bump++
       this.memberStore.clear()
-    },
+    },*/
   },
   mounted() {
     const route = useRoute()
@@ -147,7 +149,7 @@ export default {
         router.push('/members/approved/' + lastmod)
       }
     }
-    this.bump++
+    //this.bump++
   },
   methods: {
     async addMember() {
@@ -159,20 +161,24 @@ export default {
       this.$refs.banmodal?.show()
     },
     startsearch(search) {
+      //console.log('[[term]] startsearch', search)
       // Initiate search again even if search has not changed
       search = search.trim()
       this.search = search
       this.context = null
       this.memberStore.clear()
       const router = useRouter()
+      let newpath = '/members/approved/'
       if (search) {
-        router.push('/members/approved/' + this.groupid + '/' + search)
+        newpath = '/members/approved/' + this.groupid + '/' + search
       } else if (this.groupid) {
-        router.push('/members/approved/' + this.groupid)
-      } else {
-        router.push('/members/approved/')
+        newpath = '/members/approved/' + this.groupid
       }
-      this.bump++
+      if (newpath !== router.currentRoute.value.path) {
+        router.push(newpath)
+      } else {
+        this.bump++
+      }
     }
   }
 }

@@ -41,6 +41,7 @@ export default class MessageAPI extends BaseAPI {
   }
 
   fetchMessages(params) {
+    //console.error('MessageAPI fetchMessages', params)
     return this.$get('/messages', params)
   }
 

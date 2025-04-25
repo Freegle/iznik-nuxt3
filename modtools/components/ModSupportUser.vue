@@ -179,7 +179,7 @@
             <SpinButton variant="white" icon-name="save" label="Set Password" @handle="setPassword" />
           </slot>
         </b-input-group>
-        <b-input-group class="mt-2">
+        <b-input-group v-if="!user.tnuserid && !user.ljuserid" class="mt-2">
           <b-form-input v-model="newemail" type="text" placeholder="Add email" autocomplete="off" class="max" />
           <b-form-select v-model="newEmailAs" class="max">
             <option value="1">

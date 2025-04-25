@@ -10,29 +10,9 @@
 </template>
 
 <script setup>
-const props = defineProps({
-  memberTerm: {
-    type: String,
-    required: false,
-    default: null
-  },
-  groupid: {
-    type: Number,
-    required: false,
-    default: null
-  }
-})
+const term = ref('')
 
-const emit = defineEmits(['searched', 'changed'])
-
-const term = computed({
-  get() {
-    return props.memberTerm
-  },
-  set(newterm) {
-    emit('changed', newterm)
-  },
-})
+const emit = defineEmits(['searched'])
 
 const search = async (callback) => {
   const theterm = term.value?.trim()

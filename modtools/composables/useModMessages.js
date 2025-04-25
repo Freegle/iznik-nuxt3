@@ -13,6 +13,7 @@ import { useModGroupStore } from '@/stores/modgroup'
 import { useMessageStore } from '../../stores/message'
 import { useMiscStore } from '@/stores/misc'
 
+// All values need to be reset by one caller of setupModMessages()
 const summarykey = ref(false)
 const busy = ref(false)
 const context = ref(null)
@@ -45,12 +46,12 @@ const messages = computed(() => {
   } else {
     messages = messageStore.all
   }
-  // console.log('---messages groupid:', groupid.value, 'messages:', messages.length)
+  //console.log('---messages groupid:', groupid.value, 'messages:', messages.length)
   // We need to sort as otherwise new messages may appear at the end.
   messages.sort((a, b) => {
-  if (a.groups && b.groups) {
-    //console.log('---messages sort:', a.groups[0].arrival, b.groups[0].arrival)
-    return (
+    if (a.groups && b.groups) {
+      //console.log('---messages sort:', a.groups[0].arrival, b.groups[0].arrival)
+      return (
         new Date(b.groups[0].arrival).getTime() -
         new Date(a.groups[0].arrival).getTime()
       )
@@ -70,17 +71,8 @@ const visibleMessages = computed(() => {
   return msgs.slice(0, show.value)
 })
 
-export function setupModMessages() {
-  watch(groupid, async (newVal) => {
-    context.value = null
-
-    const modGroupStore = useModGroupStore()
-    await modGroupStore.fetchIfNeedBeMT(newVal)
-    group.value = modGroupStore.get(newVal)
-    await getMessages()
-
-    show.value = messages.value.length
-  })
+export function setupModMessages(reset) {
+  // Do not include any watch in here as a separate watch is called for each time setupModMessages() is called
 
   /*watch(group, async (newValue, oldValue) => {
     console.log("===useModMessages watch group", newValue?.id, oldValue?.id, groupid.value)
@@ -92,8 +84,28 @@ export function setupModMessages() {
     }
   })*/
 
+  // CAREFUL: All refs are remembered from the previous page so one caller has to reset all unused ref
+  if (reset) {
+    summarykey.value = false
+    busy.value = false
+    context.value = null
+    groupid.value = 0
+    group.value = null
+    limit.value = 10
+    workType.value = null
+    show.value = 0
+
+    collection.value = null
+    messageTerm.value = null
+    memberTerm.value = null
+    nextAfterRemoved.value = null
+
+    distance.value = 10
+
+  }
+
   const getMessages = async (workCount) => {
-    //console.log('getMessages', collection.value, groupid.value, workCount)
+    //console.log('<><><> getMessages', collection.value, groupid.value, workCount)
 
     const messageStore = useMessageStore()
     messageStore.clearContext()
@@ -108,6 +120,7 @@ export function setupModMessages() {
     }
     if (workCount) params.limit = Math.max(limit.value, workCount)
     //console.log('uMM getMessages',params.limit)
+    //params.debug = 'uMM getMessages',
     await messageStore.fetchMessagesMT(params)
 
     // Force them to show.
@@ -127,7 +140,6 @@ export function setupModMessages() {
     try {
       const authStore = useAuthStore()
       const work = authStore.work
-      // console.log(">>>>useModMessages get work", workType.value, work)
       if (!work) return 0
       if (!workType.value) return 0
       if (Array.isArray(workType.value)) {
@@ -173,6 +185,7 @@ export function setupModMessages() {
       }
 
       if (doFetch) {
+        //console.log('uMM watch work getmessages', newVal)
         getMessages(newVal)
       }
     }
@@ -195,6 +208,7 @@ export function setupModMessages() {
     summary,
     messages,
     visibleMessages,
-    work
+    work,
+    getMessages
   }
 }

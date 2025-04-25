@@ -363,7 +363,7 @@ export const useAuthStore = defineStore({
 
         if (ret) {
           ;({ me, groups, persistent, jwt } = ret) // MT added
-          //console.log('### useAuthStore ret.work',ret.work)
+          //console.log('### useAuthStore groups',groups)
           this.work = ret.work
           this.discourse = ret.discourse
 
@@ -390,6 +390,7 @@ export const useAuthStore = defineStore({
                     membership.configid = group.configid
                     membership.type = group.type
                     membership.facebook = group.facebook
+                    membership.work =  group.work
                   }
                 }
               }

@@ -33,7 +33,7 @@ export default {
   async setup() {
     const memberStore = useMemberStore()
     const miscStore = useMiscStore()
-    const modMembers = setupModMembers()
+    const modMembers = setupModMembers(true)
     modMembers.context.value = null
     modMembers.sort.value = false
     modMembers.collection.value = 'Spam'

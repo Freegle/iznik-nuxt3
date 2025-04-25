@@ -11,12 +11,13 @@
           :chatid="chatid"
           class="mt-1 mb-2"
         />
-        <div v-if="modtools">
-          <ExternalLink v-if="modtoolsLink" :href="modtoolsLink">
+        <div v-if="modtools && modtoolsLink">
+          <NuxtLink :to="modtoolsLink">View message on ModTools</NuxtLink>
+          <!--ExternalLink v-if="modtoolsLink" :href="modtoolsLink">
             <b-button variant="white">
               View message on ModTools
             </b-button>
-          </ExternalLink>
+          </ExternalLink-->
         </div>
         <div>
           <!-- eslint-disable-next-line -->
@@ -203,9 +204,9 @@ export default {
       return useMiscStore().modtools
     },
     modtoolsLink() {
-      return '/message/'+this.chatmessage?.refmsgid
+      //return '/message/'+this.chatmessage?.refmsgid
       // As an alternative: could link to message ie within Messages+Approved. Need to switch to NuxtLink
-      //return '/messages/approved/?groupid='+this.chatmessage.group.id+'&msgid='+this.chatmessage.refmsgid
+      return '/messages/approved/'+this.chatmessage.group.id+'/'+this.chatmessage.refmsgid
     },
   },
   methods: {

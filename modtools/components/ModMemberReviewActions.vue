@@ -17,7 +17,7 @@
             you before releasing them.
           </p>
           <p v-else>
-            Held by <v-icon name="hashtag" class="text-muted" scale="0.5" /><strong>{{ membership.heldby }}</strong>. Please check before releasing
+            Held by <v-icon icon="hashtag" class="text-muted" scale="0.5" /><strong>{{ membership.heldby }}</strong>. Please check before releasing
             them.
           </p>
         </NoticeMessage>

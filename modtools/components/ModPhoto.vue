@@ -35,9 +35,11 @@ export default {
   computed: {
     mods(){
       if( this.attachment.mods){
-        return JSON.parse(this.attachment.mods)
+        const jsonmods = JSON.parse(this.attachment.mods)
+        if( !jsonmods) return {}
+        return jsonmods
       }
-      return null
+      return {}
     }
   },
   methods: {

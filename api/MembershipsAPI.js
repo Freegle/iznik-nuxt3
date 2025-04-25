@@ -18,6 +18,7 @@ export default class MembershipsAPI extends BaseAPI {
   }
 
   fetchMembers(params) {
+    //console.error('MembershipsAPI fetchMembers', params)
     return this.$get('/memberships', params)
   }
 

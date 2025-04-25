@@ -11,9 +11,9 @@
       <div class="d-flex justify-content-between">
         <ModGroupSelect v-model="groupid" all modonly :work="['pending', 'pendingother']" remember="pending" />
         <ModtoolsViewControl misckey="modtoolsMessagesPendingSummary" />
-        <!--b-button variant="link" @click="loadAll">
+        <b-button variant="link" @click="loadAll">
           Load all
-        </b-button-->
+        </b-button>
       </div>
       <NoticeMessage v-if="!messages.length && !busy" class="mt-2">
         There are no messages at the moment. This will refresh automatically.
@@ -41,7 +41,7 @@ export default {
     const authStore = useAuthStore()
     const miscStore = useMiscStore()
     const modGroupStore = useModGroupStore()
-    const modMessages = setupModMessages()
+    const modMessages = setupModMessages(true)
     modMessages.summarykey.value = 'modtoolsMessagesPendingSummary'
     //modMessages.collection.value = ['Pending','PendingOther']
     modMessages.collection.value = 'Pending' // Pending also gets PendingOther
@@ -63,6 +63,20 @@ export default {
       showAimsModal: false,
       affiliationGroup: null,
       shownRulePopup: false
+    }
+  },
+  watch: {
+    groupid: {
+      async handler(newVal, oldVal) {
+        this.context = null
+
+        const modGroupStore = useModGroupStore()
+        await modGroupStore.fetchIfNeedBeMT(newVal)
+        this.group = modGroupStore.get(newVal)
+        await this.getMessages()
+
+        this.show = this.messages.length
+      }
     }
   },
   computed: {
@@ -164,29 +178,13 @@ export default {
     }
   },
   methods: {
-    /* 
     async loadAll() {
       // This is a bit of a hack - we clear the store and fetch 1000 messages, which is likely to be all of them.
       this.limit = 1000
-      await this.$store.dispatch('messages/clearContext')
-      await this.$store.dispatch('messages/clear')
-      const self = this
-    
-      this.loadMore({
-        loaded() {
-          self.show = self.messages.length
-          self.$nextTick(() => {
-            self.$refs.end.scrollIntoView()
-          })
-        },
-        complete() {
-          self.show = self.messages.length
-          self.$nextTick(() => {
-            self.$refs.end.scrollIntoView()
-          })
-        }
-      })
-    },*/
+      await this.getMessages()
+
+      this.$refs.end.scrollIntoView()
+    },
     destroy(oldid, nextid) {
       this.nextAfterRemoved = nextid
     }

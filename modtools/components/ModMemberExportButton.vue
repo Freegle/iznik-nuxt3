@@ -19,7 +19,7 @@
       </template>
       <template #footer>
         <b-button variant="white" @click="cancelit">
-          Cancel
+          {{ modalButtonLabel }}
         </b-button>
       </template>
     </b-modal>
@@ -52,7 +52,8 @@ export default {
       cancelled: false,
       limit: 100,
       fetched: 0,
-      exportList: []
+      exportList: [],
+      modalButtonLabel: 'Cancel'
     }
   },
   computed: {
@@ -67,6 +68,11 @@ export default {
   },
   methods: {
     async download() {
+      this.modalButtonLabel = 'Cancel'
+      this.context = null
+      this.cancelled = false
+      this.exportList = []
+      this.fetched = 0
       this.showExportModal = true
       await nextTick()
       this.$refs.exportmodal?.show()
@@ -74,6 +80,7 @@ export default {
     },
     cancelit() {
       this.cancelled = true
+      this.exportList = []
       this.showExportModal = false
     },
     async exportChunk() {
@@ -173,7 +180,7 @@ export default {
 
       this.context = this.memberStore.context
 
-      if (members.length) {
+      if (!this.cancelled && members.length) {
         // More to get
         this.$nextTick(() => {
           this.exportChunk()
@@ -183,8 +190,8 @@ export default {
         const str =
           writer.csvStringifier.getHeaderString() + writer.csvStringifier.stringifyRecords(this.exportList)
         const blob = new Blob([str], { type: 'text/csv;charset=utf-8' })
+        this.modalButtonLabel = 'Done'
         await saveAs(blob, 'members.csv')
-
         this.showExportModal = false
       }
     }

@@ -8,7 +8,7 @@ const busy = ref(false)
 const context = ref(null)
 const groupid = ref(0)
 const group = ref(null)
-const limit = ref(0)
+const limit = ref(2)
 const search = ref('')
 const filter = ref('0')
 // const workType = ref(null)
@@ -32,7 +32,7 @@ const members = computed(() => {
     members = memberStore.getByGroup(groupid.value)
   } else {
     members = Object.values(memberStore.list)
-    console.log('UMM members all list',members.length)
+    //console.log('UMM members all list', members.length)
   }
   if (!members) {
     return []
@@ -87,7 +87,7 @@ const loadMore = async function ($state) {
       groupid: groupid.value,
       collection: collection.value,
       modtools: true,
-      summary: false,
+      summary: 'false', // Use as string to ensure it gets through
       context: context.value,
       limit: limit.value,
       search: search.value,
@@ -105,21 +105,23 @@ const loadMore = async function ($state) {
     if (show.value > members.value.length) {
       show.value = members.value.length
     }
-    if (received === 0 || (show.value === members.value.length)) {
+    //if (received === 0 || (show.value === members.value.length)) {
+    if (received === 0) { // Search comes in one at a time
+      // console.log('UMM loadMore COMPLETE', received)
       $state.complete()
     }
     else {
       $state.loaded()
     }
     if (membersstart !== members.value.length) {
-      bump.value++
+      //bump.value++
     }
     //console.log('UMM end', show.value, members.value.length)
   }
 }
 
-watch(groupid, async (newVal) => {
-  //console.log("UMM watch groupid", newVal)
+/*watch(groupid, async (newVal) => {
+  console.log("UMM watch groupid", newVal)
   context.value = null
   show.value = 0
   const memberStore = useMemberStore()
@@ -131,23 +133,43 @@ watch(groupid, async (newVal) => {
     group.value = await modGroupStore.get(newVal)
   }
   bump.value++
-})
+})*/
 
-export function setupModMembers() {
+export function setupModMembers(reset) {
+  // CAREFUL: All refs are remembered from the previous page so one caller has to reset all unused ref
+  if (reset) {
+    bump.value = 0
+    busy.value = false
+    context.value = null
+    groupid.value = 0
+    group.value = null
+    limit.value = 2
+    search.value = ''
+    filter.value = '0'
+    show.value = 0
+    sort.value = true
+
+    collection.value = null
+    messageTerm.value = null
+    memberTerm.value = null
+    nextAfterRemoved.value = null
+
+    distance.value = 10
+  }
   /* MT3 NOT USED const work = computed(() => {
-    // Count for the type of work we're interested in.
-    try {
-      const authStore = useAuthStore()
-      const work = authStore.work
-      console.log(">>>>UMM get work", workType.value, work)
-      if (!work) return 0
-      const count = workType.value ? work[workType.value] : 0
-      return count
-    } catch (e) {
-      console.log('>>>>UMM exception', e.message)
-      return 0
-    }
-  })*/
+  // Count for the type of work we're interested in.
+  try {
+    const authStore = useAuthStore()
+    const work = authStore.work
+    console.log(">>>>UMM get work", workType.value, work)
+    if (!work) return 0
+    const count = workType.value ? work[workType.value] : 0
+    return count
+  } catch (e) {
+    console.log('>>>>UMM exception', e.message)
+    return 0
+  }
+})*/
 
   return {
     bump, // Y

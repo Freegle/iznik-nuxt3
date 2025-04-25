@@ -22,9 +22,11 @@ const messageStore = useMessageStore()
 const miscStore = useMiscStore()
 
 // composables/modMessagesPage
+const modMessages = setupModMessages()
 const {
   busy, context, group, groupid, limit, workType, show, collection, messageTerm, memberTerm, nextAfterRemoved, distance, summary, messages, visibleMessages, work,
-} = setupModMessages()
+} = modMessages
+
 
 
 const props = defineProps({
@@ -33,7 +35,6 @@ const props = defineProps({
 
 
 onMounted(async () => {
-  // console.log('###ModMessages onMounted', groupid.value, collection.value, work.value)
   // Ensure we have no cached messages for other searches/groups
   messageStore.clear()
 
@@ -46,13 +47,19 @@ onMounted(async () => {
 
   const count = work.value
   if (count > 0) {
-    await messageStore.fetchMessagesMT({
+    // console.log('###ModMessages onMounted fetchMessagesMT', groupid.value, collection.value, work.value, limit.value)
+    const params = {
+      //debug: 'MM onMounted',
       groupid: groupid.value,
       collection: collection.value,
       modtools: true,
       summary: false,
       limit: Math.max(limit.value, count)
-    })
+    }
+    //subaction: 'searchall',
+    //search: this.messageTerm,
+
+    await messageStore.fetchMessagesMT(params)
     show.value = messages.value.length
   }
 })
