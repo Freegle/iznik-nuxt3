@@ -46,6 +46,15 @@ export default {
     this.fetch()
   },
   methods: {
+    maybeFetch() {
+      if (!this.loading) {
+        this.loading = true
+
+        this.$nextTick(() => {
+          this.fetch()
+        })
+      }
+    },
     async fetch() {
       if (
         this.askfor &&
@@ -72,15 +81,6 @@ export default {
       }
       this.loading = false
     },
-    maybeFetch() {
-      if (!this.loading) {
-        this.loading = true
-
-        this.$nextTick(() => {
-          this.fetch()
-        })
-      }
-    }
   }
 }
 </script>

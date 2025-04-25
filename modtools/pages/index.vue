@@ -8,7 +8,6 @@
     <!-- eslint-disable-next-line -->
     <p>Need any help moderating? Mail <ExternalLink href="mailto:mentors@ilovefreegle.org">mentors@ilovefreegle.org</ExternalLink>
     </p>
-
     <ModDashboardDiscourseTopics v-if="start" :groupid="groupid" :group-name="groupName" :start="start" :end="end" class="mb-2" />
     <ModMissingRules />
     <!-- Disabled as Facebook sharing isn't working and will probably be retired.-->
@@ -17,11 +16,11 @@
     <div class="d-flex mb-2 mt-2 flex-wrap">
       <div class="borderit d-flex flex-column">
         <label for="dashboardgroup">Choose community:</label>
-        <ModGroupSelect id="dashboardgroup" v-model="groupidi" all modonly :systemwide="admin" active @input="update" />
+        <ModGroupSelect id="dashboardgroup" v-model="groupid" all modonly :systemwide="admin" active />
       </div>
       <div class="borderit d-flex flex-column">
         <label for="showInfo">Show info from:</label>
-        <b-form-select id="showInfo" v-model="showInfo" @input="update">
+        <b-form-select id="showInfo" v-model="showInfo">
           <option value="week">
             Last 7 days
           </option>
@@ -69,8 +68,8 @@
         </b-col>
       </b-row>
       <ModDashboardImpact :groupid="groupid" :start="start" :group-name="groupName" :end="end" class="mt-2" />
-      <ActivityGraph :groupid="groupidi" :group-name="groupName" :start="start" :end="end" offers wanteds weights donations successful activeusers
-        approvedmembers :systemwide="groupidi < 0" />
+      <ActivityGraph :groupid="groupid" :group-name="groupName" :start="start" :end="end" offers wanteds weights donations successful activeusers
+        approvedmembers :systemwide="groupid < 0" />
       <!--      TODO-ED MT POSTLAUNCH TN vs email vs web stats-->
     </div>
   </div>
@@ -94,21 +93,18 @@ const buildDate = computed(() => {
 })*/
 
 const showVolunteersWeek = ref(false)
-const groupid = ref(null)
 const starti = ref(null)
 const endi = ref(null)
 const start = ref(null)
 const end = ref(null)
 const dateFormat = ref(null)
 
-const groupidi = computed({
+const groupid = computed({
   get: () => {
-    return miscStore.get('groupidi')
+    return miscStore.get('groupiddash')
   },
   set: (newValue) => {
-    groupid.value = newValue
-    console.log('groupidi set', newValue)
-    miscStore.set({ key: 'groupidi', value: newValue })
+    miscStore.set({ key: 'groupiddash', value: newValue })
   }
 })
 
@@ -151,10 +147,6 @@ const notbeforestart = function (date) {
 
 watch(showInfo, () => {
   update()
-})
-
-watch(groupid, async () => {
-  console.log('index.vue watch groupid', groupid.value)
 })
 
 onMounted(async () => {
@@ -209,7 +201,6 @@ const update = function (newShowInfo) {
 
   start.value = starti.value
   end.value = endi.value
-  groupid.value = groupidi.value
   //console.log('UPDATE', start.value, end.value, groupid.value)
 }
 
