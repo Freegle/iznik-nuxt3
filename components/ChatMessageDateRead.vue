@@ -119,9 +119,9 @@ export default {
 
     let chatMessageUser = null
 
-    if (chatmessage?.userid) {
-      userStore.fetch(this.chatmessage.userid)
-      chatMessageUser = userStore.get(chatmessage.userid)
+    if (chatmessage.value?.userid) {
+      await userStore.fetch(chatmessage.value.userid)
+      chatMessageUser = userStore.byId(chatmessage.value.userid)
     }
 
     return {

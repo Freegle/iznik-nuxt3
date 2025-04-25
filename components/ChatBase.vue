@@ -96,8 +96,8 @@ export default {
     },
     messageIsFromCurrentUser() {
       if (this.chat?.chattype === 'User2Mod') {
-        // For User2Mod chats we want it on the right hand side we sent it.
-        return this.chatmessage?.userid === this.myid
+        // For User2Mod chats we want the user on the left hand side
+        return this.chat.user1id !== this.chatmessage?.userid
       } else {
         return this.chatmessage?.userid === this.myid
       }
